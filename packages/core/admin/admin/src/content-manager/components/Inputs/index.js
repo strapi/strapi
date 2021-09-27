@@ -12,6 +12,7 @@ import { useContentTypeLayout } from '../../hooks';
 import { getFieldName } from '../../utils';
 import Wysiwyg from '../Wysiwyg';
 import InputJSON from '../InputJSON';
+import ComingSoonInput from './ComingSoonInput';
 import GenericInput from './GenericInput';
 // import SelectWrapper from '../SelectWrapper';
 // import WysiwygWithErrors from '../WysiwygWithErrors';
@@ -188,7 +189,14 @@ function Inputs({
   }
 
   if (type === 'relation') {
-    return 'RELATION';
+    // return 'RELATION';
+    return (
+      <ComingSoonInput
+        labelAction={labelAction}
+        name={keys}
+        intlLabel={{ id: label, defaultMessage: label }}
+      />
+    );
     // return (
     //   <div key={keys}>
     //     <SelectWrapper
@@ -219,9 +227,10 @@ function Inputs({
         // uid: InputUID,
         // ...fields,
         json: InputJSON,
-        media: () => <div>TODO media</div>,
+        // FIXME
+        datetime: ComingSoonInput,
+        media: ComingSoonInput,
         uid: () => <div>TODO uid</div>,
-        // wysiwyg: () => <div>TODO wysiwyg</div>,
         wysiwyg: Wysiwyg,
       }}
       multiple={fieldSchema.multiple || false}
