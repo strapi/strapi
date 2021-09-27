@@ -5,8 +5,7 @@ const path = require('path');
 const fse = require('fs-extra');
 const _ = require('lodash');
 const chalk = require('chalk');
-
-const { getRepoInfo, downloadGitHubRepo } = require('./fetch-github');
+const { getTemplatePackageInfo, downloadNpmTemplate } = require('./fetch-npm-template');
 
 // Specify all the files and directories a template can have
 const allowFile = Symbol();
@@ -15,6 +14,7 @@ const allowedTemplateContents = {
   'README.md': allowFile,
   '.env.example': allowFile,
   'package.json': allowFile,
+  config: allowChildren,
   src: {
     admin: allowChildren,
     api: allowChildren,
@@ -30,34 +30,37 @@ const allowedTemplateContents = {
 };
 
 /**
- * merge template with new project being created
+ * Merge template with new project being created
  * @param {string} scope  project creation params
  * @param {string} rootPath  project path
  */
 module.exports = async function mergeTemplate(scope, rootPath) {
   // Parse template info
-  const repoInfo = await getRepoInfo(scope.template);
-  const { fullName } = repoInfo;
-  console.log(`Installing ${chalk.yellow(fullName)} template.`);
+  const templatePackageInfo = await getTemplatePackageInfo(scope.template);
+  console.log(templatePackageInfo);
+  console.log(`Installing ${chalk.yellow(templatePackageInfo.name)} template.`);
 
   // Download template repository to a temporary directory
-  const templatePath = await fse.mkdtemp(path.join(os.tmpdir(), 'strapi-'));
-  await downloadGitHubRepo(repoInfo, templatePath);
+  const templateParentPath = await fse.mkdtemp(path.join(os.tmpdir(), 'strapi-'));
+  const templatePath = downloadNpmTemplate(templatePackageInfo, templateParentPath);
 
   // Make sure the downloaded template matches the required format
   const { templateConfig } = await checkTemplateRootStructure(templatePath, scope);
   await checkTemplateContentsStructure(path.resolve(templatePath, 'template'));
 
   // Merge contents of the template in the project
-  const fullTemplateUrl = `https://github.com/${fullName}`;
-  await mergePackageJSON(rootPath, templateConfig, fullTemplateUrl);
+  await mergePackageJSON({ rootPath, templateConfig, templatePackageInfo });
   await mergeFilesAndDirectories(rootPath, templatePath);
 
   // Delete the downloaded template repo
-  await fse.remove(templatePath);
+  await fse.remove(templateParentPath);
 };
 
-// Make sure the template has the required top-level structure
+/**
+ * Make sure the template has the required top-level structure
+ * @param {string} templatePath - Path of the locally downloaded template
+ * @param {Object} scope - Information about the Strapi app's config
+ */
 async function checkTemplateRootStructure(templatePath, scope) {
   // Make sure the root of the repo has a template.json or a template.js file
   const templateJsonPath = path.join(templatePath, 'template.json');
@@ -118,7 +121,10 @@ async function checkTemplateRootStructure(templatePath, scope) {
   return { templateConfig };
 }
 
-// Traverse template tree to make sure each file and folder is allowed
+/**
+ * Traverse template tree to make sure each file and folder is allowed
+ * @param {string} templateContentsPath
+ */
 async function checkTemplateContentsStructure(templateContentsPath) {
   // Recursively check if each item in a directory is allowed
   const checkPathContents = (pathToCheck, parents) => {
@@ -168,8 +174,16 @@ async function checkTemplateContentsStructure(templateContentsPath) {
   checkPathContents(templateContentsPath, []);
 }
 
-// Merge the template's template.json into the Strapi project's package.json
-async function mergePackageJSON(rootPath, templateConfig, templateUrl) {
+/**
+ * Merge the template's template.json into the Strapi project's package.json
+ * @param {Object} config
+ * @param {string} config.rootPath
+ * @param {string} config.templateConfig
+ * @param {Object} config.templatePackageInfo - Info about the template's package on npm
+ * @param {Object} config.templatePackageInfo.name - The name of the template's package on npm
+ * @param {Object} config.templatePackageInfo.version - The name of the template's package on npm
+ */
+async function mergePackageJSON({ rootPath, templateConfig, templatePackageName }) {
   // Import the package.json as an object
   const packageJSON = require(path.resolve(rootPath, 'package.json'));
 
@@ -187,7 +201,7 @@ async function mergePackageJSON(rootPath, templateConfig, templateUrl) {
   const mergedConfig = _.merge(packageJSON, templateConfig.package);
 
   // Add starter info to package.json
-  _.set(mergedConfig, 'strapi.template', templateUrl);
+  _.set(mergedConfig, 'strapi.template', templatePackageName);
 
   // Save the merged config as the new package.json
   const packageJSONPath = path.join(rootPath, 'package.json');
