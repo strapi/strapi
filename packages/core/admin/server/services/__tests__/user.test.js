@@ -383,16 +383,18 @@ describe('User', () => {
     const defaults = { page: 1, pageSize: 100 };
 
     beforeEach(() => {
-      const fetchPage = jest.fn(({ page = defaults.page, pageSize = defaults.pageSize } = {}) => {
-        return {
-          results: Array.from({ length: pageSize }).map((_, i) => i + (page - 1) * pageSize),
-          pagination: { page, pageSize, total: page * pageSize, pageCount: page },
-        };
-      });
+      const findPage = jest.fn(
+        (uid, { page = defaults.page, pageSize = defaults.pageSize } = {}) => {
+          return {
+            results: Array.from({ length: pageSize }).map((_, i) => i + (page - 1) * pageSize),
+            pagination: { page, pageSize, total: page * pageSize, pageCount: page },
+          };
+        }
+      );
 
       global.strapi = {
-        query() {
-          return { findPage: fetchPage };
+        entityService: {
+          findPage,
         },
       };
     });
@@ -428,7 +430,7 @@ describe('User', () => {
     const user = { firstname: 'Kai', lastname: 'Doe', email: 'kaidoe@email.com' };
 
     beforeEach(() => {
-      const findOne = jest.fn(({ where: { id } }) =>
+      const findOne = jest.fn((uid, id) =>
         Promise.resolve(
           {
             1: user,
@@ -437,23 +439,23 @@ describe('User', () => {
       );
 
       global.strapi = {
-        query() {
-          return { findOne };
+        entityService: {
+          findOne,
         },
       };
     });
 
     test('Finds and returns a user by its ID', async () => {
-      const input = { id: 1 };
-      const res = await userService.findOne(input);
+      const id = 1;
+      const res = await userService.findOne(id);
 
       expect(res).not.toBeNull();
       expect(res).toMatchObject(user);
     });
 
     test('Fails to find a user with provided params', async () => {
-      const input = { id: 27 };
-      const res = await userService.findOne(input);
+      const id = 27;
+      const res = await userService.findOne(id);
 
       expect(res).toBeNull();
     });

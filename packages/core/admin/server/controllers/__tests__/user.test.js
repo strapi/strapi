@@ -87,7 +87,7 @@ describe('User Controller', () => {
 
       await userController.findOne(ctx);
 
-      expect(findOne).toHaveBeenCalledWith({ id: user.id });
+      expect(findOne).toHaveBeenCalledWith(user.id);
       expect(sanitizeUser).toHaveBeenCalledWith(user);
       expect(ctx.body).toStrictEqual({ data: user });
     });
@@ -108,7 +108,7 @@ describe('User Controller', () => {
 
       await userController.findOne(ctx);
 
-      expect(findOne).toHaveBeenCalledWith({ id: fakeId });
+      expect(findOne).toHaveBeenCalledWith(fakeId);
       expect(notFound).toHaveBeenCalledWith('User does not exist');
     });
   });
