@@ -11,10 +11,8 @@
     "kind": "plugin"
   },
   "dependencies": {
-    "lodash": "4.17.20",
-    "p-map": "4.0.0",
-    "pluralize": "8.0.0",
-    "@strapi/utils": "3.6.8"
+    "@strapi/utils": "3.6.8",
+    "lodash": "4.17.21"
   },
   "author": {
     "name": "A Strapi developer",
