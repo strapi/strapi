@@ -26,7 +26,7 @@ const activeRowStyle = (theme, isActive) => `
     border-radius: ${isActive ? '2px 2px 0 0' : '2px'};
   }
   ${Chevron} {
-    display: block;
+    display: flex;
   }
   ${ConditionsButton} {
     display: block;
