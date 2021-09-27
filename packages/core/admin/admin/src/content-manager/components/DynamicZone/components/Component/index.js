@@ -64,41 +64,40 @@ const Component = ({
   return (
     <Box>
       <Rectangle />
-      <Box hasRadius borderColor="neutral150" shadow="tableShadow">
-        <Accordion expanded={isOpen} toggle={() => onToggle(index)}>
-          <AccordionToggle
-            action={
-              <Stack horizontal size={2}>
-                {showDownIcon && (
-                  <IconButton
-                    label={downLabel}
-                    onClick={handleMoveComponentDown}
-                    icon={<DownIcon />}
-                  />
-                )}
-                {showUpIcon && (
-                  <IconButton label={upLabel} onClick={handleMoveComponentUp} icon={<UpIcon />} />
-                )}
-                {isFieldAllowed && (
-                  <IconButton label={deleteLabel} onClick={handleRemove} icon={<DeleteIcon />} />
-                )}
-              </Stack>
-            }
-            title={friendlyName}
-            togglePosition="left"
-          />
-          <AccordionContent>
-            <FocusTrap onEscape={() => onToggle(index)}>
-              <FieldComponent
-                componentUid={componentUid}
-                icon={icon}
-                name={`${name}.${index}`}
-                isFromDynamicZone
-              />
-            </FocusTrap>
-          </AccordionContent>
-        </Accordion>
-      </Box>
+
+      <Accordion expanded={isOpen} toggle={() => onToggle(index)}>
+        <AccordionToggle
+          action={
+            <Stack horizontal size={2}>
+              {showDownIcon && (
+                <IconButton
+                  label={downLabel}
+                  onClick={handleMoveComponentDown}
+                  icon={<DownIcon />}
+                />
+              )}
+              {showUpIcon && (
+                <IconButton label={upLabel} onClick={handleMoveComponentUp} icon={<UpIcon />} />
+              )}
+              {isFieldAllowed && (
+                <IconButton label={deleteLabel} onClick={handleRemove} icon={<DeleteIcon />} />
+              )}
+            </Stack>
+          }
+          title={friendlyName}
+          togglePosition="left"
+        />
+        <AccordionContent>
+          <FocusTrap onEscape={() => onToggle(index)}>
+            <FieldComponent
+              componentUid={componentUid}
+              icon={icon}
+              name={`${name}.${index}`}
+              isFromDynamicZone
+            />
+          </FocusTrap>
+        </AccordionContent>
+      </Accordion>
     </Box>
   );
 };
