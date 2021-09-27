@@ -9,18 +9,18 @@ const glob = require('../../load/glob');
  * Load middlewares
  */
 module.exports = async function(strapi) {
-  const installedMiddlewares = strapi.config.get('installedMiddlewares');
+  // const installedMiddlewares = strapi.config.get('installedMiddlewares');
   const appPath = strapi.config.get('appPath');
 
   let middlewares = {};
 
-  const loaders = createLoaders(strapi);
+  // const loaders = createLoaders(strapi);
 
-  await loaders.loadMiddlewareDependencies(installedMiddlewares, middlewares);
+  // await loaders.loadMiddlewareDependencies(installedMiddlewares, middlewares);
   // internal middlewares
-  await loaders.loadInternalMiddlewares(middlewares);
+  // await loaders.loadInternalMiddlewares(middlewares);
   // local middleware
-  await loaders.loadLocalMiddlewares(appPath, middlewares);
+  // await loaders.loadLocalMiddlewares(appPath, middlewares);
 
   return middlewares;
 };

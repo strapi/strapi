@@ -376,6 +376,8 @@ class Strapi {
     // Initialize middlewares.
     await initializeMiddlewares(this);
 
+    await this.server.initRouting();
+
     await this.runLifecyclesFunctions(LIFECYCLES.BOOTSTRAP);
 
     this.cron.start();

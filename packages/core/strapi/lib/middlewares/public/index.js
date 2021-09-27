@@ -18,6 +18,12 @@ const serveStatic = require('./serve-static');
  */
 
 module.exports = strapi => {
+
+
+  return async (ctx, next) => {
+    return next();
+  }
+
   return {
     /**
      * Initialize the hook

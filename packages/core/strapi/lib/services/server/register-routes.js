@@ -19,7 +19,7 @@ const createRouteScopeGenerator = namespace => route => {
   }
 };
 
-module.exports = strapi => {
+module.exports = (server, strapi) => {
   const registerAdminRoutes = () => {
     const generateRouteScope = createRouteScopeGenerator(`admin::`);
 
@@ -28,7 +28,7 @@ module.exports = strapi => {
       route.info = { pluginName: 'admin' };
     });
 
-    strapi.server.routes({
+    server.routes({
       type: 'admin',
       prefix: '/admin',
       routes: strapi.admin.routes,
@@ -47,7 +47,7 @@ module.exports = strapi => {
           route.info = { pluginName };
         });
 
-        strapi.server.routes({
+        server.routes({
           type: 'admin',
           prefix: `/${pluginName}`,
           routes: plugin.routes,
@@ -61,7 +61,7 @@ module.exports = strapi => {
             route.info = { pluginName };
           });
 
-          strapi.server.routes(router);
+          server.routes(router);
         });
       }
     }
@@ -82,7 +82,7 @@ module.exports = strapi => {
           route.info = { apiName };
         });
 
-        return strapi.server.routes(router);
+        return server.routes(router);
       });
     }
   };
