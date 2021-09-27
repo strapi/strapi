@@ -9,22 +9,16 @@ import {
   useRBAC,
   useFocusWhenNavigate,
 } from '@strapi/helper-plugin';
-import { AddIcon, DeleteIcon, Duplicate, EditIcon } from '@strapi/icons';
-import {
-  Button,
-  ContentLayout,
-  HeaderLayout,
-  Table,
-  Tbody,
-  TFooter,
-  Thead,
-  Th,
-  Tr,
-  TableLabel,
-  VisuallyHidden,
-  Main,
-  ActionLayout,
-} from '@strapi/parts';
+import AddIcon from '@strapi/icons/AddIcon';
+import DeleteIcon from '@strapi/icons/DeleteIcon';
+import Duplicate from '@strapi/icons/Duplicate';
+import EditIcon from '@strapi/icons/EditIcon';
+import { Button } from '@strapi/parts/Button';
+import { ActionLayout, ContentLayout, HeaderLayout } from '@strapi/parts/Layout';
+import { VisuallyHidden } from '@strapi/parts/VisuallyHidden';
+import { Main } from '@strapi/parts/Main';
+import { Table, Tbody, TFooter, Thead, Th, Tr } from '@strapi/parts/Table';
+import { TableLabel } from '@strapi/parts/Text';
 import { get } from 'lodash';
 import matchSorter from 'match-sorter';
 import { useIntl } from 'react-intl';

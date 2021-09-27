@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { SearchIcon } from '@strapi/icons';
+import SearchIcon from '@strapi/icons/SearchIcon';
 import { Searchbar } from '@strapi/parts/Searchbar';
 import { IconButton } from '@strapi/parts/IconButton';
 import useQueryParams from '../../hooks/useQueryParams';

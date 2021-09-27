@@ -4,6 +4,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
+import { Button } from '@strapi/parts/Button';
+import { Divider } from '@strapi/parts/Divider';
 import {
   MainNav,
   NavBrand,
@@ -12,9 +14,7 @@ import {
   NavSection,
   NavUser,
   NavCondense,
-  Divider,
-  Button,
-} from '@strapi/parts';
+} from '@strapi/parts/MainNav';
 import ContentIcon from '@strapi/icons/ContentIcon';
 import { auth, usePersistentState, useAppInfos } from '@strapi/helper-plugin';
 import useConfigurations from '../../hooks/useConfigurations';

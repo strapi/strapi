@@ -1,8 +1,9 @@
 import React, { useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Button, Box } from '@strapi/parts';
-import { FilterIcon } from '@strapi/icons';
+import { Box } from '@strapi/parts/Box';
+import { Button } from '@strapi/parts/Button';
+import FilterIcon from '@strapi/icons/FilterIcon';
 import { FilterListURLQuery, FilterPopoverURLQuery, useTracking } from '@strapi/helper-plugin';
 
 const Filters = ({ displayedFilters }) => {

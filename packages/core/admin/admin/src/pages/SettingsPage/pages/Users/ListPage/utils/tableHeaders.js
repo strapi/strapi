@@ -1,5 +1,6 @@
 import React from 'react';
-import { Text, Row } from '@strapi/parts';
+import { Row } from '@strapi/parts/Row';
+import { Text } from '@strapi/parts/Text';
 import { Status } from '@strapi/helper-plugin';
 
 const tableHeaders = [

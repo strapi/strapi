@@ -1,14 +1,14 @@
 import React from 'react';
-import { AddIcon } from '@strapi/icons';
+import AddIcon from '@strapi/icons/AddIcon';
+import { Box } from '@strapi/parts/Box';
 import {
-  Box,
   SubNav,
   SubNavHeader,
   SubNavLink,
   SubNavLinkSection,
   SubNavSection,
   SubNavSections,
-} from '@strapi/parts';
+} from '@strapi/parts/SubNav';
 import { TextButton } from '@strapi/parts/TextButton';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';

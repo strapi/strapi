@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { Row } from '@strapi/parts';
+import { Row } from '@strapi/parts/Row';
 
 const Wrapper = styled(Row)`
   position: fixed;

@@ -1,7 +1,14 @@
-import { CheckIcon, ClearField, Close, LoadingIcon } from '@strapi/icons';
-import { Box, Grid, GridItem, Row, Stack, Text } from '@strapi/parts';
-import PropTypes from 'prop-types';
 import React from 'react';
+import PropTypes from 'prop-types';
+import CheckIcon from '@strapi/icons/CheckIcon';
+import ClearField from '@strapi/icons/ClearField';
+import Close from '@strapi/icons/Close';
+import LoadingIcon from '@strapi/icons/LoadingIcon';
+import { Box } from '@strapi/parts/Box';
+import { Row } from '@strapi/parts/Row';
+import { Text } from '@strapi/parts/Text';
+import { Stack } from '@strapi/parts/Stack';
+import { Grid, GridItem } from '@strapi/parts/Grid';
 import { FormattedMessage } from 'react-intl';
 import styled from 'styled-components';
 

@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Portal, Row, Text, FocusTrap } from '@strapi/parts';
-import { Collapse } from '@strapi/icons';
+import { FocusTrap } from '@strapi/parts/FocusTrap';
+import { Portal } from '@strapi/parts/Portal';
+import { Row } from '@strapi/parts/Row';
+import { Text } from '@strapi/parts/Text';
+import Collapse from '@strapi/icons/Collapse';
 import PreviewWysiwyg from '../PreviewWysiwyg';
 import Editor from './Editor';
 import WysiwygNav from './WysiwygNav';

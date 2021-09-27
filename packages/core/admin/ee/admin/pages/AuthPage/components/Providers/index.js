@@ -1,20 +1,15 @@
 import React from 'react';
 import { Redirect, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
-import {
-  Divider,
-  Stack,
-  Row,
-  Box,
-  TableLabel,
-  Main,
-  Subtitle,
-  H1,
-  Link,
-  Text,
-  Loader,
-  Button,
-} from '@strapi/parts';
+import { Divider } from '@strapi/parts/Divider';
+import { Stack } from '@strapi/parts/Stack';
+import { Row } from '@strapi/parts/Row';
+import { Box } from '@strapi/parts/Box';
+import { Button } from '@strapi/parts/Button';
+import { Link } from '@strapi/parts/Link';
+import { Loader } from '@strapi/parts/Loader';
+import { TableLabel, H1, Text, Subtitle } from '@strapi/parts/Text';
+import { Main } from '@strapi/parts/Main';
 import { useIntl } from 'react-intl';
 import { useAuthProviders } from '../../../../hooks';
 import UnauthenticatedLayout, {

@@ -1,29 +1,24 @@
 import React, { useRef } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import {
-  Option,
-  Button,
-  Row,
-  Box,
-  Select,
-  IconButtonGroup,
-  Popover,
-  FocusTrap,
-} from '@strapi/parts';
-import {
-  Bold,
-  Italic,
-  Underline,
-  Strikethrough,
-  BulletList,
-  NumberList,
-  Code,
-  Image,
-  Link,
-  Quote,
-  More,
-} from '@strapi/icons';
+import { Box } from '@strapi/parts/Box';
+import { Button } from '@strapi/parts/Button';
+import { IconButtonGroup } from '@strapi/parts/IconButton';
+import { Option, Select } from '@strapi/parts/Select';
+import { Popover } from '@strapi/parts/Popover';
+import { FocusTrap } from '@strapi/parts/FocusTrap';
+import { Row } from '@strapi/parts/Row';
+import Bold from '@strapi/icons/Bold';
+import Italic from '@strapi/icons/Italic';
+import Underline from '@strapi/icons/Underline';
+import Strikethrough from '@strapi/icons/Strikethrough';
+import BulletList from '@strapi/icons/BulletList';
+import NumberList from '@strapi/icons/NumberList';
+import Code from '@strapi/icons/Code';
+import Image from '@strapi/icons/Image';
+import Link from '@strapi/icons/Link';
+import Quote from '@strapi/icons/Quote';
+import More from '@strapi/icons/More';
 import { MainButtons, CustomIconButton, MoreButton, IconButtonGroupMargin } from './WysiwygStyles';
 
 const WysiwygNav = ({

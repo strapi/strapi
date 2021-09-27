@@ -127,6 +127,8 @@ function ListView({
           return;
         }
 
+        console.log('iii');
+
         console.error(err);
         toggleNotification({
           type: 'warning',

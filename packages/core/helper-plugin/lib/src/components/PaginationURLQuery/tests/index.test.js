@@ -37,13 +37,6 @@ describe('<PaginationURLQuery />', () => {
     } = render(makeApp(history, 1));
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c7 {
-        font-weight: 500;
-        font-size: 0.75rem;
-        line-height: 1.33;
-        color: #32324d;
-      }
-
       .c0 {
         display: -webkit-box;
         display: -webkit-flex;
@@ -58,6 +51,10 @@ describe('<PaginationURLQuery />', () => {
         align-items: center;
       }
 
+      .c1 > * + * {
+        margin-left: 4px;
+      }
+
       .c4 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
@@ -70,8 +67,11 @@ describe('<PaginationURLQuery />', () => {
         width: 1px;
       }
 
-      .c1 > * + * {
-        margin-left: 4px;
+      .c7 {
+        font-weight: 500;
+        font-size: 0.75rem;
+        line-height: 1.33;
+        color: #32324d;
       }
 
       .c8 {

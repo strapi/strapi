@@ -1,6 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Box, Row, Td, Text, Tr, IconButton } from '@strapi/parts';
+import { Box } from '@strapi/parts/Box';
+import { Row } from '@strapi/parts/Row';
+import { Td, Tr } from '@strapi/parts/Table';
+import { Text } from '@strapi/parts/Text';
+import { IconButton } from '@strapi/parts/IconButton';
 import { stopPropagation, onRowClick } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 

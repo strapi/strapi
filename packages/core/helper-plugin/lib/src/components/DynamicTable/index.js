@@ -1,8 +1,12 @@
 import React, { Children, cloneElement, useState } from 'react';
 import PropTypes from 'prop-types';
-import { Box, Row, Button, Table as TableCompo, Subtitle } from '@strapi/parts';
+import { Box } from '@strapi/parts/Box';
+import { Row } from '@strapi/parts/Row';
+import { Button } from '@strapi/parts/Button';
+import { Subtitle } from '@strapi/parts/Text';
+import { Table as TableCompo } from '@strapi/parts/Table';
 import { useIntl } from 'react-intl';
-import { DeleteIcon } from '@strapi/icons';
+import DeleteIcon from '@strapi/icons/DeleteIcon';
 import styled from 'styled-components';
 import useQueryParams from '../../hooks/useQueryParams';
 import ConfirmDialog from '../ConfirmDialog';

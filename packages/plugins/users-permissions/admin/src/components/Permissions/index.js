@@ -1,5 +1,5 @@
 import React, { memo, useCallback, useReducer } from 'react';
-import { Accordion, AccordionToggle, AccordionContent } from '@strapi/parts';
+import { Accordion, AccordionToggle, AccordionContent } from '@strapi/parts/Accordion';
 import { useIntl } from 'react-intl';
 import { useUsersPermissions } from '../../contexts/UsersPermissionsContext';
 import formatPluginName from '../../utils/formatPluginName';

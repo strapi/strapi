@@ -14,7 +14,7 @@ import {
   ActionLayout,
   VisuallyHidden,
 } from '@strapi/parts';
-import { AddIcon } from '@strapi/icons';
+import AddIcon from '@strapi/icons/AddIcon';
 import {
   useTracking,
   SettingsPageTitle,

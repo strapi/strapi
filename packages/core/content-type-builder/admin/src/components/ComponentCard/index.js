@@ -5,11 +5,13 @@
  */
 
 import React from 'react';
-import { get } from 'lodash';
+import get from 'lodash/get';
 import PropTypes from 'prop-types';
-import { Text, Stack, Box } from '@strapi/parts';
+import { Box } from '@strapi/parts/Box';
+import { Stack } from '@strapi/parts/Stack';
+import { Text } from '@strapi/parts/Text';
 import { pxToRem } from '@strapi/helper-plugin';
-import { Close } from '@strapi/icons';
+import Close from '@strapi/icons/Close';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import styled from 'styled-components';
 

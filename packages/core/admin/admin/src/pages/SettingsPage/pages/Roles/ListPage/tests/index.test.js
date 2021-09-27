@@ -54,13 +54,6 @@ describe('<ListPage />', () => {
     } = render(App);
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c5 {
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
       .c11 {
         font-weight: 400;
         font-size: 0.875rem;
@@ -68,52 +61,104 @@ describe('<ListPage />', () => {
         color: #32324d;
       }
 
-      .c13 {
-        font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #666687;
-      }
-
-      .c36 {
-        font-weight: 500;
-        font-size: 0.75rem;
-        line-height: 1.33;
-        color: #4945ff;
-      }
-
-      .c14 {
-        font-size: 1rem;
-        line-height: 1.5;
-      }
-
       .c12 {
         font-weight: 600;
         line-height: 1.14;
-      }
-
-      .c25 {
-        font-weight: 600;
-        font-size: 0.6875rem;
-        line-height: 1.45;
-        text-transform: uppercase;
-      }
-
-      .c2 {
-        background: #f6f6f9;
-        padding-top: 56px;
-        padding-right: 56px;
-        padding-bottom: 56px;
-        padding-left: 56px;
       }
 
       .c8 {
         padding-right: 8px;
       }
 
-      .c15 {
-        padding-right: 56px;
-        padding-left: 56px;
+      .c5 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 4px;
+        background: #ffffff;
+        border: 1px solid #dcdce4;
+      }
+
+      .c5 svg {
+        height: 12px;
+        width: 12px;
+      }
+
+      .c5 svg > g,
+      .c5 svg path {
+        fill: #ffffff;
+      }
+
+      .c5[aria-disabled='true'] {
+        pointer-events: none;
+      }
+
+      .c9 {
+        height: 100%;
+      }
+
+      .c6 {
+        padding: 10px 16px;
+        background: #4945ff;
+        border: none;
+        border: 1px solid #4945ff;
+        background: #4945ff;
+      }
+
+      .c6 .c7 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c6 .c10 {
+        color: #ffffff;
+      }
+
+      .c6[aria-disabled='true'] {
+        border: 1px solid #dcdce4;
+        background: #eaeaef;
+      }
+
+      .c6[aria-disabled='true'] .c10 {
+        color: #666687;
+      }
+
+      .c6[aria-disabled='true'] svg > g,
+      .c6[aria-disabled='true'] svg path {
+        fill: #666687;
+      }
+
+      .c6[aria-disabled='true']:active {
+        border: 1px solid #dcdce4;
+        background: #eaeaef;
+      }
+
+      .c6[aria-disabled='true']:active .c10 {
+        color: #666687;
+      }
+
+      .c6[aria-disabled='true']:active svg > g,
+      .c6[aria-disabled='true']:active svg path {
+        fill: #666687;
+      }
+
+      .c6:hover {
+        border: 1px solid #7b79ff;
+        background: #7b79ff;
+      }
+
+      .c6:active {
+        border: 1px solid #4945ff;
+        background: #4945ff;
       }
 
       .c16 {
@@ -129,166 +174,21 @@ describe('<ListPage />', () => {
         padding-left: 24px;
       }
 
-      .c29 {
+      .c32 {
         background: #eaeaef;
       }
 
-      .c31 {
+      .c34 {
         background: #f0f0ff;
         padding: 20px;
       }
 
-      .c33 {
+      .c36 {
         background: #d9d8ff;
       }
 
-      .c35 {
+      .c38 {
         padding-left: 12px;
-      }
-
-      .c3 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-box-pack: justify;
-        -webkit-justify-content: space-between;
-        -ms-flex-pack: justify;
-        justify-content: space-between;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c4 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c6 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        cursor: pointer;
-        padding: 8px;
-        border-radius: 4px;
-        background: #ffffff;
-        border: 1px solid #dcdce4;
-      }
-
-      .c6 svg {
-        height: 12px;
-        width: 12px;
-      }
-
-      .c6 svg > g,
-      .c6 svg path {
-        fill: #ffffff;
-      }
-
-      .c6[aria-disabled='true'] {
-        pointer-events: none;
-      }
-
-      .c27 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
-      }
-
-      .c9 {
-        height: 100%;
-      }
-
-      .c7 {
-        padding: 10px 16px;
-        background: #4945ff;
-        border: none;
-        border: 1px solid #4945ff;
-        background: #4945ff;
-      }
-
-      .c7 .c1 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c7 .c10 {
-        color: #ffffff;
-      }
-
-      .c7[aria-disabled='true'] {
-        border: 1px solid #dcdce4;
-        background: #eaeaef;
-      }
-
-      .c7[aria-disabled='true'] .c10 {
-        color: #666687;
-      }
-
-      .c7[aria-disabled='true'] svg > g,
-      .c7[aria-disabled='true'] svg path {
-        fill: #666687;
-      }
-
-      .c7[aria-disabled='true']:active {
-        border: 1px solid #dcdce4;
-        background: #eaeaef;
-      }
-
-      .c7[aria-disabled='true']:active .c10 {
-        color: #666687;
-      }
-
-      .c7[aria-disabled='true']:active svg > g,
-      .c7[aria-disabled='true']:active svg path {
-        fill: #666687;
-      }
-
-      .c7:hover {
-        border: 1px solid #7b79ff;
-        background: #7b79ff;
-      }
-
-      .c7:active {
-        border: 1px solid #4945ff;
-        background: #4945ff;
-      }
-
-      .c30 {
-        height: 1px;
-        border: none;
-        margin: 0;
-      }
-
-      .c0 {
-        outline: none;
       }
 
       .c21 {
@@ -326,7 +226,7 @@ describe('<ListPage />', () => {
         overflow-x: auto;
       }
 
-      .c28 tr:last-of-type {
+      .c31 tr:last-of-type {
         border-bottom: none;
       }
 
@@ -348,6 +248,20 @@ describe('<ListPage />', () => {
         padding: 0 4px;
       }
 
+      .c25 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
       .c24 {
         vertical-align: middle;
         text-align: left;
@@ -359,11 +273,24 @@ describe('<ListPage />', () => {
         vertical-align: sub;
       }
 
-      .c26 svg {
+      .c29 svg {
         height: 0.25rem;
       }
 
-      .c34 {
+      .c33 {
+        height: 1px;
+        border: none;
+        margin: 0;
+      }
+
+      .c39 {
+        font-weight: 500;
+        font-size: 0.75rem;
+        line-height: 1.33;
+        color: #4945ff;
+      }
+
+      .c37 {
         height: 1.5rem;
         width: 1.5rem;
         border-radius: 50%;
@@ -381,20 +308,119 @@ describe('<ListPage />', () => {
         align-items: center;
       }
 
-      .c34 svg {
+      .c37 svg {
         height: 0.625rem;
         width: 0.625rem;
       }
 
-      .c34 svg path {
+      .c37 svg path {
         fill: #4945ff;
       }
 
-      .c32 {
+      .c35 {
         border-radius: 0 0 4px 4px;
         display: block;
         width: 100%;
         border: none;
+      }
+
+      .c26 {
+        font-weight: 400;
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #32324d;
+      }
+
+      .c27 {
+        font-weight: 600;
+        line-height: 1.14;
+      }
+
+      .c28 {
+        font-weight: 600;
+        font-size: 0.6875rem;
+        line-height: 1.45;
+        text-transform: uppercase;
+      }
+
+      .c30 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
+      }
+
+      .c1 {
+        background: #f6f6f9;
+        padding-top: 56px;
+        padding-right: 56px;
+        padding-bottom: 56px;
+        padding-left: 56px;
+      }
+
+      .c15 {
+        padding-right: 56px;
+        padding-left: 56px;
+      }
+
+      .c2 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: justify;
+        -webkit-justify-content: space-between;
+        -ms-flex-pack: justify;
+        justify-content: space-between;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c3 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c4 {
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c13 {
+        font-weight: 400;
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #666687;
+      }
+
+      .c14 {
+        font-size: 1rem;
+        line-height: 1.5;
+      }
+
+      .c0 {
+        outline: none;
       }
 
       <main
@@ -407,17 +433,17 @@ describe('<ListPage />', () => {
           style="height: 0px;"
         >
           <div
-            class="c1 c2"
+            class="c1"
             data-strapi-header="true"
           >
             <div
-              class="c1 c3"
+              class="c2"
             >
               <div
-                class="c1 c4"
+                class="c3"
               >
                 <h1
-                  class="c5"
+                  class="c4"
                   id="main-content-title"
                 >
                   roles
@@ -425,12 +451,12 @@ describe('<ListPage />', () => {
               </div>
               <button
                 aria-disabled="false"
-                class="c6 c7"
+                class="c5 c6"
                 type="button"
               >
                 <div
                   aria-hidden="true"
-                  class="c1 c8 c9"
+                  class="c7 c8 c9"
                 >
                   <svg
                     fill="none"
@@ -453,23 +479,23 @@ describe('<ListPage />', () => {
               </button>
             </div>
             <p
-              class="c10 c13 c14"
+              class="c13 c14"
             >
               List of roles
             </p>
           </div>
         </div>
         <div
-          class="c1 c15"
+          class="c15"
         >
           <div
-            class="c1 c16"
+            class="c16"
           >
             <div
-              class="c1 c17 c18"
+              class="c17 c18"
             >
               <div
-                class="c1 c19 c20"
+                class="c19 c20"
               >
                 <table
                   aria-colcount="5"
@@ -489,15 +515,15 @@ describe('<ListPage />', () => {
                         tabindex="0"
                       >
                         <div
-                          class="c1 c4"
+                          class="c25"
                         >
                           <span
-                            class="c10 c11 c12 c25"
+                            class="c26 c27 c28"
                           >
                             Name
                           </span>
                           <span
-                            class="c26"
+                            class="c29"
                           />
                         </div>
                       </th>
@@ -507,15 +533,15 @@ describe('<ListPage />', () => {
                         tabindex="-1"
                       >
                         <div
-                          class="c1 c4"
+                          class="c25"
                         >
                           <span
-                            class="c10 c11 c12 c25"
+                            class="c26 c27 c28"
                           >
                             Description
                           </span>
                           <span
-                            class="c26"
+                            class="c29"
                           />
                         </div>
                       </th>
@@ -525,15 +551,15 @@ describe('<ListPage />', () => {
                         tabindex="-1"
                       >
                         <div
-                          class="c1 c4"
+                          class="c25"
                         >
                           <span
-                            class="c10 c11 c12 c25"
+                            class="c26 c27 c28"
                           >
                             Users
                           </span>
                           <span
-                            class="c26"
+                            class="c29"
                           />
                         </div>
                       </th>
@@ -543,39 +569,39 @@ describe('<ListPage />', () => {
                         tabindex="-1"
                       >
                         <div
-                          class="c1 c4"
+                          class="c25"
                         >
                           <div
-                            class="c27"
+                            class="c30"
                           >
                             Actions
                           </div>
                           <span
-                            class="c26"
+                            class="c29"
                           />
                         </div>
                       </th>
                     </tr>
                   </thead>
                   <tbody
-                    class="c28"
+                    class="c31"
                   />
                 </table>
               </div>
             </div>
             <div>
               <hr
-                class="c1 c29 c30"
+                class="c32 c33"
               />
               <button
-                class="c1 c31 c32"
+                class="c34 c35"
               >
                 <div
-                  class="c1 c4"
+                  class="c25"
                 >
                   <div
                     aria-hidden="true"
-                    class="c1 c33 c34"
+                    class="c36 c37"
                   >
                     <svg
                       fill="none"
@@ -591,10 +617,10 @@ describe('<ListPage />', () => {
                     </svg>
                   </div>
                   <div
-                    class="c1 c35"
+                    class="c38"
                   >
                     <span
-                      class="c10 c36"
+                      class="c39"
                     >
                       Add new role
                     </span>

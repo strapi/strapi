@@ -13,22 +13,12 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
   width: 1px;
 }
 
-.c23 {
-  font-weight: 500;
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #32324d;
-}
-
-.c26 {
-  font-weight: 400;
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #32324d;
-}
-
 .c0 {
   padding-top: 24px;
+}
+
+.c14 {
+  padding-left: 8px;
 }
 
 .c1 {
@@ -49,6 +39,20 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
   align-items: flex-end;
 }
 
+.c2 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
 .c16 {
   display: -webkit-box;
   display: -webkit-flex;
@@ -63,6 +67,10 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
   align-items: center;
 }
 
+.c17 > * + * {
+  margin-left: 4px;
+}
+
 .c20 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
@@ -75,8 +83,18 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
   width: 1px;
 }
 
-.c17 > * + * {
-  margin-left: 4px;
+.c23 {
+  font-weight: 500;
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #32324d;
+}
+
+.c26 {
+  font-weight: 400;
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #32324d;
 }
 
 .c24 {
@@ -148,24 +166,6 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
 .c27:focus svg path,
 .c27:hover svg path {
   fill: #4a4a6a;
-}
-
-.c14 {
-  padding-left: 8px;
-}
-
-.c2 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
 }
 
 .c5 {

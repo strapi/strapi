@@ -6,18 +6,11 @@
 
 import React from 'react';
 import { useIntl } from 'react-intl';
-import {
-  Stack,
-  Grid,
-  GridItem,
-  ModalLayout,
-  ModalHeader,
-  ModalFooter,
-  ModalBody,
-  Button,
-  Breadcrumbs,
-  Crumb,
-} from '@strapi/parts';
+import { Button } from '@strapi/parts/Button';
+import { Stack } from '@strapi/parts/Stack';
+import { Breadcrumbs, Crumb } from '@strapi/parts/Breadcrumbs';
+import { Grid, GridItem } from '@strapi/parts/Grid';
+import { ModalLayout, ModalHeader, ModalFooter, ModalBody } from '@strapi/parts/ModalLayout';
 import PropTypes from 'prop-types';
 import { Formik } from 'formik';
 import { Form } from '@strapi/helper-plugin';

@@ -19,7 +19,7 @@ const Category = ({ category, components, isOdd, isOpen, onAddComponent, onToggl
       />
       <AccordionContent>
         <Box paddingTop={4} paddingBottom={4} paddingLeft={3} paddingRight={3}>
-          <Grid gap={2} gridCols={10}>
+          <Grid gap={2} gridCols={12}>
             {components.map(({ componentUid, info: { label, icon, name } }) => {
               return (
                 <GridItem col={2} key={componentUid} s={4} xs={12}>

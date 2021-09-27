@@ -6,7 +6,11 @@ import {
   LoadingIndicatorPage,
   SettingsPageTitle,
 } from '@strapi/helper-plugin';
-import { Box, Button, HeaderLayout, Main, Stack, ContentLayout } from '@strapi/parts';
+import { Box } from '@strapi/parts/Box';
+import { Button } from '@strapi/parts/Button';
+import { ContentLayout, HeaderLayout } from '@strapi/parts/Layout';
+import { Main } from '@strapi/parts/Main';
+import { Stack } from '@strapi/parts/Stack';
 import { Formik } from 'formik';
 import get from 'lodash/get';
 import React, { useRef, useState } from 'react';

@@ -1,7 +1,7 @@
 import React from 'react';
 import { ThemeProvider } from '@strapi/parts/ThemeProvider';
 import PropTypes from 'prop-types';
-import { lightTheme } from '@strapi/parts';
+import { lightTheme } from '@strapi/parts/themes';
 import GlobalStyle from '../GlobalStyle';
 
 const Theme = ({ children, theme }) => (

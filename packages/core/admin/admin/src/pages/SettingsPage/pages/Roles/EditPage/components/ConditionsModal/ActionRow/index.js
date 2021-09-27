@@ -1,8 +1,10 @@
-import { Box, Row, TableLabel } from '@strapi/parts';
+import React from 'react';
+import PropTypes from 'prop-types';
+import { Box } from '@strapi/parts/Box';
+import { Row } from '@strapi/parts/Row';
+import { TableLabel } from '@strapi/parts/Text';
 import { MultiSelectNested } from '@strapi/parts/Select';
 import upperFirst from 'lodash/upperFirst';
-import PropTypes from 'prop-types';
-import React from 'react';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 import { rowHeight } from '../../Permissions/utils/constants';

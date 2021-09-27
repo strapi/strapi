@@ -2,11 +2,22 @@
  *  ! Have a discussion with maeva about l.170
  */
 
-import { useTracking } from '@strapi/helper-plugin';
-import { AddIcon, BackIcon, CheckIcon, EditIcon } from '@strapi/icons';
-import { Button, ContentLayout, HeaderLayout, Link, Row, Stack, Box } from '@strapi/parts';
-import { get, has, isEqual, upperFirst } from 'lodash';
 import React, { useEffect, useState } from 'react';
+import { useTracking } from '@strapi/helper-plugin';
+import AddIcon from '@strapi/icons/AddIcon';
+import BackIcon from '@strapi/icons/BackIcon';
+import CheckIcon from '@strapi/icons/CheckIcon';
+import EditIcon from '@strapi/icons/EditIcon';
+import { Button } from '@strapi/parts/Button';
+import { Link } from '@strapi/parts/Link';
+import { Row } from '@strapi/parts/Row';
+import { Stack } from '@strapi/parts/Stack';
+import { Box } from '@strapi/parts/Box';
+import { ContentLayout, HeaderLayout } from '@strapi/parts/Layout';
+import get from 'lodash/get';
+import has from 'lodash/has';
+import isEqual from 'lodash/isEqual';
+import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
 import { Prompt, useHistory, useLocation } from 'react-router-dom';
 import List from '../../components/List';

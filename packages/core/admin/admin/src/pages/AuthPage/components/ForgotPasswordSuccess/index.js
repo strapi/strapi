@@ -1,6 +1,10 @@
 import React from 'react';
 import { useIntl } from 'react-intl';
-import { Box, H1, Text, Link, Main, Row } from '@strapi/parts';
+import { Box } from '@strapi/parts/Box';
+import { Main } from '@strapi/parts/Main';
+import { Row } from '@strapi/parts/Row';
+import { Link } from '@strapi/parts/Link';
+import { H1, Text } from '@strapi/parts/Text';
 import UnauthenticatedLayout, {
   Column,
   LayoutContent,
