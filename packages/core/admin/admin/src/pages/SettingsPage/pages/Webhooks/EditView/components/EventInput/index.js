@@ -1,7 +1,9 @@
-import { FieldLabel, P, Stack, TableLabel } from '@strapi/parts';
-import { useFormikContext } from 'formik';
-import PropTypes from 'prop-types';
 import React from 'react';
+import PropTypes from 'prop-types';
+import { FieldLabel } from '@strapi/parts/Field';
+import { Stack } from '@strapi/parts/Stack';
+import { P, TableLabel } from '@strapi/parts/Text';
+import { useFormikContext } from 'formik';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 import EventRow from './EventRow';

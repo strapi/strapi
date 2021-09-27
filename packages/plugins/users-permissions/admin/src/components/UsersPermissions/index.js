@@ -1,6 +1,8 @@
 import React, { memo, useReducer, useCallback, forwardRef, useImperativeHandle } from 'react';
 import PropTypes from 'prop-types';
-import { Text, Grid, GridItem, H3, Stack } from '@strapi/parts';
+import { H3, Text } from '@strapi/parts/Text';
+import { Stack } from '@strapi/parts/Stack';
+import { Grid, GridItem } from '@strapi/parts/Grid';
 import { useIntl } from 'react-intl';
 import getTrad from '../../utils/getTrad';
 import Policies from '../Policies';

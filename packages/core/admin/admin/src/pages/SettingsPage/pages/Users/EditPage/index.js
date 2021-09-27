@@ -25,7 +25,7 @@ import { HeaderLayout, ContentLayout } from '@strapi/parts/Layout';
 import { H3 } from '@strapi/parts/Text';
 import { Main } from '@strapi/parts/Main';
 import { Stack } from '@strapi/parts/Stack';
-import { CheckIcon } from '@strapi/icons';
+import CheckIcon from '@strapi/icons/CheckIcon';
 import MagicLink from 'ee_else_ce/pages/SettingsPage/pages/Users/components/MagicLink';
 import { formatAPIErrors } from '../../../../../utils';
 import { fetchUser, putUser } from './utils/api';

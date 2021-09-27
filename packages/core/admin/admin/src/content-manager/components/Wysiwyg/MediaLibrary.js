@@ -1,7 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@strapi/parts/ModalLayout';
-import { Text, Button } from '@strapi/parts';
+import { Button } from '@strapi/parts/Button';
+import { Text } from '@strapi/parts/Text';
 
 // const image = [
 //   { alt: 'sunrise', url: 'http://localhost:3000/sunriseimage' },

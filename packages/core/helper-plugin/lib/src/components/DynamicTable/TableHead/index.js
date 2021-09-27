@@ -1,14 +1,10 @@
 import React from 'react';
-import {
-  BaseCheckbox,
-  IconButton,
-  TableLabel,
-  Th,
-  Thead,
-  Tr,
-  Tooltip,
-  VisuallyHidden,
-} from '@strapi/parts';
+import { BaseCheckbox } from '@strapi/parts/BaseCheckbox';
+import { IconButton } from '@strapi/parts/IconButton';
+import { Tooltip } from '@strapi/parts/Tooltip';
+import { VisuallyHidden } from '@strapi/parts/VisuallyHidden';
+import { TableLabel } from '@strapi/parts/Text';
+import { Th, Thead, Tr } from '@strapi/parts/Table';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import SortIcon from '../../../icons/SortIcon';

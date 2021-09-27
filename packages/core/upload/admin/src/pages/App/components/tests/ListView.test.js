@@ -152,6 +152,28 @@ describe('MediaLibrary / ListView', () => {
         align-items: flex-end;
       }
 
+      .c49 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
+      }
+
+      .c0 {
+        display: grid;
+        grid-template-columns: repeat(auto-fit,minmax(250px,1fr));
+        grid-gap: 16px;
+      }
+
+      .c41 {
+        padding-left: 8px;
+      }
+
       .c43 {
         display: -webkit-box;
         display: -webkit-flex;
@@ -166,6 +188,10 @@ describe('MediaLibrary / ListView', () => {
         align-items: center;
       }
 
+      .c44 > * + * {
+        margin-left: 4px;
+      }
+
       .c47 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
@@ -176,10 +202,6 @@ describe('MediaLibrary / ListView', () => {
         padding: 0;
         position: absolute;
         width: 1px;
-      }
-
-      .c44 > * + * {
-        margin-left: 4px;
       }
 
       .c45 {
@@ -218,16 +240,6 @@ describe('MediaLibrary / ListView', () => {
       .c48:focus svg path,
       .c48:hover svg path {
         fill: #4a4a6a;
-      }
-
-      .c0 {
-        display: grid;
-        grid-template-columns: repeat(auto-fit,minmax(250px,1fr));
-        grid-gap: 16px;
-      }
-
-      .c41 {
-        padding-left: 8px;
       }
 
       .c29 {
@@ -931,7 +943,7 @@ describe('MediaLibrary / ListView', () => {
           </div>
         </div>
         <div
-          class="c47"
+          class="c49"
         >
           <p
             aria-live="polite"

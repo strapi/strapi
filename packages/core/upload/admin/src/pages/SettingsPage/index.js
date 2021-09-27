@@ -8,21 +8,16 @@ import {
   useNotification,
   useOverlayBlocker,
 } from '@strapi/helper-plugin';
-import { CheckIcon } from '@strapi/icons';
-import {
-  ContentLayout,
-  Box,
-  Button,
-  Main,
-  HeaderLayout,
-  Stack,
-  Grid,
-  GridItem,
-  Layout,
-  Row,
-  ToggleInput,
-  H3,
-} from '@strapi/parts';
+import CheckIcon from '@strapi/icons/CheckIcon';
+import { Box } from '@strapi/parts/Box';
+import { Row } from '@strapi/parts/Row';
+import { ToggleInput } from '@strapi/parts/ToggleInput';
+import { H3 } from '@strapi/parts/Text';
+import { Button } from '@strapi/parts/Button';
+import { Main } from '@strapi/parts/Main';
+import { Stack } from '@strapi/parts/Stack';
+import { Grid, GridItem } from '@strapi/parts/Grid';
+import { ContentLayout, HeaderLayout, Layout } from '@strapi/parts/Layout';
 import axios from 'axios';
 import isEqual from 'lodash/isEqual';
 import { axiosInstance, getRequestUrl, getTrad } from '../../utils';

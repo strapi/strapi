@@ -2,8 +2,16 @@ import React, { useState } from 'react';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import { Form } from '@strapi/helper-plugin';
-import { Box, Stack, H1, Text, TextInput, Main, Row, Button, Link } from '@strapi/parts';
-import { Show, Hide } from '@strapi/icons';
+import { Box } from '@strapi/parts/Box';
+import { Stack } from '@strapi/parts/Stack';
+import { Main } from '@strapi/parts/Main';
+import { Row } from '@strapi/parts/Row';
+import { Link } from '@strapi/parts/Link';
+import { Button } from '@strapi/parts/Button';
+import { TextInput } from '@strapi/parts/TextInput';
+import { H1, Text } from '@strapi/parts/Text';
+import Hide from '@strapi/icons/Hide';
+import Show from '@strapi/icons/Show';
 import { Formik } from 'formik';
 import UnauthenticatedLayout, {
   Column,

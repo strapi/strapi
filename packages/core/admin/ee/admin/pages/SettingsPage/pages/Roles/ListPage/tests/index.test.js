@@ -54,10 +54,6 @@ describe('<ListPage />', () => {
     } = render(App);
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c0 {
-        outline: none;
-      }
-
       .c3 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
@@ -95,6 +91,10 @@ describe('<ListPage />', () => {
 
       .c2 {
         height: 100vh;
+      }
+
+      .c0 {
+        outline: none;
       }
 
       <main

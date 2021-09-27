@@ -15,7 +15,7 @@
  */
 
 import React from 'react';
-import { NextLink, Pagination, PreviousLink, Dots, PageLink } from '@strapi/parts';
+import { NextLink, Pagination, PreviousLink, Dots, PageLink } from '@strapi/parts/Pagination';
 import PropTypes from 'prop-types';
 import { useLocation } from 'react-router-dom';
 import { useIntl } from 'react-intl';

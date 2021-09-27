@@ -1,8 +1,9 @@
-import { difference } from '@strapi/helper-plugin';
-import { Tab, TabGroup, TabPanel, TabPanels, Tabs } from '@strapi/parts';
-import { has, isEmpty } from 'lodash';
-import PropTypes from 'prop-types';
 import React, { forwardRef, memo, useCallback, useImperativeHandle, useReducer } from 'react';
+import PropTypes from 'prop-types';
+import { difference } from '@strapi/helper-plugin';
+import { Tab, TabGroup, TabPanel, TabPanels, Tabs } from '@strapi/parts/Tabs';
+import has from 'lodash/has';
+import isEmpty from 'lodash/isEmpty';
 import { useIntl } from 'react-intl';
 import ContentTypes from '../ContentTypes';
 import PermissionsDataManagerProvider from '../PermissionsDataManagerProvider';

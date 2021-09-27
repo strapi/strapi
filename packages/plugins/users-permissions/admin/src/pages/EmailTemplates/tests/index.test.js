@@ -257,6 +257,18 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         text-transform: uppercase;
       }
 
+      .c18 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
+      }
+
       .c0 {
         outline: none;
       }
@@ -323,18 +335,6 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
       .c6 {
         font-size: 1rem;
         line-height: 1.5;
-      }
-
-      .c18 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
       }
 
       <main

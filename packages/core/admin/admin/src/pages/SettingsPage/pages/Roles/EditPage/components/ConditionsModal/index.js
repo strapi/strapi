@@ -1,20 +1,16 @@
-import {
-  Box,
-  Breadcrumbs,
-  Button,
-  Crumb,
-  Divider,
-  H2,
-  ModalFooter,
-  ModalHeader,
-  ModalLayout,
-  Stack,
-  Text,
-} from '@strapi/parts';
-import produce from 'immer';
-import { get, groupBy, upperFirst } from 'lodash';
-import PropTypes from 'prop-types';
 import React, { useMemo, useState } from 'react';
+import PropTypes from 'prop-types';
+import { Box } from '@strapi/parts/Box';
+import { Button } from '@strapi/parts/Button';
+import { Divider } from '@strapi/parts/Divider';
+import { Stack } from '@strapi/parts/Stack';
+import { ModalFooter, ModalHeader, ModalLayout } from '@strapi/parts/ModalLayout';
+import { Breadcrumbs, Crumb } from '@strapi/parts/Breadcrumbs';
+import { H2, Text } from '@strapi/parts/Text';
+import produce from 'immer';
+import get from 'lodash/get';
+import groupBy from 'lodash/groupBy';
+import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
 import { usePermissionsDataManager } from '../../../../../../../hooks';
 import ActionRow from './ActionRow';

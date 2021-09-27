@@ -1,7 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { BaseCheckbox, Box, IconButton, Tbody, Td, Tr, Row } from '@strapi/parts';
-import { EditIcon, DeleteIcon, Duplicate } from '@strapi/icons';
+import { BaseCheckbox } from '@strapi/parts/BaseCheckbox';
+import { Box } from '@strapi/parts/Box';
+import { IconButton } from '@strapi/parts/IconButton';
+import { Tbody, Td, Tr } from '@strapi/parts/Table';
+import { Row } from '@strapi/parts/Row';
+import DeleteIcon from '@strapi/icons/DeleteIcon';
+import Duplicate from '@strapi/icons/Duplicate';
+import EditIcon from '@strapi/icons/EditIcon';
 import { useTracking, stopPropagation, onRowClick } from '@strapi/helper-plugin';
 import { useHistory } from 'react-router-dom';
 import { useIntl } from 'react-intl';

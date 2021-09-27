@@ -1,6 +1,9 @@
 import React from 'react';
-import { Stack, H3, Text, Box } from '@strapi/parts';
-import { map, tail } from 'lodash';
+import { Stack } from '@strapi/parts/Stack';
+import { Box } from '@strapi/parts/Box';
+import { H3, Text } from '@strapi/parts/Text';
+import map from 'lodash/map';
+import tail from 'lodash/tail';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import getMethodColor from './getMethodColor';

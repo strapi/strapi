@@ -6,10 +6,12 @@
 
 /* eslint-disable import/no-cycle */
 import React, { useState } from 'react';
-import { pxToRem } from '@strapi/helper-plugin';
-import { AddIcon } from '@strapi/icons';
-import { Box, Stack, Text } from '@strapi/parts';
 import PropTypes from 'prop-types';
+import { pxToRem } from '@strapi/helper-plugin';
+import AddIcon from '@strapi/icons/AddIcon';
+import { Box } from '@strapi/parts/Box';
+import { Stack } from '@strapi/parts/Stack';
+import { Text } from '@strapi/parts/Text';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 import useDataManager from '../../hooks/useDataManager';

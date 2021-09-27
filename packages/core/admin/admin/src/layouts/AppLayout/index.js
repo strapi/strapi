@@ -1,5 +1,7 @@
 import React from 'react';
-import { Row, Box, SkipToContent } from '@strapi/parts';
+import { Box } from '@strapi/parts/Box';
+import { Row } from '@strapi/parts/Row';
+import { SkipToContent } from '@strapi/parts/Main';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';

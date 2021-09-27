@@ -1,7 +1,7 @@
-import { Settings } from '@strapi/icons';
-import { Button } from '@strapi/parts';
-import PropTypes from 'prop-types';
 import React from 'react';
+import PropTypes from 'prop-types';
+import Settings from '@strapi/icons/Settings';
+import { Button } from '@strapi/parts/Button';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 

@@ -1,10 +1,13 @@
 import React, { useMemo, useState } from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
-import { Row, Box, TableLabel, Checkbox, Grid, GridItem } from '@strapi/parts';
-
+import { Grid, GridItem } from '@strapi/parts/Grid';
+import { Box } from '@strapi/parts/Box';
+import { Checkbox } from '@strapi/parts/Checkbox';
+import { Row } from '@strapi/parts/Row';
+import { TableLabel } from '@strapi/parts/Text';
 import { useIntl } from 'react-intl';
-import { get } from 'lodash';
+import get from 'lodash/get';
 import IS_DISABLED from 'ee_else_ce/pages/SettingsPage/pages/Roles/EditPage/components/PluginsAndSettings/SubCategory/utils/constants';
 import { usePermissionsDataManager } from '../../../../../../../../hooks';
 import { getCheckboxState, removeConditionKeyFromData } from '../../utils';

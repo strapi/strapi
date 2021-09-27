@@ -1,18 +1,15 @@
 import React, { useState } from 'react';
-import { Show, Hide } from '@strapi/icons';
-import {
-  Box,
-  Stack,
-  H1,
-  Text,
-  Subtitle,
-  Checkbox,
-  TextInput,
-  Main,
-  Row,
-  Link,
-  Button,
-} from '@strapi/parts';
+import Hide from '@strapi/icons/Hide';
+import Show from '@strapi/icons/Show';
+import { Box } from '@strapi/parts/Box';
+import { Stack } from '@strapi/parts/Stack';
+import { Main } from '@strapi/parts/Main';
+import { Row } from '@strapi/parts/Row';
+import { Link } from '@strapi/parts/Link';
+import { Button } from '@strapi/parts/Button';
+import { TextInput } from '@strapi/parts/TextInput';
+import { Checkbox } from '@strapi/parts/Checkbox';
+import { H1, Text, Subtitle } from '@strapi/parts/Text';
 import { Form } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';

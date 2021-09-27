@@ -1,6 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Text, Row, Grid, GridItem, Tooltip } from '@strapi/parts';
+import { Grid, GridItem } from '@strapi/parts/Grid';
+import { Row } from '@strapi/parts/Row';
+import { Text } from '@strapi/parts/Text';
+import { Tooltip } from '@strapi/parts/Tooltip';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
 import { Link } from 'react-router-dom';

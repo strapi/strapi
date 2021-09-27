@@ -1,25 +1,23 @@
 import React from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
-import { Box } from '@strapi/parts';
-import {
-  Component,
-  CT,
-  Date,
-  Boolean,
-  DynamicZone,
-  Email,
-  Enumeration,
-  Json,
-  LongDescription,
-  Media,
-  Numbers,
-  Password,
-  Relation,
-  St,
-  Text,
-  Uid,
-} from '@strapi/icons';
+import { Box } from '@strapi/parts/Box';
+import Component from '@strapi/icons/Component';
+import CT from '@strapi/icons/Ct';
+import Date from '@strapi/icons/Date';
+import Boolean from '@strapi/icons/Boolean';
+import DynamicZone from '@strapi/icons/DynamicZone';
+import Email from '@strapi/icons/Email';
+import Enumeration from '@strapi/icons/Enumeration';
+import Json from '@strapi/icons/Json';
+import LongDescription from '@strapi/icons/LongDescription';
+import Media from '@strapi/icons/Media';
+import Password from '@strapi/icons/Password';
+import Relation from '@strapi/icons/Relation';
+import St from '@strapi/icons/St';
+import Text from '@strapi/icons/Text';
+import Uid from '@strapi/icons/Uid';
+import Numbers from '@strapi/icons/Numbers';
 import { pxToRem } from '@strapi/helper-plugin';
 
 const iconByTypes = {
