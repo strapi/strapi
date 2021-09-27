@@ -133,3 +133,5 @@ packages/generators/app/files/public/
 ############################
 
 front-workspace.code-workspace
+.yarn
+.yarnrc

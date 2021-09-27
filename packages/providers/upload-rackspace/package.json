@@ -10,8 +10,8 @@
     "test": "echo \"no tests yet\""
   },
   "dependencies": {
-    "pkgcloud": "^2.0.0",
-    "streamifier": "^0.1.1"
+    "pkgcloud": "2.2.0",
+    "streamifier": "0.1.1"
   },
   "engines": {
     "node": ">=12.x.x <=16.x.x",
