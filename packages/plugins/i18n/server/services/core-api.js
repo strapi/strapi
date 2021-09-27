@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const { has, prop, pick, reduce, map, keys, toPath } = require('lodash/fp');
+const { prop, pick, reduce, map, keys, toPath, isNil } = require('lodash/fp');
 const { contentTypes, parseMultipartData, sanitizeEntity } = require('@strapi/utils');
 
 const { getService } = require('../utils');
@@ -113,7 +113,7 @@ const createCreateLocalizationHandler = contentType => async (ctx = {}) => {
 
   const { findByCode } = getService('locales');
 
-  if (!has('locale', data)) {
+  if (isNil(data.locale)) {
     throw strapi.errors.badRequest('locale.missing');
   }
 
@@ -139,7 +139,7 @@ const createCreateLocalizationHandler = contentType => async (ctx = {}) => {
   const newEntry = await strapi.entityService.create(contentType.uid, {
     data: sanitizedData,
     files: sanitizedFiles,
-    params: { populate: ['localizations'] },
+    populate: ['localizations'],
   });
 
   return sanitizeEntity(newEntry, { model: strapi.getModel(contentType.uid) });

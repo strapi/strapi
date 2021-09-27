@@ -1,6 +1,6 @@
 'use strict';
 
-const { prop, propEq, identity } = require('lodash/fp');
+const { prop, propEq, identity, merge } = require('lodash/fp');
 
 const LOCALE_SCALAR_TYPENAME = 'I18NLocaleCode';
 const LOCALE_ARG_PLUGIN_NAME = 'I18NLocaleArg';
@@ -23,14 +23,18 @@ module.exports = ({ strapi }) => ({
     extensionService.use(({ nexus, typeRegistry }) => {
       const i18nLocaleArgPlugin = getI18nLocaleArgPlugin({ nexus, typeRegistry });
       const i18nLocaleScalar = getLocaleScalar({ nexus });
-      const createLocalizationMutations = getCreateLocalizationMutations({
-        nexus,
-        typeRegistry,
-      });
+      const {
+        mutations: createLocalizationMutations,
+        resolversConfig: createLocalizationResolversConfig,
+      } = getCreateLocalizationMutations({ nexus, typeRegistry });
 
       return {
         plugins: [i18nLocaleArgPlugin],
         types: [i18nLocaleScalar, createLocalizationMutations],
+
+        resolversConfig: {
+          ...createLocalizationResolversConfig,
+        },
       };
     });
 
@@ -71,10 +75,21 @@ module.exports = ({ strapi }) => ({
         )
         .map(prop('config.contentType'));
 
-      return localizedContentTypes.map(ct => getCreateLocalizationMutation(ct, { nexus }));
+      const createLocalizationComponents = localizedContentTypes.map(ct =>
+        getCreateLocalizationComponents(ct, { nexus })
+      );
+
+      // Extract & merge each resolverConfig into a single object
+      const resolversConfig = createLocalizationComponents
+        .map(prop('resolverConfig'))
+        .reduce(merge, {});
+
+      const mutations = createLocalizationComponents.map(prop('mutation'));
+
+      return { mutations, resolversConfig };
     };
 
-    const getCreateLocalizationMutation = (contentType, { nexus }) => {
+    const getCreateLocalizationComponents = (contentType, { nexus }) => {
       const { getEntityResponseName, getContentTypeInputName } = getGraphQLService('utils').naming;
       const { createCreateLocalizationHandler } = getI18NService('core-api');
 
@@ -83,7 +98,7 @@ module.exports = ({ strapi }) => ({
 
       const resolverHandler = createCreateLocalizationHandler(contentType);
 
-      return nexus.extendType({
+      const mutation = nexus.extendType({
         type: 'Mutation',
 
         definition(t) {
@@ -97,13 +112,30 @@ module.exports = ({ strapi }) => ({
             },
 
             async resolve(parent, args) {
-              const value = await resolverHandler(args);
+              const { id, locale, data } = args;
+
+              const ctx = {
+                id,
+                data: { ...data, locale },
+              };
+
+              const value = await resolverHandler(ctx);
 
               return { value, info: { args, resourceUID: contentType.uid } };
             },
           });
         },
       });
+
+      const resolverConfig = {
+        [`Mutation.${mutationName}`]: {
+          auth: {
+            scope: [`${contentType.uid}.createLocalization`],
+          },
+        },
+      };
+
+      return { mutation, resolverConfig };
     };
 
     const getI18nLocaleArgPlugin = ({ nexus, typeRegistry }) => {
@@ -125,14 +157,8 @@ module.exports = ({ strapi }) => ({
 
         const contentType = registryType.config.contentType;
 
-        const createLocalizationMutationType = getCreateLocalizationMutationType(contentType);
-
         // Ignore non-localized content types
-        if (
-          !isLocalizedContentType(contentType) ||
-          // Don't add the "locale" arg on "create localization" mutations
-          config.name === createLocalizationMutationType
-        ) {
+        if (!isLocalizedContentType(contentType)) {
           return;
         }
 
