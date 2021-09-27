@@ -1,9 +1,22 @@
 'use strict';
 
+const { defaultsDeep } = require('lodash/fp');
 const helmet = require('koa-helmet');
 
-module.exports = strapi => ({
-  initialize() {
-    strapi.server.use(helmet(strapi.config.middleware.settings.helmet));
+const defaults = {
+  crossOriginEmbedderPolicy: false,
+  crossOriginOpenerPolicy: false,
+  crossOriginResourcePolicy: false,
+  originAgentCluster: false,
+  contentSecurityPolicy: false,
+  xssFilter: false,
+  hsts: {
+    maxAge: 31536000,
+    includeSubDomains: true,
   },
-});
+  frameguard: {
+    action: 'sameorigin',
+  },
+};
+
+module.exports = options => helmet(defaultsDeep(defaults, options));
