@@ -68,5 +68,5 @@ module.exports = {
     },
   },
 
-  config: schemaConfig, // TODO: to handle differently for V4
+  config: schemaConfig, // TODO: to move to content-manager options
 };
