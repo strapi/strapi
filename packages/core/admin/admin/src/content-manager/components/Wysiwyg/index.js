@@ -129,7 +129,7 @@ const Wysiwyg = ({
         <ButtonText>{label}</ButtonText>
         {labelAction && <LabelAction paddingLeft={1}>{labelAction}</LabelAction>}
       </Row>
-      <WysiwygWrapper paddingTop={1} hasRadius error={error}>
+      <WysiwygWrapper hasRadius error={error}>
         <WysiwygNav
           editorRef={editorRef}
           isPreviewMode={isPreviewMode}

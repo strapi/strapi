@@ -6,7 +6,6 @@ import { Button } from '@strapi/parts/Button';
 import { IconButtonGroup } from '@strapi/parts/IconButton';
 import { Option, Select } from '@strapi/parts/Select';
 import { Popover } from '@strapi/parts/Popover';
-import { FocusTrap } from '@strapi/parts/FocusTrap';
 import { Row } from '@strapi/parts/Row';
 import Bold from '@strapi/icons/Bold';
 import Italic from '@strapi/icons/Italic';
@@ -28,6 +27,7 @@ const WysiwygNav = ({
   onToggleMediaLib,
   onTogglePopover,
   onTogglePreviewMode,
+  noPreviewMode,
   visiblePopover,
 }) => {
   const { formatMessage } = useIntl();
@@ -36,10 +36,6 @@ const WysiwygNav = ({
     defaultMessage: 'Add a title',
   });
   const buttonMoreRef = useRef();
-  const handleEscapeMore = () => {
-    onTogglePopover();
-    buttonMoreRef.current.focus();
-  };
 
   if (isPreviewMode) {
     return (
@@ -143,70 +139,68 @@ const WysiwygNav = ({
             icon={<More />}
           />
           {visiblePopover && (
-            <Popover centered source={buttonMoreRef} spacingTop={1} id="popover">
-              <FocusTrap onEscape={handleEscapeMore} restoreFocus={false}>
-                <Row>
-                  <IconButtonGroupMargin>
-                    <CustomIconButton
-                      onClick={() => onActionClick('Strikethrough', editorRef, onTogglePopover)}
-                      id="Strikethrough"
-                      label="Strikethrough"
-                      name="Strikethrough"
-                      icon={<Strikethrough />}
-                    />
-                    <CustomIconButton
-                      onClick={() => onActionClick('BulletList', editorRef, onTogglePopover)}
-                      id="BulletList"
-                      label="BulletList"
-                      name="BulletList"
-                      icon={<BulletList />}
-                    />
-                    <CustomIconButton
-                      onClick={() => onActionClick('NumberList', editorRef, onTogglePopover)}
-                      id="NumberList"
-                      label="NumberList"
-                      name="NumberList"
-                      icon={<NumberList />}
-                    />
-                  </IconButtonGroupMargin>
-                  <IconButtonGroup>
-                    <CustomIconButton
-                      onClick={() => onActionClick('Code', editorRef, onTogglePopover)}
-                      id="Code"
-                      label="Code"
-                      name="Code"
-                      icon={<Code />}
-                    />
-                    <CustomIconButton
-                      onClick={onToggleMediaLib}
-                      id="Image"
-                      label="Image"
-                      name="Image"
-                      icon={<Image />}
-                    />
-                    <CustomIconButton
-                      onClick={() => onActionClick('Link', editorRef, onTogglePopover)}
-                      id="Link"
-                      label="Link"
-                      name="Link"
-                      // eslint-disable-next-line jsx-a11y/anchor-is-valid
-                      icon={<Link />}
-                    />
-                    <CustomIconButton
-                      onClick={() => onActionClick('Quote', editorRef, onTogglePopover)}
-                      id="Quote"
-                      label="Quote"
-                      name="Quote"
-                      icon={<Quote />}
-                    />
-                  </IconButtonGroup>
-                </Row>
-              </FocusTrap>
+            <Popover centered source={buttonMoreRef} spacing={4} id="popover">
+              <Row>
+                <IconButtonGroupMargin>
+                  <CustomIconButton
+                    onClick={() => onActionClick('Strikethrough', editorRef, onTogglePopover)}
+                    id="Strikethrough"
+                    label="Strikethrough"
+                    name="Strikethrough"
+                    icon={<Strikethrough />}
+                  />
+                  <CustomIconButton
+                    onClick={() => onActionClick('BulletList', editorRef, onTogglePopover)}
+                    id="BulletList"
+                    label="BulletList"
+                    name="BulletList"
+                    icon={<BulletList />}
+                  />
+                  <CustomIconButton
+                    onClick={() => onActionClick('NumberList', editorRef, onTogglePopover)}
+                    id="NumberList"
+                    label="NumberList"
+                    name="NumberList"
+                    icon={<NumberList />}
+                  />
+                </IconButtonGroupMargin>
+                <IconButtonGroup>
+                  <CustomIconButton
+                    onClick={() => onActionClick('Code', editorRef, onTogglePopover)}
+                    id="Code"
+                    label="Code"
+                    name="Code"
+                    icon={<Code />}
+                  />
+                  <CustomIconButton
+                    onClick={onToggleMediaLib}
+                    id="Image"
+                    label="Image"
+                    name="Image"
+                    icon={<Image />}
+                  />
+                  <CustomIconButton
+                    onClick={() => onActionClick('Link', editorRef, onTogglePopover)}
+                    id="Link"
+                    label="Link"
+                    name="Link"
+                    // eslint-disable-next-line jsx-a11y/anchor-is-valid
+                    icon={<Link />}
+                  />
+                  <CustomIconButton
+                    onClick={() => onActionClick('Quote', editorRef, onTogglePopover)}
+                    id="Quote"
+                    label="Quote"
+                    name="Quote"
+                    icon={<Quote />}
+                  />
+                </IconButtonGroup>
+              </Row>
             </Popover>
           )}
         </Row>
 
-        {onTogglePreviewMode && (
+        {!noPreviewMode && onTogglePreviewMode && (
           <Button onClick={onTogglePreviewMode} variant="tertiary" size="L" id="preview">
             {formatMessage({
               id: 'components.Wysiwyg.ToggleMode.preview-mode',
@@ -225,6 +219,7 @@ WysiwygNav.defaultProps = {
   onToggleMediaLib: () => {},
   onTogglePopover: () => {},
   onTogglePreviewMode: () => {},
+  noPreviewMode: false,
   visiblePopover: false,
 };
 
@@ -236,6 +231,7 @@ WysiwygNav.propTypes = {
   onTogglePopover: PropTypes.func,
   onTogglePreviewMode: PropTypes.func,
   visiblePopover: PropTypes.bool,
+  noPreviewMode: PropTypes.bool,
 };
 
 export default WysiwygNav;
