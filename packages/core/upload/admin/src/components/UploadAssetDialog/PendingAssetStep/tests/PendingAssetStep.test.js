@@ -279,6 +279,17 @@ describe('PendingAssetStep', () => {
         background: #4945ff;
       }
 
+      .c15 .sc-gJjCVn {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
       .c15 .c16 {
         color: #ffffff;
       }
@@ -327,6 +338,17 @@ describe('PendingAssetStep', () => {
         border: none;
         border: 1px solid #dcdce4;
         background: #ffffff;
+      }
+
+      .c51 .sc-gJjCVn {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
       }
 
       .c51 .c16 {

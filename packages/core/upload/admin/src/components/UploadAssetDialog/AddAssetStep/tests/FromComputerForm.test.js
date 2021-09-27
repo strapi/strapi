@@ -180,6 +180,17 @@ describe('FromComputerForm', () => {
         background: #4945ff;
       }
 
+      .c9 .sc-iiBnNu {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
       .c9 .c10 {
         color: #ffffff;
       }
@@ -228,6 +239,17 @@ describe('FromComputerForm', () => {
         border: none;
         border: 1px solid #dcdce4;
         background: #ffffff;
+      }
+
+      .c18 .sc-iiBnNu {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
       }
 
       .c18 .c10 {

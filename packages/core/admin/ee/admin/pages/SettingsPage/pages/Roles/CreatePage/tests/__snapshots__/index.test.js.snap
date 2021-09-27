@@ -66,6 +66,17 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
   background: #f0f0ff;
 }
 
+.c7 .sc-dvXYtj {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
 .c7 .c8 {
   color: #ffffff;
 }
@@ -131,6 +142,17 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
   border: none;
   border: 1px solid #4945ff;
   background: #4945ff;
+}
+
+.c11 .sc-dvXYtj {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
 }
 
 .c11 .c8 {

@@ -195,6 +195,17 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         width: 100%;
       }
 
+      .c29 .sc-iJCRrE {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
       .c29 .c30 {
         color: #ffffff;
       }
