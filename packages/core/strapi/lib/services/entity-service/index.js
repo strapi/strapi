@@ -7,7 +7,6 @@ const {
   sanitizeEntity,
   webhook: webhookUtils,
   contentTypes: contentTypesUtils,
-  relations: relationsUtils,
 } = require('@strapi/utils');
 const uploadFiles = require('../utils/upload-files');
 
@@ -23,8 +22,6 @@ const {
   transformParamsToQuery,
   pickSelectionParams,
 } = require('./params');
-
-const { MANY_RELATIONS } = relationsUtils.constants;
 
 // TODO: those should be strapi events used by the webhooks not the other way arround
 const { ENTRY_CREATE, ENTRY_UPDATE, ENTRY_DELETE } = webhookUtils.webhookEvents;
@@ -95,33 +92,11 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
 
   // TODO: streamline the logic based on the populate option
   async findWithRelationCounts(uid, opts) {
-    const model = strapi.getModel(uid);
-
     const wrappedParams = await this.wrapParams(opts, { uid, action: 'findWithRelationCounts' });
 
     const query = transformParamsToQuery(uid, wrappedParams);
 
-    const { attributes } = model;
-
-    const populate = (query.populate || []).reduce((populate, attributeName) => {
-      const attribute = attributes[attributeName];
-
-      if (
-        MANY_RELATIONS.includes(attribute.relation) &&
-        contentTypesUtils.isVisibleAttribute(model, attributeName)
-      ) {
-        populate[attributeName] = { count: true };
-      } else {
-        populate[attributeName] = true;
-      }
-
-      return populate;
-    }, {});
-
-    const { results, pagination } = await db.query(uid).findPage({
-      ...query,
-      populate,
-    });
+    const { results, pagination } = await db.query(uid).findPage(query);
 
     return {
       results,
