@@ -27,14 +27,11 @@ const mapKey = key => {
 };
 
 const buildCaslQuery = (ability, action, model) => {
-  const query = rulesToQuery(ability, action, model, o => o.conditions);
-  return _.get(query, '$or[0]', {});
+  return rulesToQuery(ability, action, model, o => o.conditions);
 };
 
 const buildStrapiQuery = caslQuery => {
-  const transform = _.flow([unwrapDeep]);
-  const res = transform(caslQuery);
-  return res;
+  return unwrapDeep(caslQuery);
 };
 
 const unwrapDeep = obj => {
@@ -56,11 +53,8 @@ const unwrapDeep = obj => {
         }
         _.setWith(acc, key, unwrapDeep(v));
       } else if (_.isArray(v)) {
-        _.setWith(
-          acc,
-          key,
-          v.map(v => unwrapDeep(v))
-        );
+        // prettier-ignore
+        _.setWith(acc, key, v.map(v => unwrapDeep(v)));
       } else {
         _.setWith(acc, key, v);
       }

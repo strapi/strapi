@@ -49,14 +49,14 @@ describe('Permissions Manager', () => {
     });
 
     test('It should returns a valid query from the ability', () => {
-      const ability = defineAbility(can => can('read', 'foo', ['bar'], { $and: [{ kai: 'doe' }] }));
+      const ability = defineAbility(can => can('read', 'foo', ['bar'], { kai: 'doe' }));
       const pm = createPermissionsManager({
         ability,
         action: 'read',
         model: 'foo',
       });
 
-      const expected = { $and: [{ kai: 'doe' }] };
+      const expected = { $or: [{ kai: 'doe' }] };
 
       expect(pm.getQuery()).toStrictEqual(expected);
     });
@@ -189,7 +189,7 @@ describe('Permissions Manager', () => {
       model: 'article',
     });
 
-    const pmQuery = { $and: [{ title: 'foo' }] };
+    const pmQuery = { $or: [{ $and: [{ title: 'foo' }] }] };
 
     test('Create query from simple object', () => {
       const query = { limit: 100 };
