@@ -8,6 +8,7 @@ import {
   // useTracking,
   // useStrapiApp,
   CheckPagePermissions,
+  NoContent,
 } from '@strapi/helper-plugin';
 // import { Header } from '@buffetjs/custom';
 // import { useIntl } from 'react-intl';
@@ -17,7 +18,6 @@ import {
 // import PluginCard from './PluginCard';
 // import Wrapper from './Wrapper';
 // import MarketplaceBanner from './MarketplaceBanner';
-import adminPermissions from '../../permissions';
 
 // const MarketPlacePage = () => {
 //   const toggleNotification = useNotification();
@@ -115,8 +115,37 @@ import adminPermissions from '../../permissions';
 //   );
 // };
 
-export default () => (
-  <CheckPagePermissions permissions={adminPermissions.marketplace.main}>
-    MarketplacePage
-  </CheckPagePermissions>
-);
+import { useIntl } from 'react-intl';
+import { Layout, HeaderLayout, ContentLayout } from '@strapi/parts/Layout';
+import { Main } from '@strapi/parts/Main';
+import adminPermissions from '../../permissions';
+
+const MarketPlacePage = () => {
+  const { formatMessage } = useIntl();
+
+  return (
+    <CheckPagePermissions permissions={adminPermissions.marketplace.main}>
+      <Layout>
+        <Main>
+          <HeaderLayout
+            title={formatMessage({
+              id: 'app.components.InstallPluginPage.helmet',
+              defaultMessage: 'Marketplace - Plugins',
+            })}
+          />
+          <ContentLayout>
+            <NoContent
+              content={{
+                id: 'coming soon',
+                defaultMessage:
+                  'This content is currently under construction and will be back in a few weeks!',
+              }}
+            />
+          </ContentLayout>
+        </Main>
+      </Layout>
+    </CheckPagePermissions>
+  );
+};
+
+export default MarketPlacePage;
