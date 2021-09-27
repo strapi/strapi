@@ -80,12 +80,40 @@
 // };
 
 // export default InstalledPluginsPage;
+
 import React from 'react';
-import { CheckPagePermissions } from '@strapi/helper-plugin';
+import { CheckPagePermissions, NoContent } from '@strapi/helper-plugin';
+import { useIntl } from 'react-intl';
+import { Layout, HeaderLayout, ContentLayout } from '@strapi/parts/Layout';
+import { Main } from '@strapi/parts/Main';
 import adminPermissions from '../../permissions';
 
-export default () => (
-  <CheckPagePermissions permissions={adminPermissions.marketplace.main}>
-    InstalledPluginsPage
-  </CheckPagePermissions>
-);
+const InstalledPluginsPage = () => {
+  const { formatMessage } = useIntl();
+
+  return (
+    <CheckPagePermissions permissions={adminPermissions.marketplace.main}>
+      <Layout>
+        <Main>
+          <HeaderLayout
+            title={formatMessage({
+              id: 'app.components.ListPluginsPage.helmet.title',
+              defaultMessage: 'List plugins',
+            })}
+          />
+          <ContentLayout>
+            <NoContent
+              content={{
+                id: 'coming soon',
+                defaultMessage:
+                  'This content is currently under construction and will be back in a few weeks!',
+              }}
+            />
+          </ContentLayout>
+        </Main>
+      </Layout>
+    </CheckPagePermissions>
+  );
+};
+
+export default InstalledPluginsPage;
