@@ -3,79 +3,63 @@
 // TODO: migration
 const _ = require('lodash');
 const { rulesToQuery } = require('@casl/ability/extra');
-const { VALID_REST_OPERATORS } = require('@strapi/utils');
 
-const ops = {
-  common: VALID_REST_OPERATORS.map(op => `$${op}`),
-  boolean: ['$or', '$and'],
-  cleanable: ['$elemMatch'],
+const operatorsMap = {
+  $in: '$in',
+  $nin: '$notIn',
+  $exists: '$notNull',
+  $gte: '$gte',
+  $gt: '$gt',
+  $lte: '$lte',
+  $lt: '$lt',
+  $eq: '$eq',
+  $ne: '$ne',
+  $and: '$and',
+  $or: '$or',
+  $not: '$not',
+};
+
+const mapKey = key => {
+  if (_.isString(key) && key.startsWith('$') && key in operatorsMap) {
+    return operatorsMap[key];
+  }
+  return key;
 };
 
 const buildCaslQuery = (ability, action, model) => {
-  const query = rulesToQuery(ability, action, model, o => o.conditions);
-  return _.get(query, '$or[0].$and', {});
+  return rulesToQuery(ability, action, model, o => o.conditions);
 };
 
 const buildStrapiQuery = caslQuery => {
-  const transform = _.flow([flattenDeep, cleanupUnwantedProperties]);
-  return transform(caslQuery);
+  return unwrapDeep(caslQuery);
 };
 
-const flattenDeep = condition => {
-  if (_.isArray(condition)) {
-    return _.map(condition, flattenDeep);
+const unwrapDeep = obj => {
+  if (!_.isPlainObject(obj) && !_.isArray(obj)) {
+    return obj;
   }
-
-  if (!_.isObject(condition)) {
-    return condition;
+  if (_.isArray(obj)) {
+    return obj.map(v => unwrapDeep(v));
   }
-
-  const shouldIgnore = e => !!ops.common.includes(e);
-  const shouldPerformTransformation = (v, k) => _.isObject(v) && !_.isArray(v) && !shouldIgnore(k);
-
-  const result = {};
-  const set = (key, value) => (result[key] = value);
-
-  const getTransformParams = (prevKey, v, k) =>
-    shouldIgnore(k) ? [`${prevKey}_${k.replace('$', '')}`, v] : [`${prevKey}.${k}`, v];
-
-  _.each(condition, (value, key) => {
-    if (ops.boolean.includes(key)) {
-      set(key.replace('$', '_'), _.map(value, flattenDeep));
-    } else if (shouldPerformTransformation(value, key)) {
-      _.each(flattenDeep(value), (v, k) => {
-        set(...getTransformParams(key, v, k));
-      });
-    } else {
-      set(key, flattenDeep(value));
-    }
-  });
-
-  return result;
-};
-
-const cleanupUnwantedProperties = condition => {
-  if (!_.isObject(condition)) {
-    return condition;
-  }
-
-  if (_.isArray(condition)) {
-    return condition.map(cleanupUnwantedProperties);
-  }
-
-  const shouldClean = e =>
-    typeof e === 'string' ? ops.cleanable.find(o => e.includes(`.${o}`)) : undefined;
 
   return _.reduce(
-    condition,
-    (acc, value, key) => {
-      const keyToClean = shouldClean(key);
-      const newKey = keyToClean ? key.split(`.${keyToClean}`).join('') : key;
+    obj,
+    (acc, v, k) => {
+      const key = mapKey(k);
 
-      return {
-        ...acc,
-        [newKey]: _.isArray(value) ? value.map(cleanupUnwantedProperties) : value,
-      };
+      if (_.isPlainObject(v)) {
+        if ('$elemMatch' in v) {
+          v = v.$elemMatch; // removing this key
+        }
+        _.setWith(acc, key, unwrapDeep(v));
+      } else if (_.isArray(v)) {
+        // prettier-ignore
+        _.setWith(acc, key, v.map(v => unwrapDeep(v)));
+      } else {
+        _.setWith(acc, key, v);
+      }
+
+      return acc;
     },
     {}
   );

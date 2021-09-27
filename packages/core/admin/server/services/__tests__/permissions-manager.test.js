@@ -49,14 +49,14 @@ describe('Permissions Manager', () => {
     });
 
     test('It should returns a valid query from the ability', () => {
-      const ability = defineAbility(can => can('read', 'foo', ['bar'], { $and: [{ kai: 'doe' }] }));
+      const ability = defineAbility(can => can('read', 'foo', ['bar'], { kai: 'doe' }));
       const pm = createPermissionsManager({
         ability,
         action: 'read',
         model: 'foo',
       });
 
-      const expected = [{ kai: 'doe' }];
+      const expected = { $or: [{ kai: 'doe' }] };
 
       expect(pm.getQuery()).toStrictEqual(expected);
     });
@@ -179,7 +179,7 @@ describe('Permissions Manager', () => {
     });
   });
 
-  describe('queryFrom', () => {
+  describe('addPermissionsQueryTo', () => {
     const ability = defineAbility(can =>
       can('read', 'article', ['title'], { $and: [{ title: 'foo' }] })
     );
@@ -189,25 +189,27 @@ describe('Permissions Manager', () => {
       model: 'article',
     });
 
-    const pmQuery = [{ title: 'foo' }];
+    const pmQuery = { $or: [{ $and: [{ title: 'foo' }] }] };
 
     test('Create query from simple object', () => {
-      const query = { _limit: 100 };
-      const expected = { _limit: 100, _where: pmQuery };
+      const query = { limit: 100 };
+      const expected = { limit: 100, filters: pmQuery };
 
-      const res = pm.queryFrom(query);
+      const res = pm.addPermissionsQueryTo(query);
 
       expect(res).toStrictEqual(expected);
     });
 
     test('Create query from complex object', () => {
-      const query = { _limit: 100, _where: [{ a: 'b' }, { c: 'd' }] };
+      const query = { limit: 100, filters: { $and: [{ a: 'b' }, { c: 'd' }] } };
       const expected = {
-        _limit: 100,
-        _where: [{ a: 'b' }, { c: 'd' }, ...pmQuery],
+        limit: 100,
+        filters: {
+          $and: [query.filters, pmQuery],
+        },
       };
 
-      const res = pm.queryFrom(query);
+      const res = pm.addPermissionsQueryTo(query);
 
       expect(res).toStrictEqual(expected);
     });
@@ -216,63 +218,81 @@ describe('Permissions Manager', () => {
   describe('buildStrapiQuery', () => {
     const tests = [
       ['No transform', { foo: 'bar' }, { foo: 'bar' }],
-      ['Simple op', { foo: { $eq: 'bar' } }, { foo_eq: 'bar' }],
-      ['Nested property', { foo: { nested: 'bar' } }, { 'foo.nested': 'bar' }],
+      ['Simple op', { foo: { $eq: 'bar' } }, { foo: { $eq: 'bar' } }],
+      ['Nested property', { 'foo.nested': 'bar' }, { foo: { nested: 'bar' } }],
+      [
+        'Nested property + $eq',
+        { 'foo.nested': { $eq: 'bar' } },
+        { foo: { nested: { $eq: 'bar' } } },
+      ],
+      [
+        'Nested property + $elementMatch',
+        { 'foo.nested': { $elemMatch: 'bar' } },
+        { foo: { nested: 'bar' } },
+      ],
       [
         'Deeply nested property',
-        { foo: { nested: { again: 'bar' } } },
         { 'foo.nested.again': 'bar' },
+        { foo: { nested: { again: 'bar' } } },
       ],
-      ['Op with array', { foo: { $in: ['bar', 'rab'] } }, { foo_in: ['bar', 'rab'] }],
-      ['Removable op', { foo: { $elemMatch: { a: 'b' } } }, { 'foo.a': 'b' }],
+      ['Op with array', { foo: { $in: ['bar', 'rab'] } }, { foo: { $in: ['bar', 'rab'] } }],
+      ['Removable op', { foo: { $elemMatch: { a: 'b' } } }, { foo: { a: 'b' } }],
       [
         'Combination of removable and basic ops',
         { foo: { $elemMatch: { a: { $in: [1, 2, 3] } } } },
-        { 'foo.a_in': [1, 2, 3] },
+        { foo: { a: { $in: [1, 2, 3] } } },
       ],
       [
         'Decoupling of nested properties with/without op',
         { foo: { $elemMatch: { a: { $in: [1, 2, 3] }, b: 'c' } } },
-        { 'foo.a_in': [1, 2, 3], 'foo.b': 'c' },
+        { foo: { a: { $in: [1, 2, 3] }, b: 'c' } },
       ],
       [
         'OR op and properties decoupling',
         { $or: [{ foo: { a: 2 } }, { foo: { b: 3 } }] },
-        { _or: [{ 'foo.a': 2 }, { 'foo.b': 3 }] },
+        { $or: [{ foo: { a: 2 } }, { foo: { b: 3 } }] },
       ],
       [
         'OR op with nested properties & ops',
         { $or: [{ foo: { a: 2 } }, { foo: { b: { $in: [1, 2, 3] } } }] },
-        { _or: [{ 'foo.a': 2 }, { 'foo.b_in': [1, 2, 3] }] },
+        { $or: [{ foo: { a: 2 } }, { foo: { b: { $in: [1, 2, 3] } } }] },
       ],
       [
         'Nested OR op',
         { $or: [{ $or: [{ a: 2 }, { a: 3 }] }] },
-        { _or: [{ _or: [{ a: 2 }, { a: 3 }] }] },
+        { $or: [{ $or: [{ a: 2 }, { a: 3 }] }] },
       ],
       [
         'OR op with nested AND op',
         { $or: [{ a: 2 }, [{ a: 3 }, { $or: [{ b: 1 }, { b: 4 }] }]] },
-        { _or: [{ a: 2 }, [{ a: 3 }, { _or: [{ b: 1 }, { b: 4 }] }]] },
+        { $or: [{ a: 2 }, [{ a: 3 }, { $or: [{ b: 1 }, { b: 4 }] }]] },
       ],
       [
         'OR op with nested AND op and nested properties',
-        { _or: [{ a: 2 }, [{ a: 3 }, { b: { c: 'foo' } }]] },
-        { _or: [{ a: 2 }, [{ a: 3 }, { 'b.c': 'foo' }]] },
+        { $or: [{ a: 2 }, [{ a: 3 }, { b: { c: 'foo' } }]] },
+        { $or: [{ a: 2 }, [{ a: 3 }, { b: { c: 'foo' } }]] },
       ],
       [
         'Literal nested property with removable op',
         {
-          'createdBy.roles': {
-            $elemMatch: {
-              id: {
-                $in: [1, 2, 3],
+          created_by: {
+            roles: {
+              $elemMatch: {
+                id: {
+                  $in: [1, 2, 3],
+                },
               },
             },
           },
         },
         {
-          'createdBy.roles.id_in': [1, 2, 3],
+          created_by: {
+            roles: {
+              id: {
+                $in: [1, 2, 3],
+              },
+            },
+          },
         },
       ],
     ];

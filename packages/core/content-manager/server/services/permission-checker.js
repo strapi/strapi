@@ -43,7 +43,8 @@ const createPermissionChecker = strapi => ({ userAbility, model }) => {
   const sanitizeCreateInput = data => sanitizeInput(ACTIONS.create, data);
   const sanitizeUpdateInput = entity => data => sanitizeInput(ACTIONS.update, data, entity);
 
-  const buildPermissionQuery = (query, action) => permissionsManager.queryFrom(query, action);
+  const buildPermissionQuery = (query, action) =>
+    permissionsManager.addPermissionsQueryTo(query, action);
 
   const buildReadQuery = query => buildPermissionQuery(query, ACTIONS.read);
   const buildDeleteQuery = query => buildPermissionQuery(query, ACTIONS.delete);

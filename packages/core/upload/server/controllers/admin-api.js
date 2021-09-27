@@ -2,9 +2,9 @@
 
 const _ = require('lodash');
 const { contentTypes: contentTypesUtils } = require('@strapi/utils');
-const validateSettings = require('../validation/settings');
-const validateUploadBody = require('../validation/upload');
-const { getService } = require('../../utils');
+const { getService } = require('../utils');
+const validateSettings = require('./validation/settings');
+const validateUploadBody = require('./validation/upload');
 
 const { CREATED_BY_ATTRIBUTE } = contentTypesUtils.constants;
 
@@ -35,7 +35,8 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const query = pm.queryFrom(ctx.query);
+    const query = pm.addPermissionsQueryTo(ctx.query);
+
     const files = await getService('upload').fetchAll(query);
 
     ctx.body = pm.sanitize(files, { withPrivate: false });
@@ -68,7 +69,7 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const query = pm.queryFrom(ctx.query);
+    const query = pm.addPermissionsQueryTo(ctx.query);
     const count = await getService('upload').count(query);
 
     ctx.body = { count };
@@ -185,10 +186,29 @@ module.exports = {
 
     ctx.body = pm.sanitize(uploadedFiles, { action: ACTIONS.read, withPrivate: false });
   },
+
+  async upload(ctx) {
+    const {
+      query: { id },
+      request: { files: { files } = {} },
+    } = ctx;
+
+    if (id && (_.isEmpty(files) || files.size === 0)) {
+      return this.updateFileInfo(ctx);
+    }
+
+    if (_.isEmpty(files) || files.size === 0) {
+      throw strapi.errors.badRequest(null, {
+        errors: [{ id: 'Upload.status.empty', message: 'Files are empty' }],
+      });
+    }
+
+    await (id ? this.replaceFile : this.uploadFiles)(ctx);
+  },
 };
 
 const findEntityAndCheckPermissions = async (ability, action, model, id) => {
-  const file = await getService('upload').findOne({ id }, [CREATED_BY_ATTRIBUTE]);
+  const file = await getService('upload').findOne(id, [CREATED_BY_ATTRIBUTE]);
 
   if (_.isNil(file)) {
     throw strapi.errors.notFound();
