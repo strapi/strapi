@@ -126,7 +126,7 @@ const resetPasswordByEmail = async (email, password) => {
  * @param {int|string} userId user's id to look for
  */
 const isLastSuperAdminUser = async userId => {
-  const user = await findOne(userId, ['roles']);
+  const user = await findOne(userId);
   const superAdminRole = await getService('role').getSuperAdminWithUsersCount();
 
   return superAdminRole.usersCount === 1 && hasSuperAdminRole(user);
