@@ -5,10 +5,21 @@ const { prop, propEq, identity, merge } = require('lodash/fp');
 const LOCALE_SCALAR_TYPENAME = 'I18NLocaleCode';
 const LOCALE_ARG_PLUGIN_NAME = 'I18NLocaleArg';
 
+const getLocalizedTypesFromRegistry = ({ strapi, typeRegistry }) => {
+  const { KINDS } = strapi.plugin('graphql').service('constants');
+  const { isLocalizedContentType } = strapi.plugin('i18n').service('content-types');
+
+  return typeRegistry.where(
+    ({ config }) => config.kind === KINDS.type && isLocalizedContentType(config.contentType)
+  );
+};
+
 module.exports = ({ strapi }) => ({
   register() {
     const { service: getGraphQLService } = strapi.plugin('graphql');
     const { service: getI18NService } = strapi.plugin('i18n');
+
+    const { isLocalizedContentType } = getI18NService('content-types');
 
     const extensionService = getGraphQLService('extension');
 
@@ -19,6 +30,23 @@ module.exports = ({ strapi }) => ({
     };
 
     extensionService.shadowCRUD('plugin::i18n.locale').disableMutations();
+
+    // Disable unwanted fields for localized content types
+    Object.entries(strapi.contentTypes).forEach(([uid, ct]) => {
+      if (isLocalizedContentType(ct)) {
+        // Disable locale field in localized inputs
+        extensionService
+          .shadowCRUD(uid)
+          .field('locale')
+          .disableInput();
+
+        // Disable localizations field in localized inputs
+        extensionService
+          .shadowCRUD(uid)
+          .field('localizations')
+          .disableInput();
+      }
+    });
 
     extensionService.use(({ nexus, typeRegistry }) => {
       const i18nLocaleArgPlugin = getI18nLocaleArgPlugin({ nexus, typeRegistry });
@@ -33,7 +61,10 @@ module.exports = ({ strapi }) => ({
         types: [i18nLocaleScalar, createLocalizationMutations],
 
         resolversConfig: {
+          // Auth for createLocalization mutations
           ...createLocalizationResolversConfig,
+          // locale arg transformation for localized createEntity mutations
+          ...getLocalizedCreateMutationsResolversConfigs({ typeRegistry }),
         },
       };
     });
@@ -66,14 +97,9 @@ module.exports = ({ strapi }) => ({
     };
 
     const getCreateLocalizationMutations = ({ nexus, typeRegistry }) => {
-      const { KINDS } = getGraphQLService('constants');
-      const { isLocalizedContentType } = getI18NService('content-types');
-
-      const localizedContentTypes = typeRegistry
-        .where(
-          ({ config }) => config.kind === KINDS.type && isLocalizedContentType(config.contentType)
-        )
-        .map(prop('config.contentType'));
+      const localizedContentTypes = getLocalizedTypesFromRegistry({ strapi, typeRegistry }).map(
+        prop('config.contentType')
+      );
 
       const createLocalizationComponents = localizedContentTypes.map(ct =>
         getCreateLocalizationComponents(ct, { nexus })
@@ -136,6 +162,33 @@ module.exports = ({ strapi }) => ({
       };
 
       return { mutation, resolverConfig };
+    };
+
+    const getLocalizedCreateMutationsResolversConfigs = ({ typeRegistry }) => {
+      const localizedCreateMutationsNames = getLocalizedTypesFromRegistry({
+        strapi,
+        typeRegistry,
+      })
+        .map(prop('config.contentType'))
+        .map(getGraphQLService('utils').naming.getCreateMutationTypeName);
+
+      return localizedCreateMutationsNames.reduce(
+        (acc, mutationName) => ({
+          ...acc,
+
+          [`Mutation.${mutationName}`]: {
+            middlewares: [
+              // Set data's locale using args' locale
+              (resolve, parent, args, context, info) => {
+                args.data.locale = args.locale;
+
+                return resolve(parent, args, context, info);
+              },
+            ],
+          },
+        }),
+        {}
+      );
     };
 
     const getI18nLocaleArgPlugin = ({ nexus, typeRegistry }) => {

@@ -45,7 +45,7 @@ module.exports = context => {
               .hasInputEnabled()
           );
 
-          for (const [attributeName, attribute] of validAttributes) {
+          validAttributes.forEach(([attributeName, attribute]) => {
             // Scalars
             if (isStrapiScalar(attribute)) {
               const gqlScalar = mappers.strapiScalarToGraphQLScalar(attribute.type);
@@ -101,7 +101,7 @@ module.exports = context => {
 
               t.list.field(attributeName, { type: nonNull(dzInputName) });
             }
-          }
+          });
         },
       });
     },

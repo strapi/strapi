@@ -3,6 +3,7 @@
 const getTypes = require('./types');
 const getQueries = require('./queries');
 const getMutations = require('./mutations');
+const getResolversConfig = require('./resolvers-configs');
 
 module.exports = ({ strapi }) => {
   const { config: graphQLConfig } = strapi.plugin('graphql');
@@ -32,31 +33,12 @@ module.exports = ({ strapi }) => {
     const types = getTypes({ strapi, nexus });
     const queries = getQueries({ strapi, nexus });
     const mutations = getMutations({ strapi, nexus });
+    const resolversConfig = getResolversConfig({ strapi });
 
     return {
       types: [types, queries, mutations],
 
-      resolversConfig: {
-        'Mutation.login': {
-          auth: false,
-        },
-
-        'Mutation.register': {
-          auth: false,
-        },
-
-        'Mutation.forgotPassword': {
-          auth: false,
-        },
-
-        'Mutation.resetPassword': {
-          auth: false,
-        },
-
-        'Mutation.emailConfirmation': {
-          auth: false,
-        },
-      },
+      resolversConfig,
     };
   });
 };
