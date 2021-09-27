@@ -162,7 +162,12 @@ const InputUID = ({
   }, [debouncedTargetFieldValue, isCustomized, isCreation]);
 
   const handleGenerateMouseEnter = () => {
-    setRegenerateLabel('Regenerate');
+    setRegenerateLabel(
+      formatMessage({
+        id: 'content-manager.components.uid.regenerate',
+        defaultMessage: 'Regenerate',
+      })
+    );
   };
 
   const handleGenerateMouseLeave = () => {
@@ -189,7 +194,10 @@ const InputUID = ({
             <TextValidation alignItems="center" justifyContent="flex-end">
               <AlertSucessIcon />
               <Text textColor="success600" small>
-                Available
+                {formatMessage({
+                  id: 'content-manager.components.uid.available',
+                  defaultMessage: 'Available',
+                })}
               </Text>
             </TextValidation>
           )}
@@ -197,7 +205,10 @@ const InputUID = ({
             <TextValidation notAvailable alignItems="center" justifyContent="flex-end">
               <AlertWarningIcon />
               <Text textColor="danger600" small>
-                Unavailable
+                {formatMessage({
+                  id: 'content-manager.components.uid.unavailable',
+                  defaultMessage: 'Unavailable',
+                })}
               </Text>
             </TextValidation>
           )}
@@ -232,83 +243,6 @@ const InputUID = ({
       placeholder={formattedPlaceholder}
       value={value || ''}
     />
-    // <Error
-    //   name={name}
-    //   inputError={inputError}
-    //   type="text"
-    //   validations={{ ...validations, regex: UID_REGEX }}
-    // >
-    //   {({ canCheck, onBlur, error, dispatch }) => {
-    //     const hasError = Boolean(error);
-
-    //     return (
-    //       <Wrapper ref={wrapperRef}>
-    //         <Name htmlFor={name}>
-    //           <span>{inputLabel}</span>
-    //           {labelIcon && (
-    //             <LabelIconWrapper title={labelIcon.title}>{labelIcon.icon}</LabelIconWrapper>
-    //           )}
-    //         </Name>
-    //         <InputContainer>
-    //           <Input
-    //             {...inputProps}
-    //             containsEndAdornment={editable}
-    //             editable={editable}
-    //             error={hasError}
-    //             onFocus={handleFocus}
-    //             name={name}
-    //             onChange={e => handleChange(e, canCheck, dispatch)}
-    //             type="text"
-    //             onBlur={onBlur}
-    //             // eslint-disable-next-line no-irregular-whitespace
-    //             value={value || ''}
-    //           />
-    //           <RightContent>
-    //             {label && (
-    //               <RightContentLabel color="blue">
-    //                 {formatMessage({
-    //                   id: getTrad('components.uid.regenerate'),
-    //                 })}
-    //               </RightContentLabel>
-    //             )}
-    //             {!isLoading && !label && availability && (
-    //               <RightLabel
-    //                 isAvailable={availability.isAvailable || value === availability.suggestion}
-    //               />
-    //             )}
-    //             {editable && (
-    //               <RegenerateButton
-    //                 onMouseEnter={handleGenerateMouseEnter}
-    //                 onMouseLeave={handleGenerateMouseLeave}
-    //                 onClick={() => generateUid.current()}
-    //               >
-    //                 {isLoading ? (
-    //                   <LoadingIndicator small />
-    //                 ) : (
-    //                   <Sync fill={label ? '#007EFF' : '#B5B7BB'} width="11px" height="11px" />
-    //                 )}
-    //               </RegenerateButton>
-    //             )}
-    //           </RightContent>
-    //           {availability && availability.suggestion && isSuggestionOpen && (
-    //             <Options
-    //               title={formatMessage({ id: getTrad('components.uid.suggested') })}
-    //               options={[
-    //                 {
-    //                   id: 'suggestion',
-    //                   label: availability.suggestion,
-    //                   onClick: handleSuggestionClick,
-    //                 },
-    //               ]}
-    //             />
-    //           )}
-    //         </InputContainer>
-    //         {!hasError && description && <SubLabel as={Description}>{description}</SubLabel>}
-    //         {hasError && <SubLabel as={ErrorMessage}>{error}</SubLabel>}
-    //       </Wrapper>
-    //     );
-    //   }}
-    // </Error>
   );
 };
 
@@ -350,5 +284,4 @@ InputUID.defaultProps = {
   value: '',
 };
 
-// export default memo(InputUID, isEqual);
 export default InputUID;
