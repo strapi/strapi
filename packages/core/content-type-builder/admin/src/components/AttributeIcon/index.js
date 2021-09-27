@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { Box } from '@strapi/parts/Box';
 import Component from '@strapi/icons/Component';
-import CT from '@strapi/icons/CT';
+import CT from '@strapi/icons/Ct';
 import Date from '@strapi/icons/Date';
 import Boolean from '@strapi/icons/Boolean';
 import DynamicZone from '@strapi/icons/DynamicZone';
