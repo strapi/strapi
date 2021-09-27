@@ -45,6 +45,8 @@ const createProvider = config => {
   } catch (error) {
     if (error.code === 'MODULE_NOT_FOUND') {
       modulePath = providerName;
+    } else {
+      throw error;
     }
   }
 
