@@ -19,79 +19,91 @@ const createRouteScopeGenerator = namespace => route => {
   }
 };
 
-module.exports = (server, strapi) => {
-  const registerAdminRoutes = () => {
-    const generateRouteScope = createRouteScopeGenerator(`admin::`);
+/**
+ * Register all routes
+ * @param {import('../../').Strapi} strapi
+ */
+module.exports = strapi => {
+  registerAdminRoutes(strapi);
+  registerAPIRoutes(strapi);
+  registerPluginRoutes(strapi);
+};
 
-    strapi.admin.routes.forEach(route => {
-      generateRouteScope(route);
-      route.info = { pluginName: 'admin' };
-    });
+/**
+ * Register admin routes
+ * @param {import('../../').Strapi} strapi
+ */
+const registerAdminRoutes = strapi => {
+  const generateRouteScope = createRouteScopeGenerator(`admin::`);
 
-    server.routes({
-      type: 'admin',
-      prefix: '/admin',
-      routes: strapi.admin.routes,
-    });
-  };
+  strapi.admin.routes.forEach(route => {
+    generateRouteScope(route);
+    route.info = { pluginName: 'admin' };
+  });
 
-  const registerPluginRoutes = () => {
-    for (const pluginName in strapi.plugins) {
-      const plugin = strapi.plugins[pluginName];
+  strapi.server.routes({
+    type: 'admin',
+    prefix: '/admin',
+    routes: strapi.admin.routes,
+  });
+};
 
-      const generateRouteScope = createRouteScopeGenerator(`plugin::${pluginName}`);
+/**
+ * Register plugin routes
+ * @param {import('../../').Strapi} strapi
+ */
+const registerPluginRoutes = strapi => {
+  for (const pluginName in strapi.plugins) {
+    const plugin = strapi.plugins[pluginName];
 
-      if (Array.isArray(plugin.routes)) {
-        plugin.routes.forEach(route => {
+    const generateRouteScope = createRouteScopeGenerator(`plugin::${pluginName}`);
+
+    if (Array.isArray(plugin.routes)) {
+      plugin.routes.forEach(route => {
+        generateRouteScope(route);
+        route.info = { pluginName };
+      });
+
+      strapi.server.routes({
+        type: 'admin',
+        prefix: `/${pluginName}`,
+        routes: plugin.routes,
+      });
+    } else {
+      _.forEach(plugin.routes, router => {
+        router.type = router.type || 'admin';
+        router.prefix = `/${pluginName}`;
+        router.routes.forEach(route => {
           generateRouteScope(route);
           route.info = { pluginName };
         });
 
-        server.routes({
-          type: 'admin',
-          prefix: `/${pluginName}`,
-          routes: plugin.routes,
-        });
-      } else {
-        _.forEach(plugin.routes, router => {
-          router.type = router.type || 'admin';
-          router.prefix = `/${pluginName}`;
-          router.routes.forEach(route => {
-            generateRouteScope(route);
-            route.info = { pluginName };
-          });
-
-          server.routes(router);
-        });
-      }
-    }
-  };
-
-  const registerAPIRoutes = () => {
-    for (const apiName in strapi.api) {
-      const api = strapi.api[apiName];
-
-      const generateRouteScope = createRouteScopeGenerator(`api::${apiName}`);
-
-      _.forEach(api.routes, router => {
-        // TODO: remove once auth setup
-        // pass meta down to compose endpoint
-        router.type = 'content-api';
-        router.routes.forEach(route => {
-          generateRouteScope(route);
-          route.info = { apiName };
-        });
-
-        return server.routes(router);
+        strapi.server.routes(router);
       });
     }
-  };
+  }
+};
 
-  return {
-    initialize() {
-      registerAdminRoutes();
-      registerAPIRoutes();
-      registerPluginRoutes();
-    },
-  };
+/**
+ * Register api routes
+ * @param {import('../../').Strapi} strapi
+ */
+const registerAPIRoutes = strapi => {
+  for (const apiName in strapi.api) {
+    const api = strapi.api[apiName];
+
+    const generateRouteScope = createRouteScopeGenerator(`api::${apiName}`);
+
+    _.forEach(api.routes, router => {
+      // TODO: remove once auth setup
+      // pass meta down to compose endpoint
+      router.type = 'content-api';
+      router.routes.forEach(route => {
+        generateRouteScope(route);
+        route.info = { apiName };
+      });
+
+      return strapi.server.routes(router);
+    });
+  }
 };

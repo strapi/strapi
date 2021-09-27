@@ -8,6 +8,7 @@ const { createRouteManager } = require('./routing');
 const { createAdminAPI } = require('./admin-api');
 const { createContentAPI } = require('./content-api');
 const registerAllRoutes = require('./register-routes');
+const registerMiddlewares = require('./register-middlewares');
 
 const healthCheck = async ctx => {
   ctx.set('strapi', 'You are so French!');
@@ -92,6 +93,12 @@ const createServer = strapi => {
 
     initRouting() {
       registerAllRoutes(strapi);
+      return this;
+    },
+
+    initMiddlewares() {
+      registerMiddlewares(strapi);
+      return this;
     },
 
     listen(...args) {

@@ -9,7 +9,6 @@ const loadConfiguration = require('./core/app-configuration');
 
 const { createContainer } = require('./container');
 const utils = require('./utils');
-const initializeMiddlewares = require('./middlewares');
 const createStrapiFs = require('./services/fs');
 const createEventHub = require('./services/event-hub');
 const { createServer } = require('./services/server');
@@ -276,7 +275,7 @@ class Strapi {
   }
 
   async loadMiddlewares() {
-    this.middleware = await loaders.loadMiddlewares(this);
+    await loaders.loadMiddlewares(this);
   }
 
   async loadApp() {
@@ -373,9 +372,7 @@ class Strapi {
 
     await this.startWebhooks();
 
-    // Initialize middlewares.
-    await initializeMiddlewares(this);
-
+    await this.server.initMiddlewares();
     await this.server.initRouting();
 
     await this.runLifecyclesFunctions(LIFECYCLES.BOOTSTRAP);

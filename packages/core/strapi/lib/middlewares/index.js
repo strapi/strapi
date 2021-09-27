@@ -7,14 +7,14 @@ const favicon = require('./favicon');
 const ip = require('./ip');
 const logger = require('./logger');
 const poweredBy = require('./powered-by');
-const requestParser = require('./request-parser');
+const request = require('./request');
 const responseTime = require('./response-time');
-const responseHandlers = require('./response-handlers');
+const responses = require('./responses');
 const security = require('./security');
 // session: require('./session'),
 const publicStatic = require('./public');
 
-const INTERNAL_MIDDLEWARES = [
+module.exports = {
   errors,
   ip,
   security,
@@ -23,19 +23,10 @@ const INTERNAL_MIDDLEWARES = [
   poweredBy,
   logger,
   compression,
-  responseHandlers,
-  requestParser,
+  responses,
+  request,
   favicon,
-  publicStatic,
-];
-
-module.exports = async strapi => {
-  for (const middlewareFactory of INTERNAL_MIDDLEWARES) {
-    // const config = strapi.config.get(`middlwares`);
-    const middleware = middlewareFactory({});
-
-    strapi.server.use(middleware);
-  }
+  public: publicStatic,
 };
 
 // const requiredMiddlewares = [
