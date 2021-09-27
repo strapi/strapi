@@ -118,5 +118,33 @@ module.exports = {
       category: 'users and roles',
       subCategory: 'roles',
     },
+    {
+      uid: 'api-tokens.create',
+      displayName: 'Create (generate)',
+      pluginName: 'admin',
+      section: 'settings',
+      category: 'api tokens',
+    },
+    {
+      uid: 'api-tokens.read',
+      displayName: 'Read',
+      pluginName: 'admin',
+      section: 'settings',
+      category: 'api tokens',
+    },
+    {
+      uid: 'api-tokens.update',
+      displayName: 'Update',
+      pluginName: 'admin',
+      section: 'settings',
+      category: 'api tokens',
+    },
+    {
+      uid: 'api-tokens.delete',
+      displayName: 'Delete (revoke)',
+      pluginName: 'admin',
+      section: 'settings',
+      category: 'api tokens',
+    },
   ],
 };

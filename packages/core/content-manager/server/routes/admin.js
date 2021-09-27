@@ -1,5 +1,7 @@
 'use strict';
 
+const { routing } = require('../middlewares');
+
 module.exports = {
   type: 'admin',
   routes: [
@@ -102,8 +104,8 @@ module.exports = {
       path: '/single-types/:model',
       handler: 'single-types.find',
       config: {
+        middlewares: [routing],
         policies: [
-          'routing',
           'admin::isAuthenticatedAdmin',
           {
             name: 'plugin::content-manager.hasPermissions',
@@ -117,8 +119,8 @@ module.exports = {
       path: '/single-types/:model',
       handler: 'single-types.createOrUpdate',
       config: {
+        middlewares: [routing],
         policies: [
-          'routing',
           'admin::isAuthenticatedAdmin',
           {
             name: 'plugin::content-manager.hasPermissions',
@@ -138,8 +140,8 @@ module.exports = {
       path: '/single-types/:model',
       handler: 'single-types.delete',
       config: {
+        middlewares: [routing],
         policies: [
-          'routing',
           'admin::isAuthenticatedAdmin',
           {
             name: 'plugin::content-manager.hasPermissions',
@@ -153,8 +155,8 @@ module.exports = {
       path: '/single-types/:model/actions/publish',
       handler: 'single-types.publish',
       config: {
+        middlewares: [routing],
         policies: [
-          'routing',
           'plugin::content-manager.has-draft-and-publish',
           'admin::isAuthenticatedAdmin',
           {
@@ -169,8 +171,8 @@ module.exports = {
       path: '/single-types/:model/actions/unpublish',
       handler: 'single-types.unpublish',
       config: {
+        middlewares: [routing],
         policies: [
-          'routing',
           'plugin::content-manager.has-draft-and-publish',
           'admin::isAuthenticatedAdmin',
           {
@@ -185,8 +187,8 @@ module.exports = {
       path: '/collection-types/:model/:id/:targetField',
       handler: 'collection-types.previewManyRelations',
       config: {
+        middlewares: [routing],
         policies: [
-          'routing',
           'admin::isAuthenticatedAdmin',
           {
             name: 'plugin::content-manager.hasPermissions',
@@ -200,8 +202,8 @@ module.exports = {
       path: '/collection-types/:model',
       handler: 'collection-types.find',
       config: {
+        middlewares: [routing],
         policies: [
-          'routing',
           'admin::isAuthenticatedAdmin',
           {
             name: 'plugin::content-manager.hasPermissions',
@@ -215,8 +217,8 @@ module.exports = {
       path: '/collection-types/:model',
       handler: 'collection-types.create',
       config: {
+        middlewares: [routing],
         policies: [
-          'routing',
           'admin::isAuthenticatedAdmin',
           {
             name: 'plugin::content-manager.hasPermissions',
@@ -230,8 +232,8 @@ module.exports = {
       path: '/collection-types/:model/:id',
       handler: 'collection-types.findOne',
       config: {
+        middlewares: [routing],
         policies: [
-          'routing',
           'admin::isAuthenticatedAdmin',
           {
             name: 'plugin::content-manager.hasPermissions',
@@ -245,8 +247,8 @@ module.exports = {
       path: '/collection-types/:model/:id',
       handler: 'collection-types.update',
       config: {
+        middlewares: [routing],
         policies: [
-          'routing',
           'admin::isAuthenticatedAdmin',
           {
             name: 'plugin::content-manager.hasPermissions',
@@ -260,8 +262,8 @@ module.exports = {
       path: '/collection-types/:model/:id',
       handler: 'collection-types.delete',
       config: {
+        middlewares: [routing],
         policies: [
-          'routing',
           'admin::isAuthenticatedAdmin',
           {
             name: 'plugin::content-manager.hasPermissions',
@@ -275,8 +277,8 @@ module.exports = {
       path: '/collection-types/:model/:id/actions/publish',
       handler: 'collection-types.publish',
       config: {
+        middlewares: [routing],
         policies: [
-          'routing',
           'plugin::content-manager.has-draft-and-publish',
           'admin::isAuthenticatedAdmin',
           {
@@ -291,8 +293,8 @@ module.exports = {
       path: '/collection-types/:model/:id/actions/unpublish',
       handler: 'collection-types.unpublish',
       config: {
+        middlewares: [routing],
         policies: [
-          'routing',
           'plugin::content-manager.has-draft-and-publish',
           'admin::isAuthenticatedAdmin',
           {
@@ -307,8 +309,8 @@ module.exports = {
       path: '/collection-types/:model/actions/bulkDelete',
       handler: 'collection-types.bulkDelete',
       config: {
+        middlewares: [routing],
         policies: [
-          'routing',
           'admin::isAuthenticatedAdmin',
           {
             name: 'plugin::content-manager.hasPermissions',

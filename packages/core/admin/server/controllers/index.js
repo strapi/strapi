@@ -2,6 +2,7 @@
 
 module.exports = {
   admin: require('./admin'),
+  'api-token': require('./api-token'),
   'authenticated-user': require('./authenticated-user'),
   authentication: require('./authentication'),
   permission: require('./permission'),

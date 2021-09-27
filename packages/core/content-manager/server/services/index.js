@@ -1,13 +1,13 @@
 'use strict';
 
-const components = require('../../services/components');
-const contentTypes = require('../../services/content-types');
-const dataMapper = require('../../services/data-mapper');
-const metrics = require('../../services/metrics');
-const permissionChecker = require('../../services/permission-checker');
-const permission = require('../../services/permission');
-const uid = require('../../services/uid');
-const entityManager = require('../../services/entity-manager');
+const components = require('./components');
+const contentTypes = require('./content-types');
+const dataMapper = require('./data-mapper');
+const metrics = require('./metrics');
+const permissionChecker = require('./permission-checker');
+const permission = require('./permission');
+const uid = require('./uid');
+const entityManager = require('./entity-manager');
 
 module.exports = {
   components,

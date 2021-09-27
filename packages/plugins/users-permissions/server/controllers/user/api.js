@@ -67,7 +67,7 @@ module.exports = {
       provider: 'local',
     };
 
-    user.email = user.email.toLowerCase();
+    user.email = _.toLower(user.email);
 
     if (!role) {
       const defaultRole = await strapi
@@ -85,11 +85,11 @@ module.exports = {
       ctx.badRequest(null, formatError(error));
     }
   },
+
   /**
    * Update a/an user record.
    * @return {Object}
    */
-
   async update(ctx) {
     const advancedConfigs = await strapi
       .store({ type: 'plugin', name: 'users-permissions', key: 'advanced' })
@@ -98,9 +98,7 @@ module.exports = {
     const { id } = ctx.params;
     const { email, username, password } = ctx.request.body;
 
-    const user = await getService('user').fetch({
-      id,
-    });
+    const user = await getService('user').fetch({ id });
 
     if (_.has(ctx.request.body, 'email') && !email) {
       return ctx.badRequest('email.notNull');
@@ -152,10 +150,6 @@ module.exports = {
     let updateData = {
       ...ctx.request.body,
     };
-
-    if (_.has(ctx.request.body, 'password') && password === user.password) {
-      delete updateData.password;
-    }
 
     const data = await getService('user').edit({ id }, updateData);
 

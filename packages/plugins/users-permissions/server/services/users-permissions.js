@@ -101,7 +101,10 @@ module.exports = ({ strapi }) => ({
         return;
       }
 
-      routesMap[`api::${apiName}`] = routes;
+      routesMap[`api::${apiName}`] = routes.map(route => ({
+        ...route,
+        path: `/api${route.path}`,
+      }));
     });
 
     _.forEach(strapi.plugins, (plugin, pluginName) => {
@@ -119,7 +122,10 @@ module.exports = ({ strapi }) => ({
         return;
       }
 
-      routesMap[`plugin::${pluginName}`] = routes;
+      routesMap[`plugin::${pluginName}`] = routes.map(route => ({
+        ...route,
+        path: `/api${route.path}`,
+      }));
     });
 
     return routesMap;
@@ -134,7 +140,7 @@ module.exports = ({ strapi }) => ({
     const appActions = _.flatMap(strapi.api, (api, apiName) => {
       return _.flatMap(api.controllers, (controller, controllerName) => {
         return _.keys(controller).map(actionName => {
-          return `api::${apiName}.${controllerName}.${_.toLower(actionName)}`;
+          return `api::${apiName}.${controllerName}.${actionName}`;
         });
       });
     });
@@ -142,7 +148,7 @@ module.exports = ({ strapi }) => ({
     const pluginsActions = _.flatMap(strapi.plugins, (plugin, pluginName) => {
       return _.flatMap(plugin.controllers, (controller, controllerName) => {
         return _.keys(controller).map(actionName => {
-          return `plugin::${pluginName}.${controllerName}.${_.toLower(actionName)}`;
+          return `plugin::${pluginName}.${controllerName}.${actionName}`;
         });
       });
     });
