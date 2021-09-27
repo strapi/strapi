@@ -512,13 +512,6 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         color: #666687;
       }
 
-      .c38 {
-        font-weight: 400;
-        font-size: 0.75rem;
-        line-height: 1.33;
-        color: #32324d;
-      }
-
       .c10 {
         font-size: 1rem;
         line-height: 1.5;
@@ -747,11 +740,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
               <span
                 class="c35 c36 c37"
               >
-                <span
-                  class="c38"
-                >
-                  Forgot your password?
-                </span>
+                Forgot your password?
               </span>
             </a>
           </div>
