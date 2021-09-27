@@ -4,7 +4,7 @@ const { assoc, has, prop, omit } = require('lodash/fp');
 const strapiUtils = require('@strapi/utils');
 
 const { sanitizeEntity } = strapiUtils;
-const { hasDraftAndPublish } = strapiUtils.contentTypes;
+const { hasDraftAndPublish, isVisibleAttribute } = strapiUtils.contentTypes;
 const { PUBLISHED_AT_ATTRIBUTE, CREATED_BY_ATTRIBUTE } = strapiUtils.contentTypes.constants;
 const { ENTRY_PUBLISH, ENTRY_UNPUBLISH } = strapiUtils.webhook.webhookEvents;
 const { MANY_RELATIONS } = strapiUtils.relations.constants;
@@ -96,12 +96,12 @@ const getBasePopulate = (uid, populate) => {
 const getCounterPopulate = (uid, populate) => {
   const basePopulate = getBasePopulate(uid, populate);
 
-  const { attributes } = strapi.getModel(uid);
+  const model = strapi.getModel(uid);
 
   return basePopulate.reduce((populate, attributeName) => {
-    const attribute = attributes[attributeName];
+    const attribute = model.attributes[attributeName];
 
-    if (MANY_RELATIONS.includes(attribute.relation)) {
+    if (MANY_RELATIONS.includes(attribute.relation) && isVisibleAttribute(model, attributeName)) {
       populate[attributeName] = { count: true };
     } else {
       populate[attributeName] = true;
