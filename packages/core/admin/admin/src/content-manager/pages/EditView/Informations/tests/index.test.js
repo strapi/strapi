@@ -165,7 +165,7 @@ describe('CONTENT MANAGER | EditView | Header', () => {
             <span
               class="c9"
             >
-              now
+              -
             </span>
           </div>
           <div

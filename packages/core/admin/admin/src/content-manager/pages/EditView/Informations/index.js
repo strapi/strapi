@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useIntl } from 'react-intl';
 import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 import { Box } from '@strapi/parts/Box';
@@ -11,6 +11,7 @@ import getUnits from './utils/getUnits';
 
 const Informations = () => {
   const { formatMessage, formatRelativeTime } = useIntl();
+  const [{ unit, value }, setUnits] = useState({ unit: '', value: 0 });
   const { initialData, isCreatingEntry } = useCMEditViewDataManager();
 
   const updatedAt = 'updatedAt';
@@ -18,13 +19,14 @@ const Informations = () => {
   const updatedByLastname = initialData.updatedBy?.lastname || '';
   const updatedByUsername = initialData.updatedBy?.username;
   const updatedBy = updatedByUsername || `${updatedByFirstname} ${updatedByLastname}`;
-  const currentTime = useRef(Date.now());
   const timestamp = initialData[updatedAt]
     ? new Date(initialData[updatedAt]).getTime()
     : Date.now();
-  const elapsed = timestamp - currentTime.current;
 
-  const { unit, value } = getUnits(-elapsed);
+  useEffect(() => {
+    const elapsed = timestamp - Date.now();
+    setUnits(getUnits(-elapsed));
+  }, [timestamp]);
 
   return (
     <Box>
@@ -45,7 +47,9 @@ const Informations = () => {
               defaultMessage: 'Last update',
             })}
           </Text>
-          <Text>{formatRelativeTime(value, unit, { numeric: 'auto' })}</Text>
+          <Text>
+            {isCreatingEntry ? '-' : formatRelativeTime(value, unit, { numeric: 'auto' })}
+          </Text>
         </Row>
         <Row justifyContent="space-between">
           <Text bold>
