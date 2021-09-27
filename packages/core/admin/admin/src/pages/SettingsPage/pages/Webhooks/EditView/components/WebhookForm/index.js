@@ -1,5 +1,9 @@
+import React from 'react';
+import PropTypes from 'prop-types';
 import { Form } from '@strapi/helper-plugin';
-import { BackIcon, CheckIcon, Publish } from '@strapi/icons';
+import BackIcon from '@strapi/icons/BackIcon';
+import CheckIcon from '@strapi/icons/CheckIcon';
+import Publish from '@strapi/icons/Publish';
 import { ContentLayout, HeaderLayout } from '@strapi/parts/Layout';
 import { Box } from '@strapi/parts/Box';
 import { Button } from '@strapi/parts/Button';
@@ -8,8 +12,7 @@ import { Stack } from '@strapi/parts/Stack';
 import { TextInput } from '@strapi/parts/TextInput';
 import { Grid, GridItem } from '@strapi/parts/Grid';
 import { Field, Formik } from 'formik';
-import PropTypes from 'prop-types';
-import React from 'react';
+
 import { useIntl } from 'react-intl';
 import EventInput from '../EventInput';
 import HeadersInput from '../HeadersInput';

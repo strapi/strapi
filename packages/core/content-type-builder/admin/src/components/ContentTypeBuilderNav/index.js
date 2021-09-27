@@ -1,5 +1,5 @@
 import React from 'react';
-import { AddIcon } from '@strapi/icons';
+import AddIcon from '@strapi/icons/AddIcon';
 import { Box } from '@strapi/parts/Box';
 import {
   SubNav,

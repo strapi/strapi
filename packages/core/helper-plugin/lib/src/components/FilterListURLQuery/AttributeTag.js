@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Box } from '@strapi/parts/Box';
-import { Close } from '@strapi/icons';
+import Close from '@strapi/icons/Close';
 import { Tag } from '@strapi/parts/Tag';
 import { useIntl } from 'react-intl';
 

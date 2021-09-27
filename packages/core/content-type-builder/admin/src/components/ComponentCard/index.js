@@ -11,7 +11,7 @@ import { Box } from '@strapi/parts/Box';
 import { Stack } from '@strapi/parts/Stack';
 import { Text } from '@strapi/parts/Text';
 import { pxToRem } from '@strapi/helper-plugin';
-import { Close } from '@strapi/icons';
+import Close from '@strapi/icons/Close';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import styled from 'styled-components';
 

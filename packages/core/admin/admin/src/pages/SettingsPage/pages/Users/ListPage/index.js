@@ -12,7 +12,7 @@ import { ActionLayout, ContentLayout, HeaderLayout } from '@strapi/parts/Layout'
 import { Button } from '@strapi/parts/Button';
 import { Main } from '@strapi/parts/Main';
 import { useNotifyAT } from '@strapi/parts/LiveRegions';
-import { Mail } from '@strapi/icons';
+import Mail from '@strapi/icons/Mail';
 import { useLocation } from 'react-router-dom';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
