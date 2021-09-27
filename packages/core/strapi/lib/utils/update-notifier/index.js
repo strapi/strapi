@@ -67,6 +67,7 @@ const createUpdateNotifier = strapi => {
     const now = Date.now();
     const latestVersion = config.get('latest');
     const lastNotification = config.get('lastNotification') || 0;
+
     if (
       !process.stdout.isTTY ||
       lastNotification + notifInterval > now ||

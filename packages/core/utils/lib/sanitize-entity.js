@@ -48,8 +48,10 @@ const sanitizeEntity = (dataSource, options) => {
     }
 
     // Relations
-    const relation = attribute && (attribute.model || attribute.collection || attribute.component);
-    if (relation) {
+    const isRelation = attribute && ['relation', 'component'].includes(attribute.type);
+    if (isRelation) {
+      const relation = attribute && (attribute.target || attribute.component);
+
       if (_.isNil(value)) {
         return { ...acc, [key]: value };
       }
@@ -69,23 +71,18 @@ const sanitizeEntity = (dataSource, options) => {
       };
 
       let sanitizeFn;
-      if (relation === '*') {
+      if (attribute.relation && attribute.relation.toLowerCase().includes('morph')) {
         sanitizeFn = entity => {
-          if (_.isNil(entity) || !_.has(entity, '__contentType')) {
+          if (_.isNil(entity) || !_.has(entity, '__type')) {
             return entity;
           }
 
-          return sanitizeEntity(entity, {
-            model: strapi.getModel(entity.__contentType),
-            ...baseOptions,
-          });
+          return sanitizeEntity(entity, { model: strapi.getModel(entity.__type), ...baseOptions });
         };
       } else {
-        sanitizeFn = entity =>
-          sanitizeEntity(entity, {
-            model: strapi.getModel(relation, attribute.plugin),
-            ...baseOptions,
-          });
+        sanitizeFn = entity => {
+          return sanitizeEntity(entity, { model: strapi.getModel(relation), ...baseOptions });
+        };
       }
 
       const nextVal = Array.isArray(value) ? value.map(sanitizeFn) : sanitizeFn(value);
@@ -131,18 +128,20 @@ const getAllowedFields = ({ includeFields, model, isOutput }) => {
 
   const nonVisibleWritableAttributes = _.intersection(writableAttributes, nonVisibleAttributes);
 
-  return _.concat(
-    includeFields || [],
-    ...(isOutput
-      ? [
-          STATIC_FIELDS,
-          CREATED_AT_ATTRIBUTE,
-          UPDATED_AT_ATTRIBUTE,
-          COMPONENT_FIELDS,
-          ...nonWritableAttributes,
-          ...nonVisibleAttributes,
-        ]
-      : [STATIC_FIELDS, COMPONENT_FIELDS, ...nonVisibleWritableAttributes])
+  return _.uniq(
+    _.concat(
+      includeFields || [],
+      ...(isOutput
+        ? [
+            STATIC_FIELDS,
+            CREATED_AT_ATTRIBUTE,
+            UPDATED_AT_ATTRIBUTE,
+            COMPONENT_FIELDS,
+            ...nonWritableAttributes,
+            ...nonVisibleAttributes,
+          ]
+        : [STATIC_FIELDS, COMPONENT_FIELDS, ...nonVisibleWritableAttributes])
+    )
   );
 };
 

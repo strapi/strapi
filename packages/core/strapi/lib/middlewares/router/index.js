@@ -9,9 +9,11 @@ const createRouteScopeGenerator = namespace => route => {
   if (typeof route.handler === 'string') {
     const [controller, action] = route.handler.split('.');
 
-    _.defaultsDeep(route.config, {
-      auth: {
-        scope: `${prefix}${controller}.${toLower(action)}`,
+    _.defaultsDeep(route, {
+      config: {
+        auth: {
+          scope: `${prefix}${controller}.${toLower(action)}`,
+        },
       },
     });
   }

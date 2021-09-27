@@ -26,6 +26,8 @@ const sanitizeRole = omit(['users', 'permissions']);
 const COMPARABLE_FIELDS = ['conditions', 'properties', 'subject', 'action'];
 const pickComparableFields = pick(COMPARABLE_FIELDS);
 
+const jsonClean = data => JSON.parse(JSON.stringify(data));
+
 /**
  * Compare two permissions
  * @param {Permission} p1
@@ -33,7 +35,11 @@ const pickComparableFields = pick(COMPARABLE_FIELDS);
  * @returns {boolean}
  */
 const arePermissionsEqual = (p1, p2) => {
-  return deepEqual(pickComparableFields(p1), pickComparableFields(p2));
+  if (p1.action === p2.action) {
+    return deepEqual(jsonClean(pickComparableFields(p1)), jsonClean(pickComparableFields(p2)));
+  }
+
+  return false;
 };
 
 /**

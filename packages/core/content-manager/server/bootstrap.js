@@ -1,5 +1,9 @@
 'use strict';
 
-const bootstrap = require('../config/functions/bootstrap');
+const { getService } = require('./utils');
 
-module.exports = bootstrap;
+module.exports = async () => {
+  await getService('components').syncConfigurations();
+  await getService('content-types').syncConfigurations();
+  await getService('permission').registerPermissions();
+};
