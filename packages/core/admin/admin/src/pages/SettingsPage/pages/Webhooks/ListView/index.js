@@ -453,11 +453,11 @@ const ListView = () => {
                     icon={<EmptyStateDocument width="160px" />}
                     content={formatMessage({
                       id: 'Settings.webhooks.list.empty.description',
-                      defaultMessage: 'Add your first one to this list',
+                      defaultMessage: 'Add your first webhook',
                     })}
                     action={
                       <Button
-                        size="S"
+                        size="M"
                         variant="secondary"
                         startIcon={<AddIcon />}
                         onClick={() => (canCreate ? handleGoTo('create') : {})}
