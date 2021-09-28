@@ -36,6 +36,7 @@ const cleanData = (retrievedData, currentSchema, componentsSchema) => {
         case 'time': {
           cleanedData = value;
 
+          // FIXME
           if (value && value.split(':').length < 3) {
             cleanedData = `${value}:00`;
           }

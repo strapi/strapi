@@ -1,5 +1,4 @@
-import React from // useState
-'react';
+import React from 'react'; // useState
 // import { Redirect } from 'react-router-dom';
 import { useIntl } from 'react-intl';
 // import styled from 'styled-components';
