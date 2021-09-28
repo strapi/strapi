@@ -110,7 +110,6 @@ const CMEditViewLocalePicker = ({
             <Option
               value={value.value}
               disabled
-              hidden
               startIcon={hasDraftAndPublishEnabled ? <Bullet status={currentLocaleStatus} /> : null}
             >
               {value.label}
