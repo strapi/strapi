@@ -6,7 +6,7 @@ import { Link } from '@strapi/parts/Link';
 
 const Notification = ({ dispatch, notification }) => {
   const { formatMessage } = useIntl();
-  const { message, link, type, id, onClose, timeout, blockTransition, title } = notification;
+  const { message, link, type, id, onClose, timeout, blockTransition } = notification;
 
   const formattedMessage = msg => (typeof msg === 'string' ? msg : formatMessage(msg, msg.values));
   const handleClose = useCallback(() => {
@@ -56,10 +56,6 @@ const Notification = ({ dispatch, notification }) => {
     variant = 'success';
   }
 
-  if (title) {
-    alertTitle = title;
-  }
-
   return (
     <Alert
       action={
@@ -97,7 +93,6 @@ Notification.defaultProps = {
     },
     onClose: () => null,
     timeout: 2500,
-    title: null,
     blockTransition: false,
   },
 };
@@ -126,7 +121,6 @@ Notification.propTypes = {
         }),
       ]).isRequired,
     }),
-    title: PropTypes.string,
     type: PropTypes.string,
     onClose: PropTypes.func,
     timeout: PropTypes.number,

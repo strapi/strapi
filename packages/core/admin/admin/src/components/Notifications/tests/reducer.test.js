@@ -30,7 +30,6 @@ describe('ADMIN | COMPONENTS | NOTIFICATIONS | reducer', () => {
         notifications: [
           {
             id: 0,
-            title: null,
             type: 'success',
             message: { id: 'notification.message' },
             link: null,

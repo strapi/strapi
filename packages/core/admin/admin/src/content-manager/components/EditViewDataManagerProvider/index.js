@@ -304,12 +304,13 @@ const EditViewDataManagerProvider = ({
         console.error(err);
 
         errors = getYupInnerErrors(err);
-        const firstError = Object.keys(errors)[0];
 
         toggleNotification({
           type: 'warning',
-          title: `${firstError}:`,
-          message: errors[firstError],
+          message: {
+            id: getTrad('containers.EditView.notification.errors'),
+            defaultMessage: 'The form contains some errors',
+          },
         });
       }
 
