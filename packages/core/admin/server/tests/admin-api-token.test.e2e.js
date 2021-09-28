@@ -117,7 +117,7 @@ describe('Admin API Token CRUD (e2e)', () => {
 
   test('4. Creates an api token without a description (successfully)', async () => {
     const body = {
-      name: 'api-token_tests-name-without-description',
+      name: 'api-token_tests-without-description',
       type: 'full-access',
     };
 
@@ -141,7 +141,7 @@ describe('Admin API Token CRUD (e2e)', () => {
 
   test('5. Creates an api token with trimmed description and name (successfully)', async () => {
     const body = {
-      name: 'api-token_tests-name-with-spaces-at-the-end   ',
+      name: 'api-token_tests-spaces-at-the-end   ',
       description: 'api-token_tests-description-with-spaces-at-the-end   ',
       type: 'read-only',
     };
@@ -155,7 +155,7 @@ describe('Admin API Token CRUD (e2e)', () => {
     expect(res.statusCode).toBe(201);
     expect(res.body.data).toStrictEqual({
       accessKey: expect.any(String),
-      name: 'api-token_tests-name-with-spaces-at-the-end',
+      name: 'api-token_tests-spaces-at-the-end',
       description: 'api-token_tests-description-with-spaces-at-the-end',
       type: body.type,
       id: expect.any(Number),
@@ -181,13 +181,13 @@ describe('Admin API Token CRUD (e2e)', () => {
       },
       {
         id: expect.any(Number),
-        name: 'api-token_tests-name-with-spaces-at-the-end',
+        name: 'api-token_tests-spaces-at-the-end',
         description: 'api-token_tests-description-with-spaces-at-the-end',
         type: 'read-only',
       },
       {
         id: expect.any(Number),
-        name: 'api-token_tests-name-without-description',
+        name: 'api-token_tests-without-description',
         description: '',
         type: 'full-access',
       },
