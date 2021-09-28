@@ -347,6 +347,7 @@
   "app.utils.publish": "Publish",
   "app.utils.select-all": "Select all",
   "app.utils.unpublish": "Unpublish",
+  "coming.soon": "This content is currently under construction and will be back in a few weeks!",
   "components.Select.placeholder": "Select",
   "components.TableHeader.actions-label": "Actions",
   "components.pagination.go-to": "Go to page {page}",
