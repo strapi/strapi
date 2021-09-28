@@ -94,8 +94,16 @@ const processPopulate = (populate, ctx) => {
   return finalPopulate;
 };
 
-//  Omit limit & offset to avoid needing a query per result to avoid making too many queries
-const pickPopulateParams = _.pick(['select', 'count', 'where', 'populate', 'orderBy']);
+//  TODO: Omit limit & offset to avoid needing a query per result to avoid making too many queries
+const pickPopulateParams = _.pick([
+  'select',
+  'count',
+  'where',
+  'populate',
+  'orderBy',
+  'limit',
+  'offset',
+]);
 
 // TODO: cleanup code
 // TODO: create aliases for pivot columns

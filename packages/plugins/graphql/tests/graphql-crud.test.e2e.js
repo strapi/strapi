@@ -1,5 +1,7 @@
 'use strict';
 
+const { omit, prop } = require('lodash/fp');
+
 // Helpers.
 const { createTestBuilder } = require('../../../../test/helpers/builder');
 const { createStrapiInstance } = require('../../../../test/helpers/strapi');
@@ -60,20 +62,20 @@ describe('Test Graphql API End to End', () => {
     test.each(postsPayload)('Create Post %o', async post => {
       const res = await graphqlQuery({
         query: /* GraphQL */ `
-          mutation createPost($input: createPostInput) {
-            createPost(input: $input) {
-              post {
-                name
-                bigint
-                nullable
+          mutation createPost($data: PostInput!) {
+            createPost(data: $data) {
+              data {
+                attributes {
+                  name
+                  bigint
+                  nullable
+                }
               }
             }
           }
         `,
         variables: {
-          input: {
-            data: post,
-          },
+          data: post,
         },
       });
 
@@ -83,7 +85,9 @@ describe('Test Graphql API End to End', () => {
       expect(body).toEqual({
         data: {
           createPost: {
-            post,
+            data: {
+              attributes: post,
+            },
           },
         },
       });
@@ -94,10 +98,14 @@ describe('Test Graphql API End to End', () => {
         query: /* GraphQL */ `
           {
             posts {
-              id
-              name
-              bigint
-              nullable
+              data {
+                id
+                attributes {
+                  name
+                  bigint
+                  nullable
+                }
+              }
             }
           }
         `,
@@ -108,32 +116,50 @@ describe('Test Graphql API End to End', () => {
       expect(res.statusCode).toBe(200);
       expect(body).toMatchObject({
         data: {
-          posts: postsPayload,
+          posts: {
+            data: postsPayload.map(entry => ({
+              id: expect.any(String),
+              attributes: omit('id', entry),
+            })),
+          },
         },
       });
 
       // assign for later use
-      data.posts = res.body.data.posts;
+      data.posts = res.body.data.posts.data.map(({ id, attributes }) => ({ id, ...attributes }));
     });
 
     test('List posts with limit', async () => {
       const res = await graphqlQuery({
         query: /* GraphQL */ `
           {
-            posts(limit: 1) {
-              id
-              name
-              bigint
-              nullable
+            posts(pagination: { limit: 1 }) {
+              data {
+                id
+                attributes {
+                  name
+                  bigint
+                  nullable
+                }
+              }
             }
           }
         `,
       });
 
+      const expectedPost = data.posts[0];
+
       expect(res.statusCode).toBe(200);
       expect(res.body).toEqual({
         data: {
-          posts: [data.posts[0]],
+          posts: {
+            data: [
+              {
+                id: expectedPost.id,
+                attributes: omit('id', expectedPost),
+              },
+            ],
+          },
         },
       });
     });
@@ -143,19 +169,30 @@ describe('Test Graphql API End to End', () => {
         query: /* GraphQL */ `
           {
             posts(sort: "name:desc") {
-              id
-              name
-              bigint
-              nullable
+              data {
+                id
+                attributes {
+                  name
+                  bigint
+                  nullable
+                }
+              }
             }
           }
         `,
       });
 
+      const expectedPosts = [...data.posts].reverse().map(entry => ({
+        id: expect.any(String),
+        attributes: omit('id', entry),
+      }));
+
       expect(res.statusCode).toBe(200);
       expect(res.body).toEqual({
         data: {
-          posts: [...data.posts].reverse(),
+          posts: {
+            data: expectedPosts,
+          },
         },
       });
     });
@@ -164,20 +201,33 @@ describe('Test Graphql API End to End', () => {
       const res = await graphqlQuery({
         query: /* GraphQL */ `
           {
-            posts(start: 1) {
-              id
-              name
-              bigint
-              nullable
+            posts(pagination: { start: 1 }) {
+              data {
+                id
+                attributes {
+                  name
+                  bigint
+                  nullable
+                }
+              }
             }
           }
         `,
       });
 
+      const expectedPost = data.posts[1];
+
       expect(res.statusCode).toBe(200);
       expect(res.body).toEqual({
         data: {
-          posts: [data.posts[1]],
+          posts: {
+            data: [
+              {
+                id: expectedPost.id,
+                attributes: omit('id', expectedPost),
+              },
+            ],
+          },
         },
       });
     });
@@ -187,15 +237,13 @@ describe('Test Graphql API End to End', () => {
         query: /* GraphQL */ `
           {
             posts(start: 1) {
-              id
-              name
-              bigint
-              nullable
-              createdBy {
-                username
-              }
-              updatedBy {
-                username
+              data {
+                id
+                attributes {
+                  name
+                  bigint
+                  nullable
+                }
               }
             }
           }
@@ -214,145 +262,116 @@ describe('Test Graphql API End to End', () => {
     test.each([
       [
         {
-          name: 'post 1',
-          bigint: 1316130638171,
+          name: { eq: 'post 1' },
+          bigint: { eq: 1316130638171 },
         },
         [postsPayload[0]],
       ],
       [
         {
-          name_eq: 'post 1',
-          bigint_eq: 1316130638171,
-        },
-        [postsPayload[0]],
-      ],
-      [
-        {
-          name_ne: 'post 1',
-          bigint_ne: 1316130638171,
+          name: { not: { eq: 'post 1' } },
+          bigint: { not: { eq: 1316130638171 } },
         },
         [postsPayload[1]],
       ],
       [
         {
-          name_contains: 'Post',
+          name: { contains: 'post' },
         },
         postsPayload,
       ],
       [
         {
-          name_contains: 'Post 1',
+          name: { contains: 'post 1' },
         },
         [postsPayload[0]],
       ],
       [
         {
-          name_containss: 'post',
+          name: { containsi: 'Post' },
         },
         postsPayload,
       ],
       [
         {
-          name_ncontainss: 'post 1',
+          name: { not: { containsi: 'Post 1' } },
         },
         [postsPayload[1]],
       ],
       [
         {
-          name_in: ['post 1', 'post 2', 'post 3'],
+          name: { in: ['post 1', 'post 2', 'post 3'] },
         },
         postsPayload,
       ],
       [
         {
-          name_nin: ['post 2'],
+          name: { not: { in: ['post 2'] } },
         },
         [postsPayload[0]],
       ],
       [
         {
-          nullable_null: true,
-        },
-        [postsPayload[1]],
-      ],
-      [
-        {
-          nullable_null: false,
-        },
-        [postsPayload[0]],
-      ],
-      [
-        {
-          _or: [{ name_in: ['post 2'] }, { bigint_eq: 1316130638171 }],
+          or: [{ name: { in: ['post 2'] } }, { bigint: { eq: 1316130638171 } }],
         },
         [postsPayload[0], postsPayload[1]],
       ],
       [
         {
-          _where: { nullable_null: false },
-        },
-        [postsPayload[0]],
-      ],
-      [
-        {
-          _where: { _or: { nullable_null: false } },
-        },
-        [postsPayload[0]],
-      ],
-      [
-        {
-          _where: [{ nullable_null: false }],
-        },
-        [postsPayload[0]],
-      ],
-      [
-        {
-          _where: [{ _or: [{ name_in: ['post 2'] }, { bigint_eq: 1316130638171 }] }],
+          and: [{ or: [{ name: { in: ['post 2'] } }, { bigint: { eq: 1316130638171 } }] }],
         },
         [postsPayload[0], postsPayload[1]],
       ],
       [
         {
-          _where: [
+          and: [
             {
-              _or: [
-                { name_in: ['post 2'] },
-                { _or: [{ bigint_eq: 1316130638171 }, { nullable_null: false }] },
+              or: [
+                { name: { in: ['post 2'] } },
+                { or: [{ bigint: { eq: 1316130638171 } }, { nullable: { not: { null: true } } }] },
               ],
             },
           ],
         },
         [postsPayload[0], postsPayload[1]],
       ],
-    ])('List posts with where clause %o', async (where, expected) => {
+    ])('List posts with filters clause %o', async (filters, expected) => {
       const res = await graphqlQuery({
         query: /* GraphQL */ `
-          query findPosts($where: JSON) {
-            posts(where: $where) {
-              name
-              bigint
-              nullable
+          query findPosts($filters: PostFiltersInput) {
+            posts(filters: $filters) {
+              data {
+                attributes {
+                  name
+                  bigint
+                  nullable
+                }
+              }
             }
           }
         `,
         variables: {
-          where,
+          filters,
         },
       });
 
       expect(res.statusCode).toBe(200);
 
+      const { data: posts } = res.body.data.posts;
+
       // same length
-      expect(res.body.data.posts.length).toBe(expected.length);
+      expect(posts.length).toBe(expected.length);
 
       // all the posts returned are in the expected array
-      res.body.data.posts.forEach(post => {
-        expect(expected).toEqual(expect.arrayContaining([post]));
+      posts.map(prop('attributes')).forEach(post => {
+        expect(expected.map(omit('id'))).toEqual(expect.arrayContaining([post]));
       });
 
       // all expected values are in the result
       expected.forEach(expectedPost => {
-        expect(res.body.data.posts).toEqual(expect.arrayContaining([expectedPost]));
+        expect(posts.map(prop('attributes'))).toEqual(
+          expect.arrayContaining([omit('id', expectedPost)])
+        );
       });
     });
 
@@ -361,10 +380,14 @@ describe('Test Graphql API End to End', () => {
         query: /* GraphQL */ `
           query getPost($id: ID!) {
             post(id: $id) {
-              id
-              name
-              bigint
-              nullable
+              data {
+                id
+                attributes {
+                  name
+                  bigint
+                  nullable
+                }
+              }
             }
           }
         `,
@@ -376,7 +399,12 @@ describe('Test Graphql API End to End', () => {
       expect(res.statusCode).toBe(200);
       expect(res.body).toEqual({
         data: {
-          post: data.posts[0],
+          post: {
+            data: {
+              id: data.posts[0].id,
+              attributes: omit('id', data.posts[0]),
+            },
+          },
         },
       });
     });
@@ -385,23 +413,21 @@ describe('Test Graphql API End to End', () => {
       const newName = 'new post name';
       const res = await graphqlQuery({
         query: /* GraphQL */ `
-          mutation updatePost($input: updatePostInput) {
-            updatePost(input: $input) {
-              post {
+          mutation updatePost($id: ID!, $data: PostInput!) {
+            updatePost(id: $id, data: $data) {
+              data {
                 id
-                name
+                attributes {
+                  name
+                }
               }
             }
           }
         `,
         variables: {
-          input: {
-            where: {
-              id: data.posts[0].id,
-            },
-            data: {
-              name: newName,
-            },
+          id: data.posts[0].id,
+          data: {
+            name: newName,
           },
         },
       });
@@ -410,37 +436,43 @@ describe('Test Graphql API End to End', () => {
       expect(res.body).toEqual({
         data: {
           updatePost: {
-            post: {
+            data: {
               id: data.posts[0].id,
-              name: newName,
+              attributes: {
+                name: newName,
+              },
             },
           },
         },
       });
 
-      data.posts[0] = res.body.data.updatePost.post;
+      const newPost = res.body.data.updatePost.data;
+
+      data.posts[0] = {
+        id: newPost.id,
+        ...newPost.attributes,
+      };
     });
 
     test('Delete Posts', async () => {
       for (let post of data.posts) {
         const res = await graphqlQuery({
           query: /* GraphQL */ `
-            mutation deletePost($input: deletePostInput) {
-              deletePost(input: $input) {
-                post {
+            mutation deletePost($id: ID!) {
+              deletePost(id: $id) {
+                data {
                   id
-                  name
-                  bigint
+                  attributes {
+                    name
+                    nullable
+                    bigint
+                  }
                 }
               }
             }
           `,
           variables: {
-            input: {
-              where: {
-                id: post.id,
-              },
-            },
+            id: post.id,
           },
         });
 
@@ -448,8 +480,9 @@ describe('Test Graphql API End to End', () => {
         expect(res.body).toMatchObject({
           data: {
             deletePost: {
-              post: {
+              data: {
                 id: post.id,
+                attributes: omit('id', post),
               },
             },
           },

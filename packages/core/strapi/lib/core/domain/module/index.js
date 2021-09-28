@@ -62,8 +62,8 @@ const createModule = (namespace, rawModule, strapi) => {
       strapi.container.get('config').set(uidToPath(namespace), rawModule.config);
     },
     routes: rawModule.routes,
-    config(path) {
-      return strapi.container.get('config').get(`${uidToPath(namespace)}.${path}`);
+    config(path, defaultValue) {
+      return strapi.container.get('config').get(`${uidToPath(namespace)}.${path}`, defaultValue);
     },
     contentType(ctName) {
       return strapi.container.get('content-types').get(`${namespace}.${ctName}`);

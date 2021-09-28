@@ -83,4 +83,13 @@ const extendLocalizedContentTypes = strapi => {
       // coreApiService.addGraphqlLocalizationAction(contentType); // TODO: to implement
     }
   });
+
+  if (strapi.plugin('graphql')) {
+    require('./graphql')({ strapi }).register();
+  }
+
+  // TODO: to implement
+  // strapi.db.migrations.register(fieldMigration);
+  // strapi.db.migrations.register(enableContentTypeMigration);
+  // strapi.db.migrations.register(disableContentTypeMigration);
 };
