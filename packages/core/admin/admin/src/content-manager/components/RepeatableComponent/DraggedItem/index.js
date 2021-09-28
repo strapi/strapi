@@ -5,6 +5,7 @@ import { useDrag, useDrop } from 'react-dnd';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
 import toString from 'lodash/toString';
+import styled from 'styled-components';
 import { Accordion, AccordionToggle, AccordionContent } from '@strapi/parts/Accordion';
 import { Box } from '@strapi/parts/Box';
 import { Row } from '@strapi/parts/Row';
@@ -17,10 +18,18 @@ import ItemTypes from '../../../utils/ItemTypes';
 import getTrad from '../../../utils/getTrad';
 import Inputs from '../../Inputs';
 import FieldComponent from '../../FieldComponent';
-// import Banner from '../Banner';
 import DragHandleWrapper from './DragHandleWrapper';
 import Preview from './Preview';
 import { connect, select } from './utils';
+
+// FIXME
+// Temporary workaround to remove the overflow until we migrate the react-select for the relations
+// to the DS one
+const StyledBox = styled(Box)`
+  > div {
+    overflow: visible;
+  }
+`;
 
 /* eslint-disable react/no-array-index-key */
 
@@ -146,7 +155,7 @@ const DraggedItem = ({
   };
 
   return (
-    <Box ref={refs ? refs.dropRef : null}>
+    <StyledBox ref={refs ? refs.dropRef : null}>
       {isDragging && <Preview />}
       {!isDragging && (
         <Accordion expanded={isOpen} toggle={onClickToggle} id={componentFieldName}>
@@ -239,81 +248,8 @@ const DraggedItem = ({
           </AccordionContent>
         </Accordion>
       )}
-    </Box>
+    </StyledBox>
   );
-
-  // return (
-  //   <>
-  //     <Banner
-  //       componentFieldName={componentFieldName}
-  //       hasErrors={hasErrors}
-  //       hasMinError={hasMinError}
-  //       isFirst={isFirst}
-  //       displayedValue={displayedValue}
-  //       doesPreviousFieldContainErrorsAndIsOpen={doesPreviousFieldContainErrorsAndIsOpen}
-  //       isDragging={isDragging}
-  //       isOpen={isOpen}
-  //       isReadOnly={isReadOnly}
-  //       onClickToggle={onClickToggle}
-  //       onClickRemove={() => {
-  //         removeRepeatableField(componentFieldName);
-  //         toggleCollapses();
-  //       }}
-  //       ref={refs}
-  //     />
-  //     <Collapse
-  //       isOpen={isOpen}
-  //       style={{ backgroundColor: '#FAFAFB' }}
-  //       onExited={() => setShowForm(false)}
-  //     >
-  //       {!isDragging && (
-  //         <FormWrapper hasErrors={hasErrors} isOpen={isOpen} isReadOnly={isReadOnly}>
-  //           {showForm &&
-  //             fields.map((fieldRow, key) => {
-  //               return (
-  //                 <div className="row" key={key}>
-  //                   {fieldRow.map(({ name, fieldSchema, metadatas, queryInfos, size }) => {
-  //                     const isComponent = fieldSchema.type === 'component';
-  //                     const keys = `${componentFieldName}.${name}`;
-
-  //                     if (isComponent) {
-  //                       const componentUid = fieldSchema.component;
-
-  //                       return (
-  //                         <FieldComponent
-  //                           componentUid={componentUid}
-  //                           isRepeatable={fieldSchema.repeatable}
-  //                           key={name}
-  //                           label={metadatas.label}
-  //                           isNested
-  //                           name={keys}
-  //                           max={fieldSchema.max}
-  //                           min={fieldSchema.min}
-  //                         />
-  //                       );
-  //                     }
-
-  //                     return (
-  //                       <div key={name} className={`col-${size}`}>
-  //                         <Inputs
-  //                           autoFocus={false}
-  //                           fieldSchema={fieldSchema}
-  //                           keys={keys}
-  //                           metadatas={metadatas}
-  //                           onBlur={hasErrors ? checkFormErrors : null}
-  //                           queryInfos={queryInfos}
-  //                         />
-  //                       </div>
-  //                     );
-  //                   })}
-  //                 </div>
-  //               );
-  //             })}
-  //         </FormWrapper>
-  //       )}
-  //     </Collapse>
-  //   </>
-  // );
 };
 
 DraggedItem.defaultProps = {
@@ -346,6 +282,9 @@ DraggedItem.propTypes = {
 
 const Memoized = memo(DraggedItem);
 
-export default connect(Memoized, select);
+export default connect(
+  Memoized,
+  select
+);
 
 export { DraggedItem };
