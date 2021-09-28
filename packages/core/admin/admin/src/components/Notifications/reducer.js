@@ -14,6 +14,7 @@ const notificationReducer = (state = initialState, action) =>
         draftState.notifications.push({
           // No action.config spread to limit the notification API and avoid customization
           id: state.notifId,
+          title: action.config.title || null,
           type: get(action, ['config', 'type'], 'success'),
           message: get(action, ['config', 'message'], {
             id: 'notification.success.saved',
