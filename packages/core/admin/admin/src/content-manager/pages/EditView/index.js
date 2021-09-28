@@ -11,10 +11,10 @@ import { LinkButton } from '@strapi/parts/LinkButton';
 import { Main } from '@strapi/parts/Main';
 import { Stack } from '@strapi/parts/Stack';
 import { TableLabel } from '@strapi/parts/Text';
-import ConfigureIcon from '@strapi/icons/ConfigureIcon';
+// import ConfigureIcon from '@strapi/icons/ConfigureIcon';
 import EditIcon from '@strapi/icons/EditIcon';
 import { InjectionZone } from '../../../shared/components';
-import permissions from '../../../permissions';
+// import permissions from '../../../permissions';
 // import Container from '../../components/Container';
 import DynamicZone from '../../components/DynamicZone';
 // import FormWrapper from '../../components/FormWrapper';
@@ -31,7 +31,7 @@ import Header from './Header';
 import { createAttributesLayout, getFieldsActionMatchingPermissions } from './utils';
 import DeleteLink from './DeleteLink';
 
-const cmPermissions = permissions.contentManager;
+// const cmPermissions = permissions.contentManager;
 const ctbPermissions = [{ action: 'plugin::content-type-builder.read', subject: null }];
 
 /* eslint-disable  react/no-array-index-key */
@@ -55,16 +55,16 @@ const EditView = ({
     return getFieldsActionMatchingPermissions(userPermissions, slug);
   }, [userPermissions, slug]);
 
-  const configurationPermissions = useMemo(() => {
-    return isSingleType
-      ? cmPermissions.singleTypesConfigurations
-      : cmPermissions.collectionTypesConfigurations;
-  }, [isSingleType]);
+  // const configurationPermissions = useMemo(() => {
+  //   return isSingleType
+  //     ? cmPermissions.singleTypesConfigurations
+  //     : cmPermissions.collectionTypesConfigurations;
+  // }, [isSingleType]);
 
-  // FIXME when changing the routing
-  const configurationsURL = `/content-manager/${
-    isSingleType ? 'singleType' : 'collectionType'
-  }/${slug}/configurations/edit`;
+  // // FIXME when changing the routing
+  // const configurationsURL = `/content-manager/${
+  //   isSingleType ? 'singleType' : 'collectionType'
+  // }/${slug}/configurations/edit`;
   const currentContentTypeLayoutData = get(layout, ['contentType'], {});
 
   const DataManagementWrapper = useMemo(
@@ -328,7 +328,7 @@ const EditView = ({
                             </CheckPermissions>
                           )}
 
-                          <CheckPermissions permissions={configurationPermissions}>
+                          {/* <CheckPermissions permissions={configurationPermissions}>
                             <LinkButton
                               size="S"
                               startIcon={<ConfigureIcon />}
@@ -341,7 +341,7 @@ const EditView = ({
                                 defaultMessage: 'Configure the view',
                               })}
                             </LinkButton>
-                          </CheckPermissions>
+                          </CheckPermissions> */}
                           <InjectionZone area="contentManager.editView.right-links" slug={slug} />
                           {allowedActions.canDelete && (
                             <DeleteLink

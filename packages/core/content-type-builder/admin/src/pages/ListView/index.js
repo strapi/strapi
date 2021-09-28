@@ -27,7 +27,7 @@ import useDataManager from '../../hooks/useDataManager';
 import getAttributeDisplayedType from '../../utils/getAttributeDisplayedType';
 import getTrad from '../../utils/getTrad';
 import makeSearch from '../../utils/makeSearch';
-import LinkToCMSettingsView from './LinkToCMSettingsView';
+// import LinkToCMSettingsView from './LinkToCMSettingsView';
 
 /* eslint-disable indent */
 
@@ -63,7 +63,7 @@ const ListView = () => {
   const firstMainDataPath = isInContentTypeView ? 'contentType' : 'component';
   const mainDataTypeAttributesPath = [firstMainDataPath, 'schema', 'attributes'];
   const targetUid = get(modifiedData, [firstMainDataPath, 'uid']);
-  const isTemporary = get(modifiedData, [firstMainDataPath, 'isTemporary'], false);
+  // const isTemporary = get(modifiedData, [firstMainDataPath, 'isTemporary'], false);
   const contentTypeKind = get(modifiedData, [firstMainDataPath, 'schema', 'kind'], null);
 
   const attributes = get(modifiedData, mainDataTypeAttributesPath, []);
@@ -276,13 +276,13 @@ const ListView = () => {
           <Stack size={4}>
             <Row justifyContent="flex-end">
               <Stack horizontal size={2}>
-                <LinkToCMSettingsView
+                {/* <LinkToCMSettingsView
                   key="link-to-cm-settings-view"
                   targetUid={targetUid}
                   isTemporary={isTemporary}
                   isInContentTypeView={isInContentTypeView}
                   contentTypeKind={contentTypeKind}
-                />
+                /> */}
                 <Button
                   startIcon={<AddIcon />}
                   variant="primary"
