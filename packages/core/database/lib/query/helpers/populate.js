@@ -546,6 +546,12 @@ const applyPopulate = async (results, populate, ctx) => {
       for (const type in idsByType) {
         const ids = idsByType[type];
 
+        // type was removed but still in morph relation
+        if (!db.metadata.get(type)) {
+          map[type] = {};
+          continue;
+        }
+
         const qb = db.entityManager.createQueryBuilder(type);
 
         const rows = await qb
@@ -603,6 +609,12 @@ const applyPopulate = async (results, populate, ctx) => {
       const map = {};
       for (const type in idsByType) {
         const ids = idsByType[type];
+
+        // type was removed but still in morph relation
+        if (!db.metadata.get(type)) {
+          map[type] = {};
+          continue;
+        }
 
         const qb = db.entityManager.createQueryBuilder(type);
 
