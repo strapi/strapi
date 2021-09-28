@@ -25,6 +25,10 @@ const transformResponse = (resource, meta = {}, { contentType } = {}) => {
 };
 
 const transformComponent = (data, component) => {
+  if (Array.isArray(data)) {
+    return data.map(datum => transformComponent(datum, component));
+  }
+
   const res = transformEntry(data, component);
 
   if (isNil(res)) {
