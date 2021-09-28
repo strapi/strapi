@@ -1,7 +1,7 @@
 import React from 'react';
 import I18N from '@strapi/icons/I18N';
-// FIXME
-import HelpIcon from '@strapi/icons/HelpIcon';
+
+import StrikedWorld from '@strapi/icons/StrikedWorld';
 import LabelAction from '../../components/LabelAction';
 import { getTrad } from '../../utils';
 import mutateEditViewLayout, {
@@ -450,7 +450,7 @@ describe('i18n | contentManagerHooks | mutateEditViewLayout', () => {
             labelAction: (
               <LabelAction
                 title={{ id: notLocalizedTrad, defaultMessage: notLocalizedTradDefaultMessage }}
-                icon={<HelpIcon aria-hidden />}
+                icon={<StrikedWorld aria-hidden />}
               />
             ),
           },
