@@ -148,7 +148,7 @@ module.exports = context => {
 
     const args = attribute.multiple ? getContentTypeArgs(fileContentType) : undefined;
     const type = attribute.multiple
-      ? naming.getEntityResponseCollectionName(fileContentType)
+      ? naming.getRelationResponseCollectionName(fileContentType)
       : naming.getEntityResponseName(fileContentType);
 
     builder.field(attributeName, { type, resolve, args });
@@ -225,7 +225,7 @@ module.exports = context => {
     const targetContentType = strapi.getModel(attribute.target);
 
     const type = isToManyRelation
-      ? naming.getEntityResponseCollectionName(targetContentType)
+      ? naming.getRelationResponseCollectionName(targetContentType)
       : naming.getEntityResponseName(targetContentType);
 
     const args = isToManyRelation ? getContentTypeArgs(targetContentType) : undefined;

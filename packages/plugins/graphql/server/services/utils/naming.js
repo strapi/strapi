@@ -77,6 +77,15 @@ module.exports = ({ strapi }) => {
   };
 
   /**
+   * Build the relation response collection's type name for a given content type
+   * @param {object} contentType
+   * @return {string}
+   */
+  const getRelationResponseCollectionName = contentType => {
+    return `${getTypeName(contentType)}RelationResponseCollection`;
+  };
+
+  /**
    * Build a component type name based on its definition
    * @param {object} contentType
    * @return {string}
@@ -247,6 +256,7 @@ module.exports = ({ strapi }) => {
     getEntityMetaName,
     getEntityResponseName,
     getEntityResponseCollectionName,
+    getRelationResponseCollectionName,
     getComponentName,
     getComponentNameFromAttribute,
     getDynamicZoneName,

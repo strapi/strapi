@@ -67,6 +67,7 @@ const KINDS = {
   entity: 'entity',
   entityResponse: 'entity-response',
   entityResponseCollection: 'entity-response-collection',
+  relationResponseCollection: 'relation-response-collection',
   query: 'query',
   mutation: 'mutation',
   input: 'input',

@@ -11,6 +11,7 @@ const entityMeta = require('./entity-meta');
 const type = require('./type');
 const response = require('./response');
 const responseCollection = require('./response-collection');
+const relationResponseCollection = require('./relation-response-collection');
 const queries = require('./queries');
 const mutations = require('./mutations');
 const filters = require('./filters');
@@ -31,6 +32,7 @@ const buildersFactories = [
   type,
   response,
   responseCollection,
+  relationResponseCollection,
   queries,
   mutations,
   filters,

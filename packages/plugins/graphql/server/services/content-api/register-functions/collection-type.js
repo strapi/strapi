@@ -14,6 +14,7 @@ const registerCollectionType = (contentType, { registry, strapi, builders }) => 
     entity: naming.getEntityName(contentType),
     response: naming.getEntityResponseName(contentType),
     responseCollection: naming.getEntityResponseCollectionName(contentType),
+    relationResponseCollection: naming.getRelationResponseCollectionName(contentType),
     queries: naming.getEntityQueriesTypeName(contentType),
     mutations: naming.getEntityMutationsTypeName(contentType),
   };
@@ -41,6 +42,12 @@ const registerCollectionType = (contentType, { registry, strapi, builders }) => 
     types.responseCollection,
     builders.buildResponseCollectionDefinition(contentType),
     getConfig(KINDS.entityResponseCollection)
+  );
+
+  registry.register(
+    types.relationResponseCollection,
+    builders.buildRelationResponseCollectionDefinition(contentType),
+    getConfig(KINDS.relationResponseCollection)
   );
 
   if (extension.shadowCRUD(contentType.uid).areQueriesEnabled()) {
