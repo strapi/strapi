@@ -1,8 +1,7 @@
 import React from 'react';
 import get from 'lodash/get';
 import I18N from '@strapi/icons/I18N';
-// FIXME
-import HelpIcon from '@strapi/icons/HelpIcon';
+import StrikedWorld from '@strapi/icons/StrikedWorld';
 import LabelAction from '../components/LabelAction';
 import { getTrad } from '../utils';
 
@@ -45,7 +44,7 @@ const enhanceEditLayout = layout =>
             ? 'This value is unique for the selected locale'
             : 'This value is common to all locales',
         },
-        icon: hasI18nEnabled ? <I18N aria-hidden /> : <HelpIcon aria-hidden />,
+        icon: hasI18nEnabled ? <I18N aria-hidden /> : <StrikedWorld aria-hidden />,
       };
 
       acc.push({ ...field, labelAction: <LabelAction {...labelActionProps} /> });

@@ -17,13 +17,15 @@ const Label = ({ intlLabel, id, labelAction, name, numberOfEntries, showNumberOf
   const label = intlLabel?.id ? formatMessage(intlLabel) : '';
 
   return (
-    <Row>
-      <Text textColor="neutral800" htmlFor={id || name} small bold as="label">
-        {label}
-        {showNumberOfEntries && <>&nbsp;({numberOfEntries})</>}
-      </Text>
-      {labelAction && <LabelAction paddingLeft={1}>{labelAction}</LabelAction>}
-    </Row>
+    <Box paddingBottom={1}>
+      <Row>
+        <Text textColor="neutral800" htmlFor={id || name} small bold as="label">
+          {label}
+          {showNumberOfEntries && <>&nbsp;({numberOfEntries})</>}
+        </Text>
+        {labelAction && <LabelAction paddingLeft={1}>{labelAction}</LabelAction>}
+      </Row>
+    </Box>
   );
 };
 
