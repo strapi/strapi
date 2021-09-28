@@ -1,6 +1,7 @@
 import React, { memo, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import isEqual from 'react-fast-compare';
+import styled from 'styled-components';
 import { useIntl } from 'react-intl';
 import { Accordion, AccordionToggle, AccordionContent } from '@strapi/parts/Accordion';
 import { IconButton } from '@strapi/parts/IconButton';
@@ -15,6 +16,15 @@ import { useContentTypeLayout } from '../../../../hooks';
 import { getTrad } from '../../../../utils';
 import FieldComponent from '../../../FieldComponent';
 import Rectangle from './Rectangle';
+
+// FIXME
+// Temporary workaround to remove the overflow until we migrate the react-select for the relations
+// to the DS one
+const StyledBox = styled(Box)`
+  > div {
+    overflow: visible;
+  }
+`;
 
 const Component = ({
   componentUid,
@@ -62,7 +72,7 @@ const Component = ({
   );
 
   return (
-    <Box>
+    <StyledBox>
       <Rectangle />
 
       <Accordion expanded={isOpen} toggle={() => onToggle(index)}>
@@ -98,7 +108,7 @@ const Component = ({
           </FocusTrap>
         </AccordionContent>
       </Accordion>
-    </Box>
+    </StyledBox>
   );
 };
 

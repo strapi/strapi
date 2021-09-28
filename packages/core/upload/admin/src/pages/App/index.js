@@ -67,7 +67,7 @@ const App = () => {
         <ContentLayout>
           <NoContent
             content={{
-              id: 'coming soon',
+              id: 'coming.soon',
               defaultMessage:
                 'This content is currently under construction and will be back in a few weeks!',
             }}

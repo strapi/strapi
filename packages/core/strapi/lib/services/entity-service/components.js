@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const { has, prop, omit } = require('lodash/fp');
+const { has, prop, omit, toString } = require('lodash/fp');
 
 const { contentTypes: contentTypesUtils } = require('@strapi/utils');
 
@@ -198,11 +198,13 @@ const deleteOldComponents = async (
 
   const idsToKeep = _.castArray(componentValue)
     .filter(has('id'))
-    .map(prop('id'));
+    .map(prop('id'))
+    .map(toString);
 
   const allIds = _.castArray(previousValue)
     .filter(has('id'))
-    .map(prop('id'));
+    .map(prop('id'))
+    .map(toString);
 
   idsToKeep.forEach(id => {
     if (!allIds.includes(id)) {
@@ -229,14 +231,14 @@ const deleteOldDZComponents = async (uid, entityToUpdate, attributeName, dynamic
   const idsToKeep = _.castArray(dynamiczoneValues)
     .filter(has('id'))
     .map(({ id, __component }) => ({
-      id,
+      id: toString(id),
       __component,
     }));
 
   const allIds = _.castArray(previousValue)
     .filter(has('id'))
     .map(({ id, __component }) => ({
-      id,
+      id: toString(id),
       __component,
     }));
 

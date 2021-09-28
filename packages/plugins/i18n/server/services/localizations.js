@@ -17,7 +17,7 @@ const assignDefaultLocale = async data => {
 };
 
 /**
- * Syncronize related localizations from a root one
+ * Synchronize related localizations from a root one
  * @param {Object} entry entry to update
  * @param {Object} options
  * @param {Object} options.model corresponding model

@@ -9,7 +9,7 @@
     "description": ""
   },
   "options": {
-    "draftAndPublish": false
+    "draftAndPublish": true
   },
   "pluginOptions": {},
   "attributes": {
@@ -17,35 +17,16 @@
       "type": "string",
       "pluginOptions": {}
     },
-    "simple": {
-      "pluginOptions": {},
-      "type": "uid"
+    "category": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::category.category"
     },
-    "attached": {
-      "pluginOptions": {},
-      "type": "uid",
-      "targetField": "name"
-    },
-    "attached_req": {
-      "pluginOptions": {},
-      "type": "uid",
-      "targetField": "name",
-      "required": true
-    },
-    "req": {
-      "pluginOptions": {},
-      "type": "uid",
-      "required": true
-    },
-    "default_val": {
-      "pluginOptions": {},
-      "type": "uid",
-      "default": "to",
-      "minLength": 4
-    },
-    "date": {
-      "type": "date",
-      "required": true
+    "categories": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::category.category",
+      "inversedBy": "temps"
     }
   }
 }

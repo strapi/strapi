@@ -1,6 +1,8 @@
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
-import { get, isNull } from 'lodash';
+import { useIntl } from 'react-intl';
+import get from 'lodash/get';
+import isNull from 'lodash/isNull';
 import Select from 'react-select';
 import SingleValue from './SingleValue';
 
@@ -20,9 +22,14 @@ function SelectOne({
   styles,
   value,
 }) {
+  const { formatMessage } = useIntl();
+
   return (
     <Select
-      components={{ ...components, SingleValue }}
+      components={{
+        ...components,
+        SingleValue,
+      }}
       id={name}
       isClearable
       isDisabled={isDisabled}
@@ -34,7 +41,9 @@ function SelectOne({
       onMenuClose={onMenuClose}
       onMenuOpen={onMenuOpen}
       onMenuScrollToBottom={onMenuScrollToBottom}
-      placeholder={placeholder}
+      placeholder={formatMessage(
+        placeholder || { id: 'components.Select.placeholder', defaultMessage: 'Select...' }
+      )}
       styles={styles}
       value={isNull(value) ? null : { label: get(value, [mainField.name], ''), value }}
     />
@@ -43,6 +52,7 @@ function SelectOne({
 
 SelectOne.defaultProps = {
   components: {},
+  placeholder: null,
   value: null,
 };
 
@@ -63,7 +73,10 @@ SelectOne.propTypes = {
   onMenuOpen: PropTypes.func.isRequired,
   onMenuScrollToBottom: PropTypes.func.isRequired,
   options: PropTypes.array.isRequired,
-  placeholder: PropTypes.node.isRequired,
+  placeholder: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    defaultMessage: PropTypes.string.isRequired,
+  }),
   styles: PropTypes.object.isRequired,
   value: PropTypes.object,
 };

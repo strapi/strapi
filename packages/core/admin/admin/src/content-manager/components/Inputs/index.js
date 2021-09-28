@@ -15,7 +15,7 @@ import InputJSON from '../InputJSON';
 import ComingSoonInput from './ComingSoonInput';
 import GenericInput from './GenericInput';
 import InputUID from '../InputUID';
-// import SelectWrapper from '../SelectWrapper';
+import SelectWrapper from '../SelectWrapper';
 
 import {
   connect,
@@ -38,7 +38,7 @@ function Inputs({
   onChange,
   readableFields,
   shouldNotRunValidations,
-  // queryInfos,
+  queryInfos,
   value,
 }) {
   // const { fields } = useLibrary();
@@ -190,26 +190,33 @@ function Inputs({
   if (type === 'relation') {
     // return 'RELATION';
     return (
-      <ComingSoonInput
+      <SelectWrapper
+        {...metadatas}
+        {...fieldSchema}
+        description={{
+          id: metadatas.description,
+          defaultMessage: metadatas.description,
+        }}
+        intlLabel={{
+          id: metadatas.label,
+          defaultMessage: metadatas.label,
+        }}
         labelAction={labelAction}
+        isUserAllowedToEditField={isUserAllowedToEditField}
+        isUserAllowedToReadField={isUserAllowedToReadField}
         name={keys}
-        intlLabel={{ id: label, defaultMessage: label }}
+        placeholder={
+          metadatas.placeholder
+            ? {
+                id: metadatas.placeholder,
+                defaultMessage: metadatas.placeholder,
+              }
+            : null
+        }
+        queryInfos={queryInfos}
+        value={value}
       />
     );
-    // return (
-    //   <div key={keys}>
-    //     <SelectWrapper
-    //       {...metadatas}
-    //       {...fieldSchema}
-    //       labelAction={labelAction}
-    //       isUserAllowedToEditField={isUserAllowedToEditField}
-    //       isUserAllowedToReadField={isUserAllowedToReadField}
-    //       name={keys}
-    //       queryInfos={queryInfos}
-    //       value={value}
-    //     />
-    //   </div>
-    // );
   }
 
   return (
@@ -273,4 +280,7 @@ Inputs.propTypes = {
 
 const Memoized = memo(Inputs, isEqual);
 
-export default connect(Memoized, select);
+export default connect(
+  Memoized,
+  select
+);

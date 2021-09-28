@@ -14,7 +14,7 @@ const LabelAction = styled(Box)`
 
 const Label = ({ intlLabel, id, labelAction, name, numberOfEntries, showNumberOfEntries }) => {
   const { formatMessage } = useIntl();
-  const label = intlLabel?.id ? formatMessage(intlLabel) : '';
+  const label = intlLabel?.id ? formatMessage(intlLabel) : name;
 
   return (
     <Box paddingBottom={1}>
