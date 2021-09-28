@@ -173,6 +173,10 @@ describe('FromComputerForm', () => {
       }
 
       .c9 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         padding: 8px 16px;
         background: #4945ff;
         border: none;
@@ -180,7 +184,7 @@ describe('FromComputerForm', () => {
         background: #4945ff;
       }
 
-      .c9 .sc-iiBnNu {
+      .c9 .sc-dYzmtA {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -234,6 +238,10 @@ describe('FromComputerForm', () => {
       }
 
       .c18 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         padding: 8px 16px;
         background: #4945ff;
         border: none;
@@ -241,7 +249,7 @@ describe('FromComputerForm', () => {
         background: #ffffff;
       }
 
-      .c18 .sc-iiBnNu {
+      .c18 .sc-dYzmtA {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;

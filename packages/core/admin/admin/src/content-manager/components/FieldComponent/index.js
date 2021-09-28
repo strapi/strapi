@@ -59,31 +59,32 @@ const FieldComponent = ({
 
   return (
     <Box>
-      <Stack size={1}>
-        <Row justifyContent="space-between">
-          {intlLabel && (
-            <Label
-              intlLabel={intlLabel}
-              labelAction={labelAction}
-              name={name}
-              numberOfEntries={componentValueLength}
-              showNumberOfEntries={isRepeatable}
-            />
-          )}
+      <Row justifyContent="space-between">
+        {intlLabel && (
+          <Label
+            intlLabel={intlLabel}
+            labelAction={labelAction}
+            name={name}
+            numberOfEntries={componentValueLength}
+            showNumberOfEntries={isRepeatable}
+          />
+        )}
 
-          {showResetComponent && (
-            <IconButton
-              label={formatMessage({
-                id: getTrad('components.reset-entry'),
-                defaultMessage: 'Reset Entry',
-              })}
-              icon={<DeleteIcon />}
-              onClick={() => {
-                removeComponentFromField(name, componentUid);
-              }}
-            />
-          )}
-        </Row>
+        {showResetComponent && (
+          <IconButton
+            label={formatMessage({
+              id: getTrad('components.reset-entry'),
+              defaultMessage: 'Reset Entry',
+            })}
+            icon={<DeleteIcon />}
+            noBorder
+            onClick={() => {
+              removeComponentFromField(name, componentUid);
+            }}
+          />
+        )}
+      </Row>
+      <Stack size={1}>
         {!isRepeatable && !isInitialized && (
           <ComponentInitializer
             isReadOnly={isReadOnly}
@@ -94,6 +95,7 @@ const FieldComponent = ({
           <NonRepeatableComponent
             componentUid={componentUid}
             isFromDynamicZone={isFromDynamicZone}
+            isNested={isNested}
             name={name}
           />
         )}

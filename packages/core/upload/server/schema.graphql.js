@@ -61,9 +61,7 @@ module.exports = {
         description: 'Delete one file',
         resolverOf: 'plugin::upload.upload.destroy',
         async resolver(obj, options, { context }) {
-          const file = await getService('upload').findOne({
-            id: context.params.id,
-          });
+          const file = await getService('upload').findOne(context.params.id);
           if (file) {
             const fileResult = await getService('upload').remove(file);
             return { file: fileResult };

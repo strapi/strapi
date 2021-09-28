@@ -202,6 +202,10 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
       }
 
       .c6 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         padding: 10px 16px;
         background: #4945ff;
         border: none;
@@ -263,6 +267,10 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
       }
 
       .c23 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         padding: 8px 16px;
         background: #4945ff;
         border: none;
@@ -768,6 +776,12 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
       .c32 td:first-of-type,
       .c32 th:first-of-type {
         padding: 0 4px;
+      }
+
+      .c32 th {
+        padding-top: 0;
+        padding-bottom: 0;
+        height: 3.5rem;
       }
 
       .c34 {
@@ -1442,7 +1456,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
               </div>
               <nav
                 aria-label="pagination"
-                class="sc-liAPKD"
+                class="sc-liccgK"
               >
                 <ul
                   class="c63 c64"

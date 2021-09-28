@@ -10,7 +10,7 @@ module.exports = () => {
   // Now load up the Strapi framework for real.
   const app = strapi();
 
-  app.start(() => {
+  app.start().then(() => {
     const repl = REPL.start(app.config.info.name + ' > ' || 'strapi > '); // eslint-disable-line prefer-template
 
     repl.on('exit', function(err) {

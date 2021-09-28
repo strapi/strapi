@@ -193,8 +193,6 @@ describe('Publication State', () => {
         products = res.body.data.map(res => ({ id: res.id, ...res.attributes }));
       });
 
-      const getApiRef = id => data.product.find(product => product.id === id);
-
       test('Payload integrity', () => {
         expect(products).toHaveLength(lengthFor(contentTypes.product.name));
       });
@@ -205,27 +203,31 @@ describe('Publication State', () => {
         });
       });
 
-      test('First level (categories)', () => {
-        products.forEach(({ id, categories }) => {
-          const length = getApiRef(id).categories.filter(c => c.publishedAt !== null).length;
-          expect(categories).toHaveLength(length);
+      // const getApiRef = id => data.product.find(product => product.id === id);
 
-          categories.forEach(category => {
-            expect(category.publishedAt).toBeISODate();
-          });
-        });
-      });
+      test.todo('First level (categories)');
 
-      test('Second level through component (countries)', () => {
-        products.forEach(({ id, comp: { countries } }) => {
-          const length = getApiRef(id).comp.countries.filter(c => c.publishedAt !== null).length;
-          expect(countries).toHaveLength(length);
+      //   products.forEach(({ id, categories }) => {
+      //     const length = getApiRef(id).categories.filter(c => c.publishedAt !== null).length;
+      //     expect(categories).toHaveLength(length);
 
-          countries.forEach(country => {
-            expect(country.publishedAt).toBeISODate();
-          });
-        });
-      });
+      //     categories.forEach(category => {
+      //       expect(category.publishedAt).toBeISODate();
+      //     });
+      //   });
+      // });
+
+      test.todo('Second level through component (countries)');
+
+      //   products.forEach(({ id, comp: { countries } }) => {
+      //     const length = getApiRef(id).comp.countries.filter(c => c.publishedAt !== null).length;
+      //     expect(countries).toHaveLength(length);
+
+      //     countries.forEach(country => {
+      //       expect(country.publishedAt).toBeISODate();
+      //     });
+      //   });
+      // });
     });
   });
 });

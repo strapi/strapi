@@ -1,6 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
+const { defaults } = require('lodash/fp');
 const { stringIncludes } = require('@strapi/utils');
 const { createUser, hasSuperAdminRole } = require('../domain/user');
 const { password: passwordValidator } = require('../validation/common-validators');
@@ -103,7 +104,7 @@ const updateById = async (id, attributes) => {
  * @param {string} password - new password
  */
 const resetPasswordByEmail = async (email, password) => {
-  const user = await findOne({ email });
+  const user = await strapi.query('admin::user').findOne({ where: { email }, populate: ['roles'] });
 
   if (!user) {
     throw new Error(`User not found for email: ${email}`);
@@ -125,7 +126,7 @@ const resetPasswordByEmail = async (email, password) => {
  * @param {int|string} userId user's id to look for
  */
 const isLastSuperAdminUser = async userId => {
-  const user = await findOne({ id: userId }, ['roles']);
+  const user = await findOne(userId);
   const superAdminRole = await getService('role').getSuperAdminWithUsersCount();
 
   return superAdminRole.usersCount === 1 && hasSuperAdminRole(user);
@@ -180,8 +181,8 @@ const register = async ({ registrationToken, userInfo }) => {
 /**
  * Find one user
  */
-const findOne = async (where = {}, populate = ['roles']) => {
-  return strapi.query('admin::user').findOne({ where, populate });
+const findOne = async (id, populate = ['roles']) => {
+  return strapi.entityService.findOne('admin::user', id, { populate });
 };
 
 /** Find many users (paginated)
@@ -189,15 +190,8 @@ const findOne = async (where = {}, populate = ['roles']) => {
  * @returns {Promise<user>}
  */
 const findPage = async (query = {}) => {
-  const { page = 1, pageSize = 100, populate = ['roles'] } = query;
-
-  return strapi.query('admin::user').findPage({
-    where: query.filters,
-    _q: query._q,
-    populate,
-    page,
-    pageSize,
-  });
+  const enrichedQuery = defaults({ populate: ['roles'] }, query);
+  return strapi.entityService.findPage('admin::user', enrichedQuery);
 };
 
 /** Delete a user

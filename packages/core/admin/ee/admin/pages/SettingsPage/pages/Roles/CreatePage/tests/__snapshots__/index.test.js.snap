@@ -59,6 +59,10 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
 }
 
 .c7 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
   padding: 10px 16px;
   background: #4945ff;
   border: none;
@@ -66,7 +70,7 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
   background: #f0f0ff;
 }
 
-.c7 .sc-dvXYtj {
+.c7 .sc-dwfUuu {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -137,6 +141,10 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
 }
 
 .c11 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
   padding: 10px 16px;
   background: #4945ff;
   border: none;
@@ -144,7 +152,7 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
   background: #4945ff;
 }
 
-.c11 .sc-dvXYtj {
+.c11 .sc-dwfUuu {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;

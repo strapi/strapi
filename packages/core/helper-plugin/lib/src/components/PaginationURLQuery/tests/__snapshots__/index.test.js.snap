@@ -108,7 +108,7 @@ exports[`<PaginationURLQuery /> should display the dots correctly 1`] = `
 
 <nav
   aria-label="pagination"
-  class="sc-hGwcmR"
+  class="sc-iuAqRD"
 >
   <ul
     class="c0 c1"
@@ -418,7 +418,7 @@ exports[`<PaginationURLQuery /> should work when the pageCount is inferior or eq
 
 <nav
   aria-label="pagination"
-  class="sc-hGwcmR"
+  class="sc-iuAqRD"
 >
   <ul
     class="c0 c1"
