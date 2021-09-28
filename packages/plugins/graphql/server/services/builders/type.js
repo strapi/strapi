@@ -278,6 +278,10 @@ module.exports = context => {
         name,
 
         definition(t) {
+          if (modelType === 'component' && isNotDisabled(contentType)('id')) {
+            t.nonNull.id('id');
+          }
+
           // 1. Timestamps
           // If the content type has timestamps enabled
           // then we should add the corresponding attributes in the definition

@@ -38,12 +38,21 @@ module.exports = context => {
         name,
 
         definition(t) {
-          const validAttributes = Object.entries(attributes).filter(([attributeName]) =>
-            extension
+          const isFieldEnabled = fieldName => {
+            return extension
               .shadowCRUD(contentType.uid)
-              .field(attributeName)
-              .hasInputEnabled()
+              .field(fieldName)
+              .hasInputEnabled();
+          };
+
+          const validAttributes = Object.entries(attributes).filter(([attributeName]) =>
+            isFieldEnabled(attributeName)
           );
+
+          // Add the ID for the component to enable inplace updates
+          if (modelType === 'component' && isFieldEnabled('id')) {
+            t.id('id');
+          }
 
           validAttributes.forEach(([attributeName, attribute]) => {
             // Scalars
