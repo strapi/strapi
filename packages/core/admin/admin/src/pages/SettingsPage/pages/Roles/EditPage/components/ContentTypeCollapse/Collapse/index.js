@@ -75,7 +75,7 @@ const Chevron = styled(Box)`
   }
 `;
 
-const TinyDot = styled(Box)`
+const TinyDot = styled.span`
   position: absolute;
   top: -6px;
   left: 37px;
@@ -228,7 +228,6 @@ const Collapse = ({
             }
           )}
         </Row>
-        <Box style={{ width: 120 }} />
         {isModalOpen && (
           <ConditionsModal
             headerBreadCrumbs={[label, 'app.components.LeftMenuLinkContainer.settings']}

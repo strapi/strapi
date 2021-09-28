@@ -6,19 +6,9 @@ import { Stack } from '@strapi/parts/Stack';
 import { Text } from '@strapi/parts/Text';
 import { Textarea } from '@strapi/parts/Textarea';
 import { TextInput } from '@strapi/parts/TextInput';
+import { Button } from '@strapi/parts/Button';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
-
-const UsersRoleNumber = styled.div`
-  border: 1px solid ${({ theme }) => theme.colors.primary200};
-  background: ${({ theme }) => theme.colors.primary100};
-  padding: ${({ theme }) => `${theme.spaces[2]} ${theme.spaces[4]}`};
-  color: ${({ theme }) => theme.colors.primary600};
-  border-radius: ${({ theme }) => theme.borderRadius};
-  font-size: ${12 / 16}rem;
-  font-weight: bold;
-`;
 
 const RoleForm = ({ disabled, role, values, errors, onChange, onBlur }) => {
   const { formatMessage } = useIntl();
@@ -50,7 +40,7 @@ const RoleForm = ({ disabled, role, values, errors, onChange, onBlur }) => {
                 </Text>
               </Box>
             </Box>
-            <UsersRoleNumber>
+            <Button disabled variant="secondary">
               {formatMessage(
                 {
                   id: 'Settings.roles.form.button.users-with-role',
@@ -59,7 +49,7 @@ const RoleForm = ({ disabled, role, values, errors, onChange, onBlur }) => {
                 },
                 { number: role.usersCount }
               )}
-            </UsersRoleNumber>
+            </Button>
           </Row>
           <Grid gap={4}>
             <GridItem col={6}>
