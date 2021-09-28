@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const { has, prop, pick, reduce, map, keys, toPath } = require('lodash/fp');
+const { prop, pick, reduce, map, keys, toPath, isNil } = require('lodash/fp');
 const { contentTypes, parseMultipartData, sanitizeEntity } = require('@strapi/utils');
 
 const { getService } = require('../utils');
@@ -84,74 +84,65 @@ const createSanitizer = contentType => {
  * @returns {(object) => void}
  */
 const createLocalizationHandler = contentType => {
+  const handler = createCreateLocalizationHandler(contentType);
+
+  return (ctx = {}) => {
+    const { id } = ctx.params;
+    const { data, files } = parseMultipartData(ctx);
+
+    return handler({ id, data, files });
+  };
+};
+
+const createCreateLocalizationHandler = contentType => async (ctx = {}) => {
   const { copyNonLocalizedAttributes } = getService('content-types');
 
   const { sanitizeInput, sanitizeInputFiles } = createSanitizer(contentType);
 
-  /**
-   * Create localized entry from another one
-   */
-  const createFromBaseEntry = async (ctx, entry) => {
-    const { data, files } = parseMultipartData(ctx);
+  const entry = isSingleType(contentType)
+    ? await strapi.query(contentType.uid).findOne({ populate: ['localizations'] })
+    : await strapi
+        .query(contentType.uid)
+        .findOne({ where: { id: ctx.id }, populate: ['localizations'] });
 
-    const { findByCode } = getService('locales');
-
-    if (!has('locale', data)) {
-      throw strapi.errors.badRequest('locale.missing');
-    }
-
-    const matchingLocale = await findByCode(data.locale);
-    if (!matchingLocale) {
-      throw strapi.errors.badRequest('locale.invalid');
-    }
-
-    const usedLocales = getAllLocales(entry);
-    if (usedLocales.includes(data.locale)) {
-      throw strapi.errors.badRequest('locale.already.used');
-    }
-
-    const sanitizedData = {
-      ...copyNonLocalizedAttributes(contentType, entry),
-      ...sanitizeInput(data),
-      locale: data.locale,
-      localizations: getAllLocalizationsIds(entry),
-    };
-
-    const sanitizedFiles = sanitizeInputFiles(files);
-
-    const newEntry = await strapi.entityService.create(contentType.uid, {
-      data: sanitizedData,
-      files: sanitizedFiles,
-    });
-
-    ctx.body = sanitizeEntity(newEntry, { model: strapi.getModel(contentType.uid) });
-  };
-
-  if (isSingleType(contentType)) {
-    return async function(ctx) {
-      const entry = await strapi.query(contentType.uid).findOne({ populate: ['localizations'] });
-
-      if (!entry) {
-        throw strapi.errors.notFound('baseEntryId.invalid');
-      }
-
-      await createFromBaseEntry(ctx, entry);
-    };
+  if (!entry) {
+    throw strapi.errors.notFound('baseEntryId.invalid');
   }
 
-  return async function(ctx) {
-    const { id: baseEntryId } = ctx.params;
+  const { data, files } = ctx;
 
-    const entry = await strapi
-      .query(contentType.uid)
-      .findOne({ where: { id: baseEntryId }, populate: ['localizations'] });
+  const { findByCode } = getService('locales');
 
-    if (!entry) {
-      throw strapi.errors.notFound('baseEntryId.invalid');
-    }
+  if (isNil(data.locale)) {
+    throw strapi.errors.badRequest('locale.missing');
+  }
 
-    await createFromBaseEntry(ctx, entry);
+  const matchingLocale = await findByCode(data.locale);
+  if (!matchingLocale) {
+    throw strapi.errors.badRequest('locale.invalid');
+  }
+
+  const usedLocales = getAllLocales(entry);
+  if (usedLocales.includes(data.locale)) {
+    throw strapi.errors.badRequest('locale.already.used');
+  }
+
+  const sanitizedData = {
+    ...copyNonLocalizedAttributes(contentType, entry),
+    ...sanitizeInput(data),
+    locale: data.locale,
+    localizations: getAllLocalizationsIds(entry),
   };
+
+  const sanitizedFiles = sanitizeInputFiles(files);
+
+  const newEntry = await strapi.entityService.create(contentType.uid, {
+    data: sanitizedData,
+    files: sanitizedFiles,
+    populate: ['localizations'],
+  });
+
+  return sanitizeEntity(newEntry, { model: strapi.getModel(contentType.uid) });
 };
 
 /**
@@ -285,4 +276,5 @@ module.exports = () => ({
   addCreateLocalizationAction,
   addGraphqlLocalizationAction,
   createSanitizer,
+  createCreateLocalizationHandler,
 });

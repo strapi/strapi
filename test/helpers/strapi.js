@@ -16,19 +16,25 @@ const superAdminLoginInfo = _.pick(superAdminCredentials, ['email', 'password'])
 
 const TEST_APP_URL = path.resolve(__dirname, '../../testApp');
 
-const createStrapiInstance = async ({ ensureSuperAdmin = true, logLevel = 'fatal' } = {}) => {
+const createStrapiInstance = async ({
+  ensureSuperAdmin = true,
+  logLevel = 'fatal',
+  bypassAuth = true,
+} = {}) => {
   const options = { dir: TEST_APP_URL };
   const instance = strapi(options);
 
-  instance.container.get('auth').register('content-api', {
-    name: 'test-auth',
-    authenticate() {
-      return { authenticated: true };
-    },
-    verify() {
-      return;
-    },
-  });
+  if (bypassAuth) {
+    instance.container.get('auth').register('content-api', {
+      name: 'test-auth',
+      authenticate() {
+        return { authenticated: true };
+      },
+      verify() {
+        return;
+      },
+    });
+  }
 
   await instance.load();
 

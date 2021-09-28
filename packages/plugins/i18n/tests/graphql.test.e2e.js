@@ -22,7 +22,7 @@ const recipesModel = {
       localized: true,
     },
   },
-  name: 'recipes',
+  name: 'recipe',
   description: '',
   collectionName: '',
 };
@@ -51,68 +51,80 @@ describe('Test Graphql API create localization', () => {
 
   afterAll(async () => {
     await strapi.query('plugin::i18n.locale').delete({ where: { id: localeId } });
-    await strapi.query('api::recipes.recipes').deleteMany();
+    await strapi.query('api::recipe.recipe').deleteMany();
     await strapi.destroy();
     await builder.cleanup();
   });
 
-  test('Create localization for a model with plural name', async () => {
+  test('Create localization', async () => {
     const createResponse = await graphqlQuery({
       query: /* GraphQL */ `
-        mutation createRecipe($input: createRecipeInput) {
-          createRecipe(input: $input) {
-            recipe {
+        mutation createRecipe($data: RecipeInput!) {
+          createRecipe(data: $data) {
+            data {
               id
-              name
-              locale
+              attributes {
+                name
+                locale
+              }
             }
           }
         }
       `,
       variables: {
-        input: {
-          data: {
-            name: 'Recipe Name',
-          },
+        data: {
+          name: 'Recipe Name',
         },
       },
     });
 
     expect(createResponse.statusCode).toBe(200);
-    expect(createResponse.body.data.createRecipe.recipe).toMatchObject({
-      name: 'Recipe Name',
-      locale: 'en',
+    expect(createResponse.body).toMatchObject({
+      data: {
+        createRecipe: {
+          data: {
+            attributes: {
+              name: 'Recipe Name',
+              locale: 'en',
+            },
+          },
+        },
+      },
     });
 
-    const recipeId = createResponse.body.data.createRecipe.recipe.id;
+    const recipeId = createResponse.body.data.createRecipe.data.id;
 
     const createLocalizationResponse = await graphqlQuery({
       query: /* GraphQL */ `
-        mutation createRecipeLocalization($input: updateRecipeInput!) {
-          createRecipeLocalization(input: $input) {
-            id
-            name
-            locale
+        mutation createRecipeLocalization($id: ID!, $locale: I18NLocaleCode, $data: RecipeInput!) {
+          createRecipeLocalization(id: $id, locale: $locale, data: $data) {
+            data {
+              id
+              attributes {
+                name
+                locale
+              }
+            }
           }
         }
       `,
       variables: {
-        input: {
-          where: {
-            id: recipeId,
-          },
-          data: {
-            name: 'Recipe Name fr',
-            locale: 'fr',
-          },
+        id: recipeId,
+        locale: 'fr',
+        data: {
+          name: 'Recipe Name fr',
         },
       },
     });
 
     expect(createLocalizationResponse.statusCode).toBe(200);
     expect(createLocalizationResponse.body.data.createRecipeLocalization).toMatchObject({
-      name: 'Recipe Name fr',
-      locale: 'fr',
+      data: {
+        attributes: {
+          name: 'Recipe Name fr',
+          locale: 'fr',
+        },
+      },
     });
   });
 });

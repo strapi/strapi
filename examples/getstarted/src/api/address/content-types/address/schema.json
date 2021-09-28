@@ -55,8 +55,7 @@
       "pluginOptions": {}
     },
     "slug": {
-      "type": "uid",
-      "targetField": "city"
+      "type": "uid"
     },
     "notrepeat_req": {
       "type": "component",
