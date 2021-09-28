@@ -16,7 +16,6 @@ import { getTrad } from '../../utils';
 
 const ComingSoon = () => {
   const { formatMessage } = useIntl();
-  console.log(pluginPermissions);
 
   return (
     <Layout>
