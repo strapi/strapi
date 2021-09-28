@@ -838,6 +838,10 @@ const createEntityManager = db => {
         },
       });
 
+      if (!entry) {
+        return null;
+      }
+
       return entry[field];
     },
 
