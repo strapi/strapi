@@ -36,6 +36,7 @@ const activeRowStyle = (theme, isActive) => `
   &:hover {
     ${Text} {
       color: ${theme.colors.primary600};
+      font-weight: ${theme.fontWeights.bold};
     }
   }
   
