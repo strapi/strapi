@@ -91,13 +91,15 @@ const createServer = strapi => {
       return this;
     },
 
-    initRouting() {
-      registerAllRoutes(strapi);
+    async initRouting() {
+      await registerAllRoutes(strapi);
+
       return this;
     },
 
-    initMiddlewares() {
-      registerMiddlewares(strapi);
+    async initMiddlewares() {
+      await registerMiddlewares(strapi);
+
       return this;
     },
 
