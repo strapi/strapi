@@ -167,7 +167,7 @@ module.exports = ({ strapi }) => {
           async resolve(parent, args) {
             const { id } = args;
 
-            const file = await getUploadService('upload').findOne({ id });
+            const file = await getUploadService('upload').findOne(id);
 
             if (!file) {
               return null;

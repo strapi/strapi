@@ -276,25 +276,25 @@ describe('Test Graphql API End to End', () => {
       ],
       [
         {
-          name: { contains: 'Post' },
+          name: { contains: 'post' },
         },
         postsPayload,
       ],
       [
         {
-          name: { contains: 'Post 1' },
+          name: { contains: 'post 1' },
         },
         [postsPayload[0]],
       ],
       [
         {
-          name: { containsi: 'post' },
+          name: { containsi: 'Post' },
         },
         postsPayload,
       ],
       [
         {
-          name: { not: { containsi: 'post 1' } },
+          name: { not: { containsi: 'Post 1' } },
         },
         [postsPayload[1]],
       ],

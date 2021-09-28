@@ -25,12 +25,16 @@ describe('Upload plugin end to end tests', () => {
     const formData = {
       operations: JSON.stringify({
         query: /* GraphQL */ `
-          mutation uploadFiles($file: Upload!) {
+          mutation uploadFile($file: Upload!) {
             upload(file: $file) {
-              id
-              name
-              mime
-              url
+              data {
+                id
+                attributes {
+                  name
+                  mime
+                  url
+                }
+              }
             }
           }
         `,
@@ -50,13 +54,19 @@ describe('Upload plugin end to end tests', () => {
     expect(res.body).toMatchObject({
       data: {
         upload: {
-          id: expect.anything(),
-          name: 'rec.jpg',
+          data: {
+            id: expect.anything(),
+            attributes: {
+              name: 'rec.jpg',
+              mime: 'image/jpeg',
+              url: expect.any(String),
+            },
+          },
         },
       },
     });
 
-    data.file = res.body.data.upload;
+    data.file = res.body.data.upload.data;
   });
 
   test('Upload multiple files', async () => {
@@ -65,10 +75,14 @@ describe('Upload plugin end to end tests', () => {
         query: /* GraphQL */ `
           mutation uploadFiles($files: [Upload]!) {
             multipleUpload(files: $files) {
-              id
-              name
-              mime
-              url
+              data {
+                id
+                attributes {
+                  name
+                  mime
+                  url
+                }
+              }
             }
           }
         `,
@@ -87,12 +101,19 @@ describe('Upload plugin end to end tests', () => {
     const res = await rq({ method: 'POST', url: '/graphql', formData });
 
     expect(res.statusCode).toBe(200);
+    expect(res.body.data.multipleUpload).toHaveLength(2);
     expect(res.body).toEqual({
       data: {
         multipleUpload: expect.arrayContaining([
           expect.objectContaining({
-            id: expect.anything(),
-            name: 'rec.jpg',
+            data: {
+              id: expect.anything(),
+              attributes: {
+                name: 'rec.jpg',
+                mime: 'image/jpeg',
+                url: expect.any(String),
+              },
+            },
           }),
         ]),
       },
@@ -107,10 +128,14 @@ describe('Upload plugin end to end tests', () => {
         query: /* GraphQL */ `
           mutation updateFileInfo($id: ID!, $info: FileInfoInput!) {
             updateFileInfo(id: $id, info: $info) {
-              id
-              name
-              alternativeText
-              caption
+              data {
+                id
+                attributes {
+                  name
+                  alternativeText
+                  caption
+                }
+              }
             }
           }
         `,
@@ -129,10 +154,14 @@ describe('Upload plugin end to end tests', () => {
     expect(res.body).toMatchObject({
       data: {
         updateFileInfo: {
-          id: data.file.id,
-          name: 'test name',
-          alternativeText: 'alternative text test',
-          caption: 'caption test',
+          data: {
+            id: data.file.id,
+            attributes: {
+              name: 'test name',
+              alternativeText: 'alternative text test',
+              caption: 'caption test',
+            },
+          },
         },
       },
     });
@@ -145,8 +174,8 @@ describe('Upload plugin end to end tests', () => {
       body: {
         query: /* GraphQL */ `
           mutation removeFile($id: ID!) {
-            deleteFile(input: { where: { id: $id } }) {
-              file {
+            removeFile(id: $id) {
+              data {
                 id
               }
             }
@@ -161,8 +190,8 @@ describe('Upload plugin end to end tests', () => {
     expect(res.statusCode).toBe(200);
     expect(res.body).toMatchObject({
       data: {
-        deleteFile: {
-          file: {
+        removeFile: {
+          data: {
             id: data.file.id,
           },
         },
@@ -177,8 +206,8 @@ describe('Upload plugin end to end tests', () => {
       body: {
         query: /* GraphQL */ `
           mutation removeFile($id: ID!) {
-            deleteFile(input: { where: { id: $id } }) {
-              file {
+            removeFile(id: $id) {
+              data {
                 id
               }
             }
@@ -193,7 +222,7 @@ describe('Upload plugin end to end tests', () => {
     expect(res.statusCode).toBe(200);
     expect(res.body).toMatchObject({
       data: {
-        deleteFile: null,
+        removeFile: null,
       },
     });
   });
@@ -204,10 +233,14 @@ describe('Upload plugin end to end tests', () => {
         query: /* GraphQL */ `
           mutation uploadFilesWithInfo($file: Upload!, $info: FileInfoInput) {
             upload(file: $file, info: $info) {
-              id
-              name
-              alternativeText
-              caption
+              data {
+                id
+                attributes {
+                  name
+                  alternativeText
+                  caption
+                }
+              }
             }
           }
         `,
@@ -231,10 +264,14 @@ describe('Upload plugin end to end tests', () => {
     expect(res.body).toMatchObject({
       data: {
         upload: {
-          id: expect.anything(),
-          name: 'rec.jpg',
-          alternativeText: 'alternative text test',
-          caption: 'caption test',
+          data: {
+            id: expect.anything(),
+            attributes: {
+              name: 'rec.jpg',
+              alternativeText: 'alternative text test',
+              caption: 'caption test',
+            },
+          },
         },
       },
     });

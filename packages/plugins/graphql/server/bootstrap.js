@@ -60,8 +60,11 @@ module.exports = async strapi => {
   // Create a new Apollo server
   const server = new ApolloServer(serverConfig);
 
+  // Link the Apollo server & the Strapi app
+  const path = config('endpoint', '/graphql');
+
   // Register the upload middleware
-  useUploadMiddleware(strapi, config);
+  useUploadMiddleware(strapi, path);
 
   try {
     // Since Apollo-Server v3, server.start() must be called before using server.applyMiddleware()
@@ -69,9 +72,6 @@ module.exports = async strapi => {
   } catch (e) {
     strapi.log.error('Failed to start the Apollo server', e.message);
   }
-
-  // Link the Apollo server & the Strapi app
-  const path = config('endpoint', '/graphql');
 
   strapi.server.routes([
     {
@@ -109,13 +109,13 @@ module.exports = async strapi => {
 /**
  * Register the upload middleware powered by graphql-upload in Strapi
  * @param {object} strapi
- * @param {function} config
+ * @param {string} path
  */
-const useUploadMiddleware = (strapi, config) => {
+const useUploadMiddleware = (strapi, path) => {
   const uploadMiddleware = graphqlUploadKoa();
 
   strapi.server.app.use((ctx, next) => {
-    if (ctx.path === config('endpoint')) {
+    if (ctx.path === path) {
       return uploadMiddleware(ctx, next);
     }
 
