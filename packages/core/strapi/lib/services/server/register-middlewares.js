@@ -3,9 +3,9 @@
 const { yup } = require('@strapi/utils');
 
 /**
- * @type {import('../../').Strapi} Strapi
- * @type {Array<string|{name?: string, resolve?: string, config: any}>} MiddlewaresConfig
- * @type {Array<{name: string, hanlder: Function}>} Middlewares
+ * @typedef {import('../../').Strapi} Strapi
+ * @typedef {Array<string|{name?: string, resolve?: string, config: any}>} MiddlewaresConfig
+ * @typedef {Array<{name: string, hanlder: Function}>} Middlewares
  */
 
 const defaultConfig = [
@@ -120,7 +120,7 @@ const initMiddlewares = async (config, strapi) => {
 
       middlewares.push({
         name: item,
-        handler: await middlewareFactory(),
+        handler: await middlewareFactory(null, { strapi }),
       });
 
       continue;
@@ -133,7 +133,7 @@ const initMiddlewares = async (config, strapi) => {
         const middlewareFactory = strapi.middleware(name);
         middlewares.push({
           name,
-          handler: await middlewareFactory(config),
+          handler: await middlewareFactory(config, { strapi }),
         });
 
         continue;
@@ -142,7 +142,7 @@ const initMiddlewares = async (config, strapi) => {
       if (resolve) {
         middlewares.push({
           name: resolve,
-          handler: await require(resolve)(config),
+          handler: await require(resolve)(config, { strapi }),
         });
 
         continue;

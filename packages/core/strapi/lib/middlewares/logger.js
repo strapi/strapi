@@ -13,8 +13,10 @@ const codeToColor = code => {
     : code;
 };
 
-// TODO: inject strapi
-module.exports = () => {
+/**
+ * @type {import('./').MiddlewareFactory}
+ */
+module.exports = (_, { strapi }) => {
   return async (ctx, next) => {
     const start = Date.now();
     await next();

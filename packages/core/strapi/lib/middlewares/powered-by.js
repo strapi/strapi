@@ -4,6 +4,9 @@ const defaults = {
   poweredBy: 'Strapi <strapi.io>',
 };
 
+/**
+ * @type {import('./').MiddlewareFactory}
+ */
 module.exports = options => {
   const { poweredBy } = Object.assign({}, defaults, options);
 

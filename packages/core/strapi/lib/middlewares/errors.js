@@ -1,10 +1,5 @@
 'use strict';
 
-/**
- * Boom hook
- */
-
-// Public node modules.
 const _ = require('lodash');
 const Boom = require('@hapi/boom');
 const delegate = require('delegates');
@@ -58,7 +53,11 @@ const formatBoomPayload = boomError => {
   return { status: output.statusCode, body: output.payload };
 };
 
-const createResponseUtils = () => {
+/**
+ * Create short responses ctx.(send|created|deleted)
+ * @param {Strapi} strapi
+ */
+const createResponseUtils = strapi => {
   const delegator = delegate(strapi.server.app.context, 'response');
 
   boomMethods.forEach(method => {
@@ -102,9 +101,11 @@ const createResponseUtils = () => {
     .method('deleted');
 };
 
-// TODO: inject strapi
-module.exports = () => {
-  createResponseUtils();
+/**
+ * @type {import('./').MiddlewareFactory}
+ */
+module.exports = (_, { strapi }) => {
+  createResponseUtils(strapi);
   strapi.errors = Boom;
 
   return async (ctx, next) => {

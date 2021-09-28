@@ -40,14 +40,15 @@ const addQsParser = (app, settings) => {
   return app;
 };
 
-// TODO: inject strapi
-module.exports = options => {
+/**
+ * @type {import('./').MiddlewareFactory}
+ */
+module.exports = (options, { strapi }) => {
   const { queryStringParser, ...bodyOptions } = defaultsDeep(defaults, options);
 
   addQsParser(strapi.server.app, queryStringParser);
 
   return async (ctx, next) => {
-    // disable for graphql
     // TODO: find a better way later
     if (ctx.url === '/graphql') {
       return next();

@@ -9,8 +9,10 @@ const defaults = {
   maxAge: 86400000,
 };
 
-// TODO: inject strapi
-module.exports = options => {
+/**
+ * @type {import('./').MiddlewareFactory}
+ */
+module.exports = (options, { strapi }) => {
   const { maxAge, path: faviconPath } = defaultsDeep(defaults, options);
 
   return favicon(resolve(strapi.dirs.root, faviconPath), { maxAge });

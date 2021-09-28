@@ -11,6 +11,7 @@ const request = require('./request');
 const responseTime = require('./response-time');
 const responses = require('./responses');
 const security = require('./security');
+// TODO: add back ?
 // session: require('./session'),
 const publicStatic = require('./public');
 

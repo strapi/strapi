@@ -15,8 +15,10 @@ const defaults = {
   defaultIndex: true,
 };
 
-// TODO: inject strap
-module.exports = options => {
+/**
+ * @type {import('../').MiddlewareFactory}
+ */
+module.exports = (options, { strapi }) => {
   const { defaultIndex, maxAge, path: publicPath } = defaultsDeep(defaults, options);
 
   const staticDir = path.resolve(strapi.dirs.root, publicPath || strapi.config.paths.static);
