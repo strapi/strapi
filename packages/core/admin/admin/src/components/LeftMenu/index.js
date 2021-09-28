@@ -69,7 +69,8 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
   const initials = userDisplayName
     .split(' ')
     .map(name => name.substring(0, 1))
-    .join('');
+    .join('')
+    .substring(0, 2);
 
   const handleToggleUserLinks = () => setUserLinksVisible(prev => !prev);
 
