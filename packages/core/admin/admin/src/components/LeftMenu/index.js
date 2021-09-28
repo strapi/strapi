@@ -14,7 +14,8 @@ import {
   NavUser,
   NavCondense,
 } from '@strapi/parts/MainNav';
-import { Popover } from '@strapi/parts/Popover';
+import { FocusTrap } from '@strapi/parts/FocusTrap';
+import { Box } from '@strapi/parts/Box';
 import { Text } from '@strapi/parts/Text';
 import { Stack } from '@strapi/parts/Stack';
 import ContentIcon from '@strapi/icons/ContentIcon';
@@ -29,18 +30,25 @@ const IconWrapper = styled.span`
   }
 `;
 
+const LinkUserWrapper = styled(Box)`
+  width: ${150 / 16}rem;
+  position: absolute;
+  bottom: ${({ theme }) => theme.spaces[9]};
+  left: ${({ theme }) => theme.spaces[5]};
+`;
+
 const LinkUser = styled(Link)`
   display: flex;
   justify-content: space-between;
   align-items: center;
   text-decoration: none;
-  width: ${150 / 16}rem;
   padding: ${({ theme }) => `${theme.spaces[2]} ${theme.spaces[4]}`};
   border-radius: ${({ theme }) => theme.spaces[1]};
 
   &:hover {
     background: ${({ theme, logout }) =>
       logout ? theme.colors.danger100 : theme.colors.primary100};
+    text-decoration: none;
   }
 
   svg {
@@ -68,6 +76,15 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
   const handleLogout = () => {
     auth.clearAppStorage();
     handleToggleUserLinks();
+  };
+
+  const handleBlur = e => {
+    if (
+      !e.currentTarget.contains(e.relatedTarget) &&
+      e.relatedTarget?.parentElement?.id !== 'main-nav-user-button'
+    ) {
+      setUserLinksVisible(false);
+    }
   };
 
   return (
@@ -121,21 +138,38 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
         ) : null}
       </NavSections>
 
-      <NavUser ref={buttonRef} onClick={handleToggleUserLinks} initials={initials}>
+      <NavUser
+        id="main-nav-user-button"
+        ref={buttonRef}
+        onClick={handleToggleUserLinks}
+        initials={initials}
+      >
         {userDisplayName}
       </NavUser>
       {userLinksVisible && (
-        <Popover source={buttonRef}>
-          <Stack size={0}>
-            <LinkUser onClick={handleToggleUserLinks} to="/me">
-              <Text>Profile</Text>
-            </LinkUser>
-            <LinkUser onClick={handleLogout} logout="logout" to="/auth/login">
-              <Text textColor="danger600">Logout</Text>
-              <Logout />
-            </LinkUser>
-          </Stack>
-        </Popover>
+        <LinkUserWrapper onBlur={handleBlur} padding={1} shadow="tableShadow" background="neutral0">
+          <FocusTrap onEscape={handleToggleUserLinks}>
+            <Stack size={0}>
+              <LinkUser onClick={handleToggleUserLinks} to="/me">
+                <Text>
+                  {formatMessage({
+                    id: 'app.components.LeftMenu.profile',
+                    defaultMessage: 'Profile',
+                  })}
+                </Text>
+              </LinkUser>
+              <LinkUser onClick={handleLogout} logout="logout" to="/auth/login">
+                <Text textColor="danger600">
+                  {formatMessage({
+                    id: 'app.components.LeftMenu.logout',
+                    defaultMessage: 'Logout',
+                  })}
+                </Text>
+                <Logout />
+              </LinkUser>
+            </Stack>
+          </FocusTrap>
+        </LinkUserWrapper>
       )}
 
       <NavCondense onClick={() => setCondensed(s => !s)}>
