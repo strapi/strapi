@@ -5,10 +5,12 @@ import { CheckPermissions, useTracking } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { ContentLayout } from '@strapi/parts/Layout';
 import { Box } from '@strapi/parts/Box';
+import { Divider } from '@strapi/parts/Divider';
 import { Grid, GridItem } from '@strapi/parts/Grid';
 import { LinkButton } from '@strapi/parts/LinkButton';
 import { Main } from '@strapi/parts/Main';
 import { Stack } from '@strapi/parts/Stack';
+import { TableLabel } from '@strapi/parts/Text';
 import ConfigureIcon from '@strapi/icons/ConfigureIcon';
 import EditIcon from '@strapi/icons/EditIcon';
 import { InjectionZone } from '../../../shared/components';
@@ -18,7 +20,7 @@ import DynamicZone from '../../components/DynamicZone';
 // import FormWrapper from '../../components/FormWrapper';
 import FieldComponent from '../../components/FieldComponent';
 import Inputs from '../../components/Inputs';
-// import SelectWrapper from '../../components/SelectWrapper';
+import SelectWrapper from '../../components/SelectWrapper';
 import CollectionTypeFormWrapper from '../../components/CollectionTypeFormWrapper';
 import EditViewDataManagerProvider from '../../components/EditViewDataManagerProvider';
 import SingleTypeFormWrapper from '../../components/SingleTypeFormWrapper';
@@ -87,6 +89,9 @@ const EditView = ({
       currentContentTypeLayoutData.attributes
     );
   }, [currentContentTypeLayoutData]);
+
+  const relationsLayout = currentContentTypeLayoutData.layouts.editRelations;
+  const displayedRelationsLength = relationsLayout.length;
 
   return (
     <DataManagementWrapper allLayoutData={layout} slug={slug} id={id} origin={origin}>
@@ -241,6 +246,66 @@ const EditView = ({
                         <Informations />
                         <InjectionZone area="contentManager.editView.informations" />
                       </Box>
+                      {displayedRelationsLength > 0 && (
+                        <Box
+                          as="aside"
+                          aria-labelledby="additional-informations"
+                          background="neutral0"
+                          borderColor="neutral150"
+                          hasRadius
+                          paddingBottom={4}
+                          paddingLeft={4}
+                          paddingRight={4}
+                          paddingTop={6}
+                        >
+                          <TableLabel textColor="neutral600">
+                            {formatMessage(
+                              {
+                                id: getTrad('containers.Edit.relations'),
+                                defaultMessage:
+                                  '{number, plural, =0 {relations} one {relation} other {relations}}',
+                              },
+                              { number: displayedRelationsLength }
+                            )}
+                          </TableLabel>
+                          <Box paddingTop={2} paddingBottom={6}>
+                            <Divider />
+                          </Box>
+                          <Stack size={4}>
+                            {relationsLayout.map(
+                              ({ name, fieldSchema, labelAction, metadatas, queryInfos }) => {
+                                return (
+                                  <SelectWrapper
+                                    {...fieldSchema}
+                                    {...metadatas}
+                                    key={name}
+                                    description={{
+                                      id: metadatas.description,
+                                      defaultMessage: metadatas.description,
+                                    }}
+                                    intlLabel={{
+                                      id: metadatas.label,
+                                      defaultMessage: metadatas.label,
+                                    }}
+                                    labelAction={labelAction}
+                                    name={name}
+                                    relationsType={fieldSchema.relationType}
+                                    queryInfos={queryInfos}
+                                    placeholder={
+                                      metadatas.placeholder
+                                        ? {
+                                            id: metadatas.placeholder,
+                                            defaultMessage: metadatas.placeholder,
+                                          }
+                                        : null
+                                    }
+                                  />
+                                );
+                              }
+                            )}
+                          </Stack>
+                        </Box>
+                      )}
                       <Box as="aside" aria-labelledby="links">
                         <Stack size={2}>
                           {slug !== 'strapi::administrator' && (
@@ -423,13 +488,13 @@ const EditView = ({
   //                         ({ name, fieldSchema, labelIcon, metadatas, queryInfos }) => {
   //                           return (
   //                             <SelectWrapper
-  //                               {...fieldSchema}
-  //                               {...metadatas}
-  //                               key={name}
-  //                               labelIcon={labelIcon}
-  //                               name={name}
-  //                               relationsType={fieldSchema.relationType}
-  //                               queryInfos={queryInfos}
+  // {...fieldSchema}
+  // {...metadatas}
+  // key={name}
+  // labelIcon={labelIcon}
+  // name={name}
+  // relationsType={fieldSchema.relationType}
+  // queryInfos={queryInfos}
   //                             />
   //                           );
   //                         }

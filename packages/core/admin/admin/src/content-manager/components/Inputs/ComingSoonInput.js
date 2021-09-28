@@ -18,7 +18,7 @@ const CominSoonInput = ({ description, intlLabel, labelAction, error, name }) =>
       )
     : name;
 
-  const hint = description
+  const hint = description?.id
     ? formatMessage(
         { id: description.id, defaultMessage: description.defaultMessage },
         { ...description.values }

@@ -10,7 +10,7 @@ import { useContentTypeLayout } from '../../hooks';
 import FieldComponent from '../FieldComponent';
 import Inputs from '../Inputs';
 
-const NonRepeatableComponent = ({ componentUid, name }) => {
+const NonRepeatableComponent = ({ componentUid, isFromDynamicZone, isNested, name }) => {
   const { getComponentLayout } = useContentTypeLayout();
   const componentLayoutData = useMemo(() => getComponentLayout(componentUid), [
     componentUid,
@@ -19,7 +19,15 @@ const NonRepeatableComponent = ({ componentUid, name }) => {
   const fields = componentLayoutData.layouts.edit;
 
   return (
-    <Box background="neutral100" paddingLeft={6} paddingRight={6} paddingTop={6} paddingBottom={6}>
+    <Box
+      background={isFromDynamicZone ? 'neutral0' : 'neutral100'}
+      paddingLeft={6}
+      paddingRight={6}
+      paddingTop={6}
+      paddingBottom={6}
+      hasRadius={isNested}
+      borderColor={isNested ? 'neutral200' : ''}
+    >
       <Stack size={6}>
         {fields.map((fieldRow, key) => {
           return (
@@ -39,6 +47,7 @@ const NonRepeatableComponent = ({ componentUid, name }) => {
                           id: metadatas.label,
                           defaultMessage: metadatas.label,
                         }}
+                        isNested
                         isRepeatable={fieldSchema.repeatable}
                         max={fieldSchema.max}
                         min={fieldSchema.min}
@@ -67,8 +76,15 @@ const NonRepeatableComponent = ({ componentUid, name }) => {
   );
 };
 
+NonRepeatableComponent.defaultProps = {
+  isFromDynamicZone: false,
+  isNested: false,
+};
+
 NonRepeatableComponent.propTypes = {
   componentUid: PropTypes.string.isRequired,
+  isFromDynamicZone: PropTypes.bool,
+  isNested: PropTypes.bool,
   name: PropTypes.string.isRequired,
 };
 
