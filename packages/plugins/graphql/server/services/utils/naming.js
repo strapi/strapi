@@ -175,7 +175,11 @@ module.exports = ({ strapi }) => {
    * @return {string}
    */
   const getFiltersInputTypeName = contentType => {
-    return `${getTypeName(contentType)}FiltersInput`;
+    const isComponent = contentType.modelType === 'component';
+
+    const baseName = isComponent ? getComponentName(contentType) : getTypeName(contentType);
+
+    return `${baseName}FiltersInput`;
   };
 
   /**
