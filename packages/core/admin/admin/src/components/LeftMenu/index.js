@@ -1,10 +1,9 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
+import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useIntl } from 'react-intl';
-import { useHistory } from 'react-router-dom';
-import styled from 'styled-components';
-import { Button } from '@strapi/parts/Button';
+import { NavLink as Link } from 'react-router-dom';
 import { Divider } from '@strapi/parts/Divider';
 import {
   MainNav,
@@ -15,7 +14,11 @@ import {
   NavUser,
   NavCondense,
 } from '@strapi/parts/MainNav';
+import { Popover } from '@strapi/parts/Popover';
+import { Text } from '@strapi/parts/Text';
+import { Stack } from '@strapi/parts/Stack';
 import ContentIcon from '@strapi/icons/ContentIcon';
+import Logout from '@strapi/icons/Logout';
 import { auth, usePersistentState, useAppInfos } from '@strapi/helper-plugin';
 import useConfigurations from '../../hooks/useConfigurations';
 
@@ -26,12 +29,46 @@ const IconWrapper = styled.span`
   }
 `;
 
+const LinkUser = styled(Link)`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  text-decoration: none;
+  width: ${150 / 16}rem;
+  padding: ${({ theme }) => `${theme.spaces[2]} ${theme.spaces[4]}`};
+  border-radius: ${({ theme }) => theme.spaces[1]};
+
+  &:hover {
+    background: ${({ theme, logout }) =>
+      logout ? theme.colors.danger100 : theme.colors.primary100};
+  }
+
+  svg {
+    path {
+      fill: ${({ theme }) => theme.colors.danger600};
+    }
+  }
+`;
+
 const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
+  const buttonRef = useRef();
+  const [userLinksVisible, setUserLinksVisible] = useState(false);
   const { menuLogo } = useConfigurations();
-  const { push } = useHistory();
   const [condensed, setCondensed] = usePersistentState('navbar-condensed', false);
   const { userDisplayName } = useAppInfos();
   const { formatMessage } = useIntl();
+
+  const initials = userDisplayName
+    .split(' ')
+    .map(name => name.substring(0, 1))
+    .join('');
+
+  const handleToggleUserLinks = () => setUserLinksVisible(prev => !prev);
+
+  const handleLogout = () => {
+    auth.clearAppStorage();
+    handleToggleUserLinks();
+  };
 
   return (
     <MainNav condensed={condensed}>
@@ -80,23 +117,26 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
                 {formatMessage(link.intlLabel)}
               </NavLink>
             ))}
-            {/* This is temporary */}
-            <Button
-              type="button"
-              onClick={() => {
-                auth.clearAppStorage();
-                push('/auth/login');
-              }}
-            >
-              Logout
-            </Button>
           </NavSection>
         ) : null}
       </NavSections>
 
-      <NavUser src="https://avatars.githubusercontent.com/u/3874873?v=4" to="/me">
+      <NavUser ref={buttonRef} onClick={handleToggleUserLinks} initials={initials}>
         {userDisplayName}
       </NavUser>
+      {userLinksVisible && (
+        <Popover source={buttonRef}>
+          <Stack size={0}>
+            <LinkUser onClick={handleToggleUserLinks} to="/me">
+              <Text>Profile</Text>
+            </LinkUser>
+            <LinkUser onClick={handleLogout} logout="logout" to="/auth/login">
+              <Text textColor="danger600">Logout</Text>
+              <Logout />
+            </LinkUser>
+          </Stack>
+        </Popover>
+      )}
 
       <NavCondense onClick={() => setCondensed(s => !s)}>
         {condensed
