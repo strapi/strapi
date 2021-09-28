@@ -26,7 +26,7 @@ function getSrc(name) {
       return Twitter;
     case 'Blog':
     case 'Forum':
-    case 'Careers':
+    case 'We are hiring!':
       return Strapi;
     default:
       return Strapi;

@@ -49,15 +49,15 @@ const SOCIAL_LINKS = [
   },
   {
     name: 'Blog',
-    link: 'https://strapi.io/blog',
+    link: 'https://strapi.io/blog?utm_source=admin&utm_medium=admin',
   },
   {
     name: 'Forum',
     link: 'https://forum.strapi.io',
   },
   {
-    name: 'Careers',
-    link: 'https://strapi.io/careers',
+    name: 'We are hiring!',
+    link: 'https://strapi.io/careers?utm_source=admin&utm_medium=admin',
   },
 ];
 
