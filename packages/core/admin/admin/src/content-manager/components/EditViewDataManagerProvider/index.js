@@ -304,6 +304,14 @@ const EditViewDataManagerProvider = ({
         console.error(err);
 
         errors = getYupInnerErrors(err);
+
+        toggleNotification({
+          type: 'warning',
+          message: {
+            id: getTrad('containers.EditView.notification.errors'),
+            defaultMessage: 'The form contains some errors',
+          },
+        });
       }
 
       dispatch({
@@ -311,7 +319,16 @@ const EditViewDataManagerProvider = ({
         errors,
       });
     },
-    [createFormData, isCreatingEntry, modifiedData, onPost, onPut, trackerProperty, yupSchema]
+    [
+      createFormData,
+      isCreatingEntry,
+      modifiedData,
+      onPost,
+      onPut,
+      toggleNotification,
+      trackerProperty,
+      yupSchema,
+    ]
   );
 
   const handlePublish = useCallback(async () => {

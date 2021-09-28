@@ -295,6 +295,14 @@ const createYupSchemaAttribute = (type, validations, options) => {
                     return value !== null;
                   }
 
+                  if (type === 'date' || type === 'datetime') {
+                    if (typeof value === 'string') {
+                      return !isEmpty(value);
+                    }
+
+                    return !isEmpty(value.toString());
+                  }
+
                   return !isEmpty(value);
                 });
               }
