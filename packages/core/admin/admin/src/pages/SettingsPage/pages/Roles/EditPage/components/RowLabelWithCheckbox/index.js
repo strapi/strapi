@@ -43,7 +43,8 @@ const RowLabelWithCheckbox = ({
                 name: checkboxName,
                 value,
               },
-            })}
+            })
+          }
           indeterminate={someChecked}
           value={value}
         />

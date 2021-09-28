@@ -9,6 +9,7 @@ import get from 'lodash/get';
 import omit from 'lodash/omit';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
+import { Text } from '@strapi/parts/Text';
 import IS_DISABLED from 'ee_else_ce/pages/SettingsPage/pages/Roles/EditPage/components/ContentTypeCollapse/Collapse/utils/constants';
 import { usePermissionsDataManager } from '../../../../../../../../hooks';
 import ConditionsButton from '../../ConditionsButton';
@@ -31,6 +32,13 @@ const activeRowStyle = (theme, isActive) => `
   ${ConditionsButton} {
     display: block;
   }
+
+  &:hover {
+    ${Text} {
+      color: ${theme.colors.primary600};
+    }
+  }
+  
 `;
 
 const Wrapper = styled.div`
