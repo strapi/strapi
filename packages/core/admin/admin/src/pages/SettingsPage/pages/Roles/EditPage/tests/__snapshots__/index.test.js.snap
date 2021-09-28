@@ -59,6 +59,10 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
 }
 
 .c7 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
   padding: 10px 16px;
   background: #4945ff;
   border: none;
@@ -137,6 +141,10 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
 }
 
 .c11 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
   padding: 10px 16px;
   background: #4945ff;
   border: none;

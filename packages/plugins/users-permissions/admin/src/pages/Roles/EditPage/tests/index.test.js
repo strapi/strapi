@@ -167,6 +167,10 @@ describe('Admin | containers | RoleEditPage', () => {
       }
 
       .c6 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         padding: 8px 16px;
         background: #4945ff;
         border: none;

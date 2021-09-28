@@ -155,6 +155,10 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
       }
 
       .c41 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         padding: 10px 16px;
         background: #4945ff;
         border: none;
@@ -168,10 +172,6 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
         -webkit-justify-content: center;
         -ms-flex-pack: center;
         justify-content: center;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
         width: 100%;
       }
 
@@ -486,10 +486,10 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
         display: -webkit-flex;
         display: -ms-flexbox;
         display: flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
+        -webkit-align-items: flex-start;
+        -webkit-box-align: flex-start;
+        -ms-flex-align: flex-start;
+        align-items: flex-start;
       }
 
       .c36 * {
