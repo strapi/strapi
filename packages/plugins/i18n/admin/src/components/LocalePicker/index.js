@@ -45,6 +45,10 @@ const LocalePicker = () => {
   });
 
   const handleClick = code => {
+    if (code === selected) {
+      return;
+    }
+
     dispatch({ type: 'ContentManager/RBACManager/RESET_PERMISSIONS' });
 
     setSelected(code);
