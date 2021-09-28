@@ -320,6 +320,17 @@ describe('', () => {
         background: #4945ff;
       }
 
+      .c30 .sc-cApVyb {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
       .c30 .c31 {
         color: #ffffff;
       }
@@ -368,6 +379,17 @@ describe('', () => {
         border: none;
         border: 1px solid #dcdce4;
         background: #ffffff;
+      }
+
+      .c37 .sc-cApVyb {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
       }
 
       .c37 .c31 {

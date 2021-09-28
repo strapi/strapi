@@ -10,6 +10,8 @@ const StyledBox = styled(Box)`
 `;
 
 const ContentTypes = ({ isFormDisabled, kind, layout: { actions, subjects } }) => {
+  const sortedSubjects = [...subjects].sort((a, b) => a.label > b.label);
+
   return (
     <StyledBox background="neutral0">
       <GlobalActions actions={actions} kind={kind} isFormDisabled={isFormDisabled} />
@@ -17,7 +19,7 @@ const ContentTypes = ({ isFormDisabled, kind, layout: { actions, subjects } }) =
         actions={actions}
         isFormDisabled={isFormDisabled}
         pathToData={kind}
-        subjects={subjects}
+        subjects={sortedSubjects}
       />
     </StyledBox>
   );

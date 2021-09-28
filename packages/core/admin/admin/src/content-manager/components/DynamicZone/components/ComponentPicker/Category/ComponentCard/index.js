@@ -27,7 +27,6 @@ const StyledFontAwesomeIcon = styled(FontAwesomeIcon)`
 
 const ComponentBox = styled(Box)`
   flex-shrink: 0;
-  width: ${pxToRem(140)};
   height: ${pxToRem(84)};
   border: 1px solid ${({ theme }) => theme.colors.neutral200};
   background: ${({ theme }) => theme.colors.neutral100};

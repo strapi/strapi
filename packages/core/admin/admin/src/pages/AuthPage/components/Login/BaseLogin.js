@@ -148,12 +148,10 @@ const Login = ({ onSubmit, schema, children }) => {
       <Row justifyContent="center">
         <Box paddingTop={4}>
           <Link to="/auth/forgot-password">
-            <Text small>
-              {formatMessage({
-                id: 'Auth.link.forgot-password',
-                defaultMessage: 'Forgot your password?',
-              })}
-            </Text>
+            {formatMessage({
+              id: 'Auth.link.forgot-password',
+              defaultMessage: 'Forgot your password?',
+            })}
           </Link>
         </Box>
       </Row>

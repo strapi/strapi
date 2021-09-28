@@ -12,6 +12,7 @@ import { useContentTypeLayout } from '../../hooks';
 import { getFieldName } from '../../utils';
 import Wysiwyg from '../Wysiwyg';
 import InputJSON from '../InputJSON';
+import ComingSoonInput from './ComingSoonInput';
 import GenericInput from './GenericInput';
 import InputUID from '../InputUID';
 // import SelectWrapper from '../SelectWrapper';
@@ -187,7 +188,14 @@ function Inputs({
   }
 
   if (type === 'relation') {
-    return 'RELATION';
+    // return 'RELATION';
+    return (
+      <ComingSoonInput
+        labelAction={labelAction}
+        name={keys}
+        intlLabel={{ id: label, defaultMessage: label }}
+      />
+    );
     // return (
     //   <div key={keys}>
     //     <SelectWrapper
@@ -206,7 +214,6 @@ function Inputs({
 
   return (
     <GenericInput
-      // {...metadatas}
       attribute={fieldSchema}
       autoComplete="new-password"
       intlLabel={{ id: label, defaultMessage: label }}
@@ -216,12 +223,12 @@ function Inputs({
       labelAction={labelAction}
       contentTypeUID={currentContentTypeLayout.uid}
       customInputs={{
-        // uid: InputUID,
         // ...fields,
         json: InputJSON,
-        media: () => <div>TODO media</div>,
         uid: InputUID,
-        // wysiwyg: () => <div>TODO wysiwyg</div>,
+        // FIXME
+        datetime: ComingSoonInput,
+        media: ComingSoonInput,
         wysiwyg: Wysiwyg,
       }}
       multiple={fieldSchema.multiple || false}

@@ -60,5 +60,6 @@
   "plugin.schema.i18n.localized.description-field": "The field can have different values in each locale",
   "plugin.schema.i18n.localized.label": "Enable localization for this Content-Type",
   "plugin.schema.i18n.localized.label-content-type": "Enable localization for this Content-Type",
-  "plugin.schema.i18n.localized.label-field": "Enable localization for this field"
+  "plugin.schema.i18n.localized.label-field": "Enable localization for this field",
+  "actions.select-locale": "Select a locale"
 }
