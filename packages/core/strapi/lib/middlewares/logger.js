@@ -16,7 +16,7 @@ const codeToColor = code => {
 /**
  * @type {import('./').MiddlewareFactory}
  */
-module.exports = (_, { strapi }) => {
+module.exports = (options, { strapi }) => {
   return async (ctx, next) => {
     const start = Date.now();
     await next();

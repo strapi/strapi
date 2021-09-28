@@ -104,7 +104,7 @@ const createResponseUtils = strapi => {
 /**
  * @type {import('./').MiddlewareFactory}
  */
-module.exports = (_, { strapi }) => {
+module.exports = (options, { strapi }) => {
   createResponseUtils(strapi);
   strapi.errors = Boom;
 
