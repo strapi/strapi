@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import isEmpty from 'lodash/isEmpty';
 import Select, { createFilter } from 'react-select';
+import { Box } from '@strapi/parts/Box';
 import { Stack } from '@strapi/parts/Stack';
 import ListItem from './ListItem';
 
@@ -72,26 +73,28 @@ function SelectMany({
         styles={styles}
         value={[]}
       />
-      <Stack as="ul" size={4} style={{ maxHeight: '128px', overflowY: 'auto' }}>
-        {value?.map((data, index) => {
-          return (
-            <ListItem
-              key={data.id}
-              data={data}
-              displayNavigationLink={displayNavigationLink}
-              isDisabled={isDisabled}
-              mainField={mainField}
-              onRemove={() => {
-                if (!isDisabled) {
-                  onRemove(`${name}.${index}`);
-                }
-              }}
-              searchToPersist={searchToPersist}
-              targetModel={targetModel}
-            />
-          );
-        })}
-      </Stack>
+      <Box paddingTop={3}>
+        <Stack as="ul" size={4} style={{ maxHeight: '128px', overflowY: 'auto' }}>
+          {value?.map((data, index) => {
+            return (
+              <ListItem
+                key={data.id}
+                data={data}
+                displayNavigationLink={displayNavigationLink}
+                isDisabled={isDisabled}
+                mainField={mainField}
+                onRemove={() => {
+                  if (!isDisabled) {
+                    onRemove(`${name}.${index}`);
+                  }
+                }}
+                searchToPersist={searchToPersist}
+                targetModel={targetModel}
+              />
+            );
+          })}
+        </Stack>
+      </Box>
     </>
   );
 }
