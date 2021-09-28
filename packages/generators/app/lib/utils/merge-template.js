@@ -14,7 +14,6 @@ const allowedTemplateContents = {
   'README.md': allowFile,
   '.env.example': allowFile,
   'package.json': allowFile,
-  config: allowChildren,
   src: {
     admin: allowChildren,
     api: allowChildren,
