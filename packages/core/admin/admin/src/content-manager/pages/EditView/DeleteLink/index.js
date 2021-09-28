@@ -46,7 +46,7 @@ const DeleteLink = ({ isCreatingEntry, onDelete, onDeleteSucceeded, trackerPrope
 
   return (
     <>
-      <Button onClick={toggleWarningDelete} size="S" startIcon={<Delete />} variant="danger">
+      <Button onClick={toggleWarningDelete} size="S" startIcon={<Delete />} variant="danger-light">
         {formatMessage({
           id: getTrad('containers.Edit.delete-entry'),
           defaultMessage: 'Delete this entry',
@@ -71,4 +71,7 @@ DeleteLink.propTypes = {
 
 const Memoized = memo(DeleteLink, isEqual);
 
-export default connect(Memoized, select);
+export default connect(
+  Memoized,
+  select
+);
