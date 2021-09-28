@@ -102,6 +102,10 @@ describe('<ListPage />', () => {
       }
 
       .c6 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         padding: 10px 16px;
         background: #4945ff;
         border: none;
@@ -247,6 +251,12 @@ describe('<ListPage />', () => {
       .c23 td:first-of-type,
       .c23 th:first-of-type {
         padding: 0 4px;
+      }
+
+      .c23 th {
+        padding-top: 0;
+        padding-bottom: 0;
+        height: 3.5rem;
       }
 
       .c25 {

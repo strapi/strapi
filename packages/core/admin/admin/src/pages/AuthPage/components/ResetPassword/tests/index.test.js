@@ -95,6 +95,10 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
       }
 
       .c28 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         padding: 8px 16px;
         background: #4945ff;
         border: none;

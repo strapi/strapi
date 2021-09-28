@@ -202,6 +202,12 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         padding: 0 4px;
       }
 
+      .c15 th {
+        padding-top: 0;
+        padding-bottom: 0;
+        height: 3.5rem;
+      }
+
       .c17 {
         display: -webkit-box;
         display: -webkit-flex;
