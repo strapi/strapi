@@ -14,7 +14,6 @@ import isArray from 'lodash/isArray';
 import isEmpty from 'lodash/isEmpty';
 import set from 'lodash/set';
 import { NotAllowedInput, useCMEditViewDataManager, useQueryParams } from '@strapi/helper-plugin';
-// import { Flex, Text, Padded } from '@buffetjs/core';
 import { stringify } from 'qs';
 import axios from 'axios';
 import { axiosInstance } from '../../../core/utils';
@@ -26,12 +25,7 @@ import ClearIndicator from './ClearIndicator';
 import DropdownIndicator from './DropdownIndicator';
 import IndicatorSeparator from './IndicatorSeparator';
 import Option from './Option';
-// import { A, BaselineAlignment } from './components';
-import {
-  connect,
-  select,
-  // styles
-} from './utils';
+import { connect, select } from './utils';
 import getSelectStyles from './utils/getSelectStyles';
 
 const initialPaginationState = {
@@ -282,25 +276,6 @@ function SelectWrapper({
   }
 
   const styles = getSelectStyles(theme);
-
-  // const temp = [
-  //   {
-  //     label: 'un',
-  //     value: {
-  //       id: 2,
-  //       name: 'un',
-  //       publishedAt: null,
-  //     },
-  //   },
-  //   {
-  //     label: 'deux',
-  //     value: {
-  //       id: 2,
-  //       name: 'deux',
-  //       publishedAt: null,
-  //     },
-  //   },
-  // ];
 
   return (
     <Stack size={1}>

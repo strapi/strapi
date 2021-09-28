@@ -177,6 +177,7 @@ const getSelectStyles = theme => {
 
       return { ...base, lineHeight: theme.spaces[5], backgroundColor, borderRadius: 4 };
     },
+    placeholder: base => ({ ...base, marginLeft: 0 }),
     singleValue: base => ({ ...base, marginLeft: 0 }),
     valueContainer: base => ({
       ...base,
