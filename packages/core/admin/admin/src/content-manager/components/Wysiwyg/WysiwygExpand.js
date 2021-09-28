@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { FocusTrap } from '@strapi/parts/FocusTrap';
@@ -36,6 +36,15 @@ const WysiwygExpand = ({
   const [visiblePopover, setVisiblePopover] = useState(false);
   const [mediaLibVisible, setMediaLibVisible] = useState(false);
 
+  useEffect(() => {
+    const body = document.body;
+    body.classList.add('lock-body-scroll');
+
+    return () => {
+      body.classList.remove('lock-body-scroll');
+    };
+  }, []);
+
   const handleTogglePopover = () => setVisiblePopover(prev => !prev);
   const handleToggleMediaLib = () => setMediaLibVisible(prev => !prev);
 
@@ -47,6 +56,7 @@ const WysiwygExpand = ({
             <ExpandContainer background="neutral0" hasRadius shadow="popupShadow">
               <WysiwygContainer>
                 <WysiwygNav
+                  noPreviewMode
                   editorRef={editorRef}
                   onActionClick={onActionClick}
                   onToggleMediaLib={handleToggleMediaLib}
