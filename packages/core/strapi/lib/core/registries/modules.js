@@ -25,17 +25,17 @@ const modulesRegistry = strapi => {
     },
     async bootstrap() {
       for (const mod of Object.values(modules)) {
-        await mod.bootstrap(strapi);
+        await mod.bootstrap();
       }
     },
     async register() {
       for (const mod of Object.values(modules)) {
-        await mod.register(strapi);
+        await mod.register();
       }
     },
     async destroy() {
       for (const mod of Object.values(modules)) {
-        await mod.destroy(strapi);
+        await mod.destroy();
       }
     },
   };

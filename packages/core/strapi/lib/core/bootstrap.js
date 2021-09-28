@@ -3,7 +3,7 @@
 const _ = require('lodash');
 const { getConfigUrls } = require('@strapi/utils');
 
-module.exports = function(strapi) {
+module.exports = function({ strapi }) {
   // TODO: delete v3 code
   _.forEach(strapi.api, api => {
     _.forEach(api.middlewares, (middleware, middlewareName) => {
