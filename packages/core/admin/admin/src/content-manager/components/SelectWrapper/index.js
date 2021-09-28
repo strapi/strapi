@@ -1,27 +1,37 @@
 import React, { useCallback, useState, useEffect, useMemo, memo } from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage, useIntl } from 'react-intl';
-import { Link, useLocation } from 'react-router-dom';
-import { findIndex, get, isArray, isEmpty, set } from 'lodash';
 import {
-  DropdownIndicator,
-  LabelIconWrapper,
+  // FormattedMessage,
+  useIntl,
+} from 'react-intl';
+// import { Link, useLocation } from 'react-router-dom';
+// import { findIndex, get, isArray, isEmpty, set } from 'lodash';
+import get from 'lodash/get';
+import isArray from 'lodash/isArray';
+import {
+  // DropdownIndicator,
+
   NotAllowedInput,
   useCMEditViewDataManager,
-  useQueryParams,
+  // useQueryParams,
 } from '@strapi/helper-plugin';
-import { Flex, Text, Padded } from '@buffetjs/core';
-import { stringify } from 'qs';
+// import { Flex, Text, Padded } from '@buffetjs/core';
+// import { stringify } from 'qs';
 import axios from 'axios';
 import { axiosInstance } from '../../../core/utils';
-import { getTrad } from '../../utils';
-import SelectOne from '../SelectOne';
-import SelectMany from '../SelectMany';
-import ClearIndicator from './ClearIndicator';
-import IndicatorSeparator from './IndicatorSeparator';
-import Option from './Option';
-import { A, BaselineAlignment } from './components';
-import { connect, select, styles } from './utils';
+// import { getTrad } from '../../utils';
+import ComingSoonInput from '../Inputs/ComingSoonInput';
+// import SelectOne from '../SelectOne';
+// import SelectMany from '../SelectMany';
+// import ClearIndicator from './ClearIndicator';
+// import IndicatorSeparator from './IndicatorSeparator';
+// import Option from './Option';
+// import { A, BaselineAlignment } from './components';
+import {
+  connect,
+  select,
+  // styles
+} from './utils';
 
 const initialPaginationState = {
   _contains: '',
@@ -29,77 +39,89 @@ const initialPaginationState = {
   _start: 0,
 };
 
-const buildParams = (query, paramsToKeep) => {
-  if (!paramsToKeep) {
-    return {};
-  }
+// const buildParams = (query, paramsToKeep) => {
+//   if (!paramsToKeep) {
+//     return {};
+//   }
 
-  return paramsToKeep.reduce((acc, current) => {
-    const value = get(query, current, null);
+//   return paramsToKeep.reduce((acc, current) => {
+//     const value = get(query, current, null);
 
-    if (value) {
-      set(acc, current, value);
-    }
+//     if (value) {
+//       set(acc, current, value);
+//     }
 
-    return acc;
-  }, {});
-};
+//     return acc;
+//   }, {});
+// };
 function SelectWrapper({
   description,
-  editable,
-  label,
-  labelIcon,
+  // editable,
+  labelAction,
+  intlLabel,
   isCreatingEntry,
   isFieldAllowed,
   isFieldReadable,
   mainField,
   name,
   relationType,
-  targetModel,
-  placeholder,
+  // targetModel,
+  // placeholder,
   queryInfos,
 }) {
   const { formatMessage } = useIntl();
-  const [{ query }] = useQueryParams();
+  // const [{ query }] = useQueryParams();
   // Disable the input in case of a polymorphic relation
   const isMorph = useMemo(() => relationType.toLowerCase().includes('morph'), [relationType]);
   const {
-    addRelation,
+    // addRelation,
     modifiedData,
-    moveRelation,
-    onChange,
-    onRemoveRelation,
+    // moveRelation,
+    // onChange,
+    // onRemoveRelation,
   } = useCMEditViewDataManager();
-  const { pathname } = useLocation();
+  // const { pathname } = useLocation();
 
   const value = get(modifiedData, name, null);
-  const [state, setState] = useState(initialPaginationState);
-  const [options, setOptions] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isOpen, setIsOpen] = useState(false);
+  const [
+    state,
+    // setState
+  ] = useState(initialPaginationState);
+  const [
+    // options,
+    setOptions,
+  ] = useState([]);
+  const [
+    // isLoading,
+    setIsLoading,
+  ] = useState(false);
+  const [
+    isOpen,
+    // setIsOpen
+  ] = useState(false);
 
-  const filteredOptions = useMemo(() => {
-    return options.filter(option => {
-      if (!isEmpty(value)) {
-        // SelectMany
-        if (Array.isArray(value)) {
-          return findIndex(value, o => o.id === option.value.id) === -1;
-        }
+  // const filteredOptions = useMemo(() => {
+  //   return options.filter(option => {
+  //     if (!isEmpty(value)) {
+  //       // SelectMany
+  //       if (Array.isArray(value)) {
+  //         return findIndex(value, o => o.id === option.value.id) === -1;
+  //       }
 
-        // SelectOne
-        return get(value, 'id', '') !== option.value.id;
-      }
+  //       // SelectOne
+  //       return get(value, 'id', '') !== option.value.id;
+  //     }
 
-      return true;
-    });
-  }, [options, value]);
+  //     return true;
+  //   });
+  // }, [options, value]);
 
   const {
     endPoint,
     containsKey,
     defaultParams,
-    shouldDisplayRelationLink,
-    paramsToKeep,
+    // shouldDisplayRelationLink,
+    // paramsToKeep,
   } = queryInfos;
 
   const isSingle = ['oneWay', 'oneToOne', 'manyToOne', 'oneToManyMorph', 'oneToOneMorph'].includes(
@@ -170,15 +192,17 @@ function SelectWrapper({
       }
     },
     [
-      isMorph,
-      isFieldAllowed,
-      state._limit,
-      state._contains,
-      defaultParams,
       containsKey,
+      defaultParams,
       endPoint,
       idsToOmit,
+      isFieldAllowed,
+      isMorph,
       mainField.name,
+      setIsLoading,
+      setOptions,
+      state._contains,
+      state._limit,
     ]
   );
 
@@ -193,180 +217,198 @@ function SelectWrapper({
     return () => source.cancel('Operation canceled by the user.');
   }, [getData, isOpen]);
 
-  const handleInputChange = (inputValue, { action }) => {
-    if (action === 'input-change') {
-      setState(prevState => {
-        if (prevState._contains === inputValue) {
-          return prevState;
-        }
+  // const handleInputChange = (inputValue, { action }) => {
+  //   if (action === 'input-change') {
+  //     setState(prevState => {
+  //       if (prevState._contains === inputValue) {
+  //         return prevState;
+  //       }
 
-        return { ...prevState, _contains: inputValue, _start: 0 };
-      });
-    }
+  //       return { ...prevState, _contains: inputValue, _start: 0 };
+  //     });
+  //   }
 
-    return inputValue;
-  };
+  //   return inputValue;
+  // };
 
-  const handleMenuScrollToBottom = () => {
-    setState(prevState => ({ ...prevState, _limit: prevState._limit + 20 }));
-  };
+  // const handleMenuScrollToBottom = () => {
+  //   setState(prevState => ({ ...prevState, _limit: prevState._limit + 20 }));
+  // };
 
-  const handleMenuClose = () => {
-    setState(initialPaginationState);
-    setIsOpen(false);
-  };
+  // const handleMenuClose = () => {
+  //   setState(initialPaginationState);
+  //   setIsOpen(false);
+  // };
 
-  const handleChange = value => {
-    onChange({ target: { name, value: value ? value.value : value } });
-  };
+  // const handleChange = value => {
+  //   onChange({ target: { name, value: value ? value.value : value } });
+  // };
 
-  const handleAddRelation = value => {
-    if (!isEmpty(value)) {
-      addRelation({ target: { name, value } });
-    }
-  };
+  // const handleAddRelation = value => {
+  //   if (!isEmpty(value)) {
+  //     addRelation({ target: { name, value } });
+  //   }
+  // };
 
-  const handleMenuOpen = () => {
-    setIsOpen(true);
-  };
+  // const handleMenuOpen = () => {
+  //   setIsOpen(true);
+  // };
 
-  const to = `/content-manager/collectionType/${targetModel}/${value ? value.id : null}`;
+  // const to = `/content-manager/collectionType/${targetModel}/${value ? value.id : null}`;
 
-  const searchToPersist = stringify(buildParams(query, paramsToKeep), { encode: false });
+  // const searchToPersist = stringify(buildParams(query, paramsToKeep), { encode: false });
 
-  const link = useMemo(() => {
-    if (!value) {
-      return null;
-    }
+  // const link = useMemo(() => {
+  //   if (!value) {
+  //     return null;
+  //   }
 
-    if (!shouldDisplayRelationLink) {
-      return null;
-    }
+  //   if (!shouldDisplayRelationLink) {
+  //     return null;
+  //   }
 
-    return (
-      <Link to={{ pathname: to, state: { from: pathname }, search: searchToPersist }}>
-        <FormattedMessage id="content-manager.containers.Edit.seeDetails">
-          {msg => <A color="mediumBlue">{msg}</A>}
-        </FormattedMessage>
-      </Link>
-    );
-  }, [shouldDisplayRelationLink, pathname, to, value, searchToPersist]);
+  //   return (
+  //     <Link to={{ pathname: to, state: { from: pathname }, search: searchToPersist }}>
+  //       <FormattedMessage id="content-manager.containers.Edit.seeDetails">
+  //         {msg => <A color="mediumBlue">{msg}</A>}
+  //       </FormattedMessage>
+  //     </Link>
+  //   );
+  // }, [shouldDisplayRelationLink, pathname, to, value, searchToPersist]);
 
-  const Component = isSingle ? SelectOne : SelectMany;
+  // const Component = isSingle ? SelectOne : SelectMany;
   const associationsLength = isArray(value) ? value.length : 0;
 
-  const isDisabled = useMemo(() => {
-    if (isMorph) {
-      return true;
-    }
+  // const isDisabled = useMemo(() => {
+  //   if (isMorph) {
+  //     return true;
+  //   }
 
-    if (!isCreatingEntry) {
-      return (!isFieldAllowed && isFieldReadable) || !editable;
-    }
+  //   if (!isCreatingEntry) {
+  //     return (!isFieldAllowed && isFieldReadable) || !editable;
+  //   }
 
-    return !editable;
-  }, [isMorph, isCreatingEntry, editable, isFieldAllowed, isFieldReadable]);
+  //   return !editable;
+  // }, [isMorph, isCreatingEntry, editable, isFieldAllowed, isFieldReadable]);
 
-  const labelIconformatted = labelIcon
-    ? { icon: labelIcon.icon, title: formatMessage(labelIcon.title) }
-    : labelIcon;
+  const multipleLabel = intlLabel.id
+    ? formatMessage({ id: intlLabel.id, defaultMessage: intlLabel.defaultMessage })
+    : name;
+  const formattedLabel = isSingle
+    ? intlLabel
+    : {
+        // Custom trad id in order to add the label count
+        id: 'relations-label',
+        defaultMessage: '{label} ({count})',
+        values: { label: multipleLabel, count: associationsLength },
+      };
 
   if (!isFieldAllowed && isCreatingEntry) {
-    return <NotAllowedInput label={label} labelIcon={labelIconformatted} />;
+    return <NotAllowedInput intlLabel={intlLabel} labelAction={labelAction} />;
   }
 
   if (!isCreatingEntry && !isFieldAllowed && !isFieldReadable) {
-    return <NotAllowedInput label={label} labelIcon={labelIconformatted} />;
+    return <NotAllowedInput intlLabel={intlLabel} labelAction={labelAction} />;
   }
 
   return (
-    <Padded>
-      <BaselineAlignment />
-      <Flex justifyContent="space-between">
-        <Flex>
-          <Text fontWeight="semiBold">
-            <span>
-              {label}
-              {!isSingle && ` (${associationsLength})`}
-            </span>
-          </Text>
-          {labelIconformatted && (
-            <div style={{ lineHeight: '13px' }}>
-              <LabelIconWrapper title={labelIconformatted.title}>
-                {labelIconformatted.icon}
-              </LabelIconWrapper>
-            </div>
-          )}
-        </Flex>
-        {isSingle && link}
-      </Flex>
-      {!isEmpty(description) && (
-        <Padded top size="xs">
-          <BaselineAlignment />
-          <Text fontSize="sm" color="grey" lineHeight="12px" ellipsis>
-            {description}
-          </Text>
-        </Padded>
-      )}
-      <Padded top size="sm">
-        <BaselineAlignment />
-
-        <Component
-          addRelation={handleAddRelation}
-          components={{ ClearIndicator, DropdownIndicator, IndicatorSeparator, Option }}
-          displayNavigationLink={shouldDisplayRelationLink}
-          id={name}
-          isDisabled={isDisabled}
-          isLoading={isLoading}
-          isClearable
-          mainField={mainField}
-          move={moveRelation}
-          name={name}
-          options={filteredOptions}
-          onChange={handleChange}
-          onInputChange={handleInputChange}
-          onMenuClose={handleMenuClose}
-          onMenuOpen={handleMenuOpen}
-          onMenuScrollToBottom={handleMenuScrollToBottom}
-          onRemove={onRemoveRelation}
-          placeholder={
-            isEmpty(placeholder) ? (
-              <FormattedMessage id={getTrad('containers.Edit.addAnItem')} />
-            ) : (
-              placeholder
-            )
-          }
-          searchToPersist={searchToPersist}
-          styles={styles}
-          targetModel={targetModel}
-          value={value}
-        />
-      </Padded>
-      <div style={{ marginBottom: 28 }} />
-    </Padded>
+    <ComingSoonInput
+      intlLabel={formattedLabel}
+      labelAction={labelAction}
+      description={description}
+      name={name}
+    />
   );
+
+  // return (
+  //   <Padded>
+  //     <BaselineAlignment />
+  //     <Flex justifyContent="space-between">
+  //       <Flex>
+  //         <Text fontWeight="semiBold">
+  //           <span>
+  //             {label}
+  //             {!isSingle && ` (${associationsLength})`}
+  //           </span>
+  //         </Text>
+  //         {labelIconformatted && (
+  //           <div style={{ lineHeight: '13px' }}>
+  //             <LabelIconWrapper title={labelIconformatted.title}>
+  //               {labelIconformatted.icon}
+  //             </LabelIconWrapper>
+  //           </div>
+  //         )}
+  //       </Flex>
+  //       {isSingle && link}
+  //     </Flex>
+  //     {!isEmpty(description) && (
+  //       <Padded top size="xs">
+  //         <BaselineAlignment />
+  //         <Text fontSize="sm" color="grey" lineHeight="12px" ellipsis>
+  //           {description}
+  //         </Text>
+  //       </Padded>
+  //     )}
+  //     <Padded top size="sm">
+  //       <BaselineAlignment />
+
+  //       <Component
+  //         addRelation={handleAddRelation}
+  //         components={{ ClearIndicator, DropdownIndicator, IndicatorSeparator, Option }}
+  //         displayNavigationLink={shouldDisplayRelationLink}
+  //         id={name}
+  //         isDisabled={isDisabled}
+  //         isLoading={isLoading}
+  //         isClearable
+  //         mainField={mainField}
+  //         move={moveRelation}
+  //         name={name}
+  //         options={filteredOptions}
+  //         onChange={handleChange}
+  //         onInputChange={handleInputChange}
+  //         onMenuClose={handleMenuClose}
+  //         onMenuOpen={handleMenuOpen}
+  //         onMenuScrollToBottom={handleMenuScrollToBottom}
+  //         onRemove={onRemoveRelation}
+  //         placeholder={
+  //           isEmpty(placeholder) ? (
+  //             <FormattedMessage id={getTrad('containers.Edit.addAnItem')} />
+  //           ) : (
+  //             placeholder
+  //           )
+  //         }
+  //         searchToPersist={searchToPersist}
+  //         styles={styles}
+  //         targetModel={targetModel}
+  //         value={value}
+  //       />
+  //     </Padded>
+  //     <div style={{ marginBottom: 28 }} />
+  //   </Padded>
+  // );
 }
 
 SelectWrapper.defaultProps = {
-  editable: true,
+  // editable: true,
   description: '',
-  label: '',
-  labelIcon: null,
+  labelAction: null,
   isFieldAllowed: true,
-  placeholder: '',
+  // placeholder: null,
 };
 
 SelectWrapper.propTypes = {
-  editable: PropTypes.bool,
-  description: PropTypes.string,
-  label: PropTypes.string,
-  labelIcon: PropTypes.shape({
-    icon: PropTypes.node.isRequired,
-    title: PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      defaultMessage: PropTypes.string,
-    }),
+  // editable: PropTypes.bool,
+  description: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    defaultMessage: PropTypes.string.isRequired,
+    values: PropTypes.object,
   }),
+  intlLabel: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    defaultMessage: PropTypes.string.isRequired,
+    values: PropTypes.object,
+  }).isRequired,
+  labelAction: PropTypes.element,
   isCreatingEntry: PropTypes.bool.isRequired,
   isFieldAllowed: PropTypes.bool,
   isFieldReadable: PropTypes.bool.isRequired,
@@ -377,9 +419,13 @@ SelectWrapper.propTypes = {
     }).isRequired,
   }).isRequired,
   name: PropTypes.string.isRequired,
-  placeholder: PropTypes.string,
+  // placeholder: PropTypes.shape({
+  //   id: PropTypes.string.isRequired,
+  //   defaultMessage: PropTypes.string.isRequired,
+  //   values: PropTypes.object,
+  // }),
   relationType: PropTypes.string.isRequired,
-  targetModel: PropTypes.string.isRequired,
+  // targetModel: PropTypes.string.isRequired,
   queryInfos: PropTypes.shape({
     containsKey: PropTypes.string.isRequired,
     defaultParams: PropTypes.object,
