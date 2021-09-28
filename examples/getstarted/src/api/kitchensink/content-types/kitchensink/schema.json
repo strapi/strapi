@@ -5,7 +5,8 @@
     "displayName": "Kitchen Sink",
     "singularName": "kitchensink",
     "pluralName": "kitchensinks",
-    "description": ""
+    "description": "",
+    "name": "Kitchen Sink"
   },
   "options": {
     "draftAndPublish": true
@@ -100,7 +101,8 @@
     "dynamiczone": {
       "type": "dynamiczone",
       "components": [
-        "basic.simple"
+        "basic.simple",
+        "basic.kitchensink"
       ]
     },
     "one_way_tag": {
@@ -145,6 +147,11 @@
     "morph_to_many": {
       "type": "relation",
       "relation": "morphToMany"
+    },
+    "compo": {
+      "type": "component",
+      "repeatable": false,
+      "component": "basic.kitchensink"
     }
   }
 }

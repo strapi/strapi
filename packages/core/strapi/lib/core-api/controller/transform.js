@@ -49,6 +49,22 @@ const transformEntry = (entry, contentType) => {
       const data = transformEntry(property, strapi.contentType(attribute.target));
 
       attributeValues[key] = { data };
+    } else if (attribute && attribute.type === 'component') {
+      const { id, attributes } = transformEntry(property, strapi.components[attribute.component]);
+      attributeValues[key] = { id, ...attributes };
+    } else if (attribute && attribute.type === 'dynamiczone') {
+      if (Array.isArray(property)) {
+        attributeValues[key] = property.map(subProperty => {
+          const { id, attributes } = transformEntry(
+            subProperty,
+            strapi.components[subProperty.__component]
+          );
+
+          return { id, ...attributes };
+        });
+      } else {
+        attributeValues[key] = property;
+      }
     } else if (attribute && attribute.type === 'media') {
       const data = transformEntry(property, strapi.contentType('plugin::upload.file'));
 

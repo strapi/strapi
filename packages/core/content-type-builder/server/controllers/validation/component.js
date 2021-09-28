@@ -9,7 +9,7 @@ const { isValidCategoryName, isValidIcon } = require('./common');
 const createSchema = require('./model-schema');
 const { removeEmptyDefaults } = require('./data-transform');
 
-const VALID_RELATIONS = ['oneWay', 'manyWay'];
+const VALID_RELATIONS = ['oneToOne', 'oneToMany'];
 const VALID_TYPES = [...DEFAULT_TYPES, 'component'];
 
 const componentSchema = createSchema(VALID_TYPES, VALID_RELATIONS, {
