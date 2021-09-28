@@ -1,5 +1,5 @@
 // // TODO temp file
-// import documentationPlugin from '../../../../plugins/documentation/admin/src';
+import documentationPlugin from '../../../../plugins/documentation/admin/src';
 // import graphqlPlugin from '../../../../plugins/graphql/admin/src';
 // import sentryPlugin from '../../../../plugins/sentry/admin/src';
 import i18nPlugin from '../../../../plugins/i18n/strapi-admin';
@@ -14,7 +14,7 @@ const plugins = {
   '@strapi/plugin-email': emailPlugin,
   '@strapi/plugin-upload': uploadPlugin,
   '@strapi/plugin-users-permissions': usersPermissionsPlugin,
-  // '@strapi/plugin-documentation': documentationPlugin,
+  '@strapi/plugin-documentation': documentationPlugin,
   // '@strapi/plugin-graphql': graphqlPlugin,
   // '@strapi/plugin-sentry': sentryPlugin,
 };

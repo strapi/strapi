@@ -8,12 +8,15 @@
 import React from 'react';
 import { CheckPagePermissions } from '@strapi/helper-plugin';
 import pluginPermissions from '../../permissions';
-import HomePage from '../HomePage';
+// import HomePage from '../HomePage';
+
+const ComingSoon = () => <div>Coming soon</div>;
 
 function App() {
   return (
     <CheckPagePermissions permissions={pluginPermissions.main}>
-      <HomePage />
+      {/* <HomePage /> */}
+      <ComingSoon />
     </CheckPagePermissions>
   );
 }
