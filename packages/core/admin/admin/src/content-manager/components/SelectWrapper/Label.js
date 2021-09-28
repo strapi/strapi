@@ -12,17 +12,20 @@ const LabelAction = styled(Box)`
   }
 `;
 
-const Label = ({ intlLabel, id, labelAction, name, numberOfEntries, showNumberOfEntries }) => {
+const Label = ({ intlLabel, id, labelAction, link, name, numberOfEntries, isSingle }) => {
   const { formatMessage } = useIntl();
   const label = intlLabel?.id ? formatMessage(intlLabel) : name;
 
   return (
-    <Row>
-      <Text textColor="neutral800" htmlFor={id || name} small bold as="label">
-        {label}
-        {showNumberOfEntries && <>&nbsp;({numberOfEntries})</>}
-      </Text>
-      {labelAction && <LabelAction paddingLeft={1}>{labelAction}</LabelAction>}
+    <Row justifyContent="space-between">
+      <Row>
+        <Text textColor="neutral800" htmlFor={id || name} small bold as="label">
+          {label}
+          {!isSingle && <>&nbsp;({numberOfEntries})</>}
+        </Text>
+        {labelAction && <LabelAction paddingLeft={1}>{labelAction}</LabelAction>}
+      </Row>
+      {link}
     </Row>
   );
 };
@@ -30,8 +33,8 @@ const Label = ({ intlLabel, id, labelAction, name, numberOfEntries, showNumberOf
 Label.defaultProps = {
   id: undefined,
   labelAction: undefined,
+  link: null,
   numberOfEntries: 0,
-  showNumberOfEntries: false,
 };
 
 Label.propTypes = {
@@ -41,10 +44,11 @@ Label.propTypes = {
     defaultMessage: PropTypes.string.isRequired,
     values: PropTypes.object,
   }).isRequired,
+  isSingle: PropTypes.bool.isRequired,
   labelAction: PropTypes.element,
+  link: PropTypes.element,
   name: PropTypes.string.isRequired,
   numberOfEntries: PropTypes.number,
-  showNumberOfEntries: PropTypes.bool,
 };
 
 export default Label;

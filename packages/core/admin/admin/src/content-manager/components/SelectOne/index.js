@@ -22,7 +22,10 @@ function SelectOne({
 }) {
   return (
     <Select
-      components={{ ...components, SingleValue }}
+      components={{
+        ...components,
+        SingleValue,
+      }}
       id={name}
       isClearable
       isDisabled={isDisabled}
@@ -43,6 +46,7 @@ function SelectOne({
 
 SelectOne.defaultProps = {
   components: {},
+  placeholder: null,
   value: null,
 };
 
@@ -63,7 +67,10 @@ SelectOne.propTypes = {
   onMenuOpen: PropTypes.func.isRequired,
   onMenuScrollToBottom: PropTypes.func.isRequired,
   options: PropTypes.array.isRequired,
-  placeholder: PropTypes.node.isRequired,
+  placeholder: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    defaultMessage: PropTypes.string.isRequired,
+  }),
   styles: PropTypes.object.isRequired,
   value: PropTypes.object,
 };

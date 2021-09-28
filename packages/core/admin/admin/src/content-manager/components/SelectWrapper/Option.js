@@ -4,12 +4,18 @@ import { components } from 'react-select';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import { get, has, isEmpty } from 'lodash';
-import { Flex, Text } from '@buffetjs/core';
-import { RelationDPState } from '@strapi/helper-plugin';
-import { getDisplayedValue, getTrad } from '../../utils';
+import { Row } from '@strapi/parts/Row';
+import { Text } from '@strapi/parts/Text';
+import { pxToRem } from '@strapi/helper-plugin';
+import { getTrad } from '../../utils';
 
-const TextGrow = styled(Text)`
-  flex-grow: 2;
+const StyledBullet = styled.div`
+  width: ${pxToRem(6)};
+  height: ${pxToRem(6)};
+  margin-right: ${({ theme }) => theme.spaces[2]};
+  background: ${({ theme, isDraft }) => theme.colors[isDraft ? 'secondary700' : 'success200']};
+  border-radius: 50%;
+  cursor: pointer;
 `;
 
 const Option = props => {
@@ -17,42 +23,31 @@ const Option = props => {
   const Component = components.Option;
   const hasDraftAndPublish = has(get(props, 'data.value'), 'publishedAt');
   const isDraft = isEmpty(get(props, 'data.value.publishedAt'));
-  const titleLabelID = isDraft
-    ? 'components.Select.draft-info-title'
-    : 'components.Select.publish-info-title';
-  const title = formatMessage({ id: getTrad(titleLabelID) });
-  const fontWeight = props.isFocused ? 'bold' : 'regular';
-  const mainField = get(props, ['selectProps', 'mainField'], {});
-  const value = getDisplayedValue(mainField.schema.type, props.label, mainField.name);
 
   if (hasDraftAndPublish) {
-    return (
-      <Component {...props}>
-        <Flex>
-          <RelationDPState
-            marginLeft="0"
-            marginTop="1px"
-            marginRight="10px"
-            isDraft={isDraft}
-            marginBottom="0"
-            title={title}
-          />
+    if (hasDraftAndPublish) {
+      const draftMessage = {
+        id: getTrad('components.Select.draft-info-title'),
+        defaultMessage: 'State: Draft',
+      };
+      const publishedMessage = {
+        id: getTrad('components.Select.publish-info-title'),
+        defaultMessage: 'State: Published',
+      };
+      const title = isDraft ? formatMessage(draftMessage) : formatMessage(publishedMessage);
 
-          <TextGrow ellipsis as="div" fontWeight={fontWeight} title={value}>
-            {value}&nbsp;
-          </TextGrow>
-        </Flex>
-      </Component>
-    );
+      return (
+        <Component {...props}>
+          <Row>
+            <StyledBullet title={title} isDraft={isDraft} />
+            <Text ellipsis>{props.label || '-'}</Text>
+          </Row>
+        </Component>
+      );
+    }
   }
 
-  return (
-    <Component {...props}>
-      <Text ellipsis fontWeight={fontWeight} title={value}>
-        {value}
-      </Text>
-    </Component>
-  );
+  return <Component {...props}>{props.label || '-'}</Component>;
 };
 
 Option.defaultProps = {
