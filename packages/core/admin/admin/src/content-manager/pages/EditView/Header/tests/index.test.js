@@ -150,7 +150,7 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         background: #4945ff;
       }
 
-      .c12 .sc-cxNHIi {
+      .c12 .sc-cxFLGX {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;

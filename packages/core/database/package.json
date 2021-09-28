@@ -34,8 +34,5 @@
     "knex": "0.95.6",
     "lodash": "4.17.21",
     "umzug": "2.3.0"
-  },
-  "devDependencies": {
-    "sqlite3": "5.0.2"
   }
 }

@@ -1,6 +1,6 @@
 import React, { memo, useRef, useState } from 'react';
 import { useIntl } from 'react-intl';
-import { useHistory } from 'react-router';
+import { useHistory } from 'react-router-dom';
 import get from 'lodash/get';
 import isEqual from 'lodash/isEqual';
 import isEmpty from 'lodash/isEmpty';
@@ -307,5 +307,8 @@ Header.propTypes = {
 
 const Memoized = memo(Header, isEqualFastCompare);
 
-export default connect(Memoized, select);
+export default connect(
+  Memoized,
+  select
+);
 export { Header };

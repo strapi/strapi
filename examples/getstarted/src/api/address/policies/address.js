@@ -1,3 +1,3 @@
-module.exports = (ctx, next) => {
-  return next();
+module.exports = ctx => {
+  return true;
 };

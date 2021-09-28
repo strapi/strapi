@@ -180,7 +180,7 @@ describe('FromComputerForm', () => {
         background: #4945ff;
       }
 
-      .c9 .sc-iiBnNu {
+      .c9 .sc-iitrMj {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -241,7 +241,7 @@ describe('FromComputerForm', () => {
         background: #ffffff;
       }
 
-      .c18 .sc-iiBnNu {
+      .c18 .sc-iitrMj {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;

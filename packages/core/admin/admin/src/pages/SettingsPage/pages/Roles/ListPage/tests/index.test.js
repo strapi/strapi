@@ -46,6 +46,7 @@ describe('<ListPage />', () => {
       isLoading: true,
       getData: jest.fn(),
     }));
+
     const history = createMemoryHistory();
     const App = makeApp(history);
 

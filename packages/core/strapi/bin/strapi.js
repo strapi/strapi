@@ -58,10 +58,7 @@ const getLocalScript = name => (...args) => {
 };
 
 // Initial program setup
-program
-  .storeOptionsAsProperties(false)
-  .passCommandToAction(false)
-  .allowUnknownOption(true);
+program.storeOptionsAsProperties(false).allowUnknownOption(true);
 
 program.helpOption('-h, --help', 'Display help for command');
 program.addHelpCommand('help [command]', 'Display help for command');

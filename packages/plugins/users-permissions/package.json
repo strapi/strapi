@@ -28,7 +28,7 @@
     "react-intl": "5.20.2",
     "react-redux": "7.2.3",
     "react-router": "^5.2.0",
-    "react-router-dom": "^5.0.0",
+    "react-router-dom": "5.2.0",
     "reactstrap": "8.4.1",
     "redux-saga": "^0.16.0",
     "request": "^2.83.0",

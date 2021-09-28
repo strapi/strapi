@@ -48,9 +48,9 @@ const sanitizeEntity = (dataSource, options) => {
     }
 
     // Relations
-    const isRelation = attribute && attribute.type === 'relation';
+    const isRelation = attribute && ['relation', 'component'].includes(attribute.type);
     if (isRelation) {
-      const relation = attribute && attribute.target;
+      const relation = attribute && (attribute.target || attribute.component);
 
       if (_.isNil(value)) {
         return { ...acc, [key]: value };
@@ -128,18 +128,20 @@ const getAllowedFields = ({ includeFields, model, isOutput }) => {
 
   const nonVisibleWritableAttributes = _.intersection(writableAttributes, nonVisibleAttributes);
 
-  return _.concat(
-    includeFields || [],
-    ...(isOutput
-      ? [
-          STATIC_FIELDS,
-          CREATED_AT_ATTRIBUTE,
-          UPDATED_AT_ATTRIBUTE,
-          COMPONENT_FIELDS,
-          ...nonWritableAttributes,
-          ...nonVisibleAttributes,
-        ]
-      : [STATIC_FIELDS, COMPONENT_FIELDS, ...nonVisibleWritableAttributes])
+  return _.uniq(
+    _.concat(
+      includeFields || [],
+      ...(isOutput
+        ? [
+            STATIC_FIELDS,
+            CREATED_AT_ATTRIBUTE,
+            UPDATED_AT_ATTRIBUTE,
+            COMPONENT_FIELDS,
+            ...nonWritableAttributes,
+            ...nonVisibleAttributes,
+          ]
+        : [STATIC_FIELDS, COMPONENT_FIELDS, ...nonVisibleWritableAttributes])
+    )
   );
 };
 

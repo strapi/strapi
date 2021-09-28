@@ -17,7 +17,7 @@ import { TableLabel } from '@strapi/parts/Text';
 import { Main } from '@strapi/parts/Main';
 import { VisuallyHidden } from '@strapi/parts/VisuallyHidden';
 import { useIntl } from 'react-intl';
-import { useHistory } from 'react-router';
+import { useHistory } from 'react-router-dom';
 import RoleRow from './components/RoleRow';
 import EmptyRole from './components/EmptyRole';
 import UpgradePlanModal from '../../../../../components/UpgradePlanModal ';

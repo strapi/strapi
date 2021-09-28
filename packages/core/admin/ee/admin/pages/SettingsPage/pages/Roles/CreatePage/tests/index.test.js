@@ -7,7 +7,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
-import { Router, Switch, Route } from 'react-router';
+import { Router, Switch, Route } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import moment from 'moment';
 import Theme from '../../../../../../../../admin/src/components/Theme';

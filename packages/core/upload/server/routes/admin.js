@@ -6,7 +6,7 @@ module.exports = {
     {
       method: 'GET',
       path: '/settings',
-      handler: 'upload.getSettings',
+      handler: 'admin-api.getSettings',
       config: {
         policies: [
           'admin::isAuthenticatedAdmin',
@@ -22,7 +22,7 @@ module.exports = {
     {
       method: 'PUT',
       path: '/settings',
-      handler: 'upload.updateSettings',
+      handler: 'admin-api.updateSettings',
       config: {
         policies: [
           'admin::isAuthenticatedAdmin',
@@ -38,7 +38,7 @@ module.exports = {
     {
       method: 'POST',
       path: '/',
-      handler: 'upload.upload',
+      handler: 'admin-api.upload',
       config: {
         policies: ['admin::isAuthenticatedAdmin'],
       },
@@ -46,7 +46,7 @@ module.exports = {
     {
       method: 'GET',
       path: '/files/count',
-      handler: 'upload.count',
+      handler: 'admin-api.count',
       config: {
         policies: [
           'admin::isAuthenticatedAdmin',
@@ -62,7 +62,7 @@ module.exports = {
     {
       method: 'GET',
       path: '/files',
-      handler: 'upload.find',
+      handler: 'admin-api.find',
       config: {
         policies: [
           'admin::isAuthenticatedAdmin',
@@ -78,7 +78,7 @@ module.exports = {
     {
       method: 'GET',
       path: '/files/:id',
-      handler: 'upload.findOne',
+      handler: 'admin-api.findOne',
       config: {
         policies: [
           'admin::isAuthenticatedAdmin',
@@ -89,20 +89,12 @@ module.exports = {
             },
           },
         ],
-      },
-    },
-    {
-      method: 'GET',
-      path: '/search/:id',
-      handler: 'upload.search',
-      config: {
-        policies: ['admin::isAuthenticatedAdmin'],
       },
     },
     {
       method: 'DELETE',
       path: '/files/:id',
-      handler: 'upload.destroy',
+      handler: 'admin-api.destroy',
       config: {
         policies: [
           'admin::isAuthenticatedAdmin',

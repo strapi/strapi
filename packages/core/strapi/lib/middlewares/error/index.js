@@ -6,7 +6,7 @@
 
 // Public node modules.
 const _ = require('lodash');
-const Boom = require('boom');
+const Boom = require('@hapi/boom');
 const delegate = require('delegates');
 
 const boomMethods = [

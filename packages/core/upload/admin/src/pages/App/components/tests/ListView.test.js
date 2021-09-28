@@ -1,7 +1,7 @@
 import React from 'react';
 import { ThemeProvider, lightTheme } from '@strapi/parts';
 import { render as renderTL } from '@testing-library/react';
-import { MemoryRouter } from 'react-router';
+import { MemoryRouter } from 'react-router-dom';
 import { ListView } from '../ListView';
 import en from '../../../../translations/en.json';
 
@@ -882,7 +882,7 @@ describe('MediaLibrary / ListView', () => {
             </div>
             <nav
               aria-label="pagination"
-              class="sc-fExJIe"
+              class="sc-fEpNGT"
             >
               <ul
                 class="c43 c44"

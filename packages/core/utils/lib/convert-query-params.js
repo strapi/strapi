@@ -6,6 +6,7 @@
  */
 
 const _ = require('lodash');
+const parseType = require('./parse-type');
 
 const QUERY_OPERATORS = ['_where', '_or', '_and'];
 
@@ -27,6 +28,10 @@ const validateOrder = order => {
   if (!['asc', 'desc'].includes(order.toLocaleLowerCase())) {
     throw new InvalidOrderError();
   }
+};
+
+const convertCountQueryParams = countQuery => {
+  return parseType({ type: 'boolean', value: countQuery });
 };
 
 /**
@@ -161,7 +166,7 @@ const convertNestedPopulate = subPopulate => {
   }
 
   // TODO: We will need to consider a way to add limitation / pagination
-  const { sort, filters, fields, populate } = subPopulate;
+  const { sort, filters, fields, populate, count } = subPopulate;
 
   const query = {};
 
@@ -179,6 +184,10 @@ const convertNestedPopulate = subPopulate => {
 
   if (populate) {
     query.populate = convertPopulateQueryParams(populate);
+  }
+
+  if (count) {
+    query.count = convertCountQueryParams(count);
   }
 
   return query;
@@ -206,23 +215,6 @@ const convertFieldsQueryParams = (fields, depth = 0) => {
 // NOTE: We could validate the parameters are on existing / non private attributes
 const convertFiltersQueryParams = filters => filters;
 
-// TODO: migrate
-const VALID_REST_OPERATORS = [
-  'eq',
-  'ne',
-  'in',
-  'nin',
-  'contains',
-  'ncontains',
-  'containss',
-  'ncontainss',
-  'lt',
-  'lte',
-  'gt',
-  'gte',
-  'null',
-];
-
 module.exports = {
   convertSortQueryParams,
   convertStartQueryParams,
@@ -230,6 +222,5 @@ module.exports = {
   convertPopulateQueryParams,
   convertFiltersQueryParams,
   convertFieldsQueryParams,
-  VALID_REST_OPERATORS,
   QUERY_OPERATORS,
 };

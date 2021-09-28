@@ -1,5 +1,6 @@
 'use strict';
 
+const { toLower } = require('lodash/fp');
 const { Strategy: LocalStrategy } = require('passport-local');
 
 const createLocalStrategy = strapi => {
@@ -11,7 +12,7 @@ const createLocalStrategy = strapi => {
     },
     (email, password, done) => {
       return strapi.admin.services.auth
-        .checkCredentials({ email, password })
+        .checkCredentials({ email: toLower(email), password })
         .then(([error, user, message]) => done(error, user, message))
         .catch(error => done(error));
     }
