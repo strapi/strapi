@@ -48,7 +48,7 @@ const routeSchema = yup.object({
         .array()
         .of(policyOrMiddlewareSchema)
         .notRequired(),
-      middlwares: yup
+      middlewares: yup
         .array()
         .of(policyOrMiddlewareSchema)
         .notRequired(),

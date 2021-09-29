@@ -9,6 +9,7 @@ const getDirs = root => ({
   components: join(root, 'src', 'components'),
   extensions: join(root, 'src', 'extensions'),
   policies: join(root, 'src', 'policies'),
+  middlewares: join(root, 'src', 'middlewares'),
   config: join(root, 'config'),
 });
 

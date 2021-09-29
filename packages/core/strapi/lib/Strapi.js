@@ -9,7 +9,6 @@ const loadConfiguration = require('./core/app-configuration');
 
 const { createContainer } = require('./container');
 const utils = require('./utils');
-const initializeMiddlewares = require('./middlewares');
 const createStrapiFs = require('./services/fs');
 const createEventHub = require('./services/event-hub');
 const { createServer } = require('./services/server');
@@ -83,44 +82,60 @@ class Strapi {
     return ee({ dir: this.dirs.root, logger: this.log });
   }
 
+  get services() {
+    return this.container.get('services').getAll();
+  }
+
   service(uid) {
     return this.container.get('services').get(uid);
+  }
+
+  get controllers() {
+    return this.container.get('controllers').getAll();
   }
 
   controller(uid) {
     return this.container.get('controllers').get(uid);
   }
 
+  get contentTypes() {
+    return this.container.get('content-types').getAll();
+  }
+
   contentType(name) {
     return this.container.get('content-types').get(name);
   }
 
-  get contentTypes() {
-    return this.container.get('content-types').getAll();
+  get policies() {
+    return this.container.get('policies').getAll();
   }
 
   policy(name) {
     return this.container.get('policies').get(name);
   }
 
-  middleware(name) {
-    return this.container.get('middlewares').get(name);
+  get middlewares() {
+    return this.container.get('middlewares').getAll();
   }
 
-  plugin(name) {
-    return this.container.get('plugins').get(name);
+  middleware(name) {
+    return this.container.get('middlewares').get(name);
   }
 
   get plugins() {
     return this.container.get('plugins').getAll();
   }
 
-  hook(name) {
-    return this.container.get('hooks').get(name);
+  plugin(name) {
+    return this.container.get('plugins').get(name);
   }
 
   get hooks() {
-    return this.container.get('hooks');
+    return this.container.get('hooks').getAll();
+  }
+
+  hook(name) {
+    return this.container.get('hooks').get(name);
   }
 
   // api(name) {
@@ -280,7 +295,7 @@ class Strapi {
   }
 
   async loadMiddlewares() {
-    this.middleware = await loaders.loadMiddlewares(this);
+    await loaders.loadMiddlewares(this);
   }
 
   async loadApp() {
@@ -288,8 +303,8 @@ class Strapi {
   }
 
   registerInternalHooks() {
-    this.hooks.set('strapi::content-types.beforeSync', createAsyncParallelHook());
-    this.hooks.set('strapi::content-types.afterSync', createAsyncParallelHook());
+    this.container.get('hooks').set('strapi::content-types.beforeSync', createAsyncParallelHook());
+    this.container.get('hooks').set('strapi::content-types.afterSync', createAsyncParallelHook());
 
     this.hook('strapi::content-types.beforeSync').register(draftAndPublishSync.disable);
     this.hook('strapi::content-types.afterSync').register(draftAndPublishSync.enable);
@@ -377,8 +392,8 @@ class Strapi {
 
     await this.startWebhooks();
 
-    // Initialize middlewares.
-    await initializeMiddlewares(this);
+    await this.server.initMiddlewares();
+    await this.server.initRouting();
 
     await this.runLifecyclesFunctions(LIFECYCLES.BOOTSTRAP);
 
