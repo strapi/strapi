@@ -26,7 +26,7 @@ const createProvider = emailConfig => {
   return provider.init(emailConfig.providerOptions, emailConfig.settings);
 };
 
-module.exports = async () => {
+module.exports = async ({ strapi }) => {
   const emailConfig = strapi.config.get('plugin.email');
   strapi.plugin('email').provider = createProvider(emailConfig);
 

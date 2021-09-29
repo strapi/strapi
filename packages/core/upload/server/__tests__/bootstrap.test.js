@@ -38,7 +38,7 @@ describe('Upload plugin bootstrap function', () => {
       },
     };
 
-    await bootstrap();
+    await bootstrap({ strapi });
 
     expect(setStore).toHaveBeenCalledWith({
       value: {

@@ -15,7 +15,7 @@ const merge = mergeWith((a, b) => {
   }
 });
 
-module.exports = async strapi => {
+module.exports = async ({ strapi }) => {
   // Generate the GraphQL schema for the content API
   const schema = strapi
     .plugin('graphql')

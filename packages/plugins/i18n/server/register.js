@@ -9,7 +9,7 @@ const { getService } = require('./utils');
 const enableContentType = require('./migrations/content-type/enable');
 const disableContentType = require('./migrations/content-type/disable');
 
-module.exports = strapi => {
+module.exports = ({ strapi }) => {
   extendLocalizedContentTypes(strapi);
   addContentManagerLocaleMiddleware(strapi);
   addContentTypeSyncHooks(strapi);

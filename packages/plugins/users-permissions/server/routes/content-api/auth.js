@@ -1,12 +1,14 @@
 'use strict';
 
+const { rateLimit } = require('../../middlewares');
+
 module.exports = [
   {
     method: 'GET',
     path: '/connect/(.*)',
     handler: 'auth.connect',
     config: {
-      policies: ['plugin::users-permissions.rateLimit'],
+      middlewares: [rateLimit],
       prefix: '',
     },
   },
@@ -15,7 +17,7 @@ module.exports = [
     path: '/auth/local',
     handler: 'auth.callback',
     config: {
-      policies: ['plugin::users-permissions.rateLimit'],
+      middlewares: [rateLimit],
       prefix: '',
     },
   },
@@ -24,7 +26,7 @@ module.exports = [
     path: '/auth/local/register',
     handler: 'auth.register',
     config: {
-      policies: ['plugin::users-permissions.rateLimit'],
+      middlewares: [rateLimit],
       prefix: '',
     },
   },
@@ -41,7 +43,7 @@ module.exports = [
     path: '/auth/forgot-password',
     handler: 'auth.forgotPassword',
     config: {
-      policies: ['plugin::users-permissions.rateLimit'],
+      middlewares: [rateLimit],
       prefix: '',
     },
   },
@@ -50,7 +52,7 @@ module.exports = [
     path: '/auth/reset-password',
     handler: 'auth.resetPassword',
     config: {
-      policies: ['plugin::users-permissions.rateLimit'],
+      middlewares: [rateLimit],
       prefix: '',
     },
   },
