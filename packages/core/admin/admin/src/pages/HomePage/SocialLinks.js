@@ -20,6 +20,50 @@ import Twitter from '@strapi/icons/Twitter';
 import Medium from '@strapi/icons/Medium';
 import Discourse from '@strapi/icons/Discourse';
 
+const StyledReddit = styled(Reddit)`
+  > path:first-child {
+    fill: #ff4500;
+  }
+  > path:last-child {
+    fill: ${({ theme }) => theme.colors.neutral0};
+  }
+`;
+const StyledMedium = styled(Medium)`
+  > path:first-child {
+    fill: ${({ theme }) => theme.colors.neutral800};
+  }
+  > path:last-child {
+    fill: ${({ theme }) => theme.colors.neutral0};
+  }
+`;
+
+const StyledTwitter = styled(Twitter)`
+  path {
+    fill: #1da1f2 !important;
+  }
+`;
+
+const StyledDiscourse = styled(Discourse)`
+  > path:first-child {
+    fill: #231f20;
+  }
+  > path:nth-child(2) {
+    fill: #fff9ae;
+  }
+  > path:nth-child(3) {
+    fill: #00aeef;
+  }
+  > path:nth-child(4) {
+    fill: #00a94f;
+  }
+  > path:nth-child(4) {
+    fill: #f15d22;
+  }
+  > path:nth-child(5) {
+    fill: #e31b23;
+  }
+`;
+
 const socialLinks = [
   {
     name: 'Github',
@@ -36,25 +80,25 @@ const socialLinks = [
   {
     name: 'Reddit',
     link: 'https://www.reddit.com/r/Strapi/',
-    icon: <Reddit />,
+    icon: <StyledReddit />,
     alt: 'reddit',
   },
   {
     name: 'Twitter',
     link: 'https://twitter.com/strapijs',
-    icon: <Twitter />,
+    icon: <StyledTwitter />,
     alt: 'twitter',
   },
   {
     name: 'Medium',
     link: 'https://medium.com/@strapi',
-    icon: <Medium />,
+    icon: <StyledMedium />,
     alt: 'medium',
   },
   {
     name: 'Forum',
     link: 'https://forum.strapi.io',
-    icon: <Discourse />,
+    icon: <StyledDiscourse />,
     alt: 'forum',
   },
 ];

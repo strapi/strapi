@@ -520,6 +520,50 @@ describe('Homepage', () => {
         display: flex;
       }
 
+      .c55 > path:first-child {
+        fill: #ff4500;
+      }
+
+      .c55 > path:last-child {
+        fill: #ffffff;
+      }
+
+      .c57 > path:first-child {
+        fill: #32324d;
+      }
+
+      .c57 > path:last-child {
+        fill: #ffffff;
+      }
+
+      .c56 path {
+        fill: #1da1f2 !important;
+      }
+
+      .c58 > path:first-child {
+        fill: #231f20;
+      }
+
+      .c58 > path:nth-child(2) {
+        fill: #fff9ae;
+      }
+
+      .c58 > path:nth-child(3) {
+        fill: #00aeef;
+      }
+
+      .c58 > path:nth-child(4) {
+        fill: #00a94f;
+      }
+
+      .c58 > path:nth-child(4) {
+        fill: #f15d22;
+      }
+
+      .c58 > path:nth-child(5) {
+        fill: #e31b23;
+      }
+
       .c49 {
         display: -webkit-box;
         display: -webkit-flex;
@@ -1087,6 +1131,7 @@ describe('Homepage', () => {
                                 class="c50 c51"
                               >
                                 <svg
+                                  class="c55"
                                   fill="none"
                                   height="1em"
                                   viewBox="0 0 24 24"
@@ -1129,6 +1174,7 @@ describe('Homepage', () => {
                                 class="c50 c51"
                               >
                                 <svg
+                                  class="c56"
                                   fill="none"
                                   height="1em"
                                   viewBox="0 0 24 24"
@@ -1181,6 +1227,7 @@ describe('Homepage', () => {
                                 class="c50 c51"
                               >
                                 <svg
+                                  class="c57"
                                   fill="none"
                                   height="1em"
                                   viewBox="0 0 24 24"
@@ -1251,6 +1298,7 @@ describe('Homepage', () => {
                                 class="c50 c51"
                               >
                                 <svg
+                                  class="c58"
                                   fill="none"
                                   height="1em"
                                   viewBox="0 0 24 24"
