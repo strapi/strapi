@@ -23,4 +23,5 @@ module.exports = [
       foo: 'bar',
     },
   },
+  'api::address.address-middleware',
 ];

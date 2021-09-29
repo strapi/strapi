@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * Programmatic upload middleware. We do not want to export it
+ * Programmatic sentry middleware. We do not want to expose it in the plugin
  * @param {{ strapi: import('@strapi/strapi').Strapi }}
  */
 module.exports = ({ strapi }) => {

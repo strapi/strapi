@@ -12,6 +12,10 @@ const createAPI = (strapi, opts = {}) => {
   const routeManager = createRouteManager(strapi, { type });
 
   return {
+    listRoutes() {
+      return [...api.stack];
+    },
+
     use(fn) {
       api.use(fn);
       return this;
