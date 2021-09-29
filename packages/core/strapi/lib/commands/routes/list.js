@@ -13,7 +13,7 @@ module.exports = async function() {
 
   const infoTable = new CLITable({
     head: [chalk.blue('Method'), chalk.blue('Path')],
-    colWidths: [20, 80],
+    colWidths: [20],
   });
 
   list
