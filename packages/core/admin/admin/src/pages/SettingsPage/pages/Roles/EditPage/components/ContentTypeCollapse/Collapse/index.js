@@ -9,7 +9,6 @@ import get from 'lodash/get';
 import omit from 'lodash/omit';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
-import { Text } from '@strapi/parts/Text';
 import IS_DISABLED from 'ee_else_ce/pages/SettingsPage/pages/Roles/EditPage/components/ContentTypeCollapse/Collapse/utils/constants';
 import { usePermissionsDataManager } from '../../../../../../../../hooks';
 import ConditionsButton from '../../ConditionsButton';
@@ -19,6 +18,7 @@ import { cellWidth, rowHeight } from '../../Permissions/utils/constants';
 import RowLabelWithCheckbox from '../../RowLabelWithCheckbox';
 import { getCheckboxState } from '../../utils';
 import generateCheckboxesActions from './utils/generateCheckboxesActions';
+import activeStyle from '../utils/activeStyle';
 
 const activeRowStyle = (theme, isActive) => `
   ${Wrapper} {
@@ -32,12 +32,8 @@ const activeRowStyle = (theme, isActive) => `
   ${ConditionsButton} {
     display: block;
   }
-
   &:hover {
-    ${Text} {
-      color: ${theme.colors.primary600};
-      font-weight: ${theme.fontWeights.bold};
-    }
+   ${activeStyle(theme)}
   }
   
 `;
