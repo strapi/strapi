@@ -532,15 +532,15 @@ describe('Homepage', () => {
         fill: #ffffff;
       }
 
-      .c58 > path:first-child {
+      .c59 > path:first-child {
         fill: #8e75ff;
       }
 
-      .c58 > path:nth-child(2) {
+      .c59 > path:nth-child(2) {
         fill: #8e75ff;
       }
 
-      .c58 > path:nth-child(3) {
+      .c59 > path:nth-child(3) {
         fill: #8e75ff;
       }
 
@@ -548,27 +548,27 @@ describe('Homepage', () => {
         fill: #1da1f2 !important;
       }
 
-      .c59 > path:first-child {
+      .c58 > path:first-child {
         fill: #231f20;
       }
 
-      .c59 > path:nth-child(2) {
+      .c58 > path:nth-child(2) {
         fill: #fff9ae;
       }
 
-      .c59 > path:nth-child(3) {
+      .c58 > path:nth-child(3) {
         fill: #00aeef;
       }
 
-      .c59 > path:nth-child(4) {
+      .c58 > path:nth-child(4) {
         fill: #00a94f;
       }
 
-      .c59 > path:nth-child(5) {
+      .c58 > path:nth-child(5) {
         fill: #f15d22;
       }
 
-      .c59 > path:nth-child(6) {
+      .c58 > path:nth-child(6) {
         fill: #e31b23;
       }
 
@@ -1227,59 +1227,6 @@ describe('Homepage', () => {
                             <a
                               aria-disabled="false"
                               class="c47 c48 c49"
-                              href="https://strapi.io/blog"
-                              rel="noreferrer noopener"
-                              target="_blank"
-                            >
-                              <div
-                                aria-hidden="true"
-                                class="c50 c51"
-                              >
-                                <svg
-                                  class="c58"
-                                  fill="none"
-                                  height="1em"
-                                  viewBox="0 0 24 24"
-                                  width="1em"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path
-                                    clip-rule="evenodd"
-                                    d="M23.497 0H7.68v8.035h7.783c.278 0 .503.224.503.502v7.783H24V.502A.502.502 0 0023.497 0z"
-                                    fill="#8E75FF"
-                                    fill-rule="evenodd"
-                                  />
-                                  <path
-                                    clip-rule="evenodd"
-                                    d="M7.68 0v8.035H.252a.25.25 0 01-.178-.429L7.68 0zM16.395 23.926a.251.251 0 01-.43-.178V16.32H24l-7.605 7.606z"
-                                    fill="#8E75FF"
-                                    fill-rule="evenodd"
-                                    opacity="0.405"
-                                  />
-                                  <path
-                                    d="M7.68 8.035h8.034c.14 0 .252.112.252.25v8.035H8.183a.502.502 0 01-.503-.502V8.035z"
-                                    fill="#8E75FF"
-                                    opacity="0.405"
-                                  />
-                                </svg>
-                              </div>
-                              <span
-                                class="c52 c53 c54"
-                              >
-                                Strapi blog
-                              </span>
-                            </a>
-                          </div>
-                        </div>
-                        <div
-                          class="c46"
-                        >
-                          <div
-                            class=""
-                          >
-                            <a
-                              aria-disabled="false"
-                              class="c47 c48 c49"
                               href="https://forum.strapi.io"
                               rel="noreferrer noopener"
                               target="_blank"
@@ -1289,7 +1236,7 @@ describe('Homepage', () => {
                                 class="c50 c51"
                               >
                                 <svg
-                                  class="c59"
+                                  class="c58"
                                   fill="none"
                                   height="1em"
                                   viewBox="0 0 24 24"
@@ -1339,7 +1286,7 @@ describe('Homepage', () => {
                             <a
                               aria-disabled="false"
                               class="c47 c48 c49"
-                              href="https://strapi.io/careers"
+                              href="https://strapi.io/blog?utm_source=referral&utm_medium=admin&utm_campaign=career%20page"
                               rel="noreferrer noopener"
                               target="_blank"
                             >
@@ -1348,7 +1295,7 @@ describe('Homepage', () => {
                                 class="c50 c51"
                               >
                                 <svg
-                                  class="c58"
+                                  class="c59"
                                   fill="none"
                                   height="1em"
                                   viewBox="0 0 24 24"
@@ -1378,7 +1325,60 @@ describe('Homepage', () => {
                               <span
                                 class="c52 c53 c54"
                               >
-                                Career
+                                Blog
+                              </span>
+                            </a>
+                          </div>
+                        </div>
+                        <div
+                          class="c46"
+                        >
+                          <div
+                            class=""
+                          >
+                            <a
+                              aria-disabled="false"
+                              class="c47 c48 c49"
+                              href="https://strapi.io/careers?utm_source=referral&utm_medium=admin&utm_campaign=blog"
+                              rel="noreferrer noopener"
+                              target="_blank"
+                            >
+                              <div
+                                aria-hidden="true"
+                                class="c50 c51"
+                              >
+                                <svg
+                                  class="c59"
+                                  fill="none"
+                                  height="1em"
+                                  viewBox="0 0 24 24"
+                                  width="1em"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    clip-rule="evenodd"
+                                    d="M23.497 0H7.68v8.035h7.783c.278 0 .503.224.503.502v7.783H24V.502A.502.502 0 0023.497 0z"
+                                    fill="#8E75FF"
+                                    fill-rule="evenodd"
+                                  />
+                                  <path
+                                    clip-rule="evenodd"
+                                    d="M7.68 0v8.035H.252a.25.25 0 01-.178-.429L7.68 0zM16.395 23.926a.251.251 0 01-.43-.178V16.32H24l-7.605 7.606z"
+                                    fill="#8E75FF"
+                                    fill-rule="evenodd"
+                                    opacity="0.405"
+                                  />
+                                  <path
+                                    d="M7.68 8.035h8.034c.14 0 .252.112.252.25v8.035H8.183a.502.502 0 01-.503-.502V8.035z"
+                                    fill="#8E75FF"
+                                    opacity="0.405"
+                                  />
+                                </svg>
+                              </div>
+                              <span
+                                class="c52 c53 c54"
+                              >
+                                We are hiring!
                               </span>
                             </a>
                           </div>

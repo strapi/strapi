@@ -99,20 +99,20 @@ const socialLinks = [
     alt: 'twitter',
   },
   {
-    name: 'Strapi blog',
-    link: 'https://strapi.io/blog',
-    icon: <StyledStrapi />,
-    alt: 'strapi-blog',
-  },
-  {
     name: 'Forum',
     link: 'https://forum.strapi.io',
     icon: <StyledDiscourse />,
     alt: 'forum',
   },
   {
-    name: 'Career',
-    link: 'https://strapi.io/careers',
+    name: 'Blog',
+    link: 'https://strapi.io/blog?utm_source=referral&utm_medium=admin&utm_campaign=career%20page',
+    icon: <StyledStrapi />,
+    alt: 'blog',
+  },
+  {
+    name: 'We are hiring!',
+    link: 'https://strapi.io/careers?utm_source=referral&utm_medium=admin&utm_campaign=blog',
     icon: <StyledStrapi />,
     alt: 'career',
   },
