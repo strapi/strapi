@@ -566,17 +566,14 @@ describe('Admin | containers | RoleEditPage', () => {
 
       .c20 {
         grid-column: span 6;
-        word-break: break-all;
       }
 
       .c35 {
         grid-column: span 7;
-        word-break: break-all;
       }
 
       .c53 {
         grid-column: span 5;
-        word-break: break-all;
       }
 
       .c47 {

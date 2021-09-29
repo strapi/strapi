@@ -609,7 +609,6 @@ describe('ADMIN | Pages | Profile page', () => {
 
       .c21 {
         grid-column: span 6;
-        word-break: break-all;
       }
 
       .c32 svg {

@@ -341,17 +341,14 @@ describe('Homepage', () => {
 
       .c7 {
         grid-column: span 8;
-        word-break: break-all;
       }
 
       .c33 {
         grid-column: span 4;
-        word-break: break-all;
       }
 
       .c46 {
         grid-column: span 6;
-        word-break: break-all;
       }
 
       .c53 {

@@ -677,17 +677,14 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
 
       .c20 {
         grid-column: span 6;
-        word-break: break-all;
       }
 
       .c34 {
         grid-column: span 12;
-        word-break: break-all;
       }
 
       .c50 {
         grid-column: span 6;
-        word-break: break-all;
       }
 
       @media (max-width:68.75rem) {

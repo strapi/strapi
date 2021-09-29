@@ -184,7 +184,6 @@ describe('Application page', () => {
 
       .c16 {
         grid-column: span 6;
-        word-break: break-all;
       }
 
       .c21 {

@@ -472,7 +472,6 @@ describe('PendingAssetStep', () => {
 
       .c19 {
         grid-column: span 4;
-        word-break: break-all;
       }
 
       .c20 {

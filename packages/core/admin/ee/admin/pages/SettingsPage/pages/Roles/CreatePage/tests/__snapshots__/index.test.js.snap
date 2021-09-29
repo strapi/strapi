@@ -511,7 +511,6 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
 
 .c23 {
   grid-column: span 6;
-  word-break: break-all;
 }
 
 .c0 {

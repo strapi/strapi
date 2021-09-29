@@ -53,7 +53,7 @@ describe('', () => {
       }
 
       .c1 {
-        position: absolute;
+        position: fixed;
         z-index: 4;
         inset: 0;
         background: rgb(220,220,228,0.8);
