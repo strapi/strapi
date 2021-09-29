@@ -18,6 +18,7 @@ import { cellWidth, rowHeight } from '../../Permissions/utils/constants';
 import RowLabelWithCheckbox from '../../RowLabelWithCheckbox';
 import { getCheckboxState } from '../../utils';
 import generateCheckboxesActions from './utils/generateCheckboxesActions';
+import activeStyle from '../utils/activeStyle';
 
 const activeRowStyle = (theme, isActive) => `
   ${Wrapper} {
@@ -31,6 +32,10 @@ const activeRowStyle = (theme, isActive) => `
   ${ConditionsButton} {
     display: block;
   }
+  &:hover {
+   ${activeStyle(theme)}
+  }
+  
 `;
 
 const Wrapper = styled.div`
