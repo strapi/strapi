@@ -1,3 +1,8 @@
 'use strict';
 
-module.exports = require('koa-ip');
+const ip = require('koa-ip');
+
+/**
+ * @type {import('./').MiddlewareFactory}
+ */
+module.exports = options => ip(options);

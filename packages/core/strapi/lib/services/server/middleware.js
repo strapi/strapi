@@ -45,7 +45,7 @@ const resolveMiddlewares = (config, strapi) => {
 
       middlewares.push({
         name: item,
-        handler: middlewareFactory(null, { strapi }),
+        handler: middlewareFactory({}, { strapi }),
       });
 
       continue;

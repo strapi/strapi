@@ -9,6 +9,8 @@ module.exports = [
   'strapi::poweredBy',
   'strapi::logger',
   'strapi::request',
+  // 'strapi::compression',
+  // 'strapi::ip',
   {
     name: 'strapi::responses',
     config: {
