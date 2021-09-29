@@ -32,7 +32,7 @@ const promptConfigQuestions = (plop, inquirer) => {
     {
       type: 'input',
       name: 'id',
-      message: 'Model name',
+      message: 'Content type name',
       validate: input => validateInput(input),
     },
     {
@@ -104,8 +104,8 @@ const promptAttributeQuestions = inquirer => {
 
 module.exports = plop => {
   // Model generator
-  plop.setGenerator('model', {
-    description: 'Generate a model for an API',
+  plop.setGenerator('content-type', {
+    description: 'Generate a content type for an API',
     async prompts(inquirer) {
       const config = await promptConfigQuestions(plop, inquirer);
 

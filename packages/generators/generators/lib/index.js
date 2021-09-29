@@ -9,7 +9,7 @@ const nodePlop = require('node-plop');
  */
 const runCLI = () => {
   Plop.launch({ configPath: join(__dirname, 'plopfile.js') }, env =>
-    run({ ...env, dest: process.cwd() }, undefined, true)
+    run({ ...env, dest: join(process.cwd(), 'src') }, undefined, true)
   );
 };
 
@@ -21,7 +21,7 @@ const runCLI = () => {
  * @param {string} plopOptions.dir base path for plop to generate the files from
  */
 const generate = async (generatorName, options, { dir = process.cwd() } = {}) => {
-  const plop = nodePlop(join(__dirname, 'plopfile.js'), { destBasePath: dir });
+  const plop = nodePlop(join(__dirname, 'plopfile.js'), { destBasePath: join(dir, 'src') });
 
   const generator = plop.getGenerator(generatorName);
   await generator.runActions(options, {
