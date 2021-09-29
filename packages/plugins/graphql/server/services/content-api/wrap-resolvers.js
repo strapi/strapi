@@ -30,7 +30,12 @@ const wrapResolvers = ({ schema, strapi, extension = {} }) => {
   // Fields filters
   const isValidFieldName = ([field]) => !field.startsWith('__');
 
-  const typesMaps = [schema.getTypeMap(), schema.getSubscriptionType().getFields()];
+  const typesMaps = [schema.getTypeMap()];
+
+  const subscriptionType = schema.getSubscriptionType();
+  if (subscriptionType) {
+    typesMaps.push(subscriptionType.getFields());
+  }
 
   typesMaps.forEach(typeMap =>
     // Iterate over every field from every type within the
