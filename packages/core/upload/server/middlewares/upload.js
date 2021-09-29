@@ -4,11 +4,16 @@ const { resolve } = require('path');
 const range = require('koa-range');
 const koaStatic = require('koa-static');
 
-module.exports = () => {
+/**
+ * Programmatic upload middleware. We do not want to export it
+ * @param {{ strapi: import('@strapi/strapi').Strapi }}
+ */
+module.exports = ({ strapi }) => {
   const configPublicPath = strapi.config.get(
     'middleware.settings.public.path',
     strapi.config.paths.static
   );
+
   const staticDir = resolve(strapi.dirs.root, configPublicPath);
 
   strapi.server.app.on('error', err => {

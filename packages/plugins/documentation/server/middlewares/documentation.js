@@ -6,6 +6,7 @@ const koaStatic = require('koa-static');
 
 const initialRoutes = [];
 
+// TODO: delete when refactoring documentation plugin for v4
 module.exports = {
   defaults: { documentation: { enabled: true } },
   load: {
