@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import 'bootstrap/dist/css/bootstrap.css';
 
@@ -93,19 +93,6 @@ const theme = {
 
 // eslint-disable-next-line react/prop-types
 const TempTP = ({ children }) => {
-  // FIXME:
-  // temporary hack to remove bootstrap css
-  // tested on chrome, safari and firefox it seems to be working...
-  useEffect(() => {
-    return () => {
-      const targetelement = 'style';
-
-      const allsuspects = document.getElementsByTagName(targetelement);
-
-      document.getElementsByTagName('head')[0].removeChild(allsuspects[allsuspects.length - 1]);
-    };
-  }, []);
-
   return <ThemeProvider theme={theme}>{children}</ThemeProvider>;
 };
 

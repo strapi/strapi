@@ -310,8 +310,8 @@ const ListView = () => {
                         icon={<AddIcon />}
                       >
                         {formatMessage({
-                          id: 'Settings.webhooks.list.field.add',
-                          defaultMessage: 'Add another field to this collection type',
+                          id: 'Settings.webhooks.list.button.add',
+                          defaultMessage: 'Add new webhook',
                         })}
                       </TFooter>
                     }
