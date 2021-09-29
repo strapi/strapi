@@ -73,9 +73,9 @@ const ConditionsModal = ({ actions, headerBreadCrumbs, isFormDisabled, onClosed,
   };
 
   return (
-    <ModalLayout onClose={onClosed}>
+    <ModalLayout labelledBy="condition-modal-breadcrumbs" onClose={onClosed}>
       <ModalHeader>
-        <Breadcrumbs label={headerBreadCrumbs.join(', ')}>
+        <Breadcrumbs id="condition-modal-breadcrumbs" label={headerBreadCrumbs.join(', ')}>
           {headerBreadCrumbs.map(label => (
             <Crumb key={label}>
               {upperFirst(
