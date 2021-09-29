@@ -856,7 +856,7 @@ describe('Homepage', () => {
                       </a>
                       <a
                         class="c23"
-                        href="https://strapi.io/blog"
+                        href="https://strapi.io/blog/categories/tutorials"
                         rel="noopener noreferrer nofollow"
                         target="_blank"
                       >
@@ -990,7 +990,7 @@ describe('Homepage', () => {
                           </div>
                           <a
                             class="c39"
-                            href="https://strapi.io/"
+                            href="https://portal.productboard.com/strapi/1-roadmap/tabs/2-under-consideration"
                             rel="noreferrer noopener"
                             target="_blank"
                           >
