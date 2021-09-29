@@ -105,8 +105,6 @@
   "components.PageFooter.select": "poster per sida",
   "components.ProductionBlocker.description": "För säkerhetsskäl måste vi inaktivera detta plugin i andra miljöer.",
   "components.ProductionBlocker.header": "Denna plugin är endast tillgänglig under utveckling.",
-  "components.Wysiwyg.ToggleMode.markdown": "Byt till markering",
-  "components.Wysiwyg.ToggleMode.preview": "Byt till förhandsgranskning",
   "components.Wysiwyg.collapse": "Kollapsera",
   "components.Wysiwyg.selectOptions.H1": "Titel H1",
   "components.Wysiwyg.selectOptions.H2": "Titel H2",
