@@ -2,6 +2,7 @@ import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import { Box } from '@strapi/parts/Box';
 import styled from 'styled-components';
+import sortBy from 'lodash/sortBy';
 import ContentTypeCollapses from '../ContentTypeCollapses';
 import GlobalActions from '../GlobalActions';
 
@@ -10,7 +11,7 @@ const StyledBox = styled(Box)`
 `;
 
 const ContentTypes = ({ isFormDisabled, kind, layout: { actions, subjects } }) => {
-  const sortedSubjects = [...subjects].sort((a, b) => a.label > b.label);
+  const sortedSubjects = sortBy([...subjects], 'label');
 
   return (
     <StyledBox background="neutral0">
