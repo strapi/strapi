@@ -83,6 +83,10 @@ const createServer = strapi => {
     },
 
     mount() {
+      if (state.mounted) {
+        return this;
+      }
+
       state.mounted = true;
 
       Object.values(apis).forEach(api => api.mount(router));
@@ -103,11 +107,13 @@ const createServer = strapi => {
       return this;
     },
 
-    listen(...args) {
-      if (!state.mounted) {
-        this.mount();
-      }
+    listRoutes() {
+      this.mount();
+      return router.stack.map(route => route);
+    },
 
+    listen(...args) {
+      this.mount();
       return httpServer.listen(...args);
     },
 

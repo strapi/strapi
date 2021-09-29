@@ -17,4 +17,10 @@ module.exports = [
   },
   'strapi::favicon',
   'strapi::public',
+  {
+    name: 'global::test-middleware',
+    config: {
+      foo: 'bar',
+    },
+  },
 ];
