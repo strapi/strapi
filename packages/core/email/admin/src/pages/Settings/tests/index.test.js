@@ -560,12 +560,10 @@ describe('Email | Pages | Settings', () => {
 
       .c15 {
         grid-column: span 6;
-        word-break: break-all;
       }
 
       .c36 {
         grid-column: span 7;
-        word-break: break-all;
       }
 
       @media (max-width:68.75rem) {

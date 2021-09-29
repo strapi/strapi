@@ -604,7 +604,6 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
 
 .c24 {
   grid-column: span 6;
-  word-break: break-all;
 }
 
 .c35 {

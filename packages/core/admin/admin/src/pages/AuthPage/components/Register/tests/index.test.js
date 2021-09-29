@@ -504,7 +504,6 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
 
       .c21 {
         grid-column: span 6;
-        word-break: break-all;
       }
 
       .c14 {
