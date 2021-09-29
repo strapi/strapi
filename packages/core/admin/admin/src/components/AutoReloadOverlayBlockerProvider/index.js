@@ -28,7 +28,8 @@ const AutoReloadOverlayBlockerProvider = ({ children }) => {
 
     if (isOpen) {
       timer = setInterval(() => {
-        if (elapsed > 15) {
+        // if (elapsed > 15) {
+        if (elapsed > 30) {
           clearInterval(timer);
 
           return null;
@@ -47,8 +48,8 @@ const AutoReloadOverlayBlockerProvider = ({ children }) => {
     };
   }, [isOpen, elapsed]);
 
-  let displayedIcon = config?.icon || 'sync-alt';
-  let className = 'icoContainer spinner';
+  let displayedIcon = config?.icon || 'reload';
+
   let description = {
     id: config?.description || 'components.OverlayBlocker.description',
     defaultMessage:
@@ -60,8 +61,8 @@ const AutoReloadOverlayBlockerProvider = ({ children }) => {
   };
 
   if (elapsed > 15) {
-    displayedIcon = ['far', 'clock'];
-    className = 'icoContainer';
+    displayedIcon = 'time';
+
     description = {
       id: 'components.OverlayBlocker.description.serverError',
       defaultMessage: 'The server should have restarted, please check your logs in the terminal.',
@@ -81,7 +82,6 @@ const AutoReloadOverlayBlockerProvider = ({ children }) => {
         displayedIcon={displayedIcon}
         isOpen={isOpen}
         elapsed={elapsed}
-        className={className}
         description={description}
         title={title}
       />
