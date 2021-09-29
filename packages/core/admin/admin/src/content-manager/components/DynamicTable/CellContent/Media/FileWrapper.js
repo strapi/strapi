@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { Row } from '@strapi/parts/Row';
@@ -12,7 +12,6 @@ const Wrapper = styled(Row)`
   border: 1px solid ${({ theme }) => theme.colors.neutral200};
   background: ${({ theme }) => theme.colors.neutral150};
   padding-left: 1px;
-  z-index: ${({ hovering }) => (hovering ? 1 : undefined)};
 
   span {
     line-height: 0.6rem;
@@ -20,29 +19,16 @@ const Wrapper = styled(Row)`
   }
 `;
 
-const FileWrapper = ({ children, preview }) => {
-  const [previewVisible, setPreviewVisible] = useState(false);
-
+const FileWrapper = ({ children, ...props }) => {
   return (
-    <Wrapper
-      justifyContent="center"
-      alignItems="center"
-      hovering={preview && previewVisible}
-      onMouseEnter={() => setPreviewVisible(true)}
-      onMouseLeave={() => setPreviewVisible(false)}
-    >
+    <Wrapper justifyContent="center" alignItems="center" as="span" {...props}>
       <TableLabel textColor="neutral600">{children}</TableLabel>
     </Wrapper>
   );
 };
 
-FileWrapper.defaultProps = {
-  preview: true,
-};
-
 FileWrapper.propTypes = {
   children: PropTypes.string.isRequired,
-  preview: PropTypes.bool,
 };
 
 export default FileWrapper;
