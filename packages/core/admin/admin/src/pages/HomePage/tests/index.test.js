@@ -556,11 +556,11 @@ describe('Homepage', () => {
         fill: #00a94f;
       }
 
-      .c58 > path:nth-child(4) {
+      .c58 > path:nth-child(5) {
         fill: #f15d22;
       }
 
-      .c58 > path:nth-child(5) {
+      .c58 > path:nth-child(6) {
         fill: #e31b23;
       }
 

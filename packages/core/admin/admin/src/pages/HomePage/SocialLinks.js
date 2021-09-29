@@ -56,10 +56,10 @@ const StyledDiscourse = styled(Discourse)`
   > path:nth-child(4) {
     fill: #00a94f;
   }
-  > path:nth-child(4) {
+  > path:nth-child(5) {
     fill: #f15d22;
   }
-  > path:nth-child(5) {
+  > path:nth-child(6) {
     fill: #e31b23;
   }
 `;
