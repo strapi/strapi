@@ -596,7 +596,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
                   class="c7"
                   id="main-content-title"
                 >
-                  Welcome back!
+                  Welcome!
                 </h1>
               </div>
               <div

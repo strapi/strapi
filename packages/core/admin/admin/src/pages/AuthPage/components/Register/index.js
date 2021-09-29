@@ -110,7 +110,7 @@ const Register = ({ fieldsToDisable, noSignin, onSubmit, schema }) => {
                     <H1>
                       {formatMessage({
                         id: 'Auth.form.welcome.title',
-                        defaultMessage: 'Welcome back!',
+                        defaultMessage: 'Welcome!',
                       })}
                     </H1>
                   </Box>
