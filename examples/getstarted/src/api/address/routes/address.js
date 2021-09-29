@@ -7,6 +7,7 @@ module.exports = {
       path: '/addresses',
       handler: 'address.find',
       config: {
+        middlewares: ['api::address.address-middleware'],
         policies: ['address'],
       },
     },

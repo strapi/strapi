@@ -10,6 +10,9 @@ const DELETE_FILE_MUTATION_NAME = 'removeFile';
 
 const FILE_INFO_INPUT_TYPE_NAME = 'FileInfoInput';
 
+/**
+ * @param {{ strapi: import('@strapi/strapi').Strapi }}
+ */
 module.exports = ({ strapi }) => {
   const { service: getGraphQLService, config: graphQLConfig } = strapi.plugin('graphql');
   const { service: getUploadService } = strapi.plugin('upload');

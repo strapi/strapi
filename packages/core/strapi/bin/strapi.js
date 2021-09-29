@@ -183,4 +183,29 @@ program
   .option('-p, --password <password>', 'New password for the user')
   .action(getLocalScript('admin-reset'));
 
+program
+  .command('routes:list')
+  .description('List all the application routes')
+  .action(getLocalScript('routes/list'));
+
+program
+  .command('middlewares:list')
+  .description('List all the application middlewares')
+  .action(getLocalScript('middlewares/list'));
+
+program
+  .command('policies:list')
+  .description('List all the application policies')
+  .action(getLocalScript('policies/list'));
+
+program
+  .command('content-types:list')
+  .description('List all the application content-types')
+  .action(getLocalScript('content-types/list'));
+
+program
+  .command('hooks:list')
+  .description('List all the application hooks')
+  .action(getLocalScript('hooks/list'));
+
 program.parseAsync(process.argv);

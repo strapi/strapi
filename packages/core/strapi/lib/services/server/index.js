@@ -7,6 +7,8 @@ const { createHTTPServer } = require('./http-server');
 const { createRouteManager } = require('./routing');
 const { createAdminAPI } = require('./admin-api');
 const { createContentAPI } = require('./content-api');
+const registerAllRoutes = require('./register-routes');
+const registerApplicationMiddlewares = require('./register-middlewares');
 
 const healthCheck = async ctx => {
   ctx.set('strapi', 'You are so French!');
@@ -87,6 +89,28 @@ const createServer = strapi => {
       app.use(router.routes()).use(router.allowedMethods());
 
       return this;
+    },
+
+    async initRouting() {
+      await registerAllRoutes(strapi);
+
+      return this;
+    },
+
+    async initMiddlewares() {
+      await registerApplicationMiddlewares(strapi);
+
+      return this;
+    },
+
+    listRoutes() {
+      const allRoutes = [...router.stack];
+
+      Object.values(apis).forEach(api => {
+        allRoutes.push(...api.listRoutes());
+      });
+
+      return allRoutes;
     },
 
     listen(...args) {
