@@ -146,6 +146,10 @@ class Strapi {
     return this.container.get('apis').getAll();
   }
 
+  get auth() {
+    return this.container.get('auth');
+  }
+
   async start() {
     try {
       if (!this.isLoaded) {
@@ -317,7 +321,7 @@ class Strapi {
       this.loadPolicies(),
     ]);
 
-    await bootstrap(this);
+    await bootstrap({ strapi: this });
 
     // init webhook runner
     this.webhookRunner = createWebhookRunner({
@@ -456,7 +460,7 @@ class Strapi {
     }
 
     // admin
-    await this.admin[lifecycleName](this);
+    await this.admin[lifecycleName]({ strapi: this });
   }
 
   getModel(uid) {
@@ -466,7 +470,6 @@ class Strapi {
   /**
    * Binds queries with a specific model
    * @param {string} uid
-   * @returns {}
    */
   query(uid) {
     return this.db.query(uid);

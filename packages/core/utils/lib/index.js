@@ -31,6 +31,7 @@ const relations = require('./relations');
 const setCreatorFields = require('./set-creator-fields');
 const hooks = require('./hooks');
 const providerFactory = require('./provider-factory');
+const pagination = require('./pagination');
 
 module.exports = {
   yup,
@@ -63,4 +64,5 @@ module.exports = {
   setCreatorFields,
   hooks,
   providerFactory,
+  pagination,
 };

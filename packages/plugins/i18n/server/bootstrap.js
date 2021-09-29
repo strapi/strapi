@@ -2,7 +2,7 @@
 
 const { getService } = require('./utils');
 
-module.exports = async strapi => {
+module.exports = async ({ strapi }) => {
   const { sendDidInitializeEvent } = getService('metrics');
   const { decorator } = getService('entity-service-decorator');
   const { initDefaultLocale } = getService('locales');

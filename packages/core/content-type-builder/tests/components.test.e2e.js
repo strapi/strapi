@@ -229,7 +229,11 @@ describe('Content Type Builder - Components', () => {
             category: 'default',
             icon: 'default',
             name: 'New Component',
-            attributes: {},
+            attributes: {
+              name: {
+                type: 'string',
+              },
+            },
             pluginOptions: {
               pluginName: {
                 option: false,
