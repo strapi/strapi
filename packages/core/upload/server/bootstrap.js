@@ -3,7 +3,7 @@
 const _ = require('lodash');
 const { convertToStrapiError } = require('../errors');
 
-module.exports = async () => {
+module.exports = async ({ strapi }) => {
   // set plugin store
   const configurator = strapi.store({ type: 'plugin', name: 'upload', key: 'settings' });
 
