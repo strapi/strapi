@@ -1,7 +1,6 @@
 'use strict';
 
 const _ = require('lodash');
-const { toLower } = require('lodash/fp');
 
 const createRouteScopeGenerator = namespace => route => {
   const prefix = namespace.endsWith('::') ? namespace : `${namespace}.`;
@@ -12,7 +11,7 @@ const createRouteScopeGenerator = namespace => route => {
     _.defaultsDeep(route, {
       config: {
         auth: {
-          scope: `${prefix}${controller}.${toLower(action)}`,
+          scope: `${prefix}${controller}.${action}`,
         },
       },
     });
