@@ -40,8 +40,8 @@ const ForgotPassword = ({ onSubmit, schema }) => {
                   <Box paddingTop={6} paddingBottom={7}>
                     <H1>
                       {formatMessage({
-                        id: 'Auth.form.button.password-forgotten',
-                        defaultMessage: 'Password forgotten',
+                        id: 'Auth.form.button.password-recovery',
+                        defaultMessage: 'Password Recovery',
                       })}
                     </H1>
                   </Box>

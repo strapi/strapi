@@ -20,6 +20,12 @@ import Strapi from '@strapi/icons/Strapi';
 import Twitter from '@strapi/icons/Twitter';
 import Discourse from '@strapi/icons/Discourse';
 
+const StyledDiscord = styled(Slack)`
+  path {
+    fill: #7289da !important;
+  }
+`;
+
 const StyledReddit = styled(Reddit)`
   > path:first-child {
     fill: #ff4500;
@@ -77,8 +83,8 @@ const socialLinks = [
   {
     name: 'Discord',
     link: 'https://slack.strapi.io/',
-    icon: <Slack />,
-    alt: 'slack',
+    icon: <StyledDiscord />,
+    alt: 'discord',
   },
   {
     name: 'Reddit',

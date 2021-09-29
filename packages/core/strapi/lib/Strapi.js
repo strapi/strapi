@@ -306,7 +306,7 @@ class Strapi {
       this.loadPolicies(),
     ]);
 
-    await bootstrap(this);
+    await bootstrap({ strapi: this });
 
     // init webhook runner
     this.webhookRunner = createWebhookRunner({
@@ -445,7 +445,7 @@ class Strapi {
     }
 
     // admin
-    await this.admin[lifecycleName](this);
+    await this.admin[lifecycleName]({ strapi: this });
   }
 
   getModel(uid) {

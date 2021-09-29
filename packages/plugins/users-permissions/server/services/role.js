@@ -77,7 +77,7 @@ module.exports = ({ strapi }) => ({
     const roles = await strapi.query('plugin::users-permissions.role').findMany({ sort: ['name'] });
 
     for (const role of roles) {
-      roles.nb_users = await strapi
+      role.nb_users = await strapi
         .query('plugin::users-permissions.user')
         .count({ where: { role: { id: role.id } } });
     }

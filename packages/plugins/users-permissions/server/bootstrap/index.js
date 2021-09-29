@@ -13,7 +13,7 @@ const { getService } = require('../utils');
 
 const usersPermissionsActions = require('./users-permissions-actions');
 
-module.exports = async () => {
+module.exports = async ({ strapi }) => {
   const pluginStore = strapi.store({ type: 'plugin', name: 'users-permissions' });
 
   await initGrant(pluginStore);
@@ -26,7 +26,6 @@ module.exports = async () => {
 
   await getService('users-permissions').initialize();
 
-  // TODO: adapt with new extension system
   if (!strapi.config.get('plugin.users-permissions.jwtSecret')) {
     const jwtSecret = uuid();
     strapi.config.set('plugin.users-permissions.jwtSecret', jwtSecret);
@@ -39,6 +38,9 @@ module.exports = async () => {
 
 const initGrant = async pluginStore => {
   const grantConfig = {
+    defaults: {
+      prefix: '/api/connect',
+    },
     email: {
       enabled: true,
       icon: 'envelope',
@@ -48,7 +50,7 @@ const initGrant = async pluginStore => {
       icon: 'discord',
       key: '',
       secret: '',
-      callback: `${strapi.config.server.url}/auth/discord/callback`,
+      callback: `${strapi.config.server.url}/api/auth/discord/callback`,
       scope: ['identify', 'email'],
     },
     facebook: {
@@ -56,7 +58,7 @@ const initGrant = async pluginStore => {
       icon: 'facebook-square',
       key: '',
       secret: '',
-      callback: `${strapi.config.server.url}/auth/facebook/callback`,
+      callback: `${strapi.config.server.url}/api/auth/facebook/callback`,
       scope: ['email'],
     },
     google: {
@@ -64,7 +66,7 @@ const initGrant = async pluginStore => {
       icon: 'google',
       key: '',
       secret: '',
-      callback: `${strapi.config.server.url}/auth/google/callback`,
+      callback: `${strapi.config.server.url}/api/auth/google/callback`,
       scope: ['email'],
     },
     github: {
@@ -72,7 +74,7 @@ const initGrant = async pluginStore => {
       icon: 'github',
       key: '',
       secret: '',
-      callback: `${strapi.config.server.url}/auth/github/callback`,
+      callback: `${strapi.config.server.url}/api/auth/github/callback`,
       scope: ['user', 'user:email'],
     },
     microsoft: {
@@ -80,7 +82,7 @@ const initGrant = async pluginStore => {
       icon: 'windows',
       key: '',
       secret: '',
-      callback: `${strapi.config.server.url}/auth/microsoft/callback`,
+      callback: `${strapi.config.server.url}/api/auth/microsoft/callback`,
       scope: ['user.read'],
     },
     twitter: {
@@ -88,14 +90,14 @@ const initGrant = async pluginStore => {
       icon: 'twitter',
       key: '',
       secret: '',
-      callback: `${strapi.config.server.url}/auth/twitter/callback`,
+      callback: `${strapi.config.server.url}/api/auth/twitter/callback`,
     },
     instagram: {
       enabled: false,
       icon: 'instagram',
       key: '',
       secret: '',
-      callback: `${strapi.config.server.url}/auth/instagram/callback`,
+      callback: `${strapi.config.server.url}/api/auth/instagram/callback`,
       scope: ['user_profile'],
     },
     vk: {
@@ -103,7 +105,7 @@ const initGrant = async pluginStore => {
       icon: 'vk',
       key: '',
       secret: '',
-      callback: `${strapi.config.server.url}/auth/vk/callback`,
+      callback: `${strapi.config.server.url}/api/auth/vk/callback`,
       scope: ['email'],
     },
     twitch: {
@@ -111,7 +113,7 @@ const initGrant = async pluginStore => {
       icon: 'twitch',
       key: '',
       secret: '',
-      callback: `${strapi.config.server.url}/auth/twitch/callback`,
+      callback: `${strapi.config.server.url}/api/auth/twitch/callback`,
       scope: ['user:read:email'],
     },
     linkedin: {
@@ -119,7 +121,7 @@ const initGrant = async pluginStore => {
       icon: 'linkedin',
       key: '',
       secret: '',
-      callback: `${strapi.config.server.url}/auth/linkedin/callback`,
+      callback: `${strapi.config.server.url}/api/auth/linkedin/callback`,
       scope: ['r_liteprofile', 'r_emailaddress'],
     },
     cognito: {
@@ -128,7 +130,7 @@ const initGrant = async pluginStore => {
       key: '',
       secret: '',
       subdomain: 'my.subdomain.com',
-      callback: `${strapi.config.server.url}/auth/cognito/callback`,
+      callback: `${strapi.config.server.url}/api/auth/cognito/callback`,
       scope: ['email', 'openid', 'profile'],
     },
     reddit: {
@@ -137,7 +139,7 @@ const initGrant = async pluginStore => {
       key: '',
       secret: '',
       state: true,
-      callback: `${strapi.config.server.url}/auth/reddit/callback`,
+      callback: `${strapi.config.server.url}/api/auth/reddit/callback`,
       scope: ['identity'],
     },
     auth0: {
@@ -146,7 +148,7 @@ const initGrant = async pluginStore => {
       key: '',
       secret: '',
       subdomain: 'my-tenant.eu',
-      callback: `${strapi.config.server.url}/auth/auth0/callback`,
+      callback: `${strapi.config.server.url}/api/auth/auth0/callback`,
       scope: ['openid', 'email', 'profile'],
     },
     cas: {
@@ -154,7 +156,7 @@ const initGrant = async pluginStore => {
       icon: 'book',
       key: '',
       secret: '',
-      callback: `${strapi.config.server.url}/auth/cas/callback`,
+      callback: `${strapi.config.server.url}/api/auth/cas/callback`,
       scope: ['openid email'], // scopes should be space delimited
       subdomain: 'my.subdomain.com/cas',
     },

@@ -29,7 +29,7 @@ const RBAC_ACTIONS = [
   },
 ];
 
-module.exports = async () => {
+module.exports = async ({ strapi }) => {
   await strapi.admin.services.permission.actionProvider.registerMany(RBAC_ACTIONS);
 
   return;
