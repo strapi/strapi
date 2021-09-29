@@ -16,8 +16,8 @@ import ExternalLink from '@strapi/icons/ExternalLink';
 import Github from '@strapi/icons/Github';
 import Slack from '@strapi/icons/Slack';
 import Reddit from '@strapi/icons/Reddit';
+import Strapi from '@strapi/icons/Strapi';
 import Twitter from '@strapi/icons/Twitter';
-import Medium from '@strapi/icons/Medium';
 import Discourse from '@strapi/icons/Discourse';
 
 const StyledReddit = styled(Reddit)`
@@ -28,12 +28,15 @@ const StyledReddit = styled(Reddit)`
     fill: ${({ theme }) => theme.colors.neutral0};
   }
 `;
-const StyledMedium = styled(Medium)`
+const StyledStrapi = styled(Strapi)`
   > path:first-child {
-    fill: ${({ theme }) => theme.colors.neutral800};
+    fill: #8e75ff;
   }
-  > path:last-child {
-    fill: ${({ theme }) => theme.colors.neutral0};
+  > path:nth-child(2) {
+    fill: #8e75ff;
+  }
+  > path:nth-child(3) {
+    fill: #8e75ff;
   }
 `;
 
@@ -92,7 +95,7 @@ const socialLinks = [
   {
     name: 'Medium',
     link: 'https://medium.com/@strapi',
-    icon: <StyledMedium />,
+    icon: <StyledStrapi />,
     alt: 'medium',
   },
   {
@@ -100,6 +103,12 @@ const socialLinks = [
     link: 'https://forum.strapi.io',
     icon: <StyledDiscourse />,
     alt: 'forum',
+  },
+  {
+    name: 'Career',
+    link: 'https://strapi.io/careers',
+    icon: <StyledStrapi />,
+    alt: 'career',
   },
 ];
 

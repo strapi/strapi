@@ -529,11 +529,15 @@ describe('Homepage', () => {
       }
 
       .c57 > path:first-child {
-        fill: #32324d;
+        fill: #8e75ff;
       }
 
-      .c57 > path:last-child {
-        fill: #ffffff;
+      .c57 > path:nth-child(2) {
+        fill: #8e75ff;
+      }
+
+      .c57 > path:nth-child(3) {
+        fill: #8e75ff;
       }
 
       .c56 path {
@@ -1234,41 +1238,23 @@ describe('Homepage', () => {
                                   width="1em"
                                   xmlns="http://www.w3.org/2000/svg"
                                 >
-                                  <rect
-                                    fill="#D8D8D8"
-                                    height="23"
-                                    rx="1.5"
-                                    stroke="#979797"
-                                    width="23"
-                                    x="0.5"
-                                    y="0.5"
-                                  />
-                                  <mask
-                                    height="24"
-                                    id="medium_svg__a"
-                                    maskUnits="userSpaceOnUse"
-                                    style="mask-type: alpha;"
-                                    width="24"
-                                    x="0"
-                                    y="0"
-                                  >
-                                    <rect
-                                      fill="#fff"
-                                      height="23"
-                                      rx="1.5"
-                                      stroke="#fff"
-                                      width="23"
-                                      x="0.5"
-                                      y="0.5"
-                                    />
-                                  </mask>
                                   <path
-                                    d="M22 0H2a2 2 0 00-2 2v20a2 2 0 002 2h20a2 2 0 002-2V2a2 2 0 00-2-2z"
-                                    fill="#12100E"
+                                    clip-rule="evenodd"
+                                    d="M23.497 0H7.68v8.035h7.783c.278 0 .503.224.503.502v7.783H24V.502A.502.502 0 0023.497 0z"
+                                    fill="#8E75FF"
+                                    fill-rule="evenodd"
                                   />
                                   <path
-                                    d="M5.727 8.027a.624.624 0 00-.203-.527L4.02 5.686v-.27h4.674l3.613 7.923 3.177-7.924h4.456v.271L18.65 6.92a.376.376 0 00-.143.362v9.067a.376.376 0 00.143.361l1.257 1.235v.27h-6.322v-.27l1.302-1.265c.128-.128.128-.165.128-.36V8.99l-3.62 9.195h-.49L6.691 8.99v6.163a.85.85 0 00.233.707l1.694 2.054v.271H3.815v-.27L5.51 15.86a.82.82 0 00.218-.707V8.027z"
-                                    fill="#fff"
+                                    clip-rule="evenodd"
+                                    d="M7.68 0v8.035H.252a.25.25 0 01-.178-.429L7.68 0zM16.395 23.926a.251.251 0 01-.43-.178V16.32H24l-7.605 7.606z"
+                                    fill="#8E75FF"
+                                    fill-rule="evenodd"
+                                    opacity="0.405"
+                                  />
+                                  <path
+                                    d="M7.68 8.035h8.034c.14 0 .252.112.252.25v8.035H8.183a.502.502 0 01-.503-.502V8.035z"
+                                    fill="#8E75FF"
+                                    opacity="0.405"
                                   />
                                 </svg>
                               </div>
@@ -1335,6 +1321,59 @@ describe('Homepage', () => {
                                 class="c52 c53 c54"
                               >
                                 Forum
+                              </span>
+                            </a>
+                          </div>
+                        </div>
+                        <div
+                          class="c46"
+                        >
+                          <div
+                            class=""
+                          >
+                            <a
+                              aria-disabled="false"
+                              class="c47 c48 c49"
+                              href="https://strapi.io/careers"
+                              rel="noreferrer noopener"
+                              target="_blank"
+                            >
+                              <div
+                                aria-hidden="true"
+                                class="c50 c51"
+                              >
+                                <svg
+                                  class="c57"
+                                  fill="none"
+                                  height="1em"
+                                  viewBox="0 0 24 24"
+                                  width="1em"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    clip-rule="evenodd"
+                                    d="M23.497 0H7.68v8.035h7.783c.278 0 .503.224.503.502v7.783H24V.502A.502.502 0 0023.497 0z"
+                                    fill="#8E75FF"
+                                    fill-rule="evenodd"
+                                  />
+                                  <path
+                                    clip-rule="evenodd"
+                                    d="M7.68 0v8.035H.252a.25.25 0 01-.178-.429L7.68 0zM16.395 23.926a.251.251 0 01-.43-.178V16.32H24l-7.605 7.606z"
+                                    fill="#8E75FF"
+                                    fill-rule="evenodd"
+                                    opacity="0.405"
+                                  />
+                                  <path
+                                    d="M7.68 8.035h8.034c.14 0 .252.112.252.25v8.035H8.183a.502.502 0 01-.503-.502V8.035z"
+                                    fill="#8E75FF"
+                                    opacity="0.405"
+                                  />
+                                </svg>
+                              </div>
+                              <span
+                                class="c52 c53 c54"
+                              >
+                                Career
                               </span>
                             </a>
                           </div>
