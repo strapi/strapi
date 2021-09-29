@@ -270,6 +270,8 @@
   "app.components.LeftMenuLinkContainer.singleTypes": "Single Types",
   "app.components.LeftMenu.expand": "Expand the navbar",
   "app.components.LeftMenu.collapse": "Collapse the navbar",
+  "app.components.LeftMenu.profile": "Profile",
+  "app.components.LeftMenu.logout": "Logout",
   "app.components.ListPluginsPage.deletePlugin.description": "It might take a few seconds to uninstall the plugin.",
   "app.components.ListPluginsPage.deletePlugin.title": "Uninstalling",
   "app.components.ListPluginsPage.description": "List of the installed plugins in the project.",

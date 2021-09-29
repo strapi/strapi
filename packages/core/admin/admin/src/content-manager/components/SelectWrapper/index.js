@@ -437,4 +437,7 @@ SelectWrapper.propTypes = {
 
 const Memoized = memo(SelectWrapper);
 
-export default connect(Memoized, select);
+export default connect(
+  Memoized,
+  select
+);

@@ -280,4 +280,7 @@ Inputs.propTypes = {
 
 const Memoized = memo(Inputs, isEqual);
 
-export default connect(Memoized, select);
+export default connect(
+  Memoized,
+  select
+);
