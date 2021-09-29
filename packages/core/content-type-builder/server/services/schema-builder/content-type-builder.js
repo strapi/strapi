@@ -77,7 +77,7 @@ module.exports = function createComponentBuilder() {
         throw new Error('contentType.alreadyExists');
       }
 
-      const modelName = nameToSlug(infos.name);
+      const modelName = pluralize.singular(nameToSlug(infos.name));
       const contentType = createSchemaHandler({
         modelName,
         dir: path.join(strapi.dirs.api, modelName, 'content-types', modelName),
