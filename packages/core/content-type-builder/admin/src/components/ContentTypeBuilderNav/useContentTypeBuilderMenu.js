@@ -154,31 +154,21 @@ const useContentTypeBuilderMenu = () => {
 
   const getMenu = () => {
     // Maybe we can do it simpler with matchsorter wildcards ?
-    return data
-      .map(section => {
-        const hasChild = section.links.some(l => !isEmpty(l.links));
+    return data.map(section => {
+      const hasChild = section.links.some(l => !isEmpty(l.links));
 
-        if (hasChild) {
-          return {
-            ...section,
-            links: section.links.map(l => ({ ...l, links: matchByTitle(l.links) })),
-          };
-        }
-
+      if (hasChild) {
         return {
           ...section,
-          links: matchByTitle(section.links),
+          links: section.links.map(l => ({ ...l, links: matchByTitle(l.links) })),
         };
-      })
-      .filter(section => {
-        const hasChildren = section.links.every(l => l.links);
+      }
 
-        if (hasChildren) {
-          return section.links.some(l => l.links.length);
-        }
-
-        return section.links.length;
-      });
+      return {
+        ...section,
+        links: matchByTitle(section.links),
+      };
+    });
   };
 
   return { menu: getMenu(), searchValue: search, onSearchChange: setSearch };
