@@ -520,51 +520,55 @@ describe('Homepage', () => {
         display: flex;
       }
 
-      .c55 > path:first-child {
+      .c55 path {
+        fill: #7289da !important;
+      }
+
+      .c56 > path:first-child {
         fill: #ff4500;
       }
 
-      .c55 > path:last-child {
+      .c56 > path:last-child {
         fill: #ffffff;
       }
 
-      .c57 > path:first-child {
-        fill: #8e75ff;
-      }
-
-      .c57 > path:nth-child(2) {
-        fill: #8e75ff;
-      }
-
-      .c57 > path:nth-child(3) {
-        fill: #8e75ff;
-      }
-
-      .c56 path {
-        fill: #1da1f2 !important;
-      }
-
       .c58 > path:first-child {
-        fill: #231f20;
+        fill: #8e75ff;
       }
 
       .c58 > path:nth-child(2) {
-        fill: #fff9ae;
+        fill: #8e75ff;
       }
 
       .c58 > path:nth-child(3) {
+        fill: #8e75ff;
+      }
+
+      .c57 path {
+        fill: #1da1f2 !important;
+      }
+
+      .c59 > path:first-child {
+        fill: #231f20;
+      }
+
+      .c59 > path:nth-child(2) {
+        fill: #fff9ae;
+      }
+
+      .c59 > path:nth-child(3) {
         fill: #00aeef;
       }
 
-      .c58 > path:nth-child(4) {
+      .c59 > path:nth-child(4) {
         fill: #00a94f;
       }
 
-      .c58 > path:nth-child(5) {
+      .c59 > path:nth-child(5) {
         fill: #f15d22;
       }
 
-      .c58 > path:nth-child(6) {
+      .c59 > path:nth-child(6) {
         fill: #e31b23;
       }
 
@@ -1082,6 +1086,7 @@ describe('Homepage', () => {
                                 class="c50 c51"
                               >
                                 <svg
+                                  class="c55"
                                   fill="none"
                                   height="1em"
                                   viewBox="0 0 24 24"
@@ -1135,7 +1140,7 @@ describe('Homepage', () => {
                                 class="c50 c51"
                               >
                                 <svg
-                                  class="c55"
+                                  class="c56"
                                   fill="none"
                                   height="1em"
                                   viewBox="0 0 24 24"
@@ -1178,7 +1183,7 @@ describe('Homepage', () => {
                                 class="c50 c51"
                               >
                                 <svg
-                                  class="c56"
+                                  class="c57"
                                   fill="none"
                                   height="1em"
                                   viewBox="0 0 24 24"
@@ -1222,7 +1227,7 @@ describe('Homepage', () => {
                             <a
                               aria-disabled="false"
                               class="c47 c48 c49"
-                              href="https://medium.com/@strapi"
+                              href="https://strapi.io/blog"
                               rel="noreferrer noopener"
                               target="_blank"
                             >
@@ -1231,7 +1236,7 @@ describe('Homepage', () => {
                                 class="c50 c51"
                               >
                                 <svg
-                                  class="c57"
+                                  class="c58"
                                   fill="none"
                                   height="1em"
                                   viewBox="0 0 24 24"
@@ -1261,7 +1266,7 @@ describe('Homepage', () => {
                               <span
                                 class="c52 c53 c54"
                               >
-                                Medium
+                                Strapi blog
                               </span>
                             </a>
                           </div>
@@ -1284,7 +1289,7 @@ describe('Homepage', () => {
                                 class="c50 c51"
                               >
                                 <svg
-                                  class="c58"
+                                  class="c59"
                                   fill="none"
                                   height="1em"
                                   viewBox="0 0 24 24"
@@ -1343,7 +1348,7 @@ describe('Homepage', () => {
                                 class="c50 c51"
                               >
                                 <svg
-                                  class="c57"
+                                  class="c58"
                                   fill="none"
                                   height="1em"
                                   viewBox="0 0 24 24"
