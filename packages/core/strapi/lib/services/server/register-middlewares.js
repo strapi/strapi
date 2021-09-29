@@ -1,6 +1,7 @@
 'use strict';
 
 const { yup } = require('@strapi/utils');
+const { resolveMiddlewares } = require('./middleware');
 
 /**
  * @typedef {import('../../').Strapi} Strapi
@@ -53,12 +54,12 @@ const middlewareConfigSchema = yup.array().of(
  * Register middlewares in router
  * @param {Strapi} strapi
  */
-module.exports = async strapi => {
+const registerApplicationMiddlewares = async strapi => {
   const middlewareConfig = strapi.config.get('middlewares', defaultConfig);
 
   await validateMiddlewareConfig();
 
-  const middlewares = await initMiddlewares(middlewareConfig, strapi);
+  const middlewares = await resolveMiddlewares(middlewareConfig, strapi);
 
   checkRequiredMiddlewares(middlewares);
 
@@ -101,60 +102,4 @@ const checkRequiredMiddlewares = middlewares => {
   return;
 };
 
-/**
- * Initialize every configured middlewares
- * @param {MiddlewaresConfig} config
- * @param {Strapi} strapi
- * @returns {Middlewares}
- */
-const initMiddlewares = async (config, strapi) => {
-  const middlewares = [];
-
-  for (const item of config) {
-    if (typeof item === 'string') {
-      const middlewareFactory = strapi.middleware(item);
-
-      if (!middlewareFactory) {
-        throw new Error(`Middleware ${item} not found.`);
-      }
-
-      middlewares.push({
-        name: item,
-        handler: await middlewareFactory(null, { strapi }),
-      });
-
-      continue;
-    }
-
-    if (typeof item === 'object' && item !== null) {
-      const { name, resolve, config = {} } = item;
-
-      if (name) {
-        const middlewareFactory = strapi.middleware(name);
-        middlewares.push({
-          name,
-          handler: await middlewareFactory(config, { strapi }),
-        });
-
-        continue;
-      }
-
-      if (resolve) {
-        middlewares.push({
-          name: resolve,
-          handler: await require(resolve)(config, { strapi }),
-        });
-
-        continue;
-      }
-
-      throw new Error('Invalid middleware configuration. Missing name or resolve properties.');
-    }
-
-    throw new Error(
-      'Middleware config must either be a string or an object {name?: string, resolve?: string, config: any}.'
-    );
-  }
-
-  return middlewares;
-};
+module.exports = registerApplicationMiddlewares;

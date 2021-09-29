@@ -3,7 +3,7 @@
 const { toLower, castArray, trim, prop } = require('lodash/fp');
 
 const compose = require('koa-compose');
-const { resolveMiddlewares } = require('./middleware');
+const { resolveRouteMiddlewares } = require('./middleware');
 const { resolvePolicies } = require('./policy');
 
 const getMethod = route => trim(toLower(route.method));
@@ -58,7 +58,7 @@ module.exports = strapi => {
       const method = getMethod(route);
       const path = getPath(route);
 
-      const middlewares = resolveMiddlewares(route);
+      const middlewares = resolveRouteMiddlewares(route, strapi);
       const policies = resolvePolicies(route);
 
       const action = getAction(route, strapi);

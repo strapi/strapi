@@ -23,5 +23,8 @@ module.exports = [
       foo: 'bar',
     },
   },
-  'api::address.address-middleware',
+  {
+    resolve: './src/custom/middleware.js',
+    config: {},
+  },
 ];
