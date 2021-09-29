@@ -53,7 +53,11 @@ const ContentBlocks = () => {
           iconBackground="warning100"
         />
       </BlockLink>
-      <BlockLink href="https://strapi.io/blog" target="_blank" rel="noopener noreferrer nofollow">
+      <BlockLink
+        href="https://strapi.io/blog/categories/tutorials"
+        target="_blank"
+        rel="noopener noreferrer nofollow"
+      >
         <ContentBox
           title={formatMessage({
             id: 'app.components.BlockLink.tutorial',

@@ -16,9 +16,56 @@ import ExternalLink from '@strapi/icons/ExternalLink';
 import Github from '@strapi/icons/Github';
 import Slack from '@strapi/icons/Slack';
 import Reddit from '@strapi/icons/Reddit';
+import Strapi from '@strapi/icons/Strapi';
 import Twitter from '@strapi/icons/Twitter';
-import Medium from '@strapi/icons/Medium';
 import Discourse from '@strapi/icons/Discourse';
+
+const StyledReddit = styled(Reddit)`
+  > path:first-child {
+    fill: #ff4500;
+  }
+  > path:last-child {
+    fill: ${({ theme }) => theme.colors.neutral0};
+  }
+`;
+const StyledStrapi = styled(Strapi)`
+  > path:first-child {
+    fill: #8e75ff;
+  }
+  > path:nth-child(2) {
+    fill: #8e75ff;
+  }
+  > path:nth-child(3) {
+    fill: #8e75ff;
+  }
+`;
+
+const StyledTwitter = styled(Twitter)`
+  path {
+    fill: #1da1f2 !important;
+  }
+`;
+
+const StyledDiscourse = styled(Discourse)`
+  > path:first-child {
+    fill: #231f20;
+  }
+  > path:nth-child(2) {
+    fill: #fff9ae;
+  }
+  > path:nth-child(3) {
+    fill: #00aeef;
+  }
+  > path:nth-child(4) {
+    fill: #00a94f;
+  }
+  > path:nth-child(5) {
+    fill: #f15d22;
+  }
+  > path:nth-child(6) {
+    fill: #e31b23;
+  }
+`;
 
 const socialLinks = [
   {
@@ -36,26 +83,32 @@ const socialLinks = [
   {
     name: 'Reddit',
     link: 'https://www.reddit.com/r/Strapi/',
-    icon: <Reddit />,
+    icon: <StyledReddit />,
     alt: 'reddit',
   },
   {
     name: 'Twitter',
     link: 'https://twitter.com/strapijs',
-    icon: <Twitter />,
+    icon: <StyledTwitter />,
     alt: 'twitter',
   },
   {
     name: 'Medium',
     link: 'https://medium.com/@strapi',
-    icon: <Medium />,
+    icon: <StyledStrapi />,
     alt: 'medium',
   },
   {
     name: 'Forum',
     link: 'https://forum.strapi.io',
-    icon: <Discourse />,
+    icon: <StyledDiscourse />,
     alt: 'forum',
+  },
+  {
+    name: 'Career',
+    link: 'https://strapi.io/careers',
+    icon: <StyledStrapi />,
+    alt: 'career',
   },
 ];
 
@@ -115,7 +168,10 @@ const SocialLinks = () => {
               })}
             </WordWrap>
           </Stack>
-          <Link href="https://strapi.io/" endIcon={<ExternalLink />}>
+          <Link
+            href="https://portal.productboard.com/strapi/1-roadmap/tabs/2-under-consideration"
+            endIcon={<ExternalLink />}
+          >
             {formatMessage({
               id: 'app.components.HomePage.roadmap',
               defaultMessage: 'See our road map',
