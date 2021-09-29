@@ -30,88 +30,90 @@ const wrapResolvers = ({ schema, strapi, extension = {} }) => {
   // Fields filters
   const isValidFieldName = ([field]) => !field.startsWith('__');
 
-  const typeMap = schema.getTypeMap();
+  const typesMaps = [schema.getTypeMap(), schema.getSubscriptionType().getFields()];
 
-  // Iterate over every field from every type within the
-  // schema's type map and wrap its resolve attribute if needed
-  Object.entries(typeMap).forEach(([type, definition]) => {
-    const isGraphQLObjectType = definition instanceof GraphQLObjectType;
-    const isIgnoredType = introspectionQueries.includes(type);
+  typesMaps.forEach(typeMap =>
+    // Iterate over every field from every type within the
+    // schema's type map and wrap its resolve attribute if needed
+    Object.entries(typeMap).forEach(([type, definition]) => {
+      const isGraphQLObjectType = definition instanceof GraphQLObjectType;
+      const isIgnoredType = introspectionQueries.includes(type);
 
-    if (!isGraphQLObjectType || isIgnoredType) {
-      return;
-    }
+      if (!isGraphQLObjectType || isIgnoredType) {
+        return;
+      }
 
-    const fields = definition.getFields();
-    const fieldsToProcess = Object.entries(fields).filter(isValidFieldName);
+      const fields = definition.getFields();
+      const fieldsToProcess = Object.entries(fields).filter(isValidFieldName);
 
-    for (const [fieldName, fieldDefinition] of fieldsToProcess) {
-      const defaultResolver = get(fieldName);
+      for (const [fieldName, fieldDefinition] of fieldsToProcess) {
+        const defaultResolver = get(fieldName);
 
-      const path = `${type}.${fieldName}`;
-      const resolverConfig = getOr({}, path, resolversConfig);
+        const path = `${type}.${fieldName}`;
+        const resolverConfig = getOr({}, path, resolversConfig);
 
-      const { resolve: baseResolver = defaultResolver } = fieldDefinition;
+        const { resolve: baseResolver = defaultResolver } = fieldDefinition;
 
-      // Parse & initialize the middlewares
-      const middlewares = parseMiddlewares(resolverConfig, strapi);
+        // Parse & initialize the middlewares
+        const middlewares = parseMiddlewares(resolverConfig, strapi);
 
-      // Generate the policy middleware
-      const policyMiddleware = createPoliciesMiddleware(resolverConfig, { strapi });
+        // Generate the policy middleware
+        const policyMiddleware = createPoliciesMiddleware(resolverConfig, { strapi });
 
-      // Add the policyMiddleware at the end of the middlewares collection
-      middlewares.push(policyMiddleware);
+        // Add the policyMiddleware at the end of the middlewares collection
+        middlewares.push(policyMiddleware);
 
-      // Bind every middleware to the next one
-      const boundMiddlewares = middlewares.map((middleware, index, collection) => {
-        return (...args) =>
-          middleware(
-            // Make sure the last middleware in the list calls the baseResolver
-            index >= collection.length - 1 ? baseResolver : boundMiddlewares[index + 1],
-            ...args
-          );
-      });
+        // Bind every middleware to the next one
+        const boundMiddlewares = middlewares.map((middleware, index, collection) => {
+          return (...args) =>
+            middleware(
+              // Make sure the last middleware in the list calls the baseResolver
+              index >= collection.length - 1 ? baseResolver : boundMiddlewares[index + 1],
+              ...args
+            );
+        });
 
-      /**
-       * GraphQL authorization flow
-       * @param {object} context
-       * @return {Promise<void>}
-       */
-      const authorize = async ({ context }) => {
-        const authConfig = get('auth', resolverConfig);
-        const authContext = get('state.auth', context);
+        /**
+         * GraphQL authorization flow
+         * @param {object} context
+         * @return {Promise<void>}
+         */
+        const authorize = async ({ context }) => {
+          const authConfig = get('auth', resolverConfig);
+          const authContext = get('state.auth', context);
 
-        const isMutationOrQuery = ['Mutation', 'Query'].includes(type);
-        const hasConfig = !isNil(authConfig);
+          const isValidType = ['Mutation', 'Query', 'Subscription'].includes(type);
+          const hasConfig = !isNil(authConfig);
 
-        const isAuthDisabled = authConfig === false;
+          const isAuthDisabled = authConfig === false;
 
-        if ((isMutationOrQuery || hasConfig) && !isAuthDisabled) {
-          try {
-            await strapi.auth.verify(authContext, authConfig);
-          } catch (error) {
-            // TODO: [v4] Throw GraphQL Error instead
-            throw new Error('Forbidden access');
+          if ((isValidType || hasConfig) && !isAuthDisabled) {
+            try {
+              await strapi.auth.verify(authContext, authConfig);
+            } catch (error) {
+              // TODO: [v4] Throw GraphQL Error instead
+              throw new Error('Forbidden access');
+            }
           }
-        }
-      };
+        };
 
-      /**
-       * Base resolver wrapper that handles authorization, middlewares & policies
-       * @param {object} parent
-       * @param {object} args
-       * @param {object} context
-       * @param {object} info
-       * @return {Promise<any>}
-       */
-      fieldDefinition.resolve = async (parent, args, context, info) => {
-        await authorize({ context });
+        /**
+         * Base resolver wrapper that handles authorization, middlewares & policies
+         * @param {object} parent
+         * @param {object} args
+         * @param {object} context
+         * @param {object} info
+         * @return {Promise<any>}
+         */
+        fieldDefinition.resolve = async (parent, args, context, info) => {
+          await authorize({ context });
 
-        // Execute middlewares (including the policy middleware which will always be included)
-        return first(boundMiddlewares).call(null, parent, args, context, info);
-      };
-    }
-  });
+          // Execute middlewares (including the policy middleware which will always be included)
+          return first(boundMiddlewares).call(null, parent, args, context, info);
+        };
+      }
+    })
+  );
 
   return schema;
 };
