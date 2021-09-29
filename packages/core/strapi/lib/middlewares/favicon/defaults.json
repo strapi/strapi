@@ -1,7 +1,0 @@
-{
-  "favicon": {
-    "enabled": true,
-    "path": "favicon.ico",
-    "maxAge": 86400000
-  }
-}

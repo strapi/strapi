@@ -1,86 +1,36 @@
 'use strict';
 
-// Dependencies.
-const path = require('path');
-const _ = require('lodash');
-const glob = require('../../load/glob');
+const { join, extname, basename } = require('path');
+const fse = require('fs-extra');
 
-/**
- * Load middlewares
- */
-module.exports = async function(strapi) {
-  const installedMiddlewares = strapi.config.get('installedMiddlewares');
-  const appPath = strapi.config.get('appPath');
+// TODO:: allow folders with index.js inside for bigger policies
+module.exports = async function loadMiddlewares(strapi) {
+  const localMiddlewares = await loadLocalMiddlewares(strapi);
+  const internalMiddlewares = require('../../middlewares');
 
-  let middlewares = {};
-
-  const loaders = createLoaders(strapi);
-
-  await loaders.loadMiddlewareDependencies(installedMiddlewares, middlewares);
-  // internal middlewares
-  await loaders.loadInternalMiddlewares(middlewares);
-  // local middleware
-  await loaders.loadLocalMiddlewares(appPath, middlewares);
-
-  return middlewares;
+  strapi.container.get('middlewares').add(`global::`, localMiddlewares);
+  strapi.container.get('middlewares').add(`strapi::`, internalMiddlewares);
 };
 
-/**
- * Build loader functions
- * @param {*} strapi - strapi instance
- */
-const createLoaders = strapi => {
-  const loadMiddlewaresInDir = async (dir, middlewares) => {
-    const files = await glob('*/*(index|defaults).*(js|json)', {
-      cwd: dir,
-    });
+const loadLocalMiddlewares = async strapi => {
+  const dir = strapi.dirs.middlewares;
 
-    files.forEach(f => {
-      const name = f.split('/')[0];
-      mountMiddleware(name, [path.resolve(dir, f)], middlewares);
-    });
-  };
+  if (!(await fse.pathExists(dir))) {
+    return {};
+  }
 
-  const loadInternalMiddlewares = middlewares =>
-    loadMiddlewaresInDir(path.resolve(__dirname, '..', '..', 'middlewares'), middlewares);
+  const middlewares = {};
+  const paths = await fse.readdir(dir, { withFileTypes: true });
 
-  const loadLocalMiddlewares = (appPath, middlewares) =>
-    loadMiddlewaresInDir(path.resolve(appPath, 'src', 'middlewares'), middlewares);
+  for (const fd of paths) {
+    const { name } = fd;
+    const fullPath = join(dir, name);
 
-  const loadMiddlewareDependencies = async (packages, middlewares) => {
-    for (let packageName of packages) {
-      const baseDir = path.dirname(require.resolve(`@strapi/middleware-${packageName}`));
-      const files = await glob('*(index|defaults).*(js|json)', {
-        cwd: baseDir,
-        absolute: true,
-      });
-
-      mountMiddleware(packageName, files, middlewares);
+    if (fd.isFile() && extname(name) === '.js') {
+      const key = basename(name, '.js');
+      middlewares[key] = require(fullPath);
     }
-  };
+  }
 
-  const mountMiddleware = (name, files, middlewares) => {
-    files.forEach(file => {
-      middlewares[name] = middlewares[name] || { loaded: false };
-
-      if (_.endsWith(file, 'index.js') && !middlewares[name].load) {
-        return Object.defineProperty(middlewares[name], 'load', {
-          configurable: false,
-          enumerable: true,
-          get: () => require(file)(strapi),
-        });
-      }
-
-      if (_.endsWith(file, 'defaults.json')) {
-        middlewares[name].defaults = require(file);
-        return;
-      }
-    });
-  };
-
-  return {
-    loadInternalMiddlewares,
-    loadLocalMiddlewares,
-    loadMiddlewareDependencies,
-  };
+  return middlewares;
 };

@@ -3,7 +3,6 @@
 const transformAttribute = attribute => {
   switch (attribute.type) {
     case 'media': {
-      // TODO: handle a filter on field
       return {
         type: 'relation',
         relation: attribute.multiple === true ? 'morphMany' : 'morphOne',

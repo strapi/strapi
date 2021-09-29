@@ -10,7 +10,6 @@ dotenv.config({ path: process.env.ENV_PATH });
 
 process.env.NODE_ENV = process.env.NODE_ENV || 'development';
 
-const getPrefixedDeps = require('../../utils/get-prefixed-dependencies');
 const loadConfigDir = require('./config-loader');
 const loadFunction = require('./load-functions');
 
@@ -31,15 +30,6 @@ const defaultConfig = {
     admin: { autoOpen: false },
   },
   admin: {},
-  middleware: {
-    timeout: 1000,
-    load: {
-      before: ['responseTime', 'logger', 'cors', 'responses', 'gzip'],
-      order: [],
-      after: ['parser', 'router'],
-    },
-    settings: {},
-  },
 };
 
 module.exports = (dir, initialConfig = {}) => {
@@ -63,7 +53,6 @@ module.exports = (dir, initialConfig = {}) => {
       strapi: strapiVersion,
     },
     functions: loadFunction(path.join(configDir, 'functions')),
-    installedMiddlewares: getPrefixedDeps('@strapi/middleware', pkgJSON),
   };
 
   const baseConfig = omit('plugins', loadConfigDir(configDir)); // plugin config will be loaded later
