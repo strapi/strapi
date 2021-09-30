@@ -84,6 +84,7 @@ const getController = (name, { pluginName, apiName }, strapi) => {
     if (pluginName === 'admin') {
       return strapi.controller(`admin::${name}`);
     }
+
     return strapi.plugin(pluginName).controller(name);
   } else if (apiName) {
     return strapi.controller(`api::${apiName}.${name}`);
@@ -102,7 +103,7 @@ const getAction = (route, strapi) => {
 
   const [controllerName, actionName] = trim(handler).split('.');
 
-  const controller = getController(toLower(controllerName), { pluginName, apiName }, strapi);
+  const controller = getController(controllerName, { pluginName, apiName }, strapi);
 
   if (typeof controller[actionName] !== 'function') {
     throw new Error(`Handler not found "${handler}"`);

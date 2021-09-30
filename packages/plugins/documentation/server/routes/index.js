@@ -4,7 +4,7 @@ module.exports = [
   {
     method: 'GET',
     path: '/',
-    handler: 'Documentation.index',
+    handler: 'documentation.index',
     config: {
       policies: [
         'plugin::documentation.index',
@@ -15,7 +15,7 @@ module.exports = [
   {
     method: 'GET',
     path: '/v:major(\\d+).:minor(\\d+).:patch(\\d+)',
-    handler: 'Documentation.index',
+    handler: 'documentation.index',
     config: {
       policies: [
         'plugin::documentation.index',
@@ -26,7 +26,7 @@ module.exports = [
   {
     method: 'GET',
     path: '/login',
-    handler: 'Documentation.loginView',
+    handler: 'documentation.loginView',
     config: {
       policies: [
         { name: 'admin::hasPermissions', options: { actions: ['plugin::documentation.read'] } },
@@ -36,7 +36,7 @@ module.exports = [
   {
     method: 'POST',
     path: '/login',
-    handler: 'Documentation.login',
+    handler: 'documentation.login',
     config: {
       policies: [
         { name: 'admin::hasPermissions', options: { actions: ['plugin::documentation.read'] } },
@@ -46,7 +46,7 @@ module.exports = [
   {
     method: 'GET',
     path: '/getInfos',
-    handler: 'Documentation.getInfos',
+    handler: 'documentation.getInfos',
     config: {
       policies: [
         { name: 'admin::hasPermissions', options: { actions: ['plugin::documentation.read'] } },
@@ -56,7 +56,7 @@ module.exports = [
   {
     method: 'POST',
     path: '/regenerateDoc',
-    handler: 'Documentation.regenerateDoc',
+    handler: 'documentation.regenerateDoc',
     config: {
       policies: [
         {
@@ -69,7 +69,7 @@ module.exports = [
   {
     method: 'PUT',
     path: '/updateSettings',
-    handler: 'Documentation.updateSettings',
+    handler: 'documentation.updateSettings',
     config: {
       policies: [
         {
@@ -82,7 +82,7 @@ module.exports = [
   {
     method: 'DELETE',
     path: '/deleteDoc/:version',
-    handler: 'Documentation.deleteDoc',
+    handler: 'documentation.deleteDoc',
     config: {
       policies: [],
     },

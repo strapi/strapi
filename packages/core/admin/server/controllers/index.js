@@ -8,5 +8,5 @@ module.exports = {
   permission: require('./permission'),
   role: require('./role'),
   user: require('./user'),
-  webhooks: require('./Webhooks'),
+  webhooks: require('./webhooks'),
 };

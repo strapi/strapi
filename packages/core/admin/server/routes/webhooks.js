@@ -4,7 +4,7 @@ module.exports = [
   {
     method: 'GET',
     path: '/webhooks',
-    handler: 'Webhooks.listWebhooks',
+    handler: 'webhooks.listWebhooks',
     config: {
       policies: [
         'admin::isAuthenticatedAdmin',
@@ -15,7 +15,7 @@ module.exports = [
   {
     method: 'POST',
     path: '/webhooks',
-    handler: 'Webhooks.createWebhook',
+    handler: 'webhooks.createWebhook',
     config: {
       policies: [
         'admin::isAuthenticatedAdmin',
@@ -26,7 +26,7 @@ module.exports = [
   {
     method: 'GET',
     path: '/webhooks/:id',
-    handler: 'Webhooks.getWebhook',
+    handler: 'webhooks.getWebhook',
     config: {
       policies: [
         'admin::isAuthenticatedAdmin',
@@ -37,7 +37,7 @@ module.exports = [
   {
     method: 'PUT',
     path: '/webhooks/:id',
-    handler: 'Webhooks.updateWebhook',
+    handler: 'webhooks.updateWebhook',
     config: {
       policies: [
         'admin::isAuthenticatedAdmin',
@@ -48,7 +48,7 @@ module.exports = [
   {
     method: 'DELETE',
     path: '/webhooks/:id',
-    handler: 'Webhooks.deleteWebhook',
+    handler: 'webhooks.deleteWebhook',
     config: {
       policies: [
         'admin::isAuthenticatedAdmin',
@@ -59,7 +59,7 @@ module.exports = [
   {
     method: 'POST',
     path: '/webhooks/batch-delete',
-    handler: 'Webhooks.deleteWebhooks',
+    handler: 'webhooks.deleteWebhooks',
     config: {
       policies: [
         'admin::isAuthenticatedAdmin',
@@ -70,7 +70,7 @@ module.exports = [
   {
     method: 'POST',
     path: '/webhooks/:id/trigger',
-    handler: 'Webhooks.triggerWebhook',
+    handler: 'webhooks.triggerWebhook',
     config: {
       policies: [],
     },
