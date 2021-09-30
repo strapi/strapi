@@ -1,6 +1,6 @@
 /* eslint-disable react/jsx-indent */
 import React from 'react';
-import { Combobox, ComboboxOption } from '@strapi/parts/Combobox';
+import { Select, Option } from '@strapi/parts/Select';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import useLocales from '../../hooks/useLocales';
@@ -31,7 +31,7 @@ const LocaleSelect = React.memo(({ value, onLocaleChange, error }) => {
   const computedValue = value || '';
 
   return (
-    <Combobox
+    <Select
       aria-busy={isLoading}
       error={error}
       label={formatMessage({
@@ -49,11 +49,11 @@ const LocaleSelect = React.memo(({ value, onLocaleChange, error }) => {
       placeholder={formatMessage({ id: 'components.placeholder.select', defaultMessage: 'Select' })}
     >
       {options.map(option => (
-        <ComboboxOption value={option.value} key={option.value}>
+        <Option value={option.value} key={option.value}>
           {option.label}
-        </ComboboxOption>
+        </Option>
       ))}
-    </Combobox>
+    </Select>
   );
 });
 
