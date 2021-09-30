@@ -78,7 +78,7 @@ const createCoreStore = ({ environment: defaultEnv, db }) => {
     }
 
     async function set(params = {}) {
-      const { key, value, environment = defaultEnv, type, name, tag = '' } = Object.assign(
+      const { key, value, environment = defaultEnv, type = 'core', name = '', tag = '' } = Object.assign(
         {},
         source,
         params
