@@ -7,15 +7,54 @@
 /* eslint-disable import/no-cycle */
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from 'react-intl';
-import { TabContent, TabPane, Nav } from 'reactstrap';
-import { Plus } from '@buffetjs/icons';
+import { pxToRem } from '@strapi/helper-plugin';
+import AddIcon from '@strapi/icons/AddIcon';
+import { Box } from '@strapi/parts/Box';
+import { Stack } from '@strapi/parts/Stack';
+import { Text } from '@strapi/parts/Text';
+import { useIntl } from 'react-intl';
+import styled from 'styled-components';
 import useDataManager from '../../hooks/useDataManager';
 import getTrad from '../../utils/getTrad';
-import ComponentList from '../ComponentList';
 import ComponentCard from '../ComponentCard';
-import Td from '../Td';
-import ComponentButton from './ComponentButton';
+import ComponentList from '../ComponentList';
+import Tr from '../Tr';
+
+const StyledAddIcon = styled(AddIcon)`
+  width: ${pxToRem(32)};
+  height: ${pxToRem(32)};
+  padding: ${pxToRem(9)};
+  border-radius: ${pxToRem(64)};
+  background: ${({ theme }) => theme.colors.primary100};
+  path {
+    fill: ${({ theme }) => theme.colors.primary600};
+  }
+`;
+
+const FixedBox = styled(Box)`
+  height: ${pxToRem(90)};
+  position: absolute;
+  width: 100%;
+  top: 0;
+  left: 0;
+`;
+
+const ScrollableStack = styled(Stack)`
+  width: 100%;
+  overflow-x: auto;
+`;
+
+const ComponentContentBox = styled(Box)`
+  padding-top: ${pxToRem(90)};
+`;
+
+const ComponentStack = styled(Stack)`
+  flex-shrink: 0;
+  width: ${pxToRem(140)};
+  height: ${pxToRem(80)};
+  justify-content: center;
+  align-items: center;
+`;
 
 function DynamicZoneList({
   customRowComponent,
@@ -26,7 +65,8 @@ function DynamicZoneList({
   targetUid,
 }) {
   const { isInDevelopmentMode } = useDataManager();
-  const [activeTab, setActiveTab] = useState('0');
+  const [activeTab, setActiveTab] = useState(0);
+  const { formatMessage } = useIntl();
 
   const toggle = tab => {
     if (activeTab !== tab) {
@@ -39,69 +79,69 @@ function DynamicZoneList({
   };
 
   return (
-    <tr className="dynamiczone-row">
-      <Td colSpan={12} isFromDynamicZone>
-        <div>
-          <div className="tabs-wrapper">
-            <Nav tabs>
-              {isInDevelopmentMode && (
-                <li>
-                  <ComponentButton onClick={handleClickAdd}>
-                    <div>
-                      <Plus style={{ height: 15, width: 15 }} />
-                    </div>
-                    <p>
-                      <FormattedMessage id={getTrad('button.component.add')} />
-                    </p>
-                  </ComponentButton>
-                </li>
-              )}
-              {components.map((component, index) => {
-                return (
-                  <li key={component}>
-                    <ComponentCard
-                      dzName={name}
-                      index={index}
-                      component={component}
-                      isActive={activeTab === `${index}`}
-                      isInDevelopmentMode={isInDevelopmentMode}
-                      onClick={() => {
-                        toggle(`${index}`);
-                      }}
-                    />
-                  </li>
-                );
-              })}
-            </Nav>
-          </div>
-          <TabContent activeTab={activeTab}>
+    <Tr className="dynamiczone-row" isFromDynamicZone>
+      <td colSpan={12}>
+        <FixedBox paddingLeft={8}>
+          <ScrollableStack horizontal size={2}>
+            {isInDevelopmentMode && (
+              <button type="button" onClick={handleClickAdd}>
+                <ComponentStack size={1}>
+                  <StyledAddIcon />
+                  <Text small bold textColor="primary600">
+                    {formatMessage({
+                      id: getTrad('button.component.add'),
+                      formatMessage: 'Add a component',
+                    })}
+                  </Text>
+                </ComponentStack>
+              </button>
+            )}
             {components.map((component, index) => {
-              const props = {
-                customRowComponent,
-                component,
-              };
-
               return (
-                <TabPane tabId={`${index}`} key={component}>
-                  <table>
-                    <tbody>
-                      <ComponentList
-                        {...props}
-                        isFromDynamicZone
-                        dzName={name}
-                        mainTypeName={mainTypeName}
-                        targetUid={targetUid}
-                        key={component}
-                      />
-                    </tbody>
-                  </table>
-                </TabPane>
+                <ComponentCard
+                  key={component}
+                  dzName={name}
+                  index={index}
+                  component={component}
+                  isActive={activeTab === index}
+                  isInDevelopmentMode={isInDevelopmentMode}
+                  onClick={() => toggle(index)}
+                />
               );
             })}
-          </TabContent>
-        </div>
-      </Td>
-    </tr>
+          </ScrollableStack>
+        </FixedBox>
+        <ComponentContentBox>
+          {components.map((component, index) => {
+            const props = {
+              customRowComponent,
+              component,
+            };
+
+            return (
+              <Box
+                tabId={`${index}`}
+                key={component}
+                style={{ display: activeTab === index ? 'block' : 'none' }}
+              >
+                <table>
+                  <tbody>
+                    <ComponentList
+                      {...props}
+                      isFromDynamicZone
+                      dzName={name}
+                      mainTypeName={mainTypeName}
+                      targetUid={targetUid}
+                      key={component}
+                    />
+                  </tbody>
+                </table>
+              </Box>
+            );
+          })}
+        </ComponentContentBox>
+      </td>
+    </Tr>
   );
 }
 

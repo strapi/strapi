@@ -1,37 +1,30 @@
-/* eslint-disable indent */
-import styled from 'styled-components';
-import PolicyWrapper from './SubCategory/PolicyWrapper';
+import styled, { css } from 'styled-components';
+import { Box } from '@strapi/parts/Box';
 
-const CheckboxWrapper = styled.div`
+const activeCheckboxWrapperStyles = css`
+  background: ${props => props.theme.colors.primary100};
+  svg {
+    opacity: 1;
+  }
+`;
+
+const CheckboxWrapper = styled(Box)`
   display: flex;
   justify-content: space-between;
-  min-width: 50%;
-  padding: 0.9rem;
-  height: 3.6rem;
-  position: relative;
-  ${PolicyWrapper} {
+  align-items: center;
+
+  svg {
     opacity: 0;
-    > svg {
-      align-self: center;
-      font-size: 1.4rem;
-      color: ${({ theme }) => theme.main.colors.greyDark};
+    path {
+      fill: ${props => props.theme.colors.primary600};
     }
-    cursor: pointer;
   }
+
+  /* Show active style both on hover and when the action is selected */
+  ${props => props.isActive && activeCheckboxWrapperStyles}
   &:hover {
-    ${PolicyWrapper} {
-      opacity: 1;
-    }
-    background-color: ${({ theme }) => theme.main.colors.mediumGrey};
+    ${activeCheckboxWrapperStyles}
   }
-  ${({ isActive, theme }) =>
-    isActive &&
-    `
-    ${PolicyWrapper} {
-        opacity: 1;
-      }
-    background-color: ${theme.main.colors.mediumGrey};
-  `}
 `;
 
 export default CheckboxWrapper;

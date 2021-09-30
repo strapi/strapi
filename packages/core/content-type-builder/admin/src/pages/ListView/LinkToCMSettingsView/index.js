@@ -1,15 +1,10 @@
 import React, { memo } from 'react';
-import styled from 'styled-components';
 import PropTypes from 'prop-types';
-import { LayoutIcon, CheckPermissions } from '@strapi/helper-plugin';
-import { Button as Base } from '@buffetjs/core';
+import { CheckPermissions } from '@strapi/helper-plugin';
+import { Button } from '@strapi/parts/Button';
+import ConfigureIcon from '@strapi/icons/ConfigureIcon';
 import { useHistory } from 'react-router-dom';
 import { useIntl } from 'react-intl';
-
-const StyledButton = styled(Base)`
-  padding-left: 15px;
-  padding-right: 15px;
-`;
 
 const cmPermissions = {
   collectionTypesConfigurations: [
@@ -40,7 +35,6 @@ const LinkToCMSettingsView = ({ isTemporary, isInContentTypeView, contentTypeKin
     componentsConfigurations,
     singleTypesConfigurations,
   } = cmPermissions;
-  const icon = <LayoutIcon className="colored" fill={isTemporary ? '#B4B6BA' : '#007eff'} />;
   const label = formatMessage({ id: 'content-type-builder.form.button.configure-view' });
   let permissionsToApply = collectionTypesConfigurations;
 
@@ -68,14 +62,14 @@ const LinkToCMSettingsView = ({ isTemporary, isInContentTypeView, contentTypeKin
 
   return (
     <CheckPermissions permissions={permissionsToApply}>
-      <StyledButton
-        icon={icon}
-        label={label}
-        color="secondary"
+      <Button
+        startIcon={<ConfigureIcon />}
+        variant="tertiary"
         onClick={handleClick}
-        style={{ marginTop: '2px' }}
         disabled={isTemporary}
-      />
+      >
+        {label}
+      </Button>
     </CheckPermissions>
   );
 };

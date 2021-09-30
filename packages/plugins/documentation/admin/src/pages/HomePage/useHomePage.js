@@ -16,8 +16,8 @@ const useHomePage = () => {
   };
 
   const deleteMutation = useMutation(deleteDoc, {
-    onSuccess: () => {
-      queryClient.invalidateQueries('get-documentation');
+    onSuccess: async () => {
+      await queryClient.invalidateQueries('get-documentation');
       toggleNotification({
         type: 'info',
         message: { id: getTrad('notification.delete.success') },

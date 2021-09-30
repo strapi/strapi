@@ -1,46 +1,18 @@
 import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Picker, Padded, Text, Flex } from '@buffetjs/core';
-import { Carret, useQueryParams } from '@strapi/helper-plugin';
+import { useQueryParams } from '@strapi/helper-plugin';
 import { useRouteMatch } from 'react-router-dom';
-import styled from 'styled-components';
 import get from 'lodash/get';
+import { Select, Option } from '@strapi/parts/Select';
+import { useIntl } from 'react-intl';
 import useContentTypePermissions from '../../hooks/useContentTypePermissions';
 import useHasI18n from '../../hooks/useHasI18n';
 import selectI18NLocales from '../../selectors/selectI18nLocales';
 import getInitialLocale from '../../utils/getInitialLocale';
-
-const List = styled.ul`
-  list-style-type: none;
-  padding: 3px 0;
-  margin: 0;
-`;
-
-const ListItem = styled.li`
-  margin-top: 0;
-  margin-bottom: 0;
-  margin-left: -10px;
-  margin-right: -10px;
-  padding-left: 10px;
-  padding-right: 10px;
-  height: 36px;
-  display: flex;
-  justify-content: center;
-
-  &:hover {
-    background: ${props => props.theme.main.colors.mediumGrey};
-  }
-`;
-
-const EllipsisParagraph = styled(Text)`
-  width: ${props => props.width};
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: nowrap;
-  text-align: left;
-`;
+import getTrad from '../../utils/getTrad';
 
 const LocalePicker = () => {
+  const { formatMessage } = useIntl();
   const dispatch = useDispatch();
   const locales = useSelector(selectI18NLocales);
   const [{ query }, setQuery] = useQueryParams();
@@ -51,7 +23,7 @@ const LocalePicker = () => {
   const { createPermissions, readPermissions } = useContentTypePermissions(slug);
 
   const initialLocale = getInitialLocale(query, locales);
-  const [selected, setSelected] = useState(initialLocale);
+  const [selected, setSelected] = useState(initialLocale?.code || '');
 
   if (!isFieldLocalized) {
     return null;
@@ -72,54 +44,33 @@ const LocalePicker = () => {
     return canCreate || canRead;
   });
 
+  const handleClick = code => {
+    if (code === selected) {
+      return;
+    }
+
+    dispatch({ type: 'ContentManager/RBACManager/RESET_PERMISSIONS' });
+
+    setSelected(code);
+
+    setQuery({
+      plugins: { ...query.plugins, i18n: { locale: code } },
+    });
+  };
+
   return (
-    <Picker
-      position="right"
-      renderButtonContent={isOpen => (
-        <Flex>
-          <EllipsisParagraph width="20ch">{selected.name}</EllipsisParagraph>
-
-          <Padded left size="sm">
-            <Carret fill={isOpen ? '#007eff' : '#292b2c'} isUp={isOpen} />
-          </Padded>
-        </Flex>
-      )}
-      renderSectionContent={onToggle => {
-        const handleClick = locale => {
-          dispatch({ type: 'ContentManager/RBACManager/RESET_PERMISSIONS' });
-          setSelected(locale);
-
-          setQuery({
-            plugins: { ...query.plugins, i18n: { locale: locale.code } },
-          });
-          onToggle();
-        };
-
-        const hasMultipleLocales = displayedLocales.length > 1;
-
-        return hasMultipleLocales ? (
-          <Padded left right>
-            <List>
-              {displayedLocales.map(locale => {
-                if (locale.id === selected.id) {
-                  return null;
-                }
-
-                return (
-                  <ListItem key={locale.id}>
-                    <button onClick={() => handleClick(locale)} type="button">
-                      <EllipsisParagraph width="200px">
-                        {locale.name || locale.code}
-                      </EllipsisParagraph>
-                    </button>
-                  </ListItem>
-                );
-              })}
-            </List>
-          </Padded>
-        ) : null;
-      }}
-    />
+    <Select
+      size="S"
+      aria-label={formatMessage({ id: getTrad('actions.select-locale'), defaultMessage: '' })}
+      value={selected}
+      onChange={handleClick}
+    >
+      {displayedLocales.map(locale => (
+        <Option key={locale.id} id={`menu-item${locale.name || locale.code}`} value={locale.code}>
+          {locale.name}
+        </Option>
+      ))}
+    </Select>
   );
 };
 

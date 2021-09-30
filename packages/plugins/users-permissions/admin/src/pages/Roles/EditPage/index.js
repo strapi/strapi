@@ -1,161 +1,179 @@
 import React, { useState, useRef } from 'react';
-import { Header } from '@buffetjs/custom';
-import { Padded } from '@buffetjs/core';
+import { ContentLayout, HeaderLayout } from '@strapi/parts/Layout';
+import { Main } from '@strapi/parts/Main';
+import { Button } from '@strapi/parts/Button';
+import { Stack } from '@strapi/parts/Stack';
+import { Box } from '@strapi/parts/Box';
+import { TextInput } from '@strapi/parts/TextInput';
+import { Textarea } from '@strapi/parts/Textarea';
+import { H3 } from '@strapi/parts/Text';
+import CheckIcon from '@strapi/icons/CheckIcon';
+import { GridItem, Grid } from '@strapi/parts/Grid';
 import { Formik } from 'formik';
 import { useIntl } from 'react-intl';
 import { useRouteMatch } from 'react-router-dom';
-import { request, useNotification, useOverlayBlocker } from '@strapi/helper-plugin';
-
-import BaselineAlignement from '../../../components/BaselineAlignement';
-import ContainerFluid from '../../../components/ContainerFluid';
-import FormCard from '../../../components/FormBloc';
-import SizedInput from '../../../components/SizedInput';
+import {
+  useOverlayBlocker,
+  SettingsPageTitle,
+  LoadingIndicatorPage,
+  Form,
+  useNotification,
+} from '@strapi/helper-plugin';
+import UsersPermissions from '../../../components/UsersPermissions';
 import getTrad from '../../../utils/getTrad';
 import pluginId from '../../../pluginId';
-import UsersPermissions from '../../../components/UsersPermissions';
 import { usePlugins, useFetchRole } from '../../../hooks';
-
 import schema from './utils/schema';
+import axiosInstance from '../../../utils/axiosInstance';
 
 const EditPage = () => {
   const { formatMessage } = useIntl();
-  const [isSubmiting, setIsSubmiting] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const toggleNotification = useNotification();
   const { lockApp, unlockApp } = useOverlayBlocker();
   const {
     params: { id },
   } = useRouteMatch(`/settings/${pluginId}/roles/:id`);
-  const { routes, policies, isLoading } = usePlugins();
-  const { role, isLoading: isRoleLoading, onSubmitSucceeded } = useFetchRole(id);
+  const { isLoading: isLoadingPlugins, routes } = usePlugins();
+  const { role, onSubmitSucceeded, isLoading: isLoadingRole } = useFetchRole(id);
   const permissionsRef = useRef();
 
-  const headerActions = (handleSubmit, handleReset) => {
-    if (isLoading) {
-      return [];
-    }
-
-    return [
-      {
-        label: formatMessage({
-          id: 'app.components.Button.reset',
-          defaultMessage: 'Reset',
-        }),
-        onClick: () => {
-          handleReset();
-          permissionsRef.current.resetForm();
-        },
-        color: 'cancel',
-        type: 'button',
-      },
-      {
-        label: formatMessage({
-          id: 'app.components.Button.save',
-          defaultMessage: 'Save',
-        }),
-        onClick: handleSubmit,
-        color: 'success',
-        type: 'submit',
-        isLoading: isSubmiting,
-      },
-    ];
-  };
-
-  const handleCreateRoleSubmit = data => {
+  const handleEditRoleSubmit = async data => {
+    // Set loading state
     lockApp();
-    setIsSubmiting(true);
-
-    const permissions = permissionsRef.current.getPermissions();
-
-    Promise.resolve(
-      request(`/${pluginId}/roles/${id}`, {
-        method: 'PUT',
-        body: { ...data, ...permissions, users: [] },
-      })
-    )
-      .then(() => {
-        onSubmitSucceeded({ name: data.name, description: data.description });
-        permissionsRef.current.setFormAfterSubmit();
-        toggleNotification({
-          type: 'success',
-          message: { id: getTrad('Settings.roles.edited') },
-        });
-      })
-      .catch(err => {
-        console.error(err);
-        toggleNotification({
-          type: 'warning',
-          message: { id: 'notification.error' },
-        });
-      })
-      .finally(() => {
-        setIsSubmiting(false);
-        unlockApp();
+    setIsSubmitting(true);
+    try {
+      const permissions = permissionsRef.current.getPermissions();
+      // Update role in Strapi
+      await axiosInstance.put(`/${pluginId}/roles/${id}`, { ...data, ...permissions, users: [] });
+      // Notify success
+      onSubmitSucceeded({ name: data.name, description: data.description });
+      toggleNotification({
+        type: 'success',
+        message: {
+          id: getTrad('Settings.roles.edited'),
+          defaultMessage: 'Role edited',
+        },
       });
+    } catch (err) {
+      console.error(err);
+      toggleNotification({
+        type: 'warning',
+        message: {
+          id: 'notification.error',
+          defaultMessage: 'An error occurred',
+        },
+      });
+    }
+    // Unset loading state
+    setIsSubmitting(false);
+    unlockApp();
   };
+
+  if (isLoadingRole) {
+    return <LoadingIndicatorPage />;
+  }
 
   return (
-    <Formik
-      enableReinitialize
-      initialValues={{ name: role.name, description: role.description }}
-      onSubmit={handleCreateRoleSubmit}
-      validationSchema={schema}
-    >
-      {({ handleSubmit, values, errors, handleReset, handleChange, handleBlur }) => (
-        <form onSubmit={handleSubmit}>
-          <ContainerFluid padding="0">
-            <Header
-              title={{
-                label: role.name,
-              }}
-              content={role.description}
-              actions={headerActions(handleSubmit, handleReset)}
-              isLoading={isRoleLoading}
+    <Main>
+      <SettingsPageTitle name="Roles" />
+      <Formik
+        enableReinitialize
+        initialValues={{ name: role.name, description: role.description }}
+        onSubmit={handleEditRoleSubmit}
+        validationSchema={schema}
+      >
+        {({ handleSubmit, values, handleChange, errors }) => (
+          <Form noValidate onSubmit={handleSubmit}>
+            <HeaderLayout
+              primaryAction={
+                !isLoadingPlugins && (
+                  <Button
+                    disabled={role.code === 'strapi-super-admin'}
+                    type="submit"
+                    loading={isSubmitting}
+                    startIcon={<CheckIcon />}
+                  >
+                    {formatMessage({
+                      id: 'app.components.Button.save',
+                      defaultMessage: 'Save',
+                    })}
+                  </Button>
+                )
+              }
+              title={role.name}
+              subtitle={role.description}
             />
-            <BaselineAlignement top size="3px" />
-            <FormCard
-              title={formatMessage({
-                id: getTrad('EditPage.form.roles'),
-                defaultMessage: 'Role details',
-              })}
-              isLoading={isLoading}
-            >
-              <SizedInput
-                label="Settings.roles.form.input.name"
-                defaultMessage="Name"
-                name="name"
-                type="text"
-                error={errors.name ? { id: errors.name } : null}
-                onBlur={handleBlur}
-                value={values.name}
-                onChange={handleChange}
-              />
-              <SizedInput
-                label="Settings.roles.form.input.description"
-                defaultMessage="Description"
-                name="description"
-                type="textarea"
-                error={errors.description ? { id: errors.description } : null}
-                onBlur={handleBlur}
-                value={values.description}
-                onChange={handleChange}
-                // Override the default height of the textarea
-                style={{ height: 115 }}
-              />
-            </FormCard>
-          </ContainerFluid>
-          <div style={{ paddingTop: '1.8rem' }} />
-          {!isLoading && !isRoleLoading && (
-            <UsersPermissions
-              ref={permissionsRef}
-              permissions={role.permissions}
-              routes={routes}
-              policies={policies}
-            />
-          )}
-          <Padded top size="md" />
-        </form>
-      )}
-    </Formik>
+            <ContentLayout>
+              <Stack size={7}>
+                <Box
+                  background="neutral0"
+                  hasRadius
+                  shadow="filterShadow"
+                  paddingTop={6}
+                  paddingBottom={6}
+                  paddingLeft={7}
+                  paddingRight={7}
+                >
+                  <Stack size={4}>
+                    <H3 as="h2">
+                      {formatMessage({
+                        id: getTrad('EditPage.form.roles'),
+                        defaultMessage: 'Role details',
+                      })}
+                    </H3>
+                    <Grid gap={4}>
+                      <GridItem col={6}>
+                        <TextInput
+                          name="name"
+                          value={values.name || ''}
+                          onChange={handleChange}
+                          label={formatMessage({
+                            id: 'Settings.roles.form.input.name',
+                            defaultMessage: 'Name',
+                          })}
+                          error={
+                            errors.name
+                              ? formatMessage({ id: errors.name, defaultMessage: 'Invalid value' })
+                              : null
+                          }
+                        />
+                      </GridItem>
+                      <GridItem col={6}>
+                        <Textarea
+                          name="description"
+                          value={values.description || ''}
+                          onChange={handleChange}
+                          label={formatMessage({
+                            id: 'Settings.roles.form.input.description',
+                            defaultMessage: 'Description',
+                          })}
+                          error={
+                            errors.description
+                              ? formatMessage({
+                                  id: errors.description,
+                                  defaultMessage: 'Invalid value',
+                                })
+                              : null
+                          }
+                        />
+                      </GridItem>
+                    </Grid>
+                  </Stack>
+                </Box>
+                {!isLoadingPlugins && (
+                  <UsersPermissions
+                    ref={permissionsRef}
+                    permissions={role.permissions}
+                    routes={routes}
+                  />
+                )}
+              </Stack>
+            </ContentLayout>
+          </Form>
+        )}
+      </Formik>
+    </Main>
   );
 };
 

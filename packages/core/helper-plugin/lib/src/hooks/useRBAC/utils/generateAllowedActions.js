@@ -1,4 +1,4 @@
-import { upperFirst } from 'lodash';
+import upperFirst from 'lodash/upperFirst';
 
 const generateAllowedActions = permissionsNames =>
   permissionsNames.reduce((acc, current) => {

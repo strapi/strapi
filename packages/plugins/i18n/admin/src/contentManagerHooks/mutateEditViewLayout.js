@@ -1,16 +1,18 @@
 import React from 'react';
 import get from 'lodash/get';
-import { Globe, GlobeCrossed } from '@buffetjs/icons';
+import I18N from '@strapi/icons/I18N';
+import StrikedWorld from '@strapi/icons/StrikedWorld';
+import LabelAction from '../components/LabelAction';
 import { getTrad } from '../utils';
 
 const enhanceRelationLayout = (layout, locale) =>
   layout.map(current => {
-    const labelIcon = {
+    const labelActionProps = {
       title: {
         id: getTrad('Field.localized'),
         defaultMessage: 'This value is unique for the selected locale',
       },
-      icon: <Globe />,
+      icon: <I18N aria-hidden />,
     };
     let queryInfos = current.queryInfos;
 
@@ -22,7 +24,7 @@ const enhanceRelationLayout = (layout, locale) =>
       };
     }
 
-    return { ...current, labelIcon, queryInfos };
+    return { ...current, labelAction: <LabelAction {...labelActionProps} />, queryInfos };
   });
 
 const enhanceEditLayout = layout =>
@@ -35,17 +37,17 @@ const enhanceEditLayout = layout =>
         type === 'uid'
       );
 
-      const labelIcon = {
+      const labelActionProps = {
         title: {
           id: hasI18nEnabled ? getTrad('Field.localized') : getTrad('Field.not-localized'),
           defaultMessage: hasI18nEnabled
             ? 'This value is unique for the selected locale'
             : 'This value is common to all locales',
         },
-        icon: hasI18nEnabled ? <Globe /> : <GlobeCrossed />,
+        icon: hasI18nEnabled ? <I18N aria-hidden /> : <StrikedWorld aria-hidden />,
       };
 
-      acc.push({ ...field, labelIcon });
+      acc.push({ ...field, labelAction: <LabelAction {...labelActionProps} /> });
 
       return acc;
     }, []);

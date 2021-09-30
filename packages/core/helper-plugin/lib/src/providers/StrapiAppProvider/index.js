@@ -46,7 +46,7 @@ StrapiAppProvider.propTypes = {
         defaultMessage: PropTypes.string.isRequired,
       }).isRequired,
       permissions: PropTypes.array,
-      Component: PropTypes.node,
+      Component: PropTypes.func,
     })
   ).isRequired,
   plugins: PropTypes.object.isRequired,

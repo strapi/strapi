@@ -9,7 +9,7 @@ import {
   ModalForm,
 } from '@strapi/helper-plugin';
 import { FormattedMessage } from 'react-intl';
-import { upperFirst } from 'lodash';
+import upperFirst from 'lodash/upperFirst';
 import { AttributeIcon, Button } from '@buffetjs/core';
 
 const PopupForm = ({

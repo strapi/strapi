@@ -23,7 +23,10 @@ module.exports = ({ strapi }) => {
           t.nonNull.list.field('data', {
             type: nonNull(entityName),
 
-            resolve: pipe(prop('nodes'), defaultTo([])),
+            resolve: pipe(
+              prop('nodes'),
+              defaultTo([])
+            ),
           });
         },
       });

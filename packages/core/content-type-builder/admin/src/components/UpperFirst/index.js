@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { upperFirst } from 'lodash';
+import upperFirst from 'lodash/upperFirst';
 
 const UpperFirst = ({ content }) => upperFirst(content);
 

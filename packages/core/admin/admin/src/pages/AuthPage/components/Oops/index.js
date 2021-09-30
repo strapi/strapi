@@ -1,62 +1,59 @@
 import React from 'react';
-import { Text, Padded } from '@buffetjs/core';
-import { useHistory } from 'react-router-dom';
 import { useIntl } from 'react-intl';
-import { BaselineAlignment, useQuery } from '@strapi/helper-plugin';
-import Button from '../../../../components/FullWidthButton';
-import OopsLogo from '../../../../assets/images/oops.png';
-import Box from '../Box';
+import { useQuery } from '@strapi/helper-plugin';
+import { Box } from '@strapi/parts/Box';
+import { Main } from '@strapi/parts/Main';
+import { Row } from '@strapi/parts/Row';
+import { Link } from '@strapi/parts/Link';
+import { H1, Text } from '@strapi/parts/Text';
+import UnauthenticatedLayout, {
+  Column,
+  LayoutContent,
+} from '../../../../layouts/UnauthenticatedLayout';
 import Logo from '../Logo';
-import Section from '../Section';
-import Img from './Img';
 
 const Oops = () => {
-  const { push } = useHistory();
   const { formatMessage } = useIntl();
   const query = useQuery();
 
-  const handleClick = () => {
-    push('/auth/login');
-  };
-
-  const message = query.get('info') || formatMessage({ id: 'Auth.components.Oops.text' });
+  const message =
+    query.get('info') ||
+    formatMessage({
+      id: 'Auth.components.Oops.text',
+      defaultMessage: 'Your account has been suspended.',
+    });
 
   return (
-    <>
-      <Section textAlign="center">
-        <Logo />
-      </Section>
-      <Section withBackground textAlign="center">
-        <BaselineAlignment top size="25px">
-          <Box withoutError>
-            <Padded top>
-              <Padded top size="xs">
-                <Img src={OopsLogo} alt="oops" />
-              </Padded>
-            </Padded>
-            {/* FIXME IN BUFFET.JS */}
-            <BaselineAlignment top size="20px">
-              <Padded top size="xs">
-                <Text fontSize="xl" fontWeight="bold">
-                  Oops...
-                </Text>
-              </Padded>
-            </BaselineAlignment>
-            <Padded top size="xs">
-              <Padded top size="sm">
-                <BaselineAlignment top size="3px" />
-                <Text fontSize="md">{message}</Text>
-              </Padded>
-            </Padded>
-            <Padded top size="md">
-              <Button type="button" color="primary" textTransform="uppercase" onClick={handleClick}>
-                {formatMessage({ id: 'Auth.link.signin' })}
-              </Button>
-            </Padded>
+    <UnauthenticatedLayout>
+      <Main>
+        <LayoutContent>
+          <Column>
+            <Logo />
+            <Box paddingTop={6} paddingBottom={7}>
+              <H1>
+                {formatMessage({ id: 'Auth.components.Oops.title', defaultMessage: 'Oops...' })}
+              </H1>
+            </Box>
+            <Text>{message}</Text>
+            <Box paddingTop={4}>
+              <Text>
+                {formatMessage({
+                  id: 'Auth.components.Oops.text.admin',
+                  defaultMessage: 'If this is a mistake, please contact your administrator.',
+                })}
+              </Text>
+            </Box>
+          </Column>
+        </LayoutContent>
+        <Row justifyContent="center">
+          <Box paddingTop={4}>
+            <Link to="/auth/login">
+              <Text>{formatMessage({ id: 'Auth.link.signin', defaultMessage: 'Sign in' })}</Text>
+            </Link>
           </Box>
-        </BaselineAlignment>
-      </Section>
-    </>
+        </Row>
+      </Main>
+    </UnauthenticatedLayout>
   );
 };
 

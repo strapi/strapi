@@ -1,18 +1,26 @@
 import React from 'react';
-import { Button, Flex, Padded, Separator } from '@buffetjs/core';
-import { LoadingIndicator } from '@buffetjs/styles';
 import { Redirect, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
+import { Divider } from '@strapi/parts/Divider';
+import { Stack } from '@strapi/parts/Stack';
+import { Row } from '@strapi/parts/Row';
+import { Box } from '@strapi/parts/Box';
+import { Button } from '@strapi/parts/Button';
+import { Link } from '@strapi/parts/Link';
+import { Loader } from '@strapi/parts/Loader';
+import { TableLabel, H1, Text, Subtitle } from '@strapi/parts/Text';
+import { Main } from '@strapi/parts/Main';
 import { useIntl } from 'react-intl';
-import { BaselineAlignment } from '@strapi/helper-plugin';
-import Box from '../../../../../../admin/src/pages/AuthPage/components/Box';
-import Logo from '../../../../../../admin/src/pages/AuthPage/components/Logo';
-import Section from '../../../../../../admin/src/pages/AuthPage/components/Section';
-import ProviderButton from '../../../../components/ProviderButton';
 import { useAuthProviders } from '../../../../hooks';
+import UnauthenticatedLayout, {
+  Column,
+  LayoutContent,
+} from '../../../../../../admin/src/layouts/UnauthenticatedLayout';
+import SSOProviders from './SSOProviders';
+import Logo from '../../../../../../admin/src/pages/AuthPage/components/Logo';
 
-const ProviderWrapper = styled.div`
-  padding: 5px 4px;
+const DividerFull = styled(Divider)`
+  flex: 1;
 `;
 
 const Providers = () => {
@@ -31,44 +39,49 @@ const Providers = () => {
   }
 
   return (
-    <>
-      <Section textAlign="center">
-        <Logo />
-      </Section>
-      <Section withBackground textAlign="center">
-        <BaselineAlignment top size="25px">
-          <Box withoutError>
+    <UnauthenticatedLayout>
+      <Main>
+        <LayoutContent>
+          <Column>
+            <Logo />
+            <Box paddingTop={6} paddingBottom={1}>
+              <H1>{formatMessage({ id: 'Auth.form.welcome.title' })}</H1>
+            </Box>
+            <Box paddingBottom={7}>
+              <Subtitle textColor="neutral600">
+                {formatMessage({ id: 'Auth.login.sso.subtitle' })}
+              </Subtitle>
+            </Box>
+          </Column>
+          <Stack size={7}>
             {isLoading ? (
-              <LoadingIndicator />
+              <Row justifyContent="center">
+                <Loader>{formatMessage({ id: 'Auth.login.sso.loading' })}</Loader>
+              </Row>
             ) : (
-              <Flex flexWrap="wrap">
-                {providers.map(provider => (
-                  <ProviderWrapper key={provider.uid}>
-                    <ProviderButton provider={provider} />
-                  </ProviderWrapper>
-                ))}
-              </Flex>
+              <SSOProviders providers={providers} />
             )}
-            <Padded top bottom size="smd">
-              <BaselineAlignment top size="3px" />
-              <Separator
-                label={formatMessage({
-                  id: 'or',
-                  defaultMessage: 'OR',
-                })}
-              />
-              <BaselineAlignment top size="7px" />
-            </Padded>
-            <Button style={{ width: '100%' }} onClick={handleClick} type="submit" color="secondary">
-              {formatMessage({
-                id: 'Auth.form.button.login.strapi',
-                defaultMessage: 'LOG IN VIA STRAPI',
-              })}
+            <Row>
+              <DividerFull />
+              <Box paddingLeft={3} paddingRight={3}>
+                <TableLabel textColor="neutral600">{formatMessage({ id: 'or' })}</TableLabel>
+              </Box>
+              <DividerFull />
+            </Row>
+            <Button fullWidth size="L" onClick={handleClick}>
+              {formatMessage({ id: 'Auth.form.button.login.strapi' })}
             </Button>
+          </Stack>
+        </LayoutContent>
+        <Row justifyContent="center">
+          <Box paddingTop={4}>
+            <Link to="/auth/forgot-password">
+              <Text small>{formatMessage({ id: 'Auth.link.forgot-password' })}</Text>
+            </Link>
           </Box>
-        </BaselineAlignment>
-      </Section>
-    </>
+        </Row>
+      </Main>
+    </UnauthenticatedLayout>
   );
 };
 

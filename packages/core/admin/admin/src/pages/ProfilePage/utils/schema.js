@@ -1,5 +1,5 @@
 import * as yup from 'yup';
-import { profileValidation } from '../../Users/utils/validations/users';
+import { profileValidation } from '../../SettingsPage/pages/Users/utils/validations/users';
 
 const schema = yup.object().shape(profileValidation);
 

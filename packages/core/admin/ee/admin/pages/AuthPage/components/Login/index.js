@@ -1,73 +1,53 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { useTheme } from 'styled-components';
-import { Link } from 'react-router-dom';
+import styled from 'styled-components';
+import { Box } from '@strapi/parts/Box';
+import { Row } from '@strapi/parts/Row';
+import { Divider } from '@strapi/parts/Divider';
+import { Stack } from '@strapi/parts/Stack';
+import { TableLabel } from '@strapi/parts/Text';
 import { useIntl } from 'react-intl';
-import { Flex, Padded, Separator } from '@buffetjs/core';
-import { LoadingIndicator, Tooltip } from '@buffetjs/styles';
-import { Dots } from '@buffetjs/icons';
-import { BaselineAlignment } from '@strapi/helper-plugin';
 import BaseLogin from '../../../../../../admin/src/pages/AuthPage/components/Login/BaseLogin';
-import ProviderButton from '../../../../components/ProviderButton';
-import {
-  ProviderButtonWrapper,
-  ProviderLink,
-} from '../../../../components/ProviderButton/ProviderButtonStyles';
 import { useAuthProviders } from '../../../../hooks';
+import UnauthenticatedLayout from '../../../../../../admin/src/layouts/UnauthenticatedLayout';
+import SSOProviders from '../Providers/SSOProviders';
+
+const DividerFull = styled(Divider)`
+  flex: 1;
+`;
 
 const Login = loginProps => {
   const ssoEnabled = strapi.features.isEnabled(strapi.features.SSO);
-
-  const theme = useTheme();
   const { isLoading, data: providers } = useAuthProviders({ ssoEnabled });
   const { formatMessage } = useIntl();
 
   if (!ssoEnabled || (!isLoading && providers.length === 0)) {
-    return <BaseLogin {...loginProps} />;
+    return (
+      <UnauthenticatedLayout>
+        <BaseLogin {...loginProps} />
+      </UnauthenticatedLayout>
+    );
   }
 
   return (
-    <BaseLogin {...loginProps}>
-      <Padded top size="md">
-        <BaselineAlignment top size="6px" />
-        <Separator
-          label={formatMessage({
-            id: 'or',
-            defaultMessage: 'OR',
-          })}
-        />
-        <Padded bottom size="md" />
-        {isLoading ? (
-          <LoadingIndicator />
-        ) : (
-          <Flex justifyContent="center">
-            {providers.slice(0, 2).map((provider, index) => (
-              <Padded key={provider.uid} left={index !== 0} right size="xs">
-                <ProviderButton provider={provider} />
-              </Padded>
-            ))}
-            {providers.length > 2 && (
-              <Padded left size="xs">
-                <ProviderLink as={Link} to="/auth/providers">
-                  <ProviderButtonWrapper
-                    justifyContent="center"
-                    alignItems="center"
-                    data-for="see-more-tooltip"
-                    data-tip={formatMessage({
-                      id: 'Auth.form.button.login.providers.see-more',
-                      defaultMessage: 'See more',
-                    })}
-                  >
-                    <Dots width="18" height="8" fill={theme.main.colors.black} />
-                  </ProviderButtonWrapper>
-                </ProviderLink>
-                <Tooltip id="see-more-tooltip" />
-              </Padded>
-            )}
-          </Flex>
-        )}
-      </Padded>
-    </BaseLogin>
+    <UnauthenticatedLayout>
+      <BaseLogin {...loginProps}>
+        <Box paddingTop={7}>
+          <Stack size={7}>
+            <Row>
+              <DividerFull />
+              <Box paddingLeft={3} paddingRight={3}>
+                <TableLabel textColor="neutral600">
+                  {formatMessage({ id: 'Auth.login.sso.divider' })}
+                </TableLabel>
+              </Box>
+              <DividerFull />
+            </Row>
+            <SSOProviders providers={providers} displayAllProviders={false} />
+          </Stack>
+        </Box>
+      </BaseLogin>
+    </UnauthenticatedLayout>
   );
 };
 

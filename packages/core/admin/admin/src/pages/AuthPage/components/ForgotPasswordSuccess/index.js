@@ -1,76 +1,59 @@
 import React from 'react';
-import { Padded, Text } from '@buffetjs/core';
 import { useIntl } from 'react-intl';
-import { useHistory } from 'react-router-dom';
-import { BaselineAlignment } from '@strapi/helper-plugin';
-import Button from '../../../../components/FullWidthButton';
-import Box from '../Box';
+import { Box } from '@strapi/parts/Box';
+import { Main } from '@strapi/parts/Main';
+import { Row } from '@strapi/parts/Row';
+import { Link } from '@strapi/parts/Link';
+import { H1, Text } from '@strapi/parts/Text';
+import UnauthenticatedLayout, {
+  Column,
+  LayoutContent,
+} from '../../../../layouts/UnauthenticatedLayout';
 import Logo from '../Logo';
-import Section from '../Section';
-import Envelope from './Envelope';
 
 const ForgotPasswordSuccess = () => {
   const { formatMessage } = useIntl();
-  const { push } = useHistory();
-
-  const handleClick = () => {
-    push('/auth/login');
-  };
 
   return (
-    <>
-      <Section textAlign="center">
-        <Logo />
-      </Section>
-      <Section withBackground textAlign="center">
-        <Padded top size="smd">
-          <Padded top size="xs">
-            <Box withoutError>
-              <BaselineAlignment top size="3px">
-                <Envelope />
-              </BaselineAlignment>
-
-              <Padded top size="smd">
-                <Text fontWeight="bold" lineHeight="24px" fontSize="xl">
-                  {formatMessage({ id: 'app.containers.AuthPage.ForgotPasswordSuccess.title' })}
-                </Text>
-              </Padded>
-
-              <Padded right left size="lg">
-                <Padded top size="smd">
-                  <Text fontSize="md" style={{ textAlign: 'center' }} lineHeight="18px">
-                    {formatMessage({
-                      id: 'app.containers.AuthPage.ForgotPasswordSuccess.text.email',
-                    })}
-                  </Text>
-
-                  <Padded top>
-                    <BaselineAlignment top size="7px">
-                      <Text fontSize="md" style={{ textAlign: 'center' }} lineHeight="18px">
-                        {formatMessage({
-                          id: 'app.containers.AuthPage.ForgotPasswordSuccess.text.contact-admin',
-                        })}
-                      </Text>
-                    </BaselineAlignment>
-                  </Padded>
-                </Padded>
-              </Padded>
-
-              <Padded top size="md">
-                <Button
-                  type="button"
-                  color="primary"
-                  textTransform="uppercase"
-                  onClick={handleClick}
-                >
-                  {formatMessage({ id: 'Auth.link.signin' })}
-                </Button>
-              </Padded>
+    <UnauthenticatedLayout>
+      <Main>
+        <LayoutContent>
+          <Column>
+            <Logo />
+            <Box paddingTop={6} paddingBottom={7}>
+              <H1>
+                {formatMessage({
+                  id: 'app.containers.AuthPage.ForgotPasswordSuccess.title',
+                  defaultMessage: 'Email sent',
+                })}
+              </H1>
             </Box>
-          </Padded>
-        </Padded>
-      </Section>
-    </>
+            <Text>
+              {formatMessage({
+                id: 'app.containers.AuthPage.ForgotPasswordSuccess.text.email',
+                defaultMessage: 'It can take a few minutes to receive your password recovery link.',
+              })}
+            </Text>
+            <Box paddingTop={4}>
+              <Text>
+                {formatMessage({
+                  id: 'app.containers.AuthPage.ForgotPasswordSuccess.text.contact-admin',
+                  defaultMessage:
+                    'If you do not receive this link, please contact your administrator.',
+                })}
+              </Text>
+            </Box>
+          </Column>
+        </LayoutContent>
+        <Row justifyContent="center">
+          <Box paddingTop={4}>
+            <Link to="/auth/login">
+              <Text>{formatMessage({ id: 'Auth.link.signin', defaultMessage: 'Sign in' })}</Text>
+            </Link>
+          </Box>
+        </Row>
+      </Main>
+    </UnauthenticatedLayout>
   );
 };
 

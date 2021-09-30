@@ -39,7 +39,6 @@ export default {
       },
     });
 
-    // TODO update guide
     app.addFields({ type: 'media', Component: InputMedia });
 
     app.addReducers(reducers);

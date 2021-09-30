@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { get, toString } from 'lodash';
-import { useContentManagerEditViewDataManager } from '@strapi/helper-plugin';
+import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 
 function useSelect({ schema, componentFieldName }) {
   const {
@@ -9,7 +9,7 @@ function useSelect({ schema, componentFieldName }) {
     moveComponentField,
     removeRepeatableField,
     triggerFormValidation,
-  } = useContentManagerEditViewDataManager();
+  } = useCMEditViewDataManager();
 
   const mainField = useMemo(() => get(schema, ['settings', 'mainField'], 'id'), [schema]);
   const displayedValue = toString(

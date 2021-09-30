@@ -1,18 +1,20 @@
 import React, { memo, useCallback, useReducer } from 'react';
-import { Padded } from '@buffetjs/core';
+import { Accordion, AccordionToggle, AccordionContent } from '@strapi/parts/Accordion';
+import { useIntl } from 'react-intl';
 import { useUsersPermissions } from '../../contexts/UsersPermissionsContext';
-import ListWrapper from './ListWrapper';
+import formatPluginName from '../../utils/formatPluginName';
 import PermissionRow from './PermissionRow';
 import init from './init';
 import { initialState, reducer } from './reducer';
 
 const Permissions = () => {
   const { modifiedData } = useUsersPermissions();
+  const { formatMessage } = useIntl();
   const [{ collapses }, dispatch] = useReducer(reducer, initialState, state =>
     init(state, modifiedData)
   );
 
-  const handleOpenPlugin = useCallback(index => {
+  const handleToggle = useCallback(index => {
     dispatch({
       type: 'TOGGLE_COLLAPSE',
       index,
@@ -20,24 +22,30 @@ const Permissions = () => {
   }, []);
 
   return (
-    <ListWrapper>
-      <Padded left right size="sm">
-        {collapses.map((_, index) => {
-          const { isOpen, name } = collapses[index];
-
-          return (
-            <PermissionRow
-              key={name}
-              isOpen={isOpen}
-              isWhite={index % 2 === 1}
-              name={name}
-              onOpenPlugin={() => handleOpenPlugin(index)}
-              permissions={modifiedData[name]}
-            />
-          );
-        })}
-      </Padded>
-    </ListWrapper>
+    <>
+      {collapses.map((collapse, index) => (
+        <Accordion
+          expanded={collapse.isOpen}
+          toggle={() => handleToggle(index)}
+          key={collapse.name}
+        >
+          <AccordionToggle
+            title={formatPluginName(collapse.name)}
+            description={formatMessage(
+              {
+                id: 'users-permissions.Plugin.permissions.plugins.description',
+                defaultMessage: 'Define all allowed actions for the {name} plugin.',
+              },
+              { name: collapse.name }
+            )}
+            variant={index % 2 ? 'primary' : 'secondary'}
+          />
+          <AccordionContent>
+            <PermissionRow permissions={modifiedData[collapse.name]} name={collapse.name} />
+          </AccordionContent>
+        </Accordion>
+      ))}
+    </>
   );
 };
 

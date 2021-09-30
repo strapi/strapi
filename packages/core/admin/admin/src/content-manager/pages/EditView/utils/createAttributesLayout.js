@@ -1,6 +1,7 @@
 import { get, isEmpty } from 'lodash';
-
+// TODO: refacto this file to avoid eslint issues
 /* eslint-disable no-restricted-syntax */
+/* eslint-disable no-unused-vars */
 
 const createAttributesLayout = (currentLayout, attributes) => {
   const getType = name => get(attributes, [name, 'type'], '');

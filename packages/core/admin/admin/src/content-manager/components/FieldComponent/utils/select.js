@@ -1,19 +1,21 @@
 import { useMemo } from 'react';
 import { get, take } from 'lodash';
-import { useContentManagerEditViewDataManager } from '@strapi/helper-plugin';
+import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 
 import { getFieldName } from '../../../utils';
 import { useContentTypeLayout } from '../../../hooks';
 
 function useSelect({ isFromDynamicZone, name }) {
   const {
+    addNonRepeatableComponentToField,
     createActionAllowedFields,
     isCreatingEntry,
     modifiedData,
     removeComponentFromField,
     readActionAllowedFields,
     updateActionAllowedFields,
-  } = useContentManagerEditViewDataManager();
+    formErrors,
+  } = useCMEditViewDataManager();
   const { contentType } = useContentTypeLayout();
 
   // This is used for the readonly mode when updating an entry
@@ -111,6 +113,8 @@ function useSelect({ isFromDynamicZone, name }) {
   }, [hasChildrenAllowedFields, hasChildrenReadableFields, isCreatingEntry]);
 
   return {
+    addNonRepeatableComponentToField,
+    formErrors,
     hasChildrenAllowedFields,
     hasChildrenReadableFields,
     isCreatingEntry,

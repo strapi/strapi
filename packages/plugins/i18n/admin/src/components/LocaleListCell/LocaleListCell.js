@@ -1,24 +1,56 @@
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { useSelector } from 'react-redux';
-import { Padded, Text } from '@buffetjs/core';
-import { Tooltip } from '@buffetjs/styles';
-import get from 'lodash/get';
 import styled from 'styled-components';
+import { useIntl } from 'react-intl';
+import { useSelector } from 'react-redux';
+import { Row } from '@strapi/parts/Row';
+import { Box } from '@strapi/parts/Box';
+import { Tooltip } from '@strapi/parts/Tooltip';
+import { Text } from '@strapi/parts/Text';
+import { Popover } from '@strapi/parts/Popover';
+import { SortIcon, stopPropagation } from '@strapi/helper-plugin';
+import get from 'lodash/get';
 import selectI18NLocales from '../../selectors/selectI18nLocales';
+import { getTrad } from '../../utils';
+
+const Button = styled.button`
+  svg {
+    > g,
+    path {
+      fill: ${({ theme }) => theme.colors.neutral500};
+    }
+  }
+  &:hover {
+    svg {
+      > g,
+      path {
+        fill: ${({ theme }) => theme.colors.neutral600};
+      }
+    }
+  }
+  &:active {
+    svg {
+      > g,
+      path {
+        fill: ${({ theme }) => theme.colors.neutral400};
+      }
+    }
+  }
+`;
+
+const ActionWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: ${32 / 16}rem;
+  width: ${32 / 16}rem;
+  svg {
+    height: ${4 / 16}rem;
+  }
+`;
 
 const mapToLocaleName = (locales, localeCode) =>
-  get(
-    locales.find(({ code }) => code === localeCode),
-    'name',
-    localeCode
-  );
-
-const LocaleName = styled.div`
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: nowrap;
-`;
+  get(locales.find(({ code }) => code === localeCode), 'name', localeCode);
 
 const LocaleListCell = ({ localizations, locale: currentLocaleCode, id }) => {
   const locales = useSelector(selectI18NLocales);
@@ -26,6 +58,9 @@ const LocaleListCell = ({ localizations, locale: currentLocaleCode, id }) => {
   const localizationNames = allLocalizations.map(locale => locale.locale);
   const defaultLocale = locales.find(locale => locale.isDefault);
   const hasDefaultLocale = localizationNames.includes(defaultLocale.code);
+  const [visible, setVisible] = useState(false);
+  const buttonRef = useRef();
+  const { formatMessage } = useIntl();
 
   let localesArray = [];
 
@@ -52,24 +87,49 @@ const LocaleListCell = ({ localizations, locale: currentLocaleCode, id }) => {
     localesArray = ctLocales;
   }
 
+  const handleTogglePopover = () => setVisible(prev => !prev);
+
   const elId = `entry-${id}__locale`;
   const localesNames = localesArray.join(', ');
 
   return (
-    <div>
-      <LocaleName data-for={elId} data-tip={localesNames}>
-        {localesNames}
-      </LocaleName>
-      <Tooltip id={elId} place="bottom" delay={0}>
-        {localesArray.map(name => (
-          <Padded key={name} top bottom size="xs">
-            <Text ellipsis color="white">
-              {name}
+    <Row {...stopPropagation}>
+      <Tooltip
+        label={formatMessage({
+          id: getTrad('CMListView.popover.display-locales.label'),
+          defaultMessage: 'Display translated locales',
+        })}
+      >
+        <Button type="button" onClick={handleTogglePopover} ref={buttonRef}>
+          <Row>
+            <Text
+              style={{ maxWidth: '252px', cursor: 'pointer' }}
+              data-for={elId}
+              data-tip={localesNames}
+              textColor="neutral800"
+              ellipsis
+            >
+              {localesNames}
             </Text>
-          </Padded>
-        ))}
+            <ActionWrapper>
+              <SortIcon />
+
+              {visible && (
+                <Popover source={buttonRef} spacing={16} centered>
+                  <ul>
+                    {localesArray.map(name => (
+                      <Box key={name} padding={3} as="li">
+                        <Text>{name}</Text>
+                      </Box>
+                    ))}
+                  </ul>
+                </Popover>
+              )}
+            </ActionWrapper>
+          </Row>
+        </Button>
       </Tooltip>
-    </div>
+    </Row>
   );
 };
 

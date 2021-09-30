@@ -1,0 +1,70 @@
+<!--- FilterListURLQuery.stories.mdx --->
+
+import { useEffect } from 'react';
+import { Meta, ArgsTable, Canvas, Story } from '@storybook/addon-docs';
+import { Button, Box, Main, Row, Stack } from '@strapi/parts';
+import useQueryParams from '../../hooks/useQueryParams';
+import FilterListURLQuery from './index';
+
+<Meta title="components/FilterListURLQuery" />
+
+# FilterListURLQuery
+
+This component is used to change the page size.
+
+## Imports
+
+```js
+import { FilterListURLQuery } from '@strapi/helper-plugin';
+```
+
+## Usage
+
+<Canvas>
+  <Story name="base">
+    {() => {
+      const [{ query }, setQuery] = useQueryParams();
+      const filters = {
+        $and: [{ city: { $eq: 'paris' } }, { categories: { name: { $eq: 'paris' } } }],
+      };
+      useEffect(() => {
+        setQuery({ filters });
+      }, []);
+      const handleResetFilters = () => setQuery({ filters });
+      return (
+        <Main>
+          <Stack size={6}>
+            <Row paddingTop={6}>
+              <FilterListURLQuery
+                filtersSchema={[
+                  {
+                    name: 'categories',
+                    fieldSchema: {
+                      type: 'relation',
+                      mainField: { name: 'name', schema: { type: 'string' } },
+                    },
+                    metadatas: { label: 'categories' },
+                  },
+                  {
+                    name: 'city',
+                    fieldSchema: {
+                      type: 'string',
+                    },
+                    metadatas: { label: 'city' },
+                  },
+                ]}
+              />
+            </Row>
+            <Box>
+              <Button onClick={handleResetFilters}>Reset filters</Button>
+            </Box>
+          </Stack>
+        </Main>
+      );
+    }}
+  </Story>
+</Canvas>
+
+### Props
+
+<ArgsTable of={FilterListURLQuery} />

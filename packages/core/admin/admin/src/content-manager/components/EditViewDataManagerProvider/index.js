@@ -3,6 +3,7 @@ import { cloneDeep, get, isEmpty, isEqual, set } from 'lodash';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Prompt, Redirect } from 'react-router-dom';
+import { Main } from '@strapi/parts/Main';
 import {
   LoadingIndicatorPage,
   ContentManagerEditViewDataManagerContext,
@@ -87,6 +88,21 @@ const EditViewDataManagerProvider = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shouldCheckErrors]);
+
+  useEffect(() => {
+    const errorsInForm = Object.keys(formErrors);
+
+    // TODO check if working with DZ, components...
+    // TODO use querySelector querySelectorAll('[data-strapi-field-error]')
+    if (errorsInForm.length > 0) {
+      const firstError = errorsInForm[0];
+      const el = document.getElementById(firstError);
+
+      if (el) {
+        el.focus();
+      }
+    }
+  }, [formErrors]);
 
   useEffect(() => {
     if (shouldRedirectToHomepageWhenEditingEntry) {
@@ -288,6 +304,14 @@ const EditViewDataManagerProvider = ({
         console.error(err);
 
         errors = getYupInnerErrors(err);
+
+        toggleNotification({
+          type: 'warning',
+          message: {
+            id: getTrad('containers.EditView.notification.errors'),
+            defaultMessage: 'The form contains some errors',
+          },
+        });
       }
 
       dispatch({
@@ -295,7 +319,16 @@ const EditViewDataManagerProvider = ({
         errors,
       });
     },
-    [createFormData, isCreatingEntry, modifiedData, onPost, onPut, trackerProperty, yupSchema]
+    [
+      createFormData,
+      isCreatingEntry,
+      modifiedData,
+      onPost,
+      onPut,
+      toggleNotification,
+      trackerProperty,
+      yupSchema,
+    ]
   );
 
   const handlePublish = useCallback(async () => {
@@ -426,14 +459,6 @@ const EditViewDataManagerProvider = ({
     });
   }, []);
 
-  // const overlayBlockerParams = useMemo(
-  //   () => ({
-  //     children: <div />,
-  //     noGradient: true,
-  //   }),
-  //   []
-  // );
-
   // Redirect the user to the previous page if he is not allowed to read/update a document
   if (shouldRedirectToHomepageWhenEditingEntry) {
     return <Redirect to={from} />;
@@ -477,13 +502,10 @@ const EditViewDataManagerProvider = ({
       }}
     >
       <>
-        {/* <OverlayBlocker
-          key="overlayBlocker"
-          isOpen={status !== 'resolved'}
-          {...overlayBlockerParams}
-        /> */}
-        {isLoadingForData ? (
-          <LoadingIndicatorPage />
+        {isLoadingForData || (!isCreatingEntry && !initialData.id) ? (
+          <Main aria-busy="true">
+            <LoadingIndicatorPage />
+          </Main>
         ) : (
           <>
             <Prompt
@@ -506,7 +528,7 @@ EditViewDataManagerProvider.defaultProps = {
 EditViewDataManagerProvider.propTypes = {
   allLayoutData: PropTypes.object.isRequired,
   allowedActions: PropTypes.object.isRequired,
-  children: PropTypes.arrayOf(PropTypes.element).isRequired,
+  children: PropTypes.node.isRequired,
   componentsDataStructure: PropTypes.object.isRequired,
   contentTypeDataStructure: PropTypes.object.isRequired,
   createActionAllowedFields: PropTypes.array.isRequired,

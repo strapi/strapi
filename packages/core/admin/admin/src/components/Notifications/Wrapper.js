@@ -1,19 +1,12 @@
 import styled from 'styled-components';
-import { TransitionGroup } from 'react-transition-group';
+import { Row } from '@strapi/parts/Row';
 
-const Wrapper = styled(TransitionGroup)`
-  display: flex;
-  align-items: center;
-  flex-direction: column;
+const Wrapper = styled(Row)`
   position: fixed;
-  top: 72px;
-  left: 0;
+  top: 46px;
   right: 0;
+  left: 0;
   z-index: 1100;
-  list-style: none;
-  width: 100%;
-  overflow-y: hidden;
-  pointer-events: none;
 `;
 
 export default Wrapper;

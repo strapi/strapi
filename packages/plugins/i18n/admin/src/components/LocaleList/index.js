@@ -1,89 +1,72 @@
 import React, { useState } from 'react';
 import { useIntl } from 'react-intl';
-import { EmptyState, ListButton } from '@strapi/helper-plugin';
-import { List } from '@buffetjs/custom';
-import { Button } from '@buffetjs/core';
-import { Plus } from '@buffetjs/icons';
 import PropTypes from 'prop-types';
+import { Button } from '@strapi/parts/Button';
+import { Main } from '@strapi/parts/Main';
+import { ContentLayout, EmptyStateLayout, HeaderLayout } from '@strapi/parts/Layout';
+import { useFocusWhenNavigate } from '@strapi/helper-plugin';
+import AddIcon from '@strapi/icons/AddIcon';
+import EmptyStateDocument from '@strapi/icons/EmptyStateDocument';
 import useLocales from '../../hooks/useLocales';
-import LocaleRow from '../LocaleRow';
 import { getTrad } from '../../utils';
 import ModalEdit from '../ModalEdit';
 import ModalDelete from '../ModalDelete';
 import ModalCreate from '../ModalCreate';
+import LocaleTable from './LocaleTable';
 
 const LocaleList = ({ canUpdateLocale, canDeleteLocale, onToggleCreateModal, isCreating }) => {
   const [localeToDelete, setLocaleToDelete] = useState();
   const [localeToEdit, setLocaleToEdit] = useState();
-  const { locales, isLoading } = useLocales();
+  const { locales } = useLocales();
   const { formatMessage } = useIntl();
+
+  useFocusWhenNavigate();
 
   // Delete actions
   const closeModalToDelete = () => setLocaleToDelete(undefined);
   const handleDeleteLocale = canDeleteLocale ? setLocaleToDelete : undefined;
 
   // Edit actions
-  const closeModalToEdit = () => {
-    setLocaleToEdit(undefined);
-  };
+  const closeModalToEdit = () => setLocaleToEdit(undefined);
   const handleEditLocale = canUpdateLocale ? setLocaleToEdit : undefined;
 
-  if (isLoading || (locales && locales.length > 0)) {
-    const listTitle = isLoading
-      ? null
-      : formatMessage(
-          {
-            id: getTrad(
-              `Settings.locales.list.title${locales.length > 1 ? '.plural' : '.singular'}`
-            ),
-          },
-          { number: locales.length }
-        );
-
-    return (
-      <>
-        <List
-          radius="2px"
-          title={listTitle}
-          items={locales}
-          isLoading={isLoading}
-          customRowComponent={locale => (
-            <LocaleRow locale={locale} onDelete={handleDeleteLocale} onEdit={handleEditLocale} />
-          )}
-        />
-
-        <ModalCreate
-          isOpened={isCreating}
-          onClose={onToggleCreateModal}
-          alreadyUsedLocales={locales}
-        />
-        <ModalDelete localeToDelete={localeToDelete} onClose={closeModalToDelete} />
-        <ModalEdit localeToEdit={localeToEdit} onClose={closeModalToEdit} locales={locales} />
-      </>
-    );
-  }
-
   return (
-    <>
-      <EmptyState
-        title={formatMessage({ id: getTrad('Settings.list.empty.title') })}
-        description={formatMessage({ id: getTrad('Settings.list.empty.description') })}
+    <Main tabIndex={-1}>
+      <HeaderLayout
+        primaryAction={
+          <Button startIcon={<AddIcon />} onClick={onToggleCreateModal} size="L">
+            {formatMessage({ id: getTrad('Settings.list.actions.add') })}
+          </Button>
+        }
+        title={formatMessage({ id: getTrad('plugin.name') })}
+        subtitle={formatMessage({ id: getTrad('Settings.list.description') })}
       />
-
-      {onToggleCreateModal && (
-        <ListButton>
-          <Button
-            label={formatMessage({ id: getTrad('Settings.list.actions.add') })}
-            onClick={onToggleCreateModal}
-            color="primary"
-            type="button"
-            icon={<Plus fill="#007eff" width="11px" height="11px" />}
+      <ContentLayout>
+        {locales?.length > 0 ? (
+          <LocaleTable
+            locales={locales}
+            onDeleteLocale={handleDeleteLocale}
+            onEditLocale={handleEditLocale}
           />
-        </ListButton>
-      )}
+        ) : (
+          <EmptyStateLayout
+            icon={<EmptyStateDocument width={undefined} height={undefined} />}
+            content={formatMessage({ id: getTrad('Settings.list.empty.title') })}
+            action={
+              onToggleCreateModal ? (
+                <Button variant="secondary" startIcon={<AddIcon />} onClick={onToggleCreateModal}>
+                  {formatMessage({ id: getTrad('Settings.list.actions.add') })}
+                </Button>
+              ) : null
+            }
+          />
+        )}
+      </ContentLayout>
 
-      <ModalCreate isOpened={isCreating} onClose={onToggleCreateModal} />
-    </>
+      {isCreating && <ModalCreate onClose={onToggleCreateModal} />}
+      {localeToEdit && <ModalEdit onClose={closeModalToEdit} locale={localeToEdit} />}
+      <ModalDelete localeToDelete={localeToDelete} onClose={closeModalToDelete} />
+    </Main>
   );
 };
 

@@ -1,16 +1,23 @@
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
-import { FormattedMessage } from 'react-intl';
-import { AttributeIcon, IconLinks } from '@buffetjs/core';
+import upperFirst from 'lodash/upperFirst';
+import { useIntl } from 'react-intl';
+import { IconButton } from '@strapi/parts/IconButton';
+import { Row } from '@strapi/parts/Row';
+import { Stack } from '@strapi/parts/Stack';
+import { Text } from '@strapi/parts/Text';
+import EditIcon from '@strapi/icons/EditIcon';
+import DeleteIcon from '@strapi/icons/DeleteIcon';
+import { stopPropagation, onRowClick } from '@strapi/helper-plugin';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
 import getAttributeDisplayedType from '../../utils/getAttributeDisplayedType';
 import getTrad from '../../utils/getTrad';
 import Curve from '../../icons/Curve';
 import UpperFist from '../UpperFirst';
-import Wrapper from './Wrapper';
+import BoxWrapper from './BoxWrapper';
+import AttributeIcon from '../AttributeIcon';
 
 function ListRow({
   configurable,
@@ -33,6 +40,7 @@ function ListRow({
   relation,
 }) {
   const { contentTypes, isInDevelopmentMode, modifiedData, removeAttribute } = useDataManager();
+  const { formatMessage } = useIntl();
 
   const isMorph = type === 'relation' && relation.includes('morph');
   const ico = ['integer', 'biginteger', 'float', 'decimal'].includes(type) ? 'number' : type;
@@ -198,97 +206,96 @@ function ListRow({
   }
 
   return (
-    <Wrapper
-      onClick={handleClick}
-      className={[target ? 'relation-row' : '', configurable ? 'clickable' : '']}
-      loopNumber={loopNumber}
+    <BoxWrapper
+      as="tr"
+      {...onRowClick({
+        fn: handleClick,
+        condition: isInDevelopmentMode && configurable && !isMorph,
+      })}
     >
-      <td>
-        <AttributeIcon key={src} type={src} />
-        <Curve fill={isFromDynamicZone ? '#AED4FB' : '#f3f4f4'} />
-      </td>
-      <td style={{ fontWeight: 600 }}>
-        <p>{name}</p>
+      <td style={{ position: 'relative' }}>
+        {loopNumber !== 0 && <Curve color={isFromDynamicZone ? 'primary200' : 'neutral150'} />}
+        <Stack paddingLeft={2} size={4} horizontal>
+          <AttributeIcon key={src} type={src} />
+          <Text bold>{upperFirst(name)}</Text>
+        </Stack>
       </td>
       <td>
         {target ? (
-          <div>
-            <FormattedMessage
-              id={`${pluginId}.modelPage.attribute.${
-                isMorph ? 'relation-polymorphic' : 'relationWith'
-              }`}
-            />
+          <Text>
+            {formatMessage({
+              id: getTrad(
+                `modelPage.attribute.${isMorph ? 'relation-polymorphic' : 'relationWith'}`
+              ),
+              defaultMessage: 'Relation with',
+            })}
             &nbsp;
-            <FormattedMessage id={`${pluginId}.from`}>
-              {msg => (
-                <span style={{ fontStyle: 'italic' }}>
-                  <UpperFist content={contentTypeFriendlyName} />
-                  &nbsp;
-                  {plugin && `(${msg}: ${plugin})`}
-                </span>
-              )}
-            </FormattedMessage>
-          </div>
+            <span style={{ fontStyle: 'italic' }}>
+              <UpperFist content={contentTypeFriendlyName} />
+              &nbsp;
+              {plugin &&
+                `(${formatMessage({
+                  id: getTrad(`from`),
+                  defaultMessage: 'from',
+                })}: ${plugin})`}
+            </span>
+          </Text>
         ) : (
-          <>
-            <FormattedMessage id={`${pluginId}.attribute.${readableType}`} defaultMessage={type} />
+          <Text>
+            {formatMessage({
+              id: getTrad(`attribute.${readableType}`),
+              defaultMessage: type,
+            })}
             &nbsp;
-            {repeatable && <FormattedMessage id={getTrad('component.repeatable')} />}
-          </>
+            {repeatable &&
+              formatMessage({
+                id: getTrad('component.repeatable'),
+                defaultMessage: '(repeatable)',
+              })}
+          </Text>
         )}
       </td>
-      <td className="button-container">
+      <td>
         {isInDevelopmentMode && (
-          <>
+          <Row justifyContent="flex-end" {...stopPropagation}>
             {configurable ? (
-              <>
-                {!isMorph ? (
-                  <IconLinks
-                    links={[
-                      {
-                        icon: <FontAwesomeIcon icon="pencil-alt" />,
-                        onClick: () => handleClick(),
-                      },
-                      {
-                        icon: <FontAwesomeIcon icon="trash-alt" />,
-                        onClick: e => {
-                          e.stopPropagation();
-                          removeAttribute(
-                            editTarget,
-                            name,
-                            secondLoopComponentUid || firstLoopComponentUid || ''
-                          );
-                        },
-                      },
-                    ]}
-                  />
-                ) : (
-                  <IconLinks
-                    links={[
-                      {
-                        icon: <FontAwesomeIcon icon="trash-alt" />,
-                        onClick: e => {
-                          e.stopPropagation();
-                          removeAttribute(
-                            editTarget,
-                            name,
-                            secondLoopComponentUid || firstLoopComponentUid || ''
-                          );
-                        },
-                      },
-                    ]}
+              <Stack horizontal size={1}>
+                {!isMorph && (
+                  <IconButton
+                    onClick={handleClick}
+                    label={`${formatMessage({
+                      id: 'app.utils.edit',
+                      formatMessage: 'Edit',
+                    })} ${name}`}
+                    noBorder
+                    icon={<EditIcon />}
                   />
                 )}
-              </>
+                <IconButton
+                  onClick={e => {
+                    e.stopPropagation();
+                    removeAttribute(
+                      editTarget,
+                      name,
+                      secondLoopComponentUid || firstLoopComponentUid || ''
+                    );
+                  }}
+                  label={`${formatMessage({
+                    id: 'app.utils.delete',
+                    defaultMessage: 'Delete',
+                  })} ${name}`}
+                  noBorder
+                  icon={<DeleteIcon />}
+                />
+              </Stack>
             ) : (
-              <button type="button">
-                <FontAwesomeIcon icon="lock" />
-              </button>
+              // ! TODO ASK DESIGN TO PUT LOCK ICON INSIDE DS
+              <FontAwesomeIcon icon="lock" />
             )}
-          </>
+          </Row>
         )}
       </td>
-    </Wrapper>
+    </BoxWrapper>
   );
 }
 

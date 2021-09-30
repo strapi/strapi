@@ -3,20 +3,56 @@ import { translatedErrors } from '@strapi/helper-plugin';
 
 import { getTrad } from '../../../utils';
 
+const callbackLabel = {
+  id: getTrad('PopUpForm.Providers.redirectURL.front-end.label'),
+  defaultMessage: 'The redirect URL to your front-end app',
+};
+const callbackPlaceholder = {
+  id: 'http://www.client-app.com',
+  defaultMessage: 'http://www.client-app.com',
+};
+const enabledDescription = {
+  id: getTrad('PopUpForm.Providers.enabled.description'),
+  defaultMessage: "If disabled, users won't be able to use this provider.",
+};
+const enabledLabel = {
+  id: getTrad('PopUpForm.Providers.enabled.label'),
+  defaultMessage: 'Enable',
+};
+const keyLabel = { id: getTrad('PopUpForm.Providers.key.label'), defaultMessage: 'Client ID' };
+const hintLabel = {
+  id: getTrad('PopUpForm.Providers.redirectURL.label'),
+  defaultMessage: 'The redirect URL to add in your {provider} application configurations',
+  values: {
+    provider: 'VK',
+  },
+};
+const textPlaceholder = {
+  id: getTrad('PopUpForm.Providers.key.placeholder'),
+  defaultMessage: 'TEXT',
+};
+
+const secretLabel = {
+  id: getTrad('PopUpForm.Providers.secret.label'),
+  defaultMessage: 'Client Secret',
+};
+
 const forms = {
   email: {
     form: [
-      {
-        autoFocus: true,
-        label: getTrad('PopUpForm.Providers.enabled.label'),
-        name: 'enabled',
-        type: 'bool',
-        description: getTrad('PopUpForm.Providers.enabled.description'),
-        size: { xs: 6 },
-        validations: {
-          required: true,
+      [
+        {
+          intlLabel: enabledLabel,
+          name: 'enabled',
+          type: 'bool',
+          description: enabledDescription,
+          size: 6,
+          // TODO check if still needed
+          // validations: {
+          //   required: true,
+          // },
         },
-      },
+      ],
     ],
     schema: yup.object().shape({
       enabled: yup.bool().required(translatedErrors.required),
@@ -24,65 +60,64 @@ const forms = {
   },
   providers: {
     form: [
-      {
-        autoFocus: true,
-        label: getTrad('PopUpForm.Providers.enabled.label'),
-        name: 'enabled',
-        type: 'bool',
-        description: getTrad('PopUpForm.Providers.enabled.description'),
-        size: { xs: 6 },
-        validations: {
-          required: true,
-        },
-      },
-      {
-        autoFocus: false,
-        label: getTrad('PopUpForm.Providers.key.label'),
-        name: 'key',
-        type: 'text',
-        placeholder: getTrad('PopUpForm.Providers.key.placeholder'),
-        size: { xs: 12 },
-        validations: {
-          required: true,
-        },
-      },
-      {
-        autoFocus: false,
-        label: getTrad('PopUpForm.Providers.secret.label'),
-        name: 'secret',
-        type: 'text',
-        placeholder: getTrad('PopUpForm.Providers.secret.placeholder'),
-        size: { xs: 12 },
-        validations: {
-          required: true,
-        },
-      },
-      {
-        autoFocus: false,
-        label: getTrad('PopUpForm.Providers.redirectURL.front-end.label'),
-        placeholder: 'http://www.client-app.com',
-        name: 'callback',
-        type: 'text',
-        size: { xs: 12 },
-        validations: {
-          required: true,
-        },
-      },
-      {
-        label: {
-          id: getTrad('PopUpForm.Providers.redirectURL.label'),
-          params: {
-            provider: 'VK',
+      [
+        {
+          intlLabel: enabledLabel,
+          name: 'enabled',
+          type: 'bool',
+          description: enabledDescription,
+          size: 6,
+          validations: {
+            required: true,
           },
         },
-        name: 'noName',
-        type: 'text',
-        validations: {},
-        size: {
-          xs: 12,
+      ],
+      [
+        {
+          intlLabel: keyLabel,
+          name: 'key',
+          type: 'text',
+          placeholder: textPlaceholder,
+          size: 12,
+          validations: {
+            required: true,
+          },
         },
-        disabled: true,
-      },
+      ],
+      [
+        {
+          intlLabel: secretLabel,
+          name: 'secret',
+          type: 'text',
+          placeholder: textPlaceholder,
+          size: 12,
+          validations: {
+            required: true,
+          },
+        },
+      ],
+      [
+        {
+          intlLabel: callbackLabel,
+          placeholder: callbackPlaceholder,
+          name: 'callback',
+          type: 'text',
+          size: 12,
+          validations: {
+            required: true,
+          },
+        },
+      ],
+      [
+        {
+          intlLabel: hintLabel,
+          name: 'noName',
+          type: 'text',
+          validations: {},
+          size: 12,
+          disabled: true,
+        },
+      ],
     ],
     schema: yup.object().shape({
       enabled: yup.bool().required(translatedErrors.required),
@@ -105,76 +140,83 @@ const forms = {
   },
   providersWithSubdomain: {
     form: [
-      {
-        autoFocus: true,
-        label: getTrad('PopUpForm.Providers.enabled.label'),
-        name: 'enabled',
-        type: 'bool',
-        description: getTrad('PopUpForm.Providers.enabled.description'),
-        size: { xs: 6 },
-        validations: {
-          required: true,
-        },
-      },
-      {
-        autoFocus: false,
-        label: getTrad('PopUpForm.Providers.key.label'),
-        name: 'key',
-        type: 'text',
-        placeholder: getTrad('PopUpForm.Providers.key.placeholder'),
-        size: { xs: 12 },
-        validations: {
-          required: true,
-        },
-      },
-      {
-        autoFocus: false,
-        label: getTrad('PopUpForm.Providers.secret.label'),
-        name: 'secret',
-        type: 'text',
-        placeholder: getTrad('PopUpForm.Providers.secret.placeholder'),
-        size: { xs: 12 },
-        validations: {
-          required: true,
-        },
-      },
-      {
-        autoFocus: false,
-        label: getTrad('PopUpForm.Providers.subdomain.label'),
-        name: 'subdomain',
-        type: 'text',
-        placeholder: getTrad('PopUpForm.Providers.subdomain.placeholder'),
-        size: { xs: 12 },
-        validations: {
-          required: true,
-        },
-      },
-      {
-        autoFocus: false,
-        label: getTrad('PopUpForm.Providers.redirectURL.front-end.label'),
-        placeholder: 'http://www.client-app.com',
-        name: 'callback',
-        type: 'text',
-        size: { xs: 12 },
-        validations: {
-          required: true,
-        },
-      },
-      {
-        label: {
-          id: getTrad('PopUpForm.Providers.redirectURL.label'),
-          params: {
-            provider: 'VK',
+      [
+        {
+          intlLabel: enabledLabel,
+          name: 'enabled',
+          type: 'bool',
+          description: enabledDescription,
+          size: 6,
+          validations: {
+            required: true,
           },
         },
-        name: 'noName',
-        type: 'text',
-        validations: {},
-        size: {
-          xs: 12,
+      ],
+      [
+        {
+          intlLabel: keyLabel,
+          name: 'key',
+          type: 'text',
+          placeholder: textPlaceholder,
+          size: 12,
+          validations: {
+            required: true,
+          },
         },
-        disabled: true,
-      },
+      ],
+      [
+        {
+          intlLabel: secretLabel,
+          name: 'secret',
+          type: 'text',
+          placeholder: textPlaceholder,
+          size: 12,
+          validations: {
+            required: true,
+          },
+        },
+      ],
+
+      [
+        {
+          intlLabel: {
+            id: getTrad('PopUpForm.Providers.subdomain.label'),
+            defaultMessage: 'Host URI (Subdomain)',
+          },
+          name: 'subdomain',
+          type: 'text',
+          placeholder: {
+            id: getTrad('PopUpForm.Providers.subdomain.placeholder'),
+            defaultMessage: 'my.subdomain.com',
+          },
+          size: 12,
+          validations: {
+            required: true,
+          },
+        },
+      ],
+      [
+        {
+          intlLabel: callbackLabel,
+          placeholder: callbackPlaceholder,
+          name: 'callback',
+          type: 'text',
+          size: 12,
+          validations: {
+            required: true,
+          },
+        },
+      ],
+      [
+        {
+          intlLabel: hintLabel,
+          name: 'noName',
+          type: 'text',
+          validations: {},
+          size: 12,
+          disabled: true,
+        },
+      ],
     ],
     schema: yup.object().shape({
       enabled: yup.bool().required(translatedErrors.required),

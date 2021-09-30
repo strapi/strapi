@@ -1,20 +1,23 @@
 import React from 'react';
-import { ThemeProvider } from 'styled-components';
+import { ThemeProvider } from '@strapi/parts/ThemeProvider';
 import PropTypes from 'prop-types';
+import { lightTheme } from '@strapi/parts/themes';
 import GlobalStyle from '../GlobalStyle';
-import Fonts from '../Fonts';
 
 const Theme = ({ children, theme }) => (
   <ThemeProvider theme={theme}>
-    <GlobalStyle />
-    <Fonts />
     {children}
+    <GlobalStyle />
   </ThemeProvider>
 );
 
 Theme.propTypes = {
   children: PropTypes.element.isRequired,
-  theme: PropTypes.object.isRequired,
+  theme: PropTypes.object,
+};
+
+Theme.defaultProps = {
+  theme: lightTheme,
 };
 
 export default Theme;

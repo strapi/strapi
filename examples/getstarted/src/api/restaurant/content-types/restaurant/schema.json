@@ -57,7 +57,9 @@
         "i18n": {
           "localized": true
         }
-      }
+      },
+      "repeatable": false,
+      "required": true
     },
     "contactEmail": {
       "type": "email",

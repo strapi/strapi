@@ -1,5 +1,8 @@
 import React from 'react';
-import { Globe, GlobeCrossed } from '@buffetjs/icons';
+import I18N from '@strapi/icons/I18N';
+
+import StrikedWorld from '@strapi/icons/StrikedWorld';
+import LabelAction from '../../components/LabelAction';
 import { getTrad } from '../../utils';
 import mutateEditViewLayout, {
   enhanceComponentsLayout,
@@ -115,10 +118,12 @@ describe('i18n | contentManagerHooks | mutateEditViewLayout', () => {
                 },
                 size: 6,
                 targetModelPluginOptions: {},
-                labelIcon: {
-                  title: { id: localizedTrad, defaultMessage: localizedTradDefaultMessage },
-                  icon: <Globe />,
-                },
+                labelAction: (
+                  <LabelAction
+                    title={{ id: localizedTrad, defaultMessage: localizedTradDefaultMessage }}
+                    icon={<I18N aria-hidden />}
+                  />
+                ),
               },
             ],
           },
@@ -352,10 +357,12 @@ describe('i18n | contentManagerHooks | mutateEditViewLayout', () => {
               pluginOptions: { i18n: { localized: true } },
               type: 'string',
             },
-            labelIcon: {
-              title: { id: localizedTrad, defaultMessage: localizedTradDefaultMessage },
-              icon: <Globe />,
-            },
+            labelAction: (
+              <LabelAction
+                title={{ id: localizedTrad, defaultMessage: localizedTradDefaultMessage }}
+                icon={<I18N aria-hidden />}
+              />
+            ),
           },
         ],
         [
@@ -366,10 +373,12 @@ describe('i18n | contentManagerHooks | mutateEditViewLayout', () => {
               pluginOptions: { i18n: { localized: true } },
               type: 'string',
             },
-            labelIcon: {
-              title: { id: localizedTrad, defaultMessage: localizedTradDefaultMessage },
-              icon: <Globe />,
-            },
+            labelAction: (
+              <LabelAction
+                title={{ id: localizedTrad, defaultMessage: localizedTradDefaultMessage }}
+                icon={<I18N aria-hidden />}
+              />
+            ),
           },
           {
             name: 'slug',
@@ -377,10 +386,12 @@ describe('i18n | contentManagerHooks | mutateEditViewLayout', () => {
             fieldSchema: {
               type: 'uid',
             },
-            labelIcon: {
-              title: { id: localizedTrad, defaultMessage: localizedTradDefaultMessage },
-              icon: <Globe />,
-            },
+            labelAction: (
+              <LabelAction
+                title={{ id: localizedTrad, defaultMessage: localizedTradDefaultMessage }}
+                icon={<I18N aria-hidden />}
+              />
+            ),
           },
         ],
       ];
@@ -420,10 +431,12 @@ describe('i18n | contentManagerHooks | mutateEditViewLayout', () => {
               pluginOptions: { i18n: { localized: true } },
               type: 'string',
             },
-            labelIcon: {
-              title: { id: localizedTrad, defaultMessage: localizedTradDefaultMessage },
-              icon: <Globe />,
-            },
+            labelAction: (
+              <LabelAction
+                title={{ id: localizedTrad, defaultMessage: localizedTradDefaultMessage }}
+                icon={<I18N aria-hidden />}
+              />
+            ),
           },
         ],
         [
@@ -434,10 +447,12 @@ describe('i18n | contentManagerHooks | mutateEditViewLayout', () => {
               pluginOptions: { i18n: { localized: false } },
               type: 'string',
             },
-            labelIcon: {
-              title: { id: notLocalizedTrad, defaultMessage: notLocalizedTradDefaultMessage },
-              icon: <GlobeCrossed />,
-            },
+            labelAction: (
+              <LabelAction
+                title={{ id: notLocalizedTrad, defaultMessage: notLocalizedTradDefaultMessage }}
+                icon={<StrikedWorld aria-hidden />}
+              />
+            ),
           },
         ],
       ];
@@ -466,10 +481,12 @@ describe('i18n | contentManagerHooks | mutateEditViewLayout', () => {
           queryInfos: {},
           size: 6,
           targetModelPluginOptions: {},
-          labelIcon: {
-            title: { id: localizedTrad, defaultMessage: localizedTradDefaultMessage },
-            icon: <Globe />,
-          },
+          labelAction: (
+            <LabelAction
+              title={{ id: localizedTrad, defaultMessage: localizedTradDefaultMessage }}
+              icon={<I18N aria-hidden />}
+            />
+          ),
         },
       ];
 
@@ -509,10 +526,12 @@ describe('i18n | contentManagerHooks | mutateEditViewLayout', () => {
           targetModelPluginOptions: {
             i18n: { localized: true },
           },
-          labelIcon: {
-            title: { id: localizedTrad, defaultMessage: localizedTradDefaultMessage },
-            icon: <Globe />,
-          },
+          labelAction: (
+            <LabelAction
+              title={{ id: localizedTrad, defaultMessage: localizedTradDefaultMessage }}
+              icon={<I18N aria-hidden />}
+            />
+          ),
         },
       ];
 

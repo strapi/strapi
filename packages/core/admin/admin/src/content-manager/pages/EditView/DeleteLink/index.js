@@ -1,18 +1,16 @@
 import React, { memo, useState } from 'react';
 import { useIntl } from 'react-intl';
-import { get } from 'lodash';
+import get from 'lodash/get';
 import isEqual from 'react-fast-compare';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Text } from '@buffetjs/core';
-import { PopUpWarning, useNotification } from '@strapi/helper-plugin';
+import { Button } from '@strapi/parts/Button';
+import Delete from '@strapi/icons/Delete';
+import { ConfirmDialog, useNotification } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import { getTrad } from '../../../utils';
-import { DeleteButton } from '../components';
 import { connect, select } from './utils';
 
 const DeleteLink = ({ isCreatingEntry, onDelete, onDeleteSucceeded, trackerProperty }) => {
   const [showWarningDelete, setWarningDelete] = useState(false);
-  const [didDeleteEntry, setDidDeleteEntry] = useState(false);
   const [isModalConfirmButtonLoading, setIsModalConfirmButtonLoading] = useState(false);
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
@@ -26,28 +24,19 @@ const DeleteLink = ({ isCreatingEntry, onDelete, onDeleteSucceeded, trackerPrope
 
       await onDelete(trackerProperty);
 
-      // This is used to perform action after the modal is closed
-      // so the transitions are smoother
-      // Actions will be performed in the handleClosed function
-      setDidDeleteEntry(true);
+      setIsModalConfirmButtonLoading(false);
+
+      toggleWarningDelete();
+      onDeleteSucceeded();
     } catch (err) {
       const errorMessage = get(
         err,
         'response.payload.message',
         formatMessage({ id: getTrad('error.record.delete') })
       );
-      toggleNotification({ type: 'warning', message: errorMessage });
-    } finally {
       setIsModalConfirmButtonLoading(false);
       toggleWarningDelete();
-    }
-  };
-
-  const handleClosed = () => {
-    setDidDeleteEntry(false);
-
-    if (didDeleteEntry) {
-      onDeleteSucceeded();
+      toggleNotification({ type: 'warning', message: errorMessage });
     }
   };
 
@@ -57,26 +46,17 @@ const DeleteLink = ({ isCreatingEntry, onDelete, onDeleteSucceeded, trackerPrope
 
   return (
     <>
-      <li>
-        <DeleteButton onClick={toggleWarningDelete}>
-          <FontAwesomeIcon icon="trash-alt" />
-          <Text lineHeight="22px" color="lightOrange">
-            {formatMessage({
-              id: getTrad('containers.Edit.delete-entry'),
-            })}
-          </Text>
-        </DeleteButton>
-      </li>
-      <PopUpWarning
-        isOpen={showWarningDelete}
-        toggleModal={toggleWarningDelete}
-        content={{
-          message: getTrad('popUpWarning.bodyMessage.contentType.delete'),
-        }}
-        popUpWarningType="danger"
-        onConfirm={handleConfirmDelete}
-        onClosed={handleClosed}
+      <Button onClick={toggleWarningDelete} size="S" startIcon={<Delete />} variant="danger-light">
+        {formatMessage({
+          id: getTrad('containers.Edit.delete-entry'),
+          defaultMessage: 'Delete this entry',
+        })}
+      </Button>
+      <ConfirmDialog
         isConfirmButtonLoading={isModalConfirmButtonLoading}
+        isOpen={showWarningDelete}
+        onConfirm={handleConfirmDelete}
+        onToggleDialog={toggleWarningDelete}
       />
     </>
   );
@@ -91,4 +71,7 @@ DeleteLink.propTypes = {
 
 const Memoized = memo(DeleteLink, isEqual);
 
-export default connect(Memoized, select);
+export default connect(
+  Memoized,
+  select
+);

@@ -234,7 +234,10 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
     const loadParams =
       attribute.type === 'relation'
         ? transformParamsToQuery(attribute.target, params)
-        : pipe(transformCommonParams, transformPaginationParams)(params);
+        : pipe(
+            transformCommonParams,
+            transformPaginationParams
+          )(params);
 
     return db.query(uid).load(entity, field, loadParams);
   },

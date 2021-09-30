@@ -1,173 +1,349 @@
-/* eslint-disable jsx-a11y/click-events-have-key-events */
-/* eslint-disable jsx-a11y/no-static-element-interactions */
-import React from 'react';
-import { Checkbox, Flex, Padded, Text } from '@buffetjs/core';
-import { useIntl, FormattedMessage } from 'react-intl';
-import { get } from 'lodash';
+import React, { useState, useEffect } from 'react';
+import { useIntl } from 'react-intl';
+import styled from 'styled-components';
+import get from 'lodash/get';
+import omit from 'lodash/omit';
+import { Box } from '@strapi/parts/Box';
+import { Stack } from '@strapi/parts/Stack';
+import { Main } from '@strapi/parts/Main';
+import { Row } from '@strapi/parts/Row';
+import { Link } from '@strapi/parts/Link';
+import { Button } from '@strapi/parts/Button';
+import { TextInput } from '@strapi/parts/TextInput';
+import { Checkbox } from '@strapi/parts/Checkbox';
+import { Grid, GridItem } from '@strapi/parts/Grid';
+import { H1, Subtitle } from '@strapi/parts/Text';
+import Hide from '@strapi/icons/Hide';
+import Show from '@strapi/icons/Show';
+import { Form, useQuery, useNotification } from '@strapi/helper-plugin';
+import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import Button from '../../../../components/FullWidthButton';
-import AuthLink from '../AuthLink';
-import Input from '../Input';
+import { Formik } from 'formik';
+import axios from 'axios';
+import UnauthenticatedLayout, {
+  Column,
+  LayoutContent,
+} from '../../../../layouts/UnauthenticatedLayout';
 import Logo from '../Logo';
-import Section from '../Section';
-import CustomLabel from './CustomLabel';
-import Box from '../Box';
-import InputWrapper from './InputWrapper';
-import Span from './Span';
+import FieldActionWrapper from '../FieldActionWrapper';
 
-const Register = ({
-  fieldsToDisable,
-  formErrors,
-  inputsPrefix,
-  modifiedData,
-  noSignin,
-  onChange,
-  onSubmit,
-  requestError,
-}) => {
+const CenteredBox = styled(Box)`
+  text-align: center;
+`;
+const A = styled.a`
+  color: ${({ theme }) => theme.colors.primary600};
+`;
+
+const Register = ({ fieldsToDisable, noSignin, onSubmit, schema }) => {
+  const toggleNotification = useNotification();
+  const { push } = useHistory();
+  const [passwordShown, setPasswordShown] = useState(false);
+  const [confirmPasswordShown, setConfirmPasswordShown] = useState(false);
+  const [userInfo, setUserInfo] = useState({});
   const { formatMessage } = useIntl();
+  const query = useQuery();
+  const registrationToken = query.get('registrationToken');
 
-  const handleClick = (e, to) => {
-    e.preventDefault();
-    e.stopPropagation();
+  useEffect(() => {
+    if (registrationToken) {
+      const getData = async () => {
+        try {
+          const {
+            data: { data },
+          } = await axios.get(
+            `${strapi.backendURL}/admin/registration-info?registrationToken=${registrationToken}`
+          );
 
-    const win = window.open(`https://strapi.io/${to}`, '_blank');
-    win.focus();
-  };
+          if (data) {
+            setUserInfo(data);
+          }
+        } catch (err) {
+          const errorMessage = get(err, ['response', 'data', 'message'], 'An error occurred');
 
-  const terms = (
-    <FormattedMessage id="Auth.privacy-policy-agreement.terms" key="1">
-      {content => <Span onClick={e => handleClick(e, 'terms')}>{content}</Span>}
-    </FormattedMessage>
-  );
-  const policy = (
-    <FormattedMessage id="Auth.privacy-policy-agreement.policy" key="2">
-      {content => <Span onClick={e => handleClick(e, 'privacy')}>{content}</Span>}
-    </FormattedMessage>
-  );
+          toggleNotification({
+            type: 'warning',
+            message: errorMessage,
+          });
+
+          // Redirect to the oops page in case of an invalid token
+          // @alexandrebodin @JAB I am not sure it is the wanted behavior
+          push(`/auth/oops?info=${encodeURIComponent(errorMessage)}`);
+        }
+      };
+
+      getData();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [registrationToken]);
 
   return (
-    <>
-      <Section textAlign="center">
-        <Logo />
-      </Section>
-      <Section withBackground>
-        <Padded top size="25px">
-          <Box errorMessage={get(requestError, 'errorMessage', null)}>
-            <form onSubmit={onSubmit}>
-              <InputWrapper>
-                <Input
-                  autoFocus
-                  error={formErrors[`${inputsPrefix}firstname`]}
-                  label="Auth.form.firstname.label"
-                  name={`${inputsPrefix}firstname`}
-                  onChange={onChange}
-                  placeholder="Auth.form.firstname.placeholder"
-                  type="text"
-                  validations={{ required: true }}
-                  value={get(modifiedData, `${inputsPrefix}firstname`, '')}
-                />
-                <Input
-                  error={formErrors[`${inputsPrefix}lastname`]}
-                  label="Auth.form.lastname.label"
-                  name={`${inputsPrefix}lastname`}
-                  onChange={onChange}
-                  placeholder="Auth.form.lastname.placeholder"
-                  type="text"
-                  validations={{ required: true }}
-                  value={get(modifiedData, `${inputsPrefix}lastname`, '')}
-                />
-              </InputWrapper>
-              <Input
-                error={formErrors[`${inputsPrefix}email`]}
-                disabled={fieldsToDisable.includes('email')}
-                label="Auth.form.email.label"
-                name={`${inputsPrefix}email`}
-                onChange={onChange}
-                placeholder="Auth.form.email.placeholder"
-                type="email"
-                validations={{ required: true }}
-                value={get(modifiedData, `${inputsPrefix}email`, '')}
-              />
-              <Input
-                error={formErrors[`${inputsPrefix}password`]}
-                label="Auth.form.password.label"
-                name={`${inputsPrefix}password`}
-                onChange={onChange}
-                type="password"
-                validations={{ required: true }}
-                value={get(modifiedData, `${inputsPrefix}password`, '')}
-              />
-              <Input
-                error={formErrors[`${inputsPrefix}confirmPassword`]}
-                label="Auth.form.confirmPassword.label"
-                name={`${inputsPrefix}confirmPassword`}
-                onChange={onChange}
-                type="password"
-                validations={{ required: true }}
-                value={get(modifiedData, `${inputsPrefix}confirmPassword`, '')}
-              />
-              <Flex alignItems="flex-start">
-                <Checkbox
-                  name={`${inputsPrefix}news`}
-                  onChange={onChange}
-                  value={get(modifiedData, `${inputsPrefix}news`, false)}
-                />
-                <Padded left size="sm" />
-                <CustomLabel
-                  id="Auth.form.register.news.label"
-                  values={{ terms, policy }}
-                  onClick={() => {
-                    onChange({
-                      target: {
-                        name: `${inputsPrefix}news`,
-                        value: !get(modifiedData, `${inputsPrefix}news`, false),
+    <UnauthenticatedLayout>
+      <LayoutContent>
+        <Formik
+          enableReinitialize
+          initialValues={{
+            firstname: userInfo.firstname || '',
+            lastname: userInfo.lastname || '',
+            email: userInfo.email || '',
+            password: '',
+            confirmPassword: '',
+            registrationToken: registrationToken || undefined,
+            news: false,
+          }}
+          onSubmit={(data, formik) => {
+            if (registrationToken) {
+              // We need to pass the registration token in the url param to the api in order to submit another admin user
+              onSubmit({ userInfo: omit(data, ['registrationToken']), registrationToken }, formik);
+            } else {
+              onSubmit(data, formik);
+            }
+          }}
+          validationSchema={schema}
+          validateOnChange={false}
+        >
+          {({ values, errors, handleChange }) => (
+            <Form noValidate>
+              <Main>
+                <Column>
+                  <Logo />
+                  <Box paddingTop={6} paddingBottom={1}>
+                    <H1>
+                      {formatMessage({
+                        id: 'Auth.form.welcome.title',
+                        defaultMessage: 'Welcome!',
+                      })}
+                    </H1>
+                  </Box>
+                  <CenteredBox paddingBottom={7}>
+                    <Subtitle textColor="neutral600">
+                      {formatMessage({
+                        id: 'Auth.form.register.subtitle',
+                        defaultMessage:
+                          'Your credentials are only used to authenticate yourself on the admin panel. All saved data will be stored in your own database.',
+                      })}
+                    </Subtitle>
+                  </CenteredBox>
+                </Column>
+                <Stack size={7}>
+                  <Grid gap={4}>
+                    <GridItem col={6}>
+                      <TextInput
+                        name="firstname"
+                        required
+                        value={values.firstname}
+                        error={
+                          errors.firstname
+                            ? formatMessage({
+                                id: errors.firstname,
+                                defaultMessage: 'This value is required.',
+                              })
+                            : undefined
+                        }
+                        onChange={handleChange}
+                        label={formatMessage({
+                          id: 'Auth.form.firstname.label',
+                          defaultMessage: 'Firstname',
+                        })}
+                      />
+                    </GridItem>
+                    <GridItem col={6}>
+                      <TextInput
+                        name="lastname"
+                        error={
+                          errors.lastname
+                            ? formatMessage({
+                                id: errors.lastname,
+                                defaultMessage: 'This value is required.',
+                              })
+                            : undefined
+                        }
+                        required
+                        value={values.lastname}
+                        onChange={handleChange}
+                        label={formatMessage({
+                          id: 'Auth.form.lastname.label',
+                          defaultMessage: 'Lastname',
+                        })}
+                      />
+                    </GridItem>
+                  </Grid>
+                  <TextInput
+                    name="email"
+                    disabled={fieldsToDisable.includes('email')}
+                    value={values.email}
+                    onChange={handleChange}
+                    error={
+                      errors.email
+                        ? formatMessage({
+                            id: errors.email,
+                            defaultMessage: 'This value is required.',
+                          })
+                        : undefined
+                    }
+                    required
+                    label={formatMessage({ id: 'Auth.form.email.label', defaultMessage: 'Email' })}
+                    type="email"
+                  />
+                  <TextInput
+                    name="password"
+                    onChange={handleChange}
+                    value={values.password}
+                    error={
+                      errors.password
+                        ? formatMessage({
+                            id: errors.password,
+                            defaultMessage: 'This value is required',
+                          })
+                        : undefined
+                    }
+                    endAction={
+                      // eslint-disable-next-line react/jsx-wrap-multilines
+                      <FieldActionWrapper
+                        onClick={e => {
+                          e.preventDefault();
+                          setPasswordShown(prev => !prev);
+                        }}
+                        label={formatMessage(
+                          passwordShown
+                            ? {
+                                id: 'Auth.form.password.show-password',
+                                defaultMessage: 'Show password',
+                              }
+                            : {
+                                id: 'Auth.form.password.hide-password',
+                                defaultMessage: 'Hide password',
+                              }
+                        )}
+                      >
+                        {passwordShown ? <Show /> : <Hide />}
+                      </FieldActionWrapper>
+                    }
+                    hint={formatMessage({
+                      id: 'Auth.form.password.hint',
+                      defaultMessage:
+                        'Password must contain at least 8 characters, 1 uppercase, 1 lowercase and 1 number',
+                    })}
+                    required
+                    label={formatMessage({
+                      id: 'Auth.form.password.label',
+                      defaultMessage: 'Password',
+                    })}
+                    type={passwordShown ? 'text' : 'password'}
+                  />
+                  <TextInput
+                    name="confirmPassword"
+                    onChange={handleChange}
+                    value={values.confirmPassword}
+                    error={
+                      errors.confirmPassword
+                        ? formatMessage({
+                            id: errors.confirmPassword,
+                            defaultMessage: 'This value is required.',
+                          })
+                        : undefined
+                    }
+                    endAction={
+                      // eslint-disable-next-line react/jsx-wrap-multilines
+                      <FieldActionWrapper
+                        onClick={e => {
+                          e.preventDefault();
+                          setConfirmPasswordShown(prev => !prev);
+                        }}
+                        label={formatMessage(
+                          confirmPasswordShown
+                            ? {
+                                id: 'Auth.form.password.show-password',
+                                defaultMessage: 'Show password',
+                              }
+                            : {
+                                id: 'Auth.form.password.hide-password',
+                                defaultMessage: 'Hide password',
+                              }
+                        )}
+                      >
+                        {confirmPasswordShown ? <Show /> : <Hide />}
+                      </FieldActionWrapper>
+                    }
+                    required
+                    label={formatMessage({
+                      id: 'Auth.form.confirmPassword.label',
+                      defaultMessage: 'Confirmation Password',
+                    })}
+                    type={confirmPasswordShown ? 'text' : 'password'}
+                  />
+                  <Checkbox
+                    onValueChange={checked => {
+                      handleChange({ target: { value: checked, name: 'news' } });
+                    }}
+                    value={values.news}
+                    name="news"
+                    aria-label="news"
+                  >
+                    {formatMessage(
+                      {
+                        id: 'Auth.form.register.news.label',
+                        defaultMessage:
+                          'Keep me updated about the new features and upcoming improvements (by doing this you accept the {terms} and the {policy}).',
                       },
-                    });
-                  }}
-                />
-              </Flex>
-              <Padded top size="md">
-                <Button type="submit" color="primary" textTransform="uppercase">
-                  {formatMessage({ id: 'Auth.form.button.register' })}
-                </Button>
-              </Padded>
-            </form>
+                      {
+                        terms: (
+                          <A target="_blank" href="https://strapi.io/terms" rel="noreferrer">
+                            {formatMessage({
+                              id: 'Auth.privacy-policy-agreement.terms',
+                              defaultMessage: 'terms',
+                            })}
+                          </A>
+                        ),
+                        policy: (
+                          <A target="_blank" href="https://strapi.io/privacy" rel="noreferrer">
+                            {formatMessage({
+                              id: 'Auth.privacy-policy-agreement.policy',
+                              defaultMessage: 'policy',
+                            })}
+                          </A>
+                        ),
+                      }
+                    )}
+                  </Checkbox>
+                  <Button fullWidth size="L" type="submit">
+                    {formatMessage({
+                      id: 'Auth.form.button.register',
+                      defaultMessage: "Let's start",
+                    })}
+                  </Button>
+                </Stack>
+              </Main>
+            </Form>
+          )}
+        </Formik>
+        {!noSignin && (
+          <Box paddingTop={4}>
+            <Row justifyContent="center">
+              <Link label="Auth.link.signin" to="/auth/login">
+                {formatMessage({
+                  id: 'Auth.link.signin.account',
+                  defaultMessage: 'Already have an account?',
+                })}
+              </Link>
+            </Row>
           </Box>
-        </Padded>
-      </Section>
-      {!noSignin && (
-        <AuthLink label="Auth.link.signin" to="/auth/login">
-          <Text fontSize="md">
-            {formatMessage({ id: 'Auth.link.signin.account' })}
-            &nbsp;
-            <Text fontSize="md" color="#0097f7" as="span">
-              {formatMessage({ id: 'Auth.link.signin' })}
-            </Text>
-          </Text>
-        </AuthLink>
-      )}
-    </>
+        )}
+      </LayoutContent>
+    </UnauthenticatedLayout>
   );
 };
 
 Register.defaultProps = {
   fieldsToDisable: [],
-  inputsPrefix: '',
   noSignin: false,
   onSubmit: e => e.preventDefault(),
-  requestError: null,
 };
 
 Register.propTypes = {
   fieldsToDisable: PropTypes.array,
-  formErrors: PropTypes.object.isRequired,
-  inputsPrefix: PropTypes.string,
-  modifiedData: PropTypes.object.isRequired,
   noSignin: PropTypes.bool,
-  onChange: PropTypes.func.isRequired,
   onSubmit: PropTypes.func,
-  requestError: PropTypes.object,
+  schema: PropTypes.shape({ type: PropTypes.string.isRequired }).isRequired,
 };
 
 export default Register;

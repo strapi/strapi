@@ -1,15 +1,35 @@
 /* eslint-disable import/no-cycle */
-import React, { memo, useEffect, useRef, useState } from 'react';
+import React, { memo, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { Collapse } from 'reactstrap';
 import { useDrag, useDrop } from 'react-dnd';
 import { getEmptyImage } from 'react-dnd-html5-backend';
+import { useIntl } from 'react-intl';
+import toString from 'lodash/toString';
+import styled from 'styled-components';
+import { Accordion, AccordionToggle, AccordionContent } from '@strapi/parts/Accordion';
+import { Box } from '@strapi/parts/Box';
+import { Row } from '@strapi/parts/Row';
+import { IconButton } from '@strapi/parts/IconButton';
+import { Grid, GridItem } from '@strapi/parts/Grid';
+import { Stack } from '@strapi/parts/Stack';
+import DeleteIcon from '@strapi/icons/DeleteIcon';
+import DragHandle from '@strapi/icons/Drag';
 import ItemTypes from '../../../utils/ItemTypes';
+import getTrad from '../../../utils/getTrad';
 import Inputs from '../../Inputs';
 import FieldComponent from '../../FieldComponent';
-import Banner from '../Banner';
-import FormWrapper from '../FormWrapper';
+import DragHandleWrapper from './DragHandleWrapper';
+import Preview from './Preview';
 import { connect, select } from './utils';
+
+// FIXME
+// Temporary workaround to remove the overflow until we migrate the react-select for the relations
+// to the DS one
+const StyledBox = styled(Box)`
+  > div {
+    overflow: visible;
+  }
+`;
 
 /* eslint-disable react/no-array-index-key */
 
@@ -19,12 +39,14 @@ import { connect, select } from './utils';
 
 const DraggedItem = ({
   componentFieldName,
-  doesPreviousFieldContainErrorsAndIsOpen,
-  hasErrors,
-  hasMinError,
-  isFirst,
-  isReadOnly,
+  // FIXME: errors
+  // doesPreviousFieldContainErrorsAndIsOpen,
+  // hasErrors,
+  // hasMinError,
+  // isFirst,
+  isOdd,
   isOpen,
+  isReadOnly,
   onClickToggle,
   schema,
   toggleCollapses,
@@ -32,20 +54,14 @@ const DraggedItem = ({
   moveComponentField,
   removeRepeatableField,
   triggerFormValidation,
-  checkFormErrors,
+  // checkFormErrors,
   displayedValue,
 }) => {
   const dragRef = useRef(null);
   const dropRef = useRef(null);
-  const [showForm, setShowForm] = useState(false);
+  const { formatMessage } = useIntl();
 
   const fields = schema.layouts.edit;
-
-  useEffect(() => {
-    if (isOpen) {
-      setShowForm(true);
-    }
-  }, [isOpen]);
 
   const [, drop] = useDrop({
     accept: ItemTypes.COMPONENT,
@@ -139,94 +155,119 @@ const DraggedItem = ({
   };
 
   return (
-    <>
-      <Banner
-        componentFieldName={componentFieldName}
-        hasErrors={hasErrors}
-        hasMinError={hasMinError}
-        isFirst={isFirst}
-        displayedValue={displayedValue}
-        doesPreviousFieldContainErrorsAndIsOpen={doesPreviousFieldContainErrorsAndIsOpen}
-        isDragging={isDragging}
-        isOpen={isOpen}
-        isReadOnly={isReadOnly}
-        onClickToggle={onClickToggle}
-        onClickRemove={() => {
-          removeRepeatableField(componentFieldName);
-          toggleCollapses();
-        }}
-        ref={refs}
-      />
-      <Collapse
-        isOpen={isOpen}
-        style={{ backgroundColor: '#FAFAFB' }}
-        onExited={() => setShowForm(false)}
-      >
-        {!isDragging && (
-          <FormWrapper hasErrors={hasErrors} isOpen={isOpen} isReadOnly={isReadOnly}>
-            {showForm &&
-              fields.map((fieldRow, key) => {
-                return (
-                  <div className="row" key={key}>
-                    {fieldRow.map(({ name, fieldSchema, metadatas, queryInfos, size }) => {
-                      const isComponent = fieldSchema.type === 'component';
-                      const keys = `${componentFieldName}.${name}`;
+    <StyledBox ref={refs ? refs.dropRef : null}>
+      {isDragging && <Preview />}
+      {!isDragging && (
+        <Accordion expanded={isOpen} toggle={onClickToggle} id={componentFieldName}>
+          <AccordionToggle
+            variant={isOdd ? 'primary' : 'secondary'}
+            title={toString(displayedValue)}
+            togglePosition="left"
+            action={
+              isReadOnly ? null : (
+                <Row>
+                  <IconButton
+                    onClick={() => {
+                      removeRepeatableField(componentFieldName);
+                      toggleCollapses();
+                    }}
+                    label={formatMessage({
+                      id: getTrad('containers.Edit.delete'),
+                      defaultMessage: 'Edit',
+                    })}
+                    icon={<DeleteIcon />}
+                  />
+                  <Box paddingLeft={2}>
+                    <DragHandleWrapper
+                      ref={refs.dragRef}
+                      label={formatMessage({
+                        id: getTrad('components.DragHandle-label'),
+                        defaultMessage: 'Drag',
+                      })}
+                      icon={<DragHandle />}
+                    />
+                  </Box>
+                </Row>
+              )
+            }
+          />
+          <AccordionContent>
+            <Box
+              background="neutral100"
+              paddingLeft={6}
+              paddingRight={6}
+              paddingTop={6}
+              paddingBottom={6}
+            >
+              <Stack size={6}>
+                {fields.map((fieldRow, key) => {
+                  return (
+                    <Grid gap={4} key={key}>
+                      {fieldRow.map(({ name, fieldSchema, metadatas, queryInfos, size }) => {
+                        const isComponent = fieldSchema.type === 'component';
+                        const keys = `${componentFieldName}.${name}`;
 
-                      if (isComponent) {
-                        const componentUid = fieldSchema.component;
+                        if (isComponent) {
+                          const componentUid = fieldSchema.component;
+
+                          return (
+                            <GridItem col={size} s={12} xs={12} key={name}>
+                              <FieldComponent
+                                componentUid={componentUid}
+                                intlLabel={{
+                                  id: metadatas.label,
+                                  defaultMessage: metadatas.label,
+                                }}
+                                isRepeatable={fieldSchema.repeatable}
+                                isNested
+                                name={keys}
+                                max={fieldSchema.max}
+                                min={fieldSchema.min}
+                              />
+                            </GridItem>
+                          );
+                        }
 
                         return (
-                          <FieldComponent
-                            componentUid={componentUid}
-                            isRepeatable={fieldSchema.repeatable}
-                            key={name}
-                            label={metadatas.label}
-                            isNested
-                            name={keys}
-                            max={fieldSchema.max}
-                            min={fieldSchema.min}
-                          />
+                          <GridItem key={keys} col={size} s={12} xs={12}>
+                            <Inputs
+                              fieldSchema={fieldSchema}
+                              keys={keys}
+                              metadatas={metadatas}
+                              // onBlur={hasErrors ? checkFormErrors : null}
+                              queryInfos={queryInfos}
+                            />
+                          </GridItem>
                         );
-                      }
-
-                      return (
-                        <div key={name} className={`col-${size}`}>
-                          <Inputs
-                            autoFocus={false}
-                            fieldSchema={fieldSchema}
-                            keys={keys}
-                            metadatas={metadatas}
-                            onBlur={hasErrors ? checkFormErrors : null}
-                            queryInfos={queryInfos}
-                          />
-                        </div>
-                      );
-                    })}
-                  </div>
-                );
-              })}
-          </FormWrapper>
-        )}
-      </Collapse>
-    </>
+                      })}
+                    </Grid>
+                  );
+                })}
+              </Stack>
+            </Box>
+          </AccordionContent>
+        </Accordion>
+      )}
+    </StyledBox>
   );
 };
 
 DraggedItem.defaultProps = {
-  doesPreviousFieldContainErrorsAndIsOpen: false,
-  hasErrors: false,
-  hasMinError: false,
-  isFirst: false,
+  // doesPreviousFieldContainErrorsAndIsOpen: false,
+  // hasErrors: false,
+  // hasMinError: false,
+  // isFirst: false,
   isOpen: false,
   toggleCollapses: () => {},
 };
 
 DraggedItem.propTypes = {
   componentFieldName: PropTypes.string.isRequired,
-  doesPreviousFieldContainErrorsAndIsOpen: PropTypes.bool,
-  hasErrors: PropTypes.bool,
-  hasMinError: PropTypes.bool,
-  isFirst: PropTypes.bool,
+  // doesPreviousFieldContainErrorsAndIsOpen: PropTypes.bool,
+  // hasErrors: PropTypes.bool,
+  // hasMinError: PropTypes.bool,
+  // isFirst: PropTypes.bool,
+  isOdd: PropTypes.bool.isRequired,
   isOpen: PropTypes.bool,
   isReadOnly: PropTypes.bool.isRequired,
   onClickToggle: PropTypes.func.isRequired,
@@ -235,12 +276,15 @@ DraggedItem.propTypes = {
   moveComponentField: PropTypes.func.isRequired,
   removeRepeatableField: PropTypes.func.isRequired,
   triggerFormValidation: PropTypes.func.isRequired,
-  checkFormErrors: PropTypes.func.isRequired,
+  // checkFormErrors: PropTypes.func.isRequired,
   displayedValue: PropTypes.string.isRequired,
 };
 
 const Memoized = memo(DraggedItem);
 
-export default connect(Memoized, select);
+export default connect(
+  Memoized,
+  select
+);
 
 export { DraggedItem };

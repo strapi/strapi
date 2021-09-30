@@ -1,80 +1,95 @@
 import React, { useEffect, useReducer, useRef } from 'react';
-import { Header, Inputs } from '@buffetjs/custom';
 import { Helmet } from 'react-helmet';
-import { Text } from '@buffetjs/core';
-import { isEqual } from 'lodash';
 import { useIntl } from 'react-intl';
 import {
   CheckPagePermissions,
   LoadingIndicatorPage,
+  useFocusWhenNavigate,
   useNotification,
-  request,
+  useOverlayBlocker,
 } from '@strapi/helper-plugin';
-import { getRequestUrl, getTrad } from '../../utils';
-import SectionTitleWrapper from './SectionTitleWrapper';
-import Wrapper from './Wrapper';
+import CheckIcon from '@strapi/icons/CheckIcon';
+import { Box } from '@strapi/parts/Box';
+import { Row } from '@strapi/parts/Row';
+import { ToggleInput } from '@strapi/parts/ToggleInput';
+import { H3 } from '@strapi/parts/Text';
+import { Button } from '@strapi/parts/Button';
+import { Main } from '@strapi/parts/Main';
+import { Stack } from '@strapi/parts/Stack';
+import { Grid, GridItem } from '@strapi/parts/Grid';
+import { ContentLayout, HeaderLayout, Layout } from '@strapi/parts/Layout';
+import axios from 'axios';
+import isEqual from 'lodash/isEqual';
+import { axiosInstance, getRequestUrl, getTrad } from '../../utils';
 import init from './init';
 import reducer, { initialState } from './reducer';
 import pluginPermissions from '../../permissions';
 
-const ProtectedSettingsPage = () => (
-  <CheckPagePermissions permissions={pluginPermissions.settings}>
-    <SettingsPage />
-  </CheckPagePermissions>
-);
-
-const SettingsPage = () => {
+export const SettingsPage = () => {
   const { formatMessage } = useIntl();
-  const [{ initialData, isLoading, modifiedData }, dispatch] = useReducer(
+  const { lockApp, unlockApp } = useOverlayBlocker();
+  const toggleNotification = useNotification();
+  useFocusWhenNavigate();
+
+  const [{ initialData, isLoading, isSubmiting, modifiedData }, dispatch] = useReducer(
     reducer,
     initialState,
     init
   );
 
   const isMounted = useRef(true);
-  const getDataRef = useRef();
-  const toggleNotification = useNotification();
 
-  const abortController = new AbortController();
+  useEffect(() => {
+    const CancelToken = axios.CancelToken;
+    const source = CancelToken.source();
 
-  getDataRef.current = async () => {
-    try {
-      const { signal } = abortController;
-      const { data } = await request(getRequestUrl('settings', { method: 'GET', signal }));
+    const getData = async () => {
+      try {
+        const {
+          data: { data },
+        } = await axiosInstance.get(getRequestUrl('settings'), {
+          cancelToken: source.token,
+        });
 
-      if (isMounted.current) {
         dispatch({
           type: 'GET_DATA_SUCCEEDED',
           data,
         });
+      } catch (err) {
+        console.error(err);
       }
-    } catch (err) {
-      console.error(err);
-    }
-  };
+    };
 
-  useEffect(() => {
-    getDataRef.current();
+    if (isMounted.current) {
+      getData();
+    }
 
     return () => {
-      abortController.abort();
+      source.cancel('Operation canceled by the user.');
       isMounted.current = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleSubmit = async () => {
-    try {
-      await request(getRequestUrl('settings'), {
-        method: 'PUT',
-        body: modifiedData,
-      });
+  const isSaveButtonDisabled = isEqual(initialData, modifiedData);
 
-      if (isMounted.current) {
-        dispatch({
-          type: 'SUBMIT_SUCCEEDED',
-        });
-      }
+  const handleSubmit = async e => {
+    e.preventDefault();
+
+    if (isSaveButtonDisabled) {
+      return;
+    }
+
+    lockApp();
+
+    dispatch({ type: 'ON_SUBMIT' });
+
+    try {
+      await axiosInstance.put(getRequestUrl('settings'), modifiedData);
+
+      dispatch({
+        type: 'SUBMIT_SUCCEEDED',
+      });
 
       toggleNotification({
         type: 'success',
@@ -82,38 +97,11 @@ const SettingsPage = () => {
       });
     } catch (err) {
       console.error(err);
-    }
-  };
 
-  const headerProps = {
-    title: {
-      label: formatMessage({ id: getTrad('settings.header.label') }),
-    },
-    content: formatMessage({
-      id: getTrad('settings.sub-header.label'),
-    }),
-    actions: [
-      {
-        color: 'cancel',
-        disabled: isEqual(initialData, modifiedData),
-        // TradId from the @strapi/admin package
-        label: formatMessage({ id: 'app.components.Button.cancel' }),
-        onClick: () => {
-          dispatch({
-            type: 'CANCEL_CHANGES',
-          });
-        },
-        type: 'button',
-      },
-      {
-        disabled: false,
-        color: 'success',
-        // TradId from the @strapi/admin package
-        label: formatMessage({ id: 'app.components.Button.save' }),
-        onClick: handleSubmit,
-        type: 'button',
-      },
-    ],
+      dispatch({ type: 'ON_SUBMIT_ERROR' });
+    }
+
+    unlockApp();
   };
 
   const handleChange = ({ target: { name, value } }) => {
@@ -124,93 +112,158 @@ const SettingsPage = () => {
     });
   };
 
-  if (isLoading) {
-    return <LoadingIndicatorPage />;
-  }
-
   return (
-    <>
-      <Helmet title={formatMessage({ id: getTrad('page.title') })} />
-
-      <Header {...headerProps} />
-      <Wrapper>
-        <div className="container-fluid">
-          <div className="row">
-            <SectionTitleWrapper className="col-12">
-              <Text fontSize="xs" fontWeight="semiBold" color="#787E8F">
-                {formatMessage({ id: getTrad('settings.section.image.label') })}
-              </Text>
-            </SectionTitleWrapper>
-            <div className="col-6">
-              <Inputs
-                label={formatMessage({
-                  id: getTrad('settings.form.responsiveDimensions.label'),
-                })}
-                description={formatMessage({
-                  id: getTrad('settings.form.responsiveDimensions.description'),
-                })}
-                name="responsiveDimensions"
-                onChange={handleChange}
-                type="bool"
-                value={modifiedData.responsiveDimensions}
-              />
-            </div>
-            <div className="col-6">
-              <Inputs
-                label={formatMessage({
-                  id: getTrad('settings.form.sizeOptimization.label'),
-                })}
-                name="sizeOptimization"
-                onChange={handleChange}
-                type="bool"
-                value={modifiedData.sizeOptimization}
-              />
-            </div>
-          </div>
-          <div className="row">
-            <div className="col-6">
-              <Inputs
-                label={formatMessage({
-                  id: getTrad('settings.form.autoOrientation.label'),
-                })}
-                description={formatMessage({
-                  id: getTrad('settings.form.autoOrientation.description'),
-                })}
-                name="autoOrientation"
-                onChange={handleChange}
-                type="bool"
-                value={modifiedData.autoOrientation}
-              />
-            </div>
-          </div>
-
-          {/*
-          <Divider />
-          <div className="row">
-            <SectionTitleWrapper className="col-12">
-              <Text fontSize="xs" fontWeight="semiBold" color="#787E8F">
-                {formatMessage({ id: getTrad('settings.section.video.label') })}
-              </Text>
-            </SectionTitleWrapper>
-            <div className="col-6">
-              <Inputs
-                label={formatMessage({
-                  id: getTrad('settings.form.videoPreview.label'),
-                })}
-                description={formatMessage({
-                  id: getTrad('settings.form.videoPreview.description'),
-                })}
-                name="videoPreview"
-                onChange={handleChange}
-                type="bool"
-                value={modifiedData.videoPreview}
-              />
-            </div>
-          </div> */}
-        </div>
-      </Wrapper>
-    </>
+    <Main tabIndex={-1}>
+      <Helmet
+        title={formatMessage({
+          id: getTrad('page.title'),
+          defaultMessage: 'Settings - Media Libray',
+        })}
+      />
+      <form onSubmit={handleSubmit}>
+        <HeaderLayout
+          title={formatMessage({
+            id: getTrad('settings.header.label'),
+            defaultMessage: 'Media Library - Settings',
+          })}
+          primaryAction={
+            <Button
+              disabled={isSaveButtonDisabled}
+              data-testid="save-button"
+              loading={isSubmiting}
+              type="submit"
+              startIcon={<CheckIcon />}
+              size="L"
+            >
+              {formatMessage({
+                id: 'app.components.Button.save',
+                defaultMessage: 'Save',
+              })}
+            </Button>
+          }
+          subtitle={formatMessage({
+            id: getTrad('settings.sub-header.label'),
+            defaultMessage: 'Configure the settings for the media library',
+          })}
+        />
+        <ContentLayout>
+          {isLoading ? (
+            <LoadingIndicatorPage />
+          ) : (
+            <Layout>
+              <Stack size={12}>
+                <Box background="neutral0" padding={6} shadow="filterShadow" hasRadius>
+                  <Stack size={4}>
+                    <Row>
+                      <H3 as="h2">
+                        {formatMessage({
+                          id: getTrad('settings.section.image.label'),
+                          defaultMessage: 'Image',
+                        })}
+                      </H3>
+                    </Row>
+                    <Grid gap={6}>
+                      <GridItem col={6} s={12}>
+                        <ToggleInput
+                          aria-label="responsiveDimensions"
+                          data-testid="responsiveDimensions"
+                          checked={modifiedData.responsiveDimensions}
+                          hint={formatMessage({
+                            id: getTrad('settings.form.responsiveDimensions.description'),
+                            defaultMessage:
+                              'It automatically generates multiple formats (large, medium, small) of the uploaded asset',
+                          })}
+                          label={formatMessage({
+                            id: getTrad('settings.form.responsiveDimensions.label'),
+                            defaultMessage: 'Enable responsive friendly upload',
+                          })}
+                          name="responsiveDimensions"
+                          offLabel={formatMessage({
+                            id: 'app.components.ToggleCheckbox.off-label',
+                            defaultMessage: 'Off',
+                          })}
+                          onLabel={formatMessage({
+                            id: 'app.components.ToggleCheckbox.on-label',
+                            defaultMessage: 'On',
+                          })}
+                          onChange={e => {
+                            handleChange({
+                              target: { name: 'responsiveDimensions', value: e.target.checked },
+                            });
+                          }}
+                        />
+                      </GridItem>
+                      <GridItem col={6} s={12}>
+                        <ToggleInput
+                          aria-label="sizeOptimization"
+                          data-testid="sizeOptimization"
+                          checked={modifiedData.sizeOptimization}
+                          label={formatMessage({
+                            id: getTrad('settings.form.sizeOptimization.label'),
+                            defaultMessage: 'Enable size optimization (without quality loss)',
+                          })}
+                          name="sizeOptimization"
+                          offLabel={formatMessage({
+                            id: 'app.components.ToggleCheckbox.off-label',
+                            defaultMessage: 'Off',
+                          })}
+                          onLabel={formatMessage({
+                            id: 'app.components.ToggleCheckbox.on-label',
+                            defaultMessage: 'On',
+                          })}
+                          onChange={e => {
+                            handleChange({
+                              target: { name: 'sizeOptimization', value: e.target.checked },
+                            });
+                          }}
+                        />
+                      </GridItem>
+                      <GridItem col={6} s={12}>
+                        <ToggleInput
+                          aria-label="autoOrientation"
+                          data-testid="autoOrientation"
+                          checked={modifiedData.autoOrientation}
+                          hint={formatMessage({
+                            id: getTrad('settings.form.autoOrientation.description'),
+                            defaultMessage:
+                              'Automatically rotate image according to EXIF orientation tag',
+                          })}
+                          label={formatMessage({
+                            id: getTrad('settings.form.autoOrientation.label'),
+                            defaultMessage: 'Enable auto orientation',
+                          })}
+                          name="autoOrientation"
+                          offLabel={formatMessage({
+                            id: 'app.components.ToggleCheckbox.off-label',
+                            defaultMessage: 'Off',
+                          })}
+                          onLabel={formatMessage({
+                            id: 'app.components.ToggleCheckbox.on-label',
+                            defaultMessage: 'On',
+                          })}
+                          onChange={e => {
+                            handleChange({
+                              target: { name: 'autoOrientation', value: e.target.checked },
+                            });
+                          }}
+                        />
+                      </GridItem>
+                    </Grid>
+                  </Stack>
+                </Box>
+              </Stack>
+            </Layout>
+          )}
+        </ContentLayout>
+      </form>
+    </Main>
   );
 };
+
+const ProtectedSettingsPage = () => (
+  <CheckPagePermissions permissions={pluginPermissions.settings}>
+    <SettingsPage />
+  </CheckPagePermissions>
+);
 
 export default ProtectedSettingsPage;

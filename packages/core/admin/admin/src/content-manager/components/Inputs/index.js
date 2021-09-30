@@ -4,15 +4,19 @@ import get from 'lodash/get';
 import omit from 'lodash/omit';
 import take from 'lodash/take';
 import isEqual from 'react-fast-compare';
-import { useIntl } from 'react-intl';
-import { Inputs as InputsIndex } from '@buffetjs/custom';
-import { NotAllowedInput, useLibrary } from '@strapi/helper-plugin';
+import {
+  NotAllowedInput,
+  // useLibrary
+} from '@strapi/helper-plugin';
 import { useContentTypeLayout } from '../../hooks';
 import { getFieldName } from '../../utils';
-import InputJSONWithErrors from '../InputJSONWithErrors';
-import SelectWrapper from '../SelectWrapper';
-import WysiwygWithErrors from '../WysiwygWithErrors';
+import Wysiwyg from '../Wysiwyg';
+import InputJSON from '../InputJSON';
+import ComingSoonInput from './ComingSoonInput';
+import GenericInput from './GenericInput';
 import InputUID from '../InputUID';
+import SelectWrapper from '../SelectWrapper';
+
 import {
   connect,
   generateOptions,
@@ -24,28 +28,21 @@ import {
 
 function Inputs({
   allowedFields,
-  autoFocus,
   fieldSchema,
   formErrors,
   isCreatingEntry,
   keys,
-  labelIcon,
+  labelAction,
   metadatas,
-  onBlur,
+
   onChange,
   readableFields,
   shouldNotRunValidations,
   queryInfos,
   value,
 }) {
-  const { fields } = useLibrary();
-
+  // const { fields } = useLibrary();
   const { contentType: currentContentTypeLayout } = useContentTypeLayout();
-  const { formatMessage } = useIntl();
-
-  const labelIconformatted = labelIcon
-    ? { icon: labelIcon.icon, title: formatMessage(labelIcon.title) }
-    : labelIcon;
 
   const disabled = useMemo(() => !get(metadatas, 'editable', true), [metadatas]);
   const type = fieldSchema.type;
@@ -53,8 +50,6 @@ function Inputs({
   const errorId = useMemo(() => {
     return get(formErrors, [keys, 'id'], null);
   }, [formErrors, keys]);
-
-  const errorMessage = errorId ? formatMessage({ id: errorId, defaultMessage: errorId }) : null;
 
   const fieldName = useMemo(() => {
     return getFieldName(keys);
@@ -174,7 +169,7 @@ function Inputs({
     isRequired,
   ]);
 
-  const { description, visible } = metadatas;
+  const { label, description, placeholder, visible } = metadatas;
 
   if (visible === false) {
     return null;
@@ -183,56 +178,74 @@ function Inputs({
   if (!shouldDisplayNotAllowedInput) {
     return (
       <NotAllowedInput
-        label={metadatas.label}
-        labelIcon={labelIconformatted}
-        error={errorMessage}
+        description={description ? { id: description, defaultMessage: description } : null}
+        intlLabel={{ id: label, defaultMessage: label }}
+        labelAction={labelAction}
+        error={errorId}
+        name={keys}
       />
     );
   }
 
   if (type === 'relation') {
+    // return 'RELATION';
     return (
-      <div key={keys}>
-        <SelectWrapper
-          {...metadatas}
-          {...fieldSchema}
-          labelIcon={labelIcon}
-          isUserAllowedToEditField={isUserAllowedToEditField}
-          isUserAllowedToReadField={isUserAllowedToReadField}
-          name={keys}
-          queryInfos={queryInfos}
-          value={value}
-        />
-      </div>
+      <SelectWrapper
+        {...metadatas}
+        {...fieldSchema}
+        description={{
+          id: metadatas.description,
+          defaultMessage: metadatas.description,
+        }}
+        intlLabel={{
+          id: metadatas.label,
+          defaultMessage: metadatas.label,
+        }}
+        labelAction={labelAction}
+        isUserAllowedToEditField={isUserAllowedToEditField}
+        isUserAllowedToReadField={isUserAllowedToReadField}
+        name={keys}
+        placeholder={
+          metadatas.placeholder
+            ? {
+                id: metadatas.placeholder,
+                defaultMessage: metadatas.placeholder,
+              }
+            : null
+        }
+        queryInfos={queryInfos}
+        value={value}
+      />
     );
   }
 
   return (
-    <InputsIndex
-      {...metadatas}
+    <GenericInput
+      attribute={fieldSchema}
       autoComplete="new-password"
-      autoFocus={autoFocus}
+      intlLabel={{ id: label, defaultMessage: label }}
+      description={description ? { id: description, defaultMessage: description } : null}
       disabled={shouldDisableField}
-      error={errorMessage}
-      inputDescription={description}
-      labelIcon={labelIconformatted}
-      description={description}
+      error={errorId}
+      labelAction={labelAction}
       contentTypeUID={currentContentTypeLayout.uid}
       customInputs={{
-        json: InputJSONWithErrors,
-        wysiwyg: WysiwygWithErrors,
+        // ...fields,
+        json: InputJSON,
         uid: InputUID,
-        ...fields,
+        // FIXME
+        datetime: ComingSoonInput,
+        media: ComingSoonInput,
+        wysiwyg: Wysiwyg,
       }}
       multiple={fieldSchema.multiple || false}
-      attribute={fieldSchema}
       name={keys}
-      onBlur={onBlur}
       onChange={onChange}
       options={options}
+      placeholder={placeholder ? { id: placeholder, defaultMessage: placeholder } : null}
       step={step}
       type={inputType}
-      validations={validations}
+      // validations={validations}
       value={inputValue}
       withDefaultValue={false}
     />
@@ -240,30 +253,20 @@ function Inputs({
 }
 
 Inputs.defaultProps = {
-  autoFocus: false,
   formErrors: {},
-  labelIcon: null,
-  onBlur: null,
+  labelAction: undefined,
   queryInfos: {},
   value: null,
 };
 
 Inputs.propTypes = {
   allowedFields: PropTypes.array.isRequired,
-  autoFocus: PropTypes.bool,
   fieldSchema: PropTypes.object.isRequired,
   formErrors: PropTypes.object,
   keys: PropTypes.string.isRequired,
   isCreatingEntry: PropTypes.bool.isRequired,
-  labelIcon: PropTypes.shape({
-    icon: PropTypes.node.isRequired,
-    title: PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      defaultMessage: PropTypes.string.isRequired,
-    }).isRequired,
-  }),
+  labelAction: PropTypes.element,
   metadatas: PropTypes.object.isRequired,
-  onBlur: PropTypes.func,
   onChange: PropTypes.func.isRequired,
   readableFields: PropTypes.array.isRequired,
   shouldNotRunValidations: PropTypes.bool.isRequired,
@@ -277,4 +280,7 @@ Inputs.propTypes = {
 
 const Memoized = memo(Inputs, isEqual);
 
-export default connect(Memoized, select);
+export default connect(
+  Memoized,
+  select
+);

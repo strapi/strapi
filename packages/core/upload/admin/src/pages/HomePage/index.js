@@ -17,10 +17,11 @@ import { useAppContext, useSelectTimestamps } from '../../hooks';
 import Container from '../../components/Container';
 import HomePageContent from './HomePageContent';
 import HomePageModalStepper from '../../components/HomePageModalStepper';
-import { generateStringFromParams, getHeaderLabel } from './utils';
+import { getHeaderLabel } from './utils';
 import init from './init';
 import reducer, { initialState } from './reducer';
 
+// TODO: remove this file when ML is migrated
 const HomePage = () => {
   const toggleNotification = useNotification();
   const { allowedActions } = useAppContext();
@@ -72,7 +73,7 @@ const HomePage = () => {
 
   const fetchData = async () => {
     const dataRequestURL = getRequestUrl('files');
-    const params = generateStringFromParams(query);
+    const params = query;
 
     const paramsToSend = params.includes('sort')
       ? params
@@ -98,7 +99,7 @@ const HomePage = () => {
   };
 
   const fetchDataCount = async () => {
-    const params = generateStringFromParams(query, ['_limit', '_start']);
+    const params = query;
     const requestURL = getRequestUrl('files/count');
 
     try {
