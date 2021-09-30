@@ -15,24 +15,9 @@ module.exports = plop => {
       return [
         {
           type: 'addMany',
-          destination: 'plugins/{{id}}/admin',
-          base: 'files/plugin/admin',
-          templateFiles: 'files/plugin/admin/**',
-        },
-        {
-          type: 'add',
-          path: 'plugins/{{id}}/services/{{id}}.js',
-          templateFile: 'templates/service.js.hbs',
-        },
-        {
-          type: 'add',
-          path: 'plugins/{{id}}/controllers/{{id}}.js',
-          templateFile: 'templates/controller.js.hbs',
-        },
-        {
-          type: 'add',
-          path: 'plugins/{{id}}/config/routes.json',
-          templateFile: 'templates/plugin-routes.json.hbs',
+          destination: 'plugins/{{id}}',
+          base: 'files/plugin',
+          templateFiles: 'files/plugin/**',
         },
         {
           type: 'add',

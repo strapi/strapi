@@ -1,11 +1,11 @@
 {
-  "name": "{{id}}",
+  "name": "super-plugin",
   "version": "0.0.0",
   "description": "This is the description of the plugin.",
   "strapi": {
-    "name": "{{id}}",
+    "name": "super-plugin",
     "icon": "plug",
-    "description": "Description of {{id}} plugin",
+    "description": "Description of super-plugin plugin",
     "kind": "plugin"
   },
   "dependencies": {},
