@@ -29,6 +29,7 @@
   ],
   "main": "lib/index.js",
   "dependencies": {
+    "chalk": "4.1.2",
     "fs-extra": "10.0.0",
     "node-plop": "0.26.2",
     "plop": "2.7.4",
