@@ -92,9 +92,21 @@ async function build({ plugins, dir, env, options, optimize }) {
 async function createPluginsJs(plugins, dest) {
   const pluginsArray = plugins.map(({ pathToPlugin, name }) => {
     const shortName = _.camelCase(name);
+
+    /**
+     * path.join, on windows, it uses backslashes to resolve path.
+     * The problem is that JavaScript does not resolve the path as windows.
+     * In JavaScript, we need to rely on "/" and not "\".
+     * This is the reason why '..\\..\\..\\node_modules\\@strapi\\plugin-content-type-builder/strapi-admin.js' was not working in javascript.
+     * The regexp at line 105 aims to replace the windows backslashes by standard slash so that javascript can deal with them.
+     */
+    const realPath = path
+      .join(path.relative(path.resolve(dest, 'admin/src'), pathToPlugin), 'strapi-admin.js')
+      .replace(/\\/g, '/');
+
     return {
       name,
-      pathToPlugin: path.relative(path.resolve(dest, 'admin/src'), pathToPlugin),
+      pathToPlugin: realPath,
       shortName,
     };
   });
@@ -102,7 +114,7 @@ async function createPluginsJs(plugins, dest) {
   const content = `
 ${pluginsArray
   .map(({ pathToPlugin, shortName }) => {
-    const req = `'${pathToPlugin}/strapi-admin.js'`;
+    const req = `'${pathToPlugin}'`;
 
     return `import ${shortName} from ${req};`;
   })
