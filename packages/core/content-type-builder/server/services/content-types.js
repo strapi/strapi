@@ -2,6 +2,7 @@
 
 const _ = require('lodash');
 const { getOr } = require('lodash/fp');
+const pluralize = require('pluralize');
 
 const { nameToSlug, contentTypes: contentTypesUtils } = require('@strapi/utils');
 const { formatAttributes, replaceTemporaryUIDs } = require('../utils/attributes');
@@ -129,7 +130,7 @@ const generateAPI = ({ name, kind = 'collectionType' }) => {
   const strapiGenerators = require('@strapi/generators');
   return strapiGenerators.generate(
     'api',
-    { id: nameToSlug(name), kind },
+    { id: pluralize.singular(nameToSlug(name)), kind },
     { dir: strapi.dirs.root }
   );
 };
