@@ -34,14 +34,24 @@ const allowedTemplateContents = {
  * @param {string} rootPath  project path
  */
 module.exports = async function mergeTemplate(scope, rootPath) {
-  // Parse template info
-  const templatePackageInfo = await getTemplatePackageInfo(scope.template);
-  console.log(templatePackageInfo);
-  console.log(`Installing ${chalk.yellow(templatePackageInfo.name)} template.`);
+  let templatePath;
+  let templateParentPath;
+  let templatePackageInfo = {};
+  const isLocalTemplate = Boolean(scope.template.match(/^file:/));
 
-  // Download template repository to a temporary directory
-  const templateParentPath = await fse.mkdtemp(path.join(os.tmpdir(), 'strapi-'));
-  const templatePath = downloadNpmTemplate(templatePackageInfo, templateParentPath);
+  if (isLocalTemplate) {
+    // Template is a local directory
+    console.log('Installing local template.');
+    templatePath = path.resolve(rootPath, '..', scope.template.match(/^file:(.*)?$/)[1]);
+  } else {
+    // Template should be an npm package. Fetch template info
+    templatePackageInfo = await getTemplatePackageInfo(scope.template);
+    console.log(`Installing ${chalk.yellow(templatePackageInfo.name)} template.`);
+
+    // Download template repository to a temporary directory
+    templateParentPath = await fse.mkdtemp(path.join(os.tmpdir(), 'strapi-'));
+    templatePath = downloadNpmTemplate(templatePackageInfo, templateParentPath);
+  }
 
   // Make sure the downloaded template matches the required format
   const { templateConfig } = await checkTemplateRootStructure(templatePath, scope);
@@ -51,8 +61,10 @@ module.exports = async function mergeTemplate(scope, rootPath) {
   await mergePackageJSON({ rootPath, templateConfig, templatePackageInfo });
   await mergeFilesAndDirectories(rootPath, templatePath);
 
-  // Delete the downloaded template repo
-  await fse.remove(templateParentPath);
+  // Delete the template directory if it was downloaded
+  if (!isLocalTemplate) {
+    await fse.remove(templateParentPath);
+  }
 };
 
 /**
@@ -182,7 +194,7 @@ async function checkTemplateContentsStructure(templateContentsPath) {
  * @param {Object} config.templatePackageInfo.name - The name of the template's package on npm
  * @param {Object} config.templatePackageInfo.version - The name of the template's package on npm
  */
-async function mergePackageJSON({ rootPath, templateConfig, templatePackageName }) {
+async function mergePackageJSON({ rootPath, templateConfig, templatePackageInfo }) {
   // Import the package.json as an object
   const packageJSON = require(path.resolve(rootPath, 'package.json'));
 
@@ -200,7 +212,9 @@ async function mergePackageJSON({ rootPath, templateConfig, templatePackageName 
   const mergedConfig = _.merge(packageJSON, templateConfig.package);
 
   // Add starter info to package.json
-  _.set(mergedConfig, 'strapi.template', templatePackageName);
+  if (templatePackageInfo.name) {
+    _.set(mergedConfig, 'strapi.template', templatePackageInfo.name);
+  }
 
   // Save the merged config as the new package.json
   const packageJSONPath = path.join(rootPath, 'package.json');

@@ -18,11 +18,11 @@ function getPackageInfo(packageName) {
 }
 
 /**
- * @param {string} template - The name of the template as provided by the user. Can be a shorthand.
+ * @param {string} template - The name of the template as provided by the user.
  * @returns {Object} - The full name of the template package's name on npm
  */
 async function getTemplatePackageInfo(template) {
-  // Check if template is a s horthand
+  // Check if template is a shorthand
   try {
     const longhand = `@strapi/template-${template}`;
     const packageInfo = getPackageInfo(longhand);
