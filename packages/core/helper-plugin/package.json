@@ -32,7 +32,7 @@
     "build:production": "cross-env NODE_ENV=production webpack-cli",
     "create:index": "node ./createBuildIndex.js",
     "watch": "yarn create:index && cross-env NODE_ENV=development webpack-cli -w",
-    "test": "echo \"no tests yet\"",
+    "test:front": "jest --config jest.config.front.js",
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook"
   },
