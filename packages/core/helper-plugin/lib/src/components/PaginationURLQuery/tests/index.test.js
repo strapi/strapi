@@ -10,7 +10,7 @@ import { IntlProvider } from 'react-intl';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { ThemeProvider, lightTheme } from '@strapi/parts';
-import PaginationURLQuery from '../index';
+import { PaginationURLQuery } from '../index';
 
 const messages = {
   'components.pagination.go-to': 'Go to page {page}',

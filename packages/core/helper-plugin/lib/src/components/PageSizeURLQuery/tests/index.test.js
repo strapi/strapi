@@ -10,7 +10,7 @@ import { IntlProvider } from 'react-intl';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { ThemeProvider, lightTheme } from '@strapi/parts';
-import PageSizeURLQuery from '../index';
+import { PageSizeURLQuery } from '../index';
 
 jest.mock('../../../hooks/useTracking', () => () => ({
   trackUsage: jest.fn(),

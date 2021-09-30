@@ -8,7 +8,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { ThemeProvider, lightTheme } from '@strapi/parts';
 import { IntlProvider } from 'react-intl';
-import NotAllowedInput from '../index';
+import { NotAllowedInput } from '../index';
 
 const messages = {
   'components.NotAllowedInput.text': 'No permissions to see this field',

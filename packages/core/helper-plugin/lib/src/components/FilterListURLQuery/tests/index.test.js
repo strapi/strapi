@@ -11,7 +11,7 @@ import { ThemeProvider, lightTheme } from '@strapi/parts';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import qs from 'qs';
-import FilterListURLQuery from '../index';
+import { FilterListURLQuery } from '../index';
 
 const makeApp = (history, filtersSchema) => (
   <Router history={history}>

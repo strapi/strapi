@@ -16,4 +16,4 @@ InjectionZone.propTypes = {
   area: PropTypes.string.isRequired,
 };
 
-export default InjectionZone;
+export { InjectionZone };

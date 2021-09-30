@@ -1,0 +1,34 @@
+<!--- EmptyStateLayout.stories.mdx --->
+
+import { Meta, ArgsTable, Canvas, Story } from '@storybook/addon-docs';
+import { Main, Row } from '@strapi/parts';
+import { NotAllowedInput } from './index';
+
+<Meta title="components/NotAllowedInput" />
+
+# NotAllowedInput
+
+This component is used to display an empty state.
+
+## Imports
+
+```js
+import { NotAllowedInput } from '@strapi/helper-plugin';
+```
+
+## Usage
+
+<Canvas>
+  <Story name="base">
+    <Main>
+      <NotAllowedInput
+        intlLabel={{ id: 'my-plugin.email', defaultMessage: 'Email' }}
+        name="email"
+      />
+    </Main>
+  </Story>
+</Canvas>
+
+### Props
+
+<ArgsTable of={NotAllowedInput} />

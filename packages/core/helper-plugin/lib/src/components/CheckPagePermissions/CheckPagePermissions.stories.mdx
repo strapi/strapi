@@ -1,13 +1,19 @@
 <!--- CheckPagePermissions.stories.mdx --->
 
 import { ArgsTable, Meta } from '@storybook/addon-docs';
-import CheckPagePermissions from './index';
+import { CheckPagePermissions } from './CheckPagePermissions';
 
 <Meta title="components/CheckPagePermissions" />
 
 # CheckPagePermissions
 
 This component is used in order to apply RBAC to a view. If the user does not have the permissions to access the view he will be redirect to the homepage:
+
+## Imports
+
+```js
+import { CheckPagePermissions } from '@strapi/helper-plugin';
+```
 
 ## Usage
 
