@@ -8,7 +8,7 @@ import { Table } from '@strapi/parts/Table';
 import { useIntl } from 'react-intl';
 import DeleteIcon from '@strapi/icons/DeleteIcon';
 import styled from 'styled-components';
-import useQueryParams from '../../hooks/useQueryParams';
+import { useQueryParams } from '../../hooks/useQueryParams';
 import { ConfirmDialog } from '../ConfirmDialog/ConfirmDialog';
 import { EmptyBodyTable } from '../EmptyBodyTable/EmptyBodyTable';
 import TableHead from './TableHead';

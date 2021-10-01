@@ -98,23 +98,6 @@ export { default as PopUpWarningHeader } from './old/components/PopUpWarning/Hea
 export { default as PopUpWarningIcon } from './old/components/PopUpWarning/Icon';
 export { default as PopUpWarningModal } from './old/components/PopUpWarning/StyledModal';
 
-// Hooks
-export { default as useAppInfos } from './hooks/useAppInfos';
-export { default as useQuery } from './hooks/useQuery';
-export { default as useLibrary } from './hooks/useLibrary';
-export { default as useNotification } from './hooks/useNotification';
-export { default as useStrapiApp } from './hooks/useStrapiApp';
-export { default as useTracking } from './hooks/useTracking';
-
-export { default as useQueryParams } from './hooks/useQueryParams';
-export { default as useOverlayBlocker } from './hooks/useOverlayBlocker';
-export { default as useAutoReloadOverlayBlocker } from './hooks/useAutoReloadOverlayBlocker';
-export { default as useRBACProvider } from './hooks/useRBACProvider';
-export { default as useRBAC } from './hooks/useRBAC';
-export { default as usePersistentState } from './hooks/usePersistentState';
-export { default as useFocusWhenNavigate } from './hooks/useFocusWhenNavigate';
-export { default as useLockScroll } from './hooks/useLockScroll';
-
 // Providers
 export { default as LibraryProvider } from './providers/LibraryProvider';
 export { default as NotificationsProvider } from './providers/NotificationsProvider';
@@ -184,9 +167,25 @@ export * from './contexts/OverlayBlockerContext';
 export * from './contexts/RBACProviderContext';
 export * from './contexts/TrackingContext';
 
+// Hooks
+export * from './hooks/useAppInfos';
+export * from './hooks/useAutoReloadOverlayBlocker';
+export * from './hooks/useFocusWhenNavigate';
+export * from './hooks/useLibrary/useLibrary';
+export * from './hooks/useLockScroll';
+export * from './hooks/useNotification';
+export * from './hooks/useOverlayBlocker';
+export * from './hooks/usePersistentState';
+export * from './hooks/useQuery';
+export * from './hooks/useQueryParams';
+export * from './hooks/useRBAC';
+export * from './hooks/useRBACProvider';
+export * from './hooks/useStrapiApp';
+export * from './hooks/useTracking';
+
 // New icons
-export { default as SortIcon } from './icons/SortIcon';
-export { default as RemoveRoundedButton } from './icons/RemoveRoundedButton';
+export * from './icons/RemoveRoundedButton';
+export * from './icons/SortIcon';
 
 // content-manager
 export * from './content-manager/CMEditViewDataManagerContext';

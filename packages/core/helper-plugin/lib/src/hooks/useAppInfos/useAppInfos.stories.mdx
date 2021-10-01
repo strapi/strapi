@@ -1,0 +1,36 @@
+<!--- useAppInfos.stories.mdx --->
+
+import { Meta } from '@storybook/addon-docs';
+
+<Meta title="hooks/useAppInfos" />
+
+# useAppInfos
+
+This hook is used in order to focus the user on the page in the admin panel.
+
+## Usage
+
+```
+import { useAppInfos } from '@strapi/helper-plugin';
+import { Main } from '@strapi/parts';
+
+const HomePage = () => {
+  const {
+    autoReload,
+    communityEdition,
+    currentEnvironment,
+    latestStrapiReleaseTag,
+    nodeVersion,
+    setUserDisplayName, // ƒ ()
+    shouldUpdateStrapi,
+    strapiVersion,
+    userDisplayName,
+  } = useAppInfos();
+
+  return (
+    <Main>
+      <h1>This is the homepage</h1>
+    </Main>
+  );
+};
+```

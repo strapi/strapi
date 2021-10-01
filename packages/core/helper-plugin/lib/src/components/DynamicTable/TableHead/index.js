@@ -7,8 +7,8 @@ import { TableLabel } from '@strapi/parts/Text';
 import { Th, Thead, Tr } from '@strapi/parts/Table';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import SortIcon from '../../../icons/SortIcon';
-import useQueryParams from '../../../hooks/useQueryParams';
+import { SortIcon } from '../../../icons/SortIcon';
+import { useQueryParams } from '../../../hooks/useQueryParams';
 
 const TableHead = ({
   areAllEntriesSelected,

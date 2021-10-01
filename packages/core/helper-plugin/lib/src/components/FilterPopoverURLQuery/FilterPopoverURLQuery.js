@@ -15,8 +15,8 @@ import { FocusTrap } from '@strapi/parts/FocusTrap';
 import { Select, Option } from '@strapi/parts/Select';
 import AddIcon from '@strapi/icons/AddIcon';
 import { useIntl } from 'react-intl';
-import useQueryParams from '../../hooks/useQueryParams';
-import useTracking from '../../hooks/useTracking';
+import { useQueryParams } from '../../hooks/useQueryParams';
+import { useTracking } from '../../hooks/useTracking';
 import Inputs from './Inputs';
 import getFilterList from './utils/getFilterList';
 
