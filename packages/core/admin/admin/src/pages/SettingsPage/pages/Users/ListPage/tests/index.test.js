@@ -705,7 +705,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
       }
 
       .c55 {
-        min-height: 2.5rem;
+        min-height: 2.125rem;
       }
 
       .c25 {
