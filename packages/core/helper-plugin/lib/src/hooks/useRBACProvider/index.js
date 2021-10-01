@@ -5,7 +5,7 @@
  */
 
 import { useContext } from 'react';
-import RBACProviderContext from '../../contexts/RBACProviderContext';
+import { RBACProviderContext } from '../../contexts/RBACProviderContext';
 
 const useRBACProvider = () => useContext(RBACProviderContext);
 

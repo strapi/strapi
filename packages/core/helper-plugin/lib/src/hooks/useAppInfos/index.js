@@ -5,7 +5,7 @@
  */
 
 import { useContext } from 'react';
-import AppInfosContext from '../../contexts/AppInfosContext';
+import { AppInfosContext } from '../../contexts/AppInfosContext';
 
 const useAppInfos = () => {
   const appInfos = useContext(AppInfosContext);

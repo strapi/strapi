@@ -5,7 +5,7 @@
  */
 
 import { useContext } from 'react';
-import StrapiAppContext from '../../contexts/StrapiAppContext';
+import { StrapiAppContext } from '../../contexts/StrapiAppContext';
 
 const useStrapiApp = () => useContext(StrapiAppContext);
 

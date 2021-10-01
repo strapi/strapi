@@ -5,7 +5,7 @@
  */
 
 import { useContext, useRef } from 'react';
-import LibraryContext from '../../contexts/LibraryContext';
+import { LibraryContext } from '../../contexts/LibraryContext';
 
 const useLibrary = () => {
   const { components, fields } = useContext(LibraryContext);

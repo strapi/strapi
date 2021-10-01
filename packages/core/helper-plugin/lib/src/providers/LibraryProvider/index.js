@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import PropTypes from 'prop-types';
-import LibraryContext from '../../contexts/LibraryContext';
+import { LibraryContext } from '../../contexts/LibraryContext';
 
 const LibraryProvider = ({ children, components, fields }) => {
   return (

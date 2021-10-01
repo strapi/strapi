@@ -98,20 +98,8 @@ export { default as PopUpWarningHeader } from './old/components/PopUpWarning/Hea
 export { default as PopUpWarningIcon } from './old/components/PopUpWarning/Icon';
 export { default as PopUpWarningModal } from './old/components/PopUpWarning/StyledModal';
 
-// Contexts
-export { default as AppInfosContext } from './contexts/AppInfosContext';
-export {
-  default as AutoReloadOverlayBockerContext,
-} from './contexts/AutoReloadOverlayBockerContext';
-export { default as NotificationsContext } from './contexts/NotificationsContext';
-export { default as OverlayBlockerContext } from './contexts/OverlayBlockerContext';
-
-export { default as RBACProviderContext } from './contexts/RBACProviderContext';
-export { default as TrackingContext } from './contexts/TrackingContext';
-
 // Hooks
 export { default as useAppInfos } from './hooks/useAppInfos';
-
 export { default as useQuery } from './hooks/useQuery';
 export { default as useLibrary } from './hooks/useLibrary';
 export { default as useNotification } from './hooks/useNotification';
@@ -186,6 +174,15 @@ export * from './components/PaginationURLQuery';
 export * from './components/Search';
 export * from './components/SettingsPageTitle';
 export * from './components/Status';
+
+// Contexts
+export * from './contexts/AppInfosContext';
+export * from './contexts/AutoReloadOverlayBlockerContext';
+export * from './contexts/LibraryContext';
+export * from './contexts/NotificationsContext';
+export * from './contexts/OverlayBlockerContext';
+export * from './contexts/RBACProviderContext';
+export * from './contexts/TrackingContext';
 
 // New icons
 export { default as SortIcon } from './icons/SortIcon';

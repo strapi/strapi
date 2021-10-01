@@ -8,4 +8,4 @@ import { createContext } from 'react';
 
 const TrackingContext = createContext();
 
-export default TrackingContext;
+export { TrackingContext };

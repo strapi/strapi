@@ -5,7 +5,7 @@
  */
 
 import { useContext, useRef } from 'react';
-import OverlayBlockerContext from '../../contexts/OverlayBlockerContext';
+import { OverlayBlockerContext } from '../../contexts/OverlayBlockerContext';
 
 const useOverlayBlocker = () => {
   const { lockApp, unlockApp } = useContext(OverlayBlockerContext);

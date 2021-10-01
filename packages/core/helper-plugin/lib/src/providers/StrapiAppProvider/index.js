@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import PropTypes from 'prop-types';
-import StrapiAppContext from '../../contexts/StrapiAppContext';
+import { StrapiAppContext } from '../../contexts/StrapiAppContext';
 
 const StrapiAppProvider = ({
   children,

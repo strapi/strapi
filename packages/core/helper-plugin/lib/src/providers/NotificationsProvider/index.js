@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import PropTypes from 'prop-types';
-import NotificationsContext from '../../contexts/NotificationsContext';
+import { NotificationsContext } from '../../contexts/NotificationsContext';
 
 const NotificationsProvider = ({ children, toggleNotification }) => {
   return (

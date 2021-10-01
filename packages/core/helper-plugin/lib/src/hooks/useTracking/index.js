@@ -1,6 +1,6 @@
 import { useContext, useRef } from 'react';
 import axios from 'axios';
-import TrackingContext from '../../contexts/TrackingContext';
+import { TrackingContext } from '../../contexts/TrackingContext';
 
 const useTracking = () => {
   const trackRef = useRef();

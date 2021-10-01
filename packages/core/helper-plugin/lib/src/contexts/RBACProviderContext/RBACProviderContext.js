@@ -9,4 +9,4 @@ import { createContext } from 'react';
 
 const RBACProviderContext = createContext();
 
-export default RBACProviderContext;
+export { RBACProviderContext };

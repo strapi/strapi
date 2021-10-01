@@ -5,7 +5,7 @@
  */
 
 import { useContext, useRef } from 'react';
-import NotificationsContext from '../../contexts/NotificationsContext';
+import { NotificationsContext } from '../../contexts/NotificationsContext';
 
 const useNotification = () => {
   const { toggleNotification } = useContext(NotificationsContext);

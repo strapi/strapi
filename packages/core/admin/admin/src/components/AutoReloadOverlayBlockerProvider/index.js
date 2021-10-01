@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { AutoReloadOverlayBockerContext } from '@strapi/helper-plugin';
+import { AutoReloadOverlayBlockerContext } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import Blocker from './Blocker';
 
@@ -75,7 +75,7 @@ const AutoReloadOverlayBlockerProvider = ({ children }) => {
   }
 
   return (
-    <AutoReloadOverlayBockerContext.Provider
+    <AutoReloadOverlayBlockerContext.Provider
       value={{ lockApp: lockApp.current, unlockApp: unlockApp.current }}
     >
       <Blocker
@@ -86,7 +86,7 @@ const AutoReloadOverlayBlockerProvider = ({ children }) => {
         title={title}
       />
       {children}
-    </AutoReloadOverlayBockerContext.Provider>
+    </AutoReloadOverlayBlockerContext.Provider>
   );
 };
 
