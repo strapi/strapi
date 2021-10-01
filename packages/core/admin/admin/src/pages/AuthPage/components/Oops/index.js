@@ -1,6 +1,6 @@
 import React from 'react';
 import { useIntl } from 'react-intl';
-import { useQuery } from '@strapi/helper-plugin';
+import { useQuery } from '@strapi/helper-plugin/useQuery';
 import { Box } from '@strapi/parts/Box';
 import { Main } from '@strapi/parts/Main';
 import { Row } from '@strapi/parts/Row';

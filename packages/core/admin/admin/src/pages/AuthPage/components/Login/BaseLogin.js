@@ -10,7 +10,7 @@ import { Button } from '@strapi/parts/Button';
 import { TextInput } from '@strapi/parts/TextInput';
 import { Checkbox } from '@strapi/parts/Checkbox';
 import { H1, Text, Subtitle } from '@strapi/parts/Text';
-import { Form } from '@strapi/helper-plugin';
+import { Form } from '@strapi/helper-plugin/Form';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Formik } from 'formik';

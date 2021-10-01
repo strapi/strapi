@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import { Box } from '@strapi/parts/Box';
 import { Text } from '@strapi/parts/Text';
 import { Stack } from '@strapi/parts/Stack';
-import { pxToRem } from '@strapi/helper-plugin';
+import { pxToRem } from '@strapi/helper-plugin/pxToRem';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';

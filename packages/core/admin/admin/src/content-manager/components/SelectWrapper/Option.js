@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 import { get, has, isEmpty } from 'lodash';
 import { Row } from '@strapi/parts/Row';
 import { Text } from '@strapi/parts/Text';
-import { pxToRem } from '@strapi/helper-plugin';
+import { pxToRem } from '@strapi/helper-plugin/pxToRem';
 import { getTrad } from '../../utils';
 
 const StyledBullet = styled.div`

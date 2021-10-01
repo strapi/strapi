@@ -56,6 +56,10 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         padding-top: 16px;
       }
 
+      .c7 {
+        outline: none;
+      }
+
       .c0 {
         display: -webkit-box;
         display: -webkit-flex;
@@ -106,24 +110,6 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         align-items: center;
       }
 
-      .c14 {
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c15 {
-        font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #32324d;
-      }
-
-      .c7 {
-        outline: none;
-      }
-
       .c19 {
         font-weight: 400;
         font-size: 0.875rem;
@@ -163,6 +149,20 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
 
       .c18 svg {
         font-size: 0.625rem;
+      }
+
+      .c14 {
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c15 {
+        font-weight: 400;
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #32324d;
       }
 
       .c4 {

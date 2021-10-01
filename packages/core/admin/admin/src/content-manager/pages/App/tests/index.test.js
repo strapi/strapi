@@ -138,10 +138,6 @@ describe('Content manager | App | main', () => {
         align-items: center;
       }
 
-      .c33 {
-        height: 100vh;
-      }
-
       .c30 {
         padding-bottom: 56px;
       }
@@ -153,6 +149,10 @@ describe('Content manager | App | main', () => {
 
       .c31 {
         overflow-x: hidden;
+      }
+
+      .c33 {
+        height: 100vh;
       }
 
       .c2 {

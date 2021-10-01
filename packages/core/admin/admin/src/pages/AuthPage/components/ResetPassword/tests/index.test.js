@@ -61,118 +61,27 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         padding-top: 16px;
       }
 
-      .c30 {
-        font-weight: 500;
-        font-size: 0.75rem;
-        line-height: 1.33;
-        color: #32324d;
-      }
-
-      .c27 {
+      .c15 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
         display: flex;
-        cursor: pointer;
-        padding: 8px;
-        border-radius: 4px;
-        background: #ffffff;
-        border: 1px solid #dcdce4;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
       }
 
-      .c27 svg {
-        height: 12px;
-        width: 12px;
+      .c15 > * {
+        margin-top: 0;
+        margin-bottom: 0;
       }
 
-      .c27 svg > g,
-      .c27 svg path {
-        fill: #ffffff;
+      .c15 > * + * {
+        margin-top: 24px;
       }
 
-      .c27[aria-disabled='true'] {
-        pointer-events: none;
-      }
-
-      .c28 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        padding: 8px 16px;
-        background: #4945ff;
-        border: none;
-        border: 1px solid #4945ff;
-        background: #4945ff;
-      }
-
-      .c28 .sc-dwfUuu {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c28 .c29 {
-        color: #ffffff;
-      }
-
-      .c28[aria-disabled='true'] {
-        border: 1px solid #dcdce4;
-        background: #eaeaef;
-      }
-
-      .c28[aria-disabled='true'] .c29 {
-        color: #666687;
-      }
-
-      .c28[aria-disabled='true'] svg > g,
-      .c28[aria-disabled='true'] svg path {
-        fill: #666687;
-      }
-
-      .c28[aria-disabled='true']:active {
-        border: 1px solid #dcdce4;
-        background: #eaeaef;
-      }
-
-      .c28[aria-disabled='true']:active .c29 {
-        color: #666687;
-      }
-
-      .c28[aria-disabled='true']:active svg > g,
-      .c28[aria-disabled='true']:active svg path {
-        fill: #666687;
-      }
-
-      .c28:hover {
-        border: 1px solid #7b79ff;
-        background: #7b79ff;
-      }
-
-      .c28:active {
-        border: 1px solid #4945ff;
-        background: #4945ff;
-      }
-
-      .c24 {
-        border: none;
-        background: transparent;
-        font-size: 1.6rem;
-        width: auto;
-        padding: 0;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
+      .c7 {
+        outline: none;
       }
 
       .c0 {
@@ -225,37 +134,143 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         align-items: center;
       }
 
-      .c15 {
+      .c34 {
+        font-weight: 400;
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #4945ff;
+      }
+
+      .c35 {
+        font-weight: 600;
+        line-height: 1.14;
+      }
+
+      .c36 {
+        font-weight: 600;
+        font-size: 0.6875rem;
+        line-height: 1.45;
+        text-transform: uppercase;
+      }
+
+      .c33 {
+        display: -webkit-inline-box;
+        display: -webkit-inline-flex;
+        display: -ms-inline-flexbox;
+        display: inline-flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        text-transform: uppercase;
+        -webkit-text-decoration: none;
+        text-decoration: none;
+      }
+
+      .c33 svg path {
+        fill: #4945ff;
+      }
+
+      .c33 svg {
+        font-size: 0.625rem;
+      }
+
+      .c30 {
+        font-weight: 500;
+        font-size: 0.75rem;
+        line-height: 1.33;
+        color: #32324d;
+      }
+
+      .c27 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
         display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 4px;
+        background: #ffffff;
+        border: 1px solid #dcdce4;
       }
 
-      .c15 > * {
-        margin-top: 0;
-        margin-bottom: 0;
+      .c27 svg {
+        height: 12px;
+        width: 12px;
       }
 
-      .c15 > * + * {
-        margin-top: 24px;
+      .c27 svg > g,
+      .c27 svg path {
+        fill: #ffffff;
       }
 
-      .c14 {
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-        color: #32324d;
+      .c27[aria-disabled='true'] {
+        pointer-events: none;
       }
 
-      .c37 {
-        font-weight: 400;
-        font-size: 0.75rem;
-        line-height: 1.33;
-        color: #32324d;
+      .c28 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        padding: 8px 16px;
+        background: #4945ff;
+        border: none;
+        border: 1px solid #4945ff;
+        background: #4945ff;
+      }
+
+      .c28 .sc-iJuVqt {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c28 .c29 {
+        color: #ffffff;
+      }
+
+      .c28[aria-disabled='true'] {
+        border: 1px solid #dcdce4;
+        background: #eaeaef;
+      }
+
+      .c28[aria-disabled='true'] .c29 {
+        color: #666687;
+      }
+
+      .c28[aria-disabled='true'] svg > g,
+      .c28[aria-disabled='true'] svg path {
+        fill: #666687;
+      }
+
+      .c28[aria-disabled='true']:active {
+        border: 1px solid #dcdce4;
+        background: #eaeaef;
+      }
+
+      .c28[aria-disabled='true']:active .c29 {
+        color: #666687;
+      }
+
+      .c28[aria-disabled='true']:active svg > g,
+      .c28[aria-disabled='true']:active svg path {
+        fill: #666687;
+      }
+
+      .c28:hover {
+        border: 1px solid #7b79ff;
+        background: #7b79ff;
+      }
+
+      .c28:active {
+        border: 1px solid #4945ff;
+        background: #4945ff;
       }
 
       .c19 {
@@ -376,49 +391,18 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         height: 5rem;
       }
 
-      .c7 {
-        outline: none;
+      .c14 {
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+        color: #32324d;
       }
 
-      .c34 {
+      .c37 {
         font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #4945ff;
-      }
-
-      .c35 {
-        font-weight: 600;
-        line-height: 1.14;
-      }
-
-      .c36 {
-        font-weight: 600;
-        font-size: 0.6875rem;
-        line-height: 1.45;
-        text-transform: uppercase;
-      }
-
-      .c33 {
-        display: -webkit-inline-box;
-        display: -webkit-inline-flex;
-        display: -ms-inline-flexbox;
-        display: inline-flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        text-transform: uppercase;
-        -webkit-text-decoration: none;
-        text-decoration: none;
-      }
-
-      .c33 svg path {
-        fill: #4945ff;
-      }
-
-      .c33 svg {
-        font-size: 0.625rem;
+        font-size: 0.75rem;
+        line-height: 1.33;
+        color: #32324d;
       }
 
       .c4 {
@@ -468,6 +452,22 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         -webkit-flex-direction: column;
         -ms-flex-direction: column;
         flex-direction: column;
+      }
+
+      .c24 {
+        border: none;
+        background: transparent;
+        font-size: 1.6rem;
+        width: auto;
+        padding: 0;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
       }
 
       .c12 {

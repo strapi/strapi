@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
-import { Form } from '@strapi/helper-plugin';
+import { Form } from '@strapi/helper-plugin/Form';
 import { Box } from '@strapi/parts/Box';
 import { Stack } from '@strapi/parts/Stack';
 import { Main } from '@strapi/parts/Main';

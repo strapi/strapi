@@ -6,7 +6,7 @@ import ReadDoc from '@strapi/icons/ReadDoc';
 import CodeExample from '@strapi/icons/CodeExample';
 import Tutorial from '@strapi/icons/Tutorial';
 import Blog from '@strapi/icons/Blog';
-import { ContentBox } from '@strapi/helper-plugin';
+import { ContentBox } from '@strapi/helper-plugin/ContentBox';
 
 const BlockLink = styled.a`
   text-decoration: none;

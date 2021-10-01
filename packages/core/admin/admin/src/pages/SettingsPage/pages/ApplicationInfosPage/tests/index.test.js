@@ -46,51 +46,6 @@ describe('Application page', () => {
         padding-top: 4px;
       }
 
-      .c12 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-      }
-
-      .c12 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c12 > * + * {
-        margin-top: 20px;
-      }
-
-      .c13 {
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c17 {
-        font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #32324d;
-      }
-
-      .c18 {
-        font-weight: 600;
-        line-height: 1.14;
-      }
-
-      .c19 {
-        font-weight: 600;
-        font-size: 0.6875rem;
-        line-height: 1.45;
-        text-transform: uppercase;
-      }
-
       .c1 {
         padding-bottom: 56px;
       }
@@ -170,6 +125,51 @@ describe('Application page', () => {
 
       .c3 {
         outline: none;
+      }
+
+      .c12 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+      }
+
+      .c12 > * {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .c12 > * + * {
+        margin-top: 20px;
+      }
+
+      .c13 {
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c17 {
+        font-weight: 400;
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #32324d;
+      }
+
+      .c18 {
+        font-weight: 600;
+        line-height: 1.14;
+      }
+
+      .c19 {
+        font-weight: 600;
+        font-size: 0.6875rem;
+        line-height: 1.45;
+        text-transform: uppercase;
       }
 
       .c14 {

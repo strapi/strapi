@@ -7,7 +7,7 @@ import isEqual from 'react-fast-compare';
 import {
   NotAllowedInput,
   // useLibrary
-} from '@strapi/helper-plugin';
+} from '@strapi/helper-plugin/NotAllowedInput';
 import { useContentTypeLayout } from '../../hooks';
 import { getFieldName } from '../../utils';
 import Wysiwyg from '../Wysiwyg';

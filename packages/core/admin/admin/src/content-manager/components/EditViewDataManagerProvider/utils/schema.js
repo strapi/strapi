@@ -11,7 +11,7 @@ import {
 } from 'lodash';
 
 import * as yup from 'yup';
-import { translatedErrors as errorsTrads } from '@strapi/helper-plugin';
+import { translatedErrors as errorsTrads } from '@strapi/helper-plugin/translatedErrors';
 
 yup.addMethod(yup.mixed, 'defined', function() {
   return this.test('defined', errorsTrads.required, value => value !== undefined);

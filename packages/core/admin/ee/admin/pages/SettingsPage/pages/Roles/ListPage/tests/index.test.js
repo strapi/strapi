@@ -71,6 +71,10 @@ describe('<ListPage />', () => {
         animation: gzYjWD 1s infinite linear;
       }
 
+      .c0 {
+        outline: none;
+      }
+
       .c1 {
         display: -webkit-box;
         display: -webkit-flex;
@@ -91,10 +95,6 @@ describe('<ListPage />', () => {
 
       .c2 {
         height: 100vh;
-      }
-
-      .c0 {
-        outline: none;
       }
 
       <main

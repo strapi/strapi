@@ -197,6 +197,74 @@ describe('ADMIN | Pages | Profile page', () => {
         align-items: center;
       }
 
+      .c1 {
+        background: #f6f6f9;
+        padding-top: 56px;
+        padding-right: 56px;
+        padding-bottom: 56px;
+        padding-left: 56px;
+      }
+
+      .c15 {
+        padding-right: 56px;
+        padding-left: 56px;
+      }
+
+      .c2 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: justify;
+        -webkit-justify-content: space-between;
+        -ms-flex-pack: justify;
+        justify-content: space-between;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c3 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c4 {
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c12 {
+        font-weight: 400;
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #666687;
+      }
+
+      .c13 {
+        font-size: 1rem;
+        line-height: 1.5;
+      }
+
+      .c0 {
+        outline: none;
+      }
+
       .c36 {
         position: absolute;
         left: 0;
@@ -531,74 +599,6 @@ describe('ADMIN | Pages | Profile page', () => {
 
       .c22 textarea {
         height: 5rem;
-      }
-
-      .c0 {
-        outline: none;
-      }
-
-      .c1 {
-        background: #f6f6f9;
-        padding-top: 56px;
-        padding-right: 56px;
-        padding-bottom: 56px;
-        padding-left: 56px;
-      }
-
-      .c15 {
-        padding-right: 56px;
-        padding-left: 56px;
-      }
-
-      .c2 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-box-pack: justify;
-        -webkit-justify-content: space-between;
-        -ms-flex-pack: justify;
-        justify-content: space-between;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c3 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c4 {
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c12 {
-        font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #666687;
-      }
-
-      .c13 {
-        font-size: 1rem;
-        line-height: 1.5;
       }
 
       .c20 {

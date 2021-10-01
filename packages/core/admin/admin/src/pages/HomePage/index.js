@@ -8,7 +8,7 @@ import { FormattedMessage } from 'react-intl';
 import styled from 'styled-components';
 import { Helmet } from 'react-helmet';
 import { useHistory } from 'react-router-dom';
-import { LoadingIndicatorPage } from '@strapi/helper-plugin';
+import { LoadingIndicatorPage } from '@strapi/helper-plugin/LoadingIndicatorPage';
 import { Layout } from '@strapi/parts/Layout';
 import { Main } from '@strapi/parts/Main';
 import { Box } from '@strapi/parts/Box';

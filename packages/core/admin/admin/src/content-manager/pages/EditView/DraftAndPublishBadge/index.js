@@ -6,7 +6,7 @@ import { Box } from '@strapi/parts/Box';
 import { Row } from '@strapi/parts/Row';
 import { Text } from '@strapi/parts/Text';
 import Bullet from '@strapi/icons/Bullet';
-import { pxToRem } from '@strapi/helper-plugin';
+import { pxToRem } from '@strapi/helper-plugin/pxToRem';
 import { getTrad } from '../../../utils';
 import { connect, select } from './utils';
 
@@ -88,5 +88,8 @@ DraftAndPublishBadge.propTypes = {
   isPublished: PropTypes.bool.isRequired,
 };
 
-export default connect(DraftAndPublishBadge, select);
+export default connect(
+  DraftAndPublishBadge,
+  select
+);
 export { DraftAndPublishBadge };

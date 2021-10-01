@@ -1,7 +1,7 @@
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { pxToRem } from '@strapi/helper-plugin';
+import { pxToRem } from '@strapi/helper-plugin/pxToRem';
 import { useIntl } from 'react-intl';
 import { useLocation } from 'react-router-dom';
 import has from 'lodash/has';

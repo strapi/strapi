@@ -12,7 +12,8 @@ import { Text, H1 } from '@strapi/parts/Text';
 import { Stack } from '@strapi/parts/Stack';
 import ExternalLink from '@strapi/icons/ExternalLink';
 import CloseAlertIcon from '@strapi/icons/CloseAlertIcon';
-import { setHexOpacity, useLockScroll } from '@strapi/helper-plugin';
+import { setHexOpacity } from '@strapi/helper-plugin/setHexOpacity';
+import { useLockScroll } from '@strapi/helper-plugin/useLockScroll';
 import AirBalloon from '../../assets/images/hot-air-balloon.png';
 import BigArrow from '../../assets/images/upgrade-details.png';
 

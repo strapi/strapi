@@ -3,7 +3,7 @@ import { components } from 'react-select';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
-import { pxToRem } from '@strapi/helper-plugin';
+import { pxToRem } from '@strapi/helper-plugin/pxToRem';
 import { Row } from '@strapi/parts/Row';
 import { Text } from '@strapi/parts/Text';
 import get from 'lodash/get';

@@ -2,7 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Avatar } from '@strapi/parts/Avatar';
 import { Tooltip } from '@strapi/parts/Tooltip';
-import { getFileExtension, prefixFileUrlWithBackendUrl } from '@strapi/helper-plugin';
+import { getFileExtension } from '@strapi/helper-plugin/getFileExtension';
+import { prefixFileUrlWithBackendUrl } from '@strapi/helper-plugin/prefixFileUrlWithBackendUrl';
 import FileWrapper from './FileWrapper';
 
 const Media = ({ url, mime, alternativeText, name, ext, formats }) => {

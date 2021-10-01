@@ -8,7 +8,7 @@ import React from 'react';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { pxToRem } from '@strapi/helper-plugin';
+import { pxToRem } from '@strapi/helper-plugin/pxToRem';
 import { Box } from '@strapi/parts/Box';
 import { Row } from '@strapi/parts/Row';
 import { Typography } from '@strapi/parts/Text';

@@ -1,5 +1,5 @@
 import React from 'react';
-import { useFocusWhenNavigate } from '@strapi/helper-plugin';
+import { useFocusWhenNavigate } from '@strapi/helper-plugin/useFocusWhenNavigate';
 import { Main } from '@strapi/parts/Main';
 import { LinkButton } from '@strapi/parts/LinkButton';
 import { ContentLayout, HeaderLayout } from '@strapi/parts/Layout';

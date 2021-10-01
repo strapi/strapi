@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import size from 'lodash/size';
 import isEqual from 'react-fast-compare';
 import { useIntl } from 'react-intl';
-import { NotAllowedInput } from '@strapi/helper-plugin';
+import { NotAllowedInput } from '@strapi/helper-plugin/NotAllowedInput';
 import DeleteIcon from '@strapi/icons/DeleteIcon';
 import { Box } from '@strapi/parts/Box';
 import { IconButton } from '@strapi/parts/IconButton';
@@ -155,4 +155,7 @@ FieldComponent.propTypes = {
 
 const Memoized = memo(FieldComponent, isEqual);
 
-export default connect(Memoized, select);
+export default connect(
+  Memoized,
+  select
+);

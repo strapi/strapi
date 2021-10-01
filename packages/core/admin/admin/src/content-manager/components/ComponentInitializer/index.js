@@ -8,7 +8,7 @@ import { BaseButton } from '@strapi/parts/BaseButton';
 import { Stack } from '@strapi/parts/Stack';
 import { Row } from '@strapi/parts/Row';
 import { Text } from '@strapi/parts/Text';
-import { pxToRem } from '@strapi/helper-plugin';
+import { pxToRem } from '@strapi/helper-plugin/pxToRem';
 import { getTrad } from '../../utils';
 
 const IconButton = styled(BaseButton)`

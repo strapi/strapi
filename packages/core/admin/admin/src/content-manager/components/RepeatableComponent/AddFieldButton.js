@@ -6,7 +6,7 @@ import { Box } from '@strapi/parts/Box';
 import { Row } from '@strapi/parts/Row';
 import { Text } from '@strapi/parts/Text';
 import AddIcon from '@strapi/icons/AddIcon';
-import { pxToRem } from '@strapi/helper-plugin';
+import { pxToRem } from '@strapi/helper-plugin/pxToRem';
 import { getTrad } from '../../utils';
 
 const StyledButton = styled(Box)`

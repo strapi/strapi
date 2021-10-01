@@ -83,6 +83,7 @@
 
 import React from 'react';
 import { CheckPagePermissions, NoContent } from '@strapi/helper-plugin';
+
 import { useIntl } from 'react-intl';
 import { Layout, HeaderLayout, ContentLayout } from '@strapi/parts/Layout';
 import { Main } from '@strapi/parts/Main';

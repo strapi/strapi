@@ -1,4 +1,4 @@
-import { hasPermissions } from '@strapi/helper-plugin';
+import { hasPermissions } from '@strapi/helper-plugin/hasPermissions';
 
 /**
  * This function resolves an array of Promises<boolean>
