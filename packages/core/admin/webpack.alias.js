@@ -48,7 +48,7 @@ const alias = [
   'yup',
 ];
 
-module.exports = alias.reduce(
+const aliases = alias.reduce(
   (acc, curr) => {
     acc[`${curr}$`] = require.resolve(curr);
     return acc;
@@ -62,3 +62,9 @@ module.exports = alias.reduce(
     ee_else_ce: path.resolve(__dirname),
   }
 );
+
+module.exports = {
+  ...aliases,
+  '@strapi/helper-plugin': path.dirname(require.resolve('@strapi/helper-plugin/build/')),
+  '@strapi/helper-plugin$': require.resolve('@strapi/helper-plugin/build/index.js'),
+};

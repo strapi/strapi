@@ -1,6 +1,8 @@
 import React from 'react';
 import { Switch, Route, useRouteMatch, Redirect, useLocation } from 'react-router-dom';
-import { CheckPagePermissions, LoadingIndicatorPage, NotFound } from '@strapi/helper-plugin';
+import { CheckPagePermissions } from '@strapi/helper-plugin/CheckPagePermissions';
+import { LoadingIndicatorPage } from '@strapi/helper-plugin/LoadingIndicatorPage';
+import { NotFound } from '@strapi/helper-plugin';
 import { Layout, HeaderLayout } from '@strapi/parts/Layout';
 import { Main } from '@strapi/parts/Main';
 import { useIntl } from 'react-intl';
