@@ -101,7 +101,7 @@ async function createPluginsJs(plugins, dest) {
      * The regexp at line 105 aims to replace the windows backslashes by standard slash so that javascript can deal with them.
      */
     const realPath = path
-      .join(path.relative(path.resolve(dest, 'admin/src'), pathToPlugin), 'strapi-admin.js')
+      .join(path.relative(path.resolve(dest, 'admin', 'src'), pathToPlugin), 'strapi-admin.js')
       .replace(/\\/g, '/');
 
     return {
