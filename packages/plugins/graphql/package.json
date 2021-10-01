@@ -10,7 +10,7 @@
     "kind": "plugin"
   },
   "scripts": {
-    "test:front": "jest --config jest.config.front.js"
+    "test:front": "cross-env IS_EE=true jest --config ./jest.config.front.js"
   },
   "dependencies": {
     "@apollo/federation": "^0.28.0",

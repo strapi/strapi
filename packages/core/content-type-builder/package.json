@@ -10,7 +10,8 @@
     "kind": "plugin"
   },
   "scripts": {
-    "test:front": "jest --config jest.config.front.js"
+    "test:unit": "jest --verbose",
+    "test:front": "cross-env IS_EE=true jest --config ./jest.config.front.js"
   },
   "dependencies": {
     "@sindresorhus/slugify": "1.1.0",

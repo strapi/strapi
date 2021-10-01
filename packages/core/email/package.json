@@ -11,7 +11,7 @@
     "kind": "plugin"
   },
   "scripts": {
-    "test:front": "jest --config jest.config.front.js"
+    "test:front": "cross-env IS_EE=true jest --config ./jest.config.front.js"
   },
   "dependencies": {
     "lodash": "4.17.21",

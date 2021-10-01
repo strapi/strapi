@@ -11,7 +11,7 @@
     "kind": "plugin"
   },
   "scripts": {
-    "test:front": "jest --config jest.config.front.js"
+    "test:unit": "jest --verbose"
   },
   "dependencies": {
     "@sindresorhus/slugify": "1.1.0",

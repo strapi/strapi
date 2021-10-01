@@ -74,7 +74,8 @@
     "bin": "./bin"
   },
   "scripts": {
-    "postinstall": "node lib/utils/success.js"
+    "postinstall": "node lib/utils/success.js",
+    "test:unit": "jest --verbose"
   },
   "dependencies": {
     "@hapi/boom": "9.1.4",

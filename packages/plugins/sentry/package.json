@@ -10,7 +10,7 @@
     "kind": "plugin"
   },
   "scripts": {
-    "test:front": "jest --config jest.config.front.js"
+    "test:unit": "jest --verbose"
   },
   "dependencies": {
     "@sentry/node": "6.7.1"

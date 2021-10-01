@@ -6,5 +6,5 @@ const pkg = require('./package');
 module.exports = {
   ...baseConfig,
   displayName: (pkg.strapi && pkg.strapi.name) || pkg.name,
-  roots: ['<rootDir>/packages/plugins/users-permissions'],
+  roots: [__dirname],
 };

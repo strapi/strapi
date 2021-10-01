@@ -11,7 +11,8 @@
     "kind": "plugin"
   },
   "scripts": {
-    "test:front": "jest --config jest.config.front.js"
+    "test:unit": "jest --verbose",
+    "test:front": "cross-env IS_EE=true jest --config ./jest.config.front.js"
   },
   "dependencies": {
     "@strapi/helper-plugin": "3.6.8",
