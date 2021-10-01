@@ -98,11 +98,6 @@ export { default as PopUpWarningHeader } from './old/components/PopUpWarning/Hea
 export { default as PopUpWarningIcon } from './old/components/PopUpWarning/Icon';
 export { default as PopUpWarningModal } from './old/components/PopUpWarning/StyledModal';
 
-// Providers
-export { default as LibraryProvider } from './providers/LibraryProvider';
-export { default as NotificationsProvider } from './providers/NotificationsProvider';
-export { default as StrapiAppProvider } from './providers/StrapiAppProvider';
-
 // Utils
 export { default as cleanData } from './old/utils/cleanData';
 export { default as difference } from './old/utils/difference';
@@ -194,20 +189,20 @@ export * from './content-manager/useCMEditViewDataManager';
 export * from './content-manager/formatComponentData';
 export * from './content-manager/getAttributeInfos';
 
+// Providers
+export * from './providers/LibraryProvider';
+export * from './providers/NotificationsProvider';
+export * from './providers/StrapiAppProvider';
+
 // Utils
-export { default as auth } from './utils/auth';
-export { default as hasPermissions } from './utils/hasPermissions';
-export {
-  default as prefixFileUrlWithBackendUrl,
-} from './utils/prefixFileUrlWithBackendUrl/prefixFileUrlWithBackendUrl';
-export { default as prefixPluginTranslations } from './utils/prefixPluginTranslations';
-export { default as pxToRem } from './utils/pxToRem';
-export { default as to } from './utils/await-to-js';
-export { default as setHexOpacity } from './utils/setHexOpacity';
-export { default as customEllipsis } from './utils/customEllipsis';
-export { default as translatedErrors } from './utils/translatedErrors';
-
-export { findMatchingPermissions } from './utils/hasPermissions';
-
-export { default as getFileExtension } from './utils/getFileExtension/getFileExtension';
+export * from './utils/auth';
+export * from './utils/await-to-js';
+export * from './utils/customEllipsis';
+export * from './utils/getFileExtension';
+export * from './utils/hasPermissions';
+export * from './utils/prefixFileUrlWithBackendUrl';
+export * from './utils/prefixPluginTranslations';
+export * from './utils/pxToRem';
+export * from './utils/setHexOpacity';
 export * from './utils/stopPropagation';
+export * from './utils/translatedErrors';

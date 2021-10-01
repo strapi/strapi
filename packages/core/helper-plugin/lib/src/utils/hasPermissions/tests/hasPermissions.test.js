@@ -1,4 +1,5 @@
-import hasPermissions, {
+import {
+  hasPermissions,
   findMatchingPermissions,
   formatPermissionsForRequest,
   shouldCheckPermissions,

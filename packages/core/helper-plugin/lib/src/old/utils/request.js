@@ -1,6 +1,6 @@
 import 'whatwg-fetch';
 import _ from 'lodash';
-import auth from '../../utils/auth';
+import { auth } from '../../utils/auth';
 
 /**
  * Parses the JSON returned by a network request

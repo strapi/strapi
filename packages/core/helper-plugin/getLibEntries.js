@@ -4,7 +4,7 @@ const path = require('path');
 // Allows to create distinct bundles in the dist folder
 // for people wanting to import only specific components such as
 // import Button from '@strapi/parts/Button
-const excludedFolders = ['icons', 'index.js', 'old', 'providers', 'templates', 'utils'];
+const excludedFolders = ['index.js', 'old', 'templates'];
 const folders = fs
   .readdirSync(path.resolve(__dirname, 'lib', 'src'))
   .filter(folderName => !excludedFolders.includes(folderName));

@@ -2,7 +2,7 @@ import React from 'react';
 import { IconButton } from '@strapi/parts/IconButton';
 import Autoselect from '@strapi/icons/Autoselect';
 import styled from 'styled-components';
-import pxToRem from '../../utils/pxToRem';
+import { pxToRem } from '../../utils/pxToRem';
 
 const StyledIconButton = styled(IconButton)(
   ({ theme }) => `

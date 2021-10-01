@@ -1,4 +1,4 @@
-import prefixFileUrlWithBackendUrl from '../prefixFileUrlWithBackendUrl';
+import { prefixFileUrlWithBackendUrl } from '../prefixFileUrlWithBackendUrl';
 
 describe('HELPER_PLUGIN | utils | prefixFileUrlWithBackendUrl', () => {
   it("should add the strapi back-end url if the file's url startsWith '/'", () => {
