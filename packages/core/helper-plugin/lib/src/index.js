@@ -195,8 +195,8 @@ export { default as RemoveRoundedButton } from './icons/RemoveRoundedButton';
 
 // content-manager
 export {
-  default as ContentManagerEditViewDataManagerContext,
-} from './content-manager/contexts/ContentManagerEditViewDataManagerContext';
+  default as CMEditViewDataManagerContext,
+} from './content-manager/contexts/CMEditViewDataManagerContext';
 export {
   default as useCMEditViewDataManager,
 } from './content-manager/hooks/useCMEditViewDataManager';

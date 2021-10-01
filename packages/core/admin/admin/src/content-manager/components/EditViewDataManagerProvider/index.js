@@ -6,7 +6,7 @@ import { Prompt, Redirect } from 'react-router-dom';
 import { Main } from '@strapi/parts/Main';
 import {
   LoadingIndicatorPage,
-  ContentManagerEditViewDataManagerContext,
+  CMEditViewDataManagerContext,
   useNotification,
   useOverlayBlocker,
   useTracking,
@@ -465,7 +465,7 @@ const EditViewDataManagerProvider = ({
   }
 
   return (
-    <ContentManagerEditViewDataManagerContext.Provider
+    <CMEditViewDataManagerContext.Provider
       value={{
         addComponentToDynamicZone,
         addNonRepeatableComponentToField,
@@ -516,7 +516,7 @@ const EditViewDataManagerProvider = ({
           </>
         )}
       </>
-    </ContentManagerEditViewDataManagerContext.Provider>
+    </CMEditViewDataManagerContext.Provider>
   );
 };
 
