@@ -1,8 +1,8 @@
 import { useContext } from 'react';
-import CMEditViewDataManagerContext from '../../contexts/CMEditViewDataManagerContext';
+import { CMEditViewDataManagerContext } from '../CMEditViewDataManagerContext';
 
 const useCMEditViewDataManager = () => {
   return useContext(CMEditViewDataManagerContext);
 };
 
-export default useCMEditViewDataManager;
+export { useCMEditViewDataManager };

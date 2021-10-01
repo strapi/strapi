@@ -1,7 +1,4 @@
-import {
-  contentManagementUtilRemoveFieldsFromData,
-  formatComponentData,
-} from '@strapi/helper-plugin';
+import { CMUtilRemoveFieldsFromData, formatComponentData } from '@strapi/helper-plugin';
 import removePasswordAndRelationsFieldFromData from './removePasswordAndRelationsFieldFromData';
 
 const cleanData = (data, { contentType, components }, initialLocalizations) => {
@@ -23,7 +20,7 @@ const cleanData = (data, { contentType, components }, initialLocalizations) => {
     'createdAt',
   ];
 
-  const cleanedClonedData = contentManagementUtilRemoveFieldsFromData(
+  const cleanedClonedData = CMUtilRemoveFieldsFromData(
     dataWithoutPasswordsAndRelations,
     contentType,
     components,

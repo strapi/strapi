@@ -5,7 +5,6 @@ const path = require('path');
 // for people wanting to import only specific components such as
 // import Button from '@strapi/parts/Button
 const excludedFolders = [
-  'content-manager',
   'contexts',
   'hooks',
   'icons',

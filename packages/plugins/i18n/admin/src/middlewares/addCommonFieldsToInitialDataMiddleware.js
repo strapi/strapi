@@ -2,11 +2,7 @@ import get from 'lodash/get';
 import merge from 'lodash/merge';
 import cloneDeep from 'lodash/cloneDeep';
 import { parse } from 'qs';
-import {
-  request,
-  formatComponentData,
-  contentManagementUtilRemoveFieldsFromData,
-} from '@strapi/helper-plugin';
+import { request, formatComponentData, CMUtilRemoveFieldsFromData } from '@strapi/helper-plugin';
 import pluginId from '../pluginId';
 
 const addCommonFieldsToInitialDataMiddleware = () => ({ getState, dispatch }) => next => action => {
@@ -58,7 +54,7 @@ const addCommonFieldsToInitialDataMiddleware = () => ({ getState, dispatch }) =>
         'updatedAt',
         'createdAt',
       ];
-      const cleanedMerged = contentManagementUtilRemoveFieldsFromData(
+      const cleanedMerged = CMUtilRemoveFieldsFromData(
         merged,
         currentLayout.contentType,
         currentLayout.components,

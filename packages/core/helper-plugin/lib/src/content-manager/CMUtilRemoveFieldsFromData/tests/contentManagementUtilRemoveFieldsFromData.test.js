@@ -1,21 +1,19 @@
-import testData from '../../../old/testUtils/testData';
-import contentManagementUtilRemoveFieldsFromData from '../contentManagementUtilRemoveFieldsFromData';
+import testData from './data';
+import { CMUtilRemoveFieldsFromData } from '../CMUtilRemoveFieldsFromData';
 
 describe('STRAPI_HELPER_PLUGIN | utils', () => {
-  describe('contentManagementUtilRemoveFieldsFromData', () => {
+  describe('CMUtilRemoveFieldsFromData', () => {
     it('should return an empty object', () => {
       const { components, contentType } = testData;
 
-      expect(contentManagementUtilRemoveFieldsFromData({}, contentType, components)).toEqual({});
+      expect(CMUtilRemoveFieldsFromData({}, contentType, components)).toEqual({});
     });
 
     it('should return the initial data if there is no field with the specified key', () => {
       const { components, contentType } = testData;
 
       expect(
-        contentManagementUtilRemoveFieldsFromData({ name: 'test' }, contentType, components, [
-          '_id',
-        ])
+        CMUtilRemoveFieldsFromData({ name: 'test' }, contentType, components, ['_id'])
       ).toEqual({
         name: 'test',
       });
@@ -26,9 +24,7 @@ describe('STRAPI_HELPER_PLUGIN | utils', () => {
       const data = { _id: 'test', name: 'test' };
       const expected = { name: 'test' };
 
-      expect(
-        contentManagementUtilRemoveFieldsFromData(data, contentType, components, ['_id'])
-      ).toEqual(expected);
+      expect(CMUtilRemoveFieldsFromData(data, contentType, components, ['_id'])).toEqual(expected);
     });
 
     it('should remove all the default fields', () => {
@@ -54,9 +50,9 @@ describe('STRAPI_HELPER_PLUGIN | utils', () => {
         },
       };
 
-      expect(
-        contentManagementUtilRemoveFieldsFromData(modifiedData, contentType, components)
-      ).toEqual(expectedNoFieldsModifiedData);
+      expect(CMUtilRemoveFieldsFromData(modifiedData, contentType, components)).toEqual(
+        expectedNoFieldsModifiedData
+      );
     });
   });
 });

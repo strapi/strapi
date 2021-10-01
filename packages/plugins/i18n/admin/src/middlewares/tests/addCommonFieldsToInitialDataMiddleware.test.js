@@ -7,7 +7,7 @@ jest.mock('@strapi/helper-plugin', () => ({
     localizations: ['test'],
   }),
   formatComponentData: data => data,
-  contentManagementUtilRemoveFieldsFromData: data => data,
+  CMUtilRemoveFieldsFromData: data => data,
 }));
 
 describe('i18n | middlewares | addCommonFieldsToInitialDataMiddleware', () => {

@@ -1,5 +1,3 @@
-import { getType, getOtherInfos } from './content-manager/utils/getAttributeInfos';
-
 // Assets
 export { default as colors } from './old/assets/styles/colors';
 export { default as sizes } from './old/assets/styles/sizes';
@@ -194,14 +192,11 @@ export { default as SortIcon } from './icons/SortIcon';
 export { default as RemoveRoundedButton } from './icons/RemoveRoundedButton';
 
 // content-manager
-export {
-  default as CMEditViewDataManagerContext,
-} from './content-manager/contexts/CMEditViewDataManagerContext';
-export {
-  default as useCMEditViewDataManager,
-} from './content-manager/hooks/useCMEditViewDataManager';
-export { getType };
-export { getOtherInfos };
+export * from './content-manager/CMEditViewDataManagerContext';
+export * from './content-manager/CMUtilRemoveFieldsFromData';
+export * from './content-manager/useCMEditViewDataManager';
+export * from './content-manager/formatComponentData';
+export * from './content-manager/getAttributeInfos';
 
 // Utils
 export { default as auth } from './utils/auth';
@@ -215,10 +210,8 @@ export { default as to } from './utils/await-to-js';
 export { default as setHexOpacity } from './utils/setHexOpacity';
 export { default as customEllipsis } from './utils/customEllipsis';
 export { default as translatedErrors } from './utils/translatedErrors';
-export { default as formatComponentData } from './content-manager/utils/formatComponentData';
+
 export { findMatchingPermissions } from './utils/hasPermissions';
-export {
-  default as contentManagementUtilRemoveFieldsFromData,
-} from './content-manager/utils/contentManagementUtilRemoveFieldsFromData';
+
 export { default as getFileExtension } from './utils/getFileExtension/getFileExtension';
 export * from './utils/stopPropagation';

@@ -7,7 +7,7 @@ import {
   useNotification,
   useQueryParams,
   formatComponentData,
-  contentManagementUtilRemoveFieldsFromData,
+  CMUtilRemoveFieldsFromData,
 } from '@strapi/helper-plugin';
 import { useSelector, useDispatch } from 'react-redux';
 import PropTypes from 'prop-types';
@@ -68,7 +68,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
         return data;
       }
 
-      const cleaned = contentManagementUtilRemoveFieldsFromData(
+      const cleaned = CMUtilRemoveFieldsFromData(
         data,
         allLayoutDataRef.current.contentType,
         allLayoutDataRef.current.components
