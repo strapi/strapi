@@ -1,0 +1,29 @@
+<!--- EmptyStateLayout.stories.mdx --->
+
+import { Meta, ArgsTable, Canvas, Story } from '@storybook/addon-docs';
+import { Main, Row } from '@strapi/parts';
+import { NotFound } from './index';
+
+<Meta title="components/NotFound" />
+
+# NotFound
+
+This component is used to display an empty state.
+
+## Imports
+
+```js
+import { NotFound } from '@strapi/helper-plugin';
+```
+
+## Usage
+
+<Canvas>
+  <Story name="base">
+    <NotFound />
+  </Story>
+</Canvas>
+
+### Props
+
+<ArgsTable of={NotFound} />

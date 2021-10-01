@@ -75,7 +75,6 @@ export { default as ModalHeader } from './old/components/ModalHeader';
 export { default as ModalFooter } from './old/components/FooterModal';
 export { default as ModalForm } from './old/components/FormModal';
 export { default as ModalSection } from './old/components/ModalSection';
-export { default as NotFound } from './old/components/NotFound';
 
 export { default as PageFooter } from './old/components/PageFooter';
 export { default as PluginHeader } from './old/components/PluginHeader';
@@ -183,6 +182,7 @@ export * from './components/NoContent';
 export * from './components/NoMedia';
 export * from './components/NoPermissions';
 export * from './components/NotAllowedInput';
+export * from './components/NotFound';
 export * from './components/PageSizeURLQuery';
 export * from './components/PaginationURLQuery';
 export * from './components/Search';

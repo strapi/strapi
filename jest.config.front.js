@@ -12,6 +12,7 @@ const moduleNameMapper = {
     '<rootDir>/packages/core/email/admin/src$1',
     '<rootDir>/packages/plugins/*/admin/src$1',
   ],
+  '^@strapi/helper-plugin(/.*)$': '<rootDir>/packages/core/helper-plugin/build$1',
 };
 
 if (IS_EE) {

@@ -281,7 +281,7 @@
   "app.components.MarketplaceBanner.image.alt": "a strapi rocket logo",
   "app.components.MarketplaceBanner.link": "Check it out now",
   "app.components.NotFoundPage.back": "Back to homepage",
-  "app.components.NotFoundPage.description": "Not Found",
+  "app.components.NotFound.description": "The page you are looking for does not exist",
   "app.components.Official": "Official",
   "app.components.Onboarding.help.button": "Help button",
   "app.components.Onboarding.label.completed": "% completed",
