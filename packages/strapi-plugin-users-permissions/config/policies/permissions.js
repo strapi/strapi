@@ -10,7 +10,7 @@ module.exports = async (ctx, next) => {
     return next();
   }
 
-  if (ctx.request && ctx.request.header && ctx.request.header.authorization) {
+  if (ctx.request && ctx.request.header && isAuthorized(ctx)) {
     try {
       const { id } = await strapi.plugins['users-permissions'].services.jwt.getToken(ctx);
 
@@ -86,6 +86,14 @@ module.exports = async (ctx, next) => {
 
   // Execute the action.
   await next();
+};
+
+const isAuthorized = ctx => {
+  if (!ctx.request.header.authorization) {
+    return handleErrors(ctx, undefined, 'unauthorized');
+  }
+
+  return ctx.request.header.authorization;
 };
 
 const handleErrors = (ctx, err = undefined, type) => {
