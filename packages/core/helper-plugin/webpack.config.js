@@ -2,6 +2,7 @@ const webpack = require('webpack');
 const path = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const packageJson = require('./package.json');
+const entries = require('./getLibEntries');
 
 const nodeModules = [];
 [
@@ -13,13 +14,13 @@ const nodeModules = [];
 });
 
 module.exports = {
-  entry: `${__dirname}/lib/src/index.js`,
+  entry: entries,
   externals: nodeModules,
   mode: process.env.NODE_ENV,
   devtool: process.env.NODE_ENV === 'development' ? 'eval-source-map' : false,
   output: {
     path: `${__dirname}/build`,
-    filename: `helper-plugin.${process.env.NODE_ENV}.js`,
+    filename: `[name].${process.env.NODE_ENV}.js`,
     library: {
       name: 'helperPlugin',
       type: 'umd',
