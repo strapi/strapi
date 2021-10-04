@@ -13,28 +13,6 @@ export const server = setupServer(
   rest.get('*/a-video.mp4', (req, res, ctx) =>
     res(ctx.set('Content-Type', 'video/mp4'), ctx.body())
   ),
-  rest.get('*/not-working-like-cors.lutin', (req, res, ctx) => res(ctx.json({})))
+  rest.get('*/not-working-like-cors.lutin', (req, res, ctx) => res(ctx.json({}))),
+  rest.get('*/some-where-not-existing.jpg', (req, res) => res.networkError())
 );
-
-// export const mockAssets = url => {
-//   if (url === 'http://localhost:5000/an-image.png') {
-//     const headers = { get: () => 'image/png' };
-
-//     return Promise.resolve({ url: 'http://localhost:5000/an-image.png', headers });
-//   }
-
-//   if (url === 'http://localhost:5000/a-pdf.pdf') {
-//     const headers = { get: () => 'application/pdf' };
-
-//     return Promise.resolve({ url: 'http://localhost:5000/a-pdf.pdf', headers });
-//   }
-
-//   if (url === 'http://localhost:5000/a-video.mp4') {
-//     const headers = { get: () => 'video/mp4' };
-
-//     return Promise.resolve({ url: 'http://localhost:5000/a-video.mp4', headers });
-//   }
-
-//   // eslint-disable-next-line prefer-promise-reject-errors
-//   return Promise.reject('http://localhost:5000/not-working-like-cors.lutin');
-// };
