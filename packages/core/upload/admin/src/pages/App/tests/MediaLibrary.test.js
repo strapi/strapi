@@ -9,7 +9,7 @@ import { MemoryRouter } from 'react-router-dom';
 import reducers from '../../../reducers';
 import en from '../../../translations/en.json';
 import server from './server';
-import MediaLibraryPage from '..';
+import { MediaLibrary } from '../MediaLibrary';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -43,7 +43,7 @@ const renderML = () =>
       <Provider store={store}>
         <ThemeProvider theme={lightTheme}>
           <MemoryRouter>
-            <MediaLibraryPage />
+            <MediaLibrary />
           </MemoryRouter>
         </ThemeProvider>
       </Provider>
