@@ -22,4 +22,4 @@ const defaults = {
 /**
  * @type {import('./').MiddlewareFactory}
  */
-module.exports = options => helmet(defaultsDeep(defaults, options));
+module.exports = config => helmet(defaultsDeep(defaults, config));

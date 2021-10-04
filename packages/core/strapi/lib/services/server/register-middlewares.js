@@ -1,6 +1,8 @@
 'use strict';
 
+const { isFunction } = require('lodash/fp');
 const { yup } = require('@strapi/utils');
+
 const { resolveMiddlewares } = require('./middleware');
 
 /**
@@ -15,7 +17,8 @@ const defaultConfig = [
   'strapi::cors',
   'strapi::poweredBy',
   'strapi::logger',
-  'strapi::request',
+  'strapi::query',
+  'strapi::body',
   'strapi::favicon',
   'strapi::public',
 ];
@@ -24,7 +27,8 @@ const requiredMiddlewares = [
   'strapi::errors',
   'strapi::security',
   'strapi::cors',
-  'strapi::request',
+  'strapi::query',
+  'strapi::body',
   'strapi::public',
   'strapi::favicon',
 ];
@@ -63,9 +67,13 @@ const registerApplicationMiddlewares = async strapi => {
 
   checkRequiredMiddlewares(middlewares);
 
-  for (const middleware of middlewares) {
-    strapi.server.use(middleware.handler);
-  }
+  // NOTE: exclude middlewares that return nothing.
+  // this is used for middlewares that only extend the app only need to be added in certain conditions
+  middlewares
+    .filter(middleware => isFunction(middleware.handler))
+    .forEach(middleware => {
+      strapi.server.use(middleware.handler);
+    });
 };
 
 /**

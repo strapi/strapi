@@ -12,7 +12,7 @@ module.exports = {
           'admin::isAuthenticatedAdmin',
           {
             name: 'plugin::content-manager.hasPermissions',
-            options: { actions: ['plugin::i18n.locale.read'] },
+            config: { actions: ['plugin::i18n.locale.read'] },
           },
         ],
       },
@@ -34,7 +34,7 @@ module.exports = {
           'admin::isAuthenticatedAdmin',
           {
             name: 'plugin::content-manager.hasPermissions',
-            options: { actions: ['plugin::i18n.locale.create'] },
+            config: { actions: ['plugin::i18n.locale.create'] },
           },
         ],
       },
@@ -48,7 +48,7 @@ module.exports = {
           'admin::isAuthenticatedAdmin',
           {
             name: 'plugin::content-manager.hasPermissions',
-            options: { actions: ['plugin::i18n.locale.update'] },
+            config: { actions: ['plugin::i18n.locale.update'] },
           },
         ],
       },
@@ -62,7 +62,7 @@ module.exports = {
           'admin::isAuthenticatedAdmin',
           {
             name: 'plugin::content-manager.hasPermissions',
-            options: { actions: ['plugin::i18n.locale.delete'] },
+            config: { actions: ['plugin::i18n.locale.delete'] },
           },
         ],
       },

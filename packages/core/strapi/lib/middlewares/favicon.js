@@ -1,7 +1,7 @@
 'use strict';
 
 const { resolve } = require('path');
-const { defaultsDeep } = require('lodash');
+const { defaultsDeep } = require('lodash/fp');
 const favicon = require('koa-favicon');
 
 const defaults = {
@@ -12,8 +12,8 @@ const defaults = {
 /**
  * @type {import('./').MiddlewareFactory}
  */
-module.exports = (options, { strapi }) => {
-  const { maxAge, path: faviconPath } = defaultsDeep(defaults, options);
+module.exports = (config, { strapi }) => {
+  const { maxAge, path: faviconPath } = defaultsDeep(defaults, config);
 
   return favicon(resolve(strapi.dirs.root, faviconPath), { maxAge });
 };

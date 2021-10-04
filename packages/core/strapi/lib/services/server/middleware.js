@@ -1,7 +1,7 @@
 'use strict';
 
 const path = require('path');
-const { propOr, isArray } = require('lodash/fp');
+const { propOr, isArray, isFunction } = require('lodash/fp');
 
 const getMiddlewareConfig = propOr([], 'config.middlewares');
 
@@ -14,7 +14,9 @@ const resolveRouteMiddlewares = (route, strapi) => {
 
   const middlewares = resolveMiddlewares(middlewaresConfig, strapi);
 
-  return middlewares.map(({ handler }) => handler);
+  return middlewares
+    .filter(middleware => isFunction(middleware.handler))
+    .map(({ handler }) => handler);
 };
 
 /**

@@ -8,7 +8,7 @@ module.exports = [
     config: {
       policies: [
         'admin::isAuthenticatedAdmin',
-        { name: 'admin::hasPermissions', options: { actions: ['admin::webhooks.read'] } },
+        { name: 'admin::hasPermissions', config: { actions: ['admin::webhooks.read'] } },
       ],
     },
   },
@@ -19,7 +19,7 @@ module.exports = [
     config: {
       policies: [
         'admin::isAuthenticatedAdmin',
-        { name: 'admin::hasPermissions', options: { actions: ['admin::webhooks.create'] } },
+        { name: 'admin::hasPermissions', config: { actions: ['admin::webhooks.create'] } },
       ],
     },
   },
@@ -30,7 +30,7 @@ module.exports = [
     config: {
       policies: [
         'admin::isAuthenticatedAdmin',
-        { name: 'admin::hasPermissions', options: { actions: ['admin::webhooks.read'] } },
+        { name: 'admin::hasPermissions', config: { actions: ['admin::webhooks.read'] } },
       ],
     },
   },
@@ -41,7 +41,7 @@ module.exports = [
     config: {
       policies: [
         'admin::isAuthenticatedAdmin',
-        { name: 'admin::hasPermissions', options: { actions: ['admin::webhooks.update'] } },
+        { name: 'admin::hasPermissions', config: { actions: ['admin::webhooks.update'] } },
       ],
     },
   },
@@ -52,7 +52,7 @@ module.exports = [
     config: {
       policies: [
         'admin::isAuthenticatedAdmin',
-        { name: 'admin::hasPermissions', options: { actions: ['admin::webhooks.delete'] } },
+        { name: 'admin::hasPermissions', config: { actions: ['admin::webhooks.delete'] } },
       ],
     },
   },
@@ -63,7 +63,7 @@ module.exports = [
     config: {
       policies: [
         'admin::isAuthenticatedAdmin',
-        { name: 'admin::hasPermissions', options: { actions: ['admin::webhooks.delete'] } },
+        { name: 'admin::hasPermissions', config: { actions: ['admin::webhooks.delete'] } },
       ],
     },
   },

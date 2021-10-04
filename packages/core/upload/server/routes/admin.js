@@ -12,7 +12,7 @@ module.exports = {
           'admin::isAuthenticatedAdmin',
           {
             name: 'admin::hasPermissions',
-            options: {
+            config: {
               actions: ['plugin::upload.settings.read'],
             },
           },
@@ -28,7 +28,7 @@ module.exports = {
           'admin::isAuthenticatedAdmin',
           {
             name: 'admin::hasPermissions',
-            options: {
+            config: {
               actions: ['plugin::upload.settings.read'],
             },
           },
@@ -52,7 +52,7 @@ module.exports = {
           'admin::isAuthenticatedAdmin',
           {
             name: 'admin::hasPermissions',
-            options: {
+            config: {
               actions: ['plugin::upload.read'],
             },
           },
@@ -68,7 +68,7 @@ module.exports = {
           'admin::isAuthenticatedAdmin',
           {
             name: 'admin::hasPermissions',
-            options: {
+            config: {
               actions: ['plugin::upload.read'],
             },
           },
@@ -84,7 +84,7 @@ module.exports = {
           'admin::isAuthenticatedAdmin',
           {
             name: 'admin::hasPermissions',
-            options: {
+            config: {
               actions: ['plugin::upload.read'],
             },
           },
@@ -100,7 +100,7 @@ module.exports = {
           'admin::isAuthenticatedAdmin',
           {
             name: 'admin::hasPermissions',
-            options: {
+            config: {
               actions: ['plugin::upload.assets.update'],
             },
           },
