@@ -78,4 +78,27 @@ describe('FromUrlForm', () => {
     ];
     await waitFor(() => expect(onAddAssetSpy).toHaveBeenCalledWith(expectedAssets));
   });
+
+  it('shows an error message when the asset does not exist', async () => {
+    const onAddAssetSpy = jest.fn();
+
+    renderTL(
+      <ThemeProvider theme={lightTheme}>
+        <FromUrlForm onClose={jest.fn()} onAddAsset={onAddAssetSpy} />
+      </ThemeProvider>
+    );
+
+    const urls = [
+      'http://localhost:5000/an-image.png',
+      'http://localhost:5000/a-pdf.pdf',
+      'http://localhost:5000/a-video.mp4',
+      'http://localhost:5000/not-working-like-cors.lutin',
+      'http://localhost:1234/some-where-not-existing.jpg',
+    ].join('\n');
+
+    fireEvent.change(screen.getByLabelText('URL'), { target: { value: urls } });
+    fireEvent.click(screen.getByText('Next'));
+
+    await waitFor(() => expect(screen.getByText('Network Error')).toBeInTheDocument());
+  });
 });
