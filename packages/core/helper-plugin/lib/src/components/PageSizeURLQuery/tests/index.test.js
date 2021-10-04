@@ -182,7 +182,7 @@ describe('<PageSizeURLQuery />', () => {
       }
 
       .c5 {
-        min-height: 2.5rem;
+        min-height: 2.125rem;
       }
 
       .c13 {

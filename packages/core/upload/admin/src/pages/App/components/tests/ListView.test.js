@@ -381,7 +381,7 @@ describe('MediaLibrary / ListView', () => {
       }
 
       .c34 {
-        min-height: 2.5rem;
+        min-height: 2.125rem;
       }
 
       .c42 {

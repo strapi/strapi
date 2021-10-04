@@ -34,6 +34,7 @@ const PageSizeURLQuery = ({ trackedEvent }) => {
   return (
     <Row>
       <Select
+        size="S"
         aria-label={formatMessage({
           id: 'components.PageFooter.select',
           defaultMessage: 'Entries per page',

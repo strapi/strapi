@@ -293,7 +293,7 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
 }
 
 .c7 {
-  min-height: 2.5rem;
+  min-height: 2.125rem;
 }
 
 .c15 {
