@@ -12,15 +12,21 @@ import { urlsToAssets } from '../../../utils/urlsToAssets';
 
 export const FromUrlForm = ({ onClose, onAddAsset }) => {
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(undefined);
   const { formatMessage } = useIntl();
 
   const handleSubmit = async ({ urls }) => {
     setLoading(true);
     const urlArray = urls.split(/\r?\n/);
-    const assets = await urlsToAssets(urlArray);
+    try {
+      const assets = await urlsToAssets(urlArray);
 
-    // no need to set the loading to false since the component unmounts
-    onAddAsset(assets);
+      // no need to set the loading to false since the component unmounts
+      onAddAsset(assets);
+    } catch (e) {
+      setError(e);
+      setLoading(false);
+    }
   };
 
   return (
@@ -44,9 +50,10 @@ export const FromUrlForm = ({ onClose, onAddAsset }) => {
                 defaultMessage: 'Separate your URL links by a carriage return.',
               })}
               error={
-                errors.urls
+                error?.message ||
+                (errors.urls
                   ? formatMessage({ id: errors.urls, defaultMessage: 'An error occured' })
-                  : undefined
+                  : undefined)
               }
               onChange={handleChange}
             >
