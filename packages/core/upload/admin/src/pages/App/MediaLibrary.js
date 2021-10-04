@@ -143,7 +143,9 @@ export const MediaLibrary = () => {
       {showUploadAssetDialog && (
         <UploadAssetDialog onClose={toggleUploadAssetDialog} onSuccess={() => {}} />
       )}
-      {assetToEdit && <EditAssetDialog onClose={() => setAssetToEdit(undefined)} />}
+      {assetToEdit && (
+        <EditAssetDialog onClose={() => setAssetToEdit(undefined)} asset={assetToEdit} />
+      )}
     </Layout>
   );
 };
