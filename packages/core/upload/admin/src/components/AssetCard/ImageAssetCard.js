@@ -44,6 +44,7 @@ export const ImageAssetCard = ({
             <IconButton
               label={formatMessage({ id: getTrad('control-card.edit'), defaultMessage: 'Edit' })}
               icon={<EditIcon />}
+              onClick={onEdit}
             />
           </CardAction>
         )}
