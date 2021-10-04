@@ -9,7 +9,7 @@ import { DocAssetCard } from '../../../components/AssetCard/DocAssetCard';
 import { AssetType } from '../../../constants';
 import { PaginationFooter } from '../../../components/PaginationFooter';
 
-export const ListView = ({ assets }) => {
+export const ListView = ({ assets, onEditAsset }) => {
   return (
     <>
       <KeyboardNavigable tagName="article">
@@ -40,6 +40,7 @@ export const ListView = ({ assets }) => {
                   thumbnail={prefixFileUrlWithBackendUrl(
                     asset?.formats?.thumbnail?.url || asset.url
                   )}
+                  onEdit={() => onEditAsset(asset)}
                 />
               );
             }
@@ -63,4 +64,5 @@ export const ListView = ({ assets }) => {
 
 ListView.propTypes = {
   assets: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
+  onEditAsset: PropTypes.func.isRequired,
 };
