@@ -1,7 +1,6 @@
 export const ADD_ATTRIBUTE = 'ContentTypeBuilder/DataManagerProvider/ADD_ATTRIBUTE';
 export const ADD_CREATED_COMPONENT_TO_DYNAMIC_ZONE =
   'ContentTypeBuilder/DataManagerProvider/ADD_CREATED_COMPONENT_TO_DYNAMIC_ZONE';
-export const CANCEL_CHANGES = 'ContentTypeBuilder/DataManagerProvider/CANCEL_CHANGES';
 export const CHANGE_DYNAMIC_ZONE_COMPONENTS =
   'ContentTypeBuilder/DataManagerProvider/CHANGE_DYNAMIC_ZONE_COMPONENTS';
 export const CREATE_SCHEMA = 'ContentTypeBuilder/DataManagerProvider/CREATE_SCHEMA';
