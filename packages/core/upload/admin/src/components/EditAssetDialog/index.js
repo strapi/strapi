@@ -13,7 +13,8 @@ import { Stack } from '@strapi/parts/Stack';
 import { Grid, GridItem } from '@strapi/parts/Grid';
 import { Button } from '@strapi/parts/Button';
 import { TextInput } from '@strapi/parts/TextInput';
-import { getFileExtension } from '@strapi/helper-plugin';
+import { getFileExtension, prefixFileUrlWithBackendUrl } from '@strapi/helper-plugin';
+import { PreviewBox } from './PreviewBox';
 import { AssetMeta } from './AssetMeta';
 import { getTrad } from '../../utils';
 import formatBytes from '../../utils/formatBytes';
@@ -29,13 +30,15 @@ export const EditAssetDialog = ({ onClose, asset }) => {
     <ModalLayout onClose={onClose} labelledBy="title">
       <ModalHeader>
         <ButtonText textColor="neutral800" as="h2" id="title">
-          Title
+          {formatMessage({ id: getTrad('modal.edit.title'), defaultMessage: 'Details' })}
         </ButtonText>
       </ModalHeader>
       <ModalBody>
         <Grid gap={4}>
           <GridItem xs={12} col={6}>
-            Left
+            <PreviewBox>
+              <img src={prefixFileUrlWithBackendUrl(asset.url)} alt={asset.name} />
+            </PreviewBox>
           </GridItem>
           <GridItem xs={12} col={6}>
             <Stack size={3}>
@@ -109,6 +112,8 @@ EditAssetDialog.propTypes = {
     size: PropTypes.number,
     createdAt: PropTypes.string,
     ext: PropTypes.string,
+    name: PropTypes.string,
+    url: PropTypes.string,
   }).isRequired,
   onClose: PropTypes.func.isRequired,
 };
