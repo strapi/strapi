@@ -40,14 +40,14 @@ module.exports = {
     '__tests__',
   ],
   setupFiles: [
-    '<rootDir>/test/config/front/test-bundler.js',
+    '<rootDir>/packages/admin-test-utils/lib/test-bundler.js',
     '<rootDir>/packages/admin-test-utils/lib/mocks/LocalStorageMock.js',
     '<rootDir>/packages/admin-test-utils/lib/mocks/IntersectionObserver.js',
     '<rootDir>/packages/admin-test-utils/lib/mocks/ResizeObserver.js',
   ],
   setupFilesAfterEnv: [
-    '<rootDir>/test/config/front/enzyme-setup.js',
-    '<rootDir>/test/config/front/strapi.js',
+    '<rootDir>/packages/admin-test-utils/lib/enzyme-setup.js',
+    '<rootDir>/packages/admin-test-utils/lib/strapi.js',
   ],
   transform: {
     '^.+\\.js$': ['@swc-node/jest', { jsx: true, dynamicImport: true }],
@@ -55,6 +55,5 @@ module.exports = {
       '<rootDir>/fileTransformer.js',
   },
   transformIgnorePatterns: ['node_modules/(?!(react-dnd|dnd-core|react-dnd-html5-backend)/)'],
-  testURL: 'http://localhost:4000/admin',
   testMatch: ['/**/tests/**/?(*.)+(spec|test).[jt]s?(x)'],
 };

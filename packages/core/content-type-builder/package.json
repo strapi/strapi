@@ -11,7 +11,10 @@
   },
   "scripts": {
     "test:unit": "jest --verbose",
-    "test:front": "cross-env IS_EE=true jest --config ./jest.config.front.js"
+    "test:front": "cross-env IS_EE=true jest --config ./jest.config.front.js",
+    "test:front:watch": "cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",
+    "test:front:ce": "cross-env IS_EE=false jest --config ./jest.config.front.js",
+    "test:front:watch:ce": "cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll"
   },
   "dependencies": {
     "@sindresorhus/slugify": "1.1.0",

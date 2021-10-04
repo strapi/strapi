@@ -1,3 +1,5 @@
+'use strict';
+
 /**
  *
  * Strapi
@@ -5,10 +7,8 @@
  *
  */
 
-// Setup the strapi function global variable
-
 // FIXME create a better jest setup
-import '@testing-library/jest-dom/extend-expect';
+require('@testing-library/jest-dom/extend-expect');
 
 global.process.env.ADMIN_PATH = '/admin/';
 

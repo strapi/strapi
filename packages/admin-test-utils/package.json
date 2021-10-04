@@ -4,6 +4,15 @@
   "private": true,
   "description": "Test utilities for the Strapi administration panel",
   "main": "lib/index.js",
+  "dependencies": {
+    "@babel/polyfill": "7.12.1"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "5.14.1",
+    "enzyme": "3.9.0",
+    "enzyme-adapter-react-16": "1.15.6",
+    "jest-styled-components": "7.0.2"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
