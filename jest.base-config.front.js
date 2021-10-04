@@ -3,9 +3,9 @@
 const IS_EE = process.env.IS_EE === 'true';
 
 const moduleNameMapper = {
-  '.*\\.(css|less|styl|scss|sass)$': '<rootDir>/test/config/front/mocks/cssModule.js',
+  '.*\\.(css|less|styl|scss|sass)$': '<rootDir>/packages/admin-test-utils/lib/mocks/cssModule.js',
   '.*\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga|ico)$':
-    '<rootDir>/test/config/front/mocks/image.js',
+    '<rootDir>/packages/admin-test-utils/lib/mocks/image.js',
   '^ee_else_ce(/.*)$': IS_EE
     ? [
         '<rootDir>/packages/core/admin/ee/admin$1',
@@ -40,14 +40,14 @@ module.exports = {
     '__tests__',
   ],
   setupFiles: [
-    '<rootDir>/packages/admin-test-utils/lib/test-bundler.js',
+    '<rootDir>/packages/admin-test-utils/lib/setup/test-bundler.js',
     '<rootDir>/packages/admin-test-utils/lib/mocks/LocalStorageMock.js',
     '<rootDir>/packages/admin-test-utils/lib/mocks/IntersectionObserver.js',
     '<rootDir>/packages/admin-test-utils/lib/mocks/ResizeObserver.js',
   ],
   setupFilesAfterEnv: [
-    '<rootDir>/packages/admin-test-utils/lib/enzyme-setup.js',
-    '<rootDir>/packages/admin-test-utils/lib/strapi.js',
+    '<rootDir>/packages/admin-test-utils/lib/setup/enzyme-setup.js',
+    '<rootDir>/packages/admin-test-utils/lib/setup/strapi.js',
   ],
   transform: {
     '^.+\\.js$': ['@swc-node/jest', { jsx: true, dynamicImport: true }],
