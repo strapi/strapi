@@ -42,6 +42,7 @@ const draftAndPublishSync = require('./migrations/draft-publish');
 const LIFECYCLES = {
   REGISTER: 'register',
   BOOTSTRAP: 'bootstrap',
+  DESTROY: 'destroy',
 };
 
 class Strapi {
@@ -165,19 +166,8 @@ class Strapi {
   }
 
   async destroy() {
+    await this.runLifecyclesFunctions(LIFECYCLES.DESTROY);
     await this.server.destroy();
-
-    await Promise.all(
-      Object.values(this.plugins).map(plugin => {
-        if (_.has(plugin, 'destroy') && typeof plugin.destroy === 'function') {
-          return plugin.destroy();
-        }
-      })
-    );
-
-    if (_.has(this, 'admin')) {
-      await this.admin.destroy();
-    }
 
     this.eventHub.removeAllListeners();
 
@@ -423,7 +413,7 @@ class Strapi {
       }
 
       if (this.config.get('autoReload')) {
-        this.server.destroy();
+        this.destroy();
         process.send('reload');
       }
     };
@@ -460,7 +450,9 @@ class Strapi {
     }
 
     // admin
-    await this.admin[lifecycleName]({ strapi: this });
+    if (_.has(this, 'admin')) {
+      await this.admin[lifecycleName]({ strapi: this });
+    }
   }
 
   getModel(uid) {
