@@ -139,7 +139,7 @@ export const MediaLibrary = () => {
           )}
           {canRead && assets && assets.length > 0 && (
             <>
-              <ListView assets={assets} onEditAsset={setAssetToEdit} />
+              <ListView assets={assets} onEditAsset={setAssetToEdit} onEditAsset={setAssetToEdit} />
               {data?.pagination && <PaginationFooter pagination={data.pagination} />}
             </>
           )}
