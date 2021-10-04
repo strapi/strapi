@@ -38,7 +38,6 @@ const ListView = () => {
     isInDevelopmentMode,
     isInContentTypeView,
     submitData,
-    toggleModalCancel,
   } = useDataManager();
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
@@ -226,16 +225,6 @@ const ListView = () => {
           primaryAction={
             isInDevelopmentMode && (
               <Stack horizontal size={2}>
-                <Button
-                  variant="secondary"
-                  onClick={toggleModalCancel}
-                  disabled={isEqual(modifiedData, initialData)}
-                >
-                  {formatMessage({
-                    id: getTrad('form.button.cancel'),
-                    defaultMessage: 'Cancel',
-                  })}
-                </Button>
                 <Button
                   startIcon={<CheckIcon />}
                   onClick={() => submitData()}
