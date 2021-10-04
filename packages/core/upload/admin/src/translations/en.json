@@ -56,6 +56,7 @@
   "modal.nav.computer": "From computer",
   "modal.nav.selected": "selected",
   "modal.nav.url": "From url",
+  "modal.edit.title": "Details",
   "modal.selected-list.sub-header-subtitle": "Drag & drop to reorder the assets in the field",
   "modal.upload-list.footer.button.plural": "Upload {number} assets to the library",
   "modal.upload-list.footer.button.singular": "Upload {number} asset to the library",
