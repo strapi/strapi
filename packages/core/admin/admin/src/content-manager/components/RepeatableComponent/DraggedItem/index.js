@@ -44,6 +44,7 @@ const DraggedItem = ({
   // hasErrors,
   // hasMinError,
   // isFirst,
+
   isOdd,
   isOpen,
   isReadOnly,
