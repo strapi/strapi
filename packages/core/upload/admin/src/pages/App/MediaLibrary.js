@@ -18,6 +18,7 @@ import AddIcon from '@strapi/icons/AddIcon';
 import { Box } from '@strapi/parts/Box';
 import { BaseCheckbox } from '@strapi/parts/BaseCheckbox';
 import { UploadAssetDialog } from '../../components/UploadAssetDialog/UploadAssetDialog';
+import { EditAssetDialog } from '../../components/EditAssetDialog';
 import { ListView } from './components/ListView';
 import { useAssets } from '../../hooks/useAssets';
 import { getTrad } from '../../utils';
@@ -38,6 +39,7 @@ export const MediaLibrary = () => {
   });
 
   const [showUploadAssetDialog, setShowUploadAssetDialog] = useState(false);
+  const [assetToEdit, setAssetToEdit] = useState(undefined);
   const toggleUploadAssetDialog = () => setShowUploadAssetDialog(prev => !prev);
 
   useFocusWhenNavigate();
@@ -132,13 +134,16 @@ export const MediaLibrary = () => {
               })}
             />
           )}
-          {canRead && data && data.length > 0 && <ListView assets={data} />}
+          {canRead && data && data.length > 0 && (
+            <ListView assets={data} onEditAsset={setAssetToEdit} />
+          )}
         </ContentLayout>
       </Main>
 
       {showUploadAssetDialog && (
         <UploadAssetDialog onClose={toggleUploadAssetDialog} onSuccess={() => {}} />
       )}
+      {assetToEdit && <EditAssetDialog onClose={() => setAssetToEdit(undefined)} />}
     </Layout>
   );
 };

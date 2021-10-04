@@ -130,11 +130,11 @@ describe('MediaLibrary / ListView', () => {
     );
 
     expect(container).toMatchInlineSnapshot(`
-      .c27 {
+      .c30 {
         padding-top: 24px;
       }
 
-      .c28 {
+      .c31 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -152,7 +152,7 @@ describe('MediaLibrary / ListView', () => {
         align-items: flex-end;
       }
 
-      .c49 {
+      .c52 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
@@ -170,54 +170,39 @@ describe('MediaLibrary / ListView', () => {
         grid-gap: 16px;
       }
 
-      .c41 {
+      .c44 {
         padding-left: 8px;
       }
 
-      .c43 {
+      .c5 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
         display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c44 > * + * {
-        margin-left: 4px;
-      }
-
-      .c47 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
-      }
-
-      .c45 {
-        padding: 12px;
+        cursor: pointer;
+        padding: 8px;
         border-radius: 4px;
-        -webkit-text-decoration: none;
-        text-decoration: none;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
+        background: #ffffff;
+        border: 1px solid #dcdce4;
         position: relative;
         outline: none;
       }
 
-      .c45:after {
+      .c5 svg {
+        height: 12px;
+        width: 12px;
+      }
+
+      .c5 svg > g,
+      .c5 svg path {
+        fill: #ffffff;
+      }
+
+      .c5[aria-disabled='true'] {
+        pointer-events: none;
+      }
+
+      .c5:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -232,11 +217,11 @@ describe('MediaLibrary / ListView', () => {
         border: 2px solid transparent;
       }
 
-      .c45:focus-visible {
+      .c5:focus-visible {
         outline: none;
       }
 
-      .c45:focus-visible:after {
+      .c5:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -247,34 +232,47 @@ describe('MediaLibrary / ListView', () => {
         border: 2px solid #4945ff;
       }
 
-      .c46 {
-        font-size: 0.7rem;
-        pointer-events: none;
+      .c6 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        -webkit-box-pack: center;
+        -webkit-justify-content: center;
+        -ms-flex-pack: center;
+        justify-content: center;
+        height: 2rem;
+        width: 2rem;
       }
 
-      .c46 svg path {
-        fill: #c0c0cf;
+      .c6 svg > g,
+      .c6 svg path {
+        fill: #8e8ea9;
       }
 
-      .c46:focus svg path,
-      .c46:hover svg path {
-        fill: #c0c0cf;
-      }
-
-      .c48 {
-        font-size: 0.7rem;
-      }
-
-      .c48 svg path {
+      .c6:hover svg > g,
+      .c6:hover svg path {
         fill: #666687;
       }
 
-      .c48:focus svg path,
-      .c48:hover svg path {
-        fill: #4a4a6a;
+      .c6:active svg > g,
+      .c6:active svg path {
+        fill: #a5a5ba;
       }
 
-      .c29 {
+      .c6[aria-disabled='true'] {
+        background-color: #eaeaef;
+      }
+
+      .c6[aria-disabled='true'] svg path {
+        fill: #666687;
+      }
+
+      .c46 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -288,7 +286,107 @@ describe('MediaLibrary / ListView', () => {
         align-items: center;
       }
 
-      .c33 {
+      .c47 > * + * {
+        margin-left: 4px;
+      }
+
+      .c50 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
+      }
+
+      .c48 {
+        padding: 12px;
+        border-radius: 4px;
+        -webkit-text-decoration: none;
+        text-decoration: none;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        position: relative;
+        outline: none;
+      }
+
+      .c48:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c48:focus-visible {
+        outline: none;
+      }
+
+      .c48:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
+      }
+
+      .c49 {
+        font-size: 0.7rem;
+        pointer-events: none;
+      }
+
+      .c49 svg path {
+        fill: #c0c0cf;
+      }
+
+      .c49:focus svg path,
+      .c49:hover svg path {
+        fill: #c0c0cf;
+      }
+
+      .c51 {
+        font-size: 0.7rem;
+      }
+
+      .c51 svg path {
+        fill: #666687;
+      }
+
+      .c51:focus svg path,
+      .c51:hover svg path {
+        fill: #4a4a6a;
+      }
+
+      .c32 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c36 {
         position: absolute;
         left: 0;
         right: 0;
@@ -299,27 +397,27 @@ describe('MediaLibrary / ListView', () => {
         border: none;
       }
 
-      .c33:focus {
+      .c36:focus {
         outline: none;
       }
 
-      .c37 {
+      .c40 {
         font-weight: 400;
         font-size: 0.875rem;
         line-height: 1.43;
         color: #32324d;
       }
 
-      .c36 {
+      .c39 {
         padding-right: 16px;
         padding-left: 16px;
       }
 
-      .c38 {
+      .c41 {
         padding-left: 12px;
       }
 
-      .c31 {
+      .c34 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -333,7 +431,7 @@ describe('MediaLibrary / ListView', () => {
         align-items: center;
       }
 
-      .c34 {
+      .c37 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -351,7 +449,7 @@ describe('MediaLibrary / ListView', () => {
         align-items: center;
       }
 
-      .c30 {
+      .c33 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -361,16 +459,16 @@ describe('MediaLibrary / ListView', () => {
         flex-direction: column;
       }
 
-      .c30 > * {
+      .c33 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c30 > * + * {
+      .c33 > * + * {
         margin-top: 0px;
       }
 
-      .c32 {
+      .c35 {
         position: relative;
         border: 1px solid #dcdce4;
         padding-right: 12px;
@@ -386,28 +484,28 @@ describe('MediaLibrary / ListView', () => {
         transition-duration: 0.2s;
       }
 
-      .c32:focus-within {
+      .c35:focus-within {
         border: 1px solid #4945ff;
         box-shadow: #4945ff 0px 0px 0px 2px;
       }
 
-      .c39 {
+      .c42 {
         background: transparent;
         border: none;
         position: relative;
         z-index: 1;
       }
 
-      .c39 svg {
+      .c42 svg {
         height: 0.6875rem;
         width: 0.6875rem;
       }
 
-      .c39 svg path {
+      .c42 svg path {
         fill: #666687;
       }
 
-      .c40 {
+      .c43 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -416,15 +514,15 @@ describe('MediaLibrary / ListView', () => {
         border: none;
       }
 
-      .c40 svg {
+      .c43 svg {
         width: 0.375rem;
       }
 
-      .c35 {
+      .c38 {
         width: 100%;
       }
 
-      .c42 {
+      .c45 {
         font-weight: 400;
         font-size: 0.875rem;
         line-height: 1.43;
@@ -437,25 +535,31 @@ describe('MediaLibrary / ListView', () => {
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
-      .c6 {
+      .c9 {
         padding-top: 8px;
         padding-right: 12px;
         padding-bottom: 8px;
         padding-left: 12px;
       }
 
-      .c13 {
+      .c16 {
         background: #f6f6f9;
         color: #666687;
         padding: 4px;
         border-radius: 4px;
       }
 
-      .c21 {
+      .c24 {
         background: #32324d;
         color: #ffffff;
         padding: 4px;
         border-radius: 4px;
+      }
+
+      .c4 {
+        position: absolute;
+        top: 12px;
+        right: 12px;
       }
 
       .c2 {
@@ -476,7 +580,7 @@ describe('MediaLibrary / ListView', () => {
         align-items: center;
       }
 
-      .c7 {
+      .c10 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -490,7 +594,7 @@ describe('MediaLibrary / ListView', () => {
         align-items: flex-start;
       }
 
-      .c19 {
+      .c22 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -504,14 +608,14 @@ describe('MediaLibrary / ListView', () => {
         align-items: center;
       }
 
-      .c5 {
+      .c8 {
         margin: 0;
         padding: 0;
         max-height: 100%;
         max-width: 100%;
       }
 
-      .c4 {
+      .c7 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -525,62 +629,62 @@ describe('MediaLibrary / ListView', () => {
         background: repeating-conic-gradient(#f6f6f9 0% 25%,transparent 0% 50%) 50% / 20px 20px;
       }
 
-      .c9 {
+      .c12 {
         font-weight: 500;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #32324d;
       }
 
-      .c10 {
+      .c13 {
         font-weight: 400;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #666687;
       }
 
-      .c16 {
+      .c19 {
         font-weight: 400;
         font-size: 0.875rem;
         line-height: 1.43;
         color: #32324d;
       }
 
-      .c23 {
+      .c26 {
         font-weight: 400;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #ffffff;
       }
 
-      .c17 {
+      .c20 {
         font-weight: 600;
         line-height: 1.14;
       }
 
-      .c18 {
+      .c21 {
         font-weight: 600;
         font-size: 0.6875rem;
         line-height: 1.45;
         text-transform: uppercase;
       }
 
-      .c14 {
+      .c17 {
         display: inline-block;
       }
 
-      .c12 {
+      .c15 {
         margin-left: auto;
         -webkit-flex-shrink: 0;
         -ms-flex-negative: 0;
         flex-shrink: 0;
       }
 
-      .c15 {
+      .c18 {
         margin-left: 4px;
       }
 
-      .c8 {
+      .c11 {
         word-break: break-all;
       }
 
@@ -589,31 +693,31 @@ describe('MediaLibrary / ListView', () => {
         border-bottom: 1px solid #eaeaef;
       }
 
-      .c22 {
+      .c25 {
         position: absolute;
         bottom: 4px;
         right: 4px;
       }
 
-      .c11 {
+      .c14 {
         text-transform: uppercase;
       }
 
-      .c20 canvas {
+      .c23 canvas {
         display: block;
         max-width: 100%;
         max-height: 10.25rem;
       }
 
-      .c24 {
+      .c27 {
         text-transform: uppercase;
       }
 
-      .c26 {
+      .c29 {
         text-transform: uppercase;
       }
 
-      .c25 svg {
+      .c28 svg {
         font-size: 3rem;
       }
 
@@ -635,33 +739,61 @@ describe('MediaLibrary / ListView', () => {
                 <div
                   class="c4"
                 >
+                  <span>
+                    <button
+                      aria-disabled="false"
+                      aria-labelledby="tooltip-1"
+                      class="c5 c6"
+                      tabindex="0"
+                      type="button"
+                    >
+                      <svg
+                        fill="none"
+                        height="1em"
+                        viewBox="0 0 24 24"
+                        width="1em"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          clip-rule="evenodd"
+                          d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
+                          fill="#212134"
+                          fill-rule="evenodd"
+                        />
+                      </svg>
+                    </button>
+                  </span>
+                </div>
+                <div
+                  class="c7"
+                >
                   <img
                     aria-hidden="true"
-                    class="c5"
+                    class="c8"
                     src="http://localhost:1337/uploads/thumbnail_strapi_cover_1fabc982ce_5b43615ed5.png"
                   />
                 </div>
               </div>
               <div
-                class="c6"
+                class="c9"
               >
                 <div
-                  class="c7"
+                  class="c10"
                 >
                   <div
-                    class="c8"
+                    class="c11"
                   >
                     <h2
-                      class="c9"
+                      class="c12"
                       id="card-1-title"
                     >
                       strapi-cover_1fabc982ce.png
                     </h2>
                     <div
-                      class="c10"
+                      class="c13"
                     >
                       <span
-                        class="c11"
+                        class="c14"
                       >
                         png
                       </span>
@@ -669,13 +801,13 @@ describe('MediaLibrary / ListView', () => {
                     </div>
                   </div>
                   <div
-                    class="c12"
+                    class="c15"
                   >
                     <div
-                      class="c13 c14 c15"
+                      class="c16 c17 c18"
                     >
                       <span
-                        class="c16 c17 c18"
+                        class="c19 c20 c21"
                       >
                         Image
                       </span>
@@ -693,13 +825,13 @@ describe('MediaLibrary / ListView', () => {
                 class="c2 c3"
               >
                 <div
-                  class="c4"
+                  class="c7"
                 >
                   <div
-                    class="c19"
+                    class="c22"
                   >
                     <div
-                      class="c20"
+                      class="c23"
                     >
                       <video
                         src="http://localhost:1337/uploads/mov_bbb_2f3907f7aa.mp4"
@@ -713,48 +845,48 @@ describe('MediaLibrary / ListView', () => {
                   </div>
                 </div>
                 <time
-                  class="c21 c22"
+                  class="c24 c25"
                 >
                   <span
-                    class="c23"
+                    class="c26"
                   >
                     ...
                   </span>
                 </time>
               </div>
               <div
-                class="c6"
+                class="c9"
               >
                 <div
-                  class="c7"
+                  class="c10"
                 >
                   <div
-                    class="c8"
+                    class="c11"
                   >
                     <h2
-                      class="c9"
+                      class="c12"
                       id="card-2-title"
                     >
                       mov_bbb.mp4
                     </h2>
                     <div
-                      class="c10"
+                      class="c13"
                     >
                       <span
-                        class="c24"
+                        class="c27"
                       >
                         mp4
                       </span>
                     </div>
                   </div>
                   <div
-                    class="c12"
+                    class="c15"
                   >
                     <div
-                      class="c13 c14 c15"
+                      class="c16 c17 c18"
                     >
                       <span
-                        class="c16 c17 c18"
+                        class="c19 c20 c21"
                       >
                         Video
                       </span>
@@ -772,13 +904,13 @@ describe('MediaLibrary / ListView', () => {
                 class="c2 c3"
               >
                 <div
-                  class="c4"
+                  class="c7"
                 >
                   <div
-                    class="c19"
+                    class="c22"
                   >
                     <span
-                      class="c25"
+                      class="c28"
                     >
                       <svg
                         aria-label="CARTE MARIAGE AVS - Printemps.pdf"
@@ -798,38 +930,38 @@ describe('MediaLibrary / ListView', () => {
                 </div>
               </div>
               <div
-                class="c6"
+                class="c9"
               >
                 <div
-                  class="c7"
+                  class="c10"
                 >
                   <div
-                    class="c8"
+                    class="c11"
                   >
                     <h2
-                      class="c9"
+                      class="c12"
                       id="card-3-title"
                     >
                       CARTE MARIAGE AVS - Printemps.pdf
                     </h2>
                     <div
-                      class="c10"
+                      class="c13"
                     >
                       <span
-                        class="c26"
+                        class="c29"
                       >
                         pdf
                       </span>
                     </div>
                   </div>
                   <div
-                    class="c12"
+                    class="c15"
                   >
                     <div
-                      class="c13 c14 c15"
+                      class="c16 c17 c18"
                     >
                       <span
-                        class="c16 c17 c18"
+                        class="c19 c20 c21"
                       >
                         Doc
                       </span>
@@ -841,41 +973,41 @@ describe('MediaLibrary / ListView', () => {
           </div>
         </div>
         <div
-          class="c27"
+          class="c30"
         >
           <div
-            class="c28"
+            class="c31"
           >
             <div
-              class="c29"
+              class="c32"
             >
               <div>
                 <div
-                  class="c30"
+                  class="c33"
                 >
                   <div
-                    class="c31 c32"
+                    class="c34 c35"
                   >
                     <button
                       aria-disabled="false"
                       aria-expanded="false"
                       aria-haspopup="listbox"
                       aria-labelledby="select-1-label select-1-content"
-                      class="c33"
+                      class="c36"
                       id="select-1"
                       type="button"
                     />
                     <div
-                      class="c34 c35"
+                      class="c37 c38"
                     >
                       <div
-                        class="c31"
+                        class="c34"
                       >
                         <div
-                          class="c36"
+                          class="c39"
                         >
                           <span
-                            class="c37"
+                            class="c40"
                             id="select-1-content"
                           >
                             10
@@ -883,11 +1015,11 @@ describe('MediaLibrary / ListView', () => {
                         </div>
                       </div>
                       <div
-                        class="c31"
+                        class="c34"
                       >
                         <button
                           aria-hidden="true"
-                          class="c38 c39 c40"
+                          class="c41 c42 c43"
                           tabindex="-1"
                           type="button"
                         >
@@ -912,10 +1044,10 @@ describe('MediaLibrary / ListView', () => {
                 </div>
               </div>
               <div
-                class="c41"
+                class="c44"
               >
                 <label
-                  class="c42"
+                  class="c45"
                   for="page-size"
                 />
               </div>
@@ -925,18 +1057,18 @@ describe('MediaLibrary / ListView', () => {
               class="sc-dOFSHK"
             >
               <ul
-                class="c43 c44"
+                class="c46 c47"
               >
                 <li>
                   <a
                     aria-current="page"
                     aria-disabled="true"
-                    class="c45 c46 active"
+                    class="c48 c49 active"
                     href="/"
                     tabindex="-1"
                   >
                     <div
-                      class="c47"
+                      class="c50"
                     />
                     <svg
                       aria-hidden="true"
@@ -957,11 +1089,11 @@ describe('MediaLibrary / ListView', () => {
                   <a
                     aria-current="page"
                     aria-disabled="false"
-                    class="c45 c48 active"
+                    class="c48 c51 active"
                     href="/?page=1"
                   >
                     <div
-                      class="c47"
+                      class="c50"
                     />
                     <svg
                       aria-hidden="true"
@@ -983,7 +1115,7 @@ describe('MediaLibrary / ListView', () => {
           </div>
         </div>
         <div
-          class="c49"
+          class="c52"
         >
           <p
             aria-live="polite"
