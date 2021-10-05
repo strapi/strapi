@@ -4,7 +4,7 @@ const bootstrap = require('./server/bootstrap');
 const services = require('./server/services');
 const routes = require('./server/routes');
 const controllers = require('./server/controllers');
-const middlewares = require('./server/middlewares');
+const register = require('./server/register');
 const config = require('./server/config');
 
 module.exports = () => {
@@ -13,7 +13,7 @@ module.exports = () => {
     config,
     routes,
     controllers,
-    middlewares,
+    register,
     services,
   };
 };
