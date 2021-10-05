@@ -283,13 +283,6 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         color: #32324d;
       }
 
-      .c37 {
-        font-weight: 400;
-        font-size: 0.75rem;
-        line-height: 1.33;
-        color: #32324d;
-      }
-
       .c18 {
         font-weight: 500;
         font-size: 0.75rem;
@@ -797,11 +790,7 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
                   <span
                     class="c34 c35 c36"
                   >
-                    <span
-                      class="c37"
-                    >
-                      Ready to sign in?
-                    </span>
+                    Ready to sign in?
                   </span>
                 </a>
               </div>
