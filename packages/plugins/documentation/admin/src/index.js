@@ -25,7 +25,9 @@ export default {
       },
       permissions: pluginPermissions.main,
       Component: async () => {
-        const component = await import(/* webpackChunkName: "documentation-page" */ './pages/App');
+        const component = await import(
+          /* webpackChunkName: "documentation-page" */ './pages/PluginPage'
+        );
 
         return component;
       },
