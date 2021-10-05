@@ -48,7 +48,7 @@ const Oops = () => {
         <Row justifyContent="center">
           <Box paddingTop={4}>
             <Link to="/auth/login">
-              <Text>{formatMessage({ id: 'Auth.link.signin', defaultMessage: 'Sign in' })}</Text>
+              {formatMessage({ id: 'Auth.link.signin', defaultMessage: 'Sign in' })}
             </Link>
           </Box>
         </Row>

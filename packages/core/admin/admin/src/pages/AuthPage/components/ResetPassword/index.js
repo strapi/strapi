@@ -161,9 +161,7 @@ const ForgotPassword = ({ onSubmit, schema }) => {
         <Row justifyContent="center">
           <Box paddingTop={4}>
             <Link to="/auth/login">
-              <Text small>
-                {formatMessage({ id: 'Auth.link.ready', defaultMessage: 'Ready to sign in?' })}
-              </Text>
+              {formatMessage({ id: 'Auth.link.ready', defaultMessage: 'Ready to sign in?' })}
             </Link>
           </Box>
         </Row>

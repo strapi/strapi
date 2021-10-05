@@ -350,11 +350,7 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
                   <span
                     class="c19 c20 c21"
                   >
-                    <span
-                      class="c15"
-                    >
-                      Sign in
-                    </span>
+                    Sign in
                   </span>
                 </a>
               </div>
