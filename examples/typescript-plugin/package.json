@@ -23,6 +23,6 @@
     "typescript": "4.4.3",
     "nodemon": "2.0.13",
     "ts-node": "10.2.1",
-    "@strapi/strapi": "4.0.0-next.0"
+    "@strapi/strapi": "3.6.8"
   }
 }
