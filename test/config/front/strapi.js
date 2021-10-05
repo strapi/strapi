@@ -22,3 +22,5 @@ global.strapi = {
   },
   projectType: 'Community',
 };
+
+window.prompt = jest.fn();
