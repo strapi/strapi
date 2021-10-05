@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { AutoReloadOverlayBockerContext } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
+import { AutoReloadOverlayBockerContext } from '@strapi/helper-plugin';
 import Blocker from './Blocker';
 
 const AutoReloadOverlayBlockerProvider = ({ children }) => {
@@ -28,7 +28,6 @@ const AutoReloadOverlayBlockerProvider = ({ children }) => {
 
     if (isOpen) {
       timer = setInterval(() => {
-        // if (elapsed > 15) {
         if (elapsed > 30) {
           clearInterval(timer);
 
@@ -60,7 +59,7 @@ const AutoReloadOverlayBlockerProvider = ({ children }) => {
     defaultMessage: 'Waiting for restart',
   };
 
-  if (elapsed > 15) {
+  if (elapsed > 30) {
     displayedIcon = 'time';
 
     description = {
@@ -81,7 +80,6 @@ const AutoReloadOverlayBlockerProvider = ({ children }) => {
       <Blocker
         displayedIcon={displayedIcon}
         isOpen={isOpen}
-        elapsed={elapsed}
         description={description}
         title={title}
       />
