@@ -15,6 +15,13 @@ const defaultGlobalLinks = [
     isDisplayed: false,
     permissions: adminPermissions.settings.webhooks.main,
   },
+  {
+    intlLabel: { id: 'Settings.apiTokens.title', defaultMessage: 'API Tokens' },
+    to: '/settings/api-tokens?sort=name:ASC',
+    id: 'api-tokens',
+    isDisplayed: false,
+    permissions: adminPermissions.settings['api-tokens'].main,
+  },
 ];
 
 export default defaultGlobalLinks;

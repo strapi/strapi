@@ -61,6 +61,7 @@
     "@strapi/parts": "0.0.1-alpha.49",
     "babel-loader": "^8.2.2",
     "cross-env": "^7.0.3",
+    "date-fns": "2.22.1",
     "enzyme": "3.9.0",
     "enzyme-adapter-react-16": "1.15.6",
     "rimraf": "3.0.2"

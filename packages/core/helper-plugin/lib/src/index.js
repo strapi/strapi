@@ -103,7 +103,9 @@ export { default as PopUpWarningModal } from './old/components/PopUpWarning/Styl
 
 // Contexts
 export { default as AppInfosContext } from './contexts/AppInfosContext';
-export { default as AutoReloadOverlayBockerContext } from './contexts/AutoReloadOverlayBockerContext';
+export {
+  default as AutoReloadOverlayBockerContext,
+} from './contexts/AutoReloadOverlayBockerContext';
 export { default as NotificationsContext } from './contexts/NotificationsContext';
 export { default as OverlayBlockerContext } from './contexts/OverlayBlockerContext';
 
@@ -186,21 +188,28 @@ export { default as FilterPopoverURLQuery } from './components/FilterPopoverURLQ
 export { default as Form } from './components/Form';
 export { default as PaginationURLQuery } from './components/PaginationURLQuery';
 export { default as PageSizeURLQuery } from './components/PageSizeURLQuery';
+export { default as RelativeTime } from './components/RelativeTime';
 
 // New icons
 export { default as SortIcon } from './icons/SortIcon';
 export { default as RemoveRoundedButton } from './icons/RemoveRoundedButton';
 
 // content-manager
-export { default as ContentManagerEditViewDataManagerContext } from './content-manager/contexts/ContentManagerEditViewDataManagerContext';
-export { default as useCMEditViewDataManager } from './content-manager/hooks/useCMEditViewDataManager';
+export {
+  default as ContentManagerEditViewDataManagerContext,
+} from './content-manager/contexts/ContentManagerEditViewDataManagerContext';
+export {
+  default as useCMEditViewDataManager,
+} from './content-manager/hooks/useCMEditViewDataManager';
 export { getType };
 export { getOtherInfos };
 
 // Utils
 export { default as auth } from './utils/auth';
 export { default as hasPermissions } from './utils/hasPermissions';
-export { default as prefixFileUrlWithBackendUrl } from './utils/prefixFileUrlWithBackendUrl/prefixFileUrlWithBackendUrl';
+export {
+  default as prefixFileUrlWithBackendUrl,
+} from './utils/prefixFileUrlWithBackendUrl/prefixFileUrlWithBackendUrl';
 export { default as prefixPluginTranslations } from './utils/prefixPluginTranslations';
 export { default as pxToRem } from './utils/pxToRem';
 export { default as to } from './utils/await-to-js';
@@ -209,6 +218,8 @@ export { default as customEllipsis } from './utils/customEllipsis';
 export { default as translatedErrors } from './utils/translatedErrors';
 export { default as formatComponentData } from './content-manager/utils/formatComponentData';
 export { findMatchingPermissions } from './utils/hasPermissions';
-export { default as contentManagementUtilRemoveFieldsFromData } from './content-manager/utils/contentManagementUtilRemoveFieldsFromData';
+export {
+  default as contentManagementUtilRemoveFieldsFromData,
+} from './content-manager/utils/contentManagementUtilRemoveFieldsFromData';
 export { default as getFileExtension } from './utils/getFileExtension/getFileExtension';
 export * from './utils/stopPropagation';
