@@ -186,6 +186,8 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
         border-radius: 4px;
         background: #ffffff;
         border: 1px solid #dcdce4;
+        position: relative;
+        outline: none;
       }
 
       .c9 svg {
@@ -200,6 +202,36 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
 
       .c9[aria-disabled='true'] {
         pointer-events: none;
+      }
+
+      .c9:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c9:focus-visible {
+        outline: none;
+      }
+
+      .c9:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
       }
 
       .c12 {
@@ -339,6 +371,8 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
         border-radius: 4px;
         background: #ffffff;
         border: 1px solid #dcdce4;
+        position: relative;
+        outline: none;
       }
 
       .c22 svg {
@@ -353,6 +387,36 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
 
       .c22[aria-disabled='true'] {
         pointer-events: none;
+      }
+
+      .c22:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c22:focus-visible {
+        outline: none;
+      }
+
+      .c22:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
       }
 
       .c23 {

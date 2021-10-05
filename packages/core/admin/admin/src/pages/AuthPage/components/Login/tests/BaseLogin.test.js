@@ -131,6 +131,8 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         text-transform: uppercase;
         -webkit-text-decoration: none;
         text-decoration: none;
+        position: relative;
+        outline: none;
       }
 
       .c34 svg path {
@@ -139,6 +141,36 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
 
       .c34 svg {
         font-size: 0.625rem;
+      }
+
+      .c34:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c34:focus-visible {
+        outline: none;
+      }
+
+      .c34:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
       }
 
       .c31 {
@@ -158,6 +190,8 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         border-radius: 4px;
         background: #ffffff;
         border: 1px solid #dcdce4;
+        position: relative;
+        outline: none;
       }
 
       .c28 svg {
@@ -172,6 +206,36 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
 
       .c28[aria-disabled='true'] {
         pointer-events: none;
+      }
+
+      .c28:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c28:focus-visible {
+        outline: none;
+      }
+
+      .c28:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
       }
 
       .c29 {
@@ -248,11 +312,18 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         background: #4945ff;
       }
 
-      .c15 {
+      .c14 {
         font-weight: 500;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #32324d;
+      }
+
+      .c15 {
+        font-weight: 400;
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #d02b20;
       }
 
       .c20 {
@@ -260,7 +331,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         padding-left: 8px;
       }
 
-      .c14 {
+      .c13 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -302,7 +373,6 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         font-size: 0.875rem;
         display: block;
         width: 100%;
-        height: 2.5rem;
       }
 
       .c18::-webkit-input-placeholder {
@@ -330,6 +400,11 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         color: inherit;
       }
 
+      .c18:focus {
+        outline: none;
+        box-shadow: none;
+      }
+
       .c19 {
         border: none;
         border-radius: 4px;
@@ -340,7 +415,6 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         font-size: 0.875rem;
         display: block;
         width: 100%;
-        height: 2.5rem;
       }
 
       .c19::-webkit-input-placeholder {
@@ -368,13 +442,30 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         color: inherit;
       }
 
+      .c19:focus {
+        outline: none;
+        box-shadow: none;
+      }
+
       .c17 {
         border: 1px solid #dcdce4;
         border-radius: 4px;
         background: #ffffff;
+        height: 2.5rem;
+        outline: none;
+        box-shadow: 0;
+        -webkit-transition-property: border-color,box-shadow,fill;
+        transition-property: border-color,box-shadow,fill;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
       }
 
-      .c13 {
+      .c17:focus-within {
+        border: 1px solid #4945ff;
+        box-shadow: #4945ff 0px 0px 0px 2px;
+      }
+
+      .c12 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -384,17 +475,13 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         flex-direction: column;
       }
 
-      .c13 > * {
+      .c12 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c13 > * + * {
+      .c12 > * + * {
         margin-top: 4px;
-      }
-
-      .c12 textarea {
-        height: 5rem;
       }
 
       .c26 {
@@ -612,21 +699,25 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
             <div
               class="c11"
             >
-              <div
-                class="c12"
-              >
+              <div>
                 <div>
                   <div
-                    class="c13"
+                    class="c12"
                   >
                     <div
-                      class="c14"
+                      class="c13"
                     >
                       <label
-                        class="c15"
+                        class="c14"
                         for="textinput-1"
+                        required=""
                       >
                         Email
+                        <span
+                          class="c15"
+                        >
+                          *
+                        </span>
                       </label>
                     </div>
                     <div
@@ -639,28 +730,31 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
                         id="textinput-1"
                         name="email"
                         placeholder="kai@doe.com"
-                        required=""
                         value=""
                       />
                     </div>
                   </div>
                 </div>
               </div>
-              <div
-                class="c12"
-              >
+              <div>
                 <div>
                   <div
-                    class="c13"
+                    class="c12"
                   >
                     <div
-                      class="c14"
+                      class="c13"
                     >
                       <label
-                        class="c15"
+                        class="c14"
                         for="textinput-2"
+                        required=""
                       >
                         Password
+                        <span
+                          class="c15"
+                        >
+                          *
+                        </span>
                       </label>
                     </div>
                     <div
@@ -672,7 +766,6 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
                         class="c19"
                         id="textinput-2"
                         name="password"
-                        required=""
                         type="password"
                         value=""
                       />

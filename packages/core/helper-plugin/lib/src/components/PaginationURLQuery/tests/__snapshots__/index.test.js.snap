@@ -58,6 +58,38 @@ exports[`<PaginationURLQuery /> should display the dots correctly 1`] = `
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  position: relative;
+  outline: none;
+}
+
+.c2:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c2:focus-visible {
+  outline: none;
+}
+
+.c2:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
 }
 
 .c9 {
@@ -70,6 +102,38 @@ exports[`<PaginationURLQuery /> should display the dots correctly 1`] = `
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  position: relative;
+  outline: none;
+}
+
+.c9:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c9:focus-visible {
+  outline: none;
+}
+
+.c9:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
 }
 
 .c5 {
@@ -108,7 +172,7 @@ exports[`<PaginationURLQuery /> should display the dots correctly 1`] = `
 
 <nav
   aria-label="pagination"
-  class="sc-iuAqRD"
+  class="sc-dcwqsv"
 >
   <ul
     class="c0 c1"
@@ -358,6 +422,38 @@ exports[`<PaginationURLQuery /> should work when the pageCount is inferior or eq
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  position: relative;
+  outline: none;
+}
+
+.c2:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c2:focus-visible {
+  outline: none;
+}
+
+.c2:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
 }
 
 .c5 {
@@ -370,6 +466,38 @@ exports[`<PaginationURLQuery /> should work when the pageCount is inferior or eq
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  position: relative;
+  outline: none;
+}
+
+.c5:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c5:focus-visible {
+  outline: none;
+}
+
+.c5:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
 }
 
 .c6 {
@@ -418,7 +546,7 @@ exports[`<PaginationURLQuery /> should work when the pageCount is inferior or eq
 
 <nav
   aria-label="pagination"
-  class="sc-iuAqRD"
+  class="sc-dcwqsv"
 >
   <ul
     class="c0 c1"

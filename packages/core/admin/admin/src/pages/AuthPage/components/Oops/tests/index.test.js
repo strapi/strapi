@@ -155,6 +155,8 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         text-transform: uppercase;
         -webkit-text-decoration: none;
         text-decoration: none;
+        position: relative;
+        outline: none;
       }
 
       .c18 svg path {
@@ -163,6 +165,36 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
 
       .c18 svg {
         font-size: 0.625rem;
+      }
+
+      .c18:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c18:focus-visible {
+        outline: none;
+      }
+
+      .c18:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
       }
 
       .c4 {

@@ -47,7 +47,7 @@ describe('<InputUID />', () => {
     });
 
     expect(container.firstChild).toMatchInlineSnapshot(`
-      .c9 {
+      .c8 {
         border: none;
         background: transparent;
         font-size: 1.6rem;
@@ -63,7 +63,33 @@ describe('<InputUID />', () => {
         align-items: center;
       }
 
-      .c11 {
+      .c10 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c2 {
+        font-weight: 500;
+        font-size: 0.75rem;
+        line-height: 1.33;
+        color: #32324d;
+      }
+
+      .c6 {
+        padding-right: 12px;
+        padding-left: 8px;
+      }
+
+      .c1 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -78,32 +104,6 @@ describe('<InputUID />', () => {
       }
 
       .c3 {
-        font-weight: 500;
-        font-size: 0.75rem;
-        line-height: 1.33;
-        color: #32324d;
-      }
-
-      .c7 {
-        padding-right: 12px;
-        padding-left: 8px;
-      }
-
-      .c2 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c4 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -121,7 +121,7 @@ describe('<InputUID />', () => {
         align-items: center;
       }
 
-      .c6 {
+      .c5 {
         border: none;
         border-radius: 4px;
         padding-left: 16px;
@@ -131,41 +131,57 @@ describe('<InputUID />', () => {
         font-size: 0.875rem;
         display: block;
         width: 100%;
-        height: 2.5rem;
       }
 
-      .c6::-webkit-input-placeholder {
+      .c5::-webkit-input-placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c6::-moz-placeholder {
+      .c5::-moz-placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c6:-ms-input-placeholder {
+      .c5:-ms-input-placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c6::placeholder {
+      .c5::placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c6[aria-disabled='true'] {
+      .c5[aria-disabled='true'] {
         background: inherit;
         color: inherit;
       }
 
-      .c5 {
+      .c5:focus {
+        outline: none;
+        box-shadow: none;
+      }
+
+      .c4 {
         border: 1px solid #dcdce4;
         border-radius: 4px;
         background: #ffffff;
+        height: 2.5rem;
+        outline: none;
+        box-shadow: 0;
+        -webkit-transition-property: border-color,box-shadow,fill;
+        transition-property: border-color,box-shadow,fill;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
       }
 
-      .c1 {
+      .c4:focus-within {
+        border: 1px solid #4945ff;
+        box-shadow: #4945ff 0px 0px 0px 2px;
+      }
+
+      .c0 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -175,83 +191,77 @@ describe('<InputUID />', () => {
         flex-direction: column;
       }
 
-      .c1 > * {
+      .c0 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c1 > * + * {
+      .c0 > * + * {
         margin-top: 4px;
       }
 
-      .c0 textarea {
-        height: 5rem;
-      }
-
-      .c8 {
+      .c7 {
         position: relative;
       }
 
-      .c10 svg {
+      .c9 svg {
         height: 1rem;
         width: 1rem;
       }
 
-      .c10 svg path {
+      .c9 svg path {
         fill: #a5a5ba;
       }
 
-      .c10 svg:hover path {
+      .c9 svg:hover path {
         fill: #4945ff;
       }
 
-      .c12 {
+      .c11 {
         -webkit-animation: gzYjWD 2s infinite linear;
         animation: gzYjWD 2s infinite linear;
       }
 
-      <div
-        class="c0"
-      >
+      <div>
         <div>
           <div
-            class="c1"
+            class="c0"
           >
             <div
-              class="c2"
+              class="c1"
             >
               <label
-                class="c3"
+                class="c2"
                 for="textinput-1"
               >
                 test
               </label>
             </div>
             <div
-              class="c4 c5"
+              class="c3 c4"
             >
               <input
                 aria-disabled="false"
                 aria-invalid="false"
-                class="c6"
+                class="c5"
                 id="textinput-1"
                 name="test"
                 placeholder=""
                 value="michka"
               />
               <div
-                class="c7"
+                class="c6"
               >
                 <div
-                  class="c8"
+                  class="c7"
                 >
                   <button
                     aria-label="regenerate"
-                    class="c9 c10"
+                    class="c8 c9"
                     type="button"
                   >
                     <div
-                      class="c11 c12"
+                      class="c10 c11"
                     >
                       <svg
                         fill="none"

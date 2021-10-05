@@ -36,6 +36,7 @@ describe('<DraftAndPublishBadge />', () => {
         padding-bottom: 16px;
         padding-left: 20px;
         border-radius: 4px;
+        border-color: #c6f0c2;
         border: 1px solid #c6f0c2;
       }
 
@@ -132,6 +133,7 @@ describe('<DraftAndPublishBadge />', () => {
         padding-bottom: 16px;
         padding-left: 20px;
         border-radius: 4px;
+        border-color: #b8e1ff;
         border: 1px solid #b8e1ff;
       }
 
