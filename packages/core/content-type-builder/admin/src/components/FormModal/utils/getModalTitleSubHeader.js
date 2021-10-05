@@ -5,7 +5,7 @@ const getModalTitleSubHeader = state => {
     case 'chooseAttribute':
       return getTrad(
         `modalForm.sub-header.chooseAttribute.${
-          state.forTarget.includes('component') ? 'component' : state.kind
+          state.forTarget.includes('component') ? 'component' : state.kind || 'collectionType'
         }`
       );
     case 'attribute': {

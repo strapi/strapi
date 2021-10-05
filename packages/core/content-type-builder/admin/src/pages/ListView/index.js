@@ -19,7 +19,7 @@ import has from 'lodash/has';
 import isEqual from 'lodash/isEqual';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
-import { Prompt, useHistory, useLocation } from 'react-router-dom';
+import { Prompt, useHistory, useLocation, useRouteMatch } from 'react-router-dom';
 import List from '../../components/List';
 import ListRow from '../../components/ListRow';
 import ListViewContext from '../../contexts/ListViewContext';
@@ -44,6 +44,7 @@ const ListView = () => {
   const { push } = useHistory();
   const { search } = useLocation();
   const [enablePrompt, togglePrompt] = useState(true);
+  const match = useRouteMatch('/plugins/content-type-builder/:kind/:currentUID');
 
   useEffect(() => {
     if (search === '') {
@@ -174,8 +175,17 @@ const ListView = () => {
 
     return new Promise(resolve => setTimeout(resolve, 100));
   };
-  const label = get(modifiedData, [firstMainDataPath, 'schema', 'name'], '');
+  let label = get(modifiedData, [firstMainDataPath, 'schema', 'name'], '');
   const kind = get(modifiedData, [firstMainDataPath, 'schema', 'kind'], '');
+
+  const isCreatingFirstContentType = match?.params.currentUID === 'create-content-type';
+
+  if (!label && isCreatingFirstContentType) {
+    label = formatMessage({
+      id: getTrad('button.model.create'),
+      defaultMessage: 'Create new collection type',
+    });
+  }
 
   // const listTitle = [
   //   formatMessage(
@@ -225,6 +235,24 @@ const ListView = () => {
           primaryAction={
             isInDevelopmentMode && (
               <Stack horizontal size={2}>
+                {/* DON'T display the add field button when the content type has not been created */}
+                {!isCreatingFirstContentType && (
+                  <Button
+                    startIcon={<AddIcon />}
+                    variant="secondary"
+                    onClick={() => {
+                      const headerDisplayObject = {
+                        header_label_1: currentDataName,
+                        header_icon_name_1:
+                          forTarget === 'contentType' ? contentTypeKind : forTarget,
+                        header_icon_isCustom_1: false,
+                      };
+                      handleClickAddField(forTarget, targetUid, headerDisplayObject);
+                    }}
+                  >
+                    {formatMessage({ id: getTrad('button.attributes.add.another') })}
+                  </Button>
+                )}
                 <Button
                   startIcon={<CheckIcon />}
                   onClick={() => submitData()}
@@ -241,7 +269,8 @@ const ListView = () => {
           }
           secondaryAction={
             isInDevelopmentMode &&
-            !isFromPlugin && (
+            !isFromPlugin &&
+            !isCreatingFirstContentType && (
               <Button startIcon={<EditIcon />} variant="tertiary" onClick={onEdit}>
                 {formatMessage({
                   id: getTrad('app.utils.edit'),
@@ -272,20 +301,6 @@ const ListView = () => {
                   isInContentTypeView={isInContentTypeView}
                   contentTypeKind={contentTypeKind}
                 /> */}
-                <Button
-                  startIcon={<AddIcon />}
-                  variant="primary"
-                  onClick={() => {
-                    const headerDisplayObject = {
-                      header_label_1: currentDataName,
-                      header_icon_name_1: forTarget === 'contentType' ? contentTypeKind : forTarget,
-                      header_icon_isCustom_1: false,
-                    };
-                    handleClickAddField(forTarget, targetUid, headerDisplayObject);
-                  }}
-                >
-                  {formatMessage({ id: getTrad('button.attributes.add.another') })}
-                </Button>
               </Stack>
             </Row>
             <Box background="neutral0" shadow="filterShadow" hasRadius>

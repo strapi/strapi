@@ -8,10 +8,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
-import { useTracking } from '@strapi/helper-plugin';
+import { EmptyBodyTable, useTracking } from '@strapi/helper-plugin';
 import { Box } from '@strapi/parts/Box';
+import { Button } from '@strapi/parts/Button';
 import { TableLabel } from '@strapi/parts/Text';
-import { TFooter } from '@strapi/parts/Table';
+import { Table, Thead, Tr, Th, TFooter } from '@strapi/parts/Table';
 import AddIcon from '@strapi/icons/AddIcon';
 import { useIntl } from 'react-intl';
 import useListView from '../../hooks/useListView';
@@ -44,7 +45,8 @@ function List({
 }) {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
-  const { isInDevelopmentMode, modifiedData } = useDataManager();
+  const { isInDevelopmentMode, modifiedData, isInContentTypeView } = useDataManager();
+
   const { openModalAddField } = useListView();
   const onClickAddField = () => {
     trackUsage('hasClickedCTBAddFieldBanner');
@@ -163,7 +165,74 @@ function List({
   };
 
   if (!targetUid) {
-    return null;
+    return (
+      <Table colCount={2} rowCount={2}>
+        <Thead>
+          <Tr>
+            <Th>
+              <TableLabel textColor="neutral600">
+                {formatMessage({ id: 'table.headers.name', defaultMessage: 'Name' })}
+              </TableLabel>
+            </Th>
+            <Th>
+              <TableLabel textColor="neutral600">
+                {formatMessage({ id: 'table.headers.type', defaultMessage: 'Type' })}
+              </TableLabel>
+            </Th>
+          </Tr>
+        </Thead>
+        <EmptyBodyTable
+          colSpan={2}
+          content={{
+            id: getTrad('table.content.create-first-content-type'),
+            defaultMessage: 'Create your first Collection-Type',
+          }}
+        />
+      </Table>
+    );
+  }
+
+  if (items.length === 0 && isMain) {
+    return (
+      <Table colCount={2} rowCount={2}>
+        <Thead>
+          <Tr>
+            <Th>
+              <TableLabel textColor="neutral600">
+                {formatMessage({ id: 'table.headers.name', defaultMessage: 'Name' })}
+              </TableLabel>
+            </Th>
+            <Th>
+              <TableLabel textColor="neutral600">
+                {formatMessage({ id: 'table.headers.type', defaultMessage: 'Type' })}
+              </TableLabel>
+            </Th>
+          </Tr>
+        </Thead>
+        <EmptyBodyTable
+          action={
+            <Button onClick={onClickAddField} size="L" startIcon={<AddIcon />} variant="secondary">
+              {formatMessage({
+                id: getTrad('table.button.no-fields'),
+                defaultMessage: 'Add new field',
+              })}
+            </Button>
+          }
+          colSpan={2}
+          content={
+            isInContentTypeView
+              ? {
+                  id: getTrad('table.content.no-fields.collection-type'),
+                  defaultMessage: 'Add your first field to this Collection-Type',
+                }
+              : {
+                  id: getTrad('table.content.no-fields.component'),
+                  defaultMessage: 'Add your first field to this component',
+                }
+          }
+        />
+      </Table>
+    );
   }
 
   return (
