@@ -400,6 +400,10 @@ const DataManagerProvider = ({
   const shouldRedirect = useMemo(() => {
     const dataSet = isInContentTypeView ? contentTypes : components;
 
+    if (currentUid === 'create-content-type') {
+      return false;
+    }
+
     return !Object.keys(dataSet).includes(currentUid) && !isLoading;
   }, [components, contentTypes, currentUid, isInContentTypeView, isLoading]);
 
@@ -408,7 +412,7 @@ const DataManagerProvider = ({
       .filter(uid => get(contentTypes, [uid, 'schema', 'visible'], true))
       .sort();
 
-    return get(allowedEndpoints, '0', '');
+    return get(allowedEndpoints, '0', 'create-content-type');
   }, [contentTypes]);
 
   if (shouldRedirect) {
