@@ -6,7 +6,7 @@ const {
   addResolversToSchema,
 } = require('@graphql-tools/schema');
 const { makeSchema } = require('nexus');
-const { pipe, prop, startsWith } = require('lodash/fp');
+const { prop, startsWith } = require('lodash/fp');
 
 const { wrapResolvers } = require('./wrap-resolvers');
 const {
@@ -29,6 +29,7 @@ module.exports = ({ strapi }) => {
   const { config } = strapi.plugin('graphql');
 
   const { KINDS, GENERIC_MORPH_TYPENAME } = getGraphQLService('constants');
+  const extensionService = getGraphQLService('extension');
 
   // Type Registry
   let registry;
@@ -36,8 +37,6 @@ module.exports = ({ strapi }) => {
   let builders;
 
   const buildSchema = () => {
-    const extensionService = getGraphQLService('extension');
-
     const isShadowCRUDEnabled = !!config('shadowCRUD', true);
 
     // Create a new empty type registry
@@ -54,24 +53,31 @@ module.exports = ({ strapi }) => {
       shadowCRUD();
     }
 
-    // Generate the extension configuration for the content API
+    // Build a collection of schema based on the type registry (& temporary generated extension)
+    const schemas = buildSchemas({ registry });
+
+    // Merge every created schema into a single one
+    const mergedSchema = mergeSchemas({ schemas });
+
+    // Generate the extension configuration for the content API.
+    // This extension instance needs to be generated after the Nexus schema's
+    // generation, so that configurations created during types definitions
+    // can be registered before being used in the wrap resolvers operation
     const extension = extensionService.generate({ typeRegistry: registry });
 
-    return pipe(
-      // Build a collection of schema based on the
-      // type registry & the extension configuration
-      buildSchemas,
-      // Merge every created schema into a single one
-      schemas => mergeSchemas({ schemas }),
-      // Add the extension's resolvers to the final schema
-      schema => addResolversToSchema(schema, extension.resolvers),
-      // Wrap resolvers if needed (auth, middlewares, policies...) as configured in the extension
-      schema => wrapResolvers({ schema, strapi, extension })
-    )({ registry, extension });
+    // Add the extension's resolvers to the final schema
+    const schema = addResolversToSchema(mergedSchema, extension.resolvers);
+
+    // Wrap resolvers if needed (auth, middlewares, policies...) as configured in the extension
+    const wrappedSchema = wrapResolvers({ schema, strapi, extension });
+
+    return wrappedSchema;
   };
 
-  const buildSchemas = ({ registry, extension }) => {
-    const { types, plugins, typeDefs = [] } = extension;
+  const buildSchemas = ({ registry }) => {
+    // Here we extract types, plugins & typeDefs from a temporary generated
+    // extension since there won't be any addition allowed after schemas generation
+    const { types, plugins, typeDefs = [] } = extensionService.generate({ typeRegistry: registry });
 
     // Create a new Nexus schema (shadow CRUD) & add it to the schemas collection
     const nexusSchema = makeSchema({
