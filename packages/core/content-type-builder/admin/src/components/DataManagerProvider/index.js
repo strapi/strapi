@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useMemo, useState, useRef } from 'react';
+import React, { memo, useEffect, useMemo, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { get, groupBy, set, size } from 'lodash';
 import {
@@ -10,13 +10,11 @@ import {
   useAutoReloadOverlayBlocker,
   useAppInfos,
   useRBACProvider,
-  ConfirmDialog,
 } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { useHistory, useLocation, useRouteMatch, Redirect } from 'react-router-dom';
 import { connect, useDispatch } from 'react-redux';
 import { compose } from 'redux';
-import CheckIcon from '@strapi/icons/CheckIcon';
 import DataManagerContext from '../../contexts/DataManagerContext';
 import getTrad from '../../utils/getTrad';
 import makeUnique from '../../utils/makeUnique';
@@ -28,17 +26,11 @@ import retrieveSpecificInfoFromComponents from './utils/retrieveSpecificInfoFrom
 import retrieveComponentsFromSchema from './utils/retrieveComponentsFromSchema';
 import retrieveNestedComponents from './utils/retrieveNestedComponents';
 import { retrieveComponentsThatHaveComponents } from './utils/retrieveComponentsThatHaveComponents';
-import {
-  getComponentsToPost,
-  formatMainDataType,
-  getCreatedAndModifiedComponents,
-  sortContentType,
-} from './utils/cleanData';
+import { getComponentsToPost, formatMainDataType, sortContentType } from './utils/cleanData';
 
 import {
   ADD_ATTRIBUTE,
   ADD_CREATED_COMPONENT_TO_DYNAMIC_ZONE,
-  CANCEL_CHANGES,
   CHANGE_DYNAMIC_ZONE_COMPONENTS,
   CREATE_SCHEMA,
   CREATE_COMPONENT_SCHEMA,
@@ -73,7 +65,6 @@ const DataManagerProvider = ({
   const { getPlugin } = useStrapiApp();
 
   const { apis } = getPlugin(pluginId);
-  const [infoModals, toggleInfoModal] = useState(false);
   const { autoReload } = useAppInfos();
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
@@ -157,9 +148,6 @@ const DataManagerProvider = ({
     }
   }, [autoReload, toggleNotification]);
 
-  const didModifiedComponents =
-    getCreatedAndModifiedComponents(modifiedData.components || {}, components).length > 0;
-
   const addAttribute = (
     attributeToSet,
     forTarget,
@@ -186,11 +174,6 @@ const DataManagerProvider = ({
       dynamicZoneTarget,
       componentsToAdd,
     });
-  };
-
-  const cancelChanges = () => {
-    toggleModalCancel();
-    dispatch({ type: CANCEL_CHANGES });
   };
 
   const createSchema = (
@@ -509,11 +492,6 @@ const DataManagerProvider = ({
     }
   };
 
-  // Open the modal warning cancel changes
-  const toggleModalCancel = () => {
-    toggleInfoModal(prev => !prev);
-  };
-
   const updatePermissions = async () => {
     await refetchPermissions();
   };
@@ -558,7 +536,6 @@ const DataManagerProvider = ({
         setModifiedData,
         sortedContentTypesList: sortContentType(contentTypes),
         submitData,
-        toggleModalCancel,
         updateSchema,
       }}
     >
@@ -567,37 +544,7 @@ const DataManagerProvider = ({
       ) : (
         <>
           {children}
-          {isInDevelopmentMode && (
-            <>
-              <FormModal />
-              <ConfirmDialog
-                bodyText={{
-                  id: getTrad(
-                    `popUpWarning.bodyMessage.cancel-modifications${
-                      didModifiedComponents ? '.with-components' : ''
-                    }`
-                  ),
-                  defaultMessage: `Are you sure you want to cancel your modifications? ${
-                    didModifiedComponents ? 'Some components have been created or modified...' : ''
-                  }`,
-                }}
-                isOpen={infoModals}
-                onToggleDialog={toggleModalCancel}
-                onConfirm={() => {
-                  cancelChanges();
-                }}
-                iconRightButton={<CheckIcon />}
-                title={{
-                  id: 'app.components.ConfirmDialog.title',
-                  defaultMessage: 'Confirmation',
-                }}
-                rightButtonText={{
-                  id: 'app.components.Button.confirm',
-                  defaultMessage: 'Confirm',
-                }}
-              />
-            </>
-          )}
+          {isInDevelopmentMode && <FormModal />}
         </>
       )}
     </DataManagerContext.Provider>
@@ -621,6 +568,9 @@ DataManagerProvider.propTypes = {
 };
 
 const mapStateToProps = makeSelectDataManagerProvider();
-const withConnect = connect(mapStateToProps, null);
+const withConnect = connect(
+  mapStateToProps,
+  null
+);
 
 export default compose(withConnect)(memo(DataManagerProvider));

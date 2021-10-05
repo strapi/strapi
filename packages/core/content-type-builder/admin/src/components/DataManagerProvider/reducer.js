@@ -161,12 +161,6 @@ const reducer = (state = initialState, action) =>
 
         break;
       }
-      case actions.CANCEL_CHANGES: {
-        draftState.modifiedData = state.initialData;
-        draftState.components = state.initialComponents;
-
-        break;
-      }
       case actions.CHANGE_DYNAMIC_ZONE_COMPONENTS: {
         const { dynamicZoneTarget, newComponents } = action;
 

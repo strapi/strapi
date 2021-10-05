@@ -46,7 +46,7 @@ const WebhookForm = ({
       validateOnChange={false}
       validateOnBlur={false}
     >
-      {({ handleSubmit, errors, handleReset }) => (
+      {({ handleSubmit, errors }) => (
         <Form noValidate>
           <HeaderLayout
             primaryAction={
@@ -61,12 +61,6 @@ const WebhookForm = ({
                   {formatMessage({
                     id: 'Settings.webhooks.trigger',
                     defaultMessage: 'Trigger',
-                  })}
-                </Button>
-                <Button variant="secondary" onClick={handleReset} size="L">
-                  {formatMessage({
-                    id: 'app.components.Button.reset',
-                    defaultMessage: 'Reset',
                   })}
                 </Button>
                 <Button startIcon={<CheckIcon />} onClick={handleSubmit} type="submit" size="L">
