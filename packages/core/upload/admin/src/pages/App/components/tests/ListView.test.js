@@ -213,6 +213,38 @@ describe('MediaLibrary / ListView', () => {
         display: -webkit-flex;
         display: -ms-flexbox;
         display: flex;
+        position: relative;
+        outline: none;
+      }
+
+      .c45:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c45:focus-visible {
+        outline: none;
+      }
+
+      .c45:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
       }
 
       .c46 {
@@ -256,7 +288,7 @@ describe('MediaLibrary / ListView', () => {
         align-items: center;
       }
 
-      .c32 {
+      .c33 {
         position: absolute;
         left: 0;
         right: 0;
@@ -267,7 +299,7 @@ describe('MediaLibrary / ListView', () => {
         border: none;
       }
 
-      .c32:focus {
+      .c33:focus {
         outline: none;
       }
 
@@ -287,7 +319,21 @@ describe('MediaLibrary / ListView', () => {
         padding-left: 12px;
       }
 
-      .c33 {
+      .c31 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c34 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -299,20 +345,6 @@ describe('MediaLibrary / ListView', () => {
         -webkit-justify-content: space-between;
         -ms-flex-pack: justify;
         justify-content: space-between;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c35 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -338,17 +370,25 @@ describe('MediaLibrary / ListView', () => {
         margin-top: 0px;
       }
 
-      .c31 {
+      .c32 {
         position: relative;
         border: 1px solid #dcdce4;
         padding-right: 12px;
         border-radius: 4px;
         background: #ffffff;
         overflow: hidden;
+        min-height: 2rem;
+        outline: none;
+        box-shadow: 0;
+        -webkit-transition-property: border-color,box-shadow,fill;
+        transition-property: border-color,box-shadow,fill;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
       }
 
-      .c31:focus-within {
+      .c32:focus-within {
         border: 1px solid #4945ff;
+        box-shadow: #4945ff 0px 0px 0px 2px;
       }
 
       .c39 {
@@ -380,8 +420,8 @@ describe('MediaLibrary / ListView', () => {
         width: 0.375rem;
       }
 
-      .c34 {
-        min-height: 2.125rem;
+      .c35 {
+        width: 100%;
       }
 
       .c42 {
@@ -814,22 +854,22 @@ describe('MediaLibrary / ListView', () => {
                   class="c30"
                 >
                   <div
-                    class="c31"
+                    class="c31 c32"
                   >
                     <button
                       aria-disabled="false"
                       aria-expanded="false"
                       aria-haspopup="listbox"
                       aria-labelledby="select-1-label select-1-content"
-                      class="c32"
+                      class="c33"
                       id="select-1"
                       type="button"
                     />
                     <div
-                      class="c33 c34"
+                      class="c34 c35"
                     >
                       <div
-                        class="c35"
+                        class="c31"
                       >
                         <div
                           class="c36"
@@ -843,7 +883,7 @@ describe('MediaLibrary / ListView', () => {
                         </div>
                       </div>
                       <div
-                        class="c35"
+                        class="c31"
                       >
                         <button
                           aria-hidden="true"
@@ -882,7 +922,7 @@ describe('MediaLibrary / ListView', () => {
             </div>
             <nav
               aria-label="pagination"
-              class="sc-fBxREx"
+              class="sc-gmAFnh"
             >
               <ul
                 class="c43 c44"

@@ -85,6 +85,8 @@ describe('Homepage', () => {
         border-radius: 4px;
         background: #ffffff;
         border: 1px solid #dcdce4;
+        position: relative;
+        outline: none;
       }
 
       .c15 svg {
@@ -99,6 +101,36 @@ describe('Homepage', () => {
 
       .c15[aria-disabled='true'] {
         pointer-events: none;
+      }
+
+      .c15:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c15:focus-visible {
+        outline: none;
+      }
+
+      .c15:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
       }
 
       .c16 {
@@ -377,6 +409,8 @@ describe('Homepage', () => {
         border-radius: 4px;
         background: #ffffff;
         border: 1px solid #dcdce4;
+        position: relative;
+        outline: none;
       }
 
       .c47 svg {
@@ -391,6 +425,36 @@ describe('Homepage', () => {
 
       .c47[aria-disabled='true'] {
         pointer-events: none;
+      }
+
+      .c47:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c47:focus-visible {
+        outline: none;
+      }
+
+      .c47:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
       }
 
       .c48 {
@@ -503,6 +567,8 @@ describe('Homepage', () => {
         text-transform: uppercase;
         -webkit-text-decoration: none;
         text-decoration: none;
+        position: relative;
+        outline: none;
       }
 
       .c39 svg path {
@@ -511,6 +577,36 @@ describe('Homepage', () => {
 
       .c39 svg {
         font-size: 0.625rem;
+      }
+
+      .c39:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c39:focus-visible {
+        outline: none;
+      }
+
+      .c39:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
       }
 
       .c44 {
@@ -1304,13 +1400,13 @@ describe('Homepage', () => {
                                 >
                                   <path
                                     clip-rule="evenodd"
-                                    d="M23.497 0H7.68v8.035h7.783c.278 0 .503.224.503.502v7.783H24V.502A.502.502 0 0023.497 0z"
+                                    d="M23.498 0H7.68v8.035h7.783c.278 0 .503.224.503.502v7.783H24V.502A.502.502 0 0023.498 0z"
                                     fill="#8E75FF"
                                     fill-rule="evenodd"
                                   />
                                   <path
                                     clip-rule="evenodd"
-                                    d="M7.68 0v8.035H.252a.25.25 0 01-.178-.429L7.68 0zM16.395 23.926a.251.251 0 01-.43-.178V16.32H24l-7.605 7.606z"
+                                    d="M7.68 0v8.035H.252a.25.25 0 01-.178-.429L7.68 0zM16.395 23.926a.251.251 0 01-.43-.177V16.32H24l-7.605 7.606z"
                                     fill="#8E75FF"
                                     fill-rule="evenodd"
                                     opacity="0.405"
@@ -1357,13 +1453,13 @@ describe('Homepage', () => {
                                 >
                                   <path
                                     clip-rule="evenodd"
-                                    d="M23.497 0H7.68v8.035h7.783c.278 0 .503.224.503.502v7.783H24V.502A.502.502 0 0023.497 0z"
+                                    d="M23.498 0H7.68v8.035h7.783c.278 0 .503.224.503.502v7.783H24V.502A.502.502 0 0023.498 0z"
                                     fill="#8E75FF"
                                     fill-rule="evenodd"
                                   />
                                   <path
                                     clip-rule="evenodd"
-                                    d="M7.68 0v8.035H.252a.25.25 0 01-.178-.429L7.68 0zM16.395 23.926a.251.251 0 01-.43-.178V16.32H24l-7.605 7.606z"
+                                    d="M7.68 0v8.035H.252a.25.25 0 01-.178-.429L7.68 0zM16.395 23.926a.251.251 0 01-.43-.177V16.32H24l-7.605 7.606z"
                                     fill="#8E75FF"
                                     fill-rule="evenodd"
                                     opacity="0.405"

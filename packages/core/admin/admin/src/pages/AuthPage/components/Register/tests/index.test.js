@@ -138,6 +138,8 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
         border-radius: 4px;
         background: #ffffff;
         border: 1px solid #dcdce4;
+        position: relative;
+        outline: none;
       }
 
       .c40 svg {
@@ -152,6 +154,36 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
 
       .c40[aria-disabled='true'] {
         pointer-events: none;
+      }
+
+      .c40:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c40:focus-visible {
+        outline: none;
+      }
+
+      .c40:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
       }
 
       .c41 {
@@ -228,11 +260,18 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
         background: #4945ff;
       }
 
-      .c25 {
+      .c24 {
         font-weight: 500;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #32324d;
+      }
+
+      .c25 {
+        font-weight: 400;
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #d02b20;
       }
 
       .c33 {
@@ -247,7 +286,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
         padding-left: 8px;
       }
 
-      .c24 {
+      .c23 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -289,7 +328,6 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
         font-size: 0.875rem;
         display: block;
         width: 100%;
-        height: 2.5rem;
       }
 
       .c28::-webkit-input-placeholder {
@@ -317,6 +355,11 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
         color: inherit;
       }
 
+      .c28:focus {
+        outline: none;
+        box-shadow: none;
+      }
+
       .c29 {
         border: none;
         border-radius: 4px;
@@ -327,7 +370,6 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
         font-size: 0.875rem;
         display: block;
         width: 100%;
-        height: 2.5rem;
       }
 
       .c29::-webkit-input-placeholder {
@@ -355,13 +397,30 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
         color: inherit;
       }
 
+      .c29:focus {
+        outline: none;
+        box-shadow: none;
+      }
+
       .c27 {
         border: 1px solid #dcdce4;
         border-radius: 4px;
         background: #ffffff;
+        height: 2.5rem;
+        outline: none;
+        box-shadow: 0;
+        -webkit-transition-property: border-color,box-shadow,fill;
+        transition-property: border-color,box-shadow,fill;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
       }
 
-      .c23 {
+      .c27:focus-within {
+        border: 1px solid #4945ff;
+        box-shadow: #4945ff 0px 0px 0px 2px;
+      }
+
+      .c22 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -371,17 +430,13 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
         flex-direction: column;
       }
 
-      .c23 > * {
+      .c22 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c23 > * + * {
+      .c22 > * + * {
         margin-top: 4px;
-      }
-
-      .c22 textarea {
-        height: 5rem;
       }
 
       .c37 {
@@ -720,21 +775,25 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                       <div
                         class=""
                       >
-                        <div
-                          class="c22"
-                        >
+                        <div>
                           <div>
                             <div
-                              class="c23"
+                              class="c22"
                             >
                               <div
-                                class="c24"
+                                class="c23"
                               >
                                 <label
-                                  class="c25"
+                                  class="c24"
                                   for="textinput-1"
+                                  required=""
                                 >
                                   Firstname
+                                  <span
+                                    class="c25"
+                                  >
+                                    *
+                                  </span>
                                 </label>
                               </div>
                               <div
@@ -746,7 +805,6 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                                   class="c28"
                                   id="textinput-1"
                                   name="firstname"
-                                  required=""
                                   value=""
                                 />
                               </div>
@@ -761,21 +819,25 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                       <div
                         class=""
                       >
-                        <div
-                          class="c22"
-                        >
+                        <div>
                           <div>
                             <div
-                              class="c23"
+                              class="c22"
                             >
                               <div
-                                class="c24"
+                                class="c23"
                               >
                                 <label
-                                  class="c25"
+                                  class="c24"
                                   for="textinput-2"
+                                  required=""
                                 >
                                   Lastname
+                                  <span
+                                    class="c25"
+                                  >
+                                    *
+                                  </span>
                                 </label>
                               </div>
                               <div
@@ -787,7 +849,6 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                                   class="c28"
                                   id="textinput-2"
                                   name="lastname"
-                                  required=""
                                   value=""
                                 />
                               </div>
@@ -797,21 +858,25 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                       </div>
                     </div>
                   </div>
-                  <div
-                    class="c22"
-                  >
+                  <div>
                     <div>
                       <div
-                        class="c23"
+                        class="c22"
                       >
                         <div
-                          class="c24"
+                          class="c23"
                         >
                           <label
-                            class="c25"
+                            class="c24"
                             for="textinput-3"
+                            required=""
                           >
                             Email
+                            <span
+                              class="c25"
+                            >
+                              *
+                            </span>
                           </label>
                         </div>
                         <div
@@ -823,7 +888,6 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                             class="c28"
                             id="textinput-3"
                             name="email"
-                            required=""
                             type="email"
                             value=""
                           />
@@ -831,21 +895,25 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                       </div>
                     </div>
                   </div>
-                  <div
-                    class="c22"
-                  >
+                  <div>
                     <div>
                       <div
-                        class="c23"
+                        class="c22"
                       >
                         <div
-                          class="c24"
+                          class="c23"
                         >
                           <label
-                            class="c25"
+                            class="c24"
                             for="textinput-4"
+                            required=""
                           >
                             Password
+                            <span
+                              class="c25"
+                            >
+                              *
+                            </span>
                           </label>
                         </div>
                         <div
@@ -858,7 +926,6 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                             class="c29"
                             id="textinput-4"
                             name="password"
-                            required=""
                             type="password"
                             value=""
                           />
@@ -894,21 +961,25 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                       </div>
                     </div>
                   </div>
-                  <div
-                    class="c22"
-                  >
+                  <div>
                     <div>
                       <div
-                        class="c23"
+                        class="c22"
                       >
                         <div
-                          class="c24"
+                          class="c23"
                         >
                           <label
-                            class="c25"
+                            class="c24"
                             for="textinput-5"
+                            required=""
                           >
                             Confirmation Password
+                            <span
+                              class="c25"
+                            >
+                              *
+                            </span>
                           </label>
                         </div>
                         <div
@@ -920,7 +991,6 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                             class="c29"
                             id="textinput-5"
                             name="confirmPassword"
-                            required=""
                             type="password"
                             value=""
                           />
