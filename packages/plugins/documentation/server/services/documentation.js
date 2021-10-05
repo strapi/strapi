@@ -2,6 +2,7 @@
 const path = require('path');
 const fs = require('fs-extra');
 const _ = require('lodash');
+const moment = require('moment');
 
 const { builApiEndpointPath } = require('../utils/builders');
 const defaultConfig = require('../config/default-config');
@@ -150,8 +151,13 @@ module.exports = () => {
         'full_documentation.json'
       );
 
+      const settings = _.cloneDeep(defaultConfig);
+
+      _.set(settings, ['info', 'x-generation-date'], moment().format('L LTS'));
+      _.set(settings, ['info', 'version'], this.getDocumentationVersion());
+
       await fs.ensureFile(fullDocJsonPath);
-      await fs.writeJson(fullDocJsonPath, { ...defaultConfig, paths }, { spaces: 2 });
+      await fs.writeJson(fullDocJsonPath, { ...settings, paths }, { spaces: 2 });
     },
   };
 };
