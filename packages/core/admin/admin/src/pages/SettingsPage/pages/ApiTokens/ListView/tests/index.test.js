@@ -777,7 +777,7 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
 
     const { getByText } = render(app);
 
-    await waitFor(() => {
+    waitFor(() => {
       expect(getByText('My super token')).toBeInTheDocument();
       expect(getByText('This describe my super token')).toBeInTheDocument();
     });
@@ -789,13 +789,10 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
     }));
 
     const history = createMemoryHistory();
-    history.push('/settings/api-tokens');
     const app = makeApp(history);
 
     const { queryByTestId } = render(app);
 
-    await waitFor(() => {
-      expect(queryByTestId('create-api-token-button')).not.toBeInTheDocument();
-    });
+    await waitFor(() => expect(queryByTestId('create-api-token-button')).not.toBeInTheDocument());
   });
 });
