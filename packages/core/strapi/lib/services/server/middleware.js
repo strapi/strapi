@@ -1,7 +1,7 @@
 'use strict';
 
 const path = require('path');
-const { propOr, isArray } = require('lodash/fp');
+const { propOr, isArray, isNil } = require('lodash/fp');
 
 const getMiddlewareConfig = propOr([], 'config.middlewares');
 
@@ -80,6 +80,13 @@ const resolveMiddlewares = (config, strapi) => {
       'Middleware config must either be a string or an object {name?: string, resolve?: string, config: any}.'
     );
   }
+
+  middlewares.forEach(middleware => {
+    // NOTE: we replace null middlewares by a dumb one to avoid having to filter later on
+    if (isNil(middleware.handler)) {
+      middleware.handler = (_, next) => next();
+    }
+  });
 
   return middlewares;
 };

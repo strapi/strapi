@@ -146,6 +146,8 @@ describe('Admin | containers | RoleEditPage', () => {
         border-radius: 4px;
         background: #ffffff;
         border: 1px solid #dcdce4;
+        position: relative;
+        outline: none;
       }
 
       .c5 svg {
@@ -160,6 +162,36 @@ describe('Admin | containers | RoleEditPage', () => {
 
       .c5[aria-disabled='true'] {
         pointer-events: none;
+      }
+
+      .c5:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c5:focus-visible {
+        outline: none;
+      }
+
+      .c5:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
       }
 
       .c9 {
@@ -298,14 +330,14 @@ describe('Admin | containers | RoleEditPage', () => {
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
-      .c24 {
+      .c23 {
         font-weight: 500;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #32324d;
       }
 
-      .c23 {
+      .c22 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -319,7 +351,7 @@ describe('Admin | containers | RoleEditPage', () => {
         align-items: center;
       }
 
-      .c25 {
+      .c24 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -337,7 +369,7 @@ describe('Admin | containers | RoleEditPage', () => {
         align-items: center;
       }
 
-      .c27 {
+      .c26 {
         border: none;
         border-radius: 4px;
         padding-left: 16px;
@@ -347,41 +379,57 @@ describe('Admin | containers | RoleEditPage', () => {
         font-size: 0.875rem;
         display: block;
         width: 100%;
-        height: 2.5rem;
       }
 
-      .c27::-webkit-input-placeholder {
+      .c26::-webkit-input-placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c27::-moz-placeholder {
+      .c26::-moz-placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c27:-ms-input-placeholder {
+      .c26:-ms-input-placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c27::placeholder {
+      .c26::placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c27[aria-disabled='true'] {
+      .c26[aria-disabled='true'] {
         background: inherit;
         color: inherit;
       }
 
-      .c26 {
+      .c26:focus {
+        outline: none;
+        box-shadow: none;
+      }
+
+      .c25 {
         border: 1px solid #dcdce4;
         border-radius: 4px;
         background: #ffffff;
+        height: 2.5rem;
+        outline: none;
+        box-shadow: 0;
+        -webkit-transition-property: border-color,box-shadow,fill;
+        transition-property: border-color,box-shadow,fill;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
       }
 
-      .c22 {
+      .c25:focus-within {
+        border: 1px solid #4945ff;
+        box-shadow: #4945ff 0px 0px 0px 2px;
+      }
+
+      .c21 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -391,27 +439,23 @@ describe('Admin | containers | RoleEditPage', () => {
         flex-direction: column;
       }
 
-      .c22 > * {
+      .c21 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c22 > * + * {
+      .c21 > * + * {
         margin-top: 4px;
       }
 
-      .c21 textarea {
-        height: 5rem;
-      }
-
-      .c31 {
+      .c30 {
         font-weight: 500;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #32324d;
       }
 
-      .c30 {
+      .c29 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -425,19 +469,35 @@ describe('Admin | containers | RoleEditPage', () => {
         align-items: center;
       }
 
-      .c32 {
-        display: block;
-        width: 100%;
+      .c31 {
         border: 1px solid #dcdce4;
         border-radius: 4px;
         padding-left: 16px;
         padding-right: 16px;
         padding-top: 12px;
         padding-bottom: 12px;
+        background: #ffffff;
+        outline: none;
+        box-shadow: 0;
+        -webkit-transition-property: border-color,box-shadow,fill;
+        transition-property: border-color,box-shadow,fill;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+      }
+
+      .c31:focus-within {
+        border: 1px solid #4945ff;
+        box-shadow: #4945ff 0px 0px 0px 2px;
+      }
+
+      .c32 {
+        display: block;
+        width: 100%;
         font-weight: 400;
         font-size: 0.875rem;
+        border: none;
         color: #32324d;
-        background: #ffffff;
+        resize: none;
       }
 
       .c32::-webkit-input-placeholder {
@@ -460,7 +520,11 @@ describe('Admin | containers | RoleEditPage', () => {
         opacity: 1;
       }
 
-      .c29 {
+      .c32:focus-within {
+        outline: none;
+      }
+
+      .c28 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -470,22 +534,21 @@ describe('Admin | containers | RoleEditPage', () => {
         flex-direction: column;
       }
 
-      .c29 > * {
+      .c28 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c29 > * + * {
+      .c28 > * + * {
         margin-top: 4px;
       }
 
-      .c28 textarea {
+      .c27 textarea {
         height: 5rem;
         line-height: 1.25rem;
-        font-family: -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,Cantarell,'Open Sans', 'Helvetica Neue',sans-serif;
       }
 
-      .c28 textarea::-webkit-input-placeholder {
+      .c27 textarea::-webkit-input-placeholder {
         font-weight: 400;
         font-size: 0.875rem;
         line-height: 1.43;
@@ -493,7 +556,7 @@ describe('Admin | containers | RoleEditPage', () => {
         opacity: 1;
       }
 
-      .c28 textarea::-moz-placeholder {
+      .c27 textarea::-moz-placeholder {
         font-weight: 400;
         font-size: 0.875rem;
         line-height: 1.43;
@@ -501,7 +564,7 @@ describe('Admin | containers | RoleEditPage', () => {
         opacity: 1;
       }
 
-      .c28 textarea:-ms-input-placeholder {
+      .c27 textarea:-ms-input-placeholder {
         font-weight: 400;
         font-size: 0.875rem;
         line-height: 1.43;
@@ -509,7 +572,7 @@ describe('Admin | containers | RoleEditPage', () => {
         opacity: 1;
       }
 
-      .c28 textarea::placeholder {
+      .c27 textarea::placeholder {
         font-weight: 400;
         font-size: 0.875rem;
         line-height: 1.43;
@@ -819,30 +882,28 @@ describe('Admin | containers | RoleEditPage', () => {
                       <div
                         class=""
                       >
-                        <div
-                          class="c21"
-                        >
+                        <div>
                           <div>
                             <div
-                              class="c22"
+                              class="c21"
                             >
                               <div
-                                class="c23"
+                                class="c22"
                               >
                                 <label
-                                  class="c24"
+                                  class="c23"
                                   for="textinput-1"
                                 >
                                   Name
                                 </label>
                               </div>
                               <div
-                                class="c25 c26"
+                                class="c24 c25"
                               >
                                 <input
                                   aria-disabled="false"
                                   aria-invalid="false"
-                                  class="c27"
+                                  class="c26"
                                   id="textinput-1"
                                   name="name"
                                   value="Authenticated"
@@ -860,30 +921,34 @@ describe('Admin | containers | RoleEditPage', () => {
                         class=""
                       >
                         <div
-                          class="c28"
+                          class="c27"
                         >
                           <div>
                             <div
-                              class="c29"
+                              class="c28"
                             >
                               <div
-                                class="c30"
+                                class="c29"
                               >
                                 <label
-                                  class="c31"
+                                  class="c30"
                                   for="textarea-1"
                                 >
                                   Description
                                 </label>
                               </div>
-                              <textarea
-                                aria-invalid="false"
-                                class="c32"
-                                id="textarea-1"
-                                name="description"
+                              <div
+                                class="c31"
                               >
-                                Default role given to authenticated user.
-                              </textarea>
+                                <textarea
+                                  aria-invalid="false"
+                                  class="c32"
+                                  id="textarea-1"
+                                  name="description"
+                                >
+                                  Default role given to authenticated user.
+                                </textarea>
+                              </div>
                             </div>
                           </div>
                         </div>

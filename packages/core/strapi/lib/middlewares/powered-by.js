@@ -1,5 +1,7 @@
 'use strict';
 
+const { defaultsDeep } = require('lodash/fp');
+
 const defaults = {
   poweredBy: 'Strapi <strapi.io>',
 };
@@ -7,8 +9,8 @@ const defaults = {
 /**
  * @type {import('./').MiddlewareFactory}
  */
-module.exports = options => {
-  const { poweredBy } = Object.assign({}, defaults, options);
+module.exports = config => {
+  const { poweredBy } = defaultsDeep(defaults, config);
 
   return async (ctx, next) => {
     await next();

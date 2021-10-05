@@ -221,6 +221,8 @@ describe('Application page', () => {
         text-transform: uppercase;
         -webkit-text-decoration: none;
         text-decoration: none;
+        position: relative;
+        outline: none;
       }
 
       .c20 svg path {
@@ -229,6 +231,36 @@ describe('Application page', () => {
 
       .c20 svg {
         font-size: 0.625rem;
+      }
+
+      .c20:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c20:focus-visible {
+        outline: none;
+      }
+
+      .c20:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
       }
 
       .c25 {

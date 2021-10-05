@@ -9,7 +9,7 @@ module.exports = [
       policies: [
         {
           name: 'admin::hasPermissions',
-          options: {
+          config: {
             actions: ['plugin::users-permissions.email-templates.read'],
           },
         },
@@ -24,7 +24,7 @@ module.exports = [
       policies: [
         {
           name: 'admin::hasPermissions',
-          options: {
+          config: {
             actions: ['plugin::users-permissions.email-templates.update'],
           },
         },
@@ -39,7 +39,7 @@ module.exports = [
       policies: [
         {
           name: 'admin::hasPermissions',
-          options: {
+          config: {
             actions: ['plugin::users-permissions.advanced-settings.read'],
           },
         },
@@ -54,7 +54,7 @@ module.exports = [
       policies: [
         {
           name: 'admin::hasPermissions',
-          options: {
+          config: {
             actions: ['plugin::users-permissions.advanced-settings.update'],
           },
         },
@@ -69,7 +69,7 @@ module.exports = [
       policies: [
         {
           name: 'admin::hasPermissions',
-          options: {
+          config: {
             actions: ['plugin::users-permissions.providers.read'],
           },
         },
@@ -85,7 +85,7 @@ module.exports = [
       policies: [
         {
           name: 'admin::hasPermissions',
-          options: {
+          config: {
             actions: ['plugin::users-permissions.providers.update'],
           },
         },

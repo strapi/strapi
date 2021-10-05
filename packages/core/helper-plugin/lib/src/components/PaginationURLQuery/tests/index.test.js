@@ -87,6 +87,38 @@ describe('<PaginationURLQuery />', () => {
         display: -webkit-flex;
         display: -ms-flexbox;
         display: flex;
+        position: relative;
+        outline: none;
+      }
+
+      .c2:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c2:focus-visible {
+        outline: none;
+      }
+
+      .c2:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
       }
 
       .c5 {
@@ -99,6 +131,38 @@ describe('<PaginationURLQuery />', () => {
         display: -webkit-flex;
         display: -ms-flexbox;
         display: flex;
+        position: relative;
+        outline: none;
+      }
+
+      .c5:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c5:focus-visible {
+        outline: none;
+      }
+
+      .c5:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
       }
 
       .c6 {
@@ -126,7 +190,7 @@ describe('<PaginationURLQuery />', () => {
 
       <nav
         aria-label="pagination"
-        class="sc-iuAqRD"
+        class="sc-dcwqsv"
       >
         <ul
           class="c0 c1"

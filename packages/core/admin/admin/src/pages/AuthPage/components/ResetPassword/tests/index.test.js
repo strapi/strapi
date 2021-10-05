@@ -78,6 +78,8 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         border-radius: 4px;
         background: #ffffff;
         border: 1px solid #dcdce4;
+        position: relative;
+        outline: none;
       }
 
       .c27 svg {
@@ -92,6 +94,36 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
 
       .c27[aria-disabled='true'] {
         pointer-events: none;
+      }
+
+      .c27:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c27:focus-visible {
+        outline: none;
+      }
+
+      .c27:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
       }
 
       .c28 {
@@ -258,11 +290,18 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         color: #32324d;
       }
 
-      .c19 {
+      .c18 {
         font-weight: 500;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #32324d;
+      }
+
+      .c19 {
+        font-weight: 400;
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #d02b20;
       }
 
       .c26 {
@@ -277,7 +316,7 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         padding-left: 8px;
       }
 
-      .c18 {
+      .c17 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -319,7 +358,6 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         font-size: 0.875rem;
         display: block;
         width: 100%;
-        height: 2.5rem;
       }
 
       .c22::-webkit-input-placeholder {
@@ -347,13 +385,30 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         color: inherit;
       }
 
+      .c22:focus {
+        outline: none;
+        box-shadow: none;
+      }
+
       .c21 {
         border: 1px solid #dcdce4;
         border-radius: 4px;
         background: #ffffff;
+        height: 2.5rem;
+        outline: none;
+        box-shadow: 0;
+        -webkit-transition-property: border-color,box-shadow,fill;
+        transition-property: border-color,box-shadow,fill;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
       }
 
-      .c17 {
+      .c21:focus-within {
+        border: 1px solid #4945ff;
+        box-shadow: #4945ff 0px 0px 0px 2px;
+      }
+
+      .c16 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -363,17 +418,13 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         flex-direction: column;
       }
 
-      .c17 > * {
+      .c16 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c17 > * + * {
+      .c16 > * + * {
         margin-top: 4px;
-      }
-
-      .c16 textarea {
-        height: 5rem;
       }
 
       .c7 {
@@ -411,6 +462,8 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         text-transform: uppercase;
         -webkit-text-decoration: none;
         text-decoration: none;
+        position: relative;
+        outline: none;
       }
 
       .c33 svg path {
@@ -419,6 +472,36 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
 
       .c33 svg {
         font-size: 0.625rem;
+      }
+
+      .c33:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c33:focus-visible {
+        outline: none;
+      }
+
+      .c33:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
       }
 
       .c4 {
@@ -562,21 +645,25 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
                 <div
                   class="c15"
                 >
-                  <div
-                    class="c16"
-                  >
+                  <div>
                     <div>
                       <div
-                        class="c17"
+                        class="c16"
                       >
                         <div
-                          class="c18"
+                          class="c17"
                         >
                           <label
-                            class="c19"
+                            class="c18"
                             for="textinput-1"
+                            required=""
                           >
                             Password
+                            <span
+                              class="c19"
+                            >
+                              *
+                            </span>
                           </label>
                         </div>
                         <div
@@ -589,7 +676,6 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
                             class="c22"
                             id="textinput-1"
                             name="password"
-                            required=""
                             type="password"
                             value=""
                           />
@@ -625,21 +711,25 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
                       </div>
                     </div>
                   </div>
-                  <div
-                    class="c16"
-                  >
+                  <div>
                     <div>
                       <div
-                        class="c17"
+                        class="c16"
                       >
                         <div
-                          class="c18"
+                          class="c17"
                         >
                           <label
-                            class="c19"
+                            class="c18"
                             for="textinput-2"
+                            required=""
                           >
                             Confirmation Password
+                            <span
+                              class="c19"
+                            >
+                              *
+                            </span>
                           </label>
                         </div>
                         <div
@@ -651,7 +741,6 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
                             class="c22"
                             id="textinput-2"
                             name="confirmPassword"
-                            required=""
                             type="password"
                             value=""
                           />

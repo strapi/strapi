@@ -22,7 +22,7 @@ module.exports = [
         'admin::isAuthenticatedAdmin',
         {
           name: 'admin::hasPermissions',
-          options: {
+          config: {
             actions: ['admin::roles.create'],
           },
         },
@@ -38,7 +38,7 @@ module.exports = [
         'admin::isAuthenticatedAdmin',
         {
           name: 'admin::hasPermissions',
-          options: {
+          config: {
             actions: ['admin::roles.delete'],
           },
         },
@@ -54,7 +54,7 @@ module.exports = [
         'admin::isAuthenticatedAdmin',
         {
           name: 'admin::hasPermissions',
-          options: {
+          config: {
             actions: ['admin::roles.delete'],
           },
         },

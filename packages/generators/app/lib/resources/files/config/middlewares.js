@@ -4,7 +4,8 @@ module.exports = [
   'strapi::cors',
   'strapi::poweredBy',
   'strapi::logger',
-  'strapi::request',
+  'strapi::query',
+  'strapi::body',
   'strapi::favicon',
   'strapi::public',
 ];

@@ -181,6 +181,8 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         border-radius: 4px;
         background: #ffffff;
         border: 1px solid #dcdce4;
+        position: relative;
+        outline: none;
       }
 
       .c5 svg {
@@ -195,6 +197,36 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
 
       .c5[aria-disabled='true'] {
         pointer-events: none;
+      }
+
+      .c5:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c5:focus-visible {
+        outline: none;
+      }
+
+      .c5:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
       }
 
       .c9 {
@@ -348,6 +380,8 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         border-radius: 4px;
         background: #ffffff;
         border: 1px solid #dcdce4;
+        position: relative;
+        outline: none;
       }
 
       .c20 svg {
@@ -362,6 +396,36 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
 
       .c20[aria-disabled='true'] {
         pointer-events: none;
+      }
+
+      .c20:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c20:focus-visible {
+        outline: none;
+      }
+
+      .c20:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
       }
 
       .c21 {
@@ -501,6 +565,38 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         display: -webkit-flex;
         display: -ms-flexbox;
         display: flex;
+        position: relative;
+        outline: none;
+      }
+
+      .c65:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c65:focus-visible {
+        outline: none;
+      }
+
+      .c65:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
       }
 
       .c66 {
@@ -580,7 +676,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         align-items: center;
       }
 
-      .c53 {
+      .c54 {
         position: absolute;
         left: 0;
         right: 0;
@@ -591,7 +687,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         border: none;
       }
 
-      .c53:focus {
+      .c54:focus {
         outline: none;
       }
 
@@ -611,7 +707,21 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         padding-left: 12px;
       }
 
-      .c54 {
+      .c52 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c55 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -623,20 +733,6 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         -webkit-justify-content: space-between;
         -ms-flex-pack: justify;
         justify-content: space-between;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c56 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -662,17 +758,25 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         margin-top: 0px;
       }
 
-      .c52 {
+      .c53 {
         position: relative;
         border: 1px solid #dcdce4;
         padding-right: 12px;
         border-radius: 4px;
         background: #ffffff;
         overflow: hidden;
+        min-height: 2rem;
+        outline: none;
+        box-shadow: 0;
+        -webkit-transition-property: border-color,box-shadow,fill;
+        transition-property: border-color,box-shadow,fill;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
       }
 
-      .c52:focus-within {
+      .c53:focus-within {
         border: 1px solid #4945ff;
+        box-shadow: #4945ff 0px 0px 0px 2px;
       }
 
       .c60 {
@@ -704,8 +808,8 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         width: 0.375rem;
       }
 
-      .c55 {
-        min-height: 2.125rem;
+      .c56 {
+        width: 100%;
       }
 
       .c25 {
@@ -1385,7 +1489,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                     class="c51"
                   >
                     <div
-                      class="c52"
+                      class="c52 c53"
                     >
                       <button
                         aria-disabled="false"
@@ -1393,15 +1497,15 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                         aria-haspopup="listbox"
                         aria-label="Entries per page"
                         aria-labelledby="select-1-label select-1-content"
-                        class="c53"
+                        class="c54"
                         id="select-1"
                         type="button"
                       />
                       <div
-                        class="c54 c55"
+                        class="c55 c56"
                       >
                         <div
-                          class="c56"
+                          class="c52"
                         >
                           <div
                             class="c57"
@@ -1415,7 +1519,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                           </div>
                         </div>
                         <div
-                          class="c56"
+                          class="c52"
                         >
                           <button
                             aria-hidden="true"
@@ -1456,7 +1560,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
               </div>
               <nav
                 aria-label="pagination"
-                class="sc-liccgK"
+                class="sc-hJxDiT"
               >
                 <ul
                   class="c63 c64"

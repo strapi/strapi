@@ -27,19 +27,19 @@ describe('<NotAllowedInput />', () => {
     );
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c3 {
+      .c2 {
         font-weight: 500;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #32324d;
       }
 
-      .c6 {
+      .c5 {
         padding-right: 8px;
         padding-left: 12px;
       }
 
-      .c2 {
+      .c1 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -53,7 +53,7 @@ describe('<NotAllowedInput />', () => {
         align-items: center;
       }
 
-      .c4 {
+      .c3 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -71,7 +71,7 @@ describe('<NotAllowedInput />', () => {
         align-items: center;
       }
 
-      .c8 {
+      .c7 {
         border: none;
         border-radius: 4px;
         padding-left: 0;
@@ -81,43 +81,59 @@ describe('<NotAllowedInput />', () => {
         font-size: 0.875rem;
         display: block;
         width: 100%;
-        height: 2.5rem;
       }
 
-      .c8::-webkit-input-placeholder {
+      .c7::-webkit-input-placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c8::-moz-placeholder {
+      .c7::-moz-placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c8:-ms-input-placeholder {
+      .c7:-ms-input-placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c8::placeholder {
+      .c7::placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c8[aria-disabled='true'] {
+      .c7[aria-disabled='true'] {
         background: inherit;
         color: inherit;
       }
 
-      .c5 {
+      .c7:focus {
+        outline: none;
+        box-shadow: none;
+      }
+
+      .c4 {
         border: 1px solid #dcdce4;
         border-radius: 4px;
         background: #ffffff;
+        height: 2.5rem;
+        outline: none;
+        box-shadow: 0;
+        -webkit-transition-property: border-color,box-shadow,fill;
+        transition-property: border-color,box-shadow,fill;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
         color: #666687;
         background: #eaeaef;
       }
 
-      .c1 {
+      .c4:focus-within {
+        border: 1px solid #4945ff;
+        box-shadow: #4945ff 0px 0px 0px 2px;
+      }
+
+      .c0 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -127,49 +143,43 @@ describe('<NotAllowedInput />', () => {
         flex-direction: column;
       }
 
-      .c1 > * {
+      .c0 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c1 > * + * {
+      .c0 > * + * {
         margin-top: 4px;
       }
 
-      .c0 textarea {
-        height: 5rem;
-      }
-
-      .c7 > path {
+      .c6 > path {
         fill: #666687;
       }
 
-      <div
-        class="c0"
-      >
+      <div>
         <div>
           <div
-            class="c1"
+            class="c0"
           >
             <div
-              class="c2"
+              class="c1"
             >
               <label
-                class="c3"
+                class="c2"
                 for="test"
               >
                 test
               </label>
             </div>
             <div
-              class="c4 c5"
+              class="c3 c4"
               disabled=""
             >
               <div
-                class="c6"
+                class="c5"
               >
                 <svg
-                  class="c7"
+                  class="c6"
                   fill="none"
                   height="1em"
                   viewBox="0 0 24 24"
@@ -185,7 +195,7 @@ describe('<NotAllowedInput />', () => {
               <input
                 aria-disabled="true"
                 aria-invalid="false"
-                class="c8"
+                class="c7"
                 id="test"
                 name="test"
                 placeholder="No permissions to see this field"

@@ -34,14 +34,14 @@ describe('<Input />', () => {
     } = render(makeApp('test', 'text', 'test'));
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c3 {
+      .c2 {
         font-weight: 500;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #32324d;
       }
 
-      .c2 {
+      .c1 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -55,7 +55,7 @@ describe('<Input />', () => {
         align-items: center;
       }
 
-      .c4 {
+      .c3 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -73,7 +73,7 @@ describe('<Input />', () => {
         align-items: center;
       }
 
-      .c6 {
+      .c5 {
         border: none;
         border-radius: 4px;
         padding-left: 16px;
@@ -83,41 +83,57 @@ describe('<Input />', () => {
         font-size: 0.875rem;
         display: block;
         width: 100%;
-        height: 2.5rem;
       }
 
-      .c6::-webkit-input-placeholder {
+      .c5::-webkit-input-placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c6::-moz-placeholder {
+      .c5::-moz-placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c6:-ms-input-placeholder {
+      .c5:-ms-input-placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c6::placeholder {
+      .c5::placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c6[aria-disabled='true'] {
+      .c5[aria-disabled='true'] {
         background: inherit;
         color: inherit;
       }
 
-      .c5 {
+      .c5:focus {
+        outline: none;
+        box-shadow: none;
+      }
+
+      .c4 {
         border: 1px solid #dcdce4;
         border-radius: 4px;
         background: #ffffff;
+        height: 2.5rem;
+        outline: none;
+        box-shadow: 0;
+        -webkit-transition-property: border-color,box-shadow,fill;
+        transition-property: border-color,box-shadow,fill;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
       }
 
-      .c1 {
+      .c4:focus-within {
+        border: 1px solid #4945ff;
+        box-shadow: #4945ff 0px 0px 0px 2px;
+      }
+
+      .c0 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -127,44 +143,38 @@ describe('<Input />', () => {
         flex-direction: column;
       }
 
-      .c1 > * {
+      .c0 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c1 > * + * {
+      .c0 > * + * {
         margin-top: 4px;
       }
 
-      .c0 textarea {
-        height: 5rem;
-      }
-
-      <div
-        class="c0"
-      >
+      <div>
         <div>
           <div
-            class="c1"
+            class="c0"
           >
             <div
-              class="c2"
+              class="c1"
             >
               <label
-                class="c3"
+                class="c2"
                 for="textinput-1"
               >
                 Enabled
               </label>
             </div>
             <div
-              class="c4 c5"
+              class="c3 c4"
             >
               <input
                 aria-disabled="false"
                 aria-invalid="false"
                 aria-label="test"
-                class="c6"
+                class="c5"
                 id="textinput-1"
                 name="test"
                 placeholder=""

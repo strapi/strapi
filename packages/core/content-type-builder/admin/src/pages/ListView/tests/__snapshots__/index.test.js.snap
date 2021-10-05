@@ -71,6 +71,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   border-radius: 4px;
   background: #ffffff;
   border: 1px solid #dcdce4;
+  position: relative;
+  outline: none;
 }
 
 .c12 svg {
@@ -85,6 +87,36 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
 
 .c12[aria-disabled='true'] {
   pointer-events: none;
+}
+
+.c12:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c12:focus-visible {
+  outline: none;
+}
+
+.c12:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
 }
 
 .c16 {
@@ -320,6 +352,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   border-radius: 4px;
   background: #ffffff;
   border: 1px solid #dcdce4;
+  position: relative;
+  outline: none;
 }
 
 .c41 svg {
@@ -334,6 +368,36 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
 
 .c41[aria-disabled='true'] {
   pointer-events: none;
+}
+
+.c41:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c41:focus-visible {
+  outline: none;
+}
+
+.c41:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
 }
 
 .c42 {
@@ -675,6 +739,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   text-transform: uppercase;
   -webkit-text-decoration: none;
   text-decoration: none;
+  position: relative;
+  outline: none;
 }
 
 .c2 svg path {
@@ -683,6 +749,36 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
 
 .c2 svg {
   font-size: 0.625rem;
+}
+
+.c2:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c2:focus-visible {
+  outline: none;
+}
+
+.c2:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
 }
 
 .c4 {
