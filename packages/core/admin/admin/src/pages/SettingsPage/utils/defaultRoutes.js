@@ -90,6 +90,17 @@ const defaultRoutes = [
     to: '/settings/webhooks',
     exact: true,
   },
+  {
+    Component: async () => {
+      const component = await import(
+        /* webpackChunkName: "webhook-list-page" */ '../pages/ApiTokens/ListView'
+      );
+
+      return component;
+    },
+    to: '/settings/api-tokens',
+    exact: true,
+  },
 ];
 
 export default defaultRoutes;
