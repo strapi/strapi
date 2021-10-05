@@ -13,6 +13,11 @@ module.exports = {
       handler: 'authentication.providerLogin',
     },
     {
+      method: 'POST',
+      path: '/connect/:provider',
+      handler: 'authentication.providerLogin',
+    },
+    {
       method: 'GET',
       path: '/providers/options',
       handler: 'authentication.getProviderLoginOptions',
