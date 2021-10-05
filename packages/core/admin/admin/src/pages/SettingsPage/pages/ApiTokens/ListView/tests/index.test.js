@@ -657,7 +657,7 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
 
     const { getByText } = render(app);
 
-    waitFor(() => {
+    await waitFor(() => {
       expect(getByText('My super token')).toBeInTheDocument();
       expect(getByText('This describe my super token')).toBeInTheDocument();
     });
