@@ -1,5 +1,5 @@
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { ThemeProvider, lightTheme } from '@strapi/parts';
@@ -7,6 +7,7 @@ import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 
 import PluginPage from '../index';
+import server from './server';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -35,6 +36,16 @@ const makeApp = history => (
 );
 
 describe('Plugin | Documentation | PluginPage', () => {
+  beforeAll(() => server.listen());
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  afterEach(() => server.resetHandlers());
+
+  afterAll(() => server.close());
+
   it('renders and matches the snapshot', () => {
     const history = createMemoryHistory();
     const App = makeApp(history);
@@ -403,5 +414,23 @@ describe('Plugin | Documentation | PluginPage', () => {
         </div>
       </div>
     `);
+  });
+
+  it('should show a loader when fetching data', () => {
+    const history = createMemoryHistory();
+    const App = makeApp(history);
+    render(App);
+
+    expect(screen.getByTestId('loader')).toBeInTheDocument();
+  });
+
+  it('should show a list of versions', async () => {
+    const history = createMemoryHistory();
+    const App = makeApp(history);
+    render(App);
+
+    await waitFor(() => {
+      expect(screen.getByText('1.0.0')).toBeInTheDocument();
+    });
   });
 });
