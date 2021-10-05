@@ -1,6 +1,5 @@
 'use strict';
 
-const { isFunction } = require('lodash/fp');
 const { yup } = require('@strapi/utils');
 
 const { resolveMiddlewares } = require('./middleware');
@@ -69,11 +68,9 @@ const registerApplicationMiddlewares = async strapi => {
 
   // NOTE: exclude middlewares that return nothing.
   // this is used for middlewares that only extend the app only need to be added in certain conditions
-  middlewares
-    .filter(middleware => isFunction(middleware.handler))
-    .forEach(middleware => {
-      strapi.server.use(middleware.handler);
-    });
+  for (const middleware of middlewares) {
+    strapi.server.use(middleware.handler);
+  }
 };
 
 /**
