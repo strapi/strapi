@@ -1,0 +1,28 @@
+{
+  "name": "typescript-plugin",
+  "private": true,
+  "version": "0.1.0",
+  "description": "A Strapi plugin written in Typescript",
+  "license": "MIT",
+  "strapi": {
+    "displayName": "Typescript Plugin",
+    "name": "typescript-plugin",
+    "icon": "plug",
+    "description": "A Strapi plugin written in Typescript",
+    "kind": "plugin"
+  },
+  "scripts": {
+    "develop": "tsc -p tsconfig.json -w",
+    "build": "tsc -p tsconfig.json"
+  },
+  "engines": {
+    "node": ">=12.x.x <=16.x.x",
+    "npm": ">=6.0.0"
+  },
+  "devDependencies": {
+    "typescript": "4.4.3",
+    "nodemon": "2.0.13",
+    "ts-node": "10.2.1",
+    "@strapi/strapi": "4.0.0-next.0"
+  }
+}
