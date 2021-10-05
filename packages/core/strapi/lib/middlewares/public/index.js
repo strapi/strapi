@@ -18,8 +18,8 @@ const defaults = {
 /**
  * @type {import('../').MiddlewareFactory}
  */
-module.exports = (options, { strapi }) => {
-  const { defaultIndex, maxAge, path: publicPath } = defaultsDeep(defaults, options);
+module.exports = (config, { strapi }) => {
+  const { defaultIndex, maxAge, path: publicPath } = defaultsDeep(defaults, config);
 
   const staticDir = path.resolve(strapi.dirs.root, publicPath || strapi.config.paths.static);
 
@@ -122,5 +122,5 @@ module.exports = (options, { strapi }) => {
     },
   ]);
 
-  return async (ctx, next) => next();
+  return null;
 };

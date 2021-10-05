@@ -15,10 +15,11 @@ const createPoliciesMiddleware = (resolverConfig, { strapi }) => {
 
     // Run policies & throw an error if one of them fails
     for (const policy of policies) {
-      const result = await policy({ context, strapi });
+      const result = await policy(context, { strapi });
 
-      if (!result) {
-        throw new Error('Policies failed');
+      if (![true, undefined].includes(result)) {
+        // TODO: make error clearer
+        throw new Error('Policies failed.');
       }
     }
 

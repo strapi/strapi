@@ -8,7 +8,7 @@ module.exports = [
     config: {
       policies: [
         'plugin::documentation.index',
-        { name: 'admin::hasPermissions', options: { actions: ['plugin::documentation.read'] } },
+        { name: 'admin::hasPermissions', config: { actions: ['plugin::documentation.read'] } },
       ],
     },
   },
@@ -19,7 +19,7 @@ module.exports = [
     config: {
       policies: [
         'plugin::documentation.index',
-        { name: 'admin::hasPermissions', options: { actions: ['plugin::documentation.read'] } },
+        { name: 'admin::hasPermissions', config: { actions: ['plugin::documentation.read'] } },
       ],
     },
   },
@@ -29,7 +29,7 @@ module.exports = [
     handler: 'documentation.loginView',
     config: {
       policies: [
-        { name: 'admin::hasPermissions', options: { actions: ['plugin::documentation.read'] } },
+        { name: 'admin::hasPermissions', config: { actions: ['plugin::documentation.read'] } },
       ],
     },
   },
@@ -39,7 +39,7 @@ module.exports = [
     handler: 'documentation.login',
     config: {
       policies: [
-        { name: 'admin::hasPermissions', options: { actions: ['plugin::documentation.read'] } },
+        { name: 'admin::hasPermissions', config: { actions: ['plugin::documentation.read'] } },
       ],
     },
   },
@@ -49,7 +49,7 @@ module.exports = [
     handler: 'documentation.getInfos',
     config: {
       policies: [
-        { name: 'admin::hasPermissions', options: { actions: ['plugin::documentation.read'] } },
+        { name: 'admin::hasPermissions', config: { actions: ['plugin::documentation.read'] } },
       ],
     },
   },
@@ -61,7 +61,7 @@ module.exports = [
       policies: [
         {
           name: 'admin::hasPermissions',
-          options: { actions: ['plugin::documentation.settings.regenerate'] },
+          config: { actions: ['plugin::documentation.settings.regenerate'] },
         },
       ],
     },
@@ -74,7 +74,7 @@ module.exports = [
       policies: [
         {
           name: 'admin::hasPermissions',
-          options: { actions: ['plugin::documentation.settings.update'] },
+          config: { actions: ['plugin::documentation.settings.update'] },
         },
       ],
     },

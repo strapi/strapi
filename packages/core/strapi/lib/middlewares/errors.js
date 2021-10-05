@@ -1,6 +1,6 @@
 'use strict';
 
-const _ = require('lodash');
+const { isNil } = require('lodash/fp');
 const Boom = require('@hapi/boom');
 const delegate = require('delegates');
 
@@ -46,7 +46,7 @@ const formatBoomPayload = boomError => {
 
   const { output } = boomError;
 
-  if (output.statusCode < 500 && !_.isNil(boomError.data)) {
+  if (output.statusCode < 500 && !isNil(boomError.data)) {
     output.payload.data = boomError.data;
   }
 
@@ -87,7 +87,7 @@ const createResponseUtils = strapi => {
   };
 
   strapi.server.app.response.deleted = function(data) {
-    if (_.isNil(data)) {
+    if (isNil(data)) {
       this.status = 204;
     } else {
       this.status = 200;
@@ -104,7 +104,7 @@ const createResponseUtils = strapi => {
 /**
  * @type {import('./').MiddlewareFactory}
  */
-module.exports = (options, { strapi }) => {
+module.exports = (_, { strapi }) => {
   createResponseUtils(strapi);
   strapi.errors = Boom;
 
@@ -113,7 +113,7 @@ module.exports = (options, { strapi }) => {
       // App logic.
       await next();
 
-      if (_.isNil(ctx.body) && (_.isNil(ctx.status) || ctx.status === 404)) {
+      if (isNil(ctx.body) && (isNil(ctx.status) || ctx.status === 404)) {
         ctx.notFound();
       }
     } catch (error) {

@@ -8,7 +8,7 @@ module.exports = [
     config: {
       policies: [
         'admin::isAuthenticatedAdmin',
-        { name: 'admin::hasPermissions', options: { actions: ['admin::api-tokens.create'] } },
+        { name: 'admin::hasPermissions', config: { actions: ['admin::api-tokens.create'] } },
       ],
     },
   },
@@ -19,7 +19,7 @@ module.exports = [
     config: {
       policies: [
         'admin::isAuthenticatedAdmin',
-        { name: 'admin::hasPermissions', options: { actions: ['admin::api-tokens.read'] } },
+        { name: 'admin::hasPermissions', config: { actions: ['admin::api-tokens.read'] } },
       ],
     },
   },
@@ -30,7 +30,7 @@ module.exports = [
     config: {
       policies: [
         'admin::isAuthenticatedAdmin',
-        { name: 'admin::hasPermissions', options: { actions: ['admin::api-tokens.delete'] } },
+        { name: 'admin::hasPermissions', config: { actions: ['admin::api-tokens.delete'] } },
       ],
     },
   },
@@ -41,7 +41,7 @@ module.exports = [
     config: {
       policies: [
         'admin::isAuthenticatedAdmin',
-        { name: 'admin::hasPermissions', options: { actions: ['admin::api-tokens.read'] } },
+        { name: 'admin::hasPermissions', config: { actions: ['admin::api-tokens.read'] } },
       ],
     },
   },
@@ -52,7 +52,7 @@ module.exports = [
     config: {
       policies: [
         'admin::isAuthenticatedAdmin',
-        { name: 'admin::hasPermissions', options: { actions: ['admin::api-tokens.update'] } },
+        { name: 'admin::hasPermissions', config: { actions: ['admin::api-tokens.update'] } },
       ],
     },
   },

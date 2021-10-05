@@ -23,14 +23,14 @@ const inputModifiers = [
 ];
 
 module.exports = createPolicyFactory(
-  options => {
-    const { actions } = options;
+  config => {
+    const { actions } = config;
 
     const permissions = actions.map(action =>
       inputModifiers.find(modifier => modifier.check(action)).transform(action)
     );
 
-    return ({ ctx, strapi }) => {
+    return (ctx, { strapi }) => {
       const { userAbility: ability, isAuthenticated } = ctx.state;
 
       if (!isAuthenticated || !ability) {
