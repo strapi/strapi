@@ -8,7 +8,7 @@
 import React from 'react';
 import { useIntl } from 'react-intl';
 import { CheckPermissions, LoadingIndicatorPage } from '@strapi/helper-plugin';
-import { Layout, HeaderLayout, Main, Button } from '@strapi/parts';
+import { Layout, HeaderLayout, Main, Button, ContentLayout } from '@strapi/parts';
 import ShowIcon from '@strapi/icons/Show';
 
 import permissions from '../../permissions';
@@ -20,11 +20,7 @@ const PluginPage = () => {
   const { formatMessage } = useIntl();
   const { data, isLoading } = useHomePage();
 
-  if (isLoading) {
-    return <LoadingIndicatorPage />;
-  }
-
-  const slash = data.prefix.startsWith('/') ? '' : '/';
+  const slash = data?.prefix.startsWith('/') ? '' : '/';
 
   return (
     <Layout>
@@ -53,6 +49,9 @@ const PluginPage = () => {
             </CheckPermissions>
           }
         />
+        <ContentLayout>
+          {isLoading && <LoadingIndicatorPage>Plugin is loading</LoadingIndicatorPage>}
+        </ContentLayout>
       </Main>
     </Layout>
   );
