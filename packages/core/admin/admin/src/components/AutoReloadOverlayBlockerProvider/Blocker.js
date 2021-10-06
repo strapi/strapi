@@ -58,13 +58,13 @@ const Blocker = ({ displayedIcon, description, title, isOpen }) => {
           <Row justifyContent="center">
             {displayedIcon === 'reload' && (
               <IconBox padding={6} background="primary100" borderColor="primary200">
-                <LoaderReload width={pxToRem(37)} height={pxToRem(37)} />
+                <LoaderReload width={pxToRem(36)} height={pxToRem(36)} />
               </IconBox>
             )}
 
             {displayedIcon === 'time' && (
               <IconBox padding={6} background="primary100" borderColor="primary200">
-                <Time width={pxToRem(39)} height={pxToRem(39)} />
+                <Time width={pxToRem(40)} height={pxToRem(40)} />
               </IconBox>
             )}
           </Row>
@@ -73,10 +73,7 @@ const Blocker = ({ displayedIcon, description, title, isOpen }) => {
               <Link
                 href="https://strapi.io/documentation"
                 target="_blank"
-                onClick={e => {
-                  e.preventDefault();
-                  window.open('https://strapi.io/documentation', '_blank');
-                }}
+                rel="noopener noreferrer nofollow"
               >
                 {formatMessage({
                   id: 'app.components.BlockLink.documentation',
