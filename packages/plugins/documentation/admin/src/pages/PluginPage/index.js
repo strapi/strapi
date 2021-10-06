@@ -22,7 +22,9 @@ import { Text, TableLabel } from '@strapi/parts/Text';
 import { Row } from '@strapi/parts/Row';
 import { Table, Tr, Thead, Th, Tbody, Td } from '@strapi/parts/Table';
 
-import { DeleteIcon, Show, Reload } from '@strapi/icons';
+import DeleteIcon from '@strapi/icons/DeleteIcon';
+import Show from '@strapi/icons/Show';
+import Reload from '@strapi/icons/Reload';
 
 import permissions from '../../permissions';
 import { getTrad } from '../../utils';
