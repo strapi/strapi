@@ -52,7 +52,7 @@ const ApplicationInfosPage = () => {
 
               <Grid paddingTop={1}>
                 <GridItem col={6} s={12}>
-                  <TableLabel>
+                  <TableLabel textColor="neutral600">
                     {formatMessage({
                       id: 'Settings.application.details',
                       defaultMessage: 'details',
@@ -61,7 +61,7 @@ const ApplicationInfosPage = () => {
                   <Text as="p">{appInfos.latestStrapiReleaseTag}</Text>
                 </GridItem>
                 <GridItem col={6} s={12}>
-                  <TableLabel>
+                  <TableLabel textColor="neutral600">
                     {formatMessage({
                       id: 'Settings.application.edition-title',
                       defaultMessage: 'current plan',
@@ -103,7 +103,7 @@ const ApplicationInfosPage = () => {
               </Grid>
 
               <Box paddingTop={1}>
-                <TableLabel>
+                <TableLabel textColor="neutral600">
                   {formatMessage({
                     id: 'Settings.application.node-version',
                     defaultMessage: 'node version',
