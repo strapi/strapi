@@ -12,8 +12,8 @@ import { TextButton } from '@strapi/parts/TextButton';
 import { Field, FieldArray, useFormikContext } from 'formik';
 import { useIntl } from 'react-intl';
 
-const RemoveButtonContainer = styled(Box)`
-  transform: translateY(50%);
+const RemoveButtonContainer = styled(Row)`
+  height: ${({ theme }) => theme.sizes.input.M};
 `;
 
 const HeadersInput = () => {
@@ -56,7 +56,7 @@ const HeadersInput = () => {
                     />
                   </GridItem>
                   <GridItem col={6}>
-                    <Row>
+                    <Row alignItems="flex-end">
                       <Box style={{ flex: 1 }}>
                         <Field
                           as={TextInput}
