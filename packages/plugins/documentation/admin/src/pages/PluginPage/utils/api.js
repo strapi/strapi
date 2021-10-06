@@ -5,7 +5,7 @@ const deleteDoc = ({ prefix, version }) => {
   return request(`${prefix}/deleteDoc/${version}`, { method: 'DELETE' });
 };
 
-const fetchData = async toggleNotification => {
+const fetchDocumentationVersions = async toggleNotification => {
   try {
     const data = await request(`/${pluginId}/getInfos`, { method: 'GET' });
 
@@ -25,6 +25,7 @@ const regenerateDoc = ({ prefix, version }) => {
   return request(`${prefix}/regenerateDoc`, { method: 'POST', body: { version } });
 };
 
-const submit = ({ prefix, body }) => request(`${prefix}/updateSettings`, { method: 'PUT', body });
+const updateSettings = ({ prefix, body }) =>
+  request(`${prefix}/updateSettings`, { method: 'PUT', body });
 
-export { deleteDoc, fetchData, regenerateDoc, submit };
+export { deleteDoc, fetchDocumentationVersions, regenerateDoc, updateSettings };
