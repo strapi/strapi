@@ -26,6 +26,10 @@ const App = () => {
           <Layout sideNav={<ContentTypeBuilderNav />}>
             <Suspense fallback={<LoadingIndicatorPage />}>
               <Switch>
+                <Route
+                  path={`/plugins/${pluginId}/content-types/create-content-type`}
+                  component={ListView}
+                />
                 <Route path={`/plugins/${pluginId}/content-types/:uid`} component={ListView} />
                 <Route
                   path={`/plugins/${pluginId}/component-categories/:categoryUid`}

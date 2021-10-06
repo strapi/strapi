@@ -1,7 +1,9 @@
 import styled from 'styled-components';
+import { Box } from '@strapi/parts/Box';
+import { Stack } from '@strapi/parts/Stack';
+import { pxToRem } from '@strapi/helper-plugin';
 
-// TODO refactor with DS
-const Overlay = styled.div`
+const Overlay = styled(Box)`
   position: fixed;
   top: 0;
   right: 0;
@@ -15,17 +17,27 @@ const Overlay = styled.div`
     right: 0;
     bottom: 0;
     left: 0;
-    background: ${({ theme }) => theme.colors.neutral200};
-    opacity: 0.8;
-  }
-
-  > div {
-    position: fixed;
-    top: 11.5rem;
-    left: 50%;
-    margin-left: -17.5rem;
-    z-index: 1100;
+    background: ${({ theme }) => theme.colors.neutral0};
+    opacity: 0.9;
   }
 `;
 
-export default Overlay;
+const Content = styled(Stack)`
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding-top: ${pxToRem(160)};
+`;
+
+const IconBox = styled(Box)`
+  border-radius: 50%;
+  svg {
+    > path {
+      fill: ${({ theme }) => theme.colors.primary600} !important;
+    }
+  }
+`;
+
+export { Content, IconBox, Overlay };

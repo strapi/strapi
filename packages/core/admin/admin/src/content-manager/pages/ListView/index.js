@@ -126,8 +126,6 @@ function ListView({
           return;
         }
 
-        console.log('iii');
-
         console.error(err);
         toggleNotification({
           type: 'warning',
@@ -355,6 +353,9 @@ export function mapDispatchToProps(dispatch) {
     dispatch
   );
 }
-const withConnect = connect(mapStateToProps, mapDispatchToProps);
+const withConnect = connect(
+  mapStateToProps,
+  mapDispatchToProps
+);
 
 export default compose(withConnect)(memo(ListView, isEqual));
