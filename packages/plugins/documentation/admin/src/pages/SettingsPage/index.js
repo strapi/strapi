@@ -26,7 +26,7 @@ const SettingsPage = () => {
           })}
           primaryAction={
             //  eslint-disable-next-line
-            <CheckPermissions permissions={permissions.createRole}>
+            <CheckPermissions permissions={permissions.update}>
               <Button
                 onClick={() => submitMutation.mutate({ prefix: data?.prefix, body: {} })}
                 startIcon={<Check />}
