@@ -6,7 +6,6 @@ const moment = require('moment');
 
 const { builApiEndpointPath } = require('../utils/builders');
 const defaultConfig = require('../config/default-config');
-const form = require('./utils/forms');
 
 module.exports = () => {
   const docPlugin = strapi.plugin('documentation');
@@ -57,7 +56,7 @@ module.exports = () => {
         .filter(x => x);
     },
 
-    async getFrontendForm() {
+    async getDocumentationAccess() {
       const config = await strapi
         .store({
           environment: '',
@@ -67,12 +66,7 @@ module.exports = () => {
         })
         .get();
 
-      const forms = JSON.parse(JSON.stringify(form));
-
-      _.set(forms, [0, 0, 'value'], config.restrictedAccess);
-      _.set(forms, [0, 1, 'value'], config.password || '');
-
-      return forms;
+      return { restrictedAccess: config.restrictedAccess, password: config.password || '' };
     },
 
     /**
