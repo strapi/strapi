@@ -19,13 +19,13 @@ module.exports = {
     try {
       const docService = strapi.plugin('documentation').service('documentation');
       const docVersions = docService.getDocumentationVersions();
-      const form = await docService.getFrontendForm();
+      const documentationAccess = await docService.getDocumentationAccess();
 
       ctx.send({
         docVersions,
         currentVersion: docService.getDocumentationVersion(),
         prefix: strapi.plugin('documentation').config('x-strapi-config').path,
-        form,
+        documentationAccess,
       });
     } catch (err) {
       ctx.badRequest(null, err.message);
