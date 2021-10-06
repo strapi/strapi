@@ -1,12 +1,14 @@
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { useNotification } from '@strapi/helper-plugin';
-import { fetchData, deleteDoc, regenerateDoc, submit } from './utils/api';
+import { fetchDocumentationVersions, deleteDoc, regenerateDoc, updateSettings } from './utils/api';
 import getTrad from '../../utils/getTrad';
 
-const useHomePage = () => {
+const usePluginPage = () => {
   const queryClient = useQueryClient();
   const toggleNotification = useNotification();
-  const { isLoading, data } = useQuery('get-documentation', () => fetchData(toggleNotification));
+  const { isLoading, data } = useQuery('get-documentation', () =>
+    fetchDocumentationVersions(toggleNotification)
+  );
 
   const handleError = err => {
     toggleNotification({
@@ -15,42 +17,30 @@ const useHomePage = () => {
     });
   };
 
+  const handleSuccess = (type, tradId) => {
+    queryClient.invalidateQueries('get-documentation');
+    toggleNotification({
+      type,
+      message: { id: getTrad(tradId) },
+    });
+  };
+
   const deleteMutation = useMutation(deleteDoc, {
-    onSuccess: async () => {
-      await queryClient.invalidateQueries('get-documentation');
-      toggleNotification({
-        type: 'info',
-        message: { id: getTrad('notification.delete.success') },
-      });
-    },
-    onError: handleError,
+    onSuccess: () => handleSuccess('info', 'notification.delete.success'),
+    onError: error => handleError(error),
   });
 
-  const submitMutation = useMutation(submit, {
-    onSuccess: () => {
-      queryClient.invalidateQueries('get-documentation');
-
-      toggleNotification({
-        type: 'success',
-        message: { id: getTrad('notification.update.success') },
-      });
-    },
+  const submitMutation = useMutation(updateSettings, {
+    onSuccess: () => handleSuccess('success', 'notification.update.success'),
     onError: handleError,
   });
 
   const regenerateDocMutation = useMutation(regenerateDoc, {
-    onSuccess: () => {
-      queryClient.invalidateQueries('get-documentation');
-
-      toggleNotification({
-        type: 'info',
-        message: { id: getTrad('notification.generate.success') },
-      });
-    },
-    onError: handleError,
+    onSuccess: () => handleSuccess('info', 'notification.generate.success'),
+    onError: error => handleError(error),
   });
 
   return { data, isLoading, deleteMutation, submitMutation, regenerateDocMutation };
 };
 
-export default useHomePage;
+export default usePluginPage;

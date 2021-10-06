@@ -12,24 +12,16 @@ import {
   ConfirmDialog,
   LoadingIndicatorPage,
   stopPropagation,
+  EmptyStateLayout,
 } from '@strapi/helper-plugin';
-import {
-  Layout,
-  HeaderLayout,
-  Main,
-  Button,
-  Table,
-  Tr,
-  Thead,
-  Th,
-  Tbody,
-  Text,
-  Td,
-  Row,
-  TableLabel,
-  ContentLayout,
-  IconButton,
-} from '@strapi/parts';
+import { Button } from '@strapi/parts/Button';
+import { Layout, HeaderLayout, ContentLayout } from '@strapi/parts/Layout';
+import { Main } from '@strapi/parts/Main';
+import { IconButton } from '@strapi/parts/IconButton';
+import { Text, TableLabel } from '@strapi/parts/Text';
+import { Row } from '@strapi/parts/Row';
+import { Table, Tr, Thead, Th, Tbody, Td } from '@strapi/parts/Table';
+
 import { DeleteIcon, Show, Reload } from '@strapi/icons';
 
 import permissions from '../../permissions';
@@ -45,15 +37,15 @@ const PluginPage = () => {
   const [versionToDelete, setVersionToDelete] = useState();
 
   const colCount = 4;
-  const rowCount = (data.docVersions?.length || 0) + 1;
+  const rowCount = (data?.docVersions?.length || 0) + 1;
 
   const openDocVersion = () => {
     const slash = data?.prefix.startsWith('/') ? '' : '/';
-    openWithNewTab(`${slash}${data.prefix}/v${data.currentVersion}`);
+    openWithNewTab(`${slash}${data?.prefix}/v${data?.currentVersion}`);
   };
 
   const handleRegenerateDoc = version => {
-    regenerateDocMutation.mutate({ version, prefix: data.prefix });
+    regenerateDocMutation.mutate({ version, prefix: data?.prefix });
   };
 
   const handleShowConfirmDelete = () => {
@@ -62,7 +54,7 @@ const PluginPage = () => {
 
   const handleConfirmDelete = async () => {
     setIsConfirmButtonLoading(true);
-    await deleteMutation.mutateAsync({ prefix: data.prefix, version: versionToDelete });
+    await deleteMutation.mutateAsync({ prefix: data?.prefix, version: versionToDelete });
     setShowConfirmDelete(!showConfirmDelete);
     setIsConfirmButtonLoading(false);
   };
@@ -98,88 +90,92 @@ const PluginPage = () => {
         />
         <ContentLayout>
           {isLoading && <LoadingIndicatorPage>Plugin is loading</LoadingIndicatorPage>}
-          <Table colCount={colCount} rowCount={rowCount}>
-            <Thead>
-              <Tr>
-                <Th>
-                  <TableLabel textColor="neutral600">
-                    {formatMessage({
-                      id: getTrad('pages.PluginPage.table.version'),
-                      defaultMessage: 'Version',
-                    })}
-                  </TableLabel>
-                </Th>
-                <Th>
-                  <TableLabel textColor="neutral600">
-                    {formatMessage({
-                      id: getTrad('pages.PluginPage.table.generated'),
-                      defaultMessage: 'Last Generated',
-                    })}
-                  </TableLabel>
-                </Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              {data.docVersions
-                .sort((a, b) => (a.generatedDate < b.generatedDate ? 1 : -1))
-                .map(doc => (
-                  <Tr key={doc.version}>
-                    <Td width="50%">
-                      <Text>{doc.version}</Text>
-                    </Td>
-                    <Td width="50%">
-                      <Text>{doc.generatedDate}</Text>
-                    </Td>
-                    <Td>
-                      <Row justifyContent="end" {...stopPropagation}>
-                        <IconButton
-                          onClick={openDocVersion}
-                          noBorder
-                          icon={<Show />}
-                          label={formatMessage(
-                            {
-                              id: getTrad('pages.PluginPage.table.icon.show'),
-                              defaultMessage: 'Open {target}',
-                            },
-                            { target: `${doc.version}` }
-                          )}
-                        />
-                        <CheckPermissions permissions={permissions.regenerate}>
+          {data?.docVersions.length ? (
+            <Table colCount={colCount} rowCount={rowCount}>
+              <Thead>
+                <Tr>
+                  <Th>
+                    <TableLabel textColor="neutral600">
+                      {formatMessage({
+                        id: getTrad('pages.PluginPage.table.version'),
+                        defaultMessage: 'Version',
+                      })}
+                    </TableLabel>
+                  </Th>
+                  <Th>
+                    <TableLabel textColor="neutral600">
+                      {formatMessage({
+                        id: getTrad('pages.PluginPage.table.generated'),
+                        defaultMessage: 'Last Generated',
+                      })}
+                    </TableLabel>
+                  </Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {data.docVersions
+                  .sort((a, b) => (a.generatedDate < b.generatedDate ? 1 : -1))
+                  .map(doc => (
+                    <Tr key={doc.version}>
+                      <Td width="50%">
+                        <Text>{doc.version}</Text>
+                      </Td>
+                      <Td width="50%">
+                        <Text>{doc.generatedDate}</Text>
+                      </Td>
+                      <Td>
+                        <Row justifyContent="end" {...stopPropagation}>
                           <IconButton
-                            onClick={() => handleRegenerateDoc(doc.version)}
+                            onClick={openDocVersion}
                             noBorder
-                            icon={<Reload />}
+                            icon={<Show />}
                             label={formatMessage(
                               {
-                                id: getTrad('pages.PluginPage.table.icon.regenerate'),
-                                defaultMessage: 'Regnerate {target}',
+                                id: getTrad('pages.PluginPage.table.icon.show'),
+                                defaultMessage: 'Open {target}',
                               },
                               { target: `${doc.version}` }
                             )}
                           />
-                        </CheckPermissions>
-                        <CheckPermissions permissions={permissions.update}>
-                          {doc.version !== data.currentVersion && (
+                          <CheckPermissions permissions={permissions.regenerate}>
                             <IconButton
-                              onClick={() => handleClickDelete(doc.version)}
+                              onClick={() => handleRegenerateDoc(doc.version)}
                               noBorder
-                              icon={<DeleteIcon />}
+                              icon={<Reload />}
                               label={formatMessage(
                                 {
-                                  id: getTrad('pages.PluginPage.table.icon.delete'),
-                                  defaultMessage: 'Delete {target}',
+                                  id: getTrad('pages.PluginPage.table.icon.regenerate'),
+                                  defaultMessage: 'Regnerate {target}',
                                 },
                                 { target: `${doc.version}` }
                               )}
                             />
-                          )}
-                        </CheckPermissions>
-                      </Row>
-                    </Td>
-                  </Tr>
-                ))}
-            </Tbody>
-          </Table>
+                          </CheckPermissions>
+                          <CheckPermissions permissions={permissions.update}>
+                            {doc.version !== data.currentVersion && (
+                              <IconButton
+                                onClick={() => handleClickDelete(doc.version)}
+                                noBorder
+                                icon={<DeleteIcon />}
+                                label={formatMessage(
+                                  {
+                                    id: getTrad('pages.PluginPage.table.icon.delete'),
+                                    defaultMessage: 'Delete {target}',
+                                  },
+                                  { target: `${doc.version}` }
+                                )}
+                              />
+                            )}
+                          </CheckPermissions>
+                        </Row>
+                      </Td>
+                    </Tr>
+                  ))}
+              </Tbody>
+            </Table>
+          ) : (
+            <EmptyStateLayout />
+          )}
         </ContentLayout>
         <ConfirmDialog
           isConfirmButtonLoading={isConfirmButtonLoading}
