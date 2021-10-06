@@ -1,9 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { useNotification } from '@strapi/helper-plugin';
-import { fetchDocumentationVersions, deleteDoc, regenerateDoc, updateSettings } from './utils/api';
+import { fetchDocumentationVersions, deleteDoc, regenerateDoc, updateSettings } from './api';
 import getTrad from '../../utils/getTrad';
 
-const usePluginPage = () => {
+const useReactQuery = () => {
   const queryClient = useQueryClient();
   const toggleNotification = useNotification();
   const { isLoading, data } = useQuery('get-documentation', () =>
@@ -43,4 +43,4 @@ const usePluginPage = () => {
   return { data, isLoading, deleteMutation, submitMutation, regenerateDocMutation };
 };
 
-export default usePluginPage;
+export default useReactQuery;

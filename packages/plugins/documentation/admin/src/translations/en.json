@@ -27,11 +27,12 @@
   "pages.PluginPage.header.description": "Configure the documentation plugin",
   "pages.PluginPage.table.version": "Version",
   "pages.PluginPage.table.generated": "Last generated",
-  "pages.PluginPage.table..icon.show": "Open {target}",
-  "pages.PluginPage.table..icon.regnerate": "Regenerate {target}",
-  "pages.PluginPage.table..icon.delete": "Delete {target}",
+  "pages.PluginPage.table.icon.show": "Open {target}",
+  "pages.PluginPage.table.icon.regnerate": "Regenerate {target}",
+  "pages.PluginPage.table.icon.delete": "Delete {target}",
+  "pages.SettingsPage.Button.description": "Configure the documentation plugin",
+  "pages.SettingsPage.header.save": "Save",
   "plugin.description.long": "Create an OpenAPI Document and visualize your API with SWAGGER UI.",
   "plugin.description.short": "Create an OpenAPI Document and visualize your API with SWAGGER UI.",
   "plugin.name": "Documentation"
-  
 }

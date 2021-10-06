@@ -29,11 +29,11 @@ import Reload from '@strapi/icons/Reload';
 import permissions from '../../permissions';
 import { getTrad } from '../../utils';
 import openWithNewTab from '../../utils/openWithNewTab';
-import usePluginPage from './usePluginPage';
+import useReactQuery from '../utils/useReactQuery';
 
 const PluginPage = () => {
   const { formatMessage } = useIntl();
-  const { data, isLoading, deleteMutation, regenerateDocMutation } = usePluginPage();
+  const { data, isLoading, deleteMutation, regenerateDocMutation } = useReactQuery();
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [isConfirmButtonLoading, setIsConfirmButtonLoading] = useState(false);
   const [versionToDelete, setVersionToDelete] = useState();
