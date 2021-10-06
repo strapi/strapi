@@ -29,7 +29,7 @@ describe('RelativeTime', () => {
     expect(firstChild).toMatchInlineSnapshot(`
       <time
         datetime="2015-10-01T07:55:00.000Z"
-        title="10/1/2015 9:55 AM"
+        title="10/1/2015 7:55 AM"
       >
         5 minutes ago
       </time>
