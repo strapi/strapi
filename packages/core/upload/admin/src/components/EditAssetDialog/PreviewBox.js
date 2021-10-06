@@ -50,7 +50,7 @@ export const PreviewBox = ({ children, asset, onDelete }) => {
           <Stack size={1} horizontal>
             <IconButton
               label={formatMessage({
-                id: getTrad('control-card.delete'),
+                id: getTrad('app.utils.delete'),
                 defaultMessage: 'Delete',
               })}
               icon={<DeleteIcon />}

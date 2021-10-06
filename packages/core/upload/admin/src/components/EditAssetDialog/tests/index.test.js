@@ -1174,7 +1174,7 @@ describe('<EditAssetDialog />', () => {
                                     <span
                                       class="c29"
                                     >
-                                      04/10/2021
+                                      10/4/2021
                                     </span>
                                   </div>
                                 </div>

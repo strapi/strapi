@@ -20,8 +20,7 @@ import { getTrad } from '../../utils';
 import formatBytes from '../../utils/formatBytes';
 
 export const EditAssetDialog = ({ onClose, asset }) => {
-  const { formatMessage } = useIntl();
-  const formatter = new Intl.DateTimeFormat();
+  const { formatMessage, formatDate } = useIntl();
 
   // TODO implement when the code is ready
   const handleSubmit = () => {};
@@ -46,7 +45,7 @@ export const EditAssetDialog = ({ onClose, asset }) => {
                 <AssetMeta
                   size={formatBytes(asset.size)}
                   dimension={asset.height && asset.width ? `${asset.height}✕${asset.width}` : ''}
-                  date={formatter.format(new Date(asset.createdAt))}
+                  date={formatDate(new Date(asset.createdAt))}
                   extension={getFileExtension(asset.ext)}
                 />
                 <TextInput
