@@ -36,7 +36,7 @@ const PluginPage = () => {
           })}
           primaryAction={
             //  eslint-disable-next-line
-            <CheckPermissions permissions={permissions.createRole}>
+            <CheckPermissions permissions={permissions.open}>
               <Button
                 onClick={() => openWithNewTab(`${slash}${data.prefix}/v${data.currentVersion}`)}
                 startIcon={<ShowIcon />}
