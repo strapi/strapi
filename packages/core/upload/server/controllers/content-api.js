@@ -15,7 +15,7 @@ const sanitize = (data, options = {}) => {
 
 module.exports = {
   async find(ctx) {
-    const files = await getService('upload').fetchAll(ctx.query);
+    const files = await getService('upload').findMany(ctx.query);
 
     ctx.body = sanitize(files);
   },

@@ -37,7 +37,7 @@ module.exports = {
 
     const query = pm.addPermissionsQueryTo(ctx.query);
 
-    const files = await getService('upload').fetchAll(query);
+    const files = await getService('upload').findPage(query);
 
     ctx.body = pm.sanitize(files, { withPrivate: false });
   },
