@@ -36,8 +36,9 @@ const CardPreview = ({ extension, hasError, hasIcon, url, previewUrl, type, with
         <VideoPreview src={url} previewUrl={previewUrl} hasIcon={hasIcon} />
       ) : (
         // Adding performance.now forces the browser no to cache the img
+        // if we want to save base64 coded images the cachebust will break the base64 encoded data
         // https://stackoverflow.com/questions/126772/how-to-force-a-web-browser-not-to-cache-images
-        <Image src={`${url}${withFileCaching ? `?${cacheRef.current}` : ''}`} />
+        <Image src={`${url}${withFileCaching && url.slice(0, 10) !== 'data:image' ? `?${cacheRef.current}` : ''}`} />
       )}
     </Wrapper>
   );
