@@ -44,6 +44,18 @@ const routeSchema = yup.object({
   }),
   config: yup
     .object({
+      auth: yup.lazy(value => {
+        if (value === false) {
+          return yup.boolean().required();
+        }
+
+        return yup.object({
+          scope: yup
+            .array()
+            .of(yup.string())
+            .required(),
+        });
+      }),
       policies: yup
         .array()
         .of(policyOrMiddlewareSchema)

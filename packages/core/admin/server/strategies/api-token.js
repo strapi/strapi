@@ -1,5 +1,6 @@
 'use strict';
 
+const { castArray, isEmpty } = require('lodash/fp');
 const constants = require('../services/constants');
 const { getService } = require('../utils');
 
@@ -47,7 +48,11 @@ const verify = (auth, config) => {
    * If you don't have `full-access` you can only access `find` and `findOne`
    * scopes. If the route has no scope, then you can't get access to it.
    */
-  if (config.scope && (config.scope.endsWith('find') || config.scope.endsWith('findOne'))) {
+  const hasValidScopes = castArray(config.scope).every(
+    scope => scope.endsWith('find') || scope.endsWith('findOne')
+  );
+
+  if (!isEmpty(config.scope) && hasValidScopes) {
     return;
   }
 

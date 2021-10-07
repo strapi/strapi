@@ -1,6 +1,6 @@
 'use strict';
 
-const { castArray, map } = require('lodash/fp');
+const { castArray, map, isEmpty } = require('lodash/fp');
 
 const { getService } = require('../utils');
 
@@ -78,13 +78,13 @@ const verify = async (auth, config) => {
     const allowedActions = map('action', publicPermissions);
 
     // A non authenticated user cannot access routes that do not have a scope
-    if (!config.scope) {
+    if (isEmpty(config.scope)) {
       throw new errors.UnauthorizedError();
     }
 
-    const isAllowed = castArray(config.scope).every(scope => allowedActions.includes(scope));
+    const hasValidScopes = castArray(config.scope).every(scope => allowedActions.includes(scope));
 
-    if (!isAllowed) {
+    if (!hasValidScopes) {
       throw new errors.ForbiddenError();
     }
 
@@ -98,21 +98,15 @@ const verify = async (auth, config) => {
   const allowedActions = map('action', permissions);
 
   // An authenticated user can access non scoped routes
-  if (!config.scope) {
-    return;
+  if (isEmpty(config.scope)) {
+    throw new errors.UnauthorizedError();
   }
 
-  const isAllowed = castArray(config.scope).every(scope => allowedActions.includes(scope));
+  const hasValidScopes = castArray(config.scope).every(scope => allowedActions.includes(scope));
 
-  if (!isAllowed) {
+  if (!hasValidScopes) {
     throw new errors.ForbiddenError();
   }
-
-  // TODO: if we need to keep policies for u&p execution
-  // Execute the policies.
-  // if (permission.policy) {
-  //   return await strapi.plugin('users-permissions').policy(permission.policy)(ctx, next);
-  // }
 };
 
 module.exports = {
