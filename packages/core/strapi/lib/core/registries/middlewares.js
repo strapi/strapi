@@ -30,7 +30,7 @@ const middlewaresRegistry = () => {
     },
 
     /**
-     * Returns a ma with all the middlewares in a namespace
+     * Returns a map with all the middlewares in a namespace
      * @param {string} namespace
      * @returns {{ [key: string]: Middleware }}
      */

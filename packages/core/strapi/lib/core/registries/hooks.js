@@ -20,7 +20,7 @@ const hooksRegistry = () => {
     },
 
     /**
-     * Returns the instance of a hook. Instantiate the hook if not already done
+     * Returns the instance of a hook.
      * @param {string} uid
      * @returns {Hook}
      */
@@ -29,7 +29,7 @@ const hooksRegistry = () => {
     },
 
     /**
-     * Returns a ma with all the hooks in a namespace
+     * Returns a map with all the hooks in a namespace
      * @param {string} namespace
      * @returns {{ [key: string]: Hook }}
      */

@@ -38,7 +38,7 @@ const contentTypesRegistry = () => {
     },
 
     /**
-     * Returns a ma with all the contentTypes in a namespace
+     * Returns a map with all the contentTypes in a namespace
      * @param {string} namespace
      */
     getAll(namespace) {

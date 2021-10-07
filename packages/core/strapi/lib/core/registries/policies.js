@@ -30,7 +30,7 @@ const policiesRegistry = () => {
     },
 
     /**
-     * Returns a ma with all the policies in a namespace
+     * Returns a map with all the policies in a namespace
      * @param {string} namespace
      * @returns {{ [key: string]: Policy }}
      */

@@ -42,7 +42,7 @@ const servicesRegistry = strapi => {
     },
 
     /**
-     * Returns a ma with all the services in a namespace
+     * Returns a map with all the services in a namespace
      * @param {string} namespace
      * @returns {{ [key: string]: Service }}
      */
