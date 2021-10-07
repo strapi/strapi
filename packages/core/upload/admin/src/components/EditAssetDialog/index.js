@@ -20,93 +20,94 @@ import { getTrad } from '../../utils';
 import formatBytes from '../../utils/formatBytes';
 
 export const EditAssetDialog = ({ onClose, asset }) => {
-  const { formatMessage } = useIntl();
-  const formatter = new Intl.DateTimeFormat();
+  const { formatMessage, formatDate } = useIntl();
 
   // TODO implement when the code is ready
   const handleSubmit = () => {};
 
   return (
-    <ModalLayout onClose={onClose} labelledBy="title">
-      <ModalHeader>
-        <ButtonText textColor="neutral800" as="h2" id="title">
-          {formatMessage({ id: getTrad('modal.edit.title'), defaultMessage: 'Details' })}
-        </ButtonText>
-      </ModalHeader>
-      <ModalBody>
-        <Grid gap={4}>
-          <GridItem xs={12} col={6}>
-            <PreviewBox>
-              <img src={prefixFileUrlWithBackendUrl(asset.url)} alt={asset.name} />
-            </PreviewBox>
-          </GridItem>
-          <GridItem xs={12} col={6}>
-            <Stack size={3}>
-              <AssetMeta
-                size={formatBytes(asset.size)}
-                dimension={asset.height && asset.width ? `${asset.height}✕${asset.width}` : ''}
-                date={formatter.format(new Date(asset.createdAt))}
-                extension={getFileExtension(asset.ext)}
-              />
-
-              <TextInput
-                size="S"
-                label={formatMessage({
-                  id: getTrad('form.input.label.file-name'),
-                  defaultMessage: 'File name',
-                })}
-                name="filename"
-              />
-              <TextInput
-                size="S"
-                label={formatMessage({
-                  id: getTrad('form.input.label.file-alt'),
-                  defaultMessage: 'Alternative text',
-                })}
-                name="altText"
-                hint={formatMessage({
-                  id: getTrad({ id: getTrad('form.input.decription.file-alt') }),
-                  defaultMessage: 'This text will be displayed if the asset can’t be shown.',
-                })}
-              />
-              <TextInput
-                size="S"
-                label={formatMessage({
-                  id: getTrad('form.input.label.file-caption'),
-                  defaultMessage: 'Caption',
-                })}
-                name="caption"
-              />
-            </Stack>
-          </GridItem>
-        </Grid>
-      </ModalBody>
-      <ModalFooter
-        startActions={
-          <Button onClick={onClose} variant="tertiary">
-            {formatMessage({ id: 'cancel', defaultMessage: 'Cancel' })}
-          </Button>
-        }
-        endActions={
-          <>
-            <Button variant="secondary">
-              {formatMessage({
-                id: getTrad('control-card.replace-media'),
-                defaultMessage: 'Replace media',
-              })}
+    <>
+      <ModalLayout onClose={onClose} labelledBy="title">
+        <ModalHeader>
+          <ButtonText textColor="neutral800" as="h2" id="title">
+            {formatMessage({ id: getTrad('modal.edit.title'), defaultMessage: 'Details' })}
+          </ButtonText>
+        </ModalHeader>
+        <ModalBody>
+          <Grid gap={4}>
+            <GridItem xs={12} col={6}>
+              <PreviewBox asset={asset} onDelete={onClose}>
+                <img src={prefixFileUrlWithBackendUrl(asset.url)} alt={asset.name} />
+              </PreviewBox>
+            </GridItem>
+            <GridItem xs={12} col={6}>
+              <Stack size={3}>
+                <AssetMeta
+                  size={formatBytes(asset.size)}
+                  dimension={asset.height && asset.width ? `${asset.height}✕${asset.width}` : ''}
+                  date={formatDate(new Date(asset.createdAt))}
+                  extension={getFileExtension(asset.ext)}
+                />
+                <TextInput
+                  size="S"
+                  label={formatMessage({
+                    id: getTrad('form.input.label.file-name'),
+                    defaultMessage: 'File name',
+                  })}
+                  name="filename"
+                />
+                <TextInput
+                  size="S"
+                  label={formatMessage({
+                    id: getTrad('form.input.label.file-alt'),
+                    defaultMessage: 'Alternative text',
+                  })}
+                  name="altText"
+                  hint={formatMessage({
+                    id: getTrad({ id: getTrad('form.input.decription.file-alt') }),
+                    defaultMessage: 'This text will be displayed if the asset can’t be shown.',
+                  })}
+                />
+                <TextInput
+                  size="S"
+                  label={formatMessage({
+                    id: getTrad('form.input.label.file-caption'),
+                    defaultMessage: 'Caption',
+                  })}
+                  name="caption"
+                />
+              </Stack>
+            </GridItem>
+          </Grid>
+        </ModalBody>
+        <ModalFooter
+          startActions={
+            <Button onClick={onClose} variant="tertiary">
+              {formatMessage({ id: 'cancel', defaultMessage: 'Cancel' })}
             </Button>
-            <Button onClick={handleSubmit}>
-              {formatMessage({ id: 'form.button.finish', defaultMessage: 'Finish' })}
-            </Button>
-          </>
-        }
-      />
-    </ModalLayout>
+          }
+          endActions={
+            <>
+              <Button variant="secondary">
+                {formatMessage({
+                  id: getTrad('control-card.replace-media'),
+                  defaultMessage: 'Replace media',
+                })}
+              </Button>
+              <Button onClick={handleSubmit}>
+                {formatMessage({ id: 'form.button.finish', defaultMessage: 'Finish' })}
+              </Button>
+            </>
+          }
+        />
+      </ModalLayout>
+    </>
   );
 };
 
 EditAssetDialog.propTypes = {
   asset: PropTypes.shape({
+    id: PropTypes.number,
     height: PropTypes.number,
     width: PropTypes.number,
     size: PropTypes.number,
