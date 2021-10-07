@@ -5,6 +5,7 @@ import omit from 'lodash/omit';
 import take from 'lodash/take';
 import isEqual from 'react-fast-compare';
 import {
+  GenericInput,
   NotAllowedInput,
   // useLibrary
 } from '@strapi/helper-plugin';
@@ -13,7 +14,6 @@ import { getFieldName } from '../../utils';
 import Wysiwyg from '../Wysiwyg';
 import InputJSON from '../InputJSON';
 import ComingSoonInput from './ComingSoonInput';
-import GenericInput from './GenericInput';
 import InputUID from '../InputUID';
 import SelectWrapper from '../SelectWrapper';
 

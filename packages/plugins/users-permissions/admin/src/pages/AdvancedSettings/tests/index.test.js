@@ -1115,7 +1115,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                             >
                               <label
                                 class="c53"
-                                for="textinput-1"
+                                for="email_reset_password"
                               >
                                 Reset password page
                               </label>
@@ -1124,11 +1124,11 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                               class="c54 c55"
                             >
                               <input
-                                aria-describedby="textinput-1-hint"
+                                aria-describedby="email_reset_password-hint"
                                 aria-disabled="false"
                                 aria-invalid="false"
                                 class="c56"
-                                id="textinput-1"
+                                id="email_reset_password"
                                 name="email_reset_password"
                                 placeholder="ex: https://youtfrontend.com/reset-password"
                                 type="text"
@@ -1137,7 +1137,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                             </div>
                             <p
                               class="c57"
-                              id="textinput-1-hint"
+                              id="email_reset_password-hint"
                             >
                               URL of your application's reset password page.
                             </p>
@@ -1232,7 +1232,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                             >
                               <label
                                 class="c53"
-                                for="textinput-2"
+                                for="email_confirmation_redirection"
                               >
                                 Redirection url
                               </label>
@@ -1242,11 +1242,11 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                               disabled=""
                             >
                               <input
-                                aria-describedby="textinput-2-hint"
+                                aria-describedby="email_confirmation_redirection-hint"
                                 aria-disabled="true"
                                 aria-invalid="false"
                                 class="c56"
-                                id="textinput-2"
+                                id="email_confirmation_redirection"
                                 name="email_confirmation_redirection"
                                 placeholder="ex: https://youtfrontend.com/reset-password"
                                 type="text"
@@ -1255,7 +1255,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                             </div>
                             <p
                               class="c57"
-                              id="textinput-2-hint"
+                              id="email_confirmation_redirection-hint"
                             >
                               After you confirmed your email, choose where you will be redirected.
                             </p>

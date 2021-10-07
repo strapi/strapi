@@ -792,7 +792,7 @@ describe('ADMIN | Pages | Profile page', () => {
                                 >
                                   <label
                                     class="c24"
-                                    for="textinput-1"
+                                    for="firstname"
                                   >
                                     First name
                                   </label>
@@ -804,7 +804,7 @@ describe('ADMIN | Pages | Profile page', () => {
                                     aria-disabled="false"
                                     aria-invalid="false"
                                     class="c27"
-                                    id="textinput-1"
+                                    id="firstname"
                                     name="firstname"
                                     placeholder=""
                                     type="text"
@@ -832,7 +832,7 @@ describe('ADMIN | Pages | Profile page', () => {
                                 >
                                   <label
                                     class="c24"
-                                    for="textinput-2"
+                                    for="lastname"
                                   >
                                     Last name
                                   </label>
@@ -844,7 +844,7 @@ describe('ADMIN | Pages | Profile page', () => {
                                     aria-disabled="false"
                                     aria-invalid="false"
                                     class="c27"
-                                    id="textinput-2"
+                                    id="lastname"
                                     name="lastname"
                                     placeholder=""
                                     type="text"
@@ -872,7 +872,7 @@ describe('ADMIN | Pages | Profile page', () => {
                                 >
                                   <label
                                     class="c24"
-                                    for="textinput-3"
+                                    for="email"
                                   >
                                     Email
                                   </label>
@@ -884,7 +884,7 @@ describe('ADMIN | Pages | Profile page', () => {
                                     aria-disabled="false"
                                     aria-invalid="false"
                                     class="c27"
-                                    id="textinput-3"
+                                    id="email"
                                     name="email"
                                     placeholder=""
                                     type="email"
@@ -912,7 +912,7 @@ describe('ADMIN | Pages | Profile page', () => {
                                 >
                                   <label
                                     class="c24"
-                                    for="textinput-4"
+                                    for="username"
                                   >
                                     Username
                                   </label>
@@ -924,7 +924,7 @@ describe('ADMIN | Pages | Profile page', () => {
                                     aria-disabled="false"
                                     aria-invalid="false"
                                     class="c27"
-                                    id="textinput-4"
+                                    id="username"
                                     name="username"
                                     placeholder=""
                                     type="text"
@@ -969,7 +969,7 @@ describe('ADMIN | Pages | Profile page', () => {
                                 >
                                   <label
                                     class="c24"
-                                    for="textinput-5"
+                                    for="textinput-1"
                                   >
                                     Password
                                   </label>
@@ -981,7 +981,7 @@ describe('ADMIN | Pages | Profile page', () => {
                                     aria-disabled="false"
                                     aria-invalid="false"
                                     class="c28"
-                                    id="textinput-5"
+                                    id="textinput-1"
                                     name="password"
                                     type="password"
                                     value=""
@@ -1030,7 +1030,7 @@ describe('ADMIN | Pages | Profile page', () => {
                                 >
                                   <label
                                     class="c24"
-                                    for="textinput-6"
+                                    for="textinput-2"
                                   >
                                     Password confirmation
                                   </label>
@@ -1042,7 +1042,7 @@ describe('ADMIN | Pages | Profile page', () => {
                                     aria-disabled="false"
                                     aria-invalid="false"
                                     class="c28"
-                                    id="textinput-6"
+                                    id="textinput-2"
                                     name="confirmPassword"
                                     type="password"
                                     value=""
