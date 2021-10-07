@@ -13,34 +13,31 @@ import pluginId from '../../pluginId';
 import DataManagerProvider from '../../components/DataManagerProvider';
 import RecursivePath from '../RecursivePath';
 import icons from './utils/icons.json';
-import TempTP from './TempTP';
 import ContentTypeBuilderNav from '../../components/ContentTypeBuilderNav';
 
 const ListView = lazy(() => import('../ListView'));
 
 const App = () => {
   return (
-    <TempTP>
-      <CheckPagePermissions permissions={pluginPermissions.main}>
-        <DataManagerProvider allIcons={icons}>
-          <Layout sideNav={<ContentTypeBuilderNav />}>
-            <Suspense fallback={<LoadingIndicatorPage />}>
-              <Switch>
-                <Route
-                  path={`/plugins/${pluginId}/content-types/create-content-type`}
-                  component={ListView}
-                />
-                <Route path={`/plugins/${pluginId}/content-types/:uid`} component={ListView} />
-                <Route
-                  path={`/plugins/${pluginId}/component-categories/:categoryUid`}
-                  component={RecursivePath}
-                />
-              </Switch>
-            </Suspense>
-          </Layout>
-        </DataManagerProvider>
-      </CheckPagePermissions>
-    </TempTP>
+    <CheckPagePermissions permissions={pluginPermissions.main}>
+      <DataManagerProvider allIcons={icons}>
+        <Layout sideNav={<ContentTypeBuilderNav />}>
+          <Suspense fallback={<LoadingIndicatorPage />}>
+            <Switch>
+              <Route
+                path={`/plugins/${pluginId}/content-types/create-content-type`}
+                component={ListView}
+              />
+              <Route path={`/plugins/${pluginId}/content-types/:uid`} component={ListView} />
+              <Route
+                path={`/plugins/${pluginId}/component-categories/:categoryUid`}
+                component={RecursivePath}
+              />
+            </Switch>
+          </Suspense>
+        </Layout>
+      </DataManagerProvider>
+    </CheckPagePermissions>
   );
 };
 
