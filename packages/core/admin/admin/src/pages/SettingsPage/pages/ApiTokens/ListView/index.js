@@ -6,17 +6,20 @@ import {
   useNotification,
   NoPermissions,
   useRBAC,
+  NoContent,
+  DynamicTable,
 } from '@strapi/helper-plugin';
 import { HeaderLayout, ContentLayout } from '@strapi/parts/Layout';
 import { Main } from '@strapi/parts/Main';
 import { Button } from '@strapi/parts/Button';
 import AddIcon from '@strapi/icons/AddIcon';
 import { useQuery } from 'react-query';
-import { useLocation, useHistory } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import qs from 'qs';
-import DynamicTable from './DynamicTable';
+import TableRows from './DynamicTable';
 import { axiosInstance } from '../../../../../core/utils';
 import adminPermissions from '../../../../../permissions';
+import tableHeaders from './utils/tableHeaders';
 
 const ApiTokenListView = () => {
   useFocusWhenNavigate();
@@ -25,30 +28,14 @@ const ApiTokenListView = () => {
   const {
     allowedActions: { canCreate, canDelete, canUpdate, canRead },
   } = useRBAC(adminPermissions.settings['api-tokens']);
-  const { search } = useLocation();
   const { push } = useHistory();
 
   useEffect(() => {
     push({ search: qs.stringify({ sort: 'name:ASC' }, { encode: false }) });
   }, [push]);
 
-  const createAction = () => {
-    if (!canCreate) {
-      return null;
-    }
-
-    return (
-      <Button data-testid="create-api-token-button" startIcon={<AddIcon />} size="L">
-        {formatMessage({
-          id: 'Settings.apiTokens.create',
-          defaultMessage: 'Add Entry',
-        })}
-      </Button>
-    );
-  };
-
   const { data: apiTokens, status, isFetching } = useQuery(
-    ['api-tokens', search],
+    ['api-tokens'],
     async () => {
       const {
         data: { data },
@@ -58,9 +45,6 @@ const ApiTokenListView = () => {
     },
     {
       enabled: !!canRead,
-      keepPreviousData: true,
-      retry: false,
-      staleTime: 1000 * 20,
       onError: () => {
         toggleNotification({
           type: 'warning',
@@ -87,19 +71,56 @@ const ApiTokenListView = () => {
   };
 
   const contentBasedOnPermissions = () => {
-    if (canRead) {
+    if (!canRead) {
+      return <NoPermissions />;
+    }
+
+    if (apiTokens) {
       return (
         <DynamicTable
-          canUpdate={canUpdate}
-          canDelete={canDelete}
-          canCreate={canCreate}
-          apiTokens={apiTokens}
+          headers={tableHeaders}
+          contentType="api-tokens"
+          rows={apiTokens}
+          withBulkActions={canDelete || canUpdate}
           isLoading={isLoading()}
+        >
+          <TableRows
+            canDelete={canDelete}
+            canUpdate={canUpdate}
+            rows={apiTokens}
+            withBulkActions={canDelete || canUpdate}
+          />
+        </DynamicTable>
+      );
+    }
+
+    if (canCreate) {
+      return (
+        <NoContent
+          content={{
+            id: 'Settings.apiTokens.addFirstToken',
+            defaultMessage: 'Add your first API Token',
+          }}
+          action={
+            <Button variant="secondary" startIcon={<AddIcon />}>
+              {formatMessage({
+                id: 'Settings.apiTokens.addNewToken',
+                defaultMessage: 'Add new API Token',
+              })}
+            </Button>
+          }
         />
       );
     }
 
-    return <NoPermissions />;
+    return (
+      <NoContent
+        content={{
+          id: 'Settings.apiTokens.emptyStateLayout',
+          defaultMessage: 'There is no API tokens',
+        }}
+      />
+    );
   };
 
   return (
@@ -111,7 +132,18 @@ const ApiTokenListView = () => {
           id: 'Settings.apiTokens.description',
           defaultMessage: 'List of generated tokens to consume the API',
         })}
-        primaryAction={createAction()}
+        primaryAction={
+          canCreate ? (
+            <Button data-testid="create-api-token-button" startIcon={<AddIcon />} size="L">
+              {formatMessage({
+                id: 'Settings.apiTokens.create',
+                defaultMessage: 'Add Entry',
+              })}
+            </Button>
+          ) : (
+            undefined
+          )
+        }
       />
       <ContentLayout>{contentBasedOnPermissions()}</ContentLayout>
     </Main>

@@ -4,38 +4,26 @@ import { IconButton } from '@strapi/parts/IconButton';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 
-const UpdateButton = ({ canUpdate, tokenName }) => {
+const UpdateButton = ({ tokenName }) => {
   const { formatMessage } = useIntl();
 
-  let component = null;
-
-  if (canUpdate) {
-    component = (
-      <IconButton
-        label={formatMessage(
-          {
-            id: 'app.component.table.edit',
-            defaultMessage: 'Edit {target}',
-          },
-          { target: tokenName }
-        )}
-        noBorder
-        icon={<EditIcon />}
-      />
-    );
-  }
-
-  return component;
-};
-
-UpdateButton.defaultProps = {
-  canUpdate: false,
-  tokenName: null,
+  return (
+    <IconButton
+      label={formatMessage(
+        {
+          id: 'app.component.table.edit',
+          defaultMessage: 'Edit {target}',
+        },
+        { target: `${tokenName}` }
+      )}
+      noBorder
+      icon={<EditIcon />}
+    />
+  );
 };
 
 UpdateButton.propTypes = {
-  canUpdate: PropTypes.bool,
-  tokenName: PropTypes.string,
+  tokenName: PropTypes.string.isRequired,
 };
 
 export default UpdateButton;
