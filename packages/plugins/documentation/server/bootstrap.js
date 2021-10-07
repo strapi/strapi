@@ -13,15 +13,20 @@ const RBAC_ACTIONS = [
     section: 'plugins',
     displayName: 'Update and delete',
     uid: 'settings.update',
-    subCategory: 'settings',
     pluginName: 'documentation',
   },
   {
     section: 'plugins',
     displayName: 'Regenerate',
     uid: 'settings.regenerate',
-    subCategory: 'settings',
     pluginName: 'documentation',
+  },
+  {
+    section: 'settings',
+    displayName: 'Access the documentation settings page',
+    uid: 'settings.read',
+    pluginName: 'documentation',
+    category: 'documentation',
   },
 ];
 
