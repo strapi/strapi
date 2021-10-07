@@ -208,4 +208,9 @@ program
   .description('List all the application hooks')
   .action(getLocalScript('hooks/list'));
 
+program
+  .command('services:list')
+  .description('List all the application services')
+  .action(getLocalScript('services/list'));
+
 program.parseAsync(process.argv);
