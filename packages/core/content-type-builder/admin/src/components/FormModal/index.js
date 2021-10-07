@@ -13,7 +13,6 @@ import {
   useQuery,
   useStrapiApp,
 } from '@strapi/helper-plugin';
-import { ModalLayout } from '@strapi/parts/ModalLayout';
 import { useIntl } from 'react-intl';
 import { useHistory, useLocation } from 'react-router-dom';
 import {
@@ -25,9 +24,15 @@ import {
   // toString, upperFirst
 } from 'lodash';
 import { useSelector, useDispatch, shallowEqual } from 'react-redux';
+import { Box } from '@strapi/parts/Box';
+import { Divider } from '@strapi/parts/Divider';
+import { ModalLayout } from '@strapi/parts/ModalLayout';
+import { H2 } from '@strapi/parts/Text';
+import { Tabs, Tab, TabGroup, TabPanels, TabPanel } from '@strapi/parts/Tabs';
 import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
 // New compos
+import AttributeOptions from '../AttributeOptions';
 import FormModalHeader from '../FormModalHeader';
 
 // import AttributeOption from '../AttributeOption';
@@ -48,8 +53,8 @@ import {
   createHeadersArray,
   createHeadersObjectFromArray,
   getAttributesToDisplay,
-  // getModalTitleSubHeader,
-  // getNextSearch,
+  getModalTitleSubHeader,
+  getNextSearch,
 } from './utils';
 import forms from './forms';
 import { createComponentUid, createUid } from './utils/createUid';
@@ -380,6 +385,7 @@ const FormModal = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search]);
 
+  // TODO fix with tabs
   const form = get(forms, [state.modalType, 'form', state.settingType], () => ({
     items: [],
   }));
@@ -1133,10 +1139,19 @@ const FormModal = () => {
     return null;
   }
 
+  console.log({ id: getModalTitleSubHeader(state), displayedAttributes });
+
   return (
     <>
       <ModalLayout onClose={handleClosed} labelledBy="title">
         <FormModalHeader headerId={state.headerId} headers={headers} />
+        {isPickingAttribute && (
+          <AttributeOptions
+            attributes={displayedAttributes}
+            forTarget={state.forTarget}
+            kind={state.kind || 'collectionType'}
+          />
+        )}
       </ModalLayout>
     </>
   );
