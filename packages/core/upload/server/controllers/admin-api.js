@@ -37,9 +37,11 @@ module.exports = {
 
     const query = pm.addPermissionsQueryTo(ctx.query);
 
-    const files = await getService('upload').findPage(query);
+    const { results, pagination } = await getService('upload').findPage(query);
 
-    ctx.body = pm.sanitize(files, { withPrivate: false });
+    const sanitizedResults = pm.sanitize(results, { withPrivate: false });
+
+    return { results: sanitizedResults, pagination };
   },
 
   async findOne(ctx) {
