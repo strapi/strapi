@@ -6,41 +6,32 @@ import { stopPropagation } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 
-const DeleteButton = ({ canDelete, tokenName, onClick }) => {
+const DeleteButton = ({ tokenName, onClick }) => {
   const { formatMessage } = useIntl();
 
-  let component = null;
-
-  if (canDelete) {
-    component = (
-      <Box paddingLeft={1} {...stopPropagation}>
-        <IconButton
-          onClick={onClick}
-          label={formatMessage(
-            {
-              id: 'app.component.table.delete',
-              defaultMessage: 'Delete {target}',
-            },
-            { target: tokenName }
-          )}
-          noBorder
-          icon={<DeleteIcon />}
-        />
-      </Box>
-    );
-  }
-
-  return component;
+  return (
+    <Box paddingLeft={1} {...stopPropagation}>
+      <IconButton
+        onClick={onClick}
+        label={formatMessage(
+          {
+            id: 'app.component.table.delete',
+            defaultMessage: 'Delete {target}',
+          },
+          { target: `${tokenName}` }
+        )}
+        noBorder
+        icon={<DeleteIcon />}
+      />
+    </Box>
+  );
 };
 
 DeleteButton.defaultProps = {
-  canDelete: false,
-  tokenName: null,
   onClick: () => {},
 };
 
 DeleteButton.propTypes = {
-  canDelete: PropTypes.bool,
   tokenName: PropTypes.string.isRequired,
   onClick: PropTypes.func,
 };
