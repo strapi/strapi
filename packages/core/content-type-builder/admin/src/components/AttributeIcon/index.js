@@ -58,9 +58,11 @@ const IconBox = styled(Box)`
 `;
 
 const AttributeIcon = ({ type, ...rest }) => {
-  const Compo = iconByTypes[type];
+  const iconType = type === 'collectionType' ? 'contentType' : type;
 
-  if (!iconByTypes[type]) {
+  const Compo = iconByTypes[iconType];
+
+  if (!iconByTypes[iconType]) {
     return null;
   }
 
