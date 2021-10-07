@@ -244,7 +244,7 @@ const baseForm = {
             validations: {},
           },
         ],
-        [uiHelpers.spacerMedium],
+        // [uiHelpers.spacerMedium],
       ],
     };
   },
@@ -273,7 +273,7 @@ const baseForm = {
             validations: {},
           },
         ],
-        [uiHelpers.spacerMedium],
+        // [uiHelpers.spacerMedium],
       ],
     };
   },

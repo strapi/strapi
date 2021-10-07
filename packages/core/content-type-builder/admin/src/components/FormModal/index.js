@@ -7,6 +7,7 @@ import {
   // ModalFooter,
   // ModalForm,
   // PopUpWarning,
+  GenericInput,
   getYupInnerErrors,
   useTracking,
   useNotification,
@@ -27,10 +28,12 @@ import upperFirst from 'lodash/upperFirst';
 import { useSelector, useDispatch, shallowEqual } from 'react-redux';
 import { Box } from '@strapi/parts/Box';
 import { Divider } from '@strapi/parts/Divider';
+import { Grid, GridItem } from '@strapi/parts/Grid';
 import { ModalLayout, ModalBody } from '@strapi/parts/ModalLayout';
 import { H2 } from '@strapi/parts/Text';
 import { Tabs, Tab, TabGroup, TabPanels, TabPanel } from '@strapi/parts/Tabs';
 import { Row } from '@strapi/parts/Row';
+import { Stack } from '@strapi/parts/Stack';
 import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
 // New compos
@@ -384,11 +387,6 @@ const FormModal = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search]);
 
-  // TODO fix with tabs
-  const form = get(forms, [state.modalType, 'form', state.settingType], () => ({
-    items: [],
-  }));
-
   const headers = createHeadersArray(state);
 
   const isCreatingContentType = state.modalType === 'contentType';
@@ -511,7 +509,6 @@ const FormModal = () => {
     await schema.validate(dataToValidate, { abortEarly: false });
   };
 
-  // TODO this should be a util for testing
   const getButtonSubmitMessage = () => {
     const { attributeType, modalType } = state;
     const isCreatingAComponent = get(modifiedData, 'createComponent', false);
@@ -1074,12 +1071,6 @@ const FormModal = () => {
     });
   };
 
-  // const onOpened = () => {
-  //   if (state.modalType === 'chooseAttribute') {
-  //     attributeOptionRef.current.focus();
-  //   }
-  // };
-
   const sendAdvancedTabEvent = tab => {
     if (tab !== 'advanced') {
       return;
@@ -1131,11 +1122,18 @@ const FormModal = () => {
     nestedComponents
   );
 
-  // Styles
-
   if (!isOpen) {
     return null;
   }
+
+  const formToDisplay = get(forms, [state.modalType, 'form'], {
+    advanced: () => ({
+      items: [],
+    }),
+    base: () => ({
+      items: [],
+    }),
+  });
 
   return (
     <>
@@ -1149,72 +1147,138 @@ const FormModal = () => {
           />
         )}
         {!isPickingAttribute && (
-          <ModalBody>
-            <TabGroup label="todo" id="tabs" variant="simple">
-              <Row justifyContent="space-between">
-                <H2>
-                  {formatMessage(
-                    {
-                      id: getModalTitleSubHeader(state),
-                      defaultMessage: 'Add new field',
-                    },
-                    {
-                      type: upperFirst(
-                        formatMessage({
-                          id: getTrad(`attribute.${state.attributeType}`),
-                        })
-                      ),
-                      name: upperFirst(state.attributeName),
-                      step: state.step,
-                    }
-                  )}
-                </H2>
-                <Tabs>
-                  <Tab
-                    onClick={() => {
-                      setState(prev => ({
-                        ...prev,
-                        settingType: 'base',
-                      }));
+          <form onSubmit={handleSubmit}>
+            <ModalBody>
+              <TabGroup label="todo" id="tabs" variant="simple">
+                <Row justifyContent="space-between">
+                  <H2>
+                    {formatMessage(
+                      {
+                        id: getModalTitleSubHeader(state),
+                        defaultMessage: 'Add new field',
+                      },
+                      {
+                        type: upperFirst(
+                          formatMessage({
+                            id: getTrad(`attribute.${state.attributeType}`),
+                          })
+                        ),
+                        name: upperFirst(state.attributeName),
+                        step: state.step,
+                      }
+                    )}
+                  </H2>
+                  <Tabs>
+                    <Tab
+                      onClick={() => {
+                        setState(prev => ({
+                          ...prev,
+                          settingType: 'base',
+                        }));
 
-                      push({ search: getNextSearch('base', state) });
-                    }}
-                  >
-                    {formatMessage({
-                      id: getTrad('popUpForm.navContainer.base'),
-                      defaultMessage: 'Base settings',
-                    })}
-                  </Tab>
-                  <Tab
-                    // TODO put aria-disabled
-                    disabled={shouldDisableAdvancedTab()}
-                    onClick={() => {
-                      setState(prev => ({
-                        ...prev,
-                        settingType: 'advanced',
-                      }));
-                      sendAdvancedTabEvent('advanced');
-                      push({ search: getNextSearch('advanced', state) });
-                    }}
-                  >
-                    {formatMessage({
-                      id: getTrad('popUpForm.navContainer.advanced'),
-                      defaultMessage: 'Advanced settings',
-                    })}
-                  </Tab>
-                </Tabs>
-              </Row>
+                        push({ search: getNextSearch('base', state) });
+                      }}
+                    >
+                      {formatMessage({
+                        id: getTrad('popUpForm.navContainer.base'),
+                        defaultMessage: 'Base settings',
+                      })}
+                    </Tab>
+                    <Tab
+                      // TODO put aria-disabled
+                      disabled={shouldDisableAdvancedTab()}
+                      onClick={() => {
+                        setState(prev => ({
+                          ...prev,
+                          settingType: 'advanced',
+                        }));
+                        sendAdvancedTabEvent('advanced');
+                        push({ search: getNextSearch('advanced', state) });
+                      }}
+                    >
+                      {formatMessage({
+                        id: getTrad('popUpForm.navContainer.advanced'),
+                        defaultMessage: 'Advanced settings',
+                      })}
+                    </Tab>
+                  </Tabs>
+                </Row>
 
-              <Divider />
+                <Divider />
 
-              <Box paddingTop={7} paddingBottom={7}>
-                <TabPanels>
-                  <TabPanel>Base settings</TabPanel>
-                  <TabPanel>Advanced settings</TabPanel>
-                </TabPanels>
-              </Box>
-            </TabGroup>
-          </ModalBody>
+                <Box paddingTop={7} paddingBottom={7}>
+                  <TabPanels>
+                    <TabPanel>
+                      <Stack size={6}>
+                        {state.settingType === 'base' &&
+                          formToDisplay
+                            .base({
+                              data: modifiedData,
+                              type: state.attributeType,
+                              step: state.step,
+                              actionType: state.actionType,
+                              attributes,
+                              extensions: ctbFormsAPI,
+                              forTarget: state.forTarget,
+                              contentTypeSchema: allDataSchema.contentType || {},
+                            })
+                            .items.map((row, rowIndex) => {
+                              return (
+                                <Grid key={rowIndex} gap={4}>
+                                  {row.map((input, i) => {
+                                    const key = `${rowIndex}.${i}`;
+
+                                    // FIX input size
+                                    // FIXME key in baseform
+                                    return (
+                                      <GridItem col={input.size || 6} key={input.name || key}>
+                                        {input.name}
+                                      </GridItem>
+                                    );
+                                  })}
+                                </Grid>
+                              );
+                            })}
+                      </Stack>
+                    </TabPanel>
+                    <TabPanel>
+                      <Stack size={6}>
+                        {state.settingType === 'advanced' &&
+                          formToDisplay
+                            .advanced({
+                              data: modifiedData,
+                              type: state.attributeType,
+                              step: state.step,
+                              actionType: state.actionType,
+                              attributes,
+                              extensions: ctbFormsAPI,
+                              forTarget: state.forTarget,
+                              contentTypeSchema: allDataSchema.contentType || {},
+                            })
+                            .items.map((row, rowIndex) => {
+                              return (
+                                <Grid key={rowIndex} gap={4}>
+                                  {row.map((input, i) => {
+                                    const key = `${rowIndex}.${i}`;
+
+                                    // FIX input size
+                                    // FIXME key in baseform
+                                    return (
+                                      <GridItem col={input.size || 6} key={input.name || key}>
+                                        {input.name}&nbsp;
+                                      </GridItem>
+                                    );
+                                  })}
+                                </Grid>
+                              );
+                            })}
+                      </Stack>
+                    </TabPanel>
+                  </TabPanels>
+                </Box>
+              </TabGroup>
+            </ModalBody>
+          </form>
         )}
       </ModalLayout>
     </>
@@ -1321,14 +1385,14 @@ const FormModal = () => {
   //                     );
   //                   })
   //                 : form({
-  //                     data: modifiedData,
-  //                     type: state.attributeType,
-  //                     step: state.step,
-  //                     actionType: state.actionType,
-  //                     attributes,
-  //                     extensions: ctbFormsAPI,
-  //                     forTarget: state.forTarget,
-  //                     contentTypeSchema: allDataSchema.contentType || {},
+  // data: modifiedData,
+  // type: state.attributeType,
+  // step: state.step,
+  // actionType: state.actionType,
+  // attributes,
+  // extensions: ctbFormsAPI,
+  // forTarget: state.forTarget,
+  // contentTypeSchema: allDataSchema.contentType || {},
   //                   }).items.map((row, index) => {
   //                     return (
   //                       <div className="row" key={index}>
