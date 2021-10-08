@@ -21,7 +21,7 @@ const DropdownIconWrapper = styled(Box)`
     height: ${6 / 16}rem;
     width: ${11 / 16}rem;
     > path {
-      fill: ${({ theme }) => theme.colors.primary600};
+      fill: ${({ theme }) => theme.colors.neutral600};
     }
   }
 `;
@@ -43,17 +43,17 @@ const DragPreview = ({ displayedValue }) => {
       paddingTop={3}
       paddingBottom={3}
       hasRadius
-      background="primary100"
+      background="neutral0"
       style={{ width: '20vw' }}
     >
       <Row justifyContent="space-between">
         <ToggleButton type="button">
           <Row>
-            <DropdownIconWrapper background="primary200">
+            <DropdownIconWrapper background="neutral200">
               <DropdownIcon />
             </DropdownIconWrapper>
             <Box paddingLeft={6}>
-              <Text textColor="primary700" style={{ width: '9vw' }} ellipsis>
+              <Text textColor="neutral700" style={{ width: '9vw' }} ellipsis>
                 {displayedValue}
               </Text>
             </Box>

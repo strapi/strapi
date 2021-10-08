@@ -57,7 +57,7 @@ describe('<PageSizeURLQuery />', () => {
         align-items: center;
       }
 
-      .c3 {
+      .c4 {
         position: absolute;
         left: 0;
         right: 0;
@@ -68,7 +68,7 @@ describe('<PageSizeURLQuery />', () => {
         border: none;
       }
 
-      .c3:focus {
+      .c4:focus {
         outline: none;
       }
 
@@ -88,7 +88,21 @@ describe('<PageSizeURLQuery />', () => {
         padding-left: 12px;
       }
 
-      .c4 {
+      .c2 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c5 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -100,20 +114,6 @@ describe('<PageSizeURLQuery />', () => {
         -webkit-justify-content: space-between;
         -ms-flex-pack: justify;
         justify-content: space-between;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c6 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -139,17 +139,25 @@ describe('<PageSizeURLQuery />', () => {
         margin-top: 0px;
       }
 
-      .c2 {
+      .c3 {
         position: relative;
         border: 1px solid #dcdce4;
         padding-right: 12px;
         border-radius: 4px;
         background: #ffffff;
         overflow: hidden;
+        min-height: 2rem;
+        outline: none;
+        box-shadow: 0;
+        -webkit-transition-property: border-color,box-shadow,fill;
+        transition-property: border-color,box-shadow,fill;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
       }
 
-      .c2:focus-within {
+      .c3:focus-within {
         border: 1px solid #4945ff;
+        box-shadow: #4945ff 0px 0px 0px 2px;
       }
 
       .c10 {
@@ -181,8 +189,8 @@ describe('<PageSizeURLQuery />', () => {
         width: 0.375rem;
       }
 
-      .c5 {
-        min-height: 2.125rem;
+      .c6 {
+        width: 100%;
       }
 
       .c13 {
@@ -200,7 +208,7 @@ describe('<PageSizeURLQuery />', () => {
             class="c1"
           >
             <div
-              class="c2"
+              class="c2 c3"
             >
               <button
                 aria-disabled="false"
@@ -208,15 +216,15 @@ describe('<PageSizeURLQuery />', () => {
                 aria-haspopup="listbox"
                 aria-label="Entries per page"
                 aria-labelledby="select-1-label select-1-content"
-                class="c3"
+                class="c4"
                 id="select-1"
                 type="button"
               />
               <div
-                class="c4 c5"
+                class="c5 c6"
               >
                 <div
-                  class="c6"
+                  class="c2"
                 >
                   <div
                     class="c7"
@@ -230,7 +238,7 @@ describe('<PageSizeURLQuery />', () => {
                   </div>
                 </div>
                 <div
-                  class="c6"
+                  class="c2"
                 >
                   <button
                     aria-hidden="true"

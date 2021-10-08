@@ -49,6 +49,8 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   border-radius: 4px;
   background: #ffffff;
   border: 1px solid #dcdce4;
+  position: relative;
+  outline: none;
 }
 
 .c6 svg {
@@ -63,6 +65,36 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
 
 .c6[aria-disabled='true'] {
   pointer-events: none;
+}
+
+.c6:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c6:focus-visible {
+  outline: none;
+}
+
+.c6:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
 }
 
 .c7 {
@@ -336,14 +368,14 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   color: #8e8ea9;
 }
 
-.c27 {
+.c26 {
   font-weight: 500;
   font-size: 0.75rem;
   line-height: 1.33;
   color: #32324d;
 }
 
-.c26 {
+.c25 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -357,7 +389,7 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   align-items: center;
 }
 
-.c28 {
+.c27 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -375,7 +407,7 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   align-items: center;
 }
 
-.c30 {
+.c29 {
   border: none;
   border-radius: 4px;
   padding-left: 16px;
@@ -385,41 +417,57 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   font-size: 0.875rem;
   display: block;
   width: 100%;
-  height: 2.5rem;
 }
 
-.c30::-webkit-input-placeholder {
+.c29::-webkit-input-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c30::-moz-placeholder {
+.c29::-moz-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c30:-ms-input-placeholder {
+.c29:-ms-input-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c30::placeholder {
+.c29::placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c30[aria-disabled='true'] {
+.c29[aria-disabled='true'] {
   background: inherit;
   color: inherit;
 }
 
-.c29 {
+.c29:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.c28 {
   border: 1px solid #dcdce4;
   border-radius: 4px;
   background: #ffffff;
+  height: 2.5rem;
+  outline: none;
+  box-shadow: 0;
+  -webkit-transition-property: border-color,box-shadow,fill;
+  transition-property: border-color,box-shadow,fill;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
 }
 
-.c25 {
+.c28:focus-within {
+  border: 1px solid #4945ff;
+  box-shadow: #4945ff 0px 0px 0px 2px;
+}
+
+.c24 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -429,17 +477,145 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   flex-direction: column;
 }
 
-.c25 > * {
+.c24 > * {
   margin-top: 0;
   margin-bottom: 0;
 }
 
-.c25 > * + * {
+.c24 > * + * {
   margin-top: 4px;
 }
 
-.c24 textarea {
+.c33 {
+  font-weight: 500;
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #32324d;
+}
+
+.c32 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c34 {
+  border: 1px solid #dcdce4;
+  border-radius: 4px;
+  padding-left: 16px;
+  padding-right: 16px;
+  padding-top: 12px;
+  padding-bottom: 12px;
+  background: #ffffff;
+  outline: none;
+  box-shadow: 0;
+  -webkit-transition-property: border-color,box-shadow,fill;
+  transition-property: border-color,box-shadow,fill;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+}
+
+.c34:focus-within {
+  border: 1px solid #4945ff;
+  box-shadow: #4945ff 0px 0px 0px 2px;
+}
+
+.c35 {
+  display: block;
+  width: 100%;
+  font-weight: 400;
+  font-size: 0.875rem;
+  border: none;
+  color: #32324d;
+  resize: none;
+}
+
+.c35::-webkit-input-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c35::-moz-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c35:-ms-input-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c35::placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c35:focus-within {
+  outline: none;
+}
+
+.c31 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+}
+
+.c31 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c31 > * + * {
+  margin-top: 4px;
+}
+
+.c30 textarea {
   height: 5rem;
+  line-height: 1.25rem;
+}
+
+.c30 textarea::-webkit-input-placeholder {
+  font-weight: 400;
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c30 textarea::-moz-placeholder {
+  font-weight: 400;
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c30 textarea:-ms-input-placeholder {
+  font-weight: 400;
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c30 textarea::placeholder {
+  font-weight: 400;
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #8e8ea9;
+  opacity: 1;
 }
 
 .c37 {
@@ -522,119 +698,6 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
 
 .c23 {
   grid-column: span 6;
-}
-
-.c34 {
-  font-weight: 500;
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #32324d;
-}
-
-.c33 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c35 {
-  display: block;
-  width: 100%;
-  border: 1px solid #dcdce4;
-  border-radius: 4px;
-  padding-left: 16px;
-  padding-right: 16px;
-  padding-top: 12px;
-  padding-bottom: 12px;
-  font-weight: 400;
-  font-size: 0.875rem;
-  color: #32324d;
-  background: #ffffff;
-}
-
-.c35::-webkit-input-placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c35::-moz-placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c35:-ms-input-placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c35::placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c32 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-}
-
-.c32 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c32 > * + * {
-  margin-top: 4px;
-}
-
-.c31 textarea {
-  height: 5rem;
-  line-height: 1.25rem;
-  font-family: -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,Cantarell,'Open Sans', 'Helvetica Neue',sans-serif;
-}
-
-.c31 textarea::-webkit-input-placeholder {
-  font-weight: 400;
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c31 textarea::-moz-placeholder {
-  font-weight: 400;
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c31 textarea:-ms-input-placeholder {
-  font-weight: 400;
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c31 textarea::placeholder {
-  font-weight: 400;
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #8e8ea9;
-  opacity: 1;
 }
 
 @media (max-width:68.75rem) {
@@ -753,30 +816,28 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
                   <div
                     class=""
                   >
-                    <div
-                      class="c24"
-                    >
+                    <div>
                       <div>
                         <div
-                          class="c25"
+                          class="c24"
                         >
                           <div
-                            class="c26"
+                            class="c25"
                           >
                             <label
-                              class="c27"
+                              class="c26"
                               for="textinput-1"
                             >
                               Name
                             </label>
                           </div>
                           <div
-                            class="c28 c29"
+                            class="c27 c28"
                           >
                             <input
                               aria-disabled="false"
                               aria-invalid="false"
-                              class="c30"
+                              class="c29"
                               id="textinput-1"
                               name="name"
                               value=""
@@ -794,28 +855,32 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
                     class=""
                   >
                     <div
-                      class="c31"
+                      class="c30"
                     >
                       <div>
                         <div
-                          class="c32"
+                          class="c31"
                         >
                           <div
-                            class="c33"
+                            class="c32"
                           >
                             <label
-                              class="c34"
+                              class="c33"
                               for="textarea-1"
                             >
                               Description
                             </label>
                           </div>
-                          <textarea
-                            aria-invalid="false"
-                            class="c35"
-                            id="textarea-1"
-                            name="description"
-                          />
+                          <div
+                            class="c34"
+                          >
+                            <textarea
+                              aria-invalid="false"
+                              class="c35"
+                              id="textarea-1"
+                              name="description"
+                            />
+                          </div>
                         </div>
                       </div>
                     </div>

@@ -75,6 +75,8 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         border-radius: 4px;
         background: #ffffff;
         border: 1px solid #dcdce4;
+        position: relative;
+        outline: none;
       }
 
       .c25 svg {
@@ -89,6 +91,36 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
 
       .c25[aria-disabled='true'] {
         pointer-events: none;
+      }
+
+      .c25:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c25:focus-visible {
+        outline: none;
+      }
+
+      .c25:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
       }
 
       .c26 {

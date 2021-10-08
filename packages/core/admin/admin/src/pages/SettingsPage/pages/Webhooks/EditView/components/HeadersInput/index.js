@@ -1,4 +1,5 @@
 import React from 'react';
+import styled from 'styled-components';
 import { RemoveRoundedButton } from '@strapi/helper-plugin';
 import AddIcon from '@strapi/icons/AddIcon';
 import { Box } from '@strapi/parts/Box';
@@ -10,6 +11,10 @@ import { TextInput } from '@strapi/parts/TextInput';
 import { TextButton } from '@strapi/parts/TextButton';
 import { Field, FieldArray, useFormikContext } from 'formik';
 import { useIntl } from 'react-intl';
+
+const RemoveButtonContainer = styled(Row)`
+  height: ${({ theme }) => theme.sizes.input.M};
+`;
 
 const HeadersInput = () => {
   const { formatMessage } = useIntl();
@@ -51,7 +56,7 @@ const HeadersInput = () => {
                     />
                   </GridItem>
                   <GridItem col={6}>
-                    <Row>
+                    <Row alignItems="flex-end">
                       <Box style={{ flex: 1 }}>
                         <Field
                           as={TextInput}
@@ -70,7 +75,7 @@ const HeadersInput = () => {
                           }
                         />
                       </Box>
-                      <Box paddingLeft={2}>
+                      <RemoveButtonContainer paddingLeft={2}>
                         <RemoveRoundedButton
                           onClick={() => values.headers.length !== 1 && remove(i)}
                           label={formatMessage(
@@ -81,7 +86,7 @@ const HeadersInput = () => {
                             { number: i + 1 }
                           )}
                         />
-                      </Box>
+                      </RemoveButtonContainer>
                     </Row>
                   </GridItem>
                 </React.Fragment>

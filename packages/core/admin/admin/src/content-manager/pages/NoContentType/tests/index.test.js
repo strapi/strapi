@@ -50,6 +50,8 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
         border-radius: 4px;
         background: #ffffff;
         border: 1px solid #dcdce4;
+        position: relative;
+        outline: none;
       }
 
       .c14 svg {
@@ -64,6 +66,36 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
 
       .c14[aria-disabled='true'] {
         pointer-events: none;
+      }
+
+      .c14:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c14:focus-visible {
+        outline: none;
+      }
+
+      .c14:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
       }
 
       .c15 {
