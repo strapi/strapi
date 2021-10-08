@@ -109,7 +109,7 @@ module.exports = scope => {
   if (fs.existsSync(scope.rootPath)) {
     let current = require(scope.rootPath);
     fs.unlinkSync(scope.rootPath);
-    routes = _.concat(routes, _.differenceWith(current.routes, routes, _.isEqual));
+    routes = routes.concat(_.differenceWith(current.routes, routes, _.isEqual));
   }
 
   return { routes };

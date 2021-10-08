@@ -134,8 +134,7 @@ const getAllowedFields = ({ includeFields, model, isOutput }) => {
 
   const timestamps = options.timestamps || [];
 
-  return _.concat(
-    includeFields || [],
+  return (includeFields || []).concat(
     ...(isOutput
       ? [
           primaryKey,

@@ -1,6 +1,6 @@
 'use strict';
 
-const { clone, has, concat, isNil } = require('lodash/fp');
+const { clone, has, isNil } = require('lodash/fp');
 const qs = require('qs');
 const request = require('supertest');
 const { createUtils } = require('./utils');
@@ -17,7 +17,7 @@ const createAgent = (strapi, initialState = {}) => {
       supertestAgent.auth(state.token, { type: 'bearer' });
     }
 
-    const fullUrl = concat(state.urlPrefix, url).join('');
+    const fullUrl = `${state.urlPrefix}${url}`;
 
     const rq = supertestAgent[method.toLowerCase()](fullUrl);
 

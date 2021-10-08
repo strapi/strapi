@@ -1,6 +1,6 @@
 'use strict';
 
-const { has, prop, pick, concat } = require('lodash/fp');
+const { has, prop, pick } = require('lodash/fp');
 const { PUBLISHED_AT_ATTRIBUTE } = require('strapi-utils').contentTypes.constants;
 
 const { getService } = require('../utils');
@@ -34,7 +34,7 @@ module.exports = {
 
     if (idsToOmit && Array.isArray(idsToOmit)) {
       query._where = query._where || {};
-      query._where.id_nin = concat(query._where.id_nin || [], idsToOmit);
+      query._where.id_nin = (query._where.id_nin || []).concat(idsToOmit);
     }
 
     const entityManager = getService('entity-manager');
