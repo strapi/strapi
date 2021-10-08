@@ -1,5 +1,7 @@
-import { cloneDeep, get } from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
+import get from 'lodash/get';
 import * as yup from 'yup';
+import getTrad from './getTrad';
 
 const formsAPI = {
   components: {
@@ -89,7 +91,18 @@ const formsAPI = {
       []
     );
 
-    return { sections: [...initSections, { sectionTitle: null, items: sectionsToAdd }] };
+    return {
+      sections: [
+        ...initSections,
+        {
+          sectionTitle: {
+            id: getTrad('form.attribute.item.settings.name'),
+            defaultMessage: 'Settings',
+          },
+          items: sectionsToAdd,
+        },
+      ],
+    };
   },
   makeValidator(target, initShape, ...args) {
     const validators = get(this.types, [...target, 'validators'], []);

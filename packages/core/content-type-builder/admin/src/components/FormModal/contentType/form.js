@@ -3,12 +3,13 @@ import getTrad from '../../../utils/getTrad';
 const nameField = {
   name: 'name',
   type: 'text',
-  label: {
+  intlLabel: {
     id: getTrad('contentType.displayName.label'),
+    defaultMessage: 'Display name',
   },
-  validations: {
-    required: true,
-  },
+  // validations: {
+  //   required: true,
+  // },
 };
 
 const forms = {
@@ -22,14 +23,19 @@ const forms = {
           //   },
           // ],
           {
-            sectionTitle: null,
+            sectionTitle: {
+              id: getTrad('form.contentType.divider.draft-publish'),
+              defaultMessage: 'DRAFT/PUBLISH',
+            },
             items: [
               {
-                label: {
+                intlLabel: {
                   id: getTrad('contentType.draftAndPublish.label'),
+                  defaultMessage: 'Draft/publish system',
                 },
                 description: {
                   id: getTrad('contentType.draftAndPublish.description'),
+                  defaultMessage: 'Write a draft version of each entry before publishing it',
                 },
                 name: 'draftAndPublish',
                 type: 'bool',
@@ -37,7 +43,6 @@ const forms = {
               },
             ],
           },
-          // [{ type: 'divider' }],
         ],
       };
     },
@@ -53,8 +58,13 @@ const forms = {
               {
                 description: {
                   id: getTrad('contentType.UID.description'),
+                  defaultMessage:
+                    'The UID is used to generate the API routes and databases tables/collections',
                 },
-                label: 'UID',
+                intlLabel: {
+                  id: getTrad('contentType.UID.label'),
+                  defaultMessage: 'UID',
+                },
                 name: 'uid',
                 type: 'text',
                 readOnly: true,
@@ -74,30 +84,32 @@ const forms = {
             items: [
               nameField,
               {
-                label: {
+                intlLabel: {
                   id: getTrad('modalForm.attribute.text.type-selection'),
+                  defaultMessage: 'Type',
                 },
                 name: 'kind',
                 type: 'booleanBox',
                 size: 12,
-                onChangeCallback: ({ toggleNotification }) =>
-                  toggleNotification({
-                    type: 'info',
-                    message: { id: getTrad('contentType.kind.change.warning') },
-                  }),
-                options: [
-                  {
-                    headerId: getTrad('menu.section.models.name.singular'),
-                    descriptionId: getTrad('form.button.collection-type.description'),
-                    value: 'collectionType',
-                  },
-                  {
-                    headerId: getTrad('menu.section.single-types.name.singular'),
-                    descriptionId: getTrad('form.button.single-type.description'),
-                    value: 'singleType',
-                  },
-                ],
-                validations: {},
+                // FIXME
+                // onChangeCallback: ({ toggleNotification }) =>
+                //   toggleNotification({
+                //     type: 'info',
+                //     message: { id: getTrad('contentType.kind.change.warning') },
+                //   }),
+                // options: [
+                //   {
+                //     headerId: getTrad('menu.section.models.name.singular'),
+                //     descriptionId: getTrad('form.button.collection-type.description'),
+                //     value: 'collectionType',
+                //   },
+                //   {
+                //     headerId: getTrad('menu.section.single-types.name.singular'),
+                //     descriptionId: getTrad('form.button.single-type.description'),
+                //     value: 'singleType',
+                //   },
+                // ],
+                // validations: {},
               },
             ],
           },

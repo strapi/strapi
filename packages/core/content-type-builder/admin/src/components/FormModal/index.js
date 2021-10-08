@@ -16,21 +16,15 @@ import {
 } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { useHistory, useLocation } from 'react-router-dom';
-import {
-  get,
-  has,
-  isEmpty,
-  set,
-  toLower,
-  // toString, upperFirst
-} from 'lodash';
+import { get, has, isEmpty, set, toLower } from 'lodash';
 import upperFirst from 'lodash/upperFirst';
+import toString from 'lodash/toString';
 import { useSelector, useDispatch, shallowEqual } from 'react-redux';
 import { Box } from '@strapi/parts/Box';
 import { Divider } from '@strapi/parts/Divider';
 import { Grid, GridItem } from '@strapi/parts/Grid';
 import { ModalLayout, ModalBody } from '@strapi/parts/ModalLayout';
-import { H2 } from '@strapi/parts/Text';
+import { H2, H3 } from '@strapi/parts/Text';
 import { Tabs, Tab, TabGroup, TabPanels, TabPanel } from '@strapi/parts/Tabs';
 import { Row } from '@strapi/parts/Row';
 import { Stack } from '@strapi/parts/Stack';
@@ -1226,20 +1220,69 @@ const FormModal = () => {
                               contentTypeSchema: allDataSchema.contentType || {},
                             })
                             .sections.map((section, sectionIndex) => {
-                              return (
-                                <Grid key={sectionIndex} gap={4}>
-                                  {section.items.map((input, i) => {
-                                    const key = `${sectionIndex}.${i}`;
+                              // Don't display an empty section
+                              if (section.items.length === 0) {
+                                return null;
+                              }
 
-                                    // FIX input size
-                                    // FIXME key in baseform
-                                    return (
-                                      <GridItem col={input.size || 6} key={input.name || key}>
-                                        {input.name}
-                                      </GridItem>
-                                    );
-                                  })}
-                                </Grid>
+                              return (
+                                <Box key={sectionIndex}>
+                                  {section.sectionTitle && (
+                                    <Box paddingBottom={4}>
+                                      <H3>{formatMessage(section.sectionTitle)}</H3>
+                                    </Box>
+                                  )}
+                                  <Grid gap={4}>
+                                    {section.items.map((input, i) => {
+                                      const key = `${sectionIndex}.${i}`;
+
+                                      const retrievedValue = get(modifiedData, input.name, '');
+
+                                      let value;
+
+                                      // FIXME
+
+                                      // Condition for the boolean default value
+                                      // The radio input doesn't accept false, true or null as value
+                                      // So we pass them as string
+                                      // This way the data stays accurate and we don't have to operate
+                                      // any data mutation
+                                      if (
+                                        input.name === 'default' &&
+                                        state.attributeType === 'boolean'
+                                      ) {
+                                        value = toString(retrievedValue);
+                                        // Same here for the enum
+                                      } else if (
+                                        input.name === 'enum' &&
+                                        Array.isArray(retrievedValue)
+                                      ) {
+                                        value = retrievedValue.join('\n');
+                                      } else if (input.name === 'uid') {
+                                        value = input.value;
+                                      } else if (
+                                        input.name === 'allowedTypes' &&
+                                        retrievedValue === ''
+                                      ) {
+                                        value = null;
+                                      } else if (input.type === 'checkbox' && !retrievedValue) {
+                                        value = false;
+                                      } else {
+                                        value = retrievedValue;
+                                      }
+
+                                      return (
+                                        <GridItem col={input.size || 6} key={input.name || key}>
+                                          <GenericInput
+                                            {...input}
+                                            onChange={handleChange}
+                                            value={value}
+                                          />
+                                        </GridItem>
+                                      );
+                                    })}
+                                  </Grid>
+                                </Box>
                               );
                             })}
                       </Stack>
@@ -1259,20 +1302,69 @@ const FormModal = () => {
                               contentTypeSchema: allDataSchema.contentType || {},
                             })
                             .sections.map((section, sectionIndex) => {
-                              return (
-                                <Grid key={sectionIndex} gap={4}>
-                                  {section.items.map((input, i) => {
-                                    const key = `${sectionIndex}.${i}`;
+                              // Don't display an empty section
+                              if (section.items.length === 0) {
+                                return null;
+                              }
 
-                                    // FIX input size
-                                    // FIXME key in baseform
-                                    return (
-                                      <GridItem col={input.size || 6} key={input.name || key}>
-                                        {input.name}&nbsp;
-                                      </GridItem>
-                                    );
-                                  })}
-                                </Grid>
+                              return (
+                                <Box key={sectionIndex}>
+                                  {section.sectionTitle && (
+                                    <Box paddingBottom={4}>
+                                      <H3>{formatMessage(section.sectionTitle)}</H3>
+                                    </Box>
+                                  )}
+                                  <Grid gap={4}>
+                                    {section.items.map((input, i) => {
+                                      const key = `${sectionIndex}.${i}`;
+
+                                      let value;
+
+                                      const retrievedValue = get(modifiedData, input.name, '');
+
+                                      // Condition for the boolean default value
+                                      // The radio input doesn't accept false, true or null as value
+                                      // So we pass them as string
+                                      // This way the data stays accurate and we don't have to operate
+                                      // any data mutation
+                                      if (
+                                        input.name === 'default' &&
+                                        state.attributeType === 'boolean'
+                                      ) {
+                                        value = toString(retrievedValue);
+                                        // Same here for the enum
+                                      } else if (
+                                        input.name === 'enum' &&
+                                        Array.isArray(retrievedValue)
+                                      ) {
+                                        value = retrievedValue.join('\n');
+                                      } else if (input.name === 'uid') {
+                                        value = input.value;
+                                      } else if (
+                                        input.name === 'allowedTypes' &&
+                                        retrievedValue === ''
+                                      ) {
+                                        value = null;
+                                      } else if (input.type === 'checkbox' && !retrievedValue) {
+                                        value = false;
+                                      } else {
+                                        value = retrievedValue;
+                                      }
+
+                                      // FIX input size
+                                      // FIXME key in baseform
+                                      return (
+                                        <GridItem col={input.size || 6} key={input.name || key}>
+                                          <GenericInput
+                                            {...input}
+                                            onChange={handleChange}
+                                            value={value}
+                                          />
+                                        </GridItem>
+                                      );
+                                    })}
+                                  </Grid>
+                                </Box>
                               );
                             })}
                       </Stack>
@@ -1490,29 +1582,29 @@ const FormModal = () => {
   //                                 null
   //                               );
 
-  //                           const retrievedValue = get(modifiedData, input.name, '');
+  // const retrievedValue = get(modifiedData, input.name, '');
 
-  //                           let value;
+  // let value;
 
-  //                           // Condition for the boolean default value
-  //                           // The radio input doesn't accept false, true or null as value
-  //                           // So we pass them as string
-  //                           // This way the data stays accurate and we don't have to operate
-  //                           // any data mutation
-  //                           if (input.name === 'default' && state.attributeType === 'boolean') {
-  //                             value = toString(retrievedValue);
-  //                             // Same here for the enum
-  //                           } else if (input.name === 'enum' && Array.isArray(retrievedValue)) {
-  //                             value = retrievedValue.join('\n');
-  //                           } else if (input.name === 'uid') {
-  //                             value = input.value;
-  //                           } else if (input.name === 'allowedTypes' && retrievedValue === '') {
-  //                             value = null;
-  //                           } else if (input.type === 'checkbox' && !retrievedValue) {
-  //                             value = false;
-  //                           } else {
-  //                             value = retrievedValue;
-  //                           }
+  // // Condition for the boolean default value
+  // // The radio input doesn't accept false, true or null as value
+  // // So we pass them as string
+  // // This way the data stays accurate and we don't have to operate
+  // // any data mutation
+  // if (input.name === 'default' && state.attributeType === 'boolean') {
+  //   value = toString(retrievedValue);
+  //   // Same here for the enum
+  // } else if (input.name === 'enum' && Array.isArray(retrievedValue)) {
+  //   value = retrievedValue.join('\n');
+  // } else if (input.name === 'uid') {
+  //   value = input.value;
+  // } else if (input.name === 'allowedTypes' && retrievedValue === '') {
+  //   value = null;
+  // } else if (input.type === 'checkbox' && !retrievedValue) {
+  //   value = false;
+  // } else {
+  //   value = retrievedValue;
+  // }
 
   //                           return (
   //                             <div className={`col-${input.size || 6}`} key={input.name}>

@@ -103,16 +103,19 @@ export default {
           }),
         }),
         form: {
-          // TODO
           advanced() {
             return [
               {
                 name: 'pluginOptions.i18n.localized',
                 description: {
                   id: getTrad('plugin.schema.i18n.localized.description-content-type'),
+                  defaultMessage: 'Allow you to have content in different locales',
                 },
                 type: 'checkboxConfirmation',
-                label: { id: getTrad('plugin.schema.i18n.localized.label-content-type') },
+                intlLabel: {
+                  id: getTrad('plugin.schema.i18n.localized.label-content-type'),
+                  defaultMessage: 'Enable localization for this Content-Type',
+                },
               },
             ];
           },
