@@ -101,6 +101,17 @@ const defaultRoutes = [
     to: '/settings/api-tokens',
     exact: true,
   },
+  {
+    Component: async () => {
+      const component = await import(
+        /* webpackChunkName: "webhook-list-page" */ '../pages/ApiTokens/ProtectedCreateView'
+      );
+
+      return component;
+    },
+    to: '/settings/api-tokens/create',
+    exact: true,
+  },
 ];
 
 export default defaultRoutes;

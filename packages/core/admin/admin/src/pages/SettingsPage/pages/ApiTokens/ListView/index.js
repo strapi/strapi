@@ -12,6 +12,7 @@ import {
 import { HeaderLayout, ContentLayout } from '@strapi/parts/Layout';
 import { Main } from '@strapi/parts/Main';
 import { Button } from '@strapi/parts/Button';
+import { LinkButton } from '@strapi/parts/LinkButton';
 import AddIcon from '@strapi/icons/AddIcon';
 import { useQuery } from 'react-query';
 import { useHistory } from 'react-router-dom';
@@ -73,12 +74,17 @@ const ApiTokenListView = () => {
         })}
         primaryAction={
           canCreate ? (
-            <Button data-testid="create-api-token-button" startIcon={<AddIcon />} size="L">
+            <LinkButton
+              data-testid="create-api-token-button"
+              startIcon={<AddIcon />}
+              size="L"
+              to="/settings/api-tokens/create"
+            >
               {formatMessage({
                 id: 'Settings.apiTokens.create',
                 defaultMessage: 'Add Entry',
               })}
-            </Button>
+            </LinkButton>
           ) : (
             undefined
           )
