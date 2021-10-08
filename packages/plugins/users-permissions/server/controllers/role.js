@@ -21,10 +21,8 @@ module.exports = {
 
   async getRole(ctx) {
     const { id } = ctx.params;
-    const { lang } = ctx.query;
 
-    const plugins = await getService('users-permissions').getPlugins(lang);
-    const role = await getService('role').getRole(id, plugins);
+    const role = await getService('role').getRole(id);
 
     if (!role) {
       return ctx.notFound();
