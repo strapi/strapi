@@ -50,7 +50,7 @@ const forms = {
     form: {
       advanced({ data, type, step, extensions, ...rest }) {
         try {
-          const baseForm = attributesForm.advanced[type](data, step).items;
+          const baseForm = attributesForm.advanced[type](data, step).sections;
 
           return extensions.makeAdvancedForm(['attribute', type], baseForm, {
             data,
@@ -61,7 +61,7 @@ const forms = {
         } catch (err) {
           console.error(err);
 
-          return { items: [] };
+          return { sections: [] };
         }
       },
       base({ data, type, step, attributes }) {
@@ -99,7 +99,7 @@ const forms = {
         return contentTypeForm.base.edit();
       },
       advanced({ extensions }) {
-        const baseForm = contentTypeForm.advanced.default().items;
+        const baseForm = contentTypeForm.advanced.default().sections;
 
         return extensions.makeAdvancedForm(['contentType'], baseForm);
       },
@@ -122,12 +122,12 @@ const forms = {
     form: {
       advanced() {
         return {
-          items: componentForm.advanced(),
+          sections: componentForm.advanced(),
         };
       },
       base() {
         return {
-          items: componentForm.base(),
+          sections: componentForm.base(),
         };
       },
     },

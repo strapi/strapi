@@ -103,18 +103,17 @@ export default {
           }),
         }),
         form: {
+          // TODO
           advanced() {
             return [
-              [
-                {
-                  name: 'pluginOptions.i18n.localized',
-                  description: {
-                    id: getTrad('plugin.schema.i18n.localized.description-content-type'),
-                  },
-                  type: 'checkboxConfirmation',
-                  label: { id: getTrad('plugin.schema.i18n.localized.label-content-type') },
+              {
+                name: 'pluginOptions.i18n.localized',
+                description: {
+                  id: getTrad('plugin.schema.i18n.localized.description-content-type'),
                 },
-              ],
+                type: 'checkboxConfirmation',
+                label: { id: getTrad('plugin.schema.i18n.localized.label-content-type') },
+              },
             ];
           },
         },
@@ -164,16 +163,14 @@ export default {
             }
 
             return [
-              [
-                {
-                  name: 'pluginOptions.i18n.localized',
-                  description: {
-                    id: getTrad('plugin.schema.i18n.localized.description-field'),
-                  },
-                  type: 'checkbox',
-                  label: { id: getTrad('plugin.schema.i18n.localized.label-field') },
+              {
+                name: 'pluginOptions.i18n.localized',
+                description: {
+                  id: getTrad('plugin.schema.i18n.localized.description-field'),
                 },
-              ],
+                type: 'checkbox',
+                label: { id: getTrad('plugin.schema.i18n.localized.label-field') },
+              },
             ];
           },
         },

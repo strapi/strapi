@@ -922,7 +922,7 @@ describe('MediaLibrary / ListView', () => {
             </div>
             <nav
               aria-label="pagination"
-              class="sc-gmAFnh"
+              class="sc-jLfekY"
             >
               <ul
                 class="c43 c44"

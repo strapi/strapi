@@ -1128,12 +1128,14 @@ const FormModal = () => {
 
   const formToDisplay = get(forms, [state.modalType, 'form'], {
     advanced: () => ({
-      items: [],
+      sections: [],
     }),
     base: () => ({
-      items: [],
+      sections: [],
     }),
   });
+
+  // console.log(formToDisplay.advanced());
 
   return (
     <>
@@ -1188,6 +1190,7 @@ const FormModal = () => {
                       // TODO put aria-disabled
                       disabled={shouldDisableAdvancedTab()}
                       onClick={() => {
+                        console.log('click');
                         setState(prev => ({
                           ...prev,
                           settingType: 'advanced',
@@ -1222,11 +1225,11 @@ const FormModal = () => {
                               forTarget: state.forTarget,
                               contentTypeSchema: allDataSchema.contentType || {},
                             })
-                            .items.map((row, rowIndex) => {
+                            .sections.map((section, sectionIndex) => {
                               return (
-                                <Grid key={rowIndex} gap={4}>
-                                  {row.map((input, i) => {
-                                    const key = `${rowIndex}.${i}`;
+                                <Grid key={sectionIndex} gap={4}>
+                                  {section.items.map((input, i) => {
+                                    const key = `${sectionIndex}.${i}`;
 
                                     // FIX input size
                                     // FIXME key in baseform
@@ -1255,11 +1258,11 @@ const FormModal = () => {
                               forTarget: state.forTarget,
                               contentTypeSchema: allDataSchema.contentType || {},
                             })
-                            .items.map((row, rowIndex) => {
+                            .sections.map((section, sectionIndex) => {
                               return (
-                                <Grid key={rowIndex} gap={4}>
-                                  {row.map((input, i) => {
-                                    const key = `${rowIndex}.${i}`;
+                                <Grid key={sectionIndex} gap={4}>
+                                  {section.items.map((input, i) => {
+                                    const key = `${sectionIndex}.${i}`;
 
                                     // FIX input size
                                     // FIXME key in baseform
@@ -1353,9 +1356,9 @@ const FormModal = () => {
   //           <ModalBody style={modalBodyStyle}>
   //             <div className="container-fluid">
   //               {isPickingAttribute
-  //                 ? displayedAttributes.map((row, i) => {
+  //                 ? displayedAttributes.map((section, i) => {
   //                     return (
-  //                       <div key={i} className="row">
+  //                       <div key={i} className="section">
   //                         {i === 1 && (
   //                           <hr
   //                             style={{
@@ -1366,7 +1369,7 @@ const FormModal = () => {
   //                             }}
   //                           />
   //                         )}
-  //                         {row.map((attr, index) => {
+  //                         {section.map((attr, index) => {
   //                           const tabIndex =
   //                             i === 0 ? index : displayedAttributes[0].length + index;
 
@@ -1393,10 +1396,10 @@ const FormModal = () => {
   // extensions: ctbFormsAPI,
   // forTarget: state.forTarget,
   // contentTypeSchema: allDataSchema.contentType || {},
-  //                   }).items.map((row, index) => {
+  //                   }).sections.map((section, index) => {
   //                     return (
-  //                       <div className="row" key={index}>
-  //                         {row.map((input, i) => {
+  //                       <div className="section" key={index}>
+  //                         {section.map((input, i) => {
   //                           // The divider type is used mainly the advanced tab
   //                           // It is the one responsible for displaying the settings label
   //                           if (input.type === 'divider' || input.type === 'dividerDraftPublish') {

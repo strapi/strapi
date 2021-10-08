@@ -347,7 +347,7 @@ describe('PendingAssetStep', () => {
         background: #4945ff;
       }
 
-      .c15 .sc-ezrnTI {
+      .c15 .sc-kBPahn {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -412,7 +412,7 @@ describe('PendingAssetStep', () => {
         background: #ffffff;
       }
 
-      .c51 .sc-ezrnTI {
+      .c51 .sc-kBPahn {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;

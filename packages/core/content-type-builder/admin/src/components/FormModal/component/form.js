@@ -2,50 +2,54 @@ import getTrad from '../../../utils/getTrad';
 
 const componentForm = {
   base(prefix = '') {
-    const items = [
-      [
-        {
-          autoFocus: true,
-          name: `${prefix}name`,
-          type: 'text',
-          label: {
-            id: getTrad('modalForm.attribute.form.base.name'),
-          },
+    const sections = [
+      {
+        sectionTitle: null,
+        items: [
+          {
+            name: `${prefix}name`,
+            type: 'text',
+            label: {
+              id: getTrad('modalForm.attribute.form.base.name'),
+            },
 
-          validations: {
-            required: true,
+            validations: {
+              required: true,
+            },
           },
-        },
-        {
-          autoFocus: true,
-          name: `${prefix}category`,
-          type: 'creatableSelect',
-          label: {
-            id: getTrad('modalForm.components.create-component.category.label'),
+          {
+            name: `${prefix}category`,
+            type: 'creatableSelect',
+            label: {
+              id: getTrad('modalForm.components.create-component.category.label'),
+            },
+            validations: {
+              required: true,
+            },
           },
-          validations: {
-            required: true,
+        ],
+      },
+      {
+        sectionTitle: null,
+        items: [
+          {
+            name: `${prefix}icon`,
+            type: 'componentIconPicker',
+            size: 12,
+            label: {
+              id: getTrad('modalForm.components.icon.label'),
+            },
           },
-        },
-      ],
-      [
-        {
-          name: `${prefix}icon`,
-          type: 'componentIconPicker',
-          size: 12,
-          label: {
-            id: getTrad('modalForm.components.icon.label'),
-          },
-        },
-      ],
+        ],
+      },
     ];
 
-    return items;
+    return sections;
   },
   advanced() {
-    const items = [];
+    const sections = [];
 
-    return items;
+    return sections;
   },
 };
 

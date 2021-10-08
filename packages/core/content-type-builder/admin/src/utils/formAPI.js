@@ -50,7 +50,13 @@ const formsAPI = {
     contentType.form.advanced.push(advanced);
     contentType.form.base.push(base);
   },
-  extendFields(fields, { validator, form: { advanced, base } }) {
+  extendFields(
+    fields,
+    {
+      validator,
+      form: { advanced, base },
+    }
+  ) {
     const formType = this.types.attribute;
 
     fields.forEach(field => {
@@ -83,7 +89,7 @@ const formsAPI = {
       []
     );
 
-    return { items: [...initSections, ...sectionsToAdd] };
+    return { sections: [...initSections, { sectionTitle: null, items: sectionsToAdd }] };
   },
   makeValidator(target, initShape, ...args) {
     const validators = get(this.types, [...target, 'validators'], []);
