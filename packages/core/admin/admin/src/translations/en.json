@@ -90,6 +90,7 @@
   "Settings.apiTokens.addNewToken": "Add new API Token",
   "Settings.apiTokens.types.read-only": "Read-only",
   "Settings.apiTokens.types.full-access": "Full access",
+  "Settings.apiTokens.copy.lastWarning": "Make sure to copy this token, you won’t be able to see it again!",
   "Settings.application.description":"See your project's details",
   "Settings.application.details": "details",
   "Settings.application.edition-title": "current plan",
