@@ -1,6 +1,7 @@
 import get from 'lodash/get';
 import toLower from 'lodash/toLower';
 import { nameToSlug } from '../utils/createUid';
+import getTrad from '../../../utils/getTrad';
 import { attributesForm, attributeTypes, commonBaseForm } from '../attributes';
 import { categoryForm, createCategorySchema } from '../category';
 import { contentTypeForm, createContentTypeSchema } from '../contentType';
@@ -51,13 +52,32 @@ const forms = {
       advanced({ data, type, step, extensions, ...rest }) {
         try {
           const baseForm = attributesForm.advanced[type](data, step).sections;
-
-          return extensions.makeAdvancedForm(['attribute', type], baseForm, {
+          const itemsToAdd = extensions.getAdvancedForm(['attribute', type], {
             data,
             type,
             step,
             ...rest,
           });
+
+          const sections = baseForm.reduce((acc, current) => {
+            if (current.sectionTitle === null) {
+              acc.push(current);
+            } else {
+              acc.push({ ...current, items: [...current.items, ...itemsToAdd] });
+            }
+
+            return acc;
+          }, []);
+          // IF we want a dedicated section for the plugins
+          // const sections = [
+          //   ...baseForm,
+          //   {
+          //     sectionTitle: { id: 'Zone pour plugins', defaultMessage: 'Zone pour plugins' },
+          //     items: itemsToAdd,
+          //   },
+          // ];
+
+          return { sections };
         } catch (err) {
           console.error(err);
 
@@ -100,8 +120,20 @@ const forms = {
       },
       advanced({ extensions }) {
         const baseForm = contentTypeForm.advanced.default().sections;
+        const itemsToAdd = extensions.getAdvancedForm(['contentType']);
 
-        return extensions.makeAdvancedForm(['contentType'], baseForm);
+        return {
+          sections: [
+            ...baseForm,
+            {
+              sectionTitle: {
+                id: getTrad('form.attribute.item.settings.name'),
+                defaultMessage: 'Settings',
+              },
+              items: itemsToAdd,
+            },
+          ],
+        };
       },
     },
   },

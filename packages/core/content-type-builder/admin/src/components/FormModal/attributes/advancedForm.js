@@ -1,6 +1,6 @@
-import React from 'react';
-import { FormattedMessage } from 'react-intl';
-import isEmpty from 'lodash/isEmpty';
+// import React from 'react';
+// import { FormattedMessage } from 'react-intl';
+// import isEmpty from 'lodash/isEmpty';
 import getTrad from '../../../utils/getTrad';
 import { componentForm } from '../component';
 import options from './attributeOptions';
@@ -15,20 +15,28 @@ const advancedForm = {
             {
               autoFocus: true,
               type: 'enum',
-              label: {
+              intlLabel: {
                 id: getTrad('form.attribute.settings.default'),
+                defaultMessage: 'Default value',
               },
               name: 'default',
-              options: [
-                { value: 'true', label: 'TRUE' },
-                { value: '', label: 'NULL' },
-                { value: 'false', label: 'FALSE' },
-              ],
+              options: [],
+              // options: [
+              //   { value: 'true', label: 'TRUE' },
+              //   { value: '', label: 'NULL' },
+              //   { value: 'false', label: 'FALSE' },
+              // ],
               // validations: {},
             },
           ],
         },
-        { sectionTitle: null, items: [options.required, options.unique, options.private] },
+        {
+          sectionTitle: {
+            id: getTrad('form.attribute.item.settings.name'),
+            defaultMessage: 'Settings',
+          },
+          items: [options.required, options.unique, options.private],
+        },
       ],
     };
   },
@@ -41,7 +49,10 @@ const advancedForm = {
       return {
         sections: [
           {
-            sectionTitle: null,
+            sectionTitle: {
+              id: getTrad('form.attribute.item.settings.name'),
+              defaultMessage: 'Settings',
+            },
             items: [options.required, options.private, options.max, options.min],
           },
         ],
@@ -49,7 +60,15 @@ const advancedForm = {
     }
 
     return {
-      sections: [{ sectionTitle: null, items: [options.required, options.private] }],
+      sections: [
+        {
+          sectionTitle: {
+            id: getTrad('form.attribute.item.settings.name'),
+            defaultMessage: 'Settings',
+          },
+          items: [options.required, options.private],
+        },
+      ],
     };
   },
   date: ({ type }) => {
@@ -68,13 +87,27 @@ const advancedForm = {
             },
           ],
         },
-        { sectionTitle: null, items: [options.required, options.unique, options.private] },
+        {
+          sectionTitle: {
+            id: getTrad('form.attribute.item.settings.name'),
+            defaultMessage: 'Settings',
+          },
+          items: [options.required, options.unique, options.private],
+        },
       ],
     };
   },
   dynamiczone: () => {
     return {
-      sections: [{ sectionTitle: null, items: [options.required, options.max, options.min] }],
+      sections: [
+        {
+          sectionTitle: {
+            id: getTrad('form.attribute.item.settings.name'),
+            defaultMessage: 'Settings',
+          },
+          items: [options.required, options.max, options.min],
+        },
+      ],
     };
   },
   email: () => {
@@ -91,7 +124,10 @@ const advancedForm = {
         },
 
         {
-          sectionTitle: null,
+          sectionTitle: {
+            id: getTrad('form.attribute.item.settings.name'),
+            defaultMessage: 'Settings',
+          },
           items: [
             options.required,
             options.unique,
@@ -112,51 +148,71 @@ const advancedForm = {
             {
               name: 'default',
               type: 'select',
-              label: {
+              intlLabel: {
                 id: getTrad('form.attribute.settings.default'),
+                defaultMessage: 'Default value',
               },
               validations: {},
               options: [
-                <FormattedMessage
-                  key="hidden___value__placeholder"
-                  id="components.InputSelect.option.placeholder"
-                >
-                  {msg => <option value="">{msg}</option>}
-                </FormattedMessage>,
-              ].concat(
-                data.enum
-                  ? data.enum
-                      .filter((val, index) => data.enum.indexOf(val) === index && !isEmpty(val))
-                      .map(val => (
-                        <option key={val} value={val}>
-                          {val}
-                        </option>
-                      ))
-                  : []
-              ),
+                {
+                  key: '__null_reset_value__',
+                  value: '',
+                  metadatas: {
+                    intlLabel: {
+                      id: 'components.InputSelect.option.placeholder',
+                      defaultMessage: 'Choose here',
+                    },
+                  },
+                },
+                ...(data.enum || [])
+                  .filter((value, index) => data.enum.indexOf(value) === index && value)
+                  .map(value => {
+                    return {
+                      key: value,
+                      value,
+                      metadatas: {
+                        intlLabel: { id: `${value}.no-override`, defaultMessage: value },
+                      },
+                    };
+                  }),
+              ],
             },
             {
-              label: {
+              intlLabel: {
                 id: getTrad('form.attribute.item.enumeration.graphql'),
+                defaultMessage: 'Name override for GraphQL',
               },
               name: 'enumName',
               type: 'text',
               validations: {},
               description: {
                 id: getTrad('form.attribute.item.enumeration.graphql.description'),
+                defaultMessage: 'Allows you to override the default generated name for GraphQL',
               },
             },
           ],
         },
 
-        { sectionTitle: null, items: [options.required, options.unique, options.private] },
+        {
+          sectionTitle: {
+            id: getTrad('form.attribute.item.settings.name'),
+            defaultMessage: 'Settings',
+          },
+          items: [options.required, options.unique, options.private],
+        },
       ],
     };
   },
   json: () => {
     return {
       sections: [
-        { sectionTitle: null, items: [options.required, options.unique, options.private] },
+        {
+          sectionTitle: {
+            id: getTrad('form.attribute.item.settings.name'),
+            defaultMessage: 'Settings',
+          },
+          items: [options.required, options.unique, options.private],
+        },
       ],
     };
   },
@@ -165,11 +221,15 @@ const advancedForm = {
       sections: [
         { sectionTitle: null, items: [options.required, options.unique] },
         {
-          sectionTitle: null,
+          sectionTitle: {
+            id: getTrad('form.attribute.item.settings.name'),
+            defaultMessage: 'Settings',
+          },
           items: [
             {
-              label: {
+              intlLabel: {
                 id: getTrad('form.attribute.media.allowed-types'),
+                defaultMessage: 'Select allowed types of media',
               },
               name: 'allowedTypes',
               type: 'allowedTypesSelect',
@@ -183,7 +243,7 @@ const advancedForm = {
     };
   },
   number: data => {
-    const inputStep = data.type === 'decimal' || data.type === 'float' ? 'any' : '1';
+    const inputStep = data.type === 'decimal' || data.type === 'float' ? 'any' : 1;
 
     return {
       sections: [
@@ -195,15 +255,19 @@ const advancedForm = {
               name: 'default',
               type: data.type === 'biginteger' ? 'text' : 'number',
               step: inputStep,
-              label: {
+              intlLabel: {
                 id: getTrad('form.attribute.settings.default'),
+                defaultMessage: 'Default value',
               },
               validations: {},
             },
           ],
         },
         {
-          sectionTitle: null,
+          sectionTitle: {
+            id: getTrad('form.attribute.item.settings.name'),
+            defaultMessage: 'Settings',
+          },
           items: [options.required, options.unique, options.max, options.min, options.private],
         },
       ],
@@ -215,7 +279,10 @@ const advancedForm = {
         { sectionTitle: null, items: [options.default] },
 
         {
-          sectionTitle: null,
+          sectionTitle: {
+            id: getTrad('form.attribute.item.settings.name'),
+            defaultMessage: 'Settings',
+          },
           items: [
             options.required,
             options.unique,
@@ -229,7 +296,15 @@ const advancedForm = {
   },
   relation: () => {
     return {
-      sections: [{ sectionTitle: null, items: [options.private] }],
+      sections: [
+        {
+          sectionTitle: {
+            id: getTrad('form.attribute.item.settings.name'),
+            defaultMessage: 'Settings',
+          },
+          items: [options.private],
+        },
+      ],
     };
   },
   richtext: () => {
@@ -237,7 +312,10 @@ const advancedForm = {
       sections: [
         { sectionTitle: null, items: [options.default] },
         {
-          sectionTitle: null,
+          sectionTitle: {
+            id: getTrad('form.attribute.item.settings.name'),
+            defaultMessage: 'Settings',
+          },
           items: [
             options.required,
             options.unique,
@@ -255,7 +333,10 @@ const advancedForm = {
         { sectionTitle: null, items: [options.default, options.regex] },
 
         {
-          sectionTitle: null,
+          sectionTitle: {
+            id: getTrad('form.attribute.item.settings.name'),
+            defaultMessage: 'Settings',
+          },
           items: [
             options.required,
             options.unique,
@@ -276,7 +357,10 @@ const advancedForm = {
         },
 
         {
-          sectionTitle: null,
+          sectionTitle: {
+            id: getTrad('form.attribute.item.settings.name'),
+            defaultMessage: 'Settings',
+          },
           items: [options.required, options.maxLength, options.minLength, options.private],
         },
       ],

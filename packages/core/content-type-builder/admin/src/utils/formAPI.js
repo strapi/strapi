@@ -1,7 +1,6 @@
 import cloneDeep from 'lodash/cloneDeep';
 import get from 'lodash/get';
 import * as yup from 'yup';
-import getTrad from './getTrad';
 
 const formsAPI = {
   components: {
@@ -81,7 +80,7 @@ const formsAPI = {
       }
     });
   },
-  makeAdvancedForm(target, initSections, props) {
+  getAdvancedForm(target, props = null) {
     const sectionsToAdd = get(this.types, [...target, 'form', 'advanced'], []).reduce(
       (acc, current) => {
         const sections = current(props);
@@ -91,19 +90,9 @@ const formsAPI = {
       []
     );
 
-    return {
-      sections: [
-        ...initSections,
-        {
-          sectionTitle: {
-            id: getTrad('form.attribute.item.settings.name'),
-            defaultMessage: 'Settings',
-          },
-          items: sectionsToAdd,
-        },
-      ],
-    };
+    return sectionsToAdd;
   },
+
   makeValidator(target, initShape, ...args) {
     const validators = get(this.types, [...target, 'validators'], []);
 

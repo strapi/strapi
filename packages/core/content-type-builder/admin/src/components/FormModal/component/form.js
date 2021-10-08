@@ -9,22 +9,17 @@ const componentForm = {
           {
             name: `${prefix}name`,
             type: 'text',
-            label: {
+            intlLabel: {
               id: getTrad('modalForm.attribute.form.base.name'),
-            },
-
-            validations: {
-              required: true,
+              defaultMessage: 'Name',
             },
           },
           {
             name: `${prefix}category`,
             type: 'creatableSelect',
-            label: {
+            intlLabel: {
               id: getTrad('modalForm.components.create-component.category.label'),
-            },
-            validations: {
-              required: true,
+              defaultMessage: 'Select a category or enter a name to create a new one',
             },
           },
         ],
@@ -36,8 +31,9 @@ const componentForm = {
             name: `${prefix}icon`,
             type: 'componentIconPicker',
             size: 12,
-            label: {
+            intlLabel: {
               id: getTrad('modalForm.components.icon.label'),
+              defaultMessage: 'Icon',
             },
           },
         ],

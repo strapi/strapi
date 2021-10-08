@@ -25,13 +25,14 @@ const form = {
           {
             sectionTitle: null,
             items: [
-              // TODO
+              // FIXME
               { type: 'pushRight', size: 6 },
               {
                 name: 'components',
                 type: 'componentSelect',
-                label: {
+                intlLabel: {
                   id: getTrad('modalForm.attributes.select-components'),
+                  defaultMessage: 'Select the components',
                 },
                 isMultiple: true,
               },

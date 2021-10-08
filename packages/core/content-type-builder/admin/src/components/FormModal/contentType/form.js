@@ -7,9 +7,6 @@ const nameField = {
     id: getTrad('contentType.displayName.label'),
     defaultMessage: 'Display name',
   },
-  // validations: {
-  //   required: true,
-  // },
 };
 
 const forms = {
@@ -17,11 +14,6 @@ const forms = {
     default: () => {
       return {
         sections: [
-          // [
-          //   {
-          //     type: 'dividerDraftPublish',
-          //   },
-          // ],
           {
             sectionTitle: {
               id: getTrad('form.contentType.divider.draft-publish'),

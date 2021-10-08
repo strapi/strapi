@@ -9,6 +9,7 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import cloneDeep from 'lodash/cloneDeep';
 import { formatISO } from 'date-fns';
+import { Checkbox } from '@strapi/parts/Checkbox';
 import { DatePicker } from '@strapi/parts/DatePicker';
 import { NumberInput } from '@strapi/parts/NumberInput';
 import { Select, Option } from '@strapi/parts/Select';
@@ -104,6 +105,23 @@ const GenericInput = ({
             onChange({ target: { name, value: e.target.checked } });
           }}
         />
+      );
+    }
+    case 'checkbox': {
+      return (
+        <Checkbox
+          disabled={disabled}
+          error={errorMessage}
+          hint={hint}
+          id={name}
+          name={name}
+          onValueChange={value => {
+            onChange({ target: { name, value } });
+          }}
+          value={Boolean(value)}
+        >
+          {label}
+        </Checkbox>
       );
     }
     case 'date': {
@@ -284,7 +302,11 @@ const GenericInput = ({
       );
     }
     default: {
-      return <div>{type} is not supported</div>;
+      return (
+        <div>
+          {type} is not supported for {name}
+        </div>
+      );
     }
   }
 };

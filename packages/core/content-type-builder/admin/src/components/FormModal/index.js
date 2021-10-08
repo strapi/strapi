@@ -21,9 +21,10 @@ import upperFirst from 'lodash/upperFirst';
 import toString from 'lodash/toString';
 import { useSelector, useDispatch, shallowEqual } from 'react-redux';
 import { Box } from '@strapi/parts/Box';
+import { Button } from '@strapi/parts/Button';
 import { Divider } from '@strapi/parts/Divider';
 import { Grid, GridItem } from '@strapi/parts/Grid';
-import { ModalLayout, ModalBody } from '@strapi/parts/ModalLayout';
+import { ModalLayout, ModalBody, ModalFooter } from '@strapi/parts/ModalLayout';
 import { H2, H3 } from '@strapi/parts/Text';
 import { Tabs, Tab, TabGroup, TabPanels, TabPanel } from '@strapi/parts/Tabs';
 import { Row } from '@strapi/parts/Row';
@@ -592,6 +593,7 @@ const FormModal = () => {
         'regex',
       ];
 
+      // FIXME
       // When toggling the draftAndPublish from true to false
       // We need to display a confirmation box
       if (name === 'draftAndPublish' && state.actionType === 'edit' && value === false) {
@@ -626,6 +628,7 @@ const FormModal = () => {
         }
 
         // We store an array for the enum
+        // FIXME
       } else if (name === 'enum') {
         val = value.split('\n');
       } else {
@@ -1184,7 +1187,6 @@ const FormModal = () => {
                       // TODO put aria-disabled
                       disabled={shouldDisableAdvancedTab()}
                       onClick={() => {
-                        console.log('click');
                         setState(prev => ({
                           ...prev,
                           settingType: 'advanced',
@@ -1345,9 +1347,11 @@ const FormModal = () => {
                                         retrievedValue === ''
                                       ) {
                                         value = null;
-                                      } else if (input.type === 'checkbox' && !retrievedValue) {
-                                        value = false;
-                                      } else {
+                                      }
+                                      // else if (input.type === 'checkbox' && !retrievedValue) {
+                                      //   value = false;
+                                      // }
+                                      else {
                                         value = retrievedValue;
                                       }
 
@@ -1373,6 +1377,13 @@ const FormModal = () => {
                 </Box>
               </TabGroup>
             </ModalBody>
+            <ModalFooter
+              startActions={
+                <Button variant="tertiary" onClick={handleClosed}>
+                  {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
+                </Button>
+              }
+            />
           </form>
         )}
       </ModalLayout>

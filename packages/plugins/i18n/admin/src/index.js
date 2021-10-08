@@ -170,9 +170,13 @@ export default {
                 name: 'pluginOptions.i18n.localized',
                 description: {
                   id: getTrad('plugin.schema.i18n.localized.description-field'),
+                  defaultMessage: 'The field can have different values in each locale',
                 },
                 type: 'checkbox',
-                label: { id: getTrad('plugin.schema.i18n.localized.label-field') },
+                intlLabel: {
+                  id: getTrad('plugin.schema.i18n.localized.label-field'),
+                  defaultMessage: 'Enable localization for this field',
+                },
               },
             ];
           },
