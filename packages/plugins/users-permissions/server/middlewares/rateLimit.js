@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports = (settings, { strapi }) => async (ctx, next) => {
+module.exports = (config, { strapi }) => async (ctx, next) => {
   const ratelimit = require('koa2-ratelimit').RateLimit;
 
   const message = [
