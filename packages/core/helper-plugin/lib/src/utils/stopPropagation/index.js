@@ -9,7 +9,6 @@ export const stopPropagation = {
 export const onRowClick = ({ fn, condition = true }) => {
   if (condition) {
     return {
-      style: { cursor: 'pointer' },
       onClick: fn,
     };
   }

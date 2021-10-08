@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import styled from 'styled-components';
 import { IconButton, Tbody, Text, Tr, Td, Row } from '@strapi/parts';
 import { EditIcon, DeleteIcon } from '@strapi/icons';
 import { CheckPermissions, onRowClick, stopPropagation } from '@strapi/helper-plugin';
@@ -25,10 +26,16 @@ const TableBody = ({ sortedRoles, canDelete, permissions, setRoleToDelete, onDel
     push(`/settings/${pluginId}/roles/${id}`);
   };
 
+  const TrHover = styled(Tr)`
+    &:hover {
+      cursor: pointer;
+    }
+  `;
+
   return (
     <Tbody>
       {sortedRoles?.map(role => (
-        <Tr key={role.name} {...onRowClick({ fn: () => handleClickEdit(role.id) })}>
+        <TrHover key={role.name} {...onRowClick({ fn: () => handleClickEdit(role.id) })}>
           <Td width="20%">
             <Text>{role.name}</Text>
           </Td>
@@ -71,7 +78,7 @@ const TableBody = ({ sortedRoles, canDelete, permissions, setRoleToDelete, onDel
               )}
             </Row>
           </Td>
-        </Tr>
+        </TrHover>
       ))}
     </Tbody>
   );

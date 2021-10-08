@@ -1,5 +1,6 @@
 import React, { useMemo, useRef, useState } from 'react';
 import { useIntl } from 'react-intl';
+import styled from 'styled-components';
 import {
   SettingsPageTitle,
   LoadingIndicatorPage,
@@ -149,6 +150,12 @@ export const ProvidersPage = () => {
     submitMutation.mutate({ providers: body });
   };
 
+  const TrHover = styled(Tr)`
+    &:hover {
+      cursor: pointer;
+    }
+  `;
+
   return (
     <Layout>
       <SettingsPageTitle name={pageTitle} />
@@ -197,7 +204,7 @@ export const ProvidersPage = () => {
               </Thead>
               <Tbody>
                 {providers.map(provider => (
-                  <Tr
+                  <TrHover
                     key={provider.name}
                     {...onRowClick({
                       fn: () => handleClickEdit(provider),
@@ -238,7 +245,7 @@ export const ProvidersPage = () => {
                         />
                       )}
                     </Td>
-                  </Tr>
+                  </TrHover>
                 ))}
               </Tbody>
             </Table>

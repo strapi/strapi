@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import styled from 'styled-components';
 import { useIntl } from 'react-intl';
 import { Table, Thead, Tbody, Tr, Td, Th } from '@strapi/parts/Table';
 import { VisuallyHidden } from '@strapi/parts/VisuallyHidden';
@@ -10,6 +11,12 @@ import Reload from '@strapi/icons/Reload';
 import { onRowClick, stopPropagation } from '@strapi/helper-plugin';
 import CheckIcon from '@strapi/icons/CheckIcon';
 import { getTrad } from '../../../utils';
+
+const TrHover = styled(Tr)`
+  &:hover {
+    cursor: pointer;
+  }
+`;
 
 const EmailTable = ({ canUpdate, onEditClick }) => {
   const { formatMessage } = useIntl();
@@ -45,7 +52,7 @@ const EmailTable = ({ canUpdate, onEditClick }) => {
         </Tr>
       </Thead>
       <Tbody>
-        <Tr {...onRowClick({ fn: () => onEditClick('reset_password') })}>
+        <TrHover {...onRowClick({ fn: () => onEditClick('reset_password') })}>
           <Td>
             <Reload
               aria-label={formatMessage({
@@ -73,8 +80,8 @@ const EmailTable = ({ canUpdate, onEditClick }) => {
               icon={canUpdate && <EditIcon />}
             />
           </Td>
-        </Tr>
-        <Tr {...onRowClick({ fn: () => onEditClick('email_confirmation') })}>
+        </TrHover>
+        <TrHover {...onRowClick({ fn: () => onEditClick('email_confirmation') })}>
           <Td>
             <CheckIcon
               aria-label={formatMessage({
@@ -102,7 +109,7 @@ const EmailTable = ({ canUpdate, onEditClick }) => {
               icon={canUpdate && <EditIcon />}
             />
           </Td>
-        </Tr>
+        </TrHover>
       </Tbody>
     </Table>
   );

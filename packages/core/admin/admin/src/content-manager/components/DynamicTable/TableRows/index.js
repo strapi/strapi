@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import styled from 'styled-components';
 import { BaseCheckbox } from '@strapi/parts/BaseCheckbox';
 import { Box } from '@strapi/parts/Box';
 import { IconButton } from '@strapi/parts/IconButton';
@@ -34,6 +35,12 @@ const TableRows = ({
   const { trackUsage } = useTracking();
   const pluginsQueryParams = usePluginsQueryParams();
 
+  const TrHover = styled(Tr)`
+    &:hover {
+      cursor: pointer;
+    }
+  `;
+
   return (
     <Tbody>
       {rows.map((data, index) => {
@@ -47,7 +54,7 @@ const TableRows = ({
         );
 
         return (
-          <Tr
+          <TrHover
             key={data.id}
             {...onRowClick({
               fn: () => {
@@ -149,7 +156,7 @@ const TableRows = ({
                 </Row>
               </Td>
             )}
-          </Tr>
+          </TrHover>
         );
       })}
     </Tbody>

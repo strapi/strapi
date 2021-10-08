@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useIntl } from 'react-intl';
+
 import PropTypes from 'prop-types';
 import { Button } from '@strapi/parts/Button';
 import { Main } from '@strapi/parts/Main';

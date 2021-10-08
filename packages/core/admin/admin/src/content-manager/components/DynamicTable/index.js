@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { DynamicTable as Table, useStrapiApp } from '@strapi/helper-plugin';
@@ -27,7 +28,6 @@ const DynamicTable = ({
   const hasDraftAndPublish = layout.contentType.options.draftAndPublish || false;
   const { formatMessage } = useIntl();
   const displayedHeaders = useSelector(selectDisplayedHeaders);
-
   const tableHeaders = useMemo(() => {
     const headers = runHookWaterfall(INJECT_COLUMN_IN_TABLE, {
       displayedHeaders,

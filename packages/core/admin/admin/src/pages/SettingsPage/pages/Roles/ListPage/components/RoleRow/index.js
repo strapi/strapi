@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import styled from 'styled-components';
 import { Box } from '@strapi/parts/Box';
 import { Row } from '@strapi/parts/Row';
 import { Td, Tr } from '@strapi/parts/Table';
@@ -7,6 +8,12 @@ import { Text } from '@strapi/parts/Text';
 import { IconButton } from '@strapi/parts/IconButton';
 import { stopPropagation, onRowClick } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
+
+const TrHover = styled(Tr)`
+  &:hover {
+    cursor: pointer;
+  }
+`;
 
 const RoleRow = ({ id, name, description, usersCount, icons }) => {
   const { formatMessage } = useIntl();
@@ -20,7 +27,7 @@ const RoleRow = ({ id, name, description, usersCount, icons }) => {
   );
 
   return (
-    <Tr
+    <TrHover
       key={id}
       {...onRowClick({
         fn: icons[1].onClick,
@@ -46,7 +53,7 @@ const RoleRow = ({ id, name, description, usersCount, icons }) => {
           )}
         </Row>
       </Td>
-    </Tr>
+    </TrHover>
   );
 };
 

@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import styled from 'styled-components';
 import { TableLabel, Text } from '@strapi/parts/Text';
 import { IconButton } from '@strapi/parts/IconButton';
 import { Stack } from '@strapi/parts/Stack';
@@ -11,6 +12,12 @@ import { useIntl } from 'react-intl';
 import { stopPropagation, onRowClick } from '@strapi/helper-plugin';
 
 import { getTrad } from '../../utils';
+
+const TrHover = styled(Tr)`
+  &:hover {
+    cursor: pointer;
+  }
+`;
 
 const LocaleTable = ({ locales, onDeleteLocale, onEditLocale }) => {
   const { formatMessage } = useIntl();
@@ -41,7 +48,7 @@ const LocaleTable = ({ locales, onDeleteLocale, onEditLocale }) => {
       </Thead>
       <Tbody>
         {locales.map(locale => (
-          <Tr
+          <TrHover
             key={locale.id}
             {...onRowClick({
               fn: () => onEditLocale(locale),
@@ -86,7 +93,7 @@ const LocaleTable = ({ locales, onDeleteLocale, onEditLocale }) => {
                 )}
               </Stack>
             </Td>
-          </Tr>
+          </TrHover>
         ))}
       </Tbody>
     </Table>

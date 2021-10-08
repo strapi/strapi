@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import styled from 'styled-components';
 import { BaseCheckbox } from '@strapi/parts/BaseCheckbox';
 import { Box } from '@strapi/parts/Box';
 import { IconButton } from '@strapi/parts/IconButton';
@@ -28,13 +29,19 @@ const TableRows = ({
   } = useHistory();
   const { formatMessage } = useIntl();
 
+  const TrHover = styled(Tr)`
+    &:hover {
+      cursor: pointer;
+    }
+  `;
+
   return (
     <Tbody>
       {rows.map(data => {
         const isChecked = entriesToDelete.findIndex(id => id === data.id) !== -1;
 
         return (
-          <Tr
+          <TrHover
             key={data.id}
             {...onRowClick({
               fn: () => push(`${pathname}/${data.id}`),
@@ -99,7 +106,7 @@ const TableRows = ({
                 </Row>
               </Td>
             )}
-          </Tr>
+          </TrHover>
         );
       })}
     </Tbody>
