@@ -8,7 +8,7 @@ const strapi = require('../../index');
 module.exports = async function() {
   const app = await strapi().register();
 
-  const list = app.container.get('policies').keys();
+  const list = app.container.get('services').keys();
 
   const infoTable = new CLITable({
     head: [chalk.blue('Name')],

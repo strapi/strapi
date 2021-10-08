@@ -70,6 +70,7 @@ class Strapi {
     this.startupLogger = createStartupLogger(this);
     this.log = createLogger(this.config.get('logger', {}));
     this.cron = createCronService();
+    this.telemetry = createTelemetry(this);
 
     createUpdateNotifier(this).notify();
   }
@@ -310,7 +311,7 @@ class Strapi {
     this.hook('strapi::content-types.afterSync').register(draftAndPublishSync.enable);
   }
 
-  async load() {
+  async register() {
     await Promise.all([
       this.loadApp(),
       this.loadPlugins(),
@@ -332,8 +333,14 @@ class Strapi {
 
     this.registerInternalHooks();
 
+    this.telemetry.register();
+
     await this.runLifecyclesFunctions(LIFECYCLES.REGISTER);
 
+    return this;
+  }
+
+  async bootstrap() {
     const contentTypes = [
       coreStoreModel,
       webhookModel,
@@ -360,7 +367,7 @@ class Strapi {
     const cronTasks = this.config.get('server.cron.tasks', {});
     this.cron.add(cronTasks);
 
-    this.telemetry = createTelemetry(this);
+    this.telemetry.bootstrap();
 
     let oldContentTypes;
     if (await this.db.connection.schema.hasTable(coreStoreModel.collectionName)) {
@@ -398,6 +405,13 @@ class Strapi {
     await this.runLifecyclesFunctions(LIFECYCLES.BOOTSTRAP);
 
     this.cron.start();
+
+    return this;
+  }
+
+  async load() {
+    await this.register();
+    await this.bootstrap();
 
     this.isLoaded = true;
 
