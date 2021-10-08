@@ -165,16 +165,18 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
       }
 
       .c8 {
-        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-      }
-
-      .c9 {
         background: #ffffff;
+        border-radius: 4px;
+        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
       .c11 {
         padding-right: 24px;
         padding-left: 24px;
+      }
+
+      .c9 {
+        overflow: hidden;
       }
 
       .c13 {
@@ -184,7 +186,6 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
 
       .c10 {
         position: relative;
-        border-radius: 4px 4px 0 0;
       }
 
       .c10:before {
@@ -412,10 +413,10 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
           class="c7"
         >
           <div
-            class="c8"
+            class="c8 c9"
           >
             <div
-              class="c9 c10"
+              class="c10"
             >
               <div
                 class="c11 c12"

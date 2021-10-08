@@ -813,16 +813,18 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
       }
 
       .c25 {
-        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-      }
-
-      .c26 {
         background: #ffffff;
+        border-radius: 4px;
+        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
       .c28 {
         padding-right: 24px;
         padding-left: 24px;
+      }
+
+      .c26 {
+        overflow: hidden;
       }
 
       .c30 {
@@ -832,7 +834,6 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
 
       .c27 {
         position: relative;
-        border-radius: 4px 4px 0 0;
       }
 
       .c27:before {
@@ -1216,10 +1217,10 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
           class="c15"
         >
           <div
-            class="c25"
+            class="c25 c26"
           >
             <div
-              class="c26 c27"
+              class="c27"
             >
               <div
                 class="c28 c29"
