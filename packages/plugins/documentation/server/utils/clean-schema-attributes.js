@@ -11,7 +11,7 @@ const getSchemaData = require('./get-schema-data');
  * @returns Attributes using OpenAPI acceptable data types
  */
 
-const cleanSchemaAttributes = attributes => {
+const cleanSchemaAttributes = (attributes, typeMap = new Map()) => {
   const attributesCopy = _.cloneDeep(attributes);
 
   for (const prop in attributesCopy) {
@@ -21,6 +21,9 @@ const cleanSchemaAttributes = attributes => {
     }
 
     switch (attribute.type) {
+      case 'password':
+      case 'email':
+      case 'date':
       case 'datetime': {
         attributesCopy[prop] = { type: 'string' };
         break;
@@ -66,12 +69,22 @@ const cleanSchemaAttributes = attributes => {
         break;
       }
       case 'relation': {
-        // TODO: Sanitize relation attributes and list them in the schema
         const isListOfEntities = attribute.relation.includes('ToMany');
+        if (!attribute.target || typeMap.has(attribute.target)) {
+          attributesCopy[prop] = {
+            type: 'object',
+            properties: { data: getSchemaData(isListOfEntities, {}) },
+          };
+          break;
+        }
+
+        typeMap.set(attribute.target, true);
+        const targetAttributes = strapi.contentType(attribute.target).attributes;
+
         attributesCopy[prop] = {
           type: 'object',
           properties: {
-            data: getSchemaData(isListOfEntities, {}),
+            data: getSchemaData(isListOfEntities, cleanSchemaAttributes(targetAttributes, typeMap)),
           },
         };
 
