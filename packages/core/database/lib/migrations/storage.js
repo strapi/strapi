@@ -1,7 +1,7 @@
 'use strict';
 
 const createStorage = (opts = {}) => {
-  const tableName = opts.tableName || 'strapi_migrations';
+  const tableName = opts.tableName || opts.db.tablePrefix + 'strapi_migrations';
   const knex = opts.db.connection;
 
   const hasMigrationTable = () => knex.schema.hasTable(tableName);

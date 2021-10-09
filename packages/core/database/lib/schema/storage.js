@@ -2,9 +2,10 @@
 
 const crypto = require('crypto');
 
-const TABLE_NAME = 'strapi_database_schema';
+const TABLE_BASE_NAME = 'strapi_database_schema';
 
 module.exports = db => {
+  const TABLE_NAME = db.tablePrefix + TABLE_BASE_NAME;
   const hasSchemaTable = () => db.connection.schema.hasTable(TABLE_NAME);
 
   const createSchemaTable = () => {

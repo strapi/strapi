@@ -8,6 +8,7 @@ const createMetadata = require('./metadata');
 const { createEntityManager } = require('./entity-manager');
 const { createMigrationsProvider } = require('./migrations');
 const { createLifecyclesProvider } = require('./lifecycles');
+const { createTablePrefix } = require('./utils/table-prefix');
 const errors = require('./errors');
 
 // TODO: move back into strapi
@@ -15,7 +16,9 @@ const { transformContentTypes } = require('./utils/content-types');
 
 class Database {
   constructor(config) {
-    this.metadata = createMetadata(config.models);
+    this.tablePrefix = createTablePrefix(config.tablePrefix);
+
+    this.metadata = createMetadata(config.models, this.tablePrefix);
 
     this.config = config;
 

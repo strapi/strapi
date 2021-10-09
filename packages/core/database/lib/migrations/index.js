@@ -28,7 +28,7 @@ const createUmzugProvider = db => {
   fse.ensureDirSync(migrationDir);
 
   const wrapFn = fn => db => db.connection.transaction(trx => Promise.resolve(fn(trx)));
-  const storage = createStorage({ db, tableName: 'strapi_migrations' });
+  const storage = createStorage({ db, tableName: db.tablePrefix + 'strapi_migrations' });
 
   return new Umzug({
     storage,
