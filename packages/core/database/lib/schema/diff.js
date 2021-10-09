@@ -13,6 +13,9 @@ const statuses = {
 // => this will make the creation a bit more complicated (ordering, Object.values(tables | columns)) -> not a big pbl
 
 const helpers = {
+  isReservedTableName(db, tableName) {
+    return RESERVED_TABLE_NAMES.includes(db.config.settings.tablePrefix + tableName);
+  },
   hasTable(schema, tableName) {
     return schema.tables.findIndex(table => table.name === tableName) !== -1;
   },
@@ -347,7 +350,7 @@ module.exports = db => {
     for (const srcTable of srcSchema.tables) {
       if (
         !helpers.hasTable(destSchema, srcTable.name) &&
-        !RESERVED_TABLE_NAMES.includes(srcTable.name)
+        !helpers.isReservedTableName(db, srcTable.name)
       ) {
         removedTables.push(srcTable);
       }

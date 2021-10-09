@@ -39,7 +39,10 @@ const createUmzugProvider = db => {
   fse.ensureDirSync(migrationDir);
 
   return new Umzug({
-    storage: createStorage({ db, tableName: 'strapi_migrations' }),
+    storage: createStorage({
+      db,
+      tableName: db.config.settings.tablePrefix + 'strapi_migrations',
+    }),
     context: { db },
     migrations: {
       glob: ['*.{js,sql}', { cwd: migrationDir }],

@@ -17,7 +17,7 @@ class Metadata extends Map {
  * @param {object[]} models
  * @returns {Metadata}
  */
-const createMetadata = (models = []) => {
+const createMetadata = (models = [], tablePrefix = '') => {
   const metadata = new Metadata();
 
   // init pass
@@ -25,7 +25,7 @@ const createMetadata = (models = []) => {
     metadata.add({
       singularName: model.singularName,
       uid: model.uid,
-      tableName: model.tableName,
+      tableName: tablePrefix + model.tableName,
       attributes: {
         id: {
           type: 'increments',

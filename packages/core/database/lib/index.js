@@ -7,6 +7,7 @@ const { createEntityManager } = require('./entity-manager');
 const { createMigrationsProvider } = require('./migrations');
 const { createLifecyclesProvider } = require('./lifecycles');
 const createConnection = require('./connection');
+const { createTablePrefix } = require('./utils/table-prefix');
 const errors = require('./errors');
 
 // TODO: move back into strapi
@@ -14,15 +15,21 @@ const { transformContentTypes } = require('./utils/content-types');
 
 class Database {
   constructor(config) {
-    this.metadata = createMetadata(config.models);
+    const tablePrefix = createTablePrefix(
+      config && config.settings ? config.settings.tablePrefix : ''
+    );
 
     this.config = {
       connection: {},
+      ...config,
       settings: {
         forceMigration: true,
+        ...config.settings,
+        tablePrefix,
       },
-      ...config,
     };
+
+    this.metadata = createMetadata(config.models, this.config.settings.tablePrefix);
 
     this.dialect = getDialect(this);
     this.dialect.configure();

@@ -1,11 +1,19 @@
 'use strict';
 
-const SQL_QUERIES = {
-  TABLE_LIST: `select name from sqlite_master where type = 'table' and name NOT LIKE 'sqlite%'`,
-  TABLE_INFO: `pragma table_info(??)`,
-  INDEX_LIST: 'pragma index_list(??)',
-  INDEX_INFO: 'pragma index_info(??)',
-  FOREIGN_KEY_LIST: 'pragma foreign_key_list(??)',
+const buildSqlQueries = db => {
+  const queries = {
+    TABLE_LIST: `select name from sqlite_master where type = 'table' and name NOT LIKE 'sqlite%'`,
+    TABLE_INFO: `pragma table_info(??)`,
+    INDEX_LIST: 'pragma index_list(??)',
+    INDEX_INFO: 'pragma index_info(??)',
+    FOREIGN_KEY_LIST: 'pragma foreign_key_list(??)',
+  };
+
+  if (db.config.settings.tablePrefix) {
+    queries.TABLE_LIST += ` and name LIKE '${db.config.settings.tablePrefix}%'`;
+  }
+
+  return queries;
 };
 
 const toStrapiType = column => {
@@ -59,6 +67,7 @@ const toStrapiType = column => {
 class SqliteSchemaInspector {
   constructor(db) {
     this.db = db;
+    this.queries = buildSqlQueries(db);
   }
 
   async getSchema() {
@@ -82,13 +91,13 @@ class SqliteSchemaInspector {
   }
 
   async getTables() {
-    const rows = await this.db.connection.raw(SQL_QUERIES.TABLE_LIST);
+    const rows = await this.db.connection.raw(this.queries.TABLE_LIST);
 
     return rows.map(row => row.name);
   }
 
   async getColumns(tableName) {
-    const rows = await this.db.connection.raw(SQL_QUERIES.TABLE_INFO, [tableName]);
+    const rows = await this.db.connection.raw(this.queries.TABLE_INFO, [tableName]);
 
     return rows.map(row => {
       const { type, args = [], ...rest } = toStrapiType(row);
@@ -106,12 +115,12 @@ class SqliteSchemaInspector {
   }
 
   async getIndexes(tableName) {
-    const indexes = await this.db.connection.raw(SQL_QUERIES.INDEX_LIST, [tableName]);
+    const indexes = await this.db.connection.raw(this.queries.INDEX_LIST, [tableName]);
 
     const ret = [];
 
     for (const index of indexes.filter(index => !index.name.startsWith('sqlite_'))) {
-      const res = await this.db.connection.raw(SQL_QUERIES.INDEX_INFO, [index.name]);
+      const res = await this.db.connection.raw(this.queries.INDEX_INFO, [index.name]);
 
       ret.push({
         columns: res.map(row => row.name),
@@ -124,7 +133,7 @@ class SqliteSchemaInspector {
   }
 
   async getForeignKeys(tableName) {
-    const fks = await this.db.connection.raw(SQL_QUERIES.FOREIGN_KEY_LIST, [tableName]);
+    const fks = await this.db.connection.raw(this.queries.FOREIGN_KEY_LIST, [tableName]);
 
     const ret = {};
 

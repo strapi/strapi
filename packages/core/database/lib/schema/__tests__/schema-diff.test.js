@@ -6,6 +6,11 @@ let diffSchemas;
 describe('diffSchemas', () => {
   beforeEach(() => {
     const schemaDiff = createSchemaDiff({
+      config: {
+        settings: {
+          tablePrefix: '',
+        },
+      },
       dialect: {
         usesForeignKeys() {
           return true;

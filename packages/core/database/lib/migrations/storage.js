@@ -1,7 +1,8 @@
 'use strict';
 
 const createStorage = (opts = {}) => {
-  const { db, tableName = 'strapi_migrations' } = opts;
+  const { db } = opts;
+  const tableName = opts.tableName || db.config.settings.tablePrefix + 'strapi_migrations';
 
   const hasMigrationTable = () => db.getSchemaConnection().hasTable(tableName);
 

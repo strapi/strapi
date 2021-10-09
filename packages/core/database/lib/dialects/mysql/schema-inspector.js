@@ -1,14 +1,20 @@
 'use strict';
 
-const SQL_QUERIES = {
-  TABLE_LIST: /* sql */ `
+const buildSqlQueries = db => {
+  return {
+    TABLE_LIST: /* sql */ `
     SELECT
       t.table_name as table_name
     FROM information_schema.tables t
     WHERE table_type = 'BASE TABLE'
-    AND table_schema = schema();
+    AND table_schema = schema()
+    ${
+      db.config.settings.tablePrefix
+        ? ` AND table_name LIKE '${db.config.settings.tablePrefix}%'`
+        : ''
+    };
   `,
-  LIST_COLUMNS: /* sql */ `
+    LIST_COLUMNS: /* sql */ `
     SELECT
       c.data_type as data_type,
       c.column_name as column_name,
@@ -21,10 +27,10 @@ const SQL_QUERIES = {
     WHERE table_schema = database()
     AND table_name = ?;
   `,
-  INDEX_LIST: /* sql */ `
+    INDEX_LIST: /* sql */ `
     show index from ??;
   `,
-  FOREIGN_KEY_LIST: /* sql */ `
+    FOREIGN_KEY_LIST: /* sql */ `
     SELECT
       tc.constraint_name as constraint_name,
       kcu.column_name as column_name,
@@ -40,6 +46,7 @@ const SQL_QUERIES = {
     AND tc.table_name = ?;
 
   `,
+  };
 };
 
 const toStrapiType = column => {
@@ -98,6 +105,7 @@ const toStrapiType = column => {
 class MysqlSchemaInspector {
   constructor(db) {
     this.db = db;
+    this.queries = buildSqlQueries(db);
   }
 
   async getSchema() {
@@ -124,13 +132,13 @@ class MysqlSchemaInspector {
   }
 
   async getTables() {
-    const [rows] = await this.db.connection.raw(SQL_QUERIES.TABLE_LIST);
+    const [rows] = await this.db.connection.raw(this.queries.TABLE_LIST);
 
     return rows.map(row => row.table_name);
   }
 
   async getColumns(tableName) {
-    const [rows] = await this.db.connection.raw(SQL_QUERIES.LIST_COLUMNS, [tableName]);
+    const [rows] = await this.db.connection.raw(this.queries.LIST_COLUMNS, [tableName]);
 
     return rows.map(row => {
       const { type, args = [], ...rest } = toStrapiType(row);
@@ -148,7 +156,7 @@ class MysqlSchemaInspector {
   }
 
   async getIndexes(tableName) {
-    const [rows] = await this.db.connection.raw(SQL_QUERIES.INDEX_LIST, [tableName]);
+    const [rows] = await this.db.connection.raw(this.queries.INDEX_LIST, [tableName]);
 
     const ret = {};
 
@@ -172,7 +180,7 @@ class MysqlSchemaInspector {
   }
 
   async getForeignKeys(tableName) {
-    const [rows] = await this.db.connection.raw(SQL_QUERIES.FOREIGN_KEY_LIST, [tableName]);
+    const [rows] = await this.db.connection.raw(this.queries.FOREIGN_KEY_LIST, [tableName]);
 
     const ret = {};
 

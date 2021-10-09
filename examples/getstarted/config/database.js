@@ -34,6 +34,21 @@ const db = {
   postgres,
 };
 
+/**
+ * You can have multiple Strapi installations in the same database
+ * if you give each installation a unique table prefix.
+ *
+ * Requirements:
+ * - Maximum 10 characters.
+ * - Letters, numbers and underscore.
+ *
+ * Table prefix will be transformed using Lodash snakeCase-function. (https://lodash.com/docs#snakeCase)
+ */
+const tablePrefix = '';
+
 module.exports = {
   connection: process.env.DB ? db[process.env.DB] || db.sqlite : db.sqlite,
+  settings: {
+    tablePrefix,
+  },
 };

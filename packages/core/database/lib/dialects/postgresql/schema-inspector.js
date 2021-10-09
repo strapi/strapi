@@ -1,21 +1,27 @@
 'use strict';
 
-const SQL_QUERIES = {
-  TABLE_LIST: /* sql */ `
+const buildSqlQueries = db => {
+  return {
+    TABLE_LIST: /* sql */ `
     SELECT *
     FROM information_schema.tables
     WHERE
       table_schema = ?
       AND table_type = 'BASE TABLE'
       AND table_name != 'geometry_columns'
-      AND table_name != 'spatial_ref_sys';
-  `,
-  LIST_COLUMNS: /* sql */ `
+      AND table_name != 'spatial_ref_sys'
+      ${
+        db.config.settings.tablePrefix
+          ? `AND table_name LIKE '${db.config.settings.tablePrefix}%'`
+          : ''
+      };
+    `,
+    LIST_COLUMNS: /* sql */ `
     SELECT data_type, column_name, character_maximum_length, column_default, is_nullable
     FROM information_schema.columns
     WHERE table_schema = ? AND table_name = ?;
   `,
-  INDEX_LIST: /* sql */ `
+    INDEX_LIST: /* sql */ `
     SELECT
       ix.indexrelid,
       i.relname as index_name,
@@ -38,7 +44,7 @@ const SQL_QUERIES = {
       AND s.nspname = ?
       AND t.relname = ?;
   `,
-  FOREIGN_KEY_LIST: /* sql */ `
+    FOREIGN_KEY_LIST: /* sql */ `
     SELECT
       tco."constraint_name" as constraint_name,
       kcu."column_name" as column_name,
@@ -62,7 +68,8 @@ const SQL_QUERIES = {
       AND tco.constraint_schema = ?
       AND tco.table_name = ?
     ORDER BY kcu.table_schema, kcu.table_name, kcu.ordinal_position, kcu.constraint_name;
-  `,
+    `,
+  };
 };
 
 const toStrapiType = column => {
@@ -113,6 +120,7 @@ const toStrapiType = column => {
 class PostgresqlSchemaInspector {
   constructor(db) {
     this.db = db;
+    this.queries = buildSqlQueries(db);
   }
 
   async getSchema() {
@@ -143,7 +151,7 @@ class PostgresqlSchemaInspector {
   }
 
   async getTables() {
-    const { rows } = await this.db.connection.raw(SQL_QUERIES.TABLE_LIST, [
+    const { rows } = await this.db.connection.raw(this.queries.TABLE_LIST, [
       this.getDatabaseSchema(),
     ]);
 
@@ -151,7 +159,7 @@ class PostgresqlSchemaInspector {
   }
 
   async getColumns(tableName) {
-    const { rows } = await this.db.connection.raw(SQL_QUERIES.LIST_COLUMNS, [
+    const { rows } = await this.db.connection.raw(this.queries.LIST_COLUMNS, [
       this.getDatabaseSchema(),
       tableName,
     ]);
@@ -175,7 +183,7 @@ class PostgresqlSchemaInspector {
   }
 
   async getIndexes(tableName) {
-    const { rows } = await this.db.connection.raw(SQL_QUERIES.INDEX_LIST, [
+    const { rows } = await this.db.connection.raw(this.queries.INDEX_LIST, [
       this.getDatabaseSchema(),
       tableName,
     ]);
@@ -202,7 +210,7 @@ class PostgresqlSchemaInspector {
   }
 
   async getForeignKeys(tableName) {
-    const { rows } = await this.db.connection.raw(SQL_QUERIES.FOREIGN_KEY_LIST, [
+    const { rows } = await this.db.connection.raw(this.queries.FOREIGN_KEY_LIST, [
       this.getDatabaseSchema(),
       tableName,
     ]);
