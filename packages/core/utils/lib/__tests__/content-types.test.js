@@ -6,6 +6,7 @@ const {
   getPrivateAttributes,
   getVisibleAttributes,
   getNonWritableAttributes,
+  getFilterableAttributes,
   constants,
 } = require('../content-types');
 
@@ -78,6 +79,12 @@ describe('Content types utils', () => {
           title: {
             type: 'string',
           },
+          createdAt: {
+            type: 'timestamp',
+          },
+          updatedAt: {
+            type: 'timestamp',
+          },
           invisible_field: {
             type: 'datetime',
             visible: false,
@@ -85,7 +92,7 @@ describe('Content types utils', () => {
         },
       });
 
-      expect(getVisibleAttributes(model)).toEqual(['title']);
+      expect(getFilterableAttributes(model)).toEqual(['title', 'createdAt', 'updatedAt']);
     });
 
     test('Excludes id', () => {

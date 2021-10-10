@@ -67,6 +67,14 @@ const getVisibleAttributes = model => {
   return _.difference(_.keys(model.attributes), getNonVisibleAttributes(model));
 };
 
+const getFilterableAttributes = model => {
+  const timeStamps = getTimestamps();
+  const nonFilterableAttributes = getNonVisibleAttributes(model).filter(
+    attr => !timeStamps.includes(attr)
+  );
+  return _.difference(_.keys(model.attributes), nonFilterableAttributes);
+};
+
 const isVisibleAttribute = (model, attributeName) => {
   return getVisibleAttributes(model).includes(attributeName);
 };
@@ -137,6 +145,7 @@ module.exports = {
   isWritableAttribute,
   getNonVisibleAttributes,
   getVisibleAttributes,
+  getFilterableAttributes,
   isVisibleAttribute,
   hasDraftAndPublish,
   isDraft,

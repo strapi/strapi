@@ -57,10 +57,10 @@ const formatContentTypeLabel = contentType => {
 };
 
 const formatAttributes = contentType => {
-  const { getVisibleAttributes } = contentTypesUtils;
+  const { getFilterableAttributes } = contentTypesUtils;
 
   // only get attributes that can be seen in the auto generated Edit view or List view
-  return getVisibleAttributes(contentType).reduce((acc, key) => {
+  return getFilterableAttributes(contentType).reduce((acc, key) => {
     const attribute = contentType.attributes[key];
 
     // ignore morph until they are handled in the front
