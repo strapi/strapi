@@ -34,7 +34,12 @@ export const useUpload = () => {
   const mutation = useMutation(asset => uploadAsset(asset, tokenRef.current, setProgress), {
     onSuccess: assets => {
       // Coupled with the cache of useAssets
-      queryClient.setQueryData('assets', cachedAssets => cachedAssets.concat(assets));
+      queryClient.setQueryData('assets', cachedAssets => {
+        return {
+          ...cachedAssets,
+          results: cachedAssets.results.concat(assets),
+        };
+      });
     },
   });
 
