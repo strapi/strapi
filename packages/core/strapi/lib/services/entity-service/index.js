@@ -147,7 +147,6 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
     let entity = await db.query(uid).create({
       ...query,
       data: creationPipeline(Object.assign(omitComponentData(model, validData), componentData), {
-        action: 'create',
         contentType: model,
       }),
     });
@@ -191,7 +190,6 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
       ...query,
       where: { id: entityId },
       data: updatePipeline(Object.assign(omitComponentData(model, validData), componentData), {
-        action: 'update',
         contentType: model,
       }),
     });

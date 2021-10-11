@@ -5,13 +5,9 @@ const bcrypt = require('bcrypt');
 
 const transforms = {
   password(value, context) {
-    const { action, attribute } = context;
+    const { attribute } = context;
 
     if (!isString(value) && !isBuffer(value)) {
-      return value;
-    }
-
-    if (action !== 'create' && action !== 'update') {
       return value;
     }
 
