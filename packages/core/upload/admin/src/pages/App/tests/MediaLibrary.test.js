@@ -15,6 +15,7 @@ jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useRBAC: jest.fn(),
   useNotification: jest.fn(() => jest.fn()),
+  useQueryParams: () => [{ rawQuery: 'some-url' }, jest.fn()],
 }));
 
 jest.mock('../../../utils', () => ({
