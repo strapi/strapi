@@ -3,7 +3,7 @@
 const { prop, isFunction } = require('lodash/fp');
 
 /**
- * @type {import('./').MiddlewareFactory}
+ * @param {any=} config
  */
 module.exports = (config = {}) => {
   return async (ctx, next) => {

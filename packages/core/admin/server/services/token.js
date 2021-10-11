@@ -17,7 +17,6 @@ const getTokenOptions = () => {
 
 /**
  * Create a random token
- * @returns {string}
  */
 const createToken = () => {
   return crypto.randomBytes(20).toString('hex');
@@ -25,7 +24,7 @@ const createToken = () => {
 
 /**
  * Creates a JWT token for an administration user
- * @param {object} user - admin user
+ * @param {any} user - admin user
  */
 const createJwtToken = user => {
   const { options, secret } = getTokenOptions();
@@ -36,7 +35,6 @@ const createJwtToken = user => {
 /**
  * Tries to decode a token an return its payload and if it is valid
  * @param {string} token - a token to decode
- * @return {Object} decodeInfo - the decoded info
  */
 const decodeJwtToken = token => {
   const { secret } = getTokenOptions();

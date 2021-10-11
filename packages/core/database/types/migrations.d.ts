@@ -1,4 +1,4 @@
-import { Database } from '../';
+import { Database } from './database';
 
 export interface MigrationProvider {
   shouldRun(): Promise<boolean>;

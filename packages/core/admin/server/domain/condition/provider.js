@@ -4,14 +4,7 @@ const { providerFactory } = require('@strapi/utils');
 const domain = require('./');
 
 /**
- * @typedef ConditionProviderOverride
- * @property {function(CreateConditionPayload)} register
- * @property {function(attributes CreateConditionPayload[]): Promise<this>} registerMany
- */
-
-/**
  * Creates a new instance of a condition provider
- * @return {Provider & ConditionProviderOverride}
  */
 const createConditionProvider = () => {
   const provider = providerFactory();

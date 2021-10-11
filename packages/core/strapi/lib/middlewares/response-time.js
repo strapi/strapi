@@ -1,8 +1,5 @@
 'use strict';
 
-/**
- * @type {import('./').MiddlewareFactory}
- */
 module.exports = () => {
   return async (ctx, next) => {
     const start = Date.now();

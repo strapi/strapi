@@ -3,7 +3,6 @@
 const constants = require('../services/constants');
 const { getService } = require('../utils');
 
-/** @type {import('.').AuthenticateFunction} */
 const authenticate = async ctx => {
   const apiTokenService = getService('api-token');
   const { authorization } = ctx.request.header;
@@ -30,7 +29,6 @@ const authenticate = async ctx => {
   return { authenticated: true, credentials: apiToken };
 };
 
-/** @type {import('.').VerifyFunction} */
 const verify = (auth, config) => {
   const { errors } = strapi.container.get('auth');
   const { credentials: apiToken } = auth;
@@ -54,7 +52,6 @@ const verify = (auth, config) => {
   throw new errors.ForbiddenError();
 };
 
-/** @type {import('.').AuthStrategy} */
 module.exports = {
   name: 'api-token',
   authenticate,

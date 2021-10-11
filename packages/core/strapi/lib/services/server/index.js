@@ -1,5 +1,9 @@
 'use strict';
 
+/**
+ * @typedef {import('../../../types').Strapi} Strapi
+ */
+
 const Koa = require('koa');
 const Router = require('@koa/router');
 
@@ -16,16 +20,7 @@ const healthCheck = async ctx => {
 };
 
 /**
- * @typedef Server
- *
- * @property {Koa} app
- * @property {http.Server} app
- */
-
-/**
- *
  * @param {Strapi} strapi
- * @returns {Server}
  */
 const createServer = strapi => {
   const app = new Koa({

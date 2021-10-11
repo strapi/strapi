@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * @typedef {import('../../types').Strapi} Strapi
+ * @typedef {import('../../../types').Strapi} Strapi
  */
 
 const { resolve } = require('path');
@@ -22,7 +22,6 @@ const validateSrcIndex = srcIndex => {
 
 /**
  * @param {Strapi} strapi
- * @returns {void}
  */
 module.exports = strapi => {
   if (!existsSync(strapi.dirs.src)) {
@@ -39,7 +38,7 @@ module.exports = strapi => {
   try {
     validateSrcIndex(srcIndex);
   } catch (e) {
-    strapi.stopWithError({ message: `Invalid file \`./src/index.js\`: ${e.message}` });
+    strapi.stopWithError(new Error(`Invalid file \`./src/index.js\`: ${e.message}`));
   }
 
   return srcIndex;

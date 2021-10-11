@@ -41,8 +41,7 @@ const createCoreStore = ({ db }) => {
   Object.assign(store, {
     /**
      * Get value from the core store
-     * @param {Object} params
-     * @returns {*}
+     * @param {any} params
      */
     async get(params = {}) {
       const { key, type = 'core', environment, name, tag } = params;
@@ -81,8 +80,7 @@ const createCoreStore = ({ db }) => {
 
     /**
      * Set value in the core store
-     * @param {Object} params
-     * @returns {*}
+     * @param {any} params
      */
     async set(params = {}) {
       const { key, value, type, environment, name, tag } = params;
@@ -118,8 +116,7 @@ const createCoreStore = ({ db }) => {
 
     /**
      * Deletes a value from the core store
-     * @param {Object} params
-     * @returns {*}
+     * @param {any} params
      */
     async delete(params = {}) {
       const { key, environment, type, name, tag } = params;

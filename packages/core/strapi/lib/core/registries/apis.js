@@ -1,8 +1,15 @@
 'use strict';
 
+/**
+ * @typedef {import('../../../types').Strapi} Strapi
+ */
+
 const { has } = require('lodash/fp');
 const { createCoreApi } = require('../../core-api');
 
+/**
+ * @param {Strapi} strapi
+ */
 const apisRegistry = strapi => {
   const apis = {};
 

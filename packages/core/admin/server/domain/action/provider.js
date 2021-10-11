@@ -5,14 +5,7 @@ const { validateRegisterProviderAction } = require('../../validation/action-prov
 const domain = require('./index');
 
 /**
- * @typedef ActionProviderOverride
- * @property {function(CreateActionPayload)} register
- * @property {function(attributes CreateActionPayload[]): Promise<this>} registerMany
- */
-
-/**
  * Creates a new instance of an action provider
- * @return {Provider & ActionProviderOverride}
  */
 const createActionProvider = options => {
   const provider = providerFactory(options);

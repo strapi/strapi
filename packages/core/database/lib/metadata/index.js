@@ -14,8 +14,7 @@ class Metadata extends Map {
 // TODO: check if there isn't an attribute with an id already
 /**
  * Create Metadata from models configurations
- * @param {object[]} models
- * @returns {Metadata}
+ * @param {any[]} models
  */
 const createMetadata = (models = []) => {
   const metadata = new Metadata();

@@ -1,5 +1,9 @@
 'use strict';
 
+/**
+ * @typedef {import('../../types').Strapi} Strapi
+ */
+
 const { resolve } = require('path');
 const { defaultsDeep } = require('lodash/fp');
 const favicon = require('koa-favicon');
@@ -10,7 +14,8 @@ const defaults = {
 };
 
 /**
- * @type {import('./').MiddlewareFactory}
+ * @param {any} config
+ * @param {{ strapi: Strapi}} ctx
  */
 module.exports = (config, { strapi }) => {
   const { maxAge, path: faviconPath } = defaultsDeep(defaults, config);

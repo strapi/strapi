@@ -6,6 +6,9 @@ const createConditionProvider = require('../domain/condition/provider');
 const createPermissionsManager = require('./permission/permissions-manager');
 const createPermissionEngine = require('./permission/engine');
 const createSectionsBuilder = require('./permission/sections-builder');
+/**
+ * @type {import('./permission/queries')}
+ */
 const permissionQueries = require('./permission/queries');
 
 const actionProvider = createActionProvider();

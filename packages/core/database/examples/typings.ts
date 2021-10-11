@@ -12,9 +12,8 @@ interface Article {
 }
 
 declare module '@strapi/strapi' {
-  interface StrapiModels {
+  interface StrapiContentTypes {
     article: Article;
     category: Category;
   }
 }
-

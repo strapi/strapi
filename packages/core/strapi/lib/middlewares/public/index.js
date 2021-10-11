@@ -1,5 +1,9 @@
 'use strict';
 
+/**
+ * @typedef {import('../../../types').Strapi} Strapi
+ */
+
 const fs = require('fs');
 const path = require('path');
 const stream = require('stream');
@@ -16,7 +20,8 @@ const defaults = {
 };
 
 /**
- * @type {import('../').MiddlewareFactory}
+ * @param {any} config
+ * @param {{ strapi: Strapi}} ctx
  */
 module.exports = (config, { strapi }) => {
   const { defaultIndex, maxAge, path: publicPath } = defaultsDeep(defaults, config);

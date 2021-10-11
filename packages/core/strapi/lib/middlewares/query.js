@@ -1,5 +1,9 @@
 'use strict';
 
+/**
+ * @typedef {import('../../types').Strapi} Strapi
+ */
+
 const { defaultsDeep } = require('lodash/fp');
 const qs = require('qs');
 
@@ -37,7 +41,8 @@ const addQsParser = (app, settings) => {
 };
 
 /**
- * @type {import('./').MiddlewareFactory}
+ * @param {any} config
+ * @param {{ strapi: Strapi}} ctx
  */
 module.exports = (config, { strapi }) => {
   addQsParser(strapi.server.app, defaultsDeep(defaults, config));

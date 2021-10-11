@@ -1,5 +1,10 @@
 'use strict';
 
+/**
+ * @typedef {import('@strapi/strapi').StrapiContentTypes} StrapiContentTypes
+ * @typedef {import('../types').EntityManager} EntityManager
+ */
+
 const knex = require('knex');
 
 const { getDialect } = require('./dialects');
@@ -30,9 +35,15 @@ class Database {
     this.migrations = createMigrationsProvider(this);
     this.lifecycles = createLifecyclesProvider(this);
 
+    /**
+     * @type {EntityManager}
+     */
     this.entityManager = createEntityManager(this);
   }
 
+  /**
+   * @param {keyof StrapiContentTypes} uid
+   */
   query(uid) {
     if (!this.metadata.has(uid)) {
       throw new Error(`Model ${uid} not found`);
@@ -41,6 +52,9 @@ class Database {
     return this.entityManager.getRepository(uid);
   }
 
+  /**
+   * @param {keyof StrapiContentTypes} uid
+   */
   queryBuilder(uid) {
     return this.entityManager.createQueryBuilder(uid);
   }

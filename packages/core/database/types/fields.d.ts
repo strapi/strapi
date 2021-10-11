@@ -1,6 +1,6 @@
 import { Attribute } from './schema';
 
-interface Field {
+export interface Field {
   config: {};
   toDB(value: any): any;
   fromDB(value: any): any;

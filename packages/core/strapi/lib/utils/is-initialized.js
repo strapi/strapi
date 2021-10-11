@@ -1,11 +1,14 @@
 'use strict';
 
+/**
+ * @typedef {import('../../types').Strapi} Strapi
+ */
+
 const { isEmpty, isNil } = require('lodash/fp');
 
 /**
  * Test if the strapi application is considered as initialized (1st user has been created)
  * @param {Strapi} strapi
- * @returns {boolean}
  */
 module.exports = async function isInitialized(strapi) {
   try {

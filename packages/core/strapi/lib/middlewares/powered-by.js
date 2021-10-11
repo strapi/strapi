@@ -6,9 +6,6 @@ const defaults = {
   poweredBy: 'Strapi <strapi.io>',
 };
 
-/**
- * @type {import('./').MiddlewareFactory}
- */
 module.exports = config => {
   const { poweredBy } = defaultsDeep(defaults, config);
 

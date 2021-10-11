@@ -1,0 +1,2 @@
+export interface StrapiContentTypes {}
+e;

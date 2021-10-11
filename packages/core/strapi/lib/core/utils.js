@@ -2,7 +2,7 @@
 
 /**
  * @param {string} name
- * @param {string} namespace
+ * @param {string=} namespace
  * @returns {string}
  */
 const hasNamespace = (name, namespace) => {

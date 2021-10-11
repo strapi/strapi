@@ -1,5 +1,9 @@
 'use strict';
 
+/**
+ * @typedef {import('../../types').Strapi} Strapi
+ */
+
 const { defaultsDeep } = require('lodash/fp');
 const cors = require('@koa/cors');
 
@@ -12,6 +16,9 @@ const defaults = {
   keepHeadersOnError: false,
 };
 
+/**
+ * @param {any} config
+ */
 module.exports = config => {
   const {
     origin,

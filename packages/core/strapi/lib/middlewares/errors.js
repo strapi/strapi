@@ -1,5 +1,9 @@
 'use strict';
 
+/**
+ * @typedef {import('../../types').Strapi} Strapi
+ */
+
 const { isNil } = require('lodash/fp');
 const Boom = require('@hapi/boom');
 const delegate = require('delegates');
@@ -56,7 +60,7 @@ const formatBoomPayload = boomError => {
 /**
  * Create short responses ctx.(send|created|deleted)
  *
- * @param {import('@strapi/strapi').Strapi} strapi
+ * @param {Strapi} strapi
  */
 const createResponseUtils = strapi => {
   const delegator = delegate(strapi.server.app.context, 'response');
@@ -103,7 +107,8 @@ const createResponseUtils = strapi => {
 };
 
 /**
- * @type {import('./types').MiddlewareFactory}
+ * @param {any} _
+ * @param {{ strapi: Strapi}} ctx
  */
 module.exports = (_, { strapi }) => {
   createResponseUtils(strapi);

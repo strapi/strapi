@@ -1,5 +1,5 @@
 import { BaseContext } from 'koa';
-import { Strapi } from '../../../types';
+import { Strapi } from '../../../../types';
 
 interface PolicyContext extends BaseContext {
   type: string;

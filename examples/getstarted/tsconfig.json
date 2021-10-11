@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "lib": ["esnext"],
-    "target": "esnext",
+    "lib": ["es6"],
+    "target": "es6",
     "moduleResolution": "node",
     "esModuleInterop": true,
     "resolveJsonModule": true,
@@ -16,15 +16,7 @@
     "noEmit": true,
     "declaration": false,
     "outDir": "./never",
-    "types": [
-      "@strapi/strapi"
-    ],
+    "types": ["@strapi/strapi"]
   },
-  "include": [
-    "global.d.ts",
-    "**/*.js",
-    "**/*.json",
-    "**/*.mjs",
-    "**/*.ts",
-  ],
+  "include": ["global.d.ts", "**/*.js", "**/*.json", "**/*.mjs", "**/*.ts"]
 }

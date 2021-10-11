@@ -1,5 +1,10 @@
 'use strict';
 
+/**
+ * @typedef {import('@strapi/strapi').StrapiContentTypes} StrapiContentTypes
+ * @typedef {import('../types').Database} Database
+ */
+
 const _ = require('lodash/fp');
 const types = require('./types');
 const { createField } = require('./fields');
@@ -108,7 +113,13 @@ const processData = (metadata, data = {}, { withDefaults = false } = {}) => {
   return obj;
 };
 
+/**
+ * @param {Database} db
+ */
 const createEntityManager = db => {
+  /**
+   * @type {{[key: string]: ReturnType<typeof createRepository>}}
+   */
   const repoMap = {};
 
   return {
@@ -863,10 +874,16 @@ const createEntityManager = db => {
     // -> virtuals
     // -> private
 
+    /**
+     * @param {keyof StrapiContentTypes} uid
+     */
     createQueryBuilder(uid) {
       return createQueryBuilder(uid, db);
     },
 
+    /**
+     * @param {keyof StrapiContentTypes} uid
+     */
     getRepository(uid) {
       if (!repoMap[uid]) {
         repoMap[uid] = createRepository(uid, db);

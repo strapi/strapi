@@ -1,5 +1,12 @@
 'use strict';
 
+/**
+ * @typedef {import('@strapi/database').Database} Database
+ * @typedef {import('@strapi/database').EntityManager} EntityManager
+ * @typedef {import('../../../types').Strapi} Strapi
+ * @typedef {import('../../../types').StrapiContentTypes} StrapiContentTypes
+ */
+
 const delegate = require('delegates');
 const { pipe } = require('lodash/fp');
 
@@ -26,6 +33,15 @@ const {
 // TODO: those should be strapi events used by the webhooks not the other way arround
 const { ENTRY_CREATE, ENTRY_UPDATE, ENTRY_DELETE } = webhookUtils.webhookEvents;
 
+/**
+ * @param {{
+ *   strapi: Strapi
+ *   db: Database
+ *   eventHub: any
+ *   entityValidator: any
+ * }} ctx
+ * @returns {EntityManager}
+ */
 module.exports = ctx => {
   const implementation = createDefaultImplementation(ctx);
 
@@ -50,7 +66,12 @@ module.exports = ctx => {
 };
 
 /**
- * @type {import('.').default}
+ * @param {{
+ *   strapi: Strapi
+ *   db: Database
+ *   eventHub: any
+ *   entityValidator: any
+ * }} ctx
  */
 const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) => ({
   uploadFiles,

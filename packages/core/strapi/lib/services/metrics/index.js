@@ -1,4 +1,9 @@
 'use strict';
+
+/**
+ * @typedef {import('../../../types').Strapi} Strapi
+ */
+
 /**
  * Strapi telemetry package.
  * You can learn more at https://strapi.io/documentation/developer-docs/latest/getting-started/usage-information.html
@@ -22,6 +27,9 @@ const LIMITED_EVENTS = [
   'didEnableResponsiveDimensions',
 ];
 
+/**
+ * @param {Strapin} strapi
+ */
 const createTelemetryInstance = strapi => {
   const uuid = strapi.config.get('uuid');
   const isDisabled = !uuid || isTruthy(process.env.STRAPI_TELEMETRY_DISABLED);

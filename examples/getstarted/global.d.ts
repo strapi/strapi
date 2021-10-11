@@ -2,12 +2,11 @@ interface Restaurant {
   name: string;
 }
 
-declare module "@strapi/strapi" {
-
+declare module '@strapi/strapi' {
   /**
    * augment strapi.entityService
    */
-  interface StrapiModels {
+  interface StrapiContentTypes {
     restaurant: Restaurant;
   }
 
@@ -16,8 +15,26 @@ declare module "@strapi/strapi" {
    */
   interface StrapiRegistries {
     custom: {
-      bar(): 'test'
-    }
+      bar(): 'test';
+    };
+  }
+}
+
+declare module '@strapi/strapi' {
+  /**
+   * augment strapi.entityService
+   */
+  interface StrapiContentTypes {
+    restaurantTATAT: Restaurant;
+  }
+
+  /**
+   * augment strapi.container.get
+   */
+  interface StrapiRegistries {
+    custom: {
+      bar(): 'test';
+    };
   }
 }
 

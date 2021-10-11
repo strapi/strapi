@@ -8,6 +8,10 @@ const defaults = {
   patchKoa: true,
 };
 
+/**
+ * @param {any} config
+ * @param {{ strapi: Strapi}} ctx
+ */
 module.exports = (config, { strapi }) => {
   const bodyConfig = defaultsDeep(defaults, config);
 

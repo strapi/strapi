@@ -1,5 +1,10 @@
 'use strict';
 
+/**
+ * @typedef {import('@strapi/strapi').StrapiContentTypes} StrapiContentTypes
+ * @typedef {import('../types').Database} Database
+ */
+
 const withDefaultPagination = params => {
   const { page = 1, pageSize = 10, ...rest } = params;
 
@@ -10,6 +15,11 @@ const withDefaultPagination = params => {
   };
 };
 
+/**
+ * @param {keyof StrapiContentTypes} uid
+ * @param {Database} db
+ * @returns
+ */
 const createRepository = (uid, db) => {
   return {
     findOne(params) {

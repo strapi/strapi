@@ -1,5 +1,9 @@
 'use strict';
 
+/**
+ * @typedef {import('../types').StrapiContentTypes} StrapiContentTypes
+ */
+
 const _ = require('lodash');
 const { createLogger } = require('@strapi/logger');
 const { Database } = require('@strapi/database');
@@ -256,6 +260,11 @@ class Strapi {
     });
   }
 
+  /**
+   * @param {Error=} err
+   * @param {string=} customMessage
+   * @returns {never}
+   */
   stopWithError(err, customMessage) {
     this.log.debug(`⛔️ Server wasn't able to start properly.`);
     if (customMessage) {
@@ -489,7 +498,8 @@ class Strapi {
 
   /**
    * Binds queries with a specific model
-   * @param {string} uid
+   *
+   * @param {keyof StrapiContentTypes} uid
    */
   query(uid) {
     return this.db.query(uid);

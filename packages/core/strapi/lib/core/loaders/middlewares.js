@@ -2,7 +2,7 @@
 
 /**
  * @typedef {import('../registries/types/middlewares').Middleware} Middleware
- * @typedef {import('../../types').Strapi} Strapi
+ * @typedef {import('../../../types').Strapi} Strapi
  */
 
 const { join, extname, basename } = require('path');
@@ -16,6 +16,9 @@ const fse = require('fs-extra');
  */
 module.exports = async function loadMiddlewares(strapi) {
   const localMiddlewares = await loadLocalMiddlewares(strapi);
+  /**
+   * @type {import('../../middlewares')}
+   */
   const internalMiddlewares = require('../../middlewares');
 
   strapi.container.get('middlewares').add(`global::`, localMiddlewares);

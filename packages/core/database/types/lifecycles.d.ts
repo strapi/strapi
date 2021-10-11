@@ -1,5 +1,5 @@
-import { Database } from '../';
-import { Model } from '../schema';
+import { Database } from './database';
+import { Model } from './schema';
 import { Subscriber } from './subscribers';
 
 export type Action =

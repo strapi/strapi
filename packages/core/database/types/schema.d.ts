@@ -1,7 +1,7 @@
-import { Database } from '../';
-import { Action } from '../lifecycles';
+import { Database } from './database';
+import { Action } from './lifecycles';
 
-type Type =
+export type Type =
   | 'string'
   | 'text'
   | 'richtext'

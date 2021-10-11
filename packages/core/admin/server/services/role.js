@@ -32,7 +32,6 @@ const jsonClean = data => JSON.parse(JSON.stringify(data));
  * Compare two permissions
  * @param {Permission} p1
  * @param {Permission} p2
- * @returns {boolean}
  */
 const arePermissionsEqual = (p1, p2) => {
   if (p1.action === p2.action) {
@@ -44,8 +43,7 @@ const arePermissionsEqual = (p1, p2) => {
 
 /**
  * Create and save a role in database
- * @param attributes A partial role object
- * @returns {Promise<role>}
+ * @param {any} attributes A partial role object
  */
 const create = async attributes => {
   const alreadyExists = await exists({ name: attributes.name });
@@ -68,9 +66,8 @@ const create = async attributes => {
 
 /**
  * Find a role in database
- * @param params query params to find the role
- * @param populate
- * @returns {Promise<role>}
+ * @param {any=} params query params to find the role
+ * @param {boolean=} populate
  */
 const findOne = (params = {}, populate) => {
   return strapi.query('admin::role').findOne({ where: params, populate });
@@ -78,9 +75,8 @@ const findOne = (params = {}, populate) => {
 
 /**
  * Find a role in database with usersCounts
- * @param params query params to find the role
- * @param populate
- * @returns {Promise<role>}
+ * @param {any=} params query params to find the role
+ * @param {boolean=} populate
  */
 const findOneWithUsersCount = async (params = {}, populate) => {
   const role = await strapi.query('admin::role').findOne({ where: params, populate });
@@ -94,9 +90,8 @@ const findOneWithUsersCount = async (params = {}, populate) => {
 
 /**
  * Find roles in database
- * @param params query params to find the roles
- * @param populate
- * @returns {Promise<array>}
+ * @param {any=} params query params to find the roles
+ * @param {boolean=} populate
  */
 const find = (params = {}, populate) => {
   return strapi.query('admin::role').findMany({ where: params, populate });
@@ -104,7 +99,6 @@ const find = (params = {}, populate) => {
 
 /**
  * Find all roles in database
- * @returns {Promise<array>}
  */
 const findAllWithUsersCount = async populate => {
   const roles = await strapi.query('admin::role').findMany({ populate });
@@ -117,9 +111,8 @@ const findAllWithUsersCount = async populate => {
 
 /**
  * Update a role in database
- * @param params query params to find the role to update
- * @param attributes A partial role object
- * @returns {Promise<role>}
+ * @param {any} params query params to find the role to update
+ * @param {any} attributes A partial role object
  */
 const update = async (params, attributes) => {
   const sanitizedAttributes = _.omit(attributes, ['code']);
@@ -143,8 +136,7 @@ const update = async (params, attributes) => {
 
 /**
  * Check if a role exists in database
- * @param params query params to find the role
- * @returns {Promise<boolean>}
+ * @param {any} params query params to find the role
  */
 const exists = async (params = {}) => {
   const count = await strapi.query('admin::role').count({ where: params });
@@ -153,8 +145,7 @@ const exists = async (params = {}) => {
 
 /**
  * Count the number of roles based on search params
- * @param params params used for the query
- * @returns {Promise<number>}
+ * @param {any=} params params used for the query
  */
 const count = async (params = {}) => {
   return strapi.query('admin::role').count(params);
@@ -162,8 +153,7 @@ const count = async (params = {}) => {
 
 /**
  * Check if the given roles id can be deleted safely, throw otherwise
- * @param ids
- * @returns {Promise<void>}
+ * @param {string[]} ids
  */
 const checkRolesIdForDeletion = async (ids = []) => {
   const superAdminRole = await getSuperAdmin();
@@ -182,8 +172,7 @@ const checkRolesIdForDeletion = async (ids = []) => {
 
 /**
  * Delete roles in database if they have no user assigned
- * @param ids query params to find the roles
- * @returns {Promise<array>}
+ * @param {string[]} ids query params to find the roles
  */
 const deleteByIds = async (ids = []) => {
   await checkRolesIdForDeletion(ids);
@@ -202,26 +191,26 @@ const deleteByIds = async (ids = []) => {
   return deletedRoles;
 };
 
-/** Count the number of users for some roles
- * @returns {Promise<number>}
- * @param roleId
+/**
+ * Count the number of users for some roles
+ * @param {string} roleId
  */
 const getUsersCount = async roleId => {
   return strapi.query('admin::user').count({ where: { roles: { id: roleId } } });
 };
 
-/** Returns admin role
- * @returns {Promise<role>}
+/**
+ * Returns admin role
  */
 const getSuperAdmin = () => findOne({ code: SUPER_ADMIN_CODE });
 
-/** Returns admin role with userCount
- * @returns {Promise<role>}
+/**
+ * Returns admin role with userCount
  */
 const getSuperAdminWithUsersCount = () => findOneWithUsersCount({ code: SUPER_ADMIN_CODE });
 
-/** Create superAdmin, Author and Editor role is no role already exist
- * @returns {Promise<>}
+/**
+ * Create superAdmin, Author and Editor role is no role already exist
  */
 const createRolesIfNoneExist = async () => {
   const someRolesExist = await exists();
@@ -290,9 +279,9 @@ const getDefaultPluginPermissions = ({ isAuthor = false } = {}) => {
   ].map(permissionDomain.create);
 };
 
-/** Display a warning if the role superAdmin doesn't exist
- *  or if the role is not assigned to at least one user
- * @returns {Promise<>}
+/**
+ * Display a warning if the role superAdmin doesn't exist
+ * or if the role is not assigned to at least one user
  */
 const displayWarningIfNoSuperAdmin = async () => {
   const superAdminRole = await getSuperAdminWithUsersCount();
@@ -377,7 +366,6 @@ const isContentTypeAction = action => action.section === CONTENT_TYPE_SECTION;
 
 /**
  * Reset super admin permissions (giving it all permissions)
- * @returns {Promise<>}
  */
 const resetSuperAdminPermissions = async () => {
   const superAdminRole = await getService('role').getSuperAdmin();
@@ -418,8 +406,7 @@ const resetSuperAdminPermissions = async () => {
 
 /**
  * Check if a user object includes the super admin role
- * @param {object} user
- * @return {boolean}
+ * @param {any} user
  */
 const hasSuperAdminRole = user => {
   const roles = _.get(user, 'roles', []);

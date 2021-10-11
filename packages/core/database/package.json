@@ -4,11 +4,13 @@
   "description": "Strapi's database layer",
   "homepage": "https://strapi.io",
   "main": "./lib/index.js",
+  "types": "./types",
   "scripts": {
     "test": "echo \"no tests yet\""
   },
   "directories": {
-    "lib": "./lib"
+    "lib": "./lib",
+    "types": "./types"
   },
   "author": {
     "name": "Strapi team",

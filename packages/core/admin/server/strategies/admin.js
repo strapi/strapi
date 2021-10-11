@@ -2,7 +2,6 @@
 
 const { getService } = require('../utils');
 
-/** @type {import('.').AuthenticateFunction} */
 const authenticate = async ctx => {
   const { authorization } = ctx.request.header;
 
@@ -39,7 +38,6 @@ const authenticate = async ctx => {
   return { authenticated: true, credentials: user };
 };
 
-/** @type {import('.').AuthStrategy} */
 module.exports = {
   name: 'admin',
   authenticate,

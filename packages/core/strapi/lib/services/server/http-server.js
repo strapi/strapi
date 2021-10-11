@@ -28,7 +28,9 @@ const createHTTPServer = (strapi, koaApp) => {
   // handle port in use cleanly
   server.on('error', err => {
     if (err.code === 'EADDRINUSE') {
-      return strapi.stopWithError(`The port ${err.port} is already used by another application.`);
+      return strapi.stopWithError(
+        new Error(`The port ${err.port} is already used by another application.`)
+      );
     }
 
     strapi.log.error(err);

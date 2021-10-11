@@ -14,7 +14,6 @@ const createCollectionTypeService = require('./collection-type');
 /**
  * Returns a core api for the provided model
  * @param {{ model: object, strapi: object }} context
- * @returns {object}
  */
 const createService = ({ model, strapi }) => {
   const utils = createUtils({ model });

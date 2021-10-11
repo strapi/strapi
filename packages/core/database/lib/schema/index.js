@@ -7,9 +7,6 @@ const createSchemaDiff = require('./diff');
 const createSchemaStorage = require('./storage');
 const { metadataToSchema } = require('./schema');
 
-/**
- * @type {import('.').default}
- */
 const createSchemaProvider = db => {
   const schema = metadataToSchema(db.metadata);
 

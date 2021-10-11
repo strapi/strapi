@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * @typedef {import('../../types').Strapi} Strapi
+ * @typedef {import('../../../types').Strapi} Strapi
  */
 
 const { join } = require('path');
@@ -11,7 +11,6 @@ const loadFiles = require('../../load/load-files');
 
 /**
  * @param {Strapi} strapi
- * @returns {Promise<void>}
  */
 module.exports = async strapi => {
   if (!(await pathExists(strapi.dirs.components))) {
@@ -28,7 +27,9 @@ module.exports = async strapi => {
 
       if (!schema.collectionName) {
         return strapi.stopWithError(
-          `Component ${key} is missing a "collectionName" property.\nVerify file ${filePath}.`
+          new Error(
+            `Component ${key} is missing a "collectionName" property.\nVerify file ${filePath}.`
+          )
         );
       }
 

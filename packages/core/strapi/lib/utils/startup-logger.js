@@ -1,11 +1,18 @@
 'use strict';
 
+/**
+ * @typedef {import('../../types').Strapi} Strapi
+ */
+
 const chalk = require('chalk');
 const CLITable = require('cli-table3');
 const _ = require('lodash/fp');
 const { getAbsoluteAdminUrl, getAbsoluteServerUrl } = require('@strapi/utils');
 const ee = require('./ee');
 
+/**
+ * @param {Strapi['app']} app
+ */
 module.exports = app => {
   return {
     logStats() {

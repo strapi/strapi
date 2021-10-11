@@ -23,7 +23,6 @@ const permissionDomain = require('../../domain/permission/index');
 /**
  * Delete permissions of roles in database
  * @param rolesIds ids of roles
- * @returns {Promise<array>}
  */
 const deleteByRolesIds = async rolesIds => {
   const permissionsToDelete = await strapi.query('admin::permission').findMany({
@@ -40,8 +39,7 @@ const deleteByRolesIds = async rolesIds => {
 
 /**
  * Delete permissions
- * @param ids ids of permissions
- * @returns {Promise<array>}
+ * @param {string[]} ids ids of permissions
  */
 const deleteByIds = async ids => {
   for (const id of ids) {
@@ -51,8 +49,7 @@ const deleteByIds = async ids => {
 
 /**
  * Create many permissions
- * @param permissions
- * @returns {Promise<*[]|*>}
+ * @param {any} permissions
  */
 const createMany = async permissions => {
   const createdPermissions = [];
@@ -66,9 +63,8 @@ const createMany = async permissions => {
 
 /**
  * Update a permission
- * @returns {Promise<*[]|*>}
- * @param params
- * @param attributes
+ * @param {any} params
+ * @param {any} attributes
  */
 const update = async (params, attributes) => {
   const updatedPermission = await strapi
@@ -80,8 +76,7 @@ const update = async (params, attributes) => {
 
 /**
  * Find assigned permissions in the database
- * @param params query params to find the permissions
- * @returns {Promise<Permission[]>}
+ * @param {any} params query params to find the permissions
  */
 const findMany = async (params = {}) => {
   const rawPermissions = await strapi.query('admin::permission').findMany(params);
@@ -91,8 +86,7 @@ const findMany = async (params = {}) => {
 
 /**
  * Find all permissions for a user
- * @param user - user
- * @returns {Promise<Permission[]>}
+ * @param {any} user - user
  */
 const findUserPermissions = async user => {
   return findMany({ where: { role: { users: { id: user.id } } } });
@@ -134,7 +128,6 @@ const filterPermissionsToRemove = async permissions => {
 
 /**
  * Removes permissions in database that don't exist anymore
- * @returns {Promise<>}
  */
 const cleanPermissionsInDatabase = async () => {
   const pageSize = 200;

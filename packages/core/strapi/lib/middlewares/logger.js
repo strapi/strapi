@@ -1,4 +1,9 @@
 'use strict';
+
+/**
+ * @typedef {import('../../types').Strapi} Strapi
+ */
+
 const chalk = require('chalk');
 
 const codeToColor = code => {
@@ -14,7 +19,8 @@ const codeToColor = code => {
 };
 
 /**
- * @type {import('./').MiddlewareFactory}
+ * @param {any} _
+ * @param {{ strapi: Strapi}} ctx
  */
 module.exports = (_, { strapi }) => {
   return async (ctx, next) => {
