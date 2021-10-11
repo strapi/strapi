@@ -45,6 +45,7 @@ import {
   createHeadersArray,
   createHeadersObjectFromArray,
   getAttributesToDisplay,
+  getFormInputNames,
   getModalTitleSubHeader,
   getNextSearch,
 } from './utils';
@@ -1106,6 +1107,36 @@ const FormModal = () => {
     isCreating,
   };
 
+  const advancedForm = formToDisplay.advanced({
+    data: modifiedData,
+    type: state.attributeType,
+    step: state.step,
+    actionType: state.actionType,
+    attributes,
+    extensions: ctbFormsAPI,
+    forTarget: state.forTarget,
+    contentTypeSchema: allDataSchema.contentType || {},
+  }).sections;
+  const baseForm = formToDisplay.base({
+    data: modifiedData,
+    type: state.attributeType,
+    step: state.step,
+    actionType: state.actionType,
+    attributes,
+    extensions: ctbFormsAPI,
+    forTarget: state.forTarget,
+    contentTypeSchema: allDataSchema.contentType || {},
+  }).sections;
+
+  const baseFormInputNames = getFormInputNames(baseForm);
+  const advancedFormInputNames = getFormInputNames(advancedForm);
+  const doesBaseFormHasError = Object.keys(formErrors).some(key =>
+    baseFormInputNames.includes(key)
+  );
+  const doesAdvancedFormHasError = Object.keys(formErrors).some(key =>
+    advancedFormInputNames.includes(key)
+  );
+
   return (
     <>
       <ModalLayout onClose={handleClosed} labelledBy="title">
@@ -1141,6 +1172,7 @@ const FormModal = () => {
                   </H2>
                   <Tabs>
                     <Tab
+                      hasError={doesBaseFormHasError}
                       onClick={() => {
                         setState(prev => ({
                           ...prev,
@@ -1156,6 +1188,7 @@ const FormModal = () => {
                       })}
                     </Tab>
                     <Tab
+                      hasError={doesAdvancedFormHasError}
                       // TODO put aria-disabled
                       disabled={shouldDisableAdvancedTab()}
                       onClick={() => {
@@ -1182,147 +1215,125 @@ const FormModal = () => {
                     <TabPanel>
                       <Stack size={6}>
                         {state.settingType === 'base' &&
-                          formToDisplay
-                            .base({
-                              data: modifiedData,
-                              type: state.attributeType,
-                              step: state.step,
-                              actionType: state.actionType,
-                              attributes,
-                              extensions: ctbFormsAPI,
-                              forTarget: state.forTarget,
-                              contentTypeSchema: allDataSchema.contentType || {},
-                            })
-                            .sections.map((section, sectionIndex) => {
-                              // Don't display an empty section
-                              if (section.items.length === 0) {
-                                return null;
-                              }
+                          baseForm.map((section, sectionIndex) => {
+                            // Don't display an empty section
+                            if (section.items.length === 0) {
+                              return null;
+                            }
 
-                              return (
-                                <Box key={sectionIndex}>
-                                  {section.sectionTitle && (
-                                    <Box paddingBottom={4}>
-                                      <H3>{formatMessage(section.sectionTitle)}</H3>
-                                    </Box>
-                                  )}
-                                  <Grid gap={4}>
-                                    {section.items.map((input, i) => {
-                                      const key = `${sectionIndex}.${i}`;
+                            return (
+                              <Box key={sectionIndex}>
+                                {section.sectionTitle && (
+                                  <Box paddingBottom={4}>
+                                    <H3>{formatMessage(section.sectionTitle)}</H3>
+                                  </Box>
+                                )}
+                                <Grid gap={4}>
+                                  {section.items.map((input, i) => {
+                                    const key = `${sectionIndex}.${i}`;
 
-                                      const retrievedValue = get(modifiedData, input.name, '');
+                                    const retrievedValue = get(modifiedData, input.name, '');
 
-                                      let value;
+                                    let value;
 
-                                      // FIXME
+                                    // FIXME
 
-                                      if (input.name === 'enum' && Array.isArray(retrievedValue)) {
-                                        value = retrievedValue.join('\n');
-                                      } else if (input.name === 'uid') {
-                                        value = input.value;
-                                      } else if (
-                                        input.name === 'allowedTypes' &&
-                                        retrievedValue === ''
-                                      ) {
-                                        value = null;
-                                      } else if (input.type === 'checkbox' && !retrievedValue) {
-                                        value = false;
-                                      } else {
-                                        value = retrievedValue;
-                                      }
+                                    if (input.name === 'enum' && Array.isArray(retrievedValue)) {
+                                      value = retrievedValue.join('\n');
+                                    } else if (input.name === 'uid') {
+                                      value = input.value;
+                                    } else if (
+                                      input.name === 'allowedTypes' &&
+                                      retrievedValue === ''
+                                    ) {
+                                      value = null;
+                                    } else if (input.type === 'checkbox' && !retrievedValue) {
+                                      value = false;
+                                    } else {
+                                      value = retrievedValue;
+                                    }
 
-                                      return (
-                                        <GridItem col={input.size || 6} key={input.name || key}>
-                                          <GenericInput
-                                            {...input}
-                                            {...genericInputProps}
-                                            onChange={handleChange}
-                                            value={value}
-                                          />
-                                        </GridItem>
-                                      );
-                                    })}
-                                  </Grid>
-                                </Box>
-                              );
-                            })}
+                                    return (
+                                      <GridItem col={input.size || 6} key={input.name || key}>
+                                        <GenericInput
+                                          {...input}
+                                          {...genericInputProps}
+                                          onChange={handleChange}
+                                          value={value}
+                                        />
+                                      </GridItem>
+                                    );
+                                  })}
+                                </Grid>
+                              </Box>
+                            );
+                          })}
                       </Stack>
                     </TabPanel>
                     <TabPanel>
                       <Stack size={6}>
                         {state.settingType === 'advanced' &&
-                          formToDisplay
-                            .advanced({
-                              data: modifiedData,
-                              type: state.attributeType,
-                              step: state.step,
-                              actionType: state.actionType,
-                              attributes,
-                              extensions: ctbFormsAPI,
-                              forTarget: state.forTarget,
-                              contentTypeSchema: allDataSchema.contentType || {},
-                            })
-                            .sections.map((section, sectionIndex) => {
-                              // Don't display an empty section
-                              if (section.items.length === 0) {
-                                return null;
-                              }
+                          advancedForm.map((section, sectionIndex) => {
+                            // Don't display an empty section
+                            if (section.items.length === 0) {
+                              return null;
+                            }
 
-                              return (
-                                <Box key={sectionIndex}>
-                                  {section.sectionTitle && (
-                                    <Box paddingBottom={4}>
-                                      <H3>{formatMessage(section.sectionTitle)}</H3>
-                                    </Box>
-                                  )}
-                                  <Grid gap={4}>
-                                    {section.items.map((input, i) => {
-                                      const key = `${sectionIndex}.${i}`;
+                            return (
+                              <Box key={sectionIndex}>
+                                {section.sectionTitle && (
+                                  <Box paddingBottom={4}>
+                                    <H3>{formatMessage(section.sectionTitle)}</H3>
+                                  </Box>
+                                )}
+                                <Grid gap={4}>
+                                  {section.items.map((input, i) => {
+                                    const key = `${sectionIndex}.${i}`;
 
-                                      let value;
+                                    let value;
 
-                                      const retrievedValue = get(modifiedData, input.name, '');
+                                    const retrievedValue = get(modifiedData, input.name, '');
 
-                                      // Condition for the boolean default value
-                                      // The radio input doesn't accept false, true or null as value
-                                      // So we pass them as string
-                                      // This way the data stays accurate and we don't have to operate
-                                      // any data mutation
-                                      if (input.name === 'enum' && Array.isArray(retrievedValue)) {
-                                        value = retrievedValue.join('\n');
-                                      } else if (input.name === 'uid') {
-                                        value = input.value;
-                                      } else if (
-                                        input.name === 'allowedTypes' &&
-                                        retrievedValue === ''
-                                      ) {
-                                        value = null;
-                                      }
-                                      // else if (input.type === 'checkbox' && !retrievedValue) {
-                                      //   value = false;
-                                      // }
-                                      else {
-                                        value = retrievedValue;
-                                      }
+                                    // Condition for the boolean default value
+                                    // The radio input doesn't accept false, true or null as value
+                                    // So we pass them as string
+                                    // This way the data stays accurate and we don't have to operate
+                                    // any data mutation
+                                    if (input.name === 'enum' && Array.isArray(retrievedValue)) {
+                                      value = retrievedValue.join('\n');
+                                    } else if (input.name === 'uid') {
+                                      value = input.value;
+                                    } else if (
+                                      input.name === 'allowedTypes' &&
+                                      retrievedValue === ''
+                                    ) {
+                                      value = null;
+                                    }
+                                    // else if (input.type === 'checkbox' && !retrievedValue) {
+                                    //   value = false;
+                                    // }
+                                    else {
+                                      value = retrievedValue;
+                                    }
 
-                                      // FIX input size
-                                      // FIXME key in baseform
-                                      return (
-                                        <GridItem col={input.size || 6} key={input.name || key}>
-                                          <GenericInput
-                                            {...input}
-                                            {...genericInputProps}
-                                            isCreating={isCreating}
-                                            onChange={handleChange}
-                                            value={value}
-                                          />
-                                        </GridItem>
-                                      );
-                                    })}
-                                  </Grid>
-                                </Box>
-                              );
-                            })}
+                                    // FIX input size
+                                    // FIXME key in baseform
+                                    return (
+                                      <GridItem col={input.size || 6} key={input.name || key}>
+                                        <GenericInput
+                                          {...input}
+                                          {...genericInputProps}
+                                          isCreating={isCreating}
+                                          onChange={handleChange}
+                                          value={value}
+                                        />
+                                      </GridItem>
+                                    );
+                                  })}
+                                </Grid>
+                              </Box>
+                            );
+                          })}
                       </Stack>
                     </TabPanel>
                   </TabPanels>
