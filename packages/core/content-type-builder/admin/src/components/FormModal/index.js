@@ -1113,8 +1113,9 @@ const FormModal = () => {
   });
 
   const genericInputProps = {
-    customInputs: { 'toggle-draft-publish': DraftAndPublishToggle },
+    customInputs: { 'toggle-draft-publish': DraftAndPublishToggle, ...inputsFromPlugins },
     modifiedData,
+
     isCreating,
   };
 
