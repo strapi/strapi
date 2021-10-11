@@ -1,12 +1,5 @@
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import {
-  // HeaderModal,
-  // HeaderModalTitle,
-  // Modal,
-  // ModalBody,
-  // ModalFooter,
-  // ModalForm,
-
   GenericInput,
   getYupInnerErrors,
   useTracking,
@@ -18,7 +11,6 @@ import { useIntl } from 'react-intl';
 import { useHistory, useLocation } from 'react-router-dom';
 import { get, has, isEmpty, set, toLower } from 'lodash';
 import upperFirst from 'lodash/upperFirst';
-import toString from 'lodash/toString';
 import { useSelector, useDispatch, shallowEqual } from 'react-redux';
 import AddIcon from '@strapi/icons/AddIcon';
 import { Box } from '@strapi/parts/Box';
@@ -37,6 +29,7 @@ import AttributeOptions from '../AttributeOptions';
 import DraftAndPublishToggle from '../DraftAndPublishToggle';
 import FormModalHeader from '../FormModalHeader';
 
+import BooleanDefaultValueSelect from '../BooleanDefaultValueSelect';
 import CustomRadioGroup from '../CustomRadioGroup';
 import ContentTypeRadioGroup from '../ContentTypeRadioGroup';
 // import ComponentIconPicker from '../ComponentIconPicker';
@@ -65,8 +58,8 @@ import {
   SET_DATA_TO_EDIT,
   SET_DYNAMIC_ZONE_DATA_SCHEMA,
   SET_ATTRIBUTE_DATA_SCHEMA,
-  ADD_COMPONENTS_TO_DYNAMIC_ZONE,
-  ON_CHANGE_ALLOWED_TYPE,
+  // ADD_COMPONENTS_TO_DYNAMIC_ZONE,
+  // ON_CHANGE_ALLOWED_TYPE,
   SET_ERRORS,
   ON_CHANGE,
   RESET_PROPS_AND_SET_THE_FORM_FOR_ADDING_A_COMPO_TO_A_DZ,
@@ -561,24 +554,24 @@ const FormModal = () => {
     }, '');
   };
 
-  const handleClickAddComponentsToDynamicZone = ({
-    target: { name, components, shouldAddComponents },
-  }) => {
-    dispatch({
-      type: ADD_COMPONENTS_TO_DYNAMIC_ZONE,
-      name,
-      components,
-      shouldAddComponents,
-    });
-  };
+  // const handleClickAddComponentsToDynamicZone = ({
+  //   target: { name, components, shouldAddComponents },
+  // }) => {
+  //   dispatch({
+  //     type: ADD_COMPONENTS_TO_DYNAMIC_ZONE,
+  //     name,
+  //     components,
+  //     shouldAddComponents,
+  //   });
+  // };
 
-  const handleChangeMediaAllowedTypes = ({ target: { name, value } }) => {
-    dispatch({
-      type: ON_CHANGE_ALLOWED_TYPE,
-      name,
-      value,
-    });
-  };
+  // const handleChangeMediaAllowedTypes = ({ target: { name, value } }) => {
+  //   dispatch({
+  //     type: ON_CHANGE_ALLOWED_TYPE,
+  //     name,
+  //     value,
+  //   });
+  // };
 
   const handleChange = useCallback(
     ({ target: { name, value, type, ...rest } }) => {
@@ -589,11 +582,12 @@ const FormModal = () => {
         'maxLength',
         'minLength',
         'regex',
+        'default',
       ];
 
       let val;
 
-      if (['default', ...namesThatCanResetToNullValue].includes(name) && value === '') {
+      if (namesThatCanResetToNullValue.includes(name) && value === '') {
         val = null;
       } else if (
         type === 'radio' &&
@@ -607,17 +601,6 @@ const FormModal = () => {
 
         // The boolean default accepts 3 different values
         // This check has been added to allow a reset to null for the bool
-      } else if (type === 'radio' && name === 'default') {
-        if (value === 'false') {
-          val = false;
-        } else if (value === 'true') {
-          val = true;
-        } else {
-          val = null;
-        }
-
-        // We store an array for the enum
-        // FIXME
       } else if (name === 'enum') {
         val = value.split('\n');
       } else {
@@ -1113,6 +1096,7 @@ const FormModal = () => {
 
   const genericInputProps = {
     customInputs: {
+      'select-default-boolean': BooleanDefaultValueSelect,
       'radio-group': CustomRadioGroup,
       'content-type-radio-group': ContentTypeRadioGroup,
       'toggle-draft-publish': DraftAndPublishToggle,
@@ -1233,21 +1217,7 @@ const FormModal = () => {
 
                                       // FIXME
 
-                                      // Condition for the boolean default value
-                                      // The radio input doesn't accept false, true or null as value
-                                      // So we pass them as string
-                                      // This way the data stays accurate and we don't have to operate
-                                      // any data mutation
-                                      if (
-                                        input.name === 'default' &&
-                                        state.attributeType === 'boolean'
-                                      ) {
-                                        value = toString(retrievedValue);
-                                        // Same here for the enum
-                                      } else if (
-                                        input.name === 'enum' &&
-                                        Array.isArray(retrievedValue)
-                                      ) {
+                                      if (input.name === 'enum' && Array.isArray(retrievedValue)) {
                                         value = retrievedValue.join('\n');
                                       } else if (input.name === 'uid') {
                                         value = input.value;
@@ -1319,16 +1289,7 @@ const FormModal = () => {
                                       // So we pass them as string
                                       // This way the data stays accurate and we don't have to operate
                                       // any data mutation
-                                      if (
-                                        input.name === 'default' &&
-                                        state.attributeType === 'boolean'
-                                      ) {
-                                        value = toString(retrievedValue);
-                                        // Same here for the enum
-                                      } else if (
-                                        input.name === 'enum' &&
-                                        Array.isArray(retrievedValue)
-                                      ) {
+                                      if (input.name === 'enum' && Array.isArray(retrievedValue)) {
                                         value = retrievedValue.join('\n');
                                       } else if (input.name === 'uid') {
                                         value = input.value;

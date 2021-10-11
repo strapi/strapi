@@ -14,18 +14,29 @@ const advancedForm = {
           items: [
             {
               autoFocus: true,
-              type: 'enum',
+              type: 'select-default-boolean',
               intlLabel: {
                 id: getTrad('form.attribute.settings.default'),
                 defaultMessage: 'Default value',
               },
               name: 'default',
-              options: [],
-              // options: [
-              //   { value: 'true', label: 'TRUE' },
-              //   { value: '', label: 'NULL' },
-              //   { value: 'false', label: 'FALSE' },
-              // ],
+              options: [
+                {
+                  value: 'true',
+                  key: 'true',
+                  metadatas: { intlLabel: { id: 'true', defaultMessage: 'true' } },
+                },
+                {
+                  value: '',
+                  key: 'null',
+                  metadatas: { intlLabel: { id: 'null', defaultMessage: 'null' } },
+                },
+                {
+                  value: 'false',
+                  key: 'false',
+                  metadatas: { intlLabel: { id: 'false', defaultMessage: 'false' } },
+                },
+              ],
               // validations: {},
             },
           ],
