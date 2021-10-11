@@ -818,7 +818,7 @@ describe('ADMIN | CM | LV | Configure the view', () => {
                       <span
                         class="c9 c10 c11"
                       >
-                        go back
+                        Go back
                       </span>
                     </a>
                   </div>
@@ -925,7 +925,7 @@ describe('ADMIN | CM | LV | Configure the view', () => {
                               <span
                                 class="c42"
                               >
-                                Off
+                                off
                               </span>
                             </div>
                             <div
@@ -935,7 +935,7 @@ describe('ADMIN | CM | LV | Configure the view', () => {
                               <span
                                 class="c35"
                               >
-                                On
+                                on
                               </span>
                             </div>
                             <input
@@ -981,7 +981,7 @@ describe('ADMIN | CM | LV | Configure the view', () => {
                               <span
                                 class="c42"
                               >
-                                Off
+                                off
                               </span>
                             </div>
                             <div
@@ -991,7 +991,7 @@ describe('ADMIN | CM | LV | Configure the view', () => {
                               <span
                                 class="c35"
                               >
-                                On
+                                on
                               </span>
                             </div>
                             <input
@@ -1037,7 +1037,7 @@ describe('ADMIN | CM | LV | Configure the view', () => {
                               <span
                                 class="c42"
                               >
-                                Off
+                                off
                               </span>
                             </div>
                             <div
@@ -1047,7 +1047,7 @@ describe('ADMIN | CM | LV | Configure the view', () => {
                               <span
                                 class="c35"
                               >
-                                On
+                                on
                               </span>
                             </div>
                             <input
@@ -1314,9 +1314,6 @@ describe('ADMIN | CM | LV | Configure the view', () => {
                     <hr
                       class="c63 c64"
                     />
-                  </div>
-                  <div>
-                    yo yo yo
                   </div>
                 </div>
               </div>

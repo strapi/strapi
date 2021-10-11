@@ -3,27 +3,32 @@ import React, {
   useContext,
   // useMemo,
   useReducer,
-  // useState
+  useState,
 } from 'react';
 import PropTypes from 'prop-types';
 import { useMutation } from 'react-query';
-import {
-  // get,
-  pick,
-} from 'lodash';
-import { useNotification, useTracking } from '@strapi/helper-plugin';
-// import { useIntl } from 'react-intl';
+import { isEqual, upperFirst, pick } from 'lodash';
+import { stringify } from 'qs';
+import { useNotification, useTracking, ConfirmDialog } from '@strapi/helper-plugin';
+import { useIntl } from 'react-intl';
 import { Box } from '@strapi/parts/Box';
 import { Divider } from '@strapi/parts/Divider';
+import { Layout, HeaderLayout, ContentLayout } from '@strapi/parts/Layout';
+import { Link } from '@strapi/parts/Link';
+import { Main } from '@strapi/parts/Main';
+import { Button } from '@strapi/parts/Button';
+import CheckIcon from '@strapi/icons/CheckIcon';
+import BackIcon from '@strapi/icons/BackIcon';
 import ModelsContext from '../../contexts/ModelsContext';
+import { usePluginsQueryParams } from '../../hooks';
 import putCMSettingsLV from './utils/api';
-import SettingsForm from './components/SettingsForm';
-import DragWrapper from './components/DragWrapper';
+import Settings from './components/Settings';
 // import LayoutDndProvider from '../../components/LayoutDndProvider';
 import init from './init';
 import reducer, { initialState } from './reducer';
 
 const ListSettingsView = ({ layout, slug, updateLayout }) => {
+  const pluginsQueryParams = usePluginsQueryParams();
   const toggleNotification = useNotification();
   const { refetchData } = useContext(ModelsContext);
   const [reducerState, dispatch] = useReducer(reducer, initialState, () =>
@@ -32,7 +37,7 @@ const ListSettingsView = ({ layout, slug, updateLayout }) => {
   // const [isOpen, setIsOpen] = useState(false);
   // const [isModalFormOpen, setIsModalFormOpen] = useState(false);
   // const [isDraggingSibling, setIsDraggingSibling] = useState(false);
-  // const { formatMessage } = useIntl();
+  const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   // const toggleModalForm = () => setIsModalFormOpen(prevState => !prevState);
   const {
@@ -98,6 +103,34 @@ const ListSettingsView = ({ layout, slug, updateLayout }) => {
       keys: name,
       value: name === 'settings.pageSize' ? parseInt(value, 10) : value,
     });
+  };
+
+  const [showWarningSubmit, setWarningSubmit] = useState(false);
+  const toggleWarningSubmit = () => setWarningSubmit(prevState => !prevState);
+
+  const handleSubmit = e => {
+    e.preventDefault();
+    toggleWarningSubmit();
+    trackUsage('willSaveContentTypeLayout');
+  };
+
+  const goBackUrl = () => {
+    const {
+      settings: { pageSize, defaultSortBy, defaultSortOrder },
+      kind,
+      uid,
+    } = modifiedData;
+    const sort = `${defaultSortBy}:${defaultSortOrder}`;
+    const goBackSearch = `${stringify(
+      {
+        page: 1,
+        pageSize,
+        sort,
+      },
+      { encode: false }
+    )}${pluginsQueryParams ? `&${pluginsQueryParams}` : ''}`;
+
+    return `/content-manager/${kind}/${uid}?${goBackSearch}`;
   };
 
   // const handleChangeEditLabel = ({ target: { name, value } }) => {
@@ -184,21 +217,72 @@ const ListSettingsView = ({ layout, slug, updateLayout }) => {
   // };
 
   return (
-    <SettingsForm
-      collectionName={modifiedData.info.label}
-      initialData={initialData}
-      isSubmittingForm={isSubmittingForm}
-      modifiedData={modifiedData}
-      onChange={handleChange}
-      onConfirmSubmit={handleConfirm}
-      refetchData={refetchData}
-      sortOptions={sortOptions}
-    >
-      <Box padding={6}>
-        <Divider />
-      </Box>
-      <DragWrapper />
-    </SettingsForm>
+    <Layout>
+      <Main aria-busy={isSubmittingForm}>
+        <form onSubmit={handleSubmit}>
+          <HeaderLayout
+            navigationAction={
+              <Link startIcon={<BackIcon />} to={goBackUrl}>
+                {formatMessage({ id: 'app.components.go-back', defaultMessage: 'Go back' })}
+              </Link>
+            }
+            primaryAction={
+              <Button
+                size="L"
+                startIcon={<CheckIcon />}
+                disabled={isEqual(modifiedData, initialData)}
+                type="submit"
+              >
+                {formatMessage({ id: 'form.button.save', defaultMessage: 'Save' })}
+              </Button>
+            }
+            subtitle={formatMessage({
+              id: `components.SettingsViewWrapper.pluginHeader.description.list-settings`,
+              defaultMessage: `Define the settings of the list view.`,
+            })}
+            title={formatMessage(
+              {
+                id: 'components.SettingsViewWrapper.pluginHeader.title',
+                defaultMessage: 'Configure the view - {name}',
+              },
+              { name: upperFirst(modifiedData.info.label) }
+            )}
+          />
+          <ContentLayout>
+            <Box
+              background="neutral0"
+              hasRadius
+              shadow="tableShadow"
+              paddingTop={6}
+              paddingBottom={6}
+              paddingLeft={7}
+              paddingRight={7}
+            >
+              <Settings
+                modifiedData={modifiedData}
+                onChange={handleChange}
+                sortOptions={sortOptions}
+              />
+              <Box padding={6}>
+                <Divider />
+              </Box>
+            </Box>
+          </ContentLayout>
+          <ConfirmDialog
+            bodyText={{
+              id: 'content-manager.popUpWarning.warning.updateAllSettings',
+              defaultMessage: 'This will modify all your settings',
+            }}
+            iconRightButton={<CheckIcon />}
+            isConfirmButtonLoading={isSubmittingForm}
+            isOpen={showWarningSubmit}
+            onToggleDialog={toggleWarningSubmit}
+            onConfirm={handleConfirm}
+            variantRightButton="success-light"
+          />
+        </form>
+      </Main>
+    </Layout>
 
     //     <LayoutDndProvider
     //       isDraggingSibling={isDraggingSibling}
