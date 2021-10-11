@@ -9,11 +9,12 @@ export const RelativeBox = styled(Box)`
 
 export const Wrapper = styled.div`
   position: relative;
+  text-align: center;
 
   img {
     margin: 0;
     padding: 0;
-    max-height: 100%;
+    max-height: ${264 / 16}rem;
     max-width: 100%;
   }
 `;
