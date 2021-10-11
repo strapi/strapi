@@ -88,6 +88,7 @@ const createRouteManager = (strapi, opts = {}) => {
   const createRoute = (route, router) => {
     validateRouteConfig(route);
 
+    // NOTE: the router type is used to tag controller actions and for authentication / authorization so we need to pass this info down to the route level
     _.set(route, 'info.type', type || 'admin');
 
     composeEndpoint(route, { router });
