@@ -3,6 +3,9 @@
 const _ = require('lodash');
 
 module.exports = (initialConfig = {}) => {
+  /**
+   * @type {Record<string, any>}
+   */
   const _config = Object.assign({}, initialConfig); // not deep clone because it would break some config
 
   return {

@@ -4,7 +4,7 @@ const { pickBy } = require('lodash/fp');
 const { addNamespace, hasNamespace } = require('../utils');
 
 /**
- * @typedef {import('./hooks').Hook} Hook
+ * @typedef {import('./types/hooks').Hook} Hook
  */
 
 const hooksRegistry = () => {

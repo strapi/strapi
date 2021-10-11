@@ -13,7 +13,7 @@ const { createAsyncSeriesHook, createAsyncParallelHook } = require('./hooks');
 
 /**
  * Creates a new object containing various hooks used by the providers
- * @return {ProviderHooksMap}
+ * @returns {ProviderHooksMap}
  */
 const createProviderHooksMap = () => ({
   // Register events
@@ -43,7 +43,7 @@ const createProviderHooksMap = () => ({
  * A {@link Provider} factory
  * @param {Object} [options] - The factory options
  * @param {boolean = true} options.throwOnDuplicates - Specify the wanted behaviour when encountering a duplicate key on register
- * @return {Provider}
+ * @returns {Provider}
  */
 const providerFactory = (options = {}) => {
   const { throwOnDuplicates = true } = options;

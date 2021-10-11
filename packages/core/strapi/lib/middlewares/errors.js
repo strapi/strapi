@@ -55,7 +55,8 @@ const formatBoomPayload = boomError => {
 
 /**
  * Create short responses ctx.(send|created|deleted)
- * @param {Strapi} strapi
+ *
+ * @param {import('@strapi/strapi').Strapi} strapi
  */
 const createResponseUtils = strapi => {
   const delegator = delegate(strapi.server.app.context, 'response');
@@ -102,7 +103,7 @@ const createResponseUtils = strapi => {
 };
 
 /**
- * @type {import('./').MiddlewareFactory}
+ * @type {import('./types').MiddlewareFactory}
  */
 module.exports = (_, { strapi }) => {
   createResponseUtils(strapi);

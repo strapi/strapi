@@ -1,9 +1,18 @@
 'use strict';
 
+/**
+ * @typedef {import('../../types').Strapi} Strapi
+ */
+
 const { join, extname, basename } = require('path');
 const fse = require('fs-extra');
 
-// TODO:: allow folders with index.js inside for bigger policies
+/**
+ * TODO:: allow folders with index.js inside for bigger policies
+ *
+ * @param {Strapi} strapi
+ * @returns {Promise<void>}
+ */
 module.exports = async function loadPolicies(strapi) {
   const dir = strapi.dirs.policies;
 

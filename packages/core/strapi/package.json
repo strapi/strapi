@@ -65,7 +65,7 @@
     }
   ],
   "main": "./lib",
-  "types": "./lib/index.d.ts",
+  "types": "./lib/types/index.d.ts",
   "bin": {
     "strapi": "./bin/strapi.js"
   },

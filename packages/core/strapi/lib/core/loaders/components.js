@@ -1,10 +1,18 @@
 'use strict';
 
+/**
+ * @typedef {import('../../types').Strapi} Strapi
+ */
+
 const { join } = require('path');
 const _ = require('lodash');
 const { pathExists } = require('fs-extra');
 const loadFiles = require('../../load/load-files');
 
+/**
+ * @param {Strapi} strapi
+ * @returns {Promise<void>}
+ */
 module.exports = async strapi => {
   if (!(await pathExists(strapi.dirs.components))) {
     return {};

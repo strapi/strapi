@@ -11,7 +11,7 @@ const createSingleTypeService = ({ model, strapi, utils }) => {
     /**
      * Returns singleType content
      *
-     * @return {Promise}
+     * @returns {Promise}
      */
     find(params = {}) {
       return strapi.entityService.findMany(uid, getFetchParams(params));
@@ -20,7 +20,7 @@ const createSingleTypeService = ({ model, strapi, utils }) => {
     /**
      * Creates or updates a singleType content
      *
-     * @return {Promise}
+     * @returns {Promise}
      */
     async createOrUpdate(params = {}) {
       const entity = await this.find(params);
@@ -43,7 +43,7 @@ const createSingleTypeService = ({ model, strapi, utils }) => {
     /**
      * Deletes the singleType content
      *
-     * @return {Promise}
+     * @returns {Promise}
      */
     async delete(params = {}) {
       const entity = await this.find(params);

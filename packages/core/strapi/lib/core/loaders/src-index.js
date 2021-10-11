@@ -1,5 +1,9 @@
 'use strict';
 
+/**
+ * @typedef {import('../../types').Strapi} Strapi
+ */
+
 const { resolve } = require('path');
 const { statSync, existsSync } = require('fs');
 const { yup } = require('@strapi/utils');
@@ -16,6 +20,10 @@ const validateSrcIndex = srcIndex => {
   return srcSchema.validateSync(srcIndex, { strict: true, abortEarly: false });
 };
 
+/**
+ * @param {Strapi} strapi
+ * @returns {void}
+ */
 module.exports = strapi => {
   if (!existsSync(strapi.dirs.src)) {
     throw new Error('Missing src folder. Please create one at `./src`');

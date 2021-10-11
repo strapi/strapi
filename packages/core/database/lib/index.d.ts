@@ -1,3 +1,4 @@
+import { StrapiModels } from '@strapi/strapi'
 import { LifecycleProvider } from './lifecycles';
 import { MigrationProvider } from './migrations';
 import { SchemaProvideer } from './schema';
@@ -56,34 +57,34 @@ interface Pagination {
 
 interface PopulateParams {}
 interface EntityManager {
-  findOne<K extends keyof AllTypes>(uid: K, params: FindParams<AllTypes[K]>): Promise<any>;
-  findMany<K extends keyof AllTypes>(uid: K, params: FindParams<AllTypes[K]>): Promise<any[]>;
+  findOne<K extends keyof StrapiModels>(uid: K, params: FindParams<StrapiModels[K]>): Promise<any>;
+  findMany<K extends keyof StrapiModels>(uid: K, params: FindParams<StrapiModels[K]>): Promise<any[]>;
 
-  create<K extends keyof AllTypes>(uid: K, params: CreateParams<AllTypes[K]>): Promise<any>;
-  createMany<K extends keyof AllTypes>(
+  create<K extends keyof StrapiModels>(uid: K, params: CreateParams<StrapiModels[K]>): Promise<any>;
+  createMany<K extends keyof StrapiModels>(
     uid: K,
-    params: CreateManyParams<AllTypes[K]>
+    params: CreateManyParams<StrapiModels[K]>
   ): Promise<{ count: number }>;
 
-  update<K extends keyof AllTypes>(uid: K, params: any): Promise<any>;
-  updateMany<K extends keyof AllTypes>(uid: K, params: any): Promise<{ count: number }>;
+  update<K extends keyof StrapiModels>(uid: K, params: any): Promise<any>;
+  updateMany<K extends keyof StrapiModels>(uid: K, params: any): Promise<{ count: number }>;
 
-  delete<K extends keyof AllTypes>(uid: K, params: any): Promise<any>;
-  deleteMany<K extends keyof AllTypes>(uid: K, params: any): Promise<{ count: number }>;
+  delete<K extends keyof StrapiModels>(uid: K, params: any): Promise<any>;
+  deleteMany<K extends keyof StrapiModels>(uid: K, params: any): Promise<{ count: number }>;
 
-  count<K extends keyof AllTypes>(uid: K, params: any): Promise<number>;
+  count<K extends keyof StrapiModels>(uid: K, params: any): Promise<number>;
 
-  attachRelations<K extends keyof AllTypes>(uid: K, id: ID, data: any): Promise<any>;
-  updateRelations<K extends keyof AllTypes>(uid: K, id: ID, data: any): Promise<any>;
-  deleteRelations<K extends keyof AllTypes>(uid: K, id: ID): Promise<any>;
+  attachRelations<K extends keyof StrapiModels>(uid: K, id: ID, data: any): Promise<any>;
+  updateRelations<K extends keyof StrapiModels>(uid: K, id: ID, data: any): Promise<any>;
+  deleteRelations<K extends keyof StrapiModels>(uid: K, id: ID): Promise<any>;
 
-  populate<K extends keyof AllTypes, T extends AllTypes[K]>(
+  populate<K extends keyof StrapiModels, T extends StrapiModels[K]>(
     uid: K,
     entity: T,
     populate: PopulateParams
   ): Promise<T>;
 
-  load<K extends keyof AllTypes, T extends AllTypes[K], SK extends keyof T>(
+  load<K extends keyof StrapiModels, T extends StrapiModels[K], SK extends keyof T>(
     uid: K,
     entity: T,
     field: SK,
@@ -91,14 +92,14 @@ interface EntityManager {
   ): Promise<T[SK]>;
 }
 
-interface QueryFromContentType<T extends keyof AllTypes> {
-  findOne(params: FindParams<AllTypes[T]>): Promise<any>;
-  findMany(params: FindParams<AllTypes[T]>): Promise<any[]>;
-  findWithCount(params: FindParams<AllTypes[T]>): Promise<[any[], number]>;
-  findPage(params: FindParams<AllTypes[T]>): Promise<{ results: any[]; pagination: Pagination }>;
+interface QueryFromContentType<T extends keyof StrapiModels> {
+  findOne(params: FindParams<StrapiModels[T]>): Promise<any>;
+  findMany(params: FindParams<StrapiModels[T]>): Promise<any[]>;
+  findWithCount(params: FindParams<StrapiModels[T]>): Promise<[any[], number]>;
+  findPage(params: FindParams<StrapiModels[T]>): Promise<{ results: any[]; pagination: Pagination }>;
 
-  create(params: CreateParams<AllTypes[T]>): Promise<any>;
-  createMany(params: CreateManyParams<AllTypes[T]>): Promise<{ count: number }>;
+  create(params: CreateParams<StrapiModels[T]>): Promise<any>;
+  createMany(params: CreateManyParams<StrapiModels[T]>): Promise<{ count: number }>;
 
   update(params: any): Promise<any>;
   updateMany(params: any): Promise<{ count: number }>;
@@ -112,9 +113,9 @@ interface QueryFromContentType<T extends keyof AllTypes> {
   updateRelations(id: ID, data: any): Promise<any>;
   deleteRelations(id: ID): Promise<any>;
 
-  populate<S extends AllTypes[T]>(entity: S, populate: PopulateParams): Promise<S>;
+  populate<S extends StrapiModels[T]>(entity: S, populate: PopulateParams): Promise<S>;
 
-  load<S extends AllTypes[T], K extends keyof S>(
+  load<S extends StrapiModels[T], K extends keyof S>(
     entity: S,
     field: K,
     populate: PopulateParams
@@ -138,7 +139,7 @@ export interface Database {
   migrations: MigrationProvider;
   entityManager: EntityManager;
 
-  query<T extends keyof AllTypes>(uid: T): QueryFromContentType<T>;
+  query<T extends keyof StrapiModels>(uid: T): QueryFromContentType<T>;
 }
 export class Database implements Database {
   static transformContentTypes(contentTypes: any[]): ModelConfig[];

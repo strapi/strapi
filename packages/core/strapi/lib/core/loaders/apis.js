@@ -1,5 +1,9 @@
 'use strict';
 
+/**
+ * @typedef {import('../../types').Strapi} Strapi
+ */
+
 const { join, extname, basename } = require('path');
 const { existsSync } = require('fs-extra');
 const _ = require('lodash');
@@ -13,6 +17,10 @@ const DEFAULT_CONTENT_TYPE = {
   lifecycles: {},
 };
 
+/**
+ * @param {Strapi} strapi
+ * @returns {Promise<void>}
+ */
 module.exports = async strapi => {
   if (!existsSync(strapi.dirs.api)) {
     throw new Error('Missing api folder. Please create one at `./src/api`');

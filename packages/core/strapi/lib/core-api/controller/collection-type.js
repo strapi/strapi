@@ -11,7 +11,7 @@ const createCollectionTypeController = ({ service, sanitize, transformResponse }
     /**
      * Retrieve records.
      *
-     * @return {Object|Array}
+     * @returns {Object|Array}
      */
     async find(ctx) {
       const { query } = ctx;
@@ -24,7 +24,7 @@ const createCollectionTypeController = ({ service, sanitize, transformResponse }
     /**
      * Retrieve a record.
      *
-     * @return {Object}
+     * @returns {Object}
      */
     async findOne(ctx) {
       const { id } = ctx.params;
@@ -38,7 +38,7 @@ const createCollectionTypeController = ({ service, sanitize, transformResponse }
     /**
      * Create a record.
      *
-     * @return {Object}
+     * @returns {Object}
      */
     async create(ctx) {
       const { query } = ctx.request;
@@ -53,7 +53,7 @@ const createCollectionTypeController = ({ service, sanitize, transformResponse }
     /**
      * Update a record.
      *
-     * @return {Object}
+     * @returns {Object}
      */
     async update(ctx) {
       const { id } = ctx.params;
@@ -69,7 +69,7 @@ const createCollectionTypeController = ({ service, sanitize, transformResponse }
     /**
      * Destroy a record.
      *
-     * @return {Object}
+     * @returns {Object}
      */
     async delete(ctx) {
       const { id } = ctx.params;

@@ -4,7 +4,7 @@ const { has, toNumber, isUndefined } = require('lodash/fp');
 
 /**
  * Default limit values from config
- * @return {{maxLimit: number, defaultLimit: number}}
+ * @returns {{maxLimit: number, defaultLimit: number}}
  */
 const getLimitConfigDefaults = () => ({
   defaultLimit: toNumber(strapi.config.get('api.rest.defaultLimit', 25)),

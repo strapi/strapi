@@ -1,7 +1,15 @@
 'use strict';
 
+/**
+ * @typedef {import('../../types').Strapi} Strapi
+ */
+
 const _ = require('lodash');
 
+/**
+ * @param {Strapi} strapi
+ * @returns {void}
+ */
 module.exports = strapi => {
   strapi.admin = require('@strapi/admin/strapi-server');
 

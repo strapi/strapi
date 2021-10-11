@@ -1,4 +1,4 @@
-import { Strapi } from '../../';
+import { Strapi } from '../../types';
 
 export type Service = {
   [key: string]: (...args: any) => any;

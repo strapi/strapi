@@ -226,6 +226,8 @@ class Strapi {
 
   /**
    * Add behaviors to the server
+   *
+   * @returns {Promise<void>}
    */
   async listen() {
     return new Promise((resolve, reject) => {
@@ -264,6 +266,10 @@ class Strapi {
     return this.stop();
   }
 
+  /**
+   * @param {number=} exitCode
+   * @returns {never}
+   */
   stop(exitCode = 1) {
     this.server.destroy();
 

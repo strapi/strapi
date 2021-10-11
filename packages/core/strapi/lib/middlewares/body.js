@@ -8,9 +8,6 @@ const defaults = {
   patchKoa: true,
 };
 
-/**
- * @type {import('./').MiddlewareFactory}
- */
 module.exports = (config, { strapi }) => {
   const bodyConfig = defaultsDeep(defaults, config);
 

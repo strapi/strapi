@@ -1,5 +1,14 @@
 'use strict';
 
+/**
+ * @typedef {import('./types').Strapi} Strapi
+ * @typedef {import('./types/container').StrapiRegistryContainer} StrapiRegistryContainer
+ */
+
+/**
+ * @param {Strapi} strapi
+ * @returns {StrapiRegistryContainer}
+ */
 const createContainer = strapi => {
   const registered = new Map();
   const resolved = new Map();

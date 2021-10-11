@@ -10,7 +10,7 @@ const createSingleTypeController = ({ service, sanitize, transformResponse }) =>
     /**
      * Retrieve single type content
      *
-     * @return {Object|Array}
+     * @returns {Object|Array}
      */
     async find(ctx) {
       const { query } = ctx;
@@ -21,7 +21,7 @@ const createSingleTypeController = ({ service, sanitize, transformResponse }) =>
     /**
      * create or update single type content.
      *
-     * @return {Object}
+     * @returns {Object}
      */
     async update(ctx) {
       const { query } = ctx.request;

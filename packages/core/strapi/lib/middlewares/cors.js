@@ -12,9 +12,6 @@ const defaults = {
   keepHeadersOnError: false,
 };
 
-/**
- * @type {import('./').MiddlewareFactory}
- */
 module.exports = config => {
   const {
     origin,

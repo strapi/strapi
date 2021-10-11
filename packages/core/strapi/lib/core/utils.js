@@ -1,5 +1,10 @@
 'use strict';
 
+/**
+ * @param {string} name
+ * @param {string} namespace
+ * @returns {string}
+ */
 const hasNamespace = (name, namespace) => {
   if (!namespace) {
     return true;
@@ -12,6 +17,11 @@ const hasNamespace = (name, namespace) => {
   }
 };
 
+/**
+ * @param {string} name
+ * @param {string} namespace
+ * @returns {string}
+ */
 const addNamespace = (name, namespace) => {
   if (namespace.endsWith('::')) {
     return `${namespace}${name}`;
@@ -20,6 +30,11 @@ const addNamespace = (name, namespace) => {
   }
 };
 
+/**
+ * @param {string} name
+ * @param {string} namespace
+ * @returns {string}
+ */
 const removeNamespace = (name, namespace) => {
   if (namespace.endsWith('::')) {
     return name.replace(namespace, '');

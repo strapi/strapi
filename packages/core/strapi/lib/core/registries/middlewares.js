@@ -4,7 +4,7 @@ const { pickBy, has } = require('lodash/fp');
 const { addNamespace, hasNamespace } = require('../utils');
 
 /**
- * @typedef {import('./middlewares').Middleware} Middleware
+ * @typedef {import('./types/middlewares').Middleware} Middleware
  */
 
 // TODO: move instantiation part here instead of in the server service

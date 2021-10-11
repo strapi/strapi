@@ -1,5 +1,5 @@
 import { Database } from '@strapi/database';
-import { Strapi } from '../../';
+import { Strapi, StrapiModels } from '@strapi/strapi';
 
 type ID = number | string;
 
@@ -35,18 +35,18 @@ type Params<T> = {
   files?: any;
 };
 
-interface EntityService {
-  uploadFiles<K extends keyof AllTypes, T extends AllTypes[K]>(uid: K, entity, files);
-  wrapParams<K extends keyof AllTypes, T extends AllTypes[K]>(
+export interface EntityService {
+  uploadFiles<K extends keyof StrapiModels, T extends StrapiModels[K]>(uid: K, entity, files);
+  wrapParams<K extends keyof StrapiModels, T extends StrapiModels[K]>(
     params: Params<T>,
     { uid: K, action: EntityServiceAction }
   );
 
-  findMany<K extends keyof AllTypes, T extends AllTypes[K]>(
+  findMany<K extends keyof StrapiModels, T extends StrapiModels[K]>(
     uid: K,
     params: Params<T>
   ): Promise<T[]>;
-  findPage<K extends keyof AllTypes, T extends AllTypes[K]>(
+  findPage<K extends keyof StrapiModels, T extends StrapiModels[K]>(
     uid: K,
     params: Params<T>
   ): Promise<{
@@ -54,7 +54,7 @@ interface EntityService {
     pagination: PaginationInfo;
   }>;
 
-  findWithRelationCounts<K extends keyof AllTypes, T extends AllTypes[K]>(
+  findWithRelationCounts<K extends keyof StrapiModels, T extends StrapiModels[K]>(
     uid: K,
     params: Params<T>
   ): Promise<{
@@ -62,20 +62,20 @@ interface EntityService {
     pagination: PaginationInfo;
   }>;
 
-  findOne<K extends keyof AllTypes, T extends AllTypes[K]>(
+  findOne<K extends keyof StrapiModels, T extends StrapiModels[K]>(
     uid: K,
     entityId: ID,
     params: Params<T>
   ): Promise<T>;
 
-  count<K extends keyof AllTypes, T extends AllTypes[K]>(uid: K, params: Params<T>): Promise<any>;
-  create<K extends keyof AllTypes, T extends AllTypes[K]>(uid: K, params: Params<T>): Promise<any>;
-  update<K extends keyof AllTypes, T extends AllTypes[K]>(
+  count<K extends keyof StrapiModels, T extends StrapiModels[K]>(uid: K, params: Params<T>): Promise<any>;
+  create<K extends keyof StrapiModels, T extends StrapiModels[K]>(uid: K, params: Params<T>): Promise<any>;
+  update<K extends keyof StrapiModels, T extends StrapiModels[K]>(
     uid: K,
     entityId: ID,
     params: Params<T>
   ): Promise<any>;
-  delete<K extends keyof AllTypes, T extends AllTypes[K]>(
+  delete<K extends keyof StrapiModels, T extends StrapiModels[K]>(
     uid: K,
     entityId: ID,
     params: Params<T>

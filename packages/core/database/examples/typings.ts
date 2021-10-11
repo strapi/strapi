@@ -11,7 +11,10 @@ interface Article {
   category: Category | ID;
 }
 
-interface AllTypes {
-  article: Article;
-  category: Category;
+declare module '@strapi/strapi' {
+  interface StrapiModels {
+    article: Article;
+    category: Category;
+  }
 }
+

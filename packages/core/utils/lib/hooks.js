@@ -12,7 +12,7 @@ const { eq, remove, cloneDeep } = require('lodash/fp');
 
 /**
  * Create a default Strapi hook
- * @return {Hook}
+ * @returns {Hook}
  */
 const createHook = () => {
   const state = {
@@ -43,7 +43,7 @@ const createHook = () => {
 /**
  * Create an async series hook.
  * Upon execution, it will execute every handler in order with the same context
- * @return {Hook}
+ * @returns {Hook}
  */
 const createAsyncSeriesHook = () => ({
   ...createHook(),
@@ -58,7 +58,7 @@ const createAsyncSeriesHook = () => ({
 /**
  * Create an async series waterfall hook.
  * Upon execution, it will execute every handler in order and pass the return value of the last handler to the next one
- * @return {Hook}
+ * @returns {Hook}
  */
 const createAsyncSeriesWaterfallHook = () => ({
   ...createHook(),
@@ -77,7 +77,7 @@ const createAsyncSeriesWaterfallHook = () => ({
 /**
  * Create an async parallel hook.
  * Upon execution, it will execute every registered handler in band.
- * @return {Hook}
+ * @returns {Hook}
  */
 const createAsyncParallelHook = () => ({
   ...createHook(),
