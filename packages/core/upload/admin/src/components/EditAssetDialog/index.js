@@ -21,6 +21,7 @@ import { PreviewBox } from './PreviewBox';
 import { AssetMeta } from './AssetMeta';
 import { getTrad } from '../../utils';
 import formatBytes from '../../utils/formatBytes';
+import { useEditAsset } from '../../hooks/useEditAsset';
 
 const fileInfoSchema = yup.object({
   name: yup.string().required(),
@@ -31,9 +32,11 @@ const fileInfoSchema = yup.object({
 export const EditAssetDialog = ({ onClose, asset }) => {
   const { formatMessage, formatDate } = useIntl();
   const submitButtonRef = useRef(null);
+  const { editAsset, isLoading } = useEditAsset();
 
-  const handleSubmit = () => {
-    console.log('Edit an asset');
+  const handleSubmit = async values => {
+    await editAsset({ ...asset, ...values });
+    onClose();
   };
 
   return (
@@ -139,7 +142,7 @@ export const EditAssetDialog = ({ onClose, asset }) => {
                   defaultMessage: 'Replace media',
                 })}
               </Button>
-              <Button onClick={() => submitButtonRef.current.click()}>
+              <Button onClick={() => submitButtonRef.current.click()} loading={isLoading}>
                 {formatMessage({ id: 'form.button.finish', defaultMessage: 'Finish' })}
               </Button>
             </>
