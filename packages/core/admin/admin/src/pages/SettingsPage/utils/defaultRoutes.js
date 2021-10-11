@@ -93,7 +93,7 @@ const defaultRoutes = [
   {
     Component: async () => {
       const component = await import(
-        /* webpackChunkName: "webhook-list-page" */ '../pages/ApiTokens/ListView'
+        /* webpackChunkName: "webhook-list-page" */ '../pages/ApiTokens/ProtectedListView'
       );
 
       return component;
