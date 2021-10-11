@@ -32,9 +32,8 @@ export const useUpload = () => {
   const tokenRef = useRef(axios.CancelToken.source());
 
   const mutation = useMutation(asset => uploadAsset(asset, tokenRef.current, setProgress), {
-    onSuccess: assets => {
-      // Coupled with the cache of useAssets
-      queryClient.setQueryData('assets', cachedAssets => cachedAssets.concat(assets));
+    onSuccess: () => {
+      queryClient.refetchQueries(['assets'], { active: true });
     },
   });
 
