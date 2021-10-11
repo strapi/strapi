@@ -24,6 +24,7 @@ import { useAssets } from '../../hooks/useAssets';
 import { getTrad } from '../../utils';
 import pluginPermissions from '../../permissions';
 import { Filters } from './components/Filters';
+import { PaginationFooter } from '../../components/PaginationFooter';
 
 const BoxWithHeight = styled(Box)`
   height: ${32 / 16}rem;
@@ -137,7 +138,10 @@ export const MediaLibrary = () => {
             />
           )}
           {canRead && assets && assets.length > 0 && (
-            <ListView assets={assets} onEditAsset={setAssetToEdit} />
+            <>
+              <ListView assets={assets} onEditAsset={setAssetToEdit} />
+              {data?.pagination && <PaginationFooter pagination={data.pagination} />}
+            </>
           )}
         </ContentLayout>
       </Main>
