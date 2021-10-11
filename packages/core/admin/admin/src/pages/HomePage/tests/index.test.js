@@ -895,7 +895,6 @@ describe('Homepage', () => {
                             >
                               <span
                                 class="c29"
-                                style="word-break: break-all;"
                               >
                                 Read the documentation
                               </span>
@@ -947,7 +946,6 @@ describe('Homepage', () => {
                             >
                               <span
                                 class="c29"
-                                style="word-break: break-all;"
                               >
                                 Code example
                               </span>
@@ -999,7 +997,6 @@ describe('Homepage', () => {
                             >
                               <span
                                 class="c29"
-                                style="word-break: break-all;"
                               >
                                 Tutorial
                               </span>
@@ -1049,7 +1046,6 @@ describe('Homepage', () => {
                             >
                               <span
                                 class="c29"
-                                style="word-break: break-all;"
                               >
                                 Blog
                               </span>
