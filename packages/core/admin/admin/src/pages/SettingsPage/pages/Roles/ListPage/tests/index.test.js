@@ -199,11 +199,9 @@ describe('<ListPage />', () => {
       }
 
       .c16 {
-        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-      }
-
-      .c17 {
         background: #ffffff;
+        border-radius: 4px;
+        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
       .c19 {
@@ -228,6 +226,10 @@ describe('<ListPage />', () => {
         padding-left: 12px;
       }
 
+      .c17 {
+        overflow: hidden;
+      }
+
       .c21 {
         width: 100%;
         white-space: nowrap;
@@ -235,7 +237,6 @@ describe('<ListPage />', () => {
 
       .c18 {
         position: relative;
-        border-radius: 4px 4px 0 0;
       }
 
       .c18:before {
@@ -532,10 +533,10 @@ describe('<ListPage />', () => {
           class="c15"
         >
           <div
-            class="c16"
+            class="c16 c17"
           >
             <div
-              class="c17 c18"
+              class="c18"
             >
               <div
                 class="c19 c20"

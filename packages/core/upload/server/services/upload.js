@@ -302,8 +302,12 @@ module.exports = ({ strapi }) => ({
     return strapi.entityService.findOne('plugin::upload.file', id, { populate });
   },
 
-  fetchAll(query) {
+  findMany(query) {
     return strapi.entityService.findMany('plugin::upload.file', query);
+  },
+
+  findPage(query) {
+    return strapi.entityService.findPage('plugin::upload.file', query);
   },
 
   count(query) {
