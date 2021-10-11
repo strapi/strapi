@@ -35,6 +35,11 @@ export const ImageAssetCard = ({
 }) => {
   const { formatMessage } = useIntl();
 
+  // Prevents the browser from caching the URL for all sizes and allow react-query to make a smooth update
+  // instead of a full refresh
+  const optimizedCachingThumbnail =
+    width && height ? `${thumbnail}?width=${width}&height=${height}` : thumbnail;
+
   return (
     <Card>
       <CardHeader>
@@ -48,7 +53,7 @@ export const ImageAssetCard = ({
             />
           </CardAction>
         )}
-        <CardAsset src={thumbnail} size={size} />
+        <CardAsset src={optimizedCachingThumbnail} size={size} />
       </CardHeader>
       <CardBody>
         <CardContent>
