@@ -1112,6 +1112,12 @@ const FormModal = () => {
     }),
   });
 
+  const genericInputProps = {
+    customInputs: { 'toggle-draft-publish': DraftAndPublishToggle },
+    modifiedData,
+    isCreating,
+  };
+
   return (
     <>
       <ModalLayout onClose={handleClosed} labelledBy="title">
@@ -1255,9 +1261,7 @@ const FormModal = () => {
                                         <GridItem col={input.size || 6} key={input.name || key}>
                                           <GenericInput
                                             {...input}
-                                            customInputs={{
-                                              'toggle-draft-publish': DraftAndPublishToggle,
-                                            }}
+                                            {...genericInputProps}
                                             onChange={handleChange}
                                             value={value}
                                           />
@@ -1342,9 +1346,8 @@ const FormModal = () => {
                                         <GridItem col={input.size || 6} key={input.name || key}>
                                           <GenericInput
                                             {...input}
-                                            customInputs={{
-                                              'toggle-draft-publish': DraftAndPublishToggle,
-                                            }}
+                                            {...genericInputProps}
+                                            isCreating={isCreating}
                                             onChange={handleChange}
                                             value={value}
                                           />

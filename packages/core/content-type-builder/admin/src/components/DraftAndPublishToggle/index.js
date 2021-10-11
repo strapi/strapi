@@ -16,7 +16,15 @@ import { Button } from '@strapi/parts/Button';
 import AlertWarningIcon from '@strapi/icons/AlertWarningIcon';
 import { getTrad } from '../../utils';
 
-const DraftAndPublishToggle = ({ description, disabled, intlLabel, name, onChange, value }) => {
+const DraftAndPublishToggle = ({
+  description,
+  disabled,
+  intlLabel,
+  isCreating,
+  name,
+  onChange,
+  value,
+}) => {
   const { formatMessage } = useIntl();
   const [showWarning, setShowWarning] = useState(false);
   const label = intlLabel.id
@@ -42,7 +50,7 @@ const DraftAndPublishToggle = ({ description, disabled, intlLabel, name, onChang
   };
 
   const handleChange = ({ target: { checked } }) => {
-    if (!checked) {
+    if (!checked && !isCreating) {
       handleToggle();
 
       return;
@@ -134,6 +142,7 @@ DraftAndPublishToggle.propTypes = {
     defaultMessage: PropTypes.string.isRequired,
     values: PropTypes.object,
   }).isRequired,
+  isCreating: PropTypes.bool.isRequired,
   name: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
   value: PropTypes.bool,
