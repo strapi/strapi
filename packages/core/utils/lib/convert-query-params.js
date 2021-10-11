@@ -8,8 +8,6 @@
 const _ = require('lodash');
 const parseType = require('./parse-type');
 
-const QUERY_OPERATORS = ['_where', '_or', '_and'];
-
 class InvalidOrderError extends Error {
   constructor() {
     super();
@@ -222,5 +220,4 @@ module.exports = {
   convertPopulateQueryParams,
   convertFiltersQueryParams,
   convertFieldsQueryParams,
-  QUERY_OPERATORS,
 };

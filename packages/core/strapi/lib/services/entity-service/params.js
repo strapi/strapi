@@ -15,23 +15,8 @@ const { contentTypes: contentTypesUtils } = require('@strapi/utils');
 
 const { PUBLISHED_AT_ATTRIBUTE } = contentTypesUtils.constants;
 
-// TODO: to remove once the front is migrated
-const convertOldQuery = params => {
-  const query = {};
-
-  Object.keys(params).forEach(key => {
-    if (key.startsWith('_')) {
-      query[key.slice(1)] = params[key];
-    } else {
-      query[key] = params[key];
-    }
-  });
-
-  return query;
-};
-
 const transformCommonParams = (params = {}) => {
-  const { _q, sort, filters, _where, fields, populate, ...query } = params;
+  const { _q, sort, filters, fields, populate, ...query } = params;
 
   if (_q) {
     query._q = _q;
@@ -45,12 +30,6 @@ const transformCommonParams = (params = {}) => {
     query.where = convertFiltersQueryParams(filters);
   }
 
-  if (_where) {
-    query.where = {
-      $and: [_where].concat(query.where || []),
-    };
-  }
-
   if (fields) {
     query.select = convertFieldsQueryParams(fields);
   }
@@ -59,7 +38,7 @@ const transformCommonParams = (params = {}) => {
     query.populate = convertPopulateQueryParams(populate);
   }
 
-  return { ...convertOldQuery(query), ...query };
+  return query;
 };
 
 const transformPaginationParams = (params = {}) => {
@@ -90,7 +69,7 @@ const transformPaginationParams = (params = {}) => {
     query.limit = convertLimitQueryParams(limit);
   }
 
-  return { ...convertOldQuery(query), ...query };
+  return query;
 };
 
 const transformPublicationStateParams = uid => (params = {}) => {
@@ -120,14 +99,14 @@ const transformPublicationStateParams = uid => (params = {}) => {
     }
   }
 
-  return { ...convertOldQuery(query), ...query };
+  return query;
 };
 
 const pickSelectionParams = pick(['fields', 'populate']);
 
 const transformParamsToQuery = (uid, params) => {
   return pipe(
-    // _q, _where, filters, etc...
+    // _q, filters, etc...
     transformCommonParams,
     // page, pageSize, start, limit
     transformPaginationParams,
