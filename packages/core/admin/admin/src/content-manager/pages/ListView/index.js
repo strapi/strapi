@@ -284,6 +284,10 @@ function ListView({
                 <IconButtonCustom
                   onClick={() => push(`${slug}/configurations/list`)}
                   icon={<Settings />}
+                  label={formatMessage({
+                    id: 'app.links.configure-view',
+                    defaultMessage: 'Configure the view',
+                  })}
                 />
               </CheckPermissions>
             </>

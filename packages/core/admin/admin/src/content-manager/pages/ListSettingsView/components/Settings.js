@@ -21,7 +21,7 @@ const Settings = ({ modifiedData, onChange, sortOptions }) => {
   return (
     <>
       <Box paddingBottom={4}>
-        <H3>
+        <H3 as="h2">
           {formatMessage({
             id: 'content-manager.containers.SettingPage.settings',
             defaultMessage: 'Settings',
