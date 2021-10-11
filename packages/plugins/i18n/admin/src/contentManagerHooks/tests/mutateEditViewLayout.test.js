@@ -277,7 +277,7 @@ describe('i18n | contentManagerHooks | mutateEditViewLayout', () => {
                   fieldSchema: { type: 'relation' },
                   targetModelPluginOptions: { i18n: { localized: true } },
                   queryInfos: {
-                    defaultParams: { test: true, _locale: 'en' },
+                    defaultParams: { test: true, locale: 'en' },
                     paramsToKeep: ['plugins.i18n.locale'],
                   },
                 },
@@ -299,7 +299,7 @@ describe('i18n | contentManagerHooks | mutateEditViewLayout', () => {
                   fieldSchema: { type: 'relation' },
                   targetModelPluginOptions: { i18n: { localized: true } },
                   queryInfos: {
-                    defaultParams: { test: true, _locale: 'en' },
+                    defaultParams: { test: true, locale: 'en' },
                     paramsToKeep: ['plugins.i18n.locale'],
                   },
                 },
@@ -518,7 +518,7 @@ describe('i18n | contentManagerHooks | mutateEditViewLayout', () => {
           queryInfos: {
             defaultParams: {
               test: true,
-              _locale: 'en',
+              locale: 'en',
             },
             paramsToKeep: ['plugins.i18n.locale'],
           },

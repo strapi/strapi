@@ -89,6 +89,7 @@ function ListView({
 
       try {
         const opts = source ? { cancelToken: source.token } : null;
+
         const {
           data: { results, pagination: paginationResult },
         } = await axiosInstance.get(endPoint, opts);
@@ -125,8 +126,6 @@ function ListView({
 
           return;
         }
-
-        console.log('iii');
 
         console.error(err);
         toggleNotification({
@@ -355,6 +354,9 @@ export function mapDispatchToProps(dispatch) {
     dispatch
   );
 }
-const withConnect = connect(mapStateToProps, mapDispatchToProps);
+const withConnect = connect(
+  mapStateToProps,
+  mapDispatchToProps
+);
 
 export default compose(withConnect)(memo(ListView, isEqual));

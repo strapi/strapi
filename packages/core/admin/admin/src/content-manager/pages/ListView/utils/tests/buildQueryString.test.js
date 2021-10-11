@@ -25,7 +25,7 @@ describe('buildQueryString', () => {
 
     const queryString = buildQueryString(queryParams);
 
-    expect(queryString).toBe('?page=1&pageSize=10&sort=name:ASC&_locale=en');
+    expect(queryString).toBe('?page=1&pageSize=10&sort=name:ASC&locale=en');
   });
 
   it('creates a valid query string with a filters clause', () => {
@@ -55,7 +55,7 @@ describe('buildQueryString', () => {
     const queryString = buildQueryString(queryParams);
 
     expect(queryString).toBe(
-      '?page=1&pageSize=10&sort=name:ASC&filters[0][name]=hello world&_locale=en'
+      '?page=1&pageSize=10&sort=name:ASC&filters[0][name]=hello world&locale=en'
     );
   });
 });
