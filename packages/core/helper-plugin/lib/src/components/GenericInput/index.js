@@ -53,6 +53,7 @@ const GenericInput = ({
         error={error}
         name={name}
         onChange={onChange}
+        options={options}
         placeholder={placeholder}
         type={type}
         value={value}

@@ -41,22 +41,34 @@ const baseForm = {
                 defaultMessage: 'Type',
               },
               name: 'repeatable',
-              type: 'booleanBox',
+              type: 'radio-group',
               size: 12,
-              // FIXME
-              // options: [
-              //   {
-              //     headerId: getTrad('form.attribute.component.option.repeatable'),
-              //     descriptionId: getTrad('form.attribute.component.option.repeatable.description'),
-              //     value: true,
-              //   },
-              //   {
-              //     headerId: getTrad('form.attribute.component.option.single'),
-              //     descriptionId: getTrad('form.attribute.component.option.single.description'),
-              //     value: false,
-              //   },
-              // ],
-              // validations: {},
+              radios: [
+                {
+                  title: {
+                    id: getTrad('form.attribute.component.option.repeatable'),
+                    defaultMessage: 'Repeatable component',
+                  },
+                  description: {
+                    id: getTrad('form.attribute.component.option.repeatable.description'),
+                    defaultMessage:
+                      'Best for multiple instances (array) of ingredients, meta tags, etc..',
+                  },
+                  value: true,
+                },
+                {
+                  title: {
+                    id: getTrad('form.attribute.component.option.single'),
+                    defaultMessage: 'Single component',
+                  },
+                  description: {
+                    id: getTrad('form.attribute.component.option.single.description'),
+                    defaultMessage:
+                      'Best for grouping fields like full address, main information, etc...',
+                  },
+                  value: false,
+                },
+              ],
             },
           ],
         },
@@ -168,22 +180,31 @@ const baseForm = {
               },
               name: 'multiple',
               size: 12,
-              type: 'booleanBox',
-              // FIXME
-              options: [],
-              // options: [
-              //   {
-              //     headerId: getTrad('form.attribute.media.option.multiple'),
-              //     descriptionId: getTrad('form.attribute.media.option.multiple.description'),
-              //     value: true,
-              //   },
-              //   {
-              //     headerId: getTrad('form.attribute.media.option.single'),
-              //     descriptionId: getTrad('form.attribute.media.option.single.description'),
-              //     value: false,
-              //   },
-              // ],
-              // validations: {},
+              type: 'radio-group',
+              radios: [
+                {
+                  title: {
+                    id: getTrad('form.attribute.media.option.multiple'),
+                    defaultMessage: 'Multiple media',
+                  },
+                  description: {
+                    id: getTrad('form.attribute.media.option.multiple.description'),
+                    defaultMessage: 'Best for sliders, carousels or multiple files download',
+                  },
+                  value: true,
+                },
+                {
+                  title: {
+                    id: getTrad('form.attribute.media.option.single'),
+                    defaultMessage: 'Single media',
+                  },
+                  description: {
+                    id: getTrad('form.attribute.media.option.single.description'),
+                    defaultMessage: 'Best for avatar, profile picture or cover',
+                  },
+                  value: false,
+                },
+              ],
             },
           ],
         },
@@ -293,22 +314,32 @@ const baseForm = {
               },
               name: 'type',
               size: 12,
-              type: 'booleanBox',
-              options: [],
-              // FIXME
-              // options: [
-              //   {
-              //     headerId: getTrad('form.attribute.text.option.short-text'),
-              //     descriptionId: getTrad('form.attribute.text.option.short-text.description'),
-              //     value: 'string',
-              //   },
-              //   {
-              //     headerId: getTrad('form.attribute.text.option.long-text'),
-              //     descriptionId: getTrad('form.attribute.text.option.long-text.description'),
-              //     value: 'text',
-              //   },
-              // ],
-              // validations: {},
+              type: 'radio-group',
+              radios: [
+                {
+                  title: {
+                    id: getTrad('form.attribute.text.option.short-text'),
+                    defaultMessage: 'Sort text',
+                  },
+                  description: {
+                    id: getTrad('form.attribute.text.option.short-text.description'),
+                    defaultMessage:
+                      'Best for titles, names, links (URL). It also enables exact search on the field.',
+                  },
+                  value: 'string',
+                },
+                {
+                  title: {
+                    id: getTrad('form.attribute.text.option.long-text'),
+                    defaultMessage: 'Long text',
+                  },
+                  description: {
+                    id: getTrad('form.attribute.text.option.long-text.description'),
+                    defaultMessage: 'Best for descriptions, biography. Exact search is disabled.',
+                  },
+                  value: 'text',
+                },
+              ],
             },
           ],
         },
@@ -329,22 +360,32 @@ const baseForm = {
               },
               name: 'type',
               size: 12,
-              type: 'booleanBox',
-              options: [],
-              // FIXME
-              // options: [
-              //   {
-              //     headerId: getTrad('form.attribute.text.option.short-text'),
-              //     descriptionId: getTrad('form.attribute.text.option.short-text.description'),
-              //     value: 'string',
-              //   },
-              //   {
-              //     headerId: getTrad('form.attribute.text.option.long-text'),
-              //     descriptionId: getTrad('form.attribute.text.option.long-text.description'),
-              //     value: 'text',
-              //   },
-              // ],
-              // validations: {},
+              type: 'radio-group',
+              radios: [
+                {
+                  title: {
+                    id: getTrad('form.attribute.text.option.short-text'),
+                    defaultMessage: 'Sort text',
+                  },
+                  description: {
+                    id: getTrad('form.attribute.text.option.short-text.description'),
+                    defaultMessage:
+                      'Best for titles, names, links (URL). It also enables exact search on the field.',
+                  },
+                  value: 'string',
+                },
+                {
+                  title: {
+                    id: getTrad('form.attribute.text.option.long-text'),
+                    defaultMessage: 'Long text',
+                  },
+                  description: {
+                    id: getTrad('form.attribute.text.option.long-text.description'),
+                    defaultMessage: 'Best for descriptions, biography. Exact search is disabled.',
+                  },
+                  value: 'text',
+                },
+              ],
             },
           ],
         },

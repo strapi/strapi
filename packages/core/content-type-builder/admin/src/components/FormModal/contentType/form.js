@@ -81,27 +81,33 @@ const forms = {
                   defaultMessage: 'Type',
                 },
                 name: 'kind',
-                type: 'booleanBox',
+                type: 'content-type-radio-group',
                 size: 12,
-                // FIXME
-                // onChangeCallback: ({ toggleNotification }) =>
-                //   toggleNotification({
-                //     type: 'info',
-                //     message: { id: getTrad('contentType.kind.change.warning') },
-                //   }),
-                // options: [
-                //   {
-                //     headerId: getTrad('menu.section.models.name.singular'),
-                //     descriptionId: getTrad('form.button.collection-type.description'),
-                //     value: 'collectionType',
-                //   },
-                //   {
-                //     headerId: getTrad('menu.section.single-types.name.singular'),
-                //     descriptionId: getTrad('form.button.single-type.description'),
-                //     value: 'singleType',
-                //   },
-                // ],
-                // validations: {},
+                radios: [
+                  {
+                    title: {
+                      id: getTrad('menu.section.models.name.singular'),
+                      defaultMessage: 'Collection Type',
+                    },
+                    description: {
+                      id: getTrad('form.button.collection-type.description'),
+                      defaultMessage:
+                        'Best for multiple instances like articles, products, comments, etc.',
+                    },
+                    value: 'collectionType',
+                  },
+                  {
+                    title: {
+                      id: getTrad('menu.section.single-types.name.singular'),
+                      defaultMessage: 'Single Type',
+                    },
+                    description: {
+                      id: getTrad('form.button.single-type.description'),
+                      defaultMessage: 'Best for single instance like about us, homepage, etc.',
+                    },
+                    value: 'singleType',
+                  },
+                ],
               },
             ],
           },

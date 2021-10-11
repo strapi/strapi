@@ -37,14 +37,13 @@ import AttributeOptions from '../AttributeOptions';
 import DraftAndPublishToggle from '../DraftAndPublishToggle';
 import FormModalHeader from '../FormModalHeader';
 
-// import BooleanBox from '../BooleanBox';
+import CustomRadioGroup from '../CustomRadioGroup';
+import ContentTypeRadioGroup from '../ContentTypeRadioGroup';
 // import ComponentIconPicker from '../ComponentIconPicker';
 // import CheckboxWithDescription from '../CheckboxWithDescription';
 // import CustomCheckbox from '../CustomCheckbox';
 // import ModalHeader from '../ModalHeader';
-// import HeaderModalNavContainer from '../HeaderModalNavContainer';
 // import RelationForm from '../RelationForm';
-// import HeaderNavLink from '../HeaderNavLink';
 // import WrapperSelect from '../WrapperSelect';
 import findAttribute from '../../utils/findAttribute';
 import getTrad from '../../utils/getTrad';
@@ -1113,7 +1112,12 @@ const FormModal = () => {
   });
 
   const genericInputProps = {
-    customInputs: { 'toggle-draft-publish': DraftAndPublishToggle, ...inputsFromPlugins },
+    customInputs: {
+      'radio-group': CustomRadioGroup,
+      'content-type-radio-group': ContentTypeRadioGroup,
+      'toggle-draft-publish': DraftAndPublishToggle,
+      ...inputsFromPlugins,
+    },
     modifiedData,
 
     isCreating,
@@ -1190,7 +1194,7 @@ const FormModal = () => {
 
                 <Divider />
 
-                <Box paddingTop={7} paddingBottom={7}>
+                <Box paddingTop={7}>
                   <TabPanels>
                     <TabPanel>
                       <Stack size={6}>
@@ -1723,7 +1727,7 @@ const FormModal = () => {
   //                                   componentSelect: WrapperSelect,
   //                                   creatableSelect: WrapperSelect,
   //                                   customCheckboxWithChildren: CustomCheckbox,
-  //                                   booleanBox: BooleanBox,
+  //                                   booleanBox: CustomRadioGroup,
   //                                   ...inputsFromPlugins,
   //                                 }}
   //                                 isCreating={isCreating}
