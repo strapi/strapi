@@ -881,11 +881,11 @@ describe('ADMIN | CM | LV | Configure the view', () => {
                   <div
                     class="c27"
                   >
-                    <h3
+                    <h2
                       class="c28"
                     >
                       Settings
-                    </h3>
+                    </h2>
                   </div>
                   <div
                     class="c29 c30 c31"
