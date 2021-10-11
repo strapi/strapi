@@ -133,7 +133,7 @@ describe('<EditAssetDialog />', () => {
         border: 1px solid #dcdce4;
       }
 
-      .c26 {
+      .c27 {
         background: #f6f6f9;
         padding-top: 16px;
         padding-right: 24px;
@@ -142,14 +142,14 @@ describe('<EditAssetDialog />', () => {
         border-radius: 4px;
       }
 
-      .c45 {
+      .c47 {
         font-weight: 500;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #32324d;
       }
 
-      .c42 {
+      .c44 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -163,21 +163,21 @@ describe('<EditAssetDialog />', () => {
         outline: none;
       }
 
-      .c42 svg {
+      .c44 svg {
         height: 12px;
         width: 12px;
       }
 
-      .c42 svg > g,
-      .c42 svg path {
+      .c44 svg > g,
+      .c44 svg path {
         fill: #ffffff;
       }
 
-      .c42[aria-disabled='true'] {
+      .c44[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c42:after {
+      .c44:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -192,11 +192,11 @@ describe('<EditAssetDialog />', () => {
         border: 2px solid transparent;
       }
 
-      .c42:focus-visible {
+      .c44:focus-visible {
         outline: none;
       }
 
-      .c42:focus-visible:after {
+      .c44:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -207,7 +207,7 @@ describe('<EditAssetDialog />', () => {
         border: 2px solid #4945ff;
       }
 
-      .c43 {
+      .c45 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -219,7 +219,7 @@ describe('<EditAssetDialog />', () => {
         background: #ffffff;
       }
 
-      .c43 .sc-lhuRmv {
+      .c45 .sc-lhuRmv {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -230,56 +230,56 @@ describe('<EditAssetDialog />', () => {
         align-items: center;
       }
 
-      .c43 .c44 {
+      .c45 .c46 {
         color: #ffffff;
       }
 
-      .c43[aria-disabled='true'] {
+      .c45[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c43[aria-disabled='true'] .c44 {
+      .c45[aria-disabled='true'] .c46 {
         color: #666687;
       }
 
-      .c43[aria-disabled='true'] svg > g,
-      .c43[aria-disabled='true'] svg path {
+      .c45[aria-disabled='true'] svg > g,
+      .c45[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c43[aria-disabled='true']:active {
+      .c45[aria-disabled='true']:active {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c43[aria-disabled='true']:active .c44 {
+      .c45[aria-disabled='true']:active .c46 {
         color: #666687;
       }
 
-      .c43[aria-disabled='true']:active svg > g,
-      .c43[aria-disabled='true']:active svg path {
+      .c45[aria-disabled='true']:active svg > g,
+      .c45[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
-      .c43:hover {
+      .c45:hover {
         background-color: #f6f6f9;
       }
 
-      .c43:active {
+      .c45:active {
         background-color: #eaeaef;
       }
 
-      .c43 .c44 {
+      .c45 .c46 {
         color: #32324d;
       }
 
-      .c43 svg > g,
-      .c43 svg path {
+      .c45 svg > g,
+      .c45 svg path {
         fill: #32324d;
       }
 
-      .c46 {
+      .c48 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -291,7 +291,7 @@ describe('<EditAssetDialog />', () => {
         background: #f0f0ff;
       }
 
-      .c46 .sc-lhuRmv {
+      .c48 .sc-lhuRmv {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -302,66 +302,66 @@ describe('<EditAssetDialog />', () => {
         align-items: center;
       }
 
-      .c46 .c44 {
+      .c48 .c46 {
         color: #ffffff;
       }
 
-      .c46[aria-disabled='true'] {
+      .c48[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c46[aria-disabled='true'] .c44 {
+      .c48[aria-disabled='true'] .c46 {
         color: #666687;
       }
 
-      .c46[aria-disabled='true'] svg > g,
-      .c46[aria-disabled='true'] svg path {
+      .c48[aria-disabled='true'] svg > g,
+      .c48[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c46[aria-disabled='true']:active {
+      .c48[aria-disabled='true']:active {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c46[aria-disabled='true']:active .c44 {
+      .c48[aria-disabled='true']:active .c46 {
         color: #666687;
       }
 
-      .c46[aria-disabled='true']:active svg > g,
-      .c46[aria-disabled='true']:active svg path {
+      .c48[aria-disabled='true']:active svg > g,
+      .c48[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
-      .c46:hover {
+      .c48:hover {
         background-color: #ffffff;
       }
 
-      .c46:active {
+      .c48:active {
         background-color: #ffffff;
         border: 1px solid #4945ff;
       }
 
-      .c46:active .c44 {
+      .c48:active .c46 {
         color: #4945ff;
       }
 
-      .c46:active svg > g,
-      .c46:active svg path {
+      .c48:active svg > g,
+      .c48:active svg path {
         fill: #4945ff;
       }
 
-      .c46 .c44 {
+      .c48 .c46 {
         color: #271fe0;
       }
 
-      .c46 svg > g,
-      .c46 svg path {
+      .c48 svg > g,
+      .c48 svg path {
         fill: #271fe0;
       }
 
-      .c47 {
+      .c49 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -373,7 +373,7 @@ describe('<EditAssetDialog />', () => {
         background: #4945ff;
       }
 
-      .c47 .sc-lhuRmv {
+      .c49 .sc-lhuRmv {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -384,68 +384,68 @@ describe('<EditAssetDialog />', () => {
         align-items: center;
       }
 
-      .c47 .c44 {
+      .c49 .c46 {
         color: #ffffff;
       }
 
-      .c47[aria-disabled='true'] {
+      .c49[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c47[aria-disabled='true'] .c44 {
+      .c49[aria-disabled='true'] .c46 {
         color: #666687;
       }
 
-      .c47[aria-disabled='true'] svg > g,
-      .c47[aria-disabled='true'] svg path {
+      .c49[aria-disabled='true'] svg > g,
+      .c49[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c47[aria-disabled='true']:active {
+      .c49[aria-disabled='true']:active {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c47[aria-disabled='true']:active .c44 {
+      .c49[aria-disabled='true']:active .c46 {
         color: #666687;
       }
 
-      .c47[aria-disabled='true']:active svg > g,
-      .c47[aria-disabled='true']:active svg path {
+      .c49[aria-disabled='true']:active svg > g,
+      .c49[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
-      .c47:hover {
+      .c49:hover {
         border: 1px solid #7b79ff;
         background: #7b79ff;
       }
 
-      .c47:active {
+      .c49:active {
         border: 1px solid #4945ff;
         background: #4945ff;
       }
 
-      .c48 {
+      .c50 {
         background: #212134;
         padding: 8px;
         border-radius: 4px;
       }
 
-      .c50 {
+      .c52 {
         font-weight: 400;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #ffffff;
       }
 
-      .c49 {
+      .c51 {
         position: absolute;
         z-index: 4;
         display: none;
       }
 
-      .c21 {
+      .c22 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -459,21 +459,21 @@ describe('<EditAssetDialog />', () => {
         outline: none;
       }
 
-      .c21 svg {
+      .c22 svg {
         height: 12px;
         width: 12px;
       }
 
-      .c21 svg > g,
-      .c21 svg path {
+      .c22 svg > g,
+      .c22 svg path {
         fill: #ffffff;
       }
 
-      .c21[aria-disabled='true'] {
+      .c22[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c21:after {
+      .c22:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -488,11 +488,11 @@ describe('<EditAssetDialog />', () => {
         border: 2px solid transparent;
       }
 
-      .c21:focus-visible {
+      .c22:focus-visible {
         outline: none;
       }
 
-      .c21:focus-visible:after {
+      .c22:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -503,7 +503,7 @@ describe('<EditAssetDialog />', () => {
         border: 2px solid #4945ff;
       }
 
-      .c22 {
+      .c23 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -520,35 +520,40 @@ describe('<EditAssetDialog />', () => {
         width: 2rem;
       }
 
-      .c22 svg > g,
-      .c22 svg path {
+      .c23 svg > g,
+      .c23 svg path {
         fill: #8e8ea9;
       }
 
-      .c22:hover svg > g,
-      .c22:hover svg path {
+      .c23:hover svg > g,
+      .c23:hover svg path {
         fill: #666687;
       }
 
-      .c22:active svg > g,
-      .c22:active svg path {
+      .c23:active svg > g,
+      .c23:active svg path {
         fill: #a5a5ba;
       }
 
-      .c22[aria-disabled='true'] {
+      .c23[aria-disabled='true'] {
         background-color: #eaeaef;
       }
 
-      .c22[aria-disabled='true'] svg path {
+      .c23[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c16 {
+      .c17 {
         padding-right: 12px;
         padding-left: 12px;
       }
 
-      .c17 {
+      .c25 {
+        padding-right: 8px;
+        padding-left: 8px;
+      }
+
+      .c18 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -566,7 +571,7 @@ describe('<EditAssetDialog />', () => {
         align-items: center;
       }
 
-      .c24 {
+      .c20 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -580,21 +585,7 @@ describe('<EditAssetDialog />', () => {
         align-items: center;
       }
 
-      .c19 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c25 {
+      .c26 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -604,16 +595,16 @@ describe('<EditAssetDialog />', () => {
         flex-direction: column;
       }
 
-      .c25 > * {
+      .c26 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c25 > * + * {
+      .c26 > * + * {
         margin-top: 12px;
       }
 
-      .c27 {
+      .c28 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -623,25 +614,25 @@ describe('<EditAssetDialog />', () => {
         flex-direction: column;
       }
 
-      .c27 > * {
+      .c28 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c27 > * + * {
+      .c28 > * + * {
         margin-top: 4px;
       }
 
-      .c20 > * {
+      .c21 > * {
         margin-left: 0;
         margin-right: 0;
       }
 
-      .c20 > * + * {
+      .c21 > * + * {
         margin-left: 4px;
       }
 
-      .c31 {
+      .c32 {
         font-size: 0.75rem;
         line-height: 1.33;
         color: #4a4a6a;
@@ -655,14 +646,14 @@ describe('<EditAssetDialog />', () => {
         color: #32324d;
       }
 
-      .c28 {
+      .c29 {
         font-weight: 400;
         font-size: 0.875rem;
         line-height: 1.43;
         color: #666687;
       }
 
-      .c30 {
+      .c31 {
         font-weight: 400;
         font-size: 0.75rem;
         line-height: 1.33;
@@ -674,28 +665,28 @@ describe('<EditAssetDialog />', () => {
         line-height: 1.14;
       }
 
-      .c29 {
+      .c30 {
         font-weight: 600;
         font-size: 0.6875rem;
         line-height: 1.45;
         text-transform: uppercase;
       }
 
-      .c34 {
+      .c35 {
         font-weight: 500;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #32324d;
       }
 
-      .c38 {
+      .c39 {
         font-weight: 400;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #666687;
       }
 
-      .c33 {
+      .c34 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -709,7 +700,7 @@ describe('<EditAssetDialog />', () => {
         align-items: center;
       }
 
-      .c35 {
+      .c36 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -727,7 +718,7 @@ describe('<EditAssetDialog />', () => {
         align-items: center;
       }
 
-      .c37 {
+      .c38 {
         border: none;
         border-radius: 4px;
         padding-left: 16px;
@@ -739,37 +730,37 @@ describe('<EditAssetDialog />', () => {
         width: 100%;
       }
 
-      .c37::-webkit-input-placeholder {
+      .c38::-webkit-input-placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c37::-moz-placeholder {
+      .c38::-moz-placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c37:-ms-input-placeholder {
+      .c38:-ms-input-placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c37::placeholder {
+      .c38::placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c37[aria-disabled='true'] {
+      .c38[aria-disabled='true'] {
         background: inherit;
         color: inherit;
       }
 
-      .c37:focus {
+      .c38:focus {
         outline: none;
         box-shadow: none;
       }
 
-      .c36 {
+      .c37 {
         border: 1px solid #dcdce4;
         border-radius: 4px;
         background: #ffffff;
@@ -782,12 +773,12 @@ describe('<EditAssetDialog />', () => {
         transition-duration: 0.2s;
       }
 
-      .c36:focus-within {
+      .c37:focus-within {
         border: 1px solid #4945ff;
         box-shadow: #4945ff 0px 0px 0px 2px;
       }
 
-      .c32 {
+      .c33 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -797,13 +788,25 @@ describe('<EditAssetDialog />', () => {
         flex-direction: column;
       }
 
-      .c32 > * {
+      .c33 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c32 > * + * {
+      .c33 > * + * {
         margin-top: 4px;
+      }
+
+      .c40 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
       }
 
       .c2 {
@@ -869,7 +872,7 @@ describe('<EditAssetDialog />', () => {
         align-items: center;
       }
 
-      .c40 {
+      .c42 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -985,11 +988,11 @@ describe('<EditAssetDialog />', () => {
         border-bottom: 1px solid #eaeaef;
       }
 
-      .c39 {
+      .c41 {
         border-top: 1px solid #eaeaef;
       }
 
-      .c41 > * + * {
+      .c43 > * + * {
         margin-left: 8px;
       }
 
@@ -1008,14 +1011,23 @@ describe('<EditAssetDialog />', () => {
         grid-column: span 6;
       }
 
-      .c23 img {
+      .c16 {
+        position: relative;
+      }
+
+      .c24 {
+        position: relative;
+        text-align: center;
+      }
+
+      .c24 img {
         margin: 0;
         padding: 0;
-        max-height: 100%;
+        max-height: 16.5rem;
         max-width: 100%;
       }
 
-      .c18 {
+      .c19 {
         height: 3.25rem;
       }
 
@@ -1115,19 +1127,19 @@ describe('<EditAssetDialog />', () => {
                         class=""
                       >
                         <div
-                          class="c15"
+                          class="c15 c16"
                         >
                           <div
-                            class="c16 c17 c18"
+                            class="c17 c18 c19"
                           >
                             <div
-                              class="c19 c20"
+                              class="c20 c21"
                             >
                               <span>
                                 <button
                                   aria-disabled="false"
                                   aria-labelledby="tooltip-1"
-                                  class="c21 c22"
+                                  class="c22 c23"
                                   tabindex="0"
                                   type="button"
                                 >
@@ -1149,7 +1161,7 @@ describe('<EditAssetDialog />', () => {
                                 <button
                                   aria-disabled="false"
                                   aria-labelledby="tooltip-3"
-                                  class="c21 c22"
+                                  class="c22 c23"
                                   tabindex="0"
                                   type="button"
                                 >
@@ -1173,7 +1185,7 @@ describe('<EditAssetDialog />', () => {
                                 <button
                                   aria-disabled="false"
                                   aria-labelledby="tooltip-5"
-                                  class="c21 c22"
+                                  class="c22 c23"
                                   tabindex="0"
                                   type="button"
                                 >
@@ -1199,7 +1211,7 @@ describe('<EditAssetDialog />', () => {
                                 <button
                                   aria-disabled="false"
                                   aria-labelledby="tooltip-7"
-                                  class="c21 c22"
+                                  class="c22 c23"
                                   tabindex="0"
                                   type="button"
                                 >
@@ -1220,10 +1232,16 @@ describe('<EditAssetDialog />', () => {
                             </div>
                           </div>
                           <div
-                            class="c23"
-                          />
+                            class="c24"
+                          >
+                            <img
+                              alt="Screenshot 2.png"
+                              aria-hidden="false"
+                              src="http://localhost:1337/uploads/Screenshot_2_5d4a574d61.png"
+                            />
+                          </div>
                           <div
-                            class="c16 c24 c18"
+                            class="c25 c18 c19"
                           />
                         </div>
                       </div>
@@ -1234,246 +1252,264 @@ describe('<EditAssetDialog />', () => {
                       <div
                         class=""
                       >
-                        <div
-                          class="c25"
+                        <form
+                          action="#"
+                          novalidate=""
                         >
                           <div
                             class="c26"
                           >
                             <div
-                              class="c13"
+                              class="c27"
                             >
                               <div
-                                class="c14"
+                                class="c13"
                               >
                                 <div
-                                  class=""
+                                  class="c14"
                                 >
                                   <div
-                                    class="c27"
+                                    class=""
                                   >
-                                    <span
-                                      class="c28 c8 c29"
+                                    <div
+                                      class="c28"
                                     >
-                                      Size
-                                    </span>
-                                    <span
-                                      class="c30"
-                                    >
-                                      102KB
-                                    </span>
+                                      <span
+                                        class="c29 c8 c30"
+                                      >
+                                        Size
+                                      </span>
+                                      <span
+                                        class="c31"
+                                      >
+                                        102KB
+                                      </span>
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
-                              <div
-                                class="c14"
-                              >
                                 <div
-                                  class=""
+                                  class="c14"
                                 >
                                   <div
-                                    class="c27"
+                                    class=""
                                   >
-                                    <span
-                                      class="c28 c8 c29"
+                                    <div
+                                      class="c28"
                                     >
-                                      Date
-                                    </span>
-                                    <span
-                                      class="c30"
-                                    >
-                                      10/4/2021
-                                    </span>
+                                      <span
+                                        class="c29 c8 c30"
+                                      >
+                                        Date
+                                      </span>
+                                      <span
+                                        class="c31"
+                                      >
+                                        10/4/2021
+                                      </span>
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
-                              <div
-                                class="c14"
-                              >
                                 <div
-                                  class=""
+                                  class="c14"
                                 >
                                   <div
-                                    class="c27"
+                                    class=""
                                   >
-                                    <span
-                                      class="c28 c8 c29"
+                                    <div
+                                      class="c28"
                                     >
-                                      Dimensions
-                                    </span>
-                                    <span
-                                      class="c30"
-                                    >
-                                      780✕1476
-                                    </span>
+                                      <span
+                                        class="c29 c8 c30"
+                                      >
+                                        Dimensions
+                                      </span>
+                                      <span
+                                        class="c31"
+                                      >
+                                        780✕1476
+                                      </span>
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
-                              <div
-                                class="c14"
-                              >
                                 <div
-                                  class=""
+                                  class="c14"
                                 >
                                   <div
-                                    class="c27"
+                                    class=""
                                   >
-                                    <span
-                                      class="c28 c8 c29"
+                                    <div
+                                      class="c28"
                                     >
-                                      Extension
-                                    </span>
-                                    <span
-                                      class="c31"
-                                    >
-                                      png
-                                    </span>
+                                      <span
+                                        class="c29 c8 c30"
+                                      >
+                                        Extension
+                                      </span>
+                                      <span
+                                        class="c32"
+                                      >
+                                        png
+                                      </span>
+                                    </div>
                                   </div>
                                 </div>
                               </div>
                             </div>
-                          </div>
-                          <div>
                             <div>
-                              <div
-                                class="c32"
-                              >
+                              <div>
                                 <div
                                   class="c33"
                                 >
-                                  <label
+                                  <div
                                     class="c34"
-                                    for="textinput-1"
                                   >
-                                    File name
-                                  </label>
-                                </div>
-                                <div
-                                  class="c35 c36"
-                                >
-                                  <input
-                                    aria-disabled="false"
-                                    aria-invalid="false"
-                                    class="c37"
-                                    id="textinput-1"
-                                    name="filename"
-                                  />
+                                    <label
+                                      class="c35"
+                                      for="textinput-1"
+                                    >
+                                      File name
+                                    </label>
+                                  </div>
+                                  <div
+                                    class="c36 c37"
+                                  >
+                                    <input
+                                      aria-disabled="false"
+                                      aria-invalid="false"
+                                      class="c38"
+                                      id="textinput-1"
+                                      name="name"
+                                      value="Screenshot 2.png"
+                                    />
+                                  </div>
                                 </div>
                               </div>
                             </div>
-                          </div>
-                          <div>
                             <div>
-                              <div
-                                class="c32"
-                              >
+                              <div>
                                 <div
                                   class="c33"
                                 >
-                                  <label
+                                  <div
                                     class="c34"
-                                    for="textinput-2"
                                   >
-                                    Alternative text
-                                  </label>
+                                    <label
+                                      class="c35"
+                                      for="textinput-2"
+                                    >
+                                      Alternative text
+                                    </label>
+                                  </div>
+                                  <div
+                                    class="c36 c37"
+                                  >
+                                    <input
+                                      aria-describedby="textinput-2-hint"
+                                      aria-disabled="false"
+                                      aria-invalid="false"
+                                      class="c38"
+                                      id="textinput-2"
+                                      name="alternativeText"
+                                      value="Screenshot 2.png"
+                                    />
+                                  </div>
+                                  <p
+                                    class="c39"
+                                    id="textinput-2-hint"
+                                  >
+                                    This text will be displayed if the asset can’t be shown.
+                                  </p>
                                 </div>
-                                <div
-                                  class="c35 c36"
-                                >
-                                  <input
-                                    aria-describedby="textinput-2-hint"
-                                    aria-disabled="false"
-                                    aria-invalid="false"
-                                    class="c37"
-                                    id="textinput-2"
-                                    name="altText"
-                                  />
-                                </div>
-                                <p
-                                  class="c38"
-                                  id="textinput-2-hint"
-                                >
-                                  This text will be displayed if the asset can’t be shown.
-                                </p>
                               </div>
                             </div>
-                          </div>
-                          <div>
                             <div>
-                              <div
-                                class="c32"
-                              >
+                              <div>
                                 <div
                                   class="c33"
                                 >
-                                  <label
+                                  <div
                                     class="c34"
-                                    for="textinput-3"
                                   >
-                                    Caption
-                                  </label>
-                                </div>
-                                <div
-                                  class="c35 c36"
-                                >
-                                  <input
-                                    aria-disabled="false"
-                                    aria-invalid="false"
-                                    class="c37"
-                                    id="textinput-3"
-                                    name="caption"
-                                  />
+                                    <label
+                                      class="c35"
+                                      for="textinput-3"
+                                    >
+                                      Caption
+                                    </label>
+                                  </div>
+                                  <div
+                                    class="c36 c37"
+                                  >
+                                    <input
+                                      aria-disabled="false"
+                                      aria-invalid="false"
+                                      class="c38"
+                                      id="textinput-3"
+                                      name="caption"
+                                      value="Screenshot 2.png"
+                                    />
+                                  </div>
                                 </div>
                               </div>
                             </div>
                           </div>
-                        </div>
+                          <div
+                            class="c40"
+                          >
+                            <button
+                              tabindex="-1"
+                              type="submit"
+                            >
+                              Submit
+                            </button>
+                          </div>
+                        </form>
                       </div>
                     </div>
                   </div>
                 </div>
                 <div
-                  class="c4 c39"
+                  class="c4 c41"
                 >
                   <div
                     class="c6"
                   >
                     <div
-                      class="c40 c41"
+                      class="c42 c43"
                     >
                       <button
                         aria-disabled="false"
-                        class="c42 c43"
+                        class="c44 c45"
                         type="button"
                       >
                         <span
-                          class="c44 c45"
+                          class="c46 c47"
                         >
                           Cancel
                         </span>
                       </button>
                     </div>
                     <div
-                      class="c40 c41"
+                      class="c42 c43"
                     >
                       <button
                         aria-disabled="false"
-                        class="c42 c46"
+                        class="c44 c48"
                         type="button"
                       >
                         <span
-                          class="c44 c45"
+                          class="c46 c47"
                         >
                           Replace media
                         </span>
                       </button>
                       <button
                         aria-disabled="false"
-                        class="c42 c47"
+                        class="c44 c49"
                         type="button"
                       >
                         <span
-                          class="c44 c45"
+                          class="c46 c47"
                         >
                           Finish
                         </span>
@@ -1489,12 +1525,12 @@ describe('<EditAssetDialog />', () => {
           data-react-portal="true"
         >
           <div
-            class="c48 c49"
+            class="c50 c51"
             id="tooltip-1"
             role="tooltip"
           >
             <p
-              class="c50"
+              class="c52"
             >
               Delete
             </p>
@@ -1504,12 +1540,12 @@ describe('<EditAssetDialog />', () => {
           data-react-portal="true"
         >
           <div
-            class="c48 c49"
+            class="c50 c51"
             id="tooltip-3"
             role="tooltip"
           >
             <p
-              class="c50"
+              class="c52"
             >
               Download
             </p>
@@ -1519,12 +1555,12 @@ describe('<EditAssetDialog />', () => {
           data-react-portal="true"
         >
           <div
-            class="c48 c49"
+            class="c50 c51"
             id="tooltip-5"
             role="tooltip"
           >
             <p
-              class="c50"
+              class="c52"
             >
               Copy link
             </p>
@@ -1534,12 +1570,12 @@ describe('<EditAssetDialog />', () => {
           data-react-portal="true"
         >
           <div
-            class="c48 c49"
+            class="c50 c51"
             id="tooltip-7"
             role="tooltip"
           >
             <p
-              class="c50"
+              class="c52"
             >
               Crop
             </p>
