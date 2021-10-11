@@ -35,7 +35,6 @@ import ContentTypeRadioGroup from '../ContentTypeRadioGroup';
 // import ComponentIconPicker from '../ComponentIconPicker';
 // import CheckboxWithDescription from '../CheckboxWithDescription';
 // import CustomCheckbox from '../CustomCheckbox';
-// import ModalHeader from '../ModalHeader';
 // import RelationForm from '../RelationForm';
 // import WrapperSelect from '../WrapperSelect';
 import findAttribute from '../../utils/findAttribute';
