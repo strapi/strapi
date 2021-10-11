@@ -11,7 +11,7 @@ const nameField = {
 
 const forms = {
   advanced: {
-    default: () => {
+    default: ({ actionType }) => {
       return {
         sections: [
           {
@@ -30,7 +30,8 @@ const forms = {
                   defaultMessage: 'Write a draft version of each entry before publishing it',
                 },
                 name: 'draftAndPublish',
-                type: 'bool',
+                type: actionType === 'edit' ? 'toggle-draft-publish' : 'bool',
+                // type: 'bool',
                 validations: {},
               },
             ],

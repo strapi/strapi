@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState, useMemo } from 'react';
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import {
   // HeaderModal,
   // HeaderModalTitle,
@@ -6,7 +6,7 @@ import {
   // ModalBody,
   // ModalFooter,
   // ModalForm,
-  // PopUpWarning,
+
   GenericInput,
   getYupInnerErrors,
   useTracking,
@@ -34,6 +34,7 @@ import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
 // New compos
 import AttributeOptions from '../AttributeOptions';
+import DraftAndPublishToggle from '../DraftAndPublishToggle';
 import FormModalHeader from '../FormModalHeader';
 
 // import BooleanBox from '../BooleanBox';
@@ -80,7 +81,7 @@ import {
 
 const FormModal = () => {
   const [state, setState] = useState(INITIAL_STATE_DATA);
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
+
   const formModalSelector = useMemo(makeSelectFormModal, []);
   const dispatch = useDispatch();
   const toggleNotification = useNotification();
@@ -95,7 +96,6 @@ const FormModal = () => {
   const inputsFromPlugins = ctbFormsAPI.components.inputs;
 
   const query = useQuery();
-  const attributeOptionRef = useRef();
 
   const {
     addAttribute,
@@ -581,8 +581,6 @@ const FormModal = () => {
     });
   };
 
-  const toggleConfirmModal = useCallback(() => setShowConfirmModal(prev => !prev), []);
-
   const handleChange = useCallback(
     ({ target: { name, value, type, ...rest } }) => {
       const namesThatCanResetToNullValue = [
@@ -593,15 +591,6 @@ const FormModal = () => {
         'minLength',
         'regex',
       ];
-
-      // FIXME
-      // When toggling the draftAndPublish from true to false
-      // We need to display a confirmation box
-      if (name === 'draftAndPublish' && state.actionType === 'edit' && value === false) {
-        toggleConfirmModal();
-
-        return;
-      }
 
       let val;
 
@@ -663,18 +652,8 @@ const FormModal = () => {
         ...rest,
       });
     },
-    [dispatch, formErrors, state.actionType, toggleConfirmModal]
+    [dispatch, formErrors]
   );
-
-  const handleConfirmDisableDraftAndPublish = useCallback(() => {
-    dispatch({
-      type: ON_CHANGE,
-      keys: ['draftAndPublish'],
-      value: false,
-    });
-
-    toggleConfirmModal();
-  }, [dispatch, toggleConfirmModal]);
 
   const handleSubmit = async (e, shouldContinue = isCreating) => {
     e.preventDefault();
@@ -1133,8 +1112,6 @@ const FormModal = () => {
     }),
   });
 
-  // console.log(formToDisplay.advanced());
-
   return (
     <>
       <ModalLayout onClose={handleClosed} labelledBy="title">
@@ -1278,6 +1255,9 @@ const FormModal = () => {
                                         <GridItem col={input.size || 6} key={input.name || key}>
                                           <GenericInput
                                             {...input}
+                                            customInputs={{
+                                              'toggle-draft-publish': DraftAndPublishToggle,
+                                            }}
                                             onChange={handleChange}
                                             value={value}
                                           />
@@ -1362,6 +1342,9 @@ const FormModal = () => {
                                         <GridItem col={input.size || 6} key={input.name || key}>
                                           <GenericInput
                                             {...input}
+                                            customInputs={{
+                                              'toggle-draft-publish': DraftAndPublishToggle,
+                                            }}
                                             onChange={handleChange}
                                             value={value}
                                           />
@@ -1899,18 +1882,7 @@ const FormModal = () => {
   //         )}
   //       </form>
   //     </Modal>
-  //     {/* CONFIRM MODAL FOR DRAFT AND PUBLISH */}
-  //     <PopUpWarning
-  //       isOpen={showConfirmModal}
-  //       onConfirm={handleConfirmDisableDraftAndPublish}
-  //       toggleModal={toggleConfirmModal}
-  //       popUpWarningType="danger"
-  //       content={{
-  //         message: getTrad('popUpWarning.draft-publish.message'),
-  //         secondMessage: getTrad('popUpWarning.draft-publish.second-message'),
-  //         confirm: getTrad('popUpWarning.draft-publish.button.confirm'),
-  //       }}
-  //     />
+
   //   </>
   // );
 };

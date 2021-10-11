@@ -118,8 +118,8 @@ const forms = {
 
         return contentTypeForm.base.edit();
       },
-      advanced({ extensions }) {
-        const baseForm = contentTypeForm.advanced.default().sections;
+      advanced({ extensions, ...rest }) {
+        const baseForm = contentTypeForm.advanced.default(rest).sections;
         const itemsToAdd = extensions.getAdvancedForm(['contentType']);
 
         return {
