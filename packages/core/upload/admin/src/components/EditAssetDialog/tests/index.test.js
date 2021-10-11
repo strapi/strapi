@@ -133,7 +133,7 @@ describe('<EditAssetDialog />', () => {
         border: 1px solid #dcdce4;
       }
 
-      .c25 {
+      .c26 {
         background: #f6f6f9;
         padding-top: 16px;
         padding-right: 24px;
@@ -142,14 +142,14 @@ describe('<EditAssetDialog />', () => {
         border-radius: 4px;
       }
 
-      .c44 {
+      .c45 {
         font-weight: 500;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #32324d;
       }
 
-      .c41 {
+      .c42 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -163,21 +163,21 @@ describe('<EditAssetDialog />', () => {
         outline: none;
       }
 
-      .c41 svg {
+      .c42 svg {
         height: 12px;
         width: 12px;
       }
 
-      .c41 svg > g,
-      .c41 svg path {
+      .c42 svg > g,
+      .c42 svg path {
         fill: #ffffff;
       }
 
-      .c41[aria-disabled='true'] {
+      .c42[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c41:after {
+      .c42:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -192,11 +192,11 @@ describe('<EditAssetDialog />', () => {
         border: 2px solid transparent;
       }
 
-      .c41:focus-visible {
+      .c42:focus-visible {
         outline: none;
       }
 
-      .c41:focus-visible:after {
+      .c42:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -207,7 +207,7 @@ describe('<EditAssetDialog />', () => {
         border: 2px solid #4945ff;
       }
 
-      .c42 {
+      .c43 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -219,7 +219,7 @@ describe('<EditAssetDialog />', () => {
         background: #ffffff;
       }
 
-      .c42 .sc-kKXAKc {
+      .c43 .sc-hTZspN {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -230,56 +230,56 @@ describe('<EditAssetDialog />', () => {
         align-items: center;
       }
 
-      .c42 .c43 {
+      .c43 .c44 {
         color: #ffffff;
       }
 
-      .c42[aria-disabled='true'] {
+      .c43[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c42[aria-disabled='true'] .c43 {
+      .c43[aria-disabled='true'] .c44 {
         color: #666687;
       }
 
-      .c42[aria-disabled='true'] svg > g,
-      .c42[aria-disabled='true'] svg path {
+      .c43[aria-disabled='true'] svg > g,
+      .c43[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c42[aria-disabled='true']:active {
+      .c43[aria-disabled='true']:active {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c42[aria-disabled='true']:active .c43 {
+      .c43[aria-disabled='true']:active .c44 {
         color: #666687;
       }
 
-      .c42[aria-disabled='true']:active svg > g,
-      .c42[aria-disabled='true']:active svg path {
+      .c43[aria-disabled='true']:active svg > g,
+      .c43[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
-      .c42:hover {
+      .c43:hover {
         background-color: #f6f6f9;
       }
 
-      .c42:active {
+      .c43:active {
         background-color: #eaeaef;
       }
 
-      .c42 .c43 {
+      .c43 .c44 {
         color: #32324d;
       }
 
-      .c42 svg > g,
-      .c42 svg path {
+      .c43 svg > g,
+      .c43 svg path {
         fill: #32324d;
       }
 
-      .c45 {
+      .c46 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -291,7 +291,7 @@ describe('<EditAssetDialog />', () => {
         background: #f0f0ff;
       }
 
-      .c45 .sc-kKXAKc {
+      .c46 .sc-hTZspN {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -302,89 +302,7 @@ describe('<EditAssetDialog />', () => {
         align-items: center;
       }
 
-      .c45 .c43 {
-        color: #ffffff;
-      }
-
-      .c45[aria-disabled='true'] {
-        border: 1px solid #dcdce4;
-        background: #eaeaef;
-      }
-
-      .c45[aria-disabled='true'] .c43 {
-        color: #666687;
-      }
-
-      .c45[aria-disabled='true'] svg > g,
-      .c45[aria-disabled='true'] svg path {
-        fill: #666687;
-      }
-
-      .c45[aria-disabled='true']:active {
-        border: 1px solid #dcdce4;
-        background: #eaeaef;
-      }
-
-      .c45[aria-disabled='true']:active .c43 {
-        color: #666687;
-      }
-
-      .c45[aria-disabled='true']:active svg > g,
-      .c45[aria-disabled='true']:active svg path {
-        fill: #666687;
-      }
-
-      .c45:hover {
-        background-color: #ffffff;
-      }
-
-      .c45:active {
-        background-color: #ffffff;
-        border: 1px solid #4945ff;
-      }
-
-      .c45:active .c43 {
-        color: #4945ff;
-      }
-
-      .c45:active svg > g,
-      .c45:active svg path {
-        fill: #4945ff;
-      }
-
-      .c45 .c43 {
-        color: #271fe0;
-      }
-
-      .c45 svg > g,
-      .c45 svg path {
-        fill: #271fe0;
-      }
-
-      .c46 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        padding: 8px 16px;
-        background: #4945ff;
-        border: none;
-        border: 1px solid #4945ff;
-        background: #4945ff;
-      }
-
-      .c46 .sc-kKXAKc {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c46 .c43 {
+      .c46 .c44 {
         color: #ffffff;
       }
 
@@ -393,7 +311,7 @@ describe('<EditAssetDialog />', () => {
         background: #eaeaef;
       }
 
-      .c46[aria-disabled='true'] .c43 {
+      .c46[aria-disabled='true'] .c44 {
         color: #666687;
       }
 
@@ -407,7 +325,7 @@ describe('<EditAssetDialog />', () => {
         background: #eaeaef;
       }
 
-      .c46[aria-disabled='true']:active .c43 {
+      .c46[aria-disabled='true']:active .c44 {
         color: #666687;
       }
 
@@ -417,35 +335,117 @@ describe('<EditAssetDialog />', () => {
       }
 
       .c46:hover {
-        border: 1px solid #7b79ff;
-        background: #7b79ff;
+        background-color: #ffffff;
       }
 
       .c46:active {
+        background-color: #ffffff;
+        border: 1px solid #4945ff;
+      }
+
+      .c46:active .c44 {
+        color: #4945ff;
+      }
+
+      .c46:active svg > g,
+      .c46:active svg path {
+        fill: #4945ff;
+      }
+
+      .c46 .c44 {
+        color: #271fe0;
+      }
+
+      .c46 svg > g,
+      .c46 svg path {
+        fill: #271fe0;
+      }
+
+      .c47 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        padding: 8px 16px;
+        background: #4945ff;
+        border: none;
         border: 1px solid #4945ff;
         background: #4945ff;
       }
 
-      .c47 {
+      .c47 .sc-hTZspN {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c47 .c44 {
+        color: #ffffff;
+      }
+
+      .c47[aria-disabled='true'] {
+        border: 1px solid #dcdce4;
+        background: #eaeaef;
+      }
+
+      .c47[aria-disabled='true'] .c44 {
+        color: #666687;
+      }
+
+      .c47[aria-disabled='true'] svg > g,
+      .c47[aria-disabled='true'] svg path {
+        fill: #666687;
+      }
+
+      .c47[aria-disabled='true']:active {
+        border: 1px solid #dcdce4;
+        background: #eaeaef;
+      }
+
+      .c47[aria-disabled='true']:active .c44 {
+        color: #666687;
+      }
+
+      .c47[aria-disabled='true']:active svg > g,
+      .c47[aria-disabled='true']:active svg path {
+        fill: #666687;
+      }
+
+      .c47:hover {
+        border: 1px solid #7b79ff;
+        background: #7b79ff;
+      }
+
+      .c47:active {
+        border: 1px solid #4945ff;
+        background: #4945ff;
+      }
+
+      .c48 {
         background: #212134;
         padding: 8px;
         border-radius: 4px;
       }
 
-      .c49 {
+      .c50 {
         font-weight: 400;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #ffffff;
       }
 
-      .c48 {
+      .c49 {
         position: absolute;
         z-index: 4;
         display: none;
       }
 
-      .c20 {
+      .c21 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -459,21 +459,21 @@ describe('<EditAssetDialog />', () => {
         outline: none;
       }
 
-      .c20 svg {
+      .c21 svg {
         height: 12px;
         width: 12px;
       }
 
-      .c20 svg > g,
-      .c20 svg path {
+      .c21 svg > g,
+      .c21 svg path {
         fill: #ffffff;
       }
 
-      .c20[aria-disabled='true'] {
+      .c21[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c20:after {
+      .c21:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -488,11 +488,11 @@ describe('<EditAssetDialog />', () => {
         border: 2px solid transparent;
       }
 
-      .c20:focus-visible {
+      .c21:focus-visible {
         outline: none;
       }
 
-      .c20:focus-visible:after {
+      .c21:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -503,7 +503,7 @@ describe('<EditAssetDialog />', () => {
         border: 2px solid #4945ff;
       }
 
-      .c21 {
+      .c22 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -520,26 +520,26 @@ describe('<EditAssetDialog />', () => {
         width: 2rem;
       }
 
-      .c21 svg > g,
-      .c21 svg path {
+      .c22 svg > g,
+      .c22 svg path {
         fill: #8e8ea9;
       }
 
-      .c21:hover svg > g,
-      .c21:hover svg path {
+      .c22:hover svg > g,
+      .c22:hover svg path {
         fill: #666687;
       }
 
-      .c21:active svg > g,
-      .c21:active svg path {
+      .c22:active svg > g,
+      .c22:active svg path {
         fill: #a5a5ba;
       }
 
-      .c21[aria-disabled='true'] {
+      .c22[aria-disabled='true'] {
         background-color: #eaeaef;
       }
 
-      .c21[aria-disabled='true'] svg path {
+      .c22[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
@@ -566,7 +566,7 @@ describe('<EditAssetDialog />', () => {
         align-items: center;
       }
 
-      .c23 {
+      .c24 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -580,44 +580,6 @@ describe('<EditAssetDialog />', () => {
         align-items: center;
       }
 
-      .c24 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-      }
-
-      .c24 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c24 > * + * {
-        margin-top: 12px;
-      }
-
-      .c26 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-      }
-
-      .c26 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c26 > * + * {
-        margin-top: 4px;
-      }
-
       .c19 {
         display: -webkit-box;
         display: -webkit-flex;
@@ -626,18 +588,60 @@ describe('<EditAssetDialog />', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
       }
 
-      .c19 > * {
+      .c25 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+      }
+
+      .c25 > * {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .c25 > * + * {
+        margin-top: 12px;
+      }
+
+      .c27 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+      }
+
+      .c27 > * {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .c27 > * + * {
+        margin-top: 4px;
+      }
+
+      .c20 > * {
         margin-left: 0;
         margin-right: 0;
       }
 
-      .c19 > * + * {
+      .c20 > * + * {
         margin-left: 4px;
       }
 
-      .c30 {
+      .c31 {
         font-size: 0.75rem;
         line-height: 1.33;
         color: #4a4a6a;
@@ -651,14 +655,14 @@ describe('<EditAssetDialog />', () => {
         color: #32324d;
       }
 
-      .c27 {
+      .c28 {
         font-weight: 400;
         font-size: 0.875rem;
         line-height: 1.43;
         color: #666687;
       }
 
-      .c29 {
+      .c30 {
         font-weight: 400;
         font-size: 0.75rem;
         line-height: 1.33;
@@ -670,28 +674,28 @@ describe('<EditAssetDialog />', () => {
         line-height: 1.14;
       }
 
-      .c28 {
+      .c29 {
         font-weight: 600;
         font-size: 0.6875rem;
         line-height: 1.45;
         text-transform: uppercase;
       }
 
-      .c33 {
+      .c34 {
         font-weight: 500;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #32324d;
       }
 
-      .c37 {
+      .c38 {
         font-weight: 400;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #666687;
       }
 
-      .c32 {
+      .c33 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -705,7 +709,7 @@ describe('<EditAssetDialog />', () => {
         align-items: center;
       }
 
-      .c34 {
+      .c35 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -723,7 +727,7 @@ describe('<EditAssetDialog />', () => {
         align-items: center;
       }
 
-      .c36 {
+      .c37 {
         border: none;
         border-radius: 4px;
         padding-left: 16px;
@@ -735,37 +739,37 @@ describe('<EditAssetDialog />', () => {
         width: 100%;
       }
 
-      .c36::-webkit-input-placeholder {
+      .c37::-webkit-input-placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c36::-moz-placeholder {
+      .c37::-moz-placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c36:-ms-input-placeholder {
+      .c37:-ms-input-placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c36::placeholder {
+      .c37::placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c36[aria-disabled='true'] {
+      .c37[aria-disabled='true'] {
         background: inherit;
         color: inherit;
       }
 
-      .c36:focus {
+      .c37:focus {
         outline: none;
         box-shadow: none;
       }
 
-      .c35 {
+      .c36 {
         border: 1px solid #dcdce4;
         border-radius: 4px;
         background: #ffffff;
@@ -778,12 +782,12 @@ describe('<EditAssetDialog />', () => {
         transition-duration: 0.2s;
       }
 
-      .c35:focus-within {
+      .c36:focus-within {
         border: 1px solid #4945ff;
         box-shadow: #4945ff 0px 0px 0px 2px;
       }
 
-      .c31 {
+      .c32 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -793,12 +797,12 @@ describe('<EditAssetDialog />', () => {
         flex-direction: column;
       }
 
-      .c31 > * {
+      .c32 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c31 > * + * {
+      .c32 > * + * {
         margin-top: 4px;
       }
 
@@ -865,7 +869,7 @@ describe('<EditAssetDialog />', () => {
         align-items: center;
       }
 
-      .c39 {
+      .c40 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -981,11 +985,11 @@ describe('<EditAssetDialog />', () => {
         border-bottom: 1px solid #eaeaef;
       }
 
-      .c38 {
+      .c39 {
         border-top: 1px solid #eaeaef;
       }
 
-      .c40 > * + * {
+      .c41 > * + * {
         margin-left: 8px;
       }
 
@@ -1004,7 +1008,7 @@ describe('<EditAssetDialog />', () => {
         grid-column: span 6;
       }
 
-      .c22 img {
+      .c23 img {
         margin: 0;
         padding: 0;
         max-height: 100%;
@@ -1117,13 +1121,13 @@ describe('<EditAssetDialog />', () => {
                             class="c16 c17 c18"
                           >
                             <div
-                              class="c19"
+                              class="c19 c20"
                             >
                               <span>
                                 <button
                                   aria-disabled="false"
                                   aria-labelledby="tooltip-1"
-                                  class="c20 c21"
+                                  class="c21 c22"
                                   tabindex="0"
                                   type="button"
                                 >
@@ -1145,7 +1149,7 @@ describe('<EditAssetDialog />', () => {
                                 <button
                                   aria-disabled="false"
                                   aria-labelledby="tooltip-3"
-                                  class="c20 c21"
+                                  class="c21 c22"
                                   tabindex="0"
                                   type="button"
                                 >
@@ -1169,7 +1173,7 @@ describe('<EditAssetDialog />', () => {
                                 <button
                                   aria-disabled="false"
                                   aria-labelledby="tooltip-5"
-                                  class="c20 c21"
+                                  class="c21 c22"
                                   tabindex="0"
                                   type="button"
                                 >
@@ -1195,7 +1199,7 @@ describe('<EditAssetDialog />', () => {
                                 <button
                                   aria-disabled="false"
                                   aria-labelledby="tooltip-7"
-                                  class="c20 c21"
+                                  class="c21 c22"
                                   tabindex="0"
                                   type="button"
                                 >
@@ -1216,7 +1220,7 @@ describe('<EditAssetDialog />', () => {
                             </div>
                           </div>
                           <div
-                            class="c22"
+                            class="c23"
                           >
                             <img
                               alt="Screenshot 2.png"
@@ -1224,7 +1228,7 @@ describe('<EditAssetDialog />', () => {
                             />
                           </div>
                           <div
-                            class="c16 c23 c18"
+                            class="c16 c24 c18"
                           />
                         </div>
                       </div>
@@ -1236,10 +1240,10 @@ describe('<EditAssetDialog />', () => {
                         class=""
                       >
                         <div
-                          class="c24"
+                          class="c25"
                         >
                           <div
-                            class="c25"
+                            class="c26"
                           >
                             <div
                               class="c13"
@@ -1251,15 +1255,15 @@ describe('<EditAssetDialog />', () => {
                                   class=""
                                 >
                                   <div
-                                    class="c26"
+                                    class="c27"
                                   >
                                     <span
-                                      class="c27 c8 c28"
+                                      class="c28 c8 c29"
                                     >
                                       Size
                                     </span>
                                     <span
-                                      class="c29"
+                                      class="c30"
                                     >
                                       102KB
                                     </span>
@@ -1273,15 +1277,15 @@ describe('<EditAssetDialog />', () => {
                                   class=""
                                 >
                                   <div
-                                    class="c26"
+                                    class="c27"
                                   >
                                     <span
-                                      class="c27 c8 c28"
+                                      class="c28 c8 c29"
                                     >
                                       Date
                                     </span>
                                     <span
-                                      class="c29"
+                                      class="c30"
                                     >
                                       10/4/2021
                                     </span>
@@ -1295,15 +1299,15 @@ describe('<EditAssetDialog />', () => {
                                   class=""
                                 >
                                   <div
-                                    class="c26"
+                                    class="c27"
                                   >
                                     <span
-                                      class="c27 c8 c28"
+                                      class="c28 c8 c29"
                                     >
                                       Dimensions
                                     </span>
                                     <span
-                                      class="c29"
+                                      class="c30"
                                     >
                                       780✕1476
                                     </span>
@@ -1317,15 +1321,15 @@ describe('<EditAssetDialog />', () => {
                                   class=""
                                 >
                                   <div
-                                    class="c26"
+                                    class="c27"
                                   >
                                     <span
-                                      class="c27 c8 c28"
+                                      class="c28 c8 c29"
                                     >
                                       Extension
                                     </span>
                                     <span
-                                      class="c30"
+                                      class="c31"
                                     >
                                       png
                                     </span>
@@ -1337,25 +1341,25 @@ describe('<EditAssetDialog />', () => {
                           <div>
                             <div>
                               <div
-                                class="c31"
+                                class="c32"
                               >
                                 <div
-                                  class="c32"
+                                  class="c33"
                                 >
                                   <label
-                                    class="c33"
+                                    class="c34"
                                     for="textinput-1"
                                   >
                                     File name
                                   </label>
                                 </div>
                                 <div
-                                  class="c34 c35"
+                                  class="c35 c36"
                                 >
                                   <input
                                     aria-disabled="false"
                                     aria-invalid="false"
-                                    class="c36"
+                                    class="c37"
                                     id="textinput-1"
                                     name="filename"
                                   />
@@ -1366,32 +1370,32 @@ describe('<EditAssetDialog />', () => {
                           <div>
                             <div>
                               <div
-                                class="c31"
+                                class="c32"
                               >
                                 <div
-                                  class="c32"
+                                  class="c33"
                                 >
                                   <label
-                                    class="c33"
+                                    class="c34"
                                     for="textinput-2"
                                   >
                                     Alternative text
                                   </label>
                                 </div>
                                 <div
-                                  class="c34 c35"
+                                  class="c35 c36"
                                 >
                                   <input
                                     aria-describedby="textinput-2-hint"
                                     aria-disabled="false"
                                     aria-invalid="false"
-                                    class="c36"
+                                    class="c37"
                                     id="textinput-2"
                                     name="altText"
                                   />
                                 </div>
                                 <p
-                                  class="c37"
+                                  class="c38"
                                   id="textinput-2-hint"
                                 >
                                   This text will be displayed if the asset can’t be shown.
@@ -1402,25 +1406,25 @@ describe('<EditAssetDialog />', () => {
                           <div>
                             <div>
                               <div
-                                class="c31"
+                                class="c32"
                               >
                                 <div
-                                  class="c32"
+                                  class="c33"
                                 >
                                   <label
-                                    class="c33"
+                                    class="c34"
                                     for="textinput-3"
                                   >
                                     Caption
                                   </label>
                                 </div>
                                 <div
-                                  class="c34 c35"
+                                  class="c35 c36"
                                 >
                                   <input
                                     aria-disabled="false"
                                     aria-invalid="false"
-                                    class="c36"
+                                    class="c37"
                                     id="textinput-3"
                                     name="caption"
                                   />
@@ -1434,47 +1438,47 @@ describe('<EditAssetDialog />', () => {
                   </div>
                 </div>
                 <div
-                  class="c4 c38"
+                  class="c4 c39"
                 >
                   <div
                     class="c6"
                   >
                     <div
-                      class="c39 c40"
+                      class="c40 c41"
                     >
                       <button
                         aria-disabled="false"
-                        class="c41 c42"
+                        class="c42 c43"
                         type="button"
                       >
                         <span
-                          class="c43 c44"
+                          class="c44 c45"
                         >
                           Cancel
                         </span>
                       </button>
                     </div>
                     <div
-                      class="c39 c40"
+                      class="c40 c41"
                     >
                       <button
                         aria-disabled="false"
-                        class="c41 c45"
+                        class="c42 c46"
                         type="button"
                       >
                         <span
-                          class="c43 c44"
+                          class="c44 c45"
                         >
                           Replace media
                         </span>
                       </button>
                       <button
                         aria-disabled="false"
-                        class="c41 c46"
+                        class="c42 c47"
                         type="button"
                       >
                         <span
-                          class="c43 c44"
+                          class="c44 c45"
                         >
                           Finish
                         </span>
@@ -1490,12 +1494,12 @@ describe('<EditAssetDialog />', () => {
           data-react-portal="true"
         >
           <div
-            class="c47 c48"
+            class="c48 c49"
             id="tooltip-1"
             role="tooltip"
           >
             <p
-              class="c49"
+              class="c50"
             >
               Delete
             </p>
@@ -1505,12 +1509,12 @@ describe('<EditAssetDialog />', () => {
           data-react-portal="true"
         >
           <div
-            class="c47 c48"
+            class="c48 c49"
             id="tooltip-3"
             role="tooltip"
           >
             <p
-              class="c49"
+              class="c50"
             >
               Download
             </p>
@@ -1520,12 +1524,12 @@ describe('<EditAssetDialog />', () => {
           data-react-portal="true"
         >
           <div
-            class="c47 c48"
+            class="c48 c49"
             id="tooltip-5"
             role="tooltip"
           >
             <p
-              class="c49"
+              class="c50"
             >
               Copy link
             </p>
@@ -1535,12 +1539,12 @@ describe('<EditAssetDialog />', () => {
           data-react-portal="true"
         >
           <div
-            class="c47 c48"
+            class="c48 c49"
             id="tooltip-7"
             role="tooltip"
           >
             <p
-              class="c49"
+              class="c50"
             >
               Crop
             </p>
