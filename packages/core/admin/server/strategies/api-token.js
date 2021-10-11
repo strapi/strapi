@@ -3,6 +3,8 @@
 const constants = require('../services/constants');
 const { getService } = require('../utils');
 
+const isReadScope = scope => scope.endsWith('find') || scope.endsWith('findOne');
+
 /** @type {import('.').AuthenticateFunction} */
 const authenticate = async ctx => {
   const apiTokenService = getService('api-token');
@@ -47,7 +49,8 @@ const verify = (auth, config) => {
    * If you don't have `full-access` you can only access `find` and `findOne`
    * scopes. If the route has no scope, then you can't get access to it.
    */
-  if (config.scope && (config.scope.endsWith('find') || config.scope.endsWith('findOne'))) {
+
+  if (config.scope && config.scope.every(isReadScope)) {
     return;
   }
 
