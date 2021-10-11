@@ -6,7 +6,6 @@ import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { ThemeProvider, lightTheme } from '@strapi/parts';
 import ListSettingsView from '../index';
-import server from './utils/server';
 import ModelsContext from '../../../contexts/ModelsContext';
 
 jest.mock('@strapi/helper-plugin', () => ({
@@ -72,21 +71,6 @@ const App = (
 );
 
 describe('ADMIN | CM | LV | Configure the view', () => {
-  beforeAll(() => server.listen());
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  afterEach(() => {
-    server.resetHandlers();
-  });
-
-  afterAll(() => {
-    jest.resetAllMocks();
-    server.close();
-  });
-
   it('renders and matches the snapshot', async () => {
     const { container } = render(App);
     await waitFor(() => {
