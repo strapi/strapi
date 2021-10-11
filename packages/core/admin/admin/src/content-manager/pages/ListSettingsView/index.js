@@ -24,7 +24,6 @@ import init from './init';
 import reducer, { initialState } from './reducer';
 
 const ListSettingsView = ({ layout, slug, updateLayout }) => {
-  console.log('kikou');
   const toggleNotification = useNotification();
   const { refetchData } = useContext(ModelsContext);
   const [reducerState, dispatch] = useReducer(reducer, initialState, () =>
@@ -188,15 +187,9 @@ const ListSettingsView = ({ layout, slug, updateLayout }) => {
     <SettingsForm
       collectionName={modifiedData.info.label}
       initialData={initialData}
-      isLoading={false}
       isSubmittingForm={isSubmittingForm}
       modifiedData={modifiedData}
       onChange={handleChange}
-      onConfirmReset={() => {
-        dispatch({
-          type: 'ON_RESET',
-        });
-      }}
       onConfirmSubmit={handleConfirm}
       refetchData={refetchData}
       sortOptions={sortOptions}

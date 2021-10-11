@@ -1,12 +1,7 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import {
-  GenericInput,
-  ConfirmDialog,
-  LoadingIndicatorPage,
-  useTracking,
-} from '@strapi/helper-plugin';
+import { GenericInput, ConfirmDialog, useTracking } from '@strapi/helper-plugin';
 import { get, isEqual, upperFirst } from 'lodash';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
@@ -21,7 +16,6 @@ import { H3 } from '@strapi/parts/Text';
 import { Button } from '@strapi/parts/Button';
 import CheckIcon from '@strapi/icons/CheckIcon';
 import BackIcon from '@strapi/icons/BackIcon';
-import { getTrad } from '../../../utils';
 import { usePluginsQueryParams } from '../../../hooks';
 
 const RowGap = styled(Row)`
@@ -32,7 +26,6 @@ const SettingsForm = ({
   children,
   initialData,
   isEditSettings,
-  isLoading,
   isSubmittingForm,
   modifiedData,
   collectionName,
@@ -71,13 +64,9 @@ const SettingsForm = ({
     return `/content-manager/${kind}/${uid}?${goBackSearch}`;
   };
 
-  if (isLoading) {
-    return <LoadingIndicatorPage />;
-  }
-
   return (
     <Layout>
-      <Main aria-busy={isLoading}>
+      <Main aria-busy={isSubmittingForm}>
         <form onSubmit={handleSubmit}>
           <HeaderLayout
             navigationAction={
@@ -96,18 +85,16 @@ const SettingsForm = ({
               </Button>
             }
             subtitle={formatMessage({
-              id: getTrad(
-                `components.SettingsViewWrapper.pluginHeader.description.${
-                  isEditSettings ? 'edit' : 'list'
-                }-settings`
-              ),
+              id: `components.SettingsViewWrapper.pluginHeader.description.${
+                isEditSettings ? 'edit' : 'list'
+              }-settings`,
               defaultMessage: `Define the settings of the ${
                 isEditSettings ? 'edit' : 'list'
               } view.`,
             })}
             title={formatMessage(
               {
-                id: getTrad('components.SettingsViewWrapper.pluginHeader.title'),
+                id: 'components.SettingsViewWrapper.pluginHeader.title',
                 defaultMessage: 'Configure the view - {name}',
               },
               { name: upperFirst(collectionName) }
@@ -250,17 +237,7 @@ SettingsForm.defaultProps = {
   isEditSettings: false,
   isSubmittingForm: false,
   modifiedData: {},
-  onConfirmSubmit: async () => {},
-  pluginHeaderProps: {
-    actions: [],
-    description: {
-      id: 'app.utils.defaultMessage',
-    },
-    title: {
-      id: 'app.utils.defaultMessage',
-      values: {},
-    },
-  },
+  onConfirmSubmit: () => {},
   sortOptions: [],
 };
 
@@ -269,21 +246,10 @@ SettingsForm.propTypes = {
   collectionName: PropTypes.string,
   initialData: PropTypes.object,
   isEditSettings: PropTypes.bool,
-  isLoading: PropTypes.bool.isRequired,
   isSubmittingForm: PropTypes.bool,
   modifiedData: PropTypes.object,
   onChange: PropTypes.func.isRequired,
   onConfirmSubmit: PropTypes.func,
-  pluginHeaderProps: PropTypes.shape({
-    actions: PropTypes.array,
-    description: PropTypes.shape({
-      id: PropTypes.string,
-    }),
-    title: PropTypes.shape({
-      id: PropTypes.string,
-      values: PropTypes.object,
-    }),
-  }),
   sortOptions: PropTypes.array,
 };
 
