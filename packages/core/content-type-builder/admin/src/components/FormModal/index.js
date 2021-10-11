@@ -20,6 +20,7 @@ import { get, has, isEmpty, set, toLower } from 'lodash';
 import upperFirst from 'lodash/upperFirst';
 import toString from 'lodash/toString';
 import { useSelector, useDispatch, shallowEqual } from 'react-redux';
+import AddIcon from '@strapi/icons/AddIcon';
 import { Box } from '@strapi/parts/Box';
 import { Button } from '@strapi/parts/Button';
 import { Divider } from '@strapi/parts/Divider';
@@ -35,7 +36,6 @@ import useDataManager from '../../hooks/useDataManager';
 import AttributeOptions from '../AttributeOptions';
 import FormModalHeader from '../FormModalHeader';
 
-// import AttributeOption from '../AttributeOption';
 // import BooleanBox from '../BooleanBox';
 // import ComponentIconPicker from '../ComponentIconPicker';
 // import CheckboxWithDescription from '../CheckboxWithDescription';
@@ -384,6 +384,7 @@ const FormModal = () => {
 
   const headers = createHeadersArray(state);
 
+  // FIXME rename this constant
   const isCreatingContentType = state.modalType === 'contentType';
   const isCreatingComponent = state.modalType === 'component';
   const isCreatingAttribute = state.modalType === 'attribute';
@@ -1378,6 +1379,110 @@ const FormModal = () => {
               </TabGroup>
             </ModalBody>
             <ModalFooter
+              // FIXME
+              endActions={
+                <>
+                  {(isCreatingContentType || isCreatingComponent) && !isCreating && (
+                    <Button
+                      type="button"
+                      variant="danger"
+                      onClick={e => {
+                        e.preventDefault();
+                        deleteData();
+                      }}
+                    >
+                      {formatMessage({
+                        id: getTrad('form.button.delete'),
+                        defaultMessage: 'Delete',
+                      })}
+                    </Button>
+                  )}
+                  {isEditingCategory && (
+                    <Button
+                      type="button"
+                      variant="danger"
+                      onClick={e => {
+                        e.preventDefault();
+
+                        deleteCategory(initialData.name);
+                      }}
+                    >
+                      {formatMessage({
+                        id: getTrad('form.button.delete'),
+                        defaultMessage: 'Delete',
+                      })}
+                    </Button>
+                  )}
+                  {isCreating && state.attributeType === 'dynamiczone' && (
+                    <Button
+                      type={isCreating ? 'submit' : 'button'}
+                      variant={
+                        (isCreatingContentType ||
+                          isCreatingComponent ||
+                          isEditingCategory ||
+                          (state.modalType === 'addComponentToDynamicZone' &&
+                            state.step === '1' &&
+                            !isCreatingComponentFromAView)) &&
+                        !isCreating
+                          ? 'default'
+                          : 'secondary'
+                      }
+                      onClick={e => handleSubmit(e, true)}
+                      startIcon={
+                        (isCreatingAttribute &&
+                          !isCreatingComponentFromAView &&
+                          state.step !== '1') ||
+                        (state.modalType === 'addComponentToDynamicZone' &&
+                          isCreatingComponentFromAView) ||
+                        (isCreatingComponentFromAView && state.step === '2') ? (
+                          <AddIcon />
+                        ) : null
+                      }
+                    >
+                      {getButtonSubmitMessage()}
+                    </Button>
+                  )}
+                  {state.attributeType !== 'dynamiczone' && (
+                    <Button
+                      type={isCreating ? 'submit' : 'button'}
+                      variant={
+                        (isCreatingContentType ||
+                          isCreatingComponent ||
+                          isEditingCategory ||
+                          (state.modalType === 'addComponentToDynamicZone' &&
+                            state.step === '1' &&
+                            !isCreatingComponentFromAView)) &&
+                        !isCreating
+                          ? 'default'
+                          : 'secondary'
+                      }
+                      onClick={e => handleSubmit(e, true)}
+                      startIcon={
+                        (isCreatingAttribute &&
+                          !isCreatingComponentFromAView &&
+                          state.step !== '1') ||
+                        (state.modalType === 'addComponentToDynamicZone' &&
+                          isCreatingComponentFromAView) ||
+                        (isCreatingComponentFromAView && state.step === '2') ? (
+                          <AddIcon />
+                        ) : null
+                      }
+                    >
+                      {getButtonSubmitMessage()}
+                    </Button>
+                  )}
+                  {isCreatingAttribute && !isInFirstComponentStep && (
+                    <Button
+                      type={isCreating ? 'button' : 'submit'}
+                      onClick={e => {
+                        handleSubmit(e, false);
+                      }}
+                    >
+                      {formatMessage({ id: 'form.button.finish', defaultMessage: 'Finish' })}
+                    </Button>
+                  )}
+                </>
+              }
               startActions={
                 <Button variant="tertiary" onClick={handleClosed}>
                   {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
@@ -1707,87 +1812,87 @@ const FormModal = () => {
   //                     {formatMessage({ id: 'form.button.finish' })}
   //                   </Button>
   //                 )}
-  //                 {(isCreatingContentType || isCreatingComponent) && !isCreating && (
-  //                   <Button
-  //                     type="button"
-  //                     color="delete"
-  //                     onClick={e => {
-  //                       e.preventDefault();
-  //                       deleteData();
-  //                     }}
-  //                     style={{ marginRight: '10px' }}
-  //                   >
-  //                     {formatMessage({ id: getTrad('form.button.delete') })}
-  //                   </Button>
-  //                 )}
-  //                 {isEditingCategory && (
-  //                   <Button
-  //                     type="button"
-  //                     color="delete"
-  //                     onClick={e => {
-  //                       e.preventDefault();
+  // {(isCreatingContentType || isCreatingComponent) && !isCreating && (
+  //   <Button
+  //     type="button"
+  //     color="delete"
+  //     onClick={e => {
+  //       e.preventDefault();
+  //       deleteData();
+  //     }}
+  //     style={{ marginRight: '10px' }}
+  //   >
+  //     {formatMessage({ id: getTrad('form.button.delete') })}
+  //   </Button>
+  // )}
+  // {isEditingCategory && (
+  //   <Button
+  //     type="button"
+  //     color="delete"
+  //     onClick={e => {
+  //       e.preventDefault();
 
-  //                       deleteCategory(initialData.name);
-  //                     }}
-  //                     style={{ marginRight: '10px' }}
-  //                   >
-  //                     {formatMessage({ id: getTrad('form.button.delete') })}
-  //                   </Button>
-  //                 )}
-  //                 {isCreating && state.attributeType === 'dynamiczone' && (
-  //                   <CustomButton
-  //                     type={isCreating ? 'submit' : 'button'}
-  //                     color={
-  //                       (isCreatingContentType ||
-  //                         isCreatingComponent ||
-  //                         isEditingCategory ||
-  //                         (state.modalType === 'addComponentToDynamicZone' &&
-  //                           state.step === '1' &&
-  //                           !isCreatingComponentFromAView)) &&
-  //                       !isCreating
-  //                         ? 'success'
-  //                         : 'primary'
-  //                     }
-  //                     onClick={e => handleSubmit(e, true)}
-  //                     icon={
-  //                       (isCreatingAttribute &&
-  //                         !isCreatingComponentFromAView &&
-  //                         state.step !== '1') ||
-  //                       (state.modalType === 'addComponentToDynamicZone' &&
-  //                         isCreatingComponentFromAView) ||
-  //                       (isCreatingComponentFromAView && state.step === '2')
-  //                     }
-  //                   >
-  //                     {getButtonSubmitMessage()}
-  //                   </CustomButton>
-  //                 )}
-  //                 {state.attributeType !== 'dynamiczone' && (
-  //                   <CustomButton
-  //                     type={isCreating ? 'submit' : 'button'}
-  //                     color={
-  //                       (isCreatingContentType ||
-  //                         isCreatingComponent ||
-  //                         isEditingCategory ||
-  //                         (state.modalType === 'addComponentToDynamicZone' &&
-  //                           state.step === '1' &&
-  //                           !isCreatingComponentFromAView)) &&
-  //                       !isCreating
-  //                         ? 'success'
-  //                         : 'primary'
-  //                     }
-  //                     onClick={e => handleSubmit(e, true)}
-  //                     icon={
-  //                       (isCreatingAttribute &&
-  //                         !isCreatingComponentFromAView &&
-  //                         state.step !== '1') ||
-  //                       (state.modalType === 'addComponentToDynamicZone' &&
-  //                         isCreatingComponentFromAView) ||
-  //                       (isCreatingComponentFromAView && state.step === '2')
-  //                     }
-  //                   >
-  //                     {getButtonSubmitMessage()}
-  //                   </CustomButton>
-  //                 )}
+  //       deleteCategory(initialData.name);
+  //     }}
+  //     style={{ marginRight: '10px' }}
+  //   >
+  //     {formatMessage({ id: getTrad('form.button.delete') })}
+  //   </Button>
+  // )}
+  // {isCreating && state.attributeType === 'dynamiczone' && (
+  //   <CustomButton
+  //     type={isCreating ? 'submit' : 'button'}
+  //     color={
+  //       (isCreatingContentType ||
+  //         isCreatingComponent ||
+  //         isEditingCategory ||
+  //         (state.modalType === 'addComponentToDynamicZone' &&
+  //           state.step === '1' &&
+  //           !isCreatingComponentFromAView)) &&
+  //       !isCreating
+  //         ? 'success'
+  //         : 'primary'
+  //     }
+  //     onClick={e => handleSubmit(e, true)}
+  //     icon={
+  //       (isCreatingAttribute &&
+  //         !isCreatingComponentFromAView &&
+  //         state.step !== '1') ||
+  //       (state.modalType === 'addComponentToDynamicZone' &&
+  //         isCreatingComponentFromAView) ||
+  //       (isCreatingComponentFromAView && state.step === '2')
+  //     }
+  //   >
+  //     {getButtonSubmitMessage()}
+  //   </CustomButton>
+  // )}
+  // {state.attributeType !== 'dynamiczone' && (
+  //   <CustomButton
+  //     type={isCreating ? 'submit' : 'button'}
+  //     color={
+  //       (isCreatingContentType ||
+  //         isCreatingComponent ||
+  //         isEditingCategory ||
+  //         (state.modalType === 'addComponentToDynamicZone' &&
+  //           state.step === '1' &&
+  //           !isCreatingComponentFromAView)) &&
+  //       !isCreating
+  //         ? 'success'
+  //         : 'primary'
+  //     }
+  //     onClick={e => handleSubmit(e, true)}
+  //     icon={
+  //       (isCreatingAttribute &&
+  //         !isCreatingComponentFromAView &&
+  //         state.step !== '1') ||
+  //       (state.modalType === 'addComponentToDynamicZone' &&
+  //         isCreatingComponentFromAView) ||
+  //       (isCreatingComponentFromAView && state.step === '2')
+  //     }
+  //   >
+  //     {getButtonSubmitMessage()}
+  //   </CustomButton>
+  // )}
   //               </div>
   //             </section>
   //           </ModalFooter>

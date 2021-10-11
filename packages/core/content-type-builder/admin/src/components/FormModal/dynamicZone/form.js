@@ -26,7 +26,13 @@ const form = {
             sectionTitle: null,
             items: [
               // FIXME
-              { type: 'pushRight', size: 6 },
+              {
+                type: 'pushRight',
+                size: 6,
+                // FIXME
+                intlLabel: { id: '', defaultMessage: '' },
+                name: 'pushRight',
+              },
               {
                 name: 'components',
                 type: 'componentSelect',
