@@ -1,5 +1,6 @@
 import React, { memo, useCallback, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
+import styled from 'styled-components';
 import { connect } from 'react-redux';
 import isEqual from 'react-fast-compare';
 import { bindActionCreators, compose } from 'redux';
@@ -10,7 +11,7 @@ import isEmpty from 'lodash/isEmpty';
 import { stringify } from 'qs';
 import {
   NoPermissions,
-  // CheckPermissions,
+  CheckPermissions,
   Search,
   useFocusWhenNavigate,
   useQueryParams,
@@ -18,16 +19,18 @@ import {
   useRBACProvider,
   useTracking,
 } from '@strapi/helper-plugin';
+import { IconButton } from '@strapi/parts/IconButton';
 import { Main } from '@strapi/parts/Main';
 import { ActionLayout, ContentLayout, HeaderLayout } from '@strapi/parts/Layout';
 import { useNotifyAT } from '@strapi/parts/LiveRegions';
 import { Button } from '@strapi/parts/Button';
 import Add from '@strapi/icons/Add';
+import Settings from '@strapi/icons/Settings';
 import axios from 'axios';
 import { axiosInstance } from '../../../core/utils';
 import { InjectionZone } from '../../../shared/components';
 import DynamicTable from '../../components/DynamicTable';
-// import permissions from '../../../permissions';
+import permissions from '../../../permissions';
 import { getRequestUrl, getTrad } from '../../utils';
 import FieldPicker from './FieldPicker';
 import PaginationFooter from './PaginationFooter';
@@ -36,8 +39,15 @@ import makeSelectListView from './selectors';
 import { buildQueryString } from './utils';
 import AttributeFilter from '../../components/AttributeFilter';
 
-// TODO
-// const cmPermissions = permissions.contentManager;
+const cmPermissions = permissions.contentManager;
+
+const IconButtonCustom = styled(IconButton)`
+  svg {
+    path {
+      fill: ${({ theme }) => theme.colors.neutral900};
+    }
+  }
+`;
 
 /* eslint-disable react/no-array-index-key */
 function ListView({
@@ -270,6 +280,12 @@ function ListView({
             <>
               <InjectionZone area="contentManager.listView.actions" />
               <FieldPicker layout={layout} />
+              <CheckPermissions permissions={cmPermissions.collectionTypesConfigurations}>
+                <IconButtonCustom
+                  onClick={() => push(`${slug}/configurations/list`)}
+                  icon={<Settings />}
+                />
+              </CheckPermissions>
             </>
           }
           startActions={
@@ -355,6 +371,9 @@ export function mapDispatchToProps(dispatch) {
     dispatch
   );
 }
-const withConnect = connect(mapStateToProps, mapDispatchToProps);
+const withConnect = connect(
+  mapStateToProps,
+  mapDispatchToProps
+);
 
 export default compose(withConnect)(memo(ListView, isEqual));

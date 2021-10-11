@@ -573,6 +573,7 @@
   "content-manager.form.Input.pageEntries.inputDescription": "Note: You can override this value in the Collection Type settings page.",
   "content-manager.form.Input.placeholder": "Placeholder",
   "content-manager.form.Input.placeholder.placeholder": "My awesome value",
+  "content-manager.form.Input.sort.order": "Default sort order",
   "content-manager.form.Input.search": "Enable search",
   "content-manager.form.Input.search.field": "Enable search on this field",
   "content-manager.form.Input.sort.field": "Enable sort on this field",
