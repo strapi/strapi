@@ -20,32 +20,76 @@ const contentTypesRegistry = () => {
   const contentTypes = {};
 
   return {
-    get(ctUID) {
-      return contentTypes[ctUID];
+    /**
+     * Returns this list of registered contentTypes uids
+     * @returns {string[]}
+     */
+    keys() {
+      return Object.keys(contentTypes);
     },
+
+    /**
+     * Returns the instance of a contentType. Instantiate the contentType if not already done
+     * @param {string} uid
+     * @returns
+     */
+    get(uid) {
+      return contentTypes[uid];
+    },
+
+    /**
+     * Returns a map with all the contentTypes in a namespace
+     * @param {string} namespace
+     */
     getAll(namespace) {
       return pickBy((_, uid) => hasNamespace(uid, namespace))(contentTypes);
     },
-    add(namespace, rawContentTypes) {
-      validateKeySameToSingularName(rawContentTypes);
 
-      for (const rawCtName in rawContentTypes) {
+    /**
+     * Registers a contentType
+     * @param {string} uid
+     * @param {Object} contentType
+     */
+    set(uid, contentType) {
+      contentTypes[uid] = contentType;
+      return this;
+    },
+
+    /**
+     * Registers a map of contentTypes for a specific namespace
+     * @param {string} namespace
+     * @param {{ [key: string]: Object }} newContentTypes
+     */
+    add(namespace, newContentTypes) {
+      validateKeySameToSingularName(newContentTypes);
+
+      for (const rawCtName in newContentTypes) {
         const uid = addNamespace(rawCtName, namespace);
 
         if (has(uid, contentTypes)) {
           throw new Error(`Content-type ${uid} has already been registered.`);
         }
 
-        contentTypes[uid] = createContentType(uid, rawContentTypes[rawCtName]);
+        contentTypes[uid] = createContentType(uid, newContentTypes[rawCtName]);
       }
     },
+
+    /**
+     * Wraps a contentType to extend it
+     * @param {string} uid
+     * @param {(contentType: Object) => Object} extendFn
+     */
     extend(ctUID, extendFn) {
       const currentContentType = this.get(ctUID);
+
       if (!currentContentType) {
         throw new Error(`Content-Type ${ctUID} doesn't exist`);
       }
+
       const newContentType = extendFn(currentContentType);
       contentTypes[ctUID] = newContentType;
+
+      return this;
     },
   };
 };
