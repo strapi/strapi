@@ -31,6 +31,7 @@ import schema from './utils/schema';
 
 const ApiTokenCreateView = () => {
   const [accessToken, setAccessToken] = useState('');
+  const [tokenName, setTokenName] = useState('');
   useFocusWhenNavigate();
   const { formatMessage } = useIntl();
   const { lockApp, unlockApp } = useOverlayBlocker();
@@ -45,6 +46,7 @@ const ApiTokenCreateView = () => {
       } = await axiosInstance.post(`/admin/api-tokens`, body);
 
       setAccessToken(() => response.accessKey);
+      setTokenName(() => response.name);
 
       toggleNotification({
         type: 'success',
@@ -82,10 +84,13 @@ const ApiTokenCreateView = () => {
           return (
             <Form>
               <HeaderLayout
-                title={formatMessage({
-                  id: 'Settings.apiTokens.createPage.title',
-                  defaultMessage: 'Create API Token',
-                })}
+                title={
+                  tokenName ||
+                  formatMessage({
+                    id: 'Settings.apiTokens.createPage.title',
+                    defaultMessage: 'Create API Token',
+                  })
+                }
                 primaryAction={
                   <Button
                     disabled={isSubmitting}
