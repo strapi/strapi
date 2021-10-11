@@ -1221,12 +1221,7 @@ describe('<EditAssetDialog />', () => {
                           </div>
                           <div
                             class="c23"
-                          >
-                            <img
-                              alt="Screenshot 2.png"
-                              src="http://localhost:1337/uploads/Screenshot_2_5d4a574d61.png"
-                            />
-                          </div>
+                          />
                           <div
                             class="c16 c24 c18"
                           />
