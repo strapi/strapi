@@ -13,7 +13,7 @@ import { Stack } from '@strapi/parts/Stack';
 import { Grid, GridItem } from '@strapi/parts/Grid';
 import { Button } from '@strapi/parts/Button';
 import { TextInput } from '@strapi/parts/TextInput';
-import { getFileExtension, prefixFileUrlWithBackendUrl } from '@strapi/helper-plugin';
+import { getFileExtension } from '@strapi/helper-plugin';
 import { PreviewBox } from './PreviewBox';
 import { AssetMeta } from './AssetMeta';
 import { getTrad } from '../../utils';
@@ -36,9 +36,7 @@ export const EditAssetDialog = ({ onClose, asset }) => {
         <ModalBody>
           <Grid gap={4}>
             <GridItem xs={12} col={6}>
-              <PreviewBox asset={asset} onDelete={onClose}>
-                <img src={prefixFileUrlWithBackendUrl(asset.url)} alt={asset.name} />
-              </PreviewBox>
+              <PreviewBox asset={asset} onDelete={onClose} />
             </GridItem>
             <GridItem xs={12} col={6}>
               <Stack size={3}>
