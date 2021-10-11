@@ -1,6 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
+const { isFunction } = require('lodash/fp');
 const { createLogger } = require('@strapi/logger');
 const { Database } = require('@strapi/database');
 const { createAsyncParallelHook } = require('@strapi/utils').hooks;
@@ -35,6 +36,7 @@ const createConfigProvider = require('./core/registries/config');
 const apisRegistry = require('./core/registries/apis');
 const bootstrap = require('./core/bootstrap');
 const loaders = require('./core/loaders');
+const { destroyOnSignal } = require('./utils/signals');
 
 // TODO: move somewhere else
 const draftAndPublishSync = require('./migrations/draft-publish');
@@ -42,10 +44,12 @@ const draftAndPublishSync = require('./migrations/draft-publish');
 const LIFECYCLES = {
   REGISTER: 'register',
   BOOTSTRAP: 'bootstrap',
+  DESTROY: 'destroy',
 };
 
 class Strapi {
   constructor(opts = {}) {
+    destroyOnSignal(this);
     this.dirs = utils.getDirs(opts.dir || process.cwd());
     const appConfig = loadConfiguration(this.dirs.root, opts);
     this.container = createContainer(this);
@@ -168,17 +172,7 @@ class Strapi {
   async destroy() {
     await this.server.destroy();
 
-    await Promise.all(
-      Object.values(this.plugins).map(plugin => {
-        if (_.has(plugin, 'destroy') && typeof plugin.destroy === 'function') {
-          return plugin.destroy();
-        }
-      })
-    );
-
-    if (_.has(this, 'admin')) {
-      await this.admin.destroy();
-    }
+    await this.runLifecyclesFunctions(LIFECYCLES.DESTROY);
 
     this.eventHub.removeAllListeners();
 
@@ -437,7 +431,7 @@ class Strapi {
       }
 
       if (this.config.get('autoReload')) {
-        this.server.destroy();
+        this.destroy();
         process.send('reload');
       }
     };
@@ -468,13 +462,16 @@ class Strapi {
     await this.container.get('modules')[lifecycleName]();
 
     // user
-    const lifecycleFunction = this.app[lifecycleName];
-    if (lifecycleFunction) {
-      await lifecycleFunction({ strapi: this });
+    const userLifecycleFunction = this.app[lifecycleName];
+    if (isFunction(userLifecycleFunction)) {
+      await userLifecycleFunction({ strapi: this });
     }
 
     // admin
-    await this.admin[lifecycleName]({ strapi: this });
+    const adminLifecycleFunction = this.admin[lifecycleName];
+    if (isFunction(adminLifecycleFunction)) {
+      await adminLifecycleFunction({ strapi: this });
+    }
   }
 
   getModel(uid) {
