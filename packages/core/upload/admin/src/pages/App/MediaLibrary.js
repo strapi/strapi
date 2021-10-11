@@ -24,6 +24,7 @@ import { useAssets } from '../../hooks/useAssets';
 import { getTrad } from '../../utils';
 import pluginPermissions from '../../permissions';
 import { Filters } from './components/Filters';
+import { PaginationFooter } from '../../components/PaginationFooter';
 
 const BoxWithHeight = styled(Box)`
   height: ${32 / 16}rem;
@@ -51,6 +52,8 @@ export const MediaLibrary = () => {
     return <Redirect to="/" />;
   }
 
+  const assets = data?.results;
+
   return (
     <Layout>
       <Main aria-busy={loading}>
@@ -62,13 +65,13 @@ export const MediaLibrary = () => {
           subtitle={formatMessage(
             {
               id: getTrad(
-                data?.length > 0
+                assets?.length > 0
                   ? 'header.content.assets-multiple'
                   : 'header.content.assets.assets-single'
               ),
               defaultMessage: '0 assets',
             },
-            { number: data?.length || 0 }
+            { number: assets?.length || 0 }
           )}
           primaryAction={
             <Button startIcon={<AddIcon />} onClick={toggleUploadAssetDialog}>
@@ -114,7 +117,7 @@ export const MediaLibrary = () => {
           {loading && <LoadingIndicatorPage />}
           {error && <AnErrorOccurred />}
           {!canRead && <NoPermissions />}
-          {canRead && data && data.length === 0 && (
+          {canRead && assets && assets.length === 0 && (
             <NoMedia
               action={
                 <Button
@@ -134,8 +137,11 @@ export const MediaLibrary = () => {
               })}
             />
           )}
-          {canRead && data && data.length > 0 && (
-            <ListView assets={data} onEditAsset={setAssetToEdit} />
+          {canRead && assets && assets.length > 0 && (
+            <>
+              <ListView assets={assets} onEditAsset={setAssetToEdit} />
+              {data?.pagination && <PaginationFooter pagination={data.pagination} />}
+            </>
           )}
         </ContentLayout>
       </Main>

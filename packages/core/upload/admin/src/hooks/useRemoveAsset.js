@@ -17,11 +17,9 @@ export const useRemoveAsset = onSuccess => {
   const queryClient = useQueryClient();
 
   const mutation = useMutation(assetId => removeAssetRequest(assetId), {
-    onSuccess: ({ data }) => {
+    onSuccess: () => {
       // Coupled with the cache of useAssets
-      queryClient.setQueryData('assets', (cachedAssets = []) =>
-        cachedAssets.filter(asset => asset.id !== data.id)
-      );
+      queryClient.refetchQueries(['assets'], { active: true });
 
       toggleNotification({
         type: 'success',

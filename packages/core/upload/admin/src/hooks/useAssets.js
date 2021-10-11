@@ -18,7 +18,7 @@ export const useAssets = ({ skipWhen }) => {
     return data;
   };
 
-  const { data, error, isLoading } = useQuery(`assets`, getAssets, {
+  const { data, error, isLoading } = useQuery([`assets`, rawQuery], getAssets, {
     enabled: !skipWhen,
     staleTime: 0,
     cacheTime: 0,

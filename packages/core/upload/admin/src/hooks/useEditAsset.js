@@ -45,10 +45,8 @@ export const useEditAsset = () => {
   const mutation = useMutation(
     ({ asset, file }) => editAssetRequest(asset, file, tokenRef.current, setProgress),
     {
-      onSuccess: assetUpdated => {
-        queryClient.setQueryData('assets', cachedAssets =>
-          cachedAssets.map(asset => (asset.id === assetUpdated.id ? { ...assetUpdated } : asset))
-        );
+      onSuccess: () => {
+        queryClient.refetchQueries(['assets'], { active: true });
       },
       onError: error => {
         toggleNotification({ type: 'warning', message: error.message });
