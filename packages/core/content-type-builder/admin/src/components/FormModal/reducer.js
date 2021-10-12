@@ -183,40 +183,7 @@ const reducer = (state = initialState, action) =>
 
         break;
       }
-      case actions.ON_CHANGE_ALLOWED_TYPE: {
-        if (action.name === 'all') {
-          if (action.value) {
-            set(draftState, ['modifiedData', 'allowedTypes'], ['images', 'videos', 'files']);
-            break;
-          }
 
-          set(draftState, ['modifiedData', 'allowedTypes'], null);
-
-          break;
-        }
-
-        const currentList = state.modifiedData.allowedTypes || [];
-        let updatedList = [...currentList];
-
-        if (currentList.includes(action.name)) {
-          updatedList = updatedList.filter(v => v !== action.name);
-
-          if (updatedList.length === 0) {
-            set(draftState, ['modifiedData', 'allowedTypes'], null);
-
-            break;
-          }
-
-          set(draftState, ['modifiedData', 'allowedTypes'], updatedList);
-          break;
-        }
-
-        updatedList.push(action.name);
-
-        set(draftState, ['modifiedData', 'allowedTypes'], updatedList);
-
-        break;
-      }
       case actions.RESET_PROPS:
         return initialState;
       case actions.RESET_PROPS_AND_SET_FORM_FOR_ADDING_AN_EXISTING_COMPO: {

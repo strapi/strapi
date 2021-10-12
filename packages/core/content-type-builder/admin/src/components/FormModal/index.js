@@ -25,6 +25,7 @@ import { Stack } from '@strapi/parts/Stack';
 import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
 // New compos
+import AllowedTypesSelect from '../AllowedTypesSelect';
 import AttributeOptions from '../AttributeOptions';
 import DraftAndPublishToggle from '../DraftAndPublishToggle';
 import FormModalHeader from '../FormModalHeader';
@@ -57,7 +58,6 @@ import {
   SET_DYNAMIC_ZONE_DATA_SCHEMA,
   SET_ATTRIBUTE_DATA_SCHEMA,
   // ADD_COMPONENTS_TO_DYNAMIC_ZONE,
-  // ON_CHANGE_ALLOWED_TYPE,
   SET_ERRORS,
   ON_CHANGE,
   RESET_PROPS_AND_SET_THE_FORM_FOR_ADDING_A_COMPO_TO_A_DZ,
@@ -561,14 +561,6 @@ const FormModal = () => {
   //     name,
   //     components,
   //     shouldAddComponents,
-  //   });
-  // };
-
-  // const handleChangeMediaAllowedTypes = ({ target: { name, value } }) => {
-  //   dispatch({
-  //     type: ON_CHANGE_ALLOWED_TYPE,
-  //     name,
-  //     value,
   //   });
   // };
 
@@ -1095,6 +1087,7 @@ const FormModal = () => {
 
   const genericInputProps = {
     customInputs: {
+      'allowed-types-select': AllowedTypesSelect,
       'checkbox-with-number-field': CheckboxWithNumberField,
       'select-default-boolean': BooleanDefaultValueSelect,
       'radio-group': CustomRadioGroup,
