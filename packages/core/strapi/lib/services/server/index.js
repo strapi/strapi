@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * @typedef {import('../../../types').Strapi} Strapi
+ * @typedef {import('types').Strapi} Strapi
  */
 
 const Koa = require('koa');

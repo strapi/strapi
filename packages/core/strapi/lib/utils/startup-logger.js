@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * @typedef {import('../../types').Strapi} Strapi
+ * @typedef {import('types').Strapi} Strapi
  */
 
 const chalk = require('chalk');
@@ -11,9 +11,9 @@ const { getAbsoluteAdminUrl, getAbsoluteServerUrl } = require('@strapi/utils');
 const ee = require('./ee');
 
 /**
- * @param {Strapi['app']} app
+ * @param {Strapi} strapi
  */
-module.exports = app => {
+module.exports = strapi => {
   return {
     logStats() {
       const columns = Math.min(process.stderr.columns, 80) - 2;
@@ -26,14 +26,14 @@ module.exports = app => {
         chars: { mid: '', 'left-mid': '', 'mid-mid': '', 'right-mid': '' },
       });
 
-      const isEE = app.EE === true && ee.isEE === true;
+      const isEE = strapi.EE === true && ee.isEE === true;
 
       infoTable.push(
         [chalk.blue('Time'), `${new Date()}`],
-        [chalk.blue('Launched in'), Date.now() - app.config.launchedAt + ' ms'],
-        [chalk.blue('Environment'), app.config.environment],
+        [chalk.blue('Launched in'), Date.now() - strapi.config.launchedAt + ' ms'],
+        [chalk.blue('Environment'), strapi.config.environment],
         [chalk.blue('Process PID'), process.pid],
-        [chalk.blue('Version'), `${app.config.info.strapi} (node ${process.version})`],
+        [chalk.blue('Version'), `${strapi.config.info.strapi} (node ${process.version})`],
         [chalk.blue('Edition'), isEE ? 'Enterprise' : 'Community']
       );
 
@@ -66,7 +66,7 @@ module.exports = app => {
 
       console.log(chalk.bold('Welcome back!'));
 
-      if (app.config.serveAdminPanel === true) {
+      if (strapi.config.serveAdminPanel === true) {
         console.log(chalk.grey('To manage your project 🚀, go to the administration panel at:'));
         const adminUrl = getAbsoluteAdminUrl(strapi.config);
         console.log(chalk.bold(adminUrl));

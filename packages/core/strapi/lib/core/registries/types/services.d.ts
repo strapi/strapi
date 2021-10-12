@@ -1,7 +1,7 @@
 import { Strapi } from '../../types';
 
 export type Service = {
-  [key: string]: (...args: any) => any;
+  [key: string]: any;
 };
 
 export type ServiceFactory = ({ strapi: Strapi }) => Service;

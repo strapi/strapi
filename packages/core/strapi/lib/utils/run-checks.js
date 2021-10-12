@@ -4,6 +4,10 @@ const path = require('path');
 const fs = require('fs-extra');
 
 const requiredPaths = ['api', 'extensions', 'plugins', 'config', 'public'];
+
+/**
+ * @param {{ appPath: string }} ctx
+ */
 const checkFoldersExist = ({ appPath }) => {
   let missingPaths = [];
   for (let reqPath of requiredPaths) {

@@ -3,8 +3,8 @@
 /**
  * @typedef {import('@strapi/database').Database} Database
  * @typedef {import('@strapi/database').EntityManager} EntityManager
- * @typedef {import('../../../types').Strapi} Strapi
- * @typedef {import('../../../types').StrapiContentTypes} StrapiContentTypes
+ * @typedef {import('types').Strapi} Strapi
+ * @typedef {import('types').StrapiContentTypes} StrapiContentTypes
  */
 
 const delegate = require('delegates');
@@ -40,18 +40,26 @@ const { ENTRY_CREATE, ENTRY_UPDATE, ENTRY_DELETE } = webhookUtils.webhookEvents;
  *   eventHub: any
  *   entityValidator: any
  * }} ctx
- * @returns {EntityManager}
  */
 module.exports = ctx => {
   const implementation = createDefaultImplementation(ctx);
 
+  /**
+   * @type {EntityManager}
+   */
   const service = {
+    // @ts-ignore
     implementation,
+    /**
+     * @param {Function} decorator
+     * @returns
+     */
     decorate(decorator) {
       if (typeof decorator !== 'function') {
         throw new Error(`Decorator must be a function, received ${typeof decorator}`);
       }
 
+      // @ts-ignore
       this.implementation = Object.assign({}, this.implementation, decorator(this.implementation));
       return this;
     },
@@ -60,6 +68,7 @@ module.exports = ctx => {
   const delegator = delegate(service, 'implementation');
 
   // delegate every method in implementation
+  // @ts-ignore
   Object.keys(service.implementation).forEach(key => delegator.method(key));
 
   return service;

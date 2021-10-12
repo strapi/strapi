@@ -1,14 +1,13 @@
 'use strict';
 
 /**
- * @typedef {import('../../types').Strapi} Strapi
+ * @typedef {import('types').Strapi} Strapi
  */
 
 const { getConfigUrls } = require('@strapi/utils');
 
 /**
  * @param {{ strapi: Strapi }} ctx
- * @returns {void}
  */
 module.exports = function({ strapi }) {
   strapi.config.port = strapi.config.get('server.port') || strapi.config.port;

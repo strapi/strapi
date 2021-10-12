@@ -1,10 +1,15 @@
 'use strict';
 
+/**
+ * @typedef {import('types').Strapi} Strapi
+ */
+
 const path = require('path');
 const fse = require('fs-extra');
 
 /**
  * create strapi fs layer
+ * @param {Strapi} strapi
  */
 module.exports = strapi => {
   function normalizePath(optPath) {

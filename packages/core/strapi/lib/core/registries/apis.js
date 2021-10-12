@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * @typedef {import('../../../types').Strapi} Strapi
+ * @typedef {import('types').Strapi} Strapi
  */
 
 const { has } = require('lodash/fp');
@@ -11,15 +11,25 @@ const { createCoreApi } = require('../../core-api');
  * @param {Strapi} strapi
  */
 const apisRegistry = strapi => {
+  /**
+   * @type {Record<string, any>}
+   */
   const apis = {};
 
   return {
+    /**
+     * @param {string} name
+     */
     get(name) {
       return apis[name];
     },
     getAll() {
       return apis;
     },
+    /**
+     * @param {string} apiName
+     * @param {any=} apiConfig
+     */
     add(apiName, apiConfig) {
       if (has(apiName, apis)) {
         throw new Error(`API ${apiName} has already been registered.`);

@@ -4,10 +4,14 @@ const { pickBy } = require('lodash/fp');
 const { addNamespace, hasNamespace } = require('../utils');
 
 /**
- * @typedef {import('./types/hooks').Hook} Hook
+ * @typedef {import('types').StrapiHooks} StrapiHooks
+ * @typedef {import('types').Hook} Hook
  */
 
 const hooksRegistry = () => {
+  /**
+   * @type {Record<string, Hook>}
+   */
   const hooks = {};
 
   return {
@@ -21,7 +25,8 @@ const hooksRegistry = () => {
 
     /**
      * Returns the instance of a hook.
-     * @param {string} uid
+     * @template {keyof StrapiHooks} T
+     * @param {T} uid
      * @returns {Hook}
      */
     get(uid) {
@@ -30,8 +35,8 @@ const hooksRegistry = () => {
 
     /**
      * Returns a map with all the hooks in a namespace
-     * @param {string} namespace
-     * @returns {{ [key: string]: Hook }}
+     * @param {string=} namespace
+     * @returns {Record<string, Hook>}
      */
     getAll(namespace) {
       return pickBy((_, uid) => hasNamespace(uid, namespace))(hooks);
@@ -50,8 +55,7 @@ const hooksRegistry = () => {
     /**
      * Registers a map of hooks for a specific namespace
      * @param {string} namespace
-     * @param {{ [key: string]: Hook }} newHooks
-     * @returns
+     * @param {Record<string, Hook>} hooks
      */
     add(namespace, hooks) {
       for (const hookName in hooks) {

@@ -2,6 +2,8 @@
 
 /**
  * Returns a url base on hostname, port and ssl options
+ *
+ * @param {{hostname: string, port: string, ssl?: boolean }} config
  */
 module.exports = ({ hostname, port, ssl = false }) => {
   const protocol = ssl ? 'https' : 'http';

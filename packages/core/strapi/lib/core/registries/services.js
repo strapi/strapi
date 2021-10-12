@@ -1,16 +1,26 @@
 'use strict';
 
+/**
+ * @typedef {import('types').Strapi} Strapi
+ * @typedef {import('./types/services').Service} Service
+ * @typedef {import('./types/services').ServiceFactory} ServiceFactory
+ */
+
 const _ = require('lodash');
 const { pickBy, has } = require('lodash/fp');
 const { addNamespace, hasNamespace } = require('../utils');
 
 /**
- * @typedef {import('./services').Service} Service
- * @typedef {import('./services').ServiceFactory} ServiceFactory
+ * @param {Strapi} strapi
  */
-
 const servicesRegistry = strapi => {
+  /**
+   * @type {Record<string, Service|ServiceFactory>}
+   */
   const services = {};
+  /**
+   * @type {Record<string, Service>}
+   */
   const instantiatedServices = {};
 
   return {
@@ -25,7 +35,6 @@ const servicesRegistry = strapi => {
     /**
      * Returns the instance of a service. Instantiate the service if not already done
      * @param {string} uid
-     * @returns {Service}
      */
     get(uid) {
       if (instantiatedServices[uid]) {
@@ -43,8 +52,8 @@ const servicesRegistry = strapi => {
 
     /**
      * Returns a map with all the services in a namespace
-     * @param {string} namespace
-     * @returns {{ [key: string]: Service }}
+     * @param {string=} namespace
+     * @returns {Record<string, Service | undefined>}
      */
     getAll(namespace) {
       const filteredServices = pickBy((_, uid) => hasNamespace(uid, namespace))(services);
@@ -65,7 +74,7 @@ const servicesRegistry = strapi => {
     /**
      * Registers a map of services for a specific namespace
      * @param {string} namespace
-     * @param {{ [key: string]: Service|ServiceFactory }} newServices
+     * @param {Record<string, Service | ServiceFactory>} newServices
      * @returns
      */
     add(namespace, newServices) {

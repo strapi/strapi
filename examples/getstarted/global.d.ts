@@ -6,7 +6,7 @@ declare module '@strapi/strapi' {
   /**
    * augment strapi.entityService
    */
-  interface StrapiContentTypes {
+  export interface StrapiContentTypes {
     restaurant: Restaurant;
   }
 

@@ -1,6 +1,13 @@
 'use strict';
 
-const destroyOnSignal = () => {
+/**
+ * @typedef {import('types').Strapi} Strapi
+ */
+
+/**
+ * @param {Strapi} strapi
+ */
+const destroyOnSignal = strapi => {
   let signalReceived = false;
 
   // For unknown reasons, we receive signals 2 times.

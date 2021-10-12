@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * @typedef {import('../../../types').Strapi} Strapi
+ * @typedef {import('types').Strapi} Strapi
  */
 
 const { resolve } = require('path');
@@ -11,18 +11,30 @@ const { yup } = require('@strapi/utils');
 const srcSchema = yup
   .object()
   .shape({
+    // @ts-ignore
     bootstrap: yup.mixed().isFunction(),
+    // @ts-ignore
     register: yup.mixed().isFunction(),
+    // @ts-ignore
     destroy: yup.mixed().isFunction(),
   })
   .noUnknown();
 
+/**
+ * @param {any} srcIndex
+ * @returns
+ */
 const validateSrcIndex = srcIndex => {
   return srcSchema.validateSync(srcIndex, { strict: true, abortEarly: false });
 };
 
 /**
  * @param {Strapi} strapi
+ * @returns {{
+ *   bootstrap?: () => void,
+ *   register?: () => void,
+ *   destroy?: () => void,
+ * }}
  */
 module.exports = strapi => {
   if (!existsSync(strapi.dirs.src)) {
@@ -38,8 +50,8 @@ module.exports = strapi => {
 
   try {
     validateSrcIndex(srcIndex);
-  } catch (e) {
-    strapi.stopWithError(new Error(`Invalid file \`./src/index.js\`: ${e.message}`));
+  } catch (/** @type {any} **/ e) {
+    strapi.stopWithError(e, 'Invalid file `./src/index.js`');
   }
 
   return srcIndex;

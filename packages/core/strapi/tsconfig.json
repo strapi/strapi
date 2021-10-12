@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "lib": ["es6"],
+    "target": "es6",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "jsx": "react-jsx",
+    "allowJs": true,
+    "checkJs": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+    "strictNullChecks": true,
+    "noImplicitAny": true,
+    "baseUrl": "./",
+    "noEmit": true,
+    "declaration": false,
+    "outDir": "./never"
+  },
+  "include": ["**/*.js", "**/*.json", "**/*.mjs", "**/*.ts"],
+  "exclude": ["**/*.test.js", "**/*.e2e.js"]
+}

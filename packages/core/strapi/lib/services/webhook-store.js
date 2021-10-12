@@ -1,7 +1,18 @@
 /**
  * Webhook store is the implementation of webhook storage over the core_store
+ *
  */
 'use strict';
+
+/**
+ * @typedef {import('@strapi/strapi').Webhook} Webhook
+ * @typedef {import('@strapi/database').Database} Database
+ */
+
+/**
+ * @template T
+ * @typedef {import('@strapi/database').Entity<T>} Entity<T>
+ */
 
 const webhookModel = {
   uid: 'webhook',
@@ -25,6 +36,10 @@ const webhookModel = {
   },
 };
 
+/**
+ * @param {Omit<Webhook, 'enabled'> & { isEnabled: boolean}} data
+ * @returns {Webhook}
+ */
 const toDBObject = data => {
   return {
     name: data.name,
@@ -35,6 +50,10 @@ const toDBObject = data => {
   };
 };
 
+/**
+ * @param {Entity<Webhook>} row
+ * @returns {Entity<Omit<Webhook, 'enabled'> & { isEnabled: boolean}>}
+ */
 const fromDBObject = row => {
   return {
     id: row.id,
@@ -46,6 +65,9 @@ const fromDBObject = row => {
   };
 };
 
+/**
+ * @param {{ db: Database }} ctx
+ */
 const createWebhookStore = ({ db }) => {
   const webhookQueries = db.query('webhook');
 
@@ -56,11 +78,17 @@ const createWebhookStore = ({ db }) => {
       return results.map(fromDBObject);
     },
 
+    /**
+     * @param {string} id
+     */
     async findWebhook(id) {
       const result = await webhookQueries.findOne({ where: { id } });
       return result ? fromDBObject(result) : null;
     },
 
+    /**
+     * @param {Omit<Webhook, 'enabled'> & { isEnabled: boolean}} data
+     */
     createWebhook(data) {
       return webhookQueries
         .create({
@@ -69,6 +97,10 @@ const createWebhookStore = ({ db }) => {
         .then(fromDBObject);
     },
 
+    /**
+     * @param {string} id
+     * @param {Omit<Webhook, 'enabled'> & { isEnabled: boolean}} data
+     */
     async updateWebhook(id, data) {
       const webhook = await webhookQueries.update({
         where: { id },
@@ -78,6 +110,9 @@ const createWebhookStore = ({ db }) => {
       return webhook ? fromDBObject(webhook) : null;
     },
 
+    /**
+     * @param {string} id
+     */
     async deleteWebhook(id) {
       const webhook = await webhookQueries.delete({ where: { id } });
       return webhook ? fromDBObject(webhook) : null;

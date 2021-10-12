@@ -1,6 +1,6 @@
 import { StrapiCoreRegistries } from '../lib/core/registries/types';
 import { StrapiInterface } from './strapi';
-export interface Registry extends Record<string, Function> {}
+export interface Registry extends Record<string, Function | Promise> {}
 export interface StrapiRegistries extends StrapiCoreRegistries {}
 
 export type RegistryResolver<T extends Registry> = T | ((ctx: { strapi: Strapi }, args?: any) => T);

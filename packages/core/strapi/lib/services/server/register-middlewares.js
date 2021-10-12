@@ -5,7 +5,7 @@ const { yup } = require('@strapi/utils');
 const { resolveMiddlewares } = require('./middleware');
 
 /**
- * @typedef {import('../../').Strapi} Strapi
+ * @typedef {import('types').Strapi} Strapi
  * @typedef {Array<string|{name?: string, resolve?: string, config: any}>} MiddlewaresConfig
  * @typedef {Array<{name: string, hanlder: Function}>} Middlewares
  */
@@ -33,6 +33,7 @@ const requiredMiddlewares = [
 ];
 
 const middlewareConfigSchema = yup.array().of(
+  // @ts-ignore
   yup.lazy(value => {
     if (typeof value === 'string') {
       return yup.string().required();
@@ -49,7 +50,7 @@ const middlewareConfigSchema = yup.array().of(
         .noUnknown();
     }
 
-    return yup.test(() => false);
+    return yup.mixed().test(() => false);
   })
 );
 

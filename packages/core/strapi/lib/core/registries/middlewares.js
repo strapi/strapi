@@ -9,6 +9,9 @@ const { addNamespace, hasNamespace } = require('../utils');
 
 // TODO: move instantiation part here instead of in the server service
 const middlewaresRegistry = () => {
+  /**
+   * @type {Record<string, Middleware>}
+   */
   const middlewares = {};
 
   return {
@@ -31,8 +34,8 @@ const middlewaresRegistry = () => {
 
     /**
      * Returns a map with all the middlewares in a namespace
-     * @param {string} namespace
-     * @returns {{ [key: string]: Middleware }}
+     * @param {string=} namespace
+     * @returns {Record<string, Middleware>}
      */
     getAll(namespace) {
       return pickBy((_, uid) => hasNamespace(uid, namespace))(middlewares);
@@ -51,8 +54,7 @@ const middlewaresRegistry = () => {
     /**
      * Registers a map of middlewares for a specific namespace
      * @param {string} namespace
-     * @param {{ [key: string]: Middleware }} newMiddlewares
-     * @returns
+     * @param {Record<string, Middleware>} rawMiddlewares
      */
     add(namespace, rawMiddlewares) {
       for (const middlewareName in rawMiddlewares) {

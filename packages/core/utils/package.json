@@ -8,9 +8,11 @@
     "utils"
   ],
   "directories": {
-    "lib": "./lib"
+    "lib": "./lib",
+    "types": "./types"
   },
   "main": "./lib",
+  "types": "./types",
   "dependencies": {
     "@sindresorhus/slugify": "1.1.0",
     "date-fns": "2.24.0",

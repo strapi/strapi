@@ -32,6 +32,13 @@ const defaultConfig = {
   admin: {},
 };
 
+/**
+ * @param {string} dir
+ * @param {{
+ *  autoReload?: boolean
+ *  serveAdminPanel?: boolean
+ * }} initialConfig
+ */
 module.exports = (dir, initialConfig = {}) => {
   const { autoReload = false, serveAdminPanel = true } = initialConfig;
 
@@ -57,7 +64,7 @@ module.exports = (dir, initialConfig = {}) => {
 
   const baseConfig = omit('plugins', loadConfigDir(configDir)); // plugin config will be loaded later
 
-  const envDir = path.resolve(configDir, 'env', process.env.NODE_ENV);
+  const envDir = path.resolve(configDir, 'env', process.env.NODE_ENV || '');
   const envConfig = loadConfigDir(envDir);
 
   return _.merge(rootConfig, defaultConfig, baseConfig, envConfig);

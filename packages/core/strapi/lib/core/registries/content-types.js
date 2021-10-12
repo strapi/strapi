@@ -1,14 +1,12 @@
 'use strict';
 
-/**
- * @typedef {import('../../../types').StrapiContentTypes} StrapiContentTypes
- * @typedef {import('../../services/entity-service').EntityService} EntityService
- */
-
 const { pickBy, has } = require('lodash/fp');
 const { createContentType } = require('../domain/content-type');
 const { addNamespace, hasNamespace } = require('../utils');
 
+/**
+ * @param {any} contentTypes
+ */
 const validateKeySameToSingularName = contentTypes => {
   for (const ctName in contentTypes) {
     const contentType = contentTypes[ctName];
@@ -23,7 +21,7 @@ const validateKeySameToSingularName = contentTypes => {
 
 const contentTypesRegistry = () => {
   /**
-   * @type {StrapiContentTypes}
+   * @type {Record<string, any>}
    */
   const contentTypes = {};
 
@@ -40,7 +38,6 @@ const contentTypesRegistry = () => {
      * Returns the instance of a contentType. Instantiate the contentType if not already done
      *
      * @param {string} uid
-     * @return {Database['query']}
      */
     get(uid) {
       return contentTypes[uid];
@@ -49,7 +46,6 @@ const contentTypesRegistry = () => {
     /**
      * Returns a map with all the contentTypes in a namespace
      * @param {string=} namespace
-     * @returns {EntityService}
      */
     getAll(namespace) {
       return pickBy((_, uid) => hasNamespace(uid, namespace))(contentTypes);
@@ -86,7 +82,7 @@ const contentTypesRegistry = () => {
 
     /**
      * Wraps a contentType to extend it
-     * @param {string} uid
+     * @param {string} ctUID
      * @param {(contentType: any) => any} extendFn
      */
     extend(ctUID, extendFn) {

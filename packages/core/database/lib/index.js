@@ -42,7 +42,8 @@ class Database {
   }
 
   /**
-   * @param {keyof StrapiContentTypes} uid
+   * @template {keyof StrapiContentTypes} T
+   * @param {T} uid
    */
   query(uid) {
     if (!this.metadata.has(uid)) {
@@ -53,7 +54,8 @@ class Database {
   }
 
   /**
-   * @param {keyof StrapiContentTypes} uid
+   * @template {keyof StrapiContentTypes} T
+   * @param {T} uid
    */
   queryBuilder(uid) {
     return this.entityManager.createQueryBuilder(uid);

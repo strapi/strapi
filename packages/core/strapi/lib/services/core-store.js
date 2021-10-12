@@ -1,5 +1,10 @@
 'use strict';
 
+/**
+ * @typedef {import('types').CoreStore} CoreStore
+ * @typedef {import('@strapi/database').Database} Database
+ */
+
 const coreStoreModel = {
   uid: 'strapi::core-store',
   collectionName: 'strapi_core_store_settings',
@@ -22,7 +27,17 @@ const coreStoreModel = {
   },
 };
 
+/**
+ * @param {{ db: Database }} ctx
+ */
 const createCoreStore = ({ db }) => {
+  /**
+   * @template T
+   * @template P
+   * @param {T} defaultParams
+   * @param {P} params
+   * @return {T & P}
+   */
   const mergeParams = (defaultParams, params) => {
     return {
       ...defaultParams,
@@ -30,18 +45,10 @@ const createCoreStore = ({ db }) => {
     };
   };
 
-  const store = function(defaultParams = {}) {
-    return {
-      get: params => store.get(mergeParams(defaultParams, params)),
-      set: params => store.set(mergeParams(defaultParams, params)),
-      delete: params => store.delete(mergeParams(defaultParams, params)),
-    };
-  };
-
-  Object.assign(store, {
+  const storeImpl = {
     /**
      * Get value from the core store
-     * @param {any} params
+     * @param {Partial<CoreStore & { name: string }>} params
      */
     async get(params = {}) {
       const { key, type = 'core', environment, name, tag } = params;
@@ -80,7 +87,7 @@ const createCoreStore = ({ db }) => {
 
     /**
      * Set value in the core store
-     * @param {any} params
+     * @param {Partial<CoreStore & { name: string }>} params
      */
     async set(params = {}) {
       const { key, value, type, environment, name, tag } = params;
@@ -99,7 +106,7 @@ const createCoreStore = ({ db }) => {
         return db.query('strapi::core-store').update({
           where: { id: data.id },
           data: {
-            value: JSON.stringify(value) || value.toString(),
+            value: JSON.stringify(value) || `${value}`,
             type: typeof value,
           },
         });
@@ -108,7 +115,7 @@ const createCoreStore = ({ db }) => {
       return db.query('strapi::core-store').create({
         data: {
           ...where,
-          value: JSON.stringify(value) || value.toString(),
+          value: JSON.stringify(value) || `${value}`,
           type: typeof value,
         },
       });
@@ -116,7 +123,7 @@ const createCoreStore = ({ db }) => {
 
     /**
      * Deletes a value from the core store
-     * @param {any} params
+     * @param {Partial<CoreStore & { name: string }>} params
      */
     async delete(params = {}) {
       const { key, environment, type, name, tag } = params;
@@ -131,7 +138,30 @@ const createCoreStore = ({ db }) => {
 
       return db.query('strapi::core-store').delete({ where });
     },
-  });
+  };
+
+  const store = function(defaultParams = {}) {
+    return {
+      /**
+       * @param {Partial<CoreStore & { name: string }>} params
+       */
+      get: params => storeImpl.get(mergeParams(defaultParams, params)),
+
+      /**
+       * @param {Partial<CoreStore & { name: string }>} params
+       */
+      set: params => storeImpl.set(mergeParams(defaultParams, params)),
+
+      /**
+       * @param {Partial<CoreStore & { name: string }>} params
+       */
+      delete: params => storeImpl.delete(mergeParams(defaultParams, params)),
+    };
+  };
+
+  store.get = storeImpl.get;
+  store.set = storeImpl.set;
+  store.delete = storeImpl.delete;
 
   return store;
 };

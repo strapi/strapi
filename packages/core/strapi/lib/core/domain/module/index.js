@@ -1,12 +1,23 @@
 'use strict';
 
+/**
+ * @typedef {import('types').Strapi} Strapi
+ */
+
 const _ = require('lodash');
 const { removeNamespace } = require('../../utils');
 const { validateModule } = require('./validation');
 
+/**
+ * @param {string} uid
+ */
 const uidToPath = uid => uid.replace('::', '.');
 
-// Removes the namespace from a map with keys prefixed with a namespace
+/**
+ * Removes the namespace from a map with keys prefixed with a namespace
+ * @param {any} map
+ * @param {string} namespace
+ */
 const removeNamespacedKeys = (map, namespace) => {
   return _.mapKeys(map, (value, key) => removeNamespace(key, namespace));
 };
@@ -21,16 +32,25 @@ const defaultModule = {
   middlewares: {},
 };
 
+/**
+ * @param {string} namespace
+ * @param {any} rawModule
+ * @param {Strapi} strapi
+ */
 const createModule = (namespace, rawModule, strapi) => {
   _.defaults(rawModule, defaultModule);
 
   try {
     validateModule(rawModule);
-  } catch (e) {
+  } catch (/** @type {any} **/ e) {
     throw new Error(`strapi-server.js is invalid for '${namespace}'.\n${e.errors.join('\n')}`);
   }
 
+  /**
+   * @type {any}
+   */
   const called = {};
+
   return {
     async bootstrap() {
       if (called.bootstrap) {
@@ -62,9 +82,16 @@ const createModule = (namespace, rawModule, strapi) => {
       strapi.container.get('config').set(uidToPath(namespace), rawModule.config);
     },
     routes: rawModule.routes,
+    /**
+     * @param {string} path
+     * @param {any=} defaultValue
+     */
     config(path, defaultValue) {
       return strapi.container.get('config').get(`${uidToPath(namespace)}.${path}`, defaultValue);
     },
+    /**
+     * @param {string} ctName
+     */
     contentType(ctName) {
       return strapi.container.get('content-types').get(`${namespace}.${ctName}`);
     },
@@ -72,6 +99,9 @@ const createModule = (namespace, rawModule, strapi) => {
       const contentTypes = strapi.container.get('content-types').getAll(namespace);
       return removeNamespacedKeys(contentTypes, namespace);
     },
+    /**
+     * @param {string} serviceName
+     */
     service(serviceName) {
       return strapi.container.get('services').get(`${namespace}.${serviceName}`);
     },
@@ -79,6 +109,9 @@ const createModule = (namespace, rawModule, strapi) => {
       const services = strapi.container.get('services').getAll(namespace);
       return removeNamespacedKeys(services, namespace);
     },
+    /**
+     * @param {string} policyName
+     */
     policy(policyName) {
       return strapi.container.get('policies').get(`${namespace}.${policyName}`);
     },
@@ -86,6 +119,9 @@ const createModule = (namespace, rawModule, strapi) => {
       const policies = strapi.container.get('policies').getAll(namespace);
       return removeNamespacedKeys(policies, namespace);
     },
+    /**
+     * @param {string} middlewareName
+     */
     middleware(middlewareName) {
       return strapi.container.get('middlewares').get(`${namespace}.${middlewareName}`);
     },
@@ -93,6 +129,9 @@ const createModule = (namespace, rawModule, strapi) => {
       const middlewares = strapi.container.get('middlewares').getAll(namespace);
       return removeNamespacedKeys(middlewares, namespace);
     },
+    /**
+     * @param {string} controllerName
+     */
     controller(controllerName) {
       return strapi.container.get('controllers').get(`${namespace}.${controllerName}`);
     },

@@ -7,7 +7,7 @@ const _ = require('lodash');
  * @param {string} uid model uid
  * @param {object} entity entity created
  * @param {object} files files to upload
- * @returns {void}
+ * @returns {Promise<void>}
  */
 module.exports = async (uid, entity, files) => {
   const modelDef = strapi.getModel(uid);
@@ -18,6 +18,10 @@ module.exports = async (uid, entity, files) => {
 
   const uploadService = strapi.plugin('upload').service('upload');
 
+  /**
+   * @param {string[]} path
+   * @returns
+   */
   const findModelFromUploadPath = path => {
     if (path.length === 0) {
       return uid;
@@ -63,6 +67,10 @@ module.exports = async (uid, entity, files) => {
     return modelUID;
   };
 
+  /**
+   * @param {string} key
+   * @param {Record<string, any>} files
+   */
   const doUpload = async (key, files) => {
     const parts = key.split('.');
     const [path, field] = [_.initial(parts), _.last(parts)];

@@ -4,19 +4,25 @@ const { Job } = require('node-schedule');
 const { isFunction } = require('lodash/fp');
 
 const createCronService = () => {
+  /**
+   * @type {{job: Job, options: any}[]}
+   */
   let jobsSpecs = [];
 
   return {
+    /**
+     * @param {Record<string, Function | {task: Function, options: any}>} tasks
+     */
     add(tasks = {}) {
       for (const taskExpression in tasks) {
         const taskValue = tasks[taskExpression];
 
-        let fn;
+        let /** @type {Function} **/ fn;
         let options;
         if (isFunction(taskValue)) {
           fn = taskValue.bind(tasks);
           options = taskExpression;
-        } else if (isFunction(taskValue.task)) {
+        } else if (typeof taskValue === 'object' && isFunction(taskValue.task)) {
           fn = taskValue.task.bind(taskValue);
           options = taskValue.options;
         } else {
@@ -25,9 +31,12 @@ const createCronService = () => {
           );
         }
 
+        /**
+         * @param  {...any} args
+         */
         const fnWithStrapi = (...args) => fn({ strapi }, ...args);
 
-        const job = new Job(null, fnWithStrapi);
+        const job = new Job(() => null, fnWithStrapi);
         jobsSpecs.push({ job, options });
       }
       return this;

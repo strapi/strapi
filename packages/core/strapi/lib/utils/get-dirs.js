@@ -2,6 +2,9 @@
 
 const { join } = require('path');
 
+/**
+ * @param {string} root
+ */
 const getDirs = root => ({
   root,
   src: join(root, 'src'),

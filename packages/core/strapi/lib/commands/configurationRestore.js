@@ -1,28 +1,39 @@
 'use strict';
 
+/**
+ * @typedef {import('types').CoreStore} CoreStore
+ * @typedef {import('@strapi/database').Database} Database
+ */
+
 const fs = require('fs');
 const _ = require('lodash');
 const strapi = require('../index');
 
 /**
  * Will restore configurations. It reads from a file or stdin
- * @param {string} file filepath to use as input
- * @param {string} strategy import strategy. one of (replace, merge, keep, default: replace)
+ * @param {{
+ *  file: string
+ *  strategy: 'replace' | 'merge' | 'keep'
+ * }} context
  */
 module.exports = async function({ file: filePath, strategy = 'replace' }) {
-  const input = filePath ? fs.readFileSync(filePath) : await readStdin(process.stdin);
+  const input = filePath ? fs.readFileSync(filePath) : await readStdin();
 
   const app = await strapi().load();
 
   let dataToImport;
   try {
     dataToImport = JSON.parse(input);
-  } catch (error) {
+  } catch (/** @type {any} **/ error) {
     throw new Error(`Invalid input data: ${error.message}. Expected a valid JSON array.`);
   }
 
   if (!Array.isArray(dataToImport)) {
     throw new Error(`Invalid input data. Expected a valid JSON array.`);
+  }
+
+  if (!app.db) {
+    throw new Error(`Database not initialized. strapi.boostrap may not be called`);
   }
 
   const importer = createImporter(app.db, strategy);
@@ -61,6 +72,10 @@ const readStdin = () => {
   });
 };
 
+/**
+ * @param {Database} db
+ * @param {'replace' | 'merge' | 'keep'} strategy
+ */
 const createImporter = (db, strategy) => {
   switch (strategy) {
     case 'replace':
@@ -76,7 +91,7 @@ const createImporter = (db, strategy) => {
 
 /**
  * Replace importer. Will replace the keys that already exist and create the new ones
- * @param {Object} db - DatabaseManager instance
+ * @param {Database} db - DatabaseManager instance
  */
 const createReplaceImporter = db => {
   const stats = {
@@ -89,6 +104,9 @@ const createReplaceImporter = db => {
       return `${stats.created} created, ${stats.replaced} replaced`;
     },
 
+    /**
+     * @param {CoreStore} conf
+     */
     async import(conf) {
       const matching = await db.query('strapi::core-store').count({ where: { key: conf.key } });
       if (matching > 0) {
@@ -107,7 +125,7 @@ const createReplaceImporter = db => {
 
 /**
  * Merge importer. Will merge the keys that already exist with their new value and create the new ones
- * @param {Object} db - DatabaseManager instance
+ * @param {Database} db - DatabaseManager instance
  */
 const createMergeImporter = db => {
   const stats = {
@@ -120,6 +138,9 @@ const createMergeImporter = db => {
       return `${stats.created} created, ${stats.merged} merged`;
     },
 
+    /**
+     * @param {CoreStore} conf
+     */
     async import(conf) {
       const existingConf = await db
         .query('strapi::core-store')
@@ -141,7 +162,7 @@ const createMergeImporter = db => {
 
 /**
  * Merge importer. Will keep the keys that already exist without changing them and create the new ones
- * @param {Object} db - DatabaseManager instance
+ * @param {Database} db - DatabaseManager instance
  */
 const createKeepImporter = db => {
   const stats = {
@@ -154,6 +175,9 @@ const createKeepImporter = db => {
       return `${stats.created} created, ${stats.untouched} untouched`;
     },
 
+    /**
+     * @param {CoreStore} conf
+     */
     async import(conf) {
       const matching = await db.query('strapi::core-store').count({ where: { key: conf.key } });
       if (matching > 0) {

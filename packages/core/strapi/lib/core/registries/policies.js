@@ -4,11 +4,14 @@ const { pickBy, has } = require('lodash/fp');
 const { addNamespace, hasNamespace } = require('../utils');
 
 /**
- * @typedef {import('./policies').Policy} Policy
+ * @typedef {import('./types/policies').Policy} Policy
  */
 
 // TODO: move instantiation part here instead of in the policy utils
 const policiesRegistry = () => {
+  /**
+   * @type {Record<string, Policy>}
+   */
   const policies = {};
 
   return {
@@ -31,8 +34,8 @@ const policiesRegistry = () => {
 
     /**
      * Returns a map with all the policies in a namespace
-     * @param {string} namespace
-     * @returns {{ [key: string]: Policy }}
+     * @param {string=} namespace
+     * @returns {Record<string, Policy>}
      */
     getAll(namespace) {
       return pickBy((_, uid) => hasNamespace(uid, namespace))(policies);
@@ -51,8 +54,7 @@ const policiesRegistry = () => {
     /**
      * Registers a map of policies for a specific namespace
      * @param {string} namespace
-     * @param {{ [key: string]: Policy }} newPolicies
-     * @returns
+     * @param {Record<string, Policy>} newPolicies
      */
     add(namespace, newPolicies) {
       for (const policyName in newPolicies) {

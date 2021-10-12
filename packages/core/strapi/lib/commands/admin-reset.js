@@ -16,9 +16,9 @@ const promptQuestions = [
 
 /**
  * Reset user's password
- * @param {Object} cmdOptions - command options
- * @param {string} cmdOptions.email - user's email
- * @param {string} cmdOptions.password - user's new password
+ * @param {object} cmdOptions - command options
+ * @param {string=} cmdOptions.email - user's email
+ * @param {string=} cmdOptions.password - user's new password
  */
 module.exports = async function(cmdOptions = {}) {
   const { email, password } = cmdOptions;
@@ -41,6 +41,12 @@ module.exports = async function(cmdOptions = {}) {
   return changePassword({ email, password });
 };
 
+/**
+ * @param {{
+ *  email: string
+ *  password: string
+ * }} ctx
+ */
 async function changePassword({ email, password }) {
   const app = await strapi().load();
 

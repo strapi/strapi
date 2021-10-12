@@ -5,7 +5,7 @@
 
 const debug = require('debug')('strapi:webhook');
 const _ = require('lodash');
-const fetch = require('node-fetch');
+const fetch = require('node-fetch').default;
 
 const WorkerQueue = require('./worker-queue');
 
@@ -29,7 +29,7 @@ class WebhookRunner {
 
     this.config = _.merge(defaultConfiguration, configuration);
 
-    this.queue = new WorkerQueue({ logger, concurency: 5 });
+    this.queue = new WorkerQueue({ logger, concurrency: 5 });
     this.queue.subscribe(this.executeListener.bind(this));
   }
 
@@ -102,7 +102,7 @@ class WebhookRunner {
           message: await res.text(),
         };
       })
-      .catch(err => {
+      .catch((/** @type {any} **/ err) => {
         return {
           statusCode: 500,
           message: err.message,

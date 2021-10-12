@@ -2,7 +2,8 @@ import { StrapiContentTypes } from '@strapi/strapi';
 import { LifecycleProvider } from './lifecycles';
 import { MigrationProvider } from './migrations';
 import { SchemaProvideer } from './schema';
-
+import { Database } from '../lib/index';
+export { Database };
 export type BooleanWhere<T> = {
   $and?: WhereParams<T>[];
   $or?: WhereParams<T>[];
@@ -39,7 +40,11 @@ export interface FindParams<T> {
 export interface CreateParams<T> {
   select?: (keyof T)[];
   populate?: (keyof T)[];
-  data: T[keyof T];
+  data: T;
+}
+
+export interface UpdateParams<T> extends FindParams<T> {
+  data: Omit<Partial<T>, 'id'>;
 }
 
 export interface CreateManyParams<T> {
@@ -56,6 +61,11 @@ export interface Pagination {
 }
 
 export interface PopulateParams {}
+
+export type Entity<T> = T & {
+  id: string;
+};
+
 export interface EntityManager {
   findOne<K extends keyof StrapiContentTypes>(
     uid: K,
@@ -106,23 +116,31 @@ export interface EntityManager {
 }
 
 export interface QueryFromContentType<T extends keyof StrapiContentTypes> {
-  findOne(params: FindParams<StrapiContentTypes[T]>): Promise<any>;
-  findMany(params: FindParams<StrapiContentTypes[T]>): Promise<any[]>;
-  findWithCount(params: FindParams<StrapiContentTypes[T]>): Promise<[any[], number]>;
+  findOne(
+    params: FindParams<Entity<StrapiContentTypes[T]>>
+  ): Promise<Entity<StrapiContentTypes[T]> | undefined>;
+  findMany(
+    params?: FindParams<Entity<StrapiContentTypes[T]>>
+  ): Promise<Entity<StrapiContentTypes[T]>[]>;
+  findWithCount(
+    params: FindParams<Entity<StrapiContentTypes[T]>>
+  ): Promise<[Entity<StrapiContentTypes[T]>[], number]>;
   findPage(
-    params: FindParams<StrapiContentTypes[T]>
-  ): Promise<{ results: any[]; pagination: Pagination }>;
+    params: FindParams<Entity<StrapiContentTypes[T]>>
+  ): Promise<{ results: Entity<StrapiContentTypes[T]>[]; pagination: Pagination }>;
 
-  create(params: CreateParams<StrapiContentTypes[T]>): Promise<any>;
+  create(params: CreateParams<StrapiContentTypes[T]>): Promise<Entity<StrapiContentTypes[T]>>;
   createMany(params: CreateManyParams<StrapiContentTypes[T]>): Promise<{ count: number }>;
 
-  update(params: any): Promise<any>;
-  updateMany(params: any): Promise<{ count: number }>;
+  update(
+    params: UpdateParams<Entity<StrapiContentTypes[T]>>
+  ): Promise<Entity<StrapiContentTypes[T]>>;
+  updateMany(params: UpdateParams<Entity<StrapiContentTypes[T]>>): Promise<{ count: number }>;
 
-  delete(params: any): Promise<any>;
-  deleteMany(params: any): Promise<{ count: number }>;
+  delete(params: FindParams<Entity<StrapiContentTypes[T]>>): Promise<Entity<StrapiContentTypes[T]>>;
+  deleteMany(params: FindParams<Entity<StrapiContentTypes[T]>>): Promise<{ count: number }>;
 
-  count(params: any): Promise<number>;
+  count(params: FindParams<StrapiContentTypes[T]>): Promise<number>;
 
   attachRelations(id: ID, data: any): Promise<any>;
   updateRelations(id: ID, data: any): Promise<any>;
@@ -148,15 +166,13 @@ export interface DatabaseConfig {
   connection: ConnectionConfig;
   models: ModelConfig[];
 }
-export interface Database {
-  schema: SchemaProvideer;
-  lifecycles: LifecycleProvider;
-  migrations: MigrationProvider;
-  entityManager: EntityManager;
+// export class Database implements Database {
+//   schema: SchemaProvideer;
+//   lifecycles: LifecycleProvider;
+//   migrations: MigrationProvider;
+//   entityManager: EntityManager;
 
-  query<T extends keyof StrapiContentTypes>(uid: T): QueryFromContentType<T>;
-}
-export class Database implements Database {
-  static transformContentTypes(contentTypes: any[]): ModelConfig[];
-  static init(config: DatabaseConfig): Promise<Database>;
-}
+//   query<T extends keyof StrapiContentTypes>(uid: T): QueryFromContentType<T>;
+//   static transformContentTypes(contentTypes: any[]): ModelConfig[];
+//   static init(config: DatabaseConfig): Promise<Database>;
+// }

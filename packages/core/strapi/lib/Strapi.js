@@ -1,7 +1,15 @@
 'use strict';
 
 /**
- * @typedef {import('../types').StrapiContentTypes} StrapiContentTypes
+ * @typedef {import('types').StrapiContentTypes} StrapiContentTypes
+ * @typedef {import('types').StrapiComponents} StrapiComponents
+ * @typedef {import('types').StrapiServices} StrapiServices
+ * @typedef {import('types').StrapiControllers} StrapiControllers
+ * @typedef {import('types').StrapiPolicies} StrapiPolicies
+ * @typedef {import('types').StrapiMiddlewares} StrapiMiddlewares
+ * @typedef {import('types').StrapiPlugins} StrapiPlugins
+ * @typedef {import('types').StrapiHooks} StrapiHooks
+ * @typedef {import('types').StrapiApi} StrapiApi
  */
 
 const _ = require('lodash');
@@ -24,7 +32,7 @@ const createEntityService = require('./services/entity-service');
 const createCronService = require('./services/cron');
 const entityValidator = require('./services/entity-validator');
 const createTelemetry = require('./services/metrics');
-const createAuth = require('./services/auth');
+const createAuthentication = require('./services/auth');
 const createUpdateNotifier = require('./utils/update-notifier');
 const createStartupLogger = require('./utils/startup-logger');
 const ee = require('./utils/ee');
@@ -46,31 +54,47 @@ const { destroyOnSignal } = require('./utils/signals');
 const draftAndPublishSync = require('./migrations/draft-publish');
 
 const LIFECYCLES = {
+  /**
+   * @type {'register'}
+   */
   REGISTER: 'register',
+  /**
+   * @type {'bootstrap'}
+   */
   BOOTSTRAP: 'bootstrap',
+  /**
+   * @type {'destroy'}
+   */
   DESTROY: 'destroy',
 };
 
 class Strapi {
+  /**
+   * @param {{
+   *  dir?: string
+   *  autoReload?: boolean
+   *  serveAdminPanel?: boolean
+   * }} opts
+   */
   constructor(opts = {}) {
     destroyOnSignal(this);
     this.dirs = utils.getDirs(opts.dir || process.cwd());
     const appConfig = loadConfiguration(this.dirs.root, opts);
     this.container = createContainer(this);
     this.container.register('config', createConfigProvider(appConfig));
-    this.container.register('content-types', contentTypesRegistry(this));
+    this.container.register('content-types', contentTypesRegistry());
     this.container.register('services', servicesRegistry(this));
-    this.container.register('policies', policiesRegistry(this));
-    this.container.register('middlewares', middlewaresRegistry(this));
-    this.container.register('hooks', hooksRegistry(this));
-    this.container.register('controllers', controllersRegistry(this));
+    this.container.register('policies', policiesRegistry());
+    this.container.register('middlewares', middlewaresRegistry());
+    this.container.register('hooks', hooksRegistry());
+    this.container.register('controllers', controllersRegistry());
     this.container.register('modules', modulesRegistry(this));
     this.container.register('plugins', pluginsRegistry(this));
     this.container.register('apis', apisRegistry(this));
-    this.container.register('auth', createAuth(this));
+    this.container.register('auth', createAuthentication());
 
     this.isLoaded = false;
-    this.reload = this.reload();
+    // this.reload = this.reload();
     this.server = createServer(this);
 
     this.fs = createStrapiFs(this);
@@ -95,6 +119,10 @@ class Strapi {
     return this.container.get('services').getAll();
   }
 
+  /**
+   * @template {keyof StrapiServices} T
+   * @param {T} uid
+   */
   service(uid) {
     return this.container.get('services').get(uid);
   }
@@ -103,6 +131,10 @@ class Strapi {
     return this.container.get('controllers').getAll();
   }
 
+  /**
+   * @template {keyof StrapiControllers} T
+   * @param {T} uid
+   */
   controller(uid) {
     return this.container.get('controllers').get(uid);
   }
@@ -111,6 +143,10 @@ class Strapi {
     return this.container.get('content-types').getAll();
   }
 
+  /**
+   * @template {keyof StrapiContentTypes} T
+   * @param {T} name
+   */
   contentType(name) {
     return this.container.get('content-types').get(name);
   }
@@ -119,6 +155,10 @@ class Strapi {
     return this.container.get('policies').getAll();
   }
 
+  /**
+   * @template {keyof StrapiPolicies} T
+   * @param {T} name
+   */
   policy(name) {
     return this.container.get('policies').get(name);
   }
@@ -127,6 +167,10 @@ class Strapi {
     return this.container.get('middlewares').getAll();
   }
 
+  /**
+   * @template {keyof StrapiMiddlewares} T
+   * @param {T} name
+   */
   middleware(name) {
     return this.container.get('middlewares').get(name);
   }
@@ -135,6 +179,10 @@ class Strapi {
     return this.container.get('plugins').getAll();
   }
 
+  /**
+   * @template {keyof StrapiPlugins} T
+   * @param {T} name
+   */
   plugin(name) {
     return this.container.get('plugins').get(name);
   }
@@ -143,6 +191,10 @@ class Strapi {
     return this.container.get('hooks').getAll();
   }
 
+  /**
+   * @template {keyof StrapiHooks} T
+   * @param {T} name
+   */
   hook(name) {
     return this.container.get('hooks').get(name);
   }
@@ -168,8 +220,8 @@ class Strapi {
       await this.listen();
 
       return this;
-    } catch (error) {
-      return this.stopWithError(error);
+    } catch (/** @type {any} **/ error) {
+      this.stopWithError(error);
     }
   }
 
@@ -180,13 +232,14 @@ class Strapi {
 
     this.eventHub.removeAllListeners();
 
-    if (_.has(this, 'db')) {
+    if (_.has(this, 'db') && this.db) {
       await this.db.destroy();
     }
 
     this.telemetry.destroy();
     this.cron.destroy();
 
+    // @ts-ignore
     delete global.strapi;
   }
 
@@ -203,6 +256,9 @@ class Strapi {
     });
   }
 
+  /**
+   * @param {{ isInitialized: boolean }} ctx
+   */
   async openAdmin({ isInitialized }) {
     const shouldOpenAdmin =
       this.config.get('environment') === 'development' &&
@@ -229,6 +285,9 @@ class Strapi {
    */
   async listen() {
     return new Promise((resolve, reject) => {
+      /**
+       * @param {Error=} error
+       */
       const onListen = async error => {
         if (error) {
           return reject(error);
@@ -276,7 +335,10 @@ class Strapi {
   stop(exitCode = 1) {
     this.server.destroy();
 
-    if (this.config.get('autoReload')) {
+    // From nodejs: process.send is available only when an IPC channel
+    // has been established between the parent and child
+    // (i.e. when using child_process.fork())
+    if (this.config.get('autoReload') && typeof process.send === 'function') {
       process.send('stop');
     }
 
@@ -301,7 +363,15 @@ class Strapi {
   }
 
   async loadComponents() {
-    this.components = await loaders.loadComponents(this);
+    const components = await loaders.loadComponents(this);
+
+    Object.defineProperty(this, 'components', {
+      get() {
+        return components;
+      },
+      configurable: true,
+      enumerable: true,
+    });
   }
 
   async loadMiddlewares() {
@@ -309,7 +379,7 @@ class Strapi {
   }
 
   async loadApp() {
-    this.app = await loaders.loadSrcIndex(this);
+    this.app = loaders.loadSrcIndex(this);
   }
 
   registerInternalHooks() {
@@ -331,7 +401,7 @@ class Strapi {
       this.loadPolicies(),
     ]);
 
-    await bootstrap({ strapi: this });
+    bootstrap({ strapi: this });
 
     // init webhook runner
     this.webhookRunner = createWebhookRunner({
@@ -366,12 +436,14 @@ class Strapi {
     this.webhookStore = createWebhookStore({ db: this.db });
 
     this.entityValidator = entityValidator;
-    this.entityService = createEntityService({
+
+    const entityService = createEntityService({
       strapi: this,
       db: this.db,
       eventHub: this.eventHub,
       entityValidator: this.entityValidator,
     });
+    this.entityService = entityService;
 
     const cronTasks = this.config.get('server.cron.tasks', {});
     this.cron.add(cronTasks);
@@ -428,16 +500,24 @@ class Strapi {
   }
 
   async startWebhooks() {
+    if (!this.webhookStore || !this.webhookRunner) {
+      throw new Error(`Unable to start webhooks. strapi.boostrap may not be called`);
+    }
+
     const webhooks = await this.webhookStore.findWebhooks();
-    webhooks.forEach(webhook => this.webhookRunner.add(webhook));
+
+    for (const webhook of webhooks) {
+      this.webhookRunner.add(webhook);
+    }
   }
 
-  reload() {
+  get reload() {
     const state = {
       shouldReload: 0,
+      isWatching: false,
     };
 
-    const reload = function() {
+    const reload = () => {
       if (state.shouldReload > 0) {
         // Reset the reloading state
         state.shouldReload -= 1;
@@ -447,7 +527,13 @@ class Strapi {
 
       if (this.config.get('autoReload')) {
         this.destroy();
-        process.send('reload');
+
+        // From nodejs: process.send is available only when an IPC channel
+        // has been established between the parent and child
+        // (i.e. when using child_process.fork())
+        if (typeof process.send === 'function') {
+          process.send('stop');
+        }
       }
     };
 
@@ -472,6 +558,9 @@ class Strapi {
     return reload;
   }
 
+  /**
+   * @param {'bootstrap' | 'register' | 'destroy'} lifecycleName
+   */
   async runLifecyclesFunctions(lifecycleName) {
     // plugins
     await this.container.get('modules')[lifecycleName]();
@@ -489,20 +578,34 @@ class Strapi {
     }
   }
 
+  /**
+   * @template {keyof StrapiContentTypes | keyof StrapiComponents} T
+   * @param {T} uid
+   */
   getModel(uid) {
     return this.contentTypes[uid] || this.components[uid];
   }
 
   /**
-   * Binds queries with a specific model
-   *
-   * @param {keyof StrapiContentTypes} uid
+   * @template {keyof StrapiContentTypes} T
+   * @param {T} uid
    */
   query(uid) {
+    if (!this.db) {
+      throw new Error(`Database not initialized. strapi.boostrap may not be called`);
+    }
+
     return this.db.query(uid);
   }
 }
 
+/**
+ * @param {{
+ *  dir?: string
+ *  autoReload?: boolean
+ *  serveAdminPanel?: boolean
+ * }=} options
+ */
 module.exports = options => {
   const strapi = new Strapi(options);
   global.strapi = strapi;

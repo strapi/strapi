@@ -4,7 +4,7 @@
  * Module dependencies
  */
 
-const fetch = require('node-fetch');
+const fetch = require('node-fetch').default;
 const { machineIdSync } = require('node-machine-id');
 
 /*
@@ -15,7 +15,7 @@ const { machineIdSync } = require('node-machine-id');
 try {
   if (
     process.env.npm_config_global === 'true' ||
-    JSON.parse(process.env.npm_config_argv).original.includes('global')
+    JSON.parse(process.env.npm_config_argv || '{"original":{}}').original.includes('global')
   ) {
     fetch('https://analytics.strapi.io/track', {
       method: 'POST',

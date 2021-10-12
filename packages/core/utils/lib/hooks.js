@@ -1,14 +1,10 @@
 'use strict';
 
-const { eq, remove, cloneDeep } = require('lodash/fp');
-
 /**
- * @typedef Hook
- * @property {Array<Function>} _handlers - A registry of handler used by the hook
- * @property {function(Function):Hook} register - Register a new handler into the hook's registry
- * @property {function(Function):Hook} delete- Delete the given handler from the hook's registry
- * @property {Function} call - Not implemented by default, can be replaced by any implementation.
+ * @typedef {import('@strapi/strapi').Hook} Hook
  */
+
+const { eq, remove, cloneDeep } = require('lodash/fp');
 
 /**
  * Create a default Strapi hook

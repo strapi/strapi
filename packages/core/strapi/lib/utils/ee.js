@@ -1,5 +1,9 @@
 'use strict';
 
+/**
+ * @typedef {ReturnType<typeof import('@strapi/logger').createLogger>} Logger
+ */
+
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
@@ -7,20 +11,32 @@ const _ = require('lodash');
 
 const publicKey = fs.readFileSync(path.join(__dirname, '../utils/resources/key.pub'));
 
-const noop = () => {};
+const noop = () => null;
 
 const noLog = {
   warn: noop,
   info: noop,
 };
 
-const internals = {};
+const /** @type {any} */ internals = {};
+
 const features = {
+  /** @type {string[]} **/
   bronze: [],
+
+  /** @type {string[]} **/
   silver: [],
+
+  /** @type {string[]} **/
   gold: ['sso'],
 };
 
+/**
+ * @param {{
+ *  dir: string
+ *  logger: Logger | typeof noLog
+ * }} ctx
+ */
 module.exports = ({ dir, logger = noLog }) => {
   if (_.has(internals, 'isEE')) return internals.isEE;
 
@@ -78,6 +94,11 @@ module.exports = ({ dir, logger = noLog }) => {
 };
 
 Object.defineProperty(module.exports, 'licenseInfo', {
+  /**
+   * @returns {{
+   *   type: 'bronze' | 'silver' | 'gold'
+   * }}
+   */
   get() {
     mustHaveKey('licenseInfo');
     return internals.licenseInfo;
@@ -102,6 +123,9 @@ Object.defineProperty(module.exports, 'features', {
     const { type: licenseType } = module.exports.licenseInfo;
 
     return {
+      /**
+       * @param {string} feature
+       */
       isEnabled(feature) {
         return features[licenseType].includes(feature);
       },
@@ -114,6 +138,9 @@ Object.defineProperty(module.exports, 'features', {
   enumerable: false,
 });
 
+/**
+ * @param {string} key
+ */
 const mustHaveKey = key => {
   if (!_.has(internals, key)) {
     const err = new Error('Tampering with license');
