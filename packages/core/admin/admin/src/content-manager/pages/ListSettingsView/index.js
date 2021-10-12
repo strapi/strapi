@@ -1,302 +1,431 @@
-// import React, { memo, useContext, useMemo, useReducer, useState } from 'react';
-// import PropTypes from 'prop-types';
-// import { get, pick } from 'lodash';
-// import { useNotification, useTracking } from '@strapi/helper-plugin';
-// import { useIntl } from 'react-intl';
-// import { useDrop } from 'react-dnd';
-// import { DropdownItem } from 'reactstrap';
-// import { Inputs as Input } from '@buffetjs/custom';
-// import { axiosInstance } from '../../../core/utils';
-// import { checkIfAttributeIsDisplayable, ItemTypes, getRequestUrl, getTrad } from '../../utils';
-// import PopupForm from '../../components/PopupForm';
-// import SettingsViewWrapper from '../../components/SettingsViewWrapper';
-// import SortWrapper from '../../components/SortWrapper';
+import React, {
+  memo,
+  useContext,
+  // useMemo,
+  useReducer,
+  useState,
+} from 'react';
+import PropTypes from 'prop-types';
+import { useMutation } from 'react-query';
+import isEqual from 'lodash/isEqual';
+import upperFirst from 'lodash/upperFirst';
+import pick from 'lodash/pick';
+import { stringify } from 'qs';
+import { useNotification, useTracking, ConfirmDialog } from '@strapi/helper-plugin';
+import { useIntl } from 'react-intl';
+import { Box } from '@strapi/parts/Box';
+import { Divider } from '@strapi/parts/Divider';
+import { Layout, HeaderLayout, ContentLayout } from '@strapi/parts/Layout';
+import { Link } from '@strapi/parts/Link';
+import { Main } from '@strapi/parts/Main';
+import { Button } from '@strapi/parts/Button';
+import CheckIcon from '@strapi/icons/CheckIcon';
+import BackIcon from '@strapi/icons/BackIcon';
+import ModelsContext from '../../contexts/ModelsContext';
+import { usePluginsQueryParams } from '../../hooks';
+import putCMSettingsLV from './utils/api';
+import Settings from './components/Settings';
 // import LayoutDndProvider from '../../components/LayoutDndProvider';
-// import ModelsContext from '../../contexts/ModelsContext';
-// import Label from './Label';
-// import MenuDropdown from './MenuDropdown';
-// import DropdownButton from './DropdownButton';
-// import DragWrapper from './DragWrapper';
-// import Toggle from './Toggle';
-// import init from './init';
-// import reducer, { initialState } from './reducer';
-// import forms from './forms.json';
+import init from './init';
+import reducer, { initialState } from './reducer';
+import { EXCLUDED_SORT_OPTIONS } from './utils/excludedSortOptions';
 
-// const ListSettingsView = ({ layout, slug, updateLayout }) => {
-//   const toggleNotification = useNotification();
-//   const { refetchData } = useContext(ModelsContext);
-//   const [reducerState, dispatch] = useReducer(reducer, initialState, () =>
-//     init(initialState, layout)
-//   );
-//   const [isOpen, setIsOpen] = useState(false);
-//   const [isModalFormOpen, setIsModalFormOpen] = useState(false);
-//   const [isDraggingSibling, setIsDraggingSibling] = useState(false);
-//   const { formatMessage } = useIntl();
-//   const { trackUsage } = useTracking();
-//   const toggleModalForm = () => setIsModalFormOpen(prevState => !prevState);
-//   const { labelForm, labelToEdit, initialData, modifiedData } = reducerState;
-//   const attributes = useMemo(() => {
-//     return get(modifiedData, ['attributes'], {});
-//   }, [modifiedData]);
+const ListSettingsView = ({ layout, slug }) => {
+  const pluginsQueryParams = usePluginsQueryParams();
+  const toggleNotification = useNotification();
+  const { refetchData } = useContext(ModelsContext);
+  const [reducerState, dispatch] = useReducer(reducer, initialState, () =>
+    init(initialState, layout)
+  );
+  // const [isOpen, setIsOpen] = useState(false);
+  // const [isModalFormOpen, setIsModalFormOpen] = useState(false);
+  // const [isDraggingSibling, setIsDraggingSibling] = useState(false);
+  const { formatMessage } = useIntl();
+  const { trackUsage } = useTracking();
+  // const toggleModalForm = () => setIsModalFormOpen(prevState => !prevState);
+  const {
+    // labelForm,
+    // labelToEdit,
+    initialData,
+    modifiedData,
+  } = reducerState;
+  // const metadatas = get(modifiedData, ['metadatas'], {});
 
-//   const getName = useMemo(() => {
-//     return get(modifiedData, ['info', 'name'], '');
-//   }, [modifiedData]);
+  // const attributes = useMemo(() => {
+  //   return get(modifiedData, ['attributes'], {});
+  // }, [modifiedData]);
 
-//   const displayedFields = useMemo(() => {
-//     return get(modifiedData, ['layouts', 'list'], []);
-//   }, [modifiedData]);
+  const { attributes } = layout;
 
-//   const listRemainingFields = useMemo(() => {
-//     const metadatas = get(modifiedData, ['metadatas'], {});
+  // const displayedFields = useMemo(() => {
+  //   return get(modifiedData, ['layouts', 'list'], []);
+  // }, [modifiedData]);
 
-//     return Object.keys(metadatas)
-//       .filter(key => {
-//         return checkIfAttributeIsDisplayable(get(attributes, key, {}));
-//       })
-//       .filter(field => {
-//         return !displayedFields.includes(field);
-//       })
-//       .sort();
-//   }, [displayedFields, attributes, modifiedData]);
+  // const excludedSortOptions = ['media', 'richtext', 'dynamiczone', 'relation', 'component', 'json'];
 
-//   const handleClickEditLabel = labelToEdit => {
-//     dispatch({
-//       type: 'SET_LABEL_TO_EDIT',
-//       labelToEdit,
-//     });
-//     toggleModalForm();
-//   };
+  const sortOptions = Object.entries(attributes).reduce((acc, cur) => {
+    const [name, { type }] = cur;
 
-//   const handleClosed = () => {
-//     dispatch({
-//       type: 'UNSET_LABEL_TO_EDIT',
-//     });
-//   };
+    if (!EXCLUDED_SORT_OPTIONS.includes(type)) {
+      acc.push(name);
+    }
 
-//   const handleChange = ({ target: { name, value } }) => {
-//     dispatch({
-//       type: 'ON_CHANGE',
-//       keys: name,
-//       value: name === 'settings.pageSize' ? parseInt(value, 10) : value,
-//     });
-//   };
+    return acc;
+  }, []);
 
-//   const handleChangeEditLabel = ({ target: { name, value } }) => {
-//     dispatch({
-//       type: 'ON_CHANGE_LABEL_METAS',
-//       name,
-//       value,
-//     });
-//   };
+  // const listRemainingFields = useMemo(() => {
+  //   return Object.keys(metadatas)
+  //     .filter(key => {
+  //       return checkIfAttributeIsDisplayable(get(attributes, key, {}));
+  //     })
+  //     .filter(field => {
+  //       return !displayedFields.includes(field);
+  //     })
+  //     .sort();
+  // }, [displayedFields, attributes, metadatas]);
 
-//   const handleConfirm = async () => {
-//     try {
-//       const body = pick(modifiedData, ['layouts', 'settings', 'metadatas']);
+  // console.log(displayedFields, listRemainingFields);
 
-//       const {
-//         data: { data },
-//       } = await axiosInstance.put(
-//         getRequestUrl(`content-types/${slug}/configuration`),
+  // const handleClickEditLabel = labelToEdit => {
+  //   dispatch({
+  //     type: 'SET_LABEL_TO_EDIT',
+  //     labelToEdit,
+  //   });
+  //   toggleModalForm();
+  // };
 
-//         body
-//       );
+  // const handleClosed = () => {
+  //   dispatch({
+  //     type: 'UNSET_LABEL_TO_EDIT',
+  //   });
+  // };
 
-//       updateLayout(data);
+  const handleChange = ({ target: { name, value } }) => {
+    dispatch({
+      type: 'ON_CHANGE',
+      keys: name,
+      value: name === 'settings.pageSize' ? parseInt(value, 10) : value,
+    });
+  };
 
-//       dispatch({
-//         type: 'SUBMIT_SUCCEEDED',
-//       });
-//       trackUsage('didEditListSettings');
-//     } catch (err) {
-//       toggleNotification({
-//         type: 'warning',
-//         message: { id: 'notification.error' },
-//       });
-//     }
-//   };
+  const [showWarningSubmit, setWarningSubmit] = useState(false);
+  const toggleWarningSubmit = () => setWarningSubmit(prevState => !prevState);
 
-//   const move = (originalIndex, atIndex) => {
-//     dispatch({
-//       type: 'MOVE_FIELD',
-//       originalIndex,
-//       atIndex,
-//     });
-//   };
+  const handleSubmit = e => {
+    e.preventDefault();
+    toggleWarningSubmit();
+    trackUsage('willSaveContentTypeLayout');
+  };
 
-//   const [, drop] = useDrop({ accept: ItemTypes.FIELD });
+  const goBackUrl = () => {
+    const {
+      settings: { pageSize, defaultSortBy, defaultSortOrder },
+      kind,
+      uid,
+    } = initialData;
+    const sort = `${defaultSortBy}:${defaultSortOrder}`;
+    const goBackSearch = `${stringify(
+      {
+        page: 1,
+        pageSize,
+        sort,
+      },
+      { encode: false }
+    )}${pluginsQueryParams ? `&${pluginsQueryParams}` : ''}`;
 
-//   const renderForm = () => {
-//     const type = get(attributes, [labelToEdit, 'type'], 'text');
-//     const relationType = get(attributes, [labelToEdit, 'relationType']);
-//     let shouldDisplaySortToggle = !['media', 'relation'].includes(type);
-//     const label = formatMessage({ id: getTrad('form.Input.label') });
-//     const description = formatMessage({ id: getTrad('form.Input.label.inputDescription') });
+    return `/content-manager/${kind}/${uid}?${goBackSearch}`;
+  };
 
-//     if (['oneWay', 'oneToOne', 'manyToOne'].includes(relationType)) {
-//       shouldDisplaySortToggle = true;
-//     }
+  // const handleChangeEditLabel = ({ target: { name, value } }) => {
+  //   dispatch({
+  //     type: 'ON_CHANGE_LABEL_METAS',
+  //     name,
+  //     value,
+  //   });
+  // };
 
-//     return (
-//       <>
-//         <div className="col-6" style={{ marginBottom: 4 }}>
-//           <Input
-//             description={description}
-//             label={label}
-//             type="text"
-//             name="label"
-//             onBlur={() => {}}
-//             value={get(labelForm, 'label', '')}
-//             onChange={handleChangeEditLabel}
-//           />
-//         </div>
-//         {shouldDisplaySortToggle && (
-//           <div className="col-6" style={{ marginBottom: 4 }}>
-//             <Input
-//               label={formatMessage({ id: getTrad('form.Input.sort.field') })}
-//               type="bool"
-//               name="sortable"
-//               value={get(labelForm, 'sortable', false)}
-//               onChange={handleChangeEditLabel}
-//             />
-//           </div>
-//         )}
-//       </>
-//     );
-//   };
+  const handleConfirm = async () => {
+    const body = pick(modifiedData, ['layouts', 'settings', 'metadatas']);
+    submitMutation.mutateAsync(body);
+  };
 
-//   return (
-//     <LayoutDndProvider
-//       isDraggingSibling={isDraggingSibling}
-//       setIsDraggingSibling={setIsDraggingSibling}
-//     >
-//       <SettingsViewWrapper
-//         displayedFields={displayedFields}
-//         inputs={forms}
-//         isLoading={false}
-//         initialData={initialData}
-//         modifiedData={modifiedData}
-//         onChange={handleChange}
-//         onConfirmReset={() => {
-//           dispatch({
-//             type: 'ON_RESET',
-//           });
-//         }}
-//         onConfirmSubmit={handleConfirm}
-//         onModalConfirmClosed={refetchData}
-//         name={getName}
-//       >
-//         <DragWrapper>
-//           <div className="row">
-//             <div className="col-12">
-//               <SortWrapper
-//                 ref={drop}
-//                 style={{
-//                   display: 'flex',
-//                   width: '100%',
-//                 }}
-//               >
-//                 {displayedFields.map((item, index) => {
-//                   const label = get(modifiedData, ['metadatas', item, 'list', 'label'], '');
+  const submitMutation = useMutation(body => putCMSettingsLV(body, slug), {
+    onSuccess: async () => {
+      dispatch({
+        type: 'SUBMIT_SUCCEEDED',
+      });
+      trackUsage('didEditListSettings');
+      refetchData();
+    },
+    onError: () => {
+      toggleNotification({
+        type: 'warning',
+        message: { id: 'notification.error' },
+      });
+    },
+    refetchActive: true,
+  });
 
-//                   return (
-//                     <Label
-//                       count={displayedFields.length}
-//                       key={item}
-//                       index={index}
-//                       isDraggingSibling={isDraggingSibling}
-//                       label={label}
-//                       move={move}
-//                       name={item}
-//                       onClick={handleClickEditLabel}
-//                       onRemove={e => {
-//                         e.stopPropagation();
+  const { isLoading: isSubmittingForm } = submitMutation;
 
-//                         if (displayedFields.length === 1) {
-//                           toggleNotification({
-//                             type: 'info',
-//                             message: { id: getTrad('notification.info.minimumFields') },
-//                           });
-//                         } else {
-//                           dispatch({
-//                             type: 'REMOVE_FIELD',
-//                             index,
-//                           });
-//                         }
-//                       }}
-//                       selectedItem={labelToEdit}
-//                       setIsDraggingSibling={setIsDraggingSibling}
-//                     />
-//                   );
-//                 })}
-//               </SortWrapper>
-//             </div>
-//           </div>
-//           <DropdownButton
-//             isOpen={isOpen}
-//             toggle={() => {
-//               if (listRemainingFields.length > 0) {
-//                 setIsOpen(prevState => !prevState);
-//               }
-//             }}
-//             direction="down"
-//             style={{
-//               position: 'absolute',
-//               top: 11,
-//               right: 10,
-//             }}
-//           >
-//             <Toggle disabled={listRemainingFields.length === 0} />
-//             <MenuDropdown>
-//               {listRemainingFields.map(item => (
-//                 <DropdownItem
-//                   key={item}
-//                   onClick={() => {
-//                     dispatch({
-//                       type: 'ADD_FIELD',
-//                       item,
-//                     });
-//                   }}
-//                 >
-//                   {item}
-//                 </DropdownItem>
-//               ))}
-//             </MenuDropdown>
-//           </DropdownButton>
-//         </DragWrapper>
-//       </SettingsViewWrapper>
-//       <PopupForm
-//         headerId={getTrad('containers.ListSettingsView.modal-form.edit-label')}
-//         isOpen={isModalFormOpen}
-//         onClosed={handleClosed}
-//         onSubmit={e => {
-//           e.preventDefault();
-//           toggleModalForm();
-//           dispatch({
-//             type: 'SUBMIT_LABEL_FORM',
-//           });
-//         }}
-//         onToggle={toggleModalForm}
-//         renderForm={renderForm}
-//         subHeaderContent={labelToEdit}
-//         type={get(attributes, [labelToEdit, 'type'], 'text')}
-//       />
-//     </LayoutDndProvider>
-//   );
-// };
+  // const move = (originalIndex, atIndex) => {
+  //   dispatch({
+  //     type: 'MOVE_FIELD',
+  //     originalIndex,
+  //     atIndex,
+  //   });
+  // };
 
-// ListSettingsView.propTypes = {
-//   layout: PropTypes.shape({
-//     uid: PropTypes.string.isRequired,
-//     settings: PropTypes.object.isRequired,
-//     metadatas: PropTypes.object.isRequired,
-//     options: PropTypes.object.isRequired,
-//     attributes: PropTypes.object.isRequired,
-//   }).isRequired,
-//   slug: PropTypes.string.isRequired,
-//   updateLayout: PropTypes.func.isRequired,
-// };
+  // const [, drop] = useDrop({ accept: ItemTypes.FIELD });
 
-// export default memo(ListSettingsView);
+  // const renderForm = () => {
+  //   const type = get(attributes, [labelToEdit, 'type'], 'text');
+  //   const relationType = get(attributes, [labelToEdit, 'relationType']);
+  //   let shouldDisplaySortToggle = !['media', 'relation'].includes(type);
+  //   const label = formatMessage({ id: getTrad('form.Input.label') });
+  //   const description = formatMessage({ id: getTrad('form.Input.label.inputDescription') });
 
-export default () => 'TODO ListSettingsView';
+  //   if (['oneWay', 'oneToOne', 'manyToOne'].includes(relationType)) {
+  //     shouldDisplaySortToggle = true;
+  //   }
+
+  //   return (
+  //     <>
+  //       <div className="col-6" style={{ marginBottom: 4 }}>
+  //         <Input
+  //           description={description}
+  //           label={label}
+  //           type="text"
+  //           name="label"
+  //           onBlur={() => {}}
+  //           value={get(labelForm, 'label', '')}
+  //           onChange={handleChangeEditLabel}
+  //         />
+  //       </div>
+  //       {shouldDisplaySortToggle && (
+  //         <div className="col-6" style={{ marginBottom: 4 }}>
+  //           <Input
+  //             label={formatMessage({ id: getTrad('form.Input.sort.field') })}
+  //             type="bool"
+  //             name="sortable"
+  //             value={get(labelForm, 'sortable', false)}
+  //             onChange={handleChangeEditLabel}
+  //           />
+  //         </div>
+  //       )}
+  //     </>
+  //   );
+  // };
+
+  return (
+    <Layout>
+      <Main aria-busy={isSubmittingForm}>
+        <form onSubmit={handleSubmit}>
+          <HeaderLayout
+            navigationAction={
+              <Link startIcon={<BackIcon />} to={goBackUrl} id="go-back">
+                {formatMessage({ id: 'app.components.go-back', defaultMessage: 'Go back' })}
+              </Link>
+            }
+            primaryAction={
+              <Button
+                size="L"
+                startIcon={<CheckIcon />}
+                disabled={isEqual(modifiedData, initialData)}
+                type="submit"
+              >
+                {formatMessage({ id: 'form.button.save', defaultMessage: 'Save' })}
+              </Button>
+            }
+            subtitle={formatMessage({
+              id: `components.SettingsViewWrapper.pluginHeader.description.list-settings`,
+              defaultMessage: `Define the settings of the list view.`,
+            })}
+            title={formatMessage(
+              {
+                id: 'components.SettingsViewWrapper.pluginHeader.title',
+                defaultMessage: 'Configure the view - {name}',
+              },
+              { name: upperFirst(modifiedData.info.label) }
+            )}
+          />
+          <ContentLayout>
+            <Box
+              background="neutral0"
+              hasRadius
+              shadow="tableShadow"
+              paddingTop={6}
+              paddingBottom={6}
+              paddingLeft={7}
+              paddingRight={7}
+            >
+              <Settings
+                modifiedData={modifiedData}
+                onChange={handleChange}
+                sortOptions={sortOptions}
+              />
+              <Box padding={6}>
+                <Divider />
+              </Box>
+            </Box>
+          </ContentLayout>
+          <ConfirmDialog
+            bodyText={{
+              id: 'content-manager.popUpWarning.warning.updateAllSettings',
+              defaultMessage: 'This will modify all your settings',
+            }}
+            iconRightButton={<CheckIcon />}
+            isConfirmButtonLoading={isSubmittingForm}
+            isOpen={showWarningSubmit}
+            onToggleDialog={toggleWarningSubmit}
+            onConfirm={handleConfirm}
+            variantRightButton="success-light"
+          />
+        </form>
+      </Main>
+    </Layout>
+
+    //     <LayoutDndProvider
+    //       isDraggingSibling={isDraggingSibling}
+    //       setIsDraggingSibling={setIsDraggingSibling}
+    //     >
+    //       <SettingsViewWrapper
+    //         displayedFields={displayedFields}
+    //         inputs={forms}
+    //         isLoading={false}
+    //         initialData={initialData}
+    //         modifiedData={modifiedData}
+    //         onChange={handleChange}
+    //         onConfirmReset={() => {
+    //           dispatch({
+    //             type: 'ON_RESET',
+    //           });
+    //         }}
+    //         onConfirmSubmit={handleConfirm}
+    //         onModalConfirmClosed={refetchData}
+    //         name={getName}
+    //       >
+    //         <DragWrapper>
+    //           <div className="row">
+    //             <div className="col-12">
+    //               <SortWrapper
+    //                 ref={drop}
+    //                 style={{
+    //                   display: 'flex',
+    //                   width: '100%',
+    //                 }}
+    //               >
+    //                 {displayedFields.map((item, index) => {
+    //                   const label = get(modifiedData, ['metadatas', item, 'list', 'label'], '');
+
+    //                   return (
+    //                     <Label
+    //                       count={displayedFields.length}
+    //                       key={item}
+    //                       index={index}
+    //                       isDraggingSibling={isDraggingSibling}
+    //                       label={label}
+    //                       move={move}
+    //                       name={item}
+    //                       onClick={handleClickEditLabel}
+    //                       onRemove={e => {
+    //                         e.stopPropagation();
+
+    //                         if (displayedFields.length === 1) {
+    //                           toggleNotification({
+    //                             type: 'info',
+    //                             message: { id: getTrad('notification.info.minimumFields') },
+    //                           });
+    //                         } else {
+    //                           dispatch({
+    //                             type: 'REMOVE_FIELD',
+    //                             index,
+    //                           });
+    //                         }
+    //                       }}
+    //                       selectedItem={labelToEdit}
+    //                       setIsDraggingSibling={setIsDraggingSibling}
+    //                     />
+    //                   );
+    //                 })}
+    //               </SortWrapper>
+    //             </div>
+    //           </div>
+    //           <DropdownButton
+    //             isOpen={isOpen}
+    //             toggle={() => {
+    //               if (listRemainingFields.length > 0) {
+    //                 setIsOpen(prevState => !prevState);
+    //               }
+    //             }}
+    //             direction="down"
+    //             style={{
+    //               position: 'absolute',
+    //               top: 11,
+    //               right: 10,
+    //             }}
+    //           >
+    //             <Toggle disabled={listRemainingFields.length === 0} />
+    //             <MenuDropdown>
+    //               {listRemainingFields.map(item => (
+    //                 <DropdownItem
+    //                   key={item}
+    //                   onClick={() => {
+    //                     dispatch({
+    //                       type: 'ADD_FIELD',
+    //                       item,
+    //                     });
+    //                   }}
+    //                 >
+    //                   {item}
+    //                 </DropdownItem>
+    //               ))}
+    //             </MenuDropdown>
+    //           </DropdownButton>
+    //         </DragWrapper>
+    //       </SettingsViewWrapper>
+    //       <PopupForm
+    //         headerId={getTrad('containers.ListSettingsView.modal-form.edit-label')}
+    //         isOpen={isModalFormOpen}
+    //         onClosed={handleClosed}
+    //         onSubmit={e => {
+    //           e.preventDefault();
+    //           toggleModalForm();
+    //           dispatch({
+    //             type: 'SUBMIT_LABEL_FORM',
+    //           });
+    //         }}
+    //         onToggle={toggleModalForm}
+    //         renderForm={renderForm}
+    //         subHeaderContent={labelToEdit}
+    //         type={get(attributes, [labelToEdit, 'type'], 'text')}
+    //       />
+    //     </LayoutDndProvider>
+  );
+};
+
+ListSettingsView.propTypes = {
+  layout: PropTypes.shape({
+    uid: PropTypes.string.isRequired,
+    settings: PropTypes.shape({
+      bulkable: PropTypes.bool,
+      defaultSortBy: PropTypes.string,
+      defaultSortOrder: PropTypes.string,
+      filterable: PropTypes.bool,
+      pageSize: PropTypes.number,
+      searchable: PropTypes.bool,
+    }).isRequired,
+    metadatas: PropTypes.object.isRequired,
+    options: PropTypes.object.isRequired,
+    attributes: PropTypes.objectOf(
+      PropTypes.shape({
+        type: PropTypes.string,
+      })
+    ).isRequired,
+  }).isRequired,
+  slug: PropTypes.string.isRequired,
+};
+
+export default memo(ListSettingsView);
+
+// export default () => 'TODO ListSettingsView';
