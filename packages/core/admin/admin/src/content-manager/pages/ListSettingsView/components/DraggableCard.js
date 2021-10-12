@@ -105,7 +105,12 @@ const DraggableCard = ({ title, onRemoveField }) => {
           >
             <EditIcon />
           </ActionButton>
-          <ActionButton onClick={onRemoveField} aria-label={`delete ${title}`} type="button">
+          <ActionButton
+            onClick={onRemoveField}
+            aria-label={`delete ${title}`}
+            data-testId={`delete-${title}`}
+            type="button"
+          >
             <CloseAlertIcon />
           </ActionButton>
         </Row>

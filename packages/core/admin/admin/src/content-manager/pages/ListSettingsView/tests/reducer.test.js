@@ -22,12 +22,12 @@ describe('CONTENT MANAGER | CONTAINERS | ListSettingsView | reducer', () => {
   describe('ADD_FIELD', () => {
     it('should add a field to the layout correctly', () => {
       const expected = {
+        ...state,
         modifiedData: {
           layouts: {
             list: ['title'],
           },
         },
-        ...state,
       };
       const action = { type: 'ADD_FIELD', item: 'title' };
 

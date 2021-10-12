@@ -43,10 +43,19 @@ const layout = {
   info: {
     label: 'michka',
   },
-  uid: 'api::restaurant.restaurant',
-  settings: {},
-  metadatas: {},
+  metadatas: {
+    address: {},
+    averagePrice: {},
+    cover: {},
+    id: {},
+    since: {},
+  },
+  layouts: {
+    list: ['id', 'address'],
+  },
   options: {},
+  settings: {},
+  uid: 'api::restaurant.restaurant',
 };
 
 const makeApp = history => (
@@ -93,7 +102,8 @@ describe('ADMIN | CM | LV | Configure the view', () => {
       }
 
       .c62 {
-        padding: 24px;
+        padding-top: 24px;
+        padding-bottom: 24px;
       }
 
       .c21 {
@@ -243,6 +253,23 @@ describe('ADMIN | CM | LV | Configure the view', () => {
         padding-bottom: 24px;
       }
 
+      .c65 {
+        padding-top: 16px;
+        padding-right: 16px;
+        padding-left: 16px;
+        border-radius: 4px;
+        border-style: dashed;
+        border-width: 1px;
+        border-color: #c0c0cf;
+      }
+
+      .c72 {
+        background: #f6f6f9;
+        border-radius: 4px;
+        border-color: #eaeaef;
+        border: 1px solid #eaeaef;
+      }
+
       .c30 {
         display: -webkit-box;
         display: -webkit-flex;
@@ -262,6 +289,38 @@ describe('ADMIN | CM | LV | Configure the view', () => {
         -webkit-flex-wrap: wrap;
         -ms-flex-wrap: wrap;
         flex-wrap: wrap;
+      }
+
+      .c66 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c73 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: justify;
+        -webkit-justify-content: space-between;
+        -ms-flex-pack: justify;
+        justify-content: space-between;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
       }
 
       .c52 {
@@ -360,6 +419,25 @@ describe('ADMIN | CM | LV | Configure the view', () => {
         margin-top: 4px;
       }
 
+      .c83 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+      }
+
+      .c83 > * {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .c83 > * + * {
+        margin-top: 0px;
+      }
+
       .c51 {
         position: relative;
         border: 1px solid #dcdce4;
@@ -414,11 +492,46 @@ describe('ADMIN | CM | LV | Configure the view', () => {
         width: 100%;
       }
 
+      .c69 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c70 > * {
+        margin-left: 0;
+        margin-right: 0;
+      }
+
+      .c70 > * + * {
+        margin-left: 12px;
+      }
+
       .c28 {
         font-weight: 500;
         font-size: 1rem;
         line-height: 1.25;
         color: #32324d;
+      }
+
+      .c79 {
+        font-weight: 400;
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #32324d;
+      }
+
+      .c80 {
+        font-weight: 600;
+        line-height: 1.14;
       }
 
       .c35 {
@@ -744,6 +857,89 @@ describe('ADMIN | CM | LV | Configure the view', () => {
 
       .c31 {
         gap: 16px;
+      }
+
+      .c76 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        height: 32px;
+      }
+
+      .c76:last-child {
+        padding: 0 12px;
+      }
+
+      .c77 {
+        padding: 0 12px;
+        border-right: 1px solid #eaeaef;
+        cursor: all-scroll;
+      }
+
+      .c77 svg {
+        width: 0.75rem;
+        height: 0.75rem;
+      }
+
+      .c74 {
+        min-width: 12.5rem;
+        cursor: pointer;
+      }
+
+      .c74 svg {
+        width: 0.625rem;
+        height: 0.625rem;
+      }
+
+      .c74 svg path {
+        fill: #666687;
+      }
+
+      .c74:hover {
+        background-color: #f0f0ff;
+        border-color: #d9d8ff;
+      }
+
+      .c74:hover svg path {
+        fill: #4945ff;
+      }
+
+      .c74:hover .c78 {
+        color: #4945ff;
+      }
+
+      .c74:hover .c75 {
+        border-right: 1px solid #d9d8ff;
+      }
+
+      .c71:last-child {
+        padding-right: 12px;
+      }
+
+      .c67 {
+        -webkit-flex: 1;
+        -ms-flex: 1;
+        flex: 1;
+      }
+
+      .c81 {
+        -webkit-flex: auto;
+        -ms-flex: auto;
+        flex: auto;
+      }
+
+      .c68 {
+        overflow-x: scroll;
+        overflow-y: hidden;
+      }
+
+      .c82 {
+        max-width: 12.5rem;
       }
 
       @media (max-width:68.75rem) {
@@ -1316,6 +1512,300 @@ describe('ADMIN | CM | LV | Configure the view', () => {
                       class="c63 c64"
                     />
                   </div>
+                  <div
+                    class="c27"
+                  >
+                    <h2
+                      class="c28"
+                    >
+                      View
+                    </h2>
+                  </div>
+                  <div
+                    class="c65 c66"
+                  >
+                    <div
+                      class="c27 c67 c68"
+                      size="1"
+                    >
+                      <div
+                        class="c69 c70"
+                      >
+                        <div
+                          class="c71"
+                        >
+                          <div
+                            class="c72 c73 c74"
+                          >
+                            <div
+                              class="c69 c70"
+                            >
+                              <button
+                                aria-label="move id"
+                                class="c75 c76 c77"
+                                type="button"
+                              >
+                                <svg
+                                  fill="none"
+                                  height="1em"
+                                  viewBox="0 0 24 24"
+                                  width="1em"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    d="M16.563 5.587a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                    fill="#212134"
+                                  />
+                                  <path
+                                    d="M18.487 3.083c-.012.788-.487 1.513-1.229 1.797a1.954 1.954 0 01-2.184-.574A1.943 1.943 0 0114.9 2.11c.4-.684 1.2-1.066 1.981-.927a1.954 1.954 0 011.606 1.9c.011.748 1.17.748 1.158 0A3.138 3.138 0 0017.565.17c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.674 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.006zM16.563 14.372a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                    fill="#212134"
+                                  />
+                                  <path
+                                    d="M18.487 11.867c-.012.789-.487 1.513-1.229 1.797a1.954 1.954 0 01-2.184-.574 1.943 1.943 0 01-.174-2.196c.4-.684 1.2-1.066 1.981-.927.928.156 1.588.968 1.606 1.9.011.748 1.17.748 1.158 0a3.138 3.138 0 00-2.08-2.914c-1.176-.423-2.567-.029-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.675 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.005zM16.563 23.392a2.503 2.503 0 100-5.006 2.503 2.503 0 000 5.006z"
+                                    fill="#212134"
+                                  />
+                                  <path
+                                    d="M18.487 20.89c-.012.787-.487 1.512-1.229 1.796a1.954 1.954 0 01-2.184-.574 1.943 1.943 0 01-.174-2.196c.4-.684 1.2-1.066 1.981-.927.928.156 1.588.967 1.606 1.9.011.748 1.17.748 1.158 0a3.138 3.138 0 00-2.08-2.914c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.674 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.006zM7.378 5.622a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                    fill="#212134"
+                                  />
+                                  <path
+                                    d="M9.302 3.119c-.011.788-.486 1.512-1.228 1.796a1.954 1.954 0 01-2.185-.574 1.943 1.943 0 01-.173-2.196c.4-.684 1.199-1.066 1.981-.927a1.943 1.943 0 011.605 1.9c.012.748 1.17.748 1.16 0A3.138 3.138 0 008.38.205c-1.176-.423-2.567-.029-3.36.933-.83 1.002-.968 2.45-.285 3.575.678 1.124 1.994 1.675 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.159-.005zM7.378 14.406a2.503 2.503 0 100-5.006 2.503 2.503 0 000 5.006z"
+                                    fill="#212134"
+                                  />
+                                  <path
+                                    d="M9.302 11.902c-.011.788-.486 1.513-1.228 1.797a1.954 1.954 0 01-2.185-.574 1.943 1.943 0 01-.173-2.196c.4-.684 1.199-1.066 1.981-.927a1.943 1.943 0 011.605 1.9c.012.748 1.17.748 1.16 0A3.138 3.138 0 008.38 8.988c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.285 3.575.678 1.124 1.994 1.674 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.159-.006zM7.378 23.427a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                    fill="#212134"
+                                  />
+                                  <path
+                                    d="M9.302 20.924c-.011.788-.486 1.513-1.228 1.797a1.954 1.954 0 01-2.185-.574 1.943 1.943 0 01-.173-2.196c.4-.684 1.199-1.066 1.981-.927.933.156 1.594.967 1.605 1.9.012.748 1.17.748 1.16 0A3.139 3.139 0 008.38 18.01c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.285 3.569.678 1.124 1.994 1.675 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.747-1.147-.747-1.159 0z"
+                                    fill="#212134"
+                                  />
+                                </svg>
+                              </button>
+                              <span
+                                class="c78 c79 c80"
+                              >
+                                id
+                              </span>
+                            </div>
+                            <div
+                              class="c66"
+                            >
+                              <button
+                                aria-label="edit id"
+                                class="c76"
+                                type="button"
+                              >
+                                <svg
+                                  fill="none"
+                                  height="1em"
+                                  viewBox="0 0 24 24"
+                                  width="1em"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    clip-rule="evenodd"
+                                    d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
+                                    fill="#212134"
+                                    fill-rule="evenodd"
+                                  />
+                                </svg>
+                              </button>
+                              <button
+                                aria-label="delete id"
+                                class="c76"
+                                data-testid="delete-id"
+                                type="button"
+                              >
+                                <svg
+                                  fill="none"
+                                  height="1em"
+                                  viewBox="0 0 24 24"
+                                  width="1em"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
+                                    fill="#212134"
+                                  />
+                                </svg>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                        <div
+                          class="c71"
+                        >
+                          <div
+                            class="c72 c73 c74"
+                          >
+                            <div
+                              class="c69 c70"
+                            >
+                              <button
+                                aria-label="move address"
+                                class="c75 c76 c77"
+                                type="button"
+                              >
+                                <svg
+                                  fill="none"
+                                  height="1em"
+                                  viewBox="0 0 24 24"
+                                  width="1em"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    d="M16.563 5.587a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                    fill="#212134"
+                                  />
+                                  <path
+                                    d="M18.487 3.083c-.012.788-.487 1.513-1.229 1.797a1.954 1.954 0 01-2.184-.574A1.943 1.943 0 0114.9 2.11c.4-.684 1.2-1.066 1.981-.927a1.954 1.954 0 011.606 1.9c.011.748 1.17.748 1.158 0A3.138 3.138 0 0017.565.17c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.674 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.006zM16.563 14.372a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                    fill="#212134"
+                                  />
+                                  <path
+                                    d="M18.487 11.867c-.012.789-.487 1.513-1.229 1.797a1.954 1.954 0 01-2.184-.574 1.943 1.943 0 01-.174-2.196c.4-.684 1.2-1.066 1.981-.927.928.156 1.588.968 1.606 1.9.011.748 1.17.748 1.158 0a3.138 3.138 0 00-2.08-2.914c-1.176-.423-2.567-.029-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.675 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.005zM16.563 23.392a2.503 2.503 0 100-5.006 2.503 2.503 0 000 5.006z"
+                                    fill="#212134"
+                                  />
+                                  <path
+                                    d="M18.487 20.89c-.012.787-.487 1.512-1.229 1.796a1.954 1.954 0 01-2.184-.574 1.943 1.943 0 01-.174-2.196c.4-.684 1.2-1.066 1.981-.927.928.156 1.588.967 1.606 1.9.011.748 1.17.748 1.158 0a3.138 3.138 0 00-2.08-2.914c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.674 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.006zM7.378 5.622a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                    fill="#212134"
+                                  />
+                                  <path
+                                    d="M9.302 3.119c-.011.788-.486 1.512-1.228 1.796a1.954 1.954 0 01-2.185-.574 1.943 1.943 0 01-.173-2.196c.4-.684 1.199-1.066 1.981-.927a1.943 1.943 0 011.605 1.9c.012.748 1.17.748 1.16 0A3.138 3.138 0 008.38.205c-1.176-.423-2.567-.029-3.36.933-.83 1.002-.968 2.45-.285 3.575.678 1.124 1.994 1.675 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.159-.005zM7.378 14.406a2.503 2.503 0 100-5.006 2.503 2.503 0 000 5.006z"
+                                    fill="#212134"
+                                  />
+                                  <path
+                                    d="M9.302 11.902c-.011.788-.486 1.513-1.228 1.797a1.954 1.954 0 01-2.185-.574 1.943 1.943 0 01-.173-2.196c.4-.684 1.199-1.066 1.981-.927a1.943 1.943 0 011.605 1.9c.012.748 1.17.748 1.16 0A3.138 3.138 0 008.38 8.988c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.285 3.575.678 1.124 1.994 1.674 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.159-.006zM7.378 23.427a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                    fill="#212134"
+                                  />
+                                  <path
+                                    d="M9.302 20.924c-.011.788-.486 1.513-1.228 1.797a1.954 1.954 0 01-2.185-.574 1.943 1.943 0 01-.173-2.196c.4-.684 1.199-1.066 1.981-.927.933.156 1.594.967 1.605 1.9.012.748 1.17.748 1.16 0A3.139 3.139 0 008.38 18.01c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.285 3.569.678 1.124 1.994 1.675 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.747-1.147-.747-1.159 0z"
+                                    fill="#212134"
+                                  />
+                                </svg>
+                              </button>
+                              <span
+                                class="c78 c79 c80"
+                              >
+                                address
+                              </span>
+                            </div>
+                            <div
+                              class="c66"
+                            >
+                              <button
+                                aria-label="edit address"
+                                class="c76"
+                                type="button"
+                              >
+                                <svg
+                                  fill="none"
+                                  height="1em"
+                                  viewBox="0 0 24 24"
+                                  width="1em"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    clip-rule="evenodd"
+                                    d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
+                                    fill="#212134"
+                                    fill-rule="evenodd"
+                                  />
+                                </svg>
+                              </button>
+                              <button
+                                aria-label="delete address"
+                                class="c76"
+                                data-testid="delete-address"
+                                type="button"
+                              >
+                                <svg
+                                  fill="none"
+                                  height="1em"
+                                  viewBox="0 0 24 24"
+                                  width="1em"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
+                                    fill="#212134"
+                                  />
+                                </svg>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      class="c27 c81 c82"
+                    >
+                      <div>
+                        <div
+                          class="c83"
+                        >
+                          <div
+                            class="c50 c51"
+                          >
+                            <button
+                              aria-disabled="false"
+                              aria-expanded="false"
+                              aria-haspopup="listbox"
+                              aria-labelledby="select-4-label select-4-content"
+                              class="c52"
+                              data-testid="select-fields"
+                              id="select-4"
+                              type="button"
+                            />
+                            <div
+                              class="c53 c54"
+                            >
+                              <div
+                                class="c50"
+                              >
+                                <div
+                                  class="c55"
+                                >
+                                  <span
+                                    class="c56"
+                                    id="select-4-content"
+                                  >
+                                    Add a field
+                                  </span>
+                                </div>
+                              </div>
+                              <div
+                                class="c50"
+                              >
+                                
+                                <button
+                                  aria-hidden="true"
+                                  class="c57 c58 c59"
+                                  tabindex="-1"
+                                  type="button"
+                                >
+                                  <svg
+                                    fill="none"
+                                    height="1em"
+                                    viewBox="0 0 14 8"
+                                    width="1em"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  >
+                                    <path
+                                      clip-rule="evenodd"
+                                      d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                                      fill="#32324D"
+                                      fill-rule="evenodd"
+                                    />
+                                  </svg>
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </form>
@@ -1341,5 +1831,36 @@ describe('ADMIN | CM | LV | Configure the view', () => {
     expect(history.location.search).toEqual(
       '?page=1&sort=undefined:undefined&plugins[i18n][locale]=fr'
     );
+  });
+
+  it('should show remaining fields in select fields', async () => {
+    const history = createMemoryHistory();
+    history.push('/content-manager');
+
+    render(makeApp(history), { container: document.body });
+
+    await waitFor(() => {
+      expect(screen.getByText('Configure the view - Michka')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId('select-fields'));
+    // TO DO
+    // await waitFor(() => expect(screen.getByText('cover')).toBeInTheDocument());
+  });
+
+  it('should delete field', async () => {
+    const history = createMemoryHistory();
+    history.push('/content-manager');
+
+    const { queryByTestId } = render(makeApp(history));
+    await waitFor(() => {
+      expect(screen.getByText('Configure the view - Michka')).toBeInTheDocument();
+    });
+
+    expect(queryByTestId('delete-id')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('delete-id'));
+
+    expect(queryByTestId('delete-id')).not.toBeInTheDocument();
   });
 });

@@ -344,9 +344,10 @@ const ListSettingsView = ({ layout, slug }) => {
                     onChange={e => handleAddField(e)}
                     value=""
                     placeholder="Add a field"
+                    data-testid="select-fields"
                   >
                     {listRemainingFields.map(field => (
-                      <Option value={field} key={field}>
+                      <Option id={field} value={field} key={field}>
                         {field}
                       </Option>
                     ))}
