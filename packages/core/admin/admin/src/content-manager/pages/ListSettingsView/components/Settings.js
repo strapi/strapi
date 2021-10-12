@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { get } from 'lodash';
+import get from 'lodash/get';
 import { useIntl } from 'react-intl';
 import { Row } from '@strapi/parts/Row';
 import { Grid, GridItem } from '@strapi/parts/Grid';
@@ -99,7 +99,7 @@ const Settings = ({ modifiedData, onChange, sortOptions }) => {
               defaultMessage:
                 'Note: You can override this value in the Collection Type settings page.',
             })}
-            onChange={e => onChange({ target: { name: 'settings.pageSize', value: e } })}
+            onChange={value => onChange({ target: { name: 'settings.pageSize', value } })}
             name="settings.pageSize"
             value={get(modifiedData, 'settings.pageSize', '')}
           >
@@ -116,7 +116,7 @@ const Settings = ({ modifiedData, onChange, sortOptions }) => {
               id: 'content-manager.form.Input.defaultSort',
               defaultMessage: 'Default sort attribute',
             })}
-            onChange={e => onChange({ target: { name: 'settings.defaultSortBy', value: e } })}
+            onChange={value => onChange({ target: { name: 'settings.defaultSortBy', value } })}
             name="settings.defaultSortBy"
             value={get(modifiedData, 'settings.defaultSortBy', '')}
           >
@@ -133,7 +133,7 @@ const Settings = ({ modifiedData, onChange, sortOptions }) => {
               id: 'content-manager.form.Input.sort.order',
               defaultMessage: 'Default sort order',
             })}
-            onChange={e => onChange({ target: { name: 'settings.defaultSortOrder', value: e } })}
+            onChange={value => onChange({ target: { name: 'settings.defaultSortOrder', value } })}
             name="settings.defaultSortOrder"
             value={get(modifiedData, 'settings.defaultSortOrder', '')}
           >

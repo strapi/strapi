@@ -7,7 +7,9 @@ import React, {
 } from 'react';
 import PropTypes from 'prop-types';
 import { useMutation } from 'react-query';
-import { isEqual, upperFirst, pick } from 'lodash';
+import isEqual from 'lodash/isEqual';
+import upperFirst from 'lodash/upperFirst';
+import pick from 'lodash/pick';
 import { stringify } from 'qs';
 import { useNotification, useTracking, ConfirmDialog } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
@@ -26,8 +28,9 @@ import Settings from './components/Settings';
 // import LayoutDndProvider from '../../components/LayoutDndProvider';
 import init from './init';
 import reducer, { initialState } from './reducer';
+import { EXCLUDED_SORT_OPTIONS } from './utils/excludedSortOptions';
 
-const ListSettingsView = ({ layout, slug, updateLayout }) => {
+const ListSettingsView = ({ layout, slug }) => {
   const pluginsQueryParams = usePluginsQueryParams();
   const toggleNotification = useNotification();
   const { refetchData } = useContext(ModelsContext);
@@ -58,12 +61,12 @@ const ListSettingsView = ({ layout, slug, updateLayout }) => {
   //   return get(modifiedData, ['layouts', 'list'], []);
   // }, [modifiedData]);
 
-  const excludedSortOptions = ['media', 'richtext', 'dynamiczone', 'relation', 'component', 'json'];
+  // const excludedSortOptions = ['media', 'richtext', 'dynamiczone', 'relation', 'component', 'json'];
 
   const sortOptions = Object.entries(attributes).reduce((acc, cur) => {
     const [name, { type }] = cur;
 
-    if (!excludedSortOptions.includes(type)) {
+    if (!EXCLUDED_SORT_OPTIONS.includes(type)) {
       acc.push(name);
     }
 
@@ -119,7 +122,7 @@ const ListSettingsView = ({ layout, slug, updateLayout }) => {
       settings: { pageSize, defaultSortBy, defaultSortOrder },
       kind,
       uid,
-    } = modifiedData;
+    } = initialData;
     const sort = `${defaultSortBy}:${defaultSortOrder}`;
     const goBackSearch = `${stringify(
       {
@@ -147,9 +150,7 @@ const ListSettingsView = ({ layout, slug, updateLayout }) => {
   };
 
   const submitMutation = useMutation(body => putCMSettingsLV(body, slug), {
-    onSuccess: async ({ data: { data } }) => {
-      updateLayout(data);
-
+    onSuccess: async () => {
       dispatch({
         type: 'SUBMIT_SUCCEEDED',
       });
@@ -406,13 +407,23 @@ const ListSettingsView = ({ layout, slug, updateLayout }) => {
 ListSettingsView.propTypes = {
   layout: PropTypes.shape({
     uid: PropTypes.string.isRequired,
-    settings: PropTypes.object.isRequired,
+    settings: PropTypes.shape({
+      bulkable: PropTypes.bool,
+      defaultSortBy: PropTypes.string,
+      defaultSortOrder: PropTypes.string,
+      filterable: PropTypes.bool,
+      pageSize: PropTypes.number,
+      searchable: PropTypes.bool,
+    }).isRequired,
     metadatas: PropTypes.object.isRequired,
     options: PropTypes.object.isRequired,
-    attributes: PropTypes.object.isRequired,
+    attributes: PropTypes.objectOf(
+      PropTypes.shape({
+        type: PropTypes.string,
+      })
+    ).isRequired,
   }).isRequired,
   slug: PropTypes.string.isRequired,
-  updateLayout: PropTypes.func.isRequired,
 };
 
 export default memo(ListSettingsView);
