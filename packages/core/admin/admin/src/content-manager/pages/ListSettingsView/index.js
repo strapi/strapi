@@ -1,52 +1,68 @@
-import React, {
-  memo,
-  useContext,
-  // useMemo,
-  useReducer,
-  useState,
-} from 'react';
+import React, { memo, useContext, useMemo, useReducer, useState } from 'react';
 import PropTypes from 'prop-types';
+import styled from 'styled-components';
 import { useMutation } from 'react-query';
-import { isEqual, upperFirst, pick } from 'lodash';
+import { isEqual, upperFirst, pick, get } from 'lodash';
 import { stringify } from 'qs';
 import { useNotification, useTracking, ConfirmDialog } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { Box } from '@strapi/parts/Box';
+import { Row } from '@strapi/parts/Row';
+import { Stack } from '@strapi/parts/Stack';
 import { Divider } from '@strapi/parts/Divider';
 import { Layout, HeaderLayout, ContentLayout } from '@strapi/parts/Layout';
 import { Link } from '@strapi/parts/Link';
 import { Main } from '@strapi/parts/Main';
+import { H3 } from '@strapi/parts/Text';
+import { Select, Option } from '@strapi/parts/Select';
 import { Button } from '@strapi/parts/Button';
 import CheckIcon from '@strapi/icons/CheckIcon';
 import BackIcon from '@strapi/icons/BackIcon';
+// import LayoutDndProvider from '../../components/LayoutDndProvider';
+import { checkIfAttributeIsDisplayable, getTrad } from '../../utils';
 import ModelsContext from '../../contexts/ModelsContext';
 import { usePluginsQueryParams } from '../../hooks';
 import putCMSettingsLV from './utils/api';
 import Settings from './components/Settings';
-// import LayoutDndProvider from '../../components/LayoutDndProvider';
+import DraggableCard from './components/DraggableCard';
 import init from './init';
 import reducer, { initialState } from './reducer';
 
+const Flex = styled(Box)`
+  flex: ${({ size }) => size};
+`;
+
+const ScrollableContainer = styled(Flex)`
+  overflow-x: scroll;
+  overflow-y: hidden;
+`;
+
+const SelectContainer = styled(Flex)`
+  max-width: ${200 / 16}rem;
+`;
+
 const ListSettingsView = ({ layout, slug, updateLayout }) => {
+  const { formatMessage } = useIntl();
+  const { trackUsage } = useTracking();
   const pluginsQueryParams = usePluginsQueryParams();
   const toggleNotification = useNotification();
   const { refetchData } = useContext(ModelsContext);
+  const [showWarningSubmit, setWarningSubmit] = useState(false);
+  const toggleWarningSubmit = () => setWarningSubmit(prevState => !prevState);
   const [reducerState, dispatch] = useReducer(reducer, initialState, () =>
     init(initialState, layout)
   );
   // const [isOpen, setIsOpen] = useState(false);
   // const [isModalFormOpen, setIsModalFormOpen] = useState(false);
   // const [isDraggingSibling, setIsDraggingSibling] = useState(false);
-  const { formatMessage } = useIntl();
-  const { trackUsage } = useTracking();
   // const toggleModalForm = () => setIsModalFormOpen(prevState => !prevState);
+
   const {
     // labelForm,
     // labelToEdit,
     initialData,
     modifiedData,
   } = reducerState;
-  // const metadatas = get(modifiedData, ['metadatas'], {});
 
   // const attributes = useMemo(() => {
   //   return get(modifiedData, ['attributes'], {});
@@ -54,65 +70,11 @@ const ListSettingsView = ({ layout, slug, updateLayout }) => {
 
   const { attributes } = layout;
 
-  // const displayedFields = useMemo(() => {
-  //   return get(modifiedData, ['layouts', 'list'], []);
-  // }, [modifiedData]);
+  const displayedFields = useMemo(() => {
+    return get(modifiedData, ['layouts', 'list'], []);
+  }, [modifiedData]);
 
   const excludedSortOptions = ['media', 'richtext', 'dynamiczone', 'relation', 'component', 'json'];
-
-  const sortOptions = Object.entries(attributes).reduce((acc, cur) => {
-    const [name, { type }] = cur;
-
-    if (!excludedSortOptions.includes(type)) {
-      acc.push(name);
-    }
-
-    return acc;
-  }, []);
-
-  // const listRemainingFields = useMemo(() => {
-  //   return Object.keys(metadatas)
-  //     .filter(key => {
-  //       return checkIfAttributeIsDisplayable(get(attributes, key, {}));
-  //     })
-  //     .filter(field => {
-  //       return !displayedFields.includes(field);
-  //     })
-  //     .sort();
-  // }, [displayedFields, attributes, metadatas]);
-
-  // console.log(displayedFields, listRemainingFields);
-
-  // const handleClickEditLabel = labelToEdit => {
-  //   dispatch({
-  //     type: 'SET_LABEL_TO_EDIT',
-  //     labelToEdit,
-  //   });
-  //   toggleModalForm();
-  // };
-
-  // const handleClosed = () => {
-  //   dispatch({
-  //     type: 'UNSET_LABEL_TO_EDIT',
-  //   });
-  // };
-
-  const handleChange = ({ target: { name, value } }) => {
-    dispatch({
-      type: 'ON_CHANGE',
-      keys: name,
-      value: name === 'settings.pageSize' ? parseInt(value, 10) : value,
-    });
-  };
-
-  const [showWarningSubmit, setWarningSubmit] = useState(false);
-  const toggleWarningSubmit = () => setWarningSubmit(prevState => !prevState);
-
-  const handleSubmit = e => {
-    e.preventDefault();
-    toggleWarningSubmit();
-    trackUsage('willSaveContentTypeLayout');
-  };
 
   const goBackUrl = () => {
     const {
@@ -133,18 +95,58 @@ const ListSettingsView = ({ layout, slug, updateLayout }) => {
     return `/content-manager/${kind}/${uid}?${goBackSearch}`;
   };
 
-  // const handleChangeEditLabel = ({ target: { name, value } }) => {
-  //   dispatch({
-  //     type: 'ON_CHANGE_LABEL_METAS',
-  //     name,
-  //     value,
-  //   });
-  // };
+  const handleChange = ({ target: { name, value } }) => {
+    dispatch({
+      type: 'ON_CHANGE',
+      keys: name,
+      value: name === 'settings.pageSize' ? parseInt(value, 10) : value,
+    });
+    console.log('here');
+  };
 
   const handleConfirm = async () => {
     const body = pick(modifiedData, ['layouts', 'settings', 'metadatas']);
     submitMutation.mutateAsync(body);
   };
+
+  const handleAddField = item => {
+    dispatch({
+      type: 'ADD_FIELD',
+      item,
+    });
+  };
+
+  const handleRemoveField = (e, index) => {
+    e.stopPropagation();
+
+    if (displayedFields.length === 1) {
+      toggleNotification({
+        type: 'info',
+        message: { id: getTrad('notification.info.minimumFields') },
+      });
+    } else {
+      dispatch({
+        type: 'REMOVE_FIELD',
+        index,
+      });
+    }
+  };
+
+  const handleSubmit = e => {
+    e.preventDefault();
+    toggleWarningSubmit();
+    trackUsage('willSaveContentTypeLayout');
+  };
+
+  const sortOptions = Object.entries(attributes).reduce((acc, cur) => {
+    const [name, { type }] = cur;
+
+    if (!excludedSortOptions.includes(type)) {
+      acc.push(name);
+    }
+
+    return acc;
+  }, []);
 
   const submitMutation = useMutation(body => putCMSettingsLV(body, slug), {
     onSuccess: async ({ data: { data } }) => {
@@ -164,8 +166,41 @@ const ListSettingsView = ({ layout, slug, updateLayout }) => {
     },
     refetchActive: true,
   });
-
   const { isLoading: isSubmittingForm } = submitMutation;
+
+  const metadatas = get(modifiedData, ['metadatas'], {});
+  const listRemainingFields = useMemo(() => {
+    return Object.keys(metadatas)
+      .filter(key => {
+        return checkIfAttributeIsDisplayable(get(attributes, key, {}));
+      })
+      .filter(field => {
+        return !displayedFields.includes(field);
+      })
+      .sort();
+  }, [displayedFields, attributes, metadatas]);
+
+  // const handleClickEditLabel = labelToEdit => {
+  //   dispatch({
+  //     type: 'SET_LABEL_TO_EDIT',
+  //     labelToEdit,
+  //   });
+  //   toggleModalForm();
+  // };
+
+  // const handleClosed = () => {
+  //   dispatch({
+  //     type: 'UNSET_LABEL_TO_EDIT',
+  //   });
+  // };
+
+  // const handleChangeEditLabel = ({ target: { name, value } }) => {
+  //   dispatch({
+  //     type: 'ON_CHANGE_LABEL_METAS',
+  //     name,
+  //     value,
+  //   });
+  // };
 
   // const move = (originalIndex, atIndex) => {
   //   dispatch({
@@ -263,9 +298,47 @@ const ListSettingsView = ({ layout, slug, updateLayout }) => {
                 onChange={handleChange}
                 sortOptions={sortOptions}
               />
-              <Box padding={6}>
+              <Box paddingTop={6} paddingBottom={6}>
                 <Divider />
               </Box>
+              <Box paddingBottom={4}>
+                <H3 as="h2">
+                  {formatMessage({
+                    id: 'content-manager.containers.SettingPage.view',
+                    defaultMessage: 'View',
+                  })}
+                </H3>
+              </Box>
+              <Row
+                paddingTop={4}
+                paddingLeft={4}
+                paddingRight={4}
+                borderColor="neutral300"
+                borderStyle="dashed"
+                borderWidth="1px"
+                hasRadius
+              >
+                <ScrollableContainer size="1" paddingBottom={4}>
+                  <Stack horizontal size={3}>
+                    {displayedFields.map((field, index) => (
+                      <DraggableCard
+                        onRemoveField={e => handleRemoveField(e, index)}
+                        key={field}
+                        title={field}
+                      />
+                    ))}
+                  </Stack>
+                </ScrollableContainer>
+                <SelectContainer size="auto" paddingBottom={4}>
+                  <Select onChange={e => handleAddField(e)} value="" placeholder="Add a field">
+                    {listRemainingFields.map(field => (
+                      <Option value={field} key={field}>
+                        {field}
+                      </Option>
+                    ))}
+                  </Select>
+                </SelectContainer>
+              </Row>
             </Box>
           </ContentLayout>
           <ConfirmDialog
