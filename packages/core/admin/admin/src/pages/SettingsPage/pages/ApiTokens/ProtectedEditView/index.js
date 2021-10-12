@@ -5,7 +5,7 @@ import EditView from '../EditView';
 
 const ProtectedApiTokenCreateView = () => {
   return (
-    <CheckPagePermissions permissions={adminPermissions.settings['api-tokens'].create}>
+    <CheckPagePermissions permissions={adminPermissions.settings['api-tokens'].update}>
       <EditView />
     </CheckPagePermissions>
   );

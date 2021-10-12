@@ -7,6 +7,7 @@ import {
   useOverlayBlocker,
   useNotification,
   ContentBox,
+  LoadingIndicatorPage,
 } from '@strapi/helper-plugin';
 import { HeaderLayout, ContentLayout } from '@strapi/parts/Layout';
 import { Main } from '@strapi/parts/Main';
@@ -26,16 +27,50 @@ import get from 'lodash/get';
 import { IconButton } from '@strapi/parts/IconButton';
 import Duplicate from '@strapi/icons/Duplicate';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
+import { useRouteMatch } from 'react-router-dom';
+import { useQuery } from 'react-query';
 import { formatAPIErrors } from '../../../../../utils';
 import { axiosInstance } from '../../../../../core/utils';
 import schema from './utils/schema';
 
 const ApiTokenCreateView = () => {
-  const [accessToken, setAccessToken] = useState('');
+  const [apiToken, setApiToken] = useState({});
   useFocusWhenNavigate();
   const { formatMessage } = useIntl();
   const { lockApp, unlockApp } = useOverlayBlocker();
   const toggleNotification = useNotification();
+
+  const {
+    params: { id },
+  } = useRouteMatch('/settings/api-tokens/:id');
+
+  const { status } = useQuery(
+    ['api-tokens', id],
+    async () => {
+      const {
+        data: { data },
+      } = await axiosInstance.get(`/admin/api-tokens/${id}`);
+
+      setApiToken(() => ({
+        accessKey: formatMessage({
+          id: 'Settings.apiTokens.copy.editTitle',
+          defaultMessage: 'This token isn’t accessible anymore.',
+        }),
+        ...data,
+      }));
+
+      return data;
+    },
+    {
+      enabled: id !== 'create',
+      onError: () => {
+        toggleNotification({
+          type: 'warning',
+          message: { id: 'notification.error', defaultMessage: 'An error occured' },
+        });
+      },
+    }
+  );
 
   const handleSubmit = async (body, actions) => {
     lockApp();
@@ -43,9 +78,18 @@ const ApiTokenCreateView = () => {
     try {
       const {
         data: { data: response },
-      } = await axiosInstance.post(`/admin/api-tokens`, body);
+      } =
+        id === 'create'
+          ? await axiosInstance.post(`/admin/api-tokens`, body)
+          : await axiosInstance.put(`/admin/api-tokens/${id}`, body);
 
-      setAccessToken(() => response.accessKey);
+      setApiToken(() => ({
+        accessKey: formatMessage({
+          id: 'Settings.apiTokens.copy.editTitle',
+          defaultMessage: 'This token isn’t accessible anymore.',
+        }),
+        ...response,
+      }));
 
       toggleNotification({
         type: 'success',
@@ -64,13 +108,44 @@ const ApiTokenCreateView = () => {
     unlockApp();
   };
 
+  const isLoading = status !== 'success';
+
+  if (isLoading) {
+    return (
+      <Main aria-busy="true">
+        <SettingsPageTitle name="API Tokens" />
+        <HeaderLayout
+          primaryAction={
+            <Button disabled startIcon={<CheckIcon />} type="button" size="L">
+              {formatMessage({ id: 'form.button.save', defaultMessage: 'Save' })}
+            </Button>
+          }
+          title={
+            apiToken.name ||
+            formatMessage({
+              id: 'Settings.apiTokens.createPage.title',
+              defaultMessage: 'Create API Token',
+            })
+          }
+        />
+        <ContentLayout>
+          <LoadingIndicatorPage />
+        </ContentLayout>
+      </Main>
+    );
+  }
+
   return (
     <Main>
       <SettingsPageTitle name="API Tokens" />
       <Formik
         validationSchema={schema}
         validateOnChange={false}
-        initialValues={{ name: '', description: '', type: 'read-only' }}
+        initialValues={{
+          name: apiToken.name || '',
+          description: apiToken.description || '',
+          type: apiToken.type || 'read-only',
+        }}
         onSubmit={handleSubmit}
       >
         {({ errors, handleChange, isSubmitting, values }) => {
@@ -78,7 +153,7 @@ const ApiTokenCreateView = () => {
             <Form>
               <HeaderLayout
                 title={
-                  tokenName ||
+                  apiToken.name ||
                   formatMessage({
                     id: 'Settings.apiTokens.createPage.title',
                     defaultMessage: 'Create API Token',
@@ -131,11 +206,6 @@ const ApiTokenCreateView = () => {
                           />
                         </CopyToClipboard>
                       }
-                      title={accessToken}
-                      subtitle={formatMessage({
-                        id: 'Settings.apiTokens.copy.lastWarning',
-                        default: 'Make sure to copy this token, you won’t be able to see it again!',
-                      })}
                       icon={
                         <svg xmlns="http://www.w3.org/2000/svg">
                           <text

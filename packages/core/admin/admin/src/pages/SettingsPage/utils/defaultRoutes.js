@@ -112,6 +112,17 @@ const defaultRoutes = [
     to: '/settings/api-tokens/create',
     exact: true,
   },
+  {
+    Component: async () => {
+      const component = await import(
+        /* webpackChunkName: "webhook-list-page" */ '../pages/ApiTokens/ProtectedEditView'
+      );
+
+      return component;
+    },
+    to: '/settings/api-tokens/:id',
+    exact: true,
+  },
 ];
 
 export default defaultRoutes;

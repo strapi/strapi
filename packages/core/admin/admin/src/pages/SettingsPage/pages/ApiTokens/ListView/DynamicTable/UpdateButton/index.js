@@ -4,11 +4,12 @@ import { IconButton } from '@strapi/parts/IconButton';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 
-const UpdateButton = ({ tokenName }) => {
+const UpdateButton = ({ tokenName, onClickUpdate }) => {
   const { formatMessage } = useIntl();
 
   return (
     <IconButton
+      onClick={onClickUpdate}
       label={formatMessage(
         {
           id: 'app.component.table.edit',
@@ -22,8 +23,13 @@ const UpdateButton = ({ tokenName }) => {
   );
 };
 
+UpdateButton.defaultProps = {
+  onClickUpdate: () => {},
+};
+
 UpdateButton.propTypes = {
   tokenName: PropTypes.string.isRequired,
+  onClickUpdate: PropTypes.func,
 };
 
 export default UpdateButton;

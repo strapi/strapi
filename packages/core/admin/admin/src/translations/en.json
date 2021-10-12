@@ -92,6 +92,8 @@
   "Settings.apiTokens.notification.copied": "Token copied to clipboard.",
   "Settings.apiTokens.types.full-access": "Full access",
   "Settings.apiTokens.copy.lastWarning": "Make sure to copy this token, you won’t be able to see it again!",
+  "Settings.apiTokens.copy.editTitle": "This token isn’t accessible anymore.",
+  "Settings.apiTokens.copy.editMessage": "For security matters, you can only see your token once.",
   "Settings.application.description":"See your project's details",
   "Settings.application.details": "details",
   "Settings.application.edition-title": "current plan",
