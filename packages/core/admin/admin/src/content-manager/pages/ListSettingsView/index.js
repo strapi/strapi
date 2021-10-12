@@ -2,7 +2,10 @@ import React, { memo, useContext, useMemo, useReducer, useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { useMutation } from 'react-query';
-import { isEqual, upperFirst, pick, get } from 'lodash';
+import isEqual from 'lodash/isEqual';
+import upperFirst from 'lodash/upperFirst';
+import pick from 'lodash/pick';
+import get from 'lodash/get';
 import { stringify } from 'qs';
 import { useNotification, useTracking, ConfirmDialog } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
@@ -27,6 +30,7 @@ import Settings from './components/Settings';
 import DraggableCard from './components/DraggableCard';
 import init from './init';
 import reducer, { initialState } from './reducer';
+import { EXCLUDED_SORT_OPTIONS } from './utils/excludedSortOptions';
 
 const Flex = styled(Box)`
   flex: ${({ size }) => size};
@@ -41,7 +45,7 @@ const SelectContainer = styled(Flex)`
   max-width: ${200 / 16}rem;
 `;
 
-const ListSettingsView = ({ layout, slug, updateLayout }) => {
+const ListSettingsView = ({ layout, slug }) => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const pluginsQueryParams = usePluginsQueryParams();
@@ -74,14 +78,44 @@ const ListSettingsView = ({ layout, slug, updateLayout }) => {
     return get(modifiedData, ['layouts', 'list'], []);
   }, [modifiedData]);
 
-  const excludedSortOptions = ['media', 'richtext', 'dynamiczone', 'relation', 'component', 'json'];
+  const sortOptions = Object.entries(attributes).reduce((acc, cur) => {
+    const [name, { type }] = cur;
+
+    if (!EXCLUDED_SORT_OPTIONS.includes(type)) {
+      acc.push(name);
+    }
+
+    return acc;
+  }, []);
+
+  // const handleClickEditLabel = labelToEdit => {
+  //   dispatch({
+  //     type: 'SET_LABEL_TO_EDIT',
+  //     labelToEdit,
+  //   });
+  //   toggleModalForm();
+  // };
+
+  // const handleClosed = () => {
+  //   dispatch({
+  //     type: 'UNSET_LABEL_TO_EDIT',
+  //   });
+  // };
+
+  const handleChange = ({ target: { name, value } }) => {
+    dispatch({
+      type: 'ON_CHANGE',
+      keys: name,
+      value: name === 'settings.pageSize' ? parseInt(value, 10) : value,
+    });
+  };
 
   const goBackUrl = () => {
     const {
       settings: { pageSize, defaultSortBy, defaultSortOrder },
       kind,
       uid,
-    } = modifiedData;
+    } = initialData;
     const sort = `${defaultSortBy}:${defaultSortOrder}`;
     const goBackSearch = `${stringify(
       {
@@ -93,15 +127,6 @@ const ListSettingsView = ({ layout, slug, updateLayout }) => {
     )}${pluginsQueryParams ? `&${pluginsQueryParams}` : ''}`;
 
     return `/content-manager/${kind}/${uid}?${goBackSearch}`;
-  };
-
-  const handleChange = ({ target: { name, value } }) => {
-    dispatch({
-      type: 'ON_CHANGE',
-      keys: name,
-      value: name === 'settings.pageSize' ? parseInt(value, 10) : value,
-    });
-    console.log('here');
   };
 
   const handleConfirm = async () => {
@@ -138,23 +163,8 @@ const ListSettingsView = ({ layout, slug, updateLayout }) => {
     trackUsage('willSaveContentTypeLayout');
   };
 
-  const sortOptions = Object.entries(attributes).reduce((acc, cur) => {
-    const [name, { type }] = cur;
-
-    if (!excludedSortOptions.includes(type)) {
-      acc.push(name);
-    }
-
-    return acc;
-  }, []);
-
   const submitMutation = useMutation(body => putCMSettingsLV(body, slug), {
-    onSuccess: async ({ data: { data } }) => {
-      updateLayout(data);
-
-      dispatch({
-        type: 'SUBMIT_SUCCEEDED',
-      });
+    onSuccess: async () => {
       trackUsage('didEditListSettings');
       refetchData();
     },
@@ -164,7 +174,6 @@ const ListSettingsView = ({ layout, slug, updateLayout }) => {
         message: { id: 'notification.error' },
       });
     },
-    refetchActive: true,
   });
   const { isLoading: isSubmittingForm } = submitMutation;
 
@@ -257,7 +266,7 @@ const ListSettingsView = ({ layout, slug, updateLayout }) => {
         <form onSubmit={handleSubmit}>
           <HeaderLayout
             navigationAction={
-              <Link startIcon={<BackIcon />} to={goBackUrl}>
+              <Link startIcon={<BackIcon />} to={goBackUrl} id="go-back">
                 {formatMessage({ id: 'app.components.go-back', defaultMessage: 'Go back' })}
               </Link>
             }
@@ -330,7 +339,12 @@ const ListSettingsView = ({ layout, slug, updateLayout }) => {
                   </Stack>
                 </ScrollableContainer>
                 <SelectContainer size="auto" paddingBottom={4}>
-                  <Select onChange={e => handleAddField(e)} value="" placeholder="Add a field">
+                  <Select
+                    disabled={listRemainingFields.length <= 0}
+                    onChange={e => handleAddField(e)}
+                    value=""
+                    placeholder="Add a field"
+                  >
                     {listRemainingFields.map(field => (
                       <Option value={field} key={field}>
                         {field}
@@ -479,13 +493,23 @@ const ListSettingsView = ({ layout, slug, updateLayout }) => {
 ListSettingsView.propTypes = {
   layout: PropTypes.shape({
     uid: PropTypes.string.isRequired,
-    settings: PropTypes.object.isRequired,
+    settings: PropTypes.shape({
+      bulkable: PropTypes.bool,
+      defaultSortBy: PropTypes.string,
+      defaultSortOrder: PropTypes.string,
+      filterable: PropTypes.bool,
+      pageSize: PropTypes.number,
+      searchable: PropTypes.bool,
+    }).isRequired,
     metadatas: PropTypes.object.isRequired,
     options: PropTypes.object.isRequired,
-    attributes: PropTypes.object.isRequired,
+    attributes: PropTypes.objectOf(
+      PropTypes.shape({
+        type: PropTypes.string,
+      })
+    ).isRequired,
   }).isRequired,
   slug: PropTypes.string.isRequired,
-  updateLayout: PropTypes.func.isRequired,
 };
 
 export default memo(ListSettingsView);

@@ -81,6 +81,7 @@ function ListView({
 
   const [{ query }] = useQueryParams();
   const params = buildQueryString(query);
+  const pluginsQueryParams = stringify({ plugins: query.plugins }, { encode: false });
 
   const { pathname } = useLocation();
   const { push } = useHistory();
@@ -135,8 +136,6 @@ function ListView({
 
           return;
         }
-
-        console.log('iii');
 
         console.error(err);
         toggleNotification({
@@ -256,7 +255,7 @@ function ListView({
         trackUsageRef.current('willCreateEntry', trackerProperty);
         push({
           pathname: `${pathname}/create`,
-          search: query.plugins ? stringify({ plugins: query.plugins }, { encode: false }) : '',
+          search: query.plugins ? pluginsQueryParams : '',
         });
       }}
       startIcon={<Add />}
@@ -282,7 +281,8 @@ function ListView({
               <FieldPicker layout={layout} />
               <CheckPermissions permissions={cmPermissions.collectionTypesConfigurations}>
                 <IconButtonCustom
-                  onClick={() => push(`${slug}/configurations/list`)}
+                  onClick={() =>
+                    push({ pathname: `${slug}/configurations/list`, search: pluginsQueryParams })}
                   icon={<Settings />}
                   label={formatMessage({
                     id: 'app.links.configure-view',

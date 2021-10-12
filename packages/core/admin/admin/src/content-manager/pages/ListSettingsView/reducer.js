@@ -78,10 +78,6 @@ const reducer = (state = initialState, action) =>
       //   set(draftState, [...fieldMetadataPath, 'sortable'], state.labelForm.sortable);
       //   break;
       // }
-      case 'SUBMIT_SUCCEEDED': {
-        draftState.initialData = state.modifiedData;
-        break;
-      }
       default:
         return draftState;
     }
