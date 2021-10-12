@@ -5,7 +5,7 @@
  */
 
 import PropTypes from 'prop-types';
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { useIntl } from 'react-intl';
 import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@strapi/parts/ModalLayout';
 import { ButtonText } from '@strapi/parts/Text';
@@ -22,6 +22,7 @@ import { AssetMeta } from './AssetMeta';
 import { getTrad } from '../../utils';
 import formatBytes from '../../utils/formatBytes';
 import { useEditAsset } from '../../hooks/useEditAsset';
+import { ReplaceMediaButton } from './ReplaceMediaButton';
 
 const fileInfoSchema = yup.object({
   name: yup.string().required(),
@@ -32,10 +33,11 @@ const fileInfoSchema = yup.object({
 export const EditAssetDialog = ({ onClose, asset }) => {
   const { formatMessage, formatDate } = useIntl();
   const submitButtonRef = useRef(null);
+  const [replacementFile, setReplacementFile] = useState();
   const { editAsset, isLoading } = useEditAsset();
 
   const handleSubmit = async values => {
-    await editAsset({ ...asset, ...values });
+    await editAsset({ ...asset, ...values }, replacementFile);
     onClose();
   };
 
@@ -50,7 +52,7 @@ export const EditAssetDialog = ({ onClose, asset }) => {
         <ModalBody>
           <Grid gap={4}>
             <GridItem xs={12} col={6}>
-              <PreviewBox asset={asset} onDelete={onClose} />
+              <PreviewBox asset={asset} onDelete={onClose} replacementFile={replacementFile} />
             </GridItem>
             <GridItem xs={12} col={6}>
               <Formik
@@ -136,12 +138,7 @@ export const EditAssetDialog = ({ onClose, asset }) => {
           }
           endActions={
             <>
-              <Button variant="secondary">
-                {formatMessage({
-                  id: getTrad('control-card.replace-media'),
-                  defaultMessage: 'Replace media',
-                })}
-              </Button>
+              <ReplaceMediaButton onSelectMedia={setReplacementFile} />
               <Button onClick={() => submitButtonRef.current.click()} loading={isLoading}>
                 {formatMessage({ id: 'form.button.finish', defaultMessage: 'Finish' })}
               </Button>
