@@ -42,7 +42,11 @@ module.exports = {
       const version =
         major && minor && patch
           ? `${major}.${minor}.${patch}`
-          : strapi.plugins.documentation.config.info.version;
+          : strapi
+              .plugin('documentation')
+              .service('documentation')
+              .getDocumentationVersion();
+
       const openAPISpecsPath = path.join(
         strapi.config.appPath,
         'src',
