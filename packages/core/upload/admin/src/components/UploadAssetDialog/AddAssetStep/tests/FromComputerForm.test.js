@@ -217,7 +217,7 @@ describe('FromComputerForm', () => {
         background: #4945ff;
       }
 
-      .c9 .sc-fFYUIl {
+      .c9 .sc-hlWxgi {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -282,7 +282,7 @@ describe('FromComputerForm', () => {
         background: #ffffff;
       }
 
-      .c18 .sc-fFYUIl {
+      .c18 .sc-hlWxgi {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
