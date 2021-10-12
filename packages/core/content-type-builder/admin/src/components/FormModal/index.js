@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import {
-  GenericInput,
   getYupInnerErrors,
   useTracking,
   useNotification,
@@ -16,9 +15,8 @@ import AddIcon from '@strapi/icons/AddIcon';
 import { Box } from '@strapi/parts/Box';
 import { Button } from '@strapi/parts/Button';
 import { Divider } from '@strapi/parts/Divider';
-import { Grid, GridItem } from '@strapi/parts/Grid';
 import { ModalLayout, ModalBody, ModalFooter } from '@strapi/parts/ModalLayout';
-import { H2, H3 } from '@strapi/parts/Text';
+import { H2 } from '@strapi/parts/Text';
 import { Tabs, Tab, TabGroup, TabPanels, TabPanel } from '@strapi/parts/Tabs';
 import { Row } from '@strapi/parts/Row';
 import { Stack } from '@strapi/parts/Stack';
@@ -31,8 +29,10 @@ import DraftAndPublishToggle from '../DraftAndPublishToggle';
 import FormModalHeader from '../FormModalHeader';
 
 import BooleanDefaultValueSelect from '../BooleanDefaultValueSelect';
+import CheckboxWithNumberField from '../CheckboxWithNumberField';
 import CustomRadioGroup from '../CustomRadioGroup';
 import ContentTypeRadioGroup from '../ContentTypeRadioGroup';
+import TabForm from '../TabForm';
 // import ComponentIconPicker from '../ComponentIconPicker';
 // import RelationForm from '../RelationForm';
 // import WrapperSelect from '../WrapperSelect';
@@ -51,7 +51,6 @@ import {
 import forms from './forms';
 import { createComponentUid, createUid } from './utils/createUid';
 import { INITIAL_STATE_DATA } from './utils/staticData';
-// import CustomButton from './CustomButton';
 import makeSelectFormModal from './selectors';
 import {
   SET_DATA_TO_EDIT,
@@ -65,7 +64,6 @@ import {
   RESET_PROPS_AND_SAVE_CURRENT_DATA,
   RESET_PROPS,
 } from './constants';
-import CheckboxWithNumberField from '../CheckboxWithNumberField';
 
 /* eslint-disable indent */
 /* eslint-disable react/no-array-index-key */
@@ -1206,178 +1204,28 @@ const FormModal = () => {
                   <TabPanels>
                     <TabPanel>
                       <Stack size={6}>
-                        {state.settingType === 'base' &&
-                          baseForm.map((section, sectionIndex) => {
-                            // Don't display an empty section
-                            if (section.items.length === 0) {
-                              return null;
-                            }
-
-                            return (
-                              <Box key={sectionIndex}>
-                                {section.sectionTitle && (
-                                  <Box paddingBottom={4}>
-                                    <H3>{formatMessage(section.sectionTitle)}</H3>
-                                  </Box>
-                                )}
-                                <Grid gap={4}>
-                                  {section.items.map((input, i) => {
-                                    const key = `${sectionIndex}.${i}`;
-
-                                    const retrievedValue = get(modifiedData, input.name, '');
-
-                                    let value;
-
-                                    if (input.name === 'enum' && Array.isArray(retrievedValue)) {
-                                      value = retrievedValue.join('\n');
-                                    } else if (input.name === 'uid') {
-                                      value = input.value;
-                                    } else if (
-                                      input.name === 'allowedTypes' &&
-                                      retrievedValue === ''
-                                    ) {
-                                      value = null;
-                                    } else {
-                                      value = retrievedValue;
-                                    }
-
-                                    // When extending the yup schema of an existing field (like in https://github.com/strapi/strapi/blob/293ff3b8f9559236609d123a2774e3be05ce8274/packages/strapi-plugin-i18n/admin/src/index.js#L52)
-                                    // and triggering a yup validation error in the UI (missing a required field for example)
-                                    // We got an object that looks like: formErrors = { "pluginOptions.i18n.localized": {...} }
-                                    // In order to deal with this error, we can't rely on lodash.get to resolve this key
-                                    // - lodash will try to access {pluginOptions: {i18n: {localized: true}}})
-                                    // - and we just want to access { "pluginOptions.i18n.localized": {...} }
-                                    // NOTE: this is a hack
-                                    const pluginOptionError = Object.keys(formErrors).find(
-                                      key => key === input.name
-                                    );
-
-                                    // Retrieve the error for a specific input
-                                    const errorId = pluginOptionError
-                                      ? formErrors[pluginOptionError].id
-                                      : get(
-                                          formErrors,
-                                          [
-                                            ...input.name
-                                              .split('.')
-                                              // The filter here is used when creating a component
-                                              // in the component step 1 modal
-                                              // Since the component info is stored in the
-                                              // componentToCreate object we can access the error
-                                              // By removing the key
-                                              .filter(key => key !== 'componentToCreate'),
-                                            'id',
-                                          ],
-                                          null
-                                        );
-
-                                    return (
-                                      <GridItem col={input.size || 6} key={input.name || key}>
-                                        <GenericInput
-                                          {...input}
-                                          {...genericInputProps}
-                                          error={errorId}
-                                          onChange={handleChange}
-                                          value={value}
-                                        />
-                                      </GridItem>
-                                    );
-                                  })}
-                                </Grid>
-                              </Box>
-                            );
-                          })}
+                        {state.settingType === 'base' && (
+                          <TabForm
+                            form={baseForm}
+                            formErrors={formErrors}
+                            genericInputProps={genericInputProps}
+                            modifiedData={modifiedData}
+                            onChange={handleChange}
+                          />
+                        )}
                       </Stack>
                     </TabPanel>
                     <TabPanel>
                       <Stack size={6}>
-                        {state.settingType === 'advanced' &&
-                          advancedForm.map((section, sectionIndex) => {
-                            // Don't display an empty section
-                            if (section.items.length === 0) {
-                              return null;
-                            }
-
-                            return (
-                              <Box key={sectionIndex}>
-                                {section.sectionTitle && (
-                                  <Box paddingBottom={4}>
-                                    <H3>{formatMessage(section.sectionTitle)}</H3>
-                                  </Box>
-                                )}
-                                <Grid gap={4}>
-                                  {section.items.map((input, i) => {
-                                    const key = `${sectionIndex}.${i}`;
-
-                                    let value;
-
-                                    const retrievedValue = get(modifiedData, input.name, '');
-
-                                    // Condition for the boolean default value
-                                    // The radio input doesn't accept false, true or null as value
-                                    // So we pass them as string
-                                    // This way the data stays accurate and we don't have to operate
-                                    // any data mutation
-                                    if (input.name === 'enum' && Array.isArray(retrievedValue)) {
-                                      value = retrievedValue.join('\n');
-                                    } else if (input.name === 'uid') {
-                                      value = input.value;
-                                    } else if (
-                                      input.name === 'allowedTypes' &&
-                                      retrievedValue === ''
-                                    ) {
-                                      value = null;
-                                    } else {
-                                      value = retrievedValue;
-                                    }
-
-                                    // When extending the yup schema of an existing field (like in https://github.com/strapi/strapi/blob/293ff3b8f9559236609d123a2774e3be05ce8274/packages/strapi-plugin-i18n/admin/src/index.js#L52)
-                                    // and triggering a yup validation error in the UI (missing a required field for example)
-                                    // We got an object that looks like: formErrors = { "pluginOptions.i18n.localized": {...} }
-                                    // In order to deal with this error, we can't rely on lodash.get to resolve this key
-                                    // - lodash will try to access {pluginOptions: {i18n: {localized: true}}})
-                                    // - and we just want to access { "pluginOptions.i18n.localized": {...} }
-                                    // NOTE: this is a hack
-                                    const pluginOptionError = Object.keys(formErrors).find(
-                                      key => key === input.name
-                                    );
-
-                                    // Retrieve the error for a specific input
-                                    const errorId = pluginOptionError
-                                      ? formErrors[pluginOptionError].id
-                                      : get(
-                                          formErrors,
-                                          [
-                                            ...input.name
-                                              .split('.')
-                                              // The filter here is used when creating a component
-                                              // in the component step 1 modal
-                                              // Since the component info is stored in the
-                                              // componentToCreate object we can access the error
-                                              // By removing the key
-                                              .filter(key => key !== 'componentToCreate'),
-                                            'id',
-                                          ],
-                                          null
-                                        );
-
-                                    return (
-                                      <GridItem col={input.size || 6} key={input.name || key}>
-                                        <GenericInput
-                                          {...input}
-                                          {...genericInputProps}
-                                          error={errorId}
-                                          isCreating={isCreating}
-                                          onChange={handleChange}
-                                          value={value}
-                                        />
-                                      </GridItem>
-                                    );
-                                  })}
-                                </Grid>
-                              </Box>
-                            );
-                          })}
+                        {state.settingType === 'advanced' && (
+                          <TabForm
+                            form={advancedForm}
+                            formErrors={formErrors}
+                            genericInputProps={genericInputProps}
+                            modifiedData={modifiedData}
+                            onChange={handleChange}
+                          />
+                        )}
                       </Stack>
                     </TabPanel>
                   </TabPanels>

@@ -4,7 +4,7 @@ import { Text } from '@strapi/parts/Text';
 
 const Wrapper = styled(Stack)`
   position: relative;
-  align--items: stretch;
+  align-items: stretch;
 
   label {
     max-width: 50%;
