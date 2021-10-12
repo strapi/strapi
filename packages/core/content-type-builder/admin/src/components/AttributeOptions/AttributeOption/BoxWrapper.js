@@ -3,6 +3,7 @@ import { Box } from '@strapi/parts/Box';
 
 const BoxWrapper = styled(Box)`
   width: 100%;
+  height: 100%;
   border: 1px solid ${({ theme }) => theme.colors.neutral200};
   &:hover {
     background: ${({ theme }) => theme.colors.primary100};

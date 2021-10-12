@@ -43,11 +43,12 @@ const AttributeOptions = ({ attributes, forTarget, kind }) => {
                     const paddingRight = isOdd ? 0 : 2;
 
                     return (
-                      <GridItem key={attribute} col={6}>
+                      <GridItem key={attribute} col={6} style={{ height: '100%' }}>
                         <Box
                           paddingLeft={paddingLeft}
                           paddingRight={paddingRight}
                           paddingBottom={1}
+                          style={{ height: '100%' }}
                         >
                           <AttributeOption type={attribute} />
                         </Box>
