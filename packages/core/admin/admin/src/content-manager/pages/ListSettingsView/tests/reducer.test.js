@@ -250,45 +250,4 @@ describe('CONTENT MANAGER | CONTAINERS | ListSettingsView | reducer', () => {
   //     expect(reducer(state, action)).toEqual(expected);
   //   });
   // });
-
-  describe('SUBMIT_SUCCEEDED', () => {
-    it('should submit the label and the sortable value of the field to edit', () => {
-      state.modifiedData = {
-        metadatas: {
-          cover: {
-            list: {
-              label: 'Cover',
-              sortable: false,
-            },
-          },
-        },
-      };
-      const expected = {
-        ...state,
-        initialData: {
-          metadatas: {
-            cover: {
-              list: {
-                label: 'Cover',
-                sortable: false,
-              },
-            },
-          },
-        },
-        modifiedData: {
-          metadatas: {
-            cover: {
-              list: {
-                label: 'Cover',
-                sortable: false,
-              },
-            },
-          },
-        },
-      };
-      const action = { type: 'SUBMIT_SUCCEEDED' };
-
-      expect(reducer(state, action)).toEqual(expected);
-    });
-  });
 });
