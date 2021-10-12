@@ -6,7 +6,7 @@ const { yup, formatYupErrors } = require('@strapi/utils');
 const hasPermissionsSchema = yup.object({
   actions: yup.array().of(
     yup.lazy(val => {
-      if (_.isArray(val)) {
+      if (Array.isArray(val)) {
         return yup
           .array()
           .of(yup.string())

@@ -54,7 +54,7 @@ module.exports = ({ ability, action, model }) => ({
       isOutput = true,
     } = options;
 
-    if (_.isArray(data)) {
+    if (Array.isArray(data)) {
       return data.map(entity => this.sanitize(entity, { action, withPrivate, isOutput }));
     }
 

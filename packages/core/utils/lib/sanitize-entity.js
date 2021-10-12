@@ -24,7 +24,7 @@ const sanitizeEntity = (dataSource, options) => {
     return data;
   }
 
-  if (_.isArray(data)) {
+  if (Array.isArray(data)) {
     return data.map(entity => sanitizeEntity(entity, options));
   }
 

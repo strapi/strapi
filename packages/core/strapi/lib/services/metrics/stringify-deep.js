@@ -1,6 +1,6 @@
 'use strict';
 
-const { map, mapValues, isObject, isArray, toString } = require('lodash/fp');
+const { map, mapValues, isObject, toString } = require('lodash/fp');
 
 /**
  * Stringify all non object valutes before send them
@@ -8,7 +8,7 @@ const { map, mapValues, isObject, isArray, toString } = require('lodash/fp');
  * @returns {object}
  */
 const stringifyDeep = value => {
-  if (isArray(value)) {
+  if (Array.isArray(value)) {
     return map(stringifyDeep, value);
   }
 

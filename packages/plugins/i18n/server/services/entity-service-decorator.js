@@ -1,6 +1,6 @@
 'use strict';
 
-const { has, omit, isArray } = require('lodash/fp');
+const { has, omit } = require('lodash/fp');
 const { getService } = require('../utils');
 
 const LOCALE_QUERY_FILTER = 'locale';
@@ -10,7 +10,7 @@ const BULK_ACTIONS = ['delete'];
 const paramsContain = (key, params) => {
   return (
     has(key, params.filters) ||
-    (isArray(params.filters) && params.filters.some(clause => has(key, clause)))
+    (Array.isArray(params.filters) && params.filters.some(clause => has(key, clause)))
   );
 };
 

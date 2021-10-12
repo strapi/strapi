@@ -2,7 +2,7 @@
 
 const { yup } = require('@strapi/utils');
 const _ = require('lodash');
-const { isEmpty, has, isNil, isArray } = require('lodash/fp');
+const { isEmpty, has, isNil } = require('lodash/fp');
 const { getService } = require('../utils');
 const actionDomain = require('../domain/action');
 const {
@@ -129,7 +129,7 @@ const updatePermissions = yup
                   return isNil(subject);
                 }
 
-                if (isArray(action.subjects)) {
+                if (Array.isArray(action.subjects)) {
                   return action.subjects.includes(subject);
                 }
 
@@ -153,7 +153,7 @@ const updatePermissions = yup
 
                 const { applyToProperties } = action.options;
 
-                if (!isArray(applyToProperties)) {
+                if (!Array.isArray(applyToProperties)) {
                   return false;
                 }
 

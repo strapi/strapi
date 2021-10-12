@@ -1,6 +1,6 @@
 'use strict';
 
-const { isEmpty, mergeWith, isArray } = require('lodash/fp');
+const { isEmpty, mergeWith } = require('lodash/fp');
 const { ApolloServer } = require('apollo-server-koa');
 const {
   ApolloServerPluginLandingPageDisabled,
@@ -10,7 +10,7 @@ const depthLimit = require('graphql-depth-limit');
 const { graphqlUploadKoa } = require('graphql-upload');
 
 const merge = mergeWith((a, b) => {
-  if (isArray(a) && isArray(b)) {
+  if (Array.isArray(a) && Array.isArray(b)) {
     return a.concat(b);
   }
 });

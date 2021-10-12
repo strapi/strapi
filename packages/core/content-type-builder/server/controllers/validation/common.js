@@ -89,7 +89,7 @@ const isValidDefaultJSON = {
       return true;
     }
 
-    if (_.isNumber(val) || _.isNull(val) || _.isObject(val) || _.isArray(val)) {
+    if (_.isNumber(val) || _.isNull(val) || _.isObject(val) || Array.isArray(val)) {
       return true;
     }
 

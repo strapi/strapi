@@ -1,7 +1,7 @@
-import { isArray, isObject } from 'lodash';
+import { isObject } from 'lodash';
 
 const cleanData = (value, key, secondKey) => {
-  if (isArray(value)) {
+  if (Array.isArray(value)) {
     return value.map(obj => (obj[key] ? obj[key] : obj));
   }
   if (isObject(value)) {

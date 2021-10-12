@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const { pick, pipe, has, prop, isNil, cloneDeep, isArray } = require('lodash/fp');
+const { pick, pipe, has, prop, isNil, cloneDeep } = require('lodash/fp');
 const {
   isRelationalAttribute,
   getVisibleAttributes,
@@ -129,7 +129,7 @@ const removeIdsMut = (model, entry) => {
 
   _.forEach(model.attributes, (attr, attrName) => {
     const value = entry[attrName];
-    if (attr.type === 'dynamiczone' && isArray(value)) {
+    if (attr.type === 'dynamiczone' && Array.isArray(value)) {
       value.forEach(compo => {
         if (has('__component', compo)) {
           const model = strapi.components[compo.__component];
@@ -138,7 +138,7 @@ const removeIdsMut = (model, entry) => {
       });
     } else if (attr.type === 'component') {
       const model = strapi.components[attr.component];
-      if (isArray(value)) {
+      if (Array.isArray(value)) {
         value.forEach(compo => removeIdsMut(model, compo));
       } else {
         removeIdsMut(model, value);
@@ -158,7 +158,10 @@ const removeIdsMut = (model, entry) => {
 const copyNonLocalizedAttributes = (model, entry) => {
   const nonLocalizedAttributes = getNonLocalizedAttributes(model);
 
-  return pipe(pick(nonLocalizedAttributes), removeIds(model))(entry);
+  return pipe(
+    pick(nonLocalizedAttributes),
+    removeIds(model)
+  )(entry);
 };
 
 /**

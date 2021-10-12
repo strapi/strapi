@@ -192,7 +192,7 @@ const createEntityManager = db => {
       const metadata = db.metadata.get(uid);
       const { data } = params;
 
-      if (!_.isArray(data)) {
+      if (!Array.isArray(data)) {
         throw new Error('CreateMany expects data to be an array');
       }
 

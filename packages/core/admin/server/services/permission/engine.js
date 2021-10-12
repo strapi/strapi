@@ -7,7 +7,6 @@ const {
   propEq,
   isFunction,
   isBoolean,
-  isArray,
   isNil,
   isEmpty,
   isObject,
@@ -119,7 +118,7 @@ module.exports = conditionProvider => {
       // If the `fields` property is an empty array, then ignore the permission
       const { fields } = properties;
 
-      if (isArray(fields) && isEmpty(fields)) {
+      if (Array.isArray(fields) && isEmpty(fields)) {
         return null;
       }
 

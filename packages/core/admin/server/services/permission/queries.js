@@ -4,7 +4,6 @@ const {
   flatMap,
   reject,
   isNil,
-  isArray,
   prop,
   xor,
   eq,
@@ -120,8 +119,9 @@ const filterPermissionsToRemove = async permissions => {
     );
 
     const isRegisteredAction = actionProvider.has(permission.action);
-    const hasInvalidProperties = isArray(applyToProperties) && invalidProperties.every(eq(true));
-    const isInvalidSubject = isArray(subjects) && !subjects.includes(permission.subject);
+    const hasInvalidProperties =
+      Array.isArray(applyToProperties) && invalidProperties.every(eq(true));
+    const isInvalidSubject = Array.isArray(subjects) && !subjects.includes(permission.subject);
 
     // If the permission has an invalid action, an invalid subject or invalid properties, then add it to the toBeRemoved collection
     if (!isRegisteredAction || isInvalidSubject || hasInvalidProperties) {

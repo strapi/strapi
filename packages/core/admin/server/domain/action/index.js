@@ -1,6 +1,6 @@
 'use strict';
 
-const { curry, pipe, merge, set, pick, omit, includes, isArray, prop } = require('lodash/fp');
+const { curry, pipe, merge, set, pick, omit, includes, prop } = require('lodash/fp');
 
 /**
  * Domain representation of an Action (RBAC)
@@ -98,7 +98,10 @@ const assignOrOmitSubCategory = action => {
  * @return {boolean} Return true if the property can be applied for the given action
  */
 const appliesToProperty = curry((property, action) => {
-  return pipe(prop('options.applyToProperties'), includes(property))(action);
+  return pipe(
+    prop('options.applyToProperties'),
+    includes(property)
+  )(action);
 });
 
 /**
@@ -108,7 +111,7 @@ const appliesToProperty = curry((property, action) => {
  * @return {boolean}
  */
 const appliesToSubject = curry((subject, action) => {
-  return isArray(action.subjects) && includes(subject, action.subjects);
+  return Array.isArray(action.subjects) && includes(subject, action.subjects);
 });
 
 /**

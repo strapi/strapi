@@ -47,7 +47,7 @@ const toRow = (meta, data = {}) => {
     return data;
   }
 
-  if (_.isArray(data)) {
+  if (Array.isArray(data)) {
     return data.map(datum => toRow(meta, datum));
   }
 

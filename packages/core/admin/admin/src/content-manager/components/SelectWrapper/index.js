@@ -10,7 +10,6 @@ import { Stack } from '@strapi/parts/Stack';
 import { useTheme } from 'styled-components';
 import findIndex from 'lodash/findIndex';
 import get from 'lodash/get';
-import isArray from 'lodash/isArray';
 import isEmpty from 'lodash/isEmpty';
 import set from 'lodash/set';
 import { NotAllowedInput, useCMEditViewDataManager, useQueryParams } from '@strapi/helper-plugin';
@@ -253,7 +252,7 @@ function SelectWrapper({
   }
 
   const Component = isSingle ? SelectOne : SelectMany;
-  const associationsLength = isArray(value) ? value.length : 0;
+  const associationsLength = Array.isArray(value) ? value.length : 0;
 
   const isDisabled = useMemo(() => {
     if (isMorph) {

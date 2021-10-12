@@ -1,19 +1,6 @@
 'use strict';
 
-const {
-  pipe,
-  set,
-  pick,
-  eq,
-  omit,
-  remove,
-  get,
-  uniq,
-  isArray,
-  map,
-  curry,
-  merge,
-} = require('lodash/fp');
+const { pipe, set, pick, eq, omit, remove, get, uniq, map, curry, merge } = require('lodash/fp');
 
 /**
  * Domain representation of a Permission (RBAC)
@@ -99,7 +86,10 @@ const deleteProperty = (property, permission) => omit(`properties.${property}`, 
  * @return {Permission}
  */
 const create = attributes => {
-  return pipe(pick(permissionFields), merge(getDefaultPermission()))(attributes);
+  return pipe(
+    pick(permissionFields),
+    merge(getDefaultPermission())
+  )(attributes);
 };
 
 /**
@@ -109,7 +99,7 @@ const create = attributes => {
  * @return {Permission}
  */
 const sanitizeConditions = curry((provider, permission) => {
-  if (!isArray(permission.conditions)) {
+  if (!Array.isArray(permission.conditions)) {
     return permission;
   }
 
@@ -123,7 +113,7 @@ const sanitizeConditions = curry((provider, permission) => {
  * @param {object | object[]} payload - Can either be a single object of attributes or an array of those objects.
  * @return {Permission | Permission[]}
  */
-const toPermission = payload => (isArray(payload) ? map(create, payload) : create(payload));
+const toPermission = payload => (Array.isArray(payload) ? map(create, payload) : create(payload));
 
 module.exports = {
   addCondition,

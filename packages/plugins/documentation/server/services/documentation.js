@@ -22,7 +22,7 @@ const defaultSettingsKeys = Object.keys(defaultSettings);
 const customIsEqual = (obj1, obj2) => _.isEqualWith(obj1, obj2, customComparator);
 
 const customComparator = (value1, value2) => {
-  if (_.isArray(value1) && _.isArray(value2)) {
+  if (Array.isArray(value1) && Array.isArray(value2)) {
     if (value1.length !== value2.length) {
       return false;
     }
@@ -39,7 +39,7 @@ module.exports = ({ strapi }) => ({
   cleanObject: obj => JSON.parse(JSON.stringify(obj)),
 
   arrayCustomizer(objValue, srcValue) {
-    if (_.isArray(objValue)) return objValue.concat(srcValue);
+    if (Array.isArray(objValue)) return objValue.concat(srcValue);
   },
 
   checkIfAPIDocNeedsUpdate(apiName) {

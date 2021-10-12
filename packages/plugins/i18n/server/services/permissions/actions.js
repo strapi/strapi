@@ -1,6 +1,6 @@
 'use strict';
 
-const { capitalize, isArray, getOr, prop } = require('lodash/fp');
+const { capitalize, getOr, prop } = require('lodash/fp');
 const { getService } = require('../../utils');
 
 const actions = ['create', 'read', 'update', 'delete'].map(uid => ({
@@ -24,12 +24,12 @@ const addLocalesPropertyIfNeeded = ({ value: action }) => {
   }
 
   // If the 'locales' property is already declared within the applyToProperties array, then ignore the next steps
-  if (isArray(applyToProperties) && applyToProperties.includes('locales')) {
+  if (Array.isArray(applyToProperties) && applyToProperties.includes('locales')) {
     return;
   }
 
   // Add the 'locales' property to the applyToProperties array (create it if necessary)
-  action.options.applyToProperties = isArray(applyToProperties)
+  action.options.applyToProperties = Array.isArray(applyToProperties)
     ? applyToProperties.concat('locales')
     : ['locales'];
 };

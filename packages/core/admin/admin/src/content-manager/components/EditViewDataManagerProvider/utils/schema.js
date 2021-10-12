@@ -1,14 +1,4 @@
-import {
-  get,
-  isBoolean,
-  isNumber,
-  isNull,
-  isObject,
-  isArray,
-  isEmpty,
-  isNaN,
-  toNumber,
-} from 'lodash';
+import { get, isBoolean, isNumber, isNull, isObject, isEmpty, isNaN, toNumber } from 'lodash';
 
 import * as yup from 'yup';
 import { translatedErrors as errorsTrads } from '@strapi/helper-plugin';
@@ -224,7 +214,7 @@ const createYupSchemaAttribute = (type, validations, options) => {
           return true;
         }
 
-        if (isNumber(value) || isNull(value) || isObject(value) || isArray(value)) {
+        if (isNumber(value) || isNull(value) || isObject(value) || Array.isArray(value)) {
           return true;
         }
 

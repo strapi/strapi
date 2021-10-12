@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const { set, omit, pick, prop, isArray, differenceWith, differenceBy } = require('lodash/fp');
+const { set, omit, pick, prop, differenceWith, differenceBy } = require('lodash/fp');
 const deepEqual = require('fast-deep-equal');
 const {
   generateTimestampCode,
@@ -400,7 +400,7 @@ const resetSuperAdminPermissions = async () => {
   const otherPermissions = otherActions.reduce((acc, action) => {
     const { actionId, subjects } = action;
 
-    if (isArray(subjects)) {
+    if (Array.isArray(subjects)) {
       acc.push(...subjects.map(subject => permissionDomain.create({ action: actionId, subject })));
     } else {
       acc.push(permissionDomain.create({ action: actionId }));

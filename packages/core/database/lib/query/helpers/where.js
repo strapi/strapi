@@ -40,11 +40,11 @@ const isOperator = key => OPERATORS.includes(key);
  * @returns {Object}
  */
 const processWhere = (where, ctx, depth = 0) => {
-  if (!_.isArray(where) && !_.isPlainObject(where)) {
+  if (!Array.isArray(where) && !_.isPlainObject(where)) {
     throw new Error('Where must be an array or an object');
   }
 
-  if (_.isArray(where)) {
+  if (Array.isArray(where)) {
     return where.map(sub => processWhere(sub, ctx));
   }
 
@@ -276,11 +276,11 @@ const applyWhereToColumn = (qb, column, columnWhere) => {
 };
 
 const applyWhere = (qb, where) => {
-  if (!_.isArray(where) && !_.isPlainObject(where)) {
+  if (!Array.isArray(where) && !_.isPlainObject(where)) {
     throw new Error('Where must be an array or an object');
   }
 
-  if (_.isArray(where)) {
+  if (Array.isArray(where)) {
     return qb.where(subQB => where.forEach(subWhere => applyWhere(subQB, subWhere)));
   }
 

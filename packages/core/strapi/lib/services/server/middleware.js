@@ -1,14 +1,14 @@
 'use strict';
 
 const path = require('path');
-const { propOr, isArray, isNil } = require('lodash/fp');
+const { propOr, isNil } = require('lodash/fp');
 
 const getMiddlewareConfig = propOr([], 'config.middlewares');
 
 const resolveRouteMiddlewares = (route, strapi) => {
   const middlewaresConfig = getMiddlewareConfig(route);
 
-  if (!isArray(middlewaresConfig)) {
+  if (!Array.isArray(middlewaresConfig)) {
     throw new Error('Route middlewares config must be an array');
   }
 

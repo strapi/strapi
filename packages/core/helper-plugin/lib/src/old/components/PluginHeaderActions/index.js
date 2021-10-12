@@ -6,7 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { isArray, isFunction } from 'lodash';
+import { isFunction } from 'lodash';
 
 import Button from '../Button';
 
@@ -15,7 +15,7 @@ import StyledPluginHeaderActions from './StyledPluginHeaderActions';
 function PluginHeaderActions({ actions, overrideRendering }) {
   let content = '';
 
-  if (isArray(actions)) {
+  if (Array.isArray(actions)) {
     content = actions.map(action => <Button {...action} key={action.label} />);
   }
 

@@ -1,5 +1,4 @@
 import get from 'lodash/get';
-import isArray from 'lodash/isArray';
 import isObject from 'lodash/isObject';
 
 /* eslint-disable indent */
@@ -88,7 +87,7 @@ const cleanData = (retrievedData, currentSchema, componentsSchema) => {
 };
 
 export const helperCleanData = (value, key) => {
-  if (isArray(value)) {
+  if (Array.isArray(value)) {
     return value.map(obj => (obj[key] ? obj[key] : obj));
   }
   if (isObject(value)) {

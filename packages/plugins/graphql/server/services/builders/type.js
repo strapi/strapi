@@ -1,6 +1,6 @@
 'use strict';
 
-const { isArray, isString, isUndefined, constant } = require('lodash/fp');
+const { isString, isUndefined, constant } = require('lodash/fp');
 const { objectType } = require('nexus');
 
 const { contentTypes } = require('@strapi/utils');
@@ -190,7 +190,7 @@ module.exports = context => {
     }
 
     // If the target is an array of string, resolve the associated morph type and use it
-    else if (isArray(target) && target.every(isString)) {
+    else if (Array.isArray(target) && target.every(isString)) {
       const type = naming.getMorphRelationTypeName(contentType, attributeName);
 
       builder.field(attributeName, { type, resolve });
@@ -267,7 +267,7 @@ module.exports = context => {
       const { attributes, modelType, options = {} } = contentType;
 
       const attributesKey = Object.keys(attributes);
-      const hasTimestamps = isArray(options.timestamps);
+      const hasTimestamps = Array.isArray(options.timestamps);
 
       const name = (modelType === 'component' ? getComponentName : getTypeName).call(
         null,
