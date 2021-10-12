@@ -67,6 +67,7 @@ import {
   RESET_PROPS_AND_SAVE_CURRENT_DATA,
   RESET_PROPS,
 } from './constants';
+import CheckboxWithNumberField from '../CheckboxWithNumberField';
 
 /* eslint-disable indent */
 /* eslint-disable react/no-array-index-key */
@@ -1096,6 +1097,7 @@ const FormModal = () => {
 
   const genericInputProps = {
     customInputs: {
+      'checkbox-with-number-field': CheckboxWithNumberField,
       'select-default-boolean': BooleanDefaultValueSelect,
       'radio-group': CustomRadioGroup,
       'content-type-radio-group': ContentTypeRadioGroup,
@@ -1103,7 +1105,6 @@ const FormModal = () => {
       ...inputsFromPlugins,
     },
     modifiedData,
-
     isCreating,
   };
 

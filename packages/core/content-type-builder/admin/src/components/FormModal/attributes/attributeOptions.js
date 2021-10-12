@@ -12,7 +12,7 @@ const attributeOptions = {
   },
   max: {
     name: 'max',
-    type: 'customCheckboxWithChildren',
+    type: 'checkbox-with-number-field',
     intlLabel: {
       id: getTrad('form.attribute.item.maximum'),
       defaultMessage: 'Maximum value',
@@ -21,7 +21,7 @@ const attributeOptions = {
   },
   maxLength: {
     name: 'maxLength',
-    type: 'customCheckboxWithChildren',
+    type: 'checkbox-with-number-field',
     intlLabel: {
       id: getTrad('form.attribute.item.maximumLength'),
       defaultMessage: 'Maximum length',
@@ -30,7 +30,7 @@ const attributeOptions = {
   },
   min: {
     name: 'min',
-    type: 'customCheckboxWithChildren',
+    type: 'checkbox-with-number-field',
     intlLabel: {
       id: getTrad('form.attribute.item.minimum'),
       defaultMessage: 'Minimum value',
@@ -39,7 +39,7 @@ const attributeOptions = {
   },
   minLength: {
     name: 'minLength',
-    type: 'customCheckboxWithChildren',
+    type: 'checkbox-with-number-field',
     intlLabel: {
       id: getTrad('form.attribute.item.minimumLength'),
       defaultMessage: 'Minimum length',
