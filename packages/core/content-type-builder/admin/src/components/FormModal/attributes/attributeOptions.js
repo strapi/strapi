@@ -8,7 +8,6 @@ const attributeOptions = {
       id: getTrad('form.attribute.settings.default'),
       defaultMessage: 'Default value',
     },
-    // validations: {},
   },
   max: {
     name: 'max',
@@ -17,7 +16,6 @@ const attributeOptions = {
       id: getTrad('form.attribute.item.maximum'),
       defaultMessage: 'Maximum value',
     },
-    // validations: {},
   },
   maxLength: {
     name: 'maxLength',
@@ -26,7 +24,6 @@ const attributeOptions = {
       id: getTrad('form.attribute.item.maximumLength'),
       defaultMessage: 'Maximum length',
     },
-    // validations: {},
   },
   min: {
     name: 'min',
@@ -35,7 +32,6 @@ const attributeOptions = {
       id: getTrad('form.attribute.item.minimum'),
       defaultMessage: 'Minimum value',
     },
-    // validations: {},
   },
   minLength: {
     name: 'minLength',
@@ -44,7 +40,6 @@ const attributeOptions = {
       id: getTrad('form.attribute.item.minimumLength'),
       defaultMessage: 'Minimum length',
     },
-    // validations: {},
   },
   private: {
     name: 'private',
@@ -57,7 +52,6 @@ const attributeOptions = {
       id: getTrad('form.attribute.item.privateField.description'),
       defaultMessage: 'This field will not show up in the API response',
     },
-    // validations: {},
   },
   regex: {
     intlLabel: {
@@ -66,7 +60,6 @@ const attributeOptions = {
     },
     name: 'regex',
     type: 'text',
-    // validations: {},
     description: {
       id: getTrad('form.attribute.item.text.regex.description'),
       defaultMessage: 'The text of the regular expression',
@@ -83,7 +76,6 @@ const attributeOptions = {
       id: getTrad('form.attribute.item.requiredField.description'),
       defaultMessage: "You won't be able to create an entry if this field is empty",
     },
-    // validations: {},
   },
   unique: {
     name: 'unique',
@@ -97,7 +89,6 @@ const attributeOptions = {
       defaultMessage:
         "You won't be able to create an entry if there is an existing entry with identical content",
     },
-    // validations: {},
   },
 };
 

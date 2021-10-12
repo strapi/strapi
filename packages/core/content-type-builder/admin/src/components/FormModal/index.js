@@ -33,8 +33,6 @@ import BooleanDefaultValueSelect from '../BooleanDefaultValueSelect';
 import CustomRadioGroup from '../CustomRadioGroup';
 import ContentTypeRadioGroup from '../ContentTypeRadioGroup';
 // import ComponentIconPicker from '../ComponentIconPicker';
-// import CheckboxWithDescription from '../CheckboxWithDescription';
-// import CustomCheckbox from '../CustomCheckbox';
 // import RelationForm from '../RelationForm';
 // import WrapperSelect from '../WrapperSelect';
 import findAttribute from '../../utils/findAttribute';
@@ -1237,8 +1235,6 @@ const FormModal = () => {
 
                                     let value;
 
-                                    // FIXME
-
                                     if (input.name === 'enum' && Array.isArray(retrievedValue)) {
                                       value = retrievedValue.join('\n');
                                     } else if (input.name === 'uid') {
@@ -1248,17 +1244,46 @@ const FormModal = () => {
                                       retrievedValue === ''
                                     ) {
                                       value = null;
-                                    } else if (input.type === 'checkbox' && !retrievedValue) {
-                                      value = false;
                                     } else {
                                       value = retrievedValue;
                                     }
+
+                                    // When extending the yup schema of an existing field (like in https://github.com/strapi/strapi/blob/293ff3b8f9559236609d123a2774e3be05ce8274/packages/strapi-plugin-i18n/admin/src/index.js#L52)
+                                    // and triggering a yup validation error in the UI (missing a required field for example)
+                                    // We got an object that looks like: formErrors = { "pluginOptions.i18n.localized": {...} }
+                                    // In order to deal with this error, we can't rely on lodash.get to resolve this key
+                                    // - lodash will try to access {pluginOptions: {i18n: {localized: true}}})
+                                    // - and we just want to access { "pluginOptions.i18n.localized": {...} }
+                                    // NOTE: this is a hack
+                                    const pluginOptionError = Object.keys(formErrors).find(
+                                      key => key === input.name
+                                    );
+
+                                    // Retrieve the error for a specific input
+                                    const errorId = pluginOptionError
+                                      ? formErrors[pluginOptionError].id
+                                      : get(
+                                          formErrors,
+                                          [
+                                            ...input.name
+                                              .split('.')
+                                              // The filter here is used when creating a component
+                                              // in the component step 1 modal
+                                              // Since the component info is stored in the
+                                              // componentToCreate object we can access the error
+                                              // By removing the key
+                                              .filter(key => key !== 'componentToCreate'),
+                                            'id',
+                                          ],
+                                          null
+                                        );
 
                                     return (
                                       <GridItem col={input.size || 6} key={input.name || key}>
                                         <GenericInput
                                           {...input}
                                           {...genericInputProps}
+                                          error={errorId}
                                           onChange={handleChange}
                                           value={value}
                                         />
@@ -1309,21 +1334,46 @@ const FormModal = () => {
                                       retrievedValue === ''
                                     ) {
                                       value = null;
-                                    }
-                                    // else if (input.type === 'checkbox' && !retrievedValue) {
-                                    //   value = false;
-                                    // }
-                                    else {
+                                    } else {
                                       value = retrievedValue;
                                     }
 
-                                    // FIX input size
-                                    // FIXME key in baseform
+                                    // When extending the yup schema of an existing field (like in https://github.com/strapi/strapi/blob/293ff3b8f9559236609d123a2774e3be05ce8274/packages/strapi-plugin-i18n/admin/src/index.js#L52)
+                                    // and triggering a yup validation error in the UI (missing a required field for example)
+                                    // We got an object that looks like: formErrors = { "pluginOptions.i18n.localized": {...} }
+                                    // In order to deal with this error, we can't rely on lodash.get to resolve this key
+                                    // - lodash will try to access {pluginOptions: {i18n: {localized: true}}})
+                                    // - and we just want to access { "pluginOptions.i18n.localized": {...} }
+                                    // NOTE: this is a hack
+                                    const pluginOptionError = Object.keys(formErrors).find(
+                                      key => key === input.name
+                                    );
+
+                                    // Retrieve the error for a specific input
+                                    const errorId = pluginOptionError
+                                      ? formErrors[pluginOptionError].id
+                                      : get(
+                                          formErrors,
+                                          [
+                                            ...input.name
+                                              .split('.')
+                                              // The filter here is used when creating a component
+                                              // in the component step 1 modal
+                                              // Since the component info is stored in the
+                                              // componentToCreate object we can access the error
+                                              // By removing the key
+                                              .filter(key => key !== 'componentToCreate'),
+                                            'id',
+                                          ],
+                                          null
+                                        );
+
                                     return (
                                       <GridItem col={input.size || 6} key={input.name || key}>
                                         <GenericInput
                                           {...input}
                                           {...genericInputProps}
+                                          error={errorId}
                                           isCreating={isCreating}
                                           onChange={handleChange}
                                           value={value}
@@ -1631,35 +1681,35 @@ const FormModal = () => {
   //                             );
   //                           }
 
-  //                           // When extending the yup schema of an existing field (like in https://github.com/strapi/strapi/blob/293ff3b8f9559236609d123a2774e3be05ce8274/packages/strapi-plugin-i18n/admin/src/index.js#L52)
-  //                           // and triggering a yup validation error in the UI (missing a required field for example)
-  //                           // We got an object that looks like: formErrors = { "pluginOptions.i18n.localized": {...} }
-  //                           // In order to deal with this error, we can't rely on lodash.get to resolve this key
-  //                           // - lodash will try to access {pluginOptions: {i18n: {localized: true}}})
-  //                           // - and we just want to access { "pluginOptions.i18n.localized": {...} }
-  //                           // NOTE: this is a hack
-  //                           const pluginOptionError = Object.keys(formErrors).find(
-  //                             key => key === input.name
-  //                           );
+  // // When extending the yup schema of an existing field (like in https://github.com/strapi/strapi/blob/293ff3b8f9559236609d123a2774e3be05ce8274/packages/strapi-plugin-i18n/admin/src/index.js#L52)
+  // // and triggering a yup validation error in the UI (missing a required field for example)
+  // // We got an object that looks like: formErrors = { "pluginOptions.i18n.localized": {...} }
+  // // In order to deal with this error, we can't rely on lodash.get to resolve this key
+  // // - lodash will try to access {pluginOptions: {i18n: {localized: true}}})
+  // // - and we just want to access { "pluginOptions.i18n.localized": {...} }
+  // // NOTE: this is a hack
+  // const pluginOptionError = Object.keys(formErrors).find(
+  //   key => key === input.name
+  // );
 
-  //                           // Retrieve the error for a specific input
-  //                           const errorId = pluginOptionError
-  //                             ? formErrors[pluginOptionError].id
-  //                             : get(
-  //                                 formErrors,
-  //                                 [
-  //                                   ...input.name
-  //                                     .split('.')
-  //                                     // The filter here is used when creating a component
-  //                                     // in the component step 1 modal
-  //                                     // Since the component info is stored in the
-  //                                     // componentToCreate object we can access the error
-  //                                     // By removing the key
-  //                                     .filter(key => key !== 'componentToCreate'),
-  //                                   'id',
-  //                                 ],
-  //                                 null
-  //                               );
+  // // Retrieve the error for a specific input
+  // const errorId = pluginOptionError
+  //   ? formErrors[pluginOptionError].id
+  //   : get(
+  //       formErrors,
+  //       [
+  //         ...input.name
+  //           .split('.')
+  //           // The filter here is used when creating a component
+  //           // in the component step 1 modal
+  //           // Since the component info is stored in the
+  //           // componentToCreate object we can access the error
+  //           // By removing the key
+  //           .filter(key => key !== 'componentToCreate'),
+  //         'id',
+  //       ],
+  //       null
+  //     );
 
   // const retrievedValue = get(modifiedData, input.name, '');
 
