@@ -230,12 +230,8 @@ const advancedForm = {
   media: () => {
     return {
       sections: [
-        { sectionTitle: null, items: [options.required, options.unique] },
         {
-          sectionTitle: {
-            id: getTrad('form.attribute.item.settings.name'),
-            defaultMessage: 'Settings',
-          },
+          sectionTitle: null,
           items: [
             {
               intlLabel: {
@@ -247,8 +243,14 @@ const advancedForm = {
               value: '',
               validations: {},
             },
-            options.private,
           ],
+        },
+        {
+          sectionTitle: {
+            id: getTrad('form.attribute.item.settings.name'),
+            defaultMessage: 'Settings',
+          },
+          items: [options.private, options.required, options.unique],
         },
       ],
     };
