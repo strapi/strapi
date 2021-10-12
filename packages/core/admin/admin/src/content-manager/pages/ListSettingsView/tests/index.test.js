@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, waitFor, screen } from '@testing-library/react';
+import { render, waitFor, screen, fireEvent } from '@testing-library/react';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
@@ -49,10 +49,7 @@ const layout = {
   options: {},
 };
 
-const history = createMemoryHistory();
-history.push('/content-manager');
-
-const App = (
+const makeApp = history => (
   <Router history={history}>
     <ModelsContext.Provider value={{ refetchData: jest.fn() }}>
       <QueryClientProvider client={client}>
@@ -72,7 +69,10 @@ const App = (
 
 describe('ADMIN | CM | LV | Configure the view', () => {
   it('renders and matches the snapshot', async () => {
-    const { container } = render(App);
+    const history = createMemoryHistory();
+    history.push('/content-manager');
+
+    const { container } = render(makeApp(history));
     await waitFor(() => {
       expect(screen.getByText('Configure the view - Michka')).toBeInTheDocument();
     });
@@ -797,6 +797,7 @@ describe('ADMIN | CM | LV | Configure the view', () => {
                     <a
                       class="c6"
                       href="/content-manager/undefined/api::restaurant.restaurant?page=1&sort=undefined:undefined"
+                      id="go-back"
                     >
                       <span
                         aria-hidden="true"
@@ -1322,5 +1323,23 @@ describe('ADMIN | CM | LV | Configure the view', () => {
         </div>
       </div>
     `);
+  });
+
+  it('should keep plugins query params when arriving on the page and going back', async () => {
+    const history = createMemoryHistory();
+    history.push(
+      '/content-manager/collectionType/api::category.category/configurations/list?plugins[i18n][locale]=fr'
+    );
+
+    const { container } = render(makeApp(history));
+    await waitFor(() => {
+      expect(screen.getByText('Configure the view - Michka')).toBeInTheDocument();
+    });
+
+    expect(history.location.search).toEqual('?plugins[i18n][locale]=fr');
+    fireEvent.click(container.querySelector('#go-back'));
+    expect(history.location.search).toEqual(
+      '?page=1&sort=undefined:undefined&plugins[i18n][locale]=fr'
+    );
   });
 });
