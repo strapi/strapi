@@ -18,9 +18,11 @@ import { Link } from '@strapi/parts/Link';
 import { Main } from '@strapi/parts/Main';
 import { H3 } from '@strapi/parts/Text';
 import { SimpleMenu, MenuItem } from '@strapi/parts/SimpleMenu';
+import { IconButton } from '@strapi/parts/IconButton';
 import { Button } from '@strapi/parts/Button';
 import CheckIcon from '@strapi/icons/CheckIcon';
 import BackIcon from '@strapi/icons/BackIcon';
+import AddIcon from '@strapi/icons/AddIcon';
 // import LayoutDndProvider from '../../components/LayoutDndProvider';
 import { checkIfAttributeIsDisplayable, getTrad } from '../../utils';
 import ModelsContext from '../../contexts/ModelsContext';
@@ -42,7 +44,7 @@ const ScrollableContainer = styled(Flex)`
 `;
 
 const SelectContainer = styled(Flex)`
-  max-width: ${200 / 16}rem;
+  max-width: ${32 / 16}rem;
 `;
 
 const ListSettingsView = ({ layout, slug }) => {
@@ -335,7 +337,16 @@ const ListSettingsView = ({ layout, slug }) => {
                   </Stack>
                 </ScrollableContainer>
                 <SelectContainer size="auto" paddingBottom={4}>
-                  <SimpleMenu label="Add a field" disabled={listRemainingFields.length <= 0}>
+                  <SimpleMenu
+                    label={formatMessage({
+                      id: 'content-manager.components.FieldSelect.label',
+                      defaultMessage: 'Add a field',
+                    })}
+                    as={IconButton}
+                    icon={<AddIcon />}
+                    disabled={listRemainingFields.length <= 0}
+                    data-testid="add-field"
+                  >
                     {listRemainingFields.map(field => (
                       <MenuItem key={field} onClick={() => handleAddField(field)}>
                         {field}

@@ -116,12 +116,12 @@ describe('ADMIN | CM | LV | Configure the view', () => {
       expect(screen.getByText('Configure the view - Michka')).toBeInTheDocument()
     );
 
-    fireEvent.mouseDown(screen.getByText('Add a field'));
+    fireEvent.mouseDown(screen.getByTestId('add-field'));
 
     await waitFor(() => expect(screen.getByText('cover')).toBeInTheDocument());
 
     fireEvent.mouseDown(screen.getByText('cover'));
-    fireEvent.mouseDown(screen.getByText('Add a field'));
+    fireEvent.mouseDown(screen.getByTestId('add-field'));
 
     expect(container).toMatchSnapshot();
   });

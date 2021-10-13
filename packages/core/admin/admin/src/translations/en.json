@@ -448,6 +448,7 @@
   "content-manager.components.DynamicZone.required": "Component is required",
   "content-manager.components.EmptyAttributesBlock.button": "Go to settings page",
   "content-manager.components.EmptyAttributesBlock.description": "You can change your settings",
+  "content-manager.components.FieldSelect.label": "Add a field",
   "content-manager.components.FieldItem.linkToComponentLayout": "Set the component's layout",
   "content-manager.components.FilterOptions.button.apply": "Apply",
   "content-manager.components.FiltersPickWrapper.PluginHeader.actions.apply": "Apply",

@@ -33,6 +33,7 @@ const DragButton = styled(ActionButton)`
 
 const FieldContainer = styled(Row)`
   min-width: ${200 / 16}rem;
+  max-height: ${32 / 16}rem;
   cursor: pointer;
 
   svg {
