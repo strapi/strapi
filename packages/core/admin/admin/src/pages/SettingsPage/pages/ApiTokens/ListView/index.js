@@ -16,10 +16,10 @@ import AddIcon from '@strapi/icons/AddIcon';
 import { useQuery } from 'react-query';
 import { useHistory } from 'react-router-dom';
 import qs from 'qs';
-import TableRows from './DynamicTable';
 import { axiosInstance } from '../../../../../core/utils';
 import adminPermissions from '../../../../../permissions';
 import tableHeaders from './utils/tableHeaders';
+import TableRows from './DynamicTable';
 
 const ApiTokenListView = () => {
   useFocusWhenNavigate();
@@ -44,7 +44,7 @@ const ApiTokenListView = () => {
       return data;
     },
     {
-      enabled: !!canRead,
+      enabled: canRead,
       onError: () => {
         toggleNotification({
           type: 'warning',

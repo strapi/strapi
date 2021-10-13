@@ -2,21 +2,21 @@ import React from 'react';
 import { Text } from '@strapi/parts/Text';
 import { Tbody, Tr, Td } from '@strapi/parts/Table';
 import { Row } from '@strapi/parts/Row';
-import { RelativeTime } from '@strapi/helper-plugin';
+import { RelativeTime, useQueryParams } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
-import { useLocation } from 'react-router-dom';
 import DeleteButton from './DeleteButton';
 import UpdateButton from './UpdateButton';
 
 const TableRows = ({ canDelete, canUpdate, onClickDelete, withBulkActions, rows }) => {
   const { formatMessage } = useIntl();
-  const { search } = useLocation();
+  const [{ query }] = useQueryParams();
+  const [, sortOrder] = query.sort.split(':');
 
   const apiTokens = rows.sort((a, b) => {
     const comparaison = a.name.localeCompare(b.name);
 
-    return search.endsWith('DESC') ? -comparaison : comparaison;
+    return sortOrder === 'DESC' ? -comparaison : comparaison;
   });
 
   return (
@@ -25,17 +25,17 @@ const TableRows = ({ canDelete, canUpdate, onClickDelete, withBulkActions, rows 
         return (
           <Tr key={apiToken.id}>
             <Td key="name">
-              <Text textColor="Neutral800" bold>
+              <Text textColor="neutral800" bold>
                 {apiToken.name}
               </Text>
             </Td>
             <Td key="description">
-              <Text textColor="Neutral800" ellipsis>
+              <Text textColor="neutral800" ellipsis>
                 {apiToken.description}
               </Text>
             </Td>
             <Td key="type">
-              <Text textColor="Neutral800">
+              <Text textColor="neutral800">
                 {formatMessage({
                   id: `Settings.apiTokens.types.${apiToken.type}`,
                   defaultMessage: 'Type unknown',
@@ -43,7 +43,7 @@ const TableRows = ({ canDelete, canUpdate, onClickDelete, withBulkActions, rows 
               </Text>
             </Td>
             <Td key="createdAt">
-              <Text textColor="Neutral800">
+              <Text textColor="neutral800">
                 <RelativeTime timestamp={new Date(apiToken.createdAt)} />
               </Text>
             </Td>
