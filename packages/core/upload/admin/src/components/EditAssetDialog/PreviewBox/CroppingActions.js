@@ -10,7 +10,7 @@ import { useIntl } from 'react-intl';
 import getTrad from '../../../utils/getTrad';
 import { CroppingActionRow } from './components';
 
-export const CroppingActions = ({ onCancel, onValidate }) => {
+export const CroppingActions = ({ onCancel, onValidate, onDuplicate }) => {
   const { formatMessage } = useIntl();
 
   return (
@@ -34,8 +34,18 @@ export const CroppingActions = ({ onCancel, onValidate }) => {
             as={IconButton}
             icon={<CheckIcon />}
           >
-            <MenuItem onClick={onValidate}>Crop the original asset</MenuItem>
-            <MenuItem>Somewhere internal</MenuItem>
+            <MenuItem onClick={onValidate}>
+              {formatMessage({
+                id: getTrad('checkControl.crop-original'),
+                defaultMessage: 'Crop the original asset',
+              })}
+            </MenuItem>
+            <MenuItem onClick={onDuplicate}>
+              {formatMessage({
+                id: getTrad('checkControl.crop-duplicate'),
+                defaultMessage: 'Duplicate & crop the asset',
+              })}
+            </MenuItem>
           </SimpleMenu>
         </Stack>
       </CroppingActionRow>
@@ -45,5 +55,6 @@ export const CroppingActions = ({ onCancel, onValidate }) => {
 
 CroppingActions.propTypes = {
   onCancel: PropTypes.func.isRequired,
+  onDuplicate: PropTypes.func.isRequired,
   onValidate: PropTypes.func.isRequired,
 };
