@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
 import { Row } from '@strapi/parts/Row';
 import { Box } from '@strapi/parts/Box';
 import { ButtonText } from '@strapi/parts/Text';
@@ -70,6 +71,7 @@ const FieldWrapper = styled(Box)`
 `;
 
 const DraggableCard = ({ title, onRemoveField }) => {
+  const { formatMessage } = useIntl();
   const editButtonRef = useRef();
 
   const rowHandleClick = () => {
@@ -88,7 +90,16 @@ const DraggableCard = ({ title, onRemoveField }) => {
         onClick={rowHandleClick}
       >
         <Stack horizontal size={3}>
-          <DragButton aria-label={`move ${title}`} type="button">
+          <DragButton
+            aria-label={formatMessage(
+              {
+                id: 'content-manager.components.DraggableCard.move.field',
+                defaultMessage: 'Move {item}',
+              },
+              { item: title }
+            )}
+            type="button"
+          >
             <Drag />
           </DragButton>
           <ButtonText>{title}</ButtonText>
@@ -100,15 +111,27 @@ const DraggableCard = ({ title, onRemoveField }) => {
               e.stopPropagation();
               console.log('edit');
             }}
-            aria-label={`edit ${title}`}
+            aria-label={formatMessage(
+              {
+                id: 'content-manager.components.DraggableCard.edit.field',
+                defaultMessage: 'Edit {item}',
+              },
+              { item: title }
+            )}
             type="button"
           >
             <EditIcon />
           </ActionButton>
           <ActionButton
             onClick={onRemoveField}
-            aria-label={`delete ${title}`}
-            data-testId={`delete-${title}`}
+            data-testid={`delete-${title}`}
+            aria-label={formatMessage(
+              {
+                id: 'content-manager.components.DraggableCard.delete.field',
+                defaultMessage: 'Delete {item}',
+              },
+              { item: title }
+            )}
             type="button"
           >
             <CloseAlertIcon />

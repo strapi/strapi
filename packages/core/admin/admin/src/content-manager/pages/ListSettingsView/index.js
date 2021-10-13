@@ -1,4 +1,4 @@
-import React, { memo, useContext, useMemo, useReducer, useState } from 'react';
+import React, { memo, useContext, useReducer, useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { useMutation } from 'react-query';
@@ -17,7 +17,7 @@ import { Layout, HeaderLayout, ContentLayout } from '@strapi/parts/Layout';
 import { Link } from '@strapi/parts/Link';
 import { Main } from '@strapi/parts/Main';
 import { H3 } from '@strapi/parts/Text';
-import { Select, Option } from '@strapi/parts/Select';
+import { SimpleMenu, MenuItem } from '@strapi/parts/SimpleMenu';
 import { Button } from '@strapi/parts/Button';
 import CheckIcon from '@strapi/icons/CheckIcon';
 import BackIcon from '@strapi/icons/BackIcon';
@@ -74,9 +74,7 @@ const ListSettingsView = ({ layout, slug }) => {
 
   const { attributes } = layout;
 
-  const displayedFields = useMemo(() => {
-    return get(modifiedData, ['layouts', 'list'], []);
-  }, [modifiedData]);
+  const displayedFields = get(modifiedData, ['layouts', 'list'], []);
 
   const sortOptions = Object.entries(attributes).reduce((acc, cur) => {
     const [name, { type }] = cur;
@@ -178,16 +176,14 @@ const ListSettingsView = ({ layout, slug }) => {
   const { isLoading: isSubmittingForm } = submitMutation;
 
   const metadatas = get(modifiedData, ['metadatas'], {});
-  const listRemainingFields = useMemo(() => {
-    return Object.keys(metadatas)
-      .filter(key => {
-        return checkIfAttributeIsDisplayable(get(attributes, key, {}));
-      })
-      .filter(field => {
-        return !displayedFields.includes(field);
-      })
-      .sort();
-  }, [displayedFields, attributes, metadatas]);
+  const listRemainingFields = Object.keys(metadatas)
+    .filter(key => {
+      return checkIfAttributeIsDisplayable(get(attributes, key, {}));
+    })
+    .filter(field => {
+      return !displayedFields.includes(field);
+    })
+    .sort();
 
   // const handleClickEditLabel = labelToEdit => {
   //   dispatch({
@@ -339,19 +335,13 @@ const ListSettingsView = ({ layout, slug }) => {
                   </Stack>
                 </ScrollableContainer>
                 <SelectContainer size="auto" paddingBottom={4}>
-                  <Select
-                    disabled={listRemainingFields.length <= 0}
-                    onChange={e => handleAddField(e)}
-                    value=""
-                    placeholder="Add a field"
-                    data-testid="select-fields"
-                  >
+                  <SimpleMenu label="Add a field" disabled={listRemainingFields.length <= 0}>
                     {listRemainingFields.map(field => (
-                      <Option id={field} value={field} key={field}>
+                      <MenuItem key={field} onClick={() => handleAddField(field)}>
                         {field}
-                      </Option>
+                      </MenuItem>
                     ))}
-                  </Select>
+                  </SimpleMenu>
                 </SelectContainer>
               </Row>
             </Box>
