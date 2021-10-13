@@ -90,6 +90,7 @@
     "@strapi/plugin-email": "3.6.8",
     "@strapi/plugin-upload": "3.6.8",
     "@strapi/utils": "3.6.8",
+    "bcrypt": "5.0.1",
     "boxen": "5.1.2",
     "chalk": "4.1.2",
     "chokidar": "3.5.2",

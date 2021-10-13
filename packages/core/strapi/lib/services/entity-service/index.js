@@ -16,9 +16,18 @@ const {
   deleteComponents,
 } = require('./components');
 const { transformParamsToQuery, pickSelectionParams } = require('./params');
+const { applyTransforms } = require('./attributes');
 
 // TODO: those should be strapi events used by the webhooks not the other way arround
 const { ENTRY_CREATE, ENTRY_UPDATE, ENTRY_DELETE } = webhookUtils.webhookEvents;
+
+const creationPipeline = (data, context) => {
+  return applyTransforms(data, context);
+};
+
+const updatePipeline = (data, context) => {
+  return applyTransforms(data, context);
+};
 
 module.exports = ctx => {
   const implementation = createDefaultImplementation(ctx);
@@ -131,7 +140,9 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
 
     let entity = await db.query(uid).create({
       ...query,
-      data: Object.assign(omitComponentData(model, validData), componentData),
+      data: creationPipeline(Object.assign(omitComponentData(model, validData), componentData), {
+        contentType: model,
+      }),
     });
 
     // TODO: upload the files then set the links in the entity like with compo to avoid making too many queries
@@ -172,7 +183,9 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
     let entity = await db.query(uid).update({
       ...query,
       where: { id: entityId },
-      data: Object.assign(omitComponentData(model, validData), componentData),
+      data: updatePipeline(Object.assign(omitComponentData(model, validData), componentData), {
+        contentType: model,
+      }),
     });
 
     // TODO: upload the files then set the links in the entity like with compo to avoid making too many queries
