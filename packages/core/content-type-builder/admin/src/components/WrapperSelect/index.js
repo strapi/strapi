@@ -48,7 +48,8 @@ const WrapperSelect = ({ error, label, name, type, ...rest }) => {
 
   if (type === 'allowedTypesSelect') {
     Component = AllowedTypesSelect;
-  } else if (type === 'creatableSelect') {
+    // } else if (type === 'creatableSelect') {
+  } else if (type === 'select-category') {
     Component = CreatableSelect;
   } else {
     Component = ComponentSelect;

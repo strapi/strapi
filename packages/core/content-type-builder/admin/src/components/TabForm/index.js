@@ -76,6 +76,14 @@ const TabForm = ({ form, formErrors, genericInputProps, modifiedData, onChange }
                   null
                 );
 
+            if (input.type === 'pushRight') {
+              return (
+                <GridItem col={input.size || 6} key={input.name || key}>
+                  <div />
+                </GridItem>
+              );
+            }
+
             return (
               <GridItem col={input.size || 6} key={input.name || key}>
                 <GenericInput

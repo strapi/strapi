@@ -16,7 +16,8 @@ const componentForm = {
           },
           {
             name: `${prefix}category`,
-            type: 'creatableSelect',
+            // type: 'creatableSelect',
+            type: 'select-category',
             intlLabel: {
               id: getTrad('modalForm.components.create-component.category.label'),
               defaultMessage: 'Select a category or enter a name to create a new one',

@@ -6,6 +6,7 @@ import useDataManager from '../../hooks/useDataManager';
 
 const CreatableSelect = ({ onChange, name, styles, value }) => {
   const { allComponentsCategories } = useDataManager();
+  console.log(value);
 
   const handleChange = (inputValue, actionMeta) => {
     const { action } = actionMeta;

@@ -35,6 +35,8 @@ import ContentTypeRadioGroup from '../ContentTypeRadioGroup';
 import TabForm from '../TabForm';
 // import ComponentIconPicker from '../ComponentIconPicker';
 import Relation from '../Relation';
+import SelectCategory from '../SelectCategory';
+// import SelectCategory from '../WrapperSelect';
 // import WrapperSelect from '../WrapperSelect';
 import findAttribute from '../../utils/findAttribute';
 import getTrad from '../../utils/getTrad';
@@ -1090,6 +1092,7 @@ const FormModal = () => {
       'content-type-radio-group': ContentTypeRadioGroup,
       'radio-group': CustomRadioGroup,
       relation: Relation,
+      'select-category': SelectCategory,
       'select-default-boolean': BooleanDefaultValueSelect,
       'toggle-draft-publish': DraftAndPublishToggle,
       ...inputsFromPlugins,
