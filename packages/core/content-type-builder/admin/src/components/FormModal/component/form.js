@@ -16,7 +16,6 @@ const componentForm = {
           },
           {
             name: `${prefix}category`,
-            // type: 'creatableSelect',
             type: 'select-category',
             intlLabel: {
               id: getTrad('modalForm.components.create-component.category.label'),
@@ -30,7 +29,7 @@ const componentForm = {
         items: [
           {
             name: `${prefix}icon`,
-            type: 'componentIconPicker',
+            type: 'component-icon-picker',
             size: 12,
             intlLabel: {
               id: getTrad('modalForm.components.icon.label'),

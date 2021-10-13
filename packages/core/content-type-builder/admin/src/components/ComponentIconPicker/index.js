@@ -1,19 +1,24 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { useClickAwayListener } from '@buffetjs/hooks';
-import { Label, ErrorMessage } from '@buffetjs/styles';
-import { AutoSizer, Collection } from 'react-virtualized';
 import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+import { AutoSizer, Collection } from 'react-virtualized';
+import { Searchbar } from '@strapi/parts/Searchbar';
+import { IconButton } from '@strapi/parts/IconButton';
+import SearchIcon from '@strapi/icons/SearchIcon';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Box } from '@strapi/parts/Box';
+import { Row } from '@strapi/parts/Row';
+import { Stack } from '@strapi/parts/Stack';
+import { Text, P } from '@strapi/parts/Text';
 import useDataManager from '../../hooks/useDataManager';
-import CellRenderer from './CellRenderer';
-import Search from './Search';
-import SearchWrapper from './SearchWrapper';
-import Wrapper from './Wrapper';
+import getTrad from '../../utils/getTrad';
+import Cell from './Cell';
 
-/* eslint-disable jsx-a11y/control-has-associated-label */
+const CELL_WIDTH = 44;
 
-const ComponentIconPicker = ({ error, isCreating, label, name, onChange, value }) => {
+const ComponentIconPicker = ({ error, isCreating, intlLabel, name, onChange, value }) => {
   const { allIcons, allComponentsIconAlreadyTaken } = useDataManager();
+  const { formatMessage } = useIntl();
   const [originalIcon] = useState(value);
   const initialIcons = allIcons.filter(ico => {
     if (isCreating) {
@@ -23,38 +28,34 @@ const ComponentIconPicker = ({ error, isCreating, label, name, onChange, value }
     // Edition
     return !allComponentsIconAlreadyTaken.filter(icon => icon !== originalIcon).includes(ico);
   });
-  const ref = useRef();
+
   const searchWrapperRef = useRef();
   const [showSearch, setShowSearch] = useState(false);
   const [search, setSearch] = useState('');
   const [icons, setIcons] = useState(initialIcons);
   const toggleSearch = () => setShowSearch(prev => !prev);
 
-  useClickAwayListener(searchWrapperRef, () => {
-    setShowSearch(false);
-  });
-
   useEffect(() => {
-    if (showSearch && ref.current) {
-      ref.current.focus();
+    if (showSearch) {
+      searchWrapperRef.current.querySelector('input').focus();
     }
-  }, [ref, showSearch]);
+  }, [showSearch]);
 
-  const cellCount = icons.length;
+  const handleChangeSearch = ({ target: { value } }) => {
+    setSearch(value);
+    setIcons(() => initialIcons.filter(icon => icon.includes(value)));
+  };
+
+  const errorMessage = error ? formatMessage({ id: error, defaultMessage: error }) : '';
 
   const cellSizeAndPositionGetter = ({ index }) => {
     const columnCount = 16;
     const columnPosition = index % (columnCount || 1);
 
-    const height = 48;
-    const width = 52;
-    let x = columnPosition * width;
-
-    if (x === 0) {
-      x = 8;
-    }
-
-    const y = parseInt(index / 16, 10) * 48;
+    const height = CELL_WIDTH;
+    const width = CELL_WIDTH;
+    const x = columnPosition * (width + 1);
+    const y = parseInt(index / 16, 10) * CELL_WIDTH;
 
     return {
       height,
@@ -64,66 +65,96 @@ const ComponentIconPicker = ({ error, isCreating, label, name, onChange, value }
     };
   };
 
-  const handleChangeSearch = ({ target: { value } }) => {
-    setSearch(value);
-    setIcons(() => initialIcons.filter(icon => icon.includes(value)));
-  };
+  const cellCount = icons.length;
 
   return (
-    <Wrapper error={error !== null}>
-      <div className="search">
-        <Label htmlFor={name} style={{ marginBottom: 12 }}>
-          {label}
-        </Label>
-        {!showSearch ? (
-          <button onClick={toggleSearch} type="button">
-            <FontAwesomeIcon icon="search" />
-          </button>
-        ) : (
-          <SearchWrapper ref={searchWrapperRef}>
-            <FontAwesomeIcon icon="search" />
-            <button onClick={toggleSearch} type="button" />
-            <Search ref={ref} onChange={handleChangeSearch} value={search} placeholder="Search…" />
-            <button
-              onClick={() => {
-                setSearch('');
-                setIcons(initialIcons);
-                toggleSearch();
-              }}
-              type="button"
-            >
-              <FontAwesomeIcon icon="times" />
-            </button>
-          </SearchWrapper>
-        )}
-      </div>
-      <AutoSizer disableHeight>
-        {({ width }) => {
-          return (
-            <Collection
-              cellCount={cellCount}
-              cellRenderer={({ key, index, ...rest }) => {
-                return (
-                  <CellRenderer
-                    {...rest}
-                    key={key}
-                    icon={icons[index]}
-                    name={name}
-                    value={value}
-                    onChange={onChange}
-                  />
-                );
-              }}
-              cellSizeAndPositionGetter={cellSizeAndPositionGetter}
-              className="collection"
-              height={144}
-              width={width + 4}
-            />
-          );
-        }}
-      </AutoSizer>
-      {error && <ErrorMessage style={{ marginTop: 5, marginBottom: 16 }}>{error}</ErrorMessage>}
-    </Wrapper>
+    <Box>
+      <Stack size={1}>
+        <Row justifyContent="space-between">
+          <Text textColor="neutral800" htmlFor={name} small bold as="label">
+            {formatMessage(intlLabel)}
+          </Text>
+          {showSearch ? (
+            <div ref={searchWrapperRef}>
+              <Searchbar
+                name="searchbar"
+                onBlur={() => {
+                  if (!search) {
+                    toggleSearch();
+                  }
+                }}
+                onClear={() => {
+                  setSearch('');
+                  setIcons(initialIcons);
+                  toggleSearch();
+                }}
+                value={search}
+                onChange={handleChangeSearch}
+                clearLabel="Clearing the icon search"
+                placeholder={formatMessage({
+                  id: getTrad('ComponentIconPicker.search.placeholder'),
+                  defaultMessage: 'Search for an icon',
+                })}
+                size="S"
+              >
+                {formatMessage({
+                  id: getTrad('ComponentIconPicker.search.placeholder'),
+                  defaultMessage: 'Search for an icon',
+                })}
+              </Searchbar>
+            </div>
+          ) : (
+            <IconButton onClick={toggleSearch} aria-label="Edit" icon={<SearchIcon />} />
+          )}
+        </Row>
+        <Stack size={1}>
+          <Box background="neutral100" borderColor={error ? 'danger600' : ''} hasRadius>
+            <Box>
+              <AutoSizer disableHeight>
+                {({ width }) => {
+                  return (
+                    <Collection
+                      cellCount={cellCount}
+                      cellRenderer={({ index, key, style }) => {
+                        const icon = icons[index];
+                        const isSelected = icon === value;
+                        const handleClick = () => {
+                          onChange({ target: { name, value: icon } });
+                        };
+
+                        return (
+                          <div style={{ ...style, width: CELL_WIDTH }} key={key}>
+                            <Cell
+                              style={{ width: '100%', height: CELL_WIDTH }}
+                              alignItems="center"
+                              justifyContent="center"
+                              onClick={handleClick}
+                              isSelected={isSelected}
+                              as="button"
+                              type="button"
+                            >
+                              <FontAwesomeIcon icon={icon} />
+                            </Cell>
+                          </div>
+                        );
+                      }}
+                      cellSizeAndPositionGetter={cellSizeAndPositionGetter}
+                      height={132}
+                      width={width}
+                    />
+                  );
+                }}
+              </AutoSizer>
+            </Box>
+          </Box>
+          {error && (
+            <P small id={`${name}-error`} textColor="danger600" data-strapi-field-error>
+              {errorMessage}
+            </P>
+          )}
+        </Stack>
+      </Stack>
+    </Box>
   );
 };
 
@@ -134,7 +165,11 @@ ComponentIconPicker.defaultProps = {
 ComponentIconPicker.propTypes = {
   error: PropTypes.string,
   isCreating: PropTypes.bool.isRequired,
-  label: PropTypes.string.isRequired,
+  intlLabel: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    defaultMessage: PropTypes.string.isRequired,
+    values: PropTypes.object,
+  }).isRequired,
   name: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
   value: PropTypes.string.isRequired,

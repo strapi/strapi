@@ -1,40 +1,31 @@
 import styled from 'styled-components';
+import { Row } from '@strapi/parts/Row';
 
-/* eslint-disable indent */
-const Cell = styled.div`
-  width: 54px;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: absolute;
-  cursor: pointer;
-
-  ${({ isSelected }) => {
+const Cell = styled(Row)`
+  svg {
+    z-index: 2;
+    color: ${({ isSelected, theme }) =>
+      isSelected ? theme.colors.primary600 : theme.colors.neutral300};
+  }
+  ${({ isSelected, theme }) => {
     if (isSelected) {
       return `
-        &::after {
-          content: '';
-          position: absolute;
-          top: 4px;
-          left: 6px;
-          border-radius: 50%;
-          width: 40px;
-          height: 40px;
-          background-color: #AED4FB;
-          z-index: 1;
-        }
-      `;
+      &::after {
+        content: '';
+        position: absolute;
+        top: 8px;
+        left: 8px;
+        border-radius: 50%;
+        width: 28px;
+        height: 28px;
+        background-color: ${theme.colors.primary200};
+        z-index: 1;
+      }
+    `;
     }
 
     return '';
   }}
-
-  > svg {
-    z-index: 9;
-    font-size: 18px;
-    color: ${({ isSelected }) => (isSelected ? '#007EFF' : '#b4b6ba')};
-  }
 `;
 
 export default Cell;

@@ -33,7 +33,7 @@ import CheckboxWithNumberField from '../CheckboxWithNumberField';
 import CustomRadioGroup from '../CustomRadioGroup';
 import ContentTypeRadioGroup from '../ContentTypeRadioGroup';
 import TabForm from '../TabForm';
-// import ComponentIconPicker from '../ComponentIconPicker';
+import ComponentIconPicker from '../ComponentIconPicker';
 import Relation from '../Relation';
 import SelectCategory from '../SelectCategory';
 // import SelectCategory from '../WrapperSelect';
@@ -1089,6 +1089,7 @@ const FormModal = () => {
     customInputs: {
       'allowed-types-select': AllowedTypesSelect,
       'checkbox-with-number-field': CheckboxWithNumberField,
+      'component-icon-picker': ComponentIconPicker,
       'content-type-radio-group': ContentTypeRadioGroup,
       'radio-group': CustomRadioGroup,
       relation: Relation,

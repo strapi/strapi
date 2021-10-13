@@ -189,5 +189,6 @@
   "table.content.create-first-content-type": "Create your first Collection-Type",
   "table.button.no-fields": "Add new field",
   "table.headers.name": "Name",
-  "table.headers.type": "Type"
+  "table.headers.type": "Type",
+  "ComponentIconPicker.search.placeholder": "Search for an icon"
 }
