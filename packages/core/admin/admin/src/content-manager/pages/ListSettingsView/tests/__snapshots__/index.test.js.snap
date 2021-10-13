@@ -2637,6 +2637,24 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   outline: none;
 }
 
+.c46 {
+  display: grid;
+  grid-template-columns: repeat(12,1fr);
+  gap: 16px;
+}
+
+.c47 {
+  grid-column: span 6;
+}
+
+.c61 {
+  grid-column: span 3;
+}
+
+.c31 {
+  gap: 16px;
+}
+
 .c96 {
   font-weight: 400;
   font-size: 0.875rem;
@@ -2722,24 +2740,6 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
 
 .c94:hover {
   background-color: #f0f0ff;
-}
-
-.c46 {
-  display: grid;
-  grid-template-columns: repeat(12,1fr);
-  gap: 16px;
-}
-
-.c47 {
-  grid-column: span 6;
-}
-
-.c61 {
-  grid-column: span 3;
-}
-
-.c31 {
-  gap: 16px;
 }
 
 .c76 {

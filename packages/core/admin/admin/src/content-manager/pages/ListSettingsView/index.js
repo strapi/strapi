@@ -1,6 +1,5 @@
 import React, { memo, useContext, useReducer, useState } from 'react';
 import PropTypes from 'prop-types';
-import styled from 'styled-components';
 import { useMutation } from 'react-query';
 import isEqual from 'lodash/isEqual';
 import upperFirst from 'lodash/upperFirst';
@@ -10,42 +9,23 @@ import { stringify } from 'qs';
 import { useNotification, useTracking, ConfirmDialog } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { Box } from '@strapi/parts/Box';
-import { Row } from '@strapi/parts/Row';
-import { Stack } from '@strapi/parts/Stack';
 import { Divider } from '@strapi/parts/Divider';
 import { Layout, HeaderLayout, ContentLayout } from '@strapi/parts/Layout';
 import { Link } from '@strapi/parts/Link';
 import { Main } from '@strapi/parts/Main';
-import { H3 } from '@strapi/parts/Text';
-import { SimpleMenu, MenuItem } from '@strapi/parts/SimpleMenu';
-import { IconButton } from '@strapi/parts/IconButton';
 import { Button } from '@strapi/parts/Button';
 import CheckIcon from '@strapi/icons/CheckIcon';
 import BackIcon from '@strapi/icons/BackIcon';
-import AddIcon from '@strapi/icons/AddIcon';
 // import LayoutDndProvider from '../../components/LayoutDndProvider';
 import { checkIfAttributeIsDisplayable, getTrad } from '../../utils';
 import ModelsContext from '../../contexts/ModelsContext';
 import { usePluginsQueryParams } from '../../hooks';
 import putCMSettingsLV from './utils/api';
 import Settings from './components/Settings';
-import DraggableCard from './components/DraggableCard';
+import View from './components/View';
 import init from './init';
 import reducer, { initialState } from './reducer';
 import { EXCLUDED_SORT_OPTIONS } from './utils/excludedSortOptions';
-
-const Flex = styled(Box)`
-  flex: ${({ size }) => size};
-`;
-
-const ScrollableContainer = styled(Flex)`
-  overflow-x: scroll;
-  overflow-y: hidden;
-`;
-
-const SelectContainer = styled(Flex)`
-  max-width: ${32 / 16}rem;
-`;
 
 const ListSettingsView = ({ layout, slug }) => {
   const { formatMessage } = useIntl();
@@ -308,53 +288,12 @@ const ListSettingsView = ({ layout, slug }) => {
               <Box paddingTop={6} paddingBottom={6}>
                 <Divider />
               </Box>
-              <Box paddingBottom={4}>
-                <H3 as="h2">
-                  {formatMessage({
-                    id: 'content-manager.containers.SettingPage.view',
-                    defaultMessage: 'View',
-                  })}
-                </H3>
-              </Box>
-              <Row
-                paddingTop={4}
-                paddingLeft={4}
-                paddingRight={4}
-                borderColor="neutral300"
-                borderStyle="dashed"
-                borderWidth="1px"
-                hasRadius
-              >
-                <ScrollableContainer size="1" paddingBottom={4}>
-                  <Stack horizontal size={3}>
-                    {displayedFields.map((field, index) => (
-                      <DraggableCard
-                        onRemoveField={e => handleRemoveField(e, index)}
-                        key={field}
-                        title={field}
-                      />
-                    ))}
-                  </Stack>
-                </ScrollableContainer>
-                <SelectContainer size="auto" paddingBottom={4}>
-                  <SimpleMenu
-                    label={formatMessage({
-                      id: 'content-manager.components.FieldSelect.label',
-                      defaultMessage: 'Add a field',
-                    })}
-                    as={IconButton}
-                    icon={<AddIcon />}
-                    disabled={listRemainingFields.length <= 0}
-                    data-testid="add-field"
-                  >
-                    {listRemainingFields.map(field => (
-                      <MenuItem key={field} onClick={() => handleAddField(field)}>
-                        {field}
-                      </MenuItem>
-                    ))}
-                  </SimpleMenu>
-                </SelectContainer>
-              </Row>
+              <View
+                listRemainingFields={listRemainingFields}
+                displayedFields={displayedFields}
+                handleAddField={handleAddField}
+                handleRemoveField={handleRemoveField}
+              />
             </Box>
           </ContentLayout>
           <ConfirmDialog

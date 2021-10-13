@@ -74,6 +74,7 @@ const FieldWrapper = styled(Box)`
 const DraggableCard = ({ title, onRemoveField }) => {
   const { formatMessage } = useIntl();
   const editButtonRef = useRef();
+  const cardTitle = title.length > 12 ? `${title.substring(0, 12)}...` : title;
 
   const rowHandleClick = () => {
     if (editButtonRef.current) {
@@ -103,7 +104,7 @@ const DraggableCard = ({ title, onRemoveField }) => {
           >
             <Drag />
           </DragButton>
-          <ButtonText>{title}</ButtonText>
+          <ButtonText>{cardTitle}</ButtonText>
         </Stack>
         <Row>
           <ActionButton
