@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Stack } from '@strapi/parts/Stack';
@@ -23,7 +23,7 @@ import { CroppingActions } from './CroppingActions';
 import { CopyLinkButton } from './CopyLinkButton';
 import { UploadProgress } from '../../UploadProgress';
 
-export const PreviewBox = ({ asset, onDelete }) => {
+export const PreviewBox = ({ asset, onDelete, replacementFile }) => {
   const previewRef = useRef(null);
   const [assetUrl, setAssetUrl] = useState(prefixFileUrlWithBackendUrl(asset.url));
   const { formatMessage } = useIntl();
@@ -39,13 +39,22 @@ export const PreviewBox = ({ asset, onDelete }) => {
   } = useCropImg();
   const { editAsset, error, isLoading, progress, cancel } = useEditAsset();
 
+  useEffect(() => {
+    // Whenever a replacementUrl is set, make sure to permutate the real asset.url by
+    // the locally generated one
+    if (replacementFile) {
+      const fileLocalUrl = URL.createObjectURL(replacementFile);
+      setAssetUrl(fileLocalUrl);
+    }
+  }, [replacementFile]);
+
   const handleCropping = async () => {
     const nextAsset = { ...asset, width, height };
     const file = await produceFile(nextAsset.name, nextAsset.mime, nextAsset.updatedAt);
 
     await editAsset(nextAsset, file);
 
-    // Making sure that when persistent the new asset, the URL changes with width and height
+    // Making sure that when persisting the new asset, the URL changes with width and height
     // So that the browser makes a request and handle the image caching correctly at the good size
     const optimizedCachingImage = `${asset.url}?width=${width}&height=${height}`;
     setAssetUrl(prefixFileUrlWithBackendUrl(optimizedCachingImage));
@@ -129,7 +138,12 @@ export const PreviewBox = ({ asset, onDelete }) => {
   );
 };
 
+PreviewBox.defaultProps = {
+  replacementFile: undefined,
+};
+
 PreviewBox.propTypes = {
+  replacementFile: PropTypes.instanceOf(File),
   asset: PropTypes.shape({
     id: PropTypes.number,
     height: PropTypes.number,

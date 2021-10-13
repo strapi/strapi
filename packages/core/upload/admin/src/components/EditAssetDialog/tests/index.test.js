@@ -1503,6 +1503,16 @@ describe('<EditAssetDialog />', () => {
                           Replace media
                         </span>
                       </button>
+                      <div
+                        class="c40"
+                      >
+                        <input
+                          aria-hidden="true"
+                          name="file"
+                          tabindex="-1"
+                          type="file"
+                        />
+                      </div>
                       <button
                         aria-disabled="false"
                         class="c44 c49"
