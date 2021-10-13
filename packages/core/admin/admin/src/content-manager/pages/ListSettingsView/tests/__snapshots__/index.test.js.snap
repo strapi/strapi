@@ -163,7 +163,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   background: #4945ff;
 }
 
-.c83 {
+.c84 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -177,21 +177,21 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   outline: none;
 }
 
-.c83 svg {
+.c84 svg {
   height: 12px;
   width: 12px;
 }
 
-.c83 svg > g,
-.c83 svg path {
+.c84 svg > g,
+.c84 svg path {
   fill: #ffffff;
 }
 
-.c83[aria-disabled='true'] {
+.c84[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c83:after {
+.c84:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -206,11 +206,11 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   border: 2px solid transparent;
 }
 
-.c83:focus-visible {
+.c84:focus-visible {
   outline: none;
 }
 
-.c83:focus-visible:after {
+.c84:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -221,7 +221,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   border: 2px solid #4945ff;
 }
 
-.c84 {
+.c85 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -238,26 +238,26 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   width: 2rem;
 }
 
-.c84 svg > g,
-.c84 svg path {
+.c85 svg > g,
+.c85 svg path {
   fill: #8e8ea9;
 }
 
-.c84:hover svg > g,
-.c84:hover svg path {
+.c85:hover svg > g,
+.c85:hover svg path {
   fill: #666687;
 }
 
-.c84:active svg > g,
-.c84:active svg path {
+.c85:active svg > g,
+.c85:active svg path {
   fill: #a5a5ba;
 }
 
-.c84[aria-disabled='true'] {
+.c85[aria-disabled='true'] {
   background-color: #eaeaef;
 }
 
-.c84[aria-disabled='true'] svg path {
+.c85[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -280,6 +280,10 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   border-radius: 4px;
   border-color: #eaeaef;
   border: 1px solid #eaeaef;
+}
+
+.c81 {
+  padding-left: 12px;
 }
 
 .c30 {
@@ -880,7 +884,6 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
 }
 
 .c74 {
-  min-width: 12.5rem;
   max-height: 2rem;
   cursor: pointer;
 }
@@ -921,7 +924,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   flex: 1;
 }
 
-.c81 {
+.c82 {
   -webkit-flex: auto;
   -ms-flex: auto;
   flex: auto;
@@ -932,7 +935,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   overflow-y: hidden;
 }
 
-.c82 {
+.c83 {
   max-width: 2rem;
 }
 
@@ -1583,7 +1586,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                         </span>
                       </div>
                       <div
-                        class="c66"
+                        class="c81 c66"
                       >
                         <button
                           aria-label="Edit id"
@@ -1685,7 +1688,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                         </span>
                       </div>
                       <div
-                        class="c66"
+                        class="c81 c66"
                       >
                         <button
                           aria-label="Edit address"
@@ -1732,7 +1735,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                 </div>
               </div>
               <div
-                class="c27 c81 c82"
+                class="c27 c82 c83"
               >
                 <div>
                   <span>
@@ -1742,7 +1745,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                       aria-expanded="false"
                       aria-haspopup="true"
                       aria-labelledby="tooltip-1"
-                      class="c83 c84"
+                      class="c84 c85"
                       data-testid="add-field"
                       tabindex="0"
                       type="button"
@@ -1773,7 +1776,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
 `;
 
 exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
-.c85 {
+.c86 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -1947,26 +1950,26 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   background: #4945ff;
 }
 
-.c86 {
+.c87 {
   background: #212134;
   padding: 8px;
   border-radius: 4px;
 }
 
-.c88 {
+.c89 {
   font-weight: 400;
   font-size: 0.75rem;
   line-height: 1.33;
   color: #ffffff;
 }
 
-.c87 {
+.c88 {
   position: absolute;
   z-index: 4;
   display: none;
 }
 
-.c83 {
+.c84 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -1980,21 +1983,21 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   outline: none;
 }
 
-.c83 svg {
+.c84 svg {
   height: 12px;
   width: 12px;
 }
 
-.c83 svg > g,
-.c83 svg path {
+.c84 svg > g,
+.c84 svg path {
   fill: #ffffff;
 }
 
-.c83[aria-disabled='true'] {
+.c84[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c83:after {
+.c84:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -2009,11 +2012,11 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   border: 2px solid transparent;
 }
 
-.c83:focus-visible {
+.c84:focus-visible {
   outline: none;
 }
 
-.c83:focus-visible:after {
+.c84:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -2024,7 +2027,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c84 {
+.c85 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -2041,26 +2044,26 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   width: 2rem;
 }
 
-.c84 svg > g,
-.c84 svg path {
+.c85 svg > g,
+.c85 svg path {
   fill: #8e8ea9;
 }
 
-.c84:hover svg > g,
-.c84:hover svg path {
+.c85:hover svg > g,
+.c85:hover svg path {
   fill: #666687;
 }
 
-.c84:active svg > g,
-.c84:active svg path {
+.c85:active svg > g,
+.c85:active svg path {
   fill: #a5a5ba;
 }
 
-.c84[aria-disabled='true'] {
+.c85[aria-disabled='true'] {
   background-color: #eaeaef;
 }
 
-.c84[aria-disabled='true'] svg path {
+.c85[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -2083,6 +2086,10 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   border-radius: 4px;
   border-color: #eaeaef;
   border: 1px solid #eaeaef;
+}
+
+.c81 {
+  padding-left: 12px;
 }
 
 .c30 {
@@ -2655,28 +2662,28 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   gap: 16px;
 }
 
-.c96 {
+.c97 {
   font-weight: 400;
   font-size: 0.875rem;
   line-height: 1.43;
   color: #32324d;
 }
 
-.c89 {
+.c90 {
   background: #ffffff;
   padding: 4px;
   border-radius: 4px;
 }
 
-.c92 {
+.c93 {
   padding: 4px;
 }
 
-.c95 {
+.c96 {
   padding: 8px;
 }
 
-.c93 {
+.c94 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -2694,7 +2701,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   align-items: center;
 }
 
-.c90 {
+.c91 {
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
   position: absolute;
   z-index: 4;
@@ -2702,28 +2709,28 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   background: #ffffff;
 }
 
-.c91 {
+.c92 {
   max-height: 15rem;
   overflow-y: auto;
   overflow-x: hidden;
 }
 
-.c91::-webkit-scrollbar {
+.c92::-webkit-scrollbar {
   -webkit-appearance: none;
   width: 4px;
 }
 
-.c91::-webkit-scrollbar-track {
+.c92::-webkit-scrollbar-track {
   background: #ffffff;
 }
 
-.c91::-webkit-scrollbar-thumb {
+.c92::-webkit-scrollbar-thumb {
   background: #eaeaef;
   border-radius: 4px;
   margin-right: 10px;
 }
 
-.c94 {
+.c95 {
   border: none;
   padding: 0;
   background: transparent;
@@ -2734,11 +2741,11 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   border-radius: 4px;
 }
 
-.c94:focus {
+.c95:focus {
   background-color: #f0f0ff;
 }
 
-.c94:hover {
+.c95:hover {
   background-color: #f0f0ff;
 }
 
@@ -2770,7 +2777,6 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
 }
 
 .c74 {
-  min-width: 12.5rem;
   max-height: 2rem;
   cursor: pointer;
 }
@@ -2811,7 +2817,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   flex: 1;
 }
 
-.c81 {
+.c82 {
   -webkit-flex: auto;
   -ms-flex: auto;
   flex: auto;
@@ -2822,7 +2828,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   overflow-y: hidden;
 }
 
-.c82 {
+.c83 {
   max-width: 2rem;
 }
 
@@ -3473,7 +3479,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                           </span>
                         </div>
                         <div
-                          class="c66"
+                          class="c81 c66"
                         >
                           <button
                             aria-label="Edit cover"
@@ -3575,7 +3581,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                           </span>
                         </div>
                         <div
-                          class="c66"
+                          class="c81 c66"
                         >
                           <button
                             aria-label="Edit id"
@@ -3677,7 +3683,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                           </span>
                         </div>
                         <div
-                          class="c66"
+                          class="c81 c66"
                         >
                           <button
                             aria-label="Edit address"
@@ -3724,7 +3730,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                   </div>
                 </div>
                 <div
-                  class="c27 c81 c82"
+                  class="c27 c82 c83"
                 >
                   <div>
                     <span>
@@ -3734,7 +3740,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                         aria-expanded="true"
                         aria-haspopup="true"
                         aria-labelledby="tooltip-7"
-                        class="c83 c84"
+                        class="c84 c85"
                         data-testid="add-field"
                         tabindex="0"
                         type="button"
@@ -3763,7 +3769,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
     </div>
   </div>
   <div
-    class="c85"
+    class="c86"
   >
     <p
       aria-live="polite"
@@ -3788,13 +3794,13 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
     data-react-portal="true"
   >
     <div
-      class="c86 c87"
+      class="c87 c88"
       id="tooltip-7"
       role="tooltip"
       style="left: 0px; top: -8px;"
     >
       <p
-        class="c88"
+        class="c89"
       >
         Add a field
       </p>
@@ -3804,32 +3810,32 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
     data-react-portal="true"
   >
     <div
-      class="c89 c90"
+      class="c90 c91"
       style="left: 0px; top: 4px;"
     >
       <div
-        class="c91"
+        class="c92"
       >
         <ul
-          class="c92"
+          class="c93"
           id="simplemenu-4"
           role="menu"
         >
           <li
-            class="c93"
+            class="c94"
             role="menuitem"
           >
             <button
-              class="c94"
+              class="c95"
               role="menuitem"
               tabindex="0"
               type="button"
             >
               <div
-                class="c95"
+                class="c96"
               >
                 <span
-                  class="c96"
+                  class="c97"
                 >
                   averagePrice
                 </span>
@@ -3837,20 +3843,20 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
             </button>
           </li>
           <li
-            class="c93"
+            class="c94"
             role="menuitem"
           >
             <button
-              class="c94"
+              class="c95"
               role="menuitem"
               tabindex="-1"
               type="button"
             >
               <div
-                class="c95"
+                class="c96"
               >
                 <span
-                  class="c96"
+                  class="c97"
                 >
                   since
                 </span>

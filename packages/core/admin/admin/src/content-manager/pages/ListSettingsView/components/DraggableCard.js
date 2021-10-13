@@ -32,7 +32,6 @@ const DragButton = styled(ActionButton)`
 `;
 
 const FieldContainer = styled(Row)`
-  min-width: ${200 / 16}rem;
   max-height: ${32 / 16}rem;
   cursor: pointer;
 
@@ -74,7 +73,7 @@ const FieldWrapper = styled(Box)`
 const DraggableCard = ({ title, onRemoveField }) => {
   const { formatMessage } = useIntl();
   const editButtonRef = useRef();
-  const cardTitle = title.length > 12 ? `${title.substring(0, 12)}...` : title;
+  const cardTitle = title.length > 20 ? `${title.substring(0, 20)}...` : title;
 
   const rowHandleClick = () => {
     if (editButtonRef.current) {
@@ -106,7 +105,7 @@ const DraggableCard = ({ title, onRemoveField }) => {
           </DragButton>
           <ButtonText>{cardTitle}</ButtonText>
         </Stack>
-        <Row>
+        <Row paddingLeft={3}>
           <ActionButton
             ref={editButtonRef}
             onClick={e => {
