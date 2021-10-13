@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { IconButton } from '@strapi/parts/IconButton';
 import { FocusTrap } from '@strapi/parts/FocusTrap';
+import { SimpleMenu, MenuItem } from '@strapi/parts/SimpleMenu';
 import CloseAlertIcon from '@strapi/icons/CloseAlertIcon';
 import CheckIcon from '@strapi/icons/CheckIcon';
 import { Stack } from '@strapi/parts/Stack';
@@ -25,14 +26,17 @@ export const CroppingActions = ({ onCancel, onValidate }) => {
             onClick={onCancel}
           />
 
-          <IconButton
+          <SimpleMenu
             label={formatMessage({
               id: getTrad('control-card.crop'),
               defaultMessage: 'Crop',
             })}
+            as={IconButton}
             icon={<CheckIcon />}
-            onClick={onValidate}
-          />
+          >
+            <MenuItem onClick={onValidate}>Crop the original asset</MenuItem>
+            <MenuItem>Somewhere internal</MenuItem>
+          </SimpleMenu>
         </Stack>
       </CroppingActionRow>
     </FocusTrap>
