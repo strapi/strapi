@@ -1507,6 +1507,7 @@ describe('<EditAssetDialog />', () => {
                         class="c40"
                       >
                         <input
+                          aria-hidden="true"
                           name="file"
                           tabindex="-1"
                           type="file"

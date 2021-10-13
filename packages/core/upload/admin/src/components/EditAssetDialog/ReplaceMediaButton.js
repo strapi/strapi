@@ -29,7 +29,14 @@ export const ReplaceMediaButton = ({ onSelectMedia }) => {
         })}
       </Button>
       <VisuallyHidden>
-        <input type="file" name="file" tabIndex={-1} ref={inputRef} onChange={handleChange} />
+        <input
+          type="file"
+          name="file"
+          tabIndex={-1}
+          ref={inputRef}
+          onChange={handleChange}
+          aria-hidden
+        />
       </VisuallyHidden>
     </>
   );
