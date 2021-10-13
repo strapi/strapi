@@ -1,67 +1,81 @@
-import React, { useState, useEffect, useMemo, useRef, memo } from 'react';
+import React, { useCallback, useState, useEffect, useMemo, memo } from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, useIntl } from 'react-intl';
 import { Link, useLocation } from 'react-router-dom';
-import { cloneDeep, findIndex, get, isArray, isEmpty, set } from 'lodash';
-import { request } from 'strapi-helper-plugin';
+import { findIndex, get, isArray, isEmpty, set } from 'lodash';
+import {
+  DropdownIndicator,
+  LabelIconWrapper,
+  NotAllowedInput,
+  request,
+  useContentManagerEditViewDataManager,
+  useQueryParams,
+} from 'strapi-helper-plugin';
 import { Flex, Text, Padded } from '@buffetjs/core';
+import { stringify } from 'qs';
 import pluginId from '../../pluginId';
-import useDataManager from '../../hooks/useDataManager';
-import useEditView from '../../hooks/useEditView';
-import { getFieldName } from '../../utils';
-import NotAllowedInput from '../NotAllowedInput';
 import SelectOne from '../SelectOne';
 import SelectMany from '../SelectMany';
 import ClearIndicator from './ClearIndicator';
-import DropdownIndicator from './DropdownIndicator';
 import IndicatorSeparator from './IndicatorSeparator';
 import Option from './Option';
 import { A, BaselineAlignment } from './components';
 import { connect, select, styles } from './utils';
 
+const initialPaginationState = {
+  _contains: '',
+  _limit: 20,
+  _start: 0,
+};
+
+const buildParams = (query, paramsToKeep) => {
+  if (!paramsToKeep) {
+    return {};
+  }
+
+  return paramsToKeep.reduce((acc, current) => {
+    const value = get(query, current, null);
+
+    if (value) {
+      set(acc, current, value);
+    }
+
+    return acc;
+  }, {});
+};
 function SelectWrapper({
-  componentUid,
   description,
-  displayNavigationLink,
   editable,
   label,
+  labelIcon,
   isCreatingEntry,
   isFieldAllowed,
   isFieldReadable,
   mainField,
   name,
   relationType,
-  slug,
   targetModel,
   placeholder,
+  queryInfos,
 }) {
+  const { formatMessage } = useIntl();
+  const [{ query }] = useQueryParams();
   // Disable the input in case of a polymorphic relation
-  const isMorph = relationType.toLowerCase().includes('morph');
-  const { addRelation, modifiedData, moveRelation, onChange, onRemoveRelation } = useDataManager();
-
-  const { isDraggingComponent } = useEditView();
-
-  // This is needed for making requests when used in a component
-  const fieldName = useMemo(() => {
-    const fieldNameArray = getFieldName(name);
-
-    return fieldNameArray[fieldNameArray.length - 1];
-  }, [name]);
-
+  const isMorph = useMemo(() => relationType.toLowerCase().includes('morph'), [relationType]);
+  const {
+    addRelation,
+    modifiedData,
+    moveRelation,
+    onChange,
+    onRemoveRelation,
+  } = useContentManagerEditViewDataManager();
   const { pathname } = useLocation();
 
   const value = get(modifiedData, name, null);
-  const [state, setState] = useState({
-    _contains: '',
-    _limit: 20,
-    _start: 0,
-  });
+  const [state, setState] = useState(initialPaginationState);
   const [options, setOptions] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const abortController = new AbortController();
-  const { signal } = abortController;
-  const ref = useRef();
-  const startRef = useRef();
+  const [isLoading, setIsLoading] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   const filteredOptions = useMemo(() => {
     return options.filter(option => {
@@ -79,37 +93,63 @@ function SelectWrapper({
     });
   }, [options, value]);
 
-  startRef.current = state._start;
+  const {
+    endPoint,
+    containsKey,
+    defaultParams,
+    shouldDisplayRelationLink,
+    paramsToKeep,
+  } = queryInfos;
 
-  ref.current = async () => {
-    if (isMorph) {
-      setIsLoading(false);
+  const isSingle = ['oneWay', 'oneToOne', 'manyToOne', 'oneToManyMorph', 'oneToOneMorph'].includes(
+    relationType
+  );
 
-      return;
+  const idsToOmit = useMemo(() => {
+    if (!value) {
+      return [];
     }
 
-    if (!isDraggingComponent) {
+    if (isSingle) {
+      return [value.id];
+    }
+
+    return value.map(val => val.id);
+  }, [isSingle, value]);
+
+  const getData = useCallback(
+    async signal => {
+      // Currently polymorphic relations are not handled
+      if (isMorph) {
+        setIsLoading(false);
+
+        return;
+      }
+
+      if (!isFieldAllowed) {
+        setIsLoading(false);
+
+        return;
+      }
+
+      setIsLoading(true);
+
+      const params = { _limit: state._limit, ...defaultParams };
+
+      if (state._contains) {
+        params[containsKey] = state._contains;
+      }
+
       try {
-        const requestUrl = `/${pluginId}/explorer/${slug}/relation-list/${fieldName}`;
-
-        const containsKey = `${mainField}_contains`;
-        const { _contains, ...restState } = cloneDeep(state);
-        const params = isEmpty(state._contains)
-          ? restState
-          : { [containsKey]: _contains, ...restState };
-
-        if (componentUid) {
-          set(params, '_component', componentUid);
-        }
-
-        const data = await request(requestUrl, {
-          method: 'GET',
+        const data = await request(endPoint, {
+          method: 'POST',
           params,
           signal,
+          body: { idsToOmit },
         });
 
         const formattedData = data.map(obj => {
-          return { value: obj, label: obj[mainField] };
+          return { value: obj, label: obj[mainField.name] };
         });
 
         setOptions(prevState =>
@@ -125,49 +165,34 @@ function SelectWrapper({
         );
         setIsLoading(false);
       } catch (err) {
-        if (err.code !== 20) {
-          strapi.notification.toggle({
-            type: 'warning',
-            message: { id: 'notification.error' },
-          });
-        }
+        // Silent
       }
-    }
-  };
+    },
+    [
+      isMorph,
+      isFieldAllowed,
+      state._limit,
+      state._contains,
+      defaultParams,
+      containsKey,
+      endPoint,
+      idsToOmit,
+      mainField.name,
+    ]
+  );
 
   useEffect(() => {
-    if (state._contains !== '') {
-      let timer = setTimeout(() => {
-        ref.current();
-      }, 300);
+    const abortController = new AbortController();
+    const { signal } = abortController;
 
-      return () => clearTimeout(timer);
+    if (isOpen) {
+      getData(signal);
     }
 
-    if (isFieldAllowed) {
-      ref.current();
-    } else {
-      setIsLoading(false);
-    }
+    return () => abortController.abort();
+  }, [getData, isOpen]);
 
-    return () => {
-      abortController.abort();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state._contains, isFieldAllowed]);
-
-  useEffect(() => {
-    if (state._start !== 0) {
-      ref.current();
-    }
-
-    return () => {
-      abortController.abort();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state._start]);
-
-  const onInputChange = (inputValue, { action }) => {
+  const handleInputChange = (inputValue, { action }) => {
     if (action === 'input-change') {
       setState(prevState => {
         if (prevState._contains === inputValue) {
@@ -181,33 +206,50 @@ function SelectWrapper({
     return inputValue;
   };
 
-  const onMenuScrollToBottom = () => {
-    setState(prevState => ({ ...prevState, _start: prevState._start + 20 }));
+  const handleMenuScrollToBottom = () => {
+    setState(prevState => ({ ...prevState, _limit: prevState._limit + 20 }));
   };
 
-  const isSingle = ['oneWay', 'oneToOne', 'manyToOne', 'oneToManyMorph', 'oneToOneMorph'].includes(
-    relationType
-  );
+  const handleMenuClose = () => {
+    setState(initialPaginationState);
+    setIsOpen(false);
+  };
+
+  const handleChange = value => {
+    onChange({ target: { name, value: value ? value.value : value } });
+  };
+
+  const handleAddRelation = value => {
+    if (!isEmpty(value)) {
+      addRelation({ target: { name, value } });
+    }
+  };
+
+  const handleMenuOpen = () => {
+    setIsOpen(true);
+  };
 
   const to = `/plugins/${pluginId}/collectionType/${targetModel}/${value ? value.id : null}`;
+
+  const searchToPersist = stringify(buildParams(query, paramsToKeep), { encode: false });
 
   const link = useMemo(() => {
     if (!value) {
       return null;
     }
 
-    if (!displayNavigationLink) {
+    if (!shouldDisplayRelationLink) {
       return null;
     }
 
     return (
-      <Link to={{ pathname: to, state: { from: pathname } }}>
+      <Link to={{ pathname: to, state: { from: pathname }, search: searchToPersist }}>
         <FormattedMessage id="content-manager.containers.Edit.seeDetails">
           {msg => <A color="mediumBlue">{msg}</A>}
         </FormattedMessage>
       </Link>
     );
-  }, [displayNavigationLink, pathname, to, value]);
+  }, [shouldDisplayRelationLink, pathname, to, value, searchToPersist]);
 
   const Component = isSingle ? SelectOne : SelectMany;
   const associationsLength = isArray(value) ? value.length : 0;
@@ -224,22 +266,37 @@ function SelectWrapper({
     return !editable;
   }, [isMorph, isCreatingEntry, editable, isFieldAllowed, isFieldReadable]);
 
+  const labelIconformatted = labelIcon
+    ? { icon: labelIcon.icon, title: formatMessage(labelIcon.title) }
+    : labelIcon;
+
   if (!isFieldAllowed && isCreatingEntry) {
-    return <NotAllowedInput label={label} />;
+    return <NotAllowedInput label={label} labelIcon={labelIconformatted} />;
   }
 
   if (!isCreatingEntry && !isFieldAllowed && !isFieldReadable) {
-    return <NotAllowedInput label={label} />;
+    return <NotAllowedInput label={label} labelIcon={labelIconformatted} />;
   }
 
   return (
     <Padded>
       <BaselineAlignment />
       <Flex justifyContent="space-between">
-        <Text fontWeight="semiBold">
-          {label}
-          {!isSingle && ` (${associationsLength})`}
-        </Text>
+        <Flex>
+          <Text fontWeight="semiBold">
+            <span>
+              {label}
+              {!isSingle && ` (${associationsLength})`}
+            </span>
+          </Text>
+          {labelIconformatted && (
+            <div style={{ lineHeight: '13px' }}>
+              <LabelIconWrapper title={labelIconformatted.title}>
+                {labelIconformatted.icon}
+              </LabelIconWrapper>
+            </div>
+          )}
+        </Flex>
         {isSingle && link}
       </Flex>
       {!isEmpty(description) && (
@@ -254,11 +311,9 @@ function SelectWrapper({
         <BaselineAlignment />
 
         <Component
-          addRelation={value => {
-            addRelation({ target: { name, value } });
-          }}
+          addRelation={handleAddRelation}
           components={{ ClearIndicator, DropdownIndicator, IndicatorSeparator, Option }}
-          displayNavigationLink={displayNavigationLink}
+          displayNavigationLink={shouldDisplayRelationLink}
           id={name}
           isDisabled={isDisabled}
           isLoading={isLoading}
@@ -267,14 +322,11 @@ function SelectWrapper({
           move={moveRelation}
           name={name}
           options={filteredOptions}
-          onChange={value => {
-            onChange({ target: { name, value: value ? value.value : value } });
-          }}
-          onInputChange={onInputChange}
-          onMenuClose={() => {
-            setState(prevState => ({ ...prevState, _contains: '' }));
-          }}
-          onMenuScrollToBottom={onMenuScrollToBottom}
+          onChange={handleChange}
+          onInputChange={handleInputChange}
+          onMenuClose={handleMenuClose}
+          onMenuOpen={handleMenuOpen}
+          onMenuScrollToBottom={handleMenuScrollToBottom}
           onRemove={onRemoveRelation}
           placeholder={
             isEmpty(placeholder) ? (
@@ -283,6 +335,7 @@ function SelectWrapper({
               placeholder
             )
           }
+          searchToPersist={searchToPersist}
           styles={styles}
           targetModel={targetModel}
           value={value}
@@ -294,29 +347,45 @@ function SelectWrapper({
 }
 
 SelectWrapper.defaultProps = {
-  componentUid: null,
   editable: true,
   description: '',
   label: '',
+  labelIcon: null,
   isFieldAllowed: true,
   placeholder: '',
 };
 
 SelectWrapper.propTypes = {
-  componentUid: PropTypes.string,
-  displayNavigationLink: PropTypes.bool.isRequired,
   editable: PropTypes.bool,
   description: PropTypes.string,
   label: PropTypes.string,
+  labelIcon: PropTypes.shape({
+    icon: PropTypes.node.isRequired,
+    title: PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      defaultMessage: PropTypes.string,
+    }),
+  }),
   isCreatingEntry: PropTypes.bool.isRequired,
   isFieldAllowed: PropTypes.bool,
   isFieldReadable: PropTypes.bool.isRequired,
-  mainField: PropTypes.string.isRequired,
+  mainField: PropTypes.shape({
+    name: PropTypes.string.isRequired,
+    schema: PropTypes.shape({
+      type: PropTypes.string.isRequired,
+    }).isRequired,
+  }).isRequired,
   name: PropTypes.string.isRequired,
   placeholder: PropTypes.string,
   relationType: PropTypes.string.isRequired,
-  slug: PropTypes.string.isRequired,
   targetModel: PropTypes.string.isRequired,
+  queryInfos: PropTypes.shape({
+    containsKey: PropTypes.string.isRequired,
+    defaultParams: PropTypes.object,
+    endPoint: PropTypes.string.isRequired,
+    shouldDisplayRelationLink: PropTypes.bool.isRequired,
+    paramsToKeep: PropTypes.array,
+  }).isRequired,
 };
 
 const Memoized = memo(SelectWrapper);

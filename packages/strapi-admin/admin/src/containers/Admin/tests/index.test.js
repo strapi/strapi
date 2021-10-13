@@ -20,6 +20,7 @@ describe('<Admin />', () => {
       admin: {
         appError: false,
         latestStrapiReleaseTag: '3',
+        shouldUpdateStrapi: false,
       },
       disableGlobalOverlayBlocker: jest.fn(),
       emitEvent: jest.fn(),

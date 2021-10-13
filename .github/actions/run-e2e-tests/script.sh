@@ -6,6 +6,4 @@ fi
 opts=($DB_OPTIONS)
 
 yarn run -s test:generate-app "${opts[@]}" $@
-yarn run -s test:start-app &
-wait-on http://localhost:1337
 yarn run -s test:e2e

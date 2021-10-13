@@ -16,6 +16,7 @@ const createDatabaseConfig = require('./resources/templates/database.js');
 const createServerConfig = require('./resources/templates/server.js');
 
 module.exports = async function createProject(scope, { client, connection, dependencies }) {
+  console.log(`Creating a new Strapi application at ${chalk.green(scope.rootPath)}.`);
   console.log('Creating files.');
 
   const { rootPath } = scope;
@@ -44,6 +45,7 @@ module.exports = async function createProject(scope, { client, connection, depen
         strapiVersion: scope.strapiVersion,
         projectName: _.kebabCase(scope.name),
         uuid: scope.uuid,
+        packageJsonStrapi: scope.packageJsonStrapi,
       }),
       {
         spaces: 2,
@@ -72,7 +74,7 @@ module.exports = async function createProject(scope, { client, connection, depen
     const hasTemplate = Boolean(scope.template);
     if (hasTemplate) {
       try {
-        await mergeTemplate(scope.template, rootPath);
+        await mergeTemplate(scope, rootPath);
       } catch (error) {
         throw new Error(`⛔️ Template installation failed: ${error.message}`);
       }
@@ -130,7 +132,7 @@ module.exports = async function createProject(scope, { client, connection, depen
     );
     console.log(`Don't give up, your project was created correctly.`);
     console.log(
-      `Fix the issues mentionned in the installation errors and try to run the following command:`
+      `Fix the issues mentioned in the installation errors and try to run the following command:`
     );
     console.log();
     console.log(

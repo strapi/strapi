@@ -7,6 +7,7 @@ import { Inputs as Input, Header } from '@buffetjs/custom';
 import {
   BackHeader,
   LoadingIndicatorPage,
+  ModalConfirm,
   PopUpWarning,
   // contexts
   useGlobalContext,
@@ -26,17 +27,18 @@ const SettingsViewWrapper = ({
   isEditSettings,
   isLoading,
   modifiedData,
+  name,
   onChange,
   onConfirmReset,
   onConfirmSubmit,
-  name,
+  onModalConfirmClosed,
 }) => {
   const { emitEvent, formatMessage } = useGlobalContext();
   const [showWarningCancel, setWarningCancel] = useState(false);
   const [showWarningSubmit, setWarningSubmit] = useState(false);
 
   const attributes = useMemo(() => {
-    return get(modifiedData, ['schema', 'attributes'], {});
+    return get(modifiedData, ['attributes'], {});
   }, [modifiedData]);
 
   const toggleWarningCancel = () => setWarningCancel(prevState => !prevState);
@@ -94,12 +96,11 @@ const SettingsViewWrapper = ({
     if (input.name === 'settings.defaultSortBy') {
       return [
         'id',
-        ...displayedFields.filter(
-          name =>
-            get(attributes, [name, 'type'], '') !== 'media' &&
-            name !== 'id' &&
-            get(attributes, [name, 'type'], '') !== 'richtext'
-        ),
+        ...displayedFields.filter(name => {
+          const type = get(attributes, [name, 'type']);
+
+          return !['media', 'richtext', 'dynamiczone', 'relation'].includes(type) && name !== 'id';
+        }),
       ];
     }
 
@@ -109,6 +110,7 @@ const SettingsViewWrapper = ({
 
         return (
           ![
+            'dynamiczone',
             'json',
             'text',
             'relation',
@@ -117,6 +119,7 @@ const SettingsViewWrapper = ({
             'date',
             'media',
             'richtext',
+            'timestamp',
           ].includes(type) && !!type
         );
       });
@@ -202,16 +205,21 @@ const SettingsViewWrapper = ({
               toggleWarningCancel();
             }}
           />
-          <PopUpWarning
+          <ModalConfirm
             isOpen={showWarningSubmit}
-            toggleModal={toggleWarningSubmit}
+            toggle={toggleWarningSubmit}
             content={{
-              message: `${pluginId}.popUpWarning.warning.updateAllSettings`,
+              id: `${pluginId}.popUpWarning.warning.updateAllSettings`,
             }}
-            popUpWarningType="danger"
+            type="success"
             onConfirm={async () => {
               await onConfirmSubmit();
               toggleWarningSubmit();
+            }}
+            onClosed={() => {
+              if (onModalConfirmClosed) {
+                onModalConfirmClosed();
+              }
             }}
           />
         </form>
@@ -229,6 +237,7 @@ SettingsViewWrapper.defaultProps = {
   name: '',
   onConfirmReset: () => {},
   onConfirmSubmit: async () => {},
+  onModalConfirmClosed: null,
   onSubmit: () => {},
   pluginHeaderProps: {
     actions: [],
@@ -257,6 +266,7 @@ SettingsViewWrapper.propTypes = {
   onChange: PropTypes.func.isRequired,
   onConfirmReset: PropTypes.func,
   onConfirmSubmit: PropTypes.func,
+  onModalConfirmClosed: PropTypes.func,
   onSubmit: PropTypes.func,
   pluginHeaderProps: PropTypes.shape({
     actions: PropTypes.array,

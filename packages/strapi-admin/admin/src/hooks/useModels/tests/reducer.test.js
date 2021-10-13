@@ -23,9 +23,7 @@ describe('ADMIN | HOOKS | useModels | reducer', () => {
           {
             uid: 'app.homepage',
             isDisplayed: true,
-            schema: {
-              kind: 'singleType',
-            },
+            kind: 'singleType',
           },
         ],
         isLoading: true,
@@ -51,25 +49,19 @@ describe('ADMIN | HOOKS | useModels | reducer', () => {
           {
             uid: 'app.category',
             isDisplayed: true,
-            schema: {
-              kind: 'collectionType',
-            },
+            kind: 'collectionType',
           },
           {
             uid: 'app.category',
             isDisplayed: true,
-            schema: {
-              kind: 'collectionType',
-            },
+            kind: 'collectionType',
           },
         ],
         singleTypes: [
           {
             uid: 'app.homepage',
             isDisplayed: true,
-            schema: {
-              kind: 'singleType',
-            },
+            kind: 'singleType',
           },
         ],
         components: [{}],
@@ -94,23 +86,17 @@ describe('ADMIN | HOOKS | useModels | reducer', () => {
           {
             uid: 'app.homepage',
             isDisplayed: true,
-            schema: {
-              kind: 'singleType',
-            },
+            kind: 'singleType',
           },
           {
             uid: 'permissions.role',
             isDisplayed: false,
-            schema: {
-              kind: 'collectionType',
-            },
+            kind: 'collectionType',
           },
           {
             uid: 'app.category',
             isDisplayed: true,
-            schema: {
-              kind: 'collectionType',
-            },
+            kind: 'collectionType',
           },
         ],
         components: [],
@@ -126,18 +112,14 @@ describe('ADMIN | HOOKS | useModels | reducer', () => {
           {
             uid: 'app.category',
             isDisplayed: true,
-            schema: {
-              kind: 'collectionType',
-            },
+            kind: 'collectionType',
           },
         ],
         singleTypes: [
           {
             uid: 'app.homepage',
             isDisplayed: true,
-            schema: {
-              kind: 'singleType',
-            },
+            kind: 'singleType',
           },
         ],
         components: [],

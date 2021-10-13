@@ -3,7 +3,7 @@ import { Label } from '@buffetjs/core';
 
 const Name = styled(Label)`
   display: block;
-  text-transform: capitalize;
+  text-transform: none;
   margin-bottom: 1rem;
 `;
 

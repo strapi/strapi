@@ -15,7 +15,7 @@ describe('ADMIN | CONTAINERS | AUTH | reducer', () => {
     it('should change the data correctly', () => {
       const initialState = {
         modifiedData: {
-          email: 'john@strapi.io',
+          email: 'kai@strapi.io',
           password: null,
         },
       };
@@ -26,7 +26,7 @@ describe('ADMIN | CONTAINERS | AUTH | reducer', () => {
       };
       const expected = {
         modifiedData: {
-          email: 'john@strapi.io',
+          email: 'kai@strapi.io',
           password: 'test123',
         },
       };

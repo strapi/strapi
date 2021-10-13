@@ -384,7 +384,7 @@ function EditView() {
   };
 
   const shouldShowDPEvents = useMemo(
-    () => collectionTypes.some(ct => ct.schema.options.draftAndPublish === true),
+    () => collectionTypes.some(ct => ct.options.draftAndPublish === true),
     [collectionTypes]
   );
 

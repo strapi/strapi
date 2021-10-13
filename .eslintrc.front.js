@@ -30,6 +30,7 @@ module.exports = {
     expect: false,
     assert: false,
     chai: false,
+    ENABLED_EE_FEATURES: false,
     // TODO: put all this in process.env in webpack to avoid having to set them here
     REMOTE_URL: true,
     BACKEND_URL: true,
@@ -89,6 +90,7 @@ module.exports = {
     'no-underscore-dangle': 0,
     'no-use-before-define': ['error', { functions: false, classes: false, variables: false }],
     'object-curly-newline': [2, { multiline: true, consistent: true }],
+    'one-var': ['error', 'never'],
     'operator-linebreak': 0,
     'padding-line-between-statements': [
       'error',
@@ -111,6 +113,7 @@ module.exports = {
     'react/destructuring-assignment': 0,
     'react/jsx-filename-extension': [1, { extensions: ['.js', '.jsx'] }],
     'react/forbid-prop-types': 0,
+    'react/no-unused-prop-types': 2,
     'react/jsx-props-no-spreading': 0,
     'react/jsx-one-expression-per-line': 0,
     'react/state-in-constructor': 0,

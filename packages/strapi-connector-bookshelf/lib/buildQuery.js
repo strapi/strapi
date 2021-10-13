@@ -1,8 +1,11 @@
+'use strict';
+
 const _ = require('lodash');
+const { keys, each, prop, isEmpty } = require('lodash/fp');
 const { singular } = require('pluralize');
 const { toQueries, runPopulateQueries } = require('./utils/populate-queries');
 
-const BOOLEAN_OPERATORS = ['or'];
+const BOOLEAN_OPERATORS = ['or', 'and'];
 
 /**
  * Build filters on a bookshelf query
@@ -11,18 +14,28 @@ const BOOLEAN_OPERATORS = ['or'];
  * @param {Object} options.filters - Filters params (start, limit, sort, where)
  */
 const buildQuery = ({ model, filters }) => qb => {
-  if (_.has(filters, 'where') && Array.isArray(filters.where) && filters.where.length > 0) {
+  const joinsTree = buildJoinsAndFilter(qb, model, filters);
+
+  const isSortQuery = _.has(filters, 'sort');
+
+  const isSingleResult = _.has(filters, 'limit') && filters.limit === 1;
+  const hasJoins = _.has(joinsTree, 'joins') && keys(joinsTree.joins).length;
+  const isDistinctJoin = !isSingleResult && hasJoins;
+  const hasWhereFilters =
+    _.has(filters, 'where') && Array.isArray(filters.where) && filters.where.length > 0;
+
+  const isDistinctQuery = isDistinctJoin && (isSortQuery || hasWhereFilters);
+  if (isDistinctQuery) {
     qb.distinct();
-    buildJoinsAndFilter(qb, model, filters);
   }
 
-  if (_.has(filters, 'sort')) {
-    qb.orderBy(
-      filters.sort.map(({ field, order }) => ({
-        column: field,
-        order,
-      }))
-    );
+  if (isSortQuery) {
+    const clauses = filters.sort.map(buildSortClauseFromTree(joinsTree)).filter(c => !isEmpty(c));
+    const orderBy = clauses.map(({ order, alias }) => ({ order, column: alias }));
+    const orderColumns = clauses.map(({ alias, column }) => ({ [alias]: column }));
+    const columns = [`${joinsTree.alias}.*`, ...orderColumns];
+
+    qb.column(columns).orderBy(orderBy);
   }
 
   if (_.has(filters, 'start')) {
@@ -42,13 +55,40 @@ const buildQuery = ({ model, filters }) => qb => {
 };
 
 /**
+ * Build a bookshelf sort clause (simple or deep) based on a joins tree
+ * @param tree - The joins tree that contains the aliased associations
+ */
+const buildSortClauseFromTree = tree => ({ field, order }) => {
+  if (!field.includes('.')) {
+    return {
+      column: `${tree.alias}.${field}`,
+      order,
+      alias: `_strapi_tmp_${tree.alias}_${field}`,
+    };
+  }
+
+  const [relation, attribute] = field.split('.');
+  for (const { alias, assoc } of Object.values(tree.joins)) {
+    if (relation === assoc.alias) {
+      return {
+        column: `${alias}.${attribute}`,
+        order,
+        alias: `_strapi_tmp_${alias}_${attribute}`,
+      };
+    }
+  }
+
+  return {};
+};
+
+/**
  * Add joins and where filters
  * @param {Object} qb - knex query builder
  * @param {Object} model - Bookshelf model
  * @param {Object} filters - The query filters
  */
 const buildJoinsAndFilter = (qb, model, filters) => {
-  const { where: whereClauses } = filters;
+  const { where: whereClauses = [], sort: sortClauses = [] } = filters;
 
   /**
    * Returns an alias for a name (simple incremental alias name)
@@ -157,7 +197,7 @@ const buildJoinsAndFilter = (qb, model, filters) => {
   };
 
   /**
-   * Returns the SQL path for a qery field.
+   * Returns the SQL path for a query field.
    * Adds table to the joins tree
    * @param {string} field a field used to filter
    * @param {Object} tree joins tree
@@ -187,6 +227,8 @@ const buildJoinsAndFilter = (qb, model, filters) => {
     return generateNestedJoins(parts.join('.'), tree.joins[key]);
   };
 
+  const generateNestedJoinsFromFields = each(field => generateNestedJoins(field, tree));
+
   /**
    * Format every where clauses whith the right table name aliases.
    * Add table joins to the joins list
@@ -213,19 +255,21 @@ const buildJoinsAndFilter = (qb, model, filters) => {
   };
 
   /**
-   * Add queries on tree's joins (deep search) based on given filters
+   * Add queries on tree's joins (deep search, deep sort) based on given filters
    * @param tree - joins tree
    */
   const addFiltersQueriesToJoinTree = tree => {
     _.each(tree.joins, value => {
       const { alias, model } = value;
 
+      // PublicationState
       runPopulateQueries(
         toQueries({
           publicationState: { query: filters.publicationState, model, alias },
         }),
         qb
       );
+
       addFiltersQueriesToJoinTree(value);
     });
   };
@@ -233,8 +277,13 @@ const buildJoinsAndFilter = (qb, model, filters) => {
   const aliasedWhereClauses = buildWhereClauses(whereClauses, { model });
   aliasedWhereClauses.forEach(w => buildWhereClause({ qb, ...w }));
 
+  // Force needed joins for deep sort clauses
+  generateNestedJoinsFromFields(sortClauses.map(prop('field')));
+
   buildJoinsFromTree(qb, tree);
   addFiltersQueriesToJoinTree(tree);
+
+  return tree;
 };
 
 /**
@@ -247,7 +296,7 @@ const buildJoinsAndFilter = (qb, model, filters) => {
  * @param {Object} options.value - Filter value
  */
 const buildWhereClause = ({ qb, field, operator, value }) => {
-  if (Array.isArray(value) && !['or', 'in', 'nin'].includes(operator)) {
+  if (Array.isArray(value) && !['and', 'or', 'in', 'nin'].includes(operator)) {
     return qb.where(subQb => {
       for (let val of value) {
         subQb.orWhere(q => buildWhereClause({ qb: q, field, operator, value: val }));
@@ -256,6 +305,20 @@ const buildWhereClause = ({ qb, field, operator, value }) => {
   }
 
   switch (operator) {
+    case 'and':
+      return qb.where(andQb => {
+        value.forEach(andClause => {
+          andQb.where(subQb => {
+            if (Array.isArray(andClause)) {
+              andClause.forEach(clause =>
+                subQb.where(andQb => buildWhereClause({ qb: andQb, ...clause }))
+              );
+            } else {
+              buildWhereClause({ qb: subQb, ...andClause });
+            }
+          });
+        });
+      });
     case 'or':
       return qb.where(orQb => {
         value.forEach(orClause => {
@@ -287,9 +350,9 @@ const buildWhereClause = ({ qb, field, operator, value }) => {
     case 'nin':
       return qb.whereNotIn(field, Array.isArray(value) ? value : [value]);
     case 'contains':
-      return qb.whereRaw('LOWER(??) LIKE LOWER(?)', [field, `%${value}%`]);
+      return qb.whereRaw(`${fieldLowerFn(qb)} LIKE LOWER(?)`, [field, `%${value}%`]);
     case 'ncontains':
-      return qb.whereRaw('LOWER(??) NOT LIKE LOWER(?)', [field, `%${value}%`]);
+      return qb.whereRaw(`${fieldLowerFn(qb)} NOT LIKE LOWER(?)`, [field, `%${value}%`]);
     case 'containss':
       return qb.where(field, 'like', `%${value}%`);
     case 'ncontainss':
@@ -301,6 +364,14 @@ const buildWhereClause = ({ qb, field, operator, value }) => {
     default:
       throw new Error(`Unhandled whereClause : ${field} ${operator} ${value}`);
   }
+};
+
+const fieldLowerFn = qb => {
+  // Postgres requires string to be passed
+  if (qb.client.config.client === 'pg') {
+    return 'LOWER(CAST(?? AS VARCHAR))';
+  }
+  return 'LOWER(??)';
 };
 
 const findAssoc = (model, key) => model.associations.find(assoc => assoc.alias === key);

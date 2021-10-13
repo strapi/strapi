@@ -1,20 +1,20 @@
 import React, { forwardRef, useReducer, useImperativeHandle, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { ModalSection, request } from 'strapi-helper-plugin';
-import { FormattedMessage } from 'react-intl';
+import { BaselineAlignment, ModalSection, request } from 'strapi-helper-plugin';
+import { useIntl } from 'react-intl';
 import { get } from 'lodash';
 import { Padded, Text } from '@buffetjs/core';
-import { Col, Row } from 'reactstrap';
+import { Row } from 'reactstrap';
+import MagicLink from 'ee_else_ce/components/Users/MagicLink';
+
 import checkFormValidity from '../../../utils/checkFormValidity';
-import SelectRoles from '../SelectRoles';
 import form from './utils/form';
 import schema from './utils/schema';
 import { initialState, reducer } from './reducer';
 import init from './init';
 import Input from '../../SizedInput';
 import Wrapper from './Wrapper';
-import MagicLink from '../MagicLink';
-import BaselineAlignment from '../../BaselineAlignement';
+import RoleSettingsModalSection from '../RoleSettingsModalSection';
 
 // This component accepts a ref so we can have access to the submit handler.
 const ModalCreateBody = forwardRef(
@@ -22,6 +22,7 @@ const ModalCreateBody = forwardRef(
     const [reducerState, dispatch] = useReducer(reducer, initialState, init);
     const { formErrors, modifiedData } = reducerState;
     const buttonSubmitRef = useRef(null);
+    const { formatMessage } = useIntl();
 
     useImperativeHandle(ref, () => ({
       submit: () => {
@@ -87,15 +88,13 @@ const ModalCreateBody = forwardRef(
         <ModalSection>
           <Padded top size="18px">
             <Text fontSize="xs" color="grey" fontWeight="bold" textTransform="uppercase">
-              <FormattedMessage id="app.components.Users.ModalCreateBody.block-title.details">
-                {txt => txt}
-              </FormattedMessage>
+              {formatMessage({ id: 'app.components.Users.ModalCreateBody.block-title.details' })}
             </Text>
           </Padded>
         </ModalSection>
         <ModalSection>
           <Wrapper>
-            <Padded top size="20px">
+            <Padded top size="smd">
               <Row>
                 {Object.keys(form).map((inputName, i) => (
                   <Input
@@ -116,29 +115,17 @@ const ModalCreateBody = forwardRef(
         <ModalSection>
           <Padded top size="3px">
             <Text fontSize="xs" color="grey" fontWeight="bold" textTransform="uppercase">
-              <FormattedMessage id="app.components.Users.ModalCreateBody.block-title.roles">
-                {txt => txt}
-              </FormattedMessage>
+              {formatMessage({ id: 'app.components.Users.ModalCreateBody.block-title.login' })}
             </Text>
           </Padded>
         </ModalSection>
-        <ModalSection>
-          <Wrapper>
-            <Padded top size="12px">
-              <Row>
-                <Col xs="6">
-                  <SelectRoles
-                    isDisabled={isDisabled}
-                    name="roles"
-                    onChange={handleChange}
-                    value={modifiedData.roles}
-                    error={formErrors.roles}
-                  />
-                </Col>
-              </Row>
-            </Padded>
-          </Wrapper>
-        </ModalSection>
+        <RoleSettingsModalSection
+          hasSSORegistration={modifiedData.useSSORegistration}
+          modifiedData={modifiedData}
+          onChange={handleChange}
+          formErrors={formErrors}
+          isDisabled={isDisabled}
+        />
         <button type="submit" style={{ display: 'none' }} ref={buttonSubmitRef}>
           hidden button to use the native form event
         </button>

@@ -10,3 +10,7 @@ export const RESET_PROPS = 'ContentManager/ListView/RESET_PROPS';
 export const TOGGLE_MODAL_DELETE_ALL = 'ContentManager/ListView/TOGGLE_MODAL_DELETE_ALL';
 export const TOGGLE_MODAL_DELETE = 'ContentManager/ListView/TOGGLE_MODAL_DELETE';
 export const SET_MODAL_LOADING_STATE = 'ContentManager/ListView/SET_MODAL_LOADING_STATE';
+
+export const ON_CHANGE_LIST_HEADERS = 'ContentManager/ListView/ON_CHANGE_LIST_HEADERS ';
+export const ON_RESET_LIST_HEADERS = 'ContentManager/ListView/ON_RESET_LIST_HEADERS ';
+export const SET_LIST_LAYOUT = 'ContentManager/ListView/SET_LIST_LAYOUT ';

@@ -18,6 +18,7 @@ const mountModels = require('./mount-models');
 const getQueryParams = require('./get-query-params');
 const queries = require('./queries');
 const initKnex = require('./knex');
+const registerCoreMigrations = require('./migrations');
 
 /**
  * Bookshelf hook
@@ -35,41 +36,45 @@ const defaults = {
 const isBookshelfConnection = ({ connector }) => connector === 'bookshelf';
 
 module.exports = function(strapi) {
+  const { connections } = strapi.config;
+  const bookshelfConnections = Object.keys(connections).filter(key =>
+    isBookshelfConnection(connections[key])
+  );
+
   function initialize() {
     initKnex(strapi);
 
-    const { connections } = strapi.config;
+    registerCoreMigrations();
+
     const GLOBALS = {};
 
-    const connectionsPromises = Object.keys(connections)
-      .filter(key => isBookshelfConnection(connections[key]))
-      .map(connectionName => {
-        const connection = connections[connectionName];
+    const connectionsPromises = bookshelfConnections.map(connectionName => {
+      const connection = connections[connectionName];
 
-        _.defaults(connection.settings, strapi.config.hook.settings.bookshelf);
+      _.defaults(connection.settings, strapi.config.hook.settings.bookshelf);
 
-        // Create Bookshelf instance for this connection.
-        const ORM = new bookshelf(strapi.connections[connectionName]);
+      // Create Bookshelf instance for this connection.
+      const ORM = new bookshelf(strapi.connections[connectionName]);
 
-        const initFunctionPath = path.resolve(
-          strapi.config.appPath,
-          'config',
-          'functions',
-          'bookshelf.js'
-        );
+      const initFunctionPath = path.resolve(
+        strapi.config.appPath,
+        'config',
+        'functions',
+        'bookshelf.js'
+      );
 
-        if (fs.existsSync(initFunctionPath)) {
-          require(initFunctionPath)(ORM, connection);
-        }
+      if (fs.existsSync(initFunctionPath)) {
+        require(initFunctionPath)(ORM, connection);
+      }
 
-        const ctx = {
-          GLOBALS,
-          connection,
-          ORM,
-        };
+      const ctx = {
+        GLOBALS,
+        connection,
+        ORM,
+      };
 
-        return mountConnection(connectionName, ctx);
-      });
+      return mountConnection(connectionName, ctx);
+    });
 
     return Promise.all(connectionsPromises);
   }
@@ -149,12 +154,17 @@ module.exports = function(strapi) {
     );
   }
 
+  async function destroy() {
+    await Promise.all(bookshelfConnections.map(connName => strapi.connections[connName].destroy()));
+  }
+
   return {
     defaults,
     initialize,
     getQueryParams,
     buildQuery,
     queries,
+    destroy,
     ...relations,
     get defaultTimestamps() {
       return ['created_at', 'updated_at'];

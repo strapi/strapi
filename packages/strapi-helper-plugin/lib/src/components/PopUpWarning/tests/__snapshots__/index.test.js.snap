@@ -3,11 +3,22 @@
 exports[`<PopUpWarning /> should render properly should match snapshot if onlyConfirmButton is false 1`] = `
 <DocumentFragment>
   .c8 {
+  display: -webkit-inline-box;
+  display: -webkit-inline-flex;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
   height: 30px;
-  padding: 0 15px 2px;
+  padding: 0 15px;
   font-weight: 600;
   font-size: 1.3rem;
-  line-height: normal;
   border-radius: 2px;
   cursor: pointer;
   outline: 0;
@@ -30,22 +41,31 @@ exports[`<PopUpWarning /> should render properly should match snapshot if onlyCo
 
 .c8 > span svg {
   font-size: 10px;
-  vertical-align: initial;
 }
 
 .c8 > svg {
   height: 10px;
   width: auto;
   margin-right: 10px;
-  vertical-align: baseline;
 }
 
 .c9 {
+  display: -webkit-inline-box;
+  display: -webkit-inline-flex;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
   height: 30px;
-  padding: 0 15px 2px;
+  padding: 0 15px;
   font-weight: 600;
   font-size: 1.3rem;
-  line-height: normal;
   border-radius: 2px;
   cursor: pointer;
   outline: 0;
@@ -68,14 +88,12 @@ exports[`<PopUpWarning /> should render properly should match snapshot if onlyCo
 
 .c9 > span svg {
   font-size: 10px;
-  vertical-align: initial;
 }
 
 .c9 > svg {
   height: 10px;
   width: auto;
   margin-right: 10px;
-  vertical-align: baseline;
 }
 
 .c5 {
@@ -284,11 +302,22 @@ exports[`<PopUpWarning /> should render properly should match snapshot if onlyCo
 exports[`<PopUpWarning /> should render properly should match snapshot if onlyConfirmButton is true 1`] = `
 <DocumentFragment>
   .c8 {
+  display: -webkit-inline-box;
+  display: -webkit-inline-flex;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
   height: 30px;
-  padding: 0 15px 2px;
+  padding: 0 15px;
   font-weight: 600;
   font-size: 1.3rem;
-  line-height: normal;
   border-radius: 2px;
   cursor: pointer;
   outline: 0;
@@ -311,14 +340,12 @@ exports[`<PopUpWarning /> should render properly should match snapshot if onlyCo
 
 .c8 > span svg {
   font-size: 10px;
-  vertical-align: initial;
 }
 
 .c8 > svg {
   height: 10px;
   width: auto;
   margin-right: 10px;
-  vertical-align: baseline;
 }
 
 .c5 {

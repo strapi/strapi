@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import Text from '../Text';
+import { Text } from '@buffetjs/core';
 
 const Title = styled(props => (
   <Text {...props} fontSize="md" fontWeight="bold" color="black" ellipsis />

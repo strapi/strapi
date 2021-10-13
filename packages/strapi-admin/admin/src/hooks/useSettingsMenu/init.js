@@ -2,21 +2,13 @@ import { retrieveGlobalLinks, retrievePluginsMenu, sortLinks } from '../../utils
 import { SETTINGS_BASE_URL } from '../../config';
 import adminPermissions from '../../permissions';
 import formatLinks from './utils/formatLinks';
+import globalLinks from './utils/globalLinks';
 
 const init = (initialState, plugins) => {
   // Retrieve the links that will be injected into the global section
   const pluginsGlobalLinks = retrieveGlobalLinks(plugins);
   // Sort the links by name
-  const sortedGlobalLinks = sortLinks([
-    {
-      title: { id: 'Settings.webhooks.title' },
-      to: `${SETTINGS_BASE_URL}/webhooks`,
-      name: 'webhooks',
-      isDisplayed: false,
-      permissions: adminPermissions.settings.webhooks.main,
-    },
-    ...pluginsGlobalLinks,
-  ]);
+  const sortedGlobalLinks = sortLinks([...pluginsGlobalLinks, ...globalLinks]);
   // Create the plugins settings sections
   // Note it is currently not possible to add a link into a plugin section
   const pluginsMenuSections = retrievePluginsMenu(plugins);

@@ -12,9 +12,24 @@ describe('USERS PERMISSIONS | CONTAINERS | Providers | utils | createProvidersAr
         scope: ['identify', 'email'],
         secret: '',
       },
+      cognito: {
+        enabled: false,
+        icon: 'aws',
+        key: '',
+        secret: '',
+        subdomain: '',
+        callback: '/auth/cognito/callback',
+        scope: ['email', 'openid', 'profile'],
+      },
     };
 
     const expected = [
+      {
+        name: 'cognito',
+        icon: ['fab', 'aws'],
+        enabled: false,
+        subdomain: '',
+      },
       {
         name: 'discord',
         icon: ['fab', 'discord'],

@@ -1,8 +1,8 @@
 {
   "name": "strapi-provider-upload-cloudinary",
-  "version": "3.3.3",
+  "version": "3.6.8",
   "description": "Cloudinary provider for strapi upload",
-  "homepage": "http://strapi.io",
+  "homepage": "https://strapi.io",
   "keywords": [
     "upload",
     "cloudinary",
@@ -13,7 +13,7 @@
   },
   "main": "./lib",
   "dependencies": {
-    "cloudinary": "^1.23.0",
+    "cloudinary": "^1.25.1",
     "into-stream": "^5.1.0"
   },
   "peerDependencies": {
@@ -31,7 +31,7 @@
     {
       "name": "Strapi team",
       "email": "hi@strapi.io",
-      "url": "http://strapi.io"
+      "url": "https://strapi.io"
     }
   ],
   "repository": {

@@ -1,29 +1,10 @@
 'use strict';
 
-const passport = require('koa-passport');
-const { Strategy: LocalStrategy } = require('passport-local');
-
-const createLocalStrategy = strapi => {
-  return new LocalStrategy(
-    {
-      usernameField: 'email',
-      passwordField: 'password',
-      session: false,
-    },
-    function(email, password, done) {
-      return strapi.admin.services.auth
-        .checkCredentials({ email, password })
-        .then(([error, user, message]) => done(error, user, message))
-        .catch(error => done(error));
-    }
-  );
-};
-
 module.exports = strapi => ({
   initialize() {
-    passport.use(createLocalStrategy(strapi));
+    const passportMiddleware = strapi.admin.services.passport.init();
 
-    strapi.app.use(passport.initialize());
+    strapi.app.use(passportMiddleware);
 
     strapi.app.use(async (ctx, next) => {
       if (

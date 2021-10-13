@@ -10,6 +10,7 @@ import Tab from './Tab';
 const Tabs = ({ children, isLoading, tabsLabel }) => {
   const { formatMessage } = useIntl();
   const [selectedTabIndex, setSelectedTabIndex] = useState(0);
+  const selectedChild = React.Children.toArray(children)[selectedTabIndex];
 
   const handleSelectedTab = index => {
     if (index !== selectedTabIndex) {
@@ -38,7 +39,7 @@ const Tabs = ({ children, isLoading, tabsLabel }) => {
               </Tab>
             ))}
           </Flex>
-          {children[selectedTabIndex]}
+          {selectedChild}
         </>
       )}
     </TabsWrapper>

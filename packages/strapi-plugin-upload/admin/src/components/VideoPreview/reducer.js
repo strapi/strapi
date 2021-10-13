@@ -7,6 +7,7 @@ const initialState = fromJS({
   metadataLoaded: false,
   seeked: false,
   snapshot: false,
+  isError: false,
 });
 
 const videoReducer = (state, action) => {
@@ -21,6 +22,8 @@ const videoReducer = (state, action) => {
       return state.update('isHover', () => action.isHover);
     case 'SET_SNAPSHOT':
       return state.update('snapshot', () => action.snapshot);
+    case 'SET_ERROR':
+      return state.update('isError', () => action.isError);
     default:
       return state;
   }

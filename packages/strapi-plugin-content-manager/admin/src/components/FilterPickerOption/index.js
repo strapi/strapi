@@ -33,7 +33,7 @@ function FilterPickerOption({
   type,
 }) {
   const filtersOptions = getFilterType(type);
-  const currentFilterName = get(modifiedData, [index, 'name']);
+  const currentFilterName = get(modifiedData, [index, 'name'], '');
   const currentFilterData = allowedAttributes.find(attr => attr.name === currentFilterName);
   const options = get(currentFilterData, ['options'], null) || ['true', 'false'];
 
@@ -49,7 +49,7 @@ function FilterPickerOption({
             onChange({ target: { name: `${index}.filter`, value: '=' } });
           }}
           name={`${index}.name`}
-          value={get(modifiedData, [index, 'name'], '')}
+          value={currentFilterName}
           options={allowedAttributes.map(attr => attr.name)}
           style={styles.select}
         />

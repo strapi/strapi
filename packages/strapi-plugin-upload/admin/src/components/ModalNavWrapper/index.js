@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import Flex from '../Flex';
-import Padded from '../Padded';
+import { Flex, Padded } from '@buffetjs/core';
+
 import ModalSection from '../ModalSection';
 import ModalTab from '../ModalTab';
 import Hr from './Hr';

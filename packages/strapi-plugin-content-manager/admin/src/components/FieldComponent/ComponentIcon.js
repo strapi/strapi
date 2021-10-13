@@ -9,9 +9,9 @@ const ComponentIcon = styled.div`
   > .component_name {
     overflow: hidden;
     position: relative;
-    width: 31px;
+    width: auto;
     height: 31px;
-    padding: 0 11px 0 0px;
+    padding: 0 11px 0 39px;
     color: #007eff;
     font-size: 13px;
     font-weight: 600;
@@ -19,7 +19,6 @@ const ComponentIcon = styled.div`
     border-radius: 31px;
     border: 2px solid white;
     background-color: #e6f0fb;
-    transition: all 0.2s ease-out;
 
     .component_icon {
       z-index: 1;
@@ -38,12 +37,6 @@ const ComponentIcon = styled.div`
         color: #007eff;
         font-size: 11px;
       }
-    }
-
-    &:hover {
-      cursor: pointer;
-      width: auto !important;
-      padding-left: 39px;
     }
   }
 `;

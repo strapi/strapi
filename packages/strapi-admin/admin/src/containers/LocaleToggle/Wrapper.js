@@ -9,7 +9,7 @@ const Wrapper = styled.div`
     z-index: 999;
     > button {
       width: 100%;
-      padding-right: 30px;
+      padding: 0 30px;
       background: transparent;
       border: none;
       border-radius: 0;
@@ -42,9 +42,9 @@ const Wrapper = styled.div`
     -webkit-font-smoothing: antialiased;
     span {
       color: #333740;
-      font-size: 11px;
+      font-size: 13px;
       font-family: Lato;
-      font-weight: 600;
+      font-weight: 500;
       letter-spacing: 0.5;
       vertical-align: baseline;
     }
@@ -77,7 +77,7 @@ const Wrapper = styled.div`
       padding: 0px 15px;
       line-height: 40px;
       color: #f75b1d;
-      font-size: 11px;
+      font-size: 13px;
       font-weight: 500;
       letter-spacing: 0.5;
       &:hover,

@@ -6,7 +6,6 @@
 
 // Node.js core.
 const chalk = require('chalk');
-const inquirer = require('inquirer');
 const fse = require('fs-extra');
 
 const { trackUsage } = require('./utils/usage');
@@ -51,35 +50,6 @@ module.exports = async scope => {
   if (scope.quick === true) {
     return createQuickStartProject(scope);
   }
-
-  const useQuickStart = await askShouldUseQuickstart();
-  // else if question response is quickstart create project
-  if (useQuickStart) {
-    return createQuickStartProject(scope);
-  }
-
   // create a project with full list of questions
   return createCustomizeProject(scope);
 };
-
-async function askShouldUseQuickstart() {
-  const answer = await inquirer.prompt([
-    {
-      type: 'list',
-      name: 'type',
-      message: 'Choose your installation type',
-      choices: [
-        {
-          name: 'Quickstart (recommended)',
-          value: 'quick',
-        },
-        {
-          name: 'Custom (manual settings)',
-          value: 'custom',
-        },
-      ],
-    },
-  ]);
-
-  return answer.type === 'quick';
-}

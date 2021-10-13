@@ -2,7 +2,7 @@
 
 const _ = require('lodash');
 
-const getProviderConfig = () => {
+const getProviderSettings = () => {
   return strapi.plugins.email.config;
 };
 
@@ -38,7 +38,7 @@ const sendTemplatedEmail = (emailOptions = {}, emailTemplate = {}, data = {}) =>
 };
 
 module.exports = {
-  getProviderConfig,
+  getProviderSettings,
   send,
   sendTemplatedEmail,
 };

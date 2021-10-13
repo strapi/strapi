@@ -1,533 +1,463 @@
 import reducer from '../reducer';
-import { staticAttributeActions } from '../utils';
 
-describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
+describe('ADMIN | COMPONENTS | Permissions | reducer', () => {
   describe('DEFAULT_ACTION', () => {
-    it('should return the initialState', () => {
-      const state = {
-        test: true,
+    it('should return the initialState when the type is undefined', () => {
+      const initialState = { ok: true };
+      const action = { type: undefined };
+
+      expect(reducer(initialState, action)).toEqual(initialState);
+    });
+  });
+  describe('ON_CHANGE_COLLECTION_TYPE_GLOBAL_ACTION_CHECKBOX', () => {
+    it('should set all the leafs in each content type corresponding to the correct action and remove the applied conditions when the value is falsy', () => {
+      const initialState = {
+        modifiedData: {
+          collectionTypes: {
+            address: {
+              'content-manager.explorer.create': {
+                properties: {
+                  fields: {
+                    f1: true,
+                  },
+                },
+              },
+              'content-manager.explorer.update': {
+                properties: {
+                  fields: {
+                    f1: true,
+                  },
+                },
+              },
+            },
+            restaurant: {
+              'content-manager.explorer.create': {
+                properties: {
+                  fields: {
+                    f1: true,
+                    f2: true,
+                    services: {
+                      name: true,
+                      media: true,
+                      closing: {
+                        name: {
+                          test: true,
+                        },
+                      },
+                    },
+                    dz: true,
+                    relation: true,
+                  },
+                  locales: {
+                    fr: true,
+                    en: true,
+                  },
+                },
+                conditions: {
+                  test: true,
+                },
+              },
+            },
+          },
+        },
+        singleTypes: {
+          test: {
+            'content-manager.explorer.create': {
+              properties: {
+                fields: { f1: true },
+              },
+            },
+          },
+        },
       };
 
-      expect(reducer(state, {})).toEqual(state);
+      const expected = {
+        modifiedData: {
+          collectionTypes: {
+            address: {
+              'content-manager.explorer.create': {
+                properties: {
+                  fields: {
+                    f1: false,
+                  },
+                },
+              },
+              'content-manager.explorer.update': {
+                properties: {
+                  fields: {
+                    f1: true,
+                  },
+                },
+              },
+            },
+            restaurant: {
+              'content-manager.explorer.create': {
+                properties: {
+                  fields: {
+                    f1: false,
+                    f2: false,
+                    services: {
+                      name: false,
+                      media: false,
+                      closing: {
+                        name: {
+                          test: false,
+                        },
+                      },
+                    },
+                    dz: false,
+                    relation: false,
+                  },
+                  locales: {
+                    fr: false,
+                    en: false,
+                  },
+                },
+                conditions: {
+                  test: false,
+                },
+              },
+            },
+          },
+        },
+        singleTypes: {
+          test: {
+            'content-manager.explorer.create': {
+              properties: {
+                fields: { f1: true },
+              },
+            },
+          },
+        },
+      };
+      const action = {
+        type: 'ON_CHANGE_COLLECTION_TYPE_GLOBAL_ACTION_CHECKBOX',
+        collectionTypeKind: 'collectionTypes',
+        actionId: 'content-manager.explorer.create',
+        value: false,
+      };
+
+      expect(reducer(initialState, action)).toEqual(expected);
+    });
+
+    it('should set all the leafs in each content type corresponding to the correct action and remove the applied conditions when the value is truthy', () => {
+      const initialState = {
+        modifiedData: {
+          collectionTypes: {
+            address: {
+              'content-manager.explorer.create': {
+                properties: {
+                  fields: {
+                    f1: false,
+                  },
+                },
+                conditions: {
+                  creator: false,
+                  roles: true,
+                },
+              },
+              'content-manager.explorer.update': {
+                properties: {
+                  fields: {
+                    f1: true,
+                  },
+                },
+              },
+            },
+            restaurant: {
+              'content-manager.explorer.create': {
+                properties: {
+                  fields: {
+                    f1: true,
+                    f2: true,
+                  },
+                  locales: {
+                    fr: false,
+                    en: false,
+                  },
+                },
+                conditions: {
+                  test: true,
+                },
+              },
+            },
+          },
+        },
+        singleTypes: {
+          test: {
+            'content-manager.explorer.create': {
+              properties: {
+                fields: { f1: false },
+              },
+            },
+          },
+        },
+      };
+
+      const expected = {
+        modifiedData: {
+          collectionTypes: {
+            address: {
+              'content-manager.explorer.create': {
+                properties: {
+                  fields: {
+                    f1: true,
+                  },
+                },
+                conditions: {
+                  creator: false,
+                  roles: true,
+                },
+              },
+              'content-manager.explorer.update': {
+                properties: {
+                  fields: {
+                    f1: true,
+                  },
+                },
+              },
+            },
+            restaurant: {
+              'content-manager.explorer.create': {
+                properties: {
+                  fields: {
+                    f1: true,
+                    f2: true,
+                  },
+                  locales: {
+                    fr: true,
+                    en: true,
+                  },
+                },
+                conditions: {
+                  test: true,
+                },
+              },
+            },
+          },
+        },
+        singleTypes: {
+          test: {
+            'content-manager.explorer.create': {
+              properties: {
+                fields: { f1: false },
+              },
+            },
+          },
+        },
+      };
+      const action = {
+        type: 'ON_CHANGE_COLLECTION_TYPE_GLOBAL_ACTION_CHECKBOX',
+        collectionTypeKind: 'collectionTypes',
+        actionId: 'content-manager.explorer.create',
+        value: true,
+      };
+
+      expect(reducer(initialState, action)).toEqual(expected);
     });
   });
 
-  describe('COLLAPSE_PATH', () => {
-    it('should add the first level of the path', () => {
+  describe('ON_CHANGE_COLLECTION_TYPE_ROW_LEFT_CHECKBOX', () => {
+    it('should set all the leafs of a content type property to true when the value is truthy and not remove the applied conditions', () => {
       const action = {
-        type: 'COLLAPSE_PATH',
-        index: 0,
-        value: 'address',
+        pathToCollectionType: 'collectionTypes..address',
+        propertyName: 'fields',
+        rowName: 'f2',
+        type: 'ON_CHANGE_COLLECTION_TYPE_ROW_LEFT_CHECKBOX',
+        value: true,
       };
       const initialState = {
-        collapsePath: [],
-      };
-      const expected = {
-        collapsePath: ['address'],
-      };
-
-      expect(reducer(initialState, action)).toEqual(expected);
-    });
-
-    it('should remove the value from the level level if click on the same value and level', () => {
-      const action = {
-        type: 'COLLAPSE_PATH',
-        index: 0,
-        value: 'address',
-      };
-      const initialState = {
-        collapsePath: ['address'],
-      };
-      const expected = {
-        collapsePath: [],
-      };
-
-      expect(reducer(initialState, action)).toEqual(expected);
-    });
-
-    it('should add another level to the path', () => {
-      const action = {
-        type: 'COLLAPSE_PATH',
-        index: 1,
-        value: 'city',
-      };
-      const initialState = {
-        collapsePath: ['address'],
-      };
-      const expected = {
-        collapsePath: ['address', 'city'],
-      };
-
-      expect(reducer(initialState, action)).toEqual(expected);
-    });
-
-    it('should replace the value at the right level', () => {
-      const action = {
-        type: 'COLLAPSE_PATH',
-        index: 2,
-        value: 'floor',
-      };
-      const initialState = {
-        collapsePath: ['address', 'city', 'number', 'door'],
-      };
-      const expected = {
-        collapsePath: ['address', 'city', 'floor'],
-      };
-
-      expect(reducer(initialState, action)).toEqual(expected);
-    });
-
-    it('should remove all values from the index if same values and index', () => {
-      const action = {
-        type: 'COLLAPSE_PATH',
-        index: 1,
-        value: 'city',
-      };
-      const initialState = {
-        collapsePath: ['address', 'city', 'number', 'door'],
-      };
-      const expected = {
-        collapsePath: ['address'],
-      };
-
-      expect(reducer(initialState, action)).toEqual(expected);
-    });
-  });
-
-  describe('SET_ATTRIBUTES_PERMISSIONS', () => {
-    it('should set attributes permissions correctly', () => {
-      const action = {
-        type: 'SET_ATTRIBUTES_PERMISSIONS',
-        attributes: [
-          { attributeName: 'address.city', contentTypeUid: 'place' },
-          { attributeName: 'address.street', contentTypeUid: 'place' },
-          { attributeName: 'picture', contentTypeUid: 'place' },
-          { attributeName: 'number', contentTypeUid: 'like' },
-        ],
-        action: 'create',
-        shouldEnable: true,
-      };
-      const initialState = {
-        collapsePath: [],
-        contentTypesPermissions: {},
-      };
-      const expected = {
-        collapsePath: [],
-        contentTypesPermissions: {
-          place: {
-            contentTypeActions: {},
-            attributes: {
-              'address.city': {
-                actions: ['create'],
+        initialData: { ok: true },
+        modifiedData: {
+          collectionTypes: {
+            address: {
+              create: {
+                properties: {
+                  fields: {
+                    f1: true,
+                    f2: false,
+                  },
+                },
+                conditions: {
+                  creator: false,
+                  roles: true,
+                },
               },
-              'address.street': {
-                actions: ['create'],
+              read: {
+                properties: {
+                  fields: {
+                    f1: false,
+                    f2: false,
+                  },
+                },
+                conditions: {
+                  creator: false,
+                  roles: false,
+                },
               },
-              picture: {
-                actions: ['create'],
+            },
+            restaurant: {
+              delete: {
+                properties: {
+                  enabled: true,
+                },
+                conditions: {
+                  creator: false,
+                  roles: true,
+                },
               },
             },
           },
-          like: {
-            contentTypeActions: {},
-            attributes: {
-              number: {
-                actions: ['create'],
+          plugins: { ok: true },
+        },
+      };
+
+      const expected = {
+        initialData: { ok: true },
+        modifiedData: {
+          collectionTypes: {
+            address: {
+              create: {
+                properties: {
+                  fields: {
+                    f1: true,
+                    f2: true,
+                  },
+                },
+                conditions: {
+                  creator: false,
+                  roles: true,
+                },
+              },
+              read: {
+                properties: {
+                  fields: {
+                    f1: false,
+                    f2: true,
+                  },
+                },
+                conditions: {
+                  creator: false,
+                  roles: false,
+                },
+              },
+            },
+            restaurant: {
+              delete: {
+                properties: {
+                  enabled: true,
+                },
+                conditions: {
+                  creator: false,
+                  roles: true,
+                },
               },
             },
           },
+          plugins: { ok: true },
         },
       };
 
       expect(reducer(initialState, action)).toEqual(expected);
     });
 
-    it('should remove permissions correctly', () => {
+    it('should set all the leafs of a content type property to false when the value is falsy and remove the applied conditions', () => {
       const action = {
-        type: 'SET_ATTRIBUTES_PERMISSIONS',
-        attributes: [
-          { attributeName: 'address.city', contentTypeUid: 'place' },
-          { attributeName: 'address.street', contentTypeUid: 'place' },
-          { attributeName: 'picture', contentTypeUid: 'place' },
-          { attributeName: 'number', contentTypeUid: 'like' },
-        ],
-        action: 'create',
-        shouldEnable: false,
+        pathToCollectionType: 'collectionTypes..address',
+        propertyName: 'fields',
+        rowName: 'f1',
+        type: 'ON_CHANGE_COLLECTION_TYPE_ROW_LEFT_CHECKBOX',
+        value: false,
       };
       const initialState = {
-        collapsePath: [],
-        contentTypesPermissions: {
-          place: {
-            attributes: {
-              'address.city': {
-                actions: ['create', 'read'],
+        initialData: { ok: true },
+        modifiedData: {
+          collectionTypes: {
+            address: {
+              create: {
+                properties: {
+                  fields: {
+                    f1: true,
+                    f2: false,
+                  },
+                },
+                conditions: {
+                  creator: false,
+                  roles: true,
+                },
               },
-              'address.street': {
-                actions: ['create', 'read'],
+              read: {
+                properties: {
+                  fields: {
+                    f1: false,
+                    f2: false,
+                  },
+                },
+                conditions: {
+                  creator: false,
+                  roles: false,
+                },
               },
-              picture: {
-                actions: ['create'],
+            },
+            restaurant: {
+              delete: {
+                properties: {
+                  enabled: true,
+                },
+                conditions: {
+                  creator: false,
+                  roles: true,
+                },
               },
             },
           },
-          like: {
-            contentTypeActions: {
-              delete: true,
-            },
-            attributes: {
-              number: {
-                actions: ['create'],
-              },
-            },
-          },
+          plugins: { ok: true },
         },
       };
+
       const expected = {
-        collapsePath: [],
-        contentTypesPermissions: {
-          place: {
-            contentTypeActions: {},
-            attributes: {
-              'address.city': {
-                actions: ['read'],
+        initialData: { ok: true },
+        modifiedData: {
+          collectionTypes: {
+            address: {
+              create: {
+                properties: {
+                  fields: {
+                    f1: false,
+                    f2: false,
+                  },
+                },
+                conditions: {
+                  creator: false,
+                  roles: false,
+                },
               },
-              'address.street': {
-                actions: ['read'],
+              read: {
+                properties: {
+                  fields: {
+                    f1: false,
+                    f2: false,
+                  },
+                },
+                conditions: {
+                  creator: false,
+                  roles: false,
+                },
               },
-              picture: {
-                actions: [],
+            },
+            restaurant: {
+              delete: {
+                properties: {
+                  enabled: true,
+                },
+                conditions: {
+                  creator: false,
+                  roles: true,
+                },
               },
             },
           },
-          like: {
-            contentTypeActions: {
-              delete: true,
-            },
-            attributes: {
-              number: {
-                actions: [],
-              },
-            },
-          },
-        },
-      };
-
-      expect(reducer(initialState, action)).toEqual(expected);
-    });
-
-    it('should set attributes and content type actions correctly', () => {
-      const action = {
-        type: 'SET_ATTRIBUTES_PERMISSIONS',
-        attributes: [
-          { attributeName: 'address.city', contentTypeUid: 'place' },
-          { attributeName: 'address.street', contentTypeUid: 'place' },
-          { attributeName: 'picture', contentTypeUid: 'place' },
-          { attributeName: 'number', contentTypeUid: 'like' },
-        ],
-        action: 'create',
-        shouldEnable: true,
-        hasContentTypeAction: true,
-      };
-      const initialState = {
-        collapsePath: [],
-        contentTypesPermissions: {
-          place: {
-            attributes: {
-              'address.city': {
-                actions: ['create', 'read'],
-              },
-              'address.street': {
-                actions: ['create', 'read'],
-              },
-              picture: {
-                actions: ['create'],
-              },
-            },
-          },
-          like: {
-            contentTypeActions: {
-              delete: true,
-            },
-            attributes: {
-              number: {
-                actions: ['create'],
-              },
-            },
-          },
-        },
-      };
-      const expected = {
-        collapsePath: [],
-        contentTypesPermissions: {
-          place: {
-            contentTypeActions: {
-              create: true,
-            },
-            attributes: {
-              'address.city': {
-                actions: ['create', 'read'],
-              },
-              'address.street': {
-                actions: ['create', 'read'],
-              },
-              picture: {
-                actions: ['create'],
-              },
-            },
-          },
-          like: {
-            contentTypeActions: {
-              delete: true,
-              create: true,
-            },
-            attributes: {
-              number: {
-                actions: ['create'],
-              },
-            },
-          },
-        },
-      };
-
-      expect(reducer(initialState, action)).toEqual(expected);
-    });
-
-    it('should unset attributes and content type actions correctly', () => {
-      const action = {
-        type: 'SET_ATTRIBUTES_PERMISSIONS',
-        attributes: [
-          { attributeName: 'address.city', contentTypeUid: 'place' },
-          { attributeName: 'address.street', contentTypeUid: 'place' },
-          { attributeName: 'picture', contentTypeUid: 'place' },
-          { attributeName: 'number', contentTypeUid: 'like' },
-        ],
-        action: 'create',
-        shouldEnable: false,
-        hasContentTypeAction: true,
-      };
-      const initialState = {
-        collapsePath: [],
-        contentTypesPermissions: {
-          place: {
-            contentTypeActions: {
-              create: true,
-            },
-            attributes: {
-              'address.city': {
-                actions: ['read'],
-              },
-              'address.street': {
-                actions: ['read'],
-              },
-              picture: {
-                actions: [],
-              },
-            },
-          },
-          like: {
-            contentTypeActions: {
-              delete: true,
-              create: true,
-            },
-            attributes: {
-              number: {
-                actions: ['create'],
-              },
-            },
-          },
-        },
-      };
-      const expected = {
-        collapsePath: [],
-        contentTypesPermissions: {
-          place: {
-            contentTypeActions: {
-              create: false,
-            },
-            attributes: {
-              'address.city': {
-                actions: ['read'],
-              },
-              'address.street': {
-                actions: ['read'],
-              },
-              picture: {
-                actions: [],
-              },
-            },
-          },
-          like: {
-            contentTypeActions: {
-              delete: true,
-              create: false,
-            },
-            attributes: {
-              number: {
-                actions: [],
-              },
-            },
-          },
-        },
-      };
-
-      expect(reducer(initialState, action)).toEqual(expected);
-    });
-
-    it('should set all the static actions to all attributes', () => {
-      const action = {
-        type: 'SET_ATTRIBUTES_PERMISSIONS',
-        attributes: [
-          { attributeName: 'address.city', contentTypeUid: 'place' },
-          { attributeName: 'address.street', contentTypeUid: 'place' },
-          { attributeName: 'picture', contentTypeUid: 'place' },
-          { attributeName: 'number', contentTypeUid: 'like' },
-        ],
-        shouldEnable: true,
-        hasContentTypeAction: false,
-      };
-      const initialState = {
-        collapsePath: [],
-        contentTypesPermissions: {
-          place: {
-            contentTypeActions: {
-              create: true,
-            },
-            attributes: {
-              'address.city': {
-                actions: ['read'],
-              },
-              'address.street': {
-                actions: ['read'],
-              },
-              picture: {
-                actions: [],
-              },
-            },
-          },
-          like: {
-            contentTypeActions: {
-              delete: true,
-              create: true,
-            },
-            attributes: {
-              number: {
-                actions: ['create'],
-              },
-            },
-          },
-        },
-      };
-      const expected = {
-        collapsePath: [],
-        contentTypesPermissions: {
-          place: {
-            contentTypeActions: {
-              create: true,
-            },
-            attributes: {
-              'address.city': {
-                actions: staticAttributeActions,
-              },
-              'address.street': {
-                actions: staticAttributeActions,
-              },
-              picture: {
-                actions: staticAttributeActions,
-              },
-            },
-          },
-          like: {
-            contentTypeActions: {
-              delete: true,
-              create: true,
-            },
-            attributes: {
-              number: {
-                actions: staticAttributeActions,
-              },
-            },
-          },
-        },
-      };
-
-      expect(reducer(initialState, action)).toEqual(expected);
-    });
-
-    it('should unset attributes and content type actions correctly', () => {
-      const action = {
-        type: 'SET_ATTRIBUTES_PERMISSIONS',
-        attributes: [
-          { attributeName: 'address.city', contentTypeUid: 'place' },
-          { attributeName: 'address.street', contentTypeUid: 'place', required: true },
-          { attributeName: 'picture', contentTypeUid: 'place' },
-          { attributeName: 'number', contentTypeUid: 'like', required: true },
-        ],
-        action: 'create',
-        shouldEnable: false,
-        hasContentTypeAction: true,
-      };
-      const initialState = {
-        collapsePath: [],
-        contentTypesPermissions: {
-          place: {
-            contentTypeActions: {
-              create: true,
-            },
-            attributes: {
-              'address.city': {
-                actions: ['read'],
-              },
-              'address.street': {
-                actions: ['read', 'create'],
-              },
-              picture: {
-                actions: [],
-              },
-            },
-          },
-          like: {
-            contentTypeActions: {
-              delete: true,
-              create: true,
-            },
-            attributes: {
-              number: {
-                actions: ['create'],
-              },
-            },
-          },
-        },
-      };
-      const expected = {
-        collapsePath: [],
-        contentTypesPermissions: {
-          place: {
-            contentTypeActions: {
-              create: false,
-            },
-            attributes: {
-              'address.city': {
-                actions: ['read'],
-              },
-              'address.street': {
-                actions: ['read', 'create'],
-              },
-              picture: {
-                actions: [],
-              },
-            },
-          },
-          like: {
-            contentTypeActions: {
-              delete: true,
-              create: false,
-            },
-            attributes: {
-              number: {
-                actions: ['create'],
-              },
-            },
-          },
+          plugins: { ok: true },
         },
       };
 
@@ -535,283 +465,244 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
     });
   });
 
-  describe('ALL_ATTRIBUTE_ACTIONS_SELECT', () => {
-    it('should set all static actions to an attribute permissions', () => {
-      const action = {
-        type: 'ALL_ATTRIBUTE_ACTIONS_SELECT',
-        subject: 'place',
-        attribute: 'picture',
-      };
+  describe('ON_CHANGE_CONDITIONS', () => {
+    it('should apply the conditions only to the correct actions', () => {
       const initialState = {
-        collapsePath: [],
-        contentTypesPermissions: {
-          place: {
-            conditions: {
-              read: ['admin::is-creator'],
+        initialData: { ok: true },
+        layouts: { foo: 'bar' },
+        modifiedData: {
+          collectionTypes: {
+            address: {
+              create: {
+                properties: {
+                  fields: {
+                    f1: true,
+                    f2: false,
+                  },
+                },
+                conditions: {
+                  creator: false,
+                  roles: true,
+                },
+              },
+              read: {
+                properties: {
+                  fields: {
+                    f1: true,
+                    f2: false,
+                  },
+                },
+                conditions: {
+                  creator: true,
+                  roles: false,
+                },
+              },
             },
-            contentTypeActions: {
-              'plugins::content-manager.explorer.create': true,
-              'plugins::content-manager.explorer.read': true,
-              'plugins::content-manager.explorer.update': true,
+          },
+          plugins: {
+            ctb: {
+              general: {
+                read: {
+                  properties: {
+                    enabled: false,
+                  },
+                  conditions: {
+                    creator: false,
+                    roles: false,
+                  },
+                },
+              },
             },
-            attributes: {
-              picture: {
-                actions: [],
+            doc: {
+              general: {
+                read: {
+                  properties: {
+                    enabled: true,
+                  },
+                  conditions: {
+                    creator: false,
+                    roles: false,
+                  },
+                },
+              },
+              settings: {
+                read: {
+                  properties: {
+                    enabled: false,
+                  },
+                  conditions: {
+                    creator: false,
+                    roles: false,
+                  },
+                },
+                updated: {
+                  properties: {
+                    enabled: true,
+                  },
+                  conditions: {
+                    creator: false,
+                    roles: false,
+                  },
+                },
               },
             },
           },
         },
-        permissionsLayout: {
-          sections: {
-            contentTypes: [
-              { action: 'plugins::content-manager.explorer.delete' },
-              { action: 'plugins::content-manager.explorer.publish' },
-            ],
+      };
+
+      const conditions = {
+        'collectionTypes..address..create': {
+          creator: true,
+          roles: false,
+        },
+        'collectionTypes..address..read': {
+          creator: false,
+          roles: false,
+        },
+        'plugins..doc..settings..updated': {
+          creator: true,
+          roles: true,
+        },
+      };
+
+      const expected = {
+        initialData: { ok: true },
+        layouts: { foo: 'bar' },
+        modifiedData: {
+          collectionTypes: {
+            address: {
+              create: {
+                properties: {
+                  fields: {
+                    f1: true,
+                    f2: false,
+                  },
+                },
+                conditions: {
+                  creator: true,
+                  roles: false,
+                },
+              },
+              read: {
+                properties: {
+                  fields: {
+                    f1: true,
+                    f2: false,
+                  },
+                },
+                conditions: {
+                  creator: false,
+                  roles: false,
+                },
+              },
+            },
           },
+          plugins: {
+            ctb: {
+              general: {
+                read: {
+                  properties: {
+                    enabled: false,
+                  },
+                  conditions: {
+                    creator: false,
+                    roles: false,
+                  },
+                },
+              },
+            },
+            doc: {
+              general: {
+                read: {
+                  properties: {
+                    enabled: true,
+                  },
+                  conditions: {
+                    creator: false,
+                    roles: false,
+                  },
+                },
+              },
+              settings: {
+                read: {
+                  properties: {
+                    enabled: false,
+                  },
+                  conditions: {
+                    creator: false,
+                    roles: false,
+                  },
+                },
+                updated: {
+                  properties: {
+                    enabled: true,
+                  },
+                  conditions: {
+                    creator: true,
+                    roles: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      };
+
+      const action = { type: 'ON_CHANGE_CONDITIONS', conditions };
+
+      expect(reducer(initialState, action)).toEqual(expected);
+    });
+  });
+
+  describe('ON_CHANGE_SIMPLE_CHECKBOX', () => {
+    it('should set the modifiedData.test.enabled to false when the value is falsy and remove the applied conditions', () => {
+      const action = {
+        type: 'ON_CHANGE_SIMPLE_CHECKBOX',
+        keys: 'test..properties..enabled',
+        value: false,
+      };
+
+      const initialState = {
+        initialData: {
+          test: { properties: { enabled: true }, conditions: { creator: true, roles: true } },
+        },
+        modifiedData: {
+          test: { properties: { enabled: true }, conditions: { creator: true, roles: true } },
         },
       };
       const expected = {
-        collapsePath: [],
-        contentTypesPermissions: {
-          place: {
-            conditions: {
-              read: ['admin::is-creator'],
-            },
-            contentTypeActions: {
-              'plugins::content-manager.explorer.create': true,
-              'plugins::content-manager.explorer.read': true,
-              'plugins::content-manager.explorer.update': true,
-            },
-            attributes: {
-              picture: {
-                actions: staticAttributeActions,
-              },
-            },
-          },
+        initialData: {
+          test: { properties: { enabled: true }, conditions: { creator: true, roles: true } },
         },
-        permissionsLayout: {
-          sections: {
-            contentTypes: [
-              { action: 'plugins::content-manager.explorer.delete' },
-              { action: 'plugins::content-manager.explorer.publish' },
-            ],
-          },
+        modifiedData: {
+          test: { properties: { enabled: false }, conditions: { creator: false, roles: false } },
         },
       };
 
       expect(reducer(initialState, action)).toEqual(expected);
     });
 
-    it('should set all static actions to an attribute permissions and add content type actions', () => {
+    it('should set the modifiedData.test.enabled to true when the value is truthy and not remove the applied conditions', () => {
       const action = {
-        type: 'ALL_ATTRIBUTE_ACTIONS_SELECT',
-        subject: 'place',
-        attribute: 'picture',
+        type: 'ON_CHANGE_SIMPLE_CHECKBOX',
+        keys: 'test..properties..enabled',
+        value: true,
       };
+
       const initialState = {
-        collapsePath: [],
-        contentTypesPermissions: {
-          place: {
-            conditions: {
-              read: ['admin::is-creator'],
-            },
-            attributes: {
-              picture: {
-                actions: [],
-              },
-            },
-          },
+        initialData: {
+          test: { properties: { enabled: false }, conditions: { creator: true, roles: true } },
         },
-        permissionsLayout: {
-          sections: {
-            contentTypes: [
-              { action: 'plugins::content-manager.explorer.delete' },
-              { action: 'plugins::content-manager.explorer.publish' },
-            ],
-          },
+        modifiedData: {
+          test: { properties: { enabled: false }, conditions: { creator: true, roles: true } },
         },
       };
       const expected = {
-        collapsePath: [],
-        contentTypesPermissions: {
-          place: {
-            conditions: {
-              read: ['admin::is-creator'],
-            },
-            contentTypeActions: {
-              'plugins::content-manager.explorer.create': true,
-              'plugins::content-manager.explorer.read': true,
-              'plugins::content-manager.explorer.update': true,
-            },
-            attributes: {
-              picture: {
-                actions: staticAttributeActions,
-              },
-            },
-          },
+        initialData: {
+          test: { properties: { enabled: false }, conditions: { creator: true, roles: true } },
         },
-        permissionsLayout: {
-          sections: {
-            contentTypes: [
-              { action: 'plugins::content-manager.explorer.delete' },
-              { action: 'plugins::content-manager.explorer.publish' },
-            ],
-          },
-        },
-      };
-
-      expect(reducer(initialState, action)).toEqual(expected);
-    });
-
-    it('should remove all actions if they are already in permissions', () => {
-      const action = {
-        type: 'ALL_ATTRIBUTE_ACTIONS_SELECT',
-        subject: 'place',
-        attribute: 'picture',
-      };
-      const initialState = {
-        collapsePath: [],
-        contentTypesPermissions: {
-          place: {
-            conditions: {
-              read: ['admin::is-creator'],
-            },
-            contentTypeActions: {
-              'plugins::content-manager.explorer.delete': true,
-              'plugins::content-manager.explorer.create': true,
-            },
-            attributes: {
-              picture: {
-                actions: staticAttributeActions,
-              },
-              video: {
-                actions: staticAttributeActions,
-              },
-              name: {
-                actions: ['plugins::content-manager.explorer.create'],
-              },
-            },
-          },
-        },
-        permissionsLayout: {
-          sections: {
-            contentTypes: [
-              { action: 'plugins::content-manager.explorer.delete' },
-              { action: 'plugins::content-manager.explorer.publish' },
-            ],
-          },
-        },
-      };
-      const expected = {
-        collapsePath: [],
-        contentTypesPermissions: {
-          place: {
-            conditions: {
-              read: ['admin::is-creator'],
-            },
-            contentTypeActions: {
-              'plugins::content-manager.explorer.create': true,
-              'plugins::content-manager.explorer.delete': true,
-              'plugins::content-manager.explorer.read': true,
-              'plugins::content-manager.explorer.update': true,
-            },
-            attributes: {
-              picture: {
-                actions: [],
-              },
-              video: {
-                actions: staticAttributeActions,
-              },
-              name: {
-                actions: ['plugins::content-manager.explorer.create'],
-              },
-            },
-          },
-        },
-        permissionsLayout: {
-          sections: {
-            contentTypes: [
-              { action: 'plugins::content-manager.explorer.delete' },
-              { action: 'plugins::content-manager.explorer.publish' },
-            ],
-          },
-        },
-      };
-
-      expect(reducer(initialState, action)).toEqual(expected);
-    });
-
-    it('should remove all actions if they are already in permissions and remove content type actions', () => {
-      const action = {
-        type: 'ALL_ATTRIBUTE_ACTIONS_SELECT',
-        subject: 'place',
-        attribute: 'picture',
-      };
-      const initialState = {
-        collapsePath: [],
-        contentTypesPermissions: {
-          place: {
-            conditions: {
-              read: ['admin::is-creator'],
-            },
-            contentTypeActions: {
-              'plugins::content-manager.explorer.create': true,
-              'plugins::content-manager.explorer.delete': true,
-              'plugins::content-manager.explorer.read': true,
-              'plugins::content-manager.explorer.update': true,
-            },
-            attributes: {
-              picture: {
-                actions: staticAttributeActions,
-              },
-              video: {
-                actions: [],
-              },
-              name: {
-                actions: [],
-              },
-            },
-          },
-        },
-        permissionsLayout: {
-          sections: {
-            contentTypes: [
-              { action: 'plugins::content-manager.explorer.delete' },
-              { action: 'plugins::content-manager.explorer.publish' },
-            ],
-          },
-        },
-      };
-      const expected = {
-        collapsePath: [],
-        contentTypesPermissions: {
-          place: {
-            conditions: {
-              read: ['admin::is-creator'],
-            },
-            contentTypeActions: {
-              'plugins::content-manager.explorer.delete': true,
-            },
-            attributes: {
-              picture: {
-                actions: [],
-              },
-              video: {
-                actions: [],
-              },
-              name: {
-                actions: [],
-              },
-            },
-          },
-        },
-        permissionsLayout: {
-          sections: {
-            contentTypes: [
-              { action: 'plugins::content-manager.explorer.delete' },
-              { action: 'plugins::content-manager.explorer.publish' },
-            ],
-          },
+        modifiedData: {
+          test: { properties: { enabled: true }, conditions: { creator: true, roles: true } },
         },
       };
 
@@ -819,44 +710,52 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
     });
   });
 
-  describe('ATTRIBUTE_PERMISSION_SELECT', () => {
-    it('should set a single attribute permission', () => {
+  describe('ON_CHANGE_TOGGLE_PARENT_CHECKBOX', () => {
+    it('should set all the leafs of the create action to true and not remove the applied conditions when the value is truthy', () => {
       const action = {
-        type: 'ATTRIBUTE_PERMISSION_SELECT',
-        subject: 'place',
-        attribute: 'video',
-        action: 'create',
+        type: 'ON_CHANGE_TOGGLE_PARENT_CHECKBOX',
+        keys: 'restaurant..create',
+        value: true,
       };
+
       const initialState = {
-        collapsePath: [],
-        contentTypesPermissions: {
-          place: {
-            contentTypeActions: {
-              delete: true,
-              create: true,
+        initialData: {},
+        modifiedData: {
+          restaurant: {
+            create: {
+              properties: {
+                fields: { f1: false, f2: { f1: false } },
+                locales: { en: false },
+              },
+              conditions: {
+                test: 'test',
+              },
             },
-            attributes: {
-              picture: {
-                actions: ['create'],
+            update: {
+              properties: {
+                test: true,
               },
             },
           },
         },
       };
+
       const expected = {
-        collapsePath: [],
-        contentTypesPermissions: {
-          place: {
-            contentTypeActions: {
-              delete: true,
-              create: true,
-            },
-            attributes: {
-              picture: {
-                actions: ['create'],
+        initialData: {},
+        modifiedData: {
+          restaurant: {
+            create: {
+              properties: {
+                fields: { f1: true, f2: { f1: true } },
+                locales: { en: true },
               },
-              video: {
-                actions: ['create'],
+              conditions: {
+                test: 'test',
+              },
+            },
+            update: {
+              properties: {
+                test: true,
               },
             },
           },
@@ -866,609 +765,29 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
       expect(reducer(initialState, action)).toEqual(expected);
     });
 
-    it('should set a single attribute permission and add the content type action', () => {
+    it('should set all the leafs of the create action to true and remove the applied conditions when the value is falsy', () => {
       const action = {
-        type: 'ATTRIBUTE_PERMISSION_SELECT',
-        subject: 'place',
-        attribute: 'picture',
-        action: 'create',
-      };
-      const initialState = {
-        collapsePath: [],
-        contentTypesPermissions: {
-          place: {
-            contentTypeActions: {
-              delete: true,
-            },
-            attributes: {
-              picture: {
-                actions: ['read'],
-              },
-            },
-          },
-        },
-      };
-      const expected = {
-        collapsePath: [],
-        contentTypesPermissions: {
-          place: {
-            contentTypeActions: {
-              delete: true,
-              create: true,
-            },
-            attributes: {
-              picture: {
-                actions: ['read', 'create'],
-              },
-            },
-          },
-        },
-      };
-
-      expect(reducer(initialState, action)).toEqual(expected);
-    });
-
-    it('should remove a single attribute permission', () => {
-      const action = {
-        type: 'ATTRIBUTE_PERMISSION_SELECT',
-        subject: 'place',
-        attribute: 'picture',
-        action: 'read',
-      };
-      const initialState = {
-        collapsePath: [],
-        contentTypesPermissions: {
-          place: {
-            contentTypeActions: {
-              delete: true,
-            },
-            attributes: {
-              picture: {
-                actions: ['read'],
-              },
-            },
-          },
-          country: {
-            contentTypeActions: {
-              delete: true,
-            },
-            attributes: {
-              flag: {
-                actions: ['read', 'update'],
-              },
-              description: {
-                actions: ['read', 'create'],
-              },
-            },
-          },
-        },
-      };
-      const expected = {
-        collapsePath: [],
-        contentTypesPermissions: {
-          place: {
-            contentTypeActions: {
-              delete: true,
-            },
-            attributes: {
-              picture: {
-                actions: [],
-              },
-            },
-          },
-          country: {
-            contentTypeActions: {
-              delete: true,
-            },
-            attributes: {
-              flag: {
-                actions: ['read', 'update'],
-              },
-              description: {
-                actions: ['read', 'create'],
-              },
-            },
-          },
-        },
-      };
-
-      expect(reducer(initialState, action)).toEqual(expected);
-    });
-
-    it('should remove a single attribute permission and also remove the content type action if it the last attribute to remove', () => {
-      const action = {
-        type: 'ATTRIBUTE_PERMISSION_SELECT',
-        subject: 'place',
-        attribute: 'picture',
-        action: 'read',
-      };
-      const initialState = {
-        collapsePath: [],
-        contentTypesPermissions: {
-          place: {
-            contentTypeActions: {
-              delete: true,
-              read: true,
-            },
-            attributes: {
-              picture: {
-                actions: ['read'],
-              },
-            },
-          },
-          country: {
-            contentTypeActions: {
-              delete: true,
-            },
-            attributes: {
-              flag: {
-                actions: ['read', 'update'],
-              },
-              description: {
-                actions: ['read', 'create'],
-              },
-            },
-          },
-        },
-      };
-      const expected = {
-        collapsePath: [],
-        contentTypesPermissions: {
-          place: {
-            contentTypeActions: {
-              delete: true,
-              read: false,
-            },
-            attributes: {
-              picture: {
-                actions: [],
-              },
-            },
-          },
-          country: {
-            contentTypeActions: {
-              delete: true,
-            },
-            attributes: {
-              flag: {
-                actions: ['read', 'update'],
-              },
-              description: {
-                actions: ['read', 'create'],
-              },
-            },
-          },
-        },
-      };
-
-      expect(reducer(initialState, action)).toEqual(expected);
-    });
-  });
-
-  describe('ON_ATTRIBUTES_SELECT', () => {
-    it('should set attributes permission action', () => {
-      const action = {
-        type: 'ON_ATTRIBUTES_SELECT',
-        subject: 'place',
-        action: 'create',
-        attributes: [
-          { attributeName: 'address', required: true },
-          { attributeName: 'city', required: false },
-          { attributeName: 'postal_code', required: true },
-        ],
-        shouldEnable: true,
-      };
-      const initialState = {
-        collapsePath: [],
-        contentTypesPermissions: {
-          place: {
-            contentTypeActions: {
-              delete: true,
-            },
-            attributes: {
-              picture: {
-                actions: ['read'],
-              },
-            },
-          },
-        },
-      };
-      const expected = {
-        collapsePath: [],
-        contentTypesPermissions: {
-          place: {
-            contentTypeActions: {
-              delete: true,
-              create: true,
-            },
-            attributes: {
-              address: {
-                actions: ['create'],
-              },
-              city: {
-                actions: ['create'],
-              },
-              picture: {
-                actions: ['read'],
-              },
-              postal_code: {
-                actions: ['create'],
-              },
-            },
-          },
-        },
-      };
-
-      expect(reducer(initialState, action)).toEqual(expected);
-    });
-
-    it('should remove attributes permissions except the required attributes', () => {
-      const action = {
-        type: 'ON_ATTRIBUTES_SELECT',
-        subject: 'place',
-        action: 'create',
-        attributes: [
-          { attributeName: 'address', required: true },
-          { attributeName: 'city', required: false },
-          { attributeName: 'postal_code', required: true },
-        ],
-        shouldEnable: false,
-      };
-      const initialState = {
-        collapsePath: [],
-        contentTypesPermissions: {
-          place: {
-            contentTypeActions: {
-              delete: true,
-            },
-            attributes: {
-              postal_code: {
-                actions: ['create'],
-              },
-              picture: {
-                actions: ['read'],
-              },
-            },
-          },
-        },
-      };
-      const expected = {
-        collapsePath: [],
-        contentTypesPermissions: {
-          place: {
-            contentTypeActions: {
-              delete: true,
-              create: false,
-            },
-            attributes: {
-              city: {
-                actions: [],
-              },
-              postal_code: {
-                actions: ['create'],
-              },
-              picture: {
-                actions: ['read'],
-              },
-            },
-          },
-        },
-      };
-
-      expect(reducer(initialState, action)).toEqual(expected);
-    });
-
-    it('should set attributes permission action and set the content type action', () => {
-      const action = {
-        type: 'ON_ATTRIBUTES_SELECT',
-        subject: 'place',
-        action: 'create',
-        attributes: [
-          { attributeName: 'address' },
-          { attributeName: 'city' },
-          { attributeName: 'postal_code' },
-        ],
-        shouldEnable: true,
-        hasContentTypeAction: true,
-      };
-      const initialState = {
-        collapsePath: [],
-        contentTypesPermissions: {
-          place: {
-            contentTypeActions: {
-              delete: true,
-            },
-            attributes: {
-              postal_code: {
-                actions: ['create'],
-              },
-              picture: {
-                actions: ['read'],
-              },
-            },
-          },
-        },
-      };
-      const expected = {
-        collapsePath: [],
-        contentTypesPermissions: {
-          place: {
-            contentTypeActions: {
-              delete: true,
-              create: true,
-            },
-            attributes: {
-              address: {
-                actions: ['create'],
-              },
-              city: {
-                actions: ['create'],
-              },
-              postal_code: {
-                actions: ['create'],
-              },
-              picture: {
-                actions: ['read'],
-              },
-            },
-          },
-        },
-      };
-
-      expect(reducer(initialState, action)).toEqual(expected);
-    });
-  });
-
-  describe('CONTENT_TYPE_ACTION_SELECT', () => {
-    it('should set a content type action', () => {
-      const action = {
-        type: 'CONTENT_TYPE_ACTION_SELECT',
-        subject: 'place',
-        action: 'delete',
-      };
-      const initialState = {
-        collapsePath: [],
-        contentTypesPermissions: {
-          place: {
-            attributes: {
-              postal_code: {
-                actions: ['create'],
-              },
-              picture: {
-                actions: ['read'],
-              },
-            },
-          },
-        },
-      };
-      const expected = {
-        collapsePath: [],
-        contentTypesPermissions: {
-          place: {
-            contentTypeActions: {
-              delete: true,
-            },
-            attributes: {
-              postal_code: {
-                actions: ['create'],
-              },
-              picture: {
-                actions: ['read'],
-              },
-            },
-          },
-        },
-      };
-
-      expect(reducer(initialState, action)).toEqual(expected);
-    });
-
-    it('should set the content type action to false', () => {
-      const action = {
-        type: 'CONTENT_TYPE_ACTION_SELECT',
-        subject: 'place',
-        action: 'delete',
-      };
-      const initialState = {
-        collapsePath: [],
-        contentTypesPermissions: {
-          place: {
-            contentTypeActions: {
-              delete: true,
-            },
-            attributes: {
-              postal_code: {
-                actions: ['create'],
-              },
-              picture: {
-                actions: ['read'],
-              },
-            },
-          },
-        },
-      };
-      const expected = {
-        collapsePath: [],
-        contentTypesPermissions: {
-          place: {
-            contentTypeActions: {
-              delete: false,
-            },
-            attributes: {
-              postal_code: {
-                actions: ['create'],
-              },
-              picture: {
-                actions: ['read'],
-              },
-            },
-          },
-        },
-      };
-
-      expect(reducer(initialState, action)).toEqual(expected);
-    });
-  });
-
-  describe('ALL_CONTENT_TYPE_PERMISSIONS_SELECT', () => {
-    it('should add all the content type permissions without content type actions', () => {
-      const action = {
-        type: 'ALL_CONTENT_TYPE_PERMISSIONS_SELECT',
-        subject: 'place',
-        attributes: [
-          { attributeName: 'address', required: false },
-          { attributeName: 'city', required: false },
-          { attributeName: 'postal_code', required: false },
-          { attributeName: 'media.vote', required: false },
-          { attributeName: 'media.vote.like', required: false },
-          { attributeName: 'media.vote.long_description', required: false },
-        ],
-        shouldEnable: true,
-        shouldSetAllContentTypes: false,
+        type: 'ON_CHANGE_TOGGLE_PARENT_CHECKBOX',
+        keys: 'restaurant..create',
+        value: false,
       };
 
       const initialState = {
-        contentTypesPermissions: {
-          place: {
-            conditions: {
-              read: ['admin::is-creator'],
-            },
-            attributes: {
-              address: {
-                actions: ['read'],
+        initialData: {},
+        modifiedData: {
+          restaurant: {
+            create: {
+              properties: {
+                fields: { f1: true, f2: { f1: false } },
+                locales: { en: false },
               },
-              city: {
-                actions: ['read'],
-              },
-              postal_code: {
-                actions: ['read'],
-              },
-              'media.vote': {
-                actions: [],
-              },
-              'media.vote.like': {
-                actions: [],
-              },
-              'media.vote.long_description': {
-                actions: [],
+              conditions: {
+                test: true,
               },
             },
-          },
-        },
-        permissionsLayout: {
-          sections: {
-            contentTypes: [
-              { action: 'plugins::content-manager.explorer.delete', subjects: ['place'] },
-              { action: 'plugins::content-manager.explorer.publish', subjects: ['place'] },
-            ],
-          },
-        },
-      };
-
-      const expected = {
-        contentTypesPermissions: {
-          place: {
-            conditions: {
-              read: ['admin::is-creator'],
-            },
-            contentTypeActions: {
-              'plugins::content-manager.explorer.create': true,
-              'plugins::content-manager.explorer.read': true,
-              'plugins::content-manager.explorer.update': true,
-            },
-            attributes: {
-              address: {
-                actions: staticAttributeActions,
-              },
-              city: {
-                actions: staticAttributeActions,
-              },
-              postal_code: {
-                actions: staticAttributeActions,
-              },
-              'media.vote': {
-                actions: staticAttributeActions,
-              },
-              'media.vote.like': {
-                actions: staticAttributeActions,
-              },
-              'media.vote.long_description': {
-                actions: staticAttributeActions,
-              },
-            },
-          },
-        },
-        permissionsLayout: {
-          sections: {
-            contentTypes: [
-              { action: 'plugins::content-manager.explorer.delete', subjects: ['place'] },
-              { action: 'plugins::content-manager.explorer.publish', subjects: ['place'] },
-            ],
-          },
-        },
-      };
-
-      expect(reducer(initialState, action)).toEqual(expected);
-    });
-
-    it('should add all the content type permissions with content type actions', () => {
-      const action = {
-        type: 'ALL_CONTENT_TYPE_PERMISSIONS_SELECT',
-        subject: 'place',
-        attributes: [
-          { attributeName: 'address', required: false },
-          { attributeName: 'city', required: false },
-          { attributeName: 'postal_code', required: false },
-          { attributeName: 'media.vote', required: false },
-          { attributeName: 'media.vote.like', required: false },
-          { attributeName: 'media.vote.long_description', required: false },
-        ],
-        shouldEnable: true,
-        shouldSetAllContentTypes: true,
-        permissionsLayout: {
-          sections: {
-            contentTypes: [
-              { action: 'plugins::content-manager.explorer.delete' },
-              { action: 'plugins::content-manager.explorer.publish' },
-            ],
-          },
-        },
-      };
-
-      const initialState = {
-        permissionsLayout: {
-          sections: {
-            contentTypes: [
-              { action: 'plugins::content-manager.explorer.create', subjects: ['place'] },
-              { action: 'plugins::content-manager.explorer.read', subjects: ['place'] },
-              { action: 'plugins::content-manager.explorer.update', subjects: ['place'] },
-              { action: 'plugins::content-manager.explorer.delete', subjects: ['place'] },
-            ],
-          },
-        },
-        contentTypesPermissions: {
-          place: {
-            conditions: {
-              read: ['admin::is-creator'],
-            },
-            attributes: {
-              address: {
-                actions: ['read'],
-              },
-              city: {
-                actions: ['read'],
-              },
-              postal_code: {
-                actions: ['read'],
-              },
-              'media.vote': {
-                actions: [],
-              },
-              'media.vote.like': {
-                actions: [],
-              },
-              'media.vote.long_description': {
-                actions: [],
+            update: {
+              properties: {
+                test: true,
               },
             },
           },
@@ -1476,689 +795,25 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
       };
 
       const expected = {
-        permissionsLayout: {
-          sections: {
-            contentTypes: [
-              { action: 'plugins::content-manager.explorer.create', subjects: ['place'] },
-              { action: 'plugins::content-manager.explorer.read', subjects: ['place'] },
-              { action: 'plugins::content-manager.explorer.update', subjects: ['place'] },
-              { action: 'plugins::content-manager.explorer.delete', subjects: ['place'] },
-            ],
-          },
-        },
-        contentTypesPermissions: {
-          place: {
-            conditions: {
-              read: ['admin::is-creator'],
+        initialData: {},
+        modifiedData: {
+          restaurant: {
+            create: {
+              properties: {
+                fields: { f1: false, f2: { f1: false } },
+                locales: { en: false },
+              },
+              conditions: {
+                test: false,
+              },
             },
-            contentTypeActions: {
-              'plugins::content-manager.explorer.create': true,
-              'plugins::content-manager.explorer.delete': true,
-              'plugins::content-manager.explorer.read': true,
-              'plugins::content-manager.explorer.update': true,
-            },
-            attributes: {
-              address: {
-                actions: staticAttributeActions,
-              },
-              city: {
-                actions: staticAttributeActions,
-              },
-              postal_code: {
-                actions: staticAttributeActions,
-              },
-              'media.vote': {
-                actions: staticAttributeActions,
-              },
-              'media.vote.like': {
-                actions: staticAttributeActions,
-              },
-              'media.vote.long_description': {
-                actions: staticAttributeActions,
+            update: {
+              properties: {
+                test: true,
               },
             },
           },
         },
-      };
-
-      expect(reducer(initialState, action)).toEqual(expected);
-    });
-
-    it('should remove all the content type permissions', () => {
-      const action = {
-        type: 'ALL_CONTENT_TYPE_PERMISSIONS_SELECT',
-        subject: 'place',
-        attributes: [
-          { attributeName: 'address', required: false },
-          { attributeName: 'city', required: false },
-          { attributeName: 'postal_code', required: false },
-          { attributeName: 'media.vote', required: false },
-          { attributeName: 'media.vote.like', required: false },
-          { attributeName: 'media.vote.long_description', required: false },
-        ],
-        shouldEnable: false,
-        shouldSetAllContentTypes: true,
-        permissionsLayout: {
-          sections: {
-            contentTypes: [
-              { action: 'plugins::content-manager.explorer.delete' },
-              { action: 'plugins::content-manager.explorer.publish' },
-            ],
-          },
-        },
-      };
-
-      const initialState = {
-        permissionsLayout: {
-          sections: {
-            contentTypes: [
-              { action: 'plugins::content-manager.explorer.create', subjects: ['place'] },
-              { action: 'plugins::content-manager.explorer.read', subjects: ['place'] },
-              { action: 'plugins::content-manager.explorer.update', subjects: ['place'] },
-              { action: 'plugins::content-manager.explorer.delete', subjects: ['place'] },
-            ],
-          },
-        },
-        contentTypesPermissions: {
-          place: {
-            contentTypeActions: {
-              'plugins::content-manager.explorer.delete': true,
-              'plugins::content-manager.explorer.read': true,
-              'plugins::content-manager.explorer.create': true,
-              'plugins::content-manager.explorer.update': true,
-            },
-            attributes: {
-              address: {
-                actions: staticAttributeActions,
-              },
-              city: {
-                actions: staticAttributeActions,
-              },
-              postal_code: {
-                actions: staticAttributeActions,
-              },
-              'media.vote': {
-                actions: staticAttributeActions,
-              },
-              'media.vote.like': {
-                actions: staticAttributeActions,
-              },
-              'media.vote.long_description': {
-                actions: staticAttributeActions,
-              },
-            },
-          },
-        },
-      };
-
-      const expected = {
-        permissionsLayout: {
-          sections: {
-            contentTypes: [
-              { action: 'plugins::content-manager.explorer.create', subjects: ['place'] },
-              { action: 'plugins::content-manager.explorer.read', subjects: ['place'] },
-              { action: 'plugins::content-manager.explorer.update', subjects: ['place'] },
-              { action: 'plugins::content-manager.explorer.delete', subjects: ['place'] },
-            ],
-          },
-        },
-        contentTypesPermissions: {
-          place: {
-            contentTypeActions: {
-              'plugins::content-manager.explorer.delete': false,
-              'plugins::content-manager.explorer.read': false,
-              'plugins::content-manager.explorer.update': false,
-              'plugins::content-manager.explorer.create': false,
-            },
-            attributes: {
-              address: {
-                actions: [],
-              },
-              city: {
-                actions: [],
-              },
-              postal_code: {
-                actions: [],
-              },
-              'media.vote': {
-                actions: [],
-              },
-              'media.vote.like': {
-                actions: [],
-              },
-              'media.vote.long_description': {
-                actions: [],
-              },
-            },
-          },
-        },
-      };
-
-      expect(reducer(initialState, action)).toEqual(expected);
-    });
-  });
-
-  describe('GLOBAL_PERMISSIONS_SELECT', () => {
-    it('should set the content type action to all the content types', () => {
-      const action = {
-        type: 'GLOBAL_PERMISSIONS_SELECT',
-        action: 'delete',
-        contentTypes: [{ uid: 'places' }, { uid: 'addresses' }, { uid: 'restaurants' }],
-        shouldEnable: true,
-      };
-      const initialState = {
-        contentTypesPermissions: {
-          places: {
-            attributes: {
-              image: {
-                actions: ['create'],
-              },
-            },
-            contentTypeActions: {
-              create: true,
-            },
-          },
-          addresses: {
-            contentTypeActions: {
-              create: true,
-            },
-            attributes: {
-              image: {
-                actions: ['create'],
-              },
-            },
-          },
-        },
-      };
-      const expected = {
-        contentTypesPermissions: {
-          places: {
-            attributes: {
-              image: {
-                actions: ['create'],
-              },
-            },
-            contentTypeActions: {
-              create: true,
-              delete: true,
-            },
-          },
-          addresses: {
-            contentTypeActions: {
-              create: true,
-              delete: true,
-            },
-            attributes: {
-              image: {
-                actions: ['create'],
-              },
-            },
-          },
-          restaurants: {
-            contentTypeActions: {
-              delete: true,
-            },
-          },
-        },
-      };
-
-      expect(reducer(initialState, action)).toEqual(expected);
-    });
-
-    it('should unset the content type action to all the content types', () => {
-      const action = {
-        type: 'GLOBAL_PERMISSIONS_SELECT',
-        action: 'delete',
-        contentTypes: [{ uid: 'places' }, { uid: 'addresses' }, { uid: 'restaurants' }],
-        shouldEnable: false,
-      };
-      const initialState = {
-        contentTypesPermissions: {
-          places: {
-            attributes: {
-              image: {
-                actions: ['create'],
-              },
-            },
-            contentTypeActions: {
-              create: true,
-              delete: true,
-            },
-          },
-          addresses: {
-            contentTypeActions: {
-              create: true,
-              delete: true,
-            },
-            attributes: {
-              image: {
-                actions: ['create'],
-              },
-            },
-          },
-          restaurants: {
-            contentTypeActions: {
-              delete: true,
-            },
-          },
-        },
-      };
-      const expected = {
-        contentTypesPermissions: {
-          places: {
-            attributes: {
-              image: {
-                actions: ['create'],
-              },
-            },
-            contentTypeActions: {
-              create: true,
-              delete: false,
-            },
-          },
-          addresses: {
-            contentTypeActions: {
-              create: true,
-              delete: false,
-            },
-            attributes: {
-              image: {
-                actions: ['create'],
-              },
-            },
-          },
-          restaurants: {
-            contentTypeActions: {
-              delete: false,
-            },
-          },
-        },
-      };
-
-      expect(reducer(initialState, action)).toEqual(expected);
-    });
-  });
-
-  describe('ON_PLUGIN_SETTING_ACTION', () => {
-    it('should add a single plugin/setting action', () => {
-      const action = {
-        type: 'ON_PLUGIN_SETTING_ACTION',
-        action: 'plugins::upload.assets.create',
-      };
-      const initialState = {
-        collapsePath: ['subject1'],
-        contentTypesPermissions: {
-          subject1: {
-            field1: {
-              actions: ['create'],
-            },
-          },
-        },
-        pluginsAndSettingsPermissions: [
-          {
-            action: 'plugins::upload.assets.update',
-            conditions: ['admin::is-creator'],
-            fields: null,
-            subject: null,
-          },
-        ],
-      };
-      const expected = {
-        collapsePath: ['subject1'],
-        contentTypesPermissions: {
-          subject1: {
-            field1: {
-              actions: ['create'],
-            },
-          },
-        },
-        pluginsAndSettingsPermissions: [
-          {
-            action: 'plugins::upload.assets.update',
-            conditions: ['admin::is-creator'],
-            fields: null,
-            subject: null,
-          },
-          {
-            action: 'plugins::upload.assets.create',
-            conditions: [],
-            fields: null,
-            subject: null,
-          },
-        ],
-      };
-
-      expect(reducer(initialState, action)).toEqual(expected);
-    });
-
-    it('should remove a single plugin/setting action if already exist in the state', () => {
-      const action = {
-        type: 'ON_PLUGIN_SETTING_ACTION',
-        action: 'plugins::upload.assets.create',
-      };
-      const initialState = {
-        collapsePath: ['subject1'],
-        contentTypesPermissions: {
-          subject1: {
-            field1: {
-              actions: ['create'],
-            },
-          },
-        },
-        pluginsAndSettingsPermissions: [
-          {
-            action: 'plugins::upload.assets.update',
-            conditions: ['admin::is-creator'],
-            fields: null,
-            subject: null,
-          },
-          {
-            action: 'plugins::upload.assets.create',
-            conditions: [],
-            fields: null,
-            subject: null,
-          },
-        ],
-      };
-      const expected = {
-        collapsePath: ['subject1'],
-        contentTypesPermissions: {
-          subject1: {
-            field1: {
-              actions: ['create'],
-            },
-          },
-        },
-        pluginsAndSettingsPermissions: [
-          {
-            action: 'plugins::upload.assets.update',
-            conditions: ['admin::is-creator'],
-            fields: null,
-            subject: null,
-          },
-        ],
-      };
-
-      expect(reducer(initialState, action)).toEqual(expected);
-    });
-  });
-
-  describe('ON_PLUGIN_SETTING_SUB_CATEGORY_ACTIONS', () => {
-    it('should add all plugin/setting actions of a subcategory', () => {
-      const action = {
-        type: 'ON_PLUGIN_SETTING_SUB_CATEGORY_ACTIONS',
-        actions: [
-          {
-            action: 'plugins::upload.assets.update',
-            conditions: [],
-            fields: null,
-            subject: null,
-          },
-          {
-            action: 'plugins::upload.assets.copy-link',
-            conditions: [],
-            fields: null,
-            subject: null,
-          },
-          {
-            action: 'plugins::upload.assets.delete',
-            conditions: [],
-            fields: null,
-            subject: null,
-          },
-        ],
-        shouldEnable: true,
-      };
-      const initialState = {
-        collapsePath: ['subject1'],
-        contentTypesPermissions: {
-          subject1: {
-            field1: {
-              actions: ['create'],
-            },
-          },
-        },
-        pluginsAndSettingsPermissions: [
-          {
-            action: 'plugins::upload.assets.update',
-            conditions: [],
-            fields: null,
-            subject: null,
-          },
-          {
-            action: 'plugins::upload.assets.create',
-            conditions: [],
-            fields: null,
-            subject: null,
-          },
-        ],
-      };
-      const expected = {
-        collapsePath: ['subject1'],
-        contentTypesPermissions: {
-          subject1: {
-            field1: {
-              actions: ['create'],
-            },
-          },
-        },
-        pluginsAndSettingsPermissions: [
-          {
-            action: 'plugins::upload.assets.create',
-            conditions: [],
-            fields: null,
-            subject: null,
-          },
-          {
-            action: 'plugins::upload.assets.update',
-            conditions: [],
-            fields: null,
-            subject: null,
-          },
-          {
-            action: 'plugins::upload.assets.copy-link',
-            conditions: [],
-            fields: null,
-            subject: null,
-          },
-          {
-            action: 'plugins::upload.assets.delete',
-            conditions: [],
-            fields: null,
-            subject: null,
-          },
-        ],
-      };
-
-      expect(reducer(initialState, action)).toEqual(expected);
-    });
-
-    it('should remove all plugin/setting actions of a subcategory', () => {
-      const action = {
-        type: 'ON_PLUGIN_SETTING_SUB_CATEGORY_ACTIONS',
-        actions: [
-          {
-            action: 'plugins::upload.assets.update',
-            conditions: [],
-            fields: null,
-            subject: null,
-          },
-          {
-            action: 'plugins::upload.assets.copy-link',
-            conditions: [],
-            fields: null,
-            subject: null,
-          },
-          {
-            action: 'plugins::upload.assets.delete',
-            conditions: [],
-            fields: null,
-            subject: null,
-          },
-        ],
-        shouldEnable: false,
-      };
-      const initialState = {
-        collapsePath: ['subject1'],
-        contentTypesPermissions: {
-          subject1: {
-            field1: {
-              actions: ['create'],
-            },
-          },
-        },
-        pluginsAndSettingsPermissions: [
-          {
-            action: 'plugins::upload.assets.update',
-            conditions: [],
-            fields: null,
-            subject: null,
-          },
-          {
-            action: 'plugins::upload.assets.create',
-            conditions: [],
-            fields: null,
-            subject: null,
-          },
-          {
-            action: 'plugins::upload.assets.copy-link',
-            conditions: [],
-            fields: null,
-            subject: null,
-          },
-          {
-            action: 'plugins::upload.assets.delete',
-            conditions: [],
-            fields: null,
-            subject: null,
-          },
-        ],
-      };
-      const expected = {
-        collapsePath: ['subject1'],
-        contentTypesPermissions: {
-          subject1: {
-            field1: {
-              actions: ['create'],
-            },
-          },
-        },
-        pluginsAndSettingsPermissions: [
-          {
-            action: 'plugins::upload.assets.create',
-            conditions: [],
-            fields: null,
-            subject: null,
-          },
-        ],
-      };
-
-      expect(reducer(initialState, action)).toEqual(expected);
-    });
-  });
-
-  describe('ON_CONTENT_TYPE_CONDITIONS_SELECT', () => {
-    it('should set the content type conditions properly', () => {
-      const action = {
-        type: 'ON_CONTENT_TYPE_CONDITIONS_SELECT',
-        subject: 'subject1',
-        conditions: {
-          create: ['admin::is-creator'],
-          edit: [],
-          update: ['admin::is-creator'],
-          delete: ['admin::is-creator'],
-        },
-      };
-      const initialState = {
-        contentTypesPermissions: {
-          subject1: {
-            attributes: {
-              attribute1: {
-                actions: ['create'],
-              },
-            },
-            contentTypeActions: {
-              create: true,
-            },
-            conditions: {
-              create: ['admin::is-creator'],
-              edit: ['admin::is-creator'],
-              update: ['admin::is-creator'],
-              delete: ['admin::is-creator'],
-            },
-          },
-        },
-      };
-      const expected = {
-        contentTypesPermissions: {
-          subject1: {
-            attributes: {
-              attribute1: {
-                actions: ['create'],
-              },
-            },
-            contentTypeActions: {
-              create: true,
-            },
-            conditions: {
-              create: ['admin::is-creator'],
-              edit: [],
-              update: ['admin::is-creator'],
-              delete: ['admin::is-creator'],
-            },
-          },
-        },
-      };
-
-      expect(reducer(initialState, action)).toEqual(expected);
-    });
-  });
-
-  describe('ON_PLUGIN_SETTING_CONDITIONS_SELECT', () => {
-    it('should set conditions for plugin and settings permissions', () => {
-      const action = {
-        type: 'ON_PLUGIN_SETTING_CONDITIONS_SELECT',
-        conditions: {
-          action1: ['is_creator'],
-        },
-      };
-      const initialState = {
-        pluginsAndSettingsPermissions: [
-          {
-            action: 'action1',
-            conditions: [],
-            subject: null,
-          },
-          {
-            action: 'action2',
-            conditions: [],
-            subject: null,
-          },
-          {
-            action: 'action3',
-            conditions: ['is_someone_else'],
-            subject: null,
-          },
-        ],
-      };
-      const expected = {
-        pluginsAndSettingsPermissions: [
-          {
-            action: 'action1',
-            conditions: ['is_creator'],
-            subject: null,
-          },
-          {
-            action: 'action2',
-            conditions: [],
-            subject: null,
-          },
-          {
-            action: 'action3',
-            conditions: ['is_someone_else'],
-            subject: null,
-          },
-        ],
       };
 
       expect(reducer(initialState, action)).toEqual(expected);

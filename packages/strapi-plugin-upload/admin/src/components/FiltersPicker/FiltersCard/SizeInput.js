@@ -6,10 +6,7 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 
-import { InputNumber, Select } from '@buffetjs/core';
-
-import Flex from '../../Flex';
-import Padded from '../../Padded';
+import { InputNumber, Select, Padded, Flex } from '@buffetjs/core';
 
 function SizeInput({ onChange, value, ...rest }) {
   const options = ['KB', 'MB', 'GB'];

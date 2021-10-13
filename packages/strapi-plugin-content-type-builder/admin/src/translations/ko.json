@@ -47,7 +47,7 @@
   "popUpWarning.bodyMessage.contentType.delete": "이 콘텐츠 타입을 삭제 하시겠습니까?",
   "relation.attributeName.placeholder": "Ex: author, category, tag",
   "relation.manyToMany": "N : N",
-  "relation.manyToOne": "N : 1",
+  "relation.manyToOne": "has many",
   "relation.manyWay": "has many",
   "relation.oneToMany": "1 : N",
   "relation.oneToOne": "1 : 1",

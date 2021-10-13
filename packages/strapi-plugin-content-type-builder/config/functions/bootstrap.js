@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports = () => {
+module.exports = async () => {
   const actions = [
     {
       section: 'plugins',
@@ -10,6 +10,5 @@ module.exports = () => {
     },
   ];
 
-  const { actionProvider } = strapi.admin.services.permission;
-  actionProvider.register(actions);
+  await strapi.admin.services.permission.actionProvider.registerMany(actions);
 };

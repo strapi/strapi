@@ -11,7 +11,7 @@ const DynamicComponent = ({ componentUid, friendlyName, icon, setIsOverDynamicZo
   const [isOver, setIsOver] = useState(false);
   const [{ isLoading, canAccess }, setState] = useState({ isLoading: true, canAccess: false });
   const { push } = useHistory();
-  const userPermissions = useUser();
+  const { userPermissions } = useUser();
 
   useEffect(() => {
     const checkPermission = async () => {
@@ -44,7 +44,7 @@ const DynamicComponent = ({ componentUid, friendlyName, icon, setIsOverDynamicZo
       isOver={isOver}
       onClick={() => {
         if (!isLoading && canAccess) {
-          push(`/plugins/${pluginId}/ctm-configurations/edit-settings/components/${componentUid}/`);
+          push(`/plugins/${pluginId}/components/${componentUid}/configurations/edit`);
         }
       }}
       onMouseEvent={handleMouseEvent}

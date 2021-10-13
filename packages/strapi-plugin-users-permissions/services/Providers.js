@@ -63,7 +63,7 @@ const connect = (provider, query) => {
           return resolve([
             null,
             [{ messages: [{ id: 'Auth.advanced.allow_register' }] }],
-            'Register action is actualy not available.',
+            'Register action is actually not available.',
           ]);
         }
 
@@ -170,10 +170,8 @@ const getProfile = async (provider, query, callback) => {
       if (!tokenPayload) {
         callback(new Error('unable to decode jwt token'));
       } else {
-        // Combine username and discriminator because discord username is not unique
-        var username = `${tokenPayload['cognito:username']}`;
         callback(null, {
-          username: username,
+          username: tokenPayload['cognito:username'],
           email: tokenPayload.email,
         });
       }
@@ -317,23 +315,23 @@ const getProfile = async (provider, query, callback) => {
     }
     case 'instagram': {
       const instagram = purest({
-        config: purestConfig,
         provider: 'instagram',
         key: grant.instagram.key,
         secret: grant.instagram.secret,
+        config: purestConfig,
       });
 
       instagram
         .query()
-        .get('users/self')
-        .qs({ access_token })
+        .get('me')
+        .qs({ access_token, fields: 'id,username' })
         .request((err, res, body) => {
           if (err) {
             callback(err);
           } else {
             callback(null, {
-              username: body.data.username,
-              email: `${body.data.username}@strapi.io`, // dummy email as Instagram does not provide user email
+              username: body.username,
+              email: `${body.username}@strapi.io`, // dummy email as Instagram does not provide user email
             });
           }
         });
@@ -467,10 +465,124 @@ const getProfile = async (provider, query, callback) => {
       }
       break;
     }
-    default:
-      callback({
-        message: 'Unknown provider.',
+    case 'reddit': {
+      const reddit = purest({
+        provider: 'reddit',
+        config: purestConfig,
+        defaults: {
+          headers: {
+            'user-agent': 'strapi',
+          },
+        },
       });
+
+      reddit
+        .query('auth')
+        .get('me')
+        .auth(access_token)
+        .request((err, res, body) => {
+          if (err) {
+            callback(err);
+          } else {
+            callback(null, {
+              username: body.name,
+              email: `${body.name}@strapi.io`, // dummy email as Reddit does not provide user email
+            });
+          }
+        });
+      break;
+    }
+    case 'auth0': {
+      const purestAuth0Conf = {};
+      purestAuth0Conf[`https://${grant.auth0.subdomain}.auth0.com`] = {
+        __domain: {
+          auth: {
+            auth: { bearer: '[0]' },
+          },
+        },
+        '{endpoint}': {
+          __path: {
+            alias: '__default',
+          },
+        },
+      };
+      const auth0 = purest({
+        provider: 'auth0',
+        config: {
+          auth0: purestAuth0Conf,
+        },
+      });
+
+      auth0
+        .get('userinfo')
+        .auth(access_token)
+        .request((err, res, body) => {
+          if (err) {
+            callback(err);
+          } else {
+            const username =
+              body.username || body.nickname || body.name || body.email.split('@')[0];
+            const email = body.email || `${username.replace(/\s+/g, '.')}@strapi.io`;
+
+            callback(null, {
+              username,
+              email,
+            });
+          }
+        });
+      break;
+    }
+    case 'cas': {
+      const provider_url = 'https://' + _.get(grant['cas'], 'subdomain');
+      const cas = purest({
+        provider: 'cas',
+        config: {
+          cas: {
+            [provider_url]: {
+              __domain: {
+                auth: {
+                  auth: { bearer: '[0]' },
+                },
+              },
+              '{endpoint}': {
+                __path: {
+                  alias: '__default',
+                },
+              },
+            },
+          },
+        },
+      });
+      cas
+        .query()
+        .get('oidc/profile')
+        .auth(access_token)
+        .request((err, res, body) => {
+          if (err) {
+            callback(err);
+          } else {
+            // CAS attribute may be in body.attributes or "FLAT", depending on CAS config
+            const username = body.attributes
+              ? body.attributes.strapiusername || body.id || body.sub
+              : body.strapiusername || body.id || body.sub;
+            const email = body.attributes
+              ? body.attributes.strapiemail || body.attributes.email
+              : body.strapiemail || body.email;
+            if (!username || !email) {
+              strapi.log.warn(
+                'CAS Response Body did not contain required attributes: ' + JSON.stringify(body)
+              );
+            }
+            callback(null, {
+              username,
+              email,
+            });
+          }
+        });
+      break;
+    }
+    default:
+      callback(new Error('Unknown provider.'));
       break;
   }
 };

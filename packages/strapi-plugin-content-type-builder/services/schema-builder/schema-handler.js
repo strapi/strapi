@@ -219,7 +219,10 @@ module.exports = function createSchemaHandler(infos) {
         if (list.length === 0) {
           await fse.remove(initialState.dir);
         }
+
+        return;
       }
+
       if (modified === true) {
         await fse.ensureFile(filePath);
 
@@ -231,6 +234,7 @@ module.exports = function createSchemaHandler(infos) {
             collectionName: state.schema.collectionName,
             info: state.schema.info,
             options: state.schema.options,
+            pluginOptions: state.schema.pluginOptions,
             attributes: state.schema.attributes,
           },
           { spaces: 2 }
@@ -245,6 +249,8 @@ module.exports = function createSchemaHandler(infos) {
             await fse.remove(initialState.dir);
           }
         }
+
+        return;
       }
 
       return Promise.resolve();

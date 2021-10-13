@@ -26,9 +26,19 @@ Before contributing, you will probably have to create a RFC on this [strapi/rfcs
 
 This project and everyone participating in it are governed by the [Strapi Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please read the [full text](CODE_OF_CONDUCT.md) so that you can read which actions may or may not be tolerated.
 
+## Contributor License Agreement (CLA)
+
+### Individual
+
+In order to accept your pull request, we need you to submit a CLA. You only need to do this once. If you are submitting a pull request for the first time, you can complete your CLA [here](https://cla.strapi.io/strapi/strapi) or just submit a Pull Request and our CLA Bot will ask you to sign the CLA before merging your Pull Request.
+
+### Company
+
+If you are making contributions to our repositories on behalf of your company, then we will need a Corporate Contributor License Agreement (CLA) signed. In order to do that, please contact us at [contributions@strapi.io](mailto:contributions@strapi.io).
+
 ## Documentation
 
-Pull requests relating to fixing documentation for the latest release should be directed towards the [documentation branch](https://github.com/strapi/strapi/tree/documentation) **not** towards the master branch. Any PRs made towards the master branch will not be released until the next Strapi version release.
+Pull requests relating to fixing documentation for the latest release should be directed towards the [documentation repo](https://github.com/strapi/documentation). Please see the documentation [contributing guide](https://github.com/strapi/documentation/blob/main/CONTRIBUTING.md) for more information on how to make the documentation pull request.
 
 ## Bugs
 
@@ -52,15 +62,16 @@ The core team will review your pull request and will either merge it, request ch
 
 ## Contribution Prerequisites
 
-- You have [Node](https://nodejs.org/en/) at v10.16.0+ only and [Yarn](https://yarnpkg.com/en/) at v1.2.0+.
-  - Node v14/v13 **are not supported yet**
+- You have [Node](https://nodejs.org/en/) at >= v10 and <= v14 and [Yarn](https://yarnpkg.com/en/) at v1.2.0+.
 - You are familiar with Git.
 
 ## Development Workflow
 
+_For users running on Apple Silicon M1, you may encounter errors thrown by `sharp`. You may need to re-install `libvps` or to build `sharp` manually following [this issue comment](https://github.com/lovell/sharp/issues/2460#issuecomment-751491241) in order to start the project._
+
 To facilitate the contribution, we have drastically reduced the amount of commands necessary to install the entire development environment.
 
-First of all, you need to check if you're using the [required versions of Node.js and npm](https://strapi.io/documentation/v3.x/installation/cli.html#step-1-make-sure-requirements-are-met)
+First of all, you need to check if you're using the [required versions of Node.js and npm](https://strapi.io/documentation/developer-docs/latest/setup-deployment-guides/deployment.html#recommended-requirements).
 
 Then, please follow the instructions below:
 
@@ -84,7 +95,13 @@ cd strapi && yarn setup
 
 #### 4. Start the example application
 
-Read the `getstarted` application README [here](./examples/getstarted/README.md).
+To start a test example application to test your changes quickly and also for the next step.
+
+```bash
+cd strapi/examples/getstarted && yarn develop
+```
+
+Read the `getstarted` application README [here](./examples/getstarted/README.md) for more details.
 
 #### 5. Running the administration panel in development mode
 
@@ -99,7 +116,7 @@ The administration panel will be available at http://localhost:4000/admin
 
 **Awesome! You are now able to contribute to Strapi.**
 
-#### 5. Available commands
+#### 6. Available commands
 
 - `yarn watch` starts yarn watch in all packages.
 - `yarn build` builds the `strapi-helper-plugin` (use this command when you develop in the administration panel).
@@ -116,11 +133,22 @@ The administration panel will be available at http://localhost:4000/admin
 
 ---
 
-## Running the tests
+## Running the e2e tests
+
+The end-to-end tests require a Strapi app to be able to run. You can generate a "test app" using `yarn test:generate-app <database>`:
+
+```bash
+$ yarn test:generate-app sqlite
+$ yarn test:generate-app mongo
+$ yarn test:generate-app postgres
+$ yarn test:generate-app mysql
+```
+
+You require a new app every time you run the tests. Otherwise, the test suite will fail. A script is available to make this process easier: `node test/e2e.js`. It'll delete the current test app, generate a new one, and run the test suite.
 
 **Changing the database:**
 
-You can run the test suites using different databases:
+By default the script `test/e2e,js` creates an app that uses `sqlite`. But you can run the test suites using different databases:
 
 ```bash
 $ node test/e2e.js --db=sqlite
@@ -129,13 +157,31 @@ $ node test/e2e.js --db=postgres
 $ node test/e2e.js --db=mysql
 ```
 
+**Running the tests for the CE**
+
+The test suites will run the tests for the EE version of Strapi. Should you want to test the CE version you will need to use the ENV variable `STRAPI_DISABLE_EE`:
+
+```bash
+$ STRAPI_DISABLE_EE=true node test/e2e.js
+$ STRAPI_DISABLE_EE=true yarn test:e2e
+```
+
+**Specifying a license to use for the EE e2e tests**
+
+The EE tests need a valid license to run correctly. To specify which license to use you can use `STRAPI_LICENSE`. You can specify it in an env file or as a prefix to the cli command:
+
+```bash
+$ STRAPI_LICENSE=<license> node test/e2e.js
+$ STRAPI_LICENSE=<license> yarn test:e2e
+```
+
 ---
 
 ## Miscellaneous
 
 ### Repository Organization
 
-We chose to to use a monorepo design that exploits [Yarn Workspaces](https://yarnpkg.com/en/docs/workspaces) in the way [React](https://github.com/facebook/react/tree/master/packages) or [Babel](https://github.com/babel/babel/tree/master/packages) does. This allows the community to easily maintain the whole ecosystem, keep it up-to-date and consistent.
+We chose to use a monorepo design that exploits [Yarn Workspaces](https://yarnpkg.com/en/docs/workspaces) in the way [React](https://github.com/facebook/react/tree/master/packages) or [Babel](https://github.com/babel/babel/tree/master/packages) does. This allows the community to easily maintain the whole ecosystem, keep it up-to-date and consistent.
 
 We do our best to keep the master branch as clean as possible, with tests passing at all times. However, it may happen that the master branch moves faster than the release cycle. Therefore check the [releases on npm](https://www.npmjs.com/package/strapi) so that you're always up-to-date with the latest stable version.
 
@@ -146,8 +192,8 @@ Before submitting an issue you need to make sure:
 - You are experiencing a concrete technical issue with Strapi.
 - You have already searched for related [issues](https://github.com/strapi/strapi/issues), and found none open (if you found a related _closed_ issue, please link to it from your post).
 - You are not asking a question about how to use Strapi or about whether or not Strapi has a certain feature. For general help using Strapi, you may:
-  - Refer to [the official Strapi documentation](http://strapi.io).
-  - Ask a member of the community in the [Strapi Slack Community](https://slack.strapi.io/).
+  - Refer to [the official Strapi documentation](https://strapi.io).
+  - Ask a member of the community in the [Strapi Discord Community](https://discord.strapi.io/).
   - Ask a question on [our community forum](https://forum.strapi.io).
 - Your issue title is concise, on-topic and polite.
 - You can and do provide steps to reproduce your issue.

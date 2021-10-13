@@ -1,8 +1,8 @@
 {
   "name": "strapi-database",
-  "version": "3.3.3",
+  "version": "3.6.8",
   "description": "Strapi's database layer",
-  "homepage": "http://strapi.io",
+  "homepage": "https://strapi.io",
   "main": "./lib/index.js",
   "scripts": {
     "test": "echo \"no tests yet\""
@@ -13,7 +13,7 @@
   "author": {
     "name": "Strapi team",
     "email": "hi@strapi.io",
-    "url": "http://strapi.io"
+    "url": "https://strapi.io"
   },
   "repository": {
     "type": "git",
@@ -28,9 +28,10 @@
   },
   "license": "SEE LICENSE IN LICENSE",
   "dependencies": {
-    "lodash": "4.17.19",
+    "debug": "4.3.1",
+    "lodash": "4.17.21",
     "p-map": "4.0.0",
-    "strapi-utils": "3.3.3",
+    "strapi-utils": "3.6.8",
     "verror": "^1.10.0"
   },
   "gitHead": "231263a3535658bab1e9492c6aaaed8692d62a53"

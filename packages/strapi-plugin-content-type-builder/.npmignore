@@ -92,12 +92,16 @@ logs
 results
 node_modules
 .node_history
+.snyk
+
 
 
 ############################
 # Tests
 ############################
 
-test
+tests
+__tests__
+jest.config.js
 testApp
 coverage

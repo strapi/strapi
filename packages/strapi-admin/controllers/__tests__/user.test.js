@@ -6,9 +6,9 @@ const userController = require('../user');
 describe('User Controller', () => {
   describe('Create User', () => {
     const body = {
-      firstname: 'John',
+      firstname: 'Kai',
       lastname: 'Doe',
-      email: 'johndoe@email.com',
+      email: 'kaidoe@email.com',
       roles: [1, 2],
     };
 
@@ -66,9 +66,9 @@ describe('User Controller', () => {
   describe('Find a user by its ID', () => {
     const user = {
       id: 1,
-      firstname: 'John',
+      firstname: 'Kai',
       lastname: 'Doe',
-      email: 'johndoe@email.com',
+      email: 'kaidoe@email.com',
       roles: [1, 2],
     };
 
@@ -117,16 +117,16 @@ describe('User Controller', () => {
     const users = [
       {
         id: 1,
-        firstname: 'John',
+        firstname: 'Kai',
         lastname: 'Doe',
-        email: 'johndoe@email.com',
+        email: 'kaidoe@email.com',
         roles: [1, 2],
       },
       {
         id: 2,
         firstname: 'Doe',
-        lastname: 'John',
-        email: 'doejohn@email.com',
+        lastname: 'Kai',
+        email: 'doekai@email.com',
         roles: [3],
       },
     ];
@@ -185,9 +185,9 @@ describe('User Controller', () => {
   describe('Update user', () => {
     const user = {
       id: 1,
-      firstname: 'John',
+      firstname: 'Kai',
       lastname: 'Doe',
-      email: 'johndoe@email.com',
+      email: 'kaidoe@email.com',
       roles: [1, 2],
     };
 

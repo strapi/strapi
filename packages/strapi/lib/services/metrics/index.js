@@ -1,19 +1,19 @@
 'use strict';
 /**
  * Strapi telemetry package.
- * You can learn more at https://strapi.io/documentation/v3.x/global-strapi/usage-information.html#commitment-to-our-users-data-collection
+ * You can learn more at https://strapi.io/documentation/developer-docs/latest/getting-started/usage-information.html
  */
 
-const { scheduleJob } = require('node-schedule');
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
+const { scheduleJob } = require('node-schedule');
 
+const ee = require('../../utils/ee');
 const wrapWithRateLimit = require('./rate-limiter');
 const createSender = require('./sender');
 const createMiddleware = require('./middleware');
 const isTruthy = require('./is-truthy');
-const ee = require('../../utils/ee');
 
 const LIMITED_EVENTS = [
   'didSaveMediaWithAlternativeText',
@@ -23,14 +23,17 @@ const LIMITED_EVENTS = [
 ];
 
 const createTelemetryInstance = strapi => {
-  const uuid = strapi.config.uuid;
+  const { uuid } = strapi.config;
   const isDisabled = !uuid || isTruthy(process.env.STRAPI_TELEMETRY_DISABLED);
 
+  const crons = [];
   const sender = createSender(strapi);
   const sendEvent = wrapWithRateLimit(sender, { limitedEvents: LIMITED_EVENTS });
 
   if (!isDisabled) {
-    scheduleJob('0 0 12 * * *', () => sendEvent('ping'));
+    const pingCron = scheduleJob('0 0 12 * * *', () => sendEvent('ping'));
+    crons.push(pingCron);
+
     strapi.app.use(createMiddleware({ sendEvent }));
   }
 
@@ -55,12 +58,18 @@ const createTelemetryInstance = strapi => {
     };
 
     if (!pingDisabled) {
-      scheduleJob('0 0 0 * * 7', () => sendLicenseCheck());
+      const licenseCron = scheduleJob('0 0 0 * * 7', () => sendLicenseCheck());
+      crons.push(licenseCron);
+
       sendLicenseCheck();
     }
   }
 
   return {
+    destroy() {
+      // clear open handles
+      crons.forEach(cron => cron.cancel());
+    },
     async send(event, payload) {
       if (isDisabled) return true;
       return sendEvent(event, payload);

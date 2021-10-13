@@ -8,16 +8,10 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { isEmpty, isNumber } from 'lodash';
 import { Inputs } from '@buffetjs/custom';
+import { Checkbox } from '@buffetjs/core';
 import StyledCustomCheckbox from './StyledCustomCheckbox';
 
-const CustomCheckbox = ({
-  label,
-  modifiedData,
-  name,
-  onChange,
-  value,
-  ...rest
-}) => {
+const CustomCheckbox = ({ label, modifiedData, name, onChange, value, ...rest }) => {
   const [checked, setChecked] = useState(isNumber(value) || !isEmpty(value));
   const type = modifiedData.type === 'biginteger' ? 'text' : 'number';
   const step = ['decimal', 'float'].includes(modifiedData.type) ? 'any' : '1';
@@ -25,8 +19,8 @@ const CustomCheckbox = ({
 
   return (
     <StyledCustomCheckbox>
-      <Inputs
-        label={label}
+      <Checkbox
+        message={label}
         name={name}
         type="checkbox"
         value={checked}

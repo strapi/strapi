@@ -3,6 +3,7 @@
 const { resolve } = require('path');
 const range = require('koa-range');
 const koaStatic = require('koa-static');
+const _ = require('lodash');
 
 module.exports = strapi => ({
   initialize() {
@@ -23,6 +24,12 @@ module.exports = strapi => ({
       strapi.app.onerror(err);
     });
 
-    strapi.router.get('/uploads/(.*)', range, koaStatic(staticDir, { defer: true }));
+    const localServerConfig =
+      _.get(strapi, 'plugins.upload.config.providerOptions.localServer') || {};
+    strapi.router.get(
+      '/uploads/(.*)',
+      range,
+      koaStatic(staticDir, { defer: true, ...localServerConfig })
+    );
   },
 });

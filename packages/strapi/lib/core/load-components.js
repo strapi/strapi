@@ -1,7 +1,7 @@
 'use strict';
 
-const _ = require('lodash');
 const { join } = require('path');
+const _ = require('lodash');
 const { exists } = require('fs-extra');
 const loadFiles = require('../load/load-files');
 

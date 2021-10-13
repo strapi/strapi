@@ -2,27 +2,19 @@ import { createSelector } from 'reselect';
 import pluginId from '../../pluginId';
 import { initialState } from './reducer';
 
-/**
- * Direct selector to the main state domain
- */
-const selectMainDomain = () => state =>
-  state.get(`${pluginId}_main`) || initialState;
-
-/**
- * Other specific selectors
- */
-
-/**
- * Default selector used by Main
- */
+const selectMainDomain = () => state => {
+  return state.get(`${pluginId}_main`) || initialState;
+};
 
 const makeSelectMain = () =>
-  createSelector(
-    selectMainDomain(),
-    substate => {
-      return substate.toJS();
-    }
-  );
+  createSelector(selectMainDomain(), substate => {
+    return substate;
+  });
+
+const makeSelectModelAndComponentSchemas = () =>
+  createSelector(selectMainDomain(), ({ components, models }) => ({
+    schemas: [...components, ...models],
+  }));
 
 export default makeSelectMain;
-export { selectMainDomain };
+export { makeSelectModelAndComponentSchemas, selectMainDomain };

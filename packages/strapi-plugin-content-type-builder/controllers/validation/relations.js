@@ -1,8 +1,8 @@
 'use strict';
 
 const yup = require('yup');
-const { validators, isValidName } = require('./common');
 const { typeKinds, coreUids } = require('../../services/constants');
+const { validators, isValidName } = require('./common');
 
 const REVERSE_RELATIONS = ['oneToOne', 'oneToMany', 'manyToOne', 'manyToMany'];
 const STRAPI_USER_RELATIONS = ['oneWay', 'manyWay'];
@@ -51,5 +51,6 @@ module.exports = (obj, validNatures) => {
           .nullable(),
     targetColumnName: yup.string().nullable(),
     private: yup.boolean().nullable(),
+    pluginOptions: yup.object(),
   };
 };

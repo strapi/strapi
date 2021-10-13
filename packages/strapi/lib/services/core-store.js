@@ -3,10 +3,17 @@
 const coreStoreModel = config => ({
   connection: config.get('database.defaultConnection'),
   uid: 'strapi::core-store',
-  internal: true,
   info: {
     name: 'core_store',
     description: '',
+  },
+  pluginOptions: {
+    'content-manager': {
+      visible: false,
+    },
+    'content-type-builder': {
+      visible: false,
+    },
   },
   attributes: {
     key: {
@@ -105,9 +112,28 @@ const createCoreStore = ({ environment: defaultEnv, db }) => {
       }
     }
 
+    async function deleteFn(params = {}) {
+      const { key, environment = defaultEnv, type, name, tag = '' } = Object.assign(
+        {},
+        source,
+        params
+      );
+
+      const prefix = `${type}${name ? `_${name}` : ''}`;
+
+      const where = {
+        key: `${prefix}_${key}`,
+        environment,
+        tag,
+      };
+
+      await db.query('core_store').delete(where);
+    }
+
     return {
       get,
       set,
+      delete: deleteFn,
     };
   };
 };

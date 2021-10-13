@@ -364,7 +364,12 @@ module.exports = {
 
       // Get relation nature
       let details;
+
       const targetName = association.model || association.collection || '';
+
+      const targetModel =
+        targetName !== '*' ? strapi.db.getModel(targetName, association.plugin) : null;
+
       const infos = this.getNature({
         attribute: association,
         attributeName: key,
@@ -381,6 +386,7 @@ module.exports = {
         const ast = {
           alias: key,
           type: 'collection',
+          targetUid: targetModel.uid,
           collection: association.collection,
           via: association.via || undefined,
           nature: infos.nature,
@@ -388,6 +394,7 @@ module.exports = {
           dominant: details.dominant !== true,
           plugin: association.plugin || undefined,
           filter: details.filter,
+          populate: association.populate,
         };
 
         if (infos.nature === 'manyToMany' && definition.orm === 'bookshelf') {
@@ -407,6 +414,7 @@ module.exports = {
         definition.associations.push({
           alias: key,
           type: 'model',
+          targetUid: targetModel.uid,
           model: association.model,
           via: association.via || undefined,
           nature: infos.nature,
@@ -414,6 +422,7 @@ module.exports = {
           dominant: details.dominant !== true,
           plugin: association.plugin || undefined,
           filter: details.filter,
+          populate: association.populate,
         });
         return;
       }
@@ -460,11 +469,13 @@ module.exports = {
 
       definition.associations.push({
         alias: key,
+        targetUid: '*',
         type: association.model ? 'model' : 'collection',
         related: models,
         nature: infos.nature,
         autoPopulate: _.get(association, 'autoPopulate', true),
         filter: association.filter,
+        populate: association.populate,
       });
     } catch (e) {
       strapi.log.error(

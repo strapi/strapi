@@ -21,10 +21,12 @@ const MediaLib = ({ isOpen, onChange, onToggle }) => {
 
   const handleInputChange = data => {
     if (data) {
-      const { name, alternativeText, url } = data;
-      const alt = alternativeText || name;
+      const formattedData = data.map(({ name, alternativeText, url }) => {
+        const alt = alternativeText || name;
 
-      setData({ alt, url: prefixFileUrlWithBackendUrl(url) });
+        return { alt, url: prefixFileUrlWithBackendUrl(url) };
+      });
+      setData(formattedData);
     }
   };
 
@@ -42,7 +44,7 @@ const MediaLib = ({ isOpen, onChange, onToggle }) => {
       <Component
         allowedTypes={['images', 'videos', 'files']}
         isOpen={isOpen}
-        multiple={false}
+        multiple
         noNavigation
         onClosed={handleClosed}
         onInputMediaChange={handleInputChange}

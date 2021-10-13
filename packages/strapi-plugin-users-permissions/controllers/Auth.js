@@ -149,7 +149,8 @@ module.exports = {
       }
 
       // Connect the user with the third-party provider.
-      let user, error;
+      let user;
+      let error;
       try {
         [user, error] = await strapi.plugins['users-permissions'].services.providers.connect(
           provider,
@@ -256,7 +257,7 @@ module.exports = {
 
     if (!strapi.config.server.url.startsWith('http')) {
       strapi.log.warn(
-        'You are using a third party provider for login. Make sure to set an absolute url in config/server.js. More info here: https://strapi.io/documentation/v3.x/plugins/users-permissions.html#setting-up-the-server-url'
+        'You are using a third party provider for login. Make sure to set an absolute url in config/server.js. More info here: https://strapi.io/documentation/developer-docs/latest/development/plugins/users-permissions.html#setting-up-the-server-url'
       );
     }
 
@@ -282,7 +283,7 @@ module.exports = {
         null,
         formatError({
           id: 'Auth.form.error.email.format',
-          message: 'Please provide valid email address.',
+          message: 'Please provide a valid email address.',
         })
       );
     }
@@ -305,6 +306,17 @@ module.exports = {
         formatError({
           id: 'Auth.form.error.user.not-exist',
           message: 'This email does not exist.',
+        })
+      );
+    }
+
+    // User blocked
+    if (user.blocked) {
+      return ctx.badRequest(
+        null,
+        formatError({
+          id: 'Auth.form.error.user.blocked',
+          message: 'This user is disabled.',
         })
       );
     }

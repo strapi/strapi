@@ -27,7 +27,17 @@ const types = {
 const Notification = ({ notification }) => {
   const { formatMessage } = useIntl();
   const dispatch = useDispatch();
-  const { title, message, link, type, id, onClose, timeout, blockTransition } = notification;
+  const {
+    title,
+    message,
+    link,
+    type,
+    id,
+    onClose,
+    timeout,
+    blockTransition,
+    centered,
+  } = notification;
 
   const formattedMessage = msg => (typeof msg === 'string' ? msg : formatMessage(msg, msg.values));
 
@@ -56,7 +66,7 @@ const Notification = ({ notification }) => {
   }, [blockTransition, handleClose, timeout]);
 
   return (
-    <NotificationWrapper color={types[type].color}>
+    <NotificationWrapper centered={centered} color={types[type].color}>
       <Padded top left right bottom size="smd">
         <Flex alignItems="center" justifyContent="space-between">
           <IconWrapper>
@@ -73,18 +83,20 @@ const Notification = ({ notification }) => {
                 {formattedMessage(title)}
               </Text>
             )}
-            <Flex>
+            <Flex justifyContent="space-between">
               {message && (
-                <Text title={formattedMessage(message)} ellipsis>
-                  {formattedMessage(message)}
-                </Text>
+                <Text title={formattedMessage(message)}>{formattedMessage(message)}</Text>
               )}
               {link && (
-                <a href={link.url} target="_blank" rel="noopener noreferrer">
-                  <Padded left size="xs">
+                <a
+                  href={link.url}
+                  target={link.target || '_blank'}
+                  rel={!link.target || link.target === '_blank' ? 'noopener noreferrer' : ''}
+                >
+                  <Padded right left size="xs">
                     <Flex alignItems="center">
                       <Text
-                        style={{ maxWidth: '120px' }}
+                        style={{ maxWidth: '100px' }}
                         ellipsis
                         fontWeight="bold"
                         color="blue"
@@ -92,8 +104,11 @@ const Notification = ({ notification }) => {
                       >
                         {formattedMessage(link.label)}
                       </Text>
-                      <Padded left size="xs" />
-                      <LinkArrow />
+                      {link.target === '_blank' && (
+                        <Padded left size="xs">
+                          <LinkArrow />
+                        </Padded>
+                      )}
                     </Flex>
                   </Padded>
                 </a>
@@ -120,6 +135,7 @@ Notification.defaultProps = {
     onClose: () => null,
     timeout: 2500,
     blockTransition: false,
+    centered: false,
   },
 };
 
@@ -143,6 +159,7 @@ Notification.propTypes = {
       }),
     ]),
     link: PropTypes.shape({
+      target: PropTypes.string,
       url: PropTypes.string.isRequired,
       label: PropTypes.oneOfType([
         PropTypes.string,
@@ -157,6 +174,7 @@ Notification.propTypes = {
     onClose: PropTypes.func,
     timeout: PropTypes.number,
     blockTransition: PropTypes.bool,
+    centered: PropTypes.bool,
   }),
 };
 

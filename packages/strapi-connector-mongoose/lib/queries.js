@@ -4,15 +4,23 @@
  */
 
 const _ = require('lodash');
+const { prop, omit } = require('lodash/fp');
+const pmap = require('p-map');
 const { convertRestQueryParams, buildQuery } = require('strapi-utils');
 const { contentTypes: contentTypesUtils } = require('strapi-utils');
-const populateQueries = require('./utils/populate-queries');
-const { PUBLISHED_AT_ATTRIBUTE, DP_PUB_STATES } = contentTypesUtils.constants;
+const mongoose = require('mongoose');
 
+const populateQueries = require('./utils/populate-queries');
+
+const BATCH_SIZE = 1000;
+
+const { PUBLISHED_AT_ATTRIBUTE, DP_PUB_STATES } = contentTypesUtils.constants;
 const { findComponentByGlobalId } = require('./utils/helpers');
+const { handleDatabaseError } = require('./utils/errors');
 
 const hasPK = (obj, model) => _.has(obj, model.primaryKey) || _.has(obj, 'id');
 const getPK = (obj, model) => (_.has(obj, model.primaryKey) ? obj[model.primaryKey] : obj.id);
+const pickCountFilters = omit(['sort', 'limit', 'start']);
 
 module.exports = ({ model, strapi }) => {
   const assocKeys = model.associations.map(ast => ast.alias);
@@ -28,9 +36,16 @@ module.exports = ({ model, strapi }) => {
       .filter(ast => ast.autoPopulate !== false)
       .map(ast => {
         const assocModel = strapi.db.getModelByAssoc(ast);
+
+        const populateOptions = {
+          publicationState: options.publicationState,
+          _populateComponents: !_.isArray(ast.populate),
+          _populateMorphRelations: !_.isArray(ast.populate),
+        };
+
         const populate = {
           path: ast.alias,
-          options: { publicationState: options.publicationState },
+          options: populateOptions,
         };
 
         if (
@@ -54,7 +69,15 @@ module.exports = ({ model, strapi }) => {
     return _.omit(values, excludedKeys);
   };
 
-  async function createComponents(entry, values, { isDraft }) {
+  const wrapErrors = fn => async (...args) => {
+    try {
+      return await fn(...args);
+    } catch (error) {
+      return handleDatabaseError(error);
+    }
+  };
+
+  async function createComponents(entry, values, { isDraft, session = null } = {}) {
     if (componentKeys.length === 0) return;
 
     for (let key of componentKeys) {
@@ -79,7 +102,7 @@ module.exports = ({ model, strapi }) => {
         if (repeatable === true) {
           const components = await Promise.all(
             componentValue.map(value => {
-              return strapi.query(component).create(value);
+              return strapi.query(component).create(value, { session });
             })
           );
 
@@ -89,18 +112,18 @@ module.exports = ({ model, strapi }) => {
           }));
 
           entry[key] = componentsArr;
-          await entry.save();
+          await entry.save({ session });
         } else {
           if (componentValue === null) continue;
 
-          const componentEntry = await strapi.query(component).create(componentValue);
+          const componentEntry = await strapi.query(component).create(componentValue, { session });
           entry[key] = [
             {
               kind: componentModel.globalId,
               ref: componentEntry.id,
             },
           ];
-          await entry.save();
+          await entry.save({ session });
         }
       }
 
@@ -122,7 +145,7 @@ module.exports = ({ model, strapi }) => {
             const component = value.__component;
             return strapi
               .query(component)
-              .create(value)
+              .create(value, { session })
               .then(entity => {
                 return {
                   __component: value.__component,
@@ -142,12 +165,12 @@ module.exports = ({ model, strapi }) => {
         });
 
         entry[key] = componentsArr;
-        await entry.save();
+        await entry.save({ session });
       }
     }
   }
 
-  async function updateComponents(entry, values) {
+  async function updateComponents(entry, values, { session = null } = {}) {
     if (componentKeys.length === 0) return;
 
     const updateOrCreateComponent = async ({ componentUID, value }) => {
@@ -158,10 +181,11 @@ module.exports = ({ model, strapi }) => {
           {
             [query.model.primaryKey]: getPK(value, query.model),
           },
-          value
+          value,
+          { session }
         );
       }
-      return query.create(value);
+      return query.create(value, { session });
     };
 
     for (let key of componentKeys) {
@@ -181,6 +205,7 @@ module.exports = ({ model, strapi }) => {
           await deleteOldComponents(entry, componentValue, {
             key,
             componentModel,
+            session,
           });
 
           const components = await Promise.all(
@@ -192,11 +217,12 @@ module.exports = ({ model, strapi }) => {
           }));
 
           entry[key] = componentsArr;
-          await entry.save();
+          await entry.save({ session });
         } else {
           await deleteOldComponents(entry, componentValue, {
             key,
             componentModel,
+            session,
           });
 
           if (componentValue === null) continue;
@@ -212,7 +238,7 @@ module.exports = ({ model, strapi }) => {
               ref: component.id,
             },
           ];
-          await entry.save();
+          await entry.save({ session });
         }
       }
 
@@ -221,6 +247,7 @@ module.exports = ({ model, strapi }) => {
 
         await deleteDynamicZoneOldComponents(entry, dynamiczoneValues, {
           key,
+          session,
         });
 
         const dynamiczones = await Promise.all(
@@ -245,13 +272,13 @@ module.exports = ({ model, strapi }) => {
         });
 
         entry[key] = componentsArr;
-        await entry.save();
+        await entry.save({ session });
       }
     }
     return;
   }
 
-  async function deleteDynamicZoneOldComponents(entry, values, { key }) {
+  async function deleteDynamicZoneOldComponents(entry, values, { key, session = null }) {
     const idsToKeep = values.reduce((acc, value) => {
       const component = value.__component;
       const componentModel = strapi.components[component];
@@ -309,13 +336,17 @@ module.exports = ({ model, strapi }) => {
         Object.keys(deleteMap).map(componentUID => {
           return strapi
             .query(componentUID)
-            .delete({ [`${model.primaryKey}_in`]: deleteMap[componentUID] });
+            .delete({ [`${model.primaryKey}_in`]: deleteMap[componentUID] }, { session });
         })
       );
     }
   }
 
-  async function deleteOldComponents(entry, componentValue, { key, componentModel }) {
+  async function deleteOldComponents(
+    entry,
+    componentValue,
+    { key, componentModel, session = null }
+  ) {
     const componentArr = Array.isArray(componentValue) ? componentValue : [componentValue];
 
     const idsToKeep = componentArr
@@ -344,11 +375,13 @@ module.exports = ({ model, strapi }) => {
     }, []);
 
     if (idsToDelete.length > 0) {
-      await strapi.query(componentModel.uid).delete({ [`${model.primaryKey}_in`]: idsToDelete });
+      await strapi
+        .query(componentModel.uid)
+        .delete({ [`${model.primaryKey}_in`]: idsToDelete }, { session });
     }
   }
 
-  async function deleteComponents(entry) {
+  async function deleteComponents(entry, { session = null } = {}) {
     if (componentKeys.length === 0) return;
 
     for (let key of componentKeys) {
@@ -363,7 +396,7 @@ module.exports = ({ model, strapi }) => {
           const idsToDelete = entry[key].map(el => el.ref);
           await strapi
             .query(componentModel.uid)
-            .delete({ [`${model.primaryKey}_in`]: idsToDelete });
+            .delete({ [`${model.primaryKey}_in`]: idsToDelete }, { session });
         }
       }
 
@@ -386,9 +419,12 @@ module.exports = ({ model, strapi }) => {
 
           await Promise.all(
             Object.keys(deleteMap).map(componentUID => {
-              return strapi.query(componentUID).delete({
-                [`${model.primaryKey}_in`]: deleteMap[componentUID],
-              });
+              return strapi.query(componentUID).delete(
+                {
+                  [`${model.primaryKey}_in`]: deleteMap[componentUID],
+                },
+                { session }
+              );
             })
           );
         }
@@ -396,7 +432,7 @@ module.exports = ({ model, strapi }) => {
     }
   }
 
-  function find(params, populate) {
+  function find(params, populate, { session = null } = {}) {
     const filters = convertRestQueryParams(params);
     const populateOpt = populate || defaultPopulate({ publicationState: filters.publicationState });
 
@@ -404,24 +440,22 @@ module.exports = ({ model, strapi }) => {
       model,
       filters,
       populate: populateOpt,
+      session,
     }).then(results => results.map(result => (result ? result.toObject() : null)));
   }
 
-  async function findOne(params, populate) {
-    const entries = await find({ ...params, _limit: 1 }, populate);
+  async function findOne(params, populate, { session = null } = {}) {
+    const entries = await find({ ...params, _limit: 1 }, populate, { session });
     return entries[0] || null;
   }
 
-  function count(params) {
-    const filters = convertRestQueryParams(params);
+  function count(params, { session = null } = {}) {
+    const filters = pickCountFilters(convertRestQueryParams(params));
 
-    return buildQuery({
-      model,
-      filters: { where: filters.where },
-    }).count();
+    return buildQuery({ model, filters, session }).count();
   }
 
-  async function create(values) {
+  async function create(values, { session = null } = {}) {
     // Extract values related to relational data.
     const relations = pickRelations(values);
     const data = omitExernalValues(values);
@@ -432,21 +466,28 @@ module.exports = ({ model, strapi }) => {
         : new Date();
     }
 
-    // Create entry with no-relational data.
-    const entry = await model.create(data);
-
+    /*
+      Create entry with no-relational data.
+      Note that it is mongoose requirement that you **must** pass an array as
+      the first parameter to `create()` if you want to specify options.
+      https://mongoosejs.com/docs/api.html#model_Model.create
+    */
+    const [entry] = await model.create([data], { session });
     const isDraft = contentTypesUtils.isDraft(entry, model);
-    await createComponents(entry, values, { isDraft });
+    await createComponents(entry, values, { session, isDraft });
 
     // Create relational data and return the entry.
-    return model.updateRelations({
-      [model.primaryKey]: getPK(entry, model),
-      values: relations,
-    });
+    return model.updateRelations(
+      {
+        [model.primaryKey]: getPK(entry, model),
+        values: relations,
+      },
+      { session }
+    );
   }
 
-  async function update(params, values) {
-    const entry = await model.findOne(params);
+  async function update(params, values, { session = null } = {}) {
+    const entry = await model.findOne(params).session(session);
 
     if (!entry) {
       const err = new Error('entry.notFound');
@@ -459,30 +500,53 @@ module.exports = ({ model, strapi }) => {
     const data = omitExernalValues(values);
 
     // update components first in case it fails don't update the entity
-    await updateComponents(entry, values);
+    await updateComponents(entry, values, { session });
     // Update entry with no-relational data.
-    await entry.updateOne(data);
+    await entry.updateOne(data, { session });
 
     // Update relational data and return the entry.
-    return model.updateRelations(Object.assign(params, { values: relations }));
+    return model.updateRelations(Object.assign(params, { values: relations }), { session });
   }
 
-  async function deleteMany(params) {
+  async function deleteMany(
+    params,
+    { session = null, returning = true, batchSize = BATCH_SIZE } = {}
+  ) {
     if (params[model.primaryKey]) {
-      const entries = await find({ ...params, _limit: 1 });
+      const entries = await find({ ...params, _limit: 1 }, null, { session });
       if (entries.length > 0) {
-        return deleteOne(entries[0][model.primaryKey]);
+        return deleteOne(entries[0][model.primaryKey], { session });
       }
       return null;
     }
 
-    const entries = await find(params);
-    return Promise.all(entries.map(entry => deleteOne(entry[model.primaryKey])));
+    if (returning) {
+      const entries = await find(params, null, { session });
+      return pmap(entries, entry => deleteOne(entry[model.primaryKey], { session }), {
+        concurrency: 100,
+        stopOnError: true,
+      });
+    }
+
+    // returning false, we can optimize the function
+    const batchParams = _.assign({}, params, { _limit: batchSize, _sort: 'id:ASC' });
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      const batch = await find(batchParams, null, { session });
+      await pmap(batch, entry => deleteOne(entry[model.primaryKey], { session }), {
+        concurrency: 100,
+        stopOnError: true,
+      });
+
+      if (batch.length < BATCH_SIZE) {
+        break;
+      }
+    }
   }
 
-  async function deleteOne(id) {
+  async function deleteOne(id, { session = null } = {}) {
     const entry = await model
-      .findOneAndRemove({ [model.primaryKey]: id })
+      .findOneAndRemove({ [model.primaryKey]: id }, { session })
       .populate(defaultPopulate());
 
     if (!entry) {
@@ -491,14 +555,14 @@ module.exports = ({ model, strapi }) => {
       throw err;
     }
 
-    await deleteComponents(entry);
+    await deleteComponents(entry, { session });
 
-    await model.deleteRelations(entry);
+    await model.deleteRelations(entry, { session });
 
     return entry.toObject ? entry.toObject() : null;
   }
 
-  function search(params, populate) {
+  function search(params, populate, { session = null } = {}) {
     const filters = convertRestQueryParams(_.omit(params, '_q'));
     const populateOpt = populate || defaultPopulate({ publicationState: filters.publicationState });
 
@@ -507,27 +571,77 @@ module.exports = ({ model, strapi }) => {
       filters,
       searchParam: params._q,
       populate: populateOpt,
+      session,
     }).then(results => results.map(result => (result ? result.toObject() : null)));
   }
 
-  function countSearch(params) {
-    const { where } = convertRestQueryParams(_.omit(params, '_q'));
+  function countSearch(params, { session = null } = {}) {
+    const countParams = omit(['_q'], params);
+    const filters = pickCountFilters(convertRestQueryParams(countParams));
 
     return buildQuery({
       model,
-      filters: { where },
+      filters,
       searchParam: params._q,
+      session,
     }).count();
+  }
+
+  async function fetchRelationCounters(attribute, entitiesIds = []) {
+    const assoc = model.associations.find(assoc => assoc.alias === attribute);
+
+    switch (prop('nature', assoc)) {
+      case 'oneToMany': {
+        const assocModel = strapi.db.getModelByAssoc(assoc);
+        return assocModel
+          .aggregate()
+          .match({ [assoc.via]: { $in: entitiesIds.map(mongoose.Types.ObjectId) } })
+          .group({
+            _id: `$${assoc.via}`,
+            count: { $sum: 1 },
+          })
+          .project({ _id: 0, id: '$_id', count: 1 });
+      }
+      case 'manyWay': {
+        return model
+          .aggregate()
+          .match({ [model.primaryKey]: { $in: entitiesIds.map(mongoose.Types.ObjectId) } })
+          .project({ _id: 0, id: '$_id', count: { $size: { $ifNull: [`$${assoc.alias}`, []] } } });
+      }
+      case 'manyToMany': {
+        if (assoc.dominant) {
+          return model
+            .aggregate()
+            .match({ [model.primaryKey]: { $in: entitiesIds.map(mongoose.Types.ObjectId) } })
+            .project({
+              _id: 0,
+              id: '$_id',
+              count: { $size: { $ifNull: [`$${assoc.alias}`, []] } },
+            });
+        }
+        const assocModel = strapi.db.getModelByAssoc(assoc);
+        return assocModel
+          .aggregate()
+          .match({ [assoc.via]: { $in: entitiesIds.map(mongoose.Types.ObjectId) } })
+          .unwind(assoc.via)
+          .group({ _id: `$${assoc.via}`, count: { $sum: 1 } })
+          .project({ _id: 0, id: '$_id', count: 1 });
+      }
+      default: {
+        return [];
+      }
+    }
   }
 
   return {
     findOne,
     find,
-    create,
-    update,
+    create: wrapErrors(create),
+    update: wrapErrors(update),
     delete: deleteMany,
     count,
     search,
     countSearch,
+    fetchRelationCounters,
   };
 };

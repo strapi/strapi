@@ -2,7 +2,7 @@
 
 const _ = require('lodash');
 const { subject } = require('@casl/ability');
-const createConditionProvider = require('../permission/condition-provider');
+const createConditionProvider = require('../../domain/condition/provider');
 const createPermissionsEngine = require('../permission/engine');
 
 describe('Permissions Engine', () => {
@@ -21,8 +21,8 @@ describe('Permissions Engine', () => {
         title: 'admin',
         roles: [{ id: 1 }],
       },
-      john: {
-        firstname: 'John',
+      kai: {
+        firstname: 'Kai',
         title: 'admin',
         roles: [{ id: 3 }],
       },
@@ -38,13 +38,13 @@ describe('Permissions Engine', () => {
           {
             action: 'read',
             subject: 'article',
-            fields: ['**'],
+            properties: { fields: ['**'] },
             conditions: ['plugins::test.isBob'],
           },
           {
             action: 'read',
             subject: 'user',
-            fields: ['title'],
+            properties: { fields: ['title'] },
             conditions: ['plugins::test.isAdmin'],
           },
         ],
@@ -54,7 +54,7 @@ describe('Permissions Engine', () => {
           {
             action: 'post',
             subject: 'article',
-            fields: ['*'],
+            properties: { fields: ['*'] },
             conditions: ['plugins::test.isBob'],
           },
         ],
@@ -64,7 +64,7 @@ describe('Permissions Engine', () => {
           {
             action: 'read',
             subject: 'user',
-            fields: ['title'],
+            properties: { fields: ['title'] },
             conditions: ['plugins::test.isContainedIn'],
           },
         ],
@@ -74,7 +74,7 @@ describe('Permissions Engine', () => {
           {
             action: 'read',
             subject: 'user',
-            fields: [],
+            properties: { fields: [] },
           },
         ],
       },
@@ -102,19 +102,24 @@ describe('Permissions Engine', () => {
         plugin: 'test',
         name: 'isContainedIn',
         category: 'default',
-        handler: { firstname: { $in: ['Alice', 'Foo'] } },
+        handler: () => ({ firstname: { $in: ['Alice', 'Foo'] } }),
       },
     ],
   };
 
   const getUser = name => localTestData.users[name];
 
-  beforeEach(() => {
+  beforeEach(async () => {
     global.strapi = {
       isLoaded: false,
       admin: {
         services: {
           permission: {
+            actionProvider: {
+              get() {
+                return { applyToProperties: undefined };
+              },
+            },
             findUserPermissions: jest.fn(({ roles }) =>
               _.reduce(
                 localTestData.roles,
@@ -132,11 +137,11 @@ describe('Permissions Engine', () => {
     };
 
     conditionProvider = createConditionProvider();
-    conditionProvider.registerMany(localTestData.conditions);
+    await conditionProvider.registerMany(localTestData.conditions);
 
     engine = createPermissionsEngine(conditionProvider);
 
-    jest.spyOn(engine, 'evaluatePermission');
+    jest.spyOn(engine, 'evaluate');
     jest.spyOn(engine, 'createRegisterFunction');
     jest.spyOn(engine, 'generateAbilityCreatorFor');
   });
@@ -225,7 +230,7 @@ describe('Permissions Engine', () => {
       let ability;
 
       beforeAll(async () => {
-        const user = getUser('john');
+        const user = getUser('kai');
         ability = await engine.generateUserAbility(user);
       });
 
@@ -262,32 +267,35 @@ describe('Permissions Engine', () => {
     });
   });
 
-  describe('Evaluate Permission', () => {
-    test('It should register the permission (no conditions / true result)', async () => {
-      const permission = { action: 'read', subject: 'article', fields: ['title'] };
+  describe('Evaluate', () => {
+    test('It should register the permission (no conditions)', async () => {
+      const permission = { action: 'read', subject: 'article', properties: { fields: ['title'] } };
       const user = getUser('alice');
       const registerFn = jest.fn();
 
-      await engine.evaluatePermission({ permission, user, registerFn });
+      await engine.evaluate({ permission, user, registerFn });
 
-      expect(registerFn).toHaveBeenCalledWith({ ...permission, condition: true });
+      expect(registerFn).toHaveBeenCalledWith({
+        ..._.pick(permission, ['action', 'subject']),
+        fields: permission.properties.fields,
+      });
     });
 
-    test('It should register the permission (conditions / true result)', async () => {
+    test('It should register the permission without a condition (non required true result)', async () => {
       const permission = {
         action: 'read',
         subject: 'article',
-        fields: ['title'],
+        properties: { fields: ['title'] },
         conditions: ['plugins::test.isAdmin'],
       };
       const user = getUser('alice');
       const registerFn = jest.fn();
 
-      await engine.evaluatePermission({ permission, user, registerFn });
+      await engine.evaluate({ permission, user, registerFn });
 
       const expected = {
-        ..._.omit(permission, 'conditions'),
-        condition: true,
+        ..._.omit(permission, ['conditions', 'properties']),
+        fields: permission.properties.fields,
       };
 
       expect(registerFn).toHaveBeenCalledWith(expected);
@@ -297,35 +305,66 @@ describe('Permissions Engine', () => {
       const permission = {
         action: 'read',
         subject: 'article',
-        fields: ['title'],
+        properties: { fields: ['title'] },
         conditions: ['plugins::test.isBob'],
       };
       const user = getUser('alice');
       const registerFn = jest.fn();
 
-      await engine.evaluatePermission({ permission, user, registerFn });
+      await engine.evaluate({ permission, user, registerFn });
 
       expect(registerFn).not.toHaveBeenCalled();
     });
 
-    test('It should register the permission (conditions / object result)', async () => {
+    test('It should register the permission (non required object result)', async () => {
       const permission = {
         action: 'read',
         subject: 'article',
-        fields: ['title'],
+        properties: { fields: ['title'] },
         conditions: ['plugins::test.isCreatedBy'],
       };
+
+      global.strapi.admin.services.permission.actionProvider.get = () => ({
+        applyToProperties: ['fields'],
+      });
+
       const user = getUser('alice');
       const registerFn = jest.fn();
 
-      await engine.evaluatePermission({ permission, user, registerFn });
+      await engine.evaluate({ permission, user, registerFn });
 
       const expected = {
-        ..._.omit(permission, 'conditions'),
-        condition: { created_by: user.firstname },
+        ..._.omit(permission, ['conditions', 'properties']),
+        fields: permission.properties.fields,
+        condition: {
+          $and: [
+            {
+              $or: [{ created_by: user.firstname }],
+            },
+          ],
+        },
       };
 
       expect(registerFn).toHaveBeenCalledWith(expected);
+    });
+  });
+
+  test('It should register the condition even if the subject is Nil', async () => {
+    const permission = {
+      action: 'read',
+      subject: null,
+      properties: {},
+      conditions: ['plugins::test.isCreatedBy'],
+    };
+
+    const user = getUser('alice');
+    const can = jest.fn();
+    const registerFn = engine.createRegisterFunction(can, {}, user);
+
+    await engine.evaluate({ permission, user, registerFn });
+
+    expect(can).toHaveBeenCalledWith('read', 'all', undefined, {
+      $and: [{ $or: [{ created_by: user.firstname }] }],
     });
   });
 
@@ -335,21 +374,38 @@ describe('Permissions Engine', () => {
 
     beforeEach(() => {
       can = jest.fn();
-      registerFn = engine.createRegisterFunction(can);
+      registerFn = engine.createRegisterFunction(can, {}, {});
     });
 
-    test('It should calls the can function without any condition', () => {
-      registerFn({ action: 'read', subject: 'article', fields: '*', condition: true });
+    test('It should calls the can function without any condition', async () => {
+      await registerFn({ action: 'read', subject: 'article', fields: '*', condition: true });
 
       expect(can).toHaveBeenCalledTimes(1);
       expect(can).toHaveBeenCalledWith('read', 'article', '*', undefined);
     });
 
-    test('It should calls the can function with a condition', () => {
-      registerFn({ action: 'read', subject: 'article', fields: '*', condition: { created_by: 1 } });
+    test('It should calls the can function with a condition', async () => {
+      await registerFn({
+        action: 'read',
+        subject: 'article',
+        fields: '*',
+        condition: { created_by: 1 },
+      });
 
       expect(can).toHaveBeenCalledTimes(1);
       expect(can).toHaveBeenCalledWith('read', 'article', '*', { created_by: 1 });
+    });
+
+    test(`It should use 'all' as a subject if it's Nil`, async () => {
+      await registerFn({
+        action: 'read',
+        subject: null,
+        fields: null,
+        condition: { created_by: 1 },
+      });
+
+      expect(can).toHaveBeenCalledTimes(1);
+      expect(can).toHaveBeenCalledWith('read', 'all', null, { created_by: 1 });
     });
   });
 

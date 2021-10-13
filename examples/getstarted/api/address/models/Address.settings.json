@@ -6,7 +6,7 @@
     "description": ""
   },
   "options": {
-    "draftAndPublish": true,
+    "draftAndPublish": false,
     "increments": true,
     "timestamps": [
       "created_at",
@@ -45,11 +45,18 @@
     },
     "city": {
       "type": "string",
-      "required": true
+      "required": true,
+      "maxLength": 200
     },
     "likes": {
       "collection": "like",
       "via": "address"
+    },
+    "json": {
+      "type": "json"
+    },
+    "slug": {
+      "type": "uid"
     }
   }
 }

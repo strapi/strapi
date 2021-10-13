@@ -2,7 +2,7 @@ import React, { useCallback, useReducer, useRef, useState, useEffect } from 'rea
 import { get, includes, toString, isEqual, intersectionWith } from 'lodash';
 import { useHistory, useLocation } from 'react-router-dom';
 import { Header } from '@buffetjs/custom';
-import { Button } from '@buffetjs/core';
+import { Button, Padded } from '@buffetjs/core';
 import {
   PopUpWarning,
   useGlobalContext,
@@ -14,7 +14,6 @@ import {
 import { formatFileForEditing, getRequestUrl, getTrad, getFileModelTimestamps } from '../../utils';
 import Container from '../../components/Container';
 import HomePageContent from './HomePageContent';
-import Padded from '../../components/Padded';
 import { useAppContext } from '../../hooks';
 import ModalStepper from '../ModalStepper';
 import { generateStringFromParams, getHeaderLabel } from './utils';

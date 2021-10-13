@@ -3,7 +3,7 @@
  */
 'use strict';
 
-const debug = require('debug')('strapi');
+const debug = require('debug')('strapi:worker-queue');
 
 module.exports = class WorkerQueue {
   constructor({ logger, concurrency = 5 } = {}) {

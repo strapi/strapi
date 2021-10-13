@@ -5,7 +5,7 @@ import reducer, { initialState } from './reducer';
 import init from './init';
 
 const useSettingsMenu = (noCheck = false) => {
-  const permissions = useContext(UserContext);
+  const { userPermissions: permissions } = useContext(UserContext);
   const { plugins } = useGlobalContext();
 
   const [{ isLoading, menu }, dispatch] = useReducer(reducer, initialState, () =>

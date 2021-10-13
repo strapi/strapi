@@ -18,20 +18,11 @@ import {
 } from 'strapi-helper-plugin';
 import { Switch, Redirect, Route, useParams, useHistory } from 'react-router-dom';
 import { useIntl } from 'react-intl';
-import RolesCreatePage from 'ee_else_ce/containers/Roles/CreatePage';
-import ProtectedRolesListPage from 'ee_else_ce/containers/Roles/ProtectedListPage';
 import HeaderSearch from '../../components/HeaderSearch';
 import PageTitle from '../../components/PageTitle';
 import { useSettingsMenu } from '../../hooks';
 import { retrieveGlobalLinks } from '../../utils';
-import ApplicationInfosPage from '../ApplicationInfosPage';
 import SettingsSearchHeaderProvider from '../SettingsHeaderSearchContextProvider';
-import UsersEditPage from '../Users/ProtectedEditPage';
-import UsersListPage from '../Users/ProtectedListPage';
-import RolesEditPage from '../Roles/ProtectedEditPage';
-import WebhooksCreateView from '../Webhooks/ProtectedCreateView';
-import WebhooksEditView from '../Webhooks/ProtectedEditView';
-import WebhooksListView from '../Webhooks/ProtectedListView';
 import {
   ApplicationDetailLink,
   MenuWrapper,
@@ -45,6 +36,7 @@ import {
   createPluginsLinksRoutes,
   makeUniqueRoutes,
   getSectionsToDisplay,
+  routes,
 } from './utils';
 
 function SettingsPage() {
@@ -55,6 +47,12 @@ function SettingsPage() {
   const { isLoading, menu } = useSettingsMenu();
   const { formatMessage } = useIntl();
   const pluginsGlobalLinks = useMemo(() => retrieveGlobalLinks(plugins), [plugins]);
+
+  const appRoutes = useMemo(() => {
+    return makeUniqueRoutes(
+      routes.map(({ to, Component, exact }) => createRoute(Component, to, exact))
+    );
+  }, []);
 
   // Create all the <Route /> that needs to be created by the plugins
   // For instance the upload plugin needs to create a <Route />
@@ -118,31 +116,7 @@ function SettingsPage() {
 
           <div className="col-md-9">
             <Switch>
-              <Route
-                exact
-                path={`${settingsBaseURL}/application-infos`}
-                component={ApplicationInfosPage}
-              />
-              <Route exact path={`${settingsBaseURL}/roles`} component={ProtectedRolesListPage} />
-              <Route
-                exact
-                path={`${settingsBaseURL}/roles/duplicate/:id`}
-                component={RolesCreatePage}
-              />
-              <Route exact path={`${settingsBaseURL}/roles/new`} component={RolesCreatePage} />
-              <Route exact path={`${settingsBaseURL}/roles/:id`} component={RolesEditPage} />
-              <Route exact path={`${settingsBaseURL}/users`} component={UsersListPage} />
-              <Route exact path={`${settingsBaseURL}/users/:id`} component={UsersEditPage} />
-
-              <Route
-                exact
-                path={`${settingsBaseURL}/webhooks/create`}
-                component={WebhooksCreateView}
-              />
-
-              <Route exact path={`${settingsBaseURL}/webhooks/:id`} component={WebhooksEditView} />
-
-              <Route exact path={`${settingsBaseURL}/webhooks`} component={WebhooksListView} />
+              {appRoutes}
               {globalSectionCreatedRoutes}
               {pluginsLinksRoutes}
               <Route path={`${settingsBaseURL}/:pluginId`} component={SettingDispatcher} />

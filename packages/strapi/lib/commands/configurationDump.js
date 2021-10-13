@@ -9,7 +9,7 @@ const CHUNK_SIZE = 100;
  * Will dump configurations to a file or stdout
  * @param {string} file filepath to use as output
  */
-module.exports = async function({ file: filePath }) {
+module.exports = async function({ file: filePath, pretty }) {
   const output = filePath ? fs.createWriteStream(filePath) : process.stdout;
 
   const app = await strapi().load();
@@ -38,7 +38,7 @@ module.exports = async function({ file: filePath }) {
       });
   }
 
-  output.write(JSON.stringify(exportData));
+  output.write(JSON.stringify(exportData, null, pretty ? 2 : null));
   output.write('\n');
   output.end();
 

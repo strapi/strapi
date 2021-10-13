@@ -37,6 +37,7 @@ describe('AMDIN | CONTAINERS | NEWNOTIFICATION | reducer', () => {
             link: null,
             timeout: 2500,
             blockTransition: false,
+            centered: false,
             uid: null,
             onClose: null,
           },

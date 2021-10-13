@@ -1,13 +1,16 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
-const IconUpload = () => {
+const IconUpload = ({ title, ...props }) => {
   return (
     <svg
       width="105"
       height="84"
       xmlns="http://www.w3.org/2000/svg"
       xmlnsXlink="http://www.w3.org/1999/xlink"
+      {...props}
     >
+      <title>{title}</title>
       <defs>
         <rect id="a" y="1.354" width="77.333" height="62.292" rx="4" />
         <rect id="b" y="1.354" width="77.333" height="62.292" rx="4" />
@@ -36,6 +39,10 @@ const IconUpload = () => {
       </g>
     </svg>
   );
+};
+
+IconUpload.propTypes = {
+  title: PropTypes.string.isRequired,
 };
 
 export default IconUpload;

@@ -8,12 +8,10 @@ import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import { Redirect } from 'react-router-dom';
 import { get } from 'lodash';
-
-import { BlockerComponent } from 'strapi-helper-plugin';
+import { ErrorBoundary } from 'react-error-boundary';
+import { BlockerComponent, ErrorFallback } from 'strapi-helper-plugin';
 import PageTitle from '../../components/PageTitle';
-
 import { LOGIN_LOGO } from '../../config';
-import ErrorBoundary from '../ErrorBoundary';
 
 export function PluginDispatcher(props) {
   const {
@@ -46,7 +44,7 @@ export function PluginDispatcher(props) {
   return (
     <div>
       <PageTitle title={`Strapi - ${name}`} />
-      <ErrorBoundary>
+      <ErrorBoundary FallbackComponent={ErrorFallback}>
         <PluginEntryComponent
           {...props}
           {...blockerComponentProps}

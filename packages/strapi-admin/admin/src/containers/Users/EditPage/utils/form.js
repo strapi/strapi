@@ -2,7 +2,7 @@ const form = {
   firstname: {
     autoFocus: true,
     label: 'Settings.permissions.users.form.firstname',
-    placeholder: 'e.g. John',
+    placeholder: 'e.g. Kai',
     type: 'text',
     validations: {
       required: true,
@@ -18,7 +18,7 @@ const form = {
   },
   email: {
     label: 'Settings.permissions.users.form.email',
-    placeholder: 'e.g. john.doe@strapi.io',
+    placeholder: 'e.g. kai.doe@strapi.io',
     type: 'email',
     validations: {
       required: true,
@@ -26,7 +26,7 @@ const form = {
   },
   username: {
     label: 'Auth.form.username.label',
-    placeholder: 'e.g. John_Doe',
+    placeholder: 'e.g. Kai_Doe',
     type: 'text',
     autoComplete: 'no',
     validations: {},

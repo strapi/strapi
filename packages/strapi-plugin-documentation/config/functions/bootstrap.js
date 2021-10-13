@@ -1,3 +1,5 @@
+'use strict';
+
 const fs = require('fs');
 const path = require('path');
 const _ = require('lodash');
@@ -132,6 +134,5 @@ module.exports = async () => {
     },
   ];
 
-  const { actionProvider } = strapi.admin.services.permission;
-  actionProvider.register(actions);
+  await strapi.admin.services.permission.actionProvider.registerMany(actions);
 };

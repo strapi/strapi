@@ -50,7 +50,8 @@ const Banner = forwardRef(
 
           <FormattedMessage id={`${pluginId}.containers.Edit.pluginHeader.title.new`}>
             {msg => {
-              return <div style={{ display }}>{displayedValue || msg}</div>;
+              // The displayed value may be "falsey" when the main field is a number or boolean
+              return <div style={{ display }}>{displayedValue ?? msg}</div>;
             }}
           </FormattedMessage>
           <div className="cta-wrapper" style={{ display }}>

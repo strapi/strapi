@@ -1,18 +1,31 @@
 import { useMemo } from 'react';
 import { get, take } from 'lodash';
-import useDataManager from '../../../hooks/useDataManager';
+import { useContentManagerEditViewDataManager } from 'strapi-helper-plugin';
+
 import { getFieldName } from '../../../utils';
+import { useContentTypeLayout } from '../../../hooks';
 
 function useSelect({ isFromDynamicZone, name }) {
   const {
-    allDynamicZoneFields,
     createActionAllowedFields,
     isCreatingEntry,
     modifiedData,
     removeComponentFromField,
     readActionAllowedFields,
     updateActionAllowedFields,
-  } = useDataManager();
+  } = useContentManagerEditViewDataManager();
+  const { contentType } = useContentTypeLayout();
+
+  // This is used for the readonly mode when updating an entry
+  const allDynamicZoneFields = useMemo(() => {
+    const attributes = get(contentType, ['attributes'], {});
+
+    const dynamicZoneFields = Object.keys(attributes).filter(attrName => {
+      return get(attributes, [attrName, 'type'], '') === 'dynamiczone';
+    });
+
+    return dynamicZoneFields;
+  }, [contentType]);
 
   const allowedFields = useMemo(() => {
     return isCreatingEntry ? createActionAllowedFields : updateActionAllowedFields;

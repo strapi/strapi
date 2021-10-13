@@ -1,19 +1,14 @@
-const _ = require('lodash');
+'use strict';
 
-/**
- * remove condition ids that don't exist
- * @returns {[string]}
- */
-const removeUnkownConditionIds = conditionsIds => {
-  if (!Array.isArray(conditionsIds)) {
-    return conditionsIds;
-  }
+const { isString } = require('lodash/fp');
+const { getService } = require('../utils');
 
-  const existingIds = strapi.admin.services.permission.conditionProvider.getAllIds();
+const isValidCondition = condition => {
+  const { conditionProvider } = getService('permission');
 
-  return _.intersection(conditionsIds, existingIds);
+  return isString(condition) && conditionProvider.has(condition);
 };
 
 module.exports = {
-  removeUnkownConditionIds,
+  isValidCondition,
 };

@@ -1,10 +1,7 @@
 import styled from 'styled-components';
 
-import Flex from '../../Flex';
+import { Flex } from '@buffetjs/core';
 
-// TODO : Design System
-// Wait for the product designer to see
-// if we need to add this new color in the theme or use an existing one.
 const Wrapper = styled(Flex)`
   width: 1.4rem;
   height: 1.4rem;

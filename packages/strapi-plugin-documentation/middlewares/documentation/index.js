@@ -5,8 +5,8 @@
  */
 
 // Public node modules.
-const _ = require('lodash');
 const path = require('path');
+const _ = require('lodash');
 const swaggerUi = require('swagger-ui-dist');
 const koaStatic = require('koa-static');
 

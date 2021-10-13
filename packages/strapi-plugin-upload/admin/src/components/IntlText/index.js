@@ -2,7 +2,7 @@ import React from 'react';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
 
-import Text from '../Text';
+import { Text } from '@buffetjs/core';
 
 const IntlText = ({ id, defaultMessage, values, ...textProps }) => (
   <FormattedMessage id={id} defaultMessage={defaultMessage} values={values}>

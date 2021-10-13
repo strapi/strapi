@@ -153,7 +153,7 @@ const data = {
         schema: {
           name: 'plugins::myplugins.test',
           kind: 'singleType',
-          editable: true,
+          visible: true,
           restrictRelationsTo: null,
         },
       },
@@ -162,7 +162,7 @@ const data = {
         schema: {
           name: 'plugins::myplugins.btest',
           kind: 'collectionType',
-          editable: true,
+          visible: true,
           restrictRelationsTo: null,
         },
       },
@@ -171,7 +171,7 @@ const data = {
         schema: {
           name: 'plugins::myplugins.atest',
           kind: 'collectionType',
-          editable: true,
+          visible: true,
           restrictRelationsTo: [],
         },
       },
@@ -180,7 +180,7 @@ const data = {
         schema: {
           name: 'plugins::myplugins.ctest',
           kind: 'collectionType',
-          editable: true,
+          visible: true,
           restrictRelationsTo: ['oneWay'],
         },
       },

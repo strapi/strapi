@@ -1,3 +1,5 @@
+'use strict';
+
 const { formatContentType } = require('../ContentTypes');
 
 describe('Content types service', () => {
@@ -15,6 +17,11 @@ describe('Content types service', () => {
       },
       options: {
         draftAndPublish: false,
+      },
+      pluginOptions: {
+        'content-manager': {
+          visible: true,
+        },
       },
       attributes: {
         title: {

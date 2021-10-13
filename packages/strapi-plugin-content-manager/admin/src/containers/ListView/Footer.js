@@ -1,21 +1,23 @@
 import React, { memo } from 'react';
 import { FormattedMessage } from 'react-intl';
+import PropTypes from 'prop-types';
 import { GlobalPagination, InputSelect, useGlobalContext } from 'strapi-helper-plugin';
-import useListView from '../../hooks/useListView';
+
 import { FooterWrapper, SelectWrapper, Label } from './components';
 
-function Footer() {
+function Footer({ count, onChange, params }) {
   const { emitEvent } = useGlobalContext();
-  const { count, onChangeSearch, _limit, _page } = useListView();
+  const _limit = parseInt(params.pageSize, 10);
+  const _page = parseInt(params.page, 10);
 
   const handleChangePage = ({ target: { value } }) => {
-    onChangeSearch({ target: { name: '_page', value } });
+    onChange({ page: value });
   };
 
   const handleChangeLimit = ({ target: { value } }) => {
     emitEvent('willChangeNumberOfEntriesPerPage');
 
-    onChangeSearch({ target: { name: '_limit', value } });
+    onChange({ pageSize: value });
   };
 
   return (
@@ -48,5 +50,11 @@ function Footer() {
     </FooterWrapper>
   );
 }
+
+Footer.propTypes = {
+  count: PropTypes.number.isRequired,
+  onChange: PropTypes.func.isRequired,
+  params: PropTypes.object.isRequired,
+};
 
 export default memo(Footer);

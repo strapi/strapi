@@ -14,10 +14,15 @@ Object {
     "connection": "default",
     "description": "My description",
     "draftAndPublish": false,
-    "editable": true,
     "kind": "singleType",
     "name": "My name",
+    "pluginOptions": Object {
+      "content-manager": Object {
+        "visible": true,
+      },
+    },
     "restrictRelationsTo": null,
+    "visible": true,
   },
   "uid": "test-uid",
 }

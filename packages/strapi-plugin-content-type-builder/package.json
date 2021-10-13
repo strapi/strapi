@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-content-type-builder",
-  "version": "3.3.3",
+  "version": "3.6.8",
   "description": "Strapi plugin to create content type (API).",
   "strapi": {
     "name": "Content Type Builder",
@@ -8,43 +8,43 @@
     "description": "content-type-builder.plugin.description"
   },
   "dependencies": {
-    "@buffetjs/core": "3.3.1",
-    "@buffetjs/custom": "3.3.1",
-    "@buffetjs/hooks": "3.3.1",
-    "@buffetjs/icons": "3.3.1",
-    "@buffetjs/styles": "3.3.1",
-    "@buffetjs/utils": "3.3.1",
+    "@buffetjs/core": "3.3.8",
+    "@buffetjs/custom": "3.3.8",
+    "@buffetjs/hooks": "3.3.8",
+    "@buffetjs/icons": "3.3.8",
+    "@buffetjs/styles": "3.3.8",
+    "@buffetjs/utils": "3.3.8",
     "@sindresorhus/slugify": "1.1.0",
-    "fs-extra": "^9.0.1",
+    "fs-extra": "^9.1.0",
     "immutable": "^3.8.2",
-    "lodash": "4.17.19",
+    "lodash": "4.17.21",
     "pluralize": "^8.0.0",
-    "react": "^16.13.1",
+    "react": "^16.14.0",
     "react-dom": "^16.9.0",
     "react-intl": "4.5.0",
-    "react-redux": "7.2.0",
-    "react-router": "^5.0.0",
+    "react-redux": "7.2.3",
+    "react-router": "^5.2.0",
     "react-router-dom": "^5.0.0",
     "reactstrap": "8.4.1",
     "redux": "^4.0.1",
     "redux-immutable": "^4.0.0",
     "reselect": "^4.0.0",
-    "strapi-generate": "3.3.3",
-    "strapi-generate-api": "3.3.3",
-    "strapi-helper-plugin": "3.3.3",
-    "strapi-utils": "3.3.3",
-    "yup": "^0.27.0"
+    "strapi-generate": "3.6.8",
+    "strapi-generate-api": "3.6.8",
+    "strapi-helper-plugin": "3.6.8",
+    "strapi-utils": "3.6.8",
+    "yup": "^0.32.9"
   },
   "author": {
     "name": "Strapi team",
     "email": "hi@strapi.io",
-    "url": "http://strapi.io"
+    "url": "https://strapi.io"
   },
   "maintainers": [
     {
       "name": "Strapi team",
       "email": "hi@strapi.io",
-      "url": "http://strapi.io"
+      "url": "https://strapi.io"
     }
   ],
   "repository": {

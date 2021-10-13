@@ -45,13 +45,12 @@ class Search extends React.Component {
     this.triggerChange('');
   };
 
-  triggerChange = value =>
-    this.props.changeParams({
-      target: {
-        name: '_q',
-        value,
-      },
-    });
+  triggerChange = value => {
+    const method = value ? 'push' : 'remove';
+    const params = method === 'push' ? { _q: value, page: 1 } : { _q: '' };
+
+    this.props.changeParams(params, method);
+  };
 
   render() {
     const { model } = this.props;

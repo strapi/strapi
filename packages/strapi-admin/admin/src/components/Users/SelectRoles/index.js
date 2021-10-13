@@ -19,6 +19,7 @@ const SelectRoles = ({ error, isDisabled, name, onChange, value }) => {
   return (
     <>
       <Select
+        name={name}
         components={{
           ClearIndicator,
           DropdownIndicator,

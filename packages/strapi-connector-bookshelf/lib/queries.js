@@ -4,10 +4,17 @@
  */
 
 const _ = require('lodash');
+const { omit } = require('lodash/fp');
 const pmap = require('p-map');
 const { convertRestQueryParams, buildQuery, escapeQuery } = require('strapi-utils');
 const { contentTypes: contentTypesUtils } = require('strapi-utils');
+const { singular } = require('pluralize');
+const { handleDatabaseError } = require('./utils/errors');
+
+const BATCH_SIZE = 1000;
+
 const { PUBLISHED_AT_ATTRIBUTE } = contentTypesUtils.constants;
+const pickCountFilters = omit(['sort', 'limit', 'start']);
 
 module.exports = function createQueryBuilder({ model, strapi }) {
   /* Utils */
@@ -46,6 +53,14 @@ module.exports = function createQueryBuilder({ model, strapi }) {
     return db.transaction(trx => fn(trx));
   };
 
+  const wrapErrors = fn => async (...args) => {
+    try {
+      return await fn(...args);
+    } catch (error) {
+      return handleDatabaseError(error);
+    }
+  };
+
   /**
    * Find one entry based on params
    */
@@ -74,12 +89,12 @@ module.exports = function createQueryBuilder({ model, strapi }) {
   /**
    * Count entries based on filters
    */
-  function count(params = {}) {
-    const filters = convertRestQueryParams(_.omit(params, ['_sort', '_limit', '_start']));
+  function count(params = {}, { transacting } = {}) {
+    const filters = pickCountFilters(convertRestQueryParams(params));
 
     return model
       .query(buildQuery({ model, filters }))
-      .count()
+      .count({ transacting })
       .then(Number);
   }
 
@@ -134,7 +149,7 @@ module.exports = function createQueryBuilder({ model, strapi }) {
         return model.updateRelations({ id: entry.id, values: relations }, { transacting: trx });
       }
 
-      return this.findOne(params, null, { transacting: trx });
+      return findOne(params, null, { transacting: trx });
     };
 
     return wrapTransaction(runUpdate, { transacting });
@@ -160,7 +175,10 @@ module.exports = function createQueryBuilder({ model, strapi }) {
     return wrapTransaction(runDelete, { transacting });
   }
 
-  async function deleteMany(params, { transacting } = {}) {
+  async function deleteMany(
+    params,
+    { transacting, returning = true, batchSize = BATCH_SIZE } = {}
+  ) {
     if (params[model.primaryKey]) {
       const entries = await find({ ...params, _limit: 1 }, null, { transacting });
       if (entries.length > 0) {
@@ -169,12 +187,30 @@ module.exports = function createQueryBuilder({ model, strapi }) {
       return null;
     }
 
-    const paramsWithDefaults = _.defaults(params, { _limit: -1 });
-    const entries = await find(paramsWithDefaults, null, { transacting });
-    return pmap(entries, entry => deleteOne(entry.id, { transacting }), {
-      concurrency: 100,
-      stopOnError: true,
-    });
+    if (returning) {
+      const paramsWithDefaults = _.defaults(params, { _limit: -1 });
+      const entries = await find(paramsWithDefaults, null, { transacting });
+      return pmap(entries, entry => deleteOne(entry.id, { transacting }), {
+        concurrency: 100,
+        stopOnError: true,
+      });
+    }
+
+    // returning false, we can optimize the function
+    const batchParams = _.assign({}, params, { _limit: batchSize, _sort: 'id:ASC' });
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      const batch = await find(batchParams, null, { transacting });
+
+      await pmap(batch, entry => deleteOne(entry.id, { transacting }), {
+        concurrency: 100,
+        stopOnError: true,
+      });
+
+      if (batch.length < BATCH_SIZE) {
+        break;
+      }
+    }
   }
 
   function search(params, populate) {
@@ -188,7 +224,8 @@ module.exports = function createQueryBuilder({ model, strapi }) {
   }
 
   function countSearch(params) {
-    const filters = convertRestQueryParams(_.omit(params, ['_q', '_sort', '_limit', '_start']));
+    const countParams = omit(['_q'], params);
+    const filters = pickCountFilters(convertRestQueryParams(countParams));
 
     return model
       .query(qb => qb.where(buildSearchQuery({ model, params })))
@@ -423,7 +460,6 @@ module.exports = function createQueryBuilder({ model, strapi }) {
         }
       }
     }
-    return;
   }
 
   async function deleteDynamicZoneOldComponents(entry, values, { key, joinModel, transacting }) {
@@ -456,7 +492,7 @@ module.exports = function createQueryBuilder({ model, strapi }) {
         };
       });
 
-    // verify the provided ids are realted to this entity.
+    // verify the provided ids are related to this entity.
     idsToKeep.forEach(({ id, component }) => {
       if (!allIds.find(el => el.id === id && el.component.uid === component.uid)) {
         const err = new Error(
@@ -518,7 +554,7 @@ module.exports = function createQueryBuilder({ model, strapi }) {
       .fetchAll({ transacting })
       .map(el => el.get('component_id').toString());
 
-    // verify the provided ids are realted to this entity.
+    // verify the provided ids are related to this entity.
     idsToKeep.forEach(id => {
       if (!allIds.includes(id)) {
         const err = new Error(
@@ -620,15 +656,55 @@ module.exports = function createQueryBuilder({ model, strapi }) {
     }
   }
 
+  async function fetchRelationCounters(attribute, entitiesIds = []) {
+    const assoc = model.associations.find(assoc => assoc.alias === attribute);
+    const assocModel = strapi.db.getModelByAssoc(assoc);
+    const knex = strapi.connections[model.connection];
+    const targetAttribute = assocModel.attributes[assoc.via];
+
+    switch (assoc.nature) {
+      case 'oneToMany': {
+        return knex
+          .select()
+          .column({ id: assoc.via, count: knex.raw('count(*)') })
+          .from(assocModel.collectionName)
+          .whereIn(assoc.via, entitiesIds)
+          .groupBy(assoc.via);
+      }
+      case 'manyWay': {
+        const column = `${singular(model.collectionName)}_${model.primaryKey}`;
+        return knex
+          .select()
+          .column({ id: column, count: knex.raw('count(*)') })
+          .from(assoc.tableCollectionName)
+          .whereIn(column, entitiesIds)
+          .groupBy(column);
+      }
+      case 'manyToMany': {
+        const column = `${targetAttribute.attribute}_${targetAttribute.column}`;
+        return knex
+          .select()
+          .column({ id: column, count: knex.raw('count(*)') })
+          .from(assoc.tableCollectionName)
+          .whereIn(column, entitiesIds)
+          .groupBy(column);
+      }
+      default: {
+        return [];
+      }
+    }
+  }
+
   return {
     findOne,
     find,
-    create,
-    update,
+    create: wrapErrors(create),
+    update: wrapErrors(update),
     delete: deleteMany,
     count,
     search,
     countSearch,
+    fetchRelationCounters,
   };
 };
 
@@ -646,12 +722,14 @@ const buildSearchQuery = ({ model, params }) => qb => {
 
   const searchColumns = Object.keys(model._attributes)
     .filter(attribute => !associations.includes(attribute))
-    .filter(attribute => stringTypes.includes(model._attributes[attribute].type));
+    .filter(attribute => stringTypes.includes(model._attributes[attribute].type))
+    .filter(attribute => model._attributes[attribute].searchable !== false);
 
   if (!_.isNaN(_.toNumber(query))) {
     const numberColumns = Object.keys(model._attributes)
       .filter(attribute => !associations.includes(attribute))
-      .filter(attribute => numberTypes.includes(model._attributes[attribute].type));
+      .filter(attribute => numberTypes.includes(model._attributes[attribute].type))
+      .filter(attribute => model._attributes[attribute].searchable !== false);
     searchColumns.push(...numberColumns);
   }
 

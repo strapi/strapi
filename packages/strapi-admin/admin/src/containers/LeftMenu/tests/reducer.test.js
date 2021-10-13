@@ -1,4 +1,5 @@
-import reducer from '../reducer';
+import reducer, { initialState } from '../reducer';
+import { SET_CT_OR_ST_LINKS, SET_SECTION_LINKS, TOGGLE_IS_LOADING } from '../constants';
 
 describe('ADMIN | LeftMenu | reducer', () => {
   describe('DEFAULT_ACTION', () => {
@@ -15,170 +16,62 @@ describe('ADMIN | LeftMenu | reducer', () => {
     it('should change the isLoading property correctly', () => {
       const state = {
         isLoading: true,
-        ok: true,
       };
+
       const expected = {
         isLoading: false,
-        ok: true,
       };
+
       const action = {
-        type: 'TOGGLE_IS_LOADING',
+        type: TOGGLE_IS_LOADING,
       };
 
       expect(reducer(state, action)).toEqual(expected);
     });
   });
 
-  describe('SET_LINK_PERMISSIONS', () => {
-    it('should set the isDisplayed property correctly', () => {
-      const state = {
-        isLoading: true,
-        generalSectionLinks: [
-          {
-            icon: 'list',
-            label: 'app.components.LeftMenuLinkContainer.listPlugins',
-            destination: '/list-plugins',
-            isDisplayed: false,
-            permissions: [
-              { action: 'admin::marketplace.read', subject: null },
-              { action: 'admin::marketplace.plugins.uninstall', subject: null },
-            ],
-          },
-          {
-            icon: 'shopping-basket',
-            label: 'app.components.LeftMenuLinkContainer.installNewPlugin',
-            destination: '/marketplace',
-            isDisplayed: false,
-            permissions: [
-              { action: 'admin::marketplace.read', subject: null },
-              { action: 'admin::marketplace.plugins.install', subject: null },
-            ],
-          },
-          {
-            icon: 'cog',
-            label: 'app.components.LeftMenuLinkContainer.settings',
-            isDisplayed: false,
-            destination: '/test',
-            permissions: [],
-          },
-        ],
-        pluginsSectionLinks: [
-          {
-            destination: '/plugins/content-type-builder',
-            icon: 'paint-brush',
-            isDisplayed: false,
-            label: {
-              id: 'content-type-builder.plugin.name',
-              defaultMessage: 'Content-Types Builder',
-            },
-            permissions: [
-              {
-                action: 'plugins::content-type-builder.read',
-                subject: null,
-              },
-            ],
-          },
-          {
-            destination: '/plugins/documentation',
-            icon: 'book',
-            isDisplayed: false,
-            label: { id: 'documentation.plugin.name', defaultMessage: 'Documentation' },
-            permissions: [
-              { action: 'plugins::documentation.read', subject: null },
-              { action: 'plugins::documentation.regenerate', subject: null },
-              { action: 'plugins::documentation.update', subject: null },
-            ],
-          },
-        ],
-      };
+  describe('SET_SECTION_LINKS', () => {
+    it('sets the generalSectionLinks and the pluginsSectionLinks with the action', () => {
+      const state = { ...initialState };
       const action = {
-        type: 'SET_LINK_PERMISSIONS',
+        type: SET_SECTION_LINKS,
         data: {
-          generalSectionLinks: [
-            {
-              index: 1,
-              hasPermission: true,
-            },
-            {
-              index: 0,
-              hasPermission: false,
-            },
-            {
-              index: 2,
-              hasPermission: true,
-            },
-          ],
-          pluginsSectionLinks: [
-            {
-              index: 0,
-              hasPermission: true,
-            },
-          ],
+          authorizedGeneralLinks: ['authorizd', 'links'],
+          authorizedPluginLinks: ['authorizd', 'plugin-links'],
         },
       };
 
       const expected = {
-        isLoading: true,
-        generalSectionLinks: [
-          {
-            icon: 'list',
-            label: 'app.components.LeftMenuLinkContainer.listPlugins',
-            destination: '/list-plugins',
-            isDisplayed: false,
-            permissions: [
-              { action: 'admin::marketplace.read', subject: null },
-              { action: 'admin::marketplace.plugins.uninstall', subject: null },
-            ],
-          },
-          {
-            icon: 'shopping-basket',
-            label: 'app.components.LeftMenuLinkContainer.installNewPlugin',
-            destination: '/marketplace',
-            isDisplayed: true,
-            permissions: [
-              { action: 'admin::marketplace.read', subject: null },
-              { action: 'admin::marketplace.plugins.install', subject: null },
-            ],
-          },
-          {
-            icon: 'cog',
-            label: 'app.components.LeftMenuLinkContainer.settings',
-            isDisplayed: true,
-            destination: '/test',
-            permissions: [],
-          },
-        ],
-        pluginsSectionLinks: [
-          {
-            destination: '/plugins/content-type-builder',
-            icon: 'paint-brush',
-            isDisplayed: true,
-            label: {
-              id: 'content-type-builder.plugin.name',
-              defaultMessage: 'Content-Types Builder',
-            },
-            permissions: [
-              {
-                action: 'plugins::content-type-builder.read',
-                subject: null,
-              },
-            ],
-          },
-          {
-            destination: '/plugins/documentation',
-            icon: 'book',
-            isDisplayed: false,
-            label: { id: 'documentation.plugin.name', defaultMessage: 'Documentation' },
-            permissions: [
-              { action: 'plugins::documentation.read', subject: null },
-              { action: 'plugins::documentation.regenerate', subject: null },
-              { action: 'plugins::documentation.update', subject: null },
-            ],
-          },
-        ],
+        ...initialState,
+        generalSectionLinks: ['authorizd', 'links'],
+        pluginsSectionLinks: ['authorizd', 'plugin-links'],
+      };
+      const actual = reducer(state, action);
+
+      expect(actual).toEqual(expected);
+    });
+  });
+
+  describe('SET_CT_OR_ST_LINKS', () => {
+    it('sets the generalSectionLinks and the pluginsSectionLinks with the action', () => {
+      const state = { ...initialState };
+      const action = {
+        type: SET_CT_OR_ST_LINKS,
+        data: {
+          authorizedCtLinks: ['authorizd', 'ct-links'],
+          authorizedStLinks: ['authorizd', 'st-links'],
+        },
       };
 
-      expect(reducer(state, action)).toEqual(expected);
+      const expected = {
+        ...initialState,
+        collectionTypesSectionLinks: ['authorizd', 'ct-links'],
+        singleTypesSectionLinks: ['authorizd', 'st-links'],
+      };
+
+      const actual = reducer(state, action);
+
+      expect(actual).toEqual(expected);
     });
   });
 });

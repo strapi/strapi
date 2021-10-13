@@ -3,7 +3,7 @@ import { themePropTypes } from 'strapi-helper-plugin';
 
 const FileDetailsBoxWrapper = styled.div`
   width: 100%;
-  height: 119px;
+  min-height: 119px;
   padding: 16px;
   background-color: ${({ theme }) => theme.main.colors.lightGrey};
   border-radius: ${({ theme }) => theme.main.sizes.borderRadius};

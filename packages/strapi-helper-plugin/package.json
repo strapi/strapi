@@ -1,10 +1,15 @@
 {
   "name": "strapi-helper-plugin",
-  "version": "3.3.3",
+  "version": "3.6.8",
   "description": "Helper for Strapi plugins development",
   "files": [
     "dist"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/strapi/strapi.git",
+    "directory": "packages/strapi-helper-plugin"
+  },
   "engines": {
     "node": ">=10.16.0 <=14.x.x",
     "npm": ">=6.0.0"
@@ -12,7 +17,7 @@
   "author": {
     "email": "hi@strapi.io",
     "name": "Strapi team",
-    "url": "http://strapi.io"
+    "url": "https://strapi.io"
   },
   "main": "dist/strapi-helper-plugin.cjs.min.js",
   "module": "dist/strapi-helper-plugin.esm.min.js",
@@ -20,7 +25,7 @@
     {
       "name": "Strapi team",
       "email": "hi@strapi.io",
-      "url": "http://strapi.io"
+      "url": "https://strapi.io"
     }
   ],
   "license": "SEE LICENSE IN LICENSE",
@@ -32,12 +37,12 @@
     "test": "echo \"no tests yet\""
   },
   "devDependencies": {
-    "@babel/core": "^7.12.3",
-    "@babel/plugin-proposal-class-properties": "^7.4.0",
-    "@babel/preset-env": "^7.9.5",
-    "@babel/preset-react": "^7.9.4",
+    "@babel/core": "^7.14.0",
+    "@babel/plugin-proposal-class-properties": "^7.12.1",
+    "@babel/preset-env": "^7.13.15",
+    "@babel/preset-react": "^7.13.13",
     "enzyme": "^3.8.0",
-    "enzyme-adapter-react-16": "^1.8.0",
+    "enzyme-adapter-react-16": "^1.15.6",
     "rimraf": "3.0.2",
     "rollup": "^1.10.0",
     "rollup-plugin-babel": "^4.3.2",
@@ -50,27 +55,32 @@
     "rollup-plugin-terser": "^4.0.4"
   },
   "dependencies": {
-    "@buffetjs/core": "3.3.1",
-    "@buffetjs/custom": "3.3.1",
-    "@buffetjs/hooks": "3.3.1",
-    "@buffetjs/icons": "3.3.1",
-    "@buffetjs/styles": "3.3.1",
-    "@buffetjs/utils": "3.3.1",
-    "bootstrap": "^4.5.3",
-    "classnames": "^2.2.5",
+    "@buffetjs/core": "3.3.8",
+    "@buffetjs/custom": "3.3.8",
+    "@buffetjs/hooks": "3.3.8",
+    "@buffetjs/icons": "3.3.8",
+    "@buffetjs/styles": "3.3.8",
+    "@buffetjs/utils": "3.3.8",
+    "@fortawesome/fontawesome-free": "^5.15.2",
+    "@fortawesome/fontawesome-svg-core": "^1.2.35",
+    "@fortawesome/free-brands-svg-icons": "^5.15.2",
+    "@fortawesome/free-solid-svg-icons": "^5.15.3",
+    "@fortawesome/react-fontawesome": "^0.1.14",
+    "bootstrap": "^4.6.0",
+    "classnames": "^2.3.1",
     "immutable": "^3.8.2",
     "invariant": "^2.2.1",
-    "lodash": "4.17.19",
-    "moment": "^2.16.0",
-    "react": "^16.13.1",
+    "lodash": "4.17.21",
+    "moment": "^2.29.1",
+    "react": "^16.14.0",
     "react-dom": "^16.9.0",
     "react-helmet": "^6.1.0",
     "react-intl": "4.5.0",
-    "react-router": "^5.0.0",
+    "react-router": "^5.2.0",
     "react-router-dom": "^5.0.0",
     "reactstrap": "8.4.1",
-    "styled-components": "^5.0.0",
-    "whatwg-fetch": "^3.3.1"
+    "styled-components": "^5.2.3",
+    "whatwg-fetch": "^3.6.2"
   },
   "gitHead": "231263a3535658bab1e9492c6aaaed8692d62a53"
 }

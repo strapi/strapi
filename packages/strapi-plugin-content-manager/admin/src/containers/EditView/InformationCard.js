@@ -4,9 +4,9 @@ import { get, isEmpty } from 'lodash';
 import moment from 'moment';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
-
+import { InjectionZone, useContentManagerEditViewDataManager } from 'strapi-helper-plugin';
 import { SubWrapper, StatusWrapper } from './components';
-import useDataManager from '../../hooks/useDataManager';
+import pluginId from '../../pluginId';
 import { getTrad } from '../../utils';
 
 const BaselineAlignment = styled.div`
@@ -14,11 +14,11 @@ const BaselineAlignment = styled.div`
 `;
 
 const InformationCard = () => {
-  const { initialData, hasDraftAndPublish, layout } = useDataManager();
+  const { initialData, hasDraftAndPublish, layout } = useContentManagerEditViewDataManager();
   const { formatMessage } = useIntl();
 
   const updatedAtName = useMemo(
-    () => get(layout, ['schema', 'options', 'timestamps'], ['created_at', 'updated_at'])[1],
+    () => get(layout, ['options', 'timestamps'], ['created_at', 'updated_at'])[1],
     [layout]
   );
 
@@ -64,6 +64,7 @@ const InformationCard = () => {
             </Flex>
           </Padded>
         </Padded>
+        <InjectionZone area={`${pluginId}.editView.informations`} />
       </SubWrapper>
       <Padded top size="sm" />
       {hasDraftAndPublish && (

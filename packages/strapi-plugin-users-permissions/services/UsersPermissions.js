@@ -85,7 +85,7 @@ module.exports = {
       .findOne({ id: roleID }, ['users', 'permissions']);
 
     if (!role) {
-      throw new Error('Cannot found this role');
+      throw new Error('Cannot find this role');
     }
 
     // Move users to guest role.

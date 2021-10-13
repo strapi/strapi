@@ -1,7 +1,7 @@
 {
   "name": "strapi-plugin-upload",
-  "version": "3.3.3",
-  "description": "This is the description of the plugin.",
+  "version": "3.6.8",
+  "description": "Makes it easy to upload images and files to your Strapi Application.",
   "strapi": {
     "name": "Media Library",
     "icon": "cloud-upload-alt",
@@ -12,46 +12,51 @@
     "test": "echo \"no tests yet\""
   },
   "dependencies": {
-    "@buffetjs/core": "3.3.1",
-    "@buffetjs/custom": "3.3.1",
-    "@buffetjs/hooks": "3.3.1",
-    "@buffetjs/icons": "3.3.1",
-    "@buffetjs/styles": "3.3.1",
-    "@buffetjs/utils": "3.3.1",
-    "byte-size": "^6.2.0",
-    "cropperjs": "^1.5.6",
-    "immer": "^7.0.14",
+    "@buffetjs/core": "3.3.8",
+    "@buffetjs/custom": "3.3.8",
+    "@buffetjs/hooks": "3.3.8",
+    "@buffetjs/icons": "3.3.8",
+    "@buffetjs/styles": "3.3.8",
+    "@buffetjs/utils": "3.3.8",
+    "byte-size": "^7.0.1",
+    "cropperjs": "^1.5.11",
+    "immer": "^8.0.1",
     "immutable": "^3.8.2",
-    "is-valid-domain": "0.0.15",
+    "is-valid-domain": "0.0.17",
     "koa-range": "0.3.0",
     "koa-static": "^5.0.0",
-    "lodash": "4.17.19",
+    "lodash": "4.17.21",
     "node-fetch": "2.6.1",
-    "react": "^16.13.1",
-    "react-copy-to-clipboard": "^5.0.1",
+    "react": "^16.14.0",
+    "react-copy-to-clipboard": "^5.0.3",
     "react-dom": "^16.9.0",
     "react-intl": "4.5.0",
-    "react-redux": "^7.0.2",
-    "react-router": "^5.0.0",
+    "react-redux": "7.2.3",
+    "react-router": "^5.2.0",
     "react-router-dom": "^5.0.0",
     "reactstrap": "8.4.1",
-    "sharp": "0.26.2",
-    "strapi-helper-plugin": "3.3.3",
-    "strapi-provider-upload-local": "3.3.3",
-    "strapi-utils": "3.3.3",
+    "sharp": "0.29.0",
+    "strapi-helper-plugin": "3.6.8",
+    "strapi-provider-upload-local": "3.6.8",
+    "strapi-utils": "3.6.8",
     "stream-to-array": "^2.3.0",
     "uuid": "^3.2.1"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/strapi/strapi.git",
+    "directory": "packages/strapi-plugin-upload"
+  },
   "author": {
-    "name": "A Strapi developer",
-    "email": "",
-    "url": ""
+    "name": "Strapi team",
+    "email": "hi@strapi.io",
+    "url": "https://strapi.io"
   },
   "maintainers": [
     {
-      "name": "A Strapi developer",
-      "email": "",
-      "url": ""
+      "name": "Strapi team",
+      "email": "hi@strapi.io",
+      "url": "https://strapi.io"
     }
   ],
   "engines": {

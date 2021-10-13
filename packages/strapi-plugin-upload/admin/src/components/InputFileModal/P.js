@@ -8,6 +8,8 @@ const P = styled.p`
   .bold {
     font-weight: 700;
   }
+
+  ${({ isDragging, theme }) => isDragging && `color: ${theme.main.colors.mediumBlue};`}
 `;
 
 export default P;

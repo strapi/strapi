@@ -4,6 +4,14 @@
     "name": "User",
     "description": ""
   },
+  "pluginOptions": {
+    "content-manager": {
+      "visible": false
+    },
+    "content-type-builder": {
+      "visible": false
+    }
+  },
   "attributes": {
     "firstname": {
       "type": "string",
@@ -70,6 +78,11 @@
       "default": false,
       "configurable": false,
       "private": true
+    },
+    "preferedLanguage": {
+      "type": "string",
+      "configurable": false,
+      "required": false
     }
   }
 }

@@ -11,10 +11,10 @@
   "containers.HomePage.PopUpWarning.message": "Вы уверены что хотите удалить эту версию?",
   "containers.HomePage.copied": "Токен скопирован в буфер обмена",
   "containers.HomePage.form.jwtToken": "Получите ваш JWT токен",
-  "containers.HomePage.form.jwtToken.description": "Скопируйте этот токен и используйте его в swagger, чтобы делать запросы",
+  "containers.HomePage.form.jwtToken.description": "Скопируйте этот токен и используйте его в swagger для выполнения запросов",
   "containers.HomePage.form.password": "Пароль",
   "containers.HomePage.form.password.inputDescription": "Установите пароль для доступа к документации",
-  "containers.HomePage.form.restrictedAccess": "Закрытый доступ",
+  "containers.HomePage.form.restrictedAccess": "Ограниченный доступ",
   "containers.HomePage.form.restrictedAccess.inputDescription": "Сделайте вашу документацию приватной. По умолчанию доступ открыт",
   "containers.HomePage.form.showGeneratedFiles": "Показать сгенерированные файлы",
   "containers.HomePage.form.showGeneratedFiles.inputDescription": "Полезно, если вы хотите изменить сгенерированную документацию. \nПлагин разделяет файлы на модели и плагины. \nПри включенной опции вам будет проще кастомизировать документацию",
@@ -23,5 +23,9 @@
   "error.regenerateDoc": "При генерации документации возникла ошибка",
   "error.regenerateDoc.versionMissing": "Версии, которую вы пытаетесь сгенерировать, не существует",
   "notification.update.success": "Настройки успешно обновлены",
-  "plugin.name": "Документация"
+  "plugin.name": "Документация",
+  "notification.delete.success": "Документация удалена",
+  "notification.generate.success": "Документация сгенерирована",
+  "plugin.description.short": "Создайте OpenAPI документацию для удобной работы с вашим API через SWAGGER UI.",
+  "plugin.description.long": "Создайте OpenAPI документацию для удобной работы с вашим API через SWAGGER UI."
 }

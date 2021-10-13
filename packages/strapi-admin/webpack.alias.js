@@ -1,4 +1,7 @@
+'use strict';
+
 const path = require('path');
+
 const alias = [
   'object-assign',
   'whatwg-fetch',
@@ -18,11 +21,13 @@ const alias = [
   'immutable',
   'invariant',
   'moment',
+  'qs',
   'react',
   'react-copy-to-clipboard',
   'react-dnd',
   'react-dnd-html5-backend',
   'react-dom',
+  'react-error-boundary',
   'react-fast-compare',
   'react-helmet',
   'react-is',
@@ -32,6 +37,7 @@ const alias = [
   'react-router',
   'react-router-dom',
   'react-transition-group',
+  'react-tooltip',
   'react-virtualized',
   'reactstrap',
   'react-select',

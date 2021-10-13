@@ -25,5 +25,7 @@
   "notification.update.success": "Settings updated successfully",
   "notification.delete.success": "Doc deleted",
   "notification.generate.success": "Doc generated",
-  "plugin.name": "Documentation"
+  "plugin.name": "Documentation",
+  "plugin.description.long": "Create an OpenAPI Document and visualize your API with SWAGGER UI.",
+  "plugin.description.short": "Create an OpenAPI Document and visualize your API with SWAGGER UI."
 }
