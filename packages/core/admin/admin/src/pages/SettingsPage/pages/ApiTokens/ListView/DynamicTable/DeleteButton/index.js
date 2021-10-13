@@ -27,13 +27,9 @@ const DeleteButton = ({ tokenName, onClick }) => {
   );
 };
 
-DeleteButton.defaultProps = {
-  onClick: () => {},
-};
-
 DeleteButton.propTypes = {
   tokenName: PropTypes.string.isRequired,
-  onClick: PropTypes.func,
+  onClick: PropTypes.func.isRequired,
 };
 
 export default DeleteButton;
