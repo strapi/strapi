@@ -7,7 +7,7 @@ const Wrapper = styled(Box)`
   &::before {
     content: '';
     position: absolute;
-    top: calc(50% - 2px);
+    top: calc(50% - 0px);
     height: 2px;
     width: 100%;
     background-color: ${({ theme }) => theme.colors.primary600};
@@ -28,6 +28,16 @@ const IconWrapper = styled(Box)`
       fill: ${({ theme, isSelected }) => theme.colors[isSelected ? 'primary700' : 'neutral500']};
     }
   }
+  &:disabled {
+    cursor: not-allowed;
+  }
 `;
 
-export { IconWrapper, Wrapper };
+const InfosWrapper = styled(Row)`
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+`;
+
+export { IconWrapper, InfosWrapper, Wrapper };

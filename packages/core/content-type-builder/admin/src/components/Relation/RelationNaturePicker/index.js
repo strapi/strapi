@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from 'react-intl';
+import { useIntl } from 'react-intl';
 import { useDispatch } from 'react-redux';
 import get from 'lodash/get';
 import truncate from 'lodash/truncate';
@@ -13,13 +13,12 @@ import ManyToOne from '@strapi/icons/IconRelationN1';
 import ManyToMany from '@strapi/icons/IconRelationNN';
 import { Row } from '@strapi/parts/Row';
 import { Text } from '@strapi/parts/Text';
-
 import { KeyboardNavigable } from '@strapi/parts/KeyboardNavigable';
 import { Stack } from '@strapi/parts/Stack';
 import useDataManager from '../../../hooks/useDataManager';
 import { ON_CHANGE_RELATION_TYPE } from '../../FormModal/constants';
 import getTrad from '../../../utils/getTrad';
-import { IconWrapper, Wrapper } from './components';
+import { IconWrapper, InfosWrapper, Wrapper } from './components';
 
 const relations = {
   oneWay: OneWay,
@@ -37,6 +36,7 @@ const RelationNaturePicker = ({
   target,
 }) => {
   const dispatch = useDispatch();
+  const { formatMessage } = useIntl();
 
   const { contentTypes, modifiedData } = useDataManager();
   const ctRelations = ['oneWay', 'oneToOne', 'oneToMany', 'manyToOne', 'manyToMany', 'manyWay'];
@@ -64,9 +64,9 @@ const RelationNaturePicker = ({
   );
 
   return (
-    <Wrapper>
-      <div>
-        <Row paddingLeft={9} paddingRight={9} paddingTop={8}>
+    <div>
+      <Wrapper>
+        <Row paddingLeft={9} paddingRight={9} paddingTop={1}>
           <KeyboardNavigable tagName="button">
             <Stack size={3} horizontal>
               {relationsType.map(relation => {
@@ -78,6 +78,7 @@ const RelationNaturePicker = ({
                   <IconWrapper
                     as="button"
                     isSelected={relationType === relation}
+                    disabled={!isEnabled}
                     key={relation}
                     onClick={() => {
                       if (isEnabled) {
@@ -101,53 +102,16 @@ const RelationNaturePicker = ({
             </Stack>
           </KeyboardNavigable>
         </Row>
-        <Row paddingTop={6}>
-          <Text>ll</Text>
-        </Row>
-      </div>
-    </Wrapper>
+      </Wrapper>
+      <InfosWrapper justifyContent="center">
+        <Text>{truncate(leftDisplayedValue, { length: 24 })}&nbsp;</Text>
+        <Text textColor="primary600">
+          {formatMessage({ id: getTrad(`relation.${relationType}`) })}&nbsp;
+        </Text>
+        <Text>{truncate(rightDisplayedValue, { length: 24 })}</Text>
+      </InfosWrapper>
+    </div>
   );
-
-  // return (
-  //   <Wrapper>
-  //     <div className="nature-container">
-  //       <div className="nature-buttons">
-  //         {relationsType.map(relation => {
-  //           const Asset = relations[relation];
-  //           const isEnabled =
-  //             restrictedRelations === null || restrictedRelations.includes(relation);
-
-  //           return (
-  //             <Asset
-  //               key={relation}
-  //               isSelected={relationType === relation}
-  //               style={{ cursor: isEnabled ? 'pointer' : 'not-allowed' }}
-  // onClick={() => {
-  //   if (isEnabled) {
-  //     dispatch({
-  //       type: ON_CHANGE_RELATION_TYPE,
-  //       target: {
-  //         oneThatIsCreatingARelationWithAnother,
-  //         targetContentType: target,
-  //         value: relation,
-  //       },
-  //     });
-  //   }
-  // }}
-  //             />
-  //           );
-  //         })}
-  //       </div>
-  //       <div className="nature-txt">
-  //         <span>{truncate(leftDisplayedValue, { length: 24 })}</span>
-  //         &nbsp;
-  //         <FormattedMessage id={getTrad(`relation.${relationType}`)} />
-  //         &nbsp;
-  //         <span>{truncate(rightDisplayedValue, { length: 24 })}</span>
-  //       </div>
-  //     </div>
-  //   </Wrapper>
-  // );
 };
 
 RelationNaturePicker.propTypes = {

@@ -5,12 +5,9 @@
  */
 
 import React from 'react';
-import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
-import { Box } from '@strapi/parts/Box';
 import { Row } from '@strapi/parts/Row';
 import getRelationType from '../../utils/getRelationType';
-import getTrad from '../../utils/getTrad';
 import RelationField from './RelationField';
 import RelationNaturePicker from './RelationNaturePicker';
 
@@ -18,7 +15,7 @@ const Relation = ({ formErrors, mainBoxHeader, modifiedData, naturePickerType, o
   const relationType = getRelationType(modifiedData.relation, modifiedData.targetAttribute);
 
   return (
-    <Row>
+    <Row style={{ position: 'relative' }}>
       <RelationField
         isMain
         header={mainBoxHeader}
