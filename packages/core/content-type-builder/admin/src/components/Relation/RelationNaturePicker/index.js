@@ -64,9 +64,9 @@ const RelationNaturePicker = ({
   );
 
   return (
-    <div>
+    <Row style={{ flex: 1 }}>
       <Wrapper>
-        <Row paddingLeft={9} paddingRight={9} paddingTop={1}>
+        <Row paddingLeft={9} paddingRight={9} paddingTop={1} justifyContent="center">
           <KeyboardNavigable tagName="button">
             <Stack size={3} horizontal>
               {relationsType.map(relation => {
@@ -110,7 +110,7 @@ const RelationNaturePicker = ({
         </Text>
         <Text>{truncate(rightDisplayedValue, { length: 24 })}</Text>
       </InfosWrapper>
-    </div>
+    </Row>
   );
 };
 

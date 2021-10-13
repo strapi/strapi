@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { SelectWrapper, SelectNav } from '@strapi/helper-plugin';
 import { ErrorMessage } from '@buffetjs/styles';
-import AllowedTypesSelect from '../AllowedTypesSelect';
+import AllowedTypesSelect from '../../AllowedTypesSelect';
 import ComponentSelect from '../ComponentSelect';
 import CreatableSelect from '../CreatableSelect';
 

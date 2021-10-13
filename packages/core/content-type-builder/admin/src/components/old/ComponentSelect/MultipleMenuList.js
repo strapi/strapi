@@ -6,13 +6,13 @@ import { get } from 'lodash';
 import { useQuery } from '@strapi/helper-plugin';
 import { CheckboxWrapper, Label } from '@buffetjs/styles';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import useDataManager from '../../hooks/useDataManager';
-import getTrad from '../../utils/getTrad';
-import findAttribute from '../../utils/findAttribute';
-import SelectCheckbox from '../SelectCheckbox';
+import useDataManager from '../../../hooks/useDataManager';
+import getTrad from '../../../utils/getTrad';
+import findAttribute from '../../../utils/findAttribute';
+import SelectCheckbox from '../../SelectCheckbox';
 import Ul from '../SelectMenuUl';
 import SubUl from '../SelectMenuSubUl';
-import UpperFirst from '../UpperFirst';
+import UpperFirst from '../../UpperFirst';
 
 import hasSubArray from './utils/hasSubArray';
 import hasSomeSubArray from './utils/HasSomeSubArray';

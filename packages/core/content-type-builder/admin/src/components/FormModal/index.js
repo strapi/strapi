@@ -38,8 +38,7 @@ import Relation from '../Relation';
 import SelectCategory from '../SelectCategory';
 import SelectComponent from '../SelectComponent';
 import SelectComponents from '../SelectComponents';
-// import SelectCategory from '../WrapperSelect';
-// import WrapperSelect from '../WrapperSelect';
+
 import findAttribute from '../../utils/findAttribute';
 import getTrad from '../../utils/getTrad';
 import makeSearch from '../../utils/makeSearch';

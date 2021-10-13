@@ -1348,7 +1348,38 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
       >
         <div
           class="c19 c20"
-        />
+        >
+          <div>
+            <button
+              aria-disabled="false"
+              class="c12 c13"
+              type="button"
+            >
+              <div
+                aria-hidden="true"
+                class="c14 c15 c16"
+              >
+                <svg
+                  fill="none"
+                  height="1em"
+                  viewBox="0 0 24 24"
+                  width="1em"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M4.8.2c0-.11.09-.2.2-.2h18.8c.11 0 .2.09.2.2v4.4a.2.2 0 01-.2.2H5a.2.2 0 01-.2-.2V.2zM0 9.8c0-.11.09-.2.2-.2H19c.11 0 .2.09.2.2v4.4a.2.2 0 01-.2.2H.2a.2.2 0 01-.2-.2V9.8zM5 19.2a.2.2 0 00-.2.2v4.4c0 .11.09.2.2.2h18.8a.2.2 0 00.2-.2v-4.4a.2.2 0 00-.2-.2H5z"
+                    fill="#212134"
+                  />
+                </svg>
+              </div>
+              <span
+                class="c17 c18"
+              >
+                Configure the view
+              </span>
+            </button>
+          </div>
+        </div>
       </div>
       <div
         class="c28"

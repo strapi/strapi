@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import UpperFirst from '../UpperFirst';
+import UpperFirst from '../../UpperFirst';
 import CategoryName from './CategoryName';
 
 const Category = ({ categoryName }) => (

@@ -3,9 +3,9 @@ import PropTypes from 'prop-types';
 import { components } from 'react-select';
 import { get, size } from 'lodash';
 import { FormattedMessage } from 'react-intl';
-import useDataManager from '../../hooks/useDataManager';
-import getTrad from '../../utils/getTrad';
-import UpperFirst from '../UpperFirst';
+import useDataManager from '../../../hooks/useDataManager';
+import getTrad from '../../../utils/getTrad';
+import UpperFirst from '../../UpperFirst';
 
 const Value = ({ children, ...props }) => {
   const SingleValue = components.SingleValue;

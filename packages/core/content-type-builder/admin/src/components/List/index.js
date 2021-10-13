@@ -7,7 +7,7 @@
 /* eslint-disable import/no-cycle */
 import React from 'react';
 import PropTypes from 'prop-types';
-import { get } from 'lodash';
+import get from 'lodash/get';
 import { EmptyBodyTable, useTracking } from '@strapi/helper-plugin';
 import { Box } from '@strapi/parts/Box';
 import { Button } from '@strapi/parts/Button';

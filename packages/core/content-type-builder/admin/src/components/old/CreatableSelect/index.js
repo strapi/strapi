@@ -2,11 +2,10 @@ import React from 'react';
 import Creatable from 'react-select/creatable';
 import PropTypes from 'prop-types';
 import { uniqBy } from 'lodash';
-import useDataManager from '../../hooks/useDataManager';
+import useDataManager from '../../../hooks/useDataManager';
 
 const CreatableSelect = ({ onChange, name, styles, value }) => {
   const { allComponentsCategories } = useDataManager();
-  console.log(value);
 
   const handleChange = (inputValue, actionMeta) => {
     const { action } = actionMeta;

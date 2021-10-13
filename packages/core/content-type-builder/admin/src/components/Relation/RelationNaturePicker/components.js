@@ -4,6 +4,7 @@ import { Row } from '@strapi/parts/Row';
 
 const Wrapper = styled(Box)`
   position: relative;
+  width: 100%;
   &::before {
     content: '';
     position: absolute;
