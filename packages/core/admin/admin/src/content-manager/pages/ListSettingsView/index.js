@@ -23,6 +23,7 @@ import { usePluginsQueryParams } from '../../hooks';
 import putCMSettingsLV from './utils/api';
 import Settings from './components/Settings';
 import View from './components/View';
+import EditFieldForm from './components/EditFieldForm';
 import init from './init';
 import reducer, { initialState } from './reducer';
 import { EXCLUDED_SORT_OPTIONS } from './utils/excludedSortOptions';
@@ -39,16 +40,11 @@ const ListSettingsView = ({ layout, slug }) => {
     init(initialState, layout)
   );
   // const [isOpen, setIsOpen] = useState(false);
-  // const [isModalFormOpen, setIsModalFormOpen] = useState(false);
+  const [isModalFormOpen, setIsModalFormOpen] = useState(false);
   // const [isDraggingSibling, setIsDraggingSibling] = useState(false);
-  // const toggleModalForm = () => setIsModalFormOpen(prevState => !prevState);
+  const toggleModalForm = () => setIsModalFormOpen(prevState => !prevState);
 
-  const {
-    // labelForm,
-    // labelToEdit,
-    initialData,
-    modifiedData,
-  } = reducerState;
+  const { fieldToEdit, fieldForm, initialData, modifiedData } = reducerState;
 
   // const attributes = useMemo(() => {
   //   return get(modifiedData, ['attributes'], {});
@@ -67,20 +63,6 @@ const ListSettingsView = ({ layout, slug }) => {
 
     return acc;
   }, []);
-
-  // const handleClickEditLabel = labelToEdit => {
-  //   dispatch({
-  //     type: 'SET_LABEL_TO_EDIT',
-  //     labelToEdit,
-  //   });
-  //   toggleModalForm();
-  // };
-
-  // const handleClosed = () => {
-  //   dispatch({
-  //     type: 'UNSET_LABEL_TO_EDIT',
-  //   });
-  // };
 
   const handleChange = ({ target: { name, value } }) => {
     dispatch({
@@ -143,6 +125,39 @@ const ListSettingsView = ({ layout, slug }) => {
     trackUsage('willSaveContentTypeLayout');
   };
 
+  const handleClickEditField = fieldToEdit => {
+    dispatch({
+      type: 'SET_FIELD_TO_EDIT',
+      fieldToEdit,
+    });
+    toggleModalForm();
+  };
+
+  const handleCloseModal = () => {
+    dispatch({
+      type: 'UNSET_FIELD_TO_EDIT',
+    });
+    toggleModalForm();
+  };
+
+  const handleSubmitFieldEdit = e => {
+    e.preventDefault();
+    toggleModalForm();
+    dispatch({
+      type: 'SUBMIT_FIELD_FORM',
+    });
+  };
+
+  const metadatas = get(modifiedData, ['metadatas'], {});
+  const listRemainingFields = Object.keys(metadatas)
+    .filter(key => {
+      return checkIfAttributeIsDisplayable(get(attributes, key, {}));
+    })
+    .filter(field => {
+      return !displayedFields.includes(field);
+    })
+    .sort();
+
   const submitMutation = useMutation(body => putCMSettingsLV(body, slug), {
     onSuccess: async () => {
       trackUsage('didEditListSettings');
@@ -157,37 +172,13 @@ const ListSettingsView = ({ layout, slug }) => {
   });
   const { isLoading: isSubmittingForm } = submitMutation;
 
-  const metadatas = get(modifiedData, ['metadatas'], {});
-  const listRemainingFields = Object.keys(metadatas)
-    .filter(key => {
-      return checkIfAttributeIsDisplayable(get(attributes, key, {}));
-    })
-    .filter(field => {
-      return !displayedFields.includes(field);
-    })
-    .sort();
-
-  // const handleClickEditLabel = labelToEdit => {
-  //   dispatch({
-  //     type: 'SET_LABEL_TO_EDIT',
-  //     labelToEdit,
-  //   });
-  //   toggleModalForm();
-  // };
-
-  // const handleClosed = () => {
-  //   dispatch({
-  //     type: 'UNSET_LABEL_TO_EDIT',
-  //   });
-  // };
-
-  // const handleChangeEditLabel = ({ target: { name, value } }) => {
-  //   dispatch({
-  //     type: 'ON_CHANGE_LABEL_METAS',
-  //     name,
-  //     value,
-  //   });
-  // };
+  const handleChangeEditLabel = ({ target: { name, value } }) => {
+    dispatch({
+      type: 'ON_CHANGE_FIELD_METAS',
+      name,
+      value,
+    });
+  };
 
   // const move = (originalIndex, atIndex) => {
   //   dispatch({
@@ -293,6 +284,7 @@ const ListSettingsView = ({ layout, slug }) => {
                 displayedFields={displayedFields}
                 handleAddField={handleAddField}
                 handleRemoveField={handleRemoveField}
+                handleClickEditField={handleClickEditField}
               />
             </Box>
           </ContentLayout>
@@ -308,6 +300,17 @@ const ListSettingsView = ({ layout, slug }) => {
             onConfirm={handleConfirm}
             variantRightButton="success-light"
           />
+          {isModalFormOpen && (
+            <EditFieldForm
+              attributes={attributes}
+              fieldForm={fieldForm}
+              fieldToEdit={fieldToEdit}
+              handleChangeEditLabel={handleChangeEditLabel}
+              handleCloseModal={handleCloseModal}
+              type={get(attributes, [fieldToEdit, 'type'], 'text')}
+              onSubmit={handleSubmitFieldEdit}
+            />
+          )}
         </form>
       </Main>
     </Layout>
@@ -454,5 +457,3 @@ ListSettingsView.propTypes = {
 };
 
 export default memo(ListSettingsView);
-
-// export default () => 'TODO ListSettingsView';

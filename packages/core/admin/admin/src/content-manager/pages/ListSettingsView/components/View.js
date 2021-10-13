@@ -24,7 +24,13 @@ const SelectContainer = styled(Flex)`
   max-width: ${32 / 16}rem;
 `;
 
-const View = ({ listRemainingFields, displayedFields, handleAddField, handleRemoveField }) => {
+const View = ({
+  listRemainingFields,
+  displayedFields,
+  handleAddField,
+  handleRemoveField,
+  handleClickEditField,
+}) => {
   const { formatMessage } = useIntl();
 
   return (
@@ -51,6 +57,7 @@ const View = ({ listRemainingFields, displayedFields, handleAddField, handleRemo
             {displayedFields.map((field, index) => (
               <DraggableCard
                 onRemoveField={e => handleRemoveField(e, index)}
+                onClickEditField={handleClickEditField}
                 key={field}
                 title={field}
               />
@@ -83,6 +90,7 @@ const View = ({ listRemainingFields, displayedFields, handleAddField, handleRemo
 View.defaultProps = {
   displayedFields: [],
   handleAddField: () => {},
+  handleClickEditField: () => {},
   handleRemoveField: () => {},
   listRemainingFields: [],
 };
@@ -90,6 +98,7 @@ View.defaultProps = {
 View.propTypes = {
   displayedFields: PropTypes.array,
   handleAddField: PropTypes.func,
+  handleClickEditField: PropTypes.func,
   handleRemoveField: PropTypes.func,
   listRemainingFields: PropTypes.array,
 };

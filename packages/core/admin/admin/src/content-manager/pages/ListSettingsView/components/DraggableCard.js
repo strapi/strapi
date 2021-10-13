@@ -70,7 +70,7 @@ const FieldWrapper = styled(Box)`
   }
 `;
 
-const DraggableCard = ({ title, onRemoveField }) => {
+const DraggableCard = ({ title, onRemoveField, onClickEditField }) => {
   const { formatMessage } = useIntl();
   const editButtonRef = useRef();
   const cardTitle = title.length > 20 ? `${title.substring(0, 20)}...` : title;
@@ -110,7 +110,7 @@ const DraggableCard = ({ title, onRemoveField }) => {
             ref={editButtonRef}
             onClick={e => {
               e.stopPropagation();
-              console.log('edit');
+              onClickEditField(title);
             }}
             aria-label={formatMessage(
               {
@@ -144,10 +144,12 @@ const DraggableCard = ({ title, onRemoveField }) => {
 };
 
 DraggableCard.defaultProps = {
+  onClickEditField: () => {},
   onRemoveField: () => {},
 };
 
 DraggableCard.propTypes = {
+  onClickEditField: PropTypes.func,
   onRemoveField: PropTypes.func,
   title: PropTypes.string.isRequired,
 };
