@@ -24,11 +24,13 @@ const cleanSchemaAttributes = (attributes, typeMap = new Map()) => {
       case 'password':
       case 'email':
       case 'date':
+      case 'text':
       case 'datetime': {
         attributesCopy[prop] = { type: 'string' };
         break;
       }
-      case 'decimal': {
+      case 'decimal':
+      case 'float': {
         attributesCopy[prop] = { type: 'number', format: 'float' };
         break;
       }
@@ -58,14 +60,27 @@ const cleanSchemaAttributes = (attributes, typeMap = new Map()) => {
       }
       case 'component': {
         const componentAttributes = strapi.components[attribute.component].attributes;
-        const isListOfEntities = attribute.repeatable;
 
-        attributesCopy[prop] = {
-          type: 'object',
-          properties: {
-            data: getSchemaData(isListOfEntities, cleanSchemaAttributes(componentAttributes)),
-          },
-        };
+        if (attribute.repeatable) {
+          attributesCopy[prop] = {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                id: { type: 'string' },
+                ...cleanSchemaAttributes(componentAttributes),
+              },
+            },
+          };
+        } else {
+          attributesCopy[prop] = {
+            type: 'object',
+            properties: {
+              id: { type: 'string' },
+              ...cleanSchemaAttributes(componentAttributes),
+            },
+          };
+        }
         break;
       }
       case 'relation': {
@@ -89,6 +104,25 @@ const cleanSchemaAttributes = (attributes, typeMap = new Map()) => {
         };
 
         break;
+      }
+      case 'dynamiczone': {
+        const components = attribute.components.map(component => {
+          const componentAttributes = strapi.components[component].attributes;
+          return {
+            type: 'object',
+            properties: {
+              __component: { type: 'string' },
+              ...cleanSchemaAttributes(componentAttributes),
+            },
+          };
+        });
+
+        attributesCopy[prop] = {
+          type: 'array',
+          items: {
+            anyOf: components,
+          },
+        };
       }
     }
   }
