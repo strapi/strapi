@@ -36,6 +36,7 @@ import TabForm from '../TabForm';
 import ComponentIconPicker from '../ComponentIconPicker';
 import Relation from '../Relation';
 import SelectCategory from '../SelectCategory';
+import SelectComponent from '../SelectComponent';
 // import SelectCategory from '../WrapperSelect';
 // import WrapperSelect from '../WrapperSelect';
 import findAttribute from '../../utils/findAttribute';
@@ -1085,6 +1086,9 @@ const FormModal = () => {
     }),
   });
 
+  const isAddingAComponentToAnotherComponent =
+    state.forTarget === 'components' || state.forTarget === 'component';
+
   const genericInputProps = {
     customInputs: {
       'allowed-types-select': AllowedTypesSelect,
@@ -1094,15 +1098,21 @@ const FormModal = () => {
       'radio-group': CustomRadioGroup,
       relation: Relation,
       'select-category': SelectCategory,
+      'select-component': SelectComponent,
       'select-default-boolean': BooleanDefaultValueSelect,
       'toggle-draft-publish': DraftAndPublishToggle,
       ...inputsFromPlugins,
     },
+    componentToCreate,
     formErrors,
+    isAddingAComponentToAnotherComponent,
+    isCreatingComponentWhileAddingAField,
     mainBoxHeader: get(headers, [0, 'label'], ''),
     modifiedData,
     naturePickerType: state.forTarget,
     isCreating,
+    targetUid: state.targetUid,
+    forTarget: state.forTarget,
   };
 
   const advancedForm = formToDisplay.advanced({
@@ -1609,21 +1619,21 @@ const FormModal = () => {
   //                                 // Props for the componentSelect
   //                                 // Since the component is created after adding it to a type
   //                                 // its name and category can't be retrieved from the data manager
-  //                                 componentCategoryNeededForAddingAfieldWhileCreatingAComponent={get(
-  //                                   componentToCreate,
-  //                                   'category',
-  //                                   null
-  //                                 )}
+  // componentCategoryNeededForAddingAfieldWhileCreatingAComponent={get(
+  //   componentToCreate,
+  //   'category',
+  //   null
+  // )}
   //                                 // Props for the componentSelect same explanation
   //                                 componentNameNeededForAddingAfieldWhileCreatingAComponent={get(
   //                                   componentToCreate,
   //                                   'name',
   //                                   null
   //                                 )}
-  //                                 isAddingAComponentToAnotherComponent={
-  //                                   state.forTarget === 'components' ||
-  //                                   state.forTarget === 'component'
-  //                                 }
+  // isAddingAComponentToAnotherComponent={
+  //   state.forTarget === 'components' ||
+  //   state.forTarget === 'component'
+  // }
   //                                 value={value}
   //                                 error={isEmpty(errorId) ? null : formatMessage({ id: errorId })}
   //                                 onChange={handleChange}

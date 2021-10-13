@@ -23,7 +23,7 @@ const baseForm = {
             nameField,
             {
               name: 'component',
-              type: 'componentSelect',
+              type: 'select-component',
               intlLabel: {
                 id: getTrad('modalForm.attributes.select-component'),
                 defaultMessage: 'Select a component',
