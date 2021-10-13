@@ -293,6 +293,7 @@ const baseForm = {
             {
               intlLabel: { id: 'FIXME', defaultMessage: 'FIXME' },
               name: 'relation',
+              size: 12,
               type: 'relation',
             },
           ],

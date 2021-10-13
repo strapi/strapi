@@ -4,8 +4,8 @@ import get from 'lodash/get';
 import isEmpty from 'lodash/isEmpty';
 import { useIntl } from 'react-intl';
 import getRelationType from '../../utils/getRelationType';
-import RelationFormBox from '../RelationFormBox';
-import RelationFormNaturePicker from '../RelationFormNaturePicker';
+import RelationFormBox from '../Relation/RelationField';
+import RelationFormNaturePicker from '../Relation/RelationNaturePicker';
 import Wrapper from './Wrapper';
 
 const RelationForm = ({ errors, mainBoxHeader, modifiedData, naturePickerType, onChange }) => {

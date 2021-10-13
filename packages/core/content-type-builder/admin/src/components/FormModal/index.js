@@ -34,7 +34,7 @@ import CustomRadioGroup from '../CustomRadioGroup';
 import ContentTypeRadioGroup from '../ContentTypeRadioGroup';
 import TabForm from '../TabForm';
 // import ComponentIconPicker from '../ComponentIconPicker';
-// import RelationForm from '../RelationForm';
+import Relation from '../Relation';
 // import WrapperSelect from '../WrapperSelect';
 import findAttribute from '../../utils/findAttribute';
 import getTrad from '../../utils/getTrad';
@@ -1087,13 +1087,17 @@ const FormModal = () => {
     customInputs: {
       'allowed-types-select': AllowedTypesSelect,
       'checkbox-with-number-field': CheckboxWithNumberField,
-      'select-default-boolean': BooleanDefaultValueSelect,
-      'radio-group': CustomRadioGroup,
       'content-type-radio-group': ContentTypeRadioGroup,
+      'radio-group': CustomRadioGroup,
+      relation: Relation,
+      'select-default-boolean': BooleanDefaultValueSelect,
       'toggle-draft-publish': DraftAndPublishToggle,
       ...inputsFromPlugins,
     },
+    formErrors,
+    mainBoxHeader: get(headers, [0, 'label'], ''),
     modifiedData,
+    naturePickerType: state.forTarget,
     isCreating,
   };
 
