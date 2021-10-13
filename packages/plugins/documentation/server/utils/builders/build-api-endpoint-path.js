@@ -11,7 +11,7 @@ const buildApiResponses = require('./build-api-responses');
  * @description Parses a route with ':variable'
  *
  * @param {string} routePath - The route's path property
- * @returns '{variable}'
+ * @returns {string}
  */
 const parsePathWithVariables = routePath => {
   return pathToRegexp
@@ -31,7 +31,7 @@ const parsePathWithVariables = routePath => {
  *
  * @param {string} routePath - The route's path property
  *
- * @returns Swagger path params object
+ * @returns {object } Swagger path params object
  */
 const getPathParams = routePath => {
   return pathToRegexp
@@ -51,20 +51,45 @@ const getPathParams = routePath => {
 
 /**
  *
- * @param {array} routes - The routes for a given api or plugin
- * @param {object} attributes - The attributes for a given api or plugin
- * @param {string} tag - A descriptor for OpenAPI
+ * @param {string} prefix - The route prefix
+ * @param {string} path - The route path
  *
- * @returns object of OpenAPI paths for each route
+ * @returns {string}
+ */
+const getPathWithPrefix = (prefix, path) => {
+  if (path.includes('localizations')) {
+    return path;
+  }
+
+  if (path.endsWith('/')) {
+    return prefix;
+  }
+
+  return prefix.concat(path);
+};
+
+/**
+ *
+ * @param {object} api - Information about the api
+ * @param {object} api.routeInfo - The routes for a given api or plugin
+ * @param {string} api.routeInfo.prefix - The prefix for all routes
+ * @param {array}  api.routeInfo.routes - The routes for the current api
+ * @param {object} api.attributes - The attributes for a given api or plugin
+ * @param {string} api.tag - A descriptor for OpenAPI
+ *
+ * @returns {object}
  */
 const getPaths = ({ routeInfo, attributes, tag }) => {
   const paths = routeInfo.routes.reduce(
     (acc, route) => {
       // TODO: Find a more reliable way to determine list of entities vs a single entity
       const isListOfEntities = route.handler.split('.').pop() === 'find';
-      const hasPathParams = route.path.includes('/:');
       const methodVerb = route.method.toLowerCase();
-      const pathWithPrefix = routeInfo.prefix ? `${routeInfo.prefix}/${route.path}` : route.path;
+
+      const hasPathParams = route.path.includes('/:');
+      const pathWithPrefix = routeInfo.prefix
+        ? getPathWithPrefix(routeInfo.prefix, route.path)
+        : route.path;
       const routePath = hasPathParams ? parsePathWithVariables(pathWithPrefix) : pathWithPrefix;
 
       const { responses } = buildApiResponses(attributes, route, isListOfEntities);
@@ -102,7 +127,7 @@ const getPaths = ({ routeInfo, attributes, tag }) => {
  * @property {string} api.getter - The getter for the api (api | plugin)
  * @property {array} api.ctNames - The name of all contentTypes found on the api
  *
- * @returns
+ * @returns {object}
  */
 module.exports = api => {
   if (!api.ctNames.length && api.getter === 'plugin') {
@@ -115,6 +140,7 @@ module.exports = api => {
       attributes,
       tag: api.name,
     };
+
     return getPaths(apiInfo);
   }
 
@@ -138,6 +164,7 @@ module.exports = api => {
       attributes,
       tag,
     };
+
     return getPaths(apiInfo);
   }
 };
