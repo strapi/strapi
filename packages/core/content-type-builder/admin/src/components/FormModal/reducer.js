@@ -3,7 +3,6 @@ import pluralize from 'pluralize';
 import set from 'lodash/set';
 import snakeCase from 'lodash/snakeCase';
 import getRelationType from '../../utils/getRelationType';
-import makeUnique from '../../utils/makeUnique';
 import { createComponentUid } from './utils/createUid';
 import { shouldPluralizeName, shouldPluralizeTargetAttribute } from './utils/relations';
 import * as actions from './constants';
@@ -20,22 +19,6 @@ const reducer = (state = initialState, action) =>
   // eslint-disable-next-line consistent-return
   produce(state, draftState => {
     switch (action.type) {
-      case actions.ADD_COMPONENTS_TO_DYNAMIC_ZONE: {
-        const { components, shouldAddComponents } = action;
-        let currentList = [];
-
-        if (shouldAddComponents) {
-          currentList = [...state.modifiedData.components, ...components];
-        } else {
-          currentList = state.modifiedData.components.filter(comp => {
-            return components.indexOf(comp) === -1;
-          });
-        }
-
-        draftState.modifiedData.components = makeUnique(currentList);
-
-        break;
-      }
       case actions.ON_CHANGE: {
         const { keys, value } = action;
         const obj = state.modifiedData;

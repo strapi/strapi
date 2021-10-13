@@ -35,7 +35,7 @@ const form = {
               },
               {
                 name: 'components',
-                type: 'componentSelect',
+                type: 'select-components',
                 intlLabel: {
                   id: getTrad('modalForm.attributes.select-components'),
                   defaultMessage: 'Select the components',

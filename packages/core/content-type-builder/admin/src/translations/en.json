@@ -190,5 +190,6 @@
   "table.button.no-fields": "Add new field",
   "table.headers.name": "Name",
   "table.headers.type": "Type",
-  "ComponentIconPicker.search.placeholder": "Search for an icon"
+  "ComponentIconPicker.search.placeholder": "Search for an icon",
+  "components.SelectComponents.displayed-value": "{number, plural, =0 {# components} one {# component} other {# components}} selected"
 }

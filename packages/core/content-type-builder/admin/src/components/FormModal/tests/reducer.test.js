@@ -2,66 +2,6 @@ import reducer, { initialState } from '../reducer';
 import * as actions from '../constants';
 
 describe('CTB | components | FormModal | reducer | actions', () => {
-  describe('ADD_COMPONENTS_TO_DYNAMIC_ZONE', () => {
-    it('Should add the components correctly', () => {
-      const action = {
-        type: actions.ADD_COMPONENTS_TO_DYNAMIC_ZONE,
-        components: ['default.test', 'default.test2', 'default.test3'],
-        shouldAddComponents: true,
-        name: 'components',
-      };
-
-      const state = {
-        initialData: {},
-        modifiedData: {
-          type: 'dynamiczone',
-          name: 'dz',
-          components: ['default.test'],
-        },
-      };
-
-      const expected = {
-        initialData: {},
-        modifiedData: {
-          type: 'dynamiczone',
-          name: 'dz',
-          components: ['default.test', 'default.test2', 'default.test3'],
-        },
-      };
-
-      expect(reducer(state, action)).toEqual(expected);
-    });
-
-    it('Should remove the components correctly', () => {
-      const action = {
-        type: actions.ADD_COMPONENTS_TO_DYNAMIC_ZONE,
-        components: ['default.test2', 'default.test3'],
-        shouldAddComponents: false,
-        name: 'components',
-      };
-
-      const state = {
-        initialData: {},
-        modifiedData: {
-          type: 'dynamiczone',
-          name: 'dz',
-          components: ['default.test', 'default.test2', 'default.test3'],
-        },
-      };
-
-      const expected = {
-        initialData: {},
-        modifiedData: {
-          type: 'dynamiczone',
-          name: 'dz',
-          components: ['default.test'],
-        },
-      };
-
-      expect(reducer(state, action)).toEqual(expected);
-    });
-  });
-
   describe(actions.ON_CHANGE, () => {
     it('Should update the modifiedData object correctly', () => {
       const action = {

@@ -37,6 +37,7 @@ import ComponentIconPicker from '../ComponentIconPicker';
 import Relation from '../Relation';
 import SelectCategory from '../SelectCategory';
 import SelectComponent from '../SelectComponent';
+import SelectComponents from '../SelectComponents';
 // import SelectCategory from '../WrapperSelect';
 // import WrapperSelect from '../WrapperSelect';
 import findAttribute from '../../utils/findAttribute';
@@ -59,7 +60,6 @@ import {
   SET_DATA_TO_EDIT,
   SET_DYNAMIC_ZONE_DATA_SCHEMA,
   SET_ATTRIBUTE_DATA_SCHEMA,
-  // ADD_COMPONENTS_TO_DYNAMIC_ZONE,
   SET_ERRORS,
   ON_CHANGE,
   RESET_PROPS_AND_SET_THE_FORM_FOR_ADDING_A_COMPO_TO_A_DZ,
@@ -553,17 +553,6 @@ const FormModal = () => {
       return acc;
     }, '');
   };
-
-  // const handleClickAddComponentsToDynamicZone = ({
-  //   target: { name, components, shouldAddComponents },
-  // }) => {
-  //   dispatch({
-  //     type: ADD_COMPONENTS_TO_DYNAMIC_ZONE,
-  //     name,
-  //     components,
-  //     shouldAddComponents,
-  //   });
-  // };
 
   const handleChange = useCallback(
     ({ target: { name, value, type, ...rest } }) => {
@@ -1099,11 +1088,13 @@ const FormModal = () => {
       relation: Relation,
       'select-category': SelectCategory,
       'select-component': SelectComponent,
+      'select-components': SelectComponents,
       'select-default-boolean': BooleanDefaultValueSelect,
       'toggle-draft-publish': DraftAndPublishToggle,
       ...inputsFromPlugins,
     },
     componentToCreate,
+    dynamicZoneTarget: state.dynamicZoneTarget,
     formErrors,
     isAddingAComponentToAnotherComponent,
     isCreatingComponentWhileAddingAField,
