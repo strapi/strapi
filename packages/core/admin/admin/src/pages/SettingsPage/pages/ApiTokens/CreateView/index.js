@@ -25,6 +25,7 @@ import { Select, Option } from '@strapi/parts/Select';
 import get from 'lodash/get';
 import { IconButton } from '@strapi/parts/IconButton';
 import Duplicate from '@strapi/icons/Duplicate';
+import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { formatAPIErrors } from '../../../../../utils';
 import { axiosInstance } from '../../../../../core/utils';
 import schema from './utils/schema';
@@ -119,14 +120,24 @@ const ApiTokenCreateView = () => {
                   {!!accessToken && (
                     <ContentBox
                       endAction={
-                        <IconButton
-                          label={formatMessage({
-                            id: 'app.component.CopyToClipboard.label',
-                            default: 'Copy to clipboard',
-                          })}
-                          noBorder
-                          icon={<Duplicate />}
-                        />
+                        <CopyToClipboard
+                          onCopy={() => {
+                            toggleNotification({
+                              type: 'success',
+                              message: { id: 'Settings.apiTokens.notification.copied' },
+                            });
+                          }}
+                          text={accessToken}
+                        >
+                          <IconButton
+                            label={formatMessage({
+                              id: 'app.component.CopyToClipboard.label',
+                              default: 'Copy to clipboard',
+                            })}
+                            noBorder
+                            icon={<Duplicate />}
+                          />
+                        </CopyToClipboard>
                       }
                       title={accessToken}
                       subtitle={formatMessage({
