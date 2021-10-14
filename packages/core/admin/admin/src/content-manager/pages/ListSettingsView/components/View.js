@@ -1,6 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { PropTypes } from 'prop-types';
+import get from 'lodash/get';
 import { useIntl } from 'react-intl';
 import { Box } from '@strapi/parts/Box';
 import { Row } from '@strapi/parts/Row';
@@ -30,6 +31,7 @@ const View = ({
   handleAddField,
   handleRemoveField,
   handleClickEditField,
+  metadatas,
 }) => {
   const { formatMessage } = useIntl();
 
@@ -59,7 +61,8 @@ const View = ({
                 onRemoveField={e => handleRemoveField(e, index)}
                 onClickEditField={handleClickEditField}
                 key={field}
-                title={field}
+                name={field}
+                labelField={get(metadatas, [field, 'list', 'label'])}
               />
             ))}
           </Stack>
@@ -93,6 +96,7 @@ View.defaultProps = {
   handleClickEditField: () => {},
   handleRemoveField: () => {},
   listRemainingFields: [],
+  metadatas: {},
 };
 
 View.propTypes = {
@@ -101,6 +105,13 @@ View.propTypes = {
   handleClickEditField: PropTypes.func,
   handleRemoveField: PropTypes.func,
   listRemainingFields: PropTypes.array,
+  metadatas: PropTypes.objectOf(
+    PropTypes.shape({
+      list: PropTypes.shape({
+        label: PropTypes.string,
+      }),
+    })
+  ),
 };
 
 export default View;

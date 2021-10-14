@@ -70,10 +70,11 @@ const FieldWrapper = styled(Box)`
   }
 `;
 
-const DraggableCard = ({ title, onRemoveField, onClickEditField }) => {
+const DraggableCard = ({ name, labelField, onRemoveField, onClickEditField }) => {
   const { formatMessage } = useIntl();
   const editButtonRef = useRef();
-  const cardTitle = title.length > 20 ? `${title.substring(0, 20)}...` : title;
+  const cardTitle = labelField || name;
+  const cardEllipsisTitle = cardTitle.length > 20 ? `${cardTitle.substring(0, 20)}...` : cardTitle;
 
   const rowHandleClick = () => {
     if (editButtonRef.current) {
@@ -97,27 +98,27 @@ const DraggableCard = ({ title, onRemoveField, onClickEditField }) => {
                 id: 'content-manager.components.DraggableCard.move.field',
                 defaultMessage: 'Move {item}',
               },
-              { item: title }
+              { item: name }
             )}
             type="button"
           >
             <Drag />
           </DragButton>
-          <ButtonText>{cardTitle}</ButtonText>
+          <ButtonText>{cardEllipsisTitle}</ButtonText>
         </Stack>
         <Row paddingLeft={3}>
           <ActionButton
             ref={editButtonRef}
             onClick={e => {
               e.stopPropagation();
-              onClickEditField(title);
+              onClickEditField(name);
             }}
             aria-label={formatMessage(
               {
                 id: 'content-manager.components.DraggableCard.edit.field',
                 defaultMessage: 'Edit {item}',
               },
-              { item: title }
+              { item: name }
             )}
             type="button"
           >
@@ -125,13 +126,13 @@ const DraggableCard = ({ title, onRemoveField, onClickEditField }) => {
           </ActionButton>
           <ActionButton
             onClick={onRemoveField}
-            data-testid={`delete-${title}`}
+            data-testid={`delete-${name}`}
             aria-label={formatMessage(
               {
                 id: 'content-manager.components.DraggableCard.delete.field',
                 defaultMessage: 'Delete {item}',
               },
-              { item: title }
+              { item: name }
             )}
             type="button"
           >
@@ -144,14 +145,16 @@ const DraggableCard = ({ title, onRemoveField, onClickEditField }) => {
 };
 
 DraggableCard.defaultProps = {
+  labelField: undefined,
   onClickEditField: () => {},
   onRemoveField: () => {},
 };
 
 DraggableCard.propTypes = {
+  labelField: PropTypes.string,
   onClickEditField: PropTypes.func,
   onRemoveField: PropTypes.func,
-  title: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
 };
 
 export default DraggableCard;

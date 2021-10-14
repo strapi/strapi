@@ -285,6 +285,7 @@ const ListSettingsView = ({ layout, slug }) => {
                 handleAddField={handleAddField}
                 handleRemoveField={handleRemoveField}
                 handleClickEditField={handleClickEditField}
+                metadatas={metadatas}
               />
             </Box>
           </ContentLayout>
