@@ -128,30 +128,19 @@ const FormModal = () => {
       const kind = query.get('kind') || get(allDataSchema, ['contentType', 'schema', 'kind'], null);
       const targetUid = query.get('targetUid');
       const settingType = query.get('settingType');
-      const headerId = query.get('headerId');
       const header_label_1 = query.get('header_label_1');
-      const header_icon_name_1 = query.get('header_icon_name_1');
-      const header_icon_isCustom_1 = query.get('header_icon_isCustom_1');
       const header_info_category_1 = query.get('header_info_category_1');
       const header_info_name_1 = query.get('header_info_name_1');
       const header_label_2 = query.get('header_label_2');
-      const header_icon_name_2 = query.get('header_icon_name_2');
-      const header_icon_isCustom_2 = query.get('header_icon_isCustom_2');
       const header_info_category_2 = query.get('header_info_category_2');
       const header_info_name_2 = query.get('header_info_name_2');
       const header_label_3 = query.get('header_label_3');
-      const header_icon_name_3 = query.get('header_icon_name_3');
-      const header_icon_isCustom_3 = query.get('header_icon_isCustom_3');
       const header_info_category_3 = query.get('header_info_category_3');
       const header_info_name_3 = query.get('header_info_name_3');
       const header_label_4 = query.get('header_label_4');
-      const header_icon_name_4 = query.get('header_icon_name_4');
-      const header_icon_isCustom_4 = query.get('header_icon_isCustom_4');
       const header_info_category_4 = query.get('header_info_category_4');
       const header_info_name_4 = query.get('header_info_name_4');
       const header_label_5 = query.get('header_label_5');
-      const header_icon_name_5 = query.get('header_icon_name_5');
-      const header_icon_isCustom_5 = query.get('header_icon_isCustom_5');
       const header_info_category_5 = query.get('header_info_category_5');
       const header_info_name_5 = query.get('header_info_name_5');
       const step = query.get('step');
@@ -173,31 +162,20 @@ const FormModal = () => {
         step,
         targetUid,
         header_label_1,
-        header_icon_name_1,
-        header_icon_isCustom_1,
         header_info_name_1,
         header_info_category_1,
         header_label_2,
-        header_icon_name_2,
-        header_icon_isCustom_2,
         header_info_name_2,
         header_info_category_2,
         header_label_3,
-        header_icon_name_3,
-        header_icon_isCustom_3,
         header_info_name_3,
         header_info_category_3,
         header_label_4,
-        header_icon_name_4,
-        header_icon_isCustom_4,
         header_info_name_4,
         header_info_category_4,
         header_label_5,
-        header_icon_name_5,
-        header_icon_isCustom_5,
         header_info_name_5,
         header_info_category_5,
-        headerId,
       });
 
       const collectionTypesForRelation = sortedContentTypesList.filter(
@@ -287,6 +265,7 @@ const FormModal = () => {
           modalType,
           data: {
             name,
+            // FIXME
             collectionName,
             draftAndPublish,
             kind,
@@ -624,17 +603,6 @@ const FormModal = () => {
       await checkFormValidity();
       sendButtonAddMoreFieldEvent(shouldContinue);
       const targetUid = state.forTarget === 'components' ? state.targetUid : uid;
-      let headerIcon;
-
-      if (state.forTarget === 'contentType') {
-        const currentKind = get(allDataSchema, ['contentType', 'schema', 'kind'], 'contentType');
-
-        headerIcon = state.kind || currentKind;
-      } else if (state.forTarget === 'component') {
-        headerIcon = 'component';
-      } else {
-        headerIcon = get(allDataSchema, ['components', state.targetUid, 'schema', 'icon'], '');
-      }
 
       // Remove the last header when editing
       if (state.actionType === 'edit') {
@@ -649,6 +617,7 @@ const FormModal = () => {
         if (isCreating) {
           createSchema({ ...modifiedData, kind: state.kind }, state.modalType, uid);
         } else {
+          // TODO : add comments
           if (canEditContentType(allDataSchema, modifiedData)) {
             push({ search: '' });
             submitData(modifiedData);
@@ -669,8 +638,6 @@ const FormModal = () => {
             forTarget: state.forTarget,
             targetUid,
             header_label_1: modifiedData.name,
-            header_icon_name_1: headerIcon,
-            header_icon_isCustom_1: null,
           }),
         });
       } else if (isCreatingComponent) {
@@ -687,8 +654,6 @@ const FormModal = () => {
               forTarget: state.forTarget,
               targetUid: componentUid,
               header_label_1: modifiedData.name,
-              header_icon_name_1: 'contentType',
-              header_icon_isCustom_1: null,
             }),
             pathname: `/plugins/${pluginId}/component-categories/${category}/${componentUid}`,
           });
@@ -739,8 +704,6 @@ const FormModal = () => {
             actionType: 'create',
             ...headersObject,
             header_label_2: modifiedData.name,
-            header_icon_name_2: null,
-            header_icon_isCustom_2: false,
           });
           const nextSearch = isDynamicZoneAttribute
             ? dzSearch
@@ -750,8 +713,6 @@ const FormModal = () => {
                   forTarget: state.forTarget,
                   targetUid,
                   ...headersObject,
-                  header_icon_isCustom_1: !['contentType', 'component'].includes(state.forTarget),
-                  header_icon_name_1: headerIcon,
                 },
                 shouldContinue
               );
@@ -786,8 +747,6 @@ const FormModal = () => {
             attributeType: 'component',
             step: '2',
             ...headersObject,
-            header_icon_isCustom_1: !['contentType', 'component'].includes(state.forTarget),
-            header_icon_name_1: headerIcon,
           };
 
           push({
@@ -827,8 +786,6 @@ const FormModal = () => {
           forTarget: state.forTarget,
           targetUid: state.targetUid,
           ...headersObject,
-          header_icon_isCustom_1: !['contentType', 'component'].includes(state.forTarget),
-          header_icon_name_1: headerIcon,
         };
 
         push({ search: makeSearch(nextSearch, shouldContinue) });
@@ -855,8 +812,6 @@ const FormModal = () => {
             attributeType: 'component',
             step: '2',
             ...headersObject,
-            header_icon_isCustom_1: false,
-            header_icon_name_1: 'component',
           };
 
           trackUsage('willCreateComponentFromAttributesModal');
@@ -909,11 +864,7 @@ const FormModal = () => {
           forTarget: 'components',
           targetUid: componentUid,
           ...headersObject,
-          header_icon_isCustom_1: true,
-          header_icon_name_1: componentToCreate.icon,
           [`header_label_${nextHeaderIndex}`]: modifiedData.name,
-          [`header_icon_name_${nextHeaderIndex}`]: 'component',
-          [`header_icon_isCustom_${nextHeaderIndex}`]: false,
           [`header_info_category_${nextHeaderIndex}`]: category,
           [`header_info_name_${nextHeaderIndex}`]: componentToCreate.name,
         };
@@ -961,11 +912,7 @@ const FormModal = () => {
               forTarget: 'components',
               targetUid: componentUid,
               ...headersObject,
-              header_icon_isCustom_1: true,
-              header_icon_name_1: modifiedData.componentToCreate.icon,
               [`header_label_${nextHeaderIndex}`]: modifiedData.name,
-              [`header_icon_name_${nextHeaderIndex}`]: 'component',
-              [`header_icon_isCustom_${nextHeaderIndex}`]: false,
               [`header_info_category_${nextHeaderIndex}`]: category,
               [`header_info_name_${nextHeaderIndex}`]: modifiedData.componentToCreate.name,
             };
@@ -999,6 +946,7 @@ const FormModal = () => {
       });
     }
   };
+
   const handleClosed = () => {
     // Close the modal
     push({ search: '' });
@@ -1062,6 +1010,11 @@ const FormModal = () => {
   );
 
   if (!isOpen) {
+    return null;
+  }
+
+  // FIXME
+  if (!state.modalType) {
     return null;
   }
 
@@ -1138,7 +1091,15 @@ const FormModal = () => {
   return (
     <>
       <ModalLayout onClose={handleClosed} labelledBy="title">
-        <FormModalHeader headerId={state.headerId} headers={headers} />
+        <FormModalHeader
+          actionType={state.actionType}
+          headers={headers}
+          contentTypeKind={state.kind}
+          modalType={state.modalType}
+          forTarget={state.forTarget}
+          targetUid={state.targetUid}
+          attributeType={state.attributeType}
+        />
         {isPickingAttribute && (
           <AttributeOptions
             attributes={displayedAttributes}

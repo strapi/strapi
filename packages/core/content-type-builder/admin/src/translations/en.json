@@ -143,7 +143,7 @@
   "modalForm.component.header-create": "Create a component",
   "modalForm.components.create-component.category.label": "Select a category or enter a name to create a new one",
   "modalForm.components.icon.label": "Icon",
-  "modalForm.contentType.header-create": "Create a collection type",
+  "modalForm.collectionType.header-create": "Create a collection type",
   "modalForm.editCategory.base.name.description": "No space is allowed for the name of the category",
   "modalForm.header-edit": "Edit {name}",
   "modalForm.header.categories": "Categories",

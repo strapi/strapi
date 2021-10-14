@@ -12,7 +12,6 @@ import DeleteIcon from '@strapi/icons/DeleteIcon';
 import { stopPropagation, onRowClick } from '@strapi/helper-plugin';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import useDataManager from '../../hooks/useDataManager';
-import getAttributeDisplayedType from '../../utils/getAttributeDisplayedType';
 import getTrad from '../../utils/getTrad';
 import Curve from '../../icons/Curve';
 import UpperFist from '../UpperFirst';
@@ -74,37 +73,26 @@ function ListRow({
       );
 
       const attrType = type;
-      const icoType = getAttributeDisplayedType(attrType);
 
       let firstHeaderObject = {
         header_label_1: mainTypeName,
-        header_icon_name_1: icoType,
-        header_icon_isCustom_1: false,
         header_info_category_1: null,
         header_info_name_1: null,
       };
       let secondHeaderObject = {
         header_label_2: name,
-        header_icon_name_2: null,
-        header_icon_isCustom_2: false,
         header_info_category_2: null,
         header_info_name_2: null,
       };
       let thirdHeaderObject = {
-        header_icon_name_3: 'component',
-        header_icon_isCustom_3: false,
         header_info_category_3: null,
         header_info_name_3: null,
       };
       let fourthHeaderObject = {
-        header_icon_name_4: null,
-        header_icon_isCustom_4: false,
         header_info_category_4: null,
         header_info_name_4: null,
       };
       let fifthHeaderObject = {
-        header_icon_name_5: null,
-        header_icon_isCustom_5: false,
         header_info_category_5: null,
         header_info_name_5: null,
       };
@@ -112,8 +100,6 @@ function ListRow({
       if (firstLoopComponentName) {
         secondHeaderObject = {
           header_label_2: firstLoopComponentName,
-          header_icon_name_2: 'component',
-          header_icon_isCustom_2: false,
           header_info_category_2: firstComponentCategory,
           header_info_name_2: firstLoopComponentName,
         };
@@ -121,7 +107,6 @@ function ListRow({
         thirdHeaderObject = {
           ...thirdHeaderObject,
           header_label_3: name,
-          header_icon_name_3: null,
         };
       }
 
@@ -129,27 +114,22 @@ function ListRow({
         thirdHeaderObject = {
           ...thirdHeaderObject,
           header_label_3: secondLoopComponentName,
-          header_icon_name_3: 'component',
           header_info_category_3: secondComponentCategory,
           header_info_name_3: secondLoopComponentName,
         };
         fourthHeaderObject = {
           ...fourthHeaderObject,
           header_label_4: name,
-          header_icon_name_4: null,
         };
       }
 
       if (isFromDynamicZone || isNestedInDZComponent) {
         secondHeaderObject = {
           header_label_2: dzName,
-          header_icon_name_2: 'dynamiczone',
-          header_icon_isCustom_2: false,
           header_info_name_2: null,
           header_info_category_2: null,
         };
         thirdHeaderObject = {
-          header_icon_name_3: 'component',
           header_label_3: firstLoopComponentName,
           header_info_name_3: firstComponentCategory,
           header_info_category_3: firstComponentCategory,
@@ -157,15 +137,11 @@ function ListRow({
 
         if (!isNestedInDZComponent) {
           fourthHeaderObject = {
-            header_icon_name_4: null,
-            header_icon_isCustom_4: false,
             header_info_category_4: null,
             header_label_4: name,
           };
         } else {
           fourthHeaderObject = {
-            header_icon_name_4: 'components',
-            header_icon_isCustom_4: false,
             header_info_category_4: secondComponentCategory,
             header_info_name_4: secondLoopComponentName,
             header_label_4: secondLoopComponentName,

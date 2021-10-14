@@ -39,13 +39,9 @@ const useContentTypeBuilderMenu = () => {
             id: getTrad('modalForm.header.categories'),
             defaultMessage: 'Categories',
           }),
-          header_icon_name_1: 'component',
-          header_icon_isCustom_1: false,
           header_info_category_1: null,
           header_info_name_1: null,
           header_label_2: data.name,
-          header_icon_name_2: null,
-          header_icon_isCustom_2: false,
           header_info_category_2: null,
           header_info_name_2: null,
 
@@ -85,9 +81,6 @@ const useContentTypeBuilderMenu = () => {
         actionType: 'create',
         settingType: 'base',
         forTarget: modalType,
-        headerId: getTrad(`modalForm.${type}.header-create`),
-        header_icon_isCustom_1: 'false',
-        header_icon_name_1: type,
         header_label_1: 'null',
       });
       push({

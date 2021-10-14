@@ -100,8 +100,6 @@ const ListView = () => {
   const handleClickAddComponentToDZ = async dzName => {
     const firstHeaderObject = {
       header_label_1: currentDataName,
-      header_icon_name_1: 'dynamiczone',
-      header_icon_isCustom_1: false,
     };
     const secondHeaderObj = {
       header_label_2: dzName,
@@ -217,9 +215,6 @@ const ListView = () => {
         forTarget: firstMainDataPath,
         targetUid,
         header_label_1: label,
-        header_icon_isCustom_1: false,
-        header_icon_name_1: contentType === 'singleType' ? contentType : firstMainDataPath,
-        headerId: getTrad('modalForm.header-edit'),
       }),
     });
   };
@@ -245,9 +240,6 @@ const ListView = () => {
                     onClick={() => {
                       const headerDisplayObject = {
                         header_label_1: currentDataName,
-                        header_icon_name_1:
-                          forTarget === 'contentType' ? contentTypeKind : forTarget,
-                        header_icon_isCustom_1: false,
                       };
                       handleClickAddField(forTarget, targetUid, headerDisplayObject);
                     }}
