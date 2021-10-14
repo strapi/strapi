@@ -37,7 +37,7 @@ export const useUpload = () => {
     },
   });
 
-  const upload = asset => mutation.mutate(asset);
+  const upload = asset => mutation.mutateAsync(asset);
   const cancel = () =>
     tokenRef.current.cancel(
       formatMessage({ id: getTrad('modal.upload.cancelled'), defaultMessage: '' })

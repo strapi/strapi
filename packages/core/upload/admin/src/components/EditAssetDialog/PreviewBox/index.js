@@ -12,6 +12,7 @@ import { downloadFile } from '../../../utils/downloadFile';
 import { RemoveAssetDialog } from '../RemoveAssetDialog';
 import { useCropImg } from '../../../hooks/useCropImg';
 import { useEditAsset } from '../../../hooks/useEditAsset';
+import { useUpload } from '../../../hooks/useUpload';
 import {
   RelativeBox,
   ActionRow,
@@ -23,7 +24,7 @@ import { CroppingActions } from './CroppingActions';
 import { CopyLinkButton } from './CopyLinkButton';
 import { UploadProgress } from '../../UploadProgress';
 
-export const PreviewBox = ({ asset, onDelete, replacementFile }) => {
+export const PreviewBox = ({ asset, onDelete, onCropFinish, replacementFile }) => {
   const previewRef = useRef(null);
   const [assetUrl, setAssetUrl] = useState(prefixFileUrlWithBackendUrl(asset.url));
   const { formatMessage } = useIntl();
@@ -38,6 +39,13 @@ export const PreviewBox = ({ asset, onDelete, replacementFile }) => {
     height,
   } = useCropImg();
   const { editAsset, error, isLoading, progress, cancel } = useEditAsset();
+  const {
+    upload,
+    isLoading: isLoadingUpload,
+    cancel: cancelUpload,
+    error: uploadError,
+    progress: progressUpload,
+  } = useUpload();
 
   useEffect(() => {
     // Whenever a replacementUrl is set, make sure to permutate the real asset.url by
@@ -64,11 +72,25 @@ export const PreviewBox = ({ asset, onDelete, replacementFile }) => {
 
   const isInCroppingMode = isCropping && !isLoading;
 
+  const handleDuplication = async () => {
+    const nextAsset = { ...asset, width, height };
+    const file = await produceFile(nextAsset.name, nextAsset.mime, nextAsset.updatedAt);
+
+    await upload(file);
+
+    stopCropping();
+    onCropFinish();
+  };
+
   return (
     <>
       <RelativeBox hasRadius background="neutral150" borderColor="neutral200">
         {isCropperReady && isInCroppingMode && (
-          <CroppingActions onValidate={handleCropping} onCancel={stopCropping} />
+          <CroppingActions
+            onValidate={handleCropping}
+            onDuplicate={handleDuplication}
+            onCancel={stopCropping}
+          />
         )}
 
         <ActionRow paddingLeft={3} paddingRight={3} justifyContent="flex-end">
@@ -102,9 +124,21 @@ export const PreviewBox = ({ asset, onDelete, replacementFile }) => {
         </ActionRow>
 
         <Wrapper>
+          {/* This one is for editting an asset */}
           {isLoading && (
             <UploadProgressWrapper>
               <UploadProgress error={error} onCancel={cancel} progress={progress} />
+            </UploadProgressWrapper>
+          )}
+
+          {/* This one is for duplicating an asset after cropping */}
+          {isLoadingUpload && (
+            <UploadProgressWrapper>
+              <UploadProgress
+                error={uploadError}
+                onCancel={cancelUpload}
+                progress={progressUpload}
+              />
             </UploadProgressWrapper>
           )}
 
@@ -157,4 +191,5 @@ PreviewBox.propTypes = {
     updatedAt: PropTypes.string,
   }).isRequired,
   onDelete: PropTypes.func.isRequired,
+  onCropFinish: PropTypes.func.isRequired,
 };

@@ -52,7 +52,12 @@ export const EditAssetDialog = ({ onClose, asset }) => {
         <ModalBody>
           <Grid gap={4}>
             <GridItem xs={12} col={6}>
-              <PreviewBox asset={asset} onDelete={onClose} replacementFile={replacementFile} />
+              <PreviewBox
+                asset={asset}
+                onDelete={onClose}
+                onCropFinish={onClose}
+                replacementFile={replacementFile}
+              />
             </GridItem>
             <GridItem xs={12} col={6}>
               <Formik

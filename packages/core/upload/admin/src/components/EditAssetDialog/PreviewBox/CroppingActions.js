@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { IconButton } from '@strapi/parts/IconButton';
 import { FocusTrap } from '@strapi/parts/FocusTrap';
+import { SimpleMenu, MenuItem } from '@strapi/parts/SimpleMenu';
 import CloseAlertIcon from '@strapi/icons/CloseAlertIcon';
 import CheckIcon from '@strapi/icons/CheckIcon';
 import { Stack } from '@strapi/parts/Stack';
@@ -9,7 +10,7 @@ import { useIntl } from 'react-intl';
 import getTrad from '../../../utils/getTrad';
 import { CroppingActionRow } from './components';
 
-export const CroppingActions = ({ onCancel, onValidate }) => {
+export const CroppingActions = ({ onCancel, onValidate, onDuplicate }) => {
   const { formatMessage } = useIntl();
 
   return (
@@ -25,14 +26,27 @@ export const CroppingActions = ({ onCancel, onValidate }) => {
             onClick={onCancel}
           />
 
-          <IconButton
+          <SimpleMenu
             label={formatMessage({
               id: getTrad('control-card.crop'),
               defaultMessage: 'Crop',
             })}
+            as={IconButton}
             icon={<CheckIcon />}
-            onClick={onValidate}
-          />
+          >
+            <MenuItem onClick={onValidate}>
+              {formatMessage({
+                id: getTrad('checkControl.crop-original'),
+                defaultMessage: 'Crop the original asset',
+              })}
+            </MenuItem>
+            <MenuItem onClick={onDuplicate}>
+              {formatMessage({
+                id: getTrad('checkControl.crop-duplicate'),
+                defaultMessage: 'Duplicate & crop the asset',
+              })}
+            </MenuItem>
+          </SimpleMenu>
         </Stack>
       </CroppingActionRow>
     </FocusTrap>
@@ -41,5 +55,6 @@ export const CroppingActions = ({ onCancel, onValidate }) => {
 
 CroppingActions.propTypes = {
   onCancel: PropTypes.func.isRequired,
+  onDuplicate: PropTypes.func.isRequired,
   onValidate: PropTypes.func.isRequired,
 };
