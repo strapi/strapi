@@ -1,6 +1,6 @@
 import produce from 'immer'; // current
 import set from 'lodash/set';
-// import get from 'lodash/get';
+import get from 'lodash/get';
 // import { arrayMoveItem } from '../../utils';
 
 const initialState = {
@@ -14,13 +14,13 @@ const initialState = {
 const reducer = (state = initialState, action) =>
   // eslint-disable-next-line consistent-return
   produce(state, draftState => {
-    // const layoutFieldListPath = ['modifiedData', 'layouts', 'list'];
+    const layoutFieldListPath = ['modifiedData', 'layouts', 'list'];
     switch (action.type) {
-      // case 'ADD_FIELD': {
-      //   const layoutFieldList = get(state, layoutFieldListPath, []);
-      //   set(draftState, layoutFieldListPath, [...layoutFieldList, action.item]);
-      //   break;
-      // }
+      case 'ADD_FIELD': {
+        const layoutFieldList = get(state, layoutFieldListPath, []);
+        set(draftState, layoutFieldListPath, [action.item, ...layoutFieldList]);
+        break;
+      }
       // case 'MOVE_FIELD': {
       //   const layoutFieldList = get(state, layoutFieldListPath, []);
       //   const { originalIndex, atIndex } = action;
@@ -43,15 +43,15 @@ const reducer = (state = initialState, action) =>
       //   draftState.modifiedData = state.initialData;
       //   break;
       // }
-      // case 'REMOVE_FIELD': {
-      //   const layoutFieldList = get(state, layoutFieldListPath, []);
-      //   set(
-      //     draftState,
-      //     layoutFieldListPath,
-      //     layoutFieldList.filter((_, index) => action.index !== index)
-      //   );
-      //   break;
-      // }
+      case 'REMOVE_FIELD': {
+        const layoutFieldList = get(state, layoutFieldListPath, []);
+        set(
+          draftState,
+          layoutFieldListPath,
+          layoutFieldList.filter((_, index) => action.index !== index)
+        );
+        break;
+      }
       // case 'SET_LABEL_TO_EDIT': {
       //   const { labelToEdit } = action;
       //   draftState.labelToEdit = labelToEdit;
@@ -78,10 +78,6 @@ const reducer = (state = initialState, action) =>
       //   set(draftState, [...fieldMetadataPath, 'sortable'], state.labelForm.sortable);
       //   break;
       // }
-      case 'SUBMIT_SUCCEEDED': {
-        draftState.initialData = state.modifiedData;
-        break;
-      }
       default:
         return draftState;
     }

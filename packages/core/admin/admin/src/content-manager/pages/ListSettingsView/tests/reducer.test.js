@@ -19,21 +19,21 @@ describe('CONTENT MANAGER | CONTAINERS | ListSettingsView | reducer', () => {
     expect(reducer(state, {})).toEqual(expected);
   });
 
-  // describe('ADD_FIELD', () => {
-  //   it('should add a field to the layout correctly', () => {
-  //     const expected = {
-  //       ...state,
-  //       modifiedData: {
-  //         layouts: {
-  //           list: ['title'],
-  //         },
-  //       },
-  //     };
-  //     const action = { type: 'ADD_FIELD', item: 'title' };
+  describe('ADD_FIELD', () => {
+    it('should add a field to the layout correctly', () => {
+      const expected = {
+        ...state,
+        modifiedData: {
+          layouts: {
+            list: ['title'],
+          },
+        },
+      };
+      const action = { type: 'ADD_FIELD', item: 'title' };
 
-  //     expect(reducer(state, action)).toEqual(expected);
-  //   });
-  // });
+      expect(reducer(state, action)).toEqual(expected);
+    });
+  });
 
   // describe('MOVE_FIELD', () => {
   //   it('should replace the title by the description and vice-versa', () => {
@@ -103,32 +103,32 @@ describe('CONTENT MANAGER | CONTAINERS | ListSettingsView | reducer', () => {
   //   });
   // });
 
-  // describe('REMOVE_FIELD', () => {
-  //   it('should remove the field', () => {
-  //     state.modifiedData = {
-  //       layouts: {
-  //         list: ['id', 'description', 'title'],
-  //       },
-  //       settings: {
-  //         defaultSortBy: 'id',
-  //       },
-  //     };
-  //     const expected = {
-  //       ...state,
-  //       modifiedData: {
-  //         layouts: {
-  //           list: ['id', 'title'],
-  //         },
-  //         settings: {
-  //           defaultSortBy: 'id',
-  //         },
-  //       },
-  //     };
-  //     const action = { type: 'REMOVE_FIELD', index: 1 };
+  describe('REMOVE_FIELD', () => {
+    it('should remove the field', () => {
+      state.modifiedData = {
+        layouts: {
+          list: ['id', 'description', 'title'],
+        },
+        settings: {
+          defaultSortBy: 'id',
+        },
+      };
+      const expected = {
+        ...state,
+        modifiedData: {
+          layouts: {
+            list: ['id', 'title'],
+          },
+          settings: {
+            defaultSortBy: 'id',
+          },
+        },
+      };
+      const action = { type: 'REMOVE_FIELD', index: 1 };
 
-  //     expect(reducer(state, action)).toEqual(expected);
-  //   });
-  // });
+      expect(reducer(state, action)).toEqual(expected);
+    });
+  });
 
   // describe('SET_LABEL_TO_EDIT', () => {
   //   it('should set the label form data of the field to edit', () => {
@@ -250,45 +250,4 @@ describe('CONTENT MANAGER | CONTAINERS | ListSettingsView | reducer', () => {
   //     expect(reducer(state, action)).toEqual(expected);
   //   });
   // });
-
-  describe('SUBMIT_SUCCEEDED', () => {
-    it('should submit the label and the sortable value of the field to edit', () => {
-      state.modifiedData = {
-        metadatas: {
-          cover: {
-            list: {
-              label: 'Cover',
-              sortable: false,
-            },
-          },
-        },
-      };
-      const expected = {
-        ...state,
-        initialData: {
-          metadatas: {
-            cover: {
-              list: {
-                label: 'Cover',
-                sortable: false,
-              },
-            },
-          },
-        },
-        modifiedData: {
-          metadatas: {
-            cover: {
-              list: {
-                label: 'Cover',
-                sortable: false,
-              },
-            },
-          },
-        },
-      };
-      const action = { type: 'SUBMIT_SUCCEEDED' };
-
-      expect(reducer(state, action)).toEqual(expected);
-    });
-  });
 });
