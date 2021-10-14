@@ -4,7 +4,6 @@ import { useMutation } from 'react-query';
 import isEqual from 'lodash/isEqual';
 import upperFirst from 'lodash/upperFirst';
 import pick from 'lodash/pick';
-import get from 'lodash/get';
 import { stringify } from 'qs';
 import { useNotification, useTracking, ConfirmDialog } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
@@ -56,7 +55,7 @@ const ListSettingsView = ({ layout, slug }) => {
 
   const { attributes } = layout;
 
-  const displayedFields = get(modifiedData, ['layouts', 'list'], []);
+  const displayedFields = modifiedData.layouts.list;
 
   const sortOptions = Object.entries(attributes).reduce((acc, cur) => {
     const [name, { type }] = cur;
@@ -111,7 +110,7 @@ const ListSettingsView = ({ layout, slug }) => {
 
   const handleConfirm = async () => {
     const body = pick(modifiedData, ['layouts', 'settings', 'metadatas']);
-    submitMutation.mutateAsync(body);
+    submitMutation.mutate(body);
   };
 
   const handleAddField = item => {
@@ -144,7 +143,7 @@ const ListSettingsView = ({ layout, slug }) => {
   };
 
   const submitMutation = useMutation(body => putCMSettingsLV(body, slug), {
-    onSuccess: async () => {
+    onSuccess: () => {
       trackUsage('didEditListSettings');
       refetchData();
     },
@@ -157,14 +156,19 @@ const ListSettingsView = ({ layout, slug }) => {
   });
   const { isLoading: isSubmittingForm } = submitMutation;
 
-  const metadatas = get(modifiedData, ['metadatas'], {});
-  const listRemainingFields = Object.keys(metadatas)
-    .filter(key => {
-      return checkIfAttributeIsDisplayable(get(attributes, key, {}));
-    })
-    .filter(field => {
-      return !displayedFields.includes(field);
-    })
+  const listRemainingFields = Object.entries(attributes)
+    .reduce((acc, cur) => {
+      const [attrName, fieldSchema] = cur;
+
+      const isDisplayable = checkIfAttributeIsDisplayable(fieldSchema);
+      const isAlreadyDisplayed = displayedFields.includes(attrName);
+
+      if (isDisplayable && !isAlreadyDisplayed) {
+        acc.push(attrName);
+      }
+
+      return acc;
+    }, [])
     .sort();
 
   // const handleClickEditLabel = labelToEdit => {
@@ -259,12 +263,12 @@ const ListSettingsView = ({ layout, slug }) => {
               </Button>
             }
             subtitle={formatMessage({
-              id: `components.SettingsViewWrapper.pluginHeader.description.list-settings`,
-              defaultMessage: `Define the settings of the list view.`,
+              id: getTrad('components.SettingsViewWrapper.pluginHeader.description.list-settings'),
+              defaultMessage: 'Define the settings of the list view.',
             })}
             title={formatMessage(
               {
-                id: 'components.SettingsViewWrapper.pluginHeader.title',
+                id: getTrad('components.SettingsViewWrapper.pluginHeader.title'),
                 defaultMessage: 'Configure the view - {name}',
               },
               { name: upperFirst(modifiedData.info.label) }
@@ -298,7 +302,7 @@ const ListSettingsView = ({ layout, slug }) => {
           </ContentLayout>
           <ConfirmDialog
             bodyText={{
-              id: 'content-manager.popUpWarning.warning.updateAllSettings',
+              id: getTrad('popUpWarning.warning.updateAllSettings'),
               defaultMessage: 'This will modify all your settings',
             }}
             iconRightButton={<CheckIcon />}

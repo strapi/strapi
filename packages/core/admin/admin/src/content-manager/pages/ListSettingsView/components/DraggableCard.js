@@ -9,6 +9,7 @@ import { Stack } from '@strapi/parts/Stack';
 import EditIcon from '@strapi/icons/EditIcon';
 import CloseAlertIcon from '@strapi/icons/CloseAlertIcon';
 import Drag from '@strapi/icons/Drag';
+import { getTrad } from '../../../utils';
 
 const ActionButton = styled.button`
   display: flex;
@@ -75,7 +76,7 @@ const DraggableCard = ({ title, onRemoveField }) => {
   const editButtonRef = useRef();
   const cardTitle = title.length > 20 ? `${title.substring(0, 20)}...` : title;
 
-  const rowHandleClick = () => {
+  const handleClickEditRow = () => {
     if (editButtonRef.current) {
       editButtonRef.current.click();
     }
@@ -88,13 +89,13 @@ const DraggableCard = ({ title, onRemoveField }) => {
         background="neutral100"
         hasRadius
         justifyContent="space-between"
-        onClick={rowHandleClick}
+        onClick={handleClickEditRow}
       >
         <Stack horizontal size={3}>
           <DragButton
             aria-label={formatMessage(
               {
-                id: 'content-manager.components.DraggableCard.move.field',
+                id: getTrad('components.DraggableCard.move.field'),
                 defaultMessage: 'Move {item}',
               },
               { item: title }
@@ -114,7 +115,7 @@ const DraggableCard = ({ title, onRemoveField }) => {
             }}
             aria-label={formatMessage(
               {
-                id: 'content-manager.components.DraggableCard.edit.field',
+                id: getTrad('components.DraggableCard.edit.field'),
                 defaultMessage: 'Edit {item}',
               },
               { item: title }
@@ -128,7 +129,7 @@ const DraggableCard = ({ title, onRemoveField }) => {
             data-testid={`delete-${title}`}
             aria-label={formatMessage(
               {
-                id: 'content-manager.components.DraggableCard.delete.field',
+                id: getTrad('components.DraggableCard.delete.field'),
                 defaultMessage: 'Delete {item}',
               },
               { item: title }
@@ -143,12 +144,8 @@ const DraggableCard = ({ title, onRemoveField }) => {
   );
 };
 
-DraggableCard.defaultProps = {
-  onRemoveField: () => {},
-};
-
 DraggableCard.propTypes = {
-  onRemoveField: PropTypes.func,
+  onRemoveField: PropTypes.func.isRequired,
   title: PropTypes.string.isRequired,
 };
 

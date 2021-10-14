@@ -10,6 +10,7 @@ import { SimpleMenu, MenuItem } from '@strapi/parts/SimpleMenu';
 import { IconButton } from '@strapi/parts/IconButton';
 import AddIcon from '@strapi/icons/AddIcon';
 import DraggableCard from './DraggableCard';
+import { getTrad } from '../../../utils';
 
 const Flex = styled(Box)`
   flex: ${({ size }) => size};
@@ -32,7 +33,7 @@ const View = ({ listRemainingFields, displayedFields, handleAddField, handleRemo
       <Box paddingBottom={4}>
         <H3 as="h2">
           {formatMessage({
-            id: 'content-manager.containers.SettingPage.view',
+            id: getTrad('containers.SettingPage.view'),
             defaultMessage: 'View',
           })}
         </H3>
@@ -60,7 +61,7 @@ const View = ({ listRemainingFields, displayedFields, handleAddField, handleRemo
         <SelectContainer size="auto" paddingBottom={4}>
           <SimpleMenu
             label={formatMessage({
-              id: 'content-manager.components.FieldSelect.label',
+              id: getTrad('components.FieldSelect.label'),
               defaultMessage: 'Add a field',
             })}
             as={IconButton}
@@ -80,18 +81,11 @@ const View = ({ listRemainingFields, displayedFields, handleAddField, handleRemo
   );
 };
 
-View.defaultProps = {
-  displayedFields: [],
-  handleAddField: () => {},
-  handleRemoveField: () => {},
-  listRemainingFields: [],
-};
-
 View.propTypes = {
-  displayedFields: PropTypes.array,
-  handleAddField: PropTypes.func,
-  handleRemoveField: PropTypes.func,
-  listRemainingFields: PropTypes.array,
+  displayedFields: PropTypes.array.isRequired,
+  handleAddField: PropTypes.func.isRequired,
+  handleRemoveField: PropTypes.func.isRequired,
+  listRemainingFields: PropTypes.array.isRequired,
 };
 
 export default View;

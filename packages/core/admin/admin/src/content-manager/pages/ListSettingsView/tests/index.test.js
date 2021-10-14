@@ -54,7 +54,14 @@ const layout = {
     list: ['id', 'address'],
   },
   options: {},
-  settings: {},
+  settings: {
+    bulkable: false,
+    defaultSortBy: 'id',
+    defaultSortOrder: 'ASC',
+    filterable: true,
+    pageSize: 10,
+    searchable: true,
+  },
   uid: 'api::restaurant.restaurant',
 };
 
@@ -79,7 +86,6 @@ const makeApp = history => (
 describe('ADMIN | CM | LV | Configure the view', () => {
   it('renders and matches the snapshot', async () => {
     const history = createMemoryHistory();
-    history.push('/content-manager');
 
     const { container } = render(makeApp(history));
     await waitFor(() =>
@@ -103,7 +109,7 @@ describe('ADMIN | CM | LV | Configure the view', () => {
     expect(history.location.search).toEqual('?plugins[i18n][locale]=fr');
     fireEvent.click(container.querySelector('#go-back'));
     expect(history.location.search).toEqual(
-      '?page=1&sort=undefined:undefined&plugins[i18n][locale]=fr'
+      '?page=1&pageSize=10&sort=id:ASC&plugins[i18n][locale]=fr'
     );
   });
 
@@ -128,7 +134,6 @@ describe('ADMIN | CM | LV | Configure the view', () => {
 
   it('should delete field', async () => {
     const history = createMemoryHistory();
-    history.push('/content-manager');
 
     const { queryByTestId } = render(makeApp(history));
     await waitFor(() =>
