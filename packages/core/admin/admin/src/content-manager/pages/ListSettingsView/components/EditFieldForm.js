@@ -106,6 +106,7 @@ const EditFieldForm = ({
         <Grid gap={4}>
           <GridItem s={12} col={6}>
             <TextInput
+              id="label-input"
               label={formatMessage({
                 id: getTrad('form.Input.label'),
                 defaultMessage: 'Label',
@@ -122,6 +123,7 @@ const EditFieldForm = ({
           {shouldDisplaySortToggle && (
             <GridItem s={12} col={6}>
               <ToggleInput
+                data-testid="Enable sort on this field"
                 checked={fieldForm.sortable}
                 label={formatMessage({
                   id: getTrad('form.Input.sort.field'),

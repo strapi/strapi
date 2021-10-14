@@ -1594,7 +1594,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                         <span
                           class="c80 c81 c82"
                         >
-                          ID
+                          hey
                         </span>
                       </div>
                       <div
@@ -3601,7 +3601,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                           <span
                             class="c80 c81 c82"
                           >
-                            ID
+                            hey
                           </span>
                         </div>
                         <div

@@ -5,8 +5,8 @@ describe('CONTENT MANAGER | CONTAINERS | ListSettingsView | reducer', () => {
 
   beforeEach(() => {
     state = {
-      labelForm: {},
-      labelToEdit: '',
+      fieldForm: {},
+      fieldToEdit: '',
       initialData: {},
       modifiedData: {},
       status: 'resolved',
@@ -72,19 +72,19 @@ describe('CONTENT MANAGER | CONTAINERS | ListSettingsView | reducer', () => {
     });
   });
 
-  // describe('ON_CHANGE_LABEL_METAS', () => {
-  //   it('should set the attribute metas label in the label form', () => {
-  //     const expected = {
-  //       ...state,
-  //       labelForm: {
-  //         label: 'Cover',
-  //       },
-  //     };
-  //     const action = { type: 'ON_CHANGE_LABEL_METAS', name: 'label', value: 'Cover' };
+  describe('ON_CHANGE_FIELD_METAS', () => {
+    it('should set the attribute metas label in the label form', () => {
+      const expected = {
+        ...state,
+        fieldForm: {
+          label: 'Cover',
+        },
+      };
+      const action = { type: 'ON_CHANGE_FIELD_METAS', name: 'label', value: 'Cover' };
 
-  //     expect(reducer(state, action)).toEqual(expected);
-  //   });
-  // });
+      expect(reducer(state, action)).toEqual(expected);
+    });
+  });
 
   // describe('ON_RESET', () => {
   //   it('should set the current modified data to the initial state', () => {
@@ -130,124 +130,124 @@ describe('CONTENT MANAGER | CONTAINERS | ListSettingsView | reducer', () => {
     });
   });
 
-  // describe('SET_LABEL_TO_EDIT', () => {
-  //   it('should set the label form data of the field to edit', () => {
-  //     state.modifiedData = {
-  //       metadatas: {
-  //         cover: {
-  //           list: {
-  //             label: 'Cover',
-  //             sortable: false,
-  //           },
-  //         },
-  //       },
-  //     };
-  //     const expected = {
-  //       ...state,
-  //       labelToEdit: 'cover',
-  //       labelForm: {
-  //         label: 'Cover',
-  //         sortable: false,
-  //       },
-  //       modifiedData: {
-  //         metadatas: {
-  //           cover: {
-  //             list: {
-  //               label: 'Cover',
-  //               sortable: false,
-  //             },
-  //           },
-  //         },
-  //       },
-  //     };
-  //     const action = { type: 'SET_LABEL_TO_EDIT', labelToEdit: 'cover' };
+  describe('SET_FIELD_TO_EDIT', () => {
+    it('should set the label form data of the field to edit', () => {
+      state.modifiedData = {
+        metadatas: {
+          cover: {
+            list: {
+              label: 'Cover',
+              sortable: false,
+            },
+          },
+        },
+      };
+      const expected = {
+        ...state,
+        fieldToEdit: 'cover',
+        fieldForm: {
+          label: 'Cover',
+          sortable: false,
+        },
+        modifiedData: {
+          metadatas: {
+            cover: {
+              list: {
+                label: 'Cover',
+                sortable: false,
+              },
+            },
+          },
+        },
+      };
+      const action = { type: 'SET_FIELD_TO_EDIT', fieldToEdit: 'cover' };
 
-  //     expect(reducer(state, action)).toEqual(expected);
-  //   });
-  // });
+      expect(reducer(state, action)).toEqual(expected);
+    });
+  });
 
-  // describe('UNSET_LABEL_TO_EDIT', () => {
-  //   it('should unset the label to edit and clean the label form', () => {
-  //     state = {
-  //       ...state,
-  //       labelToEdit: 'cover',
-  //       labelForm: {
-  //         label: 'Cover',
-  //         sortable: false,
-  //       },
-  //       modifiedData: {
-  //         metadatas: {
-  //           cover: {
-  //             list: {
-  //               label: 'Cover',
-  //               sortable: false,
-  //             },
-  //           },
-  //         },
-  //       },
-  //     };
-  //     const expected = {
-  //       ...state,
-  //       labelToEdit: '',
-  //       labelForm: {},
-  //       modifiedData: {
-  //         metadatas: {
-  //           cover: {
-  //             list: {
-  //               label: 'Cover',
-  //               sortable: false,
-  //             },
-  //           },
-  //         },
-  //       },
-  //     };
-  //     const action = { type: 'UNSET_LABEL_TO_EDIT', labelToEdit: 'cover' };
+  describe('UNSET_FIELD_TO_EDIT', () => {
+    it('should unset the label to edit and clean the label form', () => {
+      state = {
+        ...state,
+        fieldToEdit: 'cover',
+        fieldForm: {
+          label: 'Cover',
+          sortable: false,
+        },
+        modifiedData: {
+          metadatas: {
+            cover: {
+              list: {
+                label: 'Cover',
+                sortable: false,
+              },
+            },
+          },
+        },
+      };
+      const expected = {
+        ...state,
+        fieldToEdit: '',
+        fieldForm: {},
+        modifiedData: {
+          metadatas: {
+            cover: {
+              list: {
+                label: 'Cover',
+                sortable: false,
+              },
+            },
+          },
+        },
+      };
+      const action = { type: 'UNSET_FIELD_TO_EDIT', fieldToEdit: 'cover' };
 
-  //     expect(reducer(state, action)).toEqual(expected);
-  //   });
-  // });
+      expect(reducer(state, action)).toEqual(expected);
+    });
+  });
 
-  // describe('SUBMIT_LABEL_FORM', () => {
-  //   it('should submit the label and the sortable value of the field to edit', () => {
-  //     state = {
-  //       ...state,
-  //       labelToEdit: 'cover',
-  //       labelForm: {
-  //         label: 'New Cover',
-  //         sortable: true,
-  //       },
-  //       modifiedData: {
-  //         metadatas: {
-  //           cover: {
-  //             list: {
-  //               label: 'Cover',
-  //               sortable: false,
-  //             },
-  //           },
-  //         },
-  //       },
-  //     };
-  //     const expected = {
-  //       ...state,
-  //       labelToEdit: 'cover',
-  //       labelForm: {
-  //         label: 'New Cover',
-  //         sortable: true,
-  //       },
-  //       modifiedData: {
-  //         metadatas: {
-  //           cover: {
-  //             list: {
-  //               label: 'New Cover',
-  //               sortable: true,
-  //             },
-  //           },
-  //         },
-  //       },
-  //     };
-  //     const action = { type: 'SUBMIT_LABEL_FORM', labelToEdit: 'cover' };
+  describe('SUBMIT_FIELD_FORM', () => {
+    it('should submit the label and the sortable value of the field to edit', () => {
+      state = {
+        ...state,
+        fieldToEdit: 'cover',
+        fieldForm: {
+          label: 'New Cover',
+          sortable: true,
+        },
+        modifiedData: {
+          metadatas: {
+            cover: {
+              list: {
+                label: 'Cover',
+                sortable: false,
+              },
+            },
+          },
+        },
+      };
+      const expected = {
+        ...state,
+        fieldToEdit: 'cover',
+        fieldForm: {
+          label: 'New Cover',
+          sortable: true,
+        },
+        modifiedData: {
+          metadatas: {
+            cover: {
+              list: {
+                label: 'New Cover',
+                sortable: true,
+              },
+            },
+          },
+        },
+      };
+      const action = { type: 'SUBMIT_FIELD_FORM', fieldToEdit: 'cover' };
 
-  //     expect(reducer(state, action)).toEqual(expected);
-  //   });
-  // });
+      expect(reducer(state, action)).toEqual(expected);
+    });
+  });
 });
