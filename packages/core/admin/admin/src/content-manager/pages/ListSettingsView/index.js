@@ -34,43 +34,17 @@ const ListSettingsView = ({ layout, slug }) => {
   const pluginsQueryParams = usePluginsQueryParams();
   const toggleNotification = useNotification();
   const { refetchData } = useContext(ModelsContext);
+
   const [showWarningSubmit, setWarningSubmit] = useState(false);
   const toggleWarningSubmit = () => setWarningSubmit(prevState => !prevState);
+  const [isModalFormOpen, setIsModalFormOpen] = useState(false);
+  const toggleModalForm = () => setIsModalFormOpen(prevState => !prevState);
   const [reducerState, dispatch] = useReducer(reducer, initialState, () =>
     init(initialState, layout)
   );
-  // const [isOpen, setIsOpen] = useState(false);
-  const [isModalFormOpen, setIsModalFormOpen] = useState(false);
-  // const [isDraggingSibling, setIsDraggingSibling] = useState(false);
-  const toggleModalForm = () => setIsModalFormOpen(prevState => !prevState);
-
   const { fieldToEdit, fieldForm, initialData, modifiedData } = reducerState;
-
-  // const attributes = useMemo(() => {
-  //   return get(modifiedData, ['attributes'], {});
-  // }, [modifiedData]);
-
   const { attributes } = layout;
-
   const displayedFields = modifiedData.layouts.list;
-
-  const sortOptions = Object.entries(attributes).reduce((acc, cur) => {
-    const [name, { type }] = cur;
-
-    if (!EXCLUDED_SORT_OPTIONS.includes(type)) {
-      acc.push(name);
-    }
-
-    return acc;
-  }, []);
-
-  const handleChange = ({ target: { name, value } }) => {
-    dispatch({
-      type: 'ON_CHANGE',
-      keys: name,
-      value: name === 'settings.pageSize' ? parseInt(value, 10) : value,
-    });
-  };
 
   const goBackUrl = () => {
     const {
@@ -89,6 +63,14 @@ const ListSettingsView = ({ layout, slug }) => {
     )}${pluginsQueryParams ? `&${pluginsQueryParams}` : ''}`;
 
     return `/content-manager/${kind}/${uid}?${goBackSearch}`;
+  };
+
+  const handleChange = ({ target: { name, value } }) => {
+    dispatch({
+      type: 'ON_CHANGE',
+      keys: name,
+      value: name === 'settings.pageSize' ? parseInt(value, 10) : value,
+    });
   };
 
   const handleConfirm = async () => {
@@ -169,6 +151,7 @@ const ListSettingsView = ({ layout, slug }) => {
       value,
     });
   };
+
   const listRemainingFields = Object.entries(attributes)
     .reduce((acc, cur) => {
       const [attrName, fieldSchema] = cur;
@@ -183,6 +166,16 @@ const ListSettingsView = ({ layout, slug }) => {
       return acc;
     }, [])
     .sort();
+
+  const sortOptions = Object.entries(attributes).reduce((acc, cur) => {
+    const [name, { type }] = cur;
+
+    if (!EXCLUDED_SORT_OPTIONS.includes(type)) {
+      acc.push(name);
+    }
+
+    return acc;
+  }, []);
 
   // const handleClickEditLabel = labelToEdit => {
   //   dispatch({
@@ -300,9 +293,9 @@ const ListSettingsView = ({ layout, slug }) => {
               <View
                 listRemainingFields={listRemainingFields}
                 displayedFields={displayedFields}
-                handleAddField={handleAddField}
-                handleRemoveField={handleRemoveField}
-                handleClickEditField={handleClickEditField}
+                onAddField={handleAddField}
+                onRemoveField={handleRemoveField}
+                onClickEditField={handleClickEditField}
                 metadatas={modifiedData.metadatas}
               />
             </Box>
@@ -324,10 +317,10 @@ const ListSettingsView = ({ layout, slug }) => {
               attributes={attributes}
               fieldForm={fieldForm}
               fieldToEdit={fieldToEdit}
-              handleChangeEditLabel={handleChangeEditLabel}
-              handleCloseModal={handleCloseModal}
-              type={get(attributes, [fieldToEdit, 'type'], 'text')}
+              onChangeEditLabel={handleChangeEditLabel}
+              onCloseModal={handleCloseModal}
               onSubmit={handleSubmitFieldEdit}
+              type={get(attributes, [fieldToEdit, 'type'], 'text')}
             />
           )}
         </form>

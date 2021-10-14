@@ -44,11 +44,31 @@ const layout = {
     label: 'michka',
   },
   metadatas: {
-    address: {},
-    averagePrice: {},
-    cover: {},
-    id: {},
-    since: {},
+    address: {
+      list: {
+        label: 'address',
+      },
+    },
+    averagePrice: {
+      list: {
+        label: 'AveragePrice',
+      },
+    },
+    cover: {
+      list: {
+        label: 'michka',
+      },
+    },
+    id: {
+      list: {
+        label: 'ID',
+      },
+    },
+    since: {
+      list: {
+        label: 'since',
+      },
+    },
   },
   layouts: {
     list: ['id', 'address'],

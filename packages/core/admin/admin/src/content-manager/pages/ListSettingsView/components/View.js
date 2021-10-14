@@ -1,7 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
 import { PropTypes } from 'prop-types';
-import get from 'lodash/get';
 import { useIntl } from 'react-intl';
 import { Box } from '@strapi/parts/Box';
 import { Row } from '@strapi/parts/Row';
@@ -29,9 +28,9 @@ const SelectContainer = styled(Flex)`
 const View = ({
   listRemainingFields,
   displayedFields,
-  handleAddField,
-  handleRemoveField,
-  handleClickEditField,
+  onAddField,
+  onRemoveField,
+  onClickEditField,
   metadatas,
 }) => {
   const { formatMessage } = useIntl();
@@ -59,11 +58,11 @@ const View = ({
           <Stack horizontal size={3}>
             {displayedFields.map((field, index) => (
               <DraggableCard
-                onRemoveField={e => handleRemoveField(e, index)}
-                onClickEditField={handleClickEditField}
+                onRemoveField={e => onRemoveField(e, index)}
+                onClickEditField={onClickEditField}
                 key={field}
                 name={field}
-                labelField={get(metadatas, [field, 'list', 'label'])}
+                labelField={metadatas[field].list.label || ''}
               />
             ))}
           </Stack>
@@ -80,7 +79,7 @@ const View = ({
             data-testid="add-field"
           >
             {listRemainingFields.map(field => (
-              <MenuItem key={field} onClick={() => handleAddField(field)}>
+              <MenuItem key={field} onClick={() => onAddField(field)}>
                 {field}
               </MenuItem>
             ))}
@@ -93,9 +92,9 @@ const View = ({
 
 View.propTypes = {
   displayedFields: PropTypes.array.isRequired,
-  handleAddField: PropTypes.func.isRequired,
-  handleClickEditField: PropTypes.func.isRequired,
-  handleRemoveField: PropTypes.func.isRequired,
+  onAddField: PropTypes.func.isRequired,
+  onClickEditField: PropTypes.func.isRequired,
+  onRemoveField: PropTypes.func.isRequired,
   listRemainingFields: PropTypes.array.isRequired,
   metadatas: PropTypes.objectOf(
     PropTypes.shape({
