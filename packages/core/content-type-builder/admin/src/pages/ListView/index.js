@@ -215,7 +215,6 @@ const ListView = () => {
         forTarget: firstMainDataPath,
         targetUid,
         header_label_1: label,
-        headerId: getTrad('modalForm.header-edit'),
       }),
     });
   };

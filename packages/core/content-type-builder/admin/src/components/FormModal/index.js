@@ -128,7 +128,6 @@ const FormModal = () => {
       const kind = query.get('kind') || get(allDataSchema, ['contentType', 'schema', 'kind'], null);
       const targetUid = query.get('targetUid');
       const settingType = query.get('settingType');
-      const headerId = query.get('headerId');
       const header_label_1 = query.get('header_label_1');
       const header_info_category_1 = query.get('header_info_category_1');
       const header_info_name_1 = query.get('header_info_name_1');
@@ -177,7 +176,6 @@ const FormModal = () => {
         header_label_5,
         header_info_name_5,
         header_info_category_5,
-        headerId,
       });
 
       const collectionTypesForRelation = sortedContentTypesList.filter(
@@ -1094,7 +1092,7 @@ const FormModal = () => {
     <>
       <ModalLayout onClose={handleClosed} labelledBy="title">
         <FormModalHeader
-          headerId={state.headerId}
+          actionType={state.actionType}
           headers={headers}
           contentTypeKind={state.kind}
           modalType={state.modalType}

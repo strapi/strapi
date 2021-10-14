@@ -17,6 +17,7 @@ import { Stack } from '@strapi/parts/Stack';
 import { ButtonText } from '@strapi/parts/Text';
 import styled from 'styled-components';
 import useDataManager from '../../hooks/useDataManager';
+import getTrad from '../../utils/getTrad';
 import AttributeIcon from '../AttributeIcon';
 
 const IconBox = styled(Box)`
@@ -26,10 +27,10 @@ const IconBox = styled(Box)`
 `;
 
 const FormModalHeader = ({
+  actionType,
   attributeType,
   contentTypeKind,
   forTarget,
-  headerId,
   headers,
   modalType,
   targetUid,
@@ -69,9 +70,19 @@ const FormModalHeader = ({
     icon = attributeType;
   }
 
-  // TODO refacto
-  // Editing a content type or component
-  if (headerId) {
+  const isCreatingMainSchema = ['component', 'contentType'].includes(modalType);
+
+  if (isCreatingMainSchema) {
+    let headerId = getTrad(`modalForm.component.header-${actionType}`);
+
+    if (modalType === 'contentType') {
+      headerId = getTrad(`modalForm.${contentTypeKind}.header-create`);
+    }
+
+    if (actionType === 'edit') {
+      headerId = getTrad(`modalForm.header-edit`);
+    }
+
     return (
       <ModalHeader>
         <Row>
@@ -123,17 +134,17 @@ const FormModalHeader = ({
 };
 
 FormModalHeader.defaultProps = {
+  actionType: null,
   attributeType: null,
   contentTypeKind: null,
-  headerId: null,
   targetUid: null,
 };
 
 FormModalHeader.propTypes = {
+  actionType: PropTypes.string,
   attributeType: PropTypes.string,
   contentTypeKind: PropTypes.string,
   forTarget: PropTypes.oneOf(['contentType', 'component', 'components']).isRequired,
-  headerId: PropTypes.string,
   headers: PropTypes.arrayOf(
     PropTypes.shape({
       icon: PropTypes.shape({ name: PropTypes.string, isCustom: PropTypes.bool }),

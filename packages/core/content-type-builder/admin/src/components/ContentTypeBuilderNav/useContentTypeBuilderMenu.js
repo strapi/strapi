@@ -81,7 +81,6 @@ const useContentTypeBuilderMenu = () => {
         actionType: 'create',
         settingType: 'base',
         forTarget: modalType,
-        headerId: getTrad(`modalForm.${type}.header-create`),
         header_label_1: 'null',
       });
       push({

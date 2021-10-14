@@ -10,7 +10,6 @@ const INITIAL_STATE_DATA = {
   settingType: null,
   step: null,
   targetUid: null,
-  headerId: null,
   header_label_1: null,
   header_info_category_1: null,
   header_info_name_1: null,
