@@ -1,16 +1,19 @@
 import styled from 'styled-components';
 import { Stack } from '@strapi/parts/Stack';
 import { Text } from '@strapi/parts/Text';
+import { inputFocusStyle } from '@strapi/parts/themes';
 
 const Wrapper = styled(Stack)`
   position: relative;
   align-items: stretch;
 
   label {
+    border-radius: 2px;
     max-width: 50%;
     cursor: pointer;
     user-select: none;
     flex: 1;
+    ${inputFocusStyle()}
   }
 
   input {
