@@ -54,77 +54,16 @@ const ApiTokenListView = () => {
     }
   );
 
-  const isLoading = () => {
-    if (!canRead) {
-      return false;
-    }
+  const isLoading =
+    canRead &&
+    ((status !== 'success' && status !== 'error') || (status === 'success' && isFetching));
 
-    if (status !== 'success' && status !== 'error') {
-      return true;
-    }
-
-    if (status === 'success' && isFetching) {
-      return true;
-    }
-
-    return false;
-  };
-
-  const contentBasedOnPermissions = () => {
-    if (!canRead) {
-      return <NoPermissions />;
-    }
-
-    if (apiTokens) {
-      return (
-        <DynamicTable
-          headers={tableHeaders}
-          contentType="api-tokens"
-          rows={apiTokens}
-          withBulkActions={canDelete || canUpdate}
-          isLoading={isLoading()}
-        >
-          <TableRows
-            canDelete={canDelete}
-            canUpdate={canUpdate}
-            rows={apiTokens}
-            withBulkActions={canDelete || canUpdate}
-          />
-        </DynamicTable>
-      );
-    }
-
-    if (canCreate) {
-      return (
-        <NoContent
-          content={{
-            id: 'Settings.apiTokens.addFirstToken',
-            defaultMessage: 'Add your first API Token',
-          }}
-          action={
-            <Button variant="secondary" startIcon={<AddIcon />}>
-              {formatMessage({
-                id: 'Settings.apiTokens.addNewToken',
-                defaultMessage: 'Add new API Token',
-              })}
-            </Button>
-          }
-        />
-      );
-    }
-
-    return (
-      <NoContent
-        content={{
-          id: 'Settings.apiTokens.emptyStateLayout',
-          defaultMessage: 'There is no API tokens',
-        }}
-      />
-    );
-  };
+  const shouldDisplayDynamicTable = canRead && apiTokens;
+  const shouldDisplayNoContent = canRead && !apiTokens && !canCreate;
+  const shouldDisplayNoContentWithCreationButton = canRead && !apiTokens && canCreate;
 
   return (
-    <Main aria-busy={isLoading()}>
+    <Main aria-busy={isLoading}>
       <SettingsPageTitle name="API Tokens" />
       <HeaderLayout
         title={formatMessage({ id: 'Settings.apiTokens.title', defaultMessage: 'API Tokens' })}
@@ -145,7 +84,49 @@ const ApiTokenListView = () => {
           )
         }
       />
-      <ContentLayout>{contentBasedOnPermissions()}</ContentLayout>
+      <ContentLayout>
+        {!canRead && <NoPermissions />}
+        {shouldDisplayDynamicTable && (
+          <DynamicTable
+            headers={tableHeaders}
+            contentType="api-tokens"
+            rows={apiTokens}
+            withBulkActions={canDelete || canUpdate}
+            isLoading={isLoading}
+          >
+            <TableRows
+              canDelete={canDelete}
+              canUpdate={canUpdate}
+              rows={apiTokens}
+              withBulkActions={canDelete || canUpdate}
+            />
+          </DynamicTable>
+        )}
+        {shouldDisplayNoContentWithCreationButton && (
+          <NoContent
+            content={{
+              id: 'Settings.apiTokens.addFirstToken',
+              defaultMessage: 'Add your first API Token',
+            }}
+            action={
+              <Button variant="secondary" startIcon={<AddIcon />}>
+                {formatMessage({
+                  id: 'Settings.apiTokens.addNewToken',
+                  defaultMessage: 'Add new API Token',
+                })}
+              </Button>
+            }
+          />
+        )}
+        {shouldDisplayNoContent && (
+          <NoContent
+            content={{
+              id: 'Settings.apiTokens.emptyStateLayout',
+              defaultMessage: 'There is no API tokens',
+            }}
+          />
+        )}
+      </ContentLayout>
     </Main>
   );
 };
