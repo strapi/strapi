@@ -16,6 +16,7 @@ import { Row } from '@strapi/parts/Row';
 import { Stack } from '@strapi/parts/Stack';
 import { ButtonText } from '@strapi/parts/Text';
 import styled from 'styled-components';
+import useDataManager from '../../hooks/useDataManager';
 import AttributeIcon from '../AttributeIcon';
 
 const IconBox = styled(Box)`
@@ -24,8 +25,49 @@ const IconBox = styled(Box)`
   }
 `;
 
-const FormModalHeader = ({ headerId, headers }) => {
+const FormModalHeader = ({
+  attributeType,
+  contentTypeKind,
+  forTarget,
+  headerId,
+  headers,
+  modalType,
+  targetUid,
+}) => {
   const { formatMessage } = useIntl();
+  const { modifiedData } = useDataManager();
+
+  let icon;
+  let isFontAwesomeIcon = false;
+
+  if (modalType === 'chooseAttribute') {
+    const schema = modifiedData[forTarget][targetUid] || modifiedData[forTarget];
+
+    if (forTarget === 'components') {
+      icon = schema.schema.icon;
+      isFontAwesomeIcon = true;
+    } else if (forTarget === 'component') {
+      icon = 'component';
+    } else {
+      icon = schema.schema.kind;
+    }
+  }
+
+  if (modalType === 'contentType') {
+    icon = contentTypeKind;
+  }
+
+  if (['component', 'editCategory'].includes(modalType)) {
+    icon = 'component';
+  }
+
+  if (modalType === 'addComponentToDynamicZone') {
+    icon = 'dynamiczone';
+  }
+
+  if (modalType === 'attribute') {
+    icon = attributeType;
+  }
 
   // TODO refacto
   // Editing a content type or component
@@ -34,7 +76,7 @@ const FormModalHeader = ({ headerId, headers }) => {
       <ModalHeader>
         <Row>
           <Box>
-            <AttributeIcon type={headers[0].icon.name} />
+            <AttributeIcon type={icon} />
           </Box>
           <Box paddingLeft={3}>
             <ButtonText textColor="neutral800" as="h2" id="title">
@@ -47,15 +89,14 @@ const FormModalHeader = ({ headerId, headers }) => {
   }
 
   const breadcrumbsLabel = headers.map(({ label }) => label).join(',');
-  const { name, isCustom } = headers[0].icon;
 
   return (
     <ModalHeader>
       <Stack horizontal size={3}>
-        {!isCustom && <AttributeIcon type={name} />}
-        {isCustom && (
+        {!isFontAwesomeIcon && <AttributeIcon type={icon} />}
+        {isFontAwesomeIcon && (
           <IconBox>
-            <FontAwesomeIcon icon={name} />
+            <FontAwesomeIcon icon={icon} />
           </IconBox>
         )}
 
@@ -82,10 +123,16 @@ const FormModalHeader = ({ headerId, headers }) => {
 };
 
 FormModalHeader.defaultProps = {
+  attributeType: null,
+  contentTypeKind: null,
   headerId: null,
+  targetUid: null,
 };
 
 FormModalHeader.propTypes = {
+  attributeType: PropTypes.string,
+  contentTypeKind: PropTypes.string,
+  forTarget: PropTypes.oneOf(['contentType', 'component', 'components']).isRequired,
   headerId: PropTypes.string,
   headers: PropTypes.arrayOf(
     PropTypes.shape({
@@ -93,6 +140,8 @@ FormModalHeader.propTypes = {
       label: PropTypes.string.isRequired,
     })
   ).isRequired,
+  modalType: PropTypes.string.isRequired,
+  targetUid: PropTypes.string,
 };
 
 export default FormModalHeader;

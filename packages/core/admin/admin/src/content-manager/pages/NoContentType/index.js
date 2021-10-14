@@ -27,7 +27,7 @@ const NoContentType = () => {
             <LinkButton
               variant="secondary"
               startIcon={<AddIcon />}
-              to="/plugins/content-type-builder/content-types/plugin::users-permissions.user?modalType=contentType&kind=collectionType&actionType=create&settingType=base&forTarget=contentType&headerId=content-type-builder.modalForm.contentType.header-create&header_icon_isCustom_1=false&header_icon_name_1=contentType&header_label_1=null"
+              to="/plugins/content-type-builder/content-types/create-content-type"
             >
               {formatMessage({
                 id: 'app.components.HomePage.create',

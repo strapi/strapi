@@ -31,18 +31,12 @@ const AttributeOption = ({ type }) => {
     const header_info_category_1 = query.header_info_category_1 || null;
     const header_info_name_1 = query.header_info_name_1 || null;
     const header_label_2 = query.header_label_2 || null;
-    const header_icon_name_2 = query.header_icon_name_2 || null;
-    const header_icon_isCustom_2 = query.header_icon_isCustom_2 || null;
     const header_info_category_2 = query.header_info_category_2 || null;
     const header_info_name_2 = query.header_info_name_2 || null;
     const header_label_3 = query.header_label_3 || null;
-    const header_icon_name_3 = query.header_icon_name_3 || null;
-    const header_icon_isCustom_3 = query.header_icon_isCustom_3 || null;
     const header_info_category_3 = query.header_info_category_3 || null;
     const header_info_name_3 = query.header_info_name_3 || null;
     const header_label_4 = query.header_label_4 || null;
-    const header_icon_name_4 = query.header_icon_name_4 || null;
-    const header_icon_isCustom_4 = query.header_icon_isCustom_4 || null;
     const header_info_category_4 = query.header_info_category_4 || null;
     const header_info_name_4 = query.header_info_name_4 || null;
 
@@ -59,22 +53,14 @@ const AttributeOption = ({ type }) => {
       header_info_name_1,
       header_info_category_1,
       header_label_2,
-      header_icon_name_2,
-      header_icon_isCustom_2,
       header_info_name_2,
       header_info_category_2,
       header_label_3,
-      header_icon_name_3,
-      header_icon_isCustom_3,
       header_info_name_3,
       header_info_category_3,
       header_label_4,
-      header_icon_name_4,
-      header_icon_isCustom_4,
       header_info_name_4,
       header_info_category_4,
-      header_icon_isCustom_1: false,
-      header_icon_name_1: type,
     });
 
     if (forTarget === 'contentType') {

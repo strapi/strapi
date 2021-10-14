@@ -396,7 +396,7 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
             <a
               aria-disabled="false"
               class="c14 c15"
-              href="/plugins/content-type-builder/content-types/plugin::users-permissions.user?modalType=contentType&kind=collectionType&actionType=create&settingType=base&forTarget=contentType&headerId=content-type-builder.modalForm.contentType.header-create&header_icon_isCustom_1=false&header_icon_name_1=contentType&header_label_1=null"
+              href="/plugins/content-type-builder/content-types/create-content-type"
               variant="secondary"
             >
               <div
