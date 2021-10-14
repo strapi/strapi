@@ -122,7 +122,7 @@ const ApiTokenListView = () => {
           <NoContent
             content={{
               id: 'Settings.apiTokens.emptyStateLayout',
-              defaultMessage: 'There is no API tokens',
+              defaultMessage: 'You don’t have any content yet...',
             }}
           />
         )}

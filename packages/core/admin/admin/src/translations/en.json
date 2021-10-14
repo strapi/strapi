@@ -85,7 +85,7 @@
   "Settings.apiTokens.create": "Add Entry",
   "Settings.apiTokens.title": "API Tokens",
   "Settings.apiTokens.description": "List of generated tokens to consume the API",
-  "Settings.apiTokens.emptyStateLayout": "There is no API tokens",
+  "Settings.apiTokens.emptyStateLayout": "You don’t have any content yet...",
   "Settings.apiTokens.addFirstToken": "Add your first API Token",
   "Settings.apiTokens.addNewToken": "Add new API Token",
   "Settings.apiTokens.types.read-only": "Read-only",
