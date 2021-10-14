@@ -52,7 +52,7 @@ const ListSettingsView = ({ layout, slug }) => {
 
   const { attributes } = layout;
 
-  const displayedFields = get(modifiedData, ['layouts', 'list'], []);
+  const displayedFields = modifiedData.layouts.list;
 
   const sortOptions = Object.entries(attributes).reduce((acc, cur) => {
     const [name, { type }] = cur;
@@ -93,7 +93,7 @@ const ListSettingsView = ({ layout, slug }) => {
 
   const handleConfirm = async () => {
     const body = pick(modifiedData, ['layouts', 'settings', 'metadatas']);
-    submitMutation.mutateAsync(body);
+    submitMutation.mutate(body);
   };
 
   const handleAddField = item => {
@@ -148,18 +148,8 @@ const ListSettingsView = ({ layout, slug }) => {
     });
   };
 
-  const metadatas = get(modifiedData, ['metadatas'], {});
-  const listRemainingFields = Object.keys(metadatas)
-    .filter(key => {
-      return checkIfAttributeIsDisplayable(get(attributes, key, {}));
-    })
-    .filter(field => {
-      return !displayedFields.includes(field);
-    })
-    .sort();
-
   const submitMutation = useMutation(body => putCMSettingsLV(body, slug), {
-    onSuccess: async () => {
+    onSuccess: () => {
       trackUsage('didEditListSettings');
       refetchData();
     },
@@ -179,6 +169,34 @@ const ListSettingsView = ({ layout, slug }) => {
       value,
     });
   };
+  const listRemainingFields = Object.entries(attributes)
+    .reduce((acc, cur) => {
+      const [attrName, fieldSchema] = cur;
+
+      const isDisplayable = checkIfAttributeIsDisplayable(fieldSchema);
+      const isAlreadyDisplayed = displayedFields.includes(attrName);
+
+      if (isDisplayable && !isAlreadyDisplayed) {
+        acc.push(attrName);
+      }
+
+      return acc;
+    }, [])
+    .sort();
+
+  // const handleClickEditLabel = labelToEdit => {
+  //   dispatch({
+  //     type: 'SET_LABEL_TO_EDIT',
+  //     labelToEdit,
+  //   });
+  //   toggleModalForm();
+  // };
+
+  // const handleClosed = () => {
+  //   dispatch({
+  //     type: 'UNSET_LABEL_TO_EDIT',
+  //   });
+  // };
 
   // const move = (originalIndex, atIndex) => {
   //   dispatch({
@@ -250,12 +268,12 @@ const ListSettingsView = ({ layout, slug }) => {
               </Button>
             }
             subtitle={formatMessage({
-              id: `components.SettingsViewWrapper.pluginHeader.description.list-settings`,
-              defaultMessage: `Define the settings of the list view.`,
+              id: getTrad('components.SettingsViewWrapper.pluginHeader.description.list-settings'),
+              defaultMessage: 'Define the settings of the list view.',
             })}
             title={formatMessage(
               {
-                id: 'components.SettingsViewWrapper.pluginHeader.title',
+                id: getTrad('components.SettingsViewWrapper.pluginHeader.title'),
                 defaultMessage: 'Configure the view - {name}',
               },
               { name: upperFirst(modifiedData.info.label) }
@@ -285,13 +303,13 @@ const ListSettingsView = ({ layout, slug }) => {
                 handleAddField={handleAddField}
                 handleRemoveField={handleRemoveField}
                 handleClickEditField={handleClickEditField}
-                metadatas={metadatas}
+                metadatas={modifiedData.metadatas}
               />
             </Box>
           </ContentLayout>
           <ConfirmDialog
             bodyText={{
-              id: 'content-manager.popUpWarning.warning.updateAllSettings',
+              id: getTrad('popUpWarning.warning.updateAllSettings'),
               defaultMessage: 'This will modify all your settings',
             }}
             iconRightButton={<CheckIcon />}

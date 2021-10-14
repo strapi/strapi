@@ -9,6 +9,7 @@ import { Stack } from '@strapi/parts/Stack';
 import EditIcon from '@strapi/icons/EditIcon';
 import CloseAlertIcon from '@strapi/icons/CloseAlertIcon';
 import Drag from '@strapi/icons/Drag';
+import { getTrad } from '../../../utils';
 
 const ActionButton = styled.button`
   display: flex;
@@ -76,7 +77,7 @@ const DraggableCard = ({ name, labelField, onRemoveField, onClickEditField }) =>
   const cardTitle = labelField || name;
   const cardEllipsisTitle = cardTitle.length > 20 ? `${cardTitle.substring(0, 20)}...` : cardTitle;
 
-  const rowHandleClick = () => {
+  const handleClickEditRow = () => {
     if (editButtonRef.current) {
       editButtonRef.current.click();
     }
@@ -89,13 +90,13 @@ const DraggableCard = ({ name, labelField, onRemoveField, onClickEditField }) =>
         background="neutral100"
         hasRadius
         justifyContent="space-between"
-        onClick={rowHandleClick}
+        onClick={handleClickEditRow}
       >
         <Stack horizontal size={3}>
           <DragButton
             aria-label={formatMessage(
               {
-                id: 'content-manager.components.DraggableCard.move.field',
+                id: getTrad('components.DraggableCard.move.field'),
                 defaultMessage: 'Move {item}',
               },
               { item: name }
@@ -115,7 +116,7 @@ const DraggableCard = ({ name, labelField, onRemoveField, onClickEditField }) =>
             }}
             aria-label={formatMessage(
               {
-                id: 'content-manager.components.DraggableCard.edit.field',
+                id: getTrad('components.DraggableCard.edit.field'),
                 defaultMessage: 'Edit {item}',
               },
               { item: name }
@@ -129,7 +130,7 @@ const DraggableCard = ({ name, labelField, onRemoveField, onClickEditField }) =>
             data-testid={`delete-${name}`}
             aria-label={formatMessage(
               {
-                id: 'content-manager.components.DraggableCard.delete.field',
+                id: getTrad('components.DraggableCard.delete.field'),
                 defaultMessage: 'Delete {item}',
               },
               { item: name }
@@ -146,14 +147,12 @@ const DraggableCard = ({ name, labelField, onRemoveField, onClickEditField }) =>
 
 DraggableCard.defaultProps = {
   labelField: undefined,
-  onClickEditField: () => {},
-  onRemoveField: () => {},
 };
 
 DraggableCard.propTypes = {
   labelField: PropTypes.string,
-  onClickEditField: PropTypes.func,
-  onRemoveField: PropTypes.func,
+  onClickEditField: PropTypes.func.isRequired,
+  onRemoveField: PropTypes.func.isRequired,
   name: PropTypes.string.isRequired,
 };
 
