@@ -117,7 +117,7 @@ const ApiTokenCreateView = () => {
               />
               <ContentLayout>
                 <Stack size={6}>
-                  {!!accessToken && (
+                  {Boolean(accessToken) && (
                     <ContentBox
                       endAction={
                         <CopyToClipboard
