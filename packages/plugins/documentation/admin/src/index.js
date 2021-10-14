@@ -25,7 +25,9 @@ export default {
       },
       permissions: pluginPermissions.main,
       Component: async () => {
-        const component = await import(/* webpackChunkName: "documentation-page" */ './pages/App');
+        const component = await import(
+          /* webpackChunkName: "documentation-page" */ './pages/PluginPage'
+        );
 
         return component;
       },
@@ -41,7 +43,24 @@ export default {
       pluginLogo,
     });
   },
-  bootstrap() {},
+  bootstrap(app) {
+    app.addSettingsLink('global', {
+      intlLabel: {
+        id: `${pluginId}.plugin.name`,
+        defaultMessage: 'Documentation',
+      },
+      id: 'documentation',
+      to: `/settings/${pluginId}`,
+      Component: async () => {
+        const component = await import(
+          /* webpackChunkName: "documentation-settings" */ './pages/SettingsPage'
+        );
+
+        return component;
+      },
+      permissions: pluginPermissions.main,
+    });
+  },
   async registerTrads({ locales }) {
     const importedTrads = await Promise.all(
       locales.map(locale => {
