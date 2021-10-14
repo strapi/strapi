@@ -7,10 +7,10 @@ const strapiVersion = packageJSON.version;
 const fetchStrapiLatestRelease = async () => {
   try {
     const {
-      data: { tag_name },
-    } = await axios.get('https://api.github.com/repos/strapi/strapi/releases/latest');
+      data: { strapiVersion },
+    } = await axios.get(`${strapi.backendURL}/admin/information`);
 
-    return tag_name;
+    return strapiVersion;
   } catch (err) {
     // Don't throw an error
     return strapiVersion;
