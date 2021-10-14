@@ -81,27 +81,6 @@ const ApiTokenListView = () => {
     }
   );
 
-  const deleteMutation = useMutation(
-    async id => {
-      await axiosInstance.delete(`/admin/api-tokens/${id}`);
-    },
-    {
-      onSuccess: async () => {
-        await queryClient.invalidateQueries(['api-tokens']);
-      },
-      onError: err => {
-        if (err?.response?.data?.data) {
-          toggleNotification({ type: 'warning', message: err.response.data.data });
-        } else {
-          toggleNotification({
-            type: 'warning',
-            message: { id: 'notification.error', defaultMessage: 'An error occured' },
-          });
-        }
-      },
-    }
-  );
-
   const shouldDisplayDynamicTable = canRead && apiTokens;
   const shouldDisplayNoContent = canRead && !apiTokens && !canCreate;
   const shouldDisplayNoContentWithCreationButton = canRead && !apiTokens && canCreate;
