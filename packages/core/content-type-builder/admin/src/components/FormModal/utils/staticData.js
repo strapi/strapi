@@ -1,5 +1,3 @@
-const NAVLINKS = [{ id: 'base' }, { id: 'advanced' }];
-
 const INITIAL_STATE_DATA = {
   actionType: null,
   attributeName: null,
@@ -40,4 +38,4 @@ const INITIAL_STATE_DATA = {
   header_info_name_5: null,
 };
 
-export { NAVLINKS, INITIAL_STATE_DATA };
+export { INITIAL_STATE_DATA };

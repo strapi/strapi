@@ -42,6 +42,7 @@
   "components.componentSelect.value-component": "{number} component selected (type to search for a component)",
   "components.componentSelect.value-components": "{number} components selected",
   "configurations": "configurations",
+  "contentType.UID.label": "UID",
   "contentType.UID.description": "The UID is used to generate the API routes and databases tables/collections",
   "contentType.collectionName.description": "Useful when the name of your Content Type and your table name differ",
   "contentType.collectionName.label": "Collection name",
@@ -188,5 +189,7 @@
   "table.content.create-first-content-type": "Create your first Collection-Type",
   "table.button.no-fields": "Add new field",
   "table.headers.name": "Name",
-  "table.headers.type": "Type"
+  "table.headers.type": "Type",
+  "ComponentIconPicker.search.placeholder": "Search for an icon",
+  "components.SelectComponents.displayed-value": "{number, plural, =0 {# components} one {# component} other {# components}} selected"
 }

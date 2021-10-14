@@ -2,7 +2,7 @@
  *  ! Have a discussion with maeva about l.170
  */
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useTracking } from '@strapi/helper-plugin';
 import AddIcon from '@strapi/icons/AddIcon';
 import BackIcon from '@strapi/icons/BackIcon';
@@ -19,7 +19,7 @@ import has from 'lodash/has';
 import isEqual from 'lodash/isEqual';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
-import { Prompt, useHistory, useLocation, useRouteMatch } from 'react-router-dom';
+import { Prompt, useHistory, useRouteMatch } from 'react-router-dom';
 import List from '../../components/List';
 import ListRow from '../../components/ListRow';
 import ListViewContext from '../../contexts/ListViewContext';
@@ -27,7 +27,7 @@ import useDataManager from '../../hooks/useDataManager';
 import getAttributeDisplayedType from '../../utils/getAttributeDisplayedType';
 import getTrad from '../../utils/getTrad';
 import makeSearch from '../../utils/makeSearch';
-// import LinkToCMSettingsView from './LinkToCMSettingsView';
+import LinkToCMSettingsView from './LinkToCMSettingsView';
 
 /* eslint-disable indent */
 
@@ -42,35 +42,35 @@ const ListView = () => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const { push } = useHistory();
-  const { search } = useLocation();
-  const [enablePrompt, togglePrompt] = useState(true);
+  // const { search } = useLocation();
+  // const [enablePrompt, togglePrompt] = useState(true);
   const match = useRouteMatch('/plugins/content-type-builder/:kind/:currentUID');
 
-  useEffect(() => {
-    if (search === '') {
-      togglePrompt(true);
-    }
-  }, [search]);
+  // useEffect(() => {
+  //   if (search === '') {
+  //     togglePrompt(true);
+  //   }
+  // }, [search]);
 
   // Disabling the prompt on the first render if one of the modal is open
-  useEffect(() => {
-    if (search !== '') {
-      togglePrompt(false);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // useEffect(() => {
+  //   if (search !== '') {
+  //     togglePrompt(false);
+  //   }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, []);
 
   const firstMainDataPath = isInContentTypeView ? 'contentType' : 'component';
   const mainDataTypeAttributesPath = [firstMainDataPath, 'schema', 'attributes'];
   const targetUid = get(modifiedData, [firstMainDataPath, 'uid']);
-  // const isTemporary = get(modifiedData, [firstMainDataPath, 'isTemporary'], false);
+  const isTemporary = get(modifiedData, [firstMainDataPath, 'isTemporary'], false);
   const contentTypeKind = get(modifiedData, [firstMainDataPath, 'schema', 'kind'], null);
 
   const attributes = get(modifiedData, mainDataTypeAttributesPath, []);
   // const attributesLength = attributes.length;
   const currentDataName = get(initialData, [firstMainDataPath, 'schema', 'name'], '');
   const isFromPlugin = has(initialData, [firstMainDataPath, 'plugin']);
-  const hasModelBeenModified = !isEqual(modifiedData, initialData);
+  // const hasModelBeenModified = !isEqual(modifiedData, initialData);
   const forTarget = isInContentTypeView ? 'contentType' : 'component';
 
   const handleClickAddField = async (
@@ -82,7 +82,7 @@ const ListView = () => {
     fourthHeaderObj
   ) => {
     // disable the prompt
-    await wait();
+    // await wait();
 
     const searchObj = {
       modalType: 'chooseAttribute',
@@ -118,7 +118,7 @@ const ListView = () => {
       ...secondHeaderObj,
     };
 
-    await wait();
+    // await wait();
 
     push({ search: makeSearch(search, true) });
   };
@@ -136,7 +136,7 @@ const ListView = () => {
   ) => {
     const attributeType = getAttributeDisplayedType(type);
 
-    await wait();
+    // await wait();
 
     const search = {
       modalType: 'attribute',
@@ -154,7 +154,7 @@ const ListView = () => {
       ...fifthHeaderObj,
     };
 
-    await wait();
+    // await wait();
 
     push({ search: makeSearch(search, true) });
   };
@@ -170,11 +170,12 @@ const ListView = () => {
     );
   };
 
-  const wait = async () => {
-    togglePrompt(false);
+  // FIXME
+  // const wait = async () => {
+  //   togglePrompt(false);
 
-    return new Promise(resolve => setTimeout(resolve, 100));
-  };
+  //   return new Promise(resolve => setTimeout(resolve, 100));
+  // };
   let label = get(modifiedData, [firstMainDataPath, 'schema', 'name'], '');
   const kind = get(modifiedData, [firstMainDataPath, 'schema', 'kind'], '');
 
@@ -196,8 +197,8 @@ const ListView = () => {
   //   ),
   // ];
 
-  const onEdit = async () => {
-    await wait();
+  const onEdit = () => {
+    // await wait();
 
     const contentType = kind || firstMainDataPath;
 
@@ -228,7 +229,8 @@ const ListView = () => {
       <>
         <Prompt
           message={formatMessage({ id: getTrad('prompt.unsaved') })}
-          when={hasModelBeenModified && enablePrompt}
+          // when={hasModelBeenModified && enablePrompt}
+          when={false}
         />
         <HeaderLayout
           id="title"
@@ -294,13 +296,13 @@ const ListView = () => {
           <Stack size={4}>
             <Row justifyContent="flex-end">
               <Stack horizontal size={2}>
-                {/* <LinkToCMSettingsView
+                <LinkToCMSettingsView
                   key="link-to-cm-settings-view"
                   targetUid={targetUid}
                   isTemporary={isTemporary}
                   isInContentTypeView={isInContentTypeView}
                   contentTypeKind={contentTypeKind}
-                /> */}
+                />
               </Stack>
             </Row>
             <Box background="neutral0" shadow="filterShadow" hasRadius>

@@ -1,25 +1,39 @@
 import getTrad from '../../../utils/getTrad';
 
 const componentField = {
-  label: {
+  intlLabel: {
     id: getTrad('modalForm.attribute.text.type-selection'),
+    defaultMessage: 'Type',
   },
   name: 'createComponent',
-  type: 'booleanBox',
+  type: 'radio-group',
   size: 12,
-  options: [
+  radios: [
     {
-      headerId: getTrad('form.attribute.component.option.create'),
-      descriptionId: getTrad('form.attribute.component.option.create.description'),
+      title: {
+        id: getTrad('form.attribute.component.option.create'),
+        defaultMessage: 'Create a new component',
+      },
+      description: {
+        id: getTrad('form.attribute.component.option.create.description'),
+        defaultMessage:
+          'A component is shared across types and components, it will be available and accessible everywhere.',
+      },
       value: true,
     },
     {
-      headerId: getTrad('form.attribute.component.option.reuse-existing'),
-      descriptionId: getTrad('form.attribute.component.option.reuse-existing.description'),
+      title: {
+        id: getTrad('form.attribute.component.option.reuse-existing'),
+        defaultMessage: 'Use an existing component',
+      },
+      description: {
+        id: getTrad('form.attribute.component.option.reuse-existing.description'),
+        defaultMessage:
+          'Reuse a component already created to keep your data consistent across content-types.',
+      },
       value: false,
     },
   ],
-  validations: {},
 };
 
 export default componentField;
