@@ -22,6 +22,7 @@ import { Row } from '@strapi/parts/Row';
 import { Stack } from '@strapi/parts/Stack';
 import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
+import useFormModalNavigation from '../../hooks/useFormModalNavigation';
 // New compos
 import AllowedTypesSelect from '../AllowedTypesSelect';
 import AttributeOptions from '../AttributeOptions';
@@ -70,6 +71,9 @@ import {
 
 const FormModal = () => {
   const [state, setState] = useState(INITIAL_STATE_DATA);
+  const c = useFormModalNavigation();
+
+  console.log(c);
 
   const formModalSelector = useMemo(makeSelectFormModal, []);
   const dispatch = useDispatch();

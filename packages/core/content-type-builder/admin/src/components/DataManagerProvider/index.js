@@ -20,6 +20,7 @@ import getTrad from '../../utils/getTrad';
 import makeUnique from '../../utils/makeUnique';
 import pluginId from '../../pluginId';
 import FormModal from '../FormModal';
+import FormModalNavigationProvider from '../FormModalNavigationProvider';
 import createDataObject from './utils/createDataObject';
 import createModifiedDataSchema from './utils/createModifiedDataSchema';
 import retrieveSpecificInfoFromComponents from './utils/retrieveSpecificInfoFromComponents';
@@ -543,14 +544,16 @@ const DataManagerProvider = ({
         updateSchema,
       }}
     >
-      {isLoadingForDataToBeSet ? (
-        <LoadingIndicatorPage />
-      ) : (
-        <>
-          {children}
-          {isInDevelopmentMode && <FormModal />}
-        </>
-      )}
+      <FormModalNavigationProvider>
+        {isLoadingForDataToBeSet ? (
+          <LoadingIndicatorPage />
+        ) : (
+          <>
+            {children}
+            {isInDevelopmentMode && <FormModal />}
+          </>
+        )}
+      </FormModalNavigationProvider>
     </DataManagerContext.Provider>
   );
 };
