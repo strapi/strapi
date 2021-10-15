@@ -8,3 +8,36 @@ export interface StrapiConfigContext {
     date: (key: string, initial?: Date) => Date;
   };
 }
+
+export interface StrapiServerConfig {
+  host: string;
+  port: number;
+  proxy: boolean;
+  cron: {
+    enabled: boolean;
+  };
+  admin: {
+    autoOpen: boolean;
+  };
+}
+export interface StrapiAdminConfig {}
+
+export interface StrapiConfig {
+  installedPlugins: string[];
+  installedProviders: string[];
+  autoReload: boolean;
+  serveAdminPanel: boolean;
+  launchedAt: number;
+  appPath: string;
+  paths: {
+    config: string;
+    static: string;
+    views: string;
+  };
+  environment: string;
+  uuid: string;
+  packageJsonStrapi: Record<string, any>;
+  functions: Record<string, any>;
+  server: StrapiServerConfig;
+  admin: StrapiAdminConfig;
+}

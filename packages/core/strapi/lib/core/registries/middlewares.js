@@ -4,20 +4,21 @@ const { pickBy, has } = require('lodash/fp');
 const { addNamespace, hasNamespace } = require('../utils');
 
 /**
+ * @typedef {import('@strapi/strapi').StrapiMiddlewares} StrapiMiddlewares
  * @typedef {import('./types/middlewares').Middleware} Middleware
  */
 
 // TODO: move instantiation part here instead of in the server service
 const middlewaresRegistry = () => {
   /**
-   * @type {Record<string, Middleware>}
+   * @type {StrapiMiddlewares}
    */
+  // @ts-ignore
   const middlewares = {};
 
   return {
     /**
      * Returns this list of registered middlewares uids
-     * @returns {string[]}
      */
     keys() {
       return Object.keys(middlewares);
@@ -25,8 +26,8 @@ const middlewaresRegistry = () => {
 
     /**
      * Returns the instance of a middleware. Instantiate the middleware if not already done
-     * @param {string} uid
-     * @returns {Middleware}
+     * @template {keyof StrapiMiddlewares} T
+     * @param {T} uid
      */
     get(uid) {
       return middlewares[uid];
@@ -43,10 +44,12 @@ const middlewaresRegistry = () => {
 
     /**
      * Registers a middleware
-     * @param {string} uid
+     * @template {keyof StrapiMiddlewares} T
+     * @param {T} uid
      * @param {Middleware} middleware
      */
     set(uid, middleware) {
+      // @ts-ignore
       middlewares[uid] = middleware;
       return this;
     },
@@ -64,13 +67,15 @@ const middlewaresRegistry = () => {
         if (has(uid, middlewares)) {
           throw new Error(`Middleware ${uid} has already been registered.`);
         }
+        // @ts-ignore
         middlewares[uid] = middleware;
       }
     },
 
     /**
      * Wraps a middleware to extend it
-     * @param {string} uid
+     * @template {keyof StrapiMiddlewares} T
+     * @param {T} uid
      * @param {(middleware: Middleware) => Middleware} extendFn
      */
     extend(uid, extendFn) {
@@ -81,9 +86,7 @@ const middlewaresRegistry = () => {
       }
 
       const newMiddleware = extendFn(currentMiddleware);
-      middlewares[uid] = newMiddleware;
-
-      return this;
+      return this.set(uid, newMiddleware);
     },
   };
 };

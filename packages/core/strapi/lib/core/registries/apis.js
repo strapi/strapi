@@ -1,7 +1,8 @@
 'use strict';
 
 /**
- * @typedef {import('types').Strapi} Strapi
+ * @typedef {import('@strapi/strapi').Strapi} Strapi
+ * @typedef {import('@strapi/strapi').StrapiApi} StrapiApi
  */
 
 const { has } = require('lodash/fp');
@@ -12,13 +13,15 @@ const { createCoreApi } = require('../../core-api');
  */
 const apisRegistry = strapi => {
   /**
-   * @type {Record<string, any>}
+   * @type {StrapiApi}
    */
+  // @ts-ignore
   const apis = {};
 
   return {
     /**
-     * @param {string} name
+     * @template {keyof StrapiApi} T
+     * @param {T} name
      */
     get(name) {
       return apis[name];
@@ -27,7 +30,8 @@ const apisRegistry = strapi => {
       return apis;
     },
     /**
-     * @param {string} apiName
+     * @template {keyof StrapiApi} T
+     * @param {T} apiName
      * @param {any=} apiConfig
      */
     add(apiName, apiConfig) {
@@ -35,9 +39,12 @@ const apisRegistry = strapi => {
         throw new Error(`API ${apiName} has already been registered.`);
       }
 
+      // @ts-ignore
       const apiInstance = strapi.container.get('modules').add(`api::${apiName}`, apiConfig);
 
+      // @ts-ignore
       for (const ctName in apiInstance.contentTypes || {}) {
+        // @ts-ignore
         const contentType = apiInstance.contentTypes[ctName];
 
         const { service, controller } = createCoreApi({
@@ -46,7 +53,9 @@ const apisRegistry = strapi => {
           strapi,
         });
 
+        // @ts-ignore
         strapi.container.get('services').set(`api::${apiName}.${ctName}`, service);
+        // @ts-ignore
         strapi.container.get('controllers').set(`api::${apiName}.${ctName}`, controller);
       }
 

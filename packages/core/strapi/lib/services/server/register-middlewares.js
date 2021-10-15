@@ -5,7 +5,7 @@ const { yup } = require('@strapi/utils');
 const { resolveMiddlewares } = require('./middleware');
 
 /**
- * @typedef {import('types').Strapi} Strapi
+ * @typedef {import('@strapi/strapi').Strapi} Strapi
  * @typedef {Array<string|{name?: string, resolve?: string, config: any}>} MiddlewaresConfig
  * @typedef {Array<{name: string, hanlder: Function}>} Middlewares
  */

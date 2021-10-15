@@ -1,8 +1,8 @@
 'use strict';
 
 /**
- * @typedef {import('types').Strapi} Strapi
- * @typedef {import('types/container').StrapiRegistryContainer} StrapiRegistryContainer
+ * @typedef {import('@strapi/strapi').Strapi} Strapi
+ * @typedef {import('@strapi/strapi').StrapiRegistryContainer} StrapiRegistryContainer
  */
 
 /**

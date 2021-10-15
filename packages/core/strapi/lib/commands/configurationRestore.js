@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * @typedef {import('types').CoreStore} CoreStore
+ * @typedef {import('@strapi/strapi').CoreStore} CoreStore
  * @typedef {import('@strapi/database').Database} Database
  */
 

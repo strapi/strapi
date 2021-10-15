@@ -1,7 +1,8 @@
 'use strict';
 
 /**
- * @typedef {import('types').Strapi} Strapi
+ * @typedef {import('@strapi/strapi').Strapi} Strapi
+ * @typedef {import('@strapi/strapi').StrapiModules} StrapiModules
  */
 
 const { pickBy, has } = require('lodash/fp');
@@ -12,13 +13,15 @@ const { createModule } = require('../domain/module');
  */
 const modulesRegistry = strapi => {
   /**
-   * @type {Record<string, any>}
+   * @type {StrapiModules}
    */
+  // @ts-ignore
   const modules = {};
 
   return {
     /**
-     * @param {string} namespace
+     * @template {keyof StrapiModules} T
+     * @param {T} namespace
      */
     get(namespace) {
       return modules[namespace];
@@ -30,7 +33,8 @@ const modulesRegistry = strapi => {
       return pickBy((mod, namespace) => namespace.startsWith(prefix))(modules);
     },
     /**
-     * @param {string} namespace
+     * @template {keyof StrapiModules} T
+     * @param {T} namespace
      * @param {any} rawModule
      */
     add(namespace, rawModule) {
@@ -38,7 +42,9 @@ const modulesRegistry = strapi => {
         throw new Error(`Module ${namespace} has already been registered.`);
       }
 
+      // @ts-ignore
       modules[namespace] = createModule(namespace, rawModule, strapi);
+      // @ts-ignore
       modules[namespace].load();
 
       return modules[namespace];

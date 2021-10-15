@@ -1,16 +1,16 @@
 'use strict';
 
 /**
- * @typedef {import('types').Strapi} StrapiInterface
- * @typedef {import('types').StrapiContentTypes} StrapiContentTypes
- * @typedef {import('types').StrapiComponents} StrapiComponents
- * @typedef {import('types').StrapiServices} StrapiServices
- * @typedef {import('types').StrapiControllers} StrapiControllers
- * @typedef {import('types').StrapiPolicies} StrapiPolicies
- * @typedef {import('types').StrapiMiddlewares} StrapiMiddlewares
- * @typedef {import('types').StrapiPlugins} StrapiPlugins
- * @typedef {import('types').StrapiHooks} StrapiHooks
- * @typedef {import('types').StrapiApi} StrapiApi
+ * @typedef {import('@strapi/strapi').Strapi} StrapiInterface
+ * @typedef {import('@strapi/strapi').StrapiContentTypes} StrapiContentTypes
+ * @typedef {import('@strapi/strapi').StrapiComponents} StrapiComponents
+ * @typedef {import('@strapi/strapi').StrapiServices} StrapiServices
+ * @typedef {import('@strapi/strapi').StrapiControllers} StrapiControllers
+ * @typedef {import('@strapi/strapi').StrapiPolicies} StrapiPolicies
+ * @typedef {import('@strapi/strapi').StrapiMiddlewares} StrapiMiddlewares
+ * @typedef {import('@strapi/strapi').StrapiPlugins} StrapiPlugins
+ * @typedef {import('@strapi/strapi').StrapiHooks} StrapiHooks
+ * @typedef {import('@strapi/strapi').StrapiApi} StrapiApi
  */
 
 /**
@@ -139,6 +139,7 @@ class Strapi {
   /**
    * @template {keyof StrapiControllers} T
    * @param {T} uid
+   * @returns {StrapiControllers[T]}
    */
   controller(uid) {
     return this.container.get('controllers').get(uid);
@@ -163,6 +164,7 @@ class Strapi {
   /**
    * @template {keyof StrapiPolicies} T
    * @param {T} name
+   * @returns {StrapiPolicies[T]}
    */
   policy(name) {
     return this.container.get('policies').get(name);
@@ -175,6 +177,7 @@ class Strapi {
   /**
    * @template {keyof StrapiMiddlewares} T
    * @param {T} name
+   * @returns {StrapiMiddlewares[T]}
    */
   middleware(name) {
     return this.container.get('middlewares').get(name);
@@ -187,6 +190,7 @@ class Strapi {
   /**
    * @template {keyof StrapiPlugins} T
    * @param {T} name
+   * @returns {StrapiPlugins[T]}
    */
   plugin(name) {
     return this.container.get('plugins').get(name);
@@ -199,6 +203,7 @@ class Strapi {
   /**
    * @template {keyof StrapiHooks} T
    * @param {T} name
+   * @returns {StrapiHooks[T]}
    */
   hook(name) {
     return this.container.get('hooks').get(name);

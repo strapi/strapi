@@ -3,8 +3,8 @@
 /**
  * @typedef {import('@strapi/database').Database} Database
  * @typedef {import('@strapi/database').EntityManager} EntityManager
- * @typedef {import('types').Strapi} Strapi
- * @typedef {import('types').StrapiContentTypes} StrapiContentTypes
+ * @typedef {import('@strapi/strapi').Strapi} Strapi
+ * @typedef {import('@strapi/strapi').StrapiContentTypes} StrapiContentTypes
  */
 
 const delegate = require('delegates');

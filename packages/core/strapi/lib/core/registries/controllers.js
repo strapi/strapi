@@ -1,17 +1,23 @@
 'use strict';
 
+/**
+ * @typedef {import('@strapi/strapi').StrapiControllers} StrapiControllers
+ */
+
 const { pickBy, has } = require('lodash/fp');
 const { addNamespace, hasNamespace } = require('../utils');
 
 const controllersRegistry = () => {
   /**
-   * @type {Record<string, any>}
+   * @type {StrapiControllers}
    */
+  // @ts-ignore
   const controllers = {};
 
   return {
     /**
-     * @param {string} uid
+     * @template {keyof StrapiControllers} T
+     * @param {T} uid
      */
     get(uid) {
       return controllers[uid];
@@ -23,7 +29,8 @@ const controllersRegistry = () => {
       return pickBy((_, uid) => hasNamespace(uid, namespace))(controllers);
     },
     /**
-     * @param {string} uid
+     * @template {keyof StrapiControllers} T
+     * @param {T} uid
      * @param {any} value
      */
     set(uid, value) {
@@ -42,12 +49,15 @@ const controllersRegistry = () => {
         if (has(uid, controllers)) {
           throw new Error(`Controller ${uid} has already been registered.`);
         }
+
+        // @ts-ignore
         controllers[uid] = controller;
       }
       return this;
     },
     /**
-     * @param {string} controllerUID
+     * @template {keyof StrapiControllers} T
+     * @param {T} controllerUID
      * @param {(contoller: any) => any} extendFn
      */
     extend(controllerUID, extendFn) {

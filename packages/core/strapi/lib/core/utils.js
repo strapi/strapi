@@ -3,7 +3,6 @@
 /**
  * @param {string} name
  * @param {string=} namespace
- * @returns {string}
  */
 const hasNamespace = (name, namespace) => {
   if (!namespace) {
@@ -20,7 +19,6 @@ const hasNamespace = (name, namespace) => {
 /**
  * @param {string} name
  * @param {string} namespace
- * @returns {string}
  */
 const addNamespace = (name, namespace) => {
   if (namespace.endsWith('::')) {
@@ -33,7 +31,6 @@ const addNamespace = (name, namespace) => {
 /**
  * @param {string} name
  * @param {string} namespace
- * @returns {string}
  */
 const removeNamespace = (name, namespace) => {
   if (namespace.endsWith('::')) {

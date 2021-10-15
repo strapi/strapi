@@ -4,20 +4,21 @@ const { pickBy, has } = require('lodash/fp');
 const { addNamespace, hasNamespace } = require('../utils');
 
 /**
+ * @typedef {import('@strapi/strapi').StrapiPolicies} StrapiPolicies
  * @typedef {import('./types/policies').Policy} Policy
  */
 
 // TODO: move instantiation part here instead of in the policy utils
 const policiesRegistry = () => {
   /**
-   * @type {Record<string, Policy>}
+   * @type {StrapiPolicies}
    */
+  // @ts-ignore
   const policies = {};
 
   return {
     /**
      * Returns this list of registered policies uids
-     * @returns {string[]}
      */
     keys() {
       return Object.keys(policies);
@@ -25,8 +26,8 @@ const policiesRegistry = () => {
 
     /**
      * Returns the instance of a policy. Instantiate the policy if not already done
-     * @param {string} uid
-     * @returns {Policy}
+     * @template {keyof StrapiPolicies} T
+     * @param {T} uid
      */
     get(uid) {
       return policies[uid];
@@ -43,10 +44,12 @@ const policiesRegistry = () => {
 
     /**
      * Registers a policy
-     * @param {string} uid
+     * @template {keyof StrapiPolicies} T
+     * @param {T} uid
      * @param {Policy} policy
      */
     set(uid, policy) {
+      // @ts-ignore
       policies[uid] = policy;
       return this;
     },
@@ -64,13 +67,16 @@ const policiesRegistry = () => {
         if (has(uid, policies)) {
           throw new Error(`Policy ${uid} has already been registered.`);
         }
-        policies[uid] = policy;
+
+        // @ts-ignore
+        this.set(uid, policy);
       }
     },
 
     /**
      * Wraps a policy to extend it
-     * @param {string} uid
+     * @template {keyof StrapiPolicies} T
+     * @param {T} uid
      * @param {(policy: Policy) => Policy} extendFn
      */
     extend(uid, extendFn) {
@@ -81,9 +87,7 @@ const policiesRegistry = () => {
       }
 
       const newPolicy = extendFn(currentPolicy);
-      policies[uid] = newPolicy;
-
-      return this;
+      return this.set(uid, newPolicy);
     },
   };
 };

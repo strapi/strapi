@@ -2,7 +2,7 @@
 
 /**
  * @typedef {import('../registries/types/middlewares').Middleware} Middleware
- * @typedef {import('types').Strapi} Strapi
+ * @typedef {import('@strapi/strapi').Strapi} Strapi
  */
 
 const { join, extname, basename } = require('path');

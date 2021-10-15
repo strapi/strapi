@@ -1,7 +1,8 @@
 'use strict';
 
 /**
- * @typedef {import('types').Strapi} Strapi
+ * @typedef {import('@strapi/strapi').Strapi} Strapi
+ * @typedef {import('@strapi/strapi').StrapiServices} StrapiServices
  * @typedef {import('./types/services').Service} Service
  * @typedef {import('./types/services').ServiceFactory} ServiceFactory
  */
@@ -19,8 +20,9 @@ const servicesRegistry = strapi => {
    */
   const services = {};
   /**
-   * @type {Record<string, Service>}
+   * @type {StrapiServices}
    */
+  // @ts-ignore
   const instantiatedServices = {};
 
   return {
@@ -34,7 +36,9 @@ const servicesRegistry = strapi => {
 
     /**
      * Returns the instance of a service. Instantiate the service if not already done
-     * @param {string} uid
+     * @template {keyof StrapiServices} T
+     * @param {T} uid
+     * @returns {StrapiServices[T] | undefined}
      */
     get(uid) {
       if (instantiatedServices[uid]) {
@@ -58,12 +62,14 @@ const servicesRegistry = strapi => {
     getAll(namespace) {
       const filteredServices = pickBy((_, uid) => hasNamespace(uid, namespace))(services);
 
+      // @ts-ignore
       return _.mapValues(filteredServices, (service, serviceUID) => this.get(serviceUID));
     },
 
     /**
      * Registers a service
-     * @param {string} uid
+     * @template {keyof StrapiServices} T
+     * @param {T} uid
      * @param {Service|ServiceFactory} service
      */
     set(uid, service) {
@@ -93,7 +99,8 @@ const servicesRegistry = strapi => {
 
     /**
      * Wraps a service to extend it
-     * @param {string} uid
+     * @template {keyof StrapiServices} T
+     * @param {T} uid
      * @param {(service: Service) => Service} extendFn
      */
     extend(uid, extendFn) {
@@ -104,6 +111,8 @@ const servicesRegistry = strapi => {
       }
 
       const newService = extendFn(currentService);
+
+      // @ts-ignore
       instantiatedServices[uid] = newService;
 
       return this;

@@ -1,7 +1,8 @@
 'use strict';
 
 /**
- * @typedef {import('types').Strapi} Strapi
+ * @typedef {import('@strapi/strapi').Strapi} Strapi
+ * @typedef {import('@strapi/strapi').StrapiPlugins} StrapiPlugins
  */
 
 const { has } = require('lodash/fp');
@@ -11,13 +12,15 @@ const { has } = require('lodash/fp');
  */
 const pluginsRegistry = strapi => {
   /**
-   * @type {Record<string, any>}
+   * @type {StrapiPlugins}
    */
+  // @ts-ignore
   const plugins = {};
 
   return {
     /**
-     * @param {string} name
+     * @template {keyof StrapiPlugins} T
+     * @param {T} name
      */
     get(name) {
       return plugins[name];
@@ -26,7 +29,8 @@ const pluginsRegistry = strapi => {
       return plugins;
     },
     /**
-     * @param {string} name
+     * @template {keyof StrapiPlugins} T
+     * @param {T} name
      * @param {any=} pluginConfig
      */
     add(name, pluginConfig) {
@@ -34,7 +38,10 @@ const pluginsRegistry = strapi => {
         throw new Error(`Plugin ${name} has already been registered.`);
       }
 
+      // @ts-ignore
       const pluginModule = strapi.container.get('modules').add(`plugin::${name}`, pluginConfig);
+
+      // @ts-ignore
       plugins[name] = pluginModule;
 
       return plugins[name];

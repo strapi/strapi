@@ -1,11 +1,19 @@
 'use strict';
 
+/**
+ * @typedef {import('@strapi/strapi').StrapiConfig} StrapiConfig
+ */
+
 const _ = require('lodash');
 
+/**
+ * @param {Partial<StrapiConfig>} initialConfig
+ */
 module.exports = (initialConfig = {}) => {
   /**
-   * @type {Record<string, any>}
+   * @type {StrapiConfig}
    */
+  // @ts-ignore
   const _config = Object.assign({}, initialConfig); // not deep clone because it would break some config
 
   return {

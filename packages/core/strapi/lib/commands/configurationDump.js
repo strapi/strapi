@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * @typedef {import('types').CoreStore} CoreStore
+ * @typedef {import('@strapi/strapi').CoreStore} CoreStore
  */
 
 const fs = require('fs');

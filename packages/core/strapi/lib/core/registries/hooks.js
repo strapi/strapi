@@ -4,14 +4,15 @@ const { pickBy } = require('lodash/fp');
 const { addNamespace, hasNamespace } = require('../utils');
 
 /**
- * @typedef {import('types').StrapiHooks} StrapiHooks
- * @typedef {import('types').Hook} Hook
+ * @typedef {import('@strapi/strapi').StrapiHooks} StrapiHooks
+ * @typedef {import('@strapi/strapi').Hook} Hook
  */
 
 const hooksRegistry = () => {
   /**
-   * @type {Record<string, Hook>}
+   * @type {StrapiHooks}
    */
+  // @ts-ignore
   const hooks = {};
 
   return {
@@ -27,7 +28,6 @@ const hooksRegistry = () => {
      * Returns the instance of a hook.
      * @template {keyof StrapiHooks} T
      * @param {T} uid
-     * @returns {Hook}
      */
     get(uid) {
       return hooks[uid];
@@ -70,7 +70,8 @@ const hooksRegistry = () => {
 
     /**
      * Wraps a hook to extend it
-     * @param {string} uid
+     * @template {keyof StrapiHooks} T
+     * @param {T} uid
      * @param {(hook: Hook) => Hook} extendFn
      */
     extend(uid, extendFn) {
