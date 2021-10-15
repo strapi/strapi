@@ -1,7 +1,7 @@
 import produce from 'immer'; // current
 import set from 'lodash/set';
 import get from 'lodash/get';
-// import { arrayMoveItem } from '../../utils';
+import { arrayMoveItem } from '../../utils';
 
 const initialState = {
   fieldForm: {},
@@ -20,16 +20,16 @@ const reducer = (state = initialState, action) =>
         set(draftState, layoutFieldListPath, [action.item, ...layoutFieldList]);
         break;
       }
-      // case 'MOVE_FIELD': {
-      //   const layoutFieldList = get(state, layoutFieldListPath, []);
-      //   const { originalIndex, atIndex } = action;
-      //   set(
-      //     draftState,
-      //     layoutFieldListPath,
-      //     arrayMoveItem(layoutFieldList, originalIndex, atIndex)
-      //   );
-      //   break;
-      // }
+      case 'MOVE_FIELD': {
+        const layoutFieldList = get(state, layoutFieldListPath, []);
+        const { originalIndex, atIndex } = action;
+        set(
+          draftState,
+          layoutFieldListPath,
+          arrayMoveItem(layoutFieldList, originalIndex, atIndex)
+        );
+        break;
+      }
       case 'ON_CHANGE': {
         set(draftState, ['modifiedData', ...action.keys.split('.')], action.value);
         break;
@@ -38,10 +38,6 @@ const reducer = (state = initialState, action) =>
         set(draftState, ['fieldForm', action.name], action.value);
         break;
       }
-      // case 'ON_RESET': {
-      //   draftState.modifiedData = state.initialData;
-      //   break;
-      // }
       case 'REMOVE_FIELD': {
         const layoutFieldList = get(state, layoutFieldListPath, []);
         set(

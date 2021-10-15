@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
+import { useDrag, useDrop } from 'react-dnd';
 import { useIntl } from 'react-intl';
 import { Row } from '@strapi/parts/Row';
 import { Box } from '@strapi/parts/Box';
@@ -9,7 +10,7 @@ import { Stack } from '@strapi/parts/Stack';
 import EditIcon from '@strapi/icons/EditIcon';
 import CloseAlertIcon from '@strapi/icons/CloseAlertIcon';
 import Drag from '@strapi/icons/Drag';
-import { getTrad } from '../../../utils';
+import { getTrad, ItemTypes } from '../../../utils';
 
 const ActionButton = styled.button`
   display: flex;
@@ -35,6 +36,10 @@ const DragButton = styled(ActionButton)`
 const FieldContainer = styled(Row)`
   max-height: ${32 / 16}rem;
   cursor: pointer;
+
+  // Solution to remove borders on drag preview
+  transform: translate(0, 0);
+  opacity: ${({ isDragging }) => (isDragging ? 0 : 1)};
 
   svg {
     width: ${10 / 16}rem;
@@ -71,8 +76,16 @@ const FieldWrapper = styled(Box)`
   }
 `;
 
-const DraggableCard = ({ name, labelField, onRemoveField, onClickEditField }) => {
+const DraggableCard = ({
+  index,
+  labelField,
+  onClickEditField,
+  onMoveField,
+  onRemoveField,
+  name,
+}) => {
   const { formatMessage } = useIntl();
+  const ref = useRef(null);
   const editButtonRef = useRef();
   const cardTitle = labelField || name;
   const cardEllipsisTitle = cardTitle.length > 20 ? `${cardTitle.substring(0, 20)}...` : cardTitle;
@@ -83,6 +96,39 @@ const DraggableCard = ({ name, labelField, onRemoveField, onClickEditField }) =>
     }
   };
 
+  const [, drop] = useDrop({
+    accept: ItemTypes.FIELD,
+    hover(item) {
+      if (!ref.current) {
+        return;
+      }
+      const dragIndex = item.index;
+      const hoverIndex = index;
+
+      // Don't replace items with themselves
+      if (dragIndex === hoverIndex) {
+        return;
+      }
+      console.log('dragged', dragIndex, 'hovered', hoverIndex);
+
+      onMoveField(dragIndex, hoverIndex);
+
+      item.index = hoverIndex;
+    },
+  });
+
+  const [{ isDragging }, drag, preview] = useDrag(() => ({
+    type: ItemTypes.FIELD,
+    item: () => {
+      return { name, index };
+    },
+    collect: monitor => ({
+      isDragging: monitor.isDragging(),
+    }),
+  }));
+
+  drag(drop(ref));
+
   return (
     <FieldWrapper>
       <FieldContainer
@@ -91,6 +137,8 @@ const DraggableCard = ({ name, labelField, onRemoveField, onClickEditField }) =>
         hasRadius
         justifyContent="space-between"
         onClick={handleClickEditRow}
+        isDragging={isDragging}
+        ref={preview}
       >
         <Stack horizontal size={3}>
           <DragButton
@@ -101,6 +149,8 @@ const DraggableCard = ({ name, labelField, onRemoveField, onClickEditField }) =>
               },
               { item: name }
             )}
+            onClick={e => e.stopPropagation()}
+            ref={ref}
             type="button"
           >
             <Drag />
@@ -150,8 +200,10 @@ DraggableCard.defaultProps = {
 };
 
 DraggableCard.propTypes = {
+  index: PropTypes.number.isRequired,
   labelField: PropTypes.string,
   onClickEditField: PropTypes.func.isRequired,
+  onMoveField: PropTypes.func.isRequired,
   onRemoveField: PropTypes.func.isRequired,
   name: PropTypes.string.isRequired,
 };

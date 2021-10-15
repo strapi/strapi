@@ -29,8 +29,9 @@ const View = ({
   listRemainingFields,
   displayedFields,
   onAddField,
-  onRemoveField,
   onClickEditField,
+  onMoveField,
+  onRemoveField,
   metadatas,
 }) => {
   const { formatMessage } = useIntl();
@@ -58,11 +59,13 @@ const View = ({
           <Stack horizontal size={3}>
             {displayedFields.map((field, index) => (
               <DraggableCard
-                onRemoveField={e => onRemoveField(e, index)}
-                onClickEditField={onClickEditField}
                 key={field}
-                name={field}
+                index={index}
                 labelField={metadatas[field].list.label || ''}
+                name={field}
+                onMoveField={onMoveField}
+                onClickEditField={onClickEditField}
+                onRemoveField={e => onRemoveField(e, index)}
               />
             ))}
           </Stack>
@@ -94,6 +97,7 @@ View.propTypes = {
   displayedFields: PropTypes.array.isRequired,
   onAddField: PropTypes.func.isRequired,
   onClickEditField: PropTypes.func.isRequired,
+  onMoveField: PropTypes.func.isRequired,
   onRemoveField: PropTypes.func.isRequired,
   listRemainingFields: PropTypes.array.isRequired,
   metadatas: PropTypes.objectOf(
