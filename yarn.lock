@@ -4602,6 +4602,20 @@
     resolve-from "^5.0.0"
     store2 "^2.12.0"
 
+"@strapi/generate-new@3.6.8":
+  version "4.0.0-beta.4"
+  dependencies:
+    "@sentry/node" "6.3.0"
+    chalk "^4.1.1"
+    execa "^1.0.0"
+    fs-extra "^9.1.0"
+    inquirer "^6.3.1"
+    lodash "4.17.21"
+    node-fetch "^2.6.1"
+    node-machine-id "^1.1.10"
+    ora "^5.4.0"
+    uuid "^3.3.2"
+
 "@strapi/icons@0.0.1-alpha.50":
   version "0.0.1-alpha.50"
   resolved "https://registry.yarnpkg.com/@strapi/icons/-/icons-0.0.1-alpha.50.tgz#f62e0d329ab28942eced4aefed9b7cfd73f1373e"
@@ -11883,7 +11897,7 @@ git-url-parse@11.4.4:
   dependencies:
     git-up "^4.0.0"
 
-git-url-parse@^11.1.2, git-url-parse@^11.4.4:
+git-url-parse@^11.1.2:
   version "11.6.0"
   resolved "https://registry.yarnpkg.com/git-url-parse/-/git-url-parse-11.6.0.tgz#c634b8de7faa66498a2b88932df31702c67df605"
   integrity sha512-WWUxvJs5HsyHL6L08wOusa/IXYtMuCAhrMmnTjQPpBU0TTHyDhnOATNH3xNQz7YOQUsqIIPTGr4xiVti1Hsk5g==
