@@ -8,10 +8,8 @@ import { prefixPluginTranslations } from '@strapi/helper-plugin';
 import pluginPkg from '../../package.json';
 import pluginLogo from './assets/images/logo.svg';
 import pluginPermissions from './permissions';
-import Initializer from './components/Initializer';
 import InputMedia from './components/InputMedia';
 import InputModalStepper from './components/InputModalStepper';
-import reducers from './reducers';
 import pluginId from './pluginId';
 import { getTrad } from './utils';
 
@@ -41,15 +39,11 @@ export default {
 
     app.addFields({ type: 'media', Component: InputMedia });
 
-    app.addReducers(reducers);
-
     app.registerPlugin({
       description: pluginDescription,
       icon,
       id: pluginId,
-      initializer: Initializer,
-
-      isReady: false,
+      isReady: true,
       isRequired: pluginPkg.strapi.required || false,
       name,
       pluginLogo,

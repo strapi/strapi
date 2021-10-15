@@ -3,10 +3,7 @@ import { ThemeProvider, lightTheme } from '@strapi/parts';
 import { QueryClientProvider, QueryClient } from 'react-query';
 import { render as renderTL, screen, waitFor } from '@testing-library/react';
 import { useRBAC } from '@strapi/helper-plugin';
-import { Provider } from 'react-redux';
-import { combineReducers, createStore } from 'redux';
 import { MemoryRouter } from 'react-router-dom';
-import reducers from '../../../reducers';
 import en from '../../../translations/en.json';
 import server from './server';
 import { MediaLibrary } from '../MediaLibrary';
@@ -36,18 +33,14 @@ const queryClient = new QueryClient({
   },
 });
 
-const store = createStore(combineReducers(reducers));
-
 const renderML = () =>
   renderTL(
     <QueryClientProvider client={queryClient}>
-      <Provider store={store}>
-        <ThemeProvider theme={lightTheme}>
-          <MemoryRouter>
-            <MediaLibrary />
-          </MemoryRouter>
-        </ThemeProvider>
-      </Provider>
+      <ThemeProvider theme={lightTheme}>
+        <MemoryRouter>
+          <MediaLibrary />
+        </MemoryRouter>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 
