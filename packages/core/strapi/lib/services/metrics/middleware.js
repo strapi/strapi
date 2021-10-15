@@ -1,11 +1,19 @@
 'use strict';
 
+/**
+ * @typedef {import('@strapi/strapi').StrapiAppContext} StrapiAppContext
+ */
+
 const createMiddleware = ({ sendEvent }) => {
   const _state = {
     currentDay: null,
     counter: 0,
   };
 
+  /**
+   * @param {StrapiAppContext} ctx
+   * @param {() => Promise<void>} next
+   */
   return async (ctx, next) => {
     const { url, method } = ctx.request;
 

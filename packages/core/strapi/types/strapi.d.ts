@@ -1,9 +1,15 @@
-// import { Database } from '@strapi/database';
-// import { Server } from '@strapi/admin';
+import type {
+  DefaultContext,
+  DefaultState,
+  ParameterizedContext,
+  Request,
+} from 'koa';
+import type { ParsedUrlQuery } from 'querystring';
 
-// import { Strapi as StrapiClass } from '../lib/Strapi';
+export interface StrapiAppState {}
 
-// export interface Strapi extends StrapiClass {
-//   admin: Server;
-//   // entityService: EntityService;
-// }
+export interface StrapiAppContext
+  extends ParameterizedContext<DefaultState & StrapiAppState, DefaultContext & {}, any> {
+  query: ParsedUrlQuery & Record<string, any>;
+  request: Request & { body: any, query?: ParsedUrlQuery };
+}

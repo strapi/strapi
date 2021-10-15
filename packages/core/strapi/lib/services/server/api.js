@@ -1,9 +1,20 @@
 'use strict';
 
+/**
+ * @typedef {import('@strapi/strapi').Strapi} Strapi
+ */
+
 const Router = require('@koa/router');
 
 const { createRouteManager } = require('./routing');
 
+/**
+ * @param {Strapi} strapi
+ * @param {{
+ *  prefix?: string
+ *  type?: string
+ * }} opts
+ */
 const createAPI = (strapi, opts = {}) => {
   const { prefix, type } = opts;
 

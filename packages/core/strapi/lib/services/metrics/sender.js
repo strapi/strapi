@@ -1,10 +1,14 @@
 'use strict';
 
+/**
+ * @typedef {import('@strapi/strapi').Strapi} Strapi
+ */
+
 const os = require('os');
 const _ = require('lodash');
 const isDocker = require('is-docker');
 const { machineIdSync } = require('node-machine-id');
-const fetch = require('node-fetch');
+const fetch = require('node-fetch').default;
 const ciEnv = require('ci-info');
 const ee = require('../../utils/ee');
 const stringifyDeep = require('./stringify-deep');
@@ -18,7 +22,8 @@ const ANALYTICS_URI = 'https://analytics.strapi.io';
 
 /**
  * Add properties from the package.json strapi key in the metadata
- * @param {object} metadata
+ * @param {any} metadata
+ * @param {Strapi} strapi
  */
 const addPackageJsonStrapiMetadata = (metadata, strapi) => {
   const { packageJsonStrapi = {} } = strapi.config;
@@ -28,8 +33,7 @@ const addPackageJsonStrapiMetadata = (metadata, strapi) => {
 
 /**
  * Create a send function for event with all the necessary metadatas
- * @param {Object} strapi strapi app
- * @returns {Function} (event, payload) -> Promise{boolean}
+ * @param {Strapi} strapi strapi app
  */
 module.exports = strapi => {
   const { uuid } = strapi.config;
@@ -51,6 +55,11 @@ module.exports = strapi => {
 
   addPackageJsonStrapiMetadata(anonymous_metadata, strapi);
 
+  /**
+   * @param {string} event
+   * @param {any} payload
+   * @param {any} opts
+   */
   return async (event, payload = {}, opts = {}) => {
     const reqParams = {
       method: 'POST',
@@ -69,7 +78,7 @@ module.exports = strapi => {
     try {
       const res = await fetch(`${ANALYTICS_URI}/track`, reqParams);
       return res.ok;
-    } catch (err) {
+    } catch (/** @type {any} **/ err) {
       return false;
     }
   };

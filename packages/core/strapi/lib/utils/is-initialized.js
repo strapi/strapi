@@ -20,7 +20,7 @@ module.exports = async function isInitialized(strapi) {
     const anyAdministrator = await strapi.query('admin::user').findOne({ select: ['id'] });
 
     return !isNil(anyAdministrator);
-  } catch (err) {
+  } catch (/** @type {any} **/ err) {
     strapi.stopWithError(err);
   }
 };

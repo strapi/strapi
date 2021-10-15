@@ -1,5 +1,9 @@
 'use strict';
 
+/**
+ * @typedef {import('types').StrapiAppContext} StrapiAppContext
+ */
+
 const { parseBody } = require('./transform');
 
 /**
@@ -10,7 +14,7 @@ const createSingleTypeController = ({ service, sanitize, transformResponse }) =>
     /**
      * Retrieve single type content
      *
-     * @returns {Object|Array}
+     * @param {StrapiAppContext} ctx
      */
     async find(ctx) {
       const { query } = ctx;
@@ -21,7 +25,7 @@ const createSingleTypeController = ({ service, sanitize, transformResponse }) =>
     /**
      * create or update single type content.
      *
-     * @returns {Object}
+     * @param {StrapiAppContext} ctx
      */
     async update(ctx) {
       const { query } = ctx.request;
@@ -32,6 +36,9 @@ const createSingleTypeController = ({ service, sanitize, transformResponse }) =>
       return transformResponse(sanitize(entity));
     },
 
+    /**
+     * @param {StrapiAppContext} ctx
+     */
     async delete(ctx) {
       const { query } = ctx;
 

@@ -1,8 +1,15 @@
 'use strict';
 
+/**
+ * @typedef {import('@strapi/strapi').StrapiAppContext} StrapiAppContext
+ */
+
 const { isNil, isPlainObject } = require('lodash/fp');
 const { parseMultipartData } = require('@strapi/utils');
 
+/**
+ * @param {StrapiAppContext} ctx
+ */
 const parseBody = ctx => {
   if (ctx.is('multipart')) {
     return parseMultipartData(ctx);

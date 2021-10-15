@@ -1,5 +1,9 @@
 'use strict';
 
+/**
+ * @typedef {import('@strapi/strapi').Strapi} Strapi
+ */
+
 const Router = require('@koa/router');
 const _ = require('lodash');
 const { has } = require('lodash/fp');
@@ -75,11 +79,17 @@ const validateRouteConfig = routeConfig => {
       abortEarly: false,
       stripUnknown: true,
     });
-  } catch (error) {
-    throw new Error('Invalid route config', error.message);
+  } catch (/** @type {any} **/ error) {
+    throw new Error(`Invalid route config: ${error.message}`);
   }
 };
 
+/**
+ * @param {Strapi} strapi
+ * @param {{
+ *  type?: string,
+ * }} opts
+ */
 const createRouteManager = (strapi, opts = {}) => {
   const { type } = opts;
 

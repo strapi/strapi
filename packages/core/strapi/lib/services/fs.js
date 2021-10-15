@@ -12,6 +12,9 @@ const fse = require('fs-extra');
  * @param {Strapi} strapi
  */
 module.exports = strapi => {
+  /**
+   * @param {string | string[]} optPath
+   */
   function normalizePath(optPath) {
     const filePath = Array.isArray(optPath) ? optPath.join('/') : optPath;
 
@@ -23,7 +26,7 @@ module.exports = strapi => {
   const strapiFS = {
     /**
      * Writes a file in a strapi app
-     * @param {Array|string} optPath - file path
+     * @param {string | string[]} optPath - file path
      * @param {string} data - content
      */
     writeAppFile(optPath, data) {
@@ -34,7 +37,7 @@ module.exports = strapi => {
     /**
      * Writes a file in a plugin extensions folder
      * @param {string} plugin - plugin name
-     * @param {Array|string} optPath - path to file
+     * @param {string | string[]} optPath - path to file
      * @param {string} data - content
      */
     writePluginFile(plugin, optPath, data) {
@@ -44,6 +47,7 @@ module.exports = strapi => {
 
     /**
      * Removes a file in strapi app
+     * @param {string | string[]} optPath - path to file
      */
     removeAppFile(optPath) {
       const removePath = normalizePath(optPath);
@@ -52,6 +56,8 @@ module.exports = strapi => {
 
     /**
      * Appends a file in strapi app
+     * @param {string | string[]} optPath - path to file
+     * @param {string} data - content
      */
     appendFile(optPath, data) {
       const writePath = normalizePath(optPath);

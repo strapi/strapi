@@ -101,7 +101,7 @@ const resolveCustomMiddleware = (resolve, strapi) => {
 
   try {
     modulePath = require.resolve(resolve);
-  } catch (error) {
+  } catch (/** @type {any} **/ error) {
     if (error.code === 'MODULE_NOT_FOUND') {
       modulePath = path.resolve(strapi.dirs.root, resolve);
     } else {
@@ -111,7 +111,7 @@ const resolveCustomMiddleware = (resolve, strapi) => {
 
   try {
     return require(modulePath);
-  } catch (err) {
+  } catch (/** @type {any} **/ err) {
     throw new Error(`Could not load middleware "${modulePath}".`);
   }
 };

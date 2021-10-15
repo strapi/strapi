@@ -1,11 +1,17 @@
 'use strict';
 
+/**
+ * @typedef {import('@strapi/strapi').Strapi} Strapi
+ * @typedef {import('@strapi/strapi').StrapiAppContext} StrapiAppContext
+ */
+
 const path = require('path');
 const _ = require('lodash');
 const session = require('koa-session');
 
 /**
  * Session middleware
+ * @param {Strapi} strapi
  */
 module.exports = strapi => {
   const requireStore = store => {
@@ -113,12 +119,18 @@ module.exports = strapi => {
           );
 
           strapi.server.use(session(options, strapi.server.app));
-          strapi.server.use((ctx, next) => {
-            ctx.state = ctx.state || {};
-            ctx.state.session = ctx.session || {};
+          strapi.server.use(
+            /**
+             * @param {StrapiAppContext} ctx
+             * @param {() => Promise<void>} next
+             */
+            (ctx, next) => {
+              ctx.state = ctx.state || {};
+              ctx.state.session = ctx.session || {};
 
-            return next();
-          });
+              return next();
+            }
+          );
         }
       } else if (
         _.has(strapi.config.middleware.settings.session, 'client') &&
@@ -128,12 +140,18 @@ module.exports = strapi => {
         const options = _.assign(strapi.config.middleware.settings.session);
 
         strapi.server.use(session(options, strapi.server.app));
-        strapi.server.use((ctx, next) => {
-          ctx.state = ctx.state || {};
-          ctx.state.session = ctx.session || {};
+        strapi.server.use(
+          /**
+           * @param {StrapiAppContext} ctx
+           * @param {() => Promise<void>} next
+           */
+          (ctx, next) => {
+            ctx.state = ctx.state || {};
+            ctx.state.session = ctx.session || {};
 
-          return next();
-        });
+            return next();
+          }
+        );
       }
     },
   };

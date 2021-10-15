@@ -1,6 +1,7 @@
 'use strict';
 
 /**
+ * @typedef {import('@strapi/admin').Server} Server
  * @typedef {import('@strapi/strapi').Strapi} Strapi
  */
 
@@ -12,6 +13,10 @@ const _ = require('lodash');
  */
 module.exports = strapi => {
   strapi.admin = require('@strapi/admin/strapi-server');
+
+  if (!strapi.admin) {
+    throw new Error('"@strapi/admin" is not installed');
+  }
 
   strapi.container.get('services').add(`admin::`, strapi.admin.services);
   strapi.container.get('controllers').add(`admin::`, strapi.admin.controllers);

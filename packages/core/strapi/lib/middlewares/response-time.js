@@ -1,6 +1,14 @@
 'use strict';
 
+/**
+ * @typedef {import('@strapi/strapi').StrapiAppContext} StrapiAppContext
+ */
+
 module.exports = () => {
+  /**
+   * @param {StrapiAppContext} ctx
+   * @param {() => Promise<void>} next
+   */
   return async (ctx, next) => {
     const start = Date.now();
 

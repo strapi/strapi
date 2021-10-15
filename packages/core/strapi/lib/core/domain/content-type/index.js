@@ -15,7 +15,7 @@ const { validateContentTypeDefinition } = require('./validator');
 const createContentType = (uid, definition) => {
   try {
     validateContentTypeDefinition(definition);
-  } catch (e) {
+  } catch (/** @type {any} **/ e) {
     throw new Error(`Content Type Definition is invalid for ${uid}'.\n${e.errors}`);
   }
 

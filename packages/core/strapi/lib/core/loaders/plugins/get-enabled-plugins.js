@@ -1,5 +1,9 @@
 'use strict';
 
+/**
+ * @typedef {import('@strapi/strapi').Strapi} Strapi
+ */
+
 const { dirname, join, resolve } = require('path');
 const { statSync, existsSync } = require('fs');
 const _ = require('lodash');
@@ -15,6 +19,9 @@ const INTERNAL_PLUGINS = [
   '@strapi/plugin-upload',
 ];
 
+/**
+ * @param {string} pluginName
+ */
 const validatePluginName = pluginName => {
   if (!isKebabCase(pluginName)) {
     throw new Error(`Plugin name "${pluginName}" is not in kebab (an-example-of-kebab-case)`);
@@ -31,7 +38,7 @@ const toDetailedDeclaration = declaration => {
     let pathToPlugin = '';
     try {
       pathToPlugin = dirname(require.resolve(declaration.resolve));
-    } catch (e) {
+    } catch (/** @type {any} **/ e) {
       pathToPlugin = resolve(strapi.dirs.root, declaration.resolve);
 
       if (!existsSync(pathToPlugin) || !statSync(pathToPlugin).isDirectory()) {
@@ -44,6 +51,9 @@ const toDetailedDeclaration = declaration => {
   return detailedDeclaration;
 };
 
+/**
+ * @param {Strapi} strapi
+ */
 const getEnabledPlugins = async strapi => {
   const internalPlugins = {};
   for (const dep of INTERNAL_PLUGINS) {

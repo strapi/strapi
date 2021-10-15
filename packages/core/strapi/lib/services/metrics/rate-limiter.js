@@ -1,12 +1,20 @@
 'use strict';
 
 /**
- * @param events a list of events that need to be limited
+ * a list of events that need to be limited
+ * @param {Function} sender
+ * @param {{
+ *  limitedEvents?: string[]
+ * }} options
  */
 module.exports = (sender, { limitedEvents = [] } = {}) => {
   let currentDay = new Date().getDate();
   const eventCache = new Map();
 
+  /**
+   * @param {string} event
+   * @param {...any} args
+   */
   return async (event, ...args) => {
     if (!limitedEvents.includes(event)) {
       return sender(event, ...args);

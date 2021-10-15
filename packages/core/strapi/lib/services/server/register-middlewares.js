@@ -81,7 +81,7 @@ const registerApplicationMiddlewares = async strapi => {
 const validateMiddlewareConfig = async config => {
   try {
     await middlewareConfigSchema.validate(config, { strict: true, abortEarly: false });
-  } catch (error) {
+  } catch (/** @type {any} **/ error) {
     throw new Error(
       'Invalid middleware configuration. Expected Array<string|{name?: string, resolve?: string, config: any}.'
     );

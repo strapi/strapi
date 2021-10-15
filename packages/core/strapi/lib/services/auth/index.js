@@ -1,5 +1,9 @@
 'use strict';
 
+/**
+ * @typedef {import('@strapi/strapi').StrapiAppContext} StrapiAppContext
+ */
+
 const { strict: assert } = require('assert');
 const { has, prop } = require('lodash/fp');
 
@@ -37,6 +41,10 @@ const createAuthentication = () => {
 
       return this;
     },
+    /**
+     * @param {StrapiAppContext} ctx
+     * @param {() => Promise<void>} next
+     */
     async authenticate(ctx, next) {
       const { route } = ctx.state;
 

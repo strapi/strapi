@@ -92,7 +92,7 @@ const createPolicyFactory = (factoryCallback, options) => {
   const validate = (...args) => {
     try {
       validator(...args);
-    } catch (e) {
+    } catch (/** @type {any} **/ e) {
       throw new Error(`Invalid objects submitted to "${name}" policy.`);
     }
   };

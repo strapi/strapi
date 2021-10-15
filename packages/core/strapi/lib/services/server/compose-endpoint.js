@@ -1,15 +1,40 @@
 'use strict';
 
+/**
+ * @typedef {import('@strapi/strapi').Strapi} Strapi
+ * @typedef {import('@strapi/strapi').StrapiAppContext} StrapiAppContext
+ */
+
 const { has, toLower, castArray, trim, prop } = require('lodash/fp');
 
 const compose = require('koa-compose');
 const { resolveRouteMiddlewares } = require('./middleware');
 const { resolvePolicies } = require('./policy');
 
+/**
+ * @param {{
+ *  method: string
+ * }} route
+ */
 const getMethod = route => trim(toLower(route.method));
+/**
+ * @param {{
+ *  path: string
+ * }} route
+ */
 const getPath = route => trim(route.path);
 
-const createRouteInfoMiddleware = routeInfo => (ctx, next) => {
+/**
+ * @param {{
+ *  path: string
+ *  method: string
+ *  config: string
+ * }} routeInfo
+ */
+const createRouteInfoMiddleware = routeInfo => /**
+ * @param {StrapiAppContext} ctx
+ * @param {() => Promise<void>} next
+ */ (ctx, next) => {
   const route = {
     ...routeInfo,
     config: routeInfo.config || {},
@@ -21,7 +46,13 @@ const createRouteInfoMiddleware = routeInfo => (ctx, next) => {
 
 const getAuthConfig = prop('config.auth');
 
-const createAuthorizeMiddleware = strapi => async (ctx, next) => {
+/**
+ * @param {Strapi} strapi
+ */
+const createAuthorizeMiddleware = strapi => /**
+ * @param {StrapiAppContext} ctx
+ * @param {() => Promise<void>} next
+ */ async (ctx, next) => {
   const { auth, route } = ctx.state;
 
   const authService = strapi.container.get('auth');
@@ -30,7 +61,7 @@ const createAuthorizeMiddleware = strapi => async (ctx, next) => {
     await authService.verify(auth, getAuthConfig(route));
 
     return next();
-  } catch (error) {
+  } catch (/** @type {any} **/ error) {
     const { UnauthorizedError, ForbiddenError } = authService.errors;
 
     if (error instanceof UnauthorizedError) {
@@ -45,10 +76,19 @@ const createAuthorizeMiddleware = strapi => async (ctx, next) => {
   }
 };
 
-const createAuthenticateMiddleware = strapi => async (ctx, next) => {
+/**
+ * @param {Strapi} strapi
+ */
+const createAuthenticateMiddleware = strapi => /**
+ * @param {StrapiAppContext} ctx
+ * @param {() => Promise<void>} next
+ */ async (ctx, next) => {
   return strapi.container.get('auth').authenticate(ctx, next);
 };
 
+/**
+ * @param {Strapi} strapi
+ */
 module.exports = strapi => {
   const authenticate = createAuthenticateMiddleware(strapi);
   const authorize = createAuthorizeMiddleware(strapi);
@@ -73,7 +113,7 @@ module.exports = strapi => {
       ]);
 
       router[method](path, routeHandler);
-    } catch (error) {
+    } catch (/** @type {any} **/ error) {
       throw new Error(`Error creating endpoint ${route.method} ${route.path}: ${error.message}`);
     }
   };

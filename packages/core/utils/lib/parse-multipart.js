@@ -18,7 +18,7 @@ module.exports = ctx => {
   let data;
   try {
     data = JSON.parse(body.data);
-  } catch (error) {
+  } catch (/** @type {any} **/ error) {
     throw strapi.errors.badRequest(`Invalid 'data' field. 'data' should be a valid JSON.`);
   }
 

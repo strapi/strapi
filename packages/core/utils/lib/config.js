@@ -13,7 +13,7 @@ const getConfigUrls = (serverConfig, forAdminBuild = false) => {
   if (serverUrl.startsWith('http')) {
     try {
       serverUrl = _.trim(new URL(serverConfig.url).toString(), '/');
-    } catch (e) {
+    } catch (/** @type {any} **/ e) {
       throw new Error(
         'Invalid server url config. Make sure the url defined in server.js is valid.'
       );
@@ -31,7 +31,7 @@ const getConfigUrls = (serverConfig, forAdminBuild = false) => {
   if (adminUrl.startsWith('http')) {
     try {
       adminUrl = _.trim(new URL(adminUrl).toString(), '/');
-    } catch (e) {
+    } catch (/** @type {any} **/ e) {
       throw new Error('Invalid admin url config. Make sure the url defined in server.js is valid.');
     }
   } else {

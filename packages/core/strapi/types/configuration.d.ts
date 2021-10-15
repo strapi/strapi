@@ -1,3 +1,5 @@
+import { LoggerOptions } from 'winston';
+
 export interface StrapiConfigContext {
   env: (<T = string>(key: string, initial?: T) => T) & {
     int: (key: string, initial?: number) => number;
@@ -10,6 +12,7 @@ export interface StrapiConfigContext {
 }
 
 export interface StrapiServerConfig {
+  url: string;
   host: string;
   port: number;
   proxy: boolean;
@@ -20,9 +23,22 @@ export interface StrapiServerConfig {
     autoOpen: boolean;
   };
 }
-export interface StrapiAdminConfig {}
+export interface StrapiAdminConfig {
+  url?: string;
+  path?: string;
+}
+
+export interface StrapiMiddlewareSettings {}
+export interface StrapiMiddlewareConfig {
+  settings: StrapiMiddlewareSettings;
+}
 
 export interface StrapiConfig {
+  host: string;
+  port: number;
+  logger: LoggerOptions;
+  middleware: StrapiMiddlewareConfig;
+  uuid: string;
   installedPlugins: string[];
   installedProviders: string[];
   autoReload: boolean;
@@ -40,4 +56,9 @@ export interface StrapiConfig {
   functions: Record<string, any>;
   server: StrapiServerConfig;
   admin: StrapiAdminConfig;
+  info: {
+    name: string;
+    strapi: string;
+    dependencies: Record<string, any>;
+  };
 }

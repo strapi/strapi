@@ -27,12 +27,14 @@ const strapi = require('../index');
 module.exports = async function({ build, watchAdmin, polling, browser }) {
   const dir = process.cwd();
   const config = loadConfiguration(dir);
-  const logger = createLogger(config.logger, {});
+  const logger = createLogger(config.logger);
 
   /**
    * @type {string[]}
    */
+  // @ts-ignore
   const adminWatchIgnoreFiles = getOr([], 'server.admin.watchIgnoreFiles')(config);
+  // @ts-ignore
   const serveAdminPanel = getOr(true, 'server.admin.serveAdminPanel')(config);
 
   const buildExists = fs.existsSync(path.join(dir, 'build'));
@@ -43,7 +45,7 @@ module.exports = async function({ build, watchAdmin, polling, browser }) {
         stdio: 'inherit',
         shell: true,
       });
-    } catch (err) {
+    } catch (/** @type {any} **/ err) {
       process.exit(1);
     }
   }
@@ -55,7 +57,7 @@ module.exports = async function({ build, watchAdmin, polling, browser }) {
           execa('npm', ['run', '-s', 'strapi', 'watch-admin', '--', '--browser', browser], {
             stdio: 'inherit',
           });
-        } catch (err) {
+        } catch (/** @type {any} **/ err) {
           process.exit(1);
         }
       }
@@ -108,7 +110,7 @@ module.exports = async function({ build, watchAdmin, polling, browser }) {
 
       return strapiInstance.start();
     }
-  } catch (e) {
+  } catch (/** @type {any} **/ e) {
     logger.error(e);
     process.exit(1);
   }

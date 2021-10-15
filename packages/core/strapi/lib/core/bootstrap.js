@@ -15,6 +15,7 @@ module.exports = function({ strapi }) {
 
   const { serverUrl, adminUrl, adminPath } = getConfigUrls(strapi.config.get('server'));
 
+  // @ts-ignore
   strapi.config.server = strapi.config.server || {};
   strapi.config.server.url = serverUrl;
   strapi.config.admin.url = adminUrl;

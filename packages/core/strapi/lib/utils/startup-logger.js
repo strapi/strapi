@@ -79,6 +79,11 @@ module.exports = strapi => {
       console.log();
     },
 
+    /**
+     * @param {{
+     *  isInitialized?: boolean
+     * }} ctx
+     */
     logStartupMessage({ isInitialized } = {}) {
       // Should the startup message be displayed?
       const hideStartupMessage = process.env.STRAPI_HIDE_STARTUP_MESSAGE

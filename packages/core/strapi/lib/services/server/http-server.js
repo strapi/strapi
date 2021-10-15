@@ -1,12 +1,30 @@
 'use strict';
 
+/**
+ * @typedef {import('koa')} Koa
+ * @typedef {import('@strapi/strapi').Strapi} Strapi
+ */
+
 const http = require('http');
 
+/**
+ * @param {Strapi} strapi
+ * @param {Koa} koaApp
+ */
 const createHTTPServer = (strapi, koaApp) => {
   const connections = new Set();
 
-  // lazy creation of the request listener
+  /**
+   * lazy creation of the request listener
+   * @type {ReturnType<Koa['callback']>}
+   */
+
   let handler;
+
+  /**
+   * @param {http.IncomingMessage} req
+   * @param {http.ServerResponse} res
+   */
   const listener = function handleRequest(req, res) {
     if (!handler) {
       handler = koaApp.callback();
@@ -15,6 +33,9 @@ const createHTTPServer = (strapi, koaApp) => {
     return handler(req, res);
   };
 
+  /**
+   * @type {http.Server & { destroy?: () => Promise<void> }}
+   */
   const server = http.createServer(listener);
 
   server.on('connection', connection => {
@@ -26,15 +47,18 @@ const createHTTPServer = (strapi, koaApp) => {
   });
 
   // handle port in use cleanly
-  server.on('error', err => {
-    if (err.code === 'EADDRINUSE') {
-      return strapi.stopWithError(
-        new Error(`The port ${err.port} is already used by another application.`)
-      );
-    }
+  server.on(
+    'error',
+    /** @param {any} err **/ err => {
+      if (err.code === 'EADDRINUSE') {
+        return strapi.stopWithError(
+          new Error(`The port ${err.port} is already used by another application.`)
+        );
+      }
 
-    strapi.log.error(err);
-  });
+      strapi.log.error(err);
+    }
+  );
 
   server.destroy = async () => {
     for (const connection of connections) {

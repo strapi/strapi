@@ -1,5 +1,9 @@
 'use strict';
 
+/**
+ * @typedef {import('@strapi/strapi').StrapiConfig} StrapiConfig
+ */
+
 const os = require('os');
 const path = require('path');
 const _ = require('lodash');
@@ -38,6 +42,7 @@ const defaultConfig = {
  *  autoReload?: boolean
  *  serveAdminPanel?: boolean
  * }} initialConfig
+ * @returns {Partial<StrapiConfig>}
  */
 module.exports = (dir, initialConfig = {}) => {
   const { autoReload = false, serveAdminPanel = true } = initialConfig;

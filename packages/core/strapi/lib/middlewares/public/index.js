@@ -2,6 +2,7 @@
 
 /**
  * @typedef {import('@strapi/strapi').Strapi} Strapi
+ * @typedef {import('@strapi/strapi').StrapiAppContext} StrapiAppContext
  */
 
 const fs = require('fs');
@@ -21,7 +22,7 @@ const defaults = {
 
 /**
  * @param {any} config
- * @param {{ strapi: Strapi}} ctx
+ * @param {{ strapi: Strapi }} ctx
  */
 module.exports = (config, { strapi }) => {
   const { defaultIndex, maxAge, path: publicPath } = defaultsDeep(defaults, config);
@@ -31,6 +32,10 @@ module.exports = (config, { strapi }) => {
   if (defaultIndex === true) {
     const index = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
 
+    /**
+     * @param {StrapiAppContext} ctx
+     * @param {() => Promise<void>} next
+     */
     const serveIndexPage = async (ctx, next) => {
       // defer rendering of strapi index page
       await next();
@@ -52,7 +57,7 @@ module.exports = (config, { strapi }) => {
         ]),
       };
       const content = _.template(index)(data);
-      const body = stream.Readable({
+      const body = new stream.Readable({
         read() {
           this.push(Buffer.from(content));
           this.push(null);
@@ -97,9 +102,19 @@ module.exports = (config, { strapi }) => {
     ]);
   }
 
-  if (!strapi.config.serveAdminPanel) return async (ctx, next) => next();
+  if (!strapi.config.serveAdminPanel) {
+    /**
+     * @param {StrapiAppContext} ctx
+     * @param {() => Promise<void>} next
+     */
+    return async (ctx, next) => next();
+  }
 
   const buildDir = path.resolve(strapi.dirs.root, 'build');
+  /**
+   * @param {StrapiAppContext} ctx
+   * @param {() => Promise<void>} next
+   */
   const serveAdmin = async (ctx, next) => {
     await next();
 

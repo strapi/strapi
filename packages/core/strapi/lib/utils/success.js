@@ -26,6 +26,6 @@ try {
       headers: { 'Content-Type': 'application/json' },
     }).catch(() => {});
   }
-} catch (e) {
+} catch (/** @type {any} **/ e) {
   //...
 }

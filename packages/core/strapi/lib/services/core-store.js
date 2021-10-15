@@ -75,7 +75,7 @@ const createCoreStore = ({ db }) => {
       ) {
         try {
           return JSON.parse(data.value);
-        } catch (err) {
+        } catch (/** @type {any} **/ err) {
           return new Date(data.value);
         }
       } else if (data.type === 'number') {

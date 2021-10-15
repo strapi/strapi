@@ -1,6 +1,7 @@
 'use strict';
 
 /**
+ * @typedef {import('@strapi/strapi').StrapiAppContext} StrapiAppContext
  * @typedef {import('@strapi/strapi').Strapi} Strapi
  */
 
@@ -14,6 +15,9 @@ const { createContentAPI } = require('./content-api');
 const registerAllRoutes = require('./register-routes');
 const registerApplicationMiddlewares = require('./register-middlewares');
 
+/**
+ * @param {StrapiAppContext} ctx
+ */
 const healthCheck = async ctx => {
   ctx.set('strapi', 'You are so French!');
   ctx.status = 204;
@@ -53,6 +57,9 @@ const createServer = strapi => {
     router,
     httpServer,
 
+    /**
+     * @param {keyof apis} name
+     */
     api(name) {
       return apis[name];
     },
@@ -108,6 +115,9 @@ const createServer = strapi => {
       return allRoutes;
     },
 
+    /**
+     * @param {...any} args
+     */
     listen(...args) {
       if (!state.mounted) {
         this.mount();

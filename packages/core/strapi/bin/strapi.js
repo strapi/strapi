@@ -30,7 +30,7 @@ const checkCwdIsStrapiApp = name => {
     if (!_.has(pkgJSON, 'dependencies.@strapi/strapi')) {
       logErrorAndExit();
     }
-  } catch (err) {
+  } catch (/** @type {any} **/ err) {
     logErrorAndExit();
   }
 };

@@ -4,8 +4,8 @@ const { map, mapValues, isObject, isArray, toString } = require('lodash/fp');
 
 /**
  * Stringify all non object valutes before send them
- * @param {object} obj
- * @returns {object}
+ *
+ * @param {any} value
  */
 const stringifyDeep = value => {
   if (isArray(value)) {

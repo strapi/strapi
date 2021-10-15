@@ -1,6 +1,7 @@
 'use strict';
 
 /**
+ * @typedef {import('koa')} Koa
  * @typedef {import('@strapi/strapi').Strapi} Strapi
  */
 
@@ -15,6 +16,9 @@ const defaults = {
 
 /**
  * Body parser hook
+ *
+ * @param {Koa} app
+ * @param {any} settings
  */
 const addQsParser = (app, settings) => {
   Object.defineProperty(app.request, 'query', {

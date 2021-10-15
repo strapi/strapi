@@ -47,7 +47,7 @@ module.exports = class WorkerQueue {
     debug('Execute worker');
     try {
       await this.worker(payload);
-    } catch (error) {
+    } catch (/** @type {any} **/ error) {
       this.logger.error(error);
     } finally {
       this.pop();

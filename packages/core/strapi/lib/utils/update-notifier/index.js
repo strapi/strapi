@@ -1,5 +1,9 @@
 'use strict';
 
+/**
+ * @typedef {import('types').Strapi} Strapi
+ */
+
 const path = require('path');
 const packageJson = require('package-json');
 const Configstore = require('configstore');
@@ -8,10 +12,14 @@ const boxen = require('boxen');
 const chalk = require('chalk');
 const { env } = require('@strapi/utils');
 
-const pkg = require('../../../package');
+const pkg = require('../../../package.json');
 
 const CHECK_INTERVAL = 1000 * 60 * 60 * 24 * 1; // 1 day
 const NOTIF_INTERVAL = 1000 * 60 * 60 * 24 * 7; // 1 week
+
+/**
+ * @type {boxen.Options}
+ */
 const boxenOptions = {
   padding: 1,
   margin: 1,
@@ -20,6 +28,10 @@ const boxenOptions = {
   borderStyle: 'round',
 };
 
+/**
+ * @param {string} newVersion
+ * @param {string} currentVersion
+ */
 const geUpdatetMessage = (newVersion, currentVersion) => {
   const currentVersionLog = chalk.dim(currentVersion);
   const newVersionLog = chalk.green(newVersion);
@@ -31,7 +43,13 @@ Check out the new releases at: ${releaseLink}
 `.trim();
 };
 
+/**
+ * @param {Strapi} strapi
+ */
 const createUpdateNotifier = strapi => {
+  /**
+   * @type {Configstore | null}
+   */
   let config = null;
 
   try {
@@ -45,7 +63,14 @@ const createUpdateNotifier = strapi => {
     // we silence the error
   }
 
+  /**
+   * @param {number} checkInterval
+   */
   const checkUpdate = async checkInterval => {
+    if (config === null) {
+      return;
+    }
+
     const now = Date.now();
     const lastUpdateCheck = config.get('lastUpdateCheck') || 0;
     if (lastUpdateCheck + checkInterval > now) {
@@ -63,7 +88,14 @@ const createUpdateNotifier = strapi => {
     }
   };
 
+  /**
+   * @param {number} notifInterval
+   */
   const display = notifInterval => {
+    if (config === null) {
+      return;
+    }
+
     const now = Date.now();
     const latestVersion = config.get('latest');
     const lastNotification = config.get('lastNotification') || 0;

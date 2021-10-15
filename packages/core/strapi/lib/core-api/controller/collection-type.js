@@ -1,5 +1,9 @@
 'use strict';
 
+/**
+ * @typedef {import('types').StrapiAppContext} StrapiAppContext
+ */
+
 const { parseBody } = require('./transform');
 
 /**
@@ -11,7 +15,7 @@ const createCollectionTypeController = ({ service, sanitize, transformResponse }
     /**
      * Retrieve records.
      *
-     * @returns {Object|Array}
+     * @param {StrapiAppContext} ctx
      */
     async find(ctx) {
       const { query } = ctx;
@@ -24,7 +28,7 @@ const createCollectionTypeController = ({ service, sanitize, transformResponse }
     /**
      * Retrieve a record.
      *
-     * @returns {Object}
+     * @param {StrapiAppContext} ctx
      */
     async findOne(ctx) {
       const { id } = ctx.params;
@@ -38,7 +42,7 @@ const createCollectionTypeController = ({ service, sanitize, transformResponse }
     /**
      * Create a record.
      *
-     * @returns {Object}
+     * @param {StrapiAppContext} ctx
      */
     async create(ctx) {
       const { query } = ctx.request;
@@ -53,7 +57,7 @@ const createCollectionTypeController = ({ service, sanitize, transformResponse }
     /**
      * Update a record.
      *
-     * @returns {Object}
+     * @param {StrapiAppContext} ctx
      */
     async update(ctx) {
       const { id } = ctx.params;
@@ -69,7 +73,7 @@ const createCollectionTypeController = ({ service, sanitize, transformResponse }
     /**
      * Destroy a record.
      *
-     * @returns {Object}
+     * @param {StrapiAppContext} ctx
      */
     async delete(ctx) {
       const { id } = ctx.params;

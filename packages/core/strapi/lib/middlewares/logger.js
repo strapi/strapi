@@ -2,10 +2,14 @@
 
 /**
  * @typedef {import('@strapi/strapi').Strapi} Strapi
+ * @typedef {import('@strapi/strapi').StrapiAppContext} StrapiAppContext
  */
 
 const chalk = require('chalk');
 
+/**
+ * @param {number} code
+ */
 const codeToColor = code => {
   return code >= 500
     ? chalk.red(code)
@@ -23,6 +27,10 @@ const codeToColor = code => {
  * @param {{ strapi: Strapi}} ctx
  */
 module.exports = (_, { strapi }) => {
+  /**
+   * @param {StrapiAppContext} ctx
+   * @param {() => Promise<void>} next
+   */
   return async (ctx, next) => {
     const start = Date.now();
     await next();

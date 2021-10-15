@@ -31,7 +31,7 @@ const parseDate = value => {
     if (dates.isValid(date)) return dates.format(date, 'yyyy-MM-dd');
 
     throw new Error(`Invalid format, expected an ISO compatible date`);
-  } catch (error) {
+  } catch (/** @type {any} **/ error) {
     throw new Error(`Invalid format, expected an ISO compatible date`);
   }
 };
@@ -46,7 +46,7 @@ const parseDateTimeOrTimestamp = value => {
     if (dates.isValid(milliUnixDate)) return milliUnixDate;
 
     throw new Error(`Invalid format, expected a timestamp or an ISO date`);
-  } catch (error) {
+  } catch (/** @type {any} **/ error) {
     throw new Error(`Invalid format, expected a timestamp or an ISO date`);
   }
 };

@@ -85,7 +85,7 @@ module.exports = ({ dir, logger = noLog }) => {
     if (expirationTime < new Date().getTime()) {
       return warnAndReturn('License expired. Starting in CE');
     }
-  } catch (err) {
+  } catch (/** @type {any} **/ err) {
     return warnAndReturn();
   }
 

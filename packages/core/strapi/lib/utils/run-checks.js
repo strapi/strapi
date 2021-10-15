@@ -1,5 +1,9 @@
 'use strict';
 
+/**
+ * @typedef {import('@strapi/strapi').StrapiConfig} StrapiConfig
+ */
+
 const path = require('path');
 const fs = require('fs-extra');
 
@@ -21,6 +25,9 @@ const checkFoldersExist = ({ appPath }) => {
   }
 };
 
+/**
+ * @param {StrapiConfig} config
+ */
 module.exports = config => {
   checkFoldersExist(config);
 };

@@ -2,6 +2,7 @@
 
 /**
  * @typedef {import('@strapi/strapi').Strapi} Strapi
+ * @typedef {import('@strapi/strapi').StrapiConfig} StrapiConfig
  */
 
 const { defaultsDeep } = require('lodash/fp');
@@ -17,7 +18,7 @@ const defaults = {
 };
 
 /**
- * @param {any} config
+ * @param {StrapiConfig} config
  */
 module.exports = config => {
   const {

@@ -6,6 +6,9 @@ const ora = require('ora');
 const execa = require('execa');
 const findPackagePath = require('../load/package-path');
 
+/**
+ * @param {string[]} plugins
+ */
 module.exports = async plugins => {
   const loader = ora();
   const dir = process.cwd();
@@ -40,7 +43,7 @@ module.exports = async plugins => {
       await execa('npm', ['run', 'build']);
       loader.succeed();
     }
-  } catch (err) {
+  } catch (/** @type {any} **/ err) {
     loader.clear();
     console.error(err.message);
     process.exit(1);

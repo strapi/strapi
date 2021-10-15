@@ -1,5 +1,9 @@
 'use strict';
 
+/**
+ * @typedef {import('@strapi/strapi').Strapi} Strapi
+ */
+
 const _ = require('lodash');
 
 const createRouteScopeGenerator = namespace => route => {
@@ -20,7 +24,7 @@ const createRouteScopeGenerator = namespace => route => {
 
 /**
  * Register all routes
- * @param {import('../../').Strapi} strapi
+ * @param {import('@strapi/strapi').Strapi} strapi
  */
 module.exports = strapi => {
   registerAdminRoutes(strapi);
@@ -30,7 +34,7 @@ module.exports = strapi => {
 
 /**
  * Register admin routes
- * @param {import('../../').Strapi} strapi
+ * @param {Strapi} strapi
  */
 const registerAdminRoutes = strapi => {
   const generateRouteScope = createRouteScopeGenerator(`admin::`);
@@ -49,7 +53,7 @@ const registerAdminRoutes = strapi => {
 
 /**
  * Register plugin routes
- * @param {import('../../').Strapi} strapi
+ * @param {Strapi} strapi
  */
 const registerPluginRoutes = strapi => {
   for (const pluginName in strapi.plugins) {
@@ -85,7 +89,8 @@ const registerPluginRoutes = strapi => {
 
 /**
  * Register api routes
- * @param {import('../../').Strapi} strapi
+ *
+ * @param {Strapi} strapi
  */
 const registerAPIRoutes = strapi => {
   for (const apiName in strapi.api) {

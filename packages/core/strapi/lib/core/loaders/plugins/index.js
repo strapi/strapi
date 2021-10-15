@@ -1,5 +1,9 @@
 'use strict';
 
+/**
+ * @typedef {import('@strapi/strapi').Strapi} Strapi
+ */
+
 const { join } = require('path');
 const { existsSync } = require('fs');
 const { defaultsDeep, getOr, get } = require('lodash/fp');
@@ -78,13 +82,16 @@ const applyUserConfig = plugins => {
     const config = defaultsDeep(defaultConfig, userPluginConfig);
     try {
       plugin.config.validator(config);
-    } catch (e) {
+    } catch (/** @type {any} **/ e) {
       throw new Error(`Error regarding ${pluginName} config: ${e.message}`);
     }
     plugin.config = config;
   }
 };
 
+/**
+ * @param {Strapi} strapi
+ */
 const loadPlugins = async strapi => {
   const plugins = {};
 

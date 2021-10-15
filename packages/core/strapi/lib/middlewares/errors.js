@@ -2,6 +2,7 @@
 
 /**
  * @typedef {import('@strapi/strapi').Strapi} Strapi
+ * @typedef {import('@strapi/strapi').StrapiAppContext} StrapiAppContext
  */
 
 const { isNil } = require('lodash/fp');
@@ -114,6 +115,10 @@ module.exports = (_, { strapi }) => {
   createResponseUtils(strapi);
   strapi.errors = Boom;
 
+  /**
+   * @param {StrapiAppContext} ctx
+   * @param {() => Promise<void>} next
+   */
   return async (ctx, next) => {
     try {
       // App logic.
@@ -122,7 +127,7 @@ module.exports = (_, { strapi }) => {
       if (isNil(ctx.body) && (isNil(ctx.status) || ctx.status === 404)) {
         ctx.notFound();
       }
-    } catch (error) {
+    } catch (/** @type {any} **/ error) {
       // emit error if configured
       if (strapi.config.get('server.emitErrors', false)) {
         strapi.server.app.emit('error', error, ctx);

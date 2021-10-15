@@ -28,12 +28,15 @@ const LIMITED_EVENTS = [
 ];
 
 /**
- * @param {Strapin} strapi
+ * @param {Strapi} strapi
  */
 const createTelemetryInstance = strapi => {
   const uuid = strapi.config.get('uuid');
   const isDisabled = !uuid || isTruthy(process.env.STRAPI_TELEMETRY_DISABLED);
 
+  /**
+   * @type {Record<string, any>[]}
+   */
   const crons = [];
   const sender = createSender(strapi);
   const sendEvent = wrapWithRateLimit(sender, { limitedEvents: LIMITED_EVENTS });
@@ -80,6 +83,11 @@ const createTelemetryInstance = strapi => {
       // clear open handles
       crons.forEach(cron => cron.cancel());
     },
+    /**
+     *
+     * @param {string} event
+     * @param {any} payload
+     */
     async send(event, payload) {
       if (isDisabled) return true;
       return sendEvent(event, payload);
@@ -87,15 +95,24 @@ const createTelemetryInstance = strapi => {
   };
 };
 
+/**
+ * @param {string} str
+ */
 const hash = str =>
   crypto
     .createHash('sha256')
     .update(str)
     .digest('hex');
 
+/**
+ * @param {Strapi} strapi
+ */
 const hashProject = strapi =>
   hash(`${strapi.config.get('info.name')}${strapi.config.get('info.description')}`);
 
+/**
+ * @param {Strapi} strapi
+ */
 const hashDep = strapi => {
   const depStr = JSON.stringify(strapi.config.info.dependencies);
   const readmePath = path.join(strapi.dirs.root, 'README.md');
@@ -104,7 +121,7 @@ const hashDep = strapi => {
     if (fs.existsSync(readmePath)) {
       return hash(`${depStr}${fs.readFileSync(readmePath)}`);
     }
-  } catch (err) {
+  } catch (/** @type {any} **/ err) {
     return hash(`${depStr}`);
   }
 

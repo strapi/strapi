@@ -1,5 +1,9 @@
 'use strict';
 
+/**
+ * @typedef {import('@strapi/strapi').StrapiAppContext} StrapiAppContext
+ */
+
 const { propOr } = require('lodash/fp');
 const policy = require('@strapi/utils/lib/policy');
 
@@ -15,6 +19,10 @@ const resolvePolicies = route => {
     policy.get(policyConfig, { pluginName, apiName })
   );
 
+  /**
+   * @param {StrapiAppContext} ctx
+   * @param {() => Promise<void>} next
+   */
   const policiesMiddleware = async (ctx, next) => {
     const context = policy.createPolicyContext('koa', ctx);
 

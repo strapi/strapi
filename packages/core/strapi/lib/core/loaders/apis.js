@@ -19,7 +19,6 @@ const DEFAULT_CONTENT_TYPE = {
 
 /**
  * @param {Strapi} strapi
- * @returns {Promise<void>}
  */
 module.exports = async strapi => {
   if (!existsSync(strapi.dirs.api)) {
@@ -69,6 +68,9 @@ const validateContentTypesUnicity = apis => {
   });
 };
 
+/**
+ * @param {string} dir
+ */
 const loadAPI = async dir => {
   const [
     index,
@@ -102,12 +104,18 @@ const loadAPI = async dir => {
   };
 };
 
+/**
+ * @param {string} dir
+ */
 const loadIndex = async dir => {
   if (await fse.pathExists(join(dir, 'index.js'))) {
     return loadFile(join(dir, 'index.js'));
   }
 };
 
+/**
+ * @param {string} dir
+ */
 const loadContentTypes = async dir => {
   if (!(await fse.pathExists(dir))) {
     return;
@@ -131,6 +139,9 @@ const loadContentTypes = async dir => {
   return contentTypes;
 };
 
+/**
+ * @param {string} dir
+ */
 const loadDir = async dir => {
   if (!(await fse.pathExists(dir))) {
     return;
@@ -151,6 +162,9 @@ const loadDir = async dir => {
   return root;
 };
 
+/**
+ * @param {string} file
+ */
 const loadFile = file => {
   const ext = extname(file);
 

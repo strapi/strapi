@@ -1,4 +1,7 @@
 import * as server from '../server';
-type Server = typeof server;
+import * as serverEE from '../ee/server';
+export * from '../index';
+
+type Server = typeof server & typeof serverEE;
 
 export { Server };

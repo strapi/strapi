@@ -213,10 +213,16 @@ class Strapi {
   //   return this.container.get('apis').get(name);
   // }
 
+  /**
+   * @this StrapiInterface
+   */
   get api() {
     return this.container.get('apis').getAll();
   }
 
+  /**
+   * @this StrapiInterface
+   */
   get auth() {
     return this.container.get('auth');
   }
@@ -307,7 +313,7 @@ class Strapi {
           await this.postListen();
 
           resolve();
-        } catch (error) {
+        } catch (/** @type {any} **/ error) {
           reject(error);
         }
       };
@@ -503,6 +509,9 @@ class Strapi {
     return this;
   }
 
+  /**
+   * @this StrapiInterface
+   */
   async load() {
     await this.register();
     await this.bootstrap();

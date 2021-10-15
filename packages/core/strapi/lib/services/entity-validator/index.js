@@ -176,7 +176,7 @@ const createValidateEntity = createOrUpdate => async (model, data, { isDraft = f
   try {
     const validator = createModelValidator(createOrUpdate)(model, data, { isDraft }).required();
     return await validator.validate(data, { abortEarly: false });
-  } catch (e) {
+  } catch (/** @type {any} **/ e) {
     throw strapi.errors.badRequest('ValidationError', { errors: formatYupErrors(e) });
   }
 };
