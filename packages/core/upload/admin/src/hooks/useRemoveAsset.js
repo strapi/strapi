@@ -20,6 +20,7 @@ export const useRemoveAsset = onSuccess => {
     onSuccess: () => {
       // Coupled with the cache of useAssets
       queryClient.refetchQueries(['assets'], { active: true });
+      queryClient.refetchQueries(['asset-count'], { active: true });
 
       toggleNotification({
         type: 'success',
