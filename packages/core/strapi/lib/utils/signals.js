@@ -1,6 +1,6 @@
 'use strict';
 
-const destroyOnSignal = () => {
+const destroyOnSignal = strapi => {
   let signalReceived = false;
 
   // For unknown reasons, we receive signals 2 times.

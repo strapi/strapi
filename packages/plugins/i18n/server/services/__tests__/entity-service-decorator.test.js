@@ -141,7 +141,7 @@ describe('Entity service decorator', () => {
       }
     );
 
-    test('Replaces _locale param', async () => {
+    test('Replaces locale param', async () => {
       const defaultService = {
         wrapParams: jest.fn(opts => Promise.resolve(opts)),
       };

@@ -1,7 +1,6 @@
 'use strict';
 
 const delegate = require('delegates');
-const { pipe } = require('lodash/fp');
 
 const {
   sanitizeEntity,
@@ -16,15 +15,19 @@ const {
   updateComponents,
   deleteComponents,
 } = require('./components');
-const {
-  transformCommonParams,
-  transformPaginationParams,
-  transformParamsToQuery,
-  pickSelectionParams,
-} = require('./params');
+const { transformParamsToQuery, pickSelectionParams } = require('./params');
+const { applyTransforms } = require('./attributes');
 
 // TODO: those should be strapi events used by the webhooks not the other way arround
 const { ENTRY_CREATE, ENTRY_UPDATE, ENTRY_DELETE } = webhookUtils.webhookEvents;
+
+const creationPipeline = (data, context) => {
+  return applyTransforms(data, context);
+};
+
+const updatePipeline = (data, context) => {
+  return applyTransforms(data, context);
+};
 
 module.exports = ctx => {
   const implementation = createDefaultImplementation(ctx);
@@ -137,7 +140,9 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
 
     let entity = await db.query(uid).create({
       ...query,
-      data: Object.assign(omitComponentData(model, validData), componentData),
+      data: creationPipeline(Object.assign(omitComponentData(model, validData), componentData), {
+        contentType: model,
+      }),
     });
 
     // TODO: upload the files then set the links in the entity like with compo to avoid making too many queries
@@ -178,7 +183,9 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
     let entity = await db.query(uid).update({
       ...query,
       where: { id: entityId },
-      data: Object.assign(omitComponentData(model, validData), componentData),
+      data: updatePipeline(Object.assign(omitComponentData(model, validData), componentData), {
+        contentType: model,
+      }),
     });
 
     // TODO: upload the files then set the links in the entity like with compo to avoid making too many queries
@@ -231,13 +238,26 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
 
     const attribute = attributes[field];
 
-    const loadParams =
-      attribute.type === 'relation'
-        ? transformParamsToQuery(attribute.target, params)
-        : pipe(
-            transformCommonParams,
-            transformPaginationParams
-          )(params);
+    const loadParams = {};
+
+    switch (attribute.type) {
+      case 'relation': {
+        Object.assign(loadParams, transformParamsToQuery(attribute.target, params));
+        break;
+      }
+      case 'component': {
+        Object.assign(loadParams, transformParamsToQuery(attribute.component, params));
+        break;
+      }
+      case 'dynamiczone': {
+        Object.assign(loadParams, transformParamsToQuery(null, params));
+        break;
+      }
+      case 'media': {
+        Object.assign(loadParams, transformParamsToQuery('plugin::upload.file', params));
+        break;
+      }
+    }
 
     return db.query(uid).load(entity, field, loadParams);
   },

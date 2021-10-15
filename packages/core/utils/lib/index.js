@@ -4,7 +4,6 @@
  * Export shared utilities
  */
 const { buildQuery, hasDeepFilters } = require('./build-query');
-const { QUERY_OPERATORS } = require('./convert-query-params');
 const parseMultipartData = require('./parse-multipart');
 const sanitizeEntity = require('./sanitize-entity');
 const parseType = require('./parse-type');
@@ -38,7 +37,6 @@ module.exports = {
   formatYupErrors,
   policy,
   templateConfiguration,
-  QUERY_OPERATORS,
   buildQuery,
   hasDeepFilters,
   parseMultipartData,

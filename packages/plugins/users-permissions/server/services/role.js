@@ -40,7 +40,7 @@ module.exports = ({ strapi }) => ({
     await Promise.all(createPromises);
   },
 
-  async getRole(roleID, plugins) {
+  async getRole(roleID) {
     const role = await strapi
       .query('plugin::users-permissions.role')
       .findOne({ where: { id: roleID }, populate: ['permissions'] });
@@ -59,12 +59,6 @@ module.exports = ({ strapi }) => ({
         enabled: true,
         policy: '',
       });
-
-      if (permission.action.startsWith('plugin')) {
-        const [, pluginName] = type.split('::');
-
-        allActions[type].information = plugins.find(plugin => plugin.id === pluginName) || {};
-      }
     });
 
     return {
