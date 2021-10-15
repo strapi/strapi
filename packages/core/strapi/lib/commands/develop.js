@@ -64,14 +64,12 @@ module.exports = async function({ build, watchAdmin, polling, browser }) {
         switch (message) {
           case 'reload':
             logger.info('The server is restarting\n');
-            worker.send('isKilled');
+            worker.send('kill');
             break;
-          case 'kill':
-            worker.kill();
+          case 'killed':
             cluster.fork();
             break;
           case 'stop':
-            worker.kill();
             process.exit(1);
           default:
             return;
@@ -97,12 +95,12 @@ module.exports = async function({ build, watchAdmin, polling, browser }) {
 
       process.on('message', async message => {
         switch (message) {
-          case 'isKilled':
-            await strapiInstance.server.destroy();
+          case 'kill':
+            await strapiInstance.destroy();
             if (process.send) {
-              process.send('kill');
+              process.send('killed');
             }
-            break;
+            process.exit();
           default:
           // Do nothing.
         }

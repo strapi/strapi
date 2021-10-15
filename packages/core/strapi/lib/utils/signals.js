@@ -21,7 +21,12 @@ const destroyOnSignal = strapi => {
     }
   };
 
-  ['SIGTERM', 'SIGINT'].forEach(signal => {
+  /**
+   * @type {NodeJS.Signals[]}
+   */
+  const signals = ['SIGTERM', 'SIGINT'];
+
+  signals.forEach(signal => {
     process.on(signal, terminateStrapi);
   });
 };

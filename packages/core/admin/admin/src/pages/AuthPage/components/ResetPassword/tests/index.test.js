@@ -37,12 +37,12 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         padding-right: 40px;
       }
 
-      .c6 {
+      .c9 {
         padding-top: 64px;
         padding-bottom: 64px;
       }
 
-      .c8 {
+      .c11 {
         background: #ffffff;
         padding-top: 48px;
         padding-right: 56px;
@@ -52,23 +52,23 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
-      .c13 {
+      .c16 {
         padding-top: 24px;
         padding-bottom: 32px;
       }
 
-      .c32 {
+      .c35 {
         padding-top: 16px;
       }
 
-      .c30 {
+      .c33 {
         font-weight: 500;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #32324d;
       }
 
-      .c27 {
+      .c30 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -82,21 +82,21 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         outline: none;
       }
 
-      .c27 svg {
+      .c30 svg {
         height: 12px;
         width: 12px;
       }
 
-      .c27 svg > g,
-      .c27 svg path {
+      .c30 svg > g,
+      .c30 svg path {
         fill: #ffffff;
       }
 
-      .c27[aria-disabled='true'] {
+      .c30[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c27:after {
+      .c30:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -111,11 +111,11 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         border: 2px solid transparent;
       }
 
-      .c27:focus-visible {
+      .c30:focus-visible {
         outline: none;
       }
 
-      .c27:focus-visible:after {
+      .c30:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -126,7 +126,7 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         border: 2px solid #4945ff;
       }
 
-      .c28 {
+      .c31 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -138,7 +138,7 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         background: #4945ff;
       }
 
-      .c28 .sc-dwfUuu {
+      .c31 .sc-dwfUuu {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -149,49 +149,49 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         align-items: center;
       }
 
-      .c28 .c29 {
+      .c31 .c32 {
         color: #ffffff;
       }
 
-      .c28[aria-disabled='true'] {
+      .c31[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c28[aria-disabled='true'] .c29 {
+      .c31[aria-disabled='true'] .c32 {
         color: #666687;
       }
 
-      .c28[aria-disabled='true'] svg > g,
-      .c28[aria-disabled='true'] svg path {
+      .c31[aria-disabled='true'] svg > g,
+      .c31[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c28[aria-disabled='true']:active {
+      .c31[aria-disabled='true']:active {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c28[aria-disabled='true']:active .c29 {
+      .c31[aria-disabled='true']:active .c32 {
         color: #666687;
       }
 
-      .c28[aria-disabled='true']:active svg > g,
-      .c28[aria-disabled='true']:active svg path {
+      .c31[aria-disabled='true']:active svg > g,
+      .c31[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
-      .c28:hover {
+      .c31:hover {
         border: 1px solid #7b79ff;
         background: #7b79ff;
       }
 
-      .c28:active {
+      .c31:active {
         border: 1px solid #4945ff;
         background: #4945ff;
       }
 
-      .c24 {
+      .c27 {
         border: none;
         background: transparent;
         font-size: 1.6rem;
@@ -225,7 +225,7 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         align-items: center;
       }
 
-      .c10 {
+      .c13 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -239,7 +239,7 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         align-items: center;
       }
 
-      .c31 {
+      .c34 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -257,7 +257,7 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         align-items: center;
       }
 
-      .c15 {
+      .c18 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -267,49 +267,49 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         flex-direction: column;
       }
 
-      .c15 > * {
+      .c18 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c15 > * + * {
+      .c18 > * + * {
         margin-top: 24px;
       }
 
-      .c14 {
+      .c17 {
         font-weight: 600;
         font-size: 2rem;
         line-height: 1.25;
         color: #32324d;
       }
 
-      .c18 {
+      .c21 {
         font-weight: 500;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #32324d;
       }
 
-      .c19 {
+      .c22 {
         font-weight: 400;
         font-size: 0.875rem;
         line-height: 1.43;
         color: #d02b20;
       }
 
-      .c26 {
+      .c29 {
         font-weight: 400;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #666687;
       }
 
-      .c23 {
+      .c26 {
         padding-right: 12px;
         padding-left: 8px;
       }
 
-      .c17 {
+      .c20 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -323,7 +323,7 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         align-items: center;
       }
 
-      .c20 {
+      .c23 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -341,7 +341,7 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         align-items: center;
       }
 
-      .c22 {
+      .c25 {
         border: none;
         border-radius: 4px;
         padding-left: 16px;
@@ -353,37 +353,37 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         width: 100%;
       }
 
-      .c22::-webkit-input-placeholder {
+      .c25::-webkit-input-placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c22::-moz-placeholder {
+      .c25::-moz-placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c22:-ms-input-placeholder {
+      .c25:-ms-input-placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c22::placeholder {
+      .c25::placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c22[aria-disabled='true'] {
+      .c25[aria-disabled='true'] {
         background: inherit;
         color: inherit;
       }
 
-      .c22:focus {
+      .c25:focus {
         outline: none;
         box-shadow: none;
       }
 
-      .c21 {
+      .c24 {
         border: 1px solid #dcdce4;
         border-radius: 4px;
         background: #ffffff;
@@ -396,12 +396,12 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         transition-duration: 0.2s;
       }
 
-      .c21:focus-within {
+      .c24:focus-within {
         border: 1px solid #4945ff;
         box-shadow: #4945ff 0px 0px 0px 2px;
       }
 
-      .c16 {
+      .c19 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -411,39 +411,39 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         flex-direction: column;
       }
 
-      .c16 > * {
+      .c19 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c16 > * + * {
+      .c19 > * + * {
         margin-top: 4px;
       }
 
-      .c7 {
+      .c10 {
         outline: none;
       }
 
-      .c34 {
+      .c37 {
         font-weight: 400;
         font-size: 0.875rem;
         line-height: 1.43;
         color: #4945ff;
       }
 
-      .c35 {
+      .c38 {
         font-weight: 600;
         line-height: 1.14;
       }
 
-      .c36 {
+      .c39 {
         font-weight: 600;
         font-size: 0.6875rem;
         line-height: 1.45;
         text-transform: uppercase;
       }
 
-      .c33 {
+      .c36 {
         display: -webkit-inline-box;
         display: -webkit-inline-flex;
         display: -ms-inline-flexbox;
@@ -459,15 +459,15 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         outline: none;
       }
 
-      .c33 svg path {
+      .c36 svg path {
         fill: #4945ff;
       }
 
-      .c33 svg {
+      .c36 svg {
         font-size: 0.625rem;
       }
 
-      .c33:after {
+      .c36:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -482,11 +482,11 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         border: 2px solid transparent;
       }
 
-      .c33:focus-visible {
+      .c36:focus-visible {
         outline: none;
       }
 
-      .c33:focus-visible:after {
+      .c36:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -497,25 +497,88 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         border: 2px solid #4945ff;
       }
 
-      .c4 {
-        font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
+      .c5 {
+        font-weight: 500;
+        font-size: 0.75rem;
+        line-height: 1.33;
         color: #32324d;
       }
 
-      .c5 {
-        font-weight: 600;
-        line-height: 1.14;
-      }
-
-      .c3 {
-        padding-right: 4px;
+      .c7 {
+        padding-left: 8px;
       }
 
       .c2 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 4px;
+        background: #ffffff;
+        border: 1px solid #dcdce4;
+        position: relative;
+        outline: none;
+      }
+
+      .c2 svg {
+        height: 12px;
+        width: 12px;
+      }
+
+      .c2 svg > g,
+      .c2 svg path {
+        fill: #ffffff;
+      }
+
+      .c2[aria-disabled='true'] {
+        pointer-events: none;
+      }
+
+      .c2:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c2:focus-visible {
+        outline: none;
+      }
+
+      .c2:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
+      }
+
+      .c3 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        padding: 8px 16px;
+        background: #4945ff;
         border: none;
+        border: 1px solid transparent;
         background: transparent;
+      }
+
+      .c3 .c6 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -524,38 +587,95 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
-        font-size: 0.75rem;
       }
 
-      .c2 svg {
-        height: 0.25rem;
+      .c3 .c4 {
+        color: #ffffff;
       }
 
-      .c2 svg path {
+      .c3[aria-disabled='true'] {
+        border: 1px solid #dcdce4;
+        background: #eaeaef;
+      }
+
+      .c3[aria-disabled='true'] .c4 {
+        color: #666687;
+      }
+
+      .c3[aria-disabled='true'] svg > g,
+      .c3[aria-disabled='true'] svg path {
+        fill: #666687;
+      }
+
+      .c3[aria-disabled='true']:active {
+        border: 1px solid #dcdce4;
+        background: #eaeaef;
+      }
+
+      .c3[aria-disabled='true']:active .c4 {
+        color: #666687;
+      }
+
+      .c3[aria-disabled='true']:active svg > g,
+      .c3[aria-disabled='true']:active svg path {
+        fill: #666687;
+      }
+
+      .c3:hover {
+        background-color: #f6f6f9;
+      }
+
+      .c3:active {
+        border: 1px solid undefined;
+        background: undefined;
+      }
+
+      .c3 .c4 {
+        color: #32324d;
+      }
+
+      .c3 svg > g,
+      .c3 svg path {
         fill: #8e8ea9;
       }
 
-      .c9 {
+      .c8 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c8 svg {
+        height: 4px;
+        width: 6px;
+      }
+
+      .c12 {
         margin: 0 auto;
         width: 552px;
       }
 
-      .c11 {
+      .c14 {
         -webkit-flex-direction: column;
         -ms-flex-direction: column;
         flex-direction: column;
       }
 
-      .c12 {
+      .c15 {
         height: 4.5rem;
       }
 
-      .c25 svg {
+      .c28 svg {
         height: 1rem;
         width: 1rem;
       }
 
-      .c25 svg path {
+      .c28 svg path {
         fill: #666687;
       }
 
@@ -569,66 +689,72 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
             <div>
               <button
                 aria-controls="simplemenu-1"
+                aria-disabled="false"
                 aria-expanded="false"
                 aria-haspopup="true"
-                class="c2"
+                class="c2 c3"
                 type="button"
               >
+                <span
+                  class="c4 c5"
+                />
                 <div
-                  class="c3"
+                  aria-hidden="true"
+                  class="c6 c7"
                 >
                   <span
-                    class="c4 c5"
-                  />
+                    class="c8"
+                  >
+                    <svg
+                      aria-hidden="true"
+                      fill="none"
+                      height="1em"
+                      viewBox="0 0 14 8"
+                      width="1em"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        clip-rule="evenodd"
+                        d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                        fill="#32324D"
+                        fill-rule="evenodd"
+                      />
+                    </svg>
+                  </span>
                 </div>
-                <svg
-                  aria-hidden="true"
-                  fill="none"
-                  height="1em"
-                  viewBox="0 0 14 8"
-                  width="1em"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    clip-rule="evenodd"
-                    d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
-                    fill="#32324D"
-                    fill-rule="evenodd"
-                  />
-                </svg>
               </button>
             </div>
           </div>
         </header>
         <div
-          class="c6"
+          class="c9"
         >
           <main
             aria-labelledby="main-content-title"
-            class="c7"
+            class="c10"
             id="main-content"
             tabindex="-1"
           >
             <div
-              class="c8 c9"
+              class="c11 c12"
             >
               <form
                 action="#"
                 novalidate=""
               >
                 <div
-                  class="c10 c11"
+                  class="c13 c14"
                 >
                   <img
                     alt=""
                     aria-hidden="true"
-                    class="c12"
+                    class="c15"
                   />
                   <div
-                    class="c13"
+                    class="c16"
                   >
                     <h1
-                      class="c14"
+                      class="c17"
                       id="main-content-title"
                     >
                       Reset password
@@ -636,48 +762,48 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
                   </div>
                 </div>
                 <div
-                  class="c15"
+                  class="c18"
                 >
                   <div>
                     <div>
                       <div
-                        class="c16"
+                        class="c19"
                       >
                         <div
-                          class="c17"
+                          class="c20"
                         >
                           <label
-                            class="c18"
+                            class="c21"
                             for="textinput-1"
                             required=""
                           >
                             Password
                             <span
-                              class="c19"
+                              class="c22"
                             >
                               *
                             </span>
                           </label>
                         </div>
                         <div
-                          class="c20 c21"
+                          class="c23 c24"
                         >
                           <input
                             aria-describedby="textinput-1-hint"
                             aria-disabled="false"
                             aria-invalid="false"
-                            class="c22"
+                            class="c25"
                             id="textinput-1"
                             name="password"
                             type="password"
                             value=""
                           />
                           <div
-                            class="c23"
+                            class="c26"
                           >
                             <button
                               aria-label="Hide password"
-                              class="c24 c25"
+                              class="c27 c28"
                               type="button"
                             >
                               <svg
@@ -696,7 +822,7 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
                           </div>
                         </div>
                         <p
-                          class="c26"
+                          class="c29"
                           id="textinput-1-hint"
                         >
                           Password must contain at least 8 characters, 1 uppercase, 1 lowercase and 1 number
@@ -707,42 +833,42 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
                   <div>
                     <div>
                       <div
-                        class="c16"
+                        class="c19"
                       >
                         <div
-                          class="c17"
+                          class="c20"
                         >
                           <label
-                            class="c18"
+                            class="c21"
                             for="textinput-2"
                             required=""
                           >
                             Confirmation Password
                             <span
-                              class="c19"
+                              class="c22"
                             >
                               *
                             </span>
                           </label>
                         </div>
                         <div
-                          class="c20 c21"
+                          class="c23 c24"
                         >
                           <input
                             aria-disabled="false"
                             aria-invalid="false"
-                            class="c22"
+                            class="c25"
                             id="textinput-2"
                             name="confirmPassword"
                             type="password"
                             value=""
                           />
                           <div
-                            class="c23"
+                            class="c26"
                           >
                             <button
                               aria-label="Hide password"
-                              class="c24 c25"
+                              class="c27 c28"
                               type="button"
                             >
                               <svg
@@ -765,11 +891,11 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
                   </div>
                   <button
                     aria-disabled="false"
-                    class="c27 c28"
+                    class="c30 c31"
                     type="submit"
                   >
                     <span
-                      class="c29 c30"
+                      class="c32 c33"
                     >
                       Change password
                     </span>
@@ -778,17 +904,17 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
               </form>
             </div>
             <div
-              class="c31"
+              class="c34"
             >
               <div
-                class="c32"
+                class="c35"
               >
                 <a
-                  class="c33"
+                  class="c36"
                   href="/auth/login"
                 >
                   <span
-                    class="c34 c35 c36"
+                    class="c37 c38 c39"
                   >
                     Ready to sign in?
                   </span>

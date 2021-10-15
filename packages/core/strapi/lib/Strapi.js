@@ -338,7 +338,7 @@ class Strapi {
    * @returns {never}
    */
   stop(exitCode = 1) {
-    this.server.destroy();
+    this.destroy();
 
     // From nodejs: process.send is available only when an IPC channel
     // has been established between the parent and child
@@ -534,13 +534,11 @@ class Strapi {
       }
 
       if (this.config.get('autoReload')) {
-        this.destroy();
-
         // From nodejs: process.send is available only when an IPC channel
         // has been established between the parent and child
         // (i.e. when using child_process.fork())
         if (typeof process.send === 'function') {
-          process.send('stop');
+          process.send('reload');
         }
       }
     };

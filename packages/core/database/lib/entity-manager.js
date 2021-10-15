@@ -153,7 +153,7 @@ const createEntityManager = db => {
       await db.lifecycles.run('beforeCount', uid, { params });
 
       const res = await this.createQueryBuilder(uid)
-        .init(_.pick(['_q', 'where'], params))
+        .init(_.pick(['_q', 'where', 'filters'], params))
         .count()
         .first()
         .execute();
@@ -183,7 +183,7 @@ const createEntityManager = db => {
 
       await this.attachRelations(uid, id, data);
 
-      // TODO: in case there is not select or populate specified return the inserted data ?
+      // TODO: in case there is no select or populate specified return the inserted data ?
       // TODO: do not trigger the findOne lifecycles ?
       const result = await this.findOne(uid, {
         where: { id },
@@ -307,7 +307,7 @@ const createEntityManager = db => {
         throw new Error('Delete requires a where parameter');
       }
 
-      // TODO: avoid trigger the findOne lifecycles in the case ?
+      // TODO: do not trigger the findOne lifecycles ?
       const entity = await this.findOne(uid, {
         select: select && ['id'].concat(select),
         where,
@@ -480,7 +480,6 @@ const createEntityManager = db => {
           const { joinTable } = attribute;
           const { joinColumn, inverseJoinColumn } = joinTable;
 
-          // TODO: validate logic of delete
           if (isOneToAny(attribute) && isBidirectional(attribute)) {
             await this.createQueryBuilder(joinTable.name)
               .delete()
