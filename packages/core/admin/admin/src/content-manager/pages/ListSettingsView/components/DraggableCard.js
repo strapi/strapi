@@ -1,7 +1,8 @@
-import React, { useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { useDrag, useDrop } from 'react-dnd';
+import { getEmptyImage } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
 import { Row } from '@strapi/parts/Row';
 import { Box } from '@strapi/parts/Box';
@@ -109,7 +110,6 @@ const DraggableCard = ({
       if (dragIndex === hoverIndex) {
         return;
       }
-      console.log('dragged', dragIndex, 'hovered', hoverIndex);
 
       onMoveField(dragIndex, hoverIndex);
 
@@ -120,12 +120,16 @@ const DraggableCard = ({
   const [{ isDragging }, drag, preview] = useDrag(() => ({
     type: ItemTypes.FIELD,
     item: () => {
-      return { name, index };
+      return { index, labelField, name };
     },
     collect: monitor => ({
       isDragging: monitor.isDragging(),
     }),
   }));
+
+  useEffect(() => {
+    preview(getEmptyImage(), { captureDraggingState: true });
+  }, [preview]);
 
   drag(drop(ref));
 
@@ -138,7 +142,6 @@ const DraggableCard = ({
         justifyContent="space-between"
         onClick={handleClickEditRow}
         isDragging={isDragging}
-        ref={preview}
       >
         <Stack horizontal size={3}>
           <DragButton
