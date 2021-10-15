@@ -101,7 +101,7 @@ const renderCompo = (toggleNotification = jest.fn()) =>
       <ThemeProvider theme={lightTheme}>
         <NotificationsProvider toggleNotification={toggleNotification}>
           <IntlProvider locale="en" messages={messageForPlugin} defaultLocale="en">
-            <EditAssetDialog asset={asset} onClose={jest.fn()} />
+            <EditAssetDialog asset={asset} onClose={jest.fn()} canUpdate canCopyLink canDownload />
           </IntlProvider>
         </NotificationsProvider>
       </ThemeProvider>

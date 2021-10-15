@@ -55,7 +55,16 @@ describe('Media library homepage', () => {
   beforeAll(() => server.listen());
 
   beforeEach(() => {
-    useRBAC.mockReturnValue({ isLoading: false, allowedActions: { canMain: true } });
+    useRBAC.mockReturnValue({
+      isLoading: false,
+      allowedActions: {
+        canRead: true,
+        canCreate: true,
+        canUpdate: true,
+        canCopyLink: true,
+        canDownload: true,
+      },
+    });
   });
 
   afterEach(() => {
