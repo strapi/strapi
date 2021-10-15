@@ -30,7 +30,7 @@ const fileInfoSchema = yup.object({
   caption: yup.string(),
 });
 
-export const EditAssetDialog = ({ onClose, asset }) => {
+export const EditAssetDialog = ({ onClose, asset, canUpdate, canCopyLink, canDownload }) => {
   const { formatMessage, formatDate } = useIntl();
   const submitButtonRef = useRef(null);
   const [isCropping, setIsCropping] = useState(false);
@@ -55,6 +55,8 @@ export const EditAssetDialog = ({ onClose, asset }) => {
     onClose();
   };
 
+  const formDisabled = !canUpdate || isCropping;
+
   return (
     <>
       <ModalLayout onClose={onClose} labelledBy="title">
@@ -68,6 +70,9 @@ export const EditAssetDialog = ({ onClose, asset }) => {
             <GridItem xs={12} col={6}>
               <PreviewBox
                 asset={asset}
+                canUpdate={canUpdate}
+                canCopyLink={canCopyLink}
+                canDownload={canDownload}
                 onDelete={onClose}
                 onCropFinish={handleFinishCropping}
                 onCropStart={handleStartCropping}
@@ -108,7 +113,7 @@ export const EditAssetDialog = ({ onClose, asset }) => {
                         value={values.name}
                         error={errors.name}
                         onChange={handleChange}
-                        disabled={isCropping}
+                        disabled={formDisabled}
                       />
 
                       <TextInput
@@ -126,7 +131,7 @@ export const EditAssetDialog = ({ onClose, asset }) => {
                         value={values.alternativeText}
                         error={errors.alternativeText}
                         onChange={handleChange}
-                        disabled={isCropping}
+                        disabled={formDisabled}
                       />
 
                       <TextInput
@@ -139,7 +144,7 @@ export const EditAssetDialog = ({ onClose, asset }) => {
                         value={values.caption}
                         error={errors.caption}
                         onChange={handleChange}
-                        disabled={isCropping}
+                        disabled={formDisabled}
                       />
                     </Stack>
 
@@ -148,7 +153,7 @@ export const EditAssetDialog = ({ onClose, asset }) => {
                         type="submit"
                         tabIndex={-1}
                         ref={submitButtonRef}
-                        disabled={isCropping}
+                        disabled={formDisabled}
                       >
                         {formatMessage({ id: 'submit', defaultMessage: 'Submit' })}
                       </button>
@@ -167,11 +172,16 @@ export const EditAssetDialog = ({ onClose, asset }) => {
           }
           endActions={
             <>
-              <ReplaceMediaButton onSelectMedia={setReplacementFile} acceptedMime={asset.mime} />
+              <ReplaceMediaButton
+                onSelectMedia={setReplacementFile}
+                acceptedMime={asset.mime}
+                disabled={formDisabled}
+              />
+
               <Button
                 onClick={() => submitButtonRef.current.click()}
                 loading={isLoading}
-                disabled={isCropping}
+                disabled={formDisabled}
               >
                 {formatMessage({ id: 'form.button.finish', defaultMessage: 'Finish' })}
               </Button>
@@ -197,5 +207,8 @@ EditAssetDialog.propTypes = {
     alternativeText: PropTypes.string,
     caption: PropTypes.string,
   }).isRequired,
+  canUpdate: PropTypes.bool.isRequired,
+  canCopyLink: PropTypes.bool.isRequired,
+  canDownload: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
 };

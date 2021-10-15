@@ -28,6 +28,9 @@ import { AssetPreview } from './AssetPreview';
 
 export const PreviewBox = ({
   asset,
+  canUpdate,
+  canCopyLink,
+  canDownload,
   onDelete,
   onCropFinish,
   onCropStart,
@@ -116,27 +119,31 @@ export const PreviewBox = ({
 
         <ActionRow paddingLeft={3} paddingRight={3} justifyContent="flex-end">
           <Stack size={1} horizontal>
-            <IconButton
-              label={formatMessage({
-                id: getTrad('app.utils.delete'),
-                defaultMessage: 'Delete',
-              })}
-              icon={<DeleteIcon />}
-              onClick={() => setShowConfirmDialog(true)}
-            />
+            {canUpdate && (
+              <IconButton
+                label={formatMessage({
+                  id: getTrad('app.utils.delete'),
+                  defaultMessage: 'Delete',
+                })}
+                icon={<DeleteIcon />}
+                onClick={() => setShowConfirmDialog(true)}
+              />
+            )}
 
-            <IconButton
-              label={formatMessage({
-                id: getTrad('control-card.download'),
-                defaultMessage: 'Download',
-              })}
-              icon={<DownloadIcon />}
-              onClick={() => downloadFile(assetUrl, asset.name)}
-            />
+            {canDownload && (
+              <IconButton
+                label={formatMessage({
+                  id: getTrad('control-card.download'),
+                  defaultMessage: 'Download',
+                })}
+                icon={<DownloadIcon />}
+                onClick={() => downloadFile(assetUrl, asset.name)}
+              />
+            )}
 
-            <CopyLinkButton url={assetUrl} />
+            {canCopyLink && <CopyLinkButton url={assetUrl} />}
 
-            {asset.mime.includes(AssetType.Image) && (
+            {canUpdate && asset.mime.includes(AssetType.Image) && (
               <IconButton
                 label={formatMessage({ id: getTrad('control-card.crop'), defaultMessage: 'Crop' })}
                 icon={<Resize />}
@@ -200,6 +207,9 @@ PreviewBox.defaultProps = {
 };
 
 PreviewBox.propTypes = {
+  canUpdate: PropTypes.bool.isRequired,
+  canCopyLink: PropTypes.bool.isRequired,
+  canDownload: PropTypes.bool.isRequired,
   replacementFile: PropTypes.instanceOf(File),
   asset: PropTypes.shape({
     id: PropTypes.number,
