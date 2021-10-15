@@ -167,7 +167,7 @@ export const EditAssetDialog = ({ onClose, asset }) => {
           }
           endActions={
             <>
-              <ReplaceMediaButton onSelectMedia={setReplacementFile} />
+              <ReplaceMediaButton onSelectMedia={setReplacementFile} acceptedMime={asset.mime} />
               <Button
                 onClick={() => submitButtonRef.current.click()}
                 loading={isLoading}
@@ -191,6 +191,7 @@ EditAssetDialog.propTypes = {
     size: PropTypes.number,
     createdAt: PropTypes.string,
     ext: PropTypes.string,
+    mime: PropTypes.string,
     name: PropTypes.string,
     url: PropTypes.string,
     alternativeText: PropTypes.string,

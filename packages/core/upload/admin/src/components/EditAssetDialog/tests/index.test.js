@@ -1513,6 +1513,7 @@ describe('<EditAssetDialog />', () => {
                         class="c40"
                       >
                         <input
+                          accept="image/png"
                           aria-hidden="true"
                           name="file"
                           tabindex="-1"

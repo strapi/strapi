@@ -103,10 +103,6 @@ export const PreviewBox = ({
     onCropStart();
   };
 
-  // Allows to display the valid content on the preview box event when
-  // replacing a .mp4 by a document or an image
-  const actualMime = replacementFile?.type || asset.mime;
-
   return (
     <>
       <RelativeBox hasRadius background="neutral150" borderColor="neutral200">
@@ -169,7 +165,7 @@ export const PreviewBox = ({
             </UploadProgressWrapper>
           )}
 
-          <AssetPreview ref={previewRef} mime={actualMime} name={asset.name} url={assetUrl} />
+          <AssetPreview ref={previewRef} mime={asset.mime} name={asset.name} url={assetUrl} />
         </Wrapper>
 
         <ActionRow
