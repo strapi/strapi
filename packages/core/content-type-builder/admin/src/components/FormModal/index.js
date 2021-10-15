@@ -122,6 +122,7 @@ const FormModal = () => {
       // Returns 'null' if there isn't any attributeType search params
       const attributeName = query.get('attributeName');
       const attributeType = query.get('attributeType');
+      const categoryName = query.get('categoryName');
       const dynamicZoneTarget = query.get('dynamicZoneTarget');
       const forTarget = query.get('forTarget');
       const modalType = query.get('modalType');
@@ -153,6 +154,7 @@ const FormModal = () => {
         actionType,
         attributeName,
         attributeType,
+        categoryName,
         kind,
         dynamicZoneTarget,
         forTarget,
@@ -1093,8 +1095,10 @@ const FormModal = () => {
       <ModalLayout onClose={handleClosed} labelledBy="title">
         <FormModalHeader
           actionType={state.actionType}
-          headers={headers}
+          attributeName={state.attributeName}
+          categoryName={state.categoryName}
           contentTypeKind={state.kind}
+          dynamicZoneTarget={state.dynamicZoneTarget}
           modalType={state.modalType}
           forTarget={state.forTarget}
           targetUid={state.targetUid}
