@@ -273,7 +273,7 @@ function ListView({
       {!canRead && (
         <ActionLayout endActions={<InjectionZone area="contentManager.listView.actions" />} />
       )}
-      {canRead && (isSearchable || isFilterable) && (
+      {canRead && (
         <ActionLayout
           endActions={
             <>
