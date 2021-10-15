@@ -22,8 +22,10 @@ import { ListView } from './components/ListView';
 import { useAssets } from '../../hooks/useAssets';
 import { getTrad } from '../../utils';
 import { Filters } from './components/Filters';
+import { SortPicker } from './components/SortPicker';
 import { PaginationFooter } from '../../components/PaginationFooter';
 import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
+import { useAssetCount } from '../../hooks/useAssetCount';
 
 const BoxWithHeight = styled(Box)`
   height: ${32 / 16}rem;
@@ -41,6 +43,8 @@ export const MediaLibrary = () => {
     isLoading: isLoadingPermissions,
   } = useMediaLibraryPermissions();
 
+  const { isLoading: isLoadingCount, data: assetCount } = useAssetCount();
+
   const { formatMessage } = useIntl();
   const { data, isLoading, error } = useAssets({
     skipWhen: !canRead,
@@ -52,7 +56,7 @@ export const MediaLibrary = () => {
 
   useFocusWhenNavigate();
 
-  const loading = isLoadingPermissions || isLoading;
+  const loading = isLoadingPermissions || isLoading || isLoadingCount;
 
   if (!loading && !canRead) {
     return <Redirect to="/" />;
@@ -71,13 +75,13 @@ export const MediaLibrary = () => {
           subtitle={formatMessage(
             {
               id: getTrad(
-                assets?.length > 0
+                assetCount?.count > 0
                   ? 'header.content.assets-multiple'
                   : 'header.content.assets.assets-single'
               ),
               defaultMessage: '0 assets',
             },
-            { number: assets?.length || 0 }
+            { number: assetCount?.count || 0 }
           )}
           primaryAction={
             canCreate ? (
@@ -110,6 +114,7 @@ export const MediaLibrary = () => {
                   })}
                 />
               </BoxWithHeight>
+              <SortPicker />
               <Filters />
             </>
           }

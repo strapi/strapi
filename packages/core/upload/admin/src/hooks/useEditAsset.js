@@ -47,6 +47,7 @@ export const useEditAsset = () => {
     {
       onSuccess: () => {
         queryClient.refetchQueries(['assets'], { active: true });
+        queryClient.refetchQueries(['asset-count'], { active: true });
       },
       onError: reason => {
         if (reason.response.status === 403) {
