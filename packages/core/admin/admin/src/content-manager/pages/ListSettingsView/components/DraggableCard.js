@@ -74,8 +74,8 @@ const FieldWrapper = styled(Box)`
 const DraggableCard = ({ name, labelField, onRemoveField, onClickEditField }) => {
   const { formatMessage } = useIntl();
   const editButtonRef = useRef();
-  const cardTitle = labelField || name;
-  const cardEllipsisTitle = cardTitle.length > 20 ? `${cardTitle.substring(0, 20)}...` : cardTitle;
+  const cardEllipsisTitle =
+    labelField.length > 20 ? `${labelField.substring(0, 20)}...` : labelField;
 
   const handleClickEditRow = () => {
     if (editButtonRef.current) {
@@ -145,15 +145,11 @@ const DraggableCard = ({ name, labelField, onRemoveField, onClickEditField }) =>
   );
 };
 
-DraggableCard.defaultProps = {
-  labelField: undefined,
-};
-
 DraggableCard.propTypes = {
-  labelField: PropTypes.string,
+  labelField: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
   onClickEditField: PropTypes.func.isRequired,
   onRemoveField: PropTypes.func.isRequired,
-  name: PropTypes.string.isRequired,
 };
 
 export default DraggableCard;

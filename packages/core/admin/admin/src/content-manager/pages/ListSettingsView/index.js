@@ -22,7 +22,7 @@ import ModelsContext from '../../contexts/ModelsContext';
 import { usePluginsQueryParams } from '../../hooks';
 import putCMSettingsLV from './utils/api';
 import Settings from './components/Settings';
-import View from './components/View';
+import SortDisplayedFields from './components/SortDisplayedFields';
 import EditFieldForm from './components/EditFieldForm';
 import init from './init';
 import reducer, { initialState } from './reducer';
@@ -290,7 +290,7 @@ const ListSettingsView = ({ layout, slug }) => {
               <Box paddingTop={6} paddingBottom={6}>
                 <Divider />
               </Box>
-              <View
+              <SortDisplayedFields
                 listRemainingFields={listRemainingFields}
                 displayedFields={displayedFields}
                 onAddField={handleAddField}

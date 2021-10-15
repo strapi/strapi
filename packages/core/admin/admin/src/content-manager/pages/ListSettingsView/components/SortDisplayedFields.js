@@ -25,7 +25,7 @@ const SelectContainer = styled(Flex)`
   max-width: ${32 / 16}rem;
 `;
 
-const View = ({
+const SortDisplayedFields = ({
   listRemainingFields,
   displayedFields,
   onAddField,
@@ -62,7 +62,7 @@ const View = ({
                 onClickEditField={onClickEditField}
                 key={field}
                 name={field}
-                labelField={metadatas[field].list.label || ''}
+                labelField={metadatas[field].list.label || field}
               />
             ))}
           </Stack>
@@ -90,7 +90,7 @@ const View = ({
   );
 };
 
-View.propTypes = {
+SortDisplayedFields.propTypes = {
   displayedFields: PropTypes.array.isRequired,
   onAddField: PropTypes.func.isRequired,
   onClickEditField: PropTypes.func.isRequired,
@@ -105,4 +105,4 @@ View.propTypes = {
   ).isRequired,
 };
 
-export default View;
+export default SortDisplayedFields;

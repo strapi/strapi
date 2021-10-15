@@ -10,19 +10,12 @@ import { Row } from '@strapi/parts/Row';
 import { Grid, GridItem } from '@strapi/parts/Grid';
 import { TextInput } from '@strapi/parts/TextInput';
 import { ToggleInput } from '@strapi/parts/ToggleInput';
-import Component from '@strapi/icons/Component';
-import CT from '@strapi/icons/Ct';
 import Date from '@strapi/icons/Date';
 import Boolean from '@strapi/icons/Boolean';
-import DynamicZone from '@strapi/icons/DynamicZone';
 import Email from '@strapi/icons/Email';
 import Enumeration from '@strapi/icons/Enumeration';
-import Json from '@strapi/icons/Json';
-import LongDescription from '@strapi/icons/LongDescription';
 import Media from '@strapi/icons/Media';
-import Password from '@strapi/icons/Password';
 import Relation from '@strapi/icons/Relation';
-import St from '@strapi/icons/St';
 import Text from '@strapi/icons/Text';
 import Uid from '@strapi/icons/Uid';
 import Numbers from '@strapi/icons/Numbers';
@@ -31,12 +24,9 @@ import { getTrad } from '../../../utils';
 const iconByTypes = {
   biginteger: <Numbers />,
   boolean: <Boolean />,
-  component: <Component />,
-  contentType: <CT />,
   date: <Date />,
   datetime: <Date />,
   decimal: <Numbers />,
-  dynamiczone: <DynamicZone />,
   email: <Email />,
   enum: <Enumeration />,
   enumeration: <Enumeration />,
@@ -44,14 +34,9 @@ const iconByTypes = {
   files: <Media />,
   float: <Numbers />,
   integer: <Numbers />,
-  json: <Json />,
-  JSON: <Json />,
   media: <Media />,
   number: <Numbers />,
-  password: <Password />,
   relation: <Relation />,
-  richtext: <LongDescription />,
-  singleType: <St />,
   string: <Text />,
   text: <Text />,
   time: <Date />,
@@ -88,69 +73,77 @@ const EditFieldForm = ({
 
   return (
     <ModalLayout onClose={onCloseModal} labelledBy="title">
-      <ModalHeader>
-        <HeaderContainer>
-          {iconByTypes[type]}
-          <ButtonText textColor="neutral800" as="h2" id="title">
-            {formatMessage(
-              {
-                id: getTrad('containers.ListSettingsView.modal-form.edit-label'),
-                defaultMessage: 'Edit {fieldName}',
-              },
-              { fieldName: upperFirst(fieldToEdit) }
-            )}
-          </ButtonText>
-        </HeaderContainer>
-      </ModalHeader>
-      <ModalBody>
-        <Grid gap={4}>
-          <GridItem s={12} col={6}>
-            <TextInput
-              id="label-input"
-              label={formatMessage({
-                id: getTrad('form.Input.label'),
-                defaultMessage: 'Label',
-              })}
-              name="label"
-              onChange={e => onChangeEditLabel(e)}
-              value={fieldForm.label}
-              hint={formatMessage({
-                id: getTrad('form.Input.label.inputDescription'),
-                defaultMessage: "This value overrides the label displayed in the table's head",
-              })}
-            />
-          </GridItem>
-          {shouldDisplaySortToggle && (
+      <form>
+        <ModalHeader>
+          <HeaderContainer>
+            {iconByTypes[type]}
+            <ButtonText textColor="neutral800" as="h2" id="title">
+              {formatMessage(
+                {
+                  id: getTrad('containers.ListSettingsView.modal-form.edit-label'),
+                  defaultMessage: 'Edit {fieldName}',
+                },
+                { fieldName: upperFirst(fieldToEdit) }
+              )}
+            </ButtonText>
+          </HeaderContainer>
+        </ModalHeader>
+        <ModalBody>
+          <Grid gap={4}>
             <GridItem s={12} col={6}>
-              <ToggleInput
-                data-testid="Enable sort on this field"
-                checked={fieldForm.sortable}
+              <TextInput
+                id="label-input"
                 label={formatMessage({
-                  id: getTrad('form.Input.sort.field'),
-                  defaultMessage: 'Enable sort on this field',
+                  id: getTrad('form.Input.label'),
+                  defaultMessage: 'Label',
                 })}
-                name="sortable"
-                onChange={e =>
-                  onChangeEditLabel({ target: { name: 'sortable', value: e.target.checked } })}
-                onLabel="on"
-                offLabel="off"
+                name="label"
+                onChange={e => onChangeEditLabel(e)}
+                value={fieldForm.label}
+                hint={formatMessage({
+                  id: getTrad('form.Input.label.inputDescription'),
+                  defaultMessage: "This value overrides the label displayed in the table's head",
+                })}
               />
             </GridItem>
-          )}
-        </Grid>
-      </ModalBody>
-      <ModalFooter
-        startActions={
-          <Button onClick={onCloseModal} variant="tertiary">
-            {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
-          </Button>
-        }
-        endActions={
-          <Button type="button" onClick={e => onSubmit(e)}>
-            {formatMessage({ id: 'form.button.finish', defaultMessage: 'Finish' })}
-          </Button>
-        }
-      />
+            {shouldDisplaySortToggle && (
+              <GridItem s={12} col={6}>
+                <ToggleInput
+                  data-testid="Enable sort on this field"
+                  checked={fieldForm.sortable}
+                  label={formatMessage({
+                    id: getTrad('form.Input.sort.field'),
+                    defaultMessage: 'Enable sort on this field',
+                  })}
+                  name="sortable"
+                  onChange={e =>
+                    onChangeEditLabel({ target: { name: 'sortable', value: e.target.checked } })}
+                  onLabel={formatMessage({
+                    id: 'app.components.ToggleCheckbox.on-label',
+                    defaultMessage: 'on',
+                  })}
+                  offLabel={formatMessage({
+                    id: 'app.components.ToggleCheckbox.off-label',
+                    defaultMessage: 'off',
+                  })}
+                />
+              </GridItem>
+            )}
+          </Grid>
+        </ModalBody>
+        <ModalFooter
+          startActions={
+            <Button onClick={onCloseModal} variant="tertiary">
+              {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
+            </Button>
+          }
+          endActions={
+            <Button type="button" onClick={e => onSubmit(e)}>
+              {formatMessage({ id: 'form.button.finish', defaultMessage: 'Finish' })}
+            </Button>
+          }
+        />
+      </form>
     </ModalLayout>
   );
 };
