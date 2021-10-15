@@ -1,7 +1,8 @@
 'use strict';
 
 /**
- * @typedef {import('@strapi/strapi').Strapi} StrapiInterface
+ * @typedef {import('@hapi/boom').Boom} Boom
+ * @typedef {import('@strapi/admin').Server} StrapiAdminServer
  * @typedef {import('@strapi/strapi').StrapiContentTypes} StrapiContentTypes
  * @typedef {import('@strapi/strapi').StrapiComponents} StrapiComponents
  * @typedef {import('@strapi/strapi').StrapiServices} StrapiServices
@@ -109,6 +110,24 @@ class Strapi {
     this.cron = createCronService();
     this.telemetry = createTelemetry(this);
 
+    /**
+     * @type {Boom}
+     */
+    // @ts-ignore
+    this.errors = undefined;
+
+    /**
+     * @type {Record<string, any>}
+     */
+    // @ts-ignore
+    this.components = undefined;
+
+    /**
+     * @type {StrapiAdminServer}
+     */
+    // @ts-ignore
+    this.admin = undefined;
+
     createUpdateNotifier(this).notify();
   }
 
@@ -213,16 +232,10 @@ class Strapi {
   //   return this.container.get('apis').get(name);
   // }
 
-  /**
-   * @this StrapiInterface
-   */
   get api() {
     return this.container.get('apis').getAll();
   }
 
-  /**
-   * @this StrapiInterface
-   */
   get auth() {
     return this.container.get('auth');
   }
@@ -273,7 +286,7 @@ class Strapi {
   }
 
   /**
-   * @param {{ isInitialized: boolean }} ctx
+   * @param {{ isInitialized?: boolean }} ctx
    */
   async openAdmin({ isInitialized }) {
     const shouldOpenAdmin =
@@ -394,9 +407,6 @@ class Strapi {
     await loaders.loadMiddlewares(this);
   }
 
-  /**
-   * @this StrapiInterface
-   */
   async loadApp() {
     this.app = loaders.loadSrcIndex(this);
   }
@@ -509,9 +519,6 @@ class Strapi {
     return this;
   }
 
-  /**
-   * @this StrapiInterface
-   */
   async load() {
     await this.register();
     await this.bootstrap();
@@ -579,7 +586,6 @@ class Strapi {
   }
 
   /**
-   * @this StrapiInterface
    * @param {'bootstrap' | 'register' | 'destroy'} lifecycleName
    */
   async runLifecyclesFunctions(lifecycleName) {
@@ -606,7 +612,6 @@ class Strapi {
   /**
    * @template {keyof StrapiModels} M
    * @param {M} uid
-   * @this StrapiInterface
    */
   getModel(uid) {
     if (uid in this.contentTypes) {

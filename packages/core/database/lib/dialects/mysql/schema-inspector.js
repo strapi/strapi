@@ -1,5 +1,9 @@
 'use strict';
 
+/**
+ * @typedef {import('@strapi/database').Database} Database
+ */
+
 const SQL_QUERIES = {
   TABLE_LIST: /* sql */ `
     SELECT
@@ -96,6 +100,9 @@ const toStrapiType = column => {
 };
 
 class MysqlSchemaInspector {
+  /**
+   * @param {Database} db
+   */
   constructor(db) {
     this.db = db;
   }

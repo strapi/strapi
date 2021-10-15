@@ -1,17 +1,29 @@
 'use strict';
 
-const SQL_QUERIES = {
+/**
+ * @typedef {import('@strapi/database').Database} Database
+ */
+
+const SQL_QUERIES = /** @type {const} */ ({
   TABLE_LIST: `select name from sqlite_master where type = 'table' and name NOT LIKE 'sqlite%'`,
   TABLE_INFO: `pragma table_info(??)`,
   INDEX_LIST: 'pragma index_list(??)',
   INDEX_INFO: 'pragma index_info(??)',
   FOREIGN_KEY_LIST: 'pragma foreign_key_list(??)',
-};
+});
 
+/**
+ * @param {{
+ *  type: string,
+ *  pk: boolean,
+ *  data_type: any,
+ * }} column
+ */
 const toStrapiType = column => {
   const { type } = column;
 
-  const rootType = type.toLowerCase().match(/[^(), ]+/)[0];
+  const match = type.toLowerCase().match(/[^(), ]+/) || [];
+  const rootType = match[0];
 
   switch (rootType) {
     case 'integer': {
@@ -57,6 +69,9 @@ const toStrapiType = column => {
 };
 
 class SqliteSchemaInspector {
+  /**
+   * @param {Database} db
+   */
   constructor(db) {
     this.db = db;
   }

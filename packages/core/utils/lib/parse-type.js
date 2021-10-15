@@ -5,6 +5,9 @@ const dates = require('date-fns');
 
 const timeRegex = new RegExp('^(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])(.[0-9]{1,3})?$');
 
+/**
+ * @param {*} value
+ */
 const parseTime = value => {
   if (dates.isDate(value)) return dates.format(value, 'HH:mm:ss.SSS');
 
@@ -23,6 +26,9 @@ const parseTime = value => {
   return `${hours}:${minutes}:${seconds}.${fractionPart}`;
 };
 
+/**
+ * @param {*} value
+ */
 const parseDate = value => {
   if (dates.isDate(value)) return dates.format(value, 'yyyy-MM-dd');
   try {
@@ -36,6 +42,9 @@ const parseDate = value => {
   }
 };
 
+/**
+ * @param {*} value
+ */
 const parseDateTimeOrTimestamp = value => {
   if (dates.isDate(value)) return value;
   try {

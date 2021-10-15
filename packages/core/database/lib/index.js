@@ -2,7 +2,7 @@
 
 /**
  * @typedef {import('@strapi/strapi').StrapiContentTypes} StrapiContentTypes
- * @typedef {import('../types').EntityManager} EntityManager
+ * @typedef {import('@strapi/database').EntityManager} EntityManager
  */
 
 const knex = require('knex');

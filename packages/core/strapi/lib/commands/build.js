@@ -1,4 +1,9 @@
 'use strict';
+
+/**
+ * @typedef {import('@strapi/strapi').Strapi} Strapi
+ */
+
 const { green } = require('chalk');
 
 const strapiAdmin = require('@strapi/admin');
@@ -20,6 +25,10 @@ const getEnabledPlugins = require('../core/loaders/plugins/get-enabled-plugins')
 module.exports = async ({ clean, optimization }) => {
   const dir = process.cwd();
 
+  /**
+   * @type {Strapi}
+   */
+  // @ts-ignore
   const strapiInstance = strapi({
     dir,
     autoReload: true,

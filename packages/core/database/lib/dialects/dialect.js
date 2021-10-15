@@ -1,6 +1,13 @@
 'use strict';
 
+/**
+ * @typedef {import('@strapi/database').Database} Database
+ */
+
 class Dialect {
+  /**
+   * @param {Database} db
+   */
   constructor(db) {
     this.db = db;
   }
@@ -8,6 +15,9 @@ class Dialect {
   configure() {}
   initialize() {}
 
+  /**
+   * @param {string} type
+   */
   getSqlType(type) {
     return type;
   }
@@ -31,6 +41,9 @@ class Dialect {
   async startSchemaUpdate() {}
   async endSchemaUpdate() {}
 
+  /**
+   * @param {Error | { message?: string }} error
+   */
   transformErrors(error) {
     if (error instanceof Error) {
       throw error;

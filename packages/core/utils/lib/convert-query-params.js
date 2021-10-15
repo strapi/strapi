@@ -25,6 +25,9 @@ class InvalidSortError extends Error {
   }
 }
 
+/**
+ * @param {string} order;
+ */
 const validateOrder = order => {
   if (!['asc', 'desc'].includes(order.toLocaleLowerCase())) {
     throw new InvalidOrderError();
@@ -55,6 +58,9 @@ const convertSortQueryParams = sortQuery => {
   throw new InvalidSortError();
 };
 
+/**
+ * @param {string} sortQuery
+ */
 const convertSingleSortQueryParam = sortQuery => {
   // split field and order param with default order to ascending
   const [field, order = 'asc'] = sortQuery.split(':');
@@ -68,7 +74,13 @@ const convertSingleSortQueryParam = sortQuery => {
   return _.set({}, field, order);
 };
 
+/**
+ * @param {Record<string, any>} sortQuery
+ */
 const convertNestedSortQueryParam = sortQuery => {
+  /**
+   * @type {Record<string, any>}
+   */
   const transformedSort = {};
   for (const field in sortQuery) {
     const order = sortQuery[field];
@@ -121,7 +133,12 @@ class InvalidPopulateError extends Error {
   }
 }
 
-// NOTE: we could support foo.* or foo.bar.* etc later on
+/**
+ * NOTE: we could support foo.* or foo.bar.* etc later on
+ *
+ * @param {string | string[] | Record<string, any>} populate
+ * @param {number=} depth
+ */
 const convertPopulateQueryParams = (populate, depth = 0) => {
   if (depth === 0 && populate === '*') {
     return true;
@@ -156,6 +173,15 @@ const convertPopulateQueryParams = (populate, depth = 0) => {
   throw new InvalidPopulateError();
 };
 
+/**
+ * @param {'*' | true | {
+ *  sort?: string,
+ *  filters?: string,
+ *  fields?: string,
+ *  populate?: string,
+ *  count?: string
+ * }} subPopulate
+ */
 const convertNestedPopulate = subPopulate => {
   if (subPopulate === '*') {
     return true;
@@ -197,6 +223,11 @@ const convertNestedPopulate = subPopulate => {
   return query;
 };
 
+/**
+ *
+ * @param {string | string[]} fields
+ * @param {number=} depth
+ */
 const convertFieldsQueryParams = (fields, depth = 0) => {
   if (depth === 0 && fields === '*') {
     return undefined;

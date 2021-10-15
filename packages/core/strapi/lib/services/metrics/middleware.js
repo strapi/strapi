@@ -6,6 +6,9 @@
 
 const createMiddleware = ({ sendEvent }) => {
   const _state = {
+    /**
+     * @type {number | null }
+     */
     currentDay: null,
     counter: 0,
   };

@@ -1,7 +1,14 @@
 'use strict';
 
+/**
+ * @typedef {import('@strapi/strapi').StrapiAppContext} StrapiAppContext
+ */
+
 const _ = require('lodash');
 
+/**
+ * @param {StrapiAppContext} ctx
+ */
 module.exports = ctx => {
   if (!ctx.is('multipart')) {
     return { data: ctx.request.body, files: {} };
@@ -22,7 +29,12 @@ module.exports = ctx => {
     throw strapi.errors.badRequest(`Invalid 'data' field. 'data' should be a valid JSON.`);
   }
 
-  const filesToUpload = Object.keys(files).reduce((acc, key) => {
+  /**
+   * @type {Record<string, any>}
+   */
+  const filesToUpload = {};
+
+  Object.keys(files).reduce((acc, key) => {
     const fullPath = _.toPath(key);
 
     if (fullPath.length <= 1 || fullPath[0] !== 'files') {
@@ -35,7 +47,7 @@ For example, when a media file is named "avatar", make sure the form key name is
     const path = _.tail(fullPath);
     acc[path.join('.')] = files[key];
     return acc;
-  }, {});
+  }, filesToUpload);
 
   return {
     data,

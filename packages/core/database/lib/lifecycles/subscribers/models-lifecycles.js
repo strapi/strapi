@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * @typedef {import(".").Subscriber } Subscriber
+ * @typedef {import("@strapi/database").Subscriber } Subscriber
  */
 
 /**

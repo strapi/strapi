@@ -7,11 +7,18 @@ const excludeConfigPaths = ['info.scripts'];
 
 /**
  * Allow dynamic config values through the native ES6 template string function.
+ * @param {any} obj
+ * @param {string=} configPath
  */
 const templateConfiguration = (obj, configPath = '') => {
+  /**
+   * @type {Record<string, any>}
+   */
+  const template = {};
+
   // Allow values which looks like such as an ES6 literal string without parenthesis inside (aka function call).
   // Exclude config with conflicting syntax (e.g. npm scripts).
-  return Object.keys(obj).reduce((acc, key) => {
+  Object.keys(obj).reduce((acc, key) => {
     if (isPlainObject(obj[key]) && !isString(obj[key])) {
       acc[key] = templateConfiguration(obj[key], `${configPath}.${key}`);
     } else if (
@@ -26,7 +33,9 @@ const templateConfiguration = (obj, configPath = '') => {
     }
 
     return acc;
-  }, {});
+  }, template);
+
+  return template;
 };
 
 module.exports = templateConfiguration;

@@ -1,18 +1,18 @@
 
-type Handler = (context: any) => any;
+export type HookHandler = (context: any) => any;
 
 type AsyncHook = {
-  handlers: Handler[];
-  register(handler: Handler): ThisType<AsyncHook>;
-  delete(handler: Handler): ThisType<AsyncHook>;
+  handlers: HookHandler[];
+  register(handler: HookHandler): ThisType<AsyncHook>;
+  delete(handler: HookHandler): ThisType<AsyncHook>;
   call(args?: any): Promise<void>;
 };
 
 
 type SyncHook = {
-  get handlers(): Handler[];
-  register(handler: Handler): ThisType<SyncHook>;
-  delete(handler: Handler): ThisType<SyncHook>;
+  get handlers(): HookHandler[];
+  register(handler: HookHandler): ThisType<SyncHook>;
+  delete(handler: HookHandler): ThisType<SyncHook>;
   call(): void;
 };
 

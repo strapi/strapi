@@ -78,8 +78,17 @@ const isDraft = (data, model) =>
 
 const isSingleType = ({ kind = COLLECTION_TYPE }) => kind === SINGLE_TYPE;
 const isCollectionType = ({ kind = COLLECTION_TYPE }) => kind === COLLECTION_TYPE;
+
+/**
+ * @param {string} kind
+ */
 const isKind = kind => model => model.kind === kind;
 
+/**
+ * @param {{
+ *  attributes?: any
+ * }=} model
+ */
 const getPrivateAttributes = (model = {}) => {
   return _.union(
     strapi.config.get('api.responses.privateAttributes', []),
@@ -88,19 +97,51 @@ const getPrivateAttributes = (model = {}) => {
   );
 };
 
+/**
+ * @param {{
+ *  privateAttributes?: string
+ * }=} model
+ * @param {string=} attributeName
+ */
 const isPrivateAttribute = (model = {}, attributeName) => {
-  return model && model.privateAttributes && model.privateAttributes.includes(attributeName);
+  return (
+    model &&
+    model.privateAttributes &&
+    attributeName &&
+    model.privateAttributes.includes(attributeName)
+  );
 };
 
+/**
+ * @param {{
+ *  type: string
+ * }} attribute
+ */
 const isScalarAttribute = attribute => {
   return !['component', 'relation', 'dynamiczone'].includes(attribute.type);
 };
 
+/**
+ * @param {{
+ *  type: string
+ * }} attr
+ */
 const isMediaAttribute = attr => {
   return attr.type === 'media';
 };
 
+/**
+ * @param {{
+ *  type: string
+ * }} attribute
+ */
 const isRelationalAttribute = attribute => attribute.type === 'relation';
+
+/**
+ * @param {{
+ *  type: string
+ * }} attribute
+ */
 const isComponentAttribute = attribute => ['component', 'dynamiczone'].includes(attribute.type);
 
 /**
@@ -114,7 +155,13 @@ const isTypedAttribute = (attribute, type) => {
 
 /**
  *  Returns a route prefix for a contentType
- * @param {object} contentType
+ * @param {{
+ *  kind: string
+ *  info: {
+ *    singularName: string
+ *    pluralName: string
+ *  }
+ * }} contentType
  * @returns {string}
  */
 const getContentTypeRoutePrefix = contentType => {

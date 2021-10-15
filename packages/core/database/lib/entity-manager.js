@@ -2,7 +2,7 @@
 
 /**
  * @typedef {import('@strapi/strapi').StrapiContentTypes} StrapiContentTypes
- * @typedef {import('../types').Database} Database
+ * @typedef {import('@strapi/database').Database} Database
  */
 
 const _ = require('lodash/fp');

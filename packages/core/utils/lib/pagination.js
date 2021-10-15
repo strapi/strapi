@@ -15,6 +15,10 @@ const STRAPI_DEFAULTS = {
 
 const paginationAttributes = ['start', 'limit', 'page', 'pageSize'];
 
+/**
+ * @param {number} limit
+ * @param {number=} maxLimit
+ */
 const withMaxLimit = (limit, maxLimit = -1) => {
   if (maxLimit === -1 || limit < maxLimit) {
     return limit;
@@ -23,17 +27,40 @@ const withMaxLimit = (limit, maxLimit = -1) => {
   return maxLimit;
 };
 
-// Ensure minimum page & pageSize values (page >= 1, pageSize >= 0, start >= 0, limit >= 0)
+/**
+ * Ensure minimum page & pageSize values (page >= 1, pageSize >= 0, start >= 0, limit >= 0)
+ *
+ * @param {{
+ *  start: number,
+ *  limit: number,
+ * }} options
+ */
 const ensureMinValues = ({ start, limit }) => ({
   start: Math.max(start, 0),
   limit: Math.max(limit, 1),
 });
 
-const ensureMaxValues = (maxLimit = -1) => ({ start, limit }) => ({
+/**
+ * @param {number=} maxLimit
+ */
+const ensureMaxValues = (maxLimit = -1) => /**
+ * @param {{
+ *  start: number,
+ *  limit: number,
+ * }} options
+ */ ({ start, limit }) => ({
   start,
   limit: withMaxLimit(limit, maxLimit),
 });
 
+/**
+ * @param {{
+ *  page?: number
+ *  start?: number
+ *  pageSize?: number
+ *  limit?: number
+ * }} args
+ */
 const withDefaultPagination = (args, { defaults = {}, maxLimit = -1 } = {}) => {
   const defaultValues = merge(STRAPI_DEFAULTS, defaults);
 
@@ -55,6 +82,13 @@ const withDefaultPagination = (args, { defaults = {}, maxLimit = -1 } = {}) => {
     throw new Error('Cannot use both page & offset pagination in the same query');
   }
 
+  /**
+   * @type {{
+   *  start:number,
+   *  limit:number,
+   * }}
+   */
+  // @ts-ignores
   const pagination = {};
 
   // Start / Limit

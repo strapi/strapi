@@ -4,16 +4,7 @@ const { cloneDeep } = require('lodash/fp');
 const { createAsyncSeriesHook, createAsyncParallelHook } = require('./hooks');
 
 /**
- * @typedef ProviderHooksMap
- * @property willRegister
- * @property didRegister
- * @property willDelete
- * @property didDelete
- */
-
-/**
  * Creates a new object containing various hooks used by the providers
- * @returns {ProviderHooksMap}
  */
 const createProviderHooksMap = () => ({
   // Register events
@@ -25,37 +16,31 @@ const createProviderHooksMap = () => ({
 });
 
 /**
- * A customizable item provider enhanced with register/delete hooks
- * @typedef {Object} Provider
- * @property hooks
- * @property register
- * @property delete
- * @property get
- * @property getWhere
- * @property values
- * @property keys
- * @property has
- * @property size
- * @property clear
- */
-
-/**
  * A {@link Provider} factory
- * @param {Object} [options] - The factory options
- * @param {boolean = true} options.throwOnDuplicates - Specify the wanted behaviour when encountering a duplicate key on register
- * @returns {Provider}
+ * @param {object} options - The factory options
+ * @param {boolean=} options.throwOnDuplicates - Specify the wanted behaviour when encountering a duplicate key on register
  */
 const providerFactory = (options = {}) => {
   const { throwOnDuplicates = true } = options;
 
   const state = {
     hooks: createProviderHooksMap(),
+    /**
+     * @type {Map<string, any>}
+     */
     registry: new Map(),
   };
 
+  /**
+   * A customizable item provider enhanced with register/delete hooks
+   */
   return {
     hooks: state.hooks,
 
+    /**
+     * @param {string} key
+     * @param {any} item
+     */
     async register(key, item) {
       if (throwOnDuplicates && this.has(key)) {
         throw new Error(`Duplicated item key: ${key}`);
@@ -70,6 +55,9 @@ const providerFactory = (options = {}) => {
       return this;
     },
 
+    /**
+     * @param {string} key
+     */
     async delete(key) {
       if (this.has(key)) {
         const item = this.get(key);
@@ -84,6 +72,9 @@ const providerFactory = (options = {}) => {
       return this;
     },
 
+    /**
+     * @param {string} key
+     */
     get(key) {
       return state.registry.get(key);
     },
@@ -109,6 +100,9 @@ const providerFactory = (options = {}) => {
       return Array.from(state.registry.keys());
     },
 
+    /**
+     * @param {string} key
+     */
     has(key) {
       return state.registry.has(key);
     },

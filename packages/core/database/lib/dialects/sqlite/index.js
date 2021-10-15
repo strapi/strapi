@@ -1,5 +1,9 @@
 'use strict';
 
+/**
+ * @typedef {import('@strapi/database').Database} Database
+ */
+
 const path = require('path');
 const fse = require('fs-extra');
 
@@ -8,6 +12,9 @@ const { Dialect } = require('../dialect');
 const SqliteSchmeaInspector = require('./schema-inspector');
 
 class SqliteDialect extends Dialect {
+  /**
+   * @param {Database} db
+   */
   constructor(db) {
     super(db);
 
@@ -32,6 +39,9 @@ class SqliteDialect extends Dialect {
     return false;
   }
 
+  /**
+   * @param {string} type
+   */
   getSqlType(type) {
     switch (type) {
       // FIXME: enum must be dealt separately
@@ -59,6 +69,9 @@ class SqliteDialect extends Dialect {
     await this.db.connection.raw(`pragma foreign_keys = on`);
   }
 
+  /**
+   * @param {{ errno?: number, message?: string }} error
+   */
   transformErrors(error) {
     switch (error.errno) {
       case 19: {

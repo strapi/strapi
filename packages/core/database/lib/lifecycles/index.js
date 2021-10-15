@@ -12,7 +12,7 @@ const isValidSubscriber = subscriber => {
 };
 
 /**
- * @type {import('.').createLifecyclesProvider}
+ * @type {import('@strapi/database').createLifecyclesProvider}
  */
 const createLifecyclesProvider = db => {
   let subscribers = [timestampsLifecyclesSubscriber, modelLifecyclesSubscriber];

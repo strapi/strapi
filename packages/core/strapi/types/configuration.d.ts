@@ -1,5 +1,8 @@
 import { LoggerOptions } from 'winston';
 
+export type DeepPartial<T> = {
+  [P in keyof T]?: DeepPartial<T[P]>;
+};
 export interface StrapiConfigContext {
   env: (<T = string>(key: string, initial?: T) => T) & {
     int: (key: string, initial?: number) => number;
@@ -32,7 +35,6 @@ export interface StrapiMiddlewareSettings {}
 export interface StrapiMiddlewareConfig {
   settings: StrapiMiddlewareSettings;
 }
-
 export interface StrapiConfig {
   host: string;
   port: number;

@@ -46,7 +46,6 @@ const createUmzugProvider = db => {
 
 /**
  * Creates migrations provider
- * @type {import('.').createMigrationsProvider}
  */
 const createMigrationsProvider = db => {
   const migrations = createUmzugProvider(db);

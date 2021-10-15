@@ -1,6 +1,10 @@
 'use strict';
 
 /**
+ * @template T
+ * @typedef {import('@strapi/strapi').DeepPartial<T>} DeepPartial<T>
+ */
+/**
  * @typedef {import('@strapi/strapi').StrapiConfig} StrapiConfig
  */
 
@@ -42,7 +46,7 @@ const defaultConfig = {
  *  autoReload?: boolean
  *  serveAdminPanel?: boolean
  * }} initialConfig
- * @returns {Partial<StrapiConfig>}
+ * @returns {DeepPartial<StrapiConfig>}
  */
 module.exports = (dir, initialConfig = {}) => {
   const { autoReload = false, serveAdminPanel = true } = initialConfig;

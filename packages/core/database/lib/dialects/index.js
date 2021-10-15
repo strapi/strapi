@@ -1,5 +1,22 @@
 'use strict';
+/**
+ * @typedef {import('@strapi/database').Database} Database
+ * @typedef {typeof import('./postgresql')} PostgresDialect
+ * @typedef {typeof import('./mysql')} MysqlDialect
+ * @typedef {typeof import('./sqlite')} SqliteDialect
+ */
 
+/**
+ * @typedef {object} Clients
+ * @property {PostgresDialect} Clients.postgres
+ * @property {MysqlDialect} Clients.mysql
+ * @property {SqliteDialect} Clients.sqlite
+ */
+
+/**
+ * @template {keyof Clients} T
+ * @param {T} client
+ */
 const getDialectClass = client => {
   switch (client) {
     case 'postgres':
@@ -13,6 +30,9 @@ const getDialectClass = client => {
   }
 };
 
+/**
+ * @param {Database} db
+ */
 const getDialect = db => {
   const { client } = db.config.connection;
 

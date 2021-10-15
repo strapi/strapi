@@ -3,8 +3,8 @@
 const _ = require('lodash');
 
 /**
- * @typedef {import(".").Subscriber } Subscriber
- * @typedef { import("../").Event } Event
+ * @typedef {import("@strapi/database").Subscriber } Subscriber
+ * @typedef { import("@strapi/database").Event } Event
  */
 
 // NOTE: we could add onCreate & onUpdate on field level to do this instead

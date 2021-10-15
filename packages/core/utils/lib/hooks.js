@@ -2,6 +2,7 @@
 
 /**
  * @typedef {import('@strapi/strapi').Hook} Hook
+ * @typedef {import('@strapi/strapi').HookHandler} HookHandler
  */
 
 const { eq, remove, cloneDeep } = require('lodash/fp');
@@ -12,6 +13,9 @@ const { eq, remove, cloneDeep } = require('lodash/fp');
  */
 const createHook = () => {
   const state = {
+    /**
+     * @type {HookHandler[]}
+     */
     handlers: [],
   };
 
@@ -20,6 +24,9 @@ const createHook = () => {
       return state.handlers;
     },
 
+    /**
+     * @param {HookHandler} handler
+     */
     register(handler) {
       state.handlers.push(handler);
       return this;

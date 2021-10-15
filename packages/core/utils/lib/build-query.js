@@ -5,6 +5,13 @@
 const _ = require('lodash');
 const parseType = require('./parse-type');
 
+/**
+ * @param {{
+ *  allAttributes?: any
+ *  primaryKey?: string
+ * }} model
+ * @param {string} field
+ */
 const isAttribute = (model, field) =>
   _.has(model.allAttributes, field) || model.primaryKey === field || field === 'id';
 

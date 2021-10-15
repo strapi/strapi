@@ -1,10 +1,17 @@
 'use strict';
 
+/**
+ * @typedef {import('@strapi/database').Database} Database
+ */
+
 const errors = require('../../errors');
 const { Dialect } = require('../dialect');
 const PostgresqlSchemaInspector = require('./schema-inspector');
 
 class PostgresDialect extends Dialect {
+  /**
+   * @param {Database} db
+   */
   constructor(db) {
     super(db);
 
@@ -23,6 +30,9 @@ class PostgresDialect extends Dialect {
     return true;
   }
 
+  /**
+   * @param {string} type
+   */
   getSqlType(type) {
     switch (type) {
       case 'timestamp': {
@@ -34,6 +44,9 @@ class PostgresDialect extends Dialect {
     }
   }
 
+  /**
+   * @param {{ code?: string, column?: string, message?: string }} error
+   */
   transformErrors(error) {
     switch (error.code) {
       case '23502': {

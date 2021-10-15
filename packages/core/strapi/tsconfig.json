@@ -4,7 +4,7 @@
     "baseUrl": "./",
     "rootDir": "./",
     "strictNullChecks": true,
-    "noImplicitAny": true
+    "noImplicitAny": false
   },
   "include": ["./**/*.js", "**/*.json", "**/*.mjs", "**/*.ts"],
   "exclude": ["**/*.test.js", "**/*.e2e.js"]

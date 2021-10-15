@@ -1,9 +1,16 @@
 'use strict';
 
+/**
+ * @typedef {import('@strapi/database').Database} Database
+ */
+
 const { Dialect } = require('../dialect');
 const MysqlSchemaInspector = require('./schema-inspector');
 
 class MysqlDialect extends Dialect {
+  /**
+   * @param {Database} db
+   */
   constructor(db) {
     super(db);
 
@@ -13,7 +20,10 @@ class MysqlDialect extends Dialect {
   configure() {
     this.db.config.connection.connection.supportBigNumbers = true;
     this.db.config.connection.connection.bigNumberStrings = true;
-    this.db.config.connection.connection.typeCast = (field, next) => {
+    this.db.config.connection.connection.typeCast = /**
+     * @param {any} field
+     * @param {() => void} next
+     **/ (field, next) => {
       if (field.type == 'DECIMAL' || field.type === 'NEWDECIMAL') {
         var value = field.string();
         return value === null ? null : Number(value);
@@ -43,6 +53,9 @@ class MysqlDialect extends Dialect {
     return true;
   }
 
+  /**
+   * @param {Error | { message?: string }} error
+   */
   transformErrors(error) {
     super.transformErrors(error);
   }

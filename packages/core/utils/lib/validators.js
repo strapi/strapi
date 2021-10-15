@@ -6,29 +6,53 @@ const utils = require('./string-formatting');
 
 const MixedSchemaType = yup.mixed;
 
+/**
+ * @param {*} value
+ */
 const isNotNilTest = value => !_.isNil(value);
 
+/**
+ * @this {ReturnType<yup.mixed>}
+ */
 function isNotNill(msg = '${path} must be defined.') {
   return this.test('defined', msg, isNotNilTest);
 }
 
+/**
+ * @param {*} value
+ */
 const isNotNullTest = value => !_.isNull(value);
+/**
+ * @this {ReturnType<yup.mixed>}
+ */
 function isNotNull(msg = '${path} cannot be null.') {
   return this.test('defined', msg, isNotNullTest);
 }
 
+/**
+ * @this {ReturnType<yup.mixed>}
+ */
 function isFunction(message = '${path} is not a function') {
   return this.test('is a function', message, value => _.isUndefined(value) || _.isFunction(value));
 }
 
+/**
+ * @this {ReturnType<yup.string>}
+ */
 function isCamelCase(message = '${path} is not in camel case (anExampleOfCamelCase)') {
   return this.test('is in camelCase', message, value => utils.isCamelCase(value));
 }
 
+/**
+ * @this {ReturnType<yup.string>}
+ */
 function isKebabCase(message = '${path} is not in kebab case (an-example-of-kebab-case)') {
   return this.test('is in kebab-case', message, value => utils.isKebabCase(value));
 }
 
+/**
+ * @this {ReturnType<yup.object>}
+ */
 function onlyContainsFunctions(message = '${path} contains values that are not functions') {
   return this.test(
     'only contains functions',
