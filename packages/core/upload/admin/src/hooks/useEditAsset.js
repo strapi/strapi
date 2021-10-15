@@ -48,8 +48,15 @@ export const useEditAsset = () => {
       onSuccess: () => {
         queryClient.refetchQueries(['assets'], { active: true });
       },
-      onError: error => {
-        toggleNotification({ type: 'warning', message: error.message });
+      onError: reason => {
+        if (reason.response.status === 403) {
+          toggleNotification({
+            type: 'info',
+            message: { id: getTrad('permissions.not-allowed.update') },
+          });
+        } else {
+          toggleNotification({ type: 'warning', message: reason.message });
+        }
       },
     }
   );

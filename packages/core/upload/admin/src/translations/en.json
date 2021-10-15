@@ -68,6 +68,7 @@
   "modal.upload-list.sub-header.button": "Add more assets",
   "modal.upload.cancelled": "Upload manually aborted.",
   "page.title": "Settings - Media Library",
+  "permissions.not-allowed.update": "You are not allowed to edit this file.",
   "plugin.description.long": "Media file management.",
   "plugin.description.short": "Media file management.",
   "plugin.name": "Media Library",
