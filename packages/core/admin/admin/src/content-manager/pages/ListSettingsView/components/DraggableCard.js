@@ -37,9 +37,6 @@ const DragButton = styled(ActionButton)`
 const FieldContainer = styled(Row)`
   max-height: ${32 / 16}rem;
   cursor: pointer;
-
-  // Solution to remove borders on drag preview
-  transform: translate(0, 0);
   opacity: ${({ isDragging }) => (isDragging ? 0 : 1)};
 
   svg {
@@ -88,14 +85,17 @@ const DraggableCard = ({
   const { formatMessage } = useIntl();
   const ref = useRef(null);
   const editButtonRef = useRef();
-  const cardTitle = labelField || name;
-  const cardEllipsisTitle = cardTitle.length > 20 ? `${cardTitle.substring(0, 20)}...` : cardTitle;
+  const cardEllipsisTitle =
+    labelField.length > 20 ? `${labelField.substring(0, 20)}...` : labelField;
 
   const handleClickEditRow = () => {
     if (editButtonRef.current) {
       editButtonRef.current.click();
     }
   };
+
+  // labelField updated here but not in drag function
+  // console.log(labelField, 'outside drag func');
 
   const [, drop] = useDrop({
     accept: ItemTypes.FIELD,
@@ -120,6 +120,9 @@ const DraggableCard = ({
   const [{ isDragging }, drag, preview] = useDrag(() => ({
     type: ItemTypes.FIELD,
     item: () => {
+      // doesn't update labelField here if you edit it
+      // console.log(labelField, 'inside drag func');
+
       return { index, labelField, name };
     },
     collect: monitor => ({
@@ -198,17 +201,13 @@ const DraggableCard = ({
   );
 };
 
-DraggableCard.defaultProps = {
-  labelField: undefined,
-};
-
 DraggableCard.propTypes = {
   index: PropTypes.number.isRequired,
-  labelField: PropTypes.string,
+  labelField: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
   onClickEditField: PropTypes.func.isRequired,
   onMoveField: PropTypes.func.isRequired,
   onRemoveField: PropTypes.func.isRequired,
-  name: PropTypes.string.isRequired,
 };
 
 export default DraggableCard;
