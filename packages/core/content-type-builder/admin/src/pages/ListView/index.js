@@ -73,14 +73,7 @@ const ListView = () => {
   // const hasModelBeenModified = !isEqual(modifiedData, initialData);
   const forTarget = isInContentTypeView ? 'contentType' : 'component';
 
-  const handleClickAddField = async (
-    forTarget,
-    targetUid,
-    firstHeaderObj,
-    secondHeaderObj,
-    thirdHeaderObj,
-    fourthHeaderObj
-  ) => {
+  const handleClickAddField = async (forTarget, targetUid) => {
     // disable the prompt
     // await wait();
 
@@ -88,22 +81,12 @@ const ListView = () => {
       modalType: 'chooseAttribute',
       forTarget,
       targetUid,
-      ...firstHeaderObj,
-      ...secondHeaderObj,
-      ...thirdHeaderObj,
-      ...fourthHeaderObj,
     };
 
     push({ search: makeSearch(searchObj) });
   };
 
   const handleClickAddComponentToDZ = async dzName => {
-    const firstHeaderObject = {
-      header_label_1: currentDataName,
-    };
-    const secondHeaderObj = {
-      header_label_2: dzName,
-    };
     const search = {
       modalType: 'addComponentToDynamicZone',
       forTarget: 'contentType',
@@ -112,8 +95,6 @@ const ListView = () => {
       settingType: 'base',
       step: '1',
       actionType: 'edit',
-      ...firstHeaderObject,
-      ...secondHeaderObj,
     };
 
     // await wait();
@@ -121,17 +102,7 @@ const ListView = () => {
     push({ search: makeSearch(search, true) });
   };
 
-  const handleClickEditField = async (
-    forTarget,
-    targetUid,
-    attributeName,
-    type,
-    firstHeaderObj,
-    secondHeaderObj,
-    thirdHeaderObj,
-    fourthHeaderObj,
-    fifthHeaderObj
-  ) => {
+  const handleClickEditField = async (forTarget, targetUid, attributeName, type) => {
     const attributeType = getAttributeDisplayedType(type);
 
     // await wait();
@@ -145,11 +116,6 @@ const ListView = () => {
       attributeName,
       attributeType,
       step: type === 'component' ? '2' : null,
-      ...firstHeaderObj,
-      ...secondHeaderObj,
-      ...thirdHeaderObj,
-      ...fourthHeaderObj,
-      ...fifthHeaderObj,
     };
 
     // await wait();
@@ -214,7 +180,6 @@ const ListView = () => {
         settingType: 'base',
         forTarget: firstMainDataPath,
         targetUid,
-        header_label_1: label,
       }),
     });
   };
@@ -238,10 +203,7 @@ const ListView = () => {
                     startIcon={<AddIcon />}
                     variant="secondary"
                     onClick={() => {
-                      const headerDisplayObject = {
-                        header_label_1: currentDataName,
-                      };
-                      handleClickAddField(forTarget, targetUid, headerDisplayObject);
+                      handleClickAddField(forTarget, targetUid);
                     }}
                   >
                     {formatMessage({ id: getTrad('button.attributes.add.another') })}

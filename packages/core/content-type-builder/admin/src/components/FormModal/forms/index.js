@@ -189,6 +189,7 @@ const forms = {
       return createCategorySchema(allowedCategories);
     },
     form: {
+      advanced: () => ({ sections: [] }),
       base() {
         return categoryForm.base;
       },

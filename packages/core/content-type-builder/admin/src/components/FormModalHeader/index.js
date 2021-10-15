@@ -8,30 +8,24 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import upperFirst from 'lodash/upperFirst';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Breadcrumbs, Crumb } from '@strapi/parts/Breadcrumbs';
 import { ModalHeader } from '@strapi/parts/ModalLayout';
 import { Box } from '@strapi/parts/Box';
 import { Row } from '@strapi/parts/Row';
 import { Stack } from '@strapi/parts/Stack';
 import { ButtonText } from '@strapi/parts/Text';
-import styled from 'styled-components';
 import useDataManager from '../../hooks/useDataManager';
 import getTrad from '../../utils/getTrad';
 import AttributeIcon from '../AttributeIcon';
 
-const IconBox = styled(Box)`
-  svg {
-    color: ${({ theme }) => theme.colors.primary600};
-  }
-`;
-
 const FormModalHeader = ({
   actionType,
+  attributeName,
   attributeType,
+  categoryName,
   contentTypeKind,
+  dynamicZoneTarget,
   forTarget,
-  headers,
   modalType,
   targetUid,
 }) => {
@@ -39,20 +33,9 @@ const FormModalHeader = ({
   const { modifiedData } = useDataManager();
 
   let icon;
-  let isFontAwesomeIcon = false;
+  let headers = [];
 
-  if (modalType === 'chooseAttribute') {
-    const schema = modifiedData[forTarget][targetUid] || modifiedData[forTarget];
-
-    if (forTarget === 'components') {
-      icon = schema.schema.icon;
-      isFontAwesomeIcon = true;
-    } else if (forTarget === 'component') {
-      icon = 'component';
-    } else {
-      icon = schema.schema.kind;
-    }
-  }
+  const schema = modifiedData?.[forTarget]?.[targetUid] || modifiedData?.[forTarget] || null;
 
   if (modalType === 'contentType') {
     icon = contentTypeKind;
@@ -60,14 +43,6 @@ const FormModalHeader = ({
 
   if (['component', 'editCategory'].includes(modalType)) {
     icon = 'component';
-  }
-
-  if (modalType === 'addComponentToDynamicZone') {
-    icon = 'dynamiczone';
-  }
-
-  if (modalType === 'attribute') {
-    icon = attributeType;
   }
 
   const isCreatingMainSchema = ['component', 'contentType'].includes(modalType);
@@ -91,7 +66,7 @@ const FormModalHeader = ({
           </Box>
           <Box paddingLeft={3}>
             <ButtonText textColor="neutral800" as="h2" id="title">
-              {formatMessage({ id: headerId }, { name: headers[0].label })}
+              {formatMessage({ id: headerId }, { name: schema?.schema.name })}
             </ButtonText>
           </Box>
         </Row>
@@ -99,25 +74,54 @@ const FormModalHeader = ({
     );
   }
 
+  headers = [
+    {
+      label: schema?.schema.name || null,
+      info: { category: schema?.category || null, name: schema?.schema.name },
+    },
+  ];
+
+  if (modalType === 'chooseAttribute') {
+    icon = ['component', 'components'].includes(forTarget) ? 'component' : schema.schema.kind;
+  }
+
+  if (modalType === 'addComponentToDynamicZone') {
+    icon = 'dynamiczone';
+    headers.push({ label: dynamicZoneTarget });
+  }
+
+  if (modalType === 'attribute') {
+    icon = attributeType;
+    headers.push({ label: attributeName });
+  }
+
+  if (modalType === 'editCategory') {
+    const label = formatMessage({
+      id: getTrad('modalForm.header.categories'),
+      defaultMessage: 'Categories',
+    });
+
+    headers = [{ label }, { label: categoryName }];
+  }
+
   const breadcrumbsLabel = headers.map(({ label }) => label).join(',');
 
   return (
     <ModalHeader>
       <Stack horizontal size={3}>
-        {!isFontAwesomeIcon && <AttributeIcon type={icon} />}
-        {isFontAwesomeIcon && (
-          <IconBox>
-            <FontAwesomeIcon icon={icon} />
-          </IconBox>
-        )}
+        <AttributeIcon type={icon} />
 
         <Breadcrumbs label={breadcrumbsLabel}>
           {headers.map((header, index) => {
             const label = upperFirst(header.label);
 
+            if (!label) {
+              return null;
+            }
+
             const key = `${header.label}.${index}`;
 
-            if (header.info.category) {
+            if (header.info?.category) {
               const content = `${label} (${upperFirst(header.info.category)} - ${upperFirst(
                 header.info.name
               )})`;
@@ -135,22 +139,23 @@ const FormModalHeader = ({
 
 FormModalHeader.defaultProps = {
   actionType: null,
+  attributeName: null,
   attributeType: null,
+  categoryName: null,
+  dynamicZoneTarget: null,
+  forTarget: null,
   contentTypeKind: null,
   targetUid: null,
 };
 
 FormModalHeader.propTypes = {
   actionType: PropTypes.string,
+  attributeName: PropTypes.string,
   attributeType: PropTypes.string,
+  categoryName: PropTypes.string,
   contentTypeKind: PropTypes.string,
-  forTarget: PropTypes.oneOf(['contentType', 'component', 'components']).isRequired,
-  headers: PropTypes.arrayOf(
-    PropTypes.shape({
-      icon: PropTypes.shape({ name: PropTypes.string, isCustom: PropTypes.bool }),
-      label: PropTypes.string.isRequired,
-    })
-  ).isRequired,
+  dynamicZoneTarget: PropTypes.string,
+  forTarget: PropTypes.oneOf(['contentType', 'component', 'components']),
   modalType: PropTypes.string.isRequired,
   targetUid: PropTypes.string,
 };

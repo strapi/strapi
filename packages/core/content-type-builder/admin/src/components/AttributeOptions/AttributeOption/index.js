@@ -27,18 +27,6 @@ const AttributeOption = ({ type }) => {
     // FIXME refacto
     const forTarget = query.forTarget || null;
     const targetUid = query.targetUid || null;
-    const header_label_1 = query.header_label_1 || null;
-    const header_info_category_1 = query.header_info_category_1 || null;
-    const header_info_name_1 = query.header_info_name_1 || null;
-    const header_label_2 = query.header_label_2 || null;
-    const header_info_category_2 = query.header_info_category_2 || null;
-    const header_info_name_2 = query.header_info_name_2 || null;
-    const header_label_3 = query.header_label_3 || null;
-    const header_info_category_3 = query.header_info_category_3 || null;
-    const header_info_name_3 = query.header_info_name_3 || null;
-    const header_label_4 = query.header_label_4 || null;
-    const header_info_category_4 = query.header_info_category_4 || null;
-    const header_info_name_4 = query.header_info_name_4 || null;
 
     const search = makeSearch({
       modalType: 'attribute',
@@ -48,19 +36,6 @@ const AttributeOption = ({ type }) => {
       targetUid,
       attributeType: type,
       step: type === 'component' ? '1' : null,
-
-      header_label_1,
-      header_info_name_1,
-      header_info_category_1,
-      header_label_2,
-      header_info_name_2,
-      header_info_category_2,
-      header_label_3,
-      header_info_name_3,
-      header_info_category_3,
-      header_label_4,
-      header_info_name_4,
-      header_info_category_4,
     });
 
     if (forTarget === 'contentType') {

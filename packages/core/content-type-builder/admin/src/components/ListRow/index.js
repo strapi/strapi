@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
-import { get } from 'lodash';
+import get from 'lodash/get';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
 import { IconButton } from '@strapi/parts/IconButton';
@@ -20,25 +20,20 @@ import AttributeIcon from '../AttributeIcon';
 
 function ListRow({
   configurable,
+  editTarget,
+  firstLoopComponentUid,
+  isFromDynamicZone,
   name,
-  dzName,
   onClick,
   plugin,
+  relation,
+  repeatable,
+  secondLoopComponentUid,
   target,
   targetUid,
   type,
-  mainTypeName,
-  editTarget,
-  firstLoopComponentName,
-  firstLoopComponentUid,
-  isFromDynamicZone,
-  repeatable,
-  secondLoopComponentName,
-  secondLoopComponentUid,
-  isNestedInDZComponent,
-  relation,
 }) {
-  const { contentTypes, isInDevelopmentMode, modifiedData, removeAttribute } = useDataManager();
+  const { contentTypes, isInDevelopmentMode, removeAttribute } = useDataManager();
   const { formatMessage } = useIntl();
 
   const isMorph = type === 'relation' && relation.includes('morph');
@@ -61,98 +56,7 @@ function ListRow({
     }
 
     if (configurable !== false) {
-      const firstComponentCategory = get(
-        modifiedData,
-        ['components', firstLoopComponentUid, 'category'],
-        null
-      );
-      const secondComponentCategory = get(
-        modifiedData,
-        ['components', secondLoopComponentUid, 'category'],
-        null
-      );
-
       const attrType = type;
-
-      let firstHeaderObject = {
-        header_label_1: mainTypeName,
-        header_info_category_1: null,
-        header_info_name_1: null,
-      };
-      let secondHeaderObject = {
-        header_label_2: name,
-        header_info_category_2: null,
-        header_info_name_2: null,
-      };
-      let thirdHeaderObject = {
-        header_info_category_3: null,
-        header_info_name_3: null,
-      };
-      let fourthHeaderObject = {
-        header_info_category_4: null,
-        header_info_name_4: null,
-      };
-      let fifthHeaderObject = {
-        header_info_category_5: null,
-        header_info_name_5: null,
-      };
-
-      if (firstLoopComponentName) {
-        secondHeaderObject = {
-          header_label_2: firstLoopComponentName,
-          header_info_category_2: firstComponentCategory,
-          header_info_name_2: firstLoopComponentName,
-        };
-
-        thirdHeaderObject = {
-          ...thirdHeaderObject,
-          header_label_3: name,
-        };
-      }
-
-      if (secondLoopComponentUid) {
-        thirdHeaderObject = {
-          ...thirdHeaderObject,
-          header_label_3: secondLoopComponentName,
-          header_info_category_3: secondComponentCategory,
-          header_info_name_3: secondLoopComponentName,
-        };
-        fourthHeaderObject = {
-          ...fourthHeaderObject,
-          header_label_4: name,
-        };
-      }
-
-      if (isFromDynamicZone || isNestedInDZComponent) {
-        secondHeaderObject = {
-          header_label_2: dzName,
-          header_info_name_2: null,
-          header_info_category_2: null,
-        };
-        thirdHeaderObject = {
-          header_label_3: firstLoopComponentName,
-          header_info_name_3: firstComponentCategory,
-          header_info_category_3: firstComponentCategory,
-        };
-
-        if (!isNestedInDZComponent) {
-          fourthHeaderObject = {
-            header_info_category_4: null,
-            header_label_4: name,
-          };
-        } else {
-          fourthHeaderObject = {
-            header_info_category_4: secondComponentCategory,
-            header_info_name_4: secondLoopComponentName,
-            header_label_4: secondLoopComponentName,
-          };
-
-          fifthHeaderObject = {
-            ...fifthHeaderObject,
-            header_label_5: name,
-          };
-        }
-      }
 
       onClick(
         // Tells where the attribute is located in the main modifiedData object : contentType, component or components
@@ -162,12 +66,7 @@ function ListRow({
         // Name of the attribute
         name,
         // Type of the attribute
-        attrType,
-        firstHeaderObject,
-        secondHeaderObject,
-        thirdHeaderObject,
-        fourthHeaderObject,
-        fifthHeaderObject
+        attrType
       );
     }
   };
@@ -277,16 +176,12 @@ function ListRow({
 
 ListRow.defaultProps = {
   configurable: true,
-  dzName: null,
-  firstLoopComponentName: null,
   firstLoopComponentUid: null,
   isFromDynamicZone: false,
-  isNestedInDZComponent: false,
   onClick: () => {},
   plugin: null,
   relation: '',
   repeatable: false,
-  secondLoopComponentName: null,
   secondLoopComponentUid: null,
   target: null,
   targetUid: null,
@@ -295,19 +190,14 @@ ListRow.defaultProps = {
 
 ListRow.propTypes = {
   configurable: PropTypes.bool,
-  dzName: PropTypes.string,
   editTarget: PropTypes.string.isRequired,
-  firstLoopComponentName: PropTypes.string,
   firstLoopComponentUid: PropTypes.string,
   isFromDynamicZone: PropTypes.bool,
-  isNestedInDZComponent: PropTypes.bool,
-  mainTypeName: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
   onClick: PropTypes.func,
   plugin: PropTypes.string,
   relation: PropTypes.string,
   repeatable: PropTypes.bool,
-  secondLoopComponentName: PropTypes.string,
   secondLoopComponentUid: PropTypes.string,
   target: PropTypes.string,
   targetUid: PropTypes.string,

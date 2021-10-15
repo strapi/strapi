@@ -44,8 +44,6 @@ import getTrad from '../../utils/getTrad';
 import makeSearch from '../../utils/makeSearch';
 import {
   canEditContentType,
-  createHeadersArray,
-  createHeadersObjectFromArray,
   getAttributesToDisplay,
   getFormInputNames,
   getModalTitleSubHeader,
@@ -122,27 +120,13 @@ const FormModal = () => {
       // Returns 'null' if there isn't any attributeType search params
       const attributeName = query.get('attributeName');
       const attributeType = query.get('attributeType');
+      const categoryName = query.get('categoryName');
       const dynamicZoneTarget = query.get('dynamicZoneTarget');
       const forTarget = query.get('forTarget');
       const modalType = query.get('modalType');
       const kind = query.get('kind') || get(allDataSchema, ['contentType', 'schema', 'kind'], null);
       const targetUid = query.get('targetUid');
       const settingType = query.get('settingType');
-      const header_label_1 = query.get('header_label_1');
-      const header_info_category_1 = query.get('header_info_category_1');
-      const header_info_name_1 = query.get('header_info_name_1');
-      const header_label_2 = query.get('header_label_2');
-      const header_info_category_2 = query.get('header_info_category_2');
-      const header_info_name_2 = query.get('header_info_name_2');
-      const header_label_3 = query.get('header_label_3');
-      const header_info_category_3 = query.get('header_info_category_3');
-      const header_info_name_3 = query.get('header_info_name_3');
-      const header_label_4 = query.get('header_label_4');
-      const header_info_category_4 = query.get('header_info_category_4');
-      const header_info_name_4 = query.get('header_info_name_4');
-      const header_label_5 = query.get('header_label_5');
-      const header_info_category_5 = query.get('header_info_category_5');
-      const header_info_name_5 = query.get('header_info_name_5');
       const step = query.get('step');
       const pathToSchema =
         forTarget === 'contentType' || forTarget === 'component'
@@ -153,6 +137,7 @@ const FormModal = () => {
         actionType,
         attributeName,
         attributeType,
+        categoryName,
         kind,
         dynamicZoneTarget,
         forTarget,
@@ -161,21 +146,6 @@ const FormModal = () => {
         settingType,
         step,
         targetUid,
-        header_label_1,
-        header_info_name_1,
-        header_info_category_1,
-        header_label_2,
-        header_info_name_2,
-        header_info_category_2,
-        header_label_3,
-        header_info_name_3,
-        header_info_category_3,
-        header_label_4,
-        header_info_name_4,
-        header_info_category_4,
-        header_label_5,
-        header_info_name_5,
-        header_info_category_5,
       });
 
       const collectionTypesForRelation = sortedContentTypesList.filter(
@@ -352,8 +322,6 @@ const FormModal = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search]);
 
-  const headers = createHeadersArray(state);
-
   // FIXME rename this constant
   const isCreatingContentType = state.modalType === 'contentType';
   const isCreatingComponent = state.modalType === 'component';
@@ -369,6 +337,8 @@ const FormModal = () => {
   const isPickingAttribute = state.modalType === 'chooseAttribute';
   const uid = createUid(modifiedData.name || '');
   const attributes = get(allDataSchema, [...state.pathToSchema, 'schema', 'attributes'], null);
+  // FIXME when displayName
+  const mainSchemaName = get(allDataSchema, [...state.pathToSchema, 'schema', 'name'], '');
 
   const checkFormValidity = async () => {
     let schema;
@@ -604,14 +574,6 @@ const FormModal = () => {
       sendButtonAddMoreFieldEvent(shouldContinue);
       const targetUid = state.forTarget === 'components' ? state.targetUid : uid;
 
-      // Remove the last header when editing
-      if (state.actionType === 'edit') {
-        headers.pop();
-      }
-
-      const headersObject = createHeadersObjectFromArray(headers);
-      const nextHeaderIndex = headers.length + 1;
-
       if (isCreatingContentType) {
         // Create the content type schema
         if (isCreating) {
@@ -637,7 +599,6 @@ const FormModal = () => {
             modalType: 'chooseAttribute',
             forTarget: state.forTarget,
             targetUid,
-            header_label_1: modifiedData.name,
           }),
         });
       } else if (isCreatingComponent) {
@@ -653,7 +614,6 @@ const FormModal = () => {
               modalType: 'chooseAttribute',
               forTarget: state.forTarget,
               targetUid: componentUid,
-              header_label_1: modifiedData.name,
             }),
             pathname: `/plugins/${pluginId}/component-categories/${category}/${componentUid}`,
           });
@@ -702,8 +662,6 @@ const FormModal = () => {
             settingType: 'base',
             step: '1',
             actionType: 'create',
-            ...headersObject,
-            header_label_2: modifiedData.name,
           });
           const nextSearch = isDynamicZoneAttribute
             ? dzSearch
@@ -712,7 +670,6 @@ const FormModal = () => {
                   modalType: 'chooseAttribute',
                   forTarget: state.forTarget,
                   targetUid,
-                  ...headersObject,
                 },
                 shouldContinue
               );
@@ -746,7 +703,6 @@ const FormModal = () => {
             targetUid: state.targetUid,
             attributeType: 'component',
             step: '2',
-            ...headersObject,
           };
 
           push({
@@ -785,7 +741,6 @@ const FormModal = () => {
           modalType: 'chooseAttribute',
           forTarget: state.forTarget,
           targetUid: state.targetUid,
-          ...headersObject,
         };
 
         push({ search: makeSearch(nextSearch, shouldContinue) });
@@ -811,7 +766,6 @@ const FormModal = () => {
             targetUid: state.targetUid,
             attributeType: 'component',
             step: '2',
-            ...headersObject,
           };
 
           trackUsage('willCreateComponentFromAttributesModal');
@@ -863,10 +817,6 @@ const FormModal = () => {
           modalType: 'chooseAttribute',
           forTarget: 'components',
           targetUid: componentUid,
-          ...headersObject,
-          [`header_label_${nextHeaderIndex}`]: modifiedData.name,
-          [`header_info_category_${nextHeaderIndex}`]: category,
-          [`header_info_name_${nextHeaderIndex}`]: componentToCreate.name,
         };
 
         push({
@@ -911,10 +861,6 @@ const FormModal = () => {
               modalType: 'chooseAttribute',
               forTarget: 'components',
               targetUid: componentUid,
-              ...headersObject,
-              [`header_label_${nextHeaderIndex}`]: modifiedData.name,
-              [`header_info_category_${nextHeaderIndex}`]: category,
-              [`header_info_name_${nextHeaderIndex}`]: modifiedData.componentToCreate.name,
             };
 
             push({ search: makeSearch(searchToOpenAddField, true) });
@@ -1050,7 +996,7 @@ const FormModal = () => {
     formErrors,
     isAddingAComponentToAnotherComponent,
     isCreatingComponentWhileAddingAField,
-    mainBoxHeader: get(headers, [0, 'label'], ''),
+    mainBoxHeader: mainSchemaName,
     modifiedData,
     naturePickerType: state.forTarget,
     isCreating,
@@ -1093,8 +1039,10 @@ const FormModal = () => {
       <ModalLayout onClose={handleClosed} labelledBy="title">
         <FormModalHeader
           actionType={state.actionType}
-          headers={headers}
+          attributeName={state.attributeName}
+          categoryName={state.categoryName}
           contentTypeKind={state.kind}
+          dynamicZoneTarget={state.dynamicZoneTarget}
           modalType={state.modalType}
           forTarget={state.forTarget}
           targetUid={state.targetUid}

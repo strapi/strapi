@@ -7,7 +7,6 @@
 /* eslint-disable import/no-cycle */
 import React from 'react';
 import PropTypes from 'prop-types';
-import get from 'lodash/get';
 import { EmptyBodyTable, useTracking } from '@strapi/helper-plugin';
 import { Box } from '@strapi/parts/Box';
 import { Button } from '@strapi/parts/Button';
@@ -27,21 +26,17 @@ import NestedTFooter from '../NestedTFooter';
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 
 function List({
-  customRowComponent,
-  items,
   addComponentToDZ,
-  targetUid,
-  mainTypeName,
+  customRowComponent,
   editTarget,
-  isFromDynamicZone,
-  isNestedInDZComponent,
-  isMain,
-  firstLoopComponentName,
   firstLoopComponentUid,
-  secondLoopComponentName,
-  secondLoopComponentUid,
+  isFromDynamicZone,
+  isMain,
+  isNestedInDZComponent,
   isSub,
-  dzName,
+  items,
+  secondLoopComponentUid,
+  targetUid,
 }) {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
@@ -51,87 +46,7 @@ function List({
   const onClickAddField = () => {
     trackUsage('hasClickedCTBAddFieldBanner');
 
-    const firstComponentCategory = get(
-      modifiedData,
-      ['components', firstLoopComponentUid, 'category'],
-      null
-    );
-    const firstComponentFriendlyName = get(
-      modifiedData,
-      ['components', firstLoopComponentUid, 'schema', 'name'],
-      null
-    );
-    const secondComponentCategory = get(
-      modifiedData,
-      ['components', secondLoopComponentUid, 'category'],
-      null
-    );
-    const secondComponentFriendlyName = get(
-      modifiedData,
-      ['components', secondLoopComponentUid, 'schema', 'name'],
-      null
-    );
-
-    let firstHeaderObject = {
-      header_label_1: mainTypeName,
-      header_info_category_1: null,
-      header_info_name_1: null,
-    };
-    let secondHeaderObject = {
-      header_label_2: firstLoopComponentName,
-      header_info_category_2: firstComponentCategory,
-      header_info_name_2: firstComponentFriendlyName,
-    };
-    let thirdHeaderObject = {
-      header_info_name_3: secondComponentFriendlyName,
-    };
-    let fourthHeaderObject = {
-      header_info_category_4: secondComponentCategory,
-      header_info_name_4: secondComponentFriendlyName,
-    };
-
-    if (firstLoopComponentName) {
-      firstHeaderObject = {
-        ...firstHeaderObject,
-      };
-    }
-
-    if (secondLoopComponentUid) {
-      firstHeaderObject = {
-        ...firstHeaderObject,
-      };
-      thirdHeaderObject = {
-        ...thirdHeaderObject,
-      };
-    }
-
-    if (isFromDynamicZone || isNestedInDZComponent) {
-      secondHeaderObject = {
-        ...secondHeaderObject,
-        header_label_2: dzName,
-        header_info_category_2: null,
-        header_info_name_2: null,
-      };
-      thirdHeaderObject = {
-        ...thirdHeaderObject,
-        header_label_3: firstLoopComponentName,
-        header_info_category_3: firstComponentCategory,
-        header_info_name_3: firstComponentFriendlyName,
-      };
-      fourthHeaderObject = {
-        ...fourthHeaderObject,
-        header_label_4: secondLoopComponentName,
-      };
-    }
-
-    openModalAddField(
-      editTarget,
-      targetUid,
-      firstHeaderObject,
-      secondHeaderObject,
-      thirdHeaderObject,
-      fourthHeaderObject
-    );
+    openModalAddField(editTarget, targetUid);
   };
 
   if (!targetUid) {
@@ -239,15 +154,11 @@ function List({
                   <React.Fragment key={item.name}>
                     <CustomRow
                       {...item}
-                      dzName={dzName}
                       isNestedInDZComponent={isNestedInDZComponent}
                       targetUid={targetUid}
-                      mainTypeName={mainTypeName}
                       editTarget={editTarget}
-                      firstLoopComponentName={firstLoopComponentName}
                       firstLoopComponentUid={firstLoopComponentUid}
                       isFromDynamicZone={isFromDynamicZone}
-                      secondLoopComponentName={secondLoopComponentName}
                       secondLoopComponentUid={secondLoopComponentUid}
                     />
 
@@ -256,11 +167,8 @@ function List({
                         {...item}
                         customRowComponent={customRowComponent}
                         targetUid={targetUid}
-                        dzName={dzName}
                         isNestedInDZComponent={isFromDynamicZone}
-                        mainTypeName={mainTypeName}
                         editTarget={editTarget}
-                        firstLoopComponentName={firstLoopComponentName}
                         firstLoopComponentUid={firstLoopComponentUid}
                       />
                     )}
@@ -271,7 +179,6 @@ function List({
                         customRowComponent={customRowComponent}
                         addComponent={addComponentToDZ}
                         targetUid={targetUid}
-                        mainTypeName={mainTypeName}
                       />
                     )}
                   </React.Fragment>
@@ -315,15 +222,12 @@ function List({
 List.defaultProps = {
   addComponentToDZ: () => {},
   customRowComponent: null,
-  dzName: null,
-  firstLoopComponentName: null,
   firstLoopComponentUid: null,
   isFromDynamicZone: false,
   isNestedInDZComponent: false,
   isMain: false,
   isSub: false,
   items: [],
-  secondLoopComponentName: null,
   secondLoopComponentUid: null,
   targetUid: null,
 };
@@ -331,16 +235,12 @@ List.defaultProps = {
 List.propTypes = {
   addComponentToDZ: PropTypes.func,
   customRowComponent: PropTypes.func,
-  dzName: PropTypes.string,
   editTarget: PropTypes.string.isRequired,
-  firstLoopComponentName: PropTypes.string,
   firstLoopComponentUid: PropTypes.string,
   isFromDynamicZone: PropTypes.bool,
   isNestedInDZComponent: PropTypes.bool,
   isMain: PropTypes.bool,
   items: PropTypes.instanceOf(Array),
-  mainTypeName: PropTypes.string.isRequired,
-  secondLoopComponentName: PropTypes.string,
   secondLoopComponentUid: PropTypes.string,
   targetUid: PropTypes.string,
   isSub: PropTypes.bool,

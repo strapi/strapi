@@ -60,8 +60,6 @@ const SelectComponent = ({
   }
 
   if (isCreatingComponentWhileAddingAField) {
-    console.log({ componentToCreate });
-
     options = [
       { uid: value, label: componentToCreate.name, categoryName: componentToCreate.category },
     ];
