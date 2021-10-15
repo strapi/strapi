@@ -1,9 +1,12 @@
 import React, { forwardRef } from 'react';
 import PropTypes from 'prop-types';
 import IconDocumentation from '@strapi/icons/IconDocumentation';
+import { usePersistentState } from '@strapi/helper-plugin';
 import { AssetType } from '../../../constants';
 
 export const AssetPreview = forwardRef(({ mime, url, name }, ref) => {
+  const [lang] = usePersistentState('strapi-admin-language', 'en');
+
   if (mime.includes(AssetType.Image)) {
     return <img ref={ref} src={url} alt={name} />;
   }
@@ -11,7 +14,7 @@ export const AssetPreview = forwardRef(({ mime, url, name }, ref) => {
   if (mime.includes(AssetType.Video)) {
     return (
       <video controls src={url} ref={ref}>
-        <track label={name} default kind="captions" srcLang="en" src="" />
+        <track label={name} default kind="captions" srcLang={lang} src="" />
       </video>
     );
   }
