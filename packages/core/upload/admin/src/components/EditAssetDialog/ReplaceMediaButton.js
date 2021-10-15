@@ -5,7 +5,7 @@ import { Button } from '@strapi/parts/Button';
 import { VisuallyHidden } from '@strapi/parts/VisuallyHidden';
 import { getTrad } from '../../utils';
 
-export const ReplaceMediaButton = ({ onSelectMedia }) => {
+export const ReplaceMediaButton = ({ onSelectMedia, acceptedMime }) => {
   const { formatMessage } = useIntl();
   const inputRef = useRef(null);
 
@@ -30,6 +30,7 @@ export const ReplaceMediaButton = ({ onSelectMedia }) => {
       </Button>
       <VisuallyHidden>
         <input
+          accept={acceptedMime}
           type="file"
           name="file"
           tabIndex={-1}
@@ -43,5 +44,6 @@ export const ReplaceMediaButton = ({ onSelectMedia }) => {
 };
 
 ReplaceMediaButton.propTypes = {
+  acceptedMime: PropTypes.string.isRequired,
   onSelectMedia: PropTypes.func.isRequired,
 };

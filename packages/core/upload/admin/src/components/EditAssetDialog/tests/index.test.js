@@ -1018,9 +1018,16 @@ describe('<EditAssetDialog />', () => {
       .c24 {
         position: relative;
         text-align: center;
+        background: repeating-conic-gradient( #f6f6f9 0% 25%, transparent 0% 50% ) 50% / 20px 20px;
       }
 
-      .c24 img {
+      .c24 svg {
+        font-size: 3rem;
+        height: 16.5rem;
+      }
+
+      .c24 img,
+      .c24 video {
         margin: 0;
         padding: 0;
         max-height: 16.5rem;
@@ -1236,7 +1243,6 @@ describe('<EditAssetDialog />', () => {
                           >
                             <img
                               alt="Screenshot 2.png"
-                              aria-hidden="false"
                               src="http://localhost:1337/uploads/Screenshot_2_5d4a574d61.png"
                             />
                           </div>
@@ -1507,6 +1513,7 @@ describe('<EditAssetDialog />', () => {
                         class="c40"
                       >
                         <input
+                          accept="image/png"
                           aria-hidden="true"
                           name="file"
                           tabindex="-1"
