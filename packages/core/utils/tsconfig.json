@@ -1,10 +1,10 @@
 {
   "extends": "../../../tsconfig.json",
   "compilerOptions": {
+    "lib": ["DOM"],
     "baseUrl": "./",
     "rootDir": "./",
-    "strictNullChecks": true,
-    "noImplicitAny": true
+    "types": ["@strapi/strapi"]
   },
   "include": ["./**/*.js", "**/*.json", "**/*.mjs", "**/*.ts"],
   "exclude": ["**/*.test.js", "**/*.e2e.js"]

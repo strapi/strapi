@@ -1,7 +1,11 @@
 'use strict';
 
-// Using timestamp (milliseconds) to be sure it is unique
-// + converting timestamp to base 36 for better readibility
+/**
+ * Using timestamp (milliseconds) to be sure it is unique
+ * + converting timestamp to base 36 for better readibility
+ *
+ * @param {Date} date
+ */
 const generateTimestampCode = date => {
   const referDate = date || new Date();
 

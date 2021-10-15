@@ -173,13 +173,17 @@ const normalizeSortClauses = (clauses, { model }) => {
 
 /**
  *
- * @param {Object} options - Options
- * @param {Object} options.model - The model for which the query will be built
- * @param {Object} options.filters - The filters for the query (start, sort, limit, and where clauses)
- * @param {Object} options.rest - In case the database layer requires any other params pass them
+ * @param {object} options - Options
+ * @param {any} options.model - The model for which the query will be built
+ * @param {any} options.filters - The filters for the query (start, sort, limit, and where clauses)
+ * @param {any} options.rest - In case the database layer requires any other params pass them
  */
 const buildQuery = ({ model, filters = {}, ...rest }) => {
   const { where, sort } = filters;
+
+  if (!strapi.db) {
+    throw new Error('Database layer is not defined.');
+  }
 
   // Validate query clauses
   if ([where, sort].some(Array.isArray)) {

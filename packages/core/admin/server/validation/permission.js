@@ -11,6 +11,9 @@ const {
 } = require('../domain/role');
 const validators = require('./common-validators');
 
+/**
+ * @param {Error} error
+ */
 const handleReject = error => Promise.reject(formatYupErrors(error));
 
 // validatedUpdatePermissionsInput
@@ -34,11 +37,7 @@ const checkPermissionsAreBound = role =>
 
     for (const [subject, perms] of Object.entries(permsBySubject)) {
       const boundActions = getBoundActionsBySubject(role, subject);
-      const missingActions =
-        _.xor(
-          perms.map(p => p.action),
-          boundActions
-        ).length !== 0;
+      const missingActions = _.xor(perms.map(p => p.action), boundActions).length !== 0;
       if (missingActions) return false;
 
       const permsBoundByFields = perms.filter(p => BOUND_ACTIONS_FOR_FIELDS.includes(p.action));

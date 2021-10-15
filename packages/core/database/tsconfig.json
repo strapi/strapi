@@ -2,9 +2,7 @@
   "extends": "../../../tsconfig.json",
   "compilerOptions": {
     "baseUrl": "./",
-    "rootDir": "./",
-    "strictNullChecks": true,
-    "noImplicitAny": true
+    "rootDir": "./"
   },
   "include": ["./**/*.js", "**/*.json", "**/*.mjs", "**/*.ts"],
   "exclude": ["**/*.test.js", "**/*.e2e.js"]

@@ -3,6 +3,9 @@
 const { yup, formatYupErrors } = require('@strapi/utils');
 const constants = require('../services/constants');
 
+/**
+ * @param {Error} error
+ */
 const handleReject = error => Promise.reject(formatYupErrors(error));
 
 const apiTokenCreationSchema = yup

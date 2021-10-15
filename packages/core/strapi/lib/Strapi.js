@@ -1,6 +1,7 @@
 'use strict';
 
 /**
+ * @typedef {import('types').Strapi} StrapiInterface
  * @typedef {import('types').StrapiContentTypes} StrapiContentTypes
  * @typedef {import('types').StrapiComponents} StrapiComponents
  * @typedef {import('types').StrapiServices} StrapiServices
@@ -10,6 +11,10 @@
  * @typedef {import('types').StrapiPlugins} StrapiPlugins
  * @typedef {import('types').StrapiHooks} StrapiHooks
  * @typedef {import('types').StrapiApi} StrapiApi
+ */
+
+/**
+ * @typedef {StrapiContentTypes & StrapiComponents} StrapiModels
  */
 
 const _ = require('lodash');
@@ -378,6 +383,9 @@ class Strapi {
     await loaders.loadMiddlewares(this);
   }
 
+  /**
+   * @this StrapiInterface
+   */
   async loadApp() {
     this.app = loaders.loadSrcIndex(this);
   }
@@ -424,7 +432,7 @@ class Strapi {
       coreStoreModel,
       webhookModel,
       ...Object.values(strapi.contentTypes),
-      ...Object.values(strapi.components),
+      ...Object.values(strapi.components || []),
     ];
 
     this.db = await Database.init({
@@ -559,6 +567,7 @@ class Strapi {
   }
 
   /**
+   * @this StrapiInterface
    * @param {'bootstrap' | 'register' | 'destroy'} lifecycleName
    */
   async runLifecyclesFunctions(lifecycleName) {
@@ -566,24 +575,34 @@ class Strapi {
     await this.container.get('modules')[lifecycleName]();
 
     // user
-    const userLifecycleFunction = this.app[lifecycleName];
-    if (isFunction(userLifecycleFunction)) {
-      await userLifecycleFunction({ strapi: this });
+    if (this.app) {
+      const userLifecycleFunction = this.app[lifecycleName];
+      if (isFunction(userLifecycleFunction)) {
+        await userLifecycleFunction({ strapi: this });
+      }
     }
 
     // admin
-    const adminLifecycleFunction = this.admin[lifecycleName];
-    if (isFunction(adminLifecycleFunction)) {
-      await adminLifecycleFunction({ strapi: this });
+    if (this.admin) {
+      const adminLifecycleFunction = this.admin[lifecycleName];
+      if (isFunction(adminLifecycleFunction)) {
+        await adminLifecycleFunction({ strapi: this });
+      }
     }
   }
 
   /**
-   * @template {keyof StrapiContentTypes | keyof StrapiComponents} T
-   * @param {T} uid
+   * @template {keyof StrapiModels} M
+   * @param {M} uid
+   * @this StrapiInterface
    */
   getModel(uid) {
-    return this.contentTypes[uid] || this.components[uid];
+    if (uid in this.contentTypes) {
+      return this.contentTypes[uid];
+    }
+    if (this.components && uid in this.components) {
+      return this.components[uid];
+    }
   }
 
   /**

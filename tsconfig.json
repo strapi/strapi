@@ -1,0 +1,38 @@
+{
+  "compilerOptions": {
+    "lib": ["es6"],
+    "target": "es6",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "jsx": "react-jsx",
+    "allowJs": true,
+    "checkJs": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "strictNullChecks": true,
+    "noImplicitAny": true,
+    "baseUrl": "./packages",
+    "noEmit": true,
+    "declaration": false,
+    "outDir": "./never",
+    "paths": {
+      "@strapi/strapi*": ["core/strapi*"],
+      "@strapi/database*": ["core/database*"],
+      "@strapi/admin*": ["core/admin*"],
+      "@strapi/utils*": ["core/utils*"],
+      "@strapi/logger*": ["utils/logger*"]
+    }
+  },
+  "include": ["./**/*.js", "**/*.json", "**/*.mjs", "**/*.ts"],
+  "exclude": [
+    "**/examples/*",
+    "**/.cache/*",
+    "**/.tmp/*",
+    "**/dist/*",
+    "**/build/*",
+    "**/*.test.js",
+    "**/*.e2e.js"
+  ]
+}

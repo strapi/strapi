@@ -1,5 +1,9 @@
 'use strict';
 
+/**
+ * @typedef {import('types').Strapi} Strapi
+ */
+
 const path = require('path');
 const cluster = require('cluster');
 const fs = require('fs-extra');
@@ -13,13 +17,21 @@ const strapi = require('../index');
 
 /**
  * `$ strapi develop`
- *
+ * @param {{
+ *  build: boolean
+ *  watchAdmin: boolean
+ *  polling: boolean
+ *  browser: string
+ * }} config
  */
 module.exports = async function({ build, watchAdmin, polling, browser }) {
   const dir = process.cwd();
   const config = loadConfiguration(dir);
   const logger = createLogger(config.logger, {});
 
+  /**
+   * @type {string[]}
+   */
   const adminWatchIgnoreFiles = getOr([], 'server.admin.watchIgnoreFiles')(config);
   const serveAdminPanel = getOr(true, 'server.admin.serveAdminPanel')(config);
 
@@ -87,7 +99,9 @@ module.exports = async function({ build, watchAdmin, polling, browser }) {
         switch (message) {
           case 'isKilled':
             await strapiInstance.server.destroy();
-            process.send('kill');
+            if (process.send) {
+              process.send('kill');
+            }
             break;
           default:
           // Do nothing.
@@ -106,8 +120,9 @@ module.exports = async function({ build, watchAdmin, polling, browser }) {
  * Init file watching to auto restart strapi app
  * @param {Object} options - Options object
  * @param {string} options.dir - This is the path where the app is located, the watcher will watch the files under this folder
- * @param {Strapi} options.strapi - Strapi instance
- * @param {array} options.watchIgnoreFiles - Array of custom file paths that should not be watched
+ * @param {Strapi} options.strapiInstance - Strapi instance
+ * @param {string[]} options.watchIgnoreFiles - Array of custom file paths that should not be watched
+ * @param {boolean} options.polling
  */
 function watchFileChanges({ dir, strapiInstance, watchIgnoreFiles, polling }) {
   const restart = () => {

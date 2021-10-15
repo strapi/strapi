@@ -29,7 +29,7 @@ async function copyContent(templatePath, rootBase) {
           'success'
         )}: copy ${currentProjectBase}/${item} => ${rootBase}/template/${item}`
       );
-    } catch (error) {
+    } catch (/** @type {any} **/ error) {
       console.error(`${chalk.red('error')}: ${error.message}`);
     }
   }
@@ -43,7 +43,7 @@ async function writeTemplateJson(rootPath) {
   try {
     await fse.writeJSON(join(rootPath, 'template.json'), {});
     console.log(`${chalk.green('success')}: create JSON config file`);
-  } catch (error) {
+  } catch (/** @type {any} **/ error) {
     console.error(`${chalk.red('error')}: ${error.message}`);
   }
 }
@@ -60,6 +60,9 @@ async function templateConfigExists(rootPath) {
   return jsonConfig || functionConfig;
 }
 
+/**
+ * @param {string} directory
+ */
 module.exports = async function generateTemplate(directory) {
   const rootPath = resolve(directory);
 

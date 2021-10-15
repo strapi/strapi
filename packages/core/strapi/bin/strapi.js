@@ -12,6 +12,9 @@ const program = new Command();
 
 const packageJSON = require('../package.json');
 
+/**
+ * @param {string} name
+ */
 const checkCwdIsStrapiApp = name => {
   let logErrorAndExit = () => {
     console.log(
@@ -25,14 +28,17 @@ const checkCwdIsStrapiApp = name => {
   try {
     const pkgJSON = require(process.cwd() + '/package.json');
     if (!_.has(pkgJSON, 'dependencies.@strapi/strapi')) {
-      logErrorAndExit(name);
+      logErrorAndExit();
     }
   } catch (err) {
-    logErrorAndExit(name);
+    logErrorAndExit();
   }
 };
 
-const getLocalScript = name => (...args) => {
+/**
+ * @param {string} name
+ */
+const getLocalScript = name => /** @param {any} args **/ (...args) => {
   checkCwdIsStrapiApp(name);
 
   const cmdPath = resolveCwd.silent(`@strapi/strapi/lib/commands/${name}`);

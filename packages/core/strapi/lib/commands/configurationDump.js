@@ -1,5 +1,9 @@
 'use strict';
 
+/**
+ * @typedef {import('types').CoreStore} CoreStore
+ */
+
 const fs = require('fs');
 const strapi = require('../index');
 
@@ -7,7 +11,9 @@ const CHUNK_SIZE = 100;
 
 /**
  * Will dump configurations to a file or stdout
- * @param {string} file filepath to use as output
+ * @param {object} ctx
+ * @param {string} ctx.file filepath to use as output
+ * @param {boolean} ctx.pretty
  */
 module.exports = async function({ file: filePath, pretty }) {
   const output = filePath ? fs.createWriteStream(filePath) : process.stdout;
@@ -16,6 +22,9 @@ module.exports = async function({ file: filePath, pretty }) {
 
   const count = await app.query('strapi::core-store').count();
 
+  /**
+   * @type {CoreStore[]}
+   */
   const exportData = [];
 
   const pageCount = Math.ceil(count / CHUNK_SIZE);
@@ -38,8 +47,14 @@ module.exports = async function({ file: filePath, pretty }) {
       });
   }
 
-  output.write(JSON.stringify(exportData, null, pretty ? 2 : null));
-  output.write('\n');
+  if (output instanceof fs.WriteStream) {
+    output.write(JSON.stringify(exportData, null, pretty ? 2 : undefined));
+    output.write('\n');
+  } else {
+    output.write(JSON.stringify(exportData, null, pretty ? 2 : undefined));
+    output.write('\n');
+  }
+
   output.end();
 
   // log success only when writting to file

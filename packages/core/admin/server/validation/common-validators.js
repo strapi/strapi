@@ -180,7 +180,7 @@ const updatePermissions = yup
                     abortEarly: false,
                   });
                   return true;
-                } catch (e) {
+                } catch (/** @type {any} **/ e) {
                   // Propagate fieldsPropertyValidation error with updated path
                   throw this.createError({
                     message: e.message,

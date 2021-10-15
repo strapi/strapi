@@ -140,7 +140,7 @@ export interface QueryFromContentType<T extends keyof StrapiContentTypes> {
   delete(params: FindParams<Entity<StrapiContentTypes[T]>>): Promise<Entity<StrapiContentTypes[T]>>;
   deleteMany(params: FindParams<Entity<StrapiContentTypes[T]>>): Promise<{ count: number }>;
 
-  count(params: FindParams<StrapiContentTypes[T]>): Promise<number>;
+  count(params?: FindParams<StrapiContentTypes[T]>): Promise<number>;
 
   attachRelations(id: ID, data: any): Promise<any>;
   updateRelations(id: ID, data: any): Promise<any>;

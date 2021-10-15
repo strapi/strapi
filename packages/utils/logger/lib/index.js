@@ -5,6 +5,9 @@ const winston = require('winston');
 const formats = require('./formats');
 const createDefaultConfiguration = require('./default-configuration');
 
+/**
+ * @param {winston.LoggerOptions} userConfiguration
+ */
 const createLogger = userConfiguration => {
   const configuration = createDefaultConfiguration();
 

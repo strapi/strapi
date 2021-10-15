@@ -15,7 +15,7 @@
     "analyze:deps": "ANALYZE_DEPS=true webpack serve --config webpack.config.dev.js --progress profile"
   },
   "main": "index.js",
-  "types": "./types",
+  "types": "types",
   "dependencies": {
     "@babel/core": "7.14.0",
     "@babel/plugin-proposal-async-generator-functions": "7.13.15",

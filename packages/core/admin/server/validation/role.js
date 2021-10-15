@@ -2,6 +2,9 @@
 
 const { yup, formatYupErrors } = require('@strapi/utils');
 
+/**
+ * @param {Error} error
+ */
 const handleReject = error => Promise.reject(formatYupErrors(error));
 
 const roleUpdateSchema = yup
@@ -12,6 +15,9 @@ const roleUpdateSchema = yup
   })
   .noUnknown();
 
+/**
+ * @param {any} data
+ */
 const validateRoleUpdateInput = data => {
   return roleUpdateSchema.validate(data, { strict: true, abortEarly: false }).catch(handleReject);
 };

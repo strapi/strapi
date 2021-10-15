@@ -11,6 +11,11 @@ const getEnabledPlugins = require('../core/loaders/plugins/get-enabled-plugins')
 
 /**
  * `$ strapi build`
+ *
+ * @param {{
+ *  clean: boolean,
+ *  optimization: any,
+ * }} ctx
  */
 module.exports = async ({ clean, optimization }) => {
   const dir = process.cwd();
@@ -49,7 +54,7 @@ module.exports = async ({ clean, optimization }) => {
     .then(() => {
       process.exit();
     })
-    .catch(err => {
+    .catch((/** @type {any} **/ err) => {
       console.error(err);
       process.exit(1);
     });

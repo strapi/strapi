@@ -8,6 +8,11 @@ const addSlash = require('../utils/addSlash');
 const strapi = require('../index');
 const getEnabledPlugins = require('../core/loaders/plugins/get-enabled-plugins');
 
+/**
+ * @param {{
+ *  browser: string
+ * }} ctx
+ */
 module.exports = async function({ browser }) {
   const dir = process.cwd();
 

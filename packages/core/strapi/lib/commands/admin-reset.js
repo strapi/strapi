@@ -17,11 +17,11 @@ const promptQuestions = [
 /**
  * Reset user's password
  * @param {object} cmdOptions - command options
- * @param {string=} cmdOptions.email - user's email
- * @param {string=} cmdOptions.password - user's new password
+ * @param {string} cmdOptions.email - user's email
+ * @param {string} cmdOptions.password - user's new password
  */
-module.exports = async function(cmdOptions = {}) {
-  const { email, password } = cmdOptions;
+module.exports = async function(cmdOptions) {
+  const { email, password } = cmdOptions || {};
 
   if (_.isEmpty(email) && _.isEmpty(password) && process.stdin.isTTY) {
     const inquiry = await inquirer.prompt(promptQuestions);

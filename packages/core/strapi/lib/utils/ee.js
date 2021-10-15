@@ -34,7 +34,7 @@ const features = {
 /**
  * @param {{
  *  dir: string
- *  logger: Logger | typeof noLog
+ *  logger?: Logger | typeof noLog
  * }} ctx
  */
 module.exports = ({ dir, logger = noLog }) => {

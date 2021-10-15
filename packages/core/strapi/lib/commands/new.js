@@ -1,11 +1,12 @@
 'use strict';
 
 /**
+ * Generate a new Strapi application.
+ *
  * `$ strapi new`
  *
- * Generate a new Strapi application.
+ * @param {any} args
  */
-
 module.exports = function(...args) {
   return require('@strapi/generate-new')(...args);
 };

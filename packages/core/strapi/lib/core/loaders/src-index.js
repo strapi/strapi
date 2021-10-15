@@ -31,9 +31,9 @@ const validateSrcIndex = srcIndex => {
 /**
  * @param {Strapi} strapi
  * @returns {{
- *   bootstrap?: () => void,
- *   register?: () => void,
- *   destroy?: () => void,
+ *   bootstrap?: ({ strapi: Strapi }) => void,
+ *   register?: ({ strapi: Strapi }) => void,
+ *   destroy?: ({ strapi: Strapi }) => void,
  * }}
  */
 module.exports = strapi => {

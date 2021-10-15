@@ -7,6 +7,12 @@ const execa = require('execa');
 const inquirer = require('inquirer');
 const findPackagePath = require('../load/package-path');
 
+/**
+ * @param {string[]} plugins
+ * @param {{
+ *  deleteFiles: boolean
+ * }} ctx
+ */
 module.exports = async (plugins, { deleteFiles }) => {
   const answers = await inquirer.prompt([
     {
@@ -60,7 +66,7 @@ module.exports = async (plugins, { deleteFiles }) => {
       await execa('npm', ['run', 'build']);
       loader.succeed();
     }
-  } catch (err) {
+  } catch (/** @type {any} **/ err) {
     loader.clear();
     console.error(err.message);
     process.exit(1);

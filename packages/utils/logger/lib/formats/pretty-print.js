@@ -10,8 +10,9 @@ const defaultTimestampFormat = 'YYYY-MM-DD HH:mm:ss.SSS';
 
 /**
  * Create a pretty print formatter for a winston logger
- * @param {string|boolean} timestamps - Enable or disable timestamps print if it's a boolean value. Use the given format for the timestamps if it's a string
- * @param {boolean} colors - Enable or disable the use of colors for the log level
+ * @param {object} ctx
+ * @param {string|boolean=} ctx.timestamps - Enable or disable timestamps print if it's a boolean value. Use the given format for the timestamps if it's a string
+ * @param {boolean=} ctx.colors - Enable or disable the use of colors for the log level
  */
 module.exports = ({ timestamps = true, colors = true } = {}) => {
   const handlers = [];
