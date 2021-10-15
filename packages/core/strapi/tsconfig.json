@@ -3,6 +3,7 @@
   "compilerOptions": {
     "baseUrl": "./",
     "rootDir": "./",
+    "allowSyntheticDefaultImports": true,
     "strictNullChecks": true,
     "noImplicitAny": false
   },

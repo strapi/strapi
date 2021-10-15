@@ -4,7 +4,7 @@
  * Module dependencies
  */
 
-const fetch = require('node-fetch').default;
+const fetch = require('node-fetch');
 const { machineIdSync } = require('node-machine-id');
 
 /*

@@ -5,7 +5,7 @@
 
 const debug = require('debug')('strapi:webhook');
 const _ = require('lodash');
-const fetch = require('node-fetch').default;
+const fetch = require('node-fetch');
 
 const WorkerQueue = require('./worker-queue');
 
