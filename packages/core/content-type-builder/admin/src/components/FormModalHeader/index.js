@@ -66,7 +66,7 @@ const FormModalHeader = ({
           </Box>
           <Box paddingLeft={3}>
             <ButtonText textColor="neutral800" as="h2" id="title">
-              {formatMessage({ id: headerId }, { name: schema.schema.name })}
+              {formatMessage({ id: headerId }, { name: schema?.schema.name })}
             </ButtonText>
           </Box>
         </Row>

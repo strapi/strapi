@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useNotification, useTracking } from '@strapi/helper-plugin';
 import { camelCase, isEmpty, sortBy, toLower, upperFirst } from 'lodash';
 import matchSorter from 'match-sorter';
-import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
 import useDataManager from '../../hooks/useDataManager';
 import pluginId from '../../pluginId';
@@ -19,7 +18,6 @@ const useContentTypeBuilderMenu = () => {
   } = useDataManager();
   const toggleNotification = useNotification();
   const { trackUsage } = useTracking();
-  const { formatMessage } = useIntl();
   const { push } = useHistory();
   const [search, setSearch] = useState('');
 
@@ -35,16 +33,6 @@ const useContentTypeBuilderMenu = () => {
           actionType: 'edit',
           modalType: 'editCategory',
           categoryName: data.name,
-          header_label_1: formatMessage({
-            id: getTrad('modalForm.header.categories'),
-            defaultMessage: 'Categories',
-          }),
-          header_info_category_1: null,
-          header_info_name_1: null,
-          header_label_2: data.name,
-          header_info_category_2: null,
-          header_info_name_2: null,
-
           settingType: 'base',
         });
 
@@ -81,7 +69,6 @@ const useContentTypeBuilderMenu = () => {
         actionType: 'create',
         settingType: 'base',
         forTarget: modalType,
-        header_label_1: 'null',
       });
       push({
         search,
