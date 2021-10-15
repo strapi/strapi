@@ -44,11 +44,36 @@ const layout = {
     label: 'michka',
   },
   metadatas: {
-    address: {},
-    averagePrice: {},
-    cover: {},
-    id: {},
-    since: {},
+    address: {
+      list: {
+        label: '',
+        sortable: false,
+      },
+    },
+    averagePrice: {
+      list: {
+        label: 'AveragePrice',
+        sortable: true,
+      },
+    },
+    cover: {
+      list: {
+        label: 'michka',
+        sortable: false,
+      },
+    },
+    id: {
+      list: {
+        label: 'hey',
+        sortable: true,
+      },
+    },
+    since: {
+      list: {
+        label: 'since',
+        sortable: false,
+      },
+    },
   },
   layouts: {
     list: ['id', 'address'],
@@ -145,5 +170,48 @@ describe('ADMIN | CM | LV | Configure the view', () => {
     fireEvent.click(screen.getByTestId('delete-id'));
 
     expect(queryByTestId('delete-id')).not.toBeInTheDocument();
+  });
+
+  describe('Edit modal', () => {
+    it('should open edit modal', async () => {
+      const history = createMemoryHistory();
+
+      render(makeApp(history), { container: document.body });
+      await waitFor(() =>
+        expect(screen.getByText('Configure the view - Michka')).toBeInTheDocument()
+      );
+
+      fireEvent.click(screen.getByLabelText('Edit address'));
+
+      expect(
+        screen.getByText("This value overrides the label displayed in the table's head")
+      ).toBeInTheDocument();
+    });
+
+    it('should not show sortable toggle input if field not sortable', async () => {
+      const history = createMemoryHistory();
+
+      const { queryByText } = render(makeApp(history), { container: document.body });
+      await waitFor(() =>
+        expect(screen.getByText('Configure the view - Michka')).toBeInTheDocument()
+      );
+
+      fireEvent.click(screen.getByLabelText('Edit address'));
+
+      expect(queryByText('Enable sort on this field')).not.toBeInTheDocument();
+    });
+
+    it('should show sortable toggle input if field sortable', async () => {
+      const history = createMemoryHistory();
+
+      const { queryByTestId } = render(makeApp(history), { container: document.body });
+      await waitFor(() =>
+        expect(screen.getByText('Configure the view - Michka')).toBeInTheDocument()
+      );
+
+      fireEvent.click(screen.getByLabelText('Edit id'));
+
+      expect(queryByTestId('Enable sort on this field')).toBeInTheDocument();
+    });
   });
 });

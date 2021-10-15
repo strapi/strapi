@@ -25,7 +25,14 @@ const SelectContainer = styled(Flex)`
   max-width: ${32 / 16}rem;
 `;
 
-const View = ({ listRemainingFields, displayedFields, handleAddField, handleRemoveField }) => {
+const SortDisplayedFields = ({
+  listRemainingFields,
+  displayedFields,
+  onAddField,
+  onRemoveField,
+  onClickEditField,
+  metadatas,
+}) => {
   const { formatMessage } = useIntl();
 
   return (
@@ -51,9 +58,11 @@ const View = ({ listRemainingFields, displayedFields, handleAddField, handleRemo
           <Stack horizontal size={3}>
             {displayedFields.map((field, index) => (
               <DraggableCard
-                onRemoveField={e => handleRemoveField(e, index)}
+                onRemoveField={e => onRemoveField(e, index)}
+                onClickEditField={onClickEditField}
                 key={field}
-                title={field}
+                name={field}
+                labelField={metadatas[field].list.label || field}
               />
             ))}
           </Stack>
@@ -70,7 +79,7 @@ const View = ({ listRemainingFields, displayedFields, handleAddField, handleRemo
             data-testid="add-field"
           >
             {listRemainingFields.map(field => (
-              <MenuItem key={field} onClick={() => handleAddField(field)}>
+              <MenuItem key={field} onClick={() => onAddField(field)}>
                 {field}
               </MenuItem>
             ))}
@@ -81,11 +90,19 @@ const View = ({ listRemainingFields, displayedFields, handleAddField, handleRemo
   );
 };
 
-View.propTypes = {
+SortDisplayedFields.propTypes = {
   displayedFields: PropTypes.array.isRequired,
-  handleAddField: PropTypes.func.isRequired,
-  handleRemoveField: PropTypes.func.isRequired,
+  onAddField: PropTypes.func.isRequired,
+  onClickEditField: PropTypes.func.isRequired,
+  onRemoveField: PropTypes.func.isRequired,
   listRemainingFields: PropTypes.array.isRequired,
+  metadatas: PropTypes.objectOf(
+    PropTypes.shape({
+      list: PropTypes.shape({
+        label: PropTypes.string,
+      }),
+    })
+  ).isRequired,
 };
 
-export default View;
+export default SortDisplayedFields;
