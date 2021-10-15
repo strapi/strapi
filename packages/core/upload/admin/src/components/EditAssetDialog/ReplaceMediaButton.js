@@ -5,7 +5,7 @@ import { Button } from '@strapi/parts/Button';
 import { VisuallyHidden } from '@strapi/parts/VisuallyHidden';
 import { getTrad } from '../../utils';
 
-export const ReplaceMediaButton = ({ onSelectMedia, acceptedMime }) => {
+export const ReplaceMediaButton = ({ onSelectMedia, acceptedMime, ...props }) => {
   const { formatMessage } = useIntl();
   const inputRef = useRef(null);
 
@@ -22,7 +22,7 @@ export const ReplaceMediaButton = ({ onSelectMedia, acceptedMime }) => {
 
   return (
     <>
-      <Button variant="secondary" onClick={handleClick}>
+      <Button variant="secondary" onClick={handleClick} {...props}>
         {formatMessage({
           id: getTrad('control-card.replace-media'),
           defaultMessage: 'Replace media',

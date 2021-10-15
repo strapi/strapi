@@ -4,7 +4,6 @@ import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 import {
   LoadingIndicatorPage,
-  useRBAC,
   useFocusWhenNavigate,
   NoPermissions,
   NoMedia,
@@ -22,9 +21,9 @@ import { EditAssetDialog } from '../../components/EditAssetDialog';
 import { ListView } from './components/ListView';
 import { useAssets } from '../../hooks/useAssets';
 import { getTrad } from '../../utils';
-import pluginPermissions from '../../permissions';
 import { Filters } from './components/Filters';
 import { PaginationFooter } from '../../components/PaginationFooter';
+import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
 
 const BoxWithHeight = styled(Box)`
   height: ${32 / 16}rem;
@@ -33,10 +32,18 @@ const BoxWithHeight = styled(Box)`
 `;
 
 export const MediaLibrary = () => {
-  const state = useRBAC(pluginPermissions);
+  const {
+    canRead,
+    canCreate,
+    canUpdate,
+    canCopyLink,
+    canDownload,
+    isLoading: isLoadingPermissions,
+  } = useMediaLibraryPermissions();
+
   const { formatMessage } = useIntl();
   const { data, isLoading, error } = useAssets({
-    skipWhen: !state.allowedActions.canMain,
+    skipWhen: !canRead,
   });
 
   const [showUploadAssetDialog, setShowUploadAssetDialog] = useState(false);
@@ -45,8 +52,7 @@ export const MediaLibrary = () => {
 
   useFocusWhenNavigate();
 
-  const canRead = state.allowedActions.canMain;
-  const loading = state.isLoading || isLoading;
+  const loading = isLoadingPermissions || isLoading;
 
   if (!loading && !canRead) {
     return <Redirect to="/" />;
@@ -74,12 +80,16 @@ export const MediaLibrary = () => {
             { number: assets?.length || 0 }
           )}
           primaryAction={
-            <Button startIcon={<AddIcon />} onClick={toggleUploadAssetDialog}>
-              {formatMessage({
-                id: getTrad('header.actions.upload-assets'),
-                defaultMessage: 'Upload new assets',
-              })}
-            </Button>
+            canCreate ? (
+              <Button startIcon={<AddIcon />} onClick={toggleUploadAssetDialog}>
+                {formatMessage({
+                  id: getTrad('header.actions.upload-assets'),
+                  defaultMessage: 'Upload new assets',
+                })}
+              </Button>
+            ) : (
+              undefined
+            )
           }
         />
 
@@ -120,21 +130,32 @@ export const MediaLibrary = () => {
           {canRead && assets && assets.length === 0 && (
             <NoMedia
               action={
-                <Button
-                  variant="secondary"
-                  startIcon={<AddIcon />}
-                  onClick={toggleUploadAssetDialog}
-                >
-                  {formatMessage({
-                    id: getTrad('modal.header.browse'),
-                    defaultMessage: 'Upload assets',
-                  })}
-                </Button>
+                canCreate ? (
+                  <Button
+                    variant="secondary"
+                    startIcon={<AddIcon />}
+                    onClick={toggleUploadAssetDialog}
+                  >
+                    {formatMessage({
+                      id: getTrad('modal.header.browse'),
+                      defaultMessage: 'Upload assets',
+                    })}
+                  </Button>
+                ) : (
+                  undefined
+                )
               }
-              content={formatMessage({
-                id: getTrad('list.assets.empty'),
-                defaultMessage: 'Upload your first assets...',
-              })}
+              content={
+                canCreate
+                  ? formatMessage({
+                      id: getTrad('list.assets.empty'),
+                      defaultMessage: 'Upload your first assets...',
+                    })
+                  : formatMessage({
+                      id: getTrad('list.assets.empty.no-permissions'),
+                      defaultMessage: 'The asset list is empty',
+                    })
+              }
             />
           )}
           {canRead && assets && assets.length > 0 && (
@@ -150,7 +171,13 @@ export const MediaLibrary = () => {
         <UploadAssetDialog onClose={toggleUploadAssetDialog} onSuccess={() => {}} />
       )}
       {assetToEdit && (
-        <EditAssetDialog onClose={() => setAssetToEdit(undefined)} asset={assetToEdit} />
+        <EditAssetDialog
+          onClose={() => setAssetToEdit(undefined)}
+          asset={assetToEdit}
+          canUpdate={canUpdate}
+          canCopyLink={canCopyLink}
+          canDownload={canDownload}
+        />
       )}
     </Layout>
   );
