@@ -43,8 +43,7 @@ export default {
       description: pluginDescription,
       icon,
       id: pluginId,
-
-      isReady: false,
+      isReady: true,
       isRequired: pluginPkg.strapi.required || false,
       name,
       pluginLogo,
