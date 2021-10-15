@@ -33,11 +33,25 @@ const fileInfoSchema = yup.object({
 export const EditAssetDialog = ({ onClose, asset }) => {
   const { formatMessage, formatDate } = useIntl();
   const submitButtonRef = useRef(null);
+  const [isCropping, setIsCropping] = useState(false);
   const [replacementFile, setReplacementFile] = useState();
   const { editAsset, isLoading } = useEditAsset();
 
   const handleSubmit = async values => {
     await editAsset({ ...asset, ...values }, replacementFile);
+    onClose();
+  };
+
+  const handleStartCropping = () => {
+    setIsCropping(true);
+  };
+
+  const handleCancelCropping = () => {
+    setIsCropping(false);
+  };
+
+  const handleFinishCropping = () => {
+    setIsCropping(false);
     onClose();
   };
 
@@ -55,7 +69,9 @@ export const EditAssetDialog = ({ onClose, asset }) => {
               <PreviewBox
                 asset={asset}
                 onDelete={onClose}
-                onCropFinish={onClose}
+                onCropFinish={handleFinishCropping}
+                onCropStart={handleStartCropping}
+                onCropCancel={handleCancelCropping}
                 replacementFile={replacementFile}
               />
             </GridItem>
@@ -92,6 +108,7 @@ export const EditAssetDialog = ({ onClose, asset }) => {
                         value={values.name}
                         error={errors.name}
                         onChange={handleChange}
+                        disabled={isCropping}
                       />
 
                       <TextInput
@@ -109,6 +126,7 @@ export const EditAssetDialog = ({ onClose, asset }) => {
                         value={values.alternativeText}
                         error={errors.alternativeText}
                         onChange={handleChange}
+                        disabled={isCropping}
                       />
 
                       <TextInput
@@ -121,11 +139,17 @@ export const EditAssetDialog = ({ onClose, asset }) => {
                         value={values.caption}
                         error={errors.caption}
                         onChange={handleChange}
+                        disabled={isCropping}
                       />
                     </Stack>
 
                     <VisuallyHidden>
-                      <button type="submit" tabIndex={-1} ref={submitButtonRef}>
+                      <button
+                        type="submit"
+                        tabIndex={-1}
+                        ref={submitButtonRef}
+                        disabled={isCropping}
+                      >
                         {formatMessage({ id: 'submit', defaultMessage: 'Submit' })}
                       </button>
                     </VisuallyHidden>
@@ -143,8 +167,12 @@ export const EditAssetDialog = ({ onClose, asset }) => {
           }
           endActions={
             <>
-              <ReplaceMediaButton onSelectMedia={setReplacementFile} />
-              <Button onClick={() => submitButtonRef.current.click()} loading={isLoading}>
+              <ReplaceMediaButton onSelectMedia={setReplacementFile} acceptedMime={asset.mime} />
+              <Button
+                onClick={() => submitButtonRef.current.click()}
+                loading={isLoading}
+                disabled={isCropping}
+              >
                 {formatMessage({ id: 'form.button.finish', defaultMessage: 'Finish' })}
               </Button>
             </>
@@ -163,6 +191,7 @@ EditAssetDialog.propTypes = {
     size: PropTypes.number,
     createdAt: PropTypes.string,
     ext: PropTypes.string,
+    mime: PropTypes.string,
     name: PropTypes.string,
     url: PropTypes.string,
     alternativeText: PropTypes.string,

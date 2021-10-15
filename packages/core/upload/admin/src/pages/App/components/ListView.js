@@ -22,6 +22,7 @@ export const ListView = ({ assets, onEditAsset }) => {
                 extension={getFileExtension(asset.ext)}
                 url={prefixFileUrlWithBackendUrl(asset.url)}
                 mime={asset.mime}
+                onEdit={() => onEditAsset(asset)}
               />
             );
           }
@@ -47,6 +48,7 @@ export const ListView = ({ assets, onEditAsset }) => {
               key={asset.id}
               name={asset.name}
               extension={getFileExtension(asset.ext)}
+              onEdit={() => onEditAsset(asset)}
             />
           );
         })}

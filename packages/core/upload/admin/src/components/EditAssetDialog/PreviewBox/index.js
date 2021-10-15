@@ -23,8 +23,17 @@ import {
 import { CroppingActions } from './CroppingActions';
 import { CopyLinkButton } from './CopyLinkButton';
 import { UploadProgress } from '../../UploadProgress';
+import { AssetType } from '../../../constants';
+import { AssetPreview } from './AssetPreview';
 
-export const PreviewBox = ({ asset, onDelete, onCropFinish, replacementFile }) => {
+export const PreviewBox = ({
+  asset,
+  onDelete,
+  onCropFinish,
+  onCropStart,
+  onCropCancel,
+  replacementFile,
+}) => {
   const previewRef = useRef(null);
   const [assetUrl, setAssetUrl] = useState(prefixFileUrlWithBackendUrl(asset.url));
   const { formatMessage } = useIntl();
@@ -39,6 +48,7 @@ export const PreviewBox = ({ asset, onDelete, onCropFinish, replacementFile }) =
     height,
   } = useCropImg();
   const { editAsset, error, isLoading, progress, cancel } = useEditAsset();
+
   const {
     upload,
     isLoading: isLoadingUpload,
@@ -68,6 +78,7 @@ export const PreviewBox = ({ asset, onDelete, onCropFinish, replacementFile }) =
     setAssetUrl(prefixFileUrlWithBackendUrl(optimizedCachingImage));
 
     stopCropping();
+    onCropCancel();
   };
 
   const isInCroppingMode = isCropping && !isLoading;
@@ -82,6 +93,16 @@ export const PreviewBox = ({ asset, onDelete, onCropFinish, replacementFile }) =
     onCropFinish();
   };
 
+  const handleCropCancel = () => {
+    stopCropping();
+    onCropCancel();
+  };
+
+  const handleCropStart = () => {
+    crop(previewRef.current);
+    onCropStart();
+  };
+
   return (
     <>
       <RelativeBox hasRadius background="neutral150" borderColor="neutral200">
@@ -89,7 +110,7 @@ export const PreviewBox = ({ asset, onDelete, onCropFinish, replacementFile }) =
           <CroppingActions
             onValidate={handleCropping}
             onDuplicate={handleDuplication}
-            onCancel={stopCropping}
+            onCancel={handleCropCancel}
           />
         )}
 
@@ -115,11 +136,13 @@ export const PreviewBox = ({ asset, onDelete, onCropFinish, replacementFile }) =
 
             <CopyLinkButton url={assetUrl} />
 
-            <IconButton
-              label={formatMessage({ id: getTrad('control-card.crop'), defaultMessage: 'Crop' })}
-              icon={<Resize />}
-              onClick={() => crop(previewRef.current)}
-            />
+            {asset.mime.includes(AssetType.Image) && (
+              <IconButton
+                label={formatMessage({ id: getTrad('control-card.crop'), defaultMessage: 'Crop' })}
+                icon={<Resize />}
+                onClick={handleCropStart}
+              />
+            )}
           </Stack>
         </ActionRow>
 
@@ -142,7 +165,7 @@ export const PreviewBox = ({ asset, onDelete, onCropFinish, replacementFile }) =
             </UploadProgressWrapper>
           )}
 
-          <img aria-hidden={isLoading} ref={previewRef} src={assetUrl} alt={asset.name} />
+          <AssetPreview ref={previewRef} mime={asset.mime} name={asset.name} url={assetUrl} />
         </Wrapper>
 
         <ActionRow
@@ -192,4 +215,6 @@ PreviewBox.propTypes = {
   }).isRequired,
   onDelete: PropTypes.func.isRequired,
   onCropFinish: PropTypes.func.isRequired,
+  onCropStart: PropTypes.func.isRequired,
+  onCropCancel: PropTypes.func.isRequired,
 };

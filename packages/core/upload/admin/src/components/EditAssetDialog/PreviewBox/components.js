@@ -10,8 +10,19 @@ export const RelativeBox = styled(Box)`
 export const Wrapper = styled.div`
   position: relative;
   text-align: center;
+  background: repeating-conic-gradient(
+      ${({ theme }) => theme.colors.neutral100} 0% 25%,
+      transparent 0% 50%
+    )
+    50% / 20px 20px;
 
-  img {
+  svg {
+    font-size: 3rem;
+    height: ${264 / 16}rem;
+  }
+
+  img,
+  video {
     margin: 0;
     padding: 0;
     max-height: ${264 / 16}rem;
