@@ -20,7 +20,7 @@ jobs:
       - uses: actions/setup-node@v2-beta
         with:
           node-version: ${{ matrix.node }}
-          cache: npm
+          cache: yarn
       - uses: ./.github/actions/install-modules
       - name: Run lint
         run: yarn run -s lint
@@ -39,7 +39,7 @@ jobs:
       - uses: actions/setup-node@v2-beta
         with:
           node-version: ${{ matrix.node }}
-          cache: npm
+          cache: yarn
       - uses: ./.github/actions/install-modules
         with:
           globalPackages: codecov
@@ -60,7 +60,7 @@ jobs:
       - uses: actions/setup-node@v2-beta
         with:
           node-version: ${{ matrix.node }}
-          cache: npm
+          cache: yarn
       - uses: ./.github/actions/install-modules
         with:
           globalPackages: codecov
@@ -97,7 +97,7 @@ jobs:
       - uses: actions/setup-node@v2-beta
         with:
           node-version: ${{ matrix.node }}
-          cache: npm
+          cache: yarn
       - uses: ./.github/actions/install-modules
       - uses: ./.github/actions/run-e2e-tests
         with:
@@ -124,7 +124,7 @@ jobs:
       - uses: actions/setup-node@v2-beta
         with:
           node-version: ${{ matrix.node }}
-          cache: npm
+          cache: yarn
       - uses: ./.github/actions/install-modules
       - uses: ./.github/actions/run-e2e-tests
         with:
@@ -143,7 +143,7 @@ jobs:
       - uses: actions/setup-node@v2-beta
         with:
           node-version: ${{ matrix.node }}
-          cache: npm
+          cache: yarn
       - uses: ./.github/actions/install-modules
       - uses: ./.github/actions/run-e2e-tests
         with:
@@ -167,7 +167,7 @@ jobs:
       - uses: actions/setup-node@v2-beta
         with:
           node-version: ${{ matrix.node }}
-          cache: npm
+          cache: yarn
       - uses: ./.github/actions/install-modules
       - uses: ./.github/actions/run-e2e-tests
         with:
@@ -205,7 +205,7 @@ jobs:
       - uses: actions/setup-node@v2-beta
         with:
           node-version: ${{ matrix.node }}
-          cache: npm
+          cache: yarn
       - uses: ./.github/actions/install-modules
       - uses: ./.github/actions/run-e2e-tests
         with:
@@ -236,7 +236,7 @@ jobs:
       - uses: actions/setup-node@v2-beta
         with:
           node-version: ${{ matrix.node }}
-          cache: npm
+          cache: yarn
       - uses: ./.github/actions/install-modules
       - uses: ./.github/actions/run-e2e-tests
         with:
@@ -259,7 +259,7 @@ jobs:
       - uses: actions/setup-node@v2-beta
         with:
           node-version: ${{ matrix.node }}
-          cache: npm
+          cache: yarn
       - uses: ./.github/actions/install-modules
       - uses: ./.github/actions/run-e2e-tests
         with:
@@ -287,7 +287,7 @@ jobs:
       - uses: actions/setup-node@v2-beta
         with:
           node-version: ${{ matrix.node }}
-          cache: npm
+          cache: yarn
       - uses: ./.github/actions/install-modules
       - uses: ./.github/actions/run-e2e-tests
         with:
