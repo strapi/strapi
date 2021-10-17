@@ -1,3 +1,4 @@
+import az from './az.json';
 import ar from './ar.json';
 import cs from './cs.json';
 import de from './de.json';
@@ -26,6 +27,7 @@ import sk from './sk.json';
 import uk from './uk.json';
 
 const trads = {
+  az,
   ar,
   cs,
   de,
