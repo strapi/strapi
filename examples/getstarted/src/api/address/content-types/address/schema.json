@@ -79,14 +79,6 @@
       "component": "blog.test-como",
       "required": false,
       "min": 2
-    },
-    "testEnum": {
-      "type": "enumeration",
-      "enum": [
-        "Michka",
-        "Sacha",
-        "Ronronscelestes"
-      ]
     }
   }
 }
