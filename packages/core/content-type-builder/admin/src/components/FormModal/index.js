@@ -32,12 +32,13 @@ import BooleanDefaultValueSelect from '../BooleanDefaultValueSelect';
 import CheckboxWithNumberField from '../CheckboxWithNumberField';
 import CustomRadioGroup from '../CustomRadioGroup';
 import ContentTypeRadioGroup from '../ContentTypeRadioGroup';
-import TabForm from '../TabForm';
 import ComponentIconPicker from '../ComponentIconPicker';
 import Relation from '../Relation';
 import SelectCategory from '../SelectCategory';
 import SelectComponent from '../SelectComponent';
 import SelectComponents from '../SelectComponents';
+import TabForm from '../TabForm';
+import TextareaEnum from '../TextareaEnum';
 
 import findAttribute from '../../utils/findAttribute';
 import getTrad from '../../utils/getTrad';
@@ -530,8 +531,6 @@ const FormModal = () => {
 
         // The boolean default accepts 3 different values
         // This check has been added to allow a reset to null for the bool
-      } else if (name === 'enum') {
-        val = value.split('\n');
       } else {
         val = value;
       }
@@ -989,6 +988,7 @@ const FormModal = () => {
       'select-components': SelectComponents,
       'select-default-boolean': BooleanDefaultValueSelect,
       'toggle-draft-publish': DraftAndPublishToggle,
+      'textarea-enum': TextareaEnum,
       ...inputsFromPlugins,
     },
     componentToCreate,
