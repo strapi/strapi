@@ -11,6 +11,7 @@ import { Stack } from '@strapi/parts/Stack';
 import EditIcon from '@strapi/icons/EditIcon';
 import CloseAlertIcon from '@strapi/icons/CloseAlertIcon';
 import Drag from '@strapi/icons/Drag';
+import ellipsisCardTitle from '../utils/ellipsisCardTitle';
 import { getTrad, ItemTypes } from '../../../utils';
 
 const ActionButton = styled.button`
@@ -85,17 +86,13 @@ const DraggableCard = ({
   const { formatMessage } = useIntl();
   const ref = useRef(null);
   const editButtonRef = useRef();
-  const cardEllipsisTitle =
-    labelField.length > 20 ? `${labelField.substring(0, 20)}...` : labelField;
+  const cardEllipsisTitle = ellipsisCardTitle(labelField);
 
   const handleClickEditRow = () => {
     if (editButtonRef.current) {
       editButtonRef.current.click();
     }
   };
-
-  // labelField updated here but not in drag function
-  // console.log(labelField, 'outside drag func');
 
   const [, drop] = useDrop({
     accept: ItemTypes.FIELD,
@@ -117,18 +114,15 @@ const DraggableCard = ({
     },
   });
 
-  const [{ isDragging }, drag, preview] = useDrag(() => ({
+  const [{ isDragging }, drag, preview] = useDrag({
     type: ItemTypes.FIELD,
     item: () => {
-      // doesn't update labelField here if you edit it
-      // console.log(labelField, 'inside drag func');
-
       return { index, labelField, name };
     },
     collect: monitor => ({
       isDragging: monitor.isDragging(),
     }),
-  }));
+  });
 
   useEffect(() => {
     preview(getEmptyImage(), { captureDraggingState: true });

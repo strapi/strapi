@@ -899,6 +899,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
 .c76 {
   max-height: 2rem;
   cursor: pointer;
+  opacity: 1;
 }
 
 .c76 svg {
@@ -1552,6 +1553,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                         <button
                           aria-label="Move id"
                           class="c77 c78 c79"
+                          draggable="true"
                           type="button"
                         >
                           <svg
@@ -1654,6 +1656,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                         <button
                           aria-label="Move address"
                           class="c77 c78 c79"
+                          draggable="true"
                           type="button"
                         >
                           <svg
@@ -2804,6 +2807,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
 .c76 {
   max-height: 2rem;
   cursor: pointer;
+  opacity: 1;
 }
 
 .c76 svg {
@@ -3457,6 +3461,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                           <button
                             aria-label="Move cover"
                             class="c77 c78 c79"
+                            draggable="true"
                             type="button"
                           >
                             <svg
@@ -3559,6 +3564,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                           <button
                             aria-label="Move id"
                             class="c77 c78 c79"
+                            draggable="true"
                             type="button"
                           >
                             <svg
@@ -3661,6 +3667,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                           <button
                             aria-label="Move address"
                             class="c77 c78 c79"
+                            draggable="true"
                             type="button"
                           >
                             <svg

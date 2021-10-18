@@ -46,33 +46,6 @@ const CustomDragLayer = () => {
     })
   );
 
-  // function renderItem() {
-  //   switch (itemType) {
-  //     case ItemTypes.FIELD:
-  //       return <div>{item.labelField}</div>;
-  //     case ItemTypes.COMPONENT:
-  //       return <RepeatableComponentPreview displayedValue={item.displayedValue} />;
-  // case ItemTypes.RELATION:
-  //   return (
-  //     <Li>
-  //       <RelationItem
-  //         data={item.data}
-  //         displayNavigationLink={false}
-  //         mainField={item.mainField}
-  //         isDisabled={false}
-  //         isDragging
-  //         hasDraftAndPublish={item.hasDraftAndPublish}
-  //       />
-  //     </Li>
-  //   );
-  // case ItemTypes.EDIT_FIELD:
-  // case ItemTypes.EDIT_RELATION:
-  //   return <DraggedField name={item.name} size={12} selectedItem={item.name} />;
-  //     default:
-  //       return null;
-  //   }
-  // }
-
   if (!isDragging) {
     return null;
   }
@@ -81,7 +54,6 @@ const CustomDragLayer = () => {
     <LayoutDndProvider>
       <div style={layerStyles}>
         <div style={getItemStyles(initialOffset, currentOffset, mouseOffset)} className="col-md-2">
-          {/* {renderItem()} */}
           {itemType === ItemTypes.FIELD && <CardPreview labelField={item.labelField} />}
           {itemType === ItemTypes.COMPONENT && (
             <RepeatableComponentPreview displayedValue={item.displayedValue} />

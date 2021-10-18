@@ -2,12 +2,12 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { Row } from '@strapi/parts/Row';
-// import { Box } from '@strapi/parts/Box';
 import { ButtonText } from '@strapi/parts/Text';
 import { Stack } from '@strapi/parts/Stack';
 import EditIcon from '@strapi/icons/EditIcon';
 import CloseAlertIcon from '@strapi/icons/CloseAlertIcon';
 import Drag from '@strapi/icons/Drag';
+import ellipsisCardTitle from '../utils/ellipsisCardTitle';
 
 const ActionBox = styled(Row)`
   height: ${({ theme }) => theme.spaces[7]};
@@ -53,6 +53,8 @@ const FieldContainer = styled(Row)`
 `;
 
 const CardPreview = ({ labelField }) => {
+  const cardEllipsisTitle = ellipsisCardTitle(labelField);
+
   return (
     <FieldContainer
       borderColor="neutral150"
@@ -64,7 +66,7 @@ const CardPreview = ({ labelField }) => {
         <DragButton alignItems="center">
           <Drag />
         </DragButton>
-        <ButtonText>{labelField}</ButtonText>
+        <ButtonText>{cardEllipsisTitle}</ButtonText>
       </Stack>
       <Row paddingLeft={3}>
         <ActionBox alignItems="center">

@@ -258,18 +258,18 @@ const ListSettingsView = ({ layout, slug }) => {
             onConfirm={handleConfirm}
             variantRightButton="success-light"
           />
-          {isModalFormOpen && (
-            <EditFieldForm
-              attributes={attributes}
-              fieldForm={fieldForm}
-              fieldToEdit={fieldToEdit}
-              onChangeEditLabel={handleChangeEditLabel}
-              onCloseModal={handleCloseModal}
-              onSubmit={handleSubmitFieldEdit}
-              type={get(attributes, [fieldToEdit, 'type'], 'text')}
-            />
-          )}
         </form>
+        {isModalFormOpen && (
+          <EditFieldForm
+            attributes={attributes}
+            fieldForm={fieldForm}
+            fieldToEdit={fieldToEdit}
+            onChangeEditLabel={handleChangeEditLabel}
+            onCloseModal={handleCloseModal}
+            onSubmit={handleSubmitFieldEdit}
+            type={get(attributes, [fieldToEdit, 'type'], 'text')}
+          />
+        )}
       </Main>
     </Layout>
   );

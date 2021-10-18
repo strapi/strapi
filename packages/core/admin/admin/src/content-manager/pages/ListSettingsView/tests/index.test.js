@@ -4,6 +4,8 @@ import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 import { ThemeProvider, lightTheme } from '@strapi/parts';
 import ListSettingsView from '../index';
 import ModelsContext from '../../../contexts/ModelsContext';
@@ -96,11 +98,13 @@ const makeApp = history => (
       <QueryClientProvider client={client}>
         <IntlProvider messages={{ en: {} }} textComponent="span" locale="en">
           <ThemeProvider theme={lightTheme}>
-            <ListSettingsView
-              layout={layout}
-              slug="api::restaurant.restaurant"
-              updateLayout={jest.fn()}
-            />
+            <DndProvider backend={HTML5Backend}>
+              <ListSettingsView
+                layout={layout}
+                slug="api::restaurant.restaurant"
+                updateLayout={jest.fn()}
+              />
+            </DndProvider>
           </ThemeProvider>
         </IntlProvider>
       </QueryClientProvider>
