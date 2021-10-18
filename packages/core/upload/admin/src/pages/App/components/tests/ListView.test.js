@@ -124,7 +124,7 @@ describe('MediaLibrary / ListView', () => {
     const { container } = renderTL(
       <MemoryRouter>
         <ThemeProvider theme={lightTheme}>
-          <ListView assets={data} />
+          <ListView assets={data} selectedAssets={[]} />
         </ThemeProvider>
       </MemoryRouter>
     );
