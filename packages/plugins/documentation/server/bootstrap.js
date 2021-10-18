@@ -43,9 +43,9 @@ module.exports = async ({ strapi }) => {
     name: 'documentation',
   });
 
-  const restrictedAccess = await pluginStore.get({ key: 'config' });
+  const config = await pluginStore.get({ key: 'config' });
 
-  if (!restrictedAccess) {
+  if (!config) {
     pluginStore.set({ key: 'config', value: { restrictedAccess: false } });
   }
 

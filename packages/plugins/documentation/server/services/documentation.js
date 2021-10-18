@@ -1,39 +1,22 @@
 'use strict';
+
 const path = require('path');
 const fs = require('fs-extra');
 const _ = require('lodash');
-const moment = require('moment');
 
 const { builApiEndpointPath } = require('../utils/builders');
 const defaultConfig = require('../config/default-config');
 
-module.exports = () => {
-  const docPlugin = strapi.plugin('documentation');
+module.exports = ({ strapi }) => {
+  const config = strapi.config.get('plugin.documentation');
 
   return {
-    getMergedDocumentationPath(version = this.getDocumentationVersion()) {
-      return path.join(
-        strapi.config.appPath,
-        'src',
-        'extensions',
-        'documentation',
-        'documentation',
-        version
-      );
-    },
-
     getDocumentationVersion() {
-      return docPlugin.config('info.version');
+      return _.get(config, 'info.version');
     },
 
     getFullDocumentationPath() {
-      return path.join(
-        strapi.config.appPath,
-        'src',
-        'extensions',
-        'documentation',
-        'documentation'
-      );
+      return path.join(strapi.dirs.extensions, 'documentation', 'documentation');
     },
 
     getDocumentationVersions() {
@@ -83,10 +66,10 @@ module.exports = () => {
      */
     getApiDocumentationPath(api) {
       if (api.getter === 'plugin') {
-        return path.join(strapi.config.appPath, 'src', 'extensions', api.name, 'documentation');
+        return path.join(strapi.dirs.extensions, api.name, 'documentation');
       }
 
-      return path.join(strapi.config.appPath, 'src', 'api', api.name, 'documentation');
+      return path.join(strapi.dirs.api, api.name, 'documentation');
     },
 
     async deleteDocumentation(version) {
@@ -99,7 +82,7 @@ module.exports = () => {
     },
 
     getPluginAndApiInfo() {
-      const plugins = docPlugin.config('x-strapi-config.plugins');
+      const plugins = _.get(config, 'x-strapi-config.plugins');
       const pluginsToDocument = plugins.map(plugin => {
         return {
           name: plugin,
@@ -122,16 +105,13 @@ module.exports = () => {
     /**
      * @description - Creates the Swagger json files
      */
-    async generateFullDoc() {
+    async generateFullDoc(version = this.getDocumentationVersion()) {
       let paths = {};
 
       const apis = this.getPluginAndApiInfo();
       for (const api of apis) {
         const apiName = api.name;
-        const apiDirPath = path.join(
-          this.getApiDocumentationPath(api),
-          this.getDocumentationVersion()
-        );
+        const apiDirPath = path.join(this.getApiDocumentationPath(api), version);
 
         const apiDocPath = path.join(apiDirPath, `${apiName}.json`);
 
@@ -144,14 +124,14 @@ module.exports = () => {
 
       const fullDocJsonPath = path.join(
         this.getFullDocumentationPath(),
-        this.getDocumentationVersion(),
+        version,
         'full_documentation.json'
       );
 
       const settings = _.cloneDeep(defaultConfig);
 
-      _.set(settings, ['info', 'x-generation-date'], moment().format('L LTS'));
-      _.set(settings, ['info', 'version'], this.getDocumentationVersion());
+      _.set(settings, ['info', 'x-generation-date'], new Date().toISOString());
+      _.set(settings, ['info', 'version'], version);
 
       await fs.ensureFile(fullDocJsonPath);
       await fs.writeJson(fullDocJsonPath, { ...settings, paths }, { spaces: 2 });

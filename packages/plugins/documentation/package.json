@@ -20,7 +20,6 @@
     "koa-session": "6.2.0",
     "koa-static": "^5.0.0",
     "lodash": "4.17.21",
-    "moment": "^2.29.1",
     "path-to-regexp": "6.2.0",
     "pluralize": "8.0.0",
     "react": "^17.0.2",

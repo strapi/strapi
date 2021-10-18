@@ -49,9 +49,7 @@ module.exports = {
               .getDocumentationVersion();
 
       const openAPISpecsPath = path.join(
-        strapi.config.appPath,
-        'src',
-        'extensions',
+        strapi.dirs.extensions,
         'documentation',
         'documentation',
         version,
@@ -71,9 +69,7 @@ module.exports = {
 
         try {
           const layoutPath = path.resolve(
-            strapi.config.appPath,
-            'src',
-            'extensions',
+            strapi.dirs.extensions,
             'documentation',
             'public',
             'index.html'
@@ -85,13 +81,7 @@ module.exports = {
           ctx.url = path.basename(`${ctx.url}/index.html`);
 
           try {
-            const staticFolder = path.resolve(
-              strapi.config.appPath,
-              'src',
-              'extensions',
-              'documentation',
-              'public'
-            );
+            const staticFolder = path.resolve(strapi.dirs.extensions, 'documentation', 'public');
             return koaStatic(staticFolder)(ctx, next);
           } catch (e) {
             strapi.log.error(e);
@@ -126,9 +116,7 @@ module.exports = {
 
       try {
         const layoutPath = path.resolve(
-          strapi.config.appPath,
-          'src',
-          'extensions',
+          strapi.dirs.extensions,
           'documentation',
           'public',
           'login.html'
@@ -139,13 +127,7 @@ module.exports = {
         ctx.url = path.basename(`${ctx.url}/login.html`);
 
         try {
-          const staticFolder = path.resolve(
-            strapi.config.appPath,
-            'src',
-            'extensions',
-            'documentation',
-            'public'
-          );
+          const staticFolder = path.resolve(strapi.dirs.extensions, 'documentation', 'public');
           return koaStatic(staticFolder)(ctx, next);
         } catch (e) {
           strapi.log.error(e);
@@ -187,82 +169,48 @@ module.exports = {
   },
 
   async regenerateDoc(ctx) {
-    const service = strapi.plugin('documentation').service('documentation');
+    const { version } = ctx.request.body;
+
+    const service = strapi.service('plugin::documentation.documentation');
+
     const documentationVersions = service.getDocumentationVersions().map(el => el.version);
 
-    const {
-      request: {
-        body: { version },
-        admin,
-      },
-    } = ctx;
-
     if (_.isEmpty(version)) {
-      return ctx.badRequest(
-        null,
-        admin ? 'documentation.error.noVersion' : 'Please provide a version.'
-      );
+      return ctx.badRequest('Please provide a version.');
     }
 
     if (!documentationVersions.includes(version)) {
-      return ctx.badRequest(
-        null,
-        admin
-          ? 'documentation.error.regenerateDoc.versionMissing'
-          : 'The version you are trying to generate does not exist.'
-      );
+      return ctx.badRequest('The version you are trying to generate does not exist.');
     }
 
     try {
       strapi.reload.isWatching = false;
-      const fullDoc = service.generateFullDoc(version);
-      const documentationPath = service.getMergedDocumentationPath(version);
-      // Write the file
-      fs.writeFileSync(
-        path.resolve(documentationPath, 'full_documentation.json'),
-        JSON.stringify(fullDoc, null, 2),
-        'utf8'
-      );
-
+      await service.generateFullDoc(version);
       ctx.send({ ok: true });
-    } catch (err) {
-      ctx.badRequest(null, admin ? 'documentation.error.regenerateDoc' : 'An error occured');
     } finally {
       strapi.reload.isWatching = true;
     }
   },
 
   async deleteDoc(ctx) {
-    strapi.reload.isWatching = false;
-    const service = strapi.plugin('documentation').service('documentation');
+    const { version } = ctx.params;
+
+    const service = strapi.service('plugin::documentation.documentation');
+
     const documentationVersions = service.getDocumentationVersions().map(el => el.version);
 
-    const {
-      params: { version },
-      request: { admin },
-    } = ctx;
-
     if (_.isEmpty(version)) {
-      return ctx.badRequest(
-        null,
-        admin ? 'documentation.error.noVersion' : 'Please provide a version.'
-      );
+      return ctx.badRequest('Please provide a version.');
     }
 
     if (!documentationVersions.includes(version)) {
-      return ctx.badRequest(
-        null,
-        admin
-          ? 'documentation.error.deleteDoc.versionMissing'
-          : 'The version you are trying to delete does not exist.'
-      );
+      return ctx.badRequest('The version you are trying to delete does not exist.');
     }
 
     try {
+      strapi.reload.isWatching = false;
       await service.deleteDocumentation(version);
       ctx.send({ ok: true });
-    } catch (err) {
-      ctx.badRequest(null, admin ? 'notification.error' : err.message);
     } finally {
       strapi.reload.isWatching = true;
     }
@@ -270,8 +218,6 @@ module.exports = {
 
   async updateSettings(ctx) {
     const { restrictedAccess, password } = ctx.request.body;
-
-    console.log(ctx.request.body);
 
     const pluginStore = strapi.store({ type: 'plugin', name: 'documentation' });
 
