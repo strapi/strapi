@@ -22,7 +22,7 @@ jest.mock('../../../utils', () => ({
 
 jest.mock('react-intl', () => ({
   FormattedMessage: ({ id }) => id,
-  useIntl: () => ({ formatMessage: jest.fn(({ id }) => en[id]) }),
+  useIntl: () => ({ formatMessage: jest.fn(({ id }) => en[id] || id) }),
 }));
 
 const queryClient = new QueryClient({
@@ -69,7 +69,7 @@ describe('Media library homepage', () => {
 
   describe('loading state', () => {
     it('shows a loader when resolving the permissions', () => {
-      useRBAC.mockReturnValue({ isLoading: true, allowedActions: { canMain: false } });
+      useRBAC.mockReturnValue({ isLoading: true, allowedActions: {} });
 
       renderML();
 
@@ -91,6 +91,44 @@ describe('Media library homepage', () => {
 
       await waitFor(() =>
         expect(screen.getByText('Upload your first assets...')).toBeInTheDocument()
+      );
+
+      expect(screen.getByRole('main').getAttribute('aria-busy')).toBe('false');
+    });
+
+    it('shows a specific empty state when the user is not allowed to see the content', async () => {
+      useRBAC.mockReturnValue({
+        isLoading: false,
+        allowedActions: {
+          canRead: false,
+        },
+      });
+
+      renderML();
+
+      await waitFor(() =>
+        expect(
+          screen.getByText(`app.components.EmptyStateLayout.content-permissions`)
+        ).toBeInTheDocument()
+      );
+
+      expect(screen.getByRole('main').getAttribute('aria-busy')).toBe('false');
+    });
+
+    it('shows a specific empty state when the user can read but not create', async () => {
+      useRBAC.mockReturnValue({
+        isLoading: false,
+        allowedActions: {
+          canRead: true,
+          canCreate: false,
+        },
+      });
+
+      renderML();
+
+      await waitFor(() => expect(screen.getByText(`The asset list is empty.`)).toBeInTheDocument());
+      await waitFor(() =>
+        expect(screen.queryByText('Upload your first assets...')).not.toBeInTheDocument()
       );
 
       expect(screen.getByRole('main').getAttribute('aria-busy')).toBe('false');
