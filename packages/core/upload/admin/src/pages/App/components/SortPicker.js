@@ -9,7 +9,7 @@ export const SortPicker = () => {
   const [, setQuery] = useQueryParams();
 
   const handleChange = value => {
-    setQuery({ _sort: value });
+    setQuery({ sort: value });
   };
 
   const filters = [

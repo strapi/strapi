@@ -433,7 +433,7 @@ describe('ImageAssetCard', () => {
                   >
                     png
                   </span>
-                  - 40✕40
+                   - 40✕40
                 </div>
               </div>
               <div
