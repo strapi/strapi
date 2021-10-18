@@ -14,7 +14,7 @@ import { Main } from '@strapi/parts/Main';
 import { Button } from '@strapi/parts/Button';
 import { LinkButton } from '@strapi/parts/LinkButton';
 import AddIcon from '@strapi/icons/AddIcon';
-import { useQuery } from 'react-query';
+import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { useHistory } from 'react-router-dom';
 import qs from 'qs';
 import { axiosInstance } from '../../../../../core/utils';
@@ -24,6 +24,7 @@ import TableRows from './DynamicTable';
 
 const ApiTokenListView = () => {
   useFocusWhenNavigate();
+  const queryClient = useQueryClient();
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
   const {
@@ -58,6 +59,27 @@ const ApiTokenListView = () => {
   const isLoading =
     canRead &&
     ((status !== 'success' && status !== 'error') || (status === 'success' && isFetching));
+
+  const deleteMutation = useMutation(
+    async id => {
+      await axiosInstance.delete(`/admin/api-tokens/${id}`);
+    },
+    {
+      onSuccess: async () => {
+        await queryClient.invalidateQueries(['api-tokens']);
+      },
+      onError: err => {
+        if (err?.response?.data?.data) {
+          toggleNotification({ type: 'warning', message: err.response.data.data });
+        } else {
+          toggleNotification({
+            type: 'warning',
+            message: { id: 'notification.error', defaultMessage: 'An error occured' },
+          });
+        }
+      },
+    }
+  );
 
   const shouldDisplayDynamicTable = canRead && apiTokens;
   const shouldDisplayNoContent = canRead && !apiTokens && !canCreate;
@@ -99,6 +121,7 @@ const ApiTokenListView = () => {
             rows={apiTokens}
             withBulkActions={canDelete || canUpdate}
             isLoading={isLoading}
+            onConfirmDelete={id => deleteMutation.mutateAsync(id)}
           >
             <TableRows
               canDelete={canDelete}
