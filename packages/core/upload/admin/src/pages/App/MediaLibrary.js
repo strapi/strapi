@@ -25,6 +25,7 @@ import { SortPicker } from './components/SortPicker';
 import { PaginationFooter } from '../../components/PaginationFooter';
 import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
 import { useAssetCount } from '../../hooks/useAssetCount';
+import { BulkDeleteButton } from './components/BulkDeleteButton';
 
 const BoxWithHeight = styled(Box)`
   height: ${32 / 16}rem;
@@ -51,13 +52,34 @@ export const MediaLibrary = () => {
 
   const [showUploadAssetDialog, setShowUploadAssetDialog] = useState(false);
   const [assetToEdit, setAssetToEdit] = useState(undefined);
+  const [selected, setSelected] = useState([]);
   const toggleUploadAssetDialog = () => setShowUploadAssetDialog(prev => !prev);
 
   useFocusWhenNavigate();
 
   const loading = isLoadingPermissions || isLoading || isLoadingCount;
-
   const assets = data?.results;
+
+  const selectAllAssets = () => {
+    if (selected.length > 0) {
+      setSelected([]);
+    } else {
+      setSelected((assets || []).map(({ id }) => id));
+    }
+  };
+
+  const selectAsset = asset => {
+    const index = selected.indexOf(asset.id);
+
+    if (index > -1) {
+      setSelected(prevSelected => [
+        ...prevSelected.slice(0, index),
+        ...prevSelected.slice(index + 1),
+      ]);
+    } else {
+      setSelected(prevSelected => [...prevSelected, asset.id]);
+    }
+  };
 
   return (
     <Layout>
@@ -107,6 +129,8 @@ export const MediaLibrary = () => {
                     id: getTrad('bulk.select.label'),
                     defaultMessage: 'Select all assets',
                   })}
+                  value={selected.length === assets?.length}
+                  onChange={selectAllAssets}
                 />
               </BoxWithHeight>
               <SortPicker />
@@ -124,6 +148,10 @@ export const MediaLibrary = () => {
         />
 
         <ContentLayout>
+          {selected.length > 0 && (
+            <BulkDeleteButton assetIds={selected} onSuccess={() => setSelected([])} />
+          )}
+
           {loading && <LoadingIndicatorPage />}
           {error && <AnErrorOccurred />}
           {!canRead && <NoPermissions />}
@@ -160,7 +188,12 @@ export const MediaLibrary = () => {
           )}
           {canRead && assets && assets.length > 0 && (
             <>
-              <ListView assets={assets} onEditAsset={setAssetToEdit} />
+              <ListView
+                assets={assets}
+                onEditAsset={setAssetToEdit}
+                onSelectAsset={selectAsset}
+                selectedAssets={selected}
+              />
               {data?.pagination && <PaginationFooter pagination={data.pagination} />}
             </>
           )}

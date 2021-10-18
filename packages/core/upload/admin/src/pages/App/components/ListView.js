@@ -8,11 +8,13 @@ import { VideoAssetCard } from '../../../components/AssetCard/VideoAssetCard';
 import { DocAssetCard } from '../../../components/AssetCard/DocAssetCard';
 import { AssetType } from '../../../constants';
 
-export const ListView = ({ assets, onEditAsset }) => {
+export const ListView = ({ assets, onEditAsset, onSelectAsset, selectedAssets }) => {
   return (
     <KeyboardNavigable tagName="article">
       <GridLayout>
         {assets.map(asset => {
+          const isSelected = (selectedAssets || []).indexOf(asset.id) > -1;
+
           if (asset.mime.includes(AssetType.Video)) {
             return (
               <VideoAssetCard
@@ -23,6 +25,8 @@ export const ListView = ({ assets, onEditAsset }) => {
                 url={prefixFileUrlWithBackendUrl(asset.url)}
                 mime={asset.mime}
                 onEdit={() => onEditAsset(asset)}
+                onSelect={() => onSelectAsset(asset)}
+                selected={isSelected}
               />
             );
           }
@@ -38,6 +42,8 @@ export const ListView = ({ assets, onEditAsset }) => {
                 width={asset.width}
                 thumbnail={prefixFileUrlWithBackendUrl(asset?.formats?.thumbnail?.url || asset.url)}
                 onEdit={() => onEditAsset(asset)}
+                onSelect={() => onSelectAsset(asset)}
+                selected={isSelected}
               />
             );
           }
@@ -49,6 +55,8 @@ export const ListView = ({ assets, onEditAsset }) => {
               name={asset.name}
               extension={getFileExtension(asset.ext)}
               onEdit={() => onEditAsset(asset)}
+              onSelect={() => onSelectAsset(asset)}
+              selected={isSelected}
             />
           );
         })}
@@ -60,4 +68,6 @@ export const ListView = ({ assets, onEditAsset }) => {
 ListView.propTypes = {
   assets: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
   onEditAsset: PropTypes.func.isRequired,
+  onSelectAsset: PropTypes.func.isRequired,
+  selectedAssets: PropTypes.arrayOf(PropTypes.number).isRequired,
 };
