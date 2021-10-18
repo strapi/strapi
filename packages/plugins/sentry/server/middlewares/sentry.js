@@ -5,8 +5,14 @@
  * @param {{ strapi: import('@strapi/strapi').Strapi }}
  */
 module.exports = ({ strapi }) => {
-  const sentry = strapi.plugin('sentry').service('sentry');
-  sentry.init();
+  const sentryService = strapi.plugin('sentry').service('sentry');
+  sentryService.init();
+  const sentry = sentryService.getInstance();
+
+  if (!sentry) {
+    // initialization failed
+    return;
+  }
 
   strapi.server.use(async (ctx, next) => {
     try {

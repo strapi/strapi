@@ -25,28 +25,28 @@ describe('buildQueryString', () => {
 
     const queryString = buildQueryString(queryParams);
 
-    expect(queryString).toBe('?page=1&pageSize=10&sort=name:ASC&_locale=en');
+    expect(queryString).toBe('?page=1&pageSize=10&sort=name:ASC&locale=en');
   });
 
-  it('creates a valid query string with a _where clause', () => {
+  it('creates a valid query string with a filters clause', () => {
     const queryParams = {
       page: '1',
       pageSize: '10',
       sort: 'name:ASC',
-      _where: [{ name: 'hello world' }],
+      filters: [{ name: 'hello world' }],
     };
 
     const queryString = buildQueryString(queryParams);
 
-    expect(queryString).toBe('?page=1&pageSize=10&sort=name:ASC&_where[0][name]=hello world');
+    expect(queryString).toBe('?page=1&pageSize=10&sort=name:ASC&filters[0][name]=hello world');
   });
 
-  it('creates a valid query string with a _where and plugin options', () => {
+  it('creates a valid query string with a filters and plugin options', () => {
     const queryParams = {
       page: '1',
       pageSize: '10',
       sort: 'name:ASC',
-      _where: [{ name: 'hello world' }],
+      filters: [{ name: 'hello world' }],
       plugins: {
         i18n: { locale: 'en' },
       },
@@ -55,7 +55,7 @@ describe('buildQueryString', () => {
     const queryString = buildQueryString(queryParams);
 
     expect(queryString).toBe(
-      '?page=1&pageSize=10&sort=name:ASC&_where[0][name]=hello world&_locale=en'
+      '?page=1&pageSize=10&sort=name:ASC&filters[0][name]=hello world&locale=en'
     );
   });
 });
