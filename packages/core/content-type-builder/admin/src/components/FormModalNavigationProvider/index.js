@@ -12,6 +12,15 @@ const FormModalNavigationProvider = ({ children }) => {
   // FIXME
   const { push } = useHistory();
 
+  const onChangeSettingTypeTab = nextTab => {
+    setFormModalNavigationState(prevState => {
+      return {
+        ...prevState,
+        settingType: nextTab,
+      };
+    });
+  };
+
   const onClickSelectField = ({ attributeType, step }) => {
     if (state.forTarget === 'contentType') {
       trackUsage('didSelectContentTypeFieldType', { type: attributeType });
@@ -27,6 +36,8 @@ const FormModalNavigationProvider = ({ children }) => {
         attributeType,
       };
     });
+
+    console.log({ s: state.forTarget });
 
     const search = {
       modalType: 'attribute',
@@ -178,13 +189,84 @@ const FormModalNavigationProvider = ({ children }) => {
     push({ search: '' });
   };
 
+  const onNavigateToChooseAttributeModal = ({ forTarget, targetUid }) => {
+    setFormModalNavigationState(prev => {
+      return {
+        ...prev,
+        forTarget,
+        targetUid,
+        modalType: 'chooseAttribute',
+      };
+    });
+
+    const search = {
+      forTarget,
+      targetUid,
+      modalType: 'chooseAttribute',
+    };
+
+    push({ search: makeSearch(search) });
+  };
+
+  const onNavigateToCreateComponentStep2 = () => {
+    setFormModalNavigationState(prev => {
+      return {
+        ...prev,
+        attributeType: 'component',
+        modalType: 'attribute',
+        settingType: 'base',
+        step: '2',
+      };
+    });
+
+    const search = {
+      modalType: 'attribute',
+      actionType: state.actionType,
+      settingType: 'base',
+      forTarget: state.forTarget,
+      targetUid: state.targetUid,
+      attributeType: 'component',
+      step: '2',
+    };
+
+    push({ search: makeSearch(search) });
+  };
+
+  const onNavigateToAddCompoToDZModal = ({ dynamicZoneTarget }) => {
+    setFormModalNavigationState(prev => {
+      return {
+        ...prev,
+        dynamicZoneTarget,
+        modalType: 'addComponentToDynamicZone',
+        actionType: 'create',
+        step: '1',
+      };
+    });
+
+    const search = {
+      modalType: 'addComponentToDynamicZone',
+      forTarget: 'contentType',
+      targetUid: state.targetUid,
+      dynamicZoneTarget,
+      settingType: 'base',
+      step: '1',
+      actionType: 'create',
+    };
+
+    push({ search: makeSearch(search) });
+  };
+
   return (
     <FormModalNavigationContext.Provider
       value={{
         ...state,
+        onChangeSettingTypeTab,
         onClickSelectField,
         onCloseModal,
+        onNavigateToChooseAttributeModal,
+        onNavigateToAddCompoToDZModal,
         onOpenModalAddComponentsToDZ,
+        onNavigateToCreateComponentStep2,
         onOpenModalAddField,
         onOpenModalCreateSchema,
         onOpenModalEditCategory,
