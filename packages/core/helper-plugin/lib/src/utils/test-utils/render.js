@@ -5,7 +5,7 @@ import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { NotificationsProvider } from '@strapi/helper-plugin';
 
-const queryClient = new QueryClient({
+const internalQueryClient = new QueryClient({
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: false,
@@ -22,6 +22,7 @@ const render = (
     locale = 'en',
     translations = {},
     container = document.body,
+    queryClient = internalQueryClient,
   }
 ) =>
   RTL.render(
