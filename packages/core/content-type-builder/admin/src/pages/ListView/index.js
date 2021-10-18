@@ -41,7 +41,6 @@ const ListView = () => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
 
-  // const [enablePrompt, togglePrompt] = useState(true);
   const match = useRouteMatch('/plugins/content-type-builder/:kind/:currentUID');
 
   const {
@@ -50,20 +49,6 @@ const ListView = () => {
     onOpenModalEditField,
     onOpenModalEditSchema,
   } = useFormModalNavigation();
-
-  // useEffect(() => {
-  //   if (search === '') {
-  //     togglePrompt(true);
-  //   }
-  // }, [search]);
-
-  // Disabling the prompt on the first render if one of the modal is open
-  // useEffect(() => {
-  //   if (search !== '') {
-  //     togglePrompt(false);
-  //   }
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, []);
 
   const firstMainDataPath = isInContentTypeView ? 'contentType' : 'component';
   const mainDataTypeAttributesPath = [firstMainDataPath, 'schema', 'attributes'];
@@ -74,7 +59,8 @@ const ListView = () => {
   const attributes = get(modifiedData, mainDataTypeAttributesPath, []);
   const currentDataName = get(initialData, [firstMainDataPath, 'schema', 'name'], '');
   const isFromPlugin = has(initialData, [firstMainDataPath, 'plugin']);
-  // const hasModelBeenModified = !isEqual(modifiedData, initialData);
+  const hasModelBeenModified = !isEqual(modifiedData, initialData);
+
   const forTarget = isInContentTypeView ? 'contentType' : 'component';
 
   const handleClickAddComponentToDZ = dynamicZoneTarget => {
@@ -131,6 +117,7 @@ const ListView = () => {
       modalType: firstMainDataPath,
       forTarget: firstMainDataPath,
       targetUid,
+      kind: contentType,
     });
   };
 
@@ -138,8 +125,7 @@ const ListView = () => {
     <>
       <Prompt
         message={formatMessage({ id: getTrad('prompt.unsaved') })}
-        // when={hasModelBeenModified && enablePrompt}
-        when={false}
+        when={hasModelBeenModified}
       />
       <HeaderLayout
         id="title"

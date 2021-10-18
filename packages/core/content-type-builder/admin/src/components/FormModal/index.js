@@ -1,14 +1,16 @@
-import React, { useCallback, useEffect, useState, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import {
   getYupInnerErrors,
   useTracking,
   useNotification,
-  useQuery,
   useStrapiApp,
 } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
-import { useHistory, useLocation } from 'react-router-dom';
-import { get, has, isEmpty, set, toLower } from 'lodash';
+import { useHistory } from 'react-router-dom';
+import get from 'lodash/get';
+import has from 'lodash/has';
+import set from 'lodash/set';
+import toLower from 'lodash/toLower';
 import upperFirst from 'lodash/upperFirst';
 import { useSelector, useDispatch, shallowEqual } from 'react-redux';
 import AddIcon from '@strapi/icons/AddIcon';
@@ -50,7 +52,7 @@ import {
 } from './utils';
 import forms from './forms';
 import { createComponentUid, createUid } from './utils/createUid';
-import { INITIAL_STATE_DATA } from './utils/staticData';
+
 import makeSelectFormModal from './selectors';
 import {
   SET_DATA_TO_EDIT,
@@ -68,7 +70,6 @@ import {
 /* eslint-disable react/no-array-index-key */
 
 const FormModal = () => {
-  const [state, setState] = useState(INITIAL_STATE_DATA);
   const {
     onChangeSettingTypeTab,
     onCloseModal,
@@ -76,6 +77,17 @@ const FormModal = () => {
     onNavigateToAddCompoToDZModal,
     onNavigateToCreateComponentStep2,
     settingType,
+    actionType,
+    attributeName,
+    attributeType,
+    categoryName,
+    dynamicZoneTarget,
+    forTarget,
+    modalType,
+    isOpen,
+    kind,
+    step,
+    targetUid,
   } = useFormModalNavigation();
 
   const formModalSelector = useMemo(makeSelectFormModal, []);
@@ -83,15 +95,12 @@ const FormModal = () => {
   const toggleNotification = useNotification();
   const reducerState = useSelector(state => formModalSelector(state), shallowEqual);
   const { push } = useHistory();
-  const { search } = useLocation();
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
   const { getPlugin } = useStrapiApp();
   const ctbPlugin = getPlugin(pluginId);
   const ctbFormsAPI = ctbPlugin.apis.forms;
   const inputsFromPlugins = ctbFormsAPI.components.inputs;
-
-  const query = useQuery();
 
   const {
     addAttribute,
@@ -121,40 +130,11 @@ const FormModal = () => {
     modifiedData,
   } = reducerState;
 
+  const pathToSchema =
+    forTarget === 'contentType' || forTarget === 'component' ? [forTarget] : [forTarget, targetUid];
+
   useEffect(() => {
-    if (!isEmpty(search)) {
-      const actionType = query.get('actionType');
-      // Returns 'null' if there isn't any attributeType search params
-      const attributeName = query.get('attributeName');
-      const attributeType = query.get('attributeType');
-      const categoryName = query.get('categoryName');
-      const dynamicZoneTarget = query.get('dynamicZoneTarget');
-      const forTarget = query.get('forTarget');
-      const modalType = query.get('modalType');
-      // FIXME
-      const kind = query.get('kind') || get(allDataSchema, ['contentType', 'schema', 'kind'], null);
-      const targetUid = query.get('targetUid');
-      const step = query.get('step');
-      const pathToSchema =
-        forTarget === 'contentType' || forTarget === 'component'
-          ? [forTarget]
-          : [forTarget, targetUid];
-
-      setState({
-        actionType,
-        attributeName,
-        attributeType,
-        categoryName,
-        kind,
-        dynamicZoneTarget,
-        forTarget,
-        modalType,
-        pathToSchema,
-
-        step,
-        targetUid,
-      });
-
+    if (isOpen) {
       const collectionTypesForRelation = sortedContentTypesList.filter(
         ({ kind }) => kind === 'collectionType'
       );
@@ -178,19 +158,6 @@ const FormModal = () => {
       const foundDynamicZoneTarget =
         findAttribute(get(allDataSchema, pathToAttributes, []), dynamicZoneTarget) || null;
 
-      const shouldCloseModalToPreventErrorWhenCreatingADZ =
-        foundDynamicZoneTarget === null && modalType === 'addComponentToDynamicZone';
-
-      // Similarly when creating a component on the fly if the user reloads the app
-      // The previous data is lost
-      // Since the modal uses the search it will still be opened
-      const shouldCloseModalChooseAttribute =
-        get(allDataSchema, ['components', targetUid], null) === null && forTarget === 'components';
-
-      if (shouldCloseModalToPreventErrorWhenCreatingADZ || shouldCloseModalChooseAttribute) {
-        push({ search: '' });
-      }
-
       // Edit category
       if (modalType === 'editCategory' && actionType === 'edit') {
         dispatch({
@@ -198,17 +165,13 @@ const FormModal = () => {
           modalType,
           actionType,
           data: {
-            name: query.get('categoryName'),
+            name: categoryName,
           },
         });
       }
 
       // Create content type we need to add the default option draftAndPublish
-      if (
-        modalType === 'contentType' &&
-        state.modalType !== 'contentType' && // Prevent setting the data structure when navigating from one tab to another
-        actionType === 'create'
-      ) {
+      if (modalType === 'contentType' && actionType === 'create') {
         dispatch({
           type: SET_DATA_TO_EDIT,
           modalType,
@@ -221,11 +184,7 @@ const FormModal = () => {
       }
 
       // Edit content type
-      if (
-        modalType === 'contentType' &&
-        state.modalType !== 'contentType' &&
-        actionType === 'edit'
-      ) {
+      if (modalType === 'contentType' && actionType === 'edit') {
         const { name, collectionName, draftAndPublish, kind, pluginOptions } = get(
           allDataSchema,
           [...pathToSchema, 'schema'],
@@ -252,7 +211,7 @@ const FormModal = () => {
       }
 
       // Edit component
-      if (modalType === 'component' && state.modalType !== 'component' && actionType === 'edit') {
+      if (modalType === 'component' && actionType === 'edit') {
         const data = get(allDataSchema, pathToSchema, {});
 
         dispatch({
@@ -269,11 +228,7 @@ const FormModal = () => {
       }
 
       // Special case for the dynamic zone
-      if (
-        modalType === 'addComponentToDynamicZone' &&
-        state.modalType !== 'addComponentToDynamicZone' &&
-        actionType === 'edit'
-      ) {
+      if (modalType === 'addComponentToDynamicZone' && actionType === 'edit') {
         const attributeToEdit = {
           ...foundDynamicZoneTarget,
           // We filter the available components
@@ -292,12 +247,7 @@ const FormModal = () => {
 
       // FIXME
       // Set the predefined data structure to create an attribute
-      if (
-        attributeType &&
-        attributeType !== 'null' &&
-        // This condition is added to prevent the reducer state to be cleared when navigating from the base tab to tha advanced one
-        state.modalType !== 'attribute'
-      ) {
+      if (attributeType) {
         const attributeToEditNotFormatted = findAttribute(
           get(allDataSchema, pathToAttributes, []),
           attributeName
@@ -328,30 +278,39 @@ const FormModal = () => {
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search]);
+  }, [
+    actionType,
+    attributeName,
+    attributeType,
+    categoryName,
+    dynamicZoneTarget,
+    forTarget,
+    isOpen,
+    modalType,
+  ]);
 
   // FIXME rename this constant
-  const isCreatingContentType = state.modalType === 'contentType';
-  const isCreatingComponent = state.modalType === 'component';
-  const isCreatingAttribute = state.modalType === 'attribute';
-  const isComponentAttribute = state.attributeType === 'component' && isCreatingAttribute;
+  const isCreatingContentType = modalType === 'contentType';
+  const isCreatingComponent = modalType === 'component';
+  const isCreatingAttribute = modalType === 'attribute';
+  const isComponentAttribute = attributeType === 'component' && isCreatingAttribute;
 
-  const isCreating = state.actionType === 'create';
+  const isCreating = actionType === 'create';
   const isCreatingComponentFromAView =
     get(modifiedData, 'createComponent', false) || isCreatingComponentWhileAddingAField;
-  const isInFirstComponentStep = state.step === '1';
-  const isEditingCategory = state.modalType === 'editCategory';
-  const isOpen = !isEmpty(search);
-  const isPickingAttribute = state.modalType === 'chooseAttribute';
+  const isInFirstComponentStep = step === '1';
+  const isEditingCategory = modalType === 'editCategory';
+  // const isOpen = !isEmpty(search);
+  const isPickingAttribute = modalType === 'chooseAttribute';
   const uid = createUid(modifiedData.name || '');
-  const attributes = get(allDataSchema, [...state.pathToSchema, 'schema', 'attributes'], null);
+  const attributes = get(allDataSchema, [...pathToSchema, 'schema', 'attributes'], null);
   // FIXME when displayName
-  const mainSchemaName = get(allDataSchema, [...state.pathToSchema, 'schema', 'name'], '');
+  const mainSchemaName = get(allDataSchema, [...pathToSchema, 'schema', 'name'], '');
 
   const checkFormValidity = async () => {
     let schema;
     const dataToValidate =
-      isCreatingComponentFromAView && state.step === '1'
+      isCreatingComponentFromAView && step === '1'
         ? get(modifiedData, 'componentToCreate', {})
         : modifiedData;
 
@@ -359,9 +318,9 @@ const FormModal = () => {
     if (isCreatingContentType) {
       schema = forms.contentType.schema(
         Object.keys(contentTypes),
-        state.actionType === 'edit',
+        actionType === 'edit',
         // currentUID
-        get(allDataSchema, [...state.pathToSchema, 'uid'], null),
+        get(allDataSchema, [...pathToSchema, 'uid'], null),
         reservedNames,
         ctbFormsAPI
       );
@@ -373,8 +332,8 @@ const FormModal = () => {
         Object.keys(components),
         modifiedData.category || '',
         reservedNames,
-        state.actionType === 'edit',
-        get(allDataSchema, [...state.pathToSchema, 'uid'], null),
+        actionType === 'edit',
+        get(allDataSchema, [...pathToSchema, 'uid'], null),
         ctbFormsAPI
       );
 
@@ -393,7 +352,7 @@ const FormModal = () => {
       // Check form validity for creating a 'common attribute'
       // We need to make sure that it is independent from the step
     } else if (isCreatingAttribute && !isInFirstComponentStep) {
-      const type = state.attributeType === 'relation' ? 'relation' : modifiedData.type;
+      const type = attributeType === 'relation' ? 'relation' : modifiedData.type;
 
       let alreadyTakenTargetContentTypeAttributes = [];
 
@@ -412,7 +371,7 @@ const FormModal = () => {
         alreadyTakenTargetContentTypeAttributes = targetContentTypeAttributes.filter(
           ({ name: attrName }) => {
             // Keep all the target content type attributes when creating a relation
-            if (state.actionType !== 'edit') {
+            if (actionType !== 'edit') {
               return true;
             }
 
@@ -422,7 +381,7 @@ const FormModal = () => {
         );
       }
       schema = forms.attribute.schema(
-        get(allDataSchema, state.pathToSchema, {}),
+        get(allDataSchema, pathToSchema, {}),
         type,
         reservedNames,
         alreadyTakenTargetContentTypeAttributes,
@@ -454,7 +413,6 @@ const FormModal = () => {
   };
 
   const getButtonSubmitMessage = () => {
-    const { attributeType, modalType } = state;
     const isCreatingAComponent = get(modifiedData, 'createComponent', false);
     let tradId;
 
@@ -564,20 +522,21 @@ const FormModal = () => {
 
     try {
       await checkFormValidity();
+
       sendButtonAddMoreFieldEvent(shouldContinue);
-      const targetUid = state.forTarget === 'components' ? state.targetUid : uid;
+      const ctTargetUid = forTarget === 'components' ? targetUid : uid;
 
       if (isCreatingContentType) {
         // Create the content type schema
         if (isCreating) {
-          createSchema({ ...modifiedData, kind: state.kind }, state.modalType, uid);
+          createSchema({ ...modifiedData, kind }, modalType, uid);
           // Redirect the user to the created content type
           push({ pathname: `/plugins/${pluginId}/content-types/${uid}` });
 
           // Navigate to the choose attribute modal
           onNavigateToChooseAttributeModal({
-            forTarget: state.forTarget,
-            targetUid,
+            forTarget,
+            targetUid: ctTargetUid,
           });
         } else {
           // We cannot switch from collection type to single when the modal is making relations other than oneWay or manyWay
@@ -609,11 +568,11 @@ const FormModal = () => {
 
           // Navigate to the choose attribute modal
           onNavigateToChooseAttributeModal({
-            forTarget: state.forTarget,
+            forTarget,
             targetUid: componentUid,
           });
         } else {
-          updateSchema(modifiedData, state.modalType, state.targetUid);
+          updateSchema(modifiedData, modalType, targetUid);
 
           // Close the modal
           onCloseModal();
@@ -634,17 +593,11 @@ const FormModal = () => {
         // Add/edit a field to a content type
         // Add/edit a field to a created component (the end modal is not step 2)
       } else if (isCreatingAttribute && !isCreatingComponentFromAView) {
-        const isDynamicZoneAttribute = state.attributeType === 'dynamiczone';
+        const isDynamicZoneAttribute = attributeType === 'dynamiczone';
 
         // The user is creating a DZ (he had entered the name of the dz)
         if (isDynamicZoneAttribute) {
-          addAttribute(
-            modifiedData,
-            state.forTarget,
-            state.targetUid,
-            state.actionType === 'edit',
-            initialData
-          );
+          addAttribute(modifiedData, forTarget, targetUid, actionType === 'edit', initialData);
 
           // Adding a component to a dynamiczone is not the same logic as creating a simple field
           // so the search is different
@@ -664,16 +617,14 @@ const FormModal = () => {
 
         // Normal fields like boolean relations or dynamic zone
         if (!isComponentAttribute) {
-          addAttribute(
-            modifiedData,
-            state.forTarget,
-            state.targetUid,
-            state.actionType === 'edit',
-            initialData
-          );
+          addAttribute(modifiedData, forTarget, targetUid, actionType === 'edit', initialData);
 
           if (shouldContinue) {
-            onNavigateToChooseAttributeModal({ forTarget: state.forTarget, targetUid });
+            // FIXME
+            onNavigateToChooseAttributeModal({
+              forTarget,
+              targetUid: ctTargetUid,
+            });
           } else {
             onCloseModal();
           }
@@ -693,7 +644,7 @@ const FormModal = () => {
           // To the modal for adding a "common field"
           dispatch({
             type: RESET_PROPS_AND_SET_FORM_FOR_ADDING_AN_EXISTING_COMPO,
-            forTarget: state.forTarget,
+            forTarget,
           });
 
           // We don't want all the props to be reset
@@ -705,11 +656,11 @@ const FormModal = () => {
 
         addAttribute(
           modifiedData,
-          state.forTarget,
-          state.targetUid,
+          forTarget,
+          targetUid,
           // This change the dispatched type
           // either 'EDIT_ATTRIBUTE' or 'ADD_ATTRIBUTE' in the DataManagerProvider
-          state.actionType === 'edit',
+          actionType === 'edit',
           // This is for the edit part
           initialData,
           // Passing true will add the component to the components object
@@ -719,8 +670,8 @@ const FormModal = () => {
 
         if (shouldContinue) {
           onNavigateToChooseAttributeModal({
-            forTarget: state.forTarget,
-            targetUid: state.targetUid,
+            forTarget,
+            targetUid,
           });
         } else {
           onCloseModal();
@@ -738,7 +689,6 @@ const FormModal = () => {
         if (isInFirstComponentStep) {
           // Here the search could be refactored since it is the same as the case from above
           // Navigate the user to step 2
-          onNavigateToCreateComponentStep2();
 
           trackUsage('willCreateComponentFromAttributesModal');
 
@@ -746,8 +696,10 @@ const FormModal = () => {
           // If we were to create the component before
           dispatch({
             type: RESET_PROPS_AND_SAVE_CURRENT_DATA,
-            forTarget: state.forTarget,
+            forTarget,
           });
+
+          onNavigateToCreateComponentStep2();
 
           // Terminate because we don't want the reducer to be entirely reset
           return;
@@ -775,7 +727,7 @@ const FormModal = () => {
           isCreatingComponentFromAView
         );
         // Add the field to the schema
-        addAttribute(modifiedData, state.forTarget, state.targetUid, false);
+        addAttribute(modifiedData, forTarget, targetUid, false);
 
         dispatch({ type: RESET_PROPS });
 
@@ -810,14 +762,14 @@ const FormModal = () => {
             );
             // Add the created component to the DZ
             // We don't want to remove the old ones
-            addCreatedComponentToDynamicZone(state.dynamicZoneTarget, [componentUid]);
+            addCreatedComponentToDynamicZone(dynamicZoneTarget, [componentUid]);
 
             // The Dynamic Zone and the component is created
             // Open the modal to add fields to the created component
             onNavigateToChooseAttributeModal({ forTarget: 'components', targetUid: componentUid });
           } else {
             // Add the components to the DZ
-            changeDynamicZoneComponents(state.dynamicZoneTarget, modifiedData.components);
+            changeDynamicZoneComponents(dynamicZoneTarget, modifiedData.components);
 
             onCloseModal();
           }
@@ -845,8 +797,6 @@ const FormModal = () => {
   const handleClosed = () => {
     // Close the modal
     onCloseModal();
-    // Reset the state
-    setState(INITIAL_STATE_DATA);
     // Reset the reducer
     dispatch({
       type: RESET_PROPS,
@@ -864,16 +814,16 @@ const FormModal = () => {
       return;
     }
 
-    if (state.forTarget === 'contentType') {
+    if (forTarget === 'contentType') {
       trackUsage('didSelectContentTypeFieldSettings');
     }
   };
 
   const sendButtonAddMoreFieldEvent = shouldContinue => {
     if (
-      state.modalType === 'attribute' &&
-      state.forTarget === 'contentType' &&
-      state.attributeType !== 'dynamiczone' &&
+      modalType === 'attribute' &&
+      forTarget === 'contentType' &&
+      attributeType !== 'dynamiczone' &&
       shouldContinue
     ) {
       trackUsage('willAddMoreFieldToContentType');
@@ -881,11 +831,11 @@ const FormModal = () => {
   };
 
   const shouldDisableAdvancedTab = () => {
-    if (state.modalType === 'editCategory') {
+    if (modalType === 'editCategory') {
       return true;
     }
 
-    if (state.modalType === 'component') {
+    if (modalType === 'component') {
       return true;
     }
 
@@ -898,8 +848,8 @@ const FormModal = () => {
 
   // Display data for the attributes picker modal
   const displayedAttributes = getAttributesToDisplay(
-    state.forTarget,
-    state.targetUid,
+    forTarget,
+    targetUid,
     // We need the nested components so we know when to remove the component option
     nestedComponents
   );
@@ -909,11 +859,11 @@ const FormModal = () => {
   }
 
   // FIXME
-  if (!state.modalType) {
+  if (!modalType) {
     return null;
   }
 
-  const formToDisplay = get(forms, [state.modalType, 'form'], {
+  const formToDisplay = get(forms, [modalType, 'form'], {
     advanced: () => ({
       sections: [],
     }),
@@ -923,7 +873,7 @@ const FormModal = () => {
   });
 
   const isAddingAComponentToAnotherComponent =
-    state.forTarget === 'components' || state.forTarget === 'component';
+    forTarget === 'components' || forTarget === 'component';
 
   const genericInputProps = {
     customInputs: {
@@ -941,36 +891,36 @@ const FormModal = () => {
       ...inputsFromPlugins,
     },
     componentToCreate,
-    dynamicZoneTarget: state.dynamicZoneTarget,
+    dynamicZoneTarget,
     formErrors,
     isAddingAComponentToAnotherComponent,
     isCreatingComponentWhileAddingAField,
     mainBoxHeader: mainSchemaName,
     modifiedData,
-    naturePickerType: state.forTarget,
+    naturePickerType: forTarget,
     isCreating,
-    targetUid: state.targetUid,
-    forTarget: state.forTarget,
+    targetUid,
+    forTarget,
   };
 
   const advancedForm = formToDisplay.advanced({
     data: modifiedData,
-    type: state.attributeType,
-    step: state.step,
-    actionType: state.actionType,
+    type: attributeType,
+    step,
+    actionType,
     attributes,
     extensions: ctbFormsAPI,
-    forTarget: state.forTarget,
+    forTarget,
     contentTypeSchema: allDataSchema.contentType || {},
   }).sections;
   const baseForm = formToDisplay.base({
     data: modifiedData,
-    type: state.attributeType,
-    step: state.step,
-    actionType: state.actionType,
+    type: attributeType,
+    step,
+    actionType,
     attributes,
     extensions: ctbFormsAPI,
-    forTarget: state.forTarget,
+    forTarget,
     contentTypeSchema: allDataSchema.contentType || {},
   }).sections;
 
@@ -987,21 +937,21 @@ const FormModal = () => {
     <>
       <ModalLayout onClose={handleClosed} labelledBy="title">
         <FormModalHeader
-          actionType={state.actionType}
-          attributeName={state.attributeName}
-          categoryName={state.categoryName}
-          contentTypeKind={state.kind}
-          dynamicZoneTarget={state.dynamicZoneTarget}
-          modalType={state.modalType}
-          forTarget={state.forTarget}
-          targetUid={state.targetUid}
-          attributeType={state.attributeType}
+          actionType={actionType}
+          attributeName={attributeName}
+          categoryName={categoryName}
+          contentTypeKind={kind}
+          dynamicZoneTarget={dynamicZoneTarget}
+          modalType={modalType}
+          forTarget={forTarget}
+          targetUid={targetUid}
+          attributeType={attributeType}
         />
         {isPickingAttribute && (
           <AttributeOptions
             attributes={displayedAttributes}
-            forTarget={state.forTarget}
-            kind={state.kind || 'collectionType'}
+            forTarget={forTarget}
+            kind={kind || 'collectionType'}
           />
         )}
         {!isPickingAttribute && (
@@ -1013,22 +963,22 @@ const FormModal = () => {
                     {formatMessage(
                       {
                         id: getModalTitleSubHeader({
-                          actionType: state.actionType,
-                          forTarget: state.forTarget,
-                          kind: state.kind,
-                          step: state.step,
-                          modalType: state.modalType,
+                          actionType,
+                          forTarget,
+                          kind,
+                          step,
+                          modalType,
                         }),
                         defaultMessage: 'Add new field',
                       },
                       {
                         type: upperFirst(
                           formatMessage({
-                            id: getTrad(`attribute.${state.attributeType}`),
+                            id: getTrad(`attribute.${attributeType}`),
                           })
                         ),
-                        name: upperFirst(state.attributeName),
-                        step: state.step,
+                        name: upperFirst(attributeName),
+                        step,
                       }
                     )}
                   </H2>
@@ -1131,15 +1081,15 @@ const FormModal = () => {
                       })}
                     </Button>
                   )}
-                  {isCreating && state.attributeType === 'dynamiczone' && (
+                  {isCreating && attributeType === 'dynamiczone' && (
                     <Button
                       type={isCreating ? 'submit' : 'button'}
                       variant={
                         (isCreatingContentType ||
                           isCreatingComponent ||
                           isEditingCategory ||
-                          (state.modalType === 'addComponentToDynamicZone' &&
-                            state.step === '1' &&
+                          (modalType === 'addComponentToDynamicZone' &&
+                            step === '1' &&
                             !isCreatingComponentFromAView)) &&
                         !isCreating
                           ? 'default'
@@ -1147,12 +1097,10 @@ const FormModal = () => {
                       }
                       onClick={e => handleSubmit(e, true)}
                       startIcon={
-                        (isCreatingAttribute &&
-                          !isCreatingComponentFromAView &&
-                          state.step !== '1') ||
-                        (state.modalType === 'addComponentToDynamicZone' &&
+                        (isCreatingAttribute && !isCreatingComponentFromAView && step !== '1') ||
+                        (modalType === 'addComponentToDynamicZone' &&
                           isCreatingComponentFromAView) ||
-                        (isCreatingComponentFromAView && state.step === '2') ? (
+                        (isCreatingComponentFromAView && step === '2') ? (
                           <AddIcon />
                         ) : null
                       }
@@ -1160,15 +1108,15 @@ const FormModal = () => {
                       {getButtonSubmitMessage()}
                     </Button>
                   )}
-                  {state.attributeType !== 'dynamiczone' && (
+                  {attributeType !== 'dynamiczone' && (
                     <Button
                       type={isCreating ? 'submit' : 'button'}
                       variant={
                         (isCreatingContentType ||
                           isCreatingComponent ||
                           isEditingCategory ||
-                          (state.modalType === 'addComponentToDynamicZone' &&
-                            state.step === '1' &&
+                          (modalType === 'addComponentToDynamicZone' &&
+                            step === '1' &&
                             !isCreatingComponentFromAView)) &&
                         !isCreating
                           ? 'default'
@@ -1176,12 +1124,10 @@ const FormModal = () => {
                       }
                       onClick={e => handleSubmit(e, true)}
                       startIcon={
-                        (isCreatingAttribute &&
-                          !isCreatingComponentFromAView &&
-                          state.step !== '1') ||
-                        (state.modalType === 'addComponentToDynamicZone' &&
+                        (isCreatingAttribute && !isCreatingComponentFromAView && step !== '1') ||
+                        (modalType === 'addComponentToDynamicZone' &&
                           isCreatingComponentFromAView) ||
-                        (isCreatingComponentFromAView && state.step === '2') ? (
+                        (isCreatingComponentFromAView && step === '2') ? (
                           <AddIcon />
                         ) : null
                       }

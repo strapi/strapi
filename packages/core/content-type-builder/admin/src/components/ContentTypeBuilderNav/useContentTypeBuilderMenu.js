@@ -3,6 +3,7 @@ import { useNotification, useTracking } from '@strapi/helper-plugin';
 import isEmpty from 'lodash/isEmpty';
 import sortBy from 'lodash/sortBy';
 import toLower from 'lodash/toLower';
+import isEqual from 'lodash/isEqual';
 import matchSorter from 'match-sorter';
 import useDataManager from '../../hooks/useDataManager';
 import useFormModalNavigation from '../../hooks/useFormModalNavigation';
@@ -16,6 +17,8 @@ const useContentTypeBuilderMenu = () => {
     contentTypes,
     isInDevelopmentMode,
     sortedContentTypesList,
+    modifiedData,
+    initialData,
   } = useDataManager();
   const toggleNotification = useNotification();
   const { trackUsage } = useTracking();
@@ -50,7 +53,8 @@ const useContentTypeBuilderMenu = () => {
 
   const canOpenModalCreateCTorComponent =
     !Object.keys(contentTypes).some(ct => contentTypes[ct].isTemporary === true) &&
-    !Object.keys(components).some(component => components[component].isTemporary === true);
+    !Object.keys(components).some(component => components[component].isTemporary === true) &&
+    isEqual(modifiedData, initialData);
 
   const handleClickOpenModalCreateCollectionType = () => {
     if (canOpenModalCreateCTorComponent) {
