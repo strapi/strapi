@@ -1,8 +1,8 @@
 import React from 'react';
 import { ThemeProvider, lightTheme } from '@strapi/parts';
 import { QueryClientProvider, QueryClient } from 'react-query';
-import { render as renderTL, screen, waitFor } from '@testing-library/react';
-import { useRBAC } from '@strapi/helper-plugin';
+import { render as renderTL, screen, waitFor, fireEvent } from '@testing-library/react';
+import { useRBAC, useQueryParams } from '@strapi/helper-plugin';
 import { MemoryRouter } from 'react-router-dom';
 import { rest } from 'msw';
 import { MediaLibrary } from '../MediaLibrary';
@@ -14,7 +14,7 @@ jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useRBAC: jest.fn(),
   useNotification: jest.fn(() => jest.fn()),
-  useQueryParams: () => [{ rawQuery: 'some-url' }, jest.fn()],
+  useQueryParams: jest.fn(),
 }));
 
 jest.mock('../../../utils', () => ({
@@ -60,6 +60,8 @@ describe('Media library homepage', () => {
         canDownload: true,
       },
     });
+
+    useQueryParams.mockReturnValue([{ rawQuery: 'some-url' }, jest.fn()]);
   });
 
   afterEach(() => {
@@ -96,32 +98,59 @@ describe('Media library homepage', () => {
   });
 
   describe('general actions', () => {
-    it('hides the "Upload new asset" button when the user does not have the permissions to', async () => {
-      useRBAC.mockReturnValue({
-        isLoading: false,
-        allowedActions: {
-          canRead: true,
-          canCreate: false,
-        },
+    describe('create asset', () => {
+      it('hides the "Upload new asset" button when the user does not have the permissions to', async () => {
+        useRBAC.mockReturnValue({
+          isLoading: false,
+          allowedActions: {
+            canRead: true,
+            canCreate: false,
+          },
+        });
+
+        renderML();
+
+        await waitFor(() => expect(screen.queryByText(`Upload assets`)).not.toBeInTheDocument());
       });
 
-      renderML();
+      it('shows the "Upload assets" button when the user does have the permissions to', async () => {
+        useRBAC.mockReturnValue({
+          isLoading: false,
+          allowedActions: {
+            canRead: true,
+            canCreate: true,
+          },
+        });
 
-      await waitFor(() => expect(screen.queryByText(`Upload assets`)).not.toBeInTheDocument());
+        renderML();
+
+        await waitFor(() => expect(screen.getByText(`Upload assets`)).toBeInTheDocument());
+      });
     });
 
-    it('shows the "Upload assets" button when the user does have the permissions to', async () => {
-      useRBAC.mockReturnValue({
-        isLoading: false,
-        allowedActions: {
-          canRead: true,
-          canCreate: true,
-        },
+    describe('Sort by', () => {
+      [
+        ['Most recent uploads', 'createdAt:DESC'],
+        ['Oldest uploads', 'createdAt:ASC'],
+        ['Alphabetical order (A to Z)', 'name:ASC'],
+        ['Reverse alphabetical order (Z to A)', 'name:DESC'],
+        ['Most recent updates', 'updatedAt:DESC'],
+        ['Oldest updates', 'updatedAt:ASC'],
+      ].forEach(([label, sortKey]) => {
+        it('modifies the URL with the according params', async () => {
+          const setQueryMock = jest.fn();
+          useQueryParams.mockReturnValue([{ rawQuery: '' }, setQueryMock]);
+
+          renderML();
+
+          fireEvent.mouseDown(screen.getByText('Sort by'));
+          await waitFor(() => expect(screen.getByText(label)).toBeInTheDocument());
+          fireEvent.mouseDown(screen.getByText(label));
+          await waitFor(() => expect(screen.queryByText(label)).not.toBeInTheDocument());
+
+          expect(setQueryMock).toBeCalledWith({ sort: sortKey });
+        });
       });
-
-      renderML();
-
-      await waitFor(() => expect(screen.getByText(`Upload assets`)).toBeInTheDocument());
     });
   });
 
