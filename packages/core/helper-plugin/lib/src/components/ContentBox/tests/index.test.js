@@ -104,6 +104,7 @@ describe('ContentBox', () => {
           >
             <span
               class="c5"
+              style="word-break: break-all;"
             >
               Code example
             </span>
