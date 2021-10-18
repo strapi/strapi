@@ -71,9 +71,7 @@ import {
 
 const FormModal = () => {
   const [state, setState] = useState(INITIAL_STATE_DATA);
-  const c = useFormModalNavigation();
-
-  console.log(c);
+  const { onCloseModal } = useFormModalNavigation();
 
   const formModalSelector = useMemo(makeSelectFormModal, []);
   const dispatch = useDispatch();
@@ -128,6 +126,7 @@ const FormModal = () => {
       const dynamicZoneTarget = query.get('dynamicZoneTarget');
       const forTarget = query.get('forTarget');
       const modalType = query.get('modalType');
+      // FIXME
       const kind = query.get('kind') || get(allDataSchema, ['contentType', 'schema', 'kind'], null);
       const targetUid = query.get('targetUid');
       const settingType = query.get('settingType');
@@ -898,6 +897,7 @@ const FormModal = () => {
   };
 
   const handleClosed = () => {
+    onCloseModal();
     // Close the modal
     push({ search: '' });
     // Reset the state
