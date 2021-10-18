@@ -1,11 +1,5 @@
-/**
- *
- * Tests for EditAssetDialog
- *
- */
-
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ThemeProvider, lightTheme } from '@strapi/parts';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
@@ -119,6 +113,35 @@ describe('<EditAssetDialog />', () => {
     expect(container).toMatchSnapshot();
   });
 
+  describe('metadata form', () => {
+    it('checks the default information set in the form', () => {
+      renderCompo();
+
+      expect(screen.getByLabelText('File name')).toHaveValue('Screenshot 2.png');
+      expect(screen.getByLabelText('Alternative text')).toHaveValue('Screenshot 2.png');
+      expect(screen.getByLabelText('Caption')).toHaveValue('Screenshot 2.png');
+    });
+
+    it('disables all the actions and field when the user is not allowed to update', () => {
+      renderCompo({ canUpdate: false, canCopyLink: false, canDownload: false });
+
+      expect(screen.getByLabelText('File name')).toHaveAttribute('aria-disabled', 'true');
+      expect(screen.getByLabelText('Alternative text')).toHaveAttribute('aria-disabled', 'true');
+      expect(screen.getByLabelText('Caption')).toHaveAttribute('aria-disabled', 'true');
+      expect(screen.getByText('Finish').parentElement).toHaveAttribute('aria-disabled', 'true');
+    });
+
+    it('shows an error and sends the focus back to the name when it s not filled', async () => {
+      renderCompo();
+
+      fireEvent.change(screen.getByLabelText('File name'), { target: { value: '' } });
+      fireEvent.click(screen.getByText('Finish'));
+
+      await waitFor(() => expect(screen.getByText('name is a required field')).toBeInTheDocument());
+      expect(screen.getByLabelText('File name')).toHaveFocus();
+    });
+  });
+
   describe('PreviewBox', () => {
     it('opens the delete dialog when pressing the delete button when the user is allowed to update', () => {
       renderCompo({ canUpdate: true, canCopyLink: false, canDownload: false });
@@ -177,6 +200,28 @@ describe('<EditAssetDialog />', () => {
       renderCompo({ canUpdate: false, canCopyLink: false, canDownload: false });
 
       expect(screen.queryByLabelText('Download')).not.toBeInTheDocument();
+    });
+
+    it('shows the crop link when the user is allowed to update', () => {
+      const toggleNotificationSpy = jest.fn();
+
+      renderCompo(
+        { canUpdate: true, canCopyLink: false, canDownload: false },
+        toggleNotificationSpy
+      );
+
+      expect(screen.getByLabelText('Crop')).toBeInTheDocument();
+    });
+
+    it('hides the crop link when the user is not allowed to update', () => {
+      const toggleNotificationSpy = jest.fn();
+
+      renderCompo(
+        { canUpdate: false, canCopyLink: false, canDownload: false },
+        toggleNotificationSpy
+      );
+
+      expect(screen.queryByLabelText('Crop')).not.toBeInTheDocument();
     });
   });
 });
