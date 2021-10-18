@@ -83,7 +83,7 @@ export const MediaLibrary = () => {
               <Button startIcon={<AddIcon />} onClick={toggleUploadAssetDialog}>
                 {formatMessage({
                   id: getTrad('header.actions.upload-assets'),
-                  defaultMessage: 'Upload new assets',
+                  defaultMessage: 'Upload assets',
                 })}
               </Button>
             ) : (

@@ -4,9 +4,11 @@ import { QueryClientProvider, QueryClient } from 'react-query';
 import { render as renderTL, screen, waitFor } from '@testing-library/react';
 import { useRBAC } from '@strapi/helper-plugin';
 import { MemoryRouter } from 'react-router-dom';
+import { rest } from 'msw';
+import { MediaLibrary } from '../MediaLibrary';
 import en from '../../../translations/en.json';
 import server from './server';
-import { MediaLibrary } from '../MediaLibrary';
+import { assetResultMock } from './asset.mock';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -67,6 +69,14 @@ describe('Media library homepage', () => {
 
   afterAll(() => server.close());
 
+  describe('navigation', () => {
+    it('focuses the title when mounting the component', () => {
+      renderML();
+
+      expect(screen.getByRole('main')).toHaveFocus();
+    });
+  });
+
   describe('loading state', () => {
     it('shows a loader when resolving the permissions', () => {
       useRBAC.mockReturnValue({ isLoading: true, allowedActions: {} });
@@ -85,37 +95,8 @@ describe('Media library homepage', () => {
     });
   });
 
-  describe('empty state', () => {
-    it('shows an empty state when there are no assets found', async () => {
-      renderML();
-
-      await waitFor(() =>
-        expect(screen.getByText('Upload your first assets...')).toBeInTheDocument()
-      );
-
-      expect(screen.getByRole('main').getAttribute('aria-busy')).toBe('false');
-    });
-
-    it('shows a specific empty state when the user is not allowed to see the content', async () => {
-      useRBAC.mockReturnValue({
-        isLoading: false,
-        allowedActions: {
-          canRead: false,
-        },
-      });
-
-      renderML();
-
-      await waitFor(() =>
-        expect(
-          screen.getByText(`app.components.EmptyStateLayout.content-permissions`)
-        ).toBeInTheDocument()
-      );
-
-      expect(screen.getByRole('main').getAttribute('aria-busy')).toBe('false');
-    });
-
-    it('shows a specific empty state when the user can read but not create', async () => {
+  describe('general actions', () => {
+    it('hides the "Upload new asset" button when the user does not have the permissions to', async () => {
       useRBAC.mockReturnValue({
         isLoading: false,
         allowedActions: {
@@ -126,12 +107,93 @@ describe('Media library homepage', () => {
 
       renderML();
 
-      await waitFor(() => expect(screen.getByText(`The asset list is empty.`)).toBeInTheDocument());
-      await waitFor(() =>
-        expect(screen.queryByText('Upload your first assets...')).not.toBeInTheDocument()
-      );
+      await waitFor(() => expect(screen.queryByText(`Upload assets`)).not.toBeInTheDocument());
+    });
 
-      expect(screen.getByRole('main').getAttribute('aria-busy')).toBe('false');
+    it('shows the "Upload assets" button when the user does have the permissions to', async () => {
+      useRBAC.mockReturnValue({
+        isLoading: false,
+        allowedActions: {
+          canRead: true,
+          canCreate: true,
+        },
+      });
+
+      renderML();
+
+      await waitFor(() => expect(screen.getByText(`Upload assets`)).toBeInTheDocument());
+    });
+  });
+
+  describe('content', () => {
+    describe('empty state', () => {
+      it('shows an empty state when there are no assets and the user is allowed to read', async () => {
+        renderML();
+
+        await waitFor(() =>
+          expect(screen.getByText('Upload your first assets...')).toBeInTheDocument()
+        );
+
+        expect(screen.getByRole('main').getAttribute('aria-busy')).toBe('false');
+      });
+
+      it('shows a specific empty state when the user is not allowed to see the content', async () => {
+        useRBAC.mockReturnValue({
+          isLoading: false,
+          allowedActions: {
+            canRead: false,
+          },
+        });
+
+        renderML();
+
+        await waitFor(() =>
+          expect(
+            screen.getByText(`app.components.EmptyStateLayout.content-permissions`)
+          ).toBeInTheDocument()
+        );
+
+        expect(screen.getByRole('main').getAttribute('aria-busy')).toBe('false');
+      });
+
+      it('shows a specific empty state when the user can read but not create', async () => {
+        useRBAC.mockReturnValue({
+          isLoading: false,
+          allowedActions: {
+            canRead: true,
+            canCreate: false,
+          },
+        });
+
+        renderML();
+
+        await waitFor(() =>
+          expect(screen.getByText(`The asset list is empty.`)).toBeInTheDocument()
+        );
+        await waitFor(() =>
+          expect(screen.queryByText('Upload your first assets...')).not.toBeInTheDocument()
+        );
+
+        expect(screen.getByRole('main').getAttribute('aria-busy')).toBe('false');
+      });
+    });
+
+    describe('content resolved', () => {
+      beforeEach(() => {
+        server.use(rest.get('*/upload/files*', (req, res, ctx) => res(ctx.json(assetResultMock))));
+      });
+
+      it('shows an asset when the data resolves', async () => {
+        renderML();
+
+        await waitFor(() => expect(screen.getByText('3874873.jpg')).toBeInTheDocument());
+
+        expect(
+          screen.getByText((_, element) => element.textContent === 'jpg - 400✕400')
+        ).toBeInTheDocument();
+        expect(screen.getByText('Image')).toBeInTheDocument();
+        expect(screen.getByLabelText('Edit')).toBeInTheDocument();
+      });
     });
   });
 });

@@ -60,7 +60,7 @@ export const ImageAssetCard = ({
           <CardTitle as="h2">{name}</CardTitle>
           <CardSubtitle>
             <Extension>{extension}</Extension>
-            {height && width && `- ${height}✕${width}`}
+            {height && width && ` - ${height}✕${width}`}
           </CardSubtitle>
         </CardContent>
         <CardBadge>
