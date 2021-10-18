@@ -48,7 +48,6 @@ const TextareaEnum = ({
       hint={hint}
       name={name}
       onChange={handleChange}
-      // onChange={onChange}
       placeholder={formattedPlaceholder}
     >
       {value}
