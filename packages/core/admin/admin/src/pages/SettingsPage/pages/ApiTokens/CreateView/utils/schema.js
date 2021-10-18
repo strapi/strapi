@@ -7,6 +7,7 @@ const schema = yup.object().shape({
     .string(translatedErrors.string)
     .oneOf(['read-only', 'full-access'])
     .required(translatedErrors.required),
+  description: yup.string().nullable(),
 });
 
 export default schema;
