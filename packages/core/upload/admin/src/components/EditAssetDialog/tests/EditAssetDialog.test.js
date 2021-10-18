@@ -1,0 +1,182 @@
+/**
+ *
+ * Tests for EditAssetDialog
+ *
+ */
+
+import React from 'react';
+import { render, screen, fireEvent } from '@testing-library/react';
+import { ThemeProvider, lightTheme } from '@strapi/parts';
+import { IntlProvider } from 'react-intl';
+import { QueryClient, QueryClientProvider } from 'react-query';
+import { NotificationsProvider } from '@strapi/helper-plugin';
+import { EditAssetDialog } from '../index';
+import en from '../../../translations/en.json';
+import { downloadFile } from '../../../utils/downloadFile';
+
+jest.mock('../../../utils/downloadFile');
+
+const messageForPlugin = Object.keys(en).reduce((acc, curr) => {
+  acc[curr] = `upload.${en[curr]}`;
+
+  return acc;
+}, {});
+
+const asset = {
+  id: 8,
+  name: 'Screenshot 2.png',
+  alternativeText: null,
+  caption: null,
+  width: 1476,
+  height: 780,
+  formats: {
+    thumbnail: {
+      name: 'thumbnail_Screenshot 2.png',
+      hash: 'thumbnail_Screenshot_2_5d4a574d61',
+      ext: '.png',
+      mime: 'image/png',
+      width: 245,
+      height: 129,
+      size: 10.7,
+      path: null,
+      url: '/uploads/thumbnail_Screenshot_2_5d4a574d61.png',
+    },
+    large: {
+      name: 'large_Screenshot 2.png',
+      hash: 'large_Screenshot_2_5d4a574d61',
+      ext: '.png',
+      mime: 'image/png',
+      width: 1000,
+      height: 528,
+      size: 97.1,
+      path: null,
+      url: '/uploads/large_Screenshot_2_5d4a574d61.png',
+    },
+    medium: {
+      name: 'medium_Screenshot 2.png',
+      hash: 'medium_Screenshot_2_5d4a574d61',
+      ext: '.png',
+      mime: 'image/png',
+      width: 750,
+      height: 396,
+      size: 58.7,
+      path: null,
+      url: '/uploads/medium_Screenshot_2_5d4a574d61.png',
+    },
+    small: {
+      name: 'small_Screenshot 2.png',
+      hash: 'small_Screenshot_2_5d4a574d61',
+      ext: '.png',
+      mime: 'image/png',
+      width: 500,
+      height: 264,
+      size: 31.06,
+      path: null,
+      url: '/uploads/small_Screenshot_2_5d4a574d61.png',
+    },
+  },
+  hash: 'Screenshot_2_5d4a574d61',
+  ext: '.png',
+  mime: 'image/png',
+  size: 102.01,
+  url: '/uploads/Screenshot_2_5d4a574d61.png',
+  previewUrl: null,
+  provider: 'local',
+  provider_metadata: null,
+  createdAt: '2021-10-04T09:42:31.670Z',
+  updatedAt: '2021-10-04T09:42:31.670Z',
+};
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+    },
+  },
+});
+
+const renderCompo = (
+  props = { canUpdate: true, canCopyLink: true, canDownload: true },
+  toggleNotification = jest.fn()
+) =>
+  render(
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider theme={lightTheme}>
+        <NotificationsProvider toggleNotification={toggleNotification}>
+          <IntlProvider locale="en" messages={messageForPlugin} defaultLocale="en">
+            <EditAssetDialog asset={asset} onClose={jest.fn()} {...props} />
+          </IntlProvider>
+        </NotificationsProvider>
+      </ThemeProvider>
+    </QueryClientProvider>,
+    { container: document.body }
+  );
+
+describe('<EditAssetDialog />', () => {
+  it('renders and matches the snapshot', () => {
+    const { container } = renderCompo();
+
+    expect(container).toMatchSnapshot();
+  });
+
+  describe('PreviewBox', () => {
+    it('opens the delete dialog when pressing the delete button when the user is allowed to update', () => {
+      renderCompo({ canUpdate: true, canCopyLink: false, canDownload: false });
+
+      fireEvent.click(screen.getByLabelText('Delete'));
+
+      expect(screen.getByText('Confirmation')).toBeVisible();
+      expect(screen.getByText('Are you sure you want to delete this?')).toBeVisible();
+    });
+
+    it('does not open the delete dialog when the user is not allowed to update', () => {
+      renderCompo({ canUpdate: false, canCopyLink: false, canDownload: false });
+
+      expect(screen.queryByLabelText('Delete')).not.toBeInTheDocument();
+    });
+
+    it('copies the link and shows a notification when pressing "Copy link" and the user has permission to copy', () => {
+      const toggleNotificationSpy = jest.fn();
+      renderCompo(
+        { canUpdate: false, canCopyLink: true, canDownload: false },
+        toggleNotificationSpy
+      );
+
+      fireEvent.click(screen.getByLabelText('Copy link'));
+
+      expect(toggleNotificationSpy).toHaveBeenCalledWith({
+        message: {
+          defaultMessage: 'Link copied into the clipboard',
+          id: 'notification.link-copied',
+        },
+        type: 'success',
+      });
+    });
+
+    it('hides the copy link button when the user is not allowed to see it', () => {
+      const toggleNotificationSpy = jest.fn();
+      renderCompo(
+        { canUpdate: false, canCopyLink: false, canDownload: false },
+        toggleNotificationSpy
+      );
+
+      expect(screen.queryByLabelText('Copy link')).not.toBeInTheDocument();
+    });
+
+    it('downloads the file when pressing "Download" and the user has the right to download', () => {
+      renderCompo({ canUpdate: false, canCopyLink: false, canDownload: true });
+
+      fireEvent.click(screen.getByLabelText('Download'));
+      expect(downloadFile).toHaveBeenCalledWith(
+        'http://localhost:1337/uploads/Screenshot_2_5d4a574d61.png',
+        'Screenshot 2.png'
+      );
+    });
+
+    it('hides the download button when the user is not allowed to download it', () => {
+      renderCompo({ canUpdate: false, canCopyLink: false, canDownload: false });
+
+      expect(screen.queryByLabelText('Download')).not.toBeInTheDocument();
+    });
+  });
+});
