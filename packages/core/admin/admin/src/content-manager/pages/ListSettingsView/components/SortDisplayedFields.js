@@ -26,12 +26,13 @@ const SelectContainer = styled(Flex)`
 `;
 
 const SortDisplayedFields = ({
-  listRemainingFields,
   displayedFields,
-  onAddField,
-  onRemoveField,
-  onClickEditField,
+  listRemainingFields,
   metadatas,
+  onAddField,
+  onClickEditField,
+  onMoveField,
+  onRemoveField,
 }) => {
   const { formatMessage } = useIntl();
 
@@ -58,9 +59,11 @@ const SortDisplayedFields = ({
           <Stack horizontal size={3}>
             {displayedFields.map((field, index) => (
               <DraggableCard
-                onRemoveField={e => onRemoveField(e, index)}
-                onClickEditField={onClickEditField}
                 key={field}
+                index={index}
+                onMoveField={onMoveField}
+                onClickEditField={onClickEditField}
+                onRemoveField={e => onRemoveField(e, index)}
                 name={field}
                 labelField={metadatas[field].list.label || field}
               />
@@ -92,9 +95,6 @@ const SortDisplayedFields = ({
 
 SortDisplayedFields.propTypes = {
   displayedFields: PropTypes.array.isRequired,
-  onAddField: PropTypes.func.isRequired,
-  onClickEditField: PropTypes.func.isRequired,
-  onRemoveField: PropTypes.func.isRequired,
   listRemainingFields: PropTypes.array.isRequired,
   metadatas: PropTypes.objectOf(
     PropTypes.shape({
@@ -103,6 +103,10 @@ SortDisplayedFields.propTypes = {
       }),
     })
   ).isRequired,
+  onAddField: PropTypes.func.isRequired,
+  onClickEditField: PropTypes.func.isRequired,
+  onMoveField: PropTypes.func.isRequired,
+  onRemoveField: PropTypes.func.isRequired,
 };
 
 export default SortDisplayedFields;

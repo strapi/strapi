@@ -73,7 +73,7 @@ const EditFieldForm = ({
 
   return (
     <ModalLayout onClose={onCloseModal} labelledBy="title">
-      <form>
+      <form onSubmit={onSubmit}>
         <ModalHeader>
           <HeaderContainer>
             {iconByTypes[type]}
@@ -138,7 +138,7 @@ const EditFieldForm = ({
             </Button>
           }
           endActions={
-            <Button type="button" onClick={e => onSubmit(e)}>
+            <Button type="submit">
               {formatMessage({ id: 'form.button.finish', defaultMessage: 'Finish' })}
             </Button>
           }

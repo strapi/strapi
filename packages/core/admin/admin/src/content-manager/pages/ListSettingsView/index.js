@@ -177,68 +177,13 @@ const ListSettingsView = ({ layout, slug }) => {
     return acc;
   }, []);
 
-  // const handleClickEditLabel = labelToEdit => {
-  //   dispatch({
-  //     type: 'SET_LABEL_TO_EDIT',
-  //     labelToEdit,
-  //   });
-  //   toggleModalForm();
-  // };
-
-  // const handleClosed = () => {
-  //   dispatch({
-  //     type: 'UNSET_LABEL_TO_EDIT',
-  //   });
-  // };
-
-  // const move = (originalIndex, atIndex) => {
-  //   dispatch({
-  //     type: 'MOVE_FIELD',
-  //     originalIndex,
-  //     atIndex,
-  //   });
-  // };
-
-  // const [, drop] = useDrop({ accept: ItemTypes.FIELD });
-
-  // const renderForm = () => {
-  //   const type = get(attributes, [labelToEdit, 'type'], 'text');
-  //   const relationType = get(attributes, [labelToEdit, 'relationType']);
-  //   let shouldDisplaySortToggle = !['media', 'relation'].includes(type);
-  //   const label = formatMessage({ id: getTrad('form.Input.label') });
-  //   const description = formatMessage({ id: getTrad('form.Input.label.inputDescription') });
-
-  //   if (['oneWay', 'oneToOne', 'manyToOne'].includes(relationType)) {
-  //     shouldDisplaySortToggle = true;
-  //   }
-
-  //   return (
-  //     <>
-  //       <div className="col-6" style={{ marginBottom: 4 }}>
-  //         <Input
-  //           description={description}
-  //           label={label}
-  //           type="text"
-  //           name="label"
-  //           onBlur={() => {}}
-  //           value={get(labelForm, 'label', '')}
-  //           onChange={handleChangeEditLabel}
-  //         />
-  //       </div>
-  //       {shouldDisplaySortToggle && (
-  //         <div className="col-6" style={{ marginBottom: 4 }}>
-  //           <Input
-  //             label={formatMessage({ id: getTrad('form.Input.sort.field') })}
-  //             type="bool"
-  //             name="sortable"
-  //             value={get(labelForm, 'sortable', false)}
-  //             onChange={handleChangeEditLabel}
-  //           />
-  //         </div>
-  //       )}
-  //     </>
-  //   );
-  // };
+  const move = (originalIndex, atIndex) => {
+    dispatch({
+      type: 'MOVE_FIELD',
+      originalIndex,
+      atIndex,
+    });
+  };
 
   return (
     <Layout>
@@ -294,8 +239,9 @@ const ListSettingsView = ({ layout, slug }) => {
                 listRemainingFields={listRemainingFields}
                 displayedFields={displayedFields}
                 onAddField={handleAddField}
-                onRemoveField={handleRemoveField}
                 onClickEditField={handleClickEditField}
+                onMoveField={move}
+                onRemoveField={handleRemoveField}
                 metadatas={modifiedData.metadatas}
               />
             </Box>
@@ -312,137 +258,20 @@ const ListSettingsView = ({ layout, slug }) => {
             onConfirm={handleConfirm}
             variantRightButton="success-light"
           />
-          {isModalFormOpen && (
-            <EditFieldForm
-              attributes={attributes}
-              fieldForm={fieldForm}
-              fieldToEdit={fieldToEdit}
-              onChangeEditLabel={handleChangeEditLabel}
-              onCloseModal={handleCloseModal}
-              onSubmit={handleSubmitFieldEdit}
-              type={get(attributes, [fieldToEdit, 'type'], 'text')}
-            />
-          )}
         </form>
+        {isModalFormOpen && (
+          <EditFieldForm
+            attributes={attributes}
+            fieldForm={fieldForm}
+            fieldToEdit={fieldToEdit}
+            onChangeEditLabel={handleChangeEditLabel}
+            onCloseModal={handleCloseModal}
+            onSubmit={handleSubmitFieldEdit}
+            type={get(attributes, [fieldToEdit, 'type'], 'text')}
+          />
+        )}
       </Main>
     </Layout>
-
-    //     <LayoutDndProvider
-    //       isDraggingSibling={isDraggingSibling}
-    //       setIsDraggingSibling={setIsDraggingSibling}
-    //     >
-    //       <SettingsViewWrapper
-    //         displayedFields={displayedFields}
-    //         inputs={forms}
-    //         isLoading={false}
-    //         initialData={initialData}
-    //         modifiedData={modifiedData}
-    //         onChange={handleChange}
-    //         onConfirmReset={() => {
-    //           dispatch({
-    //             type: 'ON_RESET',
-    //           });
-    //         }}
-    //         onConfirmSubmit={handleConfirm}
-    //         onModalConfirmClosed={refetchData}
-    //         name={getName}
-    //       >
-    //         <DragWrapper>
-    //           <div className="row">
-    //             <div className="col-12">
-    //               <SortWrapper
-    //                 ref={drop}
-    //                 style={{
-    //                   display: 'flex',
-    //                   width: '100%',
-    //                 }}
-    //               >
-    //                 {displayedFields.map((item, index) => {
-    //                   const label = get(modifiedData, ['metadatas', item, 'list', 'label'], '');
-
-    //                   return (
-    //                     <Label
-    //                       count={displayedFields.length}
-    //                       key={item}
-    //                       index={index}
-    //                       isDraggingSibling={isDraggingSibling}
-    //                       label={label}
-    //                       move={move}
-    //                       name={item}
-    //                       onClick={handleClickEditLabel}
-    //                       onRemove={e => {
-    //                         e.stopPropagation();
-
-    //                         if (displayedFields.length === 1) {
-    //                           toggleNotification({
-    //                             type: 'info',
-    //                             message: { id: getTrad('notification.info.minimumFields') },
-    //                           });
-    //                         } else {
-    //                           dispatch({
-    //                             type: 'REMOVE_FIELD',
-    //                             index,
-    //                           });
-    //                         }
-    //                       }}
-    //                       selectedItem={labelToEdit}
-    //                       setIsDraggingSibling={setIsDraggingSibling}
-    //                     />
-    //                   );
-    //                 })}
-    //               </SortWrapper>
-    //             </div>
-    //           </div>
-    //           <DropdownButton
-    //             isOpen={isOpen}
-    //             toggle={() => {
-    //               if (listRemainingFields.length > 0) {
-    //                 setIsOpen(prevState => !prevState);
-    //               }
-    //             }}
-    //             direction="down"
-    //             style={{
-    //               position: 'absolute',
-    //               top: 11,
-    //               right: 10,
-    //             }}
-    //           >
-    //             <Toggle disabled={listRemainingFields.length === 0} />
-    //             <MenuDropdown>
-    //               {listRemainingFields.map(item => (
-    //                 <DropdownItem
-    //                   key={item}
-    //                   onClick={() => {
-    //                     dispatch({
-    //                       type: 'ADD_FIELD',
-    //                       item,
-    //                     });
-    //                   }}
-    //                 >
-    //                   {item}
-    //                 </DropdownItem>
-    //               ))}
-    //             </MenuDropdown>
-    //           </DropdownButton>
-    //         </DragWrapper>
-    //       </SettingsViewWrapper>
-    //       <PopupForm
-    //         headerId={getTrad('containers.ListSettingsView.modal-form.edit-label')}
-    //         isOpen={isModalFormOpen}
-    //         onClosed={handleClosed}
-    //         onSubmit={e => {
-    //           e.preventDefault();
-    //           toggleModalForm();
-    //           dispatch({
-    //             type: 'SUBMIT_LABEL_FORM',
-    //           });
-    //         }}
-    //         onToggle={toggleModalForm}
-    //         renderForm={renderForm}
-    //         subHeaderContent={labelToEdit}
-    //         type={get(attributes, [labelToEdit, 'type'], 'text')}
-    //       />
-    //     </LayoutDndProvider>
   );
 };
 

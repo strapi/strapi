@@ -35,26 +35,26 @@ describe('CONTENT MANAGER | CONTAINERS | ListSettingsView | reducer', () => {
     });
   });
 
-  // describe('MOVE_FIELD', () => {
-  //   it('should replace the title by the description and vice-versa', () => {
-  //     state.modifiedData = {
-  //       layouts: {
-  //         list: ['id', 'description', 'title'],
-  //       },
-  //     };
-  //     const expected = {
-  //       ...state,
-  //       modifiedData: {
-  //         layouts: {
-  //           list: ['id', 'title', 'description'],
-  //         },
-  //       },
-  //     };
-  //     const action = { type: 'MOVE_FIELD', atIndex: 1, originalIndex: 2 };
+  describe('MOVE_FIELD', () => {
+    it('should replace the title by the description and vice-versa', () => {
+      state.modifiedData = {
+        layouts: {
+          list: ['id', 'description', 'title'],
+        },
+      };
+      const expected = {
+        ...state,
+        modifiedData: {
+          layouts: {
+            list: ['id', 'title', 'description'],
+          },
+        },
+      };
+      const action = { type: 'MOVE_FIELD', atIndex: 1, originalIndex: 2 };
 
-  //     expect(reducer(state, action)).toEqual(expected);
-  //   });
-  // });
+      expect(reducer(state, action)).toEqual(expected);
+    });
+  });
 
   describe('ON_CHANGE', () => {
     it('should set the value related to the passed keys', () => {
@@ -85,23 +85,6 @@ describe('CONTENT MANAGER | CONTAINERS | ListSettingsView | reducer', () => {
       expect(reducer(state, action)).toEqual(expected);
     });
   });
-
-  // describe('ON_RESET', () => {
-  //   it('should set the current modified data to the initial state', () => {
-  //     state.modifiedData = {
-  //       layouts: {
-  //         list: ['id', 'description', 'title'],
-  //       },
-  //     };
-  //     const expected = {
-  //       ...state,
-  //       modifiedData: {},
-  //     };
-  //     const action = { type: 'ON_RESET' };
-
-  //     expect(reducer(state, action)).toEqual(expected);
-  //   });
-  // });
 
   describe('REMOVE_FIELD', () => {
     it('should remove the field', () => {
