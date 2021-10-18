@@ -11,7 +11,6 @@ import { KeyboardNavigable } from '@strapi/parts/KeyboardNavigable';
 import { DocAssetCard } from '../../AssetCard/DocAssetCard';
 import { ImageAssetCard } from '../../AssetCard/ImageAssetCard';
 import { VideoAssetCard } from '../../AssetCard/VideoAssetCard';
-import { UnknownAssetCard } from '../../AssetCard/UnknownAssetCard';
 import { UploadingAssetCard } from '../../AssetCard/UploadingAssetCard';
 import { getTrad } from '../../../utils';
 import { AssetType, AssetSource } from '../../../constants';
@@ -142,19 +141,6 @@ export const PendingAssetStep = ({
                         extension={asset.ext}
                         url={asset.url}
                         mime={asset.mime}
-                        size="S"
-                      />
-                    </GridItem>
-                  );
-                }
-
-                if (asset.type === AssetType.Unknown) {
-                  return (
-                    <GridItem col={4} key={assetKey}>
-                      <UnknownAssetCard
-                        id={assetKey}
-                        name={asset.name}
-                        extension={asset.ext}
                         size="S"
                       />
                     </GridItem>
