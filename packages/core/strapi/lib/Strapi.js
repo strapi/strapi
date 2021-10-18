@@ -259,7 +259,7 @@ class Strapi {
   }
 
   stop(exitCode = 1) {
-    this.server.destroy();
+    this.destroy();
 
     if (this.config.get('autoReload')) {
       process.send('stop');
@@ -431,7 +431,6 @@ class Strapi {
       }
 
       if (this.config.get('autoReload')) {
-        this.destroy();
         process.send('reload');
       }
     };

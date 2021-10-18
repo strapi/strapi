@@ -122,7 +122,11 @@ const applyPopulate = async (results, populate, ctx) => {
     const attribute = meta.attributes[key];
     const targetMeta = db.metadata.get(attribute.target);
 
-    const populateValue = pickPopulateParams(populate[key]);
+    const populateValue = {
+      ...pickPopulateParams(populate[key]),
+      filters: qb.state.filters,
+    };
+
     const isCount = populateValue.count === true;
 
     const fromTargetRow = rowOrRows => fromRow(targetMeta, rowOrRows);

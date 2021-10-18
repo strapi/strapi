@@ -171,6 +171,7 @@ describe('Publication State', () => {
         const res = await rq({ method: 'GET', url: `${baseUrl}${query}` });
 
         expect(res.body.data).toHaveLength(lengthFor(modelName, { mode }));
+
         expect(res.body.meta.pagination.total).toBe(lengthFor(modelName, { mode }));
       });
     });
@@ -190,7 +191,7 @@ describe('Publication State', () => {
           },
         });
 
-        products = res.body.data.map(res => ({ id: res.id, ...res.attributes }));
+        products = res.body.data;
       });
 
       test('Payload integrity', () => {
@@ -199,35 +200,29 @@ describe('Publication State', () => {
 
       test('Root level', () => {
         products.forEach(product => {
-          expect(product.publishedAt).toBeISODate();
+          expect(product.attributes.publishedAt).toBeISODate();
         });
       });
 
-      // const getApiRef = id => data.product.find(product => product.id === id);
+      test('First level (categories) to be published only', () => {
+        products.forEach(({ attributes }) => {
+          const categories = attributes.categories.data;
 
-      test.todo('First level (categories)');
+          categories.forEach(category => {
+            expect(category.attributes.publishedAt).toBeISODate();
+          });
+        });
+      });
 
-      //   products.forEach(({ id, categories }) => {
-      //     const length = getApiRef(id).categories.filter(c => c.publishedAt !== null).length;
-      //     expect(categories).toHaveLength(length);
+      test('Second level through component (countries) to be published only', () => {
+        products.forEach(({ attributes }) => {
+          const countries = attributes.comp.countries.data;
 
-      //     categories.forEach(category => {
-      //       expect(category.publishedAt).toBeISODate();
-      //     });
-      //   });
-      // });
-
-      test.todo('Second level through component (countries)');
-
-      //   products.forEach(({ id, comp: { countries } }) => {
-      //     const length = getApiRef(id).comp.countries.filter(c => c.publishedAt !== null).length;
-      //     expect(countries).toHaveLength(length);
-
-      //     countries.forEach(country => {
-      //       expect(country.publishedAt).toBeISODate();
-      //     });
-      //   });
-      // });
+          countries.forEach(country => {
+            expect(country.attributes.publishedAt).toBeISODate();
+          });
+        });
+      });
     });
   });
 });
