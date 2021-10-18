@@ -1466,7 +1466,7 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
               >
                 <button
                   aria-selected="false"
-                  id="tabgroup-2-0-tab"
+                  id="tabgroup-8-0-tab"
                   role="tab"
                   tabindex="-1"
                   type="button"
@@ -1482,9 +1482,9 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
                   </div>
                 </button>
                 <button
-                  aria-controls="tabgroup-2-1-tabpanel"
+                  aria-controls="tabgroup-8-1-tabpanel"
                   aria-selected="true"
-                  id="tabgroup-2-1-tab"
+                  id="tabgroup-8-1-tab"
                   role="tab"
                   tabindex="0"
                   type="button"
@@ -1506,8 +1506,8 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
             </div>
             <div>
               <div
-                aria-labelledby="tabgroup-2-1-tab"
-                id="tabgroup-2-1-tabpanel"
+                aria-labelledby="tabgroup-8-1-tab"
+                id="tabgroup-8-1-tabpanel"
                 role="tabpanel"
                 tabindex="0"
               >
