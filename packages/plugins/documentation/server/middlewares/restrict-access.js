@@ -9,7 +9,7 @@ module.exports = async (ctx, next) => {
     return next();
   }
 
-  if (!ctx.session.documentation) {
+  if (!ctx.session.documentation || !ctx.session.documentation.logged) {
     const querystring = ctx.querystring ? `?${ctx.querystring}` : '';
 
     return ctx.redirect(
@@ -17,14 +17,6 @@ module.exports = async (ctx, next) => {
         strapi.config.get('plugin.documentation.x-strapi-config').path
       }/login${querystring}`
     );
-  }
-  const isValid = await strapi.plugins['users-permissions'].services.user.validatePassword(
-    ctx.session.documentation,
-    config.password
-  );
-
-  if (!isValid) {
-    ctx.session.documentation = null;
   }
 
   // Execute the action.

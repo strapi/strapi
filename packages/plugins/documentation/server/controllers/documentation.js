@@ -8,6 +8,7 @@
 
 // Core dependencies.
 const path = require('path');
+const bcrypt = require('bcryptjs');
 
 // Public dependencies.
 const fs = require('fs-extra');
@@ -162,18 +163,19 @@ module.exports = {
       body: { password },
     } = ctx.request;
 
-    const { password: storedPassword } = await strapi
+    const { password: hash } = await strapi
       .store({ type: 'plugin', name: 'documentation', key: 'config' })
       .get();
 
-    const isValid = await strapi.plugins['users-permissions'].services.user.validatePassword(
-      password,
-      storedPassword
-    );
+    const isValid = await bcrypt.compare(password, hash);
+
     let querystring = '?error=password';
 
     if (isValid) {
-      ctx.session.documentation = password;
+      ctx.session.documentation = {
+        logged: true,
+      };
+
       querystring = '';
     }
 
@@ -267,46 +269,25 @@ module.exports = {
   },
 
   async updateSettings(ctx) {
-    const {
-      admin,
-      body: { restrictedAccess, password },
-    } = ctx.request;
+    const { restrictedAccess, password } = ctx.request.body;
 
-    const usersPermService = strapi.plugins['users-permissions'].services;
+    console.log(ctx.request.body);
 
     const pluginStore = strapi.store({ type: 'plugin', name: 'documentation' });
 
-    const prevConfig = await pluginStore.get({ key: 'config' });
+    const config = {
+      restrictedAccess: Boolean(restrictedAccess),
+    };
 
-    if (restrictedAccess && _.isEmpty(password)) {
-      return ctx.badRequest(
-        null,
-        admin ? 'users-permissions.Auth.form.error.password.provide' : 'Please provide a password'
-      );
+    if (restrictedAccess) {
+      if (_.isEmpty(password)) {
+        return ctx.badRequest('Please provide a password');
+      }
+
+      config.password = await bcrypt.hash(password, 10);
     }
 
-    const isNewPassword = !_.isEmpty(password) && password !== prevConfig.password;
-
-    if (isNewPassword && usersPermService.user.isHashed(password)) {
-      // Throw an error if the password selected by the user
-      // contains more than two times the symbol '$'.
-      return ctx.badRequest(
-        null,
-        admin
-          ? 'users-permissions.Auth.form.error.password.format'
-          : 'our password cannot contain more than three times the symbol `$`.'
-      );
-    }
-
-    if (isNewPassword) {
-      prevConfig.password = await usersPermService.user.hashPassword({
-        password,
-      });
-    }
-
-    _.set(prevConfig, 'restrictedAccess', restrictedAccess);
-
-    await pluginStore.set({ key: 'config', value: prevConfig });
+    await pluginStore.set({ key: 'config', value: config });
 
     return ctx.send({ ok: true });
   },

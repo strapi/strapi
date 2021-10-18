@@ -56,8 +56,11 @@ module.exports = () => {
         .filter(x => x);
     },
 
+    /**
+     * Returns settings stored in core-store
+     */
     async getDocumentationAccess() {
-      const config = await strapi
+      const { restrictedAccess } = await strapi
         .store({
           environment: '',
           type: 'plugin',
@@ -66,7 +69,7 @@ module.exports = () => {
         })
         .get();
 
-      return { restrictedAccess: config.restrictedAccess, password: config.password || '' };
+      return { restrictedAccess };
     },
 
     /**

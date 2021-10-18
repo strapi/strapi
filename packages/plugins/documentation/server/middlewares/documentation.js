@@ -5,7 +5,6 @@ const koaStatic = require('koa-static');
 const session = require('koa-session');
 const swaggerUi = require('swagger-ui-dist');
 
-// TODO: delete when refactoring documentation plugin for v4
 module.exports = async ({ strapi }) => {
   const sessionConfig = strapi.config.get('plugin.documentation').session;
   strapi.server.app.keys = sessionConfig.secretKeys;
@@ -19,7 +18,7 @@ module.exports = async ({ strapi }) => {
         ctx.url = path.basename(ctx.url);
 
         return koaStatic(swaggerUi.getAbsoluteFSPath(), {
-          maxage: sessionConfig.cookie.maxAge,
+          maxage: 86400000,
           defer: true,
         })(ctx, next);
       },

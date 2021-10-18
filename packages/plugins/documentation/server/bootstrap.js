@@ -37,13 +37,6 @@ const RBAC_ACTIONS = [
 module.exports = async ({ strapi }) => {
   await strapi.admin.services.permission.actionProvider.registerMany(RBAC_ACTIONS);
 
-  // Check if the plugin users-permissions is installed because the documentation needs it
-  if (Object.keys(strapi.plugins).indexOf('users-permissions') === -1) {
-    throw new Error(
-      'In order to make the documentation plugin works the users-permissions one is required'
-    );
-  }
-
   const pluginStore = strapi.store({
     environment: '',
     type: 'plugin',

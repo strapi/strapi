@@ -45,12 +45,12 @@ const SettingsPage = () => {
         <Formik
           initialValues={{
             restrictedAccess: data?.documentationAccess.restrictedAccess || false,
-            password: data?.documentationAccess.password,
+            password: '',
           }}
           onSubmit={handleUpdateSettingsSubmit}
           validationSchema={schema}
         >
-          {({ handleSubmit, values, handleChange, errors }) => {
+          {({ handleSubmit, values, handleChange, errors, setFieldTouched, setFieldValue }) => {
             return (
               <Form noValidate onSubmit={handleSubmit}>
                 <HeaderLayout
@@ -63,7 +63,6 @@ const SettingsPage = () => {
                     defaultMessage: 'Configure the documentation plugin',
                   })}
                   primaryAction={
-                    //  eslint-disable-next-line
                     <CheckPermissions permissions={permissions.update}>
                       <Button type="submit" startIcon={<Check />}>
                         {formatMessage({
@@ -104,7 +103,14 @@ const SettingsPage = () => {
                               defaultMessage: 'Make the documentation endpoint private',
                             })}
                             checked={values.restrictedAccess}
-                            onChange={handleChange}
+                            onChange={() => {
+                              if (values.restrictedAccess === true) {
+                                setFieldValue('password', '', false);
+                                setFieldTouched('password', false, false);
+                              }
+
+                              setFieldValue('restrictedAccess', !values.restrictedAccess, false);
+                            }}
                             onLabel="On"
                             offLabel="Off"
                           />
@@ -117,6 +123,7 @@ const SettingsPage = () => {
                                 defaultMessage: 'Password',
                               })}
                               name="password"
+                              placeholder="**********"
                               type={passwordShown ? 'text' : 'password'}
                               value={values.password}
                               onChange={handleChange}
@@ -129,7 +136,6 @@ const SettingsPage = () => {
                                   : null
                               }
                               endAction={
-                                // eslint-disable-next-line
                                 <FieldActionWrapper
                                   onClick={e => {
                                     e.stopPropagation();
