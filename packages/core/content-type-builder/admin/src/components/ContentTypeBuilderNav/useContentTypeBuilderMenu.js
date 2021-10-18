@@ -4,12 +4,10 @@ import isEmpty from 'lodash/isEmpty';
 import sortBy from 'lodash/sortBy';
 import toLower from 'lodash/toLower';
 import matchSorter from 'match-sorter';
-import { useHistory } from 'react-router-dom';
 import useDataManager from '../../hooks/useDataManager';
 import useFormModalNavigation from '../../hooks/useFormModalNavigation';
 import pluginId from '../../pluginId';
 import getTrad from '../../utils/getTrad';
-import makeSearch from '../../utils/makeSearch';
 
 const useContentTypeBuilderMenu = () => {
   const {
@@ -21,9 +19,8 @@ const useContentTypeBuilderMenu = () => {
   } = useDataManager();
   const toggleNotification = useNotification();
   const { trackUsage } = useTracking();
-  const { push } = useHistory();
   const [search, setSearch] = useState('');
-  const { onOpenModal } = useFormModalNavigation();
+  const { onOpenModalCreateSchema, onOpenModalEditCategory } = useFormModalNavigation();
 
   const componentsData = sortBy(
     Object.keys(componentsGroupedByCategory).map(category => ({
@@ -33,14 +30,11 @@ const useContentTypeBuilderMenu = () => {
       onClickEdit: (e, data) => {
         e.stopPropagation();
 
-        const search = makeSearch({
-          actionType: 'edit',
-          modalType: 'editCategory',
-          categoryName: data.name,
-          settingType: 'base',
-        });
-
-        push({ search });
+        if (canOpenModalCreateCTorComponent) {
+          onOpenModalEditCategory(data.name);
+        } else {
+          toggleNotificationCannotCreateSchema();
+        }
       },
       links: sortBy(
         componentsGroupedByCategory[category].map(compo => ({
@@ -58,16 +52,6 @@ const useContentTypeBuilderMenu = () => {
     !Object.keys(contentTypes).some(ct => contentTypes[ct].isTemporary === true) &&
     !Object.keys(components).some(component => components[component].isTemporary === true);
 
-  const toggleNotificationCannotCreateSchema = () => {
-    toggleNotification({
-      type: 'info',
-      message: {
-        id: `${getTrad('notification.info.creating.notSaved')}`,
-        defaultMessage: 'Please save your work before creating a new collection type or component',
-      },
-    });
-  };
-
   const handleClickOpenModalCreateCollectionType = () => {
     if (canOpenModalCreateCTorComponent) {
       trackUsage(`willCreateContentType`);
@@ -80,14 +64,7 @@ const useContentTypeBuilderMenu = () => {
         forTarget: 'contentType',
       };
 
-      onOpenModal(nextState);
-
-      // FIXME: to remove
-      const search = makeSearch(nextState);
-
-      push({
-        search,
-      });
+      onOpenModalCreateSchema(nextState);
     } else {
       toggleNotificationCannotCreateSchema();
     }
@@ -105,33 +82,11 @@ const useContentTypeBuilderMenu = () => {
         forTarget: 'contentType',
       };
 
-      const search = makeSearch(nextState);
-
-      onOpenModal(nextState);
-
-      push({
-        search,
-      });
+      onOpenModalCreateSchema(nextState);
     } else {
       toggleNotificationCannotCreateSchema();
     }
   };
-
-  // FIXME : open modal edit
-  // const handleClickOpenModalEditCategory = categoryName => {
-  //   if (canOpenModalCreateCTorComponent) {
-  //     const search = makeSearch({
-  //       actionType: 'edit',
-  //       modalType: 'editCategory',
-  //       categoryName,
-  //       settingType: 'base',
-  //     });
-
-  //     push({ search });
-  //   } else {
-  //     toggleNotificationCannotCreateSchema();
-  //   }
-  // };
 
   const handleClickOpenModalCreateComponent = () => {
     if (canOpenModalCreateCTorComponent) {
@@ -145,15 +100,20 @@ const useContentTypeBuilderMenu = () => {
         forTarget: 'component',
       };
 
-      onOpenModal(nextState);
-
-      const search = makeSearch(nextState);
-      push({
-        search,
-      });
+      onOpenModalCreateSchema(nextState);
     } else {
       toggleNotificationCannotCreateSchema();
     }
+  };
+
+  const toggleNotificationCannotCreateSchema = () => {
+    toggleNotification({
+      type: 'info',
+      message: {
+        id: `${getTrad('notification.info.creating.notSaved')}`,
+        defaultMessage: 'Please save your work before creating a new collection type or component',
+      },
+    });
   };
 
   const displayedContentTypes = sortedContentTypesList.filter(obj => obj.visible);

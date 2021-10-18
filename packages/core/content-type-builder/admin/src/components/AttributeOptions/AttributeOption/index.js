@@ -7,43 +7,25 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { useHistory } from 'react-router-dom';
-import { useTracking, useQueryParams } from '@strapi/helper-plugin';
 import { Box } from '@strapi/parts/Box';
 import { Row } from '@strapi/parts/Row';
 import { Text } from '@strapi/parts/Text';
+import useFormModalNavigation from '../../../hooks/useFormModalNavigation';
 import getTrad from '../../../utils/getTrad';
-import makeSearch from '../../../utils/makeSearch';
 import AttributeIcon from '../../AttributeIcon';
 import BoxWrapper from './BoxWrapper';
 
 const AttributeOption = ({ type }) => {
-  const { push } = useHistory();
-  const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
-  const [{ query }] = useQueryParams();
+
+  const { onClickSelectField } = useFormModalNavigation();
 
   const handleClick = () => {
-    // FIXME refacto
-    const forTarget = query.forTarget || null;
-    const targetUid = query.targetUid || null;
+    const step = type === 'component' ? '1' : null;
 
-    const search = makeSearch({
-      modalType: 'attribute',
-      actionType: 'create',
-      settingType: 'base',
-      forTarget,
-      targetUid,
+    onClickSelectField({
       attributeType: type,
-      step: type === 'component' ? '1' : null,
-    });
-
-    if (forTarget === 'contentType') {
-      trackUsage('didSelectContentTypeFieldType', { type });
-    }
-
-    push({
-      search,
+      step,
     });
   };
 
