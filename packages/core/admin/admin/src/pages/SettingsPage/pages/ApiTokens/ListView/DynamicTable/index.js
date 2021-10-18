@@ -5,7 +5,7 @@ import { Row } from '@strapi/parts/Row';
 import { RelativeTime, useQueryParams } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
-import { useLocation, useHistory } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import DeleteButton from './DeleteButton';
 import UpdateButton from './UpdateButton';
 
