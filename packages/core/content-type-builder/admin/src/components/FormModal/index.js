@@ -201,7 +201,6 @@ const FormModal = () => {
           modalType,
           data: {
             name,
-            // FIXME
             collectionName,
             draftAndPublish,
             kind,
@@ -245,7 +244,6 @@ const FormModal = () => {
         });
       }
 
-      // FIXME
       // Set the predefined data structure to create an attribute
       if (attributeType) {
         const attributeToEditNotFormatted = findAttribute(
@@ -304,7 +302,6 @@ const FormModal = () => {
   const isPickingAttribute = modalType === 'chooseAttribute';
   const uid = createUid(modifiedData.name || '');
   const attributes = get(allDataSchema, [...pathToSchema, 'schema', 'attributes'], null);
-  // FIXME when displayName
   const mainSchemaName = get(allDataSchema, [...pathToSchema, 'schema', 'name'], '');
 
   const checkFormValidity = async () => {
@@ -620,7 +617,6 @@ const FormModal = () => {
           addAttribute(modifiedData, forTarget, targetUid, actionType === 'edit', initialData);
 
           if (shouldContinue) {
-            // FIXME
             onNavigateToChooseAttributeModal({
               forTarget,
               targetUid: ctTargetUid,
@@ -858,7 +854,6 @@ const FormModal = () => {
     return null;
   }
 
-  // FIXME
   if (!modalType) {
     return null;
   }

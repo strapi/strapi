@@ -11,6 +11,7 @@ import { Router } from 'react-router-dom';
 import LanguageProvider from '../../../../../../admin/admin/src/components/LanguageProvider';
 import Theme from '../../../../../../admin/admin/src/components/Theme';
 import en from '../../../../../../admin/admin/src/translations/en.json';
+import FormModalNavigationProvider from '../../../components/FormModalNavigationProvider';
 import pluginEn from '../../../translations/en.json';
 import getTrad from '../../../utils/getTrad';
 
@@ -53,7 +54,9 @@ const makeApp = () => {
     <LanguageProvider messages={messages} localeNames={localeNames}>
       <Theme>
         <Router history={history}>
-          <ListView />
+          <FormModalNavigationProvider>
+            <ListView />
+          </FormModalNavigationProvider>
         </Router>
       </Theme>
     </LanguageProvider>

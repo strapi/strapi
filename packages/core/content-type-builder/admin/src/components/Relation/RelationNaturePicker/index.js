@@ -63,6 +63,10 @@ const RelationNaturePicker = ({
     ['manyToMany', 'oneToMany', 'manyToOne', 'manyWay'].includes(relationType) ? 2 : 1
   );
 
+  if (!relationType) {
+    return null;
+  }
+
   return (
     <Row style={{ flex: 1 }}>
       <Wrapper>
@@ -114,11 +118,16 @@ const RelationNaturePicker = ({
   );
 };
 
+RelationNaturePicker.defaultProps = {
+  relationType: null,
+  target: null,
+};
+
 RelationNaturePicker.propTypes = {
   naturePickerType: PropTypes.string.isRequired,
   oneThatIsCreatingARelationWithAnother: PropTypes.string.isRequired,
-  relationType: PropTypes.string.isRequired,
-  target: PropTypes.string.isRequired,
+  relationType: PropTypes.string,
+  target: PropTypes.string,
 };
 
 export default RelationNaturePicker;

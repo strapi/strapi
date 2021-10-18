@@ -62,9 +62,13 @@ const RelationTargetPicker = ({ oneThatIsCreatingARelationWithAnother, target })
   );
 };
 
+RelationTargetPicker.defaultProps = {
+  target: null,
+};
+
 RelationTargetPicker.propTypes = {
   oneThatIsCreatingARelationWithAnother: PropTypes.string.isRequired,
-  target: PropTypes.string.isRequired,
+  target: PropTypes.string,
 };
 
 export default RelationTargetPicker;
