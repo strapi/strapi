@@ -110,7 +110,7 @@ function ListView({
   }, [query]);
 
   const _sort = query._sort;
-  const _q = query._q || '';
+  const _q = query._q ? decodeURIComponent(query._q) : '';
 
   const label = contentType.info.label;
 

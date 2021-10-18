@@ -25,7 +25,11 @@ const useQueryParams = initialParams => {
           delete nextQuery[key];
         });
       } else {
-        nextQuery = { ...query, ...nextParams };
+        nextQuery = {
+          ...query,
+          ...nextParams,
+          _q: encodeURI(encodeURIComponent(nextParams._q)),
+        };
       }
 
       push({ search: stringify(nextQuery, { encode: false }) });
