@@ -13,7 +13,7 @@ export const ListView = ({ assets, onEditAsset, onSelectAsset, selectedAssets })
     <KeyboardNavigable tagName="article">
       <GridLayout>
         {assets.map(asset => {
-          const isSelected = (selectedAssets || []).indexOf(asset.id) > -1;
+          const isSelected = selectedAssets.indexOf(asset.id) > -1;
 
           if (asset.mime.includes(AssetType.Video)) {
             return (
