@@ -224,4 +224,33 @@ describe('<EditAssetDialog />', () => {
       expect(screen.queryByLabelText('Crop')).not.toBeInTheDocument();
     });
   });
+
+  describe('replace media', () => {
+    it('disables the replacement media button when the user is not allowed to update', () => {
+      renderCompo({ canUpdate: false, canCopyLink: false, canDownload: false });
+
+      expect(screen.getByText('Replace media').parentElement).toHaveAttribute(
+        'aria-disabled',
+        'true'
+      );
+    });
+
+    it('replaces the media when pressing the replace media button', async () => {
+      const file = new File(['Replacement media'], 'test.png', { type: 'image/png' });
+
+      const fileList = [file];
+      fileList.item = i => fileList[i];
+
+      const { container } = renderCompo({
+        canUpdate: true,
+        canCopyLink: false,
+        canDownload: false,
+      });
+
+      fireEvent.change(container.querySelector('[type="file"]'), { target: { files: fileList } });
+      const img = container.querySelector('img');
+
+      expect(img).toHaveAttribute('src', 'http://localhost:4000/assets/test.png');
+    });
+  });
 });
