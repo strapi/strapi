@@ -1,5 +1,4 @@
 import React, { useState } from 'react'; // useState
-import { Redirect } from 'react-router-dom';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 import {
@@ -58,10 +57,6 @@ export const MediaLibrary = () => {
 
   const loading = isLoadingPermissions || isLoading || isLoadingCount;
 
-  if (!loading && !canRead) {
-    return <Redirect to="/" />;
-  }
-
   const assets = data?.results;
 
   return (
@@ -88,7 +83,7 @@ export const MediaLibrary = () => {
               <Button startIcon={<AddIcon />} onClick={toggleUploadAssetDialog}>
                 {formatMessage({
                   id: getTrad('header.actions.upload-assets'),
-                  defaultMessage: 'Upload new assets',
+                  defaultMessage: 'Upload assets',
                 })}
               </Button>
             ) : (
