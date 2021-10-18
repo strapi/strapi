@@ -54,15 +54,9 @@ const ApiTokenCreateView = () => {
         message: formatMessage({ id: 'notification.success.saved', defaultMessage: 'Saved' }),
       });
     } catch (err) {
-      // FIXME when API errors are ready
       const errors = formatAPIErrors(err.response.data);
-      const fieldsErrors = Object.keys(errors).reduce((acc, current) => {
-        acc[current] = errors[current].id;
+      actions.setErrors(errors);
 
-        return acc;
-      }, {});
-
-      actions.setErrors(fieldsErrors);
       toggleNotification({
         type: 'warning',
         message: get(err, 'response.data.message', 'notification.error'),
@@ -182,7 +176,15 @@ const ApiTokenCreateView = () => {
                         <GridItem key="name" col={6} xs={12}>
                           <TextInput
                             name="name"
-                            error={errors.name && formatMessage({ id: errors.name })}
+                            error={
+                              errors.name
+                                ? formatMessage(
+                                    errors.name?.id
+                                      ? errors.name
+                                      : { id: errors.name, defaultMessage: errors.name }
+                                  )
+                                : null
+                            }
                             label={formatMessage({
                               id: 'Settings.apiTokens.form.name',
                               defaultMessage: 'Name',
@@ -198,7 +200,18 @@ const ApiTokenCreateView = () => {
                               defaultMessage: 'Description',
                             })}
                             name="description"
-                            error={errors.description && formatMessage({ id: errors.description })}
+                            error={
+                              errors.description
+                                ? formatMessage(
+                                    errors.description?.id
+                                      ? errors.description
+                                      : {
+                                          id: errors.description,
+                                          defaultMessage: errors.description,
+                                        }
+                                  )
+                                : null
+                            }
                             onChange={handleChange}
                           >
                             {values.description}
@@ -212,7 +225,15 @@ const ApiTokenCreateView = () => {
                               defaultMessage: 'Token type',
                             })}
                             value={values.type}
-                            error={errors.type && formatMessage({ id: errors.type })}
+                            error={
+                              errors.type
+                                ? formatMessage(
+                                    errors.type?.id
+                                      ? errors.type
+                                      : { id: errors.type, defaultMessage: errors.type }
+                                  )
+                                : null
+                            }
                             onChange={value => {
                               handleChange({ target: { name: 'type', value } });
                             }}
