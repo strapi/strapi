@@ -8,7 +8,7 @@ import { IconButton } from '@strapi/parts/IconButton';
 import { LinkButton } from '@strapi/parts/LinkButton';
 import { Box } from '@strapi/parts/Box';
 import { Row } from '@strapi/parts/Row';
-import { Text, H1 } from '@strapi/parts/Text';
+import { Text, Typography, H1 } from '@strapi/parts/Text';
 import { Stack } from '@strapi/parts/Stack';
 import ExternalLink from '@strapi/icons/ExternalLink';
 import CloseAlertIcon from '@strapi/icons/CloseAlertIcon';
@@ -16,52 +16,16 @@ import { setHexOpacity, useLockScroll } from '@strapi/helper-plugin';
 import AirBalloon from '../../assets/images/hot-air-balloon.png';
 import BigArrow from '../../assets/images/upgrade-details.png';
 
-const UpgradeWrapper = styled.div`
-  position: absolute;
-  z-index: 3;
-  inset: 0;
+const UpgradeWrapper = styled(Row)`
   background: ${({ theme }) => setHexOpacity(theme.colors.neutral800, 0.2)};
-  padding: 0 ${({ theme }) => theme.spaces[8]};
 `;
 
-const UpgradeContainer = styled(Row)`
-  position: relative;
-  max-width: ${830 / 16}rem;
-  height: ${415 / 16}rem;
-  margin: 0 auto;
-  overflow: hidden;
-  margin-top: 10%;
-  padding-left: ${64 / 16}rem;
-
-  img:first-of-type {
-    position: absolute;
-    right: 0;
-    top: 0;
-    max-width: ${360 / 16}rem;
-  }
-
-  img:not(:first-of-type) {
-    width: ${130 / 16}rem;
-    margin-left: 12%;
-    margin-right: ${20 / 16}rem;
-    z-index: 0;
-  }
-`;
-
-const TextBold = styled(Text)`
-  font-weight: 700;
+const PositionedImage = styled(Box)`
+  margin-left: 12%;
 `;
 
 const StackFlexStart = styled(Stack)`
   align-items: flex-start;
-  max-width: ${400 / 16}rem;
-  z-index: 0;
-`;
-
-const CloseButtonContainer = styled(Box)`
-  position: absolute;
-  right: ${({ theme }) => theme.spaces[4]};
-  top: ${({ theme }) => theme.spaces[4]};
 `;
 
 const UpgradePlanModal = ({ onClose, isOpen }) => {
@@ -74,20 +38,47 @@ const UpgradePlanModal = ({ onClose, isOpen }) => {
 
   return (
     <Portal>
-      <UpgradeWrapper>
+      <UpgradeWrapper
+        position="absolute"
+        zIndex={3}
+        left={0}
+        right={0}
+        top={0}
+        bottom={0}
+        paddingLeft={8}
+        paddingRight={8}
+        justifyContent="center"
+      >
         <FocusTrap onEscape={onClose}>
-          <UpgradeContainer aria-labelledby="upgrade-plan" background="neutral0" hasRadius>
-            <img src={AirBalloon} alt="air-balloon" />
-            <CloseButtonContainer>
+          <Row
+            aria-labelledby="upgrade-plan"
+            background="neutral0"
+            hasRadius
+            position="relative"
+            width={`${830 / 16}rem`}
+            height={`${415 / 16}rem`}
+            paddingLeft={11}
+            overflow="hidden"
+          >
+            <Box
+              as="img"
+              src={AirBalloon}
+              alt="air-balloon"
+              position="absolute"
+              right={0}
+              top={0}
+              maxWidth={`${360 / 16}rem`}
+            />
+            <Box position="absolute" right={4} top={4}>
               <IconButton onClick={onClose} aria-label="Close" icon={<CloseAlertIcon />} />
-            </CloseButtonContainer>
-            <StackFlexStart size={6}>
-              <TextBold textColor="primary600">
+            </Box>
+            <StackFlexStart size={6} maxWidth={`${400 / 16}rem`} zIndex={0}>
+              <Typography textColor="primary600" fontWeight="bold" fontSize={2} lineHeight={4}>
                 {formatMessage({
                   id: 'app.components.UpgradePlanModal.text-ce',
                   defaultMessage: 'COMMUNITY EDITION',
                 })}
-              </TextBold>
+              </Typography>
               <Stack size={2}>
                 <H1 as="h2" id="upgrade-plan">
                   {formatMessage({
@@ -110,8 +101,15 @@ const UpgradePlanModal = ({ onClose, isOpen }) => {
                 })}
               </LinkButton>
             </StackFlexStart>
-            <img src={BigArrow} alt="upgrade-arrow" />
-          </UpgradeContainer>
+            <PositionedImage
+              as="img"
+              src={BigArrow}
+              alt="upgrade-arrow"
+              width={`${130 / 16}rem`}
+              marginRight={5}
+              zIndex={0}
+            />
+          </Row>
         </FocusTrap>
       </UpgradeWrapper>
     </Portal>
