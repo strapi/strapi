@@ -86,7 +86,7 @@ TextareaEnum.propTypes = {
     defaultMessage: PropTypes.string.isRequired,
     values: PropTypes.object,
   }),
-  value: PropTypes.array,
+  value: PropTypes.oneOfType([PropTypes.array, PropTypes.string]),
 };
 
 export default TextareaEnum;
