@@ -2,10 +2,10 @@ import { NotificationsProvider } from '@strapi/helper-plugin';
 import React, { useReducer } from 'react';
 import PropTypes from 'prop-types';
 import { Box } from '@strapi/parts/Box';
+import { Row } from '@strapi/parts/Row';
 import { Stack } from '@strapi/parts/Stack';
 import Notification from './Notification';
 import reducer, { initialState } from './reducer';
-import NotificationsWrapper from './Wrapper';
 
 const Notifications = ({ children }) => {
   const [{ notifications }, dispatch] = useReducer(reducer, initialState);
@@ -19,7 +19,14 @@ const Notifications = ({ children }) => {
 
   return (
     <NotificationsProvider toggleNotification={displayNotification}>
-      <NotificationsWrapper justifyContent="space-around">
+      <Row
+        justifyContent="space-around"
+        position="fixed"
+        top="46px"
+        right={0}
+        left={0}
+        zIndex={1100}
+      >
         <Stack size={notifications.length}>
           {notifications.map(notification => {
             return (
@@ -29,7 +36,7 @@ const Notifications = ({ children }) => {
             );
           })}
         </Stack>
-      </NotificationsWrapper>
+      </Row>
       {children}
     </NotificationsProvider>
   );
