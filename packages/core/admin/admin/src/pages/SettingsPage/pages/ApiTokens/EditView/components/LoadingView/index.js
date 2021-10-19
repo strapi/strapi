@@ -1,5 +1,9 @@
 import React from 'react';
-import { SettingsPageTitle, LoadingIndicatorPage } from '@strapi/helper-plugin';
+import {
+  SettingsPageTitle,
+  LoadingIndicatorPage,
+  useFocusWhenNavigate,
+} from '@strapi/helper-plugin';
 import { HeaderLayout, ContentLayout } from '@strapi/parts/Layout';
 import { Main } from '@strapi/parts/Main';
 import { Button } from '@strapi/parts/Button';
@@ -9,6 +13,7 @@ import PropTypes from 'prop-types';
 
 const LoadingView = ({ apiTokenName }) => {
   const { formatMessage } = useIntl();
+  useFocusWhenNavigate();
 
   return (
     <Main aria-busy="true">

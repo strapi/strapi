@@ -5,6 +5,7 @@ import { IconButton } from '@strapi/parts/IconButton';
 import Duplicate from '@strapi/icons/Duplicate';
 import PropTypes from 'prop-types';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
+import IconApiTokens from '@strapi/icons/IconApiTokens';
 
 const HeaderContentBox = ({ apiToken }) => {
   const { formatMessage } = useIntl();
@@ -12,7 +13,7 @@ const HeaderContentBox = ({ apiToken }) => {
   return (
     <ContentBox
       endAction={
-        apiToken ? (
+        apiToken && (
           <CopyToClipboard
             onCopy={() => {
               toggleNotification({
@@ -31,8 +32,6 @@ const HeaderContentBox = ({ apiToken }) => {
               icon={<Duplicate />}
             />
           </CopyToClipboard>
-        ) : (
-          undefined
         )
       }
       title={
@@ -53,21 +52,7 @@ const HeaderContentBox = ({ apiToken }) => {
               defaultMessage: 'For security matters, you can only see your token once.',
             })
       }
-      icon={
-        <svg xmlns="http://www.w3.org/2000/svg">
-          <text
-            transform="translate(-23 -9)"
-            fill="#4B515A"
-            fillRule="evenodd"
-            fontSize="32"
-            fontFamily="AppleColorEmoji, Apple Color Emoji"
-          >
-            <tspan x="23" y="36">
-              🔑
-            </tspan>
-          </text>
-        </svg>
-      }
+      icon={<IconApiTokens />}
       iconBackground="neutral100"
     />
   );
