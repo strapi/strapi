@@ -10,6 +10,8 @@ import { Link } from '@strapi/parts/Link';
 import { Button } from '@strapi/parts/Button';
 import { TextInput } from '@strapi/parts/TextInput';
 import { H1, Text } from '@strapi/parts/Text';
+import { FieldAction } from '@strapi/parts/Field';
+import { Icon } from '@strapi/parts/Icon';
 import Hide from '@strapi/icons/Hide';
 import Show from '@strapi/icons/Show';
 import { Formik } from 'formik';
@@ -18,7 +20,6 @@ import UnauthenticatedLayout, {
   LayoutContent,
 } from '../../../../layouts/UnauthenticatedLayout';
 import Logo from '../Logo';
-import FieldActionWrapper from '../FieldActionWrapper';
 
 const ForgotPassword = ({ onSubmit, schema }) => {
   const [passwordShown, setPasswordShown] = useState(false);
@@ -75,7 +76,7 @@ const ForgotPassword = ({ onSubmit, schema }) => {
                         : undefined
                     }
                     endAction={
-                      <FieldActionWrapper
+                      <FieldAction
                         onClick={e => {
                           e.preventDefault();
                           setPasswordShown(prev => !prev);
@@ -92,8 +93,12 @@ const ForgotPassword = ({ onSubmit, schema }) => {
                               }
                         )}
                       >
-                        {passwordShown ? <Show /> : <Hide />}
-                      </FieldActionWrapper>
+                        {passwordShown ? (
+                          <Icon as={Show} height="16px" width="16px" color="neutral600" />
+                        ) : (
+                          <Icon as={Hide} height="16px" width="16px" color="neutral600" />
+                        )}
+                      </FieldAction>
                     }
                     hint={formatMessage({
                       id: 'Auth.form.password.hint',
@@ -120,13 +125,13 @@ const ForgotPassword = ({ onSubmit, schema }) => {
                         : undefined
                     }
                     endAction={
-                      <FieldActionWrapper
+                      <FieldAction
                         onClick={e => {
                           e.preventDefault();
                           setConfirmPasswordShown(prev => !prev);
                         }}
                         label={formatMessage(
-                          passwordShown
+                          confirmPasswordShown
                             ? {
                                 id: 'Auth.form.password.show-password',
                                 defaultMessage: 'Show password',
@@ -137,8 +142,12 @@ const ForgotPassword = ({ onSubmit, schema }) => {
                               }
                         )}
                       >
-                        {confirmPasswordShown ? <Show /> : <Hide />}
-                      </FieldActionWrapper>
+                        {confirmPasswordShown ? (
+                          <Icon as={Show} height="16px" width="16px" color="neutral600" />
+                        ) : (
+                          <Icon as={Hide} height="16px" width="16px" color="neutral600" />
+                        )}
+                      </FieldAction>
                     }
                     required
                     label={formatMessage({

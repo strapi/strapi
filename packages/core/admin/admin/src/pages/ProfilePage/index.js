@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import styled from 'styled-components';
 import {
   Form,
   GenericInput,
@@ -27,22 +26,13 @@ import { useNotifyAT } from '@strapi/parts/LiveRegions';
 import { Select, Option } from '@strapi/parts/Select';
 import { FieldAction } from '@strapi/parts/Field';
 import { TextInput } from '@strapi/parts/TextInput';
+import { Icon } from '@strapi/parts/Icon';
 import Show from '@strapi/icons/Show';
 import Hide from '@strapi/icons/Hide';
 import CheckIcon from '@strapi/icons/CheckIcon';
 import useLocalesProvider from '../../components/LocalesProvider/useLocalesProvider';
 import { fetchUser, putUser } from './utils/api';
 import schema from './utils/schema';
-
-const FieldActionWrapper = styled(FieldAction)`
-  svg {
-    height: 1rem;
-    width: 1rem;
-    path {
-      fill: ${({ theme }) => theme.colors.neutral600};
-    }
-  }
-`;
 
 const ProfilePage = () => {
   const [passwordShown, setPasswordShown] = useState(false);
@@ -270,7 +260,7 @@ const ProfilePage = () => {
                               name="password"
                               type={passwordShown ? 'text' : 'password'}
                               endAction={
-                                <FieldActionWrapper
+                                <FieldAction
                                   onClick={e => {
                                     e.stopPropagation();
                                     setPasswordShown(prev => !prev);
@@ -287,8 +277,12 @@ const ProfilePage = () => {
                                         }
                                   )}
                                 >
-                                  {passwordShown ? <Show /> : <Hide />}
-                                </FieldActionWrapper>
+                                  {passwordShown ? (
+                                    <Icon as={Show} height="16px" width="16px" color="neutral600" />
+                                  ) : (
+                                    <Icon as={Hide} height="16px" width="16px" color="neutral600" />
+                                  )}
+                                </FieldAction>
                               }
                             />
                           </GridItem>
@@ -311,7 +305,7 @@ const ProfilePage = () => {
                               name="confirmPassword"
                               type={passwordConfirmShown ? 'text' : 'password'}
                               endAction={
-                                <FieldActionWrapper
+                                <FieldAction
                                   onClick={e => {
                                     e.stopPropagation();
                                     setPasswordConfirmShown(prev => !prev);
@@ -328,8 +322,12 @@ const ProfilePage = () => {
                                         }
                                   )}
                                 >
-                                  {passwordConfirmShown ? <Show /> : <Hide />}
-                                </FieldActionWrapper>
+                                  {passwordConfirmShown ? (
+                                    <Icon as={Show} height="16px" width="16px" color="neutral600" />
+                                  ) : (
+                                    <Icon as={Hide} height="16px" width="16px" color="neutral600" />
+                                  )}
+                                </FieldAction>
                               }
                             />
                           </GridItem>

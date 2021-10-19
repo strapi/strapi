@@ -14,9 +14,10 @@ import { Form } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Formik } from 'formik';
+import { Icon } from '@strapi/parts/Icon';
+import { FieldAction } from '@strapi/parts/Field';
 import { Column, LayoutContent } from '../../../../layouts/UnauthenticatedLayout';
 import Logo from '../Logo';
-import FieldActionWrapper from '../FieldActionWrapper';
 
 const Login = ({ onSubmit, schema, children }) => {
   const [passwordShown, setPasswordShown] = useState(false);
@@ -101,7 +102,7 @@ const Login = ({ onSubmit, schema, children }) => {
                   name="password"
                   type={passwordShown ? 'text' : 'password'}
                   endAction={
-                    <FieldActionWrapper
+                    <FieldAction
                       onClick={e => {
                         e.stopPropagation();
                         setPasswordShown(prev => !prev);
@@ -118,8 +119,12 @@ const Login = ({ onSubmit, schema, children }) => {
                             }
                       )}
                     >
-                      {passwordShown ? <Show /> : <Hide />}
-                    </FieldActionWrapper>
+                      {passwordShown ? (
+                        <Icon as={Show} height="16px" width="16px" color="neutral600" />
+                      ) : (
+                        <Icon as={Hide} height="16px" width="16px" color="neutral600" />
+                      )}
+                    </FieldAction>
                   }
                   required
                 />

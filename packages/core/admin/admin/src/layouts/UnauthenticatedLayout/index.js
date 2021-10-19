@@ -7,7 +7,6 @@ import LocaleToggle from './LocaleToggle';
 
 const Wrapper = styled(Box)`
   margin: 0 auto;
-  width: 552px;
 `;
 
 export const Column = styled(Row)`
@@ -16,6 +15,7 @@ export const Column = styled(Row)`
 
 export const LayoutContent = ({ children }) => (
   <Wrapper
+    width={`${552 / 16}rem`}
     shadow="tableShadow"
     hasRadius
     paddingTop={9}

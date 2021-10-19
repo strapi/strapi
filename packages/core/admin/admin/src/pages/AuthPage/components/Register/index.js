@@ -15,6 +15,8 @@ import { Grid, GridItem } from '@strapi/parts/Grid';
 import { H1, Subtitle } from '@strapi/parts/Text';
 import Hide from '@strapi/icons/Hide';
 import Show from '@strapi/icons/Show';
+import { FieldAction } from '@strapi/parts/Field';
+import { Icon } from '@strapi/parts/Icon';
 import { Form, useQuery, useNotification } from '@strapi/helper-plugin';
 import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
@@ -25,7 +27,6 @@ import UnauthenticatedLayout, {
   LayoutContent,
 } from '../../../../layouts/UnauthenticatedLayout';
 import Logo from '../Logo';
-import FieldActionWrapper from '../FieldActionWrapper';
 
 const CenteredBox = styled(Box)`
   text-align: center;
@@ -198,7 +199,7 @@ const Register = ({ fieldsToDisable, noSignin, onSubmit, schema }) => {
                     }
                     endAction={
                       // eslint-disable-next-line react/jsx-wrap-multilines
-                      <FieldActionWrapper
+                      <FieldAction
                         onClick={e => {
                           e.preventDefault();
                           setPasswordShown(prev => !prev);
@@ -215,8 +216,12 @@ const Register = ({ fieldsToDisable, noSignin, onSubmit, schema }) => {
                               }
                         )}
                       >
-                        {passwordShown ? <Show /> : <Hide />}
-                      </FieldActionWrapper>
+                        {passwordShown ? (
+                          <Icon as={Show} height="16px" width="16px" color="neutral600" />
+                        ) : (
+                          <Icon as={Hide} height="16px" width="16px" color="neutral600" />
+                        )}
+                      </FieldAction>
                     }
                     hint={formatMessage({
                       id: 'Auth.form.password.hint',
@@ -244,7 +249,7 @@ const Register = ({ fieldsToDisable, noSignin, onSubmit, schema }) => {
                     }
                     endAction={
                       // eslint-disable-next-line react/jsx-wrap-multilines
-                      <FieldActionWrapper
+                      <FieldAction
                         onClick={e => {
                           e.preventDefault();
                           setConfirmPasswordShown(prev => !prev);
@@ -261,8 +266,12 @@ const Register = ({ fieldsToDisable, noSignin, onSubmit, schema }) => {
                               }
                         )}
                       >
-                        {confirmPasswordShown ? <Show /> : <Hide />}
-                      </FieldActionWrapper>
+                        {confirmPasswordShown ? (
+                          <Icon as={Show} height="16px" width="16px" color="neutral600" />
+                        ) : (
+                          <Icon as={Hide} height="16px" width="16px" color="neutral600" />
+                        )}
+                      </FieldAction>
                     }
                     required
                     label={formatMessage({
