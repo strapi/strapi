@@ -44,10 +44,6 @@ const UpdateButton = ({ tokenName, tokenId }) => {
   );
 };
 
-UpdateButton.defaultProps = {
-  onClickUpdate: () => {},
-};
-
 UpdateButton.propTypes = {
   tokenName: PropTypes.string.isRequired,
   tokenId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
