@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { useIntl } from 'react-intl';
-import styled, { keyframes } from 'styled-components';
+import { keyframes } from 'styled-components';
 import Time from '@strapi/icons/Time';
 import Reload from '@strapi/icons/Reload';
 import { Link } from '@strapi/parts/Link';
@@ -9,6 +9,7 @@ import { Box } from '@strapi/parts/Box';
 import { Stack } from '@strapi/parts/Stack';
 import { Row } from '@strapi/parts/Row';
 import { H1, H2 } from '@strapi/parts/Text';
+import { Icon } from '@strapi/parts/Icon';
 import PropTypes from 'prop-types';
 import Overlay from './Overlay';
 
@@ -23,11 +24,6 @@ const rotation = keyframes`
   to {
     transform: rotate(359deg);
   }
-`;
-
-const LoaderReload = styled(Reload)`
-  animation: ${rotation} 1s infinite linear;
-  ${({ small }) => small && `width: 25px; height: 25px;`}
 `;
 
 const Blocker = ({ displayedIcon, description, title, elapsed, isOpen }) => {
@@ -47,7 +43,12 @@ const Blocker = ({ displayedIcon, description, title, elapsed, isOpen }) => {
           <Row>
             {displayedIcon === 'reload' && (
               <Box paddingRight={3} style={{ alignSelf: 'baseline' }}>
-                <LoaderReload width="4rem" height="4rem" />
+                <Icon
+                  as={Reload}
+                  width="4rem"
+                  height="4rem"
+                  animation={`${rotation} 1s infinite linear`}
+                />
               </Box>
             )}
             {displayedIcon === 'time' && (
