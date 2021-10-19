@@ -5,7 +5,6 @@
 
 import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from 'react-intl';
-import styled from 'styled-components';
 import { Helmet } from 'react-helmet';
 import { useHistory } from 'react-router-dom';
 import { LoadingIndicatorPage } from '@strapi/helper-plugin';
@@ -18,15 +17,6 @@ import { useModels } from '../../hooks';
 import SocialLinks from './SocialLinks';
 import HomeHeader from './HomeHeader';
 import ContentBlocks from './ContentBlocks';
-
-const LogoContainer = styled(Box)`
-  position: absolute;
-  top: 0;
-  right: 0;
-  img {
-    width: ${150 / 16}rem;
-  }
-`;
 
 const HomePage = () => {
   // // Temporary until we develop the menu API
@@ -59,9 +49,17 @@ const HomePage = () => {
         {title => <Helmet title={title[0]} />}
       </FormattedMessage>
       <Main>
-        <LogoContainer>
-          <img alt="" aria-hidden src={Logo} />
-        </LogoContainer>
+        <Box
+          as="img"
+          position="absolute"
+          top={0}
+          right={0}
+          width={`${150 / 16}rem`}
+          alt=""
+          aria-hidden
+          src={Logo}
+        />
+
         <Box padding={10}>
           <Grid>
             <GridItem col={8} s={12}>
