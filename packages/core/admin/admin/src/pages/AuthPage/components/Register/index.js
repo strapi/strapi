@@ -31,9 +31,6 @@ import Logo from '../Logo';
 const CenteredBox = styled(Box)`
   text-align: center;
 `;
-const A = styled.a`
-  color: ${({ theme }) => theme.colors.primary600};
-`;
 
 const Register = ({ fieldsToDisable, noSignin, onSubmit, schema }) => {
   const toggleNotification = useNotification();
@@ -296,20 +293,32 @@ const Register = ({ fieldsToDisable, noSignin, onSubmit, schema }) => {
                       },
                       {
                         terms: (
-                          <A target="_blank" href="https://strapi.io/terms" rel="noreferrer">
+                          <Box
+                            as="a"
+                            color="primary600"
+                            target="_blank"
+                            href="https://strapi.io/terms"
+                            rel="noreferrer"
+                          >
                             {formatMessage({
                               id: 'Auth.privacy-policy-agreement.terms',
                               defaultMessage: 'terms',
                             })}
-                          </A>
+                          </Box>
                         ),
                         policy: (
-                          <A target="_blank" href="https://strapi.io/privacy" rel="noreferrer">
+                          <Box
+                            as="a"
+                            color="primary600"
+                            target="_blank"
+                            href="https://strapi.io/privacy"
+                            rel="noreferrer"
+                          >
                             {formatMessage({
                               id: 'Auth.privacy-policy-agreement.policy',
                               defaultMessage: 'policy',
                             })}
-                          </A>
+                          </Box>
                         ),
                       }
                     )}
