@@ -4,45 +4,23 @@ import { useIntl } from 'react-intl';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faQuestion, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { Box } from '@strapi/parts/Box';
+import { Row } from '@strapi/parts/Row';
 import { Text } from '@strapi/parts/Text';
+import { Icon } from '@strapi/parts/Icon';
+import IconDocumentation from '@strapi/icons/IconDocumentation';
+import TypeFileDefault from '@strapi/icons/TypeFileDefault';
 import { FocusTrap } from '@strapi/parts/FocusTrap';
 import { useConfigurations } from '../../../hooks';
 
-const OnboardingWrapper = styled(Box)`
-  position: fixed;
-  bottom: ${({ theme }) => theme.spaces[2]};
-  right: ${({ theme }) => theme.spaces[2]};
-`;
-
-const Button = styled.button`
-  width: ${({ theme }) => theme.spaces[8]};
-  height: ${({ theme }) => theme.spaces[8]};
-  background: ${({ theme }) => theme.colors.primary600};
-  box-shadow: ${({ theme }) => theme.shadows.tableShadow};
+const Button = styled(Row)`
   border-radius: 50%;
   svg {
     color: ${({ theme }) => theme.colors.neutral0};
   }
 `;
 
-const LinksWrapper = styled(Box)`
-  position: absolute;
-  bottom: ${({ theme }) => `${theme.spaces[9]}`};
-  right: 0;
-  width: ${200 / 16}rem;
-`;
-
-const StyledLink = styled.a`
-  display: flex;
-  align-items: center;
+const StyledLink = styled(Row)`
   text-decoration: none;
-  padding: ${({ theme }) => theme.spaces[2]};
-  padding-left: ${({ theme }) => theme.spaces[5]};
-
-  svg {
-    color: ${({ theme }) => theme.colors.neutral600};
-    margin-right: ${({ theme }) => theme.spaces[2]};
-  }
 
   &:hover {
     background: ${({ theme }) => theme.colors.neutral100};
@@ -73,7 +51,7 @@ const Onboarding = () => {
 
   const staticLinks = [
     {
-      icon: 'book',
+      icon: IconDocumentation,
       label: formatMessage({
         id: 'app.components.LeftMenuFooter.documentation',
         defaultMessage: 'Documentation',
@@ -81,7 +59,7 @@ const Onboarding = () => {
       destination: 'https://strapi.io/documentation',
     },
     {
-      icon: 'file',
+      icon: TypeFileDefault,
       label: formatMessage({ id: 'app.static.links.cheatsheet', defaultMessage: 'CheatSheet' }),
       destination: 'https://strapi-showcase.s3-us-west-2.amazonaws.com/CheatSheet.pdf',
     },
@@ -92,9 +70,18 @@ const Onboarding = () => {
   };
 
   return (
-    <OnboardingWrapper>
+    <>
       <Button
+        position="fixed"
+        bottom={2}
+        right={2}
+        justifyContent="center"
+        as="button"
         id="onboarding"
+        height={`${40 / 16}rem`}
+        width={`${40 / 16}rem`}
+        background="primary600"
+        shadow="tableShadow"
         aria-label={formatMessage({
           id: 'app.components.Onboarding.help.button',
           defaultMessage: 'Help button',
@@ -109,28 +96,37 @@ const Onboarding = () => {
        + when v4 mockups for onboarding component are ready */}
       {isOpen && (
         <FocusTrap onEscape={handleClick}>
-          <LinksWrapper
+          <Box
             background="neutral0"
             hasRadius
             shadow="tableShadow"
             paddingBottom={2}
             paddingTop={2}
+            position="absolute"
+            bottom={10}
+            right={2}
+            width={`${200 / 16}rem`}
           >
             {staticLinks.map(link => (
               <StyledLink
+                as="a"
                 key={link.label}
                 rel="nofollow noreferrer noopener"
                 target="_blank"
                 href={link.destination}
+                paddingTop={2}
+                paddingBottom={2}
+                paddingRight={5}
+                paddingLeft={5}
               >
-                <FontAwesomeIcon icon={link.icon} />
+                <Icon as={link.icon} color="neutral600" marginRight={2} />
                 <Text>{link.label}</Text>
               </StyledLink>
             ))}
-          </LinksWrapper>
+          </Box>
         </FocusTrap>
       )}
-    </OnboardingWrapper>
+    </>
   );
 };
 
