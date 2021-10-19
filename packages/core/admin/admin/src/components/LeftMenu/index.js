@@ -21,7 +21,8 @@ import { Text } from '@strapi/parts/Text';
 import { Stack } from '@strapi/parts/Stack';
 import ContentIcon from '@strapi/icons/ContentIcon';
 import Logout from '@strapi/icons/Logout';
-import { auth, usePersistentState, useAppInfos } from '@strapi/helper-plugin';
+import { auth, usePersistentState, useAppInfos, pxToRem } from '@strapi/helper-plugin';
+
 import useConfigurations from '../../hooks/useConfigurations';
 
 const LinkUser = styled(Link)`
@@ -126,7 +127,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
       </NavUser>
       {userLinksVisible && (
         <Box
-          width={`${150 / 16}rem`}
+          width={pxToRem(150)}
           position="absolute"
           bottom={9}
           left={5}

@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { Box } from '@strapi/parts/Box';
 import { Row } from '@strapi/parts/Row';
+import { pxToRem } from '@strapi/helper-plugin';
 import LocaleToggle from './LocaleToggle';
 
 const Wrapper = styled(Box)`
@@ -15,7 +16,7 @@ export const Column = styled(Row)`
 
 export const LayoutContent = ({ children }) => (
   <Wrapper
-    width={`${552 / 16}rem`}
+    width={pxToRem(552)}
     shadow="tableShadow"
     hasRadius
     paddingTop={9}

@@ -7,7 +7,7 @@ import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { Helmet } from 'react-helmet';
 import { useHistory } from 'react-router-dom';
-import { LoadingIndicatorPage } from '@strapi/helper-plugin';
+import { LoadingIndicatorPage, pxToRem } from '@strapi/helper-plugin';
 import { Layout } from '@strapi/parts/Layout';
 import { Main } from '@strapi/parts/Main';
 import { Box } from '@strapi/parts/Box';
@@ -54,7 +54,7 @@ const HomePage = () => {
           position="absolute"
           top={0}
           right={0}
-          width={`${150 / 16}rem`}
+          width={pxToRem(150)}
           alt=""
           aria-hidden
           src={Logo}
