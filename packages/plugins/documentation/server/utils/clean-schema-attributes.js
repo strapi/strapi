@@ -21,17 +21,39 @@ const cleanSchemaAttributes = (attributes, { typeMap = new Map(), isRequest = fa
     }
 
     switch (attribute.type) {
-      case 'password':
-      case 'email':
+      case 'password': {
+        if (!isRequest) {
+          delete attributesCopy[prop];
+          break;
+        }
+
+        attributesCopy[prop] = { type: 'string', format: 'password', example: '*******' };
+        break;
+      }
+      case 'email': {
+        attributesCopy[prop] = { type: 'string', format: 'email' };
+        break;
+      }
       case 'string':
       case 'text':
-      case 'richtext':
-      case 'biginteger':
-      case 'timestamp':
-      case 'time':
-      case 'date':
-      case 'datetime': {
+      case 'richtext': {
         attributesCopy[prop] = { type: 'string' };
+        break;
+      }
+      case 'timestamp': {
+        attributesCopy[prop] = { type: 'string', format: 'timestamp', example: Date.now() };
+        break;
+      }
+      case 'time': {
+        attributesCopy[prop] = { type: 'string', format: 'time', example: '12:54.000' };
+        break;
+      }
+      case 'date': {
+        attributesCopy[prop] = { type: 'string', format: 'date' };
+        break;
+      }
+      case 'datetime': {
+        attributesCopy[prop] = { type: 'string', format: 'date-time' };
         break;
       }
       case 'boolean': {
@@ -51,12 +73,16 @@ const cleanSchemaAttributes = (attributes, { typeMap = new Map(), isRequest = fa
         attributesCopy[prop] = { type: 'integer' };
         break;
       }
+      case 'biginteger': {
+        attributesCopy[prop] = { type: 'string', pattern: '^\\d*$', example: '123456789' };
+        break;
+      }
       case 'json': {
         attributesCopy[prop] = {};
         break;
       }
       case 'uid': {
-        attributesCopy[prop] = { type: 'string', format: 'uuid' };
+        attributesCopy[prop] = { type: 'string' };
         break;
       }
       case 'component': {
