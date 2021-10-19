@@ -1,7 +1,7 @@
 'use strict';
 
 const { getOr, toNumber, isString, isBuffer } = require('lodash/fp');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 
 const transforms = {
   password(value, context) {
