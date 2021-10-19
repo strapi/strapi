@@ -24,7 +24,6 @@ import { Filters } from './components/Filters';
 import { SortPicker } from './components/SortPicker';
 import { PaginationFooter } from '../../components/PaginationFooter';
 import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
-import { useAssetCount } from '../../hooks/useAssetCount';
 import { BulkDeleteButton } from './components/BulkDeleteButton';
 
 const BoxWithHeight = styled(Box)`
@@ -43,8 +42,6 @@ export const MediaLibrary = () => {
     isLoading: isLoadingPermissions,
   } = useMediaLibraryPermissions();
 
-  const { isLoading: isLoadingCount, data: assetCount } = useAssetCount();
-
   const { formatMessage } = useIntl();
   const { data, isLoading, error } = useAssets({
     skipWhen: !canRead,
@@ -57,8 +54,9 @@ export const MediaLibrary = () => {
 
   useFocusWhenNavigate();
 
-  const loading = isLoadingPermissions || isLoading || isLoadingCount;
+  const loading = isLoadingPermissions || isLoading;
   const assets = data?.results;
+  const assetCount = data?.pagination?.total || 0;
 
   const selectAllAssets = () => {
     if (selected.length > 0) {
@@ -92,13 +90,13 @@ export const MediaLibrary = () => {
           subtitle={formatMessage(
             {
               id: getTrad(
-                assetCount?.count > 0
+                assetCount > 0
                   ? 'header.content.assets-multiple'
                   : 'header.content.assets.assets-single'
               ),
               defaultMessage: '0 assets',
             },
-            { number: assetCount?.count || 0 }
+            { number: assetCount }
           )}
           primaryAction={
             canCreate ? (
