@@ -32,6 +32,7 @@ import DraftAndPublishToggle from '../DraftAndPublishToggle';
 import FormModalHeader from '../FormModalHeader';
 
 import BooleanDefaultValueSelect from '../BooleanDefaultValueSelect';
+import BooleanRadioGroup from '../BooleanRadioGroup';
 import CheckboxWithNumberField from '../CheckboxWithNumberField';
 import CustomRadioGroup from '../CustomRadioGroup';
 import ContentTypeRadioGroup from '../ContentTypeRadioGroup';
@@ -864,6 +865,7 @@ const FormModal = () => {
   const genericInputProps = {
     customInputs: {
       'allowed-types-select': AllowedTypesSelect,
+      'boolean-radio-group': BooleanRadioGroup,
       'checkbox-with-number-field': CheckboxWithNumberField,
       'component-icon-picker': ComponentIconPicker,
       'content-type-radio-group': ContentTypeRadioGroup,
