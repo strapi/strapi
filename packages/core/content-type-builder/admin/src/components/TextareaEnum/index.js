@@ -30,7 +30,7 @@ const TextareaEnum = ({
       )
     : '';
 
-  value = value ? value.join('\n') : '';
+  const inputValue = Array.isArray(value) ? value.join('\n') : '';
 
   const handleChange = e => {
     const arrayValue = e.target.value.split('\n');
@@ -49,8 +49,9 @@ const TextareaEnum = ({
       name={name}
       onChange={handleChange}
       placeholder={formattedPlaceholder}
+      value={inputValue}
     >
-      {value}
+      {inputValue}
     </Textarea>
   );
 };
