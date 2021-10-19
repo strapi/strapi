@@ -4,7 +4,7 @@ const defaultGlobalLinks = [
   {
     intlLabel: { id: 'Settings.application.title', defaultMessage: 'Application' },
     to: '/settings/application-infos',
-    id: 'application-infos',
+    id: '000-application-infos',
     isDisplayed: false,
     permissions: [],
   },
