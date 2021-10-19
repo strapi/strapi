@@ -389,7 +389,7 @@ describe('', () => {
         background: #4945ff;
       }
 
-      .c30 .sc-cAxRzm {
+      .c30 .sc-boeJfj {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -454,7 +454,7 @@ describe('', () => {
         background: #ffffff;
       }
 
-      .c37 .sc-cAxRzm {
+      .c37 .sc-boeJfj {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
