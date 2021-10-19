@@ -37,6 +37,7 @@ export const ListView = ({ assets, onEditAsset, onSelectAsset, selectedAssets })
                 id={asset.id}
                 key={asset.id}
                 name={asset.name}
+                alt={asset.alternativeText || asset.name}
                 extension={getFileExtension(asset.ext)}
                 height={asset.height}
                 width={asset.width}

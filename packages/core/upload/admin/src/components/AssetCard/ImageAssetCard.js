@@ -32,6 +32,7 @@ export const ImageAssetCard = ({
   onSelect,
   onEdit,
   size,
+  alt,
 }) => {
   const { formatMessage } = useIntl();
 
@@ -53,7 +54,7 @@ export const ImageAssetCard = ({
             />
           </CardAction>
         )}
-        <CardAsset src={optimizedCachingThumbnail} size={size} />
+        <CardAsset src={optimizedCachingThumbnail} size={size} alt={alt} />
       </CardHeader>
       <CardBody>
         <CardContent>
@@ -81,6 +82,7 @@ ImageAssetCard.defaultProps = {
 };
 
 ImageAssetCard.propTypes = {
+  alt: PropTypes.string.isRequired,
   extension: PropTypes.string.isRequired,
   height: PropTypes.number,
   name: PropTypes.string.isRequired,

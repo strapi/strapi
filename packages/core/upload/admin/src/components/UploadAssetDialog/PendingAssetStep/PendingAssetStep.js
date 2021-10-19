@@ -127,6 +127,7 @@ export const PendingAssetStep = ({
                         width={asset.width}
                         thumbnail={asset.url}
                         size="S"
+                        alt={asset.name}
                       />
                     </GridItem>
                   );
