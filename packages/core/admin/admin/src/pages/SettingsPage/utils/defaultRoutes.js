@@ -104,7 +104,7 @@ const defaultRoutes = [
   {
     Component: async () => {
       const component = await import(
-        /* webpackChunkName: "api-tokens-list-page" */ '../pages/ApiTokens/ProtectedCreateView'
+        /* webpackChunkName: "api-tokens-create-page" */ '../pages/ApiTokens/ProtectedCreateView'
       );
 
       return component;
@@ -115,7 +115,7 @@ const defaultRoutes = [
   {
     Component: async () => {
       const component = await import(
-        /* webpackChunkName: "api-tokens-list-page" */ '../pages/ApiTokens/ProtectedEditView'
+        /* webpackChunkName: "api-tokens-edit-page" */ '../pages/ApiTokens/ProtectedEditView'
       );
 
       return component;
