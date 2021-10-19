@@ -21,9 +21,9 @@ const RelationFormBox = ({
 }) => {
   return (
     <Box background="neutral100" hasRadius borderColor="neutral200">
-      <Row paddingTop={4} paddingBottom={3} justifyContent="center">
+      <Row paddingTop={isMain ? 4 : 1} paddingBottom={isMain ? 3 : 1} justifyContent="center">
         {isMain ? (
-          <Text textColor="neutral800" style={{ fontWeight: 600 }}>
+          <Text textColor="neutral800" bold small>
             {header}
           </Text>
         ) : (
