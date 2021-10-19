@@ -80,43 +80,47 @@ const getPathWithPrefix = (prefix, path) => {
  * @returns {object}
  */
 const getPaths = ({ routeInfo, attributes, tag }) => {
-  const paths = routeInfo.routes.reduce(
-    (acc, route) => {
-      // TODO: Find a more reliable way to determine list of entities vs a single entity
-      const isListOfEntities = route.handler.split('.').pop() === 'find';
-      const methodVerb = route.method.toLowerCase();
+  const paths = routeInfo.routes.reduce((acc, route) => {
+    // TODO: Find a more reliable way to determine list of entities vs a single entity
+    const isListOfEntities = route.handler.split('.').pop() === 'find';
+    const methodVerb = route.method.toLowerCase();
 
-      const hasPathParams = route.path.includes('/:');
-      const pathWithPrefix = routeInfo.prefix
-        ? getPathWithPrefix(routeInfo.prefix, route.path)
-        : route.path;
-      const routePath = hasPathParams ? parsePathWithVariables(pathWithPrefix) : pathWithPrefix;
+    const hasPathParams = route.path.includes('/:');
+    const pathWithPrefix = routeInfo.prefix
+      ? getPathWithPrefix(routeInfo.prefix, route.path)
+      : route.path;
+    const routePath = hasPathParams ? parsePathWithVariables(pathWithPrefix) : pathWithPrefix;
 
-      const { responses } = buildApiResponses(attributes, route, isListOfEntities);
-      _.set(acc.paths, `${routePath}.${methodVerb}.responses`, responses);
-      _.set(acc.paths, `${routePath}.${methodVerb}.tags`, [_.upperFirst(tag)]);
+    const { responses } = buildApiResponses(attributes, route, isListOfEntities);
 
-      if (isListOfEntities) {
-        _.set(acc.paths, `${routePath}.${methodVerb}.parameters`, queryParams);
-      }
+    const swaggerConfig = {
+      responses,
+      tags: [_.upperFirst(tag)],
+      parameters: [],
+      requestBody: {},
+    };
 
-      if (hasPathParams) {
-        const pathParams = getPathParams(route.path);
-        _.set(acc.paths, `${routePath}.${methodVerb}.parameters`, pathParams);
-      }
+    if (isListOfEntities) {
+      swaggerConfig.parameters.push(...queryParams);
+    }
 
-      if (methodVerb === 'post' || methodVerb === 'put') {
-        const { requestBody } = buildApiRequests(attributes, route);
+    if (hasPathParams) {
+      const pathParams = getPathParams(route.path);
+      swaggerConfig.parameters.push(...pathParams);
+    }
 
-        _.set(acc.paths, `${routePath}.${methodVerb}.requestBody`, requestBody);
-      }
+    if (['post', 'put'].includes(methodVerb)) {
+      const { requestBody } = buildApiRequests(attributes, route);
 
-      return acc;
-    },
-    { paths: {} }
-  );
+      swaggerConfig.requestBody = requestBody;
+    }
 
-  return paths;
+    _.set(acc, `${routePath}.${methodVerb}`, swaggerConfig);
+
+    return acc;
+  }, {});
+
+  return { paths };
 };
 
 /**

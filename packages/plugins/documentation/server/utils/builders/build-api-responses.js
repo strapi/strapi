@@ -12,6 +12,7 @@ const errorResponse = require('../error-response');
 const getMeta = isListOfEntities => {
   if (isListOfEntities) {
     return {
+      type: 'object',
       properties: {
         pagination: {
           properties: {
@@ -62,19 +63,43 @@ module.exports = (attributes, route, isListOfEntities = false) => {
           },
         },
       },
+      '400': {
+        description: 'Bad Request',
+        content: {
+          'application/json': {
+            schema: errorResponse,
+          },
+        },
+      },
+      '401': {
+        description: 'Unauthorized',
+        content: {
+          'application/json': {
+            schema: errorResponse,
+          },
+        },
+      },
       '403': {
         description: 'Forbidden',
         content: {
           'application/json': {
-            schema: errorResponse.Error,
+            schema: errorResponse,
           },
         },
       },
       '404': {
-        description: 'Not found',
+        description: 'Not Found',
         content: {
           'application/json': {
-            schema: errorResponse.Error,
+            schema: errorResponse,
+          },
+        },
+      },
+      '500': {
+        description: 'Internal Server Error',
+        content: {
+          'application/json': {
+            schema: errorResponse,
           },
         },
       },
