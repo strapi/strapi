@@ -467,18 +467,6 @@ const FormModal = () => {
 
       if (namesThatCanResetToNullValue.includes(name) && value === '') {
         val = null;
-      } else if (
-        type === 'radio' &&
-        (name === 'multiple' ||
-          name === 'single' ||
-          name === 'createComponent' ||
-          name === 'repeatable')
-      ) {
-        // eslint-disable-next-line no-unneeded-ternary
-        val = value === 'false' ? false : true;
-
-        // The boolean default accepts 3 different values
-        // This check has been added to allow a reset to null for the bool
       } else {
         val = value;
       }

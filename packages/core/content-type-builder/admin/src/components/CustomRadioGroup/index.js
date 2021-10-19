@@ -10,6 +10,23 @@ import { Wrapper } from './components';
 const CustomRadioGroup = ({ intlLabel, name, onChange, radios, value }) => {
   const { formatMessage } = useIntl();
 
+  const handleChange = e => {
+    let checked;
+
+    if (
+      name === 'multiple' ||
+      name === 'single' ||
+      name === 'createComponent' ||
+      name === 'repeatable'
+    ) {
+      checked = e.target.value !== 'false';
+    } else {
+      checked = e.target.value;
+    }
+
+    onChange({ target: { name, value: checked, type: 'radio' } });
+  };
+
   return (
     <Stack size={2}>
       <Text textColor="neutral800" htmlFor={name} small bold as="label">
@@ -26,7 +43,7 @@ const CustomRadioGroup = ({ intlLabel, name, onChange, radios, value }) => {
                 checked={radio.value === value}
                 value={radio.value}
                 key={radio.value}
-                onChange={onChange}
+                onChange={handleChange}
                 type="radio"
               />
               <Box className="option" padding={4}>
