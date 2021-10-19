@@ -14,7 +14,7 @@ import { TableLabel } from '@strapi/parts/Text';
 import { Table, Thead, Tr, Th, TFooter } from '@strapi/parts/Table';
 import AddIcon from '@strapi/icons/AddIcon';
 import { useIntl } from 'react-intl';
-import useListView from '../../hooks/useListView';
+import useFormModalNavigation from '../../hooks/useFormModalNavigation';
 import useDataManager from '../../hooks/useDataManager';
 import DynamicZoneList from '../DynamicZoneList';
 import ComponentList from '../ComponentList';
@@ -42,11 +42,11 @@ function List({
   const { trackUsage } = useTracking();
   const { isInDevelopmentMode, modifiedData, isInContentTypeView } = useDataManager();
 
-  const { openModalAddField } = useListView();
+  const { onOpenModalAddField } = useFormModalNavigation();
   const onClickAddField = () => {
     trackUsage('hasClickedCTBAddFieldBanner');
 
-    openModalAddField(editTarget, targetUid);
+    onOpenModalAddField({ forTarget: editTarget, targetUid });
   };
 
   if (!targetUid) {

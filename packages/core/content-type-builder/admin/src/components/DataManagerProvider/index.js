@@ -12,10 +12,11 @@ import {
   useRBACProvider,
 } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
-import { useHistory, useLocation, useRouteMatch, Redirect } from 'react-router-dom';
+import { useLocation, useRouteMatch, Redirect } from 'react-router-dom';
 import { connect, useDispatch } from 'react-redux';
 import { compose } from 'redux';
 import DataManagerContext from '../../contexts/DataManagerContext';
+import useFormModalNavigation from '../../hooks/useFormModalNavigation';
 import getTrad from '../../utils/getTrad';
 import makeUnique from '../../utils/makeUnique';
 import pluginId from '../../pluginId';
@@ -69,9 +70,8 @@ const DataManagerProvider = ({
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const { refetchPermissions } = useRBACProvider();
-
   const { pathname } = useLocation();
-  const { push } = useHistory();
+  const { onCloseModal } = useFormModalNavigation();
   const contentTypeMatch = useRouteMatch(`/plugins/${pluginId}/content-types/:uid`);
   const componentMatch = useRouteMatch(
     `/plugins/${pluginId}/component-categories/:categoryUid/:componentUid`
@@ -229,7 +229,7 @@ const DataManagerProvider = ({
         })
       );
       // Close the modal
-      push({ search: '' });
+      onCloseModal();
 
       if (userConfirm) {
         lockAppWithAutoreload();
@@ -268,7 +268,7 @@ const DataManagerProvider = ({
       );
 
       // Close the modal
-      push({ search: '' });
+      onCloseModal();
 
       if (userConfirm) {
         if (isTemporary) {
@@ -310,7 +310,7 @@ const DataManagerProvider = ({
       const requestURL = `/${pluginId}/component-categories/${categoryUid}`;
 
       // Close the modal
-      push({ search: '' });
+      onCloseModal();
 
       // Lock the app
       lockAppWithAutoreload();
@@ -543,14 +543,16 @@ const DataManagerProvider = ({
         updateSchema,
       }}
     >
-      {isLoadingForDataToBeSet ? (
-        <LoadingIndicatorPage />
-      ) : (
-        <>
-          {children}
-          {isInDevelopmentMode && <FormModal />}
-        </>
-      )}
+      <>
+        {isLoadingForDataToBeSet ? (
+          <LoadingIndicatorPage />
+        ) : (
+          <>
+            {children}
+            {isInDevelopmentMode && <FormModal />}
+          </>
+        )}
+      </>
     </DataManagerContext.Provider>
   );
 };

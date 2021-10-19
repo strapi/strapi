@@ -19,14 +19,13 @@ import has from 'lodash/has';
 import isEqual from 'lodash/isEqual';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
-import { Prompt, useHistory, useRouteMatch } from 'react-router-dom';
+import { Prompt, useRouteMatch } from 'react-router-dom';
 import List from '../../components/List';
 import ListRow from '../../components/ListRow';
-import ListViewContext from '../../contexts/ListViewContext';
 import useDataManager from '../../hooks/useDataManager';
+import useFormModalNavigation from '../../hooks/useFormModalNavigation';
 import getAttributeDisplayedType from '../../utils/getAttributeDisplayedType';
 import getTrad from '../../utils/getTrad';
-import makeSearch from '../../utils/makeSearch';
 import LinkToCMSettingsView from './LinkToCMSettingsView';
 
 /* eslint-disable indent */
@@ -41,24 +40,15 @@ const ListView = () => {
   } = useDataManager();
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
-  const { push } = useHistory();
-  // const { search } = useLocation();
-  // const [enablePrompt, togglePrompt] = useState(true);
+
   const match = useRouteMatch('/plugins/content-type-builder/:kind/:currentUID');
 
-  // useEffect(() => {
-  //   if (search === '') {
-  //     togglePrompt(true);
-  //   }
-  // }, [search]);
-
-  // Disabling the prompt on the first render if one of the modal is open
-  // useEffect(() => {
-  //   if (search !== '') {
-  //     togglePrompt(false);
-  //   }
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, []);
+  const {
+    onOpenModalAddComponentsToDZ,
+    onOpenModalAddField,
+    onOpenModalEditField,
+    onOpenModalEditSchema,
+  } = useFormModalNavigation();
 
   const firstMainDataPath = isInContentTypeView ? 'contentType' : 'component';
   const mainDataTypeAttributesPath = [firstMainDataPath, 'schema', 'attributes'];
@@ -67,60 +57,27 @@ const ListView = () => {
   const contentTypeKind = get(modifiedData, [firstMainDataPath, 'schema', 'kind'], null);
 
   const attributes = get(modifiedData, mainDataTypeAttributesPath, []);
-  // const attributesLength = attributes.length;
   const currentDataName = get(initialData, [firstMainDataPath, 'schema', 'name'], '');
   const isFromPlugin = has(initialData, [firstMainDataPath, 'plugin']);
-  // const hasModelBeenModified = !isEqual(modifiedData, initialData);
+  const hasModelBeenModified = !isEqual(modifiedData, initialData);
+
   const forTarget = isInContentTypeView ? 'contentType' : 'component';
 
-  const handleClickAddField = async (forTarget, targetUid) => {
-    // disable the prompt
-    // await wait();
-
-    const searchObj = {
-      modalType: 'chooseAttribute',
-      forTarget,
-      targetUid,
-    };
-
-    push({ search: makeSearch(searchObj) });
-  };
-
-  const handleClickAddComponentToDZ = async dzName => {
-    const search = {
-      modalType: 'addComponentToDynamicZone',
-      forTarget: 'contentType',
-      targetUid,
-      dynamicZoneTarget: dzName,
-      settingType: 'base',
-      step: '1',
-      actionType: 'edit',
-    };
-
-    // await wait();
-
-    push({ search: makeSearch(search, true) });
+  const handleClickAddComponentToDZ = dynamicZoneTarget => {
+    onOpenModalAddComponentsToDZ({ dynamicZoneTarget, targetUid });
   };
 
   const handleClickEditField = async (forTarget, targetUid, attributeName, type) => {
     const attributeType = getAttributeDisplayedType(type);
+    const step = type === 'component' ? '2' : null;
 
-    // await wait();
-
-    const search = {
-      modalType: 'attribute',
-      actionType: 'edit',
-      settingType: 'base',
+    onOpenModalEditField({
       forTarget,
       targetUid,
       attributeName,
       attributeType,
-      step: type === 'component' ? '2' : null,
-    };
-
-    // await wait();
-
-    push({ search: makeSearch(search, true) });
+      step,
+    });
   };
 
   const getDescription = () => {
@@ -134,12 +91,6 @@ const ListView = () => {
     );
   };
 
-  // FIXME
-  // const wait = async () => {
-  //   togglePrompt(false);
-
-  //   return new Promise(resolve => setTimeout(resolve, 100));
-  // };
   let label = get(modifiedData, [firstMainDataPath, 'schema', 'name'], '');
   const kind = get(modifiedData, [firstMainDataPath, 'schema', 'kind'], '');
 
@@ -152,18 +103,7 @@ const ListView = () => {
     });
   }
 
-  // const listTitle = [
-  //   formatMessage(
-  //     {
-  //       id: `${pluginId}.table.attributes.title.${attributesLength > 1 ? 'plural' : 'singular'}`,
-  //     },
-  //     { number: attributesLength }
-  //   ),
-  // ];
-
   const onEdit = () => {
-    // await wait();
-
     const contentType = kind || firstMainDataPath;
 
     if (contentType === 'collectionType') {
@@ -173,109 +113,103 @@ const ListView = () => {
       trackUsage('willEditNameOfSingleType');
     }
 
-    push({
-      search: makeSearch({
-        modalType: firstMainDataPath,
-        actionType: 'edit',
-        settingType: 'base',
-        forTarget: firstMainDataPath,
-        targetUid,
-      }),
+    onOpenModalEditSchema({
+      modalType: firstMainDataPath,
+      forTarget: firstMainDataPath,
+      targetUid,
+      kind: contentType,
     });
   };
 
   return (
-    <ListViewContext.Provider value={{ openModalAddField: handleClickAddField }}>
-      <>
-        <Prompt
-          message={formatMessage({ id: getTrad('prompt.unsaved') })}
-          // when={hasModelBeenModified && enablePrompt}
-          when={false}
-        />
-        <HeaderLayout
-          id="title"
-          primaryAction={
-            isInDevelopmentMode && (
-              <Stack horizontal size={2}>
-                {/* DON'T display the add field button when the content type has not been created */}
-                {!isCreatingFirstContentType && (
-                  <Button
-                    startIcon={<AddIcon />}
-                    variant="secondary"
-                    onClick={() => {
-                      handleClickAddField(forTarget, targetUid);
-                    }}
-                  >
-                    {formatMessage({ id: getTrad('button.attributes.add.another') })}
-                  </Button>
-                )}
+    <>
+      <Prompt
+        message={formatMessage({ id: getTrad('prompt.unsaved') })}
+        when={hasModelBeenModified}
+      />
+      <HeaderLayout
+        id="title"
+        primaryAction={
+          isInDevelopmentMode && (
+            <Stack horizontal size={2}>
+              {/* DON'T display the add field button when the content type has not been created */}
+              {!isCreatingFirstContentType && (
                 <Button
-                  startIcon={<CheckIcon />}
-                  onClick={() => submitData()}
-                  type="submit"
-                  disabled={isEqual(modifiedData, initialData)}
+                  startIcon={<AddIcon />}
+                  variant="secondary"
+                  onClick={() => {
+                    onOpenModalAddField({ forTarget, targetUid });
+                  }}
                 >
-                  {formatMessage({
-                    id: getTrad('form.button.save'),
-                    defaultMessage: 'Save',
-                  })}
+                  {formatMessage({ id: getTrad('button.attributes.add.another') })}
                 </Button>
-              </Stack>
-            )
-          }
-          secondaryAction={
-            isInDevelopmentMode &&
-            !isFromPlugin &&
-            !isCreatingFirstContentType && (
-              <Button startIcon={<EditIcon />} variant="tertiary" onClick={onEdit}>
+              )}
+              <Button
+                startIcon={<CheckIcon />}
+                onClick={() => submitData()}
+                type="submit"
+                disabled={isEqual(modifiedData, initialData)}
+              >
                 {formatMessage({
-                  id: getTrad('app.utils.edit'),
-                  defaultMessage: 'Edit',
+                  id: getTrad('form.button.save'),
+                  defaultMessage: 'Save',
                 })}
               </Button>
-            )
-          }
-          title={upperFirst(label)}
-          subtitle={getDescription()}
-          navigationAction={
-            <Link startIcon={<BackIcon />} to="/plugins/content-type-builder/">
+            </Stack>
+          )
+        }
+        secondaryAction={
+          isInDevelopmentMode &&
+          !isFromPlugin &&
+          !isCreatingFirstContentType && (
+            <Button startIcon={<EditIcon />} variant="tertiary" onClick={onEdit}>
               {formatMessage({
-                id: 'app.components.go-back',
-                defaultMessage: 'Go back',
+                id: getTrad('app.utils.edit'),
+                defaultMessage: 'Edit',
               })}
-            </Link>
-          }
-        />
-        <ContentLayout>
-          <Stack size={4}>
-            <Row justifyContent="flex-end">
-              <Stack horizontal size={2}>
-                <LinkToCMSettingsView
-                  key="link-to-cm-settings-view"
-                  targetUid={targetUid}
-                  isTemporary={isTemporary}
-                  isInContentTypeView={isInContentTypeView}
-                  contentTypeKind={contentTypeKind}
-                />
-              </Stack>
-            </Row>
-            <Box background="neutral0" shadow="filterShadow" hasRadius>
-              <List
-                items={attributes}
-                customRowComponent={props => <ListRow {...props} onClick={handleClickEditField} />}
-                addComponentToDZ={handleClickAddComponentToDZ}
+            </Button>
+          )
+        }
+        title={upperFirst(label)}
+        subtitle={getDescription()}
+        navigationAction={
+          <Link startIcon={<BackIcon />} to="/plugins/content-type-builder/">
+            {formatMessage({
+              id: 'app.components.go-back',
+              defaultMessage: 'Go back',
+            })}
+          </Link>
+        }
+      />
+      <ContentLayout>
+        <Stack size={4}>
+          <Row justifyContent="flex-end">
+            <Stack horizontal size={2}>
+              <LinkToCMSettingsView
+                key="link-to-cm-settings-view"
                 targetUid={targetUid}
-                dataType={forTarget}
-                dataTypeName={currentDataName}
-                mainTypeName={currentDataName}
-                editTarget={forTarget}
-                isMain
+                isTemporary={isTemporary}
+                isInContentTypeView={isInContentTypeView}
+                contentTypeKind={contentTypeKind}
               />
-            </Box>
-          </Stack>
-        </ContentLayout>
-      </>
-    </ListViewContext.Provider>
+            </Stack>
+          </Row>
+          <Box background="neutral0" shadow="filterShadow" hasRadius>
+            <List
+              items={attributes}
+              customRowComponent={props => <ListRow {...props} onClick={handleClickEditField} />}
+              addComponentToDZ={handleClickAddComponentToDZ}
+              targetUid={targetUid}
+              dataType={forTarget}
+              dataTypeName={currentDataName}
+              mainTypeName={currentDataName}
+              editTarget={forTarget}
+              isMain
+            />
+          </Box>
+        </Stack>
+      </ContentLayout>
+    </>
   );
 };
 

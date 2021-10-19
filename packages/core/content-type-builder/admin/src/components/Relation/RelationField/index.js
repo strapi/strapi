@@ -65,7 +65,7 @@ RelationFormBox.defaultProps = {
 
 RelationFormBox.propTypes = {
   disabled: PropTypes.bool,
-  error: PropTypes.string,
+  error: PropTypes.object,
   header: PropTypes.string,
   isMain: PropTypes.bool,
   name: PropTypes.string.isRequired,
