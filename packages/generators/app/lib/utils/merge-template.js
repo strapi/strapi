@@ -15,6 +15,8 @@ const allowedTemplateContents = {
   '.env.example': allowFile,
   'package.json': allowFile,
   src: {
+    'index.js': allowFile,
+    'bootstrap.js': allowFile,
     admin: allowChildren,
     api: allowChildren,
     components: allowChildren,
