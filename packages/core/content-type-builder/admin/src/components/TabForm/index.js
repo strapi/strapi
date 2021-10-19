@@ -38,9 +38,7 @@ const TabForm = ({ form, formErrors, genericInputProps, modifiedData, onChange }
 
             let value;
 
-            if (input.name === 'enum' && Array.isArray(retrievedValue)) {
-              value = retrievedValue.join('\n');
-            } else if (input.name === 'uid') {
+            if (input.name === 'uid') {
               value = input.value;
             } else if (input.name === 'allowedTypes' && retrievedValue === '') {
               value = null;

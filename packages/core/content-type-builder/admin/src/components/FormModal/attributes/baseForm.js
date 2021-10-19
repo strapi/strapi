@@ -147,7 +147,7 @@ const baseForm = {
           items: [
             {
               name: 'enum',
-              type: 'textarea',
+              type: 'textarea-enum',
               size: 8,
               intlLabel: {
                 id: getTrad('form.attribute.item.enumeration.rules'),
