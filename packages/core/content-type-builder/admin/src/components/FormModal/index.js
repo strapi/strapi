@@ -857,6 +857,10 @@ const FormModal = () => {
     return null;
   }
 
+  if (Object.keys(modifiedData).length === 0 && modalType !== 'chooseAttribute') {
+    return null;
+  }
+
   const formToDisplay = get(forms, [modalType, 'form'], {
     advanced: () => ({
       sections: [],
