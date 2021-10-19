@@ -229,7 +229,7 @@ describe('ADMIN | Pages | Profile page', () => {
         align-items: center;
       }
 
-      .c36 {
+      .c37 {
         position: absolute;
         left: 0;
         right: 0;
@@ -240,41 +240,41 @@ describe('ADMIN | Pages | Profile page', () => {
         border: none;
       }
 
-      .c36:focus {
+      .c37:focus {
         outline: none;
       }
 
-      .c33 {
+      .c34 {
         font-weight: 500;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #32324d;
       }
 
-      .c40 {
+      .c41 {
         font-weight: 400;
         font-size: 0.875rem;
         line-height: 1.43;
         color: #32324d;
       }
 
-      .c44 {
+      .c45 {
         font-weight: 400;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #666687;
       }
 
-      .c39 {
+      .c40 {
         padding-right: 16px;
         padding-left: 16px;
       }
 
-      .c42 {
+      .c43 {
         padding-left: 12px;
       }
 
-      .c34 {
+      .c35 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -288,7 +288,7 @@ describe('ADMIN | Pages | Profile page', () => {
         align-items: center;
       }
 
-      .c37 {
+      .c38 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -306,7 +306,7 @@ describe('ADMIN | Pages | Profile page', () => {
         align-items: center;
       }
 
-      .c32 {
+      .c33 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -316,16 +316,16 @@ describe('ADMIN | Pages | Profile page', () => {
         flex-direction: column;
       }
 
-      .c32 > * {
+      .c33 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c32 > * + * {
+      .c33 > * + * {
         margin-top: 4px;
       }
 
-      .c35 {
+      .c36 {
         position: relative;
         border: 1px solid #dcdce4;
         padding-right: 12px;
@@ -341,28 +341,28 @@ describe('ADMIN | Pages | Profile page', () => {
         transition-duration: 0.2s;
       }
 
-      .c35:focus-within {
+      .c36:focus-within {
         border: 1px solid #4945ff;
         box-shadow: #4945ff 0px 0px 0px 2px;
       }
 
-      .c41 {
+      .c42 {
         background: transparent;
         border: none;
         position: relative;
         z-index: 1;
       }
 
-      .c41 svg {
+      .c42 svg {
         height: 0.6875rem;
         width: 0.6875rem;
       }
 
-      .c41 svg path {
+      .c42 svg path {
         fill: #666687;
       }
 
-      .c43 {
+      .c44 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -371,11 +371,11 @@ describe('ADMIN | Pages | Profile page', () => {
         border: none;
       }
 
-      .c43 svg {
+      .c44 svg {
         width: 0.375rem;
       }
 
-      .c38 {
+      .c39 {
         width: 100%;
       }
 
@@ -667,12 +667,13 @@ describe('ADMIN | Pages | Profile page', () => {
         grid-column: span 6;
       }
 
-      .c31 svg {
-        height: 1rem;
-        width: 1rem;
+      .c31 {
+        color: #666687;
+        width: 16px;
+        height: 16px;
       }
 
-      .c31 svg path {
+      .c32 path {
         fill: #666687;
       }
 
@@ -991,14 +992,15 @@ describe('ADMIN | Pages | Profile page', () => {
                                   >
                                     <button
                                       aria-label="Hide password"
-                                      class="c30 c31"
+                                      class="c30"
                                       type="button"
                                     >
                                       <svg
+                                        class="c31 c32"
                                         fill="none"
-                                        height="1em"
+                                        height="16px"
                                         viewBox="0 0 24 24"
-                                        width="1em"
+                                        width="16px"
                                         xmlns="http://www.w3.org/2000/svg"
                                       >
                                         <path
@@ -1052,14 +1054,15 @@ describe('ADMIN | Pages | Profile page', () => {
                                   >
                                     <button
                                       aria-label="Hide password"
-                                      class="c30 c31"
+                                      class="c30"
                                       type="button"
                                     >
                                       <svg
+                                        class="c31 c32"
                                         fill="none"
-                                        height="1em"
+                                        height="16px"
                                         viewBox="0 0 24 24"
-                                        width="1em"
+                                        width="16px"
                                         xmlns="http://www.w3.org/2000/svg"
                                       >
                                         <path
@@ -1100,17 +1103,17 @@ describe('ADMIN | Pages | Profile page', () => {
                         >
                           <div>
                             <div
-                              class="c32"
+                              class="c33"
                             >
                               <span
-                                class="c33"
+                                class="c34"
                                 for="select-1"
                                 id="select-1-label"
                               >
                                 Interface language
                               </span>
                               <div
-                                class="c34 c35"
+                                class="c35 c36"
                               >
                                 <button
                                   aria-describedby="select-1-hint"
@@ -1118,21 +1121,21 @@ describe('ADMIN | Pages | Profile page', () => {
                                   aria-expanded="false"
                                   aria-haspopup="listbox"
                                   aria-labelledby="select-1-label select-1-content"
-                                  class="c36"
+                                  class="c37"
                                   id="select-1"
                                   type="button"
                                 />
                                 <div
-                                  class="c37 c38"
+                                  class="c38 c39"
                                 >
                                   <div
-                                    class="c34"
+                                    class="c35"
                                   >
                                     <div
-                                      class="c39"
+                                      class="c40"
                                     >
                                       <span
-                                        class="c40"
+                                        class="c41"
                                         id="select-1-content"
                                       >
                                         Select
@@ -1140,12 +1143,12 @@ describe('ADMIN | Pages | Profile page', () => {
                                     </div>
                                   </div>
                                   <div
-                                    class="c34"
+                                    class="c35"
                                   >
                                     <button
                                       aria-disabled="false"
                                       aria-label="Clear the interface language selected"
-                                      class="c41"
+                                      class="c42"
                                     >
                                       <svg
                                         fill="none"
@@ -1162,7 +1165,7 @@ describe('ADMIN | Pages | Profile page', () => {
                                     </button>
                                     <button
                                       aria-hidden="true"
-                                      class="c42 c41 c43"
+                                      class="c43 c42 c44"
                                       tabindex="-1"
                                       type="button"
                                     >
@@ -1185,7 +1188,7 @@ describe('ADMIN | Pages | Profile page', () => {
                                 </div>
                               </div>
                               <p
-                                class="c44"
+                                class="c45"
                                 id="select-1-hint"
                               >
                                 This will only display your own interface in the chosen language.

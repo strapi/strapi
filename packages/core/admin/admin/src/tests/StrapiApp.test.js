@@ -15,6 +15,14 @@ describe('ADMIN | StrapiApp', () => {
 
     expect(container.firstChild).toMatchInlineSnapshot(`
       .c0 {
+        position: fixed;
+        left: 0px;
+        right: 0px;
+        top: 46px;
+        z-index: 1100;
+      }
+
+      .c1 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -49,14 +57,6 @@ describe('ADMIN | StrapiApp', () => {
 
       .c2 > * + * {
         margin-top: 0px;
-      }
-
-      .c1 {
-        position: fixed;
-        top: 46px;
-        right: 0;
-        left: 0;
-        z-index: 1100;
       }
 
       <div

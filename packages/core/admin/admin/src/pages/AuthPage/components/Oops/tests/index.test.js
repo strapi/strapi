@@ -45,6 +45,7 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         padding-left: 56px;
         border-radius: 4px;
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+        width: 34.5rem;
       }
 
       .c16 {
@@ -357,7 +358,6 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
 
       .c12 {
         margin: 0 auto;
-        width: 552px;
       }
 
       .c14 {
@@ -428,6 +428,7 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
           >
             <div
               class="c11 c12"
+              width="34.5rem"
             >
               <div
                 class="c13 c14"
