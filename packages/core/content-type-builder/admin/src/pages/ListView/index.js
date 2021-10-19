@@ -80,17 +80,6 @@ const ListView = () => {
     });
   };
 
-  const getDescription = () => {
-    const description = get(modifiedData, [firstMainDataPath, 'schema', 'description'], null);
-
-    return (
-      description ||
-      formatMessage({
-        id: getTrad('modelPage.contentHeader.emptyDescription.description'),
-      })
-    );
-  };
-
   let label = get(modifiedData, [firstMainDataPath, 'schema', 'name'], '');
   const kind = get(modifiedData, [firstMainDataPath, 'schema', 'kind'], '');
 
@@ -171,7 +160,10 @@ const ListView = () => {
           )
         }
         title={upperFirst(label)}
-        subtitle={getDescription()}
+        subtitle={formatMessage({
+          id: getTrad('listView.headerLayout.description'),
+          defaultMessage: 'Build the data architecture of your content.',
+        })}
         navigationAction={
           <Link startIcon={<BackIcon />} to="/plugins/content-type-builder/">
             {formatMessage({
@@ -191,6 +183,7 @@ const ListView = () => {
                 isTemporary={isTemporary}
                 isInContentTypeView={isInContentTypeView}
                 contentTypeKind={contentTypeKind}
+                disabled={isCreatingFirstContentType}
               />
             </Stack>
           </Row>

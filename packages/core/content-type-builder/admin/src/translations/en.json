@@ -157,7 +157,7 @@
   "modalForm.sub-header.chooseAttribute.singleType": "Select a field for your single type",
   "modelPage.attribute.relation-polymorphic": "Relation (polymorphic)",
   "modelPage.attribute.relationWith": "Relation with",
-  "modelPage.contentHeader.emptyDescription.description": "There is no description",
+  "listView.headerLayout.description": "Build the data architecture of your content.",
   "none": "None",
   "notification.info.autoreaload-disable": "The autoReload feature is required to use this plugin. Start your server with `strapi develop`",
   "notification.info.creating.notSaved": "Please save your work before creating a new collection type or component",

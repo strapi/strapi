@@ -27,7 +27,13 @@ const cmPermissions = {
   ],
 };
 
-const LinkToCMSettingsView = ({ isTemporary, isInContentTypeView, contentTypeKind, targetUid }) => {
+const LinkToCMSettingsView = ({
+  disabled,
+  isTemporary,
+  isInContentTypeView,
+  contentTypeKind,
+  targetUid,
+}) => {
   const { formatMessage } = useIntl();
   const { push } = useHistory();
   const {
@@ -66,7 +72,7 @@ const LinkToCMSettingsView = ({ isTemporary, isInContentTypeView, contentTypeKin
         startIcon={<ConfigureIcon />}
         variant="tertiary"
         onClick={handleClick}
-        disabled={isTemporary}
+        disabled={isTemporary || disabled}
       >
         {label}
       </Button>
@@ -82,6 +88,7 @@ LinkToCMSettingsView.defaultProps = {
 };
 
 LinkToCMSettingsView.propTypes = {
+  disabled: PropTypes.bool.isRequired,
   contentTypeKind: PropTypes.string,
   isInContentTypeView: PropTypes.bool,
   isTemporary: PropTypes.bool,
