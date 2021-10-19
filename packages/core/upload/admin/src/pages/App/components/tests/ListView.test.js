@@ -567,6 +567,7 @@ describe('MediaLibrary / ListView', () => {
                   class="c9"
                 >
                   <img
+                    alt="strapi-cover_1fabc982ce.png"
                     aria-hidden="true"
                     class="c10"
                     src="http://localhost:1337/uploads/thumbnail_strapi_cover_1fabc982ce_5b43615ed5.png?width=1066&height=551"
