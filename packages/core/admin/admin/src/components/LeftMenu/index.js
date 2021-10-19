@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useIntl } from 'react-intl';
 import { NavLink as Link } from 'react-router-dom';
 import { Divider } from '@strapi/parts/Divider';
+import { Icon } from '@strapi/parts/Icon';
 import {
   MainNav,
   NavBrand,
@@ -23,20 +24,6 @@ import Logout from '@strapi/icons/Logout';
 import { auth, usePersistentState, useAppInfos } from '@strapi/helper-plugin';
 import useConfigurations from '../../hooks/useConfigurations';
 
-// TODO: remove when font-awesome will be removed
-const IconWrapper = styled.span`
-  svg.svg-inline--fa.fa-w-20 {
-    width: 1rem;
-  }
-`;
-
-const LinkUserWrapper = styled(Box)`
-  width: ${150 / 16}rem;
-  position: absolute;
-  bottom: ${({ theme }) => theme.spaces[9]};
-  left: ${({ theme }) => theme.spaces[5]};
-`;
-
 const LinkUser = styled(Link)`
   display: flex;
   justify-content: space-between;
@@ -49,12 +36,6 @@ const LinkUser = styled(Link)`
     background: ${({ theme, logout }) =>
       logout ? theme.colors.danger100 : theme.colors.primary100};
     text-decoration: none;
-  }
-
-  svg {
-    path {
-      fill: ${({ theme }) => theme.colors.danger600};
-    }
   }
 `;
 
@@ -109,11 +90,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
               <NavLink
                 to={link.to}
                 key={link.to}
-                icon={
-                  <IconWrapper>
-                    <FontAwesomeIcon icon={link.icon} />
-                  </IconWrapper>
-                }
+                icon={<Icon as={() => <FontAwesomeIcon icon={link.icon} />} width="1rem" />}
               >
                 {formatMessage(link.intlLabel)}
               </NavLink>
@@ -148,7 +125,16 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
         {userDisplayName}
       </NavUser>
       {userLinksVisible && (
-        <LinkUserWrapper onBlur={handleBlur} padding={1} shadow="tableShadow" background="neutral0">
+        <Box
+          width={`${150 / 16}rem`}
+          position="absolute"
+          bottom={9}
+          left={5}
+          onBlur={handleBlur}
+          padding={1}
+          shadow="tableShadow"
+          background="neutral0"
+        >
           <FocusTrap onEscape={handleToggleUserLinks}>
             <Stack size={0}>
               <LinkUser onClick={handleToggleUserLinks} to="/me">
@@ -166,11 +152,11 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
                     defaultMessage: 'Logout',
                   })}
                 </Text>
-                <Logout />
+                <Icon as={Logout} color="danger600" />
               </LinkUser>
             </Stack>
           </FocusTrap>
-        </LinkUserWrapper>
+        </Box>
       )}
 
       <NavCondense onClick={() => setCondensed(s => !s)}>
