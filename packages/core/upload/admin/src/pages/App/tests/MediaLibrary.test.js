@@ -98,6 +98,75 @@ describe('Media library homepage', () => {
   });
 
   describe('general actions', () => {
+    describe('filters', () => {
+      it('shows the filters dropdown when the user is allowed to read', () => {
+        renderML();
+
+        expect(screen.getByText('app.utils.filters')).toBeInTheDocument();
+      });
+
+      it('hides the filters dropdown when the user is not allowed to read', () => {
+        useRBAC.mockReturnValue({
+          isLoading: false,
+          allowedActions: {
+            canRead: false,
+            canCreate: true,
+            canUpdate: false,
+          },
+        });
+
+        renderML();
+
+        expect(screen.queryByText('app.utils.filters')).not.toBeInTheDocument();
+      });
+    });
+
+    describe('sort by', () => {
+      it('shows the sort by dropdown when the user is allowed to read', () => {
+        renderML();
+
+        expect(screen.getByText('Sort by')).toBeInTheDocument();
+      });
+
+      it('hides the sort by dropdown when the user is not allowed to read', () => {
+        useRBAC.mockReturnValue({
+          isLoading: false,
+          allowedActions: {
+            canRead: false,
+            canCreate: true,
+            canUpdate: false,
+          },
+        });
+
+        renderML();
+
+        expect(screen.queryByText('Sort by')).not.toBeInTheDocument();
+      });
+    });
+
+    describe('select all', () => {
+      it('shows the select all button when the user is allowed to update', () => {
+        renderML();
+
+        expect(screen.getByLabelText('Select all assets')).toBeInTheDocument();
+      });
+
+      it('hides the select all button when the user is not allowed to update', () => {
+        useRBAC.mockReturnValue({
+          isLoading: false,
+          allowedActions: {
+            canRead: true,
+            canCreate: true,
+            canUpdate: false,
+          },
+        });
+
+        renderML();
+
+        expect(screen.queryByLabelText('Select all assets')).not.toBeInTheDocument();
+      });
+    });
+
     describe('create asset', () => {
       it('hides the "Upload new asset" button when the user does not have the permissions to', async () => {
         useRBAC.mockReturnValue({

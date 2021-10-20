@@ -117,24 +117,26 @@ export const MediaLibrary = () => {
         <ActionLayout
           startActions={
             <>
-              <BoxWithHeight
-                paddingLeft={2}
-                paddingRight={2}
-                background="neutral0"
-                hasRadius
-                borderColor="neutral200"
-              >
-                <BaseCheckbox
-                  aria-label={formatMessage({
-                    id: getTrad('bulk.select.label'),
-                    defaultMessage: 'Select all assets',
-                  })}
-                  value={assets?.length > 0 && selected.length === assets?.length}
-                  onChange={selectAllAssets}
-                />
-              </BoxWithHeight>
-              <SortPicker />
-              <Filters />
+              {canUpdate && (
+                <BoxWithHeight
+                  paddingLeft={2}
+                  paddingRight={2}
+                  background="neutral0"
+                  hasRadius
+                  borderColor="neutral200"
+                >
+                  <BaseCheckbox
+                    aria-label={formatMessage({
+                      id: getTrad('bulk.select.label'),
+                      defaultMessage: 'Select all assets',
+                    })}
+                    value={assets?.length > 0 && selected.length === assets?.length}
+                    onChange={selectAllAssets}
+                  />
+                </BoxWithHeight>
+              )}
+              {canRead && <SortPicker />}
+              {canRead && <Filters />}
             </>
           }
           endActions={
