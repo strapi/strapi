@@ -1,6 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
+const { cloneDeep, isObject, set, isArray } = require('lodash/fp');
 const { subject: asSubject } = require('@casl/ability');
 const { permittedFieldsOf } = require('@casl/ability/extra');
 const {
@@ -36,10 +37,19 @@ module.exports = ({ ability, action, model }) => ({
 
   queryFrom(query = {}, action) {
     const permissionQuery = this.getQuery(action);
-    return {
-      ...query,
-      _where: query._where ? _.concat(permissionQuery, query._where) : [permissionQuery],
-    };
+
+    const newQuery = cloneDeep(query);
+    const { _where } = query;
+
+    if (isObject(_where) && !isArray(_where)) {
+      Object.assign(newQuery, { _where: [_where] });
+    }
+
+    if (!_where) {
+      Object.assign(newQuery, { _where: [] });
+    }
+
+    return set('_where', newQuery._where.concat(permissionQuery), newQuery);
   },
 
   sanitize(data, options = {}) {

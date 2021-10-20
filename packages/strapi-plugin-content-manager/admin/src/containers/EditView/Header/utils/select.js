@@ -1,4 +1,4 @@
-import useDataManager from '../../../../hooks/useDataManager';
+import { useContentManagerEditViewDataManager } from 'strapi-helper-plugin';
 
 function useSelect() {
   const {
@@ -12,7 +12,7 @@ function useSelect() {
     modifiedData,
     onPublish,
     onUnpublish,
-  } = useDataManager();
+  } = useContentManagerEditViewDataManager();
 
   return {
     componentLayouts: allLayoutData.components,

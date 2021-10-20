@@ -394,6 +394,7 @@ module.exports = {
           dominant: details.dominant !== true,
           plugin: association.plugin || undefined,
           filter: details.filter,
+          populate: association.populate,
         };
 
         if (infos.nature === 'manyToMany' && definition.orm === 'bookshelf') {
@@ -421,6 +422,7 @@ module.exports = {
           dominant: details.dominant !== true,
           plugin: association.plugin || undefined,
           filter: details.filter,
+          populate: association.populate,
         });
         return;
       }
@@ -473,6 +475,7 @@ module.exports = {
         nature: infos.nature,
         autoPopulate: _.get(association, 'autoPopulate', true),
         filter: association.filter,
+        populate: association.populate,
       });
     } catch (e) {
       strapi.log.error(

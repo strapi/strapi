@@ -23,6 +23,7 @@ function SelectMany({
   onRemove,
   options,
   placeholder,
+  searchToPersist,
   styles,
   targetModel,
   value,
@@ -109,6 +110,7 @@ function SelectMany({
                     onRemove(`${name}.${index}`);
                   }
                 }}
+                searchToPersist={searchToPersist}
                 targetModel={targetModel}
               />
             ))}
@@ -123,6 +125,7 @@ function SelectMany({
 SelectMany.defaultProps = {
   components: {},
   move: () => {},
+  searchToPersist: null,
   value: null,
 };
 
@@ -147,6 +150,7 @@ SelectMany.propTypes = {
   onRemove: PropTypes.func.isRequired,
   options: PropTypes.array.isRequired,
   placeholder: PropTypes.node.isRequired,
+  searchToPersist: PropTypes.string,
   styles: PropTypes.object.isRequired,
   targetModel: PropTypes.string.isRequired,
   value: PropTypes.array,

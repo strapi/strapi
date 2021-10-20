@@ -56,12 +56,12 @@ describe('CM API - Basic + draftAndPublish', () => {
 
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
-  }, 60000);
+  });
 
   afterAll(async () => {
     await strapi.destroy();
     await builder.cleanup();
-  }, 60000);
+  });
 
   test('Create a product', async () => {
     const product = {

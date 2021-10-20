@@ -1,12 +1,17 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Content Type Builder - Content types Collection Types Get collection type returns full schema and informations 1`] = `
+exports[`Content Type Builder - Content types Collection Types Get collection type returns full schema and information 1`] = `
 Object {
   "data": Object {
     "apiID": "test-collection-type",
     "schema": Object {
       "attributes": Object {
         "title": Object {
+          "pluginOptions": Object {
+            "i18n": Object {
+              "localized": true,
+            },
+          },
           "type": "string",
         },
       },
@@ -14,10 +19,15 @@ Object {
       "connection": "default",
       "description": "",
       "draftAndPublish": false,
-      "editable": true,
       "kind": "collectionType",
       "name": "Test Collection Type",
+      "pluginOptions": Object {
+        "i18n": Object {
+          "localized": true,
+        },
+      },
       "restrictRelationsTo": null,
+      "visible": true,
     },
     "uid": "application::test-collection-type.test-collection-type",
   },
@@ -38,23 +48,28 @@ Object {
       "connection": "default",
       "description": "",
       "draftAndPublish": true,
-      "editable": true,
       "kind": "collectionType",
       "name": "CT with DP",
       "restrictRelationsTo": null,
+      "visible": true,
     },
     "uid": "application::ct-with-dp.ct-with-dp",
   },
 }
 `;
 
-exports[`Content Type Builder - Content types Single Types Get single type returns full schema and informations 1`] = `
+exports[`Content Type Builder - Content types Single Types Get single type returns full schema and information 1`] = `
 Object {
   "data": Object {
     "apiID": "test-single-type",
     "schema": Object {
       "attributes": Object {
         "title": Object {
+          "pluginOptions": Object {
+            "i18n": Object {
+              "localized": true,
+            },
+          },
           "type": "string",
         },
       },
@@ -62,10 +77,15 @@ Object {
       "connection": "default",
       "description": "",
       "draftAndPublish": false,
-      "editable": true,
       "kind": "singleType",
       "name": "Test Single Type",
+      "pluginOptions": Object {
+        "i18n": Object {
+          "localized": true,
+        },
+      },
       "restrictRelationsTo": null,
+      "visible": true,
     },
     "uid": "application::test-single-type.test-single-type",
   },

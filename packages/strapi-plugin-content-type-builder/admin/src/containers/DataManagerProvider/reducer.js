@@ -2,6 +2,7 @@ import { fromJS, OrderedMap } from 'immutable';
 import { get, has } from 'lodash';
 import makeUnique from '../../utils/makeUnique';
 import retrieveComponentsFromSchema from './utils/retrieveComponentsFromSchema';
+import * as actions from './constants';
 
 const initialState = fromJS({
   components: {},
@@ -65,9 +66,9 @@ const addComponentsToState = (state, componentToAddUid, objToUpdate) => {
   return newObj;
 };
 
-const reducer = (state, action) => {
+const reducer = (state = initialState, action) => {
   switch (action.type) {
-    case 'ADD_ATTRIBUTE': {
+    case actions.ADD_ATTRIBUTE: {
       const {
         attributeToSet: { name, ...rest },
         forTarget,
@@ -124,7 +125,7 @@ const reducer = (state, action) => {
           return existingCompos;
         });
     }
-    case 'ADD_CREATED_COMPONENT_TO_DYNAMIC_ZONE': {
+    case actions.ADD_CREATED_COMPONENT_TO_DYNAMIC_ZONE: {
       const { dynamicZoneTarget, componentsToAdd } = action;
 
       return state.updateIn(
@@ -134,12 +135,12 @@ const reducer = (state, action) => {
         }
       );
     }
-    case 'CANCEL_CHANGES': {
+    case actions.CANCEL_CHANGES: {
       return state
         .update('modifiedData', () => state.get('initialData'))
         .update('components', () => state.get('initialComponents'));
     }
-    case 'CHANGE_DYNAMIC_ZONE_COMPONENTS': {
+    case actions.CHANGE_DYNAMIC_ZONE_COMPONENTS: {
       const { dynamicZoneTarget, newComponents } = action;
 
       return state
@@ -158,7 +159,7 @@ const reducer = (state, action) => {
         });
     }
 
-    case 'CREATE_SCHEMA': {
+    case actions.CREATE_SCHEMA: {
       const newSchema = {
         uid: action.uid,
         isTemporary: true,
@@ -170,7 +171,7 @@ const reducer = (state, action) => {
 
       return state.updateIn(['contentTypes', action.uid], () => fromJS(newSchema));
     }
-    case 'CREATE_COMPONENT_SCHEMA': {
+    case actions.CREATE_COMPONENT_SCHEMA: {
       const newSchema = {
         uid: action.uid,
         isTemporary: true,
@@ -189,13 +190,13 @@ const reducer = (state, action) => {
 
       return state.updateIn(['components', action.uid], () => fromJS(newSchema));
     }
-    case 'DELETE_NOT_SAVED_TYPE': {
+    case actions.DELETE_NOT_SAVED_TYPE: {
       // Doing so will also reset the modified and the initial data
       return state
         .update('contentTypes', () => state.get('initialContentTypes'))
         .update('components', () => state.get('initialComponents'));
     }
-    case 'EDIT_ATTRIBUTE': {
+    case actions.EDIT_ATTRIBUTE: {
       const {
         attributeToSet: { name, ...rest },
         forTarget,
@@ -334,7 +335,7 @@ const reducer = (state, action) => {
       });
     }
 
-    case 'GET_DATA_SUCCEEDED': {
+    case actions.GET_DATA_SUCCEEDED: {
       return state
         .update('components', () => fromJS(action.components))
         .update('initialComponents', () => fromJS(action.components))
@@ -344,9 +345,9 @@ const reducer = (state, action) => {
 
         .update('isLoading', () => false);
     }
-    case 'RELOAD_PLUGIN':
+    case actions.RELOAD_PLUGIN:
       return initialState;
-    case 'REMOVE_FIELD_FROM_DISPLAYED_COMPONENT': {
+    case actions.REMOVE_FIELD_FROM_DISPLAYED_COMPONENT: {
       const { attributeToRemoveName, componentUid } = action;
 
       return state.removeIn([
@@ -358,7 +359,7 @@ const reducer = (state, action) => {
         attributeToRemoveName,
       ]);
     }
-    case 'REMOVE_COMPONENT_FROM_DYNAMIC_ZONE':
+    case actions.REMOVE_COMPONENT_FROM_DYNAMIC_ZONE:
       return state.removeIn([
         'modifiedData',
         'contentType',
@@ -368,7 +369,7 @@ const reducer = (state, action) => {
         'components',
         action.componentToRemoveIndex,
       ]);
-    case 'REMOVE_FIELD': {
+    case actions.REMOVE_FIELD: {
       const { mainDataKey, attributeToRemoveName } = action;
       const pathToAttributes = ['modifiedData', mainDataKey, 'schema', 'attributes'];
       const pathToAttributeToRemove = [...pathToAttributes, attributeToRemoveName];
@@ -403,7 +404,7 @@ const reducer = (state, action) => {
         }, attributes);
       });
     }
-    case 'SET_MODIFIED_DATA': {
+    case actions.SET_MODIFIED_DATA: {
       let newState = state
         .update('isLoadingForDataToBeSet', () => false)
         .update('initialData', () => fromJS(action.schemaToSet))
@@ -419,7 +420,7 @@ const reducer = (state, action) => {
 
       return newState;
     }
-    case 'UPDATE_SCHEMA': {
+    case actions.UPDATE_SCHEMA: {
       const {
         data: { name, collectionName, category, icon, kind },
         schemaType,

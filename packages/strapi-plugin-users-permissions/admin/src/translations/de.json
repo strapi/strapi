@@ -29,7 +29,7 @@
   "Plugins.header.title": "Berechtigungen",
   "Policies.InputSelect.empty": "Keine",
   "Policies.InputSelect.label": "Diese Aktion folgenden erlauben:",
-  "Policies.header.hint": "Wähle eine Aktion aus und klicke auf das Zahnrad, um den an diese Aktion gebundenen Pfand anzuzeigen",
+  "Policies.header.hint": "Wähle eine Aktion aus und klicke auf das Zahnrad, um den an diese Aktion gebundenen Pfad anzuzeigen",
   "Policies.header.title": "Fortgeschrittene Einstellungen",
   "PopUpForm.Email.email_templates.inputDescription": "{link} für mehr Informationen",
   "PopUpForm.Email.link.documentation": "Lies die Dokumentation",

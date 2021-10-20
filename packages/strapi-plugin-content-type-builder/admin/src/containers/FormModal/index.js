@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState, useMemo } from 'react';
 import {
   HeaderModal,
   HeaderModalTitle,
@@ -10,19 +10,21 @@ import {
   getYupInnerErrors,
   useGlobalContext,
   useQuery,
+  useStrapi,
   InputsIndex,
 } from 'strapi-helper-plugin';
 import { Button, Text, Padded } from '@buffetjs/core';
 import { Inputs } from '@buffetjs/custom';
-
 import { useHistory, useLocation } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 import { get, has, isEmpty, set, toLower, toString, upperFirst } from 'lodash';
+import { useSelector, useDispatch, shallowEqual } from 'react-redux';
 import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
 import AttributeOption from '../../components/AttributeOption';
 import BooleanBox from '../../components/BooleanBox';
 import ComponentIconPicker from '../../components/ComponentIconPicker';
+import CheckboxWithDescription from '../../components/CheckboxWithDescription';
 import CustomCheckbox from '../../components/CustomCheckbox';
 import ModalHeader from '../../components/ModalHeader';
 import HeaderModalNavContainer from '../../components/HeaderModalNavContainer';
@@ -31,18 +33,32 @@ import HeaderNavLink from '../../components/HeaderNavLink';
 import WrapperSelect from '../../components/WrapperSelect';
 import getTrad from '../../utils/getTrad';
 import makeSearch from '../../utils/makeSearch';
-import getAttributes from './utils/attributes';
-import forms from './utils/forms';
-import createHeadersArray from './utils/createHeadersArray';
-import createHeadersObjectFromArray from './utils/createHeadersObjectFromArray';
+import {
+  canEditContentType,
+  createHeadersArray,
+  createHeadersObjectFromArray,
+  getAttributesToDisplay,
+  getModalTitleSubHeader,
+  getNextSearch,
+} from './utils';
+import forms from './forms';
 import { createComponentUid, createUid } from './utils/createUid';
-import getModalTitleSubHeader from './utils/getModalTitleSubHeader';
-import getNextSearch from './utils/getNextSearch';
 import { NAVLINKS, INITIAL_STATE_DATA } from './utils/staticData';
-import init from './init';
-import reducer, { initialState } from './reducer';
 import CustomButton from './CustomButton';
-import canEditContentType from './utils/canEditContentType';
+import makeSelectFormModal from './selectors';
+import {
+  SET_DATA_TO_EDIT,
+  SET_DYNAMIC_ZONE_DATA_SCHEMA,
+  SET_ATTRIBUTE_DATA_SCHEMA,
+  ADD_COMPONENTS_TO_DYNAMIC_ZONE,
+  ON_CHANGE_ALLOWED_TYPE,
+  SET_ERRORS,
+  ON_CHANGE,
+  RESET_PROPS_AND_SET_THE_FORM_FOR_ADDING_A_COMPO_TO_A_DZ,
+  RESET_PROPS_AND_SET_FORM_FOR_ADDING_AN_EXISTING_COMPO,
+  RESET_PROPS_AND_SAVE_CURRENT_DATA,
+  RESET_PROPS,
+} from './constants';
 
 /* eslint-disable indent */
 /* eslint-disable react/no-array-index-key */
@@ -50,10 +66,19 @@ import canEditContentType from './utils/canEditContentType';
 const FormModal = () => {
   const [state, setState] = useState(INITIAL_STATE_DATA);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [reducerState, dispatch] = useReducer(reducer, initialState, init);
+  const formModalSelector = useMemo(makeSelectFormModal, []);
+  const dispatch = useDispatch();
+  const reducerState = useSelector(state => formModalSelector(state), shallowEqual);
   const { push } = useHistory();
   const { search } = useLocation();
   const { emitEvent, formatMessage } = useGlobalContext();
+  const {
+    strapi: { getPlugin },
+  } = useStrapi();
+  const ctbPlugin = getPlugin(pluginId);
+  const ctbFormsAPI = ctbPlugin.apis.forms;
+  const inputsFromPlugins = ctbFormsAPI.components.inputs;
+
   const query = useQuery();
   const attributeOptionRef = useRef();
 
@@ -76,6 +101,7 @@ const FormModal = () => {
     updateSchema,
     reservedNames,
   } = useDataManager();
+
   const {
     componentToCreate,
     formErrors,
@@ -205,7 +231,9 @@ const FormModal = () => {
       // Edit category
       if (modalType === 'editCategory' && actionType === 'edit') {
         dispatch({
-          type: 'SET_DATA_TO_EDIT',
+          type: SET_DATA_TO_EDIT,
+          modalType,
+          actionType,
           data: {
             name: query.get('categoryName'),
           },
@@ -219,10 +247,13 @@ const FormModal = () => {
         actionType === 'create'
       ) {
         dispatch({
-          type: 'SET_DATA_TO_EDIT',
+          type: SET_DATA_TO_EDIT,
+          modalType,
+          actionType,
           data: {
             draftAndPublish: true,
           },
+          pluginOptions: {},
         });
       }
 
@@ -232,22 +263,26 @@ const FormModal = () => {
         state.modalType !== 'contentType' &&
         actionType === 'edit'
       ) {
-        const { name, collectionName, draftAndPublish, kind } = get(
+        const { name, collectionName, draftAndPublish, kind, pluginOptions } = get(
           allDataSchema,
           [...pathToSchema, 'schema'],
           {
             name: null,
             collectionName: null,
+            pluginOptions: {},
           }
         );
 
         dispatch({
-          type: 'SET_DATA_TO_EDIT',
+          type: SET_DATA_TO_EDIT,
+          actionType,
+          modalType,
           data: {
             name,
             collectionName,
             draftAndPublish,
             kind,
+            pluginOptions,
           },
         });
       }
@@ -257,7 +292,9 @@ const FormModal = () => {
         const data = get(allDataSchema, pathToSchema, {});
 
         dispatch({
-          type: 'SET_DATA_TO_EDIT',
+          type: SET_DATA_TO_EDIT,
+          actionType,
+          modalType,
           data: {
             name: data.schema.name,
             category: data.category,
@@ -289,7 +326,7 @@ const FormModal = () => {
         };
 
         dispatch({
-          type: 'SET_DYNAMIC_ZONE_DATA_SCHEMA',
+          type: SET_DYNAMIC_ZONE_DATA_SCHEMA,
           attributeToEdit,
         });
       }
@@ -324,13 +361,14 @@ const FormModal = () => {
         }
 
         dispatch({
-          type: 'SET_ATTRIBUTE_DATA_SCHEMA',
+          type: SET_ATTRIBUTE_DATA_SCHEMA,
           attributeType,
           nameToSetForRelation: get(collectionTypesForRelation, ['0', 'title'], 'error'),
           targetUid: get(collectionTypesForRelation, ['0', 'uid'], 'error'),
           isEditing: actionType === 'edit',
           modifiedDataToSetForEditing: attributeToEdit,
           step,
+          forTarget,
         });
       }
     }
@@ -340,6 +378,7 @@ const FormModal = () => {
   const form = get(forms, [state.modalType, 'form', state.settingType], () => ({
     items: [],
   }));
+
   const headers = createHeadersArray(state);
 
   const isCreatingContentType = state.modalType === 'contentType';
@@ -371,7 +410,8 @@ const FormModal = () => {
         state.actionType === 'edit',
         // currentUID
         get(allDataSchema, [...state.pathToSchema, 'uid'], null),
-        reservedNames
+        reservedNames,
+        ctbFormsAPI
       );
 
       // Check form validity for component
@@ -382,7 +422,8 @@ const FormModal = () => {
         modifiedData.category || '',
         reservedNames,
         state.actionType === 'edit',
-        get(allDataSchema, [...state.pathToSchema, 'uid'], null)
+        get(allDataSchema, [...state.pathToSchema, 'uid'], null),
+        ctbFormsAPI
       );
 
       // Check for validity for creating a component
@@ -393,7 +434,8 @@ const FormModal = () => {
       schema = forms.component.schema(
         Object.keys(components),
         get(modifiedData, 'componentToCreate.category', ''),
-        reservedNames
+        reservedNames,
+        ctbFormsAPI
       );
 
       // Check form validity for creating a 'common attribute'
@@ -426,18 +468,16 @@ const FormModal = () => {
           }
         );
       }
-      schema = forms[state.modalType].schema(
+      schema = forms.attribute.schema(
         get(allDataSchema, state.pathToSchema, {}),
         type,
-        modifiedData,
-        state.actionType === 'edit',
-        state.attributeName,
-        initialData,
+        reservedNames,
         alreadyTakenTargetContentTypeAttributes,
-        reservedNames
+        { modifiedData, initialData },
+        ctbFormsAPI
       );
     } else if (isEditingCategory) {
-      schema = forms.editCategory.schema(allComponentsCategories, initialData);
+      schema = forms.editCategory.schema(allComponentsCategories, initialData, ctbFormsAPI);
     } else {
       // The user is either in the addComponentToDynamicZone modal or
       // in step 1 of the add component (modalType=attribute&attributeType=component) but not creating a component
@@ -447,7 +487,8 @@ const FormModal = () => {
         schema = forms.component.schema(
           Object.keys(components),
           get(modifiedData, 'componentToCreate.category', ''),
-          reservedNames
+          reservedNames,
+          ctbFormsAPI
         );
       } else {
         // The form is valid
@@ -521,7 +562,7 @@ const FormModal = () => {
     target: { name, components, shouldAddComponents },
   }) => {
     dispatch({
-      type: 'ADD_COMPONENTS_TO_DYNAMIC_ZONE',
+      type: ADD_COMPONENTS_TO_DYNAMIC_ZONE,
       name,
       components,
       shouldAddComponents,
@@ -530,7 +571,7 @@ const FormModal = () => {
 
   const handleChangeMediaAllowedTypes = ({ target: { name, value } }) => {
     dispatch({
-      type: 'ON_CHANGE_ALLOWED_TYPE',
+      type: ON_CHANGE_ALLOWED_TYPE,
       name,
       value,
     });
@@ -605,29 +646,29 @@ const FormModal = () => {
       delete clonedErrors[name];
 
       dispatch({
-        type: 'SET_ERRORS',
+        type: SET_ERRORS,
         errors: clonedErrors,
       });
 
       dispatch({
-        type: 'ON_CHANGE',
+        type: ON_CHANGE,
         keys: name.split('.'),
         value: val,
         ...rest,
       });
     },
-    [formErrors, state.actionType, toggleConfirmModal]
+    [dispatch, formErrors, state.actionType, toggleConfirmModal]
   );
 
   const handleConfirmDisableDraftAndPublish = useCallback(() => {
     dispatch({
-      type: 'ON_CHANGE',
+      type: ON_CHANGE,
       keys: ['draftAndPublish'],
       value: false,
     });
 
     toggleConfirmModal();
-  }, [toggleConfirmModal]);
+  }, [dispatch, toggleConfirmModal]);
 
   const handleSubmit = async (e, shouldContinue = isCreating) => {
     e.preventDefault();
@@ -772,7 +813,7 @@ const FormModal = () => {
           if (isDynamicZoneAttribute) {
             // Step 1 of adding a component to a DZ, the user has the option to create a component
             dispatch({
-              type: 'RESET_PROPS_AND_SET_THE_FORM_FOR_ADDING_A_COMPO_TO_A_DZ',
+              type: RESET_PROPS_AND_SET_THE_FORM_FOR_ADDING_A_COMPO_TO_A_DZ,
             });
 
             push({ search: isCreating ? nextSearch : '' });
@@ -811,7 +852,8 @@ const FormModal = () => {
           // The first step is either needed to create a component or just to navigate
           // To the modal for adding a "common field"
           dispatch({
-            type: 'RESET_PROPS_AND_SET_FORM_FOR_ADDING_AN_EXISTING_COMPO',
+            type: RESET_PROPS_AND_SET_FORM_FOR_ADDING_AN_EXISTING_COMPO,
+            forTarget: state.forTarget,
           });
 
           // We don't want all the props to be reset
@@ -879,7 +921,8 @@ const FormModal = () => {
           // Here we clear the reducer state but we also keep the created component
           // If we were to create the component before
           dispatch({
-            type: 'RESET_PROPS_AND_SAVE_CURRENT_DATA',
+            type: RESET_PROPS_AND_SAVE_CURRENT_DATA,
+            forTarget: state.forTarget,
           });
 
           // Terminate because we don't want the reducer to be entirely reset
@@ -910,7 +953,7 @@ const FormModal = () => {
         // Add the field to the schema
         addAttribute(modifiedData, state.forTarget, state.targetUid, false);
 
-        dispatch({ type: 'RESET_PROPS' });
+        dispatch({ type: RESET_PROPS });
 
         // Open modal attribute for adding attr to component
 
@@ -997,13 +1040,14 @@ const FormModal = () => {
       }
 
       dispatch({
-        type: 'RESET_PROPS',
+        type: RESET_PROPS,
       });
     } catch (err) {
       const errors = getYupInnerErrors(err);
+      console.log({ err, errors });
 
       dispatch({
-        type: 'SET_ERRORS',
+        type: SET_ERRORS,
         errors,
       });
     }
@@ -1015,7 +1059,7 @@ const FormModal = () => {
   const onClosed = () => {
     setState(INITIAL_STATE_DATA);
     dispatch({
-      type: 'RESET_PROPS',
+      type: RESET_PROPS,
     });
   };
   const onOpened = () => {
@@ -1060,7 +1104,7 @@ const FormModal = () => {
   };
 
   // Display data for the attributes picker modal
-  const displayedAttributes = getAttributes(
+  const displayedAttributes = getAttributesToDisplay(
     state.forTarget,
     state.targetUid,
     // We need the nested components so we know when to remove the component option
@@ -1170,13 +1214,16 @@ const FormModal = () => {
                         </div>
                       );
                     })
-                  : form(
-                      modifiedData,
-                      state.attributeType,
-                      state.step,
-                      state.actionType,
-                      attributes
-                    ).items.map((row, index) => {
+                  : form({
+                      data: modifiedData,
+                      type: state.attributeType,
+                      step: state.step,
+                      actionType: state.actionType,
+                      attributes,
+                      extensions: ctbFormsAPI,
+                      forTarget: state.forTarget,
+                      contentTypeSchema: allDataSchema.contentType || {},
+                    }).items.map((row, index) => {
                       return (
                         <div className="row" key={index}>
                           {row.map((input, i) => {
@@ -1240,22 +1287,35 @@ const FormModal = () => {
                               );
                             }
 
-                            // Retrieve the error for a specific input
-                            const errorId = get(
-                              formErrors,
-                              [
-                                ...input.name
-                                  .split('.')
-                                  // The filter here is used when creating a component
-                                  // in the component step 1 modal
-                                  // Since the component info is stored in the
-                                  // componentToCreate object we can access the error
-                                  // By removing the key
-                                  .filter(key => key !== 'componentToCreate'),
-                                'id',
-                              ],
-                              null
+                            // When extending the yup schema of an existing field (like in https://github.com/strapi/strapi/blob/293ff3b8f9559236609d123a2774e3be05ce8274/packages/strapi-plugin-i18n/admin/src/index.js#L52)
+                            // and triggering a yup validation error in the UI (missing a required field for example)
+                            // We got an object that looks like: formErrors = { "pluginOptions.i18n.localized": {...} }
+                            // In order to deal with this error, we can't rely on lodash.get to resolve this key
+                            // - lodash will try to access {pluginOptions: {i18n: {localized: true}}})
+                            // - and we just want to access { "pluginOptions.i18n.localized": {...} }
+                            // NOTE: this is a hack
+                            const pluginOptionError = Object.keys(formErrors).find(
+                              key => key === input.name
                             );
+
+                            // Retrieve the error for a specific input
+                            const errorId = pluginOptionError
+                              ? formErrors[pluginOptionError].id
+                              : get(
+                                  formErrors,
+                                  [
+                                    ...input.name
+                                      .split('.')
+                                      // The filter here is used when creating a component
+                                      // in the component step 1 modal
+                                      // Since the component info is stored in the
+                                      // componentToCreate object we can access the error
+                                      // By removing the key
+                                      .filter(key => key !== 'componentToCreate'),
+                                    'id',
+                                  ],
+                                  null
+                                );
 
                             const retrievedValue = get(modifiedData, input.name, '');
 
@@ -1275,6 +1335,8 @@ const FormModal = () => {
                               value = input.value;
                             } else if (input.name === 'allowedTypes' && retrievedValue === '') {
                               value = null;
+                            } else if (input.type === 'checkbox' && !retrievedValue) {
+                              value = false;
                             } else {
                               value = retrievedValue;
                             }
@@ -1303,11 +1365,13 @@ const FormModal = () => {
                                   changeMediaAllowedTypes={handleChangeMediaAllowedTypes}
                                   customInputs={{
                                     allowedTypesSelect: WrapperSelect,
+                                    checkbox: CheckboxWithDescription,
                                     componentIconPicker: ComponentIconPicker,
                                     componentSelect: WrapperSelect,
                                     creatableSelect: WrapperSelect,
                                     customCheckboxWithChildren: CustomCheckbox,
                                     booleanBox: BooleanBox,
+                                    ...inputsFromPlugins,
                                   }}
                                   isCreating={isCreating}
                                   // Props for the componentSelect

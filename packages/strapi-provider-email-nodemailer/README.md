@@ -105,6 +105,7 @@ module.exports = ({ env }) => ({
 ```
 
 ## Usage
+> :warning: The Shipper Email (or defaultfrom) may also need to be changed in the `Email Templates` tab on the admin panel for emails to send properly
 
 To send an email from anywhere inside Strapi:
 

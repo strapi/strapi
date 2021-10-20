@@ -63,7 +63,7 @@ const connect = (provider, query) => {
           return resolve([
             null,
             [{ messages: [{ id: 'Auth.advanced.allow_register' }] }],
-            'Register action is actualy not available.',
+            'Register action is actually not available.',
           ]);
         }
 
@@ -524,6 +524,55 @@ const getProfile = async (provider, query, callback) => {
               body.username || body.nickname || body.name || body.email.split('@')[0];
             const email = body.email || `${username.replace(/\s+/g, '.')}@strapi.io`;
 
+            callback(null, {
+              username,
+              email,
+            });
+          }
+        });
+      break;
+    }
+    case 'cas': {
+      const provider_url = 'https://' + _.get(grant['cas'], 'subdomain');
+      const cas = purest({
+        provider: 'cas',
+        config: {
+          cas: {
+            [provider_url]: {
+              __domain: {
+                auth: {
+                  auth: { bearer: '[0]' },
+                },
+              },
+              '{endpoint}': {
+                __path: {
+                  alias: '__default',
+                },
+              },
+            },
+          },
+        },
+      });
+      cas
+        .query()
+        .get('oidc/profile')
+        .auth(access_token)
+        .request((err, res, body) => {
+          if (err) {
+            callback(err);
+          } else {
+            // CAS attribute may be in body.attributes or "FLAT", depending on CAS config
+            const username = body.attributes
+              ? body.attributes.strapiusername || body.id || body.sub
+              : body.strapiusername || body.id || body.sub;
+            const email = body.attributes
+              ? body.attributes.strapiemail || body.attributes.email
+              : body.strapiemail || body.email;
+            if (!username || !email) {
+              strapi.log.warn(
+                'CAS Response Body did not contain required attributes: ' + JSON.stringify(body)
+              );
+            }
             callback(null, {
               username,
               email,

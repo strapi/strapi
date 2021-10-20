@@ -61,7 +61,7 @@ const formatMainDataType = (data, isComponent = false) => {
 
   delete formattedContentType.uid;
   delete formattedContentType.isTemporary;
-  delete formattedContentType.editable;
+  delete formattedContentType.visible;
   delete formattedContentType.restrictRelationsTo;
 
   return formattedContentType;
@@ -145,7 +145,7 @@ const sortContentType = types =>
   sortBy(
     Object.keys(types)
       .map(uid => ({
-        editable: types[uid].schema.editable,
+        visible: types[uid].schema.visible,
         name: uid,
         title: types[uid].schema.name,
         plugin: types[uid].plugin || null,

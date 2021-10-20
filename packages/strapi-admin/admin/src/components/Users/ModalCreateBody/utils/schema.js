@@ -8,7 +8,10 @@ const schema = yup.object().shape({
     .string()
     .email(translatedErrors.email)
     .required(translatedErrors.required),
-  roles: yup.array().required(translatedErrors.required),
+  roles: yup
+    .array()
+    .min(1, translatedErrors.min)
+    .required(translatedErrors.required),
 });
 
 export default schema;

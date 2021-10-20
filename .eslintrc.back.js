@@ -32,5 +32,6 @@ module.exports = {
     'node/no-path-concat': 'error',
     'node/no-callback-literal': 'error',
     'node/handle-callback-err': 'error',
+    'one-var': ['error', 'never'],
   },
 };

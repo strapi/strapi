@@ -2,7 +2,6 @@ import styled from 'styled-components';
 
 const Wrapper = styled.div`
   position: relative;
-  min-width: 19rem;
   -webkit-font-smoothing: antialiased;
   > div {
     height: 6rem;
@@ -14,6 +13,7 @@ const Wrapper = styled.div`
       position: relative;
       z-index: 9;
       width: 100%;
+      padding-left: 20px;
       padding-right: 20px;
       background: white;
       border: none;
@@ -65,7 +65,7 @@ const Wrapper = styled.div`
     z-index: 8;
     top: -3px !important;
     left: auto !important;
-    min-width: 100% !important;
+    min-width: 190px;
     margin: 0 !important;
     padding: 0;
     line-height: 1.8rem;

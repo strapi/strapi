@@ -1,146 +1,171 @@
-/* eslint-disable indent */
-/* eslint-disable consistent-return */
-import produce, { current } from 'immer';
-import { get, set } from 'lodash';
+import produce from 'immer';
+import { cloneDeep, has, isObject, get, set } from 'lodash';
+import updateConditionsToFalse from './utils/updateConditionsToFalse';
+import updateValues from './utils/updateValues';
 
-import {
-  getRecursivePermissionsBySubject,
-  isAttributeAction,
-  STATIC_ATTRIBUTE_ACTIONS,
-} from './utils';
-
-export const initialState = {
-  collapsePath: [],
-  permissionsLayout: {},
-  contentTypesPermissions: {},
-  pluginsAndSettingsPermissions: [],
+const initialState = {
   initialData: {},
-  isSuperAdmin: false,
+  modifiedData: {},
+  layouts: {},
 };
 
-// This is the community edition RBAC reducer
+/* eslint-disable consistent-return */
 const reducer = (state, action) =>
   produce(state, draftState => {
     switch (action.type) {
-      case 'COLLAPSE_PATH': {
-        const { index, value } = action;
+      // This action is called when a checkbox in the <GlobalActions />
+      // changes
+      case 'ON_CHANGE_COLLECTION_TYPE_GLOBAL_ACTION_CHECKBOX': {
+        const { collectionTypeKind, actionId, value } = action;
+        const pathToData = ['modifiedData', collectionTypeKind];
 
-        if (state.collapsePath[index] === value) {
-          draftState.collapsePath = state.collapsePath.slice().splice(0, index);
-        } else {
-          draftState.collapsePath = [...state.collapsePath.slice().splice(0, index), value];
-        }
-        break;
-      }
-      // This reducer action is used to enable/disable a single attribute action
-      case 'ALL_ATTRIBUTE_ACTIONS_SELECT': {
-        const { subject, attribute, shouldEnable } = action;
-        const attributePath = [
-          'contentTypesPermissions',
-          subject,
-          'attributes',
-          attribute.attributeName,
-          'actions',
-        ];
-        const contentTypeActionPath = ['contentTypesPermissions', subject, 'contentTypeActions'];
-
-        if (shouldEnable) {
-          const shouldSetContentTypeActions =
-            Object.values(get(state, contentTypeActionPath, {})).filter(Boolean).length === 0;
-          const contentTypeActionToSet = get(
-            state.permissionsLayout,
-            ['sections', 'contentTypes'],
-            []
-          )
-            .filter(
-              ({ subjects, action }) => subjects.includes(subject) && !isAttributeAction(action)
-            )
-            .map(contentTypeAction => contentTypeAction.action);
-
-          if (shouldSetContentTypeActions) {
-            contentTypeActionToSet.forEach(action => {
-              set(draftState, [...contentTypeActionPath, action], true);
-            });
-          }
-          set(draftState, attributePath, STATIC_ATTRIBUTE_ACTIONS);
-        } else {
-          set(draftState, attributePath, []);
-          const permissionsCount = getRecursivePermissionsBySubject(
-            subject,
-            current(draftState).contentTypesPermissions
+        Object.keys(get(state, pathToData)).forEach(collectionType => {
+          const collectionTypeActionData = get(
+            state,
+            [...pathToData, collectionType, actionId],
+            undefined
           );
 
-          if (permissionsCount === 0) {
-            set(draftState, ['contentTypesPermissions', subject, 'contentTypeActions'], {});
+          if (collectionTypeActionData) {
+            let updatedValues = updateValues(collectionTypeActionData, value);
+
+            // We need to remove the applied conditions
+            if (!value && updatedValues.conditions) {
+              const updatedConditions = updateValues(updatedValues.conditions, false);
+
+              updatedValues = { ...updatedValues, conditions: updatedConditions };
+            }
+
+            set(draftState, [...pathToData, collectionType, actionId], updatedValues);
           }
-        }
+        });
 
         break;
       }
-      // This reducer action is used to enable/disable all
-      // content type attributes actions recursively
-      case 'ALL_CONTENT_TYPE_PERMISSIONS_SELECT': {
-        const { subject, attributes, shouldEnable, shouldSetAllContentTypes } = action;
-        const contentTypeActionPath = ['contentTypesPermissions', subject, 'contentTypeActions'];
-        const shouldSetContentTypeActions =
-          Object.values(get(state, contentTypeActionPath, {})).filter(Boolean).length === 0;
+      case 'ON_CHANGE_COLLECTION_TYPE_ROW_LEFT_CHECKBOX': {
+        const { pathToCollectionType, propertyName, rowName, value } = action;
+        let nextModifiedDataState = cloneDeep(state.modifiedData);
+        const pathToModifiedDataCollectionType = pathToCollectionType.split('..');
 
-        const staticActionsName = get(state.permissionsLayout, ['sections', 'contentTypes'], [])
-          .filter(
-            ({ subjects, action }) => subjects.includes(subject) && !isAttributeAction(action)
-          )
-          .map(contentTypeAction => contentTypeAction.action);
+        const objToUpdate = get(nextModifiedDataState, pathToModifiedDataCollectionType, {});
 
-        attributes.forEach(attribute => {
+        Object.keys(objToUpdate).forEach(actionId => {
+          // When a ct has multiple properties (ex: locales, field)
+          // We need to make sure that we add any new property to the modifiedData
+          // object.
+          if (has(objToUpdate[actionId], `properties.${propertyName}`)) {
+            const objValue = get(objToUpdate, [actionId, 'properties', propertyName, rowName]);
+            const pathToDataToSet = [
+              ...pathToModifiedDataCollectionType,
+              actionId,
+              'properties',
+              propertyName,
+              rowName,
+            ];
+
+            if (!isObject(objValue)) {
+              set(nextModifiedDataState, pathToDataToSet, value);
+            } else {
+              const updatedValue = updateValues(objValue, value);
+
+              set(nextModifiedDataState, pathToDataToSet, updatedValue);
+            }
+          }
+        });
+
+        // When we uncheck a row, we need to check if we also need to disable the conditions
+        if (!value) {
+          nextModifiedDataState = updateConditionsToFalse(nextModifiedDataState);
+        }
+
+        set(draftState, 'modifiedData', nextModifiedDataState);
+
+        break;
+      }
+      case 'ON_CHANGE_CONDITIONS': {
+        Object.entries(action.conditions).forEach(array => {
+          const [stringPathToData, conditionsToUpdate] = array;
+
           set(
             draftState,
-            ['contentTypesPermissions', subject, 'attributes', attribute.attributeName, 'actions'],
-            shouldEnable ? STATIC_ATTRIBUTE_ACTIONS : []
+            ['modifiedData', ...stringPathToData.split('..'), 'conditions'],
+            conditionsToUpdate
           );
         });
 
-        if (shouldSetAllContentTypes || shouldSetContentTypeActions) {
-          staticActionsName.forEach(action => {
-            set(
-              draftState,
-              ['contentTypesPermissions', subject, 'contentTypeActions', action],
-              shouldEnable
-            );
-          });
+        break;
+      }
+      case 'ON_CHANGE_SIMPLE_CHECKBOX': {
+        let nextModifiedDataState = cloneDeep(state.modifiedData);
+
+        set(nextModifiedDataState, [...action.keys.split('..')], action.value);
+
+        // When we uncheck a single checkbox we need to remove the conditions from the parent
+        if (!action.value) {
+          nextModifiedDataState = updateConditionsToFalse(nextModifiedDataState);
         }
 
-        const permissionsCount = getRecursivePermissionsBySubject(
-          subject,
-          current(draftState).contentTypesPermissions
-        );
-
-        if (permissionsCount === 0) {
-          set(draftState, ['contentTypesPermissions', subject, 'contentTypeActions'], {});
-        }
+        set(draftState, 'modifiedData', nextModifiedDataState);
 
         break;
       }
+      /*
+       * Here the idea is to retrieve a specific value of the modifiedObject
+       * then update all the boolean values of the retrieved one
+       * and update the drafState.
+       *
+       * For instance in order to enable create action for all the fields and locales
+       * of the restaurant content type we need to :
+       * 1. Retrieve the modifiedData.collectionTypes.restaurant.create object
+       * 2. Toggle all the end boolean values to the desired one
+       * 3. Update the draftState
+       *
+       * Since the case works well in order to update what we called "parent" checkbox. We can
+       * reuse the action when we need to toggle change all the values that depends on this one.
+       * A parent checkbox is a checkbox which value is not a boolean but depends on its children ones, therefore,
+       * a parent checkbox does not have a represented value in the draftState, they are just helpers.
+       *
+       * Given the following data:
+       *
+       * const data = {
+       *  restaurant: {
+       *   create: {
+       *     fields: { name: true },
+       *     locales: { en: false }
+       *   }
+       *  }
+       * }
+       *
+       * The value of the create checkbox for the restaurant will be ƒalse since not all its children have
+       * truthy values and in order to set its value to true when need to have all the values of its children set to true.
+       *
+       * Similarly, we can reuse the logic for the components attributes
+       *
+       */
+      case 'ON_CHANGE_TOGGLE_PARENT_CHECKBOX': {
+        const { keys, value } = action;
+        const pathToValue = [...keys.split('..')];
+        let nextModifiedDataState = cloneDeep(state.modifiedData);
+        const oldValues = get(nextModifiedDataState, pathToValue, {});
 
-      case 'SELECT_MULTIPLE_ATTRIBUTE': {
-        const { attributes, subject } = action;
+        const updatedValues = updateValues(oldValues, value);
+        set(nextModifiedDataState, pathToValue, updatedValues);
 
-        attributes.forEach(attribute => {
-          const attributeActionPath = [
-            'contentTypesPermissions',
-            subject,
-            'attributes',
-            attribute.attributeName,
-            'actions',
-          ];
+        // When we uncheck a parent checkbox we need to remove the associated conditions
+        if (!value) {
+          nextModifiedDataState = updateConditionsToFalse(nextModifiedDataState);
+        }
 
-          set(draftState, attributeActionPath, STATIC_ATTRIBUTE_ACTIONS);
-        });
+        set(draftState, ['modifiedData'], nextModifiedDataState);
+
         break;
       }
-      case 'ON_RESET': {
-        const { initialPermissions } = action;
-        draftState.contentTypesPermissions = initialPermissions.contentTypesPermissions;
-        draftState.pluginsAndSettingsPermissions = initialPermissions.pluginsAndSettingsPermissions;
+      case 'RESET_FORM': {
+        draftState.modifiedData = state.initialData;
+        break;
+      }
+      case 'SET_FORM_AFTER_SUBMIT': {
+        draftState.initialData = state.modifiedData;
         break;
       }
       default:
@@ -149,3 +174,4 @@ const reducer = (state, action) =>
   });
 
 export default reducer;
+export { initialState };

@@ -24,6 +24,7 @@ function PopUpWarning({
   onlyConfirmButton,
   popUpWarningType,
   toggleModal,
+  children,
   ...rest
 }) {
   const handleToggle = e => {
@@ -77,6 +78,7 @@ function PopUpWarning({
             </Text>
           </Padded>
         )}
+        {children}
       </Body>
       <StyledFooter>
         {map(footerButtons, button => {

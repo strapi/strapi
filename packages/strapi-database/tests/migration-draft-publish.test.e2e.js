@@ -66,12 +66,12 @@ describe('Migration - draft and publish', () => {
       rq = await createAuthRequest({ strapi });
 
       data.dogs = sortDogs(builder.sanitizedFixturesFor(dogModel.name, strapi));
-    }, 60000);
+    });
 
     afterAll(async () => {
       await strapi.destroy();
       await builder.cleanup();
-    }, 60000);
+    });
 
     describe('Enabling D&P on a content-type', () => {
       test('No published_at before enabling the feature', async () => {
@@ -120,7 +120,7 @@ describe('Migration - draft and publish', () => {
         });
 
         data.dogs = sortedBody;
-      }, 60000);
+      });
     });
 
     describe('Disabling D&P on a content-type', () => {
@@ -156,7 +156,7 @@ describe('Migration - draft and publish', () => {
         expect(body.results.length).toBe(1);
         expect(body.results[0]).toMatchObject(_.pick(data.dogs[0], ['name']));
         expect(body.results[0].published_at).toBeUndefined();
-      }, 60000);
+      });
 
       test('Unique constraint is kept after disabling the feature', async () => {
         const dogToCreate = { code: 'sameCode' };

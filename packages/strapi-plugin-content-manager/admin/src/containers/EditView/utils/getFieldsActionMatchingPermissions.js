@@ -10,7 +10,7 @@ const getFieldsActionMatchingPermissions = (userPermissions, slug) => {
       },
     ]);
 
-    return uniq(flatMap(matched, 'fields'));
+    return uniq(flatMap(matched, 'properties.fields'));
   };
 
   return {

@@ -230,7 +230,7 @@ function ListRow({
           </div>
         ) : (
           <>
-            <FormattedMessage id={`${pluginId}.attribute.${readableType}`} />
+            <FormattedMessage id={`${pluginId}.attribute.${readableType}`} defaultMessage={type} />
             &nbsp;
             {repeatable && <FormattedMessage id={getTrad('component.repeatable')} />}
           </>

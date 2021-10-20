@@ -5,14 +5,18 @@ import { ErrorMessage, Description } from '@buffetjs/styles';
 import { Label, Error } from '@buffetjs/core';
 import { useDebounce, useClickAwayListener } from '@buffetjs/hooks';
 import styled from 'styled-components';
-import { request, LoadingIndicator, useGlobalContext } from 'strapi-helper-plugin';
+import {
+  request,
+  LabelIconWrapper,
+  LoadingIndicator,
+  useGlobalContext,
+  useContentManagerEditViewDataManager,
+} from 'strapi-helper-plugin';
 import { FormattedMessage } from 'react-intl';
 import { get } from 'lodash';
-
 import getTrad from '../../utils/getTrad';
 import pluginId from '../../pluginId';
 import getRequestUrl from '../../utils/getRequestUrl';
-import useDataManager from '../../hooks/useDataManager';
 import RightLabel from './RightLabel';
 import Options from './Options';
 import RegenerateButton from './RegenerateButton';
@@ -43,6 +47,7 @@ const InputUID = ({
   description,
   error: inputError,
   label: inputLabel,
+  labelIcon,
   name,
   onChange,
   validations,
@@ -50,7 +55,7 @@ const InputUID = ({
   editable,
   ...inputProps
 }) => {
-  const { modifiedData, initialData, layout } = useDataManager();
+  const { modifiedData, initialData, layout } = useContentManagerEditViewDataManager();
   const [isLoading, setIsLoading] = useState(false);
   const [availability, setAvailability] = useState(null);
   const [isSuggestionOpen, setIsSuggestionOpen] = useState(true);
@@ -218,7 +223,12 @@ const InputUID = ({
 
         return (
           <Wrapper ref={wrapperRef}>
-            <Name htmlFor={name}>{inputLabel}</Name>
+            <Name htmlFor={name}>
+              <span>{inputLabel}</span>
+              {labelIcon && (
+                <LabelIconWrapper title={labelIcon.title}>{labelIcon.icon}</LabelIconWrapper>
+              )}
+            </Name>
             <InputContainer>
               <Input
                 {...inputProps}
@@ -293,6 +303,10 @@ InputUID.propTypes = {
   editable: PropTypes.bool,
   error: PropTypes.string,
   label: PropTypes.string.isRequired,
+  labelIcon: PropTypes.shape({
+    icon: PropTypes.node.isRequired,
+    title: PropTypes.string,
+  }),
   name: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
   validations: PropTypes.object,
@@ -303,6 +317,7 @@ InputUID.defaultProps = {
   description: '',
   editable: false,
   error: null,
+  labelIcon: null,
   validations: {},
   value: '',
 };

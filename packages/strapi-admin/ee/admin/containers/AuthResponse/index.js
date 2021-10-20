@@ -28,6 +28,8 @@ const AuthResponse = () => {
     try {
       const jwtToken = Cookies.get('jwtToken');
 
+      auth.clearAppStorage();
+
       if (jwtToken) {
         auth.setToken(jwtToken, true);
         const requestUrl = getRequestUrl('users/me');
@@ -49,7 +51,7 @@ const AuthResponse = () => {
       redirectToOops();
     }
 
-    if (authResponse === 'success' && !auth.getToken()) {
+    if (authResponse === 'success') {
       fetchUserInfo();
     }
   }, [authResponse, fetchUserInfo, redirectToOops]);

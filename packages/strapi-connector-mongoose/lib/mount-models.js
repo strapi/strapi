@@ -8,8 +8,11 @@ const utils = require('./utils');
 const populateQueries = require('./utils/populate-queries');
 const relations = require('./relations');
 const { findComponentByGlobalId } = require('./utils/helpers');
-const { didDefinitionChange, storeDefinition } = require('./utils/store-definition');
-const { migrateDraftAndPublish } = require('./database-migration');
+const {
+  didDefinitionChange,
+  storeDefinition,
+  getDefinitionFromStore,
+} = require('./utils/store-definition');
 
 const {
   PUBLISHED_AT_ATTRIBUTE,
@@ -45,6 +48,8 @@ module.exports = async ({ models, target }, ctx) => {
         definition.attributes[PUBLISHED_AT_ATTRIBUTE] = {
           type: 'datetime',
           configurable: false,
+          writable: true,
+          visible: false,
         };
       }
 
@@ -55,6 +60,7 @@ module.exports = async ({ models, target }, ctx) => {
         plugin: 'admin',
         configurable: false,
         writable: false,
+        visible: false,
         private: isPrivate,
       };
 
@@ -63,6 +69,7 @@ module.exports = async ({ models, target }, ctx) => {
         plugin: 'admin',
         configurable: false,
         writable: false,
+        visible: false,
         private: isPrivate,
       };
     }
@@ -205,6 +212,10 @@ module.exports = async ({ models, target }, ctx) => {
       }
     };
 
+    const associations = definition.associations.filter(
+      association => !isPolymorphicAssoc(association)
+    );
+
     schema.options.toObject = schema.options.toJSON = {
       virtuals: true,
       transform: function(doc, returned) {
@@ -268,6 +279,24 @@ module.exports = async ({ models, target }, ctx) => {
             }
           }
         });
+
+        associations.forEach(association => {
+          const relation = returned[association.alias];
+
+          if (relation) {
+            // Extract raw JSON data.
+            returned[association.alias] = relation.toJSON ? relation.toJSON() : relation;
+
+            if (_.isArray(association.populate)) {
+              const { alias, populate } = association;
+              const pickPopulate = entry => _.pick(entry, populate);
+
+              returned[alias] = _.isArray(returned[alias])
+                ? _.map(returned[alias], pickPopulate)
+                : pickPopulate(returned[alias]);
+            }
+          }
+        });
       },
     };
 
@@ -305,11 +334,10 @@ module.exports = async ({ models, target }, ctx) => {
     target[model]._attributes = definition.attributes;
     target[model].updateRelations = relations.update;
     target[model].deleteRelations = relations.deleteRelations;
-
     target[model].privateAttributes = contentTypesUtils.getPrivateAttributes(target[model]);
   }
 
-  // Instanciate every models
+  // Instantiate every models
   Object.keys(models).forEach(mountModel);
 
   // Migrations + storing schema
@@ -317,48 +345,65 @@ module.exports = async ({ models, target }, ctx) => {
     const definition = models[model];
     const modelInstance = target[model];
     const definitionDidChange = await didDefinitionChange(definition, instance);
+
+    const previousDefinition = await getDefinitionFromStore(definition, instance);
+
+    // run migrations
+    await strapi.db.migrations.run(migrateSchema, {
+      definition,
+      previousDefinition,
+      model: modelInstance,
+      ORM: instance,
+    });
+
     if (definitionDidChange) {
-      await migrateDraftAndPublish({ definition, model: modelInstance, ORM: instance });
       await storeDefinition(definition, instance);
     }
   }
 };
 
+// noop migration to match migration API
+const migrateSchema = () => {};
+
 const createOnFetchPopulateFn = ({ morphAssociations, componentAttributes, definition }) => {
   return function() {
     const populatedPaths = this.getPopulatedPaths();
-    const { publicationState, _populateComponents = true } = this.getOptions();
+    const {
+      publicationState,
+      _populateComponents = true,
+      _populateMorphRelations = true,
+    } = this.getOptions();
 
     const getMatchQuery = assoc => {
       const assocModel = strapi.db.getModelByAssoc(assoc);
 
-      if (
-        contentTypesUtils.hasDraftAndPublish(assocModel) &&
-        DP_PUB_STATES.includes(publicationState)
-      ) {
+      const hasDraftAndPublish = contentTypesUtils.hasDraftAndPublish(assocModel);
+      if (hasDraftAndPublish && DP_PUB_STATES.includes(publicationState)) {
         return populateQueries.publicationState[publicationState];
       }
 
       return undefined;
     };
 
-    morphAssociations.forEach(association => {
-      const matchQuery = getMatchQuery(association);
-      const { alias, nature } = association;
+    if (_populateMorphRelations) {
+      morphAssociations.forEach(association => {
+        const matchQuery = getMatchQuery(association);
+        const { alias, nature } = association;
 
-      if (['oneToManyMorph', 'manyToManyMorph'].includes(nature)) {
-        this.populate({ path: alias, match: matchQuery, options: { publicationState } });
-      } else if (populatedPaths.includes(alias)) {
-        _.set(this._mongooseOptions.populate, [alias, 'path'], `${alias}.ref`);
-        _.set(this._mongooseOptions.populate, [alias, 'options'], {
-          publicationState,
-        });
+        if (['oneToManyMorph', 'manyToManyMorph'].includes(nature)) {
+          this.populate({ path: alias, match: matchQuery, options: { publicationState } });
+        } else if (populatedPaths.includes(alias)) {
+          _.set(this._mongooseOptions.populate, [alias, 'path'], `${alias}.ref`);
+          _.set(this._mongooseOptions.populate, [alias, 'options'], {
+            publicationState,
+          });
 
-        if (matchQuery !== undefined) {
-          _.set(this._mongooseOptions.populate, [alias, 'match'], matchQuery);
+          if (matchQuery !== undefined) {
+            _.set(this._mongooseOptions.populate, [alias, 'match'], matchQuery);
+          }
         }
-      }
-    });
+      });
+    }
 
     if (_populateComponents) {
       componentAttributes.forEach(key => {

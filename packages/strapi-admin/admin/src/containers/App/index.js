@@ -17,6 +17,8 @@ import { Switch, Route } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { LoadingIndicatorPage, auth, request } from 'strapi-helper-plugin';
+import { QueryClientProvider, QueryClient } from 'react-query';
+
 import GlobalStyle from '../../components/GlobalStyle';
 import Admin from '../Admin';
 import AuthPage from '../AuthPage';
@@ -31,6 +33,8 @@ import NewNotification from '../NewNotification';
 import PrivateRoute from '../PrivateRoute';
 import routes from './utils/routes';
 import { makeUniqueRoutes, createRoute } from '../SettingsPage/utils';
+
+const queryClient = new QueryClient();
 
 function App(props) {
   const getDataRef = useRef();
@@ -117,22 +121,24 @@ function App(props) {
     <Theme>
       <Wrapper>
         <GlobalStyle />
-        <NotificationProvider />
-        <NewNotification />
-        <Content>
-          <Switch>
-            {authRoutes}
-            <Route
-              path="/auth/:authType"
-              render={routerProps => (
-                <AuthPage {...routerProps} setHasAdmin={setHasAdmin} hasAdmin={hasAdmin} />
-              )}
-              exact
-            />
-            <PrivateRoute path="/" component={Admin} />
-            <Route path="" component={NotFoundPage} />
-          </Switch>
-        </Content>
+        <QueryClientProvider client={queryClient}>
+          <NotificationProvider />
+          <NewNotification />
+          <Content>
+            <Switch>
+              {authRoutes}
+              <Route
+                path="/auth/:authType"
+                render={routerProps => (
+                  <AuthPage {...routerProps} setHasAdmin={setHasAdmin} hasAdmin={hasAdmin} />
+                )}
+                exact
+              />
+              <PrivateRoute path="/" component={Admin} />
+              <Route path="" component={NotFoundPage} />
+            </Switch>
+          </Content>
+        </QueryClientProvider>
       </Wrapper>
     </Theme>
   );

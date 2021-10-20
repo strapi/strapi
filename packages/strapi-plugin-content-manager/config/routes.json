@@ -10,6 +10,14 @@
     },
     {
       "method": "GET",
+      "path": "/content-types-settings",
+      "handler": "content-types.findContentTypesSettings",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
       "path": "/content-types/:uid/configuration",
       "handler": "content-types.findContentTypeConfiguration",
       "config": {

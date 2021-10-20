@@ -1,16 +1,22 @@
 import React, { useCallback, useState, useEffect, useMemo, memo } from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, useIntl } from 'react-intl';
 import { Link, useLocation } from 'react-router-dom';
-import { findIndex, get, isArray, isEmpty } from 'lodash';
-import { NotAllowedInput, request } from 'strapi-helper-plugin';
+import { findIndex, get, isArray, isEmpty, set } from 'lodash';
+import {
+  DropdownIndicator,
+  LabelIconWrapper,
+  NotAllowedInput,
+  request,
+  useContentManagerEditViewDataManager,
+  useQueryParams,
+} from 'strapi-helper-plugin';
 import { Flex, Text, Padded } from '@buffetjs/core';
+import { stringify } from 'qs';
 import pluginId from '../../pluginId';
-import useDataManager from '../../hooks/useDataManager';
 import SelectOne from '../SelectOne';
 import SelectMany from '../SelectMany';
 import ClearIndicator from './ClearIndicator';
-import DropdownIndicator from './DropdownIndicator';
 import IndicatorSeparator from './IndicatorSeparator';
 import Option from './Option';
 import { A, BaselineAlignment } from './components';
@@ -21,10 +27,27 @@ const initialPaginationState = {
   _limit: 20,
   _start: 0,
 };
+
+const buildParams = (query, paramsToKeep) => {
+  if (!paramsToKeep) {
+    return {};
+  }
+
+  return paramsToKeep.reduce((acc, current) => {
+    const value = get(query, current, null);
+
+    if (value) {
+      set(acc, current, value);
+    }
+
+    return acc;
+  }, {});
+};
 function SelectWrapper({
   description,
   editable,
   label,
+  labelIcon,
   isCreatingEntry,
   isFieldAllowed,
   isFieldReadable,
@@ -35,9 +58,17 @@ function SelectWrapper({
   placeholder,
   queryInfos,
 }) {
+  const { formatMessage } = useIntl();
+  const [{ query }] = useQueryParams();
   // Disable the input in case of a polymorphic relation
   const isMorph = useMemo(() => relationType.toLowerCase().includes('morph'), [relationType]);
-  const { addRelation, modifiedData, moveRelation, onChange, onRemoveRelation } = useDataManager();
+  const {
+    addRelation,
+    modifiedData,
+    moveRelation,
+    onChange,
+    onRemoveRelation,
+  } = useContentManagerEditViewDataManager();
   const { pathname } = useLocation();
 
   const value = get(modifiedData, name, null);
@@ -62,7 +93,13 @@ function SelectWrapper({
     });
   }, [options, value]);
 
-  const { endPoint, containsKey, defaultParams, shouldDisplayRelationLink } = queryInfos;
+  const {
+    endPoint,
+    containsKey,
+    defaultParams,
+    shouldDisplayRelationLink,
+    paramsToKeep,
+  } = queryInfos;
 
   const isSingle = ['oneWay', 'oneToOne', 'manyToOne', 'oneToManyMorph', 'oneToOneMorph'].includes(
     relationType
@@ -194,6 +231,8 @@ function SelectWrapper({
 
   const to = `/plugins/${pluginId}/collectionType/${targetModel}/${value ? value.id : null}`;
 
+  const searchToPersist = stringify(buildParams(query, paramsToKeep), { encode: false });
+
   const link = useMemo(() => {
     if (!value) {
       return null;
@@ -204,13 +243,13 @@ function SelectWrapper({
     }
 
     return (
-      <Link to={{ pathname: to, state: { from: pathname } }}>
+      <Link to={{ pathname: to, state: { from: pathname }, search: searchToPersist }}>
         <FormattedMessage id="content-manager.containers.Edit.seeDetails">
           {msg => <A color="mediumBlue">{msg}</A>}
         </FormattedMessage>
       </Link>
     );
-  }, [shouldDisplayRelationLink, pathname, to, value]);
+  }, [shouldDisplayRelationLink, pathname, to, value, searchToPersist]);
 
   const Component = isSingle ? SelectOne : SelectMany;
   const associationsLength = isArray(value) ? value.length : 0;
@@ -227,22 +266,37 @@ function SelectWrapper({
     return !editable;
   }, [isMorph, isCreatingEntry, editable, isFieldAllowed, isFieldReadable]);
 
+  const labelIconformatted = labelIcon
+    ? { icon: labelIcon.icon, title: formatMessage(labelIcon.title) }
+    : labelIcon;
+
   if (!isFieldAllowed && isCreatingEntry) {
-    return <NotAllowedInput label={label} />;
+    return <NotAllowedInput label={label} labelIcon={labelIconformatted} />;
   }
 
   if (!isCreatingEntry && !isFieldAllowed && !isFieldReadable) {
-    return <NotAllowedInput label={label} />;
+    return <NotAllowedInput label={label} labelIcon={labelIconformatted} />;
   }
 
   return (
     <Padded>
       <BaselineAlignment />
       <Flex justifyContent="space-between">
-        <Text fontWeight="semiBold">
-          {label}
-          {!isSingle && ` (${associationsLength})`}
-        </Text>
+        <Flex>
+          <Text fontWeight="semiBold">
+            <span>
+              {label}
+              {!isSingle && ` (${associationsLength})`}
+            </span>
+          </Text>
+          {labelIconformatted && (
+            <div style={{ lineHeight: '13px' }}>
+              <LabelIconWrapper title={labelIconformatted.title}>
+                {labelIconformatted.icon}
+              </LabelIconWrapper>
+            </div>
+          )}
+        </Flex>
         {isSingle && link}
       </Flex>
       {!isEmpty(description) && (
@@ -281,6 +335,7 @@ function SelectWrapper({
               placeholder
             )
           }
+          searchToPersist={searchToPersist}
           styles={styles}
           targetModel={targetModel}
           value={value}
@@ -295,6 +350,7 @@ SelectWrapper.defaultProps = {
   editable: true,
   description: '',
   label: '',
+  labelIcon: null,
   isFieldAllowed: true,
   placeholder: '',
 };
@@ -303,6 +359,13 @@ SelectWrapper.propTypes = {
   editable: PropTypes.bool,
   description: PropTypes.string,
   label: PropTypes.string,
+  labelIcon: PropTypes.shape({
+    icon: PropTypes.node.isRequired,
+    title: PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      defaultMessage: PropTypes.string,
+    }),
+  }),
   isCreatingEntry: PropTypes.bool.isRequired,
   isFieldAllowed: PropTypes.bool,
   isFieldReadable: PropTypes.bool.isRequired,
@@ -316,11 +379,12 @@ SelectWrapper.propTypes = {
   placeholder: PropTypes.string,
   relationType: PropTypes.string.isRequired,
   targetModel: PropTypes.string.isRequired,
-  queryInfos: PropTypes.exact({
+  queryInfos: PropTypes.shape({
     containsKey: PropTypes.string.isRequired,
     defaultParams: PropTypes.object,
     endPoint: PropTypes.string.isRequired,
     shouldDisplayRelationLink: PropTypes.bool.isRequired,
+    paramsToKeep: PropTypes.array,
   }).isRequired,
 };
 

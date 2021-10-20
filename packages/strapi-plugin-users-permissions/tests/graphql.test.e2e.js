@@ -12,7 +12,7 @@ describe('Test Graphql user service', () => {
   beforeAll(async () => {
     strapi = await createStrapiInstance();
     authReq = await createAuthRequest({ strapi });
-  }, 60000);
+  });
 
   afterAll(async () => {
     await strapi.destroy();

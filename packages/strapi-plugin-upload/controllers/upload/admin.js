@@ -37,7 +37,7 @@ module.exports = {
     const method = _.has(ctx.query, '_q') ? 'search' : 'fetchAll';
 
     const query = pm.queryFrom(ctx.query);
-    const files = await strapi.plugins.upload.services.upload[method](query);
+    const files = await strapi.plugins.upload.services.upload[method](query, []);
 
     ctx.body = pm.sanitize(files, { withPrivate: false });
   },
@@ -191,7 +191,7 @@ module.exports = {
 };
 
 const findEntityAndCheckPermissions = async (ability, action, model, id) => {
-  const file = await strapi.plugins.upload.services.upload.fetch({ id });
+  const file = await strapi.plugins.upload.services.upload.fetch({ id }, []);
 
   if (_.isNil(file)) {
     throw strapi.errors.notFound();
@@ -199,10 +199,11 @@ const findEntityAndCheckPermissions = async (ability, action, model, id) => {
 
   const pm = strapi.admin.services.permission.createPermissionsManager({ ability, action, model });
 
-  const roles = _.has(file, 'created_by.id')
-    ? await strapi.query('role', 'admin').find({ 'users.id': file[CREATED_BY_ATTRIBUTE].id }, [])
-    : [];
-  const fileWithRoles = _.set(_.cloneDeep(file), 'created_by.roles', roles);
+  const author = await strapi.admin.services.user.findOne({ id: file[CREATED_BY_ATTRIBUTE] }, [
+    'roles',
+  ]);
+
+  const fileWithRoles = _.set(_.cloneDeep(file), 'created_by', author);
 
   if (pm.ability.cannot(pm.action, pm.toSubject(fileWithRoles))) {
     throw strapi.errors.forbidden();

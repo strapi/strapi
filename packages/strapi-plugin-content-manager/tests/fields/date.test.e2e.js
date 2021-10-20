@@ -23,12 +23,12 @@ describe('Test type date', () => {
 
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
-  }, 60000);
+  });
 
   afterAll(async () => {
     await strapi.destroy();
     await builder.cleanup();
-  }, 60000);
+  });
 
   test('Create entry with valid value JSON', async () => {
     const res = await rq.post('/content-manager/collection-types/application::withdate.withdate', {

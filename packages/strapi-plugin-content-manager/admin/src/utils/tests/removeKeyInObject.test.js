@@ -29,6 +29,20 @@ const testGeoJson = {
       ],
     },
   ],
+  screen: [
+    'LayoutBuilder',
+    {
+      sections: [
+        [
+          'SectionBuilder',
+          {
+            container: {},
+            query: {},
+          },
+        ],
+      ],
+    },
+  ],
 };
 
 describe('CONTENT MANAGER | utils | removeKeyInObject', () => {

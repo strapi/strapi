@@ -157,12 +157,12 @@ describe('Publication State', () => {
     rq = await createAuthRequest({ strapi });
 
     Object.assign(data, builder.sanitizedFixtures(strapi));
-  }, 60000);
+  });
 
   afterAll(async () => {
     await strapi.destroy();
     await builder.cleanup();
-  }, 60000);
+  });
 
   describe.each(['default', 'live', 'preview'])('Mode: "%s"', mode => {
     describe.each(['country', 'category', 'product'])('For %s', modelName => {

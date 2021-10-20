@@ -107,7 +107,7 @@
   "form.button.add-first-field-to-created-component": "新增元件的第一個欄位",
   "form.button.add.field.to.collectionType": "新增其他欄位於此集合類型",
   "form.button.add.field.to.component": "新增其他欄位於此元件",
-  "form.button.add.field.to.contentType ": "新增其他欄位於此內容類型",
+  "form.button.add.field.to.contentType": "新增其他欄位於此內容類型",
   "form.button.add.field.to.singleType": "新增其他欄位於此單一類型",
   "form.button.cancel": "取消",
   "form.button.collection-type.description": "適用於複數實例，如議題文章,產品，貼文......等",

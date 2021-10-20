@@ -178,6 +178,12 @@ program
   .description('Generate a basic plugin')
   .action(getLocalScript('generate'));
 
+// `$ strapi generate:template <directory>`
+program
+  .command('generate:template <directory>')
+  .description('Generate template from Strapi project')
+  .action(getLocalScript('generate-template'));
+
 program
   .command('build')
   .option('--clean', 'Remove the build and .cache folders', false)

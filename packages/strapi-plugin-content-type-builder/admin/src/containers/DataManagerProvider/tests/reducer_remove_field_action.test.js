@@ -1,6 +1,7 @@
 import { fromJS } from 'immutable';
 import reducer, { initialState } from '../reducer';
 import testData from './data';
+import { REMOVE_FIELD } from '../constants';
 
 describe('CTB | containers | DataManagerProvider | reducer | REMOVE_FIELD', () => {
   describe('Removing a field that is not a relation', () => {
@@ -8,7 +9,7 @@ describe('CTB | containers | DataManagerProvider | reducer | REMOVE_FIELD', () =
       const contentTypeUID = 'application::address.address';
       const attributeToRemoveName = 'city';
       const action = {
-        type: 'REMOVE_FIELD',
+        type: REMOVE_FIELD,
         mainDataKey: 'contentType',
         attributeToRemoveName,
         componentUid: '',
@@ -37,7 +38,7 @@ describe('CTB | containers | DataManagerProvider | reducer | REMOVE_FIELD', () =
       const contentTypeUID = 'application::menusection.menusection';
       const attributeToRemoveName = 'menu';
       const action = {
-        type: 'REMOVE_FIELD',
+        type: REMOVE_FIELD,
         mainDataKey: 'contentType',
         attributeToRemoveName,
         componentUid: '',
@@ -65,7 +66,7 @@ describe('CTB | containers | DataManagerProvider | reducer | REMOVE_FIELD', () =
     it('Should handle the removal of the one side (oneWay or manyWay) nature correctly', () => {
       const contentTypeUID = 'application::dummy.dummy';
       const action = {
-        type: 'REMOVE_FIELD',
+        type: REMOVE_FIELD,
         mainDataKey: 'contentType',
         attributeToRemoveName: 'one_way_attr',
         componentUid: '',
@@ -165,7 +166,7 @@ describe('CTB | containers | DataManagerProvider | reducer | REMOVE_FIELD', () =
     it('Should handle the removal of the two sides (oneToOne, oneToMany, manyToOne, manyToMany) nature correctly', () => {
       const contentTypeUID = 'application::dummy.dummy';
       const action = {
-        type: 'REMOVE_FIELD',
+        type: REMOVE_FIELD,
         mainDataKey: 'contentType',
         attributeToRemoveName: 'one_to_many_left',
         componentUid: '',
@@ -264,7 +265,7 @@ describe('CTB | containers | DataManagerProvider | reducer | REMOVE_FIELD', () =
       const contentTypeUID = 'application::homepage.homepage';
       const attributeToRemoveName = 'description';
       const action = {
-        type: 'REMOVE_FIELD',
+        type: REMOVE_FIELD,
         mainDataKey: 'contentType',
         attributeToRemoveName,
         componentUid: '',

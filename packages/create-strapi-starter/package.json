@@ -1,6 +1,6 @@
 {
   "name": "create-strapi-starter",
-  "version": "3.5.4",
+  "version": "3.6.8",
   "description": "Generate a new Strapi application.",
   "license": "SEE LICENSE IN LICENSE",
   "homepage": "https://strapi.io",
@@ -16,16 +16,18 @@
     "create-strapi-starter": "./index.js"
   },
   "dependencies": {
-    "chalk": "4.1.0",
+    "chalk": "4.1.1",
     "ci-info": "3.1.1",
     "commander": "7.1.0",
     "execa": "5.0.0",
     "fs-extra": "9.1.0",
     "git-url-parse": "11.4.4",
-    "node-fetch": "2.6.1",
-    "ora": "5.3.0",
-    "strapi-generate-new": "3.5.4",
-    "tar": "6.1.0"
+    "inquirer": "8.1.0",
+    "js-yaml": "4.1.0",
+    "node-fetch": "^2.6.1",
+    "ora": "5.4.0",
+    "strapi-generate-new": "3.6.8",
+    "tar": "6.1.9"
   },
   "scripts": {
     "test": "echo \"no tests yet\""

@@ -791,6 +791,12 @@ exports[`<Inputs /> should match the snapshot if type is headers 1`] = `
             className=" css-2b097c-container"
             onKeyDown={[Function]}
           >
+            <span
+              aria-atomic="false"
+              aria-live="polite"
+              aria-relevant="additions text"
+              className="css-1f43avz-a11yText-A11yText"
+            />
             <div
               className=" css-1w9ejix-control"
               onMouseDown={[Function]}

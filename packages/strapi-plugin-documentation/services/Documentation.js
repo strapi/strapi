@@ -1253,7 +1253,7 @@ module.exports = {
         if (isModelRelated) {
           switch (controllerMethod) {
             case 'count':
-              return `Retrieve the numver of ${tag} documents`;
+              return `Retrieve the number of ${tag} documents`;
             case 'findOne':
               return `Find one ${tag} record`;
             case 'find':

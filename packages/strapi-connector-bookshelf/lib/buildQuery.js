@@ -1,11 +1,11 @@
 'use strict';
 
 const _ = require('lodash');
-const { each, prop, isEmpty } = require('lodash/fp');
+const { keys, each, prop, isEmpty } = require('lodash/fp');
 const { singular } = require('pluralize');
 const { toQueries, runPopulateQueries } = require('./utils/populate-queries');
 
-const BOOLEAN_OPERATORS = ['or'];
+const BOOLEAN_OPERATORS = ['or', 'and'];
 
 /**
  * Build filters on a bookshelf query
@@ -16,19 +16,26 @@ const BOOLEAN_OPERATORS = ['or'];
 const buildQuery = ({ model, filters }) => qb => {
   const joinsTree = buildJoinsAndFilter(qb, model, filters);
 
-  if (_.has(filters, 'where') && Array.isArray(filters.where) && filters.where.length > 0) {
+  const isSortQuery = _.has(filters, 'sort');
+
+  const isSingleResult = _.has(filters, 'limit') && filters.limit === 1;
+  const hasJoins = _.has(joinsTree, 'joins') && keys(joinsTree.joins).length;
+  const isDistinctJoin = !isSingleResult && hasJoins;
+  const hasWhereFilters =
+    _.has(filters, 'where') && Array.isArray(filters.where) && filters.where.length > 0;
+
+  const isDistinctQuery = isDistinctJoin && (isSortQuery || hasWhereFilters);
+  if (isDistinctQuery) {
     qb.distinct();
   }
 
-  if (_.has(filters, 'sort')) {
+  if (isSortQuery) {
     const clauses = filters.sort.map(buildSortClauseFromTree(joinsTree)).filter(c => !isEmpty(c));
     const orderBy = clauses.map(({ order, alias }) => ({ order, column: alias }));
     const orderColumns = clauses.map(({ alias, column }) => ({ [alias]: column }));
     const columns = [`${joinsTree.alias}.*`, ...orderColumns];
 
-    qb.distinct()
-      .column(columns)
-      .orderBy(orderBy);
+    qb.column(columns).orderBy(orderBy);
   }
 
   if (_.has(filters, 'start')) {
@@ -289,7 +296,7 @@ const buildJoinsAndFilter = (qb, model, filters) => {
  * @param {Object} options.value - Filter value
  */
 const buildWhereClause = ({ qb, field, operator, value }) => {
-  if (Array.isArray(value) && !['or', 'in', 'nin'].includes(operator)) {
+  if (Array.isArray(value) && !['and', 'or', 'in', 'nin'].includes(operator)) {
     return qb.where(subQb => {
       for (let val of value) {
         subQb.orWhere(q => buildWhereClause({ qb: q, field, operator, value: val }));
@@ -298,6 +305,20 @@ const buildWhereClause = ({ qb, field, operator, value }) => {
   }
 
   switch (operator) {
+    case 'and':
+      return qb.where(andQb => {
+        value.forEach(andClause => {
+          andQb.where(subQb => {
+            if (Array.isArray(andClause)) {
+              andClause.forEach(clause =>
+                subQb.where(andQb => buildWhereClause({ qb: andQb, ...clause }))
+              );
+            } else {
+              buildWhereClause({ qb: subQb, ...andClause });
+            }
+          });
+        });
+      });
     case 'or':
       return qb.where(orQb => {
         value.forEach(orClause => {

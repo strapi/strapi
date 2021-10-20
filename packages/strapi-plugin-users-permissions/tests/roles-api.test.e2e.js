@@ -46,7 +46,7 @@ describe('Roles API', () => {
 
     const res = await createTestUser();
     data.user = res.body.user;
-  }, 60000);
+  });
 
   afterAll(async () => {
     await deleteTestUser();

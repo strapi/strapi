@@ -3,7 +3,7 @@
  */
 'use strict';
 
-const debug = require('debug')('strapi');
+const debug = require('debug')('strapi:webhook');
 const _ = require('lodash');
 const fetch = require('node-fetch');
 

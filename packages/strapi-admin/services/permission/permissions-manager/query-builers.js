@@ -6,13 +6,13 @@ const { VALID_REST_OPERATORS } = require('strapi-utils');
 
 const ops = {
   common: VALID_REST_OPERATORS.map(op => `$${op}`),
-  boolean: ['$or'],
+  boolean: ['$or', '$and'],
   cleanable: ['$elemMatch'],
 };
 
 const buildCaslQuery = (ability, action, model) => {
   const query = rulesToQuery(ability, action, model, o => o.conditions);
-  return query && _.has(query, '$or') ? _.pick(query, '$or') : {};
+  return _.get(query, '$or[0].$and', {});
 };
 
 const buildStrapiQuery = caslQuery => {

@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const createService = require('../service');
+const { createService, getFetchParams } = require('../service');
 
 const maxLimit = 50;
 const defaultLimit = 20;
@@ -69,6 +69,9 @@ describe('Default Service', () => {
             find: jest.fn(() => Promise.resolve(null)),
             create: jest.fn(() => Promise.resolve({ id: 1 })),
           },
+          query() {
+            return { count() {} };
+          },
         };
 
         const model = {
@@ -101,6 +104,9 @@ describe('Default Service', () => {
           entityService: {
             find: jest.fn(() => Promise.resolve({ id: 1 })),
             update: jest.fn(() => Promise.resolve({ id: 1 })),
+          },
+          query() {
+            return { count() {} };
           },
         };
 
@@ -194,7 +200,7 @@ describe('getFetchParams', () => {
     ['1000 if _limit=1000 and no max allowed limit is set', { _limit: 1000 }, 1000],
   ])('Sets _limit parameter to %s', (description, input, expected) => {
     strapi.config.api.rest.maxLimit = input.maxLimit;
-    expect(createService.getFetchParams({ _limit: input._limit })).toMatchObject({
+    expect(getFetchParams({ _limit: input._limit })).toMatchObject({
       _limit: expected,
     });
   });

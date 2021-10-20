@@ -1,6 +1,6 @@
 {
   "name": "strapi-provider-email-nodemailer",
-  "version": "3.5.4",
+  "version": "3.6.8",
   "description": "Nodemailer provider for Strapi 3",
   "homepage": "https://strapi.io",
   "keywords": [
@@ -14,8 +14,8 @@
     "lib": "./lib"
   },
   "dependencies": {
-    "lodash": "4.17.20",
-    "nodemailer": "6.5.0"
+    "lodash": "4.17.21",
+    "nodemailer": "6.6.1"
   },
   "repository": {
     "type": "git",

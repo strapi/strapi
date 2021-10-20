@@ -22,7 +22,7 @@ describe('Test Graphql Users API End to End', () => {
         body,
       });
     };
-  }, 60000);
+  });
 
   afterAll(async () => {
     await strapi.destroy();

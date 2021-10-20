@@ -1,8 +1,9 @@
 'use strict';
 
-const { startsWith, upperFirst, has, prop, pick } = require('lodash/fp');
+const { upperFirst, has, prop, pick, getOr } = require('lodash/fp');
 const pluralize = require('pluralize');
 const { contentTypes: contentTypesUtils } = require('strapi-utils');
+const { isMediaAttribute } = require('strapi-utils').contentTypes;
 
 const dtoFields = [
   'uid',
@@ -12,7 +13,9 @@ const dtoFields = [
   'category',
   'info',
   'options',
+  'pluginOptions',
   'attributes',
+  'pluginOptions',
 ];
 
 module.exports = {
@@ -20,7 +23,7 @@ module.exports = {
     return {
       ...contentType,
       apiID: contentType.modelName,
-      isDisplayed: !isHidden(contentType),
+      isDisplayed: isVisible(contentType),
       info: {
         ...contentType.info,
         label: formatContentTypeLabel(contentType),
@@ -52,13 +55,10 @@ const formatContentTypeLabel = contentType => {
 };
 
 const formatAttributes = model => {
-  const { CREATED_BY_ATTRIBUTE, UPDATED_BY_ATTRIBUTE } = contentTypesUtils.constants;
+  const { getVisibleAttributes } = contentTypesUtils;
 
-  return Object.keys(model.attributes).reduce((acc, key) => {
-    if ([CREATED_BY_ATTRIBUTE, UPDATED_BY_ATTRIBUTE].includes(key)) {
-      return acc;
-    }
-
+  // only get attributes that can be seen in the auto generated Edit view or List view
+  return getVisibleAttributes(model).reduce((acc, key) => {
     acc[key] = formatAttribute(key, model.attributes[key], { model });
     return acc;
   }, {});
@@ -67,8 +67,7 @@ const formatAttributes = model => {
 const formatAttribute = (key, attribute, { model }) => {
   if (has('type', attribute)) return attribute;
 
-  let targetEntity = attribute.model || attribute.collection;
-  if (attribute.plugin === 'upload' && targetEntity === 'file') {
+  if (isMediaAttribute(attribute)) {
     return toMedia(attribute);
   }
 
@@ -82,6 +81,7 @@ const toMedia = attribute => {
     multiple: attribute.collection ? true : false,
     required: attribute.required ? true : false,
     allowedTypes: attribute.allowedTypes,
+    pluginOptions: attribute.pluginOptions,
   };
 };
 
@@ -91,13 +91,8 @@ const toRelation = (attribute, relation) => {
     type: 'relation',
     targetModel: relation.targetUid,
     relationType: relation.nature,
+    pluginOptions: attribute.pluginOptions,
   };
 };
 
-const HIDDEN_CONTENT_TYPES = [
-  'plugins::upload.file',
-  'plugins::users-permissions.permission',
-  'plugins::users-permissions.role',
-];
-
-const isHidden = ({ uid }) => startsWith('strapi::', uid) || HIDDEN_CONTENT_TYPES.includes(uid);
+const isVisible = model => getOr(true, 'pluginOptions.content-manager.visible', model) === true;

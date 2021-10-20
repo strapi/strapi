@@ -90,6 +90,7 @@ module.exports = {
     'no-underscore-dangle': 0,
     'no-use-before-define': ['error', { functions: false, classes: false, variables: false }],
     'object-curly-newline': [2, { multiline: true, consistent: true }],
+    'one-var': ['error', 'never'],
     'operator-linebreak': 0,
     'padding-line-between-statements': [
       'error',

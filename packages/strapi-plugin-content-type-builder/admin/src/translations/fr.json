@@ -39,7 +39,7 @@
   "form.attribute.settings.default": "Valeur par défault",
   "form.button.add.field.to.collectionType": "Ajouter un nouveau champ à cette collection",
   "form.button.add.field.to.component": "Ajouter un nouveau champ à ce composant",
-  "form.button.add.field.to.contentType ": "Ajouter un nouveau champ à cette content type",
+  "form.button.add.field.to.contentType": "Ajouter un nouveau champ à cette content type",
   "form.button.add.field.to.singleType": "Ajouter un nouveau champ à ce single type",
   "form.button.cancel": "Annuler",
   "form.button.configure-view": "Configurer la vue",

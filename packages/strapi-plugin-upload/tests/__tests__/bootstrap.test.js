@@ -5,12 +5,12 @@ const bootstrap = require('../../config/functions/bootstrap');
 describe('Upload plugin bootstrap function', () => {
   test('Sets default config if id does not exist', async () => {
     const setStore = jest.fn(() => {});
-    const register = jest.fn(() => {});
+    const registerMany = jest.fn(() => {});
 
     global.strapi = {
       dir: process.cwd(),
       admin: {
-        services: { permission: { actionProvider: { register } } },
+        services: { permission: { actionProvider: { registerMany } } },
       },
       log: {
         error() {},

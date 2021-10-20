@@ -1,3 +1,4 @@
+import { getType, getOtherInfos } from './content-manager/utils/getAttributeInfos';
 // Assets
 export { default as colors } from './assets/styles/colors';
 export { default as sizes } from './assets/styles/sizes';
@@ -16,6 +17,7 @@ export { default as CircleButton } from './components/CircleButton';
 export { default as ContainerFluid } from './components/ContainerFluid';
 export { default as ErrorBoundary } from './components/ErrorBoundary';
 export { default as ExtendComponent } from './components/ExtendComponent';
+export { default as ErrorFallback } from './components/ErrorFallback';
 export { default as FilterButton } from './components/FilterButton';
 export { default as GlobalPagination } from './components/GlobalPagination';
 export { default as HeaderNav } from './components/HeaderNav';
@@ -24,6 +26,12 @@ export { default as HeaderModalTitle } from './components/HeaderModalTitle';
 export { default as HeaderSearch } from './components/HeaderSearch';
 export { default as IcoContainer } from './components/IcoContainer';
 export { default as InputAddon } from './components/InputAddon';
+export { default as EmptyState } from './components/EmptyState';
+export * from './components/Tabs';
+export * from './components/Select';
+
+export { default as DropdownIndicator } from './components/Select/DropdownIndicator';
+export * from './components/InjectionZone';
 
 export { default as InputAddonWithErrors } from './components/InputAddonWithErrors';
 export { default as InputCheckbox } from './components/InputCheckbox';
@@ -50,6 +58,7 @@ export { default as InputToggle } from './components/InputToggle';
 export { default as InputToggleWithErrors } from './components/InputToggleWithErrors';
 
 export { default as Label } from './components/Label';
+export { default as LabelIconWrapper } from './components/LabelIconWrapper';
 export { default as LeftMenu } from './components/LeftMenu';
 export { default as LeftMenuList } from './components/LeftMenuList';
 export { default as LiLink } from './components/LiLink';
@@ -76,6 +85,7 @@ export { default as NotFound } from './components/NotFound';
 export { default as OverlayBlocker } from './components/OverlayBlocker';
 export { default as PageFooter } from './components/PageFooter';
 export { default as PluginHeader } from './components/PluginHeader';
+export { default as RelationDPState } from './components/RelationDPState';
 export { default as PopUpWarning } from './components/PopUpWarning';
 export { default as Row } from './components/Row';
 export { default as SearchInfo } from './components/SearchInfo';
@@ -101,12 +111,15 @@ export { default as PopUpWarningModal } from './components/PopUpWarning/StyledMo
 // Contexts
 export { GlobalContext, GlobalContextProvider, useGlobalContext } from './contexts/GlobalContext';
 export { default as UserContext } from './contexts/UserContext';
+export { default as ContentManagerEditViewDataManagerContext } from './contexts/ContentManagerEditViewDataManagerContext';
 
 // Hooks
+export { default as useContentManagerEditViewDataManager } from './hooks/useContentManagerEditViewDataManager';
 export { default as useQuery } from './hooks/useQuery';
 export { default as useStrapi } from './hooks/useStrapi';
 export { default as useUser } from './hooks/useUser';
 export { default as useUserPermissions } from './hooks/useUserPermissions';
+export { default as useQueryParams } from './hooks/useQueryParams';
 
 // Providers
 export { default as StrapiProvider } from './providers/StrapiProvider';
@@ -115,8 +128,10 @@ export { default as StrapiProvider } from './providers/StrapiProvider';
 export { default as auth } from './utils/auth';
 export { default as cleanData } from './utils/cleanData';
 export { default as difference } from './utils/difference';
+export { default as contentManagementUtilRemoveFieldsFromData } from './content-manager/utils/contentManagementUtilRemoveFieldsFromData';
 export { default as dateFormats } from './utils/dateFormats';
 export { default as dateToUtcTime } from './utils/dateToUtcTime';
+export { default as formatComponentData } from './content-manager/utils/formatComponentData';
 export { default as hasPermissions } from './utils/hasPermissions';
 export { findMatchingPermissions } from './utils/hasPermissions';
 export { default as translatedErrors } from './utils/translatedErrors';
@@ -130,6 +145,8 @@ export { default as Manager } from './utils/Manager';
 export { default as request } from './utils/request';
 export { default as storeData } from './utils/storeData';
 export { default as templateObject } from './utils/templateObject';
+export { getType };
+export { getOtherInfos };
 export { default as getYupInnerErrors } from './utils/getYupInnerErrors';
 export { default as generateFiltersFromSearch } from './utils/generateFiltersFromSearch';
 export { default as generateSearchFromFilters } from './utils/generateSearchFromFilters';

@@ -2,6 +2,7 @@ import { fromJS } from 'immutable';
 import { get } from 'lodash';
 import reducer, { initialState } from '../reducer';
 import testData from './data';
+import * as actions from '../constants';
 
 describe('CTB | containers | DataManagerProvider | reducer | basics actions ', () => {
   it('Should return the initial state', () => {
@@ -60,7 +61,7 @@ describe('CTB | containers | DataManagerProvider | reducer | basics actions ', (
 
       expect(
         reducer(state, {
-          type: 'ADD_CREATED_COMPONENT_TO_DYNAMIC_ZONE',
+          type: actions.ADD_CREATED_COMPONENT_TO_DYNAMIC_ZONE,
           dynamicZoneTarget: 'dz',
           componentsToAdd: ['default.test'],
         })
@@ -164,7 +165,7 @@ describe('CTB | containers | DataManagerProvider | reducer | basics actions ', (
         },
       });
 
-      expect(reducer(state, { type: 'CANCEL_CHANGES' })).toEqual(expected);
+      expect(reducer(state, { type: actions.CANCEL_CHANGES })).toEqual(expected);
     });
   });
 
@@ -193,7 +194,7 @@ describe('CTB | containers | DataManagerProvider | reducer | basics actions ', (
 
       expect(
         reducer(state, {
-          type: 'CHANGE_DYNAMIC_ZONE_COMPONENTS',
+          type: actions.CHANGE_DYNAMIC_ZONE_COMPONENTS,
           dynamicZoneTarget: 'dz',
           newComponents: ['default.dish'],
         })
@@ -223,7 +224,7 @@ describe('CTB | containers | DataManagerProvider | reducer | basics actions ', (
 
       expect(
         reducer(state, {
-          type: 'CHANGE_DYNAMIC_ZONE_COMPONENTS',
+          type: actions.CHANGE_DYNAMIC_ZONE_COMPONENTS,
           dynamicZoneTarget: 'dz',
           newComponents: ['default.dish'],
         })
@@ -234,7 +235,7 @@ describe('CTB | containers | DataManagerProvider | reducer | basics actions ', (
   describe('CREATE_COMPONENT_SCHEMA', () => {
     it('Should add the created component schema to the components object when creating a component using the left menu link', () => {
       const action = {
-        type: 'CREATE_COMPONENT_SCHEMA',
+        type: actions.CREATE_COMPONENT_SCHEMA,
         data: { name: 'new component', icon: 'arrow-alt-circle-down' },
         componentCategory: 'test',
         schemaType: 'component',
@@ -264,7 +265,7 @@ describe('CTB | containers | DataManagerProvider | reducer | basics actions ', (
 
     it('Should add the created component schema to the components object, create the attribute and also add the created component to modifiedData.components when using the add attribute modal', () => {
       const action = {
-        type: 'CREATE_COMPONENT_SCHEMA',
+        type: actions.CREATE_COMPONENT_SCHEMA,
         data: { name: 'new component', icon: 'arrow-alt-circle-down' },
         componentCategory: 'test',
         schemaType: 'component',
@@ -313,7 +314,7 @@ describe('CTB | containers | DataManagerProvider | reducer | basics actions ', (
         })
       );
 
-      expect(reducer(initialState, { type: 'CREATE_SCHEMA', uid, data })).toEqual(expected);
+      expect(reducer(initialState, { type: actions.CREATE_SCHEMA, uid, data })).toEqual(expected);
     });
   });
 
@@ -331,7 +332,7 @@ describe('CTB | containers | DataManagerProvider | reducer | basics actions ', (
         .setIn(['contentTypes'], fromJS({ baz: {} }))
         .setIn(['initialContentTypes'], fromJS({ baz: {} }));
 
-      expect(reducer(state, { type: 'DELETE_NOT_SAVED_TYPE' })).toEqual(expected);
+      expect(reducer(state, { type: actions.DELETE_NOT_SAVED_TYPE })).toEqual(expected);
     });
   });
 
@@ -368,7 +369,7 @@ describe('CTB | containers | DataManagerProvider | reducer | basics actions ', (
 
       expect(
         reducer(initialState, {
-          type: 'GET_DATA_SUCCEEDED',
+          type: actions.GET_DATA_SUCCEEDED,
           components,
           contentTypes,
           reservedNames,
@@ -381,7 +382,7 @@ describe('CTB | containers | DataManagerProvider | reducer | basics actions ', (
     it('Should return the initial state constant', () => {
       expect(
         reducer(initialState.setIn(['components', 'foo'], {}), {
-          type: 'RELOAD_PLUGIN',
+          type: actions.RELOAD_PLUGIN,
         })
       ).toEqual(initialState);
     });
@@ -675,7 +676,7 @@ describe('CTB | containers | DataManagerProvider | reducer | basics actions ', (
 
       expect(
         reducer(state, {
-          type: 'REMOVE_COMPONENT_FROM_DYNAMIC_ZONE',
+          type: actions.REMOVE_COMPONENT_FROM_DYNAMIC_ZONE,
           dzName: 'dz',
           componentToRemoveIndex: 1,
         })
@@ -728,7 +729,7 @@ describe('CTB | containers | DataManagerProvider | reducer | basics actions ', (
 
       expect(
         reducer(state, {
-          type: 'REMOVE_FIELD_FROM_DISPLAYED_COMPONENT',
+          type: actions.REMOVE_FIELD_FROM_DISPLAYED_COMPONENT,
           componentUid: 'default.test',
           attributeToRemoveName: 'other',
         })
@@ -751,7 +752,7 @@ describe('CTB | containers | DataManagerProvider | reducer | basics actions ', (
 
       expect(
         reducer(initialState, {
-          type: 'SET_MODIFIED_DATA',
+          type: actions.SET_MODIFIED_DATA,
           schemaToSet,
           hasJustCreatedSchema: true,
         })
@@ -772,7 +773,7 @@ describe('CTB | containers | DataManagerProvider | reducer | basics actions ', (
 
       expect(
         reducer(initialState, {
-          type: 'SET_MODIFIED_DATA',
+          type: actions.SET_MODIFIED_DATA,
           schemaToSet,
           hasJustCreatedSchema: false,
         })
@@ -823,7 +824,7 @@ describe('CTB | containers | DataManagerProvider | reducer | basics actions ', (
 
       expect(
         reducer(state, {
-          type: 'UPDATE_SCHEMA',
+          type: actions.UPDATE_SCHEMA,
           data,
           schemaType: 'contentType',
         })
@@ -910,7 +911,7 @@ describe('CTB | containers | DataManagerProvider | reducer | basics actions ', (
 
       expect(
         reducer(state, {
-          type: 'UPDATE_SCHEMA',
+          type: actions.UPDATE_SCHEMA,
           data,
           schemaType: 'component',
           uid: 'test',

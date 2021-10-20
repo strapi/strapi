@@ -2,6 +2,7 @@
 
 const _ = require('lodash');
 const { yup, formatYupErrors } = require('strapi-utils');
+const { getService } = require('../utils');
 const { AUTHOR_CODE, PUBLISH_ACTION } = require('../services/constants');
 const {
   BOUND_ACTIONS_FOR_FIELDS,
@@ -15,8 +16,8 @@ const handleReject = error => Promise.reject(formatYupErrors(error));
 // validatedUpdatePermissionsInput
 
 const actionFieldsAreEqual = (a, b) => {
-  const aFields = a.fields || [];
-  const bFields = b.fields || [];
+  const aFields = a.properties.fields || [];
+  const bFields = b.properties.fields || [];
 
   return _.isEqual(aFields.sort(), bFields.sort());
 };
@@ -112,7 +113,7 @@ const validatedUpdatePermissionsInput = async (permissions, role) => {
 // validatePermissionsExist
 
 const checkPermissionsExist = function(permissions) {
-  const existingActions = strapi.admin.services.permission.actionProvider.getAll();
+  const existingActions = getService('permission').actionProvider.values();
   const failIndex = permissions.findIndex(
     permission =>
       !existingActions.some(

@@ -6,7 +6,7 @@
 const _ = require('lodash');
 
 const createController = require('./controller');
-const createService = require('./service');
+const { createService } = require('./service');
 
 /**
  * Returns a service and a controller built based on the content type passed

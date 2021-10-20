@@ -130,12 +130,12 @@ describe('Search query', () => {
     rq = await createAuthRequest({ strapi });
 
     data.bed = builder.sanitizedFixturesFor(bedModel.name, strapi);
-  }, 60000);
+  });
 
   afterAll(async () => {
     await strapi.destroy();
     await builder.cleanup();
-  }, 60000);
+  });
 
   describe('Without filters', () => {
     test('search for "id"', async () => {
@@ -247,6 +247,19 @@ describe('Search query', () => {
       expect(Array.isArray(res.body)).toBe(true);
       expect(res.body.length).toBe(1);
       expect(res.body[0]).toMatchObject(data.bed[0]);
+    });
+    test('search with a backslash', async () => {
+      const res = await rq({
+        method: 'GET',
+        url: '/beds',
+        qs: {
+          _q: 'Sleepy Bed',
+          name_contains: 'test\\',
+        },
+      });
+
+      expect(Array.isArray(res.body)).toBe(true);
+      expect(res.body.length).toBe(0);
     });
   });
 });

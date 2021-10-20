@@ -116,12 +116,12 @@ describe('x-to-many RF Preview', () => {
     rq = await createAuthRequest({ strapi });
 
     Object.assign(data, builder.sanitizedFixtures(strapi));
-  }, 60000);
+  });
 
   afterAll(async () => {
     await strapi.destroy();
     await builder.cleanup();
-  }, 60000);
+  });
 
   describe('Entity Misc', () => {
     test.each(['foobar', 'name'])(`Throws if the targeted field is invalid (%s)`, async field => {

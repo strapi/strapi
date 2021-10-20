@@ -2,10 +2,19 @@ import { cloneDeep, get, set } from 'lodash';
 import { mergeMetasWithSchema } from '../../../utils';
 import pluginId from '../../../pluginId';
 
+const getRelationModel = (targetModel, models) => models.find(model => model.uid === targetModel);
+
 // editRelations is an array of strings...
 const formatEditRelationsLayoutWithMetas = (contentTypeConfiguration, models) => {
   const formatted = contentTypeConfiguration.layouts.editRelations.reduce((acc, current) => {
     const fieldSchema = get(contentTypeConfiguration, ['attributes', current], {});
+    const targetModelUID = get(
+      contentTypeConfiguration,
+      ['attributes', current, 'targetModel'],
+      null
+    );
+    const targetModelSchema = getRelationModel(targetModelUID, models);
+    const targetModelPluginOptions = targetModelSchema.pluginOptions || {};
     const metadatas = get(contentTypeConfiguration, ['metadatas', current, 'edit'], {});
     const size = 6;
 
@@ -17,6 +26,7 @@ const formatEditRelationsLayoutWithMetas = (contentTypeConfiguration, models) =>
       fieldSchema,
       metadatas,
       queryInfos,
+      targetModelPluginOptions,
     });
 
     return acc;
@@ -53,7 +63,6 @@ const formatLayouts = (initialData, models) => {
 const createMetasSchema = (initialData, models) => {
   const data = mergeMetasWithSchema(cloneDeep(initialData), models, 'contentType');
   const { components, contentType } = data;
-  const getRelationModel = targetModel => models.find(model => model.uid === targetModel);
 
   const formatMetadatas = targetSchema => {
     return Object.keys(targetSchema.metadatas).reduce((acc, current) => {
@@ -61,7 +70,7 @@ const createMetasSchema = (initialData, models) => {
       let metadatas = targetSchema.metadatas[current];
 
       if (schema.type === 'relation') {
-        const relationModel = getRelationModel(schema.targetModel);
+        const relationModel = getRelationModel(schema.targetModel, models);
         const mainFieldName = metadatas.edit.mainField;
         const mainField = {
           name: mainFieldName,
@@ -110,6 +119,10 @@ const formatLayoutWithMetas = (contentTypeConfiguration, ctUid, models) => {
       };
 
       if (fieldSchema.type === 'relation') {
+        const targetModelUID = fieldSchema.targetModel;
+        const targetModelSchema = getRelationModel(targetModelUID, models);
+        const targetModelPluginOptions = targetModelSchema.pluginOptions || {};
+
         const queryInfos = ctUid
           ? generateRelationQueryInfosForComponents(
               contentTypeConfiguration,
@@ -119,6 +132,7 @@ const formatLayoutWithMetas = (contentTypeConfiguration, ctUid, models) => {
             )
           : generateRelationQueryInfos(contentTypeConfiguration, attribute.name, models);
 
+        set(data, 'targetModelPluginOptions', targetModelPluginOptions);
         set(data, 'queryInfos', queryInfos);
       }
 

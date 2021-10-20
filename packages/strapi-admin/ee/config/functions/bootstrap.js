@@ -6,10 +6,13 @@ const executeCEBootstrap = require('../../../config/functions/bootstrap');
 const {
   features: { sso: ssoActions },
 } = require('../admin-actions');
+const { getService } = require('../../../utils');
 
 module.exports = async () => {
+  const { actionProvider } = getService('permission');
+
   if (features.isEnabled('sso')) {
-    strapi.admin.services.permission.actionProvider.register(ssoActions);
+    await actionProvider.registerMany(ssoActions);
   }
 
   await executeCEBootstrap();

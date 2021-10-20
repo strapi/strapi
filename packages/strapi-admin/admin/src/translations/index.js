@@ -12,6 +12,7 @@ import ja from './ja.json';
 import ko from './ko.json';
 import ms from './ms.json';
 import nl from './nl.json';
+import no from './no.json';
 import pl from './pl.json';
 import ptBR from './pt-BR.json';
 import pt from './pt.json';
@@ -39,6 +40,7 @@ const trads = {
   ko,
   ms,
   nl,
+  no,
   pl,
   'pt-BR': ptBR,
   pt,
@@ -67,6 +69,7 @@ export const languageNativeNames = {
   ko: '한국어',
   ms: 'Melayu',
   nl: 'Nederlands',
+  no: 'Norwegian',
   pl: 'Polski',
   'pt-BR': 'Português (Brasil)',
   pt: 'Português (Portugal)',

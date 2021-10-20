@@ -601,7 +601,7 @@ const buildWhereClause = ({ field, operator, value }) => {
     case 'contains': {
       return {
         [field]: {
-          $regex: `${val}`,
+          $regex: _.escapeRegExp(`${val}`),
           $options: 'i',
         },
       };
@@ -615,7 +615,7 @@ const buildWhereClause = ({ field, operator, value }) => {
     case 'containss':
       return {
         [field]: {
-          $regex: `${val}`,
+          $regex: _.escapeRegExp(`${val}`),
         },
       };
     case 'ncontainss':

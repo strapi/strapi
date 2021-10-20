@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo, useReducer, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useHistory } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useSelector, shallowEqual } from 'react-redux';
 import { cloneDeep, flatMap, get, set, pick } from 'lodash';
 import { request, useGlobalContext } from 'strapi-helper-plugin';
 import { Inputs as Input } from '@buffetjs/custom';
@@ -32,7 +32,7 @@ const EditSettingsView = ({ components, mainLayout, isContentTypeView, slug, upd
   const [isDraggingSibling, setIsDraggingSibling] = useState(false);
 
   const schemasSelector = useMemo(makeSelectModelAndComponentSchemas, []);
-  const { schemas } = useSelector(state => schemasSelector(state), []);
+  const { schemas } = useSelector(state => schemasSelector(state), shallowEqual);
 
   const { componentLayouts, initialData, metaToEdit, modifiedData, metaForm } = reducerState.toJS();
 

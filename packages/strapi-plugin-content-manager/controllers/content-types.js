@@ -27,6 +27,22 @@ module.exports = {
     ctx.body = { data: contentTypes.map(toDto) };
   },
 
+  async findContentTypesSettings(ctx) {
+    const { findAllContentTypes, findConfiguration } = getService('content-types');
+
+    const contentTypes = await findAllContentTypes();
+    const configurations = await Promise.all(
+      contentTypes.map(async contentType => {
+        const { uid, settings } = await findConfiguration(contentType);
+        return { uid, settings };
+      })
+    );
+
+    ctx.body = {
+      data: configurations,
+    };
+  },
+
   async findContentTypeConfiguration(ctx) {
     const { uid } = ctx.params;
 

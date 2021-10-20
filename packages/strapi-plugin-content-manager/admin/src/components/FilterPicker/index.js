@@ -34,7 +34,7 @@ function FilterPicker({
 }) {
   const { emitEvent } = useGlobalContext();
   const emitEventRef = useRef(emitEvent);
-  const userPermissions = useUser();
+  const { userPermissions } = useUser();
   const readActionAllowedFields = useMemo(() => {
     const matchingPermissions = findMatchingPermissions(userPermissions, [
       {
@@ -43,7 +43,7 @@ function FilterPicker({
       },
     ]);
 
-    return get(matchingPermissions, ['0', 'fields'], []);
+    return get(matchingPermissions, ['0', 'properties', 'fields'], []);
   }, [userPermissions, slug]);
 
   let timestamps = get(contentType, ['options', 'timestamps']);

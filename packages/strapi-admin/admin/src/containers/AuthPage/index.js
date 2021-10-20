@@ -14,9 +14,11 @@ import checkFormValidity from '../../utils/checkFormValidity';
 import formatAPIErrors from '../../utils/formatAPIErrors';
 import init from './init';
 import { initialState, reducer } from './reducer';
+import useChangeLanguage from '../LanguageProvider/hooks/useChangeLanguage';
 
 const AuthPage = ({ hasAdmin, setHasAdmin }) => {
   const { push } = useHistory();
+  const changeLocale = useChangeLanguage();
   const {
     params: { authType },
   } = useRouteMatch('/auth/:authType');
@@ -162,6 +164,10 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
         data: body,
         cancelToken: source.token,
       });
+
+      if (user.preferedLanguage) {
+        changeLocale(user.preferedLanguage);
+      }
 
       auth.setToken(token, modifiedData.rememberMe);
       auth.setUserInfo(user, modifiedData.rememberMe);

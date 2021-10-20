@@ -6,7 +6,7 @@ import generateResultsObject from './utils/generateResultsObject';
 import reducer from './reducer';
 import init from './init';
 
-const useUserPermissions = pluginPermissions => {
+const useUserPermissions = (pluginPermissions, permissions) => {
   const abortController = new AbortController();
   const { signal } = abortController;
 
@@ -14,14 +14,15 @@ const useUserPermissions = pluginPermissions => {
   const permissionNames = useMemo(() => {
     return Object.keys(pluginPermissions);
   }, [pluginPermissions]);
-  const currentUserPermissions = useUser();
+  const { userPermissions } = useUser();
+  const currentUserPermissions = permissions || userPermissions;
   const [state, dispatch] = useReducer(reducer, {}, () => init(permissionNames));
   const checkPermissionsRef = useRef();
   const generateArrayOfPromisesRef = useRef();
 
-  checkPermissionsRef.current = async permissionName => {
+  checkPermissionsRef.current = async (permissionName, permissions) => {
     const hasPermission = await hasPermissions(
-      currentUserPermissions,
+      permissions,
       pluginPermissions[permissionName],
       signal
     );
@@ -29,8 +30,8 @@ const useUserPermissions = pluginPermissions => {
     return { permissionName, hasPermission };
   };
 
-  generateArrayOfPromisesRef.current = array =>
-    array.map(permissionName => checkPermissionsRef.current(permissionName));
+  generateArrayOfPromisesRef.current = (array, permissions) =>
+    array.map(permissionName => checkPermissionsRef.current(permissionName, permissions));
 
   useEffect(() => {
     isMounted.current = true;
@@ -47,7 +48,11 @@ const useUserPermissions = pluginPermissions => {
           type: 'GET_DATA',
           permissionNames,
         });
-        const arrayOfPromises = generateArrayOfPromisesRef.current(permissionNames);
+
+        const arrayOfPromises = generateArrayOfPromisesRef.current(
+          permissionNames,
+          currentUserPermissions
+        );
         const results = await Promise.all(arrayOfPromises);
         const data = generateResultsObject(results);
 
@@ -67,7 +72,7 @@ const useUserPermissions = pluginPermissions => {
     return () => {
       abortController.abort();
     };
-  }, [permissionNames]);
+  }, [permissionNames, currentUserPermissions]);
 
   // This function is used to synchronise the hook when used in dynamic components
   const setIsLoading = useCallback(() => {

@@ -127,12 +127,12 @@ describe('Search query', () => {
     rq = await createAuthRequest({ strapi });
 
     data.beds = builder.sanitizedFixturesFor(bedModel.name, strapi);
-  }, 60000);
+  });
 
   afterAll(async () => {
     await strapi.destroy();
     await builder.cleanup();
-  }, 60000);
+  });
 
   describe('Without filters', () => {
     test('search for "id"', async () => {

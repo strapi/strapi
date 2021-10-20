@@ -31,17 +31,6 @@ const form = {
     autoComplete: 'no',
     validations: {},
   },
-  password: {
-    label: 'Auth.form.password.label',
-    type: 'password',
-    autoComplete: 'new-password',
-    validations: {},
-  },
-  confirmPassword: {
-    label: 'Auth.form.confirmPassword.label',
-    type: 'password',
-    validations: {},
-  },
 };
 
 export default form;

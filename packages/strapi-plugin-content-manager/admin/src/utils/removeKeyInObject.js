@@ -25,6 +25,12 @@ const removeKeyInObject = (obj, keyToRemove) => {
         return { ...acc, [current]: value };
       }
 
+      if (Array.isArray(acc)) {
+        acc[current] = removeKeyInObject(value, keyToRemove);
+
+        return acc;
+      }
+
       return { ...acc, [current]: removeKeyInObject(value, keyToRemove) };
     }
 

@@ -1,6 +1,6 @@
 {
   "name": "strapi-generate",
-  "version": "3.5.4",
+  "version": "3.6.8",
   "description": "Master of ceremonies for the Strapi generators.",
   "homepage": "https://strapi.io",
   "keywords": [
@@ -18,9 +18,9 @@
   "dependencies": {
     "async": "^2.6.2",
     "fs-extra": "^9.1.0",
-    "lodash": "4.17.20",
+    "lodash": "4.17.21",
     "reportback": "^2.0.2",
-    "strapi-utils": "3.5.4"
+    "strapi-utils": "3.6.8"
   },
   "author": {
     "name": "Strapi team",

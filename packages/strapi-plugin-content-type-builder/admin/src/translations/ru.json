@@ -183,5 +183,6 @@
   "relation.oneToOne": "имеет один и принадлежит одному",
   "relation.oneWay": "имеет один",
   "table.attributes.title.plural": "Полей - {number}",
-  "table.attributes.title.singular": "Поле - {number}"
+  "table.attributes.title.singular": "Поле - {number}",
+  "error.validation.enum-empty-string": "Не может быть пустой строкой"
 }

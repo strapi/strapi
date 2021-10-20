@@ -18,6 +18,7 @@ const mountModels = require('./mount-models');
 const getQueryParams = require('./get-query-params');
 const queries = require('./queries');
 const initKnex = require('./knex');
+const registerCoreMigrations = require('./migrations');
 
 /**
  * Bookshelf hook
@@ -42,6 +43,8 @@ module.exports = function(strapi) {
 
   function initialize() {
     initKnex(strapi);
+
+    registerCoreMigrations();
 
     const GLOBALS = {};
 

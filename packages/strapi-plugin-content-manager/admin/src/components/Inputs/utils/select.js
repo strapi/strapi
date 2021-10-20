@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { get } from 'lodash';
-import useDataManager from '../../../hooks/useDataManager';
+import { useContentManagerEditViewDataManager } from 'strapi-helper-plugin';
 
 function useSelect(keys) {
   const {
@@ -12,7 +12,7 @@ function useSelect(keys) {
     readActionAllowedFields,
     shouldNotRunValidations,
     updateActionAllowedFields,
-  } = useDataManager();
+  } = useContentManagerEditViewDataManager();
 
   const allowedFields = useMemo(() => {
     return isCreatingEntry ? createActionAllowedFields : updateActionAllowedFields;

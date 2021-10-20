@@ -62,6 +62,7 @@ describe('Content Manager | hooks | useFetchContentTypeLayout | utils ', () => {
             defaultParams: {},
             shouldDisplayRelationLink: true,
           },
+          targetModelPluginOptions: {},
         },
       ];
 
