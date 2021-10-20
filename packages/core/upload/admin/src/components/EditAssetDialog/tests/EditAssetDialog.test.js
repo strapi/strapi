@@ -107,6 +107,16 @@ const renderCompo = (
   );
 
 describe('<EditAssetDialog />', () => {
+  const RealNow = Date.now;
+
+  beforeAll(() => {
+    global.Date.now = jest.fn(() => new Date('2021-09-20').getTime());
+  });
+
+  afterAll(() => {
+    global.Date.now = RealNow;
+  });
+
   it('renders and matches the snapshot', () => {
     const { container } = renderCompo();
 
@@ -191,7 +201,7 @@ describe('<EditAssetDialog />', () => {
 
       fireEvent.click(screen.getByLabelText('Download'));
       expect(downloadFile).toHaveBeenCalledWith(
-        'http://localhost:1337/uploads/Screenshot_2_5d4a574d61.png',
+        'http://localhost:1337/uploads/Screenshot_2_5d4a574d61.png?id=1632096000000',
         'Screenshot 2.png'
       );
     });

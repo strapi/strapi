@@ -1130,7 +1130,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                     >
                       <img
                         alt="Screenshot 2.png"
-                        src="http://localhost:1337/uploads/Screenshot_2_5d4a574d61.png"
+                        src="http://localhost:1337/uploads/Screenshot_2_5d4a574d61.png?id=1632096000000"
                       />
                     </div>
                     <div
