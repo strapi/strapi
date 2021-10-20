@@ -6,7 +6,7 @@ const componentField = {
     defaultMessage: 'Type',
   },
   name: 'createComponent',
-  type: 'radio-group',
+  type: 'boolean-radio-group',
   size: 12,
   radios: [
     {

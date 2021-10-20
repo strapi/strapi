@@ -41,7 +41,7 @@ const baseForm = {
                 defaultMessage: 'Type',
               },
               name: 'repeatable',
-              type: 'radio-group',
+              type: 'boolean-radio-group',
               size: 12,
               radios: [
                 {
@@ -180,7 +180,7 @@ const baseForm = {
               },
               name: 'multiple',
               size: 12,
-              type: 'radio-group',
+              type: 'boolean-radio-group',
               radios: [
                 {
                   title: {
