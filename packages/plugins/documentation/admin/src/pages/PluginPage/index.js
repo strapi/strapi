@@ -13,6 +13,7 @@ import {
   LoadingIndicatorPage,
   stopPropagation,
   EmptyStateLayout,
+  useFocusWhenNavigate,
 } from '@strapi/helper-plugin';
 import { Button } from '@strapi/parts/Button';
 import { Layout, HeaderLayout, ContentLayout } from '@strapi/parts/Layout';
@@ -32,6 +33,7 @@ import openWithNewTab from '../../utils/openWithNewTab';
 import useReactQuery from '../utils/useReactQuery';
 
 const PluginPage = () => {
+  useFocusWhenNavigate();
   const { formatMessage } = useIntl();
   const { data, isLoading, deleteMutation, regenerateDocMutation } = useReactQuery();
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);

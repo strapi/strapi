@@ -1,7 +1,12 @@
 import React, { useState } from 'react';
 import { useIntl } from 'react-intl';
 import { Formik } from 'formik';
-import { CheckPermissions, Form, LoadingIndicatorPage } from '@strapi/helper-plugin';
+import {
+  CheckPermissions,
+  Form,
+  LoadingIndicatorPage,
+  useFocusWhenNavigate,
+} from '@strapi/helper-plugin';
 
 // Strapi Parts
 import { ContentLayout, HeaderLayout } from '@strapi/parts/Layout';
@@ -26,6 +31,7 @@ import FieldActionWrapper from '../../components/FieldActionWrapper';
 import schema from '../utils/schema';
 
 const SettingsPage = () => {
+  useFocusWhenNavigate();
   const { formatMessage } = useIntl();
   const { submitMutation, data, isLoading } = useReactQuery();
   const [passwordShown, setPasswordShown] = useState(false);
