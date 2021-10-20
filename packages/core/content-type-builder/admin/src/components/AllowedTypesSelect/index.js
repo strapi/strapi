@@ -20,7 +20,6 @@ const AllowedTypesSelect = ({ intlLabel, name, onChange, value }) => {
   const { formatMessage } = useIntl();
 
   /* eslint-disable indent */
-
   const displayedValue =
     value === null || value.length === 0
       ? formatMessage({ id: getTrad('form.attribute.media.allowed-types.none') })
