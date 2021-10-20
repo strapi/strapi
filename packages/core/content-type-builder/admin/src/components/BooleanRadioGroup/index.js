@@ -6,7 +6,7 @@ const BooleanRadioGroup = ({ onChange, name, ...rest }) => {
   const handleChange = e => {
     const checked = e.target.value !== 'false';
 
-    onChange({ target: { name, value: checked, type: 'radio' } });
+    onChange({ target: { name, value: checked, type: 'boolean-radio-group' } });
   };
 
   return <CustomRadioGroup {...rest} name={name} onChange={handleChange} />;
