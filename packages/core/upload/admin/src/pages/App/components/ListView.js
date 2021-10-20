@@ -60,6 +60,14 @@ export const ListView = ({ assets, onEditAsset, onSelectAsset, selectedAssets })
             />
           );
         })}
+
+        {/* TODO: Remove this when we have media queries */}
+        <div aria-hidden />
+        <div aria-hidden />
+        <div aria-hidden />
+        <div aria-hidden />
+        <div aria-hidden />
+        <div aria-hidden />
       </GridLayout>
     </KeyboardNavigable>
   );

@@ -843,6 +843,24 @@ describe('MediaLibrary / ListView', () => {
                 </div>
               </div>
             </article>
+            <div
+              aria-hidden="true"
+            />
+            <div
+              aria-hidden="true"
+            />
+            <div
+              aria-hidden="true"
+            />
+            <div
+              aria-hidden="true"
+            />
+            <div
+              aria-hidden="true"
+            />
+            <div
+              aria-hidden="true"
+            />
           </div>
         </div>
         <div
