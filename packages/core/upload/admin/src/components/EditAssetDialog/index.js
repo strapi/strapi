@@ -87,8 +87,8 @@ export const EditAssetDialog = ({ onClose, asset, canUpdate, canCopyLink, canDow
                 onSubmit={handleSubmit}
                 initialValues={{
                   name: asset.name,
-                  alternativeText: asset.alternativeText || asset.name,
-                  caption: asset.caption || asset.name,
+                  alternativeText: asset.alternativeText || '',
+                  caption: asset.caption || '',
                 }}
               >
                 {({ values, errors, handleChange }) => (
