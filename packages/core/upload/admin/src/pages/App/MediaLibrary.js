@@ -129,7 +129,7 @@ export const MediaLibrary = () => {
                     id: getTrad('bulk.select.label'),
                     defaultMessage: 'Select all assets',
                   })}
-                  value={selected.length === assets?.length}
+                  value={assets?.length > 0 && selected.length === assets?.length}
                   onChange={selectAllAssets}
                 />
               </BoxWithHeight>

@@ -1416,7 +1416,7 @@ describe('<EditAssetDialog />', () => {
                                       class="c38"
                                       id="textinput-2"
                                       name="alternativeText"
-                                      value="Screenshot 2.png"
+                                      value=""
                                     />
                                   </div>
                                   <p
@@ -1452,7 +1452,7 @@ describe('<EditAssetDialog />', () => {
                                       class="c38"
                                       id="textinput-3"
                                       name="caption"
-                                      value="Screenshot 2.png"
+                                      value=""
                                     />
                                   </div>
                                 </div>

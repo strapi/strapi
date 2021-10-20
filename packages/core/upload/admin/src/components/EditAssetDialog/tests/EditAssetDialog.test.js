@@ -118,8 +118,8 @@ describe('<EditAssetDialog />', () => {
       renderCompo();
 
       expect(screen.getByLabelText('File name')).toHaveValue('Screenshot 2.png');
-      expect(screen.getByLabelText('Alternative text')).toHaveValue('Screenshot 2.png');
-      expect(screen.getByLabelText('Caption')).toHaveValue('Screenshot 2.png');
+      expect(screen.getByLabelText('Alternative text')).toHaveValue('');
+      expect(screen.getByLabelText('Caption')).toHaveValue('');
     });
 
     it('disables all the actions and field when the user is not allowed to update', () => {

@@ -1303,7 +1303,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                                 class="c38"
                                 id="textinput-2"
                                 name="alternativeText"
-                                value="Screenshot 2.png"
+                                value=""
                               />
                             </div>
                             <p
@@ -1339,7 +1339,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                                 class="c38"
                                 id="textinput-3"
                                 name="caption"
-                                value="Screenshot 2.png"
+                                value=""
                               />
                             </div>
                           </div>
