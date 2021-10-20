@@ -73,8 +73,8 @@ const DynamicZone = ({
   }, [componentsExpanded]);
 
   const expandAllComponents = useCallback(() => {
-    setComponentsExpanded(componentsExpanded.map(() => !allComponentsExpanded()));
-  }, [componentsExpanded, allComponentsExpanded]);
+    setComponentsExpanded(dynamicDisplayedComponents.map(() => !allComponentsExpanded()));
+  }, [dynamicDisplayedComponents, allComponentsExpanded]);
 
   const handleMoveComponent = useCallback((name, index, offset) => {
     const newComponentsExpanded = [...componentsExpanded];
