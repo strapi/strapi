@@ -368,8 +368,16 @@ const reducer = (state = initialState, action) =>
             oppositeAttributeToCreate.private = rest.private;
           }
 
+          const indexOfInitialAttribute = updatedAttributes.findIndex(
+            ({ name }) => name === initialAttribute.name
+          );
+          const indexOfUpdatedAttribute = updatedAttributes.findIndex(
+            ({ name: attrName }) => name === attrName
+          );
+
           const indexToInsert =
-            updatedAttributes.findIndex(({ name }) => name === initialAttribute.name) + 1;
+            (indexOfInitialAttribute === -1 ? indexOfUpdatedAttribute : indexOfInitialAttribute) +
+            1;
 
           updatedAttributes.splice(indexToInsert, 0, oppositeAttributeToCreate);
         }
