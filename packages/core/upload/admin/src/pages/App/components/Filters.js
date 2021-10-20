@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Button } from '@strapi/parts/Button';
-import { FilterPopoverURLQuery } from '@strapi/helper-plugin';
+import { FilterPopoverURLQuery, FilterListURLQuery } from '@strapi/helper-plugin';
 import FilterIcon from '@strapi/icons/FilterIcon';
 import { useIntl } from 'react-intl';
 
@@ -56,6 +56,8 @@ export const Filters = () => {
           source={buttonRef}
         />
       )}
+
+      <FilterListURLQuery filtersSchema={displayedFilters} />
     </>
   );
 };
