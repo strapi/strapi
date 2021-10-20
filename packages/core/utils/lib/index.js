@@ -9,7 +9,8 @@ const sanitizeEntity = require('./sanitize-entity');
 const parseType = require('./parse-type');
 const policy = require('./policy');
 const templateConfiguration = require('./template-configuration');
-const { yup, formatYupErrors } = require('./validators');
+const { yup } = require('./validators');
+const errors = require('./errors');
 const {
   nameToSlug,
   nameToCollectionName,
@@ -34,7 +35,6 @@ const pagination = require('./pagination');
 
 module.exports = {
   yup,
-  formatYupErrors,
   policy,
   templateConfiguration,
   buildQuery,
@@ -63,4 +63,5 @@ module.exports = {
   hooks,
   providerFactory,
   pagination,
+  errors,
 };

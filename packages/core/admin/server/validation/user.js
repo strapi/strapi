@@ -1,10 +1,13 @@
 'use strict';
 
 const { isUndefined } = require('lodash/fp');
-const { yup, formatYupErrors } = require('@strapi/utils');
+const { yup } = require('@strapi/utils');
+const { YupValidationError } = require('@strapi/utils').errors;
 const validators = require('./common-validators');
 
-const handleReject = error => Promise.reject(formatYupErrors(error));
+const handleYupError = error => {
+  throw new YupValidationError(error);
+};
 
 const userCreationSchema = yup
   .object()
@@ -18,7 +21,9 @@ const userCreationSchema = yup
   .noUnknown();
 
 const validateUserCreationInput = data => {
-  return userCreationSchema.validate(data, { strict: true, abortEarly: false }).catch(handleReject);
+  return userCreationSchema
+    .validate(data, { strict: true, abortEarly: false })
+    .catch(handleYupError);
 };
 
 const profileUpdateSchema = yup
@@ -40,7 +45,7 @@ const profileUpdateSchema = yup
 const validateProfileUpdateInput = data => {
   return profileUpdateSchema
     .validate(data, { strict: true, abortEarly: false })
-    .catch(handleReject);
+    .catch(handleYupError);
 };
 
 const userUpdateSchema = yup
@@ -57,7 +62,7 @@ const userUpdateSchema = yup
   .noUnknown();
 
 const validateUserUpdateInput = data => {
-  return userUpdateSchema.validate(data, { strict: true, abortEarly: false }).catch(handleReject);
+  return userUpdateSchema.validate(data, { strict: true, abortEarly: false }).catch(handleYupError);
 };
 
 const usersDeleteSchema = yup
@@ -72,7 +77,9 @@ const usersDeleteSchema = yup
   .noUnknown();
 
 const validateUsersDeleteInput = async data => {
-  return usersDeleteSchema.validate(data, { strict: true, abortEarly: false }).catch(handleReject);
+  return usersDeleteSchema
+    .validate(data, { strict: true, abortEarly: false })
+    .catch(handleYupError);
 };
 
 module.exports = {

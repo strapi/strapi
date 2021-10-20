@@ -93,7 +93,7 @@ module.exports = {
     const user = ctx.state.user;
 
     if (!user) {
-      return ctx.badRequest('Unauthenticated request');
+      return ctx.unauthorized();
     }
 
     ctx.body = sanitizeUser(user);

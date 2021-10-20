@@ -1,6 +1,7 @@
 'use strict';
 
-const { yup, formatYupErrors } = require('@strapi/utils');
+const { yup } = require('@strapi/utils');
+const { YupValidationError } = require('@strapi/utils').errors;
 
 const hasPermissionsSchema = yup.object({
   actions: yup.array().of(yup.string()),
@@ -11,7 +12,7 @@ const validateHasPermissionsInput = options => {
   try {
     return hasPermissionsSchema.validateSync(options, { strict: true, abortEarly: true });
   } catch (e) {
-    throw new Error(formatYupErrors(e));
+    throw new YupValidationError(e);
   }
 };
 

@@ -117,7 +117,6 @@ describe('Locales', () => {
       const setIsDefault = jest.fn(() => expectedLocale);
       const findByCode = jest.fn(() => ({ name: 'other locale', code: 'af' }));
       const create = jest.fn(() => Promise.resolve(locale));
-      const badRequest = jest.fn();
       const getModel = jest.fn(() => localeModel.schema);
       global.strapi = {
         getModel,
@@ -136,14 +135,19 @@ describe('Locales', () => {
       };
 
       const ctx = {
-        badRequest,
         request: { body: { ...locale, isDefault: false } },
         state: { user: { id: 1 } },
       };
-      await createLocale(ctx);
+
+      expect.assertions(3);
+
+      try {
+        await createLocale(ctx);
+      } catch (e) {
+        expect(e.message).toEqual('This locale already exists');
+      }
 
       expect(findByCode).toHaveBeenCalledWith('af');
-      expect(badRequest).toHaveBeenCalledWith('This locale already exists');
       expect(create).not.toHaveBeenCalled();
     });
   });
@@ -201,7 +205,6 @@ describe('Locales', () => {
       const findById = jest.fn(() => existingLocale);
       const update = jest.fn(() => Promise.resolve(updatedLocale));
       const getModel = jest.fn(() => localeModel.schema);
-      const badRequest = jest.fn();
       global.strapi = {
         getModel,
         plugins: {
@@ -219,15 +222,19 @@ describe('Locales', () => {
       };
 
       const ctx = {
-        badRequest,
         params: { id: 1 },
         request: { body: { ...updates, isDefault: true } },
         state: { user: { id: 1 } },
       };
 
-      await updateLocale(ctx);
+      expect.assertions(5);
 
-      expect(badRequest).toHaveBeenCalled();
+      try {
+        await updateLocale(ctx);
+      } catch (e) {
+        expect(e.message).toEqual('this field has unspecified keys: code');
+      }
+
       expect(findById).not.toHaveBeenCalled();
       expect(update).not.toHaveBeenCalled();
       expect(setIsDefault).not.toHaveBeenCalled();
@@ -277,7 +284,6 @@ describe('Locales', () => {
 
       const setIsDefault = jest.fn(() => Promise.resolve(expectedLocales));
       const findById = jest.fn(() => Promise.resolve(locale));
-      const badRequest = jest.fn();
       const deleteFn = jest.fn();
       const getModel = jest.fn(() => localeModel.schema);
       global.strapi = {
@@ -295,10 +301,15 @@ describe('Locales', () => {
         },
       };
 
-      const ctx = { params: { id: 1 }, badRequest };
-      await deleteLocale(ctx);
+      const ctx = { params: { id: 1 } };
 
-      expect(badRequest).toHaveBeenCalledWith('Cannot delete the default locale');
+      expect.assertions(4);
+
+      try {
+        await deleteLocale(ctx);
+      } catch (e) {
+        expect(e.message).toEqual('Cannot delete the default locale');
+      }
 
       expect(findById).toHaveBeenCalledWith(1);
       expect(setIsDefault).not.toHaveBeenCalled();

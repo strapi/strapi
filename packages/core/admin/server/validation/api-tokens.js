@@ -1,9 +1,12 @@
 'use strict';
 
-const { yup, formatYupErrors } = require('@strapi/utils');
+const { yup } = require('@strapi/utils');
+const { YupValidationError } = require('@strapi/utils').errors;
 const constants = require('../services/constants');
 
-const handleReject = error => Promise.reject(formatYupErrors(error));
+const handleYupError = error => {
+  throw new YupValidationError(error);
+};
 
 const apiTokenCreationSchema = yup
   .object()
@@ -23,7 +26,7 @@ const apiTokenCreationSchema = yup
 const validateApiTokenCreationInput = async data => {
   return apiTokenCreationSchema
     .validate(data, { strict: true, abortEarly: false })
-    .catch(handleReject);
+    .catch(handleYupError);
 };
 
 const apiTokenUpdateSchema = yup
@@ -44,7 +47,7 @@ const apiTokenUpdateSchema = yup
 const validateApiTokenUpdateInput = async data => {
   return apiTokenUpdateSchema
     .validate(data, { strict: true, abortEarly: false })
-    .catch(handleReject);
+    .catch(handleYupError);
 };
 
 module.exports = {

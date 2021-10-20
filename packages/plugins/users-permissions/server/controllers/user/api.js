@@ -2,16 +2,14 @@
 
 const _ = require('lodash');
 const { sanitizeEntity } = require('@strapi/utils');
+const { ApplicationError, ValidationError } = require('@strapi/utils').errors;
 const { getService } = require('../../utils');
+const { validateCreateUserBody, validateUpdateUserBody } = require('../validation/user');
 
 const sanitizeUser = user =>
   sanitizeEntity(user, {
     model: strapi.getModel('plugin::users-permissions.user'),
   });
-
-const formatError = error => [
-  { messages: [{ id: error.id, message: error.message, field: error.field }] },
-];
 
 module.exports = {
   /**
@@ -23,25 +21,16 @@ module.exports = {
       .store({ type: 'plugin', name: 'users-permissions', key: 'advanced' })
       .get();
 
-    const { email, username, password, role } = ctx.request.body;
+    await validateCreateUserBody(ctx.request.body);
 
-    if (!email) return ctx.badRequest('missing.email');
-    if (!username) return ctx.badRequest('missing.username');
-    if (!password) return ctx.badRequest('missing.password');
+    const { email, username, role } = ctx.request.body;
 
     const userWithSameUsername = await strapi
       .query('plugin::users-permissions.user')
       .findOne({ where: { username } });
 
     if (userWithSameUsername) {
-      return ctx.badRequest(
-        null,
-        formatError({
-          id: 'Auth.form.error.username.taken',
-          message: 'Username already taken.',
-          field: ['username'],
-        })
-      );
+      if (!email) throw new ApplicationError('Username already taken');
     }
 
     if (advanced.unique_email) {
@@ -50,15 +39,7 @@ module.exports = {
         .findOne({ where: { email: email.toLowerCase() } });
 
       if (userWithSameEmail) {
-        return ctx.badRequest(
-          null,
-
-          formatError({
-            id: 'Auth.form.error.email.taken',
-            message: 'Email already taken.',
-            field: ['email'],
-          })
-        );
+        throw new ApplicationError('Email already taken');
       }
     }
 
@@ -82,7 +63,7 @@ module.exports = {
 
       ctx.created(sanitizeUser(data));
     } catch (error) {
-      ctx.badRequest(null, formatError(error));
+      throw new ApplicationError(error.message);
     }
   },
 
@@ -100,16 +81,10 @@ module.exports = {
 
     const user = await getService('user').fetch({ id });
 
-    if (_.has(ctx.request.body, 'email') && !email) {
-      return ctx.badRequest('email.notNull');
-    }
+    await validateUpdateUserBody(ctx.request.body);
 
-    if (_.has(ctx.request.body, 'username') && !username) {
-      return ctx.badRequest('username.notNull');
-    }
-
-    if (_.has(ctx.request.body, 'password') && !password && user.provider === 'local') {
-      return ctx.badRequest('password.notNull');
+    if (user.provider === 'local' && _.has(ctx.request.body, 'password') && !password) {
+      throw new ValidationError('password.notNull');
     }
 
     if (_.has(ctx.request.body, 'username')) {
@@ -118,14 +93,7 @@ module.exports = {
         .findOne({ where: { username } });
 
       if (userWithSameUsername && userWithSameUsername.id != id) {
-        return ctx.badRequest(
-          null,
-          formatError({
-            id: 'Auth.form.error.username.taken',
-            message: 'username.alreadyTaken.',
-            field: ['username'],
-          })
-        );
+        throw new ApplicationError('Username already taken');
       }
     }
 
@@ -135,14 +103,7 @@ module.exports = {
         .findOne({ where: { email: email.toLowerCase() } });
 
       if (userWithSameEmail && userWithSameEmail.id != id) {
-        return ctx.badRequest(
-          null,
-          formatError({
-            id: 'Auth.form.error.email.taken',
-            message: 'Email already taken',
-            field: ['email'],
-          })
-        );
+        throw new ApplicationError('Email already taken');
       }
       ctx.request.body.email = ctx.request.body.email.toLowerCase();
     }

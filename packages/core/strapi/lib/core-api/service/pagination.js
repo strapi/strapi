@@ -1,6 +1,7 @@
 'use strict';
 
 const { has, toNumber, isUndefined } = require('lodash/fp');
+const { ValidationError } = require('@strapi/utils').errors;
 
 /**
  * Default limit values from config
@@ -41,7 +42,9 @@ const shouldCount = params => {
       return false;
     }
 
-    throw new Error('Invalid withCount parameter. Expected "t","1","true","false","0","f"');
+    throw new ValidationError(
+      'Invalid withCount parameter. Expected "t","1","true","false","0","f"'
+    );
   }
 
   return Boolean(strapi.config.get('api.rest.withCount', true));
@@ -66,7 +69,9 @@ const getPaginationInfo = params => {
   }
 
   if (isOffset && isPaged) {
-    throw new Error('Invalid pagination parameters. Expected either start/limit or page/pageSize');
+    throw new ValidationError(
+      'Invalid pagination parameters. Expected either start/limit or page/pageSize'
+    );
   }
 
   if (isPagedPagination(pagination)) {

@@ -20,6 +20,7 @@ const createEntityService = require('./services/entity-service');
 const createCronService = require('./services/cron');
 const entityValidator = require('./services/entity-validator');
 const createTelemetry = require('./services/metrics');
+const errors = require('./services/errors');
 const createAuth = require('./services/auth');
 const createUpdateNotifier = require('./utils/update-notifier');
 const createStartupLogger = require('./utils/startup-logger');
@@ -51,6 +52,7 @@ class Strapi {
   constructor(opts = {}) {
     destroyOnSignal(this);
     this.dirs = utils.getDirs(opts.dir || process.cwd());
+    this.errors = errors;
     const appConfig = loadConfiguration(this.dirs.root, opts);
     this.container = createContainer(this);
     this.container.register('config', createConfigProvider(appConfig));
@@ -182,6 +184,8 @@ class Strapi {
 
     this.telemetry.destroy();
     this.cron.destroy();
+
+    process.removeAllListeners();
 
     delete global.strapi;
   }

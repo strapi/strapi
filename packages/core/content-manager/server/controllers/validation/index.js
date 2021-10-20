@@ -1,14 +1,15 @@
 'use strict';
 
 const _ = require('lodash');
-const { yup, formatYupErrors } = require('@strapi/utils');
+const { yup } = require('@strapi/utils');
+const { PaginationError, ValidationError, YupValidationError } = require('@strapi/utils').errors;
 
 const createModelConfigurationSchema = require('./model-configuration');
 
 const TYPES = ['singleType', 'collectionType'];
 
-const handleError = error => {
-  throw strapi.errors.badRequest('ValidationError', formatYupErrors(error));
+const handleYupError = error => {
+  throw new YupValidationError(error);
 };
 
 /**
@@ -20,7 +21,7 @@ const validateKind = kind => {
     .oneOf(TYPES)
     .nullable()
     .validate(kind)
-    .catch(error => Promise.reject(formatYupErrors(error)));
+    .catch(error => Promise.reject(handleYupError(error)));
 };
 
 const validateBulkDeleteInput = (data = {}) => {
@@ -37,7 +38,7 @@ const validateBulkDeleteInput = (data = {}) => {
       strict: true,
       abortEarly: false,
     })
-    .catch(handleError);
+    .catch(handleYupError);
 };
 
 const validateGenerateUIDInput = data => {
@@ -51,7 +52,7 @@ const validateGenerateUIDInput = data => {
       strict: true,
       abortEarly: false,
     })
-    .catch(handleError);
+    .catch(handleYupError);
 };
 
 const validateCheckUIDAvailabilityInput = data => {
@@ -68,23 +69,21 @@ const validateCheckUIDAvailabilityInput = data => {
       strict: true,
       abortEarly: false,
     })
-    .catch(handleError);
+    .catch(handleYupError);
 };
 
 const validateUIDField = (contentTypeUID, field) => {
   const model = strapi.contentTypes[contentTypeUID];
 
   if (!model) {
-    throw strapi.errors.badRequest('ValidationError', ['ContentType not found']);
+    throw new ValidationError('ContentType not found');
   }
 
   if (
     !_.has(model, ['attributes', field]) ||
     _.get(model, ['attributes', field, 'type']) !== 'uid'
   ) {
-    throw strapi.errors.badRequest('ValidationError', {
-      field: ['field must be a valid `uid` attribute'],
-    });
+    throw new ValidationError(`${field} must be a valid \`uid\` attribute`);
   }
 };
 
@@ -93,10 +92,10 @@ const validatePagination = ({ page, pageSize }) => {
   const pageSizeNumber = parseInt(pageSize);
 
   if (isNaN(pageNumber) || pageNumber < 1) {
-    throw strapi.errors.badRequest('invalid pageNumber param');
+    throw new PaginationError('invalid pageNumber param');
   }
   if (isNaN(pageSizeNumber) || pageSizeNumber < 1) {
-    throw strapi.errors.badRequest('invalid pageSize param');
+    throw new PaginationError('invalid pageSize param');
   }
 };
 

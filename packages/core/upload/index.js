@@ -1,6 +1,6 @@
 'use strict';
 
-const { errors } = require('./errors');
+const errors = require('./errors');
 
 module.exports = {
   errors,

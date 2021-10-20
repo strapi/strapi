@@ -111,9 +111,19 @@ describe('Content Type Builder - Content types', () => {
       expect(res.statusCode).toBe(400);
       expect(res.body).toMatchObject({
         error: {
-          ['contentType.attributes.relation.relation']: expect.arrayContaining([
-            expect.stringMatching('must be one of the following values: oneToOne, oneToMany'),
-          ]),
+          details: {
+            errors: [
+              {
+                message:
+                  'must be one of the following values: oneToOne, oneToMany, morphOne, morphMany, morphToOne, morphToMany',
+                name: 'ValidationError',
+                path: ['contentType', 'attributes', 'relation', 'relation'],
+              },
+            ],
+          },
+          message:
+            'must be one of the following values: oneToOne, oneToMany, morphOne, morphMany, morphToOne, morphToMany',
+          name: 'ValidationError',
         },
       });
     });

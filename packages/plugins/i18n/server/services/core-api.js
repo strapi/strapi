@@ -106,7 +106,7 @@ const createCreateLocalizationHandler = contentType => async (ctx = {}) => {
         .findOne({ where: { id: ctx.id }, populate: ['localizations'] });
 
   if (!entry) {
-    throw strapi.errors.notFound('baseEntryId.invalid');
+    return ctx.notFound('baseEntryId.invalid');
   }
 
   const { data, files } = ctx;
@@ -114,17 +114,17 @@ const createCreateLocalizationHandler = contentType => async (ctx = {}) => {
   const { findByCode } = getService('locales');
 
   if (isNil(data.locale)) {
-    throw strapi.errors.badRequest('locale.missing');
+    return ctx.badRequest('locale.missing');
   }
 
   const matchingLocale = await findByCode(data.locale);
   if (!matchingLocale) {
-    throw strapi.errors.badRequest('locale.invalid');
+    return ctx.badRequest('locale.invalid');
   }
 
   const usedLocales = getAllLocales(entry);
   if (usedLocales.includes(data.locale)) {
-    throw strapi.errors.badRequest('locale.already.used');
+    return ctx.badRequest('locale.already.used');
   }
 
   const sanitizedData = {

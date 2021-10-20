@@ -1,7 +1,8 @@
 'use strict';
 
 const _ = require('lodash');
-const { yup, formatYupErrors } = require('@strapi/utils');
+const { yup } = require('@strapi/utils');
+const { YupValidationError } = require('@strapi/utils').errors;
 const { getService } = require('../utils');
 const { AUTHOR_CODE, PUBLISH_ACTION } = require('../services/constants');
 const {
@@ -11,7 +12,9 @@ const {
 } = require('../domain/role');
 const validators = require('./common-validators');
 
-const handleReject = error => Promise.reject(formatYupErrors(error));
+const handleYupError = error => {
+  throw new YupValidationError(error);
+};
 
 // validatedUpdatePermissionsInput
 
@@ -34,11 +37,7 @@ const checkPermissionsAreBound = role =>
 
     for (const [subject, perms] of Object.entries(permsBySubject)) {
       const boundActions = getBoundActionsBySubject(role, subject);
-      const missingActions =
-        _.xor(
-          perms.map(p => p.action),
-          boundActions
-        ).length !== 0;
+      const missingActions = _.xor(perms.map(p => p.action), boundActions).length !== 0;
       if (missingActions) return false;
 
       const permsBoundByFields = perms.filter(p => BOUND_ACTIONS_FOR_FIELDS.includes(p.action));
@@ -96,7 +95,7 @@ const checkPermissionsSchema = yup.object().shape({
 const validateCheckPermissionsInput = data => {
   return checkPermissionsSchema
     .validate(data, { strict: true, abortEarly: false })
-    .catch(handleReject);
+    .catch(handleYupError);
 };
 
 const validatedUpdatePermissionsInput = async (permissions, role) => {
@@ -106,7 +105,7 @@ const validatedUpdatePermissionsInput = async (permissions, role) => {
       await schema.validate(permissions, { strict: true, abortEarly: false });
     }
   } catch (e) {
-    return handleReject(e);
+    handleYupError(e);
   }
 };
 
@@ -141,7 +140,9 @@ const actionsExistSchema = yup
   .test('actions-exist', '', checkPermissionsExist);
 
 const validatePermissionsExist = data => {
-  return actionsExistSchema.validate(data, { strict: true, abortEarly: false }).catch(handleReject);
+  return actionsExistSchema
+    .validate(data, { strict: true, abortEarly: false })
+    .catch(handleYupError);
 };
 
 // exports

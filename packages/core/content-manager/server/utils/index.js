@@ -1,6 +1,5 @@
 'use strict';
 
-const wrapBadRequest = require('./wrap-bad-request');
 const pickWritableAttributes = require('./pick-writable-attributes');
 
 // retrieve a local service
@@ -10,6 +9,5 @@ const getService = name => {
 
 module.exports = {
   getService,
-  wrapBadRequest,
   pickWritableAttributes,
 };

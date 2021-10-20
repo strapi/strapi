@@ -57,11 +57,20 @@ describe('Admin API Token CRUD (e2e)', () => {
 
     expect(res.statusCode).toBe(400);
     expect(res.body).toMatchObject({
-      statusCode: 400,
-      error: 'Bad Request',
-      message: 'ValidationError',
-      data: {
-        type: ['type is a required field'],
+      data: null,
+      error: {
+        status: 400,
+        name: 'ValidationError',
+        message: 'type is a required field',
+        details: {
+          errors: [
+            {
+              path: ['type'],
+              name: 'ValidationError',
+              message: 'type is a required field',
+            },
+          ],
+        },
       },
     });
   });
@@ -81,11 +90,20 @@ describe('Admin API Token CRUD (e2e)', () => {
 
     expect(res.statusCode).toBe(400);
     expect(res.body).toMatchObject({
-      statusCode: 400,
-      error: 'Bad Request',
-      message: 'ValidationError',
-      data: {
-        type: ['type must be one of the following values: read-only, full-access'],
+      data: null,
+      error: {
+        status: 400,
+        name: 'ValidationError',
+        message: 'type must be one of the following values: read-only, full-access',
+        details: {
+          errors: [
+            {
+              path: ['type'],
+              name: 'ValidationError',
+              message: 'type must be one of the following values: read-only, full-access',
+            },
+          ],
+        },
       },
     });
   });
@@ -249,7 +267,15 @@ describe('Admin API Token CRUD (e2e)', () => {
     });
 
     expect(res.statusCode).toBe(404);
-    expect(res.body.data).toBeUndefined();
+    expect(res.body).toMatchObject({
+      data: null,
+      error: {
+        status: 404,
+        name: 'NotFoundError',
+        message: 'API Token not found',
+        details: {},
+      },
+    });
   });
 
   test('11. Updates a token (successfully)', async () => {
@@ -291,7 +317,15 @@ describe('Admin API Token CRUD (e2e)', () => {
     });
 
     expect(res.statusCode).toBe(404);
-    expect(res.body.data).toBeUndefined();
+    expect(res.body).toMatchObject({
+      data: null,
+      error: {
+        status: 404,
+        name: 'NotFoundError',
+        message: 'API Token not found',
+        details: {},
+      },
+    });
   });
 
   test('13. Updates a token with partial payload (successfully)', async () => {
@@ -332,11 +366,20 @@ describe('Admin API Token CRUD (e2e)', () => {
 
     expect(res.statusCode).toBe(400);
     expect(res.body).toMatchObject({
-      statusCode: 400,
-      error: 'Bad Request',
-      message: 'ValidationError',
-      data: {
-        type: ['type must be one of the following values: read-only, full-access'],
+      data: null,
+      error: {
+        details: {
+          errors: [
+            {
+              message: 'type must be one of the following values: read-only, full-access',
+              name: 'ValidationError',
+              path: ['type'],
+            },
+          ],
+        },
+        message: 'type must be one of the following values: read-only, full-access',
+        name: 'ValidationError',
+        status: 400,
       },
     });
   });

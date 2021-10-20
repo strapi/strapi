@@ -246,38 +246,41 @@ describe('Auth', () => {
     test('Check user is active', async () => {
       const resetPasswordToken = '123';
       const findOne = jest.fn(() => Promise.resolve());
-      const badRequest = jest.fn(() => {});
 
       global.strapi = {
         query() {
           return { findOne };
         },
-        errors: { badRequest },
       };
 
       expect.assertions(2);
-      return resetPassword({ resetPasswordToken, password: 'Test1234' }).catch(() => {
-        expect(findOne).toHaveBeenCalledWith({ where: { resetPasswordToken, isActive: true } });
-        expect(badRequest).toHaveBeenCalled();
-      });
+
+      try {
+        await resetPassword({ resetPasswordToken, password: 'Test1234' });
+      } catch (e) {
+        expect(e.message).toEqual('An application error occured');
+      }
+
+      expect(findOne).toHaveBeenCalledWith({ where: { resetPasswordToken, isActive: true } });
     });
 
     test('Fails if user is not found', async () => {
       const resetPasswordToken = '123';
       const findOne = jest.fn(() => Promise.resolve());
-      const badRequest = jest.fn(() => {});
 
       global.strapi = {
         query() {
           return { findOne };
         },
-        errors: { badRequest },
       };
 
       expect.assertions(1);
-      return resetPassword({ resetPasswordToken, password: 'Test1234' }).catch(() => {
-        expect(badRequest).toHaveBeenCalled();
-      });
+
+      try {
+        await resetPassword({ resetPasswordToken, password: 'Test1234' });
+      } catch (e) {
+        expect(e.message).toEqual('An application error occured');
+      }
     });
 
     test('Changes password and clear reset token', async () => {

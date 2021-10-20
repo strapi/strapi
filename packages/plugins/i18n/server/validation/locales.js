@@ -1,12 +1,20 @@
 'use strict';
 
 const { prop } = require('lodash/fp');
-const { yup, formatYupErrors } = require('@strapi/utils');
+const { yup } = require('@strapi/utils');
+const { YupValidationError } = require('@strapi/utils').errors;
+
 const { isoLocales } = require('../constants');
 
 const allowedLocaleCodes = isoLocales.map(prop('code'));
 
-const handleReject = error => Promise.reject(formatYupErrors(error));
+const validateSchema = schema => async (body, errorMessage) => {
+  try {
+    await schema.validate(body, { strict: true, abortEarly: false });
+  } catch (e) {
+    throw new YupValidationError(e, errorMessage);
+  }
+};
 
 const createLocaleSchema = yup
   .object()
@@ -23,10 +31,6 @@ const createLocaleSchema = yup
   })
   .noUnknown();
 
-const validateCreateLocaleInput = data => {
-  return createLocaleSchema.validate(data, { strict: true, abortEarly: false }).catch(handleReject);
-};
-
 const updateLocaleSchema = yup
   .object()
   .shape({
@@ -39,11 +43,7 @@ const updateLocaleSchema = yup
   })
   .noUnknown();
 
-const validateUpdateLocaleInput = data => {
-  return updateLocaleSchema.validate(data, { strict: true, abortEarly: false }).catch(handleReject);
-};
-
 module.exports = {
-  validateCreateLocaleInput,
-  validateUpdateLocaleInput,
+  validateCreateLocaleInput: validateSchema(createLocaleSchema),
+  validateUpdateLocaleInput: validateSchema(updateLocaleSchema),
 };

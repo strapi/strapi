@@ -1,7 +1,6 @@
 'use strict';
 
 const _ = require('lodash');
-const { convertToStrapiError } = require('../errors');
 
 module.exports = async ({ strapi }) => {
   // set plugin store
@@ -23,14 +22,6 @@ module.exports = async ({ strapi }) => {
   }
 
   await registerPermissionActions();
-};
-
-const wrapFunctionForErrors = fn => async (...args) => {
-  try {
-    return fn(...args);
-  } catch (err) {
-    throw convertToStrapiError(err);
-  }
 };
 
 const createProvider = config => {
@@ -60,12 +51,8 @@ const createProvider = config => {
 
   return Object.assign(Object.create(baseProvider), {
     ...providerInstance,
-    upload: wrapFunctionForErrors((file, options = actionOptions.upload) => {
-      return providerInstance.upload(file, options);
-    }),
-    delete: wrapFunctionForErrors((file, options = actionOptions.delete) => {
-      return providerInstance.delete(file, options);
-    }),
+    upload: (file, options = actionOptions.upload) => providerInstance.upload(file, options),
+    delete: (file, options = actionOptions.delete) => providerInstance.delete(file, options),
   });
 };
 

@@ -1,6 +1,7 @@
 'use strict';
 
 const { setCreatorFields, sanitizeEntity } = require('@strapi/utils');
+const { ApplicationError } = require('@strapi/utils').errors;
 const { pick } = require('lodash/fp');
 const { getService } = require('../utils');
 const { validateCreateLocaleInput, validateUpdateLocaleInput } = require('../validation/locales');
@@ -26,17 +27,13 @@ module.exports = {
     const { body } = ctx.request;
     let { isDefault, ...localeToCreate } = body;
 
-    try {
-      await validateCreateLocaleInput(body);
-    } catch (err) {
-      return ctx.badRequest('ValidationError', err);
-    }
+    await validateCreateLocaleInput(body);
 
     const localesService = getService('locales');
 
     const existingLocale = await localesService.findByCode(body.code);
     if (existingLocale) {
-      return ctx.badRequest('This locale already exists');
+      throw new ApplicationError('This locale already exists');
     }
 
     localeToCreate = formatLocale(localeToCreate);
@@ -57,11 +54,7 @@ module.exports = {
     const { body } = ctx.request;
     let { isDefault, ...updates } = body;
 
-    try {
-      await validateUpdateLocaleInput(body);
-    } catch (err) {
-      return ctx.badRequest('ValidationError', err);
-    }
+    await validateUpdateLocaleInput(body);
 
     const localesService = getService('locales');
 
@@ -94,7 +87,7 @@ module.exports = {
 
     const defaultLocaleCode = await localesService.getDefaultLocale();
     if (existingLocale.code === defaultLocaleCode) {
-      return ctx.badRequest('Cannot delete the default locale');
+      throw new ApplicationError('Cannot delete the default locale');
     }
 
     await localesService.delete({ id });

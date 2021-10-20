@@ -52,13 +52,30 @@ describe('Content Manager single types', () => {
 
       expect(res.statusCode).toBe(400);
       expect(res.body).toMatchObject({
-        statusCode: 400,
-        error: 'Bad Request',
-        message: 'ValidationError',
-        data: {
-          contentTypeUID: expect.arrayContaining([expect.stringMatching('required field')]),
-          field: expect.arrayContaining([expect.stringMatching('required field')]),
-          data: expect.arrayContaining([expect.stringMatching('required field')]),
+        data: null,
+        error: {
+          status: 400,
+          name: 'ValidationError',
+          message: '3 errors occurred',
+          details: {
+            errors: [
+              {
+                path: ['contentTypeUID'],
+                message: 'contentTypeUID is a required field',
+                name: 'ValidationError',
+              },
+              {
+                path: ['field'],
+                message: 'field is a required field',
+                name: 'ValidationError',
+              },
+              {
+                path: ['data'],
+                message: 'data is a required field',
+                name: 'ValidationError',
+              },
+            ],
+          },
         },
       });
     });
@@ -75,11 +92,14 @@ describe('Content Manager single types', () => {
       });
 
       expect(res.statusCode).toBe(400);
-      expect(res.body).toEqual({
-        statusCode: 400,
-        error: 'Bad Request',
-        message: 'ValidationError',
-        data: ['ContentType not found'],
+      expect(res.body).toMatchObject({
+        data: null,
+        error: {
+          status: 400,
+          name: 'ValidationError',
+          message: 'ContentType not found',
+          details: {},
+        },
       });
     });
 
@@ -96,11 +116,12 @@ describe('Content Manager single types', () => {
 
       expect(res.statusCode).toBe(400);
       expect(res.body).toMatchObject({
-        statusCode: 400,
-        error: 'Bad Request',
-        message: 'ValidationError',
-        data: {
-          field: [expect.stringMatching('must be a valid `uid` attribute')],
+        data: null,
+        error: {
+          status: 400,
+          name: 'ValidationError',
+          message: 'otherField must be a valid `uid` attribute',
+          details: {},
         },
       });
     });
@@ -255,13 +276,30 @@ describe('Content Manager single types', () => {
 
       expect(res.statusCode).toBe(400);
       expect(res.body).toMatchObject({
-        statusCode: 400,
-        error: 'Bad Request',
-        message: 'ValidationError',
-        data: {
-          contentTypeUID: expect.arrayContaining([expect.stringMatching('required field')]),
-          field: expect.arrayContaining([expect.stringMatching('required field')]),
-          value: expect.arrayContaining([expect.stringMatching('required field')]),
+        data: null,
+        error: {
+          status: 400,
+          name: 'ValidationError',
+          message: '3 errors occurred',
+          details: {
+            errors: [
+              {
+                path: ['contentTypeUID'],
+                message: 'contentTypeUID is a required field',
+                name: 'ValidationError',
+              },
+              {
+                path: ['field'],
+                message: 'field is a required field',
+                name: 'ValidationError',
+              },
+              {
+                path: ['value'],
+                message: 'value is a required field',
+                name: 'ValidationError',
+              },
+            ],
+          },
         },
       });
     });
@@ -279,8 +317,20 @@ describe('Content Manager single types', () => {
 
       expect(res.statusCode).toBe(400);
       expect(res.body).toMatchObject({
-        data: {
-          value: expect.arrayContaining([expect.stringMatching('must match')]),
+        data: null,
+        error: {
+          status: 400,
+          name: 'ValidationError',
+          message: 'value must match the following: "/^[A-Za-z0-9-_.~]*$/"',
+          details: {
+            errors: [
+              {
+                message: 'value must match the following: "/^[A-Za-z0-9-_.~]*$/"',
+                name: 'ValidationError',
+                path: ['value'],
+              },
+            ],
+          },
         },
       });
     });
@@ -298,10 +348,13 @@ describe('Content Manager single types', () => {
 
       expect(res.statusCode).toBe(400);
       expect(res.body).toEqual({
-        statusCode: 400,
-        error: 'Bad Request',
-        message: 'ValidationError',
-        data: ['ContentType not found'],
+        data: null,
+        error: {
+          details: {},
+          message: 'ContentType not found',
+          name: 'ValidationError',
+          status: 400,
+        },
       });
     });
 
@@ -318,11 +371,12 @@ describe('Content Manager single types', () => {
 
       expect(res.statusCode).toBe(400);
       expect(res.body).toMatchObject({
-        statusCode: 400,
-        error: 'Bad Request',
-        message: 'ValidationError',
-        data: {
-          field: [expect.stringMatching('must be a valid `uid` attribute')],
+        data: null,
+        error: {
+          details: {},
+          message: 'otherField must be a valid `uid` attribute',
+          name: 'ValidationError',
+          status: 400,
         },
       });
     });

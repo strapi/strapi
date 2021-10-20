@@ -1,7 +1,8 @@
 'use strict';
 
 const _ = require('lodash');
-const { yup, formatYupErrors, webhook: webhookUtils } = require('@strapi/utils');
+const { yup, webhook: webhookUtils } = require('@strapi/utils');
+const { YupValidationError } = require('@strapi/utils').errors;
 
 const urlRegex = /^(?:([a-z0-9+.-]+):\/\/)(?:\S+(?::\S*)?@)?(?:(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9_]-*)*[a-z\u00a1-\uffff0-9_]+)(?:\.(?:[a-z\u00a1-\uffff0-9_]-*)*[a-z\u00a1-\uffff0-9_]+)*\.?)(?::\d{2,5})?(?:[/?#]\S*)?$/;
 
@@ -71,9 +72,7 @@ module.exports = {
         abortEarly: false,
       });
     } catch (error) {
-      return ctx.badRequest('ValidationError', {
-        errors: formatYupErrors(error),
-      });
+      throw new YupValidationError(error);
     }
 
     const webhook = await strapi.webhookStore.createWebhook(body);
@@ -93,9 +92,7 @@ module.exports = {
         abortEarly: false,
       });
     } catch (error) {
-      return ctx.badRequest('ValidationError', {
-        errors: formatYupErrors(error),
-      });
+      throw new YupValidationError(error);
     }
 
     const webhook = await strapi.webhookStore.findWebhook(id);

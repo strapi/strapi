@@ -1,14 +1,16 @@
 'use strict';
 
-const { formatYupErrors } = require('@strapi/utils');
+const { YupValidationError } = require('@strapi/utils').errors;
 const validators = require('../../../server/validation/common-validators');
 
-const handleReject = error => Promise.reject(formatYupErrors(error));
+const handleYupError = error => {
+  throw new YupValidationError(error);
+};
 
 const validatedUpdatePermissionsInput = data => {
   return validators.updatePermissions
     .validate(data, { strict: true, abortEarly: false })
-    .catch(handleReject);
+    .catch(handleYupError);
 };
 
 module.exports = {

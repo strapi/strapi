@@ -1,8 +1,11 @@
 'use strict';
 
-const { yup, formatYupErrors } = require('@strapi/utils');
+const { yup } = require('@strapi/utils');
+const { YupValidationError } = require('@strapi/utils').errors;
 
-const handleReject = error => Promise.reject(formatYupErrors(error));
+const handleYupError = error => {
+  throw new YupValidationError(error);
+};
 
 const roleUpdateSchema = yup
   .object()
@@ -13,7 +16,7 @@ const roleUpdateSchema = yup
   .noUnknown();
 
 const validateRoleUpdateInput = data => {
-  return roleUpdateSchema.validate(data, { strict: true, abortEarly: false }).catch(handleReject);
+  return roleUpdateSchema.validate(data, { strict: true, abortEarly: false }).catch(handleYupError);
 };
 
 module.exports = {

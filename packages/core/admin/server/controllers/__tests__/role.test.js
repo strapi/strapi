@@ -79,16 +79,12 @@ describe('Role controller', () => {
 
   describe('updatePermissions', () => {
     test('Fails on missing permissions input', async () => {
-      const badRequest = jest.fn();
       const findOne = jest.fn(() => Promise.resolve({ id: 1 }));
 
-      const ctx = createContext(
-        {
-          params: { id: 1 },
-          body: {},
-        },
-        { badRequest }
-      );
+      const ctx = createContext({
+        params: { id: 1 },
+        body: {},
+      });
 
       global.strapi = {
         admin: {
@@ -103,29 +99,24 @@ describe('Role controller', () => {
         },
       };
 
-      await roleController.updatePermissions(ctx);
+      expect.assertions(1);
 
-      expect(badRequest).toHaveBeenCalledWith(
-        'ValidationError',
-        expect.objectContaining({
-          permissions: expect.arrayContaining([]),
-        })
-      );
+      try {
+        await roleController.updatePermissions(ctx);
+      } catch (e) {
+        expect(e.message).toEqual('permissions is a required field');
+      }
     });
 
     test('Fails on missing action permission', async () => {
-      const badRequest = jest.fn();
       const findOne = jest.fn(() => Promise.resolve({ id: 1 }));
 
-      const ctx = createContext(
-        {
-          params: { id: 1 },
-          body: {
-            permissions: [{}],
-          },
+      const ctx = createContext({
+        params: { id: 1 },
+        body: {
+          permissions: [{}],
         },
-        { badRequest }
-      );
+      });
       global.strapi = {
         admin: {
           services: {
@@ -139,16 +130,13 @@ describe('Role controller', () => {
         },
       };
 
-      await roleController.updatePermissions(ctx);
+      expect.assertions(1);
 
-      expect(badRequest).toHaveBeenCalledWith(
-        'ValidationError',
-        expect.objectContaining({
-          'permissions[0].action': expect.arrayContaining([
-            'permissions[0].action is a required field',
-          ]),
-        })
-      );
+      try {
+        await roleController.updatePermissions(ctx);
+      } catch (e) {
+        expect(e.message).toEqual('permissions[0].action is a required field');
+      }
     });
 
     test('Assign permissions if input is valid', async () => {

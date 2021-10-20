@@ -1,8 +1,11 @@
 'use strict';
 
-const { yup, formatYupErrors } = require('@strapi/utils');
+const { yup } = require('@strapi/utils');
+const { YupValidationError } = require('@strapi/utils').errors;
 
-const handleReject = error => Promise.reject(formatYupErrors(error));
+const handleYupError = error => {
+  throw new YupValidationError(error);
+};
 
 const providerOptionsUpdateSchema = yup.object().shape({
   autoRegister: yup.boolean().required(),
@@ -17,7 +20,7 @@ const providerOptionsUpdateSchema = yup.object().shape({
 const validateProviderOptionsUpdate = async data => {
   return providerOptionsUpdateSchema
     .validate(data, { strict: true, abortEarly: false })
-    .catch(handleReject);
+    .catch(handleYupError);
 };
 
 module.exports = {

@@ -27,9 +27,14 @@ describe('i18n - Controller - content-types', () => {
         },
         badRequest,
       };
-      await getNonLocalizedAttributes(ctx);
 
-      expect(badRequest).toHaveBeenCalledWith('model.not.localized');
+      expect.assertions(1);
+
+      try {
+        await getNonLocalizedAttributes(ctx);
+      } catch (e) {
+        expect(e.message).toEqual('model.not.localized');
+      }
     });
 
     test('entity not found', async () => {

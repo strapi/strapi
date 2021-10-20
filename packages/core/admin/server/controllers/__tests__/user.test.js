@@ -14,8 +14,7 @@ describe('User Controller', () => {
 
     test('Fails if user already exist', async () => {
       const exists = jest.fn(() => Promise.resolve(true));
-      const badRequest = jest.fn();
-      const ctx = createContext({ body }, { badRequest });
+      const ctx = createContext({ body });
 
       global.strapi = {
         admin: {
@@ -27,19 +26,23 @@ describe('User Controller', () => {
         },
       };
 
-      await userController.create(ctx);
+      expect.assertions(2);
+
+      try {
+        await userController.create(ctx);
+      } catch (e) {
+        expect(e.message).toEqual('Email already taken');
+      }
 
       expect(exists).toHaveBeenCalledWith({ email: body.email });
-      expect(badRequest).toHaveBeenCalledWith('Email already taken');
     });
 
     test('Create User Successfully', async () => {
       const create = jest.fn(() => Promise.resolve(body));
       const exists = jest.fn(() => Promise.resolve(false));
       const sanitizeUser = jest.fn(user => Promise.resolve(user));
-      const badRequest = jest.fn();
       const created = jest.fn();
-      const ctx = createContext({ body }, { badRequest, created });
+      const ctx = createContext({ body }, { created });
 
       global.strapi = {
         admin: {
@@ -56,7 +59,6 @@ describe('User Controller', () => {
       await userController.create(ctx);
 
       expect(exists).toHaveBeenCalledWith({ email: body.email });
-      expect(badRequest).not.toHaveBeenCalled();
       expect(create).toHaveBeenCalledWith(body);
       expect(sanitizeUser).toHaveBeenCalled();
       expect(created).toHaveBeenCalled();
@@ -214,16 +216,19 @@ describe('User Controller', () => {
     });
 
     test('Validation error', async () => {
-      const badRequest = jest.fn();
       const body = { firstname: 21 };
 
-      const ctx = createContext({ params: { id: user.id }, body }, { badRequest });
+      const ctx = createContext({ params: { id: user.id }, body });
 
-      await userController.update(ctx);
+      expect.assertions(1);
 
-      expect(badRequest).toHaveBeenCalledWith('ValidationError', {
-        firstname: ['firstname must be a `string` type, but the final value was: `21`.'],
-      });
+      try {
+        await userController.update(ctx);
+      } catch (e) {
+        expect(e.message).toEqual(
+          'firstname must be a `string` type, but the final value was: `21`.'
+        );
+      }
     });
 
     test('Update a user correctly', async () => {

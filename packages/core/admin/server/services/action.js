@@ -18,7 +18,7 @@ const getAllowedActionsForRole = async roleId => {
     const role = await getService('role').findOne({ id: roleId });
 
     if (!role) {
-      throw new strapi.errors.notFound('role.notFound');
+      throw new Error('role.notFound');
     }
 
     if (role.code === AUTHOR_CODE) {

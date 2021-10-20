@@ -1,12 +1,18 @@
 'use strict';
 
 const _ = require('lodash');
-const { yup, formatYupErrors } = require('@strapi/utils');
+const { yup } = require('@strapi/utils');
+const { YupValidationError } = require('@strapi/utils').errors;
+
 const { getService } = require('../../utils');
 const { modelTypes, DEFAULT_TYPES, typeKinds } = require('../../services/constants');
 const createSchema = require('./model-schema');
 const { removeEmptyDefaults, removeDeletedUIDTargetFields } = require('./data-transform');
 const { nestedComponentSchema } = require('./component');
+
+const handleYupError = error => {
+  throw new YupValidationError(error);
+};
 
 /**
  * Allowed relation per type kind
@@ -89,7 +95,7 @@ const validateContentTypeInput = data => {
       strict: true,
       abortEarly: false,
     })
-    .catch(error => Promise.reject(formatYupErrors(error)));
+    .catch(handleYupError);
 };
 
 /**
@@ -115,7 +121,7 @@ const validateUpdateContentTypeInput = data => {
       strict: true,
       abortEarly: false,
     })
-    .catch(error => Promise.reject(formatYupErrors(error)));
+    .catch(handleYupError);
 };
 
 const forbiddenContentTypeNameValidator = () => {
@@ -160,7 +166,7 @@ const validateKind = kind => {
     .string()
     .oneOf([typeKinds.SINGLE_TYPE, typeKinds.COLLECTION_TYPE])
     .validate(kind)
-    .catch(error => Promise.reject(formatYupErrors(error)));
+    .catch(handleYupError);
 };
 
 module.exports = {

@@ -2,6 +2,7 @@
 
 const _ = require('lodash');
 const { sanitizeEntity } = require('@strapi/utils');
+const { ValidationError } = require('@strapi/utils').errors;
 const { getService } = require('../utils');
 const validateSettings = require('./validation/settings');
 const validateUploadBody = require('./validation/upload');
@@ -92,11 +93,7 @@ module.exports = {
 
     // cannot replace with more than one file
     if (Array.isArray(files)) {
-      throw strapi.errors.badRequest(null, {
-        errors: [
-          { id: 'Upload.replace.single', message: 'Cannot replace a file with multiple ones' },
-        ],
-      });
+      throw new ValidationError('Cannot replace a file with multiple ones');
     }
 
     const replacedFiles = await getService('upload').replace(id, {
@@ -131,9 +128,7 @@ module.exports = {
     }
 
     if (_.isEmpty(files) || files.size === 0) {
-      throw strapi.errors.badRequest(null, {
-        errors: [{ id: 'Upload.status.empty', message: 'Files are empty' }],
-      });
+      throw new ValidationError('Files are empty');
     }
 
     await (id ? this.replaceFile : this.uploadFiles)(ctx);

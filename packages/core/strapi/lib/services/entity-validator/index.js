@@ -6,9 +6,10 @@
 
 const { has, assoc, prop } = require('lodash/fp');
 const strapiUtils = require('@strapi/utils');
+const { YupValidationError } = require('@strapi/utils').errors;
 const validators = require('./validators');
 
-const { yup, formatYupErrors } = strapiUtils;
+const { yup } = strapiUtils;
 const { isMediaAttribute, isScalarAttribute, getWritableAttributes } = strapiUtils.contentTypes;
 
 const addMinMax = (attr, validator, data) => {
@@ -177,7 +178,7 @@ const createValidateEntity = createOrUpdate => async (model, data, { isDraft = f
     const validator = createModelValidator(createOrUpdate)(model, data, { isDraft }).required();
     return await validator.validate(data, { abortEarly: false });
   } catch (e) {
-    throw strapi.errors.badRequest('ValidationError', { errors: formatYupErrors(e) });
+    throw new YupValidationError(e);
   }
 };
 

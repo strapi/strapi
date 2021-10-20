@@ -1,5 +1,7 @@
 'use strict';
 
+const { ValidationError } = require('@strapi/utils').errors;
+
 /**
  * Returns a single type service to handle default core-api actions
  */
@@ -31,7 +33,7 @@ const createSingleTypeService = ({ model, strapi, utils }) => {
       if (!entity) {
         const count = await strapi.query(uid).count();
         if (count >= 1) {
-          throw strapi.errors.badRequest('singleType.alreadyExists');
+          throw new ValidationError('singleType.alreadyExists');
         }
 
         return strapi.entityService.create(uid, { ...params, data: sanitizedData });
