@@ -40,8 +40,6 @@ const TabForm = ({ form, formErrors, genericInputProps, modifiedData, onChange }
 
             if (input.name === 'uid') {
               value = input.value;
-            } else if (input.name === 'allowedTypes' && retrievedValue === '') {
-              value = null;
             } else {
               value = retrievedValue;
             }
