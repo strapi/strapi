@@ -69,7 +69,7 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
   align-items: center;
 }
 
-.c35 {
+.c38 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -185,15 +185,15 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
   border-bottom: 1px solid #eaeaef;
 }
 
-.c34 {
+.c37 {
   border-top: 1px solid #eaeaef;
 }
 
-.c36 > * + * {
+.c39 > * + * {
   margin-left: 8px;
 }
 
-.c28 {
+.c29 {
   font-weight: 500;
   font-size: 1rem;
   line-height: 1.25;
@@ -242,11 +242,26 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
   border-radius: 4px;
   border-color: #c0c0cf;
   border: 1px solid #c0c0cf;
+  position: relative;
 }
 
-.c27 {
+.c28 {
   padding-top: 12px;
   padding-bottom: 20px;
+}
+
+.c30 {
+  position: absolute;
+  left: 0px;
+  right: 0px;
+  top: 0px;
+  bottom: 0px;
+  z-index: 1;
+  width: 100%;
+}
+
+.c32 {
+  position: relative;
 }
 
 .c14 {
@@ -287,14 +302,14 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
   border-bottom: 2px solid transparent;
 }
 
-.c32 {
+.c36 {
   font-weight: 500;
   font-size: 0.75rem;
   line-height: 1.33;
   color: #32324d;
 }
 
-.c29 {
+.c33 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -308,21 +323,21 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
   outline: none;
 }
 
-.c29 svg {
+.c33 svg {
   height: 12px;
   width: 12px;
 }
 
-.c29 svg > g,
-.c29 svg path {
+.c33 svg > g,
+.c33 svg path {
   fill: #ffffff;
 }
 
-.c29[aria-disabled='true'] {
+.c33[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c29:after {
+.c33:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -337,11 +352,11 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
   border: 2px solid transparent;
 }
 
-.c29:focus-visible {
+.c33:focus-visible {
   outline: none;
 }
 
-.c29:focus-visible:after {
+.c33:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -352,7 +367,7 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c30 {
+.c34 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -364,7 +379,7 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
   background: #4945ff;
 }
 
-.c30 .sc-boeJfj {
+.c34 .sc-boeJfj {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -375,49 +390,49 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
   align-items: center;
 }
 
-.c30 .c31 {
+.c34 .c35 {
   color: #ffffff;
 }
 
-.c30[aria-disabled='true'] {
+.c34[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c30[aria-disabled='true'] .c31 {
+.c34[aria-disabled='true'] .c35 {
   color: #666687;
 }
 
-.c30[aria-disabled='true'] svg > g,
-.c30[aria-disabled='true'] svg path {
+.c34[aria-disabled='true'] svg > g,
+.c34[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c30[aria-disabled='true']:active {
+.c34[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c30[aria-disabled='true']:active .c31 {
+.c34[aria-disabled='true']:active .c35 {
   color: #666687;
 }
 
-.c30[aria-disabled='true']:active svg > g,
-.c30[aria-disabled='true']:active svg path {
+.c34[aria-disabled='true']:active svg > g,
+.c34[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c30:hover {
+.c34:hover {
   border: 1px solid #7b79ff;
   background: #7b79ff;
 }
 
-.c30:active {
+.c34:active {
   border: 1px solid #4945ff;
   background: #4945ff;
 }
 
-.c37 {
+.c40 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -429,7 +444,7 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
   background: #ffffff;
 }
 
-.c37 .sc-boeJfj {
+.c40 .sc-boeJfj {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -440,52 +455,52 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
   align-items: center;
 }
 
-.c37 .c31 {
+.c40 .c35 {
   color: #ffffff;
 }
 
-.c37[aria-disabled='true'] {
+.c40[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c37[aria-disabled='true'] .c31 {
+.c40[aria-disabled='true'] .c35 {
   color: #666687;
 }
 
-.c37[aria-disabled='true'] svg > g,
-.c37[aria-disabled='true'] svg path {
+.c40[aria-disabled='true'] svg > g,
+.c40[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c37[aria-disabled='true']:active {
+.c40[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c37[aria-disabled='true']:active .c31 {
+.c40[aria-disabled='true']:active .c35 {
   color: #666687;
 }
 
-.c37[aria-disabled='true']:active svg > g,
-.c37[aria-disabled='true']:active svg path {
+.c40[aria-disabled='true']:active svg > g,
+.c40[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c37:hover {
+.c40:hover {
   background-color: #f6f6f9;
 }
 
-.c37:active {
+.c40:active {
   background-color: #eaeaef;
 }
 
-.c37 .c31 {
+.c40 .c35 {
   color: #32324d;
 }
 
-.c37 svg > g,
-.c37 svg path {
+.c40 svg > g,
+.c40 svg path {
   fill: #32324d;
 }
 
@@ -507,26 +522,14 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
   align-items: center;
 }
 
-.c33 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
-}
-
 .c25 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -534,15 +537,25 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
 }
 
 .c26 {
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+}
+
+.c27 {
   font-size: 3.75rem;
 }
 
-.c26 svg path {
+.c27 svg path {
   fill: #4945ff;
 }
 
 .c23 {
   border-style: dashed;
+}
+
+.c31 {
+  opacity: 0;
 }
 
 <body
@@ -683,10 +696,10 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
                           class="c24"
                         >
                           <div
-                            class="c25"
+                            class="c25 c26"
                           >
                             <div
-                              class="c26"
+                              class="c27"
                             >
                               <svg
                                 aria-hidden="true"
@@ -707,34 +720,36 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
                               </svg>
                             </div>
                             <div
-                              class="c27"
+                              class="c28"
                             >
                               <span
-                                class="c28"
+                                class="c29"
                               >
                                 Drag & Drop here or
                               </span>
                             </div>
-                            <button
-                              aria-disabled="false"
-                              class="c29 c30"
-                              type="button"
-                            >
-                              <span
-                                class="c31 c32"
-                              >
-                                Browse files
-                              </span>
-                            </button>
+                            <input
+                              class="c30 c31"
+                              multiple=""
+                              name="files"
+                              tabindex="-1"
+                              type="file"
+                              width="100%"
+                            />
                             <div
-                              class="c33"
+                              class="c32"
                             >
-                              <input
-                                multiple=""
-                                name="files"
-                                tabindex="-1"
-                                type="file"
-                              />
+                              <button
+                                aria-disabled="false"
+                                class="c33 c34"
+                                type="button"
+                              >
+                                <span
+                                  class="c35 c36"
+                                >
+                                  Browse files
+                                </span>
+                              </button>
                             </div>
                           </div>
                         </div>
@@ -742,28 +757,28 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
                     </label>
                   </div>
                   <div
-                    class="c4 c34"
+                    class="c4 c37"
                   >
                     <div
                       class="c6"
                     >
                       <div
-                        class="c35 c36"
+                        class="c38 c39"
                       >
                         <button
                           aria-disabled="false"
-                          class="c29 c37"
+                          class="c33 c40"
                           type="button"
                         >
                           <span
-                            class="c31 c32"
+                            class="c35 c36"
                           >
                             app.components.Button.cancel
                           </span>
                         </button>
                       </div>
                       <div
-                        class="c35 c36"
+                        class="c38 c39"
                       />
                     </div>
                   </div>
