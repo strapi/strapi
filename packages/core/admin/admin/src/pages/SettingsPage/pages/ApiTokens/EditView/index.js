@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useIntl } from 'react-intl';
 import {
   SettingsPageTitle,
@@ -31,7 +31,7 @@ import LoadingView from './components/LoadingView';
 import HeaderContentBox from './components/ContentBox';
 
 const ApiTokenCreateView = () => {
-  const [apiToken, setApiToken] = useState({});
+  let apiToken;
   useFocusWhenNavigate();
   const { formatMessage } = useIntl();
   const { lockApp, unlockApp } = useOverlayBlocker();
@@ -44,25 +44,21 @@ const ApiTokenCreateView = () => {
 
   const isCreating = id === 'create';
 
-  const { status } = useQuery(
-    ['api-tokens', id],
+  if (history.location.state?.apiToken.accessKey) {
+    apiToken = history.location.state.apiToken;
+  }
+
+  const { status, data } = useQuery(
+    ['api-token', id],
     async () => {
-      if (history.location.state?.apiToken.accessKey) {
-        setApiToken(() => history.location.state.apiToken);
-
-        return history.location.state.apiToken;
-      }
-
       const {
         data: { data },
       } = await axiosInstance.get(`/admin/api-tokens/${id}`);
 
-      setApiToken(() => data);
-
       return data;
     },
     {
-      enabled: !isCreating,
+      enabled: !isCreating && !apiToken,
       onError: () => {
         toggleNotification({
           type: 'warning',
@@ -71,6 +67,10 @@ const ApiTokenCreateView = () => {
       },
     }
   );
+
+  if (data) {
+    apiToken = data;
+  }
 
   const handleSubmit = async (body, actions) => {
     lockApp();
@@ -82,7 +82,7 @@ const ApiTokenCreateView = () => {
         ? await axiosInstance.post(`/admin/api-tokens`, body)
         : await axiosInstance.put(`/admin/api-tokens/${id}`, body);
 
-      setApiToken(() => response);
+      apiToken = response;
 
       toggleNotification({
         type: 'success',
@@ -105,10 +105,10 @@ const ApiTokenCreateView = () => {
     unlockApp();
   };
 
-  const isLoading = !isCreating && status !== 'success';
+  const isLoading = !isCreating && !apiToken && status !== 'success';
 
   if (isLoading) {
-    return <LoadingView apiTokenName={apiToken.name} />;
+    return <LoadingView apiTokenName={apiToken?.name} />;
   }
 
   return (
@@ -131,7 +131,7 @@ const ApiTokenCreateView = () => {
             <Form>
               <HeaderLayout
                 title={
-                  apiToken.name ||
+                  apiToken?.name ||
                   formatMessage({
                     id: 'Settings.apiTokens.createPage.title',
                     defaultMessage: 'Create API Token',
@@ -162,7 +162,7 @@ const ApiTokenCreateView = () => {
               />
               <ContentLayout>
                 <Stack size={6}>
-                  {Boolean(apiToken.name) && <HeaderContentBox apiToken={apiToken.accessKey} />}
+                  {Boolean(apiToken?.name) && <HeaderContentBox apiToken={apiToken.accessKey} />}
                   <Box
                     background="neutral0"
                     hasRadius
