@@ -58,6 +58,7 @@ const FormModalNavigationProvider = ({ children }) => {
         forTarget,
         targetUid,
         modalType: 'chooseAttribute',
+
         isOpen: true,
       };
     });

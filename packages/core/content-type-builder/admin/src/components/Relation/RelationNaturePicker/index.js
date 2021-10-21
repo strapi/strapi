@@ -48,7 +48,7 @@ const RelationNaturePicker = ({
   const relationsType = dataType === 'collectionType' ? ctRelations : componentRelations;
 
   const areDisplayedNamesInverted = relationType === 'manyToOne';
-  const targetLabel = get(contentTypes, [target, 'schema', 'name'], 'unknown');
+  const targetLabel = get(contentTypes, [target, 'schema', 'displayName'], 'unknown');
   const leftTarget = areDisplayedNamesInverted
     ? targetLabel
     : oneThatIsCreatingARelationWithAnother;

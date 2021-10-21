@@ -37,6 +37,8 @@
   "button.model.create": "Create new collection type",
   "button.single-types.create": "Create new single type",
   "component.repeatable": "(repeatable)",
+  "error.contentType.pluralName-used": "This value cannot be the same as the singular one",
+  "error.contentType.singularName-used": "This value cannot be the same as the plural one",
   "components.componentSelect.no-component-available": "You have already added all your components",
   "components.componentSelect.no-component-available.with-search": "There is no component matching your search",
   "components.componentSelect.value-component": "{number} component selected (type to search for a component)",

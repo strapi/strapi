@@ -1,7 +1,7 @@
 import getTrad from '../../../utils/getTrad';
 
 const nameField = {
-  name: 'name',
+  name: 'displayName',
   type: 'text',
   intlLabel: {
     id: getTrad('contentType.displayName.label'),
@@ -40,7 +40,7 @@ const forms = {
     },
   },
   base: {
-    create: value => {
+    create: () => {
       return {
         sections: [
           {
@@ -49,19 +49,34 @@ const forms = {
               nameField,
               {
                 description: {
-                  id: getTrad('contentType.UID.description'),
+                  id: getTrad('contentType.apiId-singular.description'),
                   defaultMessage:
-                    'The UID is used to generate the API routes and databases tables/collections',
+                    'Used to generate the API routes and databases tables/collections',
                 },
                 intlLabel: {
-                  id: getTrad('contentType.UID.label'),
-                  defaultMessage: 'UID',
+                  id: getTrad('contentType.apiId-singular.label'),
+                  defaultMessage: 'API ID (Singular)',
                 },
-                name: 'uid',
-                type: 'text',
-                readOnly: true,
-                disabled: true,
-                value,
+                name: 'singularName',
+                type: 'text-singular',
+              },
+              {
+                type: 'pushRight',
+                size: 6,
+                intlLabel: { id: '', defaultMessage: '' },
+                name: 'pushRight',
+              },
+              {
+                description: {
+                  id: getTrad('contentType.apiId-plural.description'),
+                  defaultMessage: 'Pluralized API ID',
+                },
+                intlLabel: {
+                  id: getTrad('contentType.apiId-plural.label'),
+                  defaultMessage: 'API ID (Plural)',
+                },
+                name: 'pluralName',
+                type: 'text-plural',
               },
             ],
           },
@@ -75,6 +90,39 @@ const forms = {
             sectionTitle: null,
             items: [
               nameField,
+              {
+                disabled: true,
+                description: {
+                  id: getTrad('contentType.apiId-singular.description'),
+                  defaultMessage:
+                    'Used to generate the API routes and databases tables/collections',
+                },
+                intlLabel: {
+                  id: getTrad('contentType.apiId-singular.label'),
+                  defaultMessage: 'API ID (Singular)',
+                },
+                name: 'singularName',
+                type: 'text',
+              },
+              {
+                type: 'pushRight',
+                size: 6,
+                intlLabel: { id: '', defaultMessage: '' },
+                name: 'pushRight',
+              },
+              {
+                disabled: true,
+                description: {
+                  id: getTrad('contentType.apiId-plural.description'),
+                  defaultMessage: 'Pluralized API ID',
+                },
+                intlLabel: {
+                  id: getTrad('contentType.apiId-plural.label'),
+                  defaultMessage: 'API ID (Plural)',
+                },
+                name: 'pluralName',
+                type: 'text',
+              },
               {
                 intlLabel: {
                   id: getTrad('modalForm.attribute.text.type-selection'),
