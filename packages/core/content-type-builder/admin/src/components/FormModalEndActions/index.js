@@ -20,75 +20,51 @@ const FormModalEndActions = ({
   isEditingAttribute,
   isContentTypeModal,
   isCreatingContentType,
+  isComponentAttribute,
   isCreatingComponent,
+  isCreatingComponentAttribute,
   isComponentModal,
   isEditingCategory,
   onSubmitEditAttribute,
   onSubmitCreateContentType,
   onSubmitCreateComponent,
+  onSubmitCreateComponentAttribute,
   onSubmitEditCategory,
   onSubmitEditContentType,
   onSubmitEditComponent,
 }) => {
   const { formatMessage } = useIntl();
+  // TO DO
+  // component attribute
+  // dz attribute
 
-  if (isComponentModal) {
-    console.log('is component modal');
+  if (isAttributeModal && isComponentAttribute) {
+    console.log('is component attribute');
 
     return (
-      <>
-        {!isCreatingComponent && (
-          <>
-            <Button
-              type="button"
-              variant="danger"
-              onClick={e => {
-                e.preventDefault();
-                deleteComponent();
-              }}
-            >
-              {formatMessage({
-                id: getTrad('form.button.delete'),
-                defaultMessage: 'Delete',
-              })}
-            </Button>
-            <Button
-              type="submit"
-              variant="default"
-              onClick={e => {
-                e.preventDefault();
+      <Button
+        variant="secondary"
+        type="submit"
+        onClick={e => {
+          e.preventDefault();
 
-                onSubmitEditComponent(e, false);
-              }}
-            >
-              {formatMessage({
-                id: getTrad('form.button.finish'),
-                defaultMessage: 'Finish',
-              })}
-            </Button>
-          </>
-        )}
-        {isCreatingComponent && (
-          <Button
-            type="submit"
-            variant="secondary"
-            onClick={e => {
-              e.preventDefault();
-
-              onSubmitCreateComponent(e, true);
-            }}
-          >
-            {formatMessage({
-              id: getTrad('form.button.continue'),
-              defaultMessage: 'Continue',
+          onSubmitCreateComponentAttribute(e, true);
+        }}
+      >
+        {isCreatingComponentAttribute
+          ? formatMessage({
+              id: getTrad('form.button.configure-component'),
+              defaultMessage: 'Configure the component',
+            })
+          : formatMessage({
+              id: getTrad('form.button.select-component'),
+              defaultMessage: 'Configure the component',
             })}
-          </Button>
-        )}
-      </>
+      </Button>
     );
   }
 
-  if (isAttributeModal) {
+  if (isAttributeModal && !isComponentAttribute) {
     console.log('is attribute modal');
 
     return (
@@ -182,6 +158,62 @@ const FormModalEndActions = ({
     );
   }
 
+  if (isComponentModal) {
+    console.log('is component modal');
+
+    return (
+      <>
+        {!isCreatingComponent && (
+          <>
+            <Button
+              type="button"
+              variant="danger"
+              onClick={e => {
+                e.preventDefault();
+                deleteComponent();
+              }}
+            >
+              {formatMessage({
+                id: getTrad('form.button.delete'),
+                defaultMessage: 'Delete',
+              })}
+            </Button>
+            <Button
+              type="submit"
+              variant="default"
+              onClick={e => {
+                e.preventDefault();
+
+                onSubmitEditComponent(e, false);
+              }}
+            >
+              {formatMessage({
+                id: getTrad('form.button.finish'),
+                defaultMessage: 'Finish',
+              })}
+            </Button>
+          </>
+        )}
+        {isCreatingComponent && (
+          <Button
+            type="submit"
+            variant="secondary"
+            onClick={e => {
+              e.preventDefault();
+
+              onSubmitCreateComponent(e, true);
+            }}
+          >
+            {formatMessage({
+              id: getTrad('form.button.continue'),
+              defaultMessage: 'Continue',
+            })}
+          </Button>
+        )}
+      </>
+    );
+  }
+
   if (isEditingCategory) {
     console.log('is editing category');
 
@@ -241,12 +273,15 @@ FormModalEndActions.propTypes = {
   isContentTypeModal: PropTypes.bool.isRequired,
   isCreatingContentType: PropTypes.bool.isRequired,
   isCreatingComponent: PropTypes.bool.isRequired,
+  isComponentAttribute: PropTypes.bool.isRequired,
+  isCreatingComponentAttribute: PropTypes.bool.isRequired,
   isComponentModal: PropTypes.bool.isRequired,
   isEditingAttribute: PropTypes.bool.isRequired,
   isEditingCategory: PropTypes.bool.isRequired,
   onSubmitEditAttribute: PropTypes.func.isRequired,
   onSubmitCreateContentType: PropTypes.func.isRequired,
   onSubmitCreateComponent: PropTypes.func.isRequired,
+  onSubmitCreateComponentAttribute: PropTypes.func.isRequired,
   onSubmitEditCategory: PropTypes.func.isRequired,
   onSubmitEditContentType: PropTypes.func.isRequired,
   onSubmitEditComponent: PropTypes.func.isRequired,

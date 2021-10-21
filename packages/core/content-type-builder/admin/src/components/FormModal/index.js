@@ -1046,13 +1046,16 @@ const FormModal = () => {
                   categoryName={initialData.name}
                   isAttributeModal={modalType === 'attribute'}
                   isContentTypeModal={modalType === 'contentType'}
+                  isComponentAttribute={attributeType === 'component'}
                   isComponentModal={modalType === 'component'}
                   isCreatingContentType={actionType === 'create'}
                   isCreatingComponent={actionType === 'create'}
+                  isCreatingComponentAttribute={modifiedData.createComponent || false}
                   isEditingAttribute={actionType === 'edit'}
                   isEditingCategory={modalType === 'editCategory'}
                   onSubmitCreateContentType={handleSubmit}
                   onSubmitCreateComponent={handleSubmit}
+                  onSubmitCreateComponentAttribute={handleSubmit}
                   onSubmitEditAttribute={handleSubmit}
                   onSubmitEditCategory={handleSubmit}
                   onSubmitEditContentType={handleSubmit}
