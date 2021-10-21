@@ -15,11 +15,13 @@ import { Button } from '@strapi/parts/Button';
 import { ContentLayout, HeaderLayout } from '@strapi/parts/Layout';
 import { Grid, GridItem } from '@strapi/parts/Grid';
 import { Main } from '@strapi/parts/Main';
+import { Link } from '@strapi/parts/Link';
 import { Row } from '@strapi/parts/Row';
 import { Stack } from '@strapi/parts/Stack';
 import { Text } from '@strapi/parts/Text';
 import { TextInput } from '@strapi/parts/TextInput';
 import { Textarea } from '@strapi/parts/Textarea';
+import BackIcon from '@strapi/icons/BackIcon';
 import { Formik } from 'formik';
 import get from 'lodash/get';
 import isEmpty from 'lodash/isEmpty';
@@ -158,6 +160,14 @@ const CreatePage = () => {
                   id: 'Settings.roles.create.description',
                   defaultMessage: 'Define the rights given to the role',
                 })}
+                navigationAction={
+                  <Link startIcon={<BackIcon />} to="/settings/roles">
+                    {formatMessage({
+                      id: 'app.components.go-back',
+                      defaultMessage: 'Go back',
+                    })}
+                  </Link>
+                }
               />
               <ContentLayout>
                 <Stack size={6}>
