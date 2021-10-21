@@ -8,7 +8,7 @@ import Filters from '../Filters';
 import List from '../List';
 import ListEmpty from '../ListEmpty';
 import SelectAll from '../SelectAll';
-import SortPicker from '../SortPicker';
+import { SortPicker } from '../../pages/App/components/SortPicker';
 import useModalContext from '../../hooks/useModalContext';
 import Wrapper from './Wrapper';
 import CardControl from '../CardControl';
@@ -134,7 +134,7 @@ const BrowseAssets = () => {
                   />
                 </Padded>
               )}
-              <SortPicker onChange={handleChangeParams} value={params.sort} />
+              <SortPicker />
               <Padded left size="sm" />
               <Filters
                 filters={params.filters}

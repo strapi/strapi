@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { AssetType, AssetSource } from '../constants';
+import { AssetSource } from '../constants';
 import { typeFromMime } from './typeFromMime';
 
 export const urlsToAssets = async urls => {
@@ -23,30 +23,17 @@ export const urlsToAssets = async urls => {
       })
   );
   // Retrieve the assets metadata
-  const assetsResults = await Promise.allSettled(assetPromises);
+  const assetsResults = await Promise.all(assetPromises);
 
-  // Separate the fullfilled from the rejected promises
-  const fullFilledAssets = assetsResults.filter(asset => asset.status === 'fulfilled');
-  const rejectedAssets = assetsResults.filter(asset => asset.status === 'rejected');
-
-  const assets = fullFilledAssets.map(fullFilledAsset => ({
+  const assets = assetsResults.map(fullFilledAsset => ({
     source: AssetSource.Url,
-    name: fullFilledAsset.value.name,
-    type: typeFromMime(fullFilledAsset.value.mime),
-    url: fullFilledAsset.value.url,
-    ext: fullFilledAsset.value.url.split('.').pop(),
-    mime: fullFilledAsset.value.mime,
-    rawFile: fullFilledAsset.value.rawFile,
+    name: fullFilledAsset.name,
+    type: typeFromMime(fullFilledAsset.mime),
+    url: fullFilledAsset.url,
+    ext: fullFilledAsset.url.split('.').pop(),
+    mime: fullFilledAsset.mime,
+    rawFile: fullFilledAsset.rawFile,
   }));
 
-  const unknownAssets = rejectedAssets.map(unknownAsset => ({
-    source: AssetSource.Url,
-    name: unknownAsset.reason,
-    type: AssetType.Unknown,
-    url: unknownAsset.reason,
-    ext: unknownAsset.reason.split('.').pop(),
-    mime: undefined,
-  }));
-
-  return assets.concat(unknownAssets);
+  return assets;
 };

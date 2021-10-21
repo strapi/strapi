@@ -41,6 +41,7 @@ export const DocAssetCard = ({ name, extension, selected, onSelect, onEdit, size
             <IconButton
               label={formatMessage({ id: getTrad('control-card.edit'), defaultMessage: 'Edit' })}
               icon={<EditIcon />}
+              onClick={onEdit}
             />
           </CardAction>
         )}

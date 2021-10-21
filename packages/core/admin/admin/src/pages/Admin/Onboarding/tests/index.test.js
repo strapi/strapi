@@ -43,7 +43,7 @@ describe('Onboarding', () => {
         color: #ffffff;
       }
 
-      <div
+      <aside
         class="c0"
       >
         <button
@@ -67,7 +67,7 @@ describe('Onboarding', () => {
             />
           </svg>
         </button>
-      </div>
+      </aside>
     `);
   });
 

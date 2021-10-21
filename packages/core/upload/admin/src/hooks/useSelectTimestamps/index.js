@@ -1,10 +1,6 @@
-import { useSelector } from 'react-redux';
-import selectFileModelTimestamps from '../../components/Initializer/selectors';
-
+// TODO: remove when ML migration is finished
 const useSelectTimestamps = () => {
-  const timestamps = useSelector(selectFileModelTimestamps);
-
-  return timestamps;
+  return { createdAt: 'createdAt', updatedAt: 'updatedAt' };
 };
 
 export default useSelectTimestamps;
