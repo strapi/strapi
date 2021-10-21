@@ -104,7 +104,7 @@ const ComponentIconPicker = ({ error, isCreating, intlLabel, name, onChange, val
               </Searchbar>
             </div>
           ) : (
-            <IconButton onClick={toggleSearch} aria-label="Edit" icon={<SearchIcon />} />
+            <IconButton onClick={toggleSearch} aria-label="Edit" icon={<SearchIcon />} noBorder />
           )}
         </Row>
         <Stack size={1}>
