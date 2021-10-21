@@ -1,5 +1,6 @@
 'use strict';
 
+const { isUndefined } = require('lodash/fp');
 const { yup, formatYupErrors } = require('@strapi/utils');
 const validators = require('./common-validators');
 
@@ -28,6 +29,10 @@ const profileUpdateSchema = yup
     lastname: validators.lastname.notNull(),
     username: validators.username.nullable(),
     password: validators.password.notNull(),
+    currentPassword: yup
+      .string()
+      .when('password', (password, schema) => (!isUndefined(password) ? schema.required() : schema))
+      .notNull(),
     preferedLanguage: yup.string().nullable(),
   })
   .noUnknown();

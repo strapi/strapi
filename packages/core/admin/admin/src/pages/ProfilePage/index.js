@@ -47,6 +47,7 @@ const FieldActionWrapper = styled(FieldAction)`
 const ProfilePage = () => {
   const [passwordShown, setPasswordShown] = useState(false);
   const [passwordConfirmShown, setPasswordConfirmShown] = useState(false);
+  const [currentPasswordShown, setCurrentPasswordShown] = useState(false);
   const { changeLocale, localeNames } = useLocalesProvider();
   const { setUserDisplayName } = useAppInfos();
   const queryClient = useQueryClient();
@@ -88,14 +89,8 @@ const ProfilePage = () => {
         type: 'success',
         message: { id: 'notification.success.saved', defaultMessage: 'Saved' },
       });
-
-      unlockApp();
     },
-    onError: () => {
-      toggleNotification({
-        type: 'warning',
-        message: { id: 'notification.error', defaultMessage: 'An error occured' },
-      });
+    onSettled: () => {
       unlockApp();
     },
     refetchActive: true,
@@ -103,11 +98,27 @@ const ProfilePage = () => {
 
   const { isLoading: isSubmittingForm } = submitMutation;
 
-  const handleSubmit = async body => {
+  const handleSubmit = async (body, { setErrors }) => {
     lockApp();
 
     const username = body.username || null;
-    await submitMutation.mutateAsync({ ...body, username });
+    submitMutation.mutate(
+      { ...body, username },
+      {
+        onError: error => {
+          const res = error?.response?.data;
+
+          if (res?.data) {
+            return setErrors(res.data);
+          }
+
+          return toggleNotification({
+            type: 'warning',
+            message: { id: 'notification.error', defaultMessage: 'An error occured' },
+          });
+        },
+      }
+    );
   };
 
   const fieldsToPick = ['email', 'firstname', 'lastname', 'username', 'preferedLanguage'];
@@ -250,6 +261,51 @@ const ProfilePage = () => {
                             defaultMessage: 'Change password',
                           })}
                         </H3>
+
+                        <Grid gap={5}>
+                          <GridItem s={12} col={6}>
+                            <TextInput
+                              error={
+                                errors.currentPassword
+                                  ? formatMessage({
+                                      id: errors.currentPassword,
+                                      defaultMessage: errors.currentPassword,
+                                    })
+                                  : ''
+                              }
+                              onChange={handleChange}
+                              value={values.currentPassword || ''}
+                              label={formatMessage({
+                                id: 'Auth.form.currentPassword.label',
+                                defaultMessage: 'Current Password',
+                              })}
+                              name="currentPassword"
+                              type={currentPasswordShown ? 'text' : 'password'}
+                              endAction={
+                                <FieldActionWrapper
+                                  onClick={e => {
+                                    e.stopPropagation();
+                                    setCurrentPasswordShown(prev => !prev);
+                                  }}
+                                  label={formatMessage(
+                                    currentPasswordShown
+                                      ? {
+                                          id: 'Auth.form.password.show-password',
+                                          defaultMessage: 'Show password',
+                                        }
+                                      : {
+                                          id: 'Auth.form.password.hide-password',
+                                          defaultMessage: 'Hide password',
+                                        }
+                                  )}
+                                >
+                                  {currentPasswordShown ? <Show /> : <Hide />}
+                                </FieldActionWrapper>
+                              }
+                            />
+                          </GridItem>
+                        </Grid>
+
                         <Grid gap={5}>
                           <GridItem s={12} col={6}>
                             <TextInput
@@ -257,7 +313,7 @@ const ProfilePage = () => {
                                 errors.password
                                   ? formatMessage({
                                       id: errors.password,
-                                      defaultMessage: 'This value is required.',
+                                      defaultMessage: errors.password,
                                     })
                                   : ''
                               }
@@ -295,10 +351,10 @@ const ProfilePage = () => {
                           <GridItem s={12} col={6}>
                             <TextInput
                               error={
-                                errors.password
+                                errors.confirmPassword
                                   ? formatMessage({
-                                      id: errors.password,
-                                      defaultMessage: 'This value is required.',
+                                      id: errors.confirmPassword,
+                                      defaultMessage: errors.confirmPassword,
                                     })
                                   : ''
                               }
@@ -369,15 +425,21 @@ const ProfilePage = () => {
                                 defaultMessage:
                                   'This will only display your own interface in the chosen language.',
                               })}
-                              onClear={() =>
-                                handleChange({ target: { name: 'preferedLanguage', value: null } })}
+                              onClear={() => {
+                                handleChange({
+                                  target: { name: 'preferedLanguage', value: null },
+                                });
+                              }}
                               clearLabel={formatMessage({
                                 id: 'Settings.profile.form.section.experience.clear.select',
                                 defaultMessage: 'Clear the interface language selected',
                               })}
                               value={values.preferedLanguage}
-                              onChange={e =>
-                                handleChange({ target: { name: 'preferedLanguage', value: e } })}
+                              onChange={e => {
+                                handleChange({
+                                  target: { name: 'preferedLanguage', value: e },
+                                });
+                              }}
                             >
                               {Object.keys(localeNames).map(language => {
                                 const langName = localeNames[language];
