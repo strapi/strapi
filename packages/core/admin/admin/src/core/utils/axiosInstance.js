@@ -13,7 +13,7 @@ instance.interceptors.request.use(
     };
 
     if (auth.getToken() !== null) {
-      config.headers['Authorization'] = `Bearer ${auth.getToken()}`;
+      config.headers.Authorization = `Bearer ${auth.getToken()}`;
     }
 
     return config;
