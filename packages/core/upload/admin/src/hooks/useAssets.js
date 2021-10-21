@@ -9,7 +9,7 @@ export const useAssets = ({ skipWhen }) => {
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
   const { notifyStatus } = useNotifyAT();
-  const [{ rawQuery, query }, setQuery] = useQueryParams();
+  const [{ rawQuery }] = useQueryParams();
   const dataRequestURL = getRequestUrl('files');
 
   const getAssets = async () => {
@@ -23,12 +23,6 @@ export const useAssets = ({ skipWhen }) => {
     staleTime: 0,
     cacheTime: 0,
   });
-
-  useEffect(() => {
-    if (!query) {
-      setQuery({ sort: 'updatedAt:DESC', page: 1, pageSize: 10 });
-    }
-  }, [query, setQuery]);
 
   useEffect(() => {
     if (data) {
