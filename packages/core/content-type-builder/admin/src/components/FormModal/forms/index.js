@@ -1,6 +1,5 @@
 import get from 'lodash/get';
 import toLower from 'lodash/toLower';
-import nameToSlug from '../../../utils/nameToSlug';
 import getTrad from '../../../utils/getTrad';
 import { attributesForm, attributeTypes, commonBaseForm } from '../attributes';
 import { categoryForm, createCategorySchema } from '../category';
@@ -141,11 +140,9 @@ const forms = {
       );
     },
     form: {
-      base({ data = {}, actionType }) {
+      base({ actionType }) {
         if (actionType === 'create') {
-          const value = data.name ? nameToSlug(data.name) : '';
-
-          return contentTypeForm.base.create(value);
+          return contentTypeForm.base.create();
         }
 
         return contentTypeForm.base.edit();
