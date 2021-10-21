@@ -22,9 +22,11 @@ import { Box } from '@strapi/parts/Box';
 import { Button } from '@strapi/parts/Button';
 import { Grid, GridItem } from '@strapi/parts/Grid';
 import { HeaderLayout, ContentLayout } from '@strapi/parts/Layout';
+import { Link } from '@strapi/parts/Link';
 import { H3 } from '@strapi/parts/Text';
 import { Main } from '@strapi/parts/Main';
 import { Stack } from '@strapi/parts/Stack';
+import BackIcon from '@strapi/icons/BackIcon';
 import CheckIcon from '@strapi/icons/CheckIcon';
 import MagicLink from 'ee_else_ce/pages/SettingsPage/pages/Users/components/MagicLink';
 import { formatAPIErrors } from '../../../../../utils';
@@ -144,6 +146,14 @@ const EditPage = ({ canUpdate }) => {
             </Button>
           }
           title={title}
+          navigationAction={
+            <Link startIcon={<BackIcon />} to="/settings/users?pageSize=10&page=1&sort=firstname">
+              {formatMessage({
+                id: 'app.components.go-back',
+                defaultMessage: 'Go back',
+              })}
+            </Link>
+          }
         />
         <ContentLayout>
           <LoadingIndicatorPage />
@@ -177,6 +187,17 @@ const EditPage = ({ canUpdate }) => {
                   </Button>
                 }
                 title={title}
+                navigationAction={
+                  <Link
+                    startIcon={<BackIcon />}
+                    to="/settings/users?pageSize=10&page=1&sort=firstname"
+                  >
+                    {formatMessage({
+                      id: 'app.components.go-back',
+                      defaultMessage: 'Go back',
+                    })}
+                  </Link>
+                }
               />
               <ContentLayout>
                 {data?.registrationToken && (
