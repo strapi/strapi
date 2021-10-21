@@ -24,7 +24,7 @@ module.exports = {
     const userService = getService('user');
     const authServer = getService('auth');
 
-    const { currentPassword, ...userInfo } = ctx.request.body;
+    const { currentPassword, ...userInfo } = input;
 
     if (currentPassword && userInfo.password) {
       const isValid = await authServer.validatePassword(currentPassword, ctx.state.user.password);
