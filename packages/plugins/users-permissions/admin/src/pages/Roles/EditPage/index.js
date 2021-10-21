@@ -7,7 +7,9 @@ import { Box } from '@strapi/parts/Box';
 import { TextInput } from '@strapi/parts/TextInput';
 import { Textarea } from '@strapi/parts/Textarea';
 import { H3 } from '@strapi/parts/Text';
+import BackIcon from '@strapi/icons/BackIcon';
 import CheckIcon from '@strapi/icons/CheckIcon';
+import { Link } from '@strapi/parts/Link';
 import { GridItem, Grid } from '@strapi/parts/Grid';
 import { Formik } from 'formik';
 import { useIntl } from 'react-intl';
@@ -103,6 +105,14 @@ const EditPage = () => {
               }
               title={role.name}
               subtitle={role.description}
+              navigationAction={
+                <Link startIcon={<BackIcon />} to="/settings/users-permissions/roles">
+                  {formatMessage({
+                    id: 'app.components.go-back',
+                    defaultMessage: 'Go back',
+                  })}
+                </Link>
+              }
             />
             <ContentLayout>
               <Stack size={7}>
