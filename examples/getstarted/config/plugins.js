@@ -14,6 +14,13 @@ module.exports = () => ({
       },
     },
   },
+  documentation: {
+    config: {
+      info: {
+        version: '2.0.0',
+      },
+    },
+  },
   myplugin: {
     enabled: true,
     resolve: `./src/plugins/myplugin`, // From the root of the project
