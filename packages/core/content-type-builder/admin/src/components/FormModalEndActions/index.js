@@ -25,6 +25,7 @@ const FormModalEndActions = ({
   isCreatingComponentAttribute,
   isComponentModal,
   isEditingCategory,
+  isInFirstComponentStep,
   onSubmitEditAttribute,
   onSubmitCreateContentType,
   onSubmitCreateComponent,
@@ -41,27 +42,31 @@ const FormModalEndActions = ({
   if (isAttributeModal && isComponentAttribute) {
     console.log('is component attribute');
 
-    return (
-      <Button
-        variant="secondary"
-        type="submit"
-        onClick={e => {
-          e.preventDefault();
+    if (isInFirstComponentStep) {
+      return (
+        <Button
+          variant="secondary"
+          type="submit"
+          onClick={e => {
+            e.preventDefault();
 
-          onSubmitCreateComponentAttribute(e, true);
-        }}
-      >
-        {isCreatingComponentAttribute
-          ? formatMessage({
-              id: getTrad('form.button.configure-component'),
-              defaultMessage: 'Configure the component',
-            })
-          : formatMessage({
-              id: getTrad('form.button.select-component'),
-              defaultMessage: 'Configure the component',
-            })}
-      </Button>
-    );
+            onSubmitCreateComponentAttribute(e, true);
+          }}
+        >
+          {isCreatingComponentAttribute
+            ? formatMessage({
+                id: getTrad('form.button.configure-component'),
+                defaultMessage: 'Configure the component',
+              })
+            : formatMessage({
+                id: getTrad('form.button.select-component'),
+                defaultMessage: 'Configure the component',
+              })}
+        </Button>
+      );
+    } 
+      console.log('second step');
+    
   }
 
   if (isAttributeModal && !isComponentAttribute) {
@@ -278,6 +283,7 @@ FormModalEndActions.propTypes = {
   isComponentModal: PropTypes.bool.isRequired,
   isEditingAttribute: PropTypes.bool.isRequired,
   isEditingCategory: PropTypes.bool.isRequired,
+  isInFirstComponentStep: PropTypes.bool.isRequired,
   onSubmitEditAttribute: PropTypes.func.isRequired,
   onSubmitCreateContentType: PropTypes.func.isRequired,
   onSubmitCreateComponent: PropTypes.func.isRequired,

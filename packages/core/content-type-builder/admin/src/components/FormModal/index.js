@@ -1053,6 +1053,7 @@ const FormModal = () => {
                   isCreatingComponentAttribute={modifiedData.createComponent || false}
                   isEditingAttribute={actionType === 'edit'}
                   isEditingCategory={modalType === 'editCategory'}
+                  isInFirstComponentStep={step === '1'}
                   onSubmitCreateContentType={handleSubmit}
                   onSubmitCreateComponent={handleSubmit}
                   onSubmitCreateComponentAttribute={handleSubmit}
