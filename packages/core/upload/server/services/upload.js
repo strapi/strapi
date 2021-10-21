@@ -310,10 +310,6 @@ module.exports = ({ strapi }) => ({
     return strapi.entityService.findPage('plugin::upload.file', query);
   },
 
-  count(query) {
-    return strapi.entityService.count('plugin::upload.file', query);
-  },
-
   async remove(file) {
     const config = strapi.config.get('plugin.upload');
 

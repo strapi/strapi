@@ -22,7 +22,7 @@ describe('FromComputerForm', () => {
     );
 
     expect(container).toMatchInlineSnapshot(`
-      .c19 {
+      .c22 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
@@ -48,11 +48,26 @@ describe('FromComputerForm', () => {
         border-radius: 4px;
         border-color: #c0c0cf;
         border: 1px solid #c0c0cf;
+        position: relative;
       }
 
-      .c6 {
+      .c7 {
         padding-top: 12px;
         padding-bottom: 20px;
+      }
+
+      .c9 {
+        position: absolute;
+        left: 0px;
+        right: 0px;
+        top: 0px;
+        bottom: 0px;
+        z-index: 1;
+        width: 100%;
+      }
+
+      .c11 {
+        position: relative;
       }
 
       .c3 {
@@ -73,26 +88,28 @@ describe('FromComputerForm', () => {
         align-items: center;
       }
 
-      .c12 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
+      .c4 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
       }
 
-      .c7 {
+      .c8 {
         font-weight: 500;
         font-size: 1rem;
         line-height: 1.25;
         color: #666687;
       }
 
-      .c13 {
+      .c16 {
         background: #f6f6f9;
         padding-top: 16px;
         padding-right: 20px;
@@ -100,7 +117,7 @@ describe('FromComputerForm', () => {
         padding-left: 20px;
       }
 
-      .c15 {
+      .c18 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -118,7 +135,7 @@ describe('FromComputerForm', () => {
         align-items: center;
       }
 
-      .c16 {
+      .c19 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -132,22 +149,22 @@ describe('FromComputerForm', () => {
         align-items: center;
       }
 
-      .c14 {
+      .c17 {
         border-top: 1px solid #eaeaef;
       }
 
-      .c17 > * + * {
+      .c20 > * + * {
         margin-left: 8px;
       }
 
-      .c11 {
+      .c15 {
         font-weight: 500;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #32324d;
       }
 
-      .c8 {
+      .c12 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -161,21 +178,21 @@ describe('FromComputerForm', () => {
         outline: none;
       }
 
-      .c8 svg {
+      .c12 svg {
         height: 12px;
         width: 12px;
       }
 
-      .c8 svg > g,
-      .c8 svg path {
+      .c12 svg > g,
+      .c12 svg path {
         fill: #ffffff;
       }
 
-      .c8[aria-disabled='true'] {
+      .c12[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c8:after {
+      .c12:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -190,11 +207,11 @@ describe('FromComputerForm', () => {
         border: 2px solid transparent;
       }
 
-      .c8:focus-visible {
+      .c12:focus-visible {
         outline: none;
       }
 
-      .c8:focus-visible:after {
+      .c12:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -205,7 +222,7 @@ describe('FromComputerForm', () => {
         border: 2px solid #4945ff;
       }
 
-      .c9 {
+      .c13 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -217,7 +234,7 @@ describe('FromComputerForm', () => {
         background: #4945ff;
       }
 
-      .c9 .sc-eUWgZB {
+      .c13 .sc-dYzmtA {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -228,49 +245,49 @@ describe('FromComputerForm', () => {
         align-items: center;
       }
 
-      .c9 .c10 {
+      .c13 .c14 {
         color: #ffffff;
       }
 
-      .c9[aria-disabled='true'] {
+      .c13[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c9[aria-disabled='true'] .c10 {
+      .c13[aria-disabled='true'] .c14 {
         color: #666687;
       }
 
-      .c9[aria-disabled='true'] svg > g,
-      .c9[aria-disabled='true'] svg path {
+      .c13[aria-disabled='true'] svg > g,
+      .c13[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c9[aria-disabled='true']:active {
+      .c13[aria-disabled='true']:active {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c9[aria-disabled='true']:active .c10 {
+      .c13[aria-disabled='true']:active .c14 {
         color: #666687;
       }
 
-      .c9[aria-disabled='true']:active svg > g,
-      .c9[aria-disabled='true']:active svg path {
+      .c13[aria-disabled='true']:active svg > g,
+      .c13[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
-      .c9:hover {
+      .c13:hover {
         border: 1px solid #7b79ff;
         background: #7b79ff;
       }
 
-      .c9:active {
+      .c13:active {
         border: 1px solid #4945ff;
         background: #4945ff;
       }
 
-      .c18 {
+      .c21 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -282,7 +299,7 @@ describe('FromComputerForm', () => {
         background: #ffffff;
       }
 
-      .c18 .sc-eUWgZB {
+      .c21 .sc-dYzmtA {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -293,79 +310,75 @@ describe('FromComputerForm', () => {
         align-items: center;
       }
 
-      .c18 .c10 {
+      .c21 .c14 {
         color: #ffffff;
       }
 
-      .c18[aria-disabled='true'] {
+      .c21[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c18[aria-disabled='true'] .c10 {
+      .c21[aria-disabled='true'] .c14 {
         color: #666687;
       }
 
-      .c18[aria-disabled='true'] svg > g,
-      .c18[aria-disabled='true'] svg path {
+      .c21[aria-disabled='true'] svg > g,
+      .c21[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c18[aria-disabled='true']:active {
+      .c21[aria-disabled='true']:active {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c18[aria-disabled='true']:active .c10 {
+      .c21[aria-disabled='true']:active .c14 {
         color: #666687;
       }
 
-      .c18[aria-disabled='true']:active svg > g,
-      .c18[aria-disabled='true']:active svg path {
+      .c21[aria-disabled='true']:active svg > g,
+      .c21[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
-      .c18:hover {
+      .c21:hover {
         background-color: #f6f6f9;
       }
 
-      .c18:active {
+      .c21:active {
         background-color: #eaeaef;
       }
 
-      .c18 .c10 {
+      .c21 .c14 {
         color: #32324d;
       }
 
-      .c18 svg > g,
-      .c18 svg path {
+      .c21 svg > g,
+      .c21 svg path {
         fill: #32324d;
       }
 
-      .c4 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
+      .c5 {
         -webkit-flex-direction: column;
         -ms-flex-direction: column;
         flex-direction: column;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
-      .c5 {
+      .c6 {
         font-size: 3.75rem;
       }
 
-      .c5 svg path {
+      .c6 svg path {
         fill: #4945ff;
       }
 
       .c2 {
         border-style: dashed;
+      }
+
+      .c10 {
+        opacity: 0;
       }
 
       <div>
@@ -381,10 +394,10 @@ describe('FromComputerForm', () => {
                   class="c3"
                 >
                   <div
-                    class="c4"
+                    class="c4 c5"
                   >
                     <div
-                      class="c5"
+                      class="c6"
                     >
                       <svg
                         aria-hidden="true"
@@ -405,34 +418,36 @@ describe('FromComputerForm', () => {
                       </svg>
                     </div>
                     <div
-                      class="c6"
+                      class="c7"
                     >
                       <span
-                        class="c7"
+                        class="c8"
                       >
                         Drag & Drop here or
                       </span>
                     </div>
-                    <button
-                      aria-disabled="false"
-                      class="c8 c9"
-                      type="button"
-                    >
-                      <span
-                        class="c10 c11"
-                      >
-                        Browse files
-                      </span>
-                    </button>
+                    <input
+                      class="c9 c10"
+                      multiple=""
+                      name="files"
+                      tabindex="-1"
+                      type="file"
+                      width="100%"
+                    />
                     <div
-                      class="c12"
+                      class="c11"
                     >
-                      <input
-                        multiple=""
-                        name="files"
-                        tabindex="-1"
-                        type="file"
-                      />
+                      <button
+                        aria-disabled="false"
+                        class="c12 c13"
+                        type="button"
+                      >
+                        <span
+                          class="c14 c15"
+                        >
+                          Browse files
+                        </span>
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -440,34 +455,34 @@ describe('FromComputerForm', () => {
             </label>
           </div>
           <div
-            class="c13 c14"
+            class="c16 c17"
           >
             <div
-              class="c15"
+              class="c18"
             >
               <div
-                class="c16 c17"
+                class="c19 c20"
               >
                 <button
                   aria-disabled="false"
-                  class="c8 c18"
+                  class="c12 c21"
                   type="button"
                 >
                   <span
-                    class="c10 c11"
+                    class="c14 c15"
                   >
                     App level translation
                   </span>
                 </button>
               </div>
               <div
-                class="c16 c17"
+                class="c19 c20"
               />
             </div>
           </div>
         </form>
         <div
-          class="c19"
+          class="c22"
         >
           <p
             aria-live="polite"
