@@ -40,6 +40,7 @@
   "Auth.form.password.hint": "Password must contain at least 8 characters, 1 uppercase, 1 lowercase and 1 number",
   "Auth.form.password.label": "Password",
   "Auth.form.password.show-password": "Show password",
+  "Auth.form.currentPassword.label": "Current Password",
   "Auth.form.register.news.label": "Keep me updated about the new features and upcoming improvements (by doing this you accept the {terms} and the {policy}).",
   "Auth.form.register.subtitle": "Your credentials are only used to authenticate yourself on the admin panel. All saved data will be stored in your own database.",
   "Auth.form.rememberMe.label": "Remember me",
