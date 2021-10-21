@@ -2,9 +2,9 @@ import React, { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { useDrag, useDrop } from 'react-dnd';
 import { getEmptyImage } from 'react-dnd-html5-backend';
-import ItemTypes from '../../utils/ItemTypes';
-import DraggedField from '../../components/DraggedField';
-import useLayoutDnd from '../../hooks/useLayoutDnd';
+import ItemTypes from '../../../utils/ItemTypes';
+import DraggedField from '../../../components/DraggedField';
+import useLayoutDnd from '../../../hooks/useLayoutDnd';
 
 const Label = ({ count, index, label, move, name, onClick, onRemove, selectedItem }) => {
   const ref = useRef(null);
