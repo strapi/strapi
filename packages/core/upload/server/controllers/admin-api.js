@@ -60,23 +60,6 @@ module.exports = {
     ctx.body = pm.sanitize(file, { withPrivate: false });
   },
 
-  async count(ctx) {
-    const pm = strapi.admin.services.permission.createPermissionsManager({
-      ability: ctx.state.userAbility,
-      action: ACTIONS.read,
-      model: fileModel,
-    });
-
-    if (!pm.isAllowed) {
-      return ctx.forbidden();
-    }
-
-    const query = pm.addPermissionsQueryTo(ctx.query);
-    const count = await getService('upload').count(query);
-
-    ctx.body = { count };
-  },
-
   async destroy(ctx) {
     const { id } = ctx.params;
     const { userAbility } = ctx.state;
