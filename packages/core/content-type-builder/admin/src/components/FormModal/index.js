@@ -30,6 +30,8 @@ import AllowedTypesSelect from '../AllowedTypesSelect';
 import AttributeOptions from '../AttributeOptions';
 import DraftAndPublishToggle from '../DraftAndPublishToggle';
 import FormModalHeader from '../FormModalHeader';
+import FormModalEndActions from '../FormModalEndActions';
+
 import BooleanDefaultValueSelect from '../BooleanDefaultValueSelect';
 import BooleanRadioGroup from '../BooleanRadioGroup';
 import CheckboxWithNumberField from '../CheckboxWithNumberField';
@@ -1036,8 +1038,21 @@ const FormModal = () => {
               </TabGroup>
             </ModalBody>
             <ModalFooter
-              // FIXME
               endActions={
+                <FormModalEndActions
+                  deleteCategory={deleteCategory}
+                  categoryName={initialData.name}
+                  isAttributeModal={modalType === 'attribute'}
+                  isEditingAttribute={actionType === 'edit'}
+                  isContentTypeModal={modalType === 'contentType'}
+                  isEditingCategory={isEditingCategory}
+                  onSubmitEditAttribute={handleSubmit}
+                  onSubmitEditCategory={handleSubmit}
+                  onSubmitCreateContentType={handleSubmit}
+                />
+              }
+              // FIXME
+              eendActions={
                 <>
                   {(isCreatingContentType || isCreatingComponent) && !isCreating && (
                     <Button
@@ -1054,22 +1069,7 @@ const FormModal = () => {
                       })}
                     </Button>
                   )}
-                  {isEditingCategory && (
-                    <Button
-                      type="button"
-                      variant="danger"
-                      onClick={e => {
-                        e.preventDefault();
 
-                        deleteCategory(initialData.name);
-                      }}
-                    >
-                      {formatMessage({
-                        id: getTrad('form.button.delete'),
-                        defaultMessage: 'Delete',
-                      })}
-                    </Button>
-                  )}
                   {isCreating && attributeType === 'dynamiczone' && (
                     <Button
                       type={isCreating ? 'submit' : 'button'}
@@ -1097,6 +1097,7 @@ const FormModal = () => {
                       {getButtonSubmitMessage()}
                     </Button>
                   )}
+                  {/* Used in editCategory modal */}
                   {attributeType !== 'dynamiczone' && (
                     <Button
                       type={isCreating ? 'submit' : 'button'}
