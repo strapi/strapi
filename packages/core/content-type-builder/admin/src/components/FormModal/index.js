@@ -1038,21 +1038,24 @@ const FormModal = () => {
               </TabGroup>
             </ModalBody>
             <ModalFooter
-              endActions={
+              eendActions={
                 <FormModalEndActions
                   deleteCategory={deleteCategory}
+                  deleteContentType={deleteData}
                   categoryName={initialData.name}
                   isAttributeModal={modalType === 'attribute'}
-                  isEditingAttribute={actionType === 'edit'}
                   isContentTypeModal={modalType === 'contentType'}
-                  isEditingCategory={isEditingCategory}
+                  isCreatingContentType={actionType === 'create'}
+                  isEditingAttribute={actionType === 'edit'}
+                  isEditingCategory={modalType === 'editCategory'}
+                  onSubmitCreateContentType={handleSubmit}
                   onSubmitEditAttribute={handleSubmit}
                   onSubmitEditCategory={handleSubmit}
-                  onSubmitCreateContentType={handleSubmit}
+                  onSubmitEditContentType={handleSubmit}
                 />
               }
               // FIXME
-              eendActions={
+              endActions={
                 <>
                   {(isCreatingContentType || isCreatingComponent) && !isCreating && (
                     <Button

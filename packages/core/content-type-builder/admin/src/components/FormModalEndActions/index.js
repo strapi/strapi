@@ -14,17 +14,22 @@ import { getTrad } from '../../utils';
 const FormModalEndActions = ({
   categoryName,
   deleteCategory,
+  deleteContentType,
   isAttributeModal,
   isEditingAttribute,
   isContentTypeModal,
+  isCreatingContentType,
   isEditingCategory,
   onSubmitEditAttribute,
   onSubmitCreateContentType,
   onSubmitEditCategory,
+  onSubmitEditContentType,
 }) => {
   const { formatMessage } = useIntl();
 
   if (isAttributeModal) {
+    console.log('is attribute modal');
+
     return (
       <>
         <Button
@@ -61,27 +66,64 @@ const FormModalEndActions = ({
   }
 
   if (isContentTypeModal) {
-    // TODO diff between edit and create
+    console.log('is contentType modal');
 
     return (
-      <Button
-        type="submit"
-        variant="secondary"
-        onClick={e => {
-          e.preventDefault();
+      <>
+        {!isCreatingContentType && (
+          <>
+            <Button
+              type="button"
+              variant="danger"
+              onClick={e => {
+                e.preventDefault();
+                deleteContentType();
+              }}
+            >
+              {formatMessage({
+                id: getTrad('form.button.delete'),
+                defaultMessage: 'Delete',
+              })}
+            </Button>
+            <Button
+              type="submit"
+              variant="default"
+              onClick={e => {
+                e.preventDefault();
 
-          onSubmitCreateContentType(e, true);
-        }}
-      >
-        {formatMessage({
-          id: getTrad('form.button.continue'),
-          defaultMessage: 'Continue',
-        })}
-      </Button>
+                onSubmitEditContentType(e, false);
+              }}
+            >
+              {formatMessage({
+                id: getTrad('form.button.finish'),
+                defaultMessage: 'Finish',
+              })}
+            </Button>
+          </>
+        )}
+        {isCreatingContentType && (
+          <Button
+            type="submit"
+            variant="secondary"
+            onClick={e => {
+              e.preventDefault();
+
+              onSubmitCreateContentType(e, true);
+            }}
+          >
+            {formatMessage({
+              id: getTrad('form.button.continue'),
+              defaultMessage: 'Continue',
+            })}
+          </Button>
+        )}
+      </>
     );
   }
 
   if (isEditingCategory) {
+    console.log('is editing category');
+
     return (
       <>
         <Button
@@ -132,13 +174,16 @@ FormModalEndActions.defaultProps = {
 FormModalEndActions.propTypes = {
   categoryName: PropTypes.string,
   deleteCategory: PropTypes.func.isRequired,
+  deleteContentType: PropTypes.func.isRequired,
   isAttributeModal: PropTypes.bool.isRequired,
   isContentTypeModal: PropTypes.bool.isRequired,
+  isCreatingContentType: PropTypes.bool.isRequired,
   isEditingAttribute: PropTypes.bool.isRequired,
   isEditingCategory: PropTypes.bool.isRequired,
   onSubmitEditAttribute: PropTypes.func.isRequired,
   onSubmitCreateContentType: PropTypes.func.isRequired,
   onSubmitEditCategory: PropTypes.func.isRequired,
+  onSubmitEditContentType: PropTypes.func.isRequired,
 };
 
 export default FormModalEndActions;
