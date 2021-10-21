@@ -223,8 +223,8 @@ function ListView({
     defaultMessage: 'Content',
   });
   const headerLayoutTitle = formatMessage({
-    id: contentType.info.label,
-    defaultMessage: contentType.info.label || defaultHeaderLayoutTitle,
+    id: contentType.info.displayName,
+    defaultMessage: contentType.info.displayName || defaultHeaderLayoutTitle,
   });
 
   const subtitle = canRead
@@ -324,7 +324,7 @@ ListView.propTypes = {
     contentType: PropTypes.shape({
       attributes: PropTypes.object.isRequired,
       metadatas: PropTypes.object.isRequired,
-      info: PropTypes.shape({ label: PropTypes.string.isRequired }).isRequired,
+      info: PropTypes.shape({ displayName: PropTypes.string.isRequired }).isRequired,
       layouts: PropTypes.shape({
         list: PropTypes.array.isRequired,
         editRelations: PropTypes.array,
