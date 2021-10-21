@@ -41,7 +41,6 @@ module.exports = (dir, initialConfig = {}) => {
 
   const rootConfig = {
     launchedAt: Date.now(),
-    appPath: dir,
     paths: CONFIG_PATHS,
     serveAdminPanel,
     autoReload,

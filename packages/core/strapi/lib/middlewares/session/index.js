@@ -9,7 +9,7 @@ const session = require('koa-session');
  */
 module.exports = strapi => {
   const requireStore = store => {
-    return require(path.resolve(strapi.config.appPath, 'node_modules', 'koa-' + store));
+    return require(path.resolve(strapi.dirs.root, 'node_modules', 'koa-' + store));
   };
 
   const defineStore = session => {
