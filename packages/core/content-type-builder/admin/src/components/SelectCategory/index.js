@@ -4,39 +4,45 @@
  *
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
-import { Select, Option } from '@strapi/parts/Select';
+import { ComboboxOption, CreatableCombobox } from '@strapi/parts/Combobox';
 import useDataManager from '../../hooks/useDataManager';
 
-// FIXME replace with Creatable Combobox
 const SelectCategory = ({ error, intlLabel, name, onChange, value }) => {
   const { formatMessage } = useIntl();
   const { allComponentsCategories } = useDataManager();
+  const [categories, setCategories] = useState(allComponentsCategories);
 
   const errorMessage = error ? formatMessage({ id: error, defaultMessage: error }) : '';
   const label = formatMessage(intlLabel);
 
+  const handleChange = value => {
+    onChange({ target: { name, value, type: 'select-category' } });
+  };
+
+  const handleCreateOption = value => {
+    setCategories(prev => [...prev, value]);
+    handleChange(value);
+  };
+
   return (
-    <Select
+    <CreatableCombobox
       error={errorMessage}
-      label={label}
       id={name}
+      label={label}
       name={name}
-      onChange={value => {
-        onChange({ target: { name, value, type: 'select-category' } });
-      }}
-      value={value || ''}
+      onChange={handleChange}
+      onCreateOption={handleCreateOption}
+      value={value}
     >
-      {allComponentsCategories.map(category => {
-        return (
-          <Option key={category} value={category}>
-            {category}
-          </Option>
-        );
-      })}
-    </Select>
+      {categories.map(category => (
+        <ComboboxOption key={category} value={category}>
+          {category}
+        </ComboboxOption>
+      ))}
+    </CreatableCombobox>
   );
 };
 
