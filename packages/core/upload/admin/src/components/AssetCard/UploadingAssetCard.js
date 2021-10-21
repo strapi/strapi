@@ -10,47 +10,21 @@ import {
   CardSubtitle,
   CardBadge,
 } from '@strapi/parts/Card';
-import CloseAlertIcon from '@strapi/icons/CloseAlertIcon';
 import { Text } from '@strapi/parts/Text';
-import { Box } from '@strapi/parts/Box';
-import { Row } from '@strapi/parts/Row';
 import { Stack } from '@strapi/parts/Stack';
-import { ProgressBar } from '@strapi/parts/ProgressBar';
 import { useIntl } from 'react-intl';
 import { getTrad } from '../../utils';
 import { AssetType } from '../../constants';
 import { useUpload } from '../../hooks/useUpload';
+import { UploadProgress } from '../UploadProgress';
+
+const UploadProgressWrapper = styled.div`
+  height: ${88 / 16}rem;
+  width: 100%;
+`;
 
 const Extension = styled.span`
   text-transform: uppercase;
-`;
-
-const BoxWrapper = styled(Row)`
-  height: 88px;
-  width: 100%;
-  flex-direction: column;
-
-  svg {
-    path {
-      fill: ${({ theme, error }) => (error ? theme.colors.danger600 : undefined)};
-    }
-  }
-`;
-
-const CancelButton = styled.button`
-  border: none;
-  background: none;
-  display: flex;
-  align-items: center;
-
-  svg {
-    path {
-      fill: ${({ theme }) => theme.colors.neutral200};
-    }
-
-    height: 10px;
-    width: 10px;
-  }
 `;
 
 export const UploadingAssetCard = ({
@@ -101,36 +75,9 @@ export const UploadingAssetCard = ({
     <Stack size={1}>
       <Card borderColor={error ? 'danger600' : undefined}>
         <CardHeader>
-          <BoxWrapper
-            background={error ? 'danger100' : 'neutral700'}
-            justifyContent="center"
-            error={error}
-            hasRadius
-          >
-            {error ? (
-              <CloseAlertIcon aria-hidden />
-            ) : (
-              <>
-                <Box paddingBottom={2}>
-                  <ProgressBar value={progress} size="S">
-                    {`${progress}/100%`}
-                  </ProgressBar>
-                </Box>
-
-                <CancelButton type="button" onClick={handleCancel}>
-                  <Text small as="span" textColor="neutral200">
-                    {formatMessage({
-                      id: 'app.components.Button.cancel',
-                      defaultMessage: 'Cancel',
-                    })}
-                  </Text>
-                  <Box as="span" paddingLeft={2} aria-hidden>
-                    <CloseAlertIcon />
-                  </Box>
-                </CancelButton>
-              </>
-            )}
-          </BoxWrapper>
+          <UploadProgressWrapper>
+            <UploadProgress error={error} onCancel={handleCancel} progress={progress} />
+          </UploadProgressWrapper>
         </CardHeader>
         <CardBody>
           <CardContent>

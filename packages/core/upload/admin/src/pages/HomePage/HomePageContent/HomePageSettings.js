@@ -9,7 +9,7 @@ import { getTrad } from '../../../utils';
 import ControlsWrapper from '../../../components/ControlsWrapper';
 import Filters from '../../../components/Filters';
 import SelectAll from '../../../components/SelectAll';
-import SortPicker from '../../../components/SortPicker';
+import { SortPicker } from '../../App/components/SortPicker';
 
 const HomePageSettings = ({
   areAllCheckboxesSelected,

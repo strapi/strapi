@@ -32,13 +32,13 @@ export const useUpload = () => {
   const tokenRef = useRef(axios.CancelToken.source());
 
   const mutation = useMutation(asset => uploadAsset(asset, tokenRef.current, setProgress), {
-    onSuccess: assets => {
-      // Coupled with the cache of useAssets
-      queryClient.setQueryData('assets', cachedAssets => cachedAssets.concat(assets));
+    onSuccess: () => {
+      queryClient.refetchQueries(['assets'], { active: true });
+      queryClient.refetchQueries(['asset-count'], { active: true });
     },
   });
 
-  const upload = asset => mutation.mutate(asset);
+  const upload = asset => mutation.mutateAsync(asset);
   const cancel = () =>
     tokenRef.current.cancel(
       formatMessage({ id: getTrad('modal.upload.cancelled'), defaultMessage: '' })
