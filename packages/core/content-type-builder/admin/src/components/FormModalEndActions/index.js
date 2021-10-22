@@ -25,12 +25,13 @@ const FormModalEndActions = ({
   isCreatingComponentAttribute,
   isCreatingComponentWhileAddingAField,
   isComponentModal,
-  isDynamicZoneAttribute,
+  isDzAttribute,
   isEditingCategory,
   isInFirstComponentStep,
   onSubmitEditAttribute,
   onSubmitCreateContentType,
   onSubmitCreateComponent,
+  onSubmitCreateDz,
   onSubmitAddComponentAttribute,
   onSubmitEditCategory,
   onSubmitEditContentType,
@@ -38,10 +39,45 @@ const FormModalEndActions = ({
 }) => {
   const { formatMessage } = useIntl();
   // TO DO
-  // component attribute
   // dz attribute
 
-  if (isAttributeModal && isComponentAttribute && !isDynamicZoneAttribute) {
+  if (isAttributeModal && isDzAttribute) {
+    return (
+      <>
+        <Button
+          variant="secondary"
+          type="submit"
+          onClick={e => {
+            e.preventDefault();
+
+            onSubmitCreateDz(e, true);
+          }}
+          startIcon={<AddIcon />}
+        >
+          {formatMessage({
+            id: getTrad('form.button.add-components-to-dynamiczone'),
+            defaultMessage: 'Add components to the zone',
+          })}
+        </Button>
+        <Button
+          variant="default"
+          type="button"
+          onClick={e => {
+            e.preventDefault();
+
+            onSubmitCreateDz(e, false);
+          }}
+        >
+          {formatMessage({
+            id: getTrad('form.button.finish'),
+            defaultMessage: 'Finish',
+          })}
+        </Button>
+      </>
+    );
+  }
+
+  if (isAttributeModal && isComponentAttribute) {
     console.log('is component attribute');
 
     if (isInFirstComponentStep) {
@@ -108,7 +144,7 @@ const FormModalEndActions = ({
     );
   }
 
-  if (isAttributeModal && !isComponentAttribute && !isDynamicZoneAttribute) {
+  if (isAttributeModal && !isComponentAttribute && !isDzAttribute) {
     console.log('is attribute modal');
 
     return (
@@ -321,13 +357,14 @@ FormModalEndActions.propTypes = {
   isCreatingComponentAttribute: PropTypes.bool.isRequired,
   isCreatingComponentWhileAddingAField: PropTypes.bool.isRequired,
   isComponentModal: PropTypes.bool.isRequired,
-  isDynamicZoneAttribute: PropTypes.bool.isRequired,
+  isDzAttribute: PropTypes.bool.isRequired,
   isEditingAttribute: PropTypes.bool.isRequired,
   isEditingCategory: PropTypes.bool.isRequired,
   isInFirstComponentStep: PropTypes.bool.isRequired,
   onSubmitEditAttribute: PropTypes.func.isRequired,
   onSubmitCreateContentType: PropTypes.func.isRequired,
   onSubmitCreateComponent: PropTypes.func.isRequired,
+  onSubmitCreateDz: PropTypes.func.isRequired,
   onSubmitAddComponentAttribute: PropTypes.func.isRequired,
   onSubmitEditCategory: PropTypes.func.isRequired,
   onSubmitEditContentType: PropTypes.func.isRequired,

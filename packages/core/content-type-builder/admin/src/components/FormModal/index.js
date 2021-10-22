@@ -1053,12 +1053,13 @@ const FormModal = () => {
                   isCreatingComponentAttribute={modifiedData.createComponent || false}
                   isCreatingComponentWhileAddingAField={isCreatingComponentWhileAddingAField}
                   isEditingAttribute={actionType === 'edit'}
-                  isDynamicZoneAttribute={attributeType === 'dynamiczone'}
+                  isDzAttribute={attributeType === 'dynamiczone'}
                   isEditingCategory={modalType === 'editCategory'}
                   isInFirstComponentStep={step === '1'}
                   onSubmitAddComponentAttribute={handleSubmit}
                   onSubmitCreateContentType={handleSubmit}
                   onSubmitCreateComponent={handleSubmit}
+                  onSubmitCreateDz={handleSubmit}
                   onSubmitEditAttribute={handleSubmit}
                   onSubmitEditCategory={handleSubmit}
                   onSubmitEditContentType={handleSubmit}
