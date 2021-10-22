@@ -25,6 +25,7 @@ const FormModalEndActions = ({
   isCreatingComponentAttribute,
   isCreatingComponentWhileAddingAField,
   isComponentModal,
+  isDynamicZoneAttribute,
   isEditingCategory,
   isInFirstComponentStep,
   onSubmitEditAttribute,
@@ -40,7 +41,7 @@ const FormModalEndActions = ({
   // component attribute
   // dz attribute
 
-  if (isAttributeModal && isComponentAttribute) {
+  if (isAttributeModal && isComponentAttribute && !isDynamicZoneAttribute) {
     console.log('is component attribute');
 
     if (isInFirstComponentStep) {
@@ -69,40 +70,26 @@ const FormModalEndActions = ({
 
     return (
       <>
-        {isCreatingComponentWhileAddingAField && (
-          <Button
-            variant="secondary"
-            type="submit"
-            onClick={e => {
-              e.preventDefault();
+        <Button
+          variant="secondary"
+          type="submit"
+          onClick={e => {
+            e.preventDefault();
 
-              onSubmitAddComponentAttribute(e, true);
-            }}
-            startIcon={<AddIcon />}
-          >
-            {formatMessage({
-              id: getTrad('form.button.add-first-field-to-created-component'),
-              defaultMessage: 'Add first field to the component',
-            })}
-          </Button>
-        )}
-        {!isCreatingComponentWhileAddingAField && (
-          <Button
-            variant="secondary"
-            type="submit"
-            onClick={e => {
-              e.preventDefault();
-
-              onSubmitAddComponentAttribute(e, true);
-            }}
-            startIcon={<AddIcon />}
-          >
-            {formatMessage({
-              id: getTrad('form.button.add-field'),
-              defaultMessage: 'Add another field',
-            })}
-          </Button>
-        )}
+            onSubmitAddComponentAttribute(e, true);
+          }}
+          startIcon={<AddIcon />}
+        >
+          {isCreatingComponentWhileAddingAField
+            ? formatMessage({
+                id: getTrad('form.button.add-first-field-to-created-component'),
+                defaultMessage: 'Add first field to the component',
+              })
+            : formatMessage({
+                id: getTrad('form.button.add-field'),
+                defaultMessage: 'Add another field',
+              })}
+        </Button>
         <Button
           variant="default"
           type="button"
@@ -121,7 +108,7 @@ const FormModalEndActions = ({
     );
   }
 
-  if (isAttributeModal && !isComponentAttribute) {
+  if (isAttributeModal && !isComponentAttribute && !isDynamicZoneAttribute) {
     console.log('is attribute modal');
 
     return (
@@ -334,6 +321,7 @@ FormModalEndActions.propTypes = {
   isCreatingComponentAttribute: PropTypes.bool.isRequired,
   isCreatingComponentWhileAddingAField: PropTypes.bool.isRequired,
   isComponentModal: PropTypes.bool.isRequired,
+  isDynamicZoneAttribute: PropTypes.bool.isRequired,
   isEditingAttribute: PropTypes.bool.isRequired,
   isEditingCategory: PropTypes.bool.isRequired,
   isInFirstComponentStep: PropTypes.bool.isRequired,
