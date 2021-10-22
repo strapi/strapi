@@ -34,6 +34,12 @@ import useLocalesProvider from '../../components/LocalesProvider/useLocalesProvi
 import { fetchUser, putUser } from './utils/api';
 import schema from './utils/schema';
 
+const PasswordInput = styled(TextInput)`
+  ::-ms-reveal {
+    display: none;
+  }
+`;
+
 const FieldActionWrapper = styled(FieldAction)`
   svg {
     height: 1rem;
@@ -264,7 +270,7 @@ const ProfilePage = () => {
 
                         <Grid gap={5}>
                           <GridItem s={12} col={6}>
-                            <TextInput
+                            <PasswordInput
                               error={
                                 errors.currentPassword
                                   ? formatMessage({
@@ -308,7 +314,7 @@ const ProfilePage = () => {
 
                         <Grid gap={5}>
                           <GridItem s={12} col={6}>
-                            <TextInput
+                            <PasswordInput
                               error={
                                 errors.password
                                   ? formatMessage({
@@ -349,7 +355,7 @@ const ProfilePage = () => {
                             />
                           </GridItem>
                           <GridItem s={12} col={6}>
-                            <TextInput
+                            <PasswordInput
                               error={
                                 errors.confirmPassword
                                   ? formatMessage({
