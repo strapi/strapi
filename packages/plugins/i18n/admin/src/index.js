@@ -2,7 +2,6 @@ import get from 'lodash/get';
 import * as yup from 'yup';
 import { prefixPluginTranslations } from '@strapi/helper-plugin';
 import pluginPkg from '../../package.json';
-import pluginLogo from './assets/images/logo.svg';
 import CheckboxConfirmation from './components/CheckboxConfirmation';
 import CMEditViewInjectedComponents from './components/CMEditViewInjectedComponents';
 import Initializer from './components/Initializer';
@@ -20,8 +19,6 @@ import addLocaleToSingleTypesLinksHook from './contentManagerHooks/addLocaleToSi
 import addColumnToTableHook from './contentManagerHooks/addColumnToTable';
 import mutateEditViewLayoutHook from './contentManagerHooks/mutateEditViewLayout';
 
-const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
-const icon = pluginPkg.strapi.icon;
 const name = pluginPkg.strapi.name;
 
 export default {
@@ -31,14 +28,10 @@ export default {
     app.addReducers(i18nReducers);
 
     app.registerPlugin({
-      description: pluginDescription,
-      icon,
       id: pluginId,
       initializer: Initializer,
       isReady: false,
-      isRequired: pluginPkg.strapi.required || false,
       name,
-      pluginLogo,
     });
   },
   bootstrap(app) {

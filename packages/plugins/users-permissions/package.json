@@ -5,7 +5,6 @@
   "strapi": {
     "displayName": "Roles & Permissions",
     "name": "users-permissions",
-    "icon": "users",
     "description": "users-permissions.plugin.description",
     "required": true,
     "kind": "plugin"
