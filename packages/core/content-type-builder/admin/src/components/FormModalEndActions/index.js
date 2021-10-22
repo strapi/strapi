@@ -23,13 +23,14 @@ const FormModalEndActions = ({
   isComponentAttribute,
   isCreatingComponent,
   isCreatingComponentAttribute,
+  isCreatingComponentWhileAddingAField,
   isComponentModal,
   isEditingCategory,
   isInFirstComponentStep,
   onSubmitEditAttribute,
   onSubmitCreateContentType,
   onSubmitCreateComponent,
-  onSubmitCreateComponentAttribute,
+  onSubmitAddComponentAttribute,
   onSubmitEditCategory,
   onSubmitEditContentType,
   onSubmitEditComponent,
@@ -50,7 +51,7 @@ const FormModalEndActions = ({
           onClick={e => {
             e.preventDefault();
 
-            onSubmitCreateComponentAttribute(e, true);
+            onSubmitAddComponentAttribute(e, true);
           }}
         >
           {isCreatingComponentAttribute
@@ -64,9 +65,60 @@ const FormModalEndActions = ({
               })}
         </Button>
       );
-    } 
-      console.log('second step');
-    
+    }
+
+    return (
+      <>
+        {isCreatingComponentWhileAddingAField && (
+          <Button
+            variant="secondary"
+            type="submit"
+            onClick={e => {
+              e.preventDefault();
+
+              onSubmitAddComponentAttribute(e, true);
+            }}
+            startIcon={<AddIcon />}
+          >
+            {formatMessage({
+              id: getTrad('form.button.add-first-field-to-created-component'),
+              defaultMessage: 'Add first field to the component',
+            })}
+          </Button>
+        )}
+        {!isCreatingComponentWhileAddingAField && (
+          <Button
+            variant="secondary"
+            type="submit"
+            onClick={e => {
+              e.preventDefault();
+
+              onSubmitAddComponentAttribute(e, true);
+            }}
+            startIcon={<AddIcon />}
+          >
+            {formatMessage({
+              id: getTrad('form.button.add-field'),
+              defaultMessage: 'Add another field',
+            })}
+          </Button>
+        )}
+        <Button
+          variant="default"
+          type="button"
+          onClick={e => {
+            e.preventDefault();
+
+            onSubmitAddComponentAttribute(e, false);
+          }}
+        >
+          {formatMessage({
+            id: getTrad('form.button.finish'),
+            defaultMessage: 'Finish',
+          })}
+        </Button>
+      </>
+    );
   }
 
   if (isAttributeModal && !isComponentAttribute) {
@@ -280,6 +332,7 @@ FormModalEndActions.propTypes = {
   isCreatingComponent: PropTypes.bool.isRequired,
   isComponentAttribute: PropTypes.bool.isRequired,
   isCreatingComponentAttribute: PropTypes.bool.isRequired,
+  isCreatingComponentWhileAddingAField: PropTypes.bool.isRequired,
   isComponentModal: PropTypes.bool.isRequired,
   isEditingAttribute: PropTypes.bool.isRequired,
   isEditingCategory: PropTypes.bool.isRequired,
@@ -287,7 +340,7 @@ FormModalEndActions.propTypes = {
   onSubmitEditAttribute: PropTypes.func.isRequired,
   onSubmitCreateContentType: PropTypes.func.isRequired,
   onSubmitCreateComponent: PropTypes.func.isRequired,
-  onSubmitCreateComponentAttribute: PropTypes.func.isRequired,
+  onSubmitAddComponentAttribute: PropTypes.func.isRequired,
   onSubmitEditCategory: PropTypes.func.isRequired,
   onSubmitEditContentType: PropTypes.func.isRequired,
   onSubmitEditComponent: PropTypes.func.isRequired,
