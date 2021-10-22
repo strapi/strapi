@@ -1,11 +1,14 @@
 import { NotificationsProvider } from '@strapi/helper-plugin';
 import React, { useReducer } from 'react';
 import PropTypes from 'prop-types';
-import { Box } from '@strapi/parts/Box';
+import styled from 'styled-components';
 import { Stack } from '@strapi/parts/Stack';
 import Notification from './Notification';
 import reducer, { initialState } from './reducer';
-import NotificationsWrapper from './Wrapper';
+
+const CustomStack = styled(Stack)`
+  margin-left: -250px;
+`;
 
 const Notifications = ({ children }) => {
   const [{ notifications }, dispatch] = useReducer(reducer, initialState);
@@ -19,17 +22,20 @@ const Notifications = ({ children }) => {
 
   return (
     <NotificationsProvider toggleNotification={displayNotification}>
-      <NotificationsWrapper justifyContent="space-around">
-        <Stack size={notifications.length}>
-          {notifications.map(notification => {
-            return (
-              <Box key={notification.id} style={{ width: 500 }}>
-                <Notification dispatch={dispatch} notification={notification} />
-              </Box>
-            );
-          })}
-        </Stack>
-      </NotificationsWrapper>
+      <CustomStack
+        left="50%"
+        position="fixed"
+        size={2}
+        top={`${46 / 16}rem`}
+        width={`${500 / 16}rem`}
+        zIndex={10}
+      >
+        {notifications.map(notification => {
+          return (
+            <Notification key={notification.id} dispatch={dispatch} notification={notification} />
+          );
+        })}
+      </CustomStack>
       {children}
     </NotificationsProvider>
   );
