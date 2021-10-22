@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 import { Box } from '@strapi/parts/Box';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { Text } from '@strapi/parts/Text';
 
 const LabelAction = styled(Box)`
@@ -17,16 +17,16 @@ const Label = ({ intlLabel, id, labelAction, link, name, numberOfEntries, isSing
   const label = intlLabel?.id ? formatMessage(intlLabel) : name;
 
   return (
-    <Row justifyContent="space-between">
-      <Row>
+    <Flex justifyContent="space-between">
+      <Flex>
         <Text textColor="neutral800" htmlFor={id || name} small bold as="label">
           {label}
           {!isSingle && <>&nbsp;({numberOfEntries})</>}
         </Text>
         {labelAction && <LabelAction paddingLeft={1}>{labelAction}</LabelAction>}
-      </Row>
+      </Flex>
       {link}
-    </Row>
+    </Flex>
   );
 };
 

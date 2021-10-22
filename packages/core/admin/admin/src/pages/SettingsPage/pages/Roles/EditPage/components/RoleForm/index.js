@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box } from '@strapi/parts/Box';
 import { Grid, GridItem } from '@strapi/parts/Grid';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { Stack } from '@strapi/parts/Stack';
 import { Text } from '@strapi/parts/Text';
 import { Textarea } from '@strapi/parts/Textarea';
@@ -17,7 +17,7 @@ const RoleForm = ({ disabled, role, values, errors, onChange, onBlur }) => {
     <>
       <Box background="neutral0" padding={6} shadow="filterShadow" hasRadius>
         <Stack size={4}>
-          <Row justifyContent="space-between">
+          <Flex justifyContent="space-between">
             <Box>
               <Box>
                 <Text bold>
@@ -50,7 +50,7 @@ const RoleForm = ({ disabled, role, values, errors, onChange, onBlur }) => {
                 { number: role.usersCount }
               )}
             </Button>
-          </Row>
+          </Flex>
           <Grid gap={4}>
             <GridItem col={6}>
               <TextInput

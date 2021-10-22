@@ -4,7 +4,7 @@ import { useIntl } from 'react-intl';
 import { Checkbox } from '@strapi/parts/Checkbox';
 import { Dialog, DialogBody, DialogFooter } from '@strapi/parts/Dialog';
 import { Text } from '@strapi/parts/Text';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { Stack } from '@strapi/parts/Stack';
 import { Button } from '@strapi/parts/Button';
 import AlertWarningIcon from '@strapi/icons/AlertWarningIcon';
@@ -63,7 +63,7 @@ const CheckboxConfirmation = ({ description, isCreating, intlLabel, name, onChan
         <Dialog onClose={handleToggle} title="Confirmation" isOpen={isOpen}>
           <DialogBody icon={<AlertWarningIcon />}>
             <Stack size={2}>
-              <Row justifyContent="center" style={{ textAlign: 'center' }}>
+              <Flex justifyContent="center" style={{ textAlign: 'center' }}>
                 <Text id="confirm-description">
                   {formatMessage({
                     id: getTrad('CheckboxConfirmation.Modal.content'),
@@ -71,15 +71,15 @@ const CheckboxConfirmation = ({ description, isCreating, intlLabel, name, onChan
                       'Disabling localization will engender the deletion of all your content but the one associated to your default locale (if existing).',
                   })}
                 </Text>
-              </Row>
-              <Row justifyContent="center" style={{ textAlign: 'center' }}>
+              </Flex>
+              <Flex justifyContent="center" style={{ textAlign: 'center' }}>
                 <Text id="confirm-description" bold>
                   {formatMessage({
                     id: getTrad('CheckboxConfirmation.Modal.body'),
                     defaultMessage: 'Do you want to disable it?',
                   })}
                 </Text>
-              </Row>
+              </Flex>
             </Stack>
           </DialogBody>
           <DialogFooter

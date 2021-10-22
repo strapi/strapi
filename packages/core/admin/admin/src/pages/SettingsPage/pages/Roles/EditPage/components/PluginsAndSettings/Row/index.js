@@ -40,7 +40,7 @@ const PermissionRow = ({
       />
 
       <AccordionContent>
-        <Box padding={6}>
+        <Box padding={6} background="neutral0">
           {childrenForm.map(({ actions, subCategoryName, subCategoryId }) => (
             <SubCategory
               key={subCategoryName}

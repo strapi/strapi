@@ -20,7 +20,7 @@ import { Divider } from '@strapi/parts/Divider';
 import { ModalLayout, ModalBody, ModalFooter } from '@strapi/parts/ModalLayout';
 import { H2 } from '@strapi/parts/Text';
 import { Tabs, Tab, TabGroup, TabPanels, TabPanel } from '@strapi/parts/Tabs';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { Stack } from '@strapi/parts/Stack';
 import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
@@ -947,7 +947,7 @@ const FormModal = () => {
           <form onSubmit={handleSubmit}>
             <ModalBody>
               <TabGroup label="todo" id="tabs" variant="simple">
-                <Row justifyContent="space-between">
+                <Flex justifyContent="space-between">
                   <H2>
                     {formatMessage(
                       {
@@ -999,7 +999,7 @@ const FormModal = () => {
                       })}
                     </Tab>
                   </Tabs>
-                </Row>
+                </Flex>
 
                 <Divider />
 

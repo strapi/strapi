@@ -5,7 +5,7 @@ import { Meta, ArgsTable, Canvas, Story } from '@storybook/addon-docs';
 import { Main } from '@strapi/parts/Main';
 import { Button } from '@strapi/parts/Button';
 import { Box } from '@strapi/parts/Box';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { BaseCheckbox } from '@strapi/parts/BaseCheckbox';
 import { Dialog, DialogBody, DialogFooter } from '@strapi/parts/Dialog';
 import { Tbody, Td, Tr } from '@strapi/parts/Table';
@@ -192,7 +192,7 @@ import { DynamicTable } from '@strapi/helper-plugin';
                   })}
                   {withBulkActions && (
                     <Td>
-                      <Row justifyContent="end">
+                      <Flex justifyContent="end">
                         <IconButton
                           onClick={() => console.log(`${pathname}/${data.id}`)}
                           label={`Edit ${data.firstname} ${data.lastname}`}
@@ -207,7 +207,7 @@ import { DynamicTable } from '@strapi/helper-plugin';
                             icon={<DeleteIcon />}
                           />
                         </Box>
-                      </Row>
+                      </Flex>
                     </Td>
                   )}
                 </Tr>
@@ -303,7 +303,7 @@ import { DynamicTable } from '@strapi/helper-plugin';
                   })}
                   {withBulkActions && (
                     <Td>
-                      <Row justifyContent="end">
+                      <Flex justifyContent="end">
                         <IconButton
                           onClick={() => console.log(`${pathname}/${data.id}`)}
                           label={`Edit ${data.firstname} ${data.lastname}`}
@@ -318,7 +318,7 @@ import { DynamicTable } from '@strapi/helper-plugin';
                             icon={<DeleteIcon />}
                           />
                         </Box>
-                      </Row>
+                      </Flex>
                     </Td>
                   )}
                 </Tr>
@@ -350,7 +350,7 @@ import { DynamicTable } from '@strapi/helper-plugin';
                       isOpen={isOpen}
                     >
                       <DialogBody>
-                        <Row justifyContent="center">Are you sure?</Row>
+                        <Flex justifyContent="center">Are you sure?</Flex>
                       </DialogBody>
                       <DialogFooter
                         startAction={

@@ -8,7 +8,7 @@ import { Select, Option } from '@strapi/parts/Select';
 import { Button } from '@strapi/parts/Button';
 import { Box } from '@strapi/parts/Box';
 import { Typography, Text } from '@strapi/parts/Text';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { Stack } from '@strapi/parts/Stack';
 import AlertWarningIcon from '@strapi/icons/AlertWarningIcon';
 import Duplicate from '@strapi/icons/Duplicate';
@@ -104,19 +104,19 @@ const Content = ({ appLocales, currentLocale, localizations, readPermissions }) 
         type="button"
         onClick={handleToggle}
       >
-        <Row>
+        <Flex>
           <Duplicate width="12px" height="12px" />
           {formatMessage({
             id: getTrad('CMEditViewCopyLocale.copy-text'),
             defaultMessage: 'Fill in from another locale',
           })}
-        </Row>
+        </Flex>
       </StyledTypography>
       {isOpen && (
         <Dialog onClose={handleToggle} title="Confirmation" isOpen={isOpen}>
           <DialogBody icon={<AlertWarningIcon />}>
             <Stack size={2}>
-              <Row justifyContent="center">
+              <Flex justifyContent="center">
                 <Text id="confirm-description" style={{ textAlign: 'center' }}>
                   {formatMessage({
                     id: getTrad('CMEditViewCopyLocale.ModalConfirm.content'),
@@ -124,7 +124,7 @@ const Content = ({ appLocales, currentLocale, localizations, readPermissions }) 
                       'Your current content will be erased and filled by the content of the selected locale:',
                   })}
                 </Text>
-              </Row>
+              </Flex>
               <Box>
                 <Select
                   label={formatMessage({

@@ -1,10 +1,10 @@
 import React from 'react';
 import { Loader } from '@strapi/parts/Loader';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
-const Wrapper = styled(Row)`
+const Wrapper = styled(Flex)`
   height: 100vh;
 `;
 

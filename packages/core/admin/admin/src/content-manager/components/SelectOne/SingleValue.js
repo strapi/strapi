@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
 import { pxToRem } from '@strapi/helper-plugin';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { Text } from '@strapi/parts/Text';
 import get from 'lodash/get';
 import has from 'lodash/has';
@@ -39,10 +39,10 @@ const SingleValue = props => {
 
     return (
       <Component {...props}>
-        <Row>
+        <Flex>
           <StyledBullet title={title} isDraft={isDraft} />
           <Text ellipsis>{props.data.label || '-'}</Text>
-        </Row>
+        </Flex>
       </Component>
     );
   }

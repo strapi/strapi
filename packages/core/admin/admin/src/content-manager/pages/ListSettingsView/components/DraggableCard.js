@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import { useDrag, useDrop } from 'react-dnd';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { Box } from '@strapi/parts/Box';
 import { ButtonText } from '@strapi/parts/Text';
 import { Stack } from '@strapi/parts/Stack';
@@ -35,7 +35,7 @@ const DragButton = styled(ActionButton)`
   }
 `;
 
-const FieldContainer = styled(Row)`
+const FieldContainer = styled(Flex)`
   max-height: ${32 / 16}rem;
   cursor: pointer;
   opacity: ${({ isDragging }) => (isDragging ? 0 : 1)};
@@ -157,7 +157,7 @@ const DraggableCard = ({
           </DragButton>
           <ButtonText>{cardEllipsisTitle}</ButtonText>
         </Stack>
-        <Row paddingLeft={3}>
+        <Flex paddingLeft={3}>
           <ActionButton
             ref={editButtonRef}
             onClick={e => {
@@ -189,7 +189,7 @@ const DraggableCard = ({
           >
             <CloseAlertIcon />
           </ActionButton>
-        </Row>
+        </Flex>
       </FieldContainer>
     </FieldWrapper>
   );

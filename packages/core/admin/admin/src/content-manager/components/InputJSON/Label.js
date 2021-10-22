@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import { useIntl } from 'react-intl';
 import { Text } from '@strapi/parts/Text';
 import { Box } from '@strapi/parts/Box';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 
 const LabelAction = styled(Box)`
   svg path {
@@ -22,12 +22,12 @@ const Label = ({ id, intlLabel, labelAction, name }) => {
     : name;
 
   return (
-    <Row>
+    <Flex>
       <Text textColor="neutral800" htmlFor={id || name} small bold as="label">
         {label}
       </Text>
       {labelAction && <LabelAction paddingLeft={1}>{labelAction}</LabelAction>}
-    </Row>
+    </Flex>
   );
 };
 

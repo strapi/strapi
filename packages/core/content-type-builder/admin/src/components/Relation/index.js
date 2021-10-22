@@ -6,7 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import getRelationType from '../../utils/getRelationType';
 import RelationField from './RelationField';
 import RelationNaturePicker from './RelationNaturePicker';
@@ -15,7 +15,7 @@ const Relation = ({ formErrors, mainBoxHeader, modifiedData, naturePickerType, o
   const relationType = getRelationType(modifiedData.relation, modifiedData.targetAttribute);
 
   return (
-    <Row style={{ position: 'relative' }}>
+    <Flex style={{ position: 'relative' }}>
       <RelationField
         isMain
         header={mainBoxHeader}
@@ -39,7 +39,7 @@ const Relation = ({ formErrors, mainBoxHeader, modifiedData, naturePickerType, o
         target={modifiedData.target}
         value={modifiedData?.targetAttribute || ''}
       />
-    </Row>
+    </Flex>
   );
 };
 

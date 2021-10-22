@@ -20,7 +20,7 @@ import { Layout, HeaderLayout, ContentLayout } from '@strapi/parts/Layout';
 import { Main } from '@strapi/parts/Main';
 import { IconButton } from '@strapi/parts/IconButton';
 import { Text, TableLabel } from '@strapi/parts/Text';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { Table, Tr, Thead, Th, Tbody, Td } from '@strapi/parts/Table';
 
 import DeleteIcon from '@strapi/icons/DeleteIcon';
@@ -128,7 +128,7 @@ const PluginPage = () => {
                         <Text>{doc.generatedDate}</Text>
                       </Td>
                       <Td>
-                        <Row justifyContent="end" {...stopPropagation}>
+                        <Flex justifyContent="end" {...stopPropagation}>
                           <IconButton
                             onClick={openDocVersion}
                             noBorder
@@ -171,7 +171,7 @@ const PluginPage = () => {
                               />
                             )}
                           </CheckPermissions>
-                        </Row>
+                        </Flex>
                       </Td>
                     </Tr>
                   ))}

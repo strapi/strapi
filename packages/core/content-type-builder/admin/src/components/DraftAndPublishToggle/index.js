@@ -10,7 +10,7 @@ import { useIntl } from 'react-intl';
 import { Dialog, DialogBody, DialogFooter } from '@strapi/parts/Dialog';
 import { ToggleInput } from '@strapi/parts/ToggleInput';
 import { Text } from '@strapi/parts/Text';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { Stack } from '@strapi/parts/Stack';
 import { Button } from '@strapi/parts/Button';
 import AlertWarningIcon from '@strapi/icons/AlertWarningIcon';
@@ -81,7 +81,7 @@ const DraftAndPublishToggle = ({
         <Dialog onClose={handleToggle} title="Confirmation" isOpen={showWarning}>
           <DialogBody icon={<AlertWarningIcon />}>
             <Stack size={2}>
-              <Row justifyContent="center" style={{ textAlign: 'center' }}>
+              <Flex justifyContent="center" style={{ textAlign: 'center' }}>
                 <Text id="confirm-description">
                   {formatMessage({
                     id: getTrad('popUpWarning.draft-publish.message'),
@@ -89,15 +89,15 @@ const DraftAndPublishToggle = ({
                       'If you disable the Draft/Publish system, your drafts will be deleted.',
                   })}
                 </Text>
-              </Row>
-              <Row justifyContent="center" style={{ textAlign: 'center' }}>
+              </Flex>
+              <Flex justifyContent="center" style={{ textAlign: 'center' }}>
                 <Text id="confirm-description">
                   {formatMessage({
                     id: getTrad('popUpWarning.draft-publish.second-message'),
                     defaultMessage: 'Are you sure you want to disable it?',
                   })}
                 </Text>
-              </Row>
+              </Flex>
             </Stack>
           </DialogBody>
           <DialogFooter

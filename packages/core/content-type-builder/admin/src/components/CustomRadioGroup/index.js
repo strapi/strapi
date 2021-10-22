@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Text } from '@strapi/parts/Text';
 import { Box } from '@strapi/parts/Box';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { Stack } from '@strapi/parts/Stack';
 import { Wrapper } from './components';
 
@@ -30,7 +30,7 @@ const CustomRadioGroup = ({ intlLabel, name, onChange, radios, value }) => {
                 type="radio"
               />
               <Box className="option" padding={4}>
-                <Row>
+                <Flex>
                   <Box paddingRight={4}>
                     <span className="checkmark" />
                   </Box>
@@ -40,7 +40,7 @@ const CustomRadioGroup = ({ intlLabel, name, onChange, radios, value }) => {
                       {formatMessage(radio.description)}
                     </Text>
                   </Stack>
-                </Row>
+                </Flex>
               </Box>
             </label>
           );
