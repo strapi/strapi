@@ -45,8 +45,6 @@ const FormModalEndActions = ({
   const { formatMessage } = useIntl();
 
   if (isComponentToDzModal) {
-    console.log('is component to dz modal');
-
     if (isCreatingComponentInDz) {
       return (
         <Button
@@ -86,8 +84,6 @@ const FormModalEndActions = ({
   }
 
   if (isAttributeModal && isDzAttribute && !isCreatingDz) {
-    console.log('is dz attribute modal, editing');
-
     return (
       <Button
         variant="default"
@@ -107,8 +103,6 @@ const FormModalEndActions = ({
   }
 
   if (isAttributeModal && isDzAttribute && isCreatingDz) {
-    console.log('is dz attribute modal, creating');
-
     return (
       <>
         <Button
@@ -146,8 +140,6 @@ const FormModalEndActions = ({
   }
 
   if (isAttributeModal && isComponentAttribute) {
-    console.log('is component attribute');
-
     if (isInFirstComponentStep) {
       return (
         <Button
@@ -213,8 +205,6 @@ const FormModalEndActions = ({
   }
 
   if (isAttributeModal && !isComponentAttribute && !isDzAttribute) {
-    console.log('is attribute modal');
-
     return (
       <>
         <Button
@@ -251,8 +241,6 @@ const FormModalEndActions = ({
   }
 
   if (isContentTypeModal) {
-    console.log('is contentType modal');
-
     return (
       <>
         {!isCreatingContentType && (
@@ -307,8 +295,6 @@ const FormModalEndActions = ({
   }
 
   if (isComponentModal) {
-    console.log('is component modal');
-
     return (
       <>
         {!isCreatingComponent && (
@@ -363,8 +349,6 @@ const FormModalEndActions = ({
   }
 
   if (isEditingCategory) {
-    console.log('is editing category');
-
     return (
       <>
         <Button
@@ -399,13 +383,7 @@ const FormModalEndActions = ({
     );
   }
 
-  return (
-    <div>
-      <p>
-        {formatMessage({ id: getTrad('component.name'), defaultMessage: 'Form Modal End Actions' })}
-      </p>
-    </div>
-  );
+  return null;
 };
 
 FormModalEndActions.defaultProps = {
