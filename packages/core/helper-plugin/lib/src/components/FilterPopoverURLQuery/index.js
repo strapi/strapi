@@ -18,7 +18,7 @@ import { useIntl } from 'react-intl';
 import useQueryParams from '../../hooks/useQueryParams';
 import useTracking from '../../hooks/useTracking';
 import Inputs from './Inputs';
-import getFilterList from './utils/getFilterList';
+import getFilterList from '../../utils/getFilterList';
 
 const FullWidthButton = styled(Button)`
   width: 100%;

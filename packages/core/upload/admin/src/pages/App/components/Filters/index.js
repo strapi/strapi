@@ -1,8 +1,9 @@
 import React, { useState, useRef } from 'react';
 import { Button } from '@strapi/parts/Button';
-import { FilterPopoverURLQuery, FilterListURLQuery } from '@strapi/helper-plugin';
+import { FilterListURLQuery } from '@strapi/helper-plugin';
 import FilterIcon from '@strapi/icons/FilterIcon';
 import { useIntl } from 'react-intl';
+import { FilterPopover } from './FilterPopover';
 
 const displayedFilters = [
   {
@@ -48,14 +49,7 @@ export const Filters = () => {
         {formatMessage({ id: 'app.utils.filters', defaultMessage: 'Filters' })}
       </Button>
 
-      {isVisible && (
-        <FilterPopoverURLQuery
-          displayedFilters={displayedFilters}
-          isVisible={isVisible}
-          onToggle={toggleFilter}
-          source={buttonRef}
-        />
-      )}
+      {isVisible && <FilterPopover sourceRef={buttonRef} onClose={toggleFilter} />}
 
       <FilterListURLQuery filtersSchema={displayedFilters} />
     </>
