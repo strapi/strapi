@@ -19,11 +19,13 @@ const FormModalEndActions = ({
   isAttributeModal,
   isEditingAttribute,
   isContentTypeModal,
-  isCreatingContentType,
   isComponentAttribute,
+  isComponentToDzModal,
   isCreatingComponent,
   isCreatingComponentAttribute,
+  isCreatingComponentInDz,
   isCreatingComponentWhileAddingAField,
+  isCreatingContentType,
   isComponentModal,
   isDzAttribute,
   isEditingCategory,
@@ -33,6 +35,7 @@ const FormModalEndActions = ({
   onSubmitCreateComponent,
   onSubmitCreateDz,
   onSubmitAddComponentAttribute,
+  onSubmitAddComponentToDz,
   onSubmitEditCategory,
   onSubmitEditContentType,
   onSubmitEditComponent,
@@ -40,6 +43,46 @@ const FormModalEndActions = ({
   const { formatMessage } = useIntl();
   // TO DO
   // dz attribute
+  // console.log(isComponentToDzModal)
+
+  if (isComponentToDzModal) {
+    if (isCreatingComponentInDz) {
+      return (
+        <Button
+          variant="secondary"
+          type="submit"
+          onClick={e => {
+            e.preventDefault();
+
+            onSubmitAddComponentToDz(e, true);
+          }}
+          startIcon={<AddIcon />}
+        >
+          {formatMessage({
+            id: getTrad('form.button.add-first-field-to-created-component'),
+            defaultMessage: 'Add first field to the component',
+          })}
+        </Button>
+      );
+    }
+
+    return (
+      <Button
+        variant="default"
+        type="submit"
+        onClick={e => {
+          e.preventDefault();
+
+          onSubmitAddComponentToDz(e, false);
+        }}
+      >
+        {formatMessage({
+          id: getTrad('form.button.finish'),
+          defaultMessage: 'Finish',
+        })}
+      </Button>
+    );
+  }
 
   if (isAttributeModal && isDzAttribute) {
     return (
@@ -59,7 +102,8 @@ const FormModalEndActions = ({
             defaultMessage: 'Add components to the zone',
           })}
         </Button>
-        <Button
+        {/* // TO FIX fix doesnt close the modal */}
+        {/* <Button
           variant="default"
           type="button"
           onClick={e => {
@@ -72,7 +116,7 @@ const FormModalEndActions = ({
             id: getTrad('form.button.finish'),
             defaultMessage: 'Finish',
           })}
-        </Button>
+        </Button> */}
       </>
     );
   }
@@ -354,7 +398,9 @@ FormModalEndActions.propTypes = {
   isCreatingContentType: PropTypes.bool.isRequired,
   isCreatingComponent: PropTypes.bool.isRequired,
   isComponentAttribute: PropTypes.bool.isRequired,
+  isComponentToDzModal: PropTypes.bool.isRequired,
   isCreatingComponentAttribute: PropTypes.bool.isRequired,
+  isCreatingComponentInDz: PropTypes.bool.isRequired,
   isCreatingComponentWhileAddingAField: PropTypes.bool.isRequired,
   isComponentModal: PropTypes.bool.isRequired,
   isDzAttribute: PropTypes.bool.isRequired,
@@ -366,6 +412,7 @@ FormModalEndActions.propTypes = {
   onSubmitCreateComponent: PropTypes.func.isRequired,
   onSubmitCreateDz: PropTypes.func.isRequired,
   onSubmitAddComponentAttribute: PropTypes.func.isRequired,
+  onSubmitAddComponentToDz: PropTypes.func.isRequired,
   onSubmitEditCategory: PropTypes.func.isRequired,
   onSubmitEditContentType: PropTypes.func.isRequired,
   onSubmitEditComponent: PropTypes.func.isRequired,

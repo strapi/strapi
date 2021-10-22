@@ -1046,17 +1046,20 @@ const FormModal = () => {
                   categoryName={initialData.name}
                   isAttributeModal={modalType === 'attribute'}
                   isContentTypeModal={modalType === 'contentType'}
+                  isComponentToDzModal={modalType === 'addComponentToDynamicZone'}
                   isComponentAttribute={attributeType === 'component'}
                   isComponentModal={modalType === 'component'}
                   isCreatingContentType={actionType === 'create'}
                   isCreatingComponent={actionType === 'create'}
                   isCreatingComponentAttribute={modifiedData.createComponent || false}
+                  isCreatingComponentInDz={modifiedData.createComponent || false}
                   isCreatingComponentWhileAddingAField={isCreatingComponentWhileAddingAField}
                   isEditingAttribute={actionType === 'edit'}
                   isDzAttribute={attributeType === 'dynamiczone'}
                   isEditingCategory={modalType === 'editCategory'}
                   isInFirstComponentStep={step === '1'}
                   onSubmitAddComponentAttribute={handleSubmit}
+                  onSubmitAddComponentToDz={handleSubmit}
                   onSubmitCreateContentType={handleSubmit}
                   onSubmitCreateComponent={handleSubmit}
                   onSubmitCreateDz={handleSubmit}
