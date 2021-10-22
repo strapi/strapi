@@ -379,6 +379,7 @@ describe('FromComputerForm', () => {
 
       .c10 {
         opacity: 0;
+        cursor: pointer;
       }
 
       <div>

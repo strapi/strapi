@@ -493,7 +493,8 @@ describe('MediaLibrary / ListView', () => {
         text-transform: uppercase;
       }
 
-      .c25 canvas {
+      .c25 canvas,
+      .c25 video {
         display: block;
         max-width: 100%;
         max-height: 10.25rem;
@@ -671,13 +672,13 @@ describe('MediaLibrary / ListView', () => {
                       class="c25"
                     >
                       <video
-                        src="http://localhost:1337/uploads/mov_bbb_2f3907f7aa.mp4"
+                        crossorigin="anonymous"
+                        src="http://localhost:1337/uploads/mov_bbb_2f3907f7aa.mp4#t=1"
                       >
                         <source
                           type="video/mp4"
                         />
                       </video>
-                      <canvas />
                     </div>
                   </div>
                 </div>

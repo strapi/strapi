@@ -556,6 +556,7 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
 
 .c31 {
   opacity: 0;
+  cursor: pointer;
 }
 
 <body
