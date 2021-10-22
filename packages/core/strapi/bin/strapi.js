@@ -155,7 +155,7 @@ program
 program
   .command('watch-admin')
   .option('--browser <name>', 'Open the browser', true)
-  .description('Starts the admin dev server')
+  .description('Starts the admin front-end dev server')
   .action(getLocalScript('watchAdmin'));
 
 program
