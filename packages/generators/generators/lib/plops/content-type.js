@@ -1,5 +1,8 @@
 'use strict';
 
+const pluralize = require('pluralize');
+const slugify = require('@sindresorhus/slugify');
+
 const getDestinationPrompts = require('./utils/get-destination-prompts');
 const getFilePath = require('./utils/get-file-path');
 const validateInput = require('./utils/validate-input');
@@ -31,9 +34,39 @@ const promptConfigQuestions = (plop, inquirer) => {
   return inquirer.prompt([
     {
       type: 'input',
-      name: 'id',
-      message: 'Content type name',
-      validate: input => validateInput(input),
+      name: 'displayName',
+      message: 'Content type display name',
+      validate: input => !!input,
+    },
+    {
+      type: 'input',
+      name: 'singularName',
+      message: 'Content type singular name',
+      default: answers => slugify(answers.displayName),
+      validate(input) {
+        if (input.toLowerCase() !== input) {
+          return 'Value must be lowercased';
+        }
+
+        return validateInput(input);
+      },
+    },
+    {
+      type: 'input',
+      name: 'pluralName',
+      message: 'Content type plural name',
+      default: answers => pluralize(answers.singularName),
+      validate(input, answers) {
+        if (answers.singularName === input) {
+          return 'Singular and plural names cannot be the same';
+        }
+
+        if (input.toLowerCase() !== input) {
+          return 'Value must be lowercased';
+        }
+
+        return validateInput(input);
+      },
     },
     {
       type: 'list',
@@ -153,12 +186,16 @@ module.exports = plop => {
       return [
         {
           type: 'add',
-          path: `${filePath}/content-types/{{id}}/schema.json`,
+          path: `${filePath}/content-types/{{ singularName }}/schema.json`,
           templateFile: 'templates/content-type.schema.json.hbs',
+          data: {
+            id: answers.singularName,
+            collectionName: slugify(answers.pluralName, { separator: '_' }),
+          },
         },
         {
           type: 'modify',
-          path: `${filePath}/content-types/{{id}}/schema.json`,
+          path: `${filePath}/content-types/{{ singularName }}/schema.json`,
           transform(template) {
             const parsedTemplate = JSON.parse(template);
             parsedTemplate.attributes = attributes;

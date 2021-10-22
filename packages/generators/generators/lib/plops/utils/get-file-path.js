@@ -2,12 +2,12 @@
 
 module.exports = destination => {
   if (destination === 'api') {
-    return `api/{{api}}`;
+    return `api/{{ api }}`;
   }
 
   if (destination === 'plugin') {
-    return `plugins/{{plugin}}`;
+    return `plugins/{{ plugin }}`;
   }
 
-  return `api/{{id}}`;
+  return `api/{{ id }}`;
 };
