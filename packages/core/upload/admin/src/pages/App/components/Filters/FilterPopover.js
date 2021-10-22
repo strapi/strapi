@@ -11,6 +11,7 @@ import AddIcon from '@strapi/icons/AddIcon';
 import { useIntl } from 'react-intl';
 import { getFilterList, Form, useQueryParams } from '@strapi/helper-plugin';
 import getTrad from '../../../../utils/getTrad';
+import { filterSchema } from './schema';
 
 export const FilterPopover = ({ onClose, sourceRef }) => {
   const { formatMessage } = useIntl();
@@ -28,10 +29,11 @@ export const FilterPopover = ({ onClose, sourceRef }) => {
             comparator: '',
             value: undefined,
           }}
+          validationSchema={filterSchema}
           onSubmit={handleSubmit}
           validateOnChange={false}
         >
-          {({ values, setFieldValue, setTouched }) => (
+          {({ values, setFieldValue, setTouched, errors }) => (
             <Form noValidate>
               <Stack size={1} minWidth="184px">
                 <Select
@@ -41,6 +43,7 @@ export const FilterPopover = ({ onClose, sourceRef }) => {
                   })}
                   placeholder="e.g: createdAt"
                   size="M"
+                  error={errors.field}
                   onChange={nextValue => {
                     setTouched('field', true);
                     setFieldValue('field', nextValue);
@@ -62,6 +65,7 @@ export const FilterPopover = ({ onClose, sourceRef }) => {
                   size="M"
                   placeholder="e.g: is"
                   value={values.comparator}
+                  error={errors.comparator}
                   onChange={nextValue => {
                     setTouched('comparator', true);
                     setFieldValue('comparator', nextValue);
@@ -87,6 +91,7 @@ export const FilterPopover = ({ onClose, sourceRef }) => {
                       defaultMessage: 'e.g: video',
                     })}
                     size="M"
+                    error={errors.value}
                     value={values.value}
                     onChange={nextValue => {
                       setTouched('value', true);
@@ -101,6 +106,7 @@ export const FilterPopover = ({ onClose, sourceRef }) => {
                   </Select>
                 ) : (
                   <DatePicker
+                    error={errors.value}
                     onChange={date => {
                       setTouched('value', true);
                       setFieldValue('value', date);
@@ -116,6 +122,7 @@ export const FilterPopover = ({ onClose, sourceRef }) => {
                       defaultMessage: 'e.g: 24/12/2019',
                     })}
                     onClear={() => setFieldValue('value', '')}
+                    selectedDateLabel={formattedDate => `Date picker, current is ${formattedDate}`}
                   />
                 )}
 
