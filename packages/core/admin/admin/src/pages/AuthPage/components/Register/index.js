@@ -6,7 +6,7 @@ import omit from 'lodash/omit';
 import { Box } from '@strapi/parts/Box';
 import { Stack } from '@strapi/parts/Stack';
 import { Main } from '@strapi/parts/Main';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { Link } from '@strapi/parts/Link';
 import { Button } from '@strapi/parts/Button';
 import { TextInput } from '@strapi/parts/TextInput';
@@ -318,14 +318,14 @@ const Register = ({ fieldsToDisable, noSignin, onSubmit, schema }) => {
         </Formik>
         {!noSignin && (
           <Box paddingTop={4}>
-            <Row justifyContent="center">
+            <Flex justifyContent="center">
               <Link label="Auth.link.signin" to="/auth/login">
                 {formatMessage({
                   id: 'Auth.link.signin.account',
                   defaultMessage: 'Already have an account?',
                 })}
               </Link>
-            </Row>
+            </Flex>
           </Box>
         )}
       </LayoutContent>

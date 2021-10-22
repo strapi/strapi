@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Box } from '@strapi/parts/Box';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { Divider } from '@strapi/parts/Divider';
 import { Text } from '@strapi/parts/Text';
 import { GenericInput } from '@strapi/helper-plugin';
@@ -21,7 +21,7 @@ const RelationFormBox = ({
 }) => {
   return (
     <Box background="neutral100" hasRadius borderColor="neutral200">
-      <Row paddingTop={isMain ? 4 : 1} paddingBottom={isMain ? 3 : 1} justifyContent="center">
+      <Flex paddingTop={isMain ? 4 : 1} paddingBottom={isMain ? 3 : 1} justifyContent="center">
         {isMain ? (
           <Text textColor="neutral800" bold small>
             {header}
@@ -32,7 +32,7 @@ const RelationFormBox = ({
             oneThatIsCreatingARelationWithAnother={oneThatIsCreatingARelationWithAnother}
           />
         )}
-      </Row>
+      </Flex>
       <Divider />
       <Box padding={4}>
         <GenericInput

@@ -1,7 +1,7 @@
 import styled from 'styled-components';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 
-const Wrapper = styled(Row)`
+const Wrapper = styled(Flex)`
   position: fixed;
   top: 46px;
   right: 0;

@@ -8,7 +8,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Box } from '@strapi/parts/Box';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { Text } from '@strapi/parts/Text';
 import useFormModalNavigation from '../../../hooks/useFormModalNavigation';
 import getTrad from '../../../utils/getTrad';
@@ -31,22 +31,22 @@ const AttributeOption = ({ type }) => {
 
   return (
     <BoxWrapper padding={4} as="button" hasRadius type="button" onClick={handleClick}>
-      <Row>
+      <Flex>
         <AttributeIcon type={type} />
         <Box paddingLeft={4}>
-          <Row>
+          <Flex>
             <Text bold>
               {formatMessage({ id: getTrad(`attribute.${type}`), defaultMessage: type })}
             </Text>
-          </Row>
+          </Flex>
 
-          <Row>
+          <Flex>
             <Text small textColor="neutral600">
               {formatMessage({ id: getTrad(`attribute.${type}.description`) })}
             </Text>
-          </Row>
+          </Flex>
         </Box>
-      </Row>
+      </Flex>
     </BoxWrapper>
   );
 };

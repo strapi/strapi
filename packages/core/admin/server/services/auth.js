@@ -16,7 +16,7 @@ const hashPassword = password => bcrypt.hash(password, 10);
  * Validate a password
  * @param {string} password
  * @param {string} hash
- * @returns {boolean} is the password valid
+ * @returns {Promise<boolean>} is the password valid
  */
 const validatePassword = (password, hash) => bcrypt.compare(password, hash);
 

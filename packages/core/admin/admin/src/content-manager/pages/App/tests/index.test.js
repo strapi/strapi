@@ -103,23 +103,6 @@ describe('Content manager | App | main', () => {
     expect(screen.getByText('Categories')).toBeVisible();
     expect(history.location.pathname).toEqual('/content-manager/collectionType/category');
     expect(container.firstChild).toMatchInlineSnapshot(`
-      .c34 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
-      }
-
-      .c35 {
-        -webkit-animation: gzYjWD 1s infinite linear;
-        animation: gzYjWD 1s infinite linear;
-      }
-
       .c32 {
         display: -webkit-box;
         display: -webkit-flex;
@@ -136,6 +119,23 @@ describe('Content manager | App | main', () => {
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
+      }
+
+      .c34 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
+      }
+
+      .c35 {
+        -webkit-animation: gzYjWD 1s infinite linear;
+        animation: gzYjWD 1s infinite linear;
       }
 
       .c33 {

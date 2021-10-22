@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 import { Box } from '@strapi/parts/Box';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { Badge } from '@strapi/parts/Badge';
 
 export const RelativeBox = styled(Box)`
@@ -30,12 +30,12 @@ export const Wrapper = styled.div`
   }
 `;
 
-export const ActionRow = styled(Row)`
+export const ActionRow = styled(Flex)`
   height: ${52 / 16}rem;
   background-color: ${({ blurry }) => (blurry ? `rgba(33, 33, 52, 0.4)` : undefined)};
 `;
 
-export const CroppingActionRow = styled(Row)`
+export const CroppingActionRow = styled(Flex)`
   z-index: 1;
   height: ${52 / 16}rem;
   position: absolute;

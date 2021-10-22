@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Dialog, DialogBody, DialogFooter } from '@strapi/parts/Dialog';
 import { Stack } from '@strapi/parts/Stack';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { Text } from '@strapi/parts/Text';
 import { Button } from '@strapi/parts/Button';
 import AlertWarningIcon from '@strapi/icons/AlertWarningIcon';
@@ -26,17 +26,17 @@ const ConfirmDialogDelete = ({ isConfirmButtonLoading, isOpen, onToggleDialog, o
     >
       <DialogBody icon={<AlertWarningIcon />}>
         <Stack size={2}>
-          <Row justifyContent="center">
+          <Flex justifyContent="center">
             <Text id="confirm-description">
               {formatMessage({
                 id: 'components.popUpWarning.message',
                 defaultMessage: 'Are you sure you want to delete this?',
               })}
             </Text>
-          </Row>
-          <Row>
+          </Flex>
+          <Flex>
             <InjectionZoneList area="contentManager.listView.deleteModalAdditionalInfos" />
-          </Row>
+          </Flex>
         </Stack>
       </DialogBody>
       <DialogFooter

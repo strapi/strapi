@@ -2,7 +2,7 @@ import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import { BaseCheckbox } from '@strapi/parts/BaseCheckbox';
 import { Box } from '@strapi/parts/Box';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { Text } from '@strapi/parts/Text';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
@@ -24,7 +24,7 @@ const RowLabelWithCheckbox = ({
   const { formatMessage } = useIntl();
 
   return (
-    <Row alignItems="center" paddingLeft={6} style={{ width: firstRowWidth, flexShrink: 0 }}>
+    <Flex alignItems="center" paddingLeft={6} style={{ width: firstRowWidth, flexShrink: 0 }}>
       <Box paddingRight={2}>
         <BaseCheckbox
           name={checkboxName}
@@ -63,7 +63,7 @@ const RowLabelWithCheckbox = ({
         <Text ellipsis>{upperFirst(label)}</Text>
         {children}
       </CollapseLabel>
-    </Row>
+    </Flex>
   );
 };
 

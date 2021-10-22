@@ -1,7 +1,7 @@
 import React from 'react';
 import { Tbody, Tr, Td } from '@strapi/parts/Table';
 import { Box } from '@strapi/parts/Box';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { Loader } from '@strapi/parts/Loader';
 import PropTypes from 'prop-types';
 import EmptyStateLayout from '../EmptyStateLayout';
@@ -12,11 +12,11 @@ const EmptyBodyTable = ({ colSpan, isLoading, ...rest }) => {
       <Tbody>
         <Tr>
           <Td colSpan={colSpan}>
-            <Row justifyContent="center">
+            <Flex justifyContent="center">
               <Box padding={11} background="neutral0">
                 <Loader>Loading content...</Loader>
               </Box>
-            </Row>
+            </Flex>
           </Td>
         </Tr>
       </Tbody>

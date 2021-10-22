@@ -10,7 +10,7 @@ import {
 } from '@strapi/helper-plugin';
 import CheckIcon from '@strapi/icons/CheckIcon';
 import { Box } from '@strapi/parts/Box';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { ToggleInput } from '@strapi/parts/ToggleInput';
 import { H3 } from '@strapi/parts/Text';
 import { Button } from '@strapi/parts/Button';
@@ -154,14 +154,14 @@ export const SettingsPage = () => {
               <Stack size={12}>
                 <Box background="neutral0" padding={6} shadow="filterShadow" hasRadius>
                   <Stack size={4}>
-                    <Row>
+                    <Flex>
                       <H3 as="h2">
                         {formatMessage({
                           id: getTrad('settings.section.image.label'),
                           defaultMessage: 'Image',
                         })}
                       </H3>
-                    </Row>
+                    </Flex>
                     <Grid gap={6}>
                       <GridItem col={6} s={12}>
                         <ToggleInput

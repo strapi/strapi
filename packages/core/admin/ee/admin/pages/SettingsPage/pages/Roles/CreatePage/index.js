@@ -15,11 +15,13 @@ import { Button } from '@strapi/parts/Button';
 import { ContentLayout, HeaderLayout } from '@strapi/parts/Layout';
 import { Grid, GridItem } from '@strapi/parts/Grid';
 import { Main } from '@strapi/parts/Main';
-import { Row } from '@strapi/parts/Row';
+import { Link } from '@strapi/parts/Link';
+import { Flex } from '@strapi/parts/Flex';
 import { Stack } from '@strapi/parts/Stack';
 import { Text } from '@strapi/parts/Text';
 import { TextInput } from '@strapi/parts/TextInput';
 import { Textarea } from '@strapi/parts/Textarea';
+import BackIcon from '@strapi/icons/BackIcon';
 import { Formik } from 'formik';
 import get from 'lodash/get';
 import isEmpty from 'lodash/isEmpty';
@@ -158,12 +160,20 @@ const CreatePage = () => {
                   id: 'Settings.roles.create.description',
                   defaultMessage: 'Define the rights given to the role',
                 })}
+                navigationAction={
+                  <Link startIcon={<BackIcon />} to="/settings/roles">
+                    {formatMessage({
+                      id: 'app.components.go-back',
+                      defaultMessage: 'Go back',
+                    })}
+                  </Link>
+                }
               />
               <ContentLayout>
                 <Stack size={6}>
                   <Box background="neutral0" padding={6} shadow="filterShadow" hasRadius>
                     <Stack size={4}>
-                      <Row justifyContent="space-between">
+                      <Flex justifyContent="space-between">
                         <Box>
                           <Box>
                             <Text bold>
@@ -192,7 +202,7 @@ const CreatePage = () => {
                             { number: 0 }
                           )}
                         </UsersRoleNumber>
-                      </Row>
+                      </Flex>
                       <Grid gap={4}>
                         <GridItem col={6}>
                           <TextInput

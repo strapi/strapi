@@ -9,7 +9,7 @@ import Reload from '@strapi/icons/Reload';
 import { Link } from '@strapi/parts/Link';
 import { Box } from '@strapi/parts/Box';
 import { Stack } from '@strapi/parts/Stack';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { H1, Typography } from '@strapi/parts/Text';
 import { Content, IconBox, Overlay } from './Overlay';
 
@@ -46,16 +46,16 @@ const Blocker = ({ displayedIcon, description, title, isOpen }) => {
       <Overlay>
         <Content size={6}>
           <Stack size={2}>
-            <Row justifyContent="center">
+            <Flex justifyContent="center">
               <H1>{formatMessage(title)}</H1>
-            </Row>
-            <Row justifyContent="center">
+            </Flex>
+            <Flex justifyContent="center">
               <Typography as="h2" textColor="neutral600" fontSize={4} fontWeight="regular">
                 {formatMessage(description)}
               </Typography>
-            </Row>
+            </Flex>
           </Stack>
-          <Row justifyContent="center">
+          <Flex justifyContent="center">
             {displayedIcon === 'reload' && (
               <IconBox padding={6} background="primary100" borderColor="primary200">
                 <LoaderReload width={pxToRem(36)} height={pxToRem(36)} />
@@ -67,8 +67,8 @@ const Blocker = ({ displayedIcon, description, title, isOpen }) => {
                 <Time width={pxToRem(40)} height={pxToRem(40)} />
               </IconBox>
             )}
-          </Row>
-          <Row justifyContent="center">
+          </Flex>
+          <Flex justifyContent="center">
             <Box paddingTop={2}>
               <Link
                 href="https://strapi.io/documentation"
@@ -81,7 +81,7 @@ const Blocker = ({ displayedIcon, description, title, isOpen }) => {
                 })}
               </Link>
             </Box>
-          </Row>
+          </Flex>
         </Content>
       </Overlay>,
       overlayContainer

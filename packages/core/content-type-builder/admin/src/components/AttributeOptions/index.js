@@ -12,7 +12,7 @@ import { Divider } from '@strapi/parts/Divider';
 import { Grid, GridItem } from '@strapi/parts/Grid';
 import { KeyboardNavigable } from '@strapi/parts/KeyboardNavigable';
 import { ModalBody } from '@strapi/parts/ModalLayout';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { Stack } from '@strapi/parts/Stack';
 import { H2 } from '@strapi/parts/Text';
 import { getTrad } from '../../utils';
@@ -26,9 +26,9 @@ const AttributeOptions = ({ attributes, forTarget, kind }) => {
 
   return (
     <ModalBody>
-      <Row>
+      <Flex>
         <H2>{formatMessage({ id: titleId, defaultMessage: 'Select a field' })}</H2>
-      </Row>
+      </Flex>
       <Divider />
       <Box paddingTop={4} paddingBottom={4}>
         <KeyboardNavigable tagName="button">

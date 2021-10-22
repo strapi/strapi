@@ -1,3 +1,4 @@
+import React, { useRef, useState } from 'react';
 import {
   request,
   useNotification,
@@ -12,8 +13,9 @@ import { ContentLayout, HeaderLayout } from '@strapi/parts/Layout';
 import { Main } from '@strapi/parts/Main';
 import { Stack } from '@strapi/parts/Stack';
 import { Formik } from 'formik';
+import { Link } from '@strapi/parts/Link';
+import BackIcon from '@strapi/icons/BackIcon';
 import get from 'lodash/get';
-import React, { useRef, useState } from 'react';
 import { useIntl } from 'react-intl';
 import { useRouteMatch } from 'react-router-dom';
 import { Permissions, RoleForm } from './components';
@@ -129,6 +131,14 @@ const EditPage = () => {
                   id: 'Settings.roles.create.description',
                   defaultMessage: 'Define the rights given to the role',
                 })}
+                navigationAction={
+                  <Link startIcon={<BackIcon />} to="/settings/roles">
+                    {formatMessage({
+                      id: 'app.components.go-back',
+                      defaultMessage: 'Go back',
+                    })}
+                  </Link>
+                }
               />
               <ContentLayout>
                 <Stack size={6}>
