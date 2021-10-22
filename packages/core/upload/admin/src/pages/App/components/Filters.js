@@ -20,7 +20,7 @@ const displayedFilters = [
     metadatas: { label: 'updatedAt' },
   },
   {
-    name: 'type',
+    name: 'mime',
     fieldSchema: {
       type: 'enumeration',
       options: ['image', 'video', 'file'],
