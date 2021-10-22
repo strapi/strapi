@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { Box } from '@strapi/parts/Box';
 import { Checkbox } from '@strapi/parts/Checkbox';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { TableLabel } from '@strapi/parts/Text';
 import { Grid, GridItem } from '@strapi/parts/Grid';
 import CogIcon from '@strapi/icons/Cog';
@@ -59,7 +59,7 @@ const SubCategory = ({ subCategory }) => {
 
   return (
     <Box>
-      <Row justifyContent="space-between" alignItems="center">
+      <Flex justifyContent="space-between" alignItems="center">
         <Box paddingRight={4}>
           <TableLabel textColor="neutral600">{subCategory.label}</TableLabel>
         </Box>
@@ -75,8 +75,8 @@ const SubCategory = ({ subCategory }) => {
             {formatMessage({ id: 'app.utils.select-all', defaultMessage: 'Select all' })}
           </Checkbox>
         </Box>
-      </Row>
-      <Row paddingTop={6} paddingBottom={6}>
+      </Flex>
+      <Flex paddingTop={6} paddingBottom={6}>
         <Grid gap={2} style={{ flex: 1 }}>
           {subCategory.actions.map(action => {
             const name = `${action.name}.enabled`;
@@ -104,7 +104,7 @@ const SubCategory = ({ subCategory }) => {
             );
           })}
         </Grid>
-      </Row>
+      </Flex>
     </Box>
   );
 };

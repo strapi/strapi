@@ -1,7 +1,7 @@
 import styled from 'styled-components';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 
-const CollapseLabel = styled(Row)`
+const CollapseLabel = styled(Flex)`
   padding-right: ${({ theme }) => theme.spaces[2]};
   overflow: hidden;
   flex: 1;

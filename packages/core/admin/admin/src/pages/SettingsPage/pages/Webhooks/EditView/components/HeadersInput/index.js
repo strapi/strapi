@@ -4,7 +4,7 @@ import AddIcon from '@strapi/icons/AddIcon';
 import { Box } from '@strapi/parts/Box';
 import { FieldLabel } from '@strapi/parts/Field';
 import { Grid, GridItem } from '@strapi/parts/Grid';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { Stack } from '@strapi/parts/Stack';
 import { TextInput } from '@strapi/parts/TextInput';
 import { TextButton } from '@strapi/parts/TextButton';
@@ -52,7 +52,7 @@ const HeadersInput = () => {
                     />
                   </GridItem>
                   <GridItem col={6}>
-                    <Row alignItems="flex-end">
+                    <Flex alignItems="flex-end">
                       <Box style={{ flex: 1 }}>
                         <Field
                           as={TextInput}
@@ -71,7 +71,7 @@ const HeadersInput = () => {
                           }
                         />
                       </Box>
-                      <Row
+                      <Flex
                         paddingLeft={2}
                         style={{ alignSelf: 'center' }}
                         paddingTop={errors.headers?.[i]?.value ? 0 : 5}
@@ -86,8 +86,8 @@ const HeadersInput = () => {
                             { number: i + 1 }
                           )}
                         />
-                      </Row>
-                    </Row>
+                      </Flex>
+                    </Flex>
                   </GridItem>
                 </React.Fragment>
               ))}

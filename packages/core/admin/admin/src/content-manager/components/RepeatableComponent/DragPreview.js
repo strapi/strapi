@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { Box } from '@strapi/parts/Box';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { Text } from '@strapi/parts/Text';
 import { IconButton } from '@strapi/parts/IconButton';
 import DeleteIcon from '@strapi/icons/DeleteIcon';
@@ -46,9 +46,9 @@ const DragPreview = ({ displayedValue }) => {
       background="neutral0"
       style={{ width: '20vw' }}
     >
-      <Row justifyContent="space-between">
+      <Flex justifyContent="space-between">
         <ToggleButton type="button">
-          <Row>
+          <Flex>
             <DropdownIconWrapper background="neutral200">
               <DropdownIcon />
             </DropdownIconWrapper>
@@ -57,17 +57,17 @@ const DragPreview = ({ displayedValue }) => {
                 {displayedValue}
               </Text>
             </Box>
-          </Row>
+          </Flex>
         </ToggleButton>
         <Box paddingLeft={3}>
-          <Row>
+          <Flex>
             <IconButton icon={<DeleteIcon />} />
             <Box paddingLeft={2}>
               <IconButton icon={<DragHandle />} />
             </Box>
-          </Row>
+          </Flex>
         </Box>
-      </Row>
+      </Flex>
     </Box>
   );
 };

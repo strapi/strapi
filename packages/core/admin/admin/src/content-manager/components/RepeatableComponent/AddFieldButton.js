@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
 import { Box } from '@strapi/parts/Box';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { Text } from '@strapi/parts/Text';
 import AddIcon from '@strapi/icons/AddIcon';
 import { pxToRem } from '@strapi/helper-plugin';
@@ -37,7 +37,7 @@ const Button = ({ disabled, onClick }) => {
       paddingBottom={2}
       onClick={onClick}
     >
-      <Row justifyContent="center">
+      <Flex justifyContent="center">
         <Text textColor="primary600" bold>
           <StyledIcon />
           {formatMessage({
@@ -45,7 +45,7 @@ const Button = ({ disabled, onClick }) => {
             defaultMessage: 'Add an entry',
           })}
         </Text>
-      </Row>
+      </Flex>
     </StyledButton>
   );
 };

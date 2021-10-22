@@ -10,7 +10,7 @@ import CheckIcon from '@strapi/icons/CheckIcon';
 import EditIcon from '@strapi/icons/EditIcon';
 import { Button } from '@strapi/parts/Button';
 import { Link } from '@strapi/parts/Link';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { Stack } from '@strapi/parts/Stack';
 import { Box } from '@strapi/parts/Box';
 import { ContentLayout, HeaderLayout } from '@strapi/parts/Layout';
@@ -263,7 +263,7 @@ const ListView = () => {
         />
         <ContentLayout>
           <Stack size={4}>
-            <Row justifyContent="flex-end">
+            <Flex justifyContent="flex-end">
               <Stack horizontal size={2}>
                 {/* <LinkToCMSettingsView
                   key="link-to-cm-settings-view"
@@ -287,7 +287,7 @@ const ListView = () => {
                   {formatMessage({ id: getTrad('button.attributes.add.another') })}
                 </Button>
               </Stack>
-            </Row>
+            </Flex>
             <Box background="neutral0" shadow="filterShadow" hasRadius>
               <List
                 items={attributes}

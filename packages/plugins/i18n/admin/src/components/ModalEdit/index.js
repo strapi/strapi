@@ -6,7 +6,7 @@ import { Formik } from 'formik';
 import CheckIcon from '@strapi/icons/CheckIcon';
 import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@strapi/parts/ModalLayout';
 import { TabGroup, Tabs, Tab, TabPanels, TabPanel } from '@strapi/parts/Tabs';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { Box } from '@strapi/parts/Box';
 import { Button } from '@strapi/parts/Button';
 import { Divider } from '@strapi/parts/Divider';
@@ -56,7 +56,7 @@ const ModalEdit = ({ locale, onClose }) => {
               id="tabs"
               variant="simple"
             >
-              <Row justifyContent="space-between">
+              <Flex justifyContent="space-between">
                 <H2>
                   {formatMessage({
                     id: getTrad('Settings.locales.modal.title'),
@@ -77,7 +77,7 @@ const ModalEdit = ({ locale, onClose }) => {
                     })}
                   </Tab>
                 </Tabs>
-              </Row>
+              </Flex>
 
               <Divider />
 

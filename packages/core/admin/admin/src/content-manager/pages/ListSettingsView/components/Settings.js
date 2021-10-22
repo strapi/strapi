@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { Grid, GridItem } from '@strapi/parts/Grid';
 import { Select, Option } from '@strapi/parts/Select';
 import { ToggleInput } from '@strapi/parts/ToggleInput';
@@ -10,7 +10,7 @@ import { Box } from '@strapi/parts/Box';
 import { H3 } from '@strapi/parts/Text';
 import { getTrad } from '../../../utils';
 
-const RowGap = styled(Row)`
+const FlexGap = styled(Flex)`
   gap: ${({ theme }) => theme.spaces[4]};
 `;
 
@@ -28,7 +28,7 @@ const Settings = ({ modifiedData, onChange, sortOptions }) => {
           })}
         </H3>
       </Box>
-      <RowGap justifyContent="space-between" wrap="wrap" paddingBottom={6}>
+      <FlexGap justifyContent="space-between" wrap="wrap" paddingBottom={6}>
         <ToggleInput
           label={formatMessage({
             id: getTrad('form.Input.search'),
@@ -86,7 +86,7 @@ const Settings = ({ modifiedData, onChange, sortOptions }) => {
           name="settings.bulkable"
           checked={settings.bulkable}
         />
-      </RowGap>
+      </FlexGap>
       <Grid gap={4}>
         <GridItem s={12} col={6}>
           <Select

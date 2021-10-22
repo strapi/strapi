@@ -3,7 +3,7 @@ import { Redirect, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { Divider } from '@strapi/parts/Divider';
 import { Stack } from '@strapi/parts/Stack';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { Box } from '@strapi/parts/Box';
 import { Button } from '@strapi/parts/Button';
 import { Link } from '@strapi/parts/Link';
@@ -55,31 +55,31 @@ const Providers = () => {
           </Column>
           <Stack size={7}>
             {isLoading ? (
-              <Row justifyContent="center">
+              <Flex justifyContent="center">
                 <Loader>{formatMessage({ id: 'Auth.login.sso.loading' })}</Loader>
-              </Row>
+              </Flex>
             ) : (
               <SSOProviders providers={providers} />
             )}
-            <Row>
+            <Flex>
               <DividerFull />
               <Box paddingLeft={3} paddingRight={3}>
                 <TableLabel textColor="neutral600">{formatMessage({ id: 'or' })}</TableLabel>
               </Box>
               <DividerFull />
-            </Row>
+            </Flex>
             <Button fullWidth size="L" onClick={handleClick}>
               {formatMessage({ id: 'Auth.form.button.login.strapi' })}
             </Button>
           </Stack>
         </LayoutContent>
-        <Row justifyContent="center">
+        <Flex justifyContent="center">
           <Box paddingTop={4}>
             <Link to="/auth/forgot-password">
               <Text small>{formatMessage({ id: 'Auth.link.forgot-password' })}</Text>
             </Link>
           </Box>
-        </Row>
+        </Flex>
       </Main>
     </UnauthenticatedLayout>
   );

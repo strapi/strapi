@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Grid, GridItem } from '@strapi/parts/Grid';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { Text } from '@strapi/parts/Text';
 import { Tooltip } from '@strapi/parts/Tooltip';
 import styled from 'styled-components';
@@ -23,7 +23,7 @@ const SSOButton = styled.a`
   color: ${({ theme }) => theme.colors.neutral600};
 `;
 
-const SSOProvidersWrapper = styled(Row)`
+const SSOProvidersWrapper = styled(Flex)`
   & a:not(:first-child):not(:last-child) {
     margin: 0 ${({ theme }) => theme.spaces[2]};
   }

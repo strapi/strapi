@@ -1,6 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { IconButton, Tbody, Text, Tr, Td, Row } from '@strapi/parts';
+import { IconButton } from '@strapi/parts/IconButton';
+import { Text } from '@strapi/parts/Text';
+import { Flex } from '@strapi/parts/Flex';
+import { Tbody, Tr, Td } from '@strapi/parts/Table';
 import { EditIcon, DeleteIcon } from '@strapi/icons';
 import { CheckPermissions, onRowClick, stopPropagation } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
@@ -44,7 +47,7 @@ const TableBody = ({ sortedRoles, canDelete, permissions, setRoleToDelete, onDel
             </Text>
           </Td>
           <Td>
-            <Row justifyContent="end" {...stopPropagation}>
+            <Flex justifyContent="end" {...stopPropagation}>
               <CheckPermissions permissions={permissions.updateRole}>
                 <IconButton
                   onClick={() => handleClickEdit(role.id)}
@@ -69,7 +72,7 @@ const TableBody = ({ sortedRoles, canDelete, permissions, setRoleToDelete, onDel
                   />
                 </CheckPermissions>
               )}
-            </Row>
+            </Flex>
           </Td>
         </Tr>
       ))}

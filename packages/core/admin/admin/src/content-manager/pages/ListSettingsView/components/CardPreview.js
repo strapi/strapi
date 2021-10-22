@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { ButtonText } from '@strapi/parts/Text';
 import { Stack } from '@strapi/parts/Stack';
 import EditIcon from '@strapi/icons/EditIcon';
@@ -9,7 +9,7 @@ import CloseAlertIcon from '@strapi/icons/CloseAlertIcon';
 import Drag from '@strapi/icons/Drag';
 import ellipsisCardTitle from '../utils/ellipsisCardTitle';
 
-const ActionBox = styled(Row)`
+const ActionBox = styled(Flex)`
   height: ${({ theme }) => theme.spaces[7]};
 
   &:last-child {
@@ -28,7 +28,7 @@ const DragButton = styled(ActionBox)`
   }
 `;
 
-const FieldContainer = styled(Row)`
+const FieldContainer = styled(Flex)`
   display: inline-flex;
   max-height: ${32 / 16}rem;
   background-color: ${({ theme }) => theme.colors.primary100};
@@ -68,14 +68,14 @@ const CardPreview = ({ labelField }) => {
         </DragButton>
         <ButtonText>{cardEllipsisTitle}</ButtonText>
       </Stack>
-      <Row paddingLeft={3}>
+      <Flex paddingLeft={3}>
         <ActionBox alignItems="center">
           <EditIcon />
         </ActionBox>
         <ActionBox alignItems="center">
           <CloseAlertIcon />
         </ActionBox>
-      </Row>
+      </Flex>
     </FieldContainer>
   );
 };
