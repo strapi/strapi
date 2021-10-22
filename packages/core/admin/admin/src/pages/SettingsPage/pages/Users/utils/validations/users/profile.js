@@ -23,6 +23,13 @@ const schema = {
     .when('password', (password, passSchema) => {
       return password ? passSchema.required(translatedErrors.required) : passSchema;
     }),
+  currentPassword: yup
+    .string()
+    .when(['password', 'confirmPassword'], (password, confirmPassword, passSchema) => {
+      return password || confirmPassword
+        ? passSchema.required(translatedErrors.required)
+        : passSchema;
+    }),
   preferedLanguage: yup.string().nullable(),
 };
 

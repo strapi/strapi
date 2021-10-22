@@ -7,7 +7,7 @@ import { IconButton } from '@strapi/parts/IconButton';
 import SearchIcon from '@strapi/icons/SearchIcon';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Box } from '@strapi/parts/Box';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { Stack } from '@strapi/parts/Stack';
 import { Text, P } from '@strapi/parts/Text';
 import useDataManager from '../../hooks/useDataManager';
@@ -70,7 +70,7 @@ const ComponentIconPicker = ({ error, isCreating, intlLabel, name, onChange, val
   return (
     <Box>
       <Stack size={1}>
-        <Row justifyContent="space-between">
+        <Flex justifyContent="space-between">
           <Text textColor="neutral800" htmlFor={name} small bold as="label">
             {formatMessage(intlLabel)}
           </Text>
@@ -106,7 +106,7 @@ const ComponentIconPicker = ({ error, isCreating, intlLabel, name, onChange, val
           ) : (
             <IconButton onClick={toggleSearch} aria-label="Edit" icon={<SearchIcon />} noBorder />
           )}
-        </Row>
+        </Flex>
         <Stack size={1}>
           <Box background="neutral100" borderColor={error ? 'danger600' : ''} hasRadius>
             <Box>

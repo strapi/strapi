@@ -3,7 +3,7 @@ import React, { useRef } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { Box } from '@strapi/parts/Box';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { H3 } from '@strapi/parts/Text';
 import { ModalFooter } from '@strapi/parts/ModalLayout';
 import { Button } from '@strapi/parts/Button';
@@ -13,7 +13,7 @@ import { getTrad } from '../../../utils';
 import { typeFromMime } from '../../../utils/typeFromMime';
 import { AssetSource } from '../../../constants';
 
-const Wrapper = styled(Row)`
+const Wrapper = styled(Flex)`
   flex-direction: column;
 `;
 
@@ -76,7 +76,7 @@ export const FromComputerForm = ({ onClose, onAddAssets }) => {
             background="neutral100"
             position="relative"
           >
-            <Row justifyContent="center">
+            <Flex justifyContent="center">
               <Wrapper>
                 <IconWrapper>
                   <AddAssetIcon aria-hidden />
@@ -117,7 +117,7 @@ export const FromComputerForm = ({ onClose, onAddAssets }) => {
                   </Button>
                 </Box>
               </Wrapper>
-            </Row>
+            </Flex>
           </MediaBox>
         </label>
       </Box>

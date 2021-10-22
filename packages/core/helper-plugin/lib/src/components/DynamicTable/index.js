@@ -1,7 +1,7 @@
 import React, { Children, cloneElement, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Box } from '@strapi/parts/Box';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { Button } from '@strapi/parts/Button';
 import { Subtitle } from '@strapi/parts/Text';
 import { Table as TableCompo } from '@strapi/parts/Table';
@@ -13,7 +13,7 @@ import ConfirmDialog from '../ConfirmDialog';
 import EmptyBodyTable from '../EmptyBodyTable';
 import TableHead from './TableHead';
 
-const BlockActions = styled(Row)`
+const BlockActions = styled(Flex)`
   & > * + * {
     margin-left: ${({ theme }) => theme.spaces[2]};
   }
@@ -127,7 +127,7 @@ const Table = ({
       {entriesToDelete.length > 0 && (
         <Box>
           <Box paddingBottom={4}>
-            <Row justifyContent="space-between">
+            <Flex justifyContent="space-between">
               <BlockActions>
                 <Subtitle textColor="neutral600">
                   {formatMessage(
@@ -147,7 +147,7 @@ const Table = ({
                   {formatMessage({ id: 'app.utils.delete', defaultMessage: 'Delete' })}
                 </Button>
               </BlockActions>
-            </Row>
+            </Flex>
           </Box>
         </Box>
       )}

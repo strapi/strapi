@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 import { Box } from '@strapi/parts/Box';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 
 const Wrapper = styled(Box)`
   position: relative;
@@ -34,7 +34,7 @@ const IconWrapper = styled(Box)`
   }
 `;
 
-const InfosWrapper = styled(Row)`
+const InfosWrapper = styled(Flex)`
   position: absolute;
   bottom: 0;
   left: 0;

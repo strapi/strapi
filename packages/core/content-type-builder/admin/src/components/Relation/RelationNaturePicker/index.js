@@ -11,7 +11,7 @@ import ManyWay from '@strapi/icons/IconRelationUnidirectional1N';
 import OneToMany from '@strapi/icons/IconRelation1N';
 import ManyToOne from '@strapi/icons/IconRelationN1';
 import ManyToMany from '@strapi/icons/IconRelationNN';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { Text } from '@strapi/parts/Text';
 import { KeyboardNavigable } from '@strapi/parts/KeyboardNavigable';
 import { Stack } from '@strapi/parts/Stack';
@@ -68,9 +68,9 @@ const RelationNaturePicker = ({
   }
 
   return (
-    <Row style={{ flex: 1 }}>
+    <Flex style={{ flex: 1 }}>
       <Wrapper>
-        <Row paddingLeft={9} paddingRight={9} paddingTop={1} justifyContent="center">
+        <Flex paddingLeft={9} paddingRight={9} paddingTop={1} justifyContent="center">
           <KeyboardNavigable tagName="button">
             <Stack size={3} horizontal>
               {relationsType.map(relation => {
@@ -105,7 +105,7 @@ const RelationNaturePicker = ({
               })}
             </Stack>
           </KeyboardNavigable>
-        </Row>
+        </Flex>
       </Wrapper>
       <InfosWrapper justifyContent="center">
         <Text>{truncate(leftDisplayedValue, { length: 24 })}&nbsp;</Text>
@@ -114,7 +114,7 @@ const RelationNaturePicker = ({
         </Text>
         <Text>{truncate(rightDisplayedValue, { length: 24 })}</Text>
       </InfosWrapper>
-    </Row>
+    </Flex>
   );
 };
 

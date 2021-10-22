@@ -1,7 +1,7 @@
 import styled from 'styled-components';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 
-const Cell = styled(Row)`
+const Cell = styled(Flex)`
   svg {
     z-index: 2;
     color: ${({ isSelected, theme }) =>

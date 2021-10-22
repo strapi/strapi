@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import { Grid, GridItem } from '@strapi/parts/Grid';
 import { Box } from '@strapi/parts/Box';
 import { Checkbox } from '@strapi/parts/Checkbox';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { TableLabel } from '@strapi/parts/Text';
 import { useIntl } from 'react-intl';
 import get from 'lodash/get';
@@ -74,7 +74,7 @@ const SubCategory = ({ categoryName, isFormDisabled, subCategoryName, actions, p
   return (
     <>
       <Box>
-        <Row justifyContent="space-between" alignItems="center">
+        <Flex justifyContent="space-between" alignItems="center">
           <Box paddingRight={4}>
             <TableLabel textColor="neutral600">{subCategoryName}</TableLabel>
           </Box>
@@ -98,8 +98,8 @@ const SubCategory = ({ categoryName, isFormDisabled, subCategoryName, actions, p
               {formatMessage({ id: 'app.utils.select-all', defaultMessage: 'Select all' })}
             </Checkbox>
           </Box>
-        </Row>
-        <Row paddingTop={6} paddingBottom={6}>
+        </Flex>
+        <Flex paddingTop={6} paddingBottom={6}>
           <Grid gap={2} style={{ flex: 1 }}>
             {formattedActions.map(({ checkboxName, value, action, displayName, hasConditions }) => {
               return (
@@ -133,7 +133,7 @@ const SubCategory = ({ categoryName, isFormDisabled, subCategoryName, actions, p
             hasConditions={doesButtonHasCondition}
             onClick={handleToggleModalIsOpen}
           />
-        </Row>
+        </Flex>
       </Box>
       {isModalOpen && (
         <ConditionsModal

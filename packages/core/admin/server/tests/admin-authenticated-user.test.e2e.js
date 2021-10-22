@@ -133,5 +133,50 @@ describe('Authenticated User', () => {
         isActive: expect.any(Boolean),
       });
     });
+
+    test('Updating password requires currentPassword', async () => {
+      const input = {
+        password: 'newPassword1234',
+      };
+
+      const res = await rq({
+        url: '/admin/users/me',
+        method: 'PUT',
+        body: input,
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toMatchObject({
+        statusCode: 400,
+        error: 'Bad Request',
+        message: 'ValidationError',
+        data: {
+          currentPassword: expect.anything(),
+        },
+      });
+    });
+
+    test('Updating password requires currentPassword to be valid', async () => {
+      const input = {
+        password: 'newPassword1234',
+        currentPassword: 'wrongPass',
+      };
+
+      const res = await rq({
+        url: '/admin/users/me',
+        method: 'PUT',
+        body: input,
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toMatchObject({
+        statusCode: 400,
+        error: 'Bad Request',
+        message: 'ValidationError',
+        data: {
+          currentPassword: expect.anything(),
+        },
+      });
+    });
   });
 });

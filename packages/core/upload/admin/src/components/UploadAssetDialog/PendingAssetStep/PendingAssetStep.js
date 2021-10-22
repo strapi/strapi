@@ -4,7 +4,7 @@ import { ModalHeader, ModalBody, ModalFooter } from '@strapi/parts/ModalLayout';
 import { ButtonText, Text } from '@strapi/parts/Text';
 import { Button } from '@strapi/parts/Button';
 import { useIntl } from 'react-intl';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { Stack } from '@strapi/parts/Stack';
 import { Grid, GridItem } from '@strapi/parts/Grid';
 import { KeyboardNavigable } from '@strapi/parts/KeyboardNavigable';
@@ -69,7 +69,7 @@ export const PendingAssetStep = ({
 
       <ModalBody>
         <Stack size={7}>
-          <Row justifyContent="space-between">
+          <Flex justifyContent="space-between">
             <Stack size={0}>
               <Text small bold textColor="neutral800">
                 {formatMessage(
@@ -93,7 +93,7 @@ export const PendingAssetStep = ({
                 defaultMessage: 'Upload new asset',
               })}
             </Button>
-          </Row>
+          </Flex>
           <KeyboardNavigable tagName="article">
             <Grid gap={4}>
               {assets.map(asset => {

@@ -11,7 +11,7 @@ import upperFirst from 'lodash/upperFirst';
 import { Breadcrumbs, Crumb } from '@strapi/parts/Breadcrumbs';
 import { ModalHeader } from '@strapi/parts/ModalLayout';
 import { Box } from '@strapi/parts/Box';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { Stack } from '@strapi/parts/Stack';
 import { ButtonText } from '@strapi/parts/Text';
 import useDataManager from '../../hooks/useDataManager';
@@ -60,7 +60,7 @@ const FormModalHeader = ({
 
     return (
       <ModalHeader>
-        <Row>
+        <Flex>
           <Box>
             <AttributeIcon type={icon} />
           </Box>
@@ -69,7 +69,7 @@ const FormModalHeader = ({
               {formatMessage({ id: headerId }, { name: schema?.schema.name })}
             </ButtonText>
           </Box>
-        </Row>
+        </Flex>
       </ModalHeader>
     );
   }

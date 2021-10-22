@@ -2,15 +2,15 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { TableLabel } from '@strapi/parts/Text';
 import { cellWidth, firstRowWidth, rowHeight } from '../../../Permissions/utils/constants';
 
-const HeaderLabel = styled(Row)`
+const HeaderLabel = styled(Flex)`
   width: ${cellWidth};
   flex-shrink: 0;
 `;
-const PropertyLabelWrapper = styled(Row)`
+const PropertyLabelWrapper = styled(Flex)`
   width: ${firstRowWidth};
   height: ${rowHeight};
   flex-shrink: 0;
@@ -27,7 +27,7 @@ const Header = ({ headers, label }) => {
   );
 
   return (
-    <Row>
+    <Flex>
       <PropertyLabelWrapper alignItems="center" paddingLeft={6}>
         <TableLabel textColor="neutral500">{translatedLabel}</TableLabel>
       </PropertyLabelWrapper>
@@ -47,7 +47,7 @@ const Header = ({ headers, label }) => {
           </HeaderLabel>
         );
       })}
-    </Row>
+    </Flex>
   );
 };
 

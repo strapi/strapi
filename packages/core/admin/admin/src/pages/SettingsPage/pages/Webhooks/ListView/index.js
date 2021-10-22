@@ -20,7 +20,7 @@ import {
 } from '@strapi/helper-plugin';
 import { HeaderLayout, Layout, ContentLayout, ActionLayout } from '@strapi/parts/Layout';
 import { EmptyStateLayout } from '@strapi/parts/EmptyStateLayout';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { Stack } from '@strapi/parts/Stack';
 import { IconButton } from '@strapi/parts/IconButton';
 import { BaseCheckbox } from '@strapi/parts/BaseCheckbox';
@@ -395,7 +395,7 @@ const ListView = () => {
                             <Text textColor="neutral800">{webhook.url}</Text>
                           </Td>
                           <Td>
-                            <Row {...stopPropagation}>
+                            <Flex {...stopPropagation}>
                               <Switch
                                 onLabel={formatMessage({
                                   id: 'Settings.webhooks.enabled',
@@ -413,7 +413,7 @@ const ListView = () => {
                                 onChange={() => handleEnabledChange(!webhook.isEnabled, webhook.id)}
                                 visibleLabels
                               />
-                            </Row>
+                            </Flex>
                           </Td>
                           <Td>
                             <Stack horizontal size={1} {...stopPropagation}>

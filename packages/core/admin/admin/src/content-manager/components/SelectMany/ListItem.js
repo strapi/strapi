@@ -8,7 +8,7 @@ import has from 'lodash/has';
 import isEmpty from 'lodash/isEmpty';
 import { IconButton } from '@strapi/parts/IconButton';
 import { Box } from '@strapi/parts/Box';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { Text } from '@strapi/parts/Text';
 import { Link } from '@strapi/parts/Link';
 import BaseMinus from '@strapi/icons/Minus';
@@ -69,8 +69,8 @@ function ListItem({
   const { pathname } = useLocation();
 
   return (
-    <Row as="li" alignItems="center">
-      <Row style={{ flex: 1 }} alignItems="center">
+    <Flex as="li" alignItems="center">
+      <Flex style={{ flex: 1 }} alignItems="center">
         {hasDraftAndPublish && (
           <Box paddingLeft={1} paddingRight={2}>
             <StyledBullet isDraft={isDraft} title={title} />
@@ -86,9 +86,9 @@ function ListItem({
         ) : (
           <Text small>{value || data.id}</Text>
         )}
-      </Row>
+      </Flex>
       <Minus onClick={onRemove} icon={<BaseMinus />} label="Remove" style={{ cursor }} />
-    </Row>
+    </Flex>
   );
 }
 
