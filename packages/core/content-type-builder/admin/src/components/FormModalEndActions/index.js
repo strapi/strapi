@@ -43,9 +43,6 @@ const FormModalEndActions = ({
   onSubmitEditDz,
 }) => {
   const { formatMessage } = useIntl();
-  // TO DO
-  // dz attribute
-  // console.log(isComponentToDzModal)
 
   if (isComponentToDzModal) {
     console.log('is component to dz modal');
