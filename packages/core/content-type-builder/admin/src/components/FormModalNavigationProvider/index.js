@@ -75,6 +75,9 @@ const FormModalNavigationProvider = ({ children }) => {
       return {
         ...prevState,
         categoryName,
+        actionType: 'edit',
+        modalType: 'editCategory',
+        settingType: 'base',
         isOpen: true,
       };
     });

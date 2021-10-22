@@ -13,7 +13,6 @@ import set from 'lodash/set';
 import toLower from 'lodash/toLower';
 import upperFirst from 'lodash/upperFirst';
 import { useSelector, useDispatch, shallowEqual } from 'react-redux';
-import AddIcon from '@strapi/icons/AddIcon';
 import { Box } from '@strapi/parts/Box';
 import { Button } from '@strapi/parts/Button';
 import { Divider } from '@strapi/parts/Divider';
@@ -30,6 +29,8 @@ import AllowedTypesSelect from '../AllowedTypesSelect';
 import AttributeOptions from '../AttributeOptions';
 import DraftAndPublishToggle from '../DraftAndPublishToggle';
 import FormModalHeader from '../FormModalHeader';
+import FormModalEndActions from '../FormModalEndActions';
+
 import BooleanDefaultValueSelect from '../BooleanDefaultValueSelect';
 import BooleanRadioGroup from '../BooleanRadioGroup';
 import CheckboxWithNumberField from '../CheckboxWithNumberField';
@@ -409,47 +410,6 @@ const FormModal = () => {
     }
 
     await schema.validate(dataToValidate, { abortEarly: false });
-  };
-
-  const getButtonSubmitMessage = () => {
-    const isCreatingAComponent = get(modifiedData, 'createComponent', false);
-    let tradId;
-
-    switch (modalType) {
-      case 'contentType':
-      case 'component':
-      case 'editCategory':
-        tradId = !isCreating ? getTrad('form.button.finish') : getTrad('form.button.continue');
-        break;
-      case 'addComponentToDynamicZone': {
-        tradId = isCreatingAComponent
-          ? getTrad('form.button.add-first-field-to-created-component')
-          : getTrad('form.button.finish');
-        break;
-      }
-      case 'attribute': {
-        if (attributeType === 'dynamiczone') {
-          tradId = getTrad('form.button.add-components-to-dynamiczone');
-        } else if (attributeType === 'component') {
-          if (isInFirstComponentStep) {
-            tradId = isCreatingAComponent
-              ? getTrad('form.button.configure-component')
-              : getTrad('form.button.select-component');
-          } else {
-            tradId = isCreatingComponentWhileAddingAField
-              ? getTrad('form.button.add-first-field-to-created-component')
-              : getTrad('form.button.add-field');
-          }
-        } else {
-          tradId = getTrad('form.button.add-field');
-        }
-        break;
-      }
-      default:
-        tradId = getTrad('form.button.add-field');
-    }
-
-    return formatMessage({ id: tradId });
   };
 
   const handleChange = useCallback(
@@ -1036,105 +996,38 @@ const FormModal = () => {
               </TabGroup>
             </ModalBody>
             <ModalFooter
-              // FIXME
               endActions={
-                <>
-                  {(isCreatingContentType || isCreatingComponent) && !isCreating && (
-                    <Button
-                      type="button"
-                      variant="danger"
-                      onClick={e => {
-                        e.preventDefault();
-                        deleteData();
-                      }}
-                    >
-                      {formatMessage({
-                        id: getTrad('form.button.delete'),
-                        defaultMessage: 'Delete',
-                      })}
-                    </Button>
-                  )}
-                  {isEditingCategory && (
-                    <Button
-                      type="button"
-                      variant="danger"
-                      onClick={e => {
-                        e.preventDefault();
-
-                        deleteCategory(initialData.name);
-                      }}
-                    >
-                      {formatMessage({
-                        id: getTrad('form.button.delete'),
-                        defaultMessage: 'Delete',
-                      })}
-                    </Button>
-                  )}
-                  {isCreating && attributeType === 'dynamiczone' && (
-                    <Button
-                      type={isCreating ? 'submit' : 'button'}
-                      variant={
-                        (isCreatingContentType ||
-                          isCreatingComponent ||
-                          isEditingCategory ||
-                          (modalType === 'addComponentToDynamicZone' &&
-                            step === '1' &&
-                            !isCreatingComponentFromAView)) &&
-                        !isCreating
-                          ? 'default'
-                          : 'secondary'
-                      }
-                      onClick={e => handleSubmit(e, true)}
-                      startIcon={
-                        (isCreatingAttribute && !isCreatingComponentFromAView && step !== '1') ||
-                        (modalType === 'addComponentToDynamicZone' &&
-                          isCreatingComponentFromAView) ||
-                        (isCreatingComponentFromAView && step === '2') ? (
-                          <AddIcon />
-                        ) : null
-                      }
-                    >
-                      {getButtonSubmitMessage()}
-                    </Button>
-                  )}
-                  {attributeType !== 'dynamiczone' && (
-                    <Button
-                      type={isCreating ? 'submit' : 'button'}
-                      variant={
-                        (isCreatingContentType ||
-                          isCreatingComponent ||
-                          isEditingCategory ||
-                          (modalType === 'addComponentToDynamicZone' &&
-                            step === '1' &&
-                            !isCreatingComponentFromAView)) &&
-                        !isCreating
-                          ? 'default'
-                          : 'secondary'
-                      }
-                      onClick={e => handleSubmit(e, true)}
-                      startIcon={
-                        (isCreatingAttribute && !isCreatingComponentFromAView && step !== '1') ||
-                        (modalType === 'addComponentToDynamicZone' &&
-                          isCreatingComponentFromAView) ||
-                        (isCreatingComponentFromAView && step === '2') ? (
-                          <AddIcon />
-                        ) : null
-                      }
-                    >
-                      {getButtonSubmitMessage()}
-                    </Button>
-                  )}
-                  {isCreatingAttribute && !isInFirstComponentStep && (
-                    <Button
-                      type={isCreating ? 'button' : 'submit'}
-                      onClick={e => {
-                        handleSubmit(e, false);
-                      }}
-                    >
-                      {formatMessage({ id: 'form.button.finish', defaultMessage: 'Finish' })}
-                    </Button>
-                  )}
-                </>
+                <FormModalEndActions
+                  deleteCategory={deleteCategory}
+                  deleteContentType={deleteData}
+                  deleteComponent={deleteData}
+                  categoryName={initialData.name}
+                  isAttributeModal={modalType === 'attribute'}
+                  isComponentToDzModal={modalType === 'addComponentToDynamicZone'}
+                  isComponentAttribute={attributeType === 'component'}
+                  isComponentModal={modalType === 'component'}
+                  isContentTypeModal={modalType === 'contentType'}
+                  isCreatingComponent={actionType === 'create'}
+                  isCreatingDz={actionType === 'create'}
+                  isCreatingComponentAttribute={modifiedData.createComponent || false}
+                  isCreatingComponentInDz={modifiedData.createComponent || false}
+                  isCreatingComponentWhileAddingAField={isCreatingComponentWhileAddingAField}
+                  isCreatingContentType={actionType === 'create'}
+                  isEditingAttribute={actionType === 'edit'}
+                  isDzAttribute={attributeType === 'dynamiczone'}
+                  isEditingCategory={modalType === 'editCategory'}
+                  isInFirstComponentStep={step === '1'}
+                  onSubmitAddComponentAttribute={handleSubmit}
+                  onSubmitAddComponentToDz={handleSubmit}
+                  onSubmitCreateComponent={handleSubmit}
+                  onSubmitCreateContentType={handleSubmit}
+                  onSubmitCreateDz={handleSubmit}
+                  onSubmitEditAttribute={handleSubmit}
+                  onSubmitEditCategory={handleSubmit}
+                  onSubmitEditComponent={handleSubmit}
+                  onSubmitEditContentType={handleSubmit}
+                  onSubmitEditDz={handleSubmit}
+                />
               }
               startActions={
                 <Button variant="tertiary" onClick={handleClosed}>
