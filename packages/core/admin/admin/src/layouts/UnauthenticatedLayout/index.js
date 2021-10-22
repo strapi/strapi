@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { Box } from '@strapi/parts/Box';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import LocaleToggle from './LocaleToggle';
 
 const Wrapper = styled(Box)`
@@ -10,7 +10,7 @@ const Wrapper = styled(Box)`
   width: 552px;
 `;
 
-export const Column = styled(Row)`
+export const Column = styled(Flex)`
   flex-direction: column;
 `;
 
@@ -35,11 +35,11 @@ LayoutContent.propTypes = {
 const UnauthenticatedLayout = ({ children }) => {
   return (
     <div>
-      <Row as="header" justifyContent="flex-end">
+      <Flex as="header" justifyContent="flex-end">
         <Box paddingTop={6} paddingRight={8}>
           <LocaleToggle />
         </Box>
-      </Row>
+      </Flex>
       <Box paddingTop={11} paddingBottom={11}>
         {children}
       </Box>

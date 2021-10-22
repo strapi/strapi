@@ -4,7 +4,7 @@ import Show from '@strapi/icons/Show';
 import { Box } from '@strapi/parts/Box';
 import { Stack } from '@strapi/parts/Stack';
 import { Main } from '@strapi/parts/Main';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { Link } from '@strapi/parts/Link';
 import { Button } from '@strapi/parts/Button';
 import { TextInput } from '@strapi/parts/TextInput';
@@ -145,7 +145,7 @@ const Login = ({ onSubmit, schema, children }) => {
         </Formik>
         {children}
       </LayoutContent>
-      <Row justifyContent="center">
+      <Flex justifyContent="center">
         <Box paddingTop={4}>
           <Link to="/auth/forgot-password">
             {formatMessage({
@@ -154,7 +154,7 @@ const Login = ({ onSubmit, schema, children }) => {
             })}
           </Link>
         </Box>
-      </Row>
+      </Flex>
     </Main>
   );
 };

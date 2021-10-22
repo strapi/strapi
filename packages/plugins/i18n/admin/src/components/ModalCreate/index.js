@@ -7,7 +7,7 @@ import { Button } from '@strapi/parts/Button';
 import { ButtonText, H2 } from '@strapi/parts/Text';
 import { Divider } from '@strapi/parts/Divider';
 import { Box } from '@strapi/parts/Box';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import CheckIcon from '@strapi/icons/CheckIcon';
 import { useIntl } from 'react-intl';
 import { Formik } from 'formik';
@@ -66,7 +66,7 @@ const ModalCreate = ({ onClose }) => {
               id="tabs"
               variant="simple"
             >
-              <Row justifyContent="space-between">
+              <Flex justifyContent="space-between">
                 <H2>
                   {formatMessage({
                     id: getTrad('Settings.locales.modal.title'),
@@ -87,7 +87,7 @@ const ModalCreate = ({ onClose }) => {
                     })}
                   </Tab>
                 </Tabs>
-              </Row>
+              </Flex>
 
               <Divider />
 

@@ -7,7 +7,7 @@ import Reload from '@strapi/icons/Reload';
 import { Link } from '@strapi/parts/Link';
 import { Box } from '@strapi/parts/Box';
 import { Stack } from '@strapi/parts/Stack';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { H1, H2 } from '@strapi/parts/Text';
 import PropTypes from 'prop-types';
 import Overlay from './Overlay';
@@ -44,7 +44,7 @@ const Blocker = ({ displayedIcon, description, title, elapsed, isOpen }) => {
     return ReactDOM.createPortal(
       <Overlay>
         <Box>
-          <Row>
+          <Flex>
             {displayedIcon === 'reload' && (
               <Box paddingRight={3} style={{ alignSelf: 'baseline' }}>
                 <LoaderReload width="4rem" height="4rem" />
@@ -58,7 +58,7 @@ const Blocker = ({ displayedIcon, description, title, elapsed, isOpen }) => {
             <Stack size={2}>
               <H1>{formatMessage(title)}</H1>
               <H2 textColor="neutral600">{formatMessage(description)}</H2>
-              <Row>
+              <Flex>
                 {elapsed < 15 && (
                   <Link
                     href="https://strapi.io/documentation"
@@ -71,9 +71,9 @@ const Blocker = ({ displayedIcon, description, title, elapsed, isOpen }) => {
                     Read the documentation
                   </Link>
                 )}
-              </Row>
+              </Flex>
             </Stack>
-          </Row>
+          </Flex>
         </Box>
       </Overlay>,
       overlayContainer

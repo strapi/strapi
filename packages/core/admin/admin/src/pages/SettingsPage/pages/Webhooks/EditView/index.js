@@ -15,8 +15,9 @@ import {
 import { Main } from '@strapi/parts/Main';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { useHistory, useRouteMatch } from 'react-router-dom';
-import WebhookForm from './components/WebhookForm';
 import { useModels } from '../../../../../hooks';
+import { axiosInstance } from '../../../../../core/utils';
+import WebhookForm from './components/WebhookForm';
 import cleanData from './utils/formatData';
 
 const EditView = () => {
@@ -54,32 +55,6 @@ const EditView = () => {
     [toggleNotification]
   );
 
-  const triggerWebhookFn = useCallback(
-    async id => {
-      const abortController = new AbortController();
-      const { signal } = abortController;
-
-      const [err, { data }] = await to(
-        request(`/admin/webhooks/${id}/trigger`, {
-          method: 'POST',
-          signal,
-        })
-      );
-
-      if (err && err?.code !== 20) {
-        toggleNotification({
-          type: 'warning',
-          message: { id: 'notification.error' },
-        });
-      }
-
-      data.cancel = () => abortController.abort();
-
-      return data;
-    },
-    [toggleNotification]
-  );
-
   const { isLoading, data } = useQuery(['get-webhook', id], () => fetchWebhook(id), {
     enabled: !isCreating,
   });
@@ -87,9 +62,19 @@ const EditView = () => {
   const {
     isLoading: isTriggering,
     data: triggerResponse,
-    refetch: triggerWebhook,
     isIdle: isTriggerIdle,
-  } = useQuery(['trigger-webhook', id], () => triggerWebhookFn(id), { enabled: false });
+    mutate,
+  } = useMutation(() => axiosInstance.post(`/admin/webhooks/${id}/trigger`));
+
+  const triggerWebhook = () =>
+    mutate(null, {
+      onError: () => {
+        toggleNotification({
+          type: 'warning',
+          message: { id: 'notification.error' },
+        });
+      },
+    });
 
   const createWebhookMutation = useMutation(body =>
     request('/admin/webhooks', {
@@ -172,7 +157,7 @@ const EditView = () => {
           isCreating,
           isTriggering,
           isTriggerIdle,
-          triggerResponse,
+          triggerResponse: triggerResponse?.data.data,
           isDraftAndPublishEvents,
         }}
       />

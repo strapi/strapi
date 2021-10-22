@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { KeyboardNavigable } from '@strapi/parts/KeyboardNavigable';
 import { Box } from '@strapi/parts/Box';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { Text } from '@strapi/parts/Text';
 import { getTrad } from '../../../../utils';
 import { useContentTypeLayout } from '../../../../hooks';
@@ -70,14 +70,14 @@ const ComponentPicker = ({ components, isOpen, onClickAddComponent }) => {
         borderColor="neutral150"
         hasRadius
       >
-        <Row justifyContent="center">
+        <Flex justifyContent="center">
           <Text bold textColor="neutral600">
             {formatMessage({
               id: getTrad('components.DynamicZone.ComponentPicker-label'),
               defaultMessage: 'Pick one component',
             })}
           </Text>
-        </Row>
+        </Flex>
         <Box paddingTop={2}>
           <KeyboardNavigable attributeName="data-strapi-accordion-toggle">
             {dynamicComponentCategories.map(({ category, components }, index) => {

@@ -6,7 +6,7 @@ import AddIcon from '@strapi/icons/AddIconCircle';
 import { Box } from '@strapi/parts/Box';
 import { BaseButton } from '@strapi/parts/BaseButton';
 import { Stack } from '@strapi/parts/Stack';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { Text } from '@strapi/parts/Text';
 import { pxToRem } from '@strapi/helper-plugin';
 import { getTrad } from '../../utils';
@@ -40,19 +40,19 @@ const ComponentInitializer = ({ isReadOnly, onClick }) => {
       paddingBottom={9}
     >
       <Stack size={2}>
-        <Row justifyContent="center" style={{ cursor: isReadOnly ? 'not-allowed' : 'inherit' }}>
+        <Flex justifyContent="center" style={{ cursor: isReadOnly ? 'not-allowed' : 'inherit' }}>
           <IconButton disabled={isReadOnly} onClick={onClick}>
             <AddIcon />
           </IconButton>
-        </Row>
-        <Row justifyContent="center">
+        </Flex>
+        <Flex justifyContent="center">
           <Text textColor="primary600" small bold>
             {formatMessage({
               id: getTrad('components.empty-repeatable'),
               defaultMessage: 'No entry yet. Click on the button below to add one.',
             })}
           </Text>
-        </Row>
+        </Flex>
       </Stack>
     </Box>
   );

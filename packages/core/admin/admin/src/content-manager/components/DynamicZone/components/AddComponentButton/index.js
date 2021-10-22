@@ -11,7 +11,7 @@ import styled from 'styled-components';
 import AddIcon from '@strapi/icons/AddIconCircle';
 import { BaseButton } from '@strapi/parts/BaseButton';
 import { Box } from '@strapi/parts/Box';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { Text, ButtonText } from '@strapi/parts/Text';
 import { getTrad } from '../../../../utils';
 
@@ -117,20 +117,20 @@ const AddComponentButton = ({
 
   return (
     <>
-      <Row justifyContent="center">
+      <Flex justifyContent="center">
         <Box style={{ cursor: isDisabled ? 'not-allowed' : 'pointer' }}>
           <StyledButton type="button" onClick={onClick} disabled={isDisabled} hasError={hasError}>
-            <Row>
+            <Flex>
               <BoxFullHeight aria-hidden paddingRight={2}>
                 <StyledAddIcon $isOpen={isOpen} $hasError={hasError && !isOpen} />
               </BoxFullHeight>
               <ButtonText textColor={hasError && !isOpen ? 'danger600' : 'neutral500'} small>
                 {buttonLabel}
               </ButtonText>
-            </Row>
+            </Flex>
           </StyledButton>
         </Box>
-      </Row>
+      </Flex>
     </>
   );
 };

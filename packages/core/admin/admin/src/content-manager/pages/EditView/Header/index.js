@@ -10,7 +10,7 @@ import { Box } from '@strapi/parts/Box';
 import { Button } from '@strapi/parts/Button';
 import { Dialog, DialogBody, DialogFooter } from '@strapi/parts/Dialog';
 import { Link } from '@strapi/parts/Link';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { Text } from '@strapi/parts/Text';
 import { Stack } from '@strapi/parts/Stack';
 import AlertWarningIcon from '@strapi/icons/AlertWarningIcon';
@@ -103,7 +103,7 @@ const Header = ({
     /* eslint-enable indent */
 
     primaryAction = (
-      <Row>
+      <Flex>
         {shouldShowPublishButton && (
           <Button
             disabled={didChangeData}
@@ -123,7 +123,7 @@ const Header = ({
             })}
           </Button>
         </Box>
-      </Row>
+      </Flex>
     );
   }
 
@@ -181,7 +181,7 @@ const Header = ({
         >
           <DialogBody icon={<AlertWarningIcon />}>
             <Stack size={2}>
-              <Row justifyContent="center" style={{ textAlign: 'center' }}>
+              <Flex justifyContent="center" style={{ textAlign: 'center' }}>
                 <Text id="confirm-description">
                   {formatMessage(
                     {
@@ -194,15 +194,15 @@ const Header = ({
                     }
                   )}
                 </Text>
-              </Row>
-              <Row justifyContent="center" style={{ textAlign: 'center' }}>
+              </Flex>
+              <Flex justifyContent="center" style={{ textAlign: 'center' }}>
                 <Text id="confirm-description">
                   {formatMessage({
                     id: getTrad('popUpWarning.warning.unpublish-question'),
                     defaultMessage: 'Are you sure you want to unpublish it?',
                   })}
                 </Text>
-              </Row>
+              </Flex>
             </Stack>
           </DialogBody>
           <DialogFooter
@@ -236,7 +236,7 @@ const Header = ({
         >
           <DialogBody icon={<AlertWarningIcon />}>
             <Stack size={2}>
-              <Row justifyContent="center" style={{ textAlign: 'center' }}>
+              <Flex justifyContent="center" style={{ textAlign: 'center' }}>
                 <Text id="confirm-description">
                   {draftRelationsCountRef.current}
                   {formatMessage(
@@ -252,15 +252,15 @@ const Header = ({
                     }
                   )}
                 </Text>
-              </Row>
-              <Row justifyContent="center" style={{ textAlign: 'center' }}>
+              </Flex>
+              <Flex justifyContent="center" style={{ textAlign: 'center' }}>
                 <Text id="confirm-description">
                   {formatMessage({
                     id: getTrad('popUpWarning.warning.publish-question'),
                     defaultMessage: 'Do you still want to publish it?',
                   })}
                 </Text>
-              </Row>
+              </Flex>
             </Stack>
           </DialogBody>
           <DialogFooter
