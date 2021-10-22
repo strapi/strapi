@@ -3,7 +3,7 @@ import { useIntl } from 'react-intl';
 import { useQuery } from '@strapi/helper-plugin';
 import { Box } from '@strapi/parts/Box';
 import { Main } from '@strapi/parts/Main';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { Link } from '@strapi/parts/Link';
 import { H1, Text } from '@strapi/parts/Text';
 import UnauthenticatedLayout, {
@@ -45,13 +45,13 @@ const Oops = () => {
             </Box>
           </Column>
         </LayoutContent>
-        <Row justifyContent="center">
+        <Flex justifyContent="center">
           <Box paddingTop={4}>
             <Link to="/auth/login">
               {formatMessage({ id: 'Auth.link.signin', defaultMessage: 'Sign in' })}
             </Link>
           </Box>
-        </Row>
+        </Flex>
       </Main>
     </UnauthenticatedLayout>
   );

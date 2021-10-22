@@ -244,23 +244,6 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   fill: #271fe0;
 }
 
-.c46 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
-}
-
-.c47 {
-  -webkit-animation: gzYjWD 1s infinite linear;
-  animation: gzYjWD 1s infinite linear;
-}
-
 .c25 {
   display: -webkit-box;
   display: -webkit-flex;
@@ -295,6 +278,23 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
+}
+
+.c46 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c47 {
+  -webkit-animation: gzYjWD 1s infinite linear;
+  animation: gzYjWD 1s infinite linear;
 }
 
 .c12 {

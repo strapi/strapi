@@ -10,7 +10,7 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { pxToRem } from '@strapi/helper-plugin';
 import { Box } from '@strapi/parts/Box';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { Typography } from '@strapi/parts/Text';
 
 const StyledBox = styled(Box)`
@@ -22,18 +22,18 @@ const DzLabel = ({ label, labelAction, name, numberOfComponents }) => {
   const intlLabel = formatMessage({ id: label || name, defaultMessage: label || name });
 
   return (
-    <Row justifyContent="center">
+    <Flex justifyContent="center">
       <Box>
         <StyledBox padding={3} background="neutral0" shadow="filterShadow" color="neutral500">
-          <Row>
+          <Flex>
             <Typography fontSize={0} lineHeight={0} textColor="neutral600" fontWeight="bold">
               {intlLabel}&nbsp;({numberOfComponents})
             </Typography>
             {labelAction && <Box paddingLeft={1}>{labelAction}</Box>}
-          </Row>
+          </Flex>
         </StyledBox>
       </Box>
-    </Row>
+    </Flex>
   );
 };
 

@@ -16,7 +16,7 @@ import { ContentLayout, HeaderLayout } from '@strapi/parts/Layout';
 import { Grid, GridItem } from '@strapi/parts/Grid';
 import { Main } from '@strapi/parts/Main';
 import { Link } from '@strapi/parts/Link';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { Stack } from '@strapi/parts/Stack';
 import { Text } from '@strapi/parts/Text';
 import { TextInput } from '@strapi/parts/TextInput';
@@ -173,7 +173,7 @@ const CreatePage = () => {
                 <Stack size={6}>
                   <Box background="neutral0" padding={6} shadow="filterShadow" hasRadius>
                     <Stack size={4}>
-                      <Row justifyContent="space-between">
+                      <Flex justifyContent="space-between">
                         <Box>
                           <Box>
                             <Text bold>
@@ -202,7 +202,7 @@ const CreatePage = () => {
                             { number: 0 }
                           )}
                         </UsersRoleNumber>
-                      </Row>
+                      </Flex>
                       <Grid gap={4}>
                         <GridItem col={6}>
                           <TextInput

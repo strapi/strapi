@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 import { BaseCheckbox } from '@strapi/parts/BaseCheckbox';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import get from 'lodash/get';
 import IS_DISABLED from 'ee_else_ce/pages/SettingsPage/pages/Roles/EditPage/components/ContentTypeCollapse/CollapsePropertyMatrix/ActionRow/utils/constants';
 import { usePermissionsDataManager } from '../../../../../../../../../hooks';
@@ -17,12 +17,12 @@ import CarretIcon from '../CarretIcon';
 import SubActionRow from '../SubActionRow';
 import getRowLabelCheckboxeState from './utils/getRowLabelCheckboxeState';
 
-const Cell = styled(Row)`
+const Cell = styled(Flex)`
   width: ${cellWidth};
   position: relative;
 `;
 
-const Wrapper = styled(Row)`
+const Wrapper = styled(Flex)`
   height: ${rowHeight};
   flex: 1;
 
@@ -100,7 +100,7 @@ const ActionRow = ({
         isActive={isActive}
         background={isOdd ? 'neutral100' : 'neutral0'}
       >
-        <Row>
+        <Flex>
           <RowLabelWithCheckbox
             onChange={handleChangeLeftRowCheckbox}
             onClick={handleClick}
@@ -114,7 +114,7 @@ const ActionRow = ({
             {required && <RequiredSign />}
             <CarretIcon $isActive={isActive} />
           </RowLabelWithCheckbox>
-          <Row>
+          <Flex>
             {propertyActions.map(({ label, isActionRelatedToCurrentProperty, actionId }) => {
               if (!isActionRelatedToCurrentProperty) {
                 return <HiddenAction key={label} />;
@@ -189,8 +189,8 @@ const ActionRow = ({
                 </Cell>
               );
             })}
-          </Row>
-        </Row>
+          </Flex>
+        </Flex>
       </Wrapper>
       {isActive && (
         <SubActionRow

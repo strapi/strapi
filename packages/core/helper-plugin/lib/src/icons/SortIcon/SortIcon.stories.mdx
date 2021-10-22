@@ -1,7 +1,8 @@
 <!--- SortIcon.stories.mdx --->
 
 import { Meta, ArgsTable, Canvas, Story } from '@storybook/addon-docs';
-import { Row, Text } from '@strapi/parts';
+import { Text } from '@strapi/parts/Text';
+import { Flex } from '@strapi/parts/Flex';
 import { FilterDropdown } from '@strapi/icons';
 import SortIcon from './index';
 
@@ -15,13 +16,13 @@ This component is used in order to display the SortIcon.
 
 <Canvas>
   <Story name="base">
-    <Row>
+    <Flex>
       <SortIcon />
       <Text>Arrow down</Text>
-    </Row>
-    <Row>
+    </Flex>
+    <Flex>
       <SortIcon isUp />
       <Text>Arrow up</Text>
-    </Row>
+    </Flex>
   </Story>
 </Canvas>

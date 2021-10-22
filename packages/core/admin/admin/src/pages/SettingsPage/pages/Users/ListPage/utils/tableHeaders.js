@@ -1,5 +1,5 @@
 import React from 'react';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { Text } from '@strapi/parts/Text';
 import { Status } from '@strapi/helper-plugin';
 
@@ -41,10 +41,10 @@ const tableHeaders = [
     // eslint-disable-next-line react/prop-types
     cellFormatter: ({ isActive }) => {
       return (
-        <Row>
+        <Flex>
           <Status isActive={isActive} variant={isActive ? 'success' : 'danger'} />
           <Text textColor="neutral800">{isActive ? 'Active' : 'Inactive'}</Text>
-        </Row>
+        </Flex>
       );
     },
   },

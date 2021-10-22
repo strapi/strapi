@@ -5,7 +5,7 @@ import ClearField from '@strapi/icons/ClearField';
 import Close from '@strapi/icons/Close';
 import LoadingIcon from '@strapi/icons/LoadingIcon';
 import { Box } from '@strapi/parts/Box';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { Text } from '@strapi/parts/Text';
 import { Stack } from '@strapi/parts/Stack';
 import { Grid, GridItem } from '@strapi/parts/Grid';
@@ -75,20 +75,20 @@ const Message = ({ statusCode, message }) => {
 
   if (statusCode >= 200 && statusCode < 300) {
     return (
-      <Row justifyContent="flex-end">
+      <Flex justifyContent="flex-end">
         <Text>
           {formatMessage({
             id: 'Settings.webhooks.trigger.success.label',
             defaultMessage: 'success',
           })}
         </Text>
-      </Row>
+      </Flex>
     );
   }
 
   if (statusCode >= 300) {
     return (
-      <Row justifyContent="flex-end" title={message}>
+      <Flex justifyContent="flex-end" title={message}>
         <Text
           // ! REMOVE THIS WHEN DS IS UPDATED WITH ELLIPSIS PROP
           style={{
@@ -99,7 +99,7 @@ const Message = ({ statusCode, message }) => {
         >
           {message}
         </Text>
-      </Row>
+      </Flex>
     );
   }
 
@@ -118,7 +118,7 @@ const CancelButton = ({ onCancel }) => {
   const { formatMessage } = useIntl();
 
   return (
-    <Row justifyContent="flex-end">
+    <Flex justifyContent="flex-end">
       <button onClick={onCancel} type="button">
         <Stack horizontal size={2} style={{ alignItems: 'center' }}>
           <Text textColor="neutral400">
@@ -127,7 +127,7 @@ const CancelButton = ({ onCancel }) => {
           <Icon as={ClearField} color="neutral400" />
         </Stack>
       </button>
-    </Row>
+    </Flex>
   );
 };
 

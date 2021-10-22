@@ -7,7 +7,7 @@ import { FocusTrap } from '@strapi/parts/FocusTrap';
 import { IconButton } from '@strapi/parts/IconButton';
 import { LinkButton } from '@strapi/parts/LinkButton';
 import { Box } from '@strapi/parts/Box';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { Text, H1 } from '@strapi/parts/Text';
 import { Stack } from '@strapi/parts/Stack';
 import ExternalLink from '@strapi/icons/ExternalLink';
@@ -24,7 +24,7 @@ const UpgradeWrapper = styled.div`
   padding: 0 ${({ theme }) => theme.spaces[8]};
 `;
 
-const UpgradeContainer = styled(Row)`
+const UpgradeContainer = styled(Flex)`
   position: relative;
   max-width: ${830 / 16}rem;
   height: ${415 / 16}rem;

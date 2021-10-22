@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { BaseCheckbox } from '@strapi/parts/BaseCheckbox';
 import { Box } from '@strapi/parts/Box';
 import { IconButton } from '@strapi/parts/IconButton';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { Text } from '@strapi/parts/Text';
 import { Tbody, Td, Tr } from '@strapi/parts/Table';
 import EditIcon from '@strapi/icons/EditIcon';
@@ -72,7 +72,7 @@ const TableRows = ({
 
             {withBulkActions && (
               <Td>
-                <Row justifyContent="end">
+                <Flex justifyContent="end">
                   <IconButton
                     onClick={() => push(`${pathname}/${data.id}`)}
                     label={formatMessage(
@@ -96,7 +96,7 @@ const TableRows = ({
                       />
                     </Box>
                   )}
-                </Row>
+                </Flex>
               </Td>
             )}
           </Tr>

@@ -4,11 +4,11 @@ import styled from 'styled-components';
 import CloseAlertIcon from '@strapi/icons/CloseAlertIcon';
 import { Text } from '@strapi/parts/Text';
 import { Box } from '@strapi/parts/Box';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { ProgressBar } from '@strapi/parts/ProgressBar';
 import { useIntl } from 'react-intl';
 
-const BoxWrapper = styled(Row)`
+const BoxWrapper = styled(Flex)`
   width: 100%;
   height: 100%;
   flex-direction: column;

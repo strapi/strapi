@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { PropTypes } from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Box } from '@strapi/parts/Box';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { Stack } from '@strapi/parts/Stack';
 import { H3 } from '@strapi/parts/Text';
 import { SimpleMenu, MenuItem } from '@strapi/parts/SimpleMenu';
@@ -12,16 +12,16 @@ import AddIcon from '@strapi/icons/AddIcon';
 import DraggableCard from './DraggableCard';
 import { getTrad } from '../../../utils';
 
-const Flex = styled(Box)`
+const FlexWrapper = styled(Box)`
   flex: ${({ size }) => size};
 `;
 
-const ScrollableContainer = styled(Flex)`
+const ScrollableContainer = styled(FlexWrapper)`
   overflow-x: scroll;
   overflow-y: hidden;
 `;
 
-const SelectContainer = styled(Flex)`
+const SelectContainer = styled(FlexWrapper)`
   max-width: ${32 / 16}rem;
 `;
 
@@ -46,7 +46,7 @@ const SortDisplayedFields = ({
           })}
         </H3>
       </Box>
-      <Row
+      <Flex
         paddingTop={4}
         paddingLeft={4}
         paddingRight={4}
@@ -88,7 +88,7 @@ const SortDisplayedFields = ({
             ))}
           </SimpleMenu>
         </SelectContainer>
-      </Row>
+      </Flex>
     </>
   );
 };

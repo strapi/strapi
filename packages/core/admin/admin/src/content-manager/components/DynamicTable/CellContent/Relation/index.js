@@ -5,7 +5,7 @@ import { IconButton } from '@strapi/parts/IconButton';
 import { Text } from '@strapi/parts/Text';
 import { Box } from '@strapi/parts/Box';
 import { Badge } from '@strapi/parts/Badge';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { Popover } from '@strapi/parts/Popover';
 import { SortIcon, stopPropagation } from '@strapi/helper-plugin';
 import styled from 'styled-components';
@@ -43,7 +43,7 @@ const Relation = ({ fieldSchema, metadatas, queryInfos, name, rowId, value }) =>
   const handleTogglePopover = () => setVisible(prev => !prev);
 
   return (
-    <Row {...stopPropagation}>
+    <Flex {...stopPropagation}>
       <RelationCountBadge>{value.count}</RelationCountBadge>
       <Box paddingLeft={2}>
         <Text textColor="neutral800">
@@ -82,7 +82,7 @@ const Relation = ({ fieldSchema, metadatas, queryInfos, name, rowId, value }) =>
           )}
         </ActionWrapper>
       )}
-    </Row>
+    </Flex>
   );
 };
 

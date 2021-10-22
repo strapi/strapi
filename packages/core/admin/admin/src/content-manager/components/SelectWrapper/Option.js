@@ -4,7 +4,7 @@ import { components } from 'react-select';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import { get, has, isEmpty } from 'lodash';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { Text } from '@strapi/parts/Text';
 import { pxToRem } from '@strapi/helper-plugin';
 import { getTrad } from '../../utils';
@@ -38,10 +38,10 @@ const Option = props => {
 
       return (
         <Component {...props}>
-          <Row>
+          <Flex>
             <StyledBullet title={title} isDraft={isDraft} />
             <Text ellipsis>{props.label || '-'}</Text>
-          </Row>
+          </Flex>
         </Component>
       );
     }

@@ -6,7 +6,7 @@ import styled from 'styled-components';
 import { ModalLayout, ModalHeader, ModalFooter, ModalBody } from '@strapi/parts/ModalLayout';
 import { ButtonText } from '@strapi/parts/Text';
 import { Button } from '@strapi/parts/Button';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { Grid, GridItem } from '@strapi/parts/Grid';
 import { TextInput } from '@strapi/parts/TextInput';
 import { ToggleInput } from '@strapi/parts/ToggleInput';
@@ -44,7 +44,7 @@ const iconByTypes = {
   uid: <Uid />,
 };
 
-const HeaderContainer = styled(Row)`
+const HeaderContainer = styled(Flex)`
   svg {
     width: ${32 / 16}rem;
     height: ${24 / 16}rem;

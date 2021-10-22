@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 import { Box } from '@strapi/parts/Box';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { Text } from '@strapi/parts/Text';
 
 const LabelAction = styled(Box)`
@@ -18,13 +18,13 @@ const Label = ({ intlLabel, id, labelAction, name, numberOfEntries, showNumberOf
 
   return (
     <Box paddingBottom={1}>
-      <Row>
+      <Flex>
         <Text textColor="neutral800" htmlFor={id || name} small bold as="label">
           {label}
           {showNumberOfEntries && <>&nbsp;({numberOfEntries})</>}
         </Text>
         {labelAction && <LabelAction paddingLeft={1}>{labelAction}</LabelAction>}
-      </Row>
+      </Flex>
     </Box>
   );
 };
