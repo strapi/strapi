@@ -14,31 +14,33 @@ import { getTrad } from '../../utils';
 const FormModalEndActions = ({
   categoryName,
   deleteCategory,
-  deleteContentType,
   deleteComponent,
+  deleteContentType,
   isAttributeModal,
-  isEditingAttribute,
-  isContentTypeModal,
   isComponentAttribute,
   isComponentToDzModal,
+  isContentTypeModal,
   isCreatingComponent,
   isCreatingComponentAttribute,
   isCreatingComponentInDz,
   isCreatingComponentWhileAddingAField,
   isCreatingContentType,
+  isCreatingDz,
   isComponentModal,
   isDzAttribute,
+  isEditingAttribute,
   isEditingCategory,
   isInFirstComponentStep,
-  onSubmitEditAttribute,
+  onSubmitAddComponentAttribute,
+  onSubmitAddComponentToDz,
   onSubmitCreateContentType,
   onSubmitCreateComponent,
   onSubmitCreateDz,
-  onSubmitAddComponentAttribute,
-  onSubmitAddComponentToDz,
+  onSubmitEditAttribute,
   onSubmitEditCategory,
-  onSubmitEditContentType,
   onSubmitEditComponent,
+  onSubmitEditContentType,
+  onSubmitEditDz,
 }) => {
   const { formatMessage } = useIntl();
   // TO DO
@@ -46,6 +48,8 @@ const FormModalEndActions = ({
   // console.log(isComponentToDzModal)
 
   if (isComponentToDzModal) {
+    console.log('is component to dz modal');
+
     if (isCreatingComponentInDz) {
       return (
         <Button
@@ -84,7 +88,30 @@ const FormModalEndActions = ({
     );
   }
 
-  if (isAttributeModal && isDzAttribute) {
+  if (isAttributeModal && isDzAttribute && !isCreatingDz) {
+    console.log('is dz attribute modal, editing');
+
+    return (
+      <Button
+        variant="default"
+        type="submit"
+        onClick={e => {
+          e.preventDefault();
+
+          onSubmitEditDz(e, false);
+        }}
+      >
+        {formatMessage({
+          id: getTrad('form.button.finish'),
+          defaultMessage: 'Finish',
+        })}
+      </Button>
+    );
+  }
+
+  if (isAttributeModal && isDzAttribute && isCreatingDz) {
+    console.log('is dz attribute modal, creating');
+
     return (
       <>
         <Button
@@ -394,28 +421,30 @@ FormModalEndActions.propTypes = {
   deleteComponent: PropTypes.func.isRequired,
   deleteContentType: PropTypes.func.isRequired,
   isAttributeModal: PropTypes.bool.isRequired,
-  isContentTypeModal: PropTypes.bool.isRequired,
-  isCreatingContentType: PropTypes.bool.isRequired,
-  isCreatingComponent: PropTypes.bool.isRequired,
   isComponentAttribute: PropTypes.bool.isRequired,
+  isComponentModal: PropTypes.bool.isRequired,
   isComponentToDzModal: PropTypes.bool.isRequired,
+  isContentTypeModal: PropTypes.bool.isRequired,
+  isCreatingComponent: PropTypes.bool.isRequired,
   isCreatingComponentAttribute: PropTypes.bool.isRequired,
   isCreatingComponentInDz: PropTypes.bool.isRequired,
   isCreatingComponentWhileAddingAField: PropTypes.bool.isRequired,
-  isComponentModal: PropTypes.bool.isRequired,
+  isCreatingContentType: PropTypes.bool.isRequired,
+  isCreatingDz: PropTypes.bool.isRequired,
   isDzAttribute: PropTypes.bool.isRequired,
   isEditingAttribute: PropTypes.bool.isRequired,
   isEditingCategory: PropTypes.bool.isRequired,
   isInFirstComponentStep: PropTypes.bool.isRequired,
-  onSubmitEditAttribute: PropTypes.func.isRequired,
+  onSubmitAddComponentAttribute: PropTypes.func.isRequired,
+  onSubmitAddComponentToDz: PropTypes.func.isRequired,
   onSubmitCreateContentType: PropTypes.func.isRequired,
   onSubmitCreateComponent: PropTypes.func.isRequired,
   onSubmitCreateDz: PropTypes.func.isRequired,
-  onSubmitAddComponentAttribute: PropTypes.func.isRequired,
-  onSubmitAddComponentToDz: PropTypes.func.isRequired,
+  onSubmitEditAttribute: PropTypes.func.isRequired,
   onSubmitEditCategory: PropTypes.func.isRequired,
-  onSubmitEditContentType: PropTypes.func.isRequired,
   onSubmitEditComponent: PropTypes.func.isRequired,
+  onSubmitEditContentType: PropTypes.func.isRequired,
+  onSubmitEditDz: PropTypes.func.isRequired,
 };
 
 export default FormModalEndActions;

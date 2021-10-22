@@ -1045,28 +1045,30 @@ const FormModal = () => {
                   deleteComponent={deleteData}
                   categoryName={initialData.name}
                   isAttributeModal={modalType === 'attribute'}
-                  isContentTypeModal={modalType === 'contentType'}
                   isComponentToDzModal={modalType === 'addComponentToDynamicZone'}
                   isComponentAttribute={attributeType === 'component'}
                   isComponentModal={modalType === 'component'}
-                  isCreatingContentType={actionType === 'create'}
+                  isContentTypeModal={modalType === 'contentType'}
                   isCreatingComponent={actionType === 'create'}
+                  isCreatingDz={actionType === 'create'}
                   isCreatingComponentAttribute={modifiedData.createComponent || false}
                   isCreatingComponentInDz={modifiedData.createComponent || false}
                   isCreatingComponentWhileAddingAField={isCreatingComponentWhileAddingAField}
+                  isCreatingContentType={actionType === 'create'}
                   isEditingAttribute={actionType === 'edit'}
                   isDzAttribute={attributeType === 'dynamiczone'}
                   isEditingCategory={modalType === 'editCategory'}
                   isInFirstComponentStep={step === '1'}
                   onSubmitAddComponentAttribute={handleSubmit}
                   onSubmitAddComponentToDz={handleSubmit}
-                  onSubmitCreateContentType={handleSubmit}
                   onSubmitCreateComponent={handleSubmit}
+                  onSubmitCreateContentType={handleSubmit}
                   onSubmitCreateDz={handleSubmit}
                   onSubmitEditAttribute={handleSubmit}
                   onSubmitEditCategory={handleSubmit}
-                  onSubmitEditContentType={handleSubmit}
                   onSubmitEditComponent={handleSubmit}
+                  onSubmitEditContentType={handleSubmit}
+                  onSubmitEditDz={handleSubmit}
                 />
               }
               // FIXME
