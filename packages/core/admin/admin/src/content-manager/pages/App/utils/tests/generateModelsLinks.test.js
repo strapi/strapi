@@ -23,7 +23,7 @@ describe('ADMIN | LeftMenu | utils', () => {
           kind: 'collectionType',
           uid: 'api::address.address',
           info: {
-            label: 'Addresses',
+            displayName: 'Addresses',
           },
         },
         {
@@ -31,7 +31,7 @@ describe('ADMIN | LeftMenu | utils', () => {
           kind: 'collectionType',
           uid: 'api::test.test',
           info: {
-            label: 'Test',
+            displayName: 'Test',
           },
         },
         {
@@ -39,7 +39,7 @@ describe('ADMIN | LeftMenu | utils', () => {
           kind: 'singleType',
           uid: 'api::test1.test1',
           info: {
-            label: 'Test 1',
+            displayName: 'Test 1',
           },
         },
       ];
@@ -97,7 +97,7 @@ describe('ADMIN | LeftMenu | utils', () => {
           kind: 'collectionType',
           uid: 'api::address.address',
           info: {
-            label: 'Addresses',
+            displayName: 'Addresses',
           },
         },
         {
@@ -105,7 +105,7 @@ describe('ADMIN | LeftMenu | utils', () => {
           kind: 'collectionType',
           uid: 'api::test.test',
           info: {
-            label: 'Test',
+            displayName: 'Test',
           },
         },
         {
@@ -113,7 +113,7 @@ describe('ADMIN | LeftMenu | utils', () => {
           kind: 'singleType',
           uid: 'api::test1.test1',
           info: {
-            label: 'Test 1',
+            displayName: 'Test 1',
           },
         },
       ];

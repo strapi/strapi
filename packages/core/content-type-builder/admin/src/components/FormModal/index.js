@@ -30,7 +30,6 @@ import AllowedTypesSelect from '../AllowedTypesSelect';
 import AttributeOptions from '../AttributeOptions';
 import DraftAndPublishToggle from '../DraftAndPublishToggle';
 import FormModalHeader from '../FormModalHeader';
-
 import BooleanDefaultValueSelect from '../BooleanDefaultValueSelect';
 import BooleanRadioGroup from '../BooleanRadioGroup';
 import CheckboxWithNumberField from '../CheckboxWithNumberField';
@@ -38,12 +37,13 @@ import CustomRadioGroup from '../CustomRadioGroup';
 import ContentTypeRadioGroup from '../ContentTypeRadioGroup';
 import ComponentIconPicker from '../ComponentIconPicker';
 import Relation from '../Relation';
+import PluralName from '../PluralName';
 import SelectCategory from '../SelectCategory';
 import SelectComponent from '../SelectComponent';
 import SelectComponents from '../SelectComponents';
+import SingularName from '../SingularName';
 import TabForm from '../TabForm';
 import TextareaEnum from '../TextareaEnum';
-
 import findAttribute from '../../utils/findAttribute';
 import getTrad from '../../utils/getTrad';
 import {
@@ -187,13 +187,14 @@ const FormModal = () => {
 
       // Edit content type
       if (modalType === 'contentType' && actionType === 'edit') {
-        const { name, collectionName, draftAndPublish, kind, pluginOptions } = get(
+        const { displayName, draftAndPublish, kind, pluginOptions, pluralName, singularName } = get(
           allDataSchema,
           [...pathToSchema, 'schema'],
           {
-            name: null,
-            collectionName: null,
+            displayName: null,
             pluginOptions: {},
+            singularName: null,
+            pluralName: null,
           }
         );
 
@@ -202,11 +203,12 @@ const FormModal = () => {
           actionType,
           modalType,
           data: {
-            name,
-            collectionName,
+            displayName,
             draftAndPublish,
             kind,
             pluginOptions,
+            pluralName,
+            singularName,
           },
         });
       }
@@ -294,17 +296,14 @@ const FormModal = () => {
   const isCreatingComponent = modalType === 'component';
   const isCreatingAttribute = modalType === 'attribute';
   const isComponentAttribute = attributeType === 'component' && isCreatingAttribute;
-
   const isCreating = actionType === 'create';
   const isCreatingComponentFromAView =
     get(modifiedData, 'createComponent', false) || isCreatingComponentWhileAddingAField;
   const isInFirstComponentStep = step === '1';
   const isEditingCategory = modalType === 'editCategory';
-  // const isOpen = !isEmpty(search);
   const isPickingAttribute = modalType === 'chooseAttribute';
   const uid = createUid(modifiedData.name || '');
   const attributes = get(allDataSchema, [...pathToSchema, 'schema', 'attributes'], null);
-  const mainSchemaName = get(allDataSchema, [...pathToSchema, 'schema', 'name'], '');
 
   const checkFormValidity = async () => {
     let schema;
@@ -321,7 +320,8 @@ const FormModal = () => {
         // currentUID
         get(allDataSchema, [...pathToSchema, 'uid'], null),
         reservedNames,
-        ctbFormsAPI
+        ctbFormsAPI,
+        contentTypes
       );
 
       // Check form validity for component
@@ -872,6 +872,8 @@ const FormModal = () => {
       'select-components': SelectComponents,
       'select-default-boolean': BooleanDefaultValueSelect,
       'toggle-draft-publish': DraftAndPublishToggle,
+      'text-plural': PluralName,
+      'text-singular': SingularName,
       'textarea-enum': TextareaEnum,
       ...inputsFromPlugins,
     },
@@ -880,7 +882,7 @@ const FormModal = () => {
     formErrors,
     isAddingAComponentToAnotherComponent,
     isCreatingComponentWhileAddingAField,
-    mainBoxHeader: mainSchemaName,
+    mainBoxHeader: get(allDataSchema, [...pathToSchema, 'schema', 'displayName'], ''),
     modifiedData,
     naturePickerType: forTarget,
     isCreating,
@@ -918,6 +920,8 @@ const FormModal = () => {
     advancedFormInputNames.includes(key)
   );
 
+  const schemaKind = get(contentTypes, [targetUid, 'schema', 'kind']);
+
   return (
     <>
       <ModalLayout onClose={handleClosed} labelledBy="title">
@@ -936,7 +940,7 @@ const FormModal = () => {
           <AttributeOptions
             attributes={displayedAttributes}
             forTarget={forTarget}
-            kind={kind || 'collectionType'}
+            kind={schemaKind || 'collectionType'}
           />
         )}
         {!isPickingAttribute && (

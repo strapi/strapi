@@ -36,6 +36,7 @@ const FormModalHeader = ({
   let headers = [];
 
   const schema = modifiedData?.[forTarget]?.[targetUid] || modifiedData?.[forTarget] || null;
+  let displayName = forTarget === 'contentType' ? schema?.schema.displayName : schema?.schema.name;
 
   if (modalType === 'contentType') {
     icon = contentTypeKind;
@@ -66,7 +67,7 @@ const FormModalHeader = ({
           </Box>
           <Box paddingLeft={3}>
             <ButtonText textColor="neutral800" as="h2" id="title">
-              {formatMessage({ id: headerId }, { name: schema?.schema.name })}
+              {formatMessage({ id: headerId }, { name: displayName })}
             </ButtonText>
           </Box>
         </Flex>
@@ -76,7 +77,7 @@ const FormModalHeader = ({
 
   headers = [
     {
-      label: schema?.schema.name || null,
+      label: displayName,
       info: { category: schema?.category || null, name: schema?.schema.name },
     },
   ];

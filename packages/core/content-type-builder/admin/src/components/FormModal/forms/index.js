@@ -1,6 +1,5 @@
 import get from 'lodash/get';
 import toLower from 'lodash/toLower';
-import { nameToSlug } from '../utils/createUid';
 import getTrad from '../../../utils/getTrad';
 import { attributesForm, attributeTypes, commonBaseForm } from '../attributes';
 import { categoryForm, createCategorySchema } from '../category';
@@ -94,26 +93,56 @@ const forms = {
     },
   },
   contentType: {
-    schema(alreadyTakenNames, isEditing, ctUid, reservedNames, extensions) {
+    schema(alreadyTakenNames, isEditing, ctUid, reservedNames, extensions, contentTypes) {
+      const singularNames = Object.values(contentTypes).map(contentType => {
+        return contentType.schema.singularName;
+      });
+
+      const pluralNames = Object.values(contentTypes).map(contentType => {
+        return contentType.schema.pluralNames;
+      });
+
       const takenNames = isEditing
         ? alreadyTakenNames.filter(uid => uid !== ctUid)
         : alreadyTakenNames;
 
-      const contentTypeShape = createContentTypeSchema(takenNames, reservedNames.models);
+      const takenSingularNames = isEditing
+        ? singularNames.filter(singName => {
+            const currentSingularName = get(contentTypes, [ctUid, 'schema', 'singularName'], '');
 
+            return currentSingularName !== singName;
+          })
+        : singularNames;
+
+      const takenPluralNames = isEditing
+        ? pluralNames.filter(pluralName => {
+            const currentPluralName = get(contentTypes, [ctUid, 'schema', 'pluralName'], '');
+
+            return currentPluralName !== pluralName;
+          })
+        : pluralNames;
+
+      const contentTypeShape = createContentTypeSchema(
+        takenNames,
+        reservedNames.models,
+        takenSingularNames,
+        takenPluralNames
+      );
+
+      // FIXME
       return extensions.makeValidator(
         ['contentType'],
         contentTypeShape,
         takenNames,
-        reservedNames.models
+        reservedNames.models,
+        takenSingularNames,
+        takenPluralNames
       );
     },
     form: {
-      base({ data = {}, actionType }) {
+      base({ actionType }) {
         if (actionType === 'create') {
-          const value = data.name ? nameToSlug(data.name) : '';
-
-          return contentTypeForm.base.create(value);
+          return contentTypeForm.base.create();
         }
 
         return contentTypeForm.base.edit();

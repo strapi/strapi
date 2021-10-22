@@ -34,15 +34,7 @@ const TabForm = ({ form, formErrors, genericInputProps, modifiedData, onChange }
           {section.items.map((input, i) => {
             const key = `${sectionIndex}.${i}`;
 
-            const retrievedValue = get(modifiedData, input.name, '');
-
-            let value;
-
-            if (input.name === 'uid') {
-              value = input.value;
-            } else {
-              value = retrievedValue;
-            }
+            const value = get(modifiedData, input.name, '');
 
             // When extending the yup schema of an existing field (like in https://github.com/strapi/strapi/blob/293ff3b8f9559236609d123a2774e3be05ce8274/packages/strapi-plugin-i18n/admin/src/index.js#L52)
             // and triggering a yup validation error in the UI (missing a required field for example)

@@ -25,7 +25,7 @@ const RelationTargetPicker = ({ oneThatIsCreatingARelationWithAnother, target })
   const plugin = get(contentTypes, [target, 'plugin'], null);
 
   const targetFriendlyName = useMemo(() => {
-    const name = get(contentTypes, [target, 'schema', 'name'], 'error');
+    const name = get(contentTypes, [target, 'schema', 'displayName'], 'error');
 
     return name;
   }, [contentTypes, target]);

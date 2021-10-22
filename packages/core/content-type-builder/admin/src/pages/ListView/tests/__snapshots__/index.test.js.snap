@@ -1230,9 +1230,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
           <h1
             class="c10"
             id="title"
-          >
-            Address
-          </h1>
+          />
           <div
             class="c11"
           >

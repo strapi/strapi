@@ -76,7 +76,10 @@ const ListView = () => {
     });
   };
 
-  let label = get(modifiedData, [firstMainDataPath, 'schema', 'name'], '');
+  // TODO: fixme
+  let label = isInContentTypeView
+    ? get(modifiedData, [firstMainDataPath, 'schema', 'displayName'], '')
+    : get(modifiedData, [firstMainDataPath, 'schema', 'name'], '');
   const kind = get(modifiedData, [firstMainDataPath, 'schema', 'kind'], '');
 
   const isCreatingFirstContentType = match?.params.currentUID === 'create-content-type';

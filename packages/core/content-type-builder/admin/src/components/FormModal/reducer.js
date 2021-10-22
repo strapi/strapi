@@ -3,6 +3,7 @@ import pluralize from 'pluralize';
 import set from 'lodash/set';
 import snakeCase from 'lodash/snakeCase';
 import getRelationType from '../../utils/getRelationType';
+import nameToSlug from '../../utils/nameToSlug';
 import { createComponentUid } from './utils/createUid';
 import { shouldPluralizeName, shouldPluralizeTargetAttribute } from './utils/relations';
 import * as actions from './constants';
@@ -82,12 +83,12 @@ const reducer = (state = initialState, action) =>
 
         if (didChangeRelationTypeBecauseOfRestrictedRelation) {
           nameToSet = pluralize(
-            snakeCase(selectedContentTypeFriendlyName),
+            snakeCase(nameToSlug(selectedContentTypeFriendlyName)),
             shouldPluralizeName(changedRelationType)
           );
         } else {
           nameToSet = pluralize(
-            snakeCase(selectedContentTypeFriendlyName),
+            snakeCase(nameToSlug(selectedContentTypeFriendlyName)),
 
             shouldPluralizeName(modifiedData.relation)
           );
@@ -113,7 +114,7 @@ const reducer = (state = initialState, action) =>
         }
 
         const targetAttributeToSet = pluralize(
-          snakeCase(oneThatIsCreatingARelationWithAnother),
+          snakeCase(nameToSlug(oneThatIsCreatingARelationWithAnother)),
           shouldPluralizeTargetAttribute(modifiedData.relation)
         );
 
@@ -136,14 +137,15 @@ const reducer = (state = initialState, action) =>
           set(
             draftState,
             ['modifiedData', 'name'],
-            pluralize(snakeCase(currentName), shouldPluralizeName(value))
+            pluralize(snakeCase(nameToSlug(currentName)), shouldPluralizeName(value))
           );
 
           set(
             draftState,
             ['modifiedData', 'targetAttribute'],
             pluralize(
-              currentTargetAttribute || snakeCase(oneThatIsCreatingARelationWithAnother),
+              currentTargetAttribute ||
+                snakeCase(nameToSlug(oneThatIsCreatingARelationWithAnother)),
               shouldPluralizeTargetAttribute(value)
             )
           );

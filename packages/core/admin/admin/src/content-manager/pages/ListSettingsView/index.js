@@ -16,7 +16,6 @@ import { Main } from '@strapi/parts/Main';
 import { Button } from '@strapi/parts/Button';
 import CheckIcon from '@strapi/icons/CheckIcon';
 import BackIcon from '@strapi/icons/BackIcon';
-// import LayoutDndProvider from '../../components/LayoutDndProvider';
 import { checkIfAttributeIsDisplayable, getTrad } from '../../utils';
 import ModelsContext from '../../contexts/ModelsContext';
 import { usePluginsQueryParams } from '../../hooks';
@@ -214,7 +213,7 @@ const ListSettingsView = ({ layout, slug }) => {
                 id: getTrad('components.SettingsViewWrapper.pluginHeader.title'),
                 defaultMessage: 'Configure the view - {name}',
               },
-              { name: upperFirst(modifiedData.info.label) }
+              { name: upperFirst(modifiedData.info.displayName) }
             )}
           />
           <ContentLayout>
