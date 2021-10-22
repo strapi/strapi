@@ -1,42 +1,56 @@
 /* eslint-disable jsx-a11y/media-has-caption */
-import React, { useRef, useState } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
+import { Box } from '@strapi/parts/Box';
 
-const VideoPreviewWrapper = styled.div`
-  canvas {
+const VideoPreviewWrapper = styled(Box)`
+  canvas,
+  video {
     display: block;
     max-width: 100%;
     max-height: ${({ size }) => (size === 'M' ? 164 / 16 : 88 / 16)}rem;
   }
 `;
 
+// According to MDN
+// https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/readyState#value
+const HAVE_FUTURE_DATA = 3;
+
 export const VideoPreview = ({ url, mime, onLoadDuration, size }) => {
-  const [loaded, setLoaded] = useState(false);
-  const videoRef = useRef(null);
-  const canvasRef = useRef(null);
+  const handleTimeUpdate = e => {
+    if (e.target.currentTime > 0) {
+      const video = e.target;
+      const canvas = document.createElement('canvas');
 
-  const handleThumbnailVisibility = () => {
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
+      canvas.height = video.videoHeight;
+      canvas.width = video.videoWidth;
+      canvas.getContext('2d').drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
 
-    canvas.height = video.videoHeight;
-    canvas.width = video.videoWidth;
-    canvas.getContext('2d').drawImage(video, 0, 0);
+      video.replaceWith(canvas);
+      onLoadDuration(video.duration);
+    }
+  };
 
-    onLoadDuration(video.duration);
-    setLoaded(true);
+  const handleThumbnailVisibility = e => {
+    const video = e.target;
+
+    if (video.readyState < HAVE_FUTURE_DATA) return;
+
+    video.play();
   };
 
   return (
     <VideoPreviewWrapper size={size}>
-      {!loaded && (
-        <video ref={videoRef} onLoadedData={handleThumbnailVisibility} src={url}>
-          <source type={mime} />
-        </video>
-      )}
-
-      <canvas ref={canvasRef} />
+      <video
+        muted
+        onLoadedData={handleThumbnailVisibility}
+        src={`${url}#t=1`}
+        crossOrigin="anonymous"
+        onTimeUpdate={handleTimeUpdate}
+      >
+        <source type={mime} />
+      </video>
     </VideoPreviewWrapper>
   );
 };

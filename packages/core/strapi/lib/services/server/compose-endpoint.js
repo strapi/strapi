@@ -1,6 +1,6 @@
 'use strict';
 
-const { has, toLower, castArray, trim, prop } = require('lodash/fp');
+const { has, toLower, castArray, trim, prop, isNil } = require('lodash/fp');
 
 const compose = require('koa-compose');
 const { resolveRouteMiddlewares } = require('./middleware');
@@ -49,6 +49,14 @@ const createAuthenticateMiddleware = strapi => async (ctx, next) => {
   return strapi.container.get('auth').authenticate(ctx, next);
 };
 
+const returnBodyMiddleware = async (ctx, next) => {
+  const values = await next();
+
+  if (isNil(ctx.body) && !isNil(values)) {
+    ctx.body = values;
+  }
+};
+
 module.exports = strapi => {
   const authenticate = createAuthenticateMiddleware(strapi);
   const authorize = createAuthorizeMiddleware(strapi);
@@ -69,6 +77,7 @@ module.exports = strapi => {
         authorize,
         ...policies,
         ...middlewares,
+        returnBodyMiddleware,
         ...castArray(action),
       ]);
 

@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { Box } from '@strapi/parts/Box';
@@ -31,11 +31,16 @@ const MediaBox = styled(Box)`
 
 const OpaqueBox = styled(Box)`
   opacity: 0;
+  cursor: pointer;
 `;
 
 export const FromComputerForm = ({ onClose, onAddAssets }) => {
   const { formatMessage } = useIntl();
+  const [dragOver, setDragOver] = useState(false);
   const inputRef = useRef(null);
+
+  const handleDragEnter = () => setDragOver(true);
+  const handleDragLeave = () => setDragOver(false);
 
   const handleClick = e => {
     e.preventDefault();
@@ -72,9 +77,11 @@ export const FromComputerForm = ({ onClose, onAddAssets }) => {
             paddingBottom={11}
             hasRadius
             justifyContent="center"
-            borderColor="neutral300"
-            background="neutral100"
+            borderColor={dragOver ? 'primary500' : 'neutral300'}
+            background={dragOver ? 'primary100' : 'neutral100'}
             position="relative"
+            onDragEnter={handleDragEnter}
+            onDragLeave={handleDragLeave}
           >
             <Flex justifyContent="center">
               <Wrapper>

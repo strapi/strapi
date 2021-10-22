@@ -347,7 +347,7 @@ describe('PendingAssetStep', () => {
         background: #4945ff;
       }
 
-      .c15 .sc-fFYUIl {
+      .c15 .sc-hlWxgi {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -412,7 +412,7 @@ describe('PendingAssetStep', () => {
         background: #ffffff;
       }
 
-      .c49 .sc-fFYUIl {
+      .c49 .sc-hlWxgi {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -714,7 +714,8 @@ describe('PendingAssetStep', () => {
         text-transform: uppercase;
       }
 
-      .c41 canvas {
+      .c41 canvas,
+      .c41 video {
         display: block;
         max-width: 100%;
         max-height: 5.5rem;
@@ -981,13 +982,13 @@ describe('PendingAssetStep', () => {
                                 class="c41"
                               >
                                 <video
-                                  src="http://localhost:5000/mov_bbb.mp4"
+                                  crossorigin="anonymous"
+                                  src="http://localhost:5000/mov_bbb.mp4#t=1"
                                 >
                                   <source
                                     type="video/mp4"
                                   />
                                 </video>
-                                <canvas />
                               </div>
                             </div>
                           </div>
