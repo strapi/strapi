@@ -10,11 +10,11 @@ import uploadPlugin from '../../../upload/strapi-admin';
 
 const plugins = {
   '@strapi/plugin-content-type-builder': ctbPlugin,
-  '@strapi/plugin-i18n': i18nPlugin,
-  '@strapi/plugin-email': emailPlugin,
-  '@strapi/plugin-upload': uploadPlugin,
-  '@strapi/plugin-users-permissions': usersPermissionsPlugin,
-  '@strapi/plugin-documentation': documentationPlugin,
+  // '@strapi/plugin-i18n': i18nPlugin,
+  // '@strapi/plugin-email': emailPlugin,
+  // '@strapi/plugin-upload': uploadPlugin,
+  // '@strapi/plugin-users-permissions': usersPermissionsPlugin,
+  // '@strapi/plugin-documentation': documentationPlugin,
   // '@strapi/plugin-graphql': graphqlPlugin,
   // '@strapi/plugin-sentry': sentryPlugin,
 };
