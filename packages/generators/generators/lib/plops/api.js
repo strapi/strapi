@@ -25,7 +25,7 @@ module.exports = plop => {
         type: 'list',
         name: 'plugin',
         message: 'Plugin name',
-        choices: async () => {
+        async choices() {
           const pluginsPath = join(plop.getDestBasePath(), 'plugins');
           const exists = await fs.pathExists(pluginsPath);
 
@@ -60,7 +60,7 @@ module.exports = plop => {
         message: 'Use draft and publish?',
       },
     ],
-    actions: answers => {
+    actions(answers) {
       let filePath;
       if (answers.isPluginApi && answers.plugin) {
         filePath = `plugins/{{plugin}}`;
@@ -77,7 +77,7 @@ module.exports = plop => {
         {
           type: 'add',
           path: `${filePath}/content-types/{{id}}/schema.json`,
-          templateFile: 'templates/model.schema.json.hbs',
+          templateFile: 'templates/content-type.schema.json.hbs',
         },
         {
           type: 'add',

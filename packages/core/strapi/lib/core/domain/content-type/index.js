@@ -68,12 +68,10 @@ const createContentType = (uid, definition) => {
   Object.assign(schema.attributes, {
     [CREATED_AT_ATTRIBUTE]: {
       type: 'datetime',
-      default: () => new Date(),
     },
     // TODO: handle on edit set to new date
     [UPDATED_AT_ATTRIBUTE]: {
       type: 'datetime',
-      default: () => new Date(),
     },
   });
 
@@ -110,11 +108,9 @@ const createContentType = (uid, definition) => {
     private: isPrivate,
   };
 
-  return {
-    ...schema,
-    actions: actions,
-    lifecycles: lifecycles,
-  };
+  Object.assign(schema, { actions, lifecycles });
+
+  return schema;
 };
 
 const getGlobalId = (model, modelName, prefix) => {

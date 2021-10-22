@@ -51,10 +51,9 @@ module.exports = {
    * @return {Object}
    */
   async create(ctx) {
-    const {
-      request: { body },
-      state: { userAbility, admin },
-    } = ctx;
+    const { body } = ctx.request;
+    const { user: admin, userAbility } = ctx.state;
+
     const { email, username, password } = body;
 
     const pm = strapi.admin.services.permission.createPermissionsManager({
@@ -70,12 +69,7 @@ module.exports = {
     const sanitizedBody = pm.pickPermittedFieldsOf(body, { subject: userModel });
 
     const advanced = await strapi
-      .store({
-        environment: '',
-        type: 'plugin',
-        name: 'users-permissions',
-        key: 'advanced',
-      })
+      .store({ type: 'plugin', name: 'users-permissions', key: 'advanced' })
       .get();
 
     if (!email) return ctx.badRequest('missing.email');
@@ -122,7 +116,7 @@ module.exports = {
       [UPDATED_BY_ATTRIBUTE]: admin.id,
     };
 
-    user.email = user.email.toLowerCase();
+    user.email = _.toLower(user.email);
 
     if (!user.role) {
       const defaultRole = await strapi
@@ -146,20 +140,14 @@ module.exports = {
    */
 
   async update(ctx) {
+    const { id } = ctx.params;
+    const { body } = ctx.request;
+    const { user: admin, userAbility } = ctx.state;
+
     const advancedConfigs = await strapi
-      .store({
-        environment: '',
-        type: 'plugin',
-        name: 'users-permissions',
-        key: 'advanced',
-      })
+      .store({ type: 'plugin', name: 'users-permissions', key: 'advanced' })
       .get();
 
-    const {
-      params: { id },
-      request: { body },
-      state: { userAbility, admin },
-    } = ctx;
     const { email, username, password } = body;
 
     const { pm, entity: user } = await findEntityAndCheckPermissions(
@@ -201,7 +189,7 @@ module.exports = {
     if (_.has(body, 'email') && advancedConfigs.unique_email) {
       const userWithSameEmail = await strapi
         .query('plugin::users-permissions.user')
-        .findOne({ where: { email: email.toLowerCase() } });
+        .findOne({ where: { email: _.toLower(email) } });
 
       if (userWithSameEmail && userWithSameEmail.id != id) {
         return ctx.badRequest(
@@ -213,15 +201,11 @@ module.exports = {
           })
         );
       }
-      body.email = body.email.toLowerCase();
+      body.email = _.toLower(body.email);
     }
 
     const sanitizedData = pm.pickPermittedFieldsOf(body, { subject: pm.toSubject(user) });
-    const updateData = _.omit({ ...sanitizedData, updated_by: admin.id }, 'created_by');
-
-    if (_.has(body, 'password') && password === user.password) {
-      delete updateData.password;
-    }
+    const updateData = _.omit({ ...sanitizedData, updatedBy: admin.id }, 'createdBy');
 
     const data = await getService('user').edit({ id }, updateData);
 

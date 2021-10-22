@@ -193,13 +193,13 @@ describe('Role CRUD End to End', () => {
                 "action": "plugin::documentation.settings.regenerate",
                 "displayName": "Regenerate",
                 "plugin": "documentation",
-                "subCategory": "settings",
+                "subCategory": "general",
               },
               Object {
                 "action": "plugin::documentation.settings.update",
                 "displayName": "Update and delete",
                 "plugin": "documentation",
-                "subCategory": "settings",
+                "subCategory": "general",
               },
               Object {
                 "action": "plugin::upload.assets.copy-link",
@@ -294,6 +294,30 @@ describe('Role CRUD End to End', () => {
             ],
             "settings": Array [
               Object {
+                "action": "admin::api-tokens.create",
+                "category": "api tokens",
+                "displayName": "Create (generate)",
+                "subCategory": "general",
+              },
+              Object {
+                "action": "admin::api-tokens.delete",
+                "category": "api tokens",
+                "displayName": "Delete (revoke)",
+                "subCategory": "general",
+              },
+              Object {
+                "action": "admin::api-tokens.read",
+                "category": "api tokens",
+                "displayName": "Read",
+                "subCategory": "general",
+              },
+              Object {
+                "action": "admin::api-tokens.update",
+                "category": "api tokens",
+                "displayName": "Update",
+                "subCategory": "general",
+              },
+              Object {
                 "action": "admin::marketplace.plugins.install",
                 "category": "plugins and marketplace",
                 "displayName": "Install (only for dev env)",
@@ -381,6 +405,12 @@ describe('Role CRUD End to End', () => {
                 "action": "admin::webhooks.update",
                 "category": "webhooks",
                 "displayName": "Update",
+                "subCategory": "general",
+              },
+              Object {
+                "action": "plugin::documentation.settings.read",
+                "category": "documentation",
+                "displayName": "Access the documentation settings page",
                 "subCategory": "general",
               },
               Object {
@@ -642,13 +672,13 @@ describe('Role CRUD End to End', () => {
                   "action": "plugin::documentation.settings.regenerate",
                   "displayName": "Regenerate",
                   "plugin": "documentation",
-                  "subCategory": "settings",
+                  "subCategory": "general",
                 },
                 Object {
                   "action": "plugin::documentation.settings.update",
                   "displayName": "Update and delete",
                   "plugin": "documentation",
-                  "subCategory": "settings",
+                  "subCategory": "general",
                 },
                 Object {
                   "action": "plugin::upload.assets.copy-link",
@@ -742,6 +772,30 @@ describe('Role CRUD End to End', () => {
                 },
               ],
               "settings": Array [
+                Object {
+                  "action": "admin::api-tokens.create",
+                  "category": "api tokens",
+                  "displayName": "Create (generate)",
+                  "subCategory": "general",
+                },
+                Object {
+                  "action": "admin::api-tokens.delete",
+                  "category": "api tokens",
+                  "displayName": "Delete (revoke)",
+                  "subCategory": "general",
+                },
+                Object {
+                  "action": "admin::api-tokens.read",
+                  "category": "api tokens",
+                  "displayName": "Read",
+                  "subCategory": "general",
+                },
+                Object {
+                  "action": "admin::api-tokens.update",
+                  "category": "api tokens",
+                  "displayName": "Update",
+                  "subCategory": "general",
+                },
                 Object {
                   "action": "admin::marketplace.plugins.install",
                   "category": "plugins and marketplace",
@@ -842,6 +896,12 @@ describe('Role CRUD End to End', () => {
                   "action": "admin::webhooks.update",
                   "category": "webhooks",
                   "displayName": "Update",
+                  "subCategory": "general",
+                },
+                Object {
+                  "action": "plugin::documentation.settings.read",
+                  "category": "documentation",
+                  "displayName": "Access the documentation settings page",
                   "subCategory": "general",
                 },
                 Object {
@@ -1126,6 +1186,30 @@ describe('Role CRUD End to End', () => {
                 },
               ],
               "settings": Array [
+                Object {
+                  "action": "admin::api-tokens.create",
+                  "category": "api tokens",
+                  "displayName": "Create (generate)",
+                  "subCategory": "general",
+                },
+                Object {
+                  "action": "admin::api-tokens.delete",
+                  "category": "api tokens",
+                  "displayName": "Delete (revoke)",
+                  "subCategory": "general",
+                },
+                Object {
+                  "action": "admin::api-tokens.read",
+                  "category": "api tokens",
+                  "displayName": "Read",
+                  "subCategory": "general",
+                },
+                Object {
+                  "action": "admin::api-tokens.update",
+                  "category": "api tokens",
+                  "displayName": "Update",
+                  "subCategory": "general",
+                },
                 Object {
                   "action": "admin::marketplace.plugins.install",
                   "category": "plugins and marketplace",

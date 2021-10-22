@@ -27,8 +27,9 @@ module.exports = async function({ build, watchAdmin, polling, browser }) {
   // Don't run the build process if the admin is in watch mode
   if (build && !watchAdmin && serveAdminPanel && !buildExists) {
     try {
-      execa.shellSync('npm run -s build -- --no-optimization', {
+      execa.sync('npm run -s build -- --no-optimization', {
         stdio: 'inherit',
+        shell: true,
       });
     } catch (err) {
       process.exit(1);
@@ -51,14 +52,12 @@ module.exports = async function({ build, watchAdmin, polling, browser }) {
         switch (message) {
           case 'reload':
             logger.info('The server is restarting\n');
-            worker.send('isKilled');
+            worker.send('kill');
             break;
-          case 'kill':
-            worker.kill();
+          case 'killed':
             cluster.fork();
             break;
           case 'stop':
-            worker.kill();
             process.exit(1);
           default:
             return;
@@ -84,10 +83,10 @@ module.exports = async function({ build, watchAdmin, polling, browser }) {
 
       process.on('message', async message => {
         switch (message) {
-          case 'isKilled':
-            await strapiInstance.server.destroy();
-            process.send('kill');
-            break;
+          case 'kill':
+            await strapiInstance.destroy();
+            process.send('killed');
+            process.exit();
           default:
           // Do nothing.
         }
@@ -124,8 +123,8 @@ function watchFileChanges({ dir, strapiInstance, watchIgnoreFiles, polling }) {
       /tmp/,
       '**/admin',
       '**/admin/**',
-      'extensions/**/admin',
-      'extensions/**/admin/**',
+      'src/extensions/**/admin',
+      'src/extensions/**/admin/**',
       '**/documentation',
       '**/documentation/**',
       '**/node_modules',

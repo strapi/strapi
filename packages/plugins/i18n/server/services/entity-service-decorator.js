@@ -17,8 +17,8 @@ const paramsContain = (key, params) => {
 /**
  * Adds default locale or replaces locale by locale in query params
  * @param {object} params - query params
+ * @param {object} ctx
  */
-// TODO: remove _locale
 const wrapParams = async (params = {}, ctx = {}) => {
   const { action } = ctx;
 
@@ -31,20 +31,6 @@ const wrapParams = async (params = {}, ctx = {}) => {
       ...omit(LOCALE_QUERY_FILTER, params),
       filters: {
         $and: [{ locale: params[LOCALE_QUERY_FILTER] }].concat(params.filters || []),
-      },
-    };
-  }
-
-  // TODO: remove when the _locale is renamed to locale
-  if (has('_locale', params)) {
-    if (params['_locale'] === 'all') {
-      return omit('_locale', params);
-    }
-
-    return {
-      ...omit('_locale', params),
-      filters: {
-        $and: [{ locale: params['_locale'] }].concat(params.filters || []),
       },
     };
   }
@@ -91,30 +77,24 @@ const decorator = service => ({
    * @param {object} ctx - Query context
    * @param {object} ctx.model - Model that is being used
    */
-  async wrapOptions(opts = {}, ctx = {}) {
-    const wrappedOptions = await service.wrapOptions.call(this, opts, ctx);
+  async wrapParams(params = {}, ctx = {}) {
+    const wrappedParams = await service.wrapParams.call(this, params, ctx);
 
     const model = strapi.getModel(ctx.uid);
 
     const { isLocalizedContentType } = getService('content-types');
 
     if (!isLocalizedContentType(model)) {
-      return wrappedOptions;
+      return wrappedParams;
     }
 
-    const { params } = opts;
-
-    return {
-      ...wrappedOptions,
-      params: await wrapParams(params, ctx),
-    };
+    return wrapParams(params, ctx);
   },
 
   /**
-   * Creates an entry & make links between it and its related localizaionts
+   * Creates an entry & make links between it and its related localizations
+   * @param {string} uid - Model uid
    * @param {object} opts - Query options object (params, data, files, populate)
-   * @param {object} ctx - Query context
-   * @param {object} ctx.model - Model that is being used
    */
   async create(uid, opts) {
     const model = strapi.getModel(uid);
@@ -138,9 +118,9 @@ const decorator = service => ({
 
   /**
    * Updates an entry & update related localizations fields
+   * @param {string} uid
+   * @param {string} entityId
    * @param {object} opts - Query options object (params, data, files, populate)
-   * @param {object} ctx - Query context
-   * @param {object} ctx.model - Model that is being used
    */
   async update(uid, entityId, opts) {
     const model = strapi.getModel(uid);

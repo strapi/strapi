@@ -8,5 +8,5 @@ module.exports = {
       defaultFrom: 'Strapi <no-reply@strapi.io>',
     },
   },
-  validator: () => {},
+  validator() {},
 };

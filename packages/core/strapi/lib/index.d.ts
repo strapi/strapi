@@ -1,39 +1,13 @@
 import { Database } from '@strapi/database';
-import { Strapi } from './Strapi';
+import { EntityService } from './services/entity-service';
+import { Strapi as StrapiClass } from './Strapi';
 
-type ID = number | string;
-
-interface Options<T> {
-  params: Params<T>;
-}
-
-interface Params<T> {
-  fields: (keyof T)[];
-}
-
-interface EntityService {
-  uploadFiles<T extends keyof AllTypes>(uid: T);
-  wrapOptions<T extends keyof AllTypes>(uid: T);
-
-  find<T extends keyof AllTypes>(uid: T): Promise<AllTypes[T][]>;
-  findPage<T extends keyof AllTypes>(uid: T): Promise<any>;
-  findWithRelationCounts<T extends keyof AllTypes>(uid: T): Promise<any>;
-  findOne<T extends keyof AllTypes>(
-    uid: T,
-    id: ID,
-    opts: Options<AllTypes[T]>
-  ): Promise<AllTypes[T]>;
-
-  count<T extends keyof AllTypes>(uid: T): Promise<any>;
-  create<T extends keyof AllTypes>(uid: T): Promise<any>;
-  update<T extends keyof AllTypes>(uid: T): Promise<any>;
-  delete<T extends keyof AllTypes>(uid: T): Promise<any>;
-}
-
-interface StrapiInterface extends Strapi {
+interface StrapiInterface extends StrapiClass {
   query: Database['query'];
   entityService: EntityService;
 }
+
+export type Strapi = StrapiInterface;
 
 declare global {
   interface AllTypes {}
@@ -44,5 +18,9 @@ declare global {
     strapi: StrapiInterface;
   }
 
+  export type Strapi = StrapiInterface;
+
   const strapi: StrapiInterface;
 }
+
+export default function(opts): Strapi;

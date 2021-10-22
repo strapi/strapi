@@ -16,20 +16,18 @@ const DEFAULT_CONTENT_TYPE = {
 };
 
 module.exports = async strapi => {
-  const apisDir = join(strapi.dir, 'api');
-
-  if (!existsSync(apisDir)) {
-    throw new Error(`Missing api folder. Please create one in your app root directory`);
+  if (!existsSync(strapi.dirs.api)) {
+    throw new Error('Missing api folder. Please create one at `./src/api`');
   }
 
-  const apisFDs = await fse.readdir(apisDir, { withFileTypes: true });
+  const apisFDs = await fse.readdir(strapi.dirs.api, { withFileTypes: true });
   const apis = {};
 
   // only load folders
   for (const apiFD of apisFDs) {
     if (apiFD.isDirectory()) {
       const apiName = normalizeName(apiFD.name);
-      const api = await loadAPI(join(apisDir, apiFD.name));
+      const api = await loadAPI(join(strapi.dirs.api, apiFD.name));
 
       apis[apiName] = api;
     }

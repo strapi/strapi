@@ -14,7 +14,7 @@ module.exports = plop => {
       },
       ...getDestinationPrompts('policy', plop.getDestBasePath()),
     ],
-    actions: answers => {
+    actions(answers) {
       let filePath;
       if (answers.destination === 'api') {
         filePath = `api/{{api}}`;
@@ -27,7 +27,7 @@ module.exports = plop => {
       return [
         {
           type: 'add',
-          path: `${filePath}/config/policies/{{id}}.js`,
+          path: `${filePath}/policies/{{id}}.js`,
           templateFile: 'templates/policy.js.hbs',
         },
       ];

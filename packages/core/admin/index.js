@@ -12,7 +12,7 @@ const getWebpackConfig = require('./webpack.config');
 const getPkgPath = name => path.dirname(require.resolve(`${name}/package.json`));
 
 function getCustomWebpackConfig(dir, config) {
-  const adminConfigPath = path.join(dir, 'admin', 'webpack.config.js');
+  const adminConfigPath = path.join(dir, 'src', 'admin', 'webpack.config.js');
 
   let webpackConfig = getWebpackConfig(config);
 
@@ -92,9 +92,22 @@ async function build({ plugins, dir, env, options, optimize }) {
 async function createPluginsJs(plugins, dest) {
   const pluginsArray = plugins.map(({ pathToPlugin, name }) => {
     const shortName = _.camelCase(name);
+
+    /**
+     * path.join, on windows, it uses backslashes to resolve path.
+     * The problem is that Webpack does not windows paths
+     * With this tool, we need to rely on "/" and not "\".
+     * This is the reason why '..\\..\\..\\node_modules\\@strapi\\plugin-content-type-builder/strapi-admin.js' was not working.
+     * The regexp at line 105 aims to replace the windows backslashes by standard slash so that webpack can deal with them.
+     * Backslash looks to work only for absolute paths with webpack => https://webpack.js.org/concepts/module-resolution/#absolute-paths
+     */
+    const realPath = path
+      .join(path.relative(path.resolve(dest, 'admin', 'src'), pathToPlugin), 'strapi-admin.js')
+      .replace(/\\/g, '/');
+
     return {
       name,
-      pathToPlugin: path.relative(path.resolve(dest, 'admin', 'src'), pathToPlugin),
+      pathToPlugin: realPath,
       shortName,
     };
   });
@@ -102,7 +115,7 @@ async function createPluginsJs(plugins, dest) {
   const content = `
 ${pluginsArray
   .map(({ pathToPlugin, shortName }) => {
-    const req = `'${pathToPlugin}/admin/src'`;
+    const req = `'${pathToPlugin}'`;
 
     return `import ${shortName} from ${req};`;
   })
@@ -150,8 +163,7 @@ async function createCacheDir({ dir, plugins }) {
   const pluginsWithFront = Object.keys(plugins)
     .filter(pluginName => {
       const pluginInfo = plugins[pluginName];
-      // TODO: use strapi-admin
-      return fs.existsSync(path.resolve(pluginInfo.pathToPlugin, 'admin', 'src', 'index.js'));
+      return fs.existsSync(path.resolve(pluginInfo.pathToPlugin, 'strapi-admin.js'));
     })
     .map(name => ({ name, ...plugins[name] }));
 
@@ -162,14 +174,14 @@ async function createCacheDir({ dir, plugins }) {
   await copyAdmin(cacheDir);
 
   // Copy app.js
-  const customAdminConfigFilePath = path.join(dir, 'admin', 'app.js');
+  const customAdminConfigFilePath = path.join(dir, 'src', 'admin', 'app.js');
 
   if (fs.existsSync(customAdminConfigFilePath)) {
     await fs.copy(customAdminConfigFilePath, path.resolve(cacheDir, 'admin', 'src', 'app.js'));
   }
 
   // Copy admin extensions folder
-  const adminExtensionFolder = path.join(dir, 'admin', 'extensions');
+  const adminExtensionFolder = path.join(dir, 'src', 'admin', 'extensions');
 
   if (fs.existsSync(adminExtensionFolder)) {
     await fs.copy(adminExtensionFolder, path.resolve(cacheDir, 'admin', 'src', 'extensions'));
@@ -242,8 +254,8 @@ async function watchAdmin({ plugins, dir, host, port, browser, options }) {
  */
 async function watchFiles(dir) {
   const cacheDir = path.join(dir, '.cache');
-  const appExtensionFile = path.join(dir, 'admin', 'app.js');
-  const extensionsPath = path.join(dir, 'admin', 'extensions');
+  const appExtensionFile = path.join(dir, 'src', 'admin', 'app.js');
+  const extensionsPath = path.join(dir, 'src', 'admin', 'extensions');
 
   // Only watch the admin/app.js file and the files that are in the ./admin/extensions/folder
   const filesToWatch = [appExtensionFile, extensionsPath];

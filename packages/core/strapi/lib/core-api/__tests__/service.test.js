@@ -63,7 +63,7 @@ describe('Default Service', () => {
       test('Creates data when no entity is found', async () => {
         const strapi = {
           entityService: {
-            find: jest.fn(() => Promise.resolve(null)),
+            findMany: jest.fn(() => Promise.resolve(null)),
             create: jest.fn(() => Promise.resolve({ id: 1 })),
           },
           query() {
@@ -81,8 +81,8 @@ describe('Default Service', () => {
         const input = {};
         await service.createOrUpdate(input);
 
-        expect(strapi.entityService.find).toHaveBeenCalledWith('testModel', {
-          params: { publicationState: 'live' },
+        expect(strapi.entityService.findMany).toHaveBeenCalledWith('testModel', {
+          publicationState: 'live',
         });
 
         expect(strapi.entityService.create).toHaveBeenCalledWith('testModel', { data: input });
@@ -91,7 +91,7 @@ describe('Default Service', () => {
       test('Updates data when entity is found', async () => {
         const strapi = {
           entityService: {
-            find: jest.fn(() => Promise.resolve({ id: 1 })),
+            findMany: jest.fn(() => Promise.resolve({ id: 1 })),
             update: jest.fn(() => Promise.resolve({ id: 1 })),
           },
           query() {
@@ -109,9 +109,9 @@ describe('Default Service', () => {
         const input = {};
         await service.createOrUpdate(input);
 
-        expect(strapi.entityService.find).toHaveBeenCalledWith('testModel', {
+        expect(strapi.entityService.findMany).toHaveBeenCalledWith('testModel', {
           populate: undefined,
-          params: { publicationState: 'live' },
+          publicationState: 'live',
         });
 
         expect(strapi.entityService.update).toHaveBeenCalledWith('testModel', 1, {
@@ -122,7 +122,7 @@ describe('Default Service', () => {
       test('Delete data when entity is found', async () => {
         const strapi = {
           entityService: {
-            find: jest.fn(() => Promise.resolve({ id: 1 })),
+            findMany: jest.fn(() => Promise.resolve({ id: 1 })),
             delete: jest.fn(() => Promise.resolve({ id: 1 })),
           },
         };
@@ -136,9 +136,9 @@ describe('Default Service', () => {
 
         await service.delete();
 
-        expect(strapi.entityService.find).toHaveBeenCalledWith('testModel', {
+        expect(strapi.entityService.findMany).toHaveBeenCalledWith('testModel', {
           populate: undefined,
-          params: { publicationState: 'live' },
+          publicationState: 'live',
         });
 
         expect(strapi.entityService.delete).toHaveBeenCalledWith('testModel', 1);

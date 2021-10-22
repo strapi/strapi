@@ -1,4 +1,5 @@
-import { cloneDeep, get } from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
+import get from 'lodash/get';
 import * as yup from 'yup';
 
 const formsAPI = {
@@ -50,7 +51,13 @@ const formsAPI = {
     contentType.form.advanced.push(advanced);
     contentType.form.base.push(base);
   },
-  extendFields(fields, { validator, form: { advanced, base } }) {
+  extendFields(
+    fields,
+    {
+      validator,
+      form: { advanced, base },
+    }
+  ) {
     const formType = this.types.attribute;
 
     fields.forEach(field => {
@@ -73,7 +80,7 @@ const formsAPI = {
       }
     });
   },
-  makeAdvancedForm(target, initSections, props) {
+  getAdvancedForm(target, props = null) {
     const sectionsToAdd = get(this.types, [...target, 'form', 'advanced'], []).reduce(
       (acc, current) => {
         const sections = current(props);
@@ -83,8 +90,9 @@ const formsAPI = {
       []
     );
 
-    return { items: [...initSections, ...sectionsToAdd] };
+    return sectionsToAdd;
   },
+
   makeValidator(target, initShape, ...args) {
     const validators = get(this.types, [...target, 'validators'], []);
 

@@ -1,0 +1,47 @@
+<!--- Status.stories.mdx --->
+
+import { Meta, ArgsTable, Canvas, Story } from '@storybook/addon-docs';
+import { Flex } from '@strapi/parts/Flex';
+import { Text } from '@strapi/parts/Text';
+import Status from './index';
+
+<Meta title="components/Status" />
+
+# Status
+
+This component is used in order to display the status.
+
+## Usage
+
+<Canvas>
+  <Story name="base">
+    <Flex>
+      <Status variant="primary" />
+      <Text>primary</Text>
+    </Flex>
+    <Flex>
+      <Status variant="alternative" />
+      <Text>alternative</Text>
+    </Flex>
+    <Flex>
+      <Status variant="danger" />
+      <Text>danger</Text>
+    </Flex>
+    <Flex>
+      <Status variant="neutral" />
+      <Text>neutral</Text>
+    </Flex>
+    <Flex>
+      <Status variant="secondary" />
+      <Text>secondary</Text>
+    </Flex>
+    <Flex>
+      <Status variant="success" />
+      <Text>success</Text>
+    </Flex>
+    <Flex>
+      <Status variant="warning" />
+      <Text>warning</Text>
+    </Flex>
+  </Story>
+</Canvas>

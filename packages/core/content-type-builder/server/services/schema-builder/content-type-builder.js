@@ -42,7 +42,7 @@ module.exports = function createComponentBuilder() {
         generateRelation({
           key,
           attribute,
-          uid: uid,
+          uid,
           targetAttribute,
         })
       );
@@ -78,7 +78,7 @@ module.exports = function createComponentBuilder() {
 
       const contentType = createSchemaHandler({
         modelName: infos.singularName,
-        dir: path.join(strapi.dir, 'api', infos.singularName, 'content-types', infos.singularName),
+        dir: path.join(strapi.dirs.api, infos.singularName, 'content-types', infos.singularName),
         filename: `schema.json`,
       });
 

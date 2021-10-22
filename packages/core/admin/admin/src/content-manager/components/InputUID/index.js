@@ -1,71 +1,71 @@
 import React, { useEffect, useState, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { Sync } from '@buffetjs/icons';
-import { ErrorMessage, Description } from '@buffetjs/styles';
-import { Label, Error } from '@buffetjs/core';
-import { useDebounce, useClickAwayListener } from '@buffetjs/hooks';
-import styled from 'styled-components';
-import {
-  LabelIconWrapper,
-  LoadingIndicator,
-  useContentManagerEditViewDataManager,
-} from '@strapi/helper-plugin';
+import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import get from 'lodash/get';
+import { TextInput } from '@strapi/parts/TextInput';
+import { Text } from '@strapi/parts/Text';
+import Reload from '@strapi/icons/Reload';
+import AlertSucessIcon from '@strapi/icons/AlertSucessIcon';
+import AlertWarningIcon from '@strapi/icons/AlertWarningIcon';
+import LoadingIcon from '@strapi/icons/LoadingIcon';
 import { axiosInstance } from '../../../core/utils';
-import { getRequestUrl, getTrad } from '../../utils';
-import RightLabel from './RightLabel';
-import Options from './Options';
-import RegenerateButton from './RegenerateButton';
-import RightContent from './RightContent';
-import Input from './InputUID';
-import Wrapper from './Wrapper';
-import SubLabel from './SubLabel';
+import { getRequestUrl } from '../../utils';
+import useDebounce from './useDebounce';
 import UID_REGEX from './regex';
-import RightContentLabel from './RightContentLabel';
+import {
+  EndActionWrapper,
+  FieldActionWrapper,
+  TextValidation,
+  LoadingWrapper,
+} from './endActionStyle';
 
-const InputContainer = styled.div`
-  position: relative;
-`;
-const Name = styled(Label)`
-  display: block;
-  text-transform: capitalize;
-  margin-bottom: 1rem;
-`;
-
-// This component should be in buffetjs. It will be used in the media lib.
-// This component will be the strapi custom dropdown component.
-// TODO : Make this component generic -> InputDropdown.
-// TODO : Use the Compounds components pattern
-// https://blog.bitsrc.io/understanding-compound-components-in-react-23c4b84535b5
 const InputUID = ({
   attribute,
   contentTypeUID,
   description,
-  error: inputError,
-  label: inputLabel,
-  labelIcon,
+  disabled,
+  error,
+  intlLabel,
+  labelAction,
   name,
   onChange,
-  validations,
   value,
-  editable,
-  ...inputProps
+  placeholder,
 }) => {
-  const { modifiedData, initialData, layout } = useContentManagerEditViewDataManager();
+  const { modifiedData, initialData, layout } = useCMEditViewDataManager();
   const [isLoading, setIsLoading] = useState(false);
   const [availability, setAvailability] = useState(null);
-  const [isSuggestionOpen, setIsSuggestionOpen] = useState(true);
-  const [isCustomized, setIsCustomized] = useState(false);
-  const [label, setLabel] = useState();
   const debouncedValue = useDebounce(value, 300);
-  const debouncedTargetFieldValue = useDebounce(modifiedData[attribute.targetField], 300);
-  const wrapperRef = useRef(null);
   const generateUid = useRef();
   const initialValue = initialData[name];
+  const { formatMessage } = useIntl();
   const createdAtName = get(layout, ['options', 'timestamps', 0]);
   const isCreation = !initialData[createdAtName];
-  const { formatMessage } = useIntl();
+  const debouncedTargetFieldValue = useDebounce(modifiedData[attribute.targetField], 300);
+  const [isCustomized, setIsCustomized] = useState(false);
+  const [regenerateLabel, setRegenerateLabel] = useState(null);
+
+  const label = intlLabel.id
+    ? formatMessage(
+        { id: intlLabel.id, defaultMessage: intlLabel.defaultMessage },
+        { ...intlLabel.values }
+      )
+    : name;
+
+  const hint = description
+    ? formatMessage(
+        { id: description.id, defaultMessage: description.defaultMessage },
+        { ...description.values }
+      )
+    : '';
+
+  const formattedPlaceholder = placeholder
+    ? formatMessage(
+        { id: placeholder.id, defaultMessage: placeholder.defaultMessage },
+        { ...placeholder.values }
+      )
+    : '';
 
   generateUid.current = async (shouldSetInitialValue = false) => {
     setIsLoading(true);
@@ -78,7 +78,6 @@ const InputUID = ({
         field: name,
         data: modifiedData,
       });
-
       onChange({ target: { name, value: data, type: 'text' } }, shouldSetInitialValue);
       setIsLoading(false);
     } catch (err) {
@@ -105,9 +104,6 @@ const InputUID = ({
 
       setAvailability(data);
 
-      if (data.suggestion) {
-        setIsSuggestionOpen(true);
-      }
       setIsLoading(false);
     } catch (err) {
       console.error({ err });
@@ -115,13 +111,13 @@ const InputUID = ({
     }
   };
 
-  // FIXME: we need to find a better way to autofill the input when it is required.
-  // useEffect(() => {
-  //   if (!value && validations.required) {
-  //     generateUid.current(true);
-  //   }
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, []);
+  // // FIXME: we need to find a better way to autofill the input when it is required.
+  useEffect(() => {
+    if (!value && attribute.required) {
+      generateUid.current(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (
@@ -165,39 +161,20 @@ const InputUID = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedTargetFieldValue, isCustomized, isCreation]);
 
-  useClickAwayListener(wrapperRef, () => setIsSuggestionOpen(false));
-
-  const handleFocus = () => {
-    if (availability && availability.suggestion) {
-      setIsSuggestionOpen(true);
-    }
-  };
-
-  const handleSuggestionClick = () => {
-    setIsSuggestionOpen(false);
-    onChange({ target: { name, value: availability.suggestion, type: 'text' } });
-  };
-
   const handleGenerateMouseEnter = () => {
-    setLabel('regenerate');
+    setRegenerateLabel(
+      formatMessage({
+        id: 'content-manager.components.uid.regenerate',
+        defaultMessage: 'Regenerate',
+      })
+    );
   };
 
   const handleGenerateMouseLeave = () => {
-    setLabel(null);
+    setRegenerateLabel(null);
   };
 
-  const handleChange = (e, canCheck, dispatch) => {
-    if (!canCheck) {
-      dispatch({
-        type: 'SET_CHECK',
-      });
-    }
-
-    dispatch({
-      type: 'SET_ERROR',
-      error: null,
-    });
-
+  const handleChange = e => {
     if (e.target.value && isCreation) {
       setIsCustomized(true);
     }
@@ -205,110 +182,105 @@ const InputUID = ({
     onChange(e);
   };
 
-  return (
-    <Error
-      name={name}
-      inputError={inputError}
-      type="text"
-      validations={{ ...validations, regex: UID_REGEX }}
-    >
-      {({ canCheck, onBlur, error, dispatch }) => {
-        const hasError = Boolean(error);
+  const formattedError = error ? formatMessage({ id: error, defaultMessage: error }) : undefined;
 
-        return (
-          <Wrapper ref={wrapperRef}>
-            <Name htmlFor={name}>
-              <span>{inputLabel}</span>
-              {labelIcon && (
-                <LabelIconWrapper title={labelIcon.title}>{labelIcon.icon}</LabelIconWrapper>
-              )}
-            </Name>
-            <InputContainer>
-              <Input
-                {...inputProps}
-                containsEndAdornment={editable}
-                editable={editable}
-                error={hasError}
-                onFocus={handleFocus}
-                name={name}
-                onChange={e => handleChange(e, canCheck, dispatch)}
-                type="text"
-                onBlur={onBlur}
-                // eslint-disable-next-line no-irregular-whitespace
-                value={value || ''}
-              />
-              <RightContent>
-                {label && (
-                  <RightContentLabel color="blue">
-                    {formatMessage({
-                      id: getTrad('components.uid.regenerate'),
-                    })}
-                  </RightContentLabel>
-                )}
-                {!isLoading && !label && availability && (
-                  <RightLabel
-                    isAvailable={availability.isAvailable || value === availability.suggestion}
-                  />
-                )}
-                {editable && (
-                  <RegenerateButton
-                    onMouseEnter={handleGenerateMouseEnter}
-                    onMouseLeave={handleGenerateMouseLeave}
-                    onClick={() => generateUid.current()}
-                  >
-                    {isLoading ? (
-                      <LoadingIndicator small />
-                    ) : (
-                      <Sync fill={label ? '#007EFF' : '#B5B7BB'} width="11px" height="11px" />
-                    )}
-                  </RegenerateButton>
-                )}
-              </RightContent>
-              {availability && availability.suggestion && isSuggestionOpen && (
-                <Options
-                  title={formatMessage({ id: getTrad('components.uid.suggested') })}
-                  options={[
-                    {
-                      id: 'suggestion',
-                      label: availability.suggestion,
-                      onClick: handleSuggestionClick,
-                    },
-                  ]}
-                />
-              )}
-            </InputContainer>
-            {!hasError && description && <SubLabel as={Description}>{description}</SubLabel>}
-            {hasError && <SubLabel as={ErrorMessage}>{error}</SubLabel>}
-          </Wrapper>
-        );
-      }}
-    </Error>
+  return (
+    <TextInput
+      disabled={disabled}
+      error={formattedError}
+      endAction={
+        <EndActionWrapper>
+          {availability && availability.isAvailable && !regenerateLabel && (
+            <TextValidation alignItems="center" justifyContent="flex-end">
+              <AlertSucessIcon />
+              <Text textColor="success600" small>
+                {formatMessage({
+                  id: 'content-manager.components.uid.available',
+                  defaultMessage: 'Available',
+                })}
+              </Text>
+            </TextValidation>
+          )}
+          {availability && !availability.isAvailable && !regenerateLabel && (
+            <TextValidation notAvailable alignItems="center" justifyContent="flex-end">
+              <AlertWarningIcon />
+              <Text textColor="danger600" small>
+                {formatMessage({
+                  id: 'content-manager.components.uid.unavailable',
+                  defaultMessage: 'Unavailable',
+                })}
+              </Text>
+            </TextValidation>
+          )}
+          {regenerateLabel && (
+            <TextValidation alignItems="center" justifyContent="flex-end">
+              <Text textColor="primary600" small>
+                {regenerateLabel}
+              </Text>
+            </TextValidation>
+          )}
+          <FieldActionWrapper
+            onClick={() => generateUid.current()}
+            label="regenerate"
+            onMouseEnter={handleGenerateMouseEnter}
+            onMouseLeave={handleGenerateMouseLeave}
+          >
+            {isLoading ? (
+              <LoadingWrapper>
+                <LoadingIcon />
+              </LoadingWrapper>
+            ) : (
+              <Reload />
+            )}
+          </FieldActionWrapper>
+        </EndActionWrapper>
+      }
+      hint={hint}
+      label={label}
+      labelAction={labelAction}
+      name={name}
+      onChange={handleChange}
+      placeholder={formattedPlaceholder}
+      value={value || ''}
+    />
   );
 };
 
 InputUID.propTypes = {
-  attribute: PropTypes.object.isRequired,
+  attribute: PropTypes.shape({
+    targetField: PropTypes.string,
+    required: PropTypes.bool,
+  }).isRequired,
   contentTypeUID: PropTypes.string.isRequired,
-  description: PropTypes.string,
-  editable: PropTypes.bool,
-  error: PropTypes.string,
-  label: PropTypes.string.isRequired,
-  labelIcon: PropTypes.shape({
-    icon: PropTypes.node.isRequired,
-    title: PropTypes.string,
+  description: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    defaultMessage: PropTypes.string.isRequired,
+    values: PropTypes.object,
   }),
+  disabled: PropTypes.bool,
+  error: PropTypes.string,
+  intlLabel: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    defaultMessage: PropTypes.string.isRequired,
+    values: PropTypes.object,
+  }).isRequired,
+  labelAction: PropTypes.element,
   name: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
-  validations: PropTypes.object,
   value: PropTypes.string,
+  placeholder: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    defaultMessage: PropTypes.string.isRequired,
+    values: PropTypes.object,
+  }),
 };
 
 InputUID.defaultProps = {
-  description: '',
-  editable: false,
-  error: null,
-  labelIcon: null,
-  validations: {},
+  description: undefined,
+  disabled: false,
+  error: undefined,
+  labelAction: undefined,
+  placeholder: undefined,
   value: '',
 };
 

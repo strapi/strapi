@@ -142,8 +142,26 @@ describe('Upload plugin end to end tests', () => {
     });
   });
 
-  test.todo('GET /upload/files => Find files');
-  test.todo('GET /upload/files/count => Count available files');
+  test('GET /upload/files => Find files', async () => {
+    const getRes = await rq({ method: 'GET', url: '/upload/files' });
+
+    expect(getRes.statusCode).toBe(200);
+    expect(getRes.body).toEqual({
+      results: expect.arrayContaining([
+        expect.objectContaining({
+          id: expect.anything(),
+          url: expect.any(String),
+        }),
+      ]),
+      pagination: {
+        page: expect.any(Number),
+        pageSize: expect.any(Number),
+        pageCount: expect.any(Number),
+        total: expect.any(Number),
+      },
+    });
+  });
+
   test.todo('GET /upload/files/:id => Find one file');
   test.todo('GET /upload/search/:id => Search files');
   test.todo('DELETE /upload/files/:id => Delete a file');

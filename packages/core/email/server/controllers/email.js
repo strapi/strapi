@@ -38,7 +38,7 @@ module.exports = {
     }
 
     const email = {
-      to: to,
+      to,
       subject: `Strapi test mail to: ${to}`,
       text: `Great! You have correctly configured the Strapi email plugin with the ${strapi.config.get(
         'plugin.email.provider'

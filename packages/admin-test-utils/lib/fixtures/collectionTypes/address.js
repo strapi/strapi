@@ -105,25 +105,25 @@ const addressCT = {
       },
       list: { label: 'Repeat_req_min', searchable: false, sortable: false },
     },
-    created_at: {
+    createdAt: {
       edit: {
-        label: 'Created_at',
+        label: 'CreatedAt',
         description: '',
         placeholder: '',
         visible: false,
         editable: true,
       },
-      list: { label: 'Created_at', searchable: true, sortable: true },
+      list: { label: 'CreatedAt', searchable: true, sortable: true },
     },
-    updated_at: {
+    updatedAt: {
       edit: {
-        label: 'Updated_at',
+        label: 'UpdatedAt',
         description: '',
         placeholder: '',
         visible: false,
         editable: true,
       },
-      list: { label: 'Updated_at', searchable: true, sortable: true },
+      list: { label: 'UpdatedAt', searchable: true, sortable: true },
     },
   },
   layouts: {
@@ -405,7 +405,7 @@ const addressCT = {
   options: {
     draftAndPublish: true,
     increments: true,
-    timestamps: ['created_at', 'updated_at'],
+    timestamps: ['createdAt', 'updatedAt'],
     comment: '',
   },
   pluginOptions: { i18n: { localized: true } },
@@ -475,8 +475,8 @@ const addressCT = {
       required: false,
       min: 2,
     },
-    created_at: { type: 'timestamp' },
-    updated_at: { type: 'timestamp' },
+    createdAt: { type: 'timestamp' },
+    updatedAt: { type: 'timestamp' },
   },
 };
 

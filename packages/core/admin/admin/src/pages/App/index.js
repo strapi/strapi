@@ -13,12 +13,13 @@ import {
   useNotification,
   TrackingContext,
 } from '@strapi/helper-plugin';
+import { SkipToContent } from '@strapi/parts/Main';
+import { useIntl } from 'react-intl';
 import PrivateRoute from '../../components/PrivateRoute';
 import { createRoute, makeUniqueRoutes } from '../../utils';
 import AuthPage from '../AuthPage';
 import NotFoundPage from '../NotFoundPage';
 import { getUID } from './utils';
-import { Content, Wrapper } from './components';
 import routes from './utils/routes';
 
 const AuthenticatedApp = lazy(() =>
@@ -27,6 +28,7 @@ const AuthenticatedApp = lazy(() =>
 
 function App() {
   const toggleNotification = useNotification();
+  const { formatMessage } = useIntl();
   const [{ isLoading, hasAdmin, uuid }, setState] = useState({ isLoading: true, hasAdmin: false });
 
   const authRoutes = useMemo(() => {
@@ -106,23 +108,20 @@ function App() {
 
   return (
     <Suspense fallback={<LoadingIndicatorPage />}>
+      <SkipToContent>{formatMessage({ id: 'skipToContent' })}</SkipToContent>
       <TrackingContext.Provider value={uuid}>
-        <Wrapper>
-          <Content>
-            <Switch>
-              {authRoutes}
-              <Route
-                path="/auth/:authType"
-                render={routerProps => (
-                  <AuthPage {...routerProps} setHasAdmin={setHasAdmin} hasAdmin={hasAdmin} />
-                )}
-                exact
-              />
-              <PrivateRoute path="/" component={AuthenticatedApp} />
-              <Route path="" component={NotFoundPage} />
-            </Switch>
-          </Content>
-        </Wrapper>
+        <Switch>
+          {authRoutes}
+          <Route
+            path="/auth/:authType"
+            render={routerProps => (
+              <AuthPage {...routerProps} setHasAdmin={setHasAdmin} hasAdmin={hasAdmin} />
+            )}
+            exact
+          />
+          <PrivateRoute path="/" component={AuthenticatedApp} />
+          <Route path="" component={NotFoundPage} />
+        </Switch>
       </TrackingContext.Provider>
     </Suspense>
   );

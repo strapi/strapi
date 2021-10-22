@@ -11,8 +11,6 @@ const form = require('../../../../test/helpers/generators');
 const cleanDate = entry => {
   delete entry.updatedAt;
   delete entry.createdAt;
-  delete entry.created_at;
-  delete entry.updated_at;
 };
 
 const builder = createTestBuilder();

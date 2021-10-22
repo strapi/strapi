@@ -125,7 +125,7 @@ const forbiddenContentTypeNameValidator = () => {
   return {
     name: 'forbiddenContentTypeName',
     message: `Content Type name cannot be one of ${reservedNames.join(', ')}`,
-    test: value => {
+    test(value) {
       if (value && reservedNames.includes(value)) {
         return false;
       }
@@ -141,7 +141,7 @@ const alreadyUsedContentTypeName = isEdition => {
   return {
     name: 'nameAlreadyUsed',
     message: 'Content Type name `${value}` is already being used.',
-    test: value => {
+    test(value) {
       // don't check on edition
       if (isEdition) return true;
 

@@ -12,11 +12,9 @@
   },
   "dependencies": {
     "@sindresorhus/slugify": "1.1.0",
-    "@strapi/helper-plugin": "3.6.8",
     "@strapi/utils": "3.6.8",
     "lodash": "4.17.21",
-    "pluralize": "^8.0.0",
-    "yup": "^0.32.9"
+    "pluralize": "^8.0.0"
   },
   "author": {
     "name": "Strapi team",

@@ -1,27 +1,32 @@
 import React, { useCallback, useState, useEffect, useMemo, memo } from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage, useIntl } from 'react-intl';
-import { Link, useLocation } from 'react-router-dom';
-import { findIndex, get, isArray, isEmpty, set } from 'lodash';
 import {
-  DropdownIndicator,
-  LabelIconWrapper,
-  NotAllowedInput,
-  useContentManagerEditViewDataManager,
-  useQueryParams,
-} from '@strapi/helper-plugin';
-import { Flex, Text, Padded } from '@buffetjs/core';
+  // FormattedMessage,
+  useIntl,
+} from 'react-intl';
+import { useLocation } from 'react-router-dom';
+import { Link } from '@strapi/parts/Link';
+import { Stack } from '@strapi/parts/Stack';
+import { useTheme } from 'styled-components';
+import findIndex from 'lodash/findIndex';
+import get from 'lodash/get';
+import isArray from 'lodash/isArray';
+import isEmpty from 'lodash/isEmpty';
+import set from 'lodash/set';
+import { NotAllowedInput, useCMEditViewDataManager, useQueryParams } from '@strapi/helper-plugin';
 import { stringify } from 'qs';
 import axios from 'axios';
 import { axiosInstance } from '../../../core/utils';
 import { getTrad } from '../../utils';
+import Label from './Label';
 import SelectOne from '../SelectOne';
 import SelectMany from '../SelectMany';
 import ClearIndicator from './ClearIndicator';
+import DropdownIndicator from './DropdownIndicator';
 import IndicatorSeparator from './IndicatorSeparator';
 import Option from './Option';
-import { A, BaselineAlignment } from './components';
-import { connect, select, styles } from './utils';
+import { connect, select } from './utils';
+import getSelectStyles from './utils/getSelectStyles';
 
 const initialPaginationState = {
   _contains: '',
@@ -45,10 +50,10 @@ const buildParams = (query, paramsToKeep) => {
   }, {});
 };
 function SelectWrapper({
-  description,
+  // description,
   editable,
-  label,
-  labelIcon,
+  labelAction,
+  intlLabel,
   isCreatingEntry,
   isFieldAllowed,
   isFieldReadable,
@@ -69,8 +74,9 @@ function SelectWrapper({
     moveRelation,
     onChange,
     onRemoveRelation,
-  } = useContentManagerEditViewDataManager();
+  } = useCMEditViewDataManager();
   const { pathname } = useLocation();
+  const theme = useTheme();
 
   const value = get(modifiedData, name, null);
   const [state, setState] = useState(initialPaginationState);
@@ -170,15 +176,17 @@ function SelectWrapper({
       }
     },
     [
-      isMorph,
-      isFieldAllowed,
-      state._limit,
-      state._contains,
-      defaultParams,
       containsKey,
+      defaultParams,
       endPoint,
       idsToOmit,
+      isFieldAllowed,
+      isMorph,
       mainField.name,
+      setIsLoading,
+      setOptions,
+      state._contains,
+      state._limit,
     ]
   );
 
@@ -234,23 +242,15 @@ function SelectWrapper({
 
   const searchToPersist = stringify(buildParams(query, paramsToKeep), { encode: false });
 
-  const link = useMemo(() => {
-    if (!value) {
-      return null;
-    }
+  let link = null;
 
-    if (!shouldDisplayRelationLink) {
-      return null;
-    }
-
-    return (
+  if (isSingle && value && shouldDisplayRelationLink) {
+    link = (
       <Link to={{ pathname: to, state: { from: pathname }, search: searchToPersist }}>
-        <FormattedMessage id="content-manager.containers.Edit.seeDetails">
-          {msg => <A color="mediumBlue">{msg}</A>}
-        </FormattedMessage>
+        {formatMessage({ id: getTrad('containers.Edit.seeDetails'), defaultMessage: 'Details' })}
       </Link>
     );
-  }, [shouldDisplayRelationLink, pathname, to, value, searchToPersist]);
+  }
 
   const Component = isSingle ? SelectOne : SelectMany;
   const associationsLength = isArray(value) ? value.length : 0;
@@ -267,106 +267,148 @@ function SelectWrapper({
     return !editable;
   }, [isMorph, isCreatingEntry, editable, isFieldAllowed, isFieldReadable]);
 
-  const labelIconformatted = labelIcon
-    ? { icon: labelIcon.icon, title: formatMessage(labelIcon.title) }
-    : labelIcon;
-
   if (!isFieldAllowed && isCreatingEntry) {
-    return <NotAllowedInput label={label} labelIcon={labelIconformatted} />;
+    return <NotAllowedInput intlLabel={intlLabel} labelAction={labelAction} />;
   }
 
   if (!isCreatingEntry && !isFieldAllowed && !isFieldReadable) {
-    return <NotAllowedInput label={label} labelIcon={labelIconformatted} />;
+    return <NotAllowedInput intlLabel={intlLabel} labelAction={labelAction} />;
   }
 
-  return (
-    <Padded>
-      <BaselineAlignment />
-      <Flex justifyContent="space-between">
-        <Flex>
-          <Text fontWeight="semiBold">
-            <span>
-              {label}
-              {!isSingle && ` (${associationsLength})`}
-            </span>
-          </Text>
-          {labelIconformatted && (
-            <div style={{ lineHeight: '13px' }}>
-              <LabelIconWrapper title={labelIconformatted.title}>
-                {labelIconformatted.icon}
-              </LabelIconWrapper>
-            </div>
-          )}
-        </Flex>
-        {isSingle && link}
-      </Flex>
-      {!isEmpty(description) && (
-        <Padded top size="xs">
-          <BaselineAlignment />
-          <Text fontSize="sm" color="grey" lineHeight="12px" ellipsis>
-            {description}
-          </Text>
-        </Padded>
-      )}
-      <Padded top size="sm">
-        <BaselineAlignment />
+  const styles = getSelectStyles(theme);
 
-        <Component
-          addRelation={handleAddRelation}
-          components={{ ClearIndicator, DropdownIndicator, IndicatorSeparator, Option }}
-          displayNavigationLink={shouldDisplayRelationLink}
-          id={name}
-          isDisabled={isDisabled}
-          isLoading={isLoading}
-          isClearable
-          mainField={mainField}
-          move={moveRelation}
-          name={name}
-          options={filteredOptions}
-          onChange={handleChange}
-          onInputChange={handleInputChange}
-          onMenuClose={handleMenuClose}
-          onMenuOpen={handleMenuOpen}
-          onMenuScrollToBottom={handleMenuScrollToBottom}
-          onRemove={onRemoveRelation}
-          placeholder={
-            isEmpty(placeholder) ? (
-              <FormattedMessage id={getTrad('containers.Edit.addAnItem')} />
-            ) : (
-              placeholder
-            )
-          }
-          searchToPersist={searchToPersist}
-          styles={styles}
-          targetModel={targetModel}
-          value={value}
-        />
-      </Padded>
-      <div style={{ marginBottom: 28 }} />
-    </Padded>
+  return (
+    <Stack size={1}>
+      <Label
+        intlLabel={intlLabel}
+        isSingle={isSingle}
+        labelAction={labelAction}
+        link={link}
+        name={name}
+        numberOfEntries={associationsLength}
+      />
+      <Component
+        addRelation={handleAddRelation}
+        components={{
+          ClearIndicator,
+          DropdownIndicator,
+          IndicatorSeparator,
+          Option,
+        }}
+        displayNavigationLink={shouldDisplayRelationLink}
+        id={name}
+        isDisabled={isDisabled}
+        isLoading={isLoading}
+        isClearable
+        mainField={mainField}
+        move={moveRelation}
+        name={name}
+        options={filteredOptions}
+        // options={temp}
+        onChange={handleChange}
+        onInputChange={handleInputChange}
+        onMenuClose={handleMenuClose}
+        onMenuOpen={handleMenuOpen}
+        onMenuScrollToBottom={handleMenuScrollToBottom}
+        onRemove={onRemoveRelation}
+        placeholder={placeholder}
+        searchToPersist={searchToPersist}
+        styles={styles}
+        targetModel={targetModel}
+        value={value}
+      />
+    </Stack>
   );
+
+  // return (
+  //   <Padded>
+  //     <BaselineAlignment />
+  //     <Flex justifyContent="space-between">
+  //       <Flex>
+  //         <Text fontWeight="semiBold">
+  //           <span>
+  //             {label}
+  //             {!isSingle && ` (${associationsLength})`}
+  //           </span>
+  //         </Text>
+  //         {labelIconformatted && (
+  //           <div style={{ lineHeight: '13px' }}>
+  //             <LabelIconWrapper title={labelIconformatted.title}>
+  //               {labelIconformatted.icon}
+  //             </LabelIconWrapper>
+  //           </div>
+  //         )}
+  //       </Flex>
+  //       {isSingle && link}
+  //     </Flex>
+  //     {!isEmpty(description) && (
+  //       <Padded top size="xs">
+  //         <BaselineAlignment />
+  //         <Text fontSize="sm" color="grey" lineHeight="12px" ellipsis>
+  //           {description}
+  //         </Text>
+  //       </Padded>
+  //     )}
+  //     <Padded top size="sm">
+  //       <BaselineAlignment />
+
+  // <Component
+  //   addRelation={handleAddRelation}
+  //   components={{ ClearIndicator, DropdownIndicator, IndicatorSeparator, Option }}
+  //   displayNavigationLink={shouldDisplayRelationLink}
+  //   id={name}
+  //   isDisabled={isDisabled}
+  //   isLoading={isLoading}
+  //   isClearable
+  //   mainField={mainField}
+  //   move={moveRelation}
+  //   name={name}
+  //   options={filteredOptions}
+  //   onChange={handleChange}
+  //   onInputChange={handleInputChange}
+  //   onMenuClose={handleMenuClose}
+  //   onMenuOpen={handleMenuOpen}
+  //   onMenuScrollToBottom={handleMenuScrollToBottom}
+  //   onRemove={onRemoveRelation}
+  //   placeholder={
+  //     isEmpty(placeholder) ? (
+  //       <FormattedMessage id={getTrad('containers.Edit.addAnItem')} />
+  //     ) : (
+  //       placeholder
+  //     )
+  //   }
+  //   searchToPersist={searchToPersist}
+  //   styles={styles}
+  //   targetModel={targetModel}
+  //   value={value}
+  // />
+  //     </Padded>
+  //     <div style={{ marginBottom: 28 }} />
+  //   </Padded>
+  // );
 }
 
 SelectWrapper.defaultProps = {
   editable: true,
-  description: '',
-  label: '',
-  labelIcon: null,
+  // description: '',
+  labelAction: null,
   isFieldAllowed: true,
-  placeholder: '',
+  placeholder: null,
 };
 
 SelectWrapper.propTypes = {
   editable: PropTypes.bool,
-  description: PropTypes.string,
-  label: PropTypes.string,
-  labelIcon: PropTypes.shape({
-    icon: PropTypes.node.isRequired,
-    title: PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      defaultMessage: PropTypes.string,
-    }),
-  }),
+  // description: PropTypes.shape({
+  //   id: PropTypes.string.isRequired,
+  //   defaultMessage: PropTypes.string.isRequired,
+  //   values: PropTypes.object,
+  // }),
+  intlLabel: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    defaultMessage: PropTypes.string.isRequired,
+    values: PropTypes.object,
+  }).isRequired,
+  labelAction: PropTypes.element,
   isCreatingEntry: PropTypes.bool.isRequired,
   isFieldAllowed: PropTypes.bool,
   isFieldReadable: PropTypes.bool.isRequired,
@@ -377,7 +419,11 @@ SelectWrapper.propTypes = {
     }).isRequired,
   }).isRequired,
   name: PropTypes.string.isRequired,
-  placeholder: PropTypes.string,
+  placeholder: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    defaultMessage: PropTypes.string.isRequired,
+    values: PropTypes.object,
+  }),
   relationType: PropTypes.string.isRequired,
   targetModel: PropTypes.string.isRequired,
   queryInfos: PropTypes.shape({
@@ -391,4 +437,7 @@ SelectWrapper.propTypes = {
 
 const Memoized = memo(SelectWrapper);
 
-export default connect(Memoized, select);
+export default connect(
+  Memoized,
+  select
+);

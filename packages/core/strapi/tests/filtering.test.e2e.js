@@ -238,7 +238,7 @@ describe('Filtering API', () => {
           qs: {
             filters: {
               name: {
-                $contains: 'product',
+                $containsi: 'product',
               },
             },
           },
@@ -254,7 +254,7 @@ describe('Filtering API', () => {
           qs: {
             filters: {
               name: {
-                $contains: 'PrOdUct',
+                $containsi: 'PrOdUct',
               },
             },
           },
@@ -270,7 +270,7 @@ describe('Filtering API', () => {
           qs: {
             filters: {
               name: {
-                $contains: 'production',
+                $containsi: 'production',
               },
             },
           },
@@ -284,7 +284,7 @@ describe('Filtering API', () => {
           qs: {
             filters: {
               name: {
-                $contains: 'ProdUctIon',
+                $containsi: 'ProdUctIon',
               },
             },
           },
@@ -302,7 +302,7 @@ describe('Filtering API', () => {
           qs: {
             filters: {
               name: {
-                $notContains: 'production',
+                $notContainsi: 'production',
               },
             },
           },
@@ -317,7 +317,7 @@ describe('Filtering API', () => {
           url: '/products',
           qs: {
             filters: {
-              name: { $notContains: 'ProdUctIon' },
+              name: { $notContainsi: 'ProdUctIon' },
             },
           },
         });
@@ -331,7 +331,7 @@ describe('Filtering API', () => {
           url: '/products',
           qs: {
             filters: {
-              name: { $notContains: 'product' },
+              name: { $notContainsi: 'product' },
             },
           },
         });
@@ -343,7 +343,7 @@ describe('Filtering API', () => {
           url: '/products',
           qs: {
             filters: {
-              name: { $notContains: 'ProDuCt' },
+              name: { $notContainsi: 'ProDuCt' },
             },
           },
         });
@@ -1280,7 +1280,9 @@ describe('Filtering API', () => {
         method: 'GET',
         url: '/products',
         qs: {
-          limit: 1,
+          pagination: {
+            limit: 1,
+          },
           sort: 'rank:asc',
         },
       });
@@ -1293,7 +1295,9 @@ describe('Filtering API', () => {
         method: 'GET',
         url: '/products',
         qs: {
-          limit: 1,
+          pagination: {
+            limit: 1,
+          },
           sort: 'rank:desc',
         },
       });
@@ -1308,7 +1312,9 @@ describe('Filtering API', () => {
         method: 'GET',
         url: '/products',
         qs: {
-          start: 1,
+          pagination: {
+            start: 1,
+          },
           sort: 'rank:asc',
         },
       });
@@ -1321,8 +1327,10 @@ describe('Filtering API', () => {
         method: 'GET',
         url: '/products',
         qs: {
-          limit: 1,
-          start: 1,
+          pagination: {
+            limit: 1,
+            start: 1,
+          },
           sort: 'rank:asc',
         },
       });

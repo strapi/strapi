@@ -28,12 +28,7 @@ module.exports = ({ strapi }) => {
     const access_token = query.access_token || query.code || query.oauth_token;
 
     const grant = await strapi
-      .store({
-        environment: '',
-        type: 'plugin',
-        name: 'users-permissions',
-        key: 'grant',
-      })
+      .store({ type: 'plugin', name: 'users-permissions', key: 'grant' })
       .get();
 
     switch (provider) {
@@ -68,7 +63,7 @@ module.exports = ({ strapi }) => {
               // Combine username and discriminator because discord username is not unique
               var username = `${body.username}#${body.discriminator}`;
               callback(null, {
-                username: username,
+                username,
                 email: body.email,
               });
             }
@@ -524,23 +519,20 @@ module.exports = ({ strapi }) => {
           return reject([null, err]);
         }
 
+        const email = _.toLower(profile.email);
+
         // We need at least the mail.
-        if (!profile.email) {
+        if (!email) {
           return reject([null, { message: 'Email was not available.' }]);
         }
 
         try {
           const users = await strapi.query('plugin::users-permissions.user').findMany({
-            where: { email: profile.email },
+            where: { email },
           });
 
           const advanced = await strapi
-            .store({
-              environment: '',
-              type: 'plugin',
-              name: 'users-permissions',
-              key: 'advanced',
-            })
+            .store({ type: 'plugin', name: 'users-permissions', key: 'advanced' })
             .get();
 
           const user = _.find(users, { provider });
@@ -574,11 +566,13 @@ module.exports = ({ strapi }) => {
             .findOne({ where: { type: advanced.default_role } });
 
           // Create the new user.
-          const params = _.assign(profile, {
-            provider: provider,
+          const params = {
+            ...profile,
+            email, // overwrite with lowercased email
+            provider,
             role: defaultRole.id,
             confirmed: true,
-          });
+          };
 
           const createdUser = await strapi
             .query('plugin::users-permissions.user')
@@ -593,7 +587,7 @@ module.exports = ({ strapi }) => {
   };
 
   const buildRedirectUri = (provider = '') =>
-    `${getAbsoluteServerUrl(strapi.config)}/connect/${provider}/callback`;
+    `${getAbsoluteServerUrl(strapi.config)}/api/connect/${provider}/callback`;
 
   return {
     connect,

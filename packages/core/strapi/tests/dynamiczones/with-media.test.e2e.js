@@ -128,19 +128,27 @@ describe('Not required dynamiczone', () => {
               id: expect.anything(),
               __component: 'default.one-media',
               media: {
-                id: mediaId,
-                url: expect.any(String),
+                data: {
+                  id: mediaId,
+                  attributes: expect.objectContaining({
+                    url: expect.any(String),
+                  }),
+                },
               },
             },
             {
               id: expect.anything(),
               __component: 'default.many-media',
-              media: expect.arrayContaining([
-                expect.objectContaining({
-                  id: mediaId,
-                  url: expect.any(String),
-                }),
-              ]),
+              media: {
+                data: expect.arrayContaining([
+                  expect.objectContaining({
+                    id: mediaId,
+                    attributes: expect.objectContaining({
+                      url: expect.any(String),
+                    }),
+                  }),
+                ]),
+              },
             },
           ],
         },
@@ -211,19 +219,27 @@ describe('Not required dynamiczone', () => {
               id: expect.anything(),
               __component: 'default.one-media',
               media: {
-                id: newMediaId,
-                url: expect.any(String),
+                data: {
+                  id: newMediaId,
+                  attributes: expect.objectContaining({
+                    url: expect.any(String),
+                  }),
+                },
               },
             },
             {
               id: expect.anything(),
               __component: 'default.many-media',
-              media: expect.arrayContaining([
-                expect.objectContaining({
-                  id: newMediaId,
-                  url: expect.any(String),
-                }),
-              ]),
+              media: {
+                data: expect.arrayContaining([
+                  expect.objectContaining({
+                    id: newMediaId,
+                    attributes: expect.objectContaining({
+                      url: expect.any(String),
+                    }),
+                  }),
+                ]),
+              },
             },
           ],
         },
@@ -275,19 +291,27 @@ describe('Not required dynamiczone', () => {
               id: expect.anything(),
               __component: 'default.one-media',
               media: {
-                id: mediaId,
-                url: expect.any(String),
+                data: {
+                  id: mediaId,
+                  attributes: expect.objectContaining({
+                    url: expect.any(String),
+                  }),
+                },
               },
             },
             {
               id: expect.anything(),
               __component: 'default.many-media',
-              media: expect.arrayContaining([
-                expect.objectContaining({
-                  id: mediaId,
-                  url: expect.any(String),
-                }),
-              ]),
+              media: {
+                data: expect.arrayContaining([
+                  expect.objectContaining({
+                    id: mediaId,
+                    attributes: expect.objectContaining({
+                      url: expect.any(String),
+                    }),
+                  }),
+                ]),
+              },
             },
           ],
         },
@@ -335,17 +359,25 @@ describe('Not required dynamiczone', () => {
               __component: 'default.with-nested',
               singleMedia: {
                 media: {
-                  id: mediaId,
-                  url: expect.any(String),
+                  data: {
+                    id: mediaId,
+                    attributes: expect.objectContaining({
+                      url: expect.any(String),
+                    }),
+                  },
                 },
               },
               multipleMedia: {
-                media: expect.arrayContaining([
-                  expect.objectContaining({
-                    id: mediaId,
-                    url: expect.any(String),
-                  }),
-                ]),
+                media: {
+                  data: expect.arrayContaining([
+                    expect.objectContaining({
+                      id: mediaId,
+                      attributes: expect.objectContaining({
+                        url: expect.any(String),
+                      }),
+                    }),
+                  ]),
+                },
               },
             },
           ],

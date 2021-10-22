@@ -13,28 +13,28 @@
     "test": "echo \"no tests yet\""
   },
   "dependencies": {
-    "@apollo/federation": "^0.20.7",
-    "@graphql-tools/utils": "7.2.4",
-    "apollo-server-koa": "2.24.0",
-    "dataloader": "^1.4.0",
-    "glob": "^7.1.6",
-    "graphql": "15.5.0",
+    "@apollo/federation": "^0.28.0",
+    "@graphql-tools/schema": "8.1.2",
+    "@graphql-tools/utils": "^8.0.2",
+    "@strapi/utils": "3.6.8",
+    "apollo-server-core": "3.1.2",
+    "apollo-server-koa": "3.1.2",
+    "glob": "^7.1.7",
+    "graphql": "15.5.1",
     "graphql-depth-limit": "^1.1.0",
     "graphql-iso-date": "^3.6.1",
     "graphql-playground-middleware-koa": "^1.6.21",
-    "graphql-tools": "4.0.8",
-    "graphql-type-json": "0.3.2",
+    "graphql-type-json": "^0.3.2",
     "graphql-type-long": "^0.1.1",
-    "graphql-upload": "11.0.0",
+    "graphql-upload": "12.0.0",
     "koa-compose": "^4.1.0",
     "lodash": "4.17.21",
-    "pluralize": "^8.0.0",
-    "@strapi/utils": "3.6.8"
+    "nexus": "1.1.0",
+    "pluralize": "^8.0.0"
   },
   "devDependencies": {
     "cross-env": "^7.0.3",
-    "koa": "^2.13.1",
-    "rimraf": "3.0.2"
+    "koa": "^2.13.1"
   },
   "author": {
     "name": "A Strapi developer",

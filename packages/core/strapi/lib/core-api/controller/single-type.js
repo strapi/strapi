@@ -14,7 +14,7 @@ const createSingleTypeController = ({ service, sanitize, transformResponse }) =>
      */
     async find(ctx) {
       const { query } = ctx;
-      const entity = await service.find({ params: query });
+      const entity = await service.find(query);
       return transformResponse(sanitize(entity));
     },
 
@@ -27,7 +27,7 @@ const createSingleTypeController = ({ service, sanitize, transformResponse }) =>
       const { query } = ctx.request;
       const { data, files } = parseBody(ctx);
 
-      const entity = await service.createOrUpdate({ params: query, data, files });
+      const entity = await service.createOrUpdate({ ...query, data, files });
 
       return transformResponse(sanitize(entity));
     },
@@ -35,7 +35,7 @@ const createSingleTypeController = ({ service, sanitize, transformResponse }) =>
     async delete(ctx) {
       const { query } = ctx;
 
-      const entity = await service.delete({ params: query });
+      const entity = await service.delete(query);
       return transformResponse(sanitize(entity));
     },
   };

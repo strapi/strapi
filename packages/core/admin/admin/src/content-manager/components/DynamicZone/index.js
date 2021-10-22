@@ -1,23 +1,23 @@
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import { get } from 'lodash';
+import get from 'lodash/get';
 import isEqual from 'react-fast-compare';
 import PropTypes from 'prop-types';
-import { FormattedMessage, useIntl } from 'react-intl';
-import { Flex } from '@buffetjs/core';
-import { LabelIconWrapper, NotAllowedInput, useNotification } from '@strapi/helper-plugin';
+import { Stack } from '@strapi/parts/Stack';
+import { Box } from '@strapi/parts/Box';
+import { NotAllowedInput, useNotification } from '@strapi/helper-plugin';
 import { getTrad } from '../../utils';
 import connect from './utils/connect';
 import select from './utils/select';
-import BaselineAlignement from './BaselineAlignement';
-import Button from './Button';
-import Component from './Component';
-import ComponentWrapper from './ComponentWrapper';
-import DynamicZoneWrapper from './DynamicZoneWrapper';
-import Label from './Label';
-import Wrapper from './Wrapper';
-import Picker from './Picker';
+import AddComponentButton from './components/AddComponentButton';
+import DzLabel from './components/DzLabel';
+import Component from './components/Component';
+
+import ComponentPicker from './components/ComponentPicker';
 
 /* eslint-disable react/no-array-index-key */
+
+const createCollapses = arrayLength =>
+  Array.from({ length: arrayLength }).map(() => ({ isOpen: false }));
 
 const DynamicZone = ({
   name,
@@ -27,7 +27,7 @@ const DynamicZone = ({
   isCreatingEntry,
   isFieldAllowed,
   isFieldReadable,
-  labelIcon,
+  labelAction,
   moveComponentUp,
   moveComponentDown,
   removeComponentFromDynamicZone,
@@ -37,7 +37,11 @@ const DynamicZone = ({
 }) => {
   const toggleNotification = useNotification();
   const [isOpen, setIsOpen] = useState(false);
-  const { formatMessage } = useIntl();
+  const dynamicDisplayedComponentsLength = dynamicDisplayedComponents.length;
+  const [componentCollapses, setComponentsCollapses] = useState(
+    createCollapses(dynamicDisplayedComponentsLength)
+  );
+
   // We cannot use the default props here
   const { max = Infinity, min = -Infinity } = fieldSchema;
   const dynamicZoneErrors = useMemo(() => {
@@ -49,13 +53,13 @@ const DynamicZone = ({
   }, [formErrors, name]);
 
   const dynamicZoneAvailableComponents = useMemo(() => fieldSchema.components || [], [fieldSchema]);
-  const dynamicDisplayedComponentsLength = dynamicDisplayedComponents.length;
+
   const missingComponentNumber = min - dynamicDisplayedComponentsLength;
   const hasError = dynamicZoneErrors.length > 0;
+
   const hasMinError =
     dynamicZoneErrors.length > 0 && get(dynamicZoneErrors, [0, 'id'], '').includes('min');
 
-  const hasRequiredError = hasError && !hasMinError;
   const hasMaxError =
     hasError && get(dynamicZoneErrors, [0, 'id'], '') === 'components.Input.error.validation.max';
 
@@ -64,6 +68,7 @@ const DynamicZone = ({
       setIsOpen(false);
 
       addComponentToDynamicZone(name, componentUid, hasError);
+      setComponentsCollapses(prev => [...prev, { isOpen: true }]);
     },
     [addComponentToDynamicZone, hasError, name]
   );
@@ -79,123 +84,143 @@ const DynamicZone = ({
     }
   };
 
-  const formattedLabelIcon = labelIcon
-    ? { icon: labelIcon.icon, title: formatMessage(labelIcon.title) }
-    : null;
+  const handleToggleComponent = indexToToggle => {
+    setComponentsCollapses(prev =>
+      prev.map(({ isOpen }, index) => {
+        if (index === indexToToggle) {
+          return { isOpen: !isOpen };
+        }
+
+        return { isOpen };
+      })
+    );
+  };
+
+  const handleMoveComponentDown = (name, currentIndex) => {
+    moveComponentDown(name, currentIndex);
+    setComponentsCollapses(prev => {
+      return prev.map(({ isOpen }, index, refArray) => {
+        if (index === currentIndex + 1) {
+          return { isOpen: refArray[currentIndex].isOpen };
+        }
+
+        if (index === currentIndex) {
+          return { isOpen: refArray[index + 1].isOpen };
+        }
+
+        return { isOpen };
+      });
+    });
+  };
+
+  const handleMoveComponentUp = (name, currentIndex) => {
+    moveComponentUp(name, currentIndex);
+    setComponentsCollapses(prev => {
+      return prev.map(({ isOpen }, index, refArray) => {
+        if (index === currentIndex - 1) {
+          return { isOpen: refArray[currentIndex].isOpen };
+        }
+
+        if (index === currentIndex) {
+          return { isOpen: refArray[index - 1].isOpen };
+        }
+
+        return { isOpen };
+      });
+    });
+  };
+
+  const handleRemoveComponent = (name, currentIndex) => {
+    removeComponentFromDynamicZone(name, currentIndex);
+
+    setComponentsCollapses(prev => prev.filter((_, index) => index !== currentIndex));
+  };
 
   if (!isFieldAllowed && isCreatingEntry) {
     return (
-      <BaselineAlignement>
-        <NotAllowedInput
-          label={metadatas.label}
-          spacerHeight="5px"
-          labelIcon={formattedLabelIcon}
-        />
-      </BaselineAlignement>
+      <NotAllowedInput
+        description={
+          metadatas.description
+            ? { id: metadatas.description, defaultMessage: metadatas.description }
+            : null
+        }
+        intlLabel={{ id: metadatas.label, defaultMessage: metadatas.label }}
+        labelAction={labelAction}
+        name={name}
+      />
     );
   }
 
   if (!isFieldAllowed && !isFieldReadable && !isCreatingEntry) {
     return (
-      <BaselineAlignement>
-        <NotAllowedInput
-          label={metadatas.label}
-          spacerHeight="5px"
-          labelIcon={formattedLabelIcon}
-        />
-      </BaselineAlignement>
+      <NotAllowedInput
+        description={
+          metadatas.description
+            ? { id: metadatas.description, defaultMessage: metadatas.description }
+            : null
+        }
+        intlLabel={{ id: metadatas.label, defaultMessage: metadatas.label }}
+        labelAction={labelAction}
+        name={name}
+      />
     );
   }
 
   return (
-    <DynamicZoneWrapper>
+    <Stack size={6}>
       {dynamicDisplayedComponentsLength > 0 && (
-        <Label>
-          <Flex>
-            <p>
-              <span>{metadatas.label}</span>
-            </p>
-            {formattedLabelIcon && (
-              <LabelIconWrapper title={formattedLabelIcon.title}>
-                {formattedLabelIcon.icon}
-              </LabelIconWrapper>
-            )}
-          </Flex>
-          <p>{metadatas.description}</p>
-        </Label>
-      )}
-
-      {/* List of displayed components */}
-      <ComponentWrapper>
-        {dynamicDisplayedComponents.map((componentUid, index) => {
-          const showDownIcon =
-            isFieldAllowed &&
-            dynamicDisplayedComponentsLength > 0 &&
-            index < dynamicDisplayedComponentsLength - 1;
-          const showUpIcon = isFieldAllowed && dynamicDisplayedComponentsLength > 0 && index > 0;
-
-          return (
-            <Component
-              componentUid={componentUid}
-              key={index}
-              index={index}
-              isFieldAllowed={isFieldAllowed}
-              moveComponentDown={moveComponentDown}
-              moveComponentUp={moveComponentUp}
-              name={name}
-              removeComponentFromDynamicZone={removeComponentFromDynamicZone}
-              showDownIcon={showDownIcon}
-              showUpIcon={showUpIcon}
-            />
-          );
-        })}
-      </ComponentWrapper>
-      {isFieldAllowed ? (
-        <Wrapper>
-          <Button
-            type="button"
-            hasError={hasError}
-            className={isOpen && 'isOpen'}
-            onClick={handleClickOpenPicker}
+        <Box>
+          <DzLabel
+            label={metadatas.label}
+            labelAction={labelAction}
+            name={name}
+            numberOfComponents={dynamicDisplayedComponentsLength}
           />
-          {hasRequiredError && !isOpen && !hasMaxError && (
-            <div className="error-label">
-              <FormattedMessage id={getTrad('components.DynamicZone.required')} />
-            </div>
-          )}
-          {hasMaxError && !isOpen && (
-            <div className="error-label">
-              <FormattedMessage id="components.Input.error.validation.max" />
-            </div>
-          )}
-          {hasMinError && !isOpen && (
-            <div className="error-label">
-              <FormattedMessage
-                id={getTrad(
-                  `components.DynamicZone.missing${
-                    missingComponentNumber > 1 ? '.plural' : '.singular'
-                  }`
-                )}
-                values={{ count: missingComponentNumber }}
+          {dynamicDisplayedComponents.map((componentUid, index) => {
+            const showDownIcon =
+              isFieldAllowed &&
+              dynamicDisplayedComponentsLength > 0 &&
+              index < dynamicDisplayedComponentsLength - 1;
+            const showUpIcon = isFieldAllowed && dynamicDisplayedComponentsLength > 0 && index > 0;
+            const isOpen = componentCollapses[index].isOpen;
+
+            return (
+              <Component
+                componentUid={componentUid}
+                key={index}
+                index={index}
+                isOpen={isOpen}
+                isFieldAllowed={isFieldAllowed}
+                moveComponentDown={handleMoveComponentDown}
+                moveComponentUp={handleMoveComponentUp}
+                onToggle={handleToggleComponent}
+                name={name}
+                removeComponentFromDynamicZone={handleRemoveComponent}
+                showDownIcon={showDownIcon}
+                showUpIcon={showUpIcon}
               />
-            </div>
-          )}
-          <div className="info">
-            <FormattedMessage
-              id={getTrad('components.DynamicZone.add-compo')}
-              values={{ componentName: metadatas.label }}
-            />
-          </div>
-          <Picker
-            isOpen={isOpen}
-            components={dynamicZoneAvailableComponents}
-            onClickAddComponent={handleAddComponent}
-          />
-        </Wrapper>
-      ) : (
-        <BaselineAlignement top="9px" />
+            );
+          })}
+        </Box>
       )}
-    </DynamicZoneWrapper>
+
+      <AddComponentButton
+        hasError={hasError}
+        hasMaxError={hasMaxError}
+        hasMinError={hasMinError}
+        isDisabled={!isFieldAllowed}
+        label={metadatas.label}
+        missingComponentNumber={missingComponentNumber}
+        isOpen={isOpen}
+        name={name}
+        onClick={handleClickOpenPicker}
+      />
+      <ComponentPicker
+        isOpen={isOpen}
+        components={dynamicZoneAvailableComponents}
+        onClickAddComponent={handleAddComponent}
+      />
+    </Stack>
   );
 };
 
@@ -205,7 +230,7 @@ DynamicZone.defaultProps = {
     max: Infinity,
     min: -Infinity,
   },
-  labelIcon: null,
+  labelAction: null,
 };
 
 DynamicZone.propTypes = {
@@ -220,13 +245,7 @@ DynamicZone.propTypes = {
   isCreatingEntry: PropTypes.bool.isRequired,
   isFieldAllowed: PropTypes.bool.isRequired,
   isFieldReadable: PropTypes.bool.isRequired,
-  labelIcon: PropTypes.shape({
-    icon: PropTypes.node.isRequired,
-    title: PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      defaultMessage: PropTypes.string.isRequired,
-    }).isRequired,
-  }),
+  labelAction: PropTypes.element,
   metadatas: PropTypes.shape({
     description: PropTypes.string,
     label: PropTypes.string,
@@ -239,6 +258,9 @@ DynamicZone.propTypes = {
 
 const Memoized = memo(DynamicZone, isEqual);
 
-export default connect(Memoized, select);
+export default connect(
+  Memoized,
+  select
+);
 
 export { DynamicZone };

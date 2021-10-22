@@ -1,14 +1,15 @@
 import React, { useMemo } from 'react';
 import get from 'lodash/get';
+import has from 'lodash/has';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { useContentManagerEditViewDataManager, useQueryParams } from '@strapi/helper-plugin';
+import { useCMEditViewDataManager, useQueryParams } from '@strapi/helper-plugin';
 import selectI18NLocales from '../../selectors/selectI18nLocales';
 import useContentTypePermissions from '../../hooks/useContentTypePermissions';
-import CMEditViewLocalePicker from '../CMEditViewLocalePicker';
+import CMEditViewLocalePicker from './CMEditViewLocalePicker';
 
 const CMEditViewInjectedComponents = () => {
-  const { layout, modifiedData, slug, isSingleType } = useContentManagerEditViewDataManager();
+  const { layout, modifiedData, initialData, slug, isSingleType } = useCMEditViewDataManager();
   const { createPermissions, readPermissions } = useContentTypePermissions(slug);
   const locales = useSelector(selectI18NLocales);
   const params = useParams();
@@ -38,12 +39,18 @@ const CMEditViewInjectedComponents = () => {
   }
 
   const localizations = get(modifiedData, 'localizations', []);
+  let currentLocaleStatus = 'did-not-create-locale';
+
+  if (has(initialData, 'publishedAt')) {
+    currentLocaleStatus = initialData.publishedAt ? 'published' : 'draft';
+  }
 
   return (
     <CMEditViewLocalePicker
       appLocales={locales}
       currentEntityId={currentEntityId}
       createPermissions={createPermissions}
+      currentLocaleStatus={currentLocaleStatus}
       hasDraftAndPublishEnabled={hasDraftAndPublishEnabled}
       localizations={localizations}
       isSingleType={isSingleType}

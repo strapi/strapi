@@ -15,7 +15,7 @@ module.exports = plop => {
       },
       ...getDestinationPrompts('service', plop.getDestBasePath()),
     ],
-    actions: answers => {
+    actions(answers) {
       const filePath = getFilePath(answers.destination);
       return [
         {

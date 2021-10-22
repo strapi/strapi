@@ -23,13 +23,13 @@ describe('UPLOAD | components | FiltersPicker | utils', () => {
     it('should return converted filter if value is a moment object', () => {
       const momentValue = moment();
       const filter = {
-        name: 'created_at',
+        name: 'createdAt',
         filter: '=',
         value: momentValue,
       };
 
       const expected = {
-        name: 'created_at',
+        name: 'createdAt',
         filter: '=',
         value: momentValue.format(),
       };

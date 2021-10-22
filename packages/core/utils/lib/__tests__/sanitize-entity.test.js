@@ -60,7 +60,9 @@ describe('Sanitize Entity', () => {
     attributes: {
       ...userModel.attributes,
       article: {
-        collection: 'article',
+        type: 'relation',
+        relation: 'oneToOne',
+        target: 'article',
       },
     },
   };

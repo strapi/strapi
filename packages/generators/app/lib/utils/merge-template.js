@@ -13,13 +13,15 @@ const allowChildren = '*';
 const allowedTemplateContents = {
   'README.md': true,
   '.env.example': true,
-  api: allowChildren,
-  components: allowChildren,
+  src: {
+    api: allowChildren,
+    components: allowChildren,
+    plugins: allowChildren,
+  },
   config: {
     functions: allowChildren,
   },
   data: allowChildren,
-  plugins: allowChildren,
   public: allowChildren,
   scripts: allowChildren,
 };

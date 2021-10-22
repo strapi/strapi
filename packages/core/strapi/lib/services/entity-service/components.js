@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const { has, prop, omit } = require('lodash/fp');
+const { has, prop, omit, toString } = require('lodash/fp');
 
 const { contentTypes: contentTypesUtils } = require('@strapi/utils');
 
@@ -131,11 +131,26 @@ const updateComponents = async (uid, entityToUpdate, data) => {
           componentValue.map(value => updateOrCreateComponent(componentUID, value))
         );
 
-        // TODO: add order
-        componentBody[attributeName] = components.filter(_.negate(_.isNil)).map(({ id }) => id);
+        componentBody[attributeName] = components.filter(_.negate(_.isNil)).map(({ id }, idx) => {
+          return {
+            id,
+            __pivot: {
+              order: idx + 1,
+              field: attributeName,
+              component_type: componentUID,
+            },
+          };
+        });
       } else {
         const component = await updateOrCreateComponent(componentUID, componentValue);
-        componentBody[attributeName] = component && component.id;
+        componentBody[attributeName] = component && {
+          id: component.id,
+          __pivot: {
+            order: 1,
+            field: attributeName,
+            component_type: componentUID,
+          },
+        };
       }
 
       continue;
@@ -151,9 +166,17 @@ const updateComponents = async (uid, entityToUpdate, data) => {
       }
 
       componentBody[attributeName] = await Promise.all(
-        dynamiczoneValues.map(async value => {
+        dynamiczoneValues.map(async (value, idx) => {
           const { id } = await updateOrCreateComponent(value.__component, value);
-          return { id, __component: value.__component };
+
+          return {
+            id,
+            __component: value.__component,
+            __pivot: {
+              order: idx + 1,
+              field: attributeName,
+            },
+          };
         })
       );
 
@@ -175,11 +198,13 @@ const deleteOldComponents = async (
 
   const idsToKeep = _.castArray(componentValue)
     .filter(has('id'))
-    .map(prop('id'));
+    .map(prop('id'))
+    .map(toString);
 
   const allIds = _.castArray(previousValue)
     .filter(has('id'))
-    .map(prop('id'));
+    .map(prop('id'))
+    .map(toString);
 
   idsToKeep.forEach(id => {
     if (!allIds.includes(id)) {
@@ -206,14 +231,14 @@ const deleteOldDZComponents = async (uid, entityToUpdate, attributeName, dynamic
   const idsToKeep = _.castArray(dynamiczoneValues)
     .filter(has('id'))
     .map(({ id, __component }) => ({
-      id,
+      id: toString(id),
       __component,
     }));
 
   const allIds = _.castArray(previousValue)
     .filter(has('id'))
     .map(({ id, __component }) => ({
-      id,
+      id: toString(id),
       __component,
     }));
 
@@ -293,7 +318,7 @@ const createComponent = async (uid, data) => {
 
   const componentData = await createComponents(uid, data);
 
-  return await strapi.query(uid).create({
+  return strapi.query(uid).create({
     data: Object.assign(omitComponentData(model, data), componentData),
   });
 };
@@ -304,7 +329,7 @@ const updateComponent = async (uid, componentToUpdate, data) => {
 
   const componentData = await updateComponents(uid, componentToUpdate, data);
 
-  return await strapi.query(uid).update({
+  return strapi.query(uid).update({
     where: {
       id: componentToUpdate.id,
     },

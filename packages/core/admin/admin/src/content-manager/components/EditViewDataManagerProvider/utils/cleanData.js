@@ -1,4 +1,6 @@
-import { get, isArray, isObject } from 'lodash';
+import get from 'lodash/get';
+import isArray from 'lodash/isArray';
+import isObject from 'lodash/isObject';
 
 /* eslint-disable indent */
 
@@ -23,13 +25,24 @@ const cleanData = (retrievedData, currentSchema, componentsSchema) => {
           }
 
           break;
-        case 'date':
-          cleanedData =
-            value && value._isAMomentObject === true ? value.format('YYYY-MM-DD') : value;
+        // TODO
+        // case 'date':
+        //   cleanedData =
+        //     value && value._isAMomentObject === true ? value.format('YYYY-MM-DD') : value;
+        //   break;
+        // case 'datetime':
+        //   cleanedData = value && value._isAMomentObject === true ? value.toISOString() : value;
+        //   break;
+        case 'time': {
+          cleanedData = value;
+
+          // FIXME
+          if (value && value.split(':').length < 3) {
+            cleanedData = `${value}:00`;
+          }
+
           break;
-        case 'datetime':
-          cleanedData = value && value._isAMomentObject === true ? value.toISOString() : value;
-          break;
+        }
         case 'media':
           if (getOtherInfos(schema, [current, 'multiple']) === true) {
             cleanedData = value ? value.filter(file => !(file instanceof File)) : null;

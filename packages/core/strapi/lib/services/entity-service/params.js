@@ -1,6 +1,7 @@
 'use strict';
 
-const { pick } = require('lodash/fp');
+const assert = require('assert').strict;
+const { pick, isNil, toNumber, isInteger } = require('lodash/fp');
 
 const {
   convertSortQueryParams,
@@ -9,118 +10,78 @@ const {
   convertPopulateQueryParams,
   convertFiltersQueryParams,
   convertFieldsQueryParams,
+  convertPublicationStateParams,
 } = require('@strapi/utils/lib/convert-query-params');
 
-const { contentTypes: contentTypesUtils } = require('@strapi/utils');
+const pickSelectionParams = pick(['fields', 'populate']);
 
-const { PUBLISHED_AT_ATTRIBUTE } = contentTypesUtils.constants;
-
-// TODO: check invalid values / add defaults ....
-const transformParamsToQuery = (uid, params = {}) => {
-  const model = strapi.getModel(uid);
+const transformParamsToQuery = (uid, params) => {
+  // NOTE: can be a CT, a Compo or nothing in the case of polymorphism (DZ & morph relations)
+  const type = strapi.getModel(uid);
 
   const query = {};
 
-  const {
-    start,
-    page,
-    pageSize,
-    limit,
-    sort,
-    filters,
-    fields,
-    populate,
-    publicationState,
-    _q,
-    _where,
-    ...rest
-  } = params;
+  const { _q, sort, filters, fields, populate, page, pageSize, start, limit } = params;
 
-  if (_q) {
+  if (!isNil(_q)) {
     query._q = _q;
   }
 
-  if (page) {
-    query.page = Number(page);
-  }
-
-  if (pageSize) {
-    query.pageSize = Number(pageSize);
-  }
-
-  if (start) {
-    query.offset = convertStartQueryParams(start);
-  }
-
-  if (limit) {
-    query.limit = convertLimitQueryParams(limit);
-  }
-
-  if (sort) {
+  if (!isNil(sort)) {
     query.orderBy = convertSortQueryParams(sort);
   }
 
-  if (filters) {
+  if (!isNil(filters)) {
     query.where = convertFiltersQueryParams(filters);
   }
 
-  if (_where) {
-    query.where = {
-      $and: [_where].concat(query.where || []),
-    };
-  }
-
-  if (fields) {
+  if (!isNil(fields)) {
     query.select = convertFieldsQueryParams(fields);
   }
 
-  if (populate) {
+  if (!isNil(populate)) {
     query.populate = convertPopulateQueryParams(populate);
   }
 
-  // TODO: move to convert-query-params ?
-  if (publicationState && contentTypesUtils.hasDraftAndPublish(model)) {
-    const { publicationState = 'live' } = params;
+  const isPagePagination = !isNil(page) || !isNil(pageSize);
+  const isOffsetPagination = !isNil(start) || !isNil(limit);
 
-    const liveClause = {
-      [PUBLISHED_AT_ATTRIBUTE]: {
-        $notNull: true,
-      },
-    };
-
-    if (publicationState === 'live') {
-      query.where = {
-        $and: [liveClause].concat(query.where || []),
-      };
-
-      // TODO: propagate nested publicationState filter somehow
-    }
+  if (isPagePagination && isOffsetPagination) {
+    throw new Error(
+      'Invalid pagination attributes. You cannot use page and offset pagination in the same query'
+    );
   }
 
-  const finalQuery = {
-    ...convertOldQuery(rest),
-    ...query,
-  };
+  if (!isNil(page)) {
+    const pageVal = toNumber(page);
+    const isValid = isInteger(pageVal) && pageVal > 0;
 
-  return finalQuery;
+    assert(isValid, `Invalid 'page' parameter. Expected an integer > 0, received: ${page}`);
+
+    query.page = pageVal;
+  }
+
+  if (!isNil(pageSize)) {
+    const pageSizeVal = toNumber(pageSize);
+    const isValid = isInteger(pageSizeVal) && pageSizeVal > 0;
+
+    assert(isValid, `Invalid 'pageSize' parameter. Expected an integer > 0, received: ${page}`);
+
+    query.pageSize = pageSizeVal;
+  }
+
+  if (!isNil(start)) {
+    query.offset = convertStartQueryParams(start);
+  }
+
+  if (!isNil(limit)) {
+    query.limit = convertLimitQueryParams(limit);
+  }
+
+  convertPublicationStateParams(type, params, query);
+
+  return query;
 };
-
-// TODO: to remove once the front is migrated
-const convertOldQuery = params => {
-  const obj = {};
-
-  Object.keys(params).forEach(key => {
-    if (key.startsWith('_')) {
-      obj[key.slice(1)] = params[key];
-    } else {
-      obj[key] = params[key];
-    }
-  });
-
-  return obj;
-};
-
-const pickSelectionParams = pick(['fields', 'populate']);
 
 module.exports = {
   transformParamsToQuery,

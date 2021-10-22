@@ -1,4 +1,4 @@
-import testData from '../../../testUtils/testData';
+import testData from '../../../old/testUtils/testData';
 import contentManagementUtilRemoveFieldsFromData from '../contentManagementUtilRemoveFieldsFromData';
 
 describe('STRAPI_HELPER_PLUGIN | utils', () => {
@@ -36,10 +36,10 @@ describe('STRAPI_HELPER_PLUGIN | utils', () => {
       const contentType = {
         apiID: 'test',
         options: {
-          timestamps: ['created_at', 'updated_at'],
+          timestamps: ['createdAt', 'updatedAt'],
         },
         attributes: {
-          created_at: { type: 'timestamp' },
+          createdAt: { type: 'timestamp' },
           dz: { type: 'dynamiczone', components: ['compos.test-compo', 'compos.sub-compo'] },
           id: { type: 'integer' },
           name: { type: 'string' },
@@ -50,7 +50,7 @@ describe('STRAPI_HELPER_PLUGIN | utils', () => {
           },
           password: { type: 'password' },
           repeatable: { type: 'component', repeatable: true, component: 'compos.test-compo' },
-          updated_at: { type: 'timestamp' },
+          updatedAt: { type: 'timestamp' },
         },
       };
 

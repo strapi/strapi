@@ -14,7 +14,7 @@ import { getTrad } from './utils';
 import mutateCTBContentTypeSchema from './utils/mutateCTBContentTypeSchema';
 import LOCALIZED_FIELDS from './utils/localizedFields';
 import i18nReducers from './hooks/reducers';
-import DeleteModalAdditionalInfos from './components/DeleteModalAdditionalInfos';
+import DeleteModalAdditionalInfos from './components/CMListViewInjectedComponents/DeleteModalAdditionalInfos';
 import addLocaleToCollectionTypesLinksHook from './contentManagerHooks/addLocaleToCollectionTypesLinks';
 import addLocaleToSingleTypesLinksHook from './contentManagerHooks/addLocaleToSingleTypesLinks';
 import addColumnToTableHook from './contentManagerHooks/addColumnToTable';
@@ -105,16 +105,18 @@ export default {
         form: {
           advanced() {
             return [
-              [
-                {
-                  name: 'pluginOptions.i18n.localized',
-                  description: {
-                    id: getTrad('plugin.schema.i18n.localized.description-content-type'),
-                  },
-                  type: 'checkboxConfirmation',
-                  label: { id: getTrad('plugin.schema.i18n.localized.label-content-type') },
+              {
+                name: 'pluginOptions.i18n.localized',
+                description: {
+                  id: getTrad('plugin.schema.i18n.localized.description-content-type'),
+                  defaultMessage: 'Allow you to have content in different locales',
                 },
-              ],
+                type: 'checkboxConfirmation',
+                intlLabel: {
+                  id: getTrad('plugin.schema.i18n.localized.label-content-type'),
+                  defaultMessage: 'Enable localization for this Content-Type',
+                },
+              },
             ];
           },
         },
@@ -164,16 +166,18 @@ export default {
             }
 
             return [
-              [
-                {
-                  name: 'pluginOptions.i18n.localized',
-                  description: {
-                    id: getTrad('plugin.schema.i18n.localized.description-field'),
-                  },
-                  type: 'checkbox',
-                  label: { id: getTrad('plugin.schema.i18n.localized.label-field') },
+              {
+                name: 'pluginOptions.i18n.localized',
+                description: {
+                  id: getTrad('plugin.schema.i18n.localized.description-field'),
+                  defaultMessage: 'The field can have different values in each locale',
                 },
-              ],
+                type: 'checkbox',
+                intlLabel: {
+                  id: getTrad('plugin.schema.i18n.localized.label-field'),
+                  defaultMessage: 'Enable localization for this field',
+                },
+              },
             ];
           },
         },

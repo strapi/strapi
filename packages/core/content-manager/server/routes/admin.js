@@ -1,5 +1,7 @@
 'use strict';
 
+const { routing } = require('../middlewares');
+
 module.exports = {
   type: 'admin',
   routes: [
@@ -86,7 +88,7 @@ module.exports = {
           'admin::isAuthenticatedAdmin',
           {
             name: 'plugin::content-manager.hasPermissions',
-            options: {
+            config: {
               actions: [
                 'plugin::content-manager.explorer.create',
                 'plugin::content-manager.explorer.update',
@@ -102,12 +104,12 @@ module.exports = {
       path: '/single-types/:model',
       handler: 'single-types.find',
       config: {
+        middlewares: [routing],
         policies: [
-          'routing',
           'admin::isAuthenticatedAdmin',
           {
             name: 'plugin::content-manager.hasPermissions',
-            options: { actions: ['plugin::content-manager.explorer.read'] },
+            config: { actions: ['plugin::content-manager.explorer.read'] },
           },
         ],
       },
@@ -117,12 +119,12 @@ module.exports = {
       path: '/single-types/:model',
       handler: 'single-types.createOrUpdate',
       config: {
+        middlewares: [routing],
         policies: [
-          'routing',
           'admin::isAuthenticatedAdmin',
           {
             name: 'plugin::content-manager.hasPermissions',
-            options: {
+            config: {
               actions: [
                 'plugin::content-manager.explorer.create',
                 'plugin::content-manager.explorer.update',
@@ -138,12 +140,12 @@ module.exports = {
       path: '/single-types/:model',
       handler: 'single-types.delete',
       config: {
+        middlewares: [routing],
         policies: [
-          'routing',
           'admin::isAuthenticatedAdmin',
           {
             name: 'plugin::content-manager.hasPermissions',
-            options: { actions: ['plugin::content-manager.explorer.delete'] },
+            config: { actions: ['plugin::content-manager.explorer.delete'] },
           },
         ],
       },
@@ -153,13 +155,13 @@ module.exports = {
       path: '/single-types/:model/actions/publish',
       handler: 'single-types.publish',
       config: {
+        middlewares: [routing],
         policies: [
-          'routing',
           'plugin::content-manager.has-draft-and-publish',
           'admin::isAuthenticatedAdmin',
           {
             name: 'plugin::content-manager.hasPermissions',
-            options: { actions: ['plugin::content-manager.explorer.publish'] },
+            config: { actions: ['plugin::content-manager.explorer.publish'] },
           },
         ],
       },
@@ -169,13 +171,13 @@ module.exports = {
       path: '/single-types/:model/actions/unpublish',
       handler: 'single-types.unpublish',
       config: {
+        middlewares: [routing],
         policies: [
-          'routing',
           'plugin::content-manager.has-draft-and-publish',
           'admin::isAuthenticatedAdmin',
           {
             name: 'plugin::content-manager.hasPermissions',
-            options: { actions: ['plugin::content-manager.explorer.publish'] },
+            config: { actions: ['plugin::content-manager.explorer.publish'] },
           },
         ],
       },
@@ -185,12 +187,12 @@ module.exports = {
       path: '/collection-types/:model/:id/:targetField',
       handler: 'collection-types.previewManyRelations',
       config: {
+        middlewares: [routing],
         policies: [
-          'routing',
           'admin::isAuthenticatedAdmin',
           {
             name: 'plugin::content-manager.hasPermissions',
-            options: { actions: ['plugin::content-manager.explorer.read'] },
+            config: { actions: ['plugin::content-manager.explorer.read'] },
           },
         ],
       },
@@ -200,12 +202,12 @@ module.exports = {
       path: '/collection-types/:model',
       handler: 'collection-types.find',
       config: {
+        middlewares: [routing],
         policies: [
-          'routing',
           'admin::isAuthenticatedAdmin',
           {
             name: 'plugin::content-manager.hasPermissions',
-            options: { actions: ['plugin::content-manager.explorer.read'] },
+            config: { actions: ['plugin::content-manager.explorer.read'] },
           },
         ],
       },
@@ -215,12 +217,12 @@ module.exports = {
       path: '/collection-types/:model',
       handler: 'collection-types.create',
       config: {
+        middlewares: [routing],
         policies: [
-          'routing',
           'admin::isAuthenticatedAdmin',
           {
             name: 'plugin::content-manager.hasPermissions',
-            options: { actions: ['plugin::content-manager.explorer.create'] },
+            config: { actions: ['plugin::content-manager.explorer.create'] },
           },
         ],
       },
@@ -230,12 +232,12 @@ module.exports = {
       path: '/collection-types/:model/:id',
       handler: 'collection-types.findOne',
       config: {
+        middlewares: [routing],
         policies: [
-          'routing',
           'admin::isAuthenticatedAdmin',
           {
             name: 'plugin::content-manager.hasPermissions',
-            options: { actions: ['plugin::content-manager.explorer.read'] },
+            config: { actions: ['plugin::content-manager.explorer.read'] },
           },
         ],
       },
@@ -245,12 +247,12 @@ module.exports = {
       path: '/collection-types/:model/:id',
       handler: 'collection-types.update',
       config: {
+        middlewares: [routing],
         policies: [
-          'routing',
           'admin::isAuthenticatedAdmin',
           {
             name: 'plugin::content-manager.hasPermissions',
-            options: { actions: ['plugin::content-manager.explorer.update'] },
+            config: { actions: ['plugin::content-manager.explorer.update'] },
           },
         ],
       },
@@ -260,12 +262,12 @@ module.exports = {
       path: '/collection-types/:model/:id',
       handler: 'collection-types.delete',
       config: {
+        middlewares: [routing],
         policies: [
-          'routing',
           'admin::isAuthenticatedAdmin',
           {
             name: 'plugin::content-manager.hasPermissions',
-            options: { actions: ['plugin::content-manager.explorer.delete'] },
+            config: { actions: ['plugin::content-manager.explorer.delete'] },
           },
         ],
       },
@@ -275,13 +277,13 @@ module.exports = {
       path: '/collection-types/:model/:id/actions/publish',
       handler: 'collection-types.publish',
       config: {
+        middlewares: [routing],
         policies: [
-          'routing',
           'plugin::content-manager.has-draft-and-publish',
           'admin::isAuthenticatedAdmin',
           {
             name: 'plugin::content-manager.hasPermissions',
-            options: { actions: ['plugin::content-manager.explorer.publish'] },
+            config: { actions: ['plugin::content-manager.explorer.publish'] },
           },
         ],
       },
@@ -291,13 +293,13 @@ module.exports = {
       path: '/collection-types/:model/:id/actions/unpublish',
       handler: 'collection-types.unpublish',
       config: {
+        middlewares: [routing],
         policies: [
-          'routing',
           'plugin::content-manager.has-draft-and-publish',
           'admin::isAuthenticatedAdmin',
           {
             name: 'plugin::content-manager.hasPermissions',
-            options: { actions: ['plugin::content-manager.explorer.publish'] },
+            config: { actions: ['plugin::content-manager.explorer.publish'] },
           },
         ],
       },
@@ -307,12 +309,12 @@ module.exports = {
       path: '/collection-types/:model/actions/bulkDelete',
       handler: 'collection-types.bulkDelete',
       config: {
+        middlewares: [routing],
         policies: [
-          'routing',
           'admin::isAuthenticatedAdmin',
           {
             name: 'plugin::content-manager.hasPermissions',
-            options: { actions: ['plugin::content-manager.explorer.delete'] },
+            config: { actions: ['plugin::content-manager.explorer.delete'] },
           },
         ],
       },

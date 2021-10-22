@@ -4,73 +4,73 @@ module.exports = [
   {
     method: 'GET',
     path: '/webhooks',
-    handler: 'Webhooks.listWebhooks',
+    handler: 'webhooks.listWebhooks',
     config: {
       policies: [
         'admin::isAuthenticatedAdmin',
-        { name: 'admin::hasPermissions', options: { actions: ['admin::webhooks.read'] } },
+        { name: 'admin::hasPermissions', config: { actions: ['admin::webhooks.read'] } },
       ],
     },
   },
   {
     method: 'POST',
     path: '/webhooks',
-    handler: 'Webhooks.createWebhook',
+    handler: 'webhooks.createWebhook',
     config: {
       policies: [
         'admin::isAuthenticatedAdmin',
-        { name: 'admin::hasPermissions', options: { actions: ['admin::webhooks.create'] } },
+        { name: 'admin::hasPermissions', config: { actions: ['admin::webhooks.create'] } },
       ],
     },
   },
   {
     method: 'GET',
     path: '/webhooks/:id',
-    handler: 'Webhooks.getWebhook',
+    handler: 'webhooks.getWebhook',
     config: {
       policies: [
         'admin::isAuthenticatedAdmin',
-        { name: 'admin::hasPermissions', options: { actions: ['admin::webhooks.read'] } },
+        { name: 'admin::hasPermissions', config: { actions: ['admin::webhooks.read'] } },
       ],
     },
   },
   {
     method: 'PUT',
     path: '/webhooks/:id',
-    handler: 'Webhooks.updateWebhook',
+    handler: 'webhooks.updateWebhook',
     config: {
       policies: [
         'admin::isAuthenticatedAdmin',
-        { name: 'admin::hasPermissions', options: { actions: ['admin::webhooks.update'] } },
+        { name: 'admin::hasPermissions', config: { actions: ['admin::webhooks.update'] } },
       ],
     },
   },
   {
     method: 'DELETE',
     path: '/webhooks/:id',
-    handler: 'Webhooks.deleteWebhook',
+    handler: 'webhooks.deleteWebhook',
     config: {
       policies: [
         'admin::isAuthenticatedAdmin',
-        { name: 'admin::hasPermissions', options: { actions: ['admin::webhooks.delete'] } },
+        { name: 'admin::hasPermissions', config: { actions: ['admin::webhooks.delete'] } },
       ],
     },
   },
   {
     method: 'POST',
     path: '/webhooks/batch-delete',
-    handler: 'Webhooks.deleteWebhooks',
+    handler: 'webhooks.deleteWebhooks',
     config: {
       policies: [
         'admin::isAuthenticatedAdmin',
-        { name: 'admin::hasPermissions', options: { actions: ['admin::webhooks.delete'] } },
+        { name: 'admin::hasPermissions', config: { actions: ['admin::webhooks.delete'] } },
       ],
     },
   },
   {
     method: 'POST',
     path: '/webhooks/:id/trigger',
-    handler: 'Webhooks.triggerWebhook',
+    handler: 'webhooks.triggerWebhook',
     config: {
       policies: [],
     },

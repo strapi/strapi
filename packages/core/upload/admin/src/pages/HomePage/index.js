@@ -17,16 +17,17 @@ import { useAppContext, useSelectTimestamps } from '../../hooks';
 import Container from '../../components/Container';
 import HomePageContent from './HomePageContent';
 import HomePageModalStepper from '../../components/HomePageModalStepper';
-import { generateStringFromParams, getHeaderLabel } from './utils';
+import { getHeaderLabel } from './utils';
 import init from './init';
 import reducer, { initialState } from './reducer';
 
+// TODO: remove this file when ML is migrated
 const HomePage = () => {
   const toggleNotification = useNotification();
   const { allowedActions } = useAppContext();
   const { canRead } = allowedActions;
   const { formatMessage } = useIntl();
-  const [, updated_at] = useSelectTimestamps();
+  const [, updatedAt] = useSelectTimestamps();
   const [
     { data, dataCount, dataToDelete, isLoading, shouldRefetchData, showModalConfirmButtonLoading },
     dispatch,
@@ -72,11 +73,11 @@ const HomePage = () => {
 
   const fetchData = async () => {
     const dataRequestURL = getRequestUrl('files');
-    const params = generateStringFromParams(query);
+    const params = query;
 
     const paramsToSend = params.includes('sort')
       ? params
-      : params.concat(`&sort=${updated_at}:DESC`);
+      : params.concat(`&sort=${updatedAt}:DESC`);
 
     try {
       const data = await request(`${dataRequestURL}?${paramsToSend}`, {
@@ -98,7 +99,7 @@ const HomePage = () => {
   };
 
   const fetchDataCount = async () => {
-    const params = generateStringFromParams(query, ['_limit', '_start']);
+    const params = query;
     const requestURL = getRequestUrl('files/count');
 
     try {

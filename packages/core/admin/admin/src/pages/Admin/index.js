@@ -7,23 +7,13 @@
 import React, { Suspense, useEffect, useMemo, lazy } from 'react';
 import { Switch, Route } from 'react-router-dom';
 // Components from @strapi/helper-plugin
-import {
-  CheckPagePermissions,
-  useTracking,
-  LoadingIndicatorPage,
-  useStrapiApp,
-} from '@strapi/helper-plugin';
+import { useTracking, LoadingIndicatorPage, useStrapiApp } from '@strapi/helper-plugin';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import adminPermissions from '../../permissions';
-import Header from '../../components/Header/index';
-import NavTopRightWrapper from '../../components/NavTopRightWrapper';
 import LeftMenu from '../../components/LeftMenu';
-import Onboarding from '../../components/Onboarding';
+import AppLayout from '../../layouts/AppLayout';
 import { useMenu, useReleaseNotification } from '../../hooks';
-import Logout from './Logout';
-import Wrapper from './Wrapper';
-import Content from './Content';
+import Onboarding from './Onboarding';
 import { createRoute } from '../../utils';
 
 const CM = lazy(() =>
@@ -74,44 +64,34 @@ const Admin = () => {
 
   return (
     <DndProvider backend={HTML5Backend}>
-      <Wrapper>
-        <LeftMenu
-          generalSectionLinks={generalSectionLinks}
-          pluginsSectionLinks={pluginsSectionLinks}
-        />
-        <NavTopRightWrapper>
-          <Logout />
-        </NavTopRightWrapper>
-        <div className="adminPageRightWrapper">
-          <Header />
-          <Content>
-            <Suspense fallback={<LoadingIndicatorPage />}>
-              <Switch>
-                <Route path="/" component={HomePage} exact />
-                <Route path="/me" component={ProfilePage} exact />
-
-                <Route path="/content-manager" component={CM} />
-                {routes}
-                <Route path="/settings/:settingId" component={SettingsPage} />
-                <Route path="/settings" component={SettingsPage} exact />
-                <Route path="/marketplace">
-                  <CheckPagePermissions permissions={adminPermissions.marketplace.main}>
-                    <MarketplacePage />
-                  </CheckPagePermissions>
-                </Route>
-                <Route path="/list-plugins" exact>
-                  <CheckPagePermissions permissions={adminPermissions.marketplace.main}>
-                    <InstalledPluginsPage />
-                  </CheckPagePermissions>
-                </Route>
-                <Route path="/404" component={NotFoundPage} />
-                <Route path="" component={NotFoundPage} />
-              </Switch>
-            </Suspense>
-          </Content>
-        </div>
+      <AppLayout
+        sideNav={
+          <LeftMenu
+            generalSectionLinks={generalSectionLinks}
+            pluginsSectionLinks={pluginsSectionLinks}
+          />
+        }
+      >
+        <Suspense fallback={<LoadingIndicatorPage />}>
+          <Switch>
+            <Route path="/" component={HomePage} exact />
+            <Route path="/me" component={ProfilePage} exact />
+            <Route path="/content-manager" component={CM} />
+            {routes}
+            <Route path="/settings/:settingId" component={SettingsPage} />
+            <Route path="/settings" component={SettingsPage} exact />
+            <Route path="/marketplace">
+              <MarketplacePage />
+            </Route>
+            <Route path="/list-plugins" exact>
+              <InstalledPluginsPage />
+            </Route>
+            <Route path="/404" component={NotFoundPage} />
+            <Route path="" component={NotFoundPage} />
+          </Switch>
+        </Suspense>
         <Onboarding />
-      </Wrapper>
+      </AppLayout>
     </DndProvider>
   );
 };

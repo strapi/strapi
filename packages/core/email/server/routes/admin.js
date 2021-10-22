@@ -18,7 +18,7 @@ module.exports = {
       config: {
         policies: [
           'admin::isAuthenticatedAdmin',
-          { name: 'admin::hasPermissions', options: { actions: ['plugin::email.settings.read'] } },
+          { name: 'admin::hasPermissions', config: { actions: ['plugin::email.settings.read'] } },
         ],
       },
     },
@@ -29,7 +29,7 @@ module.exports = {
       config: {
         policies: [
           'admin::isAuthenticatedAdmin',
-          { name: 'admin::hasPermissions', options: { actions: ['plugin::email.settings.read'] } },
+          { name: 'admin::hasPermissions', config: { actions: ['plugin::email.settings.read'] } },
         ],
       },
     },

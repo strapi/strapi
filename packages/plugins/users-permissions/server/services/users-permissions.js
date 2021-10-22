@@ -28,63 +28,74 @@ const transformRoutePrefixFor = pluginName => route => {
 };
 
 module.exports = ({ strapi }) => ({
-  getPlugins(lang = 'en') {
-    const request = require('request');
-    return new Promise(resolve => {
-      request(
-        {
-          uri: `https://marketplace.strapi.io/plugins?lang=${lang}`,
-          json: true,
-          timeout: 3000,
-          headers: {
-            'cache-control': 'max-age=3600',
-          },
-        },
-        (err, response, body) => {
-          if (err || response.statusCode !== 200) {
-            return resolve([]);
-          }
-
-          resolve(body);
-        }
-      );
-    });
-  },
-
-  // TODO: Filter on content-api only
   getActions({ defaultEnable = false } = {}) {
     const actionMap = {};
 
-    _.forEach(strapi.api, (api, apiName) => {
-      const controllers = _.mapValues(api.controllers, controller => {
-        return _.mapValues(controller, () => {
-          return {
-            enabled: defaultEnable,
-            policy: '',
-          };
-        });
-      });
+    const isContentApi = action => {
+      if (!_.has(action, Symbol.for('__type__'))) {
+        return false;
+      }
 
-      actionMap[`api::${apiName}`] = { controllers };
+      return action[Symbol.for('__type__')].includes('content-api');
+    };
+
+    _.forEach(strapi.api, (api, apiName) => {
+      const controllers = _.reduce(
+        api.controllers,
+        (acc, controller, controllerName) => {
+          const contentApiActions = _.pickBy(controller, isContentApi);
+
+          if (_.isEmpty(contentApiActions)) {
+            return acc;
+          }
+
+          acc[controllerName] = _.mapValues(contentApiActions, () => {
+            return {
+              enabled: defaultEnable,
+              policy: '',
+            };
+          });
+
+          return acc;
+        },
+        {}
+      );
+
+      if (!_.isEmpty(controllers)) {
+        actionMap[`api::${apiName}`] = { controllers };
+      }
     });
 
     _.forEach(strapi.plugins, (plugin, pluginName) => {
-      const controllers = _.mapValues(plugin.controllers, controller => {
-        return _.mapValues(controller, () => {
-          return {
-            enabled: defaultEnable,
-            policy: '',
-          };
-        });
-      });
+      const controllers = _.reduce(
+        plugin.controllers,
+        (acc, controller, controllerName) => {
+          const contentApiActions = _.pickBy(controller, isContentApi);
 
-      actionMap[`plugin::${pluginName}`] = { controllers };
+          if (_.isEmpty(contentApiActions)) {
+            return acc;
+          }
+
+          acc[controllerName] = _.mapValues(contentApiActions, () => {
+            return {
+              enabled: defaultEnable,
+              policy: '',
+            };
+          });
+
+          return acc;
+        },
+        {}
+      );
+
+      if (!_.isEmpty(controllers)) {
+        actionMap[`plugin::${pluginName}`] = { controllers };
+      }
     });
 
     return actionMap;
   },
 
-  // TODO: Filter on content-api only
   async getRoutes() {
     const routesMap = {};
 
@@ -95,13 +106,16 @@ module.exports = ({ strapi }) => ({
         }
 
         return route;
-      });
+      }).filter(route => route.info.type === 'content-api');
 
       if (routes.length === 0) {
         return;
       }
 
-      routesMap[`api::${apiName}`] = routes;
+      routesMap[`api::${apiName}`] = routes.map(route => ({
+        ...route,
+        path: `/api${route.path}`,
+      }));
     });
 
     _.forEach(strapi.plugins, (plugin, pluginName) => {
@@ -113,13 +127,16 @@ module.exports = ({ strapi }) => ({
         }
 
         return transformPrefix(route);
-      });
+      }).filter(route => route.info.type === 'content-api');
 
       if (routes.length === 0) {
         return;
       }
 
-      routesMap[`plugin::${pluginName}`] = routes;
+      routesMap[`plugin::${pluginName}`] = routes.map(route => ({
+        ...route,
+        path: `/api${route.path}`,
+      }));
     });
 
     return routesMap;
@@ -134,7 +151,7 @@ module.exports = ({ strapi }) => ({
     const appActions = _.flatMap(strapi.api, (api, apiName) => {
       return _.flatMap(api.controllers, (controller, controllerName) => {
         return _.keys(controller).map(actionName => {
-          return `api::${apiName}.${controllerName}.${_.toLower(actionName)}`;
+          return `api::${apiName}.${controllerName}.${actionName}`;
         });
       });
     });
@@ -142,7 +159,7 @@ module.exports = ({ strapi }) => ({
     const pluginsActions = _.flatMap(strapi.plugins, (plugin, pluginName) => {
       return _.flatMap(plugin.controllers, (controller, controllerName) => {
         return _.keys(controller).map(actionName => {
-          return `plugin::${pluginName}.${controllerName}.${_.toLower(actionName)}`;
+          return `plugin::${pluginName}.${controllerName}.${actionName}`;
         });
       });
     });

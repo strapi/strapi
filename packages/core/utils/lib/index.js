@@ -4,7 +4,6 @@
  * Export shared utilities
  */
 const { buildQuery, hasDeepFilters } = require('./build-query');
-const { VALID_REST_OPERATORS, QUERY_OPERATORS } = require('./convert-query-params');
 const parseMultipartData = require('./parse-multipart');
 const sanitizeEntity = require('./sanitize-entity');
 const parseType = require('./parse-type');
@@ -31,14 +30,13 @@ const relations = require('./relations');
 const setCreatorFields = require('./set-creator-fields');
 const hooks = require('./hooks');
 const providerFactory = require('./provider-factory');
+const pagination = require('./pagination');
 
 module.exports = {
   yup,
   formatYupErrors,
   policy,
   templateConfiguration,
-  VALID_REST_OPERATORS,
-  QUERY_OPERATORS,
   buildQuery,
   hasDeepFilters,
   parseMultipartData,
@@ -64,4 +62,5 @@ module.exports = {
   setCreatorFields,
   hooks,
   providerFactory,
+  pagination,
 };

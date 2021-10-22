@@ -66,6 +66,7 @@ module.exports = {
     'import/no-extraneous-dependencies': 0,
     'import/no-named-as-default': 0,
     'import/order': 2,
+    'import/prefer-default-export': 'off',
     'jsx-a11y/click-events-have-key-events': 1,
     'max-len': [
       2,
@@ -118,5 +119,6 @@ module.exports = {
     'react/state-in-constructor': 0,
     'react/static-property-placement': 0,
     'react/display-name': 0,
+    'react/jsx-wrap-multilines': 0,
   },
 };

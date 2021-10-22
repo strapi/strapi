@@ -1,13 +1,16 @@
 import React from 'react';
-import { Remove } from '@buffetjs/icons';
 import { components } from 'react-select';
+import CloseAlertIcon from '@strapi/icons/CloseAlertIcon';
+import IconBox from './IconBox';
 
 const ClearIndicator = props => {
   const Component = components.ClearIndicator;
 
   return (
     <Component {...props}>
-      <Remove width="11px" height="11px" fill="#9EA7B8" />
+      <IconBox as="button" type="button">
+        <CloseAlertIcon />
+      </IconBox>
     </Component>
   );
 };

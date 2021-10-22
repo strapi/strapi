@@ -17,7 +17,7 @@ const formatFixtures = map(stringifyDates);
 
 module.exports = {
   contentType: {
-    create: contentType => {
+    create(contentType) {
       let createdModel;
 
       return {
@@ -29,7 +29,7 @@ module.exports = {
       };
     },
 
-    createBatch: contentTypes => {
+    createBatch(contentTypes) {
       let createdModels = [];
 
       return {
@@ -45,7 +45,7 @@ module.exports = {
       };
     },
 
-    createMany: contentTypes => {
+    createMany(contentTypes) {
       const createdModels = [];
 
       return {
@@ -66,7 +66,7 @@ module.exports = {
     },
   },
   component: {
-    create: component => {
+    create(component) {
       let createdModel;
 
       return {

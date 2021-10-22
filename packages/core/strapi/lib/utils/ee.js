@@ -78,7 +78,7 @@ module.exports = ({ dir, logger = noLog }) => {
 };
 
 Object.defineProperty(module.exports, 'licenseInfo', {
-  get: () => {
+  get() {
     mustHaveKey('licenseInfo');
     return internals.licenseInfo;
   },
@@ -87,7 +87,7 @@ Object.defineProperty(module.exports, 'licenseInfo', {
 });
 
 Object.defineProperty(module.exports, 'isEE', {
-  get: () => {
+  get() {
     mustHaveKey('isEE');
     return internals.isEE;
   },
@@ -96,7 +96,7 @@ Object.defineProperty(module.exports, 'isEE', {
 });
 
 Object.defineProperty(module.exports, 'features', {
-  get: () => {
+  get() {
     mustHaveKey('licenseInfo');
 
     const { type: licenseType } = module.exports.licenseInfo;

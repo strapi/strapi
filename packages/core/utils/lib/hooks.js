@@ -24,12 +24,14 @@ const createHook = () => {
       return state.handlers;
     },
 
-    register: handler => {
+    register(handler) {
       state.handlers.push(handler);
+      return this;
     },
 
-    delete: handler => {
+    delete(handler) {
       state.handlers = remove(eq(handler), state.handlers);
+      return this;
     },
 
     call() {
@@ -80,7 +82,7 @@ const createAsyncSeriesWaterfallHook = () => ({
 const createAsyncParallelHook = () => ({
   ...createHook(),
 
-  call(context) {
+  async call(context) {
     const promises = this.handlers.map(handler => handler(cloneDeep(context)));
 
     return Promise.all(promises);

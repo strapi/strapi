@@ -83,7 +83,7 @@ describe('content-types service', () => {
       ).toEqual(['stars', 'price']);
     });
 
-    test('Consider locale, localizations & published_at as localized', () => {
+    test('Consider locale, localizations & publishedAt as localized', () => {
       expect(
         getNonLocalizedAttributes({
           uid: 'test-model',
@@ -112,7 +112,7 @@ describe('content-types service', () => {
               target: 'test-model',
               visible: false,
             },
-            published_at: {
+            publishedAt: {
               type: 'datetime',
               visible: false,
             },
@@ -360,7 +360,7 @@ describe('content-types service', () => {
   });
 
   describe('copyNonLocalizedAttributes', () => {
-    test('Does not copy locale, localizations & published_at', () => {
+    test('Does not copy locale, localizations & publishedAt', () => {
       const model = {
         attributes: {
           title: {
@@ -386,7 +386,7 @@ describe('content-types service', () => {
             collection: 'test-model',
             visible: false,
           },
-          published_at: {
+          publishedAt: {
             type: 'datetime',
             visible: false,
           },
@@ -401,7 +401,7 @@ describe('content-types service', () => {
         description: 'My super description',
         locale: 'en',
         localizations: [1, 2, 3],
-        published_at: '2021-03-18T09:47:37.557Z',
+        publishedAt: '2021-03-18T09:47:37.557Z',
       };
 
       const result = copyNonLocalizedAttributes(model, input);

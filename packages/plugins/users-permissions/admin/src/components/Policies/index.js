@@ -1,60 +1,56 @@
-import React, { useMemo } from 'react';
-import { FormattedMessage } from 'react-intl';
-import { Col } from 'reactstrap';
+import React from 'react';
+import { useIntl } from 'react-intl';
+import { H3, Text } from '@strapi/parts/Text';
+import { Stack } from '@strapi/parts/Stack';
+import { GridItem } from '@strapi/parts/Grid';
 import { get, isEmpty, takeRight, toLower, without } from 'lodash';
-import { getTrad } from '../../utils';
 import { useUsersPermissions } from '../../contexts/UsersPermissionsContext';
 import BoundRoute from '../BoundRoute';
-import SizedInput from '../SizedInput';
-import { Header, Wrapper, Sticky } from './Components';
 
 const Policies = () => {
-  const { modifiedData, selectedAction, routes, policies, onChange } = useUsersPermissions();
-  const baseTitle = 'users-permissions.Policies.header';
-  const title = !selectedAction ? 'hint' : 'title';
+  const { formatMessage } = useIntl();
+  const { selectedAction, routes } = useUsersPermissions();
   const path = without(selectedAction.split('.'), 'controllers');
   const controllerRoutes = get(routes, path[0]);
   const displayedRoutes = isEmpty(controllerRoutes)
     ? []
     : controllerRoutes.filter(o => toLower(o.handler) === toLower(takeRight(path, 2).join('.')));
 
-  const inputName = `${selectedAction}.policy`;
-
-  const value = useMemo(() => {
-    return get(modifiedData, inputName, '');
-  }, [inputName, modifiedData]);
-
   return (
-    <Wrapper className="col-md-5">
-      <Sticky className="container-fluid">
-        <div className="row">
-          <Header className="col-md-12">
-            <FormattedMessage id={`${baseTitle}.${title}`} />
-          </Header>
-          {selectedAction && (
-            <>
-              <SizedInput
-                type="select"
-                name={inputName}
-                onChange={onChange}
-                label={getTrad('Policies.InputSelect.label')}
-                options={policies}
-                value={value}
-              />
-
-              <div className="row">
-                <Col size={{ xs: 12 }}>
-                  {displayedRoutes.map((route, key) => (
-                    // eslint-disable-next-line react/no-array-index-key
-                    <BoundRoute key={key} route={route} />
-                  ))}
-                </Col>
-              </div>
-            </>
-          )}
-        </div>
-      </Sticky>
-    </Wrapper>
+    <GridItem
+      col={5}
+      background="neutral150"
+      paddingTop={6}
+      paddingBottom={6}
+      paddingLeft={7}
+      paddingRight={7}
+      style={{ minHeight: '100%' }}
+    >
+      {selectedAction ? (
+        <Stack size={2}>
+          {displayedRoutes.map((route, key) => (
+            // eslint-disable-next-line react/no-array-index-key
+            <BoundRoute key={key} route={route} />
+          ))}
+        </Stack>
+      ) : (
+        <Stack size={2}>
+          <H3>
+            {formatMessage({
+              id: 'users-permissions.Policies.header.title',
+              defaultMessage: 'Advanced settings',
+            })}
+          </H3>
+          <Text as="p" textColor="neutral600">
+            {formatMessage({
+              id: 'users-permissions.Policies.header.hint',
+              defaultMessage:
+                "Select the application's actions or the plugin's actions and click on the cog icon to display the bound route",
+            })}
+          </Text>
+        </Stack>
+      )}
+    </GridItem>
   );
 };
 

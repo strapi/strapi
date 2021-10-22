@@ -3,7 +3,8 @@
 const { toString } = require('lodash/fp');
 
 const ssoCheckRolesIdForDeletion = async ids => {
-  const adminStore = await strapi.store({ type: 'core', environment: '', name: 'admin' });
+  const adminStore = await strapi.store({ type: 'core', name: 'admin' });
+
   const {
     providers: { defaultRole },
   } = await adminStore.get({ key: 'auth' });

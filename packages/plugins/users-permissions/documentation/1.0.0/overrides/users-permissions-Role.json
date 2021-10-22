@@ -67,16 +67,16 @@
                           "role": {
                             "type": "string"
                           },
-                          "created_by": {
+                          "createdBy": {
                             "type": "string"
                           },
-                          "updated_by": {
+                          "updatedBy": {
                             "type": "string"
                           }
                         }
                       }
                     },
-                    "created_by": {
+                    "createdBy": {
                       "required": ["id", "email"],
                       "properties": {
                         "id": {
@@ -117,7 +117,7 @@
                         }
                       }
                     },
-                    "updated_by": {
+                    "updatedBy": {
                       "required": ["id", "email"],
                       "properties": {
                         "id": {
@@ -192,7 +192,7 @@
                       "type": {
                         "type": "string"
                       },
-                      "created_by": {
+                      "createdBy": {
                         "required": ["id", "email"],
                         "properties": {
                           "id": {
@@ -233,7 +233,7 @@
                           }
                         }
                       },
-                      "updated_by": {
+                      "updatedBy": {
                         "required": ["id", "email"],
                         "properties": {
                           "id": {

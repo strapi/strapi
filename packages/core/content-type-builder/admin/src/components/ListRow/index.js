@@ -1,38 +1,40 @@
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
-import { get } from 'lodash';
-import { FormattedMessage } from 'react-intl';
-import { AttributeIcon, IconLinks } from '@buffetjs/core';
+import get from 'lodash/get';
+import upperFirst from 'lodash/upperFirst';
+import { useIntl } from 'react-intl';
+import { IconButton } from '@strapi/parts/IconButton';
+import { Flex } from '@strapi/parts/Flex';
+import { Stack } from '@strapi/parts/Stack';
+import { Text } from '@strapi/parts/Text';
+import EditIcon from '@strapi/icons/EditIcon';
+import DeleteIcon from '@strapi/icons/DeleteIcon';
+import { stopPropagation, onRowClick } from '@strapi/helper-plugin';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
-import getAttributeDisplayedType from '../../utils/getAttributeDisplayedType';
 import getTrad from '../../utils/getTrad';
 import Curve from '../../icons/Curve';
 import UpperFist from '../UpperFirst';
-import Wrapper from './Wrapper';
+import BoxWrapper from './BoxWrapper';
+import AttributeIcon from '../AttributeIcon';
 
 function ListRow({
   configurable,
+  editTarget,
+  firstLoopComponentUid,
+  isFromDynamicZone,
   name,
-  dzName,
   onClick,
   plugin,
+  relation,
+  repeatable,
+  secondLoopComponentUid,
   target,
   targetUid,
   type,
-  mainTypeName,
-  editTarget,
-  firstLoopComponentName,
-  firstLoopComponentUid,
-  isFromDynamicZone,
-  repeatable,
-  secondLoopComponentName,
-  secondLoopComponentUid,
-  isNestedInDZComponent,
-  relation,
 }) {
-  const { contentTypes, isInDevelopmentMode, modifiedData, removeAttribute } = useDataManager();
+  const { contentTypes, isInDevelopmentMode, removeAttribute } = useDataManager();
+  const { formatMessage } = useIntl();
 
   const isMorph = type === 'relation' && relation.includes('morph');
   const ico = ['integer', 'biginteger', 'float', 'decimal'].includes(type) ? 'number' : type;
@@ -54,121 +56,7 @@ function ListRow({
     }
 
     if (configurable !== false) {
-      const firstComponentCategory = get(
-        modifiedData,
-        ['components', firstLoopComponentUid, 'category'],
-        null
-      );
-      const secondComponentCategory = get(
-        modifiedData,
-        ['components', secondLoopComponentUid, 'category'],
-        null
-      );
-
       const attrType = type;
-      const icoType = getAttributeDisplayedType(attrType);
-
-      let firstHeaderObject = {
-        header_label_1: mainTypeName,
-        header_icon_name_1: icoType,
-        header_icon_isCustom_1: false,
-        header_info_category_1: null,
-        header_info_name_1: null,
-      };
-      let secondHeaderObject = {
-        header_label_2: name,
-        header_icon_name_2: null,
-        header_icon_isCustom_2: false,
-        header_info_category_2: null,
-        header_info_name_2: null,
-      };
-      let thirdHeaderObject = {
-        header_icon_name_3: 'component',
-        header_icon_isCustom_3: false,
-        header_info_category_3: null,
-        header_info_name_3: null,
-      };
-      let fourthHeaderObject = {
-        header_icon_name_4: null,
-        header_icon_isCustom_4: false,
-        header_info_category_4: null,
-        header_info_name_4: null,
-      };
-      let fifthHeaderObject = {
-        header_icon_name_5: null,
-        header_icon_isCustom_5: false,
-        header_info_category_5: null,
-        header_info_name_5: null,
-      };
-
-      if (firstLoopComponentName) {
-        secondHeaderObject = {
-          header_label_2: firstLoopComponentName,
-          header_icon_name_2: 'component',
-          header_icon_isCustom_2: false,
-          header_info_category_2: firstComponentCategory,
-          header_info_name_2: firstLoopComponentName,
-        };
-
-        thirdHeaderObject = {
-          ...thirdHeaderObject,
-          header_label_3: name,
-          header_icon_name_3: null,
-        };
-      }
-
-      if (secondLoopComponentUid) {
-        thirdHeaderObject = {
-          ...thirdHeaderObject,
-          header_label_3: secondLoopComponentName,
-          header_icon_name_3: 'component',
-          header_info_category_3: secondComponentCategory,
-          header_info_name_3: secondLoopComponentName,
-        };
-        fourthHeaderObject = {
-          ...fourthHeaderObject,
-          header_label_4: name,
-          header_icon_name_4: null,
-        };
-      }
-
-      if (isFromDynamicZone || isNestedInDZComponent) {
-        secondHeaderObject = {
-          header_label_2: dzName,
-          header_icon_name_2: 'dynamiczone',
-          header_icon_isCustom_2: false,
-          header_info_name_2: null,
-          header_info_category_2: null,
-        };
-        thirdHeaderObject = {
-          header_icon_name_3: 'component',
-          header_label_3: firstLoopComponentName,
-          header_info_name_3: firstComponentCategory,
-          header_info_category_3: firstComponentCategory,
-        };
-
-        if (!isNestedInDZComponent) {
-          fourthHeaderObject = {
-            header_icon_name_4: null,
-            header_icon_isCustom_4: false,
-            header_info_category_4: null,
-            header_label_4: name,
-          };
-        } else {
-          fourthHeaderObject = {
-            header_icon_name_4: 'components',
-            header_icon_isCustom_4: false,
-            header_info_category_4: secondComponentCategory,
-            header_info_name_4: secondLoopComponentName,
-            header_label_4: secondLoopComponentName,
-          };
-
-          fifthHeaderObject = {
-            ...fifthHeaderObject,
-            header_label_5: name,
-          };
-        }
-      }
 
       onClick(
         // Tells where the attribute is located in the main modifiedData object : contentType, component or components
@@ -178,12 +66,7 @@ function ListRow({
         // Name of the attribute
         name,
         // Type of the attribute
-        attrType,
-        firstHeaderObject,
-        secondHeaderObject,
-        thirdHeaderObject,
-        fourthHeaderObject,
-        fifthHeaderObject
+        attrType
       );
     }
   };
@@ -198,112 +81,107 @@ function ListRow({
   }
 
   return (
-    <Wrapper
-      onClick={handleClick}
-      className={[target ? 'relation-row' : '', configurable ? 'clickable' : '']}
-      loopNumber={loopNumber}
+    <BoxWrapper
+      as="tr"
+      {...onRowClick({
+        fn: handleClick,
+        condition: isInDevelopmentMode && configurable && !isMorph,
+      })}
     >
-      <td>
-        <AttributeIcon key={src} type={src} />
-        <Curve fill={isFromDynamicZone ? '#AED4FB' : '#f3f4f4'} />
-      </td>
-      <td style={{ fontWeight: 600 }}>
-        <p>{name}</p>
+      <td style={{ position: 'relative' }}>
+        {loopNumber !== 0 && <Curve color={isFromDynamicZone ? 'primary200' : 'neutral150'} />}
+        <Stack paddingLeft={2} size={4} horizontal>
+          <AttributeIcon key={src} type={src} />
+          <Text bold>{upperFirst(name)}</Text>
+        </Stack>
       </td>
       <td>
         {target ? (
-          <div>
-            <FormattedMessage
-              id={`${pluginId}.modelPage.attribute.${
-                isMorph ? 'relation-polymorphic' : 'relationWith'
-              }`}
-            />
+          <Text>
+            {formatMessage({
+              id: getTrad(
+                `modelPage.attribute.${isMorph ? 'relation-polymorphic' : 'relationWith'}`
+              ),
+              defaultMessage: 'Relation with',
+            })}
             &nbsp;
-            <FormattedMessage id={`${pluginId}.from`}>
-              {msg => (
-                <span style={{ fontStyle: 'italic' }}>
-                  <UpperFist content={contentTypeFriendlyName} />
-                  &nbsp;
-                  {plugin && `(${msg}: ${plugin})`}
-                </span>
-              )}
-            </FormattedMessage>
-          </div>
+            <span style={{ fontStyle: 'italic' }}>
+              <UpperFist content={contentTypeFriendlyName} />
+              &nbsp;
+              {plugin &&
+                `(${formatMessage({
+                  id: getTrad(`from`),
+                  defaultMessage: 'from',
+                })}: ${plugin})`}
+            </span>
+          </Text>
         ) : (
-          <>
-            <FormattedMessage id={`${pluginId}.attribute.${readableType}`} defaultMessage={type} />
+          <Text>
+            {formatMessage({
+              id: getTrad(`attribute.${readableType}`),
+              defaultMessage: type,
+            })}
             &nbsp;
-            {repeatable && <FormattedMessage id={getTrad('component.repeatable')} />}
-          </>
+            {repeatable &&
+              formatMessage({
+                id: getTrad('component.repeatable'),
+                defaultMessage: '(repeatable)',
+              })}
+          </Text>
         )}
       </td>
-      <td className="button-container">
+      <td>
         {isInDevelopmentMode && (
-          <>
+          <Flex justifyContent="flex-end" {...stopPropagation}>
             {configurable ? (
-              <>
-                {!isMorph ? (
-                  <IconLinks
-                    links={[
-                      {
-                        icon: <FontAwesomeIcon icon="pencil-alt" />,
-                        onClick: () => handleClick(),
-                      },
-                      {
-                        icon: <FontAwesomeIcon icon="trash-alt" />,
-                        onClick: e => {
-                          e.stopPropagation();
-                          removeAttribute(
-                            editTarget,
-                            name,
-                            secondLoopComponentUid || firstLoopComponentUid || ''
-                          );
-                        },
-                      },
-                    ]}
-                  />
-                ) : (
-                  <IconLinks
-                    links={[
-                      {
-                        icon: <FontAwesomeIcon icon="trash-alt" />,
-                        onClick: e => {
-                          e.stopPropagation();
-                          removeAttribute(
-                            editTarget,
-                            name,
-                            secondLoopComponentUid || firstLoopComponentUid || ''
-                          );
-                        },
-                      },
-                    ]}
+              <Stack horizontal size={1}>
+                {!isMorph && (
+                  <IconButton
+                    onClick={handleClick}
+                    label={`${formatMessage({
+                      id: 'app.utils.edit',
+                      formatMessage: 'Edit',
+                    })} ${name}`}
+                    noBorder
+                    icon={<EditIcon />}
                   />
                 )}
-              </>
+                <IconButton
+                  onClick={e => {
+                    e.stopPropagation();
+                    removeAttribute(
+                      editTarget,
+                      name,
+                      secondLoopComponentUid || firstLoopComponentUid || ''
+                    );
+                  }}
+                  label={`${formatMessage({
+                    id: 'app.utils.delete',
+                    defaultMessage: 'Delete',
+                  })} ${name}`}
+                  noBorder
+                  icon={<DeleteIcon />}
+                />
+              </Stack>
             ) : (
-              <button type="button">
-                <FontAwesomeIcon icon="lock" />
-              </button>
+              // ! TODO ASK DESIGN TO PUT LOCK ICON INSIDE DS
+              <FontAwesomeIcon icon="lock" />
             )}
-          </>
+          </Flex>
         )}
       </td>
-    </Wrapper>
+    </BoxWrapper>
   );
 }
 
 ListRow.defaultProps = {
   configurable: true,
-  dzName: null,
-  firstLoopComponentName: null,
   firstLoopComponentUid: null,
   isFromDynamicZone: false,
-  isNestedInDZComponent: false,
   onClick: () => {},
   plugin: null,
   relation: '',
   repeatable: false,
-  secondLoopComponentName: null,
   secondLoopComponentUid: null,
   target: null,
   targetUid: null,
@@ -312,19 +190,14 @@ ListRow.defaultProps = {
 
 ListRow.propTypes = {
   configurable: PropTypes.bool,
-  dzName: PropTypes.string,
   editTarget: PropTypes.string.isRequired,
-  firstLoopComponentName: PropTypes.string,
   firstLoopComponentUid: PropTypes.string,
   isFromDynamicZone: PropTypes.bool,
-  isNestedInDZComponent: PropTypes.bool,
-  mainTypeName: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
   onClick: PropTypes.func,
   plugin: PropTypes.string,
   relation: PropTypes.string,
   repeatable: PropTypes.bool,
-  secondLoopComponentName: PropTypes.string,
   secondLoopComponentUid: PropTypes.string,
   target: PropTypes.string,
   targetUid: PropTypes.string,

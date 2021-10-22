@@ -1,26 +1,34 @@
 'use strict';
 
-const { getDefaultLocale } = require('../utils');
 const { getService } = require('../../../utils');
-
-const migrateForBookshelf = require('./migrate-for-bookshelf');
-
-const after = () => {};
+const { DEFAULT_LOCALE } = require('../../../constants');
 
 // Disable i18n on CT -> Delete all entities that are not in the default locale
-const before = async ({ model, definition, previousDefinition, ORM }, context) => {
+module.exports = async ({ oldContentTypes, contentTypes }) => {
   const { isLocalizedContentType } = getService('content-types');
+  const { getDefaultLocale } = getService('locales');
 
-  if (isLocalizedContentType(definition) || !isLocalizedContentType(previousDefinition)) {
+  if (!oldContentTypes) {
     return;
   }
 
-  const defaultLocale = await getDefaultLocale(model, ORM);
+  for (const uid in contentTypes) {
+    if (!oldContentTypes[uid]) {
+      continue;
+    }
 
-  await migrateForBookshelf({ ORM, defaultLocale, definition, previousDefinition, model }, context);
-};
+    const oldContentType = oldContentTypes[uid];
+    const contentType = contentTypes[uid];
 
-module.exports = {
-  before,
-  after,
+    // if i18N is disabled remove non default locales before sync
+    if (isLocalizedContentType(oldContentType) && !isLocalizedContentType(contentType)) {
+      const defaultLocale = (await getDefaultLocale()) || DEFAULT_LOCALE.code;
+
+      await strapi.db
+        .queryBuilder(uid)
+        .delete()
+        .where({ locale: { $ne: defaultLocale } })
+        .execute();
+    }
+  }
 };

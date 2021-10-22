@@ -10,4 +10,8 @@ module.exports = {
   UPDATE_ACTION: 'plugin::content-manager.explorer.update',
   DELETE_ACTION: 'plugin::content-manager.explorer.delete',
   PUBLISH_ACTION: 'plugin::content-manager.explorer.publish',
+  API_TOKEN_TYPE: {
+    READ_ONLY: 'read-only',
+    FULL_ACCESS: 'full-access',
+  },
 };

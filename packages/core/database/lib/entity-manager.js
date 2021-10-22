@@ -29,7 +29,7 @@ const toAssocs = data => {
     });
 };
 
-const toRow = (metadata, data = {}, { withDefaults = false } = {}) => {
+const processData = (metadata, data = {}, { withDefaults = false } = {}) => {
   const { attributes } = metadata;
 
   const obj = {};
@@ -37,11 +37,9 @@ const toRow = (metadata, data = {}, { withDefaults = false } = {}) => {
   for (const attributeName in attributes) {
     const attribute = attributes[attributeName];
 
-    // TODO:  convert to column name
     if (types.isScalar(attribute.type)) {
       const field = createField(attribute);
 
-      // TODO: move application level default to entity service
       if (_.isUndefined(data[attributeName])) {
         if (!_.isUndefined(attribute.default) && withDefaults) {
           if (typeof attribute.default === 'function') {
@@ -65,7 +63,6 @@ const toRow = (metadata, data = {}, { withDefaults = false } = {}) => {
     if (types.isRelation(attribute.type)) {
       // oneToOne & manyToOne
       if (attribute.joinColumn && attribute.owner) {
-        // TODO: ensure joinColumn name respect convention ?
         const joinColumnName = attribute.joinColumn.name;
 
         // allow setting to null
@@ -145,7 +142,7 @@ const createEntityManager = db => {
       await db.lifecycles.run('beforeCount', uid, { params });
 
       const res = await this.createQueryBuilder(uid)
-        .init(_.pick(['_q', 'where'], params))
+        .init(_.pick(['_q', 'where', 'filters'], params))
         .count()
         .first()
         .execute();
@@ -167,7 +164,7 @@ const createEntityManager = db => {
         throw new Error('Create expects a data object');
       }
 
-      const dataToInsert = toRow(metadata, data, { withDefaults: true });
+      const dataToInsert = processData(metadata, data, { withDefaults: true });
 
       const [id] = await this.createQueryBuilder(uid)
         .insert(dataToInsert)
@@ -175,7 +172,7 @@ const createEntityManager = db => {
 
       await this.attachRelations(uid, id, data);
 
-      // TODO: in case there is not select or populate specified return the inserted data ?
+      // TODO: in case there is no select or populate specified return the inserted data ?
       // TODO: do not trigger the findOne lifecycles ?
       const result = await this.findOne(uid, {
         where: { id },
@@ -199,7 +196,7 @@ const createEntityManager = db => {
         throw new Error('CreateMany expects data to be an array');
       }
 
-      const dataToInsert = data.map(datum => toRow(metadata, datum, { withDefaults: true }));
+      const dataToInsert = data.map(datum => processData(metadata, datum, { withDefaults: true }));
 
       if (_.isEmpty(dataToInsert)) {
         throw new Error('Nothing to insert');
@@ -242,7 +239,7 @@ const createEntityManager = db => {
 
       const { id } = entity;
 
-      const dataToUpdate = toRow(metadata, data);
+      const dataToUpdate = processData(metadata, data);
 
       if (!_.isEmpty(dataToUpdate)) {
         await this.createQueryBuilder(uid)
@@ -272,7 +269,7 @@ const createEntityManager = db => {
       const metadata = db.metadata.get(uid);
       const { where, data } = params;
 
-      const dataToUpdate = toRow(metadata, data);
+      const dataToUpdate = processData(metadata, data);
 
       if (_.isEmpty(dataToUpdate)) {
         throw new Error('Update requires data');
@@ -299,7 +296,7 @@ const createEntityManager = db => {
         throw new Error('Delete requires a where parameter');
       }
 
-      // TODO: avoid trigger the findOne lifecycles in the case ?
+      // TODO: do not trigger the findOne lifecycles ?
       const entity = await this.findOne(uid, {
         select: select && ['id'].concat(select),
         where,
@@ -472,7 +469,6 @@ const createEntityManager = db => {
           const { joinTable } = attribute;
           const { joinColumn, inverseJoinColumn } = joinTable;
 
-          // TODO: validate logic of delete
           if (isOneToAny(attribute) && isBidirectional(attribute)) {
             await this.createQueryBuilder(joinTable.name)
               .delete()
@@ -775,6 +771,7 @@ const createEntityManager = db => {
           continue;
         }
 
+        // do not need to delete links when using foreign keys
         if (db.dialect.usesForeignKeys()) {
           return;
         }
@@ -815,7 +812,7 @@ const createEntityManager = db => {
       const entry = await this.findOne(uid, {
         select: ['id'],
         where: { id: entity.id },
-        populate: populate,
+        populate,
       });
 
       return Object.assign({}, entity, entry);
@@ -839,6 +836,10 @@ const createEntityManager = db => {
           [field]: params || true,
         },
       });
+
+      if (!entry) {
+        return null;
+      }
 
       return entry[field];
     },

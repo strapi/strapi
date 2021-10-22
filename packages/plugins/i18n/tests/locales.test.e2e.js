@@ -11,7 +11,7 @@ const data = {
   deletedLocales: [],
 };
 
-const omitTimestamps = omit(['updatedAt', 'createdAt', 'updated_at', 'created_at']);
+const omitTimestamps = omit(['updatedAt', 'createdAt']);
 const compareLocales = (a, b) => (a.code < b.code ? -1 : 1);
 
 const productModel = {

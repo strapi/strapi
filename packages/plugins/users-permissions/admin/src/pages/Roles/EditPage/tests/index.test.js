@@ -1,0 +1,1261 @@
+import React from 'react';
+import { render, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { ThemeProvider, lightTheme } from '@strapi/parts';
+import { Router, Switch, Route } from 'react-router-dom';
+import { IntlProvider } from 'react-intl';
+import { createMemoryHistory } from 'history';
+import pluginId from '../../../../pluginId';
+import RolesEditPage from '..';
+import server from './server';
+
+jest.mock('@strapi/helper-plugin', () => {
+  // Make sure the references of the mock functions stay the same, otherwise we get an endless loop
+  const mockToggleNotification = jest.fn();
+  const mockUseNotification = jest.fn(() => {
+    return mockToggleNotification;
+  });
+
+  return {
+    ...jest.requireActual('@strapi/helper-plugin'),
+    useNotification: mockUseNotification,
+    useOverlayBlocker: jest.fn(() => ({ lockApp: jest.fn(), unlockApp: jest.fn() })),
+  };
+});
+
+function makeAndRenderApp() {
+  const history = createMemoryHistory();
+  const app = (
+    <IntlProvider locale="en" messages={{}} textComponent="span">
+      <ThemeProvider theme={lightTheme}>
+        <Router history={history}>
+          <Switch>
+            <Route path={`/settings/${pluginId}/roles/:id`} component={RolesEditPage} />
+          </Switch>
+        </Router>
+      </ThemeProvider>
+    </IntlProvider>
+  );
+  const renderResult = render(app);
+  history.push(`/settings/${pluginId}/roles/1`);
+
+  return renderResult;
+}
+
+describe('Admin | containers | RoleEditPage', () => {
+  beforeAll(() => server.listen());
+
+  beforeEach(() => jest.clearAllMocks());
+
+  afterEach(() => server.resetHandlers());
+
+  afterAll(() => server.close());
+
+  it('renders users-permissions edit role and matches snapshot', async () => {
+    const { container, getByTestId, getByRole } = makeAndRenderApp();
+    await waitForElementToBeRemoved(() => getByTestId('loader'));
+    await waitFor(() => expect(getByRole('heading', { name: /permissions/i })).toBeInTheDocument());
+
+    expect(container.firstChild).toMatchInlineSnapshot(`
+      .c1 {
+        background: #f6f6f9;
+        padding-top: 24px;
+        padding-right: 56px;
+        padding-bottom: 56px;
+        padding-left: 56px;
+      }
+
+      .c2 {
+        padding-bottom: 12px;
+      }
+
+      .c21 {
+        padding-right: 56px;
+        padding-left: 56px;
+      }
+
+      .c9 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: justify;
+        -webkit-justify-content: space-between;
+        -ms-flex-pack: justify;
+        justify-content: space-between;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c10 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c11 {
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c19 {
+        font-weight: 400;
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #666687;
+      }
+
+      .c20 {
+        font-size: 1rem;
+        line-height: 1.5;
+      }
+
+      .c0 {
+        outline: none;
+      }
+
+      .c18 {
+        font-weight: 500;
+        font-size: 0.75rem;
+        line-height: 1.33;
+        color: #32324d;
+      }
+
+      .c15 {
+        padding-right: 8px;
+      }
+
+      .c12 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 4px;
+        background: #ffffff;
+        border: 1px solid #dcdce4;
+        position: relative;
+        outline: none;
+      }
+
+      .c12 svg {
+        height: 12px;
+        width: 12px;
+      }
+
+      .c12 svg > g,
+      .c12 svg path {
+        fill: #ffffff;
+      }
+
+      .c12[aria-disabled='true'] {
+        pointer-events: none;
+      }
+
+      .c12:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c12:focus-visible {
+        outline: none;
+      }
+
+      .c12:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
+      }
+
+      .c16 {
+        height: 100%;
+      }
+
+      .c13 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        padding: 8px 16px;
+        background: #4945ff;
+        border: none;
+        border: 1px solid #4945ff;
+        background: #4945ff;
+      }
+
+      .c13 .c14 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c13 .c17 {
+        color: #ffffff;
+      }
+
+      .c13[aria-disabled='true'] {
+        border: 1px solid #dcdce4;
+        background: #eaeaef;
+      }
+
+      .c13[aria-disabled='true'] .c17 {
+        color: #666687;
+      }
+
+      .c13[aria-disabled='true'] svg > g,
+      .c13[aria-disabled='true'] svg path {
+        fill: #666687;
+      }
+
+      .c13[aria-disabled='true']:active {
+        border: 1px solid #dcdce4;
+        background: #eaeaef;
+      }
+
+      .c13[aria-disabled='true']:active .c17 {
+        color: #666687;
+      }
+
+      .c13[aria-disabled='true']:active svg > g,
+      .c13[aria-disabled='true']:active svg path {
+        fill: #666687;
+      }
+
+      .c13:hover {
+        border: 1px solid #7b79ff;
+        background: #7b79ff;
+      }
+
+      .c13:active {
+        border: 1px solid #4945ff;
+        background: #4945ff;
+      }
+
+      .c22 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+      }
+
+      .c22 > * {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .c22 > * + * {
+        margin-top: 32px;
+      }
+
+      .c24 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+      }
+
+      .c24 > * {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .c24 > * + * {
+        margin-top: 16px;
+      }
+
+      .c44 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+      }
+
+      .c44 > * {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .c44 > * + * {
+        margin-top: 8px;
+      }
+
+      .c23 {
+        background: #ffffff;
+        padding-top: 24px;
+        padding-right: 32px;
+        padding-bottom: 24px;
+        padding-left: 32px;
+        border-radius: 4px;
+        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+      }
+
+      .c30 {
+        font-weight: 500;
+        font-size: 0.75rem;
+        line-height: 1.33;
+        color: #32324d;
+      }
+
+      .c29 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c31 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: justify;
+        -webkit-justify-content: space-between;
+        -ms-flex-pack: justify;
+        justify-content: space-between;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c33 {
+        border: none;
+        border-radius: 4px;
+        padding-left: 16px;
+        padding-right: 16px;
+        color: #32324d;
+        font-weight: 400;
+        font-size: 0.875rem;
+        display: block;
+        width: 100%;
+      }
+
+      .c33::-webkit-input-placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c33::-moz-placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c33:-ms-input-placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c33::placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c33[aria-disabled='true'] {
+        background: inherit;
+        color: inherit;
+      }
+
+      .c33:focus {
+        outline: none;
+        box-shadow: none;
+      }
+
+      .c32 {
+        border: 1px solid #dcdce4;
+        border-radius: 4px;
+        background: #ffffff;
+        height: 2.5rem;
+        outline: none;
+        box-shadow: 0;
+        -webkit-transition-property: border-color,box-shadow,fill;
+        transition-property: border-color,box-shadow,fill;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+      }
+
+      .c32:focus-within {
+        border: 1px solid #4945ff;
+        box-shadow: #4945ff 0px 0px 0px 2px;
+      }
+
+      .c28 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+      }
+
+      .c28 > * {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .c28 > * + * {
+        margin-top: 4px;
+      }
+
+      .c37 {
+        font-weight: 500;
+        font-size: 0.75rem;
+        line-height: 1.33;
+        color: #32324d;
+      }
+
+      .c36 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c38 {
+        border: 1px solid #dcdce4;
+        border-radius: 4px;
+        padding-left: 16px;
+        padding-right: 16px;
+        padding-top: 12px;
+        padding-bottom: 12px;
+        background: #ffffff;
+        outline: none;
+        box-shadow: 0;
+        -webkit-transition-property: border-color,box-shadow,fill;
+        transition-property: border-color,box-shadow,fill;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+      }
+
+      .c38:focus-within {
+        border: 1px solid #4945ff;
+        box-shadow: #4945ff 0px 0px 0px 2px;
+      }
+
+      .c39 {
+        display: block;
+        width: 100%;
+        font-weight: 400;
+        font-size: 0.875rem;
+        border: none;
+        color: #32324d;
+        resize: none;
+      }
+
+      .c39::-webkit-input-placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c39::-moz-placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c39:-ms-input-placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c39::placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c39:focus-within {
+        outline: none;
+      }
+
+      .c35 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+      }
+
+      .c35 > * {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .c35 > * + * {
+        margin-top: 4px;
+      }
+
+      .c34 textarea {
+        height: 5rem;
+        line-height: 1.25rem;
+      }
+
+      .c34 textarea::-webkit-input-placeholder {
+        font-weight: 400;
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c34 textarea::-moz-placeholder {
+        font-weight: 400;
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c34 textarea:-ms-input-placeholder {
+        font-weight: 400;
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c34 textarea::placeholder {
+        font-weight: 400;
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c25 {
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c45 {
+        font-weight: 400;
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #666687;
+      }
+
+      .c6 {
+        font-weight: 400;
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #4945ff;
+      }
+
+      .c7 {
+        font-weight: 600;
+        line-height: 1.14;
+      }
+
+      .c8 {
+        font-weight: 600;
+        font-size: 0.6875rem;
+        line-height: 1.45;
+        text-transform: uppercase;
+      }
+
+      .c4 {
+        padding-right: 8px;
+      }
+
+      .c3 {
+        display: -webkit-inline-box;
+        display: -webkit-inline-flex;
+        display: -ms-inline-flexbox;
+        display: inline-flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        text-transform: uppercase;
+        -webkit-text-decoration: none;
+        text-decoration: none;
+        position: relative;
+        outline: none;
+      }
+
+      .c3 svg path {
+        fill: #4945ff;
+      }
+
+      .c3 svg {
+        font-size: 0.625rem;
+      }
+
+      .c3:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c3:focus-visible {
+        outline: none;
+      }
+
+      .c3:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
+      }
+
+      .c5 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+      }
+
+      .c40 {
+        background: #ffffff;
+        border-radius: 4px;
+        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+      }
+
+      .c43 {
+        padding-top: 24px;
+        padding-right: 32px;
+        padding-bottom: 24px;
+        padding-left: 32px;
+      }
+
+      .c61 {
+        background: #eaeaef;
+        padding-top: 24px;
+        padding-right: 32px;
+        padding-bottom: 24px;
+        padding-left: 32px;
+      }
+
+      .c26 {
+        display: grid;
+        grid-template-columns: repeat(12,1fr);
+        gap: 16px;
+      }
+
+      .c41 {
+        display: grid;
+        grid-template-columns: repeat(12,1fr);
+        gap: 0px;
+      }
+
+      .c27 {
+        grid-column: span 6;
+      }
+
+      .c42 {
+        grid-column: span 7;
+      }
+
+      .c60 {
+        grid-column: span 5;
+      }
+
+      .c54 {
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+        color: #4a4a6a;
+      }
+
+      .c56 {
+        font-weight: 400;
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #666687;
+      }
+
+      .c47 {
+        border-radius: 4px;
+      }
+
+      .c49 {
+        background: #f6f6f9;
+        padding: 24px;
+        border-radius: 4px;
+      }
+
+      .c52 {
+        padding-right: 24px;
+      }
+
+      .c58 {
+        background: #dcdce4;
+      }
+
+      .c59 {
+        height: 2rem;
+        width: 2rem;
+        border-radius: 50%;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        -webkit-box-pack: center;
+        -webkit-justify-content: center;
+        -ms-flex-pack: center;
+        justify-content: center;
+      }
+
+      .c59 svg {
+        height: 0.375rem;
+        width: 0.6875rem;
+      }
+
+      .c59 svg path {
+        fill: #666687;
+      }
+
+      .c48 {
+        border: 1px solid transparent;
+        overflow: hidden;
+      }
+
+      .c48:hover {
+        border: 1px solid #4945ff;
+      }
+
+      .c48:hover .c53 {
+        color: #271fe0;
+      }
+
+      .c48:hover .c55 {
+        color: #4945ff;
+      }
+
+      .c48:hover > .c46 {
+        background: #f0f0ff;
+      }
+
+      .c48:hover .c57 {
+        background: #d9d8ff;
+      }
+
+      .c48:hover .c57 svg path {
+        fill: #4945ff;
+      }
+
+      .c51 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: justify;
+        -webkit-justify-content: space-between;
+        -ms-flex-pack: justify;
+        justify-content: space-between;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c50 {
+        border: none;
+        background: transparent;
+        display: block;
+        width: 100%;
+        text-align: unset;
+        padding: 0;
+      }
+
+      @media (max-width:68.75rem) {
+        .c27 {
+          grid-column: span;
+        }
+      }
+
+      @media (max-width:34.375rem) {
+        .c27 {
+          grid-column: span;
+        }
+      }
+
+      @media (max-width:68.75rem) {
+        .c42 {
+          grid-column: span;
+        }
+      }
+
+      @media (max-width:34.375rem) {
+        .c42 {
+          grid-column: span;
+        }
+      }
+
+      @media (max-width:68.75rem) {
+        .c60 {
+          grid-column: span;
+        }
+      }
+
+      @media (max-width:34.375rem) {
+        .c60 {
+          grid-column: span;
+        }
+      }
+
+      <main
+        aria-labelledby="main-content-title"
+        class="c0"
+        id="main-content"
+        tabindex="-1"
+      >
+        <form
+          action="#"
+          novalidate=""
+        >
+          <div
+            style="height: 0px;"
+          >
+            <div
+              class="c1"
+              data-strapi-header="true"
+            >
+              <div
+                class="c2"
+              >
+                <a
+                  aria-current="page"
+                  class="c3 active"
+                  href="/settings/users-permissions/roles"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="c4 c5"
+                  >
+                    <svg
+                      fill="none"
+                      height="1em"
+                      viewBox="0 0 24 24"
+                      width="1em"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M24 13.3a.2.2 0 01-.2.2H5.74l8.239 8.239a.2.2 0 010 .282L12.14 23.86a.2.2 0 01-.282 0L.14 12.14a.2.2 0 010-.282L11.86.14a.2.2 0 01.282 0L13.98 1.98a.2.2 0 010 .282L5.74 10.5H23.8c.11 0 .2.09.2.2v2.6z"
+                        fill="#212134"
+                      />
+                    </svg>
+                  </span>
+                  <span
+                    class="c6 c7 c8"
+                  >
+                    Go back
+                  </span>
+                </a>
+              </div>
+              <div
+                class="c9"
+              >
+                <div
+                  class="c10"
+                >
+                  <h1
+                    class="c11"
+                    id="main-content-title"
+                  >
+                    Authenticated
+                  </h1>
+                </div>
+                <button
+                  aria-disabled="false"
+                  class="c12 c13"
+                  type="submit"
+                >
+                  <div
+                    aria-hidden="true"
+                    class="c14 c15 c16"
+                  >
+                    <svg
+                      fill="none"
+                      height="1em"
+                      viewBox="0 0 24 24"
+                      width="1em"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M20.727 2.97a.2.2 0 01.286 0l2.85 2.89a.2.2 0 010 .28L9.554 20.854a.2.2 0 01-.285 0l-9.13-9.243a.2.2 0 010-.281l2.85-2.892a.2.2 0 01.284 0l6.14 6.209L20.726 2.97z"
+                        fill="#212134"
+                      />
+                    </svg>
+                  </div>
+                  <span
+                    class="c17 c18"
+                  >
+                    Save
+                  </span>
+                </button>
+              </div>
+              <p
+                class="c19 c20"
+              >
+                Default role given to authenticated user.
+              </p>
+            </div>
+          </div>
+          <div
+            class="c21"
+          >
+            <div
+              class="c22"
+            >
+              <div
+                class="c23"
+              >
+                <div
+                  class="c24"
+                >
+                  <h2
+                    class="c25"
+                  >
+                    Role details
+                  </h2>
+                  <div
+                    class="c26"
+                  >
+                    <div
+                      class="c27"
+                    >
+                      <div
+                        class=""
+                      >
+                        <div>
+                          <div>
+                            <div
+                              class="c28"
+                            >
+                              <div
+                                class="c29"
+                              >
+                                <label
+                                  class="c30"
+                                  for="textinput-1"
+                                >
+                                  Name
+                                </label>
+                              </div>
+                              <div
+                                class="c31 c32"
+                              >
+                                <input
+                                  aria-disabled="false"
+                                  aria-invalid="false"
+                                  class="c33"
+                                  id="textinput-1"
+                                  name="name"
+                                  value="Authenticated"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      class="c27"
+                    >
+                      <div
+                        class=""
+                      >
+                        <div
+                          class="c34"
+                        >
+                          <div>
+                            <div
+                              class="c35"
+                            >
+                              <div
+                                class="c36"
+                              >
+                                <label
+                                  class="c37"
+                                  for="textarea-1"
+                                >
+                                  Description
+                                </label>
+                              </div>
+                              <div
+                                class="c38"
+                              >
+                                <textarea
+                                  aria-invalid="false"
+                                  class="c39"
+                                  id="textarea-1"
+                                  name="description"
+                                >
+                                  Default role given to authenticated user.
+                                </textarea>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="c40 c41"
+              >
+                <div
+                  class="c42"
+                >
+                  <div
+                    class="c43"
+                  >
+                    <div
+                      class="c24"
+                    >
+                      <div
+                        class="c44"
+                      >
+                        <h2
+                          class="c25"
+                        >
+                          Permissions
+                        </h2>
+                        <p
+                          class="c45"
+                        >
+                          Only actions bound by a route are listed below.
+                        </p>
+                      </div>
+                      <div
+                        class="c46 c47 c48"
+                      >
+                        <div
+                          class="c46 c49"
+                        >
+                          <button
+                            aria-controls="accordion-content-accordion-1"
+                            aria-expanded="false"
+                            aria-labelledby="accordion-label-accordion-1"
+                            class="c50"
+                            data-strapi-accordion-toggle="true"
+                            type="button"
+                          >
+                            <div
+                              class="c46 c51"
+                            >
+                              <div
+                                class="c46 c52"
+                              >
+                                <span
+                                  class="c53 c54"
+                                  id="accordion-label-accordion-1"
+                                >
+                                  Address
+                                </span>
+                                <p
+                                  class="c55 c56"
+                                  id="accordion-desc-accordion-1"
+                                >
+                                  Define all allowed actions for the api::address plugin.
+                                </p>
+                              </div>
+                              <span
+                                aria-hidden="true"
+                                class="c46 c57 c58 c59"
+                              >
+                                <svg
+                                  fill="none"
+                                  height="1em"
+                                  viewBox="0 0 14 8"
+                                  width="1em"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    clip-rule="evenodd"
+                                    d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                                    fill="#32324D"
+                                    fill-rule="evenodd"
+                                  />
+                                </svg>
+                              </span>
+                            </div>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="c60"
+                >
+                  <div
+                    class="c61"
+                    style="min-height: 100%;"
+                  >
+                    <div
+                      class="c44"
+                    >
+                      <h3
+                        class="c25"
+                      >
+                        Advanced settings
+                      </h3>
+                      <p
+                        class="c45"
+                      >
+                        Select the application's actions or the plugin's actions and click on the cog icon to display the bound route
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </main>
+    `);
+  });
+
+  it("can edit a users-permissions role's name and description", async () => {
+    const { getByLabelText, getByRole, getByTestId, getAllByText } = makeAndRenderApp();
+
+    // Check loading screen
+    const loader = getByTestId('loader');
+    expect(loader).toBeInTheDocument();
+
+    // After loading, check other elements
+    await waitForElementToBeRemoved(loader);
+    const saveButton = getByRole('button', { name: /save/i });
+    expect(saveButton).toBeInTheDocument();
+    const nameField = getByLabelText(/name/i);
+    expect(nameField).toBeInTheDocument();
+    const descriptionField = getByLabelText(/description/i);
+    expect(descriptionField).toBeInTheDocument();
+
+    // Shows error when name is missing
+    await userEvent.clear(nameField);
+    expect(nameField).toHaveValue('');
+    await userEvent.clear(descriptionField);
+    expect(descriptionField).toHaveValue('');
+
+    // Show errors after form submit
+    await userEvent.click(saveButton);
+    await waitFor(() => expect(saveButton).not.toBeDisabled());
+    const errorMessages = await getAllByText(/invalid value/i);
+    errorMessages.forEach(errorMessage => expect(errorMessage).toBeInTheDocument());
+  });
+
+  it('can toggle the permissions accordions and actions', async () => {
+    // Create app and wait for loading
+    const {
+      getByLabelText,
+      queryByText,
+      getByTestId,
+      getByText,
+      getAllByRole,
+    } = makeAndRenderApp();
+    const loader = getByTestId('loader');
+    await waitForElementToBeRemoved(loader);
+
+    // Open the collapse
+    const collapse = getByText(/define all allowed actions for the api::address plugin/i);
+    await userEvent.click(collapse);
+    expect(getByLabelText(/select all/i)).toBeInTheDocument();
+
+    // Display the selected action's bound route
+    const actionCogButton = getByTestId('action-cog');
+    await userEvent.click(actionCogButton);
+    expect(getByText(/bound route to/i)).toBeInTheDocument();
+    expect(getByText('POST')).toBeInTheDocument();
+    expect(getByText('/addresses')).toBeInTheDocument();
+
+    // Select all actions with the "select all" checkbox
+    const [selectAllCheckbox, ...actionCheckboxes] = getAllByRole('checkbox');
+    expect(selectAllCheckbox.checked).toBe(false);
+    await userEvent.click(selectAllCheckbox);
+    actionCheckboxes.forEach(actionCheckbox => {
+      expect(actionCheckbox.checked).toBe(true);
+    });
+
+    // Close the collapse
+    await userEvent.click(collapse);
+    expect(queryByText(/select all/i)).not.toBeInTheDocument();
+  });
+});

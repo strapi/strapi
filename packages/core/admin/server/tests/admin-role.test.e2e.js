@@ -17,7 +17,7 @@ const data = {
   editorRole: undefined,
 };
 
-const omitTimestamps = obj => _.omit(obj, ['updatedAt', 'createdAt', 'updated_at', 'created_at']);
+const omitTimestamps = obj => _.omit(obj, ['updatedAt', 'createdAt']);
 
 describe('Role CRUD End to End', () => {
   let rq;

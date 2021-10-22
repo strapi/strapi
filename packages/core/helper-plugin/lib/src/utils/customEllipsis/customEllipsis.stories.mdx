@@ -1,0 +1,25 @@
+<!--- customEllipsis.stories.mdx --->
+
+import { Meta } from '@storybook/addon-docs';
+
+<Meta title="utils/customEllipsis" />
+
+# customEllipsis
+
+This hook is used to have a custom ellipsis for large url
+
+## Usage
+
+```js
+import { customEllipsis } from '@strapi/helper-plugin';
+
+const ContentBox = ({ title, subtitle, icon, iconBackground, endAction }) => {
+  const firstTitleChar = title.substring(0, 4);
+
+  if (title.length > 70 && firstTitleChar === 'http') {
+    //will return for example http://localhost:4000/admin/auth/register?registrationToken=e0...aa9
+    title = customEllipsis(title);
+  }
+
+  return <div>title</div>;
+```

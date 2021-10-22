@@ -60,7 +60,7 @@ const getAssociationFromFieldKey = ({ model, field }) => {
 const castInput = ({ type, value, operator }) => {
   return Array.isArray(value)
     ? value.map(val => castValue({ type, operator, value: val }))
-    : castValue({ type, operator, value: value });
+    : castValue({ type, operator, value });
 };
 
 /**

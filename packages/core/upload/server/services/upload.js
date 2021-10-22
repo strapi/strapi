@@ -43,14 +43,6 @@ const sendMediaMetrics = data => {
   }
 };
 
-const combineFilters = params => {
-  // FIXME: until we support boolean operators for querying we need to make mime_ncontains use AND instead of OR
-  if (_.has(params, 'mime_ncontains') && Array.isArray(params.mime_ncontains)) {
-    params._where = params.mime_ncontains.map(val => ({ mime_ncontains: val }));
-    delete params.mime_ncontains;
-  }
-};
-
 module.exports = ({ strapi }) => ({
   emitEvent(event, data) {
     const modelDef = strapi.getModel('plugin::upload.file');
@@ -142,9 +134,7 @@ module.exports = ({ strapi }) => ({
       return this.uploadFileAndPersist(fileData, { user });
     };
 
-    return await Promise.all(
-      fileArray.map((file, idx) => doUpload(file, fileInfoArray[idx] || {}))
-    );
+    return Promise.all(fileArray.map((file, idx) => doUpload(file, fileInfoArray[idx] || {})));
   },
 
   async uploadFileAndPersist(fileData, { user } = {}) {
@@ -191,7 +181,7 @@ module.exports = ({ strapi }) => ({
   },
 
   async updateFileInfo(id, { name, alternativeText, caption }, { user } = {}) {
-    const dbFile = await this.findOne({ id });
+    const dbFile = await this.findOne(id);
 
     if (!dbFile) {
       throw strapi.errors.notFound('file not found');
@@ -203,7 +193,7 @@ module.exports = ({ strapi }) => ({
       caption: _.isNil(caption) ? dbFile.caption : caption,
     };
 
-    return this.update({ id }, newInfos, { user });
+    return this.update(id, newInfos, { user });
   },
 
   async replace(id, { data, file }, { user } = {}) {
@@ -213,7 +203,7 @@ module.exports = ({ strapi }) => ({
       'image-manipulation'
     );
 
-    const dbFile = await this.findOne({ id });
+    const dbFile = await this.findOne(id);
 
     if (!dbFile) {
       throw strapi.errors.notFound('file not found');
@@ -276,20 +266,17 @@ module.exports = ({ strapi }) => ({
       height,
     });
 
-    return this.update({ id }, fileData, { user });
+    return this.update(id, fileData, { user });
   },
 
-  async update(params, values, { user } = {}) {
+  async update(id, values, { user } = {}) {
     const fileValues = { ...values };
     if (user) {
       fileValues[UPDATED_BY_ATTRIBUTE] = user.id;
     }
     sendMediaMetrics(fileValues);
 
-    //
-    const res = await strapi
-      .query('plugin::upload.file')
-      .update({ where: params, data: fileValues });
+    const res = await strapi.entityService.update('plugin::upload.file', id, { data: fileValues });
 
     this.emitEvent(MEDIA_UPDATE, res);
 
@@ -311,18 +298,16 @@ module.exports = ({ strapi }) => ({
     return res;
   },
 
-  findOne(params, populate) {
-    return strapi.query('plugin::upload.file').findOne({ where: params, populate });
+  findOne(id, populate) {
+    return strapi.entityService.findOne('plugin::upload.file', id, { populate });
   },
 
-  fetchAll(params) {
-    combineFilters(params);
-    return strapi.query('plugin::upload.file').findMany({ ...params });
+  findMany(query) {
+    return strapi.entityService.findMany('plugin::upload.file', query);
   },
 
-  count(params) {
-    combineFilters(params);
-    return strapi.query('plugin::upload.file').count({ ...params });
+  findPage(query) {
+    return strapi.entityService.findPage('plugin::upload.file', query);
   },
 
   async remove(file) {
@@ -372,13 +357,7 @@ module.exports = ({ strapi }) => ({
   },
 
   getSettings() {
-    return strapi
-      .store({
-        type: 'plugin',
-        name: 'upload',
-        key: 'settings',
-      })
-      .get();
+    return strapi.store({ type: 'plugin', name: 'upload', key: 'settings' }).get();
   },
 
   setSettings(value) {
@@ -388,12 +367,6 @@ module.exports = ({ strapi }) => ({
       strapi.telemetry.send('didDisableResponsiveDimensions');
     }
 
-    return strapi
-      .store({
-        type: 'plugin',
-        name: 'upload',
-        key: 'settings',
-      })
-      .set({ value });
+    return strapi.store({ type: 'plugin', name: 'upload', key: 'settings' }).set({ value });
   },
 });

@@ -1,8 +1,21 @@
 'use strict';
 
-const { diffSchemas } = require('../schema-diff');
+const createSchemaDiff = require('../diff');
 
+let diffSchemas;
 describe('diffSchemas', () => {
+  beforeEach(() => {
+    const schemaDiff = createSchemaDiff({
+      dialect: {
+        usesForeignKeys() {
+          return true;
+        },
+      },
+    });
+
+    diffSchemas = schemaDiff.diff.bind(schemaDiff);
+  });
+
   test('New Table', () => {
     const testTable = {
       name: 'my_table',

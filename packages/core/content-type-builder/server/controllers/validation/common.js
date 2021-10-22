@@ -68,7 +68,7 @@ const isValidEnum = {
 const areEnumValuesUnique = {
   name: 'areEnumValuesUnique',
   message: '${path} cannot contain duplicate values',
-  test: values => {
+  test(values) {
     const filtered = [...new Set(values)];
 
     return filtered.length === values.length;
@@ -84,7 +84,7 @@ const isValidRegExpPattern = {
 const isValidDefaultJSON = {
   name: 'isValidDefaultJSON',
   message: '${path} is not a valid JSON',
-  test: val => {
+  test(val) {
     if (val === undefined) {
       return true;
     }

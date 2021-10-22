@@ -13,9 +13,8 @@ const createSingleTypeService = ({ model, strapi, utils }) => {
      *
      * @return {Promise}
      */
-    find({ params } = {}) {
-      const normalizedParams = getFetchParams(params);
-      return strapi.entityService.find(uid, { params: normalizedParams });
+    find(params = {}) {
+      return strapi.entityService.findMany(uid, getFetchParams(params));
     },
 
     /**
@@ -23,9 +22,10 @@ const createSingleTypeService = ({ model, strapi, utils }) => {
      *
      * @return {Promise}
      */
-    async createOrUpdate({ params, data, files } = {}) {
-      const entity = await this.find({ params });
+    async createOrUpdate(params = {}) {
+      const entity = await this.find(params);
 
+      const { data } = params;
       const sanitizedData = sanitizeInput(data);
 
       if (!entity) {
@@ -34,14 +34,10 @@ const createSingleTypeService = ({ model, strapi, utils }) => {
           throw strapi.errors.badRequest('singleType.alreadyExists');
         }
 
-        return strapi.entityService.create(uid, { params, data: sanitizedData, files });
-      } else {
-        return strapi.entityService.update(uid, entity.id, {
-          params,
-          data: sanitizedData,
-          files,
-        });
+        return strapi.entityService.create(uid, { ...params, data: sanitizedData });
       }
+
+      return strapi.entityService.update(uid, entity.id, { ...params, data: sanitizedData });
     },
 
     /**
@@ -49,8 +45,8 @@ const createSingleTypeService = ({ model, strapi, utils }) => {
      *
      * @return {Promise}
      */
-    async delete({ params } = {}) {
-      const entity = await this.find({ params });
+    async delete(params = {}) {
+      const entity = await this.find(params);
 
       if (!entity) return;
 

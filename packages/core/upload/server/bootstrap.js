@@ -1,14 +1,11 @@
 'use strict';
 
+const _ = require('lodash');
 const { convertToStrapiError } = require('../errors');
 
-module.exports = async () => {
+module.exports = async ({ strapi }) => {
   // set plugin store
-  const configurator = strapi.store({
-    type: 'plugin',
-    name: 'upload',
-    key: 'settings',
-  });
+  const configurator = strapi.store({ type: 'plugin', name: 'upload', key: 'settings' });
 
   strapi.plugin('upload').provider = createProvider(strapi.config.get('plugin.upload', {}));
 
@@ -30,31 +27,46 @@ module.exports = async () => {
 
 const wrapFunctionForErrors = fn => async (...args) => {
   try {
-    return await fn(...args);
+    return fn(...args);
   } catch (err) {
     throw convertToStrapiError(err);
   }
 };
 
-const createProvider = ({ provider, providerOptions, actionOptions = {} }) => {
-  try {
-    const providerInstance = require(`@strapi/provider-upload-${provider}`).init(providerOptions);
+const createProvider = config => {
+  const { providerOptions, actionOptions = {} } = config;
 
-    return Object.assign(Object.create(baseProvider), {
-      ...providerInstance,
-      upload: wrapFunctionForErrors((file, options = actionOptions.upload) => {
-        return providerInstance.upload(file, options);
-      }),
-      delete: wrapFunctionForErrors((file, options = actionOptions.delete) => {
-        return providerInstance.delete(file, options);
-      }),
-    });
-  } catch (err) {
-    strapi.log.error(err);
-    throw new Error(
-      `The provider package isn't installed. Please run \`npm install @strapi/provider-upload-${provider}\``
-    );
+  const providerName = _.toLower(config.provider);
+  let provider;
+
+  let modulePath;
+  try {
+    modulePath = require.resolve(`@strapi/provider-upload-${providerName}`);
+  } catch (error) {
+    if (error.code === 'MODULE_NOT_FOUND') {
+      modulePath = providerName;
+    } else {
+      throw error;
+    }
   }
+
+  try {
+    provider = require(modulePath);
+  } catch (err) {
+    throw new Error(`Could not load upload provider "${providerName}".`);
+  }
+
+  const providerInstance = provider.init(providerOptions);
+
+  return Object.assign(Object.create(baseProvider), {
+    ...providerInstance,
+    upload: wrapFunctionForErrors((file, options = actionOptions.upload) => {
+      return providerInstance.upload(file, options);
+    }),
+    delete: wrapFunctionForErrors((file, options = actionOptions.delete) => {
+      return providerInstance.delete(file, options);
+    }),
+  });
 };
 
 const baseProvider = {

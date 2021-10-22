@@ -1,43 +1,45 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { useIntl } from 'react-intl';
-import { Header, List } from '@buffetjs/custom';
-import { Text } from '@buffetjs/core';
-import { Pencil } from '@buffetjs/icons';
 import {
   SettingsPageTitle,
-  SizedInput,
+  LoadingIndicatorPage,
   useTracking,
-  getYupInnerErrors,
-  request,
   useNotification,
   useOverlayBlocker,
   CheckPagePermissions,
+  useRBAC,
+  useFocusWhenNavigate,
+  onRowClick,
+  stopPropagation,
 } from '@strapi/helper-plugin';
-import { get, upperFirst, has } from 'lodash';
-import { Row } from 'reactstrap';
-import pluginPermissions from '../../permissions';
-import { useForm } from '../../hooks';
-import { getRequestURL, getTrad } from '../../utils';
-import ListBaselineAlignment from '../../components/ListBaselineAlignment';
-import ListRow from '../../components/ListRow';
-import ModalForm from '../../components/ModalForm';
-import createProvidersArray from './utils/createProvidersArray';
+import has from 'lodash/has';
+import upperFirst from 'lodash/upperFirst';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { HeaderLayout, Layout, ContentLayout } from '@strapi/parts/Layout';
+import { Main } from '@strapi/parts/Main';
+import { useNotifyAT } from '@strapi/parts/LiveRegions';
+import { Table, Thead, Tr, Th, Tbody, Td } from '@strapi/parts/Table';
+import { Text, TableLabel } from '@strapi/parts/Text';
+import { VisuallyHidden } from '@strapi/parts/VisuallyHidden';
+import { IconButton } from '@strapi/parts/IconButton';
+import EditIcon from '@strapi/icons/EditIcon';
+import { useQuery, useMutation, useQueryClient } from 'react-query';
 import forms from './utils/forms';
+import { fetchData, putProvider } from './utils/api';
+import createProvidersArray from './utils/createProvidersArray';
+import { getTrad } from '../../utils';
+import pluginPermissions from '../../permissions';
+import FormModal from '../../components/FormModal';
 
-const ProtectedProvidersPage = () => (
-  <CheckPagePermissions permissions={pluginPermissions.readProviders}>
-    <ProvidersPage />
-  </CheckPagePermissions>
-);
-
-const ProvidersPage = () => {
+export const ProvidersPage = () => {
   const { formatMessage } = useIntl();
+  useFocusWhenNavigate();
+  const { notifyStatus } = useNotifyAT();
+  const queryClient = useQueryClient();
   const { trackUsage } = useTracking();
   const trackUsageRef = useRef(trackUsage);
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmiting, setIsSubmiting] = useState(false);
-  const buttonSubmitRef = useRef(null);
-  const [showForm, setShowForm] = useState(false);
   const [providerToEditName, setProviderToEditName] = useState(null);
   const toggleNotification = useNotification();
   const { lockApp, unlockApp } = useOverlayBlocker();
@@ -47,22 +49,56 @@ const ProvidersPage = () => {
   }, []);
 
   const {
+    isLoading: isLoadingForPermissions,
     allowedActions: { canUpdate },
-    dispatchResetForm,
-    dispatchSetFormErrors,
-    dispatchSubmitSucceeded,
-    formErrors,
-    handleChange,
-    isLoading,
-    isLoadingForPermissions,
-    modifiedData,
-  } = useForm('providers', updatePermissions);
+  } = useRBAC(updatePermissions);
+
+  const { isLoading: isLoadingForData, data: modifiedData, isFetching } = useQuery(
+    'get-providers',
+    () => fetchData(toggleNotification),
+    {
+      onSuccess: () => {
+        notifyStatus(
+          formatMessage({
+            id: getTrad('Providers.data.loaded'),
+            defaultMessage: 'Providers have been loaded',
+          })
+        );
+      },
+      initialData: {},
+    }
+  );
+
+  const isLoading = isLoadingForData || isFetching;
+
+  const submitMutation = useMutation(putProvider, {
+    onSuccess: async () => {
+      await queryClient.invalidateQueries('get-providers');
+      toggleNotification({
+        type: 'info',
+        message: { id: getTrad('notification.success.submit') },
+      });
+
+      trackUsageRef.current('didEditAuthenticationProvider');
+      setIsSubmiting(false);
+      handleToggleModal();
+      unlockApp();
+    },
+    onError: () => {
+      toggleNotification({
+        type: 'warning',
+        message: { id: 'notification.error' },
+      });
+      unlockApp();
+      setIsSubmiting(false);
+    },
+    refetchActive: false,
+  });
 
   const providers = useMemo(() => createProvidersArray(modifiedData), [modifiedData]);
-  const enabledProvidersCount = useMemo(
-    () => providers.filter(provider => provider.enabled).length,
-    [providers]
-  );
+
+  const rowCount = providers.length;
+
   const isProviderWithSubdomain = useMemo(() => {
     if (!providerToEditName) {
       return false;
@@ -72,34 +108,13 @@ const ProvidersPage = () => {
 
     return has(providerToEdit, 'subdomain');
   }, [providers, providerToEditName]);
-  const disabledProvidersCount = useMemo(() => {
-    return providers.length - enabledProvidersCount;
-  }, [providers, enabledProvidersCount]);
 
-  const listTitle = useMemo(() => {
-    const enabledMessage = formatMessage(
-      {
-        id: getTrad(
-          `List.title.providers.enabled.${enabledProvidersCount > 1 ? 'plural' : 'singular'}`
-        ),
-      },
-      { number: enabledProvidersCount }
-    );
-    const disabledMessage = formatMessage(
-      {
-        id: getTrad(
-          `List.title.providers.disabled.${disabledProvidersCount > 1 ? 'plural' : 'singular'}`
-        ),
-      },
-      { number: disabledProvidersCount }
-    );
+  const pageTitle = formatMessage({
+    id: getTrad('HeaderNav.link.providers'),
+    defaultMessage: 'Providers',
+  });
 
-    return `${enabledMessage} ${disabledMessage}`;
-  }, [formatMessage, enabledProvidersCount, disabledProvidersCount]);
-
-  const pageTitle = formatMessage({ id: getTrad('HeaderNav.link.providers') });
-
-  const formToRender = useMemo(() => {
+  const layoutToRender = useMemo(() => {
     if (providerToEditName === 'email') {
       return forms.email;
     }
@@ -111,179 +126,149 @@ const ProvidersPage = () => {
     return forms.providers;
   }, [providerToEditName, isProviderWithSubdomain]);
 
-  const handleClick = useCallback(() => {
-    buttonSubmitRef.current.click();
-  }, []);
-
-  const handleToggle = useCallback(() => {
+  const handleToggleModal = () => {
     setIsOpen(prev => !prev);
-  }, []);
+  };
 
-  const handleClickEdit = useCallback(
-    provider => {
-      if (canUpdate) {
-        setProviderToEditName(provider.name);
-        handleToggle();
-      }
-    },
-    [canUpdate, handleToggle]
-  );
+  const handleClickEdit = provider => {
+    if (canUpdate) {
+      setProviderToEditName(provider.name);
+      handleToggleModal();
+    }
+  };
 
-  const handleClosed = useCallback(() => {
-    setProviderToEditName(null);
-    setShowForm(false);
-    dispatchResetForm();
-  }, [dispatchResetForm]);
+  const handleSubmit = async values => {
+    setIsSubmiting(true);
 
-  const handleOpened = useCallback(() => {
-    setShowForm(true);
-  }, []);
+    lockApp();
 
-  const handleSubmit = useCallback(
-    async e => {
-      e.preventDefault();
-      const { schema } = formToRender;
-      let errors = {};
+    trackUsageRef.current('willEditAuthenticationProvider');
 
-      setIsSubmiting(true);
+    const body = { ...modifiedData, [providerToEditName]: values };
 
-      try {
-        await schema.validate(modifiedData[providerToEditName], { abortEarly: false });
-        lockApp();
-
-        try {
-          trackUsageRef.current('willEditAuthenticationProvider');
-
-          await request(getRequestURL('providers'), {
-            method: 'PUT',
-            body: { providers: modifiedData },
-          });
-
-          trackUsageRef.current('didEditAuthenticationProvider');
-
-          toggleNotification({
-            type: 'success',
-            message: { id: getTrad('notification.success.submit') },
-          });
-
-          dispatchSubmitSucceeded();
-
-          handleToggle();
-        } catch (err) {
-          console.error(err);
-          toggleNotification({
-            type: 'warning',
-            message: { id: 'notification.error' },
-          });
-        }
-      } catch (err) {
-        console.error(err);
-        errors = getYupInnerErrors(err);
-        console.log(errors);
-      }
-
-      dispatchSetFormErrors(errors);
-
-      setIsSubmiting(false);
-      unlockApp();
-    },
-    [
-      dispatchSetFormErrors,
-      dispatchSubmitSucceeded,
-      formToRender,
-      handleToggle,
-      modifiedData,
-      providerToEditName,
-      toggleNotification,
-      lockApp,
-      unlockApp,
-    ]
-  );
+    submitMutation.mutate({ providers: body });
+  };
 
   return (
-    <>
+    <Layout>
       <SettingsPageTitle name={pageTitle} />
-      <div>
-        <Header title={{ label: pageTitle }} isLoading={isLoadingForPermissions || isLoading} />
-        <ListBaselineAlignment />
-        <List
-          title={listTitle}
-          items={providers}
-          isLoading={isLoadingForPermissions || isLoading}
-          customRowComponent={provider => (
-            <ListRow
-              {...provider}
-              onClick={() => handleClickEdit(provider)}
-              links={[
-                {
-                  icon: canUpdate ? <Pencil fill="#0e1622" /> : null,
-                  onClick: e => {
-                    e.stopPropagation();
-                    handleClickEdit(provider);
-                  },
-                },
-              ]}
-            >
-              <td key="enabled">
-                <Text
-                  fontWeight="semiBold"
-                  lineHeight="18px"
-                  color={provider.enabled ? 'green' : 'lightOrange'}
-                >
-                  {provider.enabled ? 'Enabled' : 'Disabled'}
-                </Text>
-              </td>
-            </ListRow>
-          )}
+      <Main>
+        <HeaderLayout
+          title={formatMessage({
+            id: getTrad('HeaderNav.link.providers'),
+            defaultMessage: 'Providers',
+          })}
         />
-      </div>
-      <ModalForm
+        {isLoading || isLoadingForPermissions ? (
+          <LoadingIndicatorPage />
+        ) : (
+          <ContentLayout>
+            <Table colCount={4} rowCount={rowCount + 1}>
+              <Thead>
+                <Tr>
+                  <Th>
+                    <TableLabel textColor="neutral600">
+                      <VisuallyHidden>
+                        {formatMessage({ id: getTrad('Providers.image'), defaultMessage: 'Image' })}
+                      </VisuallyHidden>
+                    </TableLabel>
+                  </Th>
+                  <Th>
+                    <TableLabel textColor="neutral600">
+                      {formatMessage({ id: getTrad('Providers.name'), defaultMessage: 'Name' })}
+                    </TableLabel>
+                  </Th>
+                  <Th>
+                    <TableLabel textColor="neutral600">
+                      {formatMessage({ id: getTrad('Providers.status'), defaultMessage: 'Status' })}
+                    </TableLabel>
+                  </Th>
+                  <Th>
+                    <TableLabel>
+                      <VisuallyHidden>
+                        {formatMessage({
+                          id: getTrad('Providers.settings'),
+                          defaultMessage: 'Settings',
+                        })}
+                      </VisuallyHidden>
+                    </TableLabel>
+                  </Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {providers.map(provider => (
+                  <Tr
+                    key={provider.name}
+                    {...onRowClick({
+                      fn: () => handleClickEdit(provider),
+                      condition: canUpdate,
+                    })}
+                  >
+                    <Td width="">
+                      <FontAwesomeIcon icon={provider.icon} />
+                    </Td>
+                    <Td width="45%">
+                      <Text highlighted textColor="neutral800">
+                        {provider.name}
+                      </Text>
+                    </Td>
+                    <Td width="65%">
+                      <Text
+                        textColor={provider.enabled ? 'success600' : 'danger600'}
+                        data-testid={`enable-${provider.name}`}
+                      >
+                        {provider.enabled
+                          ? formatMessage({
+                              id: getTrad('Providers.enabled'),
+                              defaultMessage: 'Enabled',
+                            })
+                          : formatMessage({
+                              id: getTrad('Providers.disabled'),
+                              defaultMessage: 'Disabled',
+                            })}
+                      </Text>
+                    </Td>
+                    <Td {...stopPropagation}>
+                      {canUpdate && (
+                        <IconButton
+                          onClick={() => handleClickEdit(provider)}
+                          noBorder
+                          icon={<EditIcon />}
+                          label="Edit"
+                        />
+                      )}
+                    </Td>
+                  </Tr>
+                ))}
+              </Tbody>
+            </Table>
+          </ContentLayout>
+        )}
+      </Main>
+      <FormModal
+        initialData={modifiedData[providerToEditName]}
         isOpen={isOpen}
-        onClick={handleClick}
-        onCancel={handleToggle}
-        isLoading={isSubmiting}
-        onOpened={handleOpened}
-        onClosed={handleClosed}
-        onToggle={handleToggle}
+        isSubmiting={isSubmiting}
+        layout={layoutToRender}
         headerBreadcrumbs={[
-          getTrad('PopUpForm.header.edit.providers'),
+          formatMessage({
+            id: getTrad('PopUpForm.header.edit.providers'),
+            defaultMessage: 'Edit Provider',
+          }),
           upperFirst(providerToEditName),
         ]}
-      >
-        {showForm && (
-          <form onSubmit={handleSubmit}>
-            <Row>
-              {formToRender.form.map(input => {
-                const label = input.label.params
-                  ? { ...input.label, params: { provider: upperFirst(providerToEditName) } }
-                  : input.label;
-
-                const value =
-                  input.name === 'noName'
-                    ? `${strapi.backendURL}/connect/${providerToEditName}/callback`
-                    : get(modifiedData, [providerToEditName, ...input.name.split('.')], '');
-
-                return (
-                  <SizedInput
-                    key={input.name}
-                    {...input}
-                    label={label}
-                    error={formErrors[input.name]}
-                    name={`${providerToEditName}.${input.name}`}
-                    onChange={handleChange}
-                    value={value}
-                  />
-                );
-              })}
-            </Row>
-            <button type="submit" style={{ display: 'none' }} ref={buttonSubmitRef}>
-              hidden button to use the native form event
-            </button>
-          </form>
-        )}
-      </ModalForm>
-    </>
+        onToggle={handleToggleModal}
+        onSubmit={handleSubmit}
+        providerToEditName={providerToEditName}
+      />
+    </Layout>
   );
 };
+
+const ProtectedProvidersPage = () => (
+  <CheckPagePermissions permissions={pluginPermissions.readProviders}>
+    <ProvidersPage />
+  </CheckPagePermissions>
+);
 
 export default ProtectedProvidersPage;

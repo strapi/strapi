@@ -5,12 +5,12 @@ const _ = require('lodash/fp');
 const types = require('../../types');
 const { createField } = require('../../fields');
 
-const fromRow = (metadata, row) => {
+const fromRow = (meta, row) => {
   if (Array.isArray(row)) {
-    return row.map(singleRow => fromRow(metadata, singleRow));
+    return row.map(singleRow => fromRow(meta, singleRow));
   }
 
-  const { attributes } = metadata;
+  const { attributes } = meta;
 
   if (_.isNil(row)) {
     return null;
@@ -19,25 +19,16 @@ const fromRow = (metadata, row) => {
   const obj = {};
 
   for (const column in row) {
-    // to field Name
-    const attributeName = column;
-
-    if (!attributes[attributeName]) {
-      // ignore value that are not related to an attribute (join columns ...)
+    if (!_.has(column, meta.columnToAttribute)) {
       continue;
     }
 
+    const attributeName = meta.columnToAttribute[column];
     const attribute = attributes[attributeName];
 
     if (types.isScalar(attribute.type)) {
-      // TODO: we convert to column name
-      // TODO: handle default value too
-      // TODO: format data & use dialect to know which type they support (json particularly)
-
       const field = createField(attribute);
 
-      // TODO: validate data on creation
-      // field.validate(data[attributeName]);
       const val = row[column] === null ? null : field.fromDB(row[column]);
 
       obj[attributeName] = val;
@@ -51,6 +42,43 @@ const fromRow = (metadata, row) => {
   return obj;
 };
 
+const toRow = (meta, data = {}) => {
+  if (_.isNil(data)) {
+    return data;
+  }
+
+  if (_.isArray(data)) {
+    return data.map(datum => toRow(meta, datum));
+  }
+
+  const { attributes } = meta;
+
+  for (const key in data) {
+    const attribute = attributes[key];
+
+    if (!attribute || attribute.columnName === key) {
+      continue;
+    }
+
+    data[attribute.columnName] = data[key];
+    delete data[key];
+  }
+
+  return data;
+};
+
+const toColumnName = (meta, name) => {
+  const attribute = meta.attributes[name];
+
+  if (!attribute) {
+    return name;
+  }
+
+  return attribute.columnName || name;
+};
+
 module.exports = {
+  toRow,
   fromRow,
+  toColumnName,
 };

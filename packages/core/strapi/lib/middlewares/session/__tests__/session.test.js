@@ -34,8 +34,10 @@ describe('Session middleware', () => {
         },
         use: jest.fn(),
       },
+      dirs: {
+        root: __dirname,
+      },
       config: {
-        appPath: __dirname,
         database: {
           connections: {
             mysql: {},

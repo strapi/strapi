@@ -5,6 +5,11 @@ const { getService } = require('../../utils');
 
 const migrateForBookshelf = require('./migrate-for-bookshelf');
 
+/*
+ ->
+ ->
+*/
+
 // Migration when i18n is disabled on a field of a content-type that have i18n enabled
 const after = async ({ model, definition, previousDefinition, ORM }) => {
   const { isLocalizedContentType, getLocalizedAttributes } = getService('content-types');

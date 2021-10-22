@@ -4,11 +4,15 @@ import adminPermissions from '../../permissions';
 import formatLinks from './utils/formatLinks';
 import globalLinks from './utils/globalLinks';
 
-const init = (initialState, settings) => {
+const init = (initialState, { settings, shouldUpdateStrapi }) => {
   // Retrieve the links that will be injected into the global section
   const pluginsGlobalLinks = settings.global.links;
   // Sort the links by name
-  const sortedGlobalLinks = sortLinks([...pluginsGlobalLinks, ...globalLinks]);
+  const sortedGlobalLinks = sortLinks([...pluginsGlobalLinks, ...globalLinks]).map(link => ({
+    ...link,
+    hasNotification: link.id === 'application-infos' && shouldUpdateStrapi,
+  }));
+
   const otherSections = Object.values(omit(settings, 'global'));
 
   const menu = [

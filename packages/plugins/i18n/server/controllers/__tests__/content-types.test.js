@@ -69,8 +69,8 @@ describe('i18n - Controller - content-types', () => {
         name: "Papailhau's Pizza",
         description: 'Best pizza restaurant of the town',
         locale: 'en',
-        published_at: '2021-03-30T09:34:54.042Z',
-        localizations: [{ id: 2, locale: 'it', published_at: null }],
+        publishedAt: '2021-03-30T09:34:54.042Z',
+        localizations: [{ id: 2, locale: 'it', publishedAt: null }],
       };
       const permissions = [
         { properties: { fields: ['name', 'averagePrice'], locales: ['it'] } },
@@ -108,8 +108,8 @@ describe('i18n - Controller - content-types', () => {
       expect(ctx.body).toEqual({
         nonLocalizedFields: { name: "Papailhau's Pizza" },
         localizations: [
-          { id: 2, locale: 'it', published_at: null },
-          { id: 1, locale: 'en', published_at: '2021-03-30T09:34:54.042Z' },
+          { id: 2, locale: 'it', publishedAt: null },
+          { id: 1, locale: 'en', publishedAt: '2021-03-30T09:34:54.042Z' },
         ],
       });
     });

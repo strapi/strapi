@@ -9,19 +9,16 @@ const createColumn = (name, attribute) => {
     name,
     type,
     args,
+    defaultTo: null,
+    notNullable: false,
+    unsigned: false,
     ...opts,
     ...(attribute.column || {}),
-    // TODO: allow passing custom params to the DB from the model definition
   };
-};
-
-const shouldCreateColumn = attribute => {
-  return types.isScalar(attribute.type);
 };
 
 const createTable = meta => {
   const table = {
-    // TODO: allow passing custom params to the DB from the model definition
     name: meta.tableName,
     indexes: meta.indexes || [],
     foreignKeys: meta.foreignKeys || [],
@@ -67,9 +64,14 @@ const createTable = meta => {
           // NOTE: could allow configuration
           onDelete: 'SET NULL',
         });
+
+        table.indexes.push({
+          name: `${table.name}_${columnName}_fk`,
+          columns: [columnName],
+        });
       }
-    } else if (shouldCreateColumn(attribute)) {
-      const column = createColumn(key, meta.attributes[key]);
+    } else if (types.isScalar(attribute.type)) {
+      const column = createColumn(attribute.columnName || key, attribute);
 
       if (column.unique) {
         table.indexes.push({
@@ -101,8 +103,13 @@ const getColumnType = attribute => {
 
   switch (attribute.type) {
     case 'increments': {
-      return { type: 'increments', args: [{ primary: true }] };
+      return {
+        type: 'increments',
+        args: [{ primary: true }],
+        notNullable: true,
+      };
     }
+
     // We might want to convert email/password to string types before going into the orm with specific validators & transformers
     case 'password':
     case 'email':
@@ -129,29 +136,26 @@ const getColumnType = attribute => {
       return {
         type: 'enum',
         args: [
-          attribute.enum /*,{ useNative: true, existingType: true, enumName: 'foo_type', schemaName: 'public' }*/,
+          attribute.enum,
+          /*,{ useNative: true, existingType: true, enumName: 'foo_type', schemaName: 'public' }*/
         ],
       };
     }
-
     case 'integer': {
       return { type: 'integer' };
     }
     case 'biginteger': {
       return { type: 'bigInteger' };
     }
-    // TODO: verify usage of double vs float
     case 'float': {
-      return { type: 'double', args: [] };
+      return { type: 'double' };
     }
-    // TODO: define precision
     case 'decimal': {
       return { type: 'decimal', args: [10, 2] };
     }
     case 'date': {
       return { type: 'date' };
     }
-    // TODO: define precision
     case 'time': {
       return { type: 'time', args: [{ precision: 3 }] };
     }
@@ -161,19 +165,18 @@ const getColumnType = attribute => {
         args: [
           {
             useTz: false,
-            precision: 6, // TODO: to define
+            precision: 6,
           },
         ],
       };
     }
-    // TODO: handle defaults
     case 'timestamp': {
       return {
         type: 'timestamp',
         args: [
           {
             useTz: false,
-            precision: 6, // TODO: to define
+            precision: 6,
           },
         ],
       };

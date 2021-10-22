@@ -64,8 +64,8 @@ describe('Content types utils', () => {
 
       expect(getNonWritableAttributes(model)).toEqual([
         'id',
-        'created_at',
-        'updated_at',
+        'createdAt',
+        'updatedAt',
         'non_writable_field',
       ]);
     });

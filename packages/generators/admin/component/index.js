@@ -6,7 +6,10 @@ const fileExistsInPackages = require('../utils/fileExistsInPackages');
 const getPluginList = require('../utils/getPluginList');
 const packagesFolder = require('../utils/packagesFolder');
 
-const pascalCase = flow(camelCase, upperFirst);
+const pascalCase = flow(
+  camelCase,
+  upperFirst
+);
 
 const prompts = [
   {
@@ -19,7 +22,7 @@ const prompts = [
     type: 'input',
     name: 'name',
     message: 'What should be the name of the component?',
-    validate: async (name, answers) => {
+    async validate(name, answers) {
       if (!name) {
         return 'The name cannot be empty.';
       }

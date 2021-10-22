@@ -1,21 +1,25 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
-import Select from 'react-select';
 import { useIntl } from 'react-intl';
-import { upperFirst } from 'lodash';
-import MenuList from './MenuList';
+import { MultiSelectNested } from '@strapi/parts/Select';
+import upperFirst from 'lodash/upperFirst';
 import getTrad from '../../utils/getTrad';
 
-const AllowedTypesSelect = ({ name, changeMediaAllowedTypes, styles, value }) => {
+const options = [
+  {
+    label: 'All',
+    children: [
+      { label: 'images (JPEG, PNG, GIF, SVG, TIFF, ICO, DVU)', value: 'images' },
+      { label: 'videos (MPEG, MP4, Quicktime, WMV, AVI, FLV)', value: 'videos' },
+      { label: 'files (CSV, ZIP, MP3, PDF, Excel, JSON, ...)', value: 'files' },
+    ],
+  },
+];
+
+const AllowedTypesSelect = ({ intlLabel, name, onChange, value }) => {
   const { formatMessage } = useIntl();
-  // Create a ref in order to access the StateManager
-  // So we can close the menu after clicking on a menu item
-  // This allows us to get rid of the menuIsOpen state management
-  // So we let the custom components taking care of it
-  const ref = useRef();
 
   /* eslint-disable indent */
-
   const displayedValue =
     value === null || value.length === 0
       ? formatMessage({ id: getTrad('form.attribute.media.allowed-types.none') })
@@ -26,17 +30,24 @@ const AllowedTypesSelect = ({ name, changeMediaAllowedTypes, styles, value }) =>
 
   /* eslint-enable indent */
 
+  const label = intlLabel.id
+    ? formatMessage({ id: intlLabel.id, defaultMessage: intlLabel.defaultMessage })
+    : name;
+
   return (
-    <Select
-      components={{ MenuList }}
-      isClearable={false}
-      isSearchable={false}
-      name={name}
-      changeMediaAllowedTypes={changeMediaAllowedTypes}
-      ref={ref}
-      refState={ref}
-      styles={styles}
-      value={{ label: displayedValue, value: value || '' }}
+    <MultiSelectNested
+      id="select1"
+      label={label}
+      customizeContent={() => displayedValue}
+      onChange={values => {
+        if (values.length > 0) {
+          onChange({ target: { name, value: values, type: 'allowed-types-select' } });
+        } else {
+          onChange({ target: { name, value: null, type: 'allowed-types-select' } });
+        }
+      }}
+      options={options}
+      value={value || []}
     />
   );
 };
@@ -46,9 +57,13 @@ AllowedTypesSelect.defaultProps = {
 };
 
 AllowedTypesSelect.propTypes = {
-  changeMediaAllowedTypes: PropTypes.func.isRequired,
+  intlLabel: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    defaultMessage: PropTypes.string.isRequired,
+    values: PropTypes.object,
+  }).isRequired,
   name: PropTypes.string.isRequired,
-  styles: PropTypes.object.isRequired,
+  onChange: PropTypes.func.isRequired,
   value: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
 };
 

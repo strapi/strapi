@@ -1,40 +1,12 @@
 import React, { useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import { Padded, Text, Flex } from '@buffetjs/core';
 import { useIntl } from 'react-intl';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Remove } from '@buffetjs/icons';
-import { NotificationWrapper, IconWrapper, LinkArrow, RemoveWrapper } from './styledComponents';
-
-const types = {
-  success: {
-    icon: 'check',
-    color: 'green',
-  },
-  warning: {
-    icon: 'exclamation',
-    color: 'orange',
-  },
-  info: {
-    icon: 'info',
-    color: 'blue',
-  },
-};
+import { Alert } from '@strapi/parts/Alert';
+import { Link } from '@strapi/parts/Link';
 
 const Notification = ({ dispatch, notification }) => {
   const { formatMessage } = useIntl();
-
-  const {
-    title,
-    message,
-    link,
-    type,
-    id,
-    onClose,
-    timeout,
-    blockTransition,
-    centered,
-  } = notification;
+  const { message, link, type, id, onClose, timeout, blockTransition } = notification;
 
   const formattedMessage = msg => (typeof msg === 'string' ? msg : formatMessage(msg, msg.values));
   const handleClose = useCallback(() => {
@@ -61,62 +33,53 @@ const Notification = ({ dispatch, notification }) => {
     return () => clearTimeout(timeoutToClear);
   }, [blockTransition, handleClose, timeout]);
 
+  let variant;
+  let alertTitle;
+
+  if (type === 'info') {
+    variant = 'default';
+    alertTitle = formatMessage({
+      id: 'notification.default.title',
+      defaultMessage: 'Information Alert:',
+    });
+  } else if (type === 'warning') {
+    alertTitle = formatMessage({
+      id: 'notification.warning.title',
+      defaultMessage: 'Warning Alert:',
+    });
+    variant = 'danger';
+  } else {
+    alertTitle = formatMessage({
+      id: 'notification.success.title',
+      defaultMessage: 'Success Alert:',
+    });
+    variant = 'success';
+  }
+
   return (
-    <NotificationWrapper centered={centered} color={types[type].color}>
-      <Padded top left right bottom size="smd">
-        <Flex alignItems="center" justifyContent="space-between">
-          <IconWrapper>
-            <FontAwesomeIcon icon={types[type].icon} />
-          </IconWrapper>
-          <Padded left size="sm" style={{ width: '80%', flex: 1 }}>
-            {title && (
-              <Text
-                fontSize="xs"
-                textTransform="uppercase"
-                color="grey"
-                title={formattedMessage(title)}
-              >
-                {formattedMessage(title)}
-              </Text>
-            )}
-            <Flex justifyContent="space-between">
-              {message && (
-                <Text title={formattedMessage(message)}>{formattedMessage(message)}</Text>
-              )}
-              {link && (
-                <a
-                  href={link.url}
-                  target={link.target || '_blank'}
-                  rel={!link.target || link.target === '_blank' ? 'noopener noreferrer' : ''}
-                >
-                  <Padded right left size="xs">
-                    <Flex alignItems="center">
-                      <Text
-                        style={{ maxWidth: '100px' }}
-                        ellipsis
-                        fontWeight="bold"
-                        color="blue"
-                        title={formattedMessage(link.label)}
-                      >
-                        {formattedMessage(link.label)}
-                      </Text>
-                      {link.target === '_blank' && (
-                        <Padded left size="xs">
-                          <LinkArrow />
-                        </Padded>
-                      )}
-                    </Flex>
-                  </Padded>
-                </a>
-              )}
-            </Flex>
-          </Padded>
-          <RemoveWrapper>
-            <Remove onClick={handleClose} />
-          </RemoveWrapper>
-        </Flex>
-      </Padded>
-    </NotificationWrapper>
+    <Alert
+      action={
+        link ? (
+          <Link href={link.url} target="_blank">
+            {formatMessage({
+              id: link.label?.id || link.label,
+              defaultMessage: link.label?.defaultMessage || link.label?.id || link.label,
+            })}
+          </Link>
+        ) : (
+          undefined
+        )
+      }
+      onClose={handleClose}
+      closeLabel="Close"
+      title={alertTitle}
+      variant={variant}
+    >
+      {formattedMessage({
+        id: message?.id || message,
+        defaultMessage: message?.defaultMessage || message?.id || message,
+      })}
+    </Alert>
   );
 };
 
@@ -131,7 +94,6 @@ Notification.defaultProps = {
     onClose: () => null,
     timeout: 2500,
     blockTransition: false,
-    centered: false,
   },
 };
 
@@ -140,14 +102,6 @@ Notification.propTypes = {
   notification: PropTypes.shape({
     id: PropTypes.number,
     message: PropTypes.oneOfType([
-      PropTypes.string,
-      PropTypes.shape({
-        id: PropTypes.string.isRequired,
-        defaultMessage: PropTypes.string,
-        values: PropTypes.object,
-      }),
-    ]),
-    title: PropTypes.oneOfType([
       PropTypes.string,
       PropTypes.shape({
         id: PropTypes.string.isRequired,
@@ -171,7 +125,6 @@ Notification.propTypes = {
     onClose: PropTypes.func,
     timeout: PropTypes.number,
     blockTransition: PropTypes.bool,
-    centered: PropTypes.bool,
   }),
 };
 

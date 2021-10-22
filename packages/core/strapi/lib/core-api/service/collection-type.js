@@ -28,19 +28,18 @@ const createCollectionTypeService = ({ model, strapi, utils }) => {
   const { sanitizeInput, getFetchParams } = utils;
 
   return {
-    async find(opts = {}) {
-      const params = getFetchParams(opts.params);
+    async find(params = {}) {
+      const fetchParams = getFetchParams(params);
 
-      const paginationInfo = getPaginationInfo(params);
+      const paginationInfo = getPaginationInfo(fetchParams);
 
-      const results = await strapi.entityService.find(uid, {
-        params: { ...params, ...convertPagedToStartLimit(paginationInfo) },
+      const results = await strapi.entityService.findMany(uid, {
+        ...fetchParams,
+        ...convertPagedToStartLimit(paginationInfo),
       });
 
-      if (shouldCount(params)) {
-        const count = await strapi.entityService.count(uid, {
-          params: { ...params, ...paginationInfo },
-        });
+      if (shouldCount(fetchParams)) {
+        const count = await strapi.entityService.count(uid, { ...fetchParams, ...paginationInfo });
 
         return {
           results,
@@ -54,30 +53,30 @@ const createCollectionTypeService = ({ model, strapi, utils }) => {
       };
     },
 
-    findOne(entityId, opts = {}) {
-      const params = getFetchParams(opts.params);
-
-      return strapi.entityService.findOne(uid, entityId, { params });
+    findOne(entityId, params = {}) {
+      return strapi.entityService.findOne(uid, entityId, getFetchParams(params));
     },
 
-    create({ params, data, files } = {}) {
+    create(params = {}) {
+      const { data } = params;
       const sanitizedData = sanitizeInput(data);
 
       if (hasDraftAndPublish(model)) {
         setPublishedAt(sanitizedData);
       }
 
-      return strapi.entityService.create(uid, { params, data: sanitizedData, files });
+      return strapi.entityService.create(uid, { ...params, data: sanitizedData });
     },
 
-    update(entityId, { params, data, files } = {}) {
+    update(entityId, params = {}) {
+      const { data } = params;
       const sanitizedData = sanitizeInput(data);
 
-      return strapi.entityService.update(uid, entityId, { params, data: sanitizedData, files });
+      return strapi.entityService.update(uid, entityId, { ...params, data: sanitizedData });
     },
 
-    delete(entityId, { params } = {}) {
-      return strapi.entityService.delete(uid, entityId, { params });
+    delete(entityId, params = {}) {
+      return strapi.entityService.delete(uid, entityId, params);
     },
   };
 };

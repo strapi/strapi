@@ -1,11 +1,7 @@
 'use strict';
 
 const getCoreStore = () => {
-  return strapi.store({
-    environment: '',
-    type: 'plugin',
-    name: 'i18n',
-  });
+  return strapi.store({ type: 'plugin', name: 'i18n' });
 };
 
 // retrieve a local service

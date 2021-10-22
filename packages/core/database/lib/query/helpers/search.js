@@ -3,11 +3,13 @@
 const _ = require('lodash/fp');
 
 const types = require('../../types');
+const { toColumnName } = require('./transform');
 
-const applySearch = (qb, query, ctx) => {
-  const { alias, uid, db } = ctx;
+const applySearch = (knex, query, ctx) => {
+  const { qb, uid, db } = ctx;
+  const meta = db.metadata.get(uid);
 
-  const { attributes } = db.metadata.get(uid);
+  const { attributes } = meta;
 
   const searchColumns = ['id'];
 
@@ -29,22 +31,34 @@ const applySearch = (qb, query, ctx) => {
 
   switch (db.dialect.client) {
     case 'postgres': {
-      searchColumns.forEach(attr =>
-        qb.orWhereRaw(`"${alias}"."${attr}"::text ILIKE ?`, `%${escapeQuery(query, '*%\\')}%`)
-      );
+      searchColumns.forEach(attr => {
+        const columnName = toColumnName(meta, attr);
+        return knex.orWhereRaw(`??::text ILIKE ?`, [
+          qb.aliasColumn(columnName),
+          `%${escapeQuery(query, '*%\\')}%`,
+        ]);
+      });
 
       break;
     }
     case 'sqlite': {
-      searchColumns.forEach(attr =>
-        qb.orWhereRaw(`"${alias}"."${attr}" LIKE ? ESCAPE '\\'`, `%${escapeQuery(query, '*%\\')}%`)
-      );
+      searchColumns.forEach(attr => {
+        const columnName = toColumnName(meta, attr);
+        return knex.orWhereRaw(`?? LIKE ? ESCAPE '\\'`, [
+          qb.aliasColumn(columnName),
+          `%${escapeQuery(query, '*%\\')}%`,
+        ]);
+      });
       break;
     }
     case 'mysql': {
-      searchColumns.forEach(attr =>
-        qb.orWhereRaw(`\`${alias}\`.\`${attr}\` LIKE ?`, `%${escapeQuery(query, '*%\\')}%`)
-      );
+      searchColumns.forEach(attr => {
+        const columnName = toColumnName(meta, attr);
+        return knex.orWhereRaw(`?? LIKE ?`, [
+          qb.aliasColumn(columnName),
+          `%${escapeQuery(query, '*%\\')}%`,
+        ]);
+      });
       break;
     }
     default: {

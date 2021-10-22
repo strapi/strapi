@@ -4,11 +4,12 @@
 'use strict';
 
 const _ = require('lodash');
+const { eq } = require('lodash/fp');
 
 const PLUGIN_PREFIX = 'plugin::';
 const API_PREFIX = 'api::';
 
-const createPolicy = (policyName, args) => ({ policyName, args });
+const createPolicy = (policyName, config) => ({ policyName, config });
 
 const resolveHandler = policy => {
   return _.has('handler', policy) ? policy.handler : policy;
@@ -19,8 +20,8 @@ const parsePolicy = policy => {
     return createPolicy(policy);
   }
 
-  const { name, options = {} } = policy;
-  return createPolicy(name, options);
+  const { name, config = {} } = policy;
+  return createPolicy(name, config);
 };
 
 const resolvePolicy = policyName => {
@@ -68,12 +69,12 @@ const get = (policy, { pluginName, apiName } = {}) => {
     return policy;
   }
 
-  const { policyName, args } = parsePolicy(policy);
+  const { policyName, config } = parsePolicy(policy);
 
   const resolvedPolicy = resolvePolicy(policyName);
 
   if (resolvedPolicy !== undefined) {
-    return _.isPlainObject(policy) ? resolvedPolicy(args) : resolvedPolicy;
+    return _.isPlainObject(policy) ? resolvedPolicy(config) : resolvedPolicy;
   }
 
   const localPolicy = searchLocalPolicy(policy, { pluginName, apiName });
@@ -96,13 +97,26 @@ const createPolicyFactory = (factoryCallback, options) => {
     }
   };
 
-  return options => {
+  return config => {
     if (validator) {
-      validate(options);
+      validate(config);
     }
 
-    return factoryCallback(options);
+    return factoryCallback(config);
   };
+};
+
+const createPolicyContext = (type, ctx) => {
+  return Object.assign(
+    {
+      is: eq(type),
+
+      get type() {
+        return type;
+      },
+    },
+    ctx
+  );
 };
 
 module.exports = {
@@ -110,4 +124,5 @@ module.exports = {
   globalPolicy,
   bodyPolicy,
   createPolicyFactory,
+  createPolicyContext,
 };

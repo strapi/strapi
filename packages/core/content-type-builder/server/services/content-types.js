@@ -122,7 +122,7 @@ const createContentType = async ({ contentType, components = [] }, options = {})
  */
 const generateAPI = ({ singularName, kind = 'collectionType' }) => {
   const strapiGenerators = require('@strapi/generators');
-  return strapiGenerators.generate('api', { id: singularName, kind }, { dir: strapi.dir });
+  return strapiGenerators.generate('api', { id: singularName, kind }, { dir: strapi.dirs.root });
 };
 
 /**

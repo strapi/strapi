@@ -69,7 +69,7 @@ const createAuthentication = () => {
         }
       }
 
-      return ctx.unauthorized('Missing credentials');
+      return ctx.unauthorized('Missing or invalid credentials');
     },
     async verify(auth, config = {}) {
       if (config === false) {
@@ -81,7 +81,7 @@ const createAuthentication = () => {
       }
 
       if (typeof auth.strategy.verify === 'function') {
-        return await auth.strategy.verify(auth, config);
+        return auth.strategy.verify(auth, config);
       }
 
       return;

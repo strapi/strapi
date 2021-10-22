@@ -1,24 +1,11 @@
 import React, { useMemo } from 'react';
-import { Flex, Text } from '@buffetjs/core';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import PropTypes from 'prop-types';
-import { useIntl } from 'react-intl';
-import { sortBy } from 'lodash';
-import { PermissionsWrapper, RowContainer } from '@strapi/helper-plugin';
-
-import getTrad from '../../../utils/getTrad';
+import sortBy from 'lodash/sortBy';
+import { Box } from '@strapi/parts/Box';
 import SubCategory from './SubCategory';
-import RowStyle from './RowStyle';
 
-const PermissionRow = ({ isOpen, isWhite, name, onOpenPlugin, permissions }) => {
-  const { formatMessage } = useIntl();
-
+const PermissionRow = ({ name, permissions }) => {
   const subCategories = useMemo(() => {
-    // Avoid computing when not necesserary
-    if (!isOpen) {
-      return [];
-    }
-
     return sortBy(
       Object.values(permissions.controllers).reduce((acc, curr, index) => {
         const currentName = `${name}.controllers.${Object.keys(permissions.controllers)[index]}`;
@@ -47,45 +34,19 @@ const PermissionRow = ({ isOpen, isWhite, name, onOpenPlugin, permissions }) => 
       }, []),
       'label'
     );
-  }, [isOpen, name, permissions]);
+  }, [name, permissions]);
 
   return (
-    <RowContainer isWhite={isWhite}>
-      <RowStyle isActive={isOpen} isWhite={isWhite} onClick={onOpenPlugin}>
-        <Flex alignItems="center" justifyContent="space-between">
-          <div>
-            <Text color="grey" fontWeight="bold" fontSize="xs" textTransform="uppercase">
-              {name}
-            </Text>
-            <Text lineHeight="22px" color="grey">
-              {formatMessage({ id: getTrad('Plugin.permissions.plugins.description') }, { name })}
-            </Text>
-          </div>
-          <div>
-            <FontAwesomeIcon
-              style={{ width: '11px' }}
-              color="#9EA7B8"
-              icon={isOpen ? 'chevron-up' : 'chevron-down'}
-            />
-          </div>
-        </Flex>
-      </RowStyle>
-      {isOpen && (
-        <PermissionsWrapper isWhite={isWhite}>
-          {subCategories.map(subCategory => (
-            <SubCategory key={subCategory.name} subCategory={subCategory} />
-          ))}
-        </PermissionsWrapper>
-      )}
-    </RowContainer>
+    <Box padding={6}>
+      {subCategories.map(subCategory => (
+        <SubCategory key={subCategory.name} subCategory={subCategory} />
+      ))}
+    </Box>
   );
 };
 
 PermissionRow.propTypes = {
-  isOpen: PropTypes.bool.isRequired,
-  isWhite: PropTypes.bool.isRequired,
   name: PropTypes.string.isRequired,
-  onOpenPlugin: PropTypes.func.isRequired,
   permissions: PropTypes.object.isRequired,
 };
 

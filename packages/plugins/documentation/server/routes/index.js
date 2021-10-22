@@ -1,67 +1,87 @@
 'use strict';
+const restrictAccess = require('../middlewares/restrict-access');
 
 module.exports = [
   {
     method: 'GET',
     path: '/',
-    handler: 'Documentation.index',
+    handler: 'documentation.index',
     config: {
+      auth: false,
+      middlewares: [restrictAccess],
       policies: [
-        'plugin::documentation.index',
-        { name: 'admin::hasPermissions', options: { actions: ['plugin::documentation.read'] } },
+        {
+          name: 'admin::hasPermissions',
+          config: {
+            actions: ['plugin::documentation.read'],
+          },
+        },
       ],
     },
   },
   {
     method: 'GET',
     path: '/v:major(\\d+).:minor(\\d+).:patch(\\d+)',
-    handler: 'Documentation.index',
+    handler: 'documentation.index',
     config: {
+      auth: false,
+      middlewares: [restrictAccess],
       policies: [
-        'plugin::documentation.index',
-        { name: 'admin::hasPermissions', options: { actions: ['plugin::documentation.read'] } },
+        {
+          name: 'admin::hasPermissions',
+          config: {
+            actions: ['plugin::documentation.read'],
+          },
+        },
       ],
     },
   },
   {
     method: 'GET',
     path: '/login',
-    handler: 'Documentation.loginView',
+    handler: 'documentation.loginView',
     config: {
+      auth: false,
       policies: [
-        { name: 'admin::hasPermissions', options: { actions: ['plugin::documentation.read'] } },
+        {
+          name: 'admin::hasPermissions',
+          config: {
+            actions: ['plugin::documentation.read'],
+          },
+        },
       ],
     },
   },
   {
     method: 'POST',
     path: '/login',
-    handler: 'Documentation.login',
+    handler: 'documentation.login',
     config: {
+      auth: false,
       policies: [
-        { name: 'admin::hasPermissions', options: { actions: ['plugin::documentation.read'] } },
+        { name: 'admin::hasPermissions', config: { actions: ['plugin::documentation.read'] } },
       ],
     },
   },
   {
     method: 'GET',
     path: '/getInfos',
-    handler: 'Documentation.getInfos',
+    handler: 'documentation.getInfos',
     config: {
       policies: [
-        { name: 'admin::hasPermissions', options: { actions: ['plugin::documentation.read'] } },
+        { name: 'admin::hasPermissions', config: { actions: ['plugin::documentation.read'] } },
       ],
     },
   },
   {
     method: 'POST',
     path: '/regenerateDoc',
-    handler: 'Documentation.regenerateDoc',
+    handler: 'documentation.regenerateDoc',
     config: {
       policies: [
         {
           name: 'admin::hasPermissions',
-          options: { actions: ['plugin::documentation.settings.regenerate'] },
+          config: { actions: ['plugin::documentation.settings.regenerate'] },
         },
       ],
     },
@@ -69,12 +89,12 @@ module.exports = [
   {
     method: 'PUT',
     path: '/updateSettings',
-    handler: 'Documentation.updateSettings',
+    handler: 'documentation.updateSettings',
     config: {
       policies: [
         {
           name: 'admin::hasPermissions',
-          options: { actions: ['plugin::documentation.settings.update'] },
+          config: { actions: ['plugin::documentation.settings.update'] },
         },
       ],
     },
@@ -82,7 +102,7 @@ module.exports = [
   {
     method: 'DELETE',
     path: '/deleteDoc/:version',
-    handler: 'Documentation.deleteDoc',
+    handler: 'documentation.deleteDoc',
     config: {
       policies: [],
     },

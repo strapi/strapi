@@ -11,11 +11,26 @@ const resolvePolicies = route => {
   const { pluginName, apiName } = route.info || {};
   const policiesConfig = getPoliciesConfig(route);
 
-  const policies = policiesConfig.map(policyName => {
-    return policy.get(policyName, { pluginName, apiName });
-  });
+  const resolvedPolicies = policiesConfig.map(policyConfig =>
+    policy.get(policyConfig, { pluginName, apiName })
+  );
 
-  return [...policies, bodyPolicy];
+  const policiesMiddleware = async (ctx, next) => {
+    const context = policy.createPolicyContext('koa', ctx);
+
+    for (const resolvedPolicy of resolvedPolicies) {
+      const result = await resolvedPolicy(context, { strapi });
+
+      if (![true, undefined].includes(result)) {
+        // TODO: make error clearer
+        throw new Error('Policies failed.');
+      }
+    }
+
+    await next();
+  };
+
+  return [policiesMiddleware, bodyPolicy];
 };
 
 module.exports = {

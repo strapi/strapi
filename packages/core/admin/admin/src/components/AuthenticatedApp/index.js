@@ -1,6 +1,8 @@
-import React, { useMemo } from 'react';
-import { LoadingIndicatorPage, AppInfosContext } from '@strapi/helper-plugin';
+import React, { useMemo, useState } from 'react';
+//  TODO: DS add loader
+import { auth, LoadingIndicatorPage, AppInfosContext } from '@strapi/helper-plugin';
 import { useQueries } from 'react-query';
+import get from 'lodash/get';
 import packageJSON from '../../../../package.json';
 import { useConfigurations } from '../../hooks';
 import PluginsInitializer from '../PluginsInitializer';
@@ -11,6 +13,9 @@ import checkLatestStrapiVersion from './utils/checkLatestStrapiVersion';
 const strapiVersion = packageJSON.version;
 
 const AuthenticatedApp = () => {
+  const userInfo = auth.getUserInfo();
+  const userName = get(userInfo, 'username') || `${userInfo.firstname} ${userInfo.lastname}`;
+  const [userDisplayName, setUserDisplayName] = useState(userName);
   const { showReleaseNotification } = useConfigurations();
   const [
     { data: appInfos, status },
@@ -53,7 +58,13 @@ const AuthenticatedApp = () => {
 
   return (
     <AppInfosContext.Provider
-      value={{ ...appInfos, latestStrapiReleaseTag: tag_name, shouldUpdateStrapi }}
+      value={{
+        ...appInfos,
+        latestStrapiReleaseTag: tag_name,
+        setUserDisplayName,
+        shouldUpdateStrapi,
+        userDisplayName,
+      }}
     >
       <RBACProvider permissions={permissions} refetchPermissions={refetch}>
         <PluginsInitializer />

@@ -21,7 +21,9 @@ if (edition === 'EE') {
     const localTestData = {
       models: {
         article: {
-          name: 'article',
+          singularName: 'article',
+          pluralName: 'articles',
+          displayName: 'Article',
           attributes: {
             title: {
               type: 'string',
@@ -102,7 +104,7 @@ if (edition === 'EE') {
     };
 
     const getUserRequest = idx => requests[localTestData.users[idx].id];
-    const getModelName = () => localTestData.models.article.name;
+    const getModelName = () => localTestData.models.article.singularName;
 
     const deleteFixtures = async () => {
       // Delete users

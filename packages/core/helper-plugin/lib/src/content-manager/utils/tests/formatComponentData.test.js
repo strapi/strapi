@@ -1,4 +1,4 @@
-import testData from '../../../testUtils/testData';
+import testData from '../../../old/testUtils/testData';
 import formatComponentData from '../formatComponentData';
 
 const { contentType, components, modifiedData } = testData;
@@ -6,7 +6,7 @@ const { contentType, components, modifiedData } = testData;
 describe('STRAPI_HELPER_PLUGIN | utils | formatComponentData', () => {
   it('should add the __temp_key__ property to each repeatable component object', () => {
     const expected = {
-      created_at: '2020-04-28T13:22:13.033Z',
+      createdAt: '2020-04-28T13:22:13.033Z',
       dz: [
         { __component: 'compos.sub-compo', id: 7, name: 'name', password: 'password' },
         {
@@ -66,7 +66,7 @@ describe('STRAPI_HELPER_PLUGIN | utils | formatComponentData', () => {
           __temp_key__: 1,
         },
       ],
-      updated_at: '2020-04-28T13:22:13.033Z',
+      updatedAt: '2020-04-28T13:22:13.033Z',
     };
 
     expect(formatComponentData(modifiedData, contentType, components)).toEqual(expected);

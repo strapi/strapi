@@ -12,7 +12,9 @@ let graphqlQuery;
 const data = {};
 
 const homePageModel = {
-  name: 'home-page',
+  singularName: 'home-page',
+  pluralName: 'home-pages',
+  displayName: 'Homepage',
   kind: 'singleType',
   attributes: {
     title: {
@@ -24,19 +26,15 @@ const homePageModel = {
 const updateContent = data => {
   return graphqlQuery({
     query: /* GraphQL */ `
-      mutation updateHomePage($input: updateHomePageInput) {
-        updateHomePage(input: $input) {
-          homePage {
+      mutation updateHomePage($data: HomePageInput!) {
+        updateHomePage(data: $data) {
+          data {
             id
           }
         }
       }
     `,
-    variables: {
-      input: {
-        data,
-      },
-    },
+    variables: { data },
   });
 };
 
@@ -67,7 +65,9 @@ describe('Single type Graphql support', () => {
         query: /* GraphQL */ `
           {
             homePages {
-              id
+              data {
+                id
+              }
             }
           }
         `,
@@ -92,8 +92,12 @@ describe('Single type Graphql support', () => {
         query: /* GraphQL */ `
           {
             homePage {
-              id
-              title
+              data {
+                id
+                attributes {
+                  title
+                }
+              }
             }
           }
         `,
@@ -102,12 +106,16 @@ describe('Single type Graphql support', () => {
       expect(res.statusCode).toBe(200);
       expect(res.body.data).toEqual({
         homePage: {
-          id: expect.anything(),
-          title: 'Test',
+          data: {
+            id: expect.anything(),
+            attributes: {
+              title: 'Test',
+            },
+          },
         },
       });
 
-      data.id = res.body.data.homePage.id;
+      data.id = res.body.data.homePage.data.id;
     });
   });
 
@@ -136,20 +144,20 @@ describe('Single type Graphql support', () => {
     test('update a single type does not require id', async () => {
       const updateRes = await graphqlQuery({
         query: /* GraphQL */ `
-          mutation updateHomePage($input: updateHomePageInput) {
-            updateHomePage(input: $input) {
-              homePage {
+          mutation updateHomePage($data: HomePageInput!) {
+            updateHomePage(data: $data) {
+              data {
                 id
-                title
+                attributes {
+                  title
+                }
               }
             }
           }
         `,
         variables: {
-          input: {
-            data: {
-              title: 'New Title',
-            },
+          data: {
+            title: 'New Title',
           },
         },
       });
@@ -157,9 +165,11 @@ describe('Single type Graphql support', () => {
       expect(updateRes.statusCode).toBe(200);
       expect(updateRes.body.data).toEqual({
         updateHomePage: {
-          homePage: {
+          data: {
             id: data.id,
-            title: 'New Title',
+            attributes: {
+              title: 'New Title',
+            },
           },
         },
       });
@@ -168,8 +178,12 @@ describe('Single type Graphql support', () => {
         query: /* GraphQL */ `
           {
             homePage {
-              id
-              title
+              data {
+                id
+                attributes {
+                  title
+                }
+              }
             }
           }
         `,
@@ -178,8 +192,12 @@ describe('Single type Graphql support', () => {
       expect(getRes.statusCode).toBe(200);
       expect(getRes.body.data).toEqual({
         homePage: {
-          id: data.id,
-          title: 'New Title',
+          data: {
+            id: data.id,
+            attributes: {
+              title: 'New Title',
+            },
+          },
         },
       });
     });
@@ -189,9 +207,11 @@ describe('Single type Graphql support', () => {
         query: /* GraphQL */ `
           mutation {
             deleteHomePage {
-              homePage {
+              data {
                 id
-                title
+                attributes {
+                  title
+                }
               }
             }
           }
@@ -201,9 +221,11 @@ describe('Single type Graphql support', () => {
       expect(deleteRes.statusCode).toBe(200);
       expect(deleteRes.body.data).toEqual({
         deleteHomePage: {
-          homePage: {
+          data: {
             id: data.id,
-            title: 'New Title',
+            attributes: {
+              title: 'New Title',
+            },
           },
         },
       });
@@ -212,8 +234,12 @@ describe('Single type Graphql support', () => {
         query: /* GraphQL */ `
           {
             homePage {
-              id
-              title
+              data {
+                id
+                attributes {
+                  title
+                }
+              }
             }
           }
         `,
@@ -221,7 +247,9 @@ describe('Single type Graphql support', () => {
 
       expect(getRes.statusCode).toBe(200);
       expect(getRes.body.data).toEqual({
-        homePage: null,
+        homePage: {
+          data: null,
+        },
       });
     });
   });

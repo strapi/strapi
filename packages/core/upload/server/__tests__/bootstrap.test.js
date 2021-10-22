@@ -8,7 +8,7 @@ describe('Upload plugin bootstrap function', () => {
     const registerMany = jest.fn(() => {});
 
     global.strapi = {
-      dir: process.cwd(),
+      dirs: { root: process.cwd() },
       admin: {
         services: { permission: { actionProvider: { registerMany } } },
       },
@@ -38,7 +38,7 @@ describe('Upload plugin bootstrap function', () => {
       },
     };
 
-    await bootstrap();
+    await bootstrap({ strapi });
 
     expect(setStore).toHaveBeenCalledWith({
       value: {

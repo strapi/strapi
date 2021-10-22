@@ -1,17 +1,17 @@
 import styled from 'styled-components';
 
-/* eslint-disable */
-
 const Wrapper = styled.div`
-  max-height: 555px;
-  min-height: 294px;
+  position: absolute;
+  top: 0;
+  width: 100%;
+  height: 100%;
   overflow: auto;
-  padding: 20px 20px 0 20px;
-  font-size: 16px;
-  background-color: #fff;
-  line-height: 24px !important;
-  font-family: 'Lato';
-  cursor: text;
+  padding: ${({ theme }) => `${theme.spaces[3]} ${theme.spaces[4]}`};
+  font-size: ${14 / 16}rem;
+  background-color: ${({ theme }) => theme.colors.neutral0};
+  z-index: 2;
+  cursor: not-allowed;
+  color: ${({ theme }) => theme.colors.neutral800};
 
   h1,
   h2,
@@ -21,33 +21,36 @@ const Wrapper = styled.div`
   h6 {
     margin-block-start: 10px;
     margin-block-end: 10px;
-    font-family: 'Lato';
   }
 
   h1 {
-    font-size: 36px;
+    font-size: ${36 / 16}rem;
     font-weight: 600;
   }
 
   h2 {
-    font-size: 30px;
+    font-size: ${30 / 16}rem;
     font-weight: 500;
   }
 
   h3 {
-    font-size: 24px;
+    font-size: ${24 / 16}rem;
     font-weight: 500;
   }
 
   h4 {
-    font-size: 20px;
+    font-size: ${20 / 16}rem;
     font-weight: 500;
+  }
+
+  strong {
+    font-weight: 800;
   }
 
   blockquote {
     margin-top: 41px;
     margin-bottom: 34px;
-    font-size: 16px;
+    font-size: ${14 / 16}rem;
     font-weight: 400;
     border-left: 5px solid #eee;
     font-style: italic;
@@ -87,7 +90,6 @@ const Wrapper = styled.div`
   pre,
   code {
     font-size: 13px;
-    font-family: 'Lato';
     border-radius: 3px;
     background-color: #002b36;
   }
@@ -107,7 +109,6 @@ const Wrapper = styled.div`
     border-radius: 3px;
   }
   .tip {
-    background-color: ${props => props.theme.main.colors.darkBlue};
     padding: 30px;
     border-radius: 3px;
   }
@@ -116,18 +117,6 @@ const Wrapper = styled.div`
   .footnote-backref {
     color: #007bff;
   }
-
-  ${({ isFullscreen }) => {
-    if (isFullscreen) {
-      return `
-        max-height: calc(100% - 70px) !important;
-        margin-bottom: 0;
-        margin-top: 9px;
-        padding: 10px 20px;
-        overflow: auto;
-      `;
-    }
-  }}
 `;
 
 export default Wrapper;

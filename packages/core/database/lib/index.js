@@ -6,7 +6,8 @@ const { getDialect } = require('./dialects');
 const createSchemaProvider = require('./schema');
 const createMetadata = require('./metadata');
 const { createEntityManager } = require('./entity-manager');
-const { createLifecyclesManager } = require('./lifecycles');
+const { createMigrationsProvider } = require('./migrations');
+const { createLifecyclesProvider } = require('./lifecycles');
 
 // TODO: move back into strapi
 const { transformContentTypes } = require('./utils/content-types');
@@ -15,32 +16,21 @@ class Database {
   constructor(config) {
     this.metadata = createMetadata(config.models);
 
-    // TODO: validate meta
-    // this.metadata.validate();
-
     this.config = config;
+
     this.dialect = getDialect(this);
-
-    // TODO: migrations -> allow running them through cli before startup
-    this.schema = createSchemaProvider(this);
-
-    this.lifecycles = createLifecyclesManager(this);
-
-    this.entityManager = createEntityManager(this);
-  }
-
-  async initialize() {
-    await this.dialect.initialize();
+    this.dialect.configure();
 
     this.connection = knex(this.config.connection);
 
-    // register module lifeycles subscriber
-    this.lifecycles.subscribe(async event => {
-      const { model } = event;
-      if (event.action in model.lifecycles) {
-        await model.lifecycles[event.action](event);
-      }
-    });
+    this.dialect.initialize();
+
+    this.schema = createSchemaProvider(this);
+
+    this.migrations = createMigrationsProvider(this);
+    this.lifecycles = createLifecyclesProvider(this);
+
+    this.entityManager = createEntityManager(this);
   }
 
   query(uid) {
@@ -51,6 +41,10 @@ class Database {
     return this.entityManager.getRepository(uid);
   }
 
+  queryBuilder(uid) {
+    return this.entityManager.createQueryBuilder(uid);
+  }
+
   async destroy() {
     await this.lifecycles.clear();
     await this.connection.destroy();
@@ -59,13 +53,7 @@ class Database {
 
 // TODO: move into strapi
 Database.transformContentTypes = transformContentTypes;
-Database.init = async config => {
-  const db = new Database(config);
-
-  await db.initialize();
-
-  return db;
-};
+Database.init = async config => new Database(config);
 
 module.exports = {
   Database,

@@ -33,7 +33,7 @@ const processPopulate = (populate, ctx) => {
 
   let populateMap = {};
 
-  if (populate === false) {
+  if (populate === false || _.isNil(populate)) {
     return null;
   }
 
@@ -94,8 +94,17 @@ const processPopulate = (populate, ctx) => {
   return finalPopulate;
 };
 
-//  Omit limit & offset to avoid needing a query per result to avoid making too many queries
-const pickPopulateParams = _.pick(['select', 'count', 'where', 'populate', 'orderBy']);
+//  TODO: Omit limit & offset to avoid needing a query per result to avoid making too many queries
+const pickPopulateParams = _.pick([
+  'select',
+  'count',
+  'where',
+  'populate',
+  'orderBy',
+  'limit',
+  'offset',
+  'filters',
+]);
 
 // TODO: cleanup code
 // TODO: create aliases for pivot columns
@@ -114,7 +123,11 @@ const applyPopulate = async (results, populate, ctx) => {
     const attribute = meta.attributes[key];
     const targetMeta = db.metadata.get(attribute.target);
 
-    const populateValue = pickPopulateParams(populate[key]);
+    const populateValue = {
+      filters: qb.state.filters,
+      ...pickPopulateParams(populate[key]),
+    };
+
     const isCount = populateValue.count === true;
 
     const fromTargetRow = rowOrRows => fromRow(targetMeta, rowOrRows);
@@ -181,7 +194,7 @@ const applyPopulate = async (results, populate, ctx) => {
         const rows = await qb
           .init(populateValue)
           .join({
-            alias: alias,
+            alias,
             referencedTable: joinTable.name,
             referencedColumn: joinTable.inverseJoinColumn.name,
             rootColumn: joinTable.inverseJoinColumn.referencedColumn,
@@ -265,7 +278,7 @@ const applyPopulate = async (results, populate, ctx) => {
           const rows = await qb
             .init(populateValue)
             .join({
-              alias: alias,
+              alias,
               referencedTable: joinTable.name,
               referencedColumn: joinTable.inverseJoinColumn.name,
               rootColumn: joinTable.inverseJoinColumn.referencedColumn,
@@ -299,7 +312,7 @@ const applyPopulate = async (results, populate, ctx) => {
         const rows = await qb
           .init(populateValue)
           .join({
-            alias: alias,
+            alias,
             referencedTable: joinTable.name,
             referencedColumn: joinTable.inverseJoinColumn.name,
             rootColumn: joinTable.inverseJoinColumn.referencedColumn,
@@ -344,7 +357,7 @@ const applyPopulate = async (results, populate, ctx) => {
         const rows = await qb
           .init(populateValue)
           .join({
-            alias: alias,
+            alias,
             referencedTable: joinTable.name,
             referencedColumn: joinTable.inverseJoinColumn.name,
             rootColumn: joinTable.inverseJoinColumn.referencedColumn,
@@ -378,7 +391,7 @@ const applyPopulate = async (results, populate, ctx) => {
       const rows = await qb
         .init(populateValue)
         .join({
-          alias: alias,
+          alias,
           referencedTable: joinTable.name,
           referencedColumn: joinTable.inverseJoinColumn.name,
           rootColumn: joinTable.inverseJoinColumn.referencedColumn,
@@ -461,7 +474,7 @@ const applyPopulate = async (results, populate, ctx) => {
         const rows = await qb
           .init(populateValue)
           .join({
-            alias: alias,
+            alias,
             referencedTable: joinTable.name,
             referencedColumn: joinColumn.name,
             rootColumn: joinColumn.referencedColumn,
@@ -538,6 +551,12 @@ const applyPopulate = async (results, populate, ctx) => {
       for (const type in idsByType) {
         const ids = idsByType[type];
 
+        // type was removed but still in morph relation
+        if (!db.metadata.get(type)) {
+          map[type] = {};
+          continue;
+        }
+
         const qb = db.entityManager.createQueryBuilder(type);
 
         const rows = await qb
@@ -595,6 +614,12 @@ const applyPopulate = async (results, populate, ctx) => {
       const map = {};
       for (const type in idsByType) {
         const ids = idsByType[type];
+
+        // type was removed but still in morph relation
+        if (!db.metadata.get(type)) {
+          map[type] = {};
+          continue;
+        }
 
         const qb = db.entityManager.createQueryBuilder(type);
 

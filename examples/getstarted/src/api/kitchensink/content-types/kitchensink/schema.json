@@ -1,0 +1,135 @@
+{
+  "kind": "collectionType",
+  "collectionName": "kitchensinks",
+  "info": {
+    "displayName": "Kitchen Sink",
+    "singularName": "kitchensink",
+    "pluralName": "kitchensinks",
+    "description": "",
+    "name": "Kitchen Sink"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "short_text": {
+      "type": "string"
+    },
+    "long_text": {
+      "type": "text"
+    },
+    "rich_text": {
+      "type": "richtext"
+    },
+    "integer": {
+      "type": "integer"
+    },
+    "biginteger": {
+      "type": "biginteger"
+    },
+    "decimal": {
+      "type": "decimal"
+    },
+    "float": {
+      "type": "float"
+    },
+    "date": {
+      "type": "date"
+    },
+    "datetime": {
+      "type": "datetime"
+    },
+    "time": {
+      "type": "time"
+    },
+    "timestamp": {
+      "type": "timestamp"
+    },
+    "boolean": {
+      "type": "boolean"
+    },
+    "email": {
+      "type": "email"
+    },
+    "password": {
+      "type": "password"
+    },
+    "enumeration": {
+      "type": "enumeration",
+      "enum": ["A", "B", "C", "D", "E"]
+    },
+    "single_media": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": ["images", "files", "videos"]
+    },
+    "multiple_media": {
+      "type": "media",
+      "multiple": true,
+      "required": false,
+      "allowedTypes": ["images", "files", "videos"]
+    },
+    "json": {
+      "type": "json"
+    },
+    "single_compo": {
+      "type": "component",
+      "repeatable": false,
+      "component": "basic.simple"
+    },
+    "repeatable_compo": {
+      "type": "component",
+      "repeatable": true,
+      "component": "basic.simple"
+    },
+    "dynamiczone": {
+      "type": "dynamiczone",
+      "components": ["basic.simple"]
+    },
+    "one_way_tag": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::tag.tag"
+    },
+    "one_to_one_tag": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::tag.tag",
+      "private": true,
+      "inversedBy": "one_to_one_kitchensink"
+    },
+    "one_to_many_tags": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::tag.tag",
+      "mappedBy": "many_to_one_kitchensink"
+    },
+    "many_to_one_tag": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::tag.tag",
+      "inversedBy": "one_to_many_kitchensinks"
+    },
+    "many_to_many_tags": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::tag.tag",
+      "inversedBy": "many_to_many_kitchensinks"
+    },
+    "many_way_tags": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::tag.tag"
+    },
+    "morph_to_one": {
+      "type": "relation",
+      "relation": "morphToOne"
+    },
+    "morph_to_many": {
+      "type": "relation",
+      "relation": "morphToMany"
+    }
+  }
+}

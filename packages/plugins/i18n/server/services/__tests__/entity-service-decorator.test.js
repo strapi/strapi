@@ -65,54 +65,54 @@ describe('Entity service decorator', () => {
     syncNonLocalizedAttributes.mockClear();
   });
 
-  describe('wrapOptions', () => {
-    test('Calls original wrapOptions', async () => {
+  describe('wrapParams', () => {
+    test('Calls original wrapParams', async () => {
       const defaultService = {
-        wrapOptions: jest.fn(() => Promise.resolve('li')),
+        wrapParams: jest.fn(() => Promise.resolve('li')),
       };
 
       const service = decorator(defaultService);
 
       const input = { populate: ['test'] };
-      await service.wrapOptions(input, { uid: 'test-model' });
+      await service.wrapParams(input, { uid: 'test-model' });
 
-      expect(defaultService.wrapOptions).toHaveBeenCalledWith(input, { uid: 'test-model' });
+      expect(defaultService.wrapParams).toHaveBeenCalledWith(input, { uid: 'test-model' });
     });
 
     test('Does not wrap options if model is not localized', async () => {
       const defaultService = {
-        wrapOptions: jest.fn(opts => Promise.resolve(opts)),
+        wrapParams: jest.fn(opts => Promise.resolve(opts)),
       };
       const service = decorator(defaultService);
 
       const input = { populate: ['test'] };
-      const output = await service.wrapOptions(input, { uid: 'non-localized-model' });
+      const output = await service.wrapParams(input, { uid: 'non-localized-model' });
 
       expect(output).toStrictEqual(input);
     });
 
     test('does not change non params options', async () => {
       const defaultService = {
-        wrapOptions: jest.fn(opts => Promise.resolve(opts)),
+        wrapParams: jest.fn(opts => Promise.resolve(opts)),
       };
       const service = decorator(defaultService);
 
       const input = { populate: ['test'] };
-      const output = await service.wrapOptions(input, { uid: 'test-model' });
+      const output = await service.wrapParams(input, { uid: 'test-model' });
 
       expect(output.populate).toStrictEqual(input.populate);
     });
 
     test('Adds locale param', async () => {
       const defaultService = {
-        wrapOptions: jest.fn(opts => Promise.resolve(opts)),
+        wrapParams: jest.fn(opts => Promise.resolve(opts)),
       };
       const service = decorator(defaultService);
 
       const input = { populate: ['test'] };
-      const output = await service.wrapOptions(input, { uid: 'test-model' });
+      const output = await service.wrapParams(input, { uid: 'test-model' });
 
-      expect(output).toMatchObject({ params: { filters: { $and: [{ locale: 'en' }] } } });
+      expect(output).toMatchObject({ filters: { $and: [{ locale: 'en' }] } });
     });
 
     const testData = [
@@ -130,32 +130,30 @@ describe('Entity service decorator', () => {
       "Doesn't add locale param when the params contain id or id_in - %s",
       async (action, params) => {
         const defaultService = {
-          wrapOptions: jest.fn(opts => Promise.resolve(opts)),
+          wrapParams: jest.fn(opts => Promise.resolve(opts)),
         };
         const service = decorator(defaultService);
 
-        const input = Object.assign({ populate: ['test'], params });
-        const output = await service.wrapOptions(input, { uid: 'test-model', action });
+        const input = Object.assign({ populate: ['test'], ...params });
+        const output = await service.wrapParams(input, { uid: 'test-model', action });
 
-        expect(output).toEqual({ populate: ['test'], params });
+        expect(output).toEqual({ populate: ['test'], ...params });
       }
     );
 
-    test('Replaces _locale param', async () => {
+    test('Replaces locale param', async () => {
       const defaultService = {
-        wrapOptions: jest.fn(opts => Promise.resolve(opts)),
+        wrapParams: jest.fn(opts => Promise.resolve(opts)),
       };
       const service = decorator(defaultService);
 
       const input = {
-        params: {
-          locale: 'fr',
-        },
+        locale: 'fr',
         populate: ['test'],
       };
-      const output = await service.wrapOptions(input, { uid: 'test-model' });
+      const output = await service.wrapParams(input, { uid: 'test-model' });
 
-      expect(output).toMatchObject({ params: { filters: { $and: [{ locale: 'fr' }] } } });
+      expect(output).toMatchObject({ filters: { $and: [{ locale: 'fr' }] } });
     });
   });
 

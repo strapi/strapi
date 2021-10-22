@@ -40,7 +40,7 @@ module.exports = opts => {
       name: 'A Strapi developer',
     },
     strapi: {
-      uuid: uuid,
+      uuid,
       ...packageJsonStrapi,
     },
     engines: {

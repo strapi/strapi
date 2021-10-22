@@ -38,7 +38,7 @@ const createUpdateNotifier = strapi => {
     config = new Configstore(
       pkg.name,
       {},
-      { configPath: path.join(strapi.dir, '.strapi-updater.json') }
+      { configPath: path.join(strapi.dirs.root, '.strapi-updater.json') }
     );
   } catch {
     // we don't have write access to the file system
@@ -67,6 +67,7 @@ const createUpdateNotifier = strapi => {
     const now = Date.now();
     const latestVersion = config.get('latest');
     const lastNotification = config.get('lastNotification') || 0;
+
     if (
       !process.stdout.isTTY ||
       lastNotification + notifInterval > now ||

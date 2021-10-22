@@ -1,21 +1,29 @@
 'use strict';
 
-const path = require('path');
-
-module.exports = ({ env }) => ({
+module.exports = () => ({
   graphql: {
     enabled: true,
     config: {
-      amountLimit: 50,
-      depthLimit: 10,
+      endpoint: '/graphql',
+
+      defaultLimit: 25,
+      maxLimit: 100,
+
       apolloServer: {
         tracing: true,
       },
     },
   },
+  documentation: {
+    config: {
+      info: {
+        version: '2.0.0',
+      },
+    },
+  },
   myplugin: {
     enabled: true,
-    resolve: `./plugins/myplugin`, // From the root of the project
+    resolve: `./src/plugins/myplugin`, // From the root of the project
     config: {
       testConf: 3,
     },

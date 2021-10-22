@@ -1,7 +1,0 @@
-{
-  "router": {
-    "enabled": true,
-    "prefix": "",
-    "routes": {}
-  }
-}

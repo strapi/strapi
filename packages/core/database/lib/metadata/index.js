@@ -1,8 +1,3 @@
-/**
- * @module metadata
- *
- */
-
 'use strict';
 
 const _ = require('lodash/fp');
@@ -16,43 +11,13 @@ class Metadata extends Map {
   }
 }
 
+// TODO: check if there isn't an attribute with an id already
 /**
  * Create Metadata from models configurations
- *
- * timestamps => not optional anymore but auto added. Auto added on the content type or in the db layer ?
- *
- * options => options are handled on the layer above. Options convert to fields on the CT
- *
- * filters => not in v1
- *
- * attributes
- *
- * - type
- * - mapping field name - column name
- * - mapping field type - column type
- * - formatter / parser => coming from field type so no
- * - indexes / checks / contstraints
- * - relations => reference to the target model (function or string to avoid circular deps ?)
- *   - name of the LEFT/RIGHT side foreign keys
- *   - name of join table
- *
- * - compo/dz => reference to the components
- * - validators
- * - hooks
- * - default value
- * - required -> should add a not null option instead of the API required
- * - unique -> should add a DB unique option instead of the unique in the API (Unique by locale or something else for example)
- *
- * lifecycles
- *
- * private fields ? => handled on a different layer
  * @param {object[]} models
  * @returns {Metadata}
  */
 const createMetadata = (models = []) => {
-  // TODO: reorder to make sure we can create everything or delete everything in the right order
-  // TODO: allow passing the join config in the attribute
-  // TODO: allow passing column config in the attribute
   const metadata = new Metadata();
 
   // init pass
@@ -62,7 +27,6 @@ const createMetadata = (models = []) => {
       uid: model.uid,
       tableName: model.tableName,
       attributes: {
-        // TODO: check if there isn't an attribute with an id already
         id: {
           type: 'increments',
         },
@@ -83,67 +47,12 @@ const createMetadata = (models = []) => {
     for (const [attributeName, attribute] of Object.entries(meta.attributes)) {
       try {
         if (types.isComponent(attribute.type)) {
-          // convert component to relation
-
-          Object.assign(attribute, {
-            type: 'relation',
-            relation: attribute.repeatable === true ? 'oneToMany' : 'oneToOne',
-            target: attribute.component,
-            joinTable: {
-              name: meta.componentLink.tableName,
-              joinColumn: {
-                name: 'entity_id',
-                referencedColumn: 'id',
-              },
-              inverseJoinColumn: {
-                name: 'component_id',
-                referencedColumn: 'id',
-              },
-              on: {
-                field: attributeName,
-              },
-              orderBy: {
-                order: 'asc',
-              },
-            },
-          });
-
+          createComponent(attributeName, attribute, meta, metadata);
           continue;
         }
 
         if (types.isDynamicZone(attribute.type)) {
-          //
-
-          Object.assign(attribute, {
-            type: 'relation',
-            relation: 'morphToMany',
-            // TODO: handle restrictions at some point
-            // target: attribute.components,
-            joinTable: {
-              name: meta.componentLink.tableName,
-              joinColumn: {
-                name: 'entity_id',
-                referencedColumn: 'id',
-              },
-              morphColumn: {
-                idColumn: {
-                  name: 'component_id',
-                  referencedColumn: 'id',
-                },
-                typeColumn: {
-                  name: 'component_type',
-                },
-                typeField: '__component',
-              },
-              on: {
-                field: attributeName,
-              },
-              orderBy: {
-                order: 'asc',
-              },
-            },
-          });
-
+          createDynamicZone(attributeName, attribute, meta, metadata);
           continue;
         }
 
@@ -151,12 +60,24 @@ const createMetadata = (models = []) => {
           createRelation(attributeName, attribute, meta, metadata);
           continue;
         }
+
+        createAttribute(attributeName, attribute, meta, metadata);
       } catch (error) {
+        console.log(error);
         throw new Error(
           `Error on attribute ${attributeName} in model ${meta.singularName}(${meta.uid}): ${error.message}`
         );
       }
     }
+  }
+
+  for (const meta of metadata.values()) {
+    const columnToAttribute = Object.keys(meta.attributes).reduce((acc, key) => {
+      const attribute = meta.attributes[key];
+      return Object.assign(acc, { [attribute.columnName || key]: key });
+    }, {});
+
+    meta.columnToAttribute = columnToAttribute;
   }
 
   return metadata;
@@ -201,7 +122,7 @@ const createCompoLinkModelMeta = baseModelMeta => {
         type: 'integer',
         column: {
           unsigned: true,
-          defaultTo: [0],
+          defaultTo: 0,
         },
       },
     },
@@ -209,10 +130,16 @@ const createCompoLinkModelMeta = baseModelMeta => {
       {
         name: `${baseModelMeta.tableName}_field_index`,
         columns: ['field'],
+        type: null,
       },
       {
         name: `${baseModelMeta.tableName}_component_type_index`,
         columns: ['component_type'],
+        type: null,
+      },
+      {
+        name: `${baseModelMeta.tableName}_entity_fk`,
+        columns: ['entity_id'],
       },
     ],
     foreignKeys: [
@@ -225,6 +152,68 @@ const createCompoLinkModelMeta = baseModelMeta => {
       },
     ],
   };
+};
+
+const createDynamicZone = (attributeName, attribute, meta) => {
+  Object.assign(attribute, {
+    type: 'relation',
+    relation: 'morphToMany',
+    // TODO: handle restrictions at some point
+    // target: attribute.components,
+    joinTable: {
+      name: meta.componentLink.tableName,
+      joinColumn: {
+        name: 'entity_id',
+        referencedColumn: 'id',
+      },
+      morphColumn: {
+        idColumn: {
+          name: 'component_id',
+          referencedColumn: 'id',
+        },
+        typeColumn: {
+          name: 'component_type',
+        },
+        typeField: '__component',
+      },
+      on: {
+        field: attributeName,
+      },
+      orderBy: {
+        order: 'asc',
+      },
+    },
+  });
+};
+
+const createComponent = (attributeName, attribute, meta) => {
+  Object.assign(attribute, {
+    type: 'relation',
+    relation: attribute.repeatable === true ? 'oneToMany' : 'oneToOne',
+    target: attribute.component,
+    joinTable: {
+      name: meta.componentLink.tableName,
+      joinColumn: {
+        name: 'entity_id',
+        referencedColumn: 'id',
+      },
+      inverseJoinColumn: {
+        name: 'component_id',
+        referencedColumn: 'id',
+      },
+      on: {
+        field: attributeName,
+      },
+      orderBy: {
+        order: 'asc',
+      },
+    },
+  });
+};
+
+const createAttribute = (attributeName, attribute) => {
+  const columnName = _.snakeCase(attributeName);
+  Object.assign(attribute, { columnName });
 };
 
 module.exports = createMetadata;

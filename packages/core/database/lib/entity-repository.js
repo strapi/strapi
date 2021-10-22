@@ -95,9 +95,8 @@ const createRepository = (uid, db) => {
       return db.entityManager.deleteRelations(uid, id);
     },
 
-    // TODO: add relation API
-    populate(entity, field, params) {
-      return db.entityManager.populate(uid, entity, field, params);
+    populate(entity, populate) {
+      return db.entityManager.populate(uid, entity, populate);
     },
 
     load(entity, field, params) {

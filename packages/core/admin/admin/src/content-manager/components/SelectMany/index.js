@@ -1,10 +1,10 @@
-import React, { memo, useCallback } from 'react';
+import React, { memo } from 'react';
 import PropTypes from 'prop-types';
-import { isEmpty } from 'lodash';
-import { useDrop } from 'react-dnd';
+import { useIntl } from 'react-intl';
+import isEmpty from 'lodash/isEmpty';
 import Select, { createFilter } from 'react-select';
-import ItemTypes from '../../utils/ItemTypes';
-import { ListShadow, ListWrapper } from './components';
+import { Box } from '@strapi/parts/Box';
+import { Stack } from '@strapi/parts/Stack';
 import ListItem from './ListItem';
 
 function SelectMany({
@@ -15,7 +15,6 @@ function SelectMany({
   name,
   isDisabled,
   isLoading,
-  move,
   onInputChange,
   onMenuClose,
   onMenuOpen,
@@ -28,27 +27,7 @@ function SelectMany({
   targetModel,
   value,
 }) {
-  const [, drop] = useDrop({ accept: ItemTypes.RELATION });
-  const findRelation = id => {
-    const relation = value.filter(c => {
-      return `${c.id}` === `${id}`;
-    })[0];
-
-    return {
-      relation,
-      index: value.indexOf(relation),
-    };
-  };
-
-  const moveRelation = useCallback(
-    (id, atIndex) => {
-      const { index } = findRelation(id);
-
-      move(index, atIndex, name);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [value]
-  );
+  const { formatMessage } = useIntl();
 
   const filterConfig = {
     ignoreCase: true,
@@ -88,23 +67,22 @@ function SelectMany({
         onMenuClose={onMenuClose}
         onMenuOpen={onMenuOpen}
         onMenuScrollToBottom={onMenuScrollToBottom}
-        placeholder={placeholder}
+        placeholder={formatMessage(
+          placeholder || { id: 'components.Select.placeholder', defaultMessage: 'Select...' }
+        )}
         styles={styles}
         value={[]}
       />
-
-      <ListWrapper ref={drop}>
-        {!isEmpty(value) && (
-          <ul>
-            {value.map((data, index) => (
+      <Box paddingTop={3}>
+        <Stack as="ul" size={4} style={{ maxHeight: '128px', overflowY: 'auto' }}>
+          {value?.map((data, index) => {
+            return (
               <ListItem
                 key={data.id}
                 data={data}
                 displayNavigationLink={displayNavigationLink}
                 isDisabled={isDisabled}
-                findRelation={findRelation}
                 mainField={mainField}
-                moveRelation={moveRelation}
                 onRemove={() => {
                   if (!isDisabled) {
                     onRemove(`${name}.${index}`);
@@ -113,18 +91,17 @@ function SelectMany({
                 searchToPersist={searchToPersist}
                 targetModel={targetModel}
               />
-            ))}
-          </ul>
-        )}
-        {!isEmpty(value) && value.length > 4 && <ListShadow />}
-      </ListWrapper>
+            );
+          })}
+        </Stack>
+      </Box>
     </>
   );
 }
 
 SelectMany.defaultProps = {
   components: {},
-  move: () => {},
+  placeholder: null,
   searchToPersist: null,
   value: null,
 };
@@ -141,7 +118,6 @@ SelectMany.propTypes = {
       type: PropTypes.string.isRequired,
     }).isRequired,
   }).isRequired,
-  move: PropTypes.func,
   name: PropTypes.string.isRequired,
   onInputChange: PropTypes.func.isRequired,
   onMenuClose: PropTypes.func.isRequired,
@@ -149,7 +125,10 @@ SelectMany.propTypes = {
   onMenuScrollToBottom: PropTypes.func.isRequired,
   onRemove: PropTypes.func.isRequired,
   options: PropTypes.array.isRequired,
-  placeholder: PropTypes.node.isRequired,
+  placeholder: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    defaultMessage: PropTypes.string.isRequired,
+  }),
   searchToPersist: PropTypes.string,
   styles: PropTypes.object.isRequired,
   targetModel: PropTypes.string.isRequired,

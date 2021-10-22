@@ -9,7 +9,7 @@ import { getTrad } from '../../../utils';
 import ControlsWrapper from '../../../components/ControlsWrapper';
 import Filters from '../../../components/Filters';
 import SelectAll from '../../../components/SelectAll';
-import SortPicker from '../../../components/SortPicker';
+import { SortPicker } from '../../App/components/SortPicker';
 
 const HomePageSettings = ({
   areAllCheckboxesSelected,
@@ -24,7 +24,7 @@ const HomePageSettings = ({
     allowedActions: { canUpdate },
   } = useAppContext();
   const { formatMessage } = useIntl();
-  const [, updated_at] = useSelectTimestamps();
+  const [, updatedAt] = useSelectTimestamps();
   const query = useQuery();
   const [searchValue, setSearchValue] = useState(query.get('_q') || '');
   const debouncedSearch = useDebounce(searchValue, 300);
@@ -72,7 +72,7 @@ const HomePageSettings = ({
               <Padded right />
             </>
           )}
-          <SortPicker onChange={onChange} value={query.get('sort') || `${updated_at}:DESC`} />
+          <SortPicker onChange={onChange} value={query.get('sort') || `${updatedAt}:DESC`} />
           <Padded right />
           <Filters onChange={onChange} filters={filters} onClick={onFilterDelete} />
         </ControlsWrapper>

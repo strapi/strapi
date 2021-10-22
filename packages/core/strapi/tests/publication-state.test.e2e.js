@@ -14,30 +14,30 @@ const fixtures = {
       name: 'Bamboo Desk',
       categories: ['Home'],
       comp: { countries: ['France'] },
-      published_at: null,
+      publishedAt: null,
     },
     {
       name: 'Computer',
       categories: ['Home', 'Tech'],
       comp: { countries: ['France', 'Italy', 'Spain'] },
-      published_at: new Date(),
+      publishedAt: new Date(),
     },
     {
       name: 'Burger Drone',
       categories: ['Tech', 'Food'],
       comp: { countries: ['Italy', 'Spain'] },
-      published_at: new Date(),
+      publishedAt: new Date(),
     },
   ],
   category: [
-    { name: 'Home', published_at: null },
-    { name: 'Food', published_at: new Date() },
-    { name: 'Tech', published_at: new Date() },
+    { name: 'Home', publishedAt: null },
+    { name: 'Food', publishedAt: new Date() },
+    { name: 'Tech', publishedAt: new Date() },
   ],
   country: [
-    { name: 'France', published_at: new Date() },
-    { name: 'Italy', published_at: null },
-    { name: 'Spain', published_at: new Date() },
+    { name: 'France', publishedAt: new Date() },
+    { name: 'Italy', publishedAt: null },
+    { name: 'Spain', publishedAt: new Date() },
   ],
 };
 
@@ -111,7 +111,7 @@ const components = {
 const filterBy = (name, { mode = 'live' } = {}) => {
   return fixtures[name].filter(item => {
     if (['live', 'default'].includes(mode)) {
-      return item.published_at instanceof Date;
+      return item.publishedAt instanceof Date;
     }
     return true;
   });
@@ -146,7 +146,7 @@ describe('Publication State', () => {
               name => f.country.find(country => country.name === name).id
             ),
           },
-          published_at: product.published_at,
+          publishedAt: product.publishedAt,
         }))
       )
       .build();
@@ -171,6 +171,7 @@ describe('Publication State', () => {
         const res = await rq({ method: 'GET', url: `${baseUrl}${query}` });
 
         expect(res.body.data).toHaveLength(lengthFor(modelName, { mode }));
+
         expect(res.body.meta.pagination.total).toBe(lengthFor(modelName, { mode }));
       });
     });
@@ -189,10 +190,8 @@ describe('Publication State', () => {
           },
         });
 
-        products = res.body.data.map(res => ({ id: res.id, ...res.attributes }));
+        products = res.body.data;
       });
-
-      const getApiRef = id => data.product.find(product => product.id === id);
 
       test('Payload integrity', () => {
         expect(products).toHaveLength(lengthFor(contentTypes.product.singularName));
@@ -200,28 +199,26 @@ describe('Publication State', () => {
 
       test('Root level', () => {
         products.forEach(product => {
-          expect(product.published_at).toBeISODate();
+          expect(product.attributes.publishedAt).toBeISODate();
         });
       });
 
-      test('First level (categories)', () => {
-        products.forEach(({ id, categories }) => {
-          const length = getApiRef(id).categories.filter(c => c.published_at !== null).length;
-          expect(categories).toHaveLength(length);
+      test('First level (categories) to be published only', () => {
+        products.forEach(({ attributes }) => {
+          const categories = attributes.categories.data;
 
           categories.forEach(category => {
-            expect(category.published_at).toBeISODate();
+            expect(category.attributes.publishedAt).toBeISODate();
           });
         });
       });
 
-      test('Second level through component (countries)', () => {
-        products.forEach(({ id, comp: { countries } }) => {
-          const length = getApiRef(id).comp.countries.filter(c => c.published_at !== null).length;
-          expect(countries).toHaveLength(length);
+      test('Second level through component (countries) to be published only', () => {
+        products.forEach(({ attributes }) => {
+          const countries = attributes.comp.countries.data;
 
           countries.forEach(country => {
-            expect(country.published_at).toBeISODate();
+            expect(country.attributes.publishedAt).toBeISODate();
           });
         });
       });
