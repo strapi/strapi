@@ -11,7 +11,7 @@ const { createAPI } = require('./api');
  */
 const createContentAPI = strapi => {
   const opts = {
-    prefix: strapi.config.get('api.prefix', '/api'),
+    prefix: strapi.config.get('api.rest.prefix', '/api'),
     type: 'content-api',
   };
 

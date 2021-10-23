@@ -60,28 +60,9 @@ module.exports = {
     ctx.body = pm.sanitize(file, { withPrivate: false });
   },
 
-  async count(ctx) {
-    const pm = strapi.admin.services.permission.createPermissionsManager({
-      ability: ctx.state.userAbility,
-      action: ACTIONS.read,
-      model: fileModel,
-    });
-
-    if (!pm.isAllowed) {
-      return ctx.forbidden();
-    }
-
-    const query = pm.addPermissionsQueryTo(ctx.query);
-    const count = await getService('upload').count(query);
-
-    ctx.body = { count };
-  },
-
   async destroy(ctx) {
-    const {
-      state: { userAbility },
-      params: { id },
-    } = ctx;
+    const { id } = ctx.params;
+    const { userAbility } = ctx.state;
 
     const { pm, file } = await findEntityAndCheckPermissions(
       userAbility,
@@ -218,9 +199,7 @@ const findEntityAndCheckPermissions = async (ability, action, model, id) => {
 
   const pm = strapi.admin.services.permission.createPermissionsManager({ ability, action, model });
 
-  const author = await strapi.admin.services.user.findOne({ id: file[CREATED_BY_ATTRIBUTE].id }, [
-    'roles',
-  ]);
+  const author = await strapi.admin.services.user.findOne(file[CREATED_BY_ATTRIBUTE].id, ['roles']);
 
   const fileWithRoles = _.set(_.cloneDeep(file), 'createdBy', author);
 

@@ -63,11 +63,11 @@ const Search = ({ label, trackedEvent }) => {
             setDidSearch(true);
             setValue(value);
           }}
-          onBlur={() => setIsOpen(false)}
           value={value}
           clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
           onClear={() => {
             setValue('');
+            setIsOpen(false);
             setDidSearch(false);
           }}
         >

@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Box } from '@strapi/parts/Box';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { Text } from '@strapi/parts/Text';
 import Expand from '@strapi/icons/Expand';
 import { ExpandButton } from './WysiwygStyles';
@@ -12,7 +12,7 @@ const WysiwygFooter = ({ isPreviewMode, onToggleExpand }) => {
 
   return (
     <Box padding={2} background="neutral100" hasRadius>
-      <Row justifyContent="flex-end" alignItems="flex-end">
+      <Flex justifyContent="flex-end" alignItems="flex-end">
         <ExpandButton id="expand" disabled={isPreviewMode} onClick={onToggleExpand}>
           <Text>
             {formatMessage({
@@ -22,7 +22,7 @@ const WysiwygFooter = ({ isPreviewMode, onToggleExpand }) => {
           </Text>
           <Expand />
         </ExpandButton>
-      </Row>
+      </Flex>
     </Box>
   );
 };

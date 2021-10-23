@@ -162,7 +162,6 @@ describe('Upload plugin end to end tests', () => {
     });
   });
 
-  test.todo('GET /upload/files/count => Count available files');
   test.todo('GET /upload/files/:id => Find one file');
   test.todo('GET /upload/search/:id => Search files');
   test.todo('DELETE /upload/files/:id => Delete a file');

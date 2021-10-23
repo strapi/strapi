@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { Form } from '@strapi/helper-plugin';
 import BackIcon from '@strapi/icons/BackIcon';
@@ -25,11 +25,11 @@ const WebhookForm = ({
   triggerWebhook,
   isCreating,
   isTriggering,
-  isTriggerIdle,
   triggerResponse,
   isDraftAndPublishEvents,
 }) => {
   const { formatMessage } = useIntl();
+  const [showTriggerResponse, setShowTriggerResponse] = useState(false);
 
   return (
     <Formik
@@ -52,7 +52,10 @@ const WebhookForm = ({
             primaryAction={
               <Stack horizontal size={2}>
                 <Button
-                  onClick={triggerWebhook}
+                  onClick={() => {
+                    triggerWebhook();
+                    setShowTriggerResponse(true);
+                  }}
                   variant="tertiary"
                   startIcon={<Publish />}
                   disabled={isCreating || isTriggering}
@@ -90,12 +93,12 @@ const WebhookForm = ({
           />
           <ContentLayout>
             <Stack size={4}>
-              {(isTriggering || !isTriggerIdle) && (
+              {showTriggerResponse && (
                 <div className="trigger-wrapper">
                   <TriggerContainer
                     isPending={isTriggering}
                     response={triggerResponse}
-                    onCancel={triggerResponse?.cancel}
+                    onCancel={() => setShowTriggerResponse(false)}
                   />
                 </div>
               )}
@@ -144,7 +147,6 @@ WebhookForm.propTypes = {
   isCreating: PropTypes.bool.isRequired,
   isDraftAndPublishEvents: PropTypes.bool.isRequired,
   isTriggering: PropTypes.bool.isRequired,
-  isTriggerIdle: PropTypes.bool.isRequired,
   triggerResponse: PropTypes.object,
 };
 

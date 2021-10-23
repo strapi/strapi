@@ -6,7 +6,7 @@ import { Button } from '@strapi/parts/Button';
 import { IconButtonGroup } from '@strapi/parts/IconButton';
 import { Option, Select } from '@strapi/parts/Select';
 import { Popover } from '@strapi/parts/Popover';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import Bold from '@strapi/icons/Bold';
 import Italic from '@strapi/icons/Italic';
 import Underline from '@strapi/icons/Underline';
@@ -40,8 +40,8 @@ const WysiwygNav = ({
   if (isPreviewMode) {
     return (
       <Box padding={2} background="neutral100">
-        <Row justifyContent="space-between">
-          <Row>
+        <Flex justifyContent="space-between">
+          <Flex>
             <Select
               disabled
               id="selectTitle"
@@ -76,7 +76,7 @@ const WysiwygNav = ({
             </MainButtons>
 
             <MoreButton disabled ref={buttonMoreRef} id="more" label="more" icon={<More />} />
-          </Row>
+          </Flex>
 
           <Button onClick={onTogglePreviewMode} variant="tertiary" size="L" id="preview">
             {formatMessage({
@@ -84,15 +84,15 @@ const WysiwygNav = ({
               defaultMessage: 'Markdown mode',
             })}
           </Button>
-        </Row>
+        </Flex>
       </Box>
     );
   }
 
   return (
     <Box padding={2} background="neutral100">
-      <Row justifyContent="space-between">
-        <Row>
+      <Flex justifyContent="space-between">
+        <Flex>
           <Select
             id="selectTitle"
             placeholder={selectPlaceholder}
@@ -140,7 +140,7 @@ const WysiwygNav = ({
           />
           {visiblePopover && (
             <Popover centered source={buttonMoreRef} spacing={4} id="popover">
-              <Row>
+              <Flex>
                 <IconButtonGroupMargin>
                   <CustomIconButton
                     onClick={() => onActionClick('Strikethrough', editorRef, onTogglePopover)}
@@ -195,10 +195,10 @@ const WysiwygNav = ({
                     icon={<Quote />}
                   />
                 </IconButtonGroup>
-              </Row>
+              </Flex>
             </Popover>
           )}
-        </Row>
+        </Flex>
 
         {!noPreviewMode && onTogglePreviewMode && (
           <Button onClick={onTogglePreviewMode} variant="tertiary" size="L" id="preview">
@@ -208,7 +208,7 @@ const WysiwygNav = ({
             })}
           </Button>
         )}
-      </Row>
+      </Flex>
     </Box>
   );
 };

@@ -5,11 +5,11 @@ import ClearField from '@strapi/icons/ClearField';
 import Close from '@strapi/icons/Close';
 import LoadingIcon from '@strapi/icons/LoadingIcon';
 import { Box } from '@strapi/parts/Box';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { Text } from '@strapi/parts/Text';
 import { Stack } from '@strapi/parts/Stack';
 import { Grid, GridItem } from '@strapi/parts/Grid';
-import { FormattedMessage } from 'react-intl';
+import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
 // Being discussed in Notion: create a <Icon /> component in Parts
@@ -25,12 +25,14 @@ const Icon = styled.svg(
 );
 
 const Status = ({ isPending, statusCode }) => {
+  const { formatMessage } = useIntl();
+
   if (isPending) {
     return (
       <Stack horizontal size={2} style={{ alignItems: 'center' }}>
         <Icon as={LoadingIcon} />
         <Text>
-          <FormattedMessage id="Settings.webhooks.trigger.pending" defaultMessage="pending" />
+          {formatMessage({ id: 'Settings.webhooks.trigger.pending', defaultMessage: 'pending' })}
         </Text>
       </Stack>
     );
@@ -41,7 +43,7 @@ const Status = ({ isPending, statusCode }) => {
       <Stack horizontal size={2} style={{ alignItems: 'center' }}>
         <Icon as={CheckIcon} color="success700" />
         <Text>
-          <FormattedMessage id="Settings.webhooks.trigger.success" defaultMessage="success" />
+          {formatMessage({ id: 'Settings.webhooks.trigger.success', defaultMessage: 'success' })}
         </Text>
       </Stack>
     );
@@ -52,7 +54,7 @@ const Status = ({ isPending, statusCode }) => {
       <Stack horizontal size={2} style={{ alignItems: 'center' }}>
         <Icon as={Close} color="danger700" />
         <Text>
-          <FormattedMessage id="Settings.error" defaultMessage="error" /> {statusCode}
+          {formatMessage({ id: 'Settings.error', defaultMessage: 'error' })} {statusCode}
         </Text>
       </Stack>
     );
@@ -69,19 +71,24 @@ Status.defaultProps = {
 };
 
 const Message = ({ statusCode, message }) => {
+  const { formatMessage } = useIntl();
+
   if (statusCode >= 200 && statusCode < 300) {
     return (
-      <Row justifyContent="flex-end">
+      <Flex justifyContent="flex-end">
         <Text>
-          <FormattedMessage id="Settings.webhooks.trigger.success.label" defaultMessage="success" />
+          {formatMessage({
+            id: 'Settings.webhooks.trigger.success.label',
+            defaultMessage: 'success',
+          })}
         </Text>
-      </Row>
+      </Flex>
     );
   }
 
   if (statusCode >= 300) {
     return (
-      <Row justifyContent="flex-end" title={message}>
+      <Flex justifyContent="flex-end" title={message}>
         <Text
           // ! REMOVE THIS WHEN DS IS UPDATED WITH ELLIPSIS PROP
           style={{
@@ -92,7 +99,7 @@ const Message = ({ statusCode, message }) => {
         >
           {message}
         </Text>
-      </Row>
+      </Flex>
     );
   }
 
@@ -107,29 +114,38 @@ Message.defaultProps = {
   message: undefined,
 };
 
-const CancelButton = ({ onCancel }) => (
-  <Row justifyContent="flex-end">
-    <button onClick={onCancel} type="button">
-      <Stack horizontal size={2} style={{ alignItems: 'center' }}>
-        <Text textColor="neutral400">
-          <FormattedMessage id="Settings.webhooks.trigger.cancel" defaultMessage="cancel" />
-        </Text>
-        <Icon as={ClearField} color="neutral400" />
-      </Stack>
-    </button>
-  </Row>
-);
+const CancelButton = ({ onCancel }) => {
+  const { formatMessage } = useIntl();
+
+  return (
+    <Flex justifyContent="flex-end">
+      <button onClick={onCancel} type="button">
+        <Stack horizontal size={2} style={{ alignItems: 'center' }}>
+          <Text textColor="neutral400">
+            {formatMessage({ id: 'Settings.webhooks.trigger.cancel', defaultMessage: 'cancel' })}
+          </Text>
+          <Icon as={ClearField} color="neutral400" />
+        </Stack>
+      </button>
+    </Flex>
+  );
+};
+
 CancelButton.propTypes = { onCancel: PropTypes.func.isRequired };
 
 const TriggerContainer = ({ isPending, onCancel, response }) => {
   const { statusCode, message } = response;
+  const { formatMessage } = useIntl();
 
   return (
     <Box background="neutral0" padding={5} shadow="filterShadow" hasRadius>
       <Grid gap={4} style={{ alignItems: 'center' }}>
         <GridItem col={3}>
           <Text>
-            <FormattedMessage id="Settings.webhooks.trigger.test" defaultMessage="test-trigger" />
+            {formatMessage({
+              id: 'Settings.webhooks.trigger.test',
+              defaultMessage: 'test-trigger',
+            })}
           </Text>
         </GridItem>
         <GridItem col={3}>

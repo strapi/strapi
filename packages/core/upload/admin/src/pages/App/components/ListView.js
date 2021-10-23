@@ -7,60 +7,76 @@ import { ImageAssetCard } from '../../../components/AssetCard/ImageAssetCard';
 import { VideoAssetCard } from '../../../components/AssetCard/VideoAssetCard';
 import { DocAssetCard } from '../../../components/AssetCard/DocAssetCard';
 import { AssetType } from '../../../constants';
-import { PaginationFooter } from '../../../components/PaginationFooter';
 
-export const ListView = ({ assets }) => {
+export const ListView = ({ assets, onEditAsset, onSelectAsset, selectedAssets }) => {
   return (
-    <>
-      <KeyboardNavigable tagName="article">
-        <GridLayout>
-          {assets.map(asset => {
-            if (asset.mime.includes(AssetType.Video)) {
-              return (
-                <VideoAssetCard
-                  id={asset.id}
-                  key={asset.id}
-                  name={asset.name}
-                  extension={getFileExtension(asset.ext)}
-                  url={prefixFileUrlWithBackendUrl(asset.url)}
-                  mime={asset.mime}
-                />
-              );
-            }
+    <KeyboardNavigable tagName="article">
+      <GridLayout>
+        {assets.map(asset => {
+          const isSelected = selectedAssets.indexOf(asset.id) > -1;
 
-            if (asset.mime.includes(AssetType.Image)) {
-              return (
-                <ImageAssetCard
-                  id={asset.id}
-                  key={asset.id}
-                  name={asset.name}
-                  extension={getFileExtension(asset.ext)}
-                  height={asset.height}
-                  width={asset.width}
-                  thumbnail={prefixFileUrlWithBackendUrl(
-                    asset?.formats?.thumbnail?.url || asset.url
-                  )}
-                />
-              );
-            }
-
+          if (asset.mime.includes(AssetType.Video)) {
             return (
-              <DocAssetCard
+              <VideoAssetCard
                 id={asset.id}
                 key={asset.id}
                 name={asset.name}
                 extension={getFileExtension(asset.ext)}
+                url={prefixFileUrlWithBackendUrl(asset.url)}
+                mime={asset.mime}
+                onEdit={() => onEditAsset(asset)}
+                onSelect={() => onSelectAsset(asset)}
+                selected={isSelected}
               />
             );
-          })}
-        </GridLayout>
-      </KeyboardNavigable>
+          }
 
-      <PaginationFooter />
-    </>
+          if (asset.mime.includes(AssetType.Image)) {
+            return (
+              <ImageAssetCard
+                id={asset.id}
+                key={asset.id}
+                name={asset.name}
+                alt={asset.alternativeText || asset.name}
+                extension={getFileExtension(asset.ext)}
+                height={asset.height}
+                width={asset.width}
+                thumbnail={prefixFileUrlWithBackendUrl(asset?.formats?.thumbnail?.url || asset.url)}
+                onEdit={() => onEditAsset(asset)}
+                onSelect={() => onSelectAsset(asset)}
+                selected={isSelected}
+              />
+            );
+          }
+
+          return (
+            <DocAssetCard
+              id={asset.id}
+              key={asset.id}
+              name={asset.name}
+              extension={getFileExtension(asset.ext)}
+              onEdit={() => onEditAsset(asset)}
+              onSelect={() => onSelectAsset(asset)}
+              selected={isSelected}
+            />
+          );
+        })}
+
+        {/* TODO: Remove this when we have media queries */}
+        <div aria-hidden />
+        <div aria-hidden />
+        <div aria-hidden />
+        <div aria-hidden />
+        <div aria-hidden />
+        <div aria-hidden />
+      </GridLayout>
+    </KeyboardNavigable>
   );
 };
 
 ListView.propTypes = {
   assets: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
+  onEditAsset: PropTypes.func.isRequired,
+  onSelectAsset: PropTypes.func.isRequired,
+  selectedAssets: PropTypes.arrayOf(PropTypes.number).isRequired,
 };

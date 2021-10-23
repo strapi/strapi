@@ -4,7 +4,7 @@ import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 import { Box } from '@strapi/parts/Box';
 import { Divider } from '@strapi/parts/Divider';
 import { TableLabel, Text } from '@strapi/parts/Text';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { Stack } from '@strapi/parts/Stack';
 import { getTrad } from '../../../utils';
 import getUnits from './utils/getUnits';
@@ -38,7 +38,7 @@ const Informations = () => {
         <Divider />
       </Box>
       <Stack size={4}>
-        <Row justifyContent="space-between">
+        <Flex justifyContent="space-between">
           <Text bold>
             {formatMessage({
               id: getTrad('containers.Edit.information.lastUpdate'),
@@ -46,8 +46,8 @@ const Informations = () => {
             })}
           </Text>
           <Text>{formatRelativeTime(value, unit, { numeric: 'auto' })}</Text>
-        </Row>
-        <Row justifyContent="space-between">
+        </Flex>
+        <Flex justifyContent="space-between">
           <Text bold>
             {formatMessage({
               id: getTrad('containers.Edit.information.by'),
@@ -55,7 +55,7 @@ const Informations = () => {
             })}
           </Text>
           <Text>{isCreatingEntry ? '-' : updatedBy}</Text>
-        </Row>
+        </Flex>
       </Stack>
     </Box>
   );

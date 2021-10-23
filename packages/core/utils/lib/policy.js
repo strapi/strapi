@@ -56,14 +56,6 @@ const globalPolicy = ({ method, endpoint, controller, action, plugin }) => {
   };
 };
 
-const bodyPolicy = async (ctx, next) => {
-  const values = await next();
-
-  if (_.isNil(ctx.body) && !_.isNil(values)) {
-    ctx.body = values;
-  }
-};
-
 const get = (policy, { pluginName, apiName } = {}) => {
   if (typeof policy === 'function') {
     return policy;
@@ -122,7 +114,6 @@ const createPolicyContext = (type, ctx) => {
 module.exports = {
   get,
   globalPolicy,
-  bodyPolicy,
   createPolicyFactory,
   createPolicyContext,
 };

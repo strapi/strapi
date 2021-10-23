@@ -1,10 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { TableLabel } from '@strapi/parts/Text';
 
-const Wrapper = styled(Row)`
+const Wrapper = styled(Flex)`
   position: relative;
   border-radius: 50%;
   width: 26px;

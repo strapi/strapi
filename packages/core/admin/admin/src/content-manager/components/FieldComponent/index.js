@@ -8,7 +8,7 @@ import { NotAllowedInput } from '@strapi/helper-plugin';
 import DeleteIcon from '@strapi/icons/DeleteIcon';
 import { Box } from '@strapi/parts/Box';
 import { IconButton } from '@strapi/parts/IconButton';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { Stack } from '@strapi/parts/Stack';
 import { getTrad } from '../../utils';
 import ComponentInitializer from '../ComponentInitializer';
@@ -59,7 +59,7 @@ const FieldComponent = ({
 
   return (
     <Box>
-      <Row justifyContent="space-between">
+      <Flex justifyContent="space-between">
         {intlLabel && (
           <Label
             intlLabel={intlLabel}
@@ -83,7 +83,7 @@ const FieldComponent = ({
             }}
           />
         )}
-      </Row>
+      </Flex>
       <Stack size={1}>
         {!isRepeatable && !isInitialized && (
           <ComponentInitializer
@@ -155,4 +155,7 @@ FieldComponent.propTypes = {
 
 const Memoized = memo(FieldComponent, isEqual);
 
-export default connect(Memoized, select);
+export default connect(
+  Memoized,
+  select
+);

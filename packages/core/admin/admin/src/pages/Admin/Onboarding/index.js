@@ -92,7 +92,7 @@ const Onboarding = () => {
   };
 
   return (
-    <OnboardingWrapper>
+    <OnboardingWrapper as="aside">
       <Button
         id="onboarding"
         aria-label={formatMessage({

@@ -8,7 +8,7 @@ import toString from 'lodash/toString';
 import styled from 'styled-components';
 import { Accordion, AccordionToggle, AccordionContent } from '@strapi/parts/Accordion';
 import { Box } from '@strapi/parts/Box';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { IconButton } from '@strapi/parts/IconButton';
 import { Grid, GridItem } from '@strapi/parts/Grid';
 import { Stack } from '@strapi/parts/Stack';
@@ -166,7 +166,7 @@ const DraggedItem = ({
             togglePosition="left"
             action={
               isReadOnly ? null : (
-                <Row>
+                <Flex>
                   <IconButton
                     onClick={() => {
                       removeRepeatableField(componentFieldName);
@@ -188,7 +188,7 @@ const DraggedItem = ({
                       icon={<DragHandle />}
                     />
                   </Box>
-                </Row>
+                </Flex>
               )
             }
           />

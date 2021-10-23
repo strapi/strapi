@@ -7,8 +7,6 @@
 const { propOr } = require('lodash/fp');
 const policy = require('@strapi/utils/lib/policy');
 
-const { bodyPolicy } = policy;
-
 const getPoliciesConfig = propOr([], 'config.policies');
 
 const resolvePolicies = route => {
@@ -38,7 +36,7 @@ const resolvePolicies = route => {
     await next();
   };
 
-  return [policiesMiddleware, bodyPolicy];
+  return [policiesMiddleware];
 };
 
 module.exports = {

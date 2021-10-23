@@ -1,4 +1,5 @@
 'use strict';
+const restrictAccess = require('../middlewares/restrict-access');
 
 module.exports = [
   {
@@ -6,9 +7,15 @@ module.exports = [
     path: '/',
     handler: 'documentation.index',
     config: {
+      auth: false,
+      middlewares: [restrictAccess],
       policies: [
-        'plugin::documentation.index',
-        { name: 'admin::hasPermissions', config: { actions: ['plugin::documentation.read'] } },
+        {
+          name: 'admin::hasPermissions',
+          config: {
+            actions: ['plugin::documentation.read'],
+          },
+        },
       ],
     },
   },
@@ -17,9 +24,15 @@ module.exports = [
     path: '/v:major(\\d+).:minor(\\d+).:patch(\\d+)',
     handler: 'documentation.index',
     config: {
+      auth: false,
+      middlewares: [restrictAccess],
       policies: [
-        'plugin::documentation.index',
-        { name: 'admin::hasPermissions', config: { actions: ['plugin::documentation.read'] } },
+        {
+          name: 'admin::hasPermissions',
+          config: {
+            actions: ['plugin::documentation.read'],
+          },
+        },
       ],
     },
   },
@@ -28,8 +41,14 @@ module.exports = [
     path: '/login',
     handler: 'documentation.loginView',
     config: {
+      auth: false,
       policies: [
-        { name: 'admin::hasPermissions', config: { actions: ['plugin::documentation.read'] } },
+        {
+          name: 'admin::hasPermissions',
+          config: {
+            actions: ['plugin::documentation.read'],
+          },
+        },
       ],
     },
   },
@@ -38,6 +57,7 @@ module.exports = [
     path: '/login',
     handler: 'documentation.login',
     config: {
+      auth: false,
       policies: [
         { name: 'admin::hasPermissions', config: { actions: ['plugin::documentation.read'] } },
       ],

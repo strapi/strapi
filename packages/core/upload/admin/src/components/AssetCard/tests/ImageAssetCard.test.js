@@ -406,7 +406,7 @@ describe('ImageAssetCard', () => {
               <img
                 aria-hidden="true"
                 class="c9"
-                src="http://somewhere.com/hello.png"
+                src="http://somewhere.com/hello.png?width=40&height=40"
               />
             </div>
           </div>
@@ -433,7 +433,7 @@ describe('ImageAssetCard', () => {
                   >
                     png
                   </span>
-                  - 40✕40
+                   - 40✕40
                 </div>
               </div>
               <div

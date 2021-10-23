@@ -4,7 +4,7 @@ import { get } from 'lodash';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
 import { IconButton } from '@strapi/parts/IconButton';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { Stack } from '@strapi/parts/Stack';
 import { Text } from '@strapi/parts/Text';
 import EditIcon from '@strapi/icons/EditIcon';
@@ -257,7 +257,7 @@ function ListRow({
       </td>
       <td>
         {isInDevelopmentMode && (
-          <Row justifyContent="flex-end" {...stopPropagation}>
+          <Flex justifyContent="flex-end" {...stopPropagation}>
             {configurable ? (
               <Stack horizontal size={1}>
                 {!isMorph && (
@@ -292,7 +292,7 @@ function ListRow({
               // ! TODO ASK DESIGN TO PUT LOCK ICON INSIDE DS
               <FontAwesomeIcon icon="lock" />
             )}
-          </Row>
+          </Flex>
         )}
       </td>
     </BoxWrapper>

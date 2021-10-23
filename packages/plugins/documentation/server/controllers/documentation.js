@@ -8,6 +8,7 @@
 
 // Core dependencies.
 const path = require('path');
+const bcrypt = require('bcryptjs');
 
 // Public dependencies.
 const fs = require('fs-extra');
@@ -17,15 +18,15 @@ const koaStatic = require('koa-static');
 module.exports = {
   async getInfos(ctx) {
     try {
-      const service = strapi.plugins.documentation.services.documentation;
-      const docVersions = service.retrieveDocumentationVersions();
-      const form = await service.retrieveFrontForm();
+      const docService = strapi.plugin('documentation').service('documentation');
+      const docVersions = docService.getDocumentationVersions();
+      const documentationAccess = await docService.getDocumentationAccess();
 
       ctx.send({
         docVersions,
-        currentVersion: service.getDocumentationVersion(),
-        prefix: strapi.config.get('plugin.documentation.x-strapi-config').path,
-        form,
+        currentVersion: docService.getDocumentationVersion(),
+        prefix: strapi.plugin('documentation').config('x-strapi-config').path,
+        documentationAccess,
       });
     } catch (err) {
       ctx.badRequest(null, err.message);
@@ -42,10 +43,13 @@ module.exports = {
       const version =
         major && minor && patch
           ? `${major}.${minor}.${patch}`
-          : strapi.plugins.documentation.config.info.version;
+          : strapi
+              .plugin('documentation')
+              .service('documentation')
+              .getDocumentationVersion();
+
       const openAPISpecsPath = path.join(
-        strapi.config.appPath,
-        'extensions',
+        strapi.dirs.extensions,
         'documentation',
         'documentation',
         version,
@@ -65,8 +69,7 @@ module.exports = {
 
         try {
           const layoutPath = path.resolve(
-            strapi.config.appPath,
-            'extensions',
+            strapi.dirs.extensions,
             'documentation',
             'public',
             'index.html'
@@ -78,12 +81,7 @@ module.exports = {
           ctx.url = path.basename(`${ctx.url}/index.html`);
 
           try {
-            const staticFolder = path.resolve(
-              strapi.config.appPath,
-              'extensions',
-              'documentation',
-              'public'
-            );
+            const staticFolder = path.resolve(strapi.dirs.extensions, 'documentation', 'public');
             return koaStatic(staticFolder)(ctx, next);
           } catch (e) {
             strapi.log.error(e);
@@ -118,8 +116,7 @@ module.exports = {
 
       try {
         const layoutPath = path.resolve(
-          strapi.config.appPath,
-          'extensions',
+          strapi.dirs.extensions,
           'documentation',
           'public',
           'login.html'
@@ -130,12 +127,7 @@ module.exports = {
         ctx.url = path.basename(`${ctx.url}/login.html`);
 
         try {
-          const staticFolder = path.resolve(
-            strapi.config.appPath,
-            'extensions',
-            'documentation',
-            'public'
-          );
+          const staticFolder = path.resolve(strapi.dirs.extensions, 'documentation', 'public');
           return koaStatic(staticFolder)(ctx, next);
         } catch (e) {
           strapi.log.error(e);
@@ -153,18 +145,19 @@ module.exports = {
       body: { password },
     } = ctx.request;
 
-    const { password: storedPassword } = await strapi
+    const { password: hash } = await strapi
       .store({ type: 'plugin', name: 'documentation', key: 'config' })
       .get();
 
-    const isValid = await strapi.plugins['users-permissions'].services.user.validatePassword(
-      password,
-      storedPassword
-    );
+    const isValid = await bcrypt.compare(password, hash);
+
     let querystring = '?error=password';
 
     if (isValid) {
-      ctx.session.documentation = password;
+      ctx.session.documentation = {
+        logged: true,
+      };
+
       querystring = '';
     }
 
@@ -176,126 +169,71 @@ module.exports = {
   },
 
   async regenerateDoc(ctx) {
-    const service = strapi.plugins.documentation.services.documentation;
-    const documentationVersions = service.retrieveDocumentationVersions().map(el => el.version);
-    const {
-      request: {
-        body: { version },
-        admin,
-      },
-    } = ctx;
+    const { version } = ctx.request.body;
+
+    const service = strapi.service('plugin::documentation.documentation');
+
+    const documentationVersions = service.getDocumentationVersions().map(el => el.version);
 
     if (_.isEmpty(version)) {
-      return ctx.badRequest(
-        null,
-        admin ? 'documentation.error.noVersion' : 'Please provide a version.'
-      );
+      return ctx.badRequest('Please provide a version.');
     }
 
     if (!documentationVersions.includes(version)) {
-      return ctx.badRequest(
-        null,
-        admin
-          ? 'documentation.error.regenerateDoc.versionMissing'
-          : 'The version you are trying to generate does not exist.'
-      );
+      return ctx.badRequest('The version you are trying to generate does not exist.');
     }
 
     try {
       strapi.reload.isWatching = false;
-      const fullDoc = service.generateFullDoc(version);
-      const documentationPath = service.getMergedDocumentationPath(version);
-      // Write the file
-      fs.writeFileSync(
-        path.resolve(documentationPath, 'full_documentation.json'),
-        JSON.stringify(fullDoc, null, 2),
-        'utf8'
-      );
+      await service.generateFullDoc(version);
       ctx.send({ ok: true });
-    } catch (err) {
-      ctx.badRequest(null, admin ? 'documentation.error.regenerateDoc' : 'An error occured');
     } finally {
       strapi.reload.isWatching = true;
     }
   },
 
   async deleteDoc(ctx) {
-    strapi.reload.isWatching = false;
-    const service = strapi.plugins.documentation.services.documentation;
-    const documentationVersions = service.retrieveDocumentationVersions().map(el => el.version);
+    const { version } = ctx.params;
 
-    const {
-      params: { version },
-      request: { admin },
-    } = ctx;
+    const service = strapi.service('plugin::documentation.documentation');
+
+    const documentationVersions = service.getDocumentationVersions().map(el => el.version);
 
     if (_.isEmpty(version)) {
-      return ctx.badRequest(
-        null,
-        admin ? 'documentation.error.noVersion' : 'Please provide a version.'
-      );
+      return ctx.badRequest('Please provide a version.');
     }
 
     if (!documentationVersions.includes(version)) {
-      return ctx.badRequest(
-        null,
-        admin
-          ? 'documentation.error.deleteDoc.versionMissing'
-          : 'The version you are trying to delete does not exist.'
-      );
+      return ctx.badRequest('The version you are trying to delete does not exist.');
     }
 
     try {
+      strapi.reload.isWatching = false;
       await service.deleteDocumentation(version);
       ctx.send({ ok: true });
-    } catch (err) {
-      ctx.badRequest(null, admin ? 'notification.error' : err.message);
     } finally {
       strapi.reload.isWatching = true;
     }
   },
 
   async updateSettings(ctx) {
-    const {
-      admin,
-      body: { restrictedAccess, password },
-    } = ctx.request;
-
-    const usersPermService = strapi.plugins['users-permissions'].services;
+    const { restrictedAccess, password } = ctx.request.body;
 
     const pluginStore = strapi.store({ type: 'plugin', name: 'documentation' });
 
-    const prevConfig = await pluginStore.get({ key: 'config' });
+    const config = {
+      restrictedAccess: Boolean(restrictedAccess),
+    };
 
-    if (restrictedAccess && _.isEmpty(password)) {
-      return ctx.badRequest(
-        null,
-        admin ? 'users-permissions.Auth.form.error.password.provide' : 'Please provide a password'
-      );
+    if (restrictedAccess) {
+      if (_.isEmpty(password)) {
+        return ctx.badRequest('Please provide a password');
+      }
+
+      config.password = await bcrypt.hash(password, 10);
     }
 
-    const isNewPassword = !_.isEmpty(password) && password !== prevConfig.password;
-
-    if (isNewPassword && usersPermService.user.isHashed(password)) {
-      // Throw an error if the password selected by the user
-      // contains more than two times the symbol '$'.
-      return ctx.badRequest(
-        null,
-        admin
-          ? 'users-permissions.Auth.form.error.password.format'
-          : 'our password cannot contain more than three times the symbol `$`.'
-      );
-    }
-
-    if (isNewPassword) {
-      prevConfig.password = await usersPermService.user.hashPassword({
-        password,
-      });
-    }
-
-    _.set(prevConfig, 'restrictedAccess', restrictedAccess);
-
-    await pluginStore.set({ key: 'config', value: prevConfig });
+    await pluginStore.set({ key: 'config', value: config });
 
     return ctx.send({ ok: true });
   },

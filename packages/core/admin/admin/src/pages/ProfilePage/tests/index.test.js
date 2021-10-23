@@ -971,7 +971,7 @@ describe('ADMIN | Pages | Profile page', () => {
                                     class="c24"
                                     for="textinput-1"
                                   >
-                                    Password
+                                    Current Password
                                   </label>
                                 </div>
                                 <div
@@ -982,6 +982,71 @@ describe('ADMIN | Pages | Profile page', () => {
                                     aria-invalid="false"
                                     class="c28"
                                     id="textinput-1"
+                                    name="currentPassword"
+                                    type="password"
+                                    value=""
+                                  />
+                                  <div
+                                    class="c29"
+                                  >
+                                    <button
+                                      aria-label="Hide password"
+                                      class="c30 c31"
+                                      type="button"
+                                    >
+                                      <svg
+                                        fill="none"
+                                        height="1em"
+                                        viewBox="0 0 24 24"
+                                        width="1em"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                      >
+                                        <path
+                                          d="M4.048 6.875L2.103 4.93a1 1 0 111.414-1.415l16.966 16.966a1 1 0 11-1.414 1.415l-2.686-2.686a12.247 12.247 0 01-4.383.788c-3.573 0-6.559-1.425-8.962-3.783a15.842 15.842 0 01-2.116-2.568 11.096 11.096 0 01-.711-1.211 1.145 1.145 0 010-.875c.124-.258.36-.68.711-1.211.58-.876 1.283-1.75 2.116-2.569.326-.32.663-.622 1.01-.906zm10.539 10.539l-1.551-1.551a4.005 4.005 0 01-4.9-4.9L6.584 9.411a6 6 0 008.002 8.002zM7.617 4.787A12.248 12.248 0 0112 3.998c3.572 0 6.559 1.426 8.961 3.783a15.845 15.845 0 012.117 2.569c.351.532.587.954.711 1.211.116.242.115.636 0 .875-.124.257-.36.68-.711 1.211-.58.876-1.283 1.75-2.117 2.568-.325.32-.662.623-1.01.907l-2.536-2.537a6 6 0 00-8.002-8.002L7.617 4.787zm3.347 3.347A4.005 4.005 0 0116 11.998c0 .359-.047.706-.136 1.037l-4.9-4.901z"
+                                          fill="#212134"
+                                        />
+                                      </svg>
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      class="c20"
+                    >
+                      <div
+                        class="c21"
+                      >
+                        <div
+                          class=""
+                        >
+                          <div>
+                            <div>
+                              <div
+                                class="c22"
+                              >
+                                <div
+                                  class="c23"
+                                >
+                                  <label
+                                    class="c24"
+                                    for="textinput-2"
+                                  >
+                                    Password
+                                  </label>
+                                </div>
+                                <div
+                                  class="c25 c26"
+                                >
+                                  <input
+                                    aria-disabled="false"
+                                    aria-invalid="false"
+                                    class="c28"
+                                    id="textinput-2"
                                     name="password"
                                     type="password"
                                     value=""
@@ -1030,7 +1095,7 @@ describe('ADMIN | Pages | Profile page', () => {
                                 >
                                   <label
                                     class="c24"
-                                    for="textinput-2"
+                                    for="textinput-3"
                                   >
                                     Password confirmation
                                   </label>
@@ -1042,7 +1107,7 @@ describe('ADMIN | Pages | Profile page', () => {
                                     aria-disabled="false"
                                     aria-invalid="false"
                                     class="c28"
-                                    id="textinput-2"
+                                    id="textinput-3"
                                     name="confirmPassword"
                                     type="password"
                                     value=""

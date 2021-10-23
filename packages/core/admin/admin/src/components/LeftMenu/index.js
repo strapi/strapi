@@ -93,7 +93,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
       <NavBrand
         workplace="Workplace"
         title="Strapi Dashboard"
-        icon={<img src={menuLogo} alt="" />}
+        icon={<img src={menuLogo} alt="Strapi Dashboard" />}
       />
 
       <Divider />

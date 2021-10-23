@@ -7,7 +7,7 @@
 import React from 'react';
 import { useIntl } from 'react-intl';
 import { Box } from '@strapi/parts/Box';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { Select, Option } from '@strapi/parts/Select';
 import { Text } from '@strapi/parts/Text';
 import PropTypes from 'prop-types';
@@ -32,7 +32,7 @@ const PageSizeURLQuery = ({ trackedEvent }) => {
   const pageSize = query?.pageSize || '10';
 
   return (
-    <Row>
+    <Flex>
       <Select
         size="S"
         aria-label={formatMessage({
@@ -55,7 +55,7 @@ const PageSizeURLQuery = ({ trackedEvent }) => {
           })}
         </Text>
       </Box>
-    </Row>
+    </Flex>
   );
 };
 

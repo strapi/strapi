@@ -1,10 +1,9 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { Box } from '@strapi/parts/Box';
-import { Row } from '@strapi/parts/Row';
-import { VisuallyHidden } from '@strapi/parts/VisuallyHidden';
+import { Flex } from '@strapi/parts/Flex';
 import { H3 } from '@strapi/parts/Text';
 import { ModalFooter } from '@strapi/parts/ModalLayout';
 import { Button } from '@strapi/parts/Button';
@@ -14,10 +13,8 @@ import { getTrad } from '../../../utils';
 import { typeFromMime } from '../../../utils/typeFromMime';
 import { AssetSource } from '../../../constants';
 
-const Wrapper = styled.div`
-  display: flex;
+const Wrapper = styled(Flex)`
   flex-direction: column;
-  align-items: center;
 `;
 
 const IconWrapper = styled.div`
@@ -32,9 +29,18 @@ const MediaBox = styled(Box)`
   border-style: dashed;
 `;
 
+const OpaqueBox = styled(Box)`
+  opacity: 0;
+  cursor: pointer;
+`;
+
 export const FromComputerForm = ({ onClose, onAddAssets }) => {
   const { formatMessage } = useIntl();
+  const [dragOver, setDragOver] = useState(false);
   const inputRef = useRef(null);
+
+  const handleDragEnter = () => setDragOver(true);
+  const handleDragLeave = () => setDragOver(false);
 
   const handleClick = e => {
     e.preventDefault();
@@ -71,10 +77,13 @@ export const FromComputerForm = ({ onClose, onAddAssets }) => {
             paddingBottom={11}
             hasRadius
             justifyContent="center"
-            borderColor="neutral300"
-            background="neutral100"
+            borderColor={dragOver ? 'primary500' : 'neutral300'}
+            background={dragOver ? 'primary100' : 'neutral100'}
+            position="relative"
+            onDragEnter={handleDragEnter}
+            onDragLeave={handleDragLeave}
           >
-            <Row justifyContent="center">
+            <Flex justifyContent="center">
               <Wrapper>
                 <IconWrapper>
                   <AddAssetIcon aria-hidden />
@@ -89,25 +98,33 @@ export const FromComputerForm = ({ onClose, onAddAssets }) => {
                   </H3>
                 </Box>
 
-                <Button type="button" onClick={handleClick}>
-                  {formatMessage({
-                    id: getTrad('input.button.label'),
-                    defaultMessage: 'Browse files',
-                  })}
-                </Button>
+                <OpaqueBox
+                  as="input"
+                  position="absolute"
+                  left={0}
+                  right={0}
+                  bottom={0}
+                  top={0}
+                  width="100%"
+                  type="file"
+                  multiple
+                  name="files"
+                  tabIndex={-1}
+                  ref={inputRef}
+                  zIndex={1}
+                  onChange={handleChange}
+                />
 
-                <VisuallyHidden>
-                  <input
-                    type="file"
-                    multiple
-                    name="files"
-                    tabIndex={-1}
-                    ref={inputRef}
-                    onChange={handleChange}
-                  />
-                </VisuallyHidden>
+                <Box position="relative">
+                  <Button type="button" onClick={handleClick}>
+                    {formatMessage({
+                      id: getTrad('input.button.label'),
+                      defaultMessage: 'Browse files',
+                    })}
+                  </Button>
+                </Box>
               </Wrapper>
-            </Row>
+            </Flex>
           </MediaBox>
         </label>
       </Box>

@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Box } from '@strapi/parts/Box';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { Td, Tr } from '@strapi/parts/Table';
 import { Text } from '@strapi/parts/Text';
 import { IconButton } from '@strapi/parts/IconButton';
@@ -36,7 +36,7 @@ const RoleRow = ({ id, name, description, usersCount, icons }) => {
         <Text textColor="neutral800">{usersCountText}</Text>
       </Td>
       <Td>
-        <Row justifyContent="flex-end" {...stopPropagation}>
+        <Flex justifyContent="flex-end" {...stopPropagation}>
           {icons.map((icon, i) =>
             icon ? (
               <Box key={icon.label} paddingLeft={i === 0 ? 0 : 1}>
@@ -44,7 +44,7 @@ const RoleRow = ({ id, name, description, usersCount, icons }) => {
               </Box>
             ) : null
           )}
-        </Row>
+        </Flex>
       </Td>
     </Tr>
   );

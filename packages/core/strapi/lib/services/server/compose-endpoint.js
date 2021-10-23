@@ -5,7 +5,7 @@
  * @typedef {import('@strapi/strapi').StrapiAppContext} StrapiAppContext
  */
 
-const { has, toLower, castArray, trim, prop } = require('lodash/fp');
+const { has, toLower, castArray, trim, prop, isNil } = require('lodash/fp');
 
 const compose = require('koa-compose');
 const { resolveRouteMiddlewares } = require('./middleware');
@@ -86,6 +86,14 @@ const createAuthenticateMiddleware = strapi => /**
   return strapi.container.get('auth').authenticate(ctx, next);
 };
 
+const returnBodyMiddleware = async (ctx, next) => {
+  const values = await next();
+
+  if (isNil(ctx.body) && !isNil(values)) {
+    ctx.body = values;
+  }
+};
+
 /**
  * @param {Strapi} strapi
  */
@@ -109,6 +117,7 @@ module.exports = strapi => {
         authorize,
         ...policies,
         ...middlewares,
+        returnBodyMiddleware,
         ...castArray(action),
       ]);
 

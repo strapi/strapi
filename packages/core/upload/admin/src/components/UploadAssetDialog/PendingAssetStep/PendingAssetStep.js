@@ -4,14 +4,13 @@ import { ModalHeader, ModalBody, ModalFooter } from '@strapi/parts/ModalLayout';
 import { ButtonText, Text } from '@strapi/parts/Text';
 import { Button } from '@strapi/parts/Button';
 import { useIntl } from 'react-intl';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { Stack } from '@strapi/parts/Stack';
 import { Grid, GridItem } from '@strapi/parts/Grid';
 import { KeyboardNavigable } from '@strapi/parts/KeyboardNavigable';
 import { DocAssetCard } from '../../AssetCard/DocAssetCard';
 import { ImageAssetCard } from '../../AssetCard/ImageAssetCard';
 import { VideoAssetCard } from '../../AssetCard/VideoAssetCard';
-import { UnknownAssetCard } from '../../AssetCard/UnknownAssetCard';
 import { UploadingAssetCard } from '../../AssetCard/UploadingAssetCard';
 import { getTrad } from '../../../utils';
 import { AssetType, AssetSource } from '../../../constants';
@@ -70,7 +69,7 @@ export const PendingAssetStep = ({
 
       <ModalBody>
         <Stack size={7}>
-          <Row justifyContent="space-between">
+          <Flex justifyContent="space-between">
             <Stack size={0}>
               <Text small bold textColor="neutral800">
                 {formatMessage(
@@ -94,7 +93,7 @@ export const PendingAssetStep = ({
                 defaultMessage: 'Upload new asset',
               })}
             </Button>
-          </Row>
+          </Flex>
           <KeyboardNavigable tagName="article">
             <Grid gap={4}>
               {assets.map(asset => {
@@ -128,6 +127,7 @@ export const PendingAssetStep = ({
                         width={asset.width}
                         thumbnail={asset.url}
                         size="S"
+                        alt={asset.name}
                       />
                     </GridItem>
                   );
@@ -142,19 +142,6 @@ export const PendingAssetStep = ({
                         extension={asset.ext}
                         url={asset.url}
                         mime={asset.mime}
-                        size="S"
-                      />
-                    </GridItem>
-                  );
-                }
-
-                if (asset.type === AssetType.Unknown) {
-                  return (
-                    <GridItem col={4} key={assetKey}>
-                      <UnknownAssetCard
-                        id={assetKey}
-                        name={asset.name}
-                        extension={asset.ext}
                         size="S"
                       />
                     </GridItem>

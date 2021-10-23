@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { Box } from '@strapi/parts/Box';
 import { Text } from '@strapi/parts/Text';
 import styled from 'styled-components';
@@ -35,7 +35,7 @@ const ButtonBox = styled(Box)`
 const NestedTFooter = ({ children, icon, color, ...props }) => {
   return (
     <ButtonBox paddingBottom={4} paddingTop={4} as="button" type="button" {...props}>
-      <Row>
+      <Flex>
         <IconBox color={color} aria-hidden background={`${color}200`}>
           {icon}
         </IconBox>
@@ -44,7 +44,7 @@ const NestedTFooter = ({ children, icon, color, ...props }) => {
             {children}
           </Text>
         </Box>
-      </Row>
+      </Flex>
     </ButtonBox>
   );
 };
