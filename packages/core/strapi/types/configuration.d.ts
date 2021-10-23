@@ -4,7 +4,7 @@ export type DeepPartial<T> = {
   [P in keyof T]?: DeepPartial<T[P]>;
 };
 export interface StrapiConfigContext {
-  env: (<T = string>(key: string, initial?: T) => T) & {
+  env: (<T = string, D extends T>(key: string, initial?: D) => T) & {
     int: (key: string, initial?: number) => number;
     float: (key: string, initial?: number) => number;
     bool: (key: string, initial?: boolean) => boolean;

@@ -1,13 +1,18 @@
 'use strict';
 
 /**
+ * @template T
+ * @typedef {import('@strapi/strapi').DeepPartial<T>} DeepPartial<T>
+ */
+
+/**
  * @typedef {import('@strapi/strapi').StrapiConfig} StrapiConfig
  */
 
 const _ = require('lodash');
 
 /**
- * @param {Partial<StrapiConfig>} initialConfig
+ * @param {DeepPartial<StrapiConfig>} initialConfig
  */
 module.exports = (initialConfig = {}) => {
   /**

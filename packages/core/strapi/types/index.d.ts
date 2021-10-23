@@ -1,4 +1,4 @@
-import { Strapi as StrapiClass } from '../lib/Strapi';
+import { Strapi } from '../lib/Strapi';
 import { Server } from '@strapi/admin';
 import Boom from '@hapi/boom';
 

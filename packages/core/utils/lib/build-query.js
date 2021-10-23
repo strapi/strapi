@@ -188,10 +188,6 @@ const normalizeSortClauses = (clauses, { model }) => {
 const buildQuery = ({ model, filters = {}, ...rest }) => {
   const { where, sort } = filters;
 
-  if (!strapi.db) {
-    throw new Error('Database layer is not defined.');
-  }
-
   // Validate query clauses
   if ([where, sort].some(Array.isArray)) {
     if (hasDeepFilters({ where, sort }, { minDepth: 2 })) {

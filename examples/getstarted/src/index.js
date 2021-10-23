@@ -1,11 +1,19 @@
 'use strict';
 
+/**
+ * @typedef {import('@strapi/strapi').Strapi} Strapi
+ */
+
 module.exports = {
   /**
    * An asynchronous register function that runs before
    * your application is initialized.
    *
    * This gives you an opportunity to extend code.
+   *
+   * @param {{
+   *  strapi: Strapi
+   * }} ctx
    */
   register({ strapi }) {},
 
@@ -15,6 +23,10 @@ module.exports = {
    *
    * This gives you an opportunity to set up your data model,
    * run jobs, or perform some special logic.
+   *
+   * @param {{
+   *  strapi: Strapi
+   * }} ctx
    */
   bootstrap({ strapi }) {},
 
@@ -23,6 +35,10 @@ module.exports = {
    * your application gets shut down.
    *
    * This gives you an opportunity to gracefully stop services you run.
+   *
+   * @param {{
+   *  strapi: Strapi
+   * }} ctx
    */
   destroy({ strapi }) {},
 };

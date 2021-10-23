@@ -36,7 +36,7 @@ const hooksRegistry = () => {
     /**
      * Returns a map with all the hooks in a namespace
      * @param {string=} namespace
-     * @returns {Record<string, Hook>}
+     * @returns {Partial<StrapiHooks>}
      */
     getAll(namespace) {
       return pickBy((_, uid) => hasNamespace(uid, namespace))(hooks);

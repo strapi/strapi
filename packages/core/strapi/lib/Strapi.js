@@ -128,6 +128,12 @@ class Strapi {
     // @ts-ignore
     this.admin = undefined;
 
+    /**
+     * @type {Database}
+     */
+    // @ts-ignore
+    this.db = undefined;
+
     createUpdateNotifier(this).notify();
   }
 
@@ -261,7 +267,7 @@ class Strapi {
 
     this.eventHub.removeAllListeners();
 
-    if (_.has(this, 'db') && this.db) {
+    if (_.has(this, 'db')) {
       await this.db.destroy();
     }
 
@@ -627,10 +633,6 @@ class Strapi {
    * @param {T} uid
    */
   query(uid) {
-    if (!this.db) {
-      throw new Error(`Database not initialized. strapi.boostrap may not be called`);
-    }
-
     return this.db.query(uid);
   }
 }
