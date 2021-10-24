@@ -88,7 +88,8 @@ module.exports = ctx => {
 const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) => ({
   uploadFiles,
 
-  async wrapParams(options = {}) {
+  // eslint-disable-next-line no-unused-vars
+  async wrapParams(options = {}, filters = {}) {
     return options;
   },
 

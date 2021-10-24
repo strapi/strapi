@@ -9,15 +9,15 @@ const permissionDomain = require('../domain/permission');
 
 /**
  * Creates an array of paths to the fields and nested fields, without path nodes
- * @param {string} model model used to get the nested fields
- * @param {Object} options
+ * @param {object} model model used to get the nested fields
+ * @param {object} model.attributes model used to get the nested fields
+ * @param {object} options
  * @param {string} options.prefix prefix to add to the path
  * @param {number} options.nestingLevel level of nesting to achieve
  * @param {object} options.components components where components attributes can be found
  * @param {object} options.requiredOnly only returns required nestedFields
  * @param {object} options.existingFields fields that are already selected, meaning that some sub-fields may be required
- * @returns {array<string>}
- * @param model
+ * @returns {string[]}
  */
 const getNestedFields = (
   model,
@@ -69,12 +69,13 @@ const getNestedFields = (
 
 /**
  * Creates an array of paths to the fields and nested fields, with path nodes
- * @param {string} model model used to get the nested fields
+ * @param {object} model model used to get the nested fields
+ * @param {object} model.attributes model used to get the nested fields
  * @param {Object} options
  * @param {string} options.prefix prefix to add to the path
  * @param {number} options.nestingLevel level of nesting to achieve
  * @param {object} options.components components where components attributes can be found
- * @returns {array<string>}
+ * @returns {string[]}
  */
 
 const getNestedFieldsWithIntermediate = (
@@ -115,8 +116,8 @@ const getNestedFieldsWithIntermediate = (
  * Creates an array of permissions with the "properties.fields" attribute filled
  * @param {array} actions array of actions
  * @param {object} options
- * @param {number} options.nestingLevel level of nesting
- * @param {array} options.restrictedSubjects subjectsId to ignore
+ * @param {number=} options.nestingLevel level of nesting
+ * @param {array=} options.restrictedSubjects subjectsId to ignore
  * @returns {Permission[]}
  */
 const getPermissionsWithNestedFields = (

@@ -21,6 +21,7 @@ const componentSchemaValidator = () =>
   });
 
 const validateComponentDefinition = data => {
+  // @ts-ignore
   return componentSchemaValidator.validateSync(data, { strict: true, abortEarly: false });
 };
 

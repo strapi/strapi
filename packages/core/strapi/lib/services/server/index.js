@@ -3,6 +3,7 @@
 /**
  * @typedef {import('@strapi/strapi').StrapiAppContext} StrapiAppContext
  * @typedef {import('@strapi/strapi').Strapi} Strapi
+ * @typedef {import('@strapi/strapi').StrapiApi} StrapiApi
  */
 
 const Koa = require('koa');
@@ -40,6 +41,9 @@ const createServer = strapi => {
 
   const httpServer = createHTTPServer(strapi, app);
 
+  /**
+   * @type {StrapiApi}
+   */
   const apis = {
     'content-api': createContentAPI(strapi),
     admin: createAdminAPI(strapi),
@@ -58,13 +62,14 @@ const createServer = strapi => {
     httpServer,
 
     /**
-     * @param {keyof apis} name
+     * @param {keyof StrapiApi} name
      */
     api(name) {
       return apis[name];
     },
 
     use(...args) {
+      // @ts-ignore
       app.use(...args);
       return this;
     },
@@ -127,7 +132,9 @@ const createServer = strapi => {
     },
 
     async destroy() {
-      await httpServer.destroy();
+      if (httpServer.destroy) {
+        await httpServer.destroy();
+      }
     },
   };
 };

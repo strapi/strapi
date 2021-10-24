@@ -3,4 +3,5 @@ import * as serverEE from '../ee/server';
 export * from '../index';
 type Server = typeof server & typeof serverEE;
 
+export * from './content-types';
 export { Server };

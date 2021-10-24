@@ -1,5 +1,10 @@
 'use strict';
 
+/**
+ * @typedef {import('@strapi/strapi').Strapi} Strapi
+ * @typedef {import('@strapi/strapi').StrapiMiddlewareConfig} StrapiMiddlewareConfig
+ */
+
 const path = require('path');
 const { propOr, isArray, isNil } = require('lodash/fp');
 
@@ -19,9 +24,8 @@ const resolveRouteMiddlewares = (route, strapi) => {
 
 /**
  * Initialize every configured middlewares
- * @param {MiddlewaresConfig} config
+ * @param {StrapiMiddlewareConfig} config
  * @param {Strapi} strapi
- * @returns {Middlewares}
  */
 const resolveMiddlewares = (config, strapi) => {
   const middlewares = [];

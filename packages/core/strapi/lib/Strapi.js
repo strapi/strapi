@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * @typedef {import('@hapi/boom').Boom} Boom
+ * @typedef {import('@hapi/boom')} Boom
  * @typedef {import('@strapi/admin').Server} StrapiAdminServer
  * @typedef {import('@strapi/strapi').StrapiContentTypes} StrapiContentTypes
  * @typedef {import('@strapi/strapi').StrapiComponents} StrapiComponents

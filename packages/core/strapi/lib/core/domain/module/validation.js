@@ -6,8 +6,11 @@ const { yup } = require('@strapi/utils');
 const strapiServerSchema = yup
   .object()
   .shape({
+    // @ts-ignore
     bootstrap: yup.mixed().isFunction(),
+    // @ts-ignore
     destroy: yup.mixed().isFunction(),
+    // @ts-ignore
     register: yup.mixed().isFunction(),
     config: yup.object(),
     routes: yup.lazy(value => {

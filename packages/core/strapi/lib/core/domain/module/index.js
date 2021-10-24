@@ -103,6 +103,7 @@ const createModule = (namespace, rawModule, strapi) => {
      * @param {string} serviceName
      */
     service(serviceName) {
+      // @ts-ignore
       return strapi.container.get('services').get(`${namespace}.${serviceName}`);
     },
     get services() {
@@ -113,6 +114,7 @@ const createModule = (namespace, rawModule, strapi) => {
      * @param {string} policyName
      */
     policy(policyName) {
+      // @ts-ignore
       return strapi.container.get('policies').get(`${namespace}.${policyName}`);
     },
     get policies() {
@@ -133,6 +135,7 @@ const createModule = (namespace, rawModule, strapi) => {
      * @param {string} controllerName
      */
     controller(controllerName) {
+      // @ts-ignore
       return strapi.container.get('controllers').get(`${namespace}.${controllerName}`);
     },
     get controllers() {

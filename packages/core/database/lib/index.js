@@ -5,6 +5,10 @@
  * @typedef {import('@strapi/database').EntityManager} EntityManager
  */
 
+/**
+ * @type {import('knex').Knex}
+ */
+// @ts-ignore
 const knex = require('knex');
 
 const { getDialect } = require('./dialects');
@@ -38,6 +42,7 @@ class Database {
     /**
      * @type {EntityManager}
      */
+    // @ts-ignore
     this.entityManager = createEntityManager(this);
   }
 

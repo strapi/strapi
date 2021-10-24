@@ -3,10 +3,10 @@
   "compilerOptions": {
     "baseUrl": "./",
     "rootDir": "./",
-    "allowSyntheticDefaultImports": true,
     "strictNullChecks": true,
-    "noImplicitAny": false
+    "noImplicitAny": false,
+    "types": ["@strapi/utils"]
   },
   "include": ["./**/*.js", "**/*.json", "**/*.mjs", "**/*.ts"],
-  "exclude": ["**/*.test.js", "**/*.e2e.js"]
+  "exclude": ["**/*.test.js", "**/__tests__/**", "**/*.e2e.js"]
 }

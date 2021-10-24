@@ -5,8 +5,8 @@
 'use strict';
 
 /**
+ * @typedef {import('@strapi/strapi').Strapi} Strapi
  * @typedef {import('@strapi/strapi').Webhook} Webhook
- * @typedef {import('@strapi/database').Database} Database
  */
 
 /**
@@ -66,7 +66,7 @@ const fromDBObject = row => {
 };
 
 /**
- * @param {{ db: Database }} ctx
+ * @param {{ db: Strapi['db'] }} strapi
  */
 const createWebhookStore = ({ db }) => {
   const webhookQueries = db.query('webhook');

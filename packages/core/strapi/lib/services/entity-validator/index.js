@@ -62,11 +62,10 @@ const createComponentValidator = createOrUpdate => (attr, data, { isDraft }) => 
   }
 
   if (prop('repeatable', attr) === true) {
-    validator = yup
-      .array()
-      .of(
-        yup.lazy(item => createModelValidator(createOrUpdate)(model, item, { isDraft }).notNull())
-      );
+    validator = yup.array().of(
+      // @ts-ignore
+      yup.lazy(item => createModelValidator(createOrUpdate)(model, item, { isDraft }).notNull())
+    );
     validator = addRequiredValidation(createOrUpdate)(true, validator);
     validator = addMinMax(attr, validator, data);
   } else {
@@ -81,6 +80,7 @@ const createDzValidator = createOrUpdate => (attr, data, { isDraft }) => {
   let validator;
 
   validator = yup.array().of(
+    // @ts-ignore
     yup.lazy(item => {
       const model = strapi.getModel(prop('__component', item));
       const schema = yup
@@ -91,6 +91,7 @@ const createDzValidator = createOrUpdate => (attr, data, { isDraft }) => {
             .required()
             .oneOf(Object.keys(strapi.components)),
         })
+        // @ts-ignore
         .notNull();
 
       return model

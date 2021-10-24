@@ -17,6 +17,7 @@ const policyOrMiddlewareSchema = yup.lazy(value => {
   }
 
   if (typeof value === 'function') {
+    // @ts-ignore
     return yup.mixed().isFunction();
   }
 
@@ -41,10 +42,13 @@ const routeSchema = yup.object({
       return yup.array().required();
     }
 
-    return yup
-      .mixed()
-      .isFunction()
-      .required();
+    return (
+      yup
+        .mixed()
+        // @ts-ignore
+        .isFunction()
+        .required()
+    );
   }),
   config: yup
     .object({
@@ -62,10 +66,12 @@ const routeSchema = yup.object({
       }),
       policies: yup
         .array()
+        // @ts-ignore
         .of(policyOrMiddlewareSchema)
         .notRequired(),
       middlewares: yup
         .array()
+        // @ts-ignore
         .of(policyOrMiddlewareSchema)
         .notRequired(),
     })

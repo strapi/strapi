@@ -3,13 +3,26 @@
  */
 'use strict';
 
+/**
+ * @typedef {import('@strapi/strapi').Strapi} Strapi
+ */
+
 const debug = require('debug')('strapi:worker-queue');
 
 module.exports = class WorkerQueue {
+  /**
+   * @param {{
+   *  logger?: Strapi['log'],
+   *  concurrency?: number
+   * }=} ctx
+   */
   constructor({ logger, concurrency = 5 } = {}) {
     debug('Initialize worker queue');
 
     this.logger = logger;
+    /**
+     * @type {function}
+     */
     this.worker = noop;
 
     this.concurrency = concurrency;
@@ -48,7 +61,9 @@ module.exports = class WorkerQueue {
     try {
       await this.worker(payload);
     } catch (/** @type {any} **/ error) {
-      this.logger.error(error);
+      if (this.logger) {
+        this.logger.error(error);
+      }
     } finally {
       this.pop();
     }

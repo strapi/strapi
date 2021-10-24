@@ -22,6 +22,9 @@ const createTable = meta => {
     name: meta.tableName,
     indexes: meta.indexes || [],
     foreignKeys: meta.foreignKeys || [],
+    /**
+     * @type {any[]}
+     */
     columns: [],
   };
 
@@ -192,6 +195,9 @@ const getColumnType = attribute => {
 
 const metadataToSchema = metadata => {
   const schema = {
+    /**
+     * @type {any[]}
+     */
     tables: [],
     addTable(table) {
       this.tables.push(table);

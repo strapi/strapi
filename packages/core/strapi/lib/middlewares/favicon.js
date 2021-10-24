@@ -10,7 +10,7 @@ const favicon = require('koa-favicon');
 
 const defaults = {
   path: 'favicon.ico',
-  maxAge: 86400000,
+  maxage: 86400000,
 };
 
 /**
@@ -18,7 +18,7 @@ const defaults = {
  * @param {{ strapi: Strapi}} ctx
  */
 module.exports = (config, { strapi }) => {
-  const { maxAge, path: faviconPath } = defaultsDeep(defaults, config);
+  const { maxage, path: faviconPath } = defaultsDeep(defaults, config);
 
-  return favicon(resolve(strapi.dirs.root, faviconPath), { maxAge });
+  return favicon(resolve(strapi.dirs.root, faviconPath), { maxage });
 };

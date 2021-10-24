@@ -6,6 +6,7 @@
     "moduleResolution": "node",
     "esModuleInterop": true,
     "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
     "jsx": "react-jsx",
     "allowJs": true,
     "checkJs": true,
@@ -23,7 +24,8 @@
       "@strapi/admin*": ["core/admin*"],
       "@strapi/utils*": ["core/utils*"],
       "@strapi/logger*": ["utils/logger*"]
-    }
+    },
+    "types": ["node", "lodash"]
   },
   "include": ["./**/*.js", "**/*.json", "**/*.mjs", "**/*.ts"],
   "exclude": [

@@ -28,6 +28,7 @@ const lifecyclesShape = mapValues(keyBy(LIFECYCLES), () =>
   yup
     .mixed()
     .nullable()
+    // @ts-ignore
     .isFunction()
 );
 

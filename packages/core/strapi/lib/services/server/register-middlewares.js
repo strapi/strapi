@@ -6,6 +6,7 @@ const { resolveMiddlewares } = require('./middleware');
 
 /**
  * @typedef {import('@strapi/strapi').Strapi} Strapi
+ * @typedef {import('@strapi/strapi').StrapiMiddlewareConfig} StrapiMiddlewareConfig
  * @typedef {Array<string|{name?: string, resolve?: string, config: any}>} MiddlewaresConfig
  * @typedef {Array<{name: string, hanlder: Function}>} Middlewares
  */
@@ -90,7 +91,7 @@ const validateMiddlewareConfig = async config => {
 
 /**
  * Check if some required middlewares are missing in configure middlewares
- * @param {Middlewares} middlewares
+ * @param {{ name: string }[]} middlewares
  */
 const checkRequiredMiddlewares = middlewares => {
   const missingMiddlewares = requiredMiddlewares.filter(name => {

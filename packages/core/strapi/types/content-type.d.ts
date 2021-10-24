@@ -14,6 +14,7 @@ export interface Webhook {
   enabled: boolean;
 }
 
+export interface StrapiContentTypes {}
 export interface StrapiContentTypes {
   'strapi::core-store': CoreStore;
   webhook: Webhook;

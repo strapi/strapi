@@ -211,6 +211,7 @@ const deleteOldComponents = async (
       const err = new Error(
         `Some of the provided components in ${attributeName} are not related to the entity`
       );
+      // @ts-ignore
       err.status = 400;
       throw err;
     }
@@ -247,18 +248,26 @@ const deleteOldDZComponents = async (uid, entityToUpdate, attributeName, dynamic
       const err = new Error(
         `Some of the provided components in ${attributeName} are not related to the entity`
       );
+      // @ts-ignore
       err.status = 400;
       throw err;
     }
   });
 
-  const idsToDelete = allIds.reduce((acc, { id, __component }) => {
-    if (!idsToKeep.find(el => el.id === id && el.__component === __component)) {
-      acc.push({ id, __component });
-    }
+  const idsToDelete = allIds.reduce(
+    /**
+     * @param {{ id: string, __component: any}[]} acc
+     * @param {{ id: string, __component: any}} definition
+     */
+    (acc, { id, __component }) => {
+      if (!idsToKeep.find(el => el.id === id && el.__component === __component)) {
+        acc.push({ id, __component });
+      }
 
-    return acc;
-  }, []);
+      return acc;
+    },
+    []
+  );
 
   if (idsToDelete.length > 0) {
     for (const idToDelete of idsToDelete) {

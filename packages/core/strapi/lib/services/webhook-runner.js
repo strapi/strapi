@@ -3,6 +3,10 @@
  */
 'use strict';
 
+/**
+ * @typedef {import('@strapi/strapi').Strapi} Strapi
+ */
+
 const debug = require('debug')('strapi:webhook');
 const _ = require('lodash');
 const fetch = require('node-fetch');
@@ -14,6 +18,13 @@ const defaultConfiguration = {
 };
 
 class WebhookRunner {
+  /**
+   * @param {{
+   *  eventHub: Strapi['eventHub'],
+   *  logger: Strapi['log'],
+   *  configuration: any
+   * }} ctx
+   */
   constructor({ eventHub, logger, configuration = {} }) {
     debug('Initialized webhook runer');
     this.eventHub = eventHub;

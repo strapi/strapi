@@ -4,6 +4,7 @@ import { MigrationProvider } from './migrations';
 import { SchemaProvideer } from './schema';
 import { Database } from '../lib/index';
 export { Database };
+
 export type BooleanWhere<T> = {
   $and?: WhereParams<T>[];
   $or?: WhereParams<T>[];
@@ -151,7 +152,7 @@ export interface QueryFromContentType<T extends keyof StrapiContentTypes> {
   load<S extends StrapiContentTypes[T], K extends keyof S>(
     entity: S,
     field: K,
-    populate: PopulateParams
+    populate?: PopulateParams
   ): Promise<S[K]>;
 }
 
