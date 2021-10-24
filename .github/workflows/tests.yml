@@ -17,7 +17,7 @@ jobs:
         node: [12, 14]
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2-beta
+      - uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node }}
           cache: yarn
@@ -36,7 +36,7 @@ jobs:
         node: [12, 14]
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2-beta
+      - uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node }}
           cache: yarn
@@ -57,7 +57,7 @@ jobs:
         node: [12, 14]
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2-beta
+      - uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node }}
           cache: yarn
@@ -94,7 +94,7 @@ jobs:
           - 5432:5432
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2-beta
+      - uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node }}
           cache: yarn
@@ -121,7 +121,7 @@ jobs:
           - 3306:3306
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2-beta
+      - uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node }}
           cache: yarn
@@ -140,7 +140,7 @@ jobs:
       max-parallel: 2
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2-beta
+      - uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node }}
           cache: yarn
@@ -164,7 +164,7 @@ jobs:
           - 27017:27017
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2-beta
+      - uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node }}
           cache: yarn
@@ -202,7 +202,7 @@ jobs:
           - 5432:5432
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2-beta
+      - uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node }}
           cache: yarn
@@ -233,7 +233,7 @@ jobs:
           - 3306:3306
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2-beta
+      - uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node }}
           cache: yarn
@@ -256,7 +256,7 @@ jobs:
       max-parallel: 2
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2-beta
+      - uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node }}
           cache: yarn
@@ -284,7 +284,7 @@ jobs:
           - 27017:27017
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2-beta
+      - uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node }}
           cache: yarn
