@@ -105,7 +105,9 @@ const createContentType = async ({ contentType, components = [] }, options = {})
 
   // generate api skeleton
   await generateAPI({
+    displayName: contentType.displayName,
     singularName: contentType.singularName,
+    pluralName: contentType.pluralName,
     kind: contentType.kind,
   });
 
@@ -172,7 +174,9 @@ const editContentType = async (uid, { contentType, components = [] }) => {
 
       // generate new api skeleton
       await generateAPI({
+        displayName: updatedContentType.schema.info.displayName,
         singularName: updatedContentType.schema.info.singularName,
+        pluralName: updatedContentType.schema.info.pluralName,
         kind: updatedContentType.schema.kind,
       });
 
