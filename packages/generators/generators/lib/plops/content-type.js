@@ -2,6 +2,7 @@
 
 const pluralize = require('pluralize');
 const slugify = require('@sindresorhus/slugify');
+const { isKebabCase } = require('@strapi/utils');
 
 const getDestinationPrompts = require('./utils/get-destination-prompts');
 const getFilePath = require('./utils/get-file-path');
@@ -44,11 +45,11 @@ const promptConfigQuestions = (plop, inquirer) => {
       message: 'Content type singular name',
       default: answers => slugify(answers.displayName),
       validate(input) {
-        if (input.toLowerCase() !== input) {
-          return 'Value must be lowercased';
+        if (!isKebabCase(input)) {
+          return 'Value must be in kebab-case';
         }
 
-        return validateInput(input);
+        return true;
       },
     },
     {
@@ -61,11 +62,11 @@ const promptConfigQuestions = (plop, inquirer) => {
           return 'Singular and plural names cannot be the same';
         }
 
-        if (input.toLowerCase() !== input) {
-          return 'Value must be lowercased';
+        if (!isKebabCase(input)) {
+          return 'Value must be in kebab-case';
         }
 
-        return validateInput(input);
+        return true;
       },
     },
     {
