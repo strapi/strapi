@@ -5,6 +5,7 @@ const path = require('path');
 const fse = require('fs-extra');
 const _ = require('lodash');
 const chalk = require('chalk');
+const semver = require('semver');
 const { getTemplatePackageInfo, downloadNpmTemplate } = require('./fetch-npm-template');
 
 // Specify all the files and directories a template can have
@@ -14,16 +15,7 @@ const allowedTemplateContents = {
   'README.md': allowFile,
   '.env.example': allowFile,
   'package.json': allowFile,
-  src: {
-    'index.js': allowFile,
-    'bootstrap.js': allowFile,
-    admin: allowChildren,
-    api: allowChildren,
-    components: allowChildren,
-    middlewares: allowChildren,
-    policies: allowChildren,
-    plugins: allowChildren,
-  },
+  src: allowChildren,
   data: allowChildren,
   database: allowChildren,
   public: allowChildren,
@@ -55,6 +47,9 @@ module.exports = async function mergeTemplate(scope, rootPath) {
     templatePath = downloadNpmTemplate(templatePackageInfo, templateParentPath);
   }
 
+  // Make sure the template is compatible with this version of strapi
+  checkTemplateCompat(rootPath, scope.strapiVersion);
+
   // Make sure the downloaded template matches the required format
   const { templateConfig } = await checkTemplateRootStructure(templatePath, scope);
   await checkTemplateContentsStructure(path.resolve(templatePath, 'template'));
@@ -68,6 +63,22 @@ module.exports = async function mergeTemplate(scope, rootPath) {
     await fse.remove(templateParentPath);
   }
 };
+
+function checkTemplateCompat({ rootPath, strapiVersion, templatePackageInfo }) {
+  const packageJSON = require(path.resolve(rootPath, 'package.json'));
+  const compatibleStrapiRange = packageJSON.strapi;
+  // Throw error if not compatible
+  const isCompatible = semver.satisfies(strapiVersion, compatibleStrapiRange);
+  if (!isCompatible) {
+    const { name, version } = templatePackageInfo;
+    throw new Error(`
+      The template ${chalk.green(
+        `${name}@${version}`
+      )} is not compatible with Strapi version ${strapiVersion}.
+      It will only work with Strapi versions in the range ${chalk.green(compatibleStrapiRange)}.
+    `);
+  }
+}
 
 /**
  * Make sure the template has the required top-level structure
