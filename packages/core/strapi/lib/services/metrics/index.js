@@ -86,7 +86,7 @@ const createTelemetryInstance = strapi => {
     /**
      *
      * @param {string} event
-     * @param {any} payload
+     * @param {any=} payload
      */
     async send(event, payload) {
       if (isDisabled) return true;

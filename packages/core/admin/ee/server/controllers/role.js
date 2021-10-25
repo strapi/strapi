@@ -1,5 +1,9 @@
 'use strict';
 
+/**
+ * @typedef {import('@strapi/strapi').StrapiAppContext} StrapiAppContext
+ */
+
 const { yup, formatYupErrors } = require('@strapi/utils');
 const {
   validateRoleCreateInput,
@@ -13,7 +17,7 @@ const { SUPER_ADMIN_CODE } = require('../../../server/services/constants');
 module.exports = {
   /**
    * Create a new role
-   * @param {KoaContext} ctx - koa context
+   * @param {StrapiAppContext} ctx - koa context
    */
   async create(ctx) {
     try {
@@ -32,7 +36,7 @@ module.exports = {
 
   /**
    * Delete a role
-   * @param {KoaContext} ctx - koa context
+   * @param {StrapiAppContext} ctx - koa context
    */
   async deleteOne(ctx) {
     const { id } = ctx.params;
@@ -56,7 +60,7 @@ module.exports = {
 
   /**
    * delete several roles
-   * @param {KoaContext} ctx - koa context
+   * @param {StrapiAppContext} ctx - koa context
    */
   async deleteMany(ctx) {
     const { body } = ctx.request;
@@ -78,7 +82,7 @@ module.exports = {
 
   /**
    * Updates the permissions assigned to a role
-   * @param {KoaContext} ctx - koa context
+   * @param {StrapiAppContext} ctx - koa context
    */
   async updatePermissions(ctx) {
     const { id } = ctx.params;

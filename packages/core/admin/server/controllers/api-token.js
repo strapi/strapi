@@ -1,5 +1,9 @@
 'use strict';
 
+/**
+ * @typedef {import('@strapi/strapi').StrapiAppContext} StrapiAppContext
+ */
+
 const { stringEquals } = require('@strapi/utils/lib');
 const { trim } = require('lodash/fp');
 const has = require('lodash/has');
@@ -10,6 +14,9 @@ const {
 } = require('../validation/api-tokens');
 
 module.exports = {
+  /**
+   * @param {StrapiAppContext} ctx
+   */
   async create(ctx) {
     const { body } = ctx.request;
     const apiTokenService = getService('api-token');
@@ -40,6 +47,9 @@ module.exports = {
     ctx.created({ data: apiToken });
   },
 
+  /**
+   * @param {StrapiAppContext} ctx
+   */
   async list(ctx) {
     const apiTokenService = getService('api-token');
     const apiTokens = await apiTokenService.list();
@@ -47,6 +57,9 @@ module.exports = {
     ctx.send({ data: apiTokens });
   },
 
+  /**
+   * @param {StrapiAppContext} ctx
+   */
   async revoke(ctx) {
     const { id } = ctx.params;
     const apiTokenService = getService('api-token');
@@ -55,6 +68,9 @@ module.exports = {
     ctx.deleted({ data: apiToken });
   },
 
+  /**
+   * @param {StrapiAppContext} ctx
+   */
   async get(ctx) {
     const { id } = ctx.params;
     const apiTokenService = getService('api-token');
@@ -69,6 +85,9 @@ module.exports = {
     ctx.send({ data: apiToken });
   },
 
+  /**
+   * @param {StrapiAppContext} ctx
+   */
   async update(ctx) {
     const { body } = ctx.request;
     const { id } = ctx.params;

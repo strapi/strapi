@@ -12,7 +12,6 @@ const fse = require('fs-extra');
  * TODO:: allow folders with index.js inside for bigger policies
  *
  * @param {Strapi} strapi
- * @returns {Promise<void>}
  */
 module.exports = async function loadMiddlewares(strapi) {
   const localMiddlewares = await loadLocalMiddlewares(strapi);
@@ -50,5 +49,6 @@ const loadLocalMiddlewares = async strapi => {
     }
   }
 
+  // @ts-ignore
   return middlewares;
 };

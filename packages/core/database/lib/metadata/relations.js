@@ -29,9 +29,9 @@ const shouldUseJoinTable = attribute => attribute.useJoinTable !== false;
  *   verify the owner side is valid // should be done before or at the same time ?
  *
  * @param {string} attributeName
- * @param {Attribute} attribute
- * @param {ModelMetadata} meta
- * @param {Metadata} metadata
+ * @param {object} attribute
+ * @param {object} meta
+ * @param {object} metadata
  * @retuns void
  */
 const createOneToOne = (attributeName, attribute, meta, metadata) => {
@@ -64,9 +64,9 @@ const createOneToOne = (attributeName, attribute, meta, metadata) => {
  *   do nothing
  *
  * @param {string} attributeName
- * @param {Attribute} attribute
- * @param {ModelMetadata} meta
- * @param {Metadata} metadata
+ * @param {object} attribute
+ * @param {object} meta
+ * @param {object} metadata
  */
 const createOneToMany = (attributeName, attribute, meta, metadata) => {
   if (!isBidirectional(attribute)) {
@@ -101,9 +101,9 @@ const createOneToMany = (attributeName, attribute, meta, metadata) => {
  *   set inverse attribute joinCol or joinTable info correctly
  *
  * @param {string} attributeName
- * @param {Attribute} attribute
- * @param {ModelMetadata} meta
- * @param {Metadata} metadata
+ * @param {object} attribute
+ * @param {object} meta
+ * @param {object} metadata
  */
 const createManyToOne = (attributeName, attribute, meta, metadata) => {
   if (isBidirectional(attribute) && !isOwner(attribute)) {
@@ -138,9 +138,9 @@ const createManyToOne = (attributeName, attribute, meta, metadata) => {
  *     do nothing
  *
  * @param {string} attributeName
- * @param {Attribute} attribute
- * @param {ModelMetadata} meta
- * @param {Metadata} metadata
+ * @param {object} attribute
+ * @param {object} meta
+ * @param {object} metadata
  */
 const createManyToMany = (attributeName, attribute, meta, metadata) => {
   if (!isBidirectional(attribute) || isOwner(attribute)) {
@@ -165,11 +165,12 @@ const createManyToMany = (attributeName, attribute, meta, metadata) => {
  *
  *
  * @param {string} attributeName
- * @param {Attribute} attribute
- * @param {ModelMetadata} meta
- * @param {Metadata} metadata
+ * @param {object} attribute
+ * @param {object} meta
+ * @param {object} metadata
  */
-const createMorphToOne = (attributeName, attribute /*meta, metadata*/) => {
+//eslint-disable-next-line no-unused-vars
+const createMorphToOne = (attributeName, attribute, meta, metadata) => {
   const idColumnName = 'target_id';
   const typeColumnName = 'target_type';
 
@@ -194,9 +195,9 @@ const createMorphToOne = (attributeName, attribute /*meta, metadata*/) => {
  * Creates a morphToMany relation metadata
  *
  * @param {string} attributeName
- * @param {Attribute} attribute
- * @param {ModelMetadata} meta
- * @param {Metadata} metadata
+ * @param {object} attribute
+ * @param {object} meta
+ * @param {object} metadata
  */
 const createMorphToMany = (attributeName, attribute, meta, metadata) => {
   const joinTableName = _.snakeCase(`${meta.tableName}_${attributeName}_morphs`);
@@ -279,9 +280,9 @@ const createMorphToMany = (attributeName, attribute, meta, metadata) => {
  * Creates a morphOne relation metadata
  *
  * @param {string} attributeName
- * @param {Attribute} attribute
- * @param {ModelMetadata} meta
- * @param {Metadata} metadata
+ * @param {object} attribute
+ * @param {object} meta
+ * @param {object} metadata
  */
 const createMorphOne = (attributeName, attribute, meta, metadata) => {
   const targetMeta = metadata.get(attribute.target);
@@ -299,9 +300,9 @@ const createMorphOne = (attributeName, attribute, meta, metadata) => {
  * Creates a morphMany relation metadata
  *
  * @param {string} attributeName
- * @param {Attribute} attribute
- * @param {ModelMetadata} meta
- * @param {Metadata} metadata
+ * @param {object} attribute
+ * @param {object} meta
+ * @param {object} metadata
  */
 const createMorphMany = (attributeName, attribute, meta, metadata) => {
   const targetMeta = metadata.get(attribute.target);
@@ -319,9 +320,9 @@ const createMorphMany = (attributeName, attribute, meta, metadata) => {
  * Creates a relation metadata
  *
  * @param {string} attributeName
- * @param {Attribute} attribute
- * @param {ModelMetadata} meta
- * @param {Metadata} metadata
+ * @param {object} attribute
+ * @param {object} meta
+ * @param {object} metadata
  */
 const createRelation = (attributeName, attribute, meta, metadata) => {
   switch (attribute.relation) {
@@ -367,9 +368,9 @@ const createJoinColum = (metadata, { attribute, attributeName /*meta */ }) => {
   Object.assign(attribute, { owner: true, joinColumn });
 
   if (isBidirectional(attribute)) {
-    const inverseAttribute = targetMeta.attributes[attribute.inversedBy];
+    const inverseobject = targetMeta.attributes[attribute.inversedBy];
 
-    Object.assign(inverseAttribute, {
+    Object.assign(inverseobject, {
       joinColumn: {
         name: joinColumn.referencedColumn,
         referencedColumn: joinColumn.name,
@@ -464,15 +465,15 @@ const createJoinTable = (metadata, { attributeName, attribute, meta }) => {
   attribute.joinTable = joinTable;
 
   if (isBidirectional(attribute)) {
-    const inverseAttribute = targetMeta.attributes[attribute.inversedBy];
+    const inverseobject = targetMeta.attributes[attribute.inversedBy];
 
-    if (!inverseAttribute) {
+    if (!inverseobject) {
       throw new Error(
         `inversedBy attribute ${attribute.inversedBy} not found target ${targetMeta.uid}`
       );
     }
 
-    inverseAttribute.joinTable = {
+    inverseobject.joinTable = {
       name: joinTableName,
       joinColumn: joinTable.inverseJoinColumn,
       inverseJoinColumn: joinTable.joinColumn,

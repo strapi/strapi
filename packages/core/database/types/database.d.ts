@@ -70,11 +70,20 @@ export type Entity<T> = T & {
 export interface EntityManager {
   findOne<K extends keyof StrapiContentTypes>(
     uid: K,
-    params: FindParams<StrapiContentTypes[K]>
+    params: FindParams<StrapiContentTypes[K]>,
+    options?: {
+      populate?: PopulateParams;
+    }
   ): Promise<any>;
   findMany<K extends keyof StrapiContentTypes>(
     uid: K,
     params: FindParams<StrapiContentTypes[K]>
+  ): Promise<any[]>;
+  findPage<K extends keyof StrapiContentTypes>(
+    uid: K,
+    options?: {
+      populate?: PopulateParams;
+    }
   ): Promise<any[]>;
 
   create<K extends keyof StrapiContentTypes>(
@@ -127,7 +136,7 @@ export interface QueryFromContentType<T extends keyof StrapiContentTypes> {
     params: FindParams<Entity<StrapiContentTypes[T]>>
   ): Promise<[Entity<StrapiContentTypes[T]>[], number]>;
   findPage(
-    params: FindParams<Entity<StrapiContentTypes[T]>>
+    params?: FindParams<Entity<StrapiContentTypes[T]>>
   ): Promise<{ results: Entity<StrapiContentTypes[T]>[]; pagination: Pagination }>;
 
   create(params: CreateParams<StrapiContentTypes[T]>): Promise<Entity<StrapiContentTypes[T]>>;
@@ -138,14 +147,16 @@ export interface QueryFromContentType<T extends keyof StrapiContentTypes> {
   ): Promise<Entity<StrapiContentTypes[T]>>;
   updateMany(params: UpdateParams<Entity<StrapiContentTypes[T]>>): Promise<{ count: number }>;
 
-  delete(params: FindParams<Entity<StrapiContentTypes[T]>>): Promise<Entity<StrapiContentTypes[T]>>;
-  deleteMany(params: FindParams<Entity<StrapiContentTypes[T]>>): Promise<{ count: number }>;
+  delete(
+    params?: FindParams<Entity<StrapiContentTypes[T]>>
+  ): Promise<Entity<StrapiContentTypes[T]>>;
+  deleteMany(params?: FindParams<Entity<StrapiContentTypes[T]>>): Promise<{ count: number }>;
 
   count(params?: FindParams<StrapiContentTypes[T]>): Promise<number>;
 
-  attachRelations(id: ID, data: any): Promise<any>;
-  updateRelations(id: ID, data: any): Promise<any>;
-  deleteRelations(id: ID): Promise<any>;
+  attachRelations(id: string, data: any): Promise<any>;
+  updateRelations(id: string, data: any): Promise<any>;
+  deleteRelations(id: string): Promise<any>;
 
   populate<S extends StrapiContentTypes[T]>(entity: S, populate: PopulateParams): Promise<S>;
 

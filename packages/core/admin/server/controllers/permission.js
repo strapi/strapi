@@ -1,5 +1,9 @@
 'use strict';
 
+/**
+ * @typedef {import('@strapi/strapi').StrapiAppContext} StrapiAppContext
+ */
+
 const { validateCheckPermissionsInput } = require('../validation/permission');
 const { getService } = require('../utils');
 const { formatConditions } = require('./formatters');
@@ -7,7 +11,7 @@ const { formatConditions } = require('./formatters');
 module.exports = {
   /**
    * Check each permissions from `request.body.permissions` and returns an array of booleans
-   * @param {KoaContext} ctx - koa context
+   * @param {StrapiAppContext} ctx - koa context
    */
   async check(ctx) {
     const { body: input } = ctx.request;
@@ -30,7 +34,7 @@ module.exports = {
 
   /**
    * Returns every permissions, in nested format
-   * @param {KoaContext} ctx - koa context
+   * @param {StrapiAppContext} ctx - koa context
    */
   async getAll(ctx) {
     const { role: roleId } = ctx.query;

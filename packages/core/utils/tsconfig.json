@@ -1,7 +1,6 @@
 {
   "extends": "../../../tsconfig.json",
   "compilerOptions": {
-    "lib": ["DOM"],
     "baseUrl": "./",
     "rootDir": "./",
     "types": ["@strapi/strapi"]

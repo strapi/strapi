@@ -1,5 +1,9 @@
 'use strict';
 
+/**
+ * @typedef {import('@strapi/admin').AdminAction} AdminAction
+ */
+
 const { isVisibleAttribute } = require('@strapi/utils').contentTypes;
 
 const {
@@ -13,20 +17,16 @@ const {
 
 /**
  * @typedef ContentTypesSection
- * @property {Array<Action>} actions
+ * @property {Array<AdminAction>} actions
  * @property {Array<Object>} subjects
- */
-
-/**
- * @typedef {Array<Action>} ActionArraySection
  */
 
 /**
  * Transforms & adds the given  setting action to the section
  * Note: The action is transformed to a setting specific format
  * @param {object} options
- * @param {Action} options.action
- * @param {ActionArraySection} section
+ * @param {AdminAction} options.action
+ * @param {AdminAction[]} options.section
  */
 const settings = ({ action, section }) => {
   const { category, subCategory, displayName, actionId } = action;
@@ -43,8 +43,8 @@ const settings = ({ action, section }) => {
  * Transforms & adds the given plugin action to the section
  * Note: The action is transformed to a plugin specific format
  * @param {object} options
- * @param {Action} options.action
- * @param {ActionArraySection} section
+ * @param {AdminAction} options.action
+ * @param {AdminAction[]} options.section
  */
 const plugins = ({ action, section }) => {
   const { pluginName, subCategory, displayName, actionId } = action;
@@ -61,8 +61,8 @@ const plugins = ({ action, section }) => {
  * Transforms & adds the given action to the section's actions field
  * Note: The action is transformed to a content-type specific format
  * @param {object} options
- * @param {Action} options.action
- * @param {ContentTypesSection} section
+ * @param {AdminAction} options.action
+ * @param {ContentTypesSection} options.section
  */
 const contentTypesBase = ({ action, section }) => {
   const { displayName, actionId, subjects, options } = action;
@@ -122,7 +122,7 @@ const buildDeepAttributesCollection = model => {
 /**
  * Create and populate the fields property for section's subjects based on the action's subjects list
  * @param {object} options
- * @param {Action} options.action
+ * @param {AdminAction} options.action
  * @param {ContentTypesSection} section
  */
 const fieldsProperty = ({ action, section }) => {

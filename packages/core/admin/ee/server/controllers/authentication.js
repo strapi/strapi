@@ -1,5 +1,9 @@
 'use strict';
 
+/**
+ * @typedef {import('@strapi/strapi').StrapiAppContext} StrapiAppContext
+ */
+
 const { pick, merge } = require('lodash/fp');
 const compose = require('koa-compose');
 
@@ -15,12 +19,18 @@ const providerAuthenticationFlow = compose([
 ]);
 
 module.exports = {
+  /**
+   * @param {StrapiAppContext} ctx
+   */
   async getProviders(ctx) {
     const { providerRegistry } = strapi.admin.services.passport;
 
     ctx.body = providerRegistry.getAll().map(toProviderDTO);
   },
 
+  /**
+   * @param {StrapiAppContext} ctx
+   */
   async getProviderLoginOptions(ctx) {
     const adminStore = await utils.getAdminStore();
     const { providers: providersOptions } = await adminStore.get({ key: 'auth' });
@@ -30,6 +40,9 @@ module.exports = {
     };
   },
 
+  /**
+   * @param {StrapiAppContext} ctx
+   */
   async updateProviderLoginOptions(ctx) {
     const {
       request: { body },
@@ -52,6 +65,10 @@ module.exports = {
     };
   },
 
+  /**
+   * @param {StrapiAppContext} ctx
+   * @param {() => Promise<void>} next
+   */
   providerLogin(ctx, next) {
     const {
       params: { provider: providerName },

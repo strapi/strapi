@@ -33,6 +33,9 @@ const toDetailedDeclaration = declaration => {
     return { enabled: declaration };
   }
 
+  /**
+   * @type {any}
+   */
   let detailedDeclaration = pick(['enabled'], declaration);
   if (has('resolve', declaration)) {
     let pathToPlugin = '';

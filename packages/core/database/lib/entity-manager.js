@@ -355,7 +355,7 @@ const createEntityManager = db => {
      *
      * @param {EntityManager} em - entity manager instance
      * @param {Metadata} metadata - model metadta
-     * @param {ID} id - entity ID
+     * @param {String} id - entity ID
      * @param {object} data - data received for creation
      */
     // TODO: wrap Transaction
@@ -514,7 +514,7 @@ const createEntityManager = db => {
      *
      * @param {EntityManager} em - entity manager instance
      * @param {Metadata} metadata - model metadta
-     * @param {ID} id - entity ID
+     * @param {String} id - entity ID
      * @param {object} data - data received for creation
      */
     // TODO: check relation exists (handled by FKs except for polymorphics)
@@ -702,7 +702,7 @@ const createEntityManager = db => {
      *
      * @param {EntityManager} em - entity manager instance
      * @param {Metadata} metadata - model metadta
-     * @param {ID} id - entity ID
+     * @param {String} id - entity ID
      */
     // TODO: wrap Transaction
     async deleteRelations(uid, id) {
@@ -892,6 +892,7 @@ const createEntityManager = db => {
     },
 
     clearRepositories() {
+      // @ts-ignore
       repoMap.clear();
     },
   };

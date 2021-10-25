@@ -1,9 +1,16 @@
 'use strict';
 
+/**
+ * @typedef {import('@strapi/strapi').StrapiAppContext} StrapiAppContext
+ */
+
 const { validateProfileUpdateInput } = require('../validation/user');
 const { getService } = require('../utils');
 
 module.exports = {
+  /**
+   * @param {StrapiAppContext} ctx
+   */
   async getMe(ctx) {
     const userInfo = getService('user').sanitizeUser(ctx.state.user);
 
@@ -12,6 +19,9 @@ module.exports = {
     };
   },
 
+  /**
+   * @param {StrapiAppContext} ctx
+   */
   async updateMe(ctx) {
     const input = ctx.request.body;
 
@@ -43,6 +53,9 @@ module.exports = {
     };
   },
 
+  /**
+   * @param {StrapiAppContext} ctx
+   */
   async getOwnPermissions(ctx) {
     const { findUserPermissions, sanitizePermission } = getService('permission');
     const { user } = ctx.state;

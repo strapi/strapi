@@ -1,5 +1,9 @@
 'use strict';
 
+/**
+ * @typedef {import('@strapi/admin').AdminAction} AdminAction
+ */
+
 const createSection = require('./section');
 
 /**
@@ -14,8 +18,7 @@ const createSectionBuilder = () => {
     /**
      * Create & add a section to the builder's registry
      * @param {string} sectionName - The unique name of the section
-     * @param {SectionOptions} options - The options used to build a {@link Section}
-     * @return {this}
+     * @param {any} options - The options used to build a {@link Section}
      */
     createSection(sectionName, options) {
       const section = createSection(options);
@@ -28,7 +31,6 @@ const createSectionBuilder = () => {
     /**
      * Removes a section from the builder's registry using its unique name
      * @param {string} sectionName - The name of the section to delete
-     * @return {this}
      */
     deleteSection(sectionName) {
       state.sections.remove(sectionName);
@@ -40,7 +42,6 @@ const createSectionBuilder = () => {
      * Register a handler function for a given section
      * @param {string} sectionName - The name of the section
      * @param {Function} handler - The handler to register
-     * @return {this}
      */
     addHandler(sectionName, handler) {
       if (state.sections.has(sectionName)) {
@@ -54,7 +55,6 @@ const createSectionBuilder = () => {
      * Register a matcher function for a given section
      * @param {string} sectionName - The name of the section
      * @param {Function} matcher - The handler to register
-     * @return {this}
      */
     addMatcher(sectionName, matcher) {
       if (state.sections.has(sectionName)) {
@@ -66,8 +66,7 @@ const createSectionBuilder = () => {
 
     /**
      * Build a section tree based on the registered actions and the given actions
-     * @param {Array<Action>} actions - The actions used to build each section
-     * @return {Promise<any>}
+     * @param {AdminAction[]} actions - The actions used to build each section
      */
     async build(actions = []) {
       const sections = {};

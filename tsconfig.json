@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "lib": ["es6"],
+    "lib": ["es6", "DOM"],
     "target": "es6",
     "module": "commonjs",
     "moduleResolution": "node",
@@ -12,8 +12,8 @@
     "checkJs": true,
     "strict": true,
     "skipLibCheck": true,
-    "strictNullChecks": true,
-    "noImplicitAny": true,
+    "strictNullChecks": false,
+    "noImplicitAny": false,
     "baseUrl": "./packages",
     "noEmit": true,
     "declaration": false,

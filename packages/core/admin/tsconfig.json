@@ -3,7 +3,7 @@
   "compilerOptions": {
     "baseUrl": "./",
     "rootDir": "./",
-    "types": ["@strapi/utils"]
+    "types": ["@strapi/strapi"]
   },
   "include": ["./**/*.js", "**/*.json", "**/*.mjs", "**/*.ts"],
   "exclude": ["**/*.test.js", "**/__tests__/**", "**/*.e2e.js"]

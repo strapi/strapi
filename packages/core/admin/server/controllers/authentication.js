@@ -1,5 +1,9 @@
 'use strict';
 
+/**
+ * @typedef {import('@strapi/strapi').StrapiAppContext} StrapiAppContext
+ */
+
 const passport = require('koa-passport');
 const compose = require('koa-compose');
 
@@ -48,6 +52,9 @@ module.exports = {
     },
   ]),
 
+  /**
+   * @param {StrapiAppContext} ctx
+   */
   renewToken(ctx) {
     const { token } = ctx.request.body;
 
@@ -68,6 +75,9 @@ module.exports = {
     };
   },
 
+  /**
+   * @param {StrapiAppContext} ctx
+   */
   async registrationInfo(ctx) {
     try {
       await validateRegistrationInfoQuery(ctx.request.query);
@@ -86,6 +96,9 @@ module.exports = {
     ctx.body = { data: registrationInfo };
   },
 
+  /**
+   * @param {StrapiAppContext} ctx
+   */
   async register(ctx) {
     const input = ctx.request.body;
 
@@ -105,6 +118,9 @@ module.exports = {
     };
   },
 
+  /**
+   * @param {StrapiAppContext} ctx
+   */
   async registerAdmin(ctx) {
     const input = ctx.request.body;
 
@@ -145,6 +161,9 @@ module.exports = {
     };
   },
 
+  /**
+   * @param {StrapiAppContext} ctx
+   */
   async forgotPassword(ctx) {
     const input = ctx.request.body;
 
@@ -159,6 +178,9 @@ module.exports = {
     ctx.status = 204;
   },
 
+  /**
+   * @param {StrapiAppContext} ctx
+   */
   async resetPassword(ctx) {
     const input = ctx.request.body;
 

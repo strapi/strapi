@@ -1,5 +1,9 @@
 'use strict';
 
+/**
+ * @typedef {import('@strapi/strapi').StrapiAppContext} StrapiAppContext
+ */
+
 const _ = require('lodash');
 const { yup, formatYupErrors, webhook: webhookUtils } = require('@strapi/utils');
 
@@ -19,6 +23,7 @@ const webhookValidator = yup
 
       return yup
         .object(
+          // @ts-ignore
           _.mapValues(data, () => {
             yup
               .string()
@@ -46,11 +51,17 @@ const updateWebhookValidator = webhookValidator.shape({
 });
 
 module.exports = {
+  /**
+   * @param {StrapiAppContext} ctx
+   */
   async listWebhooks(ctx) {
     const webhooks = await strapi.webhookStore.findWebhooks();
     ctx.send({ data: webhooks });
   },
 
+  /**
+   * @param {StrapiAppContext} ctx
+   */
   async getWebhook(ctx) {
     const { id } = ctx.params;
     const webhook = await strapi.webhookStore.findWebhook(id);
@@ -62,6 +73,9 @@ module.exports = {
     ctx.send({ data: webhook });
   },
 
+  /**
+   * @param {StrapiAppContext} ctx
+   */
   async createWebhook(ctx) {
     const { body } = ctx.request;
 
@@ -83,6 +97,9 @@ module.exports = {
     ctx.created({ data: webhook });
   },
 
+  /**
+   * @param {StrapiAppContext} ctx
+   */
   async updateWebhook(ctx) {
     const { id } = ctx.params;
     const { body } = ctx.request;
@@ -118,6 +135,9 @@ module.exports = {
     ctx.send({ data: updatedWebhook });
   },
 
+  /**
+   * @param {StrapiAppContext} ctx
+   */
   async deleteWebhook(ctx) {
     const { id } = ctx.params;
     const webhook = await strapi.webhookStore.findWebhook(id);
@@ -133,6 +153,9 @@ module.exports = {
     ctx.body = { data: webhook };
   },
 
+  /**
+   * @param {StrapiAppContext} ctx
+   */
   async deleteWebhooks(ctx) {
     const { ids } = ctx.request.body;
 
@@ -152,6 +175,9 @@ module.exports = {
     ctx.send({ data: ids });
   },
 
+  /**
+   * @param {StrapiAppContext} ctx
+   */
   async triggerWebhook(ctx) {
     const { id } = ctx.params;
 

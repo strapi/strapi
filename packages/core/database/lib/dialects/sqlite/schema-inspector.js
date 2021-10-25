@@ -4,13 +4,13 @@
  * @typedef {import('@strapi/database').Database} Database
  */
 
-const SQL_QUERIES = /** @type {const} */ ({
+const SQL_QUERIES = {
   TABLE_LIST: `select name from sqlite_master where type = 'table' and name NOT LIKE 'sqlite%'`,
   TABLE_INFO: `pragma table_info(??)`,
   INDEX_LIST: 'pragma index_list(??)',
   INDEX_INFO: 'pragma index_info(??)',
   FOREIGN_KEY_LIST: 'pragma foreign_key_list(??)',
-});
+};
 
 /**
  * @param {{
@@ -77,7 +77,12 @@ class SqliteSchemaInspector {
   }
 
   async getSchema() {
-    const schema = { tables: [] };
+    const schema = {
+      /**
+       * @type {any[]}
+       */
+      tables: [],
+    };
     const tables = await this.getTables();
 
     for (const tableName of tables) {

@@ -1,5 +1,9 @@
 'use strict';
 
+/**
+ * @typedef {import('@strapi/admin').AdminPermission} AdminPermission
+ */
+
 const { cloneDeep, has } = require('lodash/fp');
 const { hooks } = require('@strapi/utils');
 
@@ -15,8 +19,8 @@ const createEngineHooks = () => ({
 
 /**
  * Create a context from a domain {@link Permission} used by the WillEvaluate hook
- * @param {Permission} permission
- * @return {{readonly permission: Permission, addCondition(string): this}}
+ * @param {AdminPermission} permission
+ * @return {{readonly permission: AdminPermission, addCondition(string): ThisType}}
  */
 const createWillEvaluateContext = permission => ({
   get permission() {
@@ -34,7 +38,7 @@ const createWillEvaluateContext = permission => ({
  * Create a context from a casl Permission & some options
  * @param caslPermission
  * @param {object} options
- * @param {Permission} options.permission
+ * @param {AdminPermission} options.permission
  * @param {object} options.user
  */
 const createWillRegisterContext = (caslPermission, { permission, user }) => ({

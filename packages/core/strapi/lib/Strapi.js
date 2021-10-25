@@ -12,6 +12,7 @@
  * @typedef {import('@strapi/strapi').StrapiPlugins} StrapiPlugins
  * @typedef {import('@strapi/strapi').StrapiHooks} StrapiHooks
  * @typedef {import('@strapi/strapi').StrapiApi} StrapiApi
+ * @typedef {import('@strapi/database').EntityManager} EntityManager
  */
 
 /**
@@ -133,6 +134,12 @@ class Strapi {
      */
     // @ts-ignore
     this.db = undefined;
+
+    /**
+     * @type {EntityManager}
+     */
+    // @ts-ignore
+    this.entityService = undefined;
 
     createUpdateNotifier(this).notify();
   }

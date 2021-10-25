@@ -1,5 +1,9 @@
 'use strict';
 
+/**
+ * @typedef {import('@strapi/strapi').StrapiAppContext} StrapiAppContext
+ */
+
 const { yup, formatYupErrors } = require('@strapi/utils');
 const { validateRoleUpdateInput } = require('../validation/role');
 const { validatedUpdatePermissionsInput } = require('../validation/permission');
@@ -9,7 +13,7 @@ const { getService } = require('../utils');
 module.exports = {
   /**
    * Returns on role by id
-   * @param {KoaContext} ctx - koa context
+   * @param {StrapiAppContext} ctx - koa context
    */
   async findOne(ctx) {
     const { id } = ctx.params;
@@ -26,7 +30,7 @@ module.exports = {
 
   /**
    * Returns every roles
-   * @param {KoaContext} ctx - koa context
+   * @param {StrapiAppContext} ctx - koa context
    */
   async findAll(ctx) {
     const roles = await getService('role').findAllWithUsersCount();
@@ -38,7 +42,7 @@ module.exports = {
 
   /**
    * Updates a role by id
-   * @param {KoaContext} ctx - koa context
+   * @param {StrapiAppContext} ctx - koa context
    */
   async update(ctx) {
     const { id } = ctx.params;
@@ -72,7 +76,7 @@ module.exports = {
 
   /**
    * Returns the permissions assigned to a role
-   * @param {KoaContext} ctx - koa context
+   * @param {StrapiAppContext} ctx - koa context
    */
   async getPermissions(ctx) {
     const { id } = ctx.params;
@@ -97,7 +101,7 @@ module.exports = {
 
   /**
    * Updates the permissions assigned to a role
-   * @param {KoaContext} ctx - koa context
+   * @param {StrapiAppContext} ctx - koa context
    */
   async updatePermissions(ctx) {
     const { id } = ctx.params;

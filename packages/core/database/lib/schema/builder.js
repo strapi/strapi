@@ -1,5 +1,11 @@
 'use strict';
 
+/**
+ * @typedef {import('@strapi/database').Database} Database
+ * @typedef {import('knex').Knex.TableBuilder} TableBuilder
+ * @typedef {import('knex').Knex.SchemaBuilder} SchemaBuilder
+ */
+
 const { isNil, prop, omit, castArray } = require('lodash/fp');
 const debug = require('debug')('strapi::database');
 
@@ -9,7 +15,7 @@ module.exports = db => {
   return {
     /**
      * Returns a knex schema builder instance
-     * @param {string} table - table name
+     * @param {object} table - table name
      */
     getSchemaBuilder(table, trx = db.connection) {
       return table.schema ? trx.schema.withSchema(table.schema) : trx.schema;
@@ -17,7 +23,7 @@ module.exports = db => {
 
     /**
      * Creates schema in DB
-     * @param {Schema} schema - database schema
+     * @param {object} schema - database schema
      */
     async createSchema(schema) {
       // TODO: ensure database exists;
@@ -30,8 +36,8 @@ module.exports = db => {
 
     /**
      * Creates a list of tables in a schema
-     * @param {KnexInstance} trx
-     * @param {Table[]} tables
+     * @param {object} trx
+     * @param {object[]} tables
      */
     async createTables(tables, trx) {
       for (const table of tables) {
@@ -49,9 +55,9 @@ module.exports = db => {
     },
     /**
      * Drops schema from DB
-     * @param {Schema} schema - database schema
-     * @param {object} opts
-     * @param {boolean} opts.dropDatabase - weather to drop the entire database or simply drop the tables
+     * @param {object} schema - database schema
+     * @param {object=} opts
+     * @param {boolean=} opts.dropDatabase - weather to drop the entire database or simply drop the tables
      */
     async dropSchema(schema, { dropDatabase = false } = {}) {
       if (dropDatabase) {
@@ -109,8 +115,8 @@ module.exports = db => {
 const createHelpers = db => {
   /**
    *  Creates a foreign key on a table
-   * @param {Knex.TableBuilder} tableBuilder
-   * @param {ForeignKey} foreignKey
+   * @param {TableBuilder} tableBuilder
+   * @param {object} foreignKey
    */
   const createForeignKey = (tableBuilder, foreignKey) => {
     const { name, columns, referencedColumns, referencedTable, onDelete, onUpdate } = foreignKey;
@@ -131,8 +137,8 @@ const createHelpers = db => {
 
   /**
    * Drops a foreign key from a table
-   * @param {Knex.TableBuilder} tableBuilder
-   * @param {ForeignKey} foreignKey
+   * @param {TableBuilder} tableBuilder
+   * @param {object} foreignKey
    */
   const dropForeignKey = (tableBuilder, foreignKey) => {
     const { name, columns } = foreignKey;
@@ -142,8 +148,8 @@ const createHelpers = db => {
 
   /**
    * Creates an index on a table
-   * @param {Knex.TableBuilder} tableBuilder
-   * @param {Index} index
+   * @param {TableBuilder} tableBuilder
+   * @param {object} index
    */
   const createIndex = (tableBuilder, index) => {
     const { type, columns, name } = index;
@@ -163,8 +169,8 @@ const createHelpers = db => {
 
   /**
    * Drops an index from table
-   * @param {Knex.TableBuilder} tableBuilder
-   * @param {Index} index
+   * @param {TableBuilder} tableBuilder
+   * @param {object} index
    */
   const dropIndex = (tableBuilder, index) => {
     const { type, columns, name } = index;
@@ -184,8 +190,8 @@ const createHelpers = db => {
 
   /**
    * Creates a column in a table
-   * @param {Knex.TableBuilder} tableBuilder
-   * @param {Column} column
+   * @param {TableBuilder} tableBuilder
+   * @param {object} column
    */
   const createColumn = (tableBuilder, column) => {
     const { type, name, args = [], defaultTo, unsigned, notNullable } = column;
@@ -217,8 +223,8 @@ const createHelpers = db => {
 
   /**
    * Drops a column from a table
-   * @param {Knex.TableBuilder} tableBuilder
-   * @param {Column} column
+   * @param {TableBuilder} tableBuilder
+   * @param {object} column
    */
   const dropColumn = (tableBuilder, column) => {
     tableBuilder.dropColumn(column.name);
@@ -227,7 +233,7 @@ const createHelpers = db => {
   /**
    * Creates a table in a database
    * @param {SchemaBuilder} schemaBuilder
-   * @param {Table} table
+   * @param {object} table
    */
   const createTable = async (schemaBuilder, table) => {
     await schemaBuilder.createTable(table.name, tableBuilder => {
@@ -313,15 +319,15 @@ const createHelpers = db => {
 
   /**
    * Drops a table from a database
-   * @param {Knex.SchemaBuilder} schemaBuilder
-   * @param {Table} table
+   * @param {SchemaBuilder} schemaBuilder
+   * @param {object} table
    */
   const dropTable = (schemaBuilder, table) => schemaBuilder.dropTableIfExists(table.name);
 
   /**
    * Creates a table foreign keys constraints
    * @param {SchemaBuilder} schemaBuilder
-   * @param {Table} table
+   * @param {object} table
    */
   const createTableForeignKeys = async (schemaBuilder, table) => {
     // foreign keys
@@ -333,7 +339,7 @@ const createHelpers = db => {
   /**
    * Drops a table foreign keys constraints
    * @param {SchemaBuilder} schemaBuilder
-   * @param {Table} table
+   * @param {object} table
    */
   const dropTableForeignKeys = async (schemaBuilder, table) => {
     // foreign keys

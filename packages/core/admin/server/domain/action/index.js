@@ -1,29 +1,18 @@
 'use strict';
 
+/**
+ * @typedef {import('@strapi/admin').AdminAction} AdminAction
+ */
+
 const { curry, pipe, merge, set, pick, omit, includes, isArray, prop } = require('lodash/fp');
 
 /**
- * Domain representation of an Action (RBAC)
- * @typedef {Object} Action
- * @property {string} actionId - The unique identifier of the action
- * @property {string} section - The section linked to the action
- * @property {string} displayName - The human readable name of an action
- * @property {string} category - The main category of an action
- * @property {string} [subCategory] - The secondary category of an action (only for settings and plugins section)
- * @property {string} [pluginName] - The plugin which provide the action
- * @property {string[]} [subjects] - A list of subjects on which the action can be applied
- * @property {Object} options - The options of an action
- * @property {string[]} options.applyToProperties - The list of properties that can be associated with an action
+ * Set of attributes used to create a new {@link AdminAction} object
+ * @typedef {AdminAction & { uid: string }} CreateActionPayload
  */
 
 /**
- * Set of attributes used to create a new {@link Action} object
- * @typedef {Action, { uid: string }} CreateActionPayload
- */
-
-/**
- * Return the default attributes of a new {@link Action}
- * @return Partial<Action>
+ * Return the default attributes of a new {@link AdminAction}
  */
 const getDefaultActionAttributes = () => ({
   options: {
@@ -32,7 +21,7 @@ const getDefaultActionAttributes = () => ({
 });
 
 /**
- * Get the list of all the valid attributes of an {@link Action}
+ * Get the list of all the valid attributes of an {@link AdminAction}
  * @return {string[]}
  */
 const actionFields = [
@@ -47,8 +36,8 @@ const actionFields = [
 ];
 
 /**
- * Remove unwanted attributes from an {@link Action}
- * @type {function(action: Action | CreateActionPayload): Action}
+ * Remove unwanted attributes from an {@link AdminAction}
+ * @type {(action: AdminAction | CreateActionPayload) => Partial<AdminAction>}
  */
 const sanitizeActionAttributes = pick(actionFields);
 
@@ -80,9 +69,9 @@ const computeActionId = attributes => {
 const assignActionId = attrs => set('actionId', computeActionId(attrs), attrs);
 
 /**
- * Transform an action by adding or removing the {@link Action.subCategory} attribute
- * @param {Action} action - The action to process
- * @return {Action}
+ * Transform an action by adding or removing the {@link AdminAction.subCategory} attribute
+ * @param {AdminAction} action - The action to process
+ * @return {AdminAction}
  */
 const assignOrOmitSubCategory = action => {
   const shouldHaveSubCategory = ['settings', 'plugins'].includes(action.section);
@@ -93,18 +82,21 @@ const assignOrOmitSubCategory = action => {
 };
 
 /**
- * Check if a property can be applied to an {@link Action}
- * @type (function(property: string, action: Action): boolean) | (function(property: string): (function(action: Action): boolean))
+ * Check if a property can be applied to an {@link AdminAction}
+ * @type (function(property: string, action: AdminAction): boolean) | (function(property: string): (function(action: AdminAction): boolean))
  * @return {boolean} Return true if the property can be applied for the given action
  */
 const appliesToProperty = curry((property, action) => {
-  return pipe(prop('options.applyToProperties'), includes(property))(action);
+  return pipe(
+    prop('options.applyToProperties'),
+    includes(property)
+  )(action);
 });
 
 /**
  * Check if an action applies to a subject
  * @param {string} subject
- * @param {Action} action
+ * @param {AdminAction} action
  * @return {boolean}
  */
 const appliesToSubject = curry((subject, action) => {
@@ -112,10 +104,10 @@ const appliesToSubject = curry((subject, action) => {
 });
 
 /**
- * Transform the given attributes into a domain representation of an Action
- * @type (function(payload: CreateActionPayload): Action)
- * @param {CreateActionPayload} payload - The action payload containing the attributes needed to create an {@link Action}
- * @return {Action} A newly created {@link Action}
+ * Transform the given attributes into a domain representation of an AdminAction
+ * @type {(payload: CreateActionPayload) => Partial<AdminAction>}
+ * @param {CreateActionPayload} payload - The action payload containing the attributes needed to create an {@link AdminAction}
+ * @return {Partial<AdminAction>} A newly created {@link AdminAction}
  */
 const create = pipe(
   // Create and assign an action identifier to the action

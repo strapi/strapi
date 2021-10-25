@@ -5,6 +5,7 @@ const { addNamespace, hasNamespace } = require('../utils');
 
 /**
  * @typedef {import('@strapi/strapi').StrapiMiddlewares} StrapiMiddlewares
+ * @typedef {import('@strapi/strapi').StrapiMiddlewareFactory} StrapiMiddlewareFactory
  * @typedef {import('./types/middlewares').Middleware} Middleware
  */
 
@@ -57,7 +58,7 @@ const middlewaresRegistry = () => {
     /**
      * Registers a map of middlewares for a specific namespace
      * @param {string} namespace
-     * @param {Record<string, Middleware>} rawMiddlewares
+     * @param {Record<string, Middleware | StrapiMiddlewareFactory>} rawMiddlewares
      */
     add(namespace, rawMiddlewares) {
       for (const middlewareName in rawMiddlewares) {
@@ -76,7 +77,7 @@ const middlewaresRegistry = () => {
      * Wraps a middleware to extend it
      * @template {keyof StrapiMiddlewares} T
      * @param {T} uid
-     * @param {(middleware: Middleware) => Middleware} extendFn
+     * @param {(middleware: StrapiMiddlewares[T]) => StrapiMiddlewares[T]} extendFn
      */
     extend(uid, extendFn) {
       const currentMiddleware = this.get(uid);
@@ -86,6 +87,8 @@ const middlewaresRegistry = () => {
       }
 
       const newMiddleware = extendFn(currentMiddleware);
+
+      // @ts-ignore
       return this.set(uid, newMiddleware);
     },
   };

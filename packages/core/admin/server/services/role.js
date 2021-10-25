@@ -1,5 +1,9 @@
 'use strict';
 
+/**
+ * @typedef {import('@strapi/admin').AdminPermission} AdminPermission
+ */
+
 const _ = require('lodash');
 const { set, omit, pick, prop, isArray, differenceWith, differenceBy } = require('lodash/fp');
 const deepEqual = require('fast-deep-equal');
@@ -30,8 +34,8 @@ const jsonClean = data => JSON.parse(JSON.stringify(data));
 
 /**
  * Compare two permissions
- * @param {Permission} p1
- * @param {Permission} p2
+ * @param {AdminPermission} p1
+ * @param {AdminPermission} p2
  */
 const arePermissionsEqual = (p1, p2) => {
   if (p1.action === p2.action) {
@@ -296,8 +300,8 @@ const displayWarningIfNoSuperAdmin = async () => {
 
 /**
  * Assign permissions to a role
- * @param {string|int} roleId - role ID
- * @param {Array<Permission{action,subject,fields,conditions}>} permissions - permissions to assign to the role
+ * @param {string|number} roleId - role ID
+ * @param {AdminPermission[]} permissions - permissions to assign to the role
  */
 const assignPermissions = async (roleId, permissions = []) => {
   try {

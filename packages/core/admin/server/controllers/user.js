@@ -1,5 +1,9 @@
 'use strict';
 
+/**
+ * @typedef {import('@strapi/strapi').StrapiAppContext} StrapiAppContext
+ */
+
 const _ = require('lodash');
 const {
   validateUserCreationInput,
@@ -10,6 +14,9 @@ const {
 const { getService } = require('../utils');
 
 module.exports = {
+  /**
+   * @param {StrapiAppContext} ctx
+   */
   async create(ctx) {
     const { body } = ctx.request;
 
@@ -43,6 +50,9 @@ module.exports = {
     ctx.created({ data: userInfo });
   },
 
+  /**
+   * @param {StrapiAppContext} ctx
+   */
   async find(ctx) {
     const userService = getService('user');
 
@@ -56,6 +66,9 @@ module.exports = {
     };
   },
 
+  /**
+   * @param {StrapiAppContext} ctx
+   */
   async findOne(ctx) {
     const { id } = ctx.params;
 
@@ -70,6 +83,9 @@ module.exports = {
     };
   },
 
+  /**
+   * @param {StrapiAppContext} ctx
+   */
   async update(ctx) {
     const { id } = ctx.params;
     const { body: input } = ctx.request;
@@ -102,6 +118,9 @@ module.exports = {
     };
   },
 
+  /**
+   * @param {StrapiAppContext} ctx
+   */
   async deleteOne(ctx) {
     const { id } = ctx.params;
 
@@ -118,7 +137,7 @@ module.exports = {
 
   /**
    * Delete several users
-   * @param {KoaContext} ctx - koa context
+   * @param {StrapiAppContext} ctx - strapi context
    */
   async deleteMany(ctx) {
     const { body } = ctx.request;

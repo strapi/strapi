@@ -1,5 +1,9 @@
 'use strict';
 
+/**
+ * @typedef {import('@strapi/admin').AdminPermission} AdminPermission
+ */
+
 const _ = require('lodash');
 const { uniq, startsWith, intersection } = require('lodash/fp');
 const { contentTypes: contentTypesUtils } = require('@strapi/utils');
@@ -118,7 +122,7 @@ const getNestedFieldsWithIntermediate = (
  * @param {object} options
  * @param {number=} options.nestingLevel level of nesting
  * @param {array=} options.restrictedSubjects subjectsId to ignore
- * @returns {Permission[]}
+ * @returns {AdminPermission[]}
  */
 const getPermissionsWithNestedFields = (
   actions,
@@ -151,10 +155,9 @@ const getPermissionsWithNestedFields = (
 
 /**
  * Cleans permissions' fields (add required ones, remove the non-existing ones)
- * @param {Permission[]} permissions array of existing permissions in db
+ * @param {AdminPermission[]} permissions array of existing permissions in db
  * @param {object} options
  * @param {number} options.nestingLevel level of nesting
- * @returns {Permission[]}
  */
 const cleanPermissionFields = (permissions, { nestingLevel } = {}) => {
   const { actionProvider } = getService('permission');

@@ -1,5 +1,9 @@
 'use strict';
 
+/**
+ * @typedef {import('@strapi/admin').AdminPermission} AdminPermission
+ */
+
 const {
   curry,
   map,
@@ -59,7 +63,6 @@ module.exports = conditionProvider => {
      * Generate an ability based on the given user (using associated roles & permissions)
      * @param user
      * @param options
-     * @returns {Promise<Ability>}
      */
     async generateUserAbility(user, options) {
       const permissions = await getService('permission').findUserPermissions(user);
@@ -71,7 +74,6 @@ module.exports = conditionProvider => {
     /**
      * Create an ability factory for a specific user
      * @param user
-     * @returns {function(*, *): Promise<Ability>}
      */
     generateAbilityCreatorFor(user) {
       return async (permissions, options) => {
@@ -89,8 +91,7 @@ module.exports = conditionProvider => {
 
     /**
      * Validate, invalidate and transform the permission attributes
-     * @param {Permission} permission
-     * @returns {null|Permission}
+     * @param {AdminPermission} permission
      */
     formatPermission(permission) {
       const { actionProvider } = getService('permission');
@@ -128,8 +129,7 @@ module.exports = conditionProvider => {
 
     /**
      * Update the permission components through various processing
-     * @param {Permission} permission
-     * @returns {Promise<void>}
+     * @param {AdminPermission} permission
      */
     async applyPermissionProcessors(permission) {
       const context = createWillEvaluateContext(permission);
@@ -141,7 +141,7 @@ module.exports = conditionProvider => {
     /**
      * Register new rules using `registerFn` based on valid permission's conditions
      * @param options {object}
-     * @param options.permission {object}
+     * @param options.permission {AdminPermission}
      * @param options.user {object}
      * @param options.options {object | undefined}
      * @param options.registerFn {Function}
@@ -232,9 +232,8 @@ module.exports = conditionProvider => {
     /**
      * Encapsulate a register function with custom params to fit `evaluatePermission`'s syntax
      * @param can
-     * @param {Permission} permission
+     * @param {AdminPermission} permission
      * @param {object} user
-     * @returns {function}
      */
     createRegisterFunction(can, permission, user) {
       const registerToCasl = caslPermission => {

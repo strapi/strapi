@@ -2,14 +2,29 @@
 
 /**
  * Transform an array of actions to a more nested format
- * @param {Array<Action>} actions - array of actions
- * @returns {Object} "{ contentTypes, plugins, settings }"
+ * @param {any[]} actions - array of actions
  */
 const formatActionsBySections = actions =>
   actions.reduce((result, p) => {
     const checkboxItem = {
       displayName: p.displayName,
       action: p.actionId,
+      /**
+       * @type {any=}
+       */
+      subjects: undefined,
+      /**
+       * @type {any=}
+       */
+      subCategory: undefined,
+      /**
+       * @type {any=}
+       */
+      category: undefined,
+      /**
+       * @type {string=}
+       */
+      plugin: undefined,
     };
 
     switch (p.section) {

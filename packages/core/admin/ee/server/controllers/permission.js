@@ -1,9 +1,16 @@
 'use strict';
 
+/**
+ * @typedef {import('@strapi/strapi').StrapiAppContext} StrapiAppContext
+ */
+
 const { getService } = require('../../../server/utils');
 const { formatConditions } = require('../../../server/controllers/formatters');
 
 module.exports = {
+  /**
+   * @param {StrapiAppContext} ctx
+   */
   async getAll(ctx) {
     const { sectionsBuilder, actionProvider, conditionProvider } = getService('permission');
 

@@ -1,5 +1,9 @@
 'use strict';
 
+/**
+ * @typedef {import('@strapi/admin').AdminUser} AdminUser
+ */
+
 const _ = require('lodash');
 const { defaults } = require('lodash/fp');
 const { stringIncludes } = require('@strapi/utils');
@@ -24,7 +28,6 @@ const sanitizeUser = user => {
 /**
  * Create and save a user in database
  * @param attributes A partial user object
- * @returns {Promise<user>}
  */
 const create = async attributes => {
   const userInfo = {
@@ -49,7 +52,6 @@ const create = async attributes => {
  * Update a user in database
  * @param id query params to find the user to update
  * @param attributes A partial user object
- * @returns {Promise<user>}
  */
 const updateById = async (id, attributes) => {
   // Check at least one super admin remains
@@ -123,7 +125,7 @@ const resetPasswordByEmail = async (email, password) => {
 
 /**
  * Check if a user is the last super admin
- * @param {int|string} userId user's id to look for
+ * @param {number|string} userId user's id to look for
  */
 const isLastSuperAdminUser = async userId => {
   const user = await findOne(userId);
@@ -135,7 +137,6 @@ const isLastSuperAdminUser = async userId => {
 /**
  * Check if a user with specific attributes exists in the database
  * @param attributes A partial user object
- * @returns {Promise<boolean>}
  */
 const exists = async (attributes = {}) => {
   return (await strapi.query('admin::user').count({ where: attributes })) > 0;
@@ -144,7 +145,6 @@ const exists = async (attributes = {}) => {
 /**
  * Returns a user registration info
  * @param {string} registrationToken - a user registration token
- * @returns {Promise<registrationInfo>} - Returns user email, firstname and lastname
  */
 const findRegistrationInfo = async registrationToken => {
   const user = await strapi.query('admin::user').findOne({ where: { registrationToken } });
@@ -187,7 +187,6 @@ const findOne = async (id, populate = ['roles']) => {
 
 /** Find many users (paginated)
  * @param query
- * @returns {Promise<user>}
  */
 const findPage = async (query = {}) => {
   const enrichedQuery = defaults({ populate: ['roles'] }, query);
@@ -196,7 +195,6 @@ const findPage = async (query = {}) => {
 
 /** Delete a user
  * @param id id of the user to delete
- * @returns {Promise<user>}
  */
 const deleteById = async id => {
   // Check at least one super admin remains
@@ -226,7 +224,6 @@ const deleteById = async id => {
 
 /** Delete a user
  * @param ids ids of the users to delete
- * @returns {Promise<user>}
  */
 const deleteByIds = async ids => {
   // Check at least one super admin remains
@@ -259,7 +256,6 @@ const deleteByIds = async ids => {
 };
 
 /** Count the users that don't have any associated roles
- * @returns {Promise<number>}
  */
 const countUsersWithoutRole = async () => {
   return strapi.query('admin::user').count({
@@ -273,15 +269,13 @@ const countUsersWithoutRole = async () => {
 
 /**
  * Count the number of users based on search params
- * @param params params used for the query
- * @returns {Promise<number>}
+ * @param {object} where params used for the query
  */
 const count = async (where = {}) => {
   return strapi.query('admin::user').count({ where });
 };
 
 /** Assign some roles to several users
- * @returns {undefined}
  */
 const assignARoleToAll = async roleId => {
   const users = await strapi.query('admin::user').findMany({
@@ -302,7 +296,6 @@ const assignARoleToAll = async roleId => {
 };
 
 /** Display a warning if some users don't have at least one role
- * @returns {Promise<>}
  */
 const displayWarningIfUsersDontHaveRole = async () => {
   const count = await countUsersWithoutRole();
