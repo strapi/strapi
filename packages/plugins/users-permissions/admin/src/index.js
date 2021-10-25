@@ -6,13 +6,10 @@
 // IF THE DOC IS NOT UPDATED THE PULL REQUEST WILL NOT BE MERGED
 import { prefixPluginTranslations } from '@strapi/helper-plugin';
 import pluginPkg from '../../package.json';
-import pluginLogo from './assets/images/logo.svg';
 import pluginPermissions from './permissions';
 import pluginId from './pluginId';
 import getTrad from './utils/getTrad';
 
-const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
-const icon = pluginPkg.strapi.icon;
 const name = pluginPkg.strapi.name;
 
 export default {
@@ -95,13 +92,8 @@ export default {
     );
 
     app.registerPlugin({
-      description: pluginDescription,
-      icon,
       id: pluginId,
-      isReady: true,
-      isRequired: pluginPkg.strapi.required || false,
       name,
-      pluginLogo,
     });
   },
   bootstrap() {},

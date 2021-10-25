@@ -218,7 +218,7 @@ describe('ADMIN | StrapiApp', () => {
         to: '/plugins/bar',
         intlLabel: { id: 'bar', defaultMessage: 'bar' },
         permissions: [],
-        icon: 'book',
+        icon: () => 'book',
       };
 
       app.addMenuLink(link);
@@ -231,7 +231,7 @@ describe('ADMIN | StrapiApp', () => {
       const app = StrapiApp({ middlewares, reducers, library });
       const link = {
         to: '/plugins/content-type-builder',
-        icon: 'book',
+        icon: () => 'book',
         permissions: [],
         intlLabel: {
           id: 'content-type-builder.plugin.name',

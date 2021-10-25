@@ -114,6 +114,10 @@ class StrapiApp {
       link.Component && typeof link.Component === 'function',
       `link.Component should be a valid React Component`
     );
+    invariant(
+      link.icon && typeof link.icon === 'function',
+      `link.Icon should be a valid React Component`
+    );
 
     this.menu.push(link);
   };

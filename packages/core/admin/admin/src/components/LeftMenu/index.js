@@ -23,13 +23,6 @@ import Logout from '@strapi/icons/Logout';
 import { auth, usePersistentState, useAppInfos } from '@strapi/helper-plugin';
 import useConfigurations from '../../hooks/useConfigurations';
 
-// TODO: remove when font-awesome will be removed
-const IconWrapper = styled.span`
-  svg.svg-inline--fa.fa-w-20 {
-    width: 1rem;
-  }
-`;
-
 const LinkUserWrapper = styled(Box)`
   width: ${150 / 16}rem;
   position: absolute;
@@ -105,19 +98,15 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
 
         {pluginsSectionLinks.length > 0 ? (
           <NavSection label="Plugins">
-            {pluginsSectionLinks.map(link => (
-              <NavLink
-                to={link.to}
-                key={link.to}
-                icon={
-                  <IconWrapper>
-                    <FontAwesomeIcon icon={link.icon} />
-                  </IconWrapper>
-                }
-              >
-                {formatMessage(link.intlLabel)}
-              </NavLink>
-            ))}
+            {pluginsSectionLinks.map(link => {
+              const Icon = link.icon;
+
+              return (
+                <NavLink to={link.to} key={link.to} icon={<Icon />}>
+                  {formatMessage(link.intlLabel)}
+                </NavLink>
+              );
+            })}
           </NavSection>
         ) : null}
 
