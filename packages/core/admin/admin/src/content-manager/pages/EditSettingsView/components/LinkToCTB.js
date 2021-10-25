@@ -5,22 +5,22 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
 import { useTracking, CheckPermissions } from '@strapi/helper-plugin';
-import { useHistory } from 'react-router-dom';
 import { useIntl } from 'react-intl';
 import get from 'lodash/get';
-import { Button } from '@buffetjs/core';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { LinkButton } from '@strapi/parts/LinkButton';
+import EditIcon from '@strapi/icons/EditIcon';
 import getTrad from '../../../utils/getTrad';
+import useLayoutDnd from '../../../hooks/useLayoutDnd';
 
 const permissions = [{ action: 'plugin::content-type-builder.read', subject: null }];
 
 // Create link from content-type-builder to content-manager
-const LinkToCTB = ({ modifiedData, slug, type }) => {
+const LinkToCTB = () => {
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
-  const { push } = useHistory();
+  const { slug, modifiedData, isContentTypeView } = useLayoutDnd();
+  const type = isContentTypeView ? 'content-types' : 'components';
 
   const baseUrl = `/plugins/content-type-builder/${
     type === 'content-types' ? type : 'component-categories'
@@ -31,7 +31,6 @@ const LinkToCTB = ({ modifiedData, slug, type }) => {
 
   const handleClick = () => {
     trackUsage('willEditEditLayout');
-    push(`${baseUrl}/${suffixUrl}`);
   };
 
   if (slug === 'strapi::administrator') {
@@ -40,28 +39,20 @@ const LinkToCTB = ({ modifiedData, slug, type }) => {
 
   return (
     <CheckPermissions permissions={permissions}>
-      <Button
-        type="button"
+      <LinkButton
+        to={`${baseUrl}/${suffixUrl}`}
         onClick={handleClick}
-        icon={<FontAwesomeIcon icon="cog" style={{ fontSize: 13 }} />}
-        label={formatMessage({
+        size="S"
+        startIcon={<EditIcon />}
+        variant="secondary"
+      >
+        {formatMessage({
           id: getTrad(`edit-settings-view.link-to-ctb.${type}`),
+          defaultMessage: 'Edit the content type',
         })}
-        style={{
-          paddingLeft: 15,
-          paddingRight: 15,
-          outline: 0,
-          fontWeight: 600,
-        }}
-      />
+      </LinkButton>
     </CheckPermissions>
   );
-};
-
-LinkToCTB.propTypes = {
-  modifiedData: PropTypes.object.isRequired,
-  slug: PropTypes.string.isRequired,
-  type: PropTypes.string.isRequired,
 };
 
 export default LinkToCTB;
