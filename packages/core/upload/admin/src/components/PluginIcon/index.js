@@ -5,19 +5,11 @@
  */
 
 import React from 'react';
-import styled from 'styled-components';
+import { Icon } from '@strapi/parts/Icon';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-const IconWrapper = styled.span`
-  svg.svg-inline--fa.fa-w-20 {
-    width: 1rem;
-  }
-`;
-
 const PluginIcon = () => (
-  <IconWrapper>
-    <FontAwesomeIcon icon="cloud-upload-alt" />
-  </IconWrapper>
+  <Icon as={() => <FontAwesomeIcon icon="cloud-upload-alt" />} width="16px" />
 );
 
 export default PluginIcon;
