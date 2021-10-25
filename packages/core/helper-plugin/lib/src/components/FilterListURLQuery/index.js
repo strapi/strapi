@@ -33,7 +33,9 @@ const FilterListURLQuery = ({ filtersSchema }) => {
         const relationTargetAttribute = attribute.fieldSchema.mainField.name;
         const filterObj = filter[attributeName][relationTargetAttribute];
         const operator = Object.keys(filterObj)[0];
-        const value = filterObj[operator];
+
+        const rawValue = filterObj[operator];
+        const value = Array.isArray(rawValue) ? rawValue.join(', ') : rawValue;
 
         return (
           <AttributeTag
@@ -50,7 +52,8 @@ const FilterListURLQuery = ({ filtersSchema }) => {
 
       const filterObj = filter[attributeName];
       const operator = Object.keys(filterObj)[0];
-      const value = filterObj[operator];
+      const rawValue = filterObj[operator];
+      const value = Array.isArray(rawValue) ? rawValue.join(', ') : rawValue;
 
       return (
         <AttributeTag

@@ -75,27 +75,38 @@ const FilterPopoverURLQuery = ({ displayedFilters, isVisible, onToggle, source }
       }) !== undefined;
 
     if (modifiedData.value && !hasFilter) {
-      let filterToAdd = { [modifiedData.name]: { [modifiedData.filter]: modifiedData.value } };
+      const attribute = displayedFilters.find(({ name }) => name === modifiedData.name);
+      const type = attribute.fieldSchema.type;
 
-      const foundAttribute = displayedFilters.find(({ name }) => name === modifiedData.name);
-
-      const type = foundAttribute.fieldSchema.type;
-
-      if (foundAttribute.trackedEvent) {
-        trackUsage(foundAttribute.trackedEvent.name, foundAttribute.trackedEvent.properties);
+      if (attribute.trackedEvent) {
+        trackUsage(attribute.trackedEvent.name, attribute.trackedEvent.properties);
       }
 
+      let nextFilter;
+
       if (type === 'relation') {
-        filterToAdd = {
+        nextFilter = {
           [modifiedData.name]: {
-            [foundAttribute.fieldSchema.mainField.name]: {
+            [attribute.fieldSchema.mainField.name]: {
               [modifiedData.filter]: modifiedData.value,
             },
           },
         };
+      } else if (attribute.customizedFilter) {
+        nextFilter = {
+          [modifiedData.name]: attribute.customizedFilter(
+            modifiedData.name,
+            modifiedData.filter,
+            modifiedData.value
+          ),
+        };
+      } else {
+        nextFilter = { [modifiedData.name]: { [modifiedData.filter]: modifiedData.value } };
       }
 
-      const filters = [...(query?.filters?.$and || []), filterToAdd];
+      const queryFiltersAdd = query?.filters?.$and || [];
+
+      const filters = [...queryFiltersAdd, nextFilter];
 
       setQuery({ filters: { $and: filters }, page: 1 });
     }

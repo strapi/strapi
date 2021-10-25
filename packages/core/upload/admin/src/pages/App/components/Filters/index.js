@@ -1,9 +1,8 @@
 import React, { useState, useRef } from 'react';
 import { Button } from '@strapi/parts/Button';
-import { FilterListURLQuery } from '@strapi/helper-plugin';
+import { FilterListURLQuery, FilterPopoverURLQuery } from '@strapi/helper-plugin';
 import FilterIcon from '@strapi/icons/FilterIcon';
 import { useIntl } from 'react-intl';
-import { FilterPopover } from './FilterPopover';
 
 const displayedFilters = [
   {
@@ -27,6 +26,8 @@ const displayedFilters = [
       options: ['image', 'video', 'file'],
     },
     metadatas: { label: 'type' },
+    customizedFilter: fieldValue =>
+      fieldValue === 'mime' ? { $ne: ['video', 'image'] } : { $eq: fieldValue },
   },
 ];
 
@@ -49,7 +50,14 @@ export const Filters = () => {
         {formatMessage({ id: 'app.utils.filters', defaultMessage: 'Filters' })}
       </Button>
 
-      {isVisible && <FilterPopover sourceRef={buttonRef} onClose={toggleFilter} />}
+      {isVisible && (
+        <FilterPopoverURLQuery
+          displayedFilters={displayedFilters}
+          isVisible={isVisible}
+          onToggle={toggleFilter}
+          source={buttonRef}
+        />
+      )}
 
       <FilterListURLQuery filtersSchema={displayedFilters} />
     </>
