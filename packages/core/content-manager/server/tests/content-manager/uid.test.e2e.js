@@ -12,7 +12,9 @@ let uid = 'api::uid-model.uid-model';
 
 const model = {
   kind: 'collectionType',
-  name: 'uid-model',
+  displayName: 'uid-model',
+  singularName: 'uid-model',
+  pluralName: 'uid-models',
   attributes: {
     title: {
       type: 'string',

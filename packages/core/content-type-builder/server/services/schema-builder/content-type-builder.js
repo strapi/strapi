@@ -2,9 +2,8 @@
 
 const path = require('path');
 const _ = require('lodash');
-const pluralize = require('pluralize');
 
-const { nameToSlug, nameToCollectionName } = require('@strapi/utils');
+const { nameToCollectionName } = require('@strapi/utils');
 const { isRelation, isConfigurable } = require('../../utils/attributes');
 const { typeKinds } = require('../constants');
 const createSchemaHandler = require('./schema-handler');
@@ -77,16 +76,13 @@ module.exports = function createComponentBuilder() {
         throw new Error('contentType.alreadyExists');
       }
 
-      const modelName = pluralize.singular(nameToSlug(infos.name));
       const contentType = createSchemaHandler({
-        modelName,
-        dir: path.join(strapi.dirs.api, modelName, 'content-types', modelName),
+        modelName: infos.singularName,
+        dir: path.join(strapi.dirs.api, infos.singularName, 'content-types', infos.singularName),
         filename: `schema.json`,
       });
 
       this.contentTypes.set(uid, contentType);
-
-      const defaultCollectionName = `${nameToCollectionName(pluralize(infos.name))}`;
 
       // support self referencing content type relation
       Object.keys(infos.attributes).forEach(key => {
@@ -99,18 +95,14 @@ module.exports = function createComponentBuilder() {
       contentType
         .setUID(uid)
         .set('kind', infos.kind || typeKinds.COLLECTION_TYPE)
-        .set('collectionName', infos.collectionName || defaultCollectionName)
+        .set('collectionName', nameToCollectionName(infos.pluralName))
         .set('info', {
-          singularName: modelName,
-          pluralName: pluralize(modelName),
-          displayName: infos.name,
-          // TODO: remove name eventually
-          name: infos.name,
+          singularName: infos.singularName,
+          pluralName: infos.pluralName,
+          displayName: infos.displayName,
           description: infos.description,
         })
-        .set('options', {
-          draftAndPublish: infos.draftAndPublish || false,
-        })
+        .set('options', { draftAndPublish: infos.draftAndPublish || false })
         .set('pluginOptions', infos.pluginOptions)
         .setAttributes(this.convertAttributes(infos.attributes));
 
@@ -217,9 +209,8 @@ module.exports = function createComponentBuilder() {
       });
 
       contentType
-        .set('collectionName', infos.collectionName)
         .set('kind', infos.kind || contentType.schema.kind)
-        .set(['info', 'name'], infos.name)
+        .set(['info', 'displayName'], infos.displayName)
         .set(['info', 'description'], infos.description)
         .set(['options', 'draftAndPublish'], infos.draftAndPublish || false)
         .set('pluginOptions', infos.pluginOptions)
@@ -250,10 +241,10 @@ module.exports = function createComponentBuilder() {
  * Returns a uid from a content type infos
  *
  * @param {object} options options
- * @param {string} options.name component name
+ * @param {string} options.singularName content-type singularName
  * @returns {string} uid
  */
-const createContentTypeUID = ({ name }) => `api::${nameToSlug(name)}.${nameToSlug(name)}`;
+const createContentTypeUID = ({ singularName }) => `api::${singularName}.${singularName}`;
 
 const generateRelation = ({ key, attribute, uid, targetAttribute = {} }) => {
   const opts = {

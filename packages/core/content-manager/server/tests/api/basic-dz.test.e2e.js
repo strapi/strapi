@@ -42,7 +42,9 @@ const productWithDz = {
       required: true,
     },
   },
-  name: 'product with dz',
+  displayName: 'Product with dz',
+  singularName: 'product-with-dz',
+  pluralName: 'product-with-dzs',
   description: '',
   collectionName: '',
 };

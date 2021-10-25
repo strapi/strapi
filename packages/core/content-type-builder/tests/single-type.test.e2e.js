@@ -28,100 +28,14 @@ describe('Content Type Builder - Content types', () => {
 
   afterAll(async () => {
     const modelsUIDs = [
-      'api::test-collection-type.test-collection-type',
       'api::test-collection.test-collection',
       'api::test-single-type.test-single-type',
-      'api::ct-with-dp.ct-with-dp',
     ];
 
     await modelsUtils.cleanupModels(modelsUIDs, { strapi });
     await modelsUtils.deleteContentTypes(modelsUIDs, { strapi });
 
     await strapi.destroy();
-  });
-
-  describe('Collection Types', () => {
-    const testCollectionTypeUID = 'api::test-collection-type.test-collection-type';
-    const ctWithDpUID = 'api::ct-with-dp.ct-with-dp';
-
-    test('Successful creation of a collection type', async () => {
-      const res = await rq({
-        method: 'POST',
-        url: '/content-type-builder/content-types',
-        body: {
-          contentType: {
-            name: 'Test Collection Type',
-            pluginOptions: {
-              i18n: {
-                localized: true,
-              },
-            },
-            attributes: {
-              title: {
-                type: 'string',
-                pluginOptions: {
-                  i18n: {
-                    localized: true,
-                  },
-                },
-              },
-            },
-          },
-        },
-      });
-
-      expect(res.statusCode).toBe(201);
-      expect(res.body).toEqual({
-        data: {
-          uid: testCollectionTypeUID,
-        },
-      });
-    });
-
-    test('Get collection type returns full schema and information', async () => {
-      const res = await rq({
-        method: 'GET',
-        url: `/content-type-builder/content-types/${testCollectionTypeUID}`,
-      });
-
-      expect(res.statusCode).toBe(200);
-      expect(res.body).toMatchSnapshot();
-    });
-
-    test('Successfull creation of a collection type with draftAndPublish enabled', async () => {
-      const res = await rq({
-        method: 'POST',
-        url: '/content-type-builder/content-types',
-        body: {
-          contentType: {
-            name: 'CT with DP',
-            draftAndPublish: true,
-            attributes: {
-              title: {
-                type: 'string',
-              },
-            },
-          },
-        },
-      });
-
-      expect(res.statusCode).toBe(201);
-      expect(res.body).toEqual({
-        data: {
-          uid: ctWithDpUID,
-        },
-      });
-    });
-
-    test('Get collection type returns full schema and informations with draftAndPublish', async () => {
-      const res = await rq({
-        method: 'GET',
-        url: `/content-type-builder/content-types/${ctWithDpUID}`,
-      });
-
-      expect(res.statusCode).toBe(200);
-      expect(res.body).toMatchSnapshot();
-    });
   });
 
   describe('Single Types', () => {
@@ -134,7 +48,9 @@ describe('Content Type Builder - Content types', () => {
         body: {
           contentType: {
             kind: 'singleType',
-            name: 'Test Single Type',
+            displayName: 'Test Single Type',
+            singularName: 'test-single-type',
+            pluralName: 'test-single-types',
             pluginOptions: {
               i18n: {
                 localized: true,
@@ -209,7 +125,9 @@ describe('Content Type Builder - Content types', () => {
         body: {
           contentType: {
             kind: 'collectionType',
-            name: 'test-collection',
+            displayName: 'test-collection',
+            singularName: 'test-collection',
+            pluralName: 'test-collections',
             attributes: {
               title: {
                 type: 'string',
@@ -236,7 +154,9 @@ describe('Content Type Builder - Content types', () => {
         body: {
           contentType: {
             kind: 'singleType',
-            name: 'test-collection',
+            displayName: 'test-collection',
+            singularName: 'test-collection',
+            pluralName: 'test-collections',
             attributes: {
               title: {
                 type: 'string',
@@ -249,19 +169,17 @@ describe('Content Type Builder - Content types', () => {
       expect(updateRes.statusCode).toBe(400);
       expect(updateRes.body.error).toMatch('multiple entries in DB');
     });
-  });
 
-  describe('Private relation field', () => {
-    const singleTypeUID = 'api::test-single-type.test-single-type';
-
-    test('should add a relation field', async () => {
+    test('Should add a relation field', async () => {
       const res = await rq({
         method: 'PUT',
         url: `/content-type-builder/content-types/${singleTypeUID}`,
         body: {
           contentType: {
             kind: 'singleType',
-            name: 'test-collection',
+            displayName: 'test-collection',
+            singularName: 'test-collection',
+            pluralName: 'test-collections',
             attributes: {
               relation: {
                 private: true,
@@ -282,7 +200,7 @@ describe('Content Type Builder - Content types', () => {
       });
     });
 
-    test('should contain a private relation field', async () => {
+    test('Should contain a private relation field', async () => {
       const res = await rq({
         method: 'GET',
         url: `/content-type-builder/content-types/${singleTypeUID}`,

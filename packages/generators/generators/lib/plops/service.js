@@ -20,7 +20,7 @@ module.exports = plop => {
       return [
         {
           type: 'add',
-          path: `${filePath}/services/{{id}}.js`,
+          path: `${filePath}/services/{{ id }}.js`,
           templateFile: 'templates/service.js.hbs',
         },
       ];

@@ -12,7 +12,9 @@ let uid = 'api::single-type-model.single-type-model';
 
 const ct = {
   kind: 'singleType',
-  name: 'single-type-model',
+  displayName: 'single-type-model',
+  singularName: 'single-type-model',
+  pluralName: 'single-type-models',
   attributes: {
     title: {
       type: 'string',

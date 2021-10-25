@@ -18,6 +18,9 @@ const component = {
 
 const ct = {
   name: 'withcomponent',
+  displayName: 'withcomponent',
+  singularName: 'withcomponent',
+  pluralName: 'withcomponents',
   attributes: {
     field: {
       type: 'component',

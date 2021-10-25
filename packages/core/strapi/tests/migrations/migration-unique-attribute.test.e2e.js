@@ -21,7 +21,9 @@ const dogModel = {
     },
   },
   connection: 'default',
-  name: 'dog',
+  singularName: 'dog',
+  pluralName: 'dogs',
+  displayName: 'Dog',
   description: '',
   collectionName: '',
 };
@@ -45,13 +47,13 @@ describe.skip('Migration - unique attribute', () => {
   beforeAll(async () => {
     await builder
       .addContentType(dogModel)
-      .addFixtures(dogModel.name, dogs)
+      .addFixtures(dogModel.singularName, dogs)
       .build();
 
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
 
-    data.dogs = builder.sanitizedFixturesFor(dogModel.name, strapi);
+    data.dogs = builder.sanitizedFixturesFor(dogModel.singularName, strapi);
   });
 
   afterAll(async () => {
@@ -79,7 +81,7 @@ describe.skip('Migration - unique attribute', () => {
       data.dogs[0] = body;
 
       // migration
-      const schema = await modelsUtils.getContentTypeSchema(dogModel.name, { strapi });
+      const schema = await modelsUtils.getContentTypeSchema(dogModel.singularName, { strapi });
       schema.attributes.name.unique = true;
       await modelsUtils.modifyContentType(schema, { strapi });
 
@@ -98,7 +100,7 @@ describe.skip('Migration - unique attribute', () => {
   describe('Unique: true -> false', () => {
     test('Can create a duplicated entry after migration', async () => {
       // migration
-      const schema = await modelsUtils.getContentTypeSchema(dogModel.name, { strapi });
+      const schema = await modelsUtils.getContentTypeSchema(dogModel.singularName, { strapi });
       schema.attributes.name.unique = false;
       await modelsUtils.modifyContentType(schema, { strapi });
 

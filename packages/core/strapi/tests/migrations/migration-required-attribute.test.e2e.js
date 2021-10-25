@@ -21,7 +21,9 @@ const dogModel = {
     },
   },
   connection: 'default',
-  name: 'dog',
+  singularName: 'dog',
+  pluralName: 'dogs',
+  displayName: 'Dog',
   description: '',
   collectionName: '',
 };
@@ -45,13 +47,13 @@ describe('Migration - required attribute', () => {
   beforeAll(async () => {
     await builder
       .addContentType(dogModel)
-      .addFixtures(dogModel.name, dogs)
+      .addFixtures(dogModel.singularName, dogs)
       .build();
 
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
 
-    data.dogs = builder.sanitizedFixturesFor(dogModel.name, strapi);
+    data.dogs = builder.sanitizedFixturesFor(dogModel.singularName, strapi);
   });
 
   afterAll(async () => {
@@ -81,7 +83,7 @@ describe('Migration - required attribute', () => {
       data.dogs[0] = body;
 
       // migration
-      const schema = await modelsUtils.getContentTypeSchema(dogModel.name, { strapi });
+      const schema = await modelsUtils.getContentTypeSchema(dogModel.singularName, { strapi });
       schema.attributes.name.required = true;
 
       await modelsUtils.modifyContentType(schema, { strapi });
@@ -100,7 +102,7 @@ describe('Migration - required attribute', () => {
   describe('Required: true -> false', () => {
     test('Can create an entry with null after migration', async () => {
       // migration
-      const schema = await modelsUtils.getContentTypeSchema(dogModel.name, { strapi });
+      const schema = await modelsUtils.getContentTypeSchema(dogModel.singularName, { strapi });
       schema.attributes.name.required = false;
 
       await modelsUtils.modifyContentType(schema, { strapi });

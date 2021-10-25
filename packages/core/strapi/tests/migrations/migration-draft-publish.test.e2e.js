@@ -24,7 +24,9 @@ const dogModel = {
       unique: true,
     },
   },
-  name: 'dog',
+  singularName: 'dog',
+  pluralName: 'dogs',
+  displayName: 'Dog',
   description: '',
   collectionName: '',
 };
@@ -58,13 +60,13 @@ describe('Migration - draft and publish', () => {
 
       await builder
         .addContentType(dogModel)
-        .addFixtures(dogModel.name, dogs)
+        .addFixtures(dogModel.singularName, dogs)
         .build();
 
       strapi = await createStrapiInstance();
       rq = await createAuthRequest({ strapi });
 
-      data.dogs = sortDogs(builder.sanitizedFixturesFor(dogModel.name, strapi));
+      data.dogs = sortDogs(builder.sanitizedFixturesFor(dogModel.singularName, strapi));
     });
 
     afterAll(async () => {
@@ -90,7 +92,7 @@ describe('Migration - draft and publish', () => {
       });
 
       test('Published_at is equal to created_at after enabling the feature', async () => {
-        const schema = await modelsUtils.getContentTypeSchema(dogModel.name, { strapi });
+        const schema = await modelsUtils.getContentTypeSchema(dogModel.singularName, { strapi });
 
         await modelsUtils.modifyContentType(
           {
@@ -131,7 +133,7 @@ describe('Migration - draft and publish', () => {
 
         data.dogs[1] = res.body;
 
-        const schema = await modelsUtils.getContentTypeSchema(dogModel.name, { strapi });
+        const schema = await modelsUtils.getContentTypeSchema(dogModel.singularName, { strapi });
 
         await modelsUtils.modifyContentType(
           {
