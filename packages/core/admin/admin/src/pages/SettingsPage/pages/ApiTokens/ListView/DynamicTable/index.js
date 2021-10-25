@@ -1,7 +1,7 @@
 import React from 'react';
 import { Text } from '@strapi/parts/Text';
 import { Tbody, Tr, Td } from '@strapi/parts/Table';
-import { Row } from '@strapi/parts/Row';
+import { Flex } from '@strapi/parts/Flex';
 import { RelativeTime, useQueryParams } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
@@ -50,7 +50,7 @@ const TableRows = ({ canDelete, canUpdate, onClickDelete, withBulkActions, rows 
 
             {withBulkActions && (
               <Td>
-                <Row justifyContent="end">
+                <Flex justifyContent="end">
                   {canUpdate && <UpdateButton tokenName={apiToken.name} tokenId={apiToken.id} />}
                   {canDelete && (
                     <DeleteButton
@@ -58,7 +58,7 @@ const TableRows = ({ canDelete, canUpdate, onClickDelete, withBulkActions, rows 
                       onClickDelete={() => onClickDelete(apiToken.id)}
                     />
                   )}
-                </Row>
+                </Flex>
               </Td>
             )}
           </Tr>

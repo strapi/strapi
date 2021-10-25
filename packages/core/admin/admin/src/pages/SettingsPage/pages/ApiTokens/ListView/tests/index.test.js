@@ -304,14 +304,13 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
         display: -webkit-flex;
         display: -ms-flexbox;
         display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
-        text-align: center;
       }
 
       .c4 {

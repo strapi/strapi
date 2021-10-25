@@ -7,14 +7,14 @@ import RelativeTime from '../index';
 const App = (
   <ThemeProvider theme={lightTheme}>
     <IntlProvider locale="en" messages={{}} textComponent="span">
-      <RelativeTime timestamp={new Date('2015-10-01T07:55:00.000Z')} />
+      <RelativeTime timestamp={new Date('2015-10-01 07:55:00')} />
     </IntlProvider>
   </ThemeProvider>
 );
 
 describe('RelativeTime', () => {
   beforeEach(() => {
-    jest.spyOn(Date, 'now').mockImplementation(() => new Date('2015-10-01T08:00:00.000Z'));
+    jest.spyOn(Date, 'now').mockImplementation(() => new Date('2015-10-01 08:00:00'));
   });
 
   afterAll(() => {
@@ -37,7 +37,7 @@ describe('RelativeTime', () => {
   });
 
   it('can display the relative time for a future date', () => {
-    jest.spyOn(Date, 'now').mockImplementation(() => new Date('2015-10-01T07:50:00.000Z'));
+    jest.spyOn(Date, 'now').mockImplementation(() => new Date('2015-10-01 07:50:00'));
 
     render(App);
 
@@ -45,7 +45,7 @@ describe('RelativeTime', () => {
   });
 
   it('can display the relative time for a past date', () => {
-    jest.spyOn(Date, 'now').mockImplementation(() => new Date('2015-10-01T08:00:00.000Z'));
+    jest.spyOn(Date, 'now').mockImplementation(() => new Date('2015-10-01 08:00:00'));
 
     render(App);
 
