@@ -41,7 +41,7 @@ const exists = async (whereParams = {}) => {
  */
 const hash = accessKey => {
   return crypto
-    .createHmac('sha512', strapi.config.get('admin.api-token.salt'))
+    .createHmac('sha512', strapi.config.get('admin.apiToken.salt'))
     .update(accessKey)
     .digest('hex');
 };
@@ -75,7 +75,7 @@ const create = async attributes => {
  * @returns {void}
  */
 const createSaltIfNotDefined = () => {
-  if (strapi.config.get('admin.api-token.salt')) {
+  if (strapi.config.get('admin.apiToken.salt')) {
     return;
   }
 
@@ -87,7 +87,7 @@ const createSaltIfNotDefined = () => {
 
   const salt = crypto.randomBytes(16).toString('hex');
   strapi.fs.appendFile('.env', `API_TOKEN_SALT=${salt}\n`);
-  strapi.config.set('admin.api-token.salt', salt);
+  strapi.config.set('admin.apiToken.salt', salt);
 };
 
 /**
