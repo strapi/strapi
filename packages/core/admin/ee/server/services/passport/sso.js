@@ -8,7 +8,7 @@ const providerRegistry = createProviderRegistry();
 const getStrategyCallbackURL = providerName => `/admin/connect/${providerName}`;
 
 const syncProviderRegistryWithConfig = () => {
-  const { providers = [] } = strapi.config.get('server.admin.auth', {});
+  const { providers = [] } = strapi.config.get('admin.auth', {});
 
   providerRegistry.registerMany(providers);
 };

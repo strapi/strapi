@@ -7,7 +7,7 @@ const jwt = require('jsonwebtoken');
 const defaultJwtOptions = { expiresIn: '30d' };
 
 const getTokenOptions = () => {
-  const { options, secret } = strapi.config.get('server.admin.auth', {});
+  const { options, secret } = strapi.config.get('admin.auth', {});
 
   return {
     secret,
