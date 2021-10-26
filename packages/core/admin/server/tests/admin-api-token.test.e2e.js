@@ -110,6 +110,7 @@ describe('Admin API Token CRUD (e2e)', () => {
       description: body.description,
       type: body.type,
       id: expect.any(Number),
+      createdAt: expect.any(String),
     });
 
     apiTokens.push(res.body.data);
@@ -134,6 +135,7 @@ describe('Admin API Token CRUD (e2e)', () => {
       description: '',
       type: body.type,
       id: expect.any(Number),
+      createdAt: expect.any(String),
     });
 
     apiTokens.push(res.body.data);
@@ -159,6 +161,7 @@ describe('Admin API Token CRUD (e2e)', () => {
       description: 'api-token_tests-description-with-spaces-at-the-end',
       type: body.type,
       id: expect.any(Number),
+      createdAt: expect.any(String),
     });
 
     apiTokens.push(res.body.data);
@@ -178,18 +181,21 @@ describe('Admin API Token CRUD (e2e)', () => {
         name: 'api-token_tests-name',
         description: 'api-token_tests-description',
         type: 'read-only',
+        createdAt: expect.any(String),
       },
       {
         id: expect.any(Number),
         name: 'api-token_tests-spaces-at-the-end',
         description: 'api-token_tests-description-with-spaces-at-the-end',
         type: 'read-only',
+        createdAt: expect.any(String),
       },
       {
         id: expect.any(Number),
         name: 'api-token_tests-without-description',
         description: '',
         type: 'full-access',
+        createdAt: expect.any(String),
       },
     ]);
   });
@@ -206,6 +212,7 @@ describe('Admin API Token CRUD (e2e)', () => {
       description: apiTokens[2].description,
       type: apiTokens[2].type,
       id: apiTokens[2].id,
+      createdAt: apiTokens[2].createdAt,
     });
   });
 
@@ -231,6 +238,7 @@ describe('Admin API Token CRUD (e2e)', () => {
       description: apiTokens[0].description,
       type: apiTokens[0].type,
       id: apiTokens[0].id,
+      createdAt: apiTokens[0].createdAt,
     });
   });
 
@@ -263,6 +271,7 @@ describe('Admin API Token CRUD (e2e)', () => {
       description: body.description,
       type: body.type,
       id: apiTokens[0].id,
+      createdAt: apiTokens[0].createdAt,
     });
 
     apiTokens[0] = res.body.data;
@@ -302,6 +311,7 @@ describe('Admin API Token CRUD (e2e)', () => {
       description: body.description,
       type: apiTokens[0].type,
       id: apiTokens[0].id,
+      createdAt: apiTokens[0].createdAt,
     });
 
     apiTokens[0] = res.body.data;
@@ -348,6 +358,7 @@ describe('Admin API Token CRUD (e2e)', () => {
       description: '',
       type: apiTokens[0].type,
       id: apiTokens[0].id,
+      createdAt: apiTokens[0].createdAt,
     });
 
     apiTokens[0] = res.body.data;
@@ -370,6 +381,7 @@ describe('Admin API Token CRUD (e2e)', () => {
       description: apiTokens[0].description,
       type: apiTokens[0].type,
       id: apiTokens[0].id,
+      createdAt: apiTokens[0].createdAt,
     });
 
     apiTokens[0] = res.body.data;
