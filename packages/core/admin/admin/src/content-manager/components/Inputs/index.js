@@ -4,11 +4,7 @@ import get from 'lodash/get';
 import omit from 'lodash/omit';
 import take from 'lodash/take';
 import isEqual from 'react-fast-compare';
-import {
-  GenericInput,
-  NotAllowedInput,
-  // useLibrary
-} from '@strapi/helper-plugin';
+import { GenericInput, NotAllowedInput, useLibrary } from '@strapi/helper-plugin';
 import { useContentTypeLayout } from '../../hooks';
 import { getFieldName } from '../../utils';
 import Wysiwyg from '../Wysiwyg';
@@ -41,7 +37,7 @@ function Inputs({
   queryInfos,
   value,
 }) {
-  // const { fields } = useLibrary();
+  const { fields } = useLibrary();
   const { contentType: currentContentTypeLayout } = useContentTypeLayout();
 
   const disabled = useMemo(() => !get(metadatas, 'editable', true), [metadatas]);
@@ -235,7 +231,7 @@ function Inputs({
         uid: InputUID,
         // FIXME
         datetime: ComingSoonInput,
-        media: ComingSoonInput,
+        media: fields['media-library-input'] || ComingSoonInput,
         wysiwyg: Wysiwyg,
       }}
       multiple={fieldSchema.multiple || false}
