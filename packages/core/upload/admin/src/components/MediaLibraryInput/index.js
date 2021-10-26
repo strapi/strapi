@@ -24,9 +24,11 @@ export const MediaLibraryInput = ({ intlLabel, description, disabled, error, mul
       )
     : '';
 
+  const label = intlLabel.id ? formatMessage(intlLabel) : '';
+
   return (
     <Carousel
-      label={formatMessage(intlLabel)}
+      label={label}
       selectedSlide={selectedIndex}
       previousLabel={formatMessage({
         id: getTrad('mediaLibraryInput.actions.previousSlide'),
@@ -57,6 +59,7 @@ MediaLibraryInput.defaultProps = {
   disabled: false,
   description: undefined,
   error: undefined,
+  intlLabel: undefined,
   multiple: false,
 };
 
@@ -68,6 +71,6 @@ MediaLibraryInput.propTypes = {
     values: PropTypes.shape({}),
   }),
   error: PropTypes.string,
-  intlLabel: PropTypes.shape({ id: PropTypes.string, defaultMessage: PropTypes.string }).isRequired,
+  intlLabel: PropTypes.shape({ id: PropTypes.string, defaultMessage: PropTypes.string }),
   multiple: PropTypes.bool,
 };
