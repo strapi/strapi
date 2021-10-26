@@ -74,8 +74,9 @@ export const PendingAssetStep = ({
               <Text small bold textColor="neutral800">
                 {formatMessage(
                   {
-                    id: getTrad('list.assets.selected.plural'),
-                    defaultMessage: '0 asset selected',
+                    id: getTrad('list.assets.selected'),
+                    defaultMessage:
+                      '{number, plural, =0 {No asset} one {1 asset} other {# assets}} selected',
                   },
                   { number: assets.length }
                 )}
