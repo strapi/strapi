@@ -48,7 +48,7 @@ module.exports = async function mergeTemplate(scope, rootPath) {
   }
 
   // Make sure the template is compatible with this version of strapi
-  checkTemplateCompat(rootPath, scope.strapiVersion);
+  checkTemplateCompat(templatePath, scope.strapiVersion);
 
   // Make sure the downloaded template matches the required format
   const { templateConfig } = await checkTemplateRootStructure(templatePath, scope);
@@ -64,18 +64,40 @@ module.exports = async function mergeTemplate(scope, rootPath) {
   }
 };
 
-function checkTemplateCompat({ rootPath, strapiVersion, templatePackageInfo }) {
-  const packageJSON = require(path.resolve(rootPath, 'package.json'));
+/**
+ * Make sure the template is compatible with a specific Strapi version
+ * @param {string} templatePath - Where the template is installed
+ * @param {string} strapiVersion - Strapi version of the app being created
+ */
+function checkTemplateCompat(templatePath, strapiVersion) {
+  const packageJSON = require(path.resolve(templatePath, 'package.json'));
   const compatibleStrapiRange = packageJSON.strapi;
-  // Throw error if not compatible
-  const isCompatible = semver.satisfies(strapiVersion, compatibleStrapiRange);
+
+  // Make sure the Strapi compatibility range is set
+  if (compatibleStrapiRange == null) {
+    throw new Error('This template does not specify a range of compatible Strapi versions');
+  }
+
+  // Check that the range is set using proper semver
+  const validCompatibleStrapiRange = semver.validRange(compatibleStrapiRange);
+  if (!validCompatibleStrapiRange) {
+    throw new Error(
+      'Please use semver to specify the range of Strapi versions compatible with this plugin'
+    );
+  }
+
+  // Check if the template is compatible with this Strapi version
+  const coercedStrapiVersion = semver.coerce(strapiVersion, { includePrerelease: true });
+  const isCompatible = semver.satisfies(coercedStrapiVersion, validCompatibleStrapiRange, {
+    includePrerelease: true,
+  });
   if (!isCompatible) {
-    const { name, version } = templatePackageInfo;
     throw new Error(`
-      The template ${chalk.green(
-        `${name}@${version}`
-      )} is not compatible with Strapi version ${strapiVersion}.
-      It will only work with Strapi versions in the range ${chalk.green(compatibleStrapiRange)}.
+      This template is not compatible with Strapi version ${strapiVersion}.
+      It will only work with Strapi versions in the range ${chalk.green(
+        JSON.stringify(compatibleStrapiRange)
+      )}.
+      Try using a different Strapi version, or a different version of this template instead
     `);
   }
 }
