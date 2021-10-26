@@ -15,7 +15,7 @@ module.exports = function({ strapi }) {
 
   // check if we should serve admin panel
   const shouldServeAdmin = strapi.config.get(
-    'server.admin.serveAdminPanel',
+    'admin.serveAdminPanel',
     strapi.config.get('serveAdminPanel')
   );
 
