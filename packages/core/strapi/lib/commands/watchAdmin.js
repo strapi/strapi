@@ -19,11 +19,11 @@ module.exports = async function({ browser }) {
 
   const plugins = await getEnabledPlugins(strapiInstance);
 
-  const { adminPath } = getConfigUrls(strapiInstance.config.get('server'), true);
+  const { adminPath } = getConfigUrls(strapiInstance.config, true);
 
-  const adminPort = strapiInstance.config.get('server.admin.port', 8000);
-  const adminHost = strapiInstance.config.get('server.admin.host', 'localhost');
-  const adminWatchIgnoreFiles = strapiInstance.config.get('server.admin.watchIgnoreFiles', []);
+  const adminPort = strapiInstance.config.get('admin.port', 8000);
+  const adminHost = strapiInstance.config.get('admin.host', 'localhost');
+  const adminWatchIgnoreFiles = strapiInstance.config.get('admin.watchIgnoreFiles', []);
 
   const backendURL = getAbsoluteServerUrl(strapiInstance.config, true);
 

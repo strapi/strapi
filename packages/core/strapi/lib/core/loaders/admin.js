@@ -11,6 +11,6 @@ module.exports = strapi => {
   strapi.container.get('policies').add(`admin::`, strapi.admin.policies);
   strapi.container.get('middlewares').add(`admin::`, strapi.admin.middlewares);
 
-  const userAdminConfig = strapi.config.get('server.admin');
-  strapi.container.get('config').set('server.admin', _.merge(strapi.admin.config, userAdminConfig));
+  const userAdminConfig = strapi.config.get('admin');
+  strapi.container.get('config').set('admin', _.merge(strapi.admin.config, userAdminConfig));
 };

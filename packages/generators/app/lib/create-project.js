@@ -16,7 +16,7 @@ const mergeTemplate = require('./utils/merge-template.js');
 
 const packageJSON = require('./resources/json/package.json');
 const createDatabaseConfig = require('./resources/templates/database.js');
-const createServerConfig = require('./resources/templates/server.js');
+const createAdminConfig = require('./resources/templates/admin-config.js');
 
 module.exports = async function createProject(scope, { client, connection, dependencies }) {
   console.log(`Creating a new Strapi application at ${chalk.green(scope.rootPath)}.`);
@@ -70,7 +70,7 @@ module.exports = async function createProject(scope, { client, connection, depen
     );
 
     // create config/server.js
-    await fse.writeFile(join(rootPath, `config/server.js`), createServerConfig());
+    await fse.writeFile(join(rootPath, `config/admin.js`), createAdminConfig());
     await trackUsage({ event: 'didCopyConfigurationFiles', scope });
 
     // merge template files if a template is specified

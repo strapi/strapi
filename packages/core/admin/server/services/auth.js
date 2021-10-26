@@ -71,10 +71,10 @@ const forgotPassword = async ({ email } = {}) => {
     .sendTemplatedEmail(
       {
         to: user.email,
-        from: strapi.config.get('server.admin.forgotPassword.from'),
-        replyTo: strapi.config.get('server.admin.forgotPassword.replyTo'),
+        from: strapi.config.get('admin.forgotPassword.from'),
+        replyTo: strapi.config.get('admin.forgotPassword.replyTo'),
       },
-      strapi.config.get('server.admin.forgotPassword.emailTemplate'),
+      strapi.config.get('admin.forgotPassword.emailTemplate'),
       {
         url,
         user: _.pick(user, ['email', 'firstname', 'lastname', 'username']),
