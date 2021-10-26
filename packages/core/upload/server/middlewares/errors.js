@@ -7,7 +7,7 @@ module.exports = () => {
     try {
       await next();
     } catch (e) {
-      if (e instanceof FileTooLargeError) return ctx.PayloadTooLarge();
+      if (e instanceof FileTooLargeError) return ctx.payloadTooLarge();
       if (e instanceof FileNotFoundError) return ctx.notFound();
       throw e;
     }

@@ -21,7 +21,7 @@ module.exports = config => {
     }
 
     try {
-      return body({ patchKoa: true, ...bodyConfig })(ctx, next);
+      await body({ patchKoa: true, ...bodyConfig })(ctx, next);
     } catch (e) {
       if ((e || {}).message && e.message.includes('maxFileSize exceeded')) {
         return ctx.payloadTooLarge('FileTooBig');

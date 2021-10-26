@@ -1,5 +1,5 @@
 'use strict';
 
 module.exports = {
-  'handle-errors': require('./handle-errors'),
+  handleErrors: require('./errors'),
 };

@@ -22,6 +22,8 @@ module.exports = async ({ strapi }) => {
   }
 
   await registerPermissionActions();
+
+  strapi.service('plugin::upload.errors').registerErrorMiddleware();
 };
 
 const createProvider = config => {
