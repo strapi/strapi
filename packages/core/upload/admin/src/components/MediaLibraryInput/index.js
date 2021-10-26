@@ -45,7 +45,7 @@ export const MediaLibraryInput = ({ intlLabel, description, disabled, error, mul
     >
       <CarouselSlide
         label={formatMessage(
-          { id: getTrad('mediaLibraryInput.slideCount'), defaultMessage: '1 of 1 slides' },
+          { id: getTrad('mediaLibraryInput.slideCount'), defaultMessage: '{n} of {m} slides' },
           { n: 1, m: 1 }
         )}
       >
