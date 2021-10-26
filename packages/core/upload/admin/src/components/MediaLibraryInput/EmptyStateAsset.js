@@ -8,7 +8,7 @@ import { Box } from '@strapi/parts/Box';
 import AddAsset from '@strapi/icons/AddAsset';
 import getTrad from '../../utils/getTrad';
 
-export const EmptyInput = ({ disabled }) => {
+export const EmptyStateAsset = ({ disabled, onClick }) => {
   const { formatMessage } = useIntl();
 
   return (
@@ -21,6 +21,7 @@ export const EmptyInput = ({ disabled }) => {
         width="100%"
         as="button"
         type="button"
+        onClick={onClick}
       >
         <Icon
           as={AddAsset}
@@ -41,10 +42,11 @@ export const EmptyInput = ({ disabled }) => {
   );
 };
 
-EmptyInput.defaultProps = {
+EmptyStateAsset.defaultProps = {
   disabled: false,
 };
 
-EmptyInput.propTypes = {
+EmptyStateAsset.propTypes = {
   disabled: PropTypes.bool,
+  onClick: PropTypes.func.isRequired,
 };
