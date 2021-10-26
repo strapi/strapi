@@ -34,6 +34,12 @@ const A = styled.a`
   color: ${({ theme }) => theme.colors.primary600};
 `;
 
+const PasswordInput = styled(TextInput)`
+  ::-ms-reveal {
+    display: none;
+  }
+`;
+
 const Register = ({ fieldsToDisable, noSignin, onSubmit, schema }) => {
   const toggleNotification = useNotification();
   const { push } = useHistory();
@@ -184,7 +190,7 @@ const Register = ({ fieldsToDisable, noSignin, onSubmit, schema }) => {
                     label={formatMessage({ id: 'Auth.form.email.label', defaultMessage: 'Email' })}
                     type="email"
                   />
-                  <TextInput
+                  <PasswordInput
                     name="password"
                     onChange={handleChange}
                     value={values.password}
@@ -230,7 +236,7 @@ const Register = ({ fieldsToDisable, noSignin, onSubmit, schema }) => {
                     })}
                     type={passwordShown ? 'text' : 'password'}
                   />
-                  <TextInput
+                  <PasswordInput
                     name="confirmPassword"
                     onChange={handleChange}
                     value={values.confirmPassword}
