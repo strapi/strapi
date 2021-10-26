@@ -10,7 +10,7 @@ const schema = yup.object().shape({
     .required(translatedErrors.required),
   roles: yup
     .array()
-    .min(1, translatedErrors.min)
+    .min(1, translatedErrors.required)
     .required(translatedErrors.required),
 });
 
