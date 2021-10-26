@@ -16,12 +16,8 @@ module.exports = {
         throw errors.entityTooLarge();
       }
     };
-    const configPublicPath = strapi.config.get(
-      'middleware.settings.public.path',
-      strapi.config.paths.static
-    );
 
-    const uploadDir = path.resolve(strapi.dirs.root, configPublicPath);
+    const publicDir = strapi.dirs.public;
 
     return {
       upload(file) {
@@ -30,7 +26,7 @@ module.exports = {
         return new Promise((resolve, reject) => {
           // write file in public/assets folder
           fs.writeFile(
-            path.join(uploadDir, `/uploads/${file.hash}${file.ext}`),
+            path.join(publicDir, `/uploads/${file.hash}${file.ext}`),
             file.buffer,
             err => {
               if (err) {
@@ -46,7 +42,7 @@ module.exports = {
       },
       delete(file) {
         return new Promise((resolve, reject) => {
-          const filePath = path.join(uploadDir, `/uploads/${file.hash}${file.ext}`);
+          const filePath = path.join(publicDir, `/uploads/${file.hash}${file.ext}`);
 
           if (!fs.existsSync(filePath)) {
             return resolve("File doesn't exist");

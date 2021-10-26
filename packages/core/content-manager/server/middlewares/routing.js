@@ -23,7 +23,7 @@ module.exports = async (ctx, next) => {
 
   const configPath =
     ct.plugin === 'admin'
-      ? ['server.admin.layout', ct.modelName, 'actions', action]
+      ? ['admin.layout', ct.modelName, 'actions', action]
       : ['plugin', ct.plugin, 'layout', ct.modelName, 'actions', action];
 
   const actionConfig = strapi.config.get(configPath);

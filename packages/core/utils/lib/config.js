@@ -3,7 +3,10 @@
 const _ = require('lodash');
 const { getCommonPath } = require('./string-formatting');
 
-const getConfigUrls = (serverConfig, forAdminBuild = false) => {
+const getConfigUrls = (config, forAdminBuild = false) => {
+  const serverConfig = config.get('server');
+  const adminConfig = config.get('admin');
+
   // Defines serverUrl value
   let serverUrl = _.get(serverConfig, 'url', '');
   serverUrl = _.trim(serverUrl, '/ ');
@@ -23,7 +26,7 @@ const getConfigUrls = (serverConfig, forAdminBuild = false) => {
   }
 
   // Defines adminUrl value
-  let adminUrl = _.get(serverConfig, 'admin.url', '/admin');
+  let adminUrl = _.get(adminConfig, 'url', '/admin');
   adminUrl = _.trim(adminUrl, '/ ');
   if (typeof adminUrl !== 'string') {
     throw new Error('Invalid admin url config. Make sure the url is a non-empty string.');
@@ -60,7 +63,7 @@ const getConfigUrls = (serverConfig, forAdminBuild = false) => {
 };
 
 const getAbsoluteUrl = adminOrServer => (config, forAdminBuild = false) => {
-  const { serverUrl, adminUrl } = getConfigUrls(config.get('server'), forAdminBuild);
+  const { serverUrl, adminUrl } = getConfigUrls(config, forAdminBuild);
   let url = adminOrServer === 'server' ? serverUrl : adminUrl;
 
   if (url.startsWith('http')) {

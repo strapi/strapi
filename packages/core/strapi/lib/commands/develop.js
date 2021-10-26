@@ -20,8 +20,8 @@ module.exports = async function({ build, watchAdmin, polling, browser }) {
   const config = loadConfiguration(dir);
   const logger = createLogger(config.logger, {});
 
-  const adminWatchIgnoreFiles = getOr([], 'server.admin.watchIgnoreFiles')(config);
-  const serveAdminPanel = getOr(true, 'server.admin.serveAdminPanel')(config);
+  const adminWatchIgnoreFiles = getOr([], 'admin.watchIgnoreFiles')(config);
+  const serveAdminPanel = getOr(true, 'admin.serveAdminPanel')(config);
 
   const buildExists = fs.existsSync(path.join(dir, 'build'));
   // Don't run the build process if the admin is in watch mode

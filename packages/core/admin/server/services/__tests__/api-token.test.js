@@ -62,9 +62,7 @@ describe('API Token', () => {
       global.strapi = {
         config: {
           get: jest.fn(() => ({
-            server: {
-              admin: { 'api-token': { salt: 'api-token_tests-salt' } },
-            },
+            admin: { apiToken: { salt: 'api-token_tests-salt' } },
           })),
           set: mockedConfigSet,
         },
@@ -96,7 +94,7 @@ describe('API Token', () => {
         `API_TOKEN_SALT=${mockedApiToken.hexedString}\n`
       );
       expect(mockedConfigSet).toHaveBeenCalledWith(
-        'server.admin.api-token.salt',
+        'admin.apiToken.salt',
         mockedApiToken.hexedString
       );
     });

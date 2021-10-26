@@ -32,10 +32,7 @@ const createServer = strapi => {
     proxy: strapi.config.get('server.proxy'),
   });
 
-  const router = new Router({
-    // FIXME: this prefix can break the admin if not specified in the admin url
-    prefix: strapi.config.get('middleware.settings.router.prefix', ''),
-  });
+  const router = new Router();
 
   const routeManager = createRouteManager(strapi);
 
