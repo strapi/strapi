@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@strapi/helper-plugin": "3.6.8",
+    "@strapi/utils": "3.6.8",
     "bcryptjs": "2.4.3",
     "cheerio": "^1.0.0-rc.5",
     "fs-extra": "^9.1.0",

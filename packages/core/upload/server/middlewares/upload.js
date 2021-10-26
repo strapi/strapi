@@ -1,6 +1,5 @@
 'use strict';
 
-const { resolve } = require('path');
 const range = require('koa-range');
 const koaStatic = require('koa-static');
 
@@ -9,13 +8,6 @@ const koaStatic = require('koa-static');
  * @param {{ strapi: import('@strapi/strapi').Strapi }}
  */
 module.exports = ({ strapi }) => {
-  const configPublicPath = strapi.config.get(
-    'middleware.settings.public.path',
-    strapi.config.paths.static
-  );
-
-  const staticDir = resolve(strapi.dirs.root, configPublicPath);
-
   strapi.server.app.on('error', err => {
     if (err.code === 'EPIPE') {
       // when serving audio or video the browsers sometimes close the connection to go to range requests instead.
@@ -33,7 +25,7 @@ module.exports = ({ strapi }) => {
     {
       method: 'GET',
       path: '/uploads/(.*)',
-      handler: [range, koaStatic(staticDir, { defer: true, ...localServerConfig })],
+      handler: [range, koaStatic(strapi.dirs.public, { defer: true, ...localServerConfig })],
       config: { auth: false },
     },
   ]);
