@@ -2,11 +2,11 @@ import React from 'react';
 import { ThemeProvider, lightTheme } from '@strapi/parts';
 import { render as renderTL } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { ListView } from '../ListView';
-import en from '../../../../translations/en.json';
+import { AssetList } from '..';
+import en from '../../../translations/en.json';
 
-jest.mock('../../../../utils', () => ({
-  ...jest.requireActual('../../../../utils'),
+jest.mock('../../../utils', () => ({
+  ...jest.requireActual('../../../utils'),
   getTrad: x => x,
 }));
 
@@ -119,12 +119,12 @@ const data = [
   },
 ];
 
-describe('MediaLibrary / ListView', () => {
-  it('snapshots the listview', () => {
+describe('MediaLibrary / AssetList', () => {
+  it('snapshots the asset list', () => {
     const { container } = renderTL(
       <MemoryRouter>
         <ThemeProvider theme={lightTheme}>
-          <ListView assets={data} selectedAssets={[]} />
+          <AssetList assets={data} selectedAssets={[]} />
         </ThemeProvider>
       </MemoryRouter>
     );
