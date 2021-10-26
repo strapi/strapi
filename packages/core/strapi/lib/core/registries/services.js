@@ -58,7 +58,7 @@ const servicesRegistry = strapi => {
      * @param {Service|ServiceFactory} service
      */
     set(uid, service) {
-      services[uid] = service;
+      instantiatedServices[uid] = service;
       return this;
     },
 
