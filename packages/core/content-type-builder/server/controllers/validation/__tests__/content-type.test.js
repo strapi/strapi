@@ -44,7 +44,9 @@ describe('Content type validator', () => {
     test('Throws when reserved names are used', async () => {
       const data = {
         contentType: {
-          displayName: 'test',
+          singularName: 'test',
+          pluralName: 'tests',
+          displayName: 'Test',
           attributes: {
             thisIsReserved: {
               type: 'string',
