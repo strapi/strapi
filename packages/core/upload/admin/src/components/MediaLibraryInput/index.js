@@ -25,6 +25,7 @@ export const MediaLibraryInput = ({ intlLabel, description, disabled, error, mul
     : '';
 
   const label = intlLabel.id ? formatMessage(intlLabel) : '';
+  const errorMessage = error ? formatMessage({ id: error, defaultMessage: error }) : '';
 
   return (
     <Carousel
@@ -41,7 +42,7 @@ export const MediaLibraryInput = ({ intlLabel, description, disabled, error, mul
       onNext={handleNext}
       onPrevious={handlePrevious}
       hint={hint}
-      error={error}
+      error={errorMessage}
     >
       <CarouselSlide
         label={formatMessage(
