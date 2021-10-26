@@ -9,7 +9,10 @@ const {
   PUBLISHED_AT_ATTRIBUTE,
   CREATED_BY_ATTRIBUTE,
   UPDATED_BY_ATTRIBUTE,
-} = require('@strapi/utils').contentTypes.constants;
+} =
+  // @ts-ignore
+  require('@strapi/utils').contentTypes.constants;
+
 const { validateContentTypeDefinition } = require('./validator');
 
 const createContentType = (uid, definition) => {

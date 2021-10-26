@@ -22,6 +22,7 @@ const rolesDeleteSchema = yup
   .shape({
     ids: yup
       .array()
+      // @ts-ignore
       .of(yup.strapiID())
       .min(1)
       .required()
@@ -32,7 +33,7 @@ const rolesDeleteSchema = yup
           if (features.isEnabled('sso')) {
             await strapi.admin.services.role.ssoCheckRolesIdForDeletion(ids);
           }
-        } catch (e) {
+        } catch (/** @type {any} **/ e) {
           return this.createError({ path: 'ids', message: e.message });
         }
 
@@ -42,6 +43,7 @@ const rolesDeleteSchema = yup
   .noUnknown();
 
 const roleDeleteSchema = yup
+  // @ts-ignore
   .strapiID()
   .required()
   .test('no-admin-single-delete', 'Role deletion checks have failed', async function(id) {
@@ -51,7 +53,7 @@ const roleDeleteSchema = yup
       if (features.isEnabled('sso')) {
         await strapi.admin.services.role.ssoCheckRolesIdForDeletion([id]);
       }
-    } catch (e) {
+    } catch (/** @type {any} **/ e) {
       return this.createError({ path: 'id', message: e.message });
     }
 

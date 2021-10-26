@@ -7,6 +7,7 @@ declare global {
 }
 
 export * from './base';
+export * from './registries';
 export * from './container';
 export * from './configuration';
 export * from './content-type';

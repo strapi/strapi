@@ -35,11 +35,13 @@ const apiTokenUpdateSchema = yup
     name: yup
       .string()
       .min(1)
+      // @ts-ignore
       .notNull(),
     description: yup.string().nullable(),
     type: yup
       .string()
       .oneOf(Object.values(constants.API_TOKEN_TYPE))
+      // @ts-ignore
       .notNull(),
   })
   .noUnknown();

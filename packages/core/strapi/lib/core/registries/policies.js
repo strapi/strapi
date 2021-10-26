@@ -5,7 +5,7 @@ const { addNamespace, hasNamespace } = require('../utils');
 
 /**
  * @typedef {import('@strapi/strapi').StrapiPolicies} StrapiPolicies
- * @typedef {import('./types/policies').Policy} Policy
+ * @typedef {import('@strapi/strapi').Policy} Policy
  */
 
 // TODO: move instantiation part here instead of in the policy utils

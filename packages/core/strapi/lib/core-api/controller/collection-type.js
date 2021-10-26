@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * @typedef {import('types').StrapiAppContext} StrapiAppContext
+ * @typedef {import('@strapi/strapi').StrapiAppContext} StrapiAppContext
  */
 
 const { parseBody } = require('./transform');

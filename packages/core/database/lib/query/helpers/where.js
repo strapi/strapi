@@ -37,7 +37,6 @@ const isOperator = key => OPERATORS.includes(key);
  * @param {Object} where
  * @param {Object} ctx
  * @param {number} depth
- * @returns {Object}
  */
 const processWhere = (where, ctx, depth = 0) => {
   if (!_.isArray(where) && !_.isPlainObject(where)) {

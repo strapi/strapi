@@ -9,7 +9,6 @@ const { AUTHOR_CODE, PUBLISH_ACTION } = require('./constants');
 /**
  * Returns actions available for a role.
  * @param {string|number} roleId
- * @returns {object[]}
  */
 const getAllowedActionsForRole = async roleId => {
   const { actionProvider } = getService('permission');
@@ -18,7 +17,7 @@ const getAllowedActionsForRole = async roleId => {
     const role = await getService('role').findOne({ id: roleId });
 
     if (!role) {
-      throw new strapi.errors.notFound('role.notFound');
+      throw strapi.errors.notFound('role.notFound');
     }
 
     if (role.code === AUTHOR_CODE) {

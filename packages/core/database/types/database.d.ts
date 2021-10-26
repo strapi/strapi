@@ -1,4 +1,4 @@
-import { StrapiContentTypes } from '@strapi/strapi';
+import { StrapiContentTypes, DeepPartial } from '@strapi/strapi';
 import { LifecycleProvider } from './lifecycles';
 import { MigrationProvider } from './migrations';
 import { SchemaProvideer } from './schema';
@@ -26,7 +26,7 @@ export type Direction = 'asc' | 'ASC' | 'DESC' | 'desc';
 export interface FindParams<T> {
   select?: (keyof T)[];
   // TODO: add nested operators & relations
-  where?: WhereParams<T>;
+  where?: WhereParams<DeepPartial<T>>;
   limit?: number;
   offset?: number;
   orderBy?:  // TODO: add relations
@@ -84,7 +84,7 @@ export interface EntityManager {
     options?: {
       populate?: PopulateParams;
     }
-  ): Promise<any[]>;
+  ): Promise<{ results: any; pagination: any }>;
 
   create<K extends keyof StrapiContentTypes>(
     uid: K,

@@ -4,7 +4,7 @@ import { createArrayOfValues } from '../../utils';
 /**
  * Changes all the conditions leaf when the properties are all falsy
  * @param {object} obj the modifiedData state
- * @returns {object} the mutated modifiedData
+ * @returns {any} the mutated modifiedData
  */
 const updateConditionsToFalse = obj => {
   return Object.keys(obj).reduce((acc, current) => {

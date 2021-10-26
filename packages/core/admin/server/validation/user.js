@@ -24,14 +24,20 @@ const validateUserCreationInput = data => {
 const profileUpdateSchema = yup
   .object()
   .shape({
+    // @ts-ignore
     email: validators.email.notNull(),
+    // @ts-ignore
     firstname: validators.firstname.notNull(),
+    // @ts-ignore
     lastname: validators.lastname.notNull(),
+    // @ts-ignore
     username: validators.username.nullable(),
+    // @ts-ignore
     password: validators.password.notNull(),
     currentPassword: yup
       .string()
       .when('password', (password, schema) => (!isUndefined(password) ? schema.required() : schema))
+      // @ts-ignore
       .notNull(),
     preferedLanguage: yup.string().nullable(),
   })
@@ -46,12 +52,19 @@ const validateProfileUpdateInput = data => {
 const userUpdateSchema = yup
   .object()
   .shape({
+    // @ts-ignore
     email: validators.email.notNull(),
+    // @ts-ignore
     firstname: validators.firstname.notNull(),
+    // @ts-ignore
     lastname: validators.lastname.notNull(),
+    // @ts-ignore
     username: validators.username.nullable(),
+    // @ts-ignore
     password: validators.password.notNull(),
+    // @ts-ignore
     isActive: yup.bool().notNull(),
+    // @ts-ignore
     roles: validators.roles.min(1).notNull(),
   })
   .noUnknown();
@@ -65,6 +78,7 @@ const usersDeleteSchema = yup
   .shape({
     ids: yup
       .array()
+      // @ts-ignore
       .of(yup.strapiID())
       .min(1)
       .required(),

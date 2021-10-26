@@ -85,10 +85,12 @@ module.exports = strapi => {
         const Store = requireStore('generic-session-sequelize');
 
         // Sequelize needs to be instantiated.
+        // @ts-ignore
         if (!_.isObject(strapi.sequelize)) {
           return null;
         }
 
+        // @ts-ignore
         return new Store(strapi.sequelize, session.options);
       }
       default: {

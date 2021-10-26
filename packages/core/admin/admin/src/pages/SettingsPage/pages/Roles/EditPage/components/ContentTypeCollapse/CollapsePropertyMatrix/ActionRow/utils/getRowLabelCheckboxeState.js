@@ -3,17 +3,23 @@ import { getCheckboxState } from '../../../../utils';
 
 /**
  * Returns a filtered array of actionId
- * @param {array<object>} propertyActions
- * @returns {string} actionId
+ * @param {any[]} propertyActions
  */
 const getActionIdsFromPropertyActions = propertyActions => {
-  const actionIds = propertyActions.reduce((acc, current) => {
-    if (current.isActionRelatedToCurrentProperty) {
-      acc.push(current.actionId);
-    }
+  const actionIds = propertyActions.reduce(
+    /**
+     * @param {string[]} acc
+     * @param {any} current
+     */
+    (acc, current) => {
+      if (current.isActionRelatedToCurrentProperty) {
+        acc.push(current.actionId);
+      }
 
-    return acc;
-  }, []);
+      return acc;
+    },
+    []
+  );
 
   return actionIds;
 };
@@ -26,7 +32,6 @@ const getActionIdsFromPropertyActions = propertyActions => {
  * @param {string} pathToContentType
  * @param {string} propertyToCheck
  * @param {string} targetKey
- * @returns {object}
  */
 const getRowLabelCheckboxeState = (
   propertyActions,

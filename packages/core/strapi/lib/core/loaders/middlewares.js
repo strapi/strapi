@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * @typedef {import('../registries/types/middlewares').Middleware} Middleware
+ * @typedef {import('@strapi/strapi').Middleware} Middleware
  * @typedef {import('@strapi/strapi').Strapi} Strapi
  */
 

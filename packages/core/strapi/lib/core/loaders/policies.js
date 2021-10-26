@@ -2,6 +2,7 @@
 
 /**
  * @typedef {import('@strapi/strapi').Strapi} Strapi
+ * @typedef {import('@strapi/strapi').Policy} Policy
  */
 
 const { join, extname, basename } = require('path');
@@ -19,6 +20,9 @@ module.exports = async function loadPolicies(strapi) {
     return;
   }
 
+  /**
+   * @type {Record<string, Policy>}
+   */
   const policies = {};
   const paths = await fse.readdir(dir, { withFileTypes: true });
 

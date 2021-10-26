@@ -22,7 +22,6 @@ const getDefaultConditionAttributes = () => ({
 
 /**
  * Get the list of all the valid attributes of a {@link Condition}
- * @return {string[]}
  */
 const conditionFields = ['id', 'displayName', 'handler', 'plugin', 'category'];
 
@@ -35,7 +34,6 @@ const sanitizeConditionAttributes = pick(conditionFields);
 /**
  *
  * @param condition
- * @return {string}
  */
 const computeConditionId = condition => {
   const { name, plugin } = condition;

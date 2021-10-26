@@ -43,7 +43,6 @@ const createSection = ({
      * Verifies if an action can be applied to the section by running the matchers hook.
      * If any of the registered matcher functions returns true, then the condition applies.
      * @param {AdminAction} action
-     * @return {Promise<boolean>}
      */
     async appliesToAction(action) {
       const results = await state.hooks.matchers.call(action);
@@ -54,7 +53,6 @@ const createSection = ({
     /**
      * Init, build and returns a section object based on the given actions
      * @param {AdminAction[]} actions - A list of actions used to populate the section
-     * @return {Promise<any>}
      */
     async build(actions = []) {
       const section = initialStateFactory();

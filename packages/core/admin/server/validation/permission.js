@@ -104,7 +104,7 @@ const validatedUpdatePermissionsInput = async (permissions, role) => {
     for (const schema of schemas) {
       await schema.validate(permissions, { strict: true, abortEarly: false });
     }
-  } catch (e) {
+  } catch (/** @type {any} **/ e) {
     return handleReject(e);
   }
 };

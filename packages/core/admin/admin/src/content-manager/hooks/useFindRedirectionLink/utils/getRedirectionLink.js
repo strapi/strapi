@@ -6,7 +6,6 @@ import isObject from 'lodash/isObject';
  * Updates the leafs of the first argument
  * @param {object} initialParams
  * @param {object} params
- * @returns string
  */
 const mergeParams = (initialParams, params) => {
   return Object.keys(initialParams).reduce((acc, current) => {

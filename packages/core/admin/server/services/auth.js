@@ -8,7 +8,6 @@ const { getService } = require('../utils');
 /**
  * hashes a password
  * @param {string} password - password to hash
- * @returns {string} hashed password
  */
 const hashPassword = password => bcrypt.hash(password, 10);
 
@@ -16,7 +15,6 @@ const hashPassword = password => bcrypt.hash(password, 10);
  * Validate a password
  * @param {string} password
  * @param {string} hash
- * @returns {Promise<boolean>} is the password valid
  */
 const validatePassword = (password, hash) => bcrypt.compare(password, hash);
 
@@ -48,8 +46,8 @@ const checkCredentials = async ({ email, password }) => {
 
 /**
  * Send an email to the user if it exists or do nothing
- * @param {Object} param params
- * @param {string} param.email user email for which to reset the password
+ * @param {object} param params
+ * @param {string=} param.email user email for which to reset the password
  */
 const forgotPassword = async ({ email } = {}) => {
   const user = await strapi.query('admin::user').findOne({ where: { email, isActive: true } });
@@ -88,9 +86,9 @@ const forgotPassword = async ({ email } = {}) => {
 
 /**
  * Reset a user password
- * @param {Object} param params
- * @param {string} param.resetPasswordToken token generated to request a password reset
- * @param {string} param.password new user password
+ * @param {object} param params
+ * @param {string=} param.resetPasswordToken token generated to request a password reset
+ * @param {string=} param.password new user password
  */
 const resetPassword = async ({ resetPasswordToken, password } = {}) => {
   const matchingUser = await strapi

@@ -32,7 +32,12 @@ const password = yup
   .matches(/[A-Z]/, '${path} must contain at least one uppercase character')
   .matches(/\d/, '${path} must contain at least one number');
 
-const roles = yup.array(yup.strapiID()).min(1);
+const roles = yup
+  .array(
+    // @ts-ignore
+    yup.strapiID()
+  )
+  .min(1);
 
 const isAPluginName = yup
   .string()

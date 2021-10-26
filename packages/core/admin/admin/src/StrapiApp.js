@@ -313,7 +313,6 @@ class StrapiApp {
 
   /**
    * Load the admin translations
-   * @returns {Object} The imported admin translations
    */
   async loadAdminTrads() {
     const arrayOfPromises = this.configurations.locales.map(locale => {

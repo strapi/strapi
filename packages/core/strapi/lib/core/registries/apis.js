@@ -30,8 +30,7 @@ const apisRegistry = strapi => {
       return apis;
     },
     /**
-     * @template {keyof StrapiApi} T
-     * @param {T} apiName
+     * @param {string} apiName
      * @param {any=} apiConfig
      */
     add(apiName, apiConfig) {

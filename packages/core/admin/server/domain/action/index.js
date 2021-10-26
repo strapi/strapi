@@ -22,7 +22,6 @@ const getDefaultActionAttributes = () => ({
 
 /**
  * Get the list of all the valid attributes of an {@link AdminAction}
- * @return {string[]}
  */
 const actionFields = [
   'section',
@@ -45,7 +44,6 @@ const sanitizeActionAttributes = pick(actionFields);
  * Create and return an identifier for an {@link CreateActionPayload}.
  * The format is based on the action's source ({@link CreateActionPayload.pluginName} or 'application') and {@link CreateActionPayload.uid}.
  * @param {CreateActionPayload} attributes
- * @return {string}
  */
 const computeActionId = attributes => {
   const { pluginName, uid } = attributes;
@@ -64,14 +62,12 @@ const computeActionId = attributes => {
 /**
  * Assign an actionId attribute to an {@link CreateActionPayload} object
  * @param {CreateActionPayload} attrs - Payload used to create an action
- * @return {CreateActionPayload}
  */
 const assignActionId = attrs => set('actionId', computeActionId(attrs), attrs);
 
 /**
  * Transform an action by adding or removing the {@link AdminAction.subCategory} attribute
  * @param {AdminAction} action - The action to process
- * @return {AdminAction}
  */
 const assignOrOmitSubCategory = action => {
   const shouldHaveSubCategory = ['settings', 'plugins'].includes(action.section);
@@ -83,7 +79,7 @@ const assignOrOmitSubCategory = action => {
 
 /**
  * Check if a property can be applied to an {@link AdminAction}
- * @type (function(property: string, action: AdminAction): boolean) | (function(property: string): (function(action: AdminAction): boolean))
+ * @type {((property: string, action: AdminAction) => boolean) | ((property: string) => ((action: AdminAction) => boolean))}
  * @return {boolean} Return true if the property can be applied for the given action
  */
 const appliesToProperty = curry((property, action) => {

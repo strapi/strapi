@@ -11,10 +11,10 @@ const filePathToPath = require('./filepath-to-prop-path');
  * It builds a tree structure resembling the folder structure in dir
  * @param {string} dir - Directory to load
  * @param {string} pattern - Glob pattern to search for
- * @param {Object} options - Options
- * @param {Function} options.requireFn - Function that will require the matches files
- * @param {Function} options.shouldUseFileNameAsKey - Weather to use the filename as a key in the Object path or not
- * @param {Object} options.globArgs - extra glob function arguments
+ * @param {object} options - Options
+ * @param {Function=} options.requireFn - Function that will require the matches files
+ * @param {Function=} options.shouldUseFileNameAsKey - Weather to use the filename as a key in the Object path or not
+ * @param {object=} options.globArgs - extra glob function arguments
  */
 const loadFiles = async (
   dir,

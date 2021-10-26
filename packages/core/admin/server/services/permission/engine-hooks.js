@@ -20,7 +20,6 @@ const createEngineHooks = () => ({
 /**
  * Create a context from a domain {@link Permission} used by the WillEvaluate hook
  * @param {AdminPermission} permission
- * @return {{readonly permission: AdminPermission, addCondition(string): ThisType}}
  */
 const createWillEvaluateContext = permission => ({
   get permission() {

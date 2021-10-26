@@ -7,6 +7,7 @@ const handleReject = error => Promise.reject(formatYupErrors(error));
 const providerOptionsUpdateSchema = yup.object().shape({
   autoRegister: yup.boolean().required(),
   defaultRole: yup
+    // @ts-ignore
     .strapiID()
     .required()
     .test('is-valid-role', 'You must submit a valid default role', roleId => {

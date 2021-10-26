@@ -140,12 +140,11 @@ module.exports = conditionProvider => {
 
     /**
      * Register new rules using `registerFn` based on valid permission's conditions
-     * @param options {object}
-     * @param options.permission {AdminPermission}
-     * @param options.user {object}
-     * @param options.options {object | undefined}
-     * @param options.registerFn {Function}
-     * @returns {Promise<void>}
+     * @param {object} options
+     * @param {AdminPermission} options.permission
+     * @param {object} options.user
+     * @param {object | undefined} options.options
+     * @param {Function} options.registerFn
      */
     async evaluate(options) {
       const { user, registerFn, options: conditionOptions } = options;

@@ -1,32 +1,20 @@
 'use strict';
 
+/**
+ * @typedef {import('@strapi/admin').AdminApiToken} AdminApiToken
+ */
+
 const crypto = require('crypto');
-
-/**
- * @typedef {'read-only'|'full-access'} TokenType
- */
-
-/**
- * @typedef ApiToken
- *
- * @property {number|string} id
- * @property {string} name
- * @property {string} [description]
- * @property {string} accessKey
- * @property {TokenType} type
- */
 
 /** @constant {Array<string>} */
 const SELECT_FIELDS = ['id', 'name', 'description', 'type'];
 
 /**
  * @param {Object} whereParams
- * @param {string|number} [whereParams.id]
+ * @param {string} [whereParams.id]
  * @param {string} [whereParams.name]
  * @param {string} [whereParams.description]
  * @param {string} [whereParams.accessKey]
- *
- * @returns {Promise<boolean>}
  */
 const exists = async (whereParams = {}) => {
   const apiToken = await getBy(whereParams);
@@ -36,8 +24,6 @@ const exists = async (whereParams = {}) => {
 
 /**
  * @param {string} accessKey
- *
- * @returns {string}
  */
 const hash = accessKey => {
   return crypto
@@ -48,17 +34,17 @@ const hash = accessKey => {
 
 /**
  * @param {Object} attributes
- * @param {TokenType} attributes.type
+ * @param {AdminApiToken} attributes.type
  * @param {string} attributes.name
  * @param {string} [attributes.description]
- *
- * @returns {Promise<ApiToken>}
  */
 const create = async attributes => {
   const accessKey = crypto.randomBytes(128).toString('hex');
 
   const apiToken = await strapi.query('admin::api-token').create({
+    // @ts-ignore
     select: SELECT_FIELDS,
+    // @ts-ignore
     data: {
       ...attributes,
       accessKey: hash(accessKey),
@@ -71,9 +57,6 @@ const create = async attributes => {
   };
 };
 
-/**
- * @returns {void}
- */
 const createSaltIfNotDefined = () => {
   if (strapi.config.get('server.admin.api-token.salt')) {
     return;
@@ -90,29 +73,28 @@ const createSaltIfNotDefined = () => {
   strapi.config.set('server.admin.api-token.salt', salt);
 };
 
-/**
- * @returns {Promise<Omit<ApiToken, 'accessKey'>>}
- */
 const list = async () => {
   return strapi.query('admin::api-token').findMany({
+    // @ts-ignore
     select: SELECT_FIELDS,
     orderBy: { name: 'ASC' },
   });
 };
 
 /**
- * @param {string|number} id
- *
- * @returns {Promise<Omit<ApiToken, 'accessKey'>>}
+ * @param {string} id
  */
 const revoke = async id => {
-  return strapi.query('admin::api-token').delete({ select: SELECT_FIELDS, where: { id } });
+  return strapi.query('admin::api-token').delete({
+    // @ts-ignore
+
+    select: SELECT_FIELDS,
+    where: { id },
+  });
 };
 
 /**
- * @param {string|number} id
- *
- * @returns {Promise<Omit<ApiToken, 'accessKey'>>}
+ * @param {string} id
  */
 const getById = async id => {
   return getBy({ id });
@@ -120,43 +102,45 @@ const getById = async id => {
 
 /**
  * @param {string} name
- *
- * @returns {Promise<Omit<ApiToken, 'accessKey'>>}
  */
 const getByName = async name => {
   return getBy({ name });
 };
 
 /**
- * @param {string|number} id
+ * @param {string} id
  * @param {Object} attributes
- * @param {TokenType} attributes.type
+ * @param {AdminApiToken['type']} attributes.type
  * @param {string} attributes.name
  * @param {string} [attributes.description]
- *
- * @returns {Promise<Omit<ApiToken, 'accessKey'>>}
  */
 const update = async (id, attributes) => {
-  return strapi
-    .query('admin::api-token')
-    .update({ where: { id }, data: attributes, select: SELECT_FIELDS });
+  return strapi.query('admin::api-token').update({
+    where: { id },
+    data: attributes,
+    //@ts-ignore
+    select: SELECT_FIELDS,
+  });
 };
 
 /**
  * @param {Object} whereParams
- * @param {string|number} [whereParams.id]
+ * @param {string} [whereParams.id]
  * @param {string} [whereParams.name]
  * @param {string} [whereParams.description]
  * @param {string} [whereParams.accessKey]
- *
- * @returns {Promise<Omit<ApiToken, 'accessKey'> | null>}
  */
 const getBy = async (whereParams = {}) => {
   if (Object.keys(whereParams).length === 0) {
     return null;
   }
 
-  return strapi.query('admin::api-token').findOne({ select: SELECT_FIELDS, where: whereParams });
+  return strapi.query('admin::api-token').findOne({
+    //@ts-ignore
+    select: SELECT_FIELDS,
+    //@ts-ignore
+    where: whereParams,
+  });
 };
 
 module.exports = {

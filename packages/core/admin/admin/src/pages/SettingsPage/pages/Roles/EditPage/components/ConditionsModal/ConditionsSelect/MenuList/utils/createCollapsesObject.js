@@ -1,8 +1,7 @@
 /**
  * Creates an object with keys corresponding to the categoryName and leafs to false except for the first category
  *
- * @param {array<array>} arrayOfCategories
- * @returns {object}
+ * @param {any[]} arrayOfCategories
  */
 const createCollapsesObject = arrayOfCategories =>
   arrayOfCategories.reduce((acc, current, index) => {

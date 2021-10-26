@@ -29,8 +29,7 @@ const pluginsRegistry = strapi => {
       return plugins;
     },
     /**
-     * @template {keyof StrapiPlugins} T
-     * @param {T} name
+     * @param {string} name
      * @param {any=} pluginConfig
      */
     add(name, pluginConfig) {

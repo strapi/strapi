@@ -1,4 +1,4 @@
-import { StrapiCoreRegistries } from '../lib/core/registries/types';
+import { StrapiCoreRegistries } from './registries';
 import { StrapiInterface } from './strapi';
 export interface Registry extends Record<string, Function | Promise> {}
 export interface StrapiRegistries extends StrapiCoreRegistries {}

@@ -6,7 +6,7 @@ import { createConditionsArray } from './formatSettingsPermissionsToAPI';
  * Returns an array of property values
  * @param {object} propertyValue
  * @param {string} prefix
- * @returns {array<string>}
+ * @returns {string[]}
  */
 const createPropertyArray = (propertyValue, prefix = '') => {
   return Object.entries(propertyValue).reduce((acc, current) => {
@@ -31,7 +31,7 @@ const createPropertyArray = (propertyValue, prefix = '') => {
  * @param {object} param2
  * @config {object} conditions
  * @config {object} the name of the properties array we need to fill
- * @returns {object}
+ * @returns {any}
  */
 const createPermissionWithProperties = (action, subject, { conditions, properties }) => {
   return Object.entries(properties).reduce(
@@ -51,7 +51,7 @@ const createPermissionWithProperties = (action, subject, { conditions, propertie
  * @param {string} action The name of the action
  * @param {string} subject The name of the subject
  * @param {object} param2
- * @returns {object}
+ * @returns {any}
  */
 const createPermissionWithoutProperties = (action, subject, { conditions }) => {
   return {
@@ -66,7 +66,7 @@ const createPermissionWithoutProperties = (action, subject, { conditions }) => {
  *
  * @param {string} subject  The name of the subject
  * @param {object} actions The subject's actions
- * @returns {array<object>}
+ * @returns {any[]}
  */
 const createSubjectPermissions = (subject, actions) => {
   const permissions = Object.entries(actions).reduce((acc, current) => {
@@ -104,7 +104,7 @@ const createSubjectPermissions = (subject, actions) => {
 /**
  *
  * @param {object} contentTypesPermissions
- * @returns {array<object>}
+ * @returns {any[]}
  */
 const formatContentTypesPermissionToAPI = contentTypesPermissions => {
   const permissions = Object.entries(contentTypesPermissions).reduce((allPermissions, current) => {

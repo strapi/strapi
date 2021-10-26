@@ -7,6 +7,7 @@
     "@testing-library/react-hooks": "3.4.2",
     "@testing-library/user-event": "13.1.9",
     "@types/bcrypt": "^5.0.0",
+    "@types/bcryptjs": "2.4.2",
     "@types/configstore": "^5.0.1",
     "@types/execa": "2.0.0",
     "@types/fs-extra": "9.0.13",

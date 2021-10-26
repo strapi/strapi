@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * @typedef {import('types').Strapi} Strapi
+ * @typedef {import('@strapi/strapi').Strapi} Strapi
  */
 
 const path = require('path');

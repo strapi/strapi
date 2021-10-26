@@ -3,8 +3,8 @@
 /**
  * @typedef {import('@strapi/strapi').Strapi} Strapi
  * @typedef {import('@strapi/strapi').StrapiServices} StrapiServices
- * @typedef {import('./types/services').Service} Service
- * @typedef {import('./types/services').ServiceFactory} ServiceFactory
+ * @typedef {import('@strapi/strapi').Service} Service
+ * @typedef {import('@strapi/strapi').ServiceFactory} ServiceFactory
  */
 
 const _ = require('lodash');

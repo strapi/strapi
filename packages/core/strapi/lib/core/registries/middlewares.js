@@ -6,7 +6,7 @@ const { addNamespace, hasNamespace } = require('../utils');
 /**
  * @typedef {import('@strapi/strapi').StrapiMiddlewares} StrapiMiddlewares
  * @typedef {import('@strapi/strapi').StrapiMiddlewareFactory} StrapiMiddlewareFactory
- * @typedef {import('./types/middlewares').Middleware} Middleware
+ * @typedef {import('@strapi/strapi').Middleware} Middleware
  */
 
 // TODO: move instantiation part here instead of in the server service

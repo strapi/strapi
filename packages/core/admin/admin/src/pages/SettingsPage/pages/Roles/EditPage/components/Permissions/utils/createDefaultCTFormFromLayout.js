@@ -2,8 +2,8 @@ import { merge, get, isEmpty, set } from 'lodash';
 import findMatchingPermission from './findMatchingPermissions';
 /**
  * Creates the default condition form: { [conditionId]: false }
- * @param {object} conditions.id Id of the condition
- * @returns {object}
+ * @param {any} conditions Id of the condition
+ * @returns {any}
  */
 const createDefaultConditionsForm = (conditions, initialConditions = []) =>
   conditions.reduce((acc, current) => {
@@ -15,9 +15,10 @@ const createDefaultConditionsForm = (conditions, initialConditions = []) =>
 /**
  * Create the default form a property (fields, locales) with all the values
  * set to false
+ * @param {object} property ex: {children: [{value: 'foo',}]}
  * @param {object} property.children ex: {children: [{value: 'foo',}]}
- * @param {array<string>} The found property values retrieved from the role associated permissions
- * @returns {object} ex: { foo: false }
+ * @param {string[]} propertyValues The found property values retrieved from the role associated permissions
+ * @returns {any} ex: { foo: false }
  *
  */
 const createDefaultPropertyForms = ({ children }, propertyValues, prefix = '') => {
@@ -43,7 +44,7 @@ const createDefaultPropertyForms = ({ children }, propertyValues, prefix = '') =
 
 /**
  * Creates the default form for all the properties found in a content type's layout
- * @param {array<string>} propertiesArray ex; ['fields', 'locales']
+ * @param {string[]} propertiesArray ex; ['fields', 'locales']
  * @param {object} ctLayout layout of the content type ex:
  * ctLayout = {
  *  properties: [{
@@ -51,7 +52,7 @@ const createDefaultPropertyForms = ({ children }, propertyValues, prefix = '') =
  *    children: [{value: 'name'}]
  *  }
  * }
- * @returns {object} In this case it will return { fields: { name: false } }
+ * @returns {any} In this case it will return { fields: { name: false } }
  */
 const createDefaultPropertiesForm = (propertiesArray, ctLayout, matchingPermission) => {
   return propertiesArray.reduce(
@@ -80,7 +81,7 @@ const createDefaultPropertiesForm = (propertiesArray, ctLayout, matchingPermissi
 
 /**
  * Return an object of content types layout of an action's subject ex: { adress: {uid, label, properties } }
- * @param {array<object>} allLayouts All the content types' layout
+ * @param {any[]} allLayouts All the content types' layout
  * @param {object} subjects
  */
 const findLayouts = (allLayouts, subjects) => {
@@ -98,10 +99,10 @@ const findLayouts = (allLayouts, subjects) => {
 /**
  * Creates the default for for a content type
  * @param {object} layout.subjects All the content types to display
- * @param {array<object>} actionArray An action has the following shape:
+ * @param {any[]} actionArray An action has the following shape:
  * action = {label: 'string', actionId: 'string', subjects: [object], applyToProperties: ['string]}
- * @param {array<object>} conditionArray Ex: { id: 'string', category: 'string' }
- * @returns {object} Ex:
+ * @param {any[]} conditionArray Ex: { id: 'string', category: 'string' }
+ * @returns {any} Ex:
  * {
  *  ctUId: {
  *    [actionId]: {
