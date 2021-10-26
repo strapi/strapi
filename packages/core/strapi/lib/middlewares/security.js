@@ -8,7 +8,12 @@ const defaults = {
   crossOriginOpenerPolicy: false,
   crossOriginResourcePolicy: false,
   originAgentCluster: false,
-  contentSecurityPolicy: false,
+  contentSecurityPolicy: {
+    useDefaults: true,
+    directives: {
+      'connect-src': ["'self'", 'https:'],
+    },
+  },
   xssFilter: false,
   hsts: {
     maxAge: 31536000,
