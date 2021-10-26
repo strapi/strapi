@@ -3,10 +3,12 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Carousel, CarouselSlide } from '@strapi/parts/Carousel';
 import getTrad from '../../utils/getTrad';
-import { EmptyInput } from './EmptyInput';
+import { EmptyStateAsset } from './EmptyStateAsset';
+import { AssetDialog } from './AssetDialog';
 
 export const MediaLibraryInput = ({ intlLabel, description, disabled, error, multiple }) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [isAssetDialogOpen, setIsAssetDialogOpen] = useState(false);
   const { formatMessage } = useIntl();
 
   const handleNext = () => {
@@ -28,31 +30,36 @@ export const MediaLibraryInput = ({ intlLabel, description, disabled, error, mul
   const errorMessage = error ? formatMessage({ id: error, defaultMessage: error }) : '';
 
   return (
-    <Carousel
-      label={label}
-      selectedSlide={selectedIndex}
-      previousLabel={formatMessage({
-        id: getTrad('mediaLibraryInput.actions.previousSlide'),
-        defaultMessage: 'Previous slide',
-      })}
-      nextLabel={formatMessage({
-        id: getTrad('mediaLibraryInput.actions.nextSlide'),
-        defaultMessage: 'Next slide',
-      })}
-      onNext={handleNext}
-      onPrevious={handlePrevious}
-      hint={hint}
-      error={errorMessage}
-    >
-      <CarouselSlide
-        label={formatMessage(
-          { id: getTrad('mediaLibraryInput.slideCount'), defaultMessage: '{n} of {m} slides' },
-          { n: 1, m: 1 }
-        )}
+    <>
+      <Carousel
+        label={label}
+        selectedSlide={selectedIndex}
+        previousLabel={formatMessage({
+          id: getTrad('mediaLibraryInput.actions.previousSlide'),
+          defaultMessage: 'Previous slide',
+        })}
+        nextLabel={formatMessage({
+          id: getTrad('mediaLibraryInput.actions.nextSlide'),
+          defaultMessage: 'Next slide',
+        })}
+        onNext={handleNext}
+        onPrevious={handlePrevious}
+        hint={hint}
+        error={errorMessage}
       >
-        <EmptyInput disabled={disabled} multiple={multiple} />
-      </CarouselSlide>
-    </Carousel>
+        <CarouselSlide
+          label={formatMessage(
+            { id: getTrad('mediaLibraryInput.slideCount'), defaultMessage: '{n} of {m} slides' },
+            { n: 1, m: 1 }
+          )}
+        >
+          <EmptyStateAsset disabled={disabled} onClick={() => setIsAssetDialogOpen(true)} />
+        </CarouselSlide>
+      </Carousel>
+      {isAssetDialogOpen && (
+        <AssetDialog onClose={() => setIsAssetDialogOpen(false)} multiple={multiple} />
+      )}
+    </>
   );
 };
 

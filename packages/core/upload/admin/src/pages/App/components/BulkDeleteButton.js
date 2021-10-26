@@ -26,8 +26,9 @@ export const BulkDeleteButton = ({ assetIds, onSuccess }) => {
         <Subtitle textColor="neutral600">
           {formatMessage(
             {
-              id: getTrad('list.assets.selected.plural'),
-              defaultMessage: '1 asset selected',
+              id: getTrad('list.assets.selected'),
+              defaultMessage:
+                '{number, plural, =0 {No asset} one {1 asset} other {# assets}} selected',
             },
             {
               number: assetIds.length,

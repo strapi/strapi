@@ -90,7 +90,11 @@ describe('UploadAssetDialog', () => {
         });
 
         expect(screen.getByText('Upload new asset')).toBeInTheDocument();
-        expect(screen.getByText('{number} assets selected')).toBeInTheDocument();
+        expect(
+          screen.getByText(
+            '{number, plural, =0 {No asset} one {1 asset} other {# assets}} selected'
+          )
+        ).toBeInTheDocument();
         expect(
           screen.getByText('Manage the assets before adding them to the Media Library')
         ).toBeInTheDocument();
@@ -181,7 +185,13 @@ describe('UploadAssetDialog', () => {
         },
       ];
 
-      await waitFor(() => expect(screen.getByText('{number} assets selected')).toBeInTheDocument());
+      await waitFor(() =>
+        expect(
+          screen.getByText(
+            '{number, plural, =0 {No asset} one {1 asset} other {# assets}} selected'
+          )
+        ).toBeInTheDocument()
+      );
       expect(screen.getByText('Upload new asset')).toBeInTheDocument();
       expect(
         screen.getByText('Manage the assets before adding them to the Media Library')
