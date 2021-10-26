@@ -93,7 +93,7 @@ const Inputs = ({ label, onChange, options, type, value }) => {
         aria-label={formatMessage({ id: 'app.utils.filter-value', defaultMessage: 'Filter value' })}
         onChange={({ target: { value } }) => onChange(value)}
         value={value}
-        size="S"
+        size="M"
       />
     </Field>
   );
