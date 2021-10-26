@@ -258,6 +258,9 @@ DynamicZone.propTypes = {
 
 const Memoized = memo(DynamicZone, isEqual);
 
-export default connect(Memoized, select);
+export default connect(
+  Memoized,
+  select
+);
 
 export { DynamicZone };

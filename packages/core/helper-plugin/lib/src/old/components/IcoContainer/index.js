@@ -20,10 +20,7 @@ IcoContainer.propTypes = {
 };
 
 IcoContainer.defaultProps = {
-  icons: [
-    { icoType: 'pencil', onClick: () => {} },
-    { icoType: 'trash', onClick: () => {} },
-  ],
+  icons: [{ icoType: 'pencil', onClick: () => {} }, { icoType: 'trash', onClick: () => {} }],
 };
 
 export default IcoContainer;

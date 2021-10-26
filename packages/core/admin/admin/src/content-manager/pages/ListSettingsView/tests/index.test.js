@@ -43,7 +43,7 @@ const layout = {
     },
   },
   info: {
-    label: 'michka',
+    displayName: 'michka',
   },
   metadatas: {
     address: {

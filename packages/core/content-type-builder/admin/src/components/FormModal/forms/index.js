@@ -1,6 +1,6 @@
 import get from 'lodash/get';
 import toLower from 'lodash/toLower';
-import { nameToSlug } from '../utils/createUid';
+import getTrad from '../../../utils/getTrad';
 import { attributesForm, attributeTypes, commonBaseForm } from '../attributes';
 import { categoryForm, createCategorySchema } from '../category';
 import { contentTypeForm, createContentTypeSchema } from '../contentType';
@@ -50,18 +50,37 @@ const forms = {
     form: {
       advanced({ data, type, step, extensions, ...rest }) {
         try {
-          const baseForm = attributesForm.advanced[type](data, step).items;
-
-          return extensions.makeAdvancedForm(['attribute', type], baseForm, {
+          const baseForm = attributesForm.advanced[type](data, step).sections;
+          const itemsToAdd = extensions.getAdvancedForm(['attribute', type], {
             data,
             type,
             step,
             ...rest,
           });
+
+          const sections = baseForm.reduce((acc, current) => {
+            if (current.sectionTitle === null) {
+              acc.push(current);
+            } else {
+              acc.push({ ...current, items: [...current.items, ...itemsToAdd] });
+            }
+
+            return acc;
+          }, []);
+          // IF we want a dedicated section for the plugins
+          // const sections = [
+          //   ...baseForm,
+          //   {
+          //     sectionTitle: { id: 'Zone pour plugins', defaultMessage: 'Zone pour plugins' },
+          //     items: itemsToAdd,
+          //   },
+          // ];
+
+          return { sections };
         } catch (err) {
           console.error(err);
 
-          return { items: [] };
+          return { sections: [] };
         }
       },
       base({ data, type, step, attributes }) {
@@ -74,34 +93,76 @@ const forms = {
     },
   },
   contentType: {
-    schema(alreadyTakenNames, isEditing, ctUid, reservedNames, extensions) {
+    schema(alreadyTakenNames, isEditing, ctUid, reservedNames, extensions, contentTypes) {
+      const singularNames = Object.values(contentTypes).map(contentType => {
+        return contentType.schema.singularName;
+      });
+
+      const pluralNames = Object.values(contentTypes).map(contentType => {
+        return contentType.schema.pluralNames;
+      });
+
       const takenNames = isEditing
         ? alreadyTakenNames.filter(uid => uid !== ctUid)
         : alreadyTakenNames;
 
-      const contentTypeShape = createContentTypeSchema(takenNames, reservedNames.models);
+      const takenSingularNames = isEditing
+        ? singularNames.filter(singName => {
+            const currentSingularName = get(contentTypes, [ctUid, 'schema', 'singularName'], '');
 
+            return currentSingularName !== singName;
+          })
+        : singularNames;
+
+      const takenPluralNames = isEditing
+        ? pluralNames.filter(pluralName => {
+            const currentPluralName = get(contentTypes, [ctUid, 'schema', 'pluralName'], '');
+
+            return currentPluralName !== pluralName;
+          })
+        : pluralNames;
+
+      const contentTypeShape = createContentTypeSchema(
+        takenNames,
+        reservedNames.models,
+        takenSingularNames,
+        takenPluralNames
+      );
+
+      // FIXME
       return extensions.makeValidator(
         ['contentType'],
         contentTypeShape,
         takenNames,
-        reservedNames.models
+        reservedNames.models,
+        takenSingularNames,
+        takenPluralNames
       );
     },
     form: {
-      base({ data = {}, actionType }) {
+      base({ actionType }) {
         if (actionType === 'create') {
-          const value = data.name ? nameToSlug(data.name) : '';
-
-          return contentTypeForm.base.create(value);
+          return contentTypeForm.base.create();
         }
 
         return contentTypeForm.base.edit();
       },
-      advanced({ extensions }) {
-        const baseForm = contentTypeForm.advanced.default().items;
+      advanced({ extensions, ...rest }) {
+        const baseForm = contentTypeForm.advanced.default(rest).sections;
+        const itemsToAdd = extensions.getAdvancedForm(['contentType']);
 
-        return extensions.makeAdvancedForm(['contentType'], baseForm);
+        return {
+          sections: [
+            ...baseForm,
+            {
+              sectionTitle: {
+                id: getTrad('form.attribute.item.settings.name'),
+                defaultMessage: 'Settings',
+              },
+              items: itemsToAdd,
+            },
+          ],
+        };
       },
     },
   },
@@ -122,12 +183,12 @@ const forms = {
     form: {
       advanced() {
         return {
-          items: componentForm.advanced(),
+          sections: componentForm.advanced(),
         };
       },
       base() {
         return {
-          items: componentForm.base(),
+          sections: componentForm.base(),
         };
       },
     },
@@ -157,6 +218,7 @@ const forms = {
       return createCategorySchema(allowedCategories);
     },
     form: {
+      advanced: () => ({ sections: [] }),
       base() {
         return categoryForm.base;
       },

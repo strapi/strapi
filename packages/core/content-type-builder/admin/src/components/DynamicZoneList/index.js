@@ -56,14 +56,7 @@ const ComponentStack = styled(Stack)`
   align-items: center;
 `;
 
-function DynamicZoneList({
-  customRowComponent,
-  components,
-  addComponent,
-  mainTypeName,
-  name,
-  targetUid,
-}) {
+function DynamicZoneList({ customRowComponent, components, addComponent, name, targetUid }) {
   const { isInDevelopmentMode } = useDataManager();
   const [activeTab, setActiveTab] = useState(0);
   const { formatMessage } = useIntl();
@@ -129,8 +122,6 @@ function DynamicZoneList({
                     <ComponentList
                       {...props}
                       isFromDynamicZone
-                      dzName={name}
-                      mainTypeName={mainTypeName}
                       targetUid={targetUid}
                       key={component}
                     />
@@ -156,7 +147,6 @@ DynamicZoneList.propTypes = {
   addComponent: PropTypes.func,
   components: PropTypes.instanceOf(Array),
   customRowComponent: PropTypes.func,
-  mainTypeName: PropTypes.string.isRequired,
   name: PropTypes.string,
   targetUid: PropTypes.string.isRequired,
 };

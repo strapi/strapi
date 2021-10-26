@@ -24,7 +24,9 @@ const product = {
       maxLength: 30,
     },
   },
-  name: 'product',
+  displayName: 'Product',
+  singularName: 'product',
+  pluralName: 'products',
   description: '',
   collectionName: '',
 };

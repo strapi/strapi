@@ -2,9 +2,8 @@
 
 const _ = require('lodash');
 const { getOr } = require('lodash/fp');
-const pluralize = require('pluralize');
 
-const { nameToSlug, contentTypes: contentTypesUtils } = require('@strapi/utils');
+const { contentTypes: contentTypesUtils } = require('@strapi/utils');
 const { formatAttributes, replaceTemporaryUIDs } = require('../utils/attributes');
 const createBuilder = require('./schema-builder');
 const { coreUids, pluginsUids } = require('./constants');
@@ -26,13 +25,6 @@ const getRestrictRelationsTo = (contentType = {}) => {
   return null;
 };
 
-const getformattedName = (contentType = {}) => {
-  const { info } = contentType;
-  const name = _.get(info, 'displayName');
-
-  return name;
-};
-
 /**
  * Format a contentType info to be used by the front-end
  * @param {Object} contentType
@@ -45,7 +37,9 @@ const formatContentType = contentType => {
     plugin,
     apiID: modelName,
     schema: {
-      name: getformattedName(contentType),
+      displayName: info.displayName,
+      singularName: info.singularName,
+      pluralName: info.pluralName,
       description: _.get(info, 'description', ''),
       draftAndPublish: contentTypesUtils.hasDraftAndPublish({ options }),
       pluginOptions: contentType.pluginOptions,
@@ -111,7 +105,9 @@ const createContentType = async ({ contentType, components = [] }, options = {})
 
   // generate api skeleton
   await generateAPI({
-    name: contentType.name,
+    displayName: contentType.displayName,
+    singularName: contentType.singularName,
+    pluralName: contentType.pluralName,
     kind: contentType.kind,
   });
 
@@ -126,13 +122,9 @@ const createContentType = async ({ contentType, components = [] }, options = {})
  * Generate an API squeleton
  * @param {string} name
  */
-const generateAPI = ({ name, kind = 'collectionType' }) => {
+const generateAPI = ({ singularName, kind = 'collectionType' }) => {
   const strapiGenerators = require('@strapi/generators');
-  return strapiGenerators.generate(
-    'api',
-    { id: pluralize.singular(nameToSlug(name)), kind },
-    { dir: strapi.dirs.root }
-  );
+  return strapiGenerators.generate('api', { id: singularName, kind }, { dir: strapi.dirs.root });
 };
 
 /**
@@ -182,7 +174,9 @@ const editContentType = async (uid, { contentType, components = [] }) => {
 
       // generate new api skeleton
       await generateAPI({
-        name: updatedContentType.schema.info.name,
+        displayName: updatedContentType.schema.info.displayName,
+        singularName: updatedContentType.schema.info.singularName,
+        pluralName: updatedContentType.schema.info.pluralName,
         kind: updatedContentType.schema.kind,
       });
 

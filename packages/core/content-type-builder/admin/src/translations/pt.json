@@ -36,7 +36,6 @@
   "menu.section.models.name.plural": "Tipos de Conteúdos",
   "menu.section.models.name.singular": "Tipo de Conteúdo",
   "modelPage.attribute.relationWith": "Relação com",
-  "modelPage.contentHeader.emptyDescription.description": "Nenhuma descrição para este Tipo De Conteúdo",
   "plugin.description.long": "Modelize a estrutura de dados da sua API. Crie novos campos e relações em apenas um minuto. Os arquivos são automaticamente criados e actualizados no seu projecto.",
   "plugin.description.short": "Modelize a estrutura de dados da sua API.",
   "popUpForm.navContainer.advanced": "Definições Avançadas",

@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { useNotification, useTracking } from '@strapi/helper-plugin';
-import { camelCase, isEmpty, sortBy, toLower, upperFirst } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
+import sortBy from 'lodash/sortBy';
+import toLower from 'lodash/toLower';
+import isEqual from 'lodash/isEqual';
 import matchSorter from 'match-sorter';
-import { useIntl } from 'react-intl';
-import { useHistory } from 'react-router-dom';
 import useDataManager from '../../hooks/useDataManager';
+import useFormModalNavigation from '../../hooks/useFormModalNavigation';
 import pluginId from '../../pluginId';
 import getTrad from '../../utils/getTrad';
-import makeSearch from '../../utils/makeSearch';
 
 const useContentTypeBuilderMenu = () => {
   const {
@@ -16,12 +17,13 @@ const useContentTypeBuilderMenu = () => {
     contentTypes,
     isInDevelopmentMode,
     sortedContentTypesList,
+    modifiedData,
+    initialData,
   } = useDataManager();
   const toggleNotification = useNotification();
   const { trackUsage } = useTracking();
-  const { formatMessage } = useIntl();
-  const { push } = useHistory();
   const [search, setSearch] = useState('');
+  const { onOpenModalCreateSchema, onOpenModalEditCategory } = useFormModalNavigation();
 
   const componentsData = sortBy(
     Object.keys(componentsGroupedByCategory).map(category => ({
@@ -31,28 +33,11 @@ const useContentTypeBuilderMenu = () => {
       onClickEdit: (e, data) => {
         e.stopPropagation();
 
-        const search = makeSearch({
-          actionType: 'edit',
-          modalType: 'editCategory',
-          categoryName: data.name,
-          header_label_1: formatMessage({
-            id: getTrad('modalForm.header.categories'),
-            defaultMessage: 'Categories',
-          }),
-          header_icon_name_1: 'component',
-          header_icon_isCustom_1: false,
-          header_info_category_1: null,
-          header_info_name_1: null,
-          header_label_2: data.name,
-          header_icon_name_2: null,
-          header_icon_isCustom_2: false,
-          header_info_category_2: null,
-          header_info_name_2: null,
-
-          settingType: 'base',
-        });
-
-        push({ search });
+        if (canOpenModalCreateCTorComponent) {
+          onOpenModalEditCategory(data.name);
+        } else {
+          toggleNotificationCannotCreateSchema();
+        }
       },
       links: sortBy(
         componentsGroupedByCategory[category].map(compo => ({
@@ -66,43 +51,73 @@ const useContentTypeBuilderMenu = () => {
     obj => obj.title
   );
 
-  const canOpenModalCreateCTorComponent = () => {
-    return (
-      !Object.keys(contentTypes).some(ct => contentTypes[ct].isTemporary === true) &&
-      !Object.keys(components).some(component => components[component].isTemporary === true)
-    );
-  };
+  const canOpenModalCreateCTorComponent =
+    !Object.keys(contentTypes).some(ct => contentTypes[ct].isTemporary === true) &&
+    !Object.keys(components).some(component => components[component].isTemporary === true) &&
+    isEqual(modifiedData, initialData);
 
-  const handleClickOpenModal = async (modalType, kind = '') => {
-    const type = kind === 'singleType' ? kind : modalType;
+  const handleClickOpenModalCreateCollectionType = () => {
+    if (canOpenModalCreateCTorComponent) {
+      trackUsage(`willCreateContentType`);
 
-    if (canOpenModalCreateCTorComponent()) {
-      trackUsage(`willCreate${upperFirst(camelCase(type))}`);
-
-      const search = makeSearch({
-        modalType,
-        kind,
+      const nextState = {
+        modalType: 'contentType',
+        kind: 'collectionType',
         actionType: 'create',
         settingType: 'base',
-        forTarget: modalType,
-        headerId: getTrad(`modalForm.${type}.header-create`),
-        header_icon_isCustom_1: 'false',
-        header_icon_name_1: type,
-        header_label_1: 'null',
-      });
-      push({
-        search,
-      });
+        forTarget: 'contentType',
+      };
+
+      onOpenModalCreateSchema(nextState);
     } else {
-      toggleNotification({
-        type: 'info',
-        message: {
-          id: `${getTrad('notification.info.creating.notSaved')}`,
-          defaultMessage:
-            'Please save your work before creating a new collection type or component',
-        },
-      });
+      toggleNotificationCannotCreateSchema();
     }
+  };
+
+  const handleClickOpenModalCreateSingleType = () => {
+    if (canOpenModalCreateCTorComponent) {
+      trackUsage(`willCreateSingleType`);
+
+      const nextState = {
+        modalType: 'contentType',
+        kind: 'singleType',
+        actionType: 'create',
+        settingType: 'base',
+        forTarget: 'contentType',
+      };
+
+      onOpenModalCreateSchema(nextState);
+    } else {
+      toggleNotificationCannotCreateSchema();
+    }
+  };
+
+  const handleClickOpenModalCreateComponent = () => {
+    if (canOpenModalCreateCTorComponent) {
+      trackUsage('willCreateComponent');
+
+      const nextState = {
+        modalType: 'component',
+        kind: null,
+        actionType: 'create',
+        settingType: 'base',
+        forTarget: 'component',
+      };
+
+      onOpenModalCreateSchema(nextState);
+    } else {
+      toggleNotificationCannotCreateSchema();
+    }
+  };
+
+  const toggleNotificationCannotCreateSchema = () => {
+    toggleNotification({
+      type: 'info',
+      message: {
+        id: `${getTrad('notification.info.creating.notSaved')}`,
+        defaultMessage: 'Please save your work before creating a new collection type or component',
+      },
+    });
   };
 
   const displayedContentTypes = sortedContentTypesList.filter(obj => obj.visible);
@@ -117,7 +132,7 @@ const useContentTypeBuilderMenu = () => {
       customLink: isInDevelopmentMode && {
         id: `${getTrad('button.model.create')}`,
         defaultMessage: 'Create new collection type',
-        onClick: () => handleClickOpenModal('contentType', 'collectionType'),
+        onClick: handleClickOpenModalCreateCollectionType,
       },
       links: displayedContentTypes.filter(contentType => contentType.kind === 'collectionType'),
     },
@@ -130,7 +145,7 @@ const useContentTypeBuilderMenu = () => {
       customLink: isInDevelopmentMode && {
         id: `${getTrad('button.single-types.create')}`,
         defaultMessage: 'Create new single type',
-        onClick: () => handleClickOpenModal('contentType', 'singleType'),
+        onClick: handleClickOpenModalCreateSingleType,
       },
       links: displayedContentTypes.filter(singleType => singleType.kind === 'singleType'),
     },
@@ -143,7 +158,7 @@ const useContentTypeBuilderMenu = () => {
       customLink: {
         id: `${getTrad('button.component.create')}`,
         defaultMessage: 'Create a new component',
-        onClick: () => handleClickOpenModal('component'),
+        onClick: handleClickOpenModalCreateComponent,
       },
       links: componentsData,
     },

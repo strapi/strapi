@@ -23,7 +23,7 @@ module.exports = plop => {
       return [
         {
           type: 'add',
-          path: `${filePath}/controllers/{{id}}.js`,
+          path: `${filePath}/controllers/{{ id }}.js`,
           templateFile: 'templates/controller.js.hbs',
         },
       ];

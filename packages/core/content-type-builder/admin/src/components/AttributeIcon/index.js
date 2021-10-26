@@ -23,6 +23,7 @@ import { pxToRem } from '@strapi/helper-plugin';
 const iconByTypes = {
   biginteger: Numbers,
   boolean: Boolean,
+  collectionType: CT,
   component: Component,
   contentType: CT,
   date: Date,

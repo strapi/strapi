@@ -133,7 +133,7 @@ const sortContentType = types =>
       .map(uid => ({
         visible: types[uid].schema.visible,
         name: uid,
-        title: types[uid].schema.name,
+        title: types[uid].schema.displayName,
         plugin: types[uid].plugin || null,
         uid,
         to: `/plugins/${pluginId}/content-types/${uid}`,

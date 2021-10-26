@@ -13,7 +13,9 @@ let data = {};
 
 const model = {
   kind: 'singleType',
-  name: 'single-type',
+  displayName: 'single-type',
+  singularName: 'single-type',
+  pluralName: 'single-types',
   attributes: {
     title: {
       type: 'string',

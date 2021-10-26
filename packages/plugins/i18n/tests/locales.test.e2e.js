@@ -25,7 +25,9 @@ const productModel = {
       type: 'string',
     },
   },
-  name: 'product',
+  displayName: 'Product',
+  singularName: 'product',
+  pluralName: 'products',
   description: '',
   collectionName: '',
 };

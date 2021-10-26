@@ -20,7 +20,9 @@ const product = {
       type: 'text',
     },
   },
-  name: 'product',
+  displayName: 'product',
+  singularName: 'product',
+  pluralName: 'products',
   description: '',
   collectionName: '',
 };
