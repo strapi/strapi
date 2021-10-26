@@ -20,6 +20,7 @@ export const EmptyInput = ({ disabled }) => {
         height="100%"
         width="100%"
         as="button"
+        type="button"
       >
         <Icon
           as={AddAsset}

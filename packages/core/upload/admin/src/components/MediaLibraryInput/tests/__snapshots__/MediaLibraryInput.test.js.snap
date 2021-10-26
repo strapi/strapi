@@ -169,6 +169,7 @@ exports[`<MediaLibraryInput /> renders and matches the snapshot 1`] = `
               <button
                 class="c11 c12"
                 height="100%"
+                type="button"
                 width="100%"
               >
                 <svg

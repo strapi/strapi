@@ -20,7 +20,6 @@ export default {
   register(app) {
     // TODO update doc and guides
     app.addComponents({ name: 'media-library', Component: InputModalStepper });
-    app.addComponents({ name: 'media-library-input', Component: MediaLibraryInput });
 
     app.addMenuLink({
       to: `/plugins/${pluginId}`,
@@ -38,6 +37,7 @@ export default {
     });
 
     app.addFields({ type: 'media', Component: InputMedia });
+    app.addFields({ type: 'media-library-input', Component: MediaLibraryInput });
 
     app.registerPlugin({
       id: pluginId,

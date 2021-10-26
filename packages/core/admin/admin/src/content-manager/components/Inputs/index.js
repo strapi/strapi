@@ -37,7 +37,7 @@ function Inputs({
   queryInfos,
   value,
 }) {
-  const { components } = useLibrary();
+  const { fields } = useLibrary();
   const { contentType: currentContentTypeLayout } = useContentTypeLayout();
 
   const disabled = useMemo(() => !get(metadatas, 'editable', true), [metadatas]);
@@ -231,7 +231,7 @@ function Inputs({
         uid: InputUID,
         // FIXME
         datetime: ComingSoonInput,
-        media: components['media-library-input'] || ComingSoonInput,
+        media: fields['media-library-input'] || ComingSoonInput,
         wysiwyg: Wysiwyg,
       }}
       multiple={fieldSchema.multiple || false}

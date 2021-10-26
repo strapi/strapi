@@ -5,7 +5,7 @@ import { Carousel, CarouselSlide } from '@strapi/parts/Carousel';
 import getTrad from '../../utils/getTrad';
 import { EmptyInput } from './EmptyInput';
 
-export const MediaLibraryInput = ({ intlLabel, description, disabled, error }) => {
+export const MediaLibraryInput = ({ intlLabel, description, disabled, error, multiple }) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const { formatMessage } = useIntl();
 
@@ -17,15 +17,28 @@ export const MediaLibraryInput = ({ intlLabel, description, disabled, error }) =
     setSelectedIndex(current => (current > 0 ? current - 1 : 2));
   };
 
+  const hint = description
+    ? formatMessage(
+        { id: description.id, defaultMessage: description.defaultMessage },
+        { ...description.values }
+      )
+    : '';
+
   return (
     <Carousel
       label={formatMessage(intlLabel)}
       selectedSlide={selectedIndex}
-      previousLabel="Previous slide"
-      nextLabel="Next slide"
+      previousLabel={formatMessage({
+        id: getTrad('mediaLibraryInput.actions.previousSlide'),
+        defaultMessage: 'Previous slide',
+      })}
+      nextLabel={formatMessage({
+        id: getTrad('mediaLibraryInput.actions.nextSlide'),
+        defaultMessage: 'Next slide',
+      })}
       onNext={handleNext}
       onPrevious={handlePrevious}
-      hint={description}
+      hint={hint}
       error={error}
     >
       <CarouselSlide
@@ -34,7 +47,7 @@ export const MediaLibraryInput = ({ intlLabel, description, disabled, error }) =
           { n: 1, m: 1 }
         )}
       >
-        <EmptyInput disabled={disabled} />
+        <EmptyInput disabled={disabled} multiple={multiple} />
       </CarouselSlide>
     </Carousel>
   );
@@ -44,11 +57,17 @@ MediaLibraryInput.defaultProps = {
   disabled: false,
   description: undefined,
   error: undefined,
+  multiple: false,
 };
 
 MediaLibraryInput.propTypes = {
   disabled: PropTypes.bool,
-  description: PropTypes.string,
+  description: PropTypes.shape({
+    id: PropTypes.string,
+    defaultMessage: PropTypes.string,
+    values: PropTypes.shape({}),
+  }),
   error: PropTypes.string,
   intlLabel: PropTypes.shape({ id: PropTypes.string, defaultMessage: PropTypes.string }).isRequired,
+  multiple: PropTypes.bool,
 };
