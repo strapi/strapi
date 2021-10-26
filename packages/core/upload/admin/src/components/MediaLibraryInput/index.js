@@ -71,7 +71,7 @@ MediaLibraryInput.propTypes = {
     defaultMessage: PropTypes.string,
     values: PropTypes.shape({}),
   }),
-  error: PropTypes.string,
+  error: PropTypes.shape({ id: PropTypes.string, defaultMessage: PropTypes.string }),
   intlLabel: PropTypes.shape({ id: PropTypes.string, defaultMessage: PropTypes.string }),
   multiple: PropTypes.bool,
 };
