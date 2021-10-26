@@ -1,8 +1,7 @@
 'use strict';
 
-const execSync = require('child_process').execSync;
 const path = require('path');
-// const fetch = require('node-fetch');
+const execa = require('execa');
 const chalk = require('chalk');
 
 /**
@@ -11,9 +10,9 @@ const chalk = require('chalk');
  * @returns {Object}
  */
 function getPackageInfo(packageName) {
-  const npmInfo = execSync(`npm view ${packageName} name version --silent`).toString();
+  const { stdout } = execa.shellSync(`npm view ${packageName} name version --silent`);
   // Use regex to parse name and version from CLI result
-  const [name, version] = npmInfo.match(/(?<=')(.*?)(?=')/gm);
+  const [name, version] = stdout.match(/(?<=')(.*?)(?=')/gm);
   return { name, version };
 }
 
@@ -47,10 +46,15 @@ async function getTemplatePackageInfo(template) {
  */
 function downloadNpmTemplate({ name, version }, parentDir) {
   // Download from npm
-  execSync(`cd ${parentDir} && npm install ${name}@${version} --no-save --silent`).toString();
+  execa.shellSync(`npm install ${name}@${version} --no-save --silent`, {
+    cwd: parentDir,
+  });
 
   // Return the path of the actual template
-  const exactTemplatePath = path.resolve(parentDir, 'node_modules', name);
+  const exactTemplatePath = require.resolve(path.join('node_modules', name), {
+    paths: [parentDir],
+  });
+  // const exactTemplatePath = path.resolve(parentDir, 'node_modules', name);
   return exactTemplatePath;
 }
 

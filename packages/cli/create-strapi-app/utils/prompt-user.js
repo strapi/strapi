@@ -61,7 +61,6 @@ async function getTemplateQuestion() {
  * @param {string|null} template - The template the project should use
  * @returns Array of prompt question objects
  */
-// TODO: re-enabled once the template have been migrated to V4
 async function getPromptQuestions(projectName, template) {
   return [
     {

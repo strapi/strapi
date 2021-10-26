@@ -55,9 +55,7 @@ async function writeTemplateJson(rootPath) {
  */
 async function templateConfigExists(rootPath) {
   const jsonConfig = await fse.pathExists(join(rootPath, 'template.json'));
-  const functionConfig = await fse.pathExists(join(rootPath, 'template.js'));
-
-  return jsonConfig || functionConfig;
+  return Boolean(jsonConfig);
 }
 
 module.exports = async function generateTemplate(directory) {

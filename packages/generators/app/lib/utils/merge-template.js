@@ -31,12 +31,12 @@ module.exports = async function mergeTemplate(scope, rootPath) {
   let templatePath;
   let templateParentPath;
   let templatePackageInfo = {};
-  const isLocalTemplate = Boolean(scope.template.match(/^file:/));
+  const isLocalTemplate = ['./', '../'].some(filePrefix => scope.template.startsWith(filePrefix));
 
   if (isLocalTemplate) {
     // Template is a local directory
     console.log('Installing local template.');
-    templatePath = path.resolve(rootPath, '..', scope.template.match(/^file:(.*)?$/)[1]);
+    templatePath = path.resolve(rootPath, '..', scope.template);
   } else {
     // Template should be an npm package. Fetch template info
     templatePackageInfo = await getTemplatePackageInfo(scope.template);
@@ -51,7 +51,7 @@ module.exports = async function mergeTemplate(scope, rootPath) {
   checkTemplateCompat(templatePath, scope.strapiVersion);
 
   // Make sure the downloaded template matches the required format
-  const { templateConfig } = await checkTemplateRootStructure(templatePath, scope);
+  const templateConfig = await checkTemplateRootStructure(templatePath, scope);
   await checkTemplateContentsStructure(path.resolve(templatePath, 'template'));
 
   // Merge contents of the template in the project
@@ -70,34 +70,31 @@ module.exports = async function mergeTemplate(scope, rootPath) {
  * @param {string} strapiVersion - Strapi version of the app being created
  */
 function checkTemplateCompat(templatePath, strapiVersion) {
-  const packageJSON = require(path.resolve(templatePath, 'package.json'));
-  const compatibleStrapiRange = packageJSON.strapi;
+  const templateJSON = require(path.resolve(templatePath, 'template.json'));
+  const compatibleStrapiConstraint = templateJSON.strapi.supportedVersion;
 
-  // Make sure the Strapi compatibility range is set
-  if (compatibleStrapiRange == null) {
-    throw new Error('This template does not specify a range of compatible Strapi versions');
+  // Make sure the Strapi compatibility constraint is set
+  if (compatibleStrapiConstraint == null) {
+    throw new Error("This template does not specify the Strapi versions it's compatible with");
   }
 
   // Check that the range is set using proper semver
-  const validCompatibleStrapiRange = semver.validRange(compatibleStrapiRange);
+  const validCompatibleStrapiRange = semver.validRange(compatibleStrapiConstraint);
   if (!validCompatibleStrapiRange) {
     throw new Error(
-      'Please use semver to specify the range of Strapi versions compatible with this plugin'
+      'Please use a valid semver constraint to specify which Strapi versions this template is compatible with'
     );
   }
 
   // Check if the template is compatible with this Strapi version
-  const coercedStrapiVersion = semver.coerce(strapiVersion, { includePrerelease: true });
-  const isCompatible = semver.satisfies(coercedStrapiVersion, validCompatibleStrapiRange, {
-    includePrerelease: true,
-  });
+  const isCompatible = semver.satisfies(strapiVersion, validCompatibleStrapiRange);
   if (!isCompatible) {
     throw new Error(`
       This template is not compatible with Strapi version ${strapiVersion}.
-      It will only work with Strapi versions in the range ${chalk.green(
-        JSON.stringify(compatibleStrapiRange)
+      It will only work with Strapi versions in the constraint ${chalk.green(
+        JSON.stringify(compatibleStrapiConstraint)
       )}.
-      Try using a different Strapi version, or a different version of this template instead
+      Try using a different Strapi version, or a different version of this template instead.
     `);
   }
 }
@@ -105,49 +102,19 @@ function checkTemplateCompat(templatePath, strapiVersion) {
 /**
  * Make sure the template has the required top-level structure
  * @param {string} templatePath - Path of the locally downloaded template
- * @param {Object} scope - Information about the Strapi app's config
+ * @returns {Object} - The template config object
  */
-async function checkTemplateRootStructure(templatePath, scope) {
-  // Make sure the root of the repo has a template.json or a template.js file
+async function checkTemplateRootStructure(templatePath) {
+  // Make sure the root of the repo has a template.json file
   const templateJsonPath = path.join(templatePath, 'template.json');
-  const templateFunctionPath = path.join(templatePath, 'template.js');
-
-  // Store the template config, whether it comes from a JSON or a function
-  let templateConfig = {};
-
-  const hasJsonConfig = fse.existsSync(templateJsonPath);
-  if (hasJsonConfig) {
-    const jsonStat = await fse.stat(templateJsonPath);
-    if (!jsonStat.isFile()) {
-      throw new Error(`A template's ${chalk.green('template.json')} must be a file`);
-    }
-    templateConfig = require(templateJsonPath);
+  if (!fse.existsSync(templateJsonPath)) {
+    throw new Error(`A template must have a ${chalk.green('template.json')} root file`);
+  }
+  if (fse.statSync(templateJsonPath).isFile()) {
+    throw new Error(`A template's ${chalk.green('template.json')} must be a file`);
   }
 
-  const hasFunctionConfig = fse.existsSync(templateFunctionPath);
-  if (hasFunctionConfig) {
-    const functionStat = await fse.stat(templateFunctionPath);
-    if (!functionStat.isFile()) {
-      throw new Error(`A template's ${chalk.green('template.js')} must be a file`);
-    }
-    // Get the config by passing the scope to the function
-    templateConfig = require(templateFunctionPath)(scope);
-  }
-
-  // Make sure there's exactly one template config file
-  if (!hasJsonConfig && !hasFunctionConfig) {
-    throw new Error(
-      `A template must have either a ${chalk.green('template.json')} or a ${chalk.green(
-        'template.js'
-      )} root file`
-    );
-  } else if (hasJsonConfig && hasFunctionConfig) {
-    throw new Error(
-      `A template cannot have both ${chalk.green('template.json')} and ${chalk.green(
-        'template.js'
-      )} root files`
-    );
-  }
+  const templateConfig = require(templateJsonPath);
 
   // Make sure the root of the repo has a template folder
   const templateDirPath = path.join(templatePath, 'template');
@@ -164,7 +131,7 @@ async function checkTemplateRootStructure(templatePath, scope) {
     throw error;
   }
 
-  return { templateConfig };
+  return templateConfig;
 }
 
 /**
