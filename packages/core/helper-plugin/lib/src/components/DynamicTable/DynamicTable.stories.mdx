@@ -11,7 +11,7 @@ import { Dialog, DialogBody, DialogFooter } from '@strapi/design-system/Dialog';
 import { Tbody, Td, Tr } from '@strapi/design-system/Table';
 import { Text } from '@strapi/design-system/Text';
 import { IconButton } from '@strapi/design-system/IconButton';
-import { AddIcon, EditIcon, DeleteIcon } from '@strapi/icons';
+import { Plus, Pencil, Trash } from '@strapi/icons';
 import useQueryParams from '../../hooks/useQueryParams';
 import DynamicTable from './index';
 
@@ -197,14 +197,14 @@ import { DynamicTable } from '@strapi/helper-plugin';
                           onClick={() => console.log(`${pathname}/${data.id}`)}
                           label={`Edit ${data.firstname} ${data.lastname}`}
                           noBorder
-                          icon={<EditIcon />}
+                          icon={<Pencil />}
                         />
                         <Box paddingLeft={1}>
                           <IconButton
                             onClick={() => onClickDelete(data.id)}
                             label={`Delete ${data.firstname} ${data.lastname}`}
                             noBorder
-                            icon={<DeleteIcon />}
+                            icon={<Trash />}
                           />
                         </Box>
                       </Flex>
@@ -308,14 +308,14 @@ import { DynamicTable } from '@strapi/helper-plugin';
                           onClick={() => console.log(`${pathname}/${data.id}`)}
                           label={`Edit ${data.firstname} ${data.lastname}`}
                           noBorder
-                          icon={<EditIcon />}
+                          icon={<Pencil />}
                         />
                         <Box paddingLeft={1}>
                           <IconButton
                             onClick={() => onClickDelete(data.id)}
                             label={`Delete ${data.firstname} ${data.lastname}`}
                             noBorder
-                            icon={<DeleteIcon />}
+                            icon={<Trash />}
                           />
                         </Box>
                       </Flex>

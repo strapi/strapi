@@ -6,8 +6,8 @@ import { IconButton } from '@strapi/design-system/IconButton';
 import { Flex } from '@strapi/design-system/Flex';
 import { Text } from '@strapi/design-system/Text';
 import { Tbody, Td, Tr } from '@strapi/design-system/Table';
-import EditIcon from '@strapi/icons/EditIcon';
-import DeleteIcon from '@strapi/icons/DeleteIcon';
+import Pencil from '@strapi/icons/Pencil';
+import Trash from '@strapi/icons/Trash';
 import { useHistory } from 'react-router-dom';
 import { useIntl } from 'react-intl';
 import { stopPropagation, onRowClick } from '@strapi/helper-plugin';
@@ -80,7 +80,7 @@ const TableRows = ({
                       { target: `${data.firstname} ${data.lastname}` }
                     )}
                     noBorder
-                    icon={<EditIcon />}
+                    icon={<Pencil />}
                   />
 
                   {canDelete && (
@@ -92,7 +92,7 @@ const TableRows = ({
                           { target: `${data.firstname} ${data.lastname}` }
                         )}
                         noBorder
-                        icon={<DeleteIcon />}
+                        icon={<Trash />}
                       />
                     </Box>
                   )}

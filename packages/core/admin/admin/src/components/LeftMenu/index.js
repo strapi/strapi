@@ -18,8 +18,8 @@ import { FocusTrap } from '@strapi/design-system/FocusTrap';
 import { Box } from '@strapi/design-system/Box';
 import { Text } from '@strapi/design-system/Text';
 import { Stack } from '@strapi/design-system/Stack';
-import ContentIcon from '@strapi/icons/ContentIcon';
-import Logout from '@strapi/icons/Logout';
+import Write from '@strapi/icons/Write';
+import Exit from '@strapi/icons/Exit';
 import { auth, usePersistentState, useAppInfos } from '@strapi/helper-plugin';
 import useConfigurations from '../../hooks/useConfigurations';
 
@@ -92,7 +92,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
       <Divider />
 
       <NavSections>
-        <NavLink to="/content-manager" icon={<ContentIcon />}>
+        <NavLink to="/content-manager" icon={<Write />}>
           {formatMessage({ id: 'content-manager.plugin.name', defaultMessage: 'Content manager' })}
         </NavLink>
 
@@ -155,7 +155,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
                     defaultMessage: 'Logout',
                   })}
                 </Text>
-                <Logout />
+                <Exit />
               </LinkUser>
             </Stack>
           </FocusTrap>

@@ -1,5 +1,5 @@
 import React from 'react';
-import AddIcon from '@strapi/icons/AddIcon';
+import Plus from '@strapi/icons/Plus';
 import { Box } from '@strapi/design-system/Box';
 import {
   SubNav,
@@ -72,7 +72,7 @@ const ContentTypeBuilderNav = () => {
               </SubNavSection>
               {section.customLink && (
                 <Box as="li" paddingLeft={7}>
-                  <TextButton onClick={section.customLink.onClick} startIcon={<AddIcon />}>
+                  <TextButton onClick={section.customLink.onClick} startIcon={<Plus />}>
                     {formatMessage({
                       id: section.customLink.id,
                       defaultMessage: section.customLink.defaultMessage,

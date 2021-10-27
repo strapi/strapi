@@ -10,8 +10,8 @@ import { Link } from '@strapi/design-system/Link';
 import { Button } from '@strapi/design-system/Button';
 import { TextInput } from '@strapi/design-system/TextInput';
 import { H1, Text } from '@strapi/design-system/Text';
-import Hide from '@strapi/icons/Hide';
-import Show from '@strapi/icons/Show';
+import EyeStriked from '@strapi/icons/EyeStriked';
+import Eye from '@strapi/icons/Eye';
 import styled from 'styled-components';
 import { Formik } from 'formik';
 import UnauthenticatedLayout, {
@@ -99,7 +99,7 @@ const ForgotPassword = ({ onSubmit, schema }) => {
                               }
                         )}
                       >
-                        {passwordShown ? <Show /> : <Hide />}
+                        {passwordShown ? <Eye /> : <EyeStriked />}
                       </FieldActionWrapper>
                     }
                     hint={formatMessage({
@@ -144,7 +144,7 @@ const ForgotPassword = ({ onSubmit, schema }) => {
                               }
                         )}
                       >
-                        {confirmPasswordShown ? <Show /> : <Hide />}
+                        {confirmPasswordShown ? <Eye /> : <EyeStriked />}
                       </FieldActionWrapper>
                     }
                     required

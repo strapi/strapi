@@ -24,8 +24,8 @@ import { Main } from '@strapi/design-system/Main';
 import { ActionLayout, ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
 import { useNotifyAT } from '@strapi/design-system/LiveRegions';
 import { Button } from '@strapi/design-system/Button';
-import Add from '@strapi/icons/Add';
-import Settings from '@strapi/icons/Settings';
+import Plus from '@strapi/icons/Plus';
+import Cog from '@strapi/icons/Cog';
 import axios from 'axios';
 import { axiosInstance } from '../../../core/utils';
 import { InjectionZone } from '../../../shared/components';
@@ -259,7 +259,7 @@ function ListView({
           search: query.plugins ? pluginsQueryParams : '',
         });
       }}
-      startIcon={<Add />}
+      startIcon={<Plus />}
     >
       {formatMessage({
         id: getTrad('HeaderLayout.button.label-add-entry'),
@@ -284,7 +284,7 @@ function ListView({
                 <IconButtonCustom
                   onClick={() =>
                     push({ pathname: `${slug}/configurations/list`, search: pluginsQueryParams })}
-                  icon={<Settings />}
+                  icon={<Cog />}
                   label={formatMessage({
                     id: 'app.links.configure-view',
                     defaultMessage: 'Configure the view',

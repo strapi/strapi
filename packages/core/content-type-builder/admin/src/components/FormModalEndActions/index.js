@@ -8,7 +8,7 @@ import React from 'react';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import { Button } from '@strapi/design-system/Button';
-import AddIcon from '@strapi/icons/AddIcon';
+import Plus from '@strapi/icons/Plus';
 import { getTrad } from '../../utils';
 
 const FormModalEndActions = ({
@@ -55,7 +55,7 @@ const FormModalEndActions = ({
 
             onSubmitAddComponentToDz(e, true);
           }}
-          startIcon={<AddIcon />}
+          startIcon={<Plus />}
         >
           {formatMessage({
             id: getTrad('form.button.add-first-field-to-created-component'),
@@ -113,7 +113,7 @@ const FormModalEndActions = ({
 
             onSubmitCreateDz(e, true);
           }}
-          startIcon={<AddIcon />}
+          startIcon={<Plus />}
         >
           {formatMessage({
             id: getTrad('form.button.add-components-to-dynamiczone'),
@@ -174,7 +174,7 @@ const FormModalEndActions = ({
 
             onSubmitAddComponentAttribute(e, true);
           }}
-          startIcon={<AddIcon />}
+          startIcon={<Plus />}
         >
           {isCreatingComponentWhileAddingAField
             ? formatMessage({
@@ -215,7 +215,7 @@ const FormModalEndActions = ({
 
             onSubmitEditAttribute(e, true);
           }}
-          startIcon={<AddIcon />}
+          startIcon={<Plus />}
         >
           {formatMessage({
             id: getTrad('form.button.add-field'),

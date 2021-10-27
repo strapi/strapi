@@ -14,7 +14,7 @@ import {
   ActionLayout,
   VisuallyHidden,
 } from '@strapi/design-system';
-import AddIcon from '@strapi/icons/AddIcon';
+import Plus from '@strapi/icons/Plus';
 import {
   useTracking,
   SettingsPageTitle,
@@ -137,7 +137,7 @@ const RoleListPage = () => {
           })}
           primaryAction={
             <CheckPermissions permissions={permissions.createRole}>
-              <Button onClick={handleNewRoleClick} startIcon={<AddIcon />}>
+              <Button onClick={handleNewRoleClick} startIcon={<Plus />}>
                 {formatMessage({
                   id: getTrad('List.button.roles'),
                   defaultMessage: 'Add new role',

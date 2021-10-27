@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { Form, useRBACProvider } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { Formik } from 'formik';
-import CheckIcon from '@strapi/icons/CheckIcon';
+import Check from '@strapi/icons/Check';
 import {
   ModalLayout,
   ModalHeader,
@@ -106,7 +106,7 @@ const ModalEdit = ({ locale, onClose }) => {
               </Button>
             }
             endActions={
-              <Button type="submit" startIcon={<CheckIcon />} disabled={isEditing}>
+              <Button type="submit" startIcon={<Check />} disabled={isEditing}>
                 {formatMessage({ id: 'app.components.Button.save' })}
               </Button>
             }

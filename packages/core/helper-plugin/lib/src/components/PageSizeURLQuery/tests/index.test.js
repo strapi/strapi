@@ -72,6 +72,10 @@ describe('<PageSizeURLQuery />', () => {
         outline: none;
       }
 
+      .c4[aria-disabled='true'] {
+        cursor: not-allowed;
+      }
+
       .c8 {
         font-weight: 400;
         font-size: 0.875rem;

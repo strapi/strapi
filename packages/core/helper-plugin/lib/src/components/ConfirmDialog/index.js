@@ -6,8 +6,8 @@ import { Stack } from '@strapi/design-system/Stack';
 import { Flex } from '@strapi/design-system/Flex';
 import { Text } from '@strapi/design-system/Text';
 import { Button } from '@strapi/design-system/Button';
-import AlertWarningIcon from '@strapi/icons/AlertWarningIcon';
-import DeleteIcon from '@strapi/icons/DeleteIcon';
+import ExclamationMarkCircle from '@strapi/icons/ExclamationMarkCircle';
+import Trash from '@strapi/icons/Trash';
 
 const ConfirmDialog = ({
   bodyText,
@@ -80,8 +80,8 @@ ConfirmDialog.defaultProps = {
     id: 'components.popUpWarning.message',
     defaultMessage: 'Are you sure you want to delete this?',
   },
-  iconBody: <AlertWarningIcon />,
-  iconRightButton: <DeleteIcon />,
+  iconBody: <ExclamationMarkCircle />,
+  iconRightButton: <Trash />,
   isConfirmButtonLoading: false,
   leftButtonText: {
     id: 'app.components.Button.cancel',

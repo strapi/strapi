@@ -27,9 +27,9 @@ import { useNotifyAT } from '@strapi/design-system/LiveRegions';
 import { Select, Option } from '@strapi/design-system/Select';
 import { FieldAction } from '@strapi/design-system/Field';
 import { TextInput } from '@strapi/design-system/TextInput';
-import Show from '@strapi/icons/Show';
-import Hide from '@strapi/icons/Hide';
-import CheckIcon from '@strapi/icons/CheckIcon';
+import Eye from '@strapi/icons/Eye';
+import EyeStriked from '@strapi/icons/EyeStriked';
+import Check from '@strapi/icons/Check';
 import useLocalesProvider from '../../components/LocalesProvider/useLocalesProvider';
 import { fetchUser, putUser } from './utils/api';
 import schema from './utils/schema';
@@ -174,7 +174,7 @@ const ProfilePage = () => {
               <HeaderLayout
                 title={data.username || `${data.firstname} ${data.lastname}`}
                 primaryAction={
-                  <Button startIcon={<CheckIcon />} loading={isSubmitting} type="submit">
+                  <Button startIcon={<Check />} loading={isSubmitting} type="submit">
                     {formatMessage({ id: 'form.button.save', defaultMessage: 'Save' })}
                   </Button>
                 }
@@ -305,7 +305,7 @@ const ProfilePage = () => {
                                         }
                                   )}
                                 >
-                                  {currentPasswordShown ? <Show /> : <Hide />}
+                                  {currentPasswordShown ? <Eye /> : <EyeStriked />}
                                 </FieldActionWrapper>
                               }
                             />
@@ -349,7 +349,7 @@ const ProfilePage = () => {
                                         }
                                   )}
                                 >
-                                  {passwordShown ? <Show /> : <Hide />}
+                                  {passwordShown ? <Eye /> : <EyeStriked />}
                                 </FieldActionWrapper>
                               }
                             />
@@ -390,7 +390,7 @@ const ProfilePage = () => {
                                         }
                                   )}
                                 >
-                                  {passwordConfirmShown ? <Show /> : <Hide />}
+                                  {passwordConfirmShown ? <Eye /> : <EyeStriked />}
                                 </FieldActionWrapper>
                               }
                             />

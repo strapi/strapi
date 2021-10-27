@@ -9,9 +9,9 @@ import { useIntl } from 'react-intl';
 import { TextInput } from '@strapi/design-system/TextInput';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import Hide from '@strapi/icons/Hide';
+import EyeStriked from '@strapi/icons/EyeStriked';
 
-const StyledIcon = styled(Hide)`
+const StyledIcon = styled(EyeStriked)`
   > path {
     fill: ${({ theme }) => theme.colors.neutral600};
   }

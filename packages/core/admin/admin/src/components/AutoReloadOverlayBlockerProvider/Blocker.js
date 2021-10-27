@@ -4,8 +4,8 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled, { keyframes } from 'styled-components';
 import { pxToRem } from '@strapi/helper-plugin';
-import Time from '@strapi/icons/Time';
-import Reload from '@strapi/icons/Reload';
+import Clock from '@strapi/icons/Clock';
+import Refresh from '@strapi/icons/Refresh';
 import { Link } from '@strapi/design-system/Link';
 import { Box } from '@strapi/design-system/Box';
 import { Stack } from '@strapi/design-system/Stack';
@@ -26,7 +26,7 @@ const rotation = keyframes`
   }
 `;
 
-const LoaderReload = styled(Reload)`
+const LoaderReload = styled(Refresh)`
   animation: ${rotation} 1s infinite linear;
 `;
 
@@ -64,7 +64,7 @@ const Blocker = ({ displayedIcon, description, title, isOpen }) => {
 
             {displayedIcon === 'time' && (
               <IconBox padding={6} background="primary100" borderColor="primary200">
-                <Time width={pxToRem(40)} height={pxToRem(40)} />
+                <Clock width={pxToRem(40)} height={pxToRem(40)} />
               </IconBox>
             )}
           </Flex>

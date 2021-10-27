@@ -4,7 +4,8 @@ import { IconButton } from '@strapi/design-system/IconButton';
 import { Text } from '@strapi/design-system/Text';
 import { Flex } from '@strapi/design-system/Flex';
 import { Tbody, Tr, Td } from '@strapi/design-system/Table';
-import { EditIcon, DeleteIcon } from '@strapi/icons';
+import Pencil from '@strapi/icons/Pencil';
+import Trash from '@strapi/icons/Trash';
 import { CheckPermissions, onRowClick, stopPropagation } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
@@ -52,7 +53,7 @@ const TableBody = ({ sortedRoles, canDelete, permissions, setRoleToDelete, onDel
                 <IconButton
                   onClick={() => handleClickEdit(role.id)}
                   noBorder
-                  icon={<EditIcon />}
+                  icon={<Pencil />}
                   label={formatMessage(
                     { id: 'app.component.table.edit', defaultMessage: 'Edit {target}' },
                     { target: `${role.name}` }
@@ -64,7 +65,7 @@ const TableBody = ({ sortedRoles, canDelete, permissions, setRoleToDelete, onDel
                   <IconButton
                     onClick={() => handleClickDelete(role.id)}
                     noBorder
-                    icon={<DeleteIcon />}
+                    icon={<Trash />}
                     label={formatMessage(
                       { id: 'app.component.table.delete', defaultMessage: 'Delete {target}' },
                       { target: `${role.name}` }

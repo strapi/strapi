@@ -1,5 +1,5 @@
 import React from 'react';
-import EmptyStateDocument from '@strapi/icons/EmptyStateDocument';
+import EmptyDocuments from '@strapi/icons/EmptyDocuments';
 import { EmptyStateLayout } from '@strapi/design-system/EmptyStateLayout';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
@@ -9,7 +9,7 @@ const NoContent = ({ content, ...rest }) => {
 
   return (
     <EmptyStateLayout
-      icon={<EmptyStateDocument width="10rem" />}
+      icon={<EmptyDocuments width="10rem" />}
       {...rest}
       content={formatMessage(
         { id: content.id, defaultMessage: content.defaultMessage },

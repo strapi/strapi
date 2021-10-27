@@ -12,7 +12,7 @@ import { Flex } from '@strapi/design-system/Flex';
 import { IconButton } from '@strapi/design-system/IconButton';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { Stack } from '@strapi/design-system/Stack';
-import DeleteIcon from '@strapi/icons/DeleteIcon';
+import Trash from '@strapi/icons/Trash';
 import DragHandle from '@strapi/icons/Drag';
 import ItemTypes from '../../../utils/ItemTypes';
 import getTrad from '../../../utils/getTrad';
@@ -176,7 +176,7 @@ const DraggedItem = ({
                       id: getTrad('containers.Edit.delete'),
                       defaultMessage: 'Edit',
                     })}
-                    icon={<DeleteIcon />}
+                    icon={<Trash />}
                   />
                   <Box paddingLeft={2}>
                     <DragHandleWrapper

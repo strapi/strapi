@@ -15,7 +15,7 @@ import { Popover } from '@strapi/design-system/Popover';
 import { Stack } from '@strapi/design-system/Stack';
 import { FocusTrap } from '@strapi/design-system/FocusTrap';
 import { Select, Option } from '@strapi/design-system/Select';
-import AddIcon from '@strapi/icons/AddIcon';
+import Plus from '@strapi/icons/Plus';
 import FilterValueInput from './FilterValueInput';
 import getFilterList from './utils/getFilterList';
 
@@ -251,7 +251,7 @@ const FilterPopover = ({ displayedFilters, filters, onSubmit, onToggle, source }
                 />
               </Box>
               <Box>
-                <FullWidthButton size="L" variant="secondary" startIcon={<AddIcon />} type="submit">
+                <FullWidthButton size="L" variant="secondary" startIcon={<Plus />} type="submit">
                   {formatMessage({ id: 'app.utils.add-filter', defaultMessage: 'Add filter' })}
                 </FullWidthButton>
               </Box>

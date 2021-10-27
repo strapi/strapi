@@ -6,7 +6,7 @@ import {
   LoadingIndicatorPage,
   useFocusWhenNavigate,
 } from '@strapi/helper-plugin';
-import CheckIcon from '@strapi/icons/CheckIcon';
+import Check from '@strapi/icons/Check';
 import { ContentLayout, HeaderLayout, Layout } from '@strapi/design-system/Layout';
 import { Box } from '@strapi/design-system/Box';
 import { Button } from '@strapi/design-system/Button';
@@ -79,7 +79,7 @@ export const SingleSignOn = () => {
               data-testid="save-button"
               disabled={isHeaderButtonDisabled}
               loading={showHeaderButtonLoader}
-              startIcon={<CheckIcon />}
+              startIcon={<Check />}
               type="submit"
               size="L"
             >

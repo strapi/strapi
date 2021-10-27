@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { ArgsTable, Meta, Canvas, Story } from '@storybook/addon-docs';
 import { Button } from '@strapi/design-system/Button';
-import CheckIcon from '@strapi/icons/CheckIcon';
-import HelpIcon from '@strapi/icons/HelpIcon';
+import Check from '@strapi/icons/Check';
+import Information from '@strapi/icons/Information';
 import ConfirmDialog from './index';
 
 <Meta title="components/ConfirmDialog" />
@@ -77,8 +77,8 @@ TODO
               id: 'app.components',
               defaultMessage: 'Are you sure you want to unpublish it?',
             }}
-            iconBody={<HelpIcon />}
-            iconRightButton={<CheckIcon />}
+            iconBody={<Information />}
+            iconRightButton={<Check />}
             isConfirmButtonLoading={isLoading}
             isOpen={dialogOpen}
             onToggleDialog={handleToggle}

@@ -8,14 +8,14 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
-import AddIcon from '@strapi/icons/AddIconCircle';
+import PlusCircle from '@strapi/icons/PlusCircle';
 import { BaseButton } from '@strapi/design-system/BaseButton';
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
 import { Text, ButtonText } from '@strapi/design-system/Text';
 import { getTrad } from '../../../../utils';
 
-const StyledAddIcon = styled(AddIcon)`
+const StyledAddIcon = styled(PlusCircle)`
   transform: ${({ $isOpen }) => ($isOpen ? 'rotate(45deg)' : 'rotate(0deg)')};
   > circle {
     fill: ${({ theme, $hasError }) =>

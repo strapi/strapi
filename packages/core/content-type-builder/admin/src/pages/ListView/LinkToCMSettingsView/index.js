@@ -2,7 +2,7 @@ import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import { CheckPermissions } from '@strapi/helper-plugin';
 import { Button } from '@strapi/design-system/Button';
-import ConfigureIcon from '@strapi/icons/ConfigureIcon';
+import Layer from '@strapi/icons/Layer';
 import { useHistory } from 'react-router-dom';
 import { useIntl } from 'react-intl';
 
@@ -69,7 +69,7 @@ const LinkToCMSettingsView = ({
   return (
     <CheckPermissions permissions={permissionsToApply}>
       <Button
-        startIcon={<ConfigureIcon />}
+        startIcon={<Layer />}
         variant="tertiary"
         onClick={handleClick}
         disabled={isTemporary || disabled}

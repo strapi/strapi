@@ -13,7 +13,7 @@ import { HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
 import { Button } from '@strapi/design-system/Button';
 import { LinkButton } from '@strapi/design-system/LinkButton';
-import AddIcon from '@strapi/icons/AddIcon';
+import Plus from '@strapi/icons/Plus';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { useHistory } from 'react-router-dom';
 import qs from 'qs';
@@ -98,7 +98,7 @@ const ApiTokenListView = () => {
           canCreate ? (
             <LinkButton
               data-testid="create-api-token-button"
-              startIcon={<AddIcon />}
+              startIcon={<Plus />}
               size="L"
               to="/settings/api-tokens/create"
             >
@@ -138,7 +138,7 @@ const ApiTokenListView = () => {
               defaultMessage: 'Add your first API Token',
             }}
             action={
-              <Button variant="secondary" startIcon={<AddIcon />}>
+              <Button variant="secondary" startIcon={<Plus />}>
                 {formatMessage({
                   id: 'Settings.apiTokens.addNewToken',
                   defaultMessage: 'Add new API Token',

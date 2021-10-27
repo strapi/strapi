@@ -11,8 +11,8 @@ import { LinkButton } from '@strapi/design-system/LinkButton';
 import { Main } from '@strapi/design-system/Main';
 import { Stack } from '@strapi/design-system/Stack';
 import { TableLabel } from '@strapi/design-system/Text';
-// import ConfigureIcon from '@strapi/icons/ConfigureIcon';
-import EditIcon from '@strapi/icons/EditIcon';
+// import Layer from '@strapi/icons/Layer';
+import Pencil from '@strapi/icons/Pencil';
 import { InjectionZone } from '../../../shared/components';
 // import permissions from '../../../permissions';
 // import Container from '../../components/Container';
@@ -315,7 +315,7 @@ const EditView = ({
                                   trackUsage('willEditEditLayout');
                                 }}
                                 size="S"
-                                startIcon={<EditIcon />}
+                                startIcon={<Pencil />}
                                 style={{ width: '100%' }}
                                 to={`/plugins/content-type-builder/content-types/${slug}`}
                                 variant="secondary"
@@ -331,7 +331,7 @@ const EditView = ({
                           {/* <CheckPermissions permissions={configurationPermissions}>
                             <LinkButton
                               size="S"
-                              startIcon={<ConfigureIcon />}
+                              startIcon={<Layer />}
                               style={{ width: '100%' }}
                               to={configurationsURL}
                               variant="secondary"

@@ -22,7 +22,7 @@ import { Stack } from '@strapi/design-system/Stack';
 import { Select, Option } from '@strapi/design-system/Select';
 import { H3 } from '@strapi/design-system/Text';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
-import CheckIcon from '@strapi/icons/CheckIcon';
+import Check from '@strapi/icons/Check';
 import pluginPermissions from '../../permissions';
 import { getTrad } from '../../utils';
 import layout from './utils/layout';
@@ -151,7 +151,7 @@ const AdvancedSettingsPage = () => {
                     loading={isSubmitting}
                     type="submit"
                     disabled={!canUpdate}
-                    startIcon={<CheckIcon />}
+                    startIcon={<Check />}
                     size="L"
                   >
                     {formatMessage({ id: getTrad('Form.save'), defaultMessage: 'Save' })}

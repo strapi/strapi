@@ -20,8 +20,8 @@ import { TextInput } from '@strapi/design-system/TextInput';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
 
 // Strapi Icons
-import Show from '@strapi/icons/Show';
-import Hide from '@strapi/icons/Hide';
+import Show from '@strapi/icons/Eye';
+import Hide from '@strapi/icons/EyeStriked';
 import Check from '@strapi/icons/Check';
 
 import permissions from '../../permissions';

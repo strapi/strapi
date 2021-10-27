@@ -5,10 +5,10 @@ import { ArgsTable, Meta, Canvas, Story } from '@storybook/addon-docs';
 import ContentBox from './index';
 import { Stack } from '@strapi/design-system/Stack';
 import { IconButton } from '@strapi/design-system/IconButton';
-import ReadDoc from '@strapi/icons/ReadDoc';
-import CodeExample from '@strapi/icons/CodeExample';
-import Tutorial from '@strapi/icons/Tutorial';
-import Blog from '@strapi/icons/Blog';
+import InformationSquare from '@strapi/icons/InformationSquare';
+import CodeSquare from '@strapi/icons/CodeSquare';
+import PlaySquare from '@strapi/icons/PlaySquare';
+import FeatherSquare from '@strapi/icons/FeatherSquare';
 import Duplicate from '@strapi/icons/Duplicate';
 
 <Meta title="components/ContentBox" />
@@ -24,26 +24,26 @@ TODO
     <Stack size={4}>
       <ContentBox
         title="Read the documentation"
-        subtitle="Discover the concepts, reference, guides and tutorials"
-        icon={<ReadDoc />}
+        subtitle="Discover the concepts, reference, guides and PlaySquares"
+        icon={<InformationSquare />}
         iconBackground="primary100"
       />
       <ContentBox
         title="Code example"
         subtitle="Learn by testing real project developed by the community"
-        icon={<CodeExample />}
+        icon={<CodeSquare />}
         iconBackground="warning100"
       />
       <ContentBox
-        title="Tutorial"
+        title="PlaySquare"
         subtitle="Discover the concepts, reference, guides and tutorials"
         icon={<Tutorial />}
         iconBackground="secondary100"
       />
       <ContentBox
-        title="Blog"
+        title="FeatherSquare"
         subtitle="Discover the concepts, reference, guides and tutorials"
-        icon={<Blog />}
+        icon={<FeatherSquare />}
         iconBackground="alternative100"
       />
       <ContentBox

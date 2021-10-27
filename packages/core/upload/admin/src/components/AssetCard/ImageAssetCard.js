@@ -14,7 +14,7 @@ import {
   CardSubtitle,
 } from '@strapi/design-system/Card';
 import { IconButton } from '@strapi/design-system/IconButton';
-import EditIcon from '@strapi/icons/EditIcon';
+import Pencil from '@strapi/icons/Pencil';
 import { useIntl } from 'react-intl';
 import { getTrad } from '../../utils';
 
@@ -49,7 +49,7 @@ export const ImageAssetCard = ({
           <CardAction position="end">
             <IconButton
               label={formatMessage({ id: getTrad('control-card.edit'), defaultMessage: 'Edit' })}
-              icon={<EditIcon />}
+              icon={<Pencil />}
               onClick={onEdit}
             />
           </CardAction>

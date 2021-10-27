@@ -5,7 +5,7 @@ import { useIntl } from 'react-intl';
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
 import { Text } from '@strapi/design-system/Text';
-import AddIcon from '@strapi/icons/AddIcon';
+import Plus from '@strapi/icons/Plus';
 import { pxToRem } from '@strapi/helper-plugin';
 import { getTrad } from '../../utils';
 
@@ -15,7 +15,7 @@ const StyledButton = styled(Box)`
   cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
 `;
 
-const StyledIcon = styled(AddIcon)`
+const StyledIcon = styled(Plus)`
   width: ${pxToRem(10)};
   height: ${pxToRem(10)};
   margin-right: ${({ theme }) => theme.spaces[2]};

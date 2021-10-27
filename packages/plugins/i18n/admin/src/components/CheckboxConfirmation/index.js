@@ -7,7 +7,7 @@ import { Text } from '@strapi/design-system/Text';
 import { Flex } from '@strapi/design-system/Flex';
 import { Stack } from '@strapi/design-system/Stack';
 import { Button } from '@strapi/design-system/Button';
-import AlertWarningIcon from '@strapi/icons/AlertWarningIcon';
+import ExclamationMarkCircle from '@strapi/icons/ExclamationMarkCircle';
 import { getTrad } from '../../utils';
 
 const CheckboxConfirmation = ({ description, isCreating, intlLabel, name, onChange, value }) => {
@@ -61,7 +61,7 @@ const CheckboxConfirmation = ({ description, isCreating, intlLabel, name, onChan
       </Checkbox>
       {isOpen && (
         <Dialog onClose={handleToggle} title="Confirmation" isOpen={isOpen}>
-          <DialogBody icon={<AlertWarningIcon />}>
+          <DialogBody icon={<ExclamationMarkCircle />}>
             <Stack size={2}>
               <Flex justifyContent="center" style={{ textAlign: 'center' }}>
                 <Text id="confirm-description">

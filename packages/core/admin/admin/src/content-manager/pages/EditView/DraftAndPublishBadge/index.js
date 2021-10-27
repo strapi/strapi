@@ -5,7 +5,7 @@ import styled from 'styled-components';
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
 import { Text } from '@strapi/design-system/Text';
-import Bullet from '@strapi/icons/Bullet';
+import Bullet from '@strapi/icons/Dot';
 import { pxToRem } from '@strapi/helper-plugin';
 import { getTrad } from '../../../utils';
 import { connect, select } from './utils';

@@ -1,5 +1,5 @@
 import React from 'react';
-import AlertWarningIcon from '@strapi/icons/AlertWarningIcon';
+import ExclamationMarkCircle from '@strapi/icons/ExclamationMarkCircle';
 import { EmptyStateLayout } from '@strapi/design-system/EmptyStateLayout';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
@@ -9,7 +9,7 @@ const AnErrorOccurred = ({ content, ...rest }) => {
 
   return (
     <EmptyStateLayout
-      icon={<AlertWarningIcon width="10rem" />}
+      icon={<ExclamationMarkCircle width="10rem" />}
       content={formatMessage(
         { id: content.id, defaultMessage: content.defaultMessage },
         content.values

@@ -18,7 +18,7 @@ import { H3 } from '@strapi/design-system/Text';
 import { TextInput } from '@strapi/design-system/TextInput';
 import { Button } from '@strapi/design-system/Button';
 import { useNotifyAT } from '@strapi/design-system/LiveRegions';
-import CheckIcon from '@strapi/icons/CheckIcon';
+import Check from '@strapi/icons/Check';
 import Configuration from './components/Configuration';
 import schema from '../../utils/schema';
 import pluginPermissions from '../../permissions';
@@ -204,7 +204,7 @@ const SettingsPage = () => {
                   </GridItem>
                   <GridItem col={7} s={12}>
                     {/* to replace with envelope icon */}
-                    <Button loading={isSubmitting} type="submit" startIcon={<CheckIcon />}>
+                    <Button loading={isSubmitting} type="submit" startIcon={<Check />}>
                       Test email
                     </Button>
                   </GridItem>

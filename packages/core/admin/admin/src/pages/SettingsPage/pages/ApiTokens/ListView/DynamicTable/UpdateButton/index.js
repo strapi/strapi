@@ -1,5 +1,5 @@
 import React from 'react';
-import EditIcon from '@strapi/icons/EditIcon';
+import Pencil from '@strapi/icons/Pencil';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import { Link } from '@strapi/design-system/Link';
@@ -39,7 +39,7 @@ const UpdateButton = ({ tokenName, tokenId }) => {
         { target: `${tokenName}` }
       )}
     >
-      <EditIcon />
+      <Pencil />
     </LinkUpdate>
   );
 };

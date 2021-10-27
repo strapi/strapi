@@ -3,9 +3,9 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Stack } from '@strapi/design-system/Stack';
 import { IconButton } from '@strapi/design-system/IconButton';
-import DeleteIcon from '@strapi/icons/DeleteIcon';
-import DownloadIcon from '@strapi/icons/DownloadIcon';
-import Resize from '@strapi/icons/Resize';
+import Trash from '@strapi/icons/Trash';
+import DownloadIcon from '@strapi/icons/Download';
+import Resize from '@strapi/icons/Crop';
 import { prefixFileUrlWithBackendUrl } from '@strapi/helper-plugin';
 import getTrad from '../../../utils/getTrad';
 import { downloadFile } from '../../../utils/downloadFile';
@@ -127,7 +127,7 @@ export const PreviewBox = ({
                   id: getTrad('app.utils.delete'),
                   defaultMessage: 'Delete',
                 })}
-                icon={<DeleteIcon />}
+                icon={<Trash />}
                 onClick={() => setShowConfirmDialog(true)}
               />
             )}

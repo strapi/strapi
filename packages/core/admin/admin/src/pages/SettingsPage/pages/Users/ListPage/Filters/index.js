@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Button } from '@strapi/design-system/Button';
 import { Box } from '@strapi/design-system/Box';
-import FilterIcon from '@strapi/icons/FilterIcon';
+import Filter from '@strapi/icons/Filter';
 import { FilterListURLQuery, FilterPopoverURLQuery } from '@strapi/helper-plugin';
 
 const Filters = ({ displayedFilters }) => {
@@ -21,7 +21,7 @@ const Filters = ({ displayedFilters }) => {
         <Button
           variant="tertiary"
           ref={buttonRef}
-          startIcon={<FilterIcon />}
+          startIcon={<Filter />}
           onClick={handleToggle}
           size="S"
         >

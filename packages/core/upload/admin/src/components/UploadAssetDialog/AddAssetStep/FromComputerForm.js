@@ -7,7 +7,7 @@ import { Flex } from '@strapi/design-system/Flex';
 import { H3 } from '@strapi/design-system/Text';
 import { ModalFooter } from '@strapi/design-system/ModalLayout';
 import { Button } from '@strapi/design-system/Button';
-import AddAssetIcon from '@strapi/icons/AddAsset';
+import PicturePlus from '@strapi/icons/PicturePlus';
 import { useIntl } from 'react-intl';
 import { getTrad } from '../../../utils';
 import { typeFromMime } from '../../../utils/typeFromMime';
@@ -86,7 +86,7 @@ export const FromComputerForm = ({ onClose, onAddAssets }) => {
             <Flex justifyContent="center">
               <Wrapper>
                 <IconWrapper>
-                  <AddAssetIcon aria-hidden />
+                  <PicturePlus aria-hidden />
                 </IconWrapper>
 
                 <Box paddingTop={3} paddingBottom={5}>

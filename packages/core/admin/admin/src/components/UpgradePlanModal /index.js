@@ -11,7 +11,7 @@ import { Flex } from '@strapi/design-system/Flex';
 import { Text, H1 } from '@strapi/design-system/Text';
 import { Stack } from '@strapi/design-system/Stack';
 import ExternalLink from '@strapi/icons/ExternalLink';
-import CloseAlertIcon from '@strapi/icons/CloseAlertIcon';
+import Cross from '@strapi/icons/Cross';
 import { setHexOpacity, useLockScroll } from '@strapi/helper-plugin';
 import AirBalloon from '../../assets/images/hot-air-balloon.png';
 import BigArrow from '../../assets/images/upgrade-details.png';
@@ -79,7 +79,7 @@ const UpgradePlanModal = ({ onClose, isOpen }) => {
           <UpgradeContainer aria-labelledby="upgrade-plan" background="neutral0" hasRadius>
             <img src={AirBalloon} alt="air-balloon" />
             <CloseButtonContainer>
-              <IconButton onClick={onClose} aria-label="Close" icon={<CloseAlertIcon />} />
+              <IconButton onClick={onClose} aria-label="Close" icon={<Cross />} />
             </CloseButtonContainer>
             <StackFlexStart size={6}>
               <TextBold textColor="primary600">

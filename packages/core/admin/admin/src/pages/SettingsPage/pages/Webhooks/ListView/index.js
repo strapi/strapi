@@ -33,10 +33,10 @@ import { Main } from '@strapi/design-system/Main';
 import { LinkButton } from '@strapi/design-system/LinkButton';
 import { useNotifyAT } from '@strapi/design-system/LiveRegions';
 import { Box } from '@strapi/design-system/Box';
-import AddIcon from '@strapi/icons/AddIcon';
-import EditIcon from '@strapi/icons/EditIcon';
-import DeleteIcon from '@strapi/icons/DeleteIcon';
-import EmptyStateDocument from '@strapi/icons/EmptyStateDocument';
+import Plus from '@strapi/icons/Plus';
+import Pencil from '@strapi/icons/Pencil';
+import Trash from '@strapi/icons/Trash';
+import EmptyDocuments from '@strapi/icons/EmptyDocuments';
 import reducer, { initialState } from './reducer';
 import adminPermissions from '../../../../../permissions';
 
@@ -254,7 +254,7 @@ const ListView = () => {
               canCreate &&
               !loadingWebhooks && (
                 <LinkButton
-                  startIcon={<AddIcon />}
+                  startIcon={<Plus />}
                   variant="default"
                   to={`${pathname}/create`}
                   size="L"
@@ -283,7 +283,7 @@ const ListView = () => {
                   </Subtitle>
                   <Button
                     onClick={() => handleDeleteClick('all')}
-                    startIcon={<DeleteIcon />}
+                    startIcon={<Trash />}
                     size="L"
                     variant="danger-light"
                   >
@@ -307,7 +307,7 @@ const ListView = () => {
                     footer={
                       <TFooter
                         onClick={() => (canCreate ? handleGoTo('create') : {})}
-                        icon={<AddIcon />}
+                        icon={<Plus />}
                       >
                         {formatMessage({
                           id: 'Settings.webhooks.list.button.add',
@@ -426,7 +426,7 @@ const ListView = () => {
                                     id: 'Settings.webhooks.events.update',
                                     defaultMessage: 'Update',
                                   })}
-                                  icon={<EditIcon />}
+                                  icon={<Pencil />}
                                   noBorder
                                 />
                               )}
@@ -437,7 +437,7 @@ const ListView = () => {
                                     id: 'Settings.webhooks.events.delete',
                                     defaultMessage: 'Delete',
                                   })}
-                                  icon={<DeleteIcon />}
+                                  icon={<Trash />}
                                   noBorder
                                   id={`delete-${webhook.id}`}
                                 />
@@ -450,7 +450,7 @@ const ListView = () => {
                   </Table>
                 ) : (
                   <EmptyStateLayout
-                    icon={<EmptyStateDocument width="160px" />}
+                    icon={<EmptyDocuments width="160px" />}
                     content={formatMessage({
                       id: 'Settings.webhooks.list.empty.description',
                       defaultMessage: 'Add your first webhook',
@@ -458,7 +458,7 @@ const ListView = () => {
                     action={
                       <Button
                         variant="secondary"
-                        startIcon={<AddIcon />}
+                        startIcon={<Plus />}
                         onClick={() => (canCreate ? handleGoTo('create') : {})}
                       >
                         {formatMessage({

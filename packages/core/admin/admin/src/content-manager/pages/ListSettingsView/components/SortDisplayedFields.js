@@ -8,7 +8,7 @@ import { Stack } from '@strapi/design-system/Stack';
 import { H3 } from '@strapi/design-system/Text';
 import { SimpleMenu, MenuItem } from '@strapi/design-system/SimpleMenu';
 import { IconButton } from '@strapi/design-system/IconButton';
-import AddIcon from '@strapi/icons/AddIcon';
+import Plus from '@strapi/icons/Plus';
 import DraggableCard from './DraggableCard';
 import { getTrad } from '../../../utils';
 
@@ -77,7 +77,7 @@ const SortDisplayedFields = ({
               defaultMessage: 'Add a field',
             })}
             as={IconButton}
-            icon={<AddIcon />}
+            icon={<Plus />}
             disabled={listRemainingFields.length <= 0}
             data-testid="add-field"
           >

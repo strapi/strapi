@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Box } from '@strapi/design-system/Box';
-import Close from '@strapi/icons/Close';
+import Cross from '@strapi/icons/Cross';
 import { Tag } from '@strapi/design-system/Tag';
 import { useIntl } from 'react-intl';
 
@@ -49,7 +49,7 @@ const AttributeTag = ({ attribute, filter, onClick, operator, value }) => {
 
   return (
     <Box padding={1} onClick={handleClick}>
-      <Tag icon={<Close />}>{content}</Tag>
+      <Tag icon={<Cross />}>{content}</Tag>
     </Box>
   );
 };

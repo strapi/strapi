@@ -10,7 +10,7 @@ import { Box } from '@strapi/design-system/Box';
 import { Typography, Text } from '@strapi/design-system/Text';
 import { Flex } from '@strapi/design-system/Flex';
 import { Stack } from '@strapi/design-system/Stack';
-import AlertWarningIcon from '@strapi/icons/AlertWarningIcon';
+import ExclamationMarkCircle from '@strapi/icons/ExclamationMarkCircle';
 import Duplicate from '@strapi/icons/Duplicate';
 import { useCMEditViewDataManager, useNotification } from '@strapi/helper-plugin';
 import { axiosInstance, getTrad } from '../../../utils';
@@ -114,7 +114,7 @@ const Content = ({ appLocales, currentLocale, localizations, readPermissions }) 
       </StyledTypography>
       {isOpen && (
         <Dialog onClose={handleToggle} title="Confirmation" isOpen={isOpen}>
-          <DialogBody icon={<AlertWarningIcon />}>
+          <DialogBody icon={<ExclamationMarkCircle />}>
             <Stack size={2}>
               <Flex justifyContent="center">
                 <Text id="confirm-description" style={{ textAlign: 'center' }}>

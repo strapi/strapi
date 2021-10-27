@@ -7,8 +7,8 @@ import { Box } from '@strapi/design-system/Box';
 import { TextInput } from '@strapi/design-system/TextInput';
 import { Textarea } from '@strapi/design-system/Textarea';
 import { H3 } from '@strapi/design-system/Text';
-import BackIcon from '@strapi/icons/BackIcon';
-import CheckIcon from '@strapi/icons/CheckIcon';
+import ArrowLeft from '@strapi/icons/ArrowLeft';
+import Check from '@strapi/icons/Check';
 import { Link } from '@strapi/design-system/Link';
 import { GridItem, Grid } from '@strapi/design-system/Grid';
 import { Formik } from 'formik';
@@ -94,7 +94,7 @@ const EditPage = () => {
                     disabled={role.code === 'strapi-super-admin'}
                     type="submit"
                     loading={isSubmitting}
-                    startIcon={<CheckIcon />}
+                    startIcon={<Check />}
                   >
                     {formatMessage({
                       id: 'app.components.Button.save',
@@ -106,7 +106,7 @@ const EditPage = () => {
               title={role.name}
               subtitle={role.description}
               navigationAction={
-                <Link startIcon={<BackIcon />} to="/settings/users-permissions/roles">
+                <Link startIcon={<ArrowLeft />} to="/settings/users-permissions/roles">
                   {formatMessage({
                     id: 'app.components.go-back',
                     defaultMessage: 'Go back',

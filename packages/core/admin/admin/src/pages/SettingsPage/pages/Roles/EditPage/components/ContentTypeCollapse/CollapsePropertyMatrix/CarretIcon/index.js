@@ -1,7 +1,7 @@
 import styled from 'styled-components';
-import Carret from '@strapi/icons/Carret';
+import CarretDown from '@strapi/icons/CarretDown';
 
-const CarretIcon = styled(Carret)`
+const CarretIcon = styled(CarretDown)`
   display: none;
   width: ${10 / 16}rem;
   transform: rotate(${({ $isActive }) => ($isActive ? '180' : '0')}deg);

@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
-import AddIcon from '@strapi/icons/AddIconCircle';
+import PlusCircle from '@strapi/icons/PlusCircle';
 import { Box } from '@strapi/design-system/Box';
 import { BaseButton } from '@strapi/design-system/BaseButton';
 import { Stack } from '@strapi/design-system/Stack';
@@ -42,7 +42,7 @@ const ComponentInitializer = ({ isReadOnly, onClick }) => {
       <Stack size={2}>
         <Flex justifyContent="center" style={{ cursor: isReadOnly ? 'not-allowed' : 'inherit' }}>
           <IconButton disabled={isReadOnly} onClick={onClick}>
-            <AddIcon />
+            <PlusCircle />
           </IconButton>
         </Flex>
         <Flex justifyContent="center">

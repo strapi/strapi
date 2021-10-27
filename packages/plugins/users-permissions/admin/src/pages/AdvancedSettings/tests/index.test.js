@@ -230,6 +230,10 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         outline: none;
       }
 
+      .c25[aria-disabled='true'] {
+        cursor: not-allowed;
+      }
+
       .c22 {
         font-weight: 500;
         font-size: 0.75rem;

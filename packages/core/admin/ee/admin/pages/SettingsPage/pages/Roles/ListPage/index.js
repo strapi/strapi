@@ -9,10 +9,10 @@ import {
   useRBAC,
   useFocusWhenNavigate,
 } from '@strapi/helper-plugin';
-import AddIcon from '@strapi/icons/AddIcon';
-import DeleteIcon from '@strapi/icons/DeleteIcon';
+import Plus from '@strapi/icons/Plus';
+import Trash from '@strapi/icons/Trash';
 import Duplicate from '@strapi/icons/Duplicate';
-import EditIcon from '@strapi/icons/EditIcon';
+import Pencil from '@strapi/icons/Pencil';
 import { Button } from '@strapi/design-system/Button';
 import { ActionLayout, ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
 import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
@@ -175,7 +175,7 @@ const useRoleActions = ({ getData, canCreate, canDelete, canUpdate }) => {
             {
               onClick: () => handleGoTo(role.id),
               label: formatMessage({ id: 'app.utils.edit', defaultMessage: 'Edit' }),
-              icon: <EditIcon />,
+              icon: <Pencil />,
             },
           ]
         : []),
@@ -184,7 +184,7 @@ const useRoleActions = ({ getData, canCreate, canDelete, canUpdate }) => {
             {
               onClick: e => handleClickDelete(e, role),
               label: formatMessage({ id: 'app.utils.delete', defaultMessage: 'Delete' }),
-              icon: <DeleteIcon />,
+              icon: <Trash />,
             },
           ]
         : []),
@@ -259,7 +259,7 @@ const RoleListPage = () => {
       <HeaderLayout
         primaryAction={
           canCreate ? (
-            <Button onClick={handleNewRoleClick} startIcon={<AddIcon />} size="L">
+            <Button onClick={handleNewRoleClick} startIcon={<Plus />} size="L">
               {formatMessage({
                 id: 'Settings.roles.list.button.add',
                 defaultMessage: 'Add new role',
@@ -293,7 +293,7 @@ const RoleListPage = () => {
             rowCount={rowCount}
             footer={
               canCreate ? (
-                <TFooter onClick={handleNewRoleClick} icon={<AddIcon />}>
+                <TFooter onClick={handleNewRoleClick} icon={<Plus />}>
                   {formatMessage({
                     id: 'Settings.roles.list.button.add',
                     defaultMessage: 'Add new role',

@@ -8,7 +8,7 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { pxToRem } from '@strapi/helper-plugin';
-import AddIcon from '@strapi/icons/AddIcon';
+import Plus from '@strapi/icons/Plus';
 import { Box } from '@strapi/design-system/Box';
 import { Stack } from '@strapi/design-system/Stack';
 import { Text } from '@strapi/design-system/Text';
@@ -20,7 +20,7 @@ import ComponentCard from '../ComponentCard';
 import ComponentList from '../ComponentList';
 import Tr from '../Tr';
 
-const StyledAddIcon = styled(AddIcon)`
+const StyledAddIcon = styled(Plus)`
   width: ${pxToRem(32)};
   height: ${pxToRem(32)};
   padding: ${pxToRem(9)};

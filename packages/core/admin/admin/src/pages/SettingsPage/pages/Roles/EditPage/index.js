@@ -14,7 +14,7 @@ import { Main } from '@strapi/design-system/Main';
 import { Stack } from '@strapi/design-system/Stack';
 import { Formik } from 'formik';
 import { Link } from '@strapi/design-system/Link';
-import BackIcon from '@strapi/icons/BackIcon';
+import ArrowLeft from '@strapi/icons/ArrowLeft';
 import get from 'lodash/get';
 import { useIntl } from 'react-intl';
 import { useRouteMatch } from 'react-router-dom';
@@ -132,7 +132,7 @@ const EditPage = () => {
                   defaultMessage: 'Define the rights given to the role',
                 })}
                 navigationAction={
-                  <Link startIcon={<BackIcon />} to="/settings/roles">
+                  <Link startIcon={<ArrowLeft />} to="/settings/roles">
                     {formatMessage({
                       id: 'app.components.go-back',
                       defaultMessage: 'Go back',

@@ -1,15 +1,15 @@
 import React from 'react';
 import { EmptyStateLayout as Layout } from '@strapi/design-system/EmptyStateLayout';
-import EmptyStateDocument from '@strapi/icons/EmptyStateDocument';
-import EmptyStatePermissions from '@strapi/icons/EmptyStatePermissions';
-import EmptyStatePicture from '@strapi/icons/EmptyStatePicture';
+import EmptyDocuments from '@strapi/icons/EmptyDocuments';
+import EmptyPermissions from '@strapi/icons/EmptyPermissions';
+import EmptyPictures from '@strapi/icons/EmptyPictures';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 
 const icons = {
-  document: EmptyStateDocument,
-  media: EmptyStatePicture,
-  permissions: EmptyStatePermissions,
+  document: EmptyDocuments,
+  media: EmptyPictures,
+  permissions: EmptyPermissions,
 };
 
 const EmptyStateLayout = ({ action, content, hasRadius, icon, shadow }) => {

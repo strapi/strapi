@@ -17,8 +17,8 @@ import { Textarea } from '@strapi/design-system/Textarea';
 import { TextInput } from '@strapi/design-system/TextInput';
 import { TimePicker } from '@strapi/design-system/TimePicker';
 import { ToggleInput } from '@strapi/design-system/ToggleInput';
-import Hide from '@strapi/icons/Hide';
-import Show from '@strapi/icons/Show';
+import EyeStriked from '@strapi/icons/EyeStriked';
+import Eye from '@strapi/icons/Eye';
 
 const GenericInput = ({
   autoComplete,
@@ -209,7 +209,7 @@ const GenericInput = ({
               }}
               type="button"
             >
-              {showPassword ? <Show /> : <Hide />}
+              {showPassword ? <Eye /> : <EyeStriked />}
             </button>
           }
           label={label}
