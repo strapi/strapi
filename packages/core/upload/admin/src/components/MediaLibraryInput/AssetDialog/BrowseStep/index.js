@@ -51,10 +51,14 @@ export const BrowseStep = ({
   );
 };
 
+BrowseStep.defaultProps = {
+  onSelectAllAsset: undefined,
+};
+
 BrowseStep.propTypes = {
   assets: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
   onEditAsset: PropTypes.func.isRequired,
   onSelectAsset: PropTypes.func.isRequired,
-  onSelectAllAsset: PropTypes.func.isRequired,
+  onSelectAllAsset: PropTypes.func,
   selectedAssets: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
 };

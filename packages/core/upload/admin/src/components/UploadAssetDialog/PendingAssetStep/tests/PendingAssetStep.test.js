@@ -46,12 +46,6 @@ describe('PendingAssetStep', () => {
         ext: 'mp4',
         mime: 'video/mp4',
       },
-      {
-        source: 'url',
-        type: 'unknown',
-        url: 'https://www.w3schools.com/html/mov_bbb.mp4',
-        ext: 'mp4',
-      },
     ];
 
     const { container } = renderTL(
