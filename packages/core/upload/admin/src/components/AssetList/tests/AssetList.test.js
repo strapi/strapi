@@ -142,12 +142,6 @@ describe('MediaLibrary / AssetList', () => {
         width: 1px;
       }
 
-      .c0 {
-        display: grid;
-        grid-template-columns: repeat(auto-fit,minmax(250px,1fr));
-        grid-gap: 16px;
-      }
-
       .c7 {
         display: -webkit-box;
         display: -webkit-flex;
@@ -510,6 +504,12 @@ describe('MediaLibrary / AssetList', () => {
 
       .c30 svg {
         font-size: 3rem;
+      }
+
+      .c0 {
+        display: grid;
+        grid-template-columns: repeat(auto-fit,minmax(250px,1fr));
+        grid-gap: 16px;
       }
 
       <div>

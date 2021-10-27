@@ -31,6 +31,7 @@ export const SelectedStep = ({ selectedAssets, onSelectAsset }) => {
       </Stack>
 
       <AssetList
+        size="S"
         assets={selectedAssets}
         onSelectAsset={onSelectAsset}
         selectedAssets={selectedAssets}

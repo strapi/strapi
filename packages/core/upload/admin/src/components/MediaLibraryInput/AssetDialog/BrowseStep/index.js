@@ -41,6 +41,7 @@ export const BrowseStep = ({
       )}
 
       <AssetList
+        size="S"
         assets={assets}
         onSelectAsset={onSelectAsset}
         selectedAssets={selectedAssets}
