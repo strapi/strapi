@@ -110,7 +110,7 @@ async function checkTemplateRootStructure(templatePath) {
   if (!fse.existsSync(templateJsonPath)) {
     throw new Error(`A template must have a ${chalk.green('template.json')} root file`);
   }
-  if (fse.statSync(templateJsonPath).isFile()) {
+  if (!fse.statSync(templateJsonPath).isFile()) {
     throw new Error(`A template's ${chalk.green('template.json')} must be a file`);
   }
 
