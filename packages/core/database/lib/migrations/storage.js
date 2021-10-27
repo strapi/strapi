@@ -7,7 +7,7 @@ const createStorage = (opts = {}) => {
   const hasMigrationTable = () => knex.schema.hasTable(tableName);
 
   const createMigrationTable = () => {
-    return knex.schema.createTable(tableName, table => {
+    return knex.schema.createTable(opts.db.schemaPrefix + tableName, table => {
       table.increments('id');
       table.string('name');
       table.datetime('time', { useTz: false });
