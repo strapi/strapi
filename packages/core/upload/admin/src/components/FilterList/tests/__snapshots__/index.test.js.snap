@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
+exports[`<FilterList /> renders and matches the snapshot 1`] = `
 .c7 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
@@ -82,7 +82,7 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
         <span
           class="c4 c5"
         >
-          Boolean is true
+          type is image
         </span>
         <div
           class="c6"
@@ -119,7 +119,7 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
         <span
           class="c4 c5"
         >
-          Date is not Wednesday, September 1, 2021
+          type is not image
         </span>
         <div
           class="c6"
@@ -156,7 +156,7 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
         <span
           class="c4 c5"
         >
-          city is null 
+          createdAt is Thursday, October 7, 2021
         </span>
         <div
           class="c6"
@@ -193,7 +193,7 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
         <span
           class="c4 c5"
         >
-          country is not null 
+          type is video
         </span>
         <div
           class="c6"
@@ -230,7 +230,7 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
         <span
           class="c4 c5"
         >
-          time contains (case sensitive) 12:45 AM
+          type is file
         </span>
         <div
           class="c6"
@@ -267,266 +267,7 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
         <span
           class="c4 c5"
         >
-          many to one does not contain (case sensitive) test
-        </span>
-        <div
-          class="c6"
-        >
-          <div
-            class="c3"
-          >
-            <svg
-              fill="none"
-              height="1em"
-              viewBox="0 0 24 24"
-              width="1em"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
-                fill="#32324D"
-              />
-            </svg>
-          </div>
-        </div>
-      </div>
-    </button>
-  </div>
-  <div
-    class="c0"
-  >
-    <button
-      class="c1 c2"
-    >
-      <div
-        class="c3"
-      >
-        <span
-          class="c4 c5"
-        >
-          many to one is test
-        </span>
-        <div
-          class="c6"
-        >
-          <div
-            class="c3"
-          >
-            <svg
-              fill="none"
-              height="1em"
-              viewBox="0 0 24 24"
-              width="1em"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
-                fill="#32324D"
-              />
-            </svg>
-          </div>
-        </div>
-      </div>
-    </button>
-  </div>
-  <div
-    class="c0"
-  >
-    <button
-      class="c1 c2"
-    >
-      <div
-        class="c3"
-      >
-        <span
-          class="c4 c5"
-        >
-          city starts with paris
-        </span>
-        <div
-          class="c6"
-        >
-          <div
-            class="c3"
-          >
-            <svg
-              fill="none"
-              height="1em"
-              viewBox="0 0 24 24"
-              width="1em"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
-                fill="#32324D"
-              />
-            </svg>
-          </div>
-        </div>
-      </div>
-    </button>
-  </div>
-  <div
-    class="c0"
-  >
-    <button
-      class="c1 c2"
-    >
-      <div
-        class="c3"
-      >
-        <span
-          class="c4 c5"
-        >
-          country ends with france
-        </span>
-        <div
-          class="c6"
-        >
-          <div
-            class="c3"
-          >
-            <svg
-              fill="none"
-              height="1em"
-              viewBox="0 0 24 24"
-              width="1em"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
-                fill="#32324D"
-              />
-            </svg>
-          </div>
-        </div>
-      </div>
-    </button>
-  </div>
-  <div
-    class="c0"
-  >
-    <button
-      class="c1 c2"
-    >
-      <div
-        class="c3"
-      >
-        <span
-          class="c4 c5"
-        >
-          number is greater than 2
-        </span>
-        <div
-          class="c6"
-        >
-          <div
-            class="c3"
-          >
-            <svg
-              fill="none"
-              height="1em"
-              viewBox="0 0 24 24"
-              width="1em"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
-                fill="#32324D"
-              />
-            </svg>
-          </div>
-        </div>
-      </div>
-    </button>
-  </div>
-  <div
-    class="c0"
-  >
-    <button
-      class="c1 c2"
-    >
-      <div
-        class="c3"
-      >
-        <span
-          class="c4 c5"
-        >
-          Float is greater than or equal to 1
-        </span>
-        <div
-          class="c6"
-        >
-          <div
-            class="c3"
-          >
-            <svg
-              fill="none"
-              height="1em"
-              viewBox="0 0 24 24"
-              width="1em"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
-                fill="#32324D"
-              />
-            </svg>
-          </div>
-        </div>
-      </div>
-    </button>
-  </div>
-  <div
-    class="c0"
-  >
-    <button
-      class="c1 c2"
-    >
-      <div
-        class="c3"
-      >
-        <span
-          class="c4 c5"
-        >
-          Float is lower than or equal to 3
-        </span>
-        <div
-          class="c6"
-        >
-          <div
-            class="c3"
-          >
-            <svg
-              fill="none"
-              height="1em"
-              viewBox="0 0 24 24"
-              width="1em"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
-                fill="#32324D"
-              />
-            </svg>
-          </div>
-        </div>
-      </div>
-    </button>
-  </div>
-  <div
-    class="c0"
-  >
-    <button
-      class="c1 c2"
-    >
-      <div
-        class="c3"
-      >
-        <span
-          class="c4 c5"
-        >
-          Float is lower than 4
+          type is not file
         </span>
         <div
           class="c6"

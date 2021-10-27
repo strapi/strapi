@@ -12,6 +12,7 @@ import { TextInput } from '@strapi/parts/TextInput';
 import { H1, Text } from '@strapi/parts/Text';
 import Hide from '@strapi/icons/Hide';
 import Show from '@strapi/icons/Show';
+import styled from 'styled-components';
 import { Formik } from 'formik';
 import UnauthenticatedLayout, {
   Column,
@@ -19,6 +20,12 @@ import UnauthenticatedLayout, {
 } from '../../../../layouts/UnauthenticatedLayout';
 import Logo from '../Logo';
 import FieldActionWrapper from '../FieldActionWrapper';
+
+const PasswordInput = styled(TextInput)`
+  ::-ms-reveal {
+    display: none;
+  }
+`;
 
 const ForgotPassword = ({ onSubmit, schema }) => {
   const [passwordShown, setPasswordShown] = useState(false);
@@ -62,7 +69,7 @@ const ForgotPassword = ({ onSubmit, schema }) => {
                 </Column>
 
                 <Stack size={6}>
-                  <TextInput
+                  <PasswordInput
                     name="password"
                     onChange={handleChange}
                     value={values.password}
@@ -107,7 +114,7 @@ const ForgotPassword = ({ onSubmit, schema }) => {
                     })}
                     type={passwordShown ? 'text' : 'password'}
                   />
-                  <TextInput
+                  <PasswordInput
                     name="confirmPassword"
                     onChange={handleChange}
                     value={values.confirmPassword}

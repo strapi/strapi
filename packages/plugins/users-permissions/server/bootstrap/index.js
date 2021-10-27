@@ -37,9 +37,12 @@ module.exports = async ({ strapi }) => {
 };
 
 const initGrant = async pluginStore => {
+  const apiPrefix = strapi.config.get('api.rest.prefix');
+  const baseURL = `${strapi.config.server.url}/${apiPrefix}/auth`;
+
   const grantConfig = {
     defaults: {
-      prefix: '/api/connect',
+      prefix: `${apiPrefix}/connect`,
     },
     email: {
       enabled: true,
@@ -50,7 +53,7 @@ const initGrant = async pluginStore => {
       icon: 'discord',
       key: '',
       secret: '',
-      callback: `${strapi.config.server.url}/api/auth/discord/callback`,
+      callback: `${baseURL}/discord/callback`,
       scope: ['identify', 'email'],
     },
     facebook: {
@@ -58,7 +61,7 @@ const initGrant = async pluginStore => {
       icon: 'facebook-square',
       key: '',
       secret: '',
-      callback: `${strapi.config.server.url}/api/auth/facebook/callback`,
+      callback: `${baseURL}/facebook/callback`,
       scope: ['email'],
     },
     google: {
@@ -66,7 +69,7 @@ const initGrant = async pluginStore => {
       icon: 'google',
       key: '',
       secret: '',
-      callback: `${strapi.config.server.url}/api/auth/google/callback`,
+      callback: `${baseURL}/google/callback`,
       scope: ['email'],
     },
     github: {
@@ -74,7 +77,7 @@ const initGrant = async pluginStore => {
       icon: 'github',
       key: '',
       secret: '',
-      callback: `${strapi.config.server.url}/api/auth/github/callback`,
+      callback: `${baseURL}/github/callback`,
       scope: ['user', 'user:email'],
     },
     microsoft: {
@@ -82,7 +85,7 @@ const initGrant = async pluginStore => {
       icon: 'windows',
       key: '',
       secret: '',
-      callback: `${strapi.config.server.url}/api/auth/microsoft/callback`,
+      callback: `${baseURL}/microsoft/callback`,
       scope: ['user.read'],
     },
     twitter: {
@@ -90,14 +93,14 @@ const initGrant = async pluginStore => {
       icon: 'twitter',
       key: '',
       secret: '',
-      callback: `${strapi.config.server.url}/api/auth/twitter/callback`,
+      callback: `${baseURL}/twitter/callback`,
     },
     instagram: {
       enabled: false,
       icon: 'instagram',
       key: '',
       secret: '',
-      callback: `${strapi.config.server.url}/api/auth/instagram/callback`,
+      callback: `${baseURL}/instagram/callback`,
       scope: ['user_profile'],
     },
     vk: {
@@ -105,7 +108,7 @@ const initGrant = async pluginStore => {
       icon: 'vk',
       key: '',
       secret: '',
-      callback: `${strapi.config.server.url}/api/auth/vk/callback`,
+      callback: `${baseURL}/vk/callback`,
       scope: ['email'],
     },
     twitch: {
@@ -113,7 +116,7 @@ const initGrant = async pluginStore => {
       icon: 'twitch',
       key: '',
       secret: '',
-      callback: `${strapi.config.server.url}/api/auth/twitch/callback`,
+      callback: `${baseURL}/twitch/callback`,
       scope: ['user:read:email'],
     },
     linkedin: {
@@ -121,7 +124,7 @@ const initGrant = async pluginStore => {
       icon: 'linkedin',
       key: '',
       secret: '',
-      callback: `${strapi.config.server.url}/api/auth/linkedin/callback`,
+      callback: `${baseURL}/linkedin/callback`,
       scope: ['r_liteprofile', 'r_emailaddress'],
     },
     cognito: {
@@ -130,7 +133,7 @@ const initGrant = async pluginStore => {
       key: '',
       secret: '',
       subdomain: 'my.subdomain.com',
-      callback: `${strapi.config.server.url}/api/auth/cognito/callback`,
+      callback: `${baseURL}/cognito/callback`,
       scope: ['email', 'openid', 'profile'],
     },
     reddit: {
@@ -139,7 +142,7 @@ const initGrant = async pluginStore => {
       key: '',
       secret: '',
       state: true,
-      callback: `${strapi.config.server.url}/api/auth/reddit/callback`,
+      callback: `${baseURL}/reddit/callback`,
       scope: ['identity'],
     },
     auth0: {
@@ -148,7 +151,7 @@ const initGrant = async pluginStore => {
       key: '',
       secret: '',
       subdomain: 'my-tenant.eu',
-      callback: `${strapi.config.server.url}/api/auth/auth0/callback`,
+      callback: `${baseURL}/auth0/callback`,
       scope: ['openid', 'email', 'profile'],
     },
     cas: {
@@ -156,7 +159,7 @@ const initGrant = async pluginStore => {
       icon: 'book',
       key: '',
       secret: '',
-      callback: `${strapi.config.server.url}/api/auth/cas/callback`,
+      callback: `${baseURL}/cas/callback`,
       scope: ['openid email'], // scopes should be space delimited
       subdomain: 'my.subdomain.com/cas',
     },

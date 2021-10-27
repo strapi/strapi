@@ -202,7 +202,7 @@ class Strapi {
   async openAdmin({ isInitialized }) {
     const shouldOpenAdmin =
       this.config.get('environment') === 'development' &&
-      this.config.get('server.admin.autoOpen', true) !== false;
+      this.config.get('admin.autoOpen', true) !== false;
 
     if (shouldOpenAdmin && !isInitialized) {
       await utils.openBrowser(this.config);

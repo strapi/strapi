@@ -1,8 +1,11 @@
 import React, { useState, useRef } from 'react';
 import { Button } from '@strapi/parts/Button';
-import { FilterPopoverURLQuery, FilterListURLQuery } from '@strapi/helper-plugin';
+import { useQueryParams } from '@strapi/helper-plugin';
 import FilterIcon from '@strapi/icons/FilterIcon';
 import { useIntl } from 'react-intl';
+
+import FilterList from '../../../components/FilterList';
+import FilterPopover from '../../../components/FilterPopover';
 
 const displayedFilters = [
   {
@@ -23,7 +26,11 @@ const displayedFilters = [
     name: 'mime',
     fieldSchema: {
       type: 'enumeration',
-      options: ['image', 'video', 'file'],
+      options: [
+        { label: 'image', value: 'image' },
+        { label: 'video', value: 'video' },
+        { label: 'file', value: 'file' },
+      ],
     },
     metadatas: { label: 'type' },
   },
@@ -33,8 +40,18 @@ export const Filters = () => {
   const buttonRef = useRef(null);
   const [isVisible, setVisible] = useState(false);
   const { formatMessage } = useIntl();
+  const [{ query }, setQuery] = useQueryParams();
+  const filters = query?.filters?.$and || [];
 
   const toggleFilter = () => setVisible(prev => !prev);
+
+  const handleRemoveFilter = nextFilters => {
+    setQuery({ filters: { $and: nextFilters }, page: 1 });
+  };
+
+  const handleSubmit = filters => {
+    setQuery({ filters: { $and: filters }, page: 1 });
+  };
 
   return (
     <>
@@ -47,17 +64,20 @@ export const Filters = () => {
       >
         {formatMessage({ id: 'app.utils.filters', defaultMessage: 'Filters' })}
       </Button>
-
       {isVisible && (
-        <FilterPopoverURLQuery
+        <FilterPopover
           displayedFilters={displayedFilters}
-          isVisible={isVisible}
+          filters={filters}
+          onSubmit={handleSubmit}
           onToggle={toggleFilter}
           source={buttonRef}
         />
       )}
-
-      <FilterListURLQuery filtersSchema={displayedFilters} />
+      <FilterList
+        appliedFilters={filters}
+        filtersSchema={displayedFilters}
+        onRemoveFilter={handleRemoveFilter}
+      />
     </>
   );
 };

@@ -1,8 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const yup = require('yup');
-const { formatYupErrors } = require('@strapi/utils');
+const { yup, formatYupErrors } = require('@strapi/utils');
 const { getService } = require('../../utils');
 const { modelTypes, DEFAULT_TYPES, typeKinds } = require('../../services/constants');
 const createSchema = require('./model-schema');

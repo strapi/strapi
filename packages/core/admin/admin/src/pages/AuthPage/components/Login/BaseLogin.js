@@ -13,10 +13,17 @@ import { H1, Text, Subtitle } from '@strapi/parts/Text';
 import { Form } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
+import styled from 'styled-components';
 import { Formik } from 'formik';
 import { Column, LayoutContent } from '../../../../layouts/UnauthenticatedLayout';
 import Logo from '../Logo';
 import FieldActionWrapper from '../FieldActionWrapper';
+
+const PasswordInput = styled(TextInput)`
+  ::-ms-reveal {
+    display: none;
+  }
+`;
 
 const Login = ({ onSubmit, schema, children }) => {
   const [passwordShown, setPasswordShown] = useState(false);
@@ -83,7 +90,7 @@ const Login = ({ onSubmit, schema, children }) => {
                   name="email"
                   required
                 />
-                <TextInput
+                <PasswordInput
                   error={
                     errors.password
                       ? formatMessage({
