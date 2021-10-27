@@ -125,7 +125,7 @@ export const AssetDialog = ({ onClose, multiple }) => {
             </TabPanel>
             <TabPanel>
               <ModalBody>
-                <SelectedStep selectedAssets={selectedAssets} />
+                <SelectedStep selectedAssets={selectedAssets} onSelectAsset={selectOne} />
               </ModalBody>
             </TabPanel>
           </TabPanels>

@@ -6,7 +6,7 @@ import { Text } from '@strapi/parts/Text';
 import { AssetList } from '../../../AssetList';
 import getTrad from '../../../../utils/getTrad';
 
-export const SelectedStep = ({ selectedAssets }) => {
+export const SelectedStep = ({ selectedAssets, onSelectAsset }) => {
   const { formatMessage } = useIntl();
 
   return (
@@ -32,8 +32,8 @@ export const SelectedStep = ({ selectedAssets }) => {
 
       <AssetList
         assets={selectedAssets}
-        onSelectAsset={() => {}}
-        selectedAssets={[]}
+        onSelectAsset={onSelectAsset}
+        selectedAssets={selectedAssets}
         onEditAsset={() => {}}
       />
     </Stack>
@@ -41,5 +41,6 @@ export const SelectedStep = ({ selectedAssets }) => {
 };
 
 SelectedStep.propTypes = {
+  onSelectAsset: PropTypes.func.isRequired,
   selectedAssets: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
 };
