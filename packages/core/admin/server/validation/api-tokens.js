@@ -8,15 +8,27 @@ const handleReject = error => Promise.reject(formatYupErrors(error));
 const apiTokenCreationSchema = yup
   .object()
   .shape({
+    id: yup
+      .number()
+      .min(1)
+      .notNull(),
     name: yup
       .string()
       .min(1)
-      .required(),
-    description: yup.string().optional(),
+      .notNull(),
+    description: yup.string().nullable(),
     type: yup
       .string()
       .oneOf(Object.values(constants.API_TOKEN_TYPE))
-      .required(),
+      .notNull(),
+    createdAt: yup
+      .string()
+      .min(1)
+      .notNull(),
+    accessKey: yup
+      .string()
+      .min(1)
+      .notNull(),
   })
   .noUnknown();
 
@@ -29,6 +41,10 @@ const validateApiTokenCreationInput = async data => {
 const apiTokenUpdateSchema = yup
   .object()
   .shape({
+    id: yup
+      .number()
+      .min(1)
+      .notNull(),
     name: yup
       .string()
       .min(1)
@@ -37,6 +53,14 @@ const apiTokenUpdateSchema = yup
     type: yup
       .string()
       .oneOf(Object.values(constants.API_TOKEN_TYPE))
+      .notNull(),
+    createdAt: yup
+      .string()
+      .min(1)
+      .notNull(),
+    accessKey: yup
+      .string()
+      .min(1)
       .notNull(),
   })
   .noUnknown();
