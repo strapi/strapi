@@ -29,6 +29,19 @@ const OPERATORS = [
   '$notContainsi',
 ];
 
+const CAST_OPERATORS = [
+  '$not',
+  '$in',
+  '$notIn',
+  '$eq',
+  '$ne',
+  '$gt',
+  '$gte',
+  '$lt',
+  '$lte',
+  '$between',
+];
+
 const ARRAY_OPERATORS = ['$in', '$notIn', '$between'];
 
 const isOperator = key => OPERATORS.includes(key);
@@ -62,6 +75,15 @@ const processAttributeWhere = (attribute, where, ctx) => {
     const value = where[key];
 
     if (isOperator(key)) {
+      if (!_.isPlainObject(value)) {
+        if (CAST_OPERATORS.includes(key)) {
+          filters[key] = castValue(value, attribute);
+        } else {
+          filters[key] = value;
+        }
+        continue;
+      }
+
       filters[key] = processAttributeWhere(attribute, value, ctx);
       continue;
     }
