@@ -4,8 +4,8 @@ import { Main } from '@strapi/design-system/Main';
 import { LinkButton } from '@strapi/design-system/LinkButton';
 import { ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
 import { EmptyStateLayout } from '@strapi/design-system/EmptyStateLayout';
-import AddIcon from '@strapi/icons/AddIcon';
-import EmptyStateDocument from '@strapi/icons/EmptyStateDocument';
+import Plus from '@strapi/icons/Plus';
+import EmptyDocuments from '@strapi/icons/EmptyDocuments';
 import { useIntl } from 'react-intl';
 import { getTrad } from '../../utils';
 
@@ -26,7 +26,7 @@ const NoContentType = () => {
           action={
             <LinkButton
               variant="secondary"
-              startIcon={<AddIcon />}
+              startIcon={<Plus />}
               to="/plugins/content-type-builder/content-types/create-content-type"
             >
               {formatMessage({
@@ -41,7 +41,7 @@ const NoContentType = () => {
               "You don't have any content yet, we recommend you to create your first Content-Type.",
           })}
           hasRadius
-          icon={<EmptyStateDocument width="10rem" />}
+          icon={<EmptyDocuments width="10rem" />}
           shadow="tableShadow"
         />
       </ContentLayout>

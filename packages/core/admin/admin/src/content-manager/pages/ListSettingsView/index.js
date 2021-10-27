@@ -14,8 +14,8 @@ import { Layout, HeaderLayout, ContentLayout } from '@strapi/design-system/Layou
 import { Link } from '@strapi/design-system/Link';
 import { Main } from '@strapi/design-system/Main';
 import { Button } from '@strapi/design-system/Button';
-import CheckIcon from '@strapi/icons/CheckIcon';
-import BackIcon from '@strapi/icons/BackIcon';
+import Check from '@strapi/icons/Check';
+import ArrowLeft from '@strapi/icons/ArrowLeft';
 import { checkIfAttributeIsDisplayable, getTrad } from '../../utils';
 import ModelsContext from '../../contexts/ModelsContext';
 import { usePluginsQueryParams } from '../../hooks';
@@ -190,14 +190,14 @@ const ListSettingsView = ({ layout, slug }) => {
         <form onSubmit={handleSubmit}>
           <HeaderLayout
             navigationAction={
-              <Link startIcon={<BackIcon />} to={goBackUrl} id="go-back">
+              <Link startIcon={<ArrowLeft />} to={goBackUrl} id="go-back">
                 {formatMessage({ id: 'app.components.go-back', defaultMessage: 'Go back' })}
               </Link>
             }
             primaryAction={
               <Button
                 size="L"
-                startIcon={<CheckIcon />}
+                startIcon={<Check />}
                 disabled={isEqual(modifiedData, initialData)}
                 type="submit"
               >
@@ -250,7 +250,7 @@ const ListSettingsView = ({ layout, slug }) => {
               id: getTrad('popUpWarning.warning.updateAllSettings'),
               defaultMessage: 'This will modify all your settings',
             }}
-            iconRightButton={<CheckIcon />}
+            iconRightButton={<Check />}
             isConfirmButtonLoading={isSubmittingForm}
             isOpen={showWarningSubmit}
             onToggleDialog={toggleWarningSubmit}

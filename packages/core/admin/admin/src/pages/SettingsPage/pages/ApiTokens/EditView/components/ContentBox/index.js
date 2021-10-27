@@ -5,7 +5,7 @@ import { IconButton } from '@strapi/design-system/IconButton';
 import Duplicate from '@strapi/icons/Duplicate';
 import PropTypes from 'prop-types';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
-import IconApiTokens from '@strapi/icons/IconApiTokens';
+import Key from '@strapi/icons/Key';
 
 const HeaderContentBox = ({ apiToken }) => {
   const { formatMessage } = useIntl();
@@ -52,7 +52,7 @@ const HeaderContentBox = ({ apiToken }) => {
               defaultMessage: 'For security matters, you can only see your token once.',
             })
       }
-      icon={<IconApiTokens />}
+      icon={<Key />}
       iconBackground="neutral100"
     />
   );

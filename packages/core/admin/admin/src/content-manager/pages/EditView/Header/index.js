@@ -4,7 +4,7 @@ import { useHistory } from 'react-router-dom';
 import get from 'lodash/get';
 import isEqual from 'lodash/isEqual';
 import isEmpty from 'lodash/isEmpty';
-import BackIcon from '@strapi/icons/BackIcon';
+import ArrowLeft from '@strapi/icons/ArrowLeft';
 import { HeaderLayout } from '@strapi/design-system/Layout';
 import { Box } from '@strapi/design-system/Box';
 import { Button } from '@strapi/design-system/Button';
@@ -13,8 +13,8 @@ import { Link } from '@strapi/design-system/Link';
 import { Flex } from '@strapi/design-system/Flex';
 import { Text } from '@strapi/design-system/Text';
 import { Stack } from '@strapi/design-system/Stack';
-import AlertWarningIcon from '@strapi/icons/AlertWarningIcon';
-import CheckIcon from '@strapi/icons/CheckIcon';
+import ExclamationMarkCircle from '@strapi/icons/ExclamationMarkCircle';
+import Check from '@strapi/icons/Check';
 import PropTypes from 'prop-types';
 import isEqualFastCompare from 'react-fast-compare';
 import { getTrad } from '../../../utils';
@@ -109,7 +109,7 @@ const Header = ({
             disabled={didChangeData}
             loading={isPublishButtonLoading}
             onClick={onClick}
-            startIcon={<CheckIcon />}
+            startIcon={<Check />}
             variant="secondary"
           >
             {formatMessage(pubishButtonLabel)}
@@ -154,7 +154,7 @@ const Header = ({
         subtitle={subtitle}
         navigationAction={
           <Link
-            startIcon={<BackIcon />}
+            startIcon={<ArrowLeft />}
             // Needed in order to redirect the user with the correct search params
             // Since parts is using a link from react-router-dom the best way to do it is to disable the
             // event
@@ -179,7 +179,7 @@ const Header = ({
           describedBy="confirm-description"
           isOpen={showWarningUnpublish}
         >
-          <DialogBody icon={<AlertWarningIcon />}>
+          <DialogBody icon={<ExclamationMarkCircle />}>
             <Stack size={2}>
               <Flex justifyContent="center" style={{ textAlign: 'center' }}>
                 <Text id="confirm-description">
@@ -234,7 +234,7 @@ const Header = ({
           describedBy="confirm-description"
           isOpen={showWarningDraftRelation}
         >
-          <DialogBody icon={<AlertWarningIcon />}>
+          <DialogBody icon={<ExclamationMarkCircle />}>
             <Stack size={2}>
               <Flex justifyContent="center" style={{ textAlign: 'center' }}>
                 <Text id="confirm-description">

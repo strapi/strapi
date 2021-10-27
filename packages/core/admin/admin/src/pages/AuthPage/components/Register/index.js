@@ -13,8 +13,8 @@ import { TextInput } from '@strapi/design-system/TextInput';
 import { Checkbox } from '@strapi/design-system/Checkbox';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { H1, Subtitle } from '@strapi/design-system/Text';
-import Hide from '@strapi/icons/Hide';
-import Show from '@strapi/icons/Show';
+import EyeStriked from '@strapi/icons/EyeStriked';
+import Eye from '@strapi/icons/Eye';
 import { Form, useQuery, useNotification } from '@strapi/helper-plugin';
 import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
@@ -221,7 +221,7 @@ const Register = ({ fieldsToDisable, noSignin, onSubmit, schema }) => {
                               }
                         )}
                       >
-                        {passwordShown ? <Show /> : <Hide />}
+                        {passwordShown ? <Eye /> : <EyeStriked />}
                       </FieldActionWrapper>
                     }
                     hint={formatMessage({
@@ -267,7 +267,7 @@ const Register = ({ fieldsToDisable, noSignin, onSubmit, schema }) => {
                               }
                         )}
                       >
-                        {confirmPasswordShown ? <Show /> : <Hide />}
+                        {confirmPasswordShown ? <Eye /> : <EyeStriked />}
                       </FieldActionWrapper>
                     }
                     required

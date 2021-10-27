@@ -15,7 +15,7 @@ import {
   CardTimer,
 } from '@strapi/design-system/Card';
 import { IconButton } from '@strapi/design-system/IconButton';
-import EditIcon from '@strapi/icons/EditIcon';
+import Pencil from '@strapi/icons/Pencil';
 import { useIntl } from 'react-intl';
 import { VideoPreview } from './VideoPreview';
 import { getTrad, formatDuration } from '../../utils';
@@ -46,7 +46,7 @@ export const VideoAssetCard = ({
           <CardAction position="end">
             <IconButton
               label={formatMessage({ id: getTrad('control-card.edit'), defaultMessage: 'Edit' })}
-              icon={<EditIcon />}
+              icon={<Pencil />}
               onClick={onEdit}
             />
           </CardAction>

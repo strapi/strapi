@@ -5,7 +5,7 @@ import size from 'lodash/size';
 import isEqual from 'react-fast-compare';
 import { useIntl } from 'react-intl';
 import { NotAllowedInput } from '@strapi/helper-plugin';
-import DeleteIcon from '@strapi/icons/DeleteIcon';
+import Trash from '@strapi/icons/Trash';
 import { Box } from '@strapi/design-system/Box';
 import { IconButton } from '@strapi/design-system/IconButton';
 import { Flex } from '@strapi/design-system/Flex';
@@ -76,7 +76,7 @@ const FieldComponent = ({
               id: getTrad('components.reset-entry'),
               defaultMessage: 'Reset Entry',
             })}
-            icon={<DeleteIcon />}
+            icon={<Trash />}
             noBorder
             onClick={() => {
               removeComponentFromField(name, componentUid);

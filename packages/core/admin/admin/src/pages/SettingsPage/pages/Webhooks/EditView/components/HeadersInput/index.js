@@ -1,6 +1,6 @@
 import React from 'react';
 import { RemoveRoundedButton } from '@strapi/helper-plugin';
-import AddIcon from '@strapi/icons/AddIcon';
+import Plus from '@strapi/icons/Plus';
 import { Box } from '@strapi/design-system/Box';
 import { FieldLabel } from '@strapi/design-system/Field';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
@@ -97,7 +97,7 @@ const HeadersInput = () => {
                   onClick={() => {
                     push({ key: '', value: '' });
                   }}
-                  startIcon={<AddIcon />}
+                  startIcon={<Plus />}
                 >
                   {formatMessage({
                     id: 'Settings.webhooks.create.header',

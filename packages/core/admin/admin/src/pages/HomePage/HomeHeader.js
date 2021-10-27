@@ -7,7 +7,7 @@ import { Link } from '@strapi/design-system/Link';
 import { Stack } from '@strapi/design-system/Stack';
 import { Box } from '@strapi/design-system/Box';
 import { Button } from '@strapi/design-system/Button';
-import NextIcon from '@strapi/icons/NextIcon';
+import ArrowRight from '@strapi/icons/ArrowRight';
 
 const WordWrap = styled(Subtitle)`
   word-break: break-word;
@@ -56,7 +56,7 @@ const HomeHeader = ({ hasCreatedContentType, onCreateCT }) => {
               })}
             </Link>
           ) : (
-            <Button size="L" onClick={onCreateCT} endIcon={<NextIcon />}>
+            <Button size="L" onClick={onCreateCT} endIcon={<ArrowRight />}>
               {formatMessage({
                 id: 'app.components.HomePage.create',
                 defaultMessage: 'Create your first Content type',

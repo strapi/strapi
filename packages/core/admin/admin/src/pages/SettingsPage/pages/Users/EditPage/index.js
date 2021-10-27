@@ -26,8 +26,8 @@ import { Link } from '@strapi/design-system/Link';
 import { H3 } from '@strapi/design-system/Text';
 import { Main } from '@strapi/design-system/Main';
 import { Stack } from '@strapi/design-system/Stack';
-import BackIcon from '@strapi/icons/BackIcon';
-import CheckIcon from '@strapi/icons/CheckIcon';
+import ArrowLeft from '@strapi/icons/ArrowLeft';
+import Check from '@strapi/icons/Check';
 import MagicLink from 'ee_else_ce/pages/SettingsPage/pages/Users/components/MagicLink';
 import { formatAPIErrors } from '../../../../../utils';
 import { fetchUser, putUser } from './utils/api';
@@ -141,13 +141,13 @@ const EditPage = ({ canUpdate }) => {
         <SettingsPageTitle name="Users" />
         <HeaderLayout
           primaryAction={
-            <Button disabled startIcon={<CheckIcon />} type="button" size="L">
+            <Button disabled startIcon={<Check />} type="button" size="L">
               {formatMessage({ id: 'form.button.save', defaultMessage: 'Save' })}
             </Button>
           }
           title={title}
           navigationAction={
-            <Link startIcon={<BackIcon />} to="/settings/users?pageSize=10&page=1&sort=firstname">
+            <Link startIcon={<ArrowLeft />} to="/settings/users?pageSize=10&page=1&sort=firstname">
               {formatMessage({
                 id: 'app.components.go-back',
                 defaultMessage: 'Go back',
@@ -178,7 +178,7 @@ const EditPage = ({ canUpdate }) => {
                 primaryAction={
                   <Button
                     disabled={isSubmitting || !canUpdate}
-                    startIcon={<CheckIcon />}
+                    startIcon={<Check />}
                     loading={isSubmitting}
                     type="submit"
                     size="L"
@@ -189,7 +189,7 @@ const EditPage = ({ canUpdate }) => {
                 title={title}
                 navigationAction={
                   <Link
-                    startIcon={<BackIcon />}
+                    startIcon={<ArrowLeft />}
                     to="/settings/users?pageSize=10&page=1&sort=firstname"
                   >
                     {formatMessage({

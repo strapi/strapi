@@ -5,9 +5,9 @@ import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
 import { Text } from '@strapi/design-system/Text';
 import { IconButton } from '@strapi/design-system/IconButton';
-import DeleteIcon from '@strapi/icons/DeleteIcon';
+import Trash from '@strapi/icons/Trash';
 import DragHandle from '@strapi/icons/Drag';
-import DropdownIcon from '@strapi/icons/FilterDropdown';
+import CarretDown from '@strapi/icons/CarretDown';
 
 const DropdownIconWrapper = styled(Box)`
   height: ${32 / 16}rem;
@@ -50,7 +50,7 @@ const DragPreview = ({ displayedValue }) => {
         <ToggleButton type="button">
           <Flex>
             <DropdownIconWrapper background="neutral200">
-              <DropdownIcon />
+              <CarretDown />
             </DropdownIconWrapper>
             <Box paddingLeft={6}>
               <Text textColor="neutral700" style={{ width: '9vw' }} ellipsis>
@@ -61,7 +61,7 @@ const DragPreview = ({ displayedValue }) => {
         </ToggleButton>
         <Box paddingLeft={3}>
           <Flex>
-            <IconButton icon={<DeleteIcon />} />
+            <IconButton icon={<Trash />} />
             <Box paddingLeft={2}>
               <IconButton icon={<DragHandle />} />
             </Box>

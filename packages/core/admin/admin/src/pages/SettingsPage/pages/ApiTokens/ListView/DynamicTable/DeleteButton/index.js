@@ -1,5 +1,5 @@
 import React from 'react';
-import DeleteIcon from '@strapi/icons/DeleteIcon';
+import Trash from '@strapi/icons/Trash';
 import { IconButton } from '@strapi/design-system/IconButton';
 import { Box } from '@strapi/design-system/Box';
 import { stopPropagation } from '@strapi/helper-plugin';
@@ -21,7 +21,7 @@ const DeleteButton = ({ tokenName, onClickDelete }) => {
           { target: `${tokenName}` }
         )}
         noBorder
-        icon={<DeleteIcon />}
+        icon={<Trash />}
       />
     </Box>
   );

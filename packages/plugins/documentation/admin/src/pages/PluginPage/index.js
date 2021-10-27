@@ -23,9 +23,9 @@ import { Text, TableLabel } from '@strapi/design-system/Text';
 import { Flex } from '@strapi/design-system/Flex';
 import { Table, Tr, Thead, Th, Tbody, Td } from '@strapi/design-system/Table';
 
-import DeleteIcon from '@strapi/icons/DeleteIcon';
-import Show from '@strapi/icons/Show';
-import Reload from '@strapi/icons/Reload';
+import Trash from '@strapi/icons/Trash';
+import Show from '@strapi/icons/Eye';
+import Reload from '@strapi/icons/Refresh';
 
 import permissions from '../../permissions';
 import { getTrad } from '../../utils';
@@ -160,7 +160,7 @@ const PluginPage = () => {
                               <IconButton
                                 onClick={() => handleClickDelete(doc.version)}
                                 noBorder
-                                icon={<DeleteIcon />}
+                                icon={<Trash />}
                                 label={formatMessage(
                                   {
                                     id: getTrad('pages.PluginPage.table.icon.delete'),

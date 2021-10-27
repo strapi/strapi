@@ -6,8 +6,8 @@ import { Stack } from '@strapi/design-system/Stack';
 import { Flex } from '@strapi/design-system/Flex';
 import { Text } from '@strapi/design-system/Text';
 import { Button } from '@strapi/design-system/Button';
-import AlertWarningIcon from '@strapi/icons/AlertWarningIcon';
-import DeleteIcon from '@strapi/icons/DeleteIcon';
+import ExclamationMarkCircle from '@strapi/icons/ExclamationMarkCircle';
+import Trash from '@strapi/icons/Trash';
 import InjectionZoneList from '../../InjectionZoneList';
 import { getTrad } from '../../../utils';
 
@@ -25,7 +25,7 @@ const ConfirmDialogDeleteAll = ({ isConfirmButtonLoading, isOpen, onToggleDialog
       describedBy="confirm-description"
       isOpen={isOpen}
     >
-      <DialogBody icon={<AlertWarningIcon />}>
+      <DialogBody icon={<ExclamationMarkCircle />}>
         <Stack size={2}>
           <Flex justifyContent="center">
             <Text id="confirm-description">
@@ -53,7 +53,7 @@ const ConfirmDialogDeleteAll = ({ isConfirmButtonLoading, isOpen, onToggleDialog
           <Button
             onClick={onConfirm}
             variant="danger-light"
-            startIcon={<DeleteIcon />}
+            startIcon={<Trash />}
             id="confirm-delete"
             loading={isConfirmButtonLoading}
           >

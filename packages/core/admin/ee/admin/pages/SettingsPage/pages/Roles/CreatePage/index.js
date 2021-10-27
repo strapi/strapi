@@ -21,7 +21,7 @@ import { Stack } from '@strapi/design-system/Stack';
 import { Text } from '@strapi/design-system/Text';
 import { TextInput } from '@strapi/design-system/TextInput';
 import { Textarea } from '@strapi/design-system/Textarea';
-import BackIcon from '@strapi/icons/BackIcon';
+import ArrowLeft from '@strapi/icons/ArrowLeft';
 import { Formik } from 'formik';
 import get from 'lodash/get';
 import isEmpty from 'lodash/isEmpty';
@@ -161,7 +161,7 @@ const CreatePage = () => {
                   defaultMessage: 'Define the rights given to the role',
                 })}
                 navigationAction={
-                  <Link startIcon={<BackIcon />} to="/settings/roles">
+                  <Link startIcon={<ArrowLeft />} to="/settings/roles">
                     {formatMessage({
                       id: 'app.components.go-back',
                       defaultMessage: 'Go back',

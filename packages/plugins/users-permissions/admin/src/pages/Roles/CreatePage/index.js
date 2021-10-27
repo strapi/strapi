@@ -8,7 +8,7 @@ import { Box } from '@strapi/design-system/Box';
 import { TextInput } from '@strapi/design-system/TextInput';
 import { Textarea } from '@strapi/design-system/Textarea';
 import { H3 } from '@strapi/design-system/Text';
-import CheckIcon from '@strapi/icons/CheckIcon';
+import Check from '@strapi/icons/Check';
 import { GridItem, Grid } from '@strapi/design-system/Grid';
 import { Formik } from 'formik';
 import { useIntl } from 'react-intl';
@@ -84,7 +84,7 @@ const EditPage = () => {
             <HeaderLayout
               primaryAction={
                 !isLoadingPlugins && (
-                  <Button type="submit" loading={isSubmitting} startIcon={<CheckIcon />}>
+                  <Button type="submit" loading={isSubmitting} startIcon={<Check />}>
                     {formatMessage({
                       id: 'app.components.Button.save',
                       defaultMessage: 'Save',

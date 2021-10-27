@@ -8,7 +8,7 @@ import {
   useNotification,
   useOverlayBlocker,
 } from '@strapi/helper-plugin';
-import CheckIcon from '@strapi/icons/CheckIcon';
+import Check from '@strapi/icons/Check';
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
 import { ToggleInput } from '@strapi/design-system/ToggleInput';
@@ -132,7 +132,7 @@ export const SettingsPage = () => {
               data-testid="save-button"
               loading={isSubmiting}
               type="submit"
-              startIcon={<CheckIcon />}
+              startIcon={<Check />}
               size="L"
             >
               {formatMessage({

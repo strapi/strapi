@@ -12,7 +12,7 @@ import { ActionLayout, ContentLayout, HeaderLayout } from '@strapi/design-system
 import { Button } from '@strapi/design-system/Button';
 import { Main } from '@strapi/design-system/Main';
 import { useNotifyAT } from '@strapi/design-system/LiveRegions';
-import Mail from '@strapi/icons/Mail';
+import Envelop from '@strapi/icons/Envelop';
 import { useLocation } from 'react-router-dom';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
@@ -96,7 +96,12 @@ const ListPage = () => {
     (status !== 'success' && status !== 'error') || (status === 'success' && isFetching);
 
   const createAction = canCreate ? (
-    <Button data-testid="create-user-button" onClick={handleToggle} startIcon={<Mail />} size="L">
+    <Button
+      data-testid="create-user-button"
+      onClick={handleToggle}
+      startIcon={<Envelop />}
+      size="L"
+    >
       {formatMessage({
         id: 'Settings.permissions.users.create',
         defaultMessage: 'Create new user',

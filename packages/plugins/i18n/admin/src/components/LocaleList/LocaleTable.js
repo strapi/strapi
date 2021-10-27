@@ -5,8 +5,8 @@ import { IconButton } from '@strapi/design-system/IconButton';
 import { Stack } from '@strapi/design-system/Stack';
 import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
 import { Table, Thead, Tr, Th, Td, Tbody } from '@strapi/design-system/Table';
-import EditIcon from '@strapi/icons/EditIcon';
-import DeleteIcon from '@strapi/icons/DeleteIcon';
+import Pencil from '@strapi/icons/Pencil';
+import Trash from '@strapi/icons/Trash';
 import { useIntl } from 'react-intl';
 import { stopPropagation, onRowClick } from '@strapi/helper-plugin';
 
@@ -72,7 +72,7 @@ const LocaleTable = ({ locales, onDeleteLocale, onEditLocale }) => {
                   <IconButton
                     onClick={() => onEditLocale(locale)}
                     label={formatMessage({ id: getTrad('Settings.list.actions.edit') })}
-                    icon={<EditIcon />}
+                    icon={<Pencil />}
                     noBorder
                   />
                 )}
@@ -80,7 +80,7 @@ const LocaleTable = ({ locales, onDeleteLocale, onEditLocale }) => {
                   <IconButton
                     onClick={() => onDeleteLocale(locale)}
                     label={formatMessage({ id: getTrad('Settings.list.actions.delete') })}
-                    icon={<DeleteIcon />}
+                    icon={<Trash />}
                     noBorder
                   />
                 )}

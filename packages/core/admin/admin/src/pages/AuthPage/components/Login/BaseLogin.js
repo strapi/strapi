@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import Hide from '@strapi/icons/Hide';
-import Show from '@strapi/icons/Show';
+import EyeStriked from '@strapi/icons/EyeStriked';
+import Eye from '@strapi/icons/Eye';
 import { Box } from '@strapi/design-system/Box';
 import { Stack } from '@strapi/design-system/Stack';
 import { Main } from '@strapi/design-system/Main';
@@ -125,7 +125,7 @@ const Login = ({ onSubmit, schema, children }) => {
                             }
                       )}
                     >
-                      {passwordShown ? <Show /> : <Hide />}
+                      {passwordShown ? <Eye /> : <EyeStriked />}
                     </FieldActionWrapper>
                   }
                   required

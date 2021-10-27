@@ -10,8 +10,8 @@ import {
 import { HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
 import { Button } from '@strapi/design-system/Button';
-import CheckIcon from '@strapi/icons/CheckIcon';
-import BackIcon from '@strapi/icons/BackIcon';
+import Check from '@strapi/icons/Check';
+import ArrowLeft from '@strapi/icons/ArrowLeft';
 import { Link } from '@strapi/design-system/Link';
 import { Formik } from 'formik';
 import { Stack } from '@strapi/design-system/Stack';
@@ -141,7 +141,7 @@ const ApiTokenCreateView = () => {
                   <Button
                     disabled={isSubmitting}
                     loading={isSubmitting}
-                    startIcon={<CheckIcon />}
+                    startIcon={<Check />}
                     type="submit"
                     size="L"
                   >
@@ -152,7 +152,7 @@ const ApiTokenCreateView = () => {
                   </Button>
                 }
                 navigationAction={
-                  <Link startIcon={<BackIcon />} to="/settings/api-tokens">
+                  <Link startIcon={<ArrowLeft />} to="/settings/api-tokens">
                     {formatMessage({
                       id: 'app.components.go-back',
                       defaultMessage: 'Go back',

@@ -22,7 +22,7 @@ import { Table, Thead, Tr, Th, Tbody, Td } from '@strapi/design-system/Table';
 import { Text, TableLabel } from '@strapi/design-system/Text';
 import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
 import { IconButton } from '@strapi/design-system/IconButton';
-import EditIcon from '@strapi/icons/EditIcon';
+import Pencil from '@strapi/icons/Pencil';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import forms from './utils/forms';
 import { fetchData, putProvider } from './utils/api';
@@ -233,7 +233,7 @@ export const ProvidersPage = () => {
                         <IconButton
                           onClick={() => handleClickEdit(provider)}
                           noBorder
-                          icon={<EditIcon />}
+                          icon={<Pencil />}
                           label="Edit"
                         />
                       )}

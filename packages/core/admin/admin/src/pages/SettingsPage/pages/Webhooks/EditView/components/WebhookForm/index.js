@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { Form } from '@strapi/helper-plugin';
-import BackIcon from '@strapi/icons/BackIcon';
-import CheckIcon from '@strapi/icons/CheckIcon';
-import Publish from '@strapi/icons/Publish';
+import ArrowLeft from '@strapi/icons/ArrowLeft';
+import Check from '@strapi/icons/Check';
+import Publish from '@strapi/icons/Play';
 import { ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
 import { Box } from '@strapi/design-system/Box';
 import { Button } from '@strapi/design-system/Button';
@@ -66,7 +66,7 @@ const WebhookForm = ({
                     defaultMessage: 'Trigger',
                   })}
                 </Button>
-                <Button startIcon={<CheckIcon />} onClick={handleSubmit} type="submit" size="L">
+                <Button startIcon={<Check />} onClick={handleSubmit} type="submit" size="L">
                   {formatMessage({
                     id: 'app.components.Button.save',
                     defaultMessage: 'Save',
@@ -83,7 +83,7 @@ const WebhookForm = ({
                 : data?.name
             }
             navigationAction={
-              <Link startIcon={<BackIcon />} to="/settings/webhooks">
+              <Link startIcon={<ArrowLeft />} to="/settings/webhooks">
                 {formatMessage({
                   id: 'app.components.go-back',
                   defaultMessage: 'Go back',

@@ -7,8 +7,8 @@ import { IconButton } from '@strapi/design-system/IconButton';
 import { Flex } from '@strapi/design-system/Flex';
 import { Stack } from '@strapi/design-system/Stack';
 import { Text } from '@strapi/design-system/Text';
-import EditIcon from '@strapi/icons/EditIcon';
-import DeleteIcon from '@strapi/icons/DeleteIcon';
+import Pencil from '@strapi/icons/Pencil';
+import Trash from '@strapi/icons/Trash';
 import { stopPropagation, onRowClick } from '@strapi/helper-plugin';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import useDataManager from '../../hooks/useDataManager';
@@ -143,7 +143,7 @@ function ListRow({
                       formatMessage: 'Edit',
                     })} ${name}`}
                     noBorder
-                    icon={<EditIcon />}
+                    icon={<Pencil />}
                   />
                 )}
                 <IconButton
@@ -160,7 +160,7 @@ function ListRow({
                     defaultMessage: 'Delete',
                   })} ${name}`}
                   noBorder
-                  icon={<DeleteIcon />}
+                  icon={<Trash />}
                 />
               </Stack>
             ) : (

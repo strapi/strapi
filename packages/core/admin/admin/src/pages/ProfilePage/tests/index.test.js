@@ -244,6 +244,10 @@ describe('ADMIN | Pages | Profile page', () => {
         outline: none;
       }
 
+      .c37[aria-disabled='true'] {
+        cursor: not-allowed;
+      }
+
       .c34 {
         font-weight: 500;
         font-size: 0.75rem;

@@ -209,6 +209,10 @@ describe('Email | Pages | Settings', () => {
         outline: none;
       }
 
+      .c26[aria-disabled='true'] {
+        cursor: not-allowed;
+      }
+
       .c23 {
         font-weight: 500;
         font-size: 0.75rem;

@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import CloseAlertIcon from '@strapi/icons/CloseAlertIcon';
+import Cross from '@strapi/icons/Cross';
 import { Text } from '@strapi/design-system/Text';
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
@@ -47,7 +47,7 @@ export const UploadProgress = ({ onCancel, progress, error }) => {
       hasRadius
     >
       {error ? (
-        <CloseAlertIcon aria-label={error?.message} />
+        <Cross aria-label={error?.message} />
       ) : (
         <>
           <Box paddingBottom={2}>
@@ -64,7 +64,7 @@ export const UploadProgress = ({ onCancel, progress, error }) => {
               })}
             </Text>
             <Box as="span" paddingLeft={2} aria-hidden>
-              <CloseAlertIcon />
+              <Cross />
             </Box>
           </CancelButton>
         </>

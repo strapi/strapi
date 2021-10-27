@@ -14,13 +14,13 @@ import { LinkButton } from '@strapi/design-system/LinkButton';
 import { Link } from '@strapi/design-system/Link';
 import ExternalLink from '@strapi/icons/ExternalLink';
 import Github from '@strapi/icons/Github';
-import Slack from '@strapi/icons/Slack';
+import Discord from '@strapi/icons/Discord';
 import Reddit from '@strapi/icons/Reddit';
 import Strapi from '@strapi/icons/Strapi';
 import Twitter from '@strapi/icons/Twitter';
 import Discourse from '@strapi/icons/Discourse';
 
-const StyledDiscord = styled(Slack)`
+const StyledDiscord = styled(Discord)`
   path {
     fill: #7289da !important;
   }

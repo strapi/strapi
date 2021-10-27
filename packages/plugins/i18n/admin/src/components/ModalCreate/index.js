@@ -13,7 +13,7 @@ import { ButtonText, H2 } from '@strapi/design-system/Text';
 import { Divider } from '@strapi/design-system/Divider';
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
-import CheckIcon from '@strapi/icons/CheckIcon';
+import Check from '@strapi/icons/Check';
 import { useIntl } from 'react-intl';
 import { Formik } from 'formik';
 import localeFormSchema from '../../schemas';
@@ -115,7 +115,7 @@ const ModalCreate = ({ onClose }) => {
               </Button>
             }
             endActions={
-              <Button type="submit" startIcon={<CheckIcon />} disabled={isAdding}>
+              <Button type="submit" startIcon={<Check />} disabled={isAdding}>
                 {formatMessage({ id: 'app.components.Button.save', defaultMessage: 'Save' })}
               </Button>
             }

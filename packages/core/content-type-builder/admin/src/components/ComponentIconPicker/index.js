@@ -4,7 +4,7 @@ import { useIntl } from 'react-intl';
 import { AutoSizer, Collection } from 'react-virtualized';
 import { Searchbar } from '@strapi/design-system/Searchbar';
 import { IconButton } from '@strapi/design-system/IconButton';
-import SearchIcon from '@strapi/icons/SearchIcon';
+import Search from '@strapi/icons/Search';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
@@ -104,7 +104,7 @@ const ComponentIconPicker = ({ error, isCreating, intlLabel, name, onChange, val
               </Searchbar>
             </div>
           ) : (
-            <IconButton onClick={toggleSearch} aria-label="Edit" icon={<SearchIcon />} noBorder />
+            <IconButton onClick={toggleSearch} aria-label="Edit" icon={<Search />} noBorder />
           )}
         </Flex>
         <Stack size={1}>

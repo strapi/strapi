@@ -8,9 +8,9 @@ import { IconButton } from '@strapi/design-system/IconButton';
 import { FocusTrap } from '@strapi/design-system/FocusTrap';
 import { Box } from '@strapi/design-system/Box';
 import { Stack } from '@strapi/design-system/Stack';
-import DeleteIcon from '@strapi/icons/DeleteIcon';
-import DownIcon from '@strapi/icons/DownIcon1';
-import UpIcon from '@strapi/icons/UpIcon1';
+import Trash from '@strapi/icons/Trash';
+import ArrowDown from '@strapi/icons/ArrowDown';
+import ArrowUp from '@strapi/icons/ArrowUp';
 // import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useContentTypeLayout } from '../../../../hooks';
 import { getTrad } from '../../../../utils';
@@ -83,14 +83,14 @@ const Component = ({
                 <IconButton
                   label={downLabel}
                   onClick={handleMoveComponentDown}
-                  icon={<DownIcon />}
+                  icon={<ArrowDown />}
                 />
               )}
               {showUpIcon && (
-                <IconButton label={upLabel} onClick={handleMoveComponentUp} icon={<UpIcon />} />
+                <IconButton label={upLabel} onClick={handleMoveComponentUp} icon={<ArrowUp />} />
               )}
               {isFieldAllowed && (
-                <IconButton label={deleteLabel} onClick={handleRemove} icon={<DeleteIcon />} />
+                <IconButton label={deleteLabel} onClick={handleRemove} icon={<Trash />} />
               )}
             </Stack>
           }

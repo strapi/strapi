@@ -99,7 +99,7 @@ exports[`<FilterList /> renders and matches the snapshot 1`] = `
             >
               <path
                 d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
-                fill="#32324D"
+                fill="#212134"
               />
             </svg>
           </div>
@@ -136,7 +136,7 @@ exports[`<FilterList /> renders and matches the snapshot 1`] = `
             >
               <path
                 d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
-                fill="#32324D"
+                fill="#212134"
               />
             </svg>
           </div>
@@ -173,7 +173,7 @@ exports[`<FilterList /> renders and matches the snapshot 1`] = `
             >
               <path
                 d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
-                fill="#32324D"
+                fill="#212134"
               />
             </svg>
           </div>
@@ -210,7 +210,7 @@ exports[`<FilterList /> renders and matches the snapshot 1`] = `
             >
               <path
                 d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
-                fill="#32324D"
+                fill="#212134"
               />
             </svg>
           </div>
@@ -247,7 +247,7 @@ exports[`<FilterList /> renders and matches the snapshot 1`] = `
             >
               <path
                 d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
-                fill="#32324D"
+                fill="#212134"
               />
             </svg>
           </div>
@@ -284,7 +284,7 @@ exports[`<FilterList /> renders and matches the snapshot 1`] = `
             >
               <path
                 d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
-                fill="#32324D"
+                fill="#212134"
               />
             </svg>
           </div>

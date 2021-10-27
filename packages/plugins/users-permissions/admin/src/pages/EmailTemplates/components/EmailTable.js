@@ -5,10 +5,10 @@ import { Table, Thead, Tbody, Tr, Td, Th } from '@strapi/design-system/Table';
 import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
 import { Text, TableLabel } from '@strapi/design-system/Text';
 import { IconButton } from '@strapi/design-system/IconButton';
-import EditIcon from '@strapi/icons/EditIcon';
-import Reload from '@strapi/icons/Reload';
+import Pencil from '@strapi/icons/Pencil';
+import Reload from '@strapi/icons/Refresh';
 import { onRowClick, stopPropagation } from '@strapi/helper-plugin';
-import CheckIcon from '@strapi/icons/CheckIcon';
+import Check from '@strapi/icons/Check';
 import { getTrad } from '../../../utils';
 
 const EmailTable = ({ canUpdate, onEditClick }) => {
@@ -70,13 +70,13 @@ const EmailTable = ({ canUpdate, onEditClick }) => {
                 defaultMessage: 'Edit a template',
               })}
               noBorder
-              icon={canUpdate && <EditIcon />}
+              icon={canUpdate && <Pencil />}
             />
           </Td>
         </Tr>
         <Tr {...onRowClick({ fn: () => onEditClick('email_confirmation') })}>
           <Td>
-            <CheckIcon
+            <Check
               aria-label={formatMessage({
                 id: getTrad('Email.template.email_confirmation'),
                 defaultMessage: 'Email address confirmation',
@@ -99,7 +99,7 @@ const EmailTable = ({ canUpdate, onEditClick }) => {
                 defaultMessage: 'Edit a template',
               })}
               noBorder
-              icon={canUpdate && <EditIcon />}
+              icon={canUpdate && <Pencil />}
             />
           </Td>
         </Tr>

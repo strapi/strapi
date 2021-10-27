@@ -7,7 +7,7 @@ import {
 import { HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
 import { Button } from '@strapi/design-system/Button';
-import CheckIcon from '@strapi/icons/CheckIcon';
+import Check from '@strapi/icons/Check';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 
@@ -20,7 +20,7 @@ const LoadingView = ({ apiTokenName }) => {
       <SettingsPageTitle name="API Tokens" />
       <HeaderLayout
         primaryAction={
-          <Button disabled startIcon={<CheckIcon />} type="button" size="L">
+          <Button disabled startIcon={<Check />} type="button" size="L">
             {formatMessage({ id: 'form.button.save', defaultMessage: 'Save' })}
           </Button>
         }

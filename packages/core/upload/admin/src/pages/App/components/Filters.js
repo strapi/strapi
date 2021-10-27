@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { Button } from '@strapi/design-system/Button';
 import { useQueryParams } from '@strapi/helper-plugin';
-import FilterIcon from '@strapi/icons/FilterIcon';
+import FilterIcon from '@strapi/icons/Filter';
 import { useIntl } from 'react-intl';
 
 import FilterList from '../../../components/FilterList';

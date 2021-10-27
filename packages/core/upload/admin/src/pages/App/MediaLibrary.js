@@ -12,7 +12,7 @@ import {
 import { Layout, HeaderLayout, ContentLayout, ActionLayout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
 import { Button } from '@strapi/design-system/Button';
-import AddIcon from '@strapi/icons/AddIcon';
+import Plus from '@strapi/icons/Plus';
 import { Box } from '@strapi/design-system/Box';
 import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
 import { UploadAssetDialog } from '../../components/UploadAssetDialog/UploadAssetDialog';
@@ -100,7 +100,7 @@ export const MediaLibrary = () => {
           )}
           primaryAction={
             canCreate ? (
-              <Button startIcon={<AddIcon />} onClick={toggleUploadAssetDialog}>
+              <Button startIcon={<Plus />} onClick={toggleUploadAssetDialog}>
                 {formatMessage({
                   id: getTrad('header.actions.upload-assets'),
                   defaultMessage: 'Upload assets',
@@ -161,7 +161,7 @@ export const MediaLibrary = () => {
                 canCreate ? (
                   <Button
                     variant="secondary"
-                    startIcon={<AddIcon />}
+                    startIcon={<Plus />}
                     onClick={toggleUploadAssetDialog}
                   >
                     {formatMessage({
