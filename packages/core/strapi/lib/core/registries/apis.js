@@ -2,42 +2,48 @@
 
 const { has } = require('lodash/fp');
 const { createCoreApi } = require('../../core-api');
+const { BaseRegistry } = require('./base');
 
-const apisRegistry = strapi => {
-  const apis = {};
+class ApiRegistry extends BaseRegistry {
+  constructor(strapi) {
+    super(strapi);
+    this.apis = {};
+  }
+  get(name) {
+    return this.apis[name];
+  }
+  getAll() {
+    return this.apis;
+  }
+  add(apiName, apiConfig) {
+    if (has(apiName, this.apis)) {
+      throw new Error(`API ${apiName} has already been registered.`);
+    }
 
-  return {
-    get(name) {
-      return apis[name];
-    },
-    getAll() {
-      return apis;
-    },
-    add(apiName, apiConfig) {
-      if (has(apiName, apis)) {
-        throw new Error(`API ${apiName} has already been registered.`);
-      }
+    const apiInstance = strapi.container.get('modules').add(`api::${apiName}`, apiConfig);
 
-      const apiInstance = strapi.container.get('modules').add(`api::${apiName}`, apiConfig);
+    for (const ctName in apiInstance.contentTypes || {}) {
+      const contentType = apiInstance.contentTypes[ctName];
 
-      for (const ctName in apiInstance.contentTypes || {}) {
-        const contentType = apiInstance.contentTypes[ctName];
+      const { service, controller } = createCoreApi({
+        model: contentType,
+        api: apiInstance,
+        strapi,
+      });
 
-        const { service, controller } = createCoreApi({
-          model: contentType,
-          api: apiInstance,
-          strapi,
-        });
+      strapi.container.get('services').set(`api::${apiName}.${ctName}`, service);
+      strapi.container.get('controllers').set(`api::${apiName}.${ctName}`, controller);
+    }
 
-        strapi.container.get('services').set(`api::${apiName}.${ctName}`, service);
-        strapi.container.get('controllers').set(`api::${apiName}.${ctName}`, controller);
-      }
+    this.apis[apiName] = apiInstance;
 
-      apis[apiName] = apiInstance;
+    return this.apis[apiName];
+  }
+}
 
-      return apis[apiName];
-    },
-  };
+const createApisRegistry = strapi => {
+  return new ApiRegistry(strapi);
 };
 
-module.exports = apisRegistry;
+module.exports = createApisRegistry;
+module.exports.ApiRegistry = ApiRegistry;

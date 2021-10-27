@@ -1,28 +1,34 @@
 'use strict';
 
 const { has } = require('lodash/fp');
+const { BaseRegistry } = require('./base');
 
-const pluginsRegistry = strapi => {
-  const plugins = {};
+class PluginsRegistry extends BaseRegistry {
+  constructor(strapi) {
+    super(strapi);
+    this.plugins = {};
+  }
+  get(name) {
+    return this.plugins[name];
+  }
+  getAll() {
+    return this.plugins;
+  }
+  add(name, pluginConfig) {
+    if (has(name, this.plugins)) {
+      throw new Error(`Plugin ${name} has already been registered.`);
+    }
 
-  return {
-    get(name) {
-      return plugins[name];
-    },
-    getAll() {
-      return plugins;
-    },
-    add(name, pluginConfig) {
-      if (has(name, plugins)) {
-        throw new Error(`Plugin ${name} has already been registered.`);
-      }
+    const pluginModule = strapi.container.get('modules').add(`plugin::${name}`, pluginConfig);
+    this.plugins[name] = pluginModule;
 
-      const pluginModule = strapi.container.get('modules').add(`plugin::${name}`, pluginConfig);
-      plugins[name] = pluginModule;
+    return this.plugins[name];
+  }
+}
 
-      return plugins[name];
-    },
-  };
+const createPluginsRegistry = strapi => {
+  return new PluginsRegistry(strapi);
 };
 
-module.exports = pluginsRegistry;
+module.exports = createPluginsRegistry;
+module.exports.PluginsRegistry = PluginsRegistry;

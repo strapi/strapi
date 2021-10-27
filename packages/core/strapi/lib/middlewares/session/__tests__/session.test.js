@@ -53,7 +53,7 @@ describe('Session middleware', () => {
         },
       },
     };
-    mockStrapi.config = configProvider(mockStrapi.config);
+    mockStrapi.config = configProvider(mockStrapi, mockStrapi.config);
 
     const middleware = createMiddleware(mockStrapi);
     middleware.initialize();

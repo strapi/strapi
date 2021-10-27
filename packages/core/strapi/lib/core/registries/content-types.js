@@ -3,6 +3,7 @@
 const { pickBy, has } = require('lodash/fp');
 const { createContentType } = require('../domain/content-type');
 const { addNamespace, hasNamespace } = require('../utils');
+const { BaseRegistry } = require('./base');
 
 const validateKeySameToSingularName = contentTypes => {
   for (const ctName in contentTypes) {
@@ -16,82 +17,87 @@ const validateKeySameToSingularName = contentTypes => {
   }
 };
 
-const contentTypesRegistry = () => {
-  const contentTypes = {};
+class ContentTypesRegistry extends BaseRegistry {
+  constructor(strapi) {
+    super(strapi);
+    this.contentTypes = {};
+  }
+  /**
+   * Returns this list of registered contentTypes uids
+   * @returns {string[]}
+   */
+  keys() {
+    return Object.keys(this.contentTypes);
+  }
 
-  return {
-    /**
-     * Returns this list of registered contentTypes uids
-     * @returns {string[]}
-     */
-    keys() {
-      return Object.keys(contentTypes);
-    },
+  /**
+   * Returns the instance of a contentType. Instantiate the contentType if not already done
+   * @param {string} uid
+   * @returns
+   */
+  get(uid) {
+    return this.contentTypes[uid];
+  }
 
-    /**
-     * Returns the instance of a contentType. Instantiate the contentType if not already done
-     * @param {string} uid
-     * @returns
-     */
-    get(uid) {
-      return contentTypes[uid];
-    },
+  /**
+   * Returns a map with all the contentTypes in a namespace
+   * @param {string} namespace
+   */
+  getAll(namespace) {
+    return pickBy((_, uid) => hasNamespace(uid, namespace))(this.contentTypes);
+  }
 
-    /**
-     * Returns a map with all the contentTypes in a namespace
-     * @param {string} namespace
-     */
-    getAll(namespace) {
-      return pickBy((_, uid) => hasNamespace(uid, namespace))(contentTypes);
-    },
+  /**
+   * Registers a contentType
+   * @param {string} uid
+   * @param {Object} contentType
+   */
+  set(uid, contentType) {
+    this.contentTypes[uid] = contentType;
+    return this;
+  }
 
-    /**
-     * Registers a contentType
-     * @param {string} uid
-     * @param {Object} contentType
-     */
-    set(uid, contentType) {
-      contentTypes[uid] = contentType;
-      return this;
-    },
+  /**
+   * Registers a map of contentTypes for a specific namespace
+   * @param {string} namespace
+   * @param {{ [key: string]: Object }} newContentTypes
+   */
+  add(namespace, newContentTypes) {
+    validateKeySameToSingularName(newContentTypes);
 
-    /**
-     * Registers a map of contentTypes for a specific namespace
-     * @param {string} namespace
-     * @param {{ [key: string]: Object }} newContentTypes
-     */
-    add(namespace, newContentTypes) {
-      validateKeySameToSingularName(newContentTypes);
+    for (const rawCtName in newContentTypes) {
+      const uid = addNamespace(rawCtName, namespace);
 
-      for (const rawCtName in newContentTypes) {
-        const uid = addNamespace(rawCtName, namespace);
-
-        if (has(uid, contentTypes)) {
-          throw new Error(`Content-type ${uid} has already been registered.`);
-        }
-
-        contentTypes[uid] = createContentType(uid, newContentTypes[rawCtName]);
-      }
-    },
-
-    /**
-     * Wraps a contentType to extend it
-     * @param {string} uid
-     * @param {(contentType: Object) => Object} extendFn
-     */
-    extend(ctUID, extendFn) {
-      const currentContentType = this.get(ctUID);
-
-      if (!currentContentType) {
-        throw new Error(`Content-Type ${ctUID} doesn't exist`);
+      if (has(uid, this.contentTypes)) {
+        throw new Error(`Content-type ${uid} has already been registered.`);
       }
 
-      const newContentType = extendFn(currentContentType);
-      contentTypes[ctUID] = newContentType;
+      this.contentTypes[uid] = createContentType(uid, newContentTypes[rawCtName]);
+    }
+  }
 
-      return this;
-    },
-  };
+  /**
+   * Wraps a contentType to extend it
+   * @param {string} ctUID
+   * @param {(contentType: Object) => Object} extendFn
+   */
+  extend(ctUID, extendFn) {
+    const currentContentType = this.get(ctUID);
+
+    if (!currentContentType) {
+      throw new Error(`Content-Type ${ctUID} doesn't exist`);
+    }
+
+    const newContentType = extendFn(currentContentType);
+    this.contentTypes[ctUID] = newContentType;
+
+    return this;
+  }
+}
+
+const createContentTypesRegistry = strapi => {
+  return new ContentTypesRegistry(strapi);
 };
 
-module.exports = contentTypesRegistry;
+module.exports = createContentTypesRegistry;
+module.exports.ContentTypesRegistry = ContentTypesRegistry;
