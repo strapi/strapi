@@ -5,7 +5,7 @@ import { IconButton } from '@strapi/parts/IconButton';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { useNotification } from '@strapi/helper-plugin';
 import LinkIcon from '@strapi/icons/LinkIcon';
-import getTrad from '../../../utils/getTrad';
+import getTrad from '../../utils/getTrad';
 
 export const CopyLinkButton = ({ url }) => {
   const toggleNotification = useNotification();

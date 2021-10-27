@@ -21,7 +21,9 @@ export const AssetList = ({ assets, onEditAsset, onSelectAsset, selectedAssets, 
     <KeyboardNavigable tagName="article">
       <GridLayout size={size}>
         {assets.map(asset => {
-          const isSelected = selectedAssets.indexOf(asset) > -1;
+          const isSelected = Boolean(
+            selectedAssets.find(currentAsset => currentAsset.id === asset.id)
+          );
 
           return (
             <AssetCard

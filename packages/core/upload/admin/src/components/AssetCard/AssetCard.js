@@ -4,7 +4,7 @@ import { prefixFileUrlWithBackendUrl, getFileExtension } from '@strapi/helper-pl
 import { ImageAssetCard } from './ImageAssetCard';
 import { VideoAssetCard } from './VideoAssetCard';
 import { DocAssetCard } from './DocAssetCard';
-import { AssetType } from '../../constants';
+import { AssetType, AssetDefinition } from '../../constants';
 
 export const AssetCard = ({ asset, isSelected, onSelect, onEdit, size }) => {
   if (asset.mime.includes(AssetType.Video)) {
@@ -20,6 +20,7 @@ export const AssetCard = ({ asset, isSelected, onSelect, onEdit, size }) => {
         onSelect={() => onSelect(asset)}
         selected={isSelected}
         size={size}
+        uniqueKey={asset.updatedAt}
       />
     );
   }
@@ -65,24 +66,7 @@ AssetCard.defaultProps = {
 };
 
 AssetCard.propTypes = {
-  asset: PropTypes.shape({
-    id: PropTypes.number,
-    height: PropTypes.number,
-    width: PropTypes.number,
-    size: PropTypes.number,
-    createdAt: PropTypes.string,
-    ext: PropTypes.string,
-    mime: PropTypes.string,
-    name: PropTypes.string,
-    url: PropTypes.string,
-    alternativeText: PropTypes.string,
-    caption: PropTypes.string,
-    formats: PropTypes.shape({
-      thumbnail: PropTypes.shape({
-        url: PropTypes.string,
-      }),
-    }),
-  }).isRequired,
+  asset: AssetDefinition.isRequired,
   onSelect: PropTypes.func,
   onEdit: PropTypes.func,
   isSelected: PropTypes.bool,

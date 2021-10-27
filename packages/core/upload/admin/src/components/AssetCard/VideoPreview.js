@@ -17,7 +17,7 @@ const VideoPreviewWrapper = styled(Box)`
 // https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/readyState#value
 const HAVE_FUTURE_DATA = 3;
 
-export const VideoPreview = ({ url, mime, onLoadDuration, size }) => {
+export const VideoPreview = ({ url, mime, onLoadDuration, size, uniqueKey }) => {
   const handleTimeUpdate = e => {
     if (e.target.currentTime > 0) {
       const video = e.target;
@@ -41,11 +41,11 @@ export const VideoPreview = ({ url, mime, onLoadDuration, size }) => {
   };
 
   return (
-    <VideoPreviewWrapper size={size}>
+    <VideoPreviewWrapper size={size} key={uniqueKey}>
       <video
         muted
         onLoadedData={handleThumbnailVisibility}
-        src={`${url}#t=1`}
+        src={`${url}?unique_key=${uniqueKey}`}
         crossOrigin="anonymous"
         onTimeUpdate={handleTimeUpdate}
       >
@@ -56,12 +56,15 @@ export const VideoPreview = ({ url, mime, onLoadDuration, size }) => {
 };
 
 VideoPreview.defaultProps = {
-  size: 'M',
   onLoadDuration: () => {},
+  size: 'M',
+  uniqueKey: undefined,
 };
 
 VideoPreview.propTypes = {
   url: PropTypes.string.isRequired,
+  // uniqueKey allows to fetch the asset and to handle its caching correctly
+  uniqueKey: PropTypes.string,
   mime: PropTypes.string.isRequired,
   onLoadDuration: PropTypes.func,
   size: PropTypes.oneOf(['S', 'M']),

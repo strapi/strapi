@@ -32,7 +32,7 @@ const queryClient = new QueryClient({
   },
 });
 
-const renderML = (props = { onClose: jest.fn(), multiple: false }) =>
+const renderML = (props = { onClose: jest.fn(), multiple: false, initiallySelectedAssets: [] }) =>
   renderTL(
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={lightTheme}>

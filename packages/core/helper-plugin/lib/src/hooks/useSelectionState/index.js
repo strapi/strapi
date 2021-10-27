@@ -20,7 +20,7 @@ export const useSelectionState = (key, initialValue) => {
 
   const selectAll = nextSelections => {
     if (selections.length > 0) {
-      setSelections(initialValue);
+      setSelections([]);
     } else {
       setSelections(nextSelections);
     }

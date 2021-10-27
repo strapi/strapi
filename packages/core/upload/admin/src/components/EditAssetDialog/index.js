@@ -23,6 +23,7 @@ import { getTrad } from '../../utils';
 import formatBytes from '../../utils/formatBytes';
 import { useEditAsset } from '../../hooks/useEditAsset';
 import { ReplaceMediaButton } from './ReplaceMediaButton';
+import { AssetDefinition } from '../../constants';
 
 const fileInfoSchema = yup.object({
   name: yup.string().required(),
@@ -38,8 +39,9 @@ export const EditAssetDialog = ({ onClose, asset, canUpdate, canCopyLink, canDow
   const { editAsset, isLoading } = useEditAsset();
 
   const handleSubmit = async values => {
-    await editAsset({ ...asset, ...values }, replacementFile);
-    onClose();
+    const editedAsset = await editAsset({ ...asset, ...values }, replacementFile);
+
+    onClose(editedAsset);
   };
 
   const handleStartCropping = () => {
@@ -194,19 +196,7 @@ export const EditAssetDialog = ({ onClose, asset, canUpdate, canCopyLink, canDow
 };
 
 EditAssetDialog.propTypes = {
-  asset: PropTypes.shape({
-    id: PropTypes.number,
-    height: PropTypes.number,
-    width: PropTypes.number,
-    size: PropTypes.number,
-    createdAt: PropTypes.string,
-    ext: PropTypes.string,
-    mime: PropTypes.string,
-    name: PropTypes.string,
-    url: PropTypes.string,
-    alternativeText: PropTypes.string,
-    caption: PropTypes.string,
-  }).isRequired,
+  asset: AssetDefinition.isRequired,
   canUpdate: PropTypes.bool.isRequired,
   canCopyLink: PropTypes.bool.isRequired,
   canDownload: PropTypes.bool.isRequired,

@@ -673,7 +673,7 @@ describe('MediaLibrary / AssetList', () => {
                     >
                       <video
                         crossorigin="anonymous"
-                        src="http://localhost:1337/uploads/mov_bbb_2f3907f7aa.mp4#t=1"
+                        src="http://localhost:1337/uploads/mov_bbb_2f3907f7aa.mp4?unique_key=2021-09-14T07:48:30.882Z"
                       >
                         <source
                           type="video/mp4"

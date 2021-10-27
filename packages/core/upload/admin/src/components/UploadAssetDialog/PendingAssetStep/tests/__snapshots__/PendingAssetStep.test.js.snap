@@ -1202,7 +1202,7 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
                         >
                           <video
                             crossorigin="anonymous"
-                            src="http://localhost:5000/mov_bbb.mp4#t=1"
+                            src="http://localhost:5000/mov_bbb.mp4?unique_key=undefined"
                           >
                             <source
                               type="video/mp4"
