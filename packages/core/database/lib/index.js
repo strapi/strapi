@@ -22,6 +22,9 @@ class Database {
     this.dialect.configure();
 
     this.connection = knex(this.config.connection);
+    
+    this.schemaPrefix = (!!this.config.connection.searchPath && this.config.connection.searchPath !== 'public')
+      ? this.config.connection.searchPath + '.' : '';
 
     this.dialect.initialize();
 
