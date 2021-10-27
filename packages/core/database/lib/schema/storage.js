@@ -8,7 +8,7 @@ module.exports = db => {
   const hasSchemaTable = () => db.connection.schema.hasTable(TABLE_NAME);
 
   const createSchemaTable = () => {
-    return db.connection.schema.createTable(TABLE_NAME, t => {
+    return db.connection.schema.createTable(db.schemaPrefix + TABLE_NAME, t => {
       t.increments('id');
       t.json('schema');
       t.datetime('time', { useTz: false });
