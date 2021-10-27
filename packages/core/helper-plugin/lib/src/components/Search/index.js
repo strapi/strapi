@@ -42,6 +42,10 @@ const Search = ({ label, trackedEvent }) => {
 
   useEffect(() => {
     const handler = setTimeout(() => {
+      if (!didSearch) {
+        return;
+      }
+
       if (value) {
         setQuery({ _q: value, page: 1 });
       } else {

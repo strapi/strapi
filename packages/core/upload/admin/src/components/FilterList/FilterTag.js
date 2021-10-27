@@ -5,8 +5,8 @@ import Close from '@strapi/icons/Close';
 import { Tag } from '@strapi/parts/Tag';
 import { useIntl } from 'react-intl';
 
-const AttributeTag = ({ attribute, filter, onClick, operator, value }) => {
-  const { formatMessage, formatDate, formatTime, formatNumber } = useIntl();
+const FilterTag = ({ attribute, filter, onClick, operator, value }) => {
+  const { formatMessage, formatDate, formatTime } = useIntl();
 
   const handleClick = () => {
     onClick(filter);
@@ -14,7 +14,7 @@ const AttributeTag = ({ attribute, filter, onClick, operator, value }) => {
 
   const { fieldSchema } = attribute;
 
-  const type = fieldSchema?.mainField?.schema.type || fieldSchema.type;
+  const type = fieldSchema.type;
 
   let formattedValue = value;
 
@@ -38,14 +38,10 @@ const AttributeTag = ({ attribute, filter, onClick, operator, value }) => {
     });
   }
 
-  if (['float', 'integer', 'biginteger', 'decimal'].includes(type)) {
-    formattedValue = formatNumber(value);
-  }
-
-  const content = `${attribute.metadatas.label || attribute.name} ${formatMessage({
+  const content = `${attribute.metadatas.label} ${formatMessage({
     id: `components.FilterOptions.FILTER_TYPES.${operator}`,
     defaultMessage: operator,
-  })} ${operator !== '$null' && operator !== '$notNull' ? formattedValue : ''}`;
+  })} ${formattedValue}`;
 
   return (
     <Box padding={1} onClick={handleClick}>
@@ -54,7 +50,7 @@ const AttributeTag = ({ attribute, filter, onClick, operator, value }) => {
   );
 };
 
-AttributeTag.propTypes = {
+FilterTag.propTypes = {
   attribute: PropTypes.shape({
     name: PropTypes.string.isRequired,
     fieldSchema: PropTypes.object.isRequired,
@@ -66,4 +62,4 @@ AttributeTag.propTypes = {
   value: PropTypes.string.isRequired,
 };
 
-export default AttributeTag;
+export default FilterTag;
