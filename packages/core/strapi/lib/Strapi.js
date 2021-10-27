@@ -364,7 +364,7 @@ class Strapi {
     this.telemetry.bootstrap();
 
     let oldContentTypes;
-    if (await this.db.connection.schema.hasTable(coreStoreModel.collectionName)) {
+    if (await this.db.connection.schema.hasTable(this.db.schemaPrefix + coreStoreModel.collectionName)) {
       oldContentTypes = await this.store.get({
         type: 'strapi',
         name: 'content_types',
