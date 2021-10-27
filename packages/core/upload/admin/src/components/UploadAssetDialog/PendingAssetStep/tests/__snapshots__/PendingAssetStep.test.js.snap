@@ -814,15 +814,15 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
   text-transform: uppercase;
 }
 
+.c50 {
+  text-transform: uppercase;
+}
+
 .c46 canvas,
 .c46 video {
   display: block;
   max-width: 100%;
   max-height: 5.5rem;
-}
-
-.c50 {
-  text-transform: uppercase;
 }
 
 .c45 {
@@ -1200,14 +1200,18 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
                         <div
                           class="c46"
                         >
-                          <video
-                            crossorigin="anonymous"
-                            src="http://localhost:5000/mov_bbb.mp4?unique_key=undefined"
+                          <div
+                            class=""
                           >
-                            <source
-                              type="video/mp4"
-                            />
-                          </video>
+                            <video
+                              crossorigin="anonymous"
+                              src="http://localhost:5000/mov_bbb.mp4?unique_key=undefined"
+                            >
+                              <source
+                                type="video/mp4"
+                              />
+                            </video>
+                          </div>
                         </div>
                       </div>
                     </div>

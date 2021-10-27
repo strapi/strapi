@@ -487,15 +487,15 @@ describe('MediaLibrary / AssetList', () => {
         text-transform: uppercase;
       }
 
+      .c29 {
+        text-transform: uppercase;
+      }
+
       .c25 canvas,
       .c25 video {
         display: block;
         max-width: 100%;
         max-height: 10.25rem;
-      }
-
-      .c29 {
-        text-transform: uppercase;
       }
 
       .c31 {
@@ -671,14 +671,18 @@ describe('MediaLibrary / AssetList', () => {
                     <div
                       class="c25"
                     >
-                      <video
-                        crossorigin="anonymous"
-                        src="http://localhost:1337/uploads/mov_bbb_2f3907f7aa.mp4?unique_key=2021-09-14T07:48:30.882Z"
+                      <div
+                        class=""
                       >
-                        <source
-                          type="video/mp4"
-                        />
-                      </video>
+                        <video
+                          crossorigin="anonymous"
+                          src="http://localhost:1337/uploads/mov_bbb_2f3907f7aa.mp4?unique_key=2021-09-14T07:48:30.882Z"
+                        >
+                          <source
+                            type="video/mp4"
+                          />
+                        </video>
+                      </div>
                     </div>
                   </div>
                 </div>

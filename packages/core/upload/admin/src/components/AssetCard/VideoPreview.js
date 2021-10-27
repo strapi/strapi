@@ -1,23 +1,13 @@
 /* eslint-disable jsx-a11y/media-has-caption */
 import React from 'react';
 import PropTypes from 'prop-types';
-import styled from 'styled-components';
 import { Box } from '@strapi/parts/Box';
-
-const VideoPreviewWrapper = styled(Box)`
-  canvas,
-  video {
-    display: block;
-    max-width: 100%;
-    max-height: ${({ size }) => (size === 'M' ? 164 / 16 : 88 / 16)}rem;
-  }
-`;
 
 // According to MDN
 // https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/readyState#value
 const HAVE_FUTURE_DATA = 3;
 
-export const VideoPreview = ({ url, mime, onLoadDuration, size, uniqueKey }) => {
+export const VideoPreview = ({ url, mime, onLoadDuration, uniqueKey, ...props }) => {
   const handleTimeUpdate = e => {
     if (e.target.currentTime > 0) {
       const video = e.target;
@@ -41,7 +31,7 @@ export const VideoPreview = ({ url, mime, onLoadDuration, size, uniqueKey }) => 
   };
 
   return (
-    <VideoPreviewWrapper size={size} key={uniqueKey}>
+    <Box {...props} key={uniqueKey}>
       <video
         muted
         onLoadedData={handleThumbnailVisibility}
@@ -51,7 +41,7 @@ export const VideoPreview = ({ url, mime, onLoadDuration, size, uniqueKey }) => 
       >
         <source type={mime} />
       </video>
-    </VideoPreviewWrapper>
+    </Box>
   );
 };
 
