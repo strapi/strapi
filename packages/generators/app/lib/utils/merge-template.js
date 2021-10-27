@@ -213,7 +213,7 @@ async function mergePackageJSON({ rootPath, templateConfig, templatePackageInfo 
   // Use lodash to deeply merge them
   const mergedConfig = _.merge(packageJSON, templateConfig.package);
 
-  // Add starter info to package.json
+  // Add template info to package.json
   if (templatePackageInfo.name) {
     _.set(mergedConfig, 'strapi.template', templatePackageInfo.name);
   }
