@@ -81,4 +81,5 @@ module.exports = {
   },
   transformIgnorePatterns: ['node_modules/(?!(react-dnd|dnd-core|react-dnd-html5-backend)/)'],
   testURL: 'http://localhost:4000/admin',
+  globalSetup: '<rootDir>/test/config/front/global-setup.js',
 };
