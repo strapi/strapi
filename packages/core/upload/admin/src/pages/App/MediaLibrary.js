@@ -17,7 +17,7 @@ import { Box } from '@strapi/parts/Box';
 import { BaseCheckbox } from '@strapi/parts/BaseCheckbox';
 import { UploadAssetDialog } from '../../components/UploadAssetDialog/UploadAssetDialog';
 import { EditAssetDialog } from '../../components/EditAssetDialog';
-import { ListView } from './components/ListView';
+import { AssetList } from '../../components/AssetList';
 import { useAssets } from '../../hooks/useAssets';
 import { getTrad } from '../../utils';
 import { Filters } from './components/Filters';
@@ -188,7 +188,7 @@ export const MediaLibrary = () => {
           )}
           {canRead && assets && assets.length > 0 && (
             <>
-              <ListView
+              <AssetList
                 assets={assets}
                 onEditAsset={setAssetToEdit}
                 onSelectAsset={selectAsset}

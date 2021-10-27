@@ -3,12 +3,12 @@ import PropTypes from 'prop-types';
 import { GridLayout } from '@strapi/parts/Layout';
 import { KeyboardNavigable } from '@strapi/parts/KeyboardNavigable';
 import { prefixFileUrlWithBackendUrl, getFileExtension } from '@strapi/helper-plugin';
-import { ImageAssetCard } from '../../../components/AssetCard/ImageAssetCard';
-import { VideoAssetCard } from '../../../components/AssetCard/VideoAssetCard';
-import { DocAssetCard } from '../../../components/AssetCard/DocAssetCard';
-import { AssetType } from '../../../constants';
+import { ImageAssetCard } from '../AssetCard/ImageAssetCard';
+import { VideoAssetCard } from '../AssetCard/VideoAssetCard';
+import { DocAssetCard } from '../AssetCard/DocAssetCard';
+import { AssetType } from '../../constants';
 
-export const ListView = ({ assets, onEditAsset, onSelectAsset, selectedAssets }) => {
+export const AssetList = ({ assets, onEditAsset, onSelectAsset, selectedAssets }) => {
   return (
     <KeyboardNavigable tagName="article">
       <GridLayout>
@@ -74,7 +74,7 @@ export const ListView = ({ assets, onEditAsset, onSelectAsset, selectedAssets })
   );
 };
 
-ListView.propTypes = {
+AssetList.propTypes = {
   assets: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
   onEditAsset: PropTypes.func.isRequired,
   onSelectAsset: PropTypes.func.isRequired,
