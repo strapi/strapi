@@ -60,13 +60,17 @@ const castValue = (value, attribute) => {
   return value;
 };
 
-const processAttributeWhere = (attribute, where, ctx) => {
+const processAttributeWhere = (attribute, where, operator = '$eq') => {
   if (_.isArray(where)) {
-    return where.map(sub => processAttributeWhere(attribute, sub, ctx));
+    return where.map(sub => processAttributeWhere(attribute, sub, operator));
   }
 
   if (!_.isPlainObject(where)) {
-    return castValue(where, attribute);
+    if (CAST_OPERATORS.includes(operator)) {
+      return castValue(where, attribute);
+    }
+
+    return where;
   }
 
   const filters = {};
@@ -74,21 +78,11 @@ const processAttributeWhere = (attribute, where, ctx) => {
   for (const key in where) {
     const value = where[key];
 
-    if (isOperator(key)) {
-      if (!_.isPlainObject(value)) {
-        if (CAST_OPERATORS.includes(key)) {
-          filters[key] = castValue(value, attribute);
-        } else {
-          filters[key] = value;
-        }
-        continue;
-      }
-
-      filters[key] = processAttributeWhere(attribute, value, ctx);
-      continue;
+    if (!isOperator(key)) {
+      throw new Error(`Undefined attribute level operator ${key}`);
     }
 
-    throw new Error(`Undefined attribute level operator ${key}`);
+    filters[key] = processAttributeWhere(attribute, value, key);
   }
 
   return filters;
@@ -145,7 +139,7 @@ const processWhere = (where, ctx) => {
     const attribute = meta.attributes[key];
 
     if (!attribute) {
-      filters[qb.aliasColumn(key, alias)] = processAttributeWhere(null, value, ctx);
+      filters[qb.aliasColumn(key, alias)] = processAttributeWhere(null, value);
       continue;
     }
 
@@ -179,7 +173,7 @@ const processWhere = (where, ctx) => {
       const columnName = toColumnName(meta, key);
       const aliasedColumnName = qb.aliasColumn(columnName, alias);
 
-      filters[aliasedColumnName] = processAttributeWhere(attribute, value, ctx);
+      filters[aliasedColumnName] = processAttributeWhere(attribute, value);
 
       continue;
     }
