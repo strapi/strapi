@@ -16,11 +16,8 @@ import ExternalLink from '@strapi/icons/ExternalLink';
 import Github from '@strapi/icons/Github';
 import Discord from '@strapi/icons/Discord';
 import Reddit from '@strapi/icons/Reddit';
-// FIXME
-// eslint-disable-next-line import/no-duplicates
-import Strapi from '@strapi/icons/Discourse';
+import Strapi from '@strapi/icons/Strapi';
 import Twitter from '@strapi/icons/Twitter';
-// eslint-disable-next-line import/no-duplicates
 import Discourse from '@strapi/icons/Discourse';
 
 const StyledDiscord = styled(Discord)`
