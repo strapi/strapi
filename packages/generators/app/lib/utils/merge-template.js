@@ -3,7 +3,7 @@
 const os = require('os');
 const path = require('path');
 const fse = require('fs-extra');
-const _ = require('lodash');
+const _ = require('lodash/fp');
 const chalk = require('chalk');
 const semver = require('semver');
 const { getTemplatePackageInfo, downloadNpmTemplate } = require('./fetch-npm-template');
@@ -71,10 +71,10 @@ module.exports = async function mergeTemplate(scope, rootPath) {
  */
 function checkTemplateCompat(templatePath, strapiVersion) {
   const templateJSON = require(path.resolve(templatePath, 'template.json'));
-  const compatibleStrapiConstraint = templateJSON.strapi.supportedVersion;
+  const compatibleStrapiConstraint = _.get('strapi.supportedVersion', templateJSON);
 
   // Make sure the Strapi compatibility constraint is set
-  if (compatibleStrapiConstraint == null) {
+  if (_.isNil(compatibleStrapiConstraint)) {
     throw new Error("This template does not specify the Strapi versions it's compatible with");
   }
 
@@ -107,10 +107,12 @@ function checkTemplateCompat(templatePath, strapiVersion) {
 async function checkTemplateRootStructure(templatePath) {
   // Make sure the root of the repo has a template.json file
   const templateJsonPath = path.join(templatePath, 'template.json');
-  if (!fse.existsSync(templateJsonPath)) {
+  const templateJsonExists = await fse.exists(templateJsonPath);
+  if (!templateJsonExists) {
     throw new Error(`A template must have a ${chalk.green('template.json')} root file`);
   }
-  if (!fse.statSync(templateJsonPath).isFile()) {
+  const templateJsonStat = await fse.stat(templateJsonPath);
+  if (!templateJsonStat.isFile()) {
     throw new Error(`A template's ${chalk.green('template.json')} must be a file`);
   }
 
@@ -140,15 +142,15 @@ async function checkTemplateRootStructure(templatePath) {
  */
 async function checkTemplateContentsStructure(templateContentsPath) {
   // Recursively check if each item in a directory is allowed
-  const checkPathContents = (pathToCheck, parents) => {
-    const contents = fse.readdirSync(pathToCheck);
-    contents.forEach(item => {
+  const checkPathContents = async (pathToCheck, parents) => {
+    const contents = await fse.readdir(pathToCheck);
+    for (const item of contents) {
       const nextParents = [...parents, item];
-      const matchingTreeValue = _.get(allowedTemplateContents, nextParents);
+      const matchingTreeValue = _.get(nextParents, allowedTemplateContents);
 
       // Treat files and directories separately
       const itemPath = path.resolve(pathToCheck, item);
-      const isDirectory = fse.statSync(itemPath).isDirectory();
+      const isDirectory = (await fse.stat(itemPath)).isDirectory();
 
       if (matchingTreeValue === undefined) {
         // Unknown paths are forbidden
@@ -175,16 +177,16 @@ async function checkTemplateContentsStructure(templateContentsPath) {
           return;
         }
         // Check if the contents of the directory are allowed
-        checkPathContents(itemPath, nextParents);
+        await checkPathContents(itemPath, nextParents);
       } else {
         throw Error(
           `Illegal template structure, unknow file ${chalk.green(nextParents.join('/'))}`
         );
       }
-    });
+    }
   };
 
-  checkPathContents(templateContentsPath, []);
+  await checkPathContents(templateContentsPath, []);
 }
 
 /**
@@ -211,11 +213,11 @@ async function mergePackageJSON({ rootPath, templateConfig, templatePackageInfo 
   }
 
   // Use lodash to deeply merge them
-  const mergedConfig = _.merge(packageJSON, templateConfig.package);
+  const mergedConfig = _.merge(templateConfig.package, packageJSON);
 
   // Add template info to package.json
   if (templatePackageInfo.name) {
-    _.set(mergedConfig, 'strapi.template', templatePackageInfo.name);
+    _.set('strapi.template', templatePackageInfo.name, mergedConfig);
   }
 
   // Save the merged config as the new package.json
