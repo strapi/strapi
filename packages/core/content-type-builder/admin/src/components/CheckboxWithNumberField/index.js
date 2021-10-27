@@ -34,7 +34,7 @@ const CheckboxWithNumberField = ({ error, intlLabel, modifiedData, name, onChang
         id={name}
         name={name}
         onValueChange={value => {
-          onChange({ target: { name, value: value || null } });
+          onChange({ target: { name, value: value ? 1 : null } });
           setShowInput(prev => !prev);
         }}
         value={Boolean(value)}

@@ -29,7 +29,7 @@ const ButtonBox = styled(Box)`
   width: 100%;
   border: none;
   position: relative;
-  left: -13px;
+  left: -0.25rem;
 `;
 
 const NestedTFooter = ({ children, icon, color, ...props }) => {
