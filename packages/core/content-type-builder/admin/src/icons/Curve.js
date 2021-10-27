@@ -5,7 +5,7 @@ import { Box } from '@strapi/parts/Box';
 
 const StyledBox = styled(Box)`
   position: absolute;
-  left: -27px;
+  left: -1.125rem;
   top: 0px;
 
   &:before {

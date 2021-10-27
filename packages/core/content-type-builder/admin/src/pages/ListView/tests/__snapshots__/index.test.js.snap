@@ -946,7 +946,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   height: calc(100% - 15px);
   position: absolute;
   top: -7px;
-  left: 17px;
+  left: 1.625rem;
   border-radius: 4px;
   background: #eaeaef;
 }
@@ -979,7 +979,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   height: calc(100% - 15px);
   position: absolute;
   top: -7px;
-  left: 17px;
+  left: 1.625rem;
   border-radius: 4px;
   background-color: #d9d8ff;
 }
@@ -1128,12 +1128,12 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   width: 100%;
   border: none;
   position: relative;
-  left: -13px;
+  left: -0.25rem;
 }
 
 .c46 {
   position: absolute;
-  left: -27px;
+  left: -1.125rem;
   top: 0px;
 }
 
