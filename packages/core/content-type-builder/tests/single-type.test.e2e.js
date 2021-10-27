@@ -95,7 +95,9 @@ describe('Content Type Builder - Content types', () => {
         body: {
           contentType: {
             kind: 'singleType',
-            name: 'test-st',
+            singularName: 'test-st',
+            pluralName: 'test-sts',
+            displayName: 'Tests-st',
             attributes: {
               relation: {
                 type: 'relation',
