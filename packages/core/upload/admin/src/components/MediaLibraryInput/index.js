@@ -5,18 +5,25 @@ import { Carousel, CarouselSlide } from '@strapi/parts/Carousel';
 import getTrad from '../../utils/getTrad';
 import { EmptyStateAsset } from './EmptyStateAsset';
 import { AssetDialog } from './AssetDialog';
+import { CarouselAsset } from './CarouselAsset';
 
 export const MediaLibraryInput = ({ intlLabel, description, disabled, error, multiple }) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [selectedAssets, setSelectedAssets] = useState([]);
   const [isAssetDialogOpen, setIsAssetDialogOpen] = useState(false);
   const { formatMessage } = useIntl();
 
   const handleNext = () => {
-    setSelectedIndex(current => (current < 2 ? current + 1 : 0));
+    setSelectedIndex(current => (current < selectedAssets.length - 1 ? current + 1 : 0));
   };
 
   const handlePrevious = () => {
-    setSelectedIndex(current => (current > 0 ? current - 1 : 2));
+    setSelectedIndex(current => (current > 0 ? current - 1 : selectedAssets.length - 1));
+  };
+
+  const handleValidation = nextSelectedAssets => {
+    setSelectedAssets(nextSelectedAssets);
+    setIsAssetDialogOpen(false);
   };
 
   const hint = description
@@ -47,17 +54,38 @@ export const MediaLibraryInput = ({ intlLabel, description, disabled, error, mul
         hint={hint}
         error={errorMessage}
       >
-        <CarouselSlide
-          label={formatMessage(
-            { id: getTrad('mediaLibraryInput.slideCount'), defaultMessage: '{n} of {m} slides' },
-            { n: 1, m: 1 }
-          )}
-        >
-          <EmptyStateAsset disabled={disabled} onClick={() => setIsAssetDialogOpen(true)} />
-        </CarouselSlide>
+        {selectedAssets.length === 0 ? (
+          <CarouselSlide
+            label={formatMessage(
+              { id: getTrad('mediaLibraryInput.slideCount'), defaultMessage: '{n} of {m} slides' },
+              { n: 1, m: 1 }
+            )}
+          >
+            <EmptyStateAsset disabled={disabled} onClick={() => setIsAssetDialogOpen(true)} />
+          </CarouselSlide>
+        ) : (
+          selectedAssets.map((asset, index) => (
+            <CarouselSlide
+              key={asset.id}
+              label={formatMessage(
+                {
+                  id: getTrad('mediaLibraryInput.slideCount'),
+                  defaultMessage: '{n} of {m} slides',
+                },
+                { n: index + 1, m: selectedAssets.length }
+              )}
+            >
+              <CarouselAsset asset={asset} />
+            </CarouselSlide>
+          ))
+        )}
       </Carousel>
       {isAssetDialogOpen && (
-        <AssetDialog onClose={() => setIsAssetDialogOpen(false)} multiple={multiple} />
+        <AssetDialog
+          onClose={() => setIsAssetDialogOpen(false)}
+          onValidate={handleValidation}
+          multiple={multiple}
+        />
       )}
     </>
   );

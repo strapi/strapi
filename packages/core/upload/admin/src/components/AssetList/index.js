@@ -3,11 +3,7 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { Box } from '@strapi/parts/Box';
 import { KeyboardNavigable } from '@strapi/parts/KeyboardNavigable';
-import { prefixFileUrlWithBackendUrl, getFileExtension } from '@strapi/helper-plugin';
-import { ImageAssetCard } from '../AssetCard/ImageAssetCard';
-import { VideoAssetCard } from '../AssetCard/VideoAssetCard';
-import { DocAssetCard } from '../AssetCard/DocAssetCard';
-import { AssetType } from '../../constants';
+import { AssetCard } from '../AssetCard/AssetCard';
 
 const GridColSize = {
   S: 180,
@@ -27,51 +23,13 @@ export const AssetList = ({ assets, onEditAsset, onSelectAsset, selectedAssets, 
         {assets.map(asset => {
           const isSelected = selectedAssets.indexOf(asset) > -1;
 
-          if (asset.mime.includes(AssetType.Video)) {
-            return (
-              <VideoAssetCard
-                id={asset.id}
-                key={asset.id}
-                name={asset.name}
-                extension={getFileExtension(asset.ext)}
-                url={prefixFileUrlWithBackendUrl(asset.url)}
-                mime={asset.mime}
-                onEdit={() => onEditAsset(asset)}
-                onSelect={() => onSelectAsset(asset)}
-                selected={isSelected}
-                size={size}
-              />
-            );
-          }
-
-          if (asset.mime.includes(AssetType.Image)) {
-            return (
-              <ImageAssetCard
-                id={asset.id}
-                key={asset.id}
-                name={asset.name}
-                alt={asset.alternativeText || asset.name}
-                extension={getFileExtension(asset.ext)}
-                height={asset.height}
-                width={asset.width}
-                thumbnail={prefixFileUrlWithBackendUrl(asset?.formats?.thumbnail?.url || asset.url)}
-                onEdit={() => onEditAsset(asset)}
-                onSelect={() => onSelectAsset(asset)}
-                selected={isSelected}
-                size={size}
-              />
-            );
-          }
-
           return (
-            <DocAssetCard
-              id={asset.id}
+            <AssetCard
               key={asset.id}
-              name={asset.name}
-              extension={getFileExtension(asset.ext)}
+              asset={asset}
+              isSelected={isSelected}
               onEdit={() => onEditAsset(asset)}
               onSelect={() => onSelectAsset(asset)}
-              selected={isSelected}
               size={size}
             />
           );

@@ -57,11 +57,12 @@ export const VideoPreview = ({ url, mime, onLoadDuration, size }) => {
 
 VideoPreview.defaultProps = {
   size: 'M',
+  onLoadDuration: () => {},
 };
 
 VideoPreview.propTypes = {
   url: PropTypes.string.isRequired,
   mime: PropTypes.string.isRequired,
-  onLoadDuration: PropTypes.func.isRequired,
+  onLoadDuration: PropTypes.func,
   size: PropTypes.oneOf(['S', 'M']),
 };

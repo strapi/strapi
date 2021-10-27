@@ -26,5 +26,13 @@ export const useSelectionState = (key, initialValue) => {
     }
   };
 
-  return [selections, { selectOne, selectAll }];
+  const selectOnly = nextSelection => {
+    if (selections.indexOf(nextSelection) > -1) {
+      setSelections([]);
+    } else {
+      setSelections([nextSelection]);
+    }
+  };
+
+  return [selections, { selectOne, selectAll, selectOnly }];
 };

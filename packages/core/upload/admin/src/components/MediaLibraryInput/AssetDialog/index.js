@@ -22,16 +22,21 @@ import { BrowseStep } from './BrowseStep';
 import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
 import { useAssets } from '../../../hooks/useAssets';
 
-// TODO: this will move when "multiple" will be used for real
-// eslint-disable-next-line no-unused-vars
-export const AssetDialog = ({ onClose, multiple }) => {
+export const AssetDialog = ({ onClose, onValidate, multiple }) => {
   const { formatMessage } = useIntl();
-  const [selectedAssets, { selectOne, selectAll }] = useSelectionState('id', []);
-
+  const [selectedAssets, { selectOne, selectAll, selectOnly }] = useSelectionState('id', []);
   const { canRead, canCreate, isLoading: isLoadingPermissions } = useMediaLibraryPermissions();
   const { data, isLoading, error } = useAssets({
     skipWhen: !canRead,
   });
+
+  const handleSelectAsset = asset => {
+    if (multiple) {
+      selectOne(asset);
+    } else {
+      selectOnly(asset);
+    }
+  };
 
   const loading = isLoadingPermissions || isLoading;
   const assets = data?.results;
@@ -116,16 +121,16 @@ export const AssetDialog = ({ onClose, multiple }) => {
               <ModalBody>
                 <BrowseStep
                   assets={assets}
-                  onSelectAsset={selectOne}
+                  onSelectAsset={handleSelectAsset}
                   selectedAssets={selectedAssets}
-                  onSelectAllAsset={() => selectAll(assets)}
+                  onSelectAllAsset={multiple ? () => selectAll(assets) : undefined}
                   onEditAsset={() => {}}
                 />
               </ModalBody>
             </TabPanel>
             <TabPanel>
               <ModalBody>
-                <SelectedStep selectedAssets={selectedAssets} onSelectAsset={selectOne} />
+                <SelectedStep selectedAssets={selectedAssets} onSelectAsset={handleSelectAsset} />
               </ModalBody>
             </TabPanel>
           </TabPanels>
@@ -140,7 +145,7 @@ export const AssetDialog = ({ onClose, multiple }) => {
         }
         endActions={
           <>
-            <Button onClick={() => {}}>
+            <Button onClick={() => onValidate(selectedAssets)}>
               {formatMessage({ id: 'form.button.finish', defaultMessage: 'Finish' })}
             </Button>
           </>
@@ -157,4 +162,5 @@ AssetDialog.defaultProps = {
 AssetDialog.propTypes = {
   multiple: PropTypes.bool,
   onClose: PropTypes.func.isRequired,
+  onValidate: PropTypes.func.isRequired,
 };

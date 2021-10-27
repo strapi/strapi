@@ -8,9 +8,7 @@ import { Flex } from '@strapi/parts/Flex';
 import { Stack } from '@strapi/parts/Stack';
 import { Grid, GridItem } from '@strapi/parts/Grid';
 import { KeyboardNavigable } from '@strapi/parts/KeyboardNavigable';
-import { DocAssetCard } from '../../AssetCard/DocAssetCard';
-import { ImageAssetCard } from '../../AssetCard/ImageAssetCard';
-import { VideoAssetCard } from '../../AssetCard/VideoAssetCard';
+import { AssetCard } from '../../AssetCard/AssetCard';
 import { UploadingAssetCard } from '../../AssetCard/UploadingAssetCard';
 import { getTrad } from '../../../utils';
 import { AssetType, AssetSource } from '../../../constants';
@@ -117,41 +115,9 @@ export const PendingAssetStep = ({
                   );
                 }
 
-                if (asset.type === AssetType.Image) {
-                  return (
-                    <GridItem col={4} key={assetKey}>
-                      <ImageAssetCard
-                        id={assetKey}
-                        name={asset.name}
-                        extension={asset.ext}
-                        height={asset.height}
-                        width={asset.width}
-                        thumbnail={asset.url}
-                        size="S"
-                        alt={asset.name}
-                      />
-                    </GridItem>
-                  );
-                }
-
-                if (asset.type === AssetType.Video) {
-                  return (
-                    <GridItem col={4} key={assetKey}>
-                      <VideoAssetCard
-                        id={assetKey}
-                        name={asset.name}
-                        extension={asset.ext}
-                        url={asset.url}
-                        mime={asset.mime}
-                        size="S"
-                      />
-                    </GridItem>
-                  );
-                }
-
                 return (
                   <GridItem col={4} key={assetKey}>
-                    <DocAssetCard name={asset.name} extension={asset.ext} size="S" />
+                    <AssetCard asset={asset} size="S" key={assetKey} />
                   </GridItem>
                 );
               })}
