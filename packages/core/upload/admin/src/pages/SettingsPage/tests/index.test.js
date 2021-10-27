@@ -7,7 +7,7 @@
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
-import { ThemeProvider, lightTheme } from '@strapi/parts';
+import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { SettingsPage } from '../index';
 import server from './utils/server';
 

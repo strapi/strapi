@@ -18,21 +18,21 @@ import {
   onRowClick,
   stopPropagation,
 } from '@strapi/helper-plugin';
-import { HeaderLayout, Layout, ContentLayout, ActionLayout } from '@strapi/parts/Layout';
-import { EmptyStateLayout } from '@strapi/parts/EmptyStateLayout';
-import { Flex } from '@strapi/parts/Flex';
-import { Stack } from '@strapi/parts/Stack';
-import { IconButton } from '@strapi/parts/IconButton';
-import { BaseCheckbox } from '@strapi/parts/BaseCheckbox';
-import { Table, Thead, Tr, Th, Tbody, Td, TFooter } from '@strapi/parts/Table';
-import { Text, TableLabel, Subtitle } from '@strapi/parts/Text';
-import { Button } from '@strapi/parts/Button';
-import { VisuallyHidden } from '@strapi/parts/VisuallyHidden';
-import { Switch } from '@strapi/parts/Switch';
-import { Main } from '@strapi/parts/Main';
-import { LinkButton } from '@strapi/parts/LinkButton';
-import { useNotifyAT } from '@strapi/parts/LiveRegions';
-import { Box } from '@strapi/parts/Box';
+import { HeaderLayout, Layout, ContentLayout, ActionLayout } from '@strapi/design-system/Layout';
+import { EmptyStateLayout } from '@strapi/design-system/EmptyStateLayout';
+import { Flex } from '@strapi/design-system/Flex';
+import { Stack } from '@strapi/design-system/Stack';
+import { IconButton } from '@strapi/design-system/IconButton';
+import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
+import { Table, Thead, Tr, Th, Tbody, Td, TFooter } from '@strapi/design-system/Table';
+import { Text, TableLabel, Subtitle } from '@strapi/design-system/Text';
+import { Button } from '@strapi/design-system/Button';
+import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
+import { Switch } from '@strapi/design-system/Switch';
+import { Main } from '@strapi/design-system/Main';
+import { LinkButton } from '@strapi/design-system/LinkButton';
+import { useNotifyAT } from '@strapi/design-system/LiveRegions';
+import { Box } from '@strapi/design-system/Box';
 import AddIcon from '@strapi/icons/AddIcon';
 import EditIcon from '@strapi/icons/EditIcon';
 import DeleteIcon from '@strapi/icons/DeleteIcon';

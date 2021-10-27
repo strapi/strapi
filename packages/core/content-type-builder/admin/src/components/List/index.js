@@ -8,10 +8,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EmptyBodyTable, useTracking } from '@strapi/helper-plugin';
-import { Box } from '@strapi/parts/Box';
-import { Button } from '@strapi/parts/Button';
-import { TableLabel } from '@strapi/parts/Text';
-import { Table, Thead, Tr, Th, TFooter } from '@strapi/parts/Table';
+import { Box } from '@strapi/design-system/Box';
+import { Button } from '@strapi/design-system/Button';
+import { TableLabel } from '@strapi/design-system/Text';
+import { Table, Thead, Tr, Th, TFooter } from '@strapi/design-system/Table';
 import AddIcon from '@strapi/icons/AddIcon';
 import { useIntl } from 'react-intl';
 import useFormModalNavigation from '../../hooks/useFormModalNavigation';

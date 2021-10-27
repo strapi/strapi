@@ -3,8 +3,8 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import isEmpty from 'lodash/isEmpty';
 import Select, { createFilter } from 'react-select';
-import { Box } from '@strapi/parts/Box';
-import { Stack } from '@strapi/parts/Stack';
+import { Box } from '@strapi/design-system/Box';
+import { Stack } from '@strapi/design-system/Stack';
 import ListItem from './ListItem';
 
 function SelectMany({

@@ -1,9 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Flex } from '@strapi/parts/Flex';
-import { ButtonText } from '@strapi/parts/Text';
-import { Stack } from '@strapi/parts/Stack';
+import { Flex } from '@strapi/design-system/Flex';
+import { ButtonText } from '@strapi/design-system/Text';
+import { Stack } from '@strapi/design-system/Stack';
 import EditIcon from '@strapi/icons/EditIcon';
 import CloseAlertIcon from '@strapi/icons/CloseAlertIcon';
 import Drag from '@strapi/icons/Drag';

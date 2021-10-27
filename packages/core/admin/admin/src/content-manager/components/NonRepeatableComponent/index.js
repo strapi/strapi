@@ -3,9 +3,9 @@
 
 import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
-import { Box } from '@strapi/parts/Box';
-import { Grid, GridItem } from '@strapi/parts/Grid';
-import { Stack } from '@strapi/parts/Stack';
+import { Box } from '@strapi/design-system/Box';
+import { Grid, GridItem } from '@strapi/design-system/Grid';
+import { Stack } from '@strapi/design-system/Stack';
 import { useContentTypeLayout } from '../../hooks';
 import FieldComponent from '../FieldComponent';
 import Inputs from '../Inputs';

@@ -1,10 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Box } from '@strapi/parts/Box';
-import { Flex } from '@strapi/parts/Flex';
-import { Text } from '@strapi/parts/Text';
-import { IconButton } from '@strapi/parts/IconButton';
+import { Box } from '@strapi/design-system/Box';
+import { Flex } from '@strapi/design-system/Flex';
+import { Text } from '@strapi/design-system/Text';
+import { IconButton } from '@strapi/design-system/IconButton';
 import DeleteIcon from '@strapi/icons/DeleteIcon';
 import DragHandle from '@strapi/icons/Drag';
 import DropdownIcon from '@strapi/icons/FilterDropdown';

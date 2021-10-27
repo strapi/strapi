@@ -1,6 +1,6 @@
 import React from 'react';
 import AlertWarningIcon from '@strapi/icons/AlertWarningIcon';
-import { EmptyStateLayout } from '@strapi/parts/EmptyStateLayout';
+import { EmptyStateLayout } from '@strapi/design-system/EmptyStateLayout';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 

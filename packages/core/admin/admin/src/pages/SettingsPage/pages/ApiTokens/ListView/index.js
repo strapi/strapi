@@ -9,10 +9,10 @@ import {
   NoContent,
   DynamicTable,
 } from '@strapi/helper-plugin';
-import { HeaderLayout, ContentLayout } from '@strapi/parts/Layout';
-import { Main } from '@strapi/parts/Main';
-import { Button } from '@strapi/parts/Button';
-import { LinkButton } from '@strapi/parts/LinkButton';
+import { HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
+import { Main } from '@strapi/design-system/Main';
+import { Button } from '@strapi/design-system/Button';
+import { LinkButton } from '@strapi/design-system/LinkButton';
 import AddIcon from '@strapi/icons/AddIcon';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { useHistory } from 'react-router-dom';

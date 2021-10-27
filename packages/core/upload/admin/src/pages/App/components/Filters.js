@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Button } from '@strapi/parts/Button';
+import { Button } from '@strapi/design-system/Button';
 import { useQueryParams } from '@strapi/helper-plugin';
 import FilterIcon from '@strapi/icons/FilterIcon';
 import { useIntl } from 'react-intl';

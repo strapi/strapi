@@ -2,10 +2,10 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import CloseAlertIcon from '@strapi/icons/CloseAlertIcon';
-import { Text } from '@strapi/parts/Text';
-import { Box } from '@strapi/parts/Box';
-import { Flex } from '@strapi/parts/Flex';
-import { ProgressBar } from '@strapi/parts/ProgressBar';
+import { Text } from '@strapi/design-system/Text';
+import { Box } from '@strapi/design-system/Box';
+import { Flex } from '@strapi/design-system/Flex';
+import { ProgressBar } from '@strapi/design-system/ProgressBar';
 import { useIntl } from 'react-intl';
 
 const BoxWrapper = styled(Flex)`

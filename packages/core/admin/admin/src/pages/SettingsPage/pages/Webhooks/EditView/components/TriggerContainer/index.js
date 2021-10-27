@@ -4,11 +4,11 @@ import CheckIcon from '@strapi/icons/CheckIcon';
 import ClearField from '@strapi/icons/ClearField';
 import Close from '@strapi/icons/Close';
 import LoadingIcon from '@strapi/icons/LoadingIcon';
-import { Box } from '@strapi/parts/Box';
-import { Flex } from '@strapi/parts/Flex';
-import { Text } from '@strapi/parts/Text';
-import { Stack } from '@strapi/parts/Stack';
-import { Grid, GridItem } from '@strapi/parts/Grid';
+import { Box } from '@strapi/design-system/Box';
+import { Flex } from '@strapi/design-system/Flex';
+import { Text } from '@strapi/design-system/Text';
+import { Stack } from '@strapi/design-system/Stack';
+import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 

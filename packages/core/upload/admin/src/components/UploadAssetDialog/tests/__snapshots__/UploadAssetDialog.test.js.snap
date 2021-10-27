@@ -182,10 +182,12 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
 }
 
 .c5 {
+  border-radius: 4px 4px 0 0;
   border-bottom: 1px solid #eaeaef;
 }
 
 .c38 {
+  border-radius: 0 0 4px 4px;
   border-top: 1px solid #eaeaef;
 }
 
@@ -1009,10 +1011,12 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
 }
 
 .c4 {
+  border-radius: 4px 4px 0 0;
   border-bottom: 1px solid #eaeaef;
 }
 
 .c29 {
+  border-radius: 0 0 4px 4px;
   border-top: 1px solid #eaeaef;
 }
 

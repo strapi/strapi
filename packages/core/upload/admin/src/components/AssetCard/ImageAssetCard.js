@@ -12,8 +12,8 @@ import {
   CardHeader,
   CardTitle,
   CardSubtitle,
-} from '@strapi/parts/Card';
-import { IconButton } from '@strapi/parts/IconButton';
+} from '@strapi/design-system/Card';
+import { IconButton } from '@strapi/design-system/IconButton';
 import EditIcon from '@strapi/icons/EditIcon';
 import { useIntl } from 'react-intl';
 import { getTrad } from '../../utils';

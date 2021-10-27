@@ -1,12 +1,20 @@
 <!--- EmptyStateLayout.stories.mdx --->
 
 import { Meta, ArgsTable, Canvas, Story } from '@storybook/addon-docs';
-import { Main, Layout, HeaderLayout, Button, ActionLayout, ContentLayout,Box } from '@strapi/parts';
-import AddIcon from '@strapi/icons/AddIcon'
-import EditIcon from '@strapi/icons/EditIcon'
+import {
+  Main,
+  Layout,
+  HeaderLayout,
+  Button,
+  ActionLayout,
+  ContentLayout,
+  Box,
+} from '@strapi/design-system';
+import AddIcon from '@strapi/icons/AddIcon';
+import EditIcon from '@strapi/icons/EditIcon';
 import LoadingIndicatorPage from '../../components/LoadingIndicatorPage';
-import NoContent from '../../components/NoContent'
-import NoPermissions from '../../components/NoPermissions'
+import NoContent from '../../components/NoContent';
+import NoPermissions from '../../components/NoPermissions';
 
 <Meta title="templates/PageTemplate" />
 
@@ -17,10 +25,10 @@ This component is used to display an empty state.
 ## Imports
 
 ```js
-import { Main } from '@strapi/parts/Main';
-import { ActionLayout, ContentLayout, HeaderLayout, Layout } from '@strapi/parts/Layout';
-import { Button } from '@strapi/parts/Button';
-import { Box } from '@strapi/parts/Box';
+import { Main } from '@strapi/design-system/Main';
+import { ActionLayout, ContentLayout, HeaderLayout, Layout } from '@strapi/design-system/Layout';
+import { Button } from '@strapi/design-system/Button';
+import { Box } from '@strapi/design-system/Box';
 import { LoadingIndicatorPage, NoContent, NoPermissions } from '@strapi/helper-plugin';
 ```
 
@@ -61,7 +69,9 @@ import { LoadingIndicatorPage, NoContent, NoPermissions } from '@strapi/helper-p
               />
               <ContentLayout>
                 {!canRead && <NoPermissions />}
-                {(canRead && data && data.length === 0) && <NoContent content="No content available" action={<Button>Add content</Button>}/>}
+                {canRead && data && data.length === 0 && (
+                  <NoContent content="No content available" action={<Button>Add content</Button>} />
+                )}
                 {isLoading && <LoadingIndicatorPage />}
               </ContentLayout>
             </Main>

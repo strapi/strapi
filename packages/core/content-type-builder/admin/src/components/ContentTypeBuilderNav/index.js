@@ -1,6 +1,6 @@
 import React from 'react';
 import AddIcon from '@strapi/icons/AddIcon';
-import { Box } from '@strapi/parts/Box';
+import { Box } from '@strapi/design-system/Box';
 import {
   SubNav,
   SubNavHeader,
@@ -8,8 +8,8 @@ import {
   SubNavLinkSection,
   SubNavSection,
   SubNavSections,
-} from '@strapi/parts/SubNav';
-import { TextButton } from '@strapi/parts/TextButton';
+} from '@strapi/design-system/SubNav';
+import { TextButton } from '@strapi/design-system/TextButton';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
 import useContentTypeBuilderMenu from './useContentTypeBuilderMenu';

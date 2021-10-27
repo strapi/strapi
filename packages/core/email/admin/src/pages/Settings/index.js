@@ -9,15 +9,15 @@ import {
   useOverlayBlocker,
   useFocusWhenNavigate,
 } from '@strapi/helper-plugin';
-import { Main } from '@strapi/parts/Main';
-import { ContentLayout } from '@strapi/parts/Layout';
-import { Stack } from '@strapi/parts/Stack';
-import { Box } from '@strapi/parts/Box';
-import { Grid, GridItem } from '@strapi/parts/Grid';
-import { H3 } from '@strapi/parts/Text';
-import { TextInput } from '@strapi/parts/TextInput';
-import { Button } from '@strapi/parts/Button';
-import { useNotifyAT } from '@strapi/parts/LiveRegions';
+import { Main } from '@strapi/design-system/Main';
+import { ContentLayout } from '@strapi/design-system/Layout';
+import { Stack } from '@strapi/design-system/Stack';
+import { Box } from '@strapi/design-system/Box';
+import { Grid, GridItem } from '@strapi/design-system/Grid';
+import { H3 } from '@strapi/design-system/Text';
+import { TextInput } from '@strapi/design-system/TextInput';
+import { Button } from '@strapi/design-system/Button';
+import { useNotifyAT } from '@strapi/design-system/LiveRegions';
 import CheckIcon from '@strapi/icons/CheckIcon';
 import Configuration from './components/Configuration';
 import schema from '../../utils/schema';

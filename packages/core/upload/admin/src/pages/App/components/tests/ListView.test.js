@@ -1,5 +1,5 @@
 import React from 'react';
-import { ThemeProvider, lightTheme } from '@strapi/parts';
+import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { render as renderTL } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { ListView } from '../ListView';

@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
-import { Stack } from '@strapi/parts/Stack';
+import { Stack } from '@strapi/design-system/Stack';
 import ReadDoc from '@strapi/icons/ReadDoc';
 import CodeExample from '@strapi/icons/CodeExample';
 import Tutorial from '@strapi/icons/Tutorial';

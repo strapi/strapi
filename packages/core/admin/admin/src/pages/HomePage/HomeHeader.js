@@ -2,11 +2,11 @@ import React from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Subtitle, H1 } from '@strapi/parts/Text';
-import { Link } from '@strapi/parts/Link';
-import { Stack } from '@strapi/parts/Stack';
-import { Box } from '@strapi/parts/Box';
-import { Button } from '@strapi/parts/Button';
+import { Subtitle, H1 } from '@strapi/design-system/Text';
+import { Link } from '@strapi/design-system/Link';
+import { Stack } from '@strapi/design-system/Stack';
+import { Box } from '@strapi/design-system/Box';
+import { Button } from '@strapi/design-system/Button';
 import NextIcon from '@strapi/icons/NextIcon';
 
 const WordWrap = styled(Subtitle)`

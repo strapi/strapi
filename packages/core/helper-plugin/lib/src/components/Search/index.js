@@ -2,8 +2,8 @@ import React, { useEffect, useState, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import SearchIcon from '@strapi/icons/SearchIcon';
-import { Searchbar } from '@strapi/parts/Searchbar';
-import { IconButton } from '@strapi/parts/IconButton';
+import { Searchbar } from '@strapi/design-system/Searchbar';
+import { IconButton } from '@strapi/design-system/IconButton';
 import useQueryParams from '../../hooks/useQueryParams';
 import useTracking from '../../hooks/useTracking';
 

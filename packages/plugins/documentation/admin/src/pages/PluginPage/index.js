@@ -15,13 +15,13 @@ import {
   EmptyStateLayout,
   useFocusWhenNavigate,
 } from '@strapi/helper-plugin';
-import { Button } from '@strapi/parts/Button';
-import { Layout, HeaderLayout, ContentLayout } from '@strapi/parts/Layout';
-import { Main } from '@strapi/parts/Main';
-import { IconButton } from '@strapi/parts/IconButton';
-import { Text, TableLabel } from '@strapi/parts/Text';
-import { Flex } from '@strapi/parts/Flex';
-import { Table, Tr, Thead, Th, Tbody, Td } from '@strapi/parts/Table';
+import { Button } from '@strapi/design-system/Button';
+import { Layout, HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
+import { Main } from '@strapi/design-system/Main';
+import { IconButton } from '@strapi/design-system/IconButton';
+import { Text, TableLabel } from '@strapi/design-system/Text';
+import { Flex } from '@strapi/design-system/Flex';
+import { Table, Tr, Thead, Th, Tbody, Td } from '@strapi/design-system/Table';
 
 import DeleteIcon from '@strapi/icons/DeleteIcon';
 import Show from '@strapi/icons/Show';

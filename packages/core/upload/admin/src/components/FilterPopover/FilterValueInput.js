@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { DatePicker } from '@strapi/parts/DatePicker';
-import { Select, Option } from '@strapi/parts/Select';
+import { DatePicker } from '@strapi/design-system/DatePicker';
+import { Select, Option } from '@strapi/design-system/Select';
 import { useIntl } from 'react-intl';
 import { formatISO } from 'date-fns';
 import cloneDeep from 'lodash/cloneDeep';

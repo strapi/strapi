@@ -1,11 +1,11 @@
 import React from 'react';
 import { useIntl } from 'react-intl';
 import { useQuery } from '@strapi/helper-plugin';
-import { Box } from '@strapi/parts/Box';
-import { Main } from '@strapi/parts/Main';
-import { Flex } from '@strapi/parts/Flex';
-import { Link } from '@strapi/parts/Link';
-import { H1, Text } from '@strapi/parts/Text';
+import { Box } from '@strapi/design-system/Box';
+import { Main } from '@strapi/design-system/Main';
+import { Flex } from '@strapi/design-system/Flex';
+import { Link } from '@strapi/design-system/Link';
+import { H1, Text } from '@strapi/design-system/Text';
 import UnauthenticatedLayout, {
   Column,
   LayoutContent,

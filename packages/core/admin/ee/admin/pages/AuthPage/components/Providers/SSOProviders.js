@@ -1,9 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Grid, GridItem } from '@strapi/parts/Grid';
-import { Flex } from '@strapi/parts/Flex';
-import { Text } from '@strapi/parts/Text';
-import { Tooltip } from '@strapi/parts/Tooltip';
+import { Grid, GridItem } from '@strapi/design-system/Grid';
+import { Flex } from '@strapi/design-system/Flex';
+import { Text } from '@strapi/design-system/Text';
+import { Tooltip } from '@strapi/design-system/Tooltip';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
 import { Link } from 'react-router-dom';

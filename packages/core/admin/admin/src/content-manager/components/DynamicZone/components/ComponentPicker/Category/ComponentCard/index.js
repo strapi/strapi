@@ -6,9 +6,9 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Box } from '@strapi/parts/Box';
-import { Text } from '@strapi/parts/Text';
-import { Stack } from '@strapi/parts/Stack';
+import { Box } from '@strapi/design-system/Box';
+import { Text } from '@strapi/design-system/Text';
+import { Stack } from '@strapi/design-system/Stack';
 import { pxToRem } from '@strapi/helper-plugin';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import styled from 'styled-components';

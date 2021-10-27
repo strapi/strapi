@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { FocusTrap } from '@strapi/parts/FocusTrap';
-import { Portal } from '@strapi/parts/Portal';
-import { Flex } from '@strapi/parts/Flex';
-import { Text } from '@strapi/parts/Text';
+import { FocusTrap } from '@strapi/design-system/FocusTrap';
+import { Portal } from '@strapi/design-system/Portal';
+import { Flex } from '@strapi/design-system/Flex';
+import { Text } from '@strapi/design-system/Text';
 import Collapse from '@strapi/icons/Collapse';
 import PreviewWysiwyg from '../PreviewWysiwyg';
 import Editor from './Editor';

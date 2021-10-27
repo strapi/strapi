@@ -4,9 +4,9 @@ import {
   LoadingIndicatorPage,
   useFocusWhenNavigate,
 } from '@strapi/helper-plugin';
-import { HeaderLayout, ContentLayout } from '@strapi/parts/Layout';
-import { Main } from '@strapi/parts/Main';
-import { Button } from '@strapi/parts/Button';
+import { HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
+import { Main } from '@strapi/design-system/Main';
+import { Button } from '@strapi/design-system/Button';
 import CheckIcon from '@strapi/icons/CheckIcon';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';

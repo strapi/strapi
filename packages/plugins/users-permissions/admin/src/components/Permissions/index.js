@@ -1,7 +1,7 @@
 import React, { memo, useCallback, useReducer } from 'react';
-import { Accordion, AccordionToggle, AccordionContent } from '@strapi/parts/Accordion';
+import { Accordion, AccordionToggle, AccordionContent } from '@strapi/design-system/Accordion';
 import { useIntl } from 'react-intl';
-import { Box } from '@strapi/parts/Box';
+import { Box } from '@strapi/design-system/Box';
 import { useUsersPermissions } from '../../contexts/UsersPermissionsContext';
 import formatPluginName from '../../utils/formatPluginName';
 import PermissionRow from './PermissionRow';

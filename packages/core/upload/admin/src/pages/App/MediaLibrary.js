@@ -9,12 +9,12 @@ import {
   AnErrorOccurred,
   Search,
 } from '@strapi/helper-plugin';
-import { Layout, HeaderLayout, ContentLayout, ActionLayout } from '@strapi/parts/Layout';
-import { Main } from '@strapi/parts/Main';
-import { Button } from '@strapi/parts/Button';
+import { Layout, HeaderLayout, ContentLayout, ActionLayout } from '@strapi/design-system/Layout';
+import { Main } from '@strapi/design-system/Main';
+import { Button } from '@strapi/design-system/Button';
 import AddIcon from '@strapi/icons/AddIcon';
-import { Box } from '@strapi/parts/Box';
-import { BaseCheckbox } from '@strapi/parts/BaseCheckbox';
+import { Box } from '@strapi/design-system/Box';
+import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
 import { UploadAssetDialog } from '../../components/UploadAssetDialog/UploadAssetDialog';
 import { EditAssetDialog } from '../../components/EditAssetDialog';
 import { ListView } from './components/ListView';

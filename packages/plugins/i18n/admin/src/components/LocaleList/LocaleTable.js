@@ -1,10 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { TableLabel, Text } from '@strapi/parts/Text';
-import { IconButton } from '@strapi/parts/IconButton';
-import { Stack } from '@strapi/parts/Stack';
-import { VisuallyHidden } from '@strapi/parts/VisuallyHidden';
-import { Table, Thead, Tr, Th, Td, Tbody } from '@strapi/parts/Table';
+import { TableLabel, Text } from '@strapi/design-system/Text';
+import { IconButton } from '@strapi/design-system/IconButton';
+import { Stack } from '@strapi/design-system/Stack';
+import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
+import { Table, Thead, Tr, Th, Td, Tbody } from '@strapi/design-system/Table';
 import EditIcon from '@strapi/icons/EditIcon';
 import DeleteIcon from '@strapi/icons/DeleteIcon';
 import { useIntl } from 'react-intl';

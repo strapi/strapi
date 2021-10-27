@@ -1,8 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Flex } from '@strapi/parts/Flex';
-import { TableLabel } from '@strapi/parts/Text';
+import { Flex } from '@strapi/design-system/Flex';
+import { TableLabel } from '@strapi/design-system/Text';
 
 const Wrapper = styled(Flex)`
   position: relative;

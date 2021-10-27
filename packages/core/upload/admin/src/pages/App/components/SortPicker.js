@@ -1,6 +1,6 @@
 import React from 'react';
 import { useIntl } from 'react-intl';
-import { SimpleMenu, MenuItem } from '@strapi/parts/SimpleMenu';
+import { SimpleMenu, MenuItem } from '@strapi/design-system/SimpleMenu';
 import { useQueryParams } from '@strapi/helper-plugin';
 import { getTrad } from '../../../utils';
 

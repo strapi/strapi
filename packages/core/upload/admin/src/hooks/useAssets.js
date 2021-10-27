@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useQuery } from 'react-query';
-import { useNotifyAT } from '@strapi/parts/LiveRegions';
+import { useNotifyAT } from '@strapi/design-system/LiveRegions';
 import { useNotification, useQueryParams } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { axiosInstance, getRequestUrl } from '../utils';

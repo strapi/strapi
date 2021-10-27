@@ -1,5 +1,5 @@
 import React from 'react';
-import { ThemeProvider, lightTheme } from '@strapi/parts';
+import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { render as renderTL } from '@testing-library/react';
 import { QueryClientProvider, QueryClient } from 'react-query';
 import { PendingAssetStep } from '../PendingAssetStep';
@@ -228,10 +228,12 @@ describe('PendingAssetStep', () => {
       }
 
       .c1 {
+        border-radius: 4px 4px 0 0;
         border-bottom: 1px solid #eaeaef;
       }
 
       .c46 {
+        border-radius: 0 0 4px 4px;
         border-top: 1px solid #eaeaef;
       }
 

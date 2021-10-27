@@ -10,17 +10,17 @@ import {
   useOverlayBlocker,
   useTracking,
 } from '@strapi/helper-plugin';
-import { Box } from '@strapi/parts/Box';
-import { Button } from '@strapi/parts/Button';
-import { ContentLayout, HeaderLayout } from '@strapi/parts/Layout';
-import { Grid, GridItem } from '@strapi/parts/Grid';
-import { Main } from '@strapi/parts/Main';
-import { Link } from '@strapi/parts/Link';
-import { Flex } from '@strapi/parts/Flex';
-import { Stack } from '@strapi/parts/Stack';
-import { Text } from '@strapi/parts/Text';
-import { TextInput } from '@strapi/parts/TextInput';
-import { Textarea } from '@strapi/parts/Textarea';
+import { Box } from '@strapi/design-system/Box';
+import { Button } from '@strapi/design-system/Button';
+import { ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
+import { Grid, GridItem } from '@strapi/design-system/Grid';
+import { Main } from '@strapi/design-system/Main';
+import { Link } from '@strapi/design-system/Link';
+import { Flex } from '@strapi/design-system/Flex';
+import { Stack } from '@strapi/design-system/Stack';
+import { Text } from '@strapi/design-system/Text';
+import { TextInput } from '@strapi/design-system/TextInput';
+import { Textarea } from '@strapi/design-system/Textarea';
 import BackIcon from '@strapi/icons/BackIcon';
 import { Formik } from 'formik';
 import get from 'lodash/get';

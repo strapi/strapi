@@ -6,12 +6,12 @@
 import React from 'react';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
-import { H3, Text } from '@strapi/parts/Text';
-import { Box } from '@strapi/parts/Box';
-import { Stack } from '@strapi/parts/Stack';
-import { Grid, GridItem } from '@strapi/parts/Grid';
-import { LinkButton } from '@strapi/parts/LinkButton';
-import { Link } from '@strapi/parts/Link';
+import { H3, Text } from '@strapi/design-system/Text';
+import { Box } from '@strapi/design-system/Box';
+import { Stack } from '@strapi/design-system/Stack';
+import { Grid, GridItem } from '@strapi/design-system/Grid';
+import { LinkButton } from '@strapi/design-system/LinkButton';
+import { Link } from '@strapi/design-system/Link';
 import ExternalLink from '@strapi/icons/ExternalLink';
 import Github from '@strapi/icons/Github';
 import Slack from '@strapi/icons/Slack';

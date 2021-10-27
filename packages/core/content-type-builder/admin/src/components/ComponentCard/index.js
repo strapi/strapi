@@ -7,9 +7,9 @@
 import React from 'react';
 import get from 'lodash/get';
 import PropTypes from 'prop-types';
-import { Box } from '@strapi/parts/Box';
-import { Stack } from '@strapi/parts/Stack';
-import { Text } from '@strapi/parts/Text';
+import { Box } from '@strapi/design-system/Box';
+import { Stack } from '@strapi/design-system/Stack';
+import { Text } from '@strapi/design-system/Text';
 import { pxToRem } from '@strapi/helper-plugin';
 import Close from '@strapi/icons/Close';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';

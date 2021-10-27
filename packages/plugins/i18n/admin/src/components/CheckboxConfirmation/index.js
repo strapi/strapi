@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Checkbox } from '@strapi/parts/Checkbox';
-import { Dialog, DialogBody, DialogFooter } from '@strapi/parts/Dialog';
-import { Text } from '@strapi/parts/Text';
-import { Flex } from '@strapi/parts/Flex';
-import { Stack } from '@strapi/parts/Stack';
-import { Button } from '@strapi/parts/Button';
+import { Checkbox } from '@strapi/design-system/Checkbox';
+import { Dialog, DialogBody, DialogFooter } from '@strapi/design-system/Dialog';
+import { Text } from '@strapi/design-system/Text';
+import { Flex } from '@strapi/design-system/Flex';
+import { Stack } from '@strapi/design-system/Stack';
+import { Button } from '@strapi/design-system/Button';
 import AlertWarningIcon from '@strapi/icons/AlertWarningIcon';
 import { getTrad } from '../../utils';
 

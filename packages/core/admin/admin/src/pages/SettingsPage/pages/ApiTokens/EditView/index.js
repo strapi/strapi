@@ -7,20 +7,20 @@ import {
   useOverlayBlocker,
   useNotification,
 } from '@strapi/helper-plugin';
-import { HeaderLayout, ContentLayout } from '@strapi/parts/Layout';
-import { Main } from '@strapi/parts/Main';
-import { Button } from '@strapi/parts/Button';
+import { HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
+import { Main } from '@strapi/design-system/Main';
+import { Button } from '@strapi/design-system/Button';
 import CheckIcon from '@strapi/icons/CheckIcon';
 import BackIcon from '@strapi/icons/BackIcon';
-import { Link } from '@strapi/parts/Link';
+import { Link } from '@strapi/design-system/Link';
 import { Formik } from 'formik';
-import { Stack } from '@strapi/parts/Stack';
-import { Box } from '@strapi/parts/Box';
-import { H3 } from '@strapi/parts/Text';
-import { Grid, GridItem } from '@strapi/parts/Grid';
-import { TextInput } from '@strapi/parts/TextInput';
-import { Textarea } from '@strapi/parts/Textarea';
-import { Select, Option } from '@strapi/parts/Select';
+import { Stack } from '@strapi/design-system/Stack';
+import { Box } from '@strapi/design-system/Box';
+import { H3 } from '@strapi/design-system/Text';
+import { Grid, GridItem } from '@strapi/design-system/Grid';
+import { TextInput } from '@strapi/design-system/TextInput';
+import { Textarea } from '@strapi/design-system/Textarea';
+import { Select, Option } from '@strapi/design-system/Select';
 import get from 'lodash/get';
 import { useRouteMatch, useHistory } from 'react-router-dom';
 import { useQuery } from 'react-query';

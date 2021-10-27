@@ -1,6 +1,6 @@
 import React from 'react';
 import { render as renderTL, fireEvent, screen, waitFor, within } from '@testing-library/react';
-import { ThemeProvider, lightTheme } from '@strapi/parts';
+import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { QueryClientProvider, QueryClient } from 'react-query';
 import en from '../../../translations/en.json';
 import { UploadAssetDialog } from '../UploadAssetDialog';

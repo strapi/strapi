@@ -2,8 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
-import { Flex } from '@strapi/parts/Flex';
-import { TableLabel } from '@strapi/parts/Text';
+import { Flex } from '@strapi/design-system/Flex';
+import { TableLabel } from '@strapi/design-system/Text';
 import { cellWidth, firstRowWidth, rowHeight } from '../../../Permissions/utils/constants';
 
 const HeaderLabel = styled(Flex)`

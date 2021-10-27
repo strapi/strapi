@@ -2,7 +2,7 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { getByLabelText, render, screen, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
-import { ThemeProvider, lightTheme } from '@strapi/parts';
+import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import userEvent from '@testing-library/user-event';
 
 import { useRBAC } from '@strapi/helper-plugin';

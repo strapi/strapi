@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { GridLayout } from '@strapi/parts/Layout';
-import { KeyboardNavigable } from '@strapi/parts/KeyboardNavigable';
+import { GridLayout } from '@strapi/design-system/Layout';
+import { KeyboardNavigable } from '@strapi/design-system/KeyboardNavigable';
 import { prefixFileUrlWithBackendUrl, getFileExtension } from '@strapi/helper-plugin';
 import { ImageAssetCard } from '../../../components/AssetCard/ImageAssetCard';
 import { VideoAssetCard } from '../../../components/AssetCard/VideoAssetCard';

@@ -1,5 +1,5 @@
 import React from 'react';
-import { ThemeProvider, lightTheme } from '@strapi/parts';
+import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { render as renderTL } from '@testing-library/react';
 import { FromComputerForm } from '../FromComputerForm';
 import en from '../../../../translations/en.json';
@@ -150,6 +150,7 @@ describe('FromComputerForm', () => {
       }
 
       .c17 {
+        border-radius: 0 0 4px 4px;
         border-top: 1px solid #eaeaef;
       }
 

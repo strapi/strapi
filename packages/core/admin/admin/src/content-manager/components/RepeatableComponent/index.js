@@ -6,7 +6,7 @@ import get from 'lodash/get';
 import take from 'lodash/take';
 // import { FormattedMessage } from 'react-intl';
 import { useNotification } from '@strapi/helper-plugin';
-import { Box } from '@strapi/parts/Box';
+import { Box } from '@strapi/design-system/Box';
 // import { ErrorMessage } from '@buffetjs/styles';
 import { getMaxTempKey, getTrad } from '../../utils';
 import { useContentTypeLayout } from '../../hooks';

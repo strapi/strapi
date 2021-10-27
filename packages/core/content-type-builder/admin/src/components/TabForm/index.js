@@ -9,9 +9,9 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import get from 'lodash/get';
 import { GenericInput } from '@strapi/helper-plugin';
-import { Box } from '@strapi/parts/Box';
-import { Grid, GridItem } from '@strapi/parts/Grid';
-import { H3 } from '@strapi/parts/Text';
+import { Box } from '@strapi/design-system/Box';
+import { Grid, GridItem } from '@strapi/design-system/Grid';
+import { H3 } from '@strapi/design-system/Text';
 
 /* eslint-disable react/no-array-index-key */
 const TabForm = ({ form, formErrors, genericInputProps, modifiedData, onChange }) => {
