@@ -88,7 +88,7 @@ const GenericInput = ({
     case 'bool': {
       return (
         <ToggleInput
-          checked={value || false}
+          checked={value === null ? null : value || false}
           disabled={disabled}
           hint={hint}
           label={label}
