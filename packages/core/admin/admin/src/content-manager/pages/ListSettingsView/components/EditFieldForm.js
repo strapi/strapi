@@ -15,39 +15,8 @@ import { Flex } from '@strapi/design-system/Flex';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { TextInput } from '@strapi/design-system/TextInput';
 import { ToggleInput } from '@strapi/design-system/ToggleInput';
-import Date from '@strapi/icons/Date';
-import Boolean from '@strapi/icons/Boolean';
-import Email from '@strapi/icons/Email';
-import Enumeration from '@strapi/icons/Enumeration';
-import Media from '@strapi/icons/Landscape';
-import Relation from '@strapi/icons/Relation';
-import Text from '@strapi/icons/Text';
-import Uid from '@strapi/icons/Uid';
-import Number from '@strapi/icons/Number';
 import { getTrad } from '../../../utils';
-
-const iconByTypes = {
-  biginteger: <Number />,
-  boolean: <Boolean />,
-  date: <Date />,
-  datetime: <Date />,
-  decimal: <Number />,
-  email: <Email />,
-  enum: <Enumeration />,
-  enumeration: <Enumeration />,
-  file: <Media />,
-  files: <Media />,
-  float: <Number />,
-  integer: <Number />,
-  media: <Media />,
-  number: <Number />,
-  relation: <Relation />,
-  string: <Text />,
-  text: <Text />,
-  time: <Date />,
-  timestamp: <Date />,
-  uid: <Uid />,
-};
+import FieldTypeIcon from '../../../components/FieldTypeIcon';
 
 const HeaderContainer = styled(Flex)`
   svg {
@@ -81,7 +50,7 @@ const EditFieldForm = ({
       <form onSubmit={onSubmit}>
         <ModalHeader>
           <HeaderContainer>
-            {iconByTypes[type]}
+            <FieldTypeIcon type={type} />
             <ButtonText textColor="neutral800" as="h2" id="title">
               {formatMessage(
                 {

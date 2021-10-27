@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import get from 'lodash/get';
 import { useIntl } from 'react-intl';
 import { Button } from '@strapi/design-system/Button';
 import { Box } from '@strapi/design-system/Box';
@@ -9,6 +10,7 @@ import { SimpleMenu, MenuItem } from '@strapi/design-system/SimpleMenu';
 import Plus from '@strapi/icons/Plus';
 import { getTrad } from '../../../utils';
 import FieldButton from './FieldButton';
+import { useLayoutDnd } from '../../../hooks';
 
 const RelationalFields = ({
   relationsLayout,
@@ -17,6 +19,7 @@ const RelationalFields = ({
   onAddField,
 }) => {
   const { formatMessage } = useIntl();
+  const { setEditFieldToSelect, modifiedData } = useLayoutDnd();
 
   return (
     <Stack size={4}>
@@ -41,21 +44,30 @@ const RelationalFields = ({
       </div>
       <Box padding={4} hasRadius borderStyle="dashed" borderWidth="1px" borderColor="neutral300">
         <Stack size={2}>
-          {relationsLayout.map((relationName, index) => (
-            <FieldButton
-              onEditField={() => console.log(relationName)}
-              onDeleteField={() => onRemoveField(index)}
-              key={relationName}
-            >
-              {relationName}
-            </FieldButton>
-          ))}
+          {relationsLayout.map((relationName, index) => {
+            const relationLabel = get(
+              modifiedData,
+              ['metadatas', relationName, 'edit', 'label'],
+              ''
+            );
+
+            return (
+              <FieldButton
+                onEditField={() => setEditFieldToSelect(relationName)}
+                onDeleteField={() => onRemoveField(index)}
+                key={relationName}
+              >
+                {relationLabel || relationName}
+              </FieldButton>
+            );
+          })}
           <SimpleMenu
             id="label"
             label={formatMessage({
               id: 'containers.SettingPage.add.relational-field',
               defaultMessage: 'Insert another relational field',
             })}
+            data-testid="add-relation"
             as={Button}
             fullWidth
             startIcon={<Plus />}
