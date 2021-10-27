@@ -13,6 +13,7 @@ import {
   NoPermissions,
   NoMedia,
   AnErrorOccurred,
+  useSelectionState,
 } from '@strapi/helper-plugin';
 import AddIcon from '@strapi/icons/AddIcon';
 import getTrad from '../../../utils/getTrad';
@@ -25,8 +26,9 @@ import { useAssets } from '../../../hooks/useAssets';
 // eslint-disable-next-line no-unused-vars
 export const AssetDialog = ({ onClose, multiple }) => {
   const { formatMessage } = useIntl();
-  const { canRead, canCreate, isLoading: isLoadingPermissions } = useMediaLibraryPermissions();
+  const [selectedAssets, { selectOne, selectAll }] = useSelectionState('id', []);
 
+  const { canRead, canCreate, isLoading: isLoadingPermissions } = useMediaLibraryPermissions();
   const { data, isLoading, error } = useAssets({
     skipWhen: !canRead,
   });
@@ -97,7 +99,7 @@ export const AssetDialog = ({ onClose, multiple }) => {
                   id: getTrad('modal.header.select-files'),
                   defaultMessage: 'Selected files',
                 })}
-                <Badge marginLeft={2}>6</Badge>
+                <Badge marginLeft={2}>{selectedAssets.length}</Badge>
               </Tab>
             </Tabs>
 
@@ -114,15 +116,16 @@ export const AssetDialog = ({ onClose, multiple }) => {
               <ModalBody>
                 <BrowseStep
                   assets={assets}
-                  onSelectAsset={() => {}}
-                  selectedAssets={[]}
+                  onSelectAsset={selectOne}
+                  selectedAssets={selectedAssets}
+                  onSelectAllAsset={() => selectAll(assets)}
                   onEditAsset={() => {}}
                 />
               </ModalBody>
             </TabPanel>
             <TabPanel>
               <ModalBody>
-                <SelectedStep />
+                <SelectedStep selectedAssets={selectedAssets} onSelectAsset={selectOne} />
               </ModalBody>
             </TabPanel>
           </TabPanels>

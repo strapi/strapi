@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { GridLayout } from '@strapi/parts/Layout';
+import styled from 'styled-components';
+import { Box } from '@strapi/parts/Box';
 import { KeyboardNavigable } from '@strapi/parts/KeyboardNavigable';
 import { prefixFileUrlWithBackendUrl, getFileExtension } from '@strapi/helper-plugin';
 import { ImageAssetCard } from '../AssetCard/ImageAssetCard';
@@ -8,12 +9,23 @@ import { VideoAssetCard } from '../AssetCard/VideoAssetCard';
 import { DocAssetCard } from '../AssetCard/DocAssetCard';
 import { AssetType } from '../../constants';
 
-export const AssetList = ({ assets, onEditAsset, onSelectAsset, selectedAssets }) => {
+const GridColSize = {
+  S: 180,
+  M: 250,
+};
+
+const GridLayout = styled(Box)`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(${({ size }) => `${GridColSize[size]}px`}, 1fr));
+  grid-gap: ${({ theme }) => theme.spaces[4]};
+`;
+
+export const AssetList = ({ assets, onEditAsset, onSelectAsset, selectedAssets, size }) => {
   return (
     <KeyboardNavigable tagName="article">
-      <GridLayout>
+      <GridLayout size={size}>
         {assets.map(asset => {
-          const isSelected = selectedAssets.indexOf(asset.id) > -1;
+          const isSelected = selectedAssets.indexOf(asset) > -1;
 
           if (asset.mime.includes(AssetType.Video)) {
             return (
@@ -27,6 +39,7 @@ export const AssetList = ({ assets, onEditAsset, onSelectAsset, selectedAssets }
                 onEdit={() => onEditAsset(asset)}
                 onSelect={() => onSelectAsset(asset)}
                 selected={isSelected}
+                size={size}
               />
             );
           }
@@ -45,6 +58,7 @@ export const AssetList = ({ assets, onEditAsset, onSelectAsset, selectedAssets }
                 onEdit={() => onEditAsset(asset)}
                 onSelect={() => onSelectAsset(asset)}
                 selected={isSelected}
+                size={size}
               />
             );
           }
@@ -58,6 +72,7 @@ export const AssetList = ({ assets, onEditAsset, onSelectAsset, selectedAssets }
               onEdit={() => onEditAsset(asset)}
               onSelect={() => onSelectAsset(asset)}
               selected={isSelected}
+              size={size}
             />
           );
         })}
@@ -74,9 +89,14 @@ export const AssetList = ({ assets, onEditAsset, onSelectAsset, selectedAssets }
   );
 };
 
+AssetList.defaultProps = {
+  size: 'M',
+};
+
 AssetList.propTypes = {
   assets: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
   onEditAsset: PropTypes.func.isRequired,
   onSelectAsset: PropTypes.func.isRequired,
-  selectedAssets: PropTypes.arrayOf(PropTypes.number).isRequired,
+  selectedAssets: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
+  size: PropTypes.oneOf(['S', 'M']),
 };
