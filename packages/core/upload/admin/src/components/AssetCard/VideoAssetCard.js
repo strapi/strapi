@@ -13,8 +13,8 @@ import {
   CardTitle,
   CardSubtitle,
   CardTimer,
-} from '@strapi/parts/Card';
-import { IconButton } from '@strapi/parts/IconButton';
+} from '@strapi/design-system/Card';
+import { IconButton } from '@strapi/design-system/IconButton';
 import EditIcon from '@strapi/icons/EditIcon';
 import { useIntl } from 'react-intl';
 import { VideoPreview } from './VideoPreview';

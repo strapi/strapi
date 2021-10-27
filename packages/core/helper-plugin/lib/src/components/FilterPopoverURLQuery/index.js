@@ -7,12 +7,12 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Button } from '@strapi/parts/Button';
-import { Box } from '@strapi/parts/Box';
-import { Popover } from '@strapi/parts/Popover';
-import { Stack } from '@strapi/parts/Stack';
-import { FocusTrap } from '@strapi/parts/FocusTrap';
-import { Select, Option } from '@strapi/parts/Select';
+import { Button } from '@strapi/design-system/Button';
+import { Box } from '@strapi/design-system/Box';
+import { Popover } from '@strapi/design-system/Popover';
+import { Stack } from '@strapi/design-system/Stack';
+import { FocusTrap } from '@strapi/design-system/FocusTrap';
+import { Select, Option } from '@strapi/design-system/Select';
 import AddIcon from '@strapi/icons/AddIcon';
 import { useIntl } from 'react-intl';
 import useQueryParams from '../../hooks/useQueryParams';

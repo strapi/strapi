@@ -1,10 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Text } from '@strapi/parts/Text';
-import { Box } from '@strapi/parts/Box';
-import { Flex } from '@strapi/parts/Flex';
-import { Stack } from '@strapi/parts/Stack';
+import { Text } from '@strapi/design-system/Text';
+import { Box } from '@strapi/design-system/Box';
+import { Flex } from '@strapi/design-system/Flex';
+import { Stack } from '@strapi/design-system/Stack';
 import { Wrapper } from './components';
 
 const CustomRadioGroup = ({ intlLabel, name, onChange, radios, value }) => {

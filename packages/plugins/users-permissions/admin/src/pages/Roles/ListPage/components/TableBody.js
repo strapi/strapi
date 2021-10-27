@@ -1,9 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { IconButton } from '@strapi/parts/IconButton';
-import { Text } from '@strapi/parts/Text';
-import { Flex } from '@strapi/parts/Flex';
-import { Tbody, Tr, Td } from '@strapi/parts/Table';
+import { IconButton } from '@strapi/design-system/IconButton';
+import { Text } from '@strapi/design-system/Text';
+import { Flex } from '@strapi/design-system/Flex';
+import { Tbody, Tr, Td } from '@strapi/design-system/Table';
 import { EditIcon, DeleteIcon } from '@strapi/icons';
 import { CheckPermissions, onRowClick, stopPropagation } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';

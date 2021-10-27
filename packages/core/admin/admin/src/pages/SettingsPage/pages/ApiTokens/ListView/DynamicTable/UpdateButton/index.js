@@ -2,7 +2,7 @@ import React from 'react';
 import EditIcon from '@strapi/icons/EditIcon';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
-import { Link } from '@strapi/parts/Link';
+import { Link } from '@strapi/design-system/Link';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 

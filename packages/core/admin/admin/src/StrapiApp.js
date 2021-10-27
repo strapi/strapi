@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
-import { lightTheme } from '@strapi/parts/themes';
+import { lightTheme } from '@strapi/design-system/themes';
 import merge from 'lodash/merge';
 import pick from 'lodash/pick';
 import isFunction from 'lodash/isFunction';

@@ -7,14 +7,14 @@ import {
   useFocusWhenNavigate,
 } from '@strapi/helper-plugin';
 import CheckIcon from '@strapi/icons/CheckIcon';
-import { ContentLayout, HeaderLayout, Layout } from '@strapi/parts/Layout';
-import { Box } from '@strapi/parts/Box';
-import { Button } from '@strapi/parts/Button';
-import { Main } from '@strapi/parts/Main';
-import { Stack } from '@strapi/parts/Stack';
-import { ToggleInput } from '@strapi/parts/ToggleInput';
-import { Select, Option } from '@strapi/parts/Select';
-import { Grid, GridItem } from '@strapi/parts/Grid';
+import { ContentLayout, HeaderLayout, Layout } from '@strapi/design-system/Layout';
+import { Box } from '@strapi/design-system/Box';
+import { Button } from '@strapi/design-system/Button';
+import { Main } from '@strapi/design-system/Main';
+import { Stack } from '@strapi/design-system/Stack';
+import { ToggleInput } from '@strapi/design-system/ToggleInput';
+import { Select, Option } from '@strapi/design-system/Select';
+import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { useIntl } from 'react-intl';
 import isEqual from 'lodash/isEqual';
 import { getRequestUrl } from '../../../../../admin/src/utils';

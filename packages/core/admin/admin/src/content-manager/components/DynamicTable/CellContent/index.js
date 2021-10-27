@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Text } from '@strapi/parts/Text';
+import { Text } from '@strapi/design-system/Text';
 import Media from './Media';
 import MultipleMedias from './MultipleMedias';
 import Relation from './Relation';

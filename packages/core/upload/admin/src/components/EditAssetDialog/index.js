@@ -7,14 +7,19 @@
 import PropTypes from 'prop-types';
 import React, { useRef, useState } from 'react';
 import { useIntl } from 'react-intl';
-import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@strapi/parts/ModalLayout';
-import { ButtonText } from '@strapi/parts/Text';
-import { Stack } from '@strapi/parts/Stack';
-import { Grid, GridItem } from '@strapi/parts/Grid';
-import { Button } from '@strapi/parts/Button';
-import { TextInput } from '@strapi/parts/TextInput';
+import {
+  ModalLayout,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+} from '@strapi/design-system/ModalLayout';
+import { ButtonText } from '@strapi/design-system/Text';
+import { Stack } from '@strapi/design-system/Stack';
+import { Grid, GridItem } from '@strapi/design-system/Grid';
+import { Button } from '@strapi/design-system/Button';
+import { TextInput } from '@strapi/design-system/TextInput';
 import { getFileExtension, Form } from '@strapi/helper-plugin';
-import { VisuallyHidden } from '@strapi/parts/VisuallyHidden';
+import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
 import { Formik } from 'formik';
 import * as yup from 'yup';
 import { PreviewBox } from './PreviewBox';

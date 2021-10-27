@@ -1,8 +1,8 @@
 import React from 'react';
 import { Switch, Route, useRouteMatch, Redirect, useLocation } from 'react-router-dom';
 import { CheckPagePermissions, LoadingIndicatorPage, NotFound } from '@strapi/helper-plugin';
-import { Layout, HeaderLayout } from '@strapi/parts/Layout';
-import { Main } from '@strapi/parts/Main';
+import { Layout, HeaderLayout } from '@strapi/design-system/Layout';
+import { Main } from '@strapi/design-system/Main';
 import { useIntl } from 'react-intl';
 import sortBy from 'lodash/sortBy';
 import permissions from '../../../permissions';

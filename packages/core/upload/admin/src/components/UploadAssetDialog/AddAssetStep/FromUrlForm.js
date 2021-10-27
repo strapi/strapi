@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { Box } from '@strapi/parts/Box';
-import { ModalFooter } from '@strapi/parts/ModalLayout';
-import { Textarea } from '@strapi/parts/Textarea';
+import { Box } from '@strapi/design-system/Box';
+import { ModalFooter } from '@strapi/design-system/ModalLayout';
+import { Textarea } from '@strapi/design-system/Textarea';
 import { useIntl } from 'react-intl';
-import { Button } from '@strapi/parts/Button';
+import { Button } from '@strapi/design-system/Button';
 import { Form } from '@strapi/helper-plugin';
 import { Formik } from 'formik';
 import { getTrad, urlSchema } from '../../../utils';

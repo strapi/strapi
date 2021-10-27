@@ -1,5 +1,5 @@
 import React from 'react';
-import { EmptyStateLayout as Layout } from '@strapi/parts/EmptyStateLayout';
+import { EmptyStateLayout as Layout } from '@strapi/design-system/EmptyStateLayout';
 import EmptyStateDocument from '@strapi/icons/EmptyStateDocument';
 import EmptyStatePermissions from '@strapi/icons/EmptyStatePermissions';
 import EmptyStatePicture from '@strapi/icons/EmptyStatePicture';

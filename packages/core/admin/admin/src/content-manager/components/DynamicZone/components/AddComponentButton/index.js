@@ -9,10 +9,10 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 import AddIcon from '@strapi/icons/AddIconCircle';
-import { BaseButton } from '@strapi/parts/BaseButton';
-import { Box } from '@strapi/parts/Box';
-import { Flex } from '@strapi/parts/Flex';
-import { Text, ButtonText } from '@strapi/parts/Text';
+import { BaseButton } from '@strapi/design-system/BaseButton';
+import { Box } from '@strapi/design-system/Box';
+import { Flex } from '@strapi/design-system/Flex';
+import { Text, ButtonText } from '@strapi/design-system/Text';
 import { getTrad } from '../../../../utils';
 
 const StyledAddIcon = styled(AddIcon)`

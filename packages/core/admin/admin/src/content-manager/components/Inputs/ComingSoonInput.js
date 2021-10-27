@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { useIntl } from 'react-intl';
-import { TextInput } from '@strapi/parts/TextInput';
+import { TextInput } from '@strapi/design-system/TextInput';
 import PropTypes from 'prop-types';
 
 const CominSoonInput = ({ description, intlLabel, labelAction, error, name }) => {

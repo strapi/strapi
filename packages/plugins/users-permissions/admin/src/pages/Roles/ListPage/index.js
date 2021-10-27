@@ -13,7 +13,7 @@ import {
   ContentLayout,
   ActionLayout,
   VisuallyHidden,
-} from '@strapi/parts';
+} from '@strapi/design-system';
 import AddIcon from '@strapi/icons/AddIcon';
 import {
   useTracking,

@@ -1,9 +1,9 @@
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
-import { BaseCheckbox } from '@strapi/parts/BaseCheckbox';
-import { Box } from '@strapi/parts/Box';
-import { Flex } from '@strapi/parts/Flex';
-import { Text } from '@strapi/parts/Text';
+import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
+import { Box } from '@strapi/design-system/Box';
+import { Flex } from '@strapi/design-system/Flex';
+import { Text } from '@strapi/design-system/Text';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
 import CollapseLabel from '../CollapseLabel';

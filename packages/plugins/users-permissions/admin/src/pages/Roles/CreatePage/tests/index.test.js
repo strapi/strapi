@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
-import { ThemeProvider, lightTheme } from '@strapi/parts';
+import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { Router, Switch, Route } from 'react-router-dom';
 import { IntlProvider } from 'react-intl';
 import { createMemoryHistory } from 'history';

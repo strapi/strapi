@@ -1,7 +1,7 @@
 import React from 'react';
-import { Stack } from '@strapi/parts/Stack';
-import { Box } from '@strapi/parts/Box';
-import { H3, Text } from '@strapi/parts/Text';
+import { Stack } from '@strapi/design-system/Stack';
+import { Box } from '@strapi/design-system/Box';
+import { H3, Text } from '@strapi/design-system/Text';
 import map from 'lodash/map';
 import tail from 'lodash/tail';
 import { useIntl } from 'react-intl';

@@ -7,7 +7,7 @@
 import React from 'react';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
-import { Button } from '@strapi/parts/Button';
+import { Button } from '@strapi/design-system/Button';
 import AddIcon from '@strapi/icons/AddIcon';
 import { getTrad } from '../../utils';
 

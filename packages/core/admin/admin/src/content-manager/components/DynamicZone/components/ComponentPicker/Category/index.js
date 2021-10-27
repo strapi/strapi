@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Accordion, AccordionToggle, AccordionContent } from '@strapi/parts/Accordion';
-import { Box } from '@strapi/parts/Box';
+import { Accordion, AccordionToggle, AccordionContent } from '@strapi/design-system/Accordion';
+import { Box } from '@strapi/design-system/Box';
 import styled from 'styled-components';
 import ComponentCard from './ComponentCard';
 

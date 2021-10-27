@@ -116,8 +116,8 @@ import {
 // };
 
 import { useIntl } from 'react-intl';
-import { Layout, HeaderLayout, ContentLayout } from '@strapi/parts/Layout';
-import { Main } from '@strapi/parts/Main';
+import { Layout, HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
+import { Main } from '@strapi/design-system/Main';
 import adminPermissions from '../../permissions';
 
 const MarketPlacePage = () => {

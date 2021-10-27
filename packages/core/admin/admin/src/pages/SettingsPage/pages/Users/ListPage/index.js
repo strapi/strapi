@@ -8,10 +8,10 @@ import {
   useFocusWhenNavigate,
   NoPermissions,
 } from '@strapi/helper-plugin';
-import { ActionLayout, ContentLayout, HeaderLayout } from '@strapi/parts/Layout';
-import { Button } from '@strapi/parts/Button';
-import { Main } from '@strapi/parts/Main';
-import { useNotifyAT } from '@strapi/parts/LiveRegions';
+import { ActionLayout, ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
+import { Button } from '@strapi/design-system/Button';
+import { Main } from '@strapi/design-system/Main';
+import { useNotifyAT } from '@strapi/design-system/LiveRegions';
 import Mail from '@strapi/icons/Mail';
 import { useLocation } from 'react-router-dom';
 import { useIntl } from 'react-intl';

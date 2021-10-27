@@ -5,7 +5,7 @@ import {
   SubNavSection,
   SubNavSections,
   SubNavLink,
-} from '@strapi/parts/SubNav';
+} from '@strapi/design-system/SubNav';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import { getSectionsToDisplay } from '../../utils';

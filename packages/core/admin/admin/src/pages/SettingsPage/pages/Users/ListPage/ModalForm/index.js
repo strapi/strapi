@@ -1,13 +1,18 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { ModalLayout, ModalHeader, ModalFooter, ModalBody } from '@strapi/parts/ModalLayout';
-import { Grid, GridItem } from '@strapi/parts/Grid';
-import { Breadcrumbs, Crumb } from '@strapi/parts/Breadcrumbs';
-import { Box } from '@strapi/parts/Box';
-import { Button } from '@strapi/parts/Button';
-import { Stack } from '@strapi/parts/Stack';
-import { H2 } from '@strapi/parts/Text';
+import {
+  ModalLayout,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+} from '@strapi/design-system/ModalLayout';
+import { Grid, GridItem } from '@strapi/design-system/Grid';
+import { Breadcrumbs, Crumb } from '@strapi/design-system/Breadcrumbs';
+import { Box } from '@strapi/design-system/Box';
+import { Button } from '@strapi/design-system/Button';
+import { Stack } from '@strapi/design-system/Stack';
+import { H2 } from '@strapi/design-system/Text';
 
 import { Formik } from 'formik';
 import { Form, GenericInput, useNotification, useOverlayBlocker } from '@strapi/helper-plugin';

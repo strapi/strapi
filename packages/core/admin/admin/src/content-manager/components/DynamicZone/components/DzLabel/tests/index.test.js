@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { ThemeProvider, lightTheme, Tooltip } from '@strapi/parts';
+import { ThemeProvider, lightTheme, Tooltip } from '@strapi/design-system';
 import I18N from '@strapi/icons/I18N';
 import { IntlProvider } from 'react-intl';
 import styled from 'styled-components';

@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Subtitle } from '@strapi/parts/Text';
-import { Button } from '@strapi/parts/Button';
-import { Stack } from '@strapi/parts/Stack';
+import { Subtitle } from '@strapi/design-system/Text';
+import { Button } from '@strapi/design-system/Button';
+import { Stack } from '@strapi/design-system/Stack';
 import DeleteIcon from '@strapi/icons/DeleteIcon';
 import { ConfirmDialog } from '@strapi/helper-plugin';
 import { useBulkRemoveAsset } from '../../../hooks/useBulkRemoveAsset';

@@ -4,8 +4,8 @@ import { components } from 'react-select';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import { get, has, isEmpty } from 'lodash';
-import { Flex } from '@strapi/parts/Flex';
-import { Text } from '@strapi/parts/Text';
+import { Flex } from '@strapi/design-system/Flex';
+import { Text } from '@strapi/design-system/Text';
 import { pxToRem } from '@strapi/helper-plugin';
 import { getTrad } from '../../utils';
 

@@ -1,11 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { IconButton } from '@strapi/parts/IconButton';
-import { FocusTrap } from '@strapi/parts/FocusTrap';
-import { SimpleMenu, MenuItem } from '@strapi/parts/SimpleMenu';
+import { IconButton } from '@strapi/design-system/IconButton';
+import { FocusTrap } from '@strapi/design-system/FocusTrap';
+import { SimpleMenu, MenuItem } from '@strapi/design-system/SimpleMenu';
 import CloseAlertIcon from '@strapi/icons/CloseAlertIcon';
 import CheckIcon from '@strapi/icons/CheckIcon';
-import { Stack } from '@strapi/parts/Stack';
+import { Stack } from '@strapi/design-system/Stack';
 import { useIntl } from 'react-intl';
 import getTrad from '../../../utils/getTrad';
 import { CroppingActionRow } from './components';

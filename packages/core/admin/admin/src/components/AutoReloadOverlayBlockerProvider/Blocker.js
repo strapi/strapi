@@ -6,11 +6,11 @@ import styled, { keyframes } from 'styled-components';
 import { pxToRem } from '@strapi/helper-plugin';
 import Time from '@strapi/icons/Time';
 import Reload from '@strapi/icons/Reload';
-import { Link } from '@strapi/parts/Link';
-import { Box } from '@strapi/parts/Box';
-import { Stack } from '@strapi/parts/Stack';
-import { Flex } from '@strapi/parts/Flex';
-import { H1, Typography } from '@strapi/parts/Text';
+import { Link } from '@strapi/design-system/Link';
+import { Box } from '@strapi/design-system/Box';
+import { Stack } from '@strapi/design-system/Stack';
+import { Flex } from '@strapi/design-system/Flex';
+import { H1, Typography } from '@strapi/design-system/Text';
 import { Content, IconBox, Overlay } from './Overlay';
 
 const overlayContainer = document.createElement('div');

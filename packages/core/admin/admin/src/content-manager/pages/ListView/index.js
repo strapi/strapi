@@ -19,11 +19,11 @@ import {
   useRBACProvider,
   useTracking,
 } from '@strapi/helper-plugin';
-import { IconButton } from '@strapi/parts/IconButton';
-import { Main } from '@strapi/parts/Main';
-import { ActionLayout, ContentLayout, HeaderLayout } from '@strapi/parts/Layout';
-import { useNotifyAT } from '@strapi/parts/LiveRegions';
-import { Button } from '@strapi/parts/Button';
+import { IconButton } from '@strapi/design-system/IconButton';
+import { Main } from '@strapi/design-system/Main';
+import { ActionLayout, ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
+import { useNotifyAT } from '@strapi/design-system/LiveRegions';
+import { Button } from '@strapi/design-system/Button';
 import Add from '@strapi/icons/Add';
 import Settings from '@strapi/icons/Settings';
 import axios from 'axios';

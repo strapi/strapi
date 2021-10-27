@@ -1,7 +1,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
-import { ThemeProvider } from '@strapi/parts/ThemeProvider';
-import { lightTheme } from '@strapi/parts/themes';
+import { ThemeProvider } from '@strapi/design-system/ThemeProvider';
+import { lightTheme } from '@strapi/design-system/themes';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';

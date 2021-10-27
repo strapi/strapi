@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { ThemeProvider, lightTheme } from '@strapi/parts';
+import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { NotificationsProvider } from '@strapi/helper-plugin';
@@ -995,10 +995,12 @@ describe('<EditAssetDialog />', () => {
       }
 
       .c5 {
+        border-radius: 4px 4px 0 0;
         border-bottom: 1px solid #eaeaef;
       }
 
       .c41 {
+        border-radius: 0 0 4px 4px;
         border-top: 1px solid #eaeaef;
       }
 

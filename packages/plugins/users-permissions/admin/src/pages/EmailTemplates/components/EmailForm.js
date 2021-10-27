@@ -3,11 +3,16 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Form, GenericInput } from '@strapi/helper-plugin';
 import { Formik } from 'formik';
-import { ModalLayout, ModalHeader, ModalFooter, ModalBody } from '@strapi/parts/ModalLayout';
-import { Grid, GridItem } from '@strapi/parts/Grid';
-import { Button } from '@strapi/parts/Button';
-import { Breadcrumbs, Crumb } from '@strapi/parts/Breadcrumbs';
-import { Textarea } from '@strapi/parts/Textarea';
+import {
+  ModalLayout,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+} from '@strapi/design-system/ModalLayout';
+import { Grid, GridItem } from '@strapi/design-system/Grid';
+import { Button } from '@strapi/design-system/Button';
+import { Breadcrumbs, Crumb } from '@strapi/design-system/Breadcrumbs';
+import { Textarea } from '@strapi/design-system/Textarea';
 import { getTrad } from '../../../utils';
 import schema from '../utils/schema';
 

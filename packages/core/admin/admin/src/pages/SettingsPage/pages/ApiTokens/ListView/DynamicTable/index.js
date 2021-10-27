@@ -1,7 +1,7 @@
 import React from 'react';
-import { Text } from '@strapi/parts/Text';
-import { Tbody, Tr, Td } from '@strapi/parts/Table';
-import { Flex } from '@strapi/parts/Flex';
+import { Text } from '@strapi/design-system/Text';
+import { Tbody, Tr, Td } from '@strapi/design-system/Table';
+import { Flex } from '@strapi/design-system/Flex';
 import { RelativeTime, useQueryParams } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';

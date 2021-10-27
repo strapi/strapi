@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useIntl } from 'react-intl';
 import { NavLink as Link } from 'react-router-dom';
-import { Divider } from '@strapi/parts/Divider';
+import { Divider } from '@strapi/design-system/Divider';
 import {
   MainNav,
   NavBrand,
@@ -13,11 +13,11 @@ import {
   NavSection,
   NavUser,
   NavCondense,
-} from '@strapi/parts/MainNav';
-import { FocusTrap } from '@strapi/parts/FocusTrap';
-import { Box } from '@strapi/parts/Box';
-import { Text } from '@strapi/parts/Text';
-import { Stack } from '@strapi/parts/Stack';
+} from '@strapi/design-system/MainNav';
+import { FocusTrap } from '@strapi/design-system/FocusTrap';
+import { Box } from '@strapi/design-system/Box';
+import { Text } from '@strapi/design-system/Text';
+import { Stack } from '@strapi/design-system/Stack';
 import ContentIcon from '@strapi/icons/ContentIcon';
 import Logout from '@strapi/icons/Logout';
 import { auth, usePersistentState, useAppInfos } from '@strapi/helper-plugin';

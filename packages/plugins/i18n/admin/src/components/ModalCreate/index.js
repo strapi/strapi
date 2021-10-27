@@ -1,13 +1,18 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useRBACProvider, Form } from '@strapi/helper-plugin';
-import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@strapi/parts/ModalLayout';
-import { TabGroup, Tabs, Tab, TabPanels, TabPanel } from '@strapi/parts/Tabs';
-import { Button } from '@strapi/parts/Button';
-import { ButtonText, H2 } from '@strapi/parts/Text';
-import { Divider } from '@strapi/parts/Divider';
-import { Box } from '@strapi/parts/Box';
-import { Flex } from '@strapi/parts/Flex';
+import {
+  ModalLayout,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+} from '@strapi/design-system/ModalLayout';
+import { TabGroup, Tabs, Tab, TabPanels, TabPanel } from '@strapi/design-system/Tabs';
+import { Button } from '@strapi/design-system/Button';
+import { ButtonText, H2 } from '@strapi/design-system/Text';
+import { Divider } from '@strapi/design-system/Divider';
+import { Box } from '@strapi/design-system/Box';
+import { Flex } from '@strapi/design-system/Flex';
 import CheckIcon from '@strapi/icons/CheckIcon';
 import { useIntl } from 'react-intl';
 import { Formik } from 'formik';

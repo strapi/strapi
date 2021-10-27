@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { Box } from '@strapi/parts/Box';
+import { Box } from '@strapi/design-system/Box';
 
 /* eslint-disable */
 /* stylelint-disable */
