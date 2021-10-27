@@ -44,7 +44,7 @@ module.exports = async function mergeTemplate(scope, rootPath) {
 
     // Download template repository to a temporary directory
     templateParentPath = await fse.mkdtemp(path.join(os.tmpdir(), 'strapi-'));
-    templatePath = downloadNpmTemplate(templatePackageInfo, templateParentPath);
+    templatePath = await downloadNpmTemplate(templatePackageInfo, templateParentPath);
   }
 
   // Make sure the template is compatible with this version of strapi

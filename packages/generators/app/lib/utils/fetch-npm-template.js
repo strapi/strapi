@@ -9,8 +9,8 @@ const chalk = require('chalk');
  * @param {string} packageName - Name to look up on npm, may include a specific version
  * @returns {Object}
  */
-function getPackageInfo(packageName) {
-  const { stdout } = execa.shellSync(`npm view ${packageName} name version --silent`);
+async function getPackageInfo(packageName) {
+  const { stdout } = await execa.shell(`npm view ${packageName} name version --silent`);
   // Use regex to parse name and version from CLI result
   const [name, version] = stdout.match(/(?<=')(.*?)(?=')/gm);
   return { name, version };
@@ -24,7 +24,7 @@ async function getTemplatePackageInfo(template) {
   // Check if template is a shorthand
   try {
     const longhand = `@strapi/template-${template}`;
-    const packageInfo = getPackageInfo(longhand);
+    const packageInfo = await getPackageInfo(longhand);
     // Hasn't crashed so it is indeed a shorthand
     return packageInfo;
   } catch (error) {
@@ -44,9 +44,9 @@ async function getTemplatePackageInfo(template) {
  * @param {string} packageInfo.version
  * @param {string} parentDir - Path inside of which we install the template.
  */
-function downloadNpmTemplate({ name, version }, parentDir) {
+async function downloadNpmTemplate({ name, version }, parentDir) {
   // Download from npm
-  execa.shellSync(`npm install ${name}@${version} --no-save --silent`, {
+  await execa.shell(`npm install ${name}@${version} --no-save --silent`, {
     cwd: parentDir,
   });
 
