@@ -303,7 +303,7 @@ const FormModal = () => {
   const isInFirstComponentStep = step === '1';
   const isEditingCategory = modalType === 'editCategory';
   const isPickingAttribute = modalType === 'chooseAttribute';
-  const uid = createUid(modifiedData.name || '');
+  const uid = createUid(modifiedData.displayName || '');
   const attributes = get(allDataSchema, [...pathToSchema, 'schema', 'attributes'], null);
 
   const checkFormValidity = async () => {
