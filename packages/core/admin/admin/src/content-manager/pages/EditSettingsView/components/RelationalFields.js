@@ -1,12 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Button } from '@strapi/parts/Button';
-import { Box } from '@strapi/parts/Box';
-import { ButtonText, Text } from '@strapi/parts/Text';
-import { Stack } from '@strapi/parts/Stack';
-import { SimpleMenu, MenuItem } from '@strapi/parts/SimpleMenu';
-import AddIcon from '@strapi/icons/AddIcon';
+import { Button } from '@strapi/design-system/Button';
+import { Box } from '@strapi/design-system/Box';
+import { ButtonText } from '@strapi/design-system/Text';
+import { Stack } from '@strapi/design-system/Stack';
+import { SimpleMenu, MenuItem } from '@strapi/design-system/SimpleMenu';
+import Plus from '@strapi/icons/Plus';
 import { getTrad } from '../../../utils';
 import FieldButton from './FieldButton';
 
@@ -29,14 +29,15 @@ const RelationalFields = ({
             })}
           </ButtonText>
         </Box>
-        <Box>
+        {/* Since the drag n drop will not be available, this text will be hidden for the moment */}
+        {/* <Box>
           <Text small textColor="neutral600">
             {formatMessage({
               id: 'containers.SettingPage.editSettings.description',
               defaultMessage: 'Drag & drop the fields to build the layout',
             })}
           </Text>
-        </Box>
+        </Box> */}
       </div>
       <Box padding={4} hasRadius borderStyle="dashed" borderWidth="1px" borderColor="neutral300">
         <Stack size={2}>
@@ -57,7 +58,7 @@ const RelationalFields = ({
             })}
             as={Button}
             fullWidth
-            startIcon={<AddIcon />}
+            startIcon={<Plus />}
             endIcon={null}
             variant="secondary"
             disabled={editRelationsLayoutRemainingFields.length === 0}

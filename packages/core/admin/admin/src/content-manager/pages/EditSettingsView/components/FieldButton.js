@@ -1,12 +1,13 @@
 import React from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
-import { Box } from '@strapi/parts/Box';
-import { Flex } from '@strapi/parts/Flex';
-import { IconButton } from '@strapi/parts/IconButton';
+import { Box } from '@strapi/design-system/Box';
+import { Flex } from '@strapi/design-system/Flex';
+import { IconButton } from '@strapi/design-system/IconButton';
+import { Text } from '@strapi/design-system/Text';
 import Drag from '@strapi/icons/Drag';
-import EditIcon from '@strapi/icons/EditIcon';
-import DeleteIcon from '@strapi/icons/DeleteIcon';
+import Pencil from '@strapi/icons/Pencil';
+import Trash from '@strapi/icons/Trash';
 import { useIntl } from 'react-intl';
 import ComponentFieldList from './ComponentFieldList';
 import DynamicZoneList from './DynamicZoneList';
@@ -18,6 +19,9 @@ const CustomIconButton = styled(IconButton)`
 const CustomDragIcon = styled(Drag)`
   height: ${12 / 16}rem;
   width: ${12 / 16}rem;
+  path {
+    fill: ${({ theme }) => theme.colors.neutral600};
+  }
 `;
 const CustomFlex = styled(Flex)`
   border-right: 1px solid ${({ theme }) => theme.colors.neutral200};
@@ -49,7 +53,11 @@ const FieldButton = ({ attribute, onEditField, onDeleteField, children }) => {
       </CustomFlex>
       <Box overflow="hidden" width="100%">
         <Flex paddingLeft={3} alignItems="baseline" justifyContent="space-between">
-          <Box>{children}</Box>
+          <Box>
+            <Text textColor="neutral800" bold>
+              {children}
+            </Text>
+          </Box>
           <Flex>
             <CustomIconButton
               label={formatMessage(
@@ -60,7 +68,7 @@ const FieldButton = ({ attribute, onEditField, onDeleteField, children }) => {
                 { fieldName: children }
               )}
               onClick={onEditField}
-              icon={<EditIcon />}
+              icon={<Pencil />}
               noBorder
             />
             <CustomIconButton
@@ -74,7 +82,7 @@ const FieldButton = ({ attribute, onEditField, onDeleteField, children }) => {
                 }
               )}
               onClick={onDeleteField}
-              icon={<DeleteIcon />}
+              icon={<Trash />}
               noBorder
             />
           </Flex>

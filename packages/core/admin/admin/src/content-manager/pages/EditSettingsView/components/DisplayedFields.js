@@ -2,15 +2,15 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import get from 'lodash/get';
-import { Button } from '@strapi/parts/Button';
-import { Box } from '@strapi/parts/Box';
-import { ButtonText, Text } from '@strapi/parts/Text';
-import { Grid, GridItem } from '@strapi/parts/Grid';
-import { Stack } from '@strapi/parts/Stack';
-import { Flex } from '@strapi/parts/Flex';
-import { VisuallyHidden } from '@strapi/parts/VisuallyHidden';
-import { SimpleMenu, MenuItem } from '@strapi/parts/SimpleMenu';
-import AddIcon from '@strapi/icons/AddIcon';
+import { Button } from '@strapi/design-system/Button';
+import { Box } from '@strapi/design-system/Box';
+import { ButtonText } from '@strapi/design-system/Text';
+import { Grid, GridItem } from '@strapi/design-system/Grid';
+import { Stack } from '@strapi/design-system/Stack';
+import { Flex } from '@strapi/design-system/Flex';
+import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
+import { SimpleMenu, MenuItem } from '@strapi/design-system/SimpleMenu';
+import Plus from '@strapi/icons/Plus';
 import { getTrad } from '../../../utils';
 import { useLayoutDnd } from '../../../hooks';
 import FieldButton from './FieldButton';
@@ -38,14 +38,15 @@ const DisplayedFields = ({
               })}
             </ButtonText>
           </Box>
-          <Box>
+          {/* Since the drag n drop will not be available, this text will be hidden for the moment */}
+          {/* <Box>
             <Text small textColor="neutral600">
               {formatMessage({
                 id: 'containers.SettingPage.editSettings.description',
                 defaultMessage: 'Drag & drop the fields to build the layout',
               })}
             </Text>
-          </Box>
+          </Box> */}
         </div>
         <LinkToCTB />
       </Flex>
@@ -82,7 +83,7 @@ const DisplayedFields = ({
             })}
             as={Button}
             fullWidth
-            startIcon={<AddIcon />}
+            startIcon={<Plus />}
             endIcon={null}
             variant="secondary"
             disabled={editLayoutRemainingFields.length === 0}

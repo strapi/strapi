@@ -1,12 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Box } from '@strapi/parts/Box';
-import { Flex } from '@strapi/parts/Flex';
-import { Link } from '@strapi/parts/Link';
+import { Box } from '@strapi/design-system/Box';
+import { Flex } from '@strapi/design-system/Flex';
+import { Link } from '@strapi/design-system/Link';
+import { Text } from '@strapi/design-system/Text';
 import Cog from '@strapi/icons/Cog';
 import { useIntl } from 'react-intl';
 import get from 'lodash/get';
-import { Grid, GridItem } from '@strapi/parts/Grid';
+import { Grid, GridItem } from '@strapi/design-system/Grid';
 import useLayoutDnd from '../../../hooks/useLayoutDnd';
 import getTrad from '../../../utils/getTrad';
 
@@ -33,7 +34,7 @@ const ComponentFieldList = ({ componentUid }) => {
                   hasRadius
                   borderColor="neutral200"
                 >
-                  {rowContent.name}
+                  <Text textColor="neutral800">{rowContent.name}</Text>
                 </Flex>
               </Box>
             </GridItem>

@@ -6,25 +6,25 @@ import flatMap from 'lodash/flatMap';
 import isEqual from 'lodash/isEqual';
 import get from 'lodash/get';
 import { useHistory } from 'react-router-dom';
-import { Main } from '@strapi/parts/Main';
-import { HeaderLayout, ContentLayout } from '@strapi/parts/Layout';
-import { Link } from '@strapi/parts/Link';
-import { Button } from '@strapi/parts/Button';
-import { Box } from '@strapi/parts/Box';
-import { H3 } from '@strapi/parts/Text';
-import { Grid, GridItem } from '@strapi/parts/Grid';
-import { Select, Option } from '@strapi/parts/Select';
-import { Stack } from '@strapi/parts/Stack';
-import { Divider } from '@strapi/parts/Divider';
-import BackIcon from '@strapi/icons/BackIcon';
-import CheckIcon from '@strapi/icons/CheckIcon';
+import { Main } from '@strapi/design-system/Main';
+import { HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
+import { Link } from '@strapi/design-system/Link';
+import { Button } from '@strapi/design-system/Button';
+import { Box } from '@strapi/design-system/Box';
+import { H3 } from '@strapi/design-system/Text';
+import { Grid, GridItem } from '@strapi/design-system/Grid';
+import { Select, Option } from '@strapi/design-system/Select';
+import { Stack } from '@strapi/design-system/Stack';
+import { Divider } from '@strapi/design-system/Divider';
+import ArrowLeft from '@strapi/icons/ArrowLeft';
+import Check from '@strapi/icons/Check';
 import { Helmet } from 'react-helmet';
 import { getTrad } from '../../utils';
 import reducer, { initialState } from './reducer';
 import init from './init';
 import DisplayedFields from './components/DisplayedFields';
 import RelationalFields from './components/RelationalFields';
-import ModalForm from './ModalForm';
+import ModalForm from './components/ModalForm';
 import LayoutDndProvider from '../../components/LayoutDndProvider';
 
 const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug }) => {
@@ -129,7 +129,7 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug }) =
           })}
           navigationAction={
             <Link
-              startIcon={<BackIcon />}
+              startIcon={<ArrowLeft />}
               onClick={e => {
                 e.preventDefault();
                 goBack();
@@ -145,7 +145,7 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug }) =
           primaryAction={
             <Button
               disabled={isEqual(initialData, modifiedData)}
-              startIcon={<CheckIcon />}
+              startIcon={<Check />}
               type="submit"
             >
               {formatMessage({ id: 'form.button.save', defaultMessage: 'Save' })}

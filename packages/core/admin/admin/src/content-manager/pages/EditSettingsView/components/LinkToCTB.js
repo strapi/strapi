@@ -8,8 +8,8 @@ import React from 'react';
 import { useTracking, CheckPermissions } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import get from 'lodash/get';
-import { LinkButton } from '@strapi/parts/LinkButton';
-import EditIcon from '@strapi/icons/EditIcon';
+import { LinkButton } from '@strapi/design-system/LinkButton';
+import Pencil from '@strapi/icons/Pencil';
 import getTrad from '../../../utils/getTrad';
 import useLayoutDnd from '../../../hooks/useLayoutDnd';
 
@@ -43,7 +43,7 @@ const LinkToCTB = () => {
         to={`${baseUrl}/${suffixUrl}`}
         onClick={handleClick}
         size="S"
-        startIcon={<EditIcon />}
+        startIcon={<Pencil />}
         variant="secondary"
       >
         {formatMessage({

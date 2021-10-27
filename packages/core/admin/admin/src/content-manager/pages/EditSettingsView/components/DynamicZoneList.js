@@ -1,10 +1,10 @@
 import React from 'react';
 import get from 'lodash/get';
 import PropTypes from 'prop-types';
-import { Flex } from '@strapi/parts/Flex';
-import { Typography } from '@strapi/parts/Text';
-import { Box } from '@strapi/parts/Box';
-import { Stack } from '@strapi/parts/Stack';
+import { Flex } from '@strapi/design-system/Flex';
+import { Typography } from '@strapi/design-system/Text';
+import { Box } from '@strapi/design-system/Box';
+import { Stack } from '@strapi/design-system/Stack';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';

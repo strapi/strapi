@@ -2,43 +2,48 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import upperFirst from 'lodash/upperFirst';
-import { ModalLayout, ModalHeader, ModalFooter, ModalBody } from '@strapi/parts/ModalLayout';
-import { ButtonText } from '@strapi/parts/Text';
-import { Button } from '@strapi/parts/Button';
-import { Flex } from '@strapi/parts/Flex';
-import { Grid, GridItem } from '@strapi/parts/Grid';
+import {
+  ModalLayout,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+} from '@strapi/design-system/ModalLayout';
+import { ButtonText } from '@strapi/design-system/Text';
+import { Button } from '@strapi/design-system/Button';
+import { Flex } from '@strapi/design-system/Flex';
+import { Grid, GridItem } from '@strapi/design-system/Grid';
 import Date from '@strapi/icons/Date';
 import Boolean from '@strapi/icons/Boolean';
 import Email from '@strapi/icons/Email';
 import Enumeration from '@strapi/icons/Enumeration';
-import Media from '@strapi/icons/Media';
+import Picture from '@strapi/icons/Picture';
 import Relation from '@strapi/icons/Relation';
 import Text from '@strapi/icons/Text';
 import Uid from '@strapi/icons/Uid';
-import Numbers from '@strapi/icons/Numbers';
+import Number from '@strapi/icons/Number';
 import Json from '@strapi/icons/Json';
 import Component from '@strapi/icons/Component';
 import DynamicZone from '@strapi/icons/DynamicZone';
 import styled from 'styled-components';
-import { getTrad } from '../../utils';
-import { useLayoutDnd } from '../../hooks';
+import { getTrad } from '../../../utils';
+import { useLayoutDnd } from '../../../hooks';
 
 // Create a file
 const iconByTypes = {
-  biginteger: <Numbers />,
+  biginteger: <Number />,
   boolean: <Boolean />,
   date: <Date />,
   datetime: <Date />,
-  decimal: <Numbers />,
+  decimal: <Number />,
   email: <Email />,
   enum: <Enumeration />,
   enumeration: <Enumeration />,
-  file: <Media />,
-  files: <Media />,
-  float: <Numbers />,
-  integer: <Numbers />,
-  media: <Media />,
-  number: <Numbers />,
+  file: <Picture />,
+  files: <Picture />,
+  float: <Number />,
+  integer: <Number />,
+  media: <Picture />,
+  number: <Number />,
   relation: <Relation />,
   string: <Text />,
   text: <Text />,
