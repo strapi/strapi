@@ -22,9 +22,21 @@ class Database {
     this.dialect.configure();
 
     this.connection = knex(this.config.connection);
+
+    this.dbSchemaName = null;
+    if(
+      !!this.config.connection.connection.schema 
+    ){
+      if(this.config.connection.searchPath !== this.config.connection.connection.schema) {
+        if(this.config.connection.connection.schema !== 'public'){
+          throw new Error(`In config/database.js, database.connection.searchPath must equal database.connection.connection.schema when .schema is in use`);
+        }
+      }
+      this.dbSchemaName = this.config.connection.connection.schema
+    }
     
-    this.schemaPrefix = (!!this.config.connection.searchPath && this.config.connection.searchPath !== 'public')
-      ? this.config.connection.searchPath + '.' : '';
+    this.schemaPrefix = !!this.dbSchemaName && this.dbSchemaName !== 'public'
+      ? (this.dbSchemaName + '.') : '';
 
     this.dialect.initialize();
 
