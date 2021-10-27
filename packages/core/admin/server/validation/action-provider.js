@@ -1,6 +1,7 @@
 'use strict';
 
 const { yup } = require('@strapi/utils');
+const { YupValidationError } = require('@strapi/utils').errors;
 const validators = require('./common-validators');
 
 const registerProviderActionSchema = yup
@@ -72,11 +73,7 @@ const validateRegisterProviderAction = data => {
   try {
     registerProviderActionSchema.validateSync(data, { strict: true, abortEarly: false });
   } catch (e) {
-    if (e.errors.length > 0) {
-      throw new yup.ValidationError(e.errors.join(', '));
-    } else {
-      throw e;
-    }
+    throw new YupValidationError(e);
   }
 };
 

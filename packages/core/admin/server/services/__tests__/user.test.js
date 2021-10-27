@@ -1,6 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
+const { ApplicationError } = require('@strapi/utils').errors;
 const userService = require('../user');
 const { SUPER_ADMIN_CODE } = require('../constants');
 
@@ -269,11 +270,12 @@ describe('User', () => {
         admin: { services: { role: { getSuperAdminWithUsersCount } } },
       };
 
-      expect.assertions(1);
+      expect.assertions(2);
 
       try {
         await userService.deleteById(2);
       } catch (e) {
+        expect(e instanceof ApplicationError).toBe(true);
         expect(e.message).toEqual('You must have at least one user with super admin role.');
       }
     });
@@ -305,11 +307,12 @@ describe('User', () => {
         admin: { services: { role: { getSuperAdminWithUsersCount } } },
       };
 
-      expect.assertions(1);
+      expect.assertions(2);
 
       try {
         await userService.deleteByIds([2, 3]);
       } catch (e) {
+        expect(e instanceof ApplicationError).toBe(true);
         expect(e.message).toEqual('You must have at least one user with super admin role.');
       }
     });

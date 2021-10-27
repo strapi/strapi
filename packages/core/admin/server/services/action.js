@@ -1,6 +1,7 @@
 'use strict';
 
 const { isNil } = require('lodash/fp');
+const { NotFoundError } = require('@strapi/utils').errors;
 const { getService } = require('../utils');
 const { AUTHOR_CODE, PUBLISH_ACTION } = require('./constants');
 
@@ -18,7 +19,7 @@ const getAllowedActionsForRole = async roleId => {
     const role = await getService('role').findOne({ id: roleId });
 
     if (!role) {
-      throw new Error('role.notFound');
+      throw new NotFoundError('role.notFound');
     }
 
     if (role.code === AUTHOR_CODE) {

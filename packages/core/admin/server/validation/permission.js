@@ -1,8 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const { yup } = require('@strapi/utils');
-const { YupValidationError } = require('@strapi/utils').errors;
+const { yup, handleYupError } = require('@strapi/utils');
 const { getService } = require('../utils');
 const { AUTHOR_CODE, PUBLISH_ACTION } = require('../services/constants');
 const {
@@ -11,10 +10,6 @@ const {
   getBoundActionsBySubject,
 } = require('../domain/role');
 const validators = require('./common-validators');
-
-const handleYupError = error => {
-  throw new YupValidationError(error);
-};
 
 // validatedUpdatePermissionsInput
 

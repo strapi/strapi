@@ -2,6 +2,7 @@
 
 const { camelCase, upperFirst, lowerFirst, pipe, get } = require('lodash/fp');
 const { singular } = require('pluralize');
+const { ApplicationError } = require('@strapi/utils').errors;
 
 module.exports = ({ strapi }) => {
   /**
@@ -222,7 +223,7 @@ module.exports = ({ strapi }) => {
     const { prefix = '', suffix = '', plurality = 'singular', firstLetterCase = 'upper' } = options;
 
     if (!['plural', 'singular'].includes(plurality)) {
-      throw new Error(
+      throw new ApplicationError(
         `"plurality" param must be either "plural" or "singular", but got: "${plurality}"`
       );
     }

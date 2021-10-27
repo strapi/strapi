@@ -1,6 +1,7 @@
 'use strict';
 
 const { has, toLower, castArray, trim, prop, isNil } = require('lodash/fp');
+const { UnauthorizedError, ForbiddenError } = require('@strapi/utils').errors;
 
 const compose = require('koa-compose');
 const { resolveRouteMiddlewares } = require('./middleware');
@@ -31,8 +32,6 @@ const createAuthorizeMiddleware = strapi => async (ctx, next) => {
 
     return next();
   } catch (error) {
-    const { UnauthorizedError, ForbiddenError } = authService.errors;
-
     if (error instanceof UnauthorizedError) {
       return ctx.unauthorized();
     }

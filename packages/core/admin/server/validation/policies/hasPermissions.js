@@ -1,12 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const { yup } = require('@strapi/utils');
-const { YupValidationError } = require('@strapi/utils').errors;
-
-const handleYupError = error => {
-  throw new YupValidationError(error);
-};
+const { yup, handleYupError } = require('@strapi/utils');
 
 const hasPermissionsSchema = yup.object({
   actions: yup.array().of(

@@ -1,5 +1,6 @@
 'use strict';
 
+const { ApplicationError } = require('@strapi/utils').errors;
 const createContext = require('../../../../../../test/helpers/create-context');
 const roleController = require('../role');
 
@@ -99,11 +100,12 @@ describe('Role controller', () => {
         },
       };
 
-      expect.assertions(1);
+      expect.assertions(2);
 
       try {
         await roleController.updatePermissions(ctx);
       } catch (e) {
+        expect(e instanceof ApplicationError).toBe(true);
         expect(e.message).toEqual('permissions is a required field');
       }
     });
@@ -130,11 +132,12 @@ describe('Role controller', () => {
         },
       };
 
-      expect.assertions(1);
+      expect.assertions(2);
 
       try {
         await roleController.updatePermissions(ctx);
       } catch (e) {
+        expect(e instanceof ApplicationError).toBe(true);
         expect(e.message).toEqual('permissions[0].action is a required field');
       }
     });

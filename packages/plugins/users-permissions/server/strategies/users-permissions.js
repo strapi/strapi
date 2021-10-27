@@ -1,6 +1,7 @@
 'use strict';
 
 const { castArray, map } = require('lodash/fp');
+const { ForbiddenError, UnauthorizedError } = require('@strapi/utils').errors;
 
 const { getService } = require('../utils');
 
@@ -62,8 +63,6 @@ const authenticate = async ctx => {
 };
 
 const verify = async (auth, config) => {
-  const { errors } = strapi.container.get('auth');
-
   const { credentials: user } = auth;
 
   // public accesss
@@ -79,13 +78,13 @@ const verify = async (auth, config) => {
 
     // A non authenticated user cannot access routes that do not have a scope
     if (!config.scope) {
-      throw new errors.UnauthorizedError();
+      throw new UnauthorizedError();
     }
 
     const isAllowed = castArray(config.scope).every(scope => allowedActions.includes(scope));
 
     if (!isAllowed) {
-      throw new errors.ForbiddenError();
+      throw new ForbiddenError();
     }
 
     return;
@@ -105,7 +104,7 @@ const verify = async (auth, config) => {
   const isAllowed = castArray(config.scope).every(scope => allowedActions.includes(scope));
 
   if (!isAllowed) {
-    throw new errors.ForbiddenError();
+    throw new ForbiddenError();
   }
 
   // TODO: if we need to keep policies for u&p execution

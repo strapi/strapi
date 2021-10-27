@@ -1,18 +1,13 @@
 'use strict';
 
 const _ = require('lodash');
-const { yup } = require('@strapi/utils');
-const { YupValidationError } = require('@strapi/utils').errors;
+const { yup, handleYupError } = require('@strapi/utils');
 
 const { getService } = require('../../utils');
 const { modelTypes, DEFAULT_TYPES, typeKinds } = require('../../services/constants');
 const createSchema = require('./model-schema');
 const { removeEmptyDefaults, removeDeletedUIDTargetFields } = require('./data-transform');
 const { nestedComponentSchema } = require('./component');
-
-const handleYupError = error => {
-  throw new YupValidationError(error);
-};
 
 /**
  * Allowed relation per type kind

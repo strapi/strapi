@@ -3,6 +3,7 @@
 const yup = require('yup');
 const _ = require('lodash');
 const utils = require('./string-formatting');
+const { YupValidationError } = require('./errors');
 
 const MixedSchemaType = yup.mixed;
 
@@ -56,6 +57,11 @@ class StrapiIDSchema extends MixedSchemaType {
 
 yup.strapiID = () => new StrapiIDSchema();
 
+const handleYupError = error => {
+  throw new YupValidationError(error);
+};
+
 module.exports = {
   yup,
+  handleYupError,
 };

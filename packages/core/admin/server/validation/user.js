@@ -1,13 +1,8 @@
 'use strict';
 
 const { isUndefined } = require('lodash/fp');
-const { yup } = require('@strapi/utils');
-const { YupValidationError } = require('@strapi/utils').errors;
+const { yup, handleYupError } = require('@strapi/utils');
 const validators = require('./common-validators');
-
-const handleYupError = error => {
-  throw new YupValidationError(error);
-};
 
 const userCreationSchema = yup
   .object()

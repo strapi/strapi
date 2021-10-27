@@ -3,6 +3,7 @@
 const { extendType, nonNull } = require('nexus');
 const { omit, isNil } = require('lodash/fp');
 const { getNonWritableAttributes } = require('@strapi/utils').contentTypes;
+const { NotFoundError } = require('@strapi/utils').errors;
 
 const sanitizeInput = (contentType, data) => omit(getNonWritableAttributes(contentType), data);
 
@@ -81,7 +82,7 @@ module.exports = ({ strapi }) => {
         const entity = await strapi.entityService.findMany(uid, { params });
 
         if (!entity) {
-          throw new Error('Entity not found');
+          throw new NotFoundError('Entity not found');
         }
 
         const value = await deleteResolver(parent, { id: entity.id, params });

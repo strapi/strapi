@@ -1,5 +1,7 @@
 'use strict';
 
+const { ApplicationError } = require('@strapi/utils').errors;
+
 module.exports = ({ strapi }) => {
   const { service: getGraphQLService } = strapi.plugin('graphql');
 
@@ -13,7 +15,7 @@ module.exports = ({ strapi }) => {
       const attribute = contentType.attributes[attributeName];
 
       if (!attribute) {
-        throw new Error(
+        throw new ApplicationError(
           `Failed to build an association resolver for ${contentTypeUID}::${attributeName}`
         );
       }

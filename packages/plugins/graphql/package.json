@@ -17,6 +17,7 @@
     "@graphql-tools/utils": "^8.0.2",
     "@strapi/utils": "3.6.8",
     "apollo-server-core": "3.1.2",
+    "apollo-server-errors": "3.2.0",
     "apollo-server-koa": "3.1.2",
     "glob": "^7.1.7",
     "graphql": "15.5.1",

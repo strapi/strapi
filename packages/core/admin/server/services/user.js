@@ -108,7 +108,7 @@ const resetPasswordByEmail = async (email, password) => {
   try {
     await passwordValidator.validate(password);
   } catch (error) {
-    throw new Error(
+    throw new ValidationError(
       'Invalid password. Expected a minimum of 8 characters with at least one number and one uppercase letter'
     );
   }

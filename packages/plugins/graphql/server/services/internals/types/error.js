@@ -2,6 +2,7 @@
 
 const { objectType } = require('nexus');
 const { get } = require('lodash/fp');
+const { ValidationError } = require('@strapi/utils').errors;
 
 /**
  * Build an Error object type
@@ -20,7 +21,7 @@ module.exports = ({ strapi }) => {
 
           const isValidPlaceholderCode = Object.values(ERROR_CODES).includes(code);
           if (!isValidPlaceholderCode) {
-            throw new TypeError(`"${code}" is not a valid code value`);
+            throw new ValidationError(`"${code}" is not a valid code value`);
           }
 
           return code;

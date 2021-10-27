@@ -1,16 +1,12 @@
 'use strict';
 
 const _ = require('lodash');
-const { yup } = require('@strapi/utils');
-const { PaginationError, ValidationError, YupValidationError } = require('@strapi/utils').errors;
+const { yup, handleYupError } = require('@strapi/utils');
+const { PaginationError, ValidationError } = require('@strapi/utils').errors;
 
 const createModelConfigurationSchema = require('./model-configuration');
 
 const TYPES = ['singleType', 'collectionType'];
-
-const handleYupError = error => {
-  throw new YupValidationError(error);
-};
 
 /**
  * Validates type kind

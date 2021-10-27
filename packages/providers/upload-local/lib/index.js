@@ -7,13 +7,13 @@
 // Public node modules.
 const fs = require('fs');
 const path = require('path');
-const { FileTooLargeError } = require('@strapi/plugin-upload').errors;
+const { PayloadTooLargeError } = require('@strapi/utils').errors;
 
 module.exports = {
   init({ sizeLimit = 1000000 } = {}) {
     const verifySize = file => {
       if (file.size > sizeLimit) {
-        throw new FileTooLargeError();
+        throw new PayloadTooLargeError();
       }
     };
 

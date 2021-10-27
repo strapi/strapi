@@ -1,5 +1,6 @@
 'use strict';
 
+const { ApplicationError } = require('@strapi/utils').errors;
 const createContext = require('../../../../../../test/helpers/create-context');
 const userController = require('../user');
 
@@ -26,11 +27,12 @@ describe('User Controller', () => {
         },
       };
 
-      expect.assertions(2);
+      expect.assertions(3);
 
       try {
         await userController.create(ctx);
       } catch (e) {
+        expect(e instanceof ApplicationError).toBe(true);
         expect(e.message).toEqual('Email already taken');
       }
 
@@ -220,11 +222,12 @@ describe('User Controller', () => {
 
       const ctx = createContext({ params: { id: user.id }, body });
 
-      expect.assertions(1);
+      expect.assertions(2);
 
       try {
         await userController.update(ctx);
       } catch (e) {
+        expect(e instanceof ApplicationError).toBe(true);
         expect(e.message).toEqual(
           'firstname must be a `string` type, but the final value was: `21`.'
         );

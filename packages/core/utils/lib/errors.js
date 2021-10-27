@@ -38,10 +38,35 @@ class PaginationError extends ApplicationError {
   }
 }
 
-class QueryError extends ApplicationError {
+class NotFoundError extends ApplicationError {
   constructor(message, details) {
     super(message, details);
-    this.name = 'QueryError';
+    this.name = 'NotFoundError';
+    this.message = message || 'Entity not found';
+  }
+}
+
+class ForbiddenError extends ApplicationError {
+  constructor(message, details) {
+    super(message, details);
+    this.name = 'ForbiddenError';
+    this.message = message || 'Forbidden action';
+  }
+}
+
+class PayloadTooLargeError extends ApplicationError {
+  constructor(message, details) {
+    super(message, details);
+    this.name = 'PayloadTooLargeError';
+    this.message = message || 'Entity too large';
+  }
+}
+
+class UnauthorizedError extends ApplicationError {
+  constructor(message, details) {
+    super(message, details);
+    this.name = 'UnauthorizedError';
+    this.message = message || 'Unauthorized';
   }
 }
 
@@ -51,5 +76,8 @@ module.exports = {
   ValidationError,
   YupValidationError,
   PaginationError,
-  QueryError,
+  NotFoundError,
+  ForbiddenError,
+  PayloadTooLargeError,
+  UnauthorizedError,
 };

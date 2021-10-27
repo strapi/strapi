@@ -1,6 +1,5 @@
 'use strict';
 
-const { isNil } = require('lodash/fp');
 const { validateCheckPermissionsInput } = require('../validation/permission');
 const { getService } = require('../utils');
 const { formatConditions } = require('./formatters');
@@ -33,13 +32,6 @@ module.exports = {
     const { role: roleId } = ctx.query;
 
     const { sectionsBuilder, conditionProvider } = getService('permission');
-
-    if (!isNil(roleId)) {
-      const role = await getService('role').findOne({ id: roleId });
-      if (!role) {
-        return ctx.notFound('role.notFound');
-      }
-    }
 
     const actions = await getService('action').getAllowedActionsForRole(roleId);
     const conditions = conditionProvider.values();

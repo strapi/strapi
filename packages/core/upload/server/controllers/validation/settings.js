@@ -1,16 +1,11 @@
 'use strict';
 
-const { yup } = require('@strapi/utils');
-const { YupValidationError } = require('@strapi/utils').errors;
+const { yup, handleYupError } = require('@strapi/utils');
 
 const settingsSchema = yup.object({
   sizeOptimization: yup.boolean().required(),
   responsiveDimensions: yup.boolean().required(),
 });
-
-const handleYupError = error => {
-  throw new YupValidationError(error);
-};
 
 const validateSettings = data => {
   return settingsSchema

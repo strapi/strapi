@@ -1,12 +1,10 @@
 'use strict';
 
 const { HttpError, ApplicationError } = require('@strapi/utils').errors;
-const { DatabaseError } = require('@strapi/database').errors;
 const {
   formatApplicationError,
   formatHttpError,
   formatInternalError,
-  formatDatabaseError,
 } = require('../services/errors');
 
 module.exports = (/* _, { strapi } */) => {
@@ -27,14 +25,6 @@ module.exports = (/* _, { strapi } */) => {
 
       if (error instanceof HttpError) {
         const { status, body } = formatHttpError(error);
-        ctx.status = status;
-        ctx.body = body;
-        return;
-      }
-
-      // TODO: to handle directly in the controllers
-      if (error instanceof DatabaseError) {
-        const { status, body } = formatDatabaseError(error);
         ctx.status = status;
         ctx.body = body;
         return;

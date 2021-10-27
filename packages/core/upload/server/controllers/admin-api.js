@@ -2,15 +2,12 @@
 
 const _ = require('lodash');
 const { contentTypes: contentTypesUtils } = require('@strapi/utils');
-const { ApplicationError } = require('@strapi/utils').errors;
+const { ApplicationError, NotFoundError, ForbiddenError } = require('@strapi/utils').errors;
 const { getService } = require('../utils');
 const validateSettings = require('./validation/settings');
 const validateUploadBody = require('./validation/upload');
 
 const { CREATED_BY_ATTRIBUTE } = contentTypesUtils.constants;
-
-class NotFoundError extends Error {}
-class ForbiddenError extends Error {}
 
 const ACTIONS = {
   read: 'plugin::upload.read',
@@ -54,42 +51,30 @@ module.exports = {
       params: { id },
     } = ctx;
 
-    try {
-      const { pm, file } = await findEntityAndCheckPermissions(
-        userAbility,
-        ACTIONS.read,
-        fileModel,
-        id
-      );
+    const { pm, file } = await findEntityAndCheckPermissions(
+      userAbility,
+      ACTIONS.read,
+      fileModel,
+      id
+    );
 
-      ctx.body = pm.sanitize(file, { withPrivate: false });
-    } catch (e) {
-      if (e instanceof NotFoundError) return ctx.notFound();
-      if (e instanceof ForbiddenError) return ctx.forbidden();
-      throw e;
-    }
+    ctx.body = pm.sanitize(file, { withPrivate: false });
   },
 
   async destroy(ctx) {
     const { id } = ctx.params;
     const { userAbility } = ctx.state;
 
-    try {
-      const { pm, file } = await findEntityAndCheckPermissions(
-        userAbility,
-        ACTIONS.update,
-        fileModel,
-        id
-      );
+    const { pm, file } = await findEntityAndCheckPermissions(
+      userAbility,
+      ACTIONS.update,
+      fileModel,
+      id
+    );
 
-      await getService('upload').remove(file);
+    await getService('upload').remove(file);
 
-      ctx.body = pm.sanitize(file, { action: ACTIONS.read, withPrivate: false });
-    } catch (e) {
-      if (e instanceof NotFoundError) return ctx.notFound();
-      if (e instanceof ForbiddenError) return ctx.forbidden();
-      throw e;
-    }
+    ctx.body = pm.sanitize(file, { action: ACTIONS.read, withPrivate: false });
   },
 
   async updateSettings(ctx) {
@@ -131,23 +116,12 @@ module.exports = {
     } = ctx;
 
     const uploadService = getService('upload');
-    try {
-      const { pm } = await findEntityAndCheckPermissions(
-        userAbility,
-        ACTIONS.update,
-        fileModel,
-        id
-      );
+    const { pm } = await findEntityAndCheckPermissions(userAbility, ACTIONS.update, fileModel, id);
 
-      const data = await validateUploadBody(body);
-      const file = await uploadService.updateFileInfo(id, data.fileInfo, { user });
+    const data = await validateUploadBody(body);
+    const file = await uploadService.updateFileInfo(id, data.fileInfo, { user });
 
-      ctx.body = pm.sanitize(file, { action: ACTIONS.read, withPrivate: false });
-    } catch (e) {
-      if (e instanceof NotFoundError) return ctx.notFound();
-      if (e instanceof ForbiddenError) return ctx.forbidden();
-      throw e;
-    }
+    ctx.body = pm.sanitize(file, { action: ACTIONS.read, withPrivate: false });
   },
 
   async replaceFile(ctx) {
@@ -157,22 +131,8 @@ module.exports = {
       request: { body, files: { files } = {} },
     } = ctx;
 
-    let pm;
-
     const uploadService = getService('upload');
-    try {
-      const entityAndPm = await findEntityAndCheckPermissions(
-        userAbility,
-        ACTIONS.update,
-        fileModel,
-        id
-      );
-      pm = entityAndPm.pm;
-    } catch (e) {
-      if (e instanceof NotFoundError) return ctx.notFound();
-      if (e instanceof ForbiddenError) return ctx.forbidden();
-      throw e;
-    }
+    const { pm } = await findEntityAndCheckPermissions(userAbility, ACTIONS.update, fileModel, id);
 
     if (Array.isArray(files)) {
       throw new ApplicationError('Cannot replace a file with multiple ones');

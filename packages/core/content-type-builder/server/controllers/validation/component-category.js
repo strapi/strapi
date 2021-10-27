@@ -1,13 +1,8 @@
 'use strict';
 
-const yup = require('yup');
-const { YupValidationError } = require('@strapi/utils').errors;
+const { yup, handleYupError } = require('@strapi/utils');
 
 const { isValidCategoryName } = require('./common');
-
-const handleYupError = error => {
-  throw new YupValidationError(error);
-};
 
 module.exports = data => {
   return componentCategorySchema

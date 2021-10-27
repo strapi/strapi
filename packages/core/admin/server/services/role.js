@@ -168,13 +168,13 @@ const checkRolesIdForDeletion = async (ids = []) => {
   const superAdminRole = await getSuperAdmin();
 
   if (superAdminRole && stringIncludes(ids, superAdminRole.id)) {
-    throw new Error('You cannot delete the super admin role');
+    throw new ApplicationError('You cannot delete the super admin role');
   }
 
   for (let roleId of ids) {
     const usersCount = await getUsersCount(roleId);
     if (usersCount !== 0) {
-      throw new Error('Some roles are still assigned to some users');
+      throw new ApplicationError('Some roles are still assigned to some users');
     }
   }
 };

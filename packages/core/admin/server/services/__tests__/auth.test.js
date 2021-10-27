@@ -1,6 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
+const { ApplicationError } = require('@strapi/utils').errors;
 
 const {
   validatePassword,
@@ -258,7 +259,7 @@ describe('Auth', () => {
       try {
         await resetPassword({ resetPasswordToken, password: 'Test1234' });
       } catch (e) {
-        expect(e.message).toEqual('An application error occured');
+        expect(e instanceof ApplicationError).toBe(true);
       }
 
       expect(findOne).toHaveBeenCalledWith({ where: { resetPasswordToken, isActive: true } });
@@ -279,7 +280,7 @@ describe('Auth', () => {
       try {
         await resetPassword({ resetPasswordToken, password: 'Test1234' });
       } catch (e) {
-        expect(e.message).toEqual('An application error occured');
+        expect(e instanceof ApplicationError).toBe(true);
       }
     });
 

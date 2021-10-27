@@ -1,5 +1,6 @@
 'use strict';
 
+const { ApplicationError } = require('@strapi/utils').errors;
 const createContext = require('../../../../../../test/helpers/create-context');
 const apiTokenController = require('../api-token');
 
@@ -25,11 +26,12 @@ describe('API Token Controller', () => {
         },
       };
 
-      expect.assertions(2);
+      expect.assertions(3);
 
       try {
         await apiTokenController.create(ctx);
       } catch (e) {
+        expect(e instanceof ApplicationError).toBe(true);
         expect(e.message).toEqual('Name already taken');
       }
 
@@ -228,11 +230,12 @@ describe('API Token Controller', () => {
         },
       };
 
-      expect.assertions(2);
+      expect.assertions(3);
 
       try {
         await apiTokenController.update(ctx);
       } catch (e) {
+        expect(e instanceof ApplicationError).toBe(true);
         expect(e.message).toEqual('Name already taken');
       }
 

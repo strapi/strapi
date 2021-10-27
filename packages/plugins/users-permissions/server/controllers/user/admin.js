@@ -2,7 +2,12 @@
 
 const _ = require('lodash');
 const { contentTypes: contentTypesUtils } = require('@strapi/utils');
-const { ApplicationError, ValidationError } = require('@strapi/utils').errors;
+const {
+  ApplicationError,
+  ValidationError,
+  NotFoundError,
+  ForbiddenError,
+} = require('@strapi/utils').errors;
 const { getService } = require('../../utils');
 const { validateCreateUserBody, validateUpdateUserBody } = require('../validation/user');
 
@@ -15,9 +20,6 @@ const ACTIONS = {
   edit: 'plugin::content-manager.explorer.update',
   delete: 'plugin::content-manager.explorer.delete',
 };
-
-class NotFoundError extends Error {}
-class ForbiddenError extends Error {}
 
 const findEntityAndCheckPermissions = async (ability, action, model, id) => {
   const entity = await strapi.query('plugin::users-permissions.user').findOne({ where: { id } });
@@ -136,20 +138,14 @@ module.exports = {
     let pm;
     let user;
 
-    try {
-      const { pm: permissionManager, entity } = await findEntityAndCheckPermissions(
-        userAbility,
-        ACTIONS.edit,
-        userModel,
-        id
-      );
-      pm = permissionManager;
-      user = entity;
-    } catch (e) {
-      if (e instanceof NotFoundError) return ctx.notFound();
-      if (e instanceof ForbiddenError) return ctx.forbidden();
-      throw e;
-    }
+    const { pm: permissionManager, entity } = await findEntityAndCheckPermissions(
+      userAbility,
+      ACTIONS.edit,
+      userModel,
+      id
+    );
+    pm = permissionManager;
+    user = entity;
 
     await validateUpdateUserBody(ctx.request.body);
 

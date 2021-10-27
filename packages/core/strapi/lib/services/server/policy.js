@@ -2,7 +2,7 @@
 
 const { propOr } = require('lodash/fp');
 const policy = require('@strapi/utils/lib/policy');
-const { ApplicationError } = require('@strapi/utils').errors;
+const { ForbiddenError } = require('@strapi/utils').errors;
 
 const getPoliciesConfig = propOr([], 'config.policies');
 
@@ -21,8 +21,7 @@ const resolvePolicies = route => {
       const result = await resolvedPolicy(context, { strapi });
 
       if (![true, undefined].includes(result)) {
-        // TODO: make error clearer
-        throw new ApplicationError('Policies failed.');
+        throw new ForbiddenError('Policies failed.');
       }
     }
 

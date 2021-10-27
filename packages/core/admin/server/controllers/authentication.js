@@ -110,7 +110,7 @@ module.exports = {
     const superAdminRole = await getService('role').getSuperAdmin();
 
     if (!superAdminRole) {
-      throw new Error(
+      throw new ApplicationError(
         "Cannot register the first admin because the super admin role doesn't exist."
       );
     }

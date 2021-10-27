@@ -1,12 +1,7 @@
 'use strict';
 
-const { yup } = require('@strapi/utils');
-const { YupValidationError } = require('@strapi/utils').errors;
+const { yup, handleYupError } = require('@strapi/utils');
 const validators = require('../common-validators');
-
-const handleYupError = error => {
-  throw new YupValidationError(error);
-};
 
 const registrationSchema = yup
   .object()

@@ -1,5 +1,6 @@
 'use strict';
 
+const { ApplicationError } = require('@strapi/utils').errors;
 const {
   isLocalizedContentType,
   getValidLocale,
@@ -190,11 +191,12 @@ describe('content-types service', () => {
       try {
         await getValidLocale('en');
       } catch (e) {
+        expect(e instanceof ApplicationError).toBe(true);
         expect(e.message).toBe('Locale not found');
       }
 
       expect(findByCode).toHaveBeenCalledWith('en');
-      expect.assertions(2);
+      expect.assertions(3);
     });
   });
 
@@ -215,6 +217,7 @@ describe('content-types service', () => {
       try {
         await getAndValidateRelatedEntity(relatedEntityId, model, locale);
       } catch (e) {
+        expect(e instanceof ApplicationError).toBe(true);
         expect(e.message).toBe("The related entity doesn't exist");
       }
 
@@ -223,7 +226,7 @@ describe('content-types service', () => {
           ? { populate: ['localizations'] }
           : { where: { id: relatedEntityId }, populate: ['localizations'] }
       );
-      expect.assertions(2);
+      expect.assertions(3);
     });
 
     test('Throw if locale already exists (1/2)', async () => {
@@ -247,6 +250,7 @@ describe('content-types service', () => {
       try {
         await getAndValidateRelatedEntity(relatedEntityId, model, locale);
       } catch (e) {
+        expect(e instanceof ApplicationError).toBe(true);
         expect(e.message).toBe('The entity already exists in this locale');
       }
 
@@ -255,7 +259,7 @@ describe('content-types service', () => {
           ? { populate: ['localizations'] }
           : { where: { id: relatedEntityId }, populate: ['localizations'] }
       );
-      expect.assertions(2);
+      expect.assertions(3);
     });
 
     test('Throw if locale already exists (2/2)', async () => {
@@ -284,6 +288,7 @@ describe('content-types service', () => {
       try {
         await getAndValidateRelatedEntity(relatedEntityId, model, locale);
       } catch (e) {
+        expect(e instanceof ApplicationError).toBe(true);
         expect(e.message).toBe('The entity already exists in this locale');
       }
 
@@ -292,7 +297,7 @@ describe('content-types service', () => {
           ? { populate: ['localizations'] }
           : { where: { id: relatedEntityId }, populate: ['localizations'] }
       );
-      expect.assertions(2);
+      expect.assertions(3);
     });
 
     test('get related entity', async () => {

@@ -1,14 +1,9 @@
 'use strict';
 
-const { yup } = require('@strapi/utils');
-const { YupValidationError } = require('@strapi/utils').errors;
+const { yup, handleYupError } = require('@strapi/utils');
 // eslint-disable-next-line node/no-extraneous-require
 const { features } = require('@strapi/strapi/lib/utils/ee');
 const { schemas } = require('../../../server/validation/user');
-
-const handleYupError = error => {
-  throw new YupValidationError(error);
-};
 
 const ssoUserCreationInputExtension = yup
   .object()

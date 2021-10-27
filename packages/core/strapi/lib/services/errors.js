@@ -2,19 +2,41 @@
 
 const createError = require('http-errors');
 const {
-  InvalidTimeError,
-  InvalidDateError,
-  InvalidDateTimeError,
-} = require('@strapi/database').errors;
-const { ValidationError } = require('@strapi/utils').errors;
+  NotFoundError,
+  UnauthorizedError,
+  ForbiddenError,
+  PayloadTooLargeError,
+} = require('@strapi/utils').errors;
+
+const mapErrorsAndStatus = [
+  {
+    classError: UnauthorizedError,
+    status: 401,
+  },
+  {
+    classError: ForbiddenError,
+    status: 403,
+  },
+  {
+    classError: NotFoundError,
+    status: 404,
+  },
+  {
+    classError: PayloadTooLargeError,
+    status: 413,
+  },
+];
 
 const formatApplicationError = error => {
+  const errorAndStatus = mapErrorsAndStatus.find(pair => error instanceof pair.classError);
+  const status = errorAndStatus ? errorAndStatus.status : 400;
+
   return {
-    status: 400,
+    status,
     body: {
       data: null,
       error: {
-        status: 400,
+        status,
         name: error.name,
         message: error.message,
         details: error.details,
@@ -43,21 +65,8 @@ const formatInternalError = () => {
   return formatHttpError(error);
 };
 
-// TODO: To handle directly in the controllers
-const passingDatabaseErrors = [InvalidTimeError, InvalidDateTimeError, InvalidDateError];
-
-const formatDatabaseError = error => {
-  if (passingDatabaseErrors.some(passingError => error instanceof passingError)) {
-    const validationError = new ValidationError(error.message);
-    return formatApplicationError(validationError);
-  }
-
-  return formatInternalError();
-};
-
 module.exports = {
   formatApplicationError,
   formatHttpError,
   formatInternalError,
-  formatDatabaseError,
 };

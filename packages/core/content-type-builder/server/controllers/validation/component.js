@@ -1,8 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const yup = require('yup');
-const { YupValidationError } = require('@strapi/utils').errors;
+const { yup, handleYupError } = require('@strapi/utils');
 
 const { modelTypes, DEFAULT_TYPES } = require('../../services/constants');
 const { isValidCategoryName, isValidIcon } = require('./common');
@@ -11,10 +10,6 @@ const { removeEmptyDefaults } = require('./data-transform');
 
 const VALID_RELATIONS = ['oneToOne', 'oneToMany'];
 const VALID_TYPES = [...DEFAULT_TYPES, 'component'];
-
-const handleYupError = error => {
-  throw new YupValidationError(error);
-};
 
 const componentSchema = createSchema(VALID_TYPES, VALID_RELATIONS, {
   modelType: modelTypes.COMPONENT,

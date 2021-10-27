@@ -17,8 +17,7 @@ const {
   sanitizeEntity,
   webhook: webhookUtils,
 } = require('@strapi/utils');
-
-const { FileTooLargeError, FileNotFoundError } = require('../../errors');
+const { PayloadTooLargeError, NotFoundError } = require('@strapi/utils').errors;
 
 const { MEDIA_UPDATE, MEDIA_CREATE, MEDIA_DELETE } = webhookUtils.webhookEvents;
 
@@ -92,7 +91,7 @@ module.exports = ({ strapi }) => ({
       readBuffer = await util.promisify(fs.readFile)(file.path);
     } catch (e) {
       if (e.code === 'ERR_FS_FILE_TOO_LARGE') {
-        throw new FileTooLargeError(`The file \`${file.name}\` is bigger than the limit size`);
+        throw new PayloadTooLargeError(`The file \`${file.name}\` is bigger than the limit size`);
       }
       throw e;
     }
@@ -178,7 +177,7 @@ module.exports = ({ strapi }) => ({
     const dbFile = await this.findOne(id);
 
     if (!dbFile) {
-      throw new FileNotFoundError();
+      throw new NotFoundError();
     }
 
     const newInfos = {
@@ -200,7 +199,7 @@ module.exports = ({ strapi }) => ({
     const dbFile = await this.findOne(id);
 
     if (!dbFile) {
-      throw new FileNotFoundError();
+      throw new NotFoundError();
     }
 
     const { fileInfo } = data;

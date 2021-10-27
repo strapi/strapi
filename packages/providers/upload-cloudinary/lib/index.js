@@ -7,7 +7,7 @@
 // Public node modules.
 const cloudinary = require('cloudinary').v2;
 const intoStream = require('into-stream');
-const { FileTooLargeError } = require('@strapi/plugin-upload').errors;
+const { PayloadTooLargeError } = require('@strapi/utils').errors;
 
 module.exports = {
   init(config) {
@@ -30,7 +30,7 @@ module.exports = {
             (err, image) => {
               if (err) {
                 if (err.message.includes('File size too large')) {
-                  throw new FileTooLargeError();
+                  throw new PayloadTooLargeError();
                 }
                 throw new Error(`Error uploading to cloudinary: ${err.message}`);
               }

@@ -1,11 +1,6 @@
 'use strict';
 
-const { yup } = require('@strapi/utils');
-const { YupValidationError } = require('@strapi/utils').errors;
-
-const handleYupError = error => {
-  throw new YupValidationError(error);
-};
+const { yup, handleYupError } = require('@strapi/utils');
 
 const providerOptionsUpdateSchema = yup.object().shape({
   autoRegister: yup.boolean().required(),
