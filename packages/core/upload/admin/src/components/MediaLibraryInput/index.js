@@ -7,12 +7,24 @@ import { EmptyStateAsset } from './EmptyStateAsset';
 import { AssetDialog } from './AssetDialog';
 import { CarouselAsset } from './Carousel/CarouselAsset';
 import { CarouselAssetActions } from './Carousel/CarouselAssetActions';
+import { AssetDefinition } from '../../constants';
 
-export const MediaLibraryInput = ({ intlLabel, description, disabled, error, multiple }) => {
+export const MediaLibraryInput = ({
+  intlLabel,
+  description,
+  disabled,
+  error,
+  multiple,
+  name,
+  onChange,
+  value,
+}) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [selectedAssets, setSelectedAssets] = useState([]);
   const [isAssetDialogOpen, setIsAssetDialogOpen] = useState(false);
   const { formatMessage } = useIntl();
+
+  const selectedAssets = Array.isArray(value) ? value : [value];
+  const currentAsset = selectedAssets[selectedIndex];
 
   const handleNext = () => {
     setSelectedIndex(current => (current < selectedAssets.length - 1 ? current + 1 : 0));
@@ -23,19 +35,30 @@ export const MediaLibraryInput = ({ intlLabel, description, disabled, error, mul
   };
 
   const handleValidation = nextSelectedAssets => {
-    setSelectedAssets(nextSelectedAssets);
+    onChange({
+      target: { name, value: multiple ? nextSelectedAssets : nextSelectedAssets[0] },
+    });
     setIsAssetDialogOpen(false);
   };
 
   const handleDeleteAsset = asset => {
-    setSelectedAssets(prevAssets => prevAssets.filter(prevAsset => prevAsset.id !== asset.id));
+    const nextSelectedAssets = selectedAssets.filter(prevAsset => prevAsset.id !== asset.id);
+
+    onChange({
+      target: { name, value: multiple ? nextSelectedAssets : nextSelectedAssets[0] },
+    });
+
     setSelectedIndex(0);
   };
 
   const handleAssetEdit = asset => {
-    setSelectedAssets(prevAssets =>
-      prevAssets.map(prevAsset => (prevAsset.id === asset.id ? asset : prevAsset))
+    const nextSelectedAssets = selectedAssets.map(prevAsset =>
+      prevAsset.id === asset.id ? asset : prevAsset
     );
+
+    onChange({
+      target: { name, value: multiple ? nextSelectedAssets : nextSelectedAssets[0] },
+    });
   };
 
   let label = intlLabel.id ? formatMessage(intlLabel) : '';
@@ -44,7 +67,6 @@ export const MediaLibraryInput = ({ intlLabel, description, disabled, error, mul
     label = `${label} (${selectedIndex + 1} / ${selectedAssets.length})`;
   }
 
-  const currentAsset = selectedAssets[selectedIndex];
   const errorMessage = error ? formatMessage({ id: error, defaultMessage: error }) : '';
   const hint = description
     ? formatMessage(
@@ -128,6 +150,7 @@ MediaLibraryInput.defaultProps = {
   error: undefined,
   intlLabel: undefined,
   multiple: false,
+  value: [],
 };
 
 MediaLibraryInput.propTypes = {
@@ -140,4 +163,7 @@ MediaLibraryInput.propTypes = {
   error: PropTypes.shape({ id: PropTypes.string, defaultMessage: PropTypes.string }),
   intlLabel: PropTypes.shape({ id: PropTypes.string, defaultMessage: PropTypes.string }),
   multiple: PropTypes.bool,
+  onChange: PropTypes.func.isRequired,
+  name: PropTypes.string.isRequired,
+  value: PropTypes.oneOfType(PropTypes.arrayOf(AssetDefinition), AssetDefinition),
 };
