@@ -30,7 +30,9 @@ module.exports = async function mergeTemplate(scope, rootPath) {
   let templatePath;
   let templateParentPath;
   let templatePackageInfo = {};
-  const isLocalTemplate = ['./', '../'].some(filePrefix => scope.template.startsWith(filePrefix));
+  const isLocalTemplate = ['./', '../', '/'].some(filePrefix =>
+    scope.template.startsWith(filePrefix)
+  );
 
   if (isLocalTemplate) {
     // Template is a local directory

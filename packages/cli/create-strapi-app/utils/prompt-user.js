@@ -61,7 +61,7 @@ async function getTemplateQuestion() {
  * @param {string|null} template - The template the project should use
  * @returns Array of prompt question objects
  */
-async function getPromptQuestions(projectName, template) {
+async function getPromptQuestions(projectName /*, template*/) {
   return [
     {
       type: 'input',
@@ -85,13 +85,14 @@ async function getPromptQuestions(projectName, template) {
         },
       ],
     },
-    {
-      type: 'confirm',
-      name: 'useTemplate',
-      when: !template,
-      message:
-        'Would you like to use a template? (Templates are Strapi configurations designed for a specific use case)',
-    },
+    // TODO: re-enable once we know where to list the official compatible templates
+    // {
+    //   type: 'confirm',
+    //   name: 'useTemplate',
+    //   when: !template,
+    //   message:
+    //     'Would you like to use a template? (Templates are Strapi configurations designed for a specific use case)',
+    // },
   ];
 }
 

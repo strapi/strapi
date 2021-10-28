@@ -4,6 +4,7 @@ const { resolve, join, basename } = require('path');
 const fse = require('fs-extra');
 const chalk = require('chalk');
 const inquirer = require('inquirer');
+const _ = require('lodash/fp');
 
 // All directories that a template could need
 const TEMPLATE_CONTENT = ['api', 'components', 'config/functions/bootstrap.js', 'data'];
@@ -55,7 +56,8 @@ async function writeTemplateJson(rootPath) {
  */
 async function templateConfigExists(rootPath) {
   const jsonConfig = await fse.pathExists(join(rootPath, 'template.json'));
-  return Boolean(jsonConfig);
+  const configExists = !_.isNil(jsonConfig);
+  return configExists;
 }
 
 module.exports = async function generateTemplate(directory) {
