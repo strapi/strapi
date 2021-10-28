@@ -3,8 +3,11 @@ import PropTypes from 'prop-types';
 import { TextInput } from '@strapi/design-system/TextInput';
 import { ToggleInput } from '@strapi/design-system/ToggleInput';
 import { Select, Option } from '@strapi/design-system/Select';
+import { useIntl } from 'react-intl';
 
 const GenericInput = ({ type, options, onChange, value, name, ...inputProps }) => {
+  const { formatMessage } = useIntl();
+
   switch (type) {
     case 'text': {
       return <TextInput onChange={onChange} value={value} name={name} {...inputProps} />;
@@ -15,10 +18,16 @@ const GenericInput = ({ type, options, onChange, value, name, ...inputProps }) =
           onChange={e => {
             onChange({ target: { name, value: e.target.checked } });
           }}
-          checked={value === null ? null : value || false}
+          checked={value}
           name={name}
-          onLabel="true"
-          offLabel="false"
+          onLabel={formatMessage({
+            id: 'app.components.ToggleCheckbox.on-label',
+            defaultMessage: 'On',
+          })}
+          offLabel={formatMessage({
+            id: 'app.components.ToggleCheckbox.off-label',
+            defaultMessage: 'Off',
+          })}
           {...inputProps}
         />
       );
