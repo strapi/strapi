@@ -21,10 +21,14 @@ import { SelectedStep } from './SelectedStep';
 import { BrowseStep } from './BrowseStep';
 import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
 import { useAssets } from '../../../hooks/useAssets';
+import { AssetDefinition } from '../../../constants';
 
-export const AssetDialog = ({ onClose, onValidate, multiple }) => {
+export const AssetDialog = ({ onClose, onValidate, multiple, initiallySelectedAssets }) => {
   const { formatMessage } = useIntl();
-  const [selectedAssets, { selectOne, selectAll, selectOnly }] = useSelectionState('id', []);
+  const [selectedAssets, { selectOne, selectAll, selectOnly }] = useSelectionState(
+    'id',
+    initiallySelectedAssets
+  );
   const { canRead, canCreate, isLoading: isLoadingPermissions } = useMediaLibraryPermissions();
   const { data, isLoading, error } = useAssets({
     skipWhen: !canRead,
@@ -160,6 +164,7 @@ AssetDialog.defaultProps = {
 };
 
 AssetDialog.propTypes = {
+  initiallySelectedAssets: PropTypes.arrayOf(AssetDefinition).isRequired,
   multiple: PropTypes.bool,
   onClose: PropTypes.func.isRequired,
   onValidate: PropTypes.func.isRequired,

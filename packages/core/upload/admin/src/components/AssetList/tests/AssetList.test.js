@@ -130,7 +130,7 @@ describe('MediaLibrary / AssetList', () => {
     );
 
     expect(container).toMatchInlineSnapshot(`
-      .c32 {
+      .c33 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
@@ -240,6 +240,18 @@ describe('MediaLibrary / AssetList', () => {
         fill: #666687;
       }
 
+      .c26 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
+      }
+
       .c1 {
         background: #ffffff;
         border-radius: 4px;
@@ -260,7 +272,7 @@ describe('MediaLibrary / AssetList', () => {
         border-radius: 4px;
       }
 
-      .c26 {
+      .c27 {
         background: #32324d;
         color: #ffffff;
         padding: 4px;
@@ -367,7 +379,7 @@ describe('MediaLibrary / AssetList', () => {
         color: #32324d;
       }
 
-      .c28 {
+      .c29 {
         font-weight: 400;
         font-size: 0.75rem;
         line-height: 1.33;
@@ -477,13 +489,17 @@ describe('MediaLibrary / AssetList', () => {
         border-bottom: 1px solid #eaeaef;
       }
 
-      .c27 {
+      .c28 {
         position: absolute;
         bottom: 4px;
         right: 4px;
       }
 
       .c16 {
+        text-transform: uppercase;
+      }
+
+      .c30 {
         text-transform: uppercase;
       }
 
@@ -494,15 +510,11 @@ describe('MediaLibrary / AssetList', () => {
         max-height: 10.25rem;
       }
 
-      .c29 {
+      .c32 {
         text-transform: uppercase;
       }
 
-      .c31 {
-        text-transform: uppercase;
-      }
-
-      .c30 svg {
+      .c31 svg {
         font-size: 3rem;
       }
 
@@ -671,22 +683,31 @@ describe('MediaLibrary / AssetList', () => {
                     <div
                       class="c25"
                     >
-                      <video
-                        crossorigin="anonymous"
-                        src="http://localhost:1337/uploads/mov_bbb_2f3907f7aa.mp4#t=1"
+                      <figure
+                        class=""
                       >
-                        <source
-                          type="video/mp4"
-                        />
-                      </video>
+                        <video
+                          crossorigin="anonymous"
+                          src="http://localhost:1337/uploads/mov_bbb_2f3907f7aa.mp4?updated_at=2021-09-14T07:48:30.882Z"
+                        >
+                          <source
+                            type="video/mp4"
+                          />
+                        </video>
+                        <figcaption
+                          class="c26"
+                        >
+                          mov_bbb.mp4
+                        </figcaption>
+                      </figure>
                     </div>
                   </div>
                 </div>
                 <time
-                  class="c26 c27"
+                  class="c27 c28"
                 >
                   <span
-                    class="c28"
+                    class="c29"
                   >
                     ...
                   </span>
@@ -711,7 +732,7 @@ describe('MediaLibrary / AssetList', () => {
                       class="c15"
                     >
                       <span
-                        class="c29"
+                        class="c30"
                       >
                         mp4
                       </span>
@@ -785,7 +806,7 @@ describe('MediaLibrary / AssetList', () => {
                     class="c24"
                   >
                     <span
-                      class="c30"
+                      class="c31"
                     >
                       <svg
                         aria-label="CARTE MARIAGE AVS - Printemps.pdf"
@@ -823,7 +844,7 @@ describe('MediaLibrary / AssetList', () => {
                       class="c15"
                     >
                       <span
-                        class="c31"
+                        class="c32"
                       >
                         pdf
                       </span>
@@ -866,7 +887,7 @@ describe('MediaLibrary / AssetList', () => {
           </div>
         </div>
         <div
-          class="c32"
+          class="c33"
         >
           <p
             aria-live="polite"

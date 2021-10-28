@@ -70,12 +70,12 @@ describe('UploadAssetDialog', () => {
     });
 
     [
-      ['png', 'image/png', 'Image'],
-      ['mp4', 'video/mp4', 'Video'],
-      ['pdf', 'application/pdf', 'Doc'],
-      ['unknown', 'unknown', 'Doc'],
-    ].forEach(([ext, mime, assetType]) => {
-      it(`shows a valid ${mime} file`, () => {
+      ['png', 'image/png', 'Image', 1],
+      ['mp4', 'video/mp4', 'Video', 2],
+      ['pdf', 'application/pdf', 'Doc', 1],
+      ['unknown', 'unknown', 'Doc', 1],
+    ].forEach(([ext, mime, assetType, number]) => {
+      it(`shows ${number} valid ${mime} file`, () => {
         const onCloseSpy = jest.fn();
 
         const file = new File(['Some stuff'], `test.${ext}`, { type: mime });
@@ -98,7 +98,7 @@ describe('UploadAssetDialog', () => {
         expect(
           screen.getByText('Manage the assets before adding them to the Media Library')
         ).toBeInTheDocument();
-        expect(screen.getByText(`test.${ext}`)).toBeInTheDocument();
+        expect(screen.getAllByText(`test.${ext}`).length).toBe(number);
         expect(screen.getByText(ext)).toBeInTheDocument();
         expect(screen.getByText(assetType)).toBeInTheDocument();
       });

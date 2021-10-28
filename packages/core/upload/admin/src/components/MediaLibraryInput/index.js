@@ -5,7 +5,8 @@ import { Carousel, CarouselSlide } from '@strapi/parts/Carousel';
 import getTrad from '../../utils/getTrad';
 import { EmptyStateAsset } from './EmptyStateAsset';
 import { AssetDialog } from './AssetDialog';
-import { CarouselAsset } from './CarouselAsset';
+import { CarouselAsset } from './Carousel/CarouselAsset';
+import { CarouselAssetActions } from './Carousel/CarouselAssetActions';
 
 export const MediaLibraryInput = ({ intlLabel, description, disabled, error, multiple }) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -26,15 +27,31 @@ export const MediaLibraryInput = ({ intlLabel, description, disabled, error, mul
     setIsAssetDialogOpen(false);
   };
 
+  const handleDeleteAsset = asset => {
+    setSelectedAssets(prevAssets => prevAssets.filter(prevAsset => prevAsset.id !== asset.id));
+    setSelectedIndex(0);
+  };
+
+  const handleAssetEdit = asset => {
+    setSelectedAssets(prevAssets =>
+      prevAssets.map(prevAsset => (prevAsset.id === asset.id ? asset : prevAsset))
+    );
+  };
+
+  let label = intlLabel.id ? formatMessage(intlLabel) : '';
+
+  if (multiple && selectedAssets.length > 0) {
+    label = `${label} (${selectedIndex + 1} / ${selectedAssets.length})`;
+  }
+
+  const currentAsset = selectedAssets[selectedIndex];
+  const errorMessage = error ? formatMessage({ id: error, defaultMessage: error }) : '';
   const hint = description
     ? formatMessage(
         { id: description.id, defaultMessage: description.defaultMessage },
         { ...description.values }
       )
     : '';
-
-  const label = intlLabel.id ? formatMessage(intlLabel) : '';
-  const errorMessage = error ? formatMessage({ id: error, defaultMessage: error }) : '';
 
   return (
     <>
@@ -53,6 +70,18 @@ export const MediaLibraryInput = ({ intlLabel, description, disabled, error, mul
         onPrevious={handlePrevious}
         hint={hint}
         error={errorMessage}
+        actions={
+          currentAsset ? (
+            <CarouselAssetActions
+              asset={currentAsset}
+              onDeleteAsset={handleDeleteAsset}
+              onAddAsset={() => setIsAssetDialogOpen(true)}
+              onEditAsset={handleAssetEdit}
+            />
+          ) : (
+            undefined
+          )
+        }
       >
         {selectedAssets.length === 0 ? (
           <CarouselSlide
@@ -80,8 +109,10 @@ export const MediaLibraryInput = ({ intlLabel, description, disabled, error, mul
           ))
         )}
       </Carousel>
+
       {isAssetDialogOpen && (
         <AssetDialog
+          initiallySelectedAssets={selectedAssets}
           onClose={() => setIsAssetDialogOpen(false)}
           onValidate={handleValidation}
           multiple={multiple}

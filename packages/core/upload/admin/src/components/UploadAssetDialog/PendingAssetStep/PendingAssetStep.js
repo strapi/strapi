@@ -11,7 +11,7 @@ import { KeyboardNavigable } from '@strapi/parts/KeyboardNavigable';
 import { AssetCard } from '../../AssetCard/AssetCard';
 import { UploadingAssetCard } from '../../AssetCard/UploadingAssetCard';
 import { getTrad } from '../../../utils';
-import { AssetType, AssetSource } from '../../../constants';
+import { AssetDefinition } from '../../../constants';
 
 const Status = {
   Idle: 'IDLE',
@@ -117,7 +117,7 @@ export const PendingAssetStep = ({
 
                 return (
                   <GridItem col={4} key={assetKey}>
-                    <AssetCard asset={asset} size="S" key={assetKey} />
+                    <AssetCard asset={asset} size="S" key={assetKey} local />
                   </GridItem>
                 );
               })}
@@ -149,15 +149,7 @@ export const PendingAssetStep = ({
 };
 
 PendingAssetStep.propTypes = {
-  assets: PropTypes.arrayOf(
-    PropTypes.shape({
-      source: PropTypes.oneOf(Object.values(AssetSource)),
-      type: PropTypes.oneOf(Object.values(AssetType)),
-      url: PropTypes.string,
-      mime: PropTypes.string,
-      ext: PropTypes.string,
-    })
-  ).isRequired,
+  assets: PropTypes.arrayOf(AssetDefinition).isRequired,
   onClose: PropTypes.func.isRequired,
   onClickAddAsset: PropTypes.func.isRequired,
   onUploadSucceed: PropTypes.func.isRequired,
