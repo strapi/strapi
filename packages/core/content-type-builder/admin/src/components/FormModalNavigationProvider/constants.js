@@ -8,7 +8,6 @@ const INITIAL_STATE_DATA = {
   modalType: null,
   isOpen: false,
   kind: null,
-  settingType: null,
   step: null,
   targetUid: null,
 };

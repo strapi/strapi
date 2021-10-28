@@ -148,7 +148,7 @@ const baseForm = {
             {
               name: 'enum',
               type: 'textarea-enum',
-              size: 8,
+              size: 6,
               intlLabel: {
                 id: getTrad('form.attribute.item.enumeration.rules'),
                 defaultMessage: 'Values (one line per value)',

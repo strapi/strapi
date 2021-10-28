@@ -3,6 +3,7 @@
 const _ = require('lodash/fp');
 
 const types = require('../../types');
+const { createField } = require('../../fields');
 const { createJoin } = require('./join');
 const { toColumnName } = require('./transform');
 
@@ -28,9 +29,64 @@ const OPERATORS = [
   '$notContainsi',
 ];
 
+const CAST_OPERATORS = [
+  '$not',
+  '$in',
+  '$notIn',
+  '$eq',
+  '$ne',
+  '$gt',
+  '$gte',
+  '$lt',
+  '$lte',
+  '$between',
+];
+
 const ARRAY_OPERATORS = ['$in', '$notIn', '$between'];
 
 const isOperator = key => OPERATORS.includes(key);
+
+const castValue = (value, attribute) => {
+  if (!attribute) {
+    return value;
+  }
+
+  if (types.isScalar(attribute.type)) {
+    const field = createField(attribute);
+
+    return value === null ? null : field.toDB(value);
+  }
+
+  return value;
+};
+
+const processAttributeWhere = (attribute, where, operator = '$eq') => {
+  if (_.isArray(where)) {
+    return where.map(sub => processAttributeWhere(attribute, sub, operator));
+  }
+
+  if (!_.isPlainObject(where)) {
+    if (CAST_OPERATORS.includes(operator)) {
+      return castValue(where, attribute);
+    }
+
+    return where;
+  }
+
+  const filters = {};
+
+  for (const key in where) {
+    const value = where[key];
+
+    if (!isOperator(key)) {
+      throw new Error(`Undefined attribute level operator ${key}`);
+    }
+
+    filters[key] = processAttributeWhere(attribute, value, key);
+  }
+
+  return filters;
+};
 
 /**
  * Process where parameter
@@ -39,7 +95,7 @@ const isOperator = key => OPERATORS.includes(key);
  * @param {number} depth
  * @returns {Object}
  */
-const processWhere = (where, ctx, depth = 0) => {
+const processWhere = (where, ctx) => {
   if (!_.isArray(where) && !_.isPlainObject(where)) {
     throw new Error('Where must be an array or an object');
   }
@@ -53,7 +109,7 @@ const processWhere = (where, ctx, depth = 0) => {
       return where;
     }
 
-    return processWhere(where, ctx, depth + 1);
+    return processWhere(where, ctx);
   };
 
   const { db, uid, qb, alias } = ctx;
@@ -64,7 +120,6 @@ const processWhere = (where, ctx, depth = 0) => {
   // for each key in where
   for (const key in where) {
     const value = where[key];
-    const attribute = meta.attributes[key];
 
     // if operator $and $or then loop over them
     if (GROUP_OPERATORS.includes(key)) {
@@ -78,28 +133,17 @@ const processWhere = (where, ctx, depth = 0) => {
     }
 
     if (isOperator(key)) {
-      if (depth == 0) {
-        throw new Error(
-          `Only $and, $or and $not can by used as root level operators. Found ${key}.`
-        );
-      }
-
-      filters[key] = processNested(value, ctx);
-      continue;
+      throw new Error(`Only $and, $or and $not can by used as root level operators. Found ${key}.`);
     }
+
+    const attribute = meta.attributes[key];
 
     if (!attribute) {
-      filters[qb.aliasColumn(key, alias)] = processNested(value, ctx);
-
+      filters[qb.aliasColumn(key, alias)] = processAttributeWhere(null, value);
       continue;
-
-      // throw new Error(`Attribute ${key} not found on model ${uid}`);
     }
 
-    // move to if else to check for scalar / relation / components & throw for other types
-    if (attribute.type === 'relation') {
-      // TODO: pass down some filters (e.g published at)
-
+    if (types.isRelation(attribute.type)) {
       // attribute
       const subAlias = createJoin(ctx, {
         alias: alias || qb.alias,
@@ -127,9 +171,10 @@ const processWhere = (where, ctx, depth = 0) => {
 
     if (types.isScalar(attribute.type)) {
       const columnName = toColumnName(meta, key);
+      const aliasedColumnName = qb.aliasColumn(columnName, alias);
 
-      // TODO: cast to DB type
-      filters[qb.aliasColumn(columnName, alias)] = processNested(value, ctx);
+      filters[aliasedColumnName] = processAttributeWhere(attribute, value);
+
       continue;
     }
 
@@ -139,6 +184,7 @@ const processWhere = (where, ctx, depth = 0) => {
   return filters;
 };
 
+// TODO: add type casting per operator at some point
 const applyOperator = (qb, column, operator, value) => {
   if (Array.isArray(value) && !ARRAY_OPERATORS.includes(operator)) {
     return qb.where(subQB => {
@@ -201,7 +247,6 @@ const applyOperator = (qb, column, operator, value) => {
       break;
     }
     case '$null': {
-      // TODO: make this better
       if (value) {
         qb.whereNull(column);
       }
@@ -211,15 +256,12 @@ const applyOperator = (qb, column, operator, value) => {
       if (value) {
         qb.whereNotNull(column);
       }
-
       break;
     }
     case '$between': {
       qb.whereBetween(column, value);
       break;
     }
-
-    // TODO: add casting logic
     case '$startsWith': {
       qb.where(column, 'like', `${value}%`);
       break;
@@ -253,7 +295,7 @@ const applyOperator = (qb, column, operator, value) => {
     // TODO: relational operators every/some/exists/size ...
 
     default: {
-      throw new Error(`Undefined operator ${operator}`);
+      throw new Error(`Undefined attribute level operator ${operator}`);
     }
   }
 };
@@ -267,7 +309,6 @@ const applyWhereToColumn = (qb, column, columnWhere) => {
     return qb.where(column, columnWhere);
   }
 
-  // TODO: handle casing
   Object.keys(columnWhere).forEach(operator => {
     const value = columnWhere[operator];
 

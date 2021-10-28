@@ -49,7 +49,7 @@ const HeaderContentBox = ({ apiToken }) => {
             })
           : formatMessage({
               id: 'Settings.apiTokens.copy.editMessage',
-              defaultMessage: 'For security matters, you can only see your token once.',
+              defaultMessage: 'For security reasons, you can only see your token once.',
             })
       }
       icon={<Key />}
