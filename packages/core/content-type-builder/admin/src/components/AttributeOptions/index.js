@@ -26,7 +26,7 @@ const AttributeOptions = ({ attributes, forTarget, kind }) => {
 
   return (
     <ModalBody>
-      <Flex>
+      <Flex paddingBottom={4}>
         <H2>{formatMessage({ id: titleId, defaultMessage: 'Select a field' })}</H2>
       </Flex>
       <Divider />
