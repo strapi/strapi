@@ -13,12 +13,15 @@ const Filters = ({ displayedFilters }) => {
   const { trackUsage } = useTracking();
 
   const handleBlur = e => {
+    // TO FIX - select's modals prevent blur to work correctly
+    const notNull = e.currentTarget !== null && e.relatedTarget !== null;
     const ulListBox = document.querySelector('[role="listbox"]');
 
     if (
       !e.currentTarget.contains(e.relatedTarget) &&
       e.relatedTarget !== buttonRef.current &&
-      e.relatedTarget !== ulListBox
+      e.relatedTarget !== ulListBox &&
+      notNull
     ) {
       setIsVisible(false);
     }
