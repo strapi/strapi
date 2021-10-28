@@ -11,7 +11,7 @@ import Email from '@strapi/icons/Email';
 import Enumeration from '@strapi/icons/Enumeration';
 import Json from '@strapi/icons/Json';
 import LongDescription from '@strapi/icons/RichText';
-import Media from '@strapi/icons/Picture';
+import Media from '@strapi/icons/Media';
 import Password from '@strapi/icons/Password';
 import Relation from '@strapi/icons/Relation';
 import SingleType from '@strapi/icons/SingleType';
