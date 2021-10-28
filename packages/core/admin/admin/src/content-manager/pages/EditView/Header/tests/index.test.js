@@ -97,26 +97,26 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         color: #32324d;
       }
 
-      .c15 {
+      .c17 {
         font-weight: 400;
         font-size: 0.875rem;
         line-height: 1.43;
         color: #666687;
       }
 
-      .c16 {
+      .c18 {
         font-size: 1rem;
         line-height: 1.5;
       }
 
-      .c14 {
+      .c16 {
         font-weight: 500;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #32324d;
       }
 
-      .c11 {
+      .c13 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -130,21 +130,21 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         outline: none;
       }
 
-      .c11 svg {
+      .c13 svg {
         height: 12px;
         width: 12px;
       }
 
-      .c11 svg > g,
-      .c11 svg path {
+      .c13 svg > g,
+      .c13 svg path {
         fill: #ffffff;
       }
 
-      .c11[aria-disabled='true'] {
+      .c13[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c11:after {
+      .c13:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -159,11 +159,11 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         border: 2px solid transparent;
       }
 
-      .c11:focus-visible {
+      .c13:focus-visible {
         outline: none;
       }
 
-      .c11:focus-visible:after {
+      .c13:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -174,7 +174,7 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         border: 2px solid #4945ff;
       }
 
-      .c12 {
+      .c14 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -186,7 +186,7 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         background: #4945ff;
       }
 
-      .c12 .sc-lmoMya {
+      .c14 .sc-lmoMya {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -197,44 +197,44 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         align-items: center;
       }
 
-      .c12 .c13 {
+      .c14 .c15 {
         color: #ffffff;
       }
 
-      .c12[aria-disabled='true'] {
+      .c14[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c12[aria-disabled='true'] .c13 {
+      .c14[aria-disabled='true'] .c15 {
         color: #666687;
       }
 
-      .c12[aria-disabled='true'] svg > g,
-      .c12[aria-disabled='true'] svg path {
+      .c14[aria-disabled='true'] svg > g,
+      .c14[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c12[aria-disabled='true']:active {
+      .c14[aria-disabled='true']:active {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c12[aria-disabled='true']:active .c13 {
+      .c14[aria-disabled='true']:active .c15 {
         color: #666687;
       }
 
-      .c12[aria-disabled='true']:active svg > g,
-      .c12[aria-disabled='true']:active svg path {
+      .c14[aria-disabled='true']:active svg > g,
+      .c14[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
-      .c12:hover {
+      .c14:hover {
         border: 1px solid #7b79ff;
         background: #7b79ff;
       }
 
-      .c12:active {
+      .c14:active {
         border: 1px solid #4945ff;
         background: #4945ff;
       }
@@ -323,6 +323,29 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         display: flex;
       }
 
+      .c11 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c12 > * {
+        margin-left: 0;
+        margin-right: 0;
+      }
+
+      .c12 > * + * {
+        margin-left: 8px;
+      }
+
       <div
         style="height: 0px;"
       >
@@ -375,21 +398,25 @@ describe('CONTENT MANAGER | EditView | Header', () => {
                 Create an entry
               </h1>
             </div>
-            <button
-              aria-disabled="true"
+            <div
               class="c11 c12"
-              disabled=""
-              type="submit"
             >
-              <span
+              <button
+                aria-disabled="true"
                 class="c13 c14"
+                disabled=""
+                type="submit"
               >
-                Save
-              </span>
-            </button>
+                <span
+                  class="c15 c16"
+                >
+                  Save
+                </span>
+              </button>
+            </div>
           </div>
           <p
-            class="c15 c16"
+            class="c17 c18"
           >
             API ID  : restaurant
           </p>

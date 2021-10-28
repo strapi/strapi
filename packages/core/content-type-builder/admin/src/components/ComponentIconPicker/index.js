@@ -75,7 +75,7 @@ const ComponentIconPicker = ({ error, isCreating, intlLabel, name, onChange, val
             {formatMessage(intlLabel)}
           </Text>
           {showSearch ? (
-            <div ref={searchWrapperRef}>
+            <div ref={searchWrapperRef} style={{ width: 206 }}>
               <Searchbar
                 name="searchbar"
                 onBlur={() => {
