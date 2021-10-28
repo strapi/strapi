@@ -2,12 +2,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Box } from '@strapi/parts/Box';
+import { VisuallyHidden } from '@strapi/parts/VisuallyHidden';
 
 // According to MDN
 // https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/readyState#value
 const HAVE_FUTURE_DATA = 3;
 
-export const VideoPreview = ({ url, mime, onLoadDuration, uniqueKey, ...props }) => {
+export const VideoPreview = ({ url, mime, onLoadDuration, uniqueKey, alt, ...props }) => {
   const handleTimeUpdate = e => {
     if (e.target.currentTime > 0) {
       const video = e.target;
@@ -31,7 +32,7 @@ export const VideoPreview = ({ url, mime, onLoadDuration, uniqueKey, ...props })
   };
 
   return (
-    <Box {...props} key={uniqueKey}>
+    <Box as="figure" {...props} key={uniqueKey}>
       <video
         muted
         onLoadedData={handleThumbnailVisibility}
@@ -41,6 +42,7 @@ export const VideoPreview = ({ url, mime, onLoadDuration, uniqueKey, ...props })
       >
         <source type={mime} />
       </video>
+      <VisuallyHidden as="figcaption">{alt}</VisuallyHidden>
     </Box>
   );
 };
@@ -52,6 +54,7 @@ VideoPreview.defaultProps = {
 };
 
 VideoPreview.propTypes = {
+  alt: PropTypes.string.isRequired,
   url: PropTypes.string.isRequired,
   // uniqueKey allows to fetch the asset and to handle its caching correctly
   uniqueKey: PropTypes.string,

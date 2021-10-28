@@ -19,7 +19,12 @@ export const CarouselAsset = ({ asset }) => {
   if (asset.mime.includes(AssetType.Video)) {
     return (
       <VideoPreviewWrapper height="100%">
-        <VideoPreview url={createAssetUrl(asset)} mime={asset.mime} uniqueKey={asset.updatedAt} />
+        <VideoPreview
+          url={createAssetUrl(asset)}
+          mime={asset.mime}
+          uniqueKey={asset.updatedAt}
+          alt={asset.alternativeText || asset.name}
+        />
       </VideoPreviewWrapper>
     );
   }
@@ -36,7 +41,7 @@ export const CarouselAsset = ({ asset }) => {
     );
   }
 
-  return <Icon as={IconDocumentation} />;
+  return <Icon as={IconDocumentation} aria-label={asset.alternativeText || asset.name} />;
 };
 
 CarouselAsset.propTypes = {
