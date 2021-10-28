@@ -19,6 +19,12 @@ const Filters = ({ displayedFilters }) => {
     setIsVisible(prev => !prev);
   };
 
+  const handleBlur = e => {
+    if (!e.currentTarget.contains(e.relatedTarget)) {
+      setIsVisible(false);
+    }
+  };
+
   return (
     <>
       <Box padding={1}>
@@ -35,6 +41,7 @@ const Filters = ({ displayedFilters }) => {
           <FilterPopoverURLQuery
             displayedFilters={displayedFilters}
             isVisible={isVisible}
+            onBlur={handleBlur}
             onToggle={handleToggle}
             source={buttonRef}
           />
