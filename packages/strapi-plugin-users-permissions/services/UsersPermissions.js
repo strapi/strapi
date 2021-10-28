@@ -259,7 +259,7 @@ module.exports = {
     const dbPermissions = await strapi
       .query('permission', 'users-permissions')
       .find({ _limit: -1 });
-    let permissionsFoundInDB = dbPermissions.map(
+    let permissionsFoundInDB = dbPermissions.filter(p => !!p.role).map(
       p => `${p.type}.${p.controller}.${p.action}.${p.role[primaryKey]}`
     );
     permissionsFoundInDB = _.uniq(permissionsFoundInDB);
