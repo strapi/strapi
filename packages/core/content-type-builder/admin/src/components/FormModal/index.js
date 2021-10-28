@@ -74,12 +74,10 @@ import {
 
 const FormModal = () => {
   const {
-    onChangeSettingTypeTab,
     onCloseModal,
     onNavigateToChooseAttributeModal,
     onNavigateToAddCompoToDZModal,
     onNavigateToCreateComponentStep2,
-    settingType,
     actionType,
     attributeName,
     attributeType,
@@ -906,7 +904,16 @@ const FormModal = () => {
         {!isPickingAttribute && (
           <form onSubmit={handleSubmit}>
             <ModalBody>
-              <TabGroup label="todo" id="tabs" variant="simple">
+              <TabGroup
+                label="todo"
+                id="tabs"
+                variant="simple"
+                onTabChange={selectedTab => {
+                  if (selectedTab === 1) {
+                    sendAdvancedTabEvent('advanced');
+                  }
+                }}
+              >
                 <Flex justifyContent="space-between">
                   <H2>
                     {formatMessage(
@@ -932,12 +939,7 @@ const FormModal = () => {
                     )}
                   </H2>
                   <Tabs>
-                    <Tab
-                      hasError={doesBaseFormHasError}
-                      onClick={() => {
-                        onChangeSettingTypeTab('base');
-                      }}
-                    >
+                    <Tab hasError={doesBaseFormHasError}>
                       {formatMessage({
                         id: getTrad('popUpForm.navContainer.base'),
                         defaultMessage: 'Base settings',
@@ -947,11 +949,6 @@ const FormModal = () => {
                       hasError={doesAdvancedFormHasError}
                       // TODO put aria-disabled
                       disabled={shouldDisableAdvancedTab()}
-                      onClick={() => {
-                        onChangeSettingTypeTab('advanced');
-
-                        sendAdvancedTabEvent('advanced');
-                      }}
                     >
                       {formatMessage({
                         id: getTrad('popUpForm.navContainer.advanced'),
@@ -967,28 +964,24 @@ const FormModal = () => {
                   <TabPanels>
                     <TabPanel>
                       <Stack size={6}>
-                        {settingType === 'base' && (
-                          <TabForm
-                            form={baseForm}
-                            formErrors={formErrors}
-                            genericInputProps={genericInputProps}
-                            modifiedData={modifiedData}
-                            onChange={handleChange}
-                          />
-                        )}
+                        <TabForm
+                          form={baseForm}
+                          formErrors={formErrors}
+                          genericInputProps={genericInputProps}
+                          modifiedData={modifiedData}
+                          onChange={handleChange}
+                        />
                       </Stack>
                     </TabPanel>
                     <TabPanel>
                       <Stack size={6}>
-                        {settingType === 'advanced' && (
-                          <TabForm
-                            form={advancedForm}
-                            formErrors={formErrors}
-                            genericInputProps={genericInputProps}
-                            modifiedData={modifiedData}
-                            onChange={handleChange}
-                          />
-                        )}
+                        <TabForm
+                          form={advancedForm}
+                          formErrors={formErrors}
+                          genericInputProps={genericInputProps}
+                          modifiedData={modifiedData}
+                          onChange={handleChange}
+                        />
                       </Stack>
                     </TabPanel>
                   </TabPanels>
