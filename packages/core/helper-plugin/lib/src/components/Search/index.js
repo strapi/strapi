@@ -58,6 +58,12 @@ const Search = ({ label, trackedEvent }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
 
+  useEffect(() => {
+    if (value && !isOpen) {
+      setIsOpen(true);
+    }
+  }, [value, isOpen]);
+
   if (isOpen) {
     return (
       <div ref={wrapperRef}>
