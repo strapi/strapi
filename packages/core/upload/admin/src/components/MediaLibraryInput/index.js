@@ -4,6 +4,12 @@ import { useIntl } from 'react-intl';
 import { AssetDialog } from './AssetDialog';
 import { AssetDefinition } from '../../constants';
 import { CarouselAssets } from './Carousel/CarouselAssets';
+import { UploadAssetDialog } from '../UploadAssetDialog/UploadAssetDialog';
+
+const Steps = {
+  SelectAsset: 'SelectAsset',
+  UploadAsset: 'UploadAsset',
+};
 
 export const MediaLibraryInput = ({
   intlLabel,
@@ -15,8 +21,8 @@ export const MediaLibraryInput = ({
   onChange,
   value,
 }) => {
+  const [step, setStep] = useState(undefined);
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [isAssetDialogOpen, setIsAssetDialogOpen] = useState(false);
   const { formatMessage } = useIntl();
 
   const selectedAssets = Array.isArray(value) ? value : [value];
@@ -25,7 +31,7 @@ export const MediaLibraryInput = ({
     onChange({
       target: { name, value: multiple ? nextSelectedAssets : nextSelectedAssets[0] },
     });
-    setIsAssetDialogOpen(false);
+    setStep(undefined);
   };
 
   const handleDeleteAsset = asset => {
@@ -69,19 +75,24 @@ export const MediaLibraryInput = ({
         disabled={disabled}
         label={label}
         onDeleteAsset={handleDeleteAsset}
-        onAddAsset={() => setIsAssetDialogOpen(true)}
+        onAddAsset={() => setStep(Steps.SelectAsset)}
         onEditAsset={handleAssetEdit}
         error={errorMessage}
         hint={hint}
       />
 
-      {isAssetDialogOpen && (
+      {step === Steps.SelectAsset && (
         <AssetDialog
           initiallySelectedAssets={selectedAssets}
-          onClose={() => setIsAssetDialogOpen(false)}
+          onClose={() => setStep(undefined)}
           onValidate={handleValidation}
           multiple={multiple}
+          onAddAsset={() => setStep(Steps.UploadAsset)}
         />
+      )}
+
+      {step === Steps.UploadAsset && (
+        <UploadAssetDialog onClose={() => setStep(Steps.SelectAsset)} />
       )}
     </>
   );

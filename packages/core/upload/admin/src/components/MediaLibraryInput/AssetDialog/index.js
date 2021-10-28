@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import AddIcon from '@strapi/icons/AddIcon';
 import { ModalLayout, ModalBody } from '@strapi/parts/ModalLayout';
@@ -16,18 +16,17 @@ import { BrowseStep } from './BrowseStep';
 import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
 import { useAssets } from '../../../hooks/useAssets';
 import { AssetDefinition } from '../../../constants';
-import { UploadAssetDialog } from '../../UploadAssetDialog/UploadAssetDialog';
 import { DialogTitle } from './DialogTitle';
 import { DialogFooter } from './DialogFooter';
 
-const Steps = {
-  SelectAsset: 'SelectAsset',
-  UploadAsset: 'UploadAsset',
-};
-
-export const AssetDialog = ({ onClose, onValidate, multiple, initiallySelectedAssets }) => {
+export const AssetDialog = ({
+  onClose,
+  onAddAsset,
+  onValidate,
+  multiple,
+  initiallySelectedAssets,
+}) => {
   const { formatMessage } = useIntl();
-  const [step, setStep] = useState(Steps.SelectAsset);
   const { canRead, canCreate, isLoading: isLoadingPermissions } = useMediaLibraryPermissions();
   const { data, isLoading, error } = useAssets({ skipWhen: !canRead });
   const [selectedAssets, { selectOne, selectAll, selectOnly }] = useSelectionState(
@@ -74,20 +73,14 @@ export const AssetDialog = ({ onClose, onValidate, multiple, initiallySelectedAs
     );
   }
 
-  if (canRead && assets?.length === 0 && step === Steps.SelectAsset) {
+  if (canRead && assets?.length === 0) {
     return (
       <ModalLayout onClose={onClose} labelledBy="asset-dialog-title">
         <DialogTitle />
         <NoMedia
           action={
             canCreate ? (
-              <Button
-                variant="secondary"
-                startIcon={<AddIcon />}
-                onClick={() => {
-                  setStep(Steps.UploadAsset);
-                }}
-              >
+              <Button variant="secondary" startIcon={<AddIcon />} onClick={onAddAsset}>
                 {formatMessage({
                   id: getTrad('modal.header.browse'),
                   defaultMessage: 'Upload assets',
@@ -112,10 +105,6 @@ export const AssetDialog = ({ onClose, onValidate, multiple, initiallySelectedAs
         <DialogFooter onClose={onClose} />
       </ModalLayout>
     );
-  }
-
-  if (canCreate && step === Steps.UploadAsset) {
-    return <UploadAssetDialog onClose={() => setStep(Steps.SelectAsset)} />;
   }
 
   return (
@@ -146,7 +135,7 @@ export const AssetDialog = ({ onClose, onValidate, multiple, initiallySelectedAs
             </Tab>
           </Tabs>
 
-          <Button onClick={() => setStep(Steps.UploadAsset)}>
+          <Button onClick={onAddAsset}>
             {formatMessage({
               id: getTrad('modal.upload-list.sub-header.button'),
               defaultMessage: 'Add more assets',
@@ -186,6 +175,7 @@ AssetDialog.defaultProps = {
 AssetDialog.propTypes = {
   initiallySelectedAssets: PropTypes.arrayOf(AssetDefinition).isRequired,
   multiple: PropTypes.bool,
+  onAddAsset: PropTypes.func.isRequired,
   onClose: PropTypes.func.isRequired,
   onValidate: PropTypes.func.isRequired,
 };
