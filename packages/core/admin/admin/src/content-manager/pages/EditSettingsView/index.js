@@ -1,3 +1,279 @@
+import React, { useReducer, useState } from 'react';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+import upperFirst from 'lodash/upperFirst';
+import flatMap from 'lodash/flatMap';
+import isEqual from 'lodash/isEqual';
+import get from 'lodash/get';
+import { useHistory } from 'react-router-dom';
+import { Main } from '@strapi/design-system/Main';
+import { HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
+import { Link } from '@strapi/design-system/Link';
+import { Button } from '@strapi/design-system/Button';
+import { Box } from '@strapi/design-system/Box';
+import { H3 } from '@strapi/design-system/Text';
+import { Grid, GridItem } from '@strapi/design-system/Grid';
+import { Select, Option } from '@strapi/design-system/Select';
+import { Stack } from '@strapi/design-system/Stack';
+import { Divider } from '@strapi/design-system/Divider';
+import ArrowLeft from '@strapi/icons/ArrowLeft';
+import Check from '@strapi/icons/Check';
+import { Helmet } from 'react-helmet';
+import { getTrad } from '../../utils';
+import reducer, { initialState } from './reducer';
+import init from './init';
+import DisplayedFields from './components/DisplayedFields';
+import RelationalFields from './components/RelationalFields';
+import ModalForm from './components/ModalForm';
+import LayoutDndProvider from '../../components/LayoutDndProvider';
+
+const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug }) => {
+  const [reducerState, dispatch] = useReducer(reducer, initialState, () =>
+    init(initialState, mainLayout, components)
+  );
+  const { goBack } = useHistory();
+  const [isModalFormOpen, setIsModalFormOpen] = useState(false);
+  const { componentLayouts, initialData, modifiedData, metaToEdit, metaForm } = reducerState;
+  const { formatMessage } = useIntl();
+  const modelName = get(mainLayout, ['info', isContentTypeView ? 'displayName' : 'name'], '');
+  const attributes = get(modifiedData, ['attributes'], {});
+
+  const entryTitleOptions = Object.keys(attributes).filter(attr => {
+    const type = get(attributes, [attr, 'type'], '');
+
+    return (
+      ![
+        'dynamiczone',
+        'json',
+        'text',
+        'relation',
+        'component',
+        'boolean',
+        'date',
+        'media',
+        'richtext',
+        'timestamp',
+      ].includes(type) && !!type
+    );
+  });
+  const editLayout = get(modifiedData, ['layouts', 'edit'], []);
+  const displayedFields = flatMap(editLayout, 'rowContent');
+  const editLayoutRemainingFields = Object.keys(modifiedData.attributes)
+    .filter(attr => {
+      if (!isContentTypeView) {
+        return true;
+      }
+
+      return get(modifiedData, ['attributes', attr, 'type'], '') !== 'relation';
+    })
+    .filter(attr => get(modifiedData, ['metadatas', attr, 'edit', 'visible'], false) === true)
+    .filter(attr => {
+      return displayedFields.findIndex(el => el.name === attr) === -1;
+    })
+    .sort();
+  const relationsLayout = get(modifiedData, ['layouts', 'editRelations'], []);
+  const editRelationsLayoutRemainingFields = Object.keys(attributes)
+    .filter(attr => attributes[attr].type === 'relation')
+    .filter(attr => relationsLayout.indexOf(attr) === -1);
+
+  const handleChange = ({ target: { name, value } }) => {
+    dispatch({
+      type: 'ON_CHANGE',
+      keys: name.split('.'),
+      value,
+    });
+  };
+
+  const handleToggleModal = () => {
+    setIsModalFormOpen(prevState => !prevState);
+  };
+
+  return (
+    <LayoutDndProvider
+      isContentTypeView={isContentTypeView}
+      attributes={attributes}
+      modifiedData={modifiedData}
+      slug={slug}
+      componentLayouts={componentLayouts}
+      selectedField={metaToEdit}
+      fieldForm={metaForm}
+      setEditFieldToSelect={name => {
+        dispatch({
+          type: 'SET_FIELD_TO_EDIT',
+          name,
+        });
+        handleToggleModal();
+      }}
+    >
+      <Main>
+        <Helmet
+          title={formatMessage(
+            {
+              id: getTrad('components.SettingsViewWrapper.pluginHeader.title'),
+              defaultMessage: `Configure the view - ${upperFirst(modelName)}`,
+            },
+            { name: upperFirst(modelName) }
+          )}
+        />
+        <HeaderLayout
+          title={formatMessage(
+            {
+              id: getTrad('components.SettingsViewWrapper.pluginHeader.title'),
+              defaultMessage: `Configure the view - ${upperFirst(modelName)}`,
+            },
+            { name: upperFirst(modelName) }
+          )}
+          subtitle={formatMessage({
+            id: getTrad('components.SettingsViewWrapper.pluginHeader.description.edit-settings'),
+            defaultMessage: 'Customize how the edit view will look like.',
+          })}
+          navigationAction={
+            <Link
+              startIcon={<ArrowLeft />}
+              onClick={e => {
+                e.preventDefault();
+                goBack();
+              }}
+              to="/"
+            >
+              {formatMessage({
+                id: 'app.components.go-back',
+                defaultMessage: 'Go back',
+              })}
+            </Link>
+          }
+          primaryAction={
+            <Button
+              disabled={isEqual(initialData, modifiedData)}
+              startIcon={<Check />}
+              type="submit"
+            >
+              {formatMessage({ id: 'form.button.save', defaultMessage: 'Save' })}
+            </Button>
+          }
+        />
+        <ContentLayout>
+          <Box
+            background="neutral0"
+            hasRadius
+            shadow="filterShadow"
+            paddingTop={6}
+            paddingBottom={6}
+            paddingLeft={7}
+            paddingRight={7}
+          >
+            <Stack size={4}>
+              <H3 as="h2">
+                {formatMessage({
+                  id: getTrad('containers.SettingPage.settings'),
+                  defaultMessage: 'Settings',
+                })}
+              </H3>
+              <Grid>
+                <GridItem col={6} s={12}>
+                  <Select
+                    label={formatMessage({
+                      id: getTrad('containers.SettingPage.editSettings.entry.title'),
+                      defaultMessage: 'Entry title',
+                    })}
+                    hint={formatMessage({
+                      id: getTrad('containers.SettingPage.editSettings.entry.title.description'),
+                      defaultMessage: 'Set the display field of your entry',
+                    })}
+                    onChange={value => {
+                      handleChange({
+                        target: { name: 'settings.mainField', value: value === '' ? null : value },
+                      });
+                    }}
+                    value={modifiedData.settings.mainField}
+                  >
+                    {entryTitleOptions.map(attribute => (
+                      <Option key={attribute} value={attribute}>
+                        {attribute}
+                      </Option>
+                    ))}
+                  </Select>
+                </GridItem>
+              </Grid>
+              <Box paddingTop={2} paddingBottom={2}>
+                <Divider />
+              </Box>
+              <H3>
+                {formatMessage({
+                  id: getTrad('containers.SettingPage.view'),
+                  defaultMessage: 'View',
+                })}
+              </H3>
+              <Grid gap={4}>
+                <GridItem col={isContentTypeView ? 8 : 12} s={12}>
+                  <DisplayedFields
+                    attributes={attributes}
+                    editLayout={editLayout}
+                    editLayoutRemainingFields={editLayoutRemainingFields}
+                    onAddField={field => {
+                      dispatch({
+                        type: 'ON_ADD_FIELD',
+                        name: field,
+                      });
+                    }}
+                    onRemoveField={(rowId, index) => {
+                      dispatch({
+                        type: 'REMOVE_FIELD',
+                        rowIndex: rowId,
+                        fieldIndex: index,
+                      });
+                    }}
+                  />
+                </GridItem>
+                {isContentTypeView && (
+                  <GridItem col={4} s={12}>
+                    <RelationalFields
+                      editRelationsLayoutRemainingFields={editRelationsLayoutRemainingFields}
+                      relationsLayout={relationsLayout}
+                      onAddField={name => dispatch({ type: 'ADD_RELATION', name })}
+                      onRemoveField={index => dispatch({ type: 'REMOVE_RELATION', index })}
+                    />
+                  </GridItem>
+                )}
+              </Grid>
+            </Stack>
+          </Box>
+        </ContentLayout>
+        {isModalFormOpen && (
+          <ModalForm
+            onSubmit={e => console.log(e)}
+            onToggle={handleToggleModal}
+            type={get(attributes, [metaToEdit, 'type'], '')}
+          />
+        )}
+      </Main>
+    </LayoutDndProvider>
+  );
+};
+
+EditSettingsView.defaultProps = {
+  isContentTypeView: false,
+};
+
+EditSettingsView.propTypes = {
+  components: PropTypes.object.isRequired,
+  isContentTypeView: PropTypes.bool,
+  mainLayout: PropTypes.shape({
+    attributes: PropTypes.object.isRequired,
+    info: PropTypes.object.isRequired,
+    layouts: PropTypes.shape({
+      list: PropTypes.array.isRequired,
+      editRelations: PropTypes.array.isRequired,
+      edit: PropTypes.array.isRequired,
+    }).isRequired,
+    metadatas: PropTypes.object.isRequired,
+    options: PropTypes.object.isRequired,
+  }).isRequired,
+  slug: PropTypes.string.isRequired,
+};
+
+export default EditSettingsView;
+
 // import React, { useCallback, useMemo, useReducer, useState } from 'react';
 // import PropTypes from 'prop-types';
 // import { useHistory } from 'react-router-dom';
@@ -402,5 +678,3 @@
 // };
 
 // export default EditSettingsView;
-
-export default () => 'TODO EditSettingsView';
