@@ -9,14 +9,13 @@ const Steps = {
   PendingAsset: 'PendingAsset',
 };
 
-export const UploadAssetDialog = ({ onSuccess, onClose }) => {
+export const UploadAssetDialog = ({ onClose }) => {
   const [step, setStep] = useState(Steps.AddAsset);
   const [assets, setAssets] = useState([]);
 
   const handleAddToPendingAssets = nextAssets => {
     setAssets(prevAssets => prevAssets.concat(nextAssets));
     setStep(Steps.PendingAsset);
-    onSuccess();
   };
 
   const moveToAddAsset = () => {
@@ -61,6 +60,5 @@ export const UploadAssetDialog = ({ onSuccess, onClose }) => {
 };
 
 UploadAssetDialog.propTypes = {
-  onSuccess: PropTypes.func.isRequired,
   onClose: PropTypes.func.isRequired,
 };

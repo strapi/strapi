@@ -23,7 +23,7 @@ const queryClient = new QueryClient({
   },
 });
 
-const render = (props = { onSuccess: () => {}, onClose: () => {} }) =>
+const render = (props = { onClose: () => {} }) =>
   renderTL(
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={lightTheme}>

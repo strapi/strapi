@@ -32,6 +32,7 @@ export const PendingAssetStep = ({
 
   const handleSubmit = async e => {
     e.preventDefault();
+    e.stopPropagation();
 
     setUploadStatus(Status.Uploading);
   };
