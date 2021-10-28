@@ -8,7 +8,7 @@ const Wrapper = styled(Stack)`
   align-items: stretch;
 
   label {
-    border-radius: 2px;
+    border-radius: 4px;
     max-width: 50%;
     cursor: pointer;
     user-select: none;
@@ -23,7 +23,7 @@ const Wrapper = styled(Stack)`
 
   .option {
     height: 100%;
-    border-radius: 2px;
+    border-radius: 4px;
     border: 1px solid ${({ theme }) => theme.colors.neutral200};
     will-change: transform, opacity;
     background: ${({ theme }) => theme.colors.neutral0};

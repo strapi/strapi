@@ -8,15 +8,6 @@ const FormModalNavigationProvider = ({ children }) => {
   const [state, setFormModalNavigationState] = useState(INITIAL_STATE_DATA);
   const { trackUsage } = useTracking();
 
-  const onChangeSettingTypeTab = nextTab => {
-    setFormModalNavigationState(prevState => {
-      return {
-        ...prevState,
-        settingType: nextTab,
-      };
-    });
-  };
-
   const onClickSelectField = ({ attributeType, step }) => {
     if (state.forTarget === 'contentType') {
       trackUsage('didSelectContentTypeFieldType', { type: attributeType });
@@ -27,7 +18,6 @@ const FormModalNavigationProvider = ({ children }) => {
         ...prevState,
         actionType: 'create',
         modalType: 'attribute',
-        settingType: 'base',
         step,
         attributeType,
       };
@@ -42,7 +32,6 @@ const FormModalNavigationProvider = ({ children }) => {
         targetUid,
         modalType: 'addComponentToDynamicZone',
         forTarget: 'contentType',
-        settingType: 'base',
         step: '1',
         actionType: 'edit',
         isOpen: true,
@@ -77,7 +66,6 @@ const FormModalNavigationProvider = ({ children }) => {
         categoryName,
         actionType: 'edit',
         modalType: 'editCategory',
-        settingType: 'base',
         isOpen: true,
       };
     });
@@ -89,7 +77,6 @@ const FormModalNavigationProvider = ({ children }) => {
         ...prevState,
         modalType: 'attribute',
         actionType: 'edit',
-        settingType: 'base',
         forTarget,
         targetUid,
         attributeName,
@@ -106,7 +93,6 @@ const FormModalNavigationProvider = ({ children }) => {
         ...prevState,
         modalType,
         actionType: 'edit',
-        settingType: 'base',
         forTarget,
         targetUid,
         kind,
@@ -136,7 +122,6 @@ const FormModalNavigationProvider = ({ children }) => {
         ...prev,
         attributeType: 'component',
         modalType: 'attribute',
-        settingType: 'base',
         step: '2',
       };
     });
@@ -160,7 +145,6 @@ const FormModalNavigationProvider = ({ children }) => {
     <FormModalNavigationContext.Provider
       value={{
         ...state,
-        onChangeSettingTypeTab,
         onClickSelectField,
         onCloseModal,
         onNavigateToChooseAttributeModal,

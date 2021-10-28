@@ -19,7 +19,7 @@ import Date from '@strapi/icons/Date';
 import Boolean from '@strapi/icons/Boolean';
 import Email from '@strapi/icons/Email';
 import Enumeration from '@strapi/icons/Enumeration';
-import Media from '@strapi/icons/Landscape';
+import Media from '@strapi/icons/Media';
 import Relation from '@strapi/icons/Relation';
 import Text from '@strapi/icons/Text';
 import Uid from '@strapi/icons/Uid';
