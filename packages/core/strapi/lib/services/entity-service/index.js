@@ -59,16 +59,22 @@ module.exports = ctx => {
 
   // wrap methods to handle Database Errors
   service.decorate(oldService => {
-    const newService = _.mapValues(oldService, (method, methodName) => async (...args) => {
-      try {
-        return await oldService[methodName].call(newService, ...args);
-      } catch (error) {
-        if (databaseErrorsToTransform.some(errorToTransform => error instanceof errorToTransform)) {
-          throw new ValidationError(error.message);
+    const newService = _.mapValues(
+      oldService,
+      (method, methodName) =>
+        async function(...args) {
+          try {
+            return await oldService[methodName].call(this, ...args);
+          } catch (error) {
+            if (
+              databaseErrorsToTransform.some(errorToTransform => error instanceof errorToTransform)
+            ) {
+              throw new ValidationError(error.message);
+            }
+            throw error;
+          }
         }
-        throw error;
-      }
-    });
+    );
 
     return newService;
   });

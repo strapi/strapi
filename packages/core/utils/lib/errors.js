@@ -50,7 +50,7 @@ class ForbiddenError extends ApplicationError {
   constructor(message, details) {
     super(message, details);
     this.name = 'ForbiddenError';
-    this.message = message || 'Forbidden action';
+    this.message = message || 'Forbidden access';
   }
 }
 
