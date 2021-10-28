@@ -64,7 +64,6 @@ const useContentTypeBuilderMenu = () => {
         modalType: 'contentType',
         kind: 'collectionType',
         actionType: 'create',
-        settingType: 'base',
         forTarget: 'contentType',
       };
 
@@ -82,7 +81,6 @@ const useContentTypeBuilderMenu = () => {
         modalType: 'contentType',
         kind: 'singleType',
         actionType: 'create',
-        settingType: 'base',
         forTarget: 'contentType',
       };
 
@@ -100,7 +98,6 @@ const useContentTypeBuilderMenu = () => {
         modalType: 'component',
         kind: null,
         actionType: 'create',
-        settingType: 'base',
         forTarget: 'component',
       };
 

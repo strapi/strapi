@@ -4,7 +4,7 @@ import Date from '@strapi/icons/Date';
 import Boolean from '@strapi/icons/Boolean';
 import Email from '@strapi/icons/Email';
 import Enumeration from '@strapi/icons/Enumeration';
-import Picture from '@strapi/icons/Picture';
+import Media from '@strapi/icons/Media';
 import Relation from '@strapi/icons/Relation';
 import Text from '@strapi/icons/Text';
 import Uid from '@strapi/icons/Uid';
@@ -23,11 +23,11 @@ const iconByTypes = {
   email: <Email />,
   enum: <Enumeration />,
   enumeration: <Enumeration />,
-  file: <Picture />,
-  files: <Picture />,
+  file: <Media />,
+  files: <Media />,
   float: <Number />,
   integer: <Number />,
-  media: <Picture />,
+  media: <Media />,
   number: <Number />,
   relation: <Relation />,
   string: <Text />,

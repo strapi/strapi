@@ -71,12 +71,19 @@ const Header = ({
 
   if (isCreatingEntry && canCreate) {
     primaryAction = (
-      <Button disabled={!didChangeData} isLoading={status === 'submit-pending'} type="submit">
-        {formatMessage({
-          id: getTrad('containers.Edit.submit'),
-          defaultMessage: 'Save',
-        })}
-      </Button>
+      <Stack horizontal size={2}>
+        {hasDraftAndPublish && (
+          <Button disabled startIcon={<Check />} variant="secondary">
+            {formatMessage({ id: 'app.utils.publish', defaultMessage: 'Publish' })}
+          </Button>
+        )}
+        <Button disabled={!didChangeData} isLoading={status === 'submit-pending'} type="submit">
+          {formatMessage({
+            id: getTrad('containers.Edit.submit'),
+            defaultMessage: 'Save',
+          })}
+        </Button>
+      </Stack>
     );
   }
 

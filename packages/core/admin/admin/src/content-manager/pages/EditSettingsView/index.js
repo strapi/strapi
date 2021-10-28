@@ -45,7 +45,7 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
   const { componentLayouts, initialData, modifiedData, metaToEdit, metaForm } = reducerState;
   const { formatMessage } = useIntl();
-  const modelName = get(mainLayout, ['info', 'name'], '');
+  const modelName = get(mainLayout, ['info', isContentTypeView ? 'displayName' : 'name'], '');
   const attributes = get(modifiedData, ['attributes'], {});
 
   const entryTitleOptions = Object.keys(attributes).filter(attr => {

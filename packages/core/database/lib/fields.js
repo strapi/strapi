@@ -8,16 +8,6 @@ class Field {
     this.config = config;
   }
 
-  // TODO: impl
-  validate() {
-    // // use config validators directly
-    // if (this.config.validators) {
-    //   this.config.validators.forEach(validator => {
-    //     validator(value)
-    //   })
-    // }
-  }
-
   toDB(value) {
     return value;
   }

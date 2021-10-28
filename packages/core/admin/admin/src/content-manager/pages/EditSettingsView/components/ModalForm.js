@@ -82,26 +82,6 @@ const ModalForm = ({ onChange }) => {
           value={get(fieldForm, meta, '')}
           options={getSelectedItemSelectOptions(formType)}
         />
-        {/* <FormattedMessage
-          id={getTrad('containers.SettingPage.editSettings.relation-field.description')}
-        >
-          {description => (
-            <FormattedMessage id={get(getInputProps(meta), 'label.id', 'app.utils.defaultMessage')}>
-              {label => (
-                <Input
-                  autoFocus={index === 0}
-                  description={meta === 'mainField' ? description[0] : ''}
-                  label={label[0]}
-                  name={meta}
-                  type={getInputProps(meta).type}
-                  value={get(fieldForm, meta, '')}
-                  onChange={handleChangeMeta}
-                  options={getSelectedItemSelectOptions(formType)}
-                />
-              )}
-            </FormattedMessage>
-          )}
-        </FormattedMessage> */}
       </GridItem>
     );
   });

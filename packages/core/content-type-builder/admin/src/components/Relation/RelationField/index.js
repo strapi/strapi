@@ -33,7 +33,7 @@ const RelationFormBox = ({
           />
         )}
       </Flex>
-      <Divider />
+      <Divider background="neutral200" />
       <Box padding={4}>
         <GenericInput
           disabled={disabled}

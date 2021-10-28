@@ -36,10 +36,10 @@ const FieldButton = ({ attribute, onEditField, onDeleteField, children }) => {
     const higherFields = ['json', 'text', 'file', 'media', 'component', 'richtext', 'dynamiczone'];
 
     if (attribute && higherFields.includes(attribute.type)) {
-      return '74px';
+      return `${74 / 16}rem`;
     }
 
-    return '32px';
+    return `${32 / 16}rem`;
   };
 
   return (

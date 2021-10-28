@@ -79,9 +79,6 @@
       "component": "blog.test-como",
       "required": false,
       "min": 2
-    },
-    "ttiimmee": {
-      "type": "time"
     }
   }
 }
