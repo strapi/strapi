@@ -1,6 +1,6 @@
 import React from 'react';
 import { useIntl } from 'react-intl';
-import { ContentBox, useNotification } from '@strapi/helper-plugin';
+import { ContentBox, toggleNotification } from '@strapi/helper-plugin';
 import { IconButton } from '@strapi/design-system/IconButton';
 import Duplicate from '@strapi/icons/Duplicate';
 import PropTypes from 'prop-types';
@@ -9,7 +9,6 @@ import Key from '@strapi/icons/Key';
 
 const HeaderContentBox = ({ apiToken }) => {
   const { formatMessage } = useIntl();
-  const toggleNotification = useNotification();
 
   return (
     <ContentBox
@@ -31,6 +30,7 @@ const HeaderContentBox = ({ apiToken }) => {
               })}
               noBorder
               icon={<Duplicate />}
+              style={{ padding: 0, height: '1rem' }}
             />
           </CopyToClipboard>
         )

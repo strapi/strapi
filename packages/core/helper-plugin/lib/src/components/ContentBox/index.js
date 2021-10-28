@@ -27,7 +27,7 @@ const ContentBox = ({ title, subtitle, icon, iconBackground, endAction }) => {
         {icon}
       </IconWrapper>
       <Stack size={endAction ? 0 : 1}>
-        <Flex>
+        <Flex alignItems="start">
           <Text small bold style={{ wordBreak: 'break-all' }}>
             {title}
           </Text>
