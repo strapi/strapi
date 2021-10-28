@@ -48,6 +48,20 @@ describe('ContentBox', () => {
         align-items: center;
       }
 
+      .c5 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-align-items: start;
+        -webkit-box-align: start;
+        -ms-flex-align: start;
+        align-items: start;
+      }
+
       .c4 {
         display: -webkit-box;
         display: -webkit-flex;
@@ -67,14 +81,14 @@ describe('ContentBox', () => {
         margin-top: 4px;
       }
 
-      .c5 {
+      .c6 {
         font-weight: 500;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #32324d;
       }
 
-      .c6 {
+      .c7 {
         font-weight: 400;
         font-size: 0.875rem;
         line-height: 1.43;
@@ -100,17 +114,17 @@ describe('ContentBox', () => {
           class="c4"
         >
           <div
-            class="c1"
+            class="c5"
           >
             <span
-              class="c5"
+              class="c6"
               style="word-break: break-all;"
             >
               Code example
             </span>
           </div>
           <span
-            class="c6"
+            class="c7"
           >
             Learn by testing real project developed by the community
           </span>
