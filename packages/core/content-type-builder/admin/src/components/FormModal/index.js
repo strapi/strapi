@@ -960,7 +960,7 @@ const FormModal = () => {
 
                 <Divider />
 
-                <Box paddingTop={7}>
+                <Box paddingTop={6}>
                   <TabPanels>
                     <TabPanel>
                       <Stack size={6}>

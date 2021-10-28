@@ -30,7 +30,7 @@ const AttributeOptions = ({ attributes, forTarget, kind }) => {
         <H2>{formatMessage({ id: titleId, defaultMessage: 'Select a field' })}</H2>
       </Flex>
       <Divider />
-      <Box paddingTop={4} paddingBottom={4}>
+      <Box paddingTop={6} paddingBottom={4}>
         <KeyboardNavigable tagName="button">
           <Stack size={8}>
             {attributes.map((attributeRow, index) => {
