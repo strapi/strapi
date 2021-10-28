@@ -17,8 +17,8 @@ export const AssetCard = ({ asset, isSelected, onSelect, onEdit, size, local }) 
         extension={getFileExtension(asset.ext)}
         url={local ? asset.url : createAssetUrl(asset)}
         mime={asset.mime}
-        onEdit={() => onEdit(asset)}
-        onSelect={() => onSelect(asset)}
+        onEdit={onEdit ? () => onEdit(asset) : undefined}
+        onSelect={onSelect ? () => onSelect(asset) : undefined}
         selected={isSelected}
         size={size}
       />
@@ -36,8 +36,8 @@ export const AssetCard = ({ asset, isSelected, onSelect, onEdit, size, local }) 
         height={asset.height}
         width={asset.width}
         thumbnail={prefixFileUrlWithBackendUrl(asset?.formats?.thumbnail?.url || asset.url)}
-        onEdit={() => onEdit(asset)}
-        onSelect={() => onSelect(asset)}
+        onEdit={onEdit ? () => onEdit(asset) : undefined}
+        onSelect={onSelect ? () => onSelect(asset) : undefined}
         selected={isSelected}
         size={size}
       />
@@ -50,8 +50,8 @@ export const AssetCard = ({ asset, isSelected, onSelect, onEdit, size, local }) 
       key={asset.id}
       name={asset.name}
       extension={getFileExtension(asset.ext)}
-      onEdit={() => onEdit(asset)}
-      onSelect={() => onSelect(asset)}
+      onEdit={onEdit ? () => onEdit(asset) : undefined}
+      onSelect={onSelect ? () => onSelect(asset) : undefined}
       selected={isSelected}
       size={size}
     />

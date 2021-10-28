@@ -180,9 +180,7 @@ export const MediaLibrary = () => {
         </ContentLayout>
       </Main>
 
-      {showUploadAssetDialog && (
-        <UploadAssetDialog onClose={toggleUploadAssetDialog} onSuccess={() => {}} />
-      )}
+      {showUploadAssetDialog && <UploadAssetDialog onClose={toggleUploadAssetDialog} />}
       {assetToEdit && (
         <EditAssetDialog
           onClose={() => setAssetToEdit(undefined)}

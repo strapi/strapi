@@ -75,14 +75,14 @@ describe('AssetDialog', () => {
       renderML();
 
       expect(screen.getByRole('dialog').getAttribute('aria-busy')).toBe('true');
-      expect(screen.getByText('Loading content.')).toBeInTheDocument();
+      expect(screen.getByText('Loading the asset list.')).toBeInTheDocument();
     });
 
     it('shows a loader when resolving the assets', () => {
       renderML();
 
       expect(screen.getByRole('dialog').getAttribute('aria-busy')).toBe('true');
-      expect(screen.getByText('Loading content.')).toBeInTheDocument();
+      expect(screen.getByText('Loading the asset list.')).toBeInTheDocument();
     });
   });
 
@@ -95,7 +95,7 @@ describe('AssetDialog', () => {
           expect(screen.getByText('Upload your first assets...')).toBeInTheDocument()
         );
 
-        expect(screen.getByRole('dialog').getAttribute('aria-busy')).toBe('false');
+        expect(screen.getByRole('dialog').getAttribute('aria-busy')).toBe(null);
       });
 
       it('shows a specific empty state when the user is not allowed to see the content', async () => {
@@ -114,7 +114,7 @@ describe('AssetDialog', () => {
           ).toBeInTheDocument()
         );
 
-        expect(screen.getByRole('dialog').getAttribute('aria-busy')).toBe('false');
+        expect(screen.getByRole('dialog').getAttribute('aria-busy')).toBe(null);
       });
 
       it('shows a specific empty state when the user can read but not create', async () => {
@@ -135,7 +135,7 @@ describe('AssetDialog', () => {
           expect(screen.queryByText('Upload your first assets...')).not.toBeInTheDocument()
         );
 
-        expect(screen.getByRole('dialog').getAttribute('aria-busy')).toBe('false');
+        expect(screen.getByRole('dialog').getAttribute('aria-busy')).toBe(null);
       });
     });
 

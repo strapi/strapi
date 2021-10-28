@@ -34,6 +34,7 @@
   "input.placeholder.icon": "Drop the asset in this zone",
   "input.url.description": "Separate your URL links by a carriage return.",
   "input.url.label": "URL",
+  "list.asset.load": "Loading the asset list.",
   "list.asset.at.finished": "The assets have finished loading.",
   "list.assets-empty.subtitle": "Add one to the list.",
   "list.assets-empty.title": "There are no assets yet",
