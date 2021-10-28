@@ -1479,5 +1479,48 @@ describe('Filtering API', () => {
         expect(res.body.data).toEqual(expect.arrayContaining([data.product[1], data.product[3]]));
       });
     });
+
+    describe('Numbers', () => {
+      test('Cast number', async () => {
+        const res = await rq({
+          method: 'GET',
+          url: '/products',
+          qs: {
+            filters: {
+              price: '10.99',
+            },
+          },
+        });
+        expect(res.body.data).toEqual(expect.arrayContaining([data.product[0]]));
+      });
+
+      test.each([
+        ['$lte', '10.99', [0]],
+        ['$lt', '12', [0]],
+        ['$gte', '28.31', [1, 2]],
+        ['$gt', '28.30', [1, 2]],
+        ['$eq', '10.99', [0]],
+        ['$ne', '10.99', [1, 2]],
+        ['$not', '10.99', [1, 2]],
+        ['$in', ['10.99', '28.31'], [0, 1, 2]],
+        ['$in', '10.99', [0]],
+        ['$notIn', ['10.99', '28.31'], []],
+      ])('Cast number in operator %s - %s', async (operator, val, expectedIds) => {
+        const res = await rq({
+          method: 'GET',
+          url: '/products',
+          qs: {
+            filters: {
+              price: {
+                [operator]: val,
+              },
+            },
+          },
+        });
+        expect(res.body.data).toEqual(
+          expect.arrayContaining(expectedIds.map(id => data.product[id]))
+        );
+      });
+    });
   });
 });

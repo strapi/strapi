@@ -184,6 +184,7 @@ const processWhere = (where, ctx) => {
   return filters;
 };
 
+// TODO: add type casting per operator at some point
 const applyOperator = (qb, column, operator, value) => {
   if (Array.isArray(value) && !ARRAY_OPERATORS.includes(operator)) {
     return qb.where(subQB => {
@@ -246,7 +247,6 @@ const applyOperator = (qb, column, operator, value) => {
       break;
     }
     case '$null': {
-      // TODO: make this better
       if (value) {
         qb.whereNull(column);
       }
@@ -256,15 +256,12 @@ const applyOperator = (qb, column, operator, value) => {
       if (value) {
         qb.whereNotNull(column);
       }
-
       break;
     }
     case '$between': {
       qb.whereBetween(column, value);
       break;
     }
-
-    // TODO: add casting logic
     case '$startsWith': {
       qb.where(column, 'like', `${value}%`);
       break;
