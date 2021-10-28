@@ -22,7 +22,6 @@ export const CarouselAsset = ({ asset }) => {
         <VideoPreview
           url={createAssetUrl(asset)}
           mime={asset.mime}
-          uniqueKey={asset.updatedAt}
           alt={asset.alternativeText || asset.name}
         />
       </VideoPreviewWrapper>

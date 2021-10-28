@@ -117,7 +117,7 @@ export const PendingAssetStep = ({
 
                 return (
                   <GridItem col={4} key={assetKey}>
-                    <AssetCard asset={asset} size="S" key={assetKey} />
+                    <AssetCard asset={asset} size="S" key={assetKey} local />
                   </GridItem>
                 );
               })}

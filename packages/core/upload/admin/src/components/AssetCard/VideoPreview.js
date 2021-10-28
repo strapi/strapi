@@ -8,7 +8,7 @@ import { VisuallyHidden } from '@strapi/parts/VisuallyHidden';
 // https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/readyState#value
 const HAVE_FUTURE_DATA = 3;
 
-export const VideoPreview = ({ url, mime, onLoadDuration, uniqueKey, alt, ...props }) => {
+export const VideoPreview = ({ url, mime, onLoadDuration, alt, ...props }) => {
   const handleTimeUpdate = e => {
     if (e.target.currentTime > 0) {
       const video = e.target;
@@ -32,11 +32,11 @@ export const VideoPreview = ({ url, mime, onLoadDuration, uniqueKey, alt, ...pro
   };
 
   return (
-    <Box as="figure" {...props} key={uniqueKey}>
+    <Box as="figure" {...props} key={url}>
       <video
         muted
         onLoadedData={handleThumbnailVisibility}
-        src={`${url}?unique_key=${uniqueKey}`}
+        src={url}
         crossOrigin="anonymous"
         onTimeUpdate={handleTimeUpdate}
       >
@@ -50,14 +50,11 @@ export const VideoPreview = ({ url, mime, onLoadDuration, uniqueKey, alt, ...pro
 VideoPreview.defaultProps = {
   onLoadDuration: () => {},
   size: 'M',
-  uniqueKey: undefined,
 };
 
 VideoPreview.propTypes = {
   alt: PropTypes.string.isRequired,
   url: PropTypes.string.isRequired,
-  // uniqueKey allows to fetch the asset and to handle its caching correctly
-  uniqueKey: PropTypes.string,
   mime: PropTypes.string.isRequired,
   onLoadDuration: PropTypes.func,
   size: PropTypes.oneOf(['S', 'M']),

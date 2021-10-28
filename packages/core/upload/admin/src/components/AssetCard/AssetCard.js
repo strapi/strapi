@@ -5,8 +5,9 @@ import { ImageAssetCard } from './ImageAssetCard';
 import { VideoAssetCard } from './VideoAssetCard';
 import { DocAssetCard } from './DocAssetCard';
 import { AssetType, AssetDefinition } from '../../constants';
+import { createAssetUrl } from '../../utils/createAssetUrl';
 
-export const AssetCard = ({ asset, isSelected, onSelect, onEdit, size }) => {
+export const AssetCard = ({ asset, isSelected, onSelect, onEdit, size, local }) => {
   if (asset.mime.includes(AssetType.Video)) {
     return (
       <VideoAssetCard
@@ -14,13 +15,12 @@ export const AssetCard = ({ asset, isSelected, onSelect, onEdit, size }) => {
         key={asset.id}
         name={asset.name}
         extension={getFileExtension(asset.ext)}
-        url={prefixFileUrlWithBackendUrl(asset.url)}
+        url={local ? asset.url : createAssetUrl(asset)}
         mime={asset.mime}
         onEdit={() => onEdit(asset)}
         onSelect={() => onSelect(asset)}
         selected={isSelected}
         size={size}
-        uniqueKey={asset.updatedAt}
       />
     );
   }
@@ -60,6 +60,8 @@ export const AssetCard = ({ asset, isSelected, onSelect, onEdit, size }) => {
 
 AssetCard.defaultProps = {
   isSelected: false,
+  // Determine if the asset is loaded locally or from a remote resource
+  local: false,
   onSelect: undefined,
   onEdit: undefined,
   size: 'M',
@@ -67,6 +69,7 @@ AssetCard.defaultProps = {
 
 AssetCard.propTypes = {
   asset: AssetDefinition.isRequired,
+  local: PropTypes.bool,
   onSelect: PropTypes.func,
   onEdit: PropTypes.func,
   isSelected: PropTypes.bool,

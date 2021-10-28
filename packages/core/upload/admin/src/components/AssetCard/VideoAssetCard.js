@@ -43,7 +43,6 @@ export const VideoAssetCard = ({
   onSelect,
   onEdit,
   size,
-  uniqueKey,
 }) => {
   const { formatMessage } = useIntl();
   const [duration, setDuration] = useState();
@@ -64,12 +63,7 @@ export const VideoAssetCard = ({
         )}
         <CardAsset size={size}>
           <VideoPreviewWrapper size={size}>
-            <VideoPreview
-              url={url}
-              mime={mime}
-              onLoadDuration={setDuration}
-              uniqueKey={uniqueKey}
-            />
+            <VideoPreview url={url} mime={mime} onLoadDuration={setDuration} alt={name} />
           </VideoPreviewWrapper>
         </CardAsset>
         <CardTimer>{formattedDuration || '...'}</CardTimer>
@@ -92,7 +86,6 @@ export const VideoAssetCard = ({
 VideoAssetCard.defaultProps = {
   onSelect: undefined,
   onEdit: undefined,
-  uniqueKey: undefined,
   selected: false,
   size: 'M',
 };
@@ -103,8 +96,6 @@ VideoAssetCard.propTypes = {
   name: PropTypes.string.isRequired,
   onSelect: PropTypes.func,
   onEdit: PropTypes.func,
-  // uniqueKey allows to fetch the asset and to handle its caching correctly
-  uniqueKey: PropTypes.string,
   url: PropTypes.string.isRequired,
   selected: PropTypes.bool,
   size: PropTypes.oneOf(['S', 'M']),

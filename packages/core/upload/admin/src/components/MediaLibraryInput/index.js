@@ -38,8 +38,13 @@ export const MediaLibraryInput = ({ intlLabel, description, disabled, error, mul
     );
   };
 
+  let label = intlLabel.id ? formatMessage(intlLabel) : '';
+
+  if (multiple && selectedAssets.length > 0) {
+    label = `${label} (${selectedIndex + 1} / ${selectedAssets.length})`;
+  }
+
   const currentAsset = selectedAssets[selectedIndex];
-  const label = intlLabel.id ? formatMessage(intlLabel) : '';
   const errorMessage = error ? formatMessage({ id: error, defaultMessage: error }) : '';
   const hint = description
     ? formatMessage(
