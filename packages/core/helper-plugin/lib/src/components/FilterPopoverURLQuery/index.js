@@ -24,7 +24,7 @@ const FullWidthButton = styled(Button)`
   width: 100%;
 `;
 
-const FilterPopoverURLQuery = ({ displayedFilters, isVisible, onToggle, source, onBlur }) => {
+const FilterPopoverURLQuery = ({ displayedFilters, isVisible, onBlur, onToggle, source }) => {
   const [{ query }, setQuery] = useQueryParams();
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
