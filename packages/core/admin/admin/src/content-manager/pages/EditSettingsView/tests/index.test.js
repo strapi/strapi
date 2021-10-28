@@ -734,7 +734,7 @@ describe('EditSettingsView', () => {
         border-color: #eaeaef;
         border: 1px solid #eaeaef;
         width: 100%;
-        min-height: 32px;
+        min-height: 2rem;
       }
 
       .c59 {
