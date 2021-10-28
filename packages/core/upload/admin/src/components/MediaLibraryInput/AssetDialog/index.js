@@ -164,8 +164,8 @@ AssetDialog.defaultProps = {
 };
 
 AssetDialog.propTypes = {
+  initiallySelectedAssets: PropTypes.arrayOf(AssetDefinition).isRequired,
   multiple: PropTypes.bool,
   onClose: PropTypes.func.isRequired,
   onValidate: PropTypes.func.isRequired,
-  initiallySelectedAssets: PropTypes.arrayOf(AssetDefinition).isRequired,
 };
