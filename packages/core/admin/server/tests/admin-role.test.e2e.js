@@ -278,8 +278,14 @@ describe('Role CRUD End to End', () => {
         });
 
         expect(res.statusCode).toBe(400);
-        expect(res.body.data).toMatchObject({
-          name: [`The name must be unique and a role with name \`${role.name}\` already exists.`],
+        expect(res.body).toMatchObject({
+          data: null,
+          error: {
+            details: {},
+            message: 'The name must be unique and a role with name `new role 0` already exists.',
+            name: 'ApplicationError',
+            status: 400,
+          },
         });
       });
       test('Can create a user with a role', async () => {
@@ -402,10 +408,15 @@ describe('Role CRUD End to End', () => {
         });
 
         expect(res.statusCode).toBe(400);
-        expect(res.body.data).toMatchObject({
-          name: [
-            `The name must be unique and a role with name \`${data.rolesWithoutUsers[0].name}\` already exists.`,
-          ],
+        expect(res.body).toMatchObject({
+          data: null,
+          error: {
+            details: {},
+            message:
+              'The name must be unique and a role with name `new name - Cannot update the name of a role` already exists.',
+            name: 'ApplicationError',
+            status: 400,
+          },
         });
       });
 
@@ -436,8 +447,22 @@ describe('Role CRUD End to End', () => {
           });
 
           expect(res.statusCode).toBe(400);
-          expect(res.body.data).toMatchObject({
-            ids: ['Some roles are still assigned to some users'],
+          expect(res.body).toMatchObject({
+            data: null,
+            error: {
+              details: {
+                errors: [
+                  {
+                    message: 'Some roles are still assigned to some users',
+                    name: 'ValidationError',
+                    path: ['ids'],
+                  },
+                ],
+              },
+              message: 'Some roles are still assigned to some users',
+              name: 'ValidationError',
+              status: 400,
+            },
           });
 
           for (let role of roles) {
@@ -519,8 +544,22 @@ describe('Role CRUD End to End', () => {
           });
 
           expect(res.statusCode).toBe(400);
-          expect(res.body.data).toMatchObject({
-            id: ['Some roles are still assigned to some users'],
+          expect(res.body).toMatchObject({
+            data: null,
+            error: {
+              details: {
+                errors: [
+                  {
+                    message: 'Some roles are still assigned to some users',
+                    name: 'ValidationError',
+                    path: ['id'],
+                  },
+                ],
+              },
+              message: 'Some roles are still assigned to some users',
+              name: 'ValidationError',
+              status: 400,
+            },
           });
 
           res = await rq({
@@ -538,8 +577,22 @@ describe('Role CRUD End to End', () => {
           });
 
           expect(res.statusCode).toBe(400);
-          expect(res.body.data).toMatchObject({
-            id: ['You cannot delete the super admin role'],
+          expect(res.body).toMatchObject({
+            data: null,
+            error: {
+              details: {
+                errors: [
+                  {
+                    message: 'You cannot delete the super admin role',
+                    name: 'ValidationError',
+                    path: ['id'],
+                  },
+                ],
+              },
+              message: 'You cannot delete the super admin role',
+              name: 'ValidationError',
+              status: 400,
+            },
           });
 
           res = await rq({
@@ -566,9 +619,12 @@ describe('Role CRUD End to End', () => {
 
         expect(res.statusCode).toBe(404);
         expect(res.body).toMatchObject({
-          statusCode: 404,
-          error: 'Not Found',
-          message: 'role.notFound',
+          error: {
+            details: {},
+            message: 'role.notFound',
+            name: 'NotFoundError',
+            status: 404,
+          },
         });
       });
 
@@ -689,10 +745,21 @@ describe('Role CRUD End to End', () => {
 
         expect(res.statusCode).toBe(400);
         expect(res.body).toMatchObject({
-          statusCode: 400,
-          error: 'Bad Request',
-          message: 'ValidationError',
-          data: { 'permissions[0].action': ['action is not an existing permission action'] },
+          data: null,
+          error: {
+            details: {
+              errors: [
+                {
+                  message: 'action is not an existing permission action',
+                  name: 'ValidationError',
+                  path: ['permissions', '0', 'action'],
+                },
+              ],
+            },
+            message: 'action is not an existing permission action',
+            name: 'ValidationError',
+            status: 400,
+          },
         });
       });
 
