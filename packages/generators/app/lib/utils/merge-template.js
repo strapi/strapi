@@ -5,7 +5,6 @@ const path = require('path');
 const fse = require('fs-extra');
 const _ = require('lodash/fp');
 const chalk = require('chalk');
-const semver = require('semver');
 const { getTemplatePackageInfo, downloadNpmTemplate } = require('./fetch-npm-template');
 
 // Specify all the files and directories a template can have
@@ -47,9 +46,6 @@ module.exports = async function mergeTemplate(scope, rootPath) {
     templatePath = await downloadNpmTemplate(templatePackageInfo, templateParentPath);
   }
 
-  // Make sure the template is compatible with this version of strapi
-  checkTemplateCompat(templatePath, scope.strapiVersion);
-
   // Make sure the downloaded template matches the required format
   const templateConfig = await checkTemplateRootStructure(templatePath, scope);
   await checkTemplateContentsStructure(path.resolve(templatePath, 'template'));
@@ -63,41 +59,6 @@ module.exports = async function mergeTemplate(scope, rootPath) {
     await fse.remove(templateParentPath);
   }
 };
-
-/**
- * Make sure the template is compatible with a specific Strapi version
- * @param {string} templatePath - Where the template is installed
- * @param {string} strapiVersion - Strapi version of the app being created
- */
-function checkTemplateCompat(templatePath, strapiVersion) {
-  const templateJSON = require(path.resolve(templatePath, 'template.json'));
-  const compatibleStrapiConstraint = _.get('strapi.supportedVersion', templateJSON);
-
-  // Make sure the Strapi compatibility constraint is set
-  if (_.isNil(compatibleStrapiConstraint)) {
-    throw new Error("This template does not specify the Strapi versions it's compatible with");
-  }
-
-  // Check that the range is set using proper semver
-  const validCompatibleStrapiRange = semver.validRange(compatibleStrapiConstraint);
-  if (!validCompatibleStrapiRange) {
-    throw new Error(
-      'Please use a valid semver constraint to specify which Strapi versions this template is compatible with'
-    );
-  }
-
-  // Check if the template is compatible with this Strapi version
-  const isCompatible = semver.satisfies(strapiVersion, validCompatibleStrapiRange);
-  if (!isCompatible) {
-    throw new Error(`
-      This template is not compatible with Strapi version ${strapiVersion}.
-      It will only work with Strapi versions in the constraint ${chalk.green(
-        JSON.stringify(compatibleStrapiConstraint)
-      )}.
-      Try using a different Strapi version, or a different version of this template instead.
-    `);
-  }
-}
 
 /**
  * Make sure the template has the required top-level structure
