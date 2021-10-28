@@ -264,7 +264,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   border-color: #eaeaef;
   border: 1px solid #eaeaef;
   width: 100%;
-  min-height: 32px;
+  min-height: 2rem;
 }
 
 .c59 {
@@ -2099,7 +2099,7 @@ exports[`EditSettingsView should add field 1`] = `
   border-color: #eaeaef;
   border: 1px solid #eaeaef;
   width: 100%;
-  min-height: 32px;
+  min-height: 2rem;
 }
 
 .c59 {
@@ -4408,7 +4408,7 @@ exports[`EditSettingsView should add relation 1`] = `
   border-color: #eaeaef;
   border: 1px solid #eaeaef;
   width: 100%;
-  min-height: 32px;
+  min-height: 2rem;
 }
 
 .c59 {

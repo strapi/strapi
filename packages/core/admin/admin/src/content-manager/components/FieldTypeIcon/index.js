@@ -13,7 +13,6 @@ import Json from '@strapi/icons/Json';
 import Component from '@strapi/icons/Component';
 import DynamicZone from '@strapi/icons/DynamicZone';
 
-// Create a file
 const iconByTypes = {
   biginteger: <Number />,
   boolean: <Boolean />,
