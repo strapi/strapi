@@ -6,7 +6,7 @@ import { Flex } from '@strapi/parts/Flex';
 import { Text } from '@strapi/parts/Text';
 import { Box } from '@strapi/parts/Box';
 import AddAsset from '@strapi/icons/AddAsset';
-import getTrad from '../../utils/getTrad';
+import getTrad from '../../../utils/getTrad';
 
 export const EmptyStateAsset = ({ disabled, onClick }) => {
   const { formatMessage } = useIntl();
