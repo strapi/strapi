@@ -1,10 +1,15 @@
 import React, { useReducer, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
+import { useMutation } from 'react-query';
 import upperFirst from 'lodash/upperFirst';
+import pick from 'lodash/pick';
+import cloneDeep from 'lodash/cloneDeep';
 import flatMap from 'lodash/flatMap';
 import isEqual from 'lodash/isEqual';
 import get from 'lodash/get';
+import set from 'lodash/set';
+import { useNotification, useTracking, ConfirmDialog } from '@strapi/helper-plugin';
 import { useHistory } from 'react-router-dom';
 import { Main } from '@strapi/design-system/Main';
 import { HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
@@ -24,15 +29,20 @@ import reducer, { initialState } from './reducer';
 import init from './init';
 import DisplayedFields from './components/DisplayedFields';
 import RelationalFields from './components/RelationalFields';
-import ModalForm from './components/ModalForm';
+import ModalForm from './components/FormModal';
 import LayoutDndProvider from '../../components/LayoutDndProvider';
+import { unformatLayout } from './utils/layout';
+import putCMSettingsEV from './utils/api';
 
-const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug }) => {
+const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, updateLayout }) => {
   const [reducerState, dispatch] = useReducer(reducer, initialState, () =>
     init(initialState, mainLayout, components)
   );
+  const { trackUsage } = useTracking();
+  const toggleNotification = useNotification();
   const { goBack } = useHistory();
   const [isModalFormOpen, setIsModalFormOpen] = useState(false);
+  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
   const { componentLayouts, initialData, modifiedData, metaToEdit, metaForm } = reducerState;
   const { formatMessage } = useIntl();
   const modelName = get(mainLayout, ['info', isContentTypeView ? 'displayName' : 'name'], '');
@@ -85,7 +95,60 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug }) =
   };
 
   const handleToggleModal = () => {
-    setIsModalFormOpen(prevState => !prevState);
+    setIsModalFormOpen(prev => !prev);
+  };
+
+  const toggleConfirmDialog = () => {
+    setIsConfirmDialogOpen(prev => !prev);
+  };
+
+  const handleMetaChange = ({ target: { name, value } }) => {
+    dispatch({
+      type: 'ON_CHANGE_META',
+      keys: name.split('.'),
+      value,
+    });
+  };
+
+  const handleMetaSubmit = e => {
+    e.preventDefault();
+    dispatch({
+      type: 'SUBMIT_META_FORM',
+    });
+    handleToggleModal();
+  };
+
+  const handleSubmit = e => {
+    e.preventDefault();
+    toggleConfirmDialog();
+  };
+
+  const submitMutation = useMutation(
+    body => {
+      return putCMSettingsEV(body, slug, isContentTypeView);
+    },
+    {
+      onSuccess: ({ data }) => {
+        if (updateLayout) {
+          updateLayout(data.data);
+        }
+        dispatch({
+          type: 'SUBMIT_SUCCEEDED',
+        });
+        toggleConfirmDialog();
+        trackUsage('didEditEditSettings');
+      },
+      onError: () => {
+        toggleNotification({ type: 'warning', message: { id: 'notification.error' } });
+      },
+    }
+  );
+  const { isLoading: isSubmittingForm } = submitMutation;
+
+  const handleConfirm = () => {
+    const body = pick(cloneDeep(modifiedData), ['layouts', 'metadatas', 'settings']);
+    set(body, 'layouts.edit', unformatLayout(body.layouts.edit));
+    submitMutation.mutate(body);
   };
 
   return (
@@ -115,135 +178,153 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug }) =
             { name: upperFirst(modelName) }
           )}
         />
-        <HeaderLayout
-          title={formatMessage(
-            {
-              id: getTrad('components.SettingsViewWrapper.pluginHeader.title'),
-              defaultMessage: `Configure the view - ${upperFirst(modelName)}`,
-            },
-            { name: upperFirst(modelName) }
-          )}
-          subtitle={formatMessage({
-            id: getTrad('components.SettingsViewWrapper.pluginHeader.description.edit-settings'),
-            defaultMessage: 'Customize how the edit view will look like.',
-          })}
-          navigationAction={
-            <Link
-              startIcon={<ArrowLeft />}
-              onClick={e => {
-                e.preventDefault();
-                goBack();
-              }}
-              to="/"
-            >
-              {formatMessage({
-                id: 'app.components.go-back',
-                defaultMessage: 'Go back',
-              })}
-            </Link>
-          }
-          primaryAction={
-            <Button
-              disabled={isEqual(initialData, modifiedData)}
-              startIcon={<Check />}
-              type="submit"
-            >
-              {formatMessage({ id: 'form.button.save', defaultMessage: 'Save' })}
-            </Button>
-          }
-        />
-        <ContentLayout>
-          <Box
-            background="neutral0"
-            hasRadius
-            shadow="filterShadow"
-            paddingTop={6}
-            paddingBottom={6}
-            paddingLeft={7}
-            paddingRight={7}
-          >
-            <Stack size={4}>
-              <H3 as="h2">
+        <form onSubmit={handleSubmit}>
+          <HeaderLayout
+            title={formatMessage(
+              {
+                id: getTrad('components.SettingsViewWrapper.pluginHeader.title'),
+                defaultMessage: `Configure the view - ${upperFirst(modelName)}`,
+              },
+              { name: upperFirst(modelName) }
+            )}
+            subtitle={formatMessage({
+              id: getTrad('components.SettingsViewWrapper.pluginHeader.description.edit-settings'),
+              defaultMessage: 'Customize how the edit view will look like.',
+            })}
+            navigationAction={
+              <Link
+                startIcon={<ArrowLeft />}
+                onClick={e => {
+                  e.preventDefault();
+                  goBack();
+                }}
+                to="/"
+              >
                 {formatMessage({
-                  id: getTrad('containers.SettingPage.settings'),
-                  defaultMessage: 'Settings',
+                  id: 'app.components.go-back',
+                  defaultMessage: 'Go back',
                 })}
-              </H3>
-              <Grid>
-                <GridItem col={6} s={12}>
-                  <Select
-                    label={formatMessage({
-                      id: getTrad('containers.SettingPage.editSettings.entry.title'),
-                      defaultMessage: 'Entry title',
-                    })}
-                    hint={formatMessage({
-                      id: getTrad('containers.SettingPage.editSettings.entry.title.description'),
-                      defaultMessage: 'Set the display field of your entry',
-                    })}
-                    onChange={value => {
-                      handleChange({
-                        target: { name: 'settings.mainField', value: value === '' ? null : value },
-                      });
-                    }}
-                    value={modifiedData.settings.mainField}
-                  >
-                    {entryTitleOptions.map(attribute => (
-                      <Option key={attribute} value={attribute}>
-                        {attribute}
-                      </Option>
-                    ))}
-                  </Select>
-                </GridItem>
-              </Grid>
-              <Box paddingTop={2} paddingBottom={2}>
-                <Divider />
-              </Box>
-              <H3>
-                {formatMessage({
-                  id: getTrad('containers.SettingPage.view'),
-                  defaultMessage: 'View',
-                })}
-              </H3>
-              <Grid gap={4}>
-                <GridItem col={isContentTypeView ? 8 : 12} s={12}>
-                  <DisplayedFields
-                    attributes={attributes}
-                    editLayout={editLayout}
-                    editLayoutRemainingFields={editLayoutRemainingFields}
-                    onAddField={field => {
-                      dispatch({
-                        type: 'ON_ADD_FIELD',
-                        name: field,
-                      });
-                    }}
-                    onRemoveField={(rowId, index) => {
-                      dispatch({
-                        type: 'REMOVE_FIELD',
-                        rowIndex: rowId,
-                        fieldIndex: index,
-                      });
-                    }}
-                  />
-                </GridItem>
-                {isContentTypeView && (
-                  <GridItem col={4} s={12}>
-                    <RelationalFields
-                      editRelationsLayoutRemainingFields={editRelationsLayoutRemainingFields}
-                      relationsLayout={relationsLayout}
-                      onAddField={name => dispatch({ type: 'ADD_RELATION', name })}
-                      onRemoveField={index => dispatch({ type: 'REMOVE_RELATION', index })}
+              </Link>
+            }
+            primaryAction={
+              <Button
+                disabled={isEqual(initialData, modifiedData)}
+                startIcon={<Check />}
+                type="submit"
+              >
+                {formatMessage({ id: 'form.button.save', defaultMessage: 'Save' })}
+              </Button>
+            }
+          />
+          <ContentLayout>
+            <Box
+              background="neutral0"
+              hasRadius
+              shadow="filterShadow"
+              paddingTop={6}
+              paddingBottom={6}
+              paddingLeft={7}
+              paddingRight={7}
+            >
+              <Stack size={4}>
+                <H3 as="h2">
+                  {formatMessage({
+                    id: getTrad('containers.SettingPage.settings'),
+                    defaultMessage: 'Settings',
+                  })}
+                </H3>
+                <Grid>
+                  <GridItem col={6} s={12}>
+                    <Select
+                      label={formatMessage({
+                        id: getTrad('containers.SettingPage.editSettings.entry.title'),
+                        defaultMessage: 'Entry title',
+                      })}
+                      hint={formatMessage({
+                        id: getTrad('containers.SettingPage.editSettings.entry.title.description'),
+                        defaultMessage: 'Set the display field of your entry',
+                      })}
+                      onChange={value => {
+                        handleChange({
+                          target: {
+                            name: 'settings.mainField',
+                            value: value === '' ? null : value,
+                          },
+                        });
+                      }}
+                      value={modifiedData.settings.mainField}
+                    >
+                      {entryTitleOptions.map(attribute => (
+                        <Option key={attribute} value={attribute}>
+                          {attribute}
+                        </Option>
+                      ))}
+                    </Select>
+                  </GridItem>
+                </Grid>
+                <Box paddingTop={2} paddingBottom={2}>
+                  <Divider />
+                </Box>
+                <H3>
+                  {formatMessage({
+                    id: getTrad('containers.SettingPage.view'),
+                    defaultMessage: 'View',
+                  })}
+                </H3>
+                <Grid gap={4}>
+                  <GridItem col={isContentTypeView ? 8 : 12} s={12}>
+                    <DisplayedFields
+                      attributes={attributes}
+                      editLayout={editLayout}
+                      editLayoutRemainingFields={editLayoutRemainingFields}
+                      onAddField={field => {
+                        dispatch({
+                          type: 'ON_ADD_FIELD',
+                          name: field,
+                        });
+                      }}
+                      onRemoveField={(rowId, index) => {
+                        dispatch({
+                          type: 'REMOVE_FIELD',
+                          rowIndex: rowId,
+                          fieldIndex: index,
+                        });
+                      }}
                     />
                   </GridItem>
-                )}
-              </Grid>
-            </Stack>
-          </Box>
-        </ContentLayout>
+                  {isContentTypeView && (
+                    <GridItem col={4} s={12}>
+                      <RelationalFields
+                        editRelationsLayoutRemainingFields={editRelationsLayoutRemainingFields}
+                        relationsLayout={relationsLayout}
+                        onAddField={name => dispatch({ type: 'ADD_RELATION', name })}
+                        onRemoveField={index => dispatch({ type: 'REMOVE_RELATION', index })}
+                      />
+                    </GridItem>
+                  )}
+                </Grid>
+              </Stack>
+            </Box>
+          </ContentLayout>
+          <ConfirmDialog
+            bodyText={{
+              id: getTrad('popUpWarning.warning.updateAllSettings'),
+              defaultMessage: 'This will modify all your settings',
+            }}
+            iconRightButton={<Check />}
+            isConfirmButtonLoading={isSubmittingForm}
+            isOpen={isConfirmDialogOpen}
+            onToggleDialog={toggleConfirmDialog}
+            onConfirm={handleConfirm}
+            variantRightButton="success-light"
+          />
+        </form>
         {isModalFormOpen && (
           <ModalForm
-            onSubmit={e => console.log(e)}
+            onSubmit={handleMetaSubmit}
             onToggle={handleToggleModal}
             type={get(attributes, [metaToEdit, 'type'], '')}
+            onChange={handleMetaChange}
           />
         )}
       </Main>
@@ -253,6 +334,7 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug }) =
 
 EditSettingsView.defaultProps = {
   isContentTypeView: false,
+  updateLayout: null,
 };
 
 EditSettingsView.propTypes = {
@@ -270,6 +352,7 @@ EditSettingsView.propTypes = {
     options: PropTypes.object.isRequired,
   }).isRequired,
   slug: PropTypes.string.isRequired,
+  updateLayout: PropTypes.func,
 };
 
 export default EditSettingsView;

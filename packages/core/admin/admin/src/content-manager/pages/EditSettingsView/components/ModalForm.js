@@ -1,129 +1,90 @@
-import React from 'react';
-import PropTypes from 'prop-types';
+import React, { useMemo, useCallback } from 'react';
+import get from 'lodash/get';
+import { GridItem } from '@strapi/design-system/Grid';
+import { useSelector, shallowEqual } from 'react-redux';
 import { useIntl } from 'react-intl';
-import upperFirst from 'lodash/upperFirst';
-import {
-  ModalLayout,
-  ModalHeader,
-  ModalFooter,
-  ModalBody,
-} from '@strapi/design-system/ModalLayout';
-import { ButtonText } from '@strapi/design-system/Text';
-import { Button } from '@strapi/design-system/Button';
-import { Flex } from '@strapi/design-system/Flex';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
-import Date from '@strapi/icons/Date';
-import Boolean from '@strapi/icons/Boolean';
-import Email from '@strapi/icons/Email';
-import Enumeration from '@strapi/icons/Enumeration';
-import Media from '@strapi/icons/Media';
-import Relation from '@strapi/icons/Relation';
-import Text from '@strapi/icons/Text';
-import Uid from '@strapi/icons/Uid';
-import Number from '@strapi/icons/Number';
-import Json from '@strapi/icons/Json';
-import Component from '@strapi/icons/Component';
-import DynamicZone from '@strapi/icons/DynamicZone';
-import styled from 'styled-components';
-import { getTrad } from '../../../utils';
 import { useLayoutDnd } from '../../../hooks';
+import { createPossibleMainFieldsForModelsAndComponents, getInputProps } from '../utils';
+import { makeSelectModelAndComponentSchemas } from '../../App/selectors';
+import getTrad from '../../../utils/getTrad';
+import GenericInput from './GenericInput';
 
-// Create a file
-const iconByTypes = {
-  biginteger: <Number />,
-  boolean: <Boolean />,
-  date: <Date />,
-  datetime: <Date />,
-  decimal: <Number />,
-  email: <Email />,
-  enum: <Enumeration />,
-  enumeration: <Enumeration />,
-  file: <Media />,
-  files: <Media />,
-  float: <Number />,
-  integer: <Number />,
-  media: <Media />,
-  number: <Number />,
-  relation: <Relation />,
-  string: <Text />,
-  text: <Text />,
-  time: <Date />,
-  timestamp: <Date />,
-  json: <Json />,
-  uid: <Uid />,
-  component: <Component />,
-  dynamiczone: <DynamicZone />,
-};
-
-const HeaderContainer = styled(Flex)`
-  svg {
-    width: ${32 / 16}rem;
-    height: ${24 / 16}rem;
-    margin-right: ${({ theme }) => theme.spaces[3]};
-  }
-`;
-
-const ModalForm = ({ onToggle, onSubmit, type }) => {
-  const { selectedField } = useLayoutDnd();
+const ModalForm = ({ onChange }) => {
   const { formatMessage } = useIntl();
+  const { modifiedData, selectedField, attributes, fieldForm } = useLayoutDnd();
+  const schemasSelector = useMemo(makeSelectModelAndComponentSchemas, []);
+  const { schemas } = useSelector(state => schemasSelector(state), shallowEqual);
 
-  const getAttrType = () => {
-    if (type === 'timestamp') {
-      return 'date';
+  const formToDisplay = useMemo(() => {
+    if (!selectedField) {
+      return [];
     }
 
-    if (['decimal', 'float', 'integer', 'biginter'].includes(type)) {
-      return 'number';
-    }
+    const associatedMetas = get(modifiedData, ['metadatas', selectedField, 'edit'], {});
 
-    return type;
-  };
+    return Object.keys(associatedMetas).filter(meta => meta !== 'visible');
+  }, [selectedField, modifiedData]);
 
-  return (
-    <ModalLayout onClose={onToggle} labelledBy="title">
-      <form onSubmit={onSubmit}>
-        <ModalHeader>
-          <HeaderContainer>
-            {iconByTypes[getAttrType(type)]}
-            <ButtonText textColor="neutral800" as="h2" id="title">
-              {formatMessage(
-                {
-                  id: getTrad('containers.ListSettingsView.modal-form.edit-label'),
-                  defaultMessage: 'Edit {fieldName}',
-                },
-                { fieldName: upperFirst(selectedField) }
-              )}
-            </ButtonText>
-          </HeaderContainer>
-        </ModalHeader>
-        <ModalBody>
-          <Grid gap={4}>
-            <GridItem s={12} col={6}>
-              TO DO
-            </GridItem>
-          </Grid>
-        </ModalBody>
-        <ModalFooter
-          startActions={
-            <Button onClick={onToggle} variant="tertiary">
-              {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
-            </Button>
-          }
-          endActions={
-            <Button type="submit">
-              {formatMessage({ id: 'form.button.finish', defaultMessage: 'Finish' })}
-            </Button>
-          }
-        />
-      </form>
-    </ModalLayout>
+  const componentsAndModelsPossibleMainFields = useMemo(() => {
+    return createPossibleMainFieldsForModelsAndComponents(schemas);
+  }, [schemas]);
+
+  const getSelectedItemSelectOptions = useCallback(
+    formType => {
+      if (formType !== 'relation' && formType !== 'component') {
+        return [];
+      }
+
+      const targetKey = formType === 'component' ? 'component' : 'targetModel';
+      const key = get(modifiedData, ['attributes', selectedField, targetKey], '');
+
+      return get(componentsAndModelsPossibleMainFields, [key], []);
+    },
+
+    [selectedField, componentsAndModelsPossibleMainFields, modifiedData]
   );
-};
 
-ModalForm.propTypes = {
-  onSubmit: PropTypes.func.isRequired,
-  onToggle: PropTypes.func.isRequired,
-  type: PropTypes.string.isRequired,
+  return formToDisplay.map(meta => {
+    const formType = get(attributes, [selectedField, 'type']);
+
+    if (formType === 'dynamiczone' && !['label', 'description'].includes(meta)) {
+      return null;
+    }
+
+    if ((formType === 'component' || formType === 'media') && meta !== 'label') {
+      return null;
+    }
+
+    if ((formType === 'json' || formType === 'boolean') && meta === 'placeholder') {
+      return null;
+    }
+
+    if (formType === 'richtext' && meta === 'editable') {
+      return null;
+    }
+
+    return (
+      <GridItem col={6} key={meta}>
+        <GenericInput
+          type={getInputProps(meta).type}
+          hint={
+            meta === 'mainField'
+              ? formatMessage({
+                  id: getTrad('containers.SettingPage.editSettings.relation-field.description'),
+                })
+              : ''
+          }
+          label={formatMessage({
+            id: get(getInputProps(meta), 'label.id', 'app.utils.defaultMessage'),
+          })}
+          name={meta}
+          onChange={onChange}
+          value={get(fieldForm, meta, '')}
+          options={getSelectedItemSelectOptions(formType)}
+        />
+      </GridItem>
+    );
+  });
 };
 
 export default ModalForm;

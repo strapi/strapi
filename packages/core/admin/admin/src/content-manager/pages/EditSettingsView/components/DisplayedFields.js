@@ -16,15 +16,9 @@ import { useLayoutDnd } from '../../../hooks';
 import FieldButton from './FieldButton';
 import LinkToCTB from './LinkToCTB';
 
-const DisplayedFields = ({
-  attributes,
-  editLayout,
-  editLayoutRemainingFields,
-  onRemoveField,
-  onAddField,
-}) => {
+const DisplayedFields = ({ editLayout, editLayoutRemainingFields, onRemoveField, onAddField }) => {
   const { formatMessage } = useIntl();
-  const { setEditFieldToSelect } = useLayoutDnd();
+  const { setEditFieldToSelect, attributes, modifiedData } = useLayoutDnd();
 
   return (
     <Stack size={4}>
@@ -56,6 +50,11 @@ const DisplayedFields = ({
             <Grid gap={4} key={row.rowId}>
               {row.rowContent.map((rowItem, index) => {
                 const attribute = get(attributes, [rowItem.name], {});
+                const attributeLabel = get(
+                  modifiedData,
+                  ['metadatas', rowItem.name, 'edit', 'label'],
+                  ''
+                );
 
                 return (
                   <GridItem key={rowItem.name} col={rowItem.size}>
@@ -65,7 +64,7 @@ const DisplayedFields = ({
                         onDeleteField={() => onRemoveField(row.rowId, index)}
                         attribute={attribute}
                       >
-                        {rowItem.name}
+                        {attributeLabel || rowItem.name}
                       </FieldButton>
                     ) : (
                       <VisuallyHidden />
@@ -82,6 +81,7 @@ const DisplayedFields = ({
               defaultMessage: 'Insert another field',
             })}
             as={Button}
+            data-testid="add-field"
             fullWidth
             startIcon={<Plus />}
             endIcon={null}
@@ -103,7 +103,6 @@ const DisplayedFields = ({
 DisplayedFields.propTypes = {
   editLayout: PropTypes.array.isRequired,
   editLayoutRemainingFields: PropTypes.array.isRequired,
-  attributes: PropTypes.object.isRequired,
   onAddField: PropTypes.func.isRequired,
   onRemoveField: PropTypes.func.isRequired,
 };

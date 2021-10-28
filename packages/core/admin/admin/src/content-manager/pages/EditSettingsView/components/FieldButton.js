@@ -15,6 +15,9 @@ import getTrad from '../../../utils/getTrad';
 
 const CustomIconButton = styled(IconButton)`
   background-color: transparent;
+  path {
+    fill: ${({ theme }) => theme.colors.neutral600};
+  }
 `;
 const CustomDragIcon = styled(Drag)`
   height: ${12 / 16}rem;
@@ -81,6 +84,7 @@ const FieldButton = ({ attribute, onEditField, onDeleteField, children }) => {
                   target: children,
                 }
               )}
+              data-testid="delete-field"
               onClick={onDeleteField}
               icon={<Trash />}
               noBorder
