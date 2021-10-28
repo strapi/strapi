@@ -12,6 +12,18 @@ const Filters = ({ displayedFilters }) => {
   const buttonRef = useRef();
   const { trackUsage } = useTracking();
 
+  const handleBlur = e => {
+    const ulListBox = document.querySelector('[role="listbox"]');
+
+    if (
+      !e.currentTarget.contains(e.relatedTarget) &&
+      e.relatedTarget !== buttonRef.current &&
+      e.relatedTarget !== ulListBox
+    ) {
+      setIsVisible(false);
+    }
+  };
+
   const handleToggle = () => {
     if (!isVisible) {
       trackUsage('willFilterEntries');
@@ -35,6 +47,7 @@ const Filters = ({ displayedFilters }) => {
           <FilterPopoverURLQuery
             displayedFilters={displayedFilters}
             isVisible={isVisible}
+            onBlur={handleBlur}
             onToggle={handleToggle}
             source={buttonRef}
           />

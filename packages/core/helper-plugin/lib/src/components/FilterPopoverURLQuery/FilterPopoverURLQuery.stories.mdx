@@ -30,6 +30,16 @@ import { FilterListURLQuery } from '@strapi/helper-plugin';
       const handleToggle = () => {
         setIsVisible(prev => !prev);
       };
+      const handleBlur = (e) => {
+        const ulListBox = document.querySelector('[role="listbox"]');
+        if (
+          !e.currentTarget.contains(e.relatedTarget) && 
+          e.relatedTarget !== buttonRef.current &&
+          e.relatedTarget !== ulListBox
+        ) {
+          setIsVisible(false)
+        }
+      }
       const [{ query }, setQuery] = useQueryParams();
       const filters = {
         $and: [{ city: { $eq: 'paris' } }, { categories: { name: { $eq: 'paris' } } }],
@@ -63,6 +73,7 @@ import { FilterListURLQuery } from '@strapi/helper-plugin';
                 isVisible={isVisible}
                 onToggle={handleToggle}
                 source={buttonRef}
+                onBlur={handleBlur}
               />
               <FilterListURLQuery filtersSchema={filtersSchema} />
             </Flex>
