@@ -74,7 +74,7 @@ const Component = ({
   return (
     <StyledBox>
       <Rectangle />
-
+      Already created DZ comp
       <Accordion expanded={isOpen} toggle={() => onToggle(index)}>
         <AccordionToggle
           action={
