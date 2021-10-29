@@ -9,11 +9,19 @@ import getTrad from '../../../utils/getTrad';
 import { rawFileToAsset } from '../../../utils/rawFileToAsset';
 import { AssetSource } from '../../../constants';
 
-export const EmptyStateAsset = ({ disabled, onClick, onDropAsset }) => {
+export const EmptyStateAsset = ({ disabled, onAddAsset, onDropAsset, canRead }) => {
   const { formatMessage } = useIntl();
   const [dragOver, setDragOver] = useState(false);
 
-  const handleDragEnter = () => setDragOver(true);
+  // The creating is determined with the capability to drop another asset in the field
+  // Dropping an asset automatically opens the MediaLibrary upload dialog which is
+  // constrained by RBAC in the ML lands
+  const canCreate = Boolean(onDropAsset);
+
+  const handleDragEnter = () => {
+    setDragOver(true);
+  };
+
   const handleDragLeave = e => {
     if (!e.currentTarget.contains(e.relatedTarget)) {
       setDragOver(false);
@@ -38,6 +46,8 @@ export const EmptyStateAsset = ({ disabled, onClick, onDropAsset }) => {
     setDragOver(false);
   };
 
+  console.log('xtf', canCreate, canRead);
+
   return (
     <Flex
       borderStyle={dragOver ? 'dashed' : undefined}
@@ -50,10 +60,10 @@ export const EmptyStateAsset = ({ disabled, onClick, onDropAsset }) => {
       width="100%"
       as="button"
       type="button"
-      onClick={onClick}
-      onDragEnter={handleDragEnter}
-      onDragLeave={handleDragLeave}
-      onDrop={handleDrop}
+      onClick={canRead || canCreate ? onAddAsset : undefined}
+      onDragEnter={canCreate ? handleDragEnter : undefined}
+      onDragLeave={canCreate ? handleDragLeave : undefined}
+      onDrop={canCreate ? handleDrop : undefined}
     >
       <Icon
         as={AddAsset}
@@ -64,22 +74,48 @@ export const EmptyStateAsset = ({ disabled, onClick, onDropAsset }) => {
         marginBottom={3}
       />
       <Text small bold textColor="neutral600" style={{ textAlign: 'center' }} as="span">
-        {formatMessage({
-          id: getTrad('mediaLibraryInput.placeholder'),
-          defaultMessage: 'Click to select an asset or drag and drop one in this area',
-        })}
+        {canCreate && canRead
+          ? formatMessage({
+              id: getTrad('mediaLibraryInput.placeholder'),
+              defaultMessage: 'Click to select an asset or drag and drop one in this area',
+            })
+          : null}
+
+        {canCreate && !canRead
+          ? formatMessage({
+              id: getTrad('mediaLibraryInput.noReadPermission'),
+              defaultMessage: 'Click to add an asset or drag and drop one in this area',
+            })
+          : null}
+
+        {!canCreate && canRead
+          ? formatMessage({
+              id: getTrad('mediaLibraryInput.noCreatePermission'),
+              defaultMessage: 'Click to select an asset',
+            })
+          : null}
+
+        {!canCreate && !canRead
+          ? formatMessage({
+              id: getTrad('mediaLibraryInput.noPermission'),
+              defaultMessage: "You don't have the permission to edit this field",
+            })
+          : null}
       </Text>
     </Flex>
   );
 };
 
 EmptyStateAsset.defaultProps = {
+  canRead: false,
   disabled: false,
+  onAddAsset: undefined,
   onDropAsset: undefined,
 };
 
 EmptyStateAsset.propTypes = {
+  canRead: PropTypes.bool,
   disabled: PropTypes.bool,
-  onClick: PropTypes.func.isRequired,
+  onAddAsset: PropTypes.func,
   onDropAsset: PropTypes.func,
 };

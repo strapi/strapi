@@ -7,13 +7,7 @@ import { BaseCheckbox } from '@strapi/parts/BaseCheckbox';
 import { AssetList } from '../../../AssetList';
 import getTrad from '../../../../utils/getTrad';
 
-export const BrowseStep = ({
-  assets,
-  onEditAsset,
-  onSelectAsset,
-  onSelectAllAsset,
-  selectedAssets,
-}) => {
+export const BrowseStep = ({ assets, onSelectAsset, onSelectAllAsset, selectedAssets }) => {
   const { formatMessage } = useIntl();
 
   return (
@@ -45,7 +39,6 @@ export const BrowseStep = ({
         assets={assets}
         onSelectAsset={onSelectAsset}
         selectedAssets={selectedAssets}
-        onEditAsset={onEditAsset}
       />
     </Stack>
   );
@@ -57,7 +50,6 @@ BrowseStep.defaultProps = {
 
 BrowseStep.propTypes = {
   assets: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
-  onEditAsset: PropTypes.func.isRequired,
   onSelectAsset: PropTypes.func.isRequired,
   onSelectAllAsset: PropTypes.func,
   selectedAssets: PropTypes.arrayOf(PropTypes.shape({})).isRequired,

@@ -12,7 +12,14 @@ import { CopyLinkButton } from '../../CopyLinkButton';
 import { AssetDefinition } from '../../../constants';
 import { EditAssetDialog } from '../../EditAssetDialog';
 
-export const CarouselAssetActions = ({ asset, onDeleteAsset, onAddAsset, onEditAsset }) => {
+export const CarouselAssetActions = ({
+  asset,
+  onDeleteAsset,
+  onAddAsset,
+  onEditAsset,
+  canCopyLink,
+  canDownload,
+}) => {
   const { formatMessage } = useIntl();
   const [isEditDialogOpened, setEditDialogOpened] = useState(false);
 
@@ -30,7 +37,7 @@ export const CarouselAssetActions = ({ asset, onDeleteAsset, onAddAsset, onEditA
           />
         )}
 
-        <CopyLinkButton url={prefixFileUrlWithBackendUrl(asset.url)} />
+        {canCopyLink && <CopyLinkButton url={prefixFileUrlWithBackendUrl(asset.url)} />}
 
         {onDeleteAsset && (
           <IconButton
@@ -66,8 +73,8 @@ export const CarouselAssetActions = ({ asset, onDeleteAsset, onAddAsset, onEditA
           }}
           asset={asset}
           canUpdate
-          canCopyLink
-          canDownload
+          canCopyLink={canCopyLink}
+          canDownload={canDownload}
         />
       )}
     </>
@@ -75,6 +82,8 @@ export const CarouselAssetActions = ({ asset, onDeleteAsset, onAddAsset, onEditA
 };
 
 CarouselAssetActions.defaultProps = {
+  canCopyLink: false,
+  canDownload: false,
   onAddAsset: undefined,
   onDeleteAsset: undefined,
   onEditAsset: undefined,
@@ -82,6 +91,8 @@ CarouselAssetActions.defaultProps = {
 
 CarouselAssetActions.propTypes = {
   asset: AssetDefinition.isRequired,
+  canCopyLink: PropTypes.bool,
+  canDownload: PropTypes.bool,
   onAddAsset: PropTypes.func,
   onEditAsset: PropTypes.func,
   onDeleteAsset: PropTypes.func,

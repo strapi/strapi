@@ -30,7 +30,7 @@ export const AssetList = ({ assets, onEditAsset, onSelectAsset, selectedAssets, 
               key={asset.id}
               asset={asset}
               isSelected={isSelected}
-              onEdit={() => onEditAsset(asset)}
+              onEdit={onEditAsset ? () => onEditAsset(asset) : undefined}
               onSelect={() => onSelectAsset(asset)}
               size={size}
             />
@@ -50,12 +50,13 @@ export const AssetList = ({ assets, onEditAsset, onSelectAsset, selectedAssets, 
 };
 
 AssetList.defaultProps = {
+  onEditAsset: undefined,
   size: 'M',
 };
 
 AssetList.propTypes = {
   assets: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
-  onEditAsset: PropTypes.func.isRequired,
+  onEditAsset: PropTypes.func,
   onSelectAsset: PropTypes.func.isRequired,
   selectedAssets: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
   size: PropTypes.oneOf(['S', 'M']),

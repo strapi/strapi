@@ -130,7 +130,7 @@ describe('MediaLibrary / AssetList', () => {
     );
 
     expect(container).toMatchInlineSnapshot(`
-      .c33 {
+      .c30 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
@@ -142,105 +142,7 @@ describe('MediaLibrary / AssetList', () => {
         width: 1px;
       }
 
-      .c7 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        cursor: pointer;
-        padding: 8px;
-        border-radius: 4px;
-        background: #ffffff;
-        border: 1px solid #dcdce4;
-        position: relative;
-        outline: none;
-      }
-
-      .c7 svg {
-        height: 12px;
-        width: 12px;
-      }
-
-      .c7 svg > g,
-      .c7 svg path {
-        fill: #ffffff;
-      }
-
-      .c7[aria-disabled='true'] {
-        pointer-events: none;
-      }
-
-      .c7:after {
-        -webkit-transition-property: all;
-        transition-property: all;
-        -webkit-transition-duration: 0.2s;
-        transition-duration: 0.2s;
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -4px;
-        bottom: -4px;
-        left: -4px;
-        right: -4px;
-        border: 2px solid transparent;
-      }
-
-      .c7:focus-visible {
-        outline: none;
-      }
-
-      .c7:focus-visible:after {
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -5px;
-        bottom: -5px;
-        left: -5px;
-        right: -5px;
-        border: 2px solid #4945ff;
-      }
-
-      .c8 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        -webkit-box-pack: center;
-        -webkit-justify-content: center;
-        -ms-flex-pack: center;
-        justify-content: center;
-        height: 2rem;
-        width: 2rem;
-      }
-
-      .c8 svg > g,
-      .c8 svg path {
-        fill: #8e8ea9;
-      }
-
-      .c8:hover svg > g,
-      .c8:hover svg path {
-        fill: #666687;
-      }
-
-      .c8:active svg > g,
-      .c8:active svg path {
-        fill: #a5a5ba;
-      }
-
-      .c8[aria-disabled='true'] {
-        background-color: #eaeaef;
-      }
-
-      .c8[aria-disabled='true'] svg path {
-        fill: #666687;
-      }
-
-      .c26 {
+      .c23 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
@@ -258,21 +160,21 @@ describe('MediaLibrary / AssetList', () => {
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
-      .c11 {
+      .c8 {
         padding-top: 8px;
         padding-right: 12px;
         padding-bottom: 8px;
         padding-left: 12px;
       }
 
-      .c18 {
+      .c15 {
         background: #f6f6f9;
         color: #666687;
         padding: 4px;
         border-radius: 4px;
       }
 
-      .c27 {
+      .c24 {
         background: #32324d;
         color: #ffffff;
         padding: 4px;
@@ -283,12 +185,6 @@ describe('MediaLibrary / AssetList', () => {
         position: absolute;
         top: 12px;
         left: 12px;
-      }
-
-      .c6 {
-        position: absolute;
-        top: 12px;
-        right: 12px;
       }
 
       .c2 {
@@ -309,7 +205,7 @@ describe('MediaLibrary / AssetList', () => {
         align-items: center;
       }
 
-      .c12 {
+      .c9 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -323,7 +219,7 @@ describe('MediaLibrary / AssetList', () => {
         align-items: flex-start;
       }
 
-      .c24 {
+      .c21 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -337,14 +233,14 @@ describe('MediaLibrary / AssetList', () => {
         align-items: center;
       }
 
-      .c10 {
+      .c7 {
         margin: 0;
         padding: 0;
         max-height: 100%;
         max-width: 100%;
       }
 
-      .c9 {
+      .c6 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -358,58 +254,58 @@ describe('MediaLibrary / AssetList', () => {
         background: repeating-conic-gradient(#f6f6f9 0% 25%,transparent 0% 50%) 50% / 20px 20px;
       }
 
-      .c14 {
+      .c11 {
         font-weight: 500;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #32324d;
       }
 
-      .c15 {
+      .c12 {
         font-weight: 400;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #666687;
       }
 
-      .c21 {
+      .c18 {
         font-weight: 400;
         font-size: 0.875rem;
         line-height: 1.43;
         color: #32324d;
       }
 
-      .c29 {
+      .c26 {
         font-weight: 400;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #ffffff;
       }
 
-      .c22 {
+      .c19 {
         font-weight: 600;
         line-height: 1.14;
       }
 
-      .c23 {
+      .c20 {
         font-weight: 600;
         font-size: 0.6875rem;
         line-height: 1.45;
         text-transform: uppercase;
       }
 
-      .c19 {
+      .c16 {
         display: inline-block;
       }
 
-      .c17 {
+      .c14 {
         margin-left: auto;
         -webkit-flex-shrink: 0;
         -ms-flex-negative: 0;
         flex-shrink: 0;
       }
 
-      .c20 {
+      .c17 {
         margin-left: 4px;
       }
 
@@ -480,7 +376,7 @@ describe('MediaLibrary / AssetList', () => {
         background-color: #8e8ea9;
       }
 
-      .c13 {
+      .c10 {
         word-break: break-all;
       }
 
@@ -489,32 +385,32 @@ describe('MediaLibrary / AssetList', () => {
         border-bottom: 1px solid #eaeaef;
       }
 
-      .c28 {
+      .c25 {
         position: absolute;
         bottom: 4px;
         right: 4px;
       }
 
-      .c16 {
+      .c13 {
         text-transform: uppercase;
       }
 
-      .c30 {
+      .c27 {
         text-transform: uppercase;
       }
 
-      .c25 canvas,
-      .c25 video {
+      .c22 canvas,
+      .c22 video {
         display: block;
         max-width: 100%;
         max-height: 10.25rem;
       }
 
-      .c32 {
+      .c29 {
         text-transform: uppercase;
       }
 
-      .c31 svg {
+      .c28 svg {
         font-size: 3rem;
       }
 
@@ -551,62 +447,34 @@ describe('MediaLibrary / AssetList', () => {
                 <div
                   class="c6"
                 >
-                  <span>
-                    <button
-                      aria-disabled="false"
-                      aria-labelledby="tooltip-1"
-                      class="c7 c8"
-                      tabindex="0"
-                      type="button"
-                    >
-                      <svg
-                        fill="none"
-                        height="1em"
-                        viewBox="0 0 24 24"
-                        width="1em"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          clip-rule="evenodd"
-                          d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
-                          fill="#212134"
-                          fill-rule="evenodd"
-                        />
-                      </svg>
-                    </button>
-                  </span>
-                </div>
-                <div
-                  class="c9"
-                >
                   <img
                     alt="strapi-cover_1fabc982ce.png"
                     aria-hidden="true"
-                    class="c10"
+                    class="c7"
                     src="http://localhost:1337/uploads/thumbnail_strapi_cover_1fabc982ce_5b43615ed5.png?width=1066&height=551"
                   />
                 </div>
               </div>
               <div
-                class="c11"
+                class="c8"
               >
                 <div
-                  class="c12"
+                  class="c9"
                 >
                   <div
-                    class="c13"
+                    class="c10"
                   >
                     <h2
-                      class="c14"
+                      class="c11"
                       id="card-1-title"
                     >
                       strapi-cover_1fabc982ce.png
                     </h2>
                     <div
-                      class="c15"
+                      class="c12"
                     >
                       <span
-                        class="c16"
+                        class="c13"
                       >
                         png
                       </span>
@@ -614,13 +482,13 @@ describe('MediaLibrary / AssetList', () => {
                     </div>
                   </div>
                   <div
-                    class="c17"
+                    class="c14"
                   >
                     <div
-                      class="c18 c19 c20"
+                      class="c15 c16 c17"
                     >
                       <span
-                        class="c21 c22 c23"
+                        class="c18 c19 c20"
                       >
                         Image
                       </span>
@@ -649,39 +517,11 @@ describe('MediaLibrary / AssetList', () => {
                 <div
                   class="c6"
                 >
-                  <span>
-                    <button
-                      aria-disabled="false"
-                      aria-labelledby="tooltip-3"
-                      class="c7 c8"
-                      tabindex="0"
-                      type="button"
-                    >
-                      <svg
-                        fill="none"
-                        height="1em"
-                        viewBox="0 0 24 24"
-                        width="1em"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          clip-rule="evenodd"
-                          d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
-                          fill="#212134"
-                          fill-rule="evenodd"
-                        />
-                      </svg>
-                    </button>
-                  </span>
-                </div>
-                <div
-                  class="c9"
-                >
                   <div
-                    class="c24"
+                    class="c21"
                   >
                     <div
-                      class="c25"
+                      class="c22"
                     >
                       <figure
                         class=""
@@ -695,7 +535,7 @@ describe('MediaLibrary / AssetList', () => {
                           />
                         </video>
                         <figcaption
-                          class="c26"
+                          class="c23"
                         >
                           mov_bbb.mp4
                         </figcaption>
@@ -704,48 +544,48 @@ describe('MediaLibrary / AssetList', () => {
                   </div>
                 </div>
                 <time
-                  class="c27 c28"
+                  class="c24 c25"
                 >
                   <span
-                    class="c29"
+                    class="c26"
                   >
                     ...
                   </span>
                 </time>
               </div>
               <div
-                class="c11"
+                class="c8"
               >
                 <div
-                  class="c12"
+                  class="c9"
                 >
                   <div
-                    class="c13"
+                    class="c10"
                   >
                     <h2
-                      class="c14"
+                      class="c11"
                       id="card-2-title"
                     >
                       mov_bbb.mp4
                     </h2>
                     <div
-                      class="c15"
+                      class="c12"
                     >
                       <span
-                        class="c30"
+                        class="c27"
                       >
                         mp4
                       </span>
                     </div>
                   </div>
                   <div
-                    class="c17"
+                    class="c14"
                   >
                     <div
-                      class="c18 c19 c20"
+                      class="c15 c16 c17"
                     >
                       <span
-                        class="c21 c22 c23"
+                        class="c18 c19 c20"
                       >
                         Video
                       </span>
@@ -774,39 +614,11 @@ describe('MediaLibrary / AssetList', () => {
                 <div
                   class="c6"
                 >
-                  <span>
-                    <button
-                      aria-disabled="false"
-                      aria-labelledby="tooltip-5"
-                      class="c7 c8"
-                      tabindex="0"
-                      type="button"
-                    >
-                      <svg
-                        fill="none"
-                        height="1em"
-                        viewBox="0 0 24 24"
-                        width="1em"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          clip-rule="evenodd"
-                          d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
-                          fill="#212134"
-                          fill-rule="evenodd"
-                        />
-                      </svg>
-                    </button>
-                  </span>
-                </div>
-                <div
-                  class="c9"
-                >
                   <div
-                    class="c24"
+                    class="c21"
                   >
                     <span
-                      class="c31"
+                      class="c28"
                     >
                       <svg
                         aria-label="CARTE MARIAGE AVS - Printemps.pdf"
@@ -826,38 +638,38 @@ describe('MediaLibrary / AssetList', () => {
                 </div>
               </div>
               <div
-                class="c11"
+                class="c8"
               >
                 <div
-                  class="c12"
+                  class="c9"
                 >
                   <div
-                    class="c13"
+                    class="c10"
                   >
                     <h2
-                      class="c14"
+                      class="c11"
                       id="card-3-title"
                     >
                       CARTE MARIAGE AVS - Printemps.pdf
                     </h2>
                     <div
-                      class="c15"
+                      class="c12"
                     >
                       <span
-                        class="c32"
+                        class="c29"
                       >
                         pdf
                       </span>
                     </div>
                   </div>
                   <div
-                    class="c17"
+                    class="c14"
                   >
                     <div
-                      class="c18 c19 c20"
+                      class="c15 c16 c17"
                     >
                       <span
-                        class="c21 c22 c23"
+                        class="c18 c19 c20"
                       >
                         Doc
                       </span>
@@ -887,7 +699,7 @@ describe('MediaLibrary / AssetList', () => {
           </div>
         </div>
         <div
-          class="c33"
+          class="c30"
         >
           <p
             aria-live="polite"

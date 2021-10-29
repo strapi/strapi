@@ -5,6 +5,7 @@ import { AssetDialog } from './AssetDialog';
 import { AssetDefinition } from '../../constants';
 import { CarouselAssets } from './Carousel/CarouselAssets';
 import { UploadAssetDialog } from '../UploadAssetDialog/UploadAssetDialog';
+import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
 
 const Steps = {
   SelectAsset: 'SelectAsset',
@@ -24,6 +25,14 @@ export const MediaLibraryInput = ({
   const [step, setStep] = useState(undefined);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [droppedAssets, setDroppedAssets] = useState();
+  const {
+    isLoading,
+    canRead,
+    canCreate,
+    canUpdate,
+    canCopyLink,
+    canDownload,
+  } = useMediaLibraryPermissions();
   const { formatMessage } = useIntl();
 
   const selectedAssets = Array.isArray(value) ? value : [value];
@@ -80,12 +89,16 @@ export const MediaLibraryInput = ({
         assets={selectedAssets}
         disabled={disabled}
         label={label}
-        onDeleteAsset={handleDeleteAsset}
-        onAddAsset={() => setStep(Steps.SelectAsset)}
-        onEditAsset={handleAssetEdit}
-        onDropAsset={handleAssetDrop}
         error={errorMessage}
         hint={hint}
+        isLoading={isLoading}
+        canRead={canRead}
+        canCopyLink={canCopyLink}
+        canDownload={canDownload}
+        onDeleteAsset={canUpdate ? handleDeleteAsset : undefined}
+        onEditAsset={canUpdate ? handleAssetEdit : undefined}
+        onAddAsset={() => setStep(Steps.SelectAsset)}
+        onDropAsset={canCreate ? handleAssetDrop : undefined}
       />
 
       {step === Steps.SelectAsset && (
@@ -95,6 +108,8 @@ export const MediaLibraryInput = ({
           onValidate={handleValidation}
           multiple={multiple}
           onAddAsset={() => setStep(Steps.UploadAsset)}
+          canRead={canRead}
+          canCreate={canCreate}
         />
       )}
 

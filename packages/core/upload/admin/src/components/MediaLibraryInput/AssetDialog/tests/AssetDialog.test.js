@@ -2,7 +2,7 @@ import React from 'react';
 import { ThemeProvider, lightTheme } from '@strapi/parts';
 import { QueryClientProvider, QueryClient } from 'react-query';
 import { render as renderTL, screen, waitFor } from '@testing-library/react';
-import { useRBAC, useQueryParams } from '@strapi/helper-plugin';
+import { useQueryParams } from '@strapi/helper-plugin';
 import { MemoryRouter } from 'react-router-dom';
 import { rest } from 'msw';
 import { AssetDialog } from '..';
@@ -12,7 +12,6 @@ import { assetResultMock } from './asset.mock';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
-  useRBAC: jest.fn(),
   useNotification: jest.fn(() => jest.fn()),
   useQueryParams: jest.fn(),
 }));
@@ -32,7 +31,7 @@ const queryClient = new QueryClient({
   },
 });
 
-const renderML = (props = { onClose: jest.fn(), multiple: false, initiallySelectedAssets: [] }) =>
+const renderML = props =>
   renderTL(
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={lightTheme}>
@@ -44,42 +43,38 @@ const renderML = (props = { onClose: jest.fn(), multiple: false, initiallySelect
   );
 
 describe('AssetDialog', () => {
+  let props;
   beforeAll(() => server.listen());
 
   beforeEach(() => {
-    useRBAC.mockReturnValue({
-      isLoading: false,
-      allowedActions: {
-        canRead: true,
-        canCreate: true,
-        canUpdate: true,
-        canCopyLink: true,
-        canDownload: true,
-      },
-    });
-
+    props = {
+      onClose: jest.fn(),
+      onAddAsset: jest.fn(),
+      onValidate: jest.fn(),
+      multiple: false,
+      initiallySelectedAssets: [],
+      canRead: true,
+      canCreate: true,
+    };
     useQueryParams.mockReturnValue([{ rawQuery: 'some-url' }, jest.fn()]);
   });
 
   afterEach(() => {
     server.resetHandlers();
-    jest.clearAllMocks();
   });
 
   afterAll(() => server.close());
 
   describe('loading state', () => {
     it('shows a loader when resolving the permissions', () => {
-      useRBAC.mockReturnValue({ isLoading: true, allowedActions: {} });
-
-      renderML();
+      renderML(props);
 
       expect(screen.getByRole('dialog').getAttribute('aria-busy')).toBe('true');
       expect(screen.getByText('Loading the asset list.')).toBeInTheDocument();
     });
 
     it('shows a loader when resolving the assets', () => {
-      renderML();
+      renderML(props);
 
       expect(screen.getByRole('dialog').getAttribute('aria-busy')).toBe('true');
       expect(screen.getByText('Loading the asset list.')).toBeInTheDocument();
@@ -87,65 +82,53 @@ describe('AssetDialog', () => {
   });
 
   describe('content', () => {
+    // The permissions cases for:
+    // - canRead = false and canCreate = false
+    // are managed in the parent component
     describe('empty state', () => {
-      it('shows an empty state when there are no assets and the user is allowed to read', async () => {
-        renderML();
+      it('shows an empty state when there are no assets and the user is allowed to read and to create', async () => {
+        renderML(props);
 
         await waitFor(() =>
           expect(screen.getByText('Upload your first assets...')).toBeInTheDocument()
         );
 
+        expect(screen.getByRole('button', { name: 'Upload assets' })).toBeInTheDocument();
         expect(screen.getByRole('dialog').getAttribute('aria-busy')).toBe(null);
       });
 
-      it('shows a specific empty state when the user is not allowed to see the content', async () => {
-        useRBAC.mockReturnValue({
-          isLoading: false,
-          allowedActions: {
-            canRead: false,
-          },
-        });
-
-        renderML();
+      it('shows an empty state when there are no assets and the user is allowed to create and NOT to read', async () => {
+        props.canRead = false;
+        renderML(props);
 
         await waitFor(() =>
-          expect(
-            screen.getByText(`app.components.EmptyStateLayout.content-permissions`)
-          ).toBeInTheDocument()
+          expect(screen.getByText('Upload your first assets...')).toBeInTheDocument()
         );
 
+        expect(screen.getByRole('button', { name: 'Upload assets' })).toBeInTheDocument();
         expect(screen.getByRole('dialog').getAttribute('aria-busy')).toBe(null);
       });
 
-      it('shows a specific empty state when the user can read but not create', async () => {
-        useRBAC.mockReturnValue({
-          isLoading: false,
-          allowedActions: {
-            canRead: true,
-            canCreate: false,
-          },
-        });
-
-        renderML();
+      it('shows an empty state when there are no assets and the user is allowed to read and NOT to create', async () => {
+        props.canCreate = false;
+        renderML(props);
 
         await waitFor(() =>
-          expect(screen.getByText(`The asset list is empty.`)).toBeInTheDocument()
-        );
-        await waitFor(() =>
-          expect(screen.queryByText('Upload your first assets...')).not.toBeInTheDocument()
+          expect(screen.getByText('The asset list is empty.')).toBeInTheDocument()
         );
 
+        expect(screen.queryByRole('button', { name: 'Upload assets' })).not.toBeInTheDocument();
         expect(screen.getByRole('dialog').getAttribute('aria-busy')).toBe(null);
       });
     });
 
-    describe('content resolved', () => {
+    describe('content resolved with canRead = true', () => {
       beforeEach(() => {
         server.use(rest.get('*/upload/files*', (req, res, ctx) => res(ctx.json(assetResultMock))));
       });
 
       it('shows an asset when the data resolves', async () => {
-        renderML();
+        renderML(props);
 
         await waitFor(() => expect(screen.getByText('3874873.jpg')).toBeInTheDocument());
 
@@ -153,7 +136,24 @@ describe('AssetDialog', () => {
           screen.getByText((_, element) => element.textContent === 'jpg - 400✕400')
         ).toBeInTheDocument();
         expect(screen.getByText('Image')).toBeInTheDocument();
-        expect(screen.getByLabelText('Edit')).toBeInTheDocument();
+      });
+
+      it('shows the add more assets button when authorized to create', async () => {
+        props.canCreate = true;
+        renderML(props);
+
+        await waitFor(() => expect(screen.getByText(`browse`)).toBeInTheDocument());
+
+        expect(screen.getByText('Add more assets')).toBeInTheDocument();
+      });
+
+      it('hides the add more assets button when not authorized to create', async () => {
+        props.canCreate = false;
+        renderML(props);
+
+        await waitFor(() => expect(screen.getByText(`browse`)).toBeInTheDocument());
+
+        expect(screen.queryByText('Add more assets')).not.toBeInTheDocument();
       });
     });
   });

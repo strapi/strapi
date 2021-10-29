@@ -9,25 +9,29 @@ import { useIntl } from 'react-intl';
 import { Tabs, Tab, TabGroup, TabPanels, TabPanel } from '@strapi/parts/Tabs';
 import { Badge } from '@strapi/parts/Badge';
 import { Loader } from '@strapi/parts/Loader';
-import { NoPermissions, AnErrorOccurred, useSelectionState, NoMedia } from '@strapi/helper-plugin';
+import { AnErrorOccurred, useSelectionState, NoMedia } from '@strapi/helper-plugin';
 import getTrad from '../../../utils/getTrad';
 import { SelectedStep } from './SelectedStep';
 import { BrowseStep } from './BrowseStep';
-import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
 import { useAssets } from '../../../hooks/useAssets';
 import { AssetDefinition } from '../../../constants';
 import { DialogTitle } from './DialogTitle';
 import { DialogFooter } from './DialogFooter';
 
+// When opening the AssetDialog in the MediaLibraryInput,
+// creation permissions has already been checked.
+// However, we need to make sure that the user has read permissions since
+// ML and CM permissions are not the same
 export const AssetDialog = ({
   onClose,
   onAddAsset,
   onValidate,
   multiple,
   initiallySelectedAssets,
+  canRead,
+  canCreate,
 }) => {
   const { formatMessage } = useIntl();
-  const { canRead, canCreate, isLoading: isLoadingPermissions } = useMediaLibraryPermissions();
   const { data, isLoading, error } = useAssets({ skipWhen: !canRead });
   const [selectedAssets, { selectOne, selectAll, selectOnly }] = useSelectionState(
     'id',
@@ -35,10 +39,9 @@ export const AssetDialog = ({
   );
 
   const handleSelectAsset = asset => (multiple ? selectOne(asset) : selectOnly(asset));
-  const loading = isLoadingPermissions || isLoading;
   const assets = data?.results;
 
-  if (loading) {
+  if (isLoading) {
     return (
       <ModalLayout onClose={onClose} labelledBy="asset-dialog-title" aria-busy>
         <DialogTitle />
@@ -46,7 +49,7 @@ export const AssetDialog = ({
           <Loader>
             {formatMessage({
               id: getTrad('list.asset.load'),
-              defaultMessage: 'How do you want to upload your assets?',
+              defaultMessage: 'Loading the asset list.',
             })}
           </Loader>
         </Flex>
@@ -65,31 +68,19 @@ export const AssetDialog = ({
     );
   }
 
-  if (!canRead) {
-    return (
-      <ModalLayout onClose={onClose} labelledBy="asset-dialog-title">
-        <DialogTitle />
-        <NoPermissions />
-        <DialogFooter onClose={onClose} />
-      </ModalLayout>
-    );
-  }
-
-  if (canRead && assets?.length === 0) {
+  if ((canCreate && !canRead) || (canRead && assets?.length === 0)) {
     return (
       <ModalLayout onClose={onClose} labelledBy="asset-dialog-title">
         <DialogTitle />
         <NoMedia
           action={
-            canCreate ? (
+            canCreate && (
               <Button variant="secondary" startIcon={<AddIcon />} onClick={onAddAsset}>
                 {formatMessage({
                   id: getTrad('modal.header.browse'),
                   defaultMessage: 'Upload assets',
                 })}
               </Button>
-            ) : (
-              undefined
             )
           }
           content={
@@ -100,7 +91,7 @@ export const AssetDialog = ({
                 })
               : formatMessage({
                   id: getTrad('list.assets.empty.no-permissions'),
-                  defaultMessage: 'The asset list is empty',
+                  defaultMessage: 'The asset list is empty.',
                 })
           }
         />
@@ -110,7 +101,7 @@ export const AssetDialog = ({
   }
 
   return (
-    <ModalLayout onClose={onClose} labelledBy="asset-dialog-title" aria-busy={loading}>
+    <ModalLayout onClose={onClose} labelledBy="asset-dialog-title" aria-busy={isLoading}>
       <DialogTitle />
 
       <TabGroup
@@ -122,12 +113,14 @@ export const AssetDialog = ({
       >
         <Flex paddingLeft={8} paddingRight={8} paddingTop={6} justifyContent="space-between">
           <Tabs>
-            <Tab>
-              {formatMessage({
-                id: getTrad('modal.nav.browse'),
-                defaultMessage: 'Browse',
-              })}
-            </Tab>
+            {canRead && (
+              <Tab>
+                {formatMessage({
+                  id: getTrad('modal.nav.browse'),
+                  defaultMessage: 'Browse',
+                })}
+              </Tab>
+            )}
             <Tab>
               {formatMessage({
                 id: getTrad('modal.header.select-files'),
@@ -137,26 +130,29 @@ export const AssetDialog = ({
             </Tab>
           </Tabs>
 
-          <Button onClick={onAddAsset}>
-            {formatMessage({
-              id: getTrad('modal.upload-list.sub-header.button'),
-              defaultMessage: 'Add more assets',
-            })}
-          </Button>
+          {canCreate && (
+            <Button onClick={onAddAsset}>
+              {formatMessage({
+                id: getTrad('modal.upload-list.sub-header.button'),
+                defaultMessage: 'Add more assets',
+              })}
+            </Button>
+          )}
         </Flex>
         <Divider />
         <TabPanels>
-          <TabPanel>
-            <ModalBody>
-              <BrowseStep
-                assets={assets}
-                onSelectAsset={handleSelectAsset}
-                selectedAssets={selectedAssets}
-                onSelectAllAsset={multiple ? () => selectAll(assets) : undefined}
-                onEditAsset={() => {}}
-              />
-            </ModalBody>
-          </TabPanel>
+          {canRead && (
+            <TabPanel>
+              <ModalBody>
+                <BrowseStep
+                  assets={assets}
+                  onSelectAsset={handleSelectAsset}
+                  selectedAssets={selectedAssets}
+                  onSelectAllAsset={multiple ? () => selectAll(assets) : undefined}
+                />
+              </ModalBody>
+            </TabPanel>
+          )}
           <TabPanel>
             <ModalBody>
               <SelectedStep selectedAssets={selectedAssets} onSelectAsset={handleSelectAsset} />
@@ -171,10 +167,14 @@ export const AssetDialog = ({
 };
 
 AssetDialog.defaultProps = {
+  canCreate: false,
+  canRead: false,
   multiple: false,
 };
 
 AssetDialog.propTypes = {
+  canCreate: PropTypes.bool,
+  canRead: PropTypes.bool,
   initiallySelectedAssets: PropTypes.arrayOf(AssetDefinition).isRequired,
   multiple: PropTypes.bool,
   onAddAsset: PropTypes.func.isRequired,
