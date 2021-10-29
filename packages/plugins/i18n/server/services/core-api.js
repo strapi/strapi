@@ -2,7 +2,7 @@
 
 const _ = require('lodash');
 const { prop, pick, reduce, map, keys, toPath, isNil } = require('lodash/fp');
-const { contentTypes, parseMultipartData, sanitizeEntity } = require('@strapi/utils');
+const { contentTypes, parseMultipartData, sanitize } = require('@strapi/utils');
 
 const { getService } = require('../utils');
 
@@ -142,7 +142,7 @@ const createCreateLocalizationHandler = contentType => async (ctx = {}) => {
     populate: ['localizations'],
   });
 
-  return sanitizeEntity(newEntry, { model: strapi.getModel(contentType.uid) });
+  return sanitize.contentAPI.output(newEntry, strapi.getModel(contentType.uid));
 };
 
 /**

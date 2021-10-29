@@ -3,11 +3,8 @@
 const _ = require('lodash');
 const { cloneDeep, isPlainObject } = require('lodash/fp');
 const { subject: asSubject } = require('@casl/ability');
-const { permittedFieldsOf } = require('@casl/ability/extra');
-const {
-  sanitizeEntity,
-  contentTypes: { constants },
-} = require('@strapi/utils');
+const createSanitizeHelpers = require('./sanitize');
+
 const { buildStrapiQuery, buildCaslQuery } = require('./query-builers');
 
 module.exports = ({ ability, action, model }) => ({
@@ -24,7 +21,7 @@ module.exports = ({ ability, action, model }) => ({
   },
 
   pickPermittedFieldsOf(data, options = {}) {
-    return this.sanitize(data, { ...options, isOutput: false });
+    return this.sanitizeInput(data, options);
   },
 
   getQuery(queryAction = action) {
@@ -46,34 +43,5 @@ module.exports = ({ ability, action, model }) => ({
     return newQuery;
   },
 
-  sanitize(data, options = {}) {
-    const {
-      subject = this.toSubject(data),
-      action: actionOverride = action,
-      withPrivate = true,
-      isOutput = true,
-    } = options;
-
-    if (_.isArray(data)) {
-      return data.map(entity => this.sanitize(entity, { action, withPrivate, isOutput }));
-    }
-
-    const permittedFields = permittedFieldsOf(ability, actionOverride, subject);
-    const hasAtLeastOneRegisteredField = _.some(
-      _.flatMap(ability.rulesFor(actionOverride, subject), 'fields')
-    );
-    const shouldIncludeAllFields = _.isEmpty(permittedFields) && !hasAtLeastOneRegisteredField;
-
-    const sanitizedEntity = sanitizeEntity(data, {
-      model: strapi.getModel(model),
-      includeFields: shouldIncludeAllFields ? null : permittedFields,
-      withPrivate,
-      isOutput,
-    });
-
-    return _.omit(sanitizedEntity, [
-      `${constants.CREATED_BY_ATTRIBUTE}.roles`,
-      `${constants.UPDATED_BY_ATTRIBUTE}.roles`,
-    ]);
-  },
+  ...createSanitizeHelpers({ action, ability, model }),
 });

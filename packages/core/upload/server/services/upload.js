@@ -14,7 +14,7 @@ const _ = require('lodash');
 const {
   nameToSlug,
   contentTypes: contentTypesUtils,
-  sanitizeEntity,
+  sanitize,
   webhook: webhookUtils,
 } = require('@strapi/utils');
 
@@ -46,7 +46,7 @@ const sendMediaMetrics = data => {
 module.exports = ({ strapi }) => ({
   emitEvent(event, data) {
     const modelDef = strapi.getModel('plugin::upload.file');
-    strapi.eventHub.emit(event, { media: sanitizeEntity(data, { model: modelDef }) });
+    strapi.eventHub.emit(event, { media: sanitize.eventHub(data, modelDef) });
   },
 
   formatFileInfo({ filename, type, size }, fileInfo = {}, metas = {}) {

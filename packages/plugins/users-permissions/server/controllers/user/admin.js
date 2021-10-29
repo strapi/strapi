@@ -66,7 +66,7 @@ module.exports = {
       throw strapi.errors.forbidden();
     }
 
-    const sanitizedBody = pm.pickPermittedFieldsOf(body, { subject: userModel });
+    const sanitizedBody = await pm.pickPermittedFieldsOf(body, { subject: userModel });
 
     const advanced = await strapi
       .store({ type: 'plugin', name: 'users-permissions', key: 'advanced' })
@@ -128,8 +128,9 @@ module.exports = {
 
     try {
       const data = await getService('user').add(user);
+      const sanitizedData = await pm.sanitizeOutput(data, { action: ACTIONS.read });
 
-      ctx.created(pm.sanitize(data, { action: ACTIONS.read }));
+      ctx.created(sanitizedData);
     } catch (error) {
       ctx.badRequest(null, formatError(error));
     }
@@ -204,11 +205,11 @@ module.exports = {
       body.email = _.toLower(body.email);
     }
 
-    const sanitizedData = pm.pickPermittedFieldsOf(body, { subject: pm.toSubject(user) });
+    const sanitizedData = await pm.pickPermittedFieldsOf(body, { subject: pm.toSubject(user) });
     const updateData = _.omit({ ...sanitizedData, updatedBy: admin.id }, 'createdBy');
 
     const data = await getService('user').edit({ id }, updateData);
 
-    ctx.body = pm.sanitize(data, { action: ACTIONS.read });
+    ctx.body = await pm.sanitizeOutput(data, { action: ACTIONS.read });
   },
 };

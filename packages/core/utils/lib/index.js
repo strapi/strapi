@@ -5,7 +5,6 @@
  */
 const { buildQuery, hasDeepFilters } = require('./build-query');
 const parseMultipartData = require('./parse-multipart');
-const sanitizeEntity = require('./sanitize-entity');
 const parseType = require('./parse-type');
 const policy = require('./policy');
 const templateConfiguration = require('./template-configuration');
@@ -31,6 +30,8 @@ const setCreatorFields = require('./set-creator-fields');
 const hooks = require('./hooks');
 const providerFactory = require('./provider-factory');
 const pagination = require('./pagination');
+const sanitize = require('./sanitize');
+const traverseEntity = require('./traverse-entity');
 
 module.exports = {
   yup,
@@ -40,7 +41,8 @@ module.exports = {
   buildQuery,
   hasDeepFilters,
   parseMultipartData,
-  sanitizeEntity,
+  sanitize,
+  traverseEntity,
   parseType,
   nameToSlug,
   nameToCollectionName,
