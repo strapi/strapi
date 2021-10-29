@@ -20,18 +20,17 @@ class ValidationError extends ApplicationError {
   }
 }
 
-class YupValidationError extends ApplicationError {
+class YupValidationError extends ValidationError {
   constructor(yupError, message) {
     super();
     const { errors, message: yupMessage } = formatYupErrors(yupError);
-    this.name = 'ValidationError';
     this.message = message || yupMessage;
     this.details = { errors };
   }
 }
 
 class PaginationError extends ApplicationError {
-  constructor(message, details = {}) {
+  constructor(message, details) {
     super(message, details);
     this.name = 'PaginationError';
     this.message = message || 'Invalid pagination';
