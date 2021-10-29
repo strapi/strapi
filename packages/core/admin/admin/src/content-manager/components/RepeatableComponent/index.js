@@ -1,6 +1,6 @@
 import React, { memo, useCallback, useMemo, useState } from 'react';
 /* eslint-disable import/no-cycle */
-// import { useDrop } from 'react-dnd';
+import { useDrop } from 'react-dnd';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
@@ -15,7 +15,7 @@ import Plus from '@strapi/icons/Plus';
 // import { ErrorMessage } from '@buffetjs/styles';
 import { getMaxTempKey, getTrad } from '../../utils';
 import { useContentTypeLayout } from '../../hooks';
-// import ItemTypes from '../../utils/ItemTypes';
+import ItemTypes from '../../utils/ItemTypes';
 import ComponentInitializer from '../ComponentInitializer';
 import connect from './utils/connect';
 import select from './utils/select';
@@ -49,7 +49,7 @@ const RepeatableComponent = ({
   const toggleNotification = useNotification();
   const { formatMessage } = useIntl();
   const [collapseToOpen, setCollapseToOpen] = useState('');
-  // const [, drop] = useDrop({ accept: ItemTypes.COMPONENT });
+  const [, drop] = useDrop({ accept: ItemTypes.COMPONENT });
   const { getComponentLayout } = useContentTypeLayout();
   const componentLayoutData = useMemo(() => getComponentLayout(componentUid), [
     componentUid,
@@ -112,11 +112,7 @@ const RepeatableComponent = ({
   }
 
   return (
-    <Box
-      hasRadius 
-      background='neutral0' 
-      shadow='tableShadow'
-    >
+    <Box hasRadius background="neutral0" shadow="tableShadow" ref={drop}>
       <AccordionGroupCustom
         footer={
           <Flex justifyContent="center" height="48px" background="neutral0" hasRadius>
