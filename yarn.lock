@@ -12263,9 +12263,9 @@ grant-koa@5.4.8:
     grant "^5.4.8"
 
 grant@^5.4.8:
-  version "5.4.17"
-  resolved "https://registry.yarnpkg.com/grant/-/grant-5.4.17.tgz#59aad7f04c1843612cb0e6816e038a07f65c9859"
-  integrity sha512-bLpJYxkmi3kg/gV5v9Iv7xqgzAgWP7MhXaMwZVKnzhwiFPKZGzntUgq61aQ8QuLdmpm7tPxRv9Rw6xY4vqaAsA==
+  version "5.4.18"
+  resolved "https://registry.yarnpkg.com/grant/-/grant-5.4.18.tgz#4d95ef7be1db6169feb638a26762a9525faea675"
+  integrity sha512-5rw0RkbpmzgM1Q4n8FSasnlqud2NcyxFaEMjA++JQ77MGbRL8VnUZ3JeBoF0HTyfI+xzJbHn68LhtLdYnBz3rA==
   dependencies:
     qs "^6.10.1"
     request-compose "^2.1.4"

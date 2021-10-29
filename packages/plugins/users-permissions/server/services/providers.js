@@ -489,6 +489,45 @@ module.exports = ({ strapi }) => {
           });
         break;
       }
+      case 'crossid': {
+        const purestCrossidConf = {};
+        purestCrossidConf[`https://${grant.crossid.subdomain}.crossid.io`] = {
+          __domain: {
+            auth: {
+              auth: { bearer: '[0]' },
+            },
+          },
+          '{endpoint}': {
+            __path: {
+              alias: '__default',
+            },
+          },
+        };
+        const crossid = purest({
+          provider: 'crossid',
+          config: {
+            crossid: purestCrossidConf,
+          },
+        });
+
+        crossid
+          .get('oauth2/userinfo')
+          .auth(access_token)
+          .request((err, res, body) => {
+            if (err) {
+              callback(err);
+            } else {
+              const username =
+                body.preferred_username || body.username || body.email.split('@')[0] || body.sub;
+              const email = body.email || `${username.replace(/\s+/g, '.')}@strapi.io`;
+              callback(null, {
+                username,
+                email,
+              });
+            }
+          });
+        break;
+      }
       default:
         callback(new Error('Unknown provider.'));
         break;
