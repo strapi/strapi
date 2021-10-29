@@ -27,15 +27,13 @@ export const MediaLibraryInput = ({
   const [droppedAssets, setDroppedAssets] = useState();
   const {
     isLoading,
-    // canRead,
+    canRead,
     canCreate,
     canUpdate,
     canCopyLink,
     canDownload,
   } = useMediaLibraryPermissions();
   const { formatMessage } = useIntl();
-
-  const canRead = false;
 
   const selectedAssets = Array.isArray(value) ? value : [value];
 
