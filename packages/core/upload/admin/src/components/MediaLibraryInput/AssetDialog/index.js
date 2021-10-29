@@ -42,12 +42,14 @@ export const AssetDialog = ({
     return (
       <ModalLayout onClose={onClose} labelledBy="asset-dialog-title" aria-busy>
         <DialogTitle />
-        <Loader>
-          {formatMessage({
-            id: getTrad('list.asset.load'),
-            defaultMessage: 'How do you want to upload your assets?',
-          })}
-        </Loader>
+        <Flex justifyContent="center" paddingTop={4} paddingBottom={4}>
+          <Loader>
+            {formatMessage({
+              id: getTrad('list.asset.load'),
+              defaultMessage: 'How do you want to upload your assets?',
+            })}
+          </Loader>
+        </Flex>
         <DialogFooter onClose={onClose} />
       </ModalLayout>
     );
