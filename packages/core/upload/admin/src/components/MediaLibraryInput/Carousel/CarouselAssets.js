@@ -15,6 +15,7 @@ export const CarouselAssets = ({
   hint,
   disabled,
   onDeleteAsset,
+  onDropAsset,
   onEditAsset,
   onAddAsset,
 }) => {
@@ -67,7 +68,7 @@ export const CarouselAssets = ({
             { n: 1, m: 1 }
           )}
         >
-          <EmptyStateAsset disabled={disabled} onClick={onAddAsset} />
+          <EmptyStateAsset disabled={disabled} onClick={onAddAsset} onDropAsset={onDropAsset} />
         </CarouselSlide>
       ) : (
         assets.map((asset, index) => (
@@ -93,12 +94,15 @@ CarouselAssets.defaultProps = {
   disabled: false,
   error: undefined,
   hint: undefined,
+  onDropAsset: undefined,
 };
+
 CarouselAssets.propTypes = {
   assets: PropTypes.arrayOf(AssetDefinition).isRequired,
   disabled: PropTypes.bool,
   label: PropTypes.string.isRequired,
   onDeleteAsset: PropTypes.func.isRequired,
+  onDropAsset: PropTypes.func,
   onAddAsset: PropTypes.func.isRequired,
   onEditAsset: PropTypes.func.isRequired,
   error: PropTypes.string,
