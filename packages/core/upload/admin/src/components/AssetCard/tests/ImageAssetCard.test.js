@@ -58,7 +58,6 @@ describe('ImageAssetCard', () => {
 
       .c17 {
         background: #f6f6f9;
-        color: #666687;
         padding: 4px;
         border-radius: 4px;
       }
@@ -146,7 +145,7 @@ describe('ImageAssetCard', () => {
         font-weight: 400;
         font-size: 0.875rem;
         line-height: 1.43;
-        color: #32324d;
+        color: #666687;
       }
 
       .c21 {
