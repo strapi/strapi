@@ -1,14 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import AddIcon from '@strapi/icons/AddIcon';
-import { ModalLayout, ModalBody } from '@strapi/parts/ModalLayout';
-import { Flex } from '@strapi/parts/Flex';
-import { Button } from '@strapi/parts/Button';
-import { Divider } from '@strapi/parts/Divider';
+import PlusIcon from '@strapi/icons/Plus';
+import { ModalLayout, ModalBody } from '@strapi/design-system/ModalLayout';
+import { Flex } from '@strapi/design-system/Flex';
+import { Button } from '@strapi/design-system/Button';
+import { Divider } from '@strapi/design-system/Divider';
 import { useIntl } from 'react-intl';
-import { Tabs, Tab, TabGroup, TabPanels, TabPanel } from '@strapi/parts/Tabs';
-import { Badge } from '@strapi/parts/Badge';
-import { Loader } from '@strapi/parts/Loader';
+import { Tabs, Tab, TabGroup, TabPanels, TabPanel } from '@strapi/design-system/Tabs';
+import { Badge } from '@strapi/design-system/Badge';
+import { Loader } from '@strapi/design-system/Loader';
 import { NoPermissions, AnErrorOccurred, useSelectionState, NoMedia } from '@strapi/helper-plugin';
 import getTrad from '../../../utils/getTrad';
 import { SelectedStep } from './SelectedStep';
@@ -82,7 +82,7 @@ export const AssetDialog = ({
         <NoMedia
           action={
             canCreate ? (
-              <Button variant="secondary" startIcon={<AddIcon />} onClick={onAddAsset}>
+              <Button variant="secondary" startIcon={<PlusIcon />} onClick={onAddAsset}>
                 {formatMessage({
                   id: getTrad('modal.header.browse'),
                   defaultMessage: 'Upload assets',

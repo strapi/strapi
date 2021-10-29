@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { CarouselActions } from '@strapi/parts/Carousel';
-import { IconButton } from '@strapi/parts/IconButton';
+import { CarouselActions } from '@strapi/design-system/Carousel';
+import { IconButton } from '@strapi/design-system/IconButton';
 import { prefixFileUrlWithBackendUrl } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
-import AddIcon from '@strapi/icons/AddIcon';
-import DeleteIcon from '@strapi/icons/DeleteIcon';
-import EditIcon from '@strapi/icons/EditIcon';
+import PlusIcon from '@strapi/icons/Plus';
+import TrashIcon from '@strapi/icons/Trash';
+import PencilIcon from '@strapi/icons/Pencil';
 import getTrad from '../../../utils/getTrad';
 import { CopyLinkButton } from '../../CopyLinkButton';
 import { AssetDefinition } from '../../../constants';
@@ -25,7 +25,7 @@ export const CarouselAssetActions = ({ asset, onDeleteAsset, onAddAsset, onEditA
               id: getTrad('control-card.add'),
               defaultMessage: 'Add',
             })}
-            icon={<AddIcon />}
+            icon={<PlusIcon />}
             onClick={() => onAddAsset(asset)}
           />
         )}
@@ -38,7 +38,7 @@ export const CarouselAssetActions = ({ asset, onDeleteAsset, onAddAsset, onEditA
               id: getTrad('app.utils.delete'),
               defaultMessage: 'Delete',
             })}
-            icon={<DeleteIcon />}
+            icon={<TrashIcon />}
             onClick={() => onDeleteAsset(asset)}
           />
         )}
@@ -49,7 +49,7 @@ export const CarouselAssetActions = ({ asset, onDeleteAsset, onAddAsset, onEditA
               id: getTrad('app.utils.edit'),
               defaultMessage: 'edit',
             })}
-            icon={<EditIcon />}
+            icon={<PencilIcon />}
             onClick={() => setEditDialogOpened(true)}
           />
         )}

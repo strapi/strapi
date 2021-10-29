@@ -159,10 +159,12 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
 }
 
 .c1 {
+  border-radius: 4px 4px 0 0;
   border-bottom: 1px solid #eaeaef;
 }
 
 .c47 {
+  border-radius: 0 0 4px 4px;
   border-top: 1px solid #eaeaef;
 }
 
@@ -278,7 +280,7 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
   background: #4945ff;
 }
 
-.c15 .sc-fFYUIl {
+.c15 .sc-dYzmtA {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -343,7 +345,7 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
   background: #ffffff;
 }
 
-.c50 .sc-fFYUIl {
+.c50 .sc-dYzmtA {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -496,7 +498,6 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
 
 .c32 {
   background: #f6f6f9;
-  color: #666687;
   padding: 4px;
   border-radius: 4px;
 }
@@ -593,7 +594,7 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
   font-weight: 400;
   font-size: 0.875rem;
   line-height: 1.43;
-  color: #32324d;
+  color: #666687;
 }
 
 .c45 {

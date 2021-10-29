@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Icon } from '@strapi/parts/Icon';
-import { Flex } from '@strapi/parts/Flex';
-import { Text } from '@strapi/parts/Text';
-import AddAsset from '@strapi/icons/AddAsset';
+import { Icon } from '@strapi/design-system/Icon';
+import { Flex } from '@strapi/design-system/Flex';
+import { Text } from '@strapi/design-system/Text';
+import PicturePlusIcon from '@strapi/icons/PicturePlus';
 import getTrad from '../../../utils/getTrad';
 import { rawFileToAsset } from '../../../utils/rawFileToAsset';
 import { AssetSource } from '../../../constants';
@@ -56,7 +56,7 @@ export const EmptyStateAsset = ({ disabled, onClick, onDropAsset }) => {
       onDrop={handleDrop}
     >
       <Icon
-        as={AddAsset}
+        as={PicturePlusIcon}
         aria-hidden
         width="30px"
         height="24px"

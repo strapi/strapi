@@ -1,8 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Box } from '@strapi/parts/Box';
-import { KeyboardNavigable } from '@strapi/parts/KeyboardNavigable';
+import { Box } from '@strapi/design-system/Box';
+import { KeyboardNavigable } from '@strapi/design-system/KeyboardNavigable';
 import { AssetCard } from '../AssetCard/AssetCard';
 
 const GridColSize = {

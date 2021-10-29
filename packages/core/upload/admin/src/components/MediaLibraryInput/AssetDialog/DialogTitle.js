@@ -1,6 +1,6 @@
 import React from 'react';
-import { ButtonText } from '@strapi/parts/Text';
-import { ModalHeader } from '@strapi/parts/ModalLayout';
+import { ButtonText } from '@strapi/design-system/Text';
+import { ModalHeader } from '@strapi/design-system/ModalLayout';
 import { useIntl } from 'react-intl';
 import getTrad from '../../../utils/getTrad';
 

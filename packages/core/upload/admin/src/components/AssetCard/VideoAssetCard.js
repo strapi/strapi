@@ -17,7 +17,7 @@ import {
 import { IconButton } from '@strapi/design-system/IconButton';
 import Pencil from '@strapi/icons/Pencil';
 import { useIntl } from 'react-intl';
-import { Box } from '@strapi/parts/Box';
+import { Box } from '@strapi/design-system/Box';
 import { VideoPreview } from './VideoPreview';
 import { getTrad, formatDuration } from '../../utils';
 

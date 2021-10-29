@@ -1,8 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
-import IconDocumentation from '@strapi/icons/IconDocumentation';
-import { Icon } from '@strapi/parts/Icon';
-import { Box } from '@strapi/parts/Box';
+import BookIcon from '@strapi/icons/Book';
+import { Icon } from '@strapi/design-system/Icon';
+import { Box } from '@strapi/design-system/Box';
 import { AssetType, AssetDefinition } from '../../../constants';
 import { VideoPreview } from '../../AssetCard/VideoPreview';
 import { createAssetUrl } from '../../../utils/createAssetUrl';
@@ -40,7 +40,7 @@ export const CarouselAsset = ({ asset }) => {
     );
   }
 
-  return <Icon as={IconDocumentation} aria-label={asset.alternativeText || asset.name} />;
+  return <Icon as={BookIcon} aria-label={asset.alternativeText || asset.name} />;
 };
 
 CarouselAsset.propTypes = {

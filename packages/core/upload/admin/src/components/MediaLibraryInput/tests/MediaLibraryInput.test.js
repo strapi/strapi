@@ -1,6 +1,6 @@
 import React from 'react';
 import { render } from '@testing-library/react';
-import { ThemeProvider, lightTheme } from '@strapi/parts';
+import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { NotificationsProvider } from '@strapi/helper-plugin';
 import { MediaLibraryInput } from '..';

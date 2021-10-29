@@ -1,9 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Flex } from '@strapi/parts/Flex';
-import { Stack } from '@strapi/parts/Stack';
-import { BaseCheckbox } from '@strapi/parts/BaseCheckbox';
+import { Flex } from '@strapi/design-system/Flex';
+import { Stack } from '@strapi/design-system/Stack';
+import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
 import { AssetList } from '../../../AssetList';
 import getTrad from '../../../../utils/getTrad';
 
