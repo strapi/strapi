@@ -38,6 +38,7 @@ const FieldComponent = ({
   isReadOnly,
   componentValue,
   removeComponentFromField,
+  required,
 }) => {
   const { formatMessage } = useIntl();
   const componentValueLength = size(componentValue);
@@ -67,6 +68,7 @@ const FieldComponent = ({
             name={name}
             numberOfEntries={componentValueLength}
             showNumberOfEntries={isRepeatable}
+            required={required}
           />
         )}
 
@@ -128,6 +130,7 @@ FieldComponent.defaultProps = {
   labelAction: undefined,
   max: Infinity,
   min: -Infinity,
+  required: false,
 };
 
 FieldComponent.propTypes = {
@@ -151,6 +154,7 @@ FieldComponent.propTypes = {
   min: PropTypes.number,
   name: PropTypes.string.isRequired,
   removeComponentFromField: PropTypes.func.isRequired,
+  required: PropTypes.bool,
 };
 
 const Memoized = memo(FieldComponent, isEqual);

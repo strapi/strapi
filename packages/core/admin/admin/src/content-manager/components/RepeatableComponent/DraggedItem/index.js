@@ -224,6 +224,7 @@ const DraggedItem = ({
                                 name={keys}
                                 max={fieldSchema.max}
                                 min={fieldSchema.min}
+                                required={fieldSchema.required}
                               />
                             </GridItem>
                           );

@@ -52,6 +52,7 @@ const NonRepeatableComponent = ({ componentUid, isFromDynamicZone, isNested, nam
                         max={fieldSchema.max}
                         min={fieldSchema.min}
                         name={keys}
+                        required={fieldSchema.required || false}
                       />
                     </GridItem>
                   );

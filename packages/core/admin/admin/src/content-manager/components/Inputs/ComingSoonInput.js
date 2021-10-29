@@ -9,7 +9,7 @@ import { useIntl } from 'react-intl';
 import { TextInput } from '@strapi/design-system/TextInput';
 import PropTypes from 'prop-types';
 
-const CominSoonInput = ({ description, intlLabel, labelAction, error, name }) => {
+const CominSoonInput = ({ description, intlLabel, labelAction, error, name, required }) => {
   const { formatMessage } = useIntl();
   const label = intlLabel.id
     ? formatMessage(
@@ -38,6 +38,7 @@ const CominSoonInput = ({ description, intlLabel, labelAction, error, name }) =>
       name={name}
       onChange={() => {}}
       placeholder="Coming soon"
+      required={required}
       type="text"
       value=""
     />
@@ -48,6 +49,7 @@ CominSoonInput.defaultProps = {
   description: null,
   error: '',
   labelAction: undefined,
+  required: false,
 };
 
 CominSoonInput.propTypes = {
@@ -64,6 +66,7 @@ CominSoonInput.propTypes = {
   }).isRequired,
   labelAction: PropTypes.element,
   name: PropTypes.string.isRequired,
+  required: PropTypes.bool,
 };
 
 export default CominSoonInput;
