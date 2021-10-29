@@ -3,15 +3,16 @@ import PropTypes from 'prop-types';
 import { ModalLayout } from '@strapi/parts/ModalLayout';
 import { AddAssetStep } from './AddAssetStep/AddAssetStep';
 import { PendingAssetStep } from './PendingAssetStep/PendingAssetStep';
+import { AssetDefinition } from '../../constants';
 
 const Steps = {
   AddAsset: 'AddAsset',
   PendingAsset: 'PendingAsset',
 };
 
-export const UploadAssetDialog = ({ onClose }) => {
-  const [step, setStep] = useState(Steps.AddAsset);
-  const [assets, setAssets] = useState([]);
+export const UploadAssetDialog = ({ onClose, initialAssetsToAdd }) => {
+  const [step, setStep] = useState(initialAssetsToAdd ? Steps.PendingAsset : Steps.AddAsset);
+  const [assets, setAssets] = useState(initialAssetsToAdd || []);
 
   const handleAddToPendingAssets = nextAssets => {
     setAssets(prevAssets => prevAssets.concat(nextAssets));
@@ -53,12 +54,18 @@ export const UploadAssetDialog = ({ onClose }) => {
           onClickAddAsset={moveToAddAsset}
           onCancelUpload={handleCancelUpload}
           onUploadSucceed={handleUploadSuccess}
+          initialAssetsToAdd={initialAssetsToAdd}
         />
       )}
     </ModalLayout>
   );
 };
 
+UploadAssetDialog.defaultProps = {
+  initialAssetsToAdd: undefined,
+};
+
 UploadAssetDialog.propTypes = {
+  initialAssetsToAdd: PropTypes.arrayOf(AssetDefinition),
   onClose: PropTypes.func.isRequired,
 };

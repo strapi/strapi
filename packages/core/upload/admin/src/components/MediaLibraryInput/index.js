@@ -23,6 +23,7 @@ export const MediaLibraryInput = ({
 }) => {
   const [step, setStep] = useState(undefined);
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [droppedAssets, setDroppedAssets] = useState();
   const { formatMessage } = useIntl();
 
   const selectedAssets = Array.isArray(value) ? value : [value];
@@ -54,6 +55,11 @@ export const MediaLibraryInput = ({
     });
   };
 
+  const handleAssetDrop = assets => {
+    setDroppedAssets(assets);
+    setStep(Steps.UploadAsset);
+  };
+
   let label = intlLabel.id ? formatMessage(intlLabel) : '';
 
   if (multiple && selectedAssets.length > 0) {
@@ -77,6 +83,7 @@ export const MediaLibraryInput = ({
         onDeleteAsset={handleDeleteAsset}
         onAddAsset={() => setStep(Steps.SelectAsset)}
         onEditAsset={handleAssetEdit}
+        onDropAsset={handleAssetDrop}
         error={errorMessage}
         hint={hint}
       />
@@ -92,7 +99,10 @@ export const MediaLibraryInput = ({
       )}
 
       {step === Steps.UploadAsset && (
-        <UploadAssetDialog onClose={() => setStep(Steps.SelectAsset)} />
+        <UploadAssetDialog
+          onClose={() => setStep(Steps.SelectAsset)}
+          initialAssetsToAdd={droppedAssets}
+        />
       )}
     </>
   );
@@ -119,5 +129,5 @@ MediaLibraryInput.propTypes = {
   multiple: PropTypes.bool,
   onChange: PropTypes.func.isRequired,
   name: PropTypes.string.isRequired,
-  value: PropTypes.oneOfType(PropTypes.arrayOf(AssetDefinition), AssetDefinition),
+  value: PropTypes.oneOfType([PropTypes.arrayOf(AssetDefinition), AssetDefinition]),
 };

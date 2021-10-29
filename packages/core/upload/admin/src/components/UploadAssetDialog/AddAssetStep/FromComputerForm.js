@@ -10,7 +10,7 @@ import { Button } from '@strapi/parts/Button';
 import AddAssetIcon from '@strapi/icons/AddAsset';
 import { useIntl } from 'react-intl';
 import { getTrad } from '../../../utils';
-import { typeFromMime } from '../../../utils/typeFromMime';
+import { rawFileToAsset } from '../../../utils/rawFileToAsset';
 import { AssetSource } from '../../../constants';
 
 const Wrapper = styled(Flex)`
@@ -53,16 +53,9 @@ export const FromComputerForm = ({ onClose, onAddAssets }) => {
 
     for (let i = 0; i < files.length; i++) {
       const file = files.item(i);
+      const asset = rawFileToAsset(file, AssetSource.Computer);
 
-      assets.push({
-        name: file.name,
-        source: AssetSource.Computer,
-        type: typeFromMime(file.type),
-        url: URL.createObjectURL(file),
-        ext: file.name.split('.').pop(),
-        mime: file.type,
-        rawFile: file,
-      });
+      assets.push(asset);
     }
 
     onAddAssets(assets);
