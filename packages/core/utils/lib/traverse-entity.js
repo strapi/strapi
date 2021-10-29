@@ -3,9 +3,6 @@
 const { cloneDeep, isObject, isArray, isNil, curry } = require('lodash/fp');
 
 const traverseEntity = async (visitor, options, entity) => {
-  // assert(isFunction(visitor), `visitor must be a function, got ${typeof visitor}`);
-  // assert(isObject(schema), `schema must be an object, got ${typeof schema}`);
-
   const { path = null, schema } = options;
 
   // End recursion
