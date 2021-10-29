@@ -10,6 +10,7 @@ import { Accordion, AccordionToggle, AccordionContent } from '@strapi/design-sys
 import { IconButton } from '@strapi/design-system/IconButton';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { Stack } from '@strapi/design-system/Stack';
+import { Box } from '@strapi/design-system/Box';
 import Trash from '@strapi/icons/Trash';
 import Drag from '@strapi/icons/Drag';
 import ItemTypes from '../../../utils/ItemTypes';
@@ -22,11 +23,6 @@ import { connect, select } from './utils';
 // FIXME
 // Temporary workaround to remove the overflow until we migrate the react-select for the relations
 // to the DS one
-// const StyledBox = styled(Box)`
-//   > div {
-//     overflow: visible;
-//   }
-// `;
 
 const CustomIconButton = styled(IconButton)`
   background-color: transparent;
@@ -169,7 +165,7 @@ const DraggedItem = ({
   };
 
   return (
-    <>
+    <Box data-strapi-acc>
       {isDragging && <Preview />}
       {!isDragging &&
         <Accordion 
@@ -258,7 +254,7 @@ const DraggedItem = ({
             </Stack>
           </AccordionContent>
         </Accordion>}
-    </>
+    </Box>
   //   <StyledBox ref={refs ? refs.dropRef : null}>
   //     {isDragging && <Preview />}
   //     {!isDragging && (

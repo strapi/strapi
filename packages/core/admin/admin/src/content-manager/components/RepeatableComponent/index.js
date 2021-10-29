@@ -9,7 +9,6 @@ import take from 'lodash/take';
 // import { FormattedMessage } from 'react-intl';
 import { useNotification } from '@strapi/helper-plugin';
 import { Box } from '@strapi/design-system/Box';
-import { AccordionGroup } from '@strapi/design-system/Accordion';
 import { Flex } from '@strapi/design-system/Flex';
 import { TextButton } from '@strapi/design-system/TextButton';
 import Plus from '@strapi/icons/Plus';
@@ -21,6 +20,7 @@ import ComponentInitializer from '../ComponentInitializer';
 import connect from './utils/connect';
 import select from './utils/select';
 import DraggedItem from './DraggedItem';
+import AccordionGroupCustom from './AccordionGroupCustom';
 
 const TextButtonCustom = styled(TextButton)`
   height: 100%;
@@ -116,12 +116,8 @@ const RepeatableComponent = ({
       hasRadius 
       background='neutral0' 
       shadow='tableShadow'
-      paddingLeft={7} 
-      paddingRight={7} 
-      paddingBottom={6} 
-      paddingTop={6}
     >
-      <AccordionGroup
+      <AccordionGroupCustom
         footer={
           <Flex justifyContent="center" height="48px" background="neutral0" hasRadius>
             <TextButtonCustom disabled={isReadOnly} onClick={handleClick} startIcon={<Plus />}>
@@ -170,7 +166,7 @@ const RepeatableComponent = ({
             />
           );
         })}
-      </AccordionGroup>
+      </AccordionGroupCustom>
     </Box>
     // <Box hasRadius borderColor="neutral200">
     //   <Box ref={drop}>
