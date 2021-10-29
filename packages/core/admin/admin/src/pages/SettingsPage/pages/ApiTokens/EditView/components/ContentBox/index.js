@@ -14,24 +14,27 @@ const HeaderContentBox = ({ apiToken }) => {
     <ContentBox
       endAction={
         apiToken && (
-          <CopyToClipboard
-            onCopy={() => {
-              toggleNotification({
-                type: 'success',
-                message: { id: 'Settings.apiTokens.notification.copied' },
-              });
-            }}
-            text={apiToken}
-          >
-            <IconButton
-              label={formatMessage({
-                id: 'app.component.CopyToClipboard.label',
-                defaultMessage: 'Copy to clipboard',
-              })}
-              noBorder
-              icon={<Duplicate />}
-            />
-          </CopyToClipboard>
+          <span style={{ alignSelf: 'start' }}>
+            <CopyToClipboard
+              onCopy={() => {
+                toggleNotification({
+                  type: 'success',
+                  message: { id: 'Settings.apiTokens.notification.copied' },
+                });
+              }}
+              text={apiToken}
+            >
+              <IconButton
+                label={formatMessage({
+                  id: 'app.component.CopyToClipboard.label',
+                  defaultMessage: 'Copy to clipboard',
+                })}
+                noBorder
+                icon={<Duplicate />}
+                style={{ padding: 0, height: '1rem' }}
+              />
+            </CopyToClipboard>
+          </span>
         )
       }
       title={

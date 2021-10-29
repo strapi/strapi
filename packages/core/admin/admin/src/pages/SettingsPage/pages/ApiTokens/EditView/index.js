@@ -117,13 +117,11 @@ const ApiTokenCreateView = () => {
       <Formik
         validationSchema={schema}
         validateOnChange={false}
-        initialValues={
-          apiToken || {
-            name: '',
-            description: '',
-            type: 'read-only',
-          }
-        }
+        initialValues={{
+          name: apiToken?.name || '',
+          description: apiToken?.description || '',
+          type: apiToken?.type || 'read-only',
+        }}
         onSubmit={handleSubmit}
       >
         {({ errors, handleChange, isSubmitting, values }) => {
