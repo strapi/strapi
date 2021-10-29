@@ -93,7 +93,6 @@ const traverseEntity = async (visitor, options, entity) => {
 const createVisitorUtils = ({ data }) => ({
   remove(key) {
     delete data[key];
-    console.log('removed ', key, data[key] === undefined);
   },
 
   set(key, value) {
