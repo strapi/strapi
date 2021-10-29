@@ -1,11 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Box } from '@strapi/parts/Box';
-import { Flex } from '@strapi/parts/Flex';
-import { Divider } from '@strapi/parts/Divider';
-import { Stack } from '@strapi/parts/Stack';
-import { TableLabel } from '@strapi/parts/Text';
+import { Box } from '@strapi/design-system/Box';
+import { Flex } from '@strapi/design-system/Flex';
+import { Divider } from '@strapi/design-system/Divider';
+import { Stack } from '@strapi/design-system/Stack';
+import { TableLabel } from '@strapi/design-system/Text';
 import { useIntl } from 'react-intl';
 import BaseLogin from '../../../../../../admin/src/pages/AuthPage/components/Login/BaseLogin';
 import { useAuthProviders } from '../../../../hooks';

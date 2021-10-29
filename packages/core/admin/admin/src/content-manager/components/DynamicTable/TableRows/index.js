@@ -1,13 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { BaseCheckbox } from '@strapi/parts/BaseCheckbox';
-import { Box } from '@strapi/parts/Box';
-import { IconButton } from '@strapi/parts/IconButton';
-import { Tbody, Td, Tr } from '@strapi/parts/Table';
-import { Flex } from '@strapi/parts/Flex';
-import DeleteIcon from '@strapi/icons/DeleteIcon';
+import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
+import { Box } from '@strapi/design-system/Box';
+import { IconButton } from '@strapi/design-system/IconButton';
+import { Tbody, Td, Tr } from '@strapi/design-system/Table';
+import { Flex } from '@strapi/design-system/Flex';
+import Trash from '@strapi/icons/Trash';
 import Duplicate from '@strapi/icons/Duplicate';
-import EditIcon from '@strapi/icons/EditIcon';
+import Pencil from '@strapi/icons/Pencil';
 import { useTracking, stopPropagation, onRowClick } from '@strapi/helper-plugin';
 import { useHistory } from 'react-router-dom';
 import { useIntl } from 'react-intl';
@@ -107,7 +107,7 @@ const TableRows = ({
                       { target: itemLineText }
                     )}
                     noBorder
-                    icon={<EditIcon />}
+                    icon={<Pencil />}
                   />
 
                   {canCreate && (
@@ -142,7 +142,7 @@ const TableRows = ({
                           { target: itemLineText }
                         )}
                         noBorder
-                        icon={<DeleteIcon />}
+                        icon={<Trash />}
                       />
                     </Box>
                   )}

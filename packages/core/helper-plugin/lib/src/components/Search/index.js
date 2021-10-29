@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import SearchIcon from '@strapi/icons/SearchIcon';
-import { Searchbar } from '@strapi/parts/Searchbar';
-import { IconButton } from '@strapi/parts/IconButton';
+import SearchIcon from '@strapi/icons/Search';
+import { Searchbar } from '@strapi/design-system/Searchbar';
+import { IconButton } from '@strapi/design-system/IconButton';
 import useQueryParams from '../../hooks/useQueryParams';
 import useTracking from '../../hooks/useTracking';
 
@@ -42,6 +42,10 @@ const Search = ({ label, trackedEvent }) => {
 
   useEffect(() => {
     const handler = setTimeout(() => {
+      if (!didSearch) {
+        return;
+      }
+
       if (value) {
         setQuery({ _q: value, page: 1 });
       } else {
@@ -53,6 +57,12 @@ const Search = ({ label, trackedEvent }) => {
     return () => clearTimeout(handler);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
+
+  useEffect(() => {
+    if (value && !isOpen) {
+      setIsOpen(true);
+    }
+  }, [value, isOpen]);
 
   if (isOpen) {
     return (

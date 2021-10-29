@@ -6,8 +6,6 @@
 const getFilterList = ({ fieldSchema: { type: fieldType, mainField } }) => {
   const type = mainField?.schema.type ? mainField.schema.type : fieldType;
 
-  // TODO needs to be improved for the CM
-  // TODO translate
   switch (type) {
     case 'email':
     case 'text':

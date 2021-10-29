@@ -9,19 +9,19 @@ import {
 } from '@strapi/helper-plugin';
 
 // Strapi Parts
-import { ContentLayout, HeaderLayout } from '@strapi/parts/Layout';
-import { Main } from '@strapi/parts/Main';
-import { Button } from '@strapi/parts/Button';
-import { Box } from '@strapi/parts/Box';
-import { Stack } from '@strapi/parts/Stack';
-import { H3 } from '@strapi/parts/Text';
-import { ToggleInput } from '@strapi/parts/ToggleInput';
-import { TextInput } from '@strapi/parts/TextInput';
-import { Grid, GridItem } from '@strapi/parts/Grid';
+import { ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
+import { Main } from '@strapi/design-system/Main';
+import { Button } from '@strapi/design-system/Button';
+import { Box } from '@strapi/design-system/Box';
+import { Stack } from '@strapi/design-system/Stack';
+import { H3 } from '@strapi/design-system/Text';
+import { ToggleInput } from '@strapi/design-system/ToggleInput';
+import { TextInput } from '@strapi/design-system/TextInput';
+import { Grid, GridItem } from '@strapi/design-system/Grid';
 
 // Strapi Icons
-import Show from '@strapi/icons/Show';
-import Hide from '@strapi/icons/Hide';
+import Show from '@strapi/icons/Eye';
+import Hide from '@strapi/icons/EyeStriked';
 import Check from '@strapi/icons/Check';
 
 import permissions from '../../permissions';

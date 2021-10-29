@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Textarea } from '@strapi/parts/Textarea';
+import { Textarea } from '@strapi/design-system/Textarea';
 
 const TextareaEnum = ({
   description,

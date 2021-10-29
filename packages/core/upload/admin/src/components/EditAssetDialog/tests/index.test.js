@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { ThemeProvider, lightTheme } from '@strapi/parts';
+import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { NotificationsProvider } from '@strapi/helper-plugin';
@@ -229,7 +229,7 @@ describe('<EditAssetDialog />', () => {
         background: #ffffff;
       }
 
-      .c45 .sc-lhuRmv {
+      .c45 .sc-hmftZk {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -301,7 +301,7 @@ describe('<EditAssetDialog />', () => {
         background: #f0f0ff;
       }
 
-      .c48 .sc-lhuRmv {
+      .c48 .sc-hmftZk {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -383,7 +383,7 @@ describe('<EditAssetDialog />', () => {
         background: #4945ff;
       }
 
-      .c49 .sc-lhuRmv {
+      .c49 .sc-hmftZk {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -995,10 +995,12 @@ describe('<EditAssetDialog />', () => {
       }
 
       .c5 {
+        border-radius: 4px 4px 0 0;
         border-bottom: 1px solid #eaeaef;
       }
 
       .c41 {
+        border-radius: 0 0 4px 4px;
         border-top: 1px solid #eaeaef;
       }
 

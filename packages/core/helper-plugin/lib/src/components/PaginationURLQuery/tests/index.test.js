@@ -9,7 +9,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
-import { ThemeProvider, lightTheme } from '@strapi/parts';
+import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import PaginationURLQuery from '../index';
 
 const messages = {
@@ -190,7 +190,7 @@ describe('<PaginationURLQuery />', () => {
 
       <nav
         aria-label="pagination"
-        class="sc-DJgqy"
+        class="sc-hJxDiT"
       >
         <ul
           class="c0 c1"
@@ -264,7 +264,7 @@ describe('<PaginationURLQuery />', () => {
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <path
-                  d="M0 1.88L6.107 8 0 14.12 1.88 16l8-8-8-8L0 1.88z"
+                  d="M.12 1.88L6.227 8 .12 14.12 2 16l8-8-8-8L.12 1.88z"
                   fill="#32324D"
                 />
               </svg>

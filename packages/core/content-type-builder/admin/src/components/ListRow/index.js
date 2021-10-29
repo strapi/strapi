@@ -3,12 +3,12 @@ import PropTypes from 'prop-types';
 import get from 'lodash/get';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
-import { IconButton } from '@strapi/parts/IconButton';
-import { Flex } from '@strapi/parts/Flex';
-import { Stack } from '@strapi/parts/Stack';
-import { Text } from '@strapi/parts/Text';
-import EditIcon from '@strapi/icons/EditIcon';
-import DeleteIcon from '@strapi/icons/DeleteIcon';
+import { IconButton } from '@strapi/design-system/IconButton';
+import { Flex } from '@strapi/design-system/Flex';
+import { Stack } from '@strapi/design-system/Stack';
+import { Text } from '@strapi/design-system/Text';
+import Pencil from '@strapi/icons/Pencil';
+import Trash from '@strapi/icons/Trash';
 import { stopPropagation, onRowClick } from '@strapi/helper-plugin';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import useDataManager from '../../hooks/useDataManager';
@@ -143,7 +143,7 @@ function ListRow({
                       formatMessage: 'Edit',
                     })} ${name}`}
                     noBorder
-                    icon={<EditIcon />}
+                    icon={<Pencil />}
                   />
                 )}
                 <IconButton
@@ -160,7 +160,7 @@ function ListRow({
                     defaultMessage: 'Delete',
                   })} ${name}`}
                   noBorder
-                  icon={<DeleteIcon />}
+                  icon={<Trash />}
                 />
               </Stack>
             ) : (

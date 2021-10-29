@@ -12,10 +12,10 @@ import {
   CardHeader,
   CardTitle,
   CardSubtitle,
-} from '@strapi/parts/Card';
-import { IconButton } from '@strapi/parts/IconButton';
-import EditIcon from '@strapi/icons/EditIcon';
-import IconDocumentation from '@strapi/icons/IconDocumentation';
+} from '@strapi/design-system/Card';
+import { IconButton } from '@strapi/design-system/IconButton';
+import Pencil from '@strapi/icons/Pencil';
+import Book from '@strapi/icons/Book';
 import { useIntl } from 'react-intl';
 import { getTrad } from '../../utils';
 
@@ -40,14 +40,14 @@ export const DocAssetCard = ({ name, extension, selected, onSelect, onEdit, size
           <CardAction position="end">
             <IconButton
               label={formatMessage({ id: getTrad('control-card.edit'), defaultMessage: 'Edit' })}
-              icon={<EditIcon />}
+              icon={<Pencil />}
               onClick={onEdit}
             />
           </CardAction>
         )}
         <CardAsset size={size}>
           <IconWrapper>
-            <IconDocumentation aria-label={name} />
+            <Book aria-label={name} />
           </IconWrapper>
         </CardAsset>
       </CardHeader>

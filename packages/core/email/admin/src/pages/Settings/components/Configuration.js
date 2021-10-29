@@ -3,11 +3,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Stack } from '@strapi/parts/Stack';
-import { Grid, GridItem } from '@strapi/parts/Grid';
-import { H3, Text } from '@strapi/parts/Text';
-import { TextInput } from '@strapi/parts/TextInput';
-import { Select, Option } from '@strapi/parts/Select';
+import { Stack } from '@strapi/design-system/Stack';
+import { Grid, GridItem } from '@strapi/design-system/Grid';
+import { H3, Text } from '@strapi/design-system/Text';
+import { TextInput } from '@strapi/design-system/TextInput';
+import { Select, Option } from '@strapi/design-system/Select';
 import getTrad from '../../../utils/getTrad';
 
 const Configuration = ({ config }) => {

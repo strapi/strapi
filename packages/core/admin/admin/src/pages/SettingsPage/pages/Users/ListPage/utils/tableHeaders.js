@@ -1,6 +1,6 @@
 import React from 'react';
-import { Flex } from '@strapi/parts/Flex';
-import { Text } from '@strapi/parts/Text';
+import { Flex } from '@strapi/design-system/Flex';
+import { Text } from '@strapi/design-system/Text';
 import { Status } from '@strapi/helper-plugin';
 
 const tableHeaders = [

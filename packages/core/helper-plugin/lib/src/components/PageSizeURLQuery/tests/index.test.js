@@ -9,7 +9,7 @@ import { render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
-import { ThemeProvider, lightTheme } from '@strapi/parts';
+import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import PageSizeURLQuery from '../index';
 
 jest.mock('../../../hooks/useTracking', () => () => ({
@@ -70,6 +70,10 @@ describe('<PageSizeURLQuery />', () => {
 
       .c4:focus {
         outline: none;
+      }
+
+      .c4[aria-disabled='true'] {
+        cursor: not-allowed;
       }
 
       .c8 {

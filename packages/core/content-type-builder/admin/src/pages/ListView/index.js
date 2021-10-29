@@ -1,15 +1,15 @@
 import React from 'react';
 import { useTracking } from '@strapi/helper-plugin';
-import AddIcon from '@strapi/icons/AddIcon';
-import BackIcon from '@strapi/icons/BackIcon';
-import CheckIcon from '@strapi/icons/CheckIcon';
-import EditIcon from '@strapi/icons/EditIcon';
-import { Button } from '@strapi/parts/Button';
-import { Link } from '@strapi/parts/Link';
-import { Flex } from '@strapi/parts/Flex';
-import { Stack } from '@strapi/parts/Stack';
-import { Box } from '@strapi/parts/Box';
-import { ContentLayout, HeaderLayout } from '@strapi/parts/Layout';
+import Plus from '@strapi/icons/Plus';
+import ArrowLeft from '@strapi/icons/ArrowLeft';
+import Check from '@strapi/icons/Check';
+import Pencil from '@strapi/icons/Pencil';
+import { Button } from '@strapi/design-system/Button';
+import { Link } from '@strapi/design-system/Link';
+import { Flex } from '@strapi/design-system/Flex';
+import { Stack } from '@strapi/design-system/Stack';
+import { Box } from '@strapi/design-system/Box';
+import { ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
 import get from 'lodash/get';
 import has from 'lodash/has';
 import isEqual from 'lodash/isEqual';
@@ -123,7 +123,7 @@ const ListView = () => {
               {/* DON'T display the add field button when the content type has not been created */}
               {!isCreatingFirstContentType && (
                 <Button
-                  startIcon={<AddIcon />}
+                  startIcon={<Plus />}
                   variant="secondary"
                   onClick={() => {
                     onOpenModalAddField({ forTarget, targetUid });
@@ -133,7 +133,7 @@ const ListView = () => {
                 </Button>
               )}
               <Button
-                startIcon={<CheckIcon />}
+                startIcon={<Check />}
                 onClick={() => submitData()}
                 type="submit"
                 disabled={isEqual(modifiedData, initialData)}
@@ -150,7 +150,7 @@ const ListView = () => {
           isInDevelopmentMode &&
           !isFromPlugin &&
           !isCreatingFirstContentType && (
-            <Button startIcon={<EditIcon />} variant="tertiary" onClick={onEdit}>
+            <Button startIcon={<Pencil />} variant="tertiary" onClick={onEdit}>
               {formatMessage({
                 id: getTrad('app.utils.edit'),
                 defaultMessage: 'Edit',
@@ -164,7 +164,7 @@ const ListView = () => {
           defaultMessage: 'Build the data architecture of your content.',
         })}
         navigationAction={
-          <Link startIcon={<BackIcon />} to="/plugins/content-type-builder/">
+          <Link startIcon={<ArrowLeft />} to="/plugins/content-type-builder/">
             {formatMessage({
               id: 'app.components.go-back',
               defaultMessage: 'Go back',

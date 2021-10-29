@@ -16,23 +16,29 @@ import { useQuery, useMutation, useQueryClient } from 'react-query';
 import pick from 'lodash/pick';
 import omit from 'lodash/omit';
 import { Helmet } from 'react-helmet';
-import { Main } from '@strapi/parts/Main';
-import { H3 } from '@strapi/parts/Text';
-import { Box } from '@strapi/parts/Box';
-import { ContentLayout, HeaderLayout } from '@strapi/parts/Layout';
-import { Button } from '@strapi/parts/Button';
-import { Grid, GridItem } from '@strapi/parts/Grid';
-import { Stack } from '@strapi/parts/Stack';
-import { useNotifyAT } from '@strapi/parts/LiveRegions';
-import { Select, Option } from '@strapi/parts/Select';
-import { FieldAction } from '@strapi/parts/Field';
-import { TextInput } from '@strapi/parts/TextInput';
-import Show from '@strapi/icons/Show';
-import Hide from '@strapi/icons/Hide';
-import CheckIcon from '@strapi/icons/CheckIcon';
+import { Main } from '@strapi/design-system/Main';
+import { H3 } from '@strapi/design-system/Text';
+import { Box } from '@strapi/design-system/Box';
+import { ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
+import { Button } from '@strapi/design-system/Button';
+import { Grid, GridItem } from '@strapi/design-system/Grid';
+import { Stack } from '@strapi/design-system/Stack';
+import { useNotifyAT } from '@strapi/design-system/LiveRegions';
+import { Select, Option } from '@strapi/design-system/Select';
+import { FieldAction } from '@strapi/design-system/Field';
+import { TextInput } from '@strapi/design-system/TextInput';
+import Eye from '@strapi/icons/Eye';
+import EyeStriked from '@strapi/icons/EyeStriked';
+import Check from '@strapi/icons/Check';
 import useLocalesProvider from '../../components/LocalesProvider/useLocalesProvider';
 import { fetchUser, putUser } from './utils/api';
 import schema from './utils/schema';
+
+const PasswordInput = styled(TextInput)`
+  ::-ms-reveal {
+    display: none;
+  }
+`;
 
 const FieldActionWrapper = styled(FieldAction)`
   svg {
@@ -168,7 +174,7 @@ const ProfilePage = () => {
               <HeaderLayout
                 title={data.username || `${data.firstname} ${data.lastname}`}
                 primaryAction={
-                  <Button startIcon={<CheckIcon />} loading={isSubmitting} type="submit">
+                  <Button startIcon={<Check />} loading={isSubmitting} type="submit">
                     {formatMessage({ id: 'form.button.save', defaultMessage: 'Save' })}
                   </Button>
                 }
@@ -264,7 +270,7 @@ const ProfilePage = () => {
 
                         <Grid gap={5}>
                           <GridItem s={12} col={6}>
-                            <TextInput
+                            <PasswordInput
                               error={
                                 errors.currentPassword
                                   ? formatMessage({
@@ -299,7 +305,7 @@ const ProfilePage = () => {
                                         }
                                   )}
                                 >
-                                  {currentPasswordShown ? <Show /> : <Hide />}
+                                  {currentPasswordShown ? <Eye /> : <EyeStriked />}
                                 </FieldActionWrapper>
                               }
                             />
@@ -308,7 +314,7 @@ const ProfilePage = () => {
 
                         <Grid gap={5}>
                           <GridItem s={12} col={6}>
-                            <TextInput
+                            <PasswordInput
                               error={
                                 errors.password
                                   ? formatMessage({
@@ -343,13 +349,13 @@ const ProfilePage = () => {
                                         }
                                   )}
                                 >
-                                  {passwordShown ? <Show /> : <Hide />}
+                                  {passwordShown ? <Eye /> : <EyeStriked />}
                                 </FieldActionWrapper>
                               }
                             />
                           </GridItem>
                           <GridItem s={12} col={6}>
-                            <TextInput
+                            <PasswordInput
                               error={
                                 errors.confirmPassword
                                   ? formatMessage({
@@ -384,7 +390,7 @@ const ProfilePage = () => {
                                         }
                                   )}
                                 >
-                                  {passwordConfirmShown ? <Show /> : <Hide />}
+                                  {passwordConfirmShown ? <Eye /> : <EyeStriked />}
                                 </FieldActionWrapper>
                               }
                             />

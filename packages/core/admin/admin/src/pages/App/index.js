@@ -13,7 +13,7 @@ import {
   useNotification,
   TrackingContext,
 } from '@strapi/helper-plugin';
-import { SkipToContent } from '@strapi/parts/Main';
+import { SkipToContent } from '@strapi/design-system/Main';
 import { useIntl } from 'react-intl';
 import PrivateRoute from '../../components/PrivateRoute';
 import { createRoute, makeUniqueRoutes } from '../../utils';

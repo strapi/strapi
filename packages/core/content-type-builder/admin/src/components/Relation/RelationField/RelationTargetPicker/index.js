@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { useDispatch } from 'react-redux';
 import get from 'lodash/get';
-import { MenuItem, SimpleMenu } from '@strapi/parts/SimpleMenu';
+import { MenuItem, SimpleMenu } from '@strapi/design-system/SimpleMenu';
 import useDataManager from '../../../../hooks/useDataManager';
 import { ON_CHANGE_RELATION_TARGET } from '../../../FormModal/constants';
 

@@ -7,14 +7,14 @@
 import React from 'react';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
-import { Box } from '@strapi/parts/Box';
-import { Divider } from '@strapi/parts/Divider';
-import { Grid, GridItem } from '@strapi/parts/Grid';
-import { KeyboardNavigable } from '@strapi/parts/KeyboardNavigable';
-import { ModalBody } from '@strapi/parts/ModalLayout';
-import { Flex } from '@strapi/parts/Flex';
-import { Stack } from '@strapi/parts/Stack';
-import { H2 } from '@strapi/parts/Text';
+import { Box } from '@strapi/design-system/Box';
+import { Divider } from '@strapi/design-system/Divider';
+import { Grid, GridItem } from '@strapi/design-system/Grid';
+import { KeyboardNavigable } from '@strapi/design-system/KeyboardNavigable';
+import { ModalBody } from '@strapi/design-system/ModalLayout';
+import { Flex } from '@strapi/design-system/Flex';
+import { Stack } from '@strapi/design-system/Stack';
+import { H2 } from '@strapi/design-system/Text';
 import { getTrad } from '../../utils';
 import AttributeOption from './AttributeOption';
 
@@ -26,11 +26,11 @@ const AttributeOptions = ({ attributes, forTarget, kind }) => {
 
   return (
     <ModalBody>
-      <Flex>
+      <Flex paddingBottom={4}>
         <H2>{formatMessage({ id: titleId, defaultMessage: 'Select a field' })}</H2>
       </Flex>
       <Divider />
-      <Box paddingTop={4} paddingBottom={4}>
+      <Box paddingTop={6} paddingBottom={4}>
         <KeyboardNavigable tagName="button">
           <Stack size={8}>
             {attributes.map((attributeRow, index) => {

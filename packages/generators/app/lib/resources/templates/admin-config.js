@@ -7,7 +7,7 @@ const path = require('path');
 const _ = require('lodash');
 
 module.exports = () => {
-  const tmpl = fs.readFileSync(path.join(__dirname, `server.template`));
+  const tmpl = fs.readFileSync(path.join(__dirname, `admin-config.template`));
   const compile = _.template(tmpl);
 
   return compile({

@@ -1,14 +1,14 @@
 import styled from 'styled-components';
-import { Stack } from '@strapi/parts/Stack';
-import { Text } from '@strapi/parts/Text';
-import { inputFocusStyle } from '@strapi/parts/themes';
+import { Stack } from '@strapi/design-system/Stack';
+import { Text } from '@strapi/design-system/Text';
+import { inputFocusStyle } from '@strapi/design-system/themes';
 
 const Wrapper = styled(Stack)`
   position: relative;
   align-items: stretch;
 
   label {
-    border-radius: 2px;
+    border-radius: 4px;
     max-width: 50%;
     cursor: pointer;
     user-select: none;
@@ -23,7 +23,7 @@ const Wrapper = styled(Stack)`
 
   .option {
     height: 100%;
-    border-radius: 2px;
+    border-radius: 4px;
     border: 1px solid ${({ theme }) => theme.colors.neutral200};
     will-change: transform, opacity;
     background: ${({ theme }) => theme.colors.neutral0};

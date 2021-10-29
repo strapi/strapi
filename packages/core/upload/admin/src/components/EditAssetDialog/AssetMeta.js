@@ -1,10 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Box } from '@strapi/parts/Box';
-import { Stack } from '@strapi/parts/Stack';
-import { Grid, GridItem } from '@strapi/parts/Grid';
-import { TableLabel, Text, Typography } from '@strapi/parts/Text';
+import { Box } from '@strapi/design-system/Box';
+import { Stack } from '@strapi/design-system/Stack';
+import { Grid, GridItem } from '@strapi/design-system/Grid';
+import { TableLabel, Text, Typography } from '@strapi/design-system/Text';
 import getTrad from '../../utils/getTrad';
 
 export const AssetMeta = ({ size, date, dimension, extension }) => {

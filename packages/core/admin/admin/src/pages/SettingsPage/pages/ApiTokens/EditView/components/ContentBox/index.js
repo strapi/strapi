@@ -1,11 +1,11 @@
 import React from 'react';
 import { useIntl } from 'react-intl';
 import { ContentBox, toggleNotification } from '@strapi/helper-plugin';
-import { IconButton } from '@strapi/parts/IconButton';
+import { IconButton } from '@strapi/design-system/IconButton';
 import Duplicate from '@strapi/icons/Duplicate';
 import PropTypes from 'prop-types';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
-import IconApiTokens from '@strapi/icons/IconApiTokens';
+import Key from '@strapi/icons/Key';
 
 const HeaderContentBox = ({ apiToken }) => {
   const { formatMessage } = useIntl();
@@ -14,24 +14,27 @@ const HeaderContentBox = ({ apiToken }) => {
     <ContentBox
       endAction={
         apiToken && (
-          <CopyToClipboard
-            onCopy={() => {
-              toggleNotification({
-                type: 'success',
-                message: { id: 'Settings.apiTokens.notification.copied' },
-              });
-            }}
-            text={apiToken}
-          >
-            <IconButton
-              label={formatMessage({
-                id: 'app.component.CopyToClipboard.label',
-                defaultMessage: 'Copy to clipboard',
-              })}
-              noBorder
-              icon={<Duplicate />}
-            />
-          </CopyToClipboard>
+          <span style={{ alignSelf: 'start' }}>
+            <CopyToClipboard
+              onCopy={() => {
+                toggleNotification({
+                  type: 'success',
+                  message: { id: 'Settings.apiTokens.notification.copied' },
+                });
+              }}
+              text={apiToken}
+            >
+              <IconButton
+                label={formatMessage({
+                  id: 'app.component.CopyToClipboard.label',
+                  defaultMessage: 'Copy to clipboard',
+                })}
+                noBorder
+                icon={<Duplicate />}
+                style={{ padding: 0, height: '1rem' }}
+              />
+            </CopyToClipboard>
+          </span>
         )
       }
       title={
@@ -49,10 +52,10 @@ const HeaderContentBox = ({ apiToken }) => {
             })
           : formatMessage({
               id: 'Settings.apiTokens.copy.editMessage',
-              defaultMessage: 'For security matters, you can only see your token once.',
+              defaultMessage: 'For security reasons, you can only see your token once.',
             })
       }
-      icon={<IconApiTokens />}
+      icon={<Key />}
       iconBackground="neutral100"
     />
   );

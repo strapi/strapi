@@ -1,8 +1,8 @@
 import React from 'react';
 import { useIntl } from 'react-intl';
-import { H3, Text } from '@strapi/parts/Text';
-import { Stack } from '@strapi/parts/Stack';
-import { GridItem } from '@strapi/parts/Grid';
+import { H3, Text } from '@strapi/design-system/Text';
+import { Stack } from '@strapi/design-system/Stack';
+import { GridItem } from '@strapi/design-system/Grid';
 import { get, isEmpty, takeRight, toLower, without } from 'lodash';
 import { useUsersPermissions } from '../../contexts/UsersPermissionsContext';
 import BoundRoute from '../BoundRoute';

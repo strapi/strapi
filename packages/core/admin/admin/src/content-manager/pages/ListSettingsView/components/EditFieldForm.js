@@ -3,46 +3,20 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import upperFirst from 'lodash/upperFirst';
 import styled from 'styled-components';
-import { ModalLayout, ModalHeader, ModalFooter, ModalBody } from '@strapi/parts/ModalLayout';
-import { ButtonText } from '@strapi/parts/Text';
-import { Button } from '@strapi/parts/Button';
-import { Flex } from '@strapi/parts/Flex';
-import { Grid, GridItem } from '@strapi/parts/Grid';
-import { TextInput } from '@strapi/parts/TextInput';
-import { ToggleInput } from '@strapi/parts/ToggleInput';
-import Date from '@strapi/icons/Date';
-import Boolean from '@strapi/icons/Boolean';
-import Email from '@strapi/icons/Email';
-import Enumeration from '@strapi/icons/Enumeration';
-import Media from '@strapi/icons/Media';
-import Relation from '@strapi/icons/Relation';
-import Text from '@strapi/icons/Text';
-import Uid from '@strapi/icons/Uid';
-import Numbers from '@strapi/icons/Numbers';
+import {
+  ModalLayout,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+} from '@strapi/design-system/ModalLayout';
+import { ButtonText } from '@strapi/design-system/Text';
+import { Button } from '@strapi/design-system/Button';
+import { Flex } from '@strapi/design-system/Flex';
+import { Grid, GridItem } from '@strapi/design-system/Grid';
+import { TextInput } from '@strapi/design-system/TextInput';
+import { ToggleInput } from '@strapi/design-system/ToggleInput';
 import { getTrad } from '../../../utils';
-
-const iconByTypes = {
-  biginteger: <Numbers />,
-  boolean: <Boolean />,
-  date: <Date />,
-  datetime: <Date />,
-  decimal: <Numbers />,
-  email: <Email />,
-  enum: <Enumeration />,
-  enumeration: <Enumeration />,
-  file: <Media />,
-  files: <Media />,
-  float: <Numbers />,
-  integer: <Numbers />,
-  media: <Media />,
-  number: <Numbers />,
-  relation: <Relation />,
-  string: <Text />,
-  text: <Text />,
-  time: <Date />,
-  timestamp: <Date />,
-  uid: <Uid />,
-};
+import FieldTypeIcon from '../../../components/FieldTypeIcon';
 
 const HeaderContainer = styled(Flex)`
   svg {
@@ -76,7 +50,7 @@ const EditFieldForm = ({
       <form onSubmit={onSubmit}>
         <ModalHeader>
           <HeaderContainer>
-            {iconByTypes[type]}
+            <FieldTypeIcon type={type} />
             <ButtonText textColor="neutral800" as="h2" id="title">
               {formatMessage(
                 {

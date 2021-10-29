@@ -2,14 +2,14 @@ import React, { useEffect, useState, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { AutoSizer, Collection } from 'react-virtualized';
-import { Searchbar } from '@strapi/parts/Searchbar';
-import { IconButton } from '@strapi/parts/IconButton';
-import SearchIcon from '@strapi/icons/SearchIcon';
+import { Searchbar } from '@strapi/design-system/Searchbar';
+import { IconButton } from '@strapi/design-system/IconButton';
+import Search from '@strapi/icons/Search';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Box } from '@strapi/parts/Box';
-import { Flex } from '@strapi/parts/Flex';
-import { Stack } from '@strapi/parts/Stack';
-import { Text, P } from '@strapi/parts/Text';
+import { Box } from '@strapi/design-system/Box';
+import { Flex } from '@strapi/design-system/Flex';
+import { Stack } from '@strapi/design-system/Stack';
+import { Text, P } from '@strapi/design-system/Text';
 import useDataManager from '../../hooks/useDataManager';
 import getTrad from '../../utils/getTrad';
 import Cell from './Cell';
@@ -75,7 +75,7 @@ const ComponentIconPicker = ({ error, isCreating, intlLabel, name, onChange, val
             {formatMessage(intlLabel)}
           </Text>
           {showSearch ? (
-            <div ref={searchWrapperRef}>
+            <div ref={searchWrapperRef} style={{ width: 206 }}>
               <Searchbar
                 name="searchbar"
                 onBlur={() => {
@@ -104,7 +104,7 @@ const ComponentIconPicker = ({ error, isCreating, intlLabel, name, onChange, val
               </Searchbar>
             </div>
           ) : (
-            <IconButton onClick={toggleSearch} aria-label="Edit" icon={<SearchIcon />} noBorder />
+            <IconButton onClick={toggleSearch} aria-label="Edit" icon={<Search />} noBorder />
           )}
         </Flex>
         <Stack size={1}>

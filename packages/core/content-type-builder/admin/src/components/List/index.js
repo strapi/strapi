@@ -8,11 +8,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EmptyBodyTable, useTracking } from '@strapi/helper-plugin';
-import { Box } from '@strapi/parts/Box';
-import { Button } from '@strapi/parts/Button';
-import { TableLabel } from '@strapi/parts/Text';
-import { Table, Thead, Tr, Th, TFooter } from '@strapi/parts/Table';
-import AddIcon from '@strapi/icons/AddIcon';
+import { Box } from '@strapi/design-system/Box';
+import { Button } from '@strapi/design-system/Button';
+import { TableLabel } from '@strapi/design-system/Text';
+import { Table, Thead, Tr, Th, TFooter } from '@strapi/design-system/Table';
+import Plus from '@strapi/icons/Plus';
 import { useIntl } from 'react-intl';
 import useFormModalNavigation from '../../hooks/useFormModalNavigation';
 import useDataManager from '../../hooks/useDataManager';
@@ -96,7 +96,7 @@ function List({
         </Thead>
         <EmptyBodyTable
           action={
-            <Button onClick={onClickAddField} size="L" startIcon={<AddIcon />} variant="secondary">
+            <Button onClick={onClickAddField} size="L" startIcon={<Plus />} variant="secondary">
               {formatMessage({
                 id: getTrad('table.button.no-fields'),
                 defaultMessage: 'Add new field',
@@ -189,7 +189,7 @@ function List({
         </Box>
 
         {isMain && isInDevelopmentMode && (
-          <TFooter icon={<AddIcon />} onClick={onClickAddField}>
+          <TFooter icon={<Plus />} onClick={onClickAddField}>
             {formatMessage({
               id: getTrad(
                 `form.button.add.field.to.${
@@ -204,7 +204,7 @@ function List({
         )}
         {isSub && isInDevelopmentMode && (
           <NestedTFooter
-            icon={<AddIcon />}
+            icon={<Plus />}
             onClick={onClickAddField}
             color={isFromDynamicZone ? 'primary' : 'neutral'}
           >

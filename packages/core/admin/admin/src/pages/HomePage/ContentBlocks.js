@@ -1,11 +1,11 @@
 import React from 'react';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
-import { Stack } from '@strapi/parts/Stack';
-import ReadDoc from '@strapi/icons/ReadDoc';
-import CodeExample from '@strapi/icons/CodeExample';
-import Tutorial from '@strapi/icons/Tutorial';
-import Blog from '@strapi/icons/Blog';
+import { Stack } from '@strapi/design-system/Stack';
+import InformationSquare from '@strapi/icons/InformationSquare';
+import CodeSquare from '@strapi/icons/CodeSquare';
+import PlaySquare from '@strapi/icons/PlaySquare';
+import FeatherSquare from '@strapi/icons/FeatherSquare';
 import { ContentBox } from '@strapi/helper-plugin';
 
 const BlockLink = styled.a`
@@ -31,7 +31,7 @@ const ContentBlocks = () => {
             id: 'app.components.BlockLink.documentation.content',
             defaultMessage: 'Discover the concepts, reference, guides and tutorials',
           })}
-          icon={<ReadDoc />}
+          icon={<InformationSquare />}
           iconBackground="primary100"
         />
       </BlockLink>
@@ -49,7 +49,7 @@ const ContentBlocks = () => {
             id: 'app.components.BlockLink.code.content',
             defaultMessage: 'Learn by testing real project developed by the community',
           })}
-          icon={<CodeExample />}
+          icon={<CodeSquare />}
           iconBackground="warning100"
         />
       </BlockLink>
@@ -61,13 +61,13 @@ const ContentBlocks = () => {
         <ContentBox
           title={formatMessage({
             id: 'app.components.BlockLink.tutorial',
-            defaultMessage: 'Tutorial',
+            defaultMessage: 'PlaySquare',
           })}
           subtitle={formatMessage({
             id: 'app.components.BlockLink.tutorial.content',
             defaultMessage: 'Discover the concepts, reference, guides and tutorials',
           })}
-          icon={<Tutorial />}
+          icon={<PlaySquare />}
           iconBackground="secondary100"
         />
       </BlockLink>
@@ -75,13 +75,13 @@ const ContentBlocks = () => {
         <ContentBox
           title={formatMessage({
             id: 'app.components.BlockLink.blog',
-            defaultMessage: 'Blog',
+            defaultMessage: 'FeatherSquare',
           })}
           subtitle={formatMessage({
             id: 'app.components.BlockLink.blog.content',
             defaultMessage: 'Discover the concepts, reference, guides and tutorials',
           })}
-          icon={<Blog />}
+          icon={<FeatherSquare />}
           iconBackground="alternative100"
         />
       </BlockLink>

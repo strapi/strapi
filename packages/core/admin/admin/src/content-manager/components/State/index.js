@@ -1,8 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Text } from '@strapi/parts/Text';
-import { Box } from '@strapi/parts/Box';
+import { Text } from '@strapi/design-system/Text';
+import { Box } from '@strapi/design-system/Box';
 import { getTrad } from '../../utils';
 
 const State = ({ isPublished }) => {

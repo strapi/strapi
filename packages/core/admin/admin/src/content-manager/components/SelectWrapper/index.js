@@ -5,8 +5,8 @@ import {
   useIntl,
 } from 'react-intl';
 import { useLocation } from 'react-router-dom';
-import { Link } from '@strapi/parts/Link';
-import { Stack } from '@strapi/parts/Stack';
+import { Link } from '@strapi/design-system/Link';
+import { Stack } from '@strapi/design-system/Stack';
 import { useTheme } from 'styled-components';
 import findIndex from 'lodash/findIndex';
 import get from 'lodash/get';

@@ -1,14 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import CheckIcon from '@strapi/icons/CheckIcon';
-import ClearField from '@strapi/icons/ClearField';
-import Close from '@strapi/icons/Close';
-import LoadingIcon from '@strapi/icons/LoadingIcon';
-import { Box } from '@strapi/parts/Box';
-import { Flex } from '@strapi/parts/Flex';
-import { Text } from '@strapi/parts/Text';
-import { Stack } from '@strapi/parts/Stack';
-import { Grid, GridItem } from '@strapi/parts/Grid';
+import Check from '@strapi/icons/Check';
+import Cross from '@strapi/icons/Cross';
+import Loader from '@strapi/icons/Loader';
+import { Box } from '@strapi/design-system/Box';
+import { Flex } from '@strapi/design-system/Flex';
+import { Text } from '@strapi/design-system/Text';
+import { Stack } from '@strapi/design-system/Stack';
+import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
@@ -30,7 +29,7 @@ const Status = ({ isPending, statusCode }) => {
   if (isPending) {
     return (
       <Stack horizontal size={2} style={{ alignItems: 'center' }}>
-        <Icon as={LoadingIcon} />
+        <Icon as={Loader} />
         <Text>
           {formatMessage({ id: 'Settings.webhooks.trigger.pending', defaultMessage: 'pending' })}
         </Text>
@@ -41,7 +40,7 @@ const Status = ({ isPending, statusCode }) => {
   if (statusCode >= 200 && statusCode < 300) {
     return (
       <Stack horizontal size={2} style={{ alignItems: 'center' }}>
-        <Icon as={CheckIcon} color="success700" />
+        <Icon as={Check} color="success700" />
         <Text>
           {formatMessage({ id: 'Settings.webhooks.trigger.success', defaultMessage: 'success' })}
         </Text>
@@ -52,7 +51,7 @@ const Status = ({ isPending, statusCode }) => {
   if (statusCode >= 300) {
     return (
       <Stack horizontal size={2} style={{ alignItems: 'center' }}>
-        <Icon as={Close} color="danger700" />
+        <Icon as={Cross} color="danger700" />
         <Text>
           {formatMessage({ id: 'Settings.error', defaultMessage: 'error' })} {statusCode}
         </Text>
@@ -124,7 +123,7 @@ const CancelButton = ({ onCancel }) => {
           <Text textColor="neutral400">
             {formatMessage({ id: 'Settings.webhooks.trigger.cancel', defaultMessage: 'cancel' })}
           </Text>
-          <Icon as={ClearField} color="neutral400" />
+          <Icon as={Cross} color="neutral400" />
         </Stack>
       </button>
     </Flex>

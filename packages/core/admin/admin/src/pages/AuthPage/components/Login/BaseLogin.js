@@ -1,22 +1,29 @@
 import React, { useState } from 'react';
-import Hide from '@strapi/icons/Hide';
-import Show from '@strapi/icons/Show';
-import { Box } from '@strapi/parts/Box';
-import { Stack } from '@strapi/parts/Stack';
-import { Main } from '@strapi/parts/Main';
-import { Flex } from '@strapi/parts/Flex';
-import { Link } from '@strapi/parts/Link';
-import { Button } from '@strapi/parts/Button';
-import { TextInput } from '@strapi/parts/TextInput';
-import { Checkbox } from '@strapi/parts/Checkbox';
-import { H1, Text, Subtitle } from '@strapi/parts/Text';
+import EyeStriked from '@strapi/icons/EyeStriked';
+import Eye from '@strapi/icons/Eye';
+import { Box } from '@strapi/design-system/Box';
+import { Stack } from '@strapi/design-system/Stack';
+import { Main } from '@strapi/design-system/Main';
+import { Flex } from '@strapi/design-system/Flex';
+import { Link } from '@strapi/design-system/Link';
+import { Button } from '@strapi/design-system/Button';
+import { TextInput } from '@strapi/design-system/TextInput';
+import { Checkbox } from '@strapi/design-system/Checkbox';
+import { H1, Text, Subtitle } from '@strapi/design-system/Text';
 import { Form } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
+import styled from 'styled-components';
 import { Formik } from 'formik';
 import { Column, LayoutContent } from '../../../../layouts/UnauthenticatedLayout';
 import Logo from '../Logo';
 import FieldActionWrapper from '../FieldActionWrapper';
+
+const PasswordInput = styled(TextInput)`
+  ::-ms-reveal {
+    display: none;
+  }
+`;
 
 const Login = ({ onSubmit, schema, children }) => {
   const [passwordShown, setPasswordShown] = useState(false);
@@ -83,7 +90,7 @@ const Login = ({ onSubmit, schema, children }) => {
                   name="email"
                   required
                 />
-                <TextInput
+                <PasswordInput
                   error={
                     errors.password
                       ? formatMessage({
@@ -118,7 +125,7 @@ const Login = ({ onSubmit, schema, children }) => {
                             }
                       )}
                     >
-                      {passwordShown ? <Show /> : <Hide />}
+                      {passwordShown ? <Eye /> : <EyeStriked />}
                     </FieldActionWrapper>
                   }
                   required

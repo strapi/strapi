@@ -3,14 +3,19 @@ import PropTypes from 'prop-types';
 import { Form, useRBACProvider } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { Formik } from 'formik';
-import CheckIcon from '@strapi/icons/CheckIcon';
-import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@strapi/parts/ModalLayout';
-import { TabGroup, Tabs, Tab, TabPanels, TabPanel } from '@strapi/parts/Tabs';
-import { Flex } from '@strapi/parts/Flex';
-import { Box } from '@strapi/parts/Box';
-import { Button } from '@strapi/parts/Button';
-import { Divider } from '@strapi/parts/Divider';
-import { ButtonText, H2 } from '@strapi/parts/Text';
+import Check from '@strapi/icons/Check';
+import {
+  ModalLayout,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+} from '@strapi/design-system/ModalLayout';
+import { TabGroup, Tabs, Tab, TabPanels, TabPanel } from '@strapi/design-system/Tabs';
+import { Flex } from '@strapi/design-system/Flex';
+import { Box } from '@strapi/design-system/Box';
+import { Button } from '@strapi/design-system/Button';
+import { Divider } from '@strapi/design-system/Divider';
+import { ButtonText, H2 } from '@strapi/design-system/Text';
 import localeFormSchema from '../../schemas';
 import useEditLocale from '../../hooks/useEditLocale';
 import { getTrad } from '../../utils';
@@ -101,7 +106,7 @@ const ModalEdit = ({ locale, onClose }) => {
               </Button>
             }
             endActions={
-              <Button type="submit" startIcon={<CheckIcon />} disabled={isEditing}>
+              <Button type="submit" startIcon={<Check />} disabled={isEditing}>
                 {formatMessage({ id: 'app.components.Button.save' })}
               </Button>
             }

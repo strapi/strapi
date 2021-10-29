@@ -3,9 +3,9 @@ import styled from 'styled-components';
 import { useIntl } from 'react-intl';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faQuestion, faTimes } from '@fortawesome/free-solid-svg-icons';
-import { Box } from '@strapi/parts/Box';
-import { Text } from '@strapi/parts/Text';
-import { FocusTrap } from '@strapi/parts/FocusTrap';
+import { Box } from '@strapi/design-system/Box';
+import { Text } from '@strapi/design-system/Text';
+import { FocusTrap } from '@strapi/design-system/FocusTrap';
 import { useConfigurations } from '../../../hooks';
 
 const OnboardingWrapper = styled(Box)`

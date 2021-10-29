@@ -1,5 +1,5 @@
 import React from 'react';
-import { ThemeProvider, lightTheme } from '@strapi/parts';
+import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { render as renderTL } from '@testing-library/react';
 import { QueryClientProvider, QueryClient } from 'react-query';
 import { PendingAssetStep } from '../PendingAssetStep';
@@ -228,10 +228,12 @@ describe('PendingAssetStep', () => {
       }
 
       .c1 {
+        border-radius: 4px 4px 0 0;
         border-bottom: 1px solid #eaeaef;
       }
 
       .c46 {
+        border-radius: 0 0 4px 4px;
         border-top: 1px solid #eaeaef;
       }
 
@@ -347,7 +349,7 @@ describe('PendingAssetStep', () => {
         background: #4945ff;
       }
 
-      .c15 .sc-fFYUIl {
+      .c15 .sc-dYzmtA {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -412,7 +414,7 @@ describe('PendingAssetStep', () => {
         background: #ffffff;
       }
 
-      .c49 .sc-fFYUIl {
+      .c49 .sc-dYzmtA {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -553,7 +555,6 @@ describe('PendingAssetStep', () => {
 
       .c32 {
         background: #f6f6f9;
-        color: #666687;
         padding: 4px;
         border-radius: 4px;
       }
@@ -650,7 +651,7 @@ describe('PendingAssetStep', () => {
         font-weight: 400;
         font-size: 0.875rem;
         line-height: 1.43;
-        color: #32324d;
+        color: #666687;
       }
 
       .c44 {

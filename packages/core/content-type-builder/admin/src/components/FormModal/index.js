@@ -13,14 +13,14 @@ import set from 'lodash/set';
 import toLower from 'lodash/toLower';
 import upperFirst from 'lodash/upperFirst';
 import { useSelector, useDispatch, shallowEqual } from 'react-redux';
-import { Box } from '@strapi/parts/Box';
-import { Button } from '@strapi/parts/Button';
-import { Divider } from '@strapi/parts/Divider';
-import { ModalLayout, ModalBody, ModalFooter } from '@strapi/parts/ModalLayout';
-import { H2 } from '@strapi/parts/Text';
-import { Tabs, Tab, TabGroup, TabPanels, TabPanel } from '@strapi/parts/Tabs';
-import { Flex } from '@strapi/parts/Flex';
-import { Stack } from '@strapi/parts/Stack';
+import { Box } from '@strapi/design-system/Box';
+import { Button } from '@strapi/design-system/Button';
+import { Divider } from '@strapi/design-system/Divider';
+import { ModalLayout, ModalBody, ModalFooter } from '@strapi/design-system/ModalLayout';
+import { H2 } from '@strapi/design-system/Text';
+import { Tabs, Tab, TabGroup, TabPanels, TabPanel } from '@strapi/design-system/Tabs';
+import { Flex } from '@strapi/design-system/Flex';
+import { Stack } from '@strapi/design-system/Stack';
 import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
 import useFormModalNavigation from '../../hooks/useFormModalNavigation';
@@ -74,12 +74,10 @@ import {
 
 const FormModal = () => {
   const {
-    onChangeSettingTypeTab,
     onCloseModal,
     onNavigateToChooseAttributeModal,
     onNavigateToAddCompoToDZModal,
     onNavigateToCreateComponentStep2,
-    settingType,
     actionType,
     attributeName,
     attributeType,
@@ -303,7 +301,7 @@ const FormModal = () => {
   const isInFirstComponentStep = step === '1';
   const isEditingCategory = modalType === 'editCategory';
   const isPickingAttribute = modalType === 'chooseAttribute';
-  const uid = createUid(modifiedData.name || '');
+  const uid = createUid(modifiedData.displayName || '');
   const attributes = get(allDataSchema, [...pathToSchema, 'schema', 'attributes'], null);
 
   const checkFormValidity = async () => {
@@ -906,7 +904,16 @@ const FormModal = () => {
         {!isPickingAttribute && (
           <form onSubmit={handleSubmit}>
             <ModalBody>
-              <TabGroup label="todo" id="tabs" variant="simple">
+              <TabGroup
+                label="todo"
+                id="tabs"
+                variant="simple"
+                onTabChange={selectedTab => {
+                  if (selectedTab === 1) {
+                    sendAdvancedTabEvent('advanced');
+                  }
+                }}
+              >
                 <Flex justifyContent="space-between">
                   <H2>
                     {formatMessage(
@@ -932,12 +939,7 @@ const FormModal = () => {
                     )}
                   </H2>
                   <Tabs>
-                    <Tab
-                      hasError={doesBaseFormHasError}
-                      onClick={() => {
-                        onChangeSettingTypeTab('base');
-                      }}
-                    >
+                    <Tab hasError={doesBaseFormHasError}>
                       {formatMessage({
                         id: getTrad('popUpForm.navContainer.base'),
                         defaultMessage: 'Base settings',
@@ -947,11 +949,6 @@ const FormModal = () => {
                       hasError={doesAdvancedFormHasError}
                       // TODO put aria-disabled
                       disabled={shouldDisableAdvancedTab()}
-                      onClick={() => {
-                        onChangeSettingTypeTab('advanced');
-
-                        sendAdvancedTabEvent('advanced');
-                      }}
                     >
                       {formatMessage({
                         id: getTrad('popUpForm.navContainer.advanced'),
@@ -963,32 +960,28 @@ const FormModal = () => {
 
                 <Divider />
 
-                <Box paddingTop={7}>
+                <Box paddingTop={6}>
                   <TabPanels>
                     <TabPanel>
                       <Stack size={6}>
-                        {settingType === 'base' && (
-                          <TabForm
-                            form={baseForm}
-                            formErrors={formErrors}
-                            genericInputProps={genericInputProps}
-                            modifiedData={modifiedData}
-                            onChange={handleChange}
-                          />
-                        )}
+                        <TabForm
+                          form={baseForm}
+                          formErrors={formErrors}
+                          genericInputProps={genericInputProps}
+                          modifiedData={modifiedData}
+                          onChange={handleChange}
+                        />
                       </Stack>
                     </TabPanel>
                     <TabPanel>
                       <Stack size={6}>
-                        {settingType === 'advanced' && (
-                          <TabForm
-                            form={advancedForm}
-                            formErrors={formErrors}
-                            genericInputProps={genericInputProps}
-                            modifiedData={modifiedData}
-                            onChange={handleChange}
-                          />
-                        )}
+                        <TabForm
+                          form={advancedForm}
+                          formErrors={formErrors}
+                          genericInputProps={genericInputProps}
+                          modifiedData={modifiedData}
+                          onChange={handleChange}
+                        />
                       </Stack>
                     </TabPanel>
                   </TabPanels>

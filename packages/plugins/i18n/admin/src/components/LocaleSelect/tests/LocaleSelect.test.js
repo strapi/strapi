@@ -1,5 +1,5 @@
 import React from 'react';
-import { ThemeProvider, lightTheme } from '@strapi/parts';
+import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { render as renderTL } from '@testing-library/react';
 import { QueryClientProvider, QueryClient } from 'react-query';
 import { Provider } from 'react-redux';
@@ -67,6 +67,10 @@ describe('LocaleSelect', () => {
 
       .c4:focus {
         outline: none;
+      }
+
+      .c4[aria-disabled='true'] {
+        cursor: not-allowed;
       }
 
       .c1 {
