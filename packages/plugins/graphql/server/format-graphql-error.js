@@ -1,6 +1,6 @@
 'use strict';
 
-const { toUpper, snakeCase } = require('lodash/fp');
+const { toUpper, snakeCase, pick } = require('lodash/fp');
 const {
   HttpError,
   ForbiddenError,
@@ -15,6 +15,7 @@ const {
 } = require('apollo-server-errors');
 
 const formatToCode = name => `STRAPI_${toUpper(snakeCase(name))}`;
+const formatErrorToExtension = error => ({ error: pick(['name', 'message', 'details'])(error) });
 
 const formatGraphqlError = error => {
   const originalError = error.originalError;
@@ -24,16 +25,16 @@ const formatGraphqlError = error => {
   }
 
   if (originalError instanceof ForbiddenError || originalError instanceof UnauthorizedError) {
-    return new ApolloForbiddenError(originalError.message, { details: originalError.details });
+    return new ApolloForbiddenError(originalError.message, formatErrorToExtension(originalError));
   }
 
   if (originalError instanceof ValidationError) {
-    return new ApolloUserInputError(originalError.message, { details: originalError.details });
+    return new ApolloUserInputError(originalError.message, formatErrorToExtension(originalError));
   }
 
   if (originalError instanceof ApplicationError || originalError instanceof HttpError) {
     const name = formatToCode(originalError.name);
-    return new ApolloError(originalError.message, name, { details: originalError.details });
+    return new ApolloError(originalError.message, name, formatErrorToExtension(originalError));
   }
 
   // Internal server error
