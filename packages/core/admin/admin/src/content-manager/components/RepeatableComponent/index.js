@@ -49,6 +49,7 @@ const RepeatableComponent = ({
   const toggleNotification = useNotification();
   const { formatMessage } = useIntl();
   const [collapseToOpen, setCollapseToOpen] = useState('');
+  const [isDraggingSibling, setIsDraggingSiblig] = useState(false);
   const [, drop] = useDrop({ accept: ItemTypes.COMPONENT });
   const { getComponentLayout } = useContentTypeLayout();
   const componentLayoutData = useMemo(() => getComponentLayout(componentUid), [
@@ -145,6 +146,7 @@ const RepeatableComponent = ({
               doesPreviousFieldContainErrorsAndIsOpen={doesPreviousFieldContainErrorsAndIsOpen}
               hasErrors={hasErrors}
               hasMinError={hasMinError}
+              isDraggingSibling={isDraggingSibling}
               isFirst={index === 0}
               isOpen={isOpen}
               isReadOnly={isReadOnly}
@@ -158,6 +160,7 @@ const RepeatableComponent = ({
               }}
               parentName={name}
               schema={componentLayoutData}
+              setIsDraggingSiblig={setIsDraggingSiblig}
               toggleCollapses={toggleCollapses}
             />
           );

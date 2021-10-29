@@ -35,6 +35,11 @@ const EnhancedGroup = styled(Box)`
         border-top: 1px solid ${({ theme }) => theme.colors.primary600};
       }
     }
+
+    > span {
+      border-radius: ${({ theme }) => theme.borderRadius} ${({ theme }) => theme.borderRadius} 0 0;
+      border-top: 1px solid ${({ theme }) => theme.colors.neutral200};
+    }
   }
 
   & [data-strapi-expanded='true'] {
@@ -70,7 +75,7 @@ const AccordionGroupCustom = ({ children, footer, label, labelAction }) => {
       <EnhancedGroup footer={footer}>{children}</EnhancedGroup>
       {footer && <AccordionFooter>{footer}</AccordionFooter>}
     </KeyboardNavigable>
-  )
+  );
 };
 
 AccordionGroupCustom.defaultProps = {

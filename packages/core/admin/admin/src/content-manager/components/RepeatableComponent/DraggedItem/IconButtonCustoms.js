@@ -23,3 +23,14 @@ export const CustomIconButton = styled(IconButton)`
 export const DragHandleWrapper = styled(CustomIconButton)`
   cursor: move;
 `;
+
+export const CustomIconButtonSibling = styled(IconButton)`
+  background-color: transparent;
+
+  svg {
+    path {
+      fill: ${({ theme, expanded }) =>
+        expanded ? theme.colors.primary600 : theme.colors.neutral600};
+    }
+  }
+`;

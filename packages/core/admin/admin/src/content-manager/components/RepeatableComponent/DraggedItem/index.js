@@ -16,6 +16,7 @@ import getTrad from '../../../utils/getTrad';
 import Inputs from '../../Inputs';
 import FieldComponent from '../../FieldComponent';
 import Preview from './Preview';
+import DraggingSibling from './DraggingSibling';
 import { CustomIconButton, DragHandleWrapper } from './IconButtonCustoms';
 import { connect, select } from './utils';
 
@@ -32,6 +33,7 @@ const DraggedItem = ({
   // hasErrors,
   // hasMinError,
   // isFirst,
+  isDraggingSibling,
   isOpen,
   isReadOnly,
   onClickToggle,
@@ -40,6 +42,7 @@ const DraggedItem = ({
   // Retrieved from the select function
   moveComponentField,
   removeRepeatableField,
+  setIsDraggingSiblig,
   triggerFormValidation,
   // checkFormErrors,
   displayedValue,
@@ -123,6 +126,7 @@ const DraggedItem = ({
     end: () => {
       // Update the errors
       triggerFormValidation();
+      setIsDraggingSiblig(false);
     },
     collect: monitor => ({
       isDragging: monitor.isDragging(),
@@ -133,6 +137,12 @@ const DraggedItem = ({
     preview(getEmptyImage(), { captureDraggingState: false });
   }, [preview]);
 
+  useEffect(() => {
+    if (isDragging) {
+      setIsDraggingSiblig(true);
+    }
+  }, [isDragging, setIsDraggingSiblig]);
+
   // Create the refs
   // We need 1 for the drop target
   // 1 for the drag target
@@ -141,10 +151,15 @@ const DraggedItem = ({
     dropRef: drop(dropRef),
   };
 
+  const accordionTitle = toString(displayedValue);
+
   return (
-    <Box ref={refs ? refs.dropRef : null} data-strapi-is-dragging={isDragging}>
+    <Box ref={refs ? refs.dropRef : null}>
       {isDragging && <Preview />}
-      {!isDragging && (
+      {!isDragging && isDraggingSibling && (
+        <DraggingSibling displayedValue={accordionTitle} componentFieldName={componentFieldName} />
+      )}
+      {!isDragging && !isDraggingSibling && (
         <Accordion expanded={isOpen} toggle={onClickToggle} id={componentFieldName} size="S">
           <AccordionToggle
             action={
@@ -176,7 +191,7 @@ const DraggedItem = ({
                 </Stack>
               )
             }
-            title={toString(displayedValue)}
+            title={accordionTitle}
             togglePosition="left"
           />
           <AccordionContent>
@@ -318,7 +333,9 @@ DraggedItem.defaultProps = {
   // hasErrors: false,
   // hasMinError: false,
   // isFirst: false,
+  isDraggingSibling: false,
   isOpen: false,
+  setIsDraggingSiblig: () => {},
   toggleCollapses: () => {},
 };
 
@@ -328,6 +345,7 @@ DraggedItem.propTypes = {
   // hasErrors: PropTypes.bool,
   // hasMinError: PropTypes.bool,
   // isFirst: PropTypes.bool,
+  isDraggingSibling: PropTypes.bool,
   isOpen: PropTypes.bool,
   isReadOnly: PropTypes.bool.isRequired,
   onClickToggle: PropTypes.func.isRequired,
@@ -335,6 +353,7 @@ DraggedItem.propTypes = {
   toggleCollapses: PropTypes.func,
   moveComponentField: PropTypes.func.isRequired,
   removeRepeatableField: PropTypes.func.isRequired,
+  setIsDraggingSiblig: PropTypes.func,
   triggerFormValidation: PropTypes.func.isRequired,
   // checkFormErrors: PropTypes.func.isRequired,
   displayedValue: PropTypes.string.isRequired,
