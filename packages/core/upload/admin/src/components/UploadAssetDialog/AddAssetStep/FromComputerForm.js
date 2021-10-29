@@ -9,7 +9,7 @@ import { ModalFooter } from '@strapi/design-system/ModalLayout';
 import { Button } from '@strapi/design-system/Button';
 import PicturePlus from '@strapi/icons/PicturePlus';
 import { useIntl } from 'react-intl';
-import { getTrad } from '../../../utils';
+import getTrad from '../../../utils/getTrad';
 import { rawFileToAsset } from '../../../utils/rawFileToAsset';
 import { AssetSource } from '../../../constants';
 

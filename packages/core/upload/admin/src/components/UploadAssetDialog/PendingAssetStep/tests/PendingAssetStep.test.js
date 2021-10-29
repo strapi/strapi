@@ -5,11 +5,7 @@ import { QueryClientProvider, QueryClient } from 'react-query';
 import { PendingAssetStep } from '../PendingAssetStep';
 import en from '../../../../translations/en.json';
 
-jest.mock('../../../../utils', () => ({
-  ...jest.requireActual('../../../../utils'),
-  getTrad: x => x,
-}));
-
+jest.mock('../../../../utils/getTrad', () => x => x);
 jest.mock('react-intl', () => ({
   useIntl: () => ({ formatMessage: jest.fn(({ id }) => en[id]) }),
 }));
