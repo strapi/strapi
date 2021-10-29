@@ -18,10 +18,6 @@ import { AssetDefinition } from '../../../constants';
 import { DialogTitle } from './DialogTitle';
 import { DialogFooter } from './DialogFooter';
 
-// When opening the AssetDialog in the MediaLibraryInput,
-// creation permissions has already been checked.
-// However, we need to make sure that the user has read permissions since
-// ML and CM permissions are not the same
 export const AssetDialog = ({
   onClose,
   onAddAsset,
