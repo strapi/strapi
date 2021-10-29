@@ -64,7 +64,30 @@ export const AssetDialog = ({
     );
   }
 
-  if ((canCreate && !canRead) || (canRead && assets?.length === 0)) {
+  if (!canRead && canCreate && initiallySelectedAssets?.length === 0) {
+    return (
+      <ModalLayout onClose={onClose} labelledBy="asset-dialog-title">
+        <DialogTitle />
+        <NoMedia
+          action={
+            <Button variant="secondary" startIcon={<AddIcon />} onClick={onAddAsset}>
+              {formatMessage({
+                id: getTrad('modal.header.browse'),
+                defaultMessage: 'Upload assets',
+              })}
+            </Button>
+          }
+          content={formatMessage({
+            id: getTrad('modal.upload-list.sub-header.button'),
+            defaultMessage: 'Add more assets',
+          })}
+        />
+        <DialogFooter onClose={onClose} />
+      </ModalLayout>
+    );
+  }
+
+  if (canRead && assets?.length === 0) {
     return (
       <ModalLayout onClose={onClose} labelledBy="asset-dialog-title">
         <DialogTitle />

@@ -82,9 +82,6 @@ describe('AssetDialog', () => {
   });
 
   describe('content', () => {
-    // The permissions cases for:
-    // - canRead = false and canCreate = false
-    // are managed in the parent component
     describe('empty state', () => {
       it('shows an empty state when there are no assets and the user is allowed to read and to create', async () => {
         renderML(props);
@@ -101,9 +98,7 @@ describe('AssetDialog', () => {
         props.canRead = false;
         renderML(props);
 
-        await waitFor(() =>
-          expect(screen.getByText('Upload your first assets...')).toBeInTheDocument()
-        );
+        await waitFor(() => expect(screen.getByText('Add more assets')).toBeInTheDocument());
 
         expect(screen.getByRole('button', { name: 'Upload assets' })).toBeInTheDocument();
         expect(screen.getByRole('dialog').getAttribute('aria-busy')).toBe(null);
