@@ -175,6 +175,7 @@ const DynamicZone = ({
             labelAction={labelAction}
             name={name}
             numberOfComponents={dynamicDisplayedComponentsLength}
+            required={fieldSchema.required || false}
           />
           {dynamicDisplayedComponents.map((componentUid, index) => {
             const showDownIcon =
@@ -240,6 +241,7 @@ DynamicZone.propTypes = {
     components: PropTypes.array.isRequired,
     max: PropTypes.number,
     min: PropTypes.number,
+    required: PropTypes.bool,
   }),
   formErrors: PropTypes.object.isRequired,
   isCreatingEntry: PropTypes.bool.isRequired,

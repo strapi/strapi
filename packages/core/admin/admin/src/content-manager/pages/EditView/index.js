@@ -188,6 +188,7 @@ const EditView = ({
                                             max,
                                             min,
                                             repeatable = false,
+                                            required = false,
                                           } = fieldSchema;
 
                                           return (
@@ -203,6 +204,7 @@ const EditView = ({
                                                 max={max}
                                                 min={min}
                                                 name={name}
+                                                required={required}
                                               />
                                             </GridItem>
                                           );

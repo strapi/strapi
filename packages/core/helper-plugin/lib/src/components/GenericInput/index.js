@@ -32,6 +32,7 @@ const GenericInput = ({
   onChange,
   options,
   placeholder,
+  required,
   step,
   type,
   value,
@@ -54,6 +55,7 @@ const GenericInput = ({
         name={name}
         onChange={onChange}
         options={options}
+        required={required}
         placeholder={placeholder}
         type={type}
         value={value}
@@ -105,6 +107,7 @@ const GenericInput = ({
           onChange={e => {
             onChange({ target: { name, value: e.target.checked } });
           }}
+          required={required}
         />
       );
     }
@@ -119,6 +122,7 @@ const GenericInput = ({
           onValueChange={value => {
             onChange({ target: { name, value } });
           }}
+          required={required}
           value={Boolean(value)}
         >
           {label}
@@ -143,6 +147,7 @@ const GenericInput = ({
           }}
           onClear={() => onChange({ target: { name, value: '', type } })}
           placeholder={formattedPlaceholder}
+          required={required}
           selectedDate={value ? new Date(value) : null}
           selectedDateLabel={formattedDate => `Date picker, current is ${formattedDate}`}
         />
@@ -162,6 +167,7 @@ const GenericInput = ({
             onChange({ target: { name, value, type } });
           }}
           placeholder={formattedPlaceholder}
+          required={required}
           step={step}
           value={value || undefined}
         />
@@ -182,6 +188,7 @@ const GenericInput = ({
           name={name}
           onChange={onChange}
           placeholder={formattedPlaceholder}
+          required={required}
           type={type}
           value={value || ''}
         />
@@ -219,6 +226,7 @@ const GenericInput = ({
           name={name}
           onChange={onChange}
           placeholder={formattedPlaceholder}
+          required={required}
           type={showPassword ? 'text' : 'password'}
           value={value || ''}
         />
@@ -238,6 +246,7 @@ const GenericInput = ({
             onChange({ target: { name, value: value === '' ? null : value, type: 'select' } });
           }}
           placeholder={formattedPlaceholder}
+          required={required}
           value={value || ''}
         >
           {options.map(({ metadatas: { intlLabel, disabled, hidden }, key, value }) => {
@@ -261,6 +270,7 @@ const GenericInput = ({
           hint={hint}
           name={name}
           onChange={onChange}
+          required={required}
           placeholder={formattedPlaceholder}
           type={type}
           value={value || ''}
@@ -297,6 +307,7 @@ const GenericInput = ({
             onChange({ target: { name, value: null, type } });
           }}
           placeholder={formattedPlaceholder}
+          required={required}
           step={step}
           value={time}
         />
@@ -320,6 +331,7 @@ GenericInput.defaultProps = {
   error: '',
   labelAction: undefined,
   placeholder: null,
+  required: false,
   options: [],
   step: 1,
   value: '',
@@ -362,6 +374,7 @@ GenericInput.propTypes = {
     defaultMessage: PropTypes.string.isRequired,
     values: PropTypes.object,
   }),
+  required: PropTypes.bool,
   step: PropTypes.number,
   type: PropTypes.string.isRequired,
   value: PropTypes.any,
