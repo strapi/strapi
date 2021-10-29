@@ -44,8 +44,6 @@ module.exports = ({ action, ability, model }) => {
 
     const permittedFields = fields.shouldIncludeAll ? null : getOutputFields(fields.permitted);
 
-    console.log(permittedFields);
-
     return sanitize.utils.pipeAsync(
       // Remove roles from createdBy & updateBy fields
       omitCreatorRoles,
@@ -70,7 +68,7 @@ module.exports = ({ action, ability, model }) => {
   };
 
   const wrapSanitize = createSanitizeFunction => {
-    const wrappedSanitize = (data, options = {}) => {
+    const wrappedSanitize = async (data, options = {}) => {
       if (isArray(data)) {
         return Promise.all(data.map(entity => wrappedSanitize(entity, options)));
       }

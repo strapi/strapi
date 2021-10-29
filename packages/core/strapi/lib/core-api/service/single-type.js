@@ -22,10 +22,8 @@ const createSingleTypeService = ({ model, strapi, utils }) => {
      *
      * @return {Promise}
      */
-    async createOrUpdate(params = {}) {
+    async createOrUpdate({ data, ...params } = {}) {
       const entity = await this.find(params);
-
-      const { data } = params;
 
       if (!entity) {
         const count = await strapi.query(uid).count();

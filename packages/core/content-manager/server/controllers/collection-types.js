@@ -85,10 +85,7 @@ module.exports = {
       const sanitizedBody = await sanitizeFn(body);
       const entity = await entityManager.create(sanitizedBody, model);
 
-      console.log('created entity');
-      console.log(entity.createdBy);
       ctx.body = await permissionChecker.sanitizeOutput(entity);
-      console.log(ctx.body.createdBy);
 
       if (totalEntries === 0) {
         strapi.telemetry.send('didCreateFirstContentTypeEntry', { model });
