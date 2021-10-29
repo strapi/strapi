@@ -7,8 +7,6 @@ import { useIntl } from 'react-intl';
 import toString from 'lodash/toString';
 import styled from 'styled-components';
 import { Accordion, AccordionToggle, AccordionContent } from '@strapi/design-system/Accordion';
-import { Box } from '@strapi/design-system/Box';
-import { Flex } from '@strapi/design-system/Flex';
 import { IconButton } from '@strapi/design-system/IconButton';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { Stack } from '@strapi/design-system/Stack';
@@ -18,18 +16,17 @@ import ItemTypes from '../../../utils/ItemTypes';
 import getTrad from '../../../utils/getTrad';
 import Inputs from '../../Inputs';
 import FieldComponent from '../../FieldComponent';
-import DragHandleWrapper from './DragHandleWrapper';
 import Preview from './Preview';
 import { connect, select } from './utils';
 
 // FIXME
 // Temporary workaround to remove the overflow until we migrate the react-select for the relations
 // to the DS one
-const StyledBox = styled(Box)`
-  > div {
-    overflow: visible;
-  }
-`;
+// const StyledBox = styled(Box)`
+//   > div {
+//     overflow: visible;
+//   }
+// `;
 
 const CustomIconButton = styled(IconButton)`
   background-color: transparent;
@@ -62,8 +59,6 @@ const DraggedItem = ({
   // hasErrors,
   // hasMinError,
   // isFirst,
-
-  isOdd,
   isOpen,
   isReadOnly,
   onClickToggle,
@@ -76,171 +71,209 @@ const DraggedItem = ({
   // checkFormErrors,
   displayedValue,
 }) => {
-  // const dragRef = useRef(null);
-  // const dropRef = useRef(null);
-  // const { formatMessage } = useIntl();
+  const dragRef = useRef(null);
+  const dropRef = useRef(null);
+  const { formatMessage } = useIntl();
 
-  // const fields = schema.layouts.edit;
+  const fields = schema.layouts.edit;
 
-  // const [, drop] = useDrop({
-  //   accept: ItemTypes.COMPONENT,
-  //   canDrop() {
-  //     return false;
-  //   },
-  //   hover(item, monitor) {
-  //     if (!dropRef.current) {
-  //       return;
-  //     }
+  const [, drop] = useDrop({
+    accept: ItemTypes.COMPONENT,
+    canDrop() {
+      return false;
+    },
+    hover(item, monitor) {
+      if (!dropRef.current) {
+        return;
+      }
 
-  //     const dragPath = item.originalPath;
-  //     const hoverPath = componentFieldName;
-  //     const fullPathToComponentArray = dragPath.split('.');
-  //     const dragIndexString = fullPathToComponentArray
-  //       .slice()
-  //       .splice(-1)
-  //       .join('');
-  //     const hoverIndexString = hoverPath
-  //       .split('.')
-  //       .splice(-1)
-  //       .join('');
-  //     const pathToComponentArray = fullPathToComponentArray.slice(
-  //       0,
-  //       fullPathToComponentArray.length - 1
-  //     );
-  //     const dragIndex = parseInt(dragIndexString, 10);
-  //     const hoverIndex = parseInt(hoverIndexString, 10);
+      const dragPath = item.originalPath;
+      const hoverPath = componentFieldName;
+      const fullPathToComponentArray = dragPath.split('.');
+      const dragIndexString = fullPathToComponentArray
+        .slice()
+        .splice(-1)
+        .join('');
+      const hoverIndexString = hoverPath
+        .split('.')
+        .splice(-1)
+        .join('');
+      const pathToComponentArray = fullPathToComponentArray.slice(
+        0,
+        fullPathToComponentArray.length - 1
+      );
+      const dragIndex = parseInt(dragIndexString, 10);
+      const hoverIndex = parseInt(hoverIndexString, 10);
 
-  //     // Don't replace items with themselves
-  //     if (dragIndex === hoverIndex) {
-  //       return;
-  //     }
+      // Don't replace items with themselves
+      if (dragIndex === hoverIndex) {
+        return;
+      }
 
-  //     // Determine rectangle on screen
-  //     const hoverBoundingRect = dropRef.current.getBoundingClientRect();
-  //     // Get vertical middle
-  //     const hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
-  //     // Determine mouse position
-  //     const clientOffset = monitor.getClientOffset();
-  //     // Get pixels to the top
-  //     const hoverClientY = clientOffset.y - hoverBoundingRect.top;
+      // Determine rectangle on screen
+      const hoverBoundingRect = dropRef.current.getBoundingClientRect();
+      // Get vertical middle
+      const hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
+      // Determine mouse position
+      const clientOffset = monitor.getClientOffset();
+      // Get pixels to the top
+      const hoverClientY = clientOffset.y - hoverBoundingRect.top;
 
-  //     // Only perform the move when the mouse has crossed half of the items height
-  //     // When dragging downwards, only move when the cursor is below 50%
-  //     // When dragging upwards, only move when the cursor is above 50%
-  //     // Dragging downwards
-  //     if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) {
-  //       return;
-  //     }
-  //     // Dragging upwards
-  //     if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) {
-  //       return;
-  //     }
-  //     // Time to actually perform the action in the data
-  //     moveComponentField(pathToComponentArray, dragIndex, hoverIndex);
+      // Only perform the move when the mouse has crossed half of the items height
+      // When dragging downwards, only move when the cursor is below 50%
+      // When dragging upwards, only move when the cursor is above 50%
+      // Dragging downwards
+      if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) {
+        return;
+      }
+      // Dragging upwards
+      if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) {
+        return;
+      }
+      // Time to actually perform the action in the data
+      moveComponentField(pathToComponentArray, dragIndex, hoverIndex);
 
-  //     item.originalPath = hoverPath;
-  //   },
-  // });
-  // const [{ isDragging }, drag, preview] = useDrag({
-  //   type: ItemTypes.COMPONENT,
-  //   item: () => {
-  //     // Close all collapses
-  //     toggleCollapses(-1);
+      item.originalPath = hoverPath;
+    },
+  });
+  const [{ isDragging }, drag, preview] = useDrag({
+    type: ItemTypes.COMPONENT,
+    item: () => {
+      // Close all collapses
+      toggleCollapses(-1);
 
-  //     return {
-  //       displayedValue,
-  //       originalPath: componentFieldName,
-  //     };
-  //   },
-  //   end: () => {
-  //     // Update the errors
-  //     triggerFormValidation();
-  //   },
-  //   collect: monitor => ({
-  //     isDragging: monitor.isDragging(),
-  //   }),
-  // });
+      return {
+        displayedValue,
+        originalPath: componentFieldName,
+      };
+    },
+    end: () => {
+      // Update the errors
+      triggerFormValidation();
+    },
+    collect: monitor => ({
+      isDragging: monitor.isDragging(),
+    }),
+  });
 
-  // useEffect(() => {
-  //   preview(getEmptyImage(), { captureDraggingState: false });
-  // }, [preview]);
+  useEffect(() => {
+    preview(getEmptyImage(), { captureDraggingState: false });
+  }, [preview]);
 
   // Create the refs
   // We need 1 for the drop target
   // 1 for the drag target
-  // const refs = {
-  //   dragRef: drag(dragRef),
-  //   dropRef: drop(dropRef),
-  // };
+  const refs = {
+    dragRef: drag(dragRef),
+    dropRef: drop(dropRef),
+  };
 
   return (
-    <Accordion 
-      disabled={false} 
-      expanded={false} 
-      toggle={() => {}} 
-      id=''
-      size="S"
-    >
-      <AccordionToggle
-        action={
-          <Stack horizontal size={0}>
-            <CustomIconButton 
-              expanded={false} 
-              noBorder 
-              onClick={() => console.log('delete')} 
-              label="Delete" 
-              icon={<Trash />} 
-              disabled={false}
-            />
-            <CustomIconButton
-              expanded={false} 
-              noBorder 
-              onClick={() => console.log('drag')} 
-              label="Drag" 
-              icon={<Drag />} 
-              disabled={false}
-            />
-          </Stack>
-        }
-        title={toString(displayedValue)}
-        togglePosition="left"
-      />
-      <AccordionContent>
-        <Stack background='neutral100' paddingTop={5} paddingBottom={5} paddingLeft={7} paddingRight={7} size={3}>
-          kikou
-        </Stack>
-      </AccordionContent>
-    </Accordion>
+    <>
+      {isDragging && <Preview />}
+      {!isDragging &&
+        <Accordion 
+          expanded={isOpen} 
+          toggle={onClickToggle} 
+          id={componentFieldName}
+          size="S"
+        >
+          <AccordionToggle
+            action={
+              isReadOnly ? null : 
+              <Stack horizontal size={0}>
+                <CustomIconButton 
+                  expanded={isOpen} 
+                  noBorder 
+                  onClick={() => {
+                    removeRepeatableField(componentFieldName);
+                    toggleCollapses();
+                  }}
+                  label={formatMessage({
+                    id: getTrad('containers.Edit.delete'),
+                    defaultMessage: 'Delete',
+                  })}
+                  icon={<Trash />} 
+                />
+                <CustomIconButton
+                  expanded={isOpen} 
+                  noBorder 
+                  label={formatMessage({
+                    id: getTrad('components.DragHandle-label'),
+                    defaultMessage: 'Drag',
+                  })}
+                  icon={<Drag />} 
+                />
+              </Stack>
+            }
+            title={toString(displayedValue)}
+            togglePosition="left"
+          />
+          <AccordionContent>
+            <Stack background='neutral100' padding={6} size={6}>
+              {fields.map((fieldRow, key) => {
+                return (
+                  <Grid gap={4} key={key}>
+                    {fieldRow.map(({ name, fieldSchema, metadatas, queryInfos, size }) => {
+                      const isComponent = fieldSchema.type === 'component';
+                      const keys = `${componentFieldName}.${name}`;
+
+                      if (isComponent) {
+                        const componentUid = fieldSchema.component;
+
+                        return (
+                          <GridItem col={size} s={12} xs={12} key={name}>
+                            <FieldComponent
+                              componentUid={componentUid}
+                              intlLabel={{
+                                id: metadatas.label,
+                                defaultMessage: metadatas.label,
+                              }}
+                              isRepeatable={fieldSchema.repeatable}
+                              isNested
+                              name={keys}
+                              max={fieldSchema.max}
+                              min={fieldSchema.min}
+                              required={fieldSchema.required}
+                            />
+                          </GridItem>
+                        );
+                      }
+
+                      return (
+                        <GridItem key={keys} col={size} s={12} xs={12}>
+                          <Inputs
+                            fieldSchema={fieldSchema}
+                            keys={keys}
+                            metadatas={metadatas}
+                            // onBlur={hasErrors ? checkFormErrors : null}
+                            queryInfos={queryInfos}
+                          />
+                        </GridItem>
+                      );
+                    })}
+                  </Grid>
+                );
+              })}
+            </Stack>
+          </AccordionContent>
+        </Accordion>}
+    </>
   //   <StyledBox ref={refs ? refs.dropRef : null}>
   //     {isDragging && <Preview />}
   //     {!isDragging && (
   //       <Accordion expanded={isOpen} toggle={onClickToggle} id={componentFieldName}>
   //         <AccordionToggle
-  //           variant={isOdd ? 'primary' : 'secondary'}
-  //           title={toString(displayedValue)}
-  //           togglePosition="left"
   //           action={
   //             isReadOnly ? null : (
   //               <Flex>
   //                 <IconButton
-  //                   onClick={() => {
-  //                     removeRepeatableField(componentFieldName);
-  //                     toggleCollapses();
-  //                   }}
-  //                   label={formatMessage({
-  //                     id: getTrad('containers.Edit.delete'),
-  //                     defaultMessage: 'Edit',
-  //                   })}
   //                   icon={<Trash />}
   //                 />
   //                 <Box paddingLeft={2}>
   //                   <DragHandleWrapper
   //                     ref={refs.dragRef}
-  //                     label={formatMessage({
-  //                       id: getTrad('components.DragHandle-label'),
-  //                       defaultMessage: 'Drag',
-  //                     })}
-  //                     icon={<DragHandle />}
+  //                     icon={<Drag />}
   //                   />
   //                 </Box>
   //               </Flex>
@@ -324,7 +357,6 @@ DraggedItem.propTypes = {
   // hasErrors: PropTypes.bool,
   // hasMinError: PropTypes.bool,
   // isFirst: PropTypes.bool,
-  isOdd: PropTypes.bool.isRequired,
   isOpen: PropTypes.bool,
   isReadOnly: PropTypes.bool.isRequired,
   onClickToggle: PropTypes.func.isRequired,
