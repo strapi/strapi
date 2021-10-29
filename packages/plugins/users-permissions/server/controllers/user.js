@@ -61,7 +61,7 @@ module.exports = {
     let data = await getService('user').fetch({ id });
 
     if (data) {
-      data = await sanitizeUser(data);
+      data = await sanitizeUser(data, ctx);
     }
 
     ctx.body = data;
@@ -83,7 +83,7 @@ module.exports = {
     const { id } = ctx.params;
 
     const data = await getService('user').remove({ id });
-    const sanitizedUser = await sanitizeUser(data);
+    const sanitizedUser = await sanitizeUser(data, ctx);
 
     ctx.send(sanitizedUser);
   },
@@ -99,6 +99,6 @@ module.exports = {
       return ctx.badRequest('Unauthenticated request');
     }
 
-    ctx.body = await sanitizeUser(user);
+    ctx.body = await sanitizeUser(user, ctx);
   },
 };
