@@ -35,8 +35,13 @@ const product = {
     big_rank: {
       type: 'biginteger',
     },
+    isChecked: {
+      type: 'boolean',
+    },
   },
-  name: 'product',
+  displayName: 'Product',
+  singularName: 'product',
+  pluralName: 'products',
   description: '',
   collectionName: '',
 };
@@ -49,6 +54,7 @@ const productFixtures = [
     decimal_field: 42.43,
     rank: 42,
     big_rank: '345678912983',
+    isChecked: true,
   },
   {
     name: 'Product 2',
@@ -57,6 +63,7 @@ const productFixtures = [
     decimal_field: 91.22,
     rank: 82,
     big_rank: '926371623421',
+    isChecked: false,
   },
   {
     name: 'Product 3',
@@ -65,6 +72,7 @@ const productFixtures = [
     decimal_field: 12.22,
     rank: 91,
     big_rank: '926372323421',
+    isChecked: true,
   },
   {
     name: 'Product 4',
@@ -73,6 +81,7 @@ const productFixtures = [
     decimal_field: 12.22,
     rank: 99,
     big_rank: '999999999999',
+    isChecked: false,
   },
   {
     name: 'Продукт 5, Product 5',
@@ -81,6 +90,7 @@ const productFixtures = [
     decimal_field: 142.43,
     rank: 142,
     big_rank: 345678912983,
+    isChecked: true,
   },
 ];
 
@@ -88,7 +98,7 @@ describe('Filtering API', () => {
   beforeAll(async () => {
     await builder
       .addContentType(product)
-      .addFixtures(product.name, productFixtures)
+      .addFixtures(product.singularName, productFixtures)
       .build();
 
     strapi = await createStrapiInstance();
@@ -1372,6 +1382,145 @@ describe('Filtering API', () => {
       });
 
       expect(res.body.data).toEqual(expect.arrayContaining([data.product[4]]));
+    });
+  });
+
+  describe('Type casting', () => {
+    describe('Booleans', () => {
+      test.each(['1', 'true', true, 't'])('Cast truthy booleans %s', async val => {
+        const res = await rq({
+          method: 'GET',
+          url: '/products',
+          qs: {
+            filters: {
+              isChecked: val,
+            },
+          },
+        });
+        expect(res.body.data).toEqual(
+          expect.arrayContaining([data.product[0], data.product[2], data.product[4]])
+        );
+      });
+
+      test.each(['1', 'true', true, 't'])('Cast truthy booleans nested %s', async val => {
+        const res = await rq({
+          method: 'GET',
+          url: '/products',
+          qs: {
+            filters: {
+              isChecked: {
+                $eq: val,
+              },
+            },
+          },
+        });
+        expect(res.body.data).toEqual(
+          expect.arrayContaining([data.product[0], data.product[2], data.product[4]])
+        );
+      });
+
+      test.each(['1', 'true', true, 't'])('Cast truthy booleans in arrays %s', async val => {
+        const res = await rq({
+          method: 'GET',
+          url: '/products',
+          qs: {
+            filters: {
+              isChecked: {
+                $in: [val],
+              },
+            },
+          },
+        });
+        expect(res.body.data).toEqual(
+          expect.arrayContaining([data.product[0], data.product[2], data.product[4]])
+        );
+      });
+
+      test.each(['0', 'false', false, 'f'])('Cast truthy booleans %s', async val => {
+        const res = await rq({
+          method: 'GET',
+          url: '/products',
+          qs: {
+            filters: {
+              isChecked: val,
+            },
+          },
+        });
+        expect(res.body.data).toEqual(expect.arrayContaining([data.product[1], data.product[3]]));
+      });
+
+      test.each(['0', 'false', false, 'f'])('Cast truthy booleans nested %s', async val => {
+        const res = await rq({
+          method: 'GET',
+          url: '/products',
+          qs: {
+            filters: {
+              isChecked: {
+                $eq: val,
+              },
+            },
+          },
+        });
+        expect(res.body.data).toEqual(expect.arrayContaining([data.product[1], data.product[3]]));
+      });
+
+      test.each(['0', 'false', false, 'f'])('Cast truthy booleans in arrays %s', async val => {
+        const res = await rq({
+          method: 'GET',
+          url: '/products',
+          qs: {
+            filters: {
+              isChecked: {
+                $in: [val],
+              },
+            },
+          },
+        });
+        expect(res.body.data).toEqual(expect.arrayContaining([data.product[1], data.product[3]]));
+      });
+    });
+
+    describe('Numbers', () => {
+      test('Cast number', async () => {
+        const res = await rq({
+          method: 'GET',
+          url: '/products',
+          qs: {
+            filters: {
+              price: '10.99',
+            },
+          },
+        });
+        expect(res.body.data).toEqual(expect.arrayContaining([data.product[0]]));
+      });
+
+      test.each([
+        ['$lte', '10.99', [0]],
+        ['$lt', '12', [0]],
+        ['$gte', '28.31', [1, 2]],
+        ['$gt', '28.30', [1, 2]],
+        ['$eq', '10.99', [0]],
+        ['$ne', '10.99', [1, 2]],
+        ['$not', '10.99', [1, 2]],
+        ['$in', ['10.99', '28.31'], [0, 1, 2]],
+        ['$in', '10.99', [0]],
+        ['$notIn', ['10.99', '28.31'], []],
+      ])('Cast number in operator %s - %s', async (operator, val, expectedIds) => {
+        const res = await rq({
+          method: 'GET',
+          url: '/products',
+          qs: {
+            filters: {
+              price: {
+                [operator]: val,
+              },
+            },
+          },
+        });
+        expect(res.body.data).toEqual(
+          expect.arrayContaining(expectedIds.map(id => data.product[id]))
+        );
+      });
     });
   });
 });

@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
-import { ThemeProvider, lightTheme } from '@strapi/parts';
+import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import HomePage from '../index';
 import { useModels } from '../../../hooks';
 
@@ -895,6 +895,7 @@ describe('Homepage', () => {
                             >
                               <span
                                 class="c29"
+                                style="word-break: break-all;"
                               >
                                 Read the documentation
                               </span>
@@ -946,6 +947,7 @@ describe('Homepage', () => {
                             >
                               <span
                                 class="c29"
+                                style="word-break: break-all;"
                               >
                                 Code example
                               </span>
@@ -997,8 +999,9 @@ describe('Homepage', () => {
                             >
                               <span
                                 class="c29"
+                                style="word-break: break-all;"
                               >
-                                Tutorial
+                                PlaySquare
                               </span>
                             </div>
                             <span
@@ -1046,8 +1049,9 @@ describe('Homepage', () => {
                             >
                               <span
                                 class="c29"
+                                style="word-break: break-all;"
                               >
-                                Blog
+                                FeatherSquare
                               </span>
                             </div>
                             <span
@@ -1190,7 +1194,7 @@ describe('Homepage', () => {
                                   xmlns="http://www.w3.org/2000/svg"
                                 >
                                   <g
-                                    clip-path="url(#slack_svg__clip0)"
+                                    clip-path="url(#Discord_svg__clip0_871:4264)"
                                   >
                                     <path
                                       d="M20.04 0H3.96A2.464 2.464 0 001.5 2.468v16.2a2.464 2.464 0 002.46 2.469h13.608l-.636-2.217 1.536 1.426 1.452 1.342 2.58 2.277V2.468A2.464 2.464 0 0020.04 0zm-4.632 15.65s-.432-.516-.792-.972c1.572-.443 2.172-1.425 2.172-1.425-.492.323-.96.55-1.38.707-.6.251-1.176.419-1.74.515a8.417 8.417 0 01-3.108-.012 10.086 10.086 0 01-1.764-.515 7.053 7.053 0 01-.876-.408c-.036-.024-.072-.036-.108-.06a.166.166 0 01-.048-.036 4.202 4.202 0 01-.336-.203s.576.958 2.1 1.414c-.36.455-.804.994-.804.994-2.652-.084-3.66-1.821-3.66-1.821 0-3.859 1.728-6.986 1.728-6.986 1.728-1.294 3.372-1.258 3.372-1.258l.12.144c-2.16.623-3.156 1.57-3.156 1.57s.264-.144.708-.348c1.284-.563 2.304-.72 2.724-.755.072-.012.132-.024.204-.024A9.792 9.792 0 0116.8 7.297s-.948-.898-2.988-1.521l.168-.192s1.644-.036 3.372 1.258c0 0 1.728 3.127 1.728 6.986 0 0-1.02 1.737-3.672 1.821zm-5.58-5.597c-.684 0-1.224.6-1.224 1.33 0 .731.552 1.33 1.224 1.33.684 0 1.224-.599 1.224-1.33.012-.73-.54-1.33-1.224-1.33zm4.38 0c-.684 0-1.224.6-1.224 1.33 0 .731.552 1.33 1.224 1.33.684 0 1.224-.599 1.224-1.33 0-.73-.54-1.33-1.224-1.33z"
@@ -1199,7 +1203,7 @@ describe('Homepage', () => {
                                   </g>
                                   <defs>
                                     <clippath
-                                      id="slack_svg__clip0"
+                                      id="Discord_svg__clip0_871:4264"
                                     >
                                       <path
                                         d="M0 0h21v24H0z"
@@ -1287,7 +1291,7 @@ describe('Homepage', () => {
                                   xmlns="http://www.w3.org/2000/svg"
                                 >
                                   <g
-                                    clip-path="url(#twitter_svg__clip0)"
+                                    clip-path="url(#twitter_svg__clip0_871:4273)"
                                   >
                                     <path
                                       d="M24 4.557a9.83 9.83 0 01-2.828.775 4.932 4.932 0 002.165-2.724 9.864 9.864 0 01-3.127 1.195 4.916 4.916 0 00-3.594-1.555c-3.179 0-5.515 2.966-4.797 6.045A13.978 13.978 0 011.671 3.149a4.93 4.93 0 001.523 6.574 4.903 4.903 0 01-2.229-.616c-.054 2.281 1.581 4.415 3.949 4.89a4.935 4.935 0 01-2.224.084 4.928 4.928 0 004.6 3.419A9.9 9.9 0 010 19.54a13.94 13.94 0 007.548 2.212c9.142 0 14.307-7.721 13.995-14.646A10.025 10.025 0 0024 4.557z"
@@ -1296,7 +1300,7 @@ describe('Homepage', () => {
                                   </g>
                                   <defs>
                                     <clippath
-                                      id="twitter_svg__clip0"
+                                      id="twitter_svg__clip0_871:4273"
                                     >
                                       <path
                                         d="M0 0h24v24H0z"
@@ -1406,7 +1410,7 @@ describe('Homepage', () => {
                                   />
                                   <path
                                     clip-rule="evenodd"
-                                    d="M7.68 0v8.035H.252a.25.25 0 01-.178-.429L7.68 0zM16.395 23.926a.251.251 0 01-.43-.177V16.32H24l-7.605 7.606z"
+                                    d="M7.68 0v8.035H.252a.251.251 0 01-.178-.429L7.68 0zM16.395 23.926a.251.251 0 01-.43-.177V16.32H24l-7.605 7.606z"
                                     fill="#8E75FF"
                                     fill-rule="evenodd"
                                     opacity="0.405"
@@ -1459,7 +1463,7 @@ describe('Homepage', () => {
                                   />
                                   <path
                                     clip-rule="evenodd"
-                                    d="M7.68 0v8.035H.252a.25.25 0 01-.178-.429L7.68 0zM16.395 23.926a.251.251 0 01-.43-.177V16.32H24l-7.605 7.606z"
+                                    d="M7.68 0v8.035H.252a.251.251 0 01-.178-.429L7.68 0zM16.395 23.926a.251.251 0 01-.43-.177V16.32H24l-7.605 7.606z"
                                     fill="#8E75FF"
                                     fill-rule="evenodd"
                                     opacity="0.405"

@@ -16,7 +16,8 @@
   "attributes": {
     "postal_code": {
       "type": "string",
-      "pluginOptions": {}
+      "pluginOptions": {},
+      "maxLength": 2
     },
     "categories": {
       "type": "relation",

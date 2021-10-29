@@ -4,7 +4,7 @@
  *
  */
 
-import { Layout } from '@strapi/parts';
+import { Layout } from '@strapi/design-system';
 import { render } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import React from 'react';

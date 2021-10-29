@@ -12,7 +12,7 @@ module.exports = plop => {
         name: 'id',
         message: 'Policy name',
       },
-      ...getDestinationPrompts('policy', plop.getDestBasePath()),
+      ...getDestinationPrompts('policy', plop.getDestBasePath(), { rootFolder: true }),
     ],
     actions(answers) {
       let filePath;

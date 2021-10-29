@@ -181,10 +181,9 @@ function createSchemaBuilder({ components, contentTypes }) {
      */
     rollback() {
       return Promise.all(
-        [
-          ...Array.from(tmpComponents.values()),
-          ...Array.from(tmpContentTypes.values()),
-        ].map(schema => schema.rollback())
+        [...Array.from(tmpComponents.values()), ...Array.from(tmpContentTypes.values())].map(
+          schema => schema.rollback()
+        )
       );
     },
   };

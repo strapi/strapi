@@ -1,8 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Flex } from '@strapi/parts/Flex';
-import { Box } from '@strapi/parts/Box';
-import { Text } from '@strapi/parts/Text';
+import { Flex } from '@strapi/design-system/Flex';
+import { Box } from '@strapi/design-system/Box';
+import { Text } from '@strapi/design-system/Text';
 import styled from 'styled-components';
 
 const IconBox = styled(Box)`
@@ -29,7 +29,7 @@ const ButtonBox = styled(Box)`
   width: 100%;
   border: none;
   position: relative;
-  left: -13px;
+  left: -0.25rem;
 `;
 
 const NestedTFooter = ({ children, icon, color, ...props }) => {

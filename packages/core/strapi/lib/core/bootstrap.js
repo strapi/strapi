@@ -6,7 +6,7 @@ module.exports = function({ strapi }) {
   strapi.config.port = strapi.config.get('server.port') || strapi.config.port;
   strapi.config.host = strapi.config.get('server.host') || strapi.config.host;
 
-  const { serverUrl, adminUrl, adminPath } = getConfigUrls(strapi.config.get('server'));
+  const { serverUrl, adminUrl, adminPath } = getConfigUrls(strapi.config);
 
   strapi.config.server = strapi.config.server || {};
   strapi.config.server.url = serverUrl;
@@ -15,7 +15,7 @@ module.exports = function({ strapi }) {
 
   // check if we should serve admin panel
   const shouldServeAdmin = strapi.config.get(
-    'server.admin.serveAdminPanel',
+    'admin.serveAdminPanel',
     strapi.config.get('serveAdminPanel')
   );
 

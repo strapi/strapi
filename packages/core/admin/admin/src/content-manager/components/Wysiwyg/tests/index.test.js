@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { IntlProvider } from 'react-intl';
 import { render, waitFor, fireEvent } from '@testing-library/react';
-import { lightTheme, ThemeProvider } from '@strapi/parts';
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import Wysiwyg from '../index';
 
 document.createRange = () => {

@@ -1,6 +1,6 @@
 import React, { forwardRef } from 'react';
 import PropTypes from 'prop-types';
-import IconDocumentation from '@strapi/icons/IconDocumentation';
+import Book from '@strapi/icons/Book';
 import { usePersistentState } from '@strapi/helper-plugin';
 import { AssetType } from '../../../constants';
 
@@ -19,7 +19,7 @@ export const AssetPreview = forwardRef(({ mime, url, name }, ref) => {
     );
   }
 
-  return <IconDocumentation aria-label={name} />;
+  return <Book aria-label={name} />;
 });
 
 AssetPreview.displayName = 'AssetPreview';

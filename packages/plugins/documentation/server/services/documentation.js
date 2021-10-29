@@ -3,6 +3,7 @@
 const path = require('path');
 const fs = require('fs-extra');
 const _ = require('lodash');
+const { getAbsoluteServerUrl } = require('@strapi/utils');
 
 const { builApiEndpointPath } = require('../utils/builders');
 const defaultConfig = require('../config/default-config');
@@ -129,6 +130,16 @@ module.exports = ({ strapi }) => {
       );
 
       const settings = _.cloneDeep(defaultConfig);
+
+      const serverUrl = getAbsoluteServerUrl(strapi.config);
+      const apiPath = strapi.config.get('api.rest.prefix');
+
+      _.set(settings, 'servers', [
+        {
+          url: `${serverUrl}${apiPath}`,
+          description: 'Development server',
+        },
+      ]);
 
       _.set(settings, ['info', 'x-generation-date'], new Date().toISOString());
       _.set(settings, ['info', 'version'], version);

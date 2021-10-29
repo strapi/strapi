@@ -13,7 +13,6 @@
     "@strapi/generators": "3.6.8",
     "@strapi/helper-plugin": "3.6.8",
     "@strapi/utils": "3.6.8",
-    "bootstrap": "^4.6.0",
     "fs-extra": "^9.1.0",
     "lodash": "4.17.21",
     "pluralize": "^8.0.0",
@@ -23,7 +22,6 @@
     "react-redux": "7.2.3",
     "react-router": "^5.2.0",
     "react-router-dom": "5.2.0",
-    "reactstrap": "8.4.1",
     "redux": "^4.0.1",
     "reselect": "^4.0.0",
     "yup": "^0.32.9"

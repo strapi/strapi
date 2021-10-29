@@ -1,12 +1,12 @@
 import React, { Children, cloneElement, useState } from 'react';
 import PropTypes from 'prop-types';
-import { Box } from '@strapi/parts/Box';
-import { Flex } from '@strapi/parts/Flex';
-import { Button } from '@strapi/parts/Button';
-import { Subtitle } from '@strapi/parts/Text';
-import { Table as TableCompo } from '@strapi/parts/Table';
+import { Box } from '@strapi/design-system/Box';
+import { Flex } from '@strapi/design-system/Flex';
+import { Button } from '@strapi/design-system/Button';
+import { Subtitle } from '@strapi/design-system/Text';
+import { Table as TableCompo } from '@strapi/design-system/Table';
 import { useIntl } from 'react-intl';
-import DeleteIcon from '@strapi/icons/DeleteIcon';
+import Trash from '@strapi/icons/Trash';
 import styled from 'styled-components';
 import useQueryParams from '../../hooks/useQueryParams';
 import ConfirmDialog from '../ConfirmDialog';
@@ -140,7 +140,7 @@ const Table = ({
                 </Subtitle>
                 <Button
                   onClick={handleToggleConfirmDeleteAll}
-                  startIcon={<DeleteIcon />}
+                  startIcon={<Trash />}
                   size="L"
                   variant="danger-light"
                 >

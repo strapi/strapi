@@ -10,6 +10,10 @@ const loadCss = async () => {
 
 loadCss();
 
-const GlobalStyle = createGlobalStyle``;
+const GlobalStyle = createGlobalStyle`
+  body {
+    background: ${({ theme }) => theme.colors.neutral100};
+  }
+`;
 
 export default GlobalStyle;

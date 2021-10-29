@@ -6,13 +6,13 @@ import { getEmptyImage } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
 import toString from 'lodash/toString';
 import styled from 'styled-components';
-import { Accordion, AccordionToggle, AccordionContent } from '@strapi/parts/Accordion';
-import { Box } from '@strapi/parts/Box';
-import { Flex } from '@strapi/parts/Flex';
-import { IconButton } from '@strapi/parts/IconButton';
-import { Grid, GridItem } from '@strapi/parts/Grid';
-import { Stack } from '@strapi/parts/Stack';
-import DeleteIcon from '@strapi/icons/DeleteIcon';
+import { Accordion, AccordionToggle, AccordionContent } from '@strapi/design-system/Accordion';
+import { Box } from '@strapi/design-system/Box';
+import { Flex } from '@strapi/design-system/Flex';
+import { IconButton } from '@strapi/design-system/IconButton';
+import { Grid, GridItem } from '@strapi/design-system/Grid';
+import { Stack } from '@strapi/design-system/Stack';
+import Trash from '@strapi/icons/Trash';
 import DragHandle from '@strapi/icons/Drag';
 import ItemTypes from '../../../utils/ItemTypes';
 import getTrad from '../../../utils/getTrad';
@@ -176,7 +176,7 @@ const DraggedItem = ({
                       id: getTrad('containers.Edit.delete'),
                       defaultMessage: 'Edit',
                     })}
-                    icon={<DeleteIcon />}
+                    icon={<Trash />}
                   />
                   <Box paddingLeft={2}>
                     <DragHandleWrapper
@@ -224,6 +224,7 @@ const DraggedItem = ({
                                 name={keys}
                                 max={fieldSchema.max}
                                 min={fieldSchema.min}
+                                required={fieldSchema.required}
                               />
                             </GridItem>
                           );

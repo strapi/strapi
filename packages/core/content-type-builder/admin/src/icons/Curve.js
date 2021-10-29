@@ -1,11 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Box } from '@strapi/parts/Box';
+import { Box } from '@strapi/design-system/Box';
 
 const StyledBox = styled(Box)`
   position: absolute;
-  left: -27px;
+  left: -1.125rem;
   top: 0px;
 
   &:before {

@@ -7,6 +7,7 @@ const validationsToOmit = [
   'plugin',
   'enum',
   'regex',
+  'pluginOptions',
 ];
 
 export default validationsToOmit;

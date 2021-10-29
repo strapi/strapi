@@ -22,7 +22,7 @@ const MagicLink = ({ registrationToken }) => {
   }
 
   return (
-    <MagicLinkWrapper target={`${window.location.origin}${basename}auth/register`}>
+    <MagicLinkWrapper target={`${window.location.origin}${basename}auth/login`}>
       {formatMessage({
         id: 'app.components.Users.MagicLink.connect.sso',
         defaultMessage:

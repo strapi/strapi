@@ -22,7 +22,9 @@ const recipesModel = {
       localized: true,
     },
   },
-  name: 'recipe',
+  singularName: 'recipe',
+  pluralName: 'recipes',
+  displayName: 'Recipe',
   description: '',
   collectionName: '',
 };

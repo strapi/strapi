@@ -1,6 +1,6 @@
 /* eslint-disable react/jsx-indent */
 import React from 'react';
-import { Select, Option } from '@strapi/parts/Select';
+import { Select, Option } from '@strapi/design-system/Select';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import useLocales from '../../hooks/useLocales';

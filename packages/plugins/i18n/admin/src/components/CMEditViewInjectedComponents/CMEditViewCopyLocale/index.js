@@ -3,14 +3,14 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 import { useIntl } from 'react-intl';
-import { Dialog, DialogBody, DialogFooter } from '@strapi/parts/Dialog';
-import { Select, Option } from '@strapi/parts/Select';
-import { Button } from '@strapi/parts/Button';
-import { Box } from '@strapi/parts/Box';
-import { Typography, Text } from '@strapi/parts/Text';
-import { Flex } from '@strapi/parts/Flex';
-import { Stack } from '@strapi/parts/Stack';
-import AlertWarningIcon from '@strapi/icons/AlertWarningIcon';
+import { Dialog, DialogBody, DialogFooter } from '@strapi/design-system/Dialog';
+import { Select, Option } from '@strapi/design-system/Select';
+import { Button } from '@strapi/design-system/Button';
+import { Box } from '@strapi/design-system/Box';
+import { Typography, Text } from '@strapi/design-system/Text';
+import { Flex } from '@strapi/design-system/Flex';
+import { Stack } from '@strapi/design-system/Stack';
+import ExclamationMarkCircle from '@strapi/icons/ExclamationMarkCircle';
 import Duplicate from '@strapi/icons/Duplicate';
 import { useCMEditViewDataManager, useNotification } from '@strapi/helper-plugin';
 import { axiosInstance, getTrad } from '../../../utils';
@@ -114,7 +114,7 @@ const Content = ({ appLocales, currentLocale, localizations, readPermissions }) 
       </StyledTypography>
       {isOpen && (
         <Dialog onClose={handleToggle} title="Confirmation" isOpen={isOpen}>
-          <DialogBody icon={<AlertWarningIcon />}>
+          <DialogBody icon={<ExclamationMarkCircle />}>
             <Stack size={2}>
               <Flex justifyContent="center">
                 <Text id="confirm-description" style={{ textAlign: 'center' }}>

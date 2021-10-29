@@ -247,6 +247,10 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
   outline: none;
 }
 
+.c6[aria-disabled='true'] {
+  cursor: not-allowed;
+}
+
 .c10 {
   font-weight: 400;
   font-size: 0.875rem;
@@ -461,7 +465,7 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
       </div>
       <nav
         aria-label="pagination"
-        class="sc-BXpxD"
+        class="sc-jcRCNh"
       >
         <ul
           class="c16 c17"
@@ -553,7 +557,7 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <path
-                  d="M0 1.88L6.107 8 0 14.12 1.88 16l8-8-8-8L0 1.88z"
+                  d="M.12 1.88L6.227 8 .12 14.12 2 16l8-8-8-8L.12 1.88z"
                   fill="#32324D"
                 />
               </svg>

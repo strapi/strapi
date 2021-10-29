@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
-import { Accordion, AccordionContent, AccordionToggle } from '@strapi/parts/Accordion';
-import { Box } from '@strapi/parts/Box';
+import { Accordion, AccordionContent, AccordionToggle } from '@strapi/design-system/Accordion';
+import { Box } from '@strapi/design-system/Box';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
 import SubCategory from '../SubCategory';

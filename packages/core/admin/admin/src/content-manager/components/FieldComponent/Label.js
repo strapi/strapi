@@ -2,9 +2,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
-import { Box } from '@strapi/parts/Box';
-import { Flex } from '@strapi/parts/Flex';
-import { Text } from '@strapi/parts/Text';
+import { Box } from '@strapi/design-system/Box';
+import { Flex } from '@strapi/design-system/Flex';
+import { Text } from '@strapi/design-system/Text';
 
 const LabelAction = styled(Box)`
   svg path {
@@ -12,7 +12,15 @@ const LabelAction = styled(Box)`
   }
 `;
 
-const Label = ({ intlLabel, id, labelAction, name, numberOfEntries, showNumberOfEntries }) => {
+const Label = ({
+  intlLabel,
+  id,
+  labelAction,
+  name,
+  numberOfEntries,
+  showNumberOfEntries,
+  required,
+}) => {
   const { formatMessage } = useIntl();
   const label = intlLabel?.id ? formatMessage(intlLabel) : name;
 
@@ -22,6 +30,7 @@ const Label = ({ intlLabel, id, labelAction, name, numberOfEntries, showNumberOf
         <Text textColor="neutral800" htmlFor={id || name} small bold as="label">
           {label}
           {showNumberOfEntries && <>&nbsp;({numberOfEntries})</>}
+          {required && <Text textColor="danger600">*</Text>}
         </Text>
         {labelAction && <LabelAction paddingLeft={1}>{labelAction}</LabelAction>}
       </Flex>
@@ -33,6 +42,7 @@ Label.defaultProps = {
   id: undefined,
   labelAction: undefined,
   numberOfEntries: 0,
+  required: false,
   showNumberOfEntries: false,
 };
 
@@ -46,6 +56,7 @@ Label.propTypes = {
   labelAction: PropTypes.element,
   name: PropTypes.string.isRequired,
   numberOfEntries: PropTypes.number,
+  required: PropTypes.bool,
   showNumberOfEntries: PropTypes.bool,
 };
 

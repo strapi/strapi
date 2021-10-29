@@ -9,9 +9,9 @@ import {
   CardTitle,
   CardSubtitle,
   CardBadge,
-} from '@strapi/parts/Card';
-import { Text } from '@strapi/parts/Text';
-import { Stack } from '@strapi/parts/Stack';
+} from '@strapi/design-system/Card';
+import { Text } from '@strapi/design-system/Text';
+import { Stack } from '@strapi/design-system/Stack';
 import { useIntl } from 'react-intl';
 import { getTrad } from '../../utils';
 import { AssetType } from '../../constants';

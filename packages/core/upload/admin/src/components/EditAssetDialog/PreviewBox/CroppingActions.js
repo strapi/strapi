@@ -1,11 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { IconButton } from '@strapi/parts/IconButton';
-import { FocusTrap } from '@strapi/parts/FocusTrap';
-import { SimpleMenu, MenuItem } from '@strapi/parts/SimpleMenu';
-import CloseAlertIcon from '@strapi/icons/CloseAlertIcon';
-import CheckIcon from '@strapi/icons/CheckIcon';
-import { Stack } from '@strapi/parts/Stack';
+import { IconButton } from '@strapi/design-system/IconButton';
+import { FocusTrap } from '@strapi/design-system/FocusTrap';
+import { SimpleMenu, MenuItem } from '@strapi/design-system/SimpleMenu';
+import Cross from '@strapi/icons/Cross';
+import Check from '@strapi/icons/Check';
+import { Stack } from '@strapi/design-system/Stack';
 import { useIntl } from 'react-intl';
 import getTrad from '../../../utils/getTrad';
 import { CroppingActionRow } from './components';
@@ -22,7 +22,7 @@ export const CroppingActions = ({ onCancel, onValidate, onDuplicate }) => {
               id: getTrad('control-card.stop-crop'),
               defaultMessage: 'Stop cropping',
             })}
-            icon={<CloseAlertIcon />}
+            icon={<Cross />}
             onClick={onCancel}
           />
 
@@ -32,7 +32,7 @@ export const CroppingActions = ({ onCancel, onValidate, onDuplicate }) => {
               defaultMessage: 'Crop',
             })}
             as={IconButton}
-            icon={<CheckIcon />}
+            icon={<Check />}
           >
             <MenuItem onClick={onValidate}>
               {formatMessage({

@@ -3,7 +3,7 @@ import pluralize from 'pluralize';
 import set from 'lodash/set';
 import snakeCase from 'lodash/snakeCase';
 import getRelationType from '../../utils/getRelationType';
-import makeUnique from '../../utils/makeUnique';
+import nameToSlug from '../../utils/nameToSlug';
 import { createComponentUid } from './utils/createUid';
 import { shouldPluralizeName, shouldPluralizeTargetAttribute } from './utils/relations';
 import * as actions from './constants';
@@ -20,22 +20,6 @@ const reducer = (state = initialState, action) =>
   // eslint-disable-next-line consistent-return
   produce(state, draftState => {
     switch (action.type) {
-      case actions.ADD_COMPONENTS_TO_DYNAMIC_ZONE: {
-        const { components, shouldAddComponents } = action;
-        let currentList = [];
-
-        if (shouldAddComponents) {
-          currentList = [...state.modifiedData.components, ...components];
-        } else {
-          currentList = state.modifiedData.components.filter(comp => {
-            return components.indexOf(comp) === -1;
-          });
-        }
-
-        draftState.modifiedData.components = makeUnique(currentList);
-
-        break;
-      }
       case actions.ON_CHANGE: {
         const { keys, value } = action;
         const obj = state.modifiedData;
@@ -99,12 +83,12 @@ const reducer = (state = initialState, action) =>
 
         if (didChangeRelationTypeBecauseOfRestrictedRelation) {
           nameToSet = pluralize(
-            snakeCase(selectedContentTypeFriendlyName),
+            snakeCase(nameToSlug(selectedContentTypeFriendlyName)),
             shouldPluralizeName(changedRelationType)
           );
         } else {
           nameToSet = pluralize(
-            snakeCase(selectedContentTypeFriendlyName),
+            snakeCase(nameToSlug(selectedContentTypeFriendlyName)),
 
             shouldPluralizeName(modifiedData.relation)
           );
@@ -130,7 +114,7 @@ const reducer = (state = initialState, action) =>
         }
 
         const targetAttributeToSet = pluralize(
-          snakeCase(oneThatIsCreatingARelationWithAnother),
+          snakeCase(nameToSlug(oneThatIsCreatingARelationWithAnother)),
           shouldPluralizeTargetAttribute(modifiedData.relation)
         );
 
@@ -153,14 +137,15 @@ const reducer = (state = initialState, action) =>
           set(
             draftState,
             ['modifiedData', 'name'],
-            pluralize(snakeCase(currentName), shouldPluralizeName(value))
+            pluralize(snakeCase(nameToSlug(currentName)), shouldPluralizeName(value))
           );
 
           set(
             draftState,
             ['modifiedData', 'targetAttribute'],
             pluralize(
-              currentTargetAttribute || snakeCase(oneThatIsCreatingARelationWithAnother),
+              currentTargetAttribute ||
+                snakeCase(nameToSlug(oneThatIsCreatingARelationWithAnother)),
               shouldPluralizeTargetAttribute(value)
             )
           );
@@ -183,40 +168,7 @@ const reducer = (state = initialState, action) =>
 
         break;
       }
-      case actions.ON_CHANGE_ALLOWED_TYPE: {
-        if (action.name === 'all') {
-          if (action.value) {
-            set(draftState, ['modifiedData', 'allowedTypes'], ['images', 'videos', 'files']);
-            break;
-          }
 
-          set(draftState, ['modifiedData', 'allowedTypes'], null);
-
-          break;
-        }
-
-        const currentList = state.modifiedData.allowedTypes || [];
-        let updatedList = [...currentList];
-
-        if (currentList.includes(action.name)) {
-          updatedList = updatedList.filter(v => v !== action.name);
-
-          if (updatedList.length === 0) {
-            set(draftState, ['modifiedData', 'allowedTypes'], null);
-
-            break;
-          }
-
-          set(draftState, ['modifiedData', 'allowedTypes'], updatedList);
-          break;
-        }
-
-        updatedList.push(action.name);
-
-        set(draftState, ['modifiedData', 'allowedTypes'], updatedList);
-
-        break;
-      }
       case actions.RESET_PROPS:
         return initialState;
       case actions.RESET_PROPS_AND_SET_FORM_FOR_ADDING_AN_EXISTING_COMPO: {

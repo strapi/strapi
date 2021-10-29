@@ -106,7 +106,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   background: #ffffff;
 }
 
-.c45 .sc-lhuRmv {
+.c45 .sc-hmftZk {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -178,7 +178,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   background: #f0f0ff;
 }
 
-.c48 .sc-lhuRmv {
+.c48 .sc-hmftZk {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -260,7 +260,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   background: #4945ff;
 }
 
-.c49 .sc-lhuRmv {
+.c49 .sc-hmftZk {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -872,10 +872,12 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
 }
 
 .c5 {
+  border-radius: 4px 4px 0 0;
   border-bottom: 1px solid #eaeaef;
 }
 
 .c41 {
+  border-radius: 0 0 4px 4px;
   border-top: 1px solid #eaeaef;
 }
 

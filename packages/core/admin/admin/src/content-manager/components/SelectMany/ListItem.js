@@ -6,11 +6,11 @@ import { useIntl } from 'react-intl';
 import { useLocation } from 'react-router-dom';
 import has from 'lodash/has';
 import isEmpty from 'lodash/isEmpty';
-import { IconButton } from '@strapi/parts/IconButton';
-import { Box } from '@strapi/parts/Box';
-import { Flex } from '@strapi/parts/Flex';
-import { Text } from '@strapi/parts/Text';
-import { Link } from '@strapi/parts/Link';
+import { IconButton } from '@strapi/design-system/IconButton';
+import { Box } from '@strapi/design-system/Box';
+import { Flex } from '@strapi/design-system/Flex';
+import { Text } from '@strapi/design-system/Text';
+import { Link } from '@strapi/design-system/Link';
 import BaseMinus from '@strapi/icons/Minus';
 import { getTrad } from '../../utils';
 

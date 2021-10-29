@@ -1,11 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Flex } from '@strapi/parts/Flex';
-import { ButtonText } from '@strapi/parts/Text';
-import { Stack } from '@strapi/parts/Stack';
-import EditIcon from '@strapi/icons/EditIcon';
-import CloseAlertIcon from '@strapi/icons/CloseAlertIcon';
+import { Flex } from '@strapi/design-system/Flex';
+import { ButtonText } from '@strapi/design-system/Text';
+import { Stack } from '@strapi/design-system/Stack';
+import Pencil from '@strapi/icons/Pencil';
+import Cross from '@strapi/icons/Cross';
 import Drag from '@strapi/icons/Drag';
 import ellipsisCardTitle from '../utils/ellipsisCardTitle';
 
@@ -70,10 +70,10 @@ const CardPreview = ({ labelField }) => {
       </Stack>
       <Flex paddingLeft={3}>
         <ActionBox alignItems="center">
-          <EditIcon />
+          <Pencil />
         </ActionBox>
         <ActionBox alignItems="center">
-          <CloseAlertIcon />
+          <Cross />
         </ActionBox>
       </Flex>
     </FieldContainer>

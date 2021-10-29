@@ -1,5 +1,5 @@
 import React from 'react';
-import { ThemeProvider, lightTheme } from '@strapi/parts';
+import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { render as renderTL } from '@testing-library/react';
 import { ImageAssetCard } from '../ImageAssetCard';
 import en from '../../../translations/en.json';
@@ -58,7 +58,6 @@ describe('ImageAssetCard', () => {
 
       .c17 {
         background: #f6f6f9;
-        color: #666687;
         padding: 4px;
         border-radius: 4px;
       }
@@ -146,7 +145,7 @@ describe('ImageAssetCard', () => {
         font-weight: 400;
         font-size: 0.875rem;
         line-height: 1.43;
-        color: #32324d;
+        color: #666687;
       }
 
       .c21 {
@@ -392,7 +391,7 @@ describe('ImageAssetCard', () => {
                   >
                     <path
                       clip-rule="evenodd"
-                      d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
+                      d="M23.605 3.514c.527.528.527 1.36 0 1.887l-2.623 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.119 3.118zM0 24v-4.989l14.2-14.2L19.19 9.8 4.99 24H0z"
                       fill="#212134"
                       fill-rule="evenodd"
                     />

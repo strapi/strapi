@@ -4,12 +4,12 @@ import PropTypes from 'prop-types';
 import { useDrag, useDrop } from 'react-dnd';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
-import { Flex } from '@strapi/parts/Flex';
-import { Box } from '@strapi/parts/Box';
-import { ButtonText } from '@strapi/parts/Text';
-import { Stack } from '@strapi/parts/Stack';
-import EditIcon from '@strapi/icons/EditIcon';
-import CloseAlertIcon from '@strapi/icons/CloseAlertIcon';
+import { Flex } from '@strapi/design-system/Flex';
+import { Box } from '@strapi/design-system/Box';
+import { ButtonText } from '@strapi/design-system/Text';
+import { Stack } from '@strapi/design-system/Stack';
+import Pencil from '@strapi/icons/Pencil';
+import Cross from '@strapi/icons/Cross';
 import Drag from '@strapi/icons/Drag';
 import ellipsisCardTitle from '../utils/ellipsisCardTitle';
 import { getTrad, ItemTypes } from '../../../utils';
@@ -173,7 +173,7 @@ const DraggableCard = ({
             )}
             type="button"
           >
-            <EditIcon />
+            <Pencil />
           </ActionButton>
           <ActionButton
             onClick={onRemoveField}
@@ -187,7 +187,7 @@ const DraggableCard = ({
             )}
             type="button"
           >
-            <CloseAlertIcon />
+            <Cross />
           </ActionButton>
         </Flex>
       </FieldContainer>

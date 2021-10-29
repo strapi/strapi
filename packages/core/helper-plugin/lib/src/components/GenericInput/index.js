@@ -9,15 +9,16 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import cloneDeep from 'lodash/cloneDeep';
 import { formatISO } from 'date-fns';
-import { DatePicker } from '@strapi/parts/DatePicker';
-import { NumberInput } from '@strapi/parts/NumberInput';
-import { Select, Option } from '@strapi/parts/Select';
-import { Textarea } from '@strapi/parts/Textarea';
-import { TextInput } from '@strapi/parts/TextInput';
-import { TimePicker } from '@strapi/parts/TimePicker';
-import { ToggleInput } from '@strapi/parts/ToggleInput';
-import Hide from '@strapi/icons/Hide';
-import Show from '@strapi/icons/Show';
+import { Checkbox } from '@strapi/design-system/Checkbox';
+import { DatePicker } from '@strapi/design-system/DatePicker';
+import { NumberInput } from '@strapi/design-system/NumberInput';
+import { Select, Option } from '@strapi/design-system/Select';
+import { Textarea } from '@strapi/design-system/Textarea';
+import { TextInput } from '@strapi/design-system/TextInput';
+import { TimePicker } from '@strapi/design-system/TimePicker';
+import { ToggleInput } from '@strapi/design-system/ToggleInput';
+import EyeStriked from '@strapi/icons/EyeStriked';
+import Eye from '@strapi/icons/Eye';
 
 const GenericInput = ({
   autoComplete,
@@ -31,6 +32,7 @@ const GenericInput = ({
   onChange,
   options,
   placeholder,
+  required,
   step,
   type,
   value,
@@ -52,6 +54,8 @@ const GenericInput = ({
         error={error}
         name={name}
         onChange={onChange}
+        options={options}
+        required={required}
         placeholder={placeholder}
         type={type}
         value={value}
@@ -86,7 +90,7 @@ const GenericInput = ({
     case 'bool': {
       return (
         <ToggleInput
-          checked={value || false}
+          checked={value === null ? null : value || false}
           disabled={disabled}
           hint={hint}
           label={label}
@@ -103,7 +107,26 @@ const GenericInput = ({
           onChange={e => {
             onChange({ target: { name, value: e.target.checked } });
           }}
+          required={required}
         />
+      );
+    }
+    case 'checkbox': {
+      return (
+        <Checkbox
+          disabled={disabled}
+          error={errorMessage}
+          hint={hint}
+          id={name}
+          name={name}
+          onValueChange={value => {
+            onChange({ target: { name, value } });
+          }}
+          required={required}
+          value={Boolean(value)}
+        >
+          {label}
+        </Checkbox>
       );
     }
     case 'date': {
@@ -124,6 +147,7 @@ const GenericInput = ({
           }}
           onClear={() => onChange({ target: { name, value: '', type } })}
           placeholder={formattedPlaceholder}
+          required={required}
           selectedDate={value ? new Date(value) : null}
           selectedDateLabel={formattedDate => `Date picker, current is ${formattedDate}`}
         />
@@ -143,6 +167,7 @@ const GenericInput = ({
             onChange({ target: { name, value, type } });
           }}
           placeholder={formattedPlaceholder}
+          required={required}
           step={step}
           value={value || undefined}
         />
@@ -163,6 +188,7 @@ const GenericInput = ({
           name={name}
           onChange={onChange}
           placeholder={formattedPlaceholder}
+          required={required}
           type={type}
           value={value || ''}
         />
@@ -190,7 +216,7 @@ const GenericInput = ({
               }}
               type="button"
             >
-              {showPassword ? <Show /> : <Hide />}
+              {showPassword ? <Eye /> : <EyeStriked />}
             </button>
           }
           label={label}
@@ -200,6 +226,7 @@ const GenericInput = ({
           name={name}
           onChange={onChange}
           placeholder={formattedPlaceholder}
+          required={required}
           type={showPassword ? 'text' : 'password'}
           value={value || ''}
         />
@@ -219,6 +246,7 @@ const GenericInput = ({
             onChange({ target: { name, value: value === '' ? null : value, type: 'select' } });
           }}
           placeholder={formattedPlaceholder}
+          required={required}
           value={value || ''}
         >
           {options.map(({ metadatas: { intlLabel, disabled, hidden }, key, value }) => {
@@ -242,6 +270,7 @@ const GenericInput = ({
           hint={hint}
           name={name}
           onChange={onChange}
+          required={required}
           placeholder={formattedPlaceholder}
           type={type}
           value={value || ''}
@@ -278,13 +307,18 @@ const GenericInput = ({
             onChange({ target: { name, value: null, type } });
           }}
           placeholder={formattedPlaceholder}
+          required={required}
           step={step}
           value={time}
         />
       );
     }
     default: {
-      return <div>{type} is not supported</div>;
+      return (
+        <div>
+          {type} is not supported for {name}
+        </div>
+      );
     }
   }
 };
@@ -297,6 +331,7 @@ GenericInput.defaultProps = {
   error: '',
   labelAction: undefined,
   placeholder: null,
+  required: false,
   options: [],
   step: 1,
   value: '',
@@ -339,6 +374,7 @@ GenericInput.propTypes = {
     defaultMessage: PropTypes.string.isRequired,
     values: PropTypes.object,
   }),
+  required: PropTypes.bool,
   step: PropTypes.number,
   type: PropTypes.string.isRequired,
   value: PropTypes.any,

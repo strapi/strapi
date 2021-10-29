@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, waitFor, screen } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
-import { ThemeProvider, lightTheme } from '@strapi/parts';
+import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import server from './utils/server';
 import ProtectedSettingsPage from '../index';
 
@@ -207,6 +207,10 @@ describe('Email | Pages | Settings', () => {
 
       .c26:focus {
         outline: none;
+      }
+
+      .c26[aria-disabled='true'] {
+        cursor: not-allowed;
       }
 
       .c23 {

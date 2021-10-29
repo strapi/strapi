@@ -12,7 +12,9 @@ let graphqlQuery;
 const data = {};
 
 const homePageModel = {
-  name: 'home-page',
+  singularName: 'home-page',
+  pluralName: 'home-pages',
+  displayName: 'Homepage',
   kind: 'singleType',
   attributes: {
     title: {

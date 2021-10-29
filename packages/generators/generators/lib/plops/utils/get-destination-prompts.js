@@ -2,7 +2,7 @@
 const { join } = require('path');
 const fs = require('fs-extra');
 
-module.exports = (action, basePath) => {
+module.exports = (action, basePath, { rootFolder = false } = {}) => {
   return [
     {
       type: 'list',
@@ -10,7 +10,7 @@ module.exports = (action, basePath) => {
       message: `Where do you want to add this ${action}?`,
       choices: [
         {
-          name: `Add ${action} to ${action === 'policy' ? 'root of project' : 'new API'}`,
+          name: `Add ${action} to ${rootFolder ? 'root of project' : 'new API'}`,
           value: 'new',
         },
         { name: `Add ${action} to an existing API`, value: 'api' },

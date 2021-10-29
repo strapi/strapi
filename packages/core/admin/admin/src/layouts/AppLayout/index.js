@@ -1,7 +1,7 @@
 import React from 'react';
-import { Box } from '@strapi/parts/Box';
-import { Flex } from '@strapi/parts/Flex';
-import { SkipToContent } from '@strapi/parts/Main';
+import { Box } from '@strapi/design-system/Box';
+import { Flex } from '@strapi/design-system/Flex';
+import { SkipToContent } from '@strapi/design-system/Main';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';

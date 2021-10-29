@@ -1,13 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Dialog, DialogBody, DialogFooter } from '@strapi/parts/Dialog';
-import { Stack } from '@strapi/parts/Stack';
-import { Flex } from '@strapi/parts/Flex';
-import { Text } from '@strapi/parts/Text';
-import { Button } from '@strapi/parts/Button';
-import AlertWarningIcon from '@strapi/icons/AlertWarningIcon';
-import DeleteIcon from '@strapi/icons/DeleteIcon';
+import { Dialog, DialogBody, DialogFooter } from '@strapi/design-system/Dialog';
+import { Stack } from '@strapi/design-system/Stack';
+import { Flex } from '@strapi/design-system/Flex';
+import { Text } from '@strapi/design-system/Text';
+import { Button } from '@strapi/design-system/Button';
+import ExclamationMarkCircle from '@strapi/icons/ExclamationMarkCircle';
+import Trash from '@strapi/icons/Trash';
 import InjectionZoneList from '../../InjectionZoneList';
 
 const ConfirmDialogDelete = ({ isConfirmButtonLoading, isOpen, onToggleDialog, onConfirm }) => {
@@ -24,7 +24,7 @@ const ConfirmDialogDelete = ({ isConfirmButtonLoading, isOpen, onToggleDialog, o
       describedBy="confirm-description"
       isOpen={isOpen}
     >
-      <DialogBody icon={<AlertWarningIcon />}>
+      <DialogBody icon={<ExclamationMarkCircle />}>
         <Stack size={2}>
           <Flex justifyContent="center">
             <Text id="confirm-description">
@@ -52,7 +52,7 @@ const ConfirmDialogDelete = ({ isConfirmButtonLoading, isOpen, onToggleDialog, o
           <Button
             onClick={onConfirm}
             variant="danger-light"
-            startIcon={<DeleteIcon />}
+            startIcon={<Trash />}
             id="confirm-delete"
             loading={isConfirmButtonLoading}
           >

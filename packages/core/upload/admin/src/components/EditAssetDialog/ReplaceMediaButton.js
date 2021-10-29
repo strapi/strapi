@@ -1,8 +1,8 @@
 import PropTypes from 'prop-types';
 import React, { useRef } from 'react';
 import { useIntl } from 'react-intl';
-import { Button } from '@strapi/parts/Button';
-import { VisuallyHidden } from '@strapi/parts/VisuallyHidden';
+import { Button } from '@strapi/design-system/Button';
+import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
 import { getTrad } from '../../utils';
 
 export const ReplaceMediaButton = ({ onSelectMedia, acceptedMime, ...props }) => {

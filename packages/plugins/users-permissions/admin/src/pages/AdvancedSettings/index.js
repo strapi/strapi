@@ -13,16 +13,16 @@ import {
   useOverlayBlocker,
   useRBAC,
 } from '@strapi/helper-plugin';
-import { useNotifyAT } from '@strapi/parts/LiveRegions';
-import { Main } from '@strapi/parts/Main';
-import { HeaderLayout, ContentLayout } from '@strapi/parts/Layout';
-import { Button } from '@strapi/parts/Button';
-import { Box } from '@strapi/parts/Box';
-import { Stack } from '@strapi/parts/Stack';
-import { Select, Option } from '@strapi/parts/Select';
-import { H3 } from '@strapi/parts/Text';
-import { Grid, GridItem } from '@strapi/parts/Grid';
-import CheckIcon from '@strapi/icons/CheckIcon';
+import { useNotifyAT } from '@strapi/design-system/LiveRegions';
+import { Main } from '@strapi/design-system/Main';
+import { HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
+import { Button } from '@strapi/design-system/Button';
+import { Box } from '@strapi/design-system/Box';
+import { Stack } from '@strapi/design-system/Stack';
+import { Select, Option } from '@strapi/design-system/Select';
+import { H3 } from '@strapi/design-system/Text';
+import { Grid, GridItem } from '@strapi/design-system/Grid';
+import Check from '@strapi/icons/Check';
 import pluginPermissions from '../../permissions';
 import { getTrad } from '../../utils';
 import layout from './utils/layout';
@@ -151,7 +151,7 @@ const AdvancedSettingsPage = () => {
                     loading={isSubmitting}
                     type="submit"
                     disabled={!canUpdate}
-                    startIcon={<CheckIcon />}
+                    startIcon={<Check />}
                     size="L"
                   >
                     {formatMessage({ id: getTrad('Form.save'), defaultMessage: 'Save' })}

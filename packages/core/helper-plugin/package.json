@@ -57,10 +57,11 @@
     "@storybook/builder-webpack5": "^6.3.7",
     "@storybook/manager-webpack5": "^6.3.7",
     "@storybook/react": "^6.3.7",
-    "@strapi/icons": "0.0.1-alpha.50",
-    "@strapi/parts": "0.0.1-alpha.50",
+    "@strapi/icons": "0.0.1-alpha.56",
+    "@strapi/design-system": "0.0.1-alpha.56",
     "babel-loader": "^8.2.2",
     "cross-env": "^7.0.3",
+    "date-fns": "2.22.1",
     "enzyme": "3.9.0",
     "enzyme-adapter-react-16": "1.15.6",
     "rimraf": "3.0.2"

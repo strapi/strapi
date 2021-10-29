@@ -1,13 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Dialog, DialogBody, DialogFooter } from '@strapi/parts/Dialog';
-import { Stack } from '@strapi/parts/Stack';
-import { Flex } from '@strapi/parts/Flex';
-import { Text } from '@strapi/parts/Text';
-import { Button } from '@strapi/parts/Button';
-import AlertWarningIcon from '@strapi/icons/AlertWarningIcon';
-import DeleteIcon from '@strapi/icons/DeleteIcon';
+import { Dialog, DialogBody, DialogFooter } from '@strapi/design-system/Dialog';
+import { Stack } from '@strapi/design-system/Stack';
+import { Flex } from '@strapi/design-system/Flex';
+import { Text } from '@strapi/design-system/Text';
+import { Button } from '@strapi/design-system/Button';
+import ExclamationMarkCircle from '@strapi/icons/ExclamationMarkCircle';
+import Trash from '@strapi/icons/Trash';
 
 const ConfirmDialog = ({
   bodyText,
@@ -80,8 +80,8 @@ ConfirmDialog.defaultProps = {
     id: 'components.popUpWarning.message',
     defaultMessage: 'Are you sure you want to delete this?',
   },
-  iconBody: <AlertWarningIcon />,
-  iconRightButton: <DeleteIcon />,
+  iconBody: <ExclamationMarkCircle />,
+  iconRightButton: <Trash />,
   isConfirmButtonLoading: false,
   leftButtonText: {
     id: 'app.components.Button.cancel',

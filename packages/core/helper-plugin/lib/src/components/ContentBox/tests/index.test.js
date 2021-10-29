@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
-import { ThemeProvider, lightTheme } from '@strapi/parts';
+import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import ContentBox from '../index';
 
 const App = (
@@ -104,6 +104,7 @@ describe('ContentBox', () => {
           >
             <span
               class="c5"
+              style="word-break: break-all;"
             >
               Code example
             </span>

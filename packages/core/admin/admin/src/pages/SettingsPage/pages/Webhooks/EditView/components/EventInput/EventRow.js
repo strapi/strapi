@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { BaseCheckbox } from '@strapi/parts/BaseCheckbox';
-import { Checkbox } from '@strapi/parts/Checkbox';
+import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
+import { Checkbox } from '@strapi/design-system/Checkbox';
 import upperFirst from 'lodash/upperFirst';
 
 const EventRow = ({ disabledEvents, name, events, inputValue, handleChange, handleChangeAll }) => {

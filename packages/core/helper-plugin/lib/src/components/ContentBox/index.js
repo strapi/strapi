@@ -1,9 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Flex } from '@strapi/parts/Flex';
-import { Stack } from '@strapi/parts/Stack';
-import { Text } from '@strapi/parts/Text';
+import { Flex } from '@strapi/design-system/Flex';
+import { Stack } from '@strapi/design-system/Stack';
+import { Text } from '@strapi/design-system/Text';
 import customEllipsis from '../../utils/customEllipsis';
 
 const IconWrapper = styled(Flex)`
@@ -28,7 +28,7 @@ const ContentBox = ({ title, subtitle, icon, iconBackground, endAction }) => {
       </IconWrapper>
       <Stack size={endAction ? 0 : 1}>
         <Flex>
-          <Text small bold>
+          <Text small bold style={{ wordBreak: 'break-all' }}>
             {title}
           </Text>
           {endAction}

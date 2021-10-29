@@ -90,6 +90,39 @@ const defaultRoutes = [
     to: '/settings/webhooks',
     exact: true,
   },
+  {
+    Component: async () => {
+      const component = await import(
+        /* webpackChunkName: "api-tokens-list-page" */ '../pages/ApiTokens/ProtectedListView'
+      );
+
+      return component;
+    },
+    to: '/settings/api-tokens',
+    exact: true,
+  },
+  {
+    Component: async () => {
+      const component = await import(
+        /* webpackChunkName: "api-tokens-create-page" */ '../pages/ApiTokens/ProtectedCreateView'
+      );
+
+      return component;
+    },
+    to: '/settings/api-tokens/create',
+    exact: true,
+  },
+  {
+    Component: async () => {
+      const component = await import(
+        /* webpackChunkName: "api-tokens-edit-page" */ '../pages/ApiTokens/ProtectedEditView'
+      );
+
+      return component;
+    },
+    to: '/settings/api-tokens/:id',
+    exact: true,
+  },
 ];
 
 export default defaultRoutes;

@@ -1,10 +1,10 @@
 import React, { useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
-import Down from '@strapi/icons/Down';
-import Up from '@strapi/icons/Up';
-import { BaseCheckbox } from '@strapi/parts/BaseCheckbox';
-import { Box } from '@strapi/parts/Box';
-import { Flex } from '@strapi/parts/Flex';
+import ChevronDown from '@strapi/icons/ChevronDown';
+import ChevronUp from '@strapi/icons/ChevronUp';
+import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
+import { Box } from '@strapi/design-system/Box';
+import { Flex } from '@strapi/design-system/Flex';
 import get from 'lodash/get';
 import omit from 'lodash/omit';
 import { useIntl } from 'react-intl';
@@ -161,7 +161,7 @@ const Collapse = ({
           value={hasAllActionsSelected}
           isActive={isActive}
         >
-          <Chevron paddingLeft={2}>{isActive ? <Up /> : <Down />}</Chevron>
+          <Chevron paddingLeft={2}>{isActive ? <ChevronUp /> : <ChevronDown />}</Chevron>
         </RowLabelWithCheckbox>
 
         <Flex style={{ flex: 1 }}>

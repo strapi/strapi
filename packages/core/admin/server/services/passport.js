@@ -18,7 +18,7 @@ const keyIsValidEventName = ([key]) => {
 const getPassportStrategies = () => [createLocalStrategy(strapi)];
 
 const registerAuthEvents = () => {
-  const { events = {} } = strapi.config.get('server.admin.auth', {});
+  const { events = {} } = strapi.config.get('admin.auth', {});
   const { authEventsMapper } = strapi.admin.services.passport;
 
   const eventList = Object.entries(events)

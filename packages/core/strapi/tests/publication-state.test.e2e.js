@@ -43,12 +43,6 @@ const fixtures = {
 
 const data = { product: [], category: [], country: [] };
 
-const pluralizedModels = {
-  product: 'products',
-  country: 'countries',
-  category: 'categories',
-};
-
 const contentTypes = {
   product: {
     attributes: {
@@ -67,7 +61,9 @@ const contentTypes = {
       },
     },
     draftAndPublish: true,
-    name: 'product',
+    displayName: 'Product',
+    singularName: 'product',
+    pluralName: 'products',
     description: '',
     collectionName: '',
   },
@@ -78,7 +74,9 @@ const contentTypes = {
       },
     },
     draftAndPublish: true,
-    name: 'country',
+    displayName: 'Country',
+    singularName: 'country',
+    pluralName: 'countries',
     description: '',
     collectionName: '',
   },
@@ -89,7 +87,9 @@ const contentTypes = {
       },
     },
     draftAndPublish: true,
-    name: 'category',
+    displayName: 'Category',
+    singularName: 'category',
+    pluralName: 'categories',
     description: '',
     collectionName: '',
   },
@@ -135,9 +135,9 @@ describe('Publication State', () => {
       .addContentType(contentTypes.country)
       .addComponent(components.comp)
       .addContentTypes([contentTypes.category, contentTypes.product])
-      .addFixtures(contentTypes.country.name, fixtures.country)
-      .addFixtures(contentTypes.category.name, fixtures.category)
-      .addFixtures(contentTypes.product.name, f =>
+      .addFixtures(contentTypes.country.singularName, fixtures.country)
+      .addFixtures(contentTypes.category.singularName, fixtures.category)
+      .addFixtures(contentTypes.product.singularName, f =>
         fixtures.product.map(product => ({
           name: product.name,
           categories: product.categories.map(name => f.category.find(cat => cat.name === name).id),
@@ -164,7 +164,7 @@ describe('Publication State', () => {
 
   describe.each(['default', 'live', 'preview'])('Mode: "%s"', mode => {
     describe.each(['country', 'category', 'product'])('For %s', modelName => {
-      const baseUrl = `/${pluralizedModels[modelName]}`;
+      const baseUrl = `/${contentTypes[modelName].pluralName}`;
       const query = getQueryFromMode(mode);
 
       test('Can get entries', async () => {
@@ -180,12 +180,11 @@ describe('Publication State', () => {
   describe('Advanced checks', () => {
     describe('Nested level of relations (live mode)', () => {
       let products;
-      const pluralizedModelName = pluralizedModels[contentTypes.product.name];
 
       beforeEach(async () => {
         const res = await rq({
           method: 'GET',
-          url: `/${pluralizedModelName}?publicationState=live`,
+          url: `/${contentTypes.product.pluralName}?publicationState=live`,
           qs: {
             populate: ['categories', 'comp.countries'],
           },
@@ -195,7 +194,7 @@ describe('Publication State', () => {
       });
 
       test('Payload integrity', () => {
-        expect(products).toHaveLength(lengthFor(contentTypes.product.name));
+        expect(products).toHaveLength(lengthFor(contentTypes.product.singularName));
       });
 
       test('Root level', () => {

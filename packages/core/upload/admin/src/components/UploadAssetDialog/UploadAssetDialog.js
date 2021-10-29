@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { ModalLayout } from '@strapi/parts/ModalLayout';
+import { ModalLayout } from '@strapi/design-system/ModalLayout';
 import { AddAssetStep } from './AddAssetStep/AddAssetStep';
 import { PendingAssetStep } from './PendingAssetStep/PendingAssetStep';
 import { AssetDefinition } from '../../constants';

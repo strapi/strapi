@@ -41,7 +41,9 @@ const documentModel = {
       type: 'richtext',
     },
   },
-  name: 'document',
+  singularName: 'document',
+  pluralName: 'documents',
+  displayName: 'Document',
   description: '',
   collectionName: '',
 };
@@ -63,7 +65,9 @@ const labelModel = {
       repeatable: false,
     },
   },
-  name: 'label',
+  singularName: 'label',
+  pluralName: 'labels',
+  displayName: 'Label',
   description: '',
   collectionName: '',
 };
@@ -74,7 +78,9 @@ const carModel = {
       type: 'text',
     },
   },
-  name: 'car',
+  singularName: 'car',
+  pluralName: 'cars',
+  displayName: 'Car',
   description: '',
   collectionName: '',
 };
@@ -96,7 +102,9 @@ const personModel = {
       private: true,
     },
   },
-  name: 'person',
+  displayName: 'Person',
+  singularName: 'person',
+  pluralName: 'people',
   description: '',
   collectionName: '',
 };
@@ -682,6 +690,7 @@ describe('Test Graphql Relations API End to End', () => {
         errors: [
           {
             message: 'Cannot query field "privateName" on type "Person".',
+            // message: 'Cannot query field "people" on type "Query".',
           },
         ],
       });

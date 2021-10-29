@@ -2,12 +2,12 @@
 import React, { useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Box } from '@strapi/parts/Box';
-import { Flex } from '@strapi/parts/Flex';
-import { H3 } from '@strapi/parts/Text';
-import { ModalFooter } from '@strapi/parts/ModalLayout';
-import { Button } from '@strapi/parts/Button';
-import AddAssetIcon from '@strapi/icons/AddAsset';
+import { Box } from '@strapi/design-system/Box';
+import { Flex } from '@strapi/design-system/Flex';
+import { H3 } from '@strapi/design-system/Text';
+import { ModalFooter } from '@strapi/design-system/ModalLayout';
+import { Button } from '@strapi/design-system/Button';
+import PicturePlus from '@strapi/icons/PicturePlus';
 import { useIntl } from 'react-intl';
 import { getTrad } from '../../../utils';
 import { rawFileToAsset } from '../../../utils/rawFileToAsset';
@@ -79,7 +79,7 @@ export const FromComputerForm = ({ onClose, onAddAssets }) => {
             <Flex justifyContent="center">
               <Wrapper>
                 <IconWrapper>
-                  <AddAssetIcon aria-hidden />
+                  <PicturePlus aria-hidden />
                 </IconWrapper>
 
                 <Box paddingTop={3} paddingBottom={5}>

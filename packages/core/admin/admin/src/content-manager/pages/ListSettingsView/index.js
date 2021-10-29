@@ -8,15 +8,14 @@ import get from 'lodash/get';
 import { stringify } from 'qs';
 import { useNotification, useTracking, ConfirmDialog } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
-import { Box } from '@strapi/parts/Box';
-import { Divider } from '@strapi/parts/Divider';
-import { Layout, HeaderLayout, ContentLayout } from '@strapi/parts/Layout';
-import { Link } from '@strapi/parts/Link';
-import { Main } from '@strapi/parts/Main';
-import { Button } from '@strapi/parts/Button';
-import CheckIcon from '@strapi/icons/CheckIcon';
-import BackIcon from '@strapi/icons/BackIcon';
-// import LayoutDndProvider from '../../components/LayoutDndProvider';
+import { Box } from '@strapi/design-system/Box';
+import { Divider } from '@strapi/design-system/Divider';
+import { Layout, HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
+import { Link } from '@strapi/design-system/Link';
+import { Main } from '@strapi/design-system/Main';
+import { Button } from '@strapi/design-system/Button';
+import Check from '@strapi/icons/Check';
+import ArrowLeft from '@strapi/icons/ArrowLeft';
 import { checkIfAttributeIsDisplayable, getTrad } from '../../utils';
 import ModelsContext from '../../contexts/ModelsContext';
 import { usePluginsQueryParams } from '../../hooks';
@@ -191,14 +190,14 @@ const ListSettingsView = ({ layout, slug }) => {
         <form onSubmit={handleSubmit}>
           <HeaderLayout
             navigationAction={
-              <Link startIcon={<BackIcon />} to={goBackUrl} id="go-back">
+              <Link startIcon={<ArrowLeft />} to={goBackUrl} id="go-back">
                 {formatMessage({ id: 'app.components.go-back', defaultMessage: 'Go back' })}
               </Link>
             }
             primaryAction={
               <Button
                 size="L"
-                startIcon={<CheckIcon />}
+                startIcon={<Check />}
                 disabled={isEqual(modifiedData, initialData)}
                 type="submit"
               >
@@ -214,7 +213,7 @@ const ListSettingsView = ({ layout, slug }) => {
                 id: getTrad('components.SettingsViewWrapper.pluginHeader.title'),
                 defaultMessage: 'Configure the view - {name}',
               },
-              { name: upperFirst(modifiedData.info.label) }
+              { name: upperFirst(modifiedData.info.displayName) }
             )}
           />
           <ContentLayout>
@@ -251,7 +250,7 @@ const ListSettingsView = ({ layout, slug }) => {
               id: getTrad('popUpWarning.warning.updateAllSettings'),
               defaultMessage: 'This will modify all your settings',
             }}
-            iconRightButton={<CheckIcon />}
+            iconRightButton={<Check />}
             isConfirmButtonLoading={isSubmittingForm}
             isOpen={showWarningSubmit}
             onToggleDialog={toggleWarningSubmit}

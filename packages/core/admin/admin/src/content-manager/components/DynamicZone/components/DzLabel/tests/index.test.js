@@ -6,8 +6,8 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { ThemeProvider, lightTheme, Tooltip } from '@strapi/parts';
-import I18N from '@strapi/icons/I18N';
+import { ThemeProvider, lightTheme, Tooltip } from '@strapi/design-system';
+import Earth from '@strapi/icons/Earth';
 import { IntlProvider } from 'react-intl';
 import styled from 'styled-components';
 import DzLabel from '../index';
@@ -30,7 +30,7 @@ const LabelAction = () => {
   return (
     <Tooltip description="i18n">
       <Button aria-label="i18n" type="button">
-        <I18N aria-hidden />
+        <Earth aria-hidden />
       </Button>
     </Tooltip>
   );

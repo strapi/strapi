@@ -1,15 +1,15 @@
 import React, { useState, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
-import { ContentLayout, HeaderLayout } from '@strapi/parts/Layout';
-import { Main } from '@strapi/parts/Main';
-import { Button } from '@strapi/parts/Button';
-import { Stack } from '@strapi/parts/Stack';
-import { Box } from '@strapi/parts/Box';
-import { TextInput } from '@strapi/parts/TextInput';
-import { Textarea } from '@strapi/parts/Textarea';
-import { H3 } from '@strapi/parts/Text';
-import CheckIcon from '@strapi/icons/CheckIcon';
-import { GridItem, Grid } from '@strapi/parts/Grid';
+import { ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
+import { Main } from '@strapi/design-system/Main';
+import { Button } from '@strapi/design-system/Button';
+import { Stack } from '@strapi/design-system/Stack';
+import { Box } from '@strapi/design-system/Box';
+import { TextInput } from '@strapi/design-system/TextInput';
+import { Textarea } from '@strapi/design-system/Textarea';
+import { H3 } from '@strapi/design-system/Text';
+import Check from '@strapi/icons/Check';
+import { GridItem, Grid } from '@strapi/design-system/Grid';
 import { Formik } from 'formik';
 import { useIntl } from 'react-intl';
 import {
@@ -84,7 +84,7 @@ const EditPage = () => {
             <HeaderLayout
               primaryAction={
                 !isLoadingPlugins && (
-                  <Button type="submit" loading={isSubmitting} startIcon={<CheckIcon />}>
+                  <Button type="submit" loading={isSubmitting} startIcon={<Check />}>
                     {formatMessage({
                       id: 'app.components.Button.save',
                       defaultMessage: 'Save',

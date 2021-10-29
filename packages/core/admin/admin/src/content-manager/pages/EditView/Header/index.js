@@ -4,17 +4,17 @@ import { useHistory } from 'react-router-dom';
 import get from 'lodash/get';
 import isEqual from 'lodash/isEqual';
 import isEmpty from 'lodash/isEmpty';
-import BackIcon from '@strapi/icons/BackIcon';
-import { HeaderLayout } from '@strapi/parts/Layout';
-import { Box } from '@strapi/parts/Box';
-import { Button } from '@strapi/parts/Button';
-import { Dialog, DialogBody, DialogFooter } from '@strapi/parts/Dialog';
-import { Link } from '@strapi/parts/Link';
-import { Flex } from '@strapi/parts/Flex';
-import { Text } from '@strapi/parts/Text';
-import { Stack } from '@strapi/parts/Stack';
-import AlertWarningIcon from '@strapi/icons/AlertWarningIcon';
-import CheckIcon from '@strapi/icons/CheckIcon';
+import ArrowLeft from '@strapi/icons/ArrowLeft';
+import { HeaderLayout } from '@strapi/design-system/Layout';
+import { Box } from '@strapi/design-system/Box';
+import { Button } from '@strapi/design-system/Button';
+import { Dialog, DialogBody, DialogFooter } from '@strapi/design-system/Dialog';
+import { Link } from '@strapi/design-system/Link';
+import { Flex } from '@strapi/design-system/Flex';
+import { Text } from '@strapi/design-system/Text';
+import { Stack } from '@strapi/design-system/Stack';
+import ExclamationMarkCircle from '@strapi/icons/ExclamationMarkCircle';
+import Check from '@strapi/icons/Check';
 import PropTypes from 'prop-types';
 import isEqualFastCompare from 'react-fast-compare';
 import { getTrad } from '../../../utils';
@@ -71,12 +71,19 @@ const Header = ({
 
   if (isCreatingEntry && canCreate) {
     primaryAction = (
-      <Button disabled={!didChangeData} isLoading={status === 'submit-pending'} type="submit">
-        {formatMessage({
-          id: getTrad('containers.Edit.submit'),
-          defaultMessage: 'Save',
-        })}
-      </Button>
+      <Stack horizontal size={2}>
+        {hasDraftAndPublish && (
+          <Button disabled startIcon={<Check />} variant="secondary">
+            {formatMessage({ id: 'app.utils.publish', defaultMessage: 'Publish' })}
+          </Button>
+        )}
+        <Button disabled={!didChangeData} isLoading={status === 'submit-pending'} type="submit">
+          {formatMessage({
+            id: getTrad('containers.Edit.submit'),
+            defaultMessage: 'Save',
+          })}
+        </Button>
+      </Stack>
     );
   }
 
@@ -109,7 +116,7 @@ const Header = ({
             disabled={didChangeData}
             loading={isPublishButtonLoading}
             onClick={onClick}
-            startIcon={<CheckIcon />}
+            startIcon={<Check />}
             variant="secondary"
           >
             {formatMessage(pubishButtonLabel)}
@@ -154,7 +161,7 @@ const Header = ({
         subtitle={subtitle}
         navigationAction={
           <Link
-            startIcon={<BackIcon />}
+            startIcon={<ArrowLeft />}
             // Needed in order to redirect the user with the correct search params
             // Since parts is using a link from react-router-dom the best way to do it is to disable the
             // event
@@ -179,7 +186,7 @@ const Header = ({
           describedBy="confirm-description"
           isOpen={showWarningUnpublish}
         >
-          <DialogBody icon={<AlertWarningIcon />}>
+          <DialogBody icon={<ExclamationMarkCircle />}>
             <Stack size={2}>
               <Flex justifyContent="center" style={{ textAlign: 'center' }}>
                 <Text id="confirm-description">
@@ -234,7 +241,7 @@ const Header = ({
           describedBy="confirm-description"
           isOpen={showWarningDraftRelation}
         >
-          <DialogBody icon={<AlertWarningIcon />}>
+          <DialogBody icon={<ExclamationMarkCircle />}>
             <Stack size={2}>
               <Flex justifyContent="center" style={{ textAlign: 'center' }}>
                 <Text id="confirm-description">

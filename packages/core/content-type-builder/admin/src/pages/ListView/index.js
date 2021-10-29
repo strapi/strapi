@@ -1,33 +1,28 @@
-/**
- *  ! Have a discussion with maeva about l.170
- */
-
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useTracking } from '@strapi/helper-plugin';
-import AddIcon from '@strapi/icons/AddIcon';
-import BackIcon from '@strapi/icons/BackIcon';
-import CheckIcon from '@strapi/icons/CheckIcon';
-import EditIcon from '@strapi/icons/EditIcon';
-import { Button } from '@strapi/parts/Button';
-import { Link } from '@strapi/parts/Link';
-import { Flex } from '@strapi/parts/Flex';
-import { Stack } from '@strapi/parts/Stack';
-import { Box } from '@strapi/parts/Box';
-import { ContentLayout, HeaderLayout } from '@strapi/parts/Layout';
+import Plus from '@strapi/icons/Plus';
+import ArrowLeft from '@strapi/icons/ArrowLeft';
+import Check from '@strapi/icons/Check';
+import Pencil from '@strapi/icons/Pencil';
+import { Button } from '@strapi/design-system/Button';
+import { Link } from '@strapi/design-system/Link';
+import { Flex } from '@strapi/design-system/Flex';
+import { Stack } from '@strapi/design-system/Stack';
+import { Box } from '@strapi/design-system/Box';
+import { ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
 import get from 'lodash/get';
 import has from 'lodash/has';
 import isEqual from 'lodash/isEqual';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
-import { Prompt, useHistory, useLocation } from 'react-router-dom';
+import { Prompt, useRouteMatch } from 'react-router-dom';
 import List from '../../components/List';
 import ListRow from '../../components/ListRow';
-import ListViewContext from '../../contexts/ListViewContext';
 import useDataManager from '../../hooks/useDataManager';
+import useFormModalNavigation from '../../hooks/useFormModalNavigation';
 import getAttributeDisplayedType from '../../utils/getAttributeDisplayedType';
 import getTrad from '../../utils/getTrad';
-import makeSearch from '../../utils/makeSearch';
-// import LinkToCMSettingsView from './LinkToCMSettingsView';
+import LinkToCMSettingsView from './LinkToCMSettingsView';
 
 /* eslint-disable indent */
 
@@ -41,154 +36,62 @@ const ListView = () => {
   } = useDataManager();
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
-  const { push } = useHistory();
-  const { search } = useLocation();
-  const [enablePrompt, togglePrompt] = useState(true);
 
-  useEffect(() => {
-    if (search === '') {
-      togglePrompt(true);
-    }
-  }, [search]);
+  const match = useRouteMatch('/plugins/content-type-builder/:kind/:currentUID');
 
-  // Disabling the prompt on the first render if one of the modal is open
-  useEffect(() => {
-    if (search !== '') {
-      togglePrompt(false);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const {
+    onOpenModalAddComponentsToDZ,
+    onOpenModalAddField,
+    onOpenModalEditField,
+    onOpenModalEditSchema,
+  } = useFormModalNavigation();
 
   const firstMainDataPath = isInContentTypeView ? 'contentType' : 'component';
   const mainDataTypeAttributesPath = [firstMainDataPath, 'schema', 'attributes'];
   const targetUid = get(modifiedData, [firstMainDataPath, 'uid']);
-  // const isTemporary = get(modifiedData, [firstMainDataPath, 'isTemporary'], false);
+  const isTemporary = get(modifiedData, [firstMainDataPath, 'isTemporary'], false);
   const contentTypeKind = get(modifiedData, [firstMainDataPath, 'schema', 'kind'], null);
 
   const attributes = get(modifiedData, mainDataTypeAttributesPath, []);
-  // const attributesLength = attributes.length;
   const currentDataName = get(initialData, [firstMainDataPath, 'schema', 'name'], '');
   const isFromPlugin = has(initialData, [firstMainDataPath, 'plugin']);
   const hasModelBeenModified = !isEqual(modifiedData, initialData);
+
   const forTarget = isInContentTypeView ? 'contentType' : 'component';
 
-  const handleClickAddField = async (
-    forTarget,
-    targetUid,
-    firstHeaderObj,
-    secondHeaderObj,
-    thirdHeaderObj,
-    fourthHeaderObj
-  ) => {
-    // disable the prompt
-    await wait();
-
-    const searchObj = {
-      modalType: 'chooseAttribute',
-      forTarget,
-      targetUid,
-      ...firstHeaderObj,
-      ...secondHeaderObj,
-      ...thirdHeaderObj,
-      ...fourthHeaderObj,
-    };
-
-    push({ search: makeSearch(searchObj) });
+  const handleClickAddComponentToDZ = dynamicZoneTarget => {
+    onOpenModalAddComponentsToDZ({ dynamicZoneTarget, targetUid });
   };
 
-  const handleClickAddComponentToDZ = async dzName => {
-    const firstHeaderObject = {
-      header_label_1: currentDataName,
-      header_icon_name_1: 'dynamiczone',
-      header_icon_isCustom_1: false,
-    };
-    const secondHeaderObj = {
-      header_label_2: dzName,
-    };
-    const search = {
-      modalType: 'addComponentToDynamicZone',
-      forTarget: 'contentType',
-      targetUid,
-      dynamicZoneTarget: dzName,
-      settingType: 'base',
-      step: '1',
-      actionType: 'edit',
-      ...firstHeaderObject,
-      ...secondHeaderObj,
-    };
-
-    await wait();
-
-    push({ search: makeSearch(search, true) });
-  };
-
-  const handleClickEditField = async (
-    forTarget,
-    targetUid,
-    attributeName,
-    type,
-    firstHeaderObj,
-    secondHeaderObj,
-    thirdHeaderObj,
-    fourthHeaderObj,
-    fifthHeaderObj
-  ) => {
+  const handleClickEditField = async (forTarget, targetUid, attributeName, type) => {
     const attributeType = getAttributeDisplayedType(type);
+    const step = type === 'component' ? '2' : null;
 
-    await wait();
-
-    const search = {
-      modalType: 'attribute',
-      actionType: 'edit',
-      settingType: 'base',
+    onOpenModalEditField({
       forTarget,
       targetUid,
       attributeName,
       attributeType,
-      step: type === 'component' ? '2' : null,
-      ...firstHeaderObj,
-      ...secondHeaderObj,
-      ...thirdHeaderObj,
-      ...fourthHeaderObj,
-      ...fifthHeaderObj,
-    };
-
-    await wait();
-
-    push({ search: makeSearch(search, true) });
+      step,
+    });
   };
 
-  const getDescription = () => {
-    const description = get(modifiedData, [firstMainDataPath, 'schema', 'description'], null);
-
-    return (
-      description ||
-      formatMessage({
-        id: getTrad('modelPage.contentHeader.emptyDescription.description'),
-      })
-    );
-  };
-
-  const wait = async () => {
-    togglePrompt(false);
-
-    return new Promise(resolve => setTimeout(resolve, 100));
-  };
-  const label = get(modifiedData, [firstMainDataPath, 'schema', 'name'], '');
+  // TODO: fixme
+  let label = isInContentTypeView
+    ? get(modifiedData, [firstMainDataPath, 'schema', 'displayName'], '')
+    : get(modifiedData, [firstMainDataPath, 'schema', 'name'], '');
   const kind = get(modifiedData, [firstMainDataPath, 'schema', 'kind'], '');
 
-  // const listTitle = [
-  //   formatMessage(
-  //     {
-  //       id: `${pluginId}.table.attributes.title.${attributesLength > 1 ? 'plural' : 'singular'}`,
-  //     },
-  //     { number: attributesLength }
-  //   ),
-  // ];
+  const isCreatingFirstContentType = match?.params.currentUID === 'create-content-type';
 
-  const onEdit = async () => {
-    await wait();
+  if (!label && isCreatingFirstContentType) {
+    label = formatMessage({
+      id: getTrad('button.model.create'),
+      defaultMessage: 'Create new collection type',
+    });
+  }
 
+  const onEdit = () => {
     const contentType = kind || firstMainDataPath;
 
     if (contentType === 'collectionType') {
@@ -198,113 +101,107 @@ const ListView = () => {
       trackUsage('willEditNameOfSingleType');
     }
 
-    push({
-      search: makeSearch({
-        modalType: firstMainDataPath,
-        actionType: 'edit',
-        settingType: 'base',
-        forTarget: firstMainDataPath,
-        targetUid,
-        header_label_1: label,
-        header_icon_isCustom_1: false,
-        header_icon_name_1: contentType === 'singleType' ? contentType : firstMainDataPath,
-        headerId: getTrad('modalForm.header-edit'),
-      }),
+    onOpenModalEditSchema({
+      modalType: firstMainDataPath,
+      forTarget: firstMainDataPath,
+      targetUid,
+      kind: contentType,
     });
   };
 
   return (
-    <ListViewContext.Provider value={{ openModalAddField: handleClickAddField }}>
-      <>
-        <Prompt
-          message={formatMessage({ id: getTrad('prompt.unsaved') })}
-          when={hasModelBeenModified && enablePrompt}
-        />
-        <HeaderLayout
-          id="title"
-          primaryAction={
-            isInDevelopmentMode && (
-              <Stack horizontal size={2}>
+    <>
+      <Prompt
+        message={formatMessage({ id: getTrad('prompt.unsaved') })}
+        when={hasModelBeenModified}
+      />
+      <HeaderLayout
+        id="title"
+        primaryAction={
+          isInDevelopmentMode && (
+            <Stack horizontal size={2}>
+              {/* DON'T display the add field button when the content type has not been created */}
+              {!isCreatingFirstContentType && (
                 <Button
-                  startIcon={<CheckIcon />}
-                  onClick={() => submitData()}
-                  type="submit"
-                  disabled={isEqual(modifiedData, initialData)}
-                >
-                  {formatMessage({
-                    id: getTrad('form.button.save'),
-                    defaultMessage: 'Save',
-                  })}
-                </Button>
-              </Stack>
-            )
-          }
-          secondaryAction={
-            isInDevelopmentMode &&
-            !isFromPlugin && (
-              <Button startIcon={<EditIcon />} variant="tertiary" onClick={onEdit}>
-                {formatMessage({
-                  id: getTrad('app.utils.edit'),
-                  defaultMessage: 'Edit',
-                })}
-              </Button>
-            )
-          }
-          title={upperFirst(label)}
-          subtitle={getDescription()}
-          navigationAction={
-            <Link startIcon={<BackIcon />} to="/plugins/content-type-builder/">
-              {formatMessage({
-                id: 'app.components.go-back',
-                defaultMessage: 'Go back',
-              })}
-            </Link>
-          }
-        />
-        <ContentLayout>
-          <Stack size={4}>
-            <Flex justifyContent="flex-end">
-              <Stack horizontal size={2}>
-                {/* <LinkToCMSettingsView
-                  key="link-to-cm-settings-view"
-                  targetUid={targetUid}
-                  isTemporary={isTemporary}
-                  isInContentTypeView={isInContentTypeView}
-                  contentTypeKind={contentTypeKind}
-                /> */}
-                <Button
-                  startIcon={<AddIcon />}
-                  variant="primary"
+                  startIcon={<Plus />}
+                  variant="secondary"
                   onClick={() => {
-                    const headerDisplayObject = {
-                      header_label_1: currentDataName,
-                      header_icon_name_1: forTarget === 'contentType' ? contentTypeKind : forTarget,
-                      header_icon_isCustom_1: false,
-                    };
-                    handleClickAddField(forTarget, targetUid, headerDisplayObject);
+                    onOpenModalAddField({ forTarget, targetUid });
                   }}
                 >
                   {formatMessage({ id: getTrad('button.attributes.add.another') })}
                 </Button>
-              </Stack>
-            </Flex>
-            <Box background="neutral0" shadow="filterShadow" hasRadius>
-              <List
-                items={attributes}
-                customRowComponent={props => <ListRow {...props} onClick={handleClickEditField} />}
-                addComponentToDZ={handleClickAddComponentToDZ}
+              )}
+              <Button
+                startIcon={<Check />}
+                onClick={() => submitData()}
+                type="submit"
+                disabled={isEqual(modifiedData, initialData)}
+              >
+                {formatMessage({
+                  id: getTrad('form.button.save'),
+                  defaultMessage: 'Save',
+                })}
+              </Button>
+            </Stack>
+          )
+        }
+        secondaryAction={
+          isInDevelopmentMode &&
+          !isFromPlugin &&
+          !isCreatingFirstContentType && (
+            <Button startIcon={<Pencil />} variant="tertiary" onClick={onEdit}>
+              {formatMessage({
+                id: getTrad('app.utils.edit'),
+                defaultMessage: 'Edit',
+              })}
+            </Button>
+          )
+        }
+        title={upperFirst(label)}
+        subtitle={formatMessage({
+          id: getTrad('listView.headerLayout.description'),
+          defaultMessage: 'Build the data architecture of your content.',
+        })}
+        navigationAction={
+          <Link startIcon={<ArrowLeft />} to="/plugins/content-type-builder/">
+            {formatMessage({
+              id: 'app.components.go-back',
+              defaultMessage: 'Go back',
+            })}
+          </Link>
+        }
+      />
+      <ContentLayout>
+        <Stack size={4}>
+          <Flex justifyContent="flex-end">
+            <Stack horizontal size={2}>
+              <LinkToCMSettingsView
+                key="link-to-cm-settings-view"
                 targetUid={targetUid}
-                dataType={forTarget}
-                dataTypeName={currentDataName}
-                mainTypeName={currentDataName}
-                editTarget={forTarget}
-                isMain
+                isTemporary={isTemporary}
+                isInContentTypeView={isInContentTypeView}
+                contentTypeKind={contentTypeKind}
+                disabled={isCreatingFirstContentType}
               />
-            </Box>
-          </Stack>
-        </ContentLayout>
-      </>
-    </ListViewContext.Provider>
+            </Stack>
+          </Flex>
+          <Box background="neutral0" shadow="filterShadow" hasRadius>
+            <List
+              items={attributes}
+              customRowComponent={props => <ListRow {...props} onClick={handleClickEditField} />}
+              addComponentToDZ={handleClickAddComponentToDZ}
+              targetUid={targetUid}
+              dataType={forTarget}
+              dataTypeName={currentDataName}
+              mainTypeName={currentDataName}
+              editTarget={forTarget}
+              isMain
+            />
+          </Box>
+        </Stack>
+      </ContentLayout>
+    </>
   );
 };
 
