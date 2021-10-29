@@ -75,7 +75,8 @@ const Component = ({
             action={
               <Stack horizontal size={2}>
                 {showDownIcon && (
-                  <IconButton
+                  <IconButtonCustom
+                    noBorder
                     label={downLabel}
                     onClick={handleMoveComponentDown}
                     icon={<ArrowDown />}
