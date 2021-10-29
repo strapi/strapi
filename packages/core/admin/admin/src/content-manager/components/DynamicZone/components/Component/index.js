@@ -1,5 +1,6 @@
 import React, { memo, useMemo } from 'react';
 import PropTypes from 'prop-types';
+import styled from 'styled-components';
 import isEqual from 'react-fast-compare';
 import { useIntl } from 'react-intl';
 import { Accordion, AccordionToggle, AccordionContent } from '@strapi/design-system/Accordion';
@@ -15,6 +16,10 @@ import { useContentTypeLayout } from '../../../../hooks';
 import { getTrad } from '../../../../utils';
 import FieldComponent from '../../../FieldComponent';
 import Rectangle from './Rectangle';
+
+const IconButtonCustom = styled(IconButton)`
+  background-color: transparent;
+`;
 
 const Component = ({
   componentUid,
@@ -64,39 +69,51 @@ const Component = ({
   return (
     <Box>
       <Rectangle />
-      <Accordion expanded={isOpen} toggle={() => onToggle(index)} size="S">
-        <AccordionToggle
-          action={
-            <Stack horizontal size={2}>
-              {showDownIcon && (
-                <IconButton
-                  label={downLabel}
-                  onClick={handleMoveComponentDown}
-                  icon={<ArrowDown />}
-                />
-              )}
-              {showUpIcon && (
-                <IconButton label={upLabel} onClick={handleMoveComponentUp} icon={<ArrowUp />} />
-              )}
-              {isFieldAllowed && (
-                <IconButton label={deleteLabel} onClick={handleRemove} icon={<Trash />} />
-              )}
-            </Stack>
-          }
-          title={friendlyName}
-          togglePosition="left"
-        />
-        <AccordionContent>
-          <FocusTrap onEscape={() => onToggle(index)}>
-            <FieldComponent
-              componentUid={componentUid}
-              icon={icon}
-              name={`${name}.${index}`}
-              isFromDynamicZone
-            />
-          </FocusTrap>
-        </AccordionContent>
-      </Accordion>
+      <Box shadow="tableShadow">
+        <Accordion expanded={isOpen} toggle={() => onToggle(index)} size="S">
+          <AccordionToggle
+            action={
+              <Stack horizontal size={2}>
+                {showDownIcon && (
+                  <IconButton
+                    label={downLabel}
+                    onClick={handleMoveComponentDown}
+                    icon={<ArrowDown />}
+                  />
+                )}
+                {showUpIcon && (
+                  <IconButtonCustom
+                    noBorder
+                    label={upLabel}
+                    onClick={handleMoveComponentUp}
+                    icon={<ArrowUp />}
+                  />
+                )}
+                {isFieldAllowed && (
+                  <IconButtonCustom
+                    noBorder
+                    label={deleteLabel}
+                    onClick={handleRemove}
+                    icon={<Trash />}
+                  />
+                )}
+              </Stack>
+            }
+            title={friendlyName}
+            togglePosition="left"
+          />
+          <AccordionContent>
+            <FocusTrap onEscape={() => onToggle(index)}>
+              <FieldComponent
+                componentUid={componentUid}
+                icon={icon}
+                name={`${name}.${index}`}
+                isFromDynamicZone
+              />
+            </FocusTrap>
+          </AccordionContent>
+        </Accordion>
+      </Box>
     </Box>
   );
 };
