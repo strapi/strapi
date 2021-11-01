@@ -44,8 +44,8 @@ module.exports = opts => {
       ...packageJsonStrapi,
     },
     engines: {
-      node: '>=12.x.x <=14.x.x',
-      npm: '^6.0.0',
+      node: '>=12.x.x <=16.x.x',
+      npm: '>=6.0.0',
     },
     license: 'MIT',
   };
