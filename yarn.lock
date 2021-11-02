@@ -6480,11 +6480,6 @@ apollo-server-env@^4.0.3:
   dependencies:
     node-fetch "^2.6.1"
 
-apollo-server-errors@3.2.0:
-  version "3.2.0"
-  resolved "https://registry.yarnpkg.com/apollo-server-errors/-/apollo-server-errors-3.2.0.tgz#6c5051107b073c09bb55c2554878af0e97d59d08"
-  integrity sha512-Y7YH3JVAaR1199ao4dae3j1UrF9D/6AJwHpsORTjI3BvrwjU1X7Nk1VvEHn9bZfZF6ONaqUM+uCLm5c8GPhffQ==
-
 apollo-server-errors@^3.0.1, apollo-server-errors@^3.1.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/apollo-server-errors/-/apollo-server-errors-3.1.0.tgz#0b890dc7ae36a1f0ca4841d353e8d1c3c6524ee2"
