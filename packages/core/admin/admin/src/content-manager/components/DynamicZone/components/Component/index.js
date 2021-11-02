@@ -17,15 +17,16 @@ import { getTrad } from '../../../../utils';
 import FieldComponent from '../../../FieldComponent';
 import Rectangle from './Rectangle';
 
-// FIXME: needed for the react-select overflow
-const StyledBox = styled(Box)`
-  > div {
-    overflow: visible;
-  }
-`;
-
 const IconButtonCustom = styled(IconButton)`
   background-color: transparent;
+`;
+
+const StyledBox = styled(Box)`
+  > div {
+    > div:not(:first-of-type) {
+      overflow: visible;
+    }
+  }
 `;
 
 const Component = ({
@@ -76,12 +77,12 @@ const Component = ({
   return (
     <Box>
       <Rectangle />
-      <StyledBox shadow="tableShadow">
+      <StyledBox shadow="tableShadow" hasRadius>
         <Accordion expanded={isOpen} toggle={() => onToggle(index)} size="S">
           <AccordionToggle
             startIcon={<FontAwesomeIcon icon={icon} />}
             action={
-              <Stack horizontal size={2}>
+              <Stack horizontal size={0}>
                 {showDownIcon && (
                   <IconButtonCustom
                     noBorder
