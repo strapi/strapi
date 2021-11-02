@@ -1,5 +1,6 @@
 import Cropper from 'cropperjs';
 import { useRef, useEffect, useState } from 'react';
+import 'cropperjs/dist/cropper.css';
 
 const QUALITY = 1;
 
