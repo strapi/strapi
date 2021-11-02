@@ -15,7 +15,7 @@ const ApplicationInfosPage = () => {
   const { formatMessage } = useIntl();
   useFocusWhenNavigate();
   const appInfos = useAppInfos();
-  const { shouldUpdateStrapi, latestStrapiReleaseTag } = appInfos;
+  const { shouldUpdateStrapi, latestStrapiReleaseTag, strapiVersion } = appInfos;
 
   const currentPlan = appInfos.communityEdition
     ? 'app.components.UpgradePlanModal.text-ce'
@@ -58,7 +58,7 @@ const ApplicationInfosPage = () => {
                       defaultMessage: 'details',
                     })}
                   </TableLabel>
-                  <Text as="p">{appInfos.latestStrapiReleaseTag}</Text>
+                  <Text as="p">v{strapiVersion}</Text>
                 </GridItem>
                 <GridItem col={6} s={12}>
                   <TableLabel textColor="neutral600">

@@ -24,6 +24,7 @@ describe('Application page', () => {
       return {
         shouldUpdateStrapi: true,
         latestStrapiReleaseTag: 'v3.6.8',
+        strapiVersion: '4.0.0',
       };
     });
 
@@ -360,7 +361,8 @@ describe('Application page', () => {
                         <p
                           class="c20"
                         >
-                          v3.6.8
+                          v
+                          4.0.0
                         </p>
                       </div>
                     </div>
@@ -487,12 +489,13 @@ describe('Application page', () => {
       return {
         shouldUpdateStrapi: true,
         latestStrapiReleaseTag: 'v3.6.8',
+        strapiVersion: '4.0.0',
       };
     });
 
     render(App);
 
-    expect(screen.getByText('v3.6.8')).toBeInTheDocument();
+    expect(screen.getByText('v4.0.0')).toBeInTheDocument();
     expect(screen.getByText('Upgrade your admin panel')).toBeInTheDocument();
   });
 
