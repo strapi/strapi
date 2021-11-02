@@ -162,6 +162,7 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
           data: {
             email: user.email,
             username: user.firstname,
+            firstAdmin: !hasAdmin,
           },
           cancelToken: source.token,
         });
