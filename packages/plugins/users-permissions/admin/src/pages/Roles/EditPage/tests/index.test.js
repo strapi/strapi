@@ -853,6 +853,10 @@ describe('Admin | containers | RoleEditPage', () => {
         background: #d9d8ff;
       }
 
+      .c47:hover:not([aria-disabled='true']) svg path {
+        fill: #4945ff;
+      }
+
       .c54 {
         background: transparent;
         border: none;
@@ -938,10 +942,6 @@ describe('Admin | containers | RoleEditPage', () => {
 
       .c51 {
         height: 5.5rem;
-      }
-
-      .c51:hover svg path {
-        fill: #4945ff;
       }
 
       @media (max-width:68.75rem) {
