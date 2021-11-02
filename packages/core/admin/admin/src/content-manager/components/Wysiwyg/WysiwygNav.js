@@ -18,7 +18,13 @@ import Image from '@strapi/icons/Picture';
 import Link from '@strapi/icons/Link';
 import Quote from '@strapi/icons/Quote';
 import More from '@strapi/icons/More';
-import { MainButtons, CustomIconButton, MoreButton, IconButtonGroupMargin } from './WysiwygStyles';
+import {
+  MainButtons,
+  CustomIconButton,
+  MoreButton,
+  IconButtonGroupMargin,
+  CustomLinkIconButton,
+} from './WysiwygStyles';
 
 const WysiwygNav = ({
   editorRef,
@@ -179,7 +185,7 @@ const WysiwygNav = ({
                     name="Image"
                     icon={<Image />}
                   />
-                  <CustomIconButton
+                  <CustomLinkIconButton
                     onClick={() => onActionClick('Link', editorRef, onTogglePopover)}
                     id="Link"
                     label="Link"
