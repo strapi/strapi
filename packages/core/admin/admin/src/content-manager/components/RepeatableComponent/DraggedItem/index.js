@@ -21,10 +21,11 @@ import DraggingSibling from './DraggingSibling';
 import { CustomIconButton, DragHandleWrapper } from './IconButtonCustoms';
 import { connect, select } from './utils';
 
-// FIXME: needed for the react-select overflow
 const StyledBox = styled(Box)`
   > div {
-    overflow: visible;
+    > div:not(:first-of-type) {
+      overflow: visible;
+    }
   }
 `;
 
