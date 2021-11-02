@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import isEqual from 'react-fast-compare';
 import { useIntl } from 'react-intl';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Accordion, AccordionToggle, AccordionContent } from '@strapi/design-system/Accordion';
 import { IconButton } from '@strapi/design-system/IconButton';
 import { FocusTrap } from '@strapi/design-system/FocusTrap';
@@ -11,11 +12,17 @@ import { Stack } from '@strapi/design-system/Stack';
 import Trash from '@strapi/icons/Trash';
 import ArrowDown from '@strapi/icons/ArrowDown';
 import ArrowUp from '@strapi/icons/ArrowUp';
-// import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useContentTypeLayout } from '../../../../hooks';
 import { getTrad } from '../../../../utils';
 import FieldComponent from '../../../FieldComponent';
 import Rectangle from './Rectangle';
+
+// FIXME: needed for the react-select overflow
+const StyledBox = styled(Box)`
+  > div {
+    overflow: visible;
+  }
+`;
 
 const IconButtonCustom = styled(IconButton)`
   background-color: transparent;
@@ -69,9 +76,10 @@ const Component = ({
   return (
     <Box>
       <Rectangle />
-      <Box shadow="tableShadow">
+      <StyledBox shadow="tableShadow">
         <Accordion expanded={isOpen} toggle={() => onToggle(index)} size="S">
           <AccordionToggle
+            startIcon={<FontAwesomeIcon icon={icon} />}
             action={
               <Stack horizontal size={2}>
                 {showDownIcon && (
@@ -114,7 +122,7 @@ const Component = ({
             </FocusTrap>
           </AccordionContent>
         </Accordion>
-      </Box>
+      </StyledBox>
     </Box>
   );
 };

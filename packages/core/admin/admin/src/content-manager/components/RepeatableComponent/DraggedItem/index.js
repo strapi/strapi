@@ -1,10 +1,11 @@
 /* eslint-disable import/no-cycle */
-import React, { memo, useEffect, useRef } from 'react';
+import React, { memo, useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useDrag, useDrop } from 'react-dnd';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
 import toString from 'lodash/toString';
+import styled from 'styled-components';
 import { Accordion, AccordionToggle, AccordionContent } from '@strapi/design-system/Accordion';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { Stack } from '@strapi/design-system/Stack';
@@ -19,6 +20,13 @@ import Preview from './Preview';
 import DraggingSibling from './DraggingSibling';
 import { CustomIconButton, DragHandleWrapper } from './IconButtonCustoms';
 import { connect, select } from './utils';
+
+// FIXME: needed for the react-select overflow
+const StyledBox = styled(Box)`
+  > div {
+    overflow: visible;
+  }
+`;
 
 /* eslint-disable react/no-array-index-key */
 
@@ -49,6 +57,7 @@ const DraggedItem = ({
 }) => {
   const dragRef = useRef(null);
   const dropRef = useRef(null);
+  const [, forceRerenderAfterDnd] = useState(false);
   const { formatMessage } = useIntl();
 
   const fields = schema.layouts.edit;
@@ -143,6 +152,15 @@ const DraggedItem = ({
     }
   }, [isDragging, setIsDraggingSiblig]);
 
+  // Effect in order to force a rerender after reordering the components
+  // Since we are removing the Accordion when doing the DnD  we are losing the dragRef, therefore the replaced element cannot be dragged
+  // anymore, this hack forces a rerender in order to apply the dragRef
+  useEffect(() => {
+    if (!isDraggingSibling) {
+      forceRerenderAfterDnd(prev => !prev);
+    }
+  }, [isDraggingSibling]);
+
   // Create the refs
   // We need 1 for the drop target
   // 1 for the drag target
@@ -154,11 +172,12 @@ const DraggedItem = ({
   const accordionTitle = toString(displayedValue);
 
   return (
-    <Box ref={refs ? refs.dropRef : null}>
+    <StyledBox ref={refs ? refs.dropRef : null}>
       {isDragging && <Preview />}
       {!isDragging && isDraggingSibling && (
         <DraggingSibling displayedValue={accordionTitle} componentFieldName={componentFieldName} />
       )}
+
       {!isDragging && !isDraggingSibling && (
         <Accordion expanded={isOpen} toggle={onClickToggle} id={componentFieldName} size="S">
           <AccordionToggle
@@ -244,87 +263,7 @@ const DraggedItem = ({
           </AccordionContent>
         </Accordion>
       )}
-    </Box>
-    //   <StyledBox ref={refs ? refs.dropRef : null}>
-    //     {isDragging && <Preview />}
-    //     {!isDragging && (
-    //       <Accordion expanded={isOpen} toggle={onClickToggle} id={componentFieldName}>
-    //         <AccordionToggle
-    //           action={
-    //             isReadOnly ? null : (
-    //               <Flex>
-    //                 <IconButton
-    //                   icon={<Trash />}
-    //                 />
-    //                 <Box paddingLeft={2}>
-    //                   <DragHandleWrapper
-    //                     ref={refs.dragRef}
-    //                     icon={<Drag />}
-    //                   />
-    //                 </Box>
-    //               </Flex>
-    //             )
-    //           }
-    //         />
-    //         <AccordionContent>
-    //           <Box
-    //             background="neutral100"
-    //             paddingLeft={6}
-    //             paddingRight={6}
-    //             paddingTop={6}
-    //             paddingBottom={6}
-    //           >
-    //             <Stack size={6}>
-    //               {fields.map((fieldRow, key) => {
-    //                 return (
-    //                   <Grid gap={4} key={key}>
-    //                     {fieldRow.map(({ name, fieldSchema, metadatas, queryInfos, size }) => {
-    //                       const isComponent = fieldSchema.type === 'component';
-    //                       const keys = `${componentFieldName}.${name}`;
-
-    //                       if (isComponent) {
-    //                         const componentUid = fieldSchema.component;
-
-    //                         return (
-    //                           <GridItem col={size} s={12} xs={12} key={name}>
-    //                             <FieldComponent
-    //                               componentUid={componentUid}
-    //                               intlLabel={{
-    //                                 id: metadatas.label,
-    //                                 defaultMessage: metadatas.label,
-    //                               }}
-    //                               isRepeatable={fieldSchema.repeatable}
-    //                               isNested
-    //                               name={keys}
-    //                               max={fieldSchema.max}
-    //                               min={fieldSchema.min}
-    //                               required={fieldSchema.required}
-    //                             />
-    //                           </GridItem>
-    //                         );
-    //                       }
-
-    //                       return (
-    //                         <GridItem key={keys} col={size} s={12} xs={12}>
-    //                           <Inputs
-    //                             fieldSchema={fieldSchema}
-    //                             keys={keys}
-    //                             metadatas={metadatas}
-    //                             // onBlur={hasErrors ? checkFormErrors : null}
-    //                             queryInfos={queryInfos}
-    //                           />
-    //                         </GridItem>
-    //                       );
-    //                     })}
-    //                   </Grid>
-    //                 );
-    //               })}
-    //             </Stack>
-    //           </Box>
-    //         </AccordionContent>
-    //       </Accordion>
-    //     )}
-    //   </StyledBox>
+    </StyledBox>
   );
 };
 
