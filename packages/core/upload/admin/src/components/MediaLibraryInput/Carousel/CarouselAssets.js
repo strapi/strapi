@@ -52,8 +52,8 @@ export const CarouselAssets = ({
         currentAsset ? (
           <CarouselAssetActions
             asset={currentAsset}
-            onDeleteAsset={onDeleteAsset}
-            onAddAsset={onAddAsset}
+            onDeleteAsset={disabled ? undefined : onDeleteAsset}
+            onAddAsset={disabled ? undefined : onAddAsset}
             onEditAsset={onEditAsset}
           />
         ) : (

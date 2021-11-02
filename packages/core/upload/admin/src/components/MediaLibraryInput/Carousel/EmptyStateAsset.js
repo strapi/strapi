@@ -50,10 +50,12 @@ export const EmptyStateAsset = ({ disabled, onClick, onDropAsset }) => {
       width="100%"
       as="button"
       type="button"
+      disabled={disabled}
       onClick={onClick}
       onDragEnter={handleDragEnter}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
+      style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
     >
       <Icon
         as={PicturePlusIcon}
