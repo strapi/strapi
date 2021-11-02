@@ -21,6 +21,13 @@ export const CustomIconButton = styled(IconButton)`
   }
 `;
 
+export const CustomLinkIconButton = styled(CustomIconButton)`
+  svg {
+    width: ${8 / 16}rem;
+    height: ${8 / 16}rem;
+  }
+`;
+
 export const MainButtons = styled(IconButtonGroup)`
   margin-left: ${({ theme }) => theme.spaces[4]};
 `;
