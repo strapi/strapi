@@ -31,6 +31,7 @@ const iconByTypes = {
   relation: <Relation />,
   string: <Text />,
   text: <Text />,
+  richtext: <Text />,
   time: <Date />,
   timestamp: <Date />,
   json: <Json />,
@@ -39,7 +40,7 @@ const iconByTypes = {
   dynamiczone: <DynamicZone />,
 };
 
-const FieldTypeIcon = ({ type }) => iconByTypes[type];
+const FieldTypeIcon = ({ type }) => iconByTypes[type] || null;
 
 FieldTypeIcon.propTypes = {
   type: PropTypes.string.isRequired,

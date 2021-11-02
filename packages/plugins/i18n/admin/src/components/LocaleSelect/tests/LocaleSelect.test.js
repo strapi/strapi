@@ -54,49 +54,11 @@ describe('LocaleSelect', () => {
     const { container } = render();
 
     expect(container.firstChild).toMatchInlineSnapshot(`
-      .c4 {
-        position: absolute;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        top: 0;
-        width: 100%;
-        background: transparent;
-        border: none;
-      }
-
-      .c4:focus {
-        outline: none;
-      }
-
-      .c4[aria-disabled='true'] {
-        cursor: not-allowed;
-      }
-
-      .c1 {
-        font-weight: 500;
-        font-size: 0.75rem;
-        line-height: 1.33;
-        color: #32324d;
-      }
-
       .c8 {
-        font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #666687;
-      }
-
-      .c7 {
-        padding-right: 16px;
-        padding-left: 16px;
-      }
-
-      .c9 {
         padding-left: 12px;
       }
 
-      .c2 {
+      .c3 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -118,17 +80,119 @@ describe('LocaleSelect', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
-        -webkit-box-pack: justify;
-        -webkit-justify-content: space-between;
-        -ms-flex-pack: justify;
-        justify-content: space-between;
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
+        -webkit-flex-wrap: wrap;
+        -ms-flex-wrap: wrap;
+        flex-wrap: wrap;
+      }
+
+      .c9 {
+        background: transparent;
+        border: none;
+        position: relative;
+        z-index: 1;
+      }
+
+      .c9 svg {
+        height: 0.6875rem;
+        width: 0.6875rem;
+      }
+
+      .c9 svg path {
+        fill: #666687;
+      }
+
+      .c10 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        background: none;
+        border: none;
+      }
+
+      .c10 svg {
+        width: 0.375rem;
+      }
+
+      .c2 {
+        font-weight: 500;
+        font-size: 0.75rem;
+        line-height: 1.33;
+        color: #32324d;
       }
 
       .c0 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
+      }
+
+      .c4 {
+        position: relative;
+        border: 1px solid #dcdce4;
+        padding-right: 12px;
+        padding-left: 12px;
+        border-radius: 4px;
+        background: #ffffff;
+        outline: none;
+        box-shadow: 0;
+        -webkit-transition-property: border-color,box-shadow,fill;
+        transition-property: border-color,box-shadow,fill;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+      }
+
+      .c4:focus-within {
+        border: 1px solid #4945ff;
+        box-shadow: #4945ff 0px 0px 0px 2px;
+      }
+
+      .c6 {
+        display: grid;
+        -webkit-flex: 1 1 0%;
+        -ms-flex: 1 1 0%;
+        flex: 1 1 0%;
+        position: relative;
+      }
+
+      .c7 {
+        display: inline-grid;
+        grid-area: 1 / 1 / 2 / 3;
+        grid-template-columns: 0px min-content;
+        background: transparent;
+        min-height: 2.5rem;
+        border: none;
+        -webkit-flex: 1;
+        -ms-flex: 1;
+        flex: 1;
+        font-size: 0.875rem;
+        color: #32324d;
+        outline: none;
+      }
+
+      .c7:focus-visible {
+        outline: none;
+        box-shadow: none;
+        outline-offset: 0;
+      }
+
+      .c7[aria-disabled='true'] {
+        background: inherit;
+        color: inherit;
+        cursor: not-allowed;
+      }
+
+      .c1 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -138,136 +202,84 @@ describe('LocaleSelect', () => {
         flex-direction: column;
       }
 
-      .c0 > * {
+      .c1 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c0 > * + * {
+      .c1 > * + * {
         margin-top: 4px;
-      }
-
-      .c3 {
-        position: relative;
-        border: 1px solid #dcdce4;
-        padding-right: 12px;
-        border-radius: 4px;
-        background: #ffffff;
-        overflow: hidden;
-        min-height: 2.5rem;
-        outline: none;
-        box-shadow: 0;
-        -webkit-transition-property: border-color,box-shadow,fill;
-        transition-property: border-color,box-shadow,fill;
-        -webkit-transition-duration: 0.2s;
-        transition-duration: 0.2s;
-      }
-
-      .c3:focus-within {
-        border: 1px solid #4945ff;
-        box-shadow: #4945ff 0px 0px 0px 2px;
-      }
-
-      .c10 {
-        background: transparent;
-        border: none;
-        position: relative;
-        z-index: 1;
-      }
-
-      .c10 svg {
-        height: 0.6875rem;
-        width: 0.6875rem;
-      }
-
-      .c10 svg path {
-        fill: #666687;
-      }
-
-      .c11 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        background: none;
-        border: none;
-      }
-
-      .c11 svg {
-        width: 0.375rem;
-      }
-
-      .c6 {
-        width: 100%;
       }
 
       <div>
         <div
+          aria-atomic="false"
+          aria-live="polite"
+          aria-relevant="additions text"
           class="c0"
+        />
+        <div
+          class="c1"
         >
-          <span
-            class="c1"
-            for="select-1"
-            id="select-1-label"
+          <label
+            class="c2"
+            for="combobox-1"
+            id="combobox-1-label"
           >
             Locales
-          </span>
+          </label>
           <div
-            class="c2 c3"
+            class="c3 c4"
           >
-            <button
-              aria-busy="true"
-              aria-disabled="false"
-              aria-expanded="false"
-              aria-haspopup="listbox"
-              aria-labelledby="select-1-label select-1-content"
-              class="c4"
-              id="select-1"
-              type="button"
-            />
             <div
               class="c5 c6"
+              wrap="wrap"
             >
-              <div
-                class="c2"
+              
+              <input
+                aria-activedescendant=""
+                aria-autocomplete="list"
+                aria-controls="combobox-1-listbox"
+                aria-disabled="false"
+                aria-expanded="false"
+                aria-haspopup="listbox"
+                aria-labelledby="combobox-1-label"
+                autocomplete="off"
+                autocorrect="off"
+                class="c7"
+                id="combobox-1"
+                placeholder="Select or enter a value"
+                role="combobox"
+                spellcheck="off"
+                type="text"
+                value=""
+              />
+            </div>
+            <div
+              class="c3"
+            >
+              
+              <button
+                aria-hidden="true"
+                class="c8 c9 c10"
+                tabindex="-1"
+                type="button"
               >
-                <div
-                  class="c7"
+                <svg
+                  fill="none"
+                  height="1em"
+                  viewBox="0 0 14 8"
+                  width="1em"
+                  xmlns="http://www.w3.org/2000/svg"
                 >
-                  <span
-                    class="c8"
-                    id="select-1-content"
-                  >
-                    Select...
-                  </span>
-                </div>
-              </div>
-              <div
-                class="c2"
-              >
-                
-                <button
-                  aria-hidden="true"
-                  class="c9 c10 c11"
-                  tabindex="-1"
-                  type="button"
-                >
-                  <svg
-                    fill="none"
-                    height="1em"
-                    viewBox="0 0 14 8"
-                    width="1em"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      clip-rule="evenodd"
-                      d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
-                      fill="#32324D"
-                      fill-rule="evenodd"
-                    />
-                  </svg>
-                </button>
-              </div>
+                  <path
+                    clip-rule="evenodd"
+                    d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                    fill="#32324D"
+                    fill-rule="evenodd"
+                  />
+                </svg>
+              </button>
             </div>
           </div>
         </div>

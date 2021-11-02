@@ -44,7 +44,7 @@ const DragPreview = ({ displayedValue }) => {
       paddingBottom={3}
       hasRadius
       background="neutral0"
-      style={{ width: '20vw' }}
+      width="300px"
     >
       <Flex justifyContent="space-between">
         <ToggleButton type="button">
