@@ -1,6 +1,6 @@
 'use strict';
 
-const { defaultsDeep } = require('lodash/fp');
+const { defaultsDeep, merge } = require('lodash/fp');
 const helmet = require('koa-helmet');
 
 const defaults = {
@@ -27,4 +27,19 @@ const defaults = {
 /**
  * @type {import('./').MiddlewareFactory}
  */
-module.exports = config => helmet(defaultsDeep(defaults, config));
+module.exports = config => (ctx, next) => {
+  let helmetConfig = defaultsDeep(defaults, config);
+
+  if (ctx.method === 'GET' && ['/graphql', '/documentation'].includes(ctx.path)) {
+    helmetConfig = merge(helmetConfig, {
+      contentSecurityPolicy: {
+        directives: {
+          'script-src': ["'self'", "'unsafe-inline'", 'cdn.jsdelivr.net'],
+          'img-src': ["'self'", 'data:', 'cdn.jsdelivr.net'],
+        },
+      },
+    });
+  }
+
+  return helmet(helmetConfig)(ctx, next);
+};
