@@ -14,7 +14,8 @@ import getTrad from '../../../utils/getTrad';
 import { SelectedStep } from './SelectedStep';
 import { BrowseStep } from './BrowseStep';
 import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
-import { useAssets } from '../../../hooks/useAssets';
+import { useModalAssets } from '../../../hooks/useModalAssets';
+import useModalQueryParams from '../../../hooks/useModalAssets/useModalQueryParams';
 import { AssetDefinition } from '../../../constants';
 import { DialogTitle } from './DialogTitle';
 import { DialogFooter } from './DialogFooter';
@@ -28,7 +29,14 @@ export const AssetDialog = ({
 }) => {
   const { formatMessage } = useIntl();
   const { canRead, canCreate, isLoading: isLoadingPermissions } = useMediaLibraryPermissions();
-  const { data, isLoading, error } = useAssets({ skipWhen: !canRead });
+  const [
+    {
+      rawQuery,
+      queryObject: { pageSize },
+    },
+    { onChangePageSize },
+  ] = useModalQueryParams();
+  const { data, isLoading, error } = useModalAssets({ skipWhen: !canRead, rawQuery });
   const [selectedAssets, { selectOne, selectAll, selectOnly }] = useSelectionState(
     'id',
     initiallySelectedAssets
@@ -154,6 +162,8 @@ export const AssetDialog = ({
                 selectedAssets={selectedAssets}
                 onSelectAllAsset={multiple ? () => selectAll(assets) : undefined}
                 onEditAsset={() => {}}
+                pageSize={pageSize}
+                onChangePageSize={onChangePageSize}
               />
             </ModalBody>
           </TabPanel>
