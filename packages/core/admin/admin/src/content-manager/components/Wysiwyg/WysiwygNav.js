@@ -81,7 +81,7 @@ const WysiwygNav = ({
               />
             </MainButtons>
 
-            <MoreButton disabled ref={buttonMoreRef} id="more" label="more" icon={<More />} />
+            <MoreButton disabled ref={buttonMoreRef} id="more" label="More" icon={<More />} />
           </Flex>
 
           <Button onClick={onTogglePreviewMode} variant="tertiary" size="L" id="preview">
@@ -141,7 +141,7 @@ const WysiwygNav = ({
             ref={buttonMoreRef}
             onClick={onTogglePopover}
             id="more"
-            label="more"
+            label="More"
             icon={<More />}
           />
           {visiblePopover && (
