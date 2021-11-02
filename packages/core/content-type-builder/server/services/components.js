@@ -20,7 +20,7 @@ const formatComponent = component => {
     apiId: modelName,
     schema: {
       icon: _.get(info, 'icon'),
-      name: _.get(info, 'name') || _.upperFirst(pluralize(uid)),
+      displayName: _.get(info, 'displayName') || _.upperFirst(pluralize(uid)),
       description: _.get(info, 'description', ''),
       connection,
       collectionName,
