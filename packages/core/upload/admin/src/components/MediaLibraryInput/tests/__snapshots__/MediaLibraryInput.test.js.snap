@@ -158,6 +158,7 @@ exports[`<MediaLibraryInput /> renders and matches the snapshot 1`] = `
             <button
               class="c10 c11"
               height="100%"
+              style="cursor: pointer;"
               type="button"
               width="100%"
             >
