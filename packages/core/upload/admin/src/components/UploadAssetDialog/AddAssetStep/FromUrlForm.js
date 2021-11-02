@@ -7,7 +7,8 @@ import { useIntl } from 'react-intl';
 import { Button } from '@strapi/design-system/Button';
 import { Form } from '@strapi/helper-plugin';
 import { Formik } from 'formik';
-import { getTrad, urlSchema } from '../../../utils';
+import getTrad from '../../../utils/getTrad';
+import { urlSchema } from '../../../utils/urlYupSchema';
 import { urlsToAssets } from '../../../utils/urlsToAssets';
 
 export const FromUrlForm = ({ onClose, onAddAsset }) => {

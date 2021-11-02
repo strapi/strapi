@@ -10,7 +10,7 @@ import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { KeyboardNavigable } from '@strapi/design-system/KeyboardNavigable';
 import { AssetCard } from '../../AssetCard/AssetCard';
 import { UploadingAssetCard } from '../../AssetCard/UploadingAssetCard';
-import { getTrad } from '../../../utils';
+import getTrad from '../../../utils/getTrad';
 import { AssetDefinition } from '../../../constants';
 
 const Status = {
@@ -118,7 +118,7 @@ export const PendingAssetStep = ({
 
                 return (
                   <GridItem col={4} key={assetKey}>
-                    <AssetCard asset={asset} size="S" key={assetKey} local />
+                    <AssetCard asset={asset} size="S" key={assetKey} local alt={asset.name} />
                   </GridItem>
                 );
               })}

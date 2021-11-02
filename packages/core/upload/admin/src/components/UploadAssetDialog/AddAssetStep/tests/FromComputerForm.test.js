@@ -4,10 +4,7 @@ import { render as renderTL } from '@testing-library/react';
 import { FromComputerForm } from '../FromComputerForm';
 import en from '../../../../translations/en.json';
 
-jest.mock('../../../../utils', () => ({
-  ...jest.requireActual('../../../../utils'),
-  getTrad: x => x,
-}));
+jest.mock('../../../../utils/getTrad', () => x => x);
 
 jest.mock('react-intl', () => ({
   useIntl: () => ({ formatMessage: jest.fn(({ id }) => en[id] || 'App level translation') }),

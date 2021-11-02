@@ -6,10 +6,7 @@ import en from '../../../translations/en.json';
 import { UploadAssetDialog } from '../UploadAssetDialog';
 import { server } from './server';
 
-jest.mock('../../../utils', () => ({
-  ...jest.requireActual('../../../utils'),
-  getTrad: x => x,
-}));
+jest.mock('../../../utils/getTrad', () => x => x);
 
 jest.mock('react-intl', () => ({
   useIntl: () => ({ formatMessage: jest.fn(({ id }) => en[id] || id) }),

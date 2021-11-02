@@ -8,7 +8,7 @@ import { useIntl } from 'react-intl';
 import { Tabs, Tab, TabGroup, TabPanels, TabPanel } from '@strapi/design-system/Tabs';
 import { FromUrlForm } from './FromUrlForm';
 import { FromComputerForm } from './FromComputerForm';
-import { getTrad } from '../../../utils';
+import getTrad from '../../../utils/getTrad';
 
 export const AddAssetStep = ({ onClose, onAddAsset }) => {
   const { formatMessage } = useIntl();
