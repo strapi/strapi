@@ -20,7 +20,7 @@ const buildQueryString = (queryParams = {}) => {
     ...createPluginsFilter(queryParams.plugins),
   };
 
-  return `?${stringify(otherQueryParams, { encode: false })}`;
+  return `?${stringify(otherQueryParams, { encodeValuesOnly: true })}`;
 };
 
 export default buildQueryString;

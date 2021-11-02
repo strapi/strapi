@@ -28,11 +28,10 @@ const useQueryParams = initialParams => {
         nextQuery = {
           ...query,
           ...nextParams,
-          _q: encodeURI(encodeURIComponent(nextParams._q)),
         };
       }
 
-      push({ search: stringify(nextQuery, { encode: false }) });
+      push({ search: stringify(nextQuery, { encodeValuesOnly: true }) });
     },
     [push, query]
   );
