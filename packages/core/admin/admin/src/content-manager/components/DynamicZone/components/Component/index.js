@@ -82,7 +82,7 @@ const Component = ({
           <AccordionToggle
             startIcon={<FontAwesomeIcon icon={icon} />}
             action={
-              <Stack horizontal size={2}>
+              <Stack horizontal size={0}>
                 {showDownIcon && (
                   <IconButtonCustom
                     noBorder
