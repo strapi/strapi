@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
@@ -10,6 +10,10 @@ import { Flex } from '@strapi/design-system/Flex';
 import { Text } from '@strapi/design-system/Text';
 import { pxToRem } from '@strapi/helper-plugin';
 import { getTrad } from '../../utils';
+
+const CursorBox = styled(Box)`
+  cursor: pointer;
+`;
 
 const IconButton = styled(BaseButton)`
   border: none;
@@ -30,18 +34,26 @@ const IconButton = styled(BaseButton)`
 
 const ComponentInitializer = ({ isReadOnly, onClick }) => {
   const { formatMessage } = useIntl();
+  const addEntryButtonRef = useRef();
+
+  const handleBoxClick = () => {
+    if (addEntryButtonRef.current) {
+      addEntryButtonRef.current.click();
+    }
+  };
 
   return (
-    <Box
+    <CursorBox
       background="neutral100"
       hasRadius
       borderColor="neutral200"
       paddingTop={9}
       paddingBottom={9}
+      onClick={handleBoxClick}
     >
       <Stack size={2}>
         <Flex justifyContent="center" style={{ cursor: isReadOnly ? 'not-allowed' : 'inherit' }}>
-          <IconButton disabled={isReadOnly} onClick={onClick}>
+          <IconButton ref={addEntryButtonRef} disabled={isReadOnly} onClick={onClick}>
             <PlusCircle />
           </IconButton>
         </Flex>
@@ -54,7 +66,7 @@ const ComponentInitializer = ({ isReadOnly, onClick }) => {
           </Text>
         </Flex>
       </Stack>
-    </Box>
+    </CursorBox>
   );
 };
 
