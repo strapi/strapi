@@ -19,7 +19,12 @@ module.exports = (auth, mode) => async ({ data, key, attribute }, { remove, set 
       }
     }
 
-    set(key, newMorphValue);
+    // If the new value is empty, remove the relation completely
+    if (newMorphValue.length === 0) {
+      remove(key);
+    } else {
+      set(key, newMorphValue);
+    }
   };
 
   const handleRegularRelation = async () => {
