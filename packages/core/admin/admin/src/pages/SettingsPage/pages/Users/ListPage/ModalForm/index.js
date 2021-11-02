@@ -42,13 +42,14 @@ const ModalForm = ({ queryName, onToggle }) => {
       setIsSubmitting(false);
     },
     onError: err => {
-      console.error(err.response);
       setIsSubmitting(false);
 
       toggleNotification({
         type: 'warning',
         message: { id: 'notification.error', defaultMessage: 'An error occured' },
       });
+
+      throw err;
     },
     onSettled: () => {
       unlockApp();
@@ -60,11 +61,16 @@ const ModalForm = ({ queryName, onToggle }) => {
     defaultMessage: 'Create new user',
   });
 
-  const handleSubmit = async body => {
+  const handleSubmit = async (body, { setErrors }) => {
     lockApp();
     setIsSubmitting(true);
-
-    postMutation.mutateAsync(body);
+    try {
+      await postMutation.mutateAsync(body);
+    } catch (err) {
+      if (err?.response?.data.message === 'Email already taken') {
+        setErrors({ email: err.response.data.message });
+      }
+    }
   };
 
   const goNext = () => {
