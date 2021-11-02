@@ -190,6 +190,7 @@ export { default as Form } from './components/Form';
 export { default as PaginationURLQuery } from './components/PaginationURLQuery';
 export { default as PageSizeURLQuery } from './components/PageSizeURLQuery';
 export { default as RelativeTime } from './components/RelativeTime';
+export { default as DateTimePicker } from './components/DateTimePicker';
 
 // New icons
 export { default as SortIcon } from './icons/SortIcon';
