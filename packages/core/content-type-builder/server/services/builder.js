@@ -3,8 +3,20 @@
 module.exports = () => ({
   getReservedNames() {
     return {
-      models: ['boolean', 'date', 'date-time', 'time', 'upload'],
-      attributes: ['id', 'created_at', 'updated_at', 'created_by', 'updated_by', 'published_at'],
+      models: ['boolean', 'date', 'date-time', 'dateTime', 'time', 'upload'],
+      attributes: [
+        'id',
+        'created_at',
+        'createdAt',
+        'updated_at',
+        'updatedAt',
+        'created_by',
+        'createdBy',
+        'updated_by',
+        'updatedBy',
+        'published_at',
+        'publishedAt',
+      ],
     };
     // strapi.db.getReservedNames();
   },
