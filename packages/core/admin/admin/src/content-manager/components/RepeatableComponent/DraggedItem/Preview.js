@@ -1,20 +1,16 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Box } from '@strapi/design-system/Box';
-import { Flex } from '@strapi/design-system/Flex';
 
-const StyledBox = styled(Box)`
-  border: 1px dashed ${({ theme }) => theme.colors.primary500};
+const StyledSpan = styled.span`
+  display: block;
+  background-color: ${({ theme }) => theme.colors.primary100};
+  outline: 1px dashed ${({ theme }) => theme.colors.primary500};
+  outline-offset: -1px;
+  padding: ${({ theme }) => theme.spaces[6]};
 `;
 
 const Preview = () => {
-  return (
-    <StyledBox padding={8} background="primary100">
-      <Box>
-        <Flex />
-      </Box>
-    </StyledBox>
-  );
+  return <StyledSpan padding={6} background="primary100" />;
 };
 
 export default Preview;

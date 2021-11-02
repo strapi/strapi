@@ -1,12 +1,17 @@
 import React, { memo, useCallback, useMemo, useState } from 'react';
 /* eslint-disable import/no-cycle */
 import { useDrop } from 'react-dnd';
+import { useIntl } from 'react-intl';
+import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import get from 'lodash/get';
 import take from 'lodash/take';
 // import { FormattedMessage } from 'react-intl';
 import { useNotification } from '@strapi/helper-plugin';
 import { Box } from '@strapi/design-system/Box';
+import { Flex } from '@strapi/design-system/Flex';
+import { TextButton } from '@strapi/design-system/TextButton';
+import Plus from '@strapi/icons/Plus';
 // import { ErrorMessage } from '@buffetjs/styles';
 import { getMaxTempKey, getTrad } from '../../utils';
 import { useContentTypeLayout } from '../../hooks';
@@ -14,8 +19,20 @@ import ItemTypes from '../../utils/ItemTypes';
 import ComponentInitializer from '../ComponentInitializer';
 import connect from './utils/connect';
 import select from './utils/select';
-import Button from './AddFieldButton';
 import DraggedItem from './DraggedItem';
+import AccordionGroupCustom from './AccordionGroupCustom';
+
+const TextButtonCustom = styled(TextButton)`
+  height: 100%;
+  width: 100%;
+  border-radius: 0 0 4px 4px;
+  display: flex;
+  justify-content: center;
+  span {
+    font-weight: 600;
+    font-size: 14px;
+  }
+`;
 
 const RepeatableComponent = ({
   addRepeatableComponentToField,
@@ -30,7 +47,9 @@ const RepeatableComponent = ({
   name,
 }) => {
   const toggleNotification = useNotification();
+  const { formatMessage } = useIntl();
   const [collapseToOpen, setCollapseToOpen] = useState('');
+  const [isDraggingSibling, setIsDraggingSiblig] = useState(false);
   const [, drop] = useDrop({ accept: ItemTypes.COMPONENT });
   const { getComponentLayout } = useContentTypeLayout();
   const componentLayoutData = useMemo(() => getComponentLayout(componentUid), [
@@ -94,8 +113,19 @@ const RepeatableComponent = ({
   }
 
   return (
-    <Box hasRadius borderColor="neutral200">
-      <Box ref={drop}>
+    <Box hasRadius background="neutral0" shadow="tableShadow" ref={drop}>
+      <AccordionGroupCustom
+        footer={
+          <Flex justifyContent="center" height="48px" background="neutral0" hasRadius>
+            <TextButtonCustom disabled={isReadOnly} onClick={handleClick} startIcon={<Plus />}>
+              {formatMessage({
+                id: getTrad('containers.EditView.add.new-entry'),
+                defaultMessage: 'Add an entry',
+              })}
+            </TextButtonCustom>
+          </Flex>
+        }
+      >
         {componentValue.map((data, index) => {
           const key = data.__temp_key__;
           const isOpen = collapseToOpen === key;
@@ -116,8 +146,8 @@ const RepeatableComponent = ({
               doesPreviousFieldContainErrorsAndIsOpen={doesPreviousFieldContainErrorsAndIsOpen}
               hasErrors={hasErrors}
               hasMinError={hasMinError}
+              isDraggingSibling={isDraggingSibling}
               isFirst={index === 0}
-              isOdd={index % 2 === 1}
               isOpen={isOpen}
               isReadOnly={isReadOnly}
               key={key}
@@ -130,24 +160,67 @@ const RepeatableComponent = ({
               }}
               parentName={name}
               schema={componentLayoutData}
+              setIsDraggingSiblig={setIsDraggingSiblig}
               toggleCollapses={toggleCollapses}
             />
           );
         })}
-      </Box>
-      <Button
-        // TODO
-        // hasMinError={hasMinError}
-        disabled={isReadOnly}
-        // TODO
-        // doesPreviousFieldContainErrorsAndIsClosed={
-        //   componentValueLength > 0 &&
-        //   componentErrorKeys.includes(`${name}.${componentValueLength - 1}`) &&
-        //   componentValue[componentValueLength - 1].__temp_key__ !== collapseToOpen
-        // }
-        onClick={handleClick}
-      />
+      </AccordionGroupCustom>
     </Box>
+    // <Box hasRadius borderColor="neutral200">
+    //   <Box ref={drop}>
+    //     {componentValue.map((data, index) => {
+    //       const key = data.__temp_key__;
+    //       const isOpen = collapseToOpen === key;
+    //       const componentFieldName = `${name}.${index}`;
+    //       const previousComponentTempKey = get(componentValue, [index - 1, '__temp_key__']);
+    //       const doesPreviousFieldContainErrorsAndIsOpen =
+    //         componentErrorKeys.includes(`${name}.${index - 1}`) &&
+    //         index !== 0 &&
+    //         collapseToOpen === previousComponentTempKey;
+
+    //       const hasErrors = componentErrorKeys.includes(componentFieldName);
+
+    //       return (
+    //         <DraggedItem
+    //           componentFieldName={componentFieldName}
+    //           componentUid={componentUid}
+    //           // TODO
+    //           doesPreviousFieldContainErrorsAndIsOpen={doesPreviousFieldContainErrorsAndIsOpen}
+    //           hasErrors={hasErrors}
+    //           hasMinError={hasMinError}
+    //           isFirst={index === 0}
+    //           isOdd={index % 2 === 1}
+    //           isOpen={isOpen}
+    //           isReadOnly={isReadOnly}
+    //           key={key}
+    //           onClickToggle={() => {
+    //             if (isOpen) {
+    //               setCollapseToOpen('');
+    //             } else {
+    //               setCollapseToOpen(key);
+    //             }
+    //           }}
+    //           parentName={name}
+    //           schema={componentLayoutData}
+    //           toggleCollapses={toggleCollapses}
+    //         />
+    //       );
+    //     })}
+    //   </Box>
+    //   <Button
+    //     // TODO
+    //     // hasMinError={hasMinError}
+    //     disabled={isReadOnly}
+    //     // TODO
+    //     // doesPreviousFieldContainErrorsAndIsClosed={
+    //     //   componentValueLength > 0 &&
+    //     //   componentErrorKeys.includes(`${name}.${componentValueLength - 1}`) &&
+    //     //   componentValue[componentValueLength - 1].__temp_key__ !== collapseToOpen
+    //     // }
+    //     onClick={handleClick}
+    //   />
+    // </Box>
   );
 
   // return (

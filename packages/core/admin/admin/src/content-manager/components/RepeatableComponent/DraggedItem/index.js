@@ -5,31 +5,20 @@ import { useDrag, useDrop } from 'react-dnd';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
 import toString from 'lodash/toString';
-import styled from 'styled-components';
 import { Accordion, AccordionToggle, AccordionContent } from '@strapi/design-system/Accordion';
-import { Box } from '@strapi/design-system/Box';
-import { Flex } from '@strapi/design-system/Flex';
-import { IconButton } from '@strapi/design-system/IconButton';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { Stack } from '@strapi/design-system/Stack';
+import { Box } from '@strapi/design-system/Box';
 import Trash from '@strapi/icons/Trash';
-import DragHandle from '@strapi/icons/Drag';
+import Drag from '@strapi/icons/Drag';
 import ItemTypes from '../../../utils/ItemTypes';
 import getTrad from '../../../utils/getTrad';
 import Inputs from '../../Inputs';
 import FieldComponent from '../../FieldComponent';
-import DragHandleWrapper from './DragHandleWrapper';
 import Preview from './Preview';
+import DraggingSibling from './DraggingSibling';
+import { CustomIconButton, DragHandleWrapper } from './IconButtonCustoms';
 import { connect, select } from './utils';
-
-// FIXME
-// Temporary workaround to remove the overflow until we migrate the react-select for the relations
-// to the DS one
-const StyledBox = styled(Box)`
-  > div {
-    overflow: visible;
-  }
-`;
 
 /* eslint-disable react/no-array-index-key */
 
@@ -44,8 +33,7 @@ const DraggedItem = ({
   // hasErrors,
   // hasMinError,
   // isFirst,
-
-  isOdd,
+  isDraggingSibling,
   isOpen,
   isReadOnly,
   onClickToggle,
@@ -54,6 +42,7 @@ const DraggedItem = ({
   // Retrieved from the select function
   moveComponentField,
   removeRepeatableField,
+  setIsDraggingSiblig,
   triggerFormValidation,
   // checkFormErrors,
   displayedValue,
@@ -137,6 +126,7 @@ const DraggedItem = ({
     end: () => {
       // Update the errors
       triggerFormValidation();
+      setIsDraggingSiblig(false);
     },
     collect: monitor => ({
       isDragging: monitor.isDragging(),
@@ -147,6 +137,12 @@ const DraggedItem = ({
     preview(getEmptyImage(), { captureDraggingState: false });
   }, [preview]);
 
+  useEffect(() => {
+    if (isDragging) {
+      setIsDraggingSiblig(true);
+    }
+  }, [isDragging, setIsDraggingSiblig]);
+
   // Create the refs
   // We need 1 for the drop target
   // 1 for the drag target
@@ -155,102 +151,180 @@ const DraggedItem = ({
     dropRef: drop(dropRef),
   };
 
+  const accordionTitle = toString(displayedValue);
+
   return (
-    <StyledBox ref={refs ? refs.dropRef : null}>
+    <Box ref={refs ? refs.dropRef : null}>
       {isDragging && <Preview />}
-      {!isDragging && (
-        <Accordion expanded={isOpen} toggle={onClickToggle} id={componentFieldName}>
+      {!isDragging && isDraggingSibling && (
+        <DraggingSibling displayedValue={accordionTitle} componentFieldName={componentFieldName} />
+      )}
+      {!isDragging && !isDraggingSibling && (
+        <Accordion expanded={isOpen} toggle={onClickToggle} id={componentFieldName} size="S">
           <AccordionToggle
-            variant={isOdd ? 'primary' : 'secondary'}
-            title={toString(displayedValue)}
-            togglePosition="left"
             action={
               isReadOnly ? null : (
-                <Flex>
-                  <IconButton
+                <Stack horizontal size={0}>
+                  <CustomIconButton
+                    expanded={isOpen}
+                    noBorder
                     onClick={() => {
                       removeRepeatableField(componentFieldName);
                       toggleCollapses();
                     }}
                     label={formatMessage({
                       id: getTrad('containers.Edit.delete'),
-                      defaultMessage: 'Edit',
+                      defaultMessage: 'Delete',
                     })}
                     icon={<Trash />}
                   />
-                  <Box paddingLeft={2}>
-                    <DragHandleWrapper
-                      ref={refs.dragRef}
-                      label={formatMessage({
-                        id: getTrad('components.DragHandle-label'),
-                        defaultMessage: 'Drag',
-                      })}
-                      icon={<DragHandle />}
-                    />
-                  </Box>
-                </Flex>
+                  <DragHandleWrapper
+                    expanded={isOpen}
+                    icon={<Drag />}
+                    label={formatMessage({
+                      id: getTrad('components.DragHandle-label'),
+                      defaultMessage: 'Drag',
+                    })}
+                    noBorder
+                    ref={refs.dragRef}
+                  />
+                </Stack>
               )
             }
+            title={accordionTitle}
+            togglePosition="left"
           />
           <AccordionContent>
-            <Box
-              background="neutral100"
-              paddingLeft={6}
-              paddingRight={6}
-              paddingTop={6}
-              paddingBottom={6}
-            >
-              <Stack size={6}>
-                {fields.map((fieldRow, key) => {
-                  return (
-                    <Grid gap={4} key={key}>
-                      {fieldRow.map(({ name, fieldSchema, metadatas, queryInfos, size }) => {
-                        const isComponent = fieldSchema.type === 'component';
-                        const keys = `${componentFieldName}.${name}`;
+            <Stack background="neutral100" padding={6} size={6}>
+              {fields.map((fieldRow, key) => {
+                return (
+                  <Grid gap={4} key={key}>
+                    {fieldRow.map(({ name, fieldSchema, metadatas, queryInfos, size }) => {
+                      const isComponent = fieldSchema.type === 'component';
+                      const keys = `${componentFieldName}.${name}`;
 
-                        if (isComponent) {
-                          const componentUid = fieldSchema.component;
-
-                          return (
-                            <GridItem col={size} s={12} xs={12} key={name}>
-                              <FieldComponent
-                                componentUid={componentUid}
-                                intlLabel={{
-                                  id: metadatas.label,
-                                  defaultMessage: metadatas.label,
-                                }}
-                                isRepeatable={fieldSchema.repeatable}
-                                isNested
-                                name={keys}
-                                max={fieldSchema.max}
-                                min={fieldSchema.min}
-                                required={fieldSchema.required}
-                              />
-                            </GridItem>
-                          );
-                        }
+                      if (isComponent) {
+                        const componentUid = fieldSchema.component;
 
                         return (
-                          <GridItem key={keys} col={size} s={12} xs={12}>
-                            <Inputs
-                              fieldSchema={fieldSchema}
-                              keys={keys}
-                              metadatas={metadatas}
-                              // onBlur={hasErrors ? checkFormErrors : null}
-                              queryInfos={queryInfos}
+                          <GridItem col={size} s={12} xs={12} key={name}>
+                            <FieldComponent
+                              componentUid={componentUid}
+                              intlLabel={{
+                                id: metadatas.label,
+                                defaultMessage: metadatas.label,
+                              }}
+                              isRepeatable={fieldSchema.repeatable}
+                              isNested
+                              name={keys}
+                              max={fieldSchema.max}
+                              min={fieldSchema.min}
+                              required={fieldSchema.required}
                             />
                           </GridItem>
                         );
-                      })}
-                    </Grid>
-                  );
-                })}
-              </Stack>
-            </Box>
+                      }
+
+                      return (
+                        <GridItem key={keys} col={size} s={12} xs={12}>
+                          <Inputs
+                            fieldSchema={fieldSchema}
+                            keys={keys}
+                            metadatas={metadatas}
+                            // onBlur={hasErrors ? checkFormErrors : null}
+                            queryInfos={queryInfos}
+                          />
+                        </GridItem>
+                      );
+                    })}
+                  </Grid>
+                );
+              })}
+            </Stack>
           </AccordionContent>
         </Accordion>
       )}
-    </StyledBox>
+    </Box>
+    //   <StyledBox ref={refs ? refs.dropRef : null}>
+    //     {isDragging && <Preview />}
+    //     {!isDragging && (
+    //       <Accordion expanded={isOpen} toggle={onClickToggle} id={componentFieldName}>
+    //         <AccordionToggle
+    //           action={
+    //             isReadOnly ? null : (
+    //               <Flex>
+    //                 <IconButton
+    //                   icon={<Trash />}
+    //                 />
+    //                 <Box paddingLeft={2}>
+    //                   <DragHandleWrapper
+    //                     ref={refs.dragRef}
+    //                     icon={<Drag />}
+    //                   />
+    //                 </Box>
+    //               </Flex>
+    //             )
+    //           }
+    //         />
+    //         <AccordionContent>
+    //           <Box
+    //             background="neutral100"
+    //             paddingLeft={6}
+    //             paddingRight={6}
+    //             paddingTop={6}
+    //             paddingBottom={6}
+    //           >
+    //             <Stack size={6}>
+    //               {fields.map((fieldRow, key) => {
+    //                 return (
+    //                   <Grid gap={4} key={key}>
+    //                     {fieldRow.map(({ name, fieldSchema, metadatas, queryInfos, size }) => {
+    //                       const isComponent = fieldSchema.type === 'component';
+    //                       const keys = `${componentFieldName}.${name}`;
+
+    //                       if (isComponent) {
+    //                         const componentUid = fieldSchema.component;
+
+    //                         return (
+    //                           <GridItem col={size} s={12} xs={12} key={name}>
+    //                             <FieldComponent
+    //                               componentUid={componentUid}
+    //                               intlLabel={{
+    //                                 id: metadatas.label,
+    //                                 defaultMessage: metadatas.label,
+    //                               }}
+    //                               isRepeatable={fieldSchema.repeatable}
+    //                               isNested
+    //                               name={keys}
+    //                               max={fieldSchema.max}
+    //                               min={fieldSchema.min}
+    //                               required={fieldSchema.required}
+    //                             />
+    //                           </GridItem>
+    //                         );
+    //                       }
+
+    //                       return (
+    //                         <GridItem key={keys} col={size} s={12} xs={12}>
+    //                           <Inputs
+    //                             fieldSchema={fieldSchema}
+    //                             keys={keys}
+    //                             metadatas={metadatas}
+    //                             // onBlur={hasErrors ? checkFormErrors : null}
+    //                             queryInfos={queryInfos}
+    //                           />
+    //                         </GridItem>
+    //                       );
+    //                     })}
+    //                   </Grid>
+    //                 );
+    //               })}
+    //             </Stack>
+    //           </Box>
+    //         </AccordionContent>
+    //       </Accordion>
+    //     )}
+    //   </StyledBox>
   );
 };
 
@@ -259,7 +333,9 @@ DraggedItem.defaultProps = {
   // hasErrors: false,
   // hasMinError: false,
   // isFirst: false,
+  isDraggingSibling: false,
   isOpen: false,
+  setIsDraggingSiblig: () => {},
   toggleCollapses: () => {},
 };
 
@@ -269,7 +345,7 @@ DraggedItem.propTypes = {
   // hasErrors: PropTypes.bool,
   // hasMinError: PropTypes.bool,
   // isFirst: PropTypes.bool,
-  isOdd: PropTypes.bool.isRequired,
+  isDraggingSibling: PropTypes.bool,
   isOpen: PropTypes.bool,
   isReadOnly: PropTypes.bool.isRequired,
   onClickToggle: PropTypes.func.isRequired,
@@ -277,6 +353,7 @@ DraggedItem.propTypes = {
   toggleCollapses: PropTypes.func,
   moveComponentField: PropTypes.func.isRequired,
   removeRepeatableField: PropTypes.func.isRequired,
+  setIsDraggingSiblig: PropTypes.func,
   triggerFormValidation: PropTypes.func.isRequired,
   // checkFormErrors: PropTypes.func.isRequired,
   displayedValue: PropTypes.string.isRequired,
