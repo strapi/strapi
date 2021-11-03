@@ -5,17 +5,21 @@ import { stringify } from 'qs';
 const useModalQueryParams = () => {
   const [queryObject, setQueryObject] = useState({
     page: 1,
-    updatedAt: 'DESC',
+    sort: 'updatedAt:DESC',
     pageSize: 10,
   });
 
-  const handleChangePageSize = nextPage => {
-    setQueryObject(prev => ({ ...prev, pageSize: parseInt(nextPage, 10), page: 1 }));
+  const handleChangePageSize = pageSize => {
+    setQueryObject(prev => ({ ...prev, pageSize: parseInt(pageSize, 10), page: 1 }));
+  };
+
+  const handeChangePage = page => {
+    setQueryObject(prev => ({ ...prev, page }));
   };
 
   return [
     { queryObject, rawQuery: stringify(queryObject, { encode: false }) },
-    { onChangePageSize: handleChangePageSize },
+    { onChangePage: handeChangePage, onChangePageSize: handleChangePageSize },
   ];
 };
 
