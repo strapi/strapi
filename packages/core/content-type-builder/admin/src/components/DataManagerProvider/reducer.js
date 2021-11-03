@@ -545,13 +545,12 @@ const reducer = (state = initialState, action) =>
       }
       case actions.UPDATE_SCHEMA: {
         const {
-          data: { name, collectionName, category, icon, kind },
+          data: { displayName, category, icon, kind },
           schemaType,
           uid,
         } = action;
 
-        draftState.modifiedData[schemaType].schema.collectionName = collectionName;
-        draftState.modifiedData[schemaType].schema.name = name;
+        draftState.modifiedData[schemaType].schema.displayName = displayName;
 
         if (action.schemaType === 'component') {
           draftState.modifiedData.component.category = category;

@@ -39,7 +39,7 @@ const SelectComponent = ({
     const compos = components.map(component => {
       return {
         uid: component.uid,
-        label: component.schema.name,
+        label: component.schema.displayName,
         categoryName,
       };
     });
@@ -61,7 +61,11 @@ const SelectComponent = ({
 
   if (isCreatingComponentWhileAddingAField) {
     options = [
-      { uid: value, label: componentToCreate.name, categoryName: componentToCreate.category },
+      {
+        uid: value,
+        label: componentToCreate.displayName,
+        categoryName: componentToCreate.category,
+      },
     ];
   }
 

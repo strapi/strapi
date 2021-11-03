@@ -221,10 +221,9 @@ const FormModal = () => {
           actionType,
           modalType,
           data: {
-            name: data.schema.name,
+            displayName: data.schema.displayName,
             category: data.category,
             icon: data.schema.icon,
-            collectionName: data.schema.collectionName,
           },
         });
       }
@@ -496,10 +495,11 @@ const FormModal = () => {
 
           return;
         }
-      } else if (isCreatingComponent) {
+        // We are creating a component using the component modal from the left menu
+      } else if (modalType === 'component') {
         if (isCreating) {
           // Create the component schema
-          const componentUid = createComponentUid(modifiedData.name, modifiedData.category);
+          const componentUid = createComponentUid(modifiedData.displayName, modifiedData.category);
           const { category, ...rest } = modifiedData;
 
           createSchema(rest, 'component', componentUid, category);
@@ -652,7 +652,7 @@ const FormModal = () => {
         const { category, type, ...rest } = componentToCreate;
         // Create a the component temp UID
         // This could be refactored but I think it's more understandable to separate the logic
-        const componentUid = createComponentUid(componentToCreate.name, category);
+        const componentUid = createComponentUid(componentToCreate.displayName, category);
         // Create the component first and add it to the components data
         createSchema(
           // Component data
@@ -686,7 +686,10 @@ const FormModal = () => {
         if (isInFirstComponentStep) {
           if (isCreatingComponentFromAView) {
             const { category, type, ...rest } = modifiedData.componentToCreate;
-            const componentUid = createComponentUid(modifiedData.componentToCreate.name, category);
+            const componentUid = createComponentUid(
+              modifiedData.componentToCreate.displayName,
+              category
+            );
             // Create the component first and add it to the components data
             createSchema(
               // Component data

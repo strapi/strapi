@@ -32,7 +32,9 @@ const makeApp = () => {
     <LanguageProvider messages={messages} localeNames={localeNames}>
       <Theme>
         <Router history={history}>
-          <Layout sideNav={<ContentTypeBuilderNav />} />
+          <Layout sideNav={<ContentTypeBuilderNav />}>
+            <div />
+          </Layout>
         </Router>
       </Theme>
     </LanguageProvider>

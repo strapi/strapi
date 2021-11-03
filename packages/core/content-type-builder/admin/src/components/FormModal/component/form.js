@@ -7,11 +7,11 @@ const componentForm = {
         sectionTitle: null,
         items: [
           {
-            name: `${prefix}name`,
+            name: `${prefix}displayName`,
             type: 'text',
             intlLabel: {
-              id: getTrad('modalForm.attribute.form.base.name'),
-              defaultMessage: 'Name',
+              id: getTrad('contentType.displayName.label'),
+              defaultMessage: 'Display Name',
             },
           },
           {

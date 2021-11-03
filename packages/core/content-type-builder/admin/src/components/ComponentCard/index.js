@@ -83,7 +83,7 @@ const ComponentBox = styled(Box)`
 function ComponentCard({ component, dzName, index, isActive, isInDevelopmentMode, onClick }) {
   const { modifiedData, removeComponentFromDynamicZone } = useDataManager();
   const {
-    schema: { icon, name },
+    schema: { icon, displayName },
   } = get(modifiedData, ['components', component], {
     schema: { icon: null },
   });
@@ -95,11 +95,16 @@ function ComponentCard({ component, dzName, index, isActive, isInDevelopmentMode
 
   return (
     <button type="button" onClick={onClick}>
-      <ComponentBox className={isActive ? 'active' : ''} borderRadius="borderRadius">
+      <ComponentBox
+        className={isActive ? 'active' : ''}
+        borderRadius="borderRadius"
+        paddingLeft={4}
+        paddingRight={4}
+      >
         <Stack size={1} style={{ justifyContent: 'center', alignItems: 'center' }}>
           <StyledFontAwesomeIcon icon={icon} />
-          <Text small bold>
-            {name}
+          <Text small bold ellipsis style={{ width: `calc(${pxToRem(140)} - 32px)` }}>
+            {displayName}
           </Text>
         </Stack>
         {isInDevelopmentMode && (
