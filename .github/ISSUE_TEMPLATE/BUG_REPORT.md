@@ -43,9 +43,9 @@ If applicable, add code samples to help explain your problem.
 
 ### System
 
-- Node.js version: <!-- Please ensure you are using the Node LTS version (v12 / v14) -->
+- Node.js version: <!-- Please ensure you are using the Node LTS version (v12, v14, v16) -->
 - NPM version:
-- Strapi version: <!-- Beta and Alpha versions are no longer supported -->
+- Strapi version: <!-- v3 is not supported unless it is a critical/high security issue -->
 - Database:
 - Operating system:
 

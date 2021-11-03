@@ -188,19 +188,18 @@ describe('Content manager | App | main', () => {
 
       .c22 {
         background: #eaeaef;
-        color: #666687;
         padding: 4px;
         border-radius: 4px;
       }
 
-      .c26 {
+      .c25 {
         background: #f6f6f9;
         padding-top: 8px;
         padding-bottom: 8px;
         padding-left: 32px;
       }
 
-      .c29 {
+      .c28 {
         padding-left: 8px;
       }
 
@@ -262,7 +261,7 @@ describe('Content manager | App | main', () => {
         color: #666687;
       }
 
-      .c25 {
+      .c29 {
         font-weight: 400;
         font-size: 0.875rem;
         line-height: 1.43;
@@ -390,7 +389,7 @@ describe('Content manager | App | main', () => {
         background-color: #dcdce4;
       }
 
-      .c27 {
+      .c26 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -408,34 +407,34 @@ describe('Content manager | App | main', () => {
         color: #32324d;
       }
 
-      .c27 svg > * {
+      .c26 svg > * {
         fill: #666687;
       }
 
-      .c27.active {
+      .c26.active {
         background-color: #f0f0ff;
         border-right: 2px solid #4945ff;
       }
 
-      .c27.active svg > * {
+      .c26.active svg > * {
         fill: #271fe0;
       }
 
-      .c27.active .c18 {
+      .c26.active .c18 {
         color: #271fe0;
         font-weight: 500;
       }
 
-      .c27:focus-visible {
+      .c26:focus-visible {
         outline-offset: -2px;
       }
 
-      .c28 {
+      .c27 {
         width: 0.75rem;
         height: 0.25rem;
       }
 
-      .c28 * {
+      .c27 * {
         fill: #666687;
       }
 
@@ -572,7 +571,7 @@ describe('Content manager | App | main', () => {
                       class="c22 c23 c24"
                     >
                       <span
-                        class="c18 c25 c20 c21"
+                        class="c18 c19 c20 c21"
                       >
                         1
                       </span>
@@ -585,14 +584,14 @@ describe('Content manager | App | main', () => {
                   <li>
                     <a
                       aria-current="page"
-                      class="c26 c27 active"
+                      class="c25 c26 active"
                       href="/content-manager/collectionType/category?undefined"
                     >
                       <div
                         class="c15"
                       >
                         <svg
-                          class="c28"
+                          class="c27"
                           fill="none"
                           height="1em"
                           viewBox="0 0 4 4"
@@ -607,10 +606,10 @@ describe('Content manager | App | main', () => {
                           />
                         </svg>
                         <div
-                          class="c29"
+                          class="c28"
                         >
                           <span
-                            class="c18 c25"
+                            class="c18 c29"
                           >
                             Categories
                           </span>
@@ -644,7 +643,7 @@ describe('Content manager | App | main', () => {
                       class="c22 c23 c24"
                     >
                       <span
-                        class="c18 c25 c20 c21"
+                        class="c18 c19 c20 c21"
                       >
                         1
                       </span>
@@ -656,14 +655,14 @@ describe('Content manager | App | main', () => {
                 >
                   <li>
                     <a
-                      class="c26 c27"
+                      class="c25 c26"
                       href="/homepage?undefined"
                     >
                       <div
                         class="c15"
                       >
                         <svg
-                          class="c28"
+                          class="c27"
                           fill="none"
                           height="1em"
                           viewBox="0 0 4 4"
@@ -678,10 +677,10 @@ describe('Content manager | App | main', () => {
                           />
                         </svg>
                         <div
-                          class="c29"
+                          class="c28"
                         >
                           <span
-                            class="c18 c25"
+                            class="c18 c29"
                           >
                             Home page
                           </span>

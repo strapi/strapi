@@ -770,10 +770,6 @@ describe('Admin | containers | RoleCreatePage', () => {
         background: #d9d8ff;
       }
 
-      .c40:hover:not([aria-disabled='true']) svg path {
-        fill: #4945ff;
-      }
-
       .c47 {
         background: transparent;
         border: none;
@@ -859,6 +855,10 @@ describe('Admin | containers | RoleCreatePage', () => {
 
       .c44 {
         height: 5.5rem;
+      }
+
+      .c44:hover svg path {
+        fill: #4945ff;
       }
 
       @media (max-width:68.75rem) {

@@ -34,7 +34,6 @@ function Inputs({
   keys,
   labelAction,
   metadatas,
-
   onChange,
   readableFields,
   shouldNotRunValidations,
@@ -183,12 +182,12 @@ function Inputs({
         labelAction={labelAction}
         error={errorId}
         name={keys}
+        required={isRequired}
       />
     );
   }
 
   if (type === 'relation') {
-    // return 'RELATION';
     return (
       <SelectWrapper
         {...metadatas}
@@ -243,6 +242,7 @@ function Inputs({
       onChange={onChange}
       options={options}
       placeholder={placeholder ? { id: placeholder, defaultMessage: placeholder } : null}
+      required={fieldSchema.required || false}
       step={step}
       type={inputType}
       // validations={validations}

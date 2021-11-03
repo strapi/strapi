@@ -7,8 +7,6 @@
 import React, { useState } from 'react';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
-import styled from 'styled-components';
-
 import { Button } from '@strapi/design-system/Button';
 import { Box } from '@strapi/design-system/Box';
 import { Popover } from '@strapi/design-system/Popover';
@@ -18,10 +16,6 @@ import { Select, Option } from '@strapi/design-system/Select';
 import Plus from '@strapi/icons/Plus';
 import FilterValueInput from './FilterValueInput';
 import getFilterList from './utils/getFilterList';
-
-const FullWidthButton = styled(Button)`
-  width: 100%;
-`;
 
 const FilterPopover = ({ displayedFilters, filters, onSubmit, onToggle, source }) => {
   const { formatMessage } = useIntl();
@@ -251,9 +245,9 @@ const FilterPopover = ({ displayedFilters, filters, onSubmit, onToggle, source }
                 />
               </Box>
               <Box>
-                <FullWidthButton size="L" variant="secondary" startIcon={<Plus />} type="submit">
+                <Button size="L" variant="secondary" startIcon={<Plus />} type="submit" fullWidth>
                   {formatMessage({ id: 'app.utils.add-filter', defaultMessage: 'Add filter' })}
-                </FullWidthButton>
+                </Button>
               </Box>
             </Stack>
           </form>

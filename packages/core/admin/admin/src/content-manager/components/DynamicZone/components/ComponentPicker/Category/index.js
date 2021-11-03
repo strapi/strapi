@@ -17,7 +17,7 @@ const Category = ({ category, components, isOdd, isOpen, onAddComponent, onToggl
   };
 
   return (
-    <Accordion expanded={isOpen} toggle={handleToggle}>
+    <Accordion expanded={isOpen} toggle={handleToggle} size="S">
       <AccordionToggle
         variant={isOdd ? 'primary' : 'secondary'}
         title={category}

@@ -132,7 +132,8 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
       }
 
       .c22 {
-        padding: 4px;
+        padding-top: 4px;
+        padding-bottom: 4px;
       }
 
       .c45 {
@@ -1565,7 +1566,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
               </div>
               <nav
                 aria-label="pagination"
-                class="sc-jfJyPD"
+                class="sc-fnlXEO"
               >
                 <ul
                   class="c63 c64"

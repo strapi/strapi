@@ -6,7 +6,6 @@
 
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import styled from 'styled-components';
 import { Button } from '@strapi/design-system/Button';
 import { Box } from '@strapi/design-system/Box';
 import { Popover } from '@strapi/design-system/Popover';
@@ -19,10 +18,6 @@ import useQueryParams from '../../hooks/useQueryParams';
 import useTracking from '../../hooks/useTracking';
 import Inputs from './Inputs';
 import getFilterList from './utils/getFilterList';
-
-const FullWidthButton = styled(Button)`
-  width: 100%;
-`;
 
 const FilterPopoverURLQuery = ({ displayedFilters, isVisible, onBlur, onToggle, source }) => {
   const [{ query }, setQuery] = useQueryParams();
@@ -175,9 +170,9 @@ const FilterPopoverURLQuery = ({ displayedFilters, isVisible, onBlur, onToggle, 
               </Box>
             )}
             <Box>
-              <FullWidthButton size="L" variant="secondary" startIcon={<Plus />} type="submit">
+              <Button size="L" variant="secondary" startIcon={<Plus />} type="submit" fullWidth>
                 {formatMessage({ id: 'app.utils.add-filter', defaultMessage: 'Add filter' })}
-              </FullWidthButton>
+              </Button>
             </Box>
           </Stack>
         </form>
