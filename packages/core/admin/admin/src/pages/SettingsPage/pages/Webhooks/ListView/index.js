@@ -331,7 +331,7 @@ const ListView = () => {
                             onValueChange={handleSelectAllCheckbox}
                           />
                         </Th>
-                        <Th>
+                        <Th width="20%">
                           <TableLabel textColor="neutral600">
                             {formatMessage({
                               id: 'Settings.webhooks.form.name',
@@ -339,7 +339,7 @@ const ListView = () => {
                             })}
                           </TableLabel>
                         </Th>
-                        <Th>
+                        <Th width="60%">
                           <TableLabel textColor="neutral600">
                             {formatMessage({
                               id: 'Settings.webhooks.form.url',
@@ -347,7 +347,7 @@ const ListView = () => {
                             })}
                           </TableLabel>
                         </Th>
-                        <Th width="30%">
+                        <Th width="20%">
                           <TableLabel textColor="neutral600">
                             {formatMessage({
                               id: 'Settings.webhooks.list.th.status',
