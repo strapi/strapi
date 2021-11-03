@@ -17,9 +17,17 @@ const useModalQueryParams = () => {
     setQueryObject(prev => ({ ...prev, page }));
   };
 
+  const handleChangeSort = sort => {
+    setQueryObject(prev => ({ ...prev, sort }));
+  };
+
   return [
     { queryObject, rawQuery: stringify(queryObject, { encode: false }) },
-    { onChangePage: handeChangePage, onChangePageSize: handleChangePageSize },
+    {
+      onChangePage: handeChangePage,
+      onChangePageSize: handleChangePageSize,
+      onChangeSort: handleChangeSort,
+    },
   ];
 };
 
