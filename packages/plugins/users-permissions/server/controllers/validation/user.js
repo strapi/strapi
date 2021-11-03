@@ -1,15 +1,6 @@
 'use strict';
 
-const { yup } = require('@strapi/utils');
-const { YupValidationError } = require('@strapi/utils').errors;
-
-const validateSchema = schema => async (body, errorMessage) => {
-  try {
-    await schema.validate(body, { strict: true, abortEarly: false });
-  } catch (e) {
-    throw new YupValidationError(e, errorMessage);
-  }
-};
+const { yup, validateYupSchema } = require('@strapi/utils');
 
 const deleteRoleSchema = yup.object().shape({
   role: yup.strapiID().required(),
@@ -44,7 +35,7 @@ const updateUserBodySchema = yup.object().shape({
 });
 
 module.exports = {
-  validateCreateUserBody: validateSchema(createUserBodySchema),
-  validateUpdateUserBody: validateSchema(updateUserBodySchema),
-  validateDeleteRoleBody: validateSchema(deleteRoleSchema),
+  validateCreateUserBody: validateYupSchema(createUserBodySchema),
+  validateUpdateUserBody: validateYupSchema(updateUserBodySchema),
+  validateDeleteRoleBody: validateYupSchema(deleteRoleSchema),
 };

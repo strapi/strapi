@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const { yup, handleYupError } = require('@strapi/utils');
+const { yup, validateYupSchema } = require('@strapi/utils');
 
 const hasPermissionsSchema = yup.object({
   actions: yup.array().of(
@@ -26,14 +26,6 @@ const hasPermissionsSchema = yup.object({
   ),
 });
 
-const validateHasPermissionsInput = options => {
-  try {
-    return hasPermissionsSchema.validateSync(options, { strict: true, abortEarly: true });
-  } catch (e) {
-    handleYupError(e);
-  }
-};
-
 module.exports = {
-  validateHasPermissionsInput,
+  validateHasPermissionsInput: validateYupSchema(hasPermissionsSchema),
 };

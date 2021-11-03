@@ -1,6 +1,6 @@
 'use strict';
 
-const { yup, handleYupError } = require('@strapi/utils');
+const { yup, validateYupSchema } = require('@strapi/utils');
 
 const renewToken = yup
   .object()
@@ -8,8 +8,4 @@ const renewToken = yup
   .required()
   .noUnknown();
 
-const validateRenewTokenInput = data => {
-  return renewToken.validate(data, { strict: true, abortEarly: false }).catch(handleYupError);
-};
-
-module.exports = validateRenewTokenInput;
+module.exports = validateYupSchema(renewToken);

@@ -1,6 +1,6 @@
 'use strict';
 
-const { yup, handleYupError } = require('@strapi/utils');
+const { yup, validateYupSchema } = require('@strapi/utils');
 
 const providerOptionsUpdateSchema = yup.object().shape({
   autoRegister: yup.boolean().required(),
@@ -12,12 +12,6 @@ const providerOptionsUpdateSchema = yup.object().shape({
     }),
 });
 
-const validateProviderOptionsUpdate = async data => {
-  return providerOptionsUpdateSchema
-    .validate(data, { strict: true, abortEarly: false })
-    .catch(handleYupError);
-};
-
 module.exports = {
-  validateProviderOptionsUpdate,
+  validateProviderOptionsUpdate: validateYupSchema(providerOptionsUpdateSchema),
 };

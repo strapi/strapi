@@ -1,6 +1,6 @@
 'use strict';
 
-const { yup, handleYupError } = require('@strapi/utils');
+const { yup, validateYupSchema } = require('@strapi/utils');
 const constants = require('../services/constants');
 
 const apiTokenCreationSchema = yup
@@ -18,12 +18,6 @@ const apiTokenCreationSchema = yup
   })
   .noUnknown();
 
-const validateApiTokenCreationInput = async data => {
-  return apiTokenCreationSchema
-    .validate(data, { strict: true, abortEarly: false })
-    .catch(handleYupError);
-};
-
 const apiTokenUpdateSchema = yup
   .object()
   .shape({
@@ -39,13 +33,7 @@ const apiTokenUpdateSchema = yup
   })
   .noUnknown();
 
-const validateApiTokenUpdateInput = async data => {
-  return apiTokenUpdateSchema
-    .validate(data, { strict: true, abortEarly: false })
-    .catch(handleYupError);
-};
-
 module.exports = {
-  validateApiTokenCreationInput,
-  validateApiTokenUpdateInput,
+  validateApiTokenCreationInput: validateYupSchema(apiTokenCreationSchema),
+  validateApiTokenUpdateInput: validateYupSchema(apiTokenUpdateSchema),
 };

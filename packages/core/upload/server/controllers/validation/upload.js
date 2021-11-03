@@ -1,6 +1,6 @@
 'use strict';
 
-const { yup, handleYupError } = require('@strapi/utils');
+const { yup, validateYupSchema } = require('@strapi/utils');
 
 const fileInfoSchema = yup.object({
   name: yup.string().nullable(),
@@ -19,7 +19,7 @@ const multiUploadSchema = yup.object({
 const validateUploadBody = (data = {}, isMulti = false) => {
   const schema = isMulti ? multiUploadSchema : uploadSchema;
 
-  return schema.validate(data, { abortEarly: false }).catch(handleYupError);
+  return validateYupSchema(schema)(data);
 };
 
 module.exports = validateUploadBody;

@@ -1,6 +1,6 @@
 'use strict';
 
-const { yup, handleYupError } = require('@strapi/utils');
+const { yup, validateYupSchema } = require('@strapi/utils');
 const validators = require('../common-validators');
 
 const registrationSchema = yup
@@ -19,12 +19,6 @@ const registrationSchema = yup
   })
   .noUnknown();
 
-const validateRegistrationInput = data => {
-  return registrationSchema
-    .validate(data, { strict: true, abortEarly: false })
-    .catch(handleYupError);
-};
-
 const registrationInfoQuerySchema = yup
   .object()
   .shape({
@@ -32,12 +26,6 @@ const registrationInfoQuerySchema = yup
   })
   .required()
   .noUnknown();
-
-const validateRegistrationInfoQuery = query => {
-  return registrationInfoQuerySchema
-    .validate(query, { strict: true, abortEarly: false })
-    .catch(handleYupError);
-};
 
 const adminRegistrationSchema = yup
   .object()
@@ -50,14 +38,8 @@ const adminRegistrationSchema = yup
   .required()
   .noUnknown();
 
-const validateAdminRegistrationInput = data => {
-  return adminRegistrationSchema
-    .validate(data, { strict: true, abortEarly: false })
-    .catch(handleYupError);
-};
-
 module.exports = {
-  validateRegistrationInput,
-  validateAdminRegistrationInput,
-  validateRegistrationInfoQuery,
+  validateRegistrationInput: validateYupSchema(registrationSchema),
+  validateRegistrationInfoQuery: validateYupSchema(registrationInfoQuerySchema),
+  validateAdminRegistrationInput: validateYupSchema(adminRegistrationSchema),
 };

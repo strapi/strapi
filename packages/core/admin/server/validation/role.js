@@ -1,6 +1,6 @@
 'use strict';
 
-const { yup, handleYupError } = require('@strapi/utils');
+const { yup, validateYupSchema } = require('@strapi/utils');
 
 const roleUpdateSchema = yup
   .object()
@@ -10,10 +10,6 @@ const roleUpdateSchema = yup
   })
   .noUnknown();
 
-const validateRoleUpdateInput = data => {
-  return roleUpdateSchema.validate(data, { strict: true, abortEarly: false }).catch(handleYupError);
-};
-
 module.exports = {
-  validateRoleUpdateInput,
+  validateRoleUpdateInput: validateYupSchema(roleUpdateSchema),
 };

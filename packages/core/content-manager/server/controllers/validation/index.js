@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const { yup, handleYupError } = require('@strapi/utils');
+const { yup, validateYupSchema } = require('@strapi/utils');
 const { PaginationError, ValidationError } = require('@strapi/utils').errors;
 
 const createModelConfigurationSchema = require('./model-configuration');
@@ -11,62 +11,35 @@ const TYPES = ['singleType', 'collectionType'];
 /**
  * Validates type kind
  */
-const validateKind = kind => {
-  return yup
+const kindSchema = yup
+  .string()
+  .oneOf(TYPES)
+  .nullable();
+
+const bulkDeleteInputSchema = yup
+  .object({
+    ids: yup
+      .array()
+      .of(yup.strapiID())
+      .min(1)
+      .required(),
+  })
+  .required();
+
+const generateUIDInputSchema = yup.object({
+  contentTypeUID: yup.string().required(),
+  field: yup.string().required(),
+  data: yup.object().required(),
+});
+
+const checkUIDAvailabilityInputSchema = yup.object({
+  contentTypeUID: yup.string().required(),
+  field: yup.string().required(),
+  value: yup
     .string()
-    .oneOf(TYPES)
-    .nullable()
-    .validate(kind)
-    .catch(error => Promise.reject(handleYupError(error)));
-};
-
-const validateBulkDeleteInput = (data = {}) => {
-  return yup
-    .object({
-      ids: yup
-        .array()
-        .of(yup.strapiID())
-        .min(1)
-        .required(),
-    })
-    .required()
-    .validate(data, {
-      strict: true,
-      abortEarly: false,
-    })
-    .catch(handleYupError);
-};
-
-const validateGenerateUIDInput = data => {
-  return yup
-    .object({
-      contentTypeUID: yup.string().required(),
-      field: yup.string().required(),
-      data: yup.object().required(),
-    })
-    .validate(data, {
-      strict: true,
-      abortEarly: false,
-    })
-    .catch(handleYupError);
-};
-
-const validateCheckUIDAvailabilityInput = data => {
-  return yup
-    .object({
-      contentTypeUID: yup.string().required(),
-      field: yup.string().required(),
-      value: yup
-        .string()
-        .matches(new RegExp('^[A-Za-z0-9-_.~]*$'))
-        .required(),
-    })
-    .validate(data, {
-      strict: true,
-      abortEarly: false,
-    })
-    .catch(handleYupError);
-};
+    .matches(new RegExp('^[A-Za-z0-9-_.~]*$'))
+    .required(),
+});
 
 const validateUIDField = (contentTypeUID, field) => {
   const model = strapi.contentTypes[contentTypeUID];
@@ -97,10 +70,10 @@ const validatePagination = ({ page, pageSize }) => {
 
 module.exports = {
   createModelConfigurationSchema,
-  validateKind,
-  validateBulkDeleteInput,
-  validateGenerateUIDInput,
-  validateCheckUIDAvailabilityInput,
+  validateKind: validateYupSchema(kindSchema),
+  validateBulkDeleteInput: validateYupSchema(bulkDeleteInputSchema),
+  validateGenerateUIDInput: validateYupSchema(generateUIDInputSchema),
+  validateCheckUIDAvailabilityInput: validateYupSchema(checkUIDAvailabilityInputSchema),
   validateUIDField,
   validatePagination,
 };

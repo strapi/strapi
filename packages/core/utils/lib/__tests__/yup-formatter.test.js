@@ -1,6 +1,6 @@
 'use strict';
 
-const yup = require('yup');
+const { yup } = require('../validators');
 const { formatYupErrors } = require('../format-yup-error');
 const { YupValidationError } = require('../errors');
 

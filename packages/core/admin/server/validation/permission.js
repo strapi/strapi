@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const { yup, handleYupError } = require('@strapi/utils');
+const { yup, validateYupSchema } = require('@strapi/utils');
 const { getService } = require('../utils');
 const { AUTHOR_CODE, PUBLISH_ACTION } = require('../services/constants');
 const {
@@ -87,20 +87,10 @@ const checkPermissionsSchema = yup.object().shape({
   ),
 });
 
-const validateCheckPermissionsInput = data => {
-  return checkPermissionsSchema
-    .validate(data, { strict: true, abortEarly: false })
-    .catch(handleYupError);
-};
-
 const validatedUpdatePermissionsInput = async (permissions, role) => {
-  try {
-    const schemas = getUpdatePermissionsSchemas(role);
-    for (const schema of schemas) {
-      await schema.validate(permissions, { strict: true, abortEarly: false });
-    }
-  } catch (e) {
-    handleYupError(e);
+  const schemas = getUpdatePermissionsSchemas(role);
+  for (const schema of schemas) {
+    await validateYupSchema(schema)(permissions);
   }
 };
 
@@ -134,16 +124,10 @@ const actionsExistSchema = yup
   )
   .test('actions-exist', '', checkPermissionsExist);
 
-const validatePermissionsExist = data => {
-  return actionsExistSchema
-    .validate(data, { strict: true, abortEarly: false })
-    .catch(handleYupError);
-};
-
 // exports
 
 module.exports = {
   validatedUpdatePermissionsInput,
-  validatePermissionsExist,
-  validateCheckPermissionsInput,
+  validatePermissionsExist: validateYupSchema(actionsExistSchema),
+  validateCheckPermissionsInput: validateYupSchema(checkPermissionsSchema),
 };

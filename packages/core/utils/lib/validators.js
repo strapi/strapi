@@ -2,6 +2,7 @@
 
 const yup = require('yup');
 const _ = require('lodash');
+const { defaults } = require('lodash/fp');
 const utils = require('./string-formatting');
 const { YupValidationError } = require('./errors');
 
@@ -57,11 +58,33 @@ class StrapiIDSchema extends MixedSchemaType {
 
 yup.strapiID = () => new StrapiIDSchema();
 
-const handleYupError = error => {
-  throw new YupValidationError(error);
+const handleYupError = (error, errorMessage) => {
+  throw new YupValidationError(error, errorMessage);
+};
+
+const defaultValidationParam = { strict: true, abortEarly: false };
+
+const validateYupSchema = (schema, options = {}) => async (body, errorMessage) => {
+  try {
+    const optionsWithDefaults = defaults(defaultValidationParam, options);
+    return await schema.validate(body, optionsWithDefaults);
+  } catch (e) {
+    handleYupError(e, errorMessage);
+  }
+};
+
+const validateYupSchemaSync = (schema, options = {}) => (body, errorMessage) => {
+  try {
+    const optionsWithDefaults = defaults(defaultValidationParam, options);
+    return schema.validateSync(body, optionsWithDefaults);
+  } catch (e) {
+    handleYupError(e, errorMessage);
+  }
 };
 
 module.exports = {
   yup,
   handleYupError,
+  validateYupSchema,
+  validateYupSchemaSync,
 };

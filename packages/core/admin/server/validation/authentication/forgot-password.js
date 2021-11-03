@@ -1,6 +1,6 @@
 'use strict';
 
-const { yup, handleYupError } = require('@strapi/utils');
+const { yup, validateYupSchema } = require('@strapi/utils');
 const validators = require('../common-validators');
 
 const forgotPasswordSchema = yup
@@ -11,10 +11,4 @@ const forgotPasswordSchema = yup
   .required()
   .noUnknown();
 
-const validateForgotPasswordInput = data => {
-  return forgotPasswordSchema
-    .validate(data, { strict: true, abortEarly: false })
-    .catch(handleYupError);
-};
-
-module.exports = validateForgotPasswordInput;
+module.exports = validateYupSchema(forgotPasswordSchema);
