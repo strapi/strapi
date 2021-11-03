@@ -150,15 +150,11 @@ module.exports = context => {
     const type = attribute.multiple
       ? naming.getRelationResponseCollectionName(fileContentType)
       : naming.getEntityResponseName(fileContentType);
+    const resolverPath = `${naming.getTypeName(contentType)}.${attributeName}`;
+    const resolverAuthScope = `${fileUID}.find`;
 
     extension.use({
-      resolversConfig: {
-        [`${naming.getTypeName(contentType)}.${attributeName}`]: {
-          auth: {
-            scope: [attribute.multiple ? `${fileUID}.find` : `${fileUID}.findOne`],
-          },
-        },
-      },
+      resolversConfig: { [resolverPath]: { auth: { scope: [resolverAuthScope] } } },
     });
 
     builder.field(attributeName, { type, resolve, args });
@@ -241,17 +237,9 @@ module.exports = context => {
     const args = isToManyRelation ? getContentTypeArgs(targetContentType) : undefined;
 
     const resolverPath = `${naming.getTypeName(contentType)}.${attributeName}`;
-    const resolverScope = isToManyRelation
-      ? `${targetContentType.uid}.find`
-      : `${targetContentType.uid}.findOne`;
+    const resolverScope = `${targetContentType.uid}.find`;
 
-    extension.use({
-      resolversConfig: {
-        [resolverPath]: {
-          auth: { scope: [resolverScope] },
-        },
-      },
-    });
+    extension.use({ resolversConfig: { [resolverPath]: { auth: { scope: [resolverScope] } } } });
 
     builder.field(attributeName, { type, resolve, args });
   };

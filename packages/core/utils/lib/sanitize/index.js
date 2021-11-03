@@ -23,9 +23,7 @@ module.exports = {
 
       if (auth) {
         // Remove restricted relations
-        transforms.push(
-          traverseEntity(visitors.removeRestrictedRelations(auth, 'input'), { schema })
-        );
+        transforms.push(traverseEntity(visitors.removeRestrictedRelations(auth), { schema }));
       }
 
       return utils.pipeAsync(...transforms)(data);
@@ -42,9 +40,7 @@ module.exports = {
       ];
 
       if (auth) {
-        transforms.push(
-          traverseEntity(visitors.removeRestrictedRelations(auth, 'output'), { schema })
-        );
+        transforms.push(traverseEntity(visitors.removeRestrictedRelations(auth), { schema }));
       }
 
       return utils.pipeAsync(...transforms)(data);

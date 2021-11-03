@@ -1,6 +1,8 @@
 'use strict';
 
-module.exports = (auth, mode) => async ({ data, key, attribute }, { remove, set }) => {
+const ACTIONS_TO_VERIFY = ['find'];
+
+module.exports = auth => async ({ data, key, attribute }, { remove, set }) => {
   const isRelation = attribute.type === 'relation';
 
   if (!isRelation) {
@@ -11,7 +13,7 @@ module.exports = (auth, mode) => async ({ data, key, attribute }, { remove, set 
     const newMorphValue = [];
 
     for (const element of data[key]) {
-      const scopes = ['find', 'findOne'].map(action => `${element.__type}.${action}`);
+      const scopes = ACTIONS_TO_VERIFY.map(action => `${element.__type}.${action}`);
       const isAllowed = await hasAccessToSomeScopes(scopes, auth);
 
       if (isAllowed) {
@@ -28,13 +30,7 @@ module.exports = (auth, mode) => async ({ data, key, attribute }, { remove, set 
   };
 
   const handleRegularRelation = async () => {
-    const isTooMany = attribute.relation.endsWith('Many');
-
-    const inputActions = ['find', 'findOne'];
-    const outputActions = isTooMany ? ['find'] : ['findOne'];
-
-    const actions = mode === 'input' ? inputActions : outputActions;
-    const scopes = actions.map(action => `${attribute.target}.${action}`);
+    const scopes = ACTIONS_TO_VERIFY.map(action => `${attribute.target}.${action}`);
 
     const isAllowed = await hasAccessToSomeScopes(scopes, auth);
 
