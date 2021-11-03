@@ -1,7 +1,6 @@
 'use strict';
 
 const _ = require('lodash');
-const pluralize = require('pluralize');
 
 const { formatAttributes, replaceTemporaryUIDs } = require('../utils/attributes');
 const createBuilder = require('./schema-builder');
@@ -20,7 +19,7 @@ const formatComponent = component => {
     apiId: modelName,
     schema: {
       icon: _.get(info, 'icon'),
-      displayName: _.get(info, 'displayName') || _.upperFirst(pluralize(uid)),
+      displayName: _.get(info, 'displayName'),
       description: _.get(info, 'description', ''),
       connection,
       collectionName,
