@@ -3,9 +3,9 @@ import PropTypes from 'prop-types';
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
 import { Td, Tr } from '@strapi/design-system/Table';
-import { Text } from '@strapi/design-system/Text';
+import { Text, EllipsisText } from '@strapi/design-system/Text';
 import { IconButton } from '@strapi/design-system/IconButton';
-import { stopPropagation, onRowClick } from '@strapi/helper-plugin';
+import { stopPropagation, onRowClick, pxToRem } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 
 const RoleRow = ({ id, name, description, usersCount, icons }) => {
@@ -26,11 +26,11 @@ const RoleRow = ({ id, name, description, usersCount, icons }) => {
         fn: icons[1].onClick,
       })}
     >
-      <Td>
-        <Text textColor="neutral800">{name}</Text>
+      <Td maxWidth={pxToRem(130)}>
+        <EllipsisText textColor="neutral800">{name}</EllipsisText>
       </Td>
-      <Td>
-        <Text textColor="neutral800">{description}</Text>
+      <Td maxWidth={pxToRem(250)}>
+        <EllipsisText textColor="neutral800">{description}</EllipsisText>
       </Td>
       <Td>
         <Text textColor="neutral800">{usersCountText}</Text>
