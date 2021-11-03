@@ -1,16 +1,11 @@
 import React from 'react';
 import { useIntl } from 'react-intl';
+import PropTypes from 'prop-types';
 import { SimpleMenu, MenuItem } from '@strapi/design-system/SimpleMenu';
-import { useQueryParams } from '@strapi/helper-plugin';
-import { getTrad } from '../../../utils';
+import { getTrad } from '../../utils';
 
-export const SortPicker = () => {
+const SortPicker = ({ onChangeSort }) => {
   const { formatMessage } = useIntl();
-  const [, setQuery] = useQueryParams();
-
-  const handleChange = value => {
-    setQuery({ sort: value });
-  };
 
   const filters = [
     { key: 'sort.created_at_desc', value: `createdAt:DESC` },
@@ -30,10 +25,16 @@ export const SortPicker = () => {
       })}
     >
       {filters.map(filter => (
-        <MenuItem key={filter.key} onClick={() => handleChange(filter.value)}>
+        <MenuItem key={filter.key} onClick={() => onChangeSort(filter.value)}>
           {formatMessage({ id: getTrad(filter.key) })}
         </MenuItem>
       ))}
     </SimpleMenu>
   );
 };
+
+SortPicker.propTypes = {
+  onChangeSort: PropTypes.func.isRequired,
+};
+
+export default SortPicker;

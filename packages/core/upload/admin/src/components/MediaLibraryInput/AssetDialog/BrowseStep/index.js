@@ -8,11 +8,13 @@ import { AssetList } from '../../../AssetList';
 import getTrad from '../../../../utils/getTrad';
 import PaginationFooter from './PaginationFooter';
 import PageSize from './PageSize';
+import SortPicker from '../../../SortPicker';
 
 export const BrowseStep = ({
   assets,
   onChangePage,
   onChangePageSize,
+  onChangeSort,
   onEditAsset,
   onSelectAllAsset,
   onSelectAsset,
@@ -26,7 +28,7 @@ export const BrowseStep = ({
     <>
       <Stack size={4}>
         {onSelectAllAsset && (
-          <Flex>
+          <Stack horizontal size={2}>
             <Flex
               paddingLeft={2}
               paddingRight={2}
@@ -44,7 +46,8 @@ export const BrowseStep = ({
                 onChange={onSelectAllAsset}
               />
             </Flex>
-          </Flex>
+            <SortPicker onChangeSort={onChangeSort} />
+          </Stack>
         )}
 
         <AssetList
@@ -75,6 +78,7 @@ BrowseStep.propTypes = {
   assets: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
   onChangePage: PropTypes.func.isRequired,
   onChangePageSize: PropTypes.func.isRequired,
+  onChangeSort: PropTypes.func.isRequired,
   onEditAsset: PropTypes.func.isRequired,
   onSelectAsset: PropTypes.func.isRequired,
   onSelectAllAsset: PropTypes.func,

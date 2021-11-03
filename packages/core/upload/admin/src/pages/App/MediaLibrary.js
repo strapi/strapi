@@ -9,6 +9,7 @@ import {
   AnErrorOccurred,
   Search,
   useSelectionState,
+  useQueryParams,
 } from '@strapi/helper-plugin';
 import { Layout, HeaderLayout, ContentLayout, ActionLayout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
@@ -19,10 +20,10 @@ import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
 import { UploadAssetDialog } from '../../components/UploadAssetDialog/UploadAssetDialog';
 import { EditAssetDialog } from '../../components/EditAssetDialog';
 import { AssetList } from '../../components/AssetList';
+import SortPicker from '../../components/SortPicker';
 import { useAssets } from '../../hooks/useAssets';
 import { getTrad } from '../../utils';
 import { Filters } from './components/Filters';
-import { SortPicker } from './components/SortPicker';
 import { PaginationFooter } from '../../components/PaginationFooter';
 import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
 import { BulkDeleteButton } from './components/BulkDeleteButton';
@@ -42,11 +43,16 @@ export const MediaLibrary = () => {
     canDownload,
     isLoading: isLoadingPermissions,
   } = useMediaLibraryPermissions();
+  const [, setQuery] = useQueryParams();
 
   const { formatMessage } = useIntl();
   const { data, isLoading, error } = useAssets({
     skipWhen: !canRead,
   });
+
+  const handleChangeSort = value => {
+    setQuery({ sort: value });
+  };
 
   const [showUploadAssetDialog, setShowUploadAssetDialog] = useState(false);
   const [assetToEdit, setAssetToEdit] = useState(undefined);
@@ -113,7 +119,7 @@ export const MediaLibrary = () => {
                   />
                 </BoxWithHeight>
               )}
-              {canRead && <SortPicker />}
+              {canRead && <SortPicker onChangeSort={handleChangeSort} />}
               {canRead && <Filters />}
             </>
           }
