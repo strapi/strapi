@@ -27,7 +27,7 @@ describe('Component validator', () => {
         components: [],
         component: {
           category: 'default',
-          name: 'mycompo',
+          displayName: 'mycompo',
           icon: 'american-sign-language-interpreting',
           attributes: {
             title: {
@@ -49,7 +49,7 @@ describe('Component validator', () => {
         components: [],
         component: {
           category: 'default',
-          name: 'mycompo',
+          displayName: 'mycompo',
           icon: 'american-sign-language-interpreting',
           attributes: {
             title: {
@@ -73,7 +73,7 @@ describe('Component validator', () => {
         components: [],
         component: {
           category: 'default',
-          name: 'mycompo',
+          displayName: 'mycompo',
           icon: 'american-sign-language-interpreting',
           attributes: {
             title: {

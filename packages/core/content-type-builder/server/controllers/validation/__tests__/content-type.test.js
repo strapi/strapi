@@ -44,7 +44,7 @@ describe('Content type validator', () => {
     test('Throws when reserved names are used', async () => {
       const data = {
         contentType: {
-          name: 'test',
+          displayName: 'test',
           attributes: {
             thisIsReserved: {
               type: 'string',
@@ -133,7 +133,7 @@ describe('Content type validator', () => {
           {
             uid: 'edit',
             icon: 'star',
-            name: 'test',
+            displayName: 'test',
             category: 'test',
             attributes: {
               title: {
@@ -145,7 +145,7 @@ describe('Content type validator', () => {
           {
             tmpUID: 'random',
             icon: 'star',
-            name: 'test2',
+            displayName: 'test2',
             category: 'test',
             attributes: {
               title: {
