@@ -6,15 +6,18 @@ import { Stack } from '@strapi/design-system/Stack';
 import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
 import { AssetList } from '../../../AssetList';
 import getTrad from '../../../../utils/getTrad';
+import PaginationFooter from './PaginationFooter';
 import PageSize from './PageSize';
 
 export const BrowseStep = ({
   assets,
+  onChangePage,
   onChangePageSize,
   onEditAsset,
   onSelectAllAsset,
   onSelectAsset,
-  pageSize,
+  pagination,
+  queryObject,
   selectedAssets,
 }) => {
   const { formatMessage } = useIntl();
@@ -52,8 +55,13 @@ export const BrowseStep = ({
           onEditAsset={onEditAsset}
         />
       </Stack>
-      <Flex>
-        <PageSize pageSize={pageSize} onChangePageSize={onChangePageSize} />
+      <Flex justifyContent="space-between">
+        <PageSize pageSize={queryObject.pageSize} onChangePageSize={onChangePageSize} />
+        <PaginationFooter
+          activePage={queryObject.page}
+          onChangePage={onChangePage}
+          pagination={pagination}
+        />
       </Flex>
     </>
   );
@@ -65,10 +73,15 @@ BrowseStep.defaultProps = {
 
 BrowseStep.propTypes = {
   assets: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
+  onChangePage: PropTypes.func.isRequired,
   onChangePageSize: PropTypes.func.isRequired,
   onEditAsset: PropTypes.func.isRequired,
   onSelectAsset: PropTypes.func.isRequired,
   onSelectAllAsset: PropTypes.func,
-  pageSize: PropTypes.number.isRequired,
+  queryObject: PropTypes.shape({
+    page: PropTypes.number.isRequired,
+    pageSize: PropTypes.number.isRequired,
+  }).isRequired,
+  pagination: PropTypes.shape({ pageCount: PropTypes.number.isRequired }).isRequired,
   selectedAssets: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
 };

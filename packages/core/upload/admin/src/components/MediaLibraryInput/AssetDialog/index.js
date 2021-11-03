@@ -29,14 +29,9 @@ export const AssetDialog = ({
 }) => {
   const { formatMessage } = useIntl();
   const { canRead, canCreate, isLoading: isLoadingPermissions } = useMediaLibraryPermissions();
-  const [
-    {
-      rawQuery,
-      queryObject: { pageSize },
-    },
-    { onChangePageSize },
-  ] = useModalQueryParams();
+  const [{ rawQuery, queryObject }, { onChangePage, onChangePageSize }] = useModalQueryParams();
   const { data, isLoading, error } = useModalAssets({ skipWhen: !canRead, rawQuery });
+
   const [selectedAssets, { selectOne, selectAll, selectOnly }] = useSelectionState(
     'id',
     initiallySelectedAssets
@@ -162,7 +157,9 @@ export const AssetDialog = ({
                 selectedAssets={selectedAssets}
                 onSelectAllAsset={multiple ? () => selectAll(assets) : undefined}
                 onEditAsset={() => {}}
-                pageSize={pageSize}
+                pagination={data?.pagination}
+                queryObject={queryObject}
+                onChangePage={onChangePage}
                 onChangePageSize={onChangePageSize}
               />
             </ModalBody>
