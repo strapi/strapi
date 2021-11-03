@@ -36,8 +36,8 @@ const SelectComponents = ({ dynamicZoneTarget, intlLabel, name, onChange, value 
     const [categoryName, components] = current;
     const section = {
       label: categoryName,
-      children: components.map(({ uid, schema: { name } }) => {
-        return { label: name, value: uid };
+      children: components.map(({ uid, schema: { displayName } }) => {
+        return { label: displayName, value: uid };
       }),
     };
 

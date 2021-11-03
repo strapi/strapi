@@ -43,7 +43,7 @@ const useContentTypeBuilderMenu = () => {
         componentsGroupedByCategory[category].map(compo => ({
           name: compo.uid,
           to: `/plugins/${pluginId}/component-categories/${category}/${compo.uid}`,
-          title: compo.schema.name,
+          title: compo.schema.displayName,
         })),
         obj => obj.title
       ),

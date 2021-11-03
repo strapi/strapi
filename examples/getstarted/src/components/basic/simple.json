@@ -3,7 +3,8 @@
   "info": {
     "name": "simple",
     "icon": "ambulance",
-    "description": ""
+    "description": "",
+    "displayName": "Basic.simples"
   },
   "options": {},
   "attributes": {
