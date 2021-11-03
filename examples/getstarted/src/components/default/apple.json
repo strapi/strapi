@@ -1,7 +1,7 @@
 {
   "collectionName": "components_default_apples",
   "info": {
-    "name": "apple",
+    "displayName": "apple",
     "icon": "apple-alt",
     "description": ""
   },

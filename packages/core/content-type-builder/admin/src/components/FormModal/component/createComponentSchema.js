@@ -7,7 +7,7 @@ import { CATEGORY_NAME_REGEX } from '../category';
 
 const createComponentSchema = (usedComponentNames, reservedNames, category) => {
   const shape = {
-    name: yup
+    displayName: yup
       .string()
       .test({
         name: 'nameAlreadyUsed',

@@ -14,10 +14,10 @@ module.exports = function createComponentBuilder() {
      * Returns a uid from a component infos
      * @param {Object} options options
      * @param {string} options.category component category
-     * @param {string} options.name component name
+     * @param {string} options.displayName component displayName
      */
-    createComponentUID({ category, name }) {
-      return `${nameToSlug(category)}.${nameToSlug(name)}`;
+    createComponentUID({ category, displayName }) {
+      return `${nameToSlug(category)}.${nameToSlug(displayName)}`;
     },
 
     createNewComponentUIDMap(components) {
@@ -39,17 +39,17 @@ module.exports = function createComponentBuilder() {
 
       const handler = createSchemaHandler({
         dir: path.join(strapi.dirs.components, nameToSlug(infos.category)),
-        filename: `${nameToSlug(infos.name)}.json`,
+        filename: `${nameToSlug(infos.displayName)}.json`,
       });
 
       const collectionName = `components_${nameToCollectionName(
         infos.category
-      )}_${nameToCollectionName(pluralize(infos.name))}`;
+      )}_${nameToCollectionName(pluralize(infos.displayName))}`;
 
       handler
         .setUID(uid)
         .set('collectionName', collectionName)
-        .set(['info', 'name'], infos.name)
+        .set(['info', 'displayName'], infos.displayName)
         .set(['info', 'icon'], infos.icon)
         .set(['info', 'description'], infos.description)
         .set('pluginOptions', infos.pluginOptions)
@@ -98,7 +98,7 @@ module.exports = function createComponentBuilder() {
       component
         .setUID(newUID)
         .setDir(newDir)
-        .set(['info', 'name'], infos.name)
+        .set(['info', 'displayName'], infos.displayName)
         .set(['info', 'icon'], infos.icon)
         .set(['info', 'description'], infos.description)
         .set('pluginOptions', infos.pluginOptions)

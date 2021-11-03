@@ -53,7 +53,6 @@ const ListView = () => {
   const contentTypeKind = get(modifiedData, [firstMainDataPath, 'schema', 'kind'], null);
 
   const attributes = get(modifiedData, mainDataTypeAttributesPath, []);
-  const currentDataName = get(initialData, [firstMainDataPath, 'schema', 'name'], '');
   const isFromPlugin = has(initialData, [firstMainDataPath, 'plugin']);
   const hasModelBeenModified = !isEqual(modifiedData, initialData);
 
@@ -76,10 +75,7 @@ const ListView = () => {
     });
   };
 
-  // TODO: fixme
-  let label = isInContentTypeView
-    ? get(modifiedData, [firstMainDataPath, 'schema', 'displayName'], '')
-    : get(modifiedData, [firstMainDataPath, 'schema', 'name'], '');
+  let label = get(modifiedData, [firstMainDataPath, 'schema', 'displayName'], '');
   const kind = get(modifiedData, [firstMainDataPath, 'schema', 'kind'], '');
 
   const isCreatingFirstContentType = match?.params.currentUID === 'create-content-type';
@@ -192,9 +188,6 @@ const ListView = () => {
               customRowComponent={props => <ListRow {...props} onClick={handleClickEditField} />}
               addComponentToDZ={handleClickAddComponentToDZ}
               targetUid={targetUid}
-              dataType={forTarget}
-              dataTypeName={currentDataName}
-              mainTypeName={currentDataName}
               editTarget={forTarget}
               isMain
             />

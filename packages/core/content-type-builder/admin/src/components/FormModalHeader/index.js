@@ -36,7 +36,7 @@ const FormModalHeader = ({
   let headers = [];
 
   const schema = modifiedData?.[forTarget]?.[targetUid] || modifiedData?.[forTarget] || null;
-  let displayName = forTarget === 'contentType' ? schema?.schema.displayName : schema?.schema.name;
+  let displayName = schema?.schema.displayName;
 
   if (modalType === 'contentType') {
     icon = contentTypeKind;
@@ -78,7 +78,7 @@ const FormModalHeader = ({
   headers = [
     {
       label: displayName,
-      info: { category: schema?.category || null, name: schema?.schema.name },
+      info: { category: schema?.category || null, name: schema?.schema.displayName },
     },
   ];
 

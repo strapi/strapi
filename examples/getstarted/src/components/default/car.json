@@ -1,7 +1,7 @@
 {
   "collectionName": "components_default_cars",
   "info": {
-    "name": "car",
+    "displayName": "car",
     "icon": "align-right"
   },
   "options": {},

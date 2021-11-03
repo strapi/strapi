@@ -97,7 +97,7 @@ const contentTypes = {
 
 const components = {
   comp: {
-    name: 'comp',
+    displayName: 'comp',
     attributes: {
       countries: {
         type: 'relation',

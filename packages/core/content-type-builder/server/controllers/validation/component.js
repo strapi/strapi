@@ -16,10 +16,10 @@ const componentSchema = createSchema(VALID_TYPES, VALID_RELATIONS, {
   modelType: modelTypes.COMPONENT,
 })
   .shape({
-    name: yup
+    displayName: yup
       .string()
       .min(1)
-      .required('name.required'),
+      .required('displayName.required'),
     icon: yup
       .string()
       .nullable()

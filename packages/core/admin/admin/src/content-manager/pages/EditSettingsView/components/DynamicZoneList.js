@@ -73,7 +73,7 @@ const DynamicZoneList = ({ components }) => {
           </CustomFlex>
           <Box paddingTop={1}>
             <Typography fontSize={1} textColor="neutral600" fontWeight="bold">
-              {get(componentLayouts, [componentUid, 'info', 'name'], '')}
+              {get(componentLayouts, [componentUid, 'info', 'displayName'], '')}
             </Typography>
           </Box>
         </CustomLink>
