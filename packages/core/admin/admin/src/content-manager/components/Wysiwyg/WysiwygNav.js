@@ -18,7 +18,13 @@ import Image from '@strapi/icons/Picture';
 import Link from '@strapi/icons/Link';
 import Quote from '@strapi/icons/Quote';
 import More from '@strapi/icons/More';
-import { MainButtons, CustomIconButton, MoreButton, IconButtonGroupMargin } from './WysiwygStyles';
+import {
+  MainButtons,
+  CustomIconButton,
+  MoreButton,
+  IconButtonGroupMargin,
+  CustomLinkIconButton,
+} from './WysiwygStyles';
 
 const WysiwygNav = ({
   editorRef,
@@ -75,7 +81,7 @@ const WysiwygNav = ({
               />
             </MainButtons>
 
-            <MoreButton disabled ref={buttonMoreRef} id="more" label="more" icon={<More />} />
+            <MoreButton disabled ref={buttonMoreRef} id="more" label="More" icon={<More />} />
           </Flex>
 
           <Button onClick={onTogglePreviewMode} variant="tertiary" size="L" id="preview">
@@ -135,7 +141,7 @@ const WysiwygNav = ({
             ref={buttonMoreRef}
             onClick={onTogglePopover}
             id="more"
-            label="more"
+            label="More"
             icon={<More />}
           />
           {visiblePopover && (
@@ -179,7 +185,7 @@ const WysiwygNav = ({
                     name="Image"
                     icon={<Image />}
                   />
-                  <CustomIconButton
+                  <CustomLinkIconButton
                     onClick={() => onActionClick('Link', editorRef, onTogglePopover)}
                     id="Link"
                     label="Link"
