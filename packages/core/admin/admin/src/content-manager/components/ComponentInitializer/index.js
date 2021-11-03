@@ -4,23 +4,18 @@ import styled from 'styled-components';
 import { useIntl } from 'react-intl';
 import PlusCircle from '@strapi/icons/PlusCircle';
 import { Box } from '@strapi/design-system/Box';
-import { BaseButton } from '@strapi/design-system/BaseButton';
 import { Stack } from '@strapi/design-system/Stack';
 import { Flex } from '@strapi/design-system/Flex';
 import { Text } from '@strapi/design-system/Text';
 import { pxToRem } from '@strapi/helper-plugin';
 import { getTrad } from '../../utils';
 
-const IconButton = styled(BaseButton)`
-  border: none;
-  padding: 0;
-  background: transparent;
-  cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
+const IconWrapper = styled.span`
   > svg {
     width: ${pxToRem(24)};
     height: ${pxToRem(24)};
     > circle {
-      fill: ${({ theme }) => theme.colors.primary200}!important;
+      fill: ${({ theme }) => theme.colors.primary200};
     }
     > path {
       fill: ${({ theme }) => theme.colors.primary600};
@@ -33,17 +28,21 @@ const ComponentInitializer = ({ isReadOnly, onClick }) => {
 
   return (
     <Box
+      as="button"
       background="neutral100"
-      hasRadius
       borderColor="neutral200"
+      disabled={isReadOnly}
+      hasRadius
+      onClick={onClick}
       paddingTop={9}
       paddingBottom={9}
+      type="button"
     >
       <Stack size={2}>
         <Flex justifyContent="center" style={{ cursor: isReadOnly ? 'not-allowed' : 'inherit' }}>
-          <IconButton disabled={isReadOnly} onClick={onClick}>
+          <IconWrapper>
             <PlusCircle />
-          </IconButton>
+          </IconWrapper>
         </Flex>
         <Flex justifyContent="center">
           <Text textColor="primary600" small bold>

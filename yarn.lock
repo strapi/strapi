@@ -11883,7 +11883,7 @@ git-url-parse@11.4.4:
   dependencies:
     git-up "^4.0.0"
 
-git-url-parse@^11.1.2, git-url-parse@^11.4.4:
+git-url-parse@^11.1.2:
   version "11.6.0"
   resolved "https://registry.yarnpkg.com/git-url-parse/-/git-url-parse-11.6.0.tgz#c634b8de7faa66498a2b88932df31702c67df605"
   integrity sha512-WWUxvJs5HsyHL6L08wOusa/IXYtMuCAhrMmnTjQPpBU0TTHyDhnOATNH3xNQz7YOQUsqIIPTGr4xiVti1Hsk5g==
