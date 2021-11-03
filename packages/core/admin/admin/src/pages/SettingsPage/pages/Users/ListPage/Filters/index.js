@@ -11,6 +11,21 @@ const Filters = ({ displayedFilters }) => {
   const { formatMessage } = useIntl();
   const buttonRef = useRef();
 
+  const handleBlur = e => {
+    // TO FIX - select's modals prevent blur to work correctly
+    const notNull = e.currentTarget !== null && e.relatedTarget !== null;
+    const ulListBox = document.querySelector('[role="listbox"]');
+
+    if (
+      !e.currentTarget.contains(e.relatedTarget) &&
+      e.relatedTarget !== buttonRef.current &&
+      e.relatedTarget !== ulListBox &&
+      notNull
+    ) {
+      setIsVisible(false);
+    }
+  };
+
   const handleToggle = () => {
     setIsVisible(prev => !prev);
   };
@@ -31,6 +46,7 @@ const Filters = ({ displayedFilters }) => {
           <FilterPopoverURLQuery
             displayedFilters={displayedFilters}
             isVisible={isVisible}
+            onBlur={handleBlur}
             onToggle={handleToggle}
             source={buttonRef}
           />
