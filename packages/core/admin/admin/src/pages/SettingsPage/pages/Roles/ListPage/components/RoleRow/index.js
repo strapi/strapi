@@ -5,7 +5,7 @@ import { Flex } from '@strapi/design-system/Flex';
 import { Td, Tr } from '@strapi/design-system/Table';
 import { Text, EllipsisText } from '@strapi/design-system/Text';
 import { IconButton } from '@strapi/design-system/IconButton';
-import { stopPropagation, onRowClick } from '@strapi/helper-plugin';
+import { stopPropagation, onRowClick, pxToRem } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 
 const RoleRow = ({ id, name, description, usersCount, icons }) => {
@@ -26,10 +26,10 @@ const RoleRow = ({ id, name, description, usersCount, icons }) => {
         fn: icons[1].onClick,
       })}
     >
-      <Td maxWidth={`${130 / 16}rem`}>
+      <Td maxWidth={pxToRem(130)}>
         <EllipsisText textColor="neutral800">{name}</EllipsisText>
       </Td>
-      <Td maxWidth={`${250 / 16}rem`}>
+      <Td maxWidth={pxToRem(250)}>
         <EllipsisText textColor="neutral800">{description}</EllipsisText>
       </Td>
       <Td>
