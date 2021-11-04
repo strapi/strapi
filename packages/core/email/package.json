@@ -5,7 +5,7 @@
   "strapi": {
     "name": "email",
     "displayName": "Email",
-    "description": "email.plugin.description",
+    "description": "Configure your application to send emails.",
     "required": true,
     "kind": "plugin"
   },
