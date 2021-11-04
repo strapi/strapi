@@ -27,7 +27,7 @@ const HomePage = () => {
   const { formatMessage } = useIntl();
   const _q = query?._q || ''
   const items = [{name: 'Paul', instrument: 'bass'}, {name: 'George', instrument: 'guitar'}]
-
+  
   const sortedList = matchSorter(items, _q, {keys: ['name', 'instrument']})
   const itemsList = sortedList?.length ? sortedList : items
 
