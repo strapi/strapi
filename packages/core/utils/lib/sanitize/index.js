@@ -4,8 +4,9 @@ const { isArray } = require('lodash/fp');
 
 const traverseEntity = require('../traverse-entity');
 const { getNonWritableAttributes } = require('../content-types');
+const pipeAsync = require('../pipe-async');
+
 const visitors = require('./visitors');
-const utils = require('./utils');
 
 module.exports = {
   contentAPI: {
@@ -26,7 +27,7 @@ module.exports = {
         transforms.push(traverseEntity(visitors.removeRestrictedRelations(auth), { schema }));
       }
 
-      return utils.pipeAsync(...transforms)(data);
+      return pipeAsync(...transforms)(data);
     },
 
     output(data, schema, { auth } = {}) {
@@ -43,7 +44,7 @@ module.exports = {
         transforms.push(traverseEntity(visitors.removeRestrictedRelations(auth), { schema }));
       }
 
-      return utils.pipeAsync(...transforms)(data);
+      return pipeAsync(...transforms)(data);
     },
   },
 
@@ -52,12 +53,11 @@ module.exports = {
       return Promise.all(data.map(entry => this.eventHub(entry, schema)));
     }
 
-    return utils.pipeAsync(
+    return pipeAsync(
       traverseEntity(visitors.removePassword, { schema }),
       traverseEntity(visitors.removePrivate, { schema })
     )(data);
   },
 
-  utils,
   visitors,
 };

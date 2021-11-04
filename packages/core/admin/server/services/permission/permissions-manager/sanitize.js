@@ -15,7 +15,7 @@ const {
   intersection,
 } = require('lodash/fp');
 
-const { contentTypes, traverseEntity, sanitize } = require('@strapi/utils');
+const { contentTypes, traverseEntity, sanitize, pipeAsync } = require('@strapi/utils');
 
 const {
   constants,
@@ -44,7 +44,7 @@ module.exports = ({ action, ability, model }) => {
 
     const permittedFields = fields.shouldIncludeAll ? null : getOutputFields(fields.permitted);
 
-    return sanitize.utils.pipeAsync(
+    return pipeAsync(
       // Remove roles from createdBy & updateBy fields
       omitCreatorRoles,
       // Remove not allowed fields (RBAC)
@@ -59,7 +59,7 @@ module.exports = ({ action, ability, model }) => {
 
     const permittedFields = fields.shouldIncludeAll ? null : getInputFields(fields.permitted);
 
-    return sanitize.utils.pipeAsync(
+    return pipeAsync(
       // Remove not allowed fields (RBAC)
       traverseEntity(allowedFields(permittedFields), { schema }),
       // Remove roles from createdBy & updateBy fields

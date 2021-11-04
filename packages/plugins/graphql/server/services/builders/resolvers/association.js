@@ -2,7 +2,7 @@
 
 const { get } = require('lodash/fp');
 
-const { sanitize } = require('@strapi/utils');
+const { sanitize, pipeAsync } = require('@strapi/utils');
 
 module.exports = ({ strapi }) => {
   const { service: getGraphQLService } = strapi.plugin('graphql');
@@ -62,11 +62,7 @@ module.exports = ({ strapi }) => {
           const unwrapData = get(attributeName);
 
           // Sanitizer definition
-          const sanitizeMorphAttribute = sanitize.utils.pipeAsync(
-            wrapData,
-            sanitizeData,
-            unwrapData
-          );
+          const sanitizeMorphAttribute = pipeAsync(wrapData, sanitizeData, unwrapData);
 
           return sanitizeMorphAttribute(data);
         }
