@@ -51,7 +51,9 @@ async function downloadNpmTemplate({ name, version }, parentDir) {
   });
 
   // Return the path of the actual template
-  const exactTemplatePath = path.resolve(parentDir, 'node_modules', name);
+  const exactTemplatePath = path.dirname(
+    require.resolve(path.join(name, 'package.json'), { paths: [parentDir] })
+  );
   return exactTemplatePath;
 }
 
