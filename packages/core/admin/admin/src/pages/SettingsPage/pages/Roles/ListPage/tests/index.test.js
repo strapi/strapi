@@ -240,7 +240,7 @@ describe('<ListPage />', () => {
       }
 
       .c18:before {
-        background: linear-gradient(90deg,#000000 0%,rgba(0,0,0,0) 100%);
+        background: linear-gradient(90deg,#c0c0cf 0%,rgba(0,0,0,0) 100%);
         opacity: 0.2;
         position: absolute;
         height: 100%;
@@ -250,7 +250,7 @@ describe('<ListPage />', () => {
       }
 
       .c18:after {
-        background: linear-gradient(270deg,#000000 0%,rgba(0,0,0,0) 100%);
+        background: linear-gradient(270deg,#c0c0cf 0%,rgba(0,0,0,0) 100%);
         opacity: 0.2;
         position: absolute;
         height: 100%;

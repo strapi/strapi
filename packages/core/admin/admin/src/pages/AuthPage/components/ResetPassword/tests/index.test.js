@@ -283,18 +283,16 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         color: #32324d;
       }
 
+      .c22 {
+        line-height: 1.14;
+        color: #d02b20;
+      }
+
       .c21 {
         font-weight: 500;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #32324d;
-      }
-
-      .c22 {
-        font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #d02b20;
       }
 
       .c30 {
