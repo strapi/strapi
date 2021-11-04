@@ -5,7 +5,7 @@
  */
 const createSingleTypeService = ({ model, strapi, utils }) => {
   const { uid } = model;
-  const { sanitizeInput, getFetchParams } = utils;
+  const { getFetchParams } = utils;
 
   return {
     /**
@@ -22,11 +22,8 @@ const createSingleTypeService = ({ model, strapi, utils }) => {
      *
      * @return {Promise}
      */
-    async createOrUpdate(params = {}) {
+    async createOrUpdate({ data, ...params } = {}) {
       const entity = await this.find(params);
-
-      const { data } = params;
-      const sanitizedData = sanitizeInput(data);
 
       if (!entity) {
         const count = await strapi.query(uid).count();
@@ -34,10 +31,10 @@ const createSingleTypeService = ({ model, strapi, utils }) => {
           throw strapi.errors.badRequest('singleType.alreadyExists');
         }
 
-        return strapi.entityService.create(uid, { ...params, data: sanitizedData });
+        return strapi.entityService.create(uid, { ...params, data });
       }
 
-      return strapi.entityService.update(uid, entity.id, { ...params, data: sanitizedData });
+      return strapi.entityService.update(uid, entity.id, { ...params, data });
     },
 
     /**

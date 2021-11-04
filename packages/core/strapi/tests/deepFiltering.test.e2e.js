@@ -100,7 +100,7 @@ describe('Deep Filtering API', () => {
 
     Object.assign(
       data,
-      _.mapValues(builder.sanitizedFixtures(strapi), value => transformToRESTResource(value))
+      _.mapValues(await builder.sanitizedFixtures(strapi), value => transformToRESTResource(value))
     );
   });
 

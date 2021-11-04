@@ -1,13 +1,15 @@
 'use strict';
 
 const _ = require('lodash');
-const { sanitizeEntity } = require('@strapi/utils');
+const { sanitize } = require('@strapi/utils');
 const { getService } = require('../../utils');
 
-const sanitizeUser = user =>
-  sanitizeEntity(user, {
-    model: strapi.getModel('plugin::users-permissions.user'),
-  });
+const sanitizeOutput = (user, ctx) => {
+  const schema = strapi.getModel('plugin::users-permissions.user');
+  const { auth } = ctx.state;
+
+  return sanitize.contentAPI.output(user, schema, { auth });
+};
 
 const formatError = error => [
   { messages: [{ id: error.id, message: error.message, field: error.field }] },
@@ -79,8 +81,9 @@ module.exports = {
 
     try {
       const data = await getService('user').add(user);
+      const sanitizedData = await sanitizeOutput(data, ctx);
 
-      ctx.created(sanitizeUser(data));
+      ctx.created(sanitizedData);
     } catch (error) {
       ctx.badRequest(null, formatError(error));
     }
@@ -152,7 +155,8 @@ module.exports = {
     };
 
     const data = await getService('user').edit({ id }, updateData);
+    const sanitizedData = await sanitizeOutput(data, ctx);
 
-    ctx.send(sanitizeUser(data));
+    ctx.send(sanitizedData);
   },
 };

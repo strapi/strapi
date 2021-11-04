@@ -124,8 +124,8 @@ describe('CM API', () => {
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
 
-    data.collectors = builder.sanitizedFixturesFor(collector.singularName, strapi);
-    data.stamps = builder.sanitizedFixturesFor(stamp.singularName, strapi);
+    data.collectors = await builder.sanitizedFixturesFor(collector.singularName, strapi);
+    data.stamps = await builder.sanitizedFixturesFor(stamp.singularName, strapi);
   });
 
   afterAll(async () => {
