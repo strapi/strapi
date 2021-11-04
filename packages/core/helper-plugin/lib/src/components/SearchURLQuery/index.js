@@ -21,62 +21,58 @@ const SearchURLQuery = ({ label, trackedEvent }) => {
 
   const handleToggle = () => setIsOpen(prev => !prev);
 
-  // useEffect(() => {
-  //   if (isMountedRef.current) {
-  //     if (isOpen) {
-  //       wrapperRef.current.querySelector('input').focus();
-  //     } else {
-  //       iconButtonRef.current.focus();
-  //     }
-  //   }
+  useEffect(() => {
+    if (isMountedRef.current) {
+      if (isOpen) {
+        wrapperRef.current.querySelector('input').focus();
+      }
+    }
 
-  //   isMountedRef.current = true;
-  // }, [isOpen]);
+    isMountedRef.current = true;
+  }, [isOpen]);
 
-  // useEffect(() => {
-  //   if (didSearch && trackedEvent) {
-  //     trackUsage(trackedEvent);
-  //   }
-  // }, [didSearch, trackedEvent, trackUsage]);
+  useEffect(() => {
+    if (value && !isOpen) {
+      handleToggle();
+    }
+  }, [value, isOpen]);
 
-  // useEffect(() => {
-  //   const handler = setTimeout(() => {
-  //     if (!didSearch) {
-  //       return;
-  //     }
+  const handleClear = () => {
+    setValue('');
+    setQuery({ _q: '' }, 'remove');
+  };
 
-  //     if (value) {
-  //       setQuery({ _q: value, page: 1 });
-  //     } else {
-  //       setDidSearch(false);
-  //       setQuery({ _q: '' }, 'remove');
-  //     }
-  //   }, 300);
-
-  //   return () => clearTimeout(handler);
-  // }, [value]);
-
-  const handleSubmit = (e) => {
+  const handleSubmit = e => {
     e.preventDefault();
-    console.log('submit');
-  }
+
+    setQuery({ _q: value, page: 1 });
+  };
+
+  useEffect(() => {
+    if (didSearch && trackedEvent) {
+      trackUsage(trackedEvent);
+    }
+  }, [didSearch, trackedEvent, trackUsage]);
 
   if (isOpen) {
     return (
-      <SearchForm onSubmit={handleSubmit}>
-        <Searchbar
-          name="search"
-          onChange={({ target: { value } }) => {
-            setDidSearch(true);
-            setValue(value);
-          }}
-          value={value}
-          clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
-          onClear={() => {}}
-        >
-          {label}
-        </Searchbar>       
-      </SearchForm>
+      <div ref={wrapperRef}>
+        <SearchForm onSubmit={handleSubmit}>
+          <Searchbar
+            name="search"
+            onChange={({ target: { value } }) => {
+              setDidSearch(true);
+              setValue(value);
+            }}
+            value={value}
+            clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
+            onClear={handleClear}
+            size="S"
+          >
+            {label}
+          </Searchbar>
+        </SearchForm>
+      </div>
       // <div ref={wrapperRef}>
       //   <Searchbar
       //     name="search"
