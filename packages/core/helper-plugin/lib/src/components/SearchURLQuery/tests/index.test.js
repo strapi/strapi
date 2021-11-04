@@ -12,15 +12,16 @@ import { createMemoryHistory } from 'history';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import SearchURLQuery from '../index';
 
+const trackUsage = jest.fn();
 jest.mock('../../../hooks/useTracking', () => () => ({
-  trackUsage: jest.fn(),
+  trackUsage,
 }));
 
-const makeApp = history => (
+const makeApp = (history, trackedEvent) => (
   <Router history={history}>
     <ThemeProvider theme={lightTheme}>
       <IntlProvider locale="en">
-        <SearchURLQuery label="Search label" />
+        <SearchURLQuery label="Search label" trackedEvent={trackedEvent} />
       </IntlProvider>
     </ThemeProvider>
   </Router>
@@ -456,5 +457,39 @@ describe('<SearchURLQuery />', () => {
 
     const urlSearchQuery = history.location.search;
     expect(urlSearchQuery).toEqual('?_q=michka&page=1');
+  });
+
+  it('should clear value and update query params', async () => {
+    const history = createMemoryHistory();
+    const { container } = render(makeApp(history));
+
+    fireEvent.click(container.querySelector('button[type="button"]'));
+
+    const input = container.querySelector('input[name="search"]');
+    fireEvent.change(input, { target: { value: 'michka' } });
+    fireEvent.submit(input);
+
+    const urlSearchQuery = history.location.search;
+    expect(urlSearchQuery).toEqual('?_q=michka&page=1');
+
+    fireEvent.click(container.querySelector('button[aria-label="Clear"]'));
+
+    expect(input.value).toEqual('');
+
+    const clearedUrlSearchQuery = history.location.search;
+    expect(clearedUrlSearchQuery).toEqual('?page=1');
+  });
+
+  it.only('should call trackUsage with trackedEvent props when submit', async () => {
+    const history = createMemoryHistory();
+    const { container } = render(makeApp(history, 'thisEvent'));
+
+    fireEvent.click(container.querySelector('button[type="button"]'));
+
+    const input = container.querySelector('input[name="search"]');
+    fireEvent.change(input, { target: { value: 'michka' } });
+    fireEvent.submit(input);
+
+    expect(trackUsage.mock.calls.length).toBe(1);
   });
 });
