@@ -55,7 +55,9 @@ const LeftMenu = () => {
         values: { number: intlCollectionTypeLinks.length },
       },
       searchable: true,
-      links: sortBy(matchByTitle(intlCollectionTypeLinks, search), 'title'),
+      links: sortBy(matchByTitle(intlCollectionTypeLinks, search), object =>
+        object.title.toLowerCase()
+      ),
     },
     {
       id: 'singleTypes',
@@ -66,7 +68,9 @@ const LeftMenu = () => {
         values: { number: intlSingleTypeLinks.length },
       },
       searchable: true,
-      links: sortBy(matchByTitle(intlSingleTypeLinks, search), 'title'),
+      links: sortBy(matchByTitle(intlSingleTypeLinks, search), object =>
+        object.title.toLowerCase()
+      ),
     },
   ];
 

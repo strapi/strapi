@@ -251,7 +251,7 @@ const advancedForm = {
             id: getTrad('form.attribute.item.settings.name'),
             defaultMessage: 'Settings',
           },
-          items: [options.private, options.required, options.unique],
+          items: [options.private, options.required],
         },
       ],
     };
