@@ -297,13 +297,6 @@ function ListView({
           startActions={
             <>
               {isSearchable && (
-                // <Search
-                //   label={formatMessage(
-                //     { id: 'app.component.search.label', defaultMessage: 'Search for {target}' },
-                //     { target: headerLayoutTitle }
-                //   )}
-                //   trackedEvent="didSearch"
-                // />
                 <SearchURLQuery
                   label={formatMessage(
                     { id: 'app.component.search.label', defaultMessage: 'Search for {target}' },

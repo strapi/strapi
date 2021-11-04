@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useLayoutEffect, useState, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import SearchIcon from '@strapi/icons/Search';
@@ -10,35 +10,24 @@ import useTracking from '../../hooks/useTracking';
 const SearchURLQuery = ({ label, trackedEvent }) => {
   const wrapperRef = useRef(null);
   const iconButtonRef = useRef(null);
-  const isMountedRef = useRef(false);
-  const [didSearch, setDidSearch] = useState(false);
 
-  const [isOpen, setIsOpen] = useState(false);
   const [{ query }, setQuery] = useQueryParams();
   const [value, setValue] = useState(query?._q || '');
+  const [isOpen, setIsOpen] = useState(!!value);
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
 
   const handleToggle = () => setIsOpen(prev => !prev);
 
-  useEffect(() => {
-    if (isMountedRef.current) {
-      if (isOpen) {
+  useLayoutEffect(() => {
+    if (isOpen) {
+      setTimeout(() => {
         wrapperRef.current.querySelector('input').focus();
-      }
+      }, 0);
     }
-
-    isMountedRef.current = true;
   }, [isOpen]);
 
-  useEffect(() => {
-    if (value && !isOpen) {
-      handleToggle();
-    }
-  }, [value, isOpen]);
-
   const handleClear = () => {
-    setDidSearch(false);
     setValue('');
     setQuery({ _q: '' }, 'remove');
   };
@@ -46,14 +35,16 @@ const SearchURLQuery = ({ label, trackedEvent }) => {
   const handleSubmit = e => {
     e.preventDefault();
 
-    setQuery({ _q: value, page: 1 });
-  };
-
-  useEffect(() => {
-    if (didSearch && trackedEvent) {
-      trackUsage(trackedEvent);
+    if (value) {
+      if (trackedEvent) {
+        trackUsage(trackedEvent);
+      }
+      setQuery({ _q: value, page: 1 });
+    } else {
+      handleToggle();
+      setQuery({ _q: '' }, 'remove');
     }
-  }, [didSearch, trackedEvent, trackUsage]);
+  };
 
   if (isOpen) {
     return (
@@ -61,10 +52,7 @@ const SearchURLQuery = ({ label, trackedEvent }) => {
         <SearchForm onSubmit={handleSubmit}>
           <Searchbar
             name="search"
-            onChange={({ target: { value } }) => {
-              setDidSearch(true);
-              setValue(value);
-            }}
+            onChange={({ target: { value } }) => setValue(value)}
             value={value}
             clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
             onClear={handleClear}
