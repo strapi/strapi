@@ -125,6 +125,7 @@ export const AssetDialog = ({
           defaultMessage: 'How do you want to upload your assets?',
         })}
         variant="simple"
+        initialSelectedTabIndex={selectedAssets.length > 0 ? 1 : 0}
       >
         <Flex paddingLeft={8} paddingRight={8} paddingTop={6} justifyContent="space-between">
           <Tabs>

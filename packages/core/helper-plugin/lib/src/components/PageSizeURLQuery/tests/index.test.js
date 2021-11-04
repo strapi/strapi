@@ -39,7 +39,7 @@ describe('<PageSizeURLQuery />', () => {
     } = render(makeApp(history));
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c12 {
+      .c13 {
         padding-left: 8px;
       }
 
@@ -83,12 +83,19 @@ describe('<PageSizeURLQuery />', () => {
         color: #32324d;
       }
 
+      .c9 {
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
       .c7 {
         padding-right: 16px;
         padding-left: 16px;
       }
 
-      .c9 {
+      .c10 {
         padding-left: 12px;
       }
 
@@ -164,23 +171,23 @@ describe('<PageSizeURLQuery />', () => {
         box-shadow: #4945ff 0px 0px 0px 2px;
       }
 
-      .c10 {
+      .c11 {
         background: transparent;
         border: none;
         position: relative;
         z-index: 1;
       }
 
-      .c10 svg {
+      .c11 svg {
         height: 0.6875rem;
         width: 0.6875rem;
       }
 
-      .c10 svg path {
+      .c11 svg path {
         fill: #666687;
       }
 
-      .c11 {
+      .c12 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -189,7 +196,7 @@ describe('<PageSizeURLQuery />', () => {
         border: none;
       }
 
-      .c11 svg {
+      .c12 svg {
         width: 0.375rem;
       }
 
@@ -197,7 +204,7 @@ describe('<PageSizeURLQuery />', () => {
         width: 100%;
       }
 
-      .c13 {
+      .c14 {
         font-weight: 400;
         font-size: 0.875rem;
         line-height: 1.43;
@@ -234,7 +241,7 @@ describe('<PageSizeURLQuery />', () => {
                     class="c7"
                   >
                     <span
-                      class="c8"
+                      class="c8 c9"
                       id="select-1-content"
                     >
                       10
@@ -246,7 +253,7 @@ describe('<PageSizeURLQuery />', () => {
                 >
                   <button
                     aria-hidden="true"
-                    class="c9 c10 c11"
+                    class="c10 c11 c12"
                     tabindex="-1"
                     type="button"
                   >
@@ -271,10 +278,10 @@ describe('<PageSizeURLQuery />', () => {
           </div>
         </div>
         <div
-          class="c12"
+          class="c13"
         >
           <label
-            class="c13"
+            class="c14"
             for="page-size"
           >
             Entries per page

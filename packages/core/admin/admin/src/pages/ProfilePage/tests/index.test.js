@@ -262,11 +262,18 @@ describe('ADMIN | Pages | Profile page', () => {
         color: #32324d;
       }
 
-      .c45 {
+      .c46 {
         font-weight: 400;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #666687;
+      }
+
+      .c42 {
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
 
       .c40 {
@@ -274,7 +281,7 @@ describe('ADMIN | Pages | Profile page', () => {
         padding-left: 16px;
       }
 
-      .c43 {
+      .c44 {
         padding-left: 12px;
       }
 
@@ -350,23 +357,23 @@ describe('ADMIN | Pages | Profile page', () => {
         box-shadow: #4945ff 0px 0px 0px 2px;
       }
 
-      .c42 {
+      .c43 {
         background: transparent;
         border: none;
         position: relative;
         z-index: 1;
       }
 
-      .c42 svg {
+      .c43 svg {
         height: 0.6875rem;
         width: 0.6875rem;
       }
 
-      .c42 svg path {
+      .c43 svg path {
         fill: #666687;
       }
 
-      .c44 {
+      .c45 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -375,7 +382,7 @@ describe('ADMIN | Pages | Profile page', () => {
         border: none;
       }
 
-      .c44 svg {
+      .c45 svg {
         width: 0.375rem;
       }
 
@@ -1205,7 +1212,7 @@ describe('ADMIN | Pages | Profile page', () => {
                                       class="c40"
                                     >
                                       <span
-                                        class="c41"
+                                        class="c41 c42"
                                         id="select-1-content"
                                       >
                                         Select
@@ -1218,7 +1225,7 @@ describe('ADMIN | Pages | Profile page', () => {
                                     <button
                                       aria-disabled="false"
                                       aria-label="Clear the interface language selected"
-                                      class="c42"
+                                      class="c43"
                                     >
                                       <svg
                                         fill="none"
@@ -1235,7 +1242,7 @@ describe('ADMIN | Pages | Profile page', () => {
                                     </button>
                                     <button
                                       aria-hidden="true"
-                                      class="c43 c42 c44"
+                                      class="c44 c43 c45"
                                       tabindex="-1"
                                       type="button"
                                     >
@@ -1258,7 +1265,7 @@ describe('ADMIN | Pages | Profile page', () => {
                                 </div>
                               </div>
                               <p
-                                class="c45"
+                                class="c46"
                                 id="select-1-hint"
                               >
                                 This will only display your own interface in the chosen language.
