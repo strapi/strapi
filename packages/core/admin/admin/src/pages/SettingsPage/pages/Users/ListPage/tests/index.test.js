@@ -145,7 +145,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         padding-top: 24px;
       }
 
-      .c62 {
+      .c63 {
         padding-left: 8px;
       }
 
@@ -577,7 +577,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         animation: gzYjWD 1s infinite linear;
       }
 
-      .c63 {
+      .c64 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -591,11 +591,11 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         align-items: center;
       }
 
-      .c64 > * + * {
+      .c65 > * + * {
         margin-left: 4px;
       }
 
-      .c67 {
+      .c68 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
@@ -607,7 +607,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         width: 1px;
       }
 
-      .c65 {
+      .c66 {
         padding: 12px;
         border-radius: 4px;
         -webkit-text-decoration: none;
@@ -620,7 +620,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         outline: none;
       }
 
-      .c65:after {
+      .c66:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -635,11 +635,11 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         border: 2px solid transparent;
       }
 
-      .c65:focus-visible {
+      .c66:focus-visible {
         outline: none;
       }
 
-      .c65:focus-visible:after {
+      .c66:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -650,30 +650,30 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         border: 2px solid #4945ff;
       }
 
-      .c66 {
+      .c67 {
         font-size: 0.7rem;
         pointer-events: none;
       }
 
-      .c66 svg path {
+      .c67 svg path {
         fill: #c0c0cf;
       }
 
-      .c66:focus svg path,
-      .c66:hover svg path {
+      .c67:focus svg path,
+      .c67:hover svg path {
         fill: #c0c0cf;
       }
 
-      .c68 {
+      .c69 {
         font-size: 0.7rem;
       }
 
-      .c68 svg path {
+      .c69 svg path {
         fill: #666687;
       }
 
-      .c68:focus svg path,
-      .c68:hover svg path {
+      .c69:focus svg path,
+      .c69:hover svg path {
         fill: #4a4a6a;
       }
 
@@ -703,12 +703,19 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         color: #32324d;
       }
 
+      .c59 {
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
       .c57 {
         padding-right: 16px;
         padding-left: 16px;
       }
 
-      .c59 {
+      .c60 {
         padding-left: 12px;
       }
 
@@ -784,23 +791,23 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         box-shadow: #4945ff 0px 0px 0px 2px;
       }
 
-      .c60 {
+      .c61 {
         background: transparent;
         border: none;
         position: relative;
         z-index: 1;
       }
 
-      .c60 svg {
+      .c61 svg {
         height: 0.6875rem;
         width: 0.6875rem;
       }
 
-      .c60 svg path {
+      .c61 svg path {
         fill: #666687;
       }
 
-      .c61 {
+      .c62 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -809,7 +816,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         border: none;
       }
 
-      .c61 svg {
+      .c62 svg {
         width: 0.375rem;
       }
 
@@ -842,7 +849,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
       }
 
       .c27:before {
-        background: linear-gradient(90deg,#000000 0%,rgba(0,0,0,0) 100%);
+        background: linear-gradient(90deg,#c0c0cf 0%,rgba(0,0,0,0) 100%);
         opacity: 0.2;
         position: absolute;
         height: 100%;
@@ -852,7 +859,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
       }
 
       .c27:after {
-        background: linear-gradient(270deg,#000000 0%,rgba(0,0,0,0) 100%);
+        background: linear-gradient(270deg,#c0c0cf 0%,rgba(0,0,0,0) 100%);
         opacity: 0.2;
         position: absolute;
         height: 100%;
@@ -1517,7 +1524,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                             class="c57"
                           >
                             <span
-                              class="c58"
+                              class="c58 c59"
                               id="select-1-content"
                             >
                               10
@@ -1529,7 +1536,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                         >
                           <button
                             aria-hidden="true"
-                            class="c59 c60 c61"
+                            class="c60 c61 c62"
                             tabindex="-1"
                             type="button"
                           >
@@ -1554,7 +1561,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                   </div>
                 </div>
                 <div
-                  class="c62"
+                  class="c63"
                 >
                   <label
                     class="c37"
@@ -1569,18 +1576,18 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                 class="sc-fnlXEO"
               >
                 <ul
-                  class="c63 c64"
+                  class="c64 c65"
                 >
                   <li>
                     <a
                       aria-current="page"
                       aria-disabled="true"
-                      class="c65 c66 active"
+                      class="c66 c67 active"
                       href="/settings/user"
                       tabindex="-1"
                     >
                       <div
-                        class="c67"
+                        class="c68"
                       >
                         Go to previous page
                       </div>
@@ -1603,11 +1610,11 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                     <a
                       aria-current="page"
                       aria-disabled="false"
-                      class="c65 c68 active"
+                      class="c66 c69 active"
                       href="/settings/user?pageSize=10&page=1&sort=firstname"
                     >
                       <div
-                        class="c67"
+                        class="c68"
                       >
                         Go to next page
                       </div>

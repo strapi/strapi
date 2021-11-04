@@ -312,18 +312,16 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         background: #4945ff;
       }
 
+      .c15 {
+        line-height: 1.14;
+        color: #d02b20;
+      }
+
       .c14 {
         font-weight: 500;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #32324d;
-      }
-
-      .c15 {
-        font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #d02b20;
       }
 
       .c21 {
