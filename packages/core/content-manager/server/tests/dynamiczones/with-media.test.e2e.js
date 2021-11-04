@@ -23,7 +23,7 @@ const uploadImg = () => {
 
 const components = {
   singleMedia: {
-    name: 'single-media',
+    displayName: 'single-media',
     attributes: {
       media: {
         type: 'media',
@@ -31,7 +31,7 @@ const components = {
     },
   },
   multipleMedia: {
-    name: 'multiple-media',
+    displayName: 'multiple-media',
     attributes: {
       media: {
         type: 'media',
@@ -40,7 +40,7 @@ const components = {
     },
   },
   withNested: {
-    name: 'with-nested',
+    displayName: 'with-nested',
     attributes: {
       singleMedia: {
         type: 'component',

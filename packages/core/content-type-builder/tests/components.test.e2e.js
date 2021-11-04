@@ -38,7 +38,7 @@ describe('Content Type Builder - Components', () => {
           'component.category': ['category.required'],
           'component.icon': ['icon.required'],
           'component.attributes': ['attributes.required'],
-          'component.name': ['name.required'],
+          'component.displayName': ['displayName.required'],
         },
       });
     });
@@ -51,7 +51,7 @@ describe('Content Type Builder - Components', () => {
           component: {
             category: 'default',
             icon: 'default',
-            name: 'Some Component',
+            displayName: 'Some Component',
             pluginOptions: {
               pluginName: {
                 option: true,
@@ -92,7 +92,7 @@ describe('Content Type Builder - Components', () => {
           component: {
             category: 'default',
             icon: 'default',
-            name: 'someComponent',
+            displayName: 'someComponent',
             attributes: {},
           },
         },
@@ -121,7 +121,7 @@ describe('Content Type Builder - Components', () => {
         expect(el).toMatchObject({
           uid: expect.any(String),
           schema: expect.objectContaining({
-            name: expect.any(String),
+            displayName: expect.any(String),
             description: expect.any(String),
             collectionName: expect.any(String),
             attributes: expect.objectContaining({}),
@@ -157,7 +157,7 @@ describe('Content Type Builder - Components', () => {
           category: 'default',
           schema: {
             icon: 'default',
-            name: 'Some Component',
+            displayName: 'Some Component',
             description: '',
             collectionName: 'components_default_some_components',
             pluginOptions: {
@@ -215,7 +215,7 @@ describe('Content Type Builder - Components', () => {
         error: {
           'component.category': ['category.required'],
           'component.icon': ['icon.required'],
-          'component.name': ['name.required'],
+          'component.displayName': ['displayName.required'],
         },
       });
     });
@@ -228,7 +228,7 @@ describe('Content Type Builder - Components', () => {
           component: {
             category: 'default',
             icon: 'default',
-            name: 'New Component',
+            displayName: 'New Component',
             attributes: {
               name: {
                 type: 'string',
@@ -262,7 +262,7 @@ describe('Content Type Builder - Components', () => {
         data: {
           uid: 'default.some-component',
           schema: {
-            name: 'New Component',
+            displayName: 'New Component',
             pluginOptions: {
               pluginName: {
                 option: false,

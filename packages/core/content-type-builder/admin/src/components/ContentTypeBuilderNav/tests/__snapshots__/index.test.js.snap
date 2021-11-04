@@ -1152,7 +1152,9 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
     </nav>
     <div
       class="c41 c42"
-    />
+    >
+      <div />
+    </div>
   </div>
   <div
     class="c43"

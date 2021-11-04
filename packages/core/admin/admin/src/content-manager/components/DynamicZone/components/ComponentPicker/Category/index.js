@@ -26,12 +26,12 @@ const Category = ({ category, components, isOdd, isOpen, onAddComponent, onToggl
       <AccordionContent>
         <Box paddingTop={4} paddingBottom={4} paddingLeft={3} paddingRight={3}>
           <Grid>
-            {components.map(({ componentUid, info: { label, icon, name } }) => {
+            {components.map(({ componentUid, info: { displayName, icon } }) => {
               return (
                 <ComponentCard
                   key={componentUid}
                   componentUid={componentUid}
-                  intlLabel={{ id: label || name, defaultMessage: label || name }}
+                  intlLabel={{ id: displayName, defaultMessage: displayName }}
                   icon={icon}
                   onClick={onAddComponent}
                 />

@@ -29,7 +29,7 @@ const rgbColorComponent = {
       type: 'integer',
     },
   },
-  name: 'rgbColor',
+  displayName: 'rgbColor',
 };
 
 const documentModel = {

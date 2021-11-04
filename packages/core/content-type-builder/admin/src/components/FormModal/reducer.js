@@ -189,11 +189,11 @@ const reducer = (state = initialState, action) =>
         // This is run when the user has created a new component
         const componentToCreate = state.modifiedData.componentToCreate;
         const modifiedData = {
-          name: componentToCreate.name,
+          displayName: componentToCreate.displayName,
           type: 'component',
           repeatable: false,
           ...action.options,
-          component: createComponentUid(componentToCreate.name, componentToCreate.category),
+          component: createComponentUid(componentToCreate.displayName, componentToCreate.category),
         };
 
         const nextState = {

@@ -715,8 +715,7 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
   describe('UPDATE_SCHEMA', () => {
     it('Should update the modified data correctly if the schemaType is a content type', () => {
       const data = {
-        name: 'test1',
-        collectionName: 'newTest',
+        displayName: 'test1',
       };
 
       const state = {
@@ -726,8 +725,7 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
           contentType: {
             uid: 'test',
             schema: {
-              name: 'test',
-              collectionName: 'test',
+              displayName: 'test',
               attributes: [
                 {
                   name: 'something',
@@ -751,8 +749,7 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
           contentType: {
             uid: 'test',
             schema: {
-              name: 'test1',
-              collectionName: 'newTest',
+              displayName: 'test1',
               attributes: [
                 {
                   name: 'something',
@@ -769,8 +766,7 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
 
     it('Should update the modified data correctly if the schemaType is a component', () => {
       const data = {
-        name: 'newTest',
-        collectionName: 'newTest',
+        displayName: 'newTest',
         category: 'test',
         icon: 'test',
       };
@@ -782,9 +778,8 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
             uid: 'test',
             category: 'default',
             schema: {
-              name: 'test',
+              displayName: 'test',
               icon: 'book',
-              collectionName: 'components_tests',
               attributes: [
                 {
                   name: 'something',
@@ -800,9 +795,8 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
             uid: 'test',
             category: 'default',
             schema: {
-              name: 'test',
+              displayName: 'test',
               icon: 'book',
-              collectionName: 'components_tests',
               attributes: [
                 {
                   name: 'something',
@@ -827,9 +821,8 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
             uid: 'test',
             category: 'test',
             schema: {
-              name: 'newTest',
+              displayName: 'newTest',
               icon: 'test',
-              collectionName: 'newTest',
               attributes: [
                 {
                   name: 'something',
@@ -845,9 +838,8 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
             uid: 'test',
             category: 'test',
             schema: {
-              name: 'newTest',
+              displayName: 'newTest',
               icon: 'test',
-              collectionName: 'newTest',
               attributes: [
                 {
                   name: 'something',

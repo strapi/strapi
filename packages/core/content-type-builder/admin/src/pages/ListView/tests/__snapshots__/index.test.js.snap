@@ -47,6 +47,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
 }
 
 .c63 {
+  padding-right: 16px;
+  padding-left: 16px;
   border-radius: borderRadius;
 }
 
@@ -678,6 +680,10 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   font-size: 0.75rem;
   line-height: 1.33;
   color: #32324d;
+  display: inline-block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .c33 {
@@ -3418,9 +3424,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                               </svg>
                               <span
                                 class="c31 c67"
-                              >
-                                Compo
-                              </span>
+                                style="width: calc(8.75rem - 32px);"
+                              />
                             </div>
                             <div
                               class="c68 c69"
@@ -3469,9 +3474,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                               </svg>
                               <span
                                 class="c31 c67"
-                              >
-                                dish
-                              </span>
+                                style="width: calc(8.75rem - 32px);"
+                              />
                             </div>
                             <div
                               class="c68 c69"
@@ -3520,9 +3524,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                               </svg>
                               <span
                                 class="c31 c67"
-                              >
-                                openingtimes
-                              </span>
+                                style="width: calc(8.75rem - 32px);"
+                              />
                             </div>
                             <div
                               class="c68 c69"
@@ -3571,9 +3574,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                               </svg>
                               <span
                                 class="c31 c67"
-                              >
-                                restaurantservice
-                              </span>
+                                style="width: calc(8.75rem - 32px);"
+                              />
                             </div>
                             <div
                               class="c68 c69"

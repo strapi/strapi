@@ -362,7 +362,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
           createComponent: true,
           componentToCreate: {
             type: 'component',
-            name: 'compo',
+            displayName: 'compo',
             icon: 'air-freshener',
             category: 'default',
           },
@@ -373,12 +373,12 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         ...initialState,
         componentToCreate: {
           type: 'component',
-          name: 'compo',
+          displayName: 'compo',
           icon: 'air-freshener',
           category: 'default',
         },
         modifiedData: {
-          name: 'compo',
+          displayName: 'compo',
           type: 'component',
           repeatable: false,
           component: 'default.compo',
