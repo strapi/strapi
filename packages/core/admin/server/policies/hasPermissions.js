@@ -31,11 +31,7 @@ module.exports = createPolicyFactory(
     );
 
     return (ctx, { strapi }) => {
-      const { userAbility: ability, isAuthenticated } = ctx.state;
-
-      if (!isAuthenticated || !ability) {
-        return true;
-      }
+      const { userAbility: ability } = ctx.state;
 
       const isAuthorized = permissions.every(({ action, subject }) => ability.can(action, subject));
 

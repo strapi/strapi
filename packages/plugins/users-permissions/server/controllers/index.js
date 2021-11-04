@@ -5,6 +5,7 @@ const user = require('./user');
 const role = require('./role');
 const permissions = require('./permissions');
 const settings = require('./settings');
+const contentmanageruser = require('./content-manager-user');
 
 module.exports = {
   auth,
@@ -12,4 +13,5 @@ module.exports = {
   role,
   permissions,
   settings,
+  contentmanageruser,
 };
