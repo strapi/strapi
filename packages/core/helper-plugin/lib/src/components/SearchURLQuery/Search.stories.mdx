@@ -1,6 +1,9 @@
 <!--- Search.stories.mdx --->
 
-import { ArgsTable, Meta } from '@storybook/addon-docs';
+import { ArgsTable, Meta, Canvas, Story } from '@storybook/addon-docs';
+import { Stack } from '@strapi/design-system/Stack';
+import matchSorter from 'match-sorter';
+import useQueryParams from '../../hooks/useQueryParams';
 import SearchURLQuery from './index';
 
 <Meta title="components/SearchURLQuery" />
@@ -50,5 +53,30 @@ const HomePage = () => {
   )
 };
 ```
+
+## Base
+
+<Canvas>
+  <Story name="base">
+    {() => {
+      const [{ query }] = useQueryParams()
+      const _q = query?._q || ''
+      const items = [{name: 'Paul', instrument: 'bass'}, {name: 'George', instrument: 'guitar'}]
+      const sortedList = matchSorter(items, _q, {keys: ['name', 'instrument']})
+      const itemsList = sortedList?.length ? sortedList : items;
+      return (
+        <Stack paddingTop={6} size={4}>
+          <SearchURLQuery label="Label" />
+          {itemsList.map((item, i) => (
+            <div key={i}>
+              <h1>{item.name}</h1>
+              <p>{item.instrument}</p>
+            </div>
+          ))}
+        </Stack>
+      );
+    }}
+  </Story>
+</Canvas>
 
 <ArgsTable of={SearchURLQuery} />

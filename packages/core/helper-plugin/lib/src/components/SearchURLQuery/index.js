@@ -38,6 +38,7 @@ const SearchURLQuery = ({ label, trackedEvent }) => {
   }, [value, isOpen]);
 
   const handleClear = () => {
+    setDidSearch(false);
     setValue('');
     setQuery({ _q: '' }, 'remove');
   };
@@ -73,24 +74,6 @@ const SearchURLQuery = ({ label, trackedEvent }) => {
           </Searchbar>
         </SearchForm>
       </div>
-      // <div ref={wrapperRef}>
-      //   <Searchbar
-      //     name="search"
-      //     onChange={({ target: { value } }) => {
-      //       setDidSearch(true);
-      //       setValue(value);
-      //     }}
-      //     value={value}
-      //     clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
-      //     onClear={() => {
-      //       setValue('');
-      //       setIsOpen(false);
-      //       setDidSearch(false);
-      //     }}
-      //   >
-      //     {label}
-      //   </Searchbar>
-      // </div>
     );
   }
 
