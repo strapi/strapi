@@ -1,25 +1,25 @@
 <!--- Search.stories.mdx --->
 
 import { ArgsTable, Meta } from '@storybook/addon-docs';
-import Search from './index';
+import SearchURLQuery from './index';
 
-<Meta title="components/Search" />
+<Meta title="components/SearchURLQuery" />
 
-# Search
+# SearchURLQuery
 
 This component provides and input to search an array
 
 ## Imports
 
 ```js
-import { Search } from '@strapi/helper-plugin';
+import { SearchURLQuery } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 ```
 
 ## Usage
 
 ```jsx
-import { Search, useQueryParams } from '@strapi/helper-plugin';
+import { SearchURLQuery, useQueryParams } from '@strapi/helper-plugin';
 import matchSorter from 'match-sorter';
 
 const HomePage = () => {
@@ -32,7 +32,7 @@ const HomePage = () => {
   const itemsList = sortedList?.length ? sortedList : items
 
   return (
-    <Search
+    <SearchURLQuery
       label={formatMessage({
         id: 'app.component.search.label',
         defaultMessage: 'Search for {target}' },
@@ -51,4 +51,4 @@ const HomePage = () => {
 };
 ```
 
-<ArgsTable of={Search} />
+<ArgsTable of={SearchURLQuery} />
