@@ -33,9 +33,6 @@
   "dependencies": {
     "@strapi/utils": "3.6.8"
   },
-  "peerDependencies": {
-    "@strapi/plugin-upload": "^4.0.0"
-  },
   "bugs": {
     "url": "https://github.com/strapi/strapi/issues"
   },

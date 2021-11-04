@@ -5,6 +5,7 @@ const _ = require('lodash');
 const { defaults } = require('lodash/fp');
 const utils = require('./string-formatting');
 const { YupValidationError } = require('./errors');
+const printValue = require('./print-value');
 
 const MixedSchemaType = yup.mixed;
 
@@ -81,6 +82,26 @@ const validateYupSchemaSync = (schema, options = {}) => (body, errorMessage) => 
     handleYupError(e, errorMessage);
   }
 };
+
+// Temporary fix of this issue : https://github.com/jquense/yup/issues/616
+yup.setLocale({
+  mixed: {
+    notType({ path, type, value, originalValue }) {
+      let isCast = originalValue != null && originalValue !== value;
+      let msg =
+        `${path} must be a \`${type}\` type, ` +
+        `but the final value was: \`${printValue(value, true)}\`` +
+        (isCast ? ` (cast from the value \`${printValue(originalValue, true)}\`).` : '.');
+
+      /* Remove comment that is not supposed to be seen by the enduser
+      if (value === null) {
+        msg += `\n If "null" is intended as an empty value be sure to mark the schema as \`.nullable()\``;
+      }
+      */
+      return msg;
+    },
+  },
+});
 
 module.exports = {
   yup,

@@ -77,7 +77,7 @@ describe('Authenticated User', () => {
               {
                 message: 'this field has unspecified keys: roles',
                 name: 'ValidationError',
-                path: [''],
+                path: [],
               },
             ],
           },
@@ -105,7 +105,7 @@ describe('Authenticated User', () => {
               {
                 message: 'this field has unspecified keys: isActive',
                 name: 'ValidationError',
-                path: [''],
+                path: [],
               },
             ],
           },
@@ -133,7 +133,7 @@ describe('Authenticated User', () => {
               {
                 message: 'this field has unspecified keys: isActive',
                 name: 'ValidationError',
-                path: [''],
+                path: [],
               },
             ],
           },

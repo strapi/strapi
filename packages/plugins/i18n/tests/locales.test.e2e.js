@@ -261,7 +261,7 @@ describe('CRUD locales', () => {
           details: {
             errors: [
               {
-                path: [''],
+                path: [],
                 name: 'ValidationError',
                 message: 'this field has unspecified keys: code',
               },
@@ -293,7 +293,7 @@ describe('CRUD locales', () => {
           details: {
             errors: [
               {
-                path: [''],
+                path: [],
                 name: 'ValidationError',
                 message: 'this field has unspecified keys: code',
               },

@@ -19,12 +19,10 @@ Object.defineProperty(global, 'strapi', {
       plugin.policy = name => plugin.policies[name];
     });
 
-    const oldService = value.service;
     strapiInstance.service = (name = '') => {
       if (name.startsWith('admin::')) {
         return strapiInstance.admin.services[name.split('admin::')[1]];
       }
-      return oldService(name);
     };
   },
 });

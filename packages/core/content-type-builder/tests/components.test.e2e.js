@@ -235,17 +235,12 @@ describe('Content Type Builder - Components', () => {
       expect(res.statusCode).toBe(400);
       expect(res.body).toEqual({
         error: {
-<<<<<<< HEAD
-          'component.category': ['category.required'],
-          'component.icon': ['icon.required'],
-          'component.displayName': ['displayName.required'],
-=======
           details: {
             errors: [
               {
-                message: 'name.required',
+                message: 'displayName.required',
                 name: 'ValidationError',
-                path: ['component', 'name'],
+                path: ['component', 'displayName'],
               },
               {
                 message: 'icon.required',
@@ -261,7 +256,6 @@ describe('Content Type Builder - Components', () => {
           },
           message: '3 errors occurred',
           name: 'ValidationError',
->>>>>>> e0bdafeecb (refactor error handling)
         },
       });
     });
