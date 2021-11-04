@@ -85,7 +85,7 @@ module.exports = ({ strapi }) => ({
             throw new TypeError('Locale cannot represent non string type');
           }
 
-          const isValidLocale = locales.find(propEq('code', ast.value));
+          const isValidLocale = ast.value === 'all' || locales.find(propEq('code', ast.value));
 
           if (!isValidLocale) {
             throw new TypeError('Unknown locale supplied');
