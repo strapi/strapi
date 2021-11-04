@@ -66,7 +66,7 @@ export const EditAssetDialog = ({ onClose, asset, canUpdate, canCopyLink, canDow
 
   return (
     <>
-      <ModalLayout onClose={onClose} labelledBy="title">
+      <ModalLayout onClose={() => onClose()} labelledBy="title">
         <ModalHeader>
           <ButtonText textColor="neutral800" as="h2" id="title">
             {formatMessage({ id: getTrad('modal.edit.title'), defaultMessage: 'Details' })}
@@ -173,7 +173,7 @@ export const EditAssetDialog = ({ onClose, asset, canUpdate, canCopyLink, canDow
         </ModalBody>
         <ModalFooter
           startActions={
-            <Button onClick={onClose} variant="tertiary">
+            <Button onClick={() => onClose()} variant="tertiary">
               {formatMessage({ id: 'cancel', defaultMessage: 'Cancel' })}
             </Button>
           }
