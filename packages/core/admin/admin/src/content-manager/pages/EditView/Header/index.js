@@ -156,7 +156,7 @@ const Header = ({
   return (
     <>
       <HeaderLayout
-        title={title}
+        title={title.toString()}
         primaryAction={primaryAction}
         subtitle={subtitle}
         navigationAction={
