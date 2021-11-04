@@ -4602,33 +4602,19 @@
     resolve-from "^5.0.0"
     store2 "^2.12.0"
 
-<<<<<<< HEAD
 "@strapi/design-system@0.0.1-alpha.60":
   version "0.0.1-alpha.60"
   resolved "https://registry.yarnpkg.com/@strapi/design-system/-/design-system-0.0.1-alpha.60.tgz#85f2df1786d5b9860a7ea9dd078448957379f8d0"
   integrity sha512-D3UqW+/MKr+ulS9qeXPs3VXrG47pZlLQT4d4w5DJXGs+zrlzAQpRte6+7K9gFif7rFnhPDQrKKJLv3fmbd764Q==
-=======
-"@strapi/design-system@0.0.1-alpha.58":
-  version "0.0.1-alpha.58"
-  resolved "https://registry.yarnpkg.com/@strapi/design-system/-/design-system-0.0.1-alpha.58.tgz#06d0702060cf68f66ce1c9d6ecaa15c3d645eb77"
-  integrity sha512-J7Brq3gKe0D4Ig+hJskdv5fkEa6Z8WQdvO+CRu9pXEpZxj3at6t4Hn/3gpc0ZZ2seLfvpieH3tEFl0vAzDObtA==
->>>>>>> df7b15898 (Add DateTimePicker to helper plugin)
   dependencies:
     "@internationalized/number" "^3.0.2"
     compute-scroll-into-view "^1.0.17"
     prop-types "^15.7.2"
 
-<<<<<<< HEAD
 "@strapi/icons@0.0.1-alpha.60":
   version "0.0.1-alpha.60"
   resolved "https://registry.yarnpkg.com/@strapi/icons/-/icons-0.0.1-alpha.60.tgz#fe2794db4b55f80fbc734b43b3175b40656f2f8b"
   integrity sha512-QID8gjJF/GvZjg2g09i/C3T5koh87x9tyxHhctQQUybqvlrY779Jb+K1ASo34bZBE8bL+2RqDCT61xohmlYqGQ==
-=======
-"@strapi/icons@0.0.1-alpha.58":
-  version "0.0.1-alpha.58"
-  resolved "https://registry.yarnpkg.com/@strapi/icons/-/icons-0.0.1-alpha.58.tgz#5d621c6991b7cd51f0e0abf0a71d113896cc1972"
-  integrity sha512-HfmPRgS72VZjfwf09oCcDljMQzhVGVZNHWgWgGEDGNll1+sedPNzgY/NES8ArrOT4wChNoOVh/6RUHf/FyciZQ==
->>>>>>> df7b15898 (Add DateTimePicker to helper plugin)
 
 "@stylelint/postcss-css-in-js@^0.37.2":
   version "0.37.2"
