@@ -12,7 +12,13 @@ import { CopyLinkButton } from '../../CopyLinkButton';
 import { AssetDefinition } from '../../../constants';
 import { EditAssetDialog } from '../../EditAssetDialog';
 
-export const CarouselAssetActions = ({ asset, onDeleteAsset, onAddAsset, onEditAsset }) => {
+export const CarouselAssetActions = ({
+  asset,
+  onDeleteAsset,
+  onDeleteAssetFromMediaLibrary,
+  onAddAsset,
+  onEditAsset,
+}) => {
   const { formatMessage } = useIntl();
   const [isEditDialogOpened, setEditDialogOpened] = useState(false);
 
@@ -60,6 +66,11 @@ export const CarouselAssetActions = ({ asset, onDeleteAsset, onAddAsset, onEditA
           onClose={editedAsset => {
             setEditDialogOpened(false);
 
+            // The asset has been deleted
+            if (editedAsset === null) {
+              onDeleteAssetFromMediaLibrary();
+            }
+
             if (editedAsset) {
               onEditAsset(editedAsset);
             }
@@ -85,4 +96,5 @@ CarouselAssetActions.propTypes = {
   onAddAsset: PropTypes.func,
   onEditAsset: PropTypes.func,
   onDeleteAsset: PropTypes.func,
+  onDeleteAssetFromMediaLibrary: PropTypes.func.isRequired,
 };

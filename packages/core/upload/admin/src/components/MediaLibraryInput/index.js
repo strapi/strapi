@@ -35,11 +35,38 @@ export const MediaLibraryInput = ({
     setStep(undefined);
   };
 
-  const handleDeleteAsset = asset => {
-    const nextSelectedAssets = selectedAssets.filter(prevAsset => prevAsset.id !== asset.id);
+  const handleDeleteAssetFromMediaLibrary = () => {
+    let nextValue;
+
+    if (multiple) {
+      const nextSelectedAssets = selectedAssets.filter(
+        (_, assetIndex) => assetIndex !== selectedIndex
+      );
+      nextValue = nextSelectedAssets.length > 0 ? nextSelectedAssets : null;
+    } else {
+      nextValue = null;
+    }
 
     onChange({
-      target: { name, value: multiple ? nextSelectedAssets : nextSelectedAssets[0] },
+      target: { name, value: nextValue },
+    });
+
+    setSelectedIndex(0);
+  };
+
+  const handleDeleteAsset = asset => {
+    let nextValue;
+
+    if (multiple) {
+      const nextSelectedAssets = selectedAssets.filter(prevAsset => prevAsset.id !== asset.id);
+
+      nextValue = nextSelectedAssets.length > 0 ? nextSelectedAssets : null;
+    } else {
+      nextValue = null;
+    }
+
+    onChange({
+      target: { name, value: nextValue },
     });
 
     setSelectedIndex(0);
@@ -66,6 +93,14 @@ export const MediaLibraryInput = ({
     label = `${label} (${selectedIndex + 1} / ${selectedAssets.length})`;
   }
 
+  const handleNext = () => {
+    setSelectedIndex(current => (current < selectedAssets.length - 1 ? current + 1 : 0));
+  };
+
+  const handlePrevious = () => {
+    setSelectedIndex(current => (current > 0 ? current - 1 : selectedAssets.length - 1));
+  };
+
   const errorMessage = error ? formatMessage({ id: error, defaultMessage: error }) : '';
   const hint = description
     ? formatMessage(
@@ -81,11 +116,15 @@ export const MediaLibraryInput = ({
         disabled={disabled}
         label={label}
         onDeleteAsset={handleDeleteAsset}
+        onDeleteAssetFromMediaLibrary={handleDeleteAssetFromMediaLibrary}
         onAddAsset={() => setStep(Steps.SelectAsset)}
-        onEditAsset={handleAssetEdit}
         onDropAsset={handleAssetDrop}
+        onEditAsset={handleAssetEdit}
+        onNext={handleNext}
+        onPrevious={handlePrevious}
         error={errorMessage}
         hint={hint}
+        selectedAssetIndex={selectedIndex}
       />
 
       {step === Steps.SelectAsset && (

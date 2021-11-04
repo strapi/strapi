@@ -193,7 +193,7 @@ export const PreviewBox = ({
         <RemoveAssetDialog
           onClose={() => {
             setShowConfirmDialog(false);
-            onDelete();
+            onDelete(null);
           }}
           asset={asset}
         />

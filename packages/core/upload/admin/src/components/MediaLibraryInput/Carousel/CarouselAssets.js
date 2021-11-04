@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Carousel, CarouselSlide } from '@strapi/design-system/Carousel';
@@ -9,33 +9,28 @@ import { CarouselAsset } from './CarouselAsset';
 import { EmptyStateAsset } from './EmptyStateAsset';
 
 export const CarouselAssets = ({
-  label,
   assets,
+  disabled,
   error,
   hint,
-  disabled,
+  label,
+  onAddAsset,
   onDeleteAsset,
+  onDeleteAssetFromMediaLibrary,
   onDropAsset,
   onEditAsset,
-  onAddAsset,
+  onNext,
+  onPrevious,
+  selectedAssetIndex,
 }) => {
-  const [selectedIndex, setSelectedIndex] = useState(0);
   const { formatMessage } = useIntl();
 
-  const handleNext = () => {
-    setSelectedIndex(current => (current < assets.length - 1 ? current + 1 : 0));
-  };
-
-  const handlePrevious = () => {
-    setSelectedIndex(current => (current > 0 ? current - 1 : assets.length - 1));
-  };
-
-  const currentAsset = assets[selectedIndex];
+  const currentAsset = assets[selectedAssetIndex];
 
   return (
     <Carousel
       label={label}
-      selectedSlide={selectedIndex}
+      selectedSlide={selectedAssetIndex}
       previousLabel={formatMessage({
         id: getTrad('mediaLibraryInput.actions.previousSlide'),
         defaultMessage: 'Previous slide',
@@ -44,8 +39,8 @@ export const CarouselAssets = ({
         id: getTrad('mediaLibraryInput.actions.nextSlide'),
         defaultMessage: 'Next slide',
       })}
-      onNext={handleNext}
-      onPrevious={handlePrevious}
+      onNext={onNext}
+      onPrevious={onPrevious}
       hint={hint}
       error={error}
       actions={
@@ -53,6 +48,7 @@ export const CarouselAssets = ({
           <CarouselAssetActions
             asset={currentAsset}
             onDeleteAsset={disabled ? undefined : onDeleteAsset}
+            onDeleteAssetFromMediaLibrary={onDeleteAssetFromMediaLibrary}
             onAddAsset={disabled ? undefined : onAddAsset}
             onEditAsset={onEditAsset}
           />
@@ -100,11 +96,15 @@ CarouselAssets.defaultProps = {
 CarouselAssets.propTypes = {
   assets: PropTypes.arrayOf(AssetDefinition).isRequired,
   disabled: PropTypes.bool,
-  label: PropTypes.string.isRequired,
-  onDeleteAsset: PropTypes.func.isRequired,
-  onDropAsset: PropTypes.func,
-  onAddAsset: PropTypes.func.isRequired,
-  onEditAsset: PropTypes.func.isRequired,
   error: PropTypes.string,
   hint: PropTypes.string,
+  label: PropTypes.string.isRequired,
+  onAddAsset: PropTypes.func.isRequired,
+  onDeleteAsset: PropTypes.func.isRequired,
+  onDeleteAssetFromMediaLibrary: PropTypes.func.isRequired,
+  onDropAsset: PropTypes.func,
+  onEditAsset: PropTypes.func.isRequired,
+  onNext: PropTypes.func.isRequired,
+  onPrevious: PropTypes.func.isRequired,
+  selectedAssetIndex: PropTypes.number.isRequired,
 };
