@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { AssetDialog } from './AssetDialog';
@@ -21,10 +21,18 @@ export const MediaLibraryInput = ({
   onChange,
   value,
 }) => {
+  const [uploadedFiles, setUploadedFiles] = useState([]);
   const [step, setStep] = useState(undefined);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [droppedAssets, setDroppedAssets] = useState();
   const { formatMessage } = useIntl();
+
+  useEffect(() => {
+    // Clear the uploaded files on close
+    if (step === undefined) {
+      setUploadedFiles([]);
+    }
+  }, [step]);
 
   const selectedAssets = Array.isArray(value) ? value : [value];
 
@@ -101,6 +109,10 @@ export const MediaLibraryInput = ({
     setSelectedIndex(current => (current > 0 ? current - 1 : selectedAssets.length - 1));
   };
 
+  const handleFilesUploadSucceeded = uploadedFiles => {
+    setUploadedFiles(prev => [...prev, ...uploadedFiles]);
+  };
+
   const errorMessage = error ? formatMessage({ id: error, defaultMessage: error }) : '';
   const hint = description
     ? formatMessage(
@@ -108,6 +120,12 @@ export const MediaLibraryInput = ({
         { ...description.values }
       )
     : '';
+
+  let initiallySelectedAssets = selectedAssets;
+
+  if (uploadedFiles.length > 0) {
+    initiallySelectedAssets = multiple ? [...uploadedFiles, ...selectedAssets] : [uploadedFiles[0]];
+  }
 
   return (
     <>
@@ -129,11 +147,12 @@ export const MediaLibraryInput = ({
 
       {step === Steps.SelectAsset && (
         <AssetDialog
-          initiallySelectedAssets={selectedAssets}
+          initiallySelectedAssets={initiallySelectedAssets}
           onClose={() => setStep(undefined)}
           onValidate={handleValidation}
           multiple={multiple}
           onAddAsset={() => setStep(Steps.UploadAsset)}
+          uploadedFiles={uploadedFiles}
         />
       )}
 
@@ -141,6 +160,7 @@ export const MediaLibraryInput = ({
         <UploadAssetDialog
           onClose={() => setStep(Steps.SelectAsset)}
           initialAssetsToAdd={droppedAssets}
+          addUploadedFiles={handleFilesUploadSucceeded}
         />
       )}
     </>
