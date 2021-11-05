@@ -1,6 +1,6 @@
 'use strict';
 
-const { yup, formatYupErrors } = require('@strapi/utils');
+const { ApplicationError } = require('@strapi/utils').errors;
 const { validateRoleUpdateInput } = require('../validation/role');
 const { validatedUpdatePermissionsInput } = require('../validation/permission');
 const { EDITOR_CODE, AUTHOR_CODE, SUPER_ADMIN_CODE } = require('../services/constants');
@@ -46,11 +46,7 @@ module.exports = {
 
     const roleService = getService('role');
 
-    try {
-      await validateRoleUpdateInput(body);
-    } catch (err) {
-      return ctx.badRequest('ValidationError', err);
-    }
+    await validateRoleUpdateInput(body);
 
     const role = await roleService.findOne({ id });
 
@@ -59,7 +55,7 @@ module.exports = {
     }
 
     if (role.code === SUPER_ADMIN_CODE) {
-      return ctx.badRequest("Super admin can't be edited.");
+      throw new ApplicationError("Super admin can't be edited.");
     }
 
     const updatedRole = await roleService.update({ id }, body);
@@ -112,15 +108,11 @@ module.exports = {
       return ctx.notFound('role.notFound');
     }
 
-    try {
-      if (role.code === SUPER_ADMIN_CODE) {
-        throw formatYupErrors(new yup.ValidationError("Super admin permissions can't be edited."));
-      }
-
-      await validatedUpdatePermissionsInput(input, role);
-    } catch (err) {
-      return ctx.badRequest('ValidationError', err);
+    if (role.code === SUPER_ADMIN_CODE) {
+      throw new ApplicationError("Super admin permissions can't be edited.");
     }
+
+    await validatedUpdatePermissionsInput(input, role);
 
     let permissionsToAssign;
 

@@ -8,6 +8,7 @@ const createMetadata = require('./metadata');
 const { createEntityManager } = require('./entity-manager');
 const { createMigrationsProvider } = require('./migrations');
 const { createLifecyclesProvider } = require('./lifecycles');
+const errors = require('./errors');
 
 // TODO: move back into strapi
 const { transformContentTypes } = require('./utils/content-types');
@@ -57,4 +58,5 @@ Database.init = async config => new Database(config);
 
 module.exports = {
   Database,
+  errors,
 };

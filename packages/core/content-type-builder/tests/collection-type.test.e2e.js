@@ -150,12 +150,22 @@ describe('Content Type Builder - Content types', () => {
       expect(res.statusCode).toBe(400);
       expect(res.body).toEqual({
         error: {
-          contentType: ['contentType: singularName and pluralName should be different'],
+          details: {
+            errors: [
+              {
+                message: 'contentType: singularName and pluralName should be different',
+                name: 'ValidationError',
+                path: ['contentType'],
+              },
+            ],
+          },
+          message: 'contentType: singularName and pluralName should be different',
+          name: 'ValidationError',
         },
       });
     });
 
-    test('displayNamen singularName and pluralName are required', async () => {
+    test('displayName, singularName and pluralName are required', async () => {
       const res = await rq({
         method: 'POST',
         url: '/content-type-builder/content-types',
@@ -174,10 +184,42 @@ describe('Content Type Builder - Content types', () => {
       expect(res.statusCode).toBe(400);
       expect(res.body).toEqual({
         error: {
-          contentType: ['contentType: singularName and pluralName should be different'],
-          'contentType.displayName': ['contentType.displayName is a required field'],
-          'contentType.singularName': ['contentType.singularName is a required field'],
-          'contentType.pluralName': ['contentType.pluralName is a required field'],
+          details: {
+            errors: [
+              {
+                message: 'contentType.displayName is a required field',
+                name: 'ValidationError',
+                path: ['contentType', 'displayName'],
+              },
+              {
+                message: 'Content Type name `undefined` is already being used.',
+                name: 'ValidationError',
+                path: ['contentType', 'singularName'],
+              },
+              {
+                message: 'contentType.singularName is a required field',
+                name: 'ValidationError',
+                path: ['contentType', 'singularName'],
+              },
+              {
+                message: 'Content Type name `undefined` is already being used.',
+                name: 'ValidationError',
+                path: ['contentType', 'pluralName'],
+              },
+              {
+                message: 'contentType.pluralName is a required field',
+                name: 'ValidationError',
+                path: ['contentType', 'pluralName'],
+              },
+              {
+                message: 'contentType: singularName and pluralName should be different',
+                name: 'ValidationError',
+                path: ['contentType'],
+              },
+            ],
+          },
+          message: '6 errors occurred',
+          name: 'ValidationError',
         },
       });
     });
@@ -263,12 +305,23 @@ describe('Content Type Builder - Content types', () => {
         expect(res.statusCode).toBe(400);
         expect(res.body).toEqual({
           error: {
-            'contentType.pluralName': [
-              'contentType.pluralName is not in kebab case (an-example-of-kebab-case)',
-            ],
-            'contentType.singularName': [
-              'contentType.singularName is not in kebab case (an-example-of-kebab-case)',
-            ],
+            name: 'ValidationError',
+            message: '2 errors occurred',
+            details: {
+              errors: [
+                {
+                  message:
+                    'contentType.singularName is not in kebab case (an-example-of-kebab-case)',
+                  name: 'ValidationError',
+                  path: ['contentType', 'singularName'],
+                },
+                {
+                  message: 'contentType.pluralName is not in kebab case (an-example-of-kebab-case)',
+                  name: 'ValidationError',
+                  path: ['contentType', 'pluralName'],
+                },
+              ],
+            },
           },
         });
       }

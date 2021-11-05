@@ -1,9 +1,8 @@
 'use strict';
 
-const { yup, formatYupErrors } = require('@strapi/utils');
-const { get } = require('lodash/fp');
+const { yup, validateYupSchema } = require('@strapi/utils');
 
-const handleReject = error => Promise.reject(formatYupErrors(error));
+const { get } = require('lodash/fp');
 
 const validateGetNonLocalizedAttributesSchema = yup
   .object()
@@ -19,12 +18,8 @@ const validateGetNonLocalizedAttributesSchema = yup
   .noUnknown()
   .required();
 
-const validateGetNonLocalizedAttributesInput = data => {
-  return validateGetNonLocalizedAttributesSchema
-    .validate(data, { strict: true, abortEarly: false })
-    .catch(handleReject);
-};
-
 module.exports = {
-  validateGetNonLocalizedAttributesInput,
+  validateGetNonLocalizedAttributesInput: validateYupSchema(
+    validateGetNonLocalizedAttributesSchema
+  ),
 };

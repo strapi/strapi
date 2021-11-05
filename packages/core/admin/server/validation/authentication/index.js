@@ -7,6 +7,7 @@ const {
 } = require('./register');
 const validateForgotPasswordInput = require('./forgot-password');
 const validateResetPasswordInput = require('./reset-password');
+const validateRenewTokenInput = require('./renew-token');
 
 module.exports = {
   validateRegistrationInput,
@@ -14,4 +15,5 @@ module.exports = {
   validateRegistrationInfoQuery,
   validateForgotPasswordInput,
   validateResetPasswordInput,
+  validateRenewTokenInput,
 };

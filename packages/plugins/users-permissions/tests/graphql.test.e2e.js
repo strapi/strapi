@@ -76,9 +76,12 @@ describe('Test Graphql user service', () => {
 
       expect(res.statusCode).toBe(401);
       expect(res.body).toMatchObject({
-        error: 'Unauthorized',
-        message: 'Missing or invalid credentials',
-        statusCode: 401,
+        error: {
+          status: 401,
+          name: 'UnauthorizedError',
+          message: 'Missing or invalid credentials',
+          details: {},
+        },
       });
     });
   });
@@ -144,9 +147,12 @@ describe('Test Graphql user service', () => {
 
       expect(res.statusCode).toBe(401);
       expect(res.body).toMatchObject({
-        error: 'Unauthorized',
-        message: 'Missing or invalid credentials',
-        statusCode: 401,
+        error: {
+          status: 401,
+          name: 'UnauthorizedError',
+          message: 'Missing or invalid credentials',
+          details: {},
+        },
       });
     });
 
@@ -205,9 +211,12 @@ describe('Test Graphql user service', () => {
 
         expect(res.statusCode).toBe(401);
         expect(res.body).toMatchObject({
-          error: 'Unauthorized',
-          message: 'Missing or invalid credentials',
-          statusCode: 401,
+          error: {
+            status: 401,
+            name: 'UnauthorizedError',
+            message: 'Missing or invalid credentials',
+            details: {},
+          },
         });
       });
     });

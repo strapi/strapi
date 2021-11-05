@@ -8,6 +8,7 @@
 
 const _ = require('lodash');
 const jwt = require('jsonwebtoken');
+const { ValidationError } = require('@strapi/utils').errors;
 
 module.exports = ({ strapi }) => ({
   getToken(ctx) {
@@ -25,14 +26,14 @@ module.exports = ({ strapi }) => ({
           token = credentials;
         }
       } else {
-        throw new Error(
+        throw new ValidationError(
           'Invalid authorization header format. Format is Authorization: Bearer [token]'
         );
       }
     } else if (params.token) {
       token = params.token;
     } else {
-      throw new Error('No authorization header was found');
+      throw new ValidationError('No authorization header was found');
     }
 
     return this.verify(token);

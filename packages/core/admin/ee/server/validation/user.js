@@ -1,11 +1,9 @@
 'use strict';
 
-const { yup, formatYupErrors } = require('@strapi/utils');
+const { yup, validateYupSchema } = require('@strapi/utils');
 // eslint-disable-next-line node/no-extraneous-require
 const { features } = require('@strapi/strapi/lib/utils/ee');
 const { schemas } = require('../../../server/validation/user');
-
-const handleReject = error => Promise.reject(formatYupErrors(error));
 
 const ssoUserCreationInputExtension = yup
   .object()
@@ -21,7 +19,7 @@ const validateUserCreationInput = data => {
     schema = schema.concat(ssoUserCreationInputExtension);
   }
 
-  return schema.validate(data, { strict: true, abortEarly: false }).catch(handleReject);
+  return validateYupSchema(schema)(data);
 };
 
 module.exports = {

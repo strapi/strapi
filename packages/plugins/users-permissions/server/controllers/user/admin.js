@@ -2,14 +2,16 @@
 
 const _ = require('lodash');
 const { contentTypes: contentTypesUtils } = require('@strapi/utils');
-
+const {
+  ApplicationError,
+  ValidationError,
+  NotFoundError,
+  ForbiddenError,
+} = require('@strapi/utils').errors;
 const { getService } = require('../../utils');
+const { validateCreateUserBody, validateUpdateUserBody } = require('../validation/user');
 
 const { UPDATED_BY_ATTRIBUTE, CREATED_BY_ATTRIBUTE } = contentTypesUtils.constants;
-
-const formatError = error => [
-  { messages: [{ id: error.id, message: error.message, field: error.field }] },
-];
 
 const userModel = 'plugin::users-permissions.user';
 const ACTIONS = {
@@ -23,7 +25,7 @@ const findEntityAndCheckPermissions = async (ability, action, model, id) => {
   const entity = await strapi.query('plugin::users-permissions.user').findOne({ where: { id } });
 
   if (_.isNil(entity)) {
-    throw strapi.errors.notFound();
+    throw new NotFoundError();
   }
 
   const pm = strapi.admin.services.permission.createPermissionsManager({ ability, action, model });
@@ -39,7 +41,7 @@ const findEntityAndCheckPermissions = async (ability, action, model, id) => {
   const entityWithRoles = _.set(_.cloneDeep(entity), `${CREATED_BY_ATTRIBUTE}.roles`, roles);
 
   if (pm.ability.cannot(pm.action, pm.toSubject(entityWithRoles))) {
-    throw strapi.errors.forbidden();
+    throw new ForbiddenError();
   }
 
   return { pm, entity };
@@ -54,7 +56,7 @@ module.exports = {
     const { body } = ctx.request;
     const { user: admin, userAbility } = ctx.state;
 
-    const { email, username, password } = body;
+    const { email, username } = body;
 
     const pm = strapi.admin.services.permission.createPermissionsManager({
       ability: userAbility,
@@ -63,7 +65,7 @@ module.exports = {
     });
 
     if (!pm.isAllowed) {
-      throw strapi.errors.forbidden();
+      return ctx.forbidden();
     }
 
     const sanitizedBody = await pm.pickPermittedFieldsOf(body, { subject: userModel });
@@ -72,23 +74,14 @@ module.exports = {
       .store({ type: 'plugin', name: 'users-permissions', key: 'advanced' })
       .get();
 
-    if (!email) return ctx.badRequest('missing.email');
-    if (!username) return ctx.badRequest('missing.username');
-    if (!password) return ctx.badRequest('missing.password');
+    await validateCreateUserBody(ctx.request.body);
 
     const userWithSameUsername = await strapi
       .query('plugin::users-permissions.user')
       .findOne({ where: { username } });
 
     if (userWithSameUsername) {
-      return ctx.badRequest(
-        null,
-        formatError({
-          id: 'Auth.form.error.username.taken',
-          message: 'Username already taken.',
-          field: ['username'],
-        })
-      );
+      throw new ApplicationError('Username already taken');
     }
 
     if (advanced.unique_email) {
@@ -97,15 +90,7 @@ module.exports = {
         .findOne({ where: { email: email.toLowerCase() } });
 
       if (userWithSameEmail) {
-        return ctx.badRequest(
-          null,
-
-          formatError({
-            id: 'Auth.form.error.email.taken',
-            message: 'Email already taken.',
-            field: ['email'],
-          })
-        );
+        throw new ApplicationError('Email already taken');
       }
     }
 
@@ -132,7 +117,7 @@ module.exports = {
 
       ctx.created(sanitizedData);
     } catch (error) {
-      ctx.badRequest(null, formatError(error));
+      throw new ApplicationError(error.message);
     }
   },
   /**
@@ -151,23 +136,22 @@ module.exports = {
 
     const { email, username, password } = body;
 
-    const { pm, entity: user } = await findEntityAndCheckPermissions(
+    let pm;
+    let user;
+
+    const { pm: permissionManager, entity } = await findEntityAndCheckPermissions(
       userAbility,
       ACTIONS.edit,
       userModel,
       id
     );
+    pm = permissionManager;
+    user = entity;
 
-    if (_.has(body, 'email') && !email) {
-      return ctx.badRequest('email.notNull');
-    }
-
-    if (_.has(body, 'username') && !username) {
-      return ctx.badRequest('username.notNull');
-    }
+    await validateUpdateUserBody(ctx.request.body);
 
     if (_.has(body, 'password') && !password && user.provider === 'local') {
-      return ctx.badRequest('password.notNull');
+      throw new ValidationError('password.notNull');
     }
 
     if (_.has(body, 'username')) {
@@ -176,14 +160,7 @@ module.exports = {
         .findOne({ where: { username } });
 
       if (userWithSameUsername && userWithSameUsername.id != id) {
-        return ctx.badRequest(
-          null,
-          formatError({
-            id: 'Auth.form.error.username.taken',
-            message: 'username.alreadyTaken.',
-            field: ['username'],
-          })
-        );
+        throw new ApplicationError('Username already taken');
       }
     }
 
@@ -193,14 +170,7 @@ module.exports = {
         .findOne({ where: { email: _.toLower(email) } });
 
       if (userWithSameEmail && userWithSameEmail.id != id) {
-        return ctx.badRequest(
-          null,
-          formatError({
-            id: 'Auth.form.error.email.taken',
-            message: 'Email already taken',
-            field: ['email'],
-          })
-        );
+        throw new ApplicationError('Email already taken');
       }
       body.email = _.toLower(body.email);
     }

@@ -1,6 +1,7 @@
 'use strict';
 
 const { get } = require('lodash/fp');
+const { ApplicationError } = require('@strapi/utils').errors;
 const { getService } = require('../utils');
 
 const validateLocaleCreation = async (ctx, next) => {
@@ -30,7 +31,7 @@ const validateLocaleCreation = async (ctx, next) => {
   try {
     entityLocale = await getValidLocale(locale);
   } catch (e) {
-    return ctx.badRequest("This locale doesn't exist");
+    throw new ApplicationError("This locale doesn't exist");
   }
 
   body.locale = entityLocale;
@@ -50,7 +51,7 @@ const validateLocaleCreation = async (ctx, next) => {
   try {
     relatedEntity = await getAndValidateRelatedEntity(relatedEntityId, model, entityLocale);
   } catch (e) {
-    return ctx.badRequest(
+    throw new ApplicationError(
       "The related entity doesn't exist or the entity already exists in this locale"
     );
   }

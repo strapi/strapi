@@ -8,6 +8,7 @@ const {
   isMediaAttribute,
   isTypedAttribute,
 } = require('@strapi/utils').contentTypes;
+const { ApplicationError } = require('@strapi/utils').errors;
 const { getService } = require('../utils');
 
 const hasLocalizedOption = modelOrAttribute => {
@@ -23,7 +24,7 @@ const getValidLocale = async locale => {
 
   const foundLocale = await localesService.findByCode(locale);
   if (!foundLocale) {
-    throw new Error('Locale not found');
+    throw new ApplicationError('Locale not found');
   }
 
   return locale;
@@ -62,7 +63,7 @@ const getAndValidateRelatedEntity = async (relatedEntityId, model, locale) => {
   }
 
   if (relatedEntityId && !relatedEntity) {
-    throw new Error("The related entity doesn't exist");
+    throw new ApplicationError("The related entity doesn't exist");
   }
 
   if (
@@ -70,7 +71,7 @@ const getAndValidateRelatedEntity = async (relatedEntityId, model, locale) => {
     (relatedEntity.locale === locale ||
       relatedEntity.localizations.map(prop('locale')).includes(locale))
   ) {
-    throw new Error('The entity already exists in this locale');
+    throw new ApplicationError('The entity already exists in this locale');
   }
 
   return relatedEntity;
@@ -158,7 +159,10 @@ const removeIdsMut = (model, entry) => {
 const copyNonLocalizedAttributes = (model, entry) => {
   const nonLocalizedAttributes = getNonLocalizedAttributes(model);
 
-  return pipe(pick(nonLocalizedAttributes), removeIds(model))(entry);
+  return pipe(
+    pick(nonLocalizedAttributes),
+    removeIds(model)
+  )(entry);
 };
 
 /**

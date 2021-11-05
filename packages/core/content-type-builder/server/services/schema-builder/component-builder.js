@@ -5,6 +5,7 @@ const _ = require('lodash');
 const pluralize = require('pluralize');
 
 const { nameToSlug, nameToCollectionName } = require('@strapi/utils');
+const { ApplicationError } = require('@strapi/utils').errors;
 const { isConfigurable } = require('../../utils/attributes');
 const createSchemaHandler = require('./schema-handler');
 
@@ -34,7 +35,7 @@ module.exports = function createComponentBuilder() {
       const uid = this.createComponentUID(infos);
 
       if (this.components.has(uid)) {
-        throw new Error('component.alreadyExists');
+        throw new ApplicationError('component.alreadyExists');
       }
 
       const handler = createSchemaHandler({
@@ -73,7 +74,7 @@ module.exports = function createComponentBuilder() {
       const { uid } = infos;
 
       if (!this.components.has(uid)) {
-        throw new Error('component.notFound');
+        throw new ApplicationError('component.notFound');
       }
 
       const component = this.components.get(uid);
@@ -84,7 +85,7 @@ module.exports = function createComponentBuilder() {
       const newUID = `${newCategory}.${nameUID}`;
 
       if (newUID !== uid && this.components.has(newUID)) {
-        throw new Error('component.edit.alreadyExists');
+        throw new ApplicationError('component.edit.alreadyExists');
       }
 
       const newDir = path.join(strapi.dirs.components, newCategory);
@@ -119,7 +120,7 @@ module.exports = function createComponentBuilder() {
 
     deleteComponent(uid) {
       if (!this.components.has(uid)) {
-        throw new Error('component.notFound');
+        throw new ApplicationError('component.notFound');
       }
 
       this.components.forEach(compo => {

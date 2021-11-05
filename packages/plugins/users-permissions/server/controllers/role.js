@@ -1,7 +1,9 @@
 'use strict';
 
 const _ = require('lodash');
+const { ApplicationError, ValidationError } = require('@strapi/utils').errors;
 const { getService } = require('../utils');
+const { validateDeleteRoleBody } = require('./validation/user');
 
 module.exports = {
   /**
@@ -11,7 +13,7 @@ module.exports = {
    */
   async createRole(ctx) {
     if (_.isEmpty(ctx.request.body)) {
-      return ctx.badRequest('Request body cannot be empty');
+      throw new ValidationError('Request body cannot be empty');
     }
 
     await getService('role').createRole(ctx.request.body);
@@ -41,7 +43,7 @@ module.exports = {
     const roleID = ctx.params.role;
 
     if (_.isEmpty(ctx.request.body)) {
-      return ctx.badRequest('Request body cannot be empty');
+      throw new ValidationError('Request body cannot be empty');
     }
 
     await getService('role').updateRole(roleID, ctx.request.body);
@@ -53,7 +55,7 @@ module.exports = {
     const roleID = ctx.params.role;
 
     if (!roleID) {
-      return ctx.badRequest();
+      await validateDeleteRoleBody(ctx.params);
     }
 
     // Fetch public role.
@@ -65,7 +67,7 @@ module.exports = {
 
     // Prevent from removing the public role.
     if (roleID.toString() === publicRoleID.toString()) {
-      return ctx.badRequest('Cannot delete public role');
+      throw new ApplicationError('Cannot delete public role');
     }
 
     await getService('role').deleteRole(roleID, publicRoleID);

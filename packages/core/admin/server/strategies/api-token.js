@@ -1,5 +1,6 @@
 'use strict';
 
+const { UnauthorizedError, ForbiddenError } = require('@strapi/utils').errors;
 const constants = require('../services/constants');
 const { getService } = require('../utils');
 
@@ -34,11 +35,10 @@ const authenticate = async ctx => {
 
 /** @type {import('.').VerifyFunction} */
 const verify = (auth, config) => {
-  const { errors } = strapi.container.get('auth');
   const { credentials: apiToken } = auth;
 
   if (!apiToken) {
-    throw new errors.UnauthorizedError();
+    throw new UnauthorizedError();
   }
 
   if (apiToken.type === constants.API_TOKEN_TYPE.FULL_ACCESS) {
@@ -54,7 +54,7 @@ const verify = (auth, config) => {
     return;
   }
 
-  throw new errors.ForbiddenError();
+  throw new ForbiddenError();
 };
 
 /** @type {import('.').AuthStrategy} */
