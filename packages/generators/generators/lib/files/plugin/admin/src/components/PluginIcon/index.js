@@ -5,9 +5,8 @@
  */
 
 import React from 'react';
-import { Icon } from '@strapi/design-system/Icon';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import Puzzle from '@strapi/icons/Puzzle';
 
-const PluginIcon = () => <Icon as={() => <FontAwesomeIcon icon="plug" />} width="16px" />;
+const PluginIcon = () => <Puzzle />;
 
 export default PluginIcon;

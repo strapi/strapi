@@ -1,11 +1,14 @@
 /* eslint-disable consistent-return */
 import produce from 'immer';
+import Cog from '@strapi/icons/Cog';
+import Puzzle from '@strapi/icons/Puzzle';
+import ShoppingCart from '@strapi/icons/ShoppingCart';
 import adminPermissions from '../../permissions';
 
 const initialState = {
   generalSectionLinks: [
     {
-      icon: 'list',
+      icon: Puzzle,
       intlLabel: {
         id: 'app.components.LeftMenuLinkContainer.listPlugins',
         defaultMessage: 'Plugins',
@@ -14,7 +17,7 @@ const initialState = {
       permissions: adminPermissions.marketplace.main,
     },
     {
-      icon: 'shopping-basket',
+      icon: ShoppingCart,
       intlLabel: {
         id: 'app.components.LeftMenuLinkContainer.installNewPlugin',
         defaultMessage: 'Marketplace',
@@ -23,7 +26,7 @@ const initialState = {
       permissions: adminPermissions.marketplace.main,
     },
     {
-      icon: 'cog',
+      icon: Cog,
       intlLabel: {
         id: 'app.components.LeftMenuLinkContainer.settings',
         defaultMessage: 'Settings',

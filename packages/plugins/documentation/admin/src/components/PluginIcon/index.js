@@ -5,9 +5,8 @@
  */
 
 import React from 'react';
-import { Icon } from '@strapi/design-system/Icon';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import Information from '@strapi/icons/Information';
 
-const PluginIcon = () => <Icon as={() => <FontAwesomeIcon icon="book" />} width="16px" />;
+const PluginIcon = () => <Information />;
 
 export default PluginIcon;

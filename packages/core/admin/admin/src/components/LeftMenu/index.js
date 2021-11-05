@@ -1,7 +1,6 @@
 import React, { useRef, useState } from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useIntl } from 'react-intl';
 import { NavLink as Link } from 'react-router-dom';
 import { Divider } from '@strapi/design-system/Divider';
@@ -112,18 +111,22 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
 
         {generalSectionLinks.length > 0 ? (
           <NavSection label="General">
-            {generalSectionLinks.map(link => (
-              <NavLink
-                badgeContent={
-                  (link.notificationsCount > 0 && link.notificationsCount.toString()) || undefined
-                }
-                to={link.to}
-                key={link.to}
-                icon={<FontAwesomeIcon icon={link.icon} />}
-              >
-                {formatMessage(link.intlLabel)}
-              </NavLink>
-            ))}
+            {generalSectionLinks.map(link => {
+              const LinkIcon = link.icon;
+
+              return (
+                <NavLink
+                  badgeContent={
+                    (link.notificationsCount > 0 && link.notificationsCount.toString()) || undefined
+                  }
+                  to={link.to}
+                  key={link.to}
+                  icon={<LinkIcon />}
+                >
+                  {formatMessage(link.intlLabel)}
+                </NavLink>
+              );
+            })}
           </NavSection>
         ) : null}
       </NavSections>
