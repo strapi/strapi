@@ -10,7 +10,7 @@ export const useModalAssets = ({ skipWhen, rawQuery }) => {
   const toggleNotification = useNotification();
   const { notifyStatus } = useNotifyAT();
   const dataRequestURL = getRequestUrl('files');
-  console.log(rawQuery);
+
   const getAssets = async () => {
     const { data } = await axiosInstance.get(`${dataRequestURL}?${rawQuery}`);
 

@@ -32,7 +32,7 @@ export const AssetDialog = ({
   const [
     { searchValue },
     { rawQuery, queryObject },
-    { onChangePage, onChangePageSize, onChangeSort, onChangeSearch, onSubmitSearch },
+    { onChangePage, onChangePageSize, onChangeSort, onChangeSearch, onClearSearch, onSubmitSearch },
   ] = useModalQueryParams();
   const { data, isLoading, error } = useModalAssets({ skipWhen: !canRead, rawQuery });
 
@@ -168,6 +168,7 @@ export const AssetDialog = ({
                 onChangePageSize={onChangePageSize}
                 onChangeSort={onChangeSort}
                 onChangeSearch={onChangeSearch}
+                onClearSearch={onClearSearch}
                 onSubmitSearch={onSubmitSearch}
                 searchValue={searchValue}
               />

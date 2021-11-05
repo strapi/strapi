@@ -25,7 +25,6 @@ const useModalQueryParams = () => {
   };
 
   const handleChangeSearch = _q => {
-    // setQueryObject(prev => ({ ...prev, _q }));
     setSearchValue(_q);
   };
 
@@ -36,6 +35,11 @@ const useModalQueryParams = () => {
     setQueryObject(prev => ({ ...prev, _q: searchValue }));
   };
 
+  const handleClearSearch = () => {
+    setSearchValue('');
+    setQueryObject(prev => ({ ...prev, _q: '' }));
+  };
+
   return [
     { searchValue },
     { queryObject, rawQuery: stringify(queryObject, { encode: false }) },
@@ -44,6 +48,7 @@ const useModalQueryParams = () => {
       onChangePageSize: handleChangePageSize,
       onChangeSort: handleChangeSort,
       onChangeSearch: handleChangeSearch,
+      onClearSearch: handleClearSearch,
       onSubmitSearch: handleSubmitSearch,
     },
   ];

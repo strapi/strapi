@@ -17,6 +17,7 @@ export const BrowseStep = ({
   onChangePageSize,
   onChangeSearch,
   onChangeSort,
+  onClearSearch,
   onEditAsset,
   onSelectAllAsset,
   onSelectAsset,
@@ -56,7 +57,7 @@ export const BrowseStep = ({
             <SearchForm onSubmit={onSubmitSearch}>
               <Searchbar
                 name="searchbar"
-                onClear={() => {}}
+                onClear={onClearSearch}
                 onChange={e => onChangeSearch(e.target.value)}
                 clearLabel="Clearing the asset search"
                 size="S"
@@ -89,10 +90,7 @@ export const BrowseStep = ({
 };
 
 BrowseStep.defaultProps = {
-  onChangeSearch: undefined,
   onSelectAllAsset: undefined,
-  onSubmitSearch: undefined,
-  searchValue: undefined,
 };
 
 BrowseStep.propTypes = {
@@ -100,16 +98,17 @@ BrowseStep.propTypes = {
   onChangePage: PropTypes.func.isRequired,
   onChangePageSize: PropTypes.func.isRequired,
   onChangeSort: PropTypes.func.isRequired,
-  onChangeSearch: PropTypes.func,
+  onChangeSearch: PropTypes.func.isRequired,
+  onClearSearch: PropTypes.func.isRequired,
   onEditAsset: PropTypes.func.isRequired,
   onSelectAsset: PropTypes.func.isRequired,
   onSelectAllAsset: PropTypes.func,
-  onSubmitSearch: PropTypes.func,
+  onSubmitSearch: PropTypes.func.isRequired,
   queryObject: PropTypes.shape({
     page: PropTypes.number.isRequired,
     pageSize: PropTypes.number.isRequired,
   }).isRequired,
   pagination: PropTypes.shape({ pageCount: PropTypes.number.isRequired }).isRequired,
   selectedAssets: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
-  searchValue: PropTypes.string,
+  searchValue: PropTypes.string.isRequired,
 };
