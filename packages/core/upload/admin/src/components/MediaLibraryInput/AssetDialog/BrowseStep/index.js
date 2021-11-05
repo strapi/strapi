@@ -59,6 +59,7 @@ export const BrowseStep = ({
                 onChange={e => onChangeSearch(e.target.value)}
                 clearLabel="Clearing the asset search"
                 size="S"
+                value={queryObject._q}
               >
                 Searching for an asset
               </Searchbar>
@@ -105,6 +106,7 @@ BrowseStep.propTypes = {
   queryObject: PropTypes.shape({
     page: PropTypes.number.isRequired,
     pageSize: PropTypes.number.isRequired,
+    _q: PropTypes.string.isRequired,
   }).isRequired,
   pagination: PropTypes.shape({ pageCount: PropTypes.number.isRequired }).isRequired,
   selectedAssets: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
