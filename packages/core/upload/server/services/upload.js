@@ -14,7 +14,6 @@ const _ = require('lodash');
 const {
   nameToSlug,
   contentTypes: contentTypesUtils,
-  sanitize,
   webhook: webhookUtils,
 } = require('@strapi/utils');
 
@@ -44,9 +43,11 @@ const sendMediaMetrics = data => {
 };
 
 module.exports = ({ strapi }) => ({
-  emitEvent(event, data) {
+  async emitEvent(event, data) {
     const modelDef = strapi.getModel('plugin::upload.file');
-    strapi.eventHub.emit(event, { media: sanitize.eventHub(data, modelDef) });
+    const sanitizedData = await strapi.eventHub.sanitizeEntity(data, modelDef);
+
+    strapi.eventHub.emit(event, { media: sanitizedData });
   },
 
   formatFileInfo({ filename, type, size }, fileInfo = {}, metas = {}) {
@@ -278,7 +279,7 @@ module.exports = ({ strapi }) => ({
 
     const res = await strapi.entityService.update('plugin::upload.file', id, { data: fileValues });
 
-    this.emitEvent(MEDIA_UPDATE, res);
+    await this.emitEvent(MEDIA_UPDATE, res);
 
     return res;
   },
@@ -293,7 +294,7 @@ module.exports = ({ strapi }) => ({
 
     const res = await strapi.query('plugin::upload.file').create({ data: fileValues });
 
-    this.emitEvent(MEDIA_CREATE, res);
+    await this.emitEvent(MEDIA_CREATE, res);
 
     return res;
   },
@@ -330,7 +331,7 @@ module.exports = ({ strapi }) => ({
       where: { id: file.id },
     });
 
-    this.emitEvent(MEDIA_DELETE, media);
+    await this.emitEvent(MEDIA_DELETE, media);
 
     return strapi.query('plugin::upload.file').delete({ where: { id: file.id } });
   },

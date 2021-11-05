@@ -48,16 +48,5 @@ module.exports = {
     },
   },
 
-  eventHub(data, schema) {
-    if (isArray(data)) {
-      return Promise.all(data.map(entry => this.eventHub(entry, schema)));
-    }
-
-    return pipeAsync(
-      traverseEntity(visitors.removePassword, { schema }),
-      traverseEntity(visitors.removePrivate, { schema })
-    )(data);
-  },
-
   visitors,
 };

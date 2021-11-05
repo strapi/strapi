@@ -2,11 +2,7 @@
 
 const delegate = require('delegates');
 
-const {
-  sanitize,
-  webhook: webhookUtils,
-  contentTypes: contentTypesUtils,
-} = require('@strapi/utils');
+const { webhook: webhookUtils, contentTypes: contentTypesUtils } = require('@strapi/utils');
 const uploadFiles = require('../utils/upload-files');
 
 const {
@@ -62,12 +58,13 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
     return options;
   },
 
-  emitEvent(uid, event, entity) {
+  async emitEvent(uid, event, entity) {
     const model = strapi.getModel(uid);
+    const sanitizedEntity = await strapi.eventHub.sanitizeEntity(entity, model);
 
     eventHub.emit(event, {
       model: model.modelName,
-      entry: sanitize.eventHub(entity, model),
+      entry: sanitizedEntity,
     });
   },
 
@@ -152,7 +149,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
       entity = await this.findOne(uid, entity.id, wrappedParams);
     }
 
-    this.emitEvent(uid, ENTRY_CREATE, entity);
+    await this.emitEvent(uid, ENTRY_CREATE, entity);
 
     return entity;
   },
@@ -195,7 +192,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
       entity = await this.findOne(uid, entity.id, wrappedParams);
     }
 
-    this.emitEvent(uid, ENTRY_UPDATE, entity);
+    await this.emitEvent(uid, ENTRY_UPDATE, entity);
 
     return entity;
   },
@@ -218,7 +215,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
     await deleteComponents(uid, entityToDelete);
     await db.query(uid).delete({ where: { id: entityToDelete.id } });
 
-    this.emitEvent(uid, ENTRY_DELETE, entityToDelete);
+    await this.emitEvent(uid, ENTRY_DELETE, entityToDelete);
 
     return entityToDelete;
   },
