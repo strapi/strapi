@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import PlusIcon from '@strapi/icons/Plus';
 import { ModalLayout, ModalBody } from '@strapi/design-system/ModalLayout';
@@ -17,10 +17,12 @@ import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermis
 import { useModalAssets } from '../../../hooks/useModalAssets';
 import useModalQueryParams from '../../../hooks/useModalAssets/useModalQueryParams';
 import { AssetDefinition } from '../../../constants';
+import getAllowedFiles from '../utils/getAllowedFiles';
 import { DialogTitle } from './DialogTitle';
 import { DialogFooter } from './DialogFooter';
 
 export const AssetDialog = ({
+  allowedTypes,
   onClose,
   onAddAsset,
   onValidate,
@@ -41,7 +43,26 @@ export const AssetDialog = ({
     initiallySelectedAssets
   );
 
-  const handleSelectAsset = asset => (multiple ? selectOne(asset) : selectOnly(asset));
+  const [initialSelectedTabIndex, setInitialSelectedTabIndex] = useState(
+    selectedAssets.length > 0 ? 1 : 0
+  );
+  const handleSelectAllAssets = () => {
+    const hasAllAssets = assets.every(
+      asset => selectedAssets.findIndex(curr => curr.id === asset.id) !== -1
+    );
+
+    if (hasAllAssets) {
+      return multiple ? selectAll(assets) : undefined;
+    }
+
+    const allowedAssets = getAllowedFiles(allowedTypes, assets);
+
+    return multiple ? selectAll(allowedAssets) : undefined;
+  };
+  const handleSelectAsset = asset => {
+    return multiple ? selectOne(asset) : selectOnly(asset);
+  };
+
   const loading = isLoadingPermissions || isLoading;
   const assets = data?.results;
 
@@ -126,7 +147,8 @@ export const AssetDialog = ({
           defaultMessage: 'How do you want to upload your assets?',
         })}
         variant="simple"
-        initialSelectedTabIndex={selectedAssets.length > 0 ? 1 : 0}
+        initialSelectedTabIndex={initialSelectedTabIndex}
+        onTabChange={() => setInitialSelectedTabIndex(0)}
       >
         <Flex paddingLeft={8} paddingRight={8} paddingTop={6} justifyContent="space-between">
           <Tabs>
@@ -157,10 +179,11 @@ export const AssetDialog = ({
           <TabPanel>
             <ModalBody>
               <BrowseStep
+                allowedTypes={allowedTypes}
                 assets={assets}
                 onSelectAsset={handleSelectAsset}
                 selectedAssets={selectedAssets}
-                onSelectAllAsset={multiple ? () => selectAll(assets) : undefined}
+                onSelectAllAsset={handleSelectAllAssets}
                 onEditAsset={() => {}}
                 pagination={data?.pagination}
                 queryObject={queryObject}
@@ -188,10 +211,12 @@ export const AssetDialog = ({
 };
 
 AssetDialog.defaultProps = {
+  allowedTypes: [],
   multiple: false,
 };
 
 AssetDialog.propTypes = {
+  allowedTypes: PropTypes.arrayOf(PropTypes.string),
   initiallySelectedAssets: PropTypes.arrayOf(AssetDefinition).isRequired,
   multiple: PropTypes.bool,
   onAddAsset: PropTypes.func.isRequired,

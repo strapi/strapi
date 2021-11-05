@@ -10,8 +10,10 @@ import SortPicker from '../../../SortPicker';
 import PaginationFooter from './PaginationFooter';
 import PageSize from './PageSize';
 import SearchAsset from './SearchAsset';
+import getAllowedFiles from '../../utils/getAllowedFiles';
 
 export const BrowseStep = ({
+  allowedTypes,
   assets,
   onChangePage,
   onChangePageSize,
@@ -28,6 +30,14 @@ export const BrowseStep = ({
   searchValue,
 }) => {
   const { formatMessage } = useIntl();
+  const allAllowedAsset = getAllowedFiles(allowedTypes, assets);
+  const areAllAssetSelected =
+    allAllowedAsset.every(
+      asset => selectedAssets.findIndex(currAsset => currAsset.id === asset.id) !== -1
+    ) && selectedAssets.length > 0;
+  const hasSomeAssetSelected = allAllowedAsset.some(
+    asset => selectedAssets.findIndex(currAsset => currAsset.id === asset.id) !== -1
+  );
 
   return (
     <>
@@ -48,7 +58,8 @@ export const BrowseStep = ({
                     id: getTrad('bulk.select.label'),
                     defaultMessage: 'Select all assets',
                   })}
-                  value={assets?.length > 0 && selectedAssets.length === assets?.length}
+                  indeterminate={!areAllAssetSelected && hasSomeAssetSelected}
+                  value={areAllAssetSelected}
                   onChange={onSelectAllAsset}
                 />
               </Flex>
@@ -64,6 +75,7 @@ export const BrowseStep = ({
         )}
 
         <AssetList
+          allowedTypes={allowedTypes}
           size="S"
           assets={assets}
           onSelectAsset={onSelectAsset}
@@ -84,10 +96,12 @@ export const BrowseStep = ({
 };
 
 BrowseStep.defaultProps = {
+  allowedTypes: [],
   onSelectAllAsset: undefined,
 };
 
 BrowseStep.propTypes = {
+  allowedTypes: PropTypes.arrayOf(PropTypes.string),
   assets: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
   onChangePage: PropTypes.func.isRequired,
   onChangePageSize: PropTypes.func.isRequired,

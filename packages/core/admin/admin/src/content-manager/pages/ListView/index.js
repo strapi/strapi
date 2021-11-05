@@ -12,7 +12,7 @@ import { stringify } from 'qs';
 import {
   NoPermissions,
   CheckPermissions,
-  Search,
+  SearchURLQuery,
   useFocusWhenNavigate,
   useQueryParams,
   useNotification,
@@ -296,7 +296,7 @@ function ListView({
           startActions={
             <>
               {isSearchable && (
-                <Search
+                <SearchURLQuery
                   label={formatMessage(
                     { id: 'app.component.search.label', defaultMessage: 'Search for {target}' },
                     { target: headerLayoutTitle }
