@@ -6,9 +6,21 @@ import { VideoAssetCard } from './VideoAssetCard';
 import { DocAssetCard } from './DocAssetCard';
 import { AssetType, AssetDefinition } from '../../constants';
 import { createAssetUrl } from '../../utils/createAssetUrl';
+import toSingularTypes from '../../utils/toSingularTypes';
 
-export const AssetCard = ({ asset, isSelected, onSelect, onEdit, size, local }) => {
+export const AssetCard = ({ allowedTypes, asset, isSelected, onSelect, onEdit, size, local }) => {
+  const singularTypes = toSingularTypes(allowedTypes);
+
+  let handleSelect = onSelect ? () => onSelect(asset) : undefined;
+  const fileType = asset.mime.split('/')[0];
+
   if (asset.mime.includes(AssetType.Video)) {
+    const canSelectAsset = singularTypes.includes(fileType);
+
+    if (!canSelectAsset && !isSelected) {
+      handleSelect = undefined;
+    }
+
     return (
       <VideoAssetCard
         id={asset.id}
@@ -18,7 +30,7 @@ export const AssetCard = ({ asset, isSelected, onSelect, onEdit, size, local }) 
         url={local ? asset.url : createAssetUrl(asset)}
         mime={asset.mime}
         onEdit={onEdit ? () => onEdit(asset) : undefined}
-        onSelect={onSelect ? () => onSelect(asset) : undefined}
+        onSelect={handleSelect}
         selected={isSelected}
         size={size}
       />
@@ -26,6 +38,12 @@ export const AssetCard = ({ asset, isSelected, onSelect, onEdit, size, local }) 
   }
 
   if (asset.mime.includes(AssetType.Image)) {
+    const canSelectAsset = singularTypes.includes(fileType);
+
+    if (!canSelectAsset && !isSelected) {
+      handleSelect = undefined;
+    }
+
     return (
       <ImageAssetCard
         id={asset.id}
@@ -37,11 +55,17 @@ export const AssetCard = ({ asset, isSelected, onSelect, onEdit, size, local }) 
         width={asset.width}
         thumbnail={prefixFileUrlWithBackendUrl(asset?.formats?.thumbnail?.url || asset.url)}
         onEdit={onEdit ? () => onEdit(asset) : undefined}
-        onSelect={onSelect ? () => onSelect(asset) : undefined}
+        onSelect={handleSelect}
         selected={isSelected}
         size={size}
       />
     );
+  }
+
+  const canSelectAsset = singularTypes.includes('file') && !['video', 'image'].includes(fileType);
+
+  if (!canSelectAsset && !isSelected) {
+    handleSelect = undefined;
   }
 
   return (
@@ -51,7 +75,7 @@ export const AssetCard = ({ asset, isSelected, onSelect, onEdit, size, local }) 
       name={asset.name}
       extension={getFileExtension(asset.ext)}
       onEdit={onEdit ? () => onEdit(asset) : undefined}
-      onSelect={onSelect ? () => onSelect(asset) : undefined}
+      onSelect={handleSelect}
       selected={isSelected}
       size={size}
     />
@@ -59,6 +83,7 @@ export const AssetCard = ({ asset, isSelected, onSelect, onEdit, size, local }) 
 };
 
 AssetCard.defaultProps = {
+  allowedTypes: ['images', 'files', 'videos'],
   isSelected: false,
   // Determine if the asset is loaded locally or from a remote resource
   local: false,
@@ -68,6 +93,7 @@ AssetCard.defaultProps = {
 };
 
 AssetCard.propTypes = {
+  allowedTypes: PropTypes.array,
   asset: AssetDefinition.isRequired,
   local: PropTypes.bool,
   onSelect: PropTypes.func,

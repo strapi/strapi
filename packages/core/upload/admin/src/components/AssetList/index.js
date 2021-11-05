@@ -16,7 +16,14 @@ const GridLayout = styled(Box)`
   grid-gap: ${({ theme }) => theme.spaces[4]};
 `;
 
-export const AssetList = ({ assets, onEditAsset, onSelectAsset, selectedAssets, size }) => {
+export const AssetList = ({
+  allowedTypes,
+  assets,
+  onEditAsset,
+  onSelectAsset,
+  selectedAssets,
+  size,
+}) => {
   return (
     <KeyboardNavigable tagName="article">
       <GridLayout size={size}>
@@ -27,6 +34,7 @@ export const AssetList = ({ assets, onEditAsset, onSelectAsset, selectedAssets, 
 
           return (
             <AssetCard
+              allowedTypes={allowedTypes}
               key={asset.id}
               asset={asset}
               isSelected={isSelected}
@@ -50,10 +58,12 @@ export const AssetList = ({ assets, onEditAsset, onSelectAsset, selectedAssets, 
 };
 
 AssetList.defaultProps = {
+  allowedTypes: ['images', 'files', 'videos'],
   size: 'M',
 };
 
 AssetList.propTypes = {
+  allowedTypes: PropTypes.arrayOf(PropTypes.string),
   assets: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
   onEditAsset: PropTypes.func.isRequired,
   onSelectAsset: PropTypes.func.isRequired,
