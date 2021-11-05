@@ -7,6 +7,7 @@ const useModalQueryParams = () => {
     page: 1,
     sort: 'updatedAt:DESC',
     pageSize: 10,
+    search: '',
   });
 
   const handleChangePageSize = pageSize => {
@@ -21,8 +22,8 @@ const useModalQueryParams = () => {
     setQueryObject(prev => ({ ...prev, sort }));
   };
 
-  const handleChangeSearch = () => {
-    console.log('change search');
+  const handleChangeSearch = value => {
+    console.log(value);
   };
 
   const handleSubmitSearch = e => {

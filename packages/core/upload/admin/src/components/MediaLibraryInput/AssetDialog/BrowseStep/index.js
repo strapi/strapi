@@ -56,7 +56,7 @@ export const BrowseStep = ({
               <Searchbar
                 name="searchbar"
                 onClear={() => {}}
-                onChange={onChangeSearch}
+                onChange={e => onChangeSearch(e.target.value)}
                 clearLabel="Clearing the asset search"
                 size="S"
               >
