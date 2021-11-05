@@ -22,7 +22,7 @@ const applyMaxLimit = (limit, maxLimit) => {
     return maxLimit;
   }
 
-  return limit;
+  return Math.max(1, limit);
 };
 
 const shouldCount = params => {
@@ -72,7 +72,7 @@ const getPaginationInfo = params => {
   if (isPagedPagination(pagination)) {
     const pageSize = isUndefined(pagination.pageSize)
       ? defaultLimit
-      : Math.max(1, toNumber(pagination.pageSize));
+      : toNumber(pagination.pageSize);
 
     return {
       page: Math.max(1, toNumber(pagination.page || 1)),
@@ -80,9 +80,7 @@ const getPaginationInfo = params => {
     };
   }
 
-  const limit = isUndefined(pagination.limit)
-    ? defaultLimit
-    : Math.max(1, toNumber(pagination.limit));
+  const limit = isUndefined(pagination.limit) ? defaultLimit : toNumber(pagination.limit);
 
   return {
     start: Math.max(0, toNumber(pagination.start || 0)),
