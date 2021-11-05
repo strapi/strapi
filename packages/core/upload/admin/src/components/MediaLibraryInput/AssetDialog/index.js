@@ -102,7 +102,7 @@ export const AssetDialog = ({
     );
   }
 
-  if (canRead && assets?.length === 0) {
+  if (canRead && assets?.length === 0 && !queryObject._q) {
     return (
       <ModalLayout onClose={onClose} labelledBy="asset-dialog-title">
         <DialogTitle />
