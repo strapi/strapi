@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useReducer, useState } from 'react';
 import {
   ConfirmDialog,
   LoadingIndicatorPage,
-  Search,
+  SearchURLQuery,
   SettingsPageTitle,
   useNotification,
   useQueryParams,
@@ -277,7 +277,7 @@ const RoleListPage = () => {
       {canRead && (
         <ActionLayout
           startActions={
-            <Search
+            <SearchURLQuery
               label={formatMessage(
                 { id: 'app.component.search.label', defaultMessage: 'Search for {target}' },
                 { target: title }
