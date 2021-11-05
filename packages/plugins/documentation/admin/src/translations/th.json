@@ -1,11 +1,8 @@
 {
-  "components.Row.generatedDate": "การสร้างล่าสุด",
   "components.Row.open": "เปิด",
   "components.Row.regenerate": "สร้างใหม่",
   "containers.HomePage.Block.title": "เวอร์ชัน",
-  "containers.HomePage.Button.open": "เปิดเอกสารคู่มือ",
   "containers.HomePage.Button.update": "อัพเดต",
-  "containers.HomePage.PluginHeader.description": "กำหนดค่าปลั๊กอินเอกสารคู่มือ",
   "containers.HomePage.PluginHeader.title": "เอกสารคู่มือ - การตั้งค่า",
   "containers.HomePage.PopUpWarning.confirm": "ฉันเข้าใจ",
   "containers.HomePage.PopUpWarning.message": "คุณแน่ใจว่าต้องการลบเวอร์ชันนี้หรือไม่?",

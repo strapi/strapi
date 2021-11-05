@@ -1,11 +1,8 @@
 {
-  "components.Row.generatedDate": "Posledný dátum vygenerovania",
   "components.Row.open": "Otvoriť",
   "components.Row.regenerate": "Znova vygenerovať",
   "containers.HomePage.Block.title": "Verzie",
-  "containers.HomePage.Button.open": "Otvoriť dokumentáciu",
   "containers.HomePage.Button.update": "Upraviť",
-  "containers.HomePage.PluginHeader.description": "Nastavenia dokumentácie",
   "containers.HomePage.PluginHeader.title": "Dokumentácia - Nastavenia",
   "containers.HomePage.PopUpWarning.confirm": "Rozumiem",
   "containers.HomePage.PopUpWarning.message": "Ste si istý, že chcete odstrániť túto verziu?",
