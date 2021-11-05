@@ -7,7 +7,7 @@ import {
   NoPermissions,
   NoMedia,
   AnErrorOccurred,
-  Search,
+  SearchURLQuery,
 } from '@strapi/helper-plugin';
 import { Layout, HeaderLayout, ContentLayout, ActionLayout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
@@ -138,7 +138,7 @@ export const MediaLibrary = () => {
             </>
           }
           endActions={
-            <Search
+            <SearchURLQuery
               label={formatMessage({
                 id: getTrad('search.label'),
                 defaultMessage: 'Search for an asset',
