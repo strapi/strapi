@@ -19,6 +19,7 @@ import { TimePicker } from '@strapi/design-system/TimePicker';
 import { ToggleInput } from '@strapi/design-system/ToggleInput';
 import EyeStriked from '@strapi/icons/EyeStriked';
 import Eye from '@strapi/icons/Eye';
+import DateTimePicker from '../DateTimePicker';
 
 const GenericInput = ({
   autoComplete,
@@ -127,6 +128,30 @@ const GenericInput = ({
         >
           {label}
         </Checkbox>
+      );
+    }
+    case 'datetime': {
+      return (
+        <DateTimePicker
+          clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
+          disabled={disabled}
+          error={errorMessage}
+          label={label}
+          labelAction={labelAction}
+          id={name}
+          hint={hint}
+          name={name}
+          onChange={date => {
+            const formattedDate = formatISO(cloneDeep(date), { representation: 'complete' });
+
+            onChange({ target: { name, value: formattedDate, type } });
+          }}
+          onClear={() => onChange({ target: { name, value: '', type } })}
+          placeholder={formattedPlaceholder}
+          required={required}
+          value={value ? new Date(value) : null}
+          selectedDateLabel={formattedDate => `Date picker, current is ${formattedDate}`}
+        />
       );
     }
     case 'date': {
