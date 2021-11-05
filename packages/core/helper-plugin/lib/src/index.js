@@ -183,6 +183,7 @@ export { default as LoadingIndicatorPage } from './components/LoadingIndicatorPa
 export { default as NotAllowedInput } from './components/NotAllowedInput';
 export { default as SettingsPageTitle } from './components/SettingsPageTitle';
 export { default as Search } from './components/Search';
+export { default as SearchURLQuery } from './components/SearchURLQuery';
 export { default as Status } from './components/Status';
 export { default as FilterListURLQuery } from './components/FilterListURLQuery';
 export { default as FilterPopoverURLQuery } from './components/FilterPopoverURLQuery';

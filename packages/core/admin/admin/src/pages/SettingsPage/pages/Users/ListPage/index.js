@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   DynamicTable,
-  Search,
+  SearchURLQuery,
   SettingsPageTitle,
   useRBAC,
   useNotification,
@@ -129,7 +129,7 @@ const ListPage = () => {
         <ActionLayout
           startActions={
             <>
-              <Search
+              <SearchURLQuery
                 label={formatMessage(
                   { id: 'app.component.search.label', defaultMessage: 'Search for {target}' },
                   { target: title }
