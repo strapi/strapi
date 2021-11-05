@@ -9,7 +9,6 @@ import { useContentTypeLayout } from '../../hooks';
 import { getFieldName } from '../../utils';
 import Wysiwyg from '../Wysiwyg';
 import InputJSON from '../InputJSON';
-import ComingSoonInput from './ComingSoonInput';
 import InputUID from '../InputUID';
 import SelectWrapper from '../SelectWrapper';
 
@@ -227,8 +226,6 @@ function Inputs({
       customInputs={{
         json: InputJSON,
         uid: InputUID,
-        // FIXME
-        datetime: ComingSoonInput,
         media: fields.media,
         wysiwyg: Wysiwyg,
         ...fields,

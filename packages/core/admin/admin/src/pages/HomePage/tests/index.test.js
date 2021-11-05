@@ -897,13 +897,13 @@ describe('Homepage', () => {
                                 class="c29"
                                 style="word-break: break-all;"
                               >
-                                Read the documentation
+                                Documentation
                               </span>
                             </div>
                             <span
                               class="c12"
                             >
-                              Discover the concepts, reference, guides and tutorials
+                              Discover the essential concepts, guides and instructions.
                             </span>
                           </div>
                         </div>
@@ -955,7 +955,7 @@ describe('Homepage', () => {
                             <span
                               class="c12"
                             >
-                              Learn by testing real project developed by the community
+                              Learn by using ready-made starters for your projects.
                             </span>
                           </div>
                         </div>
@@ -1001,13 +1001,13 @@ describe('Homepage', () => {
                                 class="c29"
                                 style="word-break: break-all;"
                               >
-                                PlaySquare
+                                Tutorials
                               </span>
                             </div>
                             <span
                               class="c12"
                             >
-                              Discover the concepts, reference, guides and tutorials
+                              Follow step-by-step instructions to use and customize Strapi.
                             </span>
                           </div>
                         </div>
@@ -1051,13 +1051,13 @@ describe('Homepage', () => {
                                 class="c29"
                                 style="word-break: break-all;"
                               >
-                                FeatherSquare
+                                Blog
                               </span>
                             </div>
                             <span
                               class="c12"
                             >
-                              Discover the concepts, reference, guides and tutorials
+                              Read the latest news about Strapi and the ecosystem.
                             </span>
                           </div>
                         </div>

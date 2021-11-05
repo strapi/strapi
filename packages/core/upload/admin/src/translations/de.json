@@ -32,8 +32,6 @@
   "list.assets-empty.subtitle": "Füge welche der Liste hinzu.",
   "list.assets-empty.title": "Keine Dateien vorhanden.",
   "list.assets-empty.title-withSearch": "Es existieren keine Dateien für die gewählten Filterkriterien.",
-  "list.assets.selected.plural": "{number} Dateien ausgewählt",
-  "list.assets.selected.singular": "{number} Datei ausgewählt",
   "list.assets.type-not-allowed": "Dieser Dateityp ist nicht zulässig.",
   "modal.file-details.date": "Datum",
   "modal.file-details.dimensions": "Abmessungen",

@@ -44,7 +44,7 @@
           "localized": true
         }
       },
-      "type": "date"
+      "type": "datetime"
     }
   }
 }

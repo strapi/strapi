@@ -25,11 +25,11 @@ const ContentBlocks = () => {
         <ContentBox
           title={formatMessage({
             id: 'app.components.BlockLink.documentation',
-            defaultMessage: 'Read the documentation',
+            defaultMessage: 'Documentation',
           })}
           subtitle={formatMessage({
             id: 'app.components.BlockLink.documentation.content',
-            defaultMessage: 'Discover the concepts, reference, guides and tutorials',
+            defaultMessage: 'Discover the essential concepts, guides and instructions.',
           })}
           icon={<InformationSquare />}
           iconBackground="primary100"
@@ -47,7 +47,7 @@ const ContentBlocks = () => {
           })}
           subtitle={formatMessage({
             id: 'app.components.BlockLink.code.content',
-            defaultMessage: 'Learn by testing real project developed by the community',
+            defaultMessage: 'Learn by using ready-made starters for your projects.',
           })}
           icon={<CodeSquare />}
           iconBackground="warning100"
@@ -61,11 +61,11 @@ const ContentBlocks = () => {
         <ContentBox
           title={formatMessage({
             id: 'app.components.BlockLink.tutorial',
-            defaultMessage: 'PlaySquare',
+            defaultMessage: 'Tutorials',
           })}
           subtitle={formatMessage({
             id: 'app.components.BlockLink.tutorial.content',
-            defaultMessage: 'Discover the concepts, reference, guides and tutorials',
+            defaultMessage: 'Follow step-by-step instructions to use and customize Strapi.',
           })}
           icon={<PlaySquare />}
           iconBackground="secondary100"
@@ -75,11 +75,11 @@ const ContentBlocks = () => {
         <ContentBox
           title={formatMessage({
             id: 'app.components.BlockLink.blog',
-            defaultMessage: 'FeatherSquare',
+            defaultMessage: 'Blog',
           })}
           subtitle={formatMessage({
             id: 'app.components.BlockLink.blog.content',
-            defaultMessage: 'Discover the concepts, reference, guides and tutorials',
+            defaultMessage: 'Read the latest news about Strapi and the ecosystem.',
           })}
           icon={<FeatherSquare />}
           iconBackground="alternative100"

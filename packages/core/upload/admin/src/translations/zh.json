@@ -32,8 +32,6 @@
   "list.assets-empty.subtitle": "從開頭新增",
   "list.assets-empty.title": "尚無任何素材",
   "list.assets-empty.title-withSearch": "無素材符合此過濾條件",
-  "list.assets.selected.plural": "{number} 個素材被選取",
-  "list.assets.selected.singular": "{number} 個素材被選取",
   "list.assets.type-not-allowed": "此檔案類型不合法",
   "modal.file-details.date": "日期",
   "modal.file-details.dimensions": "尺寸",
