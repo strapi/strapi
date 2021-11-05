@@ -897,7 +897,7 @@ describe('Homepage', () => {
                                 class="c29"
                                 style="word-break: break-all;"
                               >
-                                Read the documentation
+                                Documentation
                               </span>
                             </div>
                             <span
