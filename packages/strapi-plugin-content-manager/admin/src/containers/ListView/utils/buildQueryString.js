@@ -16,11 +16,12 @@ const buildQueryString = (queryParams = {}) => {
    */
   const { plugins: _, ...otherQueryParams } = {
     ...queryParams,
+    ...(queryParams._q && { _q: encodeURIComponent(queryParams._q) }),
     _where,
     ...createPluginsFilter(queryParams.plugins),
   };
 
-  return `?${stringify(otherQueryParams, { encodeValuesOnly: true })}`;
+  return `?${stringify(otherQueryParams, { encode: false })}`;
 };
 
 export default buildQueryString;
