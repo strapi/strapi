@@ -21,7 +21,7 @@ const fetchRelation = async (endPoint, notifyStatus) => {
 };
 
 const PopoverContent = ({ fieldSchema, name, rowId, targetModel, queryInfos }) => {
-  const requestURL = getRequestUrl(`${queryInfos.endPoint}/${rowId}/${name}`);
+  const requestURL = getRequestUrl(`${queryInfos.endPoint}/${rowId}/${name.split('.')[0]}`);
   const { notifyStatus } = useNotifyAT();
   const { formatMessage } = useIntl();
 
