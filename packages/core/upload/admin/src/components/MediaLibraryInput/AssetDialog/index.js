@@ -30,6 +30,7 @@ export const AssetDialog = ({
   const { formatMessage } = useIntl();
   const { canRead, canCreate, isLoading: isLoadingPermissions } = useMediaLibraryPermissions();
   const [
+    { searchValue },
     { rawQuery, queryObject },
     { onChangePage, onChangePageSize, onChangeSort, onChangeSearch, onSubmitSearch },
   ] = useModalQueryParams();
@@ -168,6 +169,7 @@ export const AssetDialog = ({
                 onChangeSort={onChangeSort}
                 onChangeSearch={onChangeSearch}
                 onSubmitSearch={onSubmitSearch}
+                searchValue={searchValue}
               />
             </ModalBody>
           </TabPanel>

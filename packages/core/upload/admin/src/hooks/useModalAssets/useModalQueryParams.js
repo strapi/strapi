@@ -10,6 +10,8 @@ const useModalQueryParams = () => {
     _q: '',
   });
 
+  const [searchValue, setSearchValue] = useState('');
+
   const handleChangePageSize = pageSize => {
     setQueryObject(prev => ({ ...prev, pageSize: parseInt(pageSize, 10), page: 1 }));
   };
@@ -22,19 +24,20 @@ const useModalQueryParams = () => {
     setQueryObject(prev => ({ ...prev, sort }));
   };
 
-  const handleChangeSearch = value => {
-    console.log(value);
-    setQueryObject(prev => ({ ...prev, value }));
+  const handleChangeSearch = _q => {
+    // setQueryObject(prev => ({ ...prev, _q }));
+    setSearchValue(_q);
   };
 
   const handleSubmitSearch = e => {
     e.preventDefault();
     e.stopPropagation();
 
-    console.log('submit search');
+    setQueryObject(prev => ({ ...prev, _q: searchValue }));
   };
 
   return [
+    { searchValue },
     { queryObject, rawQuery: stringify(queryObject, { encode: false }) },
     {
       onChangePage: handeChangePage,
