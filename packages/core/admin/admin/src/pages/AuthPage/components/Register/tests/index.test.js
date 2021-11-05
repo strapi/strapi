@@ -260,18 +260,16 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
         background: #4945ff;
       }
 
+      .c28 {
+        line-height: 1.14;
+        color: #d02b20;
+      }
+
       .c27 {
         font-weight: 500;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #32324d;
-      }
-
-      .c28 {
-        font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #d02b20;
       }
 
       .c37 {

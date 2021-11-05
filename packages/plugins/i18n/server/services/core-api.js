@@ -2,10 +2,11 @@
 
 const _ = require('lodash');
 const { prop, pick, reduce, map, keys, toPath, isNil } = require('lodash/fp');
-const { contentTypes, parseMultipartData, sanitizeEntity } = require('@strapi/utils');
-const { ApplicationError, NotFoundError } = require('@strapi/utils').errors;
-
+const utils = require('@strapi/utils');
 const { getService } = require('../utils');
+
+const { contentTypes, parseMultipartData, sanitize } = utils;
+const { ApplicationError, NotFoundError } = utils.errors;
 
 const { getContentTypeRoutePrefix, isSingleType, getWritableAttributes } = contentTypes;
 
@@ -143,7 +144,7 @@ const createCreateLocalizationHandler = contentType => async (args = {}) => {
     populate: ['localizations'],
   });
 
-  return sanitizeEntity(newEntry, { model: strapi.getModel(contentType.uid) });
+  return sanitize.contentAPI.output(newEntry, strapi.getModel(contentType.uid));
 };
 
 /**

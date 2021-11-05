@@ -1,15 +1,19 @@
 'use strict';
 
 const _ = require('lodash');
-const { sanitizeEntity } = require('@strapi/utils');
-const { ApplicationError, ValidationError } = require('@strapi/utils').errors;
+const utils = require('@strapi/utils');
 const { getService } = require('../../utils');
 const { validateCreateUserBody, validateUpdateUserBody } = require('../validation/user');
 
-const sanitizeUser = user =>
-  sanitizeEntity(user, {
-    model: strapi.getModel('plugin::users-permissions.user'),
-  });
+const { sanitize } = utils;
+const { ApplicationError, ValidationError } = utils.errors;
+
+const sanitizeOutput = (user, ctx) => {
+  const schema = strapi.getModel('plugin::users-permissions.user');
+  const { auth } = ctx.state;
+
+  return sanitize.contentAPI.output(user, schema, { auth });
+};
 
 module.exports = {
   /**
@@ -60,8 +64,9 @@ module.exports = {
 
     try {
       const data = await getService('user').add(user);
+      const sanitizedData = await sanitizeOutput(data, ctx);
 
-      ctx.created(sanitizeUser(data));
+      ctx.created(sanitizedData);
     } catch (error) {
       throw new ApplicationError(error.message);
     }
@@ -113,7 +118,8 @@ module.exports = {
     };
 
     const data = await getService('user').edit({ id }, updateData);
+    const sanitizedData = await sanitizeOutput(data, ctx);
 
-    ctx.send(sanitizeUser(data));
+    ctx.send(sanitizedData);
   },
 };

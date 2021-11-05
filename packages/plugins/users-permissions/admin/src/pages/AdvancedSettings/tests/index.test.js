@@ -248,11 +248,18 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         color: #32324d;
       }
 
-      .c33 {
+      .c34 {
         font-weight: 400;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #666687;
+      }
+
+      .c30 {
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
 
       .c28 {
@@ -260,7 +267,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         padding-left: 16px;
       }
 
-      .c30 {
+      .c31 {
         padding-left: 12px;
       }
 
@@ -336,23 +343,23 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         box-shadow: #4945ff 0px 0px 0px 2px;
       }
 
-      .c31 {
+      .c32 {
         background: transparent;
         border: none;
         position: relative;
         z-index: 1;
       }
 
-      .c31 svg {
+      .c32 svg {
         height: 0.6875rem;
         width: 0.6875rem;
       }
 
-      .c31 svg path {
+      .c32 svg path {
         fill: #666687;
       }
 
-      .c32 {
+      .c33 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -361,7 +368,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         border: none;
       }
 
-      .c32 svg {
+      .c33 svg {
         width: 0.375rem;
       }
 
@@ -395,21 +402,21 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         color: #32324d;
       }
 
-      .c53 {
+      .c54 {
         font-weight: 500;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #32324d;
       }
 
-      .c57 {
+      .c58 {
         font-weight: 400;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #666687;
       }
 
-      .c52 {
+      .c53 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -423,7 +430,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         align-items: center;
       }
 
-      .c54 {
+      .c55 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -441,7 +448,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         align-items: center;
       }
 
-      .c56 {
+      .c57 {
         border: none;
         border-radius: 4px;
         padding-left: 16px;
@@ -453,37 +460,37 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         width: 100%;
       }
 
-      .c56::-webkit-input-placeholder {
+      .c57::-webkit-input-placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c56::-moz-placeholder {
+      .c57::-moz-placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c56:-ms-input-placeholder {
+      .c57:-ms-input-placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c56::placeholder {
+      .c57::placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c56[aria-disabled='true'] {
+      .c57[aria-disabled='true'] {
         background: inherit;
         color: inherit;
       }
 
-      .c56:focus {
+      .c57:focus {
         outline: none;
         box-shadow: none;
       }
 
-      .c55 {
+      .c56 {
         border: 1px solid #dcdce4;
         border-radius: 4px;
         background: #ffffff;
@@ -496,12 +503,12 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         transition-duration: 0.2s;
       }
 
-      .c55:focus-within {
+      .c56:focus-within {
         border: 1px solid #4945ff;
         box-shadow: #4945ff 0px 0px 0px 2px;
       }
 
-      .c58 {
+      .c59 {
         border: 1px solid #dcdce4;
         border-radius: 4px;
         background: #ffffff;
@@ -516,12 +523,12 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         background: #eaeaef;
       }
 
-      .c58:focus-within {
+      .c59:focus-within {
         border: 1px solid #4945ff;
         box-shadow: #4945ff 0px 0px 0px 2px;
       }
 
-      .c51 {
+      .c52 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -531,54 +538,54 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         flex-direction: column;
       }
 
-      .c51 > * {
+      .c52 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c51 > * + * {
+      .c52 > * + * {
         margin-top: 4px;
       }
 
-      .c38 {
+      .c39 {
         font-weight: 500;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #32324d;
       }
 
-      .c45 {
+      .c46 {
         font-weight: 500;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #b72b1a;
       }
 
-      .c49 {
+      .c50 {
         font-weight: 400;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #666687;
       }
 
-      .c41 {
+      .c42 {
         background: #ffffff;
         border-radius: 4px;
       }
 
-      .c43 {
+      .c44 {
         background: #fcecea;
         padding-right: 32px;
         padding-left: 32px;
       }
 
-      .c46 {
+      .c47 {
         background: #ffffff;
         padding-right: 32px;
         padding-left: 32px;
       }
 
-      .c37 {
+      .c38 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -592,7 +599,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         align-items: center;
       }
 
-      .c36 {
+      .c37 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -602,16 +609,16 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         flex-direction: column;
       }
 
-      .c36 > * {
+      .c37 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c36 > * + * {
+      .c37 > * + * {
         margin-top: 4px;
       }
 
-      .c40 {
+      .c41 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
@@ -623,12 +630,12 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         width: 1px;
       }
 
-      .c39 {
+      .c40 {
         position: relative;
         display: inline-block;
       }
 
-      .c42 {
+      .c43 {
         height: 2.5rem;
         border: 1px solid #dcdce4;
         display: -webkit-inline-box;
@@ -644,32 +651,32 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         transition-duration: 0.2s;
       }
 
-      .c42:focus-within {
+      .c43:focus-within {
         border: 1px solid #4945ff;
         box-shadow: #4945ff 0px 0px 0px 2px;
       }
 
-      .c47 {
+      .c48 {
         text-transform: uppercase;
         position: relative;
         z-index: 2;
       }
 
-      .c44 {
+      .c45 {
         text-transform: uppercase;
         border-right: 1px solid #dcdce4;
         position: relative;
         z-index: 2;
       }
 
-      .c48 {
+      .c49 {
         position: absolute;
         z-index: 1;
         left: 4px;
         top: 4px;
       }
 
-      .c35 {
+      .c36 {
         width: -webkit-fit-content;
         width: -moz-fit-content;
         width: fit-content;
@@ -753,11 +760,11 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         grid-column: span 6;
       }
 
-      .c34 {
+      .c35 {
         grid-column: span 12;
       }
 
-      .c50 {
+      .c51 {
         grid-column: span 6;
       }
 
@@ -774,25 +781,25 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
       }
 
       @media (max-width:68.75rem) {
-        .c34 {
+        .c35 {
           grid-column: span;
         }
       }
 
       @media (max-width:34.375rem) {
-        .c34 {
+        .c35 {
           grid-column: span 12;
         }
       }
 
       @media (max-width:68.75rem) {
-        .c50 {
+        .c51 {
           grid-column: span;
         }
       }
 
       @media (max-width:34.375rem) {
-        .c50 {
+        .c51 {
           grid-column: span 12;
         }
       }
@@ -919,7 +926,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                                   class="c28"
                                 >
                                   <span
-                                    class="c29"
+                                    class="c29 c30"
                                     id="select-1-content"
                                   >
                                     Authenticated
@@ -931,7 +938,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                               >
                                 <button
                                   aria-hidden="true"
-                                  class="c30 c31 c32"
+                                  class="c31 c32 c33"
                                   tabindex="-1"
                                   type="button"
                                 >
@@ -954,7 +961,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                             </div>
                           </div>
                           <p
-                            class="c33"
+                            class="c34"
                             id="select-1-hint"
                           >
                             It will attach the new authenticated user to the selected role.
@@ -964,67 +971,67 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                     </div>
                   </div>
                   <div
-                    class="c34"
+                    class="c35"
                   >
                     <div
                       class=""
                     >
                       <div
-                        class="c35"
+                        class="c36"
                       >
                         <div
-                          class="c36"
+                          class="c37"
                         >
                           <div
-                            class="c37"
+                            class="c38"
                           >
                             <label
-                              class="c38"
+                              class="c39"
                               for="field-1"
                             >
                               One account per email address
                             </label>
                           </div>
                           <label
-                            class="c39"
+                            class="c40"
                           >
                             <div
-                              class="c40"
+                              class="c41"
                             >
                               One account per email address
                             </div>
                             <div
-                              class="c41 c42"
+                              class="c42 c43"
                             >
                               <div
                                 aria-hidden="true"
-                                class="c43 c37 c44"
+                                class="c44 c38 c45"
                               >
                                 <span
-                                  class="c45"
+                                  class="c46"
                                 >
                                   Off
                                 </span>
                               </div>
                               <div
                                 aria-hidden="true"
-                                class="c46 c37 c47"
+                                class="c47 c38 c48"
                               >
                                 <span
-                                  class="c38"
+                                  class="c39"
                                 >
                                   On
                                 </span>
                               </div>
                               <input
-                                class="c48"
+                                class="c49"
                                 name="unique_email"
                                 type="checkbox"
                               />
                             </div>
                           </label>
                           <p
-                            class="c49"
+                            class="c50"
                             id="field-1-hint"
                           >
                             Disallow the user to create multiple accounts using the same email address with different authentication providers.
@@ -1034,67 +1041,67 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                     </div>
                   </div>
                   <div
-                    class="c34"
+                    class="c35"
                   >
                     <div
                       class=""
                     >
                       <div
-                        class="c35"
+                        class="c36"
                       >
                         <div
-                          class="c36"
+                          class="c37"
                         >
                           <div
-                            class="c37"
+                            class="c38"
                           >
                             <label
-                              class="c38"
+                              class="c39"
                               for="field-2"
                             >
                               Enable sign-ups
                             </label>
                           </div>
                           <label
-                            class="c39"
+                            class="c40"
                           >
                             <div
-                              class="c40"
+                              class="c41"
                             >
                               Enable sign-ups
                             </div>
                             <div
-                              class="c41 c42"
+                              class="c42 c43"
                             >
                               <div
                                 aria-hidden="true"
-                                class="c43 c37 c44"
+                                class="c44 c38 c45"
                               >
                                 <span
-                                  class="c45"
+                                  class="c46"
                                 >
                                   Off
                                 </span>
                               </div>
                               <div
                                 aria-hidden="true"
-                                class="c46 c37 c47"
+                                class="c47 c38 c48"
                               >
                                 <span
-                                  class="c38"
+                                  class="c39"
                                 >
                                   On
                                 </span>
                               </div>
                               <input
-                                class="c48"
+                                class="c49"
                                 name="allow_register"
                                 type="checkbox"
                               />
                             </div>
                           </label>
                           <p
-                            class="c49"
+                            class="c50"
                             id="field-2-hint"
                           >
                             When disabled (OFF), the registration process is forbidden. No one can subscribe anymore no matter the used provider.
@@ -1104,7 +1111,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                     </div>
                   </div>
                   <div
-                    class="c50"
+                    class="c51"
                   >
                     <div
                       class=""
@@ -1112,26 +1119,26 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                       <div>
                         <div>
                           <div
-                            class="c51"
+                            class="c52"
                           >
                             <div
-                              class="c52"
+                              class="c53"
                             >
                               <label
-                                class="c53"
+                                class="c54"
                                 for="email_reset_password"
                               >
                                 Reset password page
                               </label>
                             </div>
                             <div
-                              class="c54 c55"
+                              class="c55 c56"
                             >
                               <input
                                 aria-describedby="email_reset_password-hint"
                                 aria-disabled="false"
                                 aria-invalid="false"
-                                class="c56"
+                                class="c57"
                                 id="email_reset_password"
                                 name="email_reset_password"
                                 placeholder="ex: https://youtfrontend.com/reset-password"
@@ -1140,7 +1147,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                               />
                             </div>
                             <p
-                              class="c57"
+                              class="c58"
                               id="email_reset_password-hint"
                             >
                               URL of your application's reset password page.
@@ -1151,67 +1158,67 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                     </div>
                   </div>
                   <div
-                    class="c34"
+                    class="c35"
                   >
                     <div
                       class=""
                     >
                       <div
-                        class="c35"
+                        class="c36"
                       >
                         <div
-                          class="c36"
+                          class="c37"
                         >
                           <div
-                            class="c37"
+                            class="c38"
                           >
                             <label
-                              class="c38"
+                              class="c39"
                               for="field-3"
                             >
                               Enable email confirmation
                             </label>
                           </div>
                           <label
-                            class="c39"
+                            class="c40"
                           >
                             <div
-                              class="c40"
+                              class="c41"
                             >
                               Enable email confirmation
                             </div>
                             <div
-                              class="c41 c42"
+                              class="c42 c43"
                             >
                               <div
                                 aria-hidden="true"
-                                class="c43 c37 c44"
+                                class="c44 c38 c45"
                               >
                                 <span
-                                  class="c45"
+                                  class="c46"
                                 >
                                   Off
                                 </span>
                               </div>
                               <div
                                 aria-hidden="true"
-                                class="c46 c37 c47"
+                                class="c47 c38 c48"
                               >
                                 <span
-                                  class="c38"
+                                  class="c39"
                                 >
                                   On
                                 </span>
                               </div>
                               <input
-                                class="c48"
+                                class="c49"
                                 name="email_confirmation"
                                 type="checkbox"
                               />
                             </div>
                           </label>
                           <p
-                            class="c49"
+                            class="c50"
                             id="field-3-hint"
                           >
                             When enabled (ON), new registered users receive a confirmation email.
@@ -1221,7 +1228,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                     </div>
                   </div>
                   <div
-                    class="c50"
+                    class="c51"
                   >
                     <div
                       class=""
@@ -1229,27 +1236,27 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                       <div>
                         <div>
                           <div
-                            class="c51"
+                            class="c52"
                           >
                             <div
-                              class="c52"
+                              class="c53"
                             >
                               <label
-                                class="c53"
+                                class="c54"
                                 for="email_confirmation_redirection"
                               >
                                 Redirection url
                               </label>
                             </div>
                             <div
-                              class="c54 c58"
+                              class="c55 c59"
                               disabled=""
                             >
                               <input
                                 aria-describedby="email_confirmation_redirection-hint"
                                 aria-disabled="true"
                                 aria-invalid="false"
-                                class="c56"
+                                class="c57"
                                 id="email_confirmation_redirection"
                                 name="email_confirmation_redirection"
                                 placeholder="ex: https://youtfrontend.com/reset-password"
@@ -1258,7 +1265,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                               />
                             </div>
                             <p
-                              class="c57"
+                              class="c58"
                               id="email_confirmation_redirection-hint"
                             >
                               After you confirmed your email, choose where you will be redirected.

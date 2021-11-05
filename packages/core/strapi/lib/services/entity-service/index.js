@@ -8,7 +8,7 @@ const {
   InvalidDateTimeError,
 } = require('@strapi/database').errors;
 const {
-  sanitizeEntity,
+  sanitize,
   webhook: webhookUtils,
   contentTypes: contentTypesUtils,
 } = require('@strapi/utils');
@@ -97,7 +97,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
 
     eventHub.emit(event, {
       model: model.modelName,
-      entry: sanitizeEntity(entity, { model }),
+      entry: sanitize.eventHub(entity, model),
     });
   },
 

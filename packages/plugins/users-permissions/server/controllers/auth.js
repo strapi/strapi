@@ -9,8 +9,7 @@
 /* eslint-disable no-useless-escape */
 const crypto = require('crypto');
 const _ = require('lodash');
-const { sanitizeEntity } = require('@strapi/utils');
-const { ApplicationError, ValidationError } = require('@strapi/utils').errors;
+const utils = require('@strapi/utils');
 const { getService } = require('../utils');
 const {
   validateCallbackBody,
@@ -18,7 +17,17 @@ const {
   validateSendEmailConfirmationBody,
 } = require('./validation/auth');
 
+const { sanitize } = utils;
+const { ApplicationError, ValidationError } = utils.errors;
+
 const emailRegExp = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
+const sanitizeUser = (user, ctx) => {
+  const { auth } = ctx.state;
+  const userSchema = strapi.getModel('plugin::users-permissions.user');
+
+  return sanitize.contentAPI.output(user, userSchema, { auth });
+};
 
 module.exports = {
   async callback(ctx) {
@@ -83,9 +92,7 @@ module.exports = {
           jwt: getService('jwt').issue({
             id: user.id,
           }),
-          user: sanitizeEntity(user, {
-            model: strapi.getModel('plugin::users-permissions.user'),
-          }),
+          user: await sanitizeUser(user, ctx),
         });
       }
     } else {
@@ -108,9 +115,7 @@ module.exports = {
 
       ctx.send({
         jwt: getService('jwt').issue({ id: user.id }),
-        user: sanitizeEntity(user, {
-          model: strapi.getModel('plugin::users-permissions.user'),
-        }),
+        user: await sanitizeUser(user, ctx),
       });
     }
   },
@@ -141,9 +146,7 @@ module.exports = {
 
       ctx.send({
         jwt: getService('jwt').issue({ id: user.id }),
-        user: sanitizeEntity(user, {
-          model: strapi.getModel('plugin::users-permissions.user'),
-        }),
+        user: await sanitizeUser(user, ctx),
       });
     } else if (
       params.password &&
@@ -227,9 +230,7 @@ module.exports = {
       key: 'advanced',
     });
 
-    const userInfo = sanitizeEntity(user, {
-      model: strapi.getModel('plugin::users-permissions.user'),
-    });
+    const userInfo = await sanitizeUser(user, ctx);
 
     settings.message = await getService('users-permissions').template(settings.message, {
       URL: advanced.email_reset_password,
@@ -334,13 +335,11 @@ module.exports = {
 
       const user = await strapi.query('plugin::users-permissions.user').create({ data: params });
 
-      const sanitizedUser = sanitizeEntity(user, {
-        model: strapi.getModel('plugin::users-permissions.user'),
-      });
+      const sanitizedUser = await sanitizeUser(user, ctx);
 
       if (settings.email_confirmation) {
         try {
-          await getService('user').sendConfirmationEmail(user);
+          await getService('user').sendConfirmationEmail(sanitizedUser);
         } catch (err) {
           throw new ApplicationError(err.message);
         }
@@ -384,9 +383,7 @@ module.exports = {
     if (returnUser) {
       ctx.send({
         jwt: jwtService.issue({ id: user.id }),
-        user: sanitizeEntity(user, {
-          model: strapi.getModel('plugin::users-permissions.user'),
-        }),
+        user: await sanitizeUser(user, ctx),
       });
     } else {
       const settings = await strapi

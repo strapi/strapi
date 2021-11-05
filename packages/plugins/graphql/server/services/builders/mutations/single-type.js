@@ -2,10 +2,11 @@
 
 const { extendType, nonNull } = require('nexus');
 const { omit, isNil } = require('lodash/fp');
-const { getNonWritableAttributes } = require('@strapi/utils').contentTypes;
-const { NotFoundError } = require('@strapi/utils').errors;
 
-const sanitizeInput = (contentType, data) => omit(getNonWritableAttributes(contentType), data);
+const utils = require('@strapi/utils');
+
+const { sanitize } = utils;
+const { NotFoundError } = utils.errors;
 
 module.exports = ({ strapi }) => {
   const { service: getService } = strapi.plugin('graphql');
@@ -35,11 +36,18 @@ module.exports = ({ strapi }) => {
         data: nonNull(getContentTypeInputName(contentType)),
       },
 
-      async resolve(parent, args) {
+      async resolve(parent, args, context) {
+        const { auth } = context.state;
         const transformedArgs = transformArgs(args, { contentType });
 
         // Sanitize input data
-        Object.assign(transformedArgs, { data: sanitizeInput(contentType, transformedArgs.data) });
+        const sanitizedInputData = await sanitize.contentAPI.input(
+          transformedArgs.data,
+          contentType,
+          { auth }
+        );
+
+        Object.assign(transformedArgs, { data: sanitizedInputData });
 
         const { create, update } = getService('builders')
           .get('content-api')
@@ -72,20 +80,17 @@ module.exports = ({ strapi }) => {
       async resolve(parent, args) {
         const transformedArgs = transformArgs(args, { contentType });
 
-        Object.assign(transformedArgs, { data: sanitizeInput(contentType, transformedArgs.data) });
-
         const { delete: deleteResolver } = getService('builders')
           .get('content-api')
           .buildMutationsResolvers({ contentType });
 
-        const params = omit(['data', 'files'], transformedArgs);
-        const entity = await strapi.entityService.findMany(uid, { params });
+        const entity = await strapi.entityService.findMany(uid, { params: transformedArgs });
 
         if (!entity) {
           throw new NotFoundError('Entity not found');
         }
 
-        const value = await deleteResolver(parent, { id: entity.id, params });
+        const value = await deleteResolver(parent, { id: entity.id, params: transformedArgs });
 
         return toEntityResponse(value, { args: transformedArgs, resourceUID: uid });
       },

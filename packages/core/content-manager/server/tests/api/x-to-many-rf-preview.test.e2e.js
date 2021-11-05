@@ -124,7 +124,7 @@ describe('x-to-many RF Preview', () => {
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
 
-    Object.assign(data, builder.sanitizedFixtures(strapi));
+    Object.assign(data, await builder.sanitizedFixtures(strapi));
   });
 
   afterAll(async () => {

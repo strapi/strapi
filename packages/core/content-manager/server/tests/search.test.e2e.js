@@ -128,7 +128,7 @@ describe('Search query', () => {
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
 
-    data.beds = builder.sanitizedFixturesFor(bedModel.singularName, strapi);
+    data.beds = await builder.sanitizedFixturesFor(bedModel.singularName, strapi);
   });
 
   afterAll(async () => {

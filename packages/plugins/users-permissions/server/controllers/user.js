@@ -7,15 +7,17 @@
  */
 
 const _ = require('lodash');
-const { sanitizeEntity } = require('@strapi/utils');
+const { sanitize } = require('@strapi/utils');
 const { getService } = require('../utils');
 const adminUserController = require('./user/admin');
 const apiUserController = require('./user/api');
 
-const sanitizeUser = user =>
-  sanitizeEntity(user, {
-    model: strapi.getModel('plugin::users-permissions.user'),
-  });
+const sanitizeUser = (user, ctx) => {
+  const { auth } = ctx.state;
+  const userSchema = strapi.getModel('plugin::users-permissions.user');
+
+  return sanitize.contentAPI.output(user, userSchema, { auth });
+};
 
 const resolveController = ctx => {
   const {
@@ -47,7 +49,7 @@ module.exports = {
   async find(ctx, next, { populate } = {}) {
     const users = await getService('user').fetchAll(ctx.query, populate);
 
-    ctx.body = users.map(sanitizeUser);
+    ctx.body = await Promise.all(users.map(user => sanitizeUser(user, ctx)));
   },
 
   /**
@@ -59,7 +61,7 @@ module.exports = {
     let data = await getService('user').fetch({ id });
 
     if (data) {
-      data = sanitizeUser(data);
+      data = await sanitizeUser(data, ctx);
     }
 
     ctx.body = data;
@@ -81,8 +83,9 @@ module.exports = {
     const { id } = ctx.params;
 
     const data = await getService('user').remove({ id });
+    const sanitizedUser = await sanitizeUser(data, ctx);
 
-    ctx.send(sanitizeUser(data));
+    ctx.send(sanitizedUser);
   },
 
   /**
@@ -96,6 +99,6 @@ module.exports = {
       return ctx.unauthorized();
     }
 
-    ctx.body = sanitizeUser(user);
+    ctx.body = await sanitizeUser(user, ctx);
   },
 };

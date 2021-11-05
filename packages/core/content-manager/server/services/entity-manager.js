@@ -4,7 +4,7 @@ const { assoc, has, prop, omit } = require('lodash/fp');
 const strapiUtils = require('@strapi/utils');
 const { ApplicationError } = require('@strapi/utils').errors;
 
-const { sanitizeEntity } = strapiUtils;
+const { sanitize } = strapiUtils;
 const { hasDraftAndPublish, isVisibleAttribute } = strapiUtils.contentTypes;
 const { PUBLISHED_AT_ATTRIBUTE, CREATED_BY_ATTRIBUTE } = strapiUtils.contentTypes.constants;
 const { ENTRY_PUBLISH, ENTRY_UNPUBLISH } = strapiUtils.webhook.webhookEvents;
@@ -19,7 +19,7 @@ const wrapWithEmitEvent = (event, fn) => async (entity, model) => {
 
   strapi.eventHub.emit(event, {
     model: modelDef.modelName,
-    entry: sanitizeEntity(result, { model: modelDef }),
+    entry: sanitize.eventHub(result, modelDef),
   });
 
   return result;

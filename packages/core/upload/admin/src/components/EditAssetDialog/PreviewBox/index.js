@@ -6,7 +6,6 @@ import { IconButton } from '@strapi/design-system/IconButton';
 import Trash from '@strapi/icons/Trash';
 import DownloadIcon from '@strapi/icons/Download';
 import Resize from '@strapi/icons/Crop';
-import { prefixFileUrlWithBackendUrl } from '@strapi/helper-plugin';
 import getTrad from '../../../utils/getTrad';
 import { downloadFile } from '../../../utils/downloadFile';
 import { RemoveAssetDialog } from '../RemoveAssetDialog';
@@ -21,12 +20,11 @@ import {
   UploadProgressWrapper,
 } from './components';
 import { CroppingActions } from './CroppingActions';
-import { CopyLinkButton } from './CopyLinkButton';
+import { CopyLinkButton } from '../../CopyLinkButton';
 import { UploadProgress } from '../../UploadProgress';
-import { AssetType } from '../../../constants';
+import { AssetType, AssetDefinition } from '../../../constants';
 import { AssetPreview } from './AssetPreview';
-
-const createAssetUrl = url => prefixFileUrlWithBackendUrl(`${url}?id=${Date.now()}`);
+import { createAssetUrl } from '../../../utils/createAssetUrl';
 
 export const PreviewBox = ({
   asset,
@@ -40,7 +38,7 @@ export const PreviewBox = ({
   replacementFile,
 }) => {
   const previewRef = useRef(null);
-  const [assetUrl, setAssetUrl] = useState(createAssetUrl(asset.url));
+  const [assetUrl, setAssetUrl] = useState(createAssetUrl(asset));
   const { formatMessage } = useIntl();
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const {
@@ -79,7 +77,7 @@ export const PreviewBox = ({
 
     // Making sure that when persisting the new asset, the URL changes with width and height
     // So that the browser makes a request and handle the image caching correctly at the good size
-    const optimizedCachingImage = createAssetUrl(asset.url);
+    const optimizedCachingImage = createAssetUrl(asset);
     setAssetUrl(optimizedCachingImage);
 
     stopCropping();
@@ -195,7 +193,7 @@ export const PreviewBox = ({
         <RemoveAssetDialog
           onClose={() => {
             setShowConfirmDialog(false);
-            onDelete();
+            onDelete(null);
           }}
           asset={asset}
         />
@@ -213,18 +211,7 @@ PreviewBox.propTypes = {
   canCopyLink: PropTypes.bool.isRequired,
   canDownload: PropTypes.bool.isRequired,
   replacementFile: PropTypes.instanceOf(File),
-  asset: PropTypes.shape({
-    id: PropTypes.number,
-    height: PropTypes.number,
-    width: PropTypes.number,
-    size: PropTypes.number,
-    createdAt: PropTypes.string,
-    ext: PropTypes.string,
-    name: PropTypes.string,
-    url: PropTypes.string,
-    mime: PropTypes.string,
-    updatedAt: PropTypes.string,
-  }).isRequired,
+  asset: AssetDefinition.isRequired,
   onDelete: PropTypes.func.isRequired,
   onCropFinish: PropTypes.func.isRequired,
   onCropStart: PropTypes.func.isRequired,

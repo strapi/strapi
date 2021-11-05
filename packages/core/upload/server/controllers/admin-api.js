@@ -40,7 +40,7 @@ module.exports = {
 
     const { results, pagination } = await getService('upload').findPage(query);
 
-    const sanitizedResults = pm.sanitize(results, { withPrivate: false });
+    const sanitizedResults = await pm.sanitizeOutput(results);
 
     return { results: sanitizedResults, pagination };
   },
@@ -58,7 +58,7 @@ module.exports = {
       id
     );
 
-    ctx.body = pm.sanitize(file, { withPrivate: false });
+    ctx.body = await pm.sanitizeOutput(file);
   },
 
   async destroy(ctx) {
@@ -74,7 +74,7 @@ module.exports = {
 
     await getService('upload').remove(file);
 
-    ctx.body = pm.sanitize(file, { action: ACTIONS.read, withPrivate: false });
+    ctx.body = await pm.sanitizeOutput(file, { action: ACTIONS.read });
   },
 
   async updateSettings(ctx) {
@@ -121,7 +121,7 @@ module.exports = {
     const data = await validateUploadBody(body);
     const file = await uploadService.updateFileInfo(id, data.fileInfo, { user });
 
-    ctx.body = pm.sanitize(file, { action: ACTIONS.read, withPrivate: false });
+    ctx.body = await pm.sanitizeOutput(file, { action: ACTIONS.read });
   },
 
   async replaceFile(ctx) {
@@ -141,7 +141,7 @@ module.exports = {
     const data = await validateUploadBody(body);
     const replacedFiles = await uploadService.replace(id, { data, file: files }, { user });
 
-    ctx.body = pm.sanitize(replacedFiles, { action: ACTIONS.read, withPrivate: false });
+    ctx.body = await pm.sanitizeOutput(replacedFiles, { action: ACTIONS.read });
   },
 
   async uploadFiles(ctx) {
@@ -164,7 +164,7 @@ module.exports = {
     const data = await validateUploadBody(body);
     const uploadedFiles = await uploadService.upload({ data, files }, { user });
 
-    ctx.body = pm.sanitize(uploadedFiles, { action: ACTIONS.read, withPrivate: false });
+    ctx.body = await pm.sanitizeOutput(uploadedFiles, { action: ACTIONS.read });
   },
 
   async upload(ctx) {

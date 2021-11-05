@@ -8,18 +8,14 @@ import { prefixPluginTranslations } from '@strapi/helper-plugin';
 import pluginPkg from '../../package.json';
 import PluginIcon from './components/PluginIcon';
 import pluginPermissions from './permissions';
-import InputMedia from './components/InputMedia';
-import InputModalStepper from './components/InputModalStepper';
+import { MediaLibraryInput } from './components/MediaLibraryInput';
 import pluginId from './pluginId';
-import { getTrad } from './utils';
+import getTrad from './utils/getTrad';
 
 const name = pluginPkg.strapi.name;
 
 export default {
   register(app) {
-    // TODO update doc and guides
-    app.addComponents({ name: 'media-library', Component: InputModalStepper });
-
     app.addMenuLink({
       to: `/plugins/${pluginId}`,
       icon: PluginIcon,
@@ -35,7 +31,7 @@ export default {
       },
     });
 
-    app.addFields({ type: 'media', Component: InputMedia });
+    app.addFields({ type: 'media-library-input', Component: MediaLibraryInput });
 
     app.registerPlugin({
       id: pluginId,

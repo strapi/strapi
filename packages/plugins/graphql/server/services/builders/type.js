@@ -150,6 +150,12 @@ module.exports = context => {
     const type = attribute.multiple
       ? naming.getRelationResponseCollectionName(fileContentType)
       : naming.getEntityResponseName(fileContentType);
+    const resolverPath = `${naming.getTypeName(contentType)}.${attributeName}`;
+    const resolverAuthScope = `${fileUID}.find`;
+
+    extension.use({
+      resolversConfig: { [resolverPath]: { auth: { scope: [resolverAuthScope] } } },
+    });
 
     builder.field(attributeName, { type, resolve, args });
   };
@@ -229,6 +235,11 @@ module.exports = context => {
       : naming.getEntityResponseName(targetContentType);
 
     const args = isToManyRelation ? getContentTypeArgs(targetContentType) : undefined;
+
+    const resolverPath = `${naming.getTypeName(contentType)}.${attributeName}`;
+    const resolverScope = `${targetContentType.uid}.find`;
+
+    extension.use({ resolversConfig: { [resolverPath]: { auth: { scope: [resolverScope] } } } });
 
     builder.field(attributeName, { type, resolve, args });
   };
@@ -359,7 +370,7 @@ module.exports = context => {
               }
 
               // Regular Relations
-              else if (isRelation(attribute) || isMedia(attribute)) {
+              else if (isRelation(attribute)) {
                 addRegularRelationalAttribute(options);
               }
             });

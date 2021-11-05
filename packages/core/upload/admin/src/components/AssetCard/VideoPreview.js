@@ -1,23 +1,14 @@
 /* eslint-disable jsx-a11y/media-has-caption */
 import React from 'react';
 import PropTypes from 'prop-types';
-import styled from 'styled-components';
 import { Box } from '@strapi/design-system/Box';
-
-const VideoPreviewWrapper = styled(Box)`
-  canvas,
-  video {
-    display: block;
-    max-width: 100%;
-    max-height: ${({ size }) => (size === 'M' ? 164 / 16 : 88 / 16)}rem;
-  }
-`;
+import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
 
 // According to MDN
 // https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/readyState#value
 const HAVE_FUTURE_DATA = 3;
 
-export const VideoPreview = ({ url, mime, onLoadDuration, size }) => {
+export const VideoPreview = ({ url, mime, onLoadDuration, alt, ...props }) => {
   const handleTimeUpdate = e => {
     if (e.target.currentTime > 0) {
       const video = e.target;
@@ -41,27 +32,30 @@ export const VideoPreview = ({ url, mime, onLoadDuration, size }) => {
   };
 
   return (
-    <VideoPreviewWrapper size={size}>
+    <Box as="figure" {...props} key={url}>
       <video
         muted
         onLoadedData={handleThumbnailVisibility}
-        src={`${url}#t=1`}
+        src={url}
         crossOrigin="anonymous"
         onTimeUpdate={handleTimeUpdate}
       >
         <source type={mime} />
       </video>
-    </VideoPreviewWrapper>
+      <VisuallyHidden as="figcaption">{alt}</VisuallyHidden>
+    </Box>
   );
 };
 
 VideoPreview.defaultProps = {
+  onLoadDuration: () => {},
   size: 'M',
 };
 
 VideoPreview.propTypes = {
+  alt: PropTypes.string.isRequired,
   url: PropTypes.string.isRequired,
   mime: PropTypes.string.isRequired,
-  onLoadDuration: PropTypes.func.isRequired,
+  onLoadDuration: PropTypes.func,
   size: PropTypes.oneOf(['S', 'M']),
 };

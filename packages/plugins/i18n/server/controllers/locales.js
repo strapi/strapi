@@ -1,16 +1,18 @@
 'use strict';
 
-const { setCreatorFields, sanitizeEntity } = require('@strapi/utils');
-const { ApplicationError } = require('@strapi/utils').errors;
+const utils = require('@strapi/utils');
 const { pick } = require('lodash/fp');
 const { getService } = require('../utils');
 const { validateCreateLocaleInput, validateUpdateLocaleInput } = require('../validation/locales');
 const { formatLocale } = require('../domain/locale');
 
+const { setCreatorFields, sanitize } = utils;
+const { ApplicationError } = utils.errors;
+
 const sanitizeLocale = locale => {
   const model = strapi.getModel('plugin::i18n.locale');
 
-  return sanitizeEntity(locale, { model });
+  return sanitize.contentAPI.output(locale, model);
 };
 
 module.exports = {
@@ -18,8 +20,9 @@ module.exports = {
     const localesService = getService('locales');
 
     const locales = await localesService.find();
+    const sanitizedLocales = await sanitizeLocale(locales);
 
-    ctx.body = await localesService.setIsDefault(sanitizeLocale(locales));
+    ctx.body = await localesService.setIsDefault(sanitizedLocales);
   },
 
   async createLocale(ctx) {
@@ -45,7 +48,9 @@ module.exports = {
       await localesService.setDefaultLocale(locale);
     }
 
-    ctx.body = await localesService.setIsDefault(sanitizeLocale(locale));
+    const sanitizedLocale = await sanitizeLocale(locale);
+
+    ctx.body = await localesService.setIsDefault(sanitizedLocale);
   },
 
   async updateLocale(ctx) {
@@ -72,7 +77,9 @@ module.exports = {
       await localesService.setDefaultLocale(updatedLocale);
     }
 
-    ctx.body = await localesService.setIsDefault(sanitizeLocale(updatedLocale));
+    const sanitizedLocale = await sanitizeLocale(updatedLocale);
+
+    ctx.body = await localesService.setIsDefault(sanitizedLocale);
   },
 
   async deleteLocale(ctx) {
@@ -92,6 +99,8 @@ module.exports = {
 
     await localesService.delete({ id });
 
-    ctx.body = await localesService.setIsDefault(sanitizeLocale(existingLocale));
+    const sanitizedLocale = await sanitizeLocale(existingLocale);
+
+    ctx.body = await localesService.setIsDefault(sanitizedLocale);
   },
 };

@@ -120,6 +120,7 @@ export { default as useLibrary } from './hooks/useLibrary';
 export { default as useNotification } from './hooks/useNotification';
 export { default as useStrapiApp } from './hooks/useStrapiApp';
 export { default as useTracking } from './hooks/useTracking';
+export { useSelectionState } from './hooks/useSelectionState';
 
 export { default as useQueryParams } from './hooks/useQueryParams';
 export { default as useOverlayBlocker } from './hooks/useOverlayBlocker';
