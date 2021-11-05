@@ -480,7 +480,7 @@ describe('<SearchURLQuery />', () => {
     expect(clearedUrlSearchQuery).toEqual('?page=1');
   });
 
-  it.only('should call trackUsage with trackedEvent props when submit', async () => {
+  it('should call trackUsage with trackedEvent props when submit', async () => {
     const history = createMemoryHistory();
     const { container } = render(makeApp(history, 'thisEvent'));
 
