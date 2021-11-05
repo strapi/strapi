@@ -4,12 +4,12 @@ import { useIntl } from 'react-intl';
 import { Flex } from '@strapi/design-system/Flex';
 import { Stack } from '@strapi/design-system/Stack';
 import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
-import { Searchbar, SearchForm } from '@strapi/design-system/Searchbar';
-import { AssetList } from '../../../AssetList';
 import getTrad from '../../../../utils/getTrad';
+import { AssetList } from '../../../AssetList';
+import SortPicker from '../../../SortPicker';
 import PaginationFooter from './PaginationFooter';
 import PageSize from './PageSize';
-import SortPicker from '../../../SortPicker';
+import SearchAsset from './SearchAsset';
 
 export const BrowseStep = ({
   assets,
@@ -54,18 +54,12 @@ export const BrowseStep = ({
               </Flex>
               <SortPicker onChangeSort={onChangeSort} />
             </Stack>
-            <SearchForm onSubmit={onSubmitSearch}>
-              <Searchbar
-                name="searchbar"
-                onClear={onClearSearch}
-                onChange={e => onChangeSearch(e.target.value)}
-                clearLabel="Clearing the asset search"
-                size="S"
-                value={searchValue}
-              >
-                Searching for an asset
-              </Searchbar>
-            </SearchForm>
+            <SearchAsset
+              onClearSearch={onClearSearch}
+              onChangeSearch={onChangeSearch}
+              onSubmitSearch={onSubmitSearch}
+              searchValue={searchValue}
+            />
           </Flex>
         )}
 

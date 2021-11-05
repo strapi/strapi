@@ -145,16 +145,16 @@ export const MediaLibraryInput = ({
         selectedAssetIndex={selectedIndex}
       />
 
-      {/* {step === Steps.SelectAsset && ( */}
-      <AssetDialog
-        initiallySelectedAssets={initiallySelectedAssets}
-        onClose={() => setStep(undefined)}
-        onValidate={handleValidation}
-        multiple={multiple}
-        onAddAsset={() => setStep(Steps.UploadAsset)}
-        uploadedFiles={uploadedFiles}
-      />
-      {/* )} */}
+      {step === Steps.SelectAsset && (
+        <AssetDialog
+          initiallySelectedAssets={initiallySelectedAssets}
+          onClose={() => setStep(undefined)}
+          onValidate={handleValidation}
+          multiple={multiple}
+          onAddAsset={() => setStep(Steps.UploadAsset)}
+          uploadedFiles={uploadedFiles}
+        />
+      )}
 
       {step === Steps.UploadAsset && (
         <UploadAssetDialog
