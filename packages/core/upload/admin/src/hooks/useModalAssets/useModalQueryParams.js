@@ -21,12 +21,25 @@ const useModalQueryParams = () => {
     setQueryObject(prev => ({ ...prev, sort }));
   };
 
+  const handleChangeSearch = () => {
+    console.log('change search');
+  };
+
+  const handleSubmitSearch = e => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    console.log('submit search');
+  };
+
   return [
     { queryObject, rawQuery: stringify(queryObject, { encode: false }) },
     {
       onChangePage: handeChangePage,
       onChangePageSize: handleChangePageSize,
       onChangeSort: handleChangeSort,
+      onChangeSearch: handleChangeSearch,
+      onSubmitSearch: handleSubmitSearch,
     },
   ];
 };
