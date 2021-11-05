@@ -32,8 +32,6 @@
   "list.assets-empty.subtitle": "เพิ่มไปยังรายการ",
   "list.assets-empty.title": "ยังไม่มีไฟล์ใดๆ",
   "list.assets-empty.title-withSearch": "ไม่มีไฟล์ตามตัวกรองที่ใช้",
-  "list.assets.selected.plural": "{number} ไฟล์ที่เลือก",
-  "list.assets.selected.singular": "{number} ไฟล์ถูกเลือก",
   "list.assets.type-not-allowed": "ไม่อนุญาตให้ใช้ไฟล์ชนิดนี้",
   "modal.file-details.date": "วันที่",
   "modal.file-details.dimensions": "มิติ",
