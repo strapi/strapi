@@ -225,13 +225,13 @@ function Inputs({
       labelAction={labelAction}
       contentTypeUID={currentContentTypeLayout.uid}
       customInputs={{
-        // ...fields,
         json: InputJSON,
         uid: InputUID,
         // FIXME
         datetime: ComingSoonInput,
-        media: fields['media-library-input'] || ComingSoonInput,
+        media: fields.media,
         wysiwyg: Wysiwyg,
+        ...fields,
       }}
       multiple={fieldSchema.multiple || false}
       name={keys}
