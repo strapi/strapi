@@ -84,7 +84,12 @@ const TableRows = ({
                   {typeof cellFormatter === 'function' ? (
                     cellFormatter(data, { key, name, ...rest })
                   ) : (
-                    <CellContent content={data[name]} name={name} {...rest} rowId={data.id} />
+                    <CellContent
+                      content={data[name.split('.')[0]]}
+                      name={name}
+                      {...rest}
+                      rowId={data.id}
+                    />
                   )}
                 </Td>
               );
