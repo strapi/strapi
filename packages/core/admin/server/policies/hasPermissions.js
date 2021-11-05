@@ -1,9 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const {
-  policy: { createPolicyFactory },
-} = require('@strapi/utils');
+const { createPolicy } = require('@strapi/utils').policy;
 const { validateHasPermissionsInput } = require('../validation/policies/hasPermissions');
 
 const inputModifiers = [
@@ -22,28 +20,24 @@ const inputModifiers = [
   },
 ];
 
-module.exports = createPolicyFactory(
-  config => {
+module.exports = createPolicy({
+  name: 'admin::hasPermissions',
+  validator: validateHasPermissionsInput,
+  handler(ctx, config) {
     const { actions } = config;
 
     const permissions = actions.map(action =>
       inputModifiers.find(modifier => modifier.check(action)).transform(action)
     );
 
-    return ctx => {
-      const { userAbility: ability, isAuthenticated } = ctx.state;
+    const { userAbility: ability, isAuthenticated } = ctx.state;
 
-      if (!isAuthenticated || !ability) {
-        return true;
-      }
+    if (!isAuthenticated || !ability) {
+      return true;
+    }
 
-      const isAuthorized = permissions.every(({ action, subject }) => ability.can(action, subject));
+    const isAuthorized = permissions.every(({ action, subject }) => ability.can(action, subject));
 
-      return isAuthorized;
-    };
+    return isAuthorized;
   },
-  {
-    validator: validateHasPermissionsInput,
-    name: 'admin::hasPermissions',
-  }
-);
+});
