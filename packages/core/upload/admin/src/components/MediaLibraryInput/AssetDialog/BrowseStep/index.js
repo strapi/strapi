@@ -19,15 +19,12 @@ export const BrowseStep = ({
   onChangePageSize,
   onChangeSearch,
   onChangeSort,
-  onClearSearch,
   onEditAsset,
   onSelectAllAsset,
   onSelectAsset,
-  onSubmitSearch,
   pagination,
   queryObject,
   selectedAssets,
-  searchValue,
 }) => {
   const { formatMessage } = useIntl();
   const allAllowedAsset = getAllowedFiles(allowedTypes, assets);
@@ -65,12 +62,7 @@ export const BrowseStep = ({
               </Flex>
               <SortPicker onChangeSort={onChangeSort} />
             </Stack>
-            <SearchAsset
-              onClearSearch={onClearSearch}
-              onChangeSearch={onChangeSearch}
-              onSubmitSearch={onSubmitSearch}
-              searchValue={searchValue}
-            />
+            <SearchAsset onChangeSearch={onChangeSearch} queryValue={queryObject._q || ''} />
           </Flex>
         )}
 
@@ -107,16 +99,14 @@ BrowseStep.propTypes = {
   onChangePageSize: PropTypes.func.isRequired,
   onChangeSort: PropTypes.func.isRequired,
   onChangeSearch: PropTypes.func.isRequired,
-  onClearSearch: PropTypes.func.isRequired,
   onEditAsset: PropTypes.func.isRequired,
   onSelectAsset: PropTypes.func.isRequired,
   onSelectAllAsset: PropTypes.func,
-  onSubmitSearch: PropTypes.func.isRequired,
   queryObject: PropTypes.shape({
     page: PropTypes.number.isRequired,
     pageSize: PropTypes.number.isRequired,
+    _q: PropTypes.string,
   }).isRequired,
   pagination: PropTypes.shape({ pageCount: PropTypes.number.isRequired }).isRequired,
   selectedAssets: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
-  searchValue: PropTypes.string.isRequired,
 };

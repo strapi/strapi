@@ -7,10 +7,7 @@ const useModalQueryParams = () => {
     page: 1,
     sort: 'updatedAt:DESC',
     pageSize: 10,
-    _q: '',
   });
-
-  const [searchValue, setSearchValue] = useState('');
 
   const handleChangePageSize = pageSize => {
     setQueryObject(prev => ({ ...prev, pageSize: parseInt(pageSize, 10), page: 1 }));
@@ -25,31 +22,28 @@ const useModalQueryParams = () => {
   };
 
   const handleChangeSearch = _q => {
-    setSearchValue(_q);
-  };
+    if (_q) {
+      setQueryObject(prev => ({ ...prev, _q }));
+    } else {
+      const newState = {};
 
-  const handleSubmitSearch = e => {
-    e.preventDefault();
-    e.stopPropagation();
+      Object.keys(queryObject).forEach(key => {
+        if (key !== '_q') {
+          newState[key] = queryObject[key];
+        }
+      });
 
-    setQueryObject(prev => ({ ...prev, _q: searchValue }));
-  };
-
-  const handleClearSearch = () => {
-    setSearchValue('');
-    setQueryObject(prev => ({ ...prev, _q: '' }));
+      setQueryObject(newState);
+    }
   };
 
   return [
-    { searchValue },
     { queryObject, rawQuery: stringify(queryObject, { encode: false }) },
     {
       onChangePage: handeChangePage,
       onChangePageSize: handleChangePageSize,
       onChangeSort: handleChangeSort,
       onChangeSearch: handleChangeSearch,
-      onClearSearch: handleClearSearch,
-      onSubmitSearch: handleSubmitSearch,
     },
   ];
 };

@@ -32,9 +32,8 @@ export const AssetDialog = ({
   const { formatMessage } = useIntl();
   const { canRead, canCreate, isLoading: isLoadingPermissions } = useMediaLibraryPermissions();
   const [
-    { searchValue },
     { rawQuery, queryObject },
-    { onChangePage, onChangePageSize, onChangeSort, onChangeSearch, onClearSearch, onSubmitSearch },
+    { onChangePage, onChangePageSize, onChangeSort, onChangeSearch },
   ] = useModalQueryParams();
   const { data, isLoading, error } = useModalAssets({ skipWhen: !canRead, rawQuery });
 
@@ -191,9 +190,6 @@ export const AssetDialog = ({
                 onChangePageSize={onChangePageSize}
                 onChangeSort={onChangeSort}
                 onChangeSearch={onChangeSearch}
-                onClearSearch={onClearSearch}
-                onSubmitSearch={onSubmitSearch}
-                searchValue={searchValue}
               />
             </ModalBody>
           </TabPanel>

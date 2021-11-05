@@ -6,9 +6,10 @@ import { IconButton } from '@strapi/design-system/IconButton';
 import SearchIcon from '@strapi/icons/Search';
 import getTrad from '../../../../../utils/getTrad';
 
-const SearchAsset = ({ onChangeSearch, onClearSearch, onSubmitSearch, searchValue }) => {
+const SearchAsset = ({ onChangeSearch, queryValue }) => {
   const { formatMessage } = useIntl();
-  const [isOpen, setIsOpen] = useState(!!searchValue);
+  const [isOpen, setIsOpen] = useState(!!queryValue);
+  const [value, setValue] = useState(queryValue || '');
   const wrapperRef = useRef(null);
 
   useLayoutEffect(() => {
@@ -25,23 +26,30 @@ const SearchAsset = ({ onChangeSearch, onClearSearch, onSubmitSearch, searchValu
 
   const handleClear = () => {
     handleToggle();
-    onClearSearch();
+    onChangeSearch(null);
+  };
+
+  const handleSubmit = e => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    onChangeSearch(value);
   };
 
   if (isOpen) {
     return (
       <div ref={wrapperRef}>
-        <SearchForm onSubmit={onSubmitSearch}>
+        <SearchForm onSubmit={handleSubmit}>
           <Searchbar
             name="search"
             onClear={handleClear}
-            onChange={e => onChangeSearch(e.target.value)}
+            onChange={e => setValue(e.target.value)}
             clearLabel={formatMessage({
               id: getTrad('search.clear.label'),
               defaultMessage: 'Clear the search',
             })}
             size="S"
-            value={searchValue}
+            value={value}
             placeholder={formatMessage({
               id: getTrad('search.placeholder'),
               defaultMessage: 'e.g: the first dog on the moon',
@@ -57,11 +65,13 @@ const SearchAsset = ({ onChangeSearch, onClearSearch, onSubmitSearch, searchValu
   return <IconButton icon={<SearchIcon />} label="Search" onClick={handleToggle} />;
 };
 
+SearchAsset.defaultProps = {
+  queryValue: null,
+};
+
 SearchAsset.propTypes = {
   onChangeSearch: PropTypes.func.isRequired,
-  onClearSearch: PropTypes.func.isRequired,
-  onSubmitSearch: PropTypes.func.isRequired,
-  searchValue: PropTypes.string.isRequired,
+  queryValue: PropTypes.string,
 };
 
 export default SearchAsset;
