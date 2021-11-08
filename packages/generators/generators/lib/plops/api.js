@@ -3,8 +3,6 @@
 const { join } = require('path');
 const fs = require('fs-extra');
 const validateInput = require('./utils/validate-input');
-const contentTypePrompts = require('./content-type').prompts;
-const contentTypeActions = require('./content-type').actions;
 
 module.exports = plop => {
   // API generator
@@ -74,12 +72,10 @@ module.exports = plop => {
         return api;
       }
 
-      // TODO: make prompts and actions more re-usable and composable
-      const contentType = await contentTypePrompts(plop, inquirer);
-
       return {
         ...api,
-        ...contentType,
+        // TODO: make prompts and actions more re-usable and composable
+        ...(await plop.getGenerator('content-type').prompts(inquirer)),
       };
     },
     actions(answers) {
@@ -125,7 +121,7 @@ module.exports = plop => {
         },
         ...baseActions,
         // TODO: make prompts and actions more re-usable and composable
-        ...(answers.createContentType ? contentTypeActions(answers) : []),
+        ...(answers.createContentType ? plop.getGenerator('content-type').actions(answers) : []),
       ];
     },
   });
