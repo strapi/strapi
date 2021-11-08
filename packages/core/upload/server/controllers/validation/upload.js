@@ -19,7 +19,7 @@ const multiUploadSchema = yup.object({
 const validateUploadBody = (data = {}, isMulti = false) => {
   const schema = isMulti ? multiUploadSchema : uploadSchema;
 
-  return validateYupSchema(schema)(data);
+  return validateYupSchema(schema, { strict: false })(data);
 };
 
 module.exports = validateUploadBody;

@@ -15,9 +15,14 @@ const editAssetRequest = (asset, file, cancelToken, onProgress) => {
     formData.append('files', file);
   }
 
-  formData.append('fileInfo.name', asset.name);
-  formData.append('fileInfo.alternativeText', asset.alternativeText);
-  formData.append('fileInfo.caption', asset.caption);
+  formData.append(
+    'fileInfo',
+    JSON.stringify({
+      alternativeText: asset.alternativeText,
+      caption: asset.caption,
+      name: asset.name,
+    })
+  );
 
   return axiosInstance({
     method: 'post',
