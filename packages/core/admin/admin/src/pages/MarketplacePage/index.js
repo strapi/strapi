@@ -7,6 +7,7 @@ import {
   // useAppInfos,
   // useTracking,
   // useStrapiApp,
+  pxToRem,
   CheckPagePermissions,
 } from '@strapi/helper-plugin';
 // import { Header } from '@buffetjs/custom';
@@ -115,11 +116,31 @@ import {
 // };
 
 import { useIntl } from 'react-intl';
+import styled from 'styled-components';
 import { Helmet } from 'react-helmet';
 import { Layout, HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
 import { Flex } from '@strapi/design-system/Flex';
+import { Box } from '@strapi/design-system/Box';
+import { Stack } from '@strapi/design-system/Stack';
+import { LinkButton } from '@strapi/design-system/LinkButton';
 import { Main } from '@strapi/design-system/Main';
+import { Typography } from '@strapi/design-system/Typography';
 import adminPermissions from '../../permissions';
+import MarketplacePicture from '../../assets/images/marketplace-coming-soon.png';
+
+const CenterTypography = styled(Typography)`
+  text-align: center;
+`;
+
+const IllustrationContainer = styled(Box)`
+  img {
+    width: ${190 / 16}rem;
+  }
+`;
+
+const StackCentered = styled(Stack)`
+  align-items: center;
+`;
 
 const MarketPlacePage = () => {
   const { formatMessage } = useIntl();
@@ -139,18 +160,59 @@ const MarketPlacePage = () => {
               id: 'app.components.InstallPluginPage.title',
               defaultMessage: 'Marketplace',
             })}
+            subtitle={formatMessage({
+              id: 'app.components.InstallPluginPage.subtitle',
+              defaultMessage: 'Get more out of Strapi',
+            })}
           />
           <ContentLayout>
-            <Flex
+            <StackCentered
+              size={0}
               hasRadius
               background="neutral0"
               shadow="tableShadow"
               paddingTop={10}
               paddingBottom={10}
-              justifyContent="center"
             >
-              kikou
-            </Flex>
+              <IllustrationContainer paddingBottom={7}>
+                <img alt="marketplace illustration" src={MarketplacePicture} />
+              </IllustrationContainer>
+              <Typography variant="alpha">
+                {formatMessage({
+                  id: 'app.components.InstallPluginPage.coming-soon.1',
+                  defaultMessage: 'A new way to make Strapi awesome.',
+                })}
+              </Typography>
+              <Typography variant="alpha" textColor="primary700">
+                {formatMessage({
+                  id: 'app.components.InstallPluginPage.coming-soon.2',
+                  defaultMessage: 'A new way to make Strapi awesome.',
+                })}
+              </Typography>
+              <Flex maxWidth={pxToRem(580)} paddingTop={3}>
+                <CenterTypography variant="epsilon" textColor="neutral600">
+                  {formatMessage({
+                    id: 'app.components.InstallPluginPage.content.subtitle',
+                    defaultMessage:
+                      'The new marketplace will help you get more out of Strapi. We are working hard to offer the best experience to discover and install plugins.',
+                  })}
+                </CenterTypography>
+              </Flex>
+              <Stack paddingTop={6} horizontal size={2}>
+                <LinkButton href="https://strapi.io/" size="L" variant="secondary">
+                  {formatMessage({
+                    id: 'app.components.InstallPluginPage.submit.plugin.link',
+                    defaultMessage: 'Submit your plugin',
+                  })}
+                </LinkButton>
+                <LinkButton href="https://strapi.io/" size="L">
+                  {formatMessage({
+                    id: 'app.components.InstallPluginPage.blog.link',
+                    defaultMessage: 'Read our blog post',
+                  })}
+                </LinkButton>
+              </Stack>
+            </StackCentered>
           </ContentLayout>
         </Main>
       </Layout>
