@@ -82,7 +82,8 @@ module.exports = strapi => {
 
       router[method](path, routeHandler);
     } catch (error) {
-      throw new Error(`Error creating endpoint ${route.method} ${route.path}: ${error.message}`);
+      error.message = `Error creating endpoint ${route.method} ${route.path}: ${error.message}`;
+      throw error;
     }
   };
 };
