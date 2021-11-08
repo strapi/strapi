@@ -77,6 +77,7 @@
   "plugin.description.long": "Media file management.",
   "plugin.description.short": "Media file management.",
   "plugin.name": "Media Library",
+  "search.clear.label": "Clear the search",
   "search.label": "Search for an asset",
   "search.placeholder": "e.g: the first dog on the moon",
   "settings.form.autoOrientation.description": "Automatically rotate image according to EXIF orientation tag",
