@@ -69,7 +69,7 @@ export const AssetMeta = ({ size, date, dimension, extension }) => {
               fontSize={1}
               lineHeight={3}
             >
-              KIKOU{extension}
+              {extension}
             </Typography>
           </Stack>
         </GridItem>

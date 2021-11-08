@@ -1243,7 +1243,6 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                                 <span
                                   class="c32"
                                 >
-                                  KIKOU
                                   png
                                 </span>
                               </div>
