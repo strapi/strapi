@@ -76,7 +76,7 @@ const promptConfigQuestions = (plop, inquirer) => {
       default: 'collectionType',
       choices: [
         { name: 'Collection Type', value: 'collectionType' },
-        { name: 'Singe Type', value: 'singleType' },
+        { name: 'Single Type', value: 'singleType' },
       ],
       validate: input => validateInput(input),
     },
@@ -133,77 +133,90 @@ const promptAttributeQuestions = inquirer => {
   ]);
 };
 
+// TODO: make prompts and actions more re-usable and composable
+const prompts = async (plop, inquirer) => {
+  const config = await promptConfigQuestions(plop, inquirer);
+
+  if (!config.addAttributes) {
+    return {
+      ...config,
+      attributes: [],
+    };
+  }
+
+  const attributes = [];
+
+  const genAttribute = async () => {
+    const answers = await promptAttributeQuestions(inquirer);
+
+    attributes.push(answers);
+
+    if (answers.addAttributes) {
+      return genAttribute();
+    }
+  };
+
+  await genAttribute();
+
+  return {
+    ...config,
+    attributes,
+  };
+};
+
+// TODO: make prompts and actions more re-usable and composable
+const actions = answers => {
+  const attributes = answers.attributes.reduce((object, answer) => {
+    const val = { type: answer.attributeType };
+
+    if (answer.attributeType === 'enumeration') {
+      val.enum = answer.enum.split(',').map(item => item.trim());
+    }
+
+    if (answer.attributeType === 'media') {
+      val.allowedTypes = ['images', 'files', 'videos'];
+      val.multiple = answer.multiple;
+    }
+
+    return Object.assign(object, { [answer.attributeName]: val }, {});
+  }, {});
+
+  const filePath = getFilePath(answers.destination);
+
+  return [
+    {
+      type: 'add',
+      path: `${filePath}/content-types/{{ singularName }}/schema.json`,
+      templateFile: 'templates/content-type.schema.json.hbs',
+      data: {
+        id: answers.singularName,
+        collectionName: slugify(answers.pluralName, { separator: '_' }),
+      },
+    },
+    {
+      type: 'modify',
+      path: `${filePath}/content-types/{{ singularName }}/schema.json`,
+      transform(template) {
+        const parsedTemplate = JSON.parse(template);
+        parsedTemplate.attributes = attributes;
+        return JSON.stringify(parsedTemplate, null, 2);
+      },
+    },
+  ];
+};
+
 module.exports = plop => {
   // Model generator
   plop.setGenerator('content-type', {
     description: 'Generate a content type for an API',
     async prompts(inquirer) {
-      const config = await promptConfigQuestions(plop, inquirer);
-
-      if (!config.addAttributes) {
-        return {
-          ...config,
-          attributes: [],
-        };
-      }
-
-      const attributes = [];
-
-      const genAttribute = async () => {
-        const answers = await promptAttributeQuestions(inquirer);
-
-        attributes.push(answers);
-
-        if (answers.addAttributes) {
-          return genAttribute();
-        }
-      };
-
-      await genAttribute();
-
-      return {
-        ...config,
-        attributes,
-      };
+      return prompts(plop, inquirer);
     },
     actions(answers) {
-      const attributes = answers.attributes.reduce((object, answer) => {
-        const val = { type: answer.attributeType };
-
-        if (answer.attributeType === 'enumeration') {
-          val.enum = answer.enum.split(',').map(item => item.trim());
-        }
-
-        if (answer.attributeType === 'media') {
-          val.allowedTypes = ['images', 'files', 'videos'];
-          val.multiple = answer.multiple;
-        }
-
-        return Object.assign(object, { [answer.attributeName]: val }, {});
-      }, {});
-
-      const filePath = getFilePath(answers.destination);
-
-      return [
-        {
-          type: 'add',
-          path: `${filePath}/content-types/{{ singularName }}/schema.json`,
-          templateFile: 'templates/content-type.schema.json.hbs',
-          data: {
-            id: answers.singularName,
-            collectionName: slugify(answers.pluralName, { separator: '_' }),
-          },
-        },
-        {
-          type: 'modify',
-          path: `${filePath}/content-types/{{ singularName }}/schema.json`,
-          transform(template) {
-            const parsedTemplate = JSON.parse(template);
-            parsedTemplate.attributes = attributes;
-            return JSON.stringify(parsedTemplate, null, 2);
-          },
-        },
-      ];
+      return actions(answers);
     },
   });
 };
+
+module.exports.prompts = prompts;
+module.exports.actions = actions;
