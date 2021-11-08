@@ -1,25 +1,25 @@
 'use strict';
 
-const { getOr } = require('lodash/fp');
+const { propOr } = require('lodash/fp');
 const { policy: policyUtils } = require('@strapi/utils');
 const { ForbiddenError } = require('@strapi/utils').errors;
 
+const getPoliciesConfig = propOr([], 'policies');
+
 const createPoliciesMiddleware = (resolverConfig, { strapi }) => {
+  const resolverPolicies = getPoliciesConfig(resolverConfig);
+  const policies = policyUtils.resolve(resolverPolicies);
+
   return async (resolve, ...rest) => {
-    const resolverPolicies = getOr([], 'policies', resolverConfig);
-
-    // Transform every policy into a unique format
-    const policies = resolverPolicies.map(policy => policyUtils.get(policy));
-
     // Create a graphql policy context
     const context = createGraphQLPolicyContext(...rest);
 
     // Run policies & throw an error if one of them fails
-    for (const policy of policies) {
-      const result = await policy(context, { strapi });
+    for (const { handler, config } of policies) {
+      const result = await handler(context, config, { strapi });
 
       if (![true, undefined].includes(result)) {
-        throw new ForbiddenError();
+        throw new ForbiddenError('Policies failed.');
       }
     }
 

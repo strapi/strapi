@@ -1,12 +1,16 @@
 'use strict';
 
 const {
-  policy: { createPolicyFactory },
+  policy: { createPolicy },
 } = require('@strapi/utils');
 const { validateHasPermissionsInput } = require('../validation/policies/hasPermissions');
 
-module.exports = createPolicyFactory(
-  ({ actions = [], hasAtLeastOne = false } = {}) => ctx => {
+module.exports = createPolicy({
+  name: 'plugin::content-manager.hasPermissions',
+  validator: validateHasPermissionsInput,
+  handler(ctx, config = {}) {
+    const { actions = [], hasAtLeastOne = false } = config;
+
     const {
       state: { userAbility, isAuthenticatedAdmin },
       params: { model },
@@ -22,8 +26,4 @@ module.exports = createPolicyFactory(
 
     return isAuthorized;
   },
-  {
-    validator: validateHasPermissionsInput,
-    name: 'plugin::content-manager.hasPermissions',
-  }
-);
+});
