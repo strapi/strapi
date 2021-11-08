@@ -17,9 +17,9 @@ const getLimitConfigDefaults = () => ({
  * @param {number?} maxLimit - maxlimit used has capping
  * @returns {number}
  */
-const applyMaxLimit = (limit, maxLimit) => {
-  if (maxLimit && (limit === -1 || limit > maxLimit)) {
-    return maxLimit;
+const applyMaxLimit = (limit, maxLimit = null) => {
+  if (limit === -1 || (maxLimit && limit > maxLimit)) {
+    return maxLimit || -1;
   }
 
   return Math.max(1, limit);
