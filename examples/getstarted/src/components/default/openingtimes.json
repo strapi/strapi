@@ -1,7 +1,7 @@
 {
   "collectionName": "components_openingtimes",
   "info": {
-    "name": "openingtimes",
+    "displayName": "openingtimes",
     "description": "",
     "icon": "calendar"
   },

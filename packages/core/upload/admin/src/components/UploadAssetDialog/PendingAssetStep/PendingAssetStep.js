@@ -1,20 +1,17 @@
 import React, { useState, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { ModalHeader, ModalBody, ModalFooter } from '@strapi/parts/ModalLayout';
-import { ButtonText, Text } from '@strapi/parts/Text';
-import { Button } from '@strapi/parts/Button';
+import { ModalHeader, ModalBody, ModalFooter } from '@strapi/design-system/ModalLayout';
+import { ButtonText, Text } from '@strapi/design-system/Text';
+import { Button } from '@strapi/design-system/Button';
 import { useIntl } from 'react-intl';
-import { Row } from '@strapi/parts/Row';
-import { Stack } from '@strapi/parts/Stack';
-import { Grid, GridItem } from '@strapi/parts/Grid';
-import { KeyboardNavigable } from '@strapi/parts/KeyboardNavigable';
-import { DocAssetCard } from '../../AssetCard/DocAssetCard';
-import { ImageAssetCard } from '../../AssetCard/ImageAssetCard';
-import { VideoAssetCard } from '../../AssetCard/VideoAssetCard';
-import { UnknownAssetCard } from '../../AssetCard/UnknownAssetCard';
+import { Flex } from '@strapi/design-system/Flex';
+import { Stack } from '@strapi/design-system/Stack';
+import { Grid, GridItem } from '@strapi/design-system/Grid';
+import { KeyboardNavigable } from '@strapi/design-system/KeyboardNavigable';
+import { AssetCard } from '../../AssetCard/AssetCard';
 import { UploadingAssetCard } from '../../AssetCard/UploadingAssetCard';
-import { getTrad } from '../../../utils';
-import { AssetType, AssetSource } from '../../../constants';
+import getTrad from '../../../utils/getTrad';
+import { AssetDefinition } from '../../../constants';
 
 const Status = {
   Idle: 'IDLE',
@@ -23,6 +20,7 @@ const Status = {
 };
 
 export const PendingAssetStep = ({
+  addUploadedFiles,
   onClose,
   assets,
   onClickAddAsset,
@@ -35,6 +33,7 @@ export const PendingAssetStep = ({
 
   const handleSubmit = async e => {
     e.preventDefault();
+    e.stopPropagation();
 
     setUploadStatus(Status.Uploading);
   };
@@ -70,13 +69,14 @@ export const PendingAssetStep = ({
 
       <ModalBody>
         <Stack size={7}>
-          <Row justifyContent="space-between">
+          <Flex justifyContent="space-between">
             <Stack size={0}>
               <Text small bold textColor="neutral800">
                 {formatMessage(
                   {
-                    id: getTrad('list.assets.selected.plural'),
-                    defaultMessage: '0 asset selected',
+                    id: getTrad('list.assets.selected'),
+                    defaultMessage:
+                      '{number, plural, =0 {No asset} one {1 asset} other {# assets}} selected',
                   },
                   { number: assets.length }
                 )}
@@ -94,7 +94,7 @@ export const PendingAssetStep = ({
                 defaultMessage: 'Upload new asset',
               })}
             </Button>
-          </Row>
+          </Flex>
           <KeyboardNavigable tagName="article">
             <Grid gap={4}>
               {assets.map(asset => {
@@ -104,57 +104,15 @@ export const PendingAssetStep = ({
                   return (
                     <GridItem col={4} key={assetKey}>
                       <UploadingAssetCard
+                        // Props used to store the newly uploaded files
+                        addUploadedFiles={addUploadedFiles}
+                        assetType={asset.type}
+                        extension={asset.ext}
+                        file={asset.rawFile}
                         id={assetKey}
                         name={asset.name}
-                        extension={asset.ext}
-                        assetType={asset.type}
-                        file={asset.rawFile}
-                        size="S"
                         onCancel={onCancelUpload}
                         onStatusChange={status => handleStatusChange(status, asset.rawFile)}
-                      />
-                    </GridItem>
-                  );
-                }
-
-                if (asset.type === AssetType.Image) {
-                  return (
-                    <GridItem col={4} key={assetKey}>
-                      <ImageAssetCard
-                        id={assetKey}
-                        name={asset.name}
-                        extension={asset.ext}
-                        height={asset.height}
-                        width={asset.width}
-                        thumbnail={asset.url}
-                        size="S"
-                      />
-                    </GridItem>
-                  );
-                }
-
-                if (asset.type === AssetType.Video) {
-                  return (
-                    <GridItem col={4} key={assetKey}>
-                      <VideoAssetCard
-                        id={assetKey}
-                        name={asset.name}
-                        extension={asset.ext}
-                        url={asset.url}
-                        mime={asset.mime}
-                        size="S"
-                      />
-                    </GridItem>
-                  );
-                }
-
-                if (asset.type === AssetType.Unknown) {
-                  return (
-                    <GridItem col={4} key={assetKey}>
-                      <UnknownAssetCard
-                        id={assetKey}
-                        name={asset.name}
-                        extension={asset.ext}
                         size="S"
                       />
                     </GridItem>
@@ -163,7 +121,7 @@ export const PendingAssetStep = ({
 
                 return (
                   <GridItem col={4} key={assetKey}>
-                    <DocAssetCard name={asset.name} extension={asset.ext} size="S" />
+                    <AssetCard asset={asset} size="S" key={assetKey} local alt={asset.name} />
                   </GridItem>
                 );
               })}
@@ -194,16 +152,13 @@ export const PendingAssetStep = ({
   );
 };
 
+PendingAssetStep.defaultProps = {
+  addUploadedFiles: undefined,
+};
+
 PendingAssetStep.propTypes = {
-  assets: PropTypes.arrayOf(
-    PropTypes.shape({
-      source: PropTypes.oneOf(Object.values(AssetSource)),
-      type: PropTypes.oneOf(Object.values(AssetType)),
-      url: PropTypes.string,
-      mime: PropTypes.string,
-      ext: PropTypes.string,
-    })
-  ).isRequired,
+  addUploadedFiles: PropTypes.func,
+  assets: PropTypes.arrayOf(AssetDefinition).isRequired,
   onClose: PropTypes.func.isRequired,
   onClickAddAsset: PropTypes.func.isRequired,
   onUploadSucceed: PropTypes.func.isRequired,

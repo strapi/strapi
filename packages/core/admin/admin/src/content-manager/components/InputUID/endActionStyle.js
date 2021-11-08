@@ -1,7 +1,7 @@
 import styled, { keyframes } from 'styled-components';
-import { Box } from '@strapi/parts/Box';
-import { Row } from '@strapi/parts/Row';
-import { FieldAction } from '@strapi/parts/Field';
+import { Box } from '@strapi/design-system/Box';
+import { Flex } from '@strapi/design-system/Flex';
+import { FieldAction } from '@strapi/design-system/Field';
 
 export const EndActionWrapper = styled(Box)`
   position: relative;
@@ -23,7 +23,7 @@ export const FieldActionWrapper = styled(FieldAction)`
   }
 `;
 
-export const TextValidation = styled(Row)`
+export const TextValidation = styled(Flex)`
   position: absolute;
   right: ${({ theme }) => theme.spaces[6]};
   width: 100px;
@@ -49,6 +49,6 @@ const rotation = keyframes`
   }
 `;
 
-export const LoadingWrapper = styled(Row)`
+export const LoadingWrapper = styled(Flex)`
   animation: ${rotation} 2s infinite linear;
 `;

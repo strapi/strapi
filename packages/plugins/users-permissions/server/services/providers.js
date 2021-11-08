@@ -586,8 +586,10 @@ module.exports = ({ strapi }) => {
     });
   };
 
-  const buildRedirectUri = (provider = '') =>
-    `${getAbsoluteServerUrl(strapi.config)}/api/connect/${provider}/callback`;
+  const buildRedirectUri = (provider = '') => {
+    const apiPrefix = strapi.config.get('api.rest.prefix');
+    return `${getAbsoluteServerUrl(strapi.config)}/${apiPrefix}/connect/${provider}/callback`;
+  };
 
   return {
     connect,

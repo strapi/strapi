@@ -26,17 +26,13 @@ const createPermissionChecker = strapi => ({ userAbility, model }) => {
   };
 
   const sanitizeOutput = (data, { action = ACTIONS.read } = {}) => {
-    return permissionsManager.sanitize(data, {
-      subject: toSubject(data),
-      action,
-    });
+    return permissionsManager.sanitizeOutput(data, { subject: toSubject(data), action });
   };
 
   const sanitizeInput = (action, data, entity) => {
-    return permissionsManager.sanitize(data, {
+    return permissionsManager.sanitizeInput(data, {
       subject: entity ? toSubject(entity) : model,
       action,
-      isOutput: false,
     });
   };
 

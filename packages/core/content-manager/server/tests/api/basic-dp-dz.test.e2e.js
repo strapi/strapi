@@ -2,8 +2,6 @@
 
 // Test a simple default API with no relations
 
-const _ = require('lodash');
-
 const { createTestBuilder } = require('../../../../../../test/helpers/builder');
 const { createStrapiInstance } = require('../../../../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../../../../test/helpers/request');
@@ -16,7 +14,7 @@ let data = {
 };
 
 const compo = {
-  name: 'compo',
+  displayName: 'compo',
   attributes: {
     name: {
       type: 'string',
@@ -45,7 +43,9 @@ const productWithCompoAndDP = {
     },
   },
   draftAndPublish: true,
-  name: 'product with dz and DP',
+  displayName: 'product with dz and DP',
+  singularName: 'product-with-dz-and-dp',
+  pluralName: 'product-with-dz-and-dps',
   description: '',
   collectionName: '',
 };
@@ -206,9 +206,23 @@ describe('CM API - Basic + dz + draftAndPublish', () => {
         });
 
         expect(res.statusCode).toBe(400);
-        expect(_.get(res.body.data, ['errors', 'dz[0].description', '0'])).toBe(
-          'dz[0].description must be at most 30 characters'
-        );
+        expect(res.body).toMatchObject({
+          data: null,
+          error: {
+            status: 400,
+            name: 'ValidationError',
+            message: 'dz[0].description must be at most 30 characters',
+            details: {
+              errors: [
+                {
+                  path: ['dz', '0', 'description'],
+                  message: 'dz[0].description must be at most 30 characters',
+                  name: 'ValidationError',
+                },
+              ],
+            },
+          },
+        });
       });
 
       test(`Can ${method} product with compo - required`, async () => {
@@ -255,9 +269,23 @@ describe('CM API - Basic + dz + draftAndPublish', () => {
         });
 
         expect(res.statusCode).toBe(400);
-        expect(_.get(res.body.data, ['errors', 'dz[0].__component', '0'])).toBe(
-          'dz[0].__component is a required field'
-        );
+        expect(res.body).toMatchObject({
+          data: null,
+          error: {
+            status: 400,
+            name: 'ValidationError',
+            message: 'dz[0].__component is a required field',
+            details: {
+              errors: [
+                {
+                  path: ['dz', '0', '__component'],
+                  message: 'dz[0].__component is a required field',
+                  name: 'ValidationError',
+                },
+              ],
+            },
+          },
+        });
       });
     });
   });

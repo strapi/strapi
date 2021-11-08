@@ -79,7 +79,7 @@ describe('Default Service', () => {
         const service = createService({ strapi, model });
 
         const input = {};
-        await service.createOrUpdate(input);
+        await service.createOrUpdate({ data: input });
 
         expect(strapi.entityService.findMany).toHaveBeenCalledWith('testModel', {
           publicationState: 'live',
@@ -107,7 +107,7 @@ describe('Default Service', () => {
         const service = createService({ strapi, model });
 
         const input = {};
-        await service.createOrUpdate(input);
+        await service.createOrUpdate({ data: input });
 
         expect(strapi.entityService.findMany).toHaveBeenCalledWith('testModel', {
           populate: undefined,

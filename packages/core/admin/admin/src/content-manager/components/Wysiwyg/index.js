@@ -2,9 +2,9 @@ import React, { useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
-import { ButtonText, P } from '@strapi/parts/Text';
-import { Box } from '@strapi/parts/Box';
-import { Row } from '@strapi/parts/Row';
+import { ButtonText, P } from '@strapi/design-system/Text';
+import { Box } from '@strapi/design-system/Box';
+import { Flex } from '@strapi/design-system/Flex';
 import Editor from './Editor';
 import WysiwygNav from './WysiwygNav';
 import WysiwygFooter from './WysiwygFooter';
@@ -125,10 +125,10 @@ const Wysiwyg = ({
 
   return (
     <>
-      <Row>
+      <Flex>
         <ButtonText>{label}</ButtonText>
         {labelAction && <LabelAction paddingLeft={1}>{labelAction}</LabelAction>}
-      </Row>
+      </Flex>
       <WysiwygWrapper hasRadius error={error}>
         <WysiwygNav
           editorRef={editorRef}

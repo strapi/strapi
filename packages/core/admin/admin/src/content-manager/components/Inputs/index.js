@@ -4,16 +4,11 @@ import get from 'lodash/get';
 import omit from 'lodash/omit';
 import take from 'lodash/take';
 import isEqual from 'react-fast-compare';
-import {
-  NotAllowedInput,
-  // useLibrary
-} from '@strapi/helper-plugin';
+import { GenericInput, NotAllowedInput, useLibrary } from '@strapi/helper-plugin';
 import { useContentTypeLayout } from '../../hooks';
 import { getFieldName } from '../../utils';
 import Wysiwyg from '../Wysiwyg';
 import InputJSON from '../InputJSON';
-import ComingSoonInput from './ComingSoonInput';
-import GenericInput from './GenericInput';
 import InputUID from '../InputUID';
 import SelectWrapper from '../SelectWrapper';
 
@@ -34,14 +29,13 @@ function Inputs({
   keys,
   labelAction,
   metadatas,
-
   onChange,
   readableFields,
   shouldNotRunValidations,
   queryInfos,
   value,
 }) {
-  // const { fields } = useLibrary();
+  const { fields } = useLibrary();
   const { contentType: currentContentTypeLayout } = useContentTypeLayout();
 
   const disabled = useMemo(() => !get(metadatas, 'editable', true), [metadatas]);
@@ -183,12 +177,12 @@ function Inputs({
         labelAction={labelAction}
         error={errorId}
         name={keys}
+        required={isRequired}
       />
     );
   }
 
   if (type === 'relation') {
-    // return 'RELATION';
     return (
       <SelectWrapper
         {...metadatas}
@@ -230,19 +224,18 @@ function Inputs({
       labelAction={labelAction}
       contentTypeUID={currentContentTypeLayout.uid}
       customInputs={{
-        // ...fields,
         json: InputJSON,
         uid: InputUID,
-        // FIXME
-        datetime: ComingSoonInput,
-        media: ComingSoonInput,
+        media: fields.media,
         wysiwyg: Wysiwyg,
+        ...fields,
       }}
       multiple={fieldSchema.multiple || false}
       name={keys}
       onChange={onChange}
       options={options}
       placeholder={placeholder ? { id: placeholder, defaultMessage: placeholder } : null}
+      required={fieldSchema.required || false}
       step={step}
       type={inputType}
       // validations={validations}

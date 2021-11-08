@@ -5,7 +5,12 @@ const { parseBody } = require('./transform');
 /**
  * Returns a single type controller to handle default core-api actions
  */
-const createSingleTypeController = ({ service, sanitize, transformResponse }) => {
+const createSingleTypeController = ({
+  service,
+  sanitizeInput,
+  sanitizeOutput,
+  transformResponse,
+}) => {
   return {
     /**
      * Retrieve single type content
@@ -14,8 +19,11 @@ const createSingleTypeController = ({ service, sanitize, transformResponse }) =>
      */
     async find(ctx) {
       const { query } = ctx;
+
       const entity = await service.find(query);
-      return transformResponse(sanitize(entity));
+      const sanitizedEntity = await sanitizeOutput(entity, ctx);
+
+      return transformResponse(sanitizedEntity);
     },
 
     /**
@@ -26,17 +34,21 @@ const createSingleTypeController = ({ service, sanitize, transformResponse }) =>
     async update(ctx) {
       const { query } = ctx.request;
       const { data, files } = parseBody(ctx);
+      const sanitizedInputData = await sanitizeInput(data, ctx);
 
-      const entity = await service.createOrUpdate({ ...query, data, files });
+      const entity = await service.createOrUpdate({ ...query, data: sanitizedInputData, files });
+      const sanitizedEntity = await sanitizeOutput(entity, ctx);
 
-      return transformResponse(sanitize(entity));
+      return transformResponse(sanitizedEntity);
     },
 
     async delete(ctx) {
       const { query } = ctx;
 
       const entity = await service.delete(query);
-      return transformResponse(sanitize(entity));
+      const sanitizedEntity = await sanitizeOutput(entity, ctx);
+
+      return transformResponse(sanitizedEntity);
     },
   };
 };

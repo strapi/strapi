@@ -1,6 +1,6 @@
 import React from 'react';
 import { useIntl } from 'react-intl';
-import { Text } from '@strapi/parts/Text';
+import { Text } from '@strapi/design-system/Text';
 import { getTrad } from '../../../utils';
 import useHasI18n from '../../../hooks/useHasI18n';
 

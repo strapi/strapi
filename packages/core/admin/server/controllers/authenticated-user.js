@@ -15,15 +15,24 @@ module.exports = {
   async updateMe(ctx) {
     const input = ctx.request.body;
 
-    try {
-      await validateProfileUpdateInput(input);
-    } catch (err) {
-      return ctx.badRequest('ValidationError', err);
-    }
+    await validateProfileUpdateInput(input);
 
     const userService = getService('user');
+    const authServer = getService('auth');
 
-    const updatedUser = await userService.updateById(ctx.state.user.id, input);
+    const { currentPassword, ...userInfo } = input;
+
+    if (currentPassword && userInfo.password) {
+      const isValid = await authServer.validatePassword(currentPassword, ctx.state.user.password);
+
+      if (!isValid) {
+        return ctx.badRequest('ValidationError', {
+          currentPassword: ['Invalid credentials'],
+        });
+      }
+    }
+
+    const updatedUser = await userService.updateById(ctx.state.user.id, userInfo);
 
     ctx.body = {
       data: userService.sanitizeUser(updatedUser),

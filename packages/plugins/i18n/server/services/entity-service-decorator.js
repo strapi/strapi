@@ -1,6 +1,7 @@
 'use strict';
 
 const { has, omit, isArray } = require('lodash/fp');
+const { ApplicationError } = require('@strapi/utils').errors;
 const { getService } = require('../utils');
 
 const LOCALE_QUERY_FILTER = 'locale';
@@ -19,7 +20,6 @@ const paramsContain = (key, params) => {
  * @param {object} params - query params
  * @param {object} ctx
  */
-// TODO: remove _locale
 const wrapParams = async (params = {}, ctx = {}) => {
   const { action } = ctx;
 
@@ -32,20 +32,6 @@ const wrapParams = async (params = {}, ctx = {}) => {
       ...omit(LOCALE_QUERY_FILTER, params),
       filters: {
         $and: [{ locale: params[LOCALE_QUERY_FILTER] }].concat(params.filters || []),
-      },
-    };
-  }
-
-  // TODO: remove when the _locale is renamed to locale
-  if (has('_locale', params)) {
-    if (params['_locale'] === 'all') {
-      return omit('_locale', params);
-    }
-
-    return {
-      ...omit('_locale', params),
-      filters: {
-        $and: [{ locale: params['_locale'] }].concat(params.filters || []),
       },
     };
   }
@@ -77,7 +63,7 @@ const assignValidLocale = async data => {
   try {
     data.locale = await getValidLocale(data.locale);
   } catch (e) {
-    throw strapi.errors.badRequest("This locale doesn't exist");
+    throw new ApplicationError("This locale doesn't exist");
   }
 };
 

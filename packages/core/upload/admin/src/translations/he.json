@@ -32,8 +32,6 @@
   "list.assets-empty.subtitle": "הוסף אחד לרשימה.",
   "list.assets-empty.title": "אין עדיין נכסים",
   "list.assets-empty.title-withSearch": "אין נכסים עם הפילטרים שהוחלו",
-  "list.assets.selected.plural": "{number} נכסים נבחרו",
-  "list.assets.selected.singular": "נכס {number} נבחר",
   "list.assets.type-not-allowed": "סוג קובץ זה אינו מורשה.",
   "modal.file-details.date": "תאריך",
   "modal.file-details.dimensions": "ממדים",

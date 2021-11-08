@@ -1,5 +1,5 @@
 import React from 'react';
-import { ThemeProvider, lightTheme } from '@strapi/parts';
+import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { render as renderTL } from '@testing-library/react';
 import { ImageAssetCard } from '../ImageAssetCard';
 import en from '../../../translations/en.json';
@@ -31,7 +31,7 @@ describe('ImageAssetCard', () => {
     );
 
     expect(container).toMatchInlineSnapshot(`
-      .c23 {
+      .c21 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
@@ -58,7 +58,6 @@ describe('ImageAssetCard', () => {
 
       .c17 {
         background: #f6f6f9;
-        color: #666687;
         padding: 4px;
         border-radius: 4px;
       }
@@ -129,32 +128,20 @@ describe('ImageAssetCard', () => {
       }
 
       .c13 {
-        font-weight: 500;
+        font-weight: 600;
+        color: #32324d;
         font-size: 0.75rem;
         line-height: 1.33;
-        color: #32324d;
       }
 
       .c14 {
-        font-weight: 400;
+        color: #666687;
         font-size: 0.75rem;
         line-height: 1.33;
-        color: #666687;
       }
 
       .c20 {
-        font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #32324d;
-      }
-
-      .c21 {
-        font-weight: 600;
-        line-height: 1.14;
-      }
-
-      .c22 {
+        color: #666687;
         font-weight: 600;
         font-size: 0.6875rem;
         line-height: 1.45;
@@ -184,6 +171,7 @@ describe('ImageAssetCard', () => {
         border: 1px solid #c0c0cf;
         -webkit-appearance: none;
         background-color: #ffffff;
+        cursor: pointer;
       }
 
       .c4:checked {
@@ -262,6 +250,8 @@ describe('ImageAssetCard', () => {
         border-radius: 4px;
         background: #ffffff;
         border: 1px solid #dcdce4;
+        position: relative;
+        outline: none;
       }
 
       .c6 svg {
@@ -276,6 +266,36 @@ describe('ImageAssetCard', () => {
 
       .c6[aria-disabled='true'] {
         pointer-events: none;
+      }
+
+      .c6:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c6:focus-visible {
+        outline: none;
+      }
+
+      .c6:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
       }
 
       .c7 {
@@ -360,7 +380,7 @@ describe('ImageAssetCard', () => {
                   >
                     <path
                       clip-rule="evenodd"
-                      d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
+                      d="M23.605 3.514c.527.528.527 1.36 0 1.887l-2.623 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.119 3.118zM0 24v-4.989l14.2-14.2L19.19 9.8 4.99 24H0z"
                       fill="#212134"
                       fill-rule="evenodd"
                     />
@@ -374,7 +394,7 @@ describe('ImageAssetCard', () => {
               <img
                 aria-hidden="true"
                 class="c9"
-                src="http://somewhere.com/hello.png"
+                src="http://somewhere.com/hello.png?width=40&height=40"
               />
             </div>
           </div>
@@ -401,7 +421,7 @@ describe('ImageAssetCard', () => {
                   >
                     png
                   </span>
-                  - 40✕40
+                   - 40✕40
                 </div>
               </div>
               <div
@@ -411,7 +431,7 @@ describe('ImageAssetCard', () => {
                   class="c17 c18 c19"
                 >
                   <span
-                    class="c20 c21 c22"
+                    class="c20"
                   >
                     Image
                   </span>
@@ -421,7 +441,7 @@ describe('ImageAssetCard', () => {
           </div>
         </article>
         <div
-          class="c23"
+          class="c21"
         >
           <p
             aria-live="polite"

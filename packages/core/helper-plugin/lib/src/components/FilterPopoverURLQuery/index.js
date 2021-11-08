@@ -6,25 +6,20 @@
 
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import styled from 'styled-components';
-import { Button } from '@strapi/parts/Button';
-import { Box } from '@strapi/parts/Box';
-import { Popover } from '@strapi/parts/Popover';
-import { Stack } from '@strapi/parts/Stack';
-import { FocusTrap } from '@strapi/parts/FocusTrap';
-import { Select, Option } from '@strapi/parts/Select';
-import AddIcon from '@strapi/icons/AddIcon';
+import { Button } from '@strapi/design-system/Button';
+import { Box } from '@strapi/design-system/Box';
+import { Popover } from '@strapi/design-system/Popover';
+import { Stack } from '@strapi/design-system/Stack';
+import { FocusTrap } from '@strapi/design-system/FocusTrap';
+import { Select, Option } from '@strapi/design-system/Select';
+import Plus from '@strapi/icons/Plus';
 import { useIntl } from 'react-intl';
 import useQueryParams from '../../hooks/useQueryParams';
 import useTracking from '../../hooks/useTracking';
 import Inputs from './Inputs';
 import getFilterList from './utils/getFilterList';
 
-const FullWidthButton = styled(Button)`
-  width: 100%;
-`;
-
-const FilterPopoverURLQuery = ({ displayedFilters, isVisible, onToggle, source }) => {
+const FilterPopoverURLQuery = ({ displayedFilters, isVisible, onBlur, onToggle, source }) => {
   const [{ query }, setQuery] = useQueryParams();
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
@@ -120,7 +115,7 @@ const FilterPopoverURLQuery = ({ displayedFilters, isVisible, onToggle, source }
   const operator = modifiedData.filter;
 
   return (
-    <Popover source={source} padding={3} spacing={4}>
+    <Popover source={source} padding={3} spacing={4} onBlur={onBlur}>
       <FocusTrap onEscape={onToggle}>
         <form onSubmit={handleSubmit}>
           <Stack size={1} style={{ minWidth: 184 }}>
@@ -175,15 +170,19 @@ const FilterPopoverURLQuery = ({ displayedFilters, isVisible, onToggle, source }
               </Box>
             )}
             <Box>
-              <FullWidthButton size="L" variant="secondary" startIcon={<AddIcon />} type="submit">
+              <Button size="L" variant="secondary" startIcon={<Plus />} type="submit" fullWidth>
                 {formatMessage({ id: 'app.utils.add-filter', defaultMessage: 'Add filter' })}
-              </FullWidthButton>
+              </Button>
             </Box>
           </Stack>
         </form>
       </FocusTrap>
     </Popover>
   );
+};
+
+FilterPopoverURLQuery.defaultProps = {
+  onBlur: () => {},
 };
 
 FilterPopoverURLQuery.propTypes = {
@@ -200,6 +199,7 @@ FilterPopoverURLQuery.propTypes = {
     })
   ).isRequired,
   isVisible: PropTypes.bool.isRequired,
+  onBlur: PropTypes.func,
   onToggle: PropTypes.func.isRequired,
   source: PropTypes.shape({ current: PropTypes.instanceOf(Element) }).isRequired,
 };

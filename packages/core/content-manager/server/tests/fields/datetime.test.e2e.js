@@ -9,7 +9,9 @@ let strapi;
 let rq;
 
 const ct = {
-  name: 'withdatetime',
+  displayName: 'withdatetime',
+  singularName: 'withdatetime',
+  pluralName: 'withdatetimes',
   attributes: {
     field: {
       type: 'datetime',

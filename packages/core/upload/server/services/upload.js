@@ -14,9 +14,10 @@ const _ = require('lodash');
 const {
   nameToSlug,
   contentTypes: contentTypesUtils,
-  sanitizeEntity,
+  sanitize,
   webhook: webhookUtils,
 } = require('@strapi/utils');
+const { PayloadTooLargeError, NotFoundError } = require('@strapi/utils').errors;
 
 const { MEDIA_UPDATE, MEDIA_CREATE, MEDIA_DELETE } = webhookUtils.webhookEvents;
 
@@ -46,7 +47,7 @@ const sendMediaMetrics = data => {
 module.exports = ({ strapi }) => ({
   emitEvent(event, data) {
     const modelDef = strapi.getModel('plugin::upload.file');
-    strapi.eventHub.emit(event, { media: sanitizeEntity(data, { model: modelDef }) });
+    strapi.eventHub.emit(event, { media: sanitize.eventHub(data, modelDef) });
   },
 
   formatFileInfo({ filename, type, size }, fileInfo = {}, metas = {}) {
@@ -90,15 +91,7 @@ module.exports = ({ strapi }) => ({
       readBuffer = await util.promisify(fs.readFile)(file.path);
     } catch (e) {
       if (e.code === 'ERR_FS_FILE_TOO_LARGE') {
-        throw strapi.errors.entityTooLarge('FileTooBig', {
-          errors: [
-            {
-              id: 'Upload.status.sizeLimit',
-              message: `${file.name} file is bigger than the limit size!`,
-              values: { file: file.name },
-            },
-          ],
-        });
+        throw new PayloadTooLargeError(`The file \`${file.name}\` is bigger than the limit size`);
       }
       throw e;
     }
@@ -184,7 +177,7 @@ module.exports = ({ strapi }) => ({
     const dbFile = await this.findOne(id);
 
     if (!dbFile) {
-      throw strapi.errors.notFound('file not found');
+      throw new NotFoundError();
     }
 
     const newInfos = {
@@ -206,7 +199,7 @@ module.exports = ({ strapi }) => ({
     const dbFile = await this.findOne(id);
 
     if (!dbFile) {
-      throw strapi.errors.notFound('file not found');
+      throw new NotFoundError();
     }
 
     const { fileInfo } = data;
@@ -302,12 +295,12 @@ module.exports = ({ strapi }) => ({
     return strapi.entityService.findOne('plugin::upload.file', id, { populate });
   },
 
-  fetchAll(query) {
+  findMany(query) {
     return strapi.entityService.findMany('plugin::upload.file', query);
   },
 
-  count(query) {
-    return strapi.entityService.count('plugin::upload.file', query);
+  findPage(query) {
+    return strapi.entityService.findPage('plugin::upload.file', query);
   },
 
   async remove(file) {

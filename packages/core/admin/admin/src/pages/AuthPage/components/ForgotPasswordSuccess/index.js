@@ -1,10 +1,10 @@
 import React from 'react';
 import { useIntl } from 'react-intl';
-import { Box } from '@strapi/parts/Box';
-import { Main } from '@strapi/parts/Main';
-import { Row } from '@strapi/parts/Row';
-import { Link } from '@strapi/parts/Link';
-import { H1, Text } from '@strapi/parts/Text';
+import { Box } from '@strapi/design-system/Box';
+import { Main } from '@strapi/design-system/Main';
+import { Flex } from '@strapi/design-system/Flex';
+import { Link } from '@strapi/design-system/Link';
+import { H1, Text } from '@strapi/design-system/Text';
 import UnauthenticatedLayout, {
   Column,
   LayoutContent,
@@ -45,13 +45,13 @@ const ForgotPasswordSuccess = () => {
             </Box>
           </Column>
         </LayoutContent>
-        <Row justifyContent="center">
+        <Flex justifyContent="center">
           <Box paddingTop={4}>
             <Link to="/auth/login">
-              <Text>{formatMessage({ id: 'Auth.link.signin', defaultMessage: 'Sign in' })}</Text>
+              {formatMessage({ id: 'Auth.link.signin', defaultMessage: 'Sign in' })}
             </Link>
           </Box>
-        </Row>
+        </Flex>
       </Main>
     </UnauthenticatedLayout>
   );

@@ -20,13 +20,15 @@ const product = {
       type: 'text',
     },
   },
-  name: 'product',
+  displayName: 'product',
+  singularName: 'product',
+  pluralName: 'products',
   description: '',
   collectionName: '',
 };
 
 const compo = {
-  name: 'compo',
+  displayName: 'compo',
   attributes: {
     name: {
       type: 'string',

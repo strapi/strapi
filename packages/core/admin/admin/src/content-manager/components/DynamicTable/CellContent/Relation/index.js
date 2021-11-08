@@ -1,12 +1,12 @@
 import React, { useState, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { IconButton } from '@strapi/parts/IconButton';
-import { Text } from '@strapi/parts/Text';
-import { Box } from '@strapi/parts/Box';
-import { Badge } from '@strapi/parts/Badge';
-import { Row } from '@strapi/parts/Row';
-import { Popover } from '@strapi/parts/Popover';
+import { IconButton } from '@strapi/design-system/IconButton';
+import { Text } from '@strapi/design-system/Text';
+import { Box } from '@strapi/design-system/Box';
+import { Badge } from '@strapi/design-system/Badge';
+import { Flex } from '@strapi/design-system/Flex';
+import { Popover } from '@strapi/design-system/Popover';
 import { SortIcon, stopPropagation } from '@strapi/helper-plugin';
 import styled from 'styled-components';
 import PopoverContent from './PopoverContent';
@@ -43,7 +43,7 @@ const Relation = ({ fieldSchema, metadatas, queryInfos, name, rowId, value }) =>
   const handleTogglePopover = () => setVisible(prev => !prev);
 
   return (
-    <Row {...stopPropagation}>
+    <Flex {...stopPropagation}>
       <RelationCountBadge>{value.count}</RelationCountBadge>
       <Box paddingLeft={2}>
         <Text textColor="neutral800">
@@ -82,7 +82,7 @@ const Relation = ({ fieldSchema, metadatas, queryInfos, name, rowId, value }) =>
           )}
         </ActionWrapper>
       )}
-    </Row>
+    </Flex>
   );
 };
 

@@ -13,15 +13,25 @@ import {
   CardTitle,
   CardSubtitle,
   CardTimer,
-} from '@strapi/parts/Card';
-import { IconButton } from '@strapi/parts/IconButton';
-import EditIcon from '@strapi/icons/EditIcon';
+} from '@strapi/design-system/Card';
+import { IconButton } from '@strapi/design-system/IconButton';
+import Pencil from '@strapi/icons/Pencil';
 import { useIntl } from 'react-intl';
+import { Box } from '@strapi/design-system/Box';
 import { VideoPreview } from './VideoPreview';
 import { getTrad, formatDuration } from '../../utils';
 
 const Extension = styled.span`
   text-transform: uppercase;
+`;
+
+const VideoPreviewWrapper = styled(Box)`
+  canvas,
+  video {
+    display: block;
+    max-width: 100%;
+    max-height: ${({ size }) => (size === 'M' ? 164 / 16 : 88 / 16)}rem;
+  }
 `;
 
 export const VideoAssetCard = ({
@@ -46,12 +56,15 @@ export const VideoAssetCard = ({
           <CardAction position="end">
             <IconButton
               label={formatMessage({ id: getTrad('control-card.edit'), defaultMessage: 'Edit' })}
-              icon={<EditIcon />}
+              icon={<Pencil />}
+              onClick={onEdit}
             />
           </CardAction>
         )}
         <CardAsset size={size}>
-          <VideoPreview url={url} mime={mime} onLoadDuration={setDuration} size={size} />
+          <VideoPreviewWrapper size={size}>
+            <VideoPreview url={url} mime={mime} onLoadDuration={setDuration} alt={name} />
+          </VideoPreviewWrapper>
         </CardAsset>
         <CardTimer>{formattedDuration || '...'}</CardTimer>
       </CardHeader>

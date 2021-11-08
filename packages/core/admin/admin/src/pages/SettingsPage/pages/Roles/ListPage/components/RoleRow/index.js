@@ -1,11 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Box } from '@strapi/parts/Box';
-import { Row } from '@strapi/parts/Row';
-import { Td, Tr } from '@strapi/parts/Table';
-import { Text } from '@strapi/parts/Text';
-import { IconButton } from '@strapi/parts/IconButton';
-import { stopPropagation, onRowClick } from '@strapi/helper-plugin';
+import { Box } from '@strapi/design-system/Box';
+import { Flex } from '@strapi/design-system/Flex';
+import { Td, Tr } from '@strapi/design-system/Table';
+import { Text, EllipsisText } from '@strapi/design-system/Text';
+import { IconButton } from '@strapi/design-system/IconButton';
+import { stopPropagation, onRowClick, pxToRem } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 
 const RoleRow = ({ id, name, description, usersCount, icons }) => {
@@ -26,17 +26,17 @@ const RoleRow = ({ id, name, description, usersCount, icons }) => {
         fn: icons[1].onClick,
       })}
     >
-      <Td>
-        <Text textColor="neutral800">{name}</Text>
+      <Td maxWidth={pxToRem(130)}>
+        <EllipsisText textColor="neutral800">{name}</EllipsisText>
       </Td>
-      <Td>
-        <Text textColor="neutral800">{description}</Text>
+      <Td maxWidth={pxToRem(250)}>
+        <EllipsisText textColor="neutral800">{description}</EllipsisText>
       </Td>
       <Td>
         <Text textColor="neutral800">{usersCountText}</Text>
       </Td>
       <Td>
-        <Row justifyContent="flex-end" {...stopPropagation}>
+        <Flex justifyContent="flex-end" {...stopPropagation}>
           {icons.map((icon, i) =>
             icon ? (
               <Box key={icon.label} paddingLeft={i === 0 ? 0 : 1}>
@@ -44,7 +44,7 @@ const RoleRow = ({ id, name, description, usersCount, icons }) => {
               </Box>
             ) : null
           )}
-        </Row>
+        </Flex>
       </Td>
     </Tr>
   );

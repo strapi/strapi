@@ -6,10 +6,10 @@
 
 import React from 'react';
 import { useIntl } from 'react-intl';
-import { Box } from '@strapi/parts/Box';
-import { Row } from '@strapi/parts/Row';
-import { Select, Option } from '@strapi/parts/Select';
-import { Text } from '@strapi/parts/Text';
+import { Box } from '@strapi/design-system/Box';
+import { Flex } from '@strapi/design-system/Flex';
+import { Select, Option } from '@strapi/design-system/Select';
+import { Text } from '@strapi/design-system/Text';
 import PropTypes from 'prop-types';
 import useQueryParams from '../../hooks/useQueryParams';
 import useTracking from '../../hooks/useTracking';
@@ -32,7 +32,7 @@ const PageSizeURLQuery = ({ trackedEvent }) => {
   const pageSize = query?.pageSize || '10';
 
   return (
-    <Row>
+    <Flex>
       <Select
         size="S"
         aria-label={formatMessage({
@@ -55,7 +55,7 @@ const PageSizeURLQuery = ({ trackedEvent }) => {
           })}
         </Text>
       </Box>
-    </Row>
+    </Flex>
   );
 };
 

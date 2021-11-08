@@ -1,6 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
+const { ApplicationError } = require('@strapi/utils').errors;
 const userService = require('../user');
 const { SUPER_ADMIN_CODE } = require('../constants');
 
@@ -263,24 +264,20 @@ describe('User', () => {
       );
 
       const getSuperAdminWithUsersCount = jest.fn(() => Promise.resolve({ id: 1, usersCount: 1 }));
-      const badRequest = jest.fn();
 
       global.strapi = {
         query: () => ({ findOne }),
         admin: { services: { role: { getSuperAdminWithUsersCount } } },
-        errors: { badRequest },
       };
+
+      expect.assertions(2);
 
       try {
         await userService.deleteById(2);
       } catch (e) {
-        //nothing
+        expect(e instanceof ApplicationError).toBe(true);
+        expect(e.message).toEqual('You must have at least one user with super admin role.');
       }
-
-      expect(badRequest).toHaveBeenCalledWith(
-        'ValidationError',
-        'You must have at least one user with super admin role.'
-      );
     });
 
     test('Can delete a super admin if they are not the last one', async () => {
@@ -305,23 +302,19 @@ describe('User', () => {
     test('Cannot delete last super admin', async () => {
       const count = jest.fn(() => Promise.resolve(2));
       const getSuperAdminWithUsersCount = jest.fn(() => Promise.resolve({ id: 1, usersCount: 2 }));
-      const badRequest = jest.fn();
       global.strapi = {
         query: () => ({ count }),
         admin: { services: { role: { getSuperAdminWithUsersCount } } },
-        errors: { badRequest },
       };
+
+      expect.assertions(2);
 
       try {
         await userService.deleteByIds([2, 3]);
       } catch (e) {
-        // nothing
+        expect(e instanceof ApplicationError).toBe(true);
+        expect(e.message).toEqual('You must have at least one user with super admin role.');
       }
-
-      expect(badRequest).toHaveBeenCalledWith(
-        'ValidationError',
-        'You must have at least one user with super admin role.'
-      );
     });
 
     test('Can delete a super admin if they are not the last one', async () => {
@@ -511,11 +504,6 @@ describe('User', () => {
           return {
             findOne,
           };
-        },
-        errors: {
-          badRequest(msg) {
-            throw new Error(msg);
-          },
         },
       };
 

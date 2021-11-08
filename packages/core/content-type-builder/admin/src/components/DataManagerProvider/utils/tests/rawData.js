@@ -153,7 +153,7 @@ const data = {
       'plugin::myplugins.test': {
         uid: 'plugin::myplugins.test',
         schema: {
-          name: 'plugin::myplugins.test',
+          displayName: 'plugin::myplugins.test',
           kind: 'singleType',
           visible: true,
           restrictRelationsTo: null,
@@ -162,7 +162,7 @@ const data = {
       'plugin::myplugins.btest': {
         uid: 'plugin::myplugins.btest',
         schema: {
-          name: 'plugin::myplugins.btest',
+          displayName: 'plugin::myplugins.btest',
           kind: 'collectionType',
           visible: true,
           restrictRelationsTo: null,
@@ -171,7 +171,7 @@ const data = {
       'plugin::myplugins.atest': {
         uid: 'plugin::myplugins.atest',
         schema: {
-          name: 'plugin::myplugins.atest',
+          displayName: 'plugin::myplugins.atest',
           kind: 'collectionType',
           visible: true,
           restrictRelationsTo: [],
@@ -180,7 +180,7 @@ const data = {
       'plugin::myplugins.ctest': {
         uid: 'plugin::myplugins.ctest',
         schema: {
-          name: 'plugin::myplugins.ctest',
+          displayName: 'plugin::myplugins.ctest',
           kind: 'collectionType',
           visible: true,
           restrictRelationsTo: ['oneWay'],
@@ -192,9 +192,8 @@ const data = {
       uid: 'api::test-content-type.test-content-type',
       isTemporary: true,
       schema: {
-        name: 'test content type',
-        collectionName: 'test-content-types',
-        connection: 'default',
+        displayName: 'test content type',
+
         description: '',
         attributes: [
           {
@@ -246,9 +245,8 @@ const data = {
     contentTypeToEdit: {
       uid: 'api::test-content-type.test-content-type',
       schema: {
-        name: 'test content type',
-        collectionName: 'test-content-types',
-        connection: 'default',
+        displayName: 'test content type',
+
         description: '',
         attributes: [
           {

@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
-import { ThemeProvider, lightTheme } from '@strapi/parts';
+import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import Onboarding from '../index';
 
 jest.mock('../../../../hooks', () => ({
@@ -43,7 +43,7 @@ describe('Onboarding', () => {
         color: #ffffff;
       }
 
-      <div
+      <aside
         class="c0"
       >
         <button
@@ -67,7 +67,7 @@ describe('Onboarding', () => {
             />
           </svg>
         </button>
-      </div>
+      </aside>
     `);
   });
 

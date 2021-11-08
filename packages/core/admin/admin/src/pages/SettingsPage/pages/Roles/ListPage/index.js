@@ -6,16 +6,16 @@ import {
   useTracking,
   useFocusWhenNavigate,
 } from '@strapi/helper-plugin';
-import AddIcon from '@strapi/icons/AddIcon';
-import DeleteIcon from '@strapi/icons/DeleteIcon';
-import EditIcon from '@strapi/icons/EditIcon';
+import Plus from '@strapi/icons/Plus';
+import Trash from '@strapi/icons/Trash';
+import Pencil from '@strapi/icons/Pencil';
 import Duplicate from '@strapi/icons/Duplicate';
-import { Button } from '@strapi/parts/Button';
-import { ContentLayout, HeaderLayout } from '@strapi/parts/Layout';
-import { Table, Tbody, Th, Thead, Tr, TFooter } from '@strapi/parts/Table';
-import { TableLabel } from '@strapi/parts/Text';
-import { Main } from '@strapi/parts/Main';
-import { VisuallyHidden } from '@strapi/parts/VisuallyHidden';
+import { Button } from '@strapi/design-system/Button';
+import { ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
+import { Table, Tbody, Th, Thead, Tr, TFooter } from '@strapi/design-system/Table';
+import { TableLabel } from '@strapi/design-system/Text';
+import { Main } from '@strapi/design-system/Main';
+import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
 import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
 import RoleRow from './components/RoleRow';
@@ -65,12 +65,12 @@ const useRoleActions = () => {
       {
         onClick: () => handleGoTo(role.id),
         label: formatMessage({ id: 'app.utils.edit', defaultMessage: 'Edit' }),
-        icon: <EditIcon />,
+        icon: <Pencil />,
       },
       {
         onClick: handleToggle,
         label: formatMessage({ id: 'app.utils.delete', defaultMessage: 'Delete' }),
-        icon: <DeleteIcon />,
+        icon: <Trash />,
       },
     ],
     [formatMessage, handleToggle, handleGoTo]
@@ -106,7 +106,7 @@ const RoleListPage = () => {
       <SettingsPageTitle name="Roles" />
       <HeaderLayout
         primaryAction={
-          <Button onClick={handleToggleModalForCreatingRole} startIcon={<AddIcon />} size="L">
+          <Button onClick={handleToggleModalForCreatingRole} startIcon={<Plus />} size="L">
             {formatMessage({
               id: 'Settings.roles.list.button.add',
               defaultMessage: 'Add new role',
@@ -127,7 +127,7 @@ const RoleListPage = () => {
           colCount={colCount}
           rowCount={rowCount}
           footer={
-            <TFooter onClick={handleToggleModalForCreatingRole} icon={<AddIcon />}>
+            <TFooter onClick={handleToggleModalForCreatingRole} icon={<Plus />}>
               {formatMessage({
                 id: 'Settings.roles.list.button.add',
                 defaultMessage: 'Add new role',

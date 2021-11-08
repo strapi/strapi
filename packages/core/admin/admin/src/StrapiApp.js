@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
-import { lightTheme } from '@strapi/parts/themes';
+import { lightTheme } from '@strapi/design-system/themes';
 import merge from 'lodash/merge';
 import pick from 'lodash/pick';
 import isFunction from 'lodash/isFunction';
@@ -11,7 +11,7 @@ import configureStore from './core/store/configureStore';
 import { Plugin } from './core/apis';
 import App from './pages/App';
 import AuthLogo from './assets/images/logo_strapi_auth_v4.png';
-import MenuLogo from './assets/images/strapi-img.png';
+import MenuLogo from './assets/images/logo_strapi_menu.png';
 import Providers from './components/Providers';
 import Theme from './components/Theme';
 import languageNativeNames from './translations/languageNativeNames';
@@ -113,6 +113,10 @@ class StrapiApp {
     invariant(
       link.Component && typeof link.Component === 'function',
       `link.Component should be a valid React Component`
+    );
+    invariant(
+      link.icon && typeof link.icon === 'function',
+      `link.Icon should be a valid React Component`
     );
 
     this.menu.push(link);

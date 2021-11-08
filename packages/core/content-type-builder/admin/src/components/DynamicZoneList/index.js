@@ -8,10 +8,10 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { pxToRem } from '@strapi/helper-plugin';
-import AddIcon from '@strapi/icons/AddIcon';
-import { Box } from '@strapi/parts/Box';
-import { Stack } from '@strapi/parts/Stack';
-import { Text } from '@strapi/parts/Text';
+import Plus from '@strapi/icons/Plus';
+import { Box } from '@strapi/design-system/Box';
+import { Stack } from '@strapi/design-system/Stack';
+import { Text } from '@strapi/design-system/Text';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 import useDataManager from '../../hooks/useDataManager';
@@ -20,7 +20,7 @@ import ComponentCard from '../ComponentCard';
 import ComponentList from '../ComponentList';
 import Tr from '../Tr';
 
-const StyledAddIcon = styled(AddIcon)`
+const StyledAddIcon = styled(Plus)`
   width: ${pxToRem(32)};
   height: ${pxToRem(32)};
   padding: ${pxToRem(9)};
@@ -56,14 +56,7 @@ const ComponentStack = styled(Stack)`
   align-items: center;
 `;
 
-function DynamicZoneList({
-  customRowComponent,
-  components,
-  addComponent,
-  mainTypeName,
-  name,
-  targetUid,
-}) {
+function DynamicZoneList({ customRowComponent, components, addComponent, name, targetUid }) {
   const { isInDevelopmentMode } = useDataManager();
   const [activeTab, setActiveTab] = useState(0);
   const { formatMessage } = useIntl();
@@ -129,8 +122,6 @@ function DynamicZoneList({
                     <ComponentList
                       {...props}
                       isFromDynamicZone
-                      dzName={name}
-                      mainTypeName={mainTypeName}
                       targetUid={targetUid}
                       key={component}
                     />
@@ -156,7 +147,6 @@ DynamicZoneList.propTypes = {
   addComponent: PropTypes.func,
   components: PropTypes.instanceOf(Array),
   customRowComponent: PropTypes.func,
-  mainTypeName: PropTypes.string.isRequired,
   name: PropTypes.string,
   targetUid: PropTypes.string.isRequired,
 };

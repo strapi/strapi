@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 
-// TODO : To migrate with @strapi/parts
+// TODO : To migrate with @strapi/design-system
 const Wrapper = styled.div`
   display: flex;
   align-items: center;

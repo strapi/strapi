@@ -82,7 +82,7 @@ const createAsyncSeriesWaterfallHook = () => ({
 const createAsyncParallelHook = () => ({
   ...createHook(),
 
-  call(context) {
+  async call(context) {
     const promises = this.handlers.map(handler => handler(cloneDeep(context)));
 
     return Promise.all(promises);

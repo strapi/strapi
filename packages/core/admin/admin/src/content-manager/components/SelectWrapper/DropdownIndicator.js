@@ -1,10 +1,9 @@
 import React from 'react';
 import styled from 'styled-components';
-
-import DropdownIcon from '@strapi/icons/FilterDropdownIcon';
+import CarretDown from '@strapi/icons/CarretDown';
 import IconBox from './IconBox';
 
-export const CaretBox = styled(IconBox)`
+export const CarretBox = styled(IconBox)`
   display: flex;
   background: none;
   border: none;
@@ -16,9 +15,9 @@ export const CaretBox = styled(IconBox)`
 
 const DropdownIndicator = () => {
   return (
-    <CaretBox as="button" type="button" paddingRight={3}>
-      <DropdownIcon />
-    </CaretBox>
+    <CarretBox as="button" type="button" paddingRight={3}>
+      <CarretDown />
+    </CarretBox>
   );
 };
 

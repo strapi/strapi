@@ -1,21 +1,21 @@
 import React from 'react';
 import { useIntl } from 'react-intl';
 import { useAppInfos, SettingsPageTitle, useFocusWhenNavigate } from '@strapi/helper-plugin';
-import { HeaderLayout, Layout, ContentLayout } from '@strapi/parts/Layout';
-import { Main } from '@strapi/parts/Main';
-import { Box } from '@strapi/parts/Box';
-import { Grid, GridItem } from '@strapi/parts/Grid';
-import { H3, Text, TableLabel } from '@strapi/parts/Text';
+import { HeaderLayout, Layout, ContentLayout } from '@strapi/design-system/Layout';
+import { Main } from '@strapi/design-system/Main';
+import { Box } from '@strapi/design-system/Box';
+import { Grid, GridItem } from '@strapi/design-system/Grid';
+import { H3, Text, TableLabel } from '@strapi/design-system/Text';
 
-import { Stack } from '@strapi/parts/Stack';
-import { Link } from '@strapi/parts/Link';
+import { Stack } from '@strapi/design-system/Stack';
+import { Link } from '@strapi/design-system/Link';
 import ExternalLink from '@strapi/icons/ExternalLink';
 
 const ApplicationInfosPage = () => {
   const { formatMessage } = useIntl();
   useFocusWhenNavigate();
   const appInfos = useAppInfos();
-  const { shouldUpdateStrapi, latestStrapiReleaseTag } = appInfos;
+  const { shouldUpdateStrapi, latestStrapiReleaseTag, strapiVersion } = appInfos;
 
   const currentPlan = appInfos.communityEdition
     ? 'app.components.UpgradePlanModal.text-ce'
@@ -52,16 +52,16 @@ const ApplicationInfosPage = () => {
 
               <Grid paddingTop={1}>
                 <GridItem col={6} s={12}>
-                  <TableLabel>
+                  <TableLabel textColor="neutral600">
                     {formatMessage({
                       id: 'Settings.application.details',
                       defaultMessage: 'details',
                     })}
                   </TableLabel>
-                  <Text as="p">{appInfos.latestStrapiReleaseTag}</Text>
+                  <Text as="p">v{strapiVersion}</Text>
                 </GridItem>
                 <GridItem col={6} s={12}>
-                  <TableLabel>
+                  <TableLabel textColor="neutral600">
                     {formatMessage({
                       id: 'Settings.application.edition-title',
                       defaultMessage: 'current plan',
@@ -103,7 +103,7 @@ const ApplicationInfosPage = () => {
               </Grid>
 
               <Box paddingTop={1}>
-                <TableLabel>
+                <TableLabel textColor="neutral600">
                   {formatMessage({
                     id: 'Settings.application.node-version',
                     defaultMessage: 'node version',

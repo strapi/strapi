@@ -18,4 +18,4 @@ export const fetchData = async toggleNotification => {
 
 export const putProvider = body => {
   return axiosInstance.put(getRequestURL('providers'), body);
-}
+};

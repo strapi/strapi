@@ -368,8 +368,16 @@ const reducer = (state = initialState, action) =>
             oppositeAttributeToCreate.private = rest.private;
           }
 
+          const indexOfInitialAttribute = updatedAttributes.findIndex(
+            ({ name }) => name === initialAttribute.name
+          );
+          const indexOfUpdatedAttribute = updatedAttributes.findIndex(
+            ({ name: attrName }) => name === attrName
+          );
+
           const indexToInsert =
-            updatedAttributes.findIndex(({ name }) => name === initialAttribute.name) + 1;
+            (indexOfInitialAttribute === -1 ? indexOfUpdatedAttribute : indexOfInitialAttribute) +
+            1;
 
           updatedAttributes.splice(indexToInsert, 0, oppositeAttributeToCreate);
         }
@@ -537,13 +545,12 @@ const reducer = (state = initialState, action) =>
       }
       case actions.UPDATE_SCHEMA: {
         const {
-          data: { name, collectionName, category, icon, kind },
+          data: { displayName, category, icon, kind },
           schemaType,
           uid,
         } = action;
 
-        draftState.modifiedData[schemaType].schema.collectionName = collectionName;
-        draftState.modifiedData[schemaType].schema.name = name;
+        draftState.modifiedData[schemaType].schema.displayName = displayName;
 
         if (action.schemaType === 'component') {
           draftState.modifiedData.component.category = category;

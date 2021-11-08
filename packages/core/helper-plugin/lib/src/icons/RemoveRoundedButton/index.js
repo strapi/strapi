@@ -1,6 +1,6 @@
 import React from 'react';
-import { IconButton } from '@strapi/parts/IconButton';
-import Autoselect from '@strapi/icons/Autoselect';
+import { IconButton } from '@strapi/design-system/IconButton';
+import Minus from '@strapi/icons/Minus';
 import styled from 'styled-components';
 import pxToRem from '../../utils/pxToRem';
 
@@ -21,6 +21,6 @@ const StyledIconButton = styled(IconButton)(
 `
 );
 
-const RemoveRoundedButton = props => <StyledIconButton icon={<Autoselect />} {...props} />;
+const RemoveRoundedButton = props => <StyledIconButton icon={<Minus />} {...props} />;
 
 export default RemoveRoundedButton;

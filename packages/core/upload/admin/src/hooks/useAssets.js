@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useQuery } from 'react-query';
-import { useNotifyAT } from '@strapi/parts/LiveRegions';
+import { useNotifyAT } from '@strapi/design-system/LiveRegions';
 import { useNotification, useQueryParams } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { axiosInstance, getRequestUrl } from '../utils';
@@ -9,7 +9,7 @@ export const useAssets = ({ skipWhen }) => {
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
   const { notifyStatus } = useNotifyAT();
-  const [{ rawQuery, query }, setQuery] = useQueryParams();
+  const [{ rawQuery }] = useQueryParams();
   const dataRequestURL = getRequestUrl('files');
 
   const getAssets = async () => {
@@ -18,17 +18,11 @@ export const useAssets = ({ skipWhen }) => {
     return data;
   };
 
-  const { data, error, isLoading } = useQuery(`assets`, getAssets, {
+  const { data, error, isLoading } = useQuery([`assets`, rawQuery], getAssets, {
     enabled: !skipWhen,
     staleTime: 0,
     cacheTime: 0,
   });
-
-  useEffect(() => {
-    if (!query) {
-      setQuery({ sort: 'updatedAt:DESC', page: 1, pageSize: 10 });
-    }
-  }, [query, setQuery]);
 
   useEffect(() => {
     if (data) {

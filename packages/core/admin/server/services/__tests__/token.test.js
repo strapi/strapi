@@ -16,7 +16,7 @@ describe('Token', () => {
 
       const res = getTokenOptions();
 
-      expect(getFn).toHaveBeenCalledWith('server.admin.auth', {});
+      expect(getFn).toHaveBeenCalledWith('admin.auth', {});
       expect(res).toEqual({ options: { expiresIn: '30d' } });
     });
 
@@ -35,7 +35,7 @@ describe('Token', () => {
 
       const res = getTokenOptions();
 
-      expect(getFn).toHaveBeenCalledWith('server.admin.auth', {});
+      expect(getFn).toHaveBeenCalledWith('admin.auth', {});
       expect(res).toEqual({
         options: {
           expiresIn: '30d',
@@ -61,7 +61,7 @@ describe('Token', () => {
 
       const res = getTokenOptions();
 
-      expect(getFn).toHaveBeenCalledWith('server.admin.auth', {});
+      expect(getFn).toHaveBeenCalledWith('admin.auth', {});
       expect(res).toEqual({
         options: {
           expiresIn: '1d',

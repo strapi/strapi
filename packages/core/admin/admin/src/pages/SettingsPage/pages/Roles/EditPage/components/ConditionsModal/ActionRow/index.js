@@ -1,15 +1,16 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Box } from '@strapi/parts/Box';
-import { Row } from '@strapi/parts/Row';
-import { TableLabel } from '@strapi/parts/Text';
-import { MultiSelectNested } from '@strapi/parts/Select';
+import IS_DISABLED from 'ee_else_ce/pages/SettingsPage/pages/Roles/EditPage/components/ConditionsModal/ActionRow/utils/constants';
+import { Box } from '@strapi/design-system/Box';
+import { Flex } from '@strapi/design-system/Flex';
+import { TableLabel } from '@strapi/design-system/Text';
+import { MultiSelectNested } from '@strapi/design-system/Select';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 import { rowHeight } from '../../Permissions/utils/constants';
 
-const RowWrapper = styled(Row)`
+const FlexWrapper = styled(Flex)`
   height: ${rowHeight};
 `;
 
@@ -56,8 +57,8 @@ const ActionRow = ({
   };
 
   return (
-    <RowWrapper as="li" background={isGrey ? 'neutral100' : 'neutral0'}>
-      <Row paddingLeft={6} style={{ width: 180 }}>
+    <FlexWrapper as="li" background={isGrey ? 'neutral100' : 'neutral0'}>
+      <Flex paddingLeft={6} style={{ width: 180 }}>
         <TableLabel textColor="neutral600">
           {formatMessage({
             id: 'Settings.permissions.conditions.can',
@@ -87,7 +88,7 @@ const ActionRow = ({
             defaultMessage: 'When',
           })}
         </TableLabel>
-      </Row>
+      </Flex>
       <Box style={{ maxWidth: 430, width: '100%' }}>
         <MultiSelectNested
           id={name}
@@ -95,10 +96,10 @@ const ActionRow = ({
           onChange={handleChange}
           value={values}
           options={options}
-          disabled={isFormDisabled}
+          disabled={isFormDisabled || IS_DISABLED}
         />
       </Box>
-    </RowWrapper>
+    </FlexWrapper>
   );
 };
 

@@ -21,7 +21,9 @@ const productModel = {
       type: 'string',
     },
   },
-  name: 'product',
+  displayName: 'Product',
+  singularName: 'product',
+  pluralName: 'products',
   description: '',
   collectionName: '',
 };
@@ -32,7 +34,9 @@ const productWithDPModel = {
       type: 'string',
     },
   },
-  name: 'product',
+  displayName: 'Product',
+  singularName: 'product',
+  pluralName: 'products',
   draftAndPublish: true,
   description: '',
   collectionName: '',
@@ -50,7 +54,9 @@ const shopModel = {
       targetAttribute: 'shops',
     },
   },
-  name: 'shop',
+  displayName: 'Shop',
+  singularName: 'shop',
+  pluralName: 'shops',
 };
 
 const shops = [
@@ -89,15 +95,15 @@ describe('Relation-list route', () => {
     beforeAll(async () => {
       await builder
         .addContentTypes([productModel, shopModel])
-        .addFixtures(shopModel.name, shops)
-        .addFixtures(productModel.name, products({ withPublished: false }))
+        .addFixtures(shopModel.singularName, shops)
+        .addFixtures(productModel.singularName, products({ withPublished: false }))
         .build();
 
       strapi = await createStrapiInstance();
       rq = await createAuthRequest({ strapi });
 
-      data.shops = builder.sanitizedFixturesFor(shopModel.name, strapi);
-      data.products = builder.sanitizedFixturesFor(productModel.name, strapi);
+      data.shops = await builder.sanitizedFixturesFor(shopModel.singularName, strapi);
+      data.products = await builder.sanitizedFixturesFor(productModel.singularName, strapi);
     });
 
     afterAll(async () => {
@@ -137,15 +143,15 @@ describe('Relation-list route', () => {
     beforeAll(async () => {
       await builder
         .addContentTypes([productWithDPModel, shopModel])
-        .addFixtures(shopModel.name, shops)
-        .addFixtures(productWithDPModel.name, products({ withPublished: true }))
+        .addFixtures(shopModel.singularName, shops)
+        .addFixtures(productWithDPModel.singularName, products({ withPublished: true }))
         .build();
 
       strapi = await createStrapiInstance();
       rq = await createAuthRequest({ strapi });
 
-      data.shops = builder.sanitizedFixturesFor(shopModel.name, strapi);
-      data.products = builder.sanitizedFixturesFor(productWithDPModel.name, strapi);
+      data.shops = await builder.sanitizedFixturesFor(shopModel.singularName, strapi);
+      data.products = await builder.sanitizedFixturesFor(productWithDPModel.singularName, strapi);
     });
 
     afterAll(async () => {

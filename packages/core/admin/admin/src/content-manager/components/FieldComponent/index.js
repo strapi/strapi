@@ -5,11 +5,11 @@ import size from 'lodash/size';
 import isEqual from 'react-fast-compare';
 import { useIntl } from 'react-intl';
 import { NotAllowedInput } from '@strapi/helper-plugin';
-import DeleteIcon from '@strapi/icons/DeleteIcon';
-import { Box } from '@strapi/parts/Box';
-import { IconButton } from '@strapi/parts/IconButton';
-import { Row } from '@strapi/parts/Row';
-import { Stack } from '@strapi/parts/Stack';
+import Trash from '@strapi/icons/Trash';
+import { Box } from '@strapi/design-system/Box';
+import { IconButton } from '@strapi/design-system/IconButton';
+import { Flex } from '@strapi/design-system/Flex';
+import { Stack } from '@strapi/design-system/Stack';
 import { getTrad } from '../../utils';
 import ComponentInitializer from '../ComponentInitializer';
 import NonRepeatableComponent from '../NonRepeatableComponent';
@@ -38,6 +38,7 @@ const FieldComponent = ({
   isReadOnly,
   componentValue,
   removeComponentFromField,
+  required,
 }) => {
   const { formatMessage } = useIntl();
   const componentValueLength = size(componentValue);
@@ -59,7 +60,7 @@ const FieldComponent = ({
 
   return (
     <Box>
-      <Row justifyContent="space-between">
+      <Flex justifyContent="space-between">
         {intlLabel && (
           <Label
             intlLabel={intlLabel}
@@ -67,6 +68,7 @@ const FieldComponent = ({
             name={name}
             numberOfEntries={componentValueLength}
             showNumberOfEntries={isRepeatable}
+            required={required}
           />
         )}
 
@@ -76,14 +78,14 @@ const FieldComponent = ({
               id: getTrad('components.reset-entry'),
               defaultMessage: 'Reset Entry',
             })}
-            icon={<DeleteIcon />}
+            icon={<Trash />}
             noBorder
             onClick={() => {
               removeComponentFromField(name, componentUid);
             }}
           />
         )}
-      </Row>
+      </Flex>
       <Stack size={1}>
         {!isRepeatable && !isInitialized && (
           <ComponentInitializer
@@ -128,6 +130,7 @@ FieldComponent.defaultProps = {
   labelAction: undefined,
   max: Infinity,
   min: -Infinity,
+  required: false,
 };
 
 FieldComponent.propTypes = {
@@ -151,8 +154,12 @@ FieldComponent.propTypes = {
   min: PropTypes.number,
   name: PropTypes.string.isRequired,
   removeComponentFromField: PropTypes.func.isRequired,
+  required: PropTypes.bool,
 };
 
 const Memoized = memo(FieldComponent, isEqual);
 
-export default connect(Memoized, select);
+export default connect(
+  Memoized,
+  select
+);

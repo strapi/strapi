@@ -1,14 +1,19 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useRBACProvider, Form } from '@strapi/helper-plugin';
-import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@strapi/parts/ModalLayout';
-import { TabGroup, Tabs, Tab, TabPanels, TabPanel } from '@strapi/parts/Tabs';
-import { Button } from '@strapi/parts/Button';
-import { ButtonText, H2 } from '@strapi/parts/Text';
-import { Divider } from '@strapi/parts/Divider';
-import { Box } from '@strapi/parts/Box';
-import { Row } from '@strapi/parts/Row';
-import CheckIcon from '@strapi/icons/CheckIcon';
+import {
+  ModalLayout,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+} from '@strapi/design-system/ModalLayout';
+import { TabGroup, Tabs, Tab, TabPanels, TabPanel } from '@strapi/design-system/Tabs';
+import { Button } from '@strapi/design-system/Button';
+import { ButtonText, H2 } from '@strapi/design-system/Text';
+import { Divider } from '@strapi/design-system/Divider';
+import { Box } from '@strapi/design-system/Box';
+import { Flex } from '@strapi/design-system/Flex';
+import Check from '@strapi/icons/Check';
 import { useIntl } from 'react-intl';
 import { Formik } from 'formik';
 import localeFormSchema from '../../schemas';
@@ -66,7 +71,7 @@ const ModalCreate = ({ onClose }) => {
               id="tabs"
               variant="simple"
             >
-              <Row justifyContent="space-between">
+              <Flex justifyContent="space-between">
                 <H2>
                   {formatMessage({
                     id: getTrad('Settings.locales.modal.title'),
@@ -87,7 +92,7 @@ const ModalCreate = ({ onClose }) => {
                     })}
                   </Tab>
                 </Tabs>
-              </Row>
+              </Flex>
 
               <Divider />
 
@@ -110,7 +115,7 @@ const ModalCreate = ({ onClose }) => {
               </Button>
             }
             endActions={
-              <Button type="submit" startIcon={<CheckIcon />} disabled={isAdding}>
+              <Button type="submit" startIcon={<Check />} disabled={isAdding}>
                 {formatMessage({ id: 'app.components.Button.save', defaultMessage: 'Save' })}
               </Button>
             }

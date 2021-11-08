@@ -103,6 +103,7 @@ const pickPopulateParams = _.pick([
   'orderBy',
   'limit',
   'offset',
+  'filters',
 ]);
 
 // TODO: cleanup code
@@ -122,7 +123,11 @@ const applyPopulate = async (results, populate, ctx) => {
     const attribute = meta.attributes[key];
     const targetMeta = db.metadata.get(attribute.target);
 
-    const populateValue = pickPopulateParams(populate[key]);
+    const populateValue = {
+      filters: qb.state.filters,
+      ...pickPopulateParams(populate[key]),
+    };
+
     const isCount = populateValue.count === true;
 
     const fromTargetRow = rowOrRows => fromRow(targetMeta, rowOrRows);

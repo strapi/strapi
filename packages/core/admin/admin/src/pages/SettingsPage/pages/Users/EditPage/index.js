@@ -18,14 +18,16 @@ import {
 } from '@strapi/helper-plugin';
 import { useQuery } from 'react-query';
 import { Formik } from 'formik';
-import { Box } from '@strapi/parts/Box';
-import { Button } from '@strapi/parts/Button';
-import { Grid, GridItem } from '@strapi/parts/Grid';
-import { HeaderLayout, ContentLayout } from '@strapi/parts/Layout';
-import { H3 } from '@strapi/parts/Text';
-import { Main } from '@strapi/parts/Main';
-import { Stack } from '@strapi/parts/Stack';
-import CheckIcon from '@strapi/icons/CheckIcon';
+import { Box } from '@strapi/design-system/Box';
+import { Button } from '@strapi/design-system/Button';
+import { Grid, GridItem } from '@strapi/design-system/Grid';
+import { HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
+import { Link } from '@strapi/design-system/Link';
+import { H3 } from '@strapi/design-system/Text';
+import { Main } from '@strapi/design-system/Main';
+import { Stack } from '@strapi/design-system/Stack';
+import ArrowLeft from '@strapi/icons/ArrowLeft';
+import Check from '@strapi/icons/Check';
 import MagicLink from 'ee_else_ce/pages/SettingsPage/pages/Users/components/MagicLink';
 import { formatAPIErrors } from '../../../../../utils';
 import { fetchUser, putUser } from './utils/api';
@@ -139,11 +141,19 @@ const EditPage = ({ canUpdate }) => {
         <SettingsPageTitle name="Users" />
         <HeaderLayout
           primaryAction={
-            <Button disabled startIcon={<CheckIcon />} type="button" size="L">
+            <Button disabled startIcon={<Check />} type="button" size="L">
               {formatMessage({ id: 'form.button.save', defaultMessage: 'Save' })}
             </Button>
           }
           title={title}
+          navigationAction={
+            <Link startIcon={<ArrowLeft />} to="/settings/users?pageSize=10&page=1&sort=firstname">
+              {formatMessage({
+                id: 'app.components.go-back',
+                defaultMessage: 'Go back',
+              })}
+            </Link>
+          }
         />
         <ContentLayout>
           <LoadingIndicatorPage />
@@ -168,7 +178,7 @@ const EditPage = ({ canUpdate }) => {
                 primaryAction={
                   <Button
                     disabled={isSubmitting || !canUpdate}
-                    startIcon={<CheckIcon />}
+                    startIcon={<Check />}
                     loading={isSubmitting}
                     type="submit"
                     size="L"
@@ -177,6 +187,17 @@ const EditPage = ({ canUpdate }) => {
                   </Button>
                 }
                 title={title}
+                navigationAction={
+                  <Link
+                    startIcon={<ArrowLeft />}
+                    to="/settings/users?pageSize=10&page=1&sort=firstname"
+                  >
+                    {formatMessage({
+                      id: 'app.components.go-back',
+                      defaultMessage: 'Go back',
+                    })}
+                  </Link>
+                }
               />
               <ContentLayout>
                 {data?.registrationToken && (

@@ -1,6 +1,7 @@
 'use strict';
 
 const { merge, pipe, omit, isNil } = require('lodash/fp');
+const { PaginationError } = require('./errors');
 
 const STRAPI_DEFAULTS = {
   offset: {
@@ -52,7 +53,7 @@ const withDefaultPagination = (args, { defaults = {}, maxLimit = -1 } = {}) => {
 
   // If there is page & offset pagination attributes, throw an error
   if (usePagePagination && useOffsetPagination) {
-    throw new Error('Cannot use both page & offset pagination in the same query');
+    throw new PaginationError('Cannot use both page & offset pagination in the same query');
   }
 
   const pagination = {};

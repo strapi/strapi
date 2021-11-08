@@ -1,7 +1,7 @@
 import styled from 'styled-components';
-import { Box } from '@strapi/parts/Box';
-import { IconButtonGroup, IconButton } from '@strapi/parts/IconButton';
-import { BaseButton } from '@strapi/parts/BaseButton';
+import { Box } from '@strapi/design-system/Box';
+import { IconButtonGroup, IconButton } from '@strapi/design-system/IconButton';
+import { BaseButton } from '@strapi/design-system/BaseButton';
 
 export const WysiwygWrapper = styled(Box)`
   border: 1px solid
@@ -18,6 +18,13 @@ export const CustomIconButton = styled(IconButton)`
   svg {
     width: ${18 / 16}rem;
     height: ${18 / 16}rem;
+  }
+`;
+
+export const CustomLinkIconButton = styled(CustomIconButton)`
+  svg {
+    width: ${8 / 16}rem;
+    height: ${8 / 16}rem;
   }
 `;
 

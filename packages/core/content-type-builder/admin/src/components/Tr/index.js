@@ -22,7 +22,7 @@ const Tr = styled.tr`
         height: calc(100% - 15px);
         position: absolute;
         top: -7px;
-        left: 17px;
+        left: 1.625rem;
         border-radius: 4px;
 
         ${({ isFromDynamicZone, isChildOfDynamicZone, theme }) => {

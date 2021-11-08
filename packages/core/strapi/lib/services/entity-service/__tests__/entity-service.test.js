@@ -1,5 +1,7 @@
 'use strict';
 
+jest.mock('bcryptjs', () => ({ hashSync: () => 'secret-password' }));
+
 const { EventEmitter } = require('events');
 const createEntityService = require('../');
 const entityValidator = require('../../entity-validator');
@@ -109,6 +111,7 @@ describe('Entity service', () => {
               enum: ['a', 'b', 'c'],
               default: 'b',
             },
+            attrPassword: { type: 'password' },
           },
         };
 
@@ -173,9 +176,13 @@ describe('Entity service', () => {
           attrIntDefault: 10,
           attrEnumDefaultRequired: 'c',
           attrEnumDefault: 'a',
+          attrPassword: 'fooBar',
         };
 
-        await expect(instance.create('test-model', { data })).resolves.toMatchObject(data);
+        await expect(instance.create('test-model', { data })).resolves.toMatchObject({
+          ...data,
+          attrPassword: 'secret-password',
+        });
       });
     });
   });

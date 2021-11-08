@@ -1,11 +1,8 @@
 {
-  "components.Row.generatedDate": "最後產生的時間",
   "components.Row.open": "開啟",
   "components.Row.regenerate": "重新產生",
   "containers.HomePage.Block.title": "版本",
-  "containers.HomePage.Button.open": "打開文件資料",
   "containers.HomePage.Button.update": "更新",
-  "containers.HomePage.PluginHeader.description": "配置文件資料擴充套件設定",
   "containers.HomePage.PluginHeader.title": "文件資料 - 設定",
   "containers.HomePage.PopUpWarning.confirm": "我了解了",
   "containers.HomePage.PopUpWarning.message": "你確定要刪除這個版本嗎？",

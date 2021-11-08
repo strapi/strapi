@@ -9,6 +9,7 @@ const srcSchema = yup
   .shape({
     bootstrap: yup.mixed().isFunction(),
     register: yup.mixed().isFunction(),
+    destroy: yup.mixed().isFunction(),
   })
   .noUnknown();
 

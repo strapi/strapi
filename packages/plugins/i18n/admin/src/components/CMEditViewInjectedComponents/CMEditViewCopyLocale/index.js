@@ -3,14 +3,15 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 import { useIntl } from 'react-intl';
-import { Dialog, DialogBody, DialogFooter } from '@strapi/parts/Dialog';
-import { Select, Option } from '@strapi/parts/Select';
-import { Button } from '@strapi/parts/Button';
-import { Box } from '@strapi/parts/Box';
-import { Typography, Text } from '@strapi/parts/Text';
-import { Row } from '@strapi/parts/Row';
-import { Stack } from '@strapi/parts/Stack';
-import AlertWarningIcon from '@strapi/icons/AlertWarningIcon';
+import { Dialog, DialogBody, DialogFooter } from '@strapi/design-system/Dialog';
+import { Select, Option } from '@strapi/design-system/Select';
+import { Button } from '@strapi/design-system/Button';
+import { Box } from '@strapi/design-system/Box';
+import { Text } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
+import { Flex } from '@strapi/design-system/Flex';
+import { Stack } from '@strapi/design-system/Stack';
+import ExclamationMarkCircle from '@strapi/icons/ExclamationMarkCircle';
 import Duplicate from '@strapi/icons/Duplicate';
 import { useCMEditViewDataManager, useNotification } from '@strapi/helper-plugin';
 import { axiosInstance, getTrad } from '../../../utils';
@@ -104,19 +105,19 @@ const Content = ({ appLocales, currentLocale, localizations, readPermissions }) 
         type="button"
         onClick={handleToggle}
       >
-        <Row>
+        <Flex>
           <Duplicate width="12px" height="12px" />
           {formatMessage({
             id: getTrad('CMEditViewCopyLocale.copy-text'),
             defaultMessage: 'Fill in from another locale',
           })}
-        </Row>
+        </Flex>
       </StyledTypography>
       {isOpen && (
         <Dialog onClose={handleToggle} title="Confirmation" isOpen={isOpen}>
-          <DialogBody icon={<AlertWarningIcon />}>
+          <DialogBody icon={<ExclamationMarkCircle />}>
             <Stack size={2}>
-              <Row justifyContent="center">
+              <Flex justifyContent="center">
                 <Text id="confirm-description" style={{ textAlign: 'center' }}>
                   {formatMessage({
                     id: getTrad('CMEditViewCopyLocale.ModalConfirm.content'),
@@ -124,7 +125,7 @@ const Content = ({ appLocales, currentLocale, localizations, readPermissions }) 
                       'Your current content will be erased and filled by the content of the selected locale:',
                   })}
                 </Text>
-              </Row>
+              </Flex>
               <Box>
                 <Select
                   label={formatMessage({

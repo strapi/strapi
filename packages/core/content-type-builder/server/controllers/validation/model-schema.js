@@ -1,7 +1,7 @@
 'use strict';
 
+const { yup } = require('@strapi/utils');
 const _ = require('lodash');
-const yup = require('yup');
 
 const { modelTypes, FORBIDDEN_ATTRIBUTE_NAMES, typeKinds } = require('../../services/constants');
 const { getService } = require('../../utils');
@@ -11,10 +11,6 @@ const getRelationValidator = require('./relations');
 
 const createSchema = (types, relations, { modelType } = {}) => {
   const shape = {
-    name: yup
-      .string()
-      .min(1)
-      .required('name.required'),
     description: yup.string(),
     draftAndPublish: yup.boolean(),
     pluginOptions: yup.object(),

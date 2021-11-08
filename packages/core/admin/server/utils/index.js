@@ -1,9 +1,7 @@
 'use strict';
 
-const { prop } = require('lodash/fp');
-
 const getService = name => {
-  return prop(`admin.services.${name}`, strapi);
+  return strapi.service(`admin::${name}`);
 };
 
 module.exports = {

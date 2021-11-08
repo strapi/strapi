@@ -11,7 +11,7 @@ const createRouteScopeGenerator = namespace => route => {
     _.defaultsDeep(route, {
       config: {
         auth: {
-          scope: `${prefix}${controller}.${action}`,
+          scope: [`${prefix}${controller}.${action}`],
         },
       },
     });

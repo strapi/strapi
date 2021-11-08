@@ -1,28 +1,31 @@
 import React, { memo, useMemo } from 'react';
 import PropTypes from 'prop-types';
-import isEqual from 'react-fast-compare';
 import styled from 'styled-components';
+import isEqual from 'react-fast-compare';
 import { useIntl } from 'react-intl';
-import { Accordion, AccordionToggle, AccordionContent } from '@strapi/parts/Accordion';
-import { IconButton } from '@strapi/parts/IconButton';
-import { FocusTrap } from '@strapi/parts/FocusTrap';
-import { Box } from '@strapi/parts/Box';
-import { Stack } from '@strapi/parts/Stack';
-import DeleteIcon from '@strapi/icons/DeleteIcon';
-import DownIcon from '@strapi/icons/DownIcon1';
-import UpIcon from '@strapi/icons/UpIcon1';
-// import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Accordion, AccordionToggle, AccordionContent } from '@strapi/design-system/Accordion';
+import { IconButton } from '@strapi/design-system/IconButton';
+import { FocusTrap } from '@strapi/design-system/FocusTrap';
+import { Box } from '@strapi/design-system/Box';
+import { Stack } from '@strapi/design-system/Stack';
+import Trash from '@strapi/icons/Trash';
+import ArrowDown from '@strapi/icons/ArrowDown';
+import ArrowUp from '@strapi/icons/ArrowUp';
 import { useContentTypeLayout } from '../../../../hooks';
 import { getTrad } from '../../../../utils';
 import FieldComponent from '../../../FieldComponent';
 import Rectangle from './Rectangle';
 
-// FIXME
-// Temporary workaround to remove the overflow until we migrate the react-select for the relations
-// to the DS one
+const IconButtonCustom = styled(IconButton)`
+  background-color: transparent;
+`;
+
 const StyledBox = styled(Box)`
   > div {
-    overflow: visible;
+    > div:not(:first-of-type) {
+      overflow: visible;
+    }
   }
 `;
 
@@ -43,10 +46,10 @@ const Component = ({
   const { getComponentLayout } = useContentTypeLayout();
   const { icon, friendlyName } = useMemo(() => {
     const {
-      info: { icon, name },
+      info: { icon, displayName },
     } = getComponentLayout(componentUid);
 
-    return { friendlyName: name, icon };
+    return { friendlyName: displayName, icon };
   }, [componentUid, getComponentLayout]);
 
   const handleMoveComponentDown = () => moveComponentDown(name, index);
@@ -72,43 +75,56 @@ const Component = ({
   );
 
   return (
-    <StyledBox>
+    <Box>
       <Rectangle />
-
-      <Accordion expanded={isOpen} toggle={() => onToggle(index)}>
-        <AccordionToggle
-          action={
-            <Stack horizontal size={2}>
-              {showDownIcon && (
-                <IconButton
-                  label={downLabel}
-                  onClick={handleMoveComponentDown}
-                  icon={<DownIcon />}
-                />
-              )}
-              {showUpIcon && (
-                <IconButton label={upLabel} onClick={handleMoveComponentUp} icon={<UpIcon />} />
-              )}
-              {isFieldAllowed && (
-                <IconButton label={deleteLabel} onClick={handleRemove} icon={<DeleteIcon />} />
-              )}
-            </Stack>
-          }
-          title={friendlyName}
-          togglePosition="left"
-        />
-        <AccordionContent>
-          <FocusTrap onEscape={() => onToggle(index)}>
-            <FieldComponent
-              componentUid={componentUid}
-              icon={icon}
-              name={`${name}.${index}`}
-              isFromDynamicZone
-            />
-          </FocusTrap>
-        </AccordionContent>
-      </Accordion>
-    </StyledBox>
+      <StyledBox shadow="tableShadow" hasRadius>
+        <Accordion expanded={isOpen} toggle={() => onToggle(index)} size="S">
+          <AccordionToggle
+            startIcon={<FontAwesomeIcon icon={icon} />}
+            action={
+              <Stack horizontal size={0}>
+                {showDownIcon && (
+                  <IconButtonCustom
+                    noBorder
+                    label={downLabel}
+                    onClick={handleMoveComponentDown}
+                    icon={<ArrowDown />}
+                  />
+                )}
+                {showUpIcon && (
+                  <IconButtonCustom
+                    noBorder
+                    label={upLabel}
+                    onClick={handleMoveComponentUp}
+                    icon={<ArrowUp />}
+                  />
+                )}
+                {isFieldAllowed && (
+                  <IconButtonCustom
+                    noBorder
+                    label={deleteLabel}
+                    onClick={handleRemove}
+                    icon={<Trash />}
+                  />
+                )}
+              </Stack>
+            }
+            title={friendlyName}
+            togglePosition="left"
+          />
+          <AccordionContent>
+            <FocusTrap onEscape={() => onToggle(index)}>
+              <FieldComponent
+                componentUid={componentUid}
+                icon={icon}
+                name={`${name}.${index}`}
+                isFromDynamicZone
+              />
+            </FocusTrap>
+          </AccordionContent>
+        </Accordion>
+      </StyledBox>
+    </Box>
   );
 };
 

@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { FocusTrap } from '@strapi/parts/FocusTrap';
-import { Portal } from '@strapi/parts/Portal';
-import { Row } from '@strapi/parts/Row';
-import { Text } from '@strapi/parts/Text';
+import { FocusTrap } from '@strapi/design-system/FocusTrap';
+import { Portal } from '@strapi/design-system/Portal';
+import { Flex } from '@strapi/design-system/Flex';
+import { Text } from '@strapi/design-system/Text';
 import Collapse from '@strapi/icons/Collapse';
 import PreviewWysiwyg from '../PreviewWysiwyg';
 import Editor from './Editor';
@@ -75,7 +75,7 @@ const WysiwygExpand = ({
               </WysiwygContainer>
               <PreviewWrapper>
                 <PreviewHeader padding={2} background="neutral100">
-                  <Row justifyContent="flex-end" alignItems="flex-end">
+                  <Flex justifyContent="flex-end" alignItems="flex-end">
                     <ExpandButton id="collapse" onClick={() => onToggleExpand('collapse')}>
                       <Text>
                         {formatMessage({
@@ -85,7 +85,7 @@ const WysiwygExpand = ({
                       </Text>
                       <Collapse />
                     </ExpandButton>
-                  </Row>
+                  </Flex>
                 </PreviewHeader>
                 <PreviewContainer>
                   <PreviewWysiwyg data={value} />

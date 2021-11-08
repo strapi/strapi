@@ -1,6 +1,7 @@
 'use strict';
 
 const { prop, propEq, identity, merge } = require('lodash/fp');
+const { ValidationError } = require('@strapi/utils').errors;
 
 const LOCALE_SCALAR_TYPENAME = 'I18NLocaleCode';
 const LOCALE_ARG_PLUGIN_NAME = 'I18NLocaleArg';
@@ -82,13 +83,13 @@ module.exports = ({ strapi }) => ({
 
         parseLiteral(ast) {
           if (ast.kind !== 'StringValue') {
-            throw new TypeError('Locale cannot represent non string type');
+            throw new ValidationError('Locale cannot represent non string type');
           }
 
-          const isValidLocale = locales.find(propEq('code', ast.value));
+          const isValidLocale = ast.value === 'all' || locales.find(propEq('code', ast.value));
 
           if (!isValidLocale) {
-            throw new TypeError('Unknown locale supplied');
+            throw new ValidationError('Unknown locale supplied');
           }
 
           return ast.value;

@@ -45,22 +45,6 @@ module.exports = {
     },
     {
       method: 'GET',
-      path: '/files/count',
-      handler: 'admin-api.count',
-      config: {
-        policies: [
-          'admin::isAuthenticatedAdmin',
-          {
-            name: 'admin::hasPermissions',
-            config: {
-              actions: ['plugin::upload.read'],
-            },
-          },
-        ],
-      },
-    },
-    {
-      method: 'GET',
       path: '/files',
       handler: 'admin-api.find',
       config: {

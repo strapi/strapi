@@ -1,15 +1,16 @@
 import React from 'react';
 import { RemoveRoundedButton } from '@strapi/helper-plugin';
-import AddIcon from '@strapi/icons/AddIcon';
-import { Box } from '@strapi/parts/Box';
-import { FieldLabel } from '@strapi/parts/Field';
-import { Grid, GridItem } from '@strapi/parts/Grid';
-import { Row } from '@strapi/parts/Row';
-import { Stack } from '@strapi/parts/Stack';
-import { TextInput } from '@strapi/parts/TextInput';
-import { TextButton } from '@strapi/parts/TextButton';
+import Plus from '@strapi/icons/Plus';
+import { Box } from '@strapi/design-system/Box';
+import { FieldLabel } from '@strapi/design-system/Field';
+import { Grid, GridItem } from '@strapi/design-system/Grid';
+import { Flex } from '@strapi/design-system/Flex';
+import { Stack } from '@strapi/design-system/Stack';
+import { TextInput } from '@strapi/design-system/TextInput';
+import { TextButton } from '@strapi/design-system/TextButton';
 import { Field, FieldArray, useFormikContext } from 'formik';
 import { useIntl } from 'react-intl';
+import Combobox from './Combobox';
 
 const HeadersInput = () => {
   const { formatMessage } = useIntl();
@@ -34,7 +35,7 @@ const HeadersInput = () => {
                 <React.Fragment key={i}>
                   <GridItem col={6}>
                     <Field
-                      as={TextInput}
+                      as={Combobox}
                       name={`headers.${i}.key`}
                       aria-label={`row ${i + 1} key`}
                       label={formatMessage({
@@ -51,7 +52,7 @@ const HeadersInput = () => {
                     />
                   </GridItem>
                   <GridItem col={6}>
-                    <Row>
+                    <Flex alignItems="flex-end">
                       <Box style={{ flex: 1 }}>
                         <Field
                           as={TextInput}
@@ -70,7 +71,11 @@ const HeadersInput = () => {
                           }
                         />
                       </Box>
-                      <Box paddingLeft={2}>
+                      <Flex
+                        paddingLeft={2}
+                        style={{ alignSelf: 'center' }}
+                        paddingTop={errors.headers?.[i]?.value ? 0 : 5}
+                      >
                         <RemoveRoundedButton
                           onClick={() => values.headers.length !== 1 && remove(i)}
                           label={formatMessage(
@@ -81,8 +86,8 @@ const HeadersInput = () => {
                             { number: i + 1 }
                           )}
                         />
-                      </Box>
-                    </Row>
+                      </Flex>
+                    </Flex>
                   </GridItem>
                 </React.Fragment>
               ))}
@@ -92,7 +97,7 @@ const HeadersInput = () => {
                   onClick={() => {
                     push({ key: '', value: '' });
                   }}
-                  startIcon={<AddIcon />}
+                  startIcon={<Plus />}
                 >
                   {formatMessage({
                     id: 'Settings.webhooks.create.header',

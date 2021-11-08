@@ -9,6 +9,8 @@ const getFeaturesRoutes = () => {
     if (features.isEnabled(featureName)) {
       return featureRoutes;
     }
+
+    return [];
   });
 };
 

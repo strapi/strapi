@@ -3,7 +3,7 @@ import { cloneDeep, get, isEmpty, isEqual, set } from 'lodash';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Prompt, Redirect } from 'react-router-dom';
-import { Main } from '@strapi/parts/Main';
+import { Main } from '@strapi/design-system/Main';
 import {
   LoadingIndicatorPage,
   ContentManagerEditViewDataManagerContext,

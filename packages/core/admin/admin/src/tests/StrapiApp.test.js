@@ -15,24 +15,15 @@ describe('ADMIN | StrapiApp', () => {
 
     expect(container.firstChild).toMatchInlineSnapshot(`
       .c0 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-box-pack: space-around;
-        -webkit-justify-content: space-around;
-        -ms-flex-pack: space-around;
-        justify-content: space-around;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
+        margin-left: -250px;
+        position: fixed;
+        left: 50%;
+        top: 2.875rem;
+        z-index: 10;
+        width: 31.25rem;
       }
 
-      .c2 {
+      .c1 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -42,30 +33,19 @@ describe('ADMIN | StrapiApp', () => {
         flex-direction: column;
       }
 
-      .c2 > * {
+      .c1 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c2 > * + * {
-        margin-top: 0px;
-      }
-
-      .c1 {
-        position: fixed;
-        top: 46px;
-        right: 0;
-        left: 0;
-        z-index: 1100;
+      .c1 > * + * {
+        margin-top: 8px;
       }
 
       <div
         class="c0 c1"
-      >
-        <div
-          class="c2"
-        />
-      </div>
+        width="31.25rem"
+      />
     `);
   });
 
@@ -238,7 +218,7 @@ describe('ADMIN | StrapiApp', () => {
         to: '/plugins/bar',
         intlLabel: { id: 'bar', defaultMessage: 'bar' },
         permissions: [],
-        icon: 'book',
+        icon: () => 'book',
       };
 
       app.addMenuLink(link);
@@ -251,7 +231,7 @@ describe('ADMIN | StrapiApp', () => {
       const app = StrapiApp({ middlewares, reducers, library });
       const link = {
         to: '/plugins/content-type-builder',
-        icon: 'book',
+        icon: () => 'book',
         permissions: [],
         intlLabel: {
           id: 'content-type-builder.plugin.name',

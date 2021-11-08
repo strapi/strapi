@@ -30,42 +30,44 @@ const createTelemetryInstance = strapi => {
   const sender = createSender(strapi);
   const sendEvent = wrapWithRateLimit(sender, { limitedEvents: LIMITED_EVENTS });
 
-  if (!isDisabled) {
-    const pingCron = scheduleJob('0 0 12 * * *', () => sendEvent('ping'));
-    crons.push(pingCron);
-
-    strapi.server.use(createMiddleware({ sendEvent }));
-  }
-
-  if (strapi.EE === true && ee.isEE === true) {
-    const pingDisabled =
-      isTruthy(process.env.STRAPI_LICENSE_PING_DISABLED) && ee.licenseInfo.type === 'gold';
-
-    const sendLicenseCheck = () => {
-      return sendEvent(
-        'didCheckLicense',
-        {
-          licenseInfo: {
-            ...ee.licenseInfo,
-            projectHash: hashProject(strapi),
-            dependencyHash: hashDep(strapi),
-          },
-        },
-        {
-          headers: { 'x-strapi-project': 'enterprise' },
-        }
-      );
-    };
-
-    if (!pingDisabled) {
-      const licenseCron = scheduleJob('0 0 0 * * 7', () => sendLicenseCheck());
-      crons.push(licenseCron);
-
-      sendLicenseCheck();
-    }
-  }
-
   return {
+    register() {
+      if (!isDisabled) {
+        const pingCron = scheduleJob('0 0 12 * * *', () => sendEvent('ping'));
+        crons.push(pingCron);
+
+        strapi.server.use(createMiddleware({ sendEvent }));
+      }
+    },
+    bootstrap() {
+      if (strapi.EE === true && ee.isEE === true) {
+        const pingDisabled =
+          isTruthy(process.env.STRAPI_LICENSE_PING_DISABLED) && ee.licenseInfo.type === 'gold';
+
+        const sendLicenseCheck = () => {
+          return sendEvent(
+            'didCheckLicense',
+            {
+              licenseInfo: {
+                ...ee.licenseInfo,
+                projectHash: hashProject(strapi),
+                dependencyHash: hashDep(strapi),
+              },
+            },
+            {
+              headers: { 'x-strapi-project': 'enterprise' },
+            }
+          );
+        };
+
+        if (!pingDisabled) {
+          const licenseCron = scheduleJob('0 0 0 * * 7', () => sendLicenseCheck());
+          crons.push(licenseCron);
+
+          sendLicenseCheck();
+        }
+      }
+    },
     destroy() {
       // clear open handles
       crons.forEach(cron => cron.cancel());

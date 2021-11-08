@@ -1,8 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Box } from '@strapi/parts/Box';
-import Close from '@strapi/icons/Close';
-import { Tag } from '@strapi/parts/Tag';
+import { Box } from '@strapi/design-system/Box';
+import Cross from '@strapi/icons/Cross';
+import { Tag } from '@strapi/design-system/Tag';
 import { useIntl } from 'react-intl';
 
 const AttributeTag = ({ attribute, filter, onClick, operator, value }) => {
@@ -42,21 +42,14 @@ const AttributeTag = ({ attribute, filter, onClick, operator, value }) => {
     formattedValue = formatNumber(value);
   }
 
+  const content = `${attribute.metadatas.label || attribute.name} ${formatMessage({
+    id: `components.FilterOptions.FILTER_TYPES.${operator}`,
+    defaultMessage: operator,
+  })} ${operator !== '$null' && operator !== '$notNull' ? formattedValue : ''}`;
+
   return (
     <Box padding={1} onClick={handleClick}>
-      <Tag icon={<Close />}>
-        {attribute.metadatas.label || attribute.name}&nbsp;
-        {formatMessage({
-          id: `components.FilterOptions.FILTER_TYPES.${operator}`,
-          defaultMessage: operator,
-        })}
-        {operator !== '$null' && operator !== '$notNull' && (
-          <>
-            &nbsp;
-            {formattedValue}
-          </>
-        )}
-      </Tag>
+      <Tag icon={<Cross />}>{content}</Tag>
     </Box>
   );
 };

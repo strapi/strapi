@@ -2,10 +2,10 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
-import { Box } from '@strapi/parts/Box';
-import { Row } from '@strapi/parts/Row';
-import { Text } from '@strapi/parts/Text';
-import Bullet from '@strapi/icons/Bullet';
+import { Box } from '@strapi/design-system/Box';
+import { Flex } from '@strapi/design-system/Flex';
+import { Text } from '@strapi/design-system/Text';
+import Bullet from '@strapi/icons/Dot';
 import { pxToRem } from '@strapi/helper-plugin';
 import { getTrad } from '../../../utils';
 import { connect, select } from './utils';
@@ -55,7 +55,7 @@ const DraftAndPublishBadge = ({ hasDraftAndPublish, isPublished }) => {
       paddingRight={5}
       {...colorProps.box}
     >
-      <Box as={Row}>
+      <Box as={Flex}>
         <CustomBullet $bulletColor={colorProps.bulletColor} />
         <Box paddingLeft={3}>
           <Text textColor={colorProps.textColor}>
@@ -88,5 +88,8 @@ DraftAndPublishBadge.propTypes = {
   isPublished: PropTypes.bool.isRequired,
 };
 
-export default connect(DraftAndPublishBadge, select);
+export default connect(
+  DraftAndPublishBadge,
+  select
+);
 export { DraftAndPublishBadge };

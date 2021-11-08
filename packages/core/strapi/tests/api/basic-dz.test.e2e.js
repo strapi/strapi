@@ -1,7 +1,5 @@
 'use strict';
 
-const _ = require('lodash');
-
 const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
 const { createTestBuilder } = require('../../../../../test/helpers/builder');
 const { createContentAPIRequest } = require('../../../../../test/helpers/request');
@@ -14,7 +12,7 @@ const data = {
 };
 
 const compo = {
-  name: 'compo',
+  displayName: 'compo',
   attributes: {
     name: {
       type: 'string',
@@ -42,7 +40,9 @@ const productWithDz = {
       required: true,
     },
   },
-  name: 'product-with-dz',
+  displayName: 'product-with-dz',
+  singularName: 'product-with-dz',
+  pluralName: 'product-with-dzs',
   description: '',
   collectionName: '',
 };
@@ -181,7 +181,23 @@ describe('Core API - Basic + dz', () => {
       });
 
       expect(res.statusCode).toBe(400);
-      expect(_.get(res.body.data, ['errors', 'dz', '0'])).toBe('dz must be defined.');
+      expect(res.body).toMatchObject({
+        data: null,
+        error: {
+          status: 400,
+          name: 'ValidationError',
+          message: 'dz must be defined.',
+          details: {
+            errors: [
+              {
+                path: ['dz'],
+                message: 'dz must be defined.',
+                name: 'ValidationError',
+              },
+            ],
+          },
+        },
+      });
     });
 
     test('Cannot create product with compo - minLength', async () => {
@@ -205,9 +221,23 @@ describe('Core API - Basic + dz', () => {
       });
 
       expect(res.statusCode).toBe(400);
-      expect(_.get(res.body.data, ['errors', 'dz[0].description', '0'])).toBe(
-        'dz[0].description must be at least 3 characters'
-      );
+      expect(res.body).toMatchObject({
+        data: null,
+        error: {
+          status: 400,
+          name: 'ValidationError',
+          message: 'dz[0].description must be at least 3 characters',
+          details: {
+            errors: [
+              {
+                path: ['dz', '0', 'description'],
+                message: 'dz[0].description must be at least 3 characters',
+                name: 'ValidationError',
+              },
+            ],
+          },
+        },
+      });
     });
 
     test('Cannot create product with compo - maxLength', async () => {
@@ -231,9 +261,23 @@ describe('Core API - Basic + dz', () => {
       });
 
       expect(res.statusCode).toBe(400);
-      expect(_.get(res.body.data, ['errors', 'dz[0].description', '0'])).toBe(
-        'dz[0].description must be at most 10 characters'
-      );
+      expect(res.body).toMatchObject({
+        data: null,
+        error: {
+          status: 400,
+          name: 'ValidationError',
+          message: 'dz[0].description must be at most 10 characters',
+          details: {
+            errors: [
+              {
+                path: ['dz', '0', 'description'],
+                message: 'dz[0].description must be at most 10 characters',
+                name: 'ValidationError',
+              },
+            ],
+          },
+        },
+      });
     });
 
     test('Cannot create product with compo - required', async () => {
@@ -256,9 +300,23 @@ describe('Core API - Basic + dz', () => {
       });
 
       expect(res.statusCode).toBe(400);
-      expect(_.get(res.body.data, ['errors', 'dz[0].name', '0'])).toBe(
-        'dz[0].name must be defined.'
-      );
+      expect(res.body).toMatchObject({
+        data: null,
+        error: {
+          status: 400,
+          name: 'ValidationError',
+          message: 'dz[0].name must be defined.',
+          details: {
+            errors: [
+              {
+                path: ['dz', '0', 'name'],
+                message: 'dz[0].name must be defined.',
+                name: 'ValidationError',
+              },
+            ],
+          },
+        },
+      });
     });
 
     test('Cannot create product with compo - missing __component', async () => {
@@ -281,9 +339,23 @@ describe('Core API - Basic + dz', () => {
       });
 
       expect(res.statusCode).toBe(400);
-      expect(_.get(res.body.data, ['errors', 'dz[0].__component', '0'])).toBe(
-        'dz[0].__component is a required field'
-      );
+      expect(res.body).toMatchObject({
+        data: null,
+        error: {
+          status: 400,
+          name: 'ValidationError',
+          message: 'dz[0].__component is a required field',
+          details: {
+            errors: [
+              {
+                path: ['dz', '0', '__component'],
+                message: 'dz[0].__component is a required field',
+                name: 'ValidationError',
+              },
+            ],
+          },
+        },
+      });
     });
   });
 });

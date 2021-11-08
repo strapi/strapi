@@ -1,6 +1,5 @@
 'use strict';
 
-const Koa = require('koa');
 const Router = require('@koa/router');
 
 const { createHTTPServer } = require('./http-server');
@@ -9,6 +8,7 @@ const { createAdminAPI } = require('./admin-api');
 const { createContentAPI } = require('./content-api');
 const registerAllRoutes = require('./register-routes');
 const registerApplicationMiddlewares = require('./register-middlewares');
+const createKoaApp = require('./koa');
 
 const healthCheck = async ctx => {
   ctx.set('strapi', 'You are so French!');
@@ -28,14 +28,9 @@ const healthCheck = async ctx => {
  * @returns {Server}
  */
 const createServer = strapi => {
-  const app = new Koa({
-    proxy: strapi.config.get('server.proxy'),
-  });
+  const app = createKoaApp({ proxy: strapi.config.get('server.proxy') });
 
-  const router = new Router({
-    // FIXME: this prefix can break the admin if not specified in the admin url
-    prefix: strapi.config.get('middleware.settings.router.prefix', ''),
-  });
+  const router = new Router();
 
   const routeManager = createRouteManager(strapi);
 

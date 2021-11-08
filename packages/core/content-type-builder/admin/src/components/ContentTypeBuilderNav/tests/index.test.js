@@ -4,7 +4,7 @@
  *
  */
 
-import { Layout } from '@strapi/parts';
+import { Layout } from '@strapi/design-system';
 import { render } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import React from 'react';
@@ -32,7 +32,9 @@ const makeApp = () => {
     <LanguageProvider messages={messages} localeNames={localeNames}>
       <Theme>
         <Router history={history}>
-          <Layout sideNav={<ContentTypeBuilderNav />} />
+          <Layout sideNav={<ContentTypeBuilderNav />}>
+            <div />
+          </Layout>
         </Router>
       </Theme>
     </LanguageProvider>

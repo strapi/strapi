@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { P } from '@strapi/parts/Text';
+import { P } from '@strapi/design-system/Text';
 
 export const Hint = ({ id, error, name, description }) => {
   const { formatMessage } = useIntl();

@@ -1,11 +1,8 @@
 {
-  "components.Row.generatedDate": "Letztes Mal generiert",
   "components.Row.open": "Öffnen",
   "components.Row.regenerate": "Neu generieren",
   "containers.HomePage.Block.title": "Versionen",
-  "containers.HomePage.Button.open": "Dokumentation öffnen",
   "containers.HomePage.Button.update": "Aktualisieren",
-  "containers.HomePage.PluginHeader.description": "Einstellungen des Dokumentation-Plugins ändern",
   "containers.HomePage.PluginHeader.title": "Dokumentation - Einstellungen",
   "containers.HomePage.PopUpWarning.confirm": "Ich verstehe",
   "containers.HomePage.PopUpWarning.message": "Sind Sie sich sicher, dass Sie diese Version löschen wollen?",

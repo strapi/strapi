@@ -1,9 +1,9 @@
 import React, { useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Button } from '@strapi/parts/Button';
-import { Box } from '@strapi/parts/Box';
-import FilterIcon from '@strapi/icons/FilterIcon';
+import { Button } from '@strapi/design-system/Button';
+import { Box } from '@strapi/design-system/Box';
+import Filter from '@strapi/icons/Filter';
 import { FilterListURLQuery, FilterPopoverURLQuery } from '@strapi/helper-plugin';
 
 const Filters = ({ displayedFilters }) => {
@@ -11,17 +11,32 @@ const Filters = ({ displayedFilters }) => {
   const { formatMessage } = useIntl();
   const buttonRef = useRef();
 
+  const handleBlur = e => {
+    // TO FIX - select's modals prevent blur to work correctly
+    const notNull = e.currentTarget !== null && e.relatedTarget !== null;
+    const ulListBox = document.querySelector('[role="listbox"]');
+
+    if (
+      !e.currentTarget.contains(e.relatedTarget) &&
+      e.relatedTarget !== buttonRef.current &&
+      e.relatedTarget !== ulListBox &&
+      notNull
+    ) {
+      setIsVisible(false);
+    }
+  };
+
   const handleToggle = () => {
     setIsVisible(prev => !prev);
   };
 
   return (
     <>
-      <Box padding={1}>
+      <Box paddingTop={1} paddingBottom={1}>
         <Button
           variant="tertiary"
           ref={buttonRef}
-          startIcon={<FilterIcon />}
+          startIcon={<Filter />}
           onClick={handleToggle}
           size="S"
         >
@@ -31,6 +46,7 @@ const Filters = ({ displayedFilters }) => {
           <FilterPopoverURLQuery
             displayedFilters={displayedFilters}
             isVisible={isVisible}
+            onBlur={handleBlur}
             onToggle={handleToggle}
             source={buttonRef}
           />

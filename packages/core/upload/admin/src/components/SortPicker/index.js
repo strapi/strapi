@@ -1,54 +1,40 @@
 import React from 'react';
+import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from 'react-intl';
-import { Carret } from '@strapi/helper-plugin';
-import { Picker } from '@buffetjs/core';
+import { SimpleMenu, MenuItem } from '@strapi/design-system/SimpleMenu';
 import { getTrad } from '../../utils';
-import { useSelectTimestamps } from '../../hooks';
 
-import SortList from '../SortList';
+const SortPicker = ({ onChangeSort }) => {
+  const { formatMessage } = useIntl();
 
-const SortPicker = ({ onChange, value }) => {
-  const [createdAt, updatedAt] = useSelectTimestamps();
-  const orders = {
-    created_at_desc: `${createdAt}:DESC`,
-    created_at_asc: `${createdAt}:ASC`,
-    name_asc: 'name:ASC',
-    name_desc: 'name:DESC',
-    updated_at_desc: `${updatedAt}:DESC`,
-    updated_at_asc: `${updatedAt}:ASC`,
-  };
+  const filters = [
+    { key: 'sort.created_at_desc', value: `createdAt:DESC` },
+    { key: 'sort.created_at_asc', value: `createdAt:ASC` },
+    { key: 'sort.name_asc', value: 'name:ASC' },
+    { key: 'sort.name_desc', value: 'name:DESC' },
+    { key: 'sort.updated_at_desc', value: `updatedAt:DESC` },
+    { key: 'sort.updated_at_asc', value: `updatedAt:ASC` },
+  ];
 
   return (
-    <Picker
-      renderButtonContent={isOpen => (
-        <>
-          <FormattedMessage id={getTrad('sort.label')} />
-          <Carret isUp={isOpen} fill={isOpen ? '#007EFF' : '#292b2c'} />
-        </>
-      )}
-      renderSectionContent={onToggle => (
-        <SortList
-          list={orders}
-          selectedItem={value}
-          onClick={e => {
-            onChange(e);
-            onToggle();
-          }}
-        />
-      )}
-    />
+    <SimpleMenu
+      variant="tertiary"
+      label={formatMessage({
+        id: getTrad('sort.label'),
+        defaultMessage: 'Sort by',
+      })}
+    >
+      {filters.map(filter => (
+        <MenuItem key={filter.key} onClick={() => onChangeSort(filter.value)}>
+          {formatMessage({ id: getTrad(filter.key) })}
+        </MenuItem>
+      ))}
+    </SimpleMenu>
   );
 };
 
-SortPicker.defaultProps = {
-  onChange: () => {},
-  value: null,
-};
-
 SortPicker.propTypes = {
-  onChange: PropTypes.func,
-  value: PropTypes.string,
+  onChangeSort: PropTypes.func.isRequired,
 };
 
 export default SortPicker;

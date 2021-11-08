@@ -7,5 +7,5 @@ module.exports = input => {
     return 'You must provide an input';
   }
 
-  return regex.test(input) || 'Please use only letters and no spaces';
+  return regex.test(input) || "Please use only letters, '-' and no spaces";
 };

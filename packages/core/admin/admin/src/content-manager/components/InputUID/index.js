@@ -3,12 +3,12 @@ import PropTypes from 'prop-types';
 import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import get from 'lodash/get';
-import { TextInput } from '@strapi/parts/TextInput';
-import { Text } from '@strapi/parts/Text';
-import Reload from '@strapi/icons/Reload';
-import AlertSucessIcon from '@strapi/icons/AlertSucessIcon';
-import AlertWarningIcon from '@strapi/icons/AlertWarningIcon';
-import LoadingIcon from '@strapi/icons/LoadingIcon';
+import { TextInput } from '@strapi/design-system/TextInput';
+import { Text } from '@strapi/design-system/Text';
+import Refresh from '@strapi/icons/Refresh';
+import CheckCircle from '@strapi/icons/CheckCircle';
+import ExclamationMarkCircle from '@strapi/icons/ExclamationMarkCircle';
+import Loader from '@strapi/icons/Loader';
 import { axiosInstance } from '../../../core/utils';
 import { getRequestUrl } from '../../utils';
 import useDebounce from './useDebounce';
@@ -123,7 +123,8 @@ const InputUID = ({
     if (
       debouncedValue &&
       debouncedValue.trim().match(UID_REGEX) &&
-      debouncedValue !== initialValue
+      debouncedValue !== initialValue &&
+      !value
     ) {
       checkAvailability();
     }
@@ -154,7 +155,8 @@ const InputUID = ({
       !isCustomized &&
       isCreation &&
       debouncedTargetFieldValue &&
-      modifiedData[attribute.targetField]
+      modifiedData[attribute.targetField] &&
+      !value
     ) {
       generateUid.current(true);
     }
@@ -192,7 +194,7 @@ const InputUID = ({
         <EndActionWrapper>
           {availability && availability.isAvailable && !regenerateLabel && (
             <TextValidation alignItems="center" justifyContent="flex-end">
-              <AlertSucessIcon />
+              <CheckCircle />
               <Text textColor="success600" small>
                 {formatMessage({
                   id: 'content-manager.components.uid.available',
@@ -203,7 +205,7 @@ const InputUID = ({
           )}
           {availability && !availability.isAvailable && !regenerateLabel && (
             <TextValidation notAvailable alignItems="center" justifyContent="flex-end">
-              <AlertWarningIcon />
+              <ExclamationMarkCircle />
               <Text textColor="danger600" small>
                 {formatMessage({
                   id: 'content-manager.components.uid.unavailable',
@@ -227,10 +229,10 @@ const InputUID = ({
           >
             {isLoading ? (
               <LoadingWrapper>
-                <LoadingIcon />
+                <Loader />
               </LoadingWrapper>
             ) : (
-              <Reload />
+              <Refresh />
             )}
           </FieldActionWrapper>
         </EndActionWrapper>
