@@ -19,7 +19,7 @@ import useTracking from '../../hooks/useTracking';
 import Inputs from './Inputs';
 import getFilterList from './utils/getFilterList';
 
-const FilterPopoverURLQuery = ({ displayedFilters, isVisible, onToggle, source }) => {
+const FilterPopoverURLQuery = ({ displayedFilters, isVisible, onBlur, onToggle, source }) => {
   const [{ query }, setQuery] = useQueryParams();
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
@@ -115,7 +115,7 @@ const FilterPopoverURLQuery = ({ displayedFilters, isVisible, onToggle, source }
   const operator = modifiedData.filter;
 
   return (
-    <Popover source={source} padding={3} spacing={4}>
+    <Popover source={source} padding={3} spacing={4} onBlur={onBlur}>
       <FocusTrap onEscape={onToggle}>
         <form onSubmit={handleSubmit}>
           <Stack size={1} style={{ minWidth: 184 }}>
@@ -181,6 +181,10 @@ const FilterPopoverURLQuery = ({ displayedFilters, isVisible, onToggle, source }
   );
 };
 
+FilterPopoverURLQuery.defaultProps = {
+  onBlur: () => {},
+};
+
 FilterPopoverURLQuery.propTypes = {
   displayedFilters: PropTypes.arrayOf(
     PropTypes.shape({
@@ -195,6 +199,7 @@ FilterPopoverURLQuery.propTypes = {
     })
   ).isRequired,
   isVisible: PropTypes.bool.isRequired,
+  onBlur: PropTypes.func,
   onToggle: PropTypes.func.isRequired,
   source: PropTypes.shape({ current: PropTypes.instanceOf(Element) }).isRequired,
 };
