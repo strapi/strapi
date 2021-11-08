@@ -4,7 +4,7 @@ const { prop, pick } = require('lodash/fp');
 const { MANY_RELATIONS } = require('@strapi/utils').relations.constants;
 const { setCreatorFields, pipeAsync } = require('@strapi/utils');
 
-const { getService, wrapBadRequest, pickWritableAttributes } = require('../utils');
+const { getService, pickWritableAttributes } = require('../utils');
 const { validateBulkDeleteInput, validatePagination } = require('./validation');
 
 module.exports = {
@@ -81,16 +81,14 @@ module.exports = {
 
     const sanitizeFn = pipeAsync(pickWritables, pickPermittedFields, setCreator);
 
-    await wrapBadRequest(async () => {
-      const sanitizedBody = await sanitizeFn(body);
-      const entity = await entityManager.create(sanitizedBody, model);
+    const sanitizedBody = await sanitizeFn(body);
+    const entity = await entityManager.create(sanitizedBody, model);
 
-      ctx.body = await permissionChecker.sanitizeOutput(entity);
+    ctx.body = await permissionChecker.sanitizeOutput(entity);
 
-      if (totalEntries === 0) {
-        strapi.telemetry.send('didCreateFirstContentTypeEntry', { model });
-      }
-    })();
+    if (totalEntries === 0) {
+      strapi.telemetry.send('didCreateFirstContentTypeEntry', { model });
+    }
   },
 
   async update(ctx) {
@@ -121,12 +119,10 @@ module.exports = {
 
     const sanitizeFn = pipeAsync(pickWritables, pickPermittedFields, setCreator);
 
-    await wrapBadRequest(async () => {
-      const sanitizedBody = await sanitizeFn(body);
-      const updatedEntity = await entityManager.update(entity, sanitizedBody, model);
+    const sanitizedBody = await sanitizeFn(body);
+    const updatedEntity = await entityManager.update(entity, sanitizedBody, model);
 
-      ctx.body = await permissionChecker.sanitizeOutput(updatedEntity);
-    })();
+    ctx.body = await permissionChecker.sanitizeOutput(updatedEntity);
   },
 
   async delete(ctx) {

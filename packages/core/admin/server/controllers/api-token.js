@@ -1,6 +1,7 @@
 'use strict';
 
 const { stringEquals } = require('@strapi/utils/lib');
+const { ApplicationError } = require('@strapi/utils').errors;
 const { trim } = require('lodash/fp');
 const has = require('lodash/has');
 const { getService } = require('../utils');
@@ -25,15 +26,11 @@ module.exports = {
       type: body.type,
     };
 
-    try {
-      await validateApiTokenCreationInput(attributes);
-    } catch (err) {
-      return ctx.badRequest('ValidationError', err);
-    }
+    await validateApiTokenCreationInput(attributes);
 
     const alreadyExists = await apiTokenService.exists({ name: attributes.name });
     if (alreadyExists) {
-      return ctx.badRequest('Name already taken');
+      throw new ApplicationError('Name already taken');
     }
 
     const apiToken = await apiTokenService.create(attributes);
@@ -88,15 +85,11 @@ module.exports = {
       attributes.description = trim(body.description);
     }
 
-    try {
-      await validateApiTokenUpdateInput(attributes);
-    } catch (err) {
-      return ctx.badRequest('ValidationError', err);
-    }
+    await validateApiTokenUpdateInput(attributes);
 
     const apiTokenExists = await apiTokenService.getById(id);
     if (!apiTokenExists) {
-      return ctx.notFound('API token not found');
+      return ctx.notFound('API Token not found');
     }
 
     if (has(attributes, 'name')) {
@@ -108,7 +101,7 @@ module.exports = {
        * as a string. This way we avoid issues with integers in the db.
        */
       if (!!nameAlreadyTaken && !stringEquals(nameAlreadyTaken.id, id)) {
-        return ctx.badRequest('Name already taken');
+        throw new ApplicationError('Name already taken');
       }
     }
 

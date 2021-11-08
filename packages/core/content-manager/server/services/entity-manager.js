@@ -2,6 +2,7 @@
 
 const { assoc, has, prop, omit } = require('lodash/fp');
 const strapiUtils = require('@strapi/utils');
+const { ApplicationError } = require('@strapi/utils').errors;
 
 const { hasDraftAndPublish, isVisibleAttribute } = strapiUtils.contentTypes;
 const { PUBLISHED_AT_ATTRIBUTE, CREATED_BY_ATTRIBUTE } = strapiUtils.contentTypes.constants;
@@ -204,7 +205,7 @@ module.exports = ({ strapi }) => ({
 
   publish: wrapWithEmitEvent(ENTRY_PUBLISH, async (entity, uid) => {
     if (entity[PUBLISHED_AT_ATTRIBUTE]) {
-      throw strapi.errors.badRequest('already.published');
+      throw new ApplicationError('already.published');
     }
 
     // validate the entity is valid for publication
@@ -219,7 +220,7 @@ module.exports = ({ strapi }) => ({
 
   unpublish: wrapWithEmitEvent(ENTRY_UNPUBLISH, (entity, uid) => {
     if (!entity[PUBLISHED_AT_ATTRIBUTE]) {
-      throw strapi.errors.badRequest('already.draft');
+      throw new ApplicationError('already.draft');
     }
 
     const data = { [PUBLISHED_AT_ATTRIBUTE]: null };

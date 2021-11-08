@@ -1,18 +1,8 @@
 'use strict';
 
-const yup = require('yup');
-const { formatYupErrors } = require('@strapi/utils');
+const { yup, validateYupSchema } = require('@strapi/utils');
 
 const { isValidCategoryName } = require('./common');
-
-module.exports = data => {
-  return componentCategorySchema
-    .validate(data, {
-      strict: true,
-      abortEarly: false,
-    })
-    .catch(error => Promise.reject(formatYupErrors(error)));
-};
 
 const componentCategorySchema = yup
   .object({
@@ -23,3 +13,5 @@ const componentCategorySchema = yup
       .required('name.required'),
   })
   .noUnknown();
+
+module.exports = validateYupSchema(componentCategorySchema);

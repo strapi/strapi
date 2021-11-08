@@ -1,7 +1,7 @@
 'use strict';
 
-const assert = require('assert').strict;
 const { pick, isNil, toNumber, isInteger } = require('lodash/fp');
+const { PaginationError } = require('@strapi/utils').errors;
 
 const {
   convertSortQueryParams,
@@ -47,25 +47,31 @@ const transformParamsToQuery = (uid, params) => {
   const isOffsetPagination = !isNil(start) || !isNil(limit);
 
   if (isPagePagination && isOffsetPagination) {
-    throw new Error(
+    throw new PaginationError(
       'Invalid pagination attributes. You cannot use page and offset pagination in the same query'
     );
   }
 
   if (!isNil(page)) {
     const pageVal = toNumber(page);
-    const isValid = isInteger(pageVal) && pageVal > 0;
 
-    assert(isValid, `Invalid 'page' parameter. Expected an integer > 0, received: ${page}`);
+    if (!isInteger(pageVal) || pageVal <= 0) {
+      throw new PaginationError(
+        `Invalid 'page' parameter. Expected an integer > 0, received: ${page}`
+      );
+    }
 
     query.page = pageVal;
   }
 
   if (!isNil(pageSize)) {
     const pageSizeVal = toNumber(pageSize);
-    const isValid = isInteger(pageSizeVal) && pageSizeVal > 0;
 
-    assert(isValid, `Invalid 'pageSize' parameter. Expected an integer > 0, received: ${page}`);
+    if (!isInteger(pageSizeVal) || pageSizeVal <= 0) {
+      throw new PaginationError(
+        `Invalid 'pageSize' parameter. Expected an integer > 0, received: ${page}`
+      );
+    }
 
     query.pageSize = pageSizeVal;
   }

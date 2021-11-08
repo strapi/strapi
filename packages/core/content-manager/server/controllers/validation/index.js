@@ -1,90 +1,58 @@
 'use strict';
 
 const _ = require('lodash');
-const { yup, formatYupErrors } = require('@strapi/utils');
+const { yup, validateYupSchema } = require('@strapi/utils');
+const { PaginationError, ValidationError } = require('@strapi/utils').errors;
 
 const createModelConfigurationSchema = require('./model-configuration');
 
 const TYPES = ['singleType', 'collectionType'];
 
-const handleError = error => {
-  throw strapi.errors.badRequest('ValidationError', formatYupErrors(error));
-};
-
 /**
  * Validates type kind
  */
-const validateKind = kind => {
-  return yup
+const kindSchema = yup
+  .string()
+  .oneOf(TYPES)
+  .nullable();
+
+const bulkDeleteInputSchema = yup
+  .object({
+    ids: yup
+      .array()
+      .of(yup.strapiID())
+      .min(1)
+      .required(),
+  })
+  .required();
+
+const generateUIDInputSchema = yup.object({
+  contentTypeUID: yup.string().required(),
+  field: yup.string().required(),
+  data: yup.object().required(),
+});
+
+const checkUIDAvailabilityInputSchema = yup.object({
+  contentTypeUID: yup.string().required(),
+  field: yup.string().required(),
+  value: yup
     .string()
-    .oneOf(TYPES)
-    .nullable()
-    .validate(kind)
-    .catch(error => Promise.reject(formatYupErrors(error)));
-};
-
-const validateBulkDeleteInput = (data = {}) => {
-  return yup
-    .object({
-      ids: yup
-        .array()
-        .of(yup.strapiID())
-        .min(1)
-        .required(),
-    })
-    .required()
-    .validate(data, {
-      strict: true,
-      abortEarly: false,
-    })
-    .catch(handleError);
-};
-
-const validateGenerateUIDInput = data => {
-  return yup
-    .object({
-      contentTypeUID: yup.string().required(),
-      field: yup.string().required(),
-      data: yup.object().required(),
-    })
-    .validate(data, {
-      strict: true,
-      abortEarly: false,
-    })
-    .catch(handleError);
-};
-
-const validateCheckUIDAvailabilityInput = data => {
-  return yup
-    .object({
-      contentTypeUID: yup.string().required(),
-      field: yup.string().required(),
-      value: yup
-        .string()
-        .matches(new RegExp('^[A-Za-z0-9-_.~]*$'))
-        .required(),
-    })
-    .validate(data, {
-      strict: true,
-      abortEarly: false,
-    })
-    .catch(handleError);
-};
+    .matches(new RegExp('^[A-Za-z0-9-_.~]*$'))
+    .required(),
+});
 
 const validateUIDField = (contentTypeUID, field) => {
   const model = strapi.contentTypes[contentTypeUID];
 
   if (!model) {
-    throw strapi.errors.badRequest('ValidationError', ['ContentType not found']);
+    throw new ValidationError('ContentType not found');
   }
 
   if (
     !_.has(model, ['attributes', field]) ||
     _.get(model, ['attributes', field, 'type']) !== 'uid'
   ) {
-    throw strapi.errors.badRequest('ValidationError', {
-      field: ['field must be a valid `uid` attribute'],
-    });
+    throw new ValidationError(`${field} must be a valid \`uid\` attribute`);
   }
 };
 
@@ -93,19 +61,19 @@ const validatePagination = ({ page, pageSize }) => {
   const pageSizeNumber = parseInt(pageSize);
 
   if (isNaN(pageNumber) || pageNumber < 1) {
-    throw strapi.errors.badRequest('invalid pageNumber param');
+    throw new PaginationError('invalid pageNumber param');
   }
   if (isNaN(pageSizeNumber) || pageSizeNumber < 1) {
-    throw strapi.errors.badRequest('invalid pageSize param');
+    throw new PaginationError('invalid pageSize param');
   }
 };
 
 module.exports = {
   createModelConfigurationSchema,
-  validateKind,
-  validateBulkDeleteInput,
-  validateGenerateUIDInput,
-  validateCheckUIDAvailabilityInput,
+  validateKind: validateYupSchema(kindSchema),
+  validateBulkDeleteInput: validateYupSchema(bulkDeleteInputSchema),
+  validateGenerateUIDInput: validateYupSchema(generateUIDInputSchema),
+  validateCheckUIDAvailabilityInput: validateYupSchema(checkUIDAvailabilityInputSchema),
   validateUIDField,
   validatePagination,
 };

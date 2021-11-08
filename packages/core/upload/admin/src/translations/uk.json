@@ -31,8 +31,6 @@
   "list.assets-empty.subtitle": "Додайте свій перший файл.",
   "list.assets-empty.title": "Ще немає файлів",
   "list.assets-empty.title-withSearch": "Немає файлів, що відповідають застосованим фільтрам",
-  "list.assets.selected.plural": "{number} файлів вибрано",
-  "list.assets.selected.singular": "{number} файл вибрано",
   "list.assets.type-not-allowed": "Цей тип файлу не дозволений.",
   "modal.file-details.date": "Дата",
   "modal.file-details.dimensions": "Розміри",

@@ -15,11 +15,7 @@ module.exports = {
   async updateMe(ctx) {
     const input = ctx.request.body;
 
-    try {
-      await validateProfileUpdateInput(input);
-    } catch (err) {
-      return ctx.badRequest('ValidationError', err);
-    }
+    await validateProfileUpdateInput(input);
 
     const userService = getService('user');
     const authServer = getService('auth');

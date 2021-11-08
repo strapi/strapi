@@ -182,7 +182,7 @@ export * from './components/InjectionZone';
 export { default as LoadingIndicatorPage } from './components/LoadingIndicatorPage';
 export { default as NotAllowedInput } from './components/NotAllowedInput';
 export { default as SettingsPageTitle } from './components/SettingsPageTitle';
-export { default as Search } from './components/Search';
+export { default as SearchURLQuery } from './components/SearchURLQuery';
 export { default as Status } from './components/Status';
 export { default as FilterListURLQuery } from './components/FilterListURLQuery';
 export { default as FilterPopoverURLQuery } from './components/FilterPopoverURLQuery';
@@ -190,6 +190,7 @@ export { default as Form } from './components/Form';
 export { default as PaginationURLQuery } from './components/PaginationURLQuery';
 export { default as PageSizeURLQuery } from './components/PageSizeURLQuery';
 export { default as RelativeTime } from './components/RelativeTime';
+export { default as DateTimePicker } from './components/DateTimePicker';
 
 // New icons
 export { default as SortIcon } from './icons/SortIcon';

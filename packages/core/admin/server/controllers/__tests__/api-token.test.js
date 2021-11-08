@@ -1,5 +1,6 @@
 'use strict';
 
+const { ApplicationError } = require('@strapi/utils').errors;
 const createContext = require('../../../../../../test/helpers/create-context');
 const apiTokenController = require('../api-token');
 
@@ -13,8 +14,7 @@ describe('API Token Controller', () => {
 
     test('Fails if API Token already exists', async () => {
       const exists = jest.fn(() => true);
-      const badRequest = jest.fn();
-      const ctx = createContext({ body }, { badRequest });
+      const ctx = createContext({ body });
 
       global.strapi = {
         admin: {
@@ -26,10 +26,16 @@ describe('API Token Controller', () => {
         },
       };
 
-      await apiTokenController.create(ctx);
+      expect.assertions(3);
+
+      try {
+        await apiTokenController.create(ctx);
+      } catch (e) {
+        expect(e instanceof ApplicationError).toBe(true);
+        expect(e.message).toEqual('Name already taken');
+      }
 
       expect(exists).toHaveBeenCalledWith({ name: body.name });
-      expect(badRequest).toHaveBeenCalledWith('Name already taken');
     });
 
     test('Create API Token Successfully', async () => {
@@ -211,8 +217,7 @@ describe('API Token Controller', () => {
     test('Fails if the name is already taken', async () => {
       const getById = jest.fn(() => ({ id, ...body }));
       const getByName = jest.fn(() => ({ id: 2, name: body.name }));
-      const badRequest = jest.fn();
-      const ctx = createContext({ body, params: { id } }, { badRequest });
+      const ctx = createContext({ body, params: { id } });
 
       global.strapi = {
         admin: {
@@ -225,10 +230,16 @@ describe('API Token Controller', () => {
         },
       };
 
-      await apiTokenController.update(ctx);
+      expect.assertions(3);
+
+      try {
+        await apiTokenController.update(ctx);
+      } catch (e) {
+        expect(e instanceof ApplicationError).toBe(true);
+        expect(e.message).toEqual('Name already taken');
+      }
 
       expect(getByName).toHaveBeenCalledWith(body.name);
-      expect(badRequest).toHaveBeenCalledWith('Name already taken');
     });
 
     test('Fails if the token does not exist', async () => {
@@ -249,17 +260,16 @@ describe('API Token Controller', () => {
       await apiTokenController.update(ctx);
 
       expect(getById).toHaveBeenCalledWith(id);
-      expect(notFound).toHaveBeenCalledWith('API token not found');
+      expect(notFound).toHaveBeenCalledWith('API Token not found');
     });
 
     test('Updates API Token Successfully', async () => {
       const update = jest.fn().mockResolvedValue(body);
       const getById = jest.fn(() => ({ id, ...body }));
       const getByName = jest.fn(() => null);
-      const badRequest = jest.fn();
       const notFound = jest.fn();
       const send = jest.fn();
-      const ctx = createContext({ body, params: { id } }, { badRequest, notFound, send });
+      const ctx = createContext({ body, params: { id } }, { notFound, send });
 
       global.strapi = {
         admin: {
@@ -277,7 +287,6 @@ describe('API Token Controller', () => {
 
       expect(getById).toHaveBeenCalledWith(id);
       expect(getByName).toHaveBeenCalledWith(body.name);
-      expect(badRequest).not.toHaveBeenCalled();
       expect(notFound).not.toHaveBeenCalled();
       expect(update).toHaveBeenCalledWith(id, body);
       expect(send).toHaveBeenCalled();

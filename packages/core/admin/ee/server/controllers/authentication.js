@@ -2,6 +2,7 @@
 
 const { pick, merge } = require('lodash/fp');
 const compose = require('koa-compose');
+const { ValidationError } = require('@strapi/utils').errors;
 
 const { validateProviderOptionsUpdate } = require('../validation/authentication');
 const { middlewares, utils } = require('./authentication/index');
@@ -35,11 +36,7 @@ module.exports = {
       request: { body },
     } = ctx;
 
-    try {
-      await validateProviderOptionsUpdate(body);
-    } catch (err) {
-      return ctx.badRequest('ValidationError', err);
-    }
+    await validateProviderOptionsUpdate(body);
 
     const adminStore = await utils.getAdminStore();
     const currentAuthOptions = await adminStore.get({ key: 'auth' });
@@ -60,7 +57,7 @@ module.exports = {
     const { providerRegistry } = strapi.admin.services.passport;
 
     if (!providerRegistry.has(providerName)) {
-      throw strapi.errors.badRequest(`Invalid provider supplied: ${providerName}`);
+      throw new ValidationError(`Invalid provider supplied: ${providerName}`);
     }
 
     return providerAuthenticationFlow(ctx, next);

@@ -8,7 +8,8 @@ const parseMultipartData = require('./parse-multipart');
 const parseType = require('./parse-type');
 const policy = require('./policy');
 const templateConfiguration = require('./template-configuration');
-const { yup, formatYupErrors } = require('./validators');
+const { yup, handleYupError, validateYupSchema, validateYupSchemaSync } = require('./validators');
+const errors = require('./errors');
 const {
   nameToSlug,
   nameToCollectionName,
@@ -36,7 +37,7 @@ const pipeAsync = require('./pipe-async');
 
 module.exports = {
   yup,
-  formatYupErrors,
+  handleYupError,
   policy,
   templateConfiguration,
   buildQuery,
@@ -67,4 +68,7 @@ module.exports = {
   providerFactory,
   pagination,
   pipeAsync,
+  errors,
+  validateYupSchema,
+  validateYupSchemaSync,
 };

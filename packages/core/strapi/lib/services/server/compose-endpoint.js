@@ -1,6 +1,7 @@
 'use strict';
 
 const { has, toLower, castArray, trim, prop, isNil } = require('lodash/fp');
+const { UnauthorizedError, ForbiddenError } = require('@strapi/utils').errors;
 
 const compose = require('koa-compose');
 const { resolveRouteMiddlewares } = require('./middleware');
@@ -31,8 +32,6 @@ const createAuthorizeMiddleware = strapi => async (ctx, next) => {
 
     return next();
   } catch (error) {
-    const { UnauthorizedError, ForbiddenError } = authService.errors;
-
     if (error instanceof UnauthorizedError) {
       return ctx.unauthorized();
     }
@@ -83,7 +82,8 @@ module.exports = strapi => {
 
       router[method](path, routeHandler);
     } catch (error) {
-      throw new Error(`Error creating endpoint ${route.method} ${route.path}: ${error.message}`);
+      error.message = `Error creating endpoint ${route.method} ${route.path}: ${error.message}`;
+      throw error;
     }
   };
 };

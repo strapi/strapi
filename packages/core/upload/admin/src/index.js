@@ -31,7 +31,7 @@ export default {
       },
     });
 
-    app.addFields({ type: 'media-library-input', Component: MediaLibraryInput });
+    app.addFields({ type: 'media', Component: MediaLibraryInput });
 
     app.registerPlugin({
       id: pluginId,

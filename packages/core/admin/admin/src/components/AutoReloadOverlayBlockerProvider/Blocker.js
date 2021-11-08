@@ -10,7 +10,8 @@ import { Link } from '@strapi/design-system/Link';
 import { Box } from '@strapi/design-system/Box';
 import { Stack } from '@strapi/design-system/Stack';
 import { Flex } from '@strapi/design-system/Flex';
-import { H1, Typography } from '@strapi/design-system/Text';
+import { H1 } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { Content, IconBox, Overlay } from './Overlay';
 
 const overlayContainer = document.createElement('div');

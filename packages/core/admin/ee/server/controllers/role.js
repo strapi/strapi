@@ -1,6 +1,6 @@
 'use strict';
 
-const { yup, formatYupErrors } = require('@strapi/utils');
+const { ApplicationError } = require('@strapi/utils').errors;
 const {
   validateRoleCreateInput,
   validateRoleDeleteInput,
@@ -16,11 +16,7 @@ module.exports = {
    * @param {KoaContext} ctx - koa context
    */
   async create(ctx) {
-    try {
-      await validateRoleCreateInput(ctx.request.body);
-    } catch (err) {
-      return ctx.badRequest('ValidationError', err);
-    }
+    await validateRoleCreateInput(ctx.request.body);
 
     const roleService = getService('role');
 
@@ -37,11 +33,7 @@ module.exports = {
   async deleteOne(ctx) {
     const { id } = ctx.params;
 
-    try {
-      await validateRoleDeleteInput(id);
-    } catch (err) {
-      return ctx.badRequest('ValidationError', err);
-    }
+    await validateRoleDeleteInput(id);
 
     const roleService = getService('role');
 
@@ -60,11 +52,8 @@ module.exports = {
    */
   async deleteMany(ctx) {
     const { body } = ctx.request;
-    try {
-      await validateRolesDeleteInput(body);
-    } catch (err) {
-      return ctx.badRequest('ValidationError', err);
-    }
+
+    await validateRolesDeleteInput(body);
 
     const roleService = getService('role');
 
@@ -93,15 +82,11 @@ module.exports = {
       return ctx.notFound('role.notFound');
     }
 
-    try {
-      if (role.code === SUPER_ADMIN_CODE) {
-        throw formatYupErrors(new yup.ValidationError("Super admin permissions can't be edited."));
-      }
-
-      await validatedUpdatePermissionsInput(input);
-    } catch (err) {
-      return ctx.badRequest('ValidationError', err);
+    if (role.code === SUPER_ADMIN_CODE) {
+      throw new ApplicationError("Super admin permissions can't be edited.");
     }
+
+    await validatedUpdatePermissionsInput(input);
 
     if (!role) {
       return ctx.notFound('role.notFound');

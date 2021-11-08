@@ -1,12 +1,18 @@
 'use strict';
 
+const _ = require('lodash');
 const delegate = require('delegates');
-
+const {
+  InvalidTimeError,
+  InvalidDateError,
+  InvalidDateTimeError,
+} = require('@strapi/database').errors;
 const {
   webhook: webhookUtils,
   contentTypes: contentTypesUtils,
   sanitize,
 } = require('@strapi/utils');
+const { ValidationError } = require('@strapi/utils').errors;
 const uploadFiles = require('../utils/upload-files');
 
 const {
@@ -20,6 +26,8 @@ const { applyTransforms } = require('./attributes');
 
 // TODO: those should be strapi events used by the webhooks not the other way arround
 const { ENTRY_CREATE, ENTRY_UPDATE, ENTRY_DELETE } = webhookUtils.webhookEvents;
+
+const databaseErrorsToTransform = [InvalidTimeError, InvalidDateTimeError, InvalidDateError];
 
 const creationPipeline = (data, context) => {
   return applyTransforms(data, context);
@@ -48,6 +56,28 @@ module.exports = ctx => {
 
   // delegate every method in implementation
   Object.keys(service.implementation).forEach(key => delegator.method(key));
+
+  // wrap methods to handle Database Errors
+  service.decorate(oldService => {
+    const newService = _.mapValues(
+      oldService,
+      (method, methodName) =>
+        async function(...args) {
+          try {
+            return await oldService[methodName].call(this, ...args);
+          } catch (error) {
+            if (
+              databaseErrorsToTransform.some(errorToTransform => error instanceof errorToTransform)
+            ) {
+              throw new ValidationError(error.message);
+            }
+            throw error;
+          }
+        }
+    );
+
+    return newService;
+  });
 
   return service;
 };

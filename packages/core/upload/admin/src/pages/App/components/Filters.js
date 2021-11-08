@@ -45,6 +45,23 @@ export const Filters = () => {
 
   const toggleFilter = () => setVisible(prev => !prev);
 
+  const handleBlur = e => {
+    // TO FIX - select's modals prevent blur to work correctly
+    const notNull = e.currentTarget !== null && e.relatedTarget !== null;
+    const ulListBox = document.querySelector('[role="listbox"]');
+    const selectDate = document.querySelector('[role="dialog"]');
+
+    if (
+      !e.currentTarget.contains(e.relatedTarget) &&
+      e.relatedTarget !== buttonRef.current &&
+      e.relatedTarget !== ulListBox &&
+      !selectDate.contains(e.relatedTarget) &&
+      notNull
+    ) {
+      setVisible(false);
+    }
+  };
+
   const handleRemoveFilter = nextFilters => {
     setQuery({ filters: { $and: nextFilters }, page: 1 });
   };
@@ -68,6 +85,7 @@ export const Filters = () => {
         <FilterPopover
           displayedFilters={displayedFilters}
           filters={filters}
+          onBlur={handleBlur}
           onSubmit={handleSubmit}
           onToggle={toggleFilter}
           source={buttonRef}

@@ -44,7 +44,9 @@ describe('Content type validator', () => {
     test('Throws when reserved names are used', async () => {
       const data = {
         contentType: {
-          displayName: 'test',
+          singularName: 'test',
+          pluralName: 'tests',
+          displayName: 'Test',
           attributes: {
             thisIsReserved: {
               type: 'string',
@@ -54,34 +56,22 @@ describe('Content type validator', () => {
         },
       };
 
+      expect.assertions(1);
+
       await validateUpdateContentTypeInput(data).catch(err => {
         expect(err).toMatchObject({
-          'contentType.attributes.thisIsReserved': [
-            expect.stringMatching('Attribute keys cannot be one of'),
-          ],
-        });
-      });
-    });
-  });
-
-  describe('Prevents use of same singularName and pluralName', () => {
-    test('Throws when using same singularName and pluralName', async () => {
-      const data = {
-        contentType: {
-          displayName: 'news',
-          singularName: 'news',
-          pluralName: 'news',
-          attributes: {
-            title: {
-              type: 'string',
-            },
+          name: 'ValidationError',
+          message: 'Attribute keys cannot be one of __component, __contentType, thisIsReserved',
+          details: {
+            errors: [
+              {
+                path: ['contentType', 'attributes', 'thisIsReserved'],
+                message:
+                  'Attribute keys cannot be one of __component, __contentType, thisIsReserved',
+                name: 'ValidationError',
+              },
+            ],
           },
-        },
-      };
-
-      await validateContentTypeInput(data).catch(err => {
-        expect(err).toMatchObject({
-          contentType: [expect.stringMatching('singularName and pluralName should be different')],
         });
       });
     });

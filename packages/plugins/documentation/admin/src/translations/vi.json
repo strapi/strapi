@@ -1,11 +1,8 @@
 {
-  "components.Row.generatedDate": "Lần sinh ra gần nhất",
   "components.Row.open": "Mở",
   "components.Row.regenerate": "Sinh lại",
   "containers.HomePage.Block.title": "Các Phiên Bản",
-  "containers.HomePage.Button.open": "Mở tải liệu",
   "containers.HomePage.Button.update": "Cập nhật",
-  "containers.HomePage.PluginHeader.description": "Cấu hình cho tài liệu của plugin",
   "containers.HomePage.PluginHeader.title": "Tài liệu - Cài đặt",
   "containers.HomePage.PopUpWarning.confirm": "Tôi hiểu",
   "containers.HomePage.PopUpWarning.message": "Bạn có chắc là muốn xóa phiên bản này không?",

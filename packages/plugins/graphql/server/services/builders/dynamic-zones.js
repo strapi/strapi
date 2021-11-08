@@ -1,8 +1,9 @@
 'use strict';
 
-const { Kind, valueFromASTUntyped, GraphQLError } = require('graphql');
+const { Kind, valueFromASTUntyped } = require('graphql');
 const { omit } = require('lodash/fp');
 const { unionType, scalarType } = require('nexus');
+const { ApplicationError } = require('@strapi/utils');
 
 module.exports = ({ strapi }) => {
   const buildTypeDefinition = (name, components) => {
@@ -13,7 +14,7 @@ module.exports = ({ strapi }) => {
       const component = strapi.components[componentUID];
 
       if (!component) {
-        throw new Error(
+        throw new ApplicationError(
           `Trying to create a dynamic zone type with an unknown component: "${componentUID}"`
         );
       }
@@ -45,7 +46,7 @@ module.exports = ({ strapi }) => {
       );
 
       if (!component) {
-        throw new GraphQLError(
+        throw new ApplicationError(
           `Component not found. expected one of: ${components
             .map(uid => strapi.components[uid].globalId)
             .join(', ')}`

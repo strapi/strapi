@@ -3,6 +3,7 @@
 const { get, getOr, isFunction, first, isNil } = require('lodash/fp');
 
 const { GraphQLObjectType } = require('graphql');
+const { ForbiddenError } = require('@strapi/utils').errors;
 const { createPoliciesMiddleware } = require('./policy');
 
 const introspectionQueries = [
@@ -90,8 +91,7 @@ const wrapResolvers = ({ schema, strapi, extension = {} }) => {
           try {
             await strapi.auth.verify(authContext, authConfig);
           } catch (error) {
-            // TODO: [v4] Throw GraphQL Error instead
-            throw new Error('Forbidden access');
+            throw new ForbiddenError();
           }
         }
       };

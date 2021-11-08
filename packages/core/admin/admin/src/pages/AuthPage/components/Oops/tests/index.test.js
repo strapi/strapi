@@ -125,18 +125,7 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
       }
 
       .c22 {
-        font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
         color: #4945ff;
-      }
-
-      .c23 {
-        font-weight: 600;
-        line-height: 1.14;
-      }
-
-      .c24 {
         font-weight: 600;
         font-size: 0.6875rem;
         line-height: 1.45;
@@ -198,10 +187,10 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
       }
 
       .c5 {
-        font-weight: 500;
+        font-weight: 600;
+        color: #32324d;
         font-size: 0.75rem;
         line-height: 1.33;
-        color: #32324d;
       }
 
       .c7 {
@@ -474,7 +463,7 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
                   href="/auth/login"
                 >
                   <span
-                    class="c22 c23 c24"
+                    class="c22"
                   >
                     Sign in
                   </span>

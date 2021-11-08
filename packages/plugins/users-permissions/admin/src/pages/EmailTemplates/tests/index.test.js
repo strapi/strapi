@@ -65,7 +65,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
     });
 
     expect(container.firstChild).toMatchInlineSnapshot(`
-      .c26 {
+      .c24 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -79,21 +79,21 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         outline: none;
       }
 
-      .c26 svg {
+      .c24 svg {
         height: 12px;
         width: 12px;
       }
 
-      .c26 svg > g,
-      .c26 svg path {
+      .c24 svg > g,
+      .c24 svg path {
         fill: #ffffff;
       }
 
-      .c26[aria-disabled='true'] {
+      .c24[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c26:after {
+      .c24:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -108,11 +108,11 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         border: 2px solid transparent;
       }
 
-      .c26:focus-visible {
+      .c24:focus-visible {
         outline: none;
       }
 
-      .c26:focus-visible:after {
+      .c24:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -123,7 +123,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         border: 2px solid #4945ff;
       }
 
-      .c27 {
+      .c25 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -141,58 +141,58 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         border: none;
       }
 
-      .c27 svg > g,
-      .c27 svg path {
+      .c25 svg > g,
+      .c25 svg path {
         fill: #8e8ea9;
       }
 
-      .c27:hover svg > g,
-      .c27:hover svg path {
+      .c25:hover svg > g,
+      .c25:hover svg path {
         fill: #666687;
       }
 
-      .c27:active svg > g,
-      .c27:active svg path {
+      .c25:active svg > g,
+      .c25:active svg path {
         fill: #a5a5ba;
       }
 
-      .c27[aria-disabled='true'] {
+      .c25[aria-disabled='true'] {
         background-color: #eaeaef;
       }
 
-      .c27[aria-disabled='true'] svg path {
+      .c25[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c8 {
+      .c7 {
         background: #ffffff;
         border-radius: 4px;
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
-      .c11 {
+      .c10 {
         padding-right: 24px;
         padding-left: 24px;
       }
 
-      .c16 {
+      .c15 {
         width: 1%;
       }
 
-      .c9 {
+      .c8 {
         overflow: hidden;
       }
 
-      .c13 {
+      .c12 {
         width: 100%;
         white-space: nowrap;
       }
 
-      .c10 {
+      .c9 {
         position: relative;
       }
 
-      .c10:before {
+      .c9:before {
         background: linear-gradient(90deg,#c0c0cf 0%,rgba(0,0,0,0) 100%);
         opacity: 0.2;
         position: absolute;
@@ -202,7 +202,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         left: 0;
       }
 
-      .c10:after {
+      .c9:after {
         background: linear-gradient(270deg,#c0c0cf 0%,rgba(0,0,0,0) 100%);
         opacity: 0.2;
         position: absolute;
@@ -213,39 +213,39 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         top: 0;
       }
 
-      .c12 {
+      .c11 {
         overflow-x: auto;
       }
 
-      .c24 tr:last-of-type {
+      .c22 tr:last-of-type {
         border-bottom: none;
+      }
+
+      .c13 {
+        border-bottom: 1px solid #eaeaef;
       }
 
       .c14 {
         border-bottom: 1px solid #eaeaef;
       }
 
-      .c15 {
-        border-bottom: 1px solid #eaeaef;
-      }
-
-      .c15 td,
-      .c15 th {
+      .c14 td,
+      .c14 th {
         padding: 16px;
       }
 
-      .c15 td:first-of-type,
-      .c15 th:first-of-type {
+      .c14 td:first-of-type,
+      .c14 th:first-of-type {
         padding: 0 4px;
       }
 
-      .c15 th {
+      .c14 th {
         padding-top: 0;
         padding-bottom: 0;
         height: 3.5rem;
       }
 
-      .c18 {
+      .c17 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -259,48 +259,42 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         align-items: center;
       }
 
-      .c17 {
+      .c16 {
         vertical-align: middle;
         text-align: left;
         color: #666687;
         outline-offset: -4px;
       }
 
-      .c17 input {
+      .c16 input {
         vertical-align: sub;
       }
 
-      .c20 svg {
+      .c19 svg {
         height: 0.25rem;
       }
 
-      .c21 {
-        font-weight: 400;
+      .c20 {
+        color: #666687;
         font-size: 0.875rem;
         line-height: 1.43;
-        color: #666687;
       }
 
-      .c25 {
+      .c23 {
         font-weight: 400;
         font-size: 0.875rem;
         line-height: 1.43;
         color: #32324d;
       }
 
-      .c22 {
-        font-weight: 600;
-        line-height: 1.14;
-      }
-
-      .c23 {
+      .c21 {
         font-weight: 600;
         font-size: 0.6875rem;
         line-height: 1.45;
         text-transform: uppercase;
       }
 
-      .c19 {
+      .c18 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
@@ -324,7 +318,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         padding-left: 56px;
       }
 
-      .c7 {
+      .c6 {
         padding-right: 56px;
         padding-left: 56px;
       }
@@ -362,20 +356,14 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
       }
 
       .c4 {
+        color: #32324d;
         font-weight: 600;
         font-size: 2rem;
         line-height: 1.25;
-        color: #32324d;
       }
 
       .c5 {
-        font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
         color: #666687;
-      }
-
-      .c6 {
         font-size: 1rem;
         line-height: 1.5;
       }
@@ -402,110 +390,109 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
               >
                 <h1
                   class="c4"
-                  id="main-content-title"
                 >
                   Email templates
                 </h1>
               </div>
             </div>
             <p
-              class="c5 c6"
+              class="c5"
             />
           </div>
         </div>
         <div
-          class="c7"
+          class="c6"
         >
           <div
-            class="c8 c9"
+            class="c7 c8"
           >
             <div
-              class="c10"
+              class="c9"
             >
               <div
-                class="c11 c12"
+                class="c10 c11"
               >
                 <table
                   aria-colcount="3"
                   aria-rowcount="3"
-                  class="c13"
+                  class="c12"
                 >
                   <thead
-                    class="c14"
+                    class="c13"
                   >
                     <tr
                       aria-rowindex="1"
-                      class="c15"
+                      class="c14"
                     >
                       <th
                         aria-colindex="1"
-                        class="c16 c17"
+                        class="c15 c16"
                         tabindex="0"
                         width="1%"
                       >
                         <div
-                          class="c18"
+                          class="c17"
                         >
                           <div
-                            class="c19"
+                            class="c18"
                           >
                             icon
                           </div>
                           <span
-                            class="c20"
+                            class="c19"
                           />
                         </div>
                       </th>
                       <th
                         aria-colindex="2"
-                        class="c17"
+                        class="c16"
                         tabindex="-1"
                       >
                         <div
-                          class="c18"
+                          class="c17"
                         >
                           <span
-                            class="c21 c22 c23"
+                            class="c20 c21"
                           >
                             name
                           </span>
                           <span
-                            class="c20"
+                            class="c19"
                           />
                         </div>
                       </th>
                       <th
                         aria-colindex="3"
-                        class="c16 c17"
+                        class="c15 c16"
                         tabindex="-1"
                         width="1%"
                       >
                         <div
-                          class="c18"
+                          class="c17"
                         >
                           <div
-                            class="c19"
+                            class="c18"
                           >
                             action
                           </div>
                           <span
-                            class="c20"
+                            class="c19"
                           />
                         </div>
                       </th>
                     </tr>
                   </thead>
                   <tbody
-                    class="c24"
+                    class="c22"
                   >
                     <tr
                       aria-rowindex="2"
-                      class="c15"
+                      class="c14"
                       style="cursor: pointer;"
                     >
                       <td
                         aria-colindex="1"
-                        class="c17"
+                        class="c16"
                         tabindex="-1"
                       >
                         <svg
@@ -526,11 +513,11 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                       </td>
                       <td
                         aria-colindex="2"
-                        class="c17"
+                        class="c16"
                         tabindex="-1"
                       >
                         <span
-                          class="c25"
+                          class="c23"
                         >
                           Reset password
                         </span>
@@ -538,14 +525,14 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                       <td
                         aria-colindex="3"
                         aria-hidden="true"
-                        class="c17"
+                        class="c16"
                         role="button"
                       >
                         <span>
                           <button
                             aria-disabled="false"
                             aria-labelledby="tooltip-1"
-                            class="c26 c27"
+                            class="c24 c25"
                             tabindex="-1"
                             type="button"
                           >
@@ -569,12 +556,12 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                     </tr>
                     <tr
                       aria-rowindex="3"
-                      class="c15"
+                      class="c14"
                       style="cursor: pointer;"
                     >
                       <td
                         aria-colindex="1"
-                        class="c17"
+                        class="c16"
                         tabindex="-1"
                       >
                         <svg
@@ -593,11 +580,11 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                       </td>
                       <td
                         aria-colindex="2"
-                        class="c17"
+                        class="c16"
                         tabindex="-1"
                       >
                         <span
-                          class="c25"
+                          class="c23"
                         >
                           Email address confirmation
                         </span>
@@ -605,14 +592,14 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                       <td
                         aria-colindex="3"
                         aria-hidden="true"
-                        class="c17"
+                        class="c16"
                         role="button"
                       >
                         <span>
                           <button
                             aria-disabled="false"
                             aria-labelledby="tooltip-3"
-                            class="c26 c27"
+                            class="c24 c25"
                             tabindex="-1"
                             type="button"
                           >

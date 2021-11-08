@@ -13,11 +13,7 @@ module.exports = {
     const { body: input } = ctx.request;
     const { userAbility } = ctx.state;
 
-    try {
-      await validateCheckPermissionsInput(input);
-    } catch (err) {
-      return ctx.badRequest('ValidationError', err);
-    }
+    await validateCheckPermissionsInput(input);
 
     const { engine } = getService('permission');
 

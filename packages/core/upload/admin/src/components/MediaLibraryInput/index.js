@@ -5,6 +5,7 @@ import { AssetDialog } from './AssetDialog';
 import { AssetDefinition } from '../../constants';
 import { CarouselAssets } from './Carousel/CarouselAssets';
 import { UploadAssetDialog } from '../UploadAssetDialog/UploadAssetDialog';
+import getAllowedFiles from './utils/getAllowedFiles';
 
 const Steps = {
   SelectAsset: 'SelectAsset',
@@ -12,6 +13,7 @@ const Steps = {
 };
 
 export const MediaLibraryInput = ({
+  attribute: { allowedTypes },
   intlLabel,
   description,
   disabled,
@@ -124,7 +126,11 @@ export const MediaLibraryInput = ({
   let initiallySelectedAssets = selectedAssets;
 
   if (uploadedFiles.length > 0) {
-    initiallySelectedAssets = multiple ? [...uploadedFiles, ...selectedAssets] : [uploadedFiles[0]];
+    const allowedUploadedFiles = getAllowedFiles(allowedTypes, uploadedFiles);
+
+    initiallySelectedAssets = multiple
+      ? [...allowedUploadedFiles, ...selectedAssets]
+      : [allowedUploadedFiles[0]];
   }
 
   return (
@@ -147,6 +153,7 @@ export const MediaLibraryInput = ({
 
       {step === Steps.SelectAsset && (
         <AssetDialog
+          allowedTypes={allowedTypes}
           initiallySelectedAssets={initiallySelectedAssets}
           onClose={() => setStep(undefined)}
           onValidate={handleValidation}
@@ -168,6 +175,7 @@ export const MediaLibraryInput = ({
 };
 
 MediaLibraryInput.defaultProps = {
+  attribute: { allowedTypes: [] },
   disabled: false,
   description: undefined,
   error: undefined,
@@ -177,6 +185,7 @@ MediaLibraryInput.defaultProps = {
 };
 
 MediaLibraryInput.propTypes = {
+  attribute: PropTypes.shape({ allowedTypes: PropTypes.arrayOf(PropTypes.string) }),
   disabled: PropTypes.bool,
   description: PropTypes.shape({
     id: PropTypes.string,

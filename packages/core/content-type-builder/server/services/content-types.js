@@ -4,6 +4,7 @@ const _ = require('lodash');
 const { getOr } = require('lodash/fp');
 
 const { contentTypes: contentTypesUtils } = require('@strapi/utils');
+const { ApplicationError } = require('@strapi/utils').errors;
 const { formatAttributes, replaceTemporaryUIDs } = require('../utils/attributes');
 const createBuilder = require('./schema-builder');
 const { coreUids, pluginsUids } = require('./constants');
@@ -143,7 +144,7 @@ const editContentType = async (uid, { contentType, components = [] }) => {
   if (newKind !== previousKind && newKind === 'singleType') {
     const entryCount = await strapi.query(uid).count();
     if (entryCount > 1) {
-      throw strapi.errors.badRequest(
+      throw new ApplicationError(
         'You cannot convert a collectionType to a singleType when having multiple entries in DB'
       );
     }
