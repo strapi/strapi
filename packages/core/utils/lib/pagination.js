@@ -26,7 +26,7 @@ const withMaxLimit = (limit, maxLimit = -1) => {
 // Ensure minimum page & pageSize values (page >= 1, pageSize >= 0, start >= 0, limit >= 0)
 const ensureMinValues = ({ start, limit }) => ({
   start: Math.max(start, 0),
-  limit: Math.max(limit, 1),
+  limit: limit === -1 ? limit : Math.max(limit, 1),
 });
 
 const ensureMaxValues = (maxLimit = -1) => ({ start, limit }) => ({
