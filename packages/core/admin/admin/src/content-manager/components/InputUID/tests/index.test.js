@@ -64,10 +64,10 @@ describe('<InputUID />', () => {
       }
 
       .c2 {
-        font-weight: 500;
+        font-weight: 600;
+        color: #32324d;
         font-size: 0.75rem;
         line-height: 1.33;
-        color: #32324d;
       }
 
       .c6 {

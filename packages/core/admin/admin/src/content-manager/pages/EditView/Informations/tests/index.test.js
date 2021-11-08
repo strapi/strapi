@@ -51,36 +51,35 @@ describe('CONTENT MANAGER | EditView | Header', () => {
     } = render(makeApp());
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c3 {
+      .c2 {
         padding-top: 8px;
         padding-bottom: 24px;
       }
 
-      .c4 {
+      .c3 {
         background: #eaeaef;
       }
 
-      .c5 {
+      .c4 {
         height: 1px;
         border: none;
         margin: 0;
       }
 
       .c0 {
-        font-weight: 400;
+        color: #666687;
         font-size: 0.875rem;
         line-height: 1.43;
-        color: #666687;
       }
 
-      .c8 {
+      .c7 {
         font-weight: 500;
         font-size: 0.875rem;
         line-height: 1.43;
         color: #32324d;
       }
 
-      .c9 {
+      .c8 {
         font-weight: 400;
         font-size: 0.875rem;
         line-height: 1.43;
@@ -89,17 +88,12 @@ describe('CONTENT MANAGER | EditView | Header', () => {
 
       .c1 {
         font-weight: 600;
-        line-height: 1.14;
-      }
-
-      .c2 {
-        font-weight: 600;
         font-size: 0.6875rem;
         line-height: 1.45;
         text-transform: uppercase;
       }
 
-      .c7 {
+      .c6 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -117,7 +111,7 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         align-items: center;
       }
 
-      .c6 {
+      .c5 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -127,12 +121,12 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         flex-direction: column;
       }
 
-      .c6 > * {
+      .c5 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c6 > * + * {
+      .c5 > * + * {
         margin-top: 16px;
       }
 
@@ -140,44 +134,44 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         class=""
       >
         <span
-          class="c0 c1 c2"
+          class="c0 c1"
         >
           Information
         </span>
         <div
-          class="c3"
+          class="c2"
         >
           <hr
-            class="c4 c5"
+            class="c3 c4"
           />
         </div>
         <div
-          class="c6"
+          class="c5"
         >
           <div
-            class="c7"
+            class="c6"
           >
             <span
-              class="c8"
+              class="c7"
             >
               Last update
             </span>
             <span
-              class="c9"
+              class="c8"
             >
               now
             </span>
           </div>
           <div
-            class="c7"
+            class="c6"
           >
             <span
-              class="c8"
+              class="c7"
             >
               By
             </span>
             <span
-              class="c9"
+              class="c8"
             >
               -
             </span>

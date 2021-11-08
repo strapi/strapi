@@ -4,7 +4,8 @@ import { useIntl } from 'react-intl';
 import { Box } from '@strapi/design-system/Box';
 import { Stack } from '@strapi/design-system/Stack';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
-import { TableLabel, Text, Typography } from '@strapi/design-system/Text';
+import { TableLabel, Text } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import getTrad from '../../utils/getTrad';
 
 export const AssetMeta = ({ size, date, dimension, extension }) => {
