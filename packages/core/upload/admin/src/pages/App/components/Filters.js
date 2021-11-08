@@ -49,11 +49,13 @@ export const Filters = () => {
     // TO FIX - select's modals prevent blur to work correctly
     const notNull = e.currentTarget !== null && e.relatedTarget !== null;
     const ulListBox = document.querySelector('[role="listbox"]');
+    const selectDate = document.querySelector('[role="dialog"]');
 
     if (
       !e.currentTarget.contains(e.relatedTarget) &&
       e.relatedTarget !== buttonRef.current &&
       e.relatedTarget !== ulListBox &&
+      !selectDate.contains(e.relatedTarget) &&
       notNull
     ) {
       setVisible(false);
