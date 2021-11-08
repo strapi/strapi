@@ -14,7 +14,7 @@ const wrapWithEmitEvent = (event, fn) => async (entity, model) => {
   const result = await fn(entity, model);
 
   const modelDef = strapi.getModel(model);
-  const sanitizedEntity = await strapi.eventHub.sanitizeEntity(entity, modelDef);
+  const sanitizedEntity = await strapiUtils.sanitize.utils.defaultSanitizeOutput(modelDef, entity);
 
   strapi.eventHub.emit(event, {
     model: modelDef.modelName,

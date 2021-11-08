@@ -12,6 +12,7 @@ const crypto = require('crypto');
 const util = require('util');
 const _ = require('lodash');
 const {
+  sanitize,
   nameToSlug,
   contentTypes: contentTypesUtils,
   webhook: webhookUtils,
@@ -45,7 +46,7 @@ const sendMediaMetrics = data => {
 module.exports = ({ strapi }) => ({
   async emitEvent(event, data) {
     const modelDef = strapi.getModel('plugin::upload.file');
-    const sanitizedData = await strapi.eventHub.sanitizeEntity(data, modelDef);
+    const sanitizedData = await sanitize.utils.defaultSanitizeOutput(modelDef, data);
 
     strapi.eventHub.emit(event, { media: sanitizedData });
   },

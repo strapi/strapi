@@ -21,7 +21,11 @@ describe('Entity service', () => {
       'Can decorate',
       async method => {
         const instance = createEntityService({
-          strapi: {},
+          strapi: {
+            eventHub: {
+              sanitizeEntity: entity => entity,
+            },
+          },
           db: {},
           eventHub: new EventEmitter(),
         });
@@ -56,6 +60,9 @@ describe('Entity service', () => {
       };
 
       const fakeStrapi = {
+        eventHub: {
+          sanitizeEntity: entity => entity,
+        },
         getModel: jest.fn(() => {
           return { kind: 'singleType', privateAttributes: [] };
         }),
@@ -120,6 +127,9 @@ describe('Entity service', () => {
         };
 
         const fakeStrapi = {
+          eventHub: {
+            sanitizeEntity: entity => entity,
+          },
           getModel: jest.fn(() => fakeModel),
         };
 

@@ -9,7 +9,7 @@
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 
-const { getAbsoluteServerUrl, traverseEntity, sanitize, pipeAsync } = require('@strapi/utils');
+const { getAbsoluteServerUrl, sanitize } = require('@strapi/utils');
 const { getService } = require('../utils');
 
 module.exports = ({ strapi }) => ({
@@ -128,10 +128,7 @@ module.exports = ({ strapi }) => ({
       .then(storeEmail => storeEmail['email_confirmation'].options);
 
     // Sanitize the template's user information
-    const sanitizedUserInfo = await pipeAsync(
-      traverseEntity(sanitize.visitors.removePrivate, { schema: userSchema }),
-      traverseEntity(sanitize.visitors.removePassword, { schema: userSchema })
-    )(user);
+    const sanitizedUserInfo = await sanitize.utils.defaultSanitizeOutput(userSchema, user);
 
     const confirmationToken = crypto.randomBytes(20).toString('hex');
 

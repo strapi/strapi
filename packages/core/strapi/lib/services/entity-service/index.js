@@ -2,7 +2,11 @@
 
 const delegate = require('delegates');
 
-const { webhook: webhookUtils, contentTypes: contentTypesUtils } = require('@strapi/utils');
+const {
+  webhook: webhookUtils,
+  contentTypes: contentTypesUtils,
+  sanitize,
+} = require('@strapi/utils');
 const uploadFiles = require('../utils/upload-files');
 
 const {
@@ -60,7 +64,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
 
   async emitEvent(uid, event, entity) {
     const model = strapi.getModel(uid);
-    const sanitizedEntity = await strapi.eventHub.sanitizeEntity(entity, model);
+    const sanitizedEntity = await sanitize.utils.defaultSanitizeOutput(model, entity);
 
     eventHub.emit(event, {
       model: model.modelName,

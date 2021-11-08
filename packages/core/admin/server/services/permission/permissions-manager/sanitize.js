@@ -37,7 +37,7 @@ const STATIC_FIELDS = [ID_ATTRIBUTE];
 module.exports = ({ action, ability, model }) => {
   const schema = strapi.getModel(model);
 
-  const { allowedFields, removePassword } = sanitize.visitors;
+  const { allowedFields } = sanitize.visitors;
 
   const createSanitizeOutput = (options = {}) => {
     const { fields } = options;
@@ -50,7 +50,7 @@ module.exports = ({ action, ability, model }) => {
       // Remove not allowed fields (RBAC)
       traverseEntity(allowedFields(permittedFields), { schema }),
       // Remove all fields of type 'password'
-      traverseEntity(removePassword, { schema })
+      sanitize.utils.sanitizePasswords(schema)
     );
   };
 

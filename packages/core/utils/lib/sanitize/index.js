@@ -7,6 +7,7 @@ const { getNonWritableAttributes } = require('../content-types');
 const pipeAsync = require('../pipe-async');
 
 const visitors = require('./visitors');
+const utils = require('./utils');
 
 module.exports = {
   contentAPI: {
@@ -35,10 +36,7 @@ module.exports = {
         return Promise.all(data.map(entry => this.output(entry, schema, { auth })));
       }
 
-      const transforms = [
-        traverseEntity(visitors.removePassword, { schema }),
-        traverseEntity(visitors.removePrivate, { schema }),
-      ];
+      const transforms = [utils.defaultSanitizeOutput(schema)];
 
       if (auth) {
         transforms.push(traverseEntity(visitors.removeRestrictedRelations(auth), { schema }));
@@ -48,5 +46,6 @@ module.exports = {
     },
   },
 
+  utils,
   visitors,
 };
