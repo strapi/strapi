@@ -46,6 +46,7 @@
   "list.assets.preview-asset": "Preview for the video at path {path}",
   "list.assets.selected": "{number, plural, =0 {No asset} one {1 asset} other {# assets}} selected",
   "list.assets.type-not-allowed": "This type of file is not allowed.",
+  "list.assets-empty.search": "No result found",
   "mediaLibraryInput.actions.nextSlide": "Next slide",
   "mediaLibraryInput.actions.previousSlide": "Previous slide",
   "mediaLibraryInput.placeholder": "Click to select an asset or drag and drop one in this area",
