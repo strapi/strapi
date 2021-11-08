@@ -34,6 +34,12 @@ const ensureMaxValues = (maxLimit = -1) => ({ start, limit }) => ({
   limit: withMaxLimit(limit, maxLimit),
 });
 
+// Apply maxLimit as the limit when limit is -1
+const withNoLimit = (pagination, maxLimit = -1) => ({
+  ...pagination,
+  limit: pagination.limit === -1 ? maxLimit : pagination.limit,
+});
+
 const withDefaultPagination = (args, { defaults = {}, maxLimit = -1 } = {}) => {
   const defaultValues = merge(STRAPI_DEFAULTS, defaults);
 
@@ -73,6 +79,9 @@ const withDefaultPagination = (args, { defaults = {}, maxLimit = -1 } = {}) => {
       limit: pageSize,
     });
   }
+
+  // Handle -1 limit
+  Object.assign(pagination, withNoLimit(pagination, maxLimit));
 
   const replacePaginationAttributes = pipe(
     // Remove pagination attributes
