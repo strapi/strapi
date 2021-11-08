@@ -9,12 +9,7 @@ const { parseBody } = require('./transform');
  *
  * Returns a collection type controller to handle default core-api actions
  */
-const createCollectionTypeController = ({
-  service,
-  sanitizeInput,
-  sanitizeOutput,
-  transformResponse,
-}) => {
+const createCollectionTypeController = ({ service }) => {
   return {
     /**
      * Retrieve records.
@@ -25,9 +20,9 @@ const createCollectionTypeController = ({
       const { query } = ctx;
 
       const { results, pagination } = await service.find(query);
-      const sanitizedResults = await sanitizeOutput(results, ctx);
+      const sanitizedResults = await this.sanitizeOutput(results, ctx);
 
-      return transformResponse(sanitizedResults, { pagination });
+      return this.transformResponse(sanitizedResults, { pagination });
     },
 
     /**
@@ -40,9 +35,9 @@ const createCollectionTypeController = ({
       const { query } = ctx;
 
       const entity = await service.findOne(id, query);
-      const sanitizedEntity = await sanitizeOutput(entity, ctx);
+      const sanitizedEntity = await this.sanitizeOutput(entity, ctx);
 
-      return transformResponse(sanitizedEntity);
+      return this.transformResponse(sanitizedEntity);
     },
 
     /**
@@ -59,12 +54,12 @@ const createCollectionTypeController = ({
         throw new ValidationError('Missing "data" payload in the request body');
       }
 
-      const sanitizedInputData = await sanitizeInput(data, ctx);
+      const sanitizedInputData = await this.sanitizeInput(data, ctx);
 
       const entity = await service.create({ ...query, data: sanitizedInputData, files });
-      const sanitizedEntity = await sanitizeOutput(entity, ctx);
+      const sanitizedEntity = await this.sanitizeOutput(entity, ctx);
 
-      return transformResponse(sanitizedEntity);
+      return this.transformResponse(sanitizedEntity);
     },
 
     /**
@@ -82,12 +77,12 @@ const createCollectionTypeController = ({
         throw new ValidationError('Missing "data" payload in the request body');
       }
 
-      const sanitizedInputData = await sanitizeInput(data, ctx);
+      const sanitizedInputData = await this.sanitizeInput(data, ctx);
 
       const entity = await service.update(id, { ...query, data: sanitizedInputData, files });
-      const sanitizedEntity = await sanitizeOutput(entity, ctx);
+      const sanitizedEntity = await this.sanitizeOutput(entity, ctx);
 
-      return transformResponse(sanitizedEntity);
+      return this.transformResponse(sanitizedEntity);
     },
 
     /**
@@ -100,9 +95,9 @@ const createCollectionTypeController = ({
       const { query } = ctx;
 
       const entity = await service.delete(id, query);
-      const sanitizedEntity = await sanitizeOutput(entity, ctx);
+      const sanitizedEntity = await this.sanitizeOutput(entity, ctx);
 
-      return transformResponse(sanitizedEntity);
+      return this.transformResponse(sanitizedEntity);
     },
   };
 };

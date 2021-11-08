@@ -13,14 +13,18 @@ const createCollectionTypeService = require('./collection-type');
  * @param {{ model: object, strapi: object }} context
  * @returns {object}
  */
-const createService = ({ model, strapi }) => {
-  const utils = createUtils({ model });
+const createService = ({ contentType, strapi }) => {
+  const proto = { getFetchParams };
 
-  if (isSingleType(model)) {
-    return createSingleTypeService({ model, strapi, utils });
+  let service;
+
+  if (isSingleType(contentType)) {
+    service = createSingleTypeService({ contentType, strapi });
+  } else {
+    service = createCollectionTypeService({ contentType, strapi });
   }
 
-  return createCollectionTypeService({ model, strapi, utils });
+  return Object.assign(Object.create(proto), service);
 };
 
 /**
@@ -34,13 +38,6 @@ const getFetchParams = (params = {}) => {
     ...params,
   };
 };
-
-/**
- * Mixins
- */
-const createUtils = () => ({
-  getFetchParams,
-});
 
 module.exports = {
   createService,

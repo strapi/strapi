@@ -3,8 +3,6 @@
  */
 'use strict';
 
-const _ = require('lodash');
-
 const createController = require('./controller');
 const { createService } = require('./service');
 
@@ -17,16 +15,15 @@ const { createService } = require('./service');
  * @param {object} opts.strapi strapi
  * @returns {object} controller & service
  */
-function createCoreApi({ api, model, strapi }) {
-  const { modelName } = model;
+function createCoreApi({ api, contentType, strapi }) {
+  const { modelName } = contentType;
 
   // find corresponding service and controller
-  const userService = _.get(api, ['services', modelName], {});
-  const userController = _.get(api, ['controllers', modelName], {});
+  const userService = api.service(modelName);
+  const userController = api.controller(modelName);
 
-  const service = Object.assign(createService({ model, strapi }), userService);
-
-  const controller = Object.assign(createController({ service, model }), userController);
+  const service = Object.assign(createService({ contentType, strapi }), userService);
+  const controller = Object.assign(createController({ service, contentType }), userController);
 
   return {
     service,
