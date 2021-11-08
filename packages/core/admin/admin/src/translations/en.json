@@ -266,7 +266,7 @@
   "app.components.InstallPluginPage.Download.title": "Downloading...",
   "app.components.InstallPluginPage.description": "Extend your app effortlessly.",
   "app.components.InstallPluginPage.helmet": "Marketplace - Plugins",
-  "app.components.InstallPluginPage.title": "Marketplace - Plugins",
+  "app.components.InstallPluginPage.title": "Marketplace",
   "app.components.LeftMenu.collapse": "Collapse the navbar",
   "app.components.LeftMenu.expand": "Expand the navbar",
   "app.components.LeftMenu.logout": "Logout",

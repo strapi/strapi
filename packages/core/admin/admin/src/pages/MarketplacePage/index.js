@@ -8,7 +8,6 @@ import {
   // useTracking,
   // useStrapiApp,
   CheckPagePermissions,
-  NoContent,
 } from '@strapi/helper-plugin';
 // import { Header } from '@buffetjs/custom';
 // import { useIntl } from 'react-intl';
@@ -116,7 +115,9 @@ import {
 // };
 
 import { useIntl } from 'react-intl';
+import { Helmet } from 'react-helmet';
 import { Layout, HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
+import { Flex } from '@strapi/design-system/Flex';
 import { Main } from '@strapi/design-system/Main';
 import adminPermissions from '../../permissions';
 
@@ -127,20 +128,29 @@ const MarketPlacePage = () => {
     <CheckPagePermissions permissions={adminPermissions.marketplace.main}>
       <Layout>
         <Main>
-          <HeaderLayout
+          <Helmet
             title={formatMessage({
               id: 'app.components.InstallPluginPage.helmet',
               defaultMessage: 'Marketplace - Plugins',
             })}
           />
+          <HeaderLayout
+            title={formatMessage({
+              id: 'app.components.InstallPluginPage.title',
+              defaultMessage: 'Marketplace',
+            })}
+          />
           <ContentLayout>
-            <NoContent
-              content={{
-                id: 'coming.soon',
-                defaultMessage:
-                  'This content is currently under construction and will be back in a few weeks!',
-              }}
-            />
+            <Flex
+              hasRadius
+              background="neutral0"
+              shadow="tableShadow"
+              paddingTop={10}
+              paddingBottom={10}
+              justifyContent="center"
+            >
+              kikou
+            </Flex>
           </ContentLayout>
         </Main>
       </Layout>
