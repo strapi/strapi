@@ -73,11 +73,11 @@ export const PreviewBox = ({
     const nextAsset = { ...asset, width, height };
     const file = await produceFile(nextAsset.name, nextAsset.mime, nextAsset.updatedAt);
 
-    await editAsset(nextAsset, file);
+    const updatedAsset = await editAsset(nextAsset, file);
 
     // Making sure that when persisting the new asset, the URL changes with width and height
     // So that the browser makes a request and handle the image caching correctly at the good size
-    const optimizedCachingImage = createAssetUrl(asset);
+    const optimizedCachingImage = createAssetUrl(updatedAsset);
     setAssetUrl(optimizedCachingImage);
 
     stopCropping();
