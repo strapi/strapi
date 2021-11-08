@@ -1,12 +1,10 @@
 import { StrapiInterface } from '@strapi/strapi';
 
-export type ServiceMap = { [key: string]: (options: { strapi: StrapiInterface }) => object };
-
-const services: ServiceMap = {
-  foo: ({ strapi }) => ({
-    async bar() {
-      //   strapi.entityService.find()
+const services = {
+  foo: ({ strapi }: { strapi: StrapiInterface }) => ({
+    bar(message: string) {
       console.log('Hello from my Typescript plugin!');
+      console.log(message);
     },
   }),
 };

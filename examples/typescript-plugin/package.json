@@ -6,14 +6,14 @@
   "license": "MIT",
   "strapi": {
     "displayName": "Typescript Plugin",
-    "name": "typescript-plugin",
+    "name": "ts-plugin",
     "icon": "plug",
     "description": "A Strapi plugin written in Typescript",
     "kind": "plugin"
   },
   "scripts": {
-    "develop": "tsc -p tsconfig.json -w",
-    "build": "tsc -p tsconfig.json"
+    "build": "tsc -p tsconfig.json",
+    "build:watch": "tsc -p tsconfig.json -w"
   },
   "engines": {
     "node": ">=12.x.x <=16.x.x",
