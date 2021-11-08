@@ -175,17 +175,13 @@ exports[`DateTimePicker snapshots the component 1`] = `
 }
 
 .c21 {
-  font-weight: 400;
-  font-size: 0.875rem;
-  line-height: 1.43;
   color: #32324d;
-}
-
-.c22 {
-  display: block;
+  display: inline-block;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-size: 0.875rem;
+  line-height: 1.43;
 }
 
 .c18 {
@@ -269,23 +265,23 @@ exports[`DateTimePicker snapshots the component 1`] = `
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c23 {
+.c22 {
   background: transparent;
   border: none;
   position: relative;
   z-index: 1;
 }
 
-.c23 svg {
+.c22 svg {
   height: 0.6875rem;
   width: 0.6875rem;
 }
 
-.c23 svg path {
+.c22 svg path {
   fill: #666687;
 }
 
-.c24 {
+.c23 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -294,7 +290,7 @@ exports[`DateTimePicker snapshots the component 1`] = `
   border: none;
 }
 
-.c24 svg {
+.c23 svg {
   width: 0.375rem;
 }
 
@@ -323,17 +319,16 @@ exports[`DateTimePicker snapshots the component 1`] = `
 }
 
 .c3 {
-  font-weight: 500;
+  font-weight: 600;
+  color: #32324d;
   font-size: 0.75rem;
   line-height: 1.33;
-  color: #32324d;
 }
 
-.c25 {
-  font-weight: 400;
+.c24 {
+  color: #666687;
   font-size: 0.75rem;
   line-height: 1.33;
-  color: #666687;
 }
 
 .c2 {
@@ -480,7 +475,7 @@ exports[`DateTimePicker snapshots the component 1`] = `
                   class="c20"
                 >
                   <span
-                    class="c21 c22"
+                    class="c21"
                     id="timepicker-1-content"
                   >
                     10:00
@@ -492,7 +487,7 @@ exports[`DateTimePicker snapshots the component 1`] = `
               >
                 <button
                   aria-hidden="true"
-                  class="c18 c23 c24"
+                  class="c18 c22 c23"
                   tabindex="-1"
                   type="button"
                 >
@@ -518,7 +513,7 @@ exports[`DateTimePicker snapshots the component 1`] = `
       </div>
     </div>
     <p
-      class="c25"
+      class="c24"
       id="field-1-hint"
     >
       This is a super description
