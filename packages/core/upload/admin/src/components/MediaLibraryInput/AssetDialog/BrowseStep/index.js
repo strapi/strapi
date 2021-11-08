@@ -90,6 +90,7 @@ export const BrowseStep = ({
 BrowseStep.defaultProps = {
   allowedTypes: [],
   onSelectAllAsset: undefined,
+  onEditAsset: undefined,
 };
 
 BrowseStep.propTypes = {
@@ -99,7 +100,7 @@ BrowseStep.propTypes = {
   onChangePageSize: PropTypes.func.isRequired,
   onChangeSort: PropTypes.func.isRequired,
   onChangeSearch: PropTypes.func.isRequired,
-  onEditAsset: PropTypes.func.isRequired,
+  onEditAsset: PropTypes.func,
   onSelectAsset: PropTypes.func.isRequired,
   onSelectAllAsset: PropTypes.func,
   queryObject: PropTypes.shape({
