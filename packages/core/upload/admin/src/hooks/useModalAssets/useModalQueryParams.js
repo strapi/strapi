@@ -23,12 +23,12 @@ const useModalQueryParams = () => {
 
   const handleChangeSearch = _q => {
     if (_q) {
-      setQueryObject(prev => ({ ...prev, _q }));
+      setQueryObject(prev => ({ ...prev, _q, page: 1 }));
     } else {
-      const newState = {};
+      const newState = { page: 1 };
 
       Object.keys(queryObject).forEach(key => {
-        if (key !== '_q') {
+        if (!['page', '_q'].includes(key)) {
           newState[key] = queryObject[key];
         }
       });
