@@ -11,7 +11,15 @@ const uploadAsset = (file, cancelToken, onProgress) => {
   const formData = new FormData();
 
   formData.append('files', file);
-  formData.append('fileInfo', JSON.stringify(file));
+
+  formData.append(
+    'fileInfo',
+    JSON.stringify({
+      alternativeText: file.name,
+      caption: file.name,
+      name: file.name,
+    })
+  );
 
   return axiosInstance({
     method: 'post',
