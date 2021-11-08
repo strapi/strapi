@@ -28,29 +28,29 @@ describe('<NoPermissions />', () => {
     );
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c13 {
+      .c12 {
+        color: #666687;
         font-weight: 500;
         font-size: 1rem;
         line-height: 1.25;
-        color: #666687;
       }
 
-      .c8 {
+      .c7 {
         background: #ffffff;
         padding: 64px;
         border-radius: 4px;
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
-      .c10 {
+      .c9 {
         padding-bottom: 24px;
       }
 
-      .c12 {
+      .c11 {
         padding-bottom: 16px;
       }
 
-      .c9 {
+      .c8 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -65,7 +65,7 @@ describe('<NoPermissions />', () => {
         text-align: center;
       }
 
-      .c11 svg {
+      .c10 svg {
         height: 5.5rem;
       }
 
@@ -81,7 +81,7 @@ describe('<NoPermissions />', () => {
         padding-left: 56px;
       }
 
-      .c7 {
+      .c6 {
         padding-right: 56px;
         padding-left: 56px;
       }
@@ -119,20 +119,14 @@ describe('<NoPermissions />', () => {
       }
 
       .c4 {
+        color: #32324d;
         font-weight: 600;
         font-size: 2rem;
         line-height: 1.25;
-        color: #32324d;
       }
 
       .c5 {
-        font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
         color: #666687;
-      }
-
-      .c6 {
         font-size: 1rem;
         line-height: 1.5;
       }
@@ -158,26 +152,25 @@ describe('<NoPermissions />', () => {
               >
                 <h1
                   class="c4"
-                  id="main-content-title"
                 >
                   Content
                 </h1>
               </div>
             </div>
             <p
-              class="c5 c6"
+              class="c5"
             />
           </div>
         </div>
         <div
-          class="c7"
+          class="c6"
         >
           <div
-            class="c8 c9"
+            class="c7 c8"
           >
             <div
               aria-hidden="true"
-              class="c10 c11"
+              class="c9 c10"
             >
               <svg
                 fill="none"
@@ -213,10 +206,10 @@ describe('<NoPermissions />', () => {
               </svg>
             </div>
             <div
-              class="c12"
+              class="c11"
             >
               <p
-                class="c13"
+                class="c12"
               >
                 You don't have the permissions to access that content
               </p>

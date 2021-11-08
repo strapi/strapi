@@ -58,7 +58,7 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         padding-bottom: 12px;
       }
 
-      .c8 {
+      .c6 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -76,7 +76,7 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         align-items: center;
       }
 
-      .c9 {
+      .c7 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -90,33 +90,27 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         align-items: center;
       }
 
-      .c10 {
+      .c8 {
+        color: #32324d;
         font-weight: 600;
         font-size: 2rem;
         line-height: 1.25;
-        color: #32324d;
       }
 
-      .c17 {
-        font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
+      .c15 {
         color: #666687;
-      }
-
-      .c18 {
         font-size: 1rem;
         line-height: 1.5;
       }
 
-      .c16 {
-        font-weight: 500;
+      .c14 {
+        font-weight: 600;
+        color: #32324d;
         font-size: 0.75rem;
         line-height: 1.33;
-        color: #32324d;
       }
 
-      .c13 {
+      .c11 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -130,21 +124,21 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         outline: none;
       }
 
-      .c13 svg {
+      .c11 svg {
         height: 12px;
         width: 12px;
       }
 
-      .c13 svg > g,
-      .c13 svg path {
+      .c11 svg > g,
+      .c11 svg path {
         fill: #ffffff;
       }
 
-      .c13[aria-disabled='true'] {
+      .c11[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c13:after {
+      .c11:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -159,11 +153,11 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         border: 2px solid transparent;
       }
 
-      .c13:focus-visible {
+      .c11:focus-visible {
         outline: none;
       }
 
-      .c13:focus-visible:after {
+      .c11:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -174,7 +168,7 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         border: 2px solid #4945ff;
       }
 
-      .c14 {
+      .c12 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -186,7 +180,7 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         background: #4945ff;
       }
 
-      .c14 .sc-lmoMya {
+      .c12 .sc-dQoVA {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -197,61 +191,50 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         align-items: center;
       }
 
-      .c14 .c15 {
+      .c12 .c13 {
         color: #ffffff;
       }
 
-      .c14[aria-disabled='true'] {
+      .c12[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c14[aria-disabled='true'] .c15 {
+      .c12[aria-disabled='true'] .c13 {
         color: #666687;
       }
 
-      .c14[aria-disabled='true'] svg > g,
-      .c14[aria-disabled='true'] svg path {
+      .c12[aria-disabled='true'] svg > g,
+      .c12[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c14[aria-disabled='true']:active {
+      .c12[aria-disabled='true']:active {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c14[aria-disabled='true']:active .c15 {
+      .c12[aria-disabled='true']:active .c13 {
         color: #666687;
       }
 
-      .c14[aria-disabled='true']:active svg > g,
-      .c14[aria-disabled='true']:active svg path {
+      .c12[aria-disabled='true']:active svg > g,
+      .c12[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
-      .c14:hover {
+      .c12:hover {
         border: 1px solid #7b79ff;
         background: #7b79ff;
       }
 
-      .c14:active {
+      .c12:active {
         border: 1px solid #4945ff;
         background: #4945ff;
       }
 
       .c5 {
-        font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
         color: #4945ff;
-      }
-
-      .c6 {
-        font-weight: 600;
-        line-height: 1.14;
-      }
-
-      .c7 {
         font-weight: 600;
         font-size: 0.6875rem;
         line-height: 1.45;
@@ -323,7 +306,7 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         display: flex;
       }
 
-      .c11 {
+      .c9 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -337,12 +320,12 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         align-items: center;
       }
 
-      .c12 > * {
+      .c10 > * {
         margin-left: 0;
         margin-right: 0;
       }
 
-      .c12 > * + * {
+      .c10 > * + * {
         margin-left: 8px;
       }
 
@@ -379,36 +362,35 @@ describe('CONTENT MANAGER | EditView | Header', () => {
                 </svg>
               </span>
               <span
-                class="c5 c6 c7"
+                class="c5"
               >
                 Back
               </span>
             </a>
           </div>
           <div
-            class="c8"
+            class="c6"
           >
             <div
-              class="c9"
+              class="c7"
             >
               <h1
-                class="c10"
-                id="main-content-title"
+                class="c8"
               >
                 Create an entry
               </h1>
             </div>
             <div
-              class="c11 c12"
+              class="c9 c10"
             >
               <button
                 aria-disabled="true"
-                class="c13 c14"
+                class="c11 c12"
                 disabled=""
                 type="submit"
               >
                 <span
-                  class="c15 c16"
+                  class="c13 c14"
                 >
                   Save
                 </span>
@@ -416,7 +398,7 @@ describe('CONTENT MANAGER | EditView | Header', () => {
             </div>
           </div>
           <p
-            class="c17 c18"
+            class="c15"
           >
             API ID  : restaurant
           </p>

@@ -30,10 +30,10 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
 }
 
 .c47 {
-  font-weight: 500;
+  font-weight: 600;
+  color: #32324d;
   font-size: 0.75rem;
   line-height: 1.33;
-  color: #32324d;
 }
 
 .c44 {
@@ -106,7 +106,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   background: #ffffff;
 }
 
-.c45 .sc-hmftZk {
+.c45 .sc-kKXAKc {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -178,7 +178,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   background: #f0f0ff;
 }
 
-.c48 .sc-hmftZk {
+.c48 .sc-kKXAKc {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -260,7 +260,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   background: #4945ff;
 }
 
-.c49 .sc-hmftZk {
+.c49 .sc-kKXAKc {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -348,10 +348,10 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
 }
 
 .c52 {
-  font-weight: 400;
+  font-weight: 600;
+  color: #ffffff;
   font-size: 0.75rem;
   line-height: 1.33;
-  color: #ffffff;
 }
 
 .c51 {
@@ -519,11 +519,10 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   margin-left: 4px;
 }
 
-.c32 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #4a4a6a;
-  text-transform: uppercase;
+.c29 {
+  color: #666687;
+  font-size: 0.875rem;
+  line-height: 1.43;
 }
 
 .c7 {
@@ -531,13 +530,6 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   font-size: 0.875rem;
   line-height: 1.43;
   color: #32324d;
-}
-
-.c29 {
-  font-weight: 400;
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #666687;
 }
 
 .c31 {
@@ -560,17 +552,16 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
 }
 
 .c35 {
-  font-weight: 500;
+  font-weight: 600;
+  color: #32324d;
   font-size: 0.75rem;
   line-height: 1.33;
-  color: #32324d;
 }
 
 .c39 {
-  font-weight: 400;
+  color: #666687;
   font-size: 0.75rem;
   line-height: 1.33;
-  color: #666687;
 }
 
 .c34 {
@@ -927,6 +918,15 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   height: 3.25rem;
 }
 
+.c32 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #4a4a6a;
+  text-transform: uppercase;
+  font-size: 0.875rem;
+  line-height: 1.43;
+}
+
 @media (max-width:68.75rem) {
   .c14 {
     grid-column: span;
@@ -1170,7 +1170,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                                 class="c28"
                               >
                                 <span
-                                  class="c29 c8 c30"
+                                  class="c29 c30"
                                 >
                                   Size
                                 </span>
@@ -1192,7 +1192,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                                 class="c28"
                               >
                                 <span
-                                  class="c29 c8 c30"
+                                  class="c29 c30"
                                 >
                                   Date
                                 </span>
@@ -1214,7 +1214,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                                 class="c28"
                               >
                                 <span
-                                  class="c29 c8 c30"
+                                  class="c29 c30"
                                 >
                                   Dimensions
                                 </span>
@@ -1236,13 +1236,14 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                                 class="c28"
                               >
                                 <span
-                                  class="c29 c8 c30"
+                                  class="c29 c30"
                                 >
                                   Extension
                                 </span>
                                 <span
                                   class="c32"
                                 >
+                                  KIKOU
                                   png
                                 </span>
                               </div>
