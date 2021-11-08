@@ -46,7 +46,7 @@ module.exports = plop => {
         },
         {
           type: 'list',
-          name: 'modelType',
+          name: 'kind',
           message: 'Please choose the model type',
           default: 'collectionType',
           choices: [
@@ -109,7 +109,7 @@ module.exports = plop => {
       }
 
       const routeType =
-        answers.modelType === 'singleType'
+        answers.kind === 'singleType'
           ? 'single-type-routes.js.hbs'
           : 'collection-type-routes.js.hbs';
 
