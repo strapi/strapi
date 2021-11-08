@@ -9,9 +9,5 @@ module.exports = (ctx, { strapi }) => {
 
   const model = strapi.contentTypes[modelUID];
 
-  if (!hasDraftAndPublish(model)) {
-    throw strapi.errors.forbidden();
-  }
-
-  return true;
+  return hasDraftAndPublish(model);
 };

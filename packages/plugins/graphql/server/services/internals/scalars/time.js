@@ -3,6 +3,7 @@
 const { GraphQLScalarType } = require('graphql');
 const { Kind } = require('graphql');
 const { parseType } = require('@strapi/utils');
+const { ValidationError } = require('@strapi/utils').errors;
 
 /**
  * A GraphQL scalar used to store Time (HH:mm:ss.SSS) values
@@ -23,7 +24,7 @@ const TimeScalar = new GraphQLScalarType({
 
   parseLiteral(ast) {
     if (ast.kind !== Kind.STRING) {
-      throw new TypeError('Time cannot represent non string type');
+      throw new ValidationError('Time cannot represent non string type');
     }
 
     const value = ast.value;

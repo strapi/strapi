@@ -13,11 +13,9 @@
   },
   "main": "./lib",
   "dependencies": {
+    "@strapi/utils": "3.6.8",
     "cloudinary": "^1.25.1",
     "into-stream": "^5.1.0"
-  },
-  "peerDependencies": {
-    "@strapi/plugin-upload": "^4.0.0"
   },
   "strapi": {
     "isProvider": true

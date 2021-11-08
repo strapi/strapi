@@ -2,7 +2,10 @@
 
 const yup = require('yup');
 const _ = require('lodash');
+const { defaults } = require('lodash/fp');
 const utils = require('./string-formatting');
+const { YupValidationError } = require('./errors');
+const printValue = require('./print-value');
 
 const MixedSchemaType = yup.mixed;
 
@@ -56,27 +59,53 @@ class StrapiIDSchema extends MixedSchemaType {
 
 yup.strapiID = () => new StrapiIDSchema();
 
-/**
- * Returns a formatted error for http responses
- * @param {Object} validationError - a Yup ValidationError
- */
-const formatYupErrors = validationError => {
-  if (!validationError.inner) {
-    throw new Error('invalid.input');
-  }
-
-  if (validationError.inner.length === 0) {
-    if (validationError.path === undefined) return validationError.errors;
-    return { [validationError.path]: validationError.errors };
-  }
-
-  return validationError.inner.reduce((acc, err) => {
-    acc[err.path] = err.errors;
-    return acc;
-  }, {});
+const handleYupError = (error, errorMessage) => {
+  throw new YupValidationError(error, errorMessage);
 };
+
+const defaultValidationParam = { strict: true, abortEarly: false };
+
+const validateYupSchema = (schema, options = {}) => async (body, errorMessage) => {
+  try {
+    const optionsWithDefaults = defaults(defaultValidationParam, options);
+    return await schema.validate(body, optionsWithDefaults);
+  } catch (e) {
+    handleYupError(e, errorMessage);
+  }
+};
+
+const validateYupSchemaSync = (schema, options = {}) => (body, errorMessage) => {
+  try {
+    const optionsWithDefaults = defaults(defaultValidationParam, options);
+    return schema.validateSync(body, optionsWithDefaults);
+  } catch (e) {
+    handleYupError(e, errorMessage);
+  }
+};
+
+// Temporary fix of this issue : https://github.com/jquense/yup/issues/616
+yup.setLocale({
+  mixed: {
+    notType({ path, type, value, originalValue }) {
+      let isCast = originalValue != null && originalValue !== value;
+      let msg =
+        `${path} must be a \`${type}\` type, ` +
+        `but the final value was: \`${printValue(value, true)}\`` +
+        (isCast ? ` (cast from the value \`${printValue(originalValue, true)}\`).` : '.');
+
+      /* Remove comment that is not supposed to be seen by the enduser
+      if (value === null) {
+        msg += `\n If "null" is intended as an empty value be sure to mark the schema as \`.nullable()\``;
+      }
+      */
+      return msg;
+    },
+  },
+});
 
 module.exports = {
   yup,
-  formatYupErrors,
+  handleYupError,
+  validateYupSchema,
+  validateYupSchemaSync,
 };

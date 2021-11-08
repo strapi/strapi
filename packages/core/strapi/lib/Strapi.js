@@ -183,6 +183,8 @@ class Strapi {
     this.telemetry.destroy();
     this.cron.destroy();
 
+    process.removeAllListeners();
+
     delete global.strapi;
   }
 

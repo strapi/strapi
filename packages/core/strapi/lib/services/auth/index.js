@@ -3,8 +3,7 @@
 const { strict: assert } = require('assert');
 const { has, prop } = require('lodash/fp');
 
-class UnauthorizedError extends Error {}
-class ForbiddenError extends Error {}
+const { UnauthorizedError } = require('@strapi/utils').errors;
 
 const INVALID_STRATEGY_MSG =
   'Invalid auth strategy. Expecting an object with properties {name: string, authenticate: function, verify: function}';
@@ -22,10 +21,6 @@ const createAuthentication = () => {
   const strategies = {};
 
   return {
-    errors: {
-      UnauthorizedError,
-      ForbiddenError,
-    },
     register(type, strategy) {
       validStrategy(strategy);
 

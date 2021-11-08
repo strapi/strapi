@@ -2,7 +2,7 @@
 
 const passport = require('koa-passport');
 const compose = require('koa-compose');
-
+const { ApplicationError, ValidationError } = require('@strapi/utils').errors;
 const { getService } = require('../utils');
 const {
   validateRegistrationInput,
@@ -10,6 +10,7 @@ const {
   validateRegistrationInfoQuery,
   validateForgotPasswordInput,
   validateResetPasswordInput,
+  validateRenewTokenInput,
 } = require('../validation/authentication');
 
 module.exports = {
@@ -18,7 +19,7 @@ module.exports = {
       return passport.authenticate('local', { session: false }, (err, user, info) => {
         if (err) {
           strapi.eventHub.emit('admin.auth.error', { error: err, provider: 'local' });
-          return ctx.badImplementation();
+          return ctx.notImplemented();
         }
 
         if (!user) {
@@ -26,7 +27,7 @@ module.exports = {
             error: new Error(info.message),
             provider: 'local',
           });
-          return ctx.badRequest(info.message);
+          throw new ApplicationError(info.message);
         }
 
         ctx.state.user = user;
@@ -48,17 +49,15 @@ module.exports = {
     },
   ]),
 
-  renewToken(ctx) {
-    const { token } = ctx.request.body;
+  async renewToken(ctx) {
+    await validateRenewTokenInput(ctx.request.body);
 
-    if (token === undefined) {
-      return ctx.badRequest('Missing token');
-    }
+    const { token } = ctx.request.body;
 
     const { isValid, payload } = getService('token').decodeJwtToken(token);
 
     if (!isValid) {
-      return ctx.badRequest('Invalid token');
+      throw new ValidationError('Invalid token');
     }
 
     ctx.body = {
@@ -69,18 +68,14 @@ module.exports = {
   },
 
   async registrationInfo(ctx) {
-    try {
-      await validateRegistrationInfoQuery(ctx.request.query);
-    } catch (err) {
-      return ctx.badRequest('QueryError', err);
-    }
+    await validateRegistrationInfoQuery(ctx.request.query);
 
     const { registrationToken } = ctx.request.query;
 
     const registrationInfo = await getService('user').findRegistrationInfo(registrationToken);
 
     if (!registrationInfo) {
-      return ctx.badRequest('Invalid registrationToken');
+      throw new ValidationError('Invalid registrationToken');
     }
 
     ctx.body = { data: registrationInfo };
@@ -89,11 +84,7 @@ module.exports = {
   async register(ctx) {
     const input = ctx.request.body;
 
-    try {
-      await validateRegistrationInput(input);
-    } catch (err) {
-      return ctx.badRequest('ValidationError', err);
-    }
+    await validateRegistrationInput(input);
 
     const user = await getService('user').register(input);
 
@@ -108,22 +99,18 @@ module.exports = {
   async registerAdmin(ctx) {
     const input = ctx.request.body;
 
-    try {
-      await validateAdminRegistrationInput(input);
-    } catch (err) {
-      return ctx.badRequest('ValidationError', err);
-    }
+    await validateAdminRegistrationInput(input);
 
     const hasAdmin = await getService('user').exists();
 
     if (hasAdmin) {
-      return ctx.badRequest('You cannot register a new super admin');
+      throw new ApplicationError('You cannot register a new super admin');
     }
 
     const superAdminRole = await getService('role').getSuperAdmin();
 
     if (!superAdminRole) {
-      throw new Error(
+      throw new ApplicationError(
         "Cannot register the first admin because the super admin role doesn't exist."
       );
     }
@@ -148,11 +135,7 @@ module.exports = {
   async forgotPassword(ctx) {
     const input = ctx.request.body;
 
-    try {
-      await validateForgotPasswordInput(input);
-    } catch (err) {
-      return ctx.badRequest('ValidationError', err);
-    }
+    await validateForgotPasswordInput(input);
 
     getService('auth').forgotPassword(input);
 
@@ -162,11 +145,7 @@ module.exports = {
   async resetPassword(ctx) {
     const input = ctx.request.body;
 
-    try {
-      await validateResetPasswordInput(input);
-    } catch (err) {
-      return ctx.badRequest('ValidationError', err);
-    }
+    await validateResetPasswordInput(input);
 
     const user = await getService('auth').resetPassword(input);
 

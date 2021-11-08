@@ -2,6 +2,7 @@
 
 const { getOr } = require('lodash/fp');
 const { policy: policyUtils } = require('@strapi/utils');
+const { ForbiddenError } = require('@strapi/utils').errors;
 
 const createPoliciesMiddleware = (resolverConfig, { strapi }) => {
   return async (resolve, ...rest) => {
@@ -18,8 +19,7 @@ const createPoliciesMiddleware = (resolverConfig, { strapi }) => {
       const result = await policy(context, { strapi });
 
       if (![true, undefined].includes(result)) {
-        // TODO: make error clearer
-        throw new Error('Policies failed.');
+        throw new ForbiddenError();
       }
     }
 

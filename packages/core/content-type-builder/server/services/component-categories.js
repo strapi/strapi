@@ -3,6 +3,7 @@
 const { join } = require('path');
 
 const { nameToSlug } = require('@strapi/utils');
+const { ApplicationError } = require('@strapi/utils').errors;
 const createBuilder = require('./schema-builder');
 
 /**
@@ -17,11 +18,11 @@ const editCategory = async (name, infos) => {
   if (name === newName) return;
 
   if (!categoryExists(name)) {
-    throw strapi.errors.notFound('cateogry.notFound');
+    throw new ApplicationError('category not found');
   }
 
   if (categoryExists(newName)) {
-    throw strapi.errors.badRequest('Name already taken');
+    throw new ApplicationError('Name already taken');
   }
 
   const builder = createBuilder();
@@ -55,7 +56,7 @@ const editCategory = async (name, infos) => {
  */
 const deleteCategory = async name => {
   if (!categoryExists(name)) {
-    throw strapi.errors.notFound('cateogry.notFound');
+    throw new ApplicationError('category not found');
   }
 
   const builder = createBuilder();

@@ -1,9 +1,25 @@
 'use strict';
 
-const yup = require('yup');
-const { formatYupErrors } = require('../validators');
+const { yup } = require('../validators');
+const { formatYupErrors } = require('../format-yup-error');
+const { YupValidationError } = require('../errors');
 
-describe('Format yup errors', () => {
+describe('formatYupErrors', () => {
+  test('Error message is sanitized', async () => {
+    const schema = yup.object().shape({
+      name: yup.string().required(),
+    });
+
+    try {
+      await schema.validateSync({ name: null });
+    } catch (e) {
+      const formattedError = new YupValidationError(e);
+      expect(formattedError.message).toEqual(
+        'name must be a `string` type, but the final value was: `null`.'
+      );
+    }
+  });
+
   test('Format single errors', async () => {
     expect.hasAssertions();
     return yup
@@ -13,7 +29,14 @@ describe('Format yup errors', () => {
       .validate({})
       .catch(err => {
         expect(formatYupErrors(err)).toMatchObject({
-          name: ['name is required'],
+          errors: [
+            {
+              message: 'name is required',
+              name: 'ValidationError',
+              path: ['name'],
+            },
+          ],
+          message: 'name is required',
         });
       });
   });
@@ -38,7 +61,14 @@ describe('Format yup errors', () => {
       )
       .catch(err => {
         expect(formatYupErrors(err)).toMatchObject({
-          name: ['min length is 2'],
+          errors: [
+            {
+              message: 'min length is 2',
+              name: 'ValidationError',
+              path: ['name'],
+            },
+          ],
+          message: 'min length is 2',
         });
       });
   });
@@ -68,8 +98,19 @@ describe('Format yup errors', () => {
       )
       .catch(err => {
         expect(formatYupErrors(err)).toMatchObject({
-          price: ['price is required'],
-          name: ['name must be a string'],
+          errors: [
+            {
+              message: 'name must be a string',
+              name: 'ValidationError',
+              path: ['name'],
+            },
+            {
+              message: 'price is required',
+              name: 'ValidationError',
+              path: ['price'],
+            },
+          ],
+          message: '2 errors occurred',
         });
       });
   });

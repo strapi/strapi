@@ -35,10 +35,32 @@ describe('Content Type Builder - Components', () => {
       expect(res.statusCode).toBe(400);
       expect(res.body).toEqual({
         error: {
-          'component.category': ['category.required'],
-          'component.icon': ['icon.required'],
-          'component.attributes': ['attributes.required'],
-          'component.displayName': ['displayName.required'],
+          details: {
+            errors: [
+              {
+                message: 'attributes.required',
+                name: 'ValidationError',
+                path: ['component', 'attributes'],
+              },
+              {
+                message: 'displayName.required',
+                name: 'ValidationError',
+                path: ['component', 'displayName'],
+              },
+              {
+                message: 'icon.required',
+                name: 'ValidationError',
+                path: ['component', 'icon'],
+              },
+              {
+                message: 'category.required',
+                name: 'ValidationError',
+                path: ['component', 'category'],
+              },
+            ],
+          },
+          message: '4 errors occurred',
+          name: 'ValidationError',
         },
       });
     });
@@ -213,9 +235,27 @@ describe('Content Type Builder - Components', () => {
       expect(res.statusCode).toBe(400);
       expect(res.body).toEqual({
         error: {
-          'component.category': ['category.required'],
-          'component.icon': ['icon.required'],
-          'component.displayName': ['displayName.required'],
+          details: {
+            errors: [
+              {
+                message: 'displayName.required',
+                name: 'ValidationError',
+                path: ['component', 'displayName'],
+              },
+              {
+                message: 'icon.required',
+                name: 'ValidationError',
+                path: ['component', 'icon'],
+              },
+              {
+                message: 'category.required',
+                name: 'ValidationError',
+                path: ['component', 'category'],
+              },
+            ],
+          },
+          message: '3 errors occurred',
+          name: 'ValidationError',
         },
       });
     });

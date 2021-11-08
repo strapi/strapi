@@ -2,7 +2,10 @@
 
 const { get } = require('lodash/fp');
 
-const { sanitize } = require('@strapi/utils');
+const utils = require('@strapi/utils');
+
+const { sanitize } = utils;
+const { ApplicationError } = utils.errors;
 
 module.exports = ({ strapi }) => {
   const { service: getGraphQLService } = strapi.plugin('graphql');
@@ -17,7 +20,7 @@ module.exports = ({ strapi }) => {
       const attribute = contentType.attributes[attributeName];
 
       if (!attribute) {
-        throw new Error(
+        throw new ApplicationError(
           `Failed to build an association resolver for ${contentTypeUID}::${attributeName}`
         );
       }
