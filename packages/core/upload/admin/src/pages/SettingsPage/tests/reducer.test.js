@@ -76,6 +76,7 @@ describe('MEDIA LIBRARY | pages | SettingsPage | reducer', () => {
           responsiveDimensions: true,
         },
         isLoading: false,
+        isSubmiting: true,
         modifiedData: {
           responsiveDimensions: false,
         },
@@ -83,6 +84,7 @@ describe('MEDIA LIBRARY | pages | SettingsPage | reducer', () => {
       const expected = {
         initialData: { responsiveDimensions: false },
         isLoading: false,
+        isSubmiting: false,
         modifiedData: { responsiveDimensions: false },
       };
 

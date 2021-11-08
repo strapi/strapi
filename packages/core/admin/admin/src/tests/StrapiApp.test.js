@@ -15,30 +15,36 @@ describe('ADMIN | StrapiApp', () => {
 
     expect(container.firstChild).toMatchInlineSnapshot(`
       .c0 {
+        margin-left: -250px;
+        position: fixed;
+        left: 50%;
+        top: 2.875rem;
+        z-index: 10;
+        width: 31.25rem;
+      }
+
+      .c1 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
         display: flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
         -webkit-flex-direction: column;
         -ms-flex-direction: column;
         flex-direction: column;
-        position: fixed;
-        top: 72px;
-        left: 0;
-        right: 0;
-        z-index: 1100;
-        list-style: none;
-        width: 100%;
-        overflow-y: hidden;
-        pointer-events: none;
+      }
+
+      .c1 > * {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .c1 > * + * {
+        margin-top: 8px;
       }
 
       <div
-        class="c0"
+        class="c0 c1"
+        width="31.25rem"
       />
     `);
   });
@@ -212,7 +218,7 @@ describe('ADMIN | StrapiApp', () => {
         to: '/plugins/bar',
         intlLabel: { id: 'bar', defaultMessage: 'bar' },
         permissions: [],
-        icon: 'book',
+        icon: () => 'book',
       };
 
       app.addMenuLink(link);
@@ -225,7 +231,7 @@ describe('ADMIN | StrapiApp', () => {
       const app = StrapiApp({ middlewares, reducers, library });
       const link = {
         to: '/plugins/content-type-builder',
-        icon: 'book',
+        icon: () => 'book',
         permissions: [],
         intlLabel: {
           id: 'content-type-builder.plugin.name',

@@ -1,6 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
+const { ApplicationError } = require('@strapi/utils').errors;
 const {
   validateUserCreationInput,
   validateUserUpdateInput,
@@ -13,11 +14,7 @@ module.exports = {
   async create(ctx) {
     const { body } = ctx.request;
 
-    try {
-      await validateUserCreationInput(body);
-    } catch (err) {
-      return ctx.badRequest('ValidationError', err);
-    }
+    await validateUserCreationInput(body);
 
     const attributes = _.pick(body, [
       'firstname',
@@ -32,7 +29,7 @@ module.exports = {
     });
 
     if (userAlreadyExists) {
-      return ctx.badRequest('Email already taken');
+      throw new ApplicationError('Email already taken');
     }
 
     const createdUser = await getService('user').create(attributes);
@@ -74,11 +71,7 @@ module.exports = {
     const { id } = ctx.params;
     const { body: input } = ctx.request;
 
-    try {
-      await validateUserUpdateInput(input);
-    } catch (err) {
-      return ctx.badRequest('ValidationError', err);
-    }
+    await validateUserUpdateInput(input);
 
     if (_.has(input, 'email')) {
       const uniqueEmailCheck = await getService('user').exists({
@@ -87,7 +80,7 @@ module.exports = {
       });
 
       if (uniqueEmailCheck) {
-        return ctx.badRequest('A user with this email address already exists');
+        throw new ApplicationError('A user with this email address already exists');
       }
     }
 
@@ -122,11 +115,7 @@ module.exports = {
    */
   async deleteMany(ctx) {
     const { body } = ctx.request;
-    try {
-      await validateUsersDeleteInput(body);
-    } catch (err) {
-      return ctx.badRequest('ValidationError', err);
-    }
+    await validateUsersDeleteInput(body);
 
     const users = await getService('user').deleteByIds(body.ids);
 

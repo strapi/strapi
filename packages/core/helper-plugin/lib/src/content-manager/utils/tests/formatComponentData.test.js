@@ -1,4 +1,4 @@
-import testData from '../../../testUtils/testData';
+import testData from '../../../old/testUtils/testData';
 import formatComponentData from '../formatComponentData';
 
 const { contentType, components, modifiedData } = testData;

@@ -18,19 +18,7 @@ sentry.init({
   dsn: 'https://841d2b2c9b4d4b43a4cde92794cb705a@sentry.io/1762059',
 });
 
-// TODO: to remove after the templates are updated for V4
-const warnTemplatesAreDisabled = cliArguments => {
-  if (cliArguments.template) {
-    console.log(
-      '❌ Templates have been disabled for the Beta version of V4 and will be re-enabled soon!'
-    );
-    process.exit();
-  }
-};
-
 module.exports = (projectDirectory, cliArguments) => {
-  warnTemplatesAreDisabled(cliArguments);
-
   checkRequirements();
 
   const rootPath = resolve(projectDirectory);

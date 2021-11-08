@@ -2,66 +2,6 @@ import reducer, { initialState } from '../reducer';
 import * as actions from '../constants';
 
 describe('CTB | components | FormModal | reducer | actions', () => {
-  describe('ADD_COMPONENTS_TO_DYNAMIC_ZONE', () => {
-    it('Should add the components correctly', () => {
-      const action = {
-        type: actions.ADD_COMPONENTS_TO_DYNAMIC_ZONE,
-        components: ['default.test', 'default.test2', 'default.test3'],
-        shouldAddComponents: true,
-        name: 'components',
-      };
-
-      const state = {
-        initialData: {},
-        modifiedData: {
-          type: 'dynamiczone',
-          name: 'dz',
-          components: ['default.test'],
-        },
-      };
-
-      const expected = {
-        initialData: {},
-        modifiedData: {
-          type: 'dynamiczone',
-          name: 'dz',
-          components: ['default.test', 'default.test2', 'default.test3'],
-        },
-      };
-
-      expect(reducer(state, action)).toEqual(expected);
-    });
-
-    it('Should remove the components correctly', () => {
-      const action = {
-        type: actions.ADD_COMPONENTS_TO_DYNAMIC_ZONE,
-        components: ['default.test2', 'default.test3'],
-        shouldAddComponents: false,
-        name: 'components',
-      };
-
-      const state = {
-        initialData: {},
-        modifiedData: {
-          type: 'dynamiczone',
-          name: 'dz',
-          components: ['default.test', 'default.test2', 'default.test3'],
-        },
-      };
-
-      const expected = {
-        initialData: {},
-        modifiedData: {
-          type: 'dynamiczone',
-          name: 'dz',
-          components: ['default.test'],
-        },
-      };
-
-      expect(reducer(state, action)).toEqual(expected);
-    });
-  });
-
   describe(actions.ON_CHANGE, () => {
     it('Should update the modifiedData object correctly', () => {
       const action = {
@@ -134,124 +74,6 @@ describe('CTB | components | FormModal | reducer | actions', () => {
           name: 'number_of_movies',
           type: 'biginteger',
           default: '0',
-        },
-      };
-
-      expect(reducer(state, action)).toEqual(expected);
-    });
-  });
-
-  describe('ON_CHANGE_ALLOWED_TYPE', () => {
-    it('Should add the missing types', () => {
-      const state = {
-        ...initialState,
-        modifiedData: {
-          allowedTypes: ['images', 'videos'],
-        },
-      };
-      const action = {
-        name: 'all',
-        value: true,
-        type: actions.ON_CHANGE_ALLOWED_TYPE,
-      };
-
-      const expected = {
-        ...initialState,
-        modifiedData: {
-          allowedTypes: ['images', 'videos', 'files'],
-        },
-      };
-
-      expect(reducer(state, action)).toEqual(expected);
-    });
-
-    it('Should remove the missing types', () => {
-      const state = {
-        ...initialState,
-        modifiedData: {
-          allowedTypes: ['images', 'videos', 'files'],
-        },
-      };
-      const action = {
-        name: 'all',
-        value: false,
-        type: actions.ON_CHANGE_ALLOWED_TYPE,
-      };
-
-      const expected = {
-        ...initialState,
-        modifiedData: {
-          allowedTypes: null,
-        },
-      };
-
-      expect(reducer(state, action)).toEqual(expected);
-    });
-
-    it('Shoul add the missing type', () => {
-      const state = {
-        ...initialState,
-        modifiedData: {
-          allowedTypes: ['videos', 'files'],
-        },
-      };
-
-      const action = {
-        name: 'images',
-        value: null,
-        type: actions.ON_CHANGE_ALLOWED_TYPE,
-      };
-
-      const expected = {
-        ...initialState,
-        modifiedData: {
-          allowedTypes: ['videos', 'files', 'images'],
-        },
-      };
-
-      expect(reducer(state, action)).toEqual(expected);
-    });
-
-    it('Should remove the type', () => {
-      const state = {
-        ...initialState,
-        modifiedData: {
-          allowedTypes: ['videos', 'images', 'files'],
-        },
-      };
-
-      const action = {
-        name: 'images',
-        value: null,
-        type: actions.ON_CHANGE_ALLOWED_TYPE,
-      };
-
-      const expected = {
-        ...initialState,
-        modifiedData: {
-          allowedTypes: ['videos', 'files'],
-        },
-      };
-
-      expect(reducer(state, action)).toEqual(expected);
-    });
-
-    it('Should remove set the allowedTypes to null if removing the last type', () => {
-      const state = {
-        ...initialState,
-        modifiedData: {
-          allowedTypes: ['videos'],
-        },
-      };
-      const action = {
-        name: 'videos',
-        value: null,
-        type: actions.ON_CHANGE_ALLOWED_TYPE,
-      };
-      const expected = {
-        ...initialState,
-        modifiedData: {
-          allowedTypes: null,
         },
       };
 
@@ -540,7 +362,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
           createComponent: true,
           componentToCreate: {
             type: 'component',
-            name: 'compo',
+            displayName: 'compo',
             icon: 'air-freshener',
             category: 'default',
           },
@@ -551,12 +373,12 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         ...initialState,
         componentToCreate: {
           type: 'component',
-          name: 'compo',
+          displayName: 'compo',
           icon: 'air-freshener',
           category: 'default',
         },
         modifiedData: {
-          name: 'compo',
+          displayName: 'compo',
           type: 'component',
           repeatable: false,
           component: 'default.compo',

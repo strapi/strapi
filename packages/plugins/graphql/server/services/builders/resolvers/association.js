@@ -1,5 +1,12 @@
 'use strict';
 
+const { get } = require('lodash/fp');
+
+const utils = require('@strapi/utils');
+
+const { sanitize } = utils;
+const { ApplicationError } = utils.errors;
+
 module.exports = ({ strapi }) => {
   const { service: getGraphQLService } = strapi.plugin('graphql');
 
@@ -13,7 +20,7 @@ module.exports = ({ strapi }) => {
       const attribute = contentType.attributes[attributeName];
 
       if (!attribute) {
-        throw new Error(
+        throw new ApplicationError(
           `Failed to build an association resolver for ${contentTypeUID}::${attributeName}`
         );
       }
@@ -26,7 +33,9 @@ module.exports = ({ strapi }) => {
 
       const targetContentType = strapi.getModel(targetUID);
 
-      return async (parent, args = {}) => {
+      return async (parent, args = {}, context) => {
+        const { auth } = context.state;
+
         const transformedArgs = transformArgs(args, {
           contentType: targetContentType,
           usePagination: true,
@@ -44,9 +53,25 @@ module.exports = ({ strapi }) => {
           resourceUID: targetUID,
         };
 
-        // If this a polymorphic association, it returns the raw data
+        // If this a polymorphic association, it sanitizes & returns the raw data
+        // Note: The value needs to be wrapped in a fake object that represents its parent
+        // so that the sanitize util can work properly.
         if (isMorphAttribute) {
-          return data;
+          // Helpers used for the data cleanup
+          const wrapData = dataToWrap => ({ [attributeName]: dataToWrap });
+          const sanitizeData = dataToSanitize => {
+            return sanitize.contentAPI.output(dataToSanitize, contentType, { auth });
+          };
+          const unwrapData = get(attributeName);
+
+          // Sanitizer definition
+          const sanitizeMorphAttribute = sanitize.utils.pipeAsync(
+            wrapData,
+            sanitizeData,
+            unwrapData
+          );
+
+          return sanitizeMorphAttribute(data);
         }
 
         // If this is a to-many relation, it returns an object that

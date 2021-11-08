@@ -1,0 +1,26 @@
+<!--- RelativeTime.stories.mdx --->
+
+import { Meta, ArgsTable, Canvas, Story } from '@storybook/addon-docs';
+import { Main, Row, Button } from '@strapi/design-system';
+import RelativeTime from './index';
+
+<Meta title="components/RelativeTime" />
+
+# RelativeTime
+
+This component is used to display a timestamp relative to the current time.
+
+## Usage
+
+<Canvas>
+  <Story name="base">
+    <Main>
+      Strapi first commit was <RelativeTime timestamp={new Date('2015-10-01')} />.<br />
+      Christmas 2050 is <RelativeTime timestamp={new Date('2050-12-25')} />.
+    </Main>
+  </Story>
+</Canvas>
+
+### Props
+
+<ArgsTable of={RelativeTime} />

@@ -1,19 +1,19 @@
 import getTrad from '../../../utils/getTrad';
 
 const nameField = {
-  autoFocus: true,
   name: 'name',
   type: 'text',
-  label: {
+  intlLabel: {
     id: getTrad('modalForm.attribute.form.base.name'),
+    defaultMessage: 'Name',
   },
   description: {
     id: getTrad('modalForm.attribute.form.base.name.description'),
+    defaultMessage: 'No space is allowed for the name of the attribute',
   },
-  validations: {
-    required: true,
-  },
+  // validations: {
+  //   required: true,
+  // },
 };
 
-// eslint-disable-next-line import/prefer-default-export
 export { nameField };

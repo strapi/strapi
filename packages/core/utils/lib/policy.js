@@ -9,36 +9,22 @@ const { eq } = require('lodash/fp');
 const PLUGIN_PREFIX = 'plugin::';
 const API_PREFIX = 'api::';
 
-const createPolicy = (policyName, args) => ({ policyName, args });
-
-const resolveHandler = policy => {
-  return _.has('handler', policy) ? policy.handler : policy;
-};
-
 const parsePolicy = policy => {
   if (typeof policy === 'string') {
-    return createPolicy(policy);
+    return { policyName: policy, config: {} };
   }
 
-  const { name, options = {} } = policy;
-  return createPolicy(name, options);
-};
-
-const resolvePolicy = policyName => {
-  const policy = strapi.policy(policyName);
-
-  return resolveHandler(policy);
+  const { name, config } = policy;
+  return { policyName: name, config };
 };
 
 const searchLocalPolicy = (policyName, { pluginName, apiName }) => {
   if (pluginName) {
-    const policy = strapi.policy(`${PLUGIN_PREFIX}${pluginName}.${policyName}`);
-    return resolveHandler(policy);
+    return strapi.policy(`${PLUGIN_PREFIX}${pluginName}.${policyName}`);
   }
 
   if (apiName) {
-    const policy = strapi.policy(`${API_PREFIX}${apiName}.${policyName}`);
-    return resolveHandler(policy);
+    return strapi.policy(`${API_PREFIX}${apiName}.${policyName}`);
   }
 };
 
@@ -56,53 +42,68 @@ const globalPolicy = ({ method, endpoint, controller, action, plugin }) => {
   };
 };
 
-const bodyPolicy = async (ctx, next) => {
-  const values = await next();
-
-  if (_.isNil(ctx.body) && !_.isNil(values)) {
-    ctx.body = values;
-  }
+const resolvePolicies = (config, { pluginName, apiName } = {}) => {
+  return config.map(policyConfig => {
+    return {
+      handler: getPolicy(policyConfig, { pluginName, apiName }),
+      config: policyConfig.config || {},
+    };
+  });
 };
 
-const get = (policy, { pluginName, apiName } = {}) => {
-  if (typeof policy === 'function') {
-    return policy;
-  }
-
-  const { policyName, args } = parsePolicy(policy);
-
-  const resolvedPolicy = resolvePolicy(policyName);
+const findPolicy = (name, { pluginName, apiName } = {}) => {
+  const resolvedPolicy = strapi.policy(name);
 
   if (resolvedPolicy !== undefined) {
-    return _.isPlainObject(policy) ? resolvedPolicy(args) : resolvedPolicy;
+    return resolvedPolicy;
   }
 
-  const localPolicy = searchLocalPolicy(policy, { pluginName, apiName });
+  const localPolicy = searchLocalPolicy(name, { pluginName, apiName });
 
   if (localPolicy !== undefined) {
     return localPolicy;
   }
 
-  throw new Error(`Could not find policy "${policy}"`);
+  throw new Error(`Could not find policy "${name}"`);
 };
 
-const createPolicyFactory = (factoryCallback, options) => {
-  const { validator, name = 'unnamed' } = options;
+const getPolicy = (policyConfig, { pluginName, apiName } = {}) => {
+  if (typeof policyConfig === 'function') {
+    return policyConfig;
+  }
 
-  const validate = (...args) => {
-    try {
-      validator(...args);
-    } catch (e) {
-      throw new Error(`Invalid objects submitted to "${name}" policy.`);
+  const { policyName, config } = parsePolicy(policyConfig);
+
+  const policy = findPolicy(policyName, { pluginName, apiName });
+
+  if (typeof policy === 'function') {
+    return policy;
+  }
+
+  if (policy.validator) {
+    policy.validator(config);
+  }
+
+  return policy.handler;
+};
+
+const createPolicy = options => {
+  const { name = 'unnamed', validator, handler } = options;
+
+  const wrappedValidator = config => {
+    if (validator) {
+      try {
+        validator(config);
+      } catch (e) {
+        throw new Error(`Invalid config passed to "${name}" policy.`);
+      }
     }
   };
 
-  return options => {
-    if (validator) {
-      validate(options);
-    }
-
-    return factoryCallback(options);
+  return {
+    name,
+    validator: wrappedValidator,
+    handler,
   };
 };
 
@@ -110,7 +111,6 @@ const createPolicyContext = (type, ctx) => {
   return Object.assign(
     {
       is: eq(type),
-
       get type() {
         return type;
       },
@@ -120,9 +120,9 @@ const createPolicyContext = (type, ctx) => {
 };
 
 module.exports = {
-  get,
+  get: getPolicy,
+  resolve: resolvePolicies,
   globalPolicy,
-  bodyPolicy,
-  createPolicyFactory,
+  createPolicy,
   createPolicyContext,
 };

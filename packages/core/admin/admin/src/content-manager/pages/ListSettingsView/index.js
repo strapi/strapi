@@ -1,77 +1,67 @@
-import React, { memo, useContext, useMemo, useReducer, useState } from 'react';
+import React, { memo, useContext, useReducer, useState } from 'react';
 import PropTypes from 'prop-types';
-import { get, pick } from 'lodash';
-import { useNotification, useTracking } from '@strapi/helper-plugin';
+import { useMutation } from 'react-query';
+import isEqual from 'lodash/isEqual';
+import upperFirst from 'lodash/upperFirst';
+import pick from 'lodash/pick';
+import get from 'lodash/get';
+import { stringify } from 'qs';
+import { useNotification, useTracking, ConfirmDialog } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
-import { useDrop } from 'react-dnd';
-import { DropdownItem } from 'reactstrap';
-import { Inputs as Input } from '@buffetjs/custom';
-import { axiosInstance } from '../../../core/utils';
-import { checkIfAttributeIsDisplayable, ItemTypes, getRequestUrl, getTrad } from '../../utils';
-import PopupForm from '../../components/PopupForm';
-import SettingsViewWrapper from '../../components/SettingsViewWrapper';
-import SortWrapper from '../../components/SortWrapper';
-import LayoutDndProvider from '../../components/LayoutDndProvider';
+import { Box } from '@strapi/design-system/Box';
+import { Divider } from '@strapi/design-system/Divider';
+import { Layout, HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
+import { Link } from '@strapi/design-system/Link';
+import { Main } from '@strapi/design-system/Main';
+import { Button } from '@strapi/design-system/Button';
+import Check from '@strapi/icons/Check';
+import ArrowLeft from '@strapi/icons/ArrowLeft';
+import { checkIfAttributeIsDisplayable, getTrad } from '../../utils';
 import ModelsContext from '../../contexts/ModelsContext';
-import Label from './Label';
-import MenuDropdown from './MenuDropdown';
-import DropdownButton from './DropdownButton';
-import DragWrapper from './DragWrapper';
-import Toggle from './Toggle';
+import { usePluginsQueryParams } from '../../hooks';
+import putCMSettingsLV from './utils/api';
+import Settings from './components/Settings';
+import SortDisplayedFields from './components/SortDisplayedFields';
+import EditFieldForm from './components/EditFieldForm';
 import init from './init';
 import reducer, { initialState } from './reducer';
-import forms from './forms.json';
+import { EXCLUDED_SORT_OPTIONS } from './utils/excludedSortOptions';
 
-const ListSettingsView = ({ layout, slug, updateLayout }) => {
+const ListSettingsView = ({ layout, slug }) => {
+  const { formatMessage } = useIntl();
+  const { trackUsage } = useTracking();
+  const pluginsQueryParams = usePluginsQueryParams();
   const toggleNotification = useNotification();
   const { refetchData } = useContext(ModelsContext);
+
+  const [showWarningSubmit, setWarningSubmit] = useState(false);
+  const toggleWarningSubmit = () => setWarningSubmit(prevState => !prevState);
+  const [isModalFormOpen, setIsModalFormOpen] = useState(false);
+  const toggleModalForm = () => setIsModalFormOpen(prevState => !prevState);
   const [reducerState, dispatch] = useReducer(reducer, initialState, () =>
     init(initialState, layout)
   );
-  const [isOpen, setIsOpen] = useState(false);
-  const [isModalFormOpen, setIsModalFormOpen] = useState(false);
-  const [isDraggingSibling, setIsDraggingSibling] = useState(false);
-  const { formatMessage } = useIntl();
-  const { trackUsage } = useTracking();
-  const toggleModalForm = () => setIsModalFormOpen(prevState => !prevState);
-  const { labelForm, labelToEdit, initialData, modifiedData } = reducerState;
-  const attributes = useMemo(() => {
-    return get(modifiedData, ['attributes'], {});
-  }, [modifiedData]);
+  const { fieldToEdit, fieldForm, initialData, modifiedData } = reducerState;
+  const { attributes } = layout;
+  const displayedFields = modifiedData.layouts.list;
 
-  const getName = useMemo(() => {
-    return get(modifiedData, ['info', 'name'], '');
-  }, [modifiedData]);
+  const goBackUrl = () => {
+    const {
+      settings: { pageSize, defaultSortBy, defaultSortOrder },
+      kind,
+      uid,
+    } = initialData;
+    const sort = `${defaultSortBy}:${defaultSortOrder}`;
+    const goBackSearch = `${stringify(
+      {
+        page: 1,
+        pageSize,
+        sort,
+      },
+      { encode: false }
+    )}${pluginsQueryParams ? `&${pluginsQueryParams}` : ''}`;
 
-  const displayedFields = useMemo(() => {
-    return get(modifiedData, ['layouts', 'list'], []);
-  }, [modifiedData]);
-
-  const listRemainingFields = useMemo(() => {
-    const metadatas = get(modifiedData, ['metadatas'], {});
-
-    return Object.keys(metadatas)
-      .filter(key => {
-        return checkIfAttributeIsDisplayable(get(attributes, key, {}));
-      })
-      .filter(field => {
-        return !displayedFields.includes(field);
-      })
-      .sort();
-  }, [displayedFields, attributes, modifiedData]);
-
-  const handleClickEditLabel = labelToEdit => {
-    dispatch({
-      type: 'SET_LABEL_TO_EDIT',
-      labelToEdit,
-    });
-    toggleModalForm();
-  };
-
-  const handleClosed = () => {
-    dispatch({
-      type: 'UNSET_LABEL_TO_EDIT',
-    });
+    return `/content-manager/${kind}/${uid}?${goBackSearch}`;
   };
 
   const handleChange = ({ target: { name, value } }) => {
@@ -82,39 +72,109 @@ const ListSettingsView = ({ layout, slug, updateLayout }) => {
     });
   };
 
+  const handleConfirm = async () => {
+    const body = pick(modifiedData, ['layouts', 'settings', 'metadatas']);
+    submitMutation.mutate(body);
+  };
+
+  const handleAddField = item => {
+    dispatch({
+      type: 'ADD_FIELD',
+      item,
+    });
+  };
+
+  const handleRemoveField = (e, index) => {
+    e.stopPropagation();
+
+    if (displayedFields.length === 1) {
+      toggleNotification({
+        type: 'info',
+        message: { id: getTrad('notification.info.minimumFields') },
+      });
+    } else {
+      dispatch({
+        type: 'REMOVE_FIELD',
+        index,
+      });
+    }
+  };
+
+  const handleSubmit = e => {
+    e.preventDefault();
+    toggleWarningSubmit();
+    trackUsage('willSaveContentTypeLayout');
+  };
+
+  const handleClickEditField = fieldToEdit => {
+    dispatch({
+      type: 'SET_FIELD_TO_EDIT',
+      fieldToEdit,
+    });
+    toggleModalForm();
+  };
+
+  const handleCloseModal = () => {
+    dispatch({
+      type: 'UNSET_FIELD_TO_EDIT',
+    });
+    toggleModalForm();
+  };
+
+  const handleSubmitFieldEdit = e => {
+    e.preventDefault();
+    toggleModalForm();
+    dispatch({
+      type: 'SUBMIT_FIELD_FORM',
+    });
+  };
+
+  const submitMutation = useMutation(body => putCMSettingsLV(body, slug), {
+    onSuccess: () => {
+      trackUsage('didEditListSettings');
+      refetchData();
+    },
+    onError: () => {
+      toggleNotification({
+        type: 'warning',
+        message: { id: 'notification.error' },
+      });
+    },
+  });
+  const { isLoading: isSubmittingForm } = submitMutation;
+
   const handleChangeEditLabel = ({ target: { name, value } }) => {
     dispatch({
-      type: 'ON_CHANGE_LABEL_METAS',
+      type: 'ON_CHANGE_FIELD_METAS',
       name,
       value,
     });
   };
 
-  const handleConfirm = async () => {
-    try {
-      const body = pick(modifiedData, ['layouts', 'settings', 'metadatas']);
+  const listRemainingFields = Object.entries(attributes)
+    .reduce((acc, cur) => {
+      const [attrName, fieldSchema] = cur;
 
-      const {
-        data: { data },
-      } = await axiosInstance.put(
-        getRequestUrl(`content-types/${slug}/configuration`),
+      const isDisplayable = checkIfAttributeIsDisplayable(fieldSchema);
+      const isAlreadyDisplayed = displayedFields.includes(attrName);
 
-        body
-      );
+      if (isDisplayable && !isAlreadyDisplayed) {
+        acc.push(attrName);
+      }
 
-      updateLayout(data);
+      return acc;
+    }, [])
+    .sort();
 
-      dispatch({
-        type: 'SUBMIT_SUCCEEDED',
-      });
-      trackUsage('didEditListSettings');
-    } catch (err) {
-      toggleNotification({
-        type: 'warning',
-        message: { id: 'notification.error' },
-      });
+  const sortOptions = Object.entries(attributes).reduce((acc, cur) => {
+    const [name, { type }] = cur;
+
+    if (!EXCLUDED_SORT_OPTIONS.includes(type)) {
+      acc.push(name);
     }
-  };
+
+    return acc;
+  }, []);
 
   const move = (originalIndex, atIndex) => {
     dispatch({
@@ -124,177 +184,116 @@ const ListSettingsView = ({ layout, slug, updateLayout }) => {
     });
   };
 
-  const [, drop] = useDrop({ accept: ItemTypes.FIELD });
-
-  const renderForm = () => {
-    const type = get(attributes, [labelToEdit, 'type'], 'text');
-    const relationType = get(attributes, [labelToEdit, 'relationType']);
-    let shouldDisplaySortToggle = !['media', 'relation'].includes(type);
-    const label = formatMessage({ id: getTrad('form.Input.label') });
-    const description = formatMessage({ id: getTrad('form.Input.label.inputDescription') });
-
-    if (['oneWay', 'oneToOne', 'manyToOne'].includes(relationType)) {
-      shouldDisplaySortToggle = true;
-    }
-
-    return (
-      <>
-        <div className="col-6" style={{ marginBottom: 4 }}>
-          <Input
-            description={description}
-            label={label}
-            type="text"
-            name="label"
-            onBlur={() => {}}
-            value={get(labelForm, 'label', '')}
-            onChange={handleChangeEditLabel}
-          />
-        </div>
-        {shouldDisplaySortToggle && (
-          <div className="col-6" style={{ marginBottom: 4 }}>
-            <Input
-              label={formatMessage({ id: getTrad('form.Input.sort.field') })}
-              type="bool"
-              name="sortable"
-              value={get(labelForm, 'sortable', false)}
-              onChange={handleChangeEditLabel}
-            />
-          </div>
-        )}
-      </>
-    );
-  };
-
   return (
-    <LayoutDndProvider
-      isDraggingSibling={isDraggingSibling}
-      setIsDraggingSibling={setIsDraggingSibling}
-    >
-      <SettingsViewWrapper
-        displayedFields={displayedFields}
-        inputs={forms}
-        isLoading={false}
-        initialData={initialData}
-        modifiedData={modifiedData}
-        onChange={handleChange}
-        onConfirmReset={() => {
-          dispatch({
-            type: 'ON_RESET',
-          });
-        }}
-        onConfirmSubmit={handleConfirm}
-        onModalConfirmClosed={refetchData}
-        name={getName}
-      >
-        <DragWrapper>
-          <div className="row">
-            <div className="col-12">
-              <SortWrapper
-                ref={drop}
-                style={{
-                  display: 'flex',
-                  width: '100%',
-                }}
+    <Layout>
+      <Main aria-busy={isSubmittingForm}>
+        <form onSubmit={handleSubmit}>
+          <HeaderLayout
+            navigationAction={
+              <Link startIcon={<ArrowLeft />} to={goBackUrl} id="go-back">
+                {formatMessage({ id: 'app.components.go-back', defaultMessage: 'Go back' })}
+              </Link>
+            }
+            primaryAction={
+              <Button
+                size="L"
+                startIcon={<Check />}
+                disabled={isEqual(modifiedData, initialData)}
+                type="submit"
               >
-                {displayedFields.map((item, index) => {
-                  const label = get(modifiedData, ['metadatas', item, 'list', 'label'], '');
-
-                  return (
-                    <Label
-                      count={displayedFields.length}
-                      key={item}
-                      index={index}
-                      isDraggingSibling={isDraggingSibling}
-                      label={label}
-                      move={move}
-                      name={item}
-                      onClick={handleClickEditLabel}
-                      onRemove={e => {
-                        e.stopPropagation();
-
-                        if (displayedFields.length === 1) {
-                          toggleNotification({
-                            type: 'info',
-                            message: { id: getTrad('notification.info.minimumFields') },
-                          });
-                        } else {
-                          dispatch({
-                            type: 'REMOVE_FIELD',
-                            index,
-                          });
-                        }
-                      }}
-                      selectedItem={labelToEdit}
-                      setIsDraggingSibling={setIsDraggingSibling}
-                    />
-                  );
-                })}
-              </SortWrapper>
-            </div>
-          </div>
-          <DropdownButton
-            isOpen={isOpen}
-            toggle={() => {
-              if (listRemainingFields.length > 0) {
-                setIsOpen(prevState => !prevState);
-              }
+                {formatMessage({ id: 'form.button.save', defaultMessage: 'Save' })}
+              </Button>
+            }
+            subtitle={formatMessage({
+              id: getTrad('components.SettingsViewWrapper.pluginHeader.description.list-settings'),
+              defaultMessage: 'Define the settings of the list view.',
+            })}
+            title={formatMessage(
+              {
+                id: getTrad('components.SettingsViewWrapper.pluginHeader.title'),
+                defaultMessage: 'Configure the view - {name}',
+              },
+              { name: upperFirst(modifiedData.info.displayName) }
+            )}
+          />
+          <ContentLayout>
+            <Box
+              background="neutral0"
+              hasRadius
+              shadow="tableShadow"
+              paddingTop={6}
+              paddingBottom={6}
+              paddingLeft={7}
+              paddingRight={7}
+            >
+              <Settings
+                modifiedData={modifiedData}
+                onChange={handleChange}
+                sortOptions={sortOptions}
+              />
+              <Box paddingTop={6} paddingBottom={6}>
+                <Divider />
+              </Box>
+              <SortDisplayedFields
+                listRemainingFields={listRemainingFields}
+                displayedFields={displayedFields}
+                onAddField={handleAddField}
+                onClickEditField={handleClickEditField}
+                onMoveField={move}
+                onRemoveField={handleRemoveField}
+                metadatas={modifiedData.metadatas}
+              />
+            </Box>
+          </ContentLayout>
+          <ConfirmDialog
+            bodyText={{
+              id: getTrad('popUpWarning.warning.updateAllSettings'),
+              defaultMessage: 'This will modify all your settings',
             }}
-            direction="down"
-            style={{
-              position: 'absolute',
-              top: 11,
-              right: 10,
-            }}
-          >
-            <Toggle disabled={listRemainingFields.length === 0} />
-            <MenuDropdown>
-              {listRemainingFields.map(item => (
-                <DropdownItem
-                  key={item}
-                  onClick={() => {
-                    dispatch({
-                      type: 'ADD_FIELD',
-                      item,
-                    });
-                  }}
-                >
-                  {item}
-                </DropdownItem>
-              ))}
-            </MenuDropdown>
-          </DropdownButton>
-        </DragWrapper>
-      </SettingsViewWrapper>
-      <PopupForm
-        headerId={getTrad('containers.ListSettingsView.modal-form.edit-label')}
-        isOpen={isModalFormOpen}
-        onClosed={handleClosed}
-        onSubmit={e => {
-          e.preventDefault();
-          toggleModalForm();
-          dispatch({
-            type: 'SUBMIT_LABEL_FORM',
-          });
-        }}
-        onToggle={toggleModalForm}
-        renderForm={renderForm}
-        subHeaderContent={labelToEdit}
-        type={get(attributes, [labelToEdit, 'type'], 'text')}
-      />
-    </LayoutDndProvider>
+            iconRightButton={<Check />}
+            isConfirmButtonLoading={isSubmittingForm}
+            isOpen={showWarningSubmit}
+            onToggleDialog={toggleWarningSubmit}
+            onConfirm={handleConfirm}
+            variantRightButton="success-light"
+          />
+        </form>
+        {isModalFormOpen && (
+          <EditFieldForm
+            attributes={attributes}
+            fieldForm={fieldForm}
+            fieldToEdit={fieldToEdit}
+            onChangeEditLabel={handleChangeEditLabel}
+            onCloseModal={handleCloseModal}
+            onSubmit={handleSubmitFieldEdit}
+            type={get(attributes, [fieldToEdit, 'type'], 'text')}
+          />
+        )}
+      </Main>
+    </Layout>
   );
 };
 
 ListSettingsView.propTypes = {
   layout: PropTypes.shape({
     uid: PropTypes.string.isRequired,
-    settings: PropTypes.object.isRequired,
+    settings: PropTypes.shape({
+      bulkable: PropTypes.bool,
+      defaultSortBy: PropTypes.string,
+      defaultSortOrder: PropTypes.string,
+      filterable: PropTypes.bool,
+      pageSize: PropTypes.number,
+      searchable: PropTypes.bool,
+    }).isRequired,
     metadatas: PropTypes.object.isRequired,
     options: PropTypes.object.isRequired,
-    attributes: PropTypes.object.isRequired,
+    attributes: PropTypes.objectOf(
+      PropTypes.shape({
+        type: PropTypes.string,
+      })
+    ).isRequired,
   }).isRequired,
   slug: PropTypes.string.isRequired,
-  updateLayout: PropTypes.func.isRequired,
 };
 
 export default memo(ListSettingsView);

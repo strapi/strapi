@@ -1,5 +1,6 @@
 'use strict';
 
+const { ApplicationError } = require('@strapi/utils').errors;
 const { getNonLocalizedAttributes } = require('../content-types');
 const ctService = require('../../services/content-types')();
 
@@ -27,9 +28,15 @@ describe('i18n - Controller - content-types', () => {
         },
         badRequest,
       };
-      await getNonLocalizedAttributes(ctx);
 
-      expect(badRequest).toHaveBeenCalledWith('model.not.localized');
+      expect.assertions(2);
+
+      try {
+        await getNonLocalizedAttributes(ctx);
+      } catch (e) {
+        expect(e instanceof ApplicationError).toBe(true);
+        expect(e.message).toEqual('model.not.localized');
+      }
     });
 
     test('entity not found', async () => {

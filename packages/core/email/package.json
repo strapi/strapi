@@ -5,7 +5,6 @@
   "strapi": {
     "name": "email",
     "displayName": "Email",
-    "icon": "paper-plane",
     "description": "email.plugin.description",
     "required": true,
     "kind": "plugin"
@@ -15,7 +14,8 @@
   },
   "dependencies": {
     "lodash": "4.17.21",
-    "@strapi/provider-email-sendmail": "3.6.8"
+    "@strapi/provider-email-sendmail": "3.6.8",
+    "@strapi/utils": "3.6.8"
   },
   "devDependencies": {
     "@strapi/helper-plugin": "3.6.8"

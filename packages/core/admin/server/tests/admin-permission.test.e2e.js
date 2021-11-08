@@ -193,13 +193,13 @@ describe('Role CRUD End to End', () => {
                 "action": "plugin::documentation.settings.regenerate",
                 "displayName": "Regenerate",
                 "plugin": "documentation",
-                "subCategory": "settings",
+                "subCategory": "general",
               },
               Object {
                 "action": "plugin::documentation.settings.update",
                 "displayName": "Update and delete",
                 "plugin": "documentation",
-                "subCategory": "settings",
+                "subCategory": "general",
               },
               Object {
                 "action": "plugin::upload.assets.copy-link",
@@ -405,6 +405,12 @@ describe('Role CRUD End to End', () => {
                 "action": "admin::webhooks.update",
                 "category": "webhooks",
                 "displayName": "Update",
+                "subCategory": "general",
+              },
+              Object {
+                "action": "plugin::documentation.settings.read",
+                "category": "documentation",
+                "displayName": "Access the documentation settings page",
                 "subCategory": "general",
               },
               Object {
@@ -666,13 +672,13 @@ describe('Role CRUD End to End', () => {
                   "action": "plugin::documentation.settings.regenerate",
                   "displayName": "Regenerate",
                   "plugin": "documentation",
-                  "subCategory": "settings",
+                  "subCategory": "general",
                 },
                 Object {
                   "action": "plugin::documentation.settings.update",
                   "displayName": "Update and delete",
                   "plugin": "documentation",
-                  "subCategory": "settings",
+                  "subCategory": "general",
                 },
                 Object {
                   "action": "plugin::upload.assets.copy-link",
@@ -890,6 +896,12 @@ describe('Role CRUD End to End', () => {
                   "action": "admin::webhooks.update",
                   "category": "webhooks",
                   "displayName": "Update",
+                  "subCategory": "general",
+                },
+                Object {
+                  "action": "plugin::documentation.settings.read",
+                  "category": "documentation",
+                  "displayName": "Access the documentation settings page",
                   "subCategory": "general",
                 },
                 Object {

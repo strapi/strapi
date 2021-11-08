@@ -1,6 +1,7 @@
 'use strict';
 
 const { pick } = require('lodash/fp');
+const { ApplicationError } = require('@strapi/utils').errors;
 const { validateUserCreationInput } = require('../validation/user');
 const { getService } = require('../../../server/utils');
 
@@ -10,11 +11,7 @@ module.exports = {
   async create(ctx) {
     const { body } = ctx.request;
 
-    try {
-      await validateUserCreationInput(body);
-    } catch (err) {
-      return ctx.badRequest('ValidationError', err);
-    }
+    await validateUserCreationInput(body);
 
     const attributes = pickUserCreationAttributes(body);
     const { useSSORegistration } = body;
@@ -22,7 +19,7 @@ module.exports = {
     const userAlreadyExists = await getService('user').exists({ email: attributes.email });
 
     if (userAlreadyExists) {
-      return ctx.badRequest('Email already taken');
+      throw new ApplicationError('Email already taken');
     }
 
     if (useSSORegistration) {

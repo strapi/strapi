@@ -401,7 +401,7 @@ const addressCT = {
   isDisplayed: true,
   apiID: 'address',
   kind: 'collectionType',
-  info: { name: 'address', description: '', label: 'Addresses' },
+  info: { displayName: 'addresse', name: 'address', description: '', label: 'Addresses' },
   options: {
     draftAndPublish: true,
     increments: true,

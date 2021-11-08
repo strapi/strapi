@@ -12,7 +12,7 @@ module.exports = plop => {
         name: 'id',
         message: 'Policy name',
       },
-      ...getDestinationPrompts('policy', plop.getDestBasePath()),
+      ...getDestinationPrompts('policy', plop.getDestBasePath(), { rootFolder: true }),
     ],
     actions(answers) {
       let filePath;
@@ -27,7 +27,7 @@ module.exports = plop => {
       return [
         {
           type: 'add',
-          path: `${filePath}/config/policies/{{id}}.js`,
+          path: `${filePath}/policies/{{id}}.js`,
           templateFile: 'templates/policy.js.hbs',
         },
       ];

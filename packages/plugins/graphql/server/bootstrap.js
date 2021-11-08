@@ -10,6 +10,7 @@ const {
 } = require('apollo-server-core');
 const depthLimit = require('graphql-depth-limit');
 const { graphqlUploadKoa } = require('graphql-upload');
+const formatGraphqlError = require('./format-graphql-error');
 
 const merge = mergeWith((a, b) => {
   if (isArray(a) && isArray(b)) {
@@ -46,6 +47,9 @@ module.exports = async ({ strapi }) => {
 
     // Validation
     validationRules: [depthLimit(config('depthLimit'))],
+
+    // Errors
+    formatError: formatGraphqlError,
 
     // Misc
     cors: false,

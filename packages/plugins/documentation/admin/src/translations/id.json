@@ -1,11 +1,8 @@
 {
-  "components.Row.generatedDate": "Generasi terakhir",
   "components.Row.open": "Buka",
   "components.Row.regenerate": "Diperbarui",
   "containers.HomePage.Block.title": "Versi",
-  "containers.HomePage.Button.open": "Buka dokumentasi",
   "containers.HomePage.Button.update": "Perbarui",
-  "containers.HomePage.PluginHeader.description": "Konfigurasikan plugin dokumentasi",
   "containers.HomePage.PluginHeader.title": "Dokumentasi - Pengaturan",
   "containers.HomePage.PopUpWarning.confirm": "Saya mengerti",
   "containers.HomePage.PopUpWarning.message": "Anda yakin ingin menghapus versi ini?",

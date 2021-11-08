@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
+import { lightTheme } from '@strapi/design-system/themes';
 import merge from 'lodash/merge';
 import pick from 'lodash/pick';
 import isFunction from 'lodash/isFunction';
@@ -9,7 +10,7 @@ import { basename, createHook } from './core/utils';
 import configureStore from './core/store/configureStore';
 import { Plugin } from './core/apis';
 import App from './pages/App';
-import AuthLogo from './assets/images/logo_strapi_auth.png';
+import AuthLogo from './assets/images/logo_strapi_auth_v4.png';
 import MenuLogo from './assets/images/logo_strapi_menu.png';
 import Providers from './components/Providers';
 import Theme from './components/Theme';
@@ -22,7 +23,6 @@ import {
 } from './exposedHooks';
 import injectionZones from './injectionZones';
 import favicon from './favicon.ico';
-import themes from './themes';
 
 class StrapiApp {
   constructor({ adminConfig, appPlugins, library, middlewares, reducers }) {
@@ -34,7 +34,7 @@ class StrapiApp {
       locales: ['en'],
       menuLogo: MenuLogo,
       notifications: { releases: true },
-      theme: themes,
+      theme: lightTheme,
       translations: {},
       tutorials: true,
     };
@@ -113,6 +113,10 @@ class StrapiApp {
     invariant(
       link.Component && typeof link.Component === 'function',
       `link.Component should be a valid React Component`
+    );
+    invariant(
+      link.icon && typeof link.icon === 'function',
+      `link.Icon should be a valid React Component`
     );
 
     this.menu.push(link);

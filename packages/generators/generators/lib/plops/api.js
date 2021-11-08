@@ -77,7 +77,7 @@ module.exports = plop => {
         {
           type: 'add',
           path: `${filePath}/content-types/{{id}}/schema.json`,
-          templateFile: 'templates/model.schema.json.hbs',
+          templateFile: 'templates/content-type.schema.json.hbs',
         },
         {
           type: 'add',

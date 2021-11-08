@@ -1,29 +1,22 @@
 import React, { useEffect, useReducer } from 'react';
 import axios from 'axios';
-import { camelCase, get, omit, upperFirst } from 'lodash';
+import { camelCase, get, omit } from 'lodash';
 import { Redirect, useRouteMatch, useHistory } from 'react-router-dom';
-import { BaselineAlignment, auth, useNotification, useQuery } from '@strapi/helper-plugin';
-import { Padded } from '@buffetjs/core';
+import { auth, useQuery } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import forms from 'ee_else_ce/pages/AuthPage/utils/forms';
 import useLocalesProvider from '../../components/LocalesProvider/useLocalesProvider';
-import NavTopRightWrapper from '../../components/NavTopRightWrapper';
-import PageTitle from '../../components/PageTitle';
-import LocaleToggle from '../../components/LocaleToggle';
-import checkFormValidity from '../../utils/checkFormValidity';
 import formatAPIErrors from '../../utils/formatAPIErrors';
 import init from './init';
 import { initialState, reducer } from './reducer';
 
 const AuthPage = ({ hasAdmin, setHasAdmin }) => {
-  const toggleNotification = useNotification();
   const { push } = useHistory();
   const { changeLocale } = useLocalesProvider();
   const {
     params: { authType },
   } = useRouteMatch('/auth/:authType');
   const query = useQuery();
-  const registrationToken = query.get('registrationToken');
   const { Component, endPoint, fieldsToDisable, fieldsToOmit, inputsPrefix, schema, ...rest } = get(
     forms,
     authType,
@@ -52,41 +45,6 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
     });
   }, [authType]);
 
-  useEffect(() => {
-    if (authType === 'register') {
-      const getData = async () => {
-        try {
-          const {
-            data: { data },
-          } = await axios.get(
-            `${strapi.backendURL}/admin/registration-info?registrationToken=${registrationToken}`
-          );
-
-          if (data) {
-            dispatch({
-              type: 'SET_DATA',
-              data: { registrationToken, userInfo: data },
-            });
-          }
-        } catch (err) {
-          const errorMessage = get(err, ['response', 'data', 'message'], 'An error occurred');
-
-          toggleNotification({
-            type: 'warning',
-            message: errorMessage,
-          });
-
-          // Redirect to the oops page in case of an invalid token
-          // @alexandrebodin @JAB I am not sure it is the wanted behavior
-          push(`/auth/oops?info=${encodeURIComponent(errorMessage)}`);
-        }
-      };
-
-      getData();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [authType]);
-
   const handleChange = ({ target: { name, value } }) => {
     dispatch({
       type: 'ON_CHANGE',
@@ -95,44 +53,29 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
     });
   };
 
-  const handleSubmit = async e => {
-    e.preventDefault();
+  const handleSubmit = async (e, { setSubmitting, setErrors }) => {
+    setSubmitting(true);
+    const body = omit(e, fieldsToOmit);
+    const requestURL = `/admin/${endPoint}`;
 
-    dispatch({
-      type: 'SET_ERRORS',
-      errors: {},
-    });
+    if (authType === 'login') {
+      await loginRequest(e, requestURL, { setSubmitting, setErrors });
+    }
 
-    const errors = await checkFormValidity(modifiedData, schema);
+    if (authType === 'register' || authType === 'register-admin') {
+      await registerRequest(e, requestURL, { setSubmitting, setErrors });
+    }
 
-    dispatch({
-      type: 'SET_ERRORS',
-      errors: errors || {},
-    });
+    if (authType === 'forgot-password') {
+      await forgotPasswordRequest(body, requestURL, { setSubmitting, setErrors });
+    }
 
-    if (!errors) {
-      const body = omit(modifiedData, fieldsToOmit);
-      const requestURL = `/admin/${endPoint}`;
-
-      if (authType === 'login') {
-        await loginRequest(body, requestURL);
-      }
-
-      if (authType === 'register' || authType === 'register-admin') {
-        await registerRequest(body, requestURL);
-      }
-
-      if (authType === 'forgot-password') {
-        await forgotPasswordRequest(body, requestURL);
-      }
-
-      if (authType === 'reset-password') {
-        await resetPasswordRequest(body, requestURL);
-      }
+    if (authType === 'reset-password') {
+      await resetPasswordRequest(body, requestURL, { setSubmitting, setErrors });
     }
   };
 
-  const forgotPasswordRequest = async (body, requestURL) => {
+  const forgotPasswordRequest = async (body, requestURL, { setSubmitting, setErrors }) => {
     try {
       await axios({
         method: 'POST',
@@ -145,14 +88,13 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
     } catch (err) {
       console.error(err);
 
-      toggleNotification({
-        type: 'warning',
-        message: { id: 'notification.error' },
-      });
+      setErrors({ errorMessage: 'notification.error' });
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  const loginRequest = async (body, requestURL) => {
+  const loginRequest = async (body, requestURL, { setSubmitting, setErrors }) => {
     try {
       const {
         data: {
@@ -161,7 +103,7 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
       } = await axios({
         method: 'POST',
         url: `${strapi.backendURL}${requestURL}`,
-        data: body,
+        data: omit(body, fieldsToOmit),
         cancelToken: source.token,
       });
 
@@ -169,14 +111,13 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
         changeLocale(user.preferedLanguage);
       }
 
-      auth.setToken(token, modifiedData.rememberMe);
-      auth.setUserInfo(user, modifiedData.rememberMe);
+      auth.setToken(token, body.rememberMe);
+      auth.setUserInfo(user, body.rememberMe);
 
       push('/');
     } catch (err) {
       if (err.response) {
         const errorMessage = get(err, ['response', 'data', 'message'], 'Something went wrong');
-        const errorStatus = get(err, ['response', 'data', 'statusCode'], 400);
 
         if (camelCase(errorMessage).toLowerCase() === 'usernotactive') {
           push('/auth/oops');
@@ -188,16 +129,14 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
           return;
         }
 
-        dispatch({
-          type: 'SET_REQUEST_ERROR',
-          errorMessage,
-          errorStatus,
-        });
+        setErrors({ errorMessage });
       }
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  const registerRequest = async (body, requestURL) => {
+  const registerRequest = async (body, requestURL, { setSubmitting, setErrors }) => {
     try {
       const {
         data: {
@@ -206,7 +145,7 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
       } = await axios({
         method: 'POST',
         url: `${strapi.backendURL}${requestURL}`,
-        data: body,
+        data: omit(body, fieldsToOmit),
         cancelToken: source.token,
       });
 
@@ -214,8 +153,8 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
       auth.setUserInfo(user, false);
 
       if (
-        (authType === 'register' && modifiedData.userInfo.news === true) ||
-        (authType === 'register-admin' && modifiedData.news === true)
+        (authType === 'register' && body.userInfo.news === true) ||
+        (authType === 'register-admin' && body.news === true)
       ) {
         axios({
           method: 'POST',
@@ -224,9 +163,11 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
             email: user.email,
             username: user.firstname,
           },
+          cancelToken: source.token,
         });
       }
       // Redirect to the homePage
+      setSubmitting(false);
       setHasAdmin(true);
       push('/');
     } catch (err) {
@@ -234,15 +175,12 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
         const { data } = err.response;
         const apiErrors = formatAPIErrors(data);
 
-        dispatch({
-          type: 'SET_ERRORS',
-          errors: apiErrors,
-        });
+        setErrors({ apiErrors });
       }
     }
   };
 
-  const resetPasswordRequest = async (body, requestURL) => {
+  const resetPasswordRequest = async (body, requestURL, { setErrors, setSubmitting }) => {
     try {
       const {
         data: {
@@ -270,7 +208,10 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
           errorMessage,
           errorStatus,
         });
+        setErrors({ errorMessage });
       }
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -288,24 +229,17 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
   }
 
   return (
-    <Padded bottom size="md">
-      <PageTitle title={upperFirst(authType)} />
-      <NavTopRightWrapper>
-        <LocaleToggle isLogged className="localeDropdownMenuNotLogged" />
-      </NavTopRightWrapper>
-      <BaselineAlignment top size="78px">
-        <Component
-          {...rest}
-          fieldsToDisable={fieldsToDisable}
-          formErrors={formErrors}
-          inputsPrefix={inputsPrefix}
-          modifiedData={modifiedData}
-          onChange={handleChange}
-          onSubmit={handleSubmit}
-          requestError={requestError}
-        />
-      </BaselineAlignment>
-    </Padded>
+    <Component
+      {...rest}
+      fieldsToDisable={fieldsToDisable}
+      formErrors={formErrors}
+      inputsPrefix={inputsPrefix}
+      modifiedData={modifiedData}
+      onChange={handleChange}
+      onSubmit={handleSubmit}
+      requestError={requestError}
+      schema={schema}
+    />
   );
 };
 

@@ -9,7 +9,9 @@ let strapi;
 let rq;
 
 const ct = {
-  name: 'withtime',
+  displayName: 'withtime',
+  singularName: 'withtime',
+  pluralName: 'withtimes',
   attributes: {
     field: {
       type: 'time',
@@ -56,7 +58,7 @@ describe('Test type time', () => {
     }
   );
 
-  test.each(['24:11:23', '23:72:11', '12:45:83', 1234, {}, 'test', new Date()])(
+  test.each(['00.00', '24:11:23', '23:72:11', '12:45:83', 1234, {}, 'test', new Date()])(
     'Throws on invalid time (%s)',
     async input => {
       const res = await rq.post('/content-manager/collection-types/api::withtime.withtime', {

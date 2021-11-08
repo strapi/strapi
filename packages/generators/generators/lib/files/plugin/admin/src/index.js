@@ -2,16 +2,15 @@ import { prefixPluginTranslations } from '@strapi/helper-plugin';
 import pluginPkg from '../../package.json';
 import pluginId from './pluginId';
 import Initializer from './components/Initializer';
+import PluginIcon from './components/PluginIcon';
 
-const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
-const icon = pluginPkg.strapi.icon;
 const name = pluginPkg.strapi.name;
 
 export default {
   register(app) {
     app.addMenuLink({
       to: `/plugins/${pluginId}`,
-      icon,
+      icon: PluginIcon,
       intlLabel: {
         id: `${pluginId}.plugin.name`,
         defaultMessage: name,
@@ -30,12 +29,9 @@ export default {
       ],
     });
     app.registerPlugin({
-      description: pluginDescription,
-      icon,
       id: pluginId,
       initializer: Initializer,
       isReady: false,
-      isRequired: pluginPkg.strapi.required || false,
       name,
     });
   },

@@ -1,42 +1,69 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from 'react-intl';
-import { useContentManagerEditViewDataManager } from '@strapi/helper-plugin';
+import styled from 'styled-components';
+import { useIntl } from 'react-intl';
+import PlusCircle from '@strapi/icons/PlusCircle';
+import { Box } from '@strapi/design-system/Box';
+import { Stack } from '@strapi/design-system/Stack';
+import { Flex } from '@strapi/design-system/Flex';
+import { Text } from '@strapi/design-system/Text';
+import { pxToRem } from '@strapi/helper-plugin';
 import { getTrad } from '../../utils';
-import NonRepeatableWrapper from '../NonRepeatableWrapper';
-import PlusButton from '../PlusButton';
-import P from './P';
 
-const ComponentInitializer = ({ componentUid, isReadOnly, name }) => {
-  const { addNonRepeatableComponentToField } = useContentManagerEditViewDataManager();
+const IconWrapper = styled.span`
+  > svg {
+    width: ${pxToRem(24)};
+    height: ${pxToRem(24)};
+    > circle {
+      fill: ${({ theme }) => theme.colors.primary200};
+    }
+    > path {
+      fill: ${({ theme }) => theme.colors.primary600};
+    }
+  }
+`;
+
+const ComponentInitializer = ({ isReadOnly, onClick }) => {
+  const { formatMessage } = useIntl();
 
   return (
-    <NonRepeatableWrapper
-      isEmpty
-      isReadOnly={isReadOnly}
-      onClick={() => {
-        if (!isReadOnly) {
-          addNonRepeatableComponentToField(name, componentUid);
-        }
-      }}
+    <Box
+      as="button"
+      background="neutral100"
+      borderColor="neutral200"
+      disabled={isReadOnly}
+      hasRadius
+      onClick={onClick}
+      paddingTop={9}
+      paddingBottom={9}
+      type="button"
     >
-      <PlusButton type="button" />
-      <FormattedMessage id={getTrad('components.empty-repeatable')}>
-        {msg => <P style={{ paddingTop: 78 }}>{msg}</P>}
-      </FormattedMessage>
-    </NonRepeatableWrapper>
+      <Stack size={2}>
+        <Flex justifyContent="center" style={{ cursor: isReadOnly ? 'not-allowed' : 'inherit' }}>
+          <IconWrapper>
+            <PlusCircle />
+          </IconWrapper>
+        </Flex>
+        <Flex justifyContent="center">
+          <Text textColor="primary600" small bold>
+            {formatMessage({
+              id: getTrad('components.empty-repeatable'),
+              defaultMessage: 'No entry yet. Click on the button below to add one.',
+            })}
+          </Text>
+        </Flex>
+      </Stack>
+    </Box>
   );
 };
 
 ComponentInitializer.defaultProps = {
   isReadOnly: false,
-  name: '',
 };
 
 ComponentInitializer.propTypes = {
-  componentUid: PropTypes.string.isRequired,
   isReadOnly: PropTypes.bool,
-  name: PropTypes.string,
+  onClick: PropTypes.func.isRequired,
 };
 
 export default ComponentInitializer;

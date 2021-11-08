@@ -36,8 +36,6 @@
   "list.assets.loading-asset": "Chargement du contenu pour le media {path}",
   "list.assets.not-supported-content": "Preview non disponible",
   "list.assets.preview-asset": "Preview de la vidéo {path}",
-  "list.assets.selected.plural": "{number} médias sélectionnés",
-  "list.assets.selected.singular": "{number} média sélectionné",
   "list.assets.type-not-allowed": "Ce type de fichier n'est pas autorisé.",
   "modal.file-details.date": "Date",
   "modal.file-details.dimensions": "Dimensions",

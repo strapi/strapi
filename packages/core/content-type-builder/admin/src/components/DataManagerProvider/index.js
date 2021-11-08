@@ -1,11 +1,10 @@
-import React, { memo, useEffect, useMemo, useState, useRef } from 'react';
+import React, { memo, useEffect, useMemo, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { get, groupBy, set, size } from 'lodash';
 import {
   request,
   LoadingIndicatorPage,
   useTracking,
-  PopUpWarning,
   useNotification,
   useStrapiApp,
   useAutoReloadOverlayBlocker,
@@ -13,10 +12,11 @@ import {
   useRBACProvider,
 } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
-import { useHistory, useLocation, useRouteMatch, Redirect } from 'react-router-dom';
+import { useLocation, useRouteMatch, Redirect } from 'react-router-dom';
 import { connect, useDispatch } from 'react-redux';
 import { compose } from 'redux';
 import DataManagerContext from '../../contexts/DataManagerContext';
+import useFormModalNavigation from '../../hooks/useFormModalNavigation';
 import getTrad from '../../utils/getTrad';
 import makeUnique from '../../utils/makeUnique';
 import pluginId from '../../pluginId';
@@ -27,17 +27,11 @@ import retrieveSpecificInfoFromComponents from './utils/retrieveSpecificInfoFrom
 import retrieveComponentsFromSchema from './utils/retrieveComponentsFromSchema';
 import retrieveNestedComponents from './utils/retrieveNestedComponents';
 import { retrieveComponentsThatHaveComponents } from './utils/retrieveComponentsThatHaveComponents';
-import {
-  getComponentsToPost,
-  formatMainDataType,
-  getCreatedAndModifiedComponents,
-  sortContentType,
-} from './utils/cleanData';
+import { getComponentsToPost, formatMainDataType, sortContentType } from './utils/cleanData';
 
 import {
   ADD_ATTRIBUTE,
   ADD_CREATED_COMPONENT_TO_DYNAMIC_ZONE,
-  CANCEL_CHANGES,
   CHANGE_DYNAMIC_ZONE_COMPONENTS,
   CREATE_SCHEMA,
   CREATE_COMPONENT_SCHEMA,
@@ -72,14 +66,12 @@ const DataManagerProvider = ({
   const { getPlugin } = useStrapiApp();
 
   const { apis } = getPlugin(pluginId);
-  const [infoModals, toggleInfoModal] = useState({ cancel: false });
   const { autoReload } = useAppInfos();
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const { refetchPermissions } = useRBACProvider();
-
   const { pathname } = useLocation();
-  const { push } = useHistory();
+  const { onCloseModal } = useFormModalNavigation();
   const contentTypeMatch = useRouteMatch(`/plugins/${pluginId}/content-types/:uid`);
   const componentMatch = useRouteMatch(
     `/plugins/${pluginId}/component-categories/:categoryUid/:componentUid`
@@ -156,9 +148,6 @@ const DataManagerProvider = ({
     }
   }, [autoReload, toggleNotification]);
 
-  const didModifiedComponents =
-    getCreatedAndModifiedComponents(modifiedData.components || {}, components).length > 0;
-
   const addAttribute = (
     attributeToSet,
     forTarget,
@@ -185,11 +174,6 @@ const DataManagerProvider = ({
       dynamicZoneTarget,
       componentsToAdd,
     });
-  };
-
-  const cancelChanges = () => {
-    toggleModalCancel();
-    dispatch({ type: CANCEL_CHANGES });
   };
 
   const createSchema = (
@@ -245,7 +229,7 @@ const DataManagerProvider = ({
         })
       );
       // Close the modal
-      push({ search: '' });
+      onCloseModal();
 
       if (userConfirm) {
         lockAppWithAutoreload();
@@ -284,7 +268,7 @@ const DataManagerProvider = ({
       );
 
       // Close the modal
-      push({ search: '' });
+      onCloseModal();
 
       if (userConfirm) {
         if (isTemporary) {
@@ -326,7 +310,7 @@ const DataManagerProvider = ({
       const requestURL = `/${pluginId}/component-categories/${categoryUid}`;
 
       // Close the modal
-      push({ search: '' });
+      onCloseModal();
 
       // Lock the app
       lockAppWithAutoreload();
@@ -416,6 +400,10 @@ const DataManagerProvider = ({
   const shouldRedirect = useMemo(() => {
     const dataSet = isInContentTypeView ? contentTypes : components;
 
+    if (currentUid === 'create-content-type') {
+      return false;
+    }
+
     return !Object.keys(dataSet).includes(currentUid) && !isLoading;
   }, [components, contentTypes, currentUid, isInContentTypeView, isLoading]);
 
@@ -424,7 +412,7 @@ const DataManagerProvider = ({
       .filter(uid => get(contentTypes, [uid, 'schema', 'visible'], true))
       .sort();
 
-    return get(allowedEndpoints, '0', '');
+    return get(allowedEndpoints, '0', 'create-content-type');
   }, [contentTypes]);
 
   if (shouldRedirect) {
@@ -508,11 +496,6 @@ const DataManagerProvider = ({
     }
   };
 
-  // Open the modal warning cancel changes
-  const toggleModalCancel = () => {
-    toggleInfoModal(prev => ({ ...prev, cancel: !prev.cancel }));
-  };
-
   const updatePermissions = async () => {
     await refetchPermissions();
   };
@@ -557,37 +540,19 @@ const DataManagerProvider = ({
         setModifiedData,
         sortedContentTypesList: sortContentType(contentTypes),
         submitData,
-        toggleModalCancel,
         updateSchema,
       }}
     >
-      {isLoadingForDataToBeSet ? (
-        <LoadingIndicatorPage />
-      ) : (
-        <>
-          {children}
-          {isInDevelopmentMode && (
-            <>
-              <FormModal />
-              <PopUpWarning
-                isOpen={infoModals.cancel}
-                toggleModal={toggleModalCancel}
-                content={{
-                  message: getTrad(
-                    `popUpWarning.bodyMessage.cancel-modifications${
-                      didModifiedComponents ? '.with-components' : ''
-                    }`
-                  ),
-                }}
-                popUpWarningType="danger"
-                onConfirm={() => {
-                  cancelChanges();
-                }}
-              />
-            </>
-          )}
-        </>
-      )}
+      <>
+        {isLoadingForDataToBeSet ? (
+          <LoadingIndicatorPage />
+        ) : (
+          <>
+            {children}
+            {isInDevelopmentMode && <FormModal />}
+          </>
+        )}
+      </>
     </DataManagerContext.Provider>
   );
 };
@@ -609,6 +574,9 @@ DataManagerProvider.propTypes = {
 };
 
 const mapStateToProps = makeSelectDataManagerProvider();
-const withConnect = connect(mapStateToProps, null);
+const withConnect = connect(
+  mapStateToProps,
+  null
+);
 
 export default compose(withConnect)(memo(DataManagerProvider));

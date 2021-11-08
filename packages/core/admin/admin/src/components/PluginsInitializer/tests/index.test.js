@@ -11,7 +11,15 @@ describe('ADMIN | COMPONENTS | PluginsInitializer', () => {
 
     expect(
       render(
-        <StrapiAppProvider plugins={{}} getPlugin={getPlugin}>
+        <StrapiAppProvider
+          plugins={{}}
+          getPlugin={getPlugin}
+          runHookParallel={jest.fn()}
+          runHookWaterfall={jest.fn()}
+          runHookSeries={jest.fn()}
+          menu={[]}
+          settings={{}}
+        >
           <PluginsInitializer />
         </StrapiAppProvider>
       )

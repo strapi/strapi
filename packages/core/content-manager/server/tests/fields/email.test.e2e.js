@@ -9,7 +9,9 @@ let strapi;
 let rq;
 
 const ct = {
-  name: 'withemail',
+  displayName: 'withemail',
+  singularName: 'withemail',
+  pluralName: 'withemails',
   attributes: {
     field: {
       type: 'email',

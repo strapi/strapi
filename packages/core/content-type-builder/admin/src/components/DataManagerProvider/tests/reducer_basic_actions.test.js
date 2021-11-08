@@ -91,106 +91,6 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
     });
   });
 
-  describe('CANCEL_CHANGES', () => {
-    it('Should set the modifiedData and the components object with the initial ones', () => {
-      const state = {
-        components: {
-          test: {
-            something: true,
-          },
-          other: {
-            something: false,
-          },
-        },
-        initialComponents: {
-          test: {
-            something: false,
-          },
-          other: {
-            something: false,
-          },
-        },
-        modifiedData: {
-          components: {
-            test: {
-              something: true,
-            },
-            other: {
-              something: false,
-            },
-          },
-          contentType: {
-            uid: 'something',
-            name: 'test',
-          },
-        },
-        initialData: {
-          components: {
-            test: {
-              something: false,
-            },
-            other: {
-              something: false,
-            },
-          },
-          contentType: {
-            uid: 'something',
-            name: 'something',
-          },
-        },
-      };
-
-      const expected = {
-        components: {
-          test: {
-            something: false,
-          },
-          other: {
-            something: false,
-          },
-        },
-        initialComponents: {
-          test: {
-            something: false,
-          },
-          other: {
-            something: false,
-          },
-        },
-        modifiedData: {
-          components: {
-            test: {
-              something: false,
-            },
-            other: {
-              something: false,
-            },
-          },
-          contentType: {
-            uid: 'something',
-            name: 'something',
-          },
-        },
-        initialData: {
-          components: {
-            test: {
-              something: false,
-            },
-            other: {
-              something: false,
-            },
-          },
-          contentType: {
-            uid: 'something',
-            name: 'something',
-          },
-        },
-      };
-
-      expect(reducer(state, { type: actions.CANCEL_CHANGES })).toEqual(expected);
-    });
-  });
-
   describe('CHANGE_DYNAMIC_ZONE_COMPONENTS', () => {
     it('Should add the component to the dz field and to the modifiedData.components if the added component is not already in the modifiedData.components', () => {
       const componentUID = 'default.openingtimes';
@@ -815,8 +715,7 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
   describe('UPDATE_SCHEMA', () => {
     it('Should update the modified data correctly if the schemaType is a content type', () => {
       const data = {
-        name: 'test1',
-        collectionName: 'newTest',
+        displayName: 'test1',
       };
 
       const state = {
@@ -826,8 +725,7 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
           contentType: {
             uid: 'test',
             schema: {
-              name: 'test',
-              collectionName: 'test',
+              displayName: 'test',
               attributes: [
                 {
                   name: 'something',
@@ -851,8 +749,7 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
           contentType: {
             uid: 'test',
             schema: {
-              name: 'test1',
-              collectionName: 'newTest',
+              displayName: 'test1',
               attributes: [
                 {
                   name: 'something',
@@ -869,8 +766,7 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
 
     it('Should update the modified data correctly if the schemaType is a component', () => {
       const data = {
-        name: 'newTest',
-        collectionName: 'newTest',
+        displayName: 'newTest',
         category: 'test',
         icon: 'test',
       };
@@ -882,9 +778,8 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
             uid: 'test',
             category: 'default',
             schema: {
-              name: 'test',
+              displayName: 'test',
               icon: 'book',
-              collectionName: 'components_tests',
               attributes: [
                 {
                   name: 'something',
@@ -900,9 +795,8 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
             uid: 'test',
             category: 'default',
             schema: {
-              name: 'test',
+              displayName: 'test',
               icon: 'book',
-              collectionName: 'components_tests',
               attributes: [
                 {
                   name: 'something',
@@ -927,9 +821,8 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
             uid: 'test',
             category: 'test',
             schema: {
-              name: 'newTest',
+              displayName: 'newTest',
               icon: 'test',
-              collectionName: 'newTest',
               attributes: [
                 {
                   name: 'something',
@@ -945,9 +838,8 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
             uid: 'test',
             category: 'test',
             schema: {
-              name: 'newTest',
+              displayName: 'newTest',
               icon: 'test',
-              collectionName: 'newTest',
               attributes: [
                 {
                   name: 'something',

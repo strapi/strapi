@@ -41,7 +41,6 @@ const useAuthProviders = ({ ssoEnabled }) => {
       toggleNotification({
         type: 'warning',
         message: { id: 'notification.error' },
-        centered: true,
       });
     }
   };

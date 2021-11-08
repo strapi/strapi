@@ -1,10 +1,9 @@
-const init = (state, permissions, routes, policies) => {
+const init = (state, permissions, routes) => {
   return {
     ...state,
     initialData: permissions,
     modifiedData: permissions,
     routes,
-    policies,
   };
 };
 

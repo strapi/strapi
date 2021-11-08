@@ -1,4 +1,4 @@
-import { useContentManagerEditViewDataManager } from '@strapi/helper-plugin';
+import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 
 function useSelect() {
   const {
@@ -12,7 +12,7 @@ function useSelect() {
     modifiedData,
     onPublish,
     onUnpublish,
-  } = useContentManagerEditViewDataManager();
+  } = useCMEditViewDataManager();
 
   return {
     componentLayouts: allLayoutData.components,

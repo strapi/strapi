@@ -1,11 +1,8 @@
 {
-  "components.Row.generatedDate": "上一个生成的版本",
   "components.Row.open": "打开",
   "components.Row.regenerate": "重新生成",
   "containers.HomePage.Block.title": "版本号",
-  "containers.HomePage.Button.open": "打开文档",
   "containers.HomePage.Button.update": "更新",
-  "containers.HomePage.PluginHeader.description": "配置文档插件",
   "containers.HomePage.PluginHeader.title": "文档 - 设置",
   "containers.HomePage.PopUpWarning.confirm": "我确定",
   "containers.HomePage.PopUpWarning.message": "您确定要删除此版本吗？",
@@ -22,10 +19,10 @@
   "error.noVersion": "需要一个版本",
   "error.regenerateDoc": "重新生成文件时发生错误",
   "error.regenerateDoc.versionMissing": "您尝试重新生成的版本不存在",
-  "notification.update.success": "设置更新成功",
   "notification.delete.success": "文档删除成功",
   "notification.generate.success": "文档生成成功",
-  "plugin.name": "文档",
+  "notification.update.success": "设置更新成功",
   "plugin.description.long": "创建OpenAPI文档并使用SwaggerUI可视化你的API",
-  "plugin.description.short": "创建OpenAPI文档并使用SwaggerUI可视化你的API"
+  "plugin.description.short": "创建OpenAPI文档并使用SwaggerUI可视化你的API",
+  "plugin.name": "文档"
 }

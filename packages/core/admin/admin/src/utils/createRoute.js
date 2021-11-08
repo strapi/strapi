@@ -13,6 +13,7 @@ const LazyCompo = ({ loadComponent }) => {
 
         setCompo(() => loadedCompo.default);
       } catch (err) {
+        // TODO return the error component
         console.log(err);
       }
     };

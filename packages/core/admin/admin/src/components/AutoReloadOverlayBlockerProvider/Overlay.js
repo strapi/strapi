@@ -1,7 +1,9 @@
 import styled from 'styled-components';
+import { Box } from '@strapi/design-system/Box';
+import { Stack } from '@strapi/design-system/Stack';
+import { pxToRem } from '@strapi/helper-plugin';
 
-// TODO refactor with DS
-const Overlay = styled.div`
+const Overlay = styled(Box)`
   position: fixed;
   top: 0;
   right: 0;
@@ -11,33 +13,31 @@ const Overlay = styled.div`
   &:before {
     content: '';
     position: fixed;
-    top: 6rem;
+    top: 0;
     right: 0;
     bottom: 0;
     left: 0;
-    background: linear-gradient(rgba(0, 0, 0, 15) 0%, rgba(0, 0, 0, 0) 100%);
-    opacity: 0.5;
-  }
-
-  &:after {
-    content: '';
-    position: fixed;
-    top: 6rem;
-    right: 0;
-    bottom: 0;
-    left: 24rem;
-    background: linear-gradient(#fbfbfb 20%, rgba(0, 0, 100, 0) 100%);
-    box-shadow: inset 0px 2px 4px rgba(0, 0, 0, 0.1);
-    box-shadow: inset 0 1px 2px 0 rgba(40, 42, 49, 0.16);
-  }
-
-  > div {
-    position: fixed;
-    top: 11.5rem;
-    left: 50%;
-    margin-left: -17.5rem;
-    z-index: 1100;
+    background: ${({ theme }) => theme.colors.neutral0};
+    opacity: 0.9;
   }
 `;
 
-export default Overlay;
+const Content = styled(Stack)`
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding-top: ${pxToRem(160)};
+`;
+
+const IconBox = styled(Box)`
+  border-radius: 50%;
+  svg {
+    > path {
+      fill: ${({ theme }) => theme.colors.primary600} !important;
+    }
+  }
+`;
+
+export { Content, IconBox, Overlay };

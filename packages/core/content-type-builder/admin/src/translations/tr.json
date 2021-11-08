@@ -36,7 +36,6 @@
   "menu.section.models.name.plural": "İçerik Türleri",
   "menu.section.models.name.singular": "İçerik Türü",
   "modelPage.attribute.relationWith": "İlişkili",
-  "modelPage.contentHeader.emptyDescription.description": "Bu İçerik Türü için açıklama bulunmamaktadır.",
   "plugin.description.long": "Servisinizin veri yapısını modelleyin. Bir dakika içinde yeni alanlar ve ilişkiler yaratın. Dosyalar, projenizde otomatik olarak oluşturulur ve güncellenir.",
   "plugin.description.short": "Servisinizin veri yapısını modelleyin.",
   "popUpForm.navContainer.advanced": "Gelişmiş Ayarlar",

@@ -88,7 +88,7 @@ module.exports = {
           'admin::isAuthenticatedAdmin',
           {
             name: 'plugin::content-manager.hasPermissions',
-            options: {
+            config: {
               actions: [
                 'plugin::content-manager.explorer.create',
                 'plugin::content-manager.explorer.update',
@@ -109,7 +109,7 @@ module.exports = {
           'admin::isAuthenticatedAdmin',
           {
             name: 'plugin::content-manager.hasPermissions',
-            options: { actions: ['plugin::content-manager.explorer.read'] },
+            config: { actions: ['plugin::content-manager.explorer.read'] },
           },
         ],
       },
@@ -124,7 +124,7 @@ module.exports = {
           'admin::isAuthenticatedAdmin',
           {
             name: 'plugin::content-manager.hasPermissions',
-            options: {
+            config: {
               actions: [
                 'plugin::content-manager.explorer.create',
                 'plugin::content-manager.explorer.update',
@@ -145,7 +145,7 @@ module.exports = {
           'admin::isAuthenticatedAdmin',
           {
             name: 'plugin::content-manager.hasPermissions',
-            options: { actions: ['plugin::content-manager.explorer.delete'] },
+            config: { actions: ['plugin::content-manager.explorer.delete'] },
           },
         ],
       },
@@ -161,7 +161,7 @@ module.exports = {
           'admin::isAuthenticatedAdmin',
           {
             name: 'plugin::content-manager.hasPermissions',
-            options: { actions: ['plugin::content-manager.explorer.publish'] },
+            config: { actions: ['plugin::content-manager.explorer.publish'] },
           },
         ],
       },
@@ -177,7 +177,7 @@ module.exports = {
           'admin::isAuthenticatedAdmin',
           {
             name: 'plugin::content-manager.hasPermissions',
-            options: { actions: ['plugin::content-manager.explorer.publish'] },
+            config: { actions: ['plugin::content-manager.explorer.publish'] },
           },
         ],
       },
@@ -192,7 +192,7 @@ module.exports = {
           'admin::isAuthenticatedAdmin',
           {
             name: 'plugin::content-manager.hasPermissions',
-            options: { actions: ['plugin::content-manager.explorer.read'] },
+            config: { actions: ['plugin::content-manager.explorer.read'] },
           },
         ],
       },
@@ -207,7 +207,7 @@ module.exports = {
           'admin::isAuthenticatedAdmin',
           {
             name: 'plugin::content-manager.hasPermissions',
-            options: { actions: ['plugin::content-manager.explorer.read'] },
+            config: { actions: ['plugin::content-manager.explorer.read'] },
           },
         ],
       },
@@ -222,7 +222,7 @@ module.exports = {
           'admin::isAuthenticatedAdmin',
           {
             name: 'plugin::content-manager.hasPermissions',
-            options: { actions: ['plugin::content-manager.explorer.create'] },
+            config: { actions: ['plugin::content-manager.explorer.create'] },
           },
         ],
       },
@@ -237,7 +237,7 @@ module.exports = {
           'admin::isAuthenticatedAdmin',
           {
             name: 'plugin::content-manager.hasPermissions',
-            options: { actions: ['plugin::content-manager.explorer.read'] },
+            config: { actions: ['plugin::content-manager.explorer.read'] },
           },
         ],
       },
@@ -252,7 +252,7 @@ module.exports = {
           'admin::isAuthenticatedAdmin',
           {
             name: 'plugin::content-manager.hasPermissions',
-            options: { actions: ['plugin::content-manager.explorer.update'] },
+            config: { actions: ['plugin::content-manager.explorer.update'] },
           },
         ],
       },
@@ -267,7 +267,7 @@ module.exports = {
           'admin::isAuthenticatedAdmin',
           {
             name: 'plugin::content-manager.hasPermissions',
-            options: { actions: ['plugin::content-manager.explorer.delete'] },
+            config: { actions: ['plugin::content-manager.explorer.delete'] },
           },
         ],
       },
@@ -283,7 +283,7 @@ module.exports = {
           'admin::isAuthenticatedAdmin',
           {
             name: 'plugin::content-manager.hasPermissions',
-            options: { actions: ['plugin::content-manager.explorer.publish'] },
+            config: { actions: ['plugin::content-manager.explorer.publish'] },
           },
         ],
       },
@@ -299,7 +299,7 @@ module.exports = {
           'admin::isAuthenticatedAdmin',
           {
             name: 'plugin::content-manager.hasPermissions',
-            options: { actions: ['plugin::content-manager.explorer.publish'] },
+            config: { actions: ['plugin::content-manager.explorer.publish'] },
           },
         ],
       },
@@ -314,7 +314,7 @@ module.exports = {
           'admin::isAuthenticatedAdmin',
           {
             name: 'plugin::content-manager.hasPermissions',
-            options: { actions: ['plugin::content-manager.explorer.delete'] },
+            config: { actions: ['plugin::content-manager.explorer.delete'] },
           },
         ],
       },

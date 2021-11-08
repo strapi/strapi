@@ -4,13 +4,12 @@
  * Export shared utilities
  */
 const { buildQuery, hasDeepFilters } = require('./build-query');
-const { QUERY_OPERATORS } = require('./convert-query-params');
 const parseMultipartData = require('./parse-multipart');
-const sanitizeEntity = require('./sanitize-entity');
 const parseType = require('./parse-type');
 const policy = require('./policy');
 const templateConfiguration = require('./template-configuration');
-const { yup, formatYupErrors } = require('./validators');
+const { yup, handleYupError, validateYupSchema, validateYupSchemaSync } = require('./validators');
+const errors = require('./errors');
 const {
   nameToSlug,
   nameToCollectionName,
@@ -32,17 +31,19 @@ const setCreatorFields = require('./set-creator-fields');
 const hooks = require('./hooks');
 const providerFactory = require('./provider-factory');
 const pagination = require('./pagination');
+const sanitize = require('./sanitize');
+const traverseEntity = require('./traverse-entity');
 
 module.exports = {
   yup,
-  formatYupErrors,
+  handleYupError,
   policy,
   templateConfiguration,
-  QUERY_OPERATORS,
   buildQuery,
   hasDeepFilters,
   parseMultipartData,
-  sanitizeEntity,
+  sanitize,
+  traverseEntity,
   parseType,
   nameToSlug,
   nameToCollectionName,
@@ -65,4 +66,7 @@ module.exports = {
   hooks,
   providerFactory,
   pagination,
+  errors,
+  validateYupSchema,
+  validateYupSchemaSync,
 };

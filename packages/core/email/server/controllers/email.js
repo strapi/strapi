@@ -1,6 +1,7 @@
 'use strict';
 
 const { isNil, pick } = require('lodash/fp');
+const { ApplicationError } = require('@strapi/utils').errors;
 
 /**
  * Email.js controller
@@ -18,7 +19,7 @@ module.exports = {
         .send(options);
     } catch (e) {
       if (e.statusCode === 400) {
-        return ctx.badRequest(e.message);
+        throw new ApplicationError(e.message);
       } else {
         throw new Error(`Couldn't send email: ${e.message}.`);
       }
@@ -32,9 +33,7 @@ module.exports = {
     const { to } = ctx.request.body;
 
     if (isNil(to)) {
-      throw strapi.errors.badRequest(null, {
-        errors: [{ id: 'Email.to.empty', message: 'No recipient(s) are given' }],
-      });
+      throw new ApplicationError('No recipient(s) are given');
     }
 
     const email = {
@@ -52,7 +51,7 @@ module.exports = {
         .send(email);
     } catch (e) {
       if (e.statusCode === 400) {
-        return ctx.badRequest(e.message);
+        throw new ApplicationError(e.message);
       } else {
         throw new Error(`Couldn't send test email: ${e.message}.`);
       }

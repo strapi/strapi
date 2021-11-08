@@ -8,7 +8,7 @@ let strapi;
 let rq;
 
 const component = {
-  name: 'somecomponent',
+  displayName: 'somecomponent',
   attributes: {
     name: {
       type: 'string',
@@ -17,7 +17,9 @@ const component = {
 };
 
 const ct = {
-  name: 'withcomponent',
+  singularName: 'withcomponent',
+  pluralName: 'withcomponents',
+  displayName: 'With Component',
   attributes: {
     field: {
       type: 'component',

@@ -58,10 +58,13 @@ module.exports = {
   setupFiles: [
     '<rootDir>/test/config/front/test-bundler.js',
     '<rootDir>/packages/admin-test-utils/lib/mocks/LocalStorageMock.js',
+    '<rootDir>/packages/admin-test-utils/lib/mocks/IntersectionObserver.js',
+    '<rootDir>/packages/admin-test-utils/lib/mocks/ResizeObserver.js',
   ],
   testPathIgnorePatterns: [
     '/node_modules/',
     '<rootDir>/examples/getstarted/',
+    '<rootDir>/examples/kitchensink/',
     '<rootDir>/packages/strapi-helper-plugin/dist/',
     '/OLD/',
     '__tests__',
@@ -78,4 +81,5 @@ module.exports = {
   },
   transformIgnorePatterns: ['node_modules/(?!(react-dnd|dnd-core|react-dnd-html5-backend)/)'],
   testURL: 'http://localhost:4000/admin',
+  globalSetup: '<rootDir>/test/config/front/global-setup.js',
 };

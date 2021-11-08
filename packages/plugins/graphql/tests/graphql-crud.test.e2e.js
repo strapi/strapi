@@ -24,7 +24,9 @@ const postModel = {
       type: 'string',
     },
   },
-  name: 'post',
+  singularName: 'post',
+  pluralName: 'posts',
+  displayName: 'Post',
   description: '',
   collectionName: '',
 };

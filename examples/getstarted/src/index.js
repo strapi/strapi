@@ -17,4 +17,12 @@ module.exports = {
    * run jobs, or perform some special logic.
    */
   bootstrap({ strapi }) {},
+
+  /**
+   * An asynchronous destroy function that runs before
+   * your application gets shut down.
+   *
+   * This gives you an opportunity to gracefully stop services you run.
+   */
+  destroy({ strapi }) {},
 };

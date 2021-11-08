@@ -9,7 +9,7 @@ import {
   isNaN,
   toNumber,
 } from 'lodash';
-import moment from 'moment';
+
 import * as yup from 'yup';
 import { translatedErrors as errorsTrads } from '@strapi/helper-plugin';
 
@@ -169,14 +169,14 @@ const createYupSchema = (
             dynamicZoneSchema = dynamicZoneSchema
               .test('min', errorsTrads.min, value => {
                 if (options.isCreatingEntry) {
-                  return value && value.length > 0;
+                  return value && value.length >= min;
                 }
 
                 if (value === undefined) {
                   return true;
                 }
 
-                return value !== null && value.length > 0;
+                return value !== null && value.length >= min;
               })
               .test('required', errorsTrads.required, value => {
                 if (options.isCreatingEntry) {
@@ -291,12 +291,16 @@ const createYupSchemaAttribute = (type, validations, options) => {
                     return !!value;
                   }
 
-                  if (['date', 'datetime'].includes(type)) {
-                    return moment(value)._isValid === true;
-                  }
-
                   if (type === 'boolean') {
                     return value !== null;
+                  }
+
+                  if (type === 'date' || type === 'datetime') {
+                    if (typeof value === 'string') {
+                      return !isEmpty(value);
+                    }
+
+                    return !isEmpty(value.toString());
                   }
 
                   return !isEmpty(value);

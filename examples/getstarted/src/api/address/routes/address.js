@@ -7,7 +7,8 @@ module.exports = {
       path: '/addresses',
       handler: 'address.find',
       config: {
-        policies: ['address'],
+        middlewares: ['api::address.address-middleware'],
+        policies: ['global::test-policy', 'api::address.address'],
       },
     },
     {

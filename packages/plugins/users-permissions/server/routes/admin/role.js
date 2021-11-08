@@ -9,7 +9,7 @@ module.exports = [
       policies: [
         {
           name: 'admin::hasPermissions',
-          options: {
+          config: {
             actions: ['plugin::users-permissions.roles.read'],
           },
         },
@@ -24,7 +24,7 @@ module.exports = [
       policies: [
         {
           name: 'admin::hasPermissions',
-          options: {
+          config: {
             actions: ['plugin::users-permissions.roles.read'],
           },
         },
@@ -39,7 +39,7 @@ module.exports = [
       policies: [
         {
           name: 'admin::hasPermissions',
-          options: {
+          config: {
             actions: ['plugin::users-permissions.roles.create'],
           },
         },
@@ -54,7 +54,7 @@ module.exports = [
       policies: [
         {
           name: 'admin::hasPermissions',
-          options: {
+          config: {
             actions: ['plugin::users-permissions.roles.update'],
           },
         },
@@ -69,7 +69,7 @@ module.exports = [
       policies: [
         {
           name: 'admin::hasPermissions',
-          options: {
+          config: {
             actions: ['plugin::users-permissions.roles.delete'],
           },
         },

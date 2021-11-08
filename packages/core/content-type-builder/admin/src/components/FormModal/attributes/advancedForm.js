@@ -1,240 +1,382 @@
-import React from 'react';
-import { FormattedMessage } from 'react-intl';
-import isEmpty from 'lodash/isEmpty';
+// import React from 'react';
+// import { FormattedMessage } from 'react-intl';
+// import isEmpty from 'lodash/isEmpty';
 import getTrad from '../../../utils/getTrad';
 import { componentForm } from '../component';
 import options from './attributeOptions';
-import uiHelpers from './uiHelpers';
 
 const advancedForm = {
   boolean: () => {
     return {
-      items: [
-        [
-          {
-            autoFocus: true,
-            type: 'enum',
-            label: {
-              id: getTrad('form.attribute.settings.default'),
+      sections: [
+        {
+          sectionTitle: null,
+          items: [
+            {
+              autoFocus: true,
+              type: 'select-default-boolean',
+              intlLabel: {
+                id: getTrad('form.attribute.settings.default'),
+                defaultMessage: 'Default value',
+              },
+              name: 'default',
+              options: [
+                {
+                  value: 'true',
+                  key: 'true',
+                  metadatas: { intlLabel: { id: 'true', defaultMessage: 'true' } },
+                },
+                {
+                  value: '',
+                  key: 'null',
+                  metadatas: { intlLabel: { id: 'null', defaultMessage: 'null' } },
+                },
+                {
+                  value: 'false',
+                  key: 'false',
+                  metadatas: { intlLabel: { id: 'false', defaultMessage: 'false' } },
+                },
+              ],
+              // validations: {},
             },
-            name: 'default',
-            options: [
-              { value: 'true', label: 'TRUE' },
-              { value: '', label: 'NULL' },
-              { value: 'false', label: 'FALSE' },
-            ],
-            validations: {},
+          ],
+        },
+        {
+          sectionTitle: {
+            id: getTrad('form.attribute.item.settings.name'),
+            defaultMessage: 'Settings',
           },
-        ],
-        [uiHelpers.divider],
-        [options.required, options.unique],
-        [options.private],
+          items: [options.required, options.unique, options.private],
+        },
       ],
     };
   },
   component: ({ repeatable }, step) => {
     if (step === '1') {
-      return { items: componentForm.advanced('componentToCreate') };
+      return { sections: componentForm.advanced('componentToCreate') };
     }
 
     if (repeatable) {
       return {
-        items: [
-          [options.required, options.private],
-          [uiHelpers.divider],
-          [options.max, options.min],
+        sections: [
+          {
+            sectionTitle: {
+              id: getTrad('form.attribute.item.settings.name'),
+              defaultMessage: 'Settings',
+            },
+            items: [options.required, options.private, options.max, options.min],
+          },
         ],
       };
     }
 
     return {
-      items: [[options.required, options.private]],
+      sections: [
+        {
+          sectionTitle: {
+            id: getTrad('form.attribute.item.settings.name'),
+            defaultMessage: 'Settings',
+          },
+          items: [options.required, options.private],
+        },
+      ],
     };
   },
   date: ({ type }) => {
     return {
-      items: [
-        [
-          {
-            ...options.default,
-            type: type || 'date',
-            value: null,
-            withDefaultValue: false,
-            disabled: !type,
-            autoFocus: false,
+      sections: [
+        {
+          sectionTitle: null,
+          items: [
+            {
+              ...options.default,
+              type: type || 'date',
+              value: null,
+              withDefaultValue: false,
+              disabled: !type,
+              autoFocus: false,
+            },
+          ],
+        },
+        {
+          sectionTitle: {
+            id: getTrad('form.attribute.item.settings.name'),
+            defaultMessage: 'Settings',
           },
-        ],
-        [uiHelpers.divider],
-        [options.required, options.unique],
-        [options.private],
+          items: [options.required, options.unique, options.private],
+        },
       ],
     };
   },
   dynamiczone: () => {
     return {
-      items: [[options.required], [uiHelpers.divider], [options.max, options.min]],
+      sections: [
+        {
+          sectionTitle: {
+            id: getTrad('form.attribute.item.settings.name'),
+            defaultMessage: 'Settings',
+          },
+          items: [options.required, options.max, options.min],
+        },
+      ],
     };
   },
   email: () => {
     return {
-      items: [
-        [
-          {
-            ...options.default,
-            type: 'email',
+      sections: [
+        {
+          sectionTitle: null,
+          items: [
+            {
+              ...options.default,
+              type: 'email',
+            },
+          ],
+        },
+
+        {
+          sectionTitle: {
+            id: getTrad('form.attribute.item.settings.name'),
+            defaultMessage: 'Settings',
           },
-        ],
-        [uiHelpers.divider],
-        [options.required, options.unique],
-        [options.maxLength, options.minLength],
-        [options.private],
+          items: [
+            options.required,
+            options.unique,
+            options.maxLength,
+            options.minLength,
+            options.private,
+          ],
+        },
       ],
     };
   },
   enumeration: data => {
     return {
-      items: [
-        [
-          {
-            autoFocus: false,
-            name: 'default',
-            type: 'select',
-            label: {
-              id: getTrad('form.attribute.settings.default'),
+      sections: [
+        {
+          sectionTitle: null,
+          items: [
+            {
+              name: 'default',
+              type: 'select',
+              intlLabel: {
+                id: getTrad('form.attribute.settings.default'),
+                defaultMessage: 'Default value',
+              },
+              validations: {},
+              options: [
+                {
+                  key: '__null_reset_value__',
+                  value: '',
+                  metadatas: {
+                    intlLabel: {
+                      id: 'components.InputSelect.option.placeholder',
+                      defaultMessage: 'Choose here',
+                    },
+                  },
+                },
+                ...(data.enum || [])
+                  .filter((value, index) => data.enum.indexOf(value) === index && value)
+                  .map(value => {
+                    return {
+                      key: value,
+                      value,
+                      metadatas: {
+                        intlLabel: { id: `${value}.no-override`, defaultMessage: value },
+                      },
+                    };
+                  }),
+              ],
             },
-            validations: {},
-            options: [
-              <FormattedMessage
-                key="hidden___value__placeholder"
-                id="components.InputSelect.option.placeholder"
-              >
-                {msg => <option value="">{msg}</option>}
-              </FormattedMessage>,
-            ].concat(
-              data.enum
-                ? data.enum
-                    .filter((val, index) => data.enum.indexOf(val) === index && !isEmpty(val))
-                    .map(val => (
-                      <option key={val} value={val}>
-                        {val}
-                      </option>
-                    ))
-                : []
-            ),
+            {
+              intlLabel: {
+                id: getTrad('form.attribute.item.enumeration.graphql'),
+                defaultMessage: 'Name override for GraphQL',
+              },
+              name: 'enumName',
+              type: 'text',
+              validations: {},
+              description: {
+                id: getTrad('form.attribute.item.enumeration.graphql.description'),
+                defaultMessage: 'Allows you to override the default generated name for GraphQL',
+              },
+            },
+          ],
+        },
+
+        {
+          sectionTitle: {
+            id: getTrad('form.attribute.item.settings.name'),
+            defaultMessage: 'Settings',
           },
-          {
-            label: {
-              id: getTrad('form.attribute.item.enumeration.graphql'),
-            },
-            name: 'enumName',
-            type: 'text',
-            validations: {},
-            description: {
-              id: getTrad('form.attribute.item.enumeration.graphql.description'),
-            },
-          },
-        ],
-        [uiHelpers.divider],
-        [options.required, options.unique],
-        [options.private],
+          items: [options.required, options.unique, options.private],
+        },
       ],
     };
   },
   json: () => {
     return {
-      items: [[uiHelpers.divider], [options.required, options.unique], [options.private]],
+      sections: [
+        {
+          sectionTitle: {
+            id: getTrad('form.attribute.item.settings.name'),
+            defaultMessage: 'Settings',
+          },
+          items: [options.required, options.unique, options.private],
+        },
+      ],
     };
   },
   media: () => {
     return {
-      items: [
-        [uiHelpers.divider],
-        [options.required, options.unique],
-        [
-          {
-            label: {
-              id: getTrad('form.attribute.media.allowed-types'),
+      sections: [
+        {
+          sectionTitle: null,
+          items: [
+            {
+              intlLabel: {
+                id: getTrad('form.attribute.media.allowed-types'),
+                defaultMessage: 'Select allowed types of media',
+              },
+              name: 'allowedTypes',
+              type: 'allowed-types-select',
+              size: 7,
+              value: '',
+              validations: {},
             },
-            name: 'allowedTypes',
-            type: 'allowedTypesSelect',
-            value: '',
-            validations: {},
+          ],
+        },
+        {
+          sectionTitle: {
+            id: getTrad('form.attribute.item.settings.name'),
+            defaultMessage: 'Settings',
           },
-        ],
-        [options.private],
+          items: [options.private, options.required],
+        },
       ],
     };
   },
   number: data => {
-    const inputStep = data.type === 'decimal' || data.type === 'float' ? 'any' : '1';
+    const inputStep = data.type === 'decimal' || data.type === 'float' ? 'any' : 1;
 
     return {
-      items: [
-        [
-          {
-            autoFocus: true,
-            name: 'default',
-            type: data.type === 'biginteger' ? 'text' : 'number',
-            step: inputStep,
-            label: {
-              id: getTrad('form.attribute.settings.default'),
+      sections: [
+        {
+          sectionTitle: null,
+          items: [
+            {
+              autoFocus: true,
+              name: 'default',
+              type: data.type === 'biginteger' ? 'text' : 'number',
+              step: inputStep,
+              intlLabel: {
+                id: getTrad('form.attribute.settings.default'),
+                defaultMessage: 'Default value',
+              },
+              validations: {},
             },
-            validations: {},
+          ],
+        },
+        {
+          sectionTitle: {
+            id: getTrad('form.attribute.item.settings.name'),
+            defaultMessage: 'Settings',
           },
-        ],
-        [uiHelpers.divider],
-        [options.required, options.unique],
-        [options.max, options.min],
-        [options.private],
+          items: [options.required, options.unique, options.max, options.min, options.private],
+        },
       ],
     };
   },
   password: () => {
     return {
-      items: [
-        [options.default],
-        [uiHelpers.divider],
-        [options.required, options.unique],
-        [options.maxLength, options.minLength],
-        [options.private],
+      sections: [
+        { sectionTitle: null, items: [options.default] },
+
+        {
+          sectionTitle: {
+            id: getTrad('form.attribute.item.settings.name'),
+            defaultMessage: 'Settings',
+          },
+          items: [
+            options.required,
+            options.unique,
+            options.maxLength,
+            options.minLength,
+            options.private,
+          ],
+        },
       ],
     };
   },
   relation: () => {
     return {
-      items: [[uiHelpers.divider], [options.private]],
+      sections: [
+        {
+          sectionTitle: {
+            id: getTrad('form.attribute.item.settings.name'),
+            defaultMessage: 'Settings',
+          },
+          items: [options.private],
+        },
+      ],
     };
   },
   richtext: () => {
     return {
-      items: [
-        [options.default],
-        [uiHelpers.divider],
-        [options.required, options.unique],
-        [options.maxLength, options.minLength],
-        [options.private],
+      sections: [
+        { sectionTitle: null, items: [options.default] },
+        {
+          sectionTitle: {
+            id: getTrad('form.attribute.item.settings.name'),
+            defaultMessage: 'Settings',
+          },
+          items: [
+            options.required,
+            options.unique,
+            options.maxLength,
+            options.minLength,
+            options.private,
+          ],
+        },
       ],
     };
   },
   text: () => {
     return {
-      items: [
-        [options.default, options.regex],
-        [uiHelpers.divider],
-        [options.required, options.unique],
-        [options.maxLength, options.minLength],
-        [options.private],
+      sections: [
+        { sectionTitle: null, items: [options.default, options.regex] },
+
+        {
+          sectionTitle: {
+            id: getTrad('form.attribute.item.settings.name'),
+            defaultMessage: 'Settings',
+          },
+          items: [
+            options.required,
+            options.unique,
+            options.maxLength,
+            options.minLength,
+            options.private,
+          ],
+        },
       ],
     };
   },
   uid: data => {
     return {
-      items: [
-        [{ ...options.default, disabled: Boolean(data.targetField), type: 'text' }],
-        [uiHelpers.divider],
-        [options.required],
-        [options.maxLength, options.minLength],
-        [options.private],
+      sections: [
+        {
+          sectionTitle: null,
+          items: [{ ...options.default, disabled: Boolean(data.targetField), type: 'text' }],
+        },
+
+        {
+          sectionTitle: {
+            id: getTrad('form.attribute.item.settings.name'),
+            defaultMessage: 'Settings',
+          },
+          items: [options.required, options.maxLength, options.minLength, options.private],
+        },
       ],
     };
   },

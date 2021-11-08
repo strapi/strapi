@@ -1,11 +1,9 @@
 import { NotificationsProvider } from '@strapi/helper-plugin';
 import React, { useReducer } from 'react';
 import PropTypes from 'prop-types';
-import { CSSTransition } from 'react-transition-group';
-
+import { Stack } from '@strapi/design-system/Stack';
 import Notification from './Notification';
 import reducer, { initialState } from './reducer';
-import NotificationsWrapper from './Wrapper';
 
 const Notifications = ({ children }) => {
   const [{ notifications }, dispatch] = useReducer(reducer, initialState);
@@ -19,20 +17,21 @@ const Notifications = ({ children }) => {
 
   return (
     <NotificationsProvider toggleNotification={displayNotification}>
-      <NotificationsWrapper>
-        {notifications.map(notification => (
-          <CSSTransition
-            key={notification.id}
-            classNames="notification"
-            timeout={{
-              enter: 500,
-              exit: 300,
-            }}
-          >
-            <Notification dispatch={dispatch} notification={notification} />
-          </CSSTransition>
-        ))}
-      </NotificationsWrapper>
+      <Stack
+        left="50%"
+        marginLeft="-250px"
+        position="fixed"
+        size={2}
+        top={`${46 / 16}rem`}
+        width={`${500 / 16}rem`}
+        zIndex={10}
+      >
+        {notifications.map(notification => {
+          return (
+            <Notification key={notification.id} dispatch={dispatch} notification={notification} />
+          );
+        })}
+      </Stack>
       {children}
     </NotificationsProvider>
   );

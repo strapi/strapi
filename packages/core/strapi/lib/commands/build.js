@@ -24,7 +24,7 @@ module.exports = async ({ clean, optimization }) => {
   const plugins = await getEnabledPlugins(strapiInstance);
 
   const env = strapiInstance.config.get('environment');
-  const { serverUrl, adminPath } = getConfigUrls(strapiInstance.config.get('server'), true);
+  const { serverUrl, adminPath } = getConfigUrls(strapiInstance.config, true);
 
   console.log(`Building your admin UI with ${green(env)} configuration ...`);
 

@@ -2,97 +2,93 @@ import getTrad from '../../../utils/getTrad';
 
 const attributeOptions = {
   default: {
-    autoFocus: true,
     name: 'default',
     type: 'text',
-    label: {
+    intlLabel: {
       id: getTrad('form.attribute.settings.default'),
+      defaultMessage: 'Default value',
     },
-    validations: {},
   },
   max: {
-    autoFocus: false,
     name: 'max',
-    type: 'customCheckboxWithChildren',
-    label: {
+    type: 'checkbox-with-number-field',
+    intlLabel: {
       id: getTrad('form.attribute.item.maximum'),
+      defaultMessage: 'Maximum value',
     },
-    validations: {},
   },
   maxLength: {
-    autoFocus: false,
     name: 'maxLength',
-    type: 'customCheckboxWithChildren',
-    label: {
+    type: 'checkbox-with-number-field',
+    intlLabel: {
       id: getTrad('form.attribute.item.maximumLength'),
+      defaultMessage: 'Maximum length',
     },
-    validations: {},
   },
   min: {
-    autoFocus: false,
     name: 'min',
-    type: 'customCheckboxWithChildren',
-    label: {
+    type: 'checkbox-with-number-field',
+    intlLabel: {
       id: getTrad('form.attribute.item.minimum'),
+      defaultMessage: 'Minimum value',
     },
-    validations: {},
   },
   minLength: {
-    autoFocus: false,
     name: 'minLength',
-    type: 'customCheckboxWithChildren',
-    label: {
+    type: 'checkbox-with-number-field',
+    intlLabel: {
       id: getTrad('form.attribute.item.minimumLength'),
+      defaultMessage: 'Minimum length',
     },
-    validations: {},
   },
   private: {
-    autoFocus: false,
     name: 'private',
     type: 'checkbox',
-    label: {
+    intlLabel: {
       id: getTrad('form.attribute.item.privateField'),
+      defaultMessage: 'Private field',
     },
     description: {
       id: getTrad('form.attribute.item.privateField.description'),
+      defaultMessage: 'This field will not show up in the API response',
     },
-    validations: {},
   },
   regex: {
-    autoFocus: false,
-    label: {
+    intlLabel: {
       id: getTrad('form.attribute.item.text.regex'),
+      defaultMessage: 'RegExp pattern',
     },
     name: 'regex',
     type: 'text',
-    validations: {},
     description: {
       id: getTrad('form.attribute.item.text.regex.description'),
+      defaultMessage: 'The text of the regular expression',
     },
   },
   required: {
-    autoFocus: false,
     name: 'required',
     type: 'checkbox',
-    label: {
+    intlLabel: {
       id: getTrad('form.attribute.item.requiredField'),
+      defaultMessage: 'Required field',
     },
     description: {
       id: getTrad('form.attribute.item.requiredField.description'),
+      defaultMessage: "You won't be able to create an entry if this field is empty",
     },
-    validations: {},
   },
   unique: {
-    autoFocus: false,
     name: 'unique',
     type: 'checkbox',
-    label: {
+    intlLabel: {
       id: getTrad('form.attribute.item.uniqueField'),
+      defaultMessage: 'Unique field',
     },
     description: {
       id: getTrad('form.attribute.item.uniqueField.description'),
+      defaultMessage:
+        "You won't be able to create an entry if there is an existing entry with identical content",
     },
-    validations: {},
   },
 };
 

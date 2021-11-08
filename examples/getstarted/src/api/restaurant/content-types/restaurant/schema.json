@@ -10,6 +10,7 @@
   },
   "options": {
     "draftAndPublish": true,
+    "populateCreatorFields": true,
     "comment": ""
   },
   "pluginOptions": {
@@ -56,7 +57,9 @@
         "i18n": {
           "localized": true
         }
-      }
+      },
+      "repeatable": false,
+      "required": true
     },
     "contactEmail": {
       "type": "email",

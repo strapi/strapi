@@ -24,7 +24,9 @@ const defaultBody = {
 
 const models = {
   ct: {
-    name: 'withdynamiczone',
+    displayName: 'withdynamiczone',
+    singularName: 'withdynamiczone',
+    pluralName: 'withdynamiczones',
     attributes: {
       field: {
         type: 'dynamiczone',
@@ -36,7 +38,7 @@ const models = {
     },
   },
   simpleCompo: {
-    name: 'simple-compo',
+    displayName: 'simple-compo',
     attributes: {
       name: {
         type: 'string',
@@ -44,7 +46,7 @@ const models = {
     },
   },
   otherCompo: {
-    name: 'compo-with-other-compo',
+    displayName: 'compo-with-other-compo',
     attributes: {
       compo: {
         type: 'component',

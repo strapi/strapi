@@ -9,7 +9,9 @@ let strapi;
 let rq;
 
 const ct = {
-  name: 'withrichtext',
+  displayName: 'withrichtext',
+  singularName: 'withrichtext',
+  pluralName: 'withrichtexts',
   attributes: {
     field: {
       type: 'richtext',

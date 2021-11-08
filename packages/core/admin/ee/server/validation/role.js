@@ -1,10 +1,8 @@
 'use strict';
 
-const { yup, formatYupErrors } = require('@strapi/utils');
+const { yup, validateYupSchema } = require('@strapi/utils');
 // eslint-disable-next-line node/no-extraneous-require
 const { features } = require('@strapi/strapi/lib/utils/ee');
-
-const handleReject = error => Promise.reject(formatYupErrors(error));
 
 const roleCreateSchema = yup
   .object()
@@ -58,20 +56,8 @@ const roleDeleteSchema = yup
     return true;
   });
 
-const validateRoleCreateInput = async data => {
-  return roleCreateSchema.validate(data, { strict: true, abortEarly: false }).catch(handleReject);
-};
-
-const validateRolesDeleteInput = async data => {
-  return rolesDeleteSchema.validate(data, { strict: true, abortEarly: false }).catch(handleReject);
-};
-
-const validateRoleDeleteInput = async data => {
-  return roleDeleteSchema.validate(data, { strict: true, abortEarly: false }).catch(handleReject);
-};
-
 module.exports = {
-  validateRoleCreateInput,
-  validateRolesDeleteInput,
-  validateRoleDeleteInput,
+  validateRoleCreateInput: validateYupSchema(roleCreateSchema),
+  validateRolesDeleteInput: validateYupSchema(rolesDeleteSchema),
+  validateRoleDeleteInput: validateYupSchema(roleDeleteSchema),
 };

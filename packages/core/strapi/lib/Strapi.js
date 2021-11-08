@@ -1,6 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
+const { isFunction } = require('lodash/fp');
 const { createLogger } = require('@strapi/logger');
 const { Database } = require('@strapi/database');
 const { createAsyncParallelHook } = require('@strapi/utils').hooks;
@@ -9,7 +10,6 @@ const loadConfiguration = require('./core/app-configuration');
 
 const { createContainer } = require('./container');
 const utils = require('./utils');
-const initializeMiddlewares = require('./middlewares');
 const createStrapiFs = require('./services/fs');
 const createEventHub = require('./services/event-hub');
 const { createServer } = require('./services/server');
@@ -36,6 +36,7 @@ const createConfigProvider = require('./core/registries/config');
 const apisRegistry = require('./core/registries/apis');
 const bootstrap = require('./core/bootstrap');
 const loaders = require('./core/loaders');
+const { destroyOnSignal } = require('./utils/signals');
 
 // TODO: move somewhere else
 const draftAndPublishSync = require('./migrations/draft-publish');
@@ -43,10 +44,12 @@ const draftAndPublishSync = require('./migrations/draft-publish');
 const LIFECYCLES = {
   REGISTER: 'register',
   BOOTSTRAP: 'bootstrap',
+  DESTROY: 'destroy',
 };
 
 class Strapi {
   constructor(opts = {}) {
+    destroyOnSignal(this);
     this.dirs = utils.getDirs(opts.dir || process.cwd());
     const appConfig = loadConfiguration(this.dirs.root, opts);
     this.container = createContainer(this);
@@ -71,6 +74,7 @@ class Strapi {
     this.startupLogger = createStartupLogger(this);
     this.log = createLogger(this.config.get('logger', {}));
     this.cron = createCronService();
+    this.telemetry = createTelemetry(this);
 
     createUpdateNotifier(this).notify();
   }
@@ -83,44 +87,60 @@ class Strapi {
     return ee({ dir: this.dirs.root, logger: this.log });
   }
 
+  get services() {
+    return this.container.get('services').getAll();
+  }
+
   service(uid) {
     return this.container.get('services').get(uid);
+  }
+
+  get controllers() {
+    return this.container.get('controllers').getAll();
   }
 
   controller(uid) {
     return this.container.get('controllers').get(uid);
   }
 
+  get contentTypes() {
+    return this.container.get('content-types').getAll();
+  }
+
   contentType(name) {
     return this.container.get('content-types').get(name);
   }
 
-  get contentTypes() {
-    return this.container.get('content-types').getAll();
+  get policies() {
+    return this.container.get('policies').getAll();
   }
 
   policy(name) {
     return this.container.get('policies').get(name);
   }
 
-  middleware(name) {
-    return this.container.get('middlewares').get(name);
+  get middlewares() {
+    return this.container.get('middlewares').getAll();
   }
 
-  plugin(name) {
-    return this.container.get('plugins').get(name);
+  middleware(name) {
+    return this.container.get('middlewares').get(name);
   }
 
   get plugins() {
     return this.container.get('plugins').getAll();
   }
 
-  hook(name) {
-    return this.container.get('hooks').get(name);
+  plugin(name) {
+    return this.container.get('plugins').get(name);
   }
 
   get hooks() {
-    return this.container.get('hooks');
+    return this.container.get('hooks').getAll();
+  }
+
+  hook(name) {
+    return this.container.get('hooks').get(name);
   }
 
   // api(name) {
@@ -152,17 +172,7 @@ class Strapi {
   async destroy() {
     await this.server.destroy();
 
-    await Promise.all(
-      Object.values(this.plugins).map(plugin => {
-        if (_.has(plugin, 'destroy') && typeof plugin.destroy === 'function') {
-          return plugin.destroy();
-        }
-      })
-    );
-
-    if (_.has(this, 'admin')) {
-      await this.admin.destroy();
-    }
+    await this.runLifecyclesFunctions(LIFECYCLES.DESTROY);
 
     this.eventHub.removeAllListeners();
 
@@ -172,6 +182,8 @@ class Strapi {
 
     this.telemetry.destroy();
     this.cron.destroy();
+
+    process.removeAllListeners();
 
     delete global.strapi;
   }
@@ -192,7 +204,7 @@ class Strapi {
   async openAdmin({ isInitialized }) {
     const shouldOpenAdmin =
       this.config.get('environment') === 'development' &&
-      this.config.get('server.admin.autoOpen', true) !== false;
+      this.config.get('admin.autoOpen', true) !== false;
 
     if (shouldOpenAdmin && !isInitialized) {
       await utils.openBrowser(this.config);
@@ -249,7 +261,7 @@ class Strapi {
   }
 
   stop(exitCode = 1) {
-    this.server.destroy();
+    this.destroy();
 
     if (this.config.get('autoReload')) {
       process.send('stop');
@@ -280,7 +292,7 @@ class Strapi {
   }
 
   async loadMiddlewares() {
-    this.middleware = await loaders.loadMiddlewares(this);
+    await loaders.loadMiddlewares(this);
   }
 
   async loadApp() {
@@ -288,14 +300,14 @@ class Strapi {
   }
 
   registerInternalHooks() {
-    this.hooks.set('strapi::content-types.beforeSync', createAsyncParallelHook());
-    this.hooks.set('strapi::content-types.afterSync', createAsyncParallelHook());
+    this.container.get('hooks').set('strapi::content-types.beforeSync', createAsyncParallelHook());
+    this.container.get('hooks').set('strapi::content-types.afterSync', createAsyncParallelHook());
 
     this.hook('strapi::content-types.beforeSync').register(draftAndPublishSync.disable);
     this.hook('strapi::content-types.afterSync').register(draftAndPublishSync.enable);
   }
 
-  async load() {
+  async register() {
     await Promise.all([
       this.loadApp(),
       this.loadPlugins(),
@@ -317,8 +329,14 @@ class Strapi {
 
     this.registerInternalHooks();
 
+    this.telemetry.register();
+
     await this.runLifecyclesFunctions(LIFECYCLES.REGISTER);
 
+    return this;
+  }
+
+  async bootstrap() {
     const contentTypes = [
       coreStoreModel,
       webhookModel,
@@ -345,7 +363,7 @@ class Strapi {
     const cronTasks = this.config.get('server.cron.tasks', {});
     this.cron.add(cronTasks);
 
-    this.telemetry = createTelemetry(this);
+    this.telemetry.bootstrap();
 
     let oldContentTypes;
     if (await this.db.connection.schema.hasTable(coreStoreModel.collectionName)) {
@@ -377,12 +395,19 @@ class Strapi {
 
     await this.startWebhooks();
 
-    // Initialize middlewares.
-    await initializeMiddlewares(this);
+    await this.server.initMiddlewares();
+    await this.server.initRouting();
 
     await this.runLifecyclesFunctions(LIFECYCLES.BOOTSTRAP);
 
     this.cron.start();
+
+    return this;
+  }
+
+  async load() {
+    await this.register();
+    await this.bootstrap();
 
     this.isLoaded = true;
 
@@ -408,7 +433,6 @@ class Strapi {
       }
 
       if (this.config.get('autoReload')) {
-        this.server.destroy();
         process.send('reload');
       }
     };
@@ -439,13 +463,16 @@ class Strapi {
     await this.container.get('modules')[lifecycleName]();
 
     // user
-    const lifecycleFunction = this.app[lifecycleName];
-    if (lifecycleFunction) {
-      await lifecycleFunction({ strapi: this });
+    const userLifecycleFunction = this.app[lifecycleName];
+    if (isFunction(userLifecycleFunction)) {
+      await userLifecycleFunction({ strapi: this });
     }
 
     // admin
-    await this.admin[lifecycleName]({ strapi: this });
+    const adminLifecycleFunction = this.admin[lifecycleName];
+    if (isFunction(adminLifecycleFunction)) {
+      await adminLifecycleFunction({ strapi: this });
+    }
   }
 
   getModel(uid) {

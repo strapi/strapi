@@ -1,0 +1,25 @@
+<!--- EmptyStateLayout.stories.mdx --->
+
+import { Meta, ArgsTable, Canvas, Story } from '@storybook/addon-docs';
+import { Main, Row, Button } from '@strapi/design-system';
+import NoMedia from './index';
+
+<Meta title="components/NoMedia" />
+
+# NoMedia
+
+This component is used to display an empty state.
+
+## Usage
+
+<Canvas>
+  <Story name="base">
+    <Main>
+      <NoMedia content="There's no media" action={<Button>Add a media</Button>} />
+    </Main>
+  </Story>
+</Canvas>
+
+### Props
+
+<ArgsTable of={NoMedia} />

@@ -4,9 +4,17 @@
  * `{{id}}` policy.
  */
 
-module.exports = async (ctx, next) => {
-  // Add your own logic here.
-  console.log('In {{id}} policy.');
+module.exports = (config, { strapi }) => {
+  return policyCtx => {
+    // Add your own logic here.
+    strapi.log.info('In {{id}} policy.');
 
-  await next();
+    const canDoSomething = true;
+
+    if (canDoSomething) {
+      return true;
+    }
+
+    return false;
+  };
 };

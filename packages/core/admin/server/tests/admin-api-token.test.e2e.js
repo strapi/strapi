@@ -57,11 +57,20 @@ describe('Admin API Token CRUD (e2e)', () => {
 
     expect(res.statusCode).toBe(400);
     expect(res.body).toMatchObject({
-      statusCode: 400,
-      error: 'Bad Request',
-      message: 'ValidationError',
-      data: {
-        type: ['type is a required field'],
+      data: null,
+      error: {
+        status: 400,
+        name: 'ValidationError',
+        message: 'type is a required field',
+        details: {
+          errors: [
+            {
+              path: ['type'],
+              name: 'ValidationError',
+              message: 'type is a required field',
+            },
+          ],
+        },
       },
     });
   });
@@ -81,11 +90,20 @@ describe('Admin API Token CRUD (e2e)', () => {
 
     expect(res.statusCode).toBe(400);
     expect(res.body).toMatchObject({
-      statusCode: 400,
-      error: 'Bad Request',
-      message: 'ValidationError',
-      data: {
-        type: ['type must be one of the following values: read-only, full-access'],
+      data: null,
+      error: {
+        status: 400,
+        name: 'ValidationError',
+        message: 'type must be one of the following values: read-only, full-access',
+        details: {
+          errors: [
+            {
+              path: ['type'],
+              name: 'ValidationError',
+              message: 'type must be one of the following values: read-only, full-access',
+            },
+          ],
+        },
       },
     });
   });
@@ -110,6 +128,7 @@ describe('Admin API Token CRUD (e2e)', () => {
       description: body.description,
       type: body.type,
       id: expect.any(Number),
+      createdAt: expect.any(String),
     });
 
     apiTokens.push(res.body.data);
@@ -134,6 +153,7 @@ describe('Admin API Token CRUD (e2e)', () => {
       description: '',
       type: body.type,
       id: expect.any(Number),
+      createdAt: expect.any(String),
     });
 
     apiTokens.push(res.body.data);
@@ -159,6 +179,7 @@ describe('Admin API Token CRUD (e2e)', () => {
       description: 'api-token_tests-description-with-spaces-at-the-end',
       type: body.type,
       id: expect.any(Number),
+      createdAt: expect.any(String),
     });
 
     apiTokens.push(res.body.data);
@@ -178,18 +199,21 @@ describe('Admin API Token CRUD (e2e)', () => {
         name: 'api-token_tests-name',
         description: 'api-token_tests-description',
         type: 'read-only',
+        createdAt: expect.any(String),
       },
       {
         id: expect.any(Number),
         name: 'api-token_tests-spaces-at-the-end',
         description: 'api-token_tests-description-with-spaces-at-the-end',
         type: 'read-only',
+        createdAt: expect.any(String),
       },
       {
         id: expect.any(Number),
         name: 'api-token_tests-without-description',
         description: '',
         type: 'full-access',
+        createdAt: expect.any(String),
       },
     ]);
   });
@@ -206,6 +230,7 @@ describe('Admin API Token CRUD (e2e)', () => {
       description: apiTokens[2].description,
       type: apiTokens[2].type,
       id: apiTokens[2].id,
+      createdAt: apiTokens[2].createdAt,
     });
   });
 
@@ -231,6 +256,7 @@ describe('Admin API Token CRUD (e2e)', () => {
       description: apiTokens[0].description,
       type: apiTokens[0].type,
       id: apiTokens[0].id,
+      createdAt: apiTokens[0].createdAt,
     });
   });
 
@@ -241,7 +267,15 @@ describe('Admin API Token CRUD (e2e)', () => {
     });
 
     expect(res.statusCode).toBe(404);
-    expect(res.body.data).toBeUndefined();
+    expect(res.body).toMatchObject({
+      data: null,
+      error: {
+        status: 404,
+        name: 'NotFoundError',
+        message: 'API Token not found',
+        details: {},
+      },
+    });
   });
 
   test('11. Updates a token (successfully)', async () => {
@@ -263,6 +297,7 @@ describe('Admin API Token CRUD (e2e)', () => {
       description: body.description,
       type: body.type,
       id: apiTokens[0].id,
+      createdAt: apiTokens[0].createdAt,
     });
 
     apiTokens[0] = res.body.data;
@@ -282,7 +317,15 @@ describe('Admin API Token CRUD (e2e)', () => {
     });
 
     expect(res.statusCode).toBe(404);
-    expect(res.body.data).toBeUndefined();
+    expect(res.body).toMatchObject({
+      data: null,
+      error: {
+        status: 404,
+        name: 'NotFoundError',
+        message: 'API Token not found',
+        details: {},
+      },
+    });
   });
 
   test('13. Updates a token with partial payload (successfully)', async () => {
@@ -302,6 +345,7 @@ describe('Admin API Token CRUD (e2e)', () => {
       description: body.description,
       type: apiTokens[0].type,
       id: apiTokens[0].id,
+      createdAt: apiTokens[0].createdAt,
     });
 
     apiTokens[0] = res.body.data;
@@ -322,11 +366,20 @@ describe('Admin API Token CRUD (e2e)', () => {
 
     expect(res.statusCode).toBe(400);
     expect(res.body).toMatchObject({
-      statusCode: 400,
-      error: 'Bad Request',
-      message: 'ValidationError',
-      data: {
-        type: ['type must be one of the following values: read-only, full-access'],
+      data: null,
+      error: {
+        details: {
+          errors: [
+            {
+              message: 'type must be one of the following values: read-only, full-access',
+              name: 'ValidationError',
+              path: ['type'],
+            },
+          ],
+        },
+        message: 'type must be one of the following values: read-only, full-access',
+        name: 'ValidationError',
+        status: 400,
       },
     });
   });
@@ -348,6 +401,7 @@ describe('Admin API Token CRUD (e2e)', () => {
       description: '',
       type: apiTokens[0].type,
       id: apiTokens[0].id,
+      createdAt: apiTokens[0].createdAt,
     });
 
     apiTokens[0] = res.body.data;
@@ -370,6 +424,7 @@ describe('Admin API Token CRUD (e2e)', () => {
       description: apiTokens[0].description,
       type: apiTokens[0].type,
       id: apiTokens[0].id,
+      createdAt: apiTokens[0].createdAt,
     });
 
     apiTokens[0] = res.body.data;

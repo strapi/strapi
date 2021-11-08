@@ -1,6 +1,7 @@
 'use strict';
 
-const { pick, pipe, isNil } = require('lodash/fp');
+const { pick, isNil, toNumber, isInteger } = require('lodash/fp');
+const { PaginationError } = require('@strapi/utils').errors;
 
 const {
   convertSortQueryParams,
@@ -9,137 +10,86 @@ const {
   convertPopulateQueryParams,
   convertFiltersQueryParams,
   convertFieldsQueryParams,
+  convertPublicationStateParams,
 } = require('@strapi/utils/lib/convert-query-params');
 
-const { contentTypes: contentTypesUtils } = require('@strapi/utils');
+const pickSelectionParams = pick(['fields', 'populate']);
 
-const { PUBLISHED_AT_ATTRIBUTE } = contentTypesUtils.constants;
+const transformParamsToQuery = (uid, params) => {
+  // NOTE: can be a CT, a Compo or nothing in the case of polymorphism (DZ & morph relations)
+  const type = strapi.getModel(uid);
 
-// TODO: to remove once the front is migrated
-const convertOldQuery = params => {
   const query = {};
 
-  Object.keys(params).forEach(key => {
-    if (key.startsWith('_')) {
-      query[key.slice(1)] = params[key];
-    } else {
-      query[key] = params[key];
-    }
-  });
+  const { _q, sort, filters, fields, populate, page, pageSize, start, limit } = params;
 
-  return query;
-};
-
-const transformCommonParams = (params = {}) => {
-  const { _q, sort, filters, _where, fields, populate, ...query } = params;
-
-  if (_q) {
+  if (!isNil(_q)) {
     query._q = _q;
   }
 
-  if (sort) {
+  if (!isNil(sort)) {
     query.orderBy = convertSortQueryParams(sort);
   }
 
-  if (filters) {
+  if (!isNil(filters)) {
     query.where = convertFiltersQueryParams(filters);
   }
 
-  if (_where) {
-    query.where = {
-      $and: [_where].concat(query.where || []),
-    };
-  }
-
-  if (fields) {
+  if (!isNil(fields)) {
     query.select = convertFieldsQueryParams(fields);
   }
 
-  if (populate) {
+  if (!isNil(populate)) {
     query.populate = convertPopulateQueryParams(populate);
   }
-
-  return { ...convertOldQuery(query), ...query };
-};
-
-const transformPaginationParams = (params = {}) => {
-  const { page, pageSize, start, limit, ...query } = params;
 
   const isPagePagination = !isNil(page) || !isNil(pageSize);
   const isOffsetPagination = !isNil(start) || !isNil(limit);
 
   if (isPagePagination && isOffsetPagination) {
-    throw new Error(
+    throw new PaginationError(
       'Invalid pagination attributes. You cannot use page and offset pagination in the same query'
     );
   }
 
-  if (page) {
-    query.page = Number(page);
+  if (!isNil(page)) {
+    const pageVal = toNumber(page);
+
+    if (!isInteger(pageVal) || pageVal <= 0) {
+      throw new PaginationError(
+        `Invalid 'page' parameter. Expected an integer > 0, received: ${page}`
+      );
+    }
+
+    query.page = pageVal;
   }
 
-  if (pageSize) {
-    query.pageSize = Number(pageSize);
+  if (!isNil(pageSize)) {
+    const pageSizeVal = toNumber(pageSize);
+
+    if (!isInteger(pageSizeVal) || pageSizeVal <= 0) {
+      throw new PaginationError(
+        `Invalid 'pageSize' parameter. Expected an integer > 0, received: ${page}`
+      );
+    }
+
+    query.pageSize = pageSizeVal;
   }
 
-  if (start) {
+  if (!isNil(start)) {
     query.offset = convertStartQueryParams(start);
   }
 
-  if (limit) {
+  if (!isNil(limit)) {
     query.limit = convertLimitQueryParams(limit);
   }
 
-  return { ...convertOldQuery(query), ...query };
-};
+  convertPublicationStateParams(type, params, query);
 
-const transformPublicationStateParams = uid => (params = {}) => {
-  const contentType = strapi.getModel(uid);
-
-  if (!contentType) {
-    return params;
-  }
-
-  const { publicationState, ...query } = params;
-
-  if (publicationState && contentTypesUtils.hasDraftAndPublish(contentType)) {
-    const { publicationState = 'live' } = params;
-
-    const liveClause = {
-      [PUBLISHED_AT_ATTRIBUTE]: {
-        $notNull: true,
-      },
-    };
-
-    if (publicationState === 'live') {
-      query.where = {
-        $and: [liveClause].concat(query.where || []),
-      };
-
-      // TODO: propagate nested publicationState filter somehow
-    }
-  }
-
-  return { ...convertOldQuery(query), ...query };
-};
-
-const pickSelectionParams = pick(['fields', 'populate']);
-
-const transformParamsToQuery = (uid, params) => {
-  return pipe(
-    // _q, _where, filters, etc...
-    transformCommonParams,
-    // page, pageSize, start, limit
-    transformPaginationParams,
-    // publicationState
-    transformPublicationStateParams(uid)
-  )(params);
+  return query;
 };
 
 module.exports = {
-  transformCommonParams,
-  transformPublicationStateParams,
-  transformPaginationParams,
   transformParamsToQuery,
   pickSelectionParams,
 };

@@ -57,11 +57,11 @@ async function getTemplateQuestion() {
 }
 
 /**
- *
+ * @param {string|null} projectName - The name of the project
+ * @param {string|null} template - The template the project should use
  * @returns Array of prompt question objects
  */
-// TODO: re-enabled once the template have been migrated to V4
-async function getPromptQuestions(projectName /*, template */) {
+async function getPromptQuestions(projectName /*, template*/) {
   return [
     {
       type: 'input',
@@ -85,7 +85,7 @@ async function getPromptQuestions(projectName /*, template */) {
         },
       ],
     },
-    // TODO: re-enabled once the template have been migrated to V4
+    // TODO: re-enable once we know where to list the official compatible templates
     // {
     //   type: 'confirm',
     //   name: 'useTemplate',

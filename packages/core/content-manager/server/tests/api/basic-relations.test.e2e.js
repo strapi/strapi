@@ -14,7 +14,9 @@ let data = {
 };
 
 const stamp = {
-  name: 'stamp',
+  displayName: 'stamp',
+  singularName: 'stamp',
+  pluralName: 'stamps',
   kind: 'collectionType',
   attributes: {
     name: {
@@ -24,7 +26,9 @@ const stamp = {
 };
 
 const collector = {
-  name: 'collector',
+  displayName: 'collector',
+  singularName: 'collector',
+  pluralName: 'collectors',
   kind: 'collectionType',
   attributes: {
     name: {
@@ -113,15 +117,15 @@ describe('CM API', () => {
   beforeAll(async () => {
     await builder
       .addContentTypes([stamp, collector])
-      .addFixtures(stamp.name, stampFixtures)
-      .addFixtures(collector.name, collectorFixtures)
+      .addFixtures(stamp.singularName, stampFixtures)
+      .addFixtures(collector.singularName, collectorFixtures)
       .build();
 
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
 
-    data.collectors = builder.sanitizedFixturesFor(collector.name, strapi);
-    data.stamps = builder.sanitizedFixturesFor(stamp.name, strapi);
+    data.collectors = await builder.sanitizedFixturesFor(collector.singularName, strapi);
+    data.stamps = await builder.sanitizedFixturesFor(stamp.singularName, strapi);
   });
 
   afterAll(async () => {

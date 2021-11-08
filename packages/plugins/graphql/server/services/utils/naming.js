@@ -2,6 +2,7 @@
 
 const { camelCase, upperFirst, lowerFirst, pipe, get } = require('lodash/fp');
 const { singular } = require('pluralize');
+const { ApplicationError } = require('@strapi/utils').errors;
 
 module.exports = ({ strapi }) => {
   /**
@@ -11,10 +12,14 @@ module.exports = ({ strapi }) => {
    * @return {string}
    */
   const getEnumName = (contentType, attributeName) => {
-    const { attributes, modelName } = contentType;
+    const { attributes } = contentType;
     const { enumName } = attributes[attributeName];
+    const { modelType } = contentType;
 
-    const defaultEnumName = `ENUM_${modelName.toUpperCase()}_${attributeName.toUpperCase()}`;
+    const typeName =
+      modelType === 'component' ? getComponentName(contentType) : getTypeName(contentType);
+
+    const defaultEnumName = `ENUM_${typeName.toUpperCase()}_${attributeName.toUpperCase()}`;
 
     return enumName || defaultEnumName;
   };
@@ -218,7 +223,7 @@ module.exports = ({ strapi }) => {
     const { prefix = '', suffix = '', plurality = 'singular', firstLetterCase = 'upper' } = options;
 
     if (!['plural', 'singular'].includes(plurality)) {
-      throw new Error(
+      throw new ApplicationError(
         `"plurality" param must be either "plural" or "singular", but got: "${plurality}"`
       );
     }
