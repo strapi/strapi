@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import { Flex } from '@strapi/design-system/Flex';
 import { Stack } from '@strapi/design-system/Stack';
 import { Text } from '@strapi/design-system/Text';
-import customEllipsis from '../../utils/customEllipsis';
+import { Typography } from '@strapi/design-system/Typography';
 
 const IconWrapper = styled(Flex)`
   margin-right: ${({ theme }) => theme.spaces[6]};
@@ -14,11 +14,13 @@ const IconWrapper = styled(Flex)`
   }
 `;
 
-const ContentBox = ({ title, subtitle, icon, iconBackground, endAction }) => {
-  const firstTitleChar = title.substring(0, 4);
+const TypographyWordBreak = styled(Typography)`
+  word-break: break-all;
+`;
 
-  if (title.length > 70 && firstTitleChar === 'http') {
-    title = customEllipsis(title);
+const ContentBox = ({ title, subtitle, icon, iconBackground, endAction, titleEllipsis }) => {
+  if (title.length > 70 && titleEllipsis) {
+    title = `${title.substring(0, 70)}...`;
   }
 
   return (
@@ -28,9 +30,9 @@ const ContentBox = ({ title, subtitle, icon, iconBackground, endAction }) => {
       </IconWrapper>
       <Stack size={endAction ? 0 : 1}>
         <Flex>
-          <Text small bold style={{ wordBreak: 'break-all' }}>
+          <TypographyWordBreak variant="pi" fontWeight="bold">
             {title}
-          </Text>
+          </TypographyWordBreak>
           {endAction}
         </Flex>
         <Text textColor="neutral600">{subtitle}</Text>
@@ -40,6 +42,7 @@ const ContentBox = ({ title, subtitle, icon, iconBackground, endAction }) => {
 };
 
 ContentBox.defaultProps = {
+  titleEllipsis: false,
   title: undefined,
   subtitle: undefined,
   icon: undefined,
@@ -48,6 +51,7 @@ ContentBox.defaultProps = {
 };
 
 ContentBox.propTypes = {
+  titleEllipsis: PropTypes.bool,
   title: PropTypes.string,
   subtitle: PropTypes.string,
   icon: PropTypes.node,
