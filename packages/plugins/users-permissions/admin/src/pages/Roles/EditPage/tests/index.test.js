@@ -811,7 +811,6 @@ describe('Admin | containers | RoleEditPage', () => {
 
       .c44 {
         border: 1px solid #ffffff;
-        overflow: hidden;
       }
 
       .c44:hover:not([aria-disabled='true']) {
@@ -919,6 +918,7 @@ describe('Admin | containers | RoleEditPage', () => {
 
       .c48 {
         height: 5.5rem;
+        border-radius: 4px;
       }
 
       .c48:hover svg path {
