@@ -29,7 +29,7 @@ const ContentBox = ({ title, subtitle, icon, iconBackground, endAction, titleEll
       </IconWrapper>
       <Stack size={endAction ? 0 : 1}>
         <Flex>
-          <TypographyWordBreak variant="pi" fontWeight="bold">
+          <TypographyWordBreak fontWeight="semiBold" variant="pi">
             {title}
           </TypographyWordBreak>
           {endAction}

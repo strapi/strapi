@@ -296,7 +296,7 @@ describe('Homepage', () => {
       }
 
       .c28 {
-        font-weight: 600;
+        font-weight: 500;
         color: #32324d;
         font-size: 0.75rem;
         line-height: 1.33;
