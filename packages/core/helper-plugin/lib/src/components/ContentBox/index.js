@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { Flex } from '@strapi/design-system/Flex';
 import { Stack } from '@strapi/design-system/Stack';
-import { Text } from '@strapi/design-system/Text';
 import { Typography } from '@strapi/design-system/Typography';
 
 const IconWrapper = styled(Flex)`
@@ -35,7 +34,7 @@ const ContentBox = ({ title, subtitle, icon, iconBackground, endAction, titleEll
           </TypographyWordBreak>
           {endAction}
         </Flex>
-        <Text textColor="neutral600">{subtitle}</Text>
+        <Typography textColor="neutral600">{subtitle}</Typography>
       </Stack>
     </Flex>
   );
