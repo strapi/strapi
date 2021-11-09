@@ -266,6 +266,7 @@
   "app.components.InstallPluginPage.Download.title": "Downloading...",
   "app.components.InstallPluginPage.description": "Extend your app effortlessly.",
   "app.components.InstallPluginPage.helmet": "Marketplace - Plugins",
+  "app.components.InstallPluginPage.illustration": "marketplace illustration",
   "app.components.InstallPluginPage.title": "Marketplace",
   "app.components.InstallPluginPage.subtitle": "Get more out of Strapi",
   "app.components.InstallPluginPage.coming-soon.1": "A new way to make Strapi awesome.",

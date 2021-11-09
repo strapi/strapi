@@ -132,10 +132,8 @@ const CenterTypography = styled(Typography)`
   text-align: center;
 `;
 
-const IllustrationContainer = styled(Box)`
-  img {
-    width: ${190 / 16}rem;
-  }
+const Img = styled.img`
+  width: ${190 / 16}rem;
 `;
 
 const StackCentered = styled(Stack)`
@@ -174,9 +172,15 @@ const MarketPlacePage = () => {
               paddingTop={10}
               paddingBottom={10}
             >
-              <IllustrationContainer paddingBottom={7}>
-                <img alt="marketplace illustration" src={MarketplacePicture} />
-              </IllustrationContainer>
+              <Box paddingBottom={7}>
+                <Img
+                  alt={formatMessage({
+                    id: 'app.components.InstallPluginPage.illustration',
+                    defaultMessage: 'marketplace illustration',
+                  })}
+                  src={MarketplacePicture}
+                />
+              </Box>
               <Typography variant="alpha">
                 {formatMessage({
                   id: 'app.components.InstallPluginPage.coming-soon.1',
