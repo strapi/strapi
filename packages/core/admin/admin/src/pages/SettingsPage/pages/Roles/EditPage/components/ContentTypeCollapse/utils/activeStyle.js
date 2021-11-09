@@ -4,7 +4,7 @@ import CarretIcon from '../CollapsePropertyMatrix/CarretIcon';
 const activeStyle = theme => `
   ${Typography} {
     color: ${theme.colors.primary600};
-    font-weight: bold;
+    font-weight: ${theme.fontWeights.bold}
   }
   ${CarretIcon} {
     display: block;

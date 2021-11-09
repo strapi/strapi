@@ -60,7 +60,13 @@ const RowLabelWithCheckbox = ({
           role: 'button',
         })}
       >
-        <Typography ellipsis>{upperFirst(label)}</Typography>
+        <Typography
+          fontWeight={isActive ? 'bold' : ''}
+          textColor={isActive ? 'primary600' : 'neutral800'}
+          ellipsis
+        >
+          {upperFirst(label)}
+        </Typography>
         {children}
       </CollapseLabel>
     </Flex>
