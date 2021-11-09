@@ -192,7 +192,12 @@ export const titleHandler = (editor, titleType) => {
     { line: currentLine, ch: lineContent.length }
   );
   editor.current.replaceSelection(textToInsert);
-  setTimeout(() => editor.current.focus(), 0);
+
+  setTimeout(() => {
+    const newLastLineLength = editor.current.getLine(currentLine).length;
+    editor.current.focus();
+    editor.current.setCursor({ line: currentLine, ch: newLastLineLength });
+  }, 0);
 };
 
 export const insertImage = (editor, files) => {
