@@ -138,7 +138,7 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         background: #4945ff;
       }
 
-      .c32 .sc-higWrZ {
+      .c32 .sc-eCstlR {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
