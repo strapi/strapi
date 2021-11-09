@@ -126,7 +126,7 @@
     "url-loader": "4.1.1",
     "webpack": "5.36.2",
     "webpack-cli": "4.6.0",
-    "webpack-dev-server": "3.11.2",
+    "webpack-dev-server": "4.4.0",
     "webpackbar": "5.0.0-3",
     "yup": "^0.32.9"
   },
