@@ -739,7 +739,6 @@ describe('Admin | containers | RoleCreatePage', () => {
 
       .c39 {
         border: 1px solid #ffffff;
-        overflow: hidden;
       }
 
       .c39:hover:not([aria-disabled='true']) {
@@ -847,6 +846,7 @@ describe('Admin | containers | RoleCreatePage', () => {
 
       .c43 {
         height: 5.5rem;
+        border-radius: 4px;
       }
 
       .c43:hover svg path {
