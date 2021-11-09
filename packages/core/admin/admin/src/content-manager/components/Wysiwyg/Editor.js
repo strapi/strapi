@@ -29,6 +29,7 @@ const Editor = ({
         'Shift-Tab': false,
       },
       readOnly: false,
+      smartIndent: false,
     });
 
     CodeMirror.commands.newlineAndIndentContinueMarkdownList = newlineAndIndentContinueMarkdownList;
