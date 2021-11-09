@@ -72,7 +72,10 @@ const withDefaultPagination = (args, { defaults = {}, maxLimit = -1 } = {}) => {
 
   // Page / PageSize
   if (usePagePagination) {
-    const { page, pageSize } = merge(defaultValues.page, args);
+    const { page, pageSize } = merge(defaultValues.page, {
+      ...args,
+      pageSize: Math.max(1, args.pageSize),
+    });
 
     Object.assign(pagination, {
       start: (page - 1) * pageSize,

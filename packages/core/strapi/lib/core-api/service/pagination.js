@@ -76,7 +76,7 @@ const getPaginationInfo = params => {
 
     return {
       page: Math.max(1, toNumber(pagination.page || 1)),
-      pageSize: applyMaxLimit(pageSize, maxLimit),
+      pageSize: Math.max(1, applyMaxLimit(pageSize, maxLimit)),
     };
   }
 
