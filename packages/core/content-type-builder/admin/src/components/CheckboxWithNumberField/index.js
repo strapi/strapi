@@ -34,7 +34,10 @@ const CheckboxWithNumberField = ({ error, intlLabel, modifiedData, name, onChang
         id={name}
         name={name}
         onValueChange={value => {
-          onChange({ target: { name, value: value || value === 0 ? 0 : null } });
+          const initValue = type === 'text' ? '0' : 0;
+          const nextValue = value ? initValue : null;
+
+          onChange({ target: { name, value: nextValue } });
           setShowInput(prev => !prev);
         }}
         value={showInput}
@@ -51,7 +54,7 @@ const CheckboxWithNumberField = ({ error, intlLabel, modifiedData, name, onChang
               id={name}
               name={name}
               onChange={onChange}
-              value={typeof value === 'boolean' ? '0' : value}
+              value={value === null ? '' : value}
             />
           ) : (
             <NumberInput
@@ -63,7 +66,7 @@ const CheckboxWithNumberField = ({ error, intlLabel, modifiedData, name, onChang
               onValueChange={value => {
                 onChange({ target: { name, value, type } });
               }}
-              value={typeof value === 'boolean' ? 0 : value}
+              value={value || 0}
             />
           )}
         </Box>
