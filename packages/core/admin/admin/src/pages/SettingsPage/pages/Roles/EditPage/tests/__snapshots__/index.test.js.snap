@@ -104,7 +104,7 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   background: #4945ff;
 }
 
-.c13 .sc-higWrZ {
+.c13 .sc-eCstlR {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -169,7 +169,7 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   background: #f0f0ff;
 }
 
-.c24 .sc-higWrZ {
+.c24 .sc-eCstlR {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
