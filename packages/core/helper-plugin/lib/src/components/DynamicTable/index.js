@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
 import { Button } from '@strapi/design-system/Button';
-import { Subtitle } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { Table as TableCompo } from '@strapi/design-system/Table';
 import { useIntl } from 'react-intl';
 import Trash from '@strapi/icons/Trash';
@@ -129,7 +129,7 @@ const Table = ({
           <Box paddingBottom={4}>
             <Flex justifyContent="space-between">
               <BlockActions>
-                <Subtitle textColor="neutral600">
+                <Typography variant="epsilon" textColor="neutral600">
                   {formatMessage(
                     {
                       id: 'content-manager.components.TableDelete.label',
@@ -137,7 +137,7 @@ const Table = ({
                     },
                     { number: entriesToDelete.length }
                   )}
-                </Subtitle>
+                </Typography>
                 <Button
                   onClick={handleToggleConfirmDeleteAll}
                   startIcon={<Trash />}
