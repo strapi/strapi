@@ -15,11 +15,11 @@ In order to use the plugin, you'll need to transpile the code to Javascript.
 
 To do so, you can use one of the following commands:
 
-1. `npm run build`
+1. `yarn run build`
 
    Which will transpile the plugin's code once
 
-2. `npm run build:watch`
+2. `yarn run build:watch`
 
    Which will transpile the plugin's code everytime a change is detected
 

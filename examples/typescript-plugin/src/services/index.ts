@@ -1,12 +1,6 @@
-import { StrapiInterface } from '@strapi/strapi';
+import foo from './foo';
 
-const services = {
-  foo: ({ strapi }: { strapi: StrapiInterface }) => ({
-    bar(message: string) {
-      console.log('Hello from my Typescript plugin!');
-      console.log(message);
-    },
-  }),
+// Services map
+export default {
+  foo,
 };
-
-export default services;
