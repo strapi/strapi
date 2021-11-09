@@ -8,6 +8,7 @@ import { Select, Option } from '@strapi/design-system/Select';
 import { useIntl } from 'react-intl';
 import { formatISO } from 'date-fns';
 import cloneDeep from 'lodash/cloneDeep';
+import DateTimePicker from '../DateTimePicker';
 
 const Inputs = ({ label, onChange, options, type, value }) => {
   const { formatMessage } = useIntl();
@@ -35,11 +36,32 @@ const Inputs = ({ label, onChange, options, type, value }) => {
         onChange={date => {
           const formattedDate = formatISO(cloneDeep(date), { representation: 'date' });
 
+          console.log(formattedDate);
+
           onChange(formattedDate);
         }}
         onClear={() => onChange('')}
         // selectedDate={value || null}
         selectedDate={value ? new Date(value) : null}
+        selectedDateLabel={formattedDate => `Date picker, current is ${formattedDate}`}
+      />
+    );
+  }
+
+  if (type === 'datetime') {
+    return (
+      <DateTimePicker
+        clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
+        aria-label={label}
+        name="datetimepicker"
+        onChange={date => {
+          const formattedDate = formatISO(cloneDeep(date), { representation: 'complete' });
+          console.log(new Date(formattedDate).toISOString());
+
+          onChange(formattedDate);
+        }}
+        onClear={() => onChange('')}
+        value={value ? new Date(value) : null}
         selectedDateLabel={formattedDate => `Date picker, current is ${formattedDate}`}
       />
     );
