@@ -72,11 +72,11 @@ const getPaginationInfo = params => {
   if (isPagedPagination(pagination)) {
     const pageSize = isUndefined(pagination.pageSize)
       ? defaultLimit
-      : toNumber(pagination.pageSize);
+      : Math.max(1, toNumber(pagination.pageSize));
 
     return {
       page: Math.max(1, toNumber(pagination.page || 1)),
-      pageSize: Math.max(1, applyMaxLimit(pageSize, maxLimit)),
+      pageSize: applyMaxLimit(pageSize, maxLimit),
     };
   }
 
