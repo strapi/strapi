@@ -15,7 +15,7 @@ import { TextInput } from '@strapi/design-system/TextInput';
 
 const CheckboxWithNumberField = ({ error, intlLabel, modifiedData, name, onChange, value }) => {
   const { formatMessage } = useIntl();
-  const [showInput, setShowInput] = useState(!!value);
+  const [showInput, setShowInput] = useState(!!value || value === 0);
   const label = intlLabel.id
     ? formatMessage(
         { id: intlLabel.id, defaultMessage: intlLabel.defaultMessage },
@@ -34,10 +34,10 @@ const CheckboxWithNumberField = ({ error, intlLabel, modifiedData, name, onChang
         id={name}
         name={name}
         onValueChange={value => {
-          onChange({ target: { name, value: value ? 1 : null } });
+          onChange({ target: { name, value: value || value === 0 ? 0 : null } });
           setShowInput(prev => !prev);
         }}
-        value={Boolean(value)}
+        value={showInput}
       >
         {label}
       </Checkbox>
@@ -51,7 +51,7 @@ const CheckboxWithNumberField = ({ error, intlLabel, modifiedData, name, onChang
               id={name}
               name={name}
               onChange={onChange}
-              value={typeof value === 'boolean' ? '1' : value}
+              value={typeof value === 'boolean' ? '0' : value}
             />
           ) : (
             <NumberInput

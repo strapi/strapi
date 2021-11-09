@@ -883,6 +883,8 @@ const FormModal = () => {
 
   const schemaKind = get(contentTypes, [targetUid, 'schema', 'kind']);
 
+  console.log({ formModal: modifiedData });
+
   return (
     <>
       <ModalLayout onClose={handleClosed} labelledBy="title">
