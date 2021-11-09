@@ -3,6 +3,10 @@
 const { join } = require('path');
 const fs = require('fs-extra');
 const validateInput = require('./utils/validate-input');
+const getCtNamesPrompts = require('./utils/get-ct-names-prompts');
+const getKindPrompts = require('./utils/get-kind-prompts');
+const getDraftAndPublishPrompts = require('./utils/get-draft-and-publish-prompts');
+const getAttributesPrompts = require('./utils/get-attributes-prompts');
 
 module.exports = plop => {
   // API generator
@@ -74,8 +78,12 @@ module.exports = plop => {
 
       return {
         ...api,
-        // TODO: make prompts and actions more re-usable and composable
-        ...(await plop.getGenerator('content-type').prompts(inquirer)),
+        ...(await inquirer.prompt([
+          ...getCtNamesPrompts,
+          ...getKindPrompts,
+          ...getDraftAndPublishPrompts,
+        ])),
+        attributes: await getAttributesPrompts(inquirer),
       };
     },
     actions(answers) {
@@ -94,11 +102,6 @@ module.exports = plop => {
         },
         {
           type: 'add',
-          path: `${filePath}/content-types/{{id}}/schema.json`,
-          templateFile: 'templates/content-type.schema.json.hbs',
-        },
-        {
-          type: 'add',
           path: `${filePath}/services/{{id}}.js`,
           templateFile: 'templates/service.js.hbs',
         },
@@ -113,6 +116,21 @@ module.exports = plop => {
           ? 'single-type-routes.js.hbs'
           : 'collection-type-routes.js.hbs';
 
+      if (answers.createContentType) {
+        baseActions.push(
+          ...(answers.isPluginApi && answers.plugin
+            ? plop.getGenerator('content-type').actions({
+                ...answers,
+                destination: 'plugin',
+                plugin: answers.id,
+              })
+            : plop.getGenerator('content-type').actions({
+                ...answers,
+                destination: 'new',
+              }))
+        );
+      }
+
       return [
         {
           type: 'add',
@@ -120,8 +138,6 @@ module.exports = plop => {
           templateFile: `templates/${routeType}`,
         },
         ...baseActions,
-        // TODO: make prompts and actions more re-usable and composable
-        ...(answers.createContentType ? plop.getGenerator('content-type').actions(answers) : []),
       ];
     },
   });
