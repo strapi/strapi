@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
 import { Box } from '@strapi/design-system/Box';
 import { Stack } from '@strapi/design-system/Stack';
-import { TableLabel } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import styled from 'styled-components';
 import get from 'lodash/get';
 import IS_DISABLED from 'ee_else_ce/pages/SettingsPage/pages/Roles/EditPage/components/GlobalActions/utils/constants';
@@ -37,12 +37,12 @@ const GlobalActions = ({ actions, isFormDisabled, kind }) => {
         {displayedActions.map(({ label, actionId }) => {
           return (
             <CenteredStack key={actionId} size={3}>
-              <TableLabel textColor="neutral500">
+              <Typography variant="sigma" textColor="neutral500">
                 {formatMessage({
                   id: `Settings.roles.form.permissions.${label.toLowerCase()}`,
                   defaultMessage: label,
                 })}
-              </TableLabel>
+              </Typography>
               <BaseCheckbox
                 disabled={isFormDisabled || IS_DISABLED}
                 onValueChange={value => {

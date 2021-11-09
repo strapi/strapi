@@ -6,7 +6,7 @@ import { Divider } from '@strapi/design-system/Divider';
 import { Stack } from '@strapi/design-system/Stack';
 import { ModalFooter, ModalHeader, ModalLayout } from '@strapi/design-system/ModalLayout';
 import { Breadcrumbs, Crumb } from '@strapi/design-system/Breadcrumbs';
-import { H2, Text } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import produce from 'immer';
 import get from 'lodash/get';
 import groupBy from 'lodash/groupBy';
@@ -90,24 +90,24 @@ const ConditionsModal = ({ actions, headerBreadCrumbs, isFormDisabled, onClosed,
       </ModalHeader>
       <Box padding={8}>
         <Stack size={6}>
-          <H2>
+          <Typography variant="beta">
             {formatMessage({
               id: 'Settings.permissions.conditions.define-conditions',
               defaultMessage: 'Define conditions',
             })}
-          </H2>
+          </Typography>
           <Box>
             <Divider />
           </Box>
           <Box>
             {actionsToDisplay.length === 0 && (
-              <Text>
+              <Typography>
                 {formatMessage({
                   id: 'Settings.permissions.conditions.no-actions',
                   defaultMessage:
                     'You first need to select actions (create, read, update, ...) before defining conditions on them.',
                 })}
-              </Text>
+              </Typography>
             )}
             <ul>
               {actionsToDisplay.map(({ actionId, label, pathToConditionsObject }, index) => {

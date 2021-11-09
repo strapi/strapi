@@ -6,9 +6,9 @@ const CarretIcon = styled(CarretDown)`
   width: ${10 / 16}rem;
   transform: rotate(${({ $isActive }) => ($isActive ? '180' : '0')}deg);
   margin-left: ${({ theme }) => theme.spaces[2]};
-  * {
+  /* * {
     fill: ${({ theme }) => theme.colors.primary600};
-  }
+  } */
 `;
 
 export default CarretIcon;

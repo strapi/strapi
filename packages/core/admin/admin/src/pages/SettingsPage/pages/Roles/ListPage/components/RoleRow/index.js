@@ -1,12 +1,17 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import styled from 'styled-components';
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
 import { Td, Tr } from '@strapi/design-system/Table';
-import { Text, EllipsisText } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { IconButton } from '@strapi/design-system/IconButton';
 import { stopPropagation, onRowClick, pxToRem } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
+
+const CustomTypographyEllipsis = styled(Typography)`
+  display: block;
+`;
 
 const RoleRow = ({ id, name, description, usersCount, icons }) => {
   const { formatMessage } = useIntl();
@@ -27,13 +32,17 @@ const RoleRow = ({ id, name, description, usersCount, icons }) => {
       })}
     >
       <Td maxWidth={pxToRem(130)}>
-        <EllipsisText textColor="neutral800">{name}</EllipsisText>
+        <CustomTypographyEllipsis ellipsis textColor="neutral800">
+          {name}
+        </CustomTypographyEllipsis>
       </Td>
       <Td maxWidth={pxToRem(250)}>
-        <EllipsisText textColor="neutral800">{description}</EllipsisText>
+        <CustomTypographyEllipsis ellipsis textColor="neutral800">
+          {description}
+        </CustomTypographyEllipsis>
       </Td>
       <Td>
-        <Text textColor="neutral800">{usersCountText}</Text>
+        <Typography textColor="neutral800">{usersCountText}</Typography>
       </Td>
       <Td>
         <Flex justifyContent="flex-end" {...stopPropagation}>
