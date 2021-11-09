@@ -31,12 +31,10 @@ const Inputs = ({ label, onChange, options, type, value }) => {
     return (
       <DatePicker
         clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
-        aria-label={label}
+        ariaLabel={label}
         name="datepicker"
         onChange={date => {
           const formattedDate = formatISO(cloneDeep(date), { representation: 'date' });
-
-          console.log(formattedDate);
 
           onChange(formattedDate);
         }}
@@ -52,11 +50,10 @@ const Inputs = ({ label, onChange, options, type, value }) => {
     return (
       <DateTimePicker
         clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
-        aria-label={label}
+        ariaLabel={label}
         name="datetimepicker"
         onChange={date => {
-          const formattedDate = formatISO(cloneDeep(date), { representation: 'complete' });
-          console.log(new Date(formattedDate).toISOString());
+          const formattedDate = new Date(date).toISOString();
 
           onChange(formattedDate);
         }}

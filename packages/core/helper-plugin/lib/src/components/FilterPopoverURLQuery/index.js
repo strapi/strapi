@@ -45,8 +45,6 @@ const FilterPopoverURLQuery = ({ displayedFilters, isVisible, onBlur, onToggle, 
     } = nextField;
     let filterValue = '';
 
-    console.log(type);
-
     if (type === 'boolean') {
       filterValue = 'true';
     }

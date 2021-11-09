@@ -257,6 +257,9 @@ const FilterPopover = ({ displayedFilters, filters, onSubmit, onToggle, source, 
   );
 };
 
+FilterPopover.defaultProps = {
+  onBlur: () => null,
+};
 FilterPopover.propTypes = {
   displayedFilters: PropTypes.arrayOf(
     PropTypes.shape({
@@ -266,7 +269,7 @@ FilterPopover.propTypes = {
     })
   ).isRequired,
   filters: PropTypes.array.isRequired,
-  onBlur: PropTypes.func.isRequired,
+  onBlur: PropTypes.func,
   onSubmit: PropTypes.func.isRequired,
   onToggle: PropTypes.func.isRequired,
   source: PropTypes.shape({ current: PropTypes.instanceOf(Element) }).isRequired,
