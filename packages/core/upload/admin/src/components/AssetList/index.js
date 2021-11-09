@@ -38,7 +38,7 @@ export const AssetList = ({
               key={asset.id}
               asset={asset}
               isSelected={isSelected}
-              onEdit={() => onEditAsset(asset)}
+              onEdit={onEditAsset ? () => onEditAsset(asset) : undefined}
               onSelect={() => onSelectAsset(asset)}
               size={size}
             />
@@ -59,13 +59,14 @@ export const AssetList = ({
 
 AssetList.defaultProps = {
   allowedTypes: ['images', 'files', 'videos'],
+  onEditAsset: undefined,
   size: 'M',
 };
 
 AssetList.propTypes = {
   allowedTypes: PropTypes.arrayOf(PropTypes.string),
   assets: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
-  onEditAsset: PropTypes.func.isRequired,
+  onEditAsset: PropTypes.func,
   onSelectAsset: PropTypes.func.isRequired,
   selectedAssets: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
   size: PropTypes.oneOf(['S', 'M']),

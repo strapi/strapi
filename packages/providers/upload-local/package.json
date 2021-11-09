@@ -30,8 +30,8 @@
     "type": "git",
     "url": "git://github.com/strapi/strapi.git"
   },
-  "peerDependencies": {
-    "@strapi/plugin-upload": "^4.0.0"
+  "dependencies": {
+    "@strapi/utils": "3.6.8"
   },
   "bugs": {
     "url": "https://github.com/strapi/strapi/issues"

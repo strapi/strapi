@@ -7,7 +7,7 @@ import {
   NoPermissions,
   NoMedia,
   AnErrorOccurred,
-  Search,
+  SearchURLQuery,
   useSelectionState,
   useQueryParams,
 } from '@strapi/helper-plugin';
@@ -43,7 +43,7 @@ export const MediaLibrary = () => {
     canDownload,
     isLoading: isLoadingPermissions,
   } = useMediaLibraryPermissions();
-  const [, setQuery] = useQueryParams();
+  const [{ query }, setQuery] = useQueryParams();
 
   const { formatMessage } = useIntl();
   const { data, isLoading, error } = useAssets({
@@ -64,6 +64,7 @@ export const MediaLibrary = () => {
   const loading = isLoadingPermissions || isLoading;
   const assets = data?.results;
   const assetCount = data?.pagination?.total || 0;
+  const isFiltering = Boolean(query._q || query.filters);
 
   return (
     <Layout>
@@ -124,7 +125,7 @@ export const MediaLibrary = () => {
             </>
           }
           endActions={
-            <Search
+            <SearchURLQuery
               label={formatMessage({
                 id: getTrad('search.label'),
                 defaultMessage: 'Search for an asset',
@@ -144,7 +145,7 @@ export const MediaLibrary = () => {
           {canRead && assets && assets.length === 0 && (
             <NoMedia
               action={
-                canCreate ? (
+                canCreate && !isFiltering ? (
                   <Button
                     variant="secondary"
                     startIcon={<Plus />}
@@ -160,7 +161,13 @@ export const MediaLibrary = () => {
                 )
               }
               content={
-                canCreate
+                // eslint-disable-next-line no-nested-ternary
+                isFiltering
+                  ? formatMessage({
+                      id: getTrad('list.assets-empty.title-withSearch'),
+                      defaultMessage: 'There are no assets with the applied filters',
+                    })
+                  : canCreate
                   ? formatMessage({
                       id: getTrad('list.assets.empty'),
                       defaultMessage: 'Upload your first assets...',

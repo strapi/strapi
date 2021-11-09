@@ -1,6 +1,6 @@
 'use strict';
 
-const yup = require('yup');
+const { yup } = require('@strapi/utils');
 const { typeKinds, coreUids } = require('../../services/constants');
 const { isValidName } = require('./common');
 

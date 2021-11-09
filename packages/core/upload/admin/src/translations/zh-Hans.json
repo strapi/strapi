@@ -36,8 +36,6 @@
   "list.assets.loading-asset": "正在为媒体加载预览: {path}",
   "list.assets.not-supported-content": "无可用预览",
   "list.assets.preview-asset": "预览视频（路径：{path}）",
-  "list.assets.selected.plural": "{number}个素材选中",
-  "list.assets.selected.singular": "{number}个素材被选中",
   "list.assets.type-not-allowed": "文件类型不合法",
   "modal.file-details.date": "日期",
   "modal.file-details.dimensions": "尺寸",

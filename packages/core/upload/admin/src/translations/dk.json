@@ -32,8 +32,6 @@
   "list.assets-empty.subtitle": "Tilføj en til listen.",
   "list.assets-empty.title": "Der er ingen medier endnu",
   "list.assets-empty.title-withSearch": "Der er ingen medier med de valgte filtre",
-  "list.assets.selected.plural": "{number} medier valgt",
-  "list.assets.selected.singular": "{number} medie valgt",
   "list.assets.type-not-allowed": "Filtypen er ikke tilladt.",
   "modal.file-details.date": "Dato",
   "modal.file-details.dimensions": "Dimensioner",

@@ -52,9 +52,26 @@ describe('Permission Controller', () => {
         { state: { userAbility: localTestData.ability }, badRequest: localTestData.badRequest }
       );
 
-      await permissionController.check(ctx);
+      expect.assertions(1);
 
-      expect(localTestData.badRequest).toHaveBeenCalled();
+      try {
+        await permissionController.check(ctx);
+      } catch (e) {
+        expect(e).toMatchObject({
+          name: 'ValidationError',
+          message: 'permissions[0].action must be a `string` type, but the final value was: `{}`.',
+          details: {
+            errors: [
+              {
+                path: ['permissions', '0', 'action'],
+                message:
+                  'permissions[0].action must be a `string` type, but the final value was: `{}`.',
+                name: 'ValidationError',
+              },
+            ],
+          },
+        });
+      }
     });
 
     test('Invalid Permission Shape (missing required action)', async () => {
@@ -63,9 +80,25 @@ describe('Permission Controller', () => {
         { state: { userAbility: localTestData.ability }, badRequest: localTestData.badRequest }
       );
 
-      await permissionController.check(ctx);
+      expect.assertions(1);
 
-      expect(localTestData.badRequest).toHaveBeenCalled();
+      try {
+        await permissionController.check(ctx);
+      } catch (e) {
+        expect(e).toMatchObject({
+          name: 'ValidationError',
+          message: 'permissions[0].action is a required field',
+          details: {
+            errors: [
+              {
+                path: ['permissions', '0', 'action'],
+                message: 'permissions[0].action is a required field',
+                name: 'ValidationError',
+              },
+            ],
+          },
+        });
+      }
     });
 
     test('Invalid Permission Shape (bad type for subject)', async () => {
@@ -74,9 +107,26 @@ describe('Permission Controller', () => {
         { state: { userAbility: localTestData.ability }, badRequest: localTestData.badRequest }
       );
 
-      await permissionController.check(ctx);
+      expect.assertions(1);
 
-      expect(localTestData.badRequest).toHaveBeenCalled();
+      try {
+        await permissionController.check(ctx);
+      } catch (e) {
+        expect(e).toMatchObject({
+          name: 'ValidationError',
+          message: 'permissions[0].subject must be a `string` type, but the final value was: `{}`.',
+          details: {
+            errors: [
+              {
+                path: ['permissions', '0', 'subject'],
+                message:
+                  'permissions[0].subject must be a `string` type, but the final value was: `{}`.',
+                name: 'ValidationError',
+              },
+            ],
+          },
+        });
+      }
     });
 
     test('Invalid Permission Shape (bad type for field)', async () => {
@@ -85,9 +135,26 @@ describe('Permission Controller', () => {
         { state: { userAbility: localTestData.ability }, badRequest: localTestData.badRequest }
       );
 
-      await permissionController.check(ctx);
+      expect.assertions(1);
 
-      expect(localTestData.badRequest).toHaveBeenCalled();
+      try {
+        await permissionController.check(ctx);
+      } catch (e) {
+        expect(e).toMatchObject({
+          name: 'ValidationError',
+          message: 'permissions[0].field must be a `string` type, but the final value was: `{}`.',
+          details: {
+            errors: [
+              {
+                path: ['permissions', '0', 'field'],
+                message:
+                  'permissions[0].field must be a `string` type, but the final value was: `{}`.',
+                name: 'ValidationError',
+              },
+            ],
+          },
+        });
+      }
     });
 
     test('Invalid Permission Shape (unrecognized foo param)', async () => {
@@ -96,9 +163,25 @@ describe('Permission Controller', () => {
         { state: { userAbility: localTestData.ability }, badRequest: localTestData.badRequest }
       );
 
-      await permissionController.check(ctx);
+      expect.assertions(1);
 
-      expect(localTestData.badRequest).toHaveBeenCalled();
+      try {
+        await permissionController.check(ctx);
+      } catch (e) {
+        expect(e).toMatchObject({
+          name: 'ValidationError',
+          message: 'permissions[0] field has unspecified keys: foo',
+          details: {
+            errors: [
+              {
+                path: ['permissions', '0'],
+                message: 'permissions[0] field has unspecified keys: foo',
+                name: 'ValidationError',
+              },
+            ],
+          },
+        });
+      }
     });
 
     test('Check Many Permissions', async () => {

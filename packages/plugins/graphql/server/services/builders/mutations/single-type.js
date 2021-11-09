@@ -2,7 +2,11 @@
 
 const { extendType, nonNull } = require('nexus');
 const { omit, isNil } = require('lodash/fp');
-const { sanitize } = require('@strapi/utils');
+
+const utils = require('@strapi/utils');
+
+const { sanitize } = utils;
+const { NotFoundError } = utils.errors;
 
 module.exports = ({ strapi }) => {
   const { service: getService } = strapi.plugin('graphql');
@@ -83,7 +87,7 @@ module.exports = ({ strapi }) => {
         const entity = await strapi.entityService.findMany(uid, { params: transformedArgs });
 
         if (!entity) {
-          throw new Error('Entity not found');
+          throw new NotFoundError('Entity not found');
         }
 
         const value = await deleteResolver(parent, { id: entity.id, params: transformedArgs });

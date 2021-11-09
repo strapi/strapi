@@ -2,6 +2,7 @@
 
 const { join } = require('path');
 const _ = require('lodash');
+const { ApplicationError } = require('@strapi/utils').errors;
 
 const createSchemaHandler = require('./schema-handler');
 const createComponentBuilder = require('./component-builder');
@@ -115,7 +116,7 @@ function createSchemaBuilder({ components, contentTypes }) {
           acc[key] = attr;
 
           if (target && !this.contentTypes.has(target)) {
-            throw new Error(`target: ${target} does not exist`);
+            throw new ApplicationError(`target: ${target} does not exist`);
           }
 
           if (_.isNil(targetAttribute)) {
@@ -170,7 +171,7 @@ function createSchemaBuilder({ components, contentTypes }) {
           );
           strapi.log.error(error);
 
-          throw new Error('Invalid schema edition');
+          throw new ApplicationError('Invalid schema edition');
         });
     },
 

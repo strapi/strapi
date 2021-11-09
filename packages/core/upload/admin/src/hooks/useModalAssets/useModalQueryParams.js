@@ -21,12 +21,29 @@ const useModalQueryParams = () => {
     setQueryObject(prev => ({ ...prev, sort }));
   };
 
+  const handleChangeSearch = _q => {
+    if (_q) {
+      setQueryObject(prev => ({ ...prev, _q, page: 1 }));
+    } else {
+      const newState = { page: 1 };
+
+      Object.keys(queryObject).forEach(key => {
+        if (!['page', '_q'].includes(key)) {
+          newState[key] = queryObject[key];
+        }
+      });
+
+      setQueryObject(newState);
+    }
+  };
+
   return [
     { queryObject, rawQuery: stringify(queryObject, { encode: false }) },
     {
       onChangePage: handeChangePage,
       onChangePageSize: handleChangePageSize,
       onChangeSort: handleChangeSort,
+      onChangeSearch: handleChangeSearch,
     },
   ];
 };

@@ -20,6 +20,7 @@ import { AssetDefinition } from '../../../constants';
 import getAllowedFiles from '../utils/getAllowedFiles';
 import { DialogTitle } from './DialogTitle';
 import { DialogFooter } from './DialogFooter';
+import { EditAssetDialog } from '../../EditAssetDialog';
 
 export const AssetDialog = ({
   allowedTypes,
@@ -29,11 +30,19 @@ export const AssetDialog = ({
   multiple,
   initiallySelectedAssets,
 }) => {
+  const [assetToEdit, setAssetToEdit] = useState(undefined);
   const { formatMessage } = useIntl();
-  const { canRead, canCreate, isLoading: isLoadingPermissions } = useMediaLibraryPermissions();
+  const {
+    canRead,
+    canCreate,
+    isLoading: isLoadingPermissions,
+    canUpdate,
+    canCopyLink,
+    canDownload,
+  } = useMediaLibraryPermissions();
   const [
     { rawQuery, queryObject },
-    { onChangePage, onChangePageSize, onChangeSort },
+    { onChangePage, onChangePageSize, onChangeSort, onChangeSearch },
   ] = useModalQueryParams();
   const { data, isLoading, error } = useModalAssets({ skipWhen: !canRead, rawQuery });
 
@@ -102,7 +111,7 @@ export const AssetDialog = ({
     );
   }
 
-  if (canRead && assets?.length === 0) {
+  if (canRead && assets?.length === 0 && !queryObject._q) {
     return (
       <ModalLayout onClose={onClose} labelledBy="asset-dialog-title">
         <DialogTitle />
@@ -133,6 +142,18 @@ export const AssetDialog = ({
         />
         <DialogFooter onClose={onClose} />
       </ModalLayout>
+    );
+  }
+
+  if (assetToEdit) {
+    return (
+      <EditAssetDialog
+        onClose={() => setAssetToEdit(undefined)}
+        asset={assetToEdit}
+        canUpdate={canUpdate}
+        canCopyLink={canCopyLink}
+        canDownload={canDownload}
+      />
     );
   }
 
@@ -183,12 +204,13 @@ export const AssetDialog = ({
                 onSelectAsset={handleSelectAsset}
                 selectedAssets={selectedAssets}
                 onSelectAllAsset={handleSelectAllAssets}
-                onEditAsset={() => {}}
+                onEditAsset={canUpdate ? setAssetToEdit : undefined}
                 pagination={data?.pagination}
                 queryObject={queryObject}
                 onChangePage={onChangePage}
                 onChangePageSize={onChangePageSize}
                 onChangeSort={onChangeSort}
+                onChangeSearch={onChangeSearch}
               />
             </ModalBody>
           </TabPanel>

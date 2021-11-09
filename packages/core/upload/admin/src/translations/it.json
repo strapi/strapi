@@ -32,8 +32,6 @@
   "list.assets-empty.subtitle": "Aggiungi uno alla lista.",
   "list.assets-empty.title": "Ancora nessuna risorsa",
   "list.assets-empty.title-withSearch": "Nessuna risorsa con i filtri selezionati",
-  "list.assets.selected.plural": "{number} risorse selezionate",
-  "list.assets.selected.singular": "{number} risorsa selezionata",
   "list.assets.type-not-allowed": "Questo tipo di file non è consentito.",
   "modal.file-details.date": "Data",
   "modal.file-details.dimensions": "Dimensioni",

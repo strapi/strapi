@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const yup = require('yup');
+const { yup } = require('@strapi/utils');
 
 const { hasComponent } = require('../../utils/attributes');
 const { modelTypes, VALID_UID_TARGETS } = require('../../services/constants');

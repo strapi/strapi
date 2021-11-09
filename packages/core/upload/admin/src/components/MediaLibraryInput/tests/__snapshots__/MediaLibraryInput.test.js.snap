@@ -43,6 +43,17 @@ exports[`<MediaLibraryInput /> renders and matches the snapshot 1`] = `
   color: #666687;
 }
 
+.c12 {
+  color: #4945ff;
+  margin-bottom: 12px;
+  width: 30px;
+  height: 24px;
+}
+
+.c13 path {
+  fill: #4945ff;
+}
+
 .c0 {
   padding-bottom: 4px;
 }
@@ -70,10 +81,10 @@ exports[`<MediaLibraryInput /> renders and matches the snapshot 1`] = `
 }
 
 .c1 {
-  font-weight: 500;
+  font-weight: 600;
+  color: #32324d;
   font-size: 0.75rem;
   line-height: 1.33;
-  color: #32324d;
 }
 
 .c4 {
@@ -109,17 +120,6 @@ exports[`<MediaLibraryInput /> renders and matches the snapshot 1`] = `
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-}
-
-.c12 {
-  color: #4945ff;
-  margin-bottom: 12px;
-  width: 30px;
-  height: 24px;
-}
-
-.c13 path {
-  fill: #4945ff;
 }
 
 <body>

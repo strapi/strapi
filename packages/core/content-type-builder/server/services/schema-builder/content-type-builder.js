@@ -4,6 +4,7 @@ const path = require('path');
 const _ = require('lodash');
 
 const { nameToCollectionName } = require('@strapi/utils');
+const { ApplicationError } = require('@strapi/utils').errors;
 const { isRelation, isConfigurable } = require('../../utils/attributes');
 const { typeKinds } = require('../constants');
 const createSchemaHandler = require('./schema-handler');
@@ -73,7 +74,7 @@ module.exports = function createComponentBuilder() {
       const uid = createContentTypeUID(infos);
 
       if (this.contentTypes.has(uid)) {
-        throw new Error('contentType.alreadyExists');
+        throw new ApplicationError('contentType.alreadyExists');
       }
 
       const contentType = createSchemaHandler({
@@ -125,7 +126,7 @@ module.exports = function createComponentBuilder() {
       const { uid } = infos;
 
       if (!this.contentTypes.has(uid)) {
-        throw new Error('contentType.notFound');
+        throw new ApplicationError('contentType.notFound');
       }
 
       const contentType = this.contentTypes.get(uid);
@@ -221,7 +222,7 @@ module.exports = function createComponentBuilder() {
 
     deleteContentType(uid) {
       if (!this.contentTypes.has(uid)) {
-        throw new Error('contentType.notFound');
+        throw new ApplicationError('contentType.notFound');
       }
 
       this.components.forEach(compo => {

@@ -1,11 +1,8 @@
 {
-  "components.Row.generatedDate": "Última generación",
   "components.Row.open": "Abrir",
   "components.Row.regenerate": "Regenerar",
   "containers.HomePage.Block.title": "Versiones",
-  "containers.HomePage.Button.open": "Abrir la documentación",
   "containers.HomePage.Button.update": "Actualizar",
-  "containers.HomePage.PluginHeader.description": "Configurar el plugin de documentación",
   "containers.HomePage.PluginHeader.title": "Documentación - Configuración",
   "containers.HomePage.PopUpWarning.confirm": "Confirmar",
   "containers.HomePage.PopUpWarning.message": "¿Estás seguro de que deseas eliminar esta versión?",
