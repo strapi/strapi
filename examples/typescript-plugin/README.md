@@ -58,5 +58,5 @@ It should log
 
 ```
 Hello from my Typescript plugin!
-It's working
+It's working!
 ```
