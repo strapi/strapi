@@ -385,13 +385,6 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         margin-top: 16px;
       }
 
-      .c16 {
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
       .c51 {
         font-weight: 600;
         color: #32324d;
@@ -730,6 +723,13 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         color: #666687;
         font-size: 1rem;
         line-height: 1.5;
+      }
+
+      .c16 {
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+        color: #32324d;
       }
 
       .c17 {
