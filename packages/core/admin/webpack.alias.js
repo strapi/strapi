@@ -39,7 +39,6 @@ const alias = [
   'react-transition-group',
   'react-tooltip',
   'react-virtualized',
-  'reactstrap',
   'react-select',
   'redux',
   'redux-immutable',

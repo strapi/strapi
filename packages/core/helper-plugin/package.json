@@ -37,9 +37,9 @@
     "build-storybook": "build-storybook"
   },
   "peerDependencies": {
+    "formik": "^2.2.6",
     "immer": "9.0.6",
     "qs": "6.10.1",
-    "formik": "^2.2.6",
     "react-select": "^4.0.2"
   },
   "devDependencies": {
@@ -57,8 +57,8 @@
     "@storybook/builder-webpack5": "^6.3.7",
     "@storybook/manager-webpack5": "^6.3.7",
     "@storybook/react": "^6.3.7",
-    "@strapi/icons": "0.0.1-alpha.64",
     "@strapi/design-system": "0.0.1-alpha.64",
+    "@strapi/icons": "0.0.1-alpha.64",
     "babel-loader": "^8.2.2",
     "cross-env": "^7.0.3",
     "date-fns": "2.22.1",
@@ -93,7 +93,6 @@
     "react-intl": "5.20.2",
     "react-router": "^5.2.0",
     "react-router-dom": "5.2.0",
-    "reactstrap": "8.4.1",
     "styled-components": "^5.2.3",
     "whatwg-fetch": "^3.6.2"
   },

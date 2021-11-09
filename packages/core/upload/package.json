@@ -29,7 +29,6 @@
     "react-redux": "7.2.3",
     "react-router": "^5.2.0",
     "react-router-dom": "5.2.0",
-    "reactstrap": "8.4.1",
     "sharp": "0.28.1"
   },
   "author": {
