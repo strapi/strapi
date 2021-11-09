@@ -243,7 +243,7 @@ const createYupSchemaAttribute = (type, validations, options) => {
     schema = schema.email(errorsTrads.email);
   }
 
-  if (['number', 'integer', 'biginteger', 'float', 'decimal'].includes(type)) {
+  if (['number', 'integer', 'float', 'decimal'].includes(type)) {
     schema = yup
       .number()
       .transform(cv => (isNaN(cv) ? undefined : cv))
@@ -255,7 +255,7 @@ const createYupSchemaAttribute = (type, validations, options) => {
   }
 
   if (type === 'biginteger') {
-    schema = yup.string().matches(/^\d*$/);
+    schema = yup.string().matches(/^-?\d*$/);
   }
 
   Object.keys(validations).forEach(validation => {

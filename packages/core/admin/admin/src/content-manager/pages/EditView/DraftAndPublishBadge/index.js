@@ -36,7 +36,7 @@ const DraftAndPublishBadge = ({ hasDraftAndPublish, isPublished }) => {
     },
     published: {
       textColor: 'success700',
-      bullet: 'success600',
+      bulletColor: 'success600',
       box: {
         background: 'success100',
         borderColor: 'success200',
