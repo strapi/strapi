@@ -23,13 +23,13 @@ To do so, you can use one of the following commands:
 
    Which will transpile the plugin's code everytime a change is detected
 
-You can configure the build directory from your tsconfig.json file using `compilerOptions.outDir`.
+You can configure the build directory from your `tsconfig.json` file using `compilerOptions.outDir`.
 
 ### Linking the Plugin
 
 In order for Strapi to recognize & use the plugin, you'll need to register it.
 
-Head over the `/config/plugin.js` file located in your Strapi app and adds the following configuration (don't forget to replace `resolve`'s path with the one to your transpiled plugin code):
+Head over to the `/config/plugin.js` file located in your Strapi app and adds the following configuration (don't forget to replace `resolve`'s path with the one to your transpiled plugin code):
 
 ```js
 module.exports = () => ({
