@@ -77,6 +77,10 @@ describe('<DraftAndPublishBadge />', () => {
         height: 0.375rem;
       }
 
+      .c2 * {
+        fill: #328048;
+      }
+
       <aside
         class="c0"
       >
