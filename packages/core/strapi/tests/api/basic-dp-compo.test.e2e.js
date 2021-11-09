@@ -1,7 +1,5 @@
 'use strict';
 
-const _ = require('lodash');
-
 const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
 const { createTestBuilder } = require('../../../../../test/helpers/builder');
 const { createContentAPIRequest } = require('../../../../../test/helpers/request');
@@ -14,7 +12,7 @@ let data = {
 };
 
 const compo = {
-  name: 'compo',
+  displayName: 'compo',
   attributes: {
     name: {
       type: 'string',
@@ -178,7 +176,23 @@ describe('Core API - Basic + compo + draftAndPublish', () => {
       });
 
       expect(res.statusCode).toBe(400);
-      expect(_.get(res, 'body.data.errors.compo.0')).toBe('compo must be defined.');
+      expect(res.body).toMatchObject({
+        data: null,
+        error: {
+          status: 400,
+          name: 'ValidationError',
+          message: 'compo must be defined.',
+          details: {
+            errors: [
+              {
+                path: ['compo'],
+                message: 'compo must be defined.',
+                name: 'ValidationError',
+              },
+            ],
+          },
+        },
+      });
     });
 
     test('Cannot create product with compo - minLength', async () => {
@@ -199,9 +213,23 @@ describe('Core API - Basic + compo + draftAndPublish', () => {
       });
 
       expect(res.statusCode).toBe(400);
-      expect(_.get(res.body.data, ['errors', 'compo.description', '0'])).toBe(
-        'compo.description must be at least 3 characters'
-      );
+      expect(res.body).toMatchObject({
+        data: null,
+        error: {
+          status: 400,
+          name: 'ValidationError',
+          message: 'compo.description must be at least 3 characters',
+          details: {
+            errors: [
+              {
+                path: ['compo', 'description'],
+                message: 'compo.description must be at least 3 characters',
+                name: 'ValidationError',
+              },
+            ],
+          },
+        },
+      });
     });
 
     test('Cannot create product with compo - maxLength', async () => {
@@ -222,9 +250,23 @@ describe('Core API - Basic + compo + draftAndPublish', () => {
       });
 
       expect(res.statusCode).toBe(400);
-      expect(_.get(res.body.data, ['errors', 'compo.description', '0'])).toBe(
-        'compo.description must be at most 10 characters'
-      );
+      expect(res.body).toMatchObject({
+        data: null,
+        error: {
+          status: 400,
+          name: 'ValidationError',
+          message: 'compo.description must be at most 10 characters',
+          details: {
+            errors: [
+              {
+                path: ['compo', 'description'],
+                message: 'compo.description must be at most 10 characters',
+                name: 'ValidationError',
+              },
+            ],
+          },
+        },
+      });
     });
 
     test('Cannot create product with compo - required', async () => {
@@ -244,9 +286,23 @@ describe('Core API - Basic + compo + draftAndPublish', () => {
       });
 
       expect(res.statusCode).toBe(400);
-      expect(_.get(res.body.data, ['errors', 'compo.name', '0'])).toBe(
-        'compo.name must be defined.'
-      );
+      expect(res.body).toMatchObject({
+        data: null,
+        error: {
+          status: 400,
+          name: 'ValidationError',
+          message: 'compo.name must be defined.',
+          details: {
+            errors: [
+              {
+                path: ['compo', 'name'],
+                message: 'compo.name must be defined.',
+                name: 'ValidationError',
+              },
+            ],
+          },
+        },
+      });
     });
   });
 });

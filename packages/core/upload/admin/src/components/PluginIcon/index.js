@@ -5,11 +5,8 @@
  */
 
 import React from 'react';
-import { Icon } from '@strapi/design-system/Icon';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import Landscape from '@strapi/icons/Landscape';
 
-const PluginIcon = () => (
-  <Icon as={() => <FontAwesomeIcon icon="cloud-upload-alt" />} width="16px" />
-);
+const PluginIcon = () => <Landscape />;
 
 export default PluginIcon;

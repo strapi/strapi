@@ -84,17 +84,16 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
 }
 
 .c23 {
-  font-weight: 500;
+  font-weight: 600;
+  color: #32324d;
   font-size: 0.75rem;
   line-height: 1.33;
-  color: #32324d;
 }
 
 .c26 {
-  font-weight: 400;
+  color: #32324d;
   font-size: 0.75rem;
   line-height: 1.33;
-  color: #32324d;
 }
 
 .c24 {
@@ -252,10 +251,13 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
 }
 
 .c10 {
-  font-weight: 400;
+  color: #32324d;
+  display: inline-block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   font-size: 0.875rem;
   line-height: 1.43;
-  color: #32324d;
 }
 
 .c9 {
@@ -465,7 +467,7 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
       </div>
       <nav
         aria-label="pagination"
-        class="sc-jcRCNh"
+        class="sc-eGCaLh"
       >
         <ul
           class="c16 c17"

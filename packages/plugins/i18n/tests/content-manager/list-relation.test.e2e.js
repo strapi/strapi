@@ -98,8 +98,8 @@ describe('i18n - Relation-list route', () => {
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
 
-    data.shops = builder.sanitizedFixturesFor(shopModel.singularName, strapi);
-    data.products = builder.sanitizedFixturesFor(productModel.singularName, strapi);
+    data.shops = await builder.sanitizedFixturesFor(shopModel.singularName, strapi);
+    data.products = await builder.sanitizedFixturesFor(productModel.singularName, strapi);
   });
 
   afterAll(async () => {

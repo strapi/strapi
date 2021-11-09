@@ -2,7 +2,7 @@ import React from 'react';
 import get from 'lodash/get';
 import PropTypes from 'prop-types';
 import { Flex } from '@strapi/design-system/Flex';
-import { Typography } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { Box } from '@strapi/design-system/Box';
 import { Stack } from '@strapi/design-system/Stack';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -73,7 +73,7 @@ const DynamicZoneList = ({ components }) => {
           </CustomFlex>
           <Box paddingTop={1}>
             <Typography fontSize={1} textColor="neutral600" fontWeight="bold">
-              {get(componentLayouts, [componentUid, 'info', 'name'], '')}
+              {get(componentLayouts, [componentUid, 'info', 'displayName'], '')}
             </Typography>
           </Box>
         </CustomLink>

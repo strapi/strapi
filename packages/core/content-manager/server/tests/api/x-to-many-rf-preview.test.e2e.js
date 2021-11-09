@@ -124,7 +124,7 @@ describe('x-to-many RF Preview', () => {
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
 
-    Object.assign(data, builder.sanitizedFixtures(strapi));
+    Object.assign(data, await builder.sanitizedFixtures(strapi));
   });
 
   afterAll(async () => {
@@ -138,15 +138,30 @@ describe('x-to-many RF Preview', () => {
       const { body, statusCode } = await rq.get(`${cmProductUrl}/${product.id}/${field}`);
 
       expect(statusCode).toBe(400);
-      expect(body.error).toBe('Bad Request');
-      expect(body.message).toBe('Invalid target field');
+      expect(body).toMatchObject({
+        data: null,
+        error: {
+          status: 400,
+          name: 'BadRequestError',
+          message: 'Invalid target field',
+          details: {},
+        },
+      });
     });
 
     test('Throws if the entity does not exist', async () => {
       const { body, statusCode } = await rq.get(`${cmProductUrl}/${data.shop[11].id}/categories`);
 
       expect(statusCode).toBe(404);
-      expect(body.error).toBe('Not Found');
+      expect(body).toMatchObject({
+        data: null,
+        error: {
+          status: 404,
+          name: 'NotFoundError',
+          message: 'Not Found',
+          details: {},
+        },
+      });
     });
   });
 
@@ -158,8 +173,15 @@ describe('x-to-many RF Preview', () => {
       const { body, statusCode } = await rq.get(`${url}/${id}/product`);
 
       expect(statusCode).toBe(400);
-      expect(body.error).toBe('Bad Request');
-      expect(body.message).toBe('Invalid target field');
+      expect(body).toMatchObject({
+        data: null,
+        error: {
+          status: 400,
+          name: 'BadRequestError',
+          message: 'Invalid target field',
+          details: {},
+        },
+      });
     });
   });
 

@@ -7,7 +7,9 @@ import {
   NoPermissions,
   NoMedia,
   AnErrorOccurred,
-  Search,
+  SearchURLQuery,
+  useSelectionState,
+  useQueryParams,
 } from '@strapi/helper-plugin';
 import { Layout, HeaderLayout, ContentLayout, ActionLayout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
@@ -17,11 +19,11 @@ import { Box } from '@strapi/design-system/Box';
 import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
 import { UploadAssetDialog } from '../../components/UploadAssetDialog/UploadAssetDialog';
 import { EditAssetDialog } from '../../components/EditAssetDialog';
-import { ListView } from './components/ListView';
+import { AssetList } from '../../components/AssetList';
+import SortPicker from '../../components/SortPicker';
 import { useAssets } from '../../hooks/useAssets';
 import { getTrad } from '../../utils';
 import { Filters } from './components/Filters';
-import { SortPicker } from './components/SortPicker';
 import { PaginationFooter } from '../../components/PaginationFooter';
 import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
 import { BulkDeleteButton } from './components/BulkDeleteButton';
@@ -41,15 +43,20 @@ export const MediaLibrary = () => {
     canDownload,
     isLoading: isLoadingPermissions,
   } = useMediaLibraryPermissions();
+  const [{ query }, setQuery] = useQueryParams();
 
   const { formatMessage } = useIntl();
   const { data, isLoading, error } = useAssets({
     skipWhen: !canRead,
   });
 
+  const handleChangeSort = value => {
+    setQuery({ sort: value });
+  };
+
   const [showUploadAssetDialog, setShowUploadAssetDialog] = useState(false);
   const [assetToEdit, setAssetToEdit] = useState(undefined);
-  const [selected, setSelected] = useState([]);
+  const [selected, { selectOne, selectAll }] = useSelectionState('id', []);
   const toggleUploadAssetDialog = () => setShowUploadAssetDialog(prev => !prev);
 
   useFocusWhenNavigate();
@@ -57,27 +64,7 @@ export const MediaLibrary = () => {
   const loading = isLoadingPermissions || isLoading;
   const assets = data?.results;
   const assetCount = data?.pagination?.total || 0;
-
-  const selectAllAssets = () => {
-    if (selected.length > 0) {
-      setSelected([]);
-    } else {
-      setSelected((assets || []).map(({ id }) => id));
-    }
-  };
-
-  const selectAsset = asset => {
-    const index = selected.indexOf(asset.id);
-
-    if (index > -1) {
-      setSelected(prevSelected => [
-        ...prevSelected.slice(0, index),
-        ...prevSelected.slice(index + 1),
-      ]);
-    } else {
-      setSelected(prevSelected => [...prevSelected, asset.id]);
-    }
-  };
+  const isFiltering = Boolean(query._q || query.filters);
 
   return (
     <Layout>
@@ -129,16 +116,16 @@ export const MediaLibrary = () => {
                       defaultMessage: 'Select all assets',
                     })}
                     value={assets?.length > 0 && selected.length === assets?.length}
-                    onChange={selectAllAssets}
+                    onChange={() => selectAll(assets)}
                   />
                 </BoxWithHeight>
               )}
-              {canRead && <SortPicker />}
+              {canRead && <SortPicker onChangeSort={handleChangeSort} />}
               {canRead && <Filters />}
             </>
           }
           endActions={
-            <Search
+            <SearchURLQuery
               label={formatMessage({
                 id: getTrad('search.label'),
                 defaultMessage: 'Search for an asset',
@@ -149,7 +136,7 @@ export const MediaLibrary = () => {
 
         <ContentLayout>
           {selected.length > 0 && (
-            <BulkDeleteButton assetIds={selected} onSuccess={() => setSelected([])} />
+            <BulkDeleteButton selectedAssets={selected} onSuccess={selectAll} />
           )}
 
           {loading && <LoadingIndicatorPage />}
@@ -158,7 +145,7 @@ export const MediaLibrary = () => {
           {canRead && assets && assets.length === 0 && (
             <NoMedia
               action={
-                canCreate ? (
+                canCreate && !isFiltering ? (
                   <Button
                     variant="secondary"
                     startIcon={<Plus />}
@@ -174,7 +161,13 @@ export const MediaLibrary = () => {
                 )
               }
               content={
-                canCreate
+                // eslint-disable-next-line no-nested-ternary
+                isFiltering
+                  ? formatMessage({
+                      id: getTrad('list.assets-empty.title-withSearch'),
+                      defaultMessage: 'There are no assets with the applied filters',
+                    })
+                  : canCreate
                   ? formatMessage({
                       id: getTrad('list.assets.empty'),
                       defaultMessage: 'Upload your first assets...',
@@ -188,10 +181,10 @@ export const MediaLibrary = () => {
           )}
           {canRead && assets && assets.length > 0 && (
             <>
-              <ListView
+              <AssetList
                 assets={assets}
                 onEditAsset={setAssetToEdit}
-                onSelectAsset={selectAsset}
+                onSelectAsset={selectOne}
                 selectedAssets={selected}
               />
               {data?.pagination && <PaginationFooter pagination={data.pagination} />}
@@ -200,9 +193,7 @@ export const MediaLibrary = () => {
         </ContentLayout>
       </Main>
 
-      {showUploadAssetDialog && (
-        <UploadAssetDialog onClose={toggleUploadAssetDialog} onSuccess={() => {}} />
-      )}
+      {showUploadAssetDialog && <UploadAssetDialog onClose={toggleUploadAssetDialog} />}
       {assetToEdit && (
         <EditAssetDialog
           onClose={() => setAssetToEdit(undefined)}

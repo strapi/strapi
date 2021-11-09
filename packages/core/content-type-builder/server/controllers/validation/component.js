@@ -1,8 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const yup = require('yup');
-const { formatYupErrors } = require('@strapi/utils');
+const { yup, validateYupSchema } = require('@strapi/utils');
 
 const { modelTypes, DEFAULT_TYPES } = require('../../services/constants');
 const { isValidCategoryName, isValidIcon } = require('./common');
@@ -16,10 +15,10 @@ const componentSchema = createSchema(VALID_TYPES, VALID_RELATIONS, {
   modelType: modelTypes.COMPONENT,
 })
   .shape({
-    name: yup
+    displayName: yup
       .string()
       .min(1)
-      .required('name.required'),
+      .required('displayName.required'),
     icon: yup
       .string()
       .nullable()
@@ -53,19 +52,21 @@ const nestedComponentSchema = yup.array().of(
     .noUnknown()
 );
 
-const validateComponentInput = data => {
-  return yup
-    .object({
-      component: componentSchema,
-      components: nestedComponentSchema,
-    })
-    .noUnknown()
-    .validate(data, {
-      strict: true,
-      abortEarly: false,
-    })
-    .catch(error => Promise.reject(formatYupErrors(error)));
-};
+const componentInputSchema = yup
+  .object({
+    component: componentSchema,
+    components: nestedComponentSchema,
+  })
+  .noUnknown();
+
+const validateComponentInput = validateYupSchema(componentInputSchema);
+
+const updateComponentInputSchema = yup
+  .object({
+    component: componentSchema,
+    components: nestedComponentSchema,
+  })
+  .noUnknown();
 
 const validateUpdateComponentInput = data => {
   if (_.has(data, 'component')) {
@@ -80,17 +81,7 @@ const validateUpdateComponentInput = data => {
     });
   }
 
-  return yup
-    .object({
-      component: componentSchema,
-      components: nestedComponentSchema,
-    })
-    .noUnknown()
-    .validate(data, {
-      strict: true,
-      abortEarly: false,
-    })
-    .catch(error => Promise.reject(formatYupErrors(error)));
+  return validateYupSchema(updateComponentInputSchema)(data);
 };
 
 module.exports = {

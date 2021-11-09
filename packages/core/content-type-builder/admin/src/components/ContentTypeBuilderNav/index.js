@@ -44,7 +44,7 @@ const ContentTypeBuilderNav = () => {
           return (
             <React.Fragment key={section.name}>
               <SubNavSection
-                label={formatMessage({ id: title, defaultMessage: title.defaultMessage })}
+                label={formatMessage({ id: title, defaultMessage: title })}
                 collapsable
                 badgeLabel={section.links.length.toString()}
               >

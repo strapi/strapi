@@ -25,7 +25,7 @@ const setPublishedAt = data => {
 const createCollectionTypeService = ({ model, strapi, utils }) => {
   const { uid } = model;
 
-  const { sanitizeInput, getFetchParams } = utils;
+  const { getFetchParams } = utils;
 
   return {
     async find(params = {}) {
@@ -59,20 +59,18 @@ const createCollectionTypeService = ({ model, strapi, utils }) => {
 
     create(params = {}) {
       const { data } = params;
-      const sanitizedData = sanitizeInput(data);
 
       if (hasDraftAndPublish(model)) {
-        setPublishedAt(sanitizedData);
+        setPublishedAt(data);
       }
 
-      return strapi.entityService.create(uid, { ...params, data: sanitizedData });
+      return strapi.entityService.create(uid, { ...params, data });
     },
 
     update(entityId, params = {}) {
       const { data } = params;
-      const sanitizedData = sanitizeInput(data);
 
-      return strapi.entityService.update(uid, entityId, { ...params, data: sanitizedData });
+      return strapi.entityService.update(uid, entityId, { ...params, data });
     },
 
     delete(entityId, params = {}) {

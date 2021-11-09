@@ -11,7 +11,8 @@ import styled from 'styled-components';
 import { pxToRem } from '@strapi/helper-plugin';
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
-import { Text, Typography } from '@strapi/design-system/Text';
+import { Text } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 
 const StyledBox = styled(Box)`
   border-radius: ${pxToRem(26)};

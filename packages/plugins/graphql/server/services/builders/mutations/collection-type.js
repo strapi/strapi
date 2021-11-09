@@ -1,6 +1,7 @@
 'use strict';
 
 const { extendType, nonNull } = require('nexus');
+const { sanitize } = require('@strapi/utils');
 
 module.exports = ({ strapi }) => {
   const { service: getService } = strapi.plugin('graphql');
@@ -31,8 +32,18 @@ module.exports = ({ strapi }) => {
         data: nonNull(getContentTypeInputName(contentType)),
       },
 
-      async resolve(parent, args) {
+      async resolve(parent, args, context) {
+        const { auth } = context.state;
         const transformedArgs = transformArgs(args, { contentType });
+
+        // Sanitize input data
+        const sanitizedInputData = await sanitize.contentAPI.input(
+          transformedArgs.data,
+          contentType,
+          { auth }
+        );
+
+        Object.assign(transformedArgs, { data: sanitizedInputData });
 
         const { create } = getService('builders')
           .get('content-api')
@@ -68,8 +79,18 @@ module.exports = ({ strapi }) => {
         data: nonNull(getContentTypeInputName(contentType)),
       },
 
-      async resolve(parent, args) {
+      async resolve(parent, args, context) {
+        const { auth } = context.state;
         const transformedArgs = transformArgs(args, { contentType });
+
+        // Sanitize input data
+        const sanitizedInputData = await sanitize.contentAPI.input(
+          transformedArgs.data,
+          contentType,
+          { auth }
+        );
+
+        Object.assign(transformedArgs, { data: sanitizedInputData });
 
         const { update } = getService('builders')
           .get('content-api')

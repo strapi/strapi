@@ -34,6 +34,7 @@ export const UploadingAssetCard = ({
   file,
   onCancel,
   onStatusChange,
+  addUploadedFiles,
 }) => {
   const { upload, cancel, error, progress, status } = useUpload();
   const { formatMessage } = useIntl();
@@ -58,7 +59,15 @@ export const UploadingAssetCard = ({
   }
 
   useEffect(() => {
-    upload(file);
+    const uploadFile = async () => {
+      const files = await upload(file);
+
+      if (addUploadedFiles) {
+        addUploadedFiles(files);
+      }
+    };
+
+    uploadFile();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -100,7 +109,12 @@ export const UploadingAssetCard = ({
   );
 };
 
+UploadingAssetCard.defaultProps = {
+  addUploadedFiles: undefined,
+};
+
 UploadingAssetCard.propTypes = {
+  addUploadedFiles: PropTypes.func,
   assetType: PropTypes.oneOf(Object.values(AssetType)).isRequired,
   extension: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,

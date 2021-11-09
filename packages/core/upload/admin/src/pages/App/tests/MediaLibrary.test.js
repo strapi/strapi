@@ -61,7 +61,7 @@ describe('Media library homepage', () => {
       },
     });
 
-    useQueryParams.mockReturnValue([{ rawQuery: 'some-url' }, jest.fn()]);
+    useQueryParams.mockReturnValue([{ rawQuery: 'some-url', query: {} }, jest.fn()]);
   });
 
   afterEach(() => {
@@ -208,7 +208,7 @@ describe('Media library homepage', () => {
       ].forEach(([label, sortKey]) => {
         it('modifies the URL with the according params', async () => {
           const setQueryMock = jest.fn();
-          useQueryParams.mockReturnValue([{ rawQuery: '' }, setQueryMock]);
+          useQueryParams.mockReturnValue([{ rawQuery: '', query: {} }, setQueryMock]);
 
           renderML();
 
@@ -230,6 +230,34 @@ describe('Media library homepage', () => {
 
         await waitFor(() =>
           expect(screen.getByText('Upload your first assets...')).toBeInTheDocument()
+        );
+
+        expect(screen.getByRole('main').getAttribute('aria-busy')).toBe('false');
+      });
+
+      it('shows an empty state when there are no assets and that there s a search', async () => {
+        useQueryParams.mockReturnValue([{ rawQuery: '', query: { _q: 'hello-moto' } }]);
+
+        renderML();
+
+        await waitFor(() =>
+          expect(
+            screen.getByText('There are no assets with the applied filters')
+          ).toBeInTheDocument()
+        );
+
+        expect(screen.getByRole('main').getAttribute('aria-busy')).toBe('false');
+      });
+
+      it('shows an empty state when there are no assets and that there s a filter', async () => {
+        useQueryParams.mockReturnValue([{ rawQuery: '', query: { filters: [{ key: 'value' }] } }]);
+
+        renderML();
+
+        await waitFor(() =>
+          expect(
+            screen.getByText('There are no assets with the applied filters')
+          ).toBeInTheDocument()
         );
 
         expect(screen.getByRole('main').getAttribute('aria-busy')).toBe('false');

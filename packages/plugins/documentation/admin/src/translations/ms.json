@@ -1,11 +1,8 @@
 {
-  "components.Row.generatedDate": "Hasil yang lalu",
   "components.Row.open": "Buka",
   "components.Row.regenerate": "Hasilkan Semula",
   "containers.HomePage.Block.title": "Versi",
-  "containers.HomePage.Button.open": "Buka Dokumen",
   "containers.HomePage.Button.update": "Kemas Kini",
-  "containers.HomePage.PluginHeader.description": "Tetapkan plugin dokumen the documentation plugin",
   "containers.HomePage.PluginHeader.title": "Dokumen - Tetapan",
   "containers.HomePage.PopUpWarning.confirm": "Saya faham",
   "containers.HomePage.PopUpWarning.message": "Anda pasti untuk memadam versi ini?",

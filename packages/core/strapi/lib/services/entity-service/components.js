@@ -4,6 +4,7 @@ const _ = require('lodash');
 const { has, prop, omit, toString } = require('lodash/fp');
 
 const { contentTypes: contentTypesUtils } = require('@strapi/utils');
+const { ApplicationError } = require('@strapi/utils').errors;
 
 const omitComponentData = (contentType, data) => {
   const { attributes } = contentType;
@@ -208,11 +209,9 @@ const deleteOldComponents = async (
 
   idsToKeep.forEach(id => {
     if (!allIds.includes(id)) {
-      const err = new Error(
+      throw new ApplicationError(
         `Some of the provided components in ${attributeName} are not related to the entity`
       );
-      err.status = 400;
-      throw err;
     }
   });
 

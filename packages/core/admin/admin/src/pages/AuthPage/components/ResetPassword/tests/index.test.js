@@ -62,10 +62,10 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
       }
 
       .c34 {
-        font-weight: 500;
+        font-weight: 600;
+        color: #32324d;
         font-size: 0.75rem;
         line-height: 1.33;
-        color: #32324d;
       }
 
       .c31 {
@@ -138,7 +138,7 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         background: #4945ff;
       }
 
-      .c32 .sc-dwfUuu {
+      .c32 .sc-eCstlR {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -284,24 +284,23 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
       }
 
       .c21 {
-        font-weight: 500;
+        font-weight: 600;
+        color: #32324d;
         font-size: 0.75rem;
         line-height: 1.33;
-        color: #32324d;
       }
 
       .c22 {
-        font-weight: 400;
+        line-height: 1.14;
+        color: #d02b20;
         font-size: 0.875rem;
         line-height: 1.43;
-        color: #d02b20;
       }
 
       .c30 {
-        font-weight: 400;
+        color: #666687;
         font-size: 0.75rem;
         line-height: 1.33;
-        color: #666687;
       }
 
       .c27 {
@@ -425,18 +424,7 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
       }
 
       .c38 {
-        font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
         color: #4945ff;
-      }
-
-      .c39 {
-        font-weight: 600;
-        line-height: 1.14;
-      }
-
-      .c40 {
         font-weight: 600;
         font-size: 0.6875rem;
         line-height: 1.45;
@@ -498,10 +486,10 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
       }
 
       .c5 {
-        font-weight: 500;
+        font-weight: 600;
+        color: #32324d;
         font-size: 0.75rem;
         line-height: 1.33;
-        color: #32324d;
       }
 
       .c7 {
@@ -918,7 +906,7 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
                   href="/auth/login"
                 >
                   <span
-                    class="c38 c39 c40"
+                    class="c38"
                   >
                     Ready to sign in?
                   </span>

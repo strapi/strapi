@@ -46,10 +46,10 @@ const Component = ({
   const { getComponentLayout } = useContentTypeLayout();
   const { icon, friendlyName } = useMemo(() => {
     const {
-      info: { icon, name },
+      info: { icon, displayName },
     } = getComponentLayout(componentUid);
 
-    return { friendlyName: name, icon };
+    return { friendlyName: displayName, icon };
   }, [componentUid, getComponentLayout]);
 
   const handleMoveComponentDown = () => moveComponentDown(name, index);

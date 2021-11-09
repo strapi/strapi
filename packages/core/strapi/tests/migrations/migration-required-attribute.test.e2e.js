@@ -53,7 +53,7 @@ describe('Migration - required attribute', () => {
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
 
-    data.dogs = builder.sanitizedFixturesFor(dogModel.singularName, strapi);
+    data.dogs = await builder.sanitizedFixturesFor(dogModel.singularName, strapi);
   });
 
   afterAll(async () => {
@@ -95,7 +95,24 @@ describe('Migration - required attribute', () => {
         url: '/content-manager/collection-types/api::dog.dog',
         body: { name: null },
       });
-      expect(res.body.message).toBe('ValidationError');
+
+      expect(res.body).toMatchObject({
+        data: null,
+        error: {
+          details: {
+            errors: [
+              {
+                message: 'name must be a `string` type, but the final value was: `null`.',
+                name: 'ValidationError',
+                path: ['name'],
+              },
+            ],
+          },
+          message: 'name must be a `string` type, but the final value was: `null`.',
+          name: 'ValidationError',
+          status: 400,
+        },
+      });
     });
   });
 

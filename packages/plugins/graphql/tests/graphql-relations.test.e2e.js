@@ -29,7 +29,7 @@ const rgbColorComponent = {
       type: 'integer',
     },
   },
-  name: 'rgbColor',
+  displayName: 'rgbColor',
 };
 
 const documentModel = {
@@ -690,7 +690,6 @@ describe('Test Graphql Relations API End to End', () => {
         errors: [
           {
             message: 'Cannot query field "privateName" on type "Person".',
-            // message: 'Cannot query field "people" on type "Query".',
           },
         ],
       });

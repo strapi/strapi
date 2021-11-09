@@ -29,7 +29,7 @@ describe('hasDraftAndPublish policy', () => {
 
   test('It should succeed when the model has draft & publish enabled', () => {
     const ctx = { params: { model: 'foo' } };
-    const res = hasDraftAndPublish(ctx, { strapi: global.strapi });
+    const res = hasDraftAndPublish(ctx, {}, { strapi: global.strapi });
 
     expect(res).toBe(true);
   });
@@ -37,21 +37,21 @@ describe('hasDraftAndPublish policy', () => {
   test(`It should fail when the model has draft & publish disabled`, () => {
     const ctx = { params: { model: 'bar' } };
 
-    expect(() => hasDraftAndPublish(ctx, { strapi: global.strapi })).toThrowError('forbidden');
-    expect(strapi.errors.forbidden).toHaveBeenCalled();
+    const res = hasDraftAndPublish(ctx, {}, { strapi: global.strapi });
+    expect(res).toBe(false);
   });
 
   test(`It should fail when the model doesn't exists`, () => {
     const ctx = { params: { model: 'foobar' } };
 
-    expect(() => hasDraftAndPublish(ctx, { strapi: global.strapi })).toThrowError('forbidden');
-    expect(strapi.errors.forbidden).toHaveBeenCalled();
+    const res = hasDraftAndPublish(ctx, {}, { strapi: global.strapi });
+    expect(res).toBe(false);
   });
 
   test(`It should fail when params.model isn't provided`, () => {
     const ctx = { params: {} };
 
-    expect(() => hasDraftAndPublish(ctx, { strapi: global.strapi })).toThrowError('forbidden');
-    expect(strapi.errors.forbidden).toHaveBeenCalled();
+    const res = hasDraftAndPublish(ctx, {}, { strapi: global.strapi });
+    expect(res).toBe(false);
   });
 });

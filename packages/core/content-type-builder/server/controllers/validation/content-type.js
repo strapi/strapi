@@ -1,7 +1,8 @@
 'use strict';
 
 const _ = require('lodash');
-const { yup, formatYupErrors } = require('@strapi/utils');
+const { yup, validateYupSchema } = require('@strapi/utils');
+
 const { getService } = require('../../utils');
 const { modelTypes, DEFAULT_TYPES, typeKinds } = require('../../services/constants');
 const createSchema = require('./model-schema');
@@ -84,12 +85,7 @@ const createContentTypeSchema = (data, { isEdition = false } = {}) => {
  * Validator for content type creation
  */
 const validateContentTypeInput = data => {
-  return createContentTypeSchema(data)
-    .validate(data, {
-      strict: true,
-      abortEarly: false,
-    })
-    .catch(error => Promise.reject(formatYupErrors(error)));
+  return validateYupSchema(createContentTypeSchema(data))(data);
 };
 
 /**
@@ -110,12 +106,7 @@ const validateUpdateContentTypeInput = data => {
 
   removeDeletedUIDTargetFields(data.contentType);
 
-  return createContentTypeSchema(data, { isEdition: true })
-    .validate(data, {
-      strict: true,
-      abortEarly: false,
-    })
-    .catch(error => Promise.reject(formatYupErrors(error)));
+  return validateYupSchema(createContentTypeSchema(data, { isEdition: true }))(data);
 };
 
 const forbiddenContentTypeNameValidator = () => {
@@ -155,16 +146,10 @@ const alreadyUsedContentTypeName = isEdition => {
 /**
  * Validates type kind
  */
-const validateKind = kind => {
-  return yup
-    .string()
-    .oneOf([typeKinds.SINGLE_TYPE, typeKinds.COLLECTION_TYPE])
-    .validate(kind)
-    .catch(error => Promise.reject(formatYupErrors(error)));
-};
+const kindSchema = yup.string().oneOf([typeKinds.SINGLE_TYPE, typeKinds.COLLECTION_TYPE]);
 
 module.exports = {
   validateContentTypeInput,
   validateUpdateContentTypeInput,
-  validateKind,
+  validateKind: validateYupSchema(kindSchema),
 };

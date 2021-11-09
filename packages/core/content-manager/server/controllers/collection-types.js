@@ -1,10 +1,10 @@
 'use strict';
 
-const { pipe, prop, pick } = require('lodash/fp');
+const { prop, pick } = require('lodash/fp');
 const { MANY_RELATIONS } = require('@strapi/utils').relations.constants;
-const { setCreatorFields } = require('@strapi/utils');
+const { setCreatorFields, sanitize } = require('@strapi/utils');
 
-const { getService, wrapBadRequest, pickWritableAttributes } = require('../utils');
+const { getService, pickWritableAttributes } = require('../utils');
 const { validateBulkDeleteInput, validatePagination } = require('./validation');
 
 module.exports = {
@@ -27,8 +27,12 @@ module.exports = {
       model
     );
 
+    const sanitizedResults = await Promise.all(
+      results.map(result => permissionChecker.sanitizeOutput(result))
+    );
+
     ctx.body = {
-      results: results.map(entity => permissionChecker.sanitizeOutput(entity)),
+      results: sanitizedResults,
       pagination,
     };
   },
@@ -54,7 +58,7 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    ctx.body = permissionChecker.sanitizeOutput(entity);
+    ctx.body = await permissionChecker.sanitizeOutput(entity);
   },
 
   async create(ctx) {
@@ -75,17 +79,16 @@ module.exports = {
     const pickPermittedFields = permissionChecker.sanitizeCreateInput;
     const setCreator = setCreatorFields({ user });
 
-    const sanitizeFn = pipe([pickWritables, pickPermittedFields, setCreator]);
+    const sanitizeFn = sanitize.utils.pipeAsync(pickWritables, pickPermittedFields, setCreator);
 
-    await wrapBadRequest(async () => {
-      const entity = await entityManager.create(sanitizeFn(body), model);
+    const sanitizedBody = await sanitizeFn(body);
+    const entity = await entityManager.create(sanitizedBody, model);
 
-      ctx.body = permissionChecker.sanitizeOutput(entity);
+    ctx.body = await permissionChecker.sanitizeOutput(entity);
 
-      if (totalEntries === 0) {
-        strapi.telemetry.send('didCreateFirstContentTypeEntry', { model });
-      }
-    })();
+    if (totalEntries === 0) {
+      strapi.telemetry.send('didCreateFirstContentTypeEntry', { model });
+    }
   },
 
   async update(ctx) {
@@ -114,13 +117,12 @@ module.exports = {
     const pickPermittedFields = permissionChecker.sanitizeUpdateInput(entity);
     const setCreator = setCreatorFields({ user, isEdition: true });
 
-    const sanitizeFn = pipe([pickWritables, pickPermittedFields, setCreator]);
+    const sanitizeFn = sanitize.utils.pipeAsync(pickWritables, pickPermittedFields, setCreator);
 
-    await wrapBadRequest(async () => {
-      const updatedEntity = await entityManager.update(entity, sanitizeFn(body), model);
+    const sanitizedBody = await sanitizeFn(body);
+    const updatedEntity = await entityManager.update(entity, sanitizedBody, model);
 
-      ctx.body = permissionChecker.sanitizeOutput(updatedEntity);
-    })();
+    ctx.body = await permissionChecker.sanitizeOutput(updatedEntity);
   },
 
   async delete(ctx) {
@@ -146,7 +148,7 @@ module.exports = {
 
     const result = await entityManager.delete(entity, model);
 
-    ctx.body = permissionChecker.sanitizeOutput(result);
+    ctx.body = await permissionChecker.sanitizeOutput(result);
   },
 
   async publish(ctx) {
@@ -172,7 +174,7 @@ module.exports = {
 
     const result = await entityManager.publish(entity, model);
 
-    ctx.body = permissionChecker.sanitizeOutput(result);
+    ctx.body = await permissionChecker.sanitizeOutput(result);
   },
 
   async unpublish(ctx) {
@@ -198,7 +200,7 @@ module.exports = {
 
     const result = await entityManager.unpublish(entity, model);
 
-    ctx.body = permissionChecker.sanitizeOutput(result);
+    ctx.body = await permissionChecker.sanitizeOutput(result);
   },
 
   async bulkDelete(ctx) {

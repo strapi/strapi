@@ -104,10 +104,9 @@ describe('Filtering API', () => {
     strapi = await createStrapiInstance();
     rq = await createContentAPIRequest({ strapi });
 
-    Object.assign(
-      data,
-      _.mapValues(builder.sanitizedFixtures(strapi), value => transformToRESTResource(value))
-    );
+    const sanitizedFixtures = await builder.sanitizedFixtures(strapi);
+
+    Object.assign(data, _.mapValues(sanitizedFixtures, value => transformToRESTResource(value)));
   });
 
   afterAll(async () => {

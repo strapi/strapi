@@ -32,8 +32,6 @@
   "list.assets-empty.subtitle": "Add one to the list.",
   "list.assets-empty.title": "Nie ma jeszcze żadnych zasobów",
   "list.assets-empty.title-withSearch": "Brak zasobów pasujących do wybranych filtrów",
-  "list.assets.selected.plural": "{number} wybranych zasobów",
-  "list.assets.selected.singular": "{number} wybrany zasób",
   "list.assets.type-not-allowed": "Ten typ pliku jest niedozwolony.",
   "modal.file-details.date": "Data",
   "modal.file-details.dimensions": "Wymiary",

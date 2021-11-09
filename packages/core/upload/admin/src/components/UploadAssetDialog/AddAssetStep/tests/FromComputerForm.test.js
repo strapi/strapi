@@ -4,10 +4,7 @@ import { render as renderTL } from '@testing-library/react';
 import { FromComputerForm } from '../FromComputerForm';
 import en from '../../../../translations/en.json';
 
-jest.mock('../../../../utils', () => ({
-  ...jest.requireActual('../../../../utils'),
-  getTrad: x => x,
-}));
+jest.mock('../../../../utils/getTrad', () => x => x);
 
 jest.mock('react-intl', () => ({
   useIntl: () => ({ formatMessage: jest.fn(({ id }) => en[id] || 'App level translation') }),
@@ -159,10 +156,10 @@ describe('FromComputerForm', () => {
       }
 
       .c15 {
-        font-weight: 500;
+        font-weight: 600;
+        color: #32324d;
         font-size: 0.75rem;
         line-height: 1.33;
-        color: #32324d;
       }
 
       .c12 {
@@ -235,7 +232,7 @@ describe('FromComputerForm', () => {
         background: #4945ff;
       }
 
-      .c13 .sc-hxqEdz {
+      .c13 .sc-jcRCNh {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -300,7 +297,7 @@ describe('FromComputerForm', () => {
         background: #ffffff;
       }
 
-      .c21 .sc-hxqEdz {
+      .c21 .sc-jcRCNh {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;

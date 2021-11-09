@@ -32,8 +32,6 @@
   "list.assets-empty.subtitle": "Pridať jeden do zoznamu.",
   "list.assets-empty.title": "Zaitaľ neexistujú žiadne súbory",
   "list.assets-empty.title-withSearch": "Neexistujú žiadne súbory so zvoleným filtrom",
-  "list.assets.selected.plural": "{number} zvolené/ých súbory/ov",
-  "list.assets.selected.singular": "{number} zvolený súbor",
   "list.assets.type-not-allowed": "Tento typ súboru nie je podporovaný.",
   "modal.file-details.date": "Dátum",
   "modal.file-details.dimensions": "Dimenzie",

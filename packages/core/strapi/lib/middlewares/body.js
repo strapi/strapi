@@ -11,7 +11,7 @@ const defaults = {
 /**
  * @type {import('./').MiddlewareFactory}
  */
-module.exports = (config, { strapi }) => {
+module.exports = config => {
   const bodyConfig = defaultsDeep(defaults, config);
 
   return async (ctx, next) => {
@@ -21,17 +21,10 @@ module.exports = (config, { strapi }) => {
     }
 
     try {
-      return body({ patchKoa: true, ...bodyConfig })(ctx, next);
+      await body({ patchKoa: true, ...bodyConfig })(ctx, next);
     } catch (e) {
       if ((e || {}).message && e.message.includes('maxFileSize exceeded')) {
-        throw strapi.errors.entityTooLarge('FileTooBig', {
-          errors: [
-            {
-              id: 'parser.file.status.sizeLimit',
-              message: `file is bigger than the limit size!`,
-            },
-          ],
-        });
+        return ctx.payloadTooLarge('FileTooBig');
       }
 
       throw e;

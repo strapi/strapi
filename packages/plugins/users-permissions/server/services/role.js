@@ -1,6 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
+const { NotFoundError } = require('@strapi/utils').errors;
 const { getService } = require('../utils');
 
 module.exports = ({ strapi }) => ({
@@ -46,7 +47,7 @@ module.exports = ({ strapi }) => ({
       .findOne({ where: { id: roleID }, populate: ['permissions'] });
 
     if (!role) {
-      throw new Error('Role not found');
+      throw new NotFoundError('Role not found');
     }
 
     const allActions = getService('users-permissions').getActions();
@@ -85,7 +86,7 @@ module.exports = ({ strapi }) => ({
       .findOne({ where: { id: roleID }, populate: ['permissions'] });
 
     if (!role) {
-      throw new Error('Role not found');
+      throw new NotFoundError('Role not found');
     }
 
     await strapi.query('plugin::users-permissions.role').update({
@@ -147,7 +148,7 @@ module.exports = ({ strapi }) => ({
       .findOne({ where: { id: roleID }, populate: ['users', 'permissions'] });
 
     if (!role) {
-      throw new Error('Role not found');
+      throw new NotFoundError('Role not found');
     }
 
     // Move users to guest role.

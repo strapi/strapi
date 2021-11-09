@@ -1,6 +1,7 @@
 'use strict';
 
 const { has, omit, isArray } = require('lodash/fp');
+const { ApplicationError } = require('@strapi/utils').errors;
 const { getService } = require('../utils');
 
 const LOCALE_QUERY_FILTER = 'locale';
@@ -62,7 +63,7 @@ const assignValidLocale = async data => {
   try {
     data.locale = await getValidLocale(data.locale);
   } catch (e) {
-    throw strapi.errors.badRequest("This locale doesn't exist");
+    throw new ApplicationError("This locale doesn't exist");
   }
 };
 

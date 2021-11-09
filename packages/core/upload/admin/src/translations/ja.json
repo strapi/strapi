@@ -32,8 +32,6 @@
   "list.assets-empty.subtitle": "最初の1つを追加します。",
   "list.assets-empty.title": "アセットはまだありません",
   "list.assets-empty.title-withSearch": "適用されたフィルターを持つアセットはありません",
-  "list.assets.selected.plural": "選択されたアセット数: {number}",
-  "list.assets.selected.singular": "選択されたアセット数: {number}",
   "list.assets.type-not-allowed": "このファイルの拡張子は許可されていません。",
   "modal.file-details.date": "日付",
   "modal.file-details.dimensions": "寸法",

@@ -9,14 +9,14 @@ import { ConfirmDialog } from '@strapi/helper-plugin';
 import { useBulkRemoveAsset } from '../../../hooks/useBulkRemoveAsset';
 import getTrad from '../../../utils/getTrad';
 
-export const BulkDeleteButton = ({ assetIds, onSuccess }) => {
+export const BulkDeleteButton = ({ selectedAssets, onSuccess }) => {
   const { formatMessage } = useIntl();
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
   const { isLoading, removeAssets } = useBulkRemoveAsset();
 
   const handleConfirmRemove = async () => {
-    await removeAssets(assetIds);
+    await removeAssets(selectedAssets.map(({ id }) => id));
     onSuccess();
   };
 
@@ -26,11 +26,12 @@ export const BulkDeleteButton = ({ assetIds, onSuccess }) => {
         <Subtitle textColor="neutral600">
           {formatMessage(
             {
-              id: getTrad('list.assets.selected.plural'),
-              defaultMessage: '1 asset selected',
+              id: getTrad('list.assets.selected'),
+              defaultMessage:
+                '{number, plural, =0 {No asset} one {1 asset} other {# assets}} selected',
             },
             {
-              number: assetIds.length,
+              number: selectedAssets.length,
             }
           )}
         </Subtitle>
@@ -55,6 +56,6 @@ export const BulkDeleteButton = ({ assetIds, onSuccess }) => {
 };
 
 BulkDeleteButton.propTypes = {
-  assetIds: PropTypes.arrayOf(PropTypes.number).isRequired,
+  selectedAssets: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
   onSuccess: PropTypes.func.isRequired,
 };

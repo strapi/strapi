@@ -2,8 +2,6 @@
 
 // Test a simple default API with no relations
 
-const _ = require('lodash');
-
 const { createTestBuilder } = require('../../../../../../test/helpers/builder');
 const { createStrapiInstance } = require('../../../../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../../../../test/helpers/request');
@@ -16,7 +14,7 @@ let data = {
 };
 
 const compo = {
-  name: 'compo',
+  displayName: 'compo',
   attributes: {
     name: {
       type: 'string',
@@ -193,9 +191,23 @@ describe('CM API - Basic + compo + draftAndPublish', () => {
       });
 
       expect(res.statusCode).toBe(400);
-      expect(_.get(res.body.data, ['errors', 'compo.description', '0'])).toBe(
-        'compo.description must be at most 30 characters'
-      );
+      expect(res.body).toMatchObject({
+        data: null,
+        error: {
+          status: 400,
+          name: 'ValidationError',
+          message: 'compo.description must be at most 30 characters',
+          details: {
+            errors: [
+              {
+                path: ['compo', 'description'],
+                message: 'compo.description must be at most 30 characters',
+                name: 'ValidationError',
+              },
+            ],
+          },
+        },
+      });
     });
 
     test('Can create product with compo - required', async () => {

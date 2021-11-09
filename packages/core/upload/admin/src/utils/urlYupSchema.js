@@ -3,7 +3,7 @@ import * as yup from 'yup';
 import { translatedErrors as errorsTrads } from '@strapi/helper-plugin';
 import getTrad from './getTrad';
 
-const urlSchema = yup.object().shape({
+export const urlSchema = yup.object().shape({
   urls: yup.string().test({
     name: 'isUrlValid',
     message: '${path}',
@@ -55,5 +55,3 @@ const urlSchema = yup.object().shape({
     },
   }),
 });
-
-export default urlSchema;

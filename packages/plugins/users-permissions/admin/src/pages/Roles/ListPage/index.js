@@ -23,7 +23,7 @@ import {
   useRBAC,
   NoPermissions,
   LoadingIndicatorPage,
-  Search,
+  SearchURLQuery,
   useQueryParams,
   EmptyStateLayout,
   ConfirmDialog,
@@ -137,7 +137,7 @@ const RoleListPage = () => {
           })}
           primaryAction={
             <CheckPermissions permissions={permissions.createRole}>
-              <Button onClick={handleNewRoleClick} startIcon={<Plus />}>
+              <Button onClick={handleNewRoleClick} startIcon={<Plus />} size="L">
                 {formatMessage({
                   id: getTrad('List.button.roles'),
                   defaultMessage: 'Add new role',
@@ -149,7 +149,7 @@ const RoleListPage = () => {
 
         <ActionLayout
           startActions={
-            <Search
+            <SearchURLQuery
               label={formatMessage({
                 id: 'app.component.search.label',
                 defaultMessage: 'Search',

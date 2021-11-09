@@ -33,7 +33,7 @@ describe('Application page', () => {
     } = render(App);
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c11 {
+      .c10 {
         background: #ffffff;
         padding-top: 32px;
         padding-right: 24px;
@@ -43,11 +43,11 @@ describe('Application page', () => {
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
-      .c27 {
+      .c22 {
         padding-top: 4px;
       }
 
-      .c12 {
+      .c11 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -57,46 +57,13 @@ describe('Application page', () => {
         flex-direction: column;
       }
 
-      .c12 > * {
+      .c11 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c12 > * + * {
+      .c11 > * + * {
         margin-top: 20px;
-      }
-
-      .c13 {
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c17 {
-        font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #666687;
-      }
-
-      .c20 {
-        font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #32324d;
-      }
-
-      .c18 {
-        font-weight: 600;
-        line-height: 1.14;
-      }
-
-      .c19 {
-        font-weight: 600;
-        font-size: 0.6875rem;
-        line-height: 1.45;
-        text-transform: uppercase;
       }
 
       .c1 {
@@ -111,7 +78,7 @@ describe('Application page', () => {
         padding-left: 56px;
       }
 
-      .c10 {
+      .c9 {
         padding-right: 56px;
         padding-left: 56px;
       }
@@ -158,20 +125,14 @@ describe('Application page', () => {
       }
 
       .c7 {
+        color: #32324d;
         font-weight: 600;
         font-size: 2rem;
         line-height: 1.25;
-        color: #32324d;
       }
 
       .c8 {
-        font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
         color: #666687;
-      }
-
-      .c9 {
         font-size: 1rem;
         line-height: 1.5;
       }
@@ -180,44 +141,54 @@ describe('Application page', () => {
         outline: none;
       }
 
-      .c14 {
+      .c13 {
         padding-top: 4px;
       }
 
-      .c15 {
+      .c14 {
         display: grid;
         grid-template-columns: repeat(12,1fr);
         gap: 0px;
       }
 
-      .c16 {
+      .c15 {
         grid-column: span 6;
       }
 
-      .c22 {
-        font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #4945ff;
+      .c12 {
+        color: #32324d;
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
       }
 
-      .c23 {
-        font-weight: 600;
-        line-height: 1.14;
-      }
-
-      .c24 {
+      .c16 {
+        color: #666687;
         font-weight: 600;
         font-size: 0.6875rem;
         line-height: 1.45;
         text-transform: uppercase;
       }
 
-      .c25 {
+      .c17 {
+        color: #32324d;
+        font-size: 0.875rem;
+        line-height: 1.43;
+      }
+
+      .c19 {
+        color: #4945ff;
+        font-weight: 600;
+        font-size: 0.6875rem;
+        line-height: 1.45;
+        text-transform: uppercase;
+      }
+
+      .c20 {
         padding-left: 8px;
       }
 
-      .c21 {
+      .c18 {
         display: -webkit-inline-box;
         display: -webkit-inline-flex;
         display: -ms-inline-flexbox;
@@ -233,15 +204,15 @@ describe('Application page', () => {
         outline: none;
       }
 
-      .c21 svg path {
+      .c18 svg path {
         fill: #4945ff;
       }
 
-      .c21 svg {
+      .c18 svg {
         font-size: 0.625rem;
       }
 
-      .c21:after {
+      .c18:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -256,11 +227,11 @@ describe('Application page', () => {
         border: 2px solid transparent;
       }
 
-      .c21:focus-visible {
+      .c18:focus-visible {
         outline: none;
       }
 
-      .c21:focus-visible:after {
+      .c18:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -271,7 +242,7 @@ describe('Application page', () => {
         border: 2px solid #4945ff;
       }
 
-      .c26 {
+      .c21 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -279,13 +250,13 @@ describe('Application page', () => {
       }
 
       @media (max-width:68.75rem) {
-        .c16 {
+        .c15 {
           grid-column: span 12;
         }
       }
 
       @media (max-width:34.375rem) {
-        .c16 {
+        .c15 {
           grid-column: span;
         }
       }
@@ -317,49 +288,48 @@ describe('Application page', () => {
                   >
                     <h1
                       class="c7"
-                      id="main-content-title"
                     >
                       Application
                     </h1>
                   </div>
                 </div>
                 <p
-                  class="c8 c9"
+                  class="c8"
                 >
                   See your project's details
                 </p>
               </div>
             </div>
             <div
-              class="c10"
+              class="c9"
             >
               <div
-                class="c11"
+                class="c10"
               >
                 <div
-                  class="c12"
+                  class="c11"
                 >
-                  <h3
-                    class="c13"
+                  <span
+                    class="c12"
                   >
                     Information
-                  </h3>
+                  </span>
                   <div
-                    class="c14 c15"
+                    class="c13 c14"
                   >
                     <div
-                      class="c16"
+                      class="c15"
                     >
                       <div
                         class=""
                       >
                         <span
-                          class="c17 c18 c19"
+                          class="c16"
                         >
                           details
                         </span>
                         <p
-                          class="c20"
+                          class="c17"
                         >
                           v
                           4.0.0
@@ -367,18 +337,18 @@ describe('Application page', () => {
                       </div>
                     </div>
                     <div
-                      class="c16"
+                      class="c15"
                     >
                       <div
                         class=""
                       >
                         <span
-                          class="c17 c18 c19"
+                          class="c16"
                         >
                           current plan
                         </span>
                         <p
-                          class="c20"
+                          class="c17"
                         >
                           Enterprise Edition
                         </p>
@@ -386,28 +356,28 @@ describe('Application page', () => {
                     </div>
                   </div>
                   <div
-                    class="c14 c15"
+                    class="c13 c14"
                   >
                     <div
-                      class="c16"
+                      class="c15"
                     >
                       <div
                         class=""
                       >
                         <a
-                          class="c21"
+                          class="c18"
                           href="https://github.com/strapi/strapi/releases/tag/v3.6.8"
                           rel="noreferrer noopener"
                           target="_blank"
                         >
                           <span
-                            class="c22 c23 c24"
+                            class="c19"
                           >
                             Upgrade your admin panel
                           </span>
                           <span
                             aria-hidden="true"
-                            class="c25 c26"
+                            class="c20 c21"
                           >
                             <svg
                               fill="none"
@@ -426,25 +396,25 @@ describe('Application page', () => {
                       </div>
                     </div>
                     <div
-                      class="c16"
+                      class="c15"
                     >
                       <div
                         class=""
                       >
                         <a
-                          class="c21"
+                          class="c18"
                           href="https://strapi.io/pricing-self-hosted"
                           rel="noreferrer noopener"
                           target="_blank"
                         >
                           <span
-                            class="c22 c23 c24"
+                            class="c19"
                           >
                             See all pricing
                           </span>
                           <span
                             aria-hidden="true"
-                            class="c25 c26"
+                            class="c20 c21"
                           >
                             <svg
                               fill="none"
@@ -464,15 +434,15 @@ describe('Application page', () => {
                     </div>
                   </div>
                   <div
-                    class="c27"
+                    class="c22"
                   >
                     <span
-                      class="c17 c18 c19"
+                      class="c16"
                     >
                       node version
                     </span>
                     <p
-                      class="c20"
+                      class="c17"
                     />
                   </div>
                 </div>

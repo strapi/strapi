@@ -2,12 +2,15 @@
 
 const _ = require('lodash');
 const { contentTypes: contentTypesUtils } = require('@strapi/utils');
+const {
+  ApplicationError,
+  ValidationError,
+  NotFoundError,
+  ForbiddenError,
+} = require('@strapi/utils').errors;
+const { validateCreateUserBody, validateUpdateUserBody } = require('./validation/user');
 
 const { UPDATED_BY_ATTRIBUTE, CREATED_BY_ATTRIBUTE } = contentTypesUtils.constants;
-
-const formatError = error => [
-  { messages: [{ id: error.id, message: error.message, field: error.field }] },
-];
 
 const userModel = 'plugin::users-permissions.user';
 const ACTIONS = {
@@ -24,13 +27,13 @@ const findEntityAndCheckPermissions = async (ability, action, model, id) => {
   });
 
   if (_.isNil(entity)) {
-    throw strapi.errors.notFound();
+    throw new NotFoundError();
   }
 
   const pm = strapi.admin.services.permission.createPermissionsManager({ ability, action, model });
 
   if (pm.ability.cannot(pm.action, pm.toSubject(entity))) {
-    throw strapi.errors.forbidden();
+    throw new ForbiddenError();
   }
 
   const entityWithoutCreatorRoles = _.omit(entity, `${CREATED_BY_ATTRIBUTE}.roles`);
@@ -47,7 +50,7 @@ module.exports = {
     const { body } = ctx.request;
     const { user: admin, userAbility } = ctx.state;
 
-    const { email, username, password } = body;
+    const { email, username } = body;
 
     const pm = strapi.admin.services.permission.createPermissionsManager({
       ability: userAbility,
@@ -56,32 +59,23 @@ module.exports = {
     });
 
     if (!pm.isAllowed) {
-      throw strapi.errors.forbidden();
+      return ctx.forbidden();
     }
 
-    const sanitizedBody = pm.pickPermittedFieldsOf(body, { subject: userModel });
+    const sanitizedBody = await pm.pickPermittedFieldsOf(body, { subject: userModel });
 
     const advanced = await strapi
       .store({ type: 'plugin', name: 'users-permissions', key: 'advanced' })
       .get();
 
-    if (!email) return ctx.badRequest('missing.email');
-    if (!username) return ctx.badRequest('missing.username');
-    if (!password) return ctx.badRequest('missing.password');
+    await validateCreateUserBody(ctx.request.body);
 
     const userWithSameUsername = await strapi
       .query('plugin::users-permissions.user')
       .findOne({ where: { username } });
 
     if (userWithSameUsername) {
-      return ctx.badRequest(
-        null,
-        formatError({
-          id: 'Auth.form.error.username.taken',
-          message: 'Username already taken.',
-          field: ['username'],
-        })
-      );
+      throw new ApplicationError('Username already taken');
     }
 
     if (advanced.unique_email) {
@@ -90,15 +84,7 @@ module.exports = {
         .findOne({ where: { email: email.toLowerCase() } });
 
       if (userWithSameEmail) {
-        return ctx.badRequest(
-          null,
-
-          formatError({
-            id: 'Auth.form.error.email.taken',
-            message: 'Email already taken.',
-            field: ['email'],
-          })
-        );
+        throw new ApplicationError('Email already taken');
       }
     }
 
@@ -123,10 +109,11 @@ module.exports = {
       const data = await strapi
         .service('plugin::content-manager.entity-manager')
         .create(user, userModel);
+      const sanitizedData = await pm.sanitizeOutput(data, { action: ACTIONS.read });
 
-      ctx.created(pm.sanitize(data, { action: ACTIONS.read }));
+      ctx.created(sanitizedData);
     } catch (error) {
-      ctx.badRequest(null, formatError(error));
+      throw new ApplicationError(error.message);
     }
   },
   /**
@@ -145,23 +132,22 @@ module.exports = {
 
     const { email, username, password } = body;
 
-    const { pm, entity: user } = await findEntityAndCheckPermissions(
+    let pm;
+    let user;
+
+    const { pm: permissionManager, entity } = await findEntityAndCheckPermissions(
       userAbility,
       ACTIONS.edit,
       userModel,
       id
     );
+    pm = permissionManager;
+    user = entity;
 
-    if (_.has(body, 'email') && !email) {
-      return ctx.badRequest('email.notNull');
-    }
-
-    if (_.has(body, 'username') && !username) {
-      return ctx.badRequest('username.notNull');
-    }
+    await validateUpdateUserBody(ctx.request.body);
 
     if (_.has(body, 'password') && !password && user.provider === 'local') {
-      return ctx.badRequest('password.notNull');
+      throw new ValidationError('password.notNull');
     }
 
     if (_.has(body, 'username')) {
@@ -170,14 +156,7 @@ module.exports = {
         .findOne({ where: { username } });
 
       if (userWithSameUsername && userWithSameUsername.id != id) {
-        return ctx.badRequest(
-          null,
-          formatError({
-            id: 'Auth.form.error.username.taken',
-            message: 'username.alreadyTaken.',
-            field: ['username'],
-          })
-        );
+        throw new ApplicationError('Username already taken');
       }
     }
 
@@ -187,25 +166,18 @@ module.exports = {
         .findOne({ where: { email: _.toLower(email) } });
 
       if (userWithSameEmail && userWithSameEmail.id != id) {
-        return ctx.badRequest(
-          null,
-          formatError({
-            id: 'Auth.form.error.email.taken',
-            message: 'Email already taken',
-            field: ['email'],
-          })
-        );
+        throw new ApplicationError('Email already taken');
       }
       body.email = _.toLower(body.email);
     }
 
-    const sanitizedData = pm.pickPermittedFieldsOf(body, { subject: pm.toSubject(user) });
+    const sanitizedData = await pm.pickPermittedFieldsOf(body, { subject: pm.toSubject(user) });
     const updateData = _.omit({ ...sanitizedData, updatedBy: admin.id }, 'createdBy');
 
     const data = await strapi
       .service('plugin::content-manager.entity-manager')
       .update({ id }, updateData, userModel);
 
-    ctx.body = pm.sanitize(data, { action: ACTIONS.read });
+    ctx.body = await pm.sanitizeOutput(data, { action: ACTIONS.read });
   },
 };

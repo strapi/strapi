@@ -17,7 +17,7 @@ const forms = {
           {
             sectionTitle: {
               id: getTrad('form.contentType.divider.draft-publish'),
-              defaultMessage: 'DRAFT/PUBLISH',
+              defaultMessage: 'Draft/Publish',
             },
             items: [
               {
