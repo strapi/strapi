@@ -25,8 +25,9 @@ const Editor = ({
       lineWrapping: true,
       extraKeys: {
         Enter: 'newlineAndIndentContinueMarkdownList',
-        Tab: false,
-        'Shift-Tab': false,
+        // Leaving this commented for now
+        // Tab: false,
+        // 'Shift-Tab': false,
       },
       readOnly: false,
       smartIndent: false,
