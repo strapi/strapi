@@ -68,6 +68,7 @@ import {
   RESET_PROPS_AND_SAVE_CURRENT_DATA,
   RESET_PROPS,
 } from './constants';
+import SelectNumber from '../SelectNumber';
 
 /* eslint-disable indent */
 /* eslint-disable react/no-array-index-key */
@@ -832,6 +833,7 @@ const FormModal = () => {
       'select-component': SelectComponent,
       'select-components': SelectComponents,
       'select-default-boolean': BooleanDefaultValueSelect,
+      'select-number': SelectNumber,
       'toggle-draft-publish': DraftAndPublishToggle,
       'text-plural': PluralName,
       'text-singular': SingularName,
@@ -882,6 +884,8 @@ const FormModal = () => {
   );
 
   const schemaKind = get(contentTypes, [targetUid, 'schema', 'kind']);
+
+  console.log({ formModal: modifiedData });
 
   return (
     <>
