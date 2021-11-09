@@ -1,4 +1,6 @@
-import { isEqual, transform, isObject } from 'lodash';
+import isEqual from 'lodash/isEqual';
+import transform from 'lodash/transform';
+import isObject from 'lodash/isObject';
 
 function difference(object, base) {
   function changes(object, base) {

@@ -1,6 +1,6 @@
 import 'whatwg-fetch';
-import _ from 'lodash';
-import auth from '../../utils/auth';
+import startsWith from 'lodash/startsWith';
+import auth from '../auth';
 
 /**
  * Parses the JSON returned by a network request
@@ -130,7 +130,7 @@ export default function request(...args) {
   }
 
   // Add parameters to url
-  url = _.startsWith(url, '/') ? `${strapi.backendURL}${url}` : url;
+  url = startsWith(url, '/') ? `${strapi.backendURL}${url}` : url;
 
   if (options && options.params) {
     const params = formatQueryParams(options.params);

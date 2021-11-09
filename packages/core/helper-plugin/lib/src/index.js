@@ -36,25 +36,6 @@ export { default as NotificationsProvider } from './providers/NotificationsProvi
 export { default as StrapiAppProvider } from './providers/StrapiAppProvider';
 
 // Utils
-export { default as cleanData } from './old/utils/cleanData';
-export { default as difference } from './old/utils/difference';
-
-export { default as dateFormats } from './old/utils/dateFormats';
-export { default as dateToUtcTime } from './old/utils/dateToUtcTime';
-
-export { darken } from './old/utils/colors';
-
-export { default as getFilterType } from './old/utils/getFilterType';
-export { default as getQueryParameters } from './old/utils/getQueryParameters';
-export { default as validateInput } from './old/utils/inputsValidations';
-export { default as request } from './old/utils/request';
-export { default as storeData } from './old/utils/storeData';
-export { default as templateObject } from './old/utils/templateObject';
-
-export { default as getYupInnerErrors } from './old/utils/getYupInnerErrors';
-export { default as generateFiltersFromSearch } from './old/utils/generateFiltersFromSearch';
-export { default as generateSearchFromFilters } from './old/utils/generateSearchFromFilters';
-export { default as generateSearchFromObject } from './old/utils/generateSearchFromObject';
 
 // New components
 export { default as CheckPagePermissions } from './components/CheckPagePermissions';
@@ -116,3 +97,7 @@ export {
 } from './content-manager/utils/contentManagementUtilRemoveFieldsFromData';
 export { default as getFileExtension } from './utils/getFileExtension/getFileExtension';
 export * from './utils/stopPropagation';
+export { default as difference } from './utils/difference';
+
+export { default as request } from './utils/request';
+export { default as getYupInnerErrors } from './utils/getYupInnerErrors';
