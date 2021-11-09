@@ -224,7 +224,7 @@ const baseForm = {
                 defaultMessage: 'Number format',
               },
               name: 'type',
-              type: 'select',
+              type: 'select-number',
               options: [
                 {
                   key: '__null_reset_value__',

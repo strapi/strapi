@@ -111,18 +111,6 @@ const EditorWrapper = styled.div`
 
   /* DEFAULT THEME */
 
-  .cm-s-default .cm-header {
-    color: blue;
-  }
-  .cm-s-default .cm-quote {
-    color: #090;
-  }
-  .cm-negative {
-    color: #d44;
-  }
-  .cm-positive {
-    color: #292;
-  }
   .cm-header,
   .cm-strong {
     font-weight: bold;
@@ -191,7 +179,7 @@ const EditorWrapper = styled.div`
   .CodeMirror-scrollbar-filler,
   .CodeMirror-gutter-filler {
     position: absolute;
-    /* z-index: 6; */
+    z-index: 1;
     display: none;
     outline: none;
   }
@@ -340,6 +328,12 @@ const EditorWrapper = styled.div`
   /* Help users use markselection to safely style text background */
   span.CodeMirror-selectedtext {
     background: none;
+  }
+
+  span {
+    font-family: --apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell,
+      'Open Sans', 'Helvetica Neue', sans-serif;
+    color: ${({ theme }) => theme.colors.neutral800} !important;
   }
 `;
 

@@ -3,6 +3,9 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Flex } from '@strapi/design-system/Flex';
 import { Stack } from '@strapi/design-system/Stack';
+import { Typography } from '@strapi/design-system/Typography';
+import { Icon } from '@strapi/design-system/Icon';
+import EmptyPicturesIcon from '@strapi/icons/EmptyPictures';
 import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
 import getTrad from '../../../../utils/getTrad';
 import { AssetList } from '../../../AssetList';
@@ -66,14 +69,26 @@ export const BrowseStep = ({
           </Flex>
         )}
 
-        <AssetList
-          allowedTypes={allowedTypes}
-          size="S"
-          assets={assets}
-          onSelectAsset={onSelectAsset}
-          selectedAssets={selectedAssets}
-          onEditAsset={onEditAsset}
-        />
+        {assets.length > 0 ? (
+          <AssetList
+            allowedTypes={allowedTypes}
+            size="S"
+            assets={assets}
+            onSelectAsset={onSelectAsset}
+            selectedAssets={selectedAssets}
+            onEditAsset={onEditAsset}
+          />
+        ) : (
+          <Flex justifyContent="center" direction="column" paddingTop={8} paddingBottom={8}>
+            <Icon as={EmptyPicturesIcon} height="114px" width="216px" color="" marginBottom={6} />
+            <Typography variant="delta" textColor="neutral600">
+              {formatMessage({
+                id: getTrad('list.assets-empty.search'),
+                defaultMessage: 'No result found',
+              })}
+            </Typography>
+          </Flex>
+        )}
       </Stack>
       <Flex justifyContent="space-between">
         <PageSize pageSize={queryObject.pageSize} onChangePageSize={onChangePageSize} />
@@ -90,6 +105,7 @@ export const BrowseStep = ({
 BrowseStep.defaultProps = {
   allowedTypes: [],
   onSelectAllAsset: undefined,
+  onEditAsset: undefined,
 };
 
 BrowseStep.propTypes = {
@@ -99,7 +115,7 @@ BrowseStep.propTypes = {
   onChangePageSize: PropTypes.func.isRequired,
   onChangeSort: PropTypes.func.isRequired,
   onChangeSearch: PropTypes.func.isRequired,
-  onEditAsset: PropTypes.func.isRequired,
+  onEditAsset: PropTypes.func,
   onSelectAsset: PropTypes.func.isRequired,
   onSelectAllAsset: PropTypes.func,
   queryObject: PropTypes.shape({

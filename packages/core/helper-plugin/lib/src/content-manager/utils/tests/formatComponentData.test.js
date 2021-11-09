@@ -1,5 +1,5 @@
-import testData from '../../../old/testUtils/testData';
 import formatComponentData from '../formatComponentData';
+import testData from './testData';
 
 const { contentType, components, modifiedData } = testData;
 

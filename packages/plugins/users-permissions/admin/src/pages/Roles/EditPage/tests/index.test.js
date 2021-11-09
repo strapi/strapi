@@ -811,14 +811,13 @@ describe('Admin | containers | RoleEditPage', () => {
 
       .c44 {
         border: 1px solid #ffffff;
-        overflow: hidden;
       }
 
       .c44:hover:not([aria-disabled='true']) {
         border: 1px solid #4945ff;
       }
 
-      .c44:hover:not([aria-disabled='true']) .sc-gzpPtL {
+      .c44:hover:not([aria-disabled='true']) .sc-clQlQD {
         color: #271fe0;
       }
 
@@ -919,6 +918,7 @@ describe('Admin | containers | RoleEditPage', () => {
 
       .c48 {
         height: 5.5rem;
+        border-radius: 4px;
       }
 
       .c48:hover svg path {

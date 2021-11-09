@@ -51,18 +51,18 @@ const types = {
       default: yup
         .string()
         .nullable()
-        .matches(/^\d*$/),
+        .matches(/^-?\d*$/),
       unique: validators.unique(),
       required: validators.required(),
       max: yup
         .string()
         .nullable()
-        .matches(/^\d*$/, errorsTrads.regex),
+        .matches(/^-?\d*$/, errorsTrads.regex),
       min: yup
         .string()
         .nullable()
         .test(isMinSuperiorThanMax)
-        .matches(/^\d*$/, errorsTrads.regex),
+        .matches(/^-?\d*$/, errorsTrads.regex),
     };
 
     return yup.object(shape);
