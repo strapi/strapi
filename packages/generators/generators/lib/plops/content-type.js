@@ -45,8 +45,6 @@ module.exports = plop => {
 
       const filePath = getFilePath(answers.destination);
 
-      console.log({ filePath, answers });
-
       return [
         {
           type: 'add',
