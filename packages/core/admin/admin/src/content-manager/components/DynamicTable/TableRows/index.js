@@ -120,7 +120,7 @@ const TableRows = ({
                       <IconButton
                         onClick={() => {
                           push({
-                            pathname: `${pathname}/create/clone${data.id}`,
+                            pathname: `${pathname}/create/clone/${data.id}`,
                             state: { from: pathname },
                             search: pluginsQueryParams,
                           });
