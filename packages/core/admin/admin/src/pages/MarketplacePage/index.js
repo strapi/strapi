@@ -199,13 +199,14 @@ const MarketPlacePage = () => {
                 </CenterTypography>
               </Flex>
               <Stack paddingTop={6} horizontal size={2}>
-                <LinkButton href="https://strapi.io/" size="L" variant="secondary">
+                {/* Temporarily hidden until we have the right URL for the link */}
+                {/* <LinkButton href="https://strapi.io/" size="L" variant="secondary">
                   {formatMessage({
                     id: 'app.components.InstallPluginPage.submit.plugin.link',
                     defaultMessage: 'Submit your plugin',
                   })}
-                </LinkButton>
-                <LinkButton href="https://strapi.io/" size="L">
+                </LinkButton> */}
+                <LinkButton href="https://strapi.io/blog/strapi-market-is-coming-soon" size="L">
                   {formatMessage({
                     id: 'app.components.InstallPluginPage.blog.link',
                     defaultMessage: 'Read our blog post',
