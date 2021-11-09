@@ -87,7 +87,7 @@
     "markdown-it-sub": "^1.0.0",
     "markdown-it-sup": "1.0.0",
     "match-sorter": "^4.0.2",
-    "mini-css-extract-plugin": "1.6.0",
+    "mini-css-extract-plugin": "2.4.4",
     "moment": "^2.29.1",
     "node-polyfill-webpack-plugin": "1.1.0",
     "p-map": "4.0.0",
