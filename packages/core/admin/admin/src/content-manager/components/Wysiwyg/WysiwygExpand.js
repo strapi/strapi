@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
+import { pxToRem } from '@strapi/helper-plugin';
 import { FocusTrap } from '@strapi/design-system/FocusTrap';
 import { Portal } from '@strapi/design-system/Portal';
 import { Flex } from '@strapi/design-system/Flex';
@@ -74,8 +75,8 @@ const WysiwygExpand = ({
                 />
               </WysiwygContainer>
               <PreviewWrapper>
-                <PreviewHeader padding={2} background="neutral100">
-                  <Flex justifyContent="flex-end" alignItems="flex-end">
+                <PreviewHeader height={pxToRem(48)} background="neutral100">
+                  <Flex height="100%" justifyContent="flex-end" alignItems="center">
                     <ExpandButton id="collapse" onClick={() => onToggleExpand('collapse')}>
                       <Text>
                         {formatMessage({

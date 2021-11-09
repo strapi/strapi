@@ -106,7 +106,6 @@ export const WysiwygContainer = styled(Box)`
 `;
 
 export const PreviewHeader = styled(Box)`
-  border-radius: 0 0 4px 4px;
   border-top: 0;
 `;
 
