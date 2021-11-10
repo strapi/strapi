@@ -17,7 +17,7 @@ import Plus from '@strapi/icons/Plus';
 import FilterValueInput from './FilterValueInput';
 import getFilterList from './utils/getFilterList';
 
-const FilterPopover = ({ displayedFilters, filters, onSubmit, onToggle, source, onBlur }) => {
+const FilterPopover = ({ displayedFilters, filters, onSubmit, onToggle, source }) => {
   const { formatMessage } = useIntl();
 
   const [modifiedData, setModifiedData] = useState({
@@ -192,7 +192,7 @@ const FilterPopover = ({ displayedFilters, filters, onSubmit, onToggle, source, 
 
   return (
     <>
-      <Popover source={source} padding={3} spacing={4} onBlur={onBlur}>
+      <Popover source={source} padding={3} spacing={4}>
         <FocusTrap onEscape={onToggle}>
           <form onSubmit={handleSubmit}>
             <Stack size={1} style={{ minWidth: 184 }}>
@@ -257,9 +257,6 @@ const FilterPopover = ({ displayedFilters, filters, onSubmit, onToggle, source, 
   );
 };
 
-FilterPopover.defaultProps = {
-  onBlur: () => null,
-};
 FilterPopover.propTypes = {
   displayedFilters: PropTypes.arrayOf(
     PropTypes.shape({
@@ -269,7 +266,6 @@ FilterPopover.propTypes = {
     })
   ).isRequired,
   filters: PropTypes.array.isRequired,
-  onBlur: PropTypes.func,
   onSubmit: PropTypes.func.isRequired,
   onToggle: PropTypes.func.isRequired,
   source: PropTypes.shape({ current: PropTypes.instanceOf(Element) }).isRequired,

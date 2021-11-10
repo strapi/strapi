@@ -6,8 +6,6 @@ import { NumberInput } from '@strapi/design-system/NumberInput';
 import { TimePicker } from '@strapi/design-system/TimePicker';
 import { Select, Option } from '@strapi/design-system/Select';
 import { useIntl } from 'react-intl';
-import { formatISO } from 'date-fns';
-import cloneDeep from 'lodash/cloneDeep';
 import DateTimePicker from '../DateTimePicker';
 
 const Inputs = ({ label, onChange, options, type, value }) => {
@@ -33,13 +31,8 @@ const Inputs = ({ label, onChange, options, type, value }) => {
         clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
         ariaLabel={label}
         name="datepicker"
-        onChange={date => {
-          const formattedDate = formatISO(cloneDeep(date), { representation: 'date' });
-
-          onChange(formattedDate);
-        }}
-        onClear={() => onChange('')}
-        // selectedDate={value || null}
+        onChange={date => onChange(date.toISOString())}
+        onClear={() => onChange(null)}
         selectedDate={value ? new Date(value) : null}
         selectedDateLabel={formattedDate => `Date picker, current is ${formattedDate}`}
       />
@@ -52,12 +45,8 @@ const Inputs = ({ label, onChange, options, type, value }) => {
         clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
         ariaLabel={label}
         name="datetimepicker"
-        onChange={date => {
-          const formattedDate = new Date(date).toISOString();
-
-          onChange(formattedDate);
-        }}
-        onClear={() => onChange('')}
+        onChange={date => onChange(date.toISOString())}
+        onClear={() => onChange(null)}
         value={value ? new Date(value) : null}
         selectedDateLabel={formattedDate => `Date picker, current is ${formattedDate}`}
       />
