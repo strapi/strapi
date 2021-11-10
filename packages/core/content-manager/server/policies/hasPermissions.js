@@ -12,13 +12,9 @@ module.exports = createPolicy({
     const { actions = [], hasAtLeastOne = false } = config;
 
     const {
-      state: { userAbility, isAuthenticatedAdmin },
+      state: { userAbility },
       params: { model },
     } = ctx;
-
-    if (!isAuthenticatedAdmin || !userAbility) {
-      return true;
-    }
 
     const isAuthorized = hasAtLeastOne
       ? actions.some(action => userAbility.can(action, model))

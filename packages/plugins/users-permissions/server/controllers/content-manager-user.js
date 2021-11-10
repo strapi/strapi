@@ -8,8 +8,7 @@ const {
   NotFoundError,
   ForbiddenError,
 } = require('@strapi/utils').errors;
-const { getService } = require('../../utils');
-const { validateCreateUserBody, validateUpdateUserBody } = require('../validation/user');
+const { validateCreateUserBody, validateUpdateUserBody } = require('./validation/user');
 
 const { UPDATED_BY_ATTRIBUTE, CREATED_BY_ATTRIBUTE } = contentTypesUtils.constants;
 
@@ -22,7 +21,10 @@ const ACTIONS = {
 };
 
 const findEntityAndCheckPermissions = async (ability, action, model, id) => {
-  const entity = await strapi.query('plugin::users-permissions.user').findOne({ where: { id } });
+  const entity = await strapi.query(userModel).findOne({
+    where: { id },
+    populate: [`${CREATED_BY_ATTRIBUTE}.roles`],
+  });
 
   if (_.isNil(entity)) {
     throw new NotFoundError();
@@ -30,21 +32,13 @@ const findEntityAndCheckPermissions = async (ability, action, model, id) => {
 
   const pm = strapi.admin.services.permission.createPermissionsManager({ ability, action, model });
 
-  const roles = _.has(entity, `${CREATED_BY_ATTRIBUTE}.id`)
-    ? await strapi.query('admin::role').findMany({
-        where: {
-          users: { id: entity[CREATED_BY_ATTRIBUTE].id },
-        },
-      })
-    : [];
-
-  const entityWithRoles = _.set(_.cloneDeep(entity), `${CREATED_BY_ATTRIBUTE}.roles`, roles);
-
-  if (pm.ability.cannot(pm.action, pm.toSubject(entityWithRoles))) {
+  if (pm.ability.cannot(pm.action, pm.toSubject(entity))) {
     throw new ForbiddenError();
   }
 
-  return { pm, entity };
+  const entityWithoutCreatorRoles = _.omit(entity, `${CREATED_BY_ATTRIBUTE}.roles`);
+
+  return { pm, entity: entityWithoutCreatorRoles };
 };
 
 module.exports = {
@@ -112,7 +106,9 @@ module.exports = {
     }
 
     try {
-      const data = await getService('user').add(user);
+      const data = await strapi
+        .service('plugin::content-manager.entity-manager')
+        .create(user, userModel);
       const sanitizedData = await pm.sanitizeOutput(data, { action: ACTIONS.read });
 
       ctx.created(sanitizedData);
@@ -178,7 +174,9 @@ module.exports = {
     const sanitizedData = await pm.pickPermittedFieldsOf(body, { subject: pm.toSubject(user) });
     const updateData = _.omit({ ...sanitizedData, updatedBy: admin.id }, 'createdBy');
 
-    const data = await getService('user').edit({ id }, updateData);
+    const data = await strapi
+      .service('plugin::content-manager.entity-manager')
+      .update({ id }, updateData, userModel);
 
     ctx.body = await pm.sanitizeOutput(data, { action: ACTIONS.read });
   },

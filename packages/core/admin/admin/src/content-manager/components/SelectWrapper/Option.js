@@ -13,7 +13,7 @@ const StyledBullet = styled.div`
   width: ${pxToRem(6)};
   height: ${pxToRem(6)};
   margin-right: ${({ theme }) => theme.spaces[2]};
-  background: ${({ theme, isDraft }) => theme.colors[isDraft ? 'secondary700' : 'success200']};
+  background: ${({ theme, isDraft }) => theme.colors[isDraft ? 'secondary600' : 'success600']};
   border-radius: 50%;
   cursor: pointer;
 `;
