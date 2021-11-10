@@ -88,7 +88,6 @@ export { default as prefixPluginTranslations } from './utils/prefixPluginTransla
 export { default as pxToRem } from './utils/pxToRem';
 export { default as to } from './utils/await-to-js';
 export { default as setHexOpacity } from './utils/setHexOpacity';
-export { default as customEllipsis } from './utils/customEllipsis';
 export { default as translatedErrors } from './utils/translatedErrors';
 export { default as formatComponentData } from './content-manager/utils/formatComponentData';
 export { findMatchingPermissions } from './utils/hasPermissions';

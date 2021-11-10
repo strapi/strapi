@@ -44,6 +44,7 @@ const MagicLinkWrapper = ({ children, target }) => {
         </CopyToClipboard>
       }
       title={target}
+      titleEllipsis
       subtitle={children}
       icon={<Envelope />}
       iconBackground="neutral100"
