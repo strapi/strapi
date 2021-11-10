@@ -309,11 +309,11 @@ describe('Application page', () => {
                 <div
                   class="c11"
                 >
-                  <span
+                  <h3
                     class="c12"
                   >
                     Information
-                  </span>
+                  </h3>
                   <div
                     class="c13 c14"
                   >
