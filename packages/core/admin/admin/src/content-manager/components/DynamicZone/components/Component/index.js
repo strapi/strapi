@@ -31,6 +31,7 @@ const StyledBox = styled(Box)`
 
 const Component = ({
   componentUid,
+  formErrors,
   index,
   isOpen,
   isFieldAllowed,
@@ -74,11 +75,30 @@ const Component = ({
     { name: friendlyName }
   );
 
+  const formErrorsKeys =  Object.keys(formErrors);
+
+  const fieldsErrors = formErrorsKeys.filter(errorKey => {
+    
+    const errorKeysArray = errorKey.split('.').filter((_, index) => index < 2)
+    
+    if (errorKeysArray.join('.') === `${name}.${index}`) {
+      return true;
+    }
+
+    return false;
+  });
+
+  let errorMessage;
+
+  if (fieldsErrors.length > 0) {
+    errorMessage = formatMessage({ id: 'TODO', defaultMessage: 'firstChildError.id'})
+  };
+
   return (
     <Box>
       <Rectangle />
       <StyledBox shadow="tableShadow" hasRadius>
-        <Accordion expanded={isOpen} toggle={() => onToggle(index)} size="S">
+        <Accordion expanded={isOpen} toggle={() => onToggle(index)} size="S" error={errorMessage}>
           <AccordionToggle
             startIcon={<FontAwesomeIcon icon={icon} />}
             action={

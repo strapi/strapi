@@ -32,8 +32,19 @@
     "dz": {
       "type": "dynamiczone",
       "components": [
+        "basic.pay",
+        "basic.component",
         "basic.rep2",
-        "basic.component"
+        "basic.simple",
+        "basic.tata",
+        "blog.test-como",
+        "default.apple",
+        "default.car",
+        "default.closingperiod",
+        "default.dish",
+        "default.openingtimes",
+        "default.restaurantservice",
+        "default.temp"
       ],
       "required": true,
       "min": 2
