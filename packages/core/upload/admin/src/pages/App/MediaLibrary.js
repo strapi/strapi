@@ -115,6 +115,11 @@ export const MediaLibrary = () => {
                       id: getTrad('bulk.select.label'),
                       defaultMessage: 'Select all assets',
                     })}
+                    indeterminate={
+                      assets?.length > 0 &&
+                      selected.length > 0 &&
+                      selected.length !== assets?.length
+                    }
                     value={assets?.length > 0 && selected.length === assets?.length}
                     onChange={() => selectAll(assets)}
                   />
