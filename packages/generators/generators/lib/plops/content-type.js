@@ -4,9 +4,9 @@ const slugify = require('@sindresorhus/slugify');
 
 const getDestinationPrompts = require('./prompts/get-destination-prompts');
 const getFilePath = require('./utils/get-file-path');
-const getCtNamesPrompts = require('./prompts/get-ct-names-prompts');
-const getKindPrompts = require('./prompts/get-kind-prompts');
-const getDraftAndPublishPrompts = require('./prompts/get-draft-and-publish-prompts');
+const ctNamesPrompts = require('./prompts/ct-names-prompts');
+const kindPrompts = require('./prompts/kind-prompts');
+const draftAndPublishPrompts = require('./prompts/draft-and-publish-prompts');
 const getAttributesPrompts = require('./prompts/get-attributes-prompts');
 
 module.exports = plop => {
@@ -15,10 +15,10 @@ module.exports = plop => {
     description: 'Generate a content type for an API',
     async prompts(inquirer) {
       const config = await inquirer.prompt([
-        ...getCtNamesPrompts,
-        ...getKindPrompts,
+        ...ctNamesPrompts,
+        ...kindPrompts,
         ...getDestinationPrompts('model', plop.getDestBasePath()),
-        ...getDraftAndPublishPrompts,
+        ...draftAndPublishPrompts,
       ]);
       const attributes = await getAttributesPrompts(inquirer);
 

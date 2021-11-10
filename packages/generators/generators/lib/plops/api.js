@@ -3,11 +3,11 @@
 const { join } = require('path');
 const fs = require('fs-extra');
 const validateInput = require('./utils/validate-input');
-const getCtNamesPrompts = require('./prompts/get-ct-names-prompts');
-const getKindPrompts = require('./prompts/get-kind-prompts');
-const getDraftAndPublishPrompts = require('./prompts/get-draft-and-publish-prompts');
+const ctNamesPrompts = require('./prompts/ct-names-prompts');
+const kindPrompts = require('./prompts/kind-prompts');
+const draftAndPublishPrompts = require('./prompts/draft-and-publish-prompts');
 const getAttributesPrompts = require('./prompts/get-attributes-prompts');
-const getDefaultRoutesPrompts = require('./prompts/get-default-routes-prompts');
+const defaultRoutesPrompts = require('./prompts/default-routes-prompts');
 
 module.exports = plop => {
   // API generator
@@ -64,10 +64,10 @@ module.exports = plop => {
       return {
         ...api,
         ...(await inquirer.prompt([
-          ...getCtNamesPrompts,
-          ...getKindPrompts,
-          ...getDraftAndPublishPrompts,
-          ...getDefaultRoutesPrompts,
+          ...ctNamesPrompts,
+          ...kindPrompts,
+          ...draftAndPublishPrompts,
+          ...defaultRoutesPrompts,
         ])),
         attributes: await getAttributesPrompts(inquirer),
       };
