@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import CodeMirror from 'codemirror';
 import 'codemirror/addon/display/placeholder';
 import PreviewWysiwyg from '../PreviewWysiwyg';
-import EditorWrapper from './EditorWrapper';
+import { EditorStylesContainer } from './EditorStylesContainer';
 import { EditorAndPreviewWrapper } from './WysiwygStyles';
 import newlineAndIndentContinueMarkdownList from './utils/continueList';
 
@@ -64,9 +64,9 @@ const Editor = ({
 
   return (
     <EditorAndPreviewWrapper>
-      <EditorWrapper disabled={disabled || isPreviewMode}>
+      <EditorStylesContainer disabled={disabled || isPreviewMode}>
         <textarea ref={textareaRef} placeholder={placeholder} />
-      </EditorWrapper>
+      </EditorStylesContainer>
       {isPreviewMode && <PreviewWysiwyg data={value} />}
     </EditorAndPreviewWrapper>
   );

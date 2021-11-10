@@ -1,13 +1,6 @@
 import styled from 'styled-components';
-import { Box } from '@strapi/design-system/Box';
 import { IconButtonGroup, IconButton } from '@strapi/design-system/IconButton';
 import { BaseButton } from '@strapi/design-system/BaseButton';
-
-export const WysiwygWrapper = styled(Box)`
-  border: 1px solid
-    ${({ theme, error }) => (error ? theme.colors.danger600 : theme.colors.neutral200)};
-  margin-top: ${({ theme }) => `${theme.spaces[2]}`};
-`;
 
 // NAV BUTTONS
 export const CustomIconButton = styled(IconButton)`
@@ -55,7 +48,6 @@ export const EditorAndPreviewWrapper = styled.div`
 `;
 
 // FOOTER
-
 export const ExpandButton = styled(BaseButton)`
   background-color: transparent;
   border: none;
@@ -69,47 +61,4 @@ export const ExpandButton = styled(BaseButton)`
       height: ${12 / 16}rem;
     }
   }
-`;
-
-// PREVIEW
-
-const setOpacity = (hex, alpha) =>
-  `${hex}${Math.floor(alpha * 255)
-    .toString(16)
-    .padStart(2, 0)}`;
-
-export const ExpandWrapper = styled.div`
-  position: absolute;
-  z-index: 4;
-  inset: 0;
-  background: ${({ theme }) => setOpacity(theme.colors.neutral800, 0.2)};
-  padding: 0 ${({ theme }) => theme.spaces[8]};
-`;
-
-export const ExpandContainer = styled(Box)`
-  display: flex;
-  max-width: ${1080 / 16}rem;
-  min-height: ${500 / 16}rem;
-  margin: 0 auto;
-  overflow: hidden;
-  margin-top: 10%;
-  border: ${({ theme }) => `1px solid ${theme.colors.neutral200}`};
-`;
-
-export const PreviewWrapper = styled(Box)`
-  width: 50%;
-  border-left: ${({ theme }) => `1px solid ${theme.colors.neutral200}`};
-`;
-
-export const WysiwygContainer = styled(Box)`
-  width: 50%;
-`;
-
-export const PreviewHeader = styled(Box)`
-  border-top: 0;
-`;
-
-export const PreviewContainer = styled(Box)`
-  position: relative;
-  height: 100%;
 `;
