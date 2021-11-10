@@ -15,7 +15,6 @@ import { getTrad } from '../../utils';
 const StyledBullet = styled.div`
   width: ${pxToRem(6)};
   height: ${pxToRem(6)};
-  margin-right: ${({ theme }) => theme.spaces[2]};
   background: ${({ theme, isDraft }) => theme.colors[isDraft ? 'secondary600' : 'success600']};
   border-radius: 50%;
   cursor: pointer;
@@ -60,7 +59,7 @@ function ListItem({
     <Flex as="li" alignItems="center">
       <Flex style={{ flex: 1 }} alignItems="center">
         {hasDraftAndPublish && (
-          <Box paddingLeft={1} paddingRight={2}>
+          <Box paddingRight={2}>
             <StyledBullet isDraft={isDraft} title={title} />
           </Box>
         )}
