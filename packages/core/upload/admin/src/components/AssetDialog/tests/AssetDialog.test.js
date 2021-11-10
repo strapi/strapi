@@ -17,7 +17,7 @@ jest.mock('@strapi/helper-plugin', () => ({
   useQueryParams: jest.fn(),
 }));
 
-jest.mock('../../../../utils/getTrad', () => x => x);
+jest.mock('../../../utils/getTrad', () => x => x);
 
 jest.mock('react-intl', () => ({
   FormattedMessage: ({ id }) => id,
