@@ -1,0 +1,25 @@
+{
+  "kind": "collectionType",
+  "collectionName": "complexes",
+  "info": {
+    "singularName": "complex",
+    "pluralName": "complexes",
+    "displayName": "Complex",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string"
+    },
+    "Repeatable": {
+      "displayName": "Component",
+      "type": "component",
+      "repeatable": true,
+      "component": "basic.component"
+    }
+  }
+}

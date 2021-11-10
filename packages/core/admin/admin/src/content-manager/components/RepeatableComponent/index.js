@@ -72,6 +72,8 @@ const RepeatableComponent = ({
         .join('.');
     });
 
+  console.log({ componentErrorKeys });
+
   const toggleCollapses = () => {
     setCollapseToOpen('');
   };
@@ -112,9 +114,20 @@ const RepeatableComponent = ({
     return <ComponentInitializer isReadOnly={isReadOnly} onClick={handleClick} />;
   }
 
+  const doesRepComponentHasChildError = componentErrorKeys.some(
+    error => error.split('.').length > 1
+  );
+
+  let errorMessage = formErrors[name];
+
+  if (doesRepComponentHasChildError) {
+    errorMessage = 'The component(s) contain error(s)';
+  }
+
   return (
     <Box hasRadius background="neutral0" shadow="tableShadow" ref={drop}>
       <AccordionGroupCustom
+        error={errorMessage}
         footer={
           <Flex justifyContent="center" height="48px" background="neutral0" hasRadius>
             <TextButtonCustom disabled={isReadOnly} onClick={handleClick} startIcon={<Plus />}>
@@ -130,24 +143,15 @@ const RepeatableComponent = ({
           const key = data.__temp_key__;
           const isOpen = collapseToOpen === key;
           const componentFieldName = `${name}.${index}`;
-          const previousComponentTempKey = get(componentValue, [index - 1, '__temp_key__']);
-          const doesPreviousFieldContainErrorsAndIsOpen =
-            componentErrorKeys.includes(`${name}.${index - 1}`) &&
-            index !== 0 &&
-            collapseToOpen === previousComponentTempKey;
-
           const hasErrors = componentErrorKeys.includes(componentFieldName);
 
           return (
             <DraggedItem
               componentFieldName={componentFieldName}
               componentUid={componentUid}
-              // TODO
-              doesPreviousFieldContainErrorsAndIsOpen={doesPreviousFieldContainErrorsAndIsOpen}
               hasErrors={hasErrors}
               hasMinError={hasMinError}
               isDraggingSibling={isDraggingSibling}
-              isFirst={index === 0}
               isOpen={isOpen}
               isReadOnly={isReadOnly}
               key={key}

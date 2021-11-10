@@ -38,10 +38,9 @@ const StyledBox = styled(Box)`
 const DraggedItem = ({
   componentFieldName,
   // FIXME: errors
-  // doesPreviousFieldContainErrorsAndIsOpen,
-  // hasErrors,
-  // hasMinError,
-  // isFirst,
+  // Retrieved from the AccordionGroupCustom cloneElement
+  hasErrorMessage,
+  hasErrors,
   isDraggingSibling,
   isOpen,
   isReadOnly,
@@ -180,7 +179,14 @@ const DraggedItem = ({
       )}
 
       {!isDragging && !isDraggingSibling && (
-        <Accordion expanded={isOpen} toggle={onClickToggle} id={componentFieldName} size="S">
+        <Accordion
+          error={hasErrors ? 'ok' : undefined}
+          hasErrorMessage={hasErrorMessage}
+          expanded={isOpen}
+          toggle={onClickToggle}
+          id={componentFieldName}
+          size="S"
+        >
           <AccordionToggle
             action={
               isReadOnly ? null : (
@@ -269,10 +275,6 @@ const DraggedItem = ({
 };
 
 DraggedItem.defaultProps = {
-  // doesPreviousFieldContainErrorsAndIsOpen: false,
-  // hasErrors: false,
-  // hasMinError: false,
-  // isFirst: false,
   isDraggingSibling: false,
   isOpen: false,
   setIsDraggingSiblig: () => {},
@@ -281,10 +283,8 @@ DraggedItem.defaultProps = {
 
 DraggedItem.propTypes = {
   componentFieldName: PropTypes.string.isRequired,
-  // doesPreviousFieldContainErrorsAndIsOpen: PropTypes.bool,
-  // hasErrors: PropTypes.bool,
-  // hasMinError: PropTypes.bool,
-  // isFirst: PropTypes.bool,
+  hasErrorMessage: PropTypes.bool.isRequired,
+  hasErrors: PropTypes.bool.isRequired,
   isDraggingSibling: PropTypes.bool,
   isOpen: PropTypes.bool,
   isReadOnly: PropTypes.bool.isRequired,
