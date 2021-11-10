@@ -3,7 +3,7 @@ import { translatedErrors } from '@strapi/helper-plugin';
 
 const schema = yup.object().shape({
   firstname: yup.string().required(translatedErrors.required),
-  lastname: yup.string().required(translatedErrors.required),
+  lastname: yup.string(),
   email: yup
     .string()
     .email(translatedErrors.email)

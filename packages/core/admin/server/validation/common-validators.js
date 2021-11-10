@@ -21,7 +21,7 @@ const email = yup
 
 const firstname = yup.string().min(1);
 
-const lastname = yup.string().min(1);
+const lastname = yup.string();
 
 const username = yup.string().min(1);
 
