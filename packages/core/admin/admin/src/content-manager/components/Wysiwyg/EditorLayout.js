@@ -70,6 +70,7 @@ export const EditorLayout = ({ children, isExpandMode, error, previewContent, on
             justifyContent="center"
           >
             <Box
+              id="wysiwyg-expand"
               background="neutral0"
               hasRadius
               shadow="popupShadow"
