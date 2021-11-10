@@ -106,7 +106,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   background: #ffffff;
 }
 
-.c45 .sc-kKXAKc {
+.c45 .sc-cuWdqJ {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -178,7 +178,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   background: #f0f0ff;
 }
 
-.c48 .sc-kKXAKc {
+.c48 .sc-cuWdqJ {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -260,7 +260,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   background: #4945ff;
 }
 
-.c49 .sc-kKXAKc {
+.c49 .sc-cuWdqJ {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -519,38 +519,6 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   margin-left: 4px;
 }
 
-.c29 {
-  color: #666687;
-  font-size: 0.875rem;
-  line-height: 1.43;
-}
-
-.c7 {
-  font-weight: 400;
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #32324d;
-}
-
-.c31 {
-  font-weight: 400;
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #4a4a6a;
-}
-
-.c8 {
-  font-weight: 600;
-  line-height: 1.14;
-}
-
-.c30 {
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-}
-
 .c35 {
   font-weight: 600;
   color: #32324d;
@@ -673,6 +641,15 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
 
 .c33 > * + * {
   margin-top: 4px;
+}
+
+.c32 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #4a4a6a;
+  text-transform: uppercase;
+  font-size: 0.875rem;
+  line-height: 1.43;
 }
 
 .c40 {
@@ -881,6 +858,38 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   max-height: 60vh;
 }
 
+.c29 {
+  color: #666687;
+  font-size: 0.875rem;
+  line-height: 1.43;
+}
+
+.c7 {
+  font-weight: 400;
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #32324d;
+}
+
+.c31 {
+  font-weight: 400;
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #4a4a6a;
+}
+
+.c8 {
+  font-weight: 600;
+  line-height: 1.14;
+}
+
+.c30 {
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+}
+
 .c13 {
   display: grid;
   grid-template-columns: repeat(12,1fr);
@@ -916,15 +925,6 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
 
 .c19 {
   height: 3.25rem;
-}
-
-.c32 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #4a4a6a;
-  text-transform: uppercase;
-  font-size: 0.875rem;
-  line-height: 1.43;
 }
 
 @media (max-width:68.75rem) {

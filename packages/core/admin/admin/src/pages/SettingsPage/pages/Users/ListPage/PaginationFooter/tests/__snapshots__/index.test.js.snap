@@ -375,10 +375,9 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
 }
 
 .c15 {
-  font-weight: 400;
+  color: #666687;
   font-size: 0.875rem;
   line-height: 1.43;
-  color: #666687;
 }
 
 <div>
@@ -467,7 +466,7 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
       </div>
       <nav
         aria-label="pagination"
-        class="sc-tkKUh"
+        class="sc-eGCaLh"
       >
         <ul
           class="c16 c17"

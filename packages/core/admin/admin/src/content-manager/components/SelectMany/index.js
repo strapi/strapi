@@ -73,8 +73,8 @@ function SelectMany({
         styles={styles}
         value={[]}
       />
-      <Box paddingTop={3}>
-        <Stack as="ul" size={4} style={{ maxHeight: '128px', overflowY: 'auto' }}>
+      <Box paddingTop={3} style={{ overflow: 'auto' }}>
+        <Stack as="ul" size={4} style={{ maxHeight: '128px', overflowX: 'hidden' }}>
           {value?.map((data, index) => {
             return (
               <ListItem

@@ -203,6 +203,7 @@ export const AssetDialog = ({
                 assets={assets}
                 onSelectAsset={handleSelectAsset}
                 selectedAssets={selectedAssets}
+                multiple={multiple}
                 onSelectAllAsset={handleSelectAllAssets}
                 onEditAsset={canUpdate ? setAssetToEdit : undefined}
                 pagination={data?.pagination}

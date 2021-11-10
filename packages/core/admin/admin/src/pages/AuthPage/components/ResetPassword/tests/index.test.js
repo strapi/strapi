@@ -138,7 +138,7 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         background: #4945ff;
       }
 
-      .c32 .sc-higWrZ {
+      .c32 .sc-eCstlR {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -274,13 +274,6 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
 
       .c18 > * + * {
         margin-top: 24px;
-      }
-
-      .c17 {
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-        color: #32324d;
       }
 
       .c21 {
@@ -483,6 +476,13 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         left: -5px;
         right: -5px;
         border: 2px solid #4945ff;
+      }
+
+      .c17 {
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+        color: #32324d;
       }
 
       .c5 {

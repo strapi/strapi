@@ -4,7 +4,7 @@ import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
 import { Box } from '@strapi/design-system/Box';
 import { IconButton } from '@strapi/design-system/IconButton';
 import { Flex } from '@strapi/design-system/Flex';
-import { Text } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { Tbody, Td, Tr } from '@strapi/design-system/Table';
 import Pencil from '@strapi/icons/Pencil';
 import Trash from '@strapi/icons/Trash';
@@ -64,7 +64,7 @@ const TableRows = ({
                   {typeof cellFormatter === 'function' ? (
                     cellFormatter(data, { key, name, ...rest })
                   ) : (
-                    <Text textColor="neutral800">{data[name] || '-'}</Text>
+                    <Typography textColor="neutral800">{data[name] || '-'}</Typography>
                   )}
                 </Td>
               );

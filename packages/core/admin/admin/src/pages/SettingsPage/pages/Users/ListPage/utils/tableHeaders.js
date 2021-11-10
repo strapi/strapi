@@ -1,6 +1,6 @@
 import React from 'react';
 import { Flex } from '@strapi/design-system/Flex';
-import { Text } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { Status } from '@strapi/helper-plugin';
 
 const tableHeaders = [
@@ -25,7 +25,9 @@ const tableHeaders = [
     metadatas: { label: 'Roles', sortable: false },
     /* eslint-disable react/prop-types */
     cellFormatter: ({ roles }) => {
-      return <Text textColor="neutral800">{roles.map(role => role.name).join(',\n')}</Text>;
+      return (
+        <Typography textColor="neutral800">{roles.map(role => role.name).join(',\n')}</Typography>
+      );
     },
     /* eslint-enable react/prop-types */
   },
@@ -43,7 +45,7 @@ const tableHeaders = [
       return (
         <Flex>
           <Status isActive={isActive} variant={isActive ? 'success' : 'danger'} />
-          <Text textColor="neutral800">{isActive ? 'Active' : 'Inactive'}</Text>
+          <Typography textColor="neutral800">{isActive ? 'Active' : 'Inactive'}</Typography>
         </Flex>
       );
     },

@@ -403,20 +403,6 @@ describe('Email | Pages | Settings', () => {
         margin-top: 4px;
       }
 
-      .c11 {
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c12 {
-        font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #32324d;
-      }
-
       .c17 {
         font-weight: 600;
         color: #32324d;
@@ -629,6 +615,20 @@ describe('Email | Pages | Settings', () => {
 
       .c34 {
         grid-column: span 7;
+      }
+
+      .c11 {
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c12 {
+        font-weight: 400;
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #32324d;
       }
 
       @media (max-width:68.75rem) {

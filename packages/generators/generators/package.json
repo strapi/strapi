@@ -31,8 +31,8 @@
   "dependencies": {
     "chalk": "4.1.2",
     "fs-extra": "10.0.0",
-    "node-plop": "0.26.2",
-    "plop": "2.7.4",
+    "node-plop": "0.26.3",
+    "plop": "2.7.6",
     "pluralize": "8.0.0",
     "@strapi/utils": "3.6.8",
     "@sindresorhus/slugify": "1.1.0"

@@ -56,6 +56,7 @@ const getSelectStyles = theme => {
         boxShadow: 0,
         fontSize: '14px',
         fontFamily: 'Arial',
+        zIndex: 2,
       };
     },
     menuList: base => ({
