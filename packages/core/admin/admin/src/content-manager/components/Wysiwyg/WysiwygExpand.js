@@ -27,7 +27,7 @@ const WysiwygExpand = ({
   name,
   onActionClick,
   onChange,
-  onSubmitImage,
+  onSelectAssets,
   onToggleExpand,
   placeholder,
   textareaRef,
@@ -97,13 +97,7 @@ const WysiwygExpand = ({
         </FocusTrap>
       </Portal>
       {mediaLibVisible && (
-        <MediaLibrary
-          editorRef={editorRef}
-          onSubmitImage={onSubmitImage}
-          onToggle={handleToggleMediaLib}
-          onToggleMediaLib={handleToggleMediaLib}
-          onTogglePopover={handleTogglePopover}
-        />
+        <MediaLibrary onClose={handleToggleMediaLib} onSelectAssets={onSelectAssets} />
       )}
     </>
   );
@@ -114,7 +108,7 @@ WysiwygExpand.defaultProps = {
   onChange: () => {},
   onToggleExpand: () => {},
   onActionClick: () => {},
-  onSubmitImage: () => {},
+  onSelectAssets: () => {},
   value: '',
   placeholder: '',
 };
@@ -125,7 +119,7 @@ WysiwygExpand.propTypes = {
   onChange: PropTypes.func,
   onToggleExpand: PropTypes.func,
   onActionClick: PropTypes.func,
-  onSubmitImage: PropTypes.func,
+  onSelectAssets: PropTypes.func,
   textareaRef: PropTypes.shape({ current: PropTypes.any }).isRequired,
   editorRef: PropTypes.shape({ current: PropTypes.any }).isRequired,
   value: PropTypes.string,

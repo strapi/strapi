@@ -5,6 +5,7 @@ import { useIntl } from 'react-intl';
 import { ButtonText, P } from '@strapi/design-system/Text';
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
+import { prefixFileUrlWithBackendUrl } from '@strapi/helper-plugin';
 import Editor from './Editor';
 import WysiwygNav from './WysiwygNav';
 import WysiwygFooter from './WysiwygFooter';
@@ -15,7 +16,7 @@ import {
   markdownHandler,
   listHandler,
   titleHandler,
-  insertImage,
+  insertFile,
   quoteAndCodeHandler,
 } from './utils/utils';
 
@@ -113,14 +114,20 @@ const Wysiwyg = ({
     }
   };
 
-  const handleSubmitImage = (files, currentEditorRef, toggleMediaLib, togglePopover) => {
-    toggleMediaLib();
-    togglePopover();
-    insertImage(currentEditorRef, files);
-  };
-
   const handleToggleExpand = () => {
     setIsExpandMode(prev => !prev);
+  };
+
+  const handleSelectAssets = files => {
+    const formattedFiles = files.map(f => ({
+      alt: f.alternativeText || f.name,
+      url: prefixFileUrlWithBackendUrl(f.url),
+      mime: f.mime,
+    }));
+
+    insertFile(editorRef, formattedFiles);
+    handleToggleMediaLib();
+    handleTogglePopover();
   };
 
   return (
@@ -160,12 +167,7 @@ const Wysiwyg = ({
         </Box>
       )}
       {mediaLibVisible && (
-        <MediaLibrary
-          editorRef={editorRef}
-          onSubmitImage={handleSubmitImage}
-          onToggleMediaLib={handleToggleMediaLib}
-          onTogglePopover={handleTogglePopover}
-        />
+        <MediaLibrary onClose={handleToggleMediaLib} onSelectAssets={handleSelectAssets} />
       )}
       {isExpandMode && (
         <WysiwygExpand
@@ -174,7 +176,7 @@ const Wysiwyg = ({
           name={name}
           onActionClick={handleActionClick}
           onChange={onChange}
-          onSubmitImage={handleSubmitImage}
+          onSelectAssets={handleSelectAssets}
           onToggleExpand={handleToggleExpand}
           placeholder={formattedPlaceholder}
           textareaRef={textareaRef}

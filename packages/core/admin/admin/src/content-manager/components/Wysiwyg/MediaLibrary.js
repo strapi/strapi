@@ -1,58 +1,37 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import {
-  ModalLayout,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-} from '@strapi/design-system/ModalLayout';
-import { Button } from '@strapi/design-system/Button';
-import { Text } from '@strapi/design-system/Text';
+import { useLibrary } from '@strapi/helper-plugin';
 
-// const image = [
-//   { alt: 'sunrise', url: 'http://localhost:3000/sunriseimage' },
-//   { alt: 'sunset', url: 'http://localhost:3000/sunsetimage' },
-// ];
+const Steps = {
+  SelectAsset: 'SelectAsset',
+  UploadAsset: 'UploadAsset',
+};
 
-const MediaLibrary = ({
-  // onTogglePopover,
-  onToggleMediaLib,
-  // onSubmitImage,
-  // editorRef
-}) => {
-  return (
-    <ModalLayout onClose={onToggleMediaLib} labelledBy="media-library" id="media-library">
-      <ModalHeader>
-        <Text>Media Library</Text>
-      </ModalHeader>
-      <ModalBody>
-        {/* <Text>Choose your picture 🔥</Text> */}
-        <Text>COMING SOON</Text>
-      </ModalBody>
-      <ModalFooter
-        startActions={
-          <Button onClick={onToggleMediaLib} variant="tertiary">
-            Cancel
-          </Button>
-        }
-        endActions={
-          <Button
-            id="insert-button"
-            // onClick={() => onSubmitImage(image, editorRef, onToggleMediaLib, onTogglePopover)}
-          >
-            Insert
-          </Button>
-        }
+const MediaLibrary = ({ onClose, onSelectAssets }) => {
+  const { components } = useLibrary();
+  const [step, setStep] = useState(Steps.SelectAsset);
+
+  const AssetDialog = components.AssetDialog;
+  const UploadAssetDialog = components.UploadAssetDialog;
+
+  if (step === Steps.SelectAsset) {
+    return (
+      <AssetDialog
+        allowedTypes={['files', 'images', 'videos']}
+        onClose={onClose}
+        onValidate={onSelectAssets}
+        onAddAsset={() => setStep(Steps.UploadAsset)}
+        multiple
       />
-    </ModalLayout>
-  );
+    );
+  }
+
+  return <UploadAssetDialog onClose={() => setStep(Steps.SelectAsset)} />;
 };
 
 MediaLibrary.propTypes = {
-  // onTogglePopover: PropTypes.func.isRequired,
-  onToggleMediaLib: PropTypes.func.isRequired,
-  // onSubmitImage: PropTypes.func.isRequired,
-  // editorRef: PropTypes.shape({ current: PropTypes.any }).isRequired,
+  onClose: PropTypes.func.isRequired,
+  onSelectAssets: PropTypes.func.isRequired,
 };
 
 export default MediaLibrary;

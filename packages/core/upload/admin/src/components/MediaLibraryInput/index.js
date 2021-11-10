@@ -160,7 +160,6 @@ export const MediaLibraryInput = ({
           onValidate={handleValidation}
           multiple={multiple}
           onAddAsset={() => setStep(Steps.UploadAsset)}
-          uploadedFiles={uploadedFiles}
         />
       )}
 
