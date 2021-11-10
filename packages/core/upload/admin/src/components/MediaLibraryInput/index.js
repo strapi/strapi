@@ -23,6 +23,7 @@ export const MediaLibraryInput = ({
   onChange,
   value,
 }) => {
+  const fieldAllowedTypes = allowedTypes || ['files', 'images', 'videos'];
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [step, setStep] = useState(undefined);
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -126,7 +127,7 @@ export const MediaLibraryInput = ({
   let initiallySelectedAssets = selectedAssets;
 
   if (uploadedFiles.length > 0) {
-    const allowedUploadedFiles = getAllowedFiles(allowedTypes, uploadedFiles);
+    const allowedUploadedFiles = getAllowedFiles(fieldAllowedTypes, uploadedFiles);
 
     initiallySelectedAssets = multiple
       ? [...allowedUploadedFiles, ...selectedAssets]
@@ -153,7 +154,7 @@ export const MediaLibraryInput = ({
 
       {step === Steps.SelectAsset && (
         <AssetDialog
-          allowedTypes={allowedTypes}
+          allowedTypes={fieldAllowedTypes}
           initiallySelectedAssets={initiallySelectedAssets}
           onClose={() => setStep(undefined)}
           onValidate={handleValidation}
@@ -175,7 +176,7 @@ export const MediaLibraryInput = ({
 };
 
 MediaLibraryInput.defaultProps = {
-  attribute: { allowedTypes: [] },
+  attribute: { allowedTypes: ['videos', 'files', 'images'] },
   disabled: false,
   description: undefined,
   error: undefined,
