@@ -4,7 +4,7 @@ import { useIntl } from 'react-intl';
 import { Dialog, DialogBody, DialogFooter } from '@strapi/design-system/Dialog';
 import { Stack } from '@strapi/design-system/Stack';
 import { Flex } from '@strapi/design-system/Flex';
-import { Text } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { Button } from '@strapi/design-system/Button';
 import ExclamationMarkCircle from '@strapi/icons/ExclamationMarkCircle';
 import Trash from '@strapi/icons/Trash';
@@ -38,12 +38,12 @@ const ConfirmDialog = ({
       <DialogBody icon={iconBody}>
         <Stack size={2}>
           <Flex justifyContent="center">
-            <Text id="confirm-description">
+            <Typography variant="omega" id="confirm-description">
               {formatMessage({
                 id: bodyText.id,
                 defaultMessage: bodyText.defaultMessage,
               })}
-            </Text>
+            </Typography>
           </Flex>
         </Stack>
       </DialogBody>

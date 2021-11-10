@@ -745,7 +745,7 @@ describe('Admin | containers | RoleCreatePage', () => {
         border: 1px solid #4945ff;
       }
 
-      .c39:hover:not([aria-disabled='true']) .sc-bQbCr {
+      .c39:hover:not([aria-disabled='true']) .sc-joeujd {
         color: #271fe0;
       }
 

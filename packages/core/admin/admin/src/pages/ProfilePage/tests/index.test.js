@@ -423,13 +423,6 @@ describe('ADMIN | Pages | Profile page', () => {
         margin-top: 16px;
       }
 
-      .c18 {
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
       .c23 {
         font-weight: 600;
         color: #32324d;
@@ -597,6 +590,13 @@ describe('ADMIN | Pages | Profile page', () => {
 
       .c0 {
         outline: none;
+      }
+
+      .c18 {
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+        color: #32324d;
       }
 
       .c1 {

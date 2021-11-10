@@ -137,16 +137,16 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         padding-bottom: 4px;
       }
 
-      .c42 {
+      .c41 {
         background: #ffffff;
         padding: 64px;
       }
 
-      .c45 {
+      .c44 {
         padding-top: 24px;
       }
 
-      .c59 {
+      .c58 {
         padding-left: 8px;
       }
 
@@ -367,7 +367,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         fill: #32324d;
       }
 
-      .c41 {
+      .c40 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -385,7 +385,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         align-items: center;
       }
 
-      .c46 {
+      .c45 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -403,7 +403,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         align-items: flex-end;
       }
 
-      .c47 {
+      .c46 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -515,7 +515,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         fill: #666687;
       }
 
-      .c37 {
+      .c36 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -533,30 +533,30 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         border: none;
       }
 
-      .c37 svg > g,
-      .c37 svg path {
+      .c36 svg > g,
+      .c36 svg path {
         fill: #8e8ea9;
       }
 
-      .c37:hover svg > g,
-      .c37:hover svg path {
+      .c36:hover svg > g,
+      .c36:hover svg path {
         fill: #666687;
       }
 
-      .c37:active svg > g,
-      .c37:active svg path {
+      .c36:active svg > g,
+      .c36:active svg path {
         fill: #a5a5ba;
       }
 
-      .c37[aria-disabled='true'] {
+      .c36[aria-disabled='true'] {
         background-color: #eaeaef;
       }
 
-      .c37[aria-disabled='true'] svg path {
+      .c36[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c43 {
+      .c42 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
@@ -568,12 +568,12 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         width: 1px;
       }
 
-      .c44 {
+      .c43 {
         -webkit-animation: gzYjWD 1s infinite linear;
         animation: gzYjWD 1s infinite linear;
       }
 
-      .c61 {
+      .c60 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -587,11 +587,11 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         align-items: center;
       }
 
-      .c62 > * + * {
+      .c61 > * + * {
         margin-left: 4px;
       }
 
-      .c65 {
+      .c64 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
@@ -603,7 +603,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         width: 1px;
       }
 
-      .c63 {
+      .c62 {
         padding: 12px;
         border-radius: 4px;
         -webkit-text-decoration: none;
@@ -616,7 +616,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         outline: none;
       }
 
-      .c63:after {
+      .c62:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -631,11 +631,11 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         border: 2px solid transparent;
       }
 
-      .c63:focus-visible {
+      .c62:focus-visible {
         outline: none;
       }
 
-      .c63:focus-visible:after {
+      .c62:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -646,34 +646,34 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         border: 2px solid #4945ff;
       }
 
-      .c64 {
+      .c63 {
         font-size: 0.7rem;
         pointer-events: none;
       }
 
-      .c64 svg path {
+      .c63 svg path {
         fill: #c0c0cf;
       }
 
-      .c64:focus svg path,
-      .c64:hover svg path {
+      .c63:focus svg path,
+      .c63:hover svg path {
         fill: #c0c0cf;
       }
 
-      .c66 {
+      .c65 {
         font-size: 0.7rem;
       }
 
-      .c66 svg path {
+      .c65 svg path {
         fill: #666687;
       }
 
-      .c66:focus svg path,
-      .c66:hover svg path {
+      .c65:focus svg path,
+      .c65:hover svg path {
         fill: #4a4a6a;
       }
 
-      .c51 {
+      .c50 {
         position: absolute;
         left: 0;
         right: 0;
@@ -684,15 +684,15 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         border: none;
       }
 
-      .c51:focus {
+      .c50:focus {
         outline: none;
       }
 
-      .c51[aria-disabled='true'] {
+      .c50[aria-disabled='true'] {
         cursor: not-allowed;
       }
 
-      .c55 {
+      .c54 {
         color: #32324d;
         display: inline-block;
         white-space: nowrap;
@@ -702,16 +702,16 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         line-height: 1.43;
       }
 
-      .c54 {
+      .c53 {
         padding-right: 16px;
         padding-left: 16px;
       }
 
-      .c56 {
+      .c55 {
         padding-left: 12px;
       }
 
-      .c49 {
+      .c48 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -725,7 +725,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         align-items: center;
       }
 
-      .c52 {
+      .c51 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -743,7 +743,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         align-items: center;
       }
 
-      .c48 {
+      .c47 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -753,16 +753,16 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         flex-direction: column;
       }
 
-      .c48 > * {
+      .c47 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c48 > * + * {
+      .c47 > * + * {
         margin-top: 0px;
       }
 
-      .c50 {
+      .c49 {
         position: relative;
         border: 1px solid #dcdce4;
         padding-right: 12px;
@@ -778,28 +778,28 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         transition-duration: 0.2s;
       }
 
-      .c50:focus-within {
+      .c49:focus-within {
         border: 1px solid #4945ff;
         box-shadow: #4945ff 0px 0px 0px 2px;
       }
 
-      .c57 {
+      .c56 {
         background: transparent;
         border: none;
         position: relative;
         z-index: 1;
       }
 
-      .c57 svg {
+      .c56 svg {
         height: 0.6875rem;
         width: 0.6875rem;
       }
 
-      .c57 svg path {
+      .c56 svg path {
         fill: #666687;
       }
 
-      .c58 {
+      .c57 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -808,11 +808,11 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         border: none;
       }
 
-      .c58 svg {
+      .c57 svg {
         width: 0.375rem;
       }
 
-      .c53 {
+      .c52 {
         width: 100%;
       }
 
@@ -865,7 +865,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         overflow-x: auto;
       }
 
-      .c40 tr:last-of-type {
+      .c39 tr:last-of-type {
         border-bottom: none;
       }
 
@@ -924,25 +924,19 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
 
       .c35 {
         color: #666687;
-        font-size: 0.875rem;
-        line-height: 1.43;
-      }
-
-      .c60 {
-        font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #666687;
-      }
-
-      .c36 {
         font-weight: 600;
         font-size: 0.6875rem;
         line-height: 1.45;
         text-transform: uppercase;
       }
 
-      .c39 {
+      .c59 {
+        color: #666687;
+        font-size: 0.875rem;
+        line-height: 1.43;
+      }
+
+      .c38 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
@@ -954,7 +948,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         width: 1px;
       }
 
-      .c38 {
+      .c37 {
         -webkit-transform: rotate(0deg);
         -ms-transform: rotate(0deg);
         transform: rotate(0deg);
@@ -1263,7 +1257,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                           <span>
                             <span
                               aria-labelledby="tooltip-1"
-                              class="c35 c36"
+                              class="c35"
                               label="Firstname"
                               tabindex="-1"
                             >
@@ -1277,12 +1271,12 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                               <button
                                 aria-disabled="false"
                                 aria-labelledby="tooltip-3"
-                                class="c18 c37"
+                                class="c18 c36"
                                 tabindex="-1"
                                 type="button"
                               >
                                 <svg
-                                  class="c38"
+                                  class="c37"
                                   fill="none"
                                   height="1em"
                                   viewBox="0 0 14 8"
@@ -1311,7 +1305,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                           <span>
                             <button
                               aria-labelledby="tooltip-3"
-                              class="c35 c36"
+                              class="c35"
                               label="Lastname"
                               tabindex="-1"
                             >
@@ -1333,7 +1327,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                           <span>
                             <button
                               aria-labelledby="tooltip-5"
-                              class="c35 c36"
+                              class="c35"
                               label="Email"
                               tabindex="-1"
                             >
@@ -1355,7 +1349,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                           <span>
                             <span
                               aria-labelledby="tooltip-7"
-                              class="c35 c36"
+                              class="c35"
                               label="Roles"
                               tabindex="-1"
                             >
@@ -1377,7 +1371,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                           <span>
                             <button
                               aria-labelledby="tooltip-9"
-                              class="c35 c36"
+                              class="c35"
                               label="Username"
                               tabindex="-1"
                             >
@@ -1399,7 +1393,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                           <span>
                             <span
                               aria-labelledby="tooltip-11"
-                              class="c35 c36"
+                              class="c35"
                               label="Active User"
                               tabindex="-1"
                             >
@@ -1420,7 +1414,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                           class="c32"
                         >
                           <div
-                            class="c39"
+                            class="c38"
                           >
                             Actions
                           </div>
@@ -1432,7 +1426,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                     </tr>
                   </thead>
                   <tbody
-                    class="c40"
+                    class="c39"
                   >
                     <tr
                       aria-rowindex="2"
@@ -1445,23 +1439,23 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                         tabindex="-1"
                       >
                         <div
-                          class="c41"
+                          class="c40"
                         >
                           <div
-                            class="c42"
+                            class="c41"
                           >
                             <div
                               aria-live="assertive"
                               role="alert"
                             >
                               <div
-                                class="c43"
+                                class="c42"
                               >
                                 Loading content...
                               </div>
                               <img
                                 aria-hidden="true"
-                                class="c44"
+                                class="c43"
                                 src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjMiIGhlaWdodD0iNjMiIHZpZXdCb3g9IjAgMCA2MyA2MyIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTQyLjU1NjMgMTEuOTgxNkMzOS40ODQgMTAuMzA3MSAzNS44NTc1IDkuMjkwOTcgMzIuMzM1NCA5LjEzNTIxQzI4LjY0NDMgOC45Mjg4OCAyNC44Mjk1IDkuNzIzMTggMjEuMzMzNiAxMS40MTI5QzIwLjkxMjMgMTEuNTkwMSAyMC41Mzc2IDExLjgxMDEgMjAuMTcyMiAxMi4wMjQ5TDIwLjAxMDggMTIuMTE3OUMxOS44Nzc0IDEyLjE5NTEgMTkuNzQ0MSAxMi4yNzI0IDE5LjYwOCAxMi4zNTM2QzE5LjMyNTMgMTIuNTE0NiAxOS4wNDkyIDEyLjY3NDQgMTguNzU0NCAxMi44NzkyQzE4LjU0NjMgMTMuMDMyOSAxOC4zMzk1IDEzLjE3NTkgMTguMTMwMSAxMy4zMjNDMTcuNTY1OCAxMy43MjA4IDE2Ljk4NjggMTQuMTMxNyAxNi40OTgzIDE0LjU5NzlDMTQuODQ3NiAxNS45NTI0IDEzLjU1NzEgMTcuNjA3NSAxMi42MDcxIDE4LjkyMTRDMTAuNDM2NSAyMi4xNTY2IDkuMDg2MjIgMjUuOTU2NyA4LjgwNzAyIDI5LjYxNDNMOC43NzY0IDMwLjE1ODhDOC43MzMyOCAzMC45MTk2IDguNjg0NzYgMzEuNzA1NyA4Ljc1MzUzIDMyLjQ1NTVDOC43NjY0OCAzMi42MDg0IDguNzY2MSAzMi43NjM4IDguNzc1MDYgMzIuOTE0QzguNzg4OTUgMzMuMjI5IDguODAxNTIgMzMuNTM3MyA4Ljg0NiAzMy44NjcyTDkuMDczOTYgMzUuNDIyMUM5LjA5NzU2IDM1LjU3NjQgOS4xMTk4IDM1Ljc0MTMgOS4xNjMzIDM1LjkyNjNMOS42NTkxOSAzNy45MjcyTDEwLjEzOCAzOS4yODIzQzEwLjI3MjkgMzkuNjY3MyAxMC40MTU4IDQwLjA3NTEgMTAuNiA0MC40M0MxMi4wMjkyIDQzLjYzNyAxNC4xNDI1IDQ2LjQ1NzggMTYuNzA2MyA0OC41ODVDMTkuMDUwOCA1MC41Mjk2IDIxLjgyNCA1Mi4wMDIzIDI0Ljc0OTEgNTIuODQ1MkwyNi4yMzcxIDUzLjIzNzZDMjYuMzc4MSA1My4yNjkzIDI2LjQ5MjYgNTMuMjg4OSAyNi42MDMxIDUzLjMwNThMMjYuNzc3NSA1My4zMzExQzI3LjAwNTIgNTMuMzYzNiAyNy4yMTk1IDUzLjM5ODYgMjcuNDQ0NSA1My40MzVDMjcuODU5OCA1My41MDc2IDI4LjI2NzIgNTMuNTc0OCAyOC43MDc5IDUzLjYxODNMMzAuNTY0MSA1My43MjI5QzMwLjk1MTYgNTMuNzI0OSAzMS4zMzUyIDUzLjcwNjggMzEuNzA4MSA1My42ODc0QzMxLjkwMzkgNTMuNjgxIDMyLjA5ODQgNTMuNjY4MSAzMi4zMjg4IDUzLjY2MkMzNC41MjUzIDUzLjQ3NzIgMzYuNTEwNiA1My4wNjM0IDM4LjA1MTYgNTIuNDY1MkMzOC4xNzY5IDUyLjQxNzEgMzguMzAwOCA1Mi4zNzk2IDM4LjQyMzQgNTIuMzM1NUMzOC42NzI3IDUyLjI0OTkgMzguOTI1OSA1Mi4xNjcgMzkuMTQzMiA1Mi4wNTk5TDQwLjg1OTEgNTEuMjYyNkw0Mi41NzAyIDUwLjI2NkM0Mi45MDA5IDUwLjA2ODIgNDMuMDIwNSA0OS42NDE0IDQyLjgyODIgNDkuMjk4NEM0Mi42MzIgNDguOTUyNiA0Mi4yMDM0IDQ4LjgzMDggNDEuODYzNCA0OS4wMTY2TDQwLjE3OTIgNDkuOTIxOEwzOC40OTk1IDUwLjYyMjRDMzguMzE2OSA1MC42OTUzIDM4LjEyMSA1MC43NTM0IDM3LjkyMjQgNTAuODE1NUMzNy43ODM4IDUwLjg0ODkgMzcuNjUxOCA1MC44OTgzIDM3LjUwMTIgNTAuOTQwOEMzNi4wNzExIDUxLjQzNSAzNC4yNDQ1IDUxLjc0MjUgMzIuMjQ0IDUxLjgzNDZDMzIuMDQ0MiA1MS44MzgzIDMxLjg0NzEgNTEuODM3OSAzMS42NTQgNTEuODQwM0MzMS4zMDUxIDUxLjg0MTQgMzAuOTYwMiA1MS44NDUxIDMwLjYzOTIgNTEuODMwNUwyOC45MTc3IDUxLjY3MjVDMjguNTQ3NiA1MS42MTkgMjguMTY5NSA1MS41NDI3IDI3Ljc4NDggNTEuNDY3OEMyNy41NjM5IDUxLjQxNjcgMjcuMzM3NiA1MS4zNzM3IDI3LjEyOTkgNTEuMzM3NEwyNi45NTI5IDUxLjI5ODdDMjYuODcwNCA1MS4yODM0IDI2Ljc3NzIgNTEuMjY2NyAyNi43MzMzIDUxLjI1NDNMMjUuMzQ2NiA1MC44MzIyQzIyLjc2NTEgNDkuOTc4OSAyMC4zMyA0OC41NzI5IDE4LjI5NDIgNDYuNzU1N0MxNi4xMDU2IDQ0Ljc5NTEgMTQuMzMzOSA0Mi4yMzM1IDEzLjE3NDIgMzkuMzU4MkMxMi4wMjc2IDM2LjYwMTMgMTEuNTk4OCAzMy4yNzkyIDExLjk3MTYgMzAuMDA3NkMxMi4zMTQ1IDI3LjAyMTMgMTMuMzk0OCAyNC4xNjM1IDE1LjE4NTggMjEuNTA4M0MxNS4zMDM0IDIxLjMzMzkgMTUuNDIxIDIxLjE1OTYgMTUuNTIxMiAyMS4wMTk2QzE2LjQzMDkgMTkuODY4OCAxNy41NDA4IDE4LjU1ODkgMTguOTQ4MyAxNy40OTZDMTkuMzM2NyAxNy4xNTI1IDE5Ljc4NjIgMTYuODU2IDIwLjI2MTEgMTYuNTQ3OEMyMC40ODc4IDE2LjQwMDkgMjAuNzA3OSAxNi4yNTUzIDIwLjg5MDcgMTYuMTMwNkMyMS4wOTc0IDE2LjAwNDggMjEuMzE4OCAxNS44ODMxIDIxLjUzNDggMTUuNzY5NEMyMS42NzYxIDE1LjY5NzUgMjEuODE2MiAxNS42MTkgMjEuOTM4OCAxNS41NTc2TDIyLjEwMDIgMTUuNDY0NkMyMi40MDAyIDE1LjMwMzcgMjIuNjc0OSAxNS4xNTQ2IDIyLjk5MDggMTUuMDM5TDI0LjExODYgMTQuNTcxNUMyNC4zMzk5IDE0LjQ4NDQgMjQuNTcxOCAxNC40MTU5IDI0Ljc5OTcgMTQuMzQ0N0MyNC45NTMgMTQuMjk4MiAyNS4wOTgyIDE0LjI2MzUgMjUuMjYzNSAxNC4yMDc4QzI1Ljc4NiAxNC4wMTgyIDI2LjMyODMgMTMuOTExMiAyNi45MTA1IDEzLjc5NjVDMjcuMTE3IDEzLjc1NzEgMjcuMzMwMiAxMy43MTYzIDI3LjU2MDggMTMuNjU4NUMyNy43NTUzIDEzLjYxMSAyNy45NzM3IDEzLjU5NjkgMjguMjA4MiAxMy41NzYyQzI4LjM2NCAxMy41NjAzIDI4LjUxNzIgMTMuNTQ4MyAyOC42MzE4IDEzLjUzMzNDMjguNzg3NiAxMy41MTczIDI4LjkzNDIgMTMuNTA2NiAyOS4wOTI3IDEzLjQ4NjdDMjkuMzI4NSAxMy40NTU1IDI5LjU0NTYgMTMuNDM0NyAyOS43NDk0IDEzLjQzMzdDMzAuMDIzNyAxMy40NCAzMC4yOTk0IDEzLjQzNTcgMzAuNTc3NyAxMy40Mjc0QzMxLjA4MTEgMTMuNDIxIDMxLjU1NzkgMTMuNDE5NyAzMi4wMzE4IDEzLjQ5MTRDMzQuOTY2NCAxMy43MzUyIDM3LjcxNDQgMTQuNjA4NSA0MC4yMDUyIDE2LjA4NjhDNDIuMzQ4OSAxNy4zNjU1IDQ0LjI3MTYgMTkuMTUyNSA0NS43NjA3IDIxLjI2NEM0Ny4wMjU1IDIzLjA2MjggNDcuOTc1NiAyNS4wNTI4IDQ4LjQ5MjggMjcuMDM5M0M0OC41NzIgMjcuMzE3NiA0OC42Mjk5IDI3LjU5MzEgNDguNjgzOSAyNy44NjU5QzQ4LjcxNTQgMjguMDQyOCA0OC43NTYzIDI4LjIxNDUgNDguNzg5MiAyOC4zNjM2QzQ4LjgwMzcgMjguNDU0MSA0OC44MjA4IDI4LjU0MDYgNDguODQ0NSAyOC42MjU4QzQ4Ljg3NDkgMjguNzQ0MyA0OC44OTg2IDI4Ljg2NCA0OC45MTE2IDI4Ljk2NTFMNDguOTc5MyAyOS42MDQ3QzQ4Ljk5MjIgMjkuNzc0OCA0OS4wMTMyIDI5LjkzMzEgNDkuMDMwMSAzMC4wODg3QzQ5LjA2NjggMzAuMzI2OCA0OS4wODg5IDMwLjU2MDggNDkuMDk2NCAzMC43NTYxTDQ5LjEwODMgMzEuOTAwMUM0OS4xMzEyIDMyLjMzMDcgNDkuMDg5IDMyLjcxMTYgNDkuMDUyMiAzMy4wNjczQzQ5LjAzODQgMzMuMjU5OCA0OS4wMTI2IDMzLjQ0NDMgNDkuMDEyMyAzMy41ODI0QzQ4Ljk5NjEgMzMuNjkyNiA0OC45OTE4IDMzLjc5MzUgNDguOTgzNiAzMy44OTE3QzQ4Ljk3NTMgMzQuMDA3MiA0OC45NzI0IDM0LjExNDggNDguOTQxNCAzNC4yNTU0TDQ4LjU0NDkgMzYuMzA1OUM0OC4zMTM0IDM3Ljg2MjMgNDkuMzc5MyAzOS4zMzY1IDUwLjk0ODggMzkuNTgyMkM1Mi4wNDE3IDM5Ljc2MDEgNTMuMTUzNiAzOS4yODE5IDUzLjc3MTEgMzguMzY2NEM1NC4wMDYzIDM4LjAxNzYgNTQuMTYwNCAzNy42MjU3IDU0LjIyMjcgMzcuMjA2NEw1NC41MjE3IDM1LjI1NzRDNTQuNTUxNCAzNS4wNzU2IDU0LjU3MiAzNC44MyA1NC41ODQ2IDM0LjU3OTFMNTQuNjAyOCAzNC4yMzM4QzU0LjYwOTggMzQuMDU5OCA1NC42MjIzIDMzLjg3NzkgNTQuNjM0NyAzMy42Nzg4QzU0LjY3MzQgMzMuMTA1MiA1NC43MTYzIDMyLjQ0NzkgNTQuNjYxOSAzMS44MDU4TDU0LjU4NjcgMzAuNDI4OUM1NC41NjIyIDMwLjA5NTIgNTQuNTA5NyAyOS43NiA1NC40NTU5IDI5LjQxODFDNTQuNDMxIDI5LjI1NzIgNTQuNDA0OCAyOS4wODk2IDU0LjM4MjYgMjguOTA3NEw1NC4yNjg3IDI4LjEwNEM1NC4yMzMyIDI3LjkyNDQgNTQuMTgwNCAyNy43MjczIDU0LjEzMjkgMjcuNTM5Nkw1NC4wNjQzIDI3LjI0NTRDNTQuMDE5NSAyNy4wNzEgNTMuOTc3MyAyNi44OTI3IDUzLjkzMzggMjYuNzA3NkM1My44NDU1IDI2LjMzMDkgNTMuNzQ3OSAyNS45NDIyIDUzLjYxMyAyNS41NTcxQzUyLjg0IDIzLjAyOTIgNTEuNTM4MyAyMC41MTk0IDQ5LjgzMzggMTguMjc5OUM0Ny44NTQ0IDE1LjY4MiA0NS4zMzMzIDEzLjUwODcgNDIuNTU2MyAxMS45ODE2WiIgZmlsbD0iIzQ5NDVGRiIvPgo8L3N2Zz4K"
                               />
                             </div>
@@ -1475,20 +1469,20 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
             </div>
           </div>
           <div
-            class="c45"
+            class="c44"
           >
             <div
-              class="c46"
+              class="c45"
             >
               <div
-                class="c47"
+                class="c46"
               >
                 <div>
                   <div
-                    class="c48"
+                    class="c47"
                   >
                     <div
-                      class="c49 c50"
+                      class="c48 c49"
                     >
                       <button
                         aria-disabled="false"
@@ -1496,21 +1490,21 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                         aria-haspopup="listbox"
                         aria-label="Entries per page"
                         aria-labelledby="select-1-label select-1-content"
-                        class="c51"
+                        class="c50"
                         id="select-1"
                         type="button"
                       />
                       <div
-                        class="c52 c53"
+                        class="c51 c52"
                       >
                         <div
-                          class="c49"
+                          class="c48"
                         >
                           <div
-                            class="c54"
+                            class="c53"
                           >
                             <span
-                              class="c55"
+                              class="c54"
                               id="select-1-content"
                             >
                               10
@@ -1518,11 +1512,11 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                           </div>
                         </div>
                         <div
-                          class="c49"
+                          class="c48"
                         >
                           <button
                             aria-hidden="true"
-                            class="c56 c57 c58"
+                            class="c55 c56 c57"
                             tabindex="-1"
                             type="button"
                           >
@@ -1547,10 +1541,10 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                   </div>
                 </div>
                 <div
-                  class="c59"
+                  class="c58"
                 >
                   <label
-                    class="c60"
+                    class="c59"
                     for="page-size"
                   >
                     Entries per page
@@ -1562,18 +1556,18 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                 class="sc-bXDkGd"
               >
                 <ul
-                  class="c61 c62"
+                  class="c60 c61"
                 >
                   <li>
                     <a
                       aria-current="page"
                       aria-disabled="true"
-                      class="c63 c64 active"
+                      class="c62 c63 active"
                       href="/settings/user"
                       tabindex="-1"
                     >
                       <div
-                        class="c65"
+                        class="c64"
                       >
                         Go to previous page
                       </div>
@@ -1596,11 +1590,11 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                     <a
                       aria-current="page"
                       aria-disabled="false"
-                      class="c63 c66 active"
+                      class="c62 c65 active"
                       href="/settings/user?pageSize=10&page=1&sort=firstname"
                     >
                       <div
-                        class="c65"
+                        class="c64"
                       >
                         Go to next page
                       </div>

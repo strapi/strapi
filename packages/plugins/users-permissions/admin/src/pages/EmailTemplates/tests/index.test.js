@@ -274,26 +274,6 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         height: 0.25rem;
       }
 
-      .c20 {
-        color: #666687;
-        font-size: 0.875rem;
-        line-height: 1.43;
-      }
-
-      .c23 {
-        font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #32324d;
-      }
-
-      .c21 {
-        font-weight: 600;
-        font-size: 0.6875rem;
-        line-height: 1.45;
-        text-transform: uppercase;
-      }
-
       .c18 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
@@ -366,6 +346,26 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         color: #666687;
         font-size: 1rem;
         line-height: 1.5;
+      }
+
+      .c20 {
+        color: #666687;
+        font-size: 0.875rem;
+        line-height: 1.43;
+      }
+
+      .c23 {
+        font-weight: 400;
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #32324d;
+      }
+
+      .c21 {
+        font-weight: 600;
+        font-size: 0.6875rem;
+        line-height: 1.45;
+        text-transform: uppercase;
       }
 
       <main

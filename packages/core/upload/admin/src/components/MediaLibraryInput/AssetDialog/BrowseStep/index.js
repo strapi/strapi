@@ -18,6 +18,7 @@ import getAllowedFiles from '../../utils/getAllowedFiles';
 export const BrowseStep = ({
   allowedTypes,
   assets,
+  multiple,
   onChangePage,
   onChangePageSize,
   onChangeSearch,
@@ -45,24 +46,26 @@ export const BrowseStep = ({
         {onSelectAllAsset && (
           <Flex justifyContent="space-between">
             <Stack horizontal size={2}>
-              <Flex
-                paddingLeft={2}
-                paddingRight={2}
-                background="neutral0"
-                hasRadius
-                borderColor="neutral200"
-                height={`${32 / 16}rem`}
-              >
-                <BaseCheckbox
-                  aria-label={formatMessage({
-                    id: getTrad('bulk.select.label'),
-                    defaultMessage: 'Select all assets',
-                  })}
-                  indeterminate={!areAllAssetSelected && hasSomeAssetSelected}
-                  value={areAllAssetSelected}
-                  onChange={onSelectAllAsset}
-                />
-              </Flex>
+              {multiple && (
+                <Flex
+                  paddingLeft={2}
+                  paddingRight={2}
+                  background="neutral0"
+                  hasRadius
+                  borderColor="neutral200"
+                  height={`${32 / 16}rem`}
+                >
+                  <BaseCheckbox
+                    aria-label={formatMessage({
+                      id: getTrad('bulk.select.label'),
+                      defaultMessage: 'Select all assets',
+                    })}
+                    indeterminate={!areAllAssetSelected && hasSomeAssetSelected}
+                    value={areAllAssetSelected}
+                    onChange={onSelectAllAsset}
+                  />
+                </Flex>
+              )}
               <SortPicker onChangeSort={onChangeSort} />
             </Stack>
             <SearchAsset onChangeSearch={onChangeSearch} queryValue={queryObject._q || ''} />
@@ -104,6 +107,7 @@ export const BrowseStep = ({
 
 BrowseStep.defaultProps = {
   allowedTypes: [],
+  multiple: false,
   onSelectAllAsset: undefined,
   onEditAsset: undefined,
 };
@@ -111,6 +115,7 @@ BrowseStep.defaultProps = {
 BrowseStep.propTypes = {
   allowedTypes: PropTypes.arrayOf(PropTypes.string),
   assets: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
+  multiple: PropTypes.bool,
   onChangePage: PropTypes.func.isRequired,
   onChangePageSize: PropTypes.func.isRequired,
   onChangeSort: PropTypes.func.isRequired,
