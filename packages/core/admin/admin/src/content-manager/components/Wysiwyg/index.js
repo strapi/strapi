@@ -39,13 +39,6 @@ const Wysiwyg = ({
   value,
 }) => {
   const { formatMessage } = useIntl();
-  const label = intlLabel.id
-    ? formatMessage(
-        { id: intlLabel.id, defaultMessage: intlLabel.defaultMessage },
-        { ...intlLabel.values }
-      )
-    : name;
-
   const textareaRef = useRef(null);
   const editorRef = useRef(null);
   const [isPreviewMode, setIsPreviewMode] = useState(false);
@@ -105,7 +98,6 @@ const Wysiwyg = ({
     }));
 
     insertFile(editorRef, formattedFiles);
-
     setMediaLibVisible(false);
   };
 
@@ -117,6 +109,12 @@ const Wysiwyg = ({
     : '';
 
   const errorMessage = error ? formatMessage({ id: error, defaultMessage: error }) : '';
+  const label = intlLabel.id
+    ? formatMessage(
+        { id: intlLabel.id, defaultMessage: intlLabel.defaultMessage },
+        { ...intlLabel.values }
+      )
+    : name;
 
   // FIXME
   // const hint = description
