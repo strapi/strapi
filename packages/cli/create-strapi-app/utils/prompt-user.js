@@ -9,8 +9,8 @@ const yaml = require('js-yaml');
  * @param {string|null} template - The Github repo of the template
  * @returns Object containting prompt answers
  */
-module.exports = async function promptUser(projectName, template) {
-  const questions = await getPromptQuestions(projectName, template);
+module.exports = async function promptUser(projectName, program) {
+  const questions = await getPromptQuestions(projectName, program);
   const [initialResponse, templateQuestion] = await Promise.all([
     inquirer.prompt(questions),
     getTemplateQuestion(),
@@ -61,7 +61,7 @@ async function getTemplateQuestion() {
  * @param {string|null} template - The template the project should use
  * @returns Array of prompt question objects
  */
-async function getPromptQuestions(projectName /*, template*/) {
+async function getPromptQuestions(projectName, program) {
   return [
     {
       type: 'input',
@@ -74,6 +74,7 @@ async function getPromptQuestions(projectName /*, template*/) {
       type: 'list',
       name: 'quick',
       message: 'Choose your installation type',
+      when: typeof program.quickstart === 'undefined',
       choices: [
         {
           name: 'Quickstart (recommended)',
@@ -89,7 +90,7 @@ async function getPromptQuestions(projectName /*, template*/) {
     // {
     //   type: 'confirm',
     //   name: 'useTemplate',
-    //   when: !template,
+    //   when: !program.template,
     //   message:
     //     'Would you like to use a template? (Templates are Strapi configurations designed for a specific use case)',
     // },

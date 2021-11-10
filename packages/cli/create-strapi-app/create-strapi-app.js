@@ -9,6 +9,17 @@ const packageJson = require('./package.json');
 
 const program = new commander.Command(packageJson.name);
 
+const incompatibleQuickstartOptions = [
+  'dbclient',
+  'dbhost',
+  'dbport',
+  'dbname',
+  'dbusername',
+  'dbpassword',
+  'dbssl',
+  'dbfile',
+];
+
 program
   .version(packageJson.version)
   .arguments('[directory]')
@@ -35,7 +46,6 @@ program
 function generateApp(projectName, options) {
   if (!projectName) {
     console.error('Please specify the <directory> of your project when using --quickstart');
-    // eslint-disable-next-line no-process-exit
     process.exit(1);
   }
 
@@ -47,16 +57,31 @@ function generateApp(projectName, options) {
 }
 
 async function initProject(projectName, program) {
+  const hasIncompatibleQuickstartOptions = incompatibleQuickstartOptions.some(opt => program[opt]);
+
+  if (program.quickstart && hasIncompatibleQuickstartOptions) {
+    console.error(
+      `The quickstart option is incompatible with the following options: ${incompatibleQuickstartOptions.join(
+        ', '
+      )}`
+    );
+    process.exit(1);
+  }
+
+  if (hasIncompatibleQuickstartOptions) {
+    program.quickstart = false; // Will disable the quickstart question because != 'undefined'
+  }
+
   if (program.quickstart) {
     return generateApp(projectName, program);
   }
 
-  const prompt = await promptUser(projectName, program.template);
+  const prompt = await promptUser(projectName, program);
 
   const directory = prompt.directory || projectName;
   const options = {
     template: prompt.template || program.template,
-    quickstart: prompt.quick,
+    quickstart: prompt.quick || program.quickstart,
   };
 
   const generateStrapiAppOptions = {
