@@ -20,6 +20,23 @@
       "type": "component",
       "repeatable": true,
       "component": "basic.component"
+    },
+    "rep_required": {
+      "displayName": "rep2",
+      "type": "component",
+      "repeatable": true,
+      "component": "basic.rep2",
+      "required": true,
+      "min": 2
+    },
+    "dz": {
+      "type": "dynamiczone",
+      "components": [
+        "basic.rep2",
+        "basic.component"
+      ],
+      "required": true,
+      "min": 2
     }
   }
 }

@@ -43,7 +43,7 @@ const RepeatableComponent = ({
   isNested,
   isReadOnly,
   max,
-  // min,
+  min,
   name,
 }) => {
   const toggleNotification = useNotification();
@@ -72,16 +72,13 @@ const RepeatableComponent = ({
         .join('.');
     });
 
-  console.log({ componentErrorKeys });
-
   const toggleCollapses = () => {
     setCollapseToOpen('');
   };
-  // TODO
-  // const missingComponentsValue = min - componentValueLength;
-  const errorsArray = componentErrorKeys.map(key => get(formErrors, [key, 'id'], ''));
 
-  const hasMinError = get(errorsArray, [0], '').includes('min');
+  const missingComponentsValue = min - componentValueLength;
+
+  const hasMinError = get(formErrors, name, { id: '' }).id.includes('min');
 
   const handleClick = useCallback(() => {
     if (!isReadOnly) {
@@ -110,22 +107,34 @@ const RepeatableComponent = ({
     toggleNotification,
   ]);
 
+  let errorMessage = formErrors[name];
+
+  if (hasMinError) {
+    errorMessage = {
+      id: 'content-manager.components.DynamicZone.missing-components',
+      defaultMessage:
+        'There {number, plural, =0 {are # missing components} one {is # missing component} other {are # missing components}}',
+      values: { number: missingComponentsValue },
+    };
+  }
+
   if (componentValueLength === 0) {
-    return <ComponentInitializer isReadOnly={isReadOnly} onClick={handleClick} />;
+    return (
+      <ComponentInitializer error={errorMessage} isReadOnly={isReadOnly} onClick={handleClick} />
+    );
   }
 
   const doesRepComponentHasChildError = componentErrorKeys.some(
     error => error.split('.').length > 1
   );
 
-  let errorMessage = formErrors[name];
-
-  if (doesRepComponentHasChildError) {
-    errorMessage = 'The component(s) contain error(s)';
+  // FIXME
+  if (doesRepComponentHasChildError && !hasMinError) {
+    errorMessage = { id: 'TODO', defaultMessage: 'The component(s) contain error(s)' };
   }
 
   return (
-    <Box hasRadius background="neutral0" shadow="tableShadow" ref={drop}>
+    <Box hasRadius ref={drop}>
       <AccordionGroupCustom
         error={errorMessage}
         footer={
@@ -171,139 +180,7 @@ const RepeatableComponent = ({
         })}
       </AccordionGroupCustom>
     </Box>
-    // <Box hasRadius borderColor="neutral200">
-    //   <Box ref={drop}>
-    //     {componentValue.map((data, index) => {
-    //       const key = data.__temp_key__;
-    //       const isOpen = collapseToOpen === key;
-    //       const componentFieldName = `${name}.${index}`;
-    //       const previousComponentTempKey = get(componentValue, [index - 1, '__temp_key__']);
-    //       const doesPreviousFieldContainErrorsAndIsOpen =
-    //         componentErrorKeys.includes(`${name}.${index - 1}`) &&
-    //         index !== 0 &&
-    //         collapseToOpen === previousComponentTempKey;
-
-    //       const hasErrors = componentErrorKeys.includes(componentFieldName);
-
-    //       return (
-    //         <DraggedItem
-    //           componentFieldName={componentFieldName}
-    //           componentUid={componentUid}
-    //           // TODO
-    //           doesPreviousFieldContainErrorsAndIsOpen={doesPreviousFieldContainErrorsAndIsOpen}
-    //           hasErrors={hasErrors}
-    //           hasMinError={hasMinError}
-    //           isFirst={index === 0}
-    //           isOdd={index % 2 === 1}
-    //           isOpen={isOpen}
-    //           isReadOnly={isReadOnly}
-    //           key={key}
-    //           onClickToggle={() => {
-    //             if (isOpen) {
-    //               setCollapseToOpen('');
-    //             } else {
-    //               setCollapseToOpen(key);
-    //             }
-    //           }}
-    //           parentName={name}
-    //           schema={componentLayoutData}
-    //           toggleCollapses={toggleCollapses}
-    //         />
-    //       );
-    //     })}
-    //   </Box>
-    //   <Button
-    //     // TODO
-    //     // hasMinError={hasMinError}
-    //     disabled={isReadOnly}
-    //     // TODO
-    //     // doesPreviousFieldContainErrorsAndIsClosed={
-    //     //   componentValueLength > 0 &&
-    //     //   componentErrorKeys.includes(`${name}.${componentValueLength - 1}`) &&
-    //     //   componentValue[componentValueLength - 1].__temp_key__ !== collapseToOpen
-    //     // }
-    //     onClick={handleClick}
-    //   />
-    // </Box>
   );
-
-  // return (
-  //   <div>
-  //     {componentValueLength === 0 && (
-  //       <EmptyComponent hasMinError={hasMinError}>
-  //         <FormattedMessage id={getTrad('components.empty-repeatable')}>
-  //           {msg => <p>{msg}</p>}
-  //         </FormattedMessage>
-  //       </EmptyComponent>
-  //     )}
-  //     <div ref={drop}>
-  //       {componentValueLength > 0 &&
-  //         componentValue.map((data, index) => {
-  //           const key = data.__temp_key__;
-  //           const isOpen = collapseToOpen === key;
-  //           const componentFieldName = `${name}.${index}`;
-  //           const previousComponentTempKey = get(componentValue, [index - 1, '__temp_key__']);
-  //           const doesPreviousFieldContainErrorsAndIsOpen =
-  //             componentErrorKeys.includes(`${name}.${index - 1}`) &&
-  //             index !== 0 &&
-  //             collapseToOpen === previousComponentTempKey;
-
-  //           const hasErrors = componentErrorKeys.includes(componentFieldName);
-
-  //           return (
-  //             <DraggedItem
-  //               componentFieldName={componentFieldName}
-  //               componentUid={componentUid}
-  //               doesPreviousFieldContainErrorsAndIsOpen={doesPreviousFieldContainErrorsAndIsOpen}
-  //               hasErrors={hasErrors}
-  //               hasMinError={hasMinError}
-  //               isFirst={index === 0}
-  //               isReadOnly={isReadOnly}
-  //               isOpen={isOpen}
-  //               key={key}
-  //               onClickToggle={() => {
-  //                 if (isOpen) {
-  //                   setCollapseToOpen('');
-  //                 } else {
-  //                   setCollapseToOpen(key);
-  //                 }
-  //               }}
-  //               parentName={name}
-  //               schema={componentLayoutData}
-  //               toggleCollapses={toggleCollapses}
-  //             />
-  //           );
-  //         })}
-  //     </div>
-  //     <Button
-  //       hasMinError={hasMinError}
-  //       disabled={isReadOnly}
-  //       withBorderRadius={false}
-  //       doesPreviousFieldContainErrorsAndIsClosed={
-  //         componentValueLength > 0 &&
-  //         componentErrorKeys.includes(`${name}.${componentValueLength - 1}`) &&
-  //         componentValue[componentValueLength - 1].__temp_key__ !== collapseToOpen
-  //       }
-  //       type="button"
-  //       onClick={handleClick}
-  //     >
-  //       <i className="fa fa-plus" />
-  //       <FormattedMessage id={getTrad('containers.EditView.add.new')} />
-  //     </Button>
-  //     {hasMinError && (
-  //       <ErrorMessage>
-  //         <FormattedMessage
-  //           id={getTrad(
-  //             `components.DynamicZone.missing${
-  //               missingComponentsValue > 1 ? '.plural' : '.singular'
-  //             }`
-  //           )}
-  //           values={{ count: missingComponentsValue }}
-  //         />
-  //       </ErrorMessage>
-  //     )}
-  //   </div>
-  // );
 };
 
 RepeatableComponent.defaultProps = {
@@ -312,7 +189,7 @@ RepeatableComponent.defaultProps = {
   formErrors: {},
   isNested: false,
   max: Infinity,
-  // min: -Infinity,
+  min: 0,
 };
 
 RepeatableComponent.propTypes = {
@@ -324,7 +201,7 @@ RepeatableComponent.propTypes = {
   isNested: PropTypes.bool,
   isReadOnly: PropTypes.bool.isRequired,
   max: PropTypes.number,
-  // min: PropTypes.number,
+  min: PropTypes.number,
   name: PropTypes.string.isRequired,
 };
 

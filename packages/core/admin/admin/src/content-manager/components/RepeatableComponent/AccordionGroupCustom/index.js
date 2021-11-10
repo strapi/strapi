@@ -1,5 +1,6 @@
 import React, { Children, cloneElement } from 'react';
 import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 import { Box } from '@strapi/design-system/Box';
 import { Text } from '@strapi/design-system/Text';
@@ -63,6 +64,7 @@ const LabelAction = styled(Box)`
 `;
 
 const AccordionGroupCustom = ({ children, footer, label, labelAction, error }) => {
+  const { formatMessage } = useIntl();
   const childrenArray = Children.toArray(children).map(child => {
     return cloneElement(child, { hasErrorMessage: false });
   });
@@ -82,7 +84,7 @@ const AccordionGroupCustom = ({ children, footer, label, labelAction, error }) =
       {error && (
         <Box paddingTop={1}>
           <Typography variant="pi" textColor="danger600">
-            {error}
+            {formatMessage({ id: error.id, defaultMessage: error.defaultMessage }, error.values)}
           </Typography>
         </Box>
       )}
@@ -99,7 +101,11 @@ AccordionGroupCustom.defaultProps = {
 
 AccordionGroupCustom.propTypes = {
   children: PropTypes.node.isRequired,
-  error: PropTypes.string,
+  error: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    defaultMessage: PropTypes.string.isRequired,
+    values: PropTypes.object,
+  }),
   footer: PropTypes.node,
   label: PropTypes.string,
   labelAction: PropTypes.node,

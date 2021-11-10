@@ -1,0 +1,20 @@
+{
+  "collectionName": "components_basic_rep2s",
+  "info": {
+    "displayName": "rep2",
+    "icon": "angle-double-right",
+    "description": ""
+  },
+  "options": {},
+  "attributes": {
+    "name_name": {
+      "type": "string",
+      "required": true
+    },
+    "nested": {
+      "type": "component",
+      "repeatable": true,
+      "component": "basic.component"
+    }
+  }
+}
