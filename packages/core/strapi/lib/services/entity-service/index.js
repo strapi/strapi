@@ -94,7 +94,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
 
   async emitEvent(uid, event, entity) {
     const model = strapi.getModel(uid);
-    const sanitizedEntity = await sanitize.utils.defaultSanitizeOutput(model, entity);
+    const sanitizedEntity = await sanitize.sanitizers.defaultSanitizeOutput(model, entity);
 
     eventHub.emit(event, {
       model: model.modelName,

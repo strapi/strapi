@@ -128,7 +128,7 @@ module.exports = ({ strapi }) => ({
       .then(storeEmail => storeEmail['email_confirmation'].options);
 
     // Sanitize the template's user information
-    const sanitizedUserInfo = await sanitize.utils.defaultSanitizeOutput(userSchema, user);
+    const sanitizedUserInfo = await sanitize.sanitizers.defaultSanitizeOutput(userSchema, user);
 
     const confirmationToken = crypto.randomBytes(20).toString('hex');
 

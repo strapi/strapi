@@ -50,7 +50,7 @@ module.exports = ({ action, ability, model }) => {
       // Remove not allowed fields (RBAC)
       traverseEntity(allowedFields(permittedFields), { schema }),
       // Remove all fields of type 'password'
-      sanitize.utils.sanitizePasswords(schema)
+      sanitize.sanitizers.sanitizePasswords(schema)
     );
   };
 
