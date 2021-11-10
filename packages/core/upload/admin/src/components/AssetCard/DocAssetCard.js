@@ -17,6 +17,7 @@ import { IconButton } from '@strapi/design-system/IconButton';
 import Pencil from '@strapi/icons/Pencil';
 import FileIcon from '@strapi/icons/File';
 import FilePdfIcon from '@strapi/icons/FilePdf';
+import { pxToRem } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { getTrad } from '../../utils';
 
@@ -53,7 +54,7 @@ export const DocAssetCard = ({ name, extension, selected, onSelect, onEdit, size
         )}
         <CardAsset
           width="100%"
-          height={size === 'S' ? `${88 / 16}rem` : `${164 / 16}rem`}
+          height={size === 'S' ? pxToRem(88) : pxToRem(164)}
           justifyContent="center"
         >
           <IconWrapper>
