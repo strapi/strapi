@@ -205,10 +205,13 @@ const createQueryBuilder = (uid, db) => {
       this.select('id');
       const subQB = this.getKnexQuery();
 
-      const nestedSubQuery = db.connection.select('id').from(subQB.as('subQuery'));
+      const nestedSubQuery = db
+        .getConnection()
+        .select('id')
+        .from(subQB.as('subQuery'));
 
       return db
-        .connection(tableName)
+        .getConnection(tableName)
         [state.type]()
         .whereIn('id', nestedSubQuery);
     },
@@ -257,9 +260,11 @@ const createQueryBuilder = (uid, db) => {
         this.select('*');
       }
 
-      const aliasedTableName = this.mustUseAlias() ? { [this.alias]: tableName } : tableName;
+      // const aliasedTableName = this.mustUseAlias() ? { [this.alias]: tableName } : tableName;
+      const aliasedTableName = this.mustUseAlias() ? `${tableName} as ${this.alias}` : tableName;
 
-      const qb = db.connection(aliasedTableName);
+      console.log(aliasedTableName);
+      const qb = db.getConnection(aliasedTableName);
 
       if (this.shouldUseSubQuery()) {
         return this.runSubQuery();

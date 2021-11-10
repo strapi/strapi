@@ -11,8 +11,8 @@ module.exports = db => {
      * Returns a knex schema builder instance
      * @param {string} table - table name
      */
-    getSchemaBuilder(table, trx = db.connection) {
-      return table.schema ? trx.schema.withSchema(table.schema) : trx.schema;
+    getSchemaBuilder(trx) {
+      return db.getSchemaConnection(trx);
     },
 
     /**
@@ -20,10 +20,7 @@ module.exports = db => {
      * @param {Schema} schema - database schema
      */
     async createSchema(schema) {
-      // TODO: ensure database exists;
-
       await db.connection.transaction(async trx => {
-        // create tables without FKs first do avoid ordering issues
         await this.createTables(schema.tables, trx);
       });
     },
@@ -36,14 +33,14 @@ module.exports = db => {
     async createTables(tables, trx) {
       for (const table of tables) {
         debug(`Creating table: ${table.name}`);
-        const schemaBuilder = this.getSchemaBuilder(table, trx);
+        const schemaBuilder = this.getSchemaBuilder(trx);
         await helpers.createTable(schemaBuilder, table);
       }
 
       // create FKs once all the tables exist
       for (const table of tables) {
         debug(`Creating table foreign keys: ${table.name}`);
-        const schemaBuilder = this.getSchemaBuilder(table, trx);
+        const schemaBuilder = this.getSchemaBuilder(trx);
         await helpers.createTableForeignKeys(schemaBuilder, table);
       }
     },
@@ -61,7 +58,7 @@ module.exports = db => {
 
       await db.connection.transaction(async trx => {
         for (const table of schema.tables.reverse()) {
-          const schemaBuilder = this.getSchemaBuilder(table, trx);
+          const schemaBuilder = this.getSchemaBuilder(trx);
           await helpers.dropTable(schemaBuilder, table);
         }
       });
@@ -73,29 +70,33 @@ module.exports = db => {
      */
     // TODO: implement force option to disable removal in DB
     async updateSchema(schemaDiff) {
+      const { forceMigration } = db.config.settings;
+
       await db.dialect.startSchemaUpdate();
       await db.connection.transaction(async trx => {
         await this.createTables(schemaDiff.tables.added, trx);
 
-        // drop all delete table foreign keys then delete the tables
-        for (const table of schemaDiff.tables.removed) {
-          debug(`Removing table foreign keys: ${table.name}`);
+        if (forceMigration) {
+          // drop all delete table foreign keys then delete the tables
+          for (const table of schemaDiff.tables.removed) {
+            debug(`Removing table foreign keys: ${table.name}`);
 
-          const schemaBuilder = this.getSchemaBuilder(table, trx);
-          await helpers.dropTableForeignKeys(schemaBuilder, table);
-        }
+            const schemaBuilder = this.getSchemaBuilder(trx);
+            await helpers.dropTableForeignKeys(schemaBuilder, table);
+          }
 
-        for (const table of schemaDiff.tables.removed) {
-          debug(`Removing table: ${table.name}`);
+          for (const table of schemaDiff.tables.removed) {
+            debug(`Removing table: ${table.name}`);
 
-          const schemaBuilder = this.getSchemaBuilder(table, trx);
-          await helpers.dropTable(schemaBuilder, table);
+            const schemaBuilder = this.getSchemaBuilder(trx);
+            await helpers.dropTable(schemaBuilder, table);
+          }
         }
 
         for (const table of schemaDiff.tables.updated) {
           debug(`Updating table: ${table.name}`);
           // alter table
-          const schemaBuilder = this.getSchemaBuilder(table, trx);
+          const schemaBuilder = this.getSchemaBuilder(trx);
 
           await helpers.alterTable(schemaBuilder, table);
         }
@@ -115,10 +116,16 @@ const createHelpers = db => {
   const createForeignKey = (tableBuilder, foreignKey) => {
     const { name, columns, referencedColumns, referencedTable, onDelete, onUpdate } = foreignKey;
 
+    console.log(db.connection.getSchemaName());
+
     const constraint = tableBuilder
       .foreign(columns, name)
       .references(referencedColumns)
-      .inTable(referencedTable);
+      .inTable(
+        db.connection.getSchemaName()
+          ? `${db.connection.getSchemaName()}.${referencedTable}`
+          : referencedTable
+      );
 
     if (onDelete) {
       constraint.onDelete(onDelete);
@@ -167,6 +174,10 @@ const createHelpers = db => {
    * @param {Index} index
    */
   const dropIndex = (tableBuilder, index) => {
+    if (!db.config.settings.forceMigration) {
+      return;
+    }
+
     const { type, columns, name } = index;
 
     switch (type) {
@@ -221,7 +232,11 @@ const createHelpers = db => {
    * @param {Column} column
    */
   const dropColumn = (tableBuilder, column) => {
-    tableBuilder.dropColumn(column.name);
+    if (!db.config.settings.forceMigration) {
+      return;
+    }
+
+    return tableBuilder.dropColumn(column.name);
   };
 
   /**
@@ -316,7 +331,13 @@ const createHelpers = db => {
    * @param {Knex.SchemaBuilder} schemaBuilder
    * @param {Table} table
    */
-  const dropTable = (schemaBuilder, table) => schemaBuilder.dropTableIfExists(table.name);
+  const dropTable = (schemaBuilder, table) => {
+    if (!db.config.settings.forceMigration) {
+      return;
+    }
+
+    return schemaBuilder.dropTableIfExists(table.name);
+  };
 
   /**
    * Creates a table foreign keys constraints
@@ -336,6 +357,10 @@ const createHelpers = db => {
    * @param {Table} table
    */
   const dropTableForeignKeys = async (schemaBuilder, table) => {
+    if (!db.config.settings.forceMigration) {
+      return;
+    }
+
     // foreign keys
     await schemaBuilder.table(table.name, tableBuilder => {
       (table.foreignKeys || []).forEach(foreignKey => dropForeignKey(tableBuilder, foreignKey));

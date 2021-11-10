@@ -1,13 +1,12 @@
 'use strict';
 
 const createStorage = (opts = {}) => {
-  const tableName = opts.tableName || 'strapi_migrations';
-  const knex = opts.db.connection;
+  const { db, tableName = 'strapi_migrations' } = opts;
 
-  const hasMigrationTable = () => knex.schema.hasTable(tableName);
+  const hasMigrationTable = () => db.getSchemaConnection().hasTable(tableName);
 
   const createMigrationTable = () => {
-    return knex.schema.createTable(tableName, table => {
+    return db.getSchemaConnection().createTable(tableName, table => {
       table.increments('id');
       table.string('name');
       table.datetime('time', { useTz: false });
@@ -16,7 +15,8 @@ const createStorage = (opts = {}) => {
 
   return {
     async logMigration(migrationName) {
-      await knex
+      await db
+        .getConnection()
         .insert({
           name: migrationName,
           time: new Date(),
@@ -25,7 +25,8 @@ const createStorage = (opts = {}) => {
     },
 
     async unlogMigration(migrationName) {
-      await knex(tableName)
+      await db
+        .getConnection(tableName)
         .del()
         .where({ name: migrationName });
     },
@@ -36,7 +37,8 @@ const createStorage = (opts = {}) => {
         return [];
       }
 
-      const logs = await knex
+      const logs = await db
+        .getConnection(tableName)
         .select()
         .from(tableName)
         .orderBy('time');

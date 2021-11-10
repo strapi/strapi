@@ -14,6 +14,7 @@ const postgres = {
     password: 'strapi',
     port: 5432,
     host: 'localhost',
+    schema: 'coucou',
   },
 };
 
