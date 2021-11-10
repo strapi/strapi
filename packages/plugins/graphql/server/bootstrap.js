@@ -31,9 +31,9 @@ module.exports = async ({ strapi }) => {
     return;
   }
 
-  const { config } = strapi.plugin('graphql');
+  const { config } = strapi.plugin('graphql').service('utils');
 
-  const path = config('endpoint', '/graphql');
+  const path = config.endpoint;
 
   const defaultServerConfig = {
     // Schema
@@ -46,7 +46,7 @@ module.exports = async ({ strapi }) => {
     }),
 
     // Validation
-    validationRules: [depthLimit(config('depthLimit'))],
+    validationRules: [depthLimit(config.depthLimit)],
 
     // Errors
     formatError: formatGraphqlError,
@@ -63,10 +63,10 @@ module.exports = async ({ strapi }) => {
     ],
   };
 
-  const serverConfig = merge(defaultServerConfig, config('apolloServer', {}));
+  const serverConfig = merge(defaultServerConfig, config.apolloServer);
 
   // Handle subscriptions
-  if (config('subscriptions', true)) {
+  if (config.subscriptions) {
     const subscriptionServer = SubscriptionServer.create(
       { schema, execute, subscribe },
       { server: strapi.server.httpServer, path }
