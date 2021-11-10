@@ -12,8 +12,6 @@ const defaults = {
     useDefaults: true,
     directives: {
       'connect-src': ["'self'", 'https:'],
-      'img-src': ["'self'", 'data:', 'blob:'],
-      'media-src': ["'self'", 'data:', 'blob:'],
     },
   },
   xssFilter: false,

@@ -3,7 +3,7 @@
 const createController = require('./core-api/controller');
 const { createService } = require('./core-api/service');
 
-const createCoreController = (uid, cfg) => {
+const createCoreController = (uid, cfg = {}) => {
   return ({ strapi }) => {
     const deps = {
       service: strapi.service(uid),
@@ -14,17 +14,14 @@ const createCoreController = (uid, cfg) => {
 
     let userCtrl = typeof cfg === 'function' ? cfg({ strapi }) : cfg;
 
-    // TODO: can only extend the defined action so we can add some without creating breaking
+    for (const methodName of Object.keys(baseController)) {
+      if (userCtrl[methodName] === undefined) {
+        userCtrl[methodName] = baseController[methodName];
+      }
+    }
 
-    return Object.assign(
-      Object.create(baseController),
-      {
-        get coreController() {
-          return baseController;
-        },
-      },
-      userCtrl
-    );
+    Object.setPrototypeOf(userCtrl, baseController);
+    return userCtrl;
   };
 };
 
@@ -36,9 +33,16 @@ const createCoreService = (uid, cfg) => {
 
     const baseService = createService(deps);
 
-    let userCtrl = typeof cfg === 'function' ? cfg({ strapi }) : cfg;
+    let userService = typeof cfg === 'function' ? cfg({ strapi }) : cfg;
 
-    return Object.assign(baseService, userCtrl);
+    for (const methodName of Object.keys(baseService)) {
+      if (userService[methodName] === undefined) {
+        userService[methodName] = baseService[methodName];
+      }
+    }
+
+    Object.setPrototypeOf(userService, baseService);
+    return userService;
   };
 };
 
