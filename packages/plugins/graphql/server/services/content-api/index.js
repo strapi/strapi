@@ -27,7 +27,7 @@ const {
 
 module.exports = ({ strapi }) => {
   const { service: getGraphQLService } = strapi.plugin('graphql');
-  const { config } = getGraphQLService('utils');
+  const { config } = strapi.plugin('graphql');
 
   const { KINDS, GENERIC_MORPH_TYPENAME } = getGraphQLService('constants');
   const extensionService = getGraphQLService('extension');
@@ -38,7 +38,7 @@ module.exports = ({ strapi }) => {
   let builders;
 
   const buildSchema = () => {
-    const isShadowCRUDEnabled = !!config.shadowCRUD;
+    const isShadowCRUDEnabled = !!config('shadowCRUD');
 
     // Create a new empty type registry
     registry = getGraphQLService('type-registry').new();

@@ -25,7 +25,7 @@ const introspectionQueries = [
  * @return {GraphQLSchema}
  */
 const wrapResolvers = ({ schema, strapi, extension = {} }) => {
-  const { config: graphQLConfig } = strapi.plugin('graphql').service('utils');
+  const { config: graphQLConfig } = strapi.plugin('graphql');
   // Get all the registered resolvers configuration
   const { resolversConfig = {} } = extension;
 
@@ -34,7 +34,7 @@ const wrapResolvers = ({ schema, strapi, extension = {} }) => {
 
   const typeMap = schema.getTypeMap();
 
-  if (!graphQLConfig.subscriptions) {
+  if (!graphQLConfig('subscriptions')) {
     delete typeMap.Subscription;
   }
 
