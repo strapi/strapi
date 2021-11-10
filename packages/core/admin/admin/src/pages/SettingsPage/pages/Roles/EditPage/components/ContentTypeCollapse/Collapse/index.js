@@ -59,10 +59,6 @@ const BoxWrapper = styled.div`
   &:hover {
     ${({ theme, isActive }) => activeRowStyle(theme, isActive)}
   }
-
-  &:focus-within {
-    ${({ theme, isActive }) => activeRowStyle(theme, isActive)}
-  }
 `;
 
 const Cell = styled(Flex)`
