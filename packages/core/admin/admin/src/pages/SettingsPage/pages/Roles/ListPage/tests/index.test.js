@@ -363,6 +363,14 @@ describe('<ListPage />', () => {
         border: none;
       }
 
+      .c24 {
+        color: #666687;
+        font-weight: 600;
+        font-size: 0.6875rem;
+        line-height: 1.45;
+        text-transform: uppercase;
+      }
+
       .c26 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
@@ -431,14 +439,6 @@ describe('<ListPage />', () => {
         color: #666687;
         font-size: 1rem;
         line-height: 1.5;
-      }
-
-      .c24 {
-        color: #666687;
-        font-weight: 600;
-        font-size: 0.6875rem;
-        line-height: 1.45;
-        text-transform: uppercase;
       }
 
       .c0 {
