@@ -122,9 +122,22 @@ const createContentType = async ({ contentType, components = [] }, options = {})
  * Generate an API squeleton
  * @param {string} name
  */
-const generateAPI = ({ singularName, kind = 'collectionType' }) => {
+const generateAPI = ({ singularName, kind = 'collectionType', pluralName, displayName }) => {
   const strapiGenerators = require('@strapi/generators');
-  return strapiGenerators.generate('api', { id: singularName, kind }, { dir: strapi.dirs.root });
+  return strapiGenerators.generate(
+    'api',
+    {
+      id: singularName,
+      kind,
+      singularName,
+      pluralName,
+      displayName,
+      createContentType: true,
+      generateDefaultRoutes: true,
+      attributes: [],
+    },
+    { dir: strapi.dirs.root }
+  );
 };
 
 /**

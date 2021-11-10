@@ -2,12 +2,12 @@
 
 const slugify = require('@sindresorhus/slugify');
 
-const getDestinationPrompts = require('./utils/get-destination-prompts');
+const getDestinationPrompts = require('./prompts/get-destination-prompts');
 const getFilePath = require('./utils/get-file-path');
-const getCtNamesPrompts = require('./utils/get-ct-names-prompts');
-const getKindPrompts = require('./utils/get-kind-prompts');
-const getDraftAndPublishPrompts = require('./utils/get-draft-and-publish-prompts');
-const getAttributesPrompts = require('./utils/get-attributes-prompts');
+const getCtNamesPrompts = require('./prompts/get-ct-names-prompts');
+const getKindPrompts = require('./prompts/get-kind-prompts');
+const getDraftAndPublishPrompts = require('./prompts/get-draft-and-publish-prompts');
+const getAttributesPrompts = require('./prompts/get-attributes-prompts');
 
 module.exports = plop => {
   // Model generator

@@ -3,10 +3,11 @@
 const { join } = require('path');
 const fs = require('fs-extra');
 const validateInput = require('./utils/validate-input');
-const getCtNamesPrompts = require('./utils/get-ct-names-prompts');
-const getKindPrompts = require('./utils/get-kind-prompts');
-const getDraftAndPublishPrompts = require('./utils/get-draft-and-publish-prompts');
-const getAttributesPrompts = require('./utils/get-attributes-prompts');
+const getCtNamesPrompts = require('./prompts/get-ct-names-prompts');
+const getKindPrompts = require('./prompts/get-kind-prompts');
+const getDraftAndPublishPrompts = require('./prompts/get-draft-and-publish-prompts');
+const getAttributesPrompts = require('./prompts/get-attributes-prompts');
+const getDefaultRoutesPrompts = require('./prompts/get-default-routes-prompts');
 
 module.exports = plop => {
   // API generator
@@ -49,25 +50,9 @@ module.exports = plop => {
           },
         },
         {
-          type: 'list',
-          name: 'kind',
-          message: 'Please choose the model type',
-          default: 'collectionType',
-          choices: [
-            { name: 'Collection Type', value: 'collectionType' },
-            { name: 'Single Type', value: 'singleType' },
-          ],
-        },
-        {
-          type: 'confirm',
-          name: 'useDraftAndPublish',
-          default: false,
-          message: 'Use draft and publish?',
-        },
-        {
           type: 'confirm',
           name: 'createContentType',
-          default: false,
+          default: true,
           message: 'Create a content-type?',
         },
       ]);
@@ -82,6 +67,7 @@ module.exports = plop => {
           ...getCtNamesPrompts,
           ...getKindPrompts,
           ...getDraftAndPublishPrompts,
+          ...getDefaultRoutesPrompts,
         ])),
         attributes: await getAttributesPrompts(inquirer),
       };
@@ -111,33 +97,41 @@ module.exports = plop => {
         return baseActions;
       }
 
-      const routeType =
-        answers.kind === 'singleType'
-          ? 'single-type-routes.js.hbs'
-          : 'collection-type-routes.js.hbs';
-
-      if (answers.createContentType) {
-        baseActions.push(
-          ...(answers.isPluginApi && answers.plugin
-            ? plop.getGenerator('content-type').actions({
-                ...answers,
-                destination: 'plugin',
-                plugin: answers.id,
-              })
-            : plop.getGenerator('content-type').actions({
-                ...answers,
-                destination: 'new',
-              }))
-        );
+      if (!answers.createContentType) {
+        return [
+          {
+            type: 'add',
+            path: `${filePath}/routes/{{id}}.js`,
+            templateFile: `templates/single-route.js.hbs`,
+          },
+          ...baseActions,
+        ];
       }
 
-      return [
-        {
+      if (answers.generateDefaultRoutes) {
+        const routeType =
+          answers.kind === 'singleType'
+            ? 'single-type-routes.js.hbs'
+            : 'collection-type-routes.js.hbs';
+
+        baseActions.push({
           type: 'add',
           path: `${filePath}/routes/{{id}}.js`,
           templateFile: `templates/${routeType}`,
-        },
+        });
+      }
+
+      const destination =
+        answers.isPluginApi && answers.plugin
+          ? { destination: 'plugin', plugin: answers.id }
+          : { destination: 'new' };
+
+      return [
         ...baseActions,
+        ...plop.getGenerator('content-type').actions({
+          ...answers,
+          ...destination,
+        }),
       ];
     },
   });

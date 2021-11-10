@@ -1,6 +1,6 @@
 'use strict';
 
-const validateInput = require('./validate-input');
+const validateInput = require('../utils/validate-input');
 
 module.exports = [
   {
