@@ -4,7 +4,7 @@ import { useIntl } from 'react-intl';
 import { Searchbar, SearchForm } from '@strapi/design-system/Searchbar';
 import { IconButton } from '@strapi/design-system/IconButton';
 import SearchIcon from '@strapi/icons/Search';
-import getTrad from '../../../../../utils/getTrad';
+import getTrad from '../../../../utils/getTrad';
 
 const SearchAsset = ({ onChangeSearch, queryValue }) => {
   const { formatMessage } = useIntl();
