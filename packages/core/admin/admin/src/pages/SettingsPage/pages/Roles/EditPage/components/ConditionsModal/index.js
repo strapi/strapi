@@ -90,7 +90,7 @@ const ConditionsModal = ({ actions, headerBreadCrumbs, isFormDisabled, onClosed,
       </ModalHeader>
       <Box padding={8}>
         <Stack size={6}>
-          <Typography variant="beta">
+          <Typography variant="beta" as="h2">
             {formatMessage({
               id: 'Settings.permissions.conditions.define-conditions',
               defaultMessage: 'Define conditions',
