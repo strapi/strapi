@@ -130,7 +130,7 @@ describe('MediaLibrary / AssetList', () => {
     );
 
     expect(container).toMatchInlineSnapshot(`
-      .c28 {
+      .c31 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
@@ -140,6 +140,29 @@ describe('MediaLibrary / AssetList', () => {
         padding: 0;
         position: absolute;
         width: 1px;
+      }
+
+      .c26 {
+        width: 100%;
+        height: 10.25rem;
+      }
+
+      .c27 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: center;
+        -webkit-justify-content: center;
+        -ms-flex-pack: center;
+        justify-content: center;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
       }
 
       .c21 {
@@ -393,12 +416,17 @@ describe('MediaLibrary / AssetList', () => {
         max-height: 10.25rem;
       }
 
-      .c27 {
+      .c30 {
         text-transform: uppercase;
       }
 
-      .c26 svg {
+      .c29 svg {
         font-size: 3rem;
+      }
+
+      .c28 {
+        border-radius: 4px 4px 0 0;
+        background: linear-gradient(180deg,#ffffff 0%,#f6f6f9 121.48%);
       }
 
       .c0 {
@@ -599,29 +627,33 @@ describe('MediaLibrary / AssetList', () => {
                   />
                 </div>
                 <div
-                  class="c6"
+                  class="c26 c27 c28"
+                  height="10.25rem"
+                  width="100%"
                 >
-                  <div
-                    class="c19"
+                  <span
+                    class="c29"
                   >
-                    <span
-                      class="c26"
+                    <svg
+                      aria-label="CARTE MARIAGE AVS - Printemps.pdf"
+                      fill="none"
+                      height="1em"
+                      viewBox="0 0 24 33"
+                      width="1em"
+                      xmlns="http://www.w3.org/2000/svg"
                     >
-                      <svg
-                        aria-label="CARTE MARIAGE AVS - Printemps.pdf"
-                        fill="none"
-                        height="1em"
-                        viewBox="0 0 24 24"
-                        width="1em"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M20 22H6.5A3.5 3.5 0 013 18.5V5a3 3 0 013-3h14a1 1 0 011 1v18a1 1 0 01-1 1zm-1-2v-3H6.5a1.5 1.5 0 100 3H19z"
-                          fill="#8E8EA9"
-                        />
-                      </svg>
-                    </span>
-                  </div>
+                      <path
+                        d="M23.305 8.126L16.39.749c-.443-.472-1.043-.741-1.643-.741H2.337c-.632 0-1.2.27-1.642.74A2.529 2.529 0 000 2.5v27.015c0 1.381 1.042 2.493 2.337 2.493h19.326c1.295 0 2.337-1.112 2.337-2.493V9.877c0-.64-.253-1.28-.695-1.751zm-1.326.606h-5.116c-.568 0-1.042-.505-1.042-1.112V2.197l6.158 6.535zm-.316 21.827H2.337c-.537 0-.98-.471-.98-1.044V2.5c0-.269.096-.538.285-.74a.949.949 0 01.695-.304h12.126V7.62c0 1.415 1.074 2.56 2.4 2.56h5.78v19.335c0 .573-.443 1.044-.98 1.044z"
+                        fill="#D9822F"
+                      />
+                      <path
+                        clip-rule="evenodd"
+                        d="M13.964 20.095c.344.252.781.522 1.312.811a16.714 16.714 0 011.827-.1c1.53 0 2.451.236 2.764.709.166.212.177.463.031.753 0 .01-.005.02-.016.029l-.03.029v.014c-.063.367-.433.55-1.11.55-.5 0-1.098-.096-1.795-.29a11.908 11.908 0 01-2.03-.767c-2.3.232-4.341.633-6.121 1.202-1.593 2.53-2.852 3.795-3.779 3.795a.965.965 0 01-.437-.102l-.375-.174a1.668 1.668 0 00-.093-.072c-.105-.096-.136-.27-.094-.521.094-.386.385-.828.874-1.325.49-.498 1.177-.963 2.061-1.398.146-.087.266-.058.36.087.02.02.03.039.03.058a34.703 34.703 0 001.672-2.853c.707-1.313 1.249-2.578 1.623-3.794a10.952 10.952 0 01-.476-2.31c-.067-.748-.034-1.364.102-1.847.114-.386.333-.579.655-.579h.344c.24 0 .422.072.547.217.187.203.234.531.14.985a.307.307 0 01-.062.116.35.35 0 01.015.116v.434c-.02 1.188-.093 2.115-.218 2.78.572 1.584 1.332 2.733 2.28 3.447zM4.97 26.047c.542-.232 1.255-.995 2.14-2.289-.531.387-.987.792-1.367 1.217-.38.425-.637.782-.773 1.072zm6.183-11.412c-.135-.868-.125-1.506.032-1.911v-.03c.01-.009.015-.019.015-.028a.798.798 0 01.203.521c0 .01.005.024.016.044 0 .01.005.019.015.029a.317.317 0 00-.062.116c-.073.386-.11.593-.11.622l-.109.637zm-1.904 7.66a24.288 24.288 0 014.434-1.173 2.398 2.398 0 01-.203-.137 2.761 2.761 0 01-.25-.196c-.79-.647-1.452-1.496-1.983-2.549-.28.83-.713 1.782-1.296 2.854-.312.54-.546.94-.702 1.201zm7.9-.58c1.208 0 1.937.117 2.187.349.02.019.031.033.031.043-.042.01-.135.014-.281.014-.5 0-1.145-.135-1.936-.405z"
+                        fill="#D9822F"
+                        fill-rule="evenodd"
+                      />
+                    </svg>
+                  </span>
                 </div>
               </div>
               <div
@@ -643,7 +675,7 @@ describe('MediaLibrary / AssetList', () => {
                       class="c12"
                     >
                       <span
-                        class="c27"
+                        class="c30"
                       >
                         pdf
                       </span>
@@ -686,7 +718,7 @@ describe('MediaLibrary / AssetList', () => {
           </div>
         </div>
         <div
-          class="c28"
+          class="c31"
         >
           <p
             aria-live="polite"

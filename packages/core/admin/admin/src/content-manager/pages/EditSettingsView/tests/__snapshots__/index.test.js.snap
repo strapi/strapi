@@ -633,32 +633,6 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   margin-top: 8px;
 }
 
-.c21 {
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
-  color: #32324d;
-}
-
-.c43 {
-  font-weight: 400;
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #32324d;
-}
-
-.c63 {
-  font-weight: 500;
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #32324d;
-}
-
-.c44 {
-  font-weight: 600;
-  line-height: 1.14;
-}
-
 .c0 {
   outline: none;
 }
@@ -796,6 +770,32 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+}
+
+.c21 {
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c43 {
+  font-weight: 400;
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #32324d;
+}
+
+.c63 {
+  font-weight: 500;
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #32324d;
+}
+
+.c44 {
+  font-weight: 600;
+  line-height: 1.14;
 }
 
 .c22 {
@@ -2452,32 +2452,6 @@ exports[`EditSettingsView should add field 1`] = `
   margin-top: 8px;
 }
 
-.c21 {
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
-  color: #32324d;
-}
-
-.c43 {
-  font-weight: 400;
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #32324d;
-}
-
-.c63 {
-  font-weight: 500;
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #32324d;
-}
-
-.c44 {
-  font-weight: 600;
-  line-height: 1.14;
-}
-
 .c0 {
   outline: none;
 }
@@ -2615,6 +2589,32 @@ exports[`EditSettingsView should add field 1`] = `
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+}
+
+.c21 {
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c43 {
+  font-weight: 400;
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #32324d;
+}
+
+.c63 {
+  font-weight: 500;
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #32324d;
+}
+
+.c44 {
+  font-weight: 600;
+  line-height: 1.14;
 }
 
 .c22 {
@@ -4764,32 +4764,6 @@ exports[`EditSettingsView should add relation 1`] = `
   margin-top: 8px;
 }
 
-.c21 {
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
-  color: #32324d;
-}
-
-.c43 {
-  font-weight: 400;
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #32324d;
-}
-
-.c63 {
-  font-weight: 500;
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #32324d;
-}
-
-.c44 {
-  font-weight: 600;
-  line-height: 1.14;
-}
-
 .c0 {
   outline: none;
 }
@@ -4927,6 +4901,32 @@ exports[`EditSettingsView should add relation 1`] = `
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+}
+
+.c21 {
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c43 {
+  font-weight: 400;
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #32324d;
+}
+
+.c63 {
+  font-weight: 500;
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #32324d;
+}
+
+.c44 {
+  font-weight: 600;
+  line-height: 1.14;
 }
 
 .c22 {

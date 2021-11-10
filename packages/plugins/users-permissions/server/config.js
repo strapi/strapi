@@ -13,8 +13,8 @@ module.exports = {
     layout: {
       user: {
         actions: {
-          create: 'User.create', // Use the User plugin's controller.
-          update: 'User.update',
+          create: 'contentManagerUser.create', // Use the User plugin's controller.
+          update: 'contentManagerUser.update',
         },
       },
     },

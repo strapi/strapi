@@ -513,25 +513,6 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   margin-left: 12px;
 }
 
-.c24 {
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
-  color: #32324d;
-}
-
-.c77 {
-  font-weight: 400;
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #32324d;
-}
-
-.c78 {
-  font-weight: 600;
-  line-height: 1.14;
-}
-
 .c31 {
   font-weight: 600;
   color: #32324d;
@@ -847,6 +828,25 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
 
 .c59 {
   grid-column: span 3;
+}
+
+.c24 {
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c77 {
+  font-weight: 400;
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #32324d;
+}
+
+.c78 {
+  font-weight: 600;
+  line-height: 1.14;
 }
 
 .c27 {
@@ -2317,25 +2317,6 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   margin-left: 12px;
 }
 
-.c24 {
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
-  color: #32324d;
-}
-
-.c77 {
-  font-weight: 400;
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #32324d;
-}
-
-.c78 {
-  font-weight: 600;
-  line-height: 1.14;
-}
-
 .c31 {
   font-weight: 600;
   color: #32324d;
@@ -2651,6 +2632,25 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
 
 .c59 {
   grid-column: span 3;
+}
+
+.c24 {
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c77 {
+  font-weight: 400;
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #32324d;
+}
+
+.c78 {
+  font-weight: 600;
+  line-height: 1.14;
 }
 
 .c27 {

@@ -4,7 +4,6 @@ import styled from 'styled-components';
 import {
   Card,
   CardAction,
-  CardAsset,
   CardBadge,
   CardBody,
   CardCheckbox,
@@ -13,9 +12,12 @@ import {
   CardTitle,
   CardSubtitle,
 } from '@strapi/design-system/Card';
+import { Flex } from '@strapi/design-system/Flex';
 import { IconButton } from '@strapi/design-system/IconButton';
 import Pencil from '@strapi/icons/Pencil';
-import Book from '@strapi/icons/Book';
+import FileIcon from '@strapi/icons/File';
+import FilePdfIcon from '@strapi/icons/FilePdf';
+import { pxToRem } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { getTrad } from '../../utils';
 
@@ -27,6 +29,11 @@ const IconWrapper = styled.span`
   svg {
     font-size: 3rem;
   }
+`;
+
+const CardAsset = styled(Flex)`
+  border-radius: ${({ theme }) => theme.borderRadius} ${({ theme }) => theme.borderRadius} 0 0;
+  background: linear-gradient(180deg, #ffffff 0%, #f6f6f9 121.48%);
 `;
 
 export const DocAssetCard = ({ name, extension, selected, onSelect, onEdit, size }) => {
@@ -45,9 +52,17 @@ export const DocAssetCard = ({ name, extension, selected, onSelect, onEdit, size
             />
           </CardAction>
         )}
-        <CardAsset size={size}>
+        <CardAsset
+          width="100%"
+          height={size === 'S' ? pxToRem(88) : pxToRem(164)}
+          justifyContent="center"
+        >
           <IconWrapper>
-            <Book aria-label={name} />
+            {extension === 'pdf' ? (
+              <FilePdfIcon aria-label={name} />
+            ) : (
+              <FileIcon aria-label={name} />
+            )}
           </IconWrapper>
         </CardAsset>
       </CardHeader>
