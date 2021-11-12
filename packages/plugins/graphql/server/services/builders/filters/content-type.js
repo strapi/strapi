@@ -31,8 +31,12 @@ module.exports = ({ strapi }) => {
             .hasFiltersEnabeld()
         );
 
+        const isIDFilterEnabled = extension
+          .shadowCRUD(contentType.uid)
+          .field('id')
+          .hasFiltersEnabeld();
         // Add an ID filter to the collection types
-        if (contentType.kind === 'collectionType') {
+        if (contentType.kind === 'collectionType' && isIDFilterEnabled) {
           t.field('id', { type: getScalarFilterInputTypeName('ID') });
         }
 
