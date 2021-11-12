@@ -27,6 +27,8 @@ const createModule = (namespace, rawModule, strapi) => {
   try {
     validateModule(rawModule);
   } catch (e) {
+    console.error(e);
+
     throw new Error(`strapi-server.js is invalid for '${namespace}'.\n${e.errors.join('\n')}`);
   }
 
@@ -61,7 +63,9 @@ const createModule = (namespace, rawModule, strapi) => {
       strapi.container.get('controllers').add(namespace, rawModule.controllers);
       strapi.container.get('config').set(uidToPath(namespace), rawModule.config);
     },
-    routes: rawModule.routes,
+    get routes() {
+      return rawModule.routes;
+    },
     config(path, defaultValue) {
       return strapi.container.get('config').get(`${uidToPath(namespace)}.${path}`, defaultValue);
     },

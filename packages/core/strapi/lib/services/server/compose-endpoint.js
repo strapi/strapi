@@ -89,17 +89,30 @@ module.exports = strapi => {
 };
 
 const getController = (name, { pluginName, apiName }, strapi) => {
+  let ctrl;
+
   if (pluginName) {
     if (pluginName === 'admin') {
-      return strapi.controller(`admin::${name}`);
+      ctrl = strapi.controller(`admin::${name}`);
+    } else {
+      ctrl = strapi.plugin(pluginName).controller(name);
     }
-
-    return strapi.plugin(pluginName).controller(name);
   } else if (apiName) {
-    return strapi.controller(`api::${apiName}.${name}`);
+    ctrl = strapi.controller(`api::${apiName}.${name}`);
   }
 
-  return strapi.controller(name);
+  if (!ctrl) {
+    return strapi.controller(name);
+  }
+
+  return ctrl;
+};
+
+const extractHandlerParts = name => {
+  const controllerName = name.slice(0, name.lastIndexOf('.'));
+  const actionName = name.slice(name.lastIndexOf('.') + 1);
+
+  return { controllerName, actionName };
 };
 
 const getAction = (route, strapi) => {
@@ -110,7 +123,7 @@ const getAction = (route, strapi) => {
     return handler;
   }
 
-  const [controllerName, actionName] = trim(handler).split('.');
+  const { controllerName, actionName } = extractHandlerParts(trim(handler));
 
   const controller = getController(controllerName, { pluginName, apiName }, strapi);
 

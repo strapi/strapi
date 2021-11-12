@@ -1,17 +1,8 @@
 const { createCoreController } = require('@strapi/strapi').factories;
 
-module.exports = createCoreController('api::address.address', ({ strapi }) => ({
+module.exports = createCoreController('api::address.address', {
   async find(ctx) {
-    const { query } = ctx;
-
-    const { results, pagination } = await strapi.service('api::address.address').find(query);
-    const sanitizedResults = await this.sanitizeOutput(results, ctx);
-
-    return this.transformResponse(sanitizedResults, { pagination });
+    const { results } = await strapi.service('api::address.address').find();
+    ctx.body = await this.sanitizeOutput(results);
   },
-
-  async findOne(ctx) {
-    // use the parent controller
-    return super.findOne(ctx);
-  },
-}));
+});
