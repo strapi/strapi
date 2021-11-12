@@ -264,7 +264,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
     return db.query(uid).deleteMany(query);
   },
 
-  load(uid, entity, field, params) {
+  load(uid, entity, field, params = {}) {
     const { attributes } = strapi.getModel(uid);
 
     const attribute = attributes[field];
