@@ -95,7 +95,8 @@ module.exports = ({ strapi }) => {
      * Apply basic transform to GQL args
      */
     transformArgs(args, { contentType, usePagination = false } = {}) {
-      const { mappers, config } = getService('utils');
+      const { mappers } = getService('utils');
+      const { config } = strapi.plugin('graphql');
       const { pagination = {}, filters = {} } = args;
 
       // Init
@@ -103,7 +104,8 @@ module.exports = ({ strapi }) => {
 
       // Pagination
       if (usePagination) {
-        const { defaultLimit, maxLimit } = config;
+        const defaultLimit = config('defaultLimit');
+        const maxLimit = config('maxLimit');
 
         Object.assign(
           newArgs,
