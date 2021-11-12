@@ -1,6 +1,6 @@
 'use strict';
 
-const pipeAsync = (...methods) => async data => {
+module.exports = (...methods) => async data => {
   let res = data;
 
   for (const method of methods) {
@@ -8,8 +8,4 @@ const pipeAsync = (...methods) => async data => {
   }
 
   return res;
-};
-
-module.exports = {
-  pipeAsync,
 };

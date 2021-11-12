@@ -16,7 +16,7 @@ module.exports = (allowedFields = null) => ({ key, path }, { remove }) => {
   const containedPaths = getContainedPaths(path);
 
   /**
-   * Tells if the current path should be keeped or not based
+   * Tells if the current path should be kept or not based
    * on the success of the check functions for any of the allowed paths.
    *
    * The check functions are defined as follow:
