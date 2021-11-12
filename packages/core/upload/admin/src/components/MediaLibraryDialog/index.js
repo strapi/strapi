@@ -1,23 +1,20 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { useLibrary } from '@strapi/helper-plugin';
+import { AssetDialog } from '../AssetDialog';
+import { UploadAssetDialog } from '../UploadAssetDialog/UploadAssetDialog';
 
 const Steps = {
   SelectAsset: 'SelectAsset',
   UploadAsset: 'UploadAsset',
 };
 
-const MediaLibrary = ({ onClose, onSelectAssets }) => {
-  const { components } = useLibrary();
+export const MediaLibraryDialog = ({ onClose, onSelectAssets, allowedTypes }) => {
   const [step, setStep] = useState(Steps.SelectAsset);
-
-  const AssetDialog = components.AssetDialog;
-  const UploadAssetDialog = components.UploadAssetDialog;
 
   if (step === Steps.SelectAsset) {
     return (
       <AssetDialog
-        allowedTypes={['files', 'images', 'videos']}
+        allowedTypes={allowedTypes}
         onClose={onClose}
         onValidate={onSelectAssets}
         onAddAsset={() => setStep(Steps.UploadAsset)}
@@ -29,9 +26,12 @@ const MediaLibrary = ({ onClose, onSelectAssets }) => {
   return <UploadAssetDialog onClose={() => setStep(Steps.SelectAsset)} />;
 };
 
-MediaLibrary.propTypes = {
+MediaLibraryDialog.defaultProps = {
+  allowedTypes: ['files', 'images', 'videos'],
+};
+
+MediaLibraryDialog.propTypes = {
+  allowedTypes: PropTypes.arrayOf(PropTypes.string),
   onClose: PropTypes.func.isRequired,
   onSelectAssets: PropTypes.func.isRequired,
 };
-
-export default MediaLibrary;

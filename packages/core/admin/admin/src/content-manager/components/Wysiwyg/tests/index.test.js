@@ -4,6 +4,11 @@ import { render, waitFor, fireEvent } from '@testing-library/react';
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import Wysiwyg from '../index';
 
+jest.mock('@strapi/helper-plugin', () => ({
+  ...jest.requireActual('@strapi/helper-plugin'),
+  useLibrary: () => ({ components: {} }),
+}));
+
 document.createRange = () => {
   const range = new Range();
   range.getBoundingClientRect = jest.fn();

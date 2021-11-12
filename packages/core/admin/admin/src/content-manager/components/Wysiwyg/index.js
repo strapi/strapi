@@ -6,11 +6,10 @@ import { Typography } from '@strapi/design-system/Typography';
 import { P } from '@strapi/design-system/Text';
 import { Box } from '@strapi/design-system/Box';
 import { Stack } from '@strapi/design-system/Stack';
-import { prefixFileUrlWithBackendUrl } from '@strapi/helper-plugin';
+import { prefixFileUrlWithBackendUrl, useLibrary } from '@strapi/helper-plugin';
 import Editor from './Editor';
 import WysiwygNav from './WysiwygNav';
 import WysiwygFooter from './WysiwygFooter';
-import MediaLibrary from './MediaLibrary';
 
 import {
   markdownHandler,
@@ -44,6 +43,9 @@ const Wysiwyg = ({
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [mediaLibVisible, setMediaLibVisible] = useState(false);
   const [isExpandMode, setIsExpandMode] = useState(false);
+  const { components } = useLibrary();
+
+  const MediaLibraryDialog = components['media-library'];
 
   const handleToggleMediaLib = () => setMediaLibVisible(prev => !prev);
   const handleTogglePreviewMode = () => setIsPreviewMode(prev => !prev);
@@ -175,7 +177,7 @@ const Wysiwyg = ({
       )}
 
       {mediaLibVisible && (
-        <MediaLibrary onClose={handleToggleMediaLib} onSelectAssets={handleSelectAssets} />
+        <MediaLibraryDialog onClose={handleToggleMediaLib} onSelectAssets={handleSelectAssets} />
       )}
     </>
   );
