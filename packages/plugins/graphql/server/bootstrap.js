@@ -1,6 +1,8 @@
 'use strict';
 
 const { isEmpty, mergeWith, isArray } = require('lodash/fp');
+const { execute, subscribe } = require('graphql');
+const { SubscriptionServer } = require('subscriptions-transport-ws');
 const { ApolloServer } = require('apollo-server-koa');
 const {
   ApolloServerPluginLandingPageDisabled,
@@ -31,6 +33,8 @@ module.exports = async ({ strapi }) => {
 
   const { config } = strapi.plugin('graphql');
 
+  const path = config('endpoint');
+
   const defaultServerConfig = {
     // Schema
     schema,
@@ -59,13 +63,28 @@ module.exports = async ({ strapi }) => {
     ],
   };
 
-  const serverConfig = merge(defaultServerConfig, config('apolloServer', {}));
+  const serverConfig = merge(defaultServerConfig, config('apolloServer'));
+
+  // Handle subscriptions
+  if (config('subscriptions')) {
+    const subscriptionServer = SubscriptionServer.create(
+      { schema, execute, subscribe },
+      { server: strapi.server.httpServer, path }
+    );
+
+    serverConfig.plugins.push({
+      async serverWillStart() {
+        return {
+          async drainServer() {
+            subscriptionServer.close();
+          },
+        };
+      },
+    });
+  }
 
   // Create a new Apollo server
   const server = new ApolloServer(serverConfig);
-
-  // Link the Apollo server & the Strapi app
-  const path = config('endpoint', '/graphql');
 
   // Register the upload middleware
   useUploadMiddleware(strapi, path);
@@ -77,6 +96,7 @@ module.exports = async ({ strapi }) => {
     strapi.log.error('Failed to start the Apollo server', e.message);
   }
 
+  // Link the Apollo server & the Strapi app
   strapi.server.routes([
     {
       method: 'ALL',
