@@ -142,7 +142,11 @@ module.exports = {
 
       if (!reverseAttribute) {
         throw new Error(
-          `The attribute \`${attribute.via}\` is missing in the model ${_.upperFirst(
+          `The attribute \`${attribute.via}\` referenced by the \`${
+            attributeName
+          }\` attribute of the ${_.upperFirst(
+            modelName
+          )} model was not found on the related model ${_.upperFirst(
             attribute.model
           )}${attribute.plugin ? ' (plugin - ' + attribute.plugin + ')' : ''}`
         );
