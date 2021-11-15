@@ -75,6 +75,10 @@ const createCollectionTypeService = ({ model, strapi, utils }) => {
     update(entityId, params = {}) {
       const { data } = params;
 
+      if (!isObject(data)) {
+        throw new ValidationError(`Expecting body.data to be an object, found "${typeof data}"`);
+      }
+
       return strapi.entityService.update(uid, entityId, { ...params, data });
     },
 
