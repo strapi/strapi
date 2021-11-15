@@ -5,7 +5,6 @@ import { useDrag, useDrop } from 'react-dnd';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
 import toString from 'lodash/toString';
-import styled from 'styled-components';
 import { Accordion, AccordionToggle, AccordionContent } from '@strapi/design-system/Accordion';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { Stack } from '@strapi/design-system/Stack';
@@ -20,14 +19,6 @@ import Preview from './Preview';
 import DraggingSibling from './DraggingSibling';
 import { CustomIconButton, DragHandleWrapper } from './IconButtonCustoms';
 import { connect, select } from './utils';
-
-const StyledBox = styled(Box)`
-  > div {
-    > div:not(:first-of-type) {
-      overflow: visible;
-    }
-  }
-`;
 
 /* eslint-disable react/no-array-index-key */
 
@@ -172,7 +163,7 @@ const DraggedItem = ({
   const accordionTitle = toString(displayedValue);
 
   return (
-    <StyledBox ref={refs ? refs.dropRef : null}>
+    <Box ref={refs ? refs.dropRef : null}>
       {isDragging && <Preview />}
       {!isDragging && isDraggingSibling && (
         <DraggingSibling displayedValue={accordionTitle} componentFieldName={componentFieldName} />
@@ -270,7 +261,7 @@ const DraggedItem = ({
           </AccordionContent>
         </Accordion>
       )}
-    </StyledBox>
+    </Box>
   );
 };
 
