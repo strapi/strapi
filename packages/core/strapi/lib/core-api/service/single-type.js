@@ -1,5 +1,6 @@
 'use strict';
 
+const { isObject } = require('lodash/fp');
 const { ValidationError } = require('@strapi/utils').errors;
 
 /**
@@ -26,6 +27,10 @@ const createSingleTypeService = ({ model, strapi, utils }) => {
      */
     async createOrUpdate({ data, ...params } = {}) {
       const entity = await this.find(params);
+
+      if (!isObject(data)) {
+        throw new ValidationError(`Expecting body.data to be an object but found '${typeof data}'`);
+      }
 
       if (!entity) {
         const count = await strapi.query(uid).count();
