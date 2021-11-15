@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
-import { Text } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
 import CollapseLabel from '../CollapseLabel';
@@ -60,7 +60,13 @@ const RowLabelWithCheckbox = ({
           role: 'button',
         })}
       >
-        <Text ellipsis>{upperFirst(label)}</Text>
+        <Typography
+          fontWeight={isActive ? 'bold' : ''}
+          textColor={isActive ? 'primary600' : 'neutral800'}
+          ellipsis
+        >
+          {upperFirst(label)}
+        </Typography>
         {children}
       </CollapseLabel>
     </Flex>

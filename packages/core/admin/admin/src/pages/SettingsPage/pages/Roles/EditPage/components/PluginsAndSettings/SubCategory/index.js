@@ -5,7 +5,7 @@ import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { Box } from '@strapi/design-system/Box';
 import { Checkbox } from '@strapi/design-system/Checkbox';
 import { Flex } from '@strapi/design-system/Flex';
-import { TableLabel } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { useIntl } from 'react-intl';
 import get from 'lodash/get';
 import IS_DISABLED from 'ee_else_ce/pages/SettingsPage/pages/Roles/EditPage/components/PluginsAndSettings/SubCategory/utils/constants';
@@ -76,7 +76,9 @@ const SubCategory = ({ categoryName, isFormDisabled, subCategoryName, actions, p
       <Box>
         <Flex justifyContent="space-between" alignItems="center">
           <Box paddingRight={4}>
-            <TableLabel textColor="neutral600">{subCategoryName}</TableLabel>
+            <Typography variant="sigma" textColor="neutral600">
+              {subCategoryName}
+            </Typography>
           </Box>
           <Border />
           <Box paddingLeft={4}>
