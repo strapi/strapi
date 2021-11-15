@@ -45,6 +45,7 @@ const DraggedItem = ({
   // checkFormErrors,
   displayedValue,
 }) => {
+  console.log(hasErrorMessage, hasErrors);
   const dragRef = useRef(null);
   const dropRef = useRef(null);
   const [, forceRerenderAfterDnd] = useState(false);
@@ -160,6 +161,7 @@ const DraggedItem = ({
   };
 
   const accordionTitle = toString(displayedValue);
+  const accordionHasError = hasErrors ? 'error' : undefined;
 
   return (
     <Box ref={refs ? refs.dropRef : null}>
@@ -170,7 +172,7 @@ const DraggedItem = ({
 
       {!isDragging && !isDraggingSibling && (
         <Accordion
-          error={hasErrors ? 'ok' : undefined}
+          error={accordionHasError}
           hasErrorMessage={hasErrorMessage}
           expanded={isOpen}
           toggle={onClickToggle}

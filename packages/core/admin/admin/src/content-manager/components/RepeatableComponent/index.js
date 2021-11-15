@@ -111,7 +111,7 @@ const RepeatableComponent = ({
 
   if (hasMinError) {
     errorMessage = {
-      id: 'content-manager.components.DynamicZone.missing-components',
+      id: getTrad('components.DynamicZone.missing-components'),
       defaultMessage:
         'There {number, plural, =0 {are # missing components} one {is # missing component} other {are # missing components}}',
       values: { number: missingComponentsValue },
@@ -128,9 +128,11 @@ const RepeatableComponent = ({
     error => error.split('.').length > 1
   );
 
-  // FIXME
   if (doesRepComponentHasChildError && !hasMinError) {
-    errorMessage = { id: 'TODO', defaultMessage: 'The component(s) contain error(s)' };
+    errorMessage = {
+      id: getTrad('components.RepComponent.error-message'),
+      defaultMessage: 'The component(s) contain error(s)',
+    };
   }
 
   return (

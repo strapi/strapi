@@ -475,6 +475,7 @@
   "content-manager.components.LeftMenu.single-types": "{number, plural, =0 {Single Types} one {Single Type } other {Single Types}}",
   "content-manager.components.LimitSelect.itemsPerPage": "Items per page",
   "content-manager.components.NotAllowedInput.text": "No permissions to see this field",
+  "content-manager.components.RepComponent.error-message": "The component(s) contain error(s)",
   "content-manager.components.Search.placeholder": "Search for an entry...",
   "content-manager.components.Select.draft-info-title": "State: Draft",
   "content-manager.components.Select.publish-info-title": "State: Published",
