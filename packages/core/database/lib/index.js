@@ -30,7 +30,7 @@ class Database {
     this.config = {
       connection: {},
       settings: {
-        forceMigration: false,
+        forceMigration: true,
       },
       ...config,
     };
