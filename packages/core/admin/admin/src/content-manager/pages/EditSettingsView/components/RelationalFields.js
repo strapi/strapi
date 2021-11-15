@@ -8,9 +8,9 @@ import { Typography } from '@strapi/design-system/Typography';
 import { Stack } from '@strapi/design-system/Stack';
 import { SimpleMenu, MenuItem } from '@strapi/design-system/SimpleMenu';
 import Plus from '@strapi/icons/Plus';
-import { getTrad } from '../../../utils';
-import FieldButton from './FieldButton';
+import { getTrad, ItemTypes } from '../../../utils';
 import { useLayoutDnd } from '../../../hooks';
+import FieldButton from './FieldButton';
 
 const RelationalFields = ({
   relationsLayout,
@@ -19,7 +19,7 @@ const RelationalFields = ({
   onAddField,
 }) => {
   const { formatMessage } = useIntl();
-  const { setEditFieldToSelect, modifiedData } = useLayoutDnd();
+  const { setEditFieldToSelect, modifiedData, onMoveRelation } = useLayoutDnd();
 
   return (
     <Stack size={4}>
@@ -56,6 +56,10 @@ const RelationalFields = ({
                 onEditField={() => setEditFieldToSelect(relationName)}
                 onDeleteField={() => onRemoveField(index)}
                 key={relationName}
+                index={index}
+                name={relationName}
+                onMoveField={onMoveRelation}
+                itemType={ItemTypes.EDIT_RELATION}
               >
                 {relationLabel || relationName}
               </FieldButton>

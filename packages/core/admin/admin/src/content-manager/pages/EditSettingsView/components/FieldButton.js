@@ -1,6 +1,9 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
+import { useDrop, useDrag } from 'react-dnd';
+import { getEmptyImage } from 'react-dnd-html5-backend';
+import { useIntl } from 'react-intl';
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
 import { IconButton } from '@strapi/design-system/IconButton';
@@ -8,10 +11,9 @@ import { Typography } from '@strapi/design-system/Typography';
 import Drag from '@strapi/icons/Drag';
 import Pencil from '@strapi/icons/Pencil';
 import Trash from '@strapi/icons/Trash';
-import { useIntl } from 'react-intl';
+import { getTrad } from '../../../utils';
 import ComponentFieldList from './ComponentFieldList';
 import DynamicZoneList from './DynamicZoneList';
-import getTrad from '../../../utils/getTrad';
 
 const CustomIconButton = styled(IconButton)`
   background-color: transparent;
@@ -27,10 +29,63 @@ const CustomDragIcon = styled(Drag)`
   }
 `;
 const CustomFlex = styled(Flex)`
+  opacity: ${({ isDragging }) => (isDragging ? 0 : 1)};
+`;
+const DragButton = styled(Flex)`
+  cursor: all-scroll;
   border-right: 1px solid ${({ theme }) => theme.colors.neutral200};
 `;
 
-const FieldButton = ({ attribute, onEditField, onDeleteField, children }) => {
+const FieldButton = ({
+  attribute,
+  onEditField,
+  onDeleteField,
+  children,
+  index,
+  itemType,
+  name,
+  onMoveField,
+}) => {
+  const dragButtonRef = useRef();
+
+  const [, drop] = useDrop({
+    accept: itemType,
+    hover(item) {
+      if (!dragButtonRef.current) {
+        return;
+      }
+      const dragIndex = item.index;
+      const hoverIndex = index;
+
+      // Don't replace items with themselves
+      if (dragIndex === hoverIndex) {
+        return;
+      }
+
+      console.log(hoverIndex);
+
+      onMoveField(dragIndex, hoverIndex);
+
+      item.index = hoverIndex;
+    },
+  });
+
+  const [{ isDragging }, drag, dragPreview] = useDrag({
+    type: itemType,
+    item: () => {
+      return { index, labelField: children, name };
+    },
+    collect: monitor => ({
+      isDragging: monitor.isDragging(),
+    }),
+  });
+
+  useEffect(() => {
+    dragPreview(getEmptyImage(), { captureDraggingState: true });
+  }, [dragPreview]);
+
+  drag(drop(dragButtonRef));
+
   const { formatMessage } = useIntl();
   const getHeight = () => {
     const higherFields = ['json', 'text', 'file', 'media', 'component', 'richtext', 'dynamiczone'];
@@ -43,17 +98,28 @@ const FieldButton = ({ attribute, onEditField, onDeleteField, children }) => {
   };
 
   return (
-    <Flex
+    <CustomFlex
       width="100%"
       borderColor="neutral150"
       hasRadius
       background="neutral100"
       minHeight={getHeight()}
       alignItems="stretch"
+      isDragging={isDragging}
     >
-      <CustomFlex alignItems="center" paddingLeft={3} paddingRight={3}>
+      <DragButton
+        as="button"
+        type="button"
+        ref={dragButtonRef}
+        onClick={e => e.stopPropagation()}
+        alignItems="center"
+        paddingLeft={3}
+        paddingRight={3}
+        // Disable the keyboard navigation since the drag n drop isn't accessible with the keyboard for the moment
+        tabIndex={-1}
+      >
         <CustomDragIcon />
-      </CustomFlex>
+      </DragButton>
       <Box overflow="hidden" width="100%">
         <Flex paddingLeft={3} alignItems="baseline" justifyContent="space-between">
           <Box>
@@ -96,7 +162,7 @@ const FieldButton = ({ attribute, onEditField, onDeleteField, children }) => {
         )}
         {attribute?.type === 'dynamiczone' && <DynamicZoneList components={attribute.components} />}
       </Box>
-    </Flex>
+    </CustomFlex>
   );
 };
 
@@ -113,6 +179,10 @@ FieldButton.propTypes = {
   onEditField: PropTypes.func.isRequired,
   onDeleteField: PropTypes.func.isRequired,
   children: PropTypes.string.isRequired,
+  index: PropTypes.number.isRequired,
+  name: PropTypes.string.isRequired,
+  itemType: PropTypes.string.isRequired,
+  onMoveField: PropTypes.func.isRequired,
 };
 
 export default FieldButton;
