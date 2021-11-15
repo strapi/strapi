@@ -5,20 +5,21 @@ import get from 'lodash/get';
 import { Button } from '@strapi/design-system/Button';
 import { Box } from '@strapi/design-system/Box';
 import { ButtonText } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { Stack } from '@strapi/design-system/Stack';
 import { Flex } from '@strapi/design-system/Flex';
 import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
 import { SimpleMenu, MenuItem } from '@strapi/design-system/SimpleMenu';
 import Plus from '@strapi/icons/Plus';
-import { getTrad } from '../../../utils';
+import { getTrad, ItemTypes } from '../../../utils';
 import { useLayoutDnd } from '../../../hooks';
 import FieldButton from './FieldButton';
 import LinkToCTB from './LinkToCTB';
 
 const DisplayedFields = ({ editLayout, editLayoutRemainingFields, onRemoveField, onAddField }) => {
   const { formatMessage } = useIntl();
-  const { setEditFieldToSelect, attributes, modifiedData } = useLayoutDnd();
+  const { setEditFieldToSelect, attributes, modifiedData, onMoveField } = useLayoutDnd();
 
   return (
     <Stack size={4}>
@@ -32,15 +33,14 @@ const DisplayedFields = ({ editLayout, editLayoutRemainingFields, onRemoveField,
               })}
             </ButtonText>
           </Box>
-          {/* Since the drag n drop will not be available, this text will be hidden for the moment */}
-          {/* <Box>
-            <Text small textColor="neutral600">
+          <Box>
+            <Typography variant="pi" textColor="neutral600">
               {formatMessage({
                 id: 'containers.SettingPage.editSettings.description',
                 defaultMessage: 'Drag & drop the fields to build the layout',
               })}
-            </Text>
-          </Box> */}
+            </Typography>
+          </Box>
         </div>
         <LinkToCTB />
       </Flex>
@@ -63,6 +63,10 @@ const DisplayedFields = ({ editLayout, editLayoutRemainingFields, onRemoveField,
                         onEditField={() => setEditFieldToSelect(rowItem.name)}
                         onDeleteField={() => onRemoveField(row.rowId, index)}
                         attribute={attribute}
+                        itemType={ItemTypes.EDIT_RELATION}
+                        index={index}
+                        name={rowItem.name}
+                        onMoveField={onMoveField}
                       >
                         {attributeLabel || rowItem.name}
                       </FieldButton>
