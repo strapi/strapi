@@ -22,11 +22,13 @@ const IconButtonCustom = styled(IconButton)`
 `;
 
 const StyledBox = styled(Box)`
-  > div {
-    > div:not(:first-of-type) {
-      overflow: visible;
-    }
+  > div:first-child {
+    box-shadow: ${({ theme }) => theme.shadows.tableShadow};
   }
+`;
+
+const AccordionContentRadius = styled(Box)`
+  border-radius: 0 0 ${({ theme }) => theme.spaces[1]} ${({ theme }) => theme.spaces[1]};
 `;
 
 const Component = ({
@@ -75,12 +77,11 @@ const Component = ({
     { name: friendlyName }
   );
 
-  const formErrorsKeys =  Object.keys(formErrors);
+  const formErrorsKeys = Object.keys(formErrors);
 
   const fieldsErrors = formErrorsKeys.filter(errorKey => {
-    
-    const errorKeysArray = errorKey.split('.').filter((_, index) => index < 2)
-    
+    const errorKeysArray = errorKey.split('.').filter((_, index) => index < 2);
+
     if (errorKeysArray.join('.') === `${name}.${index}`) {
       return true;
     }
@@ -91,13 +92,13 @@ const Component = ({
   let errorMessage;
 
   if (fieldsErrors.length > 0) {
-    errorMessage = formatMessage({ id: 'TODO', defaultMessage: 'firstChildError.id'})
-  };
+    errorMessage = formatMessage({ id: 'TODO', defaultMessage: 'firstChildError.id' });
+  }
 
   return (
     <Box>
       <Rectangle />
-      <StyledBox shadow="tableShadow" hasRadius>
+      <StyledBox hasRadius>
         <Accordion expanded={isOpen} toggle={() => onToggle(index)} size="S" error={errorMessage}>
           <AccordionToggle
             startIcon={<FontAwesomeIcon icon={icon} />}
@@ -133,14 +134,16 @@ const Component = ({
             togglePosition="left"
           />
           <AccordionContent>
-            <FocusTrap onEscape={() => onToggle(index)}>
-              <FieldComponent
-                componentUid={componentUid}
-                icon={icon}
-                name={`${name}.${index}`}
-                isFromDynamicZone
-              />
-            </FocusTrap>
+            <AccordionContentRadius background="neutral0">
+              <FocusTrap onEscape={() => onToggle(index)}>
+                <FieldComponent
+                  componentUid={componentUid}
+                  icon={icon}
+                  name={`${name}.${index}`}
+                  isFromDynamicZone
+                />
+              </FocusTrap>
+            </AccordionContentRadius>
           </AccordionContent>
         </Accordion>
       </StyledBox>
@@ -150,6 +153,7 @@ const Component = ({
 
 Component.propTypes = {
   componentUid: PropTypes.string.isRequired,
+  formErrors: PropTypes.object.isRequired,
   index: PropTypes.number.isRequired,
   isFieldAllowed: PropTypes.bool.isRequired,
   isOpen: PropTypes.bool.isRequired,

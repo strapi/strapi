@@ -44,7 +44,8 @@
         "default.dish",
         "default.openingtimes",
         "default.restaurantservice",
-        "default.temp"
+        "default.temp",
+        "basic.select"
       ],
       "required": true,
       "min": 2

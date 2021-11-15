@@ -1,0 +1,19 @@
+{
+  "collectionName": "components_basic_selects",
+  "info": {
+    "displayName": "select",
+    "icon": "asterisk"
+  },
+  "options": {},
+  "attributes": {
+    "selectest": {
+      "type": "enumeration",
+      "enum": [
+        "hola",
+        "hello",
+        "yo",
+        "toutca"
+      ]
+    }
+  }
+}
