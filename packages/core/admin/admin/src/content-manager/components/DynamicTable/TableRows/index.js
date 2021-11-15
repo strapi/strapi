@@ -51,7 +51,7 @@ const TableRows = ({
             key={data.id}
             {...onRowClick({
               fn: () => {
-                trackUsage('willEditEntryFromButton');
+                trackUsage('willEditEntryFromList');
                 push({
                   pathname: `${pathname}/${data.id}`,
                   state: { from: pathname },

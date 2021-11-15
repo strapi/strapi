@@ -9,6 +9,7 @@ import { useIntl } from 'react-intl';
 import Trash from '@strapi/icons/Trash';
 import styled from 'styled-components';
 import useQueryParams from '../../hooks/useQueryParams';
+import useTracking from '../../hooks/useTracking';
 import ConfirmDialog from '../ConfirmDialog';
 import EmptyBodyTable from '../EmptyBodyTable';
 import TableHead from './TableHead';
@@ -29,6 +30,7 @@ const Table = ({
   isLoading,
   onConfirmDeleteAll,
   onConfirmDelete,
+  onOnOpenDeleteAllModalTrackedEvent,
   rows,
   withBulkActions,
   withMainAction,
@@ -40,6 +42,7 @@ const Table = ({
   const [isConfirmButtonLoading, setIsConfirmButtonLoading] = useState(false);
   const [{ query }] = useQueryParams();
   const { formatMessage } = useIntl();
+  const { trackUsage } = useTracking();
   const ROW_COUNT = rows.length + 1;
   const COL_COUNT = headers.length + (withBulkActions ? 1 : 0) + (withMainAction ? 1 : 0);
   const hasFilters = query?.filters !== undefined;
@@ -88,6 +91,10 @@ const Table = ({
   };
 
   const handleToggleConfirmDeleteAll = () => {
+    if (!showConfirmDeleteAll && onOnOpenDeleteAllModalTrackedEvent) {
+      trackUsage(onOnOpenDeleteAllModalTrackedEvent);
+    }
+
     setShowConfirmDeleteAll(prev => !prev);
   };
 
@@ -203,6 +210,7 @@ Table.defaultProps = {
   isLoading: false,
   onConfirmDeleteAll: () => {},
   onConfirmDelete: () => {},
+  onOnOpenDeleteAllModalTrackedEvent: undefined,
   rows: [],
   withBulkActions: false,
   withMainAction: false,
@@ -229,6 +237,7 @@ Table.propTypes = {
   isLoading: PropTypes.bool,
   onConfirmDeleteAll: PropTypes.func,
   onConfirmDelete: PropTypes.func,
+  onOnOpenDeleteAllModalTrackedEvent: PropTypes.string,
   rows: PropTypes.array,
   withBulkActions: PropTypes.bool,
   withMainAction: PropTypes.bool,
