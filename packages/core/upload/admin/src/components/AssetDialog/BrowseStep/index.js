@@ -3,8 +3,7 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Flex } from '@strapi/design-system/Flex';
 import { Stack } from '@strapi/design-system/Stack';
-import { Typography } from '@strapi/design-system/Typography';
-import { Icon } from '@strapi/design-system/Icon';
+import { Box } from '@strapi/design-system/Box';
 import EmptyPicturesIcon from '@strapi/icons/EmptyPictures';
 import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
 import getTrad from '../../../utils/getTrad';
@@ -14,6 +13,7 @@ import PaginationFooter from './PaginationFooter';
 import PageSize from './PageSize';
 import SearchAsset from './SearchAsset';
 import getAllowedFiles from '../../../utils/getAllowedFiles';
+import { EmptyAssets } from '../../EmptyAssets';
 
 export const BrowseStep = ({
   allowedTypes,
@@ -82,15 +82,17 @@ export const BrowseStep = ({
             onEditAsset={onEditAsset}
           />
         ) : (
-          <Flex justifyContent="center" direction="column" paddingTop={8} paddingBottom={8}>
-            <Icon as={EmptyPicturesIcon} height="114px" width="216px" color="" marginBottom={6} />
-            <Typography variant="delta" textColor="neutral600">
-              {formatMessage({
+          <Box paddingBottom={6}>
+            <EmptyAssets
+              icon={EmptyPicturesIcon}
+              size="S"
+              count={6}
+              content={formatMessage({
                 id: getTrad('list.assets-empty.search'),
                 defaultMessage: 'No result found',
               })}
-            </Typography>
-          </Flex>
+            />
+          </Box>
         )}
       </Stack>
       <Flex justifyContent="space-between">
