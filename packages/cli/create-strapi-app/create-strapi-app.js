@@ -2,8 +2,9 @@
 
 // FIXME
 /* eslint-disable import/extensions */
+const { resolve } = require('path');
 const commander = require('commander');
-const generateNewApp = require('@strapi/generate-new');
+const { checkInstallPath, generateNewApp } = require('@strapi/generate-new');
 const promptUser = require('./utils/prompt-user');
 const packageJson = require('./package.json');
 
@@ -51,6 +52,7 @@ async function initProject(projectName, program) {
     return generateApp(projectName, program);
   }
 
+  await checkInstallPath(resolve(projectName));
   const prompt = await promptUser(projectName, program.template);
 
   const directory = prompt.directory || projectName;
