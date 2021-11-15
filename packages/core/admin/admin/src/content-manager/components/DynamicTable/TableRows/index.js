@@ -141,7 +141,11 @@ const TableRows = ({
                   {canDelete && (
                     <Box paddingLeft={1}>
                       <IconButton
-                        onClick={() => onClickDelete(data.id)}
+                        onClick={() => {
+                          trackUsage('willDeleteEntryFromList');
+
+                          onClickDelete(data.id);
+                        }}
                         label={formatMessage(
                           { id: 'app.component.table.delete', defaultMessage: 'Delete {target}' },
                           { target: itemLineText }
