@@ -151,6 +151,22 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
     submitMutation.mutate(body);
   };
 
+  const handleMoveRelation = (fromIndex, toIndex) => {
+    dispatch({
+      type: 'MOVE_RELATION',
+      fromIndex,
+      toIndex,
+    });
+  };
+
+  const handleMoveField = (fromIndex, toIndex) => {
+    dispatch({
+      type: 'MOVE_FIELD',
+      fromIndex,
+      toIndex,
+    });
+  };
+
   return (
     <LayoutDndProvider
       isContentTypeView={isContentTypeView}
@@ -160,6 +176,8 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
       componentLayouts={componentLayouts}
       selectedField={metaToEdit}
       fieldForm={metaForm}
+      onMoveRelation={handleMoveRelation}
+      onMoveField={handleMoveField}
       setEditFieldToSelect={name => {
         dispatch({
           type: 'SET_FIELD_TO_EDIT',

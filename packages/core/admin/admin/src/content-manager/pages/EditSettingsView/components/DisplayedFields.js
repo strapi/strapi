@@ -11,14 +11,14 @@ import { Flex } from '@strapi/design-system/Flex';
 import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
 import { SimpleMenu, MenuItem } from '@strapi/design-system/SimpleMenu';
 import Plus from '@strapi/icons/Plus';
-import { getTrad } from '../../../utils';
+import { getTrad, ItemTypes } from '../../../utils';
 import { useLayoutDnd } from '../../../hooks';
 import FieldButton from './FieldButton';
 import LinkToCTB from './LinkToCTB';
 
 const DisplayedFields = ({ editLayout, editLayoutRemainingFields, onRemoveField, onAddField }) => {
   const { formatMessage } = useIntl();
-  const { setEditFieldToSelect, attributes, modifiedData } = useLayoutDnd();
+  const { setEditFieldToSelect, attributes, modifiedData, onMoveField } = useLayoutDnd();
 
   return (
     <Stack size={4}>
@@ -32,15 +32,14 @@ const DisplayedFields = ({ editLayout, editLayoutRemainingFields, onRemoveField,
               })}
             </Typography>
           </Box>
-          {/* Since the drag n drop will not be available, this text will be hidden for the moment */}
-          {/* <Box>
+          <Box>
             <Typography variant="pi" textColor="neutral600">
               {formatMessage({
                 id: 'containers.SettingPage.editSettings.description',
                 defaultMessage: 'Drag & drop the fields to build the layout',
               })}
             </Typography>
-          </Box> */}
+          </Box>
         </div>
         <LinkToCTB />
       </Flex>
@@ -63,6 +62,10 @@ const DisplayedFields = ({ editLayout, editLayoutRemainingFields, onRemoveField,
                         onEditField={() => setEditFieldToSelect(rowItem.name)}
                         onDeleteField={() => onRemoveField(row.rowId, index)}
                         attribute={attribute}
+                        itemType={ItemTypes.EDIT_RELATION}
+                        index={index}
+                        name={rowItem.name}
+                        onMoveField={onMoveField}
                       >
                         {attributeLabel || rowItem.name}
                       </FieldButton>
