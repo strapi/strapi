@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 import { Helmet } from 'react-helmet';
-import { pxToRem, CheckPagePermissions } from '@strapi/helper-plugin';
+import { pxToRem, CheckPagePermissions, useTracking } from '@strapi/helper-plugin';
 import { Layout, HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
 import { Flex } from '@strapi/design-system/Flex';
 import { Box } from '@strapi/design-system/Box';
@@ -27,6 +27,11 @@ const StackCentered = styled(Stack)`
 
 const MarketPlacePage = () => {
   const { formatMessage } = useIntl();
+  const { trackUsage } = useTracking();
+
+  useEffect(() => {
+    trackUsage('didGoToMarketplace');
+  }, [trackUsage]);
 
   return (
     <CheckPagePermissions permissions={adminPermissions.marketplace.main}>
