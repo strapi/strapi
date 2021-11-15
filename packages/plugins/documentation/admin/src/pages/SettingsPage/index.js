@@ -14,7 +14,7 @@ import { Main } from '@strapi/design-system/Main';
 import { Button } from '@strapi/design-system/Button';
 import { Box } from '@strapi/design-system/Box';
 import { Stack } from '@strapi/design-system/Stack';
-import { H3 } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { ToggleInput } from '@strapi/design-system/ToggleInput';
 import { TextInput } from '@strapi/design-system/TextInput';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
@@ -90,12 +90,12 @@ const SettingsPage = () => {
                     paddingRight={7}
                   >
                     <Stack size={4}>
-                      <H3 as="h2">
+                      <Typography variant="delta" as="h2">
                         {formatMessage({
                           id: getTrad('pages.SettingsPage.title'),
                           defaultMessage: 'Settings',
                         })}
-                      </H3>
+                      </Typography>
                       <Grid gap={4}>
                         <GridItem col={6} s={12}>
                           <ToggleInput
