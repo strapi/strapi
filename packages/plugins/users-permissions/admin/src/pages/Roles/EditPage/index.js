@@ -6,7 +6,7 @@ import { Stack } from '@strapi/design-system/Stack';
 import { Box } from '@strapi/design-system/Box';
 import { TextInput } from '@strapi/design-system/TextInput';
 import { Textarea } from '@strapi/design-system/Textarea';
-import { H3 } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import ArrowLeft from '@strapi/icons/ArrowLeft';
 import Check from '@strapi/icons/Check';
 import { Link } from '@strapi/design-system/Link';
@@ -126,12 +126,12 @@ const EditPage = () => {
                   paddingRight={7}
                 >
                   <Stack size={4}>
-                    <H3 as="h2">
+                    <Typography variant="delta" as="h2">
                       {formatMessage({
                         id: getTrad('EditPage.form.roles'),
                         defaultMessage: 'Role details',
                       })}
-                    </H3>
+                    </Typography>
                     <Grid gap={4}>
                       <GridItem col={6}>
                         <TextInput
