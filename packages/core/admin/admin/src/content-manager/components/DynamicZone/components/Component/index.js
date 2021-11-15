@@ -80,9 +80,9 @@ const Component = ({
   const formErrorsKeys = Object.keys(formErrors);
 
   const fieldsErrors = formErrorsKeys.filter(errorKey => {
-    const errorKeysArray = errorKey.split('.').filter((_, index) => index < 2);
+    const errorKeysArray = errorKey.split('.');
 
-    if (errorKeysArray.join('.') === `${name}.${index}`) {
+    if (`${errorKeysArray[0]}.${errorKeysArray[1]}` === `${name}.${index}`) {
       return true;
     }
 
