@@ -1,4 +1,4 @@
-import toSingularTypes from '../../../utils/toSingularTypes';
+import toSingularTypes from './toSingularTypes';
 
 /**
  * Returns the files that can be added to the media field

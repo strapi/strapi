@@ -35,6 +35,10 @@ const activeRowStyle = (theme, isActive) => `
   &:hover {
    ${activeStyle(theme)}
   }
+
+  &:focus-within {
+    ${({ theme, isActive }) => activeRowStyle(theme, isActive)}
+  }
   
 `;
 
@@ -57,10 +61,6 @@ const BoxWrapper = styled.div`
   }
   ${({ isActive, theme }) => isActive && activeRowStyle(theme, isActive)}
   &:hover {
-    ${({ theme, isActive }) => activeRowStyle(theme, isActive)}
-  }
-
-  &:focus-within {
     ${({ theme, isActive }) => activeRowStyle(theme, isActive)}
   }
 `;

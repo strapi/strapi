@@ -5,22 +5,24 @@ import { ModalLayout, ModalBody } from '@strapi/design-system/ModalLayout';
 import { Flex } from '@strapi/design-system/Flex';
 import { Button } from '@strapi/design-system/Button';
 import { Divider } from '@strapi/design-system/Divider';
+import { Box } from '@strapi/design-system/Box';
 import { useIntl } from 'react-intl';
 import { Tabs, Tab, TabGroup, TabPanels, TabPanel } from '@strapi/design-system/Tabs';
 import { Badge } from '@strapi/design-system/Badge';
 import { Loader } from '@strapi/design-system/Loader';
-import { NoPermissions, AnErrorOccurred, useSelectionState, NoMedia } from '@strapi/helper-plugin';
-import getTrad from '../../../utils/getTrad';
+import { NoPermissions, AnErrorOccurred, useSelectionState } from '@strapi/helper-plugin';
+import getTrad from '../../utils/getTrad';
 import { SelectedStep } from './SelectedStep';
 import { BrowseStep } from './BrowseStep';
-import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
-import { useModalAssets } from '../../../hooks/useModalAssets';
-import useModalQueryParams from '../../../hooks/useModalAssets/useModalQueryParams';
-import { AssetDefinition } from '../../../constants';
-import getAllowedFiles from '../utils/getAllowedFiles';
+import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
+import { useModalAssets } from '../../hooks/useModalAssets';
+import useModalQueryParams from '../../hooks/useModalAssets/useModalQueryParams';
+import { AssetDefinition } from '../../constants';
+import getAllowedFiles from '../../utils/getAllowedFiles';
 import { DialogTitle } from './DialogTitle';
 import { DialogFooter } from './DialogFooter';
-import { EditAssetDialog } from '../../EditAssetDialog';
+import { EditAssetDialog } from '../EditAssetDialog';
+import { EmptyAssets } from '../EmptyAssets';
 
 export const AssetDialog = ({
   allowedTypes,
@@ -29,6 +31,7 @@ export const AssetDialog = ({
   onValidate,
   multiple,
   initiallySelectedAssets,
+  trackedLocation,
 }) => {
   const [assetToEdit, setAssetToEdit] = useState(undefined);
   const { formatMessage } = useIntl();
@@ -115,31 +118,35 @@ export const AssetDialog = ({
     return (
       <ModalLayout onClose={onClose} labelledBy="asset-dialog-title">
         <DialogTitle />
-        <NoMedia
-          action={
-            canCreate ? (
-              <Button variant="secondary" startIcon={<PlusIcon />} onClick={onAddAsset}>
-                {formatMessage({
-                  id: getTrad('modal.header.browse'),
-                  defaultMessage: 'Upload assets',
-                })}
-              </Button>
-            ) : (
-              undefined
-            )
-          }
-          content={
-            canCreate
-              ? formatMessage({
-                  id: getTrad('list.assets.empty'),
-                  defaultMessage: 'Upload your first assets...',
-                })
-              : formatMessage({
-                  id: getTrad('list.assets.empty.no-permissions'),
-                  defaultMessage: 'The asset list is empty',
-                })
-          }
-        />
+        <Box paddingLeft={8} paddingRight={8} paddingBottom={6}>
+          <EmptyAssets
+            size="S"
+            count={6}
+            action={
+              canCreate ? (
+                <Button variant="secondary" startIcon={<PlusIcon />} onClick={onAddAsset}>
+                  {formatMessage({
+                    id: getTrad('modal.header.browse'),
+                    defaultMessage: 'Upload assets',
+                  })}
+                </Button>
+              ) : (
+                undefined
+              )
+            }
+            content={
+              canCreate
+                ? formatMessage({
+                    id: getTrad('list.assets.empty'),
+                    defaultMessage: 'Upload your first assets...',
+                  })
+                : formatMessage({
+                    id: getTrad('list.assets.empty.no-permissions'),
+                    defaultMessage: 'The asset list is empty',
+                  })
+            }
+          />
+        </Box>
         <DialogFooter onClose={onClose} />
       </ModalLayout>
     );
@@ -153,6 +160,7 @@ export const AssetDialog = ({
         canUpdate={canUpdate}
         canCopyLink={canCopyLink}
         canDownload={canDownload}
+        trackedLocation={trackedLocation}
       />
     );
   }
@@ -230,14 +238,17 @@ export const AssetDialog = ({
 
 AssetDialog.defaultProps = {
   allowedTypes: [],
+  initiallySelectedAssets: [],
   multiple: false,
+  trackedLocation: undefined,
 };
 
 AssetDialog.propTypes = {
   allowedTypes: PropTypes.arrayOf(PropTypes.string),
-  initiallySelectedAssets: PropTypes.arrayOf(AssetDefinition).isRequired,
+  initiallySelectedAssets: PropTypes.arrayOf(AssetDefinition),
   multiple: PropTypes.bool,
   onAddAsset: PropTypes.func.isRequired,
   onClose: PropTypes.func.isRequired,
   onValidate: PropTypes.func.isRequired,
+  trackedLocation: PropTypes.string,
 };

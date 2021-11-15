@@ -194,7 +194,7 @@ const GenericInput = ({
           placeholder={formattedPlaceholder}
           required={required}
           step={step}
-          value={value || undefined}
+          value={value ?? undefined}
         />
       );
     }
