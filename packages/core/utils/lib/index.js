@@ -33,6 +33,7 @@ const providerFactory = require('./provider-factory');
 const pagination = require('./pagination');
 const sanitize = require('./sanitize');
 const traverseEntity = require('./traverse-entity');
+const pipeAsync = require('./pipe-async');
 
 module.exports = {
   yup,
@@ -66,6 +67,7 @@ module.exports = {
   hooks,
   providerFactory,
   pagination,
+  pipeAsync,
   errors,
   validateYupSchema,
   validateYupSchemaSync,

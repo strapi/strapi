@@ -204,20 +204,20 @@ describe('<ListPage />', () => {
         padding-left: 24px;
       }
 
-      .c29 {
+      .c28 {
         background: #eaeaef;
       }
 
-      .c31 {
+      .c30 {
         background: #f0f0ff;
         padding: 20px;
       }
 
-      .c33 {
+      .c32 {
         background: #d9d8ff;
       }
 
-      .c35 {
+      .c34 {
         padding-left: 12px;
       }
 
@@ -259,7 +259,7 @@ describe('<ListPage />', () => {
         overflow-x: auto;
       }
 
-      .c28 tr:last-of-type {
+      .c27 tr:last-of-type {
         border-bottom: none;
       }
 
@@ -312,24 +312,24 @@ describe('<ListPage />', () => {
         vertical-align: sub;
       }
 
-      .c26 svg {
+      .c25 svg {
         height: 0.25rem;
       }
 
-      .c30 {
+      .c29 {
         height: 1px;
         border: none;
         margin: 0;
       }
 
-      .c36 {
+      .c35 {
         font-weight: 600;
         color: #4945ff;
         font-size: 0.75rem;
         line-height: 1.33;
       }
 
-      .c34 {
+      .c33 {
         height: 1.5rem;
         width: 1.5rem;
         border-radius: 50%;
@@ -347,23 +347,31 @@ describe('<ListPage />', () => {
         align-items: center;
       }
 
-      .c34 svg {
+      .c33 svg {
         height: 0.625rem;
         width: 0.625rem;
       }
 
-      .c34 svg path {
+      .c33 svg path {
         fill: #4945ff;
       }
 
-      .c32 {
+      .c31 {
         border-radius: 0 0 4px 4px;
         display: block;
         width: 100%;
         border: none;
       }
 
-      .c27 {
+      .c24 {
+        color: #666687;
+        font-weight: 600;
+        font-size: 0.6875rem;
+        line-height: 1.45;
+        text-transform: uppercase;
+      }
+
+      .c26 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
@@ -431,19 +439,6 @@ describe('<ListPage />', () => {
         color: #666687;
         font-size: 1rem;
         line-height: 1.5;
-      }
-
-      .c24 {
-        color: #666687;
-        font-size: 0.875rem;
-        line-height: 1.43;
-      }
-
-      .c25 {
-        font-weight: 600;
-        font-size: 0.6875rem;
-        line-height: 1.45;
-        text-transform: uppercase;
       }
 
       .c0 {
@@ -544,12 +539,12 @@ describe('<ListPage />', () => {
                           class="c23"
                         >
                           <span
-                            class="c24 c25"
+                            class="c24"
                           >
                             Name
                           </span>
                           <span
-                            class="c26"
+                            class="c25"
                           />
                         </div>
                       </th>
@@ -562,12 +557,12 @@ describe('<ListPage />', () => {
                           class="c23"
                         >
                           <span
-                            class="c24 c25"
+                            class="c24"
                           >
                             Description
                           </span>
                           <span
-                            class="c26"
+                            class="c25"
                           />
                         </div>
                       </th>
@@ -580,12 +575,12 @@ describe('<ListPage />', () => {
                           class="c23"
                         >
                           <span
-                            class="c24 c25"
+                            class="c24"
                           >
                             Users
                           </span>
                           <span
-                            class="c26"
+                            class="c25"
                           />
                         </div>
                       </th>
@@ -598,36 +593,36 @@ describe('<ListPage />', () => {
                           class="c23"
                         >
                           <div
-                            class="c27"
+                            class="c26"
                           >
                             Actions
                           </div>
                           <span
-                            class="c26"
+                            class="c25"
                           />
                         </div>
                       </th>
                     </tr>
                   </thead>
                   <tbody
-                    class="c28"
+                    class="c27"
                   />
                 </table>
               </div>
             </div>
             <div>
               <hr
-                class="c29 c30"
+                class="c28 c29"
               />
               <button
-                class="c31 c32"
+                class="c30 c31"
               >
                 <div
                   class="c23"
                 >
                   <div
                     aria-hidden="true"
-                    class="c33 c34"
+                    class="c32 c33"
                   >
                     <svg
                       fill="none"
@@ -643,10 +638,10 @@ describe('<ListPage />', () => {
                     </svg>
                   </div>
                   <div
-                    class="c35"
+                    class="c34"
                   >
                     <span
-                      class="c36"
+                      class="c35"
                     >
                       Add new role
                     </span>

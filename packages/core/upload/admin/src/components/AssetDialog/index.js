@@ -10,17 +10,17 @@ import { Tabs, Tab, TabGroup, TabPanels, TabPanel } from '@strapi/design-system/
 import { Badge } from '@strapi/design-system/Badge';
 import { Loader } from '@strapi/design-system/Loader';
 import { NoPermissions, AnErrorOccurred, useSelectionState, NoMedia } from '@strapi/helper-plugin';
-import getTrad from '../../../utils/getTrad';
+import getTrad from '../../utils/getTrad';
 import { SelectedStep } from './SelectedStep';
 import { BrowseStep } from './BrowseStep';
-import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
-import { useModalAssets } from '../../../hooks/useModalAssets';
-import useModalQueryParams from '../../../hooks/useModalAssets/useModalQueryParams';
-import { AssetDefinition } from '../../../constants';
-import getAllowedFiles from '../utils/getAllowedFiles';
+import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
+import { useModalAssets } from '../../hooks/useModalAssets';
+import useModalQueryParams from '../../hooks/useModalAssets/useModalQueryParams';
+import { AssetDefinition } from '../../constants';
+import getAllowedFiles from '../../utils/getAllowedFiles';
 import { DialogTitle } from './DialogTitle';
 import { DialogFooter } from './DialogFooter';
-import { EditAssetDialog } from '../../EditAssetDialog';
+import { EditAssetDialog } from '../EditAssetDialog';
 
 export const AssetDialog = ({
   allowedTypes,
@@ -203,6 +203,7 @@ export const AssetDialog = ({
                 assets={assets}
                 onSelectAsset={handleSelectAsset}
                 selectedAssets={selectedAssets}
+                multiple={multiple}
                 onSelectAllAsset={handleSelectAllAssets}
                 onEditAsset={canUpdate ? setAssetToEdit : undefined}
                 pagination={data?.pagination}
@@ -229,12 +230,13 @@ export const AssetDialog = ({
 
 AssetDialog.defaultProps = {
   allowedTypes: [],
+  initiallySelectedAssets: [],
   multiple: false,
 };
 
 AssetDialog.propTypes = {
   allowedTypes: PropTypes.arrayOf(PropTypes.string),
-  initiallySelectedAssets: PropTypes.arrayOf(AssetDefinition).isRequired,
+  initiallySelectedAssets: PropTypes.arrayOf(AssetDefinition),
   multiple: PropTypes.bool,
   onAddAsset: PropTypes.func.isRequired,
   onClose: PropTypes.func.isRequired,

@@ -32,7 +32,7 @@ module.exports = (/* _, { strapi } */) => {
 
       strapi.log.error(error);
 
-      const { status, body } = formatInternalError();
+      const { status, body } = formatInternalError(error);
       ctx.status = status;
       ctx.body = body;
     }

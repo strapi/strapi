@@ -2,7 +2,7 @@ import styled from 'styled-components';
 
 /* eslint-disable */
 /* stylelint-disable */
-const EditorWrapper = styled.div`
+export const EditorStylesContainer = styled.div`
   cursor: ${({ disabled }) => (disabled ? 'not-allowed !important' : 'auto')};
   /* BASICS */
 
@@ -336,5 +336,3 @@ const EditorWrapper = styled.div`
     color: ${({ theme }) => theme.colors.neutral800} !important;
   }
 `;
-
-export default EditorWrapper;

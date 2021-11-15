@@ -26,6 +26,7 @@ const LabelAction = styled(Box)`
 `;
 
 const DateTimePicker = ({
+  ariaLabel,
   clearLabel,
   disabled,
   error,
@@ -124,7 +125,7 @@ const DateTimePicker = ({
           <DatePicker
             data-testid="datetimepicker-date"
             name={name}
-            ariaLabel={label}
+            ariaLabel={label || ariaLabel}
             error={error}
             selectedDate={dateValue}
             selectedDateLabel={formattedDate => `Date picker, current is ${formattedDate}`}
@@ -138,7 +139,7 @@ const DateTimePicker = ({
           <TimePicker
             data-testid="datetimepicker-time"
             size={size}
-            aria-label={label}
+            aria-label={label || ariaLabel}
             error={error}
             value={timeValue}
             onChange={handleTimeChange}
@@ -157,9 +158,12 @@ const DateTimePicker = ({
 DateTimePicker.displayName = 'DateTimePicker';
 
 DateTimePicker.defaultProps = {
+  ariaLabel: undefined,
   clearLabel: 'clear',
   disabled: false,
   error: undefined,
+  hint: undefined,
+  label: undefined,
   labelAction: undefined,
   onClear: undefined,
   required: false,
@@ -168,11 +172,12 @@ DateTimePicker.defaultProps = {
 };
 
 DateTimePicker.propTypes = {
+  ariaLabel: PropTypes.string,
   clearLabel: PropTypes.string,
   disabled: PropTypes.bool,
   error: PropTypes.string,
-  hint: PropTypes.string.isRequired,
-  label: PropTypes.string.isRequired,
+  hint: PropTypes.string,
+  label: PropTypes.string,
   labelAction: PropTypes.element,
   name: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,

@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 import { Flex } from '@strapi/design-system/Flex';
-import { TableLabel } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { cellWidth, firstRowWidth, rowHeight } from '../../../Permissions/utils/constants';
 
 const HeaderLabel = styled(Flex)`
@@ -29,7 +29,9 @@ const Header = ({ headers, label }) => {
   return (
     <Flex>
       <PropertyLabelWrapper alignItems="center" paddingLeft={6}>
-        <TableLabel textColor="neutral500">{translatedLabel}</TableLabel>
+        <Typography variant="sigma" textColor="neutral500">
+          {translatedLabel}
+        </Typography>
       </PropertyLabelWrapper>
       {headers.map(header => {
         if (!header.isActionRelatedToCurrentProperty) {
@@ -38,12 +40,12 @@ const Header = ({ headers, label }) => {
 
         return (
           <HeaderLabel justifyContent="center" key={header.label}>
-            <TableLabel textColor="neutral500">
+            <Typography variant="sigma" textColor="neutral500">
               {formatMessage({
                 id: `Settings.roles.form.permissions.${header.label.toLowerCase()}`,
                 defaultMessage: header.label,
               })}
-            </TableLabel>
+            </Typography>
           </HeaderLabel>
         );
       })}

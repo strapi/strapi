@@ -603,6 +603,19 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   opacity: 1;
 }
 
+.c22 {
+  font-weight: 600;
+  color: #32324d;
+  font-size: 0.875rem;
+  line-height: 1.43;
+}
+
+.c23 {
+  color: #8e8ea9;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
 .c41 {
   height: 100vh;
 }
@@ -744,20 +757,6 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-}
-
-.c22 {
-  font-weight: 500;
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #32324d;
-}
-
-.c23 {
-  font-weight: 400;
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #8e8ea9;
 }
 
 .c26 {

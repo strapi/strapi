@@ -7,7 +7,7 @@ import styled from 'styled-components';
 import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
-import { Text } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import IS_DISABLED from 'ee_else_ce/pages/SettingsPage/pages/Roles/EditPage/components/ContentTypeCollapse/CollapsePropertyMatrix/SubActionRow/utils/constants';
 import { usePermissionsDataManager } from '../../../../../../../../../hooks';
 import CollapseLabel from '../../../CollapseLabel';
@@ -126,7 +126,7 @@ const SubActionRow = ({
                     })}
                     title={label}
                   >
-                    <Text ellipsis>{upperFirst(label)}</Text>
+                    <Typography ellipsis>{upperFirst(label)}</Typography>
                     {required && <RequiredSign />}
                     <CarretIcon $isActive={isActive} />
                   </CollapseLabel>

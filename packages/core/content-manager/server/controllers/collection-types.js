@@ -2,7 +2,7 @@
 
 const { prop, pick } = require('lodash/fp');
 const { MANY_RELATIONS } = require('@strapi/utils').relations.constants;
-const { setCreatorFields, sanitize } = require('@strapi/utils');
+const { setCreatorFields, pipeAsync } = require('@strapi/utils');
 
 const { getService, pickWritableAttributes } = require('../utils');
 const { validateBulkDeleteInput, validatePagination } = require('./validation');
@@ -79,7 +79,7 @@ module.exports = {
     const pickPermittedFields = permissionChecker.sanitizeCreateInput;
     const setCreator = setCreatorFields({ user });
 
-    const sanitizeFn = sanitize.utils.pipeAsync(pickWritables, pickPermittedFields, setCreator);
+    const sanitizeFn = pipeAsync(pickWritables, pickPermittedFields, setCreator);
 
     const sanitizedBody = await sanitizeFn(body);
     const entity = await entityManager.create(sanitizedBody, model);
@@ -117,7 +117,7 @@ module.exports = {
     const pickPermittedFields = permissionChecker.sanitizeUpdateInput(entity);
     const setCreator = setCreatorFields({ user, isEdition: true });
 
-    const sanitizeFn = sanitize.utils.pipeAsync(pickWritables, pickPermittedFields, setCreator);
+    const sanitizeFn = pipeAsync(pickWritables, pickPermittedFields, setCreator);
 
     const sanitizedBody = await sanitizeFn(body);
     const updatedEntity = await entityManager.update(entity, sanitizedBody, model);
