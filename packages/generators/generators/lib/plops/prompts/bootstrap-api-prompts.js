@@ -3,8 +3,8 @@
 module.exports = [
   {
     type: 'confirm',
-    name: 'generateDefaultRoutes',
+    name: 'bootstrapApi',
     default: true,
-    message: 'Generate default routes?',
+    message: 'Bootstrap API related files?',
   },
 ];

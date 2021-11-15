@@ -8,6 +8,7 @@ const ctNamesPrompts = require('./prompts/ct-names-prompts');
 const kindPrompts = require('./prompts/kind-prompts');
 const draftAndPublishPrompts = require('./prompts/draft-and-publish-prompts');
 const getAttributesPrompts = require('./prompts/get-attributes-prompts');
+const bootstrapApiPrompts = require('./prompts/bootstrap-api-prompts');
 
 module.exports = plop => {
   // Model generator
@@ -19,6 +20,7 @@ module.exports = plop => {
         ...kindPrompts,
         ...getDestinationPrompts('model', plop.getDestBasePath()),
         ...draftAndPublishPrompts,
+        ...bootstrapApiPrompts,
       ]);
       const attributes = await getAttributesPrompts(inquirer);
 
@@ -45,17 +47,21 @@ module.exports = plop => {
 
       const filePath = getFilePath(answers.destination);
 
-      return [
+      answers.id = answers.singularName;
+
+      const baseActions = [
         {
           type: 'add',
           path: `${filePath}/content-types/{{ singularName }}/schema.json`,
           templateFile: 'templates/content-type.schema.json.hbs',
           data: {
-            id: answers.singularName,
             collectionName: slugify(answers.pluralName, { separator: '_' }),
           },
         },
-        {
+      ];
+
+      if (attributes.lenght > 0) {
+        baseActions.push({
           type: 'modify',
           path: `${filePath}/content-types/{{ singularName }}/schema.json`,
           transform(template) {
@@ -63,8 +69,30 @@ module.exports = plop => {
             parsedTemplate.attributes = attributes;
             return JSON.stringify(parsedTemplate, null, 2);
           },
-        },
-      ];
+        });
+      }
+
+      if (answers.bootstrapApi) {
+        baseActions.push(
+          {
+            type: 'add',
+            path: `${filePath}/controllers/{{singularName}}.js`,
+            templateFile: 'templates/controller.js.hbs',
+          },
+          {
+            type: 'add',
+            path: `${filePath}/services/{{singularName}}.js`,
+            templateFile: 'templates/service.js.hbs',
+          },
+          {
+            type: 'add',
+            path: `${filePath}/routes/{{singularName}}.js`,
+            templateFile: `templates/${slugify(answers.kind)}-routes.js.hbs`,
+          }
+        );
+      }
+
+      return baseActions;
     },
   });
 };

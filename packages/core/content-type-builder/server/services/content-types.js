@@ -125,15 +125,14 @@ const createContentType = async ({ contentType, components = [] }, options = {})
 const generateAPI = ({ singularName, kind = 'collectionType', pluralName, displayName }) => {
   const strapiGenerators = require('@strapi/generators');
   return strapiGenerators.generate(
-    'api',
+    'content-type',
     {
-      id: singularName,
       kind,
       singularName,
       pluralName,
       displayName,
-      createContentType: true,
-      generateDefaultRoutes: true,
+      destination: 'new',
+      bootstrapApi: true,
       attributes: [],
     },
     { dir: strapi.dirs.root }
