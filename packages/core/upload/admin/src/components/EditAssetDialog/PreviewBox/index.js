@@ -6,6 +6,7 @@ import { IconButton } from '@strapi/design-system/IconButton';
 import Trash from '@strapi/icons/Trash';
 import DownloadIcon from '@strapi/icons/Download';
 import Resize from '@strapi/icons/Crop';
+import { useTracking } from '@strapi/helper-plugin';
 import getTrad from '../../../utils/getTrad';
 import { downloadFile } from '../../../utils/downloadFile';
 import { RemoveAssetDialog } from '../RemoveAssetDialog';
@@ -36,7 +37,9 @@ export const PreviewBox = ({
   onCropStart,
   onCropCancel,
   replacementFile,
+  trackedLocation,
 }) => {
+  const { trackUsage } = useTracking();
   const previewRef = useRef(null);
   const [assetUrl, setAssetUrl] = useState(createAssetUrl(asset));
   const { formatMessage } = useIntl();
@@ -85,14 +88,17 @@ export const PreviewBox = ({
       optimizedCachingImage = URL.createObjectURL(file);
       asset.url = optimizedCachingImage;
       asset.rawFile = file;
+
+      trackUsage('didCropFile', { duplicatedFile: null, location: trackedLocation });
     } else {
       const updatedAsset = await editAsset(nextAsset, file);
       optimizedCachingImage = createAssetUrl(updatedAsset);
+
+      trackUsage('didCropFile', { duplicatedFile: false, location: trackedLocation });
     }
 
     stopCropping();
     onCropCancel();
-
     setAssetUrl(optimizedCachingImage);
   };
 
@@ -103,6 +109,8 @@ export const PreviewBox = ({
     const file = await produceFile(nextAsset.name, nextAsset.mime, nextAsset.updatedAt);
 
     await upload(file);
+
+    trackUsage('didCropFile', { duplicatedFile: true, location: trackedLocation });
 
     stopCropping();
     onCropFinish();
@@ -216,6 +224,7 @@ export const PreviewBox = ({
 
 PreviewBox.defaultProps = {
   replacementFile: undefined,
+  trackedLocation: undefined,
 };
 
 PreviewBox.propTypes = {
@@ -228,4 +237,5 @@ PreviewBox.propTypes = {
   onCropFinish: PropTypes.func.isRequired,
   onCropStart: PropTypes.func.isRequired,
   onCropCancel: PropTypes.func.isRequired,
+  trackedLocation: PropTypes.string,
 };
