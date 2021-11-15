@@ -28,8 +28,7 @@ import { connect, select } from './utils';
 
 const DraggedItem = ({
   componentFieldName,
-  // FIXME: errors
-  // Retrieved from the AccordionGroupCustom cloneElement
+  // Errors are retrieved from the AccordionGroupCustom cloneElement
   hasErrorMessage,
   hasErrors,
   isDraggingSibling,
