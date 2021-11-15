@@ -116,8 +116,6 @@ const createHelpers = db => {
   const createForeignKey = (tableBuilder, foreignKey) => {
     const { name, columns, referencedColumns, referencedTable, onDelete, onUpdate } = foreignKey;
 
-    console.log(db.connection.getSchemaName());
-
     const constraint = tableBuilder
       .foreign(columns, name)
       .references(referencedColumns)

@@ -260,10 +260,8 @@ const createQueryBuilder = (uid, db) => {
         this.select('*');
       }
 
-      // const aliasedTableName = this.mustUseAlias() ? { [this.alias]: tableName } : tableName;
       const aliasedTableName = this.mustUseAlias() ? `${tableName} as ${this.alias}` : tableName;
 
-      console.log(aliasedTableName);
       const qb = db.getConnection(aliasedTableName);
 
       if (this.shouldUseSubQuery()) {
