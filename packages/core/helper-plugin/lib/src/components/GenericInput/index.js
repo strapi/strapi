@@ -7,8 +7,6 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import cloneDeep from 'lodash/cloneDeep';
-import { formatISO } from 'date-fns';
 import { Checkbox } from '@strapi/design-system/Checkbox';
 import { DatePicker } from '@strapi/design-system/DatePicker';
 import { NumberInput } from '@strapi/design-system/NumberInput';
@@ -142,7 +140,8 @@ const GenericInput = ({
           hint={hint}
           name={name}
           onChange={date => {
-            const formattedDate = formatISO(cloneDeep(date), { representation: 'complete' });
+            // const formattedDate = formatISO(cloneDeep(date), { representation: 'complete' });
+            const formattedDate = date.toISOString();
 
             onChange({ target: { name, value: formattedDate, type } });
           }}
@@ -166,7 +165,8 @@ const GenericInput = ({
           hint={hint}
           name={name}
           onChange={date => {
-            const formattedDate = formatISO(cloneDeep(date), { representation: 'date' });
+            // const formattedDate = formatISO(cloneDeep(date), { representation: 'date' });
+            const formattedDate = date.toISOString();
 
             onChange({ target: { name, value: formattedDate, type } });
           }}

@@ -122,10 +122,12 @@ const EditViewDataManagerProvider = ({
   }, [componentsDataStructure, contentTypeDataStructure]);
 
   useEffect(() => {
-    dispatch({
-      type: 'INIT_FORM',
-      initialValues,
-    });
+    if (initialValues) {
+      dispatch({
+        type: 'INIT_FORM',
+        initialValues,
+      });
+    }
   }, [initialValues]);
 
   const addComponentToDynamicZone = useCallback((keys, componentUid, shouldCheckErrors = false) => {
@@ -464,6 +466,10 @@ const EditViewDataManagerProvider = ({
     return <Redirect to={from} />;
   }
 
+  if (!modifiedData) {
+    return null;
+  }
+
   return (
     <ContentManagerEditViewDataManagerContext.Provider
       value={{
@@ -522,6 +528,7 @@ const EditViewDataManagerProvider = ({
 
 EditViewDataManagerProvider.defaultProps = {
   from: '/',
+  initialValues: null,
   redirectToPreviousPage: () => {},
 };
 
@@ -533,7 +540,7 @@ EditViewDataManagerProvider.propTypes = {
   contentTypeDataStructure: PropTypes.object.isRequired,
   createActionAllowedFields: PropTypes.array.isRequired,
   from: PropTypes.string,
-  initialValues: PropTypes.object.isRequired,
+  initialValues: PropTypes.object,
   isCreatingEntry: PropTypes.bool.isRequired,
   isLoadingForData: PropTypes.bool.isRequired,
   isSingleType: PropTypes.bool.isRequired,
