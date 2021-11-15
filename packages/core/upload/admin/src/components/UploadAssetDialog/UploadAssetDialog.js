@@ -10,7 +10,12 @@ const Steps = {
   PendingAsset: 'PendingAsset',
 };
 
-export const UploadAssetDialog = ({ initialAssetsToAdd, onClose, addUploadedFiles }) => {
+export const UploadAssetDialog = ({
+  initialAssetsToAdd,
+  onClose,
+  addUploadedFiles,
+  trackedLocation,
+}) => {
   const [step, setStep] = useState(initialAssetsToAdd ? Steps.PendingAsset : Steps.AddAsset);
   const [assets, setAssets] = useState(initialAssetsToAdd || []);
 
@@ -45,7 +50,11 @@ export const UploadAssetDialog = ({ initialAssetsToAdd, onClose, addUploadedFile
   return (
     <ModalLayout onClose={onClose} labelledBy="title">
       {step === Steps.AddAsset && (
-        <AddAssetStep onClose={onClose} onAddAsset={handleAddToPendingAssets} />
+        <AddAssetStep
+          onClose={onClose}
+          onAddAsset={handleAddToPendingAssets}
+          trackedLocation={trackedLocation}
+        />
       )}
       {step === Steps.PendingAsset && (
         <PendingAssetStep
@@ -65,10 +74,12 @@ export const UploadAssetDialog = ({ initialAssetsToAdd, onClose, addUploadedFile
 UploadAssetDialog.defaultProps = {
   addUploadedFiles: undefined,
   initialAssetsToAdd: undefined,
+  trackedLocation: undefined,
 };
 
 UploadAssetDialog.propTypes = {
   addUploadedFiles: PropTypes.func,
   initialAssetsToAdd: PropTypes.arrayOf(AssetDefinition),
   onClose: PropTypes.func.isRequired,
+  trackedLocation: PropTypes.string,
 };

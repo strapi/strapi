@@ -150,6 +150,7 @@ export const MediaLibraryInput = ({
         error={errorMessage}
         hint={hint}
         selectedAssetIndex={selectedIndex}
+        trackedLocation="content-manager"
       />
 
       {step === Steps.SelectAsset && (
@@ -160,6 +161,7 @@ export const MediaLibraryInput = ({
           onValidate={handleValidation}
           multiple={multiple}
           onAddAsset={() => setStep(Steps.UploadAsset)}
+          trackedLocation="content-manager"
         />
       )}
 
@@ -168,6 +170,7 @@ export const MediaLibraryInput = ({
           onClose={() => setStep(Steps.SelectAsset)}
           initialAssetsToAdd={droppedAssets}
           addUploadedFiles={handleFilesUploadSucceeded}
+          trackedLocation="content-manager"
         />
       )}
     </>

@@ -36,7 +36,14 @@ const fileInfoSchema = yup.object({
   caption: yup.string(),
 });
 
-export const EditAssetDialog = ({ onClose, asset, canUpdate, canCopyLink, canDownload }) => {
+export const EditAssetDialog = ({
+  onClose,
+  asset,
+  canUpdate,
+  canCopyLink,
+  canDownload,
+  trackedLocation,
+}) => {
   const { formatMessage, formatDate } = useIntl();
   const submitButtonRef = useRef(null);
   const [isCropping, setIsCropping] = useState(false);
@@ -183,6 +190,7 @@ export const EditAssetDialog = ({ onClose, asset, canUpdate, canCopyLink, canDow
                 onSelectMedia={setReplacementFile}
                 acceptedMime={asset.mime}
                 disabled={formDisabled}
+                trackedLocation={trackedLocation}
               />
 
               <Button
@@ -200,10 +208,15 @@ export const EditAssetDialog = ({ onClose, asset, canUpdate, canCopyLink, canDow
   );
 };
 
+EditAssetDialog.defaultProps = {
+  trackedLocation: undefined,
+};
+
 EditAssetDialog.propTypes = {
   asset: AssetDefinition.isRequired,
   canUpdate: PropTypes.bool.isRequired,
   canCopyLink: PropTypes.bool.isRequired,
   canDownload: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
+  trackedLocation: PropTypes.string,
 };

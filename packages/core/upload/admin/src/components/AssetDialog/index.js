@@ -29,6 +29,7 @@ export const AssetDialog = ({
   onValidate,
   multiple,
   initiallySelectedAssets,
+  trackedLocation,
 }) => {
   const [assetToEdit, setAssetToEdit] = useState(undefined);
   const { formatMessage } = useIntl();
@@ -153,6 +154,7 @@ export const AssetDialog = ({
         canUpdate={canUpdate}
         canCopyLink={canCopyLink}
         canDownload={canDownload}
+        trackedLocation={trackedLocation}
       />
     );
   }
@@ -232,6 +234,7 @@ AssetDialog.defaultProps = {
   allowedTypes: [],
   initiallySelectedAssets: [],
   multiple: false,
+  trackedLocation: undefined,
 };
 
 AssetDialog.propTypes = {
@@ -241,4 +244,5 @@ AssetDialog.propTypes = {
   onAddAsset: PropTypes.func.isRequired,
   onClose: PropTypes.func.isRequired,
   onValidate: PropTypes.func.isRequired,
+  trackedLocation: PropTypes.string,
 };

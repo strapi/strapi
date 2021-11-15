@@ -23,6 +23,7 @@ export const CarouselAssets = ({
   onNext,
   onPrevious,
   selectedAssetIndex,
+  trackedLocation,
 }) => {
   const { formatMessage } = useIntl();
   const [isEditingAsset, setIsEditingAsset] = useState(false);
@@ -105,6 +106,7 @@ export const CarouselAssets = ({
           canUpdate
           canCopyLink
           canDownload
+          trackedLocation={trackedLocation}
         />
       )}
     </>
@@ -116,6 +118,7 @@ CarouselAssets.defaultProps = {
   error: undefined,
   hint: undefined,
   onDropAsset: undefined,
+  trackedLocation: undefined,
 };
 
 CarouselAssets.propTypes = {
@@ -132,4 +135,5 @@ CarouselAssets.propTypes = {
   onNext: PropTypes.func.isRequired,
   onPrevious: PropTypes.func.isRequired,
   selectedAssetIndex: PropTypes.number.isRequired,
+  trackedLocation: PropTypes.string,
 };
