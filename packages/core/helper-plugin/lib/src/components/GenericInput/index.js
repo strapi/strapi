@@ -140,7 +140,6 @@ const GenericInput = ({
           hint={hint}
           name={name}
           onChange={date => {
-            // const formattedDate = formatISO(cloneDeep(date), { representation: 'complete' });
             const formattedDate = date.toISOString();
 
             onChange({ target: { name, value: formattedDate, type } });
@@ -165,7 +164,6 @@ const GenericInput = ({
           hint={hint}
           name={name}
           onChange={date => {
-            // const formattedDate = formatISO(cloneDeep(date), { representation: 'date' });
             const formattedDate = date.toISOString();
 
             onChange({ target: { name, value: formattedDate, type } });
