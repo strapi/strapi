@@ -1,7 +1,7 @@
 import React from 'react';
 import { Stack } from '@strapi/design-system/Stack';
 import { Box } from '@strapi/design-system/Box';
-import { H3, Text } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import map from 'lodash/map';
 import tail from 'lodash/tail';
 import { useIntl } from 'react-intl';
@@ -18,17 +18,17 @@ function BoundRoute({ route }) {
 
   return (
     <Stack size={2}>
-      <H3>
+      <Typography variant="delta">
         {formatMessage({
           id: 'users-permissions.BoundRoute.title',
           defaultMessage: 'Bound route to',
         })}
         &nbsp;
         <span>{controller}</span>
-        <Text style={{ fontSize: 'inherit', fontWeight: 'inherit' }} textColor="primary600">
+        <Typography variant="delta" textColor="primary600">
           .{action}
-        </Text>
-      </H3>
+        </Typography>
+      </Typography>
       <Box hasRadius background="neutral0" borderColor="neutral200">
         <Box
           color={colors.text}
@@ -43,13 +43,13 @@ function BoundRoute({ route }) {
             borderBottomRightRadius: 0,
           }}
         >
-          <Text bold>{method}</Text>
+          <Typography bold>{method}</Typography>
         </Box>
         <Box style={{ display: 'inline-block' }} paddingLeft={2} paddingRight={2}>
           {map(formattedRoute, value => (
-            <Text key={value} textColor={value.includes(':') ? 'neutral600' : 'neutral900'}>
+            <Typography key={value} textColor={value.includes(':') ? 'neutral600' : 'neutral900'}>
               /{value}
-            </Text>
+            </Typography>
           ))}
         </Box>
       </Box>
