@@ -62,8 +62,6 @@ const FieldButton = ({
         return;
       }
 
-      console.log(hoverIndex);
-
       onMoveField(dragIndex, hoverIndex);
 
       item.index = hoverIndex;
