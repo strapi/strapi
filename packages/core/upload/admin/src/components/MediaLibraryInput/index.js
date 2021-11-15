@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { AssetDialog } from './AssetDialog';
+import { AssetDialog } from '../AssetDialog';
 import { AssetDefinition } from '../../constants';
 import { CarouselAssets } from './Carousel/CarouselAssets';
 import { UploadAssetDialog } from '../UploadAssetDialog/UploadAssetDialog';
-import getAllowedFiles from './utils/getAllowedFiles';
+import getAllowedFiles from '../../utils/getAllowedFiles';
 
 const Steps = {
   SelectAsset: 'SelectAsset',
@@ -160,7 +160,6 @@ export const MediaLibraryInput = ({
           onValidate={handleValidation}
           multiple={multiple}
           onAddAsset={() => setStep(Steps.UploadAsset)}
-          uploadedFiles={uploadedFiles}
         />
       )}
 

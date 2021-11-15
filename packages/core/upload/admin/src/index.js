@@ -9,6 +9,7 @@ import pluginPkg from '../../package.json';
 import PluginIcon from './components/PluginIcon';
 import pluginPermissions from './permissions';
 import { MediaLibraryInput } from './components/MediaLibraryInput';
+import { MediaLibraryDialog } from './components/MediaLibraryDialog';
 import pluginId from './pluginId';
 import getTrad from './utils/getTrad';
 
@@ -32,6 +33,7 @@ export default {
     });
 
     app.addFields({ type: 'media', Component: MediaLibraryInput });
+    app.addComponents([{ name: 'media-library', Component: MediaLibraryDialog }]);
 
     app.registerPlugin({
       id: pluginId,

@@ -3,8 +3,8 @@ import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import { Stack } from '@strapi/design-system/Stack';
 import { Text } from '@strapi/design-system/Text';
-import { AssetList } from '../../../AssetList';
-import getTrad from '../../../../utils/getTrad';
+import { AssetList } from '../../AssetList';
+import getTrad from '../../../utils/getTrad';
 
 export const SelectedStep = ({ selectedAssets, onSelectAsset }) => {
   const { formatMessage } = useIntl();

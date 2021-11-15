@@ -7,13 +7,13 @@ import { Typography } from '@strapi/design-system/Typography';
 import { Icon } from '@strapi/design-system/Icon';
 import EmptyPicturesIcon from '@strapi/icons/EmptyPictures';
 import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
-import getTrad from '../../../../utils/getTrad';
-import { AssetList } from '../../../AssetList';
-import SortPicker from '../../../SortPicker';
+import getTrad from '../../../utils/getTrad';
+import { AssetList } from '../../AssetList';
+import SortPicker from '../../SortPicker';
 import PaginationFooter from './PaginationFooter';
 import PageSize from './PageSize';
 import SearchAsset from './SearchAsset';
-import getAllowedFiles from '../../utils/getAllowedFiles';
+import getAllowedFiles from '../../../utils/getAllowedFiles';
 
 export const BrowseStep = ({
   allowedTypes,
