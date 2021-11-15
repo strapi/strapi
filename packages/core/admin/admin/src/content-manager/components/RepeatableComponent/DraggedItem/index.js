@@ -45,7 +45,6 @@ const DraggedItem = ({
   // checkFormErrors,
   displayedValue,
 }) => {
-  console.log(hasErrorMessage, hasErrors);
   const dragRef = useRef(null);
   const dropRef = useRef(null);
   const [, forceRerenderAfterDnd] = useState(false);
