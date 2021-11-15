@@ -33,6 +33,7 @@ import Check from '@strapi/icons/Check';
 import useLocalesProvider from '../../components/LocalesProvider/useLocalesProvider';
 import { fetchUser, putUser } from './utils/api';
 import schema from './utils/schema';
+import { getFullName } from '../../utils';
 
 const PasswordInput = styled(TextInput)`
   ::-ms-reveal {
@@ -87,7 +88,7 @@ const ProfilePage = () => {
       await queryClient.invalidateQueries('user');
 
       auth.setUserInfo(data);
-      const userDisplayName = data.username || `${data.firstname} ${data.lastname}`;
+      const userDisplayName = data.username || getFullName(data.firstname, data.lastname);
       setUserDisplayName(userDisplayName);
       changeLocale(data.preferedLanguage);
 
@@ -172,7 +173,7 @@ const ProfilePage = () => {
           return (
             <Form>
               <HeaderLayout
-                title={data.username || `${data.firstname} ${data.lastname}`}
+                title={data.username || getFullName(data.firstname, data.lastname)}
                 primaryAction={
                   <Button startIcon={<Check />} loading={isSubmitting} type="submit">
                     {formatMessage({ id: 'form.button.save', defaultMessage: 'Save' })}
