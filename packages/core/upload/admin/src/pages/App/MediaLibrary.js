@@ -5,7 +5,6 @@ import {
   LoadingIndicatorPage,
   useFocusWhenNavigate,
   NoPermissions,
-  NoMedia,
   AnErrorOccurred,
   SearchURLQuery,
   useSelectionState,
@@ -27,6 +26,7 @@ import { Filters } from './components/Filters';
 import { PaginationFooter } from '../../components/PaginationFooter';
 import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
 import { BulkDeleteButton } from './components/BulkDeleteButton';
+import { EmptyAssets } from '../../components/EmptyAssets';
 
 const BoxWithHeight = styled(Box)`
   height: ${32 / 16}rem;
@@ -148,7 +148,7 @@ export const MediaLibrary = () => {
           {error && <AnErrorOccurred />}
           {!canRead && <NoPermissions />}
           {canRead && assets && assets.length === 0 && (
-            <NoMedia
+            <EmptyAssets
               action={
                 canCreate && !isFiltering ? (
                   <Button
