@@ -25,12 +25,12 @@ describe('Default Service', () => {
   describe('Collection Type', () => {
     test('Creates default actions', () => {
       const strapi = {};
-      const model = {
+      const contentType = {
         modelName: 'testModel',
         kind: 'collectionType',
       };
 
-      const service = createService({ strapi, model });
+      const service = createService({ strapi, contentType });
 
       expect(service).toEqual({
         find: expect.any(Function),
@@ -45,12 +45,12 @@ describe('Default Service', () => {
   describe('Single Type', () => {
     test('Creates default actions', () => {
       const strapi = {};
-      const model = {
+      const contentType = {
         modelName: 'testModel',
         kind: 'singleType',
       };
 
-      const service = createService({ strapi, model });
+      const service = createService({ strapi, contentType });
 
       expect(service).toEqual({
         find: expect.any(Function),
@@ -71,12 +71,12 @@ describe('Default Service', () => {
           },
         };
 
-        const model = {
+        const contentType = {
           uid: 'testModel',
           kind: 'singleType',
         };
 
-        const service = createService({ strapi, model });
+        const service = createService({ strapi, contentType });
 
         const input = {};
         await service.createOrUpdate({ data: input });
@@ -99,12 +99,12 @@ describe('Default Service', () => {
           },
         };
 
-        const model = {
+        const contentType = {
           uid: 'testModel',
           kind: 'singleType',
         };
 
-        const service = createService({ strapi, model });
+        const service = createService({ strapi, contentType });
 
         const input = {};
         await service.createOrUpdate({ data: input });
@@ -127,12 +127,12 @@ describe('Default Service', () => {
           },
         };
 
-        const model = {
+        const contentType = {
           uid: 'testModel',
           kind: 'singleType',
         };
 
-        const service = createService({ strapi, model });
+        const service = createService({ strapi, contentType });
 
         await service.delete();
 

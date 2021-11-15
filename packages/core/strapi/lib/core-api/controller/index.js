@@ -10,7 +10,7 @@ const createCollectionTypeController = require('./collection-type');
 
 const getAuthFromKoaContext = getOr({}, 'state.auth');
 
-module.exports = ({ service, contentType }) => {
+const createController = ({ service, contentType }) => {
   const ctx = {
     contentType,
     service,
@@ -44,3 +44,5 @@ module.exports = ({ service, contentType }) => {
 
   return Object.assign(Object.create(proto), ctrl);
 };
+
+module.exports = { createController };

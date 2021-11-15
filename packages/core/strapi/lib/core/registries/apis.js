@@ -2,7 +2,7 @@
 
 const { has } = require('lodash/fp');
 const { createService } = require('../../core-api/service');
-const createController = require('../../core-api/controller');
+const { createController } = require('../../core-api/controller');
 
 const apisRegistry = strapi => {
   const apis = {};

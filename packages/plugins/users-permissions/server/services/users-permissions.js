@@ -40,13 +40,9 @@ module.exports = ({ strapi }) => ({
     };
 
     _.forEach(strapi.api, (api, apiName) => {
-      console.log(api.controllers);
-
       const controllers = _.reduce(
         api.controllers,
         (acc, controller, controllerName) => {
-          console.log(controllerName, controller);
-
           const contentApiActions = _.pickBy(controller, isContentApi);
 
           if (_.isEmpty(contentApiActions)) {

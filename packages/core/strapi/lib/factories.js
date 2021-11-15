@@ -1,9 +1,10 @@
 'use strict';
 
 const { pipe, omit, pick } = require('lodash/fp');
-const { isSingleType } = require('@strapi/utils').contentTypes;
-const createController = require('./core-api/controller');
+
+const { createController } = require('./core-api/controller');
 const { createService } = require('./core-api/service');
+const { createRoutes } = require('./core-api/routes');
 
 const createCoreController = (uid, cfg = {}) => {
   return ({ strapi }) => {
@@ -50,72 +51,6 @@ const createCoreService = (uid, cfg = {}) => {
   };
 };
 
-const getSingleTypeRoutes = ({ uid, info }) => {
-  return {
-    find: {
-      method: 'GET',
-      path: `/${info.pluralName}`,
-      handler: `${uid}.find`,
-      config: {},
-    },
-    createOrUpdate: {
-      method: 'PUT',
-      path: `/${info.pluralName}`,
-      handler: `${uid}.update`,
-      config: {},
-    },
-    delete: {
-      method: 'DELETE',
-      path: `/${info.pluralName}`,
-      handler: `${uid}.delete`,
-      config: {},
-    },
-  };
-};
-
-const getCollectionTypeRoutes = ({ uid, info }) => {
-  return {
-    find: {
-      method: 'GET',
-      path: `/${info.pluralName}`,
-      handler: `${uid}.find`,
-      config: {},
-    },
-    findOne: {
-      method: 'GET',
-      path: `/${info.pluralName}/:id`,
-      handler: `${uid}.findOne`,
-      config: {},
-    },
-    create: {
-      method: 'POST',
-      path: `/${info.pluralName}`,
-      handler: `${uid}.create`,
-      config: {},
-    },
-    update: {
-      method: 'PUT',
-      path: `/${info.pluralName}/:id`,
-      handler: `${uid}.update`,
-      config: {},
-    },
-    delete: {
-      method: 'DELETE',
-      path: `/${info.pluralName}/:id`,
-      handler: `${uid}.delete`,
-      config: {},
-    },
-  };
-};
-
-const getDefaultRoutes = ({ contentType }) => {
-  if (isSingleType(contentType)) {
-    return getSingleTypeRoutes(contentType);
-  }
-
-  return getCollectionTypeRoutes(contentType);
-};
-
 const createCoreRouter = (uid, cfg = {}) => {
   const { prefix, config = {}, only, except } = cfg;
   let routes;
@@ -128,7 +63,7 @@ const createCoreRouter = (uid, cfg = {}) => {
       if (!routes) {
         const contentType = strapi.contentType(uid);
 
-        const defaultRoutes = getDefaultRoutes({ contentType });
+        const defaultRoutes = createRoutes({ contentType });
 
         Object.keys(defaultRoutes).forEach(routeName => {
           const defaultRoute = defaultRoutes[routeName];
