@@ -26,6 +26,8 @@ const FieldPicker = ({ layout }) => {
   const values = displayedHeaders.map(({ name }) => name);
 
   const handleChange = updatedValues => {
+    trackUsage('didChangeDisplayedFields');
+
     // removing a header
     if (updatedValues.length < values.length) {
       const removedHeader = values.filter(value => {
@@ -34,7 +36,6 @@ const FieldPicker = ({ layout }) => {
 
       dispatch(onChangeListHeaders({ name: removedHeader[0], value: true }));
     } else {
-      trackUsage('didChangeDisplayedFields');
       const addedHeader = updatedValues.filter(value => {
         return values.indexOf(value) === -1;
       });

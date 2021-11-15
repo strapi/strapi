@@ -7,7 +7,6 @@ import { bindActionCreators, compose } from 'redux';
 import { useIntl } from 'react-intl';
 import { useHistory, useLocation } from 'react-router-dom';
 import get from 'lodash/get';
-import isEmpty from 'lodash/isEmpty';
 import { stringify } from 'qs';
 import {
   NoPermissions,
@@ -171,18 +170,6 @@ function ListView({
   const handleConfirmDeleteData = useCallback(
     async idToDelete => {
       try {
-        let trackerProperty = {};
-
-        if (hasDraftAndPublish) {
-          const dataToDelete = data.find(obj => obj.id.toString() === idToDelete.toString());
-          const isDraftEntry = isEmpty(dataToDelete.publishedAt);
-          const status = isDraftEntry ? 'draft' : 'published';
-
-          trackerProperty = { status };
-        }
-
-        trackUsageRef.current('willDeleteEntry', trackerProperty);
-
         await axiosInstance.delete(getRequestUrl(`collection-types/${slug}/${idToDelete}`));
 
         const requestUrl = getRequestUrl(`collection-types/${slug}${params}`);
@@ -192,8 +179,6 @@ function ListView({
           type: 'success',
           message: { id: getTrad('success.record.delete') },
         });
-
-        trackUsageRef.current('didDeleteEntry', trackerProperty);
       } catch (err) {
         const errorMessage = get(
           err,
@@ -207,7 +192,7 @@ function ListView({
         });
       }
     },
-    [hasDraftAndPublish, slug, params, fetchData, toggleNotification, data, formatMessage]
+    [slug, params, fetchData, toggleNotification, formatMessage]
   );
 
   useEffect(() => {
@@ -282,8 +267,11 @@ function ListView({
               <FieldPicker layout={layout} />
               <CheckPermissions permissions={cmPermissions.collectionTypesConfigurations}>
                 <IconButtonCustom
-                  onClick={() =>
-                    push({ pathname: `${slug}/configurations/list`, search: pluginsQueryParams })}
+                  onClick={() => {
+                    trackUsage('willEditListLayout');
+
+                    push({ pathname: `${slug}/configurations/list`, search: pluginsQueryParams });
+                  }}
                   icon={<Cog />}
                   label={formatMessage({
                     id: 'app.links.configure-view',

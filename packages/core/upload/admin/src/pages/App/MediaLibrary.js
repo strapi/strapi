@@ -198,7 +198,9 @@ export const MediaLibrary = () => {
         </ContentLayout>
       </Main>
 
-      {showUploadAssetDialog && <UploadAssetDialog onClose={toggleUploadAssetDialog} />}
+      {showUploadAssetDialog && (
+        <UploadAssetDialog onClose={toggleUploadAssetDialog} trackedLocation="upload" />
+      )}
       {assetToEdit && (
         <EditAssetDialog
           onClose={() => setAssetToEdit(undefined)}
@@ -206,6 +208,7 @@ export const MediaLibrary = () => {
           canUpdate={canUpdate}
           canCopyLink={canCopyLink}
           canDownload={canDownload}
+          trackedLocation="upload"
         />
       )}
     </Layout>

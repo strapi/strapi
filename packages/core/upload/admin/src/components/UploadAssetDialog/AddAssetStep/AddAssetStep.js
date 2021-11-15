@@ -10,7 +10,7 @@ import { FromUrlForm } from './FromUrlForm';
 import { FromComputerForm } from './FromComputerForm';
 import getTrad from '../../../utils/getTrad';
 
-export const AddAssetStep = ({ onClose, onAddAsset }) => {
+export const AddAssetStep = ({ onClose, onAddAsset, trackedLocation }) => {
   const { formatMessage } = useIntl();
 
   return (
@@ -51,10 +51,18 @@ export const AddAssetStep = ({ onClose, onAddAsset }) => {
         </Box>
         <TabPanels>
           <TabPanel>
-            <FromComputerForm onClose={onClose} onAddAssets={onAddAsset} />
+            <FromComputerForm
+              onClose={onClose}
+              onAddAssets={onAddAsset}
+              trackedLocation={trackedLocation}
+            />
           </TabPanel>
           <TabPanel>
-            <FromUrlForm onClose={onClose} onAddAsset={onAddAsset} />
+            <FromUrlForm
+              onClose={onClose}
+              onAddAsset={onAddAsset}
+              trackedLocation={trackedLocation}
+            />
           </TabPanel>
         </TabPanels>
       </TabGroup>
@@ -62,7 +70,12 @@ export const AddAssetStep = ({ onClose, onAddAsset }) => {
   );
 };
 
+AddAssetStep.defaultProps = {
+  trackedLocation: undefined,
+};
+
 AddAssetStep.propTypes = {
   onClose: PropTypes.func.isRequired,
   onAddAsset: PropTypes.func.isRequired,
+  trackedLocation: PropTypes.string,
 };
