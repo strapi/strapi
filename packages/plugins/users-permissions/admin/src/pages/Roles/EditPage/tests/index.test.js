@@ -816,7 +816,7 @@ describe('Admin | containers | RoleEditPage', () => {
         border: 1px solid #4945ff;
       }
 
-      .c44:hover:not([aria-disabled='true']) .sc-jVcspg {
+      .c44:hover:not([aria-disabled='true']) .sc-heejUR {
         color: #271fe0;
       }
 
@@ -1262,11 +1262,11 @@ describe('Admin | containers | RoleEditPage', () => {
                     <div
                       class="c41"
                     >
-                      <span
+                      <h3
                         class="c22"
                       >
                         Advanced settings
-                      </span>
+                      </h3>
                       <p
                         class="c42"
                       >
