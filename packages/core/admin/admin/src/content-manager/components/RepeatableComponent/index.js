@@ -130,7 +130,7 @@ const RepeatableComponent = ({
 
   if (doesRepComponentHasChildError && !hasMinError) {
     errorMessage = {
-      id: getTrad('components.RepComponent.error-message'),
+      id: getTrad('components.RepeatableComponent.error-message'),
       defaultMessage: 'The component(s) contain error(s)',
     };
   }
