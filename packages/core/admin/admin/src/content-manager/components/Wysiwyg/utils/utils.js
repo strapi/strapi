@@ -200,7 +200,7 @@ export const titleHandler = (editor, titleType) => {
   }, 0);
 };
 
-export const insertImage = (editor, files) => {
+export const insertFile = (editor, files) => {
   let { line, ch } = editor.current.getCursor();
 
   files.forEach((file, i) => {
@@ -215,7 +215,12 @@ export const insertImage = (editor, files) => {
       line++;
       editor.current.replaceSelection('\n');
     }
-    editor.current.replaceSelection(`[${file.alt}](${file.url})`);
+
+    if (file.mime.includes('image')) {
+      editor.current.replaceSelection(`![${file.alt}](${file.url})`);
+    } else {
+      editor.current.replaceSelection(`[${file.alt}](${file.url})`);
+    }
   });
 
   setTimeout(() => editor.current.focus(), 0);

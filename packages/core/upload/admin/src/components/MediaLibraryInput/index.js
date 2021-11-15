@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { AssetDialog } from './AssetDialog';
+import { AssetDialog } from '../AssetDialog';
 import { AssetDefinition } from '../../constants';
 import { CarouselAssets } from './Carousel/CarouselAssets';
 import { UploadAssetDialog } from '../UploadAssetDialog/UploadAssetDialog';
-import getAllowedFiles from './utils/getAllowedFiles';
+import getAllowedFiles from '../../utils/getAllowedFiles';
 
 const Steps = {
   SelectAsset: 'SelectAsset',
@@ -23,6 +23,7 @@ export const MediaLibraryInput = ({
   onChange,
   value,
 }) => {
+  const fieldAllowedTypes = allowedTypes || ['files', 'images', 'videos'];
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [step, setStep] = useState(undefined);
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -126,7 +127,7 @@ export const MediaLibraryInput = ({
   let initiallySelectedAssets = selectedAssets;
 
   if (uploadedFiles.length > 0) {
-    const allowedUploadedFiles = getAllowedFiles(allowedTypes, uploadedFiles);
+    const allowedUploadedFiles = getAllowedFiles(fieldAllowedTypes, uploadedFiles);
 
     initiallySelectedAssets = multiple
       ? [...allowedUploadedFiles, ...selectedAssets]
@@ -153,13 +154,12 @@ export const MediaLibraryInput = ({
 
       {step === Steps.SelectAsset && (
         <AssetDialog
-          allowedTypes={allowedTypes}
+          allowedTypes={fieldAllowedTypes}
           initiallySelectedAssets={initiallySelectedAssets}
           onClose={() => setStep(undefined)}
           onValidate={handleValidation}
           multiple={multiple}
           onAddAsset={() => setStep(Steps.UploadAsset)}
-          uploadedFiles={uploadedFiles}
         />
       )}
 
@@ -175,7 +175,7 @@ export const MediaLibraryInput = ({
 };
 
 MediaLibraryInput.defaultProps = {
-  attribute: { allowedTypes: [] },
+  attribute: { allowedTypes: ['videos', 'files', 'images'] },
   disabled: false,
   description: undefined,
   error: undefined,

@@ -2,22 +2,23 @@ import React, { useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
-import { ButtonText, P } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
+import { P } from '@strapi/design-system/Text';
 import { Box } from '@strapi/design-system/Box';
-import { Flex } from '@strapi/design-system/Flex';
+import { Stack } from '@strapi/design-system/Stack';
+import { prefixFileUrlWithBackendUrl, useLibrary } from '@strapi/helper-plugin';
 import Editor from './Editor';
 import WysiwygNav from './WysiwygNav';
 import WysiwygFooter from './WysiwygFooter';
-import WysiwygExpand from './WysiwygExpand';
-import MediaLibrary from './MediaLibrary';
-import { WysiwygWrapper } from './WysiwygStyles';
+
 import {
   markdownHandler,
   listHandler,
   titleHandler,
-  insertImage,
+  insertFile,
   quoteAndCodeHandler,
 } from './utils/utils';
+import { EditorLayout } from './EditorLayout';
 
 const LabelAction = styled(Box)`
   svg path {
@@ -37,40 +38,18 @@ const Wysiwyg = ({
   value,
 }) => {
   const { formatMessage } = useIntl();
-  const label = intlLabel.id
-    ? formatMessage(
-        { id: intlLabel.id, defaultMessage: intlLabel.defaultMessage },
-        { ...intlLabel.values }
-      )
-    : name;
-
-  // FIXME
-  // const hint = description
-  //   ? formatMessage(
-  //       { id: description.id, defaultMessage: description.defaultMessage },
-  //       { ...description.values }
-  //     )
-  //   : '';
-
-  const formattedPlaceholder = placeholder
-    ? formatMessage(
-        { id: placeholder.id, defaultMessage: placeholder.defaultMessage },
-        { ...placeholder.values }
-      )
-    : '';
-
-  const errorMessage = error ? formatMessage({ id: error, defaultMessage: error }) : '';
   const textareaRef = useRef(null);
   const editorRef = useRef(null);
-  const editorRefExpanded = useRef(null);
-  const [visiblePopover, setVisiblePopover] = useState(false);
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [mediaLibVisible, setMediaLibVisible] = useState(false);
   const [isExpandMode, setIsExpandMode] = useState(false);
+  const { components } = useLibrary();
+
+  const MediaLibraryDialog = components['media-library'];
 
   const handleToggleMediaLib = () => setMediaLibVisible(prev => !prev);
-  const handleTogglePopover = () => setVisiblePopover(prev => !prev);
   const handleTogglePreviewMode = () => setIsPreviewMode(prev => !prev);
+  const handleToggleExpand = () => setIsExpandMode(prev => !prev);
 
   const handleActionClick = (value, currentEditorRef, togglePopover) => {
     switch (value) {
@@ -113,45 +92,82 @@ const Wysiwyg = ({
     }
   };
 
-  const handleSubmitImage = (files, currentEditorRef, toggleMediaLib, togglePopover) => {
-    toggleMediaLib();
-    togglePopover();
-    insertImage(currentEditorRef, files);
+  const handleSelectAssets = files => {
+    const formattedFiles = files.map(f => ({
+      alt: f.alternativeText || f.name,
+      url: prefixFileUrlWithBackendUrl(f.url),
+      mime: f.mime,
+    }));
+
+    insertFile(editorRef, formattedFiles);
+    setMediaLibVisible(false);
   };
 
-  const handleToggleExpand = () => {
-    setIsExpandMode(prev => !prev);
-  };
+  const formattedPlaceholder = placeholder
+    ? formatMessage(
+        { id: placeholder.id, defaultMessage: placeholder.defaultMessage },
+        { ...placeholder.values }
+      )
+    : '';
+
+  const errorMessage = error ? formatMessage({ id: error, defaultMessage: error }) : '';
+  const label = intlLabel.id
+    ? formatMessage(
+        { id: intlLabel.id, defaultMessage: intlLabel.defaultMessage },
+        { ...intlLabel.values }
+      )
+    : name;
+
+  // FIXME
+  // const hint = description
+  //   ? formatMessage(
+  //       { id: description.id, defaultMessage: description.defaultMessage },
+  //       { ...description.values }
+  //     )
+  //   : '';
 
   return (
     <>
-      <Flex>
-        <ButtonText>{label}</ButtonText>
-        {labelAction && <LabelAction paddingLeft={1}>{labelAction}</LabelAction>}
-      </Flex>
-      <WysiwygWrapper hasRadius error={error}>
-        <WysiwygNav
-          editorRef={editorRef}
-          isPreviewMode={isPreviewMode}
-          onActionClick={handleActionClick}
-          onToggleMediaLib={handleToggleMediaLib}
-          onTogglePopover={handleTogglePopover}
-          onTogglePreviewMode={handleTogglePreviewMode}
-          visiblePopover={visiblePopover}
-        />
-        <Editor
-          disabled={disabled}
-          editorRef={editorRef}
-          error={errorMessage}
-          isPreviewMode={isPreviewMode}
-          name={name}
-          onChange={onChange}
-          placeholder={formattedPlaceholder}
-          textareaRef={textareaRef}
-          value={value}
-        />
-        <WysiwygFooter isPreviewMode={isPreviewMode} onToggleExpand={handleToggleExpand} />
-      </WysiwygWrapper>
+      <Stack size={1}>
+        <Stack horizontal size={1}>
+          <Typography variant="pi" fontWeight="bold" textColor="neutral800">
+            {label}
+          </Typography>
+          {labelAction && <LabelAction paddingLeft={1}>{labelAction}</LabelAction>}
+        </Stack>
+
+        <EditorLayout
+          isExpandMode={isExpandMode}
+          error={error}
+          previewContent={value}
+          onCollapse={handleToggleExpand}
+        >
+          <WysiwygNav
+            editorRef={editorRef}
+            isPreviewMode={isPreviewMode}
+            onActionClick={handleActionClick}
+            onToggleMediaLib={handleToggleMediaLib}
+            onTogglePreviewMode={isExpandMode ? undefined : handleTogglePreviewMode}
+          />
+
+          <Editor
+            disabled={disabled}
+            editorRef={editorRef}
+            error={errorMessage}
+            isPreviewMode={isPreviewMode}
+            name={name}
+            onChange={onChange}
+            placeholder={formattedPlaceholder}
+            textareaRef={textareaRef}
+            value={value}
+          />
+
+          {!isExpandMode && (
+            <WysiwygFooter isPreviewMode={isPreviewMode} onToggleExpand={handleToggleExpand} />
+          )}
+        </EditorLayout>
+      </Stack>
+
       {errorMessage && (
         <Box paddingTop={1}>
           <P small textColor="danger600" data-strapi-field-error>
@@ -159,27 +175,9 @@ const Wysiwyg = ({
           </P>
         </Box>
       )}
+
       {mediaLibVisible && (
-        <MediaLibrary
-          editorRef={editorRef}
-          onSubmitImage={handleSubmitImage}
-          onToggleMediaLib={handleToggleMediaLib}
-          onTogglePopover={handleTogglePopover}
-        />
-      )}
-      {isExpandMode && (
-        <WysiwygExpand
-          disabled={disabled}
-          editorRef={editorRefExpanded}
-          name={name}
-          onActionClick={handleActionClick}
-          onChange={onChange}
-          onSubmitImage={handleSubmitImage}
-          onToggleExpand={handleToggleExpand}
-          placeholder={formattedPlaceholder}
-          textareaRef={textareaRef}
-          value={value}
-        />
+        <MediaLibraryDialog onClose={handleToggleMediaLib} onSelectAssets={handleSelectAssets} />
       )}
     </>
   );

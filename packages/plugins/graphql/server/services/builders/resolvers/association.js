@@ -4,7 +4,7 @@ const { get } = require('lodash/fp');
 
 const utils = require('@strapi/utils');
 
-const { sanitize } = utils;
+const { sanitize, pipeAsync } = utils;
 const { ApplicationError } = utils.errors;
 
 module.exports = ({ strapi }) => {
@@ -65,11 +65,7 @@ module.exports = ({ strapi }) => {
           const unwrapData = get(attributeName);
 
           // Sanitizer definition
-          const sanitizeMorphAttribute = sanitize.utils.pipeAsync(
-            wrapData,
-            sanitizeData,
-            unwrapData
-          );
+          const sanitizeMorphAttribute = pipeAsync(wrapData, sanitizeData, unwrapData);
 
           return sanitizeMorphAttribute(data);
         }

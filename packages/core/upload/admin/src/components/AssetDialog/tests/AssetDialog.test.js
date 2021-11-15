@@ -6,7 +6,7 @@ import { useRBAC, useQueryParams } from '@strapi/helper-plugin';
 import { MemoryRouter } from 'react-router-dom';
 import { rest } from 'msw';
 import { AssetDialog } from '..';
-import en from '../../../../translations/en.json';
+import en from '../../../translations/en.json';
 import server from './server';
 import { assetResultMock } from './asset.mock';
 
@@ -17,7 +17,7 @@ jest.mock('@strapi/helper-plugin', () => ({
   useQueryParams: jest.fn(),
 }));
 
-jest.mock('../../../../utils/getTrad', () => x => x);
+jest.mock('../../../utils/getTrad', () => x => x);
 
 jest.mock('react-intl', () => ({
   FormattedMessage: ({ id }) => id,

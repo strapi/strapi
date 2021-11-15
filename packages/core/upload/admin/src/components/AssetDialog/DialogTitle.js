@@ -2,7 +2,7 @@ import React from 'react';
 import { ButtonText } from '@strapi/design-system/Text';
 import { ModalHeader } from '@strapi/design-system/ModalLayout';
 import { useIntl } from 'react-intl';
-import getTrad from '../../../utils/getTrad';
+import getTrad from '../../utils/getTrad';
 
 export const DialogTitle = () => {
   const { formatMessage } = useIntl();
