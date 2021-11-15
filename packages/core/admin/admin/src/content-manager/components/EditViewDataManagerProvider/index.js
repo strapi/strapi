@@ -300,8 +300,8 @@ const EditViewDataManagerProvider = ({
           onPut(formData, trackerProperty);
         }
       } catch (err) {
-        console.error('ValidationError');
-        console.error(err);
+        console.log('ValidationError');
+        console.log(err);
 
         errors = getYupInnerErrors(err);
 
