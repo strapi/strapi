@@ -454,6 +454,7 @@
   "content-manager.components.DynamicZone.ComponentPicker-label": "Pick one component",
   "content-manager.components.DynamicZone.add-component": "Add a component to {componentName}",
   "content-manager.components.DynamicZone.delete-label": "Delete {name}",
+  "content-manager.components.DynamicZone.error-message": "The component contains error(s)",
   "content-manager.components.DynamicZone.missing-components": "There {number, plural, =0 {are # missing components} one {is # missing component} other {are # missing components}}",
   "content-manager.components.DynamicZone.move-down-label": "Move component down",
   "content-manager.components.DynamicZone.move-up-label": "Move component up",

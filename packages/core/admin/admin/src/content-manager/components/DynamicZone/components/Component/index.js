@@ -92,7 +92,10 @@ const Component = ({
   let errorMessage;
 
   if (fieldsErrors.length > 0) {
-    errorMessage = formatMessage({ id: 'TODO', defaultMessage: 'firstChildError.id' });
+    errorMessage = formatMessage({
+      id: getTrad('components.DynamicZone.error-message'),
+      defaultMessage: 'The component contains error(s)',
+    });
   }
 
   return (
