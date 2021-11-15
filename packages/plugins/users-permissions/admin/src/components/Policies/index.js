@@ -35,7 +35,7 @@ const Policies = () => {
         </Stack>
       ) : (
         <Stack size={2}>
-          <Typography variant="delta">
+          <Typography variant="delta" as="h3">
             {formatMessage({
               id: 'users-permissions.Policies.header.title',
               defaultMessage: 'Advanced settings',

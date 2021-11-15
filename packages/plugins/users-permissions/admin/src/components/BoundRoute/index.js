@@ -1,4 +1,5 @@
 import React from 'react';
+import styled from 'styled-components';
 import { Stack } from '@strapi/design-system/Stack';
 import { Box } from '@strapi/design-system/Box';
 import { Typography } from '@strapi/design-system/Typography';
@@ -7,6 +8,11 @@ import tail from 'lodash/tail';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import getMethodColor from './getMethodColor';
+
+const MethodBox = styled(Box)`
+  margin: -1px;
+  border-radius: ${({ theme }) => theme.spaces[1]} 0 0 ${({ theme }) => theme.spaces[1]};
+`;
 
 function BoundRoute({ route }) {
   const { formatMessage } = useIntl();
@@ -18,7 +24,7 @@ function BoundRoute({ route }) {
 
   return (
     <Stack size={2}>
-      <Typography variant="delta">
+      <Typography variant="delta" as="h3">
         {formatMessage({
           id: 'users-permissions.BoundRoute.title',
           defaultMessage: 'Bound route to',
@@ -29,30 +35,20 @@ function BoundRoute({ route }) {
           .{action}
         </Typography>
       </Typography>
-      <Box hasRadius background="neutral0" borderColor="neutral200">
-        <Box
-          color={colors.text}
-          background={colors.background}
-          borderColor={colors.border}
-          padding={2}
-          hasRadius
-          style={{
-            display: 'inline-block',
-            margin: '-1px',
-            borderTopRightRadius: 0,
-            borderBottomRightRadius: 0,
-          }}
-        >
-          <Typography bold>{method}</Typography>
-        </Box>
-        <Box style={{ display: 'inline-block' }} paddingLeft={2} paddingRight={2}>
+      <Stack horizontal hasRadius background="neutral0" borderColor="neutral200" size={0}>
+        <MethodBox background={colors.background} borderColor={colors.border} padding={2}>
+          <Typography fontWeight="bold" textColor={colors.text}>
+            {method}
+          </Typography>
+        </MethodBox>
+        <Box paddingLeft={2} paddingRight={2}>
           {map(formattedRoute, value => (
             <Typography key={value} textColor={value.includes(':') ? 'neutral600' : 'neutral900'}>
               /{value}
             </Typography>
           ))}
         </Box>
-      </Box>
+      </Stack>
     </Stack>
   );
 }
