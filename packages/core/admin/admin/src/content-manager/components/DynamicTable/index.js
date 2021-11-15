@@ -81,7 +81,7 @@ const DynamicTable = ({
       headers={tableHeaders}
       onConfirmDelete={onConfirmDelete}
       onConfirmDeleteAll={onConfirmDeleteAll}
-      onOnOpenDeleteAllModalTrackedEvent="willBulkDeleteEntries"
+      onOpenDeleteAllModalTrackedEvent="willBulkDeleteEntries"
       rows={rows}
       withBulkActions
       withMainAction={canDelete && isBulkable}

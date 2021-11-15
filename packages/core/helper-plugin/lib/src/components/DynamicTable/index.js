@@ -30,7 +30,7 @@ const Table = ({
   isLoading,
   onConfirmDeleteAll,
   onConfirmDelete,
-  onOnOpenDeleteAllModalTrackedEvent,
+  onOpenDeleteAllModalTrackedEvent,
   rows,
   withBulkActions,
   withMainAction,
@@ -91,8 +91,8 @@ const Table = ({
   };
 
   const handleToggleConfirmDeleteAll = () => {
-    if (!showConfirmDeleteAll && onOnOpenDeleteAllModalTrackedEvent) {
-      trackUsage(onOnOpenDeleteAllModalTrackedEvent);
+    if (!showConfirmDeleteAll && onOpenDeleteAllModalTrackedEvent) {
+      trackUsage(onOpenDeleteAllModalTrackedEvent);
     }
 
     setShowConfirmDeleteAll(prev => !prev);
@@ -210,7 +210,7 @@ Table.defaultProps = {
   isLoading: false,
   onConfirmDeleteAll: () => {},
   onConfirmDelete: () => {},
-  onOnOpenDeleteAllModalTrackedEvent: undefined,
+  onOpenDeleteAllModalTrackedEvent: undefined,
   rows: [],
   withBulkActions: false,
   withMainAction: false,
@@ -237,7 +237,7 @@ Table.propTypes = {
   isLoading: PropTypes.bool,
   onConfirmDeleteAll: PropTypes.func,
   onConfirmDelete: PropTypes.func,
-  onOnOpenDeleteAllModalTrackedEvent: PropTypes.string,
+  onOpenDeleteAllModalTrackedEvent: PropTypes.string,
   rows: PropTypes.array,
   withBulkActions: PropTypes.bool,
   withMainAction: PropTypes.bool,
