@@ -122,7 +122,7 @@ const EventInput = ({ isDraftAndPublish }) => {
                     })}
                   >
                     <Typography variant="sigma" textColor="neutral600">
-                      {formatMessage({ id: header })}
+                      {formatMessage({ id: header, defaultMessage: header })}
                     </Typography>
                   </td>
                 );
@@ -131,7 +131,7 @@ const EventInput = ({ isDraftAndPublish }) => {
               return (
                 <td key={header}>
                   <Typography variant="sigma" textColor="neutral600">
-                    {formatMessage({ id: header })}
+                    {formatMessage({ id: header, defaultMessage: header })}
                   </Typography>
                 </td>
               );

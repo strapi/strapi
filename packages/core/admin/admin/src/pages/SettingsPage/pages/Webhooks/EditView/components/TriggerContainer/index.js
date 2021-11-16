@@ -91,7 +91,7 @@ const Message = ({ statusCode, message }) => {
       <Flex justifyContent="flex-end">
         <Flex maxWidth={pxToRem(250)} justifyContent="flex-end" title={message}>
           <Typography ellipsis textColor="neutral600">
-            {message}YOLOOOOOOdjkeb bdewib dehwb dilwb dilhwebd ilewb dlw
+            {message}
           </Typography>
         </Flex>
       </Flex>
