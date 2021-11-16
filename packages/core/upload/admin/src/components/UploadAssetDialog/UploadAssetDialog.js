@@ -88,6 +88,7 @@ export const UploadAssetDialog = ({
           canUpdate
           canCopyLink={false}
           canDownload={false}
+          trackedLocation={trackedLocation}
         />
       )}
     </ModalLayout>
