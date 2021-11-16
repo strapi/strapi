@@ -53,6 +53,7 @@ const ListView = () => {
     reducer,
     initialState
   );
+  console.log(webhooks);
   const { notifyStatus } = useNotifyAT();
 
   useFocusWhenNavigate();
