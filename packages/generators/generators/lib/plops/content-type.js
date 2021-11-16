@@ -1,6 +1,8 @@
 'use strict';
 
+const { join } = require('path');
 const slugify = require('@sindresorhus/slugify');
+const fs = require('fs-extra');
 
 const getDestinationPrompts = require('./prompts/get-destination-prompts');
 const getFilePath = require('./utils/get-file-path');
@@ -18,14 +20,42 @@ module.exports = plop => {
       const config = await inquirer.prompt([
         ...ctNamesPrompts,
         ...kindPrompts,
-        ...getDestinationPrompts('model', plop.getDestBasePath()),
         ...draftAndPublishPrompts,
-        ...bootstrapApiPrompts,
       ]);
       const attributes = await getAttributesPrompts(inquirer);
 
+      const api = await inquirer.prompt([
+        ...getDestinationPrompts('model', plop.getDestBasePath()),
+        {
+          when: answers => answers.destination === 'new',
+          type: 'input',
+          name: 'id',
+          default: config.singularName,
+          message: 'Name of the new API?',
+          async validate(input) {
+            const apiPath = join(plop.getDestBasePath(), 'api');
+            const exists = await fs.pathExists(apiPath);
+
+            if (!exists) {
+              return true;
+            }
+
+            const apiDir = await fs.readdir(apiPath, { withFileTypes: true });
+            const apiDirContent = apiDir.filter(fd => fd.isDirectory());
+
+            if (apiDirContent.findIndex(api => api.name === input) !== -1) {
+              throw new Error('This name is already taken.');
+            }
+
+            return true;
+          },
+        },
+        ...bootstrapApiPrompts,
+      ]);
+
       return {
         ...config,
+        ...api,
         attributes,
       };
     },
@@ -46,8 +76,6 @@ module.exports = plop => {
       }, {});
 
       const filePath = getFilePath(answers.destination);
-
-      answers.id = answers.singularName;
 
       const baseActions = [
         {

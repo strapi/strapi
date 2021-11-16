@@ -129,6 +129,7 @@ const generateAPI = ({ singularName, kind = 'collectionType', pluralName, displa
     {
       kind,
       singularName,
+      id: singularName,
       pluralName,
       displayName,
       destination: 'new',
