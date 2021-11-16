@@ -1,12 +1,11 @@
 'use strict';
 
-const { propOr, isObject } = require('lodash/fp');
+const { propOr } = require('lodash/fp');
 
 const {
   hasDraftAndPublish,
   constants: { PUBLISHED_AT_ATTRIBUTE },
 } = require('@strapi/utils').contentTypes;
-const { ValidationError } = require('@strapi/utils').errors;
 
 const {
   getPaginationInfo,
@@ -61,10 +60,6 @@ const createCollectionTypeService = ({ model, strapi, utils }) => {
     create(params = {}) {
       const { data } = params;
 
-      if (!isObject(data)) {
-        throw new ValidationError(`Expecting body.data to be an object but found '${typeof data}'`);
-      }
-
       if (hasDraftAndPublish(model)) {
         setPublishedAt(data);
       }
@@ -74,10 +69,6 @@ const createCollectionTypeService = ({ model, strapi, utils }) => {
 
     update(entityId, params = {}) {
       const { data } = params;
-
-      if (!isObject(data)) {
-        throw new ValidationError(`Expecting body.data to be an object, found "${typeof data}"`);
-      }
 
       return strapi.entityService.update(uid, entityId, { ...params, data });
     },

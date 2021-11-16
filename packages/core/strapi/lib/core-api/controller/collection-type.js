@@ -1,5 +1,8 @@
 'use strict';
 
+const { isObject } = require('lodash/fp');
+const { ValidationError } = require('@strapi/utils').errors;
+
 const { parseBody } = require('./transform');
 
 /**
@@ -51,6 +54,11 @@ const createCollectionTypeController = ({
       const { query } = ctx.request;
 
       const { data, files } = parseBody(ctx);
+
+      if (!isObject(data)) {
+        throw new ValidationError('Missing "data" payload in the request body');
+      }
+
       const sanitizedInputData = await sanitizeInput(data, ctx);
 
       const entity = await service.create({ ...query, data: sanitizedInputData, files });
@@ -69,6 +77,11 @@ const createCollectionTypeController = ({
       const { query } = ctx.request;
 
       const { data, files } = parseBody(ctx);
+
+      if (!isObject(data)) {
+        throw new ValidationError('Missing "data" payload in the request body');
+      }
+
       const sanitizedInputData = await sanitizeInput(data, ctx);
 
       const entity = await service.update(id, { ...query, data: sanitizedInputData, files });
