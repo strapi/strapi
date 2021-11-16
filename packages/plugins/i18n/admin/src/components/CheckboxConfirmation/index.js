@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Checkbox } from '@strapi/design-system/Checkbox';
 import { Dialog, DialogBody, DialogFooter } from '@strapi/design-system/Dialog';
-import { Text } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { Flex } from '@strapi/design-system/Flex';
 import { Stack } from '@strapi/design-system/Stack';
 import { Button } from '@strapi/design-system/Button';
@@ -64,21 +64,21 @@ const CheckboxConfirmation = ({ description, isCreating, intlLabel, name, onChan
           <DialogBody icon={<ExclamationMarkCircle />}>
             <Stack size={2}>
               <Flex justifyContent="center" style={{ textAlign: 'center' }}>
-                <Text id="confirm-description">
+                <Typography id="confirm-description">
                   {formatMessage({
                     id: getTrad('CheckboxConfirmation.Modal.content'),
                     defaultMessage:
                       'Disabling localization will engender the deletion of all your content but the one associated to your default locale (if existing).',
                   })}
-                </Text>
+                </Typography>
               </Flex>
               <Flex justifyContent="center" style={{ textAlign: 'center' }}>
-                <Text id="confirm-description" bold>
+                <Typography id="confirm-description" bold>
                   {formatMessage({
                     id: getTrad('CheckboxConfirmation.Modal.body'),
                     defaultMessage: 'Do you want to disable it?',
                   })}
-                </Text>
+                </Typography>
               </Flex>
             </Stack>
           </DialogBody>
