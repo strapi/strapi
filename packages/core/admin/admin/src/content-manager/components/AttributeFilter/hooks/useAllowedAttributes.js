@@ -2,15 +2,10 @@ import get from 'lodash/get';
 import { useRBACProvider, findMatchingPermissions } from '@strapi/helper-plugin';
 
 const NOT_ALLOWED_FILTERS = ['json', 'component', 'media', 'richtext', 'dynamiczone', 'password'];
+const TIMESTAMPS = ['createdAt', 'updatedAt'];
 
 const useAllowedAttributes = (contentType, slug) => {
   const { allPermissions } = useRBACProvider();
-
-  let timestamps = get(contentType, ['options', 'timestamps']);
-
-  if (!Array.isArray(timestamps)) {
-    timestamps = [];
-  }
 
   const readPermissionsForSlug = findMatchingPermissions(allPermissions, [
     {
@@ -33,7 +28,7 @@ const useAllowedAttributes = (contentType, slug) => {
         return false;
       }
 
-      if (!readPermissionForAttr.includes(attr) && attr !== 'id' && !timestamps.includes(attr)) {
+      if (!readPermissionForAttr.includes(attr) && attr !== 'id' && !TIMESTAMPS.includes(attr)) {
         return false;
       }
 

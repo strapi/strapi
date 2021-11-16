@@ -45,7 +45,7 @@ const FieldPicker = ({ layout }) => {
   };
 
   return (
-    <Box>
+    <Box paddingTop={1} paddingBottom={1}>
       <Select
         aria-label="change displayed fields"
         value={values}
