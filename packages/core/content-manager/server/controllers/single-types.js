@@ -1,6 +1,6 @@
 'use strict';
 
-const { setCreatorFields, sanitize } = require('@strapi/utils');
+const { setCreatorFields, pipeAsync } = require('@strapi/utils');
 
 const { getService, pickWritableAttributes } = require('../utils');
 
@@ -66,7 +66,7 @@ module.exports = {
       ? setCreatorFields({ user, isEdition: true })
       : setCreatorFields({ user });
 
-    const sanitizeFn = sanitize.utils.pipeAsync(pickWritables, pickPermittedFields, setCreator);
+    const sanitizeFn = pipeAsync(pickWritables, pickPermittedFields, setCreator);
 
     if (!entity) {
       const sanitizedBody = await sanitizeFn(body);

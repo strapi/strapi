@@ -66,7 +66,7 @@ module.exports = context => {
       strapi,
     });
 
-    const args = getContentTypeArgs(targetComponent);
+    const args = getContentTypeArgs(targetComponent, { multiple: !!attribute.repeatable });
 
     builder.field(attributeName, { type, resolve, args });
   };

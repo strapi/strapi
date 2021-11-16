@@ -40,12 +40,15 @@ export const CroppingActions = ({ onCancel, onValidate, onDuplicate }) => {
                 defaultMessage: 'Crop the original asset',
               })}
             </MenuItem>
-            <MenuItem onClick={onDuplicate}>
-              {formatMessage({
-                id: getTrad('checkControl.crop-duplicate'),
-                defaultMessage: 'Duplicate & crop the asset',
-              })}
-            </MenuItem>
+
+            {onDuplicate && (
+              <MenuItem onClick={onDuplicate}>
+                {formatMessage({
+                  id: getTrad('checkControl.crop-duplicate'),
+                  defaultMessage: 'Duplicate & crop the asset',
+                })}
+              </MenuItem>
+            )}
           </SimpleMenu>
         </Stack>
       </CroppingActionRow>
@@ -53,8 +56,12 @@ export const CroppingActions = ({ onCancel, onValidate, onDuplicate }) => {
   );
 };
 
+CroppingActions.defaultProps = {
+  onDuplicate: undefined,
+};
+
 CroppingActions.propTypes = {
   onCancel: PropTypes.func.isRequired,
-  onDuplicate: PropTypes.func.isRequired,
+  onDuplicate: PropTypes.func,
   onValidate: PropTypes.func.isRequired,
 };

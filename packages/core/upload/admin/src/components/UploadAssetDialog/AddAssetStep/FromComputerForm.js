@@ -5,6 +5,7 @@ import styled from 'styled-components';
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
 import { H3 } from '@strapi/design-system/Text';
+import { useTracking } from '@strapi/helper-plugin';
 import { ModalFooter } from '@strapi/design-system/ModalLayout';
 import { Button } from '@strapi/design-system/Button';
 import PicturePlus from '@strapi/icons/PicturePlus';
@@ -34,10 +35,11 @@ const OpaqueBox = styled(Box)`
   cursor: pointer;
 `;
 
-export const FromComputerForm = ({ onClose, onAddAssets }) => {
+export const FromComputerForm = ({ onClose, onAddAssets, trackedLocation }) => {
   const { formatMessage } = useIntl();
   const [dragOver, setDragOver] = useState(false);
   const inputRef = useRef(null);
+  const { trackUsage } = useTracking();
 
   const handleDragEnter = () => setDragOver(true);
   const handleDragLeave = () => setDragOver(false);
@@ -56,6 +58,10 @@ export const FromComputerForm = ({ onClose, onAddAssets }) => {
       const asset = rawFileToAsset(file, AssetSource.Computer);
 
       assets.push(asset);
+    }
+
+    if (trackedLocation) {
+      trackUsage('didSelectFile', { source: 'computer', location: trackedLocation });
     }
 
     onAddAssets(assets);
@@ -136,7 +142,12 @@ export const FromComputerForm = ({ onClose, onAddAssets }) => {
   );
 };
 
+FromComputerForm.defaultProps = {
+  trackedLocation: undefined,
+};
+
 FromComputerForm.propTypes = {
   onClose: PropTypes.func.isRequired,
   onAddAssets: PropTypes.func.isRequired,
+  trackedLocation: PropTypes.string,
 };

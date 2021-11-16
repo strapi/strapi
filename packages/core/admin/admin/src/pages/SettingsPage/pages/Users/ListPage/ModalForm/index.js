@@ -113,7 +113,7 @@ const ModalForm = ({ queryName, onToggle }) => {
                 <Stack size={6}>
                   {currentStep !== 'create' && <MagicLink registrationToken={registrationToken} />}
                   <Box>
-                    <Typography variant="beta">
+                    <Typography variant="beta" as="h2">
                       {formatMessage({
                         id: 'app.components.Users.ModalCreateBody.block-title.details',
                         defaultMessage: 'Details',
@@ -142,7 +142,7 @@ const ModalForm = ({ queryName, onToggle }) => {
                     </Box>
                   </Box>
                   <Box>
-                    <Typography variant="beta">
+                    <Typography variant="beta" as="h2">
                       {formatMessage({
                         id: 'app.components.Users.ModalCreateBody.block-title.login',
                         defaultMessage: 'Login settings',

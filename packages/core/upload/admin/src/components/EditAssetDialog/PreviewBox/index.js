@@ -6,6 +6,7 @@ import { IconButton } from '@strapi/design-system/IconButton';
 import Trash from '@strapi/icons/Trash';
 import DownloadIcon from '@strapi/icons/Download';
 import Resize from '@strapi/icons/Crop';
+import { useTracking } from '@strapi/helper-plugin';
 import getTrad from '../../../utils/getTrad';
 import { downloadFile } from '../../../utils/downloadFile';
 import { RemoveAssetDialog } from '../RemoveAssetDialog';
@@ -36,7 +37,9 @@ export const PreviewBox = ({
   onCropStart,
   onCropCancel,
   replacementFile,
+  trackedLocation,
 }) => {
+  const { trackUsage } = useTracking();
   const previewRef = useRef(null);
   const [assetUrl, setAssetUrl] = useState(createAssetUrl(asset));
   const { formatMessage } = useIntl();
@@ -65,23 +68,38 @@ export const PreviewBox = ({
     // the locally generated one
     if (replacementFile) {
       const fileLocalUrl = URL.createObjectURL(replacementFile);
+
+      if (asset.isLocal) {
+        asset.url = fileLocalUrl;
+      }
       setAssetUrl(fileLocalUrl);
     }
-  }, [replacementFile]);
+  }, [replacementFile, asset]);
 
   const handleCropping = async () => {
     const nextAsset = { ...asset, width, height };
     const file = await produceFile(nextAsset.name, nextAsset.mime, nextAsset.updatedAt);
 
-    const updatedAsset = await editAsset(nextAsset, file);
-
     // Making sure that when persisting the new asset, the URL changes with width and height
     // So that the browser makes a request and handle the image caching correctly at the good size
-    const optimizedCachingImage = createAssetUrl(updatedAsset);
-    setAssetUrl(optimizedCachingImage);
+    let optimizedCachingImage;
+
+    if (asset.isLocal) {
+      optimizedCachingImage = URL.createObjectURL(file);
+      asset.url = optimizedCachingImage;
+      asset.rawFile = file;
+
+      trackUsage('didCropFile', { duplicatedFile: null, location: trackedLocation });
+    } else {
+      const updatedAsset = await editAsset(nextAsset, file);
+      optimizedCachingImage = createAssetUrl(updatedAsset);
+
+      trackUsage('didCropFile', { duplicatedFile: false, location: trackedLocation });
+    }
 
     stopCropping();
     onCropCancel();
+    setAssetUrl(optimizedCachingImage);
   };
 
   const isInCroppingMode = isCropping && !isLoading;
@@ -91,6 +109,8 @@ export const PreviewBox = ({
     const file = await produceFile(nextAsset.name, nextAsset.mime, nextAsset.updatedAt);
 
     await upload(file);
+
+    trackUsage('didCropFile', { duplicatedFile: true, location: trackedLocation });
 
     stopCropping();
     onCropFinish();
@@ -112,14 +132,14 @@ export const PreviewBox = ({
         {isCropperReady && isInCroppingMode && (
           <CroppingActions
             onValidate={handleCropping}
-            onDuplicate={handleDuplication}
+            onDuplicate={asset.isLocal ? undefined : handleDuplication}
             onCancel={handleCropCancel}
           />
         )}
 
         <ActionRow paddingLeft={3} paddingRight={3} justifyContent="flex-end">
           <Stack size={1} horizontal>
-            {canUpdate && (
+            {canUpdate && !asset.isLocal && (
               <IconButton
                 label={formatMessage({
                   id: getTrad('app.utils.delete'),
@@ -183,7 +203,7 @@ export const PreviewBox = ({
         >
           {isInCroppingMode && width && height && (
             <BadgeOverride background="neutral900" color="neutral0">
-              {`${height}✕${width}`}
+              {width && height ? `${height}✕${width}` : 'N/A'}
             </BadgeOverride>
           )}
         </ActionRow>
@@ -204,6 +224,7 @@ export const PreviewBox = ({
 
 PreviewBox.defaultProps = {
   replacementFile: undefined,
+  trackedLocation: undefined,
 };
 
 PreviewBox.propTypes = {
@@ -216,4 +237,5 @@ PreviewBox.propTypes = {
   onCropFinish: PropTypes.func.isRequired,
   onCropStart: PropTypes.func.isRequired,
   onCropCancel: PropTypes.func.isRequired,
+  trackedLocation: PropTypes.string,
 };

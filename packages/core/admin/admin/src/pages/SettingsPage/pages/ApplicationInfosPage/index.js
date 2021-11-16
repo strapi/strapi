@@ -43,7 +43,7 @@ const ApplicationInfosPage = () => {
             paddingLeft={6}
           >
             <Stack size={5}>
-              <Typography variant="delta">
+              <Typography variant="delta" as="h3">
                 {formatMessage({
                   id: 'Settings.application.information',
                   defaultMessage: 'Information',

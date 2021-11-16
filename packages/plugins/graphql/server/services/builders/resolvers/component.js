@@ -6,7 +6,11 @@ module.exports = ({ strapi }) => ({
 
     return async (parent, args = {}) => {
       const contentType = strapi.contentTypes[contentTypeUID];
-      const transformedArgs = transformArgs(args, { contentType, usePagination: true });
+
+      const { component: componentName } = contentType.attributes[attributeName];
+      const component = strapi.getModel(componentName);
+
+      const transformedArgs = transformArgs(args, { contentType: component, usePagination: true });
 
       return strapi.entityService.load(contentTypeUID, parent, attributeName, transformedArgs);
     };

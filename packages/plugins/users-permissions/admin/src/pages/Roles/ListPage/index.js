@@ -1,19 +1,11 @@
 import React, { useMemo, useState } from 'react';
-import {
-  Button,
-  HeaderLayout,
-  Layout,
-  Main,
-  Table,
-  Tr,
-  Thead,
-  Th,
-  TableLabel,
-  useNotifyAT,
-  ContentLayout,
-  ActionLayout,
-  VisuallyHidden,
-} from '@strapi/design-system';
+import { Button } from '@strapi/design-system/Button';
+import { HeaderLayout, Layout, ContentLayout, ActionLayout } from '@strapi/design-system/Layout';
+import { Main } from '@strapi/design-system/Main';
+import { Table, Tr, Thead, Th } from '@strapi/design-system/Table';
+import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
+import { Typography } from '@strapi/design-system/Typography';
+import { useNotifyAT } from '@strapi/design-system/LiveRegions';
 import Plus from '@strapi/icons/Plus';
 import {
   useTracking,
@@ -166,25 +158,25 @@ const RoleListPage = () => {
               <Thead>
                 <Tr>
                   <Th>
-                    <TableLabel textColor="neutral600">
+                    <Typography variant="sigma" textColor="neutral600">
                       {formatMessage({ id: getTrad('Roles.name'), defaultMessage: 'Name' })}
-                    </TableLabel>
+                    </Typography>
                   </Th>
                   <Th>
-                    <TableLabel textColor="neutral600">
+                    <Typography variant="sigma" textColor="neutral600">
                       {formatMessage({
                         id: getTrad('Roles.description'),
                         defaultMessage: 'Description',
                       })}
-                    </TableLabel>
+                    </Typography>
                   </Th>
                   <Th>
-                    <TableLabel textColor="neutral600">
+                    <Typography variant="sigma" textColor="neutral600">
                       {formatMessage({
                         id: getTrad('Roles.users'),
                         defaultMessage: 'Users',
                       })}
-                    </TableLabel>
+                    </Typography>
                   </Th>
                   <Th>
                     <VisuallyHidden>

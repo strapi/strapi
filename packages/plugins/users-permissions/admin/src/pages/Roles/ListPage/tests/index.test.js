@@ -58,13 +58,6 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
     } = render(App);
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c9 {
-        color: #32324d;
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-      }
-
       .c14 {
         font-weight: 600;
         color: #32324d;
@@ -72,105 +65,11 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
         line-height: 1.43;
       }
 
-      .c15 {
-        color: #666687;
-        font-size: 1rem;
-        line-height: 1.5;
-      }
-
-      .c2 {
-        padding-bottom: 56px;
-      }
-
-      .c5 {
-        background: #f6f6f9;
-        padding-top: 56px;
-        padding-right: 56px;
-        padding-bottom: 56px;
-        padding-left: 56px;
-      }
-
-      .c12 {
+      .c11 {
         padding-right: 8px;
       }
 
-      .c16 {
-        padding-right: 56px;
-        padding-left: 56px;
-      }
-
-      .c17 {
-        padding-bottom: 16px;
-      }
-
-      .c6 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-box-pack: justify;
-        -webkit-justify-content: space-between;
-        -ms-flex-pack: justify;
-        justify-content: space-between;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c7 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c18 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-box-pack: justify;
-        -webkit-justify-content: space-between;
-        -ms-flex-pack: justify;
-        justify-content: space-between;
-        -webkit-align-items: flex-start;
-        -webkit-box-align: flex-start;
-        -ms-flex-align: flex-start;
-        align-items: flex-start;
-      }
-
-      .c19 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        -webkit-flex-wrap: wrap;
-        -ms-flex-wrap: wrap;
-        flex-wrap: wrap;
-      }
-
-      .c10 {
+      .c8 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -184,21 +83,21 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
         outline: none;
       }
 
-      .c10 svg {
+      .c8 svg {
         height: 12px;
         width: 12px;
       }
 
-      .c10 svg > g,
-      .c10 svg path {
+      .c8 svg > g,
+      .c8 svg path {
         fill: #ffffff;
       }
 
-      .c10[aria-disabled='true'] {
+      .c8[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c10:after {
+      .c8:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -213,11 +112,11 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
         border: 2px solid transparent;
       }
 
-      .c10:focus-visible {
+      .c8:focus-visible {
         outline: none;
       }
 
-      .c10:focus-visible:after {
+      .c8:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -228,11 +127,11 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
         border: 2px solid #4945ff;
       }
 
-      .c13 {
+      .c12 {
         height: 100%;
       }
 
-      .c11 {
+      .c9 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -244,7 +143,7 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
         background: #4945ff;
       }
 
-      .c11 .c0 {
+      .c9 .c10 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -255,63 +154,46 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
         align-items: center;
       }
 
-      .c11 .c8 {
+      .c9 .c13 {
         color: #ffffff;
       }
 
-      .c11[aria-disabled='true'] {
+      .c9[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c11[aria-disabled='true'] .c8 {
+      .c9[aria-disabled='true'] .c13 {
         color: #666687;
       }
 
-      .c11[aria-disabled='true'] svg > g,
-      .c11[aria-disabled='true'] svg path {
+      .c9[aria-disabled='true'] svg > g,
+      .c9[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c11[aria-disabled='true']:active {
+      .c9[aria-disabled='true']:active {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c11[aria-disabled='true']:active .c8 {
+      .c9[aria-disabled='true']:active .c13 {
         color: #666687;
       }
 
-      .c11[aria-disabled='true']:active svg > g,
-      .c11[aria-disabled='true']:active svg path {
+      .c9[aria-disabled='true']:active svg > g,
+      .c9[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
-      .c11:hover {
+      .c9:hover {
         border: 1px solid #7b79ff;
         background: #7b79ff;
       }
 
-      .c11:active {
+      .c9:active {
         border: 1px solid #4945ff;
         background: #4945ff;
-      }
-
-      .c1 {
-        display: grid;
-        grid-template-columns: 1fr;
-      }
-
-      .c3 {
-        overflow-x: hidden;
-      }
-
-      .c20 > * + * {
-        margin-left: 8px;
-      }
-
-      .c4 {
-        outline: none;
       }
 
       .c32 {
@@ -492,16 +374,134 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
         height: 100vh;
       }
 
+      .c1 {
+        padding-bottom: 56px;
+      }
+
+      .c4 {
+        background: #f6f6f9;
+        padding-top: 56px;
+        padding-right: 56px;
+        padding-bottom: 56px;
+        padding-left: 56px;
+      }
+
+      .c16 {
+        padding-right: 56px;
+        padding-left: 56px;
+      }
+
+      .c17 {
+        padding-bottom: 16px;
+      }
+
+      .c0 {
+        display: grid;
+        grid-template-columns: 1fr;
+      }
+
+      .c2 {
+        overflow-x: hidden;
+      }
+
+      .c5 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: justify;
+        -webkit-justify-content: space-between;
+        -ms-flex-pack: justify;
+        justify-content: space-between;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c6 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c18 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: justify;
+        -webkit-justify-content: space-between;
+        -ms-flex-pack: justify;
+        justify-content: space-between;
+        -webkit-align-items: flex-start;
+        -webkit-box-align: flex-start;
+        -ms-flex-align: flex-start;
+        align-items: flex-start;
+      }
+
+      .c19 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        -webkit-flex-wrap: wrap;
+        -ms-flex-wrap: wrap;
+        flex-wrap: wrap;
+      }
+
+      .c20 > * + * {
+        margin-left: 8px;
+      }
+
+      .c7 {
+        color: #32324d;
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+      }
+
+      .c15 {
+        color: #666687;
+        font-size: 1rem;
+        line-height: 1.5;
+      }
+
+      .c3 {
+        outline: none;
+      }
+
       <div
-        class="c0 c1"
+        class="c0"
       >
         <div
-          class="c0 c2 c3"
+          class="c1 c2"
         >
           <main
             aria-busy="true"
             aria-labelledby="main-content-title"
-            class="c4"
+            class="c3"
             id="main-content"
             tabindex="-1"
           >
@@ -509,29 +509,29 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
               style="height: 0px;"
             >
               <div
-                class="c0 c5"
+                class="c4"
                 data-strapi-header="true"
               >
                 <div
-                  class="c0 c6"
+                  class="c5"
                 >
                   <div
-                    class="c0 c7"
+                    class="c6"
                   >
                     <h1
-                      class="c8 c9"
+                      class="c7"
                     >
                       Roles
                     </h1>
                   </div>
                   <button
                     aria-disabled="false"
-                    class="c10 c11"
+                    class="c8 c9"
                     type="button"
                   >
                     <div
                       aria-hidden="true"
-                      class="c0 c12 c13"
+                      class="c10 c11 c12"
                     >
                       <svg
                         fill="none"
@@ -547,30 +547,30 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
                       </svg>
                     </div>
                     <span
-                      class="c8 c14"
+                      class="c13 c14"
                     >
                       Add new role
                     </span>
                   </button>
                 </div>
                 <p
-                  class="c8 c15"
+                  class="c15"
                 >
                   List of roles
                 </p>
               </div>
             </div>
             <div
-              class="c0 c16"
+              class="c16"
             >
               <div
-                class="c0 c17"
+                class="c17"
               >
                 <div
-                  class="c0 c18"
+                  class="c18"
                 >
                   <div
-                    class="c0 c19 c20"
+                    class="c19 c20"
                     wrap="wrap"
                   >
                     <span>
@@ -602,7 +602,7 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
               </div>
             </div>
             <div
-              class="c0 c16"
+              class="c16"
             >
               <div
                 class="c23 c24"
