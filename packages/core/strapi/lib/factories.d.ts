@@ -42,7 +42,7 @@ interface CollectionTypeService {}
 type Service = SingleTypeService | CollectionTypeService;
 
 export function createCoreController(uid: string, cfg: ControllerConfig): Controller;
-export function createService(uid: string, cfg: ServiceConfig): Service;
+export function createCoreService(uid: string, cfg: ServiceConfig): Service;
 
 type HandlerConfig = {
   auth: false | { scope: string[] };

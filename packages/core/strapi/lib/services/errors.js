@@ -60,9 +60,14 @@ const formatHttpError = error => {
   };
 };
 
-const formatInternalError = () => {
-  const error = createError(500);
-  return formatHttpError(error);
+const formatInternalError = error => {
+  const httpError = createError(error);
+
+  if (httpError.expose) {
+    return formatHttpError(httpError);
+  }
+
+  return formatHttpError(createError(httpError.status || 500));
 };
 
 module.exports = {
