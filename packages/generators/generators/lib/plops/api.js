@@ -43,12 +43,6 @@ module.exports = plop => {
           return pluginsDirContent;
         },
       },
-      {
-        type: 'confirm',
-        name: 'createContentType',
-        default: true,
-        message: 'Create a content-type?',
-      },
     ],
     actions(answers) {
       const filePath = answers.isPluginApi && answers.plugin ? 'plugins/{{plugin}}' : 'api/{{id}}';
