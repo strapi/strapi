@@ -15,7 +15,7 @@ import { Flex } from '@strapi/design-system/Flex';
 import { Box } from '@strapi/design-system/Box';
 import { Button } from '@strapi/design-system/Button';
 import { Divider } from '@strapi/design-system/Divider';
-import { ButtonText, H2 } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import localeFormSchema from '../../schemas';
 import useEditLocale from '../../hooks/useEditLocale';
 import { getTrad } from '../../utils';
@@ -45,12 +45,12 @@ const ModalEdit = ({ locale, onClose }) => {
       >
         <Form>
           <ModalHeader>
-            <ButtonText textColor="neutral800" as="h2" id="edit-locale-title">
+            <Typography fontWeight="bold" textColor="neutral800" as="h2" id="edit-locale-title">
               {formatMessage({
                 id: getTrad('Settings.list.actions.edit'),
                 defaultMessage: 'Edit a locale',
               })}
-            </ButtonText>
+            </Typography>
           </ModalHeader>
           <ModalBody>
             <TabGroup
@@ -62,12 +62,12 @@ const ModalEdit = ({ locale, onClose }) => {
               variant="simple"
             >
               <Flex justifyContent="space-between">
-                <H2>
+                <Typography as="h2">
                   {formatMessage({
                     id: getTrad('Settings.locales.modal.title'),
                     defaultMessage: 'Configurations',
                   })}
-                </H2>
+                </Typography>
                 <Tabs>
                   <Tab>
                     {formatMessage({
