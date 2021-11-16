@@ -1,5 +1,8 @@
 'use strict';
 
+const { isObject } = require('lodash/fp');
+const { ValidationError } = require('@strapi/utils').errors;
+
 const { parseBody } = require('./transform');
 
 /**
@@ -34,6 +37,11 @@ const createSingleTypeController = ({
     async update(ctx) {
       const { query } = ctx.request;
       const { data, files } = parseBody(ctx);
+
+      if (!isObject(data)) {
+        throw new ValidationError('Missing "data" payload in the request body');
+      }
+
       const sanitizedInputData = await sanitizeInput(data, ctx);
 
       const entity = await service.createOrUpdate({ ...query, data: sanitizedInputData, files });

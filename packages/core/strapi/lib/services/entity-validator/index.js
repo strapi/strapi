@@ -4,12 +4,13 @@
  */
 'use strict';
 
-const { has, assoc, prop } = require('lodash/fp');
+const { has, assoc, prop, isObject } = require('lodash/fp');
 const strapiUtils = require('@strapi/utils');
 const validators = require('./validators');
 
 const { yup, validateYupSchema } = strapiUtils;
 const { isMediaAttribute, isScalarAttribute, getWritableAttributes } = strapiUtils.contentTypes;
+const { ValidationError } = strapiUtils.errors;
 
 const addMinMax = (attr, validator, data) => {
   if (Number.isInteger(attr.min) && (attr.required || (Array.isArray(data) && data.length > 0))) {
@@ -173,6 +174,14 @@ const createModelValidator = createOrUpdate => (model, data, { isDraft }) => {
 };
 
 const createValidateEntity = createOrUpdate => async (model, data, { isDraft = false } = {}) => {
+  if (!isObject(data)) {
+    const { displayName } = model.info;
+
+    throw new ValidationError(
+      `Invalid payload submitted for the ${createOrUpdate} of an entity of type ${displayName}. Expected an object, but got ${typeof data}`
+    );
+  }
+
   const validator = createModelValidator(createOrUpdate)(model, data, { isDraft }).required();
   return validateYupSchema(validator, { strict: false, abortEarly: false })(data);
 };
