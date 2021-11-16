@@ -56,36 +56,6 @@ describe('Content Manager End to End', () => {
     await builder.cleanup();
   });
 
-  describe('Content Types api', () => {
-    test('Label is pluralized', async () => {
-      const res = await rq({
-        url: `/content-manager/content-types`,
-        method: 'GET',
-      });
-
-      expect(res.statusCode).toBe(200);
-      expect(res.body.data).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
-            info: expect.objectContaining({
-              label: 'Articles',
-            }),
-          }),
-          expect.objectContaining({
-            info: expect.objectContaining({
-              label: 'Tags',
-            }),
-          }),
-          expect.objectContaining({
-            info: expect.objectContaining({
-              label: 'Categories',
-            }),
-          }),
-        ])
-      );
-    });
-  });
-
   describe('Test manyToMany relation (article - tag) with Content Manager', () => {
     beforeAll(async () => {
       data = {
