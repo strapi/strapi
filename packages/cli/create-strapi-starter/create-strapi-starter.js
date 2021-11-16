@@ -1,7 +1,5 @@
 'use strict';
 
-// FIXME
-/* eslint-disable import/extensions */
 const commander = require('commander');
 
 const packageJson = require('./package.json');

@@ -1,7 +1,5 @@
 'use strict';
 
-// FIXME
-/* eslint-disable import/extensions */
 const commander = require('commander');
 const generateNewApp = require('@strapi/generate-new');
 const promptUser = require('./utils/prompt-user');
@@ -9,7 +7,7 @@ const packageJson = require('./package.json');
 
 const program = new commander.Command(packageJson.name);
 
-const incompatibleQuickstartOptions = [
+const databaseOptions = [
   'dbclient',
   'dbhost',
   'dbport',
@@ -57,18 +55,18 @@ function generateApp(projectName, options) {
 }
 
 async function initProject(projectName, program) {
-  const hasIncompatibleQuickstartOptions = incompatibleQuickstartOptions.some(opt => program[opt]);
+  const hasDatabaseOptions = databaseOptions.some(opt => program[opt]);
 
-  if (program.quickstart && hasIncompatibleQuickstartOptions) {
+  if (program.quickstart && hasDatabaseOptions) {
     console.error(
-      `The quickstart option is incompatible with the following options: ${incompatibleQuickstartOptions.join(
+      `The quickstart option is incompatible with the following options: ${databaseOptions.join(
         ', '
       )}`
     );
     process.exit(1);
   }
 
-  if (hasIncompatibleQuickstartOptions) {
+  if (hasDatabaseOptions) {
     program.quickstart = false; // Will disable the quickstart question because != 'undefined'
   }
 
@@ -80,7 +78,7 @@ async function initProject(projectName, program) {
 
   const directory = prompt.directory || projectName;
   const options = {
-    template: prompt.template || program.template,
+    template: program.template,
     quickstart: prompt.quick || program.quickstart,
   };
 

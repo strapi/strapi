@@ -22,7 +22,7 @@ module.exports = async function promptUser(projectName, starter, program) {
       type: 'list',
       name: 'quick',
       message: 'Choose your installation type',
-      when: typeof program.quickstart === 'undefined',
+      when: !program.quickstart,
       choices: [
         {
           name: 'Quickstart (recommended)',
