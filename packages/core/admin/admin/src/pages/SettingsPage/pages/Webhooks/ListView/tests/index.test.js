@@ -38,7 +38,7 @@ describe('Admin | containers | ListView', () => {
 
   afterAll(() => server.close());
 
-  it.only('renders and matches the snapshot', async () => {
+  it('renders and matches the snapshot', async () => {
     useRBAC.mockImplementation(() => ({
       isLoading: false,
       allowedActions: { canUpdate: true, canCreate: true, canRead: true, canDelete: true },
