@@ -3,8 +3,8 @@ import PropTypes from 'prop-types';
 import { ComboboxOption, CreatableCombobox } from '@strapi/design-system/Combobox';
 import keys from './keys';
 
-const Combobox = ({ name, onChange, ...props }) => {
-  const [options, setOptions] = useState(keys);
+const Combobox = ({ name, onChange, value, ...props }) => {
+  const [options, setOptions] = useState(value ? [...keys, value] : keys);
 
   const handleChange = value => {
     onChange({ target: { name, value } });
@@ -22,6 +22,7 @@ const Combobox = ({ name, onChange, ...props }) => {
       onChange={handleChange}
       onCreateOption={handleCreateOption}
       placeholder=""
+      value={value}
     >
       {options.map(key => (
         <ComboboxOption value={key} key={key}>
@@ -32,9 +33,14 @@ const Combobox = ({ name, onChange, ...props }) => {
   );
 };
 
+Combobox.defaultProps = {
+  value: undefined,
+};
+
 Combobox.propTypes = {
   name: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
+  value: PropTypes.string,
 };
 
 export default Combobox;
