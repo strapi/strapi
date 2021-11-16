@@ -9,14 +9,6 @@ module.exports = [
     config: {
       auth: false,
       middlewares: [restrictAccess],
-      policies: [
-        {
-          name: 'admin::hasPermissions',
-          config: {
-            actions: ['plugin::documentation.read'],
-          },
-        },
-      ],
     },
   },
   {
@@ -26,14 +18,6 @@ module.exports = [
     config: {
       auth: false,
       middlewares: [restrictAccess],
-      policies: [
-        {
-          name: 'admin::hasPermissions',
-          config: {
-            actions: ['plugin::documentation.read'],
-          },
-        },
-      ],
     },
   },
   {
@@ -42,14 +26,6 @@ module.exports = [
     handler: 'documentation.loginView',
     config: {
       auth: false,
-      policies: [
-        {
-          name: 'admin::hasPermissions',
-          config: {
-            actions: ['plugin::documentation.read'],
-          },
-        },
-      ],
     },
   },
   {
@@ -58,9 +34,6 @@ module.exports = [
     handler: 'documentation.login',
     config: {
       auth: false,
-      policies: [
-        { name: 'admin::hasPermissions', config: { actions: ['plugin::documentation.read'] } },
-      ],
     },
   },
   {
