@@ -18,7 +18,7 @@ module.exports = async scope => {
   const hasDatabaseConfig = Boolean(scope.database);
 
   // check rootPath is empty
-  if (await fse.exists(scope.rootPath)) {
+  if (await fse.pathExists(scope.rootPath)) {
     const stat = await fse.stat(scope.rootPath);
 
     if (!stat.isDirectory()) {
