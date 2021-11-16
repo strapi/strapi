@@ -4,6 +4,7 @@ import { rest } from 'msw';
 const handlers = [
   rest.get('*/settings', (req, res, ctx) => {
     return res(
+      ctx.delay(200),
       ctx.status(200),
       ctx.json({
         data: { autoOrientation: true, responsiveDimensions: true, sizeOptimization: false },
