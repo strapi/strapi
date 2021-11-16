@@ -23,45 +23,64 @@ const IconWrapper = styled.span`
   }
 `;
 
-const ComponentInitializer = ({ isReadOnly, onClick }) => {
+const ComponentInitializer = ({ error, isReadOnly, onClick }) => {
   const { formatMessage } = useIntl();
 
   return (
-    <Box
-      as="button"
-      background="neutral100"
-      borderColor="neutral200"
-      disabled={isReadOnly}
-      hasRadius
-      onClick={onClick}
-      paddingTop={9}
-      paddingBottom={9}
-      type="button"
-    >
-      <Stack size={2}>
-        <Flex justifyContent="center" style={{ cursor: isReadOnly ? 'not-allowed' : 'inherit' }}>
-          <IconWrapper>
-            <PlusCircle />
-          </IconWrapper>
-        </Flex>
-        <Flex justifyContent="center">
-          <Text textColor="primary600" small bold>
-            {formatMessage({
-              id: getTrad('components.empty-repeatable'),
-              defaultMessage: 'No entry yet. Click on the button below to add one.',
-            })}
-          </Text>
-        </Flex>
-      </Stack>
-    </Box>
+    <>
+      <Box
+        as="button"
+        background="neutral100"
+        borderColor={error ? 'danger600' : 'neutral200'}
+        disabled={isReadOnly}
+        hasRadius
+        onClick={onClick}
+        paddingTop={9}
+        paddingBottom={9}
+        type="button"
+      >
+        <Stack size={2}>
+          <Flex justifyContent="center" style={{ cursor: isReadOnly ? 'not-allowed' : 'inherit' }}>
+            <IconWrapper>
+              <PlusCircle />
+            </IconWrapper>
+          </Flex>
+          <Flex justifyContent="center">
+            <Text textColor="primary600" small bold>
+              {formatMessage({
+                id: getTrad('components.empty-repeatable'),
+                defaultMessage: 'No entry yet. Click on the button below to add one.',
+              })}
+            </Text>
+          </Flex>
+        </Stack>
+      </Box>
+      {error?.id && (
+        <Text textColor="danger600" small>
+          {formatMessage(
+            {
+              id: error.id,
+              defaultMessage: error.defaultMessage,
+            },
+            error.values
+          )}
+        </Text>
+      )}
+    </>
   );
 };
 
 ComponentInitializer.defaultProps = {
+  error: undefined,
   isReadOnly: false,
 };
 
 ComponentInitializer.propTypes = {
+  error: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    defaultMessage: PropTypes.string.isRequired,
+    values: PropTypes.object,
+  }),
   isReadOnly: PropTypes.bool,
   onClick: PropTypes.func.isRequired,
 };

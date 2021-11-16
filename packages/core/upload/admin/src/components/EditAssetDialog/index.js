@@ -97,6 +97,7 @@ export const EditAssetDialog = ({
                 onCropStart={handleStartCropping}
                 onCropCancel={handleCancelCropping}
                 replacementFile={replacementFile}
+                trackedLocation={trackedLocation}
               />
             </GridItem>
             <GridItem xs={12} col={6}>

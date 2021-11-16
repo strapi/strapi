@@ -88,7 +88,7 @@ const baseForm = {
                 defaultMessage: 'Type',
               },
               name: 'type',
-              type: 'select',
+              type: 'select-date',
               options: [
                 {
                   key: '__null_reset_value__',
