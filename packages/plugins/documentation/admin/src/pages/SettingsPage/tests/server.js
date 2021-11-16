@@ -4,10 +4,10 @@ import { rest } from 'msw';
 const handlers = [
   rest.get('*/getInfos', (req, res, ctx) => {
     return res(
-      ctx.delay(1000),
+      ctx.delay(100),
       ctx.status(200),
       ctx.json({
-        documentationAccess: { restrictedAccess: false, password: '' },
+        documentationAccess: { restrictedAccess: false },
       })
     );
   }),

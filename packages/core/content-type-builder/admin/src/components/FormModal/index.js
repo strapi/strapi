@@ -42,6 +42,8 @@ import PluralName from '../PluralName';
 import SelectCategory from '../SelectCategory';
 import SelectComponent from '../SelectComponent';
 import SelectComponents from '../SelectComponents';
+import SelectDateType from '../SelectDateType';
+import SelectNumber from '../SelectNumber';
 import SingularName from '../SingularName';
 import TabForm from '../TabForm';
 import TextareaEnum from '../TextareaEnum';
@@ -68,7 +70,6 @@ import {
   RESET_PROPS_AND_SAVE_CURRENT_DATA,
   RESET_PROPS,
 } from './constants';
-import SelectNumber from '../SelectNumber';
 
 /* eslint-disable indent */
 /* eslint-disable react/no-array-index-key */
@@ -834,6 +835,7 @@ const FormModal = () => {
       'select-components': SelectComponents,
       'select-default-boolean': BooleanDefaultValueSelect,
       'select-number': SelectNumber,
+      'select-date': SelectDateType,
       'toggle-draft-publish': DraftAndPublishToggle,
       'text-plural': PluralName,
       'text-singular': SingularName,

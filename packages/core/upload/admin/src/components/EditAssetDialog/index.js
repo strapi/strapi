@@ -51,9 +51,14 @@ export const EditAssetDialog = ({
   const { editAsset, isLoading } = useEditAsset();
 
   const handleSubmit = async values => {
-    const editedAsset = await editAsset({ ...asset, ...values }, replacementFile);
+    if (asset.isLocal) {
+      const nextAsset = { ...asset, ...values };
 
-    onClose(editedAsset);
+      onClose(nextAsset);
+    } else {
+      const editedAsset = await editAsset({ ...asset, ...values }, replacementFile);
+      onClose(editedAsset);
+    }
   };
 
   const handleStartCropping = () => {
@@ -92,6 +97,7 @@ export const EditAssetDialog = ({
                 onCropStart={handleStartCropping}
                 onCropCancel={handleCancelCropping}
                 replacementFile={replacementFile}
+                trackedLocation={trackedLocation}
               />
             </GridItem>
             <GridItem xs={12} col={6}>

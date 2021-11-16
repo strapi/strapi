@@ -20,7 +20,7 @@ import { Button } from '@strapi/design-system/Button';
 import { Box } from '@strapi/design-system/Box';
 import { Stack } from '@strapi/design-system/Stack';
 import { Select, Option } from '@strapi/design-system/Select';
-import { H3 } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
 import Check from '@strapi/icons/Check';
 import pluginPermissions from '../../permissions';
@@ -169,12 +169,12 @@ const AdvancedSettingsPage = () => {
                   paddingRight={7}
                 >
                   <Stack size={4}>
-                    <H3>
+                    <Typography variant="delta" as="h2">
                       {formatMessage({
                         id: getTrad('Form.title.advancedSettings'),
                         defaultMessage: 'Settings',
                       })}
-                    </H3>
+                    </Typography>
                     <Grid gap={6}>
                       <GridItem col={6} s={12}>
                         <Select

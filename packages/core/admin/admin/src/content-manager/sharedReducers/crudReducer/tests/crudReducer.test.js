@@ -35,7 +35,7 @@ describe('CONTENT MANAGER | sharedReducers | crudReducer', () => {
 
     const expected = produce(state, draft => {
       draft.isLoading = true;
-      draft.data = {};
+      draft.data = null;
     });
 
     expect(crudReducer(state, action)).toEqual(expected);

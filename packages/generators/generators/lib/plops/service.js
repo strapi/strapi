@@ -1,6 +1,6 @@
 'use strict';
 
-const getDestinationPrompts = require('./utils/get-destination-prompts');
+const getDestinationPrompts = require('./prompts/get-destination-prompts');
 const getFilePath = require('./utils/get-file-path');
 
 module.exports = plop => {

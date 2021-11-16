@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import { Box } from '@strapi/design-system/Box';
 import { Checkbox } from '@strapi/design-system/Checkbox';
 import { Flex } from '@strapi/design-system/Flex';
-import { TableLabel } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
 import CogIcon from '@strapi/icons/Cog';
 import { useIntl } from 'react-intl';
@@ -61,7 +61,9 @@ const SubCategory = ({ subCategory }) => {
     <Box>
       <Flex justifyContent="space-between" alignItems="center">
         <Box paddingRight={4}>
-          <TableLabel textColor="neutral600">{subCategory.label}</TableLabel>
+          <Typography variant="sigma" textColor="neutral600">
+            {subCategory.label}
+          </Typography>
         </Box>
         <Border />
         <Box paddingLeft={4}>
