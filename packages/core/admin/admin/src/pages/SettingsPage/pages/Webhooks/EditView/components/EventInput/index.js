@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { FieldLabel } from '@strapi/design-system/Field';
 import { Stack } from '@strapi/design-system/Stack';
-import { P, TableLabel } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { useFormikContext } from 'formik';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
@@ -121,14 +121,18 @@ const EventInput = ({ isDraftAndPublish }) => {
                         'This event only exists for contents with Draft/Publish system enabled',
                     })}
                   >
-                    <TableLabel textColor="neutral600">{formatMessage({ id: header })}</TableLabel>
+                    <Typography variant="sigma" textColor="neutral600">
+                      {formatMessage({ id: header })}
+                    </Typography>
                   </td>
                 );
               }
 
               return (
                 <td key={header}>
-                  <TableLabel textColor="neutral600">{formatMessage({ id: header })}</TableLabel>
+                  <Typography variant="sigma" textColor="neutral600">
+                    {formatMessage({ id: header })}
+                  </Typography>
                 </td>
               );
             })}
@@ -151,12 +155,12 @@ const EventInput = ({ isDraftAndPublish }) => {
         </tbody>
       </StyledTable>
       {errors.events && (
-        <P small textColor="danger600" data-strapi-field-error>
+        <Typography variant="pi" textColor="danger600" data-strapi-field-error>
           {formatMessage({
             id: 'components.Input.error.validation.required',
             defaultMessage: 'This value is required',
           })}
-        </P>
+        </Typography>
       )}
     </Stack>
   );
