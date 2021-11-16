@@ -12,6 +12,7 @@ import { Box } from '@strapi/design-system/Box';
 import { Button } from '@strapi/design-system/Button';
 import { Main } from '@strapi/design-system/Main';
 import { Stack } from '@strapi/design-system/Stack';
+import { Typography } from '@strapi/design-system/Typography';
 import { ToggleInput } from '@strapi/design-system/ToggleInput';
 import { Select, Option } from '@strapi/design-system/Select';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
@@ -100,8 +101,14 @@ export const SingleSignOn = () => {
             <LoadingIndicatorPage />
           ) : (
             <Layout>
-              <Stack size={12}>
-                <Box background="neutral0" padding={6} shadow="filterShadow" hasRadius>
+              <Box background="neutral0" padding={6} shadow="filterShadow" hasRadius>
+                <Stack size={4}>
+                  <Typography variant="delta" as="h2">
+                    {formatMessage({
+                      id: 'Settings.sso.form.settings.title',
+                      defaultMessage: 'Settings',
+                    })}
+                  </Typography>
                   <Grid gap={4}>
                     <GridItem col={6} m={6} s={12}>
                       <ToggleInput
@@ -171,8 +178,8 @@ export const SingleSignOn = () => {
                       </Select>
                     </GridItem>
                   </Grid>
-                </Box>
-              </Stack>
+                </Stack>
+              </Box>
             </Layout>
           )}
         </ContentLayout>
