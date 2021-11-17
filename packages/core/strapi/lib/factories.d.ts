@@ -1,48 +1,9 @@
-type SingleTypeControllerConfig = {
-  find(): void;
-  update(): void;
-  delete(): void;
-};
+import { Service } from './core-api/service';
+import { Controller } from './core-api/controller';
 
-type CollectionTypeControllerConfig = {
-  find(): void;
-  findOne(): void;
-  create(): void;
-  update(): void;
-  delete(): void;
-};
+type ControllerConfig = Controller;
 
-type ControllerConfig = SingleTypeControllerConfig | CollectionTypeControllerConfig;
-
-interface SingleTypeController {}
-
-interface CollectionTypeController {}
-
-type Controller = SingleTypeController | CollectionTypeController;
-
-type SingleTypeServiceConfig = {
-  find(): void;
-  update(): void;
-  delete(): void;
-};
-
-type CollectionTypeServiceConfig = {
-  find(): void;
-  findOne(): void;
-  create(): void;
-  update(): void;
-  delete(): void;
-};
-
-type ServiceConfig = SingleTypeServiceConfig | CollectionTypeServiceConfig;
-
-interface SingleTypeService {}
-interface CollectionTypeService {}
-
-type Service = SingleTypeService | CollectionTypeService;
-
-export function createCoreController(uid: string, cfg: ControllerConfig): Controller;
-export function createCoreService(uid: string, cfg: ServiceConfig): Service;
+type ServiceConfig = Service;
 
 type HandlerConfig = {
   auth: false | { scope: string[] };
@@ -75,10 +36,11 @@ interface Route {
   method: string;
   path: string;
 }
-
 interface Router {
   prefix: string;
   routes: Route[];
 }
 
-export function createCoreRouter(uid: string, cfg: RouterConfig): Router;
+export function createCoreRouter(uid: string, cfg: RouterConfig): () => Router;
+export function createCoreController(uid: string, cfg: ControllerConfig): () => Controller;
+export function createCoreService(uid: string, cfg: ServiceConfig): () => Service;

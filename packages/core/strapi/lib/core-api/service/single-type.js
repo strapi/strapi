@@ -8,6 +8,9 @@ const { ValidationError } = require('@strapi/utils').errors;
 const createSingleTypeService = ({ contentType }) => {
   const { uid } = contentType;
 
+  /**
+   * @type {import('./').SingleTypeService}
+   */
   return {
     /**
      * Returns singleType content
