@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
+import styled from 'styled-components';
 import { useIntl } from 'react-intl';
 import { Checkbox } from '@strapi/design-system/Checkbox';
 import { Dialog, DialogBody, DialogFooter } from '@strapi/design-system/Dialog';
@@ -9,6 +10,10 @@ import { Stack } from '@strapi/design-system/Stack';
 import { Button } from '@strapi/design-system/Button';
 import ExclamationMarkCircle from '@strapi/icons/ExclamationMarkCircle';
 import { getTrad } from '../../utils';
+
+const TextAlignTypography = styled(Typography)`
+  text-align: center;
+`;
 
 const CheckboxConfirmation = ({ description, isCreating, intlLabel, name, onChange, value }) => {
   const { formatMessage } = useIntl();
@@ -63,17 +68,17 @@ const CheckboxConfirmation = ({ description, isCreating, intlLabel, name, onChan
         <Dialog onClose={handleToggle} title="Confirmation" isOpen={isOpen}>
           <DialogBody icon={<ExclamationMarkCircle />}>
             <Stack size={2}>
-              <Flex justifyContent="center" style={{ textAlign: 'center' }}>
-                <Typography id="confirm-description">
+              <Flex justifyContent="center">
+                <TextAlignTypography id="confirm-description">
                   {formatMessage({
                     id: getTrad('CheckboxConfirmation.Modal.content'),
                     defaultMessage:
                       'Disabling localization will engender the deletion of all your content but the one associated to your default locale (if existing).',
                   })}
-                </Typography>
+                </TextAlignTypography>
               </Flex>
-              <Flex justifyContent="center" style={{ textAlign: 'center' }}>
-                <Typography id="confirm-description" bold>
+              <Flex justifyContent="center">
+                <Typography fontWeight="semiBold" id="confirm-description">
                   {formatMessage({
                     id: getTrad('CheckboxConfirmation.Modal.body'),
                     defaultMessage: 'Do you want to disable it?',
