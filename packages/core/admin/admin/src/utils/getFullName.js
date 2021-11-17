@@ -5,5 +5,5 @@
  * @param {string} lastname
  */
 export default (firstname, lastname = '') => {
-  return [firstname, lastname].filter(e => e !== '').join(' ');
+  return [firstname, lastname].filter(str => str).join(' ');
 };
