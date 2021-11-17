@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { ModalHeader } from '@strapi/design-system/ModalLayout';
-import { ButtonText } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { Divider } from '@strapi/design-system/Divider';
 import { Box } from '@strapi/design-system/Box';
 import { useIntl } from 'react-intl';
@@ -16,12 +16,12 @@ export const AddAssetStep = ({ onClose, onAddAsset, trackedLocation }) => {
   return (
     <>
       <ModalHeader>
-        <ButtonText textColor="neutral800" as="h2" id="title">
+        <Typography fontWeight="bold" textColor="neutral800" as="h2" id="title">
           {formatMessage({
             id: getTrad('header.actions.upload-assets'),
             defaultMessage: 'Upload assets',
           })}
-        </ButtonText>
+        </Typography>
       </ModalHeader>
 
       <TabGroup
