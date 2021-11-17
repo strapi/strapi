@@ -183,6 +183,7 @@
   "Settings.sso.form.defaultRole.label": "Default role",
   "Settings.sso.form.registration.description": "Create new user on SSO login if no account exists",
   "Settings.sso.form.registration.label": "Auto-registration",
+  "Settings.sso.form.settings.title": "Settings",
   "Settings.sso.title": "Single Sign-On",
   "Settings.webhooks.create": "Create a webhook",
   "Settings.webhooks.create.header": "Create a new header",
