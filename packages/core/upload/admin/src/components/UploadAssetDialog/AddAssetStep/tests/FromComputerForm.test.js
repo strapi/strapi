@@ -100,10 +100,10 @@ describe('FromComputerForm', () => {
       }
 
       .c8 {
+        color: #666687;
         font-weight: 500;
         font-size: 1rem;
         line-height: 1.25;
-        color: #666687;
       }
 
       .c15 {
@@ -183,7 +183,7 @@ describe('FromComputerForm', () => {
         background: #4945ff;
       }
 
-      .c13 .sc-gfaqzF {
+      .c13 .sc-hRxcUd {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -248,7 +248,7 @@ describe('FromComputerForm', () => {
         background: #ffffff;
       }
 
-      .c21 .sc-gfaqzF {
+      .c21 .sc-hRxcUd {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;

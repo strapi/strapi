@@ -46,10 +46,9 @@ describe('<UploadProgress />', () => {
 
     expect(firstChild).toMatchInlineSnapshot(`
       .c6 {
-        font-weight: 400;
+        color: #dcdce4;
         font-size: 0.75rem;
         line-height: 1.33;
-        color: #dcdce4;
       }
 
       .c3 {
