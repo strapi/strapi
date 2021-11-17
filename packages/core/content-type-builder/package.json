@@ -1,11 +1,11 @@
 {
   "name": "@strapi/plugin-content-type-builder",
   "version": "3.6.8",
-  "description": "Strapi plugin to create content type (API).",
+  "description": "Strapi plugin to create content type",
   "strapi": {
     "name": "content-type-builder",
     "displayName": "Content Type Builder",
-    "description": "content-type-builder.plugin.description",
+    "description": "Modelize the data structure of your API. Create new fields and relations in just a minute. The files are automatically created and updated in your project.",
     "kind": "plugin"
   },
   "dependencies": {

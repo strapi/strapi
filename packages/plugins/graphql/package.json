@@ -5,7 +5,7 @@
   "strapi": {
     "displayName": "GraphQL",
     "name": "graphql",
-    "description": "graphql.plugin.description",
+    "description": "Adds GraphQL endpoint with default API methods.",
     "kind": "plugin"
   },
   "scripts": {
