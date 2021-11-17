@@ -134,7 +134,7 @@ describe('Search query', () => {
     strapi = await createStrapiInstance();
     rq = await createContentAPIRequest({ strapi });
 
-    data.bed = builder.sanitizedFixturesFor(bedModel.singularName, strapi);
+    data.bed = await builder.sanitizedFixturesFor(bedModel.singularName, strapi);
   });
 
   afterAll(async () => {

@@ -25,7 +25,6 @@ function ListRow({
   isFromDynamicZone,
   name,
   onClick,
-  plugin,
   relation,
   repeatable,
   secondLoopComponentUid,
@@ -47,7 +46,10 @@ function ListRow({
     readableType = 'text';
   }
 
-  const contentTypeFriendlyName = get(contentTypes, [target, 'schema', 'name'], '');
+  const contentType = get(contentTypes, [target], {});
+  const contentTypeFriendlyName = get(contentType, ['schema', 'displayName'], '');
+  const isPluginContentType = get(contentType, 'plugin');
+
   const src = target ? 'relation' : ico;
 
   const handleClick = () => {
@@ -108,11 +110,11 @@ function ListRow({
             <span style={{ fontStyle: 'italic' }}>
               <UpperFist content={contentTypeFriendlyName} />
               &nbsp;
-              {plugin &&
+              {isPluginContentType &&
                 `(${formatMessage({
                   id: getTrad(`from`),
                   defaultMessage: 'from',
-                })}: ${plugin})`}
+                })}: ${isPluginContentType})`}
             </span>
           </Text>
         ) : (
@@ -179,7 +181,6 @@ ListRow.defaultProps = {
   firstLoopComponentUid: null,
   isFromDynamicZone: false,
   onClick: () => {},
-  plugin: null,
   relation: '',
   repeatable: false,
   secondLoopComponentUid: null,
@@ -195,7 +196,6 @@ ListRow.propTypes = {
   isFromDynamicZone: PropTypes.bool,
   name: PropTypes.string.isRequired,
   onClick: PropTypes.func,
-  plugin: PropTypes.string,
   relation: PropTypes.string,
   repeatable: PropTypes.bool,
   secondLoopComponentUid: PropTypes.string,

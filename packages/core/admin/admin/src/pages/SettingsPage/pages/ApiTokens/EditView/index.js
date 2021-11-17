@@ -16,7 +16,7 @@ import { Link } from '@strapi/design-system/Link';
 import { Formik } from 'formik';
 import { Stack } from '@strapi/design-system/Stack';
 import { Box } from '@strapi/design-system/Box';
-import { H3 } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { TextInput } from '@strapi/design-system/TextInput';
 import { Textarea } from '@strapi/design-system/Textarea';
@@ -171,12 +171,12 @@ const ApiTokenCreateView = () => {
                     paddingRight={7}
                   >
                     <Stack size={4}>
-                      <H3 as="h2">
+                      <Typography variant="delta" as="h2">
                         {formatMessage({
                           id: 'app.components.Users.ModalCreateBody.block-title.details',
                           defaultMessage: 'Details',
                         })}
-                      </H3>
+                      </Typography>
                       <Grid gap={5}>
                         <GridItem key="name" col={6} xs={12}>
                           <TextInput

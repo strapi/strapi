@@ -1,14 +1,16 @@
-import { Text } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import CarretIcon from '../CollapsePropertyMatrix/CarretIcon';
 
 const activeStyle = theme => `
-  ${Text} {
+  ${Typography} {
     color: ${theme.colors.primary600};
-    font-weight: bold;
+    font-weight: ${theme.fontWeights.bold}
   }
   ${CarretIcon} {
     display: block;
-    color: ${theme.colors.primary600};
+    path {
+      fill: ${theme.colors.primary600}
+    };
   }
 `;
 

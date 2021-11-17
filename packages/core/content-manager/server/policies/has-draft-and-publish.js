@@ -4,14 +4,10 @@ const {
   contentTypes: { hasDraftAndPublish },
 } = require('@strapi/utils');
 
-module.exports = (ctx, { strapi }) => {
+module.exports = (ctx, config, { strapi }) => {
   const { model: modelUID } = ctx.params;
 
   const model = strapi.contentTypes[modelUID];
 
-  if (!hasDraftAndPublish(model)) {
-    throw strapi.errors.forbidden();
-  }
-
-  return true;
+  return hasDraftAndPublish(model);
 };

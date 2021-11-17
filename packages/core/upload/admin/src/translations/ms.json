@@ -30,8 +30,6 @@
   "list.assets-empty.subtitle": "Tambah ke senarai untuk kali pertama.",
   "list.assets-empty.title": "Masih belum ada aset",
   "list.assets-empty.title-withSearch": "Tidak ada aset dalam tapisan yang ditetapkan",
-  "list.assets.selected.plural": "{number} aset yang dipilih",
-  "list.assets.selected.singular": "{number} aset yang dipilih",
   "list.assets.type-not-allowed": "Jenis fail ini tidak dibenarkan.",
   "modal.header.browse": "Muat naik aset",
   "modal.header.file-detail": "Butiran",

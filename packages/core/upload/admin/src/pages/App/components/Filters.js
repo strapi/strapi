@@ -3,38 +3,9 @@ import { Button } from '@strapi/design-system/Button';
 import { useQueryParams } from '@strapi/helper-plugin';
 import FilterIcon from '@strapi/icons/Filter';
 import { useIntl } from 'react-intl';
-
 import FilterList from '../../../components/FilterList';
 import FilterPopover from '../../../components/FilterPopover';
-
-const displayedFilters = [
-  {
-    name: 'createdAt',
-    fieldSchema: {
-      type: 'date',
-    },
-    metadatas: { label: 'createdAt' },
-  },
-  {
-    name: 'updatedAt',
-    fieldSchema: {
-      type: 'date',
-    },
-    metadatas: { label: 'updatedAt' },
-  },
-  {
-    name: 'mime',
-    fieldSchema: {
-      type: 'enumeration',
-      options: [
-        { label: 'image', value: 'image' },
-        { label: 'video', value: 'video' },
-        { label: 'file', value: 'file' },
-      ],
-    },
-    metadatas: { label: 'type' },
-  },
-];
+import displayedFilters from '../../../utils/displayedFilters';
 
 export const Filters = () => {
   const buttonRef = useRef(null);

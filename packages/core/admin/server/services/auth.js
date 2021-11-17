@@ -3,6 +3,7 @@
 const bcrypt = require('bcryptjs');
 const _ = require('lodash');
 const { getAbsoluteAdminUrl } = require('@strapi/utils');
+const { ApplicationError } = require('@strapi/utils').errors;
 const { getService } = require('../utils');
 
 /**
@@ -98,7 +99,7 @@ const resetPassword = async ({ resetPasswordToken, password } = {}) => {
     .findOne({ where: { resetPasswordToken, isActive: true } });
 
   if (!matchingUser) {
-    throw strapi.errors.badRequest();
+    throw new ApplicationError();
   }
 
   return getService('user').updateById(matchingUser.id, {

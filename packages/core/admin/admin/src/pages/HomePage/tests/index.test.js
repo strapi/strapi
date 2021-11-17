@@ -45,7 +45,7 @@ describe('Homepage', () => {
         padding-left: 24px;
       }
 
-      .c34 {
+      .c35 {
         background: #ffffff;
         padding-top: 24px;
         padding-right: 20px;
@@ -55,23 +55,18 @@ describe('Homepage', () => {
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
-      .c35 {
+      .c36 {
         padding-bottom: 32px;
       }
 
       .c18 {
-        font-weight: 400;
+        font-weight: 600;
+        color: #32324d;
         font-size: 0.875rem;
         line-height: 1.43;
-        color: #32324d;
       }
 
-      .c19 {
-        font-weight: 600;
-        line-height: 1.14;
-      }
-
-      .c21 {
+      .c20 {
         padding-left: 8px;
       }
 
@@ -145,7 +140,7 @@ describe('Homepage', () => {
         background: #4945ff;
       }
 
-      .c16 .c20 {
+      .c16 .c19 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -198,38 +193,38 @@ describe('Homepage', () => {
         background: #4945ff;
       }
 
-      .c24 {
+      .c23 {
         background: #ffffff;
         padding: 24px;
         border-radius: 4px;
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
-      .c26 {
+      .c25 {
         background: #f0f0ff;
         padding: 12px;
         border-radius: 4px;
       }
 
-      .c30 {
+      .c31 {
         background: #fdf4dc;
         padding: 12px;
         border-radius: 4px;
       }
 
-      .c31 {
+      .c32 {
         background: #eaf5ff;
         padding: 12px;
         border-radius: 4px;
       }
 
-      .c32 {
+      .c33 {
         background: #f6ecfc;
         padding: 12px;
         border-radius: 4px;
       }
 
-      .c25 {
+      .c24 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -262,7 +257,7 @@ describe('Homepage', () => {
         margin-top: 20px;
       }
 
-      .c28 {
+      .c27 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -272,16 +267,16 @@ describe('Homepage', () => {
         flex-direction: column;
       }
 
-      .c28 > * {
+      .c27 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c28 > * + * {
+      .c27 > * + * {
         margin-top: 4px;
       }
 
-      .c36 {
+      .c37 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -291,55 +286,39 @@ describe('Homepage', () => {
         flex-direction: column;
       }
 
-      .c36 > * {
+      .c37 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c36 > * + * {
+      .c37 > * + * {
         margin-top: 12px;
       }
 
-      .c11 {
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c37 {
+      .c28 {
         font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
         color: #32324d;
-      }
-
-      .c12 {
-        font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #666687;
-      }
-
-      .c29 {
-        font-weight: 500;
         font-size: 0.75rem;
         line-height: 1.33;
-        color: #32324d;
       }
 
-      .c13 {
-        font-size: 1rem;
-        line-height: 1.5;
+      .c30 {
+        color: #666687;
+        font-size: 0.875rem;
+        line-height: 1.43;
       }
 
-      .c27 {
+      .c26 {
         margin-right: 24px;
       }
 
-      .c27 svg {
+      .c26 svg {
         width: 2rem;
         height: 2rem;
+      }
+
+      .c29 {
+        word-break: break-all;
       }
 
       .c1 {
@@ -365,7 +344,7 @@ describe('Homepage', () => {
         gap: 0px;
       }
 
-      .c22 {
+      .c21 {
         display: grid;
         grid-template-columns: repeat(12,1fr);
         gap: 24px;
@@ -375,31 +354,52 @@ describe('Homepage', () => {
         grid-column: span 8;
       }
 
-      .c33 {
+      .c34 {
         grid-column: span 4;
       }
 
-      .c46 {
+      .c45 {
         grid-column: span 6;
       }
 
-      .c53 {
-        font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
+      .c11 {
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
         color: #32324d;
       }
 
-      .c54 {
-        font-weight: 600;
-        line-height: 1.14;
+      .c38 {
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+        color: #32324d;
       }
 
-      .c51 {
+      .c12 {
+        font-weight: 400;
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #666687;
+      }
+
+      .c13 {
+        font-size: 1rem;
+        line-height: 1.5;
+      }
+
+      .c52 {
+        font-weight: 600;
+        color: #32324d;
+        font-size: 0.875rem;
+        line-height: 1.43;
+      }
+
+      .c50 {
         padding-right: 8px;
       }
 
-      .c47 {
+      .c46 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -413,21 +413,21 @@ describe('Homepage', () => {
         outline: none;
       }
 
-      .c47 svg {
+      .c46 svg {
         height: 12px;
         width: 12px;
       }
 
-      .c47 svg > g,
-      .c47 svg path {
+      .c46 svg > g,
+      .c46 svg path {
         fill: #ffffff;
       }
 
-      .c47[aria-disabled='true'] {
+      .c46[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c47:after {
+      .c46:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -442,11 +442,11 @@ describe('Homepage', () => {
         border: 2px solid transparent;
       }
 
-      .c47:focus-visible {
+      .c46:focus-visible {
         outline: none;
       }
 
-      .c47:focus-visible:after {
+      .c46:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -457,7 +457,7 @@ describe('Homepage', () => {
         border: 2px solid #4945ff;
       }
 
-      .c48 {
+      .c47 {
         padding: 10px 16px;
         background: #4945ff;
         border: none;
@@ -472,7 +472,7 @@ describe('Homepage', () => {
         text-decoration: none;
       }
 
-      .c48 .c50 {
+      .c47 .c49 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -483,79 +483,68 @@ describe('Homepage', () => {
         align-items: center;
       }
 
-      .c48 .c52 {
+      .c47 .c51 {
         color: #ffffff;
       }
 
-      .c48[aria-disabled='true'] {
+      .c47[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c48[aria-disabled='true'] .c52 {
+      .c47[aria-disabled='true'] .c51 {
         color: #666687;
       }
 
-      .c48[aria-disabled='true'] svg > g,
-      .c48[aria-disabled='true'] svg path {
+      .c47[aria-disabled='true'] svg > g,
+      .c47[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c48[aria-disabled='true']:active {
+      .c47[aria-disabled='true']:active {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c48[aria-disabled='true']:active .c52 {
+      .c47[aria-disabled='true']:active .c51 {
         color: #666687;
       }
 
-      .c48[aria-disabled='true']:active svg > g,
-      .c48[aria-disabled='true']:active svg path {
+      .c47[aria-disabled='true']:active svg > g,
+      .c47[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
-      .c48:hover {
+      .c47:hover {
         background-color: #f6f6f9;
       }
 
-      .c48:active {
+      .c47:active {
         background-color: #eaeaef;
       }
 
-      .c48 .c52 {
+      .c47 .c51 {
         color: #32324d;
       }
 
-      .c48 svg > g,
-      .c48 svg path {
+      .c47 svg > g,
+      .c47 svg path {
         fill: #32324d;
       }
 
-      .c40 {
-        font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #4945ff;
-      }
-
       .c41 {
-        font-weight: 600;
-        line-height: 1.14;
-      }
-
-      .c42 {
+        color: #4945ff;
         font-weight: 600;
         font-size: 0.6875rem;
         line-height: 1.45;
         text-transform: uppercase;
       }
 
-      .c43 {
+      .c42 {
         padding-left: 8px;
       }
 
-      .c39 {
+      .c40 {
         display: -webkit-inline-box;
         display: -webkit-inline-flex;
         display: -ms-inline-flexbox;
@@ -571,15 +560,15 @@ describe('Homepage', () => {
         outline: none;
       }
 
-      .c39 svg path {
+      .c40 svg path {
         fill: #4945ff;
       }
 
-      .c39 svg {
+      .c40 svg {
         font-size: 0.625rem;
       }
 
-      .c39:after {
+      .c40:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -594,11 +583,11 @@ describe('Homepage', () => {
         border: 2px solid transparent;
       }
 
-      .c39:focus-visible {
+      .c40:focus-visible {
         outline: none;
       }
 
-      .c39:focus-visible:after {
+      .c40:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -609,66 +598,66 @@ describe('Homepage', () => {
         border: 2px solid #4945ff;
       }
 
-      .c44 {
+      .c43 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
         display: flex;
       }
 
-      .c55 path {
+      .c53 path {
         fill: #7289da !important;
       }
 
-      .c56 > path:first-child {
+      .c54 > path:first-child {
         fill: #ff4500;
       }
 
-      .c56 > path:last-child {
+      .c54 > path:last-child {
         fill: #ffffff;
       }
 
-      .c59 > path:first-child {
+      .c57 > path:first-child {
         fill: #8e75ff;
       }
 
-      .c59 > path:nth-child(2) {
+      .c57 > path:nth-child(2) {
         fill: #8e75ff;
       }
 
-      .c59 > path:nth-child(3) {
+      .c57 > path:nth-child(3) {
         fill: #8e75ff;
       }
 
-      .c57 path {
+      .c55 path {
         fill: #1da1f2 !important;
       }
 
-      .c58 > path:first-child {
+      .c56 > path:first-child {
         fill: #231f20;
       }
 
-      .c58 > path:nth-child(2) {
+      .c56 > path:nth-child(2) {
         fill: #fff9ae;
       }
 
-      .c58 > path:nth-child(3) {
+      .c56 > path:nth-child(3) {
         fill: #00aeef;
       }
 
-      .c58 > path:nth-child(4) {
+      .c56 > path:nth-child(4) {
         fill: #00a94f;
       }
 
-      .c58 > path:nth-child(5) {
+      .c56 > path:nth-child(5) {
         fill: #f15d22;
       }
 
-      .c58 > path:nth-child(6) {
+      .c56 > path:nth-child(6) {
         fill: #e31b23;
       }
 
-      .c49 {
+      .c48 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -680,22 +669,22 @@ describe('Homepage', () => {
         border: none;
       }
 
-      .c49 svg {
+      .c48 svg {
         width: 24px;
         height: 24px;
       }
 
-      .c49 span {
+      .c48 span {
         word-break: keep-all;
       }
 
-      .c45 {
+      .c44 {
         row-gap: 8px;
         -webkit-column-gap: 16px;
         column-gap: 16px;
       }
 
-      .c38 {
+      .c39 {
         word-break: break-word;
       }
 
@@ -710,7 +699,7 @@ describe('Homepage', () => {
         align-items: flex-start;
       }
 
-      .c23 {
+      .c22 {
         -webkit-text-decoration: none;
         text-decoration: none;
       }
@@ -738,25 +727,25 @@ describe('Homepage', () => {
       }
 
       @media (max-width:68.75rem) {
-        .c33 {
+        .c34 {
           grid-column: span 12;
         }
       }
 
       @media (max-width:34.375rem) {
-        .c33 {
+        .c34 {
           grid-column: span;
         }
       }
 
       @media (max-width:68.75rem) {
-        .c46 {
+        .c45 {
           grid-column: span 12;
         }
       }
 
       @media (max-width:34.375rem) {
-        .c46 {
+        .c45 {
           grid-column: span;
         }
       }
@@ -818,13 +807,13 @@ describe('Homepage', () => {
                             type="button"
                           >
                             <span
-                              class="c17 c18 c19"
+                              class="c17 c18"
                             >
                               Create your first Content type
                             </span>
                             <div
                               aria-hidden="true"
-                              class="c20 c21"
+                              class="c19 c20"
                             >
                               <svg
                                 fill="none"
@@ -847,7 +836,7 @@ describe('Homepage', () => {
                 </div>
               </div>
               <div
-                class="c22"
+                class="c21"
               >
                 <div
                   class="c7"
@@ -859,16 +848,16 @@ describe('Homepage', () => {
                       class="c9"
                     >
                       <a
-                        class="c23"
+                        class="c22"
                         href="https://strapi.io/resource-center"
                         rel="noopener noreferrer nofollow"
                         target="_blank"
                       >
                         <div
-                          class="c24 c25"
+                          class="c23 c24"
                         >
                           <div
-                            class="c26 c25 c27"
+                            class="c25 c24 c26"
                           >
                             <svg
                               fill="none"
@@ -888,37 +877,36 @@ describe('Homepage', () => {
                             </svg>
                           </div>
                           <div
-                            class="c28"
+                            class="c27"
                           >
                             <div
-                              class="c25"
+                              class="c24"
                             >
                               <span
-                                class="c29"
-                                style="word-break: break-all;"
+                                class="c28 c29"
                               >
-                                Read the documentation
+                                Documentation
                               </span>
                             </div>
                             <span
-                              class="c12"
+                              class="c30"
                             >
-                              Discover the concepts, reference, guides and tutorials
+                              Discover the essential concepts, guides and instructions.
                             </span>
                           </div>
                         </div>
                       </a>
                       <a
-                        class="c23"
+                        class="c22"
                         href="https://strapi.io/starters"
                         rel="noopener noreferrer nofollow"
                         target="_blank"
                       >
                         <div
-                          class="c24 c25"
+                          class="c23 c24"
                         >
                           <div
-                            class="c30 c25 c27"
+                            class="c31 c24 c26"
                           >
                             <svg
                               fill="none"
@@ -940,37 +928,36 @@ describe('Homepage', () => {
                             </svg>
                           </div>
                           <div
-                            class="c28"
+                            class="c27"
                           >
                             <div
-                              class="c25"
+                              class="c24"
                             >
                               <span
-                                class="c29"
-                                style="word-break: break-all;"
+                                class="c28 c29"
                               >
                                 Code example
                               </span>
                             </div>
                             <span
-                              class="c12"
+                              class="c30"
                             >
-                              Learn by testing real project developed by the community
+                              Learn by using ready-made starters for your projects.
                             </span>
                           </div>
                         </div>
                       </a>
                       <a
-                        class="c23"
+                        class="c22"
                         href="https://strapi.io/blog/categories/tutorials"
                         rel="noopener noreferrer nofollow"
                         target="_blank"
                       >
                         <div
-                          class="c24 c25"
+                          class="c23 c24"
                         >
                           <div
-                            class="c31 c25 c27"
+                            class="c32 c24 c26"
                           >
                             <svg
                               fill="none"
@@ -992,37 +979,36 @@ describe('Homepage', () => {
                             </svg>
                           </div>
                           <div
-                            class="c28"
+                            class="c27"
                           >
                             <div
-                              class="c25"
+                              class="c24"
                             >
                               <span
-                                class="c29"
-                                style="word-break: break-all;"
+                                class="c28 c29"
                               >
-                                PlaySquare
+                                Tutorials
                               </span>
                             </div>
                             <span
-                              class="c12"
+                              class="c30"
                             >
-                              Discover the concepts, reference, guides and tutorials
+                              Follow step-by-step instructions to use and customize Strapi.
                             </span>
                           </div>
                         </div>
                       </a>
                       <a
-                        class="c23"
+                        class="c22"
                         href="https://strapi.io/blog"
                         rel="noopener noreferrer nofollow"
                         target="_blank"
                       >
                         <div
-                          class="c24 c25"
+                          class="c23 c24"
                         >
                           <div
-                            class="c32 c25 c27"
+                            class="c33 c24 c26"
                           >
                             <svg
                               fill="none"
@@ -1042,22 +1028,21 @@ describe('Homepage', () => {
                             </svg>
                           </div>
                           <div
-                            class="c28"
+                            class="c27"
                           >
                             <div
-                              class="c25"
+                              class="c24"
                             >
                               <span
-                                class="c29"
-                                style="word-break: break-all;"
+                                class="c28 c29"
                               >
-                                FeatherSquare
+                                Blog
                               </span>
                             </div>
                             <span
-                              class="c12"
+                              class="c30"
                             >
-                              Discover the concepts, reference, guides and tutorials
+                              Read the latest news about Strapi and the ecosystem.
                             </span>
                           </div>
                         </div>
@@ -1066,50 +1051,50 @@ describe('Homepage', () => {
                   </div>
                 </div>
                 <div
-                  class="c33"
+                  class="c34"
                 >
                   <div
                     class=""
                   >
                     <aside
                       aria-labelledby="join-the-community"
-                      class="c34"
+                      class="c35"
                     >
                       <div
-                        class="c35"
+                        class="c36"
                       >
                         <div
                           class="c9"
                         >
                           <div
-                            class="c36"
+                            class="c37"
                           >
                             <h2
-                              class="c37"
+                              class="c38"
                               id="join-the-community"
                             >
                               Join the community
                             </h2>
                             <span
-                              class="c12 c38"
+                              class="c12 c39"
                             >
                               Discuss with team members, contributors and developers on different channels
                             </span>
                           </div>
                           <a
-                            class="c39"
+                            class="c40"
                             href="https://portal.productboard.com/strapi/1-roadmap/tabs/2-under-consideration"
                             rel="noreferrer noopener"
                             target="_blank"
                           >
                             <span
-                              class="c40 c41 c42"
+                              class="c41"
                             >
                               See our road map
                             </span>
                             <span
                               aria-hidden="true"
-                              class="c43 c44"
+                              class="c42 c43"
                             >
                               <svg
                                 fill="none"
@@ -1128,24 +1113,24 @@ describe('Homepage', () => {
                         </div>
                       </div>
                       <div
-                        class="c6 c45"
+                        class="c6 c44"
                       >
                         <div
-                          class="c46"
+                          class="c45"
                         >
                           <div
                             class=""
                           >
                             <a
                               aria-disabled="false"
-                              class="c47 c48 c49"
+                              class="c46 c47 c48"
                               href="https://github.com/strapi/strapi/"
                               rel="noreferrer noopener"
                               target="_blank"
                             >
                               <div
                                 aria-hidden="true"
-                                class="c50 c51"
+                                class="c49 c50"
                               >
                                 <svg
                                   fill="#7289DA"
@@ -1161,7 +1146,7 @@ describe('Homepage', () => {
                                 </svg>
                               </div>
                               <span
-                                class="c52 c53 c54"
+                                class="c51 c52"
                               >
                                 Github
                               </span>
@@ -1169,24 +1154,24 @@ describe('Homepage', () => {
                           </div>
                         </div>
                         <div
-                          class="c46"
+                          class="c45"
                         >
                           <div
                             class=""
                           >
                             <a
                               aria-disabled="false"
-                              class="c47 c48 c49"
+                              class="c46 c47 c48"
                               href="https://slack.strapi.io/"
                               rel="noreferrer noopener"
                               target="_blank"
                             >
                               <div
                                 aria-hidden="true"
-                                class="c50 c51"
+                                class="c49 c50"
                               >
                                 <svg
-                                  class="c55"
+                                  class="c53"
                                   fill="none"
                                   height="1em"
                                   viewBox="0 0 24 24"
@@ -1215,7 +1200,7 @@ describe('Homepage', () => {
                                 </svg>
                               </div>
                               <span
-                                class="c52 c53 c54"
+                                class="c51 c52"
                               >
                                 Discord
                               </span>
@@ -1223,24 +1208,24 @@ describe('Homepage', () => {
                           </div>
                         </div>
                         <div
-                          class="c46"
+                          class="c45"
                         >
                           <div
                             class=""
                           >
                             <a
                               aria-disabled="false"
-                              class="c47 c48 c49"
+                              class="c46 c47 c48"
                               href="https://www.reddit.com/r/Strapi/"
                               rel="noreferrer noopener"
                               target="_blank"
                             >
                               <div
                                 aria-hidden="true"
-                                class="c50 c51"
+                                class="c49 c50"
                               >
                                 <svg
-                                  class="c56"
+                                  class="c54"
                                   fill="none"
                                   height="1em"
                                   viewBox="0 0 24 24"
@@ -1258,7 +1243,7 @@ describe('Homepage', () => {
                                 </svg>
                               </div>
                               <span
-                                class="c52 c53 c54"
+                                class="c51 c52"
                               >
                                 Reddit
                               </span>
@@ -1266,24 +1251,24 @@ describe('Homepage', () => {
                           </div>
                         </div>
                         <div
-                          class="c46"
+                          class="c45"
                         >
                           <div
                             class=""
                           >
                             <a
                               aria-disabled="false"
-                              class="c47 c48 c49"
+                              class="c46 c47 c48"
                               href="https://twitter.com/strapijs"
                               rel="noreferrer noopener"
                               target="_blank"
                             >
                               <div
                                 aria-hidden="true"
-                                class="c50 c51"
+                                class="c49 c50"
                               >
                                 <svg
-                                  class="c57"
+                                  class="c55"
                                   fill="none"
                                   height="1em"
                                   viewBox="0 0 24 24"
@@ -1311,7 +1296,7 @@ describe('Homepage', () => {
                                 </svg>
                               </div>
                               <span
-                                class="c52 c53 c54"
+                                class="c51 c52"
                               >
                                 Twitter
                               </span>
@@ -1319,24 +1304,24 @@ describe('Homepage', () => {
                           </div>
                         </div>
                         <div
-                          class="c46"
+                          class="c45"
                         >
                           <div
                             class=""
                           >
                             <a
                               aria-disabled="false"
-                              class="c47 c48 c49"
+                              class="c46 c47 c48"
                               href="https://forum.strapi.io"
                               rel="noreferrer noopener"
                               target="_blank"
                             >
                               <div
                                 aria-hidden="true"
-                                class="c50 c51"
+                                class="c49 c50"
                               >
                                 <svg
-                                  class="c58"
+                                  class="c56"
                                   fill="none"
                                   height="1em"
                                   viewBox="0 0 24 24"
@@ -1370,7 +1355,7 @@ describe('Homepage', () => {
                                 </svg>
                               </div>
                               <span
-                                class="c52 c53 c54"
+                                class="c51 c52"
                               >
                                 Forum
                               </span>
@@ -1378,24 +1363,24 @@ describe('Homepage', () => {
                           </div>
                         </div>
                         <div
-                          class="c46"
+                          class="c45"
                         >
                           <div
                             class=""
                           >
                             <a
                               aria-disabled="false"
-                              class="c47 c48 c49"
+                              class="c46 c47 c48"
                               href="https://strapi.io/blog?utm_source=referral&utm_medium=admin&utm_campaign=career%20page"
                               rel="noreferrer noopener"
                               target="_blank"
                             >
                               <div
                                 aria-hidden="true"
-                                class="c50 c51"
+                                class="c49 c50"
                               >
                                 <svg
-                                  class="c59"
+                                  class="c57"
                                   fill="none"
                                   height="1em"
                                   viewBox="0 0 24 24"
@@ -1423,7 +1408,7 @@ describe('Homepage', () => {
                                 </svg>
                               </div>
                               <span
-                                class="c52 c53 c54"
+                                class="c51 c52"
                               >
                                 Blog
                               </span>
@@ -1431,24 +1416,24 @@ describe('Homepage', () => {
                           </div>
                         </div>
                         <div
-                          class="c46"
+                          class="c45"
                         >
                           <div
                             class=""
                           >
                             <a
                               aria-disabled="false"
-                              class="c47 c48 c49"
+                              class="c46 c47 c48"
                               href="https://strapi.io/careers?utm_source=referral&utm_medium=admin&utm_campaign=blog"
                               rel="noreferrer noopener"
                               target="_blank"
                             >
                               <div
                                 aria-hidden="true"
-                                class="c50 c51"
+                                class="c49 c50"
                               >
                                 <svg
-                                  class="c59"
+                                  class="c57"
                                   fill="none"
                                   height="1em"
                                   viewBox="0 0 24 24"
@@ -1476,7 +1461,7 @@ describe('Homepage', () => {
                                 </svg>
                               </div>
                               <span
-                                class="c52 c53 c54"
+                                class="c51 c52"
                               >
                                 We are hiring!
                               </span>

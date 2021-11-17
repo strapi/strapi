@@ -2,6 +2,7 @@
 
 const execa = require('execa');
 const _ = require('lodash');
+const { ValidationError } = require('@strapi/utils').errors;
 // eslint-disable-next-line node/no-extraneous-require
 const ee = require('@strapi/strapi/lib/utils/ee');
 
@@ -57,7 +58,7 @@ module.exports = {
       const { plugin } = ctx.request.body;
 
       if (!isValidPluginName(plugin)) {
-        return ctx.badRequest('Invalid plugin name');
+        throw new ValidationError('Invalid plugin name');
       }
 
       strapi.reload.isWatching = false;
@@ -69,9 +70,8 @@ module.exports = {
 
       strapi.reload();
     } catch (err) {
-      strapi.log.error(err);
       strapi.reload.isWatching = true;
-      ctx.badRequest(null, [{ messages: [{ id: 'An error occurred' }] }]);
+      throw err;
     }
   },
 
@@ -92,7 +92,7 @@ module.exports = {
       const { plugin } = ctx.params;
 
       if (!isValidPluginName(plugin)) {
-        return ctx.badRequest('Invalid plugin name');
+        throw new ValidationError('Invalid plugin name');
       }
 
       strapi.reload.isWatching = false;
@@ -104,9 +104,8 @@ module.exports = {
 
       strapi.reload();
     } catch (err) {
-      strapi.log.error(err);
       strapi.reload.isWatching = true;
-      ctx.badRequest(null, [{ messages: [{ id: 'An error occurred' }] }]);
+      throw err;
     }
   },
 };

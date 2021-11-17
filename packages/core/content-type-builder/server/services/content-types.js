@@ -4,6 +4,7 @@ const _ = require('lodash');
 const { getOr } = require('lodash/fp');
 
 const { contentTypes: contentTypesUtils } = require('@strapi/utils');
+const { ApplicationError } = require('@strapi/utils').errors;
 const { formatAttributes, replaceTemporaryUIDs } = require('../utils/attributes');
 const createBuilder = require('./schema-builder');
 const { coreUids, pluginsUids } = require('./constants');
@@ -122,9 +123,22 @@ const createContentType = async ({ contentType, components = [] }, options = {})
  * Generate an API squeleton
  * @param {string} name
  */
-const generateAPI = ({ singularName, kind = 'collectionType' }) => {
+const generateAPI = ({ singularName, kind = 'collectionType', pluralName, displayName }) => {
   const strapiGenerators = require('@strapi/generators');
-  return strapiGenerators.generate('api', { id: singularName, kind }, { dir: strapi.dirs.root });
+  return strapiGenerators.generate(
+    'content-type',
+    {
+      kind,
+      singularName,
+      id: singularName,
+      pluralName,
+      displayName,
+      destination: 'new',
+      bootstrapApi: true,
+      attributes: [],
+    },
+    { dir: strapi.dirs.root }
+  );
 };
 
 /**
@@ -143,7 +157,7 @@ const editContentType = async (uid, { contentType, components = [] }) => {
   if (newKind !== previousKind && newKind === 'singleType') {
     const entryCount = await strapi.query(uid).count();
     if (entryCount > 1) {
-      throw strapi.errors.badRequest(
+      throw new ApplicationError(
         'You cannot convert a collectionType to a singleType when having multiple entries in DB'
       );
     }

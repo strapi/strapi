@@ -1,6 +1,6 @@
 'use strict';
 
-const getDestinationPrompts = require('./utils/get-destination-prompts');
+const getDestinationPrompts = require('./prompts/get-destination-prompts');
 
 module.exports = plop => {
   // Policy generator

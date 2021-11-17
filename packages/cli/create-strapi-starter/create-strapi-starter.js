@@ -1,7 +1,5 @@
 'use strict';
 
-// FIXME
-/* eslint-disable import/extensions */
 const commander = require('commander');
 
 const packageJson = require('./package.json');
@@ -9,6 +7,17 @@ const buildStarter = require('./utils/build-starter');
 const promptUser = require('./utils/prompt-user');
 
 const program = new commander.Command(packageJson.name);
+
+const incompatibleQuickstartOptions = [
+  'dbclient',
+  'dbhost',
+  'dbport',
+  'dbname',
+  'dbusername',
+  'dbpassword',
+  'dbssl',
+  'dbfile',
+];
 
 program
   .version(packageJson.version)
@@ -47,12 +56,27 @@ function generateApp(projectArgs, programArgs) {
 }
 
 async function initProject(projectArgs, program) {
+  const hasIncompatibleQuickstartOptions = incompatibleQuickstartOptions.some(opt => program[opt]);
+
+  if (program.quickstart && hasIncompatibleQuickstartOptions) {
+    console.error(
+      `The quickstart option is incompatible with the following options: ${incompatibleQuickstartOptions.join(
+        ', '
+      )}`
+    );
+    process.exit(1);
+  }
+
+  if (hasIncompatibleQuickstartOptions) {
+    program.quickstart = false; // Will disable the quickstart question because != 'undefined'
+  }
+
   const { projectName, starterUrl } = projectArgs;
   if (program.quickstart) {
     return generateApp(projectArgs, program);
   }
 
-  const prompt = await promptUser(projectName, starterUrl);
+  const prompt = await promptUser(projectName, starterUrl, program);
 
   const promptProjectArgs = {
     projectName: prompt.directory || projectName,
@@ -61,7 +85,7 @@ async function initProject(projectArgs, program) {
 
   const programArgs = {
     ...program,
-    quickstart: prompt.quick,
+    quickstart: prompt.quick || program.quickstart,
   };
 
   return generateApp(promptProjectArgs, programArgs);

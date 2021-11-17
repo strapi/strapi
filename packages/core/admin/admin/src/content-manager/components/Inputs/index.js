@@ -4,16 +4,11 @@ import get from 'lodash/get';
 import omit from 'lodash/omit';
 import take from 'lodash/take';
 import isEqual from 'react-fast-compare';
-import {
-  GenericInput,
-  NotAllowedInput,
-  // useLibrary
-} from '@strapi/helper-plugin';
+import { GenericInput, NotAllowedInput, useLibrary } from '@strapi/helper-plugin';
 import { useContentTypeLayout } from '../../hooks';
 import { getFieldName } from '../../utils';
 import Wysiwyg from '../Wysiwyg';
 import InputJSON from '../InputJSON';
-import ComingSoonInput from './ComingSoonInput';
 import InputUID from '../InputUID';
 import SelectWrapper from '../SelectWrapper';
 
@@ -40,7 +35,7 @@ function Inputs({
   queryInfos,
   value,
 }) {
-  // const { fields } = useLibrary();
+  const { fields } = useLibrary();
   const { contentType: currentContentTypeLayout } = useContentTypeLayout();
 
   const disabled = useMemo(() => !get(metadatas, 'editable', true), [metadatas]);
@@ -229,13 +224,11 @@ function Inputs({
       labelAction={labelAction}
       contentTypeUID={currentContentTypeLayout.uid}
       customInputs={{
-        // ...fields,
         json: InputJSON,
         uid: InputUID,
-        // FIXME
-        datetime: ComingSoonInput,
-        media: ComingSoonInput,
+        media: fields.media,
         wysiwyg: Wysiwyg,
+        ...fields,
       }}
       multiple={fieldSchema.multiple || false}
       name={keys}

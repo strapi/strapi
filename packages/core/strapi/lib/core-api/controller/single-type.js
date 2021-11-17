@@ -1,11 +1,19 @@
 'use strict';
 
+const { isObject } = require('lodash/fp');
+const { ValidationError } = require('@strapi/utils').errors;
+
 const { parseBody } = require('./transform');
 
 /**
  * Returns a single type controller to handle default core-api actions
  */
-const createSingleTypeController = ({ service, sanitize, transformResponse }) => {
+const createSingleTypeController = ({
+  service,
+  sanitizeInput,
+  sanitizeOutput,
+  transformResponse,
+}) => {
   return {
     /**
      * Retrieve single type content
@@ -14,8 +22,11 @@ const createSingleTypeController = ({ service, sanitize, transformResponse }) =>
      */
     async find(ctx) {
       const { query } = ctx;
+
       const entity = await service.find(query);
-      return transformResponse(sanitize(entity));
+      const sanitizedEntity = await sanitizeOutput(entity, ctx);
+
+      return transformResponse(sanitizedEntity);
     },
 
     /**
@@ -27,16 +38,25 @@ const createSingleTypeController = ({ service, sanitize, transformResponse }) =>
       const { query } = ctx.request;
       const { data, files } = parseBody(ctx);
 
-      const entity = await service.createOrUpdate({ ...query, data, files });
+      if (!isObject(data)) {
+        throw new ValidationError('Missing "data" payload in the request body');
+      }
 
-      return transformResponse(sanitize(entity));
+      const sanitizedInputData = await sanitizeInput(data, ctx);
+
+      const entity = await service.createOrUpdate({ ...query, data: sanitizedInputData, files });
+      const sanitizedEntity = await sanitizeOutput(entity, ctx);
+
+      return transformResponse(sanitizedEntity);
     },
 
     async delete(ctx) {
       const { query } = ctx;
 
       const entity = await service.delete(query);
-      return transformResponse(sanitize(entity));
+      const sanitizedEntity = await sanitizeOutput(entity, ctx);
+
+      return transformResponse(sanitizedEntity);
     },
   };
 };

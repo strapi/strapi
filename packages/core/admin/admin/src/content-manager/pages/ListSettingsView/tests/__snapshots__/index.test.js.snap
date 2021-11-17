@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1`] = `
-.c26 {
+.c22 {
   background: #ffffff;
   padding-top: 24px;
   padding-right: 32px;
@@ -11,32 +11,27 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
-.c27 {
+.c23 {
   padding-bottom: 16px;
 }
 
-.c64 {
+.c60 {
   padding-top: 24px;
   padding-bottom: 24px;
 }
 
-.c21 {
-  font-weight: 400;
+.c19 {
+  font-weight: 600;
+  color: #32324d;
   font-size: 0.875rem;
   line-height: 1.43;
-  color: #32324d;
 }
 
-.c22 {
-  font-weight: 600;
-  line-height: 1.14;
-}
-
-.c18 {
+.c16 {
   padding-right: 8px;
 }
 
-.c15 {
+.c13 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -50,21 +45,21 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   outline: none;
 }
 
-.c15 svg {
+.c13 svg {
   height: 12px;
   width: 12px;
 }
 
-.c15 svg > g,
-.c15 svg path {
+.c13 svg > g,
+.c13 svg path {
   fill: #ffffff;
 }
 
-.c15[aria-disabled='true'] {
+.c13[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c15:after {
+.c13:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -79,11 +74,11 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   border: 2px solid transparent;
 }
 
-.c15:focus-visible {
+.c13:focus-visible {
   outline: none;
 }
 
-.c15:focus-visible:after {
+.c13:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -94,11 +89,11 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   border: 2px solid #4945ff;
 }
 
-.c19 {
+.c17 {
   height: 100%;
 }
 
-.c16 {
+.c14 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -110,7 +105,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   background: #4945ff;
 }
 
-.c16 .c17 {
+.c14 .c15 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -121,53 +116,53 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   align-items: center;
 }
 
-.c16 .c20 {
+.c14 .c18 {
   color: #ffffff;
 }
 
-.c16[aria-disabled='true'] {
+.c14[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c16[aria-disabled='true'] .c20 {
+.c14[aria-disabled='true'] .c18 {
   color: #666687;
 }
 
-.c16[aria-disabled='true'] svg > g,
-.c16[aria-disabled='true'] svg path {
+.c14[aria-disabled='true'] svg > g,
+.c14[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c16[aria-disabled='true']:active {
+.c14[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c16[aria-disabled='true']:active .c20 {
+.c14[aria-disabled='true']:active .c18 {
   color: #666687;
 }
 
-.c16[aria-disabled='true']:active svg > g,
-.c16[aria-disabled='true']:active svg path {
+.c14[aria-disabled='true']:active svg > g,
+.c14[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c16:hover {
+.c14:hover {
   border: 1px solid #7b79ff;
   background: #7b79ff;
 }
 
-.c16:active {
+.c14:active {
   border: 1px solid #4945ff;
   background: #4945ff;
 }
 
-.c29 {
+.c25 {
   padding-bottom: 24px;
 }
 
-.c67 {
+.c63 {
   padding-top: 16px;
   padding-right: 16px;
   padding-left: 16px;
@@ -177,18 +172,18 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   border-color: #c0c0cf;
 }
 
-.c74 {
+.c70 {
   background: #f6f6f9;
   border-radius: 4px;
   border-color: #eaeaef;
   border: 1px solid #eaeaef;
 }
 
-.c83 {
+.c79 {
   padding-left: 12px;
 }
 
-.c30 {
+.c26 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -209,7 +204,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   flex-wrap: wrap;
 }
 
-.c68 {
+.c64 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -223,7 +218,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   align-items: center;
 }
 
-.c75 {
+.c71 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -241,7 +236,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   align-items: center;
 }
 
-.c86 {
+.c82 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -255,21 +250,21 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   outline: none;
 }
 
-.c86 svg {
+.c82 svg {
   height: 12px;
   width: 12px;
 }
 
-.c86 svg > g,
-.c86 svg path {
+.c82 svg > g,
+.c82 svg path {
   fill: #ffffff;
 }
 
-.c86[aria-disabled='true'] {
+.c82[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c86:after {
+.c82:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -284,11 +279,11 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   border: 2px solid transparent;
 }
 
-.c86:focus-visible {
+.c82:focus-visible {
   outline: none;
 }
 
-.c86:focus-visible:after {
+.c82:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -299,7 +294,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   border: 2px solid #4945ff;
 }
 
-.c87 {
+.c83 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -316,30 +311,30 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   width: 2rem;
 }
 
-.c87 svg > g,
-.c87 svg path {
+.c83 svg > g,
+.c83 svg path {
   fill: #8e8ea9;
 }
 
-.c87:hover svg > g,
-.c87:hover svg path {
+.c83:hover svg > g,
+.c83:hover svg path {
   fill: #666687;
 }
 
-.c87:active svg > g,
-.c87:active svg path {
+.c83:active svg > g,
+.c83:active svg path {
   fill: #a5a5ba;
 }
 
-.c87[aria-disabled='true'] {
+.c83[aria-disabled='true'] {
   background-color: #eaeaef;
 }
 
-.c87[aria-disabled='true'] svg path {
+.c83[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c54 {
+.c50 {
   position: absolute;
   left: 0;
   right: 0;
@@ -350,45 +345,47 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   border: none;
 }
 
-.c54:focus {
+.c50:focus {
   outline: none;
 }
 
-.c54[aria-disabled='true'] {
+.c50[aria-disabled='true'] {
   cursor: not-allowed;
 }
 
-.c51 {
-  font-weight: 500;
+.c47 {
+  font-weight: 600;
+  color: #32324d;
   font-size: 0.75rem;
   line-height: 1.33;
+}
+
+.c54 {
   color: #32324d;
+  display: inline-block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.875rem;
+  line-height: 1.43;
 }
 
 .c58 {
-  font-weight: 400;
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #32324d;
-}
-
-.c62 {
-  font-weight: 400;
+  color: #666687;
   font-size: 0.75rem;
   line-height: 1.33;
-  color: #666687;
 }
 
-.c57 {
+.c53 {
   padding-right: 16px;
   padding-left: 16px;
 }
 
-.c59 {
+.c55 {
   padding-left: 12px;
 }
 
-.c52 {
+.c48 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -402,7 +399,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   align-items: center;
 }
 
-.c55 {
+.c51 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -420,7 +417,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   align-items: center;
 }
 
-.c50 {
+.c46 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -430,16 +427,16 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   flex-direction: column;
 }
 
-.c50 > * {
+.c46 > * {
   margin-top: 0;
   margin-bottom: 0;
 }
 
-.c50 > * + * {
+.c46 > * + * {
   margin-top: 4px;
 }
 
-.c53 {
+.c49 {
   position: relative;
   border: 1px solid #dcdce4;
   padding-right: 12px;
@@ -455,28 +452,28 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   transition-duration: 0.2s;
 }
 
-.c53:focus-within {
+.c49:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c60 {
+.c56 {
   background: transparent;
   border: none;
   position: relative;
   z-index: 1;
 }
 
-.c60 svg {
+.c56 svg {
   height: 0.6875rem;
   width: 0.6875rem;
 }
 
-.c60 svg path {
+.c56 svg path {
   fill: #666687;
 }
 
-.c61 {
+.c57 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -485,15 +482,15 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   border: none;
 }
 
-.c61 svg {
+.c57 svg {
   width: 0.375rem;
 }
 
-.c56 {
+.c52 {
   width: 100%;
 }
 
-.c71 {
+.c67 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -507,79 +504,60 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   align-items: center;
 }
 
-.c72 > * {
+.c68 > * {
   margin-left: 0;
   margin-right: 0;
 }
 
-.c72 > * + * {
+.c68 > * + * {
   margin-left: 12px;
 }
 
-.c28 {
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
-  color: #32324d;
-}
-
-.c81 {
-  font-weight: 400;
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #32324d;
-}
-
-.c82 {
+.c31 {
   font-weight: 600;
-  line-height: 1.14;
-}
-
-.c35 {
-  font-weight: 500;
-  font-size: 0.75rem;
-  line-height: 1.33;
   color: #32324d;
-}
-
-.c44 {
-  font-weight: 500;
   font-size: 0.75rem;
   line-height: 1.33;
+}
+
+.c40 {
+  font-weight: 600;
   color: #271fe0;
-}
-
-.c47 {
-  font-weight: 500;
   font-size: 0.75rem;
   line-height: 1.33;
-  color: #b72b1a;
 }
 
-.c38 {
+.c43 {
+  font-weight: 600;
+  color: #b72b1a;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c34 {
   background: #ffffff;
   border-radius: 4px;
 }
 
-.c40 {
+.c36 {
   background: #ffffff;
   padding-right: 32px;
   padding-left: 32px;
 }
 
-.c42 {
+.c38 {
   background: #f0f0ff;
   padding-right: 32px;
   padding-left: 32px;
 }
 
-.c46 {
+.c42 {
   background: #fcecea;
   padding-right: 32px;
   padding-left: 32px;
 }
 
-.c34 {
+.c30 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -593,7 +571,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   align-items: center;
 }
 
-.c33 {
+.c29 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -603,16 +581,16 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   flex-direction: column;
 }
 
-.c33 > * {
+.c29 > * {
   margin-top: 0;
   margin-bottom: 0;
 }
 
-.c33 > * + * {
+.c29 > * + * {
   margin-top: 4px;
 }
 
-.c37 {
+.c33 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -624,12 +602,12 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   width: 1px;
 }
 
-.c36 {
+.c32 {
   position: relative;
   display: inline-block;
 }
 
-.c39 {
+.c35 {
   height: 2.5rem;
   border: 1px solid #dcdce4;
   display: -webkit-inline-box;
@@ -645,42 +623,42 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   transition-duration: 0.2s;
 }
 
-.c39:focus-within {
+.c35:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c43 {
+.c39 {
   text-transform: uppercase;
   position: relative;
   z-index: 2;
 }
 
-.c41 {
+.c37 {
   text-transform: uppercase;
   border-right: 1px solid #dcdce4;
   position: relative;
   z-index: 2;
 }
 
-.c45 {
+.c41 {
   position: absolute;
   z-index: 1;
   left: 4px;
   top: 4px;
 }
 
-.c32 {
+.c28 {
   width: -webkit-fit-content;
   width: -moz-fit-content;
   width: fit-content;
 }
 
-.c65 {
+.c61 {
   background: #eaeaef;
 }
 
-.c66 {
+.c62 {
   height: 1px;
   border: none;
   margin: 0;
@@ -702,7 +680,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   padding-bottom: 12px;
 }
 
-.c25 {
+.c21 {
   padding-right: 56px;
   padding-left: 56px;
 }
@@ -716,7 +694,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   overflow-x: hidden;
 }
 
-.c12 {
+.c10 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -734,7 +712,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   align-items: center;
 }
 
-.c13 {
+.c11 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -748,38 +726,21 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   align-items: center;
 }
 
-.c14 {
+.c12 {
+  color: #32324d;
   font-weight: 600;
   font-size: 2rem;
   line-height: 1.25;
-  color: #32324d;
 }
 
-.c23 {
-  font-weight: 400;
-  font-size: 0.875rem;
-  line-height: 1.43;
+.c20 {
   color: #666687;
-}
-
-.c24 {
   font-size: 1rem;
   line-height: 1.5;
 }
 
 .c9 {
-  font-weight: 400;
-  font-size: 0.875rem;
-  line-height: 1.43;
   color: #4945ff;
-}
-
-.c10 {
-  font-weight: 600;
-  line-height: 1.14;
-}
-
-.c11 {
   font-weight: 600;
   font-size: 0.6875rem;
   line-height: 1.45;
@@ -855,25 +816,44 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   outline: none;
 }
 
-.c48 {
+.c44 {
   display: grid;
   grid-template-columns: repeat(12,1fr);
   gap: 16px;
 }
 
-.c49 {
+.c45 {
   grid-column: span 6;
 }
 
-.c63 {
+.c59 {
   grid-column: span 3;
 }
 
-.c31 {
-  gap: 16px;
+.c24 {
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c77 {
+  font-weight: 400;
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #32324d;
 }
 
 .c78 {
+  font-weight: 600;
+  line-height: 1.14;
+}
+
+.c27 {
+  gap: 16px;
+}
+
+.c74 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -885,98 +865,98 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   height: 32px;
 }
 
-.c78:last-child {
+.c74:last-child {
   padding: 0 12px;
 }
 
-.c79 {
+.c75 {
   padding: 0 12px;
   border-right: 1px solid #eaeaef;
   cursor: all-scroll;
 }
 
-.c79 svg {
+.c75 svg {
   width: 0.75rem;
   height: 0.75rem;
 }
 
-.c76 {
+.c72 {
   max-height: 2rem;
   cursor: pointer;
   opacity: 1;
 }
 
-.c76 svg {
+.c72 svg {
   width: 0.625rem;
   height: 0.625rem;
 }
 
-.c76 svg path {
+.c72 svg path {
   fill: #666687;
 }
 
-.c76:hover {
+.c72:hover {
   background-color: #f0f0ff;
   border-color: #d9d8ff;
 }
 
-.c76:hover svg path {
+.c72:hover svg path {
   fill: #4945ff;
 }
 
-.c76:hover .c80 {
+.c72:hover .c76 {
   color: #4945ff;
 }
 
-.c76:hover .c77 {
+.c72:hover .c73 {
   border-right: 1px solid #d9d8ff;
 }
 
-.c73:last-child {
+.c69:last-child {
   padding-right: 12px;
 }
 
-.c69 {
+.c65 {
   -webkit-flex: 1;
   -ms-flex: 1;
   flex: 1;
 }
 
-.c84 {
+.c80 {
   -webkit-flex: auto;
   -ms-flex: auto;
   flex: auto;
 }
 
-.c70 {
+.c66 {
   overflow-x: scroll;
   overflow-y: hidden;
 }
 
-.c85 {
+.c81 {
   max-width: 2rem;
 }
 
 @media (max-width:68.75rem) {
-  .c49 {
+  .c45 {
     grid-column: span 12;
   }
 }
 
 @media (max-width:34.375rem) {
-  .c49 {
+  .c45 {
     grid-column: span;
   }
 }
 
 @media (max-width:68.75rem) {
-  .c63 {
+  .c59 {
     grid-column: span 12;
   }
 }
 
 @media (max-width:34.375rem) {
-  .c63 {
+  .c59 {
     grid-column: span;
   }
 }
@@ -1028,34 +1008,33 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                   </svg>
                 </span>
                 <span
-                  class="c9 c10 c11"
+                  class="c9"
                 >
                   Go back
                 </span>
               </a>
             </div>
             <div
-              class="c12"
+              class="c10"
             >
               <div
-                class="c13"
+                class="c11"
               >
                 <h1
-                  class="c14"
-                  id="main-content-title"
+                  class="c12"
                 >
                   Configure the view - Michka
                 </h1>
               </div>
               <button
                 aria-disabled="true"
-                class="c15 c16"
+                class="c13 c14"
                 disabled=""
                 type="submit"
               >
                 <div
                   aria-hidden="true"
-                  class="c17 c18 c19"
+                  class="c15 c16 c17"
                 >
                   <svg
                     fill="none"
@@ -1071,88 +1050,88 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                   </svg>
                 </div>
                 <span
-                  class="c20 c21 c22"
+                  class="c18 c19"
                 >
                   Save
                 </span>
               </button>
             </div>
             <p
-              class="c23 c24"
+              class="c20"
             >
               Define the settings of the list view.
             </p>
           </div>
         </div>
         <div
-          class="c25"
+          class="c21"
         >
           <div
-            class="c26"
+            class="c22"
           >
             <div
-              class="c27"
+              class="c23"
             >
               <h2
-                class="c28"
+                class="c24"
               >
                 Settings
               </h2>
             </div>
             <div
-              class="c29 c30 c31"
+              class="c25 c26 c27"
               wrap="wrap"
             >
               <div
-                class="c32"
+                class="c28"
               >
                 <div
-                  class="c33"
+                  class="c29"
                 >
                   <div
-                    class="c34"
+                    class="c30"
                   >
                     <label
-                      class="c35"
+                      class="c31"
                       for="field-1"
                     >
                       Enable search
                     </label>
                   </div>
                   <label
-                    class="c36"
+                    class="c32"
                   >
                     <div
-                      class="c37"
+                      class="c33"
                     >
                       Enable search
                     </div>
                     <div
-                      class="c38 c39"
+                      class="c34 c35"
                     >
                       <div
                         aria-hidden="true"
-                        class="c40 c34 c41"
+                        class="c36 c30 c37"
                       >
                         <span
-                          class="c35"
+                          class="c31"
                         >
                           off
                         </span>
                       </div>
                       <div
                         aria-hidden="true"
-                        class="c42 c34 c43"
+                        class="c38 c30 c39"
                       >
                         <span
-                          class="c44"
+                          class="c40"
                         >
                           on
                         </span>
                       </div>
                       <input
                         checked=""
-                        class="c45"
+                        class="c41"
                         name="settings.searchable"
                         type="checkbox"
                       />
@@ -1161,55 +1140,55 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                 </div>
               </div>
               <div
-                class="c32"
+                class="c28"
               >
                 <div
-                  class="c33"
+                  class="c29"
                 >
                   <div
-                    class="c34"
+                    class="c30"
                   >
                     <label
-                      class="c35"
+                      class="c31"
                       for="field-2"
                     >
                       Enable filters
                     </label>
                   </div>
                   <label
-                    class="c36"
+                    class="c32"
                   >
                     <div
-                      class="c37"
+                      class="c33"
                     >
                       Enable filters
                     </div>
                     <div
-                      class="c38 c39"
+                      class="c34 c35"
                     >
                       <div
                         aria-hidden="true"
-                        class="c40 c34 c41"
+                        class="c36 c30 c37"
                       >
                         <span
-                          class="c35"
+                          class="c31"
                         >
                           off
                         </span>
                       </div>
                       <div
                         aria-hidden="true"
-                        class="c42 c34 c43"
+                        class="c38 c30 c39"
                       >
                         <span
-                          class="c44"
+                          class="c40"
                         >
                           on
                         </span>
                       </div>
                       <input
                         checked=""
-                        class="c45"
+                        class="c41"
                         name="settings.filterable"
                         type="checkbox"
                       />
@@ -1218,54 +1197,54 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                 </div>
               </div>
               <div
-                class="c32"
+                class="c28"
               >
                 <div
-                  class="c33"
+                  class="c29"
                 >
                   <div
-                    class="c34"
+                    class="c30"
                   >
                     <label
-                      class="c35"
+                      class="c31"
                       for="field-3"
                     >
                       Enable bulk actions
                     </label>
                   </div>
                   <label
-                    class="c36"
+                    class="c32"
                   >
                     <div
-                      class="c37"
+                      class="c33"
                     >
                       Enable bulk actions
                     </div>
                     <div
-                      class="c38 c39"
+                      class="c34 c35"
                     >
                       <div
                         aria-hidden="true"
-                        class="c46 c34 c41"
+                        class="c42 c30 c37"
                       >
                         <span
-                          class="c47"
+                          class="c43"
                         >
                           off
                         </span>
                       </div>
                       <div
                         aria-hidden="true"
-                        class="c40 c34 c43"
+                        class="c36 c30 c39"
                       >
                         <span
-                          class="c35"
+                          class="c31"
                         >
                           on
                         </span>
                       </div>
                       <input
-                        class="c45"
+                        class="c41"
                         name="settings.bulkable"
                         type="checkbox"
                       />
@@ -1275,27 +1254,27 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
               </div>
             </div>
             <div
-              class="c48"
+              class="c44"
             >
               <div
-                class="c49"
+                class="c45"
               >
                 <div
                   class=""
                 >
                   <div>
                     <div
-                      class="c50"
+                      class="c46"
                     >
                       <span
-                        class="c51"
+                        class="c47"
                         for="select-1"
                         id="select-1-label"
                       >
                         Entries per page
                       </span>
                       <div
-                        class="c52 c53"
+                        class="c48 c49"
                       >
                         <button
                           aria-describedby="select-1-hint"
@@ -1303,22 +1282,22 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                           aria-expanded="false"
                           aria-haspopup="listbox"
                           aria-labelledby="select-1-label select-1-content"
-                          class="c54"
+                          class="c50"
                           id="select-1"
                           name="settings.pageSize"
                           type="button"
                         />
                         <div
-                          class="c55 c56"
+                          class="c51 c52"
                         >
                           <div
-                            class="c52"
+                            class="c48"
                           >
                             <div
-                              class="c57"
+                              class="c53"
                             >
                               <span
-                                class="c58"
+                                class="c54"
                                 id="select-1-content"
                               >
                                 10
@@ -1326,11 +1305,11 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                             </div>
                           </div>
                           <div
-                            class="c52"
+                            class="c48"
                           >
                             <button
                               aria-hidden="true"
-                              class="c59 c60 c61"
+                              class="c55 c56 c57"
                               tabindex="-1"
                               type="button"
                             >
@@ -1353,7 +1332,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                         </div>
                       </div>
                       <p
-                        class="c62"
+                        class="c58"
                         id="select-1-hint"
                       >
                         Note: You can override this value in the Collection Type settings page.
@@ -1363,46 +1342,46 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                 </div>
               </div>
               <div
-                class="c63"
+                class="c59"
               >
                 <div
                   class=""
                 >
                   <div>
                     <div
-                      class="c50"
+                      class="c46"
                     >
                       <span
-                        class="c51"
+                        class="c47"
                         for="select-2"
                         id="select-2-label"
                       >
                         Default sort attribute
                       </span>
                       <div
-                        class="c52 c53"
+                        class="c48 c49"
                       >
                         <button
                           aria-disabled="false"
                           aria-expanded="false"
                           aria-haspopup="listbox"
                           aria-labelledby="select-2-label select-2-content"
-                          class="c54"
+                          class="c50"
                           id="select-2"
                           name="settings.defaultSortBy"
                           type="button"
                         />
                         <div
-                          class="c55 c56"
+                          class="c51 c52"
                         >
                           <div
-                            class="c52"
+                            class="c48"
                           >
                             <div
-                              class="c57"
+                              class="c53"
                             >
                               <span
-                                class="c58"
+                                class="c54"
                                 id="select-2-content"
                               >
                                 id
@@ -1410,11 +1389,11 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                             </div>
                           </div>
                           <div
-                            class="c52"
+                            class="c48"
                           >
                             <button
                               aria-hidden="true"
-                              class="c59 c60 c61"
+                              class="c55 c56 c57"
                               tabindex="-1"
                               type="button"
                             >
@@ -1441,46 +1420,46 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                 </div>
               </div>
               <div
-                class="c63"
+                class="c59"
               >
                 <div
                   class=""
                 >
                   <div>
                     <div
-                      class="c50"
+                      class="c46"
                     >
                       <span
-                        class="c51"
+                        class="c47"
                         for="select-3"
                         id="select-3-label"
                       >
                         Default sort order
                       </span>
                       <div
-                        class="c52 c53"
+                        class="c48 c49"
                       >
                         <button
                           aria-disabled="false"
                           aria-expanded="false"
                           aria-haspopup="listbox"
                           aria-labelledby="select-3-label select-3-content"
-                          class="c54"
+                          class="c50"
                           id="select-3"
                           name="settings.defaultSortOrder"
                           type="button"
                         />
                         <div
-                          class="c55 c56"
+                          class="c51 c52"
                         >
                           <div
-                            class="c52"
+                            class="c48"
                           >
                             <div
-                              class="c57"
+                              class="c53"
                             >
                               <span
-                                class="c58"
+                                class="c54"
                                 id="select-3-content"
                               >
                                 ASC
@@ -1488,11 +1467,11 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                             </div>
                           </div>
                           <div
-                            class="c52"
+                            class="c48"
                           >
                             <button
                               aria-hidden="true"
-                              class="c59 c60 c61"
+                              class="c55 c56 c57"
                               tabindex="-1"
                               type="button"
                             >
@@ -1520,43 +1499,43 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
               </div>
             </div>
             <div
-              class="c64"
+              class="c60"
             >
               <hr
-                class="c65 c66"
+                class="c61 c62"
               />
             </div>
             <div
-              class="c27"
+              class="c23"
             >
               <h2
-                class="c28"
+                class="c24"
               >
                 View
               </h2>
             </div>
             <div
-              class="c67 c68"
+              class="c63 c64"
             >
               <div
-                class="c27 c69 c70"
+                class="c23 c65 c66"
                 size="1"
               >
                 <div
-                  class="c71 c72"
+                  class="c67 c68"
                 >
                   <div
-                    class="c73"
+                    class="c69"
                   >
                     <div
-                      class="c74 c75 c76"
+                      class="c70 c71 c72"
                     >
                       <div
-                        class="c71 c72"
+                        class="c67 c68"
                       >
                         <button
                           aria-label="Move id"
-                          class="c77 c78 c79"
+                          class="c73 c74 c75"
                           draggable="true"
                           type="button"
                         >
@@ -1598,17 +1577,17 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                           </svg>
                         </button>
                         <span
-                          class="c80 c81 c82"
+                          class="c76 c77 c78"
                         >
                           hey
                         </span>
                       </div>
                       <div
-                        class="c83 c68"
+                        class="c79 c64"
                       >
                         <button
                           aria-label="Edit id"
-                          class="c78"
+                          class="c74"
                           type="button"
                         >
                           <svg
@@ -1628,7 +1607,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                         </button>
                         <button
                           aria-label="Delete id"
-                          class="c78"
+                          class="c74"
                           data-testid="delete-id"
                           type="button"
                         >
@@ -1649,17 +1628,17 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                     </div>
                   </div>
                   <div
-                    class="c73"
+                    class="c69"
                   >
                     <div
-                      class="c74 c75 c76"
+                      class="c70 c71 c72"
                     >
                       <div
-                        class="c71 c72"
+                        class="c67 c68"
                       >
                         <button
                           aria-label="Move address"
-                          class="c77 c78 c79"
+                          class="c73 c74 c75"
                           draggable="true"
                           type="button"
                         >
@@ -1701,17 +1680,17 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                           </svg>
                         </button>
                         <span
-                          class="c80 c81 c82"
+                          class="c76 c77 c78"
                         >
                           address
                         </span>
                       </div>
                       <div
-                        class="c83 c68"
+                        class="c79 c64"
                       >
                         <button
                           aria-label="Edit address"
-                          class="c78"
+                          class="c74"
                           type="button"
                         >
                           <svg
@@ -1731,7 +1710,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                         </button>
                         <button
                           aria-label="Delete address"
-                          class="c78"
+                          class="c74"
                           data-testid="delete-address"
                           type="button"
                         >
@@ -1754,7 +1733,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                 </div>
               </div>
               <div
-                class="c27 c84 c85"
+                class="c23 c80 c81"
               >
                 <div>
                   <span>
@@ -1764,7 +1743,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                       aria-expanded="false"
                       aria-haspopup="true"
                       aria-labelledby="tooltip-1"
-                      class="c86 c87"
+                      class="c82 c83"
                       data-testid="add-field"
                       tabindex="0"
                       type="button"
@@ -1795,7 +1774,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
 `;
 
 exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
-.c88 {
+.c84 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -1807,7 +1786,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   width: 1px;
 }
 
-.c26 {
+.c22 {
   background: #ffffff;
   padding-top: 24px;
   padding-right: 32px;
@@ -1817,32 +1796,27 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
-.c27 {
+.c23 {
   padding-bottom: 16px;
 }
 
-.c64 {
+.c60 {
   padding-top: 24px;
   padding-bottom: 24px;
 }
 
-.c21 {
-  font-weight: 400;
+.c19 {
+  font-weight: 600;
+  color: #32324d;
   font-size: 0.875rem;
   line-height: 1.43;
-  color: #32324d;
 }
 
-.c22 {
-  font-weight: 600;
-  line-height: 1.14;
-}
-
-.c18 {
+.c16 {
   padding-right: 8px;
 }
 
-.c15 {
+.c13 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -1856,21 +1830,21 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   outline: none;
 }
 
-.c15 svg {
+.c13 svg {
   height: 12px;
   width: 12px;
 }
 
-.c15 svg > g,
-.c15 svg path {
+.c13 svg > g,
+.c13 svg path {
   fill: #ffffff;
 }
 
-.c15[aria-disabled='true'] {
+.c13[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c15:after {
+.c13:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -1885,11 +1859,11 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   border: 2px solid transparent;
 }
 
-.c15:focus-visible {
+.c13:focus-visible {
   outline: none;
 }
 
-.c15:focus-visible:after {
+.c13:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -1900,11 +1874,11 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c19 {
+.c17 {
   height: 100%;
 }
 
-.c16 {
+.c14 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -1916,7 +1890,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   background: #4945ff;
 }
 
-.c16 .c17 {
+.c14 .c15 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -1927,53 +1901,53 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   align-items: center;
 }
 
-.c16 .c20 {
+.c14 .c18 {
   color: #ffffff;
 }
 
-.c16[aria-disabled='true'] {
+.c14[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c16[aria-disabled='true'] .c20 {
+.c14[aria-disabled='true'] .c18 {
   color: #666687;
 }
 
-.c16[aria-disabled='true'] svg > g,
-.c16[aria-disabled='true'] svg path {
+.c14[aria-disabled='true'] svg > g,
+.c14[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c16[aria-disabled='true']:active {
+.c14[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c16[aria-disabled='true']:active .c20 {
+.c14[aria-disabled='true']:active .c18 {
   color: #666687;
 }
 
-.c16[aria-disabled='true']:active svg > g,
-.c16[aria-disabled='true']:active svg path {
+.c14[aria-disabled='true']:active svg > g,
+.c14[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c16:hover {
+.c14:hover {
   border: 1px solid #7b79ff;
   background: #7b79ff;
 }
 
-.c16:active {
+.c14:active {
   border: 1px solid #4945ff;
   background: #4945ff;
 }
 
-.c29 {
+.c25 {
   padding-bottom: 24px;
 }
 
-.c67 {
+.c63 {
   padding-top: 16px;
   padding-right: 16px;
   padding-left: 16px;
@@ -1983,18 +1957,18 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   border-color: #c0c0cf;
 }
 
-.c74 {
+.c70 {
   background: #f6f6f9;
   border-radius: 4px;
   border-color: #eaeaef;
   border: 1px solid #eaeaef;
 }
 
-.c83 {
+.c79 {
   padding-left: 12px;
 }
 
-.c30 {
+.c26 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -2015,7 +1989,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   flex-wrap: wrap;
 }
 
-.c68 {
+.c64 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -2029,7 +2003,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   align-items: center;
 }
 
-.c75 {
+.c71 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -2047,26 +2021,26 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   align-items: center;
 }
 
-.c89 {
+.c85 {
   background: #212134;
   padding: 8px;
   border-radius: 4px;
 }
 
-.c91 {
-  font-weight: 400;
+.c87 {
+  font-weight: 600;
+  color: #ffffff;
   font-size: 0.75rem;
   line-height: 1.33;
-  color: #ffffff;
 }
 
-.c90 {
+.c86 {
   position: absolute;
   z-index: 4;
   display: none;
 }
 
-.c86 {
+.c82 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -2080,21 +2054,21 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   outline: none;
 }
 
-.c86 svg {
+.c82 svg {
   height: 12px;
   width: 12px;
 }
 
-.c86 svg > g,
-.c86 svg path {
+.c82 svg > g,
+.c82 svg path {
   fill: #ffffff;
 }
 
-.c86[aria-disabled='true'] {
+.c82[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c86:after {
+.c82:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -2109,11 +2083,11 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   border: 2px solid transparent;
 }
 
-.c86:focus-visible {
+.c82:focus-visible {
   outline: none;
 }
 
-.c86:focus-visible:after {
+.c82:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -2124,7 +2098,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c87 {
+.c83 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -2141,30 +2115,30 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   width: 2rem;
 }
 
-.c87 svg > g,
-.c87 svg path {
+.c83 svg > g,
+.c83 svg path {
   fill: #8e8ea9;
 }
 
-.c87:hover svg > g,
-.c87:hover svg path {
+.c83:hover svg > g,
+.c83:hover svg path {
   fill: #666687;
 }
 
-.c87:active svg > g,
-.c87:active svg path {
+.c83:active svg > g,
+.c83:active svg path {
   fill: #a5a5ba;
 }
 
-.c87[aria-disabled='true'] {
+.c83[aria-disabled='true'] {
   background-color: #eaeaef;
 }
 
-.c87[aria-disabled='true'] svg path {
+.c83[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c54 {
+.c50 {
   position: absolute;
   left: 0;
   right: 0;
@@ -2175,45 +2149,47 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   border: none;
 }
 
-.c54:focus {
+.c50:focus {
   outline: none;
 }
 
-.c54[aria-disabled='true'] {
+.c50[aria-disabled='true'] {
   cursor: not-allowed;
 }
 
-.c51 {
-  font-weight: 500;
+.c47 {
+  font-weight: 600;
+  color: #32324d;
   font-size: 0.75rem;
   line-height: 1.33;
+}
+
+.c54 {
   color: #32324d;
+  display: inline-block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.875rem;
+  line-height: 1.43;
 }
 
 .c58 {
-  font-weight: 400;
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #32324d;
-}
-
-.c62 {
-  font-weight: 400;
+  color: #666687;
   font-size: 0.75rem;
   line-height: 1.33;
-  color: #666687;
 }
 
-.c57 {
+.c53 {
   padding-right: 16px;
   padding-left: 16px;
 }
 
-.c59 {
+.c55 {
   padding-left: 12px;
 }
 
-.c52 {
+.c48 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -2227,7 +2203,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   align-items: center;
 }
 
-.c55 {
+.c51 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -2245,7 +2221,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   align-items: center;
 }
 
-.c50 {
+.c46 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -2255,16 +2231,16 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   flex-direction: column;
 }
 
-.c50 > * {
+.c46 > * {
   margin-top: 0;
   margin-bottom: 0;
 }
 
-.c50 > * + * {
+.c46 > * + * {
   margin-top: 4px;
 }
 
-.c53 {
+.c49 {
   position: relative;
   border: 1px solid #dcdce4;
   padding-right: 12px;
@@ -2280,28 +2256,28 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   transition-duration: 0.2s;
 }
 
-.c53:focus-within {
+.c49:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c60 {
+.c56 {
   background: transparent;
   border: none;
   position: relative;
   z-index: 1;
 }
 
-.c60 svg {
+.c56 svg {
   height: 0.6875rem;
   width: 0.6875rem;
 }
 
-.c60 svg path {
+.c56 svg path {
   fill: #666687;
 }
 
-.c61 {
+.c57 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -2310,15 +2286,15 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   border: none;
 }
 
-.c61 svg {
+.c57 svg {
   width: 0.375rem;
 }
 
-.c56 {
+.c52 {
   width: 100%;
 }
 
-.c71 {
+.c67 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -2332,79 +2308,60 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   align-items: center;
 }
 
-.c72 > * {
+.c68 > * {
   margin-left: 0;
   margin-right: 0;
 }
 
-.c72 > * + * {
+.c68 > * + * {
   margin-left: 12px;
 }
 
-.c28 {
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
-  color: #32324d;
-}
-
-.c81 {
-  font-weight: 400;
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #32324d;
-}
-
-.c82 {
+.c31 {
   font-weight: 600;
-  line-height: 1.14;
-}
-
-.c35 {
-  font-weight: 500;
-  font-size: 0.75rem;
-  line-height: 1.33;
   color: #32324d;
-}
-
-.c44 {
-  font-weight: 500;
   font-size: 0.75rem;
   line-height: 1.33;
+}
+
+.c40 {
+  font-weight: 600;
   color: #271fe0;
-}
-
-.c47 {
-  font-weight: 500;
   font-size: 0.75rem;
   line-height: 1.33;
-  color: #b72b1a;
 }
 
-.c38 {
+.c43 {
+  font-weight: 600;
+  color: #b72b1a;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c34 {
   background: #ffffff;
   border-radius: 4px;
 }
 
-.c40 {
+.c36 {
   background: #ffffff;
   padding-right: 32px;
   padding-left: 32px;
 }
 
-.c42 {
+.c38 {
   background: #f0f0ff;
   padding-right: 32px;
   padding-left: 32px;
 }
 
-.c46 {
+.c42 {
   background: #fcecea;
   padding-right: 32px;
   padding-left: 32px;
 }
 
-.c34 {
+.c30 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -2418,7 +2375,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   align-items: center;
 }
 
-.c33 {
+.c29 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -2428,16 +2385,16 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   flex-direction: column;
 }
 
-.c33 > * {
+.c29 > * {
   margin-top: 0;
   margin-bottom: 0;
 }
 
-.c33 > * + * {
+.c29 > * + * {
   margin-top: 4px;
 }
 
-.c37 {
+.c33 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -2449,12 +2406,12 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   width: 1px;
 }
 
-.c36 {
+.c32 {
   position: relative;
   display: inline-block;
 }
 
-.c39 {
+.c35 {
   height: 2.5rem;
   border: 1px solid #dcdce4;
   display: -webkit-inline-box;
@@ -2470,42 +2427,42 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   transition-duration: 0.2s;
 }
 
-.c39:focus-within {
+.c35:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c43 {
+.c39 {
   text-transform: uppercase;
   position: relative;
   z-index: 2;
 }
 
-.c41 {
+.c37 {
   text-transform: uppercase;
   border-right: 1px solid #dcdce4;
   position: relative;
   z-index: 2;
 }
 
-.c45 {
+.c41 {
   position: absolute;
   z-index: 1;
   left: 4px;
   top: 4px;
 }
 
-.c32 {
+.c28 {
   width: -webkit-fit-content;
   width: -moz-fit-content;
   width: fit-content;
 }
 
-.c65 {
+.c61 {
   background: #eaeaef;
 }
 
-.c66 {
+.c62 {
   height: 1px;
   border: none;
   margin: 0;
@@ -2527,7 +2484,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   padding-bottom: 12px;
 }
 
-.c25 {
+.c21 {
   padding-right: 56px;
   padding-left: 56px;
 }
@@ -2541,7 +2498,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   overflow-x: hidden;
 }
 
-.c12 {
+.c10 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -2559,7 +2516,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   align-items: center;
 }
 
-.c13 {
+.c11 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -2573,38 +2530,21 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   align-items: center;
 }
 
-.c14 {
+.c12 {
+  color: #32324d;
   font-weight: 600;
   font-size: 2rem;
   line-height: 1.25;
-  color: #32324d;
 }
 
-.c23 {
-  font-weight: 400;
-  font-size: 0.875rem;
-  line-height: 1.43;
+.c20 {
   color: #666687;
-}
-
-.c24 {
   font-size: 1rem;
   line-height: 1.5;
 }
 
 .c9 {
-  font-weight: 400;
-  font-size: 0.875rem;
-  line-height: 1.43;
   color: #4945ff;
-}
-
-.c10 {
-  font-weight: 600;
-  line-height: 1.14;
-}
-
-.c11 {
   font-weight: 600;
   font-size: 0.6875rem;
   line-height: 1.45;
@@ -2680,46 +2620,64 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   outline: none;
 }
 
-.c48 {
+.c44 {
   display: grid;
   grid-template-columns: repeat(12,1fr);
   gap: 16px;
 }
 
-.c49 {
+.c45 {
   grid-column: span 6;
 }
 
-.c63 {
+.c59 {
   grid-column: span 3;
 }
 
-.c31 {
-  gap: 16px;
+.c24 {
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+  color: #32324d;
 }
 
-.c99 {
+.c77 {
   font-weight: 400;
   font-size: 0.875rem;
   line-height: 1.43;
   color: #32324d;
 }
 
-.c92 {
+.c78 {
+  font-weight: 600;
+  line-height: 1.14;
+}
+
+.c27 {
+  gap: 16px;
+}
+
+.c95 {
+  color: #32324d;
+  font-size: 0.875rem;
+  line-height: 1.43;
+}
+
+.c88 {
   background: #ffffff;
   padding: 4px;
   border-radius: 4px;
 }
 
-.c95 {
+.c91 {
   padding: 4px;
 }
 
-.c98 {
+.c94 {
   padding: 8px;
 }
 
-.c96 {
+.c92 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -2737,7 +2695,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   align-items: center;
 }
 
-.c93 {
+.c89 {
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
   position: absolute;
   z-index: 4;
@@ -2745,28 +2703,28 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   background: #ffffff;
 }
 
-.c94 {
+.c90 {
   max-height: 15rem;
   overflow-y: auto;
   overflow-x: hidden;
 }
 
-.c94::-webkit-scrollbar {
+.c90::-webkit-scrollbar {
   -webkit-appearance: none;
   width: 4px;
 }
 
-.c94::-webkit-scrollbar-track {
+.c90::-webkit-scrollbar-track {
   background: #ffffff;
 }
 
-.c94::-webkit-scrollbar-thumb {
+.c90::-webkit-scrollbar-thumb {
   background: #eaeaef;
   border-radius: 4px;
   margin-right: 10px;
 }
 
-.c97 {
+.c93 {
   border: none;
   padding: 0;
   background: transparent;
@@ -2777,15 +2735,15 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   border-radius: 4px;
 }
 
-.c97:focus {
+.c93:focus {
   background-color: #f0f0ff;
 }
 
-.c97:hover {
+.c93:hover {
   background-color: #f0f0ff;
 }
 
-.c78 {
+.c74 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -2797,98 +2755,98 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   height: 32px;
 }
 
-.c78:last-child {
+.c74:last-child {
   padding: 0 12px;
 }
 
-.c79 {
+.c75 {
   padding: 0 12px;
   border-right: 1px solid #eaeaef;
   cursor: all-scroll;
 }
 
-.c79 svg {
+.c75 svg {
   width: 0.75rem;
   height: 0.75rem;
 }
 
-.c76 {
+.c72 {
   max-height: 2rem;
   cursor: pointer;
   opacity: 1;
 }
 
-.c76 svg {
+.c72 svg {
   width: 0.625rem;
   height: 0.625rem;
 }
 
-.c76 svg path {
+.c72 svg path {
   fill: #666687;
 }
 
-.c76:hover {
+.c72:hover {
   background-color: #f0f0ff;
   border-color: #d9d8ff;
 }
 
-.c76:hover svg path {
+.c72:hover svg path {
   fill: #4945ff;
 }
 
-.c76:hover .c80 {
+.c72:hover .c76 {
   color: #4945ff;
 }
 
-.c76:hover .c77 {
+.c72:hover .c73 {
   border-right: 1px solid #d9d8ff;
 }
 
-.c73:last-child {
+.c69:last-child {
   padding-right: 12px;
 }
 
-.c69 {
+.c65 {
   -webkit-flex: 1;
   -ms-flex: 1;
   flex: 1;
 }
 
-.c84 {
+.c80 {
   -webkit-flex: auto;
   -ms-flex: auto;
   flex: auto;
 }
 
-.c70 {
+.c66 {
   overflow-x: scroll;
   overflow-y: hidden;
 }
 
-.c85 {
+.c81 {
   max-width: 2rem;
 }
 
 @media (max-width:68.75rem) {
-  .c49 {
+  .c45 {
     grid-column: span 12;
   }
 }
 
 @media (max-width:34.375rem) {
-  .c49 {
+  .c45 {
     grid-column: span;
   }
 }
 
 @media (max-width:68.75rem) {
-  .c63 {
+  .c59 {
     grid-column: span 12;
   }
 }
 
 @media (max-width:34.375rem) {
-  .c63 {
+  .c59 {
     grid-column: span;
   }
 }
@@ -2941,33 +2899,32 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                     </svg>
                   </span>
                   <span
-                    class="c9 c10 c11"
+                    class="c9"
                   >
                     Go back
                   </span>
                 </a>
               </div>
               <div
-                class="c12"
+                class="c10"
               >
                 <div
-                  class="c13"
+                  class="c11"
                 >
                   <h1
-                    class="c14"
-                    id="main-content-title"
+                    class="c12"
                   >
                     Configure the view - Michka
                   </h1>
                 </div>
                 <button
                   aria-disabled="false"
-                  class="c15 c16"
+                  class="c13 c14"
                   type="submit"
                 >
                   <div
                     aria-hidden="true"
-                    class="c17 c18 c19"
+                    class="c15 c16 c17"
                   >
                     <svg
                       fill="none"
@@ -2983,88 +2940,88 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                     </svg>
                   </div>
                   <span
-                    class="c20 c21 c22"
+                    class="c18 c19"
                   >
                     Save
                   </span>
                 </button>
               </div>
               <p
-                class="c23 c24"
+                class="c20"
               >
                 Define the settings of the list view.
               </p>
             </div>
           </div>
           <div
-            class="c25"
+            class="c21"
           >
             <div
-              class="c26"
+              class="c22"
             >
               <div
-                class="c27"
+                class="c23"
               >
                 <h2
-                  class="c28"
+                  class="c24"
                 >
                   Settings
                 </h2>
               </div>
               <div
-                class="c29 c30 c31"
+                class="c25 c26 c27"
                 wrap="wrap"
               >
                 <div
-                  class="c32"
+                  class="c28"
                 >
                   <div
-                    class="c33"
+                    class="c29"
                   >
                     <div
-                      class="c34"
+                      class="c30"
                     >
                       <label
-                        class="c35"
+                        class="c31"
                         for="field-10"
                       >
                         Enable search
                       </label>
                     </div>
                     <label
-                      class="c36"
+                      class="c32"
                     >
                       <div
-                        class="c37"
+                        class="c33"
                       >
                         Enable search
                       </div>
                       <div
-                        class="c38 c39"
+                        class="c34 c35"
                       >
                         <div
                           aria-hidden="true"
-                          class="c40 c34 c41"
+                          class="c36 c30 c37"
                         >
                           <span
-                            class="c35"
+                            class="c31"
                           >
                             off
                           </span>
                         </div>
                         <div
                           aria-hidden="true"
-                          class="c42 c34 c43"
+                          class="c38 c30 c39"
                         >
                           <span
-                            class="c44"
+                            class="c40"
                           >
                             on
                           </span>
                         </div>
                         <input
                           checked=""
-                          class="c45"
+                          class="c41"
                           name="settings.searchable"
                           type="checkbox"
                         />
@@ -3073,55 +3030,55 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                   </div>
                 </div>
                 <div
-                  class="c32"
+                  class="c28"
                 >
                   <div
-                    class="c33"
+                    class="c29"
                   >
                     <div
-                      class="c34"
+                      class="c30"
                     >
                       <label
-                        class="c35"
+                        class="c31"
                         for="field-11"
                       >
                         Enable filters
                       </label>
                     </div>
                     <label
-                      class="c36"
+                      class="c32"
                     >
                       <div
-                        class="c37"
+                        class="c33"
                       >
                         Enable filters
                       </div>
                       <div
-                        class="c38 c39"
+                        class="c34 c35"
                       >
                         <div
                           aria-hidden="true"
-                          class="c40 c34 c41"
+                          class="c36 c30 c37"
                         >
                           <span
-                            class="c35"
+                            class="c31"
                           >
                             off
                           </span>
                         </div>
                         <div
                           aria-hidden="true"
-                          class="c42 c34 c43"
+                          class="c38 c30 c39"
                         >
                           <span
-                            class="c44"
+                            class="c40"
                           >
                             on
                           </span>
                         </div>
                         <input
                           checked=""
-                          class="c45"
+                          class="c41"
                           name="settings.filterable"
                           type="checkbox"
                         />
@@ -3130,54 +3087,54 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                   </div>
                 </div>
                 <div
-                  class="c32"
+                  class="c28"
                 >
                   <div
-                    class="c33"
+                    class="c29"
                   >
                     <div
-                      class="c34"
+                      class="c30"
                     >
                       <label
-                        class="c35"
+                        class="c31"
                         for="field-12"
                       >
                         Enable bulk actions
                       </label>
                     </div>
                     <label
-                      class="c36"
+                      class="c32"
                     >
                       <div
-                        class="c37"
+                        class="c33"
                       >
                         Enable bulk actions
                       </div>
                       <div
-                        class="c38 c39"
+                        class="c34 c35"
                       >
                         <div
                           aria-hidden="true"
-                          class="c46 c34 c41"
+                          class="c42 c30 c37"
                         >
                           <span
-                            class="c47"
+                            class="c43"
                           >
                             off
                           </span>
                         </div>
                         <div
                           aria-hidden="true"
-                          class="c40 c34 c43"
+                          class="c36 c30 c39"
                         >
                           <span
-                            class="c35"
+                            class="c31"
                           >
                             on
                           </span>
                         </div>
                         <input
-                          class="c45"
+                          class="c41"
                           name="settings.bulkable"
                           type="checkbox"
                         />
@@ -3187,27 +3144,27 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                 </div>
               </div>
               <div
-                class="c48"
+                class="c44"
               >
                 <div
-                  class="c49"
+                  class="c45"
                 >
                   <div
                     class=""
                   >
                     <div>
                       <div
-                        class="c50"
+                        class="c46"
                       >
                         <span
-                          class="c51"
+                          class="c47"
                           for="select-10"
                           id="select-10-label"
                         >
                           Entries per page
                         </span>
                         <div
-                          class="c52 c53"
+                          class="c48 c49"
                         >
                           <button
                             aria-describedby="select-10-hint"
@@ -3215,22 +3172,22 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                             aria-expanded="false"
                             aria-haspopup="listbox"
                             aria-labelledby="select-10-label select-10-content"
-                            class="c54"
+                            class="c50"
                             id="select-10"
                             name="settings.pageSize"
                             type="button"
                           />
                           <div
-                            class="c55 c56"
+                            class="c51 c52"
                           >
                             <div
-                              class="c52"
+                              class="c48"
                             >
                               <div
-                                class="c57"
+                                class="c53"
                               >
                                 <span
-                                  class="c58"
+                                  class="c54"
                                   id="select-10-content"
                                 >
                                   10
@@ -3238,11 +3195,11 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                               </div>
                             </div>
                             <div
-                              class="c52"
+                              class="c48"
                             >
                               <button
                                 aria-hidden="true"
-                                class="c59 c60 c61"
+                                class="c55 c56 c57"
                                 tabindex="-1"
                                 type="button"
                               >
@@ -3265,7 +3222,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                           </div>
                         </div>
                         <p
-                          class="c62"
+                          class="c58"
                           id="select-10-hint"
                         >
                           Note: You can override this value in the Collection Type settings page.
@@ -3275,46 +3232,46 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                   </div>
                 </div>
                 <div
-                  class="c63"
+                  class="c59"
                 >
                   <div
                     class=""
                   >
                     <div>
                       <div
-                        class="c50"
+                        class="c46"
                       >
                         <span
-                          class="c51"
+                          class="c47"
                           for="select-11"
                           id="select-11-label"
                         >
                           Default sort attribute
                         </span>
                         <div
-                          class="c52 c53"
+                          class="c48 c49"
                         >
                           <button
                             aria-disabled="false"
                             aria-expanded="false"
                             aria-haspopup="listbox"
                             aria-labelledby="select-11-label select-11-content"
-                            class="c54"
+                            class="c50"
                             id="select-11"
                             name="settings.defaultSortBy"
                             type="button"
                           />
                           <div
-                            class="c55 c56"
+                            class="c51 c52"
                           >
                             <div
-                              class="c52"
+                              class="c48"
                             >
                               <div
-                                class="c57"
+                                class="c53"
                               >
                                 <span
-                                  class="c58"
+                                  class="c54"
                                   id="select-11-content"
                                 >
                                   id
@@ -3322,11 +3279,11 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                               </div>
                             </div>
                             <div
-                              class="c52"
+                              class="c48"
                             >
                               <button
                                 aria-hidden="true"
-                                class="c59 c60 c61"
+                                class="c55 c56 c57"
                                 tabindex="-1"
                                 type="button"
                               >
@@ -3353,46 +3310,46 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                   </div>
                 </div>
                 <div
-                  class="c63"
+                  class="c59"
                 >
                   <div
                     class=""
                   >
                     <div>
                       <div
-                        class="c50"
+                        class="c46"
                       >
                         <span
-                          class="c51"
+                          class="c47"
                           for="select-12"
                           id="select-12-label"
                         >
                           Default sort order
                         </span>
                         <div
-                          class="c52 c53"
+                          class="c48 c49"
                         >
                           <button
                             aria-disabled="false"
                             aria-expanded="false"
                             aria-haspopup="listbox"
                             aria-labelledby="select-12-label select-12-content"
-                            class="c54"
+                            class="c50"
                             id="select-12"
                             name="settings.defaultSortOrder"
                             type="button"
                           />
                           <div
-                            class="c55 c56"
+                            class="c51 c52"
                           >
                             <div
-                              class="c52"
+                              class="c48"
                             >
                               <div
-                                class="c57"
+                                class="c53"
                               >
                                 <span
-                                  class="c58"
+                                  class="c54"
                                   id="select-12-content"
                                 >
                                   ASC
@@ -3400,11 +3357,11 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                               </div>
                             </div>
                             <div
-                              class="c52"
+                              class="c48"
                             >
                               <button
                                 aria-hidden="true"
-                                class="c59 c60 c61"
+                                class="c55 c56 c57"
                                 tabindex="-1"
                                 type="button"
                               >
@@ -3432,43 +3389,43 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                 </div>
               </div>
               <div
-                class="c64"
+                class="c60"
               >
                 <hr
-                  class="c65 c66"
+                  class="c61 c62"
                 />
               </div>
               <div
-                class="c27"
+                class="c23"
               >
                 <h2
-                  class="c28"
+                  class="c24"
                 >
                   View
                 </h2>
               </div>
               <div
-                class="c67 c68"
+                class="c63 c64"
               >
                 <div
-                  class="c27 c69 c70"
+                  class="c23 c65 c66"
                   size="1"
                 >
                   <div
-                    class="c71 c72"
+                    class="c67 c68"
                   >
                     <div
-                      class="c73"
+                      class="c69"
                     >
                       <div
-                        class="c74 c75 c76"
+                        class="c70 c71 c72"
                       >
                         <div
-                          class="c71 c72"
+                          class="c67 c68"
                         >
                           <button
                             aria-label="Move cover"
-                            class="c77 c78 c79"
+                            class="c73 c74 c75"
                             draggable="true"
                             type="button"
                           >
@@ -3510,17 +3467,17 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                             </svg>
                           </button>
                           <span
-                            class="c80 c81 c82"
+                            class="c76 c77 c78"
                           >
                             michka
                           </span>
                         </div>
                         <div
-                          class="c83 c68"
+                          class="c79 c64"
                         >
                           <button
                             aria-label="Edit cover"
-                            class="c78"
+                            class="c74"
                             type="button"
                           >
                             <svg
@@ -3540,7 +3497,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                           </button>
                           <button
                             aria-label="Delete cover"
-                            class="c78"
+                            class="c74"
                             data-testid="delete-cover"
                             type="button"
                           >
@@ -3561,17 +3518,17 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                       </div>
                     </div>
                     <div
-                      class="c73"
+                      class="c69"
                     >
                       <div
-                        class="c74 c75 c76"
+                        class="c70 c71 c72"
                       >
                         <div
-                          class="c71 c72"
+                          class="c67 c68"
                         >
                           <button
                             aria-label="Move id"
-                            class="c77 c78 c79"
+                            class="c73 c74 c75"
                             draggable="true"
                             type="button"
                           >
@@ -3613,17 +3570,17 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                             </svg>
                           </button>
                           <span
-                            class="c80 c81 c82"
+                            class="c76 c77 c78"
                           >
                             hey
                           </span>
                         </div>
                         <div
-                          class="c83 c68"
+                          class="c79 c64"
                         >
                           <button
                             aria-label="Edit id"
-                            class="c78"
+                            class="c74"
                             type="button"
                           >
                             <svg
@@ -3643,7 +3600,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                           </button>
                           <button
                             aria-label="Delete id"
-                            class="c78"
+                            class="c74"
                             data-testid="delete-id"
                             type="button"
                           >
@@ -3664,17 +3621,17 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                       </div>
                     </div>
                     <div
-                      class="c73"
+                      class="c69"
                     >
                       <div
-                        class="c74 c75 c76"
+                        class="c70 c71 c72"
                       >
                         <div
-                          class="c71 c72"
+                          class="c67 c68"
                         >
                           <button
                             aria-label="Move address"
-                            class="c77 c78 c79"
+                            class="c73 c74 c75"
                             draggable="true"
                             type="button"
                           >
@@ -3716,17 +3673,17 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                             </svg>
                           </button>
                           <span
-                            class="c80 c81 c82"
+                            class="c76 c77 c78"
                           >
                             address
                           </span>
                         </div>
                         <div
-                          class="c83 c68"
+                          class="c79 c64"
                         >
                           <button
                             aria-label="Edit address"
-                            class="c78"
+                            class="c74"
                             type="button"
                           >
                             <svg
@@ -3746,7 +3703,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                           </button>
                           <button
                             aria-label="Delete address"
-                            class="c78"
+                            class="c74"
                             data-testid="delete-address"
                             type="button"
                           >
@@ -3769,7 +3726,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                   </div>
                 </div>
                 <div
-                  class="c27 c84 c85"
+                  class="c23 c80 c81"
                 >
                   <div>
                     <span>
@@ -3779,7 +3736,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                         aria-expanded="true"
                         aria-haspopup="true"
                         aria-labelledby="tooltip-7"
-                        class="c86 c87"
+                        class="c82 c83"
                         data-testid="add-field"
                         tabindex="0"
                         type="button"
@@ -3808,7 +3765,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
     </div>
   </div>
   <div
-    class="c88"
+    class="c84"
   >
     <p
       aria-live="polite"
@@ -3833,13 +3790,13 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
     data-react-portal="true"
   >
     <div
-      class="c89 c90"
+      class="c85 c86"
       id="tooltip-7"
       role="tooltip"
       style="left: 0px; top: -8px;"
     >
       <p
-        class="c91"
+        class="c87"
       >
         Add a field
       </p>
@@ -3849,32 +3806,32 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
     data-react-portal="true"
   >
     <div
-      class="c92 c93"
+      class="c88 c89"
       style="left: 0px; top: 4px;"
     >
       <div
-        class="c94"
+        class="c90"
       >
         <ul
-          class="c95"
+          class="c91"
           id="simplemenu-4"
           role="menu"
         >
           <li
-            class="c96"
+            class="c92"
             role="menuitem"
           >
             <button
-              class="c97"
+              class="c93"
               role="menuitem"
               tabindex="0"
               type="button"
             >
               <div
-                class="c98"
+                class="c94"
               >
                 <span
-                  class="c99"
+                  class="c95"
                 >
                   averagePrice
                 </span>
@@ -3882,20 +3839,20 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
             </button>
           </li>
           <li
-            class="c96"
+            class="c92"
             role="menuitem"
           >
             <button
-              class="c97"
+              class="c93"
               role="menuitem"
               tabindex="-1"
               type="button"
             >
               <div
-                class="c98"
+                class="c94"
               >
                 <span
-                  class="c99"
+                  class="c95"
                 >
                   since
                 </span>

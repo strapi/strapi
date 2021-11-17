@@ -12,11 +12,12 @@ const crypto = require('crypto');
 const util = require('util');
 const _ = require('lodash');
 const {
+  sanitize,
   nameToSlug,
   contentTypes: contentTypesUtils,
-  sanitizeEntity,
   webhook: webhookUtils,
 } = require('@strapi/utils');
+const { PayloadTooLargeError, NotFoundError } = require('@strapi/utils').errors;
 
 const { MEDIA_UPDATE, MEDIA_CREATE, MEDIA_DELETE } = webhookUtils.webhookEvents;
 
@@ -44,9 +45,11 @@ const sendMediaMetrics = data => {
 };
 
 module.exports = ({ strapi }) => ({
-  emitEvent(event, data) {
+  async emitEvent(event, data) {
     const modelDef = strapi.getModel('plugin::upload.file');
-    strapi.eventHub.emit(event, { media: sanitizeEntity(data, { model: modelDef }) });
+    const sanitizedData = await sanitize.sanitizers.defaultSanitizeOutput(modelDef, data);
+
+    strapi.eventHub.emit(event, { media: sanitizedData });
   },
 
   formatFileInfo({ filename, type, size }, fileInfo = {}, metas = {}) {
@@ -90,15 +93,7 @@ module.exports = ({ strapi }) => ({
       readBuffer = await util.promisify(fs.readFile)(file.path);
     } catch (e) {
       if (e.code === 'ERR_FS_FILE_TOO_LARGE') {
-        throw strapi.errors.entityTooLarge('FileTooBig', {
-          errors: [
-            {
-              id: 'Upload.status.sizeLimit',
-              message: `${file.name} file is bigger than the limit size!`,
-              values: { file: file.name },
-            },
-          ],
-        });
+        throw new PayloadTooLargeError(`The file \`${file.name}\` is bigger than the limit size`);
       }
       throw e;
     }
@@ -184,7 +179,7 @@ module.exports = ({ strapi }) => ({
     const dbFile = await this.findOne(id);
 
     if (!dbFile) {
-      throw strapi.errors.notFound('file not found');
+      throw new NotFoundError();
     }
 
     const newInfos = {
@@ -206,7 +201,7 @@ module.exports = ({ strapi }) => ({
     const dbFile = await this.findOne(id);
 
     if (!dbFile) {
-      throw strapi.errors.notFound('file not found');
+      throw new NotFoundError();
     }
 
     const { fileInfo } = data;
@@ -278,7 +273,7 @@ module.exports = ({ strapi }) => ({
 
     const res = await strapi.entityService.update('plugin::upload.file', id, { data: fileValues });
 
-    this.emitEvent(MEDIA_UPDATE, res);
+    await this.emitEvent(MEDIA_UPDATE, res);
 
     return res;
   },
@@ -293,7 +288,7 @@ module.exports = ({ strapi }) => ({
 
     const res = await strapi.query('plugin::upload.file').create({ data: fileValues });
 
-    this.emitEvent(MEDIA_CREATE, res);
+    await this.emitEvent(MEDIA_CREATE, res);
 
     return res;
   },
@@ -330,7 +325,7 @@ module.exports = ({ strapi }) => ({
       where: { id: file.id },
     });
 
-    this.emitEvent(MEDIA_DELETE, media);
+    await this.emitEvent(MEDIA_DELETE, media);
 
     return strapi.query('plugin::upload.file').delete({ where: { id: file.id } });
   },

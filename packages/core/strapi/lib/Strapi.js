@@ -183,6 +183,8 @@ class Strapi {
     this.telemetry.destroy();
     this.cron.destroy();
 
+    process.removeAllListeners();
+
     delete global.strapi;
   }
 
@@ -364,7 +366,7 @@ class Strapi {
     this.telemetry.bootstrap();
 
     let oldContentTypes;
-    if (await this.db.connection.schema.hasTable(coreStoreModel.collectionName)) {
+    if (await this.db.getSchemaConnection().hasTable(coreStoreModel.collectionName)) {
       oldContentTypes = await this.store.get({
         type: 'strapi',
         name: 'content_types',

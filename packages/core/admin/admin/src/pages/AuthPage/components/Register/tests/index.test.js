@@ -117,15 +117,10 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
       }
 
       .c47 {
-        font-weight: 400;
+        font-weight: 600;
+        color: #32324d;
         font-size: 0.875rem;
         line-height: 1.43;
-        color: #32324d;
-      }
-
-      .c48 {
-        font-weight: 600;
-        line-height: 1.14;
       }
 
       .c44 {
@@ -207,7 +202,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
         width: 100%;
       }
 
-      .c45 .sc-giImIA {
+      .c45 .sc-kstqJO {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -261,24 +256,23 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
       }
 
       .c27 {
-        font-weight: 500;
+        font-weight: 600;
+        color: #32324d;
         font-size: 0.75rem;
         line-height: 1.33;
-        color: #32324d;
       }
 
       .c28 {
-        font-weight: 400;
+        line-height: 1.14;
+        color: #d02b20;
         font-size: 0.875rem;
         line-height: 1.43;
-        color: #d02b20;
       }
 
       .c37 {
-        font-weight: 400;
+        color: #666687;
         font-size: 0.75rem;
         line-height: 1.33;
-        color: #666687;
       }
 
       .c34 {
@@ -447,6 +441,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
         border: 1px solid #c0c0cf;
         -webkit-appearance: none;
         background-color: #ffffff;
+        cursor: pointer;
       }
 
       .c41:checked {
@@ -530,10 +525,9 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
       }
 
       .c39 {
-        font-weight: 400;
+        color: #32324d;
         font-size: 0.875rem;
         line-height: 1.43;
-        color: #32324d;
       }
 
       .c40 {
@@ -548,7 +542,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
       }
 
       .c40 * {
-        cursor: default;
+        cursor: pointer;
       }
 
       .c23 {
@@ -597,10 +591,10 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
       }
 
       .c5 {
-        font-weight: 500;
+        font-weight: 600;
+        color: #32324d;
         font-size: 0.75rem;
         line-height: 1.33;
-        color: #32324d;
       }
 
       .c7 {
@@ -1196,7 +1190,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                     type="submit"
                   >
                     <span
-                      class="c46 c47 c48"
+                      class="c46 c47"
                     >
                       Let's start
                     </span>

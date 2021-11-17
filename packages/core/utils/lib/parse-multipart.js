@@ -10,7 +10,7 @@ module.exports = ctx => {
   const { body = {}, files = {} } = ctx.request;
 
   if (!body.data) {
-    throw strapi.errors.badRequest(
+    return ctx.badRequest(
       `When using multipart/form-data you need to provide your data in a JSON 'data' field.`
     );
   }
@@ -19,14 +19,14 @@ module.exports = ctx => {
   try {
     data = JSON.parse(body.data);
   } catch (error) {
-    throw strapi.errors.badRequest(`Invalid 'data' field. 'data' should be a valid JSON.`);
+    return ctx.badRequest(`Invalid 'data' field. 'data' should be a valid JSON.`);
   }
 
   const filesToUpload = Object.keys(files).reduce((acc, key) => {
     const fullPath = _.toPath(key);
 
     if (fullPath.length <= 1 || fullPath[0] !== 'files') {
-      throw strapi.errors.badRequest(
+      return ctx.badRequest(
         `When using multipart/form-data you need to provide your files by prefixing them with the 'files'.
 For example, when a media file is named "avatar", make sure the form key name is "files.avatar"`
       );

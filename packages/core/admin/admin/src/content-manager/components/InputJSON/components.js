@@ -24,6 +24,7 @@ const EditorWrapper = styled.div`
     /* Set height, width, borders, and global font properties here */
     font-size: ${14 / 16}rem;
     direction: ltr;
+    z-index: 0;
   }
 `;
 

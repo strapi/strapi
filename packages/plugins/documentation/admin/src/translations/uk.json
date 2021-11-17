@@ -1,11 +1,8 @@
 {
-  "components.Row.generatedDate": "Згенеровано востаннє",
   "components.Row.open": "Відкрити",
   "components.Row.regenerate": "Згенерувати",
   "containers.HomePage.Block.title": "Версії",
-  "containers.HomePage.Button.open": "Відкрити документацію",
   "containers.HomePage.Button.update": "Оновити",
-  "containers.HomePage.PluginHeader.description": "Налаштуйте плаґін документації",
   "containers.HomePage.PluginHeader.title": "Документація - Налаштування",
   "containers.HomePage.PopUpWarning.confirm": "Я усвідомлюю",
   "containers.HomePage.PopUpWarning.message": "Ви впевнені, що хочете видалити цю версію?",

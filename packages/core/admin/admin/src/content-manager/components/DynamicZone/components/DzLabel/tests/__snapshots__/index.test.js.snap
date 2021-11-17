@@ -61,6 +61,8 @@ exports[`<DzLabel /> displays the labelAction correctly 1`] = `
   font-size: 0.6875rem;
   line-height: 1.14;
   color: #666687;
+  font-size: 0.875rem;
+  line-height: 1.43;
 }
 
 .c2 {
@@ -225,6 +227,8 @@ exports[`<DzLabel /> displays the name of the dz when the label is empty 1`] = `
   font-size: 0.6875rem;
   line-height: 1.14;
   color: #666687;
+  font-size: 0.875rem;
+  line-height: 1.43;
 }
 
 .c2 {
@@ -338,6 +342,8 @@ exports[`<DzLabel /> renders and matches the snapshot 1`] = `
   font-size: 0.6875rem;
   line-height: 1.14;
   color: #666687;
+  font-size: 0.875rem;
+  line-height: 1.43;
 }
 
 .c2 {

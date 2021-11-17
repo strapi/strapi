@@ -34,8 +34,8 @@
   "pages.SettingsPage.Button.description": "Configure the documentation plugin",
   "pages.SettingsPage.header.save": "Save",
   "pages.SettingsPage.password.label": "Password",
-  "pages.SettingsPage.toggle.label": "Restricted Access",
   "pages.SettingsPage.toggle.hint": "Make the documentation endpoint private",
+  "pages.SettingsPage.toggle.label": "Restricted Access",
   "plugin.description.long": "Create an OpenAPI Document and visualize your API with SWAGGER UI.",
   "plugin.description.short": "Create an OpenAPI Document and visualize your API with SWAGGER UI.",
   "plugin.name": "Documentation"

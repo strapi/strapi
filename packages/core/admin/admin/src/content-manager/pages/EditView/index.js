@@ -244,6 +244,7 @@ const EditView = ({
                         paddingLeft={4}
                         paddingRight={4}
                         paddingTop={6}
+                        shadow="tableShadow"
                       >
                         <Informations />
                         <InjectionZone area="contentManager.editView.informations" />
@@ -259,6 +260,7 @@ const EditView = ({
                           paddingLeft={4}
                           paddingRight={4}
                           paddingTop={6}
+                          shadow="tableShadow"
                         >
                           <TableLabel textColor="neutral600">
                             {formatMessage(

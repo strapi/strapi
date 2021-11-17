@@ -24,12 +24,23 @@ describe('Entity validator', () => {
 
         expect.hasAssertions();
 
-        await entityValidator.validateEntityCreation(model, input).catch(() => {
-          expect(strapi.errors.badRequest).toHaveBeenCalledWith(
-            'ValidationError',
-            expect.any(Object)
-          );
-        });
+        try {
+          await entityValidator.validateEntityCreation(model, input);
+        } catch (e) {
+          expect(e).toMatchObject({
+            name: 'ValidationError',
+            message: 'title must be a `string` type, but the final value was: `1234`.',
+            details: {
+              errors: [
+                {
+                  path: ['title'],
+                  message: 'title must be a `string` type, but the final value was: `1234`.',
+                  name: 'ValidationError',
+                },
+              ],
+            },
+          });
+        }
       });
 
       it('Returns data on valid input', async () => {
@@ -90,17 +101,41 @@ describe('Entity validator', () => {
 
         expect.hasAssertions();
 
-        await entityValidator.validateEntityCreation(model, {}).catch(() => {
-          expect(strapi.errors.badRequest).toHaveBeenCalledWith('ValidationError', {
-            errors: { title: [expect.stringMatching('must be defined')] },
+        try {
+          await entityValidator.validateEntityCreation(model, {});
+        } catch (e) {
+          expect(e).toMatchObject({
+            name: 'ValidationError',
+            message: 'title must be defined.',
+            details: {
+              errors: [
+                {
+                  path: ['title'],
+                  message: 'title must be defined.',
+                  name: 'ValidationError',
+                },
+              ],
+            },
           });
-        });
+        }
 
-        await entityValidator.validateEntityCreation(model, { title: null }).catch(() => {
-          expect(strapi.errors.badRequest).toHaveBeenCalledWith('ValidationError', {
-            errors: { title: [expect.stringMatching('must be defined')] },
+        try {
+          await entityValidator.validateEntityCreation(model, { title: null });
+        } catch (e) {
+          expect(e).toMatchObject({
+            name: 'ValidationError',
+            message: 'title must be a `string` type, but the final value was: `null`.',
+            details: {
+              errors: [
+                {
+                  path: ['title'],
+                  message: 'title must be a `string` type, but the final value was: `null`.',
+                  name: 'ValidationError',
+                },
+              ],
+            },
           });
-        });
+        }
       });
 
       it('Supports custom field types', async () => {
@@ -144,11 +179,23 @@ describe('Entity validator', () => {
 
         expect.hasAssertions();
 
-        await entityValidator.validateEntityCreation(model, input).catch(() => {
-          expect(strapi.errors.badRequest).toHaveBeenCalledWith('ValidationError', {
-            errors: { title: [expect.stringMatching('at least 10 characters')] },
+        try {
+          await entityValidator.validateEntityCreation(model, input);
+        } catch (e) {
+          expect(e).toMatchObject({
+            name: 'ValidationError',
+            message: 'title must be at least 10 characters',
+            details: {
+              errors: [
+                {
+                  path: ['title'],
+                  message: 'title must be at least 10 characters',
+                  name: 'ValidationError',
+                },
+              ],
+            },
           });
-        });
+        }
       });
 
       test('Throws on max length not respected', async () => {
@@ -171,11 +218,23 @@ describe('Entity validator', () => {
 
         expect.hasAssertions();
 
-        await entityValidator.validateEntityCreation(model, input).catch(() => {
-          expect(strapi.errors.badRequest).toHaveBeenCalledWith('ValidationError', {
-            errors: { title: [expect.stringMatching('at most 2 characters')] },
+        try {
+          await entityValidator.validateEntityCreation(model, input);
+        } catch (e) {
+          expect(e).toMatchObject({
+            name: 'ValidationError',
+            message: 'title must be at most 2 characters',
+            details: {
+              errors: [
+                {
+                  path: ['title'],
+                  message: 'title must be at most 2 characters',
+                  name: 'ValidationError',
+                },
+              ],
+            },
           });
-        });
+        }
       });
 
       test('Allows empty strings even when required', async () => {
@@ -284,12 +343,23 @@ describe('Entity validator', () => {
 
         expect.hasAssertions();
 
-        await entityValidator.validateEntityCreation(model, input, { isDraft: true }).catch(() => {
-          expect(strapi.errors.badRequest).toHaveBeenCalledWith(
-            'ValidationError',
-            expect.any(Object)
-          );
-        });
+        try {
+          await entityValidator.validateEntityCreation(model, input, { isDraft: true });
+        } catch (e) {
+          expect(e).toMatchObject({
+            name: 'ValidationError',
+            message: 'title must be a `string` type, but the final value was: `1234`.',
+            details: {
+              errors: [
+                {
+                  path: ['title'],
+                  message: 'title must be a `string` type, but the final value was: `1234`.',
+                  name: 'ValidationError',
+                },
+              ],
+            },
+          });
+        }
       });
 
       it('Returns data on valid input', async () => {
@@ -414,11 +484,23 @@ describe('Entity validator', () => {
 
         expect.hasAssertions();
 
-        await entityValidator.validateEntityCreation(model, input, { isDraft: true }).catch(() => {
-          expect(strapi.errors.badRequest).toHaveBeenCalledWith('ValidationError', {
-            errors: { title: [expect.stringMatching('at most 2 characters')] },
+        try {
+          await entityValidator.validateEntityCreation(model, input, { isDraft: true });
+        } catch (e) {
+          expect(e).toMatchObject({
+            name: 'ValidationError',
+            message: 'title must be at most 2 characters',
+            details: {
+              errors: [
+                {
+                  path: ['title'],
+                  message: 'title must be at most 2 characters',
+                  name: 'ValidationError',
+                },
+              ],
+            },
           });
-        });
+        }
       });
 
       test('Allows empty strings even when required', async () => {

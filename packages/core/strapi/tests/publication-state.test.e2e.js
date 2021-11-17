@@ -154,7 +154,7 @@ describe('Publication State', () => {
     strapi = await createStrapiInstance();
     rq = await createContentAPIRequest({ strapi });
 
-    Object.assign(data, builder.sanitizedFixtures(strapi));
+    Object.assign(data, await builder.sanitizedFixtures(strapi));
   });
 
   afterAll(async () => {

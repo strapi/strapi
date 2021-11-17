@@ -66,7 +66,7 @@ describe('Migration - draft and publish', () => {
       strapi = await createStrapiInstance();
       rq = await createAuthRequest({ strapi });
 
-      data.dogs = sortDogs(builder.sanitizedFixturesFor(dogModel.singularName, strapi));
+      data.dogs = sortDogs(await builder.sanitizedFixturesFor(dogModel.singularName, strapi));
     });
 
     afterAll(async () => {

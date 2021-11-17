@@ -7,12 +7,11 @@ import { bindActionCreators, compose } from 'redux';
 import { useIntl } from 'react-intl';
 import { useHistory, useLocation } from 'react-router-dom';
 import get from 'lodash/get';
-import isEmpty from 'lodash/isEmpty';
 import { stringify } from 'qs';
 import {
   NoPermissions,
   CheckPermissions,
-  Search,
+  SearchURLQuery,
   useFocusWhenNavigate,
   useQueryParams,
   useNotification,
@@ -21,6 +20,7 @@ import {
 } from '@strapi/helper-plugin';
 import { IconButton } from '@strapi/design-system/IconButton';
 import { Main } from '@strapi/design-system/Main';
+import { Box } from '@strapi/design-system/Box';
 import { ActionLayout, ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
 import { useNotifyAT } from '@strapi/design-system/LiveRegions';
 import { Button } from '@strapi/design-system/Button';
@@ -171,18 +171,6 @@ function ListView({
   const handleConfirmDeleteData = useCallback(
     async idToDelete => {
       try {
-        let trackerProperty = {};
-
-        if (hasDraftAndPublish) {
-          const dataToDelete = data.find(obj => obj.id.toString() === idToDelete.toString());
-          const isDraftEntry = isEmpty(dataToDelete.publishedAt);
-          const status = isDraftEntry ? 'draft' : 'published';
-
-          trackerProperty = { status };
-        }
-
-        trackUsageRef.current('willDeleteEntry', trackerProperty);
-
         await axiosInstance.delete(getRequestUrl(`collection-types/${slug}/${idToDelete}`));
 
         const requestUrl = getRequestUrl(`collection-types/${slug}${params}`);
@@ -192,8 +180,6 @@ function ListView({
           type: 'success',
           message: { id: getTrad('success.record.delete') },
         });
-
-        trackUsageRef.current('didDeleteEntry', trackerProperty);
       } catch (err) {
         const errorMessage = get(
           err,
@@ -207,7 +193,7 @@ function ListView({
         });
       }
     },
-    [hasDraftAndPublish, slug, params, fetchData, toggleNotification, data, formatMessage]
+    [slug, params, fetchData, toggleNotification, formatMessage]
   );
 
   useEffect(() => {
@@ -281,26 +267,35 @@ function ListView({
               <InjectionZone area="contentManager.listView.actions" />
               <FieldPicker layout={layout} />
               <CheckPermissions permissions={cmPermissions.collectionTypesConfigurations}>
-                <IconButtonCustom
-                  onClick={() =>
-                    push({ pathname: `${slug}/configurations/list`, search: pluginsQueryParams })}
-                  icon={<Cog />}
-                  label={formatMessage({
-                    id: 'app.links.configure-view',
-                    defaultMessage: 'Configure the view',
-                  })}
-                />
+                <Box paddingTop={1} paddingBottom={1}>
+                  <IconButtonCustom
+                    onClick={() => {
+                      trackUsage('willEditListLayout');
+
+                      push({ pathname: `${slug}/configurations/list`, search: pluginsQueryParams });
+                    }}
+                    icon={<Cog />}
+                    label={formatMessage({
+                      id: 'app.links.configure-view',
+                      defaultMessage: 'Configure the view',
+                    })}
+                  />
+                </Box>
               </CheckPermissions>
             </>
           }
           startActions={
             <>
               {isSearchable && (
-                <Search
+                <SearchURLQuery
                   label={formatMessage(
                     { id: 'app.component.search.label', defaultMessage: 'Search for {target}' },
                     { target: headerLayoutTitle }
                   )}
+                  placeholder={formatMessage({
+                    id: 'app.component.search.placeholder',
+                    defaultMessage: 'Search...',
+                  })}
                   trackedEvent="didSearch"
                 />
               )}

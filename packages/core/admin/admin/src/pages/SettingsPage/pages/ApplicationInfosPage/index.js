@@ -5,7 +5,7 @@ import { HeaderLayout, Layout, ContentLayout } from '@strapi/design-system/Layou
 import { Main } from '@strapi/design-system/Main';
 import { Box } from '@strapi/design-system/Box';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
-import { H3, Text, TableLabel } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 
 import { Stack } from '@strapi/design-system/Stack';
 import { Link } from '@strapi/design-system/Link';
@@ -43,38 +43,38 @@ const ApplicationInfosPage = () => {
             paddingLeft={6}
           >
             <Stack size={5}>
-              <H3>
+              <Typography variant="delta" as="h3">
                 {formatMessage({
                   id: 'Settings.application.information',
                   defaultMessage: 'Information',
                 })}
-              </H3>
+              </Typography>
 
               <Grid paddingTop={1}>
                 <GridItem col={6} s={12}>
-                  <TableLabel textColor="neutral600">
+                  <Typography variant="sigma" textColor="neutral600">
                     {formatMessage({
                       id: 'Settings.application.details',
                       defaultMessage: 'details',
                     })}
-                  </TableLabel>
-                  <Text as="p">v{strapiVersion}</Text>
+                  </Typography>
+                  <Typography as="p">v{strapiVersion}</Typography>
                 </GridItem>
                 <GridItem col={6} s={12}>
-                  <TableLabel textColor="neutral600">
+                  <Typography variant="sigma" textColor="neutral600">
                     {formatMessage({
                       id: 'Settings.application.edition-title',
                       defaultMessage: 'current plan',
                     })}
-                  </TableLabel>
-                  <Text as="p">
+                  </Typography>
+                  <Typography as="p">
                     {formatMessage({
                       id: currentPlan,
                       defaultMessage: `${
                         appInfos.communityEdition ? 'Community Edition' : 'Enterprise Edition'
                       }`,
                     })}
-                  </Text>
+                  </Typography>
                 </GridItem>
               </Grid>
 
@@ -103,13 +103,13 @@ const ApplicationInfosPage = () => {
               </Grid>
 
               <Box paddingTop={1}>
-                <TableLabel textColor="neutral600">
+                <Typography variant="sigma" textColor="neutral600">
                   {formatMessage({
                     id: 'Settings.application.node-version',
                     defaultMessage: 'node version',
                   })}
-                </TableLabel>
-                <Text as="p">{appInfos.nodeVersion}</Text>
+                </Typography>
+                <Typography as="p">{appInfos.nodeVersion}</Typography>
               </Box>
             </Stack>
           </Box>

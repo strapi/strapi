@@ -28,6 +28,7 @@ import { getTrad } from '../../utils';
 import formatBytes from '../../utils/formatBytes';
 import { useEditAsset } from '../../hooks/useEditAsset';
 import { ReplaceMediaButton } from './ReplaceMediaButton';
+import { AssetDefinition } from '../../constants';
 
 const fileInfoSchema = yup.object({
   name: yup.string().required(),
@@ -35,7 +36,14 @@ const fileInfoSchema = yup.object({
   caption: yup.string(),
 });
 
-export const EditAssetDialog = ({ onClose, asset, canUpdate, canCopyLink, canDownload }) => {
+export const EditAssetDialog = ({
+  onClose,
+  asset,
+  canUpdate,
+  canCopyLink,
+  canDownload,
+  trackedLocation,
+}) => {
   const { formatMessage, formatDate } = useIntl();
   const submitButtonRef = useRef(null);
   const [isCropping, setIsCropping] = useState(false);
@@ -43,8 +51,14 @@ export const EditAssetDialog = ({ onClose, asset, canUpdate, canCopyLink, canDow
   const { editAsset, isLoading } = useEditAsset();
 
   const handleSubmit = async values => {
-    await editAsset({ ...asset, ...values }, replacementFile);
-    onClose();
+    if (asset.isLocal) {
+      const nextAsset = { ...asset, ...values };
+
+      onClose(nextAsset);
+    } else {
+      const editedAsset = await editAsset({ ...asset, ...values }, replacementFile);
+      onClose(editedAsset);
+    }
   };
 
   const handleStartCropping = () => {
@@ -64,7 +78,7 @@ export const EditAssetDialog = ({ onClose, asset, canUpdate, canCopyLink, canDow
 
   return (
     <>
-      <ModalLayout onClose={onClose} labelledBy="title">
+      <ModalLayout onClose={() => onClose()} labelledBy="title">
         <ModalHeader>
           <ButtonText textColor="neutral800" as="h2" id="title">
             {formatMessage({ id: getTrad('modal.edit.title'), defaultMessage: 'Details' })}
@@ -83,6 +97,7 @@ export const EditAssetDialog = ({ onClose, asset, canUpdate, canCopyLink, canDow
                 onCropStart={handleStartCropping}
                 onCropCancel={handleCancelCropping}
                 replacementFile={replacementFile}
+                trackedLocation={trackedLocation}
               />
             </GridItem>
             <GridItem xs={12} col={6}>
@@ -171,7 +186,7 @@ export const EditAssetDialog = ({ onClose, asset, canUpdate, canCopyLink, canDow
         </ModalBody>
         <ModalFooter
           startActions={
-            <Button onClick={onClose} variant="tertiary">
+            <Button onClick={() => onClose()} variant="tertiary">
               {formatMessage({ id: 'cancel', defaultMessage: 'Cancel' })}
             </Button>
           }
@@ -181,6 +196,7 @@ export const EditAssetDialog = ({ onClose, asset, canUpdate, canCopyLink, canDow
                 onSelectMedia={setReplacementFile}
                 acceptedMime={asset.mime}
                 disabled={formDisabled}
+                trackedLocation={trackedLocation}
               />
 
               <Button
@@ -198,22 +214,15 @@ export const EditAssetDialog = ({ onClose, asset, canUpdate, canCopyLink, canDow
   );
 };
 
+EditAssetDialog.defaultProps = {
+  trackedLocation: undefined,
+};
+
 EditAssetDialog.propTypes = {
-  asset: PropTypes.shape({
-    id: PropTypes.number,
-    height: PropTypes.number,
-    width: PropTypes.number,
-    size: PropTypes.number,
-    createdAt: PropTypes.string,
-    ext: PropTypes.string,
-    mime: PropTypes.string,
-    name: PropTypes.string,
-    url: PropTypes.string,
-    alternativeText: PropTypes.string,
-    caption: PropTypes.string,
-  }).isRequired,
+  asset: AssetDefinition.isRequired,
   canUpdate: PropTypes.bool.isRequired,
   canCopyLink: PropTypes.bool.isRequired,
   canDownload: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
+  trackedLocation: PropTypes.string,
 };

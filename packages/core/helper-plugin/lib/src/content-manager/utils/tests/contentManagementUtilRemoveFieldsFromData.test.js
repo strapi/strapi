@@ -1,4 +1,4 @@
-import testData from '../../../old/testUtils/testData';
+import testData from './testData';
 import contentManagementUtilRemoveFieldsFromData from '../contentManagementUtilRemoveFieldsFromData';
 
 describe('STRAPI_HELPER_PLUGIN | utils', () => {

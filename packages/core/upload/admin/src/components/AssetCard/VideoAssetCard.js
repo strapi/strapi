@@ -17,11 +17,21 @@ import {
 import { IconButton } from '@strapi/design-system/IconButton';
 import Pencil from '@strapi/icons/Pencil';
 import { useIntl } from 'react-intl';
+import { Box } from '@strapi/design-system/Box';
 import { VideoPreview } from './VideoPreview';
 import { getTrad, formatDuration } from '../../utils';
 
 const Extension = styled.span`
   text-transform: uppercase;
+`;
+
+const VideoPreviewWrapper = styled(Box)`
+  canvas,
+  video {
+    display: block;
+    max-width: 100%;
+    max-height: ${({ size }) => (size === 'M' ? 164 / 16 : 88 / 16)}rem;
+  }
 `;
 
 export const VideoAssetCard = ({
@@ -52,7 +62,9 @@ export const VideoAssetCard = ({
           </CardAction>
         )}
         <CardAsset size={size}>
-          <VideoPreview url={url} mime={mime} onLoadDuration={setDuration} size={size} />
+          <VideoPreviewWrapper size={size}>
+            <VideoPreview url={url} mime={mime} onLoadDuration={setDuration} alt={name} />
+          </VideoPreviewWrapper>
         </CardAsset>
         <CardTimer>{formattedDuration || '...'}</CardTimer>
       </CardHeader>

@@ -106,37 +106,12 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         align-items: center;
       }
 
-      .c17 {
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c18 {
-        font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #32324d;
-      }
-
       .c10 {
         outline: none;
       }
 
       .c22 {
-        font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
         color: #4945ff;
-      }
-
-      .c23 {
-        font-weight: 600;
-        line-height: 1.14;
-      }
-
-      .c24 {
         font-weight: 600;
         font-size: 0.6875rem;
         line-height: 1.45;
@@ -197,11 +172,25 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         border: 2px solid #4945ff;
       }
 
+      .c17 {
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c18 {
+        font-weight: 400;
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #32324d;
+      }
+
       .c5 {
-        font-weight: 500;
+        font-weight: 600;
+        color: #32324d;
         font-size: 0.75rem;
         line-height: 1.33;
-        color: #32324d;
       }
 
       .c7 {
@@ -474,7 +463,7 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
                   href="/auth/login"
                 >
                   <span
-                    class="c22 c23 c24"
+                    class="c22"
                   >
                     Sign in
                   </span>

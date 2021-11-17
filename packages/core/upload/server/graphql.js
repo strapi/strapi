@@ -184,6 +184,16 @@ module.exports = ({ strapi }) => {
       },
     });
 
-    return { types: [fileInfoInputType, mutations] };
+    return {
+      types: [fileInfoInputType, mutations],
+      resolversConfig: {
+        // Use custom scopes for the upload file CRUD operations
+        ['Query.uploadFiles']: { auth: { scope: 'plugin::upload.content-api.find' } },
+        ['Query.uploadFile']: { auth: { scope: 'plugin::upload.content-api.findOne' } },
+        ['Mutation.createUploadFile']: { auth: { scope: 'plugin::upload.content-api.upload' } },
+        ['Mutation.updateUploadFile']: { auth: { scope: 'plugin::upload.content-api.upload' } },
+        ['Mutation.deleteUploadFile']: { auth: { scope: 'plugin::upload.content-api.destroy' } },
+      },
+    };
   });
 };

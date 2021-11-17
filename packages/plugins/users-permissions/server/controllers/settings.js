@@ -1,6 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
+const { ValidationError } = require('@strapi/utils').errors;
 const { getService } = require('../utils');
 const { isValidEmailTemplate } = require('./validation/email-template');
 
@@ -11,7 +12,7 @@ module.exports = {
 
   async updateEmailTemplate(ctx) {
     if (_.isEmpty(ctx.request.body)) {
-      return ctx.badRequest('Request body cannot be empty');
+      throw new ValidationError('Request body cannot be empty');
     }
 
     const emailTemplates = ctx.request.body['email-templates'];
@@ -20,7 +21,7 @@ module.exports = {
       const template = emailTemplates[key].options.message;
 
       if (!isValidEmailTemplate(template)) {
-        return ctx.badRequest('Invalid template');
+        throw new ValidationError('Invalid template');
       }
     }
 
@@ -43,7 +44,7 @@ module.exports = {
 
   async updateAdvancedSettings(ctx) {
     if (_.isEmpty(ctx.request.body)) {
-      return ctx.badRequest('Request body cannot be empty');
+      throw new ValidationError('Request body cannot be empty');
     }
 
     await strapi
@@ -72,7 +73,7 @@ module.exports = {
 
   async updateProviders(ctx) {
     if (_.isEmpty(ctx.request.body)) {
-      return ctx.badRequest('Request body cannot be empty');
+      throw new ValidationError('Request body cannot be empty');
     }
 
     await strapi

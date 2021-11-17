@@ -5,7 +5,7 @@ import { Main, Row } from '@strapi/design-system';
 import { TextInput } from '@strapi/design-system/TextInput';
 import { Button } from '@strapi/design-system/Button';
 import { Box } from '@strapi/design-system/Box';
-import { Text } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import Form from './';
@@ -75,7 +75,7 @@ Make sure to run this story in detached mode. The embeded iframe breaks the focu
                 tabIndex={-1}
                 id="global-form-error"
               >
-                <Text>The email is invalid</Text>
+                <Typography>The email is invalid</Typography>
               </Box>
             ) : null}
             <TextInput

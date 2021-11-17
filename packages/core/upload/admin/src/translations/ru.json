@@ -32,8 +32,6 @@
   "list.assets-empty.subtitle": "Добавить первый в список.",
   "list.assets-empty.title": "Пока нет ни одного ресурса",
   "list.assets-empty.title-withSearch": "Нет ресурсов по выбранным фильтрам",
-  "list.assets.selected.plural": "Ресурсов выбрано: {number}",
-  "list.assets.selected.singular": "Ресурсов выбрано: {number}",
   "list.assets.type-not-allowed": "Этот тип файлов не допускается.",
   "modal.file-details.date": "Дата",
   "modal.file-details.dimensions": "Размеры",

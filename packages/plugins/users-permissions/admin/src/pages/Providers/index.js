@@ -19,7 +19,7 @@ import { HeaderLayout, Layout, ContentLayout } from '@strapi/design-system/Layou
 import { Main } from '@strapi/design-system/Main';
 import { useNotifyAT } from '@strapi/design-system/LiveRegions';
 import { Table, Thead, Tr, Th, Tbody, Td } from '@strapi/design-system/Table';
-import { Text, TableLabel } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
 import { IconButton } from '@strapi/design-system/IconButton';
 import Pencil from '@strapi/icons/Pencil';
@@ -167,31 +167,31 @@ export const ProvidersPage = () => {
               <Thead>
                 <Tr>
                   <Th>
-                    <TableLabel textColor="neutral600">
+                    <Typography variant="sigma" textColor="neutral600">
                       <VisuallyHidden>
                         {formatMessage({ id: getTrad('Providers.image'), defaultMessage: 'Image' })}
                       </VisuallyHidden>
-                    </TableLabel>
+                    </Typography>
                   </Th>
                   <Th>
-                    <TableLabel textColor="neutral600">
+                    <Typography variant="sigma" textColor="neutral600">
                       {formatMessage({ id: getTrad('Providers.name'), defaultMessage: 'Name' })}
-                    </TableLabel>
+                    </Typography>
                   </Th>
                   <Th>
-                    <TableLabel textColor="neutral600">
+                    <Typography variant="sigma" textColor="neutral600">
                       {formatMessage({ id: getTrad('Providers.status'), defaultMessage: 'Status' })}
-                    </TableLabel>
+                    </Typography>
                   </Th>
                   <Th>
-                    <TableLabel>
+                    <Typography variant="sigma">
                       <VisuallyHidden>
                         {formatMessage({
                           id: getTrad('Providers.settings'),
                           defaultMessage: 'Settings',
                         })}
                       </VisuallyHidden>
-                    </TableLabel>
+                    </Typography>
                   </Th>
                 </Tr>
               </Thead>
@@ -208,12 +208,12 @@ export const ProvidersPage = () => {
                       <FontAwesomeIcon icon={provider.icon} />
                     </Td>
                     <Td width="45%">
-                      <Text highlighted textColor="neutral800">
+                      <Typography fontWeight="semiBold" textColor="neutral800">
                         {provider.name}
-                      </Text>
+                      </Typography>
                     </Td>
                     <Td width="65%">
-                      <Text
+                      <Typography
                         textColor={provider.enabled ? 'success600' : 'danger600'}
                         data-testid={`enable-${provider.name}`}
                       >
@@ -226,7 +226,7 @@ export const ProvidersPage = () => {
                               id: getTrad('Providers.disabled'),
                               defaultMessage: 'Disabled',
                             })}
-                      </Text>
+                      </Typography>
                     </Td>
                     <Td {...stopPropagation}>
                       {canUpdate && (

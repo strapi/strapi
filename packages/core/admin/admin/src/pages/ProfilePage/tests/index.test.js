@@ -61,11 +61,11 @@ describe('ADMIN | Pages | Profile page', () => {
     });
 
     expect(container.firstChild).toMatchInlineSnapshot(`
-      .c14 {
+      .c13 {
         padding-bottom: 56px;
       }
 
-      .c17 {
+      .c16 {
         background: #ffffff;
         padding-top: 24px;
         padding-right: 32px;
@@ -76,10 +76,10 @@ describe('ADMIN | Pages | Profile page', () => {
       }
 
       .c11 {
-        font-weight: 500;
+        font-weight: 600;
+        color: #32324d;
         font-size: 0.75rem;
         line-height: 1.33;
-        color: #32324d;
       }
 
       .c8 {
@@ -213,7 +213,7 @@ describe('ADMIN | Pages | Profile page', () => {
         background: #4945ff;
       }
 
-      .c31 {
+      .c30 {
         border: none;
         background: transparent;
         font-size: 1.6rem;
@@ -229,7 +229,7 @@ describe('ADMIN | Pages | Profile page', () => {
         align-items: center;
       }
 
-      .c37 {
+      .c36 {
         position: absolute;
         left: 0;
         right: 0;
@@ -240,45 +240,47 @@ describe('ADMIN | Pages | Profile page', () => {
         border: none;
       }
 
-      .c37:focus {
+      .c36:focus {
         outline: none;
       }
 
-      .c37[aria-disabled='true'] {
+      .c36[aria-disabled='true'] {
         cursor: not-allowed;
       }
 
-      .c34 {
-        font-weight: 500;
+      .c33 {
+        font-weight: 600;
+        color: #32324d;
         font-size: 0.75rem;
         line-height: 1.33;
-        color: #32324d;
-      }
-
-      .c41 {
-        font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #32324d;
-      }
-
-      .c45 {
-        font-weight: 400;
-        font-size: 0.75rem;
-        line-height: 1.33;
-        color: #666687;
       }
 
       .c40 {
+        color: #32324d;
+        display: inline-block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: 0.875rem;
+        line-height: 1.43;
+      }
+
+      .c44 {
+        color: #666687;
+        font-size: 0.75rem;
+        line-height: 1.33;
+      }
+
+      .c39 {
         padding-right: 16px;
         padding-left: 16px;
       }
 
-      .c43 {
+      .c42 {
         padding-left: 12px;
       }
 
-      .c35 {
+      .c34 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -292,7 +294,7 @@ describe('ADMIN | Pages | Profile page', () => {
         align-items: center;
       }
 
-      .c38 {
+      .c37 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -310,7 +312,7 @@ describe('ADMIN | Pages | Profile page', () => {
         align-items: center;
       }
 
-      .c33 {
+      .c32 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -320,16 +322,16 @@ describe('ADMIN | Pages | Profile page', () => {
         flex-direction: column;
       }
 
-      .c33 > * {
+      .c32 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c33 > * + * {
+      .c32 > * + * {
         margin-top: 4px;
       }
 
-      .c36 {
+      .c35 {
         position: relative;
         border: 1px solid #dcdce4;
         padding-right: 12px;
@@ -345,28 +347,28 @@ describe('ADMIN | Pages | Profile page', () => {
         transition-duration: 0.2s;
       }
 
-      .c36:focus-within {
+      .c35:focus-within {
         border: 1px solid #4945ff;
         box-shadow: #4945ff 0px 0px 0px 2px;
       }
 
-      .c42 {
+      .c41 {
         background: transparent;
         border: none;
         position: relative;
         z-index: 1;
       }
 
-      .c42 svg {
+      .c41 svg {
         height: 0.6875rem;
         width: 0.6875rem;
       }
 
-      .c42 svg path {
+      .c41 svg path {
         fill: #666687;
       }
 
-      .c44 {
+      .c43 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -375,15 +377,15 @@ describe('ADMIN | Pages | Profile page', () => {
         border: none;
       }
 
-      .c44 svg {
+      .c43 svg {
         width: 0.375rem;
       }
 
-      .c39 {
+      .c38 {
         width: 100%;
       }
 
-      .c16 {
+      .c15 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -393,16 +395,16 @@ describe('ADMIN | Pages | Profile page', () => {
         flex-direction: column;
       }
 
-      .c16 > * {
+      .c15 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c16 > * + * {
+      .c15 > * + * {
         margin-top: 24px;
       }
 
-      .c18 {
+      .c17 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -412,35 +414,28 @@ describe('ADMIN | Pages | Profile page', () => {
         flex-direction: column;
       }
 
-      .c18 > * {
+      .c17 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c18 > * + * {
+      .c17 > * + * {
         margin-top: 16px;
       }
 
-      .c19 {
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
+      .c23 {
+        font-weight: 600;
         color: #32324d;
-      }
-
-      .c24 {
-        font-weight: 500;
         font-size: 0.75rem;
         line-height: 1.33;
-        color: #32324d;
       }
 
-      .c30 {
+      .c29 {
         padding-right: 12px;
         padding-left: 8px;
       }
 
-      .c23 {
+      .c22 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -454,7 +449,7 @@ describe('ADMIN | Pages | Profile page', () => {
         align-items: center;
       }
 
-      .c25 {
+      .c24 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -472,11 +467,53 @@ describe('ADMIN | Pages | Profile page', () => {
         align-items: center;
       }
 
-      .c27 {
+      .c26 {
         border: none;
         border-radius: 4px;
         padding-left: 16px;
         padding-right: 16px;
+        color: #32324d;
+        font-weight: 400;
+        font-size: 0.875rem;
+        display: block;
+        width: 100%;
+      }
+
+      .c26::-webkit-input-placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c26::-moz-placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c26:-ms-input-placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c26::placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c26[aria-disabled='true'] {
+        background: inherit;
+        color: inherit;
+      }
+
+      .c26:focus {
+        outline: none;
+        box-shadow: none;
+      }
+
+      .c27 {
+        border: none;
+        border-radius: 4px;
+        padding-left: 16px;
+        padding-right: 0;
         color: #32324d;
         font-weight: 400;
         font-size: 0.875rem;
@@ -514,49 +551,7 @@ describe('ADMIN | Pages | Profile page', () => {
         box-shadow: none;
       }
 
-      .c28 {
-        border: none;
-        border-radius: 4px;
-        padding-left: 16px;
-        padding-right: 0;
-        color: #32324d;
-        font-weight: 400;
-        font-size: 0.875rem;
-        display: block;
-        width: 100%;
-      }
-
-      .c28::-webkit-input-placeholder {
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c28::-moz-placeholder {
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c28:-ms-input-placeholder {
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c28::placeholder {
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c28[aria-disabled='true'] {
-        background: inherit;
-        color: inherit;
-      }
-
-      .c28:focus {
-        outline: none;
-        box-shadow: none;
-      }
-
-      .c26 {
+      .c25 {
         border: 1px solid #dcdce4;
         border-radius: 4px;
         background: #ffffff;
@@ -569,12 +564,12 @@ describe('ADMIN | Pages | Profile page', () => {
         transition-duration: 0.2s;
       }
 
-      .c26:focus-within {
+      .c25:focus-within {
         border: 1px solid #4945ff;
         box-shadow: #4945ff 0px 0px 0px 2px;
       }
 
-      .c22 {
+      .c21 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -584,17 +579,24 @@ describe('ADMIN | Pages | Profile page', () => {
         flex-direction: column;
       }
 
-      .c22 > * {
+      .c21 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c22 > * + * {
+      .c21 > * + * {
         margin-top: 4px;
       }
 
       .c0 {
         outline: none;
+      }
+
+      .c18 {
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+        color: #32324d;
       }
 
       .c1 {
@@ -605,7 +607,7 @@ describe('ADMIN | Pages | Profile page', () => {
         padding-left: 56px;
       }
 
-      .c15 {
+      .c14 {
         padding-right: 56px;
         padding-left: 56px;
       }
@@ -643,55 +645,49 @@ describe('ADMIN | Pages | Profile page', () => {
       }
 
       .c4 {
+        color: #32324d;
         font-weight: 600;
         font-size: 2rem;
         line-height: 1.25;
-        color: #32324d;
       }
 
       .c12 {
-        font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
         color: #666687;
-      }
-
-      .c13 {
         font-size: 1rem;
         line-height: 1.5;
       }
 
-      .c20 {
+      .c19 {
         display: grid;
         grid-template-columns: repeat(12,1fr);
         gap: 20px;
       }
 
-      .c21 {
+      .c20 {
         grid-column: span 6;
       }
 
-      .c29::-ms-reveal {
+      .c28::-ms-reveal {
         display: none;
       }
 
-      .c32 svg {
+      .c31 svg {
         height: 1rem;
         width: 1rem;
       }
 
-      .c32 svg path {
+      .c31 svg path {
         fill: #666687;
       }
 
       @media (max-width:68.75rem) {
-        .c21 {
+        .c20 {
           grid-column: span 12;
         }
       }
 
       @media (max-width:34.375rem) {
-        .c21 {
+        .c20 {
           grid-column: span;
         }
       }
@@ -722,7 +718,6 @@ describe('ADMIN | Pages | Profile page', () => {
                 >
                   <h1
                     class="c4"
-                    id="main-content-title"
                   >
                     yolo
                   </h1>
@@ -757,35 +752,35 @@ describe('ADMIN | Pages | Profile page', () => {
                 </button>
               </div>
               <p
-                class="c12 c13"
+                class="c12"
               />
             </div>
           </div>
           <div
-            class="c14"
+            class="c13"
           >
             <div
-              class="c15"
+              class="c14"
             >
               <div
-                class="c16"
+                class="c15"
               >
                 <div
-                  class="c17"
+                  class="c16"
                 >
                   <div
-                    class="c18"
+                    class="c17"
                   >
                     <h2
-                      class="c19"
+                      class="c18"
                     >
                       Profile
                     </h2>
                     <div
-                      class="c20"
+                      class="c19"
                     >
                       <div
-                        class="c21"
+                        class="c20"
                       >
                         <div
                           class=""
@@ -793,25 +788,25 @@ describe('ADMIN | Pages | Profile page', () => {
                           <div>
                             <div>
                               <div
-                                class="c22"
+                                class="c21"
                               >
                                 <div
-                                  class="c23"
+                                  class="c22"
                                 >
                                   <label
-                                    class="c24"
+                                    class="c23"
                                     for="firstname"
                                   >
                                     First name
                                   </label>
                                 </div>
                                 <div
-                                  class="c25 c26"
+                                  class="c24 c25"
                                 >
                                   <input
                                     aria-disabled="false"
                                     aria-invalid="false"
-                                    class="c27"
+                                    class="c26"
                                     id="firstname"
                                     name="firstname"
                                     placeholder=""
@@ -825,7 +820,7 @@ describe('ADMIN | Pages | Profile page', () => {
                         </div>
                       </div>
                       <div
-                        class="c21"
+                        class="c20"
                       >
                         <div
                           class=""
@@ -833,25 +828,25 @@ describe('ADMIN | Pages | Profile page', () => {
                           <div>
                             <div>
                               <div
-                                class="c22"
+                                class="c21"
                               >
                                 <div
-                                  class="c23"
+                                  class="c22"
                                 >
                                   <label
-                                    class="c24"
+                                    class="c23"
                                     for="lastname"
                                   >
                                     Last name
                                   </label>
                                 </div>
                                 <div
-                                  class="c25 c26"
+                                  class="c24 c25"
                                 >
                                   <input
                                     aria-disabled="false"
                                     aria-invalid="false"
-                                    class="c27"
+                                    class="c26"
                                     id="lastname"
                                     name="lastname"
                                     placeholder=""
@@ -865,7 +860,7 @@ describe('ADMIN | Pages | Profile page', () => {
                         </div>
                       </div>
                       <div
-                        class="c21"
+                        class="c20"
                       >
                         <div
                           class=""
@@ -873,25 +868,25 @@ describe('ADMIN | Pages | Profile page', () => {
                           <div>
                             <div>
                               <div
-                                class="c22"
+                                class="c21"
                               >
                                 <div
-                                  class="c23"
+                                  class="c22"
                                 >
                                   <label
-                                    class="c24"
+                                    class="c23"
                                     for="email"
                                   >
                                     Email
                                   </label>
                                 </div>
                                 <div
-                                  class="c25 c26"
+                                  class="c24 c25"
                                 >
                                   <input
                                     aria-disabled="false"
                                     aria-invalid="false"
-                                    class="c27"
+                                    class="c26"
                                     id="email"
                                     name="email"
                                     placeholder=""
@@ -905,7 +900,7 @@ describe('ADMIN | Pages | Profile page', () => {
                         </div>
                       </div>
                       <div
-                        class="c21"
+                        class="c20"
                       >
                         <div
                           class=""
@@ -913,25 +908,25 @@ describe('ADMIN | Pages | Profile page', () => {
                           <div>
                             <div>
                               <div
-                                class="c22"
+                                class="c21"
                               >
                                 <div
-                                  class="c23"
+                                  class="c22"
                                 >
                                   <label
-                                    class="c24"
+                                    class="c23"
                                     for="username"
                                   >
                                     Username
                                   </label>
                                 </div>
                                 <div
-                                  class="c25 c26"
+                                  class="c24 c25"
                                 >
                                   <input
                                     aria-disabled="false"
                                     aria-invalid="false"
-                                    class="c27"
+                                    class="c26"
                                     id="username"
                                     name="username"
                                     placeholder=""
@@ -948,21 +943,21 @@ describe('ADMIN | Pages | Profile page', () => {
                   </div>
                 </div>
                 <div
-                  class="c17"
+                  class="c16"
                 >
                   <div
-                    class="c18"
+                    class="c17"
                   >
                     <h2
-                      class="c19"
+                      class="c18"
                     >
                       Change password
                     </h2>
                     <div
-                      class="c20"
+                      class="c19"
                     >
                       <div
-                        class="c21"
+                        class="c20"
                       >
                         <div
                           class=""
@@ -970,36 +965,36 @@ describe('ADMIN | Pages | Profile page', () => {
                           <div>
                             <div>
                               <div
-                                class="c22"
+                                class="c21"
                               >
                                 <div
-                                  class="c23"
+                                  class="c22"
                                 >
                                   <label
-                                    class="c24"
+                                    class="c23"
                                     for="textinput-1"
                                   >
                                     Current Password
                                   </label>
                                 </div>
                                 <div
-                                  class="c25 c26"
+                                  class="c24 c25"
                                 >
                                   <input
                                     aria-disabled="false"
                                     aria-invalid="false"
-                                    class="c28 c29"
+                                    class="c27 c28"
                                     id="textinput-1"
                                     name="currentPassword"
                                     type="password"
                                     value=""
                                   />
                                   <div
-                                    class="c30"
+                                    class="c29"
                                   >
                                     <button
                                       aria-label="Hide password"
-                                      class="c31 c32"
+                                      class="c30 c31"
                                       type="button"
                                     >
                                       <svg
@@ -1024,10 +1019,10 @@ describe('ADMIN | Pages | Profile page', () => {
                       </div>
                     </div>
                     <div
-                      class="c20"
+                      class="c19"
                     >
                       <div
-                        class="c21"
+                        class="c20"
                       >
                         <div
                           class=""
@@ -1035,36 +1030,36 @@ describe('ADMIN | Pages | Profile page', () => {
                           <div>
                             <div>
                               <div
-                                class="c22"
+                                class="c21"
                               >
                                 <div
-                                  class="c23"
+                                  class="c22"
                                 >
                                   <label
-                                    class="c24"
+                                    class="c23"
                                     for="textinput-2"
                                   >
                                     Password
                                   </label>
                                 </div>
                                 <div
-                                  class="c25 c26"
+                                  class="c24 c25"
                                 >
                                   <input
                                     aria-disabled="false"
                                     aria-invalid="false"
-                                    class="c28 c29"
+                                    class="c27 c28"
                                     id="textinput-2"
                                     name="password"
                                     type="password"
                                     value=""
                                   />
                                   <div
-                                    class="c30"
+                                    class="c29"
                                   >
                                     <button
                                       aria-label="Hide password"
-                                      class="c31 c32"
+                                      class="c30 c31"
                                       type="button"
                                     >
                                       <svg
@@ -1088,7 +1083,7 @@ describe('ADMIN | Pages | Profile page', () => {
                         </div>
                       </div>
                       <div
-                        class="c21"
+                        class="c20"
                       >
                         <div
                           class=""
@@ -1096,36 +1091,36 @@ describe('ADMIN | Pages | Profile page', () => {
                           <div>
                             <div>
                               <div
-                                class="c22"
+                                class="c21"
                               >
                                 <div
-                                  class="c23"
+                                  class="c22"
                                 >
                                   <label
-                                    class="c24"
+                                    class="c23"
                                     for="textinput-3"
                                   >
                                     Password confirmation
                                   </label>
                                 </div>
                                 <div
-                                  class="c25 c26"
+                                  class="c24 c25"
                                 >
                                   <input
                                     aria-disabled="false"
                                     aria-invalid="false"
-                                    class="c28 c29"
+                                    class="c27 c28"
                                     id="textinput-3"
                                     name="confirmPassword"
                                     type="password"
                                     value=""
                                   />
                                   <div
-                                    class="c30"
+                                    class="c29"
                                   >
                                     <button
                                       aria-label="Hide password"
-                                      class="c31 c32"
+                                      class="c30 c31"
                                       type="button"
                                     >
                                       <svg
@@ -1152,38 +1147,38 @@ describe('ADMIN | Pages | Profile page', () => {
                   </div>
                 </div>
                 <div
-                  class="c17"
+                  class="c16"
                 >
                   <div
-                    class="c18"
+                    class="c17"
                   >
                     <h2
-                      class="c19"
+                      class="c18"
                     >
                       Experience
                     </h2>
                     <div
-                      class="c20"
+                      class="c19"
                     >
                       <div
-                        class="c21"
+                        class="c20"
                       >
                         <div
                           class=""
                         >
                           <div>
                             <div
-                              class="c33"
+                              class="c32"
                             >
                               <span
-                                class="c34"
+                                class="c33"
                                 for="select-1"
                                 id="select-1-label"
                               >
                                 Interface language
                               </span>
                               <div
-                                class="c35 c36"
+                                class="c34 c35"
                               >
                                 <button
                                   aria-describedby="select-1-hint"
@@ -1191,21 +1186,21 @@ describe('ADMIN | Pages | Profile page', () => {
                                   aria-expanded="false"
                                   aria-haspopup="listbox"
                                   aria-labelledby="select-1-label select-1-content"
-                                  class="c37"
+                                  class="c36"
                                   id="select-1"
                                   type="button"
                                 />
                                 <div
-                                  class="c38 c39"
+                                  class="c37 c38"
                                 >
                                   <div
-                                    class="c35"
+                                    class="c34"
                                   >
                                     <div
-                                      class="c40"
+                                      class="c39"
                                     >
                                       <span
-                                        class="c41"
+                                        class="c40"
                                         id="select-1-content"
                                       >
                                         Select
@@ -1213,12 +1208,12 @@ describe('ADMIN | Pages | Profile page', () => {
                                     </div>
                                   </div>
                                   <div
-                                    class="c35"
+                                    class="c34"
                                   >
                                     <button
                                       aria-disabled="false"
                                       aria-label="Clear the interface language selected"
-                                      class="c42"
+                                      class="c41"
                                     >
                                       <svg
                                         fill="none"
@@ -1235,7 +1230,7 @@ describe('ADMIN | Pages | Profile page', () => {
                                     </button>
                                     <button
                                       aria-hidden="true"
-                                      class="c43 c42 c44"
+                                      class="c42 c41 c43"
                                       tabindex="-1"
                                       type="button"
                                     >
@@ -1258,7 +1253,7 @@ describe('ADMIN | Pages | Profile page', () => {
                                 </div>
                               </div>
                               <p
-                                class="c45"
+                                class="c44"
                                 id="select-1-hint"
                               >
                                 This will only display your own interface in the chosen language.

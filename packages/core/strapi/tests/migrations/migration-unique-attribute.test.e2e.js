@@ -53,7 +53,7 @@ describe.skip('Migration - unique attribute', () => {
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
 
-    data.dogs = builder.sanitizedFixturesFor(dogModel.singularName, strapi);
+    data.dogs = await builder.sanitizedFixturesFor(dogModel.singularName, strapi);
   });
 
   afterAll(async () => {

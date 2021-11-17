@@ -2,9 +2,11 @@
 
 const _ = require('lodash');
 const { prop, pick, reduce, map, keys, toPath, isNil } = require('lodash/fp');
-const { contentTypes, parseMultipartData, sanitizeEntity } = require('@strapi/utils');
-
+const utils = require('@strapi/utils');
 const { getService } = require('../utils');
+
+const { contentTypes, parseMultipartData, sanitize } = utils;
+const { ApplicationError, NotFoundError } = utils.errors;
 
 const { getContentTypeRoutePrefix, isSingleType, getWritableAttributes } = contentTypes;
 
@@ -94,7 +96,7 @@ const createLocalizationHandler = contentType => {
   };
 };
 
-const createCreateLocalizationHandler = contentType => async (ctx = {}) => {
+const createCreateLocalizationHandler = contentType => async (args = {}) => {
   const { copyNonLocalizedAttributes } = getService('content-types');
 
   const { sanitizeInput, sanitizeInputFiles } = createSanitizer(contentType);
@@ -103,28 +105,28 @@ const createCreateLocalizationHandler = contentType => async (ctx = {}) => {
     ? await strapi.query(contentType.uid).findOne({ populate: ['localizations'] })
     : await strapi
         .query(contentType.uid)
-        .findOne({ where: { id: ctx.id }, populate: ['localizations'] });
+        .findOne({ where: { id: args.id }, populate: ['localizations'] });
 
   if (!entry) {
-    throw strapi.errors.notFound('baseEntryId.invalid');
+    throw new NotFoundError();
   }
 
-  const { data, files } = ctx;
+  const { data, files } = args;
 
   const { findByCode } = getService('locales');
 
   if (isNil(data.locale)) {
-    throw strapi.errors.badRequest('locale.missing');
+    throw new ApplicationError('locale is missing');
   }
 
   const matchingLocale = await findByCode(data.locale);
   if (!matchingLocale) {
-    throw strapi.errors.badRequest('locale.invalid');
+    throw new ApplicationError('locale is invalid');
   }
 
   const usedLocales = getAllLocales(entry);
   if (usedLocales.includes(data.locale)) {
-    throw strapi.errors.badRequest('locale.already.used');
+    throw new ApplicationError('locale is already used');
   }
 
   const sanitizedData = {
@@ -142,7 +144,7 @@ const createCreateLocalizationHandler = contentType => async (ctx = {}) => {
     populate: ['localizations'],
   });
 
-  return sanitizeEntity(newEntry, { model: strapi.getModel(contentType.uid) });
+  return sanitize.contentAPI.output(newEntry, strapi.getModel(contentType.uid));
 };
 
 /**

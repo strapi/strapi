@@ -1,6 +1,7 @@
 'use strict';
 
 const { has, omit, isArray } = require('lodash/fp');
+const { ApplicationError } = require('@strapi/utils').errors;
 const { getService } = require('../utils');
 
 const LOCALE_QUERY_FILTER = 'locale';
@@ -59,10 +60,14 @@ const wrapParams = async (params = {}, ctx = {}) => {
 const assignValidLocale = async data => {
   const { getValidLocale } = getService('content-types');
 
+  if (!data) {
+    return;
+  }
+
   try {
     data.locale = await getValidLocale(data.locale);
   } catch (e) {
-    throw strapi.errors.badRequest("This locale doesn't exist");
+    throw new ApplicationError("This locale doesn't exist");
   }
 };
 
@@ -96,7 +101,7 @@ const decorator = service => ({
    * @param {string} uid - Model uid
    * @param {object} opts - Query options object (params, data, files, populate)
    */
-  async create(uid, opts) {
+  async create(uid, opts = {}) {
     const model = strapi.getModel(uid);
 
     const { syncLocalizations, syncNonLocalizedAttributes } = getService('localizations');
@@ -122,7 +127,7 @@ const decorator = service => ({
    * @param {string} entityId
    * @param {object} opts - Query options object (params, data, files, populate)
    */
-  async update(uid, entityId, opts) {
+  async update(uid, entityId, opts = {}) {
     const model = strapi.getModel(uid);
 
     const { syncNonLocalizedAttributes } = getService('localizations');

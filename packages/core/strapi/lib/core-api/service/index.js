@@ -1,10 +1,7 @@
 'use strict';
 
-const _ = require('lodash');
-
 const {
   isSingleType,
-  getNonWritableAttributes,
   constants: { DP_PUB_STATE_LIVE },
 } = require('@strapi/utils').contentTypes;
 
@@ -41,13 +38,9 @@ const getFetchParams = (params = {}) => {
 /**
  * Mixins
  */
-const createUtils = ({ model }) => {
-  return {
-    // make sure to keep the call to getNonWritableAttributes dynamic
-    sanitizeInput: data => _.omit(data, getNonWritableAttributes(model)),
-    getFetchParams,
-  };
-};
+const createUtils = () => ({
+  getFetchParams,
+});
 
 module.exports = {
   createService,

@@ -1,6 +1,7 @@
 'use strict';
 
 const { isFunction } = require('lodash/fp');
+const { ApplicationError } = require('@strapi/utils').errors;
 
 /**
  * @typedef RegisteredTypeDef
@@ -25,7 +26,7 @@ const createTypeRegistry = () => {
      */
     register(name, definition, config = {}) {
       if (registry.has(name)) {
-        throw new Error(`"${name}" has already been registered`);
+        throw new ApplicationError(`"${name}" has already been registered`);
       }
 
       registry.set(name, { name, definition, config });

@@ -2,6 +2,7 @@
 
 const _ = require('lodash/fp');
 const dateFns = require('date-fns');
+const { InvalidTimeError, InvalidDateError, InvalidDateTimeError } = require('./errors');
 
 class Field {
   constructor(config) {
@@ -102,12 +103,12 @@ const parseTime = value => {
   if (dateFns.isDate(value)) return dateFns.format(value, 'HH:mm:ss.SSS');
 
   if (typeof value !== 'string') {
-    throw new Error(`Expected a string, got a ${typeof value}`);
+    throw new InvalidTimeError(`Expected a string, got a ${typeof value}`);
   }
   const result = value.match(timeRegex);
 
   if (result === null) {
-    throw new Error('Invalid time format, expected HH:mm:ss.SSS');
+    throw new InvalidTimeError('Invalid time format, expected HH:mm:ss.SSS');
   }
 
   const [, hours, minutes, seconds, fraction = '.000'] = result;
@@ -123,9 +124,9 @@ const parseDate = value => {
 
     if (dateFns.isValid(date)) return dateFns.format(date, 'yyyy-MM-dd');
 
-    throw new Error(`Invalid format, expected an ISO compatible date`);
+    throw new InvalidDateError(`Invalid format, expected an ISO compatible date`);
   } catch (error) {
-    throw new Error(`Invalid format, expected an ISO compatible date`);
+    throw new InvalidDateError(`Invalid format, expected an ISO compatible date`);
   }
 };
 
@@ -138,9 +139,9 @@ const parseDateTimeOrTimestamp = value => {
     const milliUnixDate = dateFns.parse(value, 'T', new Date());
     if (dateFns.isValid(milliUnixDate)) return milliUnixDate;
 
-    throw new Error(`Invalid format, expected a timestamp or an ISO date`);
+    throw new InvalidDateTimeError(`Invalid format, expected a timestamp or an ISO date`);
   } catch (error) {
-    throw new Error(`Invalid format, expected a timestamp or an ISO date`);
+    throw new InvalidDateTimeError(`Invalid format, expected a timestamp or an ISO date`);
   }
 };
 

@@ -23,7 +23,7 @@ import { Button } from '@strapi/design-system/Button';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
 import { Link } from '@strapi/design-system/Link';
-import { H3 } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { Main } from '@strapi/design-system/Main';
 import { Stack } from '@strapi/design-system/Stack';
 import ArrowLeft from '@strapi/icons/ArrowLeft';
@@ -216,12 +216,12 @@ const EditPage = ({ canUpdate }) => {
                     paddingRight={7}
                   >
                     <Stack size={4}>
-                      <H3 as="h2">
+                      <Typography variant="delta" as="h2">
                         {formatMessage({
                           id: 'app.components.Users.ModalCreateBody.block-title.details',
                           defaultMessage: 'Details',
                         })}
-                      </H3>
+                      </Typography>
                       <Grid gap={5}>
                         {layout.map(row => {
                           return row.map(input => {
@@ -251,12 +251,12 @@ const EditPage = ({ canUpdate }) => {
                     paddingRight={7}
                   >
                     <Stack size={4}>
-                      <H3 as="h2">
+                      <Typography variant="delta" as="h2">
                         {formatMessage({
                           id: 'app.components.Users.ModalCreateBody.block-title.login',
                           defaultMessage: 'Login settings',
                         })}
-                      </H3>
+                      </Typography>
                       <Grid gap={5}>
                         <GridItem col={6} xs={12}>
                           <SelectRoles

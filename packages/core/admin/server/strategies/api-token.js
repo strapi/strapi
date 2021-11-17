@@ -1,26 +1,37 @@
 'use strict';
 
+const { UnauthorizedError, ForbiddenError } = require('@strapi/utils').errors;
 const constants = require('../services/constants');
 const { getService } = require('../utils');
 
 const isReadScope = scope => scope.endsWith('find') || scope.endsWith('findOne');
 
+const extractToken = ctx => {
+  if (ctx.request && ctx.request.header && ctx.request.header.authorization) {
+    const parts = ctx.request.header.authorization.split(/\s+/);
+
+    if (parts[0].toLowerCase() !== 'bearer' || parts.length !== 2) {
+      return null;
+    }
+
+    return parts[1];
+  }
+  if (ctx.query.access_token) {
+    return ctx.query.access_token;
+  }
+
+  return null;
+};
+
 /** @type {import('.').AuthenticateFunction} */
 const authenticate = async ctx => {
   const apiTokenService = getService('api-token');
-  const { authorization } = ctx.request.header;
+  const token = extractToken(ctx);
 
-  if (!authorization) {
+  if (!token) {
     return { authenticated: false };
   }
 
-  const parts = authorization.split(/\s+/);
-
-  if (parts[0].toLowerCase() !== 'bearer' || parts.length !== 2) {
-    return { authenticated: false };
-  }
-
-  const token = parts[1];
   const apiToken = await apiTokenService.getBy({
     accessKey: apiTokenService.hash(token),
   });
@@ -34,11 +45,10 @@ const authenticate = async ctx => {
 
 /** @type {import('.').VerifyFunction} */
 const verify = (auth, config) => {
-  const { errors } = strapi.container.get('auth');
   const { credentials: apiToken } = auth;
 
   if (!apiToken) {
-    throw new errors.UnauthorizedError();
+    throw new UnauthorizedError();
   }
 
   if (apiToken.type === constants.API_TOKEN_TYPE.FULL_ACCESS) {
@@ -54,7 +64,7 @@ const verify = (auth, config) => {
     return;
   }
 
-  throw new errors.ForbiddenError();
+  throw new ForbiddenError();
 };
 
 /** @type {import('.').AuthStrategy} */

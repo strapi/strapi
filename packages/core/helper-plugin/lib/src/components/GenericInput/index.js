@@ -7,8 +7,6 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import cloneDeep from 'lodash/cloneDeep';
-import { formatISO } from 'date-fns';
 import { Checkbox } from '@strapi/design-system/Checkbox';
 import { DatePicker } from '@strapi/design-system/DatePicker';
 import { NumberInput } from '@strapi/design-system/NumberInput';
@@ -17,8 +15,10 @@ import { Textarea } from '@strapi/design-system/Textarea';
 import { TextInput } from '@strapi/design-system/TextInput';
 import { TimePicker } from '@strapi/design-system/TimePicker';
 import { ToggleInput } from '@strapi/design-system/ToggleInput';
+import { Icon } from '@strapi/design-system/Icon';
 import EyeStriked from '@strapi/icons/EyeStriked';
 import Eye from '@strapi/icons/Eye';
+import DateTimePicker from '../DateTimePicker';
 
 const GenericInput = ({
   autoComplete,
@@ -129,6 +129,30 @@ const GenericInput = ({
         </Checkbox>
       );
     }
+    case 'datetime': {
+      return (
+        <DateTimePicker
+          clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
+          disabled={disabled}
+          error={errorMessage}
+          label={label}
+          labelAction={labelAction}
+          id={name}
+          hint={hint}
+          name={name}
+          onChange={date => {
+            const formattedDate = date.toISOString();
+
+            onChange({ target: { name, value: formattedDate, type } });
+          }}
+          onClear={() => onChange({ target: { name, value: '', type } })}
+          placeholder={formattedPlaceholder}
+          required={required}
+          value={value ? new Date(value) : null}
+          selectedDateLabel={formattedDate => `Date picker, current is ${formattedDate}`}
+        />
+      );
+    }
     case 'date': {
       return (
         <DatePicker
@@ -141,7 +165,7 @@ const GenericInput = ({
           hint={hint}
           name={name}
           onChange={date => {
-            const formattedDate = formatISO(cloneDeep(date), { representation: 'date' });
+            const formattedDate = date.toISOString();
 
             onChange({ target: { name, value: formattedDate, type } });
           }}
@@ -169,7 +193,7 @@ const GenericInput = ({
           placeholder={formattedPlaceholder}
           required={required}
           step={step}
-          value={value || undefined}
+          value={value ?? undefined}
         />
       );
     }
@@ -216,7 +240,11 @@ const GenericInput = ({
               }}
               type="button"
             >
-              {showPassword ? <Eye /> : <EyeStriked />}
+              {showPassword ? (
+                <Icon as={Eye} color="neutral500" />
+              ) : (
+                <Icon as={EyeStriked} color="neutral500" />
+              )}
             </button>
           }
           label={label}

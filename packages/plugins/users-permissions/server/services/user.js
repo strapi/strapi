@@ -9,7 +9,7 @@
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 
-const { sanitizeEntity, getAbsoluteServerUrl } = require('@strapi/utils');
+const { getAbsoluteServerUrl, sanitize } = require('@strapi/utils');
 const { getService } = require('../utils');
 
 module.exports = ({ strapi }) => ({
@@ -121,14 +121,14 @@ module.exports = ({ strapi }) => ({
   async sendConfirmationEmail(user) {
     const userPermissionService = getService('users-permissions');
     const pluginStore = await strapi.store({ type: 'plugin', name: 'users-permissions' });
+    const userSchema = strapi.getModel('plugin::users-permissions.user');
 
     const settings = await pluginStore
       .get({ key: 'email' })
       .then(storeEmail => storeEmail['email_confirmation'].options);
 
-    const userInfo = sanitizeEntity(user, {
-      model: strapi.getModel('plugin::users-permissions.user'),
-    });
+    // Sanitize the template's user information
+    const sanitizedUserInfo = await sanitize.sanitizers.defaultSanitizeOutput(userSchema, user);
 
     const confirmationToken = crypto.randomBytes(20).toString('hex');
 
@@ -136,11 +136,13 @@ module.exports = ({ strapi }) => ({
 
     settings.message = await userPermissionService.template(settings.message, {
       URL: `${getAbsoluteServerUrl(strapi.config)}/auth/email-confirmation`,
-      USER: userInfo,
+      USER: sanitizedUserInfo,
       CODE: confirmationToken,
     });
 
-    settings.object = await userPermissionService.template(settings.object, { USER: userInfo });
+    settings.object = await userPermissionService.template(settings.object, {
+      USER: sanitizedUserInfo,
+    });
 
     // Send an email to the user.
     await strapi

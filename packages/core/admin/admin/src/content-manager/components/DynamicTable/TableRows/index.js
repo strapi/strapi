@@ -51,7 +51,7 @@ const TableRows = ({
             key={data.id}
             {...onRowClick({
               fn: () => {
-                trackUsage('willEditEntryFromButton');
+                trackUsage('willEditEntryFromList');
                 push({
                   pathname: `${pathname}/${data.id}`,
                   state: { from: pathname },
@@ -84,7 +84,12 @@ const TableRows = ({
                   {typeof cellFormatter === 'function' ? (
                     cellFormatter(data, { key, name, ...rest })
                   ) : (
-                    <CellContent content={data[name]} name={name} {...rest} rowId={data.id} />
+                    <CellContent
+                      content={data[name.split('.')[0]]}
+                      name={name}
+                      {...rest}
+                      rowId={data.id}
+                    />
                   )}
                 </Td>
               );
@@ -115,7 +120,7 @@ const TableRows = ({
                       <IconButton
                         onClick={() => {
                           push({
-                            pathname: `${pathname}/create/clone${data.id}`,
+                            pathname: `${pathname}/create/clone/${data.id}`,
                             state: { from: pathname },
                             search: pluginsQueryParams,
                           });
@@ -136,7 +141,11 @@ const TableRows = ({
                   {canDelete && (
                     <Box paddingLeft={1}>
                       <IconButton
-                        onClick={() => onClickDelete(data.id)}
+                        onClick={() => {
+                          trackUsage('willDeleteEntryFromList');
+
+                          onClickDelete(data.id);
+                        }}
                         label={formatMessage(
                           { id: 'app.component.table.delete', defaultMessage: 'Delete {target}' },
                           { target: itemLineText }

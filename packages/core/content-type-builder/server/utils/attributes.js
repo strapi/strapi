@@ -2,6 +2,7 @@
 
 const _ = require('lodash');
 const utils = require('@strapi/utils');
+const { ApplicationError } = require('@strapi/utils').errors;
 
 const hasComponent = model => {
   const compoKeys = Object.keys(model.attributes || {}).filter(key => {
@@ -86,7 +87,7 @@ const replaceTemporaryUIDs = uidMap => schema => {
         }
 
         if (!_.has(strapi.components, attr.component)) {
-          throw new Error('component.notFound');
+          throw new ApplicationError('component.notFound');
         }
       }
 
@@ -100,7 +101,7 @@ const replaceTemporaryUIDs = uidMap => schema => {
             if (_.has(uidMap, value)) return uidMap[value];
 
             if (!_.has(strapi.components, value)) {
-              throw new Error('component.notFound');
+              throw new ApplicationError('component.notFound');
             }
 
             return value;

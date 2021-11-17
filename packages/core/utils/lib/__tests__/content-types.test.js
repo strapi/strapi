@@ -59,6 +59,12 @@ describe('Content types utils', () => {
             type: 'string',
             writable: false,
           },
+          createdAt: {
+            type: 'datetime',
+          },
+          updatedAt: {
+            type: 'datetime',
+          },
         },
       });
 

@@ -3,7 +3,7 @@ import { Box } from '@strapi/design-system/Box';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { Flex } from '@strapi/design-system/Flex';
 import { Stack } from '@strapi/design-system/Stack';
-import { Text } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { Textarea } from '@strapi/design-system/Textarea';
 import { TextInput } from '@strapi/design-system/TextInput';
 import { Button } from '@strapi/design-system/Button';
@@ -20,24 +20,24 @@ const RoleForm = ({ disabled, role, values, errors, onChange, onBlur }) => {
           <Flex justifyContent="space-between">
             <Box>
               <Box>
-                <Text bold>
+                <Typography fontWeight="bold">
                   {role
                     ? role.name
                     : formatMessage({
                         id: 'Settings.roles.form.title',
                         defaultMessage: 'Details',
                       })}
-                </Text>
+                </Typography>
               </Box>
               <Box>
-                <Text textColor="neutral500" small>
+                <Typography textColor="neutral500" variant="pi">
                   {role
                     ? role.description
                     : formatMessage({
                         id: 'Settings.roles.form.description',
                         defaultMessage: 'Name and description of the role',
                       })}
-                </Text>
+                </Typography>
               </Box>
             </Box>
             <Button disabled variant="secondary">

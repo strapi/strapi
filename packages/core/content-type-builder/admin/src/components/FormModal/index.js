@@ -42,6 +42,8 @@ import PluralName from '../PluralName';
 import SelectCategory from '../SelectCategory';
 import SelectComponent from '../SelectComponent';
 import SelectComponents from '../SelectComponents';
+import SelectDateType from '../SelectDateType';
+import SelectNumber from '../SelectNumber';
 import SingularName from '../SingularName';
 import TabForm from '../TabForm';
 import TextareaEnum from '../TextareaEnum';
@@ -832,6 +834,8 @@ const FormModal = () => {
       'select-component': SelectComponent,
       'select-components': SelectComponents,
       'select-default-boolean': BooleanDefaultValueSelect,
+      'select-number': SelectNumber,
+      'select-date': SelectDateType,
       'toggle-draft-publish': DraftAndPublishToggle,
       'text-plural': PluralName,
       'text-singular': SingularName,

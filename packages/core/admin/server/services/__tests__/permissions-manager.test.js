@@ -36,6 +36,14 @@ const defineAbility = register => {
 };
 
 describe('Permissions Manager', () => {
+  beforeEach(() => {
+    global.strapi = {
+      getModel() {
+        return {};
+      },
+    };
+  });
+
   describe('get Query', () => {
     test('It should returns an empty query when no conditions are defined', async () => {
       const ability = defineAbility(can => can('read', 'foo'));
@@ -97,6 +105,12 @@ describe('Permissions Manager', () => {
   });
 
   describe('toSubject', () => {
+    global.strapi = {
+      getModel() {
+        return {};
+      },
+    };
+
     const attr = '__caslSubjectType__';
     const ability = defineAbility(can => can('read', 'foo'));
     const pm = createPermissionsManager({
@@ -126,16 +140,6 @@ describe('Permissions Manager', () => {
   });
 
   describe('pickPermittedFieldsOf', () => {
-    const ability = defineAbility(can => {
-      can('read', 'article', ['title'], { title: 'foo' });
-      can('edit', 'article', ['title'], { title: { $in: ['kai', 'doe'] } });
-    });
-    const pm = createPermissionsManager({
-      ability,
-      action: 'read',
-      model: 'article',
-    });
-
     global.strapi = {
       getModel() {
         return {
@@ -155,25 +159,36 @@ describe('Permissions Manager', () => {
       },
     };
 
-    test('Pick all fields (output) using default model', () => {
+    const ability = defineAbility(can => {
+      can('read', 'article', ['title'], { title: 'foo' });
+      can('edit', 'article', ['title'], { title: { $in: ['kai', 'doe'] } });
+    });
+
+    const pm = createPermissionsManager({
+      ability,
+      action: 'read',
+      model: 'article',
+    });
+
+    test('Pick all fields (output) using default model', async () => {
       const input = { title: 'foo' };
-      const res = pm.pickPermittedFieldsOf(input);
+      const res = await pm.pickPermittedFieldsOf(input);
 
       expect(res).toStrictEqual(input);
     });
 
-    test(`Pick 0 fields (output) using custom model`, () => {
+    test(`Pick 0 fields (output) using custom model`, async () => {
       const input = { title: 'foo' };
-      const res = pm.pickPermittedFieldsOf(input, { action: 'edit' });
+      const res = await pm.pickPermittedFieldsOf(input, { action: 'edit' });
 
       expect(res).toStrictEqual({});
     });
 
-    test('Sanitize an array of objects', () => {
+    test('Sanitize an array of objects', async () => {
       const input = [{ title: 'foo' }, { title: 'kai' }];
       const expected = [{ title: 'foo' }, {}];
 
-      const res = pm.pickPermittedFieldsOf(input);
+      const res = await pm.pickPermittedFieldsOf(input);
 
       expect(res).toStrictEqual(expected);
     });

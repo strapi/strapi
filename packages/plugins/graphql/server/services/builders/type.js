@@ -66,7 +66,7 @@ module.exports = context => {
       strapi,
     });
 
-    const args = getContentTypeArgs(targetComponent);
+    const args = getContentTypeArgs(targetComponent, { multiple: !!attribute.repeatable });
 
     builder.field(attributeName, { type, resolve, args });
   };
@@ -150,6 +150,12 @@ module.exports = context => {
     const type = attribute.multiple
       ? naming.getRelationResponseCollectionName(fileContentType)
       : naming.getEntityResponseName(fileContentType);
+    const resolverPath = `${naming.getTypeName(contentType)}.${attributeName}`;
+    const resolverAuthScope = `${fileUID}.find`;
+
+    extension.use({
+      resolversConfig: { [resolverPath]: { auth: { scope: [resolverAuthScope] } } },
+    });
 
     builder.field(attributeName, { type, resolve, args });
   };
@@ -230,6 +236,11 @@ module.exports = context => {
 
     const args = isToManyRelation ? getContentTypeArgs(targetContentType) : undefined;
 
+    const resolverPath = `${naming.getTypeName(contentType)}.${attributeName}`;
+    const resolverScope = `${targetContentType.uid}.find`;
+
+    extension.use({ resolversConfig: { [resolverPath]: { auth: { scope: [resolverScope] } } } });
+
     builder.field(attributeName, { type, resolve, args });
   };
 
@@ -264,10 +275,9 @@ module.exports = context => {
         isRelation,
       } = utils.attributes;
 
-      const { attributes, modelType, options = {} } = contentType;
+      const { attributes, modelType } = contentType;
 
       const attributesKey = Object.keys(attributes);
-      const hasTimestamps = isArray(options.timestamps);
 
       const name = (modelType === 'component' ? getComponentName : getTypeName).call(
         null,
@@ -282,17 +292,7 @@ module.exports = context => {
             t.nonNull.id('id');
           }
 
-          // 1. Timestamps
-          // If the content type has timestamps enabled
-          // then we should add the corresponding attributes in the definition
-          if (hasTimestamps) {
-            const [createdAtKey, updatedAtKey] = contentType.options.timestamps;
-
-            t.nonNull.dateTime(createdAtKey);
-            t.nonNull.dateTime(updatedAtKey);
-          }
-
-          /** 2. Attributes
+          /** Attributes
            *
            * Attributes can be of 7 different kind:
            * - Scalar
@@ -359,7 +359,7 @@ module.exports = context => {
               }
 
               // Regular Relations
-              else if (isRelation(attribute) || isMedia(attribute)) {
+              else if (isRelation(attribute)) {
                 addRegularRelationalAttribute(options);
               }
             });

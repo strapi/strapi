@@ -101,18 +101,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
       }
 
       .c36 {
-        font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
         color: #4945ff;
-      }
-
-      .c37 {
-        font-weight: 600;
-        line-height: 1.14;
-      }
-
-      .c38 {
         font-weight: 600;
         font-size: 0.6875rem;
         line-height: 1.45;
@@ -174,10 +163,10 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
       }
 
       .c32 {
-        font-weight: 500;
+        font-weight: 600;
+        color: #32324d;
         font-size: 0.75rem;
         line-height: 1.33;
-        color: #32324d;
       }
 
       .c29 {
@@ -259,7 +248,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         width: 100%;
       }
 
-      .c30 .sc-giImIA {
+      .c30 .sc-kstqJO {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -313,17 +302,17 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
       }
 
       .c14 {
-        font-weight: 500;
+        font-weight: 600;
+        color: #32324d;
         font-size: 0.75rem;
         line-height: 1.33;
-        color: #32324d;
       }
 
       .c15 {
-        font-weight: 400;
+        line-height: 1.14;
+        color: #d02b20;
         font-size: 0.875rem;
         line-height: 1.43;
-        color: #d02b20;
       }
 
       .c21 {
@@ -492,6 +481,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         border: 1px solid #c0c0cf;
         -webkit-appearance: none;
         background-color: #ffffff;
+        cursor: pointer;
       }
 
       .c27:checked {
@@ -575,10 +565,9 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
       }
 
       .c25 {
-        font-weight: 400;
+        color: #32324d;
         font-size: 0.875rem;
         line-height: 1.43;
-        color: #32324d;
       }
 
       .c26 {
@@ -593,7 +582,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
       }
 
       .c26 * {
-        cursor: default;
+        cursor: pointer;
       }
 
       .c7 {
@@ -846,7 +835,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
               href="/auth/forgot-password"
             >
               <span
-                class="c36 c37 c38"
+                class="c36"
               >
                 Forgot your password?
               </span>
