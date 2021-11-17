@@ -1,28 +1,18 @@
 import React, { useState, useRef } from 'react';
+import PropTypes from 'prop-types';
 import { Button } from '@strapi/design-system/Button';
-import { useQueryParams } from '@strapi/helper-plugin';
 import FilterIcon from '@strapi/icons/Filter';
 import { useIntl } from 'react-intl';
-import FilterList from '../../../components/FilterList';
-import FilterPopover from '../../../components/FilterPopover';
+import FilterList from '../../FilterList';
+import FilterPopover from '../../FilterPopover';
 import displayedFilters from '../../../utils/displayedFilters';
 
-export const Filters = () => {
+export const Filters = ({ appliedFilters, onChangeFilters }) => {
   const buttonRef = useRef(null);
   const [isVisible, setVisible] = useState(false);
   const { formatMessage } = useIntl();
-  const [{ query }, setQuery] = useQueryParams();
-  const filters = query?.filters?.$and || [];
 
   const toggleFilter = () => setVisible(prev => !prev);
-
-  const handleRemoveFilter = nextFilters => {
-    setQuery({ filters: { $and: nextFilters }, page: 1 });
-  };
-
-  const handleSubmit = filters => {
-    setQuery({ filters: { $and: filters }, page: 1 });
-  };
 
   return (
     <>
@@ -38,17 +28,23 @@ export const Filters = () => {
       {isVisible && (
         <FilterPopover
           displayedFilters={displayedFilters}
-          filters={filters}
-          onSubmit={handleSubmit}
+          filters={appliedFilters}
+          onSubmit={onChangeFilters}
           onToggle={toggleFilter}
           source={buttonRef}
         />
       )}
+
       <FilterList
-        appliedFilters={filters}
+        appliedFilters={appliedFilters}
         filtersSchema={displayedFilters}
-        onRemoveFilter={handleRemoveFilter}
+        onRemoveFilter={onChangeFilters}
       />
     </>
   );
+};
+
+Filters.propTypes = {
+  appliedFilters: PropTypes.array.isRequired,
+  onChangeFilters: PropTypes.func.isRequired,
 };
