@@ -29,6 +29,7 @@ const Wrapper = styled(Stack)`
     background: ${({ theme }) => theme.colors.neutral0};
 
     .checkmark {
+      position: relative;
       display: block;
       will-change: transform;
       background: ${({ theme }) => theme.colors.neutral0};
