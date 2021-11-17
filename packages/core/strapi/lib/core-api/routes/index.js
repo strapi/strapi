@@ -14,19 +14,19 @@ const getSingleTypeRoutes = ({ uid, info }) => {
   return {
     find: {
       method: 'GET',
-      path: `/${info.pluralName}`,
+      path: `/${info.singularName}`,
       handler: `${uid}.find`,
       config: {},
     },
     update: {
       method: 'PUT',
-      path: `/${info.pluralName}`,
+      path: `/${info.singularName}`,
       handler: `${uid}.update`,
       config: {},
     },
     delete: {
       method: 'DELETE',
-      path: `/${info.pluralName}`,
+      path: `/${info.singularName}`,
       handler: `${uid}.delete`,
       config: {},
     },
