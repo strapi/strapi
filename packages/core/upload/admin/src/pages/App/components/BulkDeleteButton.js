@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Subtitle } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { Button } from '@strapi/design-system/Button';
 import { Stack } from '@strapi/design-system/Stack';
 import Trash from '@strapi/icons/Trash';
@@ -23,7 +23,7 @@ export const BulkDeleteButton = ({ selectedAssets, onSuccess }) => {
   return (
     <>
       <Stack horizontal size={2} paddingBottom={5}>
-        <Subtitle textColor="neutral600">
+        <Typography variant="epsilon" textColor="neutral600">
           {formatMessage(
             {
               id: getTrad('list.assets.selected'),
@@ -34,7 +34,7 @@ export const BulkDeleteButton = ({ selectedAssets, onSuccess }) => {
               number: selectedAssets.length,
             }
           )}
-        </Subtitle>
+        </Typography>
         <Button
           variant="danger-light"
           size="S"
