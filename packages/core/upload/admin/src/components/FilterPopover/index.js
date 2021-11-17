@@ -52,6 +52,7 @@ const FilterPopover = ({ displayedFilters, filters, onSubmit, onToggle, source }
 
   const handleSubmit = e => {
     e.preventDefault();
+    e.stopPropagation();
 
     if (modifiedData.value) {
       if (modifiedData.name === 'mime') {

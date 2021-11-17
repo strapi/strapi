@@ -45,7 +45,7 @@ export const AssetDialog = ({
   } = useMediaLibraryPermissions();
   const [
     { rawQuery, queryObject },
-    { onChangePage, onChangePageSize, onChangeSort, onChangeSearch },
+    { onChangeFilters, onChangePage, onChangePageSize, onChangeSort, onChangeSearch },
   ] = useModalQueryParams();
   const { data, isLoading, error } = useModalAssets({ skipWhen: !canRead, rawQuery });
 
@@ -114,7 +114,7 @@ export const AssetDialog = ({
     );
   }
 
-  if (canRead && assets?.length === 0 && !queryObject._q) {
+  if (canRead && assets?.length === 0 && !queryObject._q && queryObject.filters.$and.length === 0) {
     return (
       <ModalLayout onClose={onClose} labelledBy="asset-dialog-title">
         <DialogTitle />
@@ -216,6 +216,7 @@ export const AssetDialog = ({
                 onEditAsset={canUpdate ? setAssetToEdit : undefined}
                 pagination={data?.pagination}
                 queryObject={queryObject}
+                onChangeFilters={onChangeFilters}
                 onChangePage={onChangePage}
                 onChangePageSize={onChangePageSize}
                 onChangeSort={onChangeSort}
