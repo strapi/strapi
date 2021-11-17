@@ -6,7 +6,7 @@ import { PaginationURLQuery, PageSizeURLQuery } from '@strapi/helper-plugin';
 
 const PaginationFooter = ({ pagination }) => {
   return (
-    <Box paddingTop={6}>
+    <Box paddingTop={4}>
       <Flex alignItems="flex-end" justifyContent="space-between">
         <PageSizeURLQuery />
         <PaginationURLQuery pagination={pagination} />
