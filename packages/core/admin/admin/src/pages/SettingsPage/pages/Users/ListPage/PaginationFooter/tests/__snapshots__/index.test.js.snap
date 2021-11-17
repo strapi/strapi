@@ -14,7 +14,7 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
 }
 
 .c0 {
-  padding-top: 24px;
+  padding-top: 16px;
 }
 
 .c14 {

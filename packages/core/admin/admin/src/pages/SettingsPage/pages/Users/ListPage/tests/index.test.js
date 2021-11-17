@@ -143,7 +143,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
       }
 
       .c44 {
-        padding-top: 24px;
+        padding-top: 16px;
       }
 
       .c58 {
