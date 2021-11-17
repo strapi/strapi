@@ -15,6 +15,7 @@ import { Textarea } from '@strapi/design-system/Textarea';
 import { TextInput } from '@strapi/design-system/TextInput';
 import { TimePicker } from '@strapi/design-system/TimePicker';
 import { ToggleInput } from '@strapi/design-system/ToggleInput';
+import { Icon } from '@strapi/design-system/Icon';
 import EyeStriked from '@strapi/icons/EyeStriked';
 import Eye from '@strapi/icons/Eye';
 import DateTimePicker from '../DateTimePicker';
@@ -239,7 +240,11 @@ const GenericInput = ({
               }}
               type="button"
             >
-              {showPassword ? <Eye /> : <EyeStriked />}
+              {showPassword ? (
+                <Icon as={Eye} color="neutral500" />
+              ) : (
+                <Icon as={EyeStriked} color="neutral500" />
+              )}
             </button>
           }
           label={label}
