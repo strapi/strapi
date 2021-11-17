@@ -27,14 +27,12 @@ const apisRegistry = strapi => {
         const uid = `api::${apiName}.${ctName}`;
 
         if (!has(contentType.modelName, api.services)) {
-          const service = createService({ contentType, strapi });
+          const service = createService({ contentType });
           strapi.container.get('services').set(uid, service);
         }
 
         if (!has(contentType.modelName, api.controllers)) {
-          const service = strapi.container.get('services').get(uid);
-
-          const controller = createController({ contentType, service });
+          const controller = createController({ contentType });
           strapi.container.get('controllers').set(uid, controller);
         }
       }

@@ -9,7 +9,9 @@ const { parseBody } = require('./transform');
  *
  * Returns a collection type controller to handle default core-api actions
  */
-const createCollectionTypeController = ({ service }) => {
+const createCollectionTypeController = ({ contentType }) => {
+  const { uid } = contentType;
+
   return {
     /**
      * Retrieve records.
@@ -19,7 +21,7 @@ const createCollectionTypeController = ({ service }) => {
     async find(ctx) {
       const { query } = ctx;
 
-      const { results, pagination } = await service.find(query);
+      const { results, pagination } = await strapi.service(uid).find(query);
       const sanitizedResults = await this.sanitizeOutput(results, ctx);
 
       return this.transformResponse(sanitizedResults, { pagination });
@@ -34,7 +36,7 @@ const createCollectionTypeController = ({ service }) => {
       const { id } = ctx.params;
       const { query } = ctx;
 
-      const entity = await service.findOne(id, query);
+      const entity = await strapi.service(uid).findOne(id, query);
       const sanitizedEntity = await this.sanitizeOutput(entity, ctx);
 
       return this.transformResponse(sanitizedEntity);
@@ -56,7 +58,9 @@ const createCollectionTypeController = ({ service }) => {
 
       const sanitizedInputData = await this.sanitizeInput(data, ctx);
 
-      const entity = await service.create({ ...query, data: sanitizedInputData, files });
+      const entity = await strapi
+        .service(uid)
+        .create({ ...query, data: sanitizedInputData, files });
       const sanitizedEntity = await this.sanitizeOutput(entity, ctx);
 
       return this.transformResponse(sanitizedEntity);
@@ -79,7 +83,9 @@ const createCollectionTypeController = ({ service }) => {
 
       const sanitizedInputData = await this.sanitizeInput(data, ctx);
 
-      const entity = await service.update(id, { ...query, data: sanitizedInputData, files });
+      const entity = await strapi
+        .service(uid)
+        .update(id, { ...query, data: sanitizedInputData, files });
       const sanitizedEntity = await this.sanitizeOutput(entity, ctx);
 
       return this.transformResponse(sanitizedEntity);
@@ -94,7 +100,7 @@ const createCollectionTypeController = ({ service }) => {
       const { id } = ctx.params;
       const { query } = ctx;
 
-      const entity = await service.delete(id, query);
+      const entity = await strapi.service(uid).delete(id, query);
       const sanitizedEntity = await this.sanitizeOutput(entity, ctx);
 
       return this.transformResponse(sanitizedEntity);

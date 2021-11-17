@@ -22,7 +22,7 @@ const setPublishedAt = data => {
  *
  * Returns a collection type service to handle default core-api actions
  */
-const createCollectionTypeService = ({ contentType, strapi }) => {
+const createCollectionTypeService = ({ contentType }) => {
   const { uid } = contentType;
 
   return {

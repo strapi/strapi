@@ -5,7 +5,7 @@ const { ValidationError } = require('@strapi/utils').errors;
 /**
  * Returns a single type service to handle default core-api actions
  */
-const createSingleTypeService = ({ contentType, strapi }) => {
+const createSingleTypeService = ({ contentType }) => {
   const { uid } = contentType;
 
   return {

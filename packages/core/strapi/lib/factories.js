@@ -8,13 +8,9 @@ const { createRoutes } = require('./core-api/routes');
 
 const createCoreController = (uid, cfg = {}) => {
   return ({ strapi }) => {
-    const deps = {
-      strapi,
-      service: strapi.service(uid),
+    const baseController = createController({
       contentType: strapi.contentType(uid),
-    };
-
-    const baseController = createController(deps);
+    });
 
     let userCtrl = typeof cfg === 'function' ? cfg({ strapi }) : cfg;
 
@@ -31,12 +27,9 @@ const createCoreController = (uid, cfg = {}) => {
 
 const createCoreService = (uid, cfg = {}) => {
   return ({ strapi }) => {
-    const deps = {
-      strapi,
+    const baseService = createService({
       contentType: strapi.contentType(uid),
-    };
-
-    const baseService = createService(deps);
+    });
 
     let userService = typeof cfg === 'function' ? cfg({ strapi }) : cfg;
 

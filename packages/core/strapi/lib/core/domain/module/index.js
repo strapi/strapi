@@ -27,8 +27,6 @@ const createModule = (namespace, rawModule, strapi) => {
   try {
     validateModule(rawModule);
   } catch (e) {
-    console.error(e);
-
     throw new Error(`strapi-server.js is invalid for '${namespace}'.\n${e.errors.join('\n')}`);
   }
 

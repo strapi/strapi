@@ -13,15 +13,15 @@ const createCollectionTypeService = require('./collection-type');
  * @param {{ model: object, strapi: object }} context
  * @returns {object}
  */
-const createService = ({ contentType, strapi }) => {
+const createService = ({ contentType }) => {
   const proto = { getFetchParams };
 
   let service;
 
   if (isSingleType(contentType)) {
-    service = createSingleTypeService({ contentType, strapi });
+    service = createSingleTypeService({ contentType });
   } else {
-    service = createCollectionTypeService({ contentType, strapi });
+    service = createCollectionTypeService({ contentType });
   }
 
   return Object.assign(Object.create(proto), service);
