@@ -6,7 +6,7 @@ import { Box } from '@strapi/design-system/Box';
 import { FocusTrap } from '@strapi/design-system/FocusTrap';
 import { Portal } from '@strapi/design-system/Portal';
 import { BaseButton } from '@strapi/design-system/BaseButton';
-import { Text } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { pxToRem } from '@strapi/helper-plugin';
 import Collapse from '@strapi/icons/Collapse';
 import { useIntl } from 'react-intl';
@@ -85,12 +85,12 @@ export const EditorLayout = ({ children, isExpandMode, error, previewContent, on
                 <Box flex="1" height="100%">
                   <Flex height={pxToRem(48)} background="neutral100" justifyContent="flex-end">
                     <ExpandButton id="collapse" onClick={onCollapse}>
-                      <Text>
+                      <Typography>
                         {formatMessage({
                           id: 'components.Wysiwyg.collapse',
                           defaultMessage: 'Collapse',
                         })}
-                      </Text>
+                      </Typography>
                       <Collapse />
                     </ExpandButton>
                   </Flex>

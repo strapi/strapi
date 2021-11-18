@@ -5,7 +5,7 @@ import styled from 'styled-components';
 import { useIntl } from 'react-intl';
 import { pxToRem } from '@strapi/helper-plugin';
 import { Flex } from '@strapi/design-system/Flex';
-import { Text } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import get from 'lodash/get';
 import has from 'lodash/has';
 import isEmpty from 'lodash/isEmpty';
@@ -41,7 +41,7 @@ const SingleValue = props => {
       <Component {...props}>
         <Flex>
           <StyledBullet title={title} isDraft={isDraft} />
-          <Text ellipsis>{props.data.label || '-'}</Text>
+          <Typography ellipsis>{props.data.label || '-'}</Typography>
         </Flex>
       </Component>
     );

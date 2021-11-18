@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Text } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { Box } from '@strapi/design-system/Box';
 import { getTrad } from '../../utils';
 
@@ -23,9 +23,9 @@ const State = ({ isPublished }) => {
       paddingRight={2}
       style={{ width: 'fit-content' }}
     >
-      <Text bold textColor={textColor}>
+      <Typography fontWeight="bold" textColor={textColor}>
         {content}
-      </Text>
+      </Typography>
     </Box>
   );
 };
