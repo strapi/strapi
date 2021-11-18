@@ -9,3 +9,4 @@ yarn-error.log
 npm-debug.log
 .idea
 .env
+admin/src/plugins-dev.js
