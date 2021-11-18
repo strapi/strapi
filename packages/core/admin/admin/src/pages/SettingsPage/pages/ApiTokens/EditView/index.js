@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useIntl } from 'react-intl';
 import {
   SettingsPageTitle,
@@ -6,6 +6,7 @@ import {
   Form,
   useOverlayBlocker,
   useNotification,
+  useTracking,
 } from '@strapi/helper-plugin';
 import { HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
@@ -37,6 +38,12 @@ const ApiTokenCreateView = () => {
   const { lockApp, unlockApp } = useOverlayBlocker();
   const toggleNotification = useNotification();
   const history = useHistory();
+  const { trackUsage } = useTracking();
+  const trackUsageRef = useRef(trackUsage);
+
+  useEffect(() => {
+    trackUsageRef.current('didEditTokenFromList');
+  }, []);
 
   const {
     params: { id },
@@ -73,6 +80,7 @@ const ApiTokenCreateView = () => {
   }
 
   const handleSubmit = async (body, actions) => {
+    trackUsageRef(isCreating ? 'willCreateToken' : 'willEditToken');
     lockApp();
 
     try {
@@ -88,6 +96,8 @@ const ApiTokenCreateView = () => {
         type: 'success',
         message: formatMessage({ id: 'notification.success.saved', defaultMessage: 'Saved' }),
       });
+
+      trackUsageRef(isCreating ? 'didCreateToken' : 'didEditToken', { type: apiToken.type });
 
       if (isCreating) {
         history.replace(`/settings/api-tokens/${response.id}`, { apiToken: response });
