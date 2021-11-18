@@ -138,7 +138,7 @@ const RepeatableComponent = ({
       <AccordionGroupCustom
         error={errorMessage}
         footer={
-          <Flex justifyContent="center" height="48px" background="neutral0" hasRadius>
+          <Flex justifyContent="center" height="48px" background="neutral0">
             <TextButtonCustom disabled={isReadOnly} onClick={handleClick} startIcon={<Plus />}>
               {formatMessage({
                 id: getTrad('containers.EditView.add.new-entry'),
