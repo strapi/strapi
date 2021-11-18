@@ -1,5 +1,7 @@
 import { Service } from './core-api/service';
 import { Controller } from './core-api/controller';
+import { Middleware } from './middlewares';
+import { Policy } from './core/registries/policies';
 
 type ControllerConfig = Controller;
 
@@ -7,8 +9,8 @@ type ServiceConfig = Service;
 
 type HandlerConfig = {
   auth: false | { scope: string[] };
-  policies: string[];
-  middlewares: string[];
+  policies: Array<string | Policy>;
+  middlewares: Array<string | Middleware>;
 };
 
 type SingleTypeRouterConfig = {

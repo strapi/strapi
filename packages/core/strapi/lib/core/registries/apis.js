@@ -1,8 +1,6 @@
 'use strict';
 
 const { has } = require('lodash/fp');
-const { createService } = require('../../core-api/service');
-const { createController } = require('../../core-api/controller');
 
 const apisRegistry = strapi => {
   const apis = {};
@@ -20,22 +18,6 @@ const apisRegistry = strapi => {
       }
 
       const api = strapi.container.get('modules').add(`api::${apiName}`, apiConfig);
-
-      for (const ctName in api.contentTypes || {}) {
-        const contentType = api.contentTypes[ctName];
-
-        const uid = `api::${apiName}.${ctName}`;
-
-        if (!has(contentType.modelName, api.services)) {
-          const service = createService({ contentType });
-          strapi.container.get('services').set(uid, service);
-        }
-
-        if (!has(contentType.modelName, api.controllers)) {
-          const controller = createController({ contentType });
-          strapi.container.get('controllers').set(uid, controller);
-        }
-      }
 
       apis[apiName] = api;
 
