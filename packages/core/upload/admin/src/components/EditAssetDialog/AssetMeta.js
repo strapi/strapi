@@ -4,7 +4,6 @@ import { useIntl } from 'react-intl';
 import { Box } from '@strapi/design-system/Box';
 import { Stack } from '@strapi/design-system/Stack';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
-import { TableLabel, Text } from '@strapi/design-system/Text';
 import { Typography } from '@strapi/design-system/Typography';
 import getTrad from '../../utils/getTrad';
 
@@ -23,45 +22,45 @@ export const AssetMeta = ({ size, date, dimension, extension }) => {
       <Grid gap={4}>
         <GridItem col={6} xs={12}>
           <Stack size={1}>
-            <TableLabel textColor="neutral600">
+            <Typography variant="sigma" textColor="neutral600">
               {formatMessage({ id: getTrad('modal.file-details.size'), defaultMessage: 'Size' })}
-            </TableLabel>
-            <Text small textColor="neutral700">
+            </Typography>
+            <Typography variant="pi" textColor="neutral700">
               {size}
-            </Text>
+            </Typography>
           </Stack>
         </GridItem>
         <GridItem col={6} xs={12}>
           <Stack size={1}>
-            <TableLabel textColor="neutral600">
+            <Typography variant="sigma" textColor="neutral600">
               {formatMessage({ id: getTrad('modal.file-details.date'), defaultMessage: 'Date' })}
-            </TableLabel>
-            <Text small textColor="neutral700">
+            </Typography>
+            <Typography variant="pi" textColor="neutral700">
               {date}
-            </Text>
+            </Typography>
           </Stack>
         </GridItem>
         <GridItem col={6} xs={12}>
           <Stack size={1}>
-            <TableLabel textColor="neutral600">
+            <Typography variant="sigma" textColor="neutral600">
               {formatMessage({
                 id: getTrad('modal.file-details.dimensions'),
                 defaultMessage: 'Dimensions',
               })}
-            </TableLabel>
-            <Text small textColor="neutral700">
+            </Typography>
+            <Typography variant="pi" textColor="neutral700">
               {dimension}
-            </Text>
+            </Typography>
           </Stack>
         </GridItem>
         <GridItem col={6} xs={12}>
           <Stack size={1}>
-            <TableLabel textColor="neutral600">
+            <Typography variant="sigma" textColor="neutral600">
               {formatMessage({
                 id: getTrad('modal.file-details.extension'),
                 defaultMessage: 'Extension',
               })}
-            </TableLabel>
+            </Typography>
 
             <Typography
               textColor="neutral700"

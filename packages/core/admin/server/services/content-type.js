@@ -35,11 +35,11 @@ const getNestedFields = (
       if (nonAuthorizableFields.includes(key)) return fields;
 
       const fieldPath = prefix ? `${prefix}.${key}` : key;
-      const requiredOrNotNeeded = !requiredOnly || attr.required === true;
+      const shouldBeIncluded = !requiredOnly || attr.required === true;
       const insideExistingFields = existingFields && existingFields.some(startsWith(fieldPath));
 
       if (attr.type === 'component') {
-        if (requiredOrNotNeeded || insideExistingFields) {
+        if (shouldBeIncluded || insideExistingFields) {
           const compoFields = getNestedFields(components[attr.component], {
             nestingLevel: nestingLevel - 1,
             prefix: fieldPath,
@@ -48,7 +48,7 @@ const getNestedFields = (
             existingFields,
           });
 
-          if (requiredOnly && compoFields.length === 0 && attr.required) {
+          if (compoFields.length === 0 && shouldBeIncluded) {
             return fields.concat(fieldPath);
           }
 
@@ -57,7 +57,7 @@ const getNestedFields = (
         return fields;
       }
 
-      if (requiredOrNotNeeded) {
+      if (shouldBeIncluded) {
         return fields.concat(fieldPath);
       }
 

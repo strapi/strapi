@@ -29,8 +29,12 @@ const StyledAddIcon = styled(PlusCircle)`
 
 const StyledButton = styled(BaseButton)`
   border-radius: 26px;
+  border-color: ${({ theme }) => theme.colors.neutral150};
   background: ${({ theme }) => theme.colors.neutral0};
-  padding: ${({ theme }) => theme.spaces[3]};
+  padding-top: ${({ theme }) => theme.spaces[3]};
+  padding-right: ${({ theme }) => theme.spaces[4]};
+  padding-bottom: ${({ theme }) => theme.spaces[3]};
+  padding-left: ${({ theme }) => theme.spaces[4]};
 
   box-shadow: ${({ theme }) => theme.shadows.filterShadow};
 

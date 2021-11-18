@@ -12,7 +12,7 @@ import Check from '@strapi/icons/Check';
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
 import { ToggleInput } from '@strapi/design-system/ToggleInput';
-import { H3 } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { Button } from '@strapi/design-system/Button';
 import { Main } from '@strapi/design-system/Main';
 import { Stack } from '@strapi/design-system/Stack';
@@ -155,12 +155,12 @@ export const SettingsPage = () => {
                 <Box background="neutral0" padding={6} shadow="filterShadow" hasRadius>
                   <Stack size={4}>
                     <Flex>
-                      <H3 as="h2">
+                      <Typography variant="delta" as="h2">
                         {formatMessage({
                           id: getTrad('settings.section.image.label'),
                           defaultMessage: 'Image',
                         })}
-                      </H3>
+                      </Typography>
                     </Flex>
                     <Grid gap={6}>
                       <GridItem col={6} s={12}>

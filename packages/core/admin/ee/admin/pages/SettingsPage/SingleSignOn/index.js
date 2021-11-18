@@ -8,10 +8,10 @@ import {
 } from '@strapi/helper-plugin';
 import Check from '@strapi/icons/Check';
 import { ContentLayout, HeaderLayout, Layout } from '@strapi/design-system/Layout';
-import { Box } from '@strapi/design-system/Box';
 import { Button } from '@strapi/design-system/Button';
 import { Main } from '@strapi/design-system/Main';
 import { Stack } from '@strapi/design-system/Stack';
+import { Typography } from '@strapi/design-system/Typography';
 import { ToggleInput } from '@strapi/design-system/ToggleInput';
 import { Select, Option } from '@strapi/design-system/Select';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
@@ -61,123 +61,127 @@ export const SingleSignOn = () => {
   const isHeaderButtonDisabled = isEqual(initialData, modifiedData);
 
   return (
-    <Main tabIndex={-1}>
+    <Layout>
       <SettingsPageTitle name="SSO" />
-      <form
-        onSubmit={e => {
-          if (isHeaderButtonDisabled) {
-            e.preventDefault();
+      <Main tabIndex={-1}>
+        <form
+          onSubmit={e => {
+            if (isHeaderButtonDisabled) {
+              e.preventDefault();
 
-            return;
-          }
-          handleSubmit(e);
-        }}
-      >
-        <HeaderLayout
-          primaryAction={
-            <Button
-              data-testid="save-button"
-              disabled={isHeaderButtonDisabled}
-              loading={showHeaderButtonLoader}
-              startIcon={<Check />}
-              type="submit"
-              size="L"
-            >
-              {formatMessage({
-                id: 'app.components.Button.save',
-                defaultMessage: 'Save',
-              })}
-            </Button>
-          }
-          title={formatMessage({ id: 'Settings.sso.title', defaultMessage: 'Single Sign-On' })}
-          subtitle={formatMessage({
-            id: 'Settings.sso.description',
-            defaultMessage: 'Configure the settings for the Single Sign-On feature.',
-          })}
-        />
-        <ContentLayout>
-          {showLoader ? (
-            <LoadingIndicatorPage />
-          ) : (
-            <Layout>
-              <Stack size={12}>
-                <Box background="neutral0" padding={6} shadow="filterShadow" hasRadius>
-                  <Grid gap={4}>
-                    <GridItem col={6} m={6} s={12}>
-                      <ToggleInput
-                        aria-label="autoRegister"
-                        data-testid="autoRegister"
-                        disabled={!canUpdate}
-                        checked={modifiedData.autoRegister}
-                        hint={formatMessage({
-                          id: 'Settings.sso.form.registration.description',
-                          defaultMessage: 'Create new user on SSO login if no account exists',
-                        })}
-                        label={formatMessage({
-                          id: 'Settings.sso.form.registration.label',
-                          defaultMessage: 'Auto-registration',
-                        })}
-                        name="autoRegister"
-                        offLabel={formatMessage({
-                          id: 'app.components.ToggleCheckbox.off-label',
-                          defaultMessage: 'Off',
-                        })}
-                        onLabel={formatMessage({
-                          id: 'app.components.ToggleCheckbox.on-label',
-                          defaultMessage: 'On',
-                        })}
-                        onChange={e => {
-                          handleChange({
-                            target: { name: 'autoRegister', value: e.target.checked },
-                          });
-                        }}
-                      />
-                    </GridItem>
-                    <GridItem col={6} m={6} s={12}>
-                      <Select
-                        disabled={!canUpdate}
-                        hint={formatMessage({
-                          id: 'Settings.sso.form.defaultRole.description',
-                          defaultMessage:
-                            'It will attach the new authenticated user to the selected role',
-                        })}
-                        error={
-                          formErrors.defaultRole
-                            ? formatMessage({
-                                id: formErrors.defaultRole.id,
-                                defaultMessage: formErrors.defaultRole.id,
-                              })
-                            : ''
-                        }
-                        label={formatMessage({
-                          id: 'Settings.sso.form.defaultRole.label',
-                          defaultMessage: 'Default role',
-                        })}
-                        name="defaultRole"
-                        onChange={value => {
-                          handleChange({ target: { name: 'defaultRole', value } });
-                        }}
-                        placeholder={formatMessage({
-                          id: 'components.InputSelect.option.placeholder',
-                          defaultMessage: 'Choose here',
-                        })}
-                        value={modifiedData.defaultRole}
-                      >
-                        {roles.map(({ id, name }) => (
-                          <Option key={id} value={id.toString()}>
-                            {name}
-                          </Option>
-                        ))}
-                      </Select>
-                    </GridItem>
-                  </Grid>
-                </Box>
+              return;
+            }
+            handleSubmit(e);
+          }}
+        >
+          <HeaderLayout
+            primaryAction={
+              <Button
+                data-testid="save-button"
+                disabled={isHeaderButtonDisabled}
+                loading={showHeaderButtonLoader}
+                startIcon={<Check />}
+                type="submit"
+                size="L"
+              >
+                {formatMessage({
+                  id: 'app.components.Button.save',
+                  defaultMessage: 'Save',
+                })}
+              </Button>
+            }
+            title={formatMessage({ id: 'Settings.sso.title', defaultMessage: 'Single Sign-On' })}
+            subtitle={formatMessage({
+              id: 'Settings.sso.description',
+              defaultMessage: 'Configure the settings for the Single Sign-On feature.',
+            })}
+          />
+          <ContentLayout>
+            {showLoader ? (
+              <LoadingIndicatorPage />
+            ) : (
+              <Stack size={4} background="neutral0" padding={6} shadow="filterShadow" hasRadius>
+                <Typography variant="delta" as="h2">
+                  {formatMessage({
+                    id: 'Settings.sso.form.settings.title',
+                    defaultMessage: 'Settings',
+                  })}
+                </Typography>
+                <Grid gap={4}>
+                  <GridItem col={6} m={6} s={12}>
+                    <ToggleInput
+                      aria-label="autoRegister"
+                      data-testid="autoRegister"
+                      disabled={!canUpdate}
+                      checked={modifiedData.autoRegister}
+                      hint={formatMessage({
+                        id: 'Settings.sso.form.registration.description',
+                        defaultMessage: 'Create new user on SSO login if no account exists',
+                      })}
+                      label={formatMessage({
+                        id: 'Settings.sso.form.registration.label',
+                        defaultMessage: 'Auto-registration',
+                      })}
+                      name="autoRegister"
+                      offLabel={formatMessage({
+                        id: 'app.components.ToggleCheckbox.off-label',
+                        defaultMessage: 'Off',
+                      })}
+                      onLabel={formatMessage({
+                        id: 'app.components.ToggleCheckbox.on-label',
+                        defaultMessage: 'On',
+                      })}
+                      onChange={e => {
+                        handleChange({
+                          target: { name: 'autoRegister', value: e.target.checked },
+                        });
+                      }}
+                    />
+                  </GridItem>
+                  <GridItem col={6} m={6} s={12}>
+                    <Select
+                      disabled={!canUpdate}
+                      hint={formatMessage({
+                        id: 'Settings.sso.form.defaultRole.description',
+                        defaultMessage:
+                          'It will attach the new authenticated user to the selected role',
+                      })}
+                      error={
+                        formErrors.defaultRole
+                          ? formatMessage({
+                              id: formErrors.defaultRole.id,
+                              defaultMessage: formErrors.defaultRole.id,
+                            })
+                          : ''
+                      }
+                      label={formatMessage({
+                        id: 'Settings.sso.form.defaultRole.label',
+                        defaultMessage: 'Default role',
+                      })}
+                      name="defaultRole"
+                      onChange={value => {
+                        handleChange({ target: { name: 'defaultRole', value } });
+                      }}
+                      placeholder={formatMessage({
+                        id: 'components.InputSelect.option.placeholder',
+                        defaultMessage: 'Choose here',
+                      })}
+                      value={modifiedData.defaultRole}
+                    >
+                      {roles.map(({ id, name }) => (
+                        <Option key={id} value={id.toString()}>
+                          {name}
+                        </Option>
+                      ))}
+                    </Select>
+                  </GridItem>
+                </Grid>
               </Stack>
-            </Layout>
-          )}
-        </ContentLayout>
-      </form>
-    </Main>
+            )}
+          </ContentLayout>
+        </form>
+      </Main>
+    </Layout>
   );
 };
 

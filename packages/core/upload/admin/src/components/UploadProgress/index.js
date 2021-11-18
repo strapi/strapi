@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import Cross from '@strapi/icons/Cross';
-import { Text } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
 import { ProgressBar } from '@strapi/design-system/ProgressBar';
@@ -57,12 +57,12 @@ export const UploadProgress = ({ onCancel, progress, error }) => {
           </Box>
 
           <CancelButton type="button" onClick={onCancel}>
-            <Text small as="span" textColor="neutral200">
+            <Typography variant="pi" as="span" textColor="neutral200">
               {formatMessage({
                 id: 'app.components.Button.cancel',
                 defaultMessage: 'Cancel',
               })}
-            </Text>
+            </Typography>
             <Box as="span" paddingLeft={2} aria-hidden>
               <Cross />
             </Box>

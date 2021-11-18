@@ -292,6 +292,10 @@ function ListView({
                     { id: 'app.component.search.label', defaultMessage: 'Search for {target}' },
                     { target: headerLayoutTitle }
                   )}
+                  placeholder={formatMessage({
+                    id: 'app.component.search.placeholder',
+                    defaultMessage: 'Search...',
+                  })}
                   trackedEvent="didSearch"
                 />
               )}
