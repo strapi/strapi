@@ -96,7 +96,6 @@ module.exports = async function buildStarter({ projectName, starter }, program) 
   let starterParentPath;
   let starterPackageInfo = {};
   const isLocalStarter = ['./', '../', '/'].some(filePrefix => starter.startsWith(filePrefix));
-  console.log('STARTER', starter);
 
   // Project directory
   const rootPath = resolve(projectName);
