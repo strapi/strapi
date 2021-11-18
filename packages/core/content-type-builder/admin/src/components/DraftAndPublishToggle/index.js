@@ -6,15 +6,20 @@
 
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
+import styled from 'styled-components';
 import { useIntl } from 'react-intl';
 import { Dialog, DialogBody, DialogFooter } from '@strapi/design-system/Dialog';
 import { ToggleInput } from '@strapi/design-system/ToggleInput';
-import { Text } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { Flex } from '@strapi/design-system/Flex';
 import { Stack } from '@strapi/design-system/Stack';
 import { Button } from '@strapi/design-system/Button';
 import ExclamationMarkCircle from '@strapi/icons/ExclamationMarkCircle';
 import { getTrad } from '../../utils';
+
+const TypographyTextAlign = styled(Typography)`
+  text-align: center;
+`;
 
 const DraftAndPublishToggle = ({
   description,
@@ -81,22 +86,22 @@ const DraftAndPublishToggle = ({
         <Dialog onClose={handleToggle} title="Confirmation" isOpen={showWarning}>
           <DialogBody icon={<ExclamationMarkCircle />}>
             <Stack size={2}>
-              <Flex justifyContent="center" style={{ textAlign: 'center' }}>
-                <Text id="confirm-description">
+              <Flex justifyContent="center">
+                <TypographyTextAlign id="confirm-description">
                   {formatMessage({
                     id: getTrad('popUpWarning.draft-publish.message'),
                     defaultMessage:
                       'If you disable the Draft/Publish system, your drafts will be deleted.',
                   })}
-                </Text>
+                </TypographyTextAlign>
               </Flex>
-              <Flex justifyContent="center" style={{ textAlign: 'center' }}>
-                <Text id="confirm-description">
+              <Flex justifyContent="center">
+                <Typography id="confirm-description">
                   {formatMessage({
                     id: getTrad('popUpWarning.draft-publish.second-message'),
                     defaultMessage: 'Are you sure you want to disable it?',
                   })}
-                </Text>
+                </Typography>
               </Flex>
             </Stack>
           </DialogBody>

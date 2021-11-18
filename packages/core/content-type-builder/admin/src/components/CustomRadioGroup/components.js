@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 import { Stack } from '@strapi/design-system/Stack';
-import { Text } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { inputFocusStyle } from '@strapi/design-system/themes';
 
 const Wrapper = styled(Stack)`
@@ -60,7 +60,7 @@ const Wrapper = styled(Stack)`
 
   .container input:checked ~ div {
     background: ${({ theme }) => theme.colors.primary100};
-    ${Text} {
+    ${Typography} {
       color: ${({ theme }) => theme.colors.primary600};
     }
     border: 1px solid ${({ theme }) => theme.colors.primary200};

@@ -14,7 +14,7 @@ import { KeyboardNavigable } from '@strapi/design-system/KeyboardNavigable';
 import { ModalBody } from '@strapi/design-system/ModalLayout';
 import { Flex } from '@strapi/design-system/Flex';
 import { Stack } from '@strapi/design-system/Stack';
-import { H2 } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { getTrad } from '../../utils';
 import AttributeOption from './AttributeOption';
 
@@ -27,7 +27,9 @@ const AttributeOptions = ({ attributes, forTarget, kind }) => {
   return (
     <ModalBody>
       <Flex paddingBottom={4}>
-        <H2>{formatMessage({ id: titleId, defaultMessage: 'Select a field' })}</H2>
+        <Typography variant="beta" as="h2">
+          {formatMessage({ id: titleId, defaultMessage: 'Select a field' })}
+        </Typography>
       </Flex>
       <Divider />
       <Box paddingTop={6} paddingBottom={4}>

@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
 import { Divider } from '@strapi/design-system/Divider';
-import { Text } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { GenericInput } from '@strapi/helper-plugin';
 import getTrad from '../../../utils/getTrad';
 import RelationTargetPicker from './RelationTargetPicker';
@@ -23,9 +23,9 @@ const RelationFormBox = ({
     <Box background="neutral100" hasRadius borderColor="neutral200">
       <Flex paddingTop={isMain ? 4 : 1} paddingBottom={isMain ? 3 : 1} justifyContent="center">
         {isMain ? (
-          <Text textColor="neutral800" bold small>
+          <Typography variant="pi" fontWeight="bold" textColor="neutral800">
             {header}
-          </Text>
+          </Typography>
         ) : (
           <RelationTargetPicker
             target={target}

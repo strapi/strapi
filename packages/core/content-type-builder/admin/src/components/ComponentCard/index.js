@@ -9,7 +9,7 @@ import get from 'lodash/get';
 import PropTypes from 'prop-types';
 import { Box } from '@strapi/design-system/Box';
 import { Stack } from '@strapi/design-system/Stack';
-import { Text } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { pxToRem } from '@strapi/helper-plugin';
 import Cross from '@strapi/icons/Cross';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -74,10 +74,14 @@ const ComponentBox = styled(Box)`
       }
     }
 
-    ${Text} {
+    ${Typography} {
       color: ${({ theme }) => theme.colors.primary600};
     }
   }
+`;
+
+const StackCentered = styled(Stack)`
+  align-items: center;
 `;
 
 function ComponentCard({ component, dzName, index, isActive, isInDevelopmentMode, onClick }) {
@@ -101,12 +105,14 @@ function ComponentCard({ component, dzName, index, isActive, isInDevelopmentMode
         paddingLeft={4}
         paddingRight={4}
       >
-        <Stack size={1} style={{ justifyContent: 'center', alignItems: 'center' }}>
+        <StackCentered size={1}>
           <StyledFontAwesomeIcon icon={icon} />
-          <Text small bold ellipsis style={{ width: `calc(${pxToRem(140)} - 32px)` }}>
-            {displayName}
-          </Text>
-        </Stack>
+          <Box maxWidth={`calc(${pxToRem(140)} - 32px)`}>
+            <Typography variant="pi" fontWeight="bold" ellipsis>
+              {displayName}
+            </Typography>
+          </Box>
+        </StackCentered>
         {isInDevelopmentMode && (
           <CloseButton
             role="button"

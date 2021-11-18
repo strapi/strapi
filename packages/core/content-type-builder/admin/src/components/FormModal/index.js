@@ -17,7 +17,7 @@ import { Box } from '@strapi/design-system/Box';
 import { Button } from '@strapi/design-system/Button';
 import { Divider } from '@strapi/design-system/Divider';
 import { ModalLayout, ModalBody, ModalFooter } from '@strapi/design-system/ModalLayout';
-import { H2 } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { Tabs, Tab, TabGroup, TabPanels, TabPanel } from '@strapi/design-system/Tabs';
 import { Flex } from '@strapi/design-system/Flex';
 import { Stack } from '@strapi/design-system/Stack';
@@ -924,7 +924,7 @@ const FormModal = () => {
                 }}
               >
                 <Flex justifyContent="space-between">
-                  <H2>
+                  <Typography as="h2" variant="beta">
                     {formatMessage(
                       {
                         id: getModalTitleSubHeader({
@@ -946,7 +946,7 @@ const FormModal = () => {
                         step,
                       }
                     )}
-                  </H2>
+                  </Typography>
                   <Tabs>
                     <Tab hasError={doesBaseFormHasError}>
                       {formatMessage({

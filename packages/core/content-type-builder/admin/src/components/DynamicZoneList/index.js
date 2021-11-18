@@ -11,7 +11,7 @@ import { pxToRem } from '@strapi/helper-plugin';
 import Plus from '@strapi/icons/Plus';
 import { Box } from '@strapi/design-system/Box';
 import { Stack } from '@strapi/design-system/Stack';
-import { Text } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 import useDataManager from '../../hooks/useDataManager';
@@ -80,12 +80,12 @@ function DynamicZoneList({ customRowComponent, components, addComponent, name, t
               <button type="button" onClick={handleClickAdd}>
                 <ComponentStack size={1}>
                   <StyledAddIcon />
-                  <Text small bold textColor="primary600">
+                  <Typography varian="pi" fontWeight="bold" textColor="primary600">
                     {formatMessage({
                       id: getTrad('button.component.add'),
                       formatMessage: 'Add a component',
                     })}
-                  </Text>
+                  </Typography>
                 </ComponentStack>
               </button>
             )}

@@ -13,7 +13,7 @@ import { ModalHeader } from '@strapi/design-system/ModalLayout';
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
 import { Stack } from '@strapi/design-system/Stack';
-import { ButtonText } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import useDataManager from '../../hooks/useDataManager';
 import getTrad from '../../utils/getTrad';
 import AttributeIcon from '../AttributeIcon';
@@ -66,9 +66,9 @@ const FormModalHeader = ({
             <AttributeIcon type={icon} />
           </Box>
           <Box paddingLeft={3}>
-            <ButtonText textColor="neutral800" as="h2" id="title">
+            <Typography fontWeight="bold" textColor="neutral800" as="h2" id="title">
               {formatMessage({ id: headerId }, { name: displayName })}
-            </ButtonText>
+            </Typography>
           </Box>
         </Flex>
       </ModalHeader>
