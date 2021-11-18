@@ -10,3 +10,4 @@ npm-debug.log
 .idea
 .env
 admin/src/plugins-dev.js
+admin/src/plugins.js

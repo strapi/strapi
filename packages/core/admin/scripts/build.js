@@ -3,16 +3,28 @@
 const path = require('path');
 const webpack = require('webpack');
 const webpackConfig = require('../webpack.config');
+const {
+  getCorePluginsPath,
+  getPluginToInstallPath,
+  createPluginsFile,
+} = require('./create-plugins-file');
+
+const PLUGINS_TO_INSTALL = ['i18n'];
 
 const buildAdmin = async () => {
   const entry = path.join(__dirname, '..', 'admin', 'src');
   const dest = path.join(__dirname, '..', 'build');
+  const corePlugins = getCorePluginsPath();
+  const plugins = getPluginToInstallPath(PLUGINS_TO_INSTALL);
+  const allPlugins = { ...corePlugins, ...plugins };
+
+  await createPluginsFile(allPlugins);
 
   const args = {
     entry,
     dest,
     cacheDir: __dirname,
-    pluginsPath: [path.resolve(__dirname, '../../../..')],
+    pluginsPath: [path.resolve(__dirname, '../../../../packages')],
     env: 'production',
     optimize: true,
     options: {
