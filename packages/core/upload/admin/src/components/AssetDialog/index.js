@@ -168,7 +168,7 @@ export const AssetDialog = ({
 
   const handleMoveItem = (hoverIndex, destIndex) => {
     const offset = destIndex - hoverIndex;
-    const orderedAssetsClone = [...selectedAssets];
+    const orderedAssetsClone = selectedAssets.slice();
     const nextAssets = moveElement(orderedAssetsClone, hoverIndex, offset);
 
     setSelections(nextAssets);

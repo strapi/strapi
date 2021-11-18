@@ -30,12 +30,12 @@ export const Draggable = ({ children, id, index, moveItem }) => {
     }),
   });
 
-  const opacity = isDragging ? 0 : 1;
+  const opacity = isDragging ? 0.2 : 1;
 
   drag(drop(ref));
 
   return (
-    <div ref={ref} style={{ opacity }}>
+    <div ref={ref} style={{ opacity, cursor: 'move' }}>
       {children}
     </div>
   );
