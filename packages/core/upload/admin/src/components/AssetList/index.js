@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { Box } from '@strapi/design-system/Box';
 import { KeyboardNavigable } from '@strapi/design-system/KeyboardNavigable';
 import { AssetCard } from '../AssetCard/AssetCard';
+import { Draggable } from './Draggable';
+import { moveElement } from './utils';
 
 const GridColSize = {
   S: 180,
@@ -23,19 +25,45 @@ export const AssetList = ({
   onSelectAsset,
   selectedAssets,
   size,
+  sortable,
 }) => {
+  const [orderedAssets, setOrderedAssets] = useState(assets);
+
+  const handleMoveItem = (hoverIndex, destIndex) => {
+    const offset = destIndex - hoverIndex;
+    const orderedAssetsClone = [...orderedAssets];
+    const nextAssets = moveElement(orderedAssetsClone, hoverIndex, offset);
+
+    setOrderedAssets(nextAssets);
+  };
+
   return (
     <KeyboardNavigable tagName="article">
       <GridLayout size={size}>
-        {assets.map(asset => {
+        {orderedAssets.map((asset, index) => {
           const isSelected = Boolean(
             selectedAssets.find(currentAsset => currentAsset.id === asset.id)
           );
 
+          if (sortable) {
+            return (
+              <Draggable key={asset.id} index={index} moveItem={handleMoveItem} id={asset.id}>
+                <AssetCard
+                  allowedTypes={allowedTypes}
+                  asset={asset}
+                  isSelected={isSelected}
+                  onEdit={onEditAsset ? () => onEditAsset(asset) : undefined}
+                  onSelect={() => onSelectAsset(asset)}
+                  size={size}
+                />
+              </Draggable>
+            );
+          }
+
           return (
             <AssetCard
-              allowedTypes={allowedTypes}
               key={asset.id}
+              allowedTypes={allowedTypes}
               asset={asset}
               isSelected={isSelected}
               onEdit={onEditAsset ? () => onEditAsset(asset) : undefined}
@@ -61,6 +89,7 @@ AssetList.defaultProps = {
   allowedTypes: ['images', 'files', 'videos'],
   onEditAsset: undefined,
   size: 'M',
+  sortable: false,
 };
 
 AssetList.propTypes = {
@@ -70,4 +99,5 @@ AssetList.propTypes = {
   onSelectAsset: PropTypes.func.isRequired,
   selectedAssets: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
   size: PropTypes.oneOf(['S', 'M']),
+  sortable: PropTypes.bool,
 };

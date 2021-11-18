@@ -35,7 +35,7 @@ export const SelectedStep = ({ selectedAssets, onSelectAsset }) => {
         assets={selectedAssets}
         onSelectAsset={onSelectAsset}
         selectedAssets={selectedAssets}
-        onEditAsset={() => {}}
+        sortable
       />
     </Stack>
   );
