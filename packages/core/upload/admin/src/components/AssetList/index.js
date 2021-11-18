@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import { Box } from '@strapi/design-system/Box';
 import { KeyboardNavigable } from '@strapi/design-system/KeyboardNavigable';
 import { AssetCard } from '../AssetCard/AssetCard';
+import { Draggable } from './Draggable';
 
 const GridColSize = {
   S: 180,
@@ -23,19 +24,35 @@ export const AssetList = ({
   onSelectAsset,
   selectedAssets,
   size,
+  onReorderAsset,
 }) => {
   return (
     <KeyboardNavigable tagName="article">
       <GridLayout size={size}>
-        {assets.map(asset => {
+        {assets.map((asset, index) => {
           const isSelected = Boolean(
             selectedAssets.find(currentAsset => currentAsset.id === asset.id)
           );
 
+          if (onReorderAsset) {
+            return (
+              <Draggable key={asset.id} index={index} moveItem={onReorderAsset} id={asset.id}>
+                <AssetCard
+                  allowedTypes={allowedTypes}
+                  asset={asset}
+                  isSelected={isSelected}
+                  onEdit={onEditAsset ? () => onEditAsset(asset) : undefined}
+                  onSelect={() => onSelectAsset(asset)}
+                  size={size}
+                />
+              </Draggable>
+            );
+          }
+
           return (
             <AssetCard
-              allowedTypes={allowedTypes}
               key={asset.id}
+              allowedTypes={allowedTypes}
               asset={asset}
               isSelected={isSelected}
               onEdit={onEditAsset ? () => onEditAsset(asset) : undefined}
@@ -61,6 +78,7 @@ AssetList.defaultProps = {
   allowedTypes: ['images', 'files', 'videos'],
   onEditAsset: undefined,
   size: 'M',
+  onReorderAsset: undefined,
 };
 
 AssetList.propTypes = {
@@ -70,4 +88,5 @@ AssetList.propTypes = {
   onSelectAsset: PropTypes.func.isRequired,
   selectedAssets: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
   size: PropTypes.oneOf(['S', 'M']),
+  onReorderAsset: PropTypes.func,
 };

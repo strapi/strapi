@@ -6,7 +6,7 @@ import { Typography } from '@strapi/design-system/Typography';
 import { AssetList } from '../../AssetList';
 import getTrad from '../../../utils/getTrad';
 
-export const SelectedStep = ({ selectedAssets, onSelectAsset }) => {
+export const SelectedStep = ({ selectedAssets, onSelectAsset, onReorderAsset }) => {
   const { formatMessage } = useIntl();
 
   return (
@@ -35,13 +35,18 @@ export const SelectedStep = ({ selectedAssets, onSelectAsset }) => {
         assets={selectedAssets}
         onSelectAsset={onSelectAsset}
         selectedAssets={selectedAssets}
-        onEditAsset={() => {}}
+        onReorderAsset={onReorderAsset}
       />
     </Stack>
   );
 };
 
+SelectedStep.defaultProps = {
+  onReorderAsset: undefined,
+};
+
 SelectedStep.propTypes = {
   onSelectAsset: PropTypes.func.isRequired,
   selectedAssets: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
+  onReorderAsset: PropTypes.func,
 };

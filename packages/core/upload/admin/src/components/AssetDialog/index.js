@@ -23,6 +23,7 @@ import { DialogTitle } from './DialogTitle';
 import { DialogFooter } from './DialogFooter';
 import { EditAssetDialog } from '../EditAssetDialog';
 import { EmptyAssets } from '../EmptyAssets';
+import { moveElement } from '../../utils/moveElement';
 
 export const AssetDialog = ({
   allowedTypes,
@@ -49,7 +50,7 @@ export const AssetDialog = ({
   ] = useModalQueryParams();
   const { data, isLoading, error } = useModalAssets({ skipWhen: !canRead, rawQuery });
 
-  const [selectedAssets, { selectOne, selectAll, selectOnly }] = useSelectionState(
+  const [selectedAssets, { selectOne, selectAll, selectOnly, setSelections }] = useSelectionState(
     'id',
     initiallySelectedAssets
   );
@@ -165,6 +166,14 @@ export const AssetDialog = ({
     );
   }
 
+  const handleMoveItem = (hoverIndex, destIndex) => {
+    const offset = destIndex - hoverIndex;
+    const orderedAssetsClone = selectedAssets.slice();
+    const nextAssets = moveElement(orderedAssetsClone, hoverIndex, offset);
+
+    setSelections(nextAssets);
+  };
+
   return (
     <ModalLayout onClose={onClose} labelledBy="asset-dialog-title" aria-busy={loading}>
       <DialogTitle />
@@ -226,7 +235,11 @@ export const AssetDialog = ({
           </TabPanel>
           <TabPanel>
             <ModalBody>
-              <SelectedStep selectedAssets={selectedAssets} onSelectAsset={handleSelectAsset} />
+              <SelectedStep
+                selectedAssets={selectedAssets}
+                onSelectAsset={handleSelectAsset}
+                onReorderAsset={handleMoveItem}
+              />
             </ModalBody>
           </TabPanel>
         </TabPanels>
