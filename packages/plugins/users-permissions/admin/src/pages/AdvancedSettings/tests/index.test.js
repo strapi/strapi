@@ -238,7 +238,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
 
       .c27 {
         color: #32324d;
-        display: inline-block;
+        display: block;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
