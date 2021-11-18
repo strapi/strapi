@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { P } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 
 export const Hint = ({ id, error, name, description }) => {
   const { formatMessage } = useIntl();
@@ -17,9 +17,9 @@ export const Hint = ({ id, error, name, description }) => {
   }
 
   return (
-    <P small id={`${id || name}-hint`} textColor="neutral600">
+    <Typography as="p" variant="pi" id={`${id || name}-hint`} textColor="neutral600">
       {hint}
-    </P>
+    </Typography>
   );
 };
 

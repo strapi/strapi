@@ -13,7 +13,7 @@ import {
   ModalBody,
   ModalFooter,
 } from '@strapi/design-system/ModalLayout';
-import { ButtonText } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { Stack } from '@strapi/design-system/Stack';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { Button } from '@strapi/design-system/Button';
@@ -80,9 +80,9 @@ export const EditAssetDialog = ({
     <>
       <ModalLayout onClose={() => onClose()} labelledBy="title">
         <ModalHeader>
-          <ButtonText textColor="neutral800" as="h2" id="title">
+          <Typography fontWeight="bold" textColor="neutral800" as="h2" id="title">
             {formatMessage({ id: getTrad('modal.edit.title'), defaultMessage: 'Details' })}
-          </ButtonText>
+          </Typography>
         </ModalHeader>
         <ModalBody>
           <Grid gap={4}>

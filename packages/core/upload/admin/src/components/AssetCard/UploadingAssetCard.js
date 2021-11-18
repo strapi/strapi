@@ -10,7 +10,7 @@ import {
   CardSubtitle,
   CardBadge,
 } from '@strapi/design-system/Card';
-import { Text } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { Stack } from '@strapi/design-system/Stack';
 import { useIntl } from 'react-intl';
 import { getTrad } from '../../utils';
@@ -99,9 +99,9 @@ export const UploadingAssetCard = ({
         </CardBody>
       </Card>
       {error ? (
-        <Text small bold textColor="danger600">
+        <Typography variant="pi" fontWeight="bold" textColor="danger600">
           {error.message}
-        </Text>
+        </Typography>
       ) : (
         undefined
       )}

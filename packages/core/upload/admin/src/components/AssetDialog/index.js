@@ -23,6 +23,7 @@ import { DialogTitle } from './DialogTitle';
 import { DialogFooter } from './DialogFooter';
 import { EditAssetDialog } from '../EditAssetDialog';
 import { EmptyAssets } from '../EmptyAssets';
+import { moveElement } from '../../utils/moveElement';
 
 export const AssetDialog = ({
   allowedTypes,
@@ -45,11 +46,11 @@ export const AssetDialog = ({
   } = useMediaLibraryPermissions();
   const [
     { rawQuery, queryObject },
-    { onChangePage, onChangePageSize, onChangeSort, onChangeSearch },
+    { onChangeFilters, onChangePage, onChangePageSize, onChangeSort, onChangeSearch },
   ] = useModalQueryParams();
   const { data, isLoading, error } = useModalAssets({ skipWhen: !canRead, rawQuery });
 
-  const [selectedAssets, { selectOne, selectAll, selectOnly }] = useSelectionState(
+  const [selectedAssets, { selectOne, selectAll, selectOnly, setSelections }] = useSelectionState(
     'id',
     initiallySelectedAssets
   );
@@ -114,7 +115,7 @@ export const AssetDialog = ({
     );
   }
 
-  if (canRead && assets?.length === 0 && !queryObject._q) {
+  if (canRead && assets?.length === 0 && !queryObject._q && queryObject.filters.$and.length === 0) {
     return (
       <ModalLayout onClose={onClose} labelledBy="asset-dialog-title">
         <DialogTitle />
@@ -164,6 +165,14 @@ export const AssetDialog = ({
       />
     );
   }
+
+  const handleMoveItem = (hoverIndex, destIndex) => {
+    const offset = destIndex - hoverIndex;
+    const orderedAssetsClone = selectedAssets.slice();
+    const nextAssets = moveElement(orderedAssetsClone, hoverIndex, offset);
+
+    setSelections(nextAssets);
+  };
 
   return (
     <ModalLayout onClose={onClose} labelledBy="asset-dialog-title" aria-busy={loading}>
@@ -216,6 +225,7 @@ export const AssetDialog = ({
                 onEditAsset={canUpdate ? setAssetToEdit : undefined}
                 pagination={data?.pagination}
                 queryObject={queryObject}
+                onChangeFilters={onChangeFilters}
                 onChangePage={onChangePage}
                 onChangePageSize={onChangePageSize}
                 onChangeSort={onChangeSort}
@@ -225,7 +235,11 @@ export const AssetDialog = ({
           </TabPanel>
           <TabPanel>
             <ModalBody>
-              <SelectedStep selectedAssets={selectedAssets} onSelectAsset={handleSelectAsset} />
+              <SelectedStep
+                selectedAssets={selectedAssets}
+                onSelectAsset={handleSelectAsset}
+                onReorderAsset={handleMoveItem}
+              />
             </ModalBody>
           </TabPanel>
         </TabPanels>

@@ -20,6 +20,7 @@ import {
 } from '@strapi/helper-plugin';
 import { IconButton } from '@strapi/design-system/IconButton';
 import { Main } from '@strapi/design-system/Main';
+import { Box } from '@strapi/design-system/Box';
 import { ActionLayout, ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
 import { useNotifyAT } from '@strapi/design-system/LiveRegions';
 import { Button } from '@strapi/design-system/Button';
@@ -266,18 +267,20 @@ function ListView({
               <InjectionZone area="contentManager.listView.actions" />
               <FieldPicker layout={layout} />
               <CheckPermissions permissions={cmPermissions.collectionTypesConfigurations}>
-                <IconButtonCustom
-                  onClick={() => {
-                    trackUsage('willEditListLayout');
+                <Box paddingTop={1} paddingBottom={1}>
+                  <IconButtonCustom
+                    onClick={() => {
+                      trackUsage('willEditListLayout');
 
-                    push({ pathname: `${slug}/configurations/list`, search: pluginsQueryParams });
-                  }}
-                  icon={<Cog />}
-                  label={formatMessage({
-                    id: 'app.links.configure-view',
-                    defaultMessage: 'Configure the view',
-                  })}
-                />
+                      push({ pathname: `${slug}/configurations/list`, search: pluginsQueryParams });
+                    }}
+                    icon={<Cog />}
+                    label={formatMessage({
+                      id: 'app.links.configure-view',
+                      defaultMessage: 'Configure the view',
+                    })}
+                  />
+                </Box>
               </CheckPermissions>
             </>
           }
@@ -289,6 +292,10 @@ function ListView({
                     { id: 'app.component.search.label', defaultMessage: 'Search for {target}' },
                     { target: headerLayoutTitle }
                   )}
+                  placeholder={formatMessage({
+                    id: 'app.component.search.placeholder',
+                    defaultMessage: 'Search...',
+                  })}
                   trackedEvent="didSearch"
                 />
               )}

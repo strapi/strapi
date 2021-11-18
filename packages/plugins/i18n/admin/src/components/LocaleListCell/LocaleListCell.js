@@ -6,7 +6,7 @@ import { useSelector } from 'react-redux';
 import { Flex } from '@strapi/design-system/Flex';
 import { Box } from '@strapi/design-system/Box';
 import { Tooltip } from '@strapi/design-system/Tooltip';
-import { Text } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { Popover } from '@strapi/design-system/Popover';
 import { SortIcon, stopPropagation } from '@strapi/helper-plugin';
 import get from 'lodash/get';
@@ -102,7 +102,7 @@ const LocaleListCell = ({ localizations, locale: currentLocaleCode, id }) => {
       >
         <Button type="button" onClick={handleTogglePopover} ref={buttonRef}>
           <Flex>
-            <Text
+            <Typography
               style={{ maxWidth: '252px', cursor: 'pointer' }}
               data-for={elId}
               data-tip={localesNames}
@@ -110,7 +110,7 @@ const LocaleListCell = ({ localizations, locale: currentLocaleCode, id }) => {
               ellipsis
             >
               {localesNames}
-            </Text>
+            </Typography>
             <ActionWrapper>
               <SortIcon />
 
@@ -119,7 +119,7 @@ const LocaleListCell = ({ localizations, locale: currentLocaleCode, id }) => {
                   <ul>
                     {localesArray.map(name => (
                       <Box key={name} padding={3} as="li">
-                        <Text>{name}</Text>
+                        <Typography>{name}</Typography>
                       </Box>
                     ))}
                   </ul>

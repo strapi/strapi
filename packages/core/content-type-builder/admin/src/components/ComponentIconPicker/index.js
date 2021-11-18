@@ -9,7 +9,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
 import { Stack } from '@strapi/design-system/Stack';
-import { Text, P } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import useDataManager from '../../hooks/useDataManager';
 import getTrad from '../../utils/getTrad';
 import Cell from './Cell';
@@ -71,9 +71,15 @@ const ComponentIconPicker = ({ error, isCreating, intlLabel, name, onChange, val
     <Box>
       <Stack size={1}>
         <Flex justifyContent="space-between">
-          <Text textColor="neutral800" htmlFor={name} small bold as="label">
+          <Typography
+            variant="pi"
+            fontWeight="bold"
+            textColor="neutral800"
+            htmlFor={name}
+            as="label"
+          >
             {formatMessage(intlLabel)}
-          </Text>
+          </Typography>
           {showSearch ? (
             <div ref={searchWrapperRef} style={{ width: 206 }}>
               <Searchbar
@@ -148,9 +154,14 @@ const ComponentIconPicker = ({ error, isCreating, intlLabel, name, onChange, val
             </Box>
           </Box>
           {error && (
-            <P small id={`${name}-error`} textColor="danger600" data-strapi-field-error>
+            <Typography
+              variant="pi"
+              id={`${name}-error`}
+              textColor="danger600"
+              data-strapi-field-error
+            >
               {errorMessage}
-            </P>
+            </Typography>
           )}
         </Stack>
       </Stack>

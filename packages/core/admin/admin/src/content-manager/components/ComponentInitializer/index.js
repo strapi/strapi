@@ -6,7 +6,7 @@ import PlusCircle from '@strapi/icons/PlusCircle';
 import { Box } from '@strapi/design-system/Box';
 import { Stack } from '@strapi/design-system/Stack';
 import { Flex } from '@strapi/design-system/Flex';
-import { Text } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { pxToRem } from '@strapi/helper-plugin';
 import { getTrad } from '../../utils';
 
@@ -46,17 +46,17 @@ const ComponentInitializer = ({ error, isReadOnly, onClick }) => {
             </IconWrapper>
           </Flex>
           <Flex justifyContent="center">
-            <Text textColor="primary600" small bold>
+            <Typography textColor="primary600" variant="pi" fontWeight="bold">
               {formatMessage({
                 id: getTrad('components.empty-repeatable'),
                 defaultMessage: 'No entry yet. Click on the button below to add one.',
               })}
-            </Text>
+            </Typography>
           </Flex>
         </Stack>
       </Box>
       {error?.id && (
-        <Text textColor="danger600" small>
+        <Typography textColor="danger600" variant="pi">
           {formatMessage(
             {
               id: error.id,
@@ -64,7 +64,7 @@ const ComponentInitializer = ({ error, isReadOnly, onClick }) => {
             },
             error.values
           )}
-        </Text>
+        </Typography>
       )}
     </>
   );

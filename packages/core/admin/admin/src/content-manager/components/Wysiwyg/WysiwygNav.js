@@ -10,7 +10,7 @@ import { Flex } from '@strapi/design-system/Flex';
 import Bold from '@strapi/icons/Bold';
 import Italic from '@strapi/icons/Italic';
 import Underline from '@strapi/icons/Underline';
-import Strikethrough from '@strapi/icons/Strikethrough';
+import Strikethrough from '@strapi/icons/StrikeThrough';
 import BulletList from '@strapi/icons/BulletList';
 import NumberList from '@strapi/icons/NumberList';
 import Code from '@strapi/icons/Code';

@@ -4,7 +4,7 @@ import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import get from 'lodash/get';
 import { TextInput } from '@strapi/design-system/TextInput';
-import { Text } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import Refresh from '@strapi/icons/Refresh';
 import CheckCircle from '@strapi/icons/CheckCircle';
 import ExclamationMarkCircle from '@strapi/icons/ExclamationMarkCircle';
@@ -195,30 +195,30 @@ const InputUID = ({
           {availability && availability.isAvailable && !regenerateLabel && (
             <TextValidation alignItems="center" justifyContent="flex-end">
               <CheckCircle />
-              <Text textColor="success600" small>
+              <Typography textColor="success600" variant="pi">
                 {formatMessage({
                   id: 'content-manager.components.uid.available',
                   defaultMessage: 'Available',
                 })}
-              </Text>
+              </Typography>
             </TextValidation>
           )}
           {availability && !availability.isAvailable && !regenerateLabel && (
             <TextValidation notAvailable alignItems="center" justifyContent="flex-end">
               <ExclamationMarkCircle />
-              <Text textColor="danger600" small>
+              <Typography textColor="danger600" variant="pi">
                 {formatMessage({
                   id: 'content-manager.components.uid.unavailable',
                   defaultMessage: 'Unavailable',
                 })}
-              </Text>
+              </Typography>
             </TextValidation>
           )}
           {regenerateLabel && (
             <TextValidation alignItems="center" justifyContent="flex-end">
-              <Text textColor="primary600" small>
+              <Typography textColor="primary600" variant="pi">
                 {regenerateLabel}
-              </Text>
+              </Typography>
             </TextValidation>
           )}
           <FieldActionWrapper

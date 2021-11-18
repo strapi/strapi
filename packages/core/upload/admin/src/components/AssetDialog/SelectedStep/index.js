@@ -2,17 +2,17 @@ import React from 'react';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import { Stack } from '@strapi/design-system/Stack';
-import { Text } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { AssetList } from '../../AssetList';
 import getTrad from '../../../utils/getTrad';
 
-export const SelectedStep = ({ selectedAssets, onSelectAsset }) => {
+export const SelectedStep = ({ selectedAssets, onSelectAsset, onReorderAsset }) => {
   const { formatMessage } = useIntl();
 
   return (
     <Stack size={4}>
       <Stack size={0}>
-        <Text small bold textColor="neutral800">
+        <Typography variant="pi" fontWeight="bold" textColor="neutral800">
           {formatMessage(
             {
               id: getTrad('list.assets.selected'),
@@ -21,13 +21,13 @@ export const SelectedStep = ({ selectedAssets, onSelectAsset }) => {
             },
             { number: selectedAssets.length }
           )}
-        </Text>
-        <Text small textColor="neutral600">
+        </Typography>
+        <Typography variant="pi" textColor="neutral600">
           {formatMessage({
             id: getTrad('modal.upload-list.sub-header-subtitle'),
             defaultMessage: 'Manage the assets before adding them to the Media Library',
           })}
-        </Text>
+        </Typography>
       </Stack>
 
       <AssetList
@@ -35,13 +35,18 @@ export const SelectedStep = ({ selectedAssets, onSelectAsset }) => {
         assets={selectedAssets}
         onSelectAsset={onSelectAsset}
         selectedAssets={selectedAssets}
-        onEditAsset={() => {}}
+        onReorderAsset={onReorderAsset}
       />
     </Stack>
   );
 };
 
+SelectedStep.defaultProps = {
+  onReorderAsset: undefined,
+};
+
 SelectedStep.propTypes = {
   onSelectAsset: PropTypes.func.isRequired,
   selectedAssets: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
+  onReorderAsset: PropTypes.func,
 };

@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 import { Box } from '@strapi/design-system/Box';
-import { Text } from '@strapi/design-system/Text';
 import { Typography } from '@strapi/design-system/Typography';
 import { Flex } from '@strapi/design-system/Flex';
 import { KeyboardNavigable } from '@strapi/design-system/KeyboardNavigable';
@@ -73,9 +72,9 @@ const AccordionGroupCustom = ({ children, footer, label, labelAction, error }) =
     <KeyboardNavigable attributeName="data-strapi-accordion-toggle">
       {label && (
         <Flex paddingBottom={1}>
-          <Text as="label" textColor="neutral800" small bold>
+          <Typography as="label" textColor="neutral800" variant="pi" fontWeight="bold">
             {label}
-          </Text>
+          </Typography>
           {labelAction && <LabelAction paddingLeft={1}>{labelAction}</LabelAction>}
         </Flex>
       )}

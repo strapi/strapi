@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import { useIntl } from 'react-intl';
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
-import { Text } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import Plus from '@strapi/icons/Plus';
 import { pxToRem } from '@strapi/helper-plugin';
 import { getTrad } from '../../utils';
@@ -38,13 +38,13 @@ const Button = ({ disabled, onClick }) => {
       onClick={onClick}
     >
       <Flex justifyContent="center">
-        <Text textColor="primary600" bold>
+        <Typography fontWeight="bold" textColor="primary600">
           <StyledIcon />
           {formatMessage({
             id: getTrad('containers.EditView.add.new-entry'),
             defaultMessage: 'Add an entry',
           })}
-        </Text>
+        </Typography>
       </Flex>
     </StyledButton>
   );

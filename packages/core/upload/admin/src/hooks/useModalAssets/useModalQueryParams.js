@@ -7,7 +7,14 @@ const useModalQueryParams = () => {
     page: 1,
     sort: 'updatedAt:DESC',
     pageSize: 10,
+    filters: {
+      $and: [],
+    },
   });
+
+  const handleChangeFilters = nextFilters => {
+    setQueryObject(prev => ({ ...prev, page: 1, filters: { $and: nextFilters } }));
+  };
 
   const handleChangePageSize = pageSize => {
     setQueryObject(prev => ({ ...prev, pageSize: parseInt(pageSize, 10), page: 1 }));
@@ -40,6 +47,7 @@ const useModalQueryParams = () => {
   return [
     { queryObject, rawQuery: stringify(queryObject, { encode: false }) },
     {
+      onChangeFilters: handleChangeFilters,
       onChangePage: handeChangePage,
       onChangePageSize: handleChangePageSize,
       onChangeSort: handleChangeSort,

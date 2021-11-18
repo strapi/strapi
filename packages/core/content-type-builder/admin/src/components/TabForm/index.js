@@ -11,7 +11,7 @@ import get from 'lodash/get';
 import { GenericInput } from '@strapi/helper-plugin';
 import { Box } from '@strapi/design-system/Box';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
-import { H3 } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 
 /* eslint-disable react/no-array-index-key */
 const TabForm = ({ form, formErrors, genericInputProps, modifiedData, onChange }) => {
@@ -27,7 +27,9 @@ const TabForm = ({ form, formErrors, genericInputProps, modifiedData, onChange }
       <Box key={sectionIndex}>
         {section.sectionTitle && (
           <Box paddingBottom={4}>
-            <H3>{formatMessage(section.sectionTitle)}</H3>
+            <Typography variant="delta" as="h3">
+              {formatMessage(section.sectionTitle)}
+            </Typography>
           </Box>
         )}
         <Grid gap={4}>

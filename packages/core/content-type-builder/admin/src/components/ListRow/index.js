@@ -6,7 +6,7 @@ import { useIntl } from 'react-intl';
 import { IconButton } from '@strapi/design-system/IconButton';
 import { Flex } from '@strapi/design-system/Flex';
 import { Stack } from '@strapi/design-system/Stack';
-import { Text } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import Pencil from '@strapi/icons/Pencil';
 import Trash from '@strapi/icons/Trash';
 import { stopPropagation, onRowClick } from '@strapi/helper-plugin';
@@ -94,12 +94,12 @@ function ListRow({
         {loopNumber !== 0 && <Curve color={isFromDynamicZone ? 'primary200' : 'neutral150'} />}
         <Stack paddingLeft={2} size={4} horizontal>
           <AttributeIcon key={src} type={src} />
-          <Text bold>{upperFirst(name)}</Text>
+          <Typography fontWeight="bold">{upperFirst(name)}</Typography>
         </Stack>
       </td>
       <td>
         {target ? (
-          <Text>
+          <Typography>
             {formatMessage({
               id: getTrad(
                 `modelPage.attribute.${isMorph ? 'relation-polymorphic' : 'relationWith'}`
@@ -116,9 +116,9 @@ function ListRow({
                   defaultMessage: 'from',
                 })}: ${isPluginContentType})`}
             </span>
-          </Text>
+          </Typography>
         ) : (
-          <Text>
+          <Typography>
             {formatMessage({
               id: getTrad(`attribute.${readableType}`),
               defaultMessage: type,
@@ -129,7 +129,7 @@ function ListRow({
                 id: getTrad('component.repeatable'),
                 defaultMessage: '(repeatable)',
               })}
-          </Text>
+          </Typography>
         )}
       </td>
       <td>

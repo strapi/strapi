@@ -59,17 +59,16 @@ describe('<DraftAndPublishBadge />', () => {
       }
 
       .c4 {
-        font-weight: 400;
+        color: #2f6846;
         font-size: 0.875rem;
         line-height: 1.43;
-        color: #2f6846;
       }
 
       .c5 {
-        font-weight: 500;
+        font-weight: 600;
+        color: #2f6846;
         font-size: 0.875rem;
         line-height: 1.43;
-        color: #2f6846;
       }
 
       .c2 {
@@ -160,17 +159,16 @@ describe('<DraftAndPublishBadge />', () => {
       }
 
       .c4 {
-        font-weight: 400;
+        color: #006096;
         font-size: 0.875rem;
         line-height: 1.43;
-        color: #006096;
       }
 
       .c5 {
-        font-weight: 500;
+        font-weight: 600;
+        color: #006096;
         font-size: 0.875rem;
         line-height: 1.43;
-        color: #006096;
       }
 
       .c2 {

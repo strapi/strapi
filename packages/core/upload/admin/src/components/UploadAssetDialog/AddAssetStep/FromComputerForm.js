@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
-import { H3 } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { useTracking } from '@strapi/helper-plugin';
 import { ModalFooter } from '@strapi/design-system/ModalLayout';
 import { Button } from '@strapi/design-system/Button';
@@ -89,12 +89,12 @@ export const FromComputerForm = ({ onClose, onAddAssets, trackedLocation }) => {
                 </IconWrapper>
 
                 <Box paddingTop={3} paddingBottom={5}>
-                  <H3 textColor="neutral600" as="span">
+                  <Typography variant="delta" textColor="neutral600" as="span">
                     {formatMessage({
                       id: getTrad('input.label'),
                       defaultMessage: 'Drag & Drop here or',
                     })}
-                  </H3>
+                  </Typography>
                 </Box>
 
                 <OpaqueBox

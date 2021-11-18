@@ -7,7 +7,7 @@ import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { Select, Option } from '@strapi/design-system/Select';
 import { ToggleInput } from '@strapi/design-system/ToggleInput';
 import { Box } from '@strapi/design-system/Box';
-import { H3 } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { getTrad } from '../../../utils';
 
 const FlexGap = styled(Flex)`
@@ -21,12 +21,12 @@ const Settings = ({ modifiedData, onChange, sortOptions }) => {
   return (
     <>
       <Box paddingBottom={4}>
-        <H3 as="h2">
+        <Typography variant="delta" as="h2">
           {formatMessage({
             id: getTrad('containers.SettingPage.settings'),
             defaultMessage: 'Settings',
           })}
-        </H3>
+        </Typography>
       </Box>
       <FlexGap justifyContent="space-between" wrap="wrap" paddingBottom={6}>
         <ToggleInput

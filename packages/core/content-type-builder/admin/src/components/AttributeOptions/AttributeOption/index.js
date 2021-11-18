@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
-import { Text } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import useFormModalNavigation from '../../../hooks/useFormModalNavigation';
 import getTrad from '../../../utils/getTrad';
 import AttributeIcon from '../../AttributeIcon';
@@ -35,15 +35,15 @@ const AttributeOption = ({ type }) => {
         <AttributeIcon type={type} />
         <Box paddingLeft={4}>
           <Flex>
-            <Text bold>
+            <Typography fontWeight="bold">
               {formatMessage({ id: getTrad(`attribute.${type}`), defaultMessage: type })}
-            </Text>
+            </Typography>
           </Flex>
 
           <Flex>
-            <Text small textColor="neutral600">
+            <Typography variant="pi" textColor="neutral600">
               {formatMessage({ id: getTrad(`attribute.${type}.description`) })}
-            </Text>
+            </Typography>
           </Flex>
         </Box>
       </Flex>

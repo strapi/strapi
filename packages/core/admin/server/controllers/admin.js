@@ -76,8 +76,14 @@ module.exports = {
   },
 
   async plugins(ctx) {
-    // TODO: use name from plugin package.json info
-    const plugins = _.mapValues(strapi.plugins, (_, key) => ({ name: key }));
+    const enabledPlugins = strapi.config.get('enabledPlugins');
+
+    const plugins = Object.entries(enabledPlugins).map(([key, plugin]) => ({
+      name: plugin.info.name || key,
+      displayName: plugin.info.displayName || plugin.info.name || key,
+      description: plugin.info.description || '',
+    }));
+
     ctx.send({ plugins });
   },
 
