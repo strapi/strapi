@@ -25,7 +25,15 @@ const DzLabel = ({ label, labelAction, name, numberOfComponents, required }) => 
   return (
     <Flex justifyContent="center">
       <Box>
-        <StyledBox padding={3} background="neutral0" shadow="filterShadow" color="neutral500">
+        <StyledBox
+          paddingTop={3}
+          paddingBottom={3}
+          paddingRight={4}
+          paddingLeft={4}
+          background="neutral0"
+          shadow="filterShadow"
+          color="neutral500"
+        >
           <Flex>
             <Typography fontSize={0} lineHeight={0} textColor="neutral600" fontWeight="bold">
               {intlLabel}&nbsp;({numberOfComponents})
