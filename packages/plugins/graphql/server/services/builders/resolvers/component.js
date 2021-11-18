@@ -5,7 +5,7 @@ module.exports = ({ strapi }) => ({
     const { transformArgs } = strapi.plugin('graphql').service('builders').utils;
 
     return async (parent, args = {}) => {
-      const contentType = strapi.contentTypes[contentTypeUID];
+      const contentType = strapi.getModel(contentTypeUID);
 
       const { component: componentName } = contentType.attributes[attributeName];
       const component = strapi.getModel(componentName);
