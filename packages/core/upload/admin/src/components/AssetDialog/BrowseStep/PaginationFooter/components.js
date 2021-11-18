@@ -3,13 +3,12 @@ import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import ChevronLeft from '@strapi/icons/ChevronLeft';
 import ChevronRight from '@strapi/icons/ChevronRight';
-
 import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
-import { Text } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { buttonFocusStyle } from '@strapi/design-system/themes';
 import { usePagination } from './PaginationContext';
 
-const PaginationText = styled(Text)`
+const PaginationText = styled(Typography)`
   line-height: revert;
 `;
 
@@ -98,7 +97,7 @@ export const PageLink = ({ number, children, ...props }) => {
     <li>
       <PageLinkWrapper {...props} active={isActive}>
         <VisuallyHidden>{children}</VisuallyHidden>
-        <PaginationText aria-hidden small bold={isActive}>
+        <PaginationText aria-hidden variant="pi" fontWeight={isActive ? 'bold' : ''}>
           {number}
         </PaginationText>
       </PageLinkWrapper>
