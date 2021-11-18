@@ -278,6 +278,8 @@ const FormModal = () => {
           forTarget,
         });
       }
+    } else {
+      dispatch({ type: RESET_PROPS });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
