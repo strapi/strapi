@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { TableLabel, Text } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { IconButton } from '@strapi/design-system/IconButton';
 import { Stack } from '@strapi/design-system/Stack';
 import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
@@ -20,19 +20,19 @@ const LocaleTable = ({ locales, onDeleteLocale, onEditLocale }) => {
       <Thead>
         <Tr>
           <Th>
-            <TableLabel textColor="neutral600">
+            <Typography variant="sigma" textColor="neutral600">
               {formatMessage({ id: getTrad('Settings.locales.row.id') })}
-            </TableLabel>
+            </Typography>
           </Th>
           <Th>
-            <TableLabel textColor="neutral600">
+            <Typography variant="sigma" textColor="neutral600">
               {formatMessage({ id: getTrad('Settings.locales.row.displayName') })}
-            </TableLabel>
+            </Typography>
           </Th>
           <Th>
-            <TableLabel textColor="neutral600">
+            <Typography variant="sigma" textColor="neutral600">
               {formatMessage({ id: getTrad('Settings.locales.row.default-locale') })}
-            </TableLabel>
+            </Typography>
           </Th>
           <Th>
             <VisuallyHidden>Actions</VisuallyHidden>
@@ -49,17 +49,17 @@ const LocaleTable = ({ locales, onDeleteLocale, onEditLocale }) => {
             })}
           >
             <Td>
-              <Text textColor="neutral800">{locale.id}</Text>
+              <Typography textColor="neutral800">{locale.id}</Typography>
             </Td>
             <Td>
-              <Text textColor="neutral800">{locale.name}</Text>
+              <Typography textColor="neutral800">{locale.name}</Typography>
             </Td>
             <Td>
-              <Text textColor="neutral800">
+              <Typography textColor="neutral800">
                 {locale.isDefault
                   ? formatMessage({ id: getTrad('Settings.locales.row.default-locale') })
                   : null}
-              </Text>
+              </Typography>
             </Td>
             <Td>
               <Stack

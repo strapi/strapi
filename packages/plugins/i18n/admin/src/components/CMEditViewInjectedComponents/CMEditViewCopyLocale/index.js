@@ -7,7 +7,6 @@ import { Dialog, DialogBody, DialogFooter } from '@strapi/design-system/Dialog';
 import { Select, Option } from '@strapi/design-system/Select';
 import { Button } from '@strapi/design-system/Button';
 import { Box } from '@strapi/design-system/Box';
-import { Text } from '@strapi/design-system/Text';
 import { Typography } from '@strapi/design-system/Typography';
 import { Flex } from '@strapi/design-system/Flex';
 import { Stack } from '@strapi/design-system/Stack';
@@ -26,6 +25,10 @@ const StyledTypography = styled(Typography)`
       fill: ${({ theme }) => theme.colors.primary600};
     }
   }
+`;
+
+const CenteredTypography = styled(Typography)`
+  text-align: center;
 `;
 
 const CMEditViewCopyLocale = props => {
@@ -118,13 +121,13 @@ const Content = ({ appLocales, currentLocale, localizations, readPermissions }) 
           <DialogBody icon={<ExclamationMarkCircle />}>
             <Stack size={2}>
               <Flex justifyContent="center">
-                <Text id="confirm-description" style={{ textAlign: 'center' }}>
+                <CenteredTypography id="confirm-description">
                   {formatMessage({
                     id: getTrad('CMEditViewCopyLocale.ModalConfirm.content'),
                     defaultMessage:
                       'Your current content will be erased and filled by the content of the selected locale:',
                   })}
-                </Text>
+                </CenteredTypography>
               </Flex>
               <Box>
                 <Select

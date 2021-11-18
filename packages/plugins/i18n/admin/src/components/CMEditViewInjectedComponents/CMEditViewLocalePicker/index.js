@@ -4,7 +4,7 @@ import get from 'lodash/get';
 import { Box } from '@strapi/design-system/Box';
 import { Divider } from '@strapi/design-system/Divider';
 import { Select, Option } from '@strapi/design-system/Select';
-import { TableLabel } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { Stack } from '@strapi/design-system/Stack';
 import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
@@ -92,9 +92,9 @@ const CMEditViewLocalePicker = ({
 
   return (
     <Box paddingTop={6}>
-      <TableLabel textColor="neutral600">
+      <Typography variant="sigma" textColor="neutral600">
         {formatMessage({ id: getTrad('plugin.name'), defaultMessage: 'Internationalization' })}
-      </TableLabel>
+      </Typography>
       <Box paddingTop={2} paddingBottom={6}>
         <Divider />
       </Box>
