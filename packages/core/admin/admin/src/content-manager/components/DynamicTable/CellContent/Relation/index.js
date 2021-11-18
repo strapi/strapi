@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { IconButton } from '@strapi/design-system/IconButton';
-import { Text } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { Box } from '@strapi/design-system/Box';
 import { Badge } from '@strapi/design-system/Badge';
 import { Flex } from '@strapi/design-system/Flex';
@@ -34,9 +34,9 @@ const Relation = ({ fieldSchema, metadatas, queryInfos, name, rowId, value }) =>
 
   if (SINGLE_RELATIONS.includes(fieldSchema.relation)) {
     return (
-      <Text textColor="neutral800">
+      <Typography textColor="neutral800">
         <CellValue type={metadatas.mainField.schema.type} value={value[metadatas.mainField.name]} />
-      </Text>
+      </Typography>
     );
   }
 
@@ -46,7 +46,7 @@ const Relation = ({ fieldSchema, metadatas, queryInfos, name, rowId, value }) =>
     <Flex {...stopPropagation}>
       <RelationCountBadge>{value.count}</RelationCountBadge>
       <Box paddingLeft={2}>
-        <Text textColor="neutral800">
+        <Typography textColor="neutral800">
           {formatMessage(
             {
               id: 'content-manager.containers.ListPage.items',
@@ -54,7 +54,7 @@ const Relation = ({ fieldSchema, metadatas, queryInfos, name, rowId, value }) =>
             },
             { number: value.count }
           )}
-        </Text>
+        </Typography>
       </Box>
       {value.count > 0 && (
         <ActionWrapper>

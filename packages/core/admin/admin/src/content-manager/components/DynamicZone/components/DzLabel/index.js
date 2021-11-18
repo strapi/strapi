@@ -11,7 +11,6 @@ import styled from 'styled-components';
 import { pxToRem } from '@strapi/helper-plugin';
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
-import { Text } from '@strapi/design-system/Text';
 import { Typography } from '@strapi/design-system/Typography';
 
 const StyledBox = styled(Box)`
@@ -38,7 +37,7 @@ const DzLabel = ({ label, labelAction, name, numberOfComponents, required }) => 
             <Typography fontSize={0} lineHeight={0} textColor="neutral600" fontWeight="bold">
               {intlLabel}&nbsp;({numberOfComponents})
             </Typography>
-            {required && <Text textColor="danger600">*</Text>}
+            {required && <Typography textColor="danger600">*</Typography>}
             {labelAction && <Box paddingLeft={1}>{labelAction}</Box>}
           </Flex>
         </StyledBox>
