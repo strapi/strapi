@@ -12,19 +12,19 @@ const generateNewApp = require('@strapi/generate-new');
 
 const hasYarn = require('./has-yarn');
 const { runInstall, runApp, initGit } = require('./child-process');
-const { getRepoInfo, downloadGitHubRepo } = require('./fetch-github');
+const { getStarterPackageInfo, downloadNpmStarter } = require('./fetch-npm-starter');
 const logger = require('./logger');
 const stopProcess = require('./stop-process');
 
 /**
  * @param  {string} - filePath Path to starter.json file
  */
-function readStarterJson(filePath, starterUrl) {
+function readStarterJson(filePath, starter) {
   try {
     const data = fse.readFileSync(filePath);
     return JSON.parse(data);
   } catch (err) {
-    stopProcess(`Could not find ${chalk.yellow('starter.json')} in ${chalk.yellow(starterUrl)}`);
+    stopProcess(`Could not find ${chalk.yellow('starter.json')} in ${chalk.yellow(starter)}`);
   }
 }
 
@@ -88,27 +88,35 @@ async function installWithLogs(path) {
 /**
  * @param  {Object} projectArgs - The arguments for create a project
  * @param {string|null} projectArgs.projectName - The name/path of project
- * @param {string|null} projectArgs.starterUrl - The GitHub repo of the starter
+ * @param {string|null} projectArgs.starter - The npm package of the starter
  * @param  {Object} program - Commands for generating new application
  */
-module.exports = async function buildStarter(programArgs, program) {
-  let { projectName, starterUrl } = programArgs;
-
-  // Fetch repo info
-  const repoInfo = await getRepoInfo(starterUrl);
-  const { fullName } = repoInfo;
-
-  // Create temporary directory for starter
-  const tmpDir = await fse.mkdtemp(join(os.tmpdir(), 'strapi-'));
-
-  // Download repo inside temporary directory
-  await downloadGitHubRepo(repoInfo, tmpDir);
-
-  const starterJson = readStarterJson(join(tmpDir, 'starter.json'), starterUrl);
+module.exports = async function buildStarter({ projectName, starter }, program) {
+  let starterPath;
+  let starterParentPath;
+  let starterPackageInfo = {};
+  const isLocalStarter = ['./', '../', '/'].some(filePrefix => starter.startsWith(filePrefix));
+  console.log('STARTER', starter);
 
   // Project directory
   const rootPath = resolve(projectName);
   const projectBasename = basename(rootPath);
+
+  if (isLocalStarter) {
+    // Starter is a local directory
+    console.log('Installing local starter.');
+    starterPath = resolve(rootPath, '..', starter);
+  } else {
+    // Starter should be an npm package. Fetch starter info
+    starterPackageInfo = await getStarterPackageInfo(starter);
+    console.log(`Installing ${chalk.yellow(starterPackageInfo.name)} starter.`);
+
+    // Download starter repository to a temporary directory
+    starterParentPath = await fse.mkdtemp(join(os.tmpdir(), 'strapi-'));
+    starterPath = await downloadNpmStarter(starterPackageInfo, starterParentPath);
+  }
+
+  const starterJson = readStarterJson(join(starterPath, 'starter.json'), starter);
 
   try {
     await fse.ensureDir(rootPath);
@@ -119,10 +127,8 @@ module.exports = async function buildStarter(programArgs, program) {
   // Copy the downloaded frontend folder to the project folder
   const frontendPath = join(rootPath, 'frontend');
 
-  const starterDir = (await fse.pathExists(join(tmpDir, 'starter'))) ? 'starter' : 'frontend';
-
   try {
-    await fse.copy(join(tmpDir, starterDir), frontendPath, {
+    await fse.copy(join(starterPath, 'starter'), frontendPath, {
       overwrite: true,
       recursive: true,
     });
@@ -130,15 +136,16 @@ module.exports = async function buildStarter(programArgs, program) {
     stopProcess(`Failed to create ${chalk.yellow(frontendPath)}: ${error.message}`);
   }
 
-  // Delete temporary directory
-  await fse.remove(tmpDir);
+  // Delete the starter directory if it was downloaded
+  if (!isLocalStarter) {
+    await fse.remove(starterParentPath);
+  }
 
-  const fullUrl = `https://github.com/${fullName}`;
   // Set command options for Strapi app
   const generateStrapiAppOptions = {
     ...program,
-    starter: fullUrl,
-    template: starterJson.template,
+    starter: starterPackageInfo.name,
+    template: `${starterJson.template.name}@${starterJson.template.version}`,
     run: false,
   };
 
@@ -147,7 +154,7 @@ module.exports = async function buildStarter(programArgs, program) {
 
   // Install frontend dependencies
   console.log(`Creating Strapi starter frontend at ${chalk.green(frontendPath)}.`);
-  console.log(`Installing ${chalk.yellow(fullName)} starter`);
+  console.log(`Installing ${chalk.yellow(starterPackageInfo.name)} starter`);
   await installWithLogs(frontendPath);
 
   // Setup monorepo

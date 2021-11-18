@@ -3,6 +3,7 @@
 const path = require('path');
 const execa = require('execa');
 const chalk = require('chalk');
+const stopProcess = require('./stop-process');
 
 /**
  * Gets the package version on npm. Will fail if the package does not exist
@@ -17,13 +18,13 @@ async function getPackageInfo(packageName) {
 }
 
 /**
- * @param {string} template - The name of the template as provided by the user.
- * @returns {Object} - The full name of the template package's name on npm
+ * @param {string} starter - The name of the starter as provided by the user.
+ * @returns {Object} - The full name of the starter package's name on npm
  */
-async function getTemplatePackageInfo(template) {
-  // Check if template is a shorthand
+async function getStarterPackageInfo(starter) {
+  // Check if starter is a shorthand
   try {
-    const longhand = `@strapi/template-${template}`;
+    const longhand = `@strapi/starter-${starter}`;
     const packageInfo = await getPackageInfo(longhand);
     // Hasn't crashed so it is indeed a shorthand
     return packageInfo;
@@ -32,29 +33,29 @@ async function getTemplatePackageInfo(template) {
   }
   // Fetch version of the non-shorthand package
   try {
-    return getPackageInfo(template);
+    return getPackageInfo(starter);
   } catch (error) {
-    throw new Error(`Could not find package ${chalk.green(template)} on npm`);
+    stopProcess(`Could not find package ${chalk.green(starter)} on npm`);
   }
 }
 
 /**
- * @param {Object} packageInfo - Template's npm package information
+ * @param {Object} packageInfo - Starter's npm package information
  * @param {string} packageInfo.name
  * @param {string} packageInfo.version
- * @param {string} parentDir - Path inside of which we install the template.
+ * @param {string} parentDir - Path inside of which we install the starter.
  */
-async function downloadNpmTemplate({ name, version }, parentDir) {
+async function downloadNpmStarter({ name, version }, parentDir) {
   // Download from npm
   await execa.shell(`npm install ${name}@${version} --no-save --silent`, {
     cwd: parentDir,
   });
 
-  // Return the path of the actual template
-  const exactTemplatePath = path.dirname(
+  // Return the path of the actual starter
+  const exactStarterPath = path.dirname(
     require.resolve(`${name}/package.json`, { paths: [parentDir] })
   );
-  return exactTemplatePath;
+  return exactStarterPath;
 }
 
-module.exports = { getTemplatePackageInfo, downloadNpmTemplate };
+module.exports = { getStarterPackageInfo, downloadNpmStarter };
