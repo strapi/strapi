@@ -152,7 +152,7 @@ module.exports = {
   },
 
   async publish(ctx) {
-    const { userAbility } = ctx.state;
+    const { userAbility, user } = ctx.state;
     const { id, model } = ctx.params;
 
     const entityManager = getService('entity-manager');
@@ -172,13 +172,17 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const result = await entityManager.publish(entity, model);
+    const result = await entityManager.publish(
+      entity,
+      setCreatorFields({ user, isEdition: true })({}),
+      model
+    );
 
     ctx.body = await permissionChecker.sanitizeOutput(result);
   },
 
   async unpublish(ctx) {
-    const { userAbility } = ctx.state;
+    const { userAbility, user } = ctx.state;
     const { id, model } = ctx.params;
 
     const entityManager = getService('entity-manager');
@@ -198,7 +202,11 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const result = await entityManager.unpublish(entity, model);
+    const result = await entityManager.unpublish(
+      entity,
+      setCreatorFields({ user, isEdition: true })({}),
+      model
+    );
 
     ctx.body = await permissionChecker.sanitizeOutput(result);
   },
