@@ -25,7 +25,7 @@ const getPluginsPackages = async () => {
         .split('/')
         .slice(-1)[0];
 
-      const adminEntryPoint = resolve(join(__dirname, '..', 'admin', 'src'));
+      const adminEntryPoint = join(__dirname, '..', 'admin', 'src');
 
       const pathToPlugin = join(relative(adminEntryPoint, current), 'admin', 'src').replace(
         /\\/g,
@@ -43,7 +43,7 @@ const getPluginsPackages = async () => {
  */
 const createFile = async () => {
   const customPluginFile = join(__dirname, '..', 'admin', 'src', 'plugins-dev.js');
-  const pluginFileDest = resolve(__dirname, '..', 'admin', 'src', 'plugins.js');
+  const pluginFileDest = join(__dirname, '..', 'admin', 'src', 'plugins.js');
 
   if (fs.existsSync(customPluginFile)) {
     await fs.copy(customPluginFile, pluginFileDest);

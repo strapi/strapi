@@ -9,7 +9,7 @@ const {
   createPluginsFile,
 } = require('./create-plugins-file');
 
-const PLUGINS_TO_INSTALL = ['i18n'];
+const PLUGINS_TO_INSTALL = ['i18n', 'users-permissions'];
 
 const buildAdmin = async () => {
   const entry = path.join(__dirname, '..', 'admin', 'src');

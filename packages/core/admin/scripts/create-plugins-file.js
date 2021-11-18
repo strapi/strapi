@@ -4,7 +4,7 @@ const { join, resolve, relative } = require('path');
 const { camelCase } = require('lodash');
 const fs = require('fs-extra');
 
-const CORE_PLUGINS = ['content-type-builder', 'email', 'upload', 'i18n'];
+const CORE_PLUGINS = ['content-type-builder', 'email', 'upload'];
 
 /**
  * Retrieve the core plugins path
