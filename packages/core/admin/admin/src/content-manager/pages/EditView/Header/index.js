@@ -11,7 +11,7 @@ import { Button } from '@strapi/design-system/Button';
 import { Dialog, DialogBody, DialogFooter } from '@strapi/design-system/Dialog';
 import { Link } from '@strapi/design-system/Link';
 import { Flex } from '@strapi/design-system/Flex';
-import { Text } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { Stack } from '@strapi/design-system/Stack';
 import ExclamationMarkCircle from '@strapi/icons/ExclamationMarkCircle';
 import Check from '@strapi/icons/Check';
@@ -189,7 +189,7 @@ const Header = ({
           <DialogBody icon={<ExclamationMarkCircle />}>
             <Stack size={2}>
               <Flex justifyContent="center" style={{ textAlign: 'center' }}>
-                <Text id="confirm-description">
+                <Typography id="confirm-description">
                   {formatMessage(
                     {
                       id: getTrad('popUpWarning.warning.unpublish'),
@@ -200,15 +200,15 @@ const Header = ({
                       br: () => <br />,
                     }
                   )}
-                </Text>
+                </Typography>
               </Flex>
               <Flex justifyContent="center" style={{ textAlign: 'center' }}>
-                <Text id="confirm-description">
+                <Typography id="confirm-description">
                   {formatMessage({
                     id: getTrad('popUpWarning.warning.unpublish-question'),
                     defaultMessage: 'Are you sure you want to unpublish it?',
                   })}
-                </Text>
+                </Typography>
               </Flex>
             </Stack>
           </DialogBody>
@@ -244,7 +244,7 @@ const Header = ({
           <DialogBody icon={<ExclamationMarkCircle />}>
             <Stack size={2}>
               <Flex justifyContent="center" style={{ textAlign: 'center' }}>
-                <Text id="confirm-description">
+                <Typography id="confirm-description">
                   {draftRelationsCountRef.current}
                   {formatMessage(
                     {
@@ -254,19 +254,19 @@ const Header = ({
                     },
                     {
                       br: () => <br />,
-                      b: chunks => <Text bold>{chunks}</Text>,
+                      b: chunks => <Typography fontWeight="bold">{chunks}</Typography>,
                       count: draftRelationsCountRef.current,
                     }
                   )}
-                </Text>
+                </Typography>
               </Flex>
               <Flex justifyContent="center" style={{ textAlign: 'center' }}>
-                <Text id="confirm-description">
+                <Typography id="confirm-description">
                   {formatMessage({
                     id: getTrad('popUpWarning.warning.publish-question'),
                     defaultMessage: 'Do you still want to publish it?',
                   })}
-                </Text>
+                </Typography>
               </Flex>
             </Stack>
           </DialogBody>

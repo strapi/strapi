@@ -61,10 +61,9 @@ describe('Wysiwyg render and actions buttons', () => {
       }
 
       .c37 {
-        font-weight: 400;
+        color: #32324d;
         font-size: 0.875rem;
         line-height: 1.43;
-        color: #32324d;
       }
 
       .c4 {
@@ -204,7 +203,7 @@ describe('Wysiwyg render and actions buttons', () => {
         background: #ffffff;
       }
 
-      .c28 .sc-cipXqI {
+      .c28 .sc-BXpxD {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;

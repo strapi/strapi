@@ -4,7 +4,7 @@ import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
-import { Text } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import Bullet from '@strapi/icons/Dot';
 import { pxToRem } from '@strapi/helper-plugin';
 import { getTrad } from '../../../utils';
@@ -58,14 +58,14 @@ const DraftAndPublishBadge = ({ hasDraftAndPublish, isPublished }) => {
       <Box as={Flex}>
         <CustomBullet $bulletColor={colorProps.bulletColor} />
         <Box paddingLeft={3}>
-          <Text textColor={colorProps.textColor}>
+          <Typography textColor={colorProps.textColor}>
             {formatMessage({
               id: getTrad('containers.Edit.information.editing'),
               defaultMessage: 'Editing',
             })}
             &nbsp;
-          </Text>
-          <Text textColor={colorProps.textColor} bold>
+          </Typography>
+          <Typography fontWeight="bold" textColor={colorProps.textColor}>
             {isPublished &&
               formatMessage({
                 id: getTrad('containers.Edit.information.publishedVersion'),
@@ -76,7 +76,7 @@ const DraftAndPublishBadge = ({ hasDraftAndPublish, isPublished }) => {
                 id: getTrad('containers.Edit.information.draftVersion'),
                 defaultMessage: 'draft version',
               })}
-          </Text>
+          </Typography>
         </Box>
       </Box>
     </Box>

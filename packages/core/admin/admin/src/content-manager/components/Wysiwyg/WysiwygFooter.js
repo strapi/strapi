@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
-import { Text } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import Expand from '@strapi/icons/Expand';
 import { ExpandButton } from './WysiwygStyles';
 
@@ -14,12 +14,12 @@ const WysiwygFooter = ({ isPreviewMode, onToggleExpand }) => {
     <Box padding={2} background="neutral100" hasRadius>
       <Flex justifyContent="flex-end" alignItems="flex-end">
         <ExpandButton id="expand" disabled={isPreviewMode} onClick={onToggleExpand}>
-          <Text>
+          <Typography>
             {formatMessage({
               id: 'components.WysiwygBottomControls.fullscreen',
               defaultMessage: 'Expand',
             })}
-          </Text>
+          </Typography>
           <Expand />
         </ExpandButton>
       </Flex>
