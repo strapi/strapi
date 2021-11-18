@@ -29,6 +29,11 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
   color: #4945ff;
   padding-right: 12px;
   padding-left: 12px;
+  border-radius: 4px;
+  border-style: solid;
+  border-width: 1px;
+  border-color: #d9d8ff;
+  height: 2rem;
 }
 
 .c6 {
@@ -47,12 +52,6 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
-}
-
-.c2 {
-  border: 1px solid #d9d8ff;
-  border-radius: 4px;
-  height: 2rem;
 }
 
 .c2 svg {
@@ -74,7 +73,9 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
     class="c0"
   >
     <button
+      aria-disabled="false"
       class="c1 c2"
+      height="2rem"
     >
       <div
         class="c3"
@@ -111,7 +112,9 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
     class="c0"
   >
     <button
+      aria-disabled="false"
       class="c1 c2"
+      height="2rem"
     >
       <div
         class="c3"
@@ -148,7 +151,9 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
     class="c0"
   >
     <button
+      aria-disabled="false"
       class="c1 c2"
+      height="2rem"
     >
       <div
         class="c3"
@@ -185,7 +190,9 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
     class="c0"
   >
     <button
+      aria-disabled="false"
       class="c1 c2"
+      height="2rem"
     >
       <div
         class="c3"
@@ -222,7 +229,9 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
     class="c0"
   >
     <button
+      aria-disabled="false"
       class="c1 c2"
+      height="2rem"
     >
       <div
         class="c3"
@@ -259,7 +268,9 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
     class="c0"
   >
     <button
+      aria-disabled="false"
       class="c1 c2"
+      height="2rem"
     >
       <div
         class="c3"
@@ -296,7 +307,9 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
     class="c0"
   >
     <button
+      aria-disabled="false"
       class="c1 c2"
+      height="2rem"
     >
       <div
         class="c3"
@@ -333,7 +346,9 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
     class="c0"
   >
     <button
+      aria-disabled="false"
       class="c1 c2"
+      height="2rem"
     >
       <div
         class="c3"
@@ -370,7 +385,9 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
     class="c0"
   >
     <button
+      aria-disabled="false"
       class="c1 c2"
+      height="2rem"
     >
       <div
         class="c3"
@@ -407,7 +424,9 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
     class="c0"
   >
     <button
+      aria-disabled="false"
       class="c1 c2"
+      height="2rem"
     >
       <div
         class="c3"
@@ -444,7 +463,9 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
     class="c0"
   >
     <button
+      aria-disabled="false"
       class="c1 c2"
+      height="2rem"
     >
       <div
         class="c3"
@@ -481,7 +502,9 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
     class="c0"
   >
     <button
+      aria-disabled="false"
       class="c1 c2"
+      height="2rem"
     >
       <div
         class="c3"
@@ -518,7 +541,9 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
     class="c0"
   >
     <button
+      aria-disabled="false"
       class="c1 c2"
+      height="2rem"
     >
       <div
         class="c3"

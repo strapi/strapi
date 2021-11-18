@@ -222,7 +222,7 @@ describe('Email | Pages | Settings', () => {
 
       .c29 {
         color: #666687;
-        display: inline-block;
+        display: block;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;

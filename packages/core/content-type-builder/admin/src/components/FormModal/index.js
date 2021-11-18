@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import {
   getYupInnerErrors,
   useTracking,
@@ -92,6 +92,8 @@ const FormModal = () => {
     step,
     targetUid,
   } = useFormModalNavigation();
+
+  const tabGroupRef = useRef();
 
   const formModalSelector = useMemo(makeSelectFormModal, []);
   const dispatch = useDispatch();
@@ -554,6 +556,8 @@ const FormModal = () => {
               type: RESET_PROPS_AND_SET_THE_FORM_FOR_ADDING_A_COMPO_TO_A_DZ,
             });
 
+            tabGroupRef.current._handlers.setSelectedTabIndex(0);
+
             onNavigateToAddCompoToDZModal({ dynamicZoneTarget: modifiedData.name });
           } else {
             onCloseModal();
@@ -917,6 +921,7 @@ const FormModal = () => {
                 label="todo"
                 id="tabs"
                 variant="simple"
+                ref={tabGroupRef}
                 onTabChange={selectedTab => {
                   if (selectedTab === 1) {
                     sendAdvancedTabEvent('advanced');

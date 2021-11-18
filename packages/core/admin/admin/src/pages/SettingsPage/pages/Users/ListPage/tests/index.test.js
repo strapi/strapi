@@ -702,7 +702,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
 
       .c56 {
         color: #32324d;
-        display: inline-block;
+        display: block;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;

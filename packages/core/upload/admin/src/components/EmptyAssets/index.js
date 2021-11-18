@@ -5,7 +5,7 @@ import { Typography } from '@strapi/design-system/Typography';
 import { Stack } from '@strapi/design-system/Stack';
 import { Box } from '@strapi/design-system/Box';
 import { Icon } from '@strapi/design-system/Icon';
-import EmptyStateDocument from '@strapi/icons/EmptyStateDocument';
+import EmptyStateDocument from '@strapi/icons/EmptyDocuments';
 import { EmptyAssetGrid } from './EmptyAssetGrid';
 
 const EnhancedStack = styled(Stack)`
