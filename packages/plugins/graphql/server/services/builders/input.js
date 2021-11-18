@@ -2,7 +2,7 @@
 
 const { inputObjectType, nonNull } = require('nexus');
 const {
-  contentTypes: { getWritableAttributes },
+  contentTypes: { isWritableAttribute },
 } = require('@strapi/utils');
 
 module.exports = context => {
@@ -41,9 +41,6 @@ module.exports = context => {
         name,
 
         definition(t) {
-          const writableAttributes = getWritableAttributes(contentType);
-
-          const isWritableAttribute = attributeName => writableAttributes.includes(attributeName);
           const isFieldEnabled = fieldName => {
             return extension
               .shadowCRUD(contentType.uid)
@@ -51,9 +48,9 @@ module.exports = context => {
               .hasInputEnabled();
           };
 
-          const validAttributes = Object.entries(attributes).filter(
-            ([attributeName]) => isWritableAttribute(attributeName) && isFieldEnabled(attributeName)
-          );
+          const validAttributes = Object.entries(attributes).filter(([attributeName]) => {
+            return isWritableAttribute(contentType, attributeName) && isFieldEnabled(attributeName);
+          });
 
           // Add the ID for the component to enable inplace updates
           if (modelType === 'component' && isFieldEnabled('id')) {
