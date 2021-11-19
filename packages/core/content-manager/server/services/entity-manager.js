@@ -11,8 +11,8 @@ const { MANY_RELATIONS } = strapiUtils.relations.constants;
 
 const omitPublishedAtField = omit(PUBLISHED_AT_ATTRIBUTE);
 
-const wrapWithEmitEvent = (event, fn) => async (entity, model) => {
-  const result = await fn(entity, model);
+const wrapWithEmitEvent = (event, fn) => async (entity, body, model) => {
+  const result = await fn(entity, body, model);
 
   const modelDef = strapi.getModel(model);
   const sanitizedEntity = await strapiUtils.sanitize.sanitizers.defaultSanitizeOutput(
@@ -206,7 +206,7 @@ module.exports = ({ strapi }) => ({
     return strapi.entityService.deleteMany(uid, params);
   },
 
-  publish: wrapWithEmitEvent(ENTRY_PUBLISH, async (entity, uid) => {
+  publish: wrapWithEmitEvent(ENTRY_PUBLISH, async (entity, body = {}, uid) => {
     if (entity[PUBLISHED_AT_ATTRIBUTE]) {
       throw new ApplicationError('already.published');
     }
@@ -214,19 +214,19 @@ module.exports = ({ strapi }) => ({
     // validate the entity is valid for publication
     await strapi.entityValidator.validateEntityCreation(strapi.getModel(uid), entity);
 
-    const data = { [PUBLISHED_AT_ATTRIBUTE]: new Date() };
+    const data = { ...body, [PUBLISHED_AT_ATTRIBUTE]: new Date() };
 
     const params = { data, populate: getDeepPopulate(uid) };
 
     return strapi.entityService.update(uid, entity.id, params);
   }),
 
-  unpublish: wrapWithEmitEvent(ENTRY_UNPUBLISH, (entity, uid) => {
+  unpublish: wrapWithEmitEvent(ENTRY_UNPUBLISH, (entity, body = {}, uid) => {
     if (!entity[PUBLISHED_AT_ATTRIBUTE]) {
       throw new ApplicationError('already.draft');
     }
 
-    const data = { [PUBLISHED_AT_ATTRIBUTE]: null };
+    const data = { ...body, [PUBLISHED_AT_ATTRIBUTE]: null };
 
     const params = { data, populate: getDeepPopulate(uid) };
 

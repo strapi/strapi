@@ -114,7 +114,7 @@ module.exports = {
   },
 
   async publish(ctx) {
-    const { userAbility } = ctx.state;
+    const { userAbility, user } = ctx.state;
     const { model } = ctx.params;
     const { query = {} } = ctx.request;
 
@@ -135,13 +135,17 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const publishedEntity = await entityManager.publish(entity, model);
+    const publishedEntity = await entityManager.publish(
+      entity,
+      setCreatorFields({ user, isEdition: true })({}),
+      model
+    );
 
     ctx.body = await permissionChecker.sanitizeOutput(publishedEntity);
   },
 
   async unpublish(ctx) {
-    const { userAbility } = ctx.state;
+    const { userAbility, user } = ctx.state;
     const { model } = ctx.params;
     const { query = {} } = ctx.request;
 
@@ -162,7 +166,11 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const unpublishedEntity = await entityManager.unpublish(entity, model);
+    const unpublishedEntity = await entityManager.unpublish(
+      entity,
+      setCreatorFields({ user, isEdition: true })({}),
+      model
+    );
 
     ctx.body = await permissionChecker.sanitizeOutput(unpublishedEntity);
   },
