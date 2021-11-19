@@ -19,6 +19,7 @@ import { Icon } from '@strapi/design-system/Icon';
 import EyeStriked from '@strapi/icons/EyeStriked';
 import Eye from '@strapi/icons/Eye';
 import DateTimePicker from '../DateTimePicker';
+import NotSupported from './NotSupported';
 
 const GenericInput = ({
   autoComplete,
@@ -197,7 +198,26 @@ const GenericInput = ({
         />
       );
     }
-    case 'email':
+    case 'email': {
+      return (
+        <TextInput
+          autoComplete={autoComplete}
+          disabled={disabled}
+          error={errorMessage}
+          label={label}
+          labelAction={labelAction}
+          id={name}
+          hint={hint}
+          name={name}
+          onChange={onChange}
+          placeholder={formattedPlaceholder}
+          required={required}
+          type="email"
+          value={value || ''}
+        />
+      );
+    }
+    case 'timestamp':
     case 'text':
     case 'string': {
       return (
@@ -213,7 +233,7 @@ const GenericInput = ({
           onChange={onChange}
           placeholder={formattedPlaceholder}
           required={required}
-          type={type}
+          type="text"
           value={value || ''}
         />
       );
@@ -343,9 +363,14 @@ const GenericInput = ({
     }
     default: {
       return (
-        <div>
-          {type} is not supported for {name}
-        </div>
+        <NotSupported
+          name={name}
+          label={label}
+          labelAction={labelAction}
+          hint={hint}
+          error={errorMessage}
+          required={required}
+        />
       );
     }
   }
