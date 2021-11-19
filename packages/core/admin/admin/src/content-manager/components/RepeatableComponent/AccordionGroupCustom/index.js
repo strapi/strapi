@@ -8,6 +8,7 @@ import { Flex } from '@strapi/design-system/Flex';
 import { KeyboardNavigable } from '@strapi/design-system/KeyboardNavigable';
 
 const AccordionFooter = styled(Box)`
+  overflow: hidden;
   border-bottom: 1px solid ${({ theme }) => theme.colors.neutral200};
   border-right: 1px solid ${({ theme }) => theme.colors.neutral200};
   border-left: 1px solid ${({ theme }) => theme.colors.neutral200};
@@ -22,11 +23,19 @@ const EnhancedGroup = styled(Box)`
       border-left: 1px solid ${({ theme }) => theme.colors.neutral200};
       border-bottom: 1px solid ${({ theme }) => theme.colors.neutral200};
     }
+    > div {
+      > div:first-of-type {
+        border-radius: unset;
+      }
+    }
   }
 
   > div:first-of-type {
     > div {
       border-radius: ${({ theme }) => theme.borderRadius} ${({ theme }) => theme.borderRadius} 0 0;
+      > div:first-of-type {
+        border-radius: ${({ theme }) => theme.borderRadius} ${({ theme }) => theme.borderRadius} 0 0;
+      }
     }
 
     > div:not([data-strapi-expanded='true']) {

@@ -17,6 +17,15 @@ import { getTrad } from '../../../../utils';
 import FieldComponent from '../../../FieldComponent';
 import Rectangle from './Rectangle';
 
+const ActionStack = styled(Stack)`
+  svg {
+    path {
+      fill: ${({ theme, expanded }) =>
+        expanded ? theme.colors.primary600 : theme.colors.neutral600};
+    }
+  }
+`;
+
 const IconButtonCustom = styled(IconButton)`
   background-color: transparent;
 `;
@@ -106,7 +115,7 @@ const Component = ({
           <AccordionToggle
             startIcon={<FontAwesomeIcon icon={icon} />}
             action={
-              <Stack horizontal size={0}>
+              <ActionStack horizontal size={0} expanded={isOpen}>
                 {showDownIcon && (
                   <IconButtonCustom
                     noBorder
@@ -131,7 +140,7 @@ const Component = ({
                     icon={<Trash />}
                   />
                 )}
-              </Stack>
+              </ActionStack>
             }
             title={friendlyName}
             togglePosition="left"
