@@ -1,6 +1,5 @@
 'use strict';
 
-const _ = require('lodash');
 const { pickBy, has } = require('lodash/fp');
 const { addNamespace, hasNamespace } = require('../utils');
 
@@ -37,8 +36,6 @@ const servicesRegistry = strapi => {
         instantiatedServices[uid] = typeof service === 'function' ? service({ strapi }) : service;
         return instantiatedServices[uid];
       }
-
-      return undefined;
     },
 
     /**
@@ -49,16 +46,28 @@ const servicesRegistry = strapi => {
     getAll(namespace) {
       const filteredServices = pickBy((_, uid) => hasNamespace(uid, namespace))(services);
 
-      return _.mapValues(filteredServices, (service, serviceUID) => this.get(serviceUID));
+      // create lazy accessor to avoid instantiating the services;
+      const map = {};
+      for (const uid in filteredServices) {
+        Object.defineProperty(map, uid, {
+          enumerable: true,
+          get: () => {
+            return this.get(uid);
+          },
+        });
+      }
+
+      return map;
     },
 
     /**
      * Registers a service
      * @param {string} uid
-     * @param {Service|ServiceFactory} service
+     * @param {Service} service
      */
     set(uid, service) {
-      instantiatedServices[uid] = service;
+      services[uid] = service;
+      delete instantiatedServices[uid];
       return this;
     },
 

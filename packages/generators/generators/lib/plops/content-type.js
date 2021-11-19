@@ -3,6 +3,7 @@
 const { join } = require('path');
 const slugify = require('@sindresorhus/slugify');
 const fs = require('fs-extra');
+const { isKebabCase } = require('@strapi/utils');
 
 const getDestinationPrompts = require('./prompts/get-destination-prompts');
 const getFilePath = require('./utils/get-file-path');
@@ -33,6 +34,10 @@ module.exports = plop => {
           default: config.singularName,
           message: 'Name of the new API?',
           async validate(input) {
+            if (!isKebabCase(input)) {
+              return 'Value must be in kebab-case';
+            }
+
             const apiPath = join(plop.getDestBasePath(), 'api');
             const exists = await fs.pathExists(apiPath);
 
@@ -101,21 +106,35 @@ module.exports = plop => {
       }
 
       if (answers.bootstrapApi) {
+        const { singularName } = answers;
+
+        let uid;
+        if (answers.destination === 'new') {
+          uid = `api::${answers.id}.${singularName}`;
+        } else if (answers.api) {
+          uid = `api::${answers.api}.${singularName}`;
+        } else if (answers.plugin) {
+          uid = `plugin::${answers.plugin}.${singularName}`;
+        }
+
         baseActions.push(
           {
             type: 'add',
             path: `${filePath}/controllers/{{singularName}}.js`,
-            templateFile: 'templates/controller.js.hbs',
+            templateFile: 'templates/core-controller.js.hbs',
+            data: { uid },
           },
           {
             type: 'add',
             path: `${filePath}/services/{{singularName}}.js`,
-            templateFile: 'templates/service.js.hbs',
+            templateFile: 'templates/core-service.js.hbs',
+            data: { uid },
           },
           {
             type: 'add',
             path: `${filePath}/routes/{{singularName}}.js`,
-            templateFile: `templates/${slugify(answers.kind)}-routes.js.hbs`,
+            templateFile: `templates/core-router.js.hbs`,
+            data: { uid },
           }
         );
       }
