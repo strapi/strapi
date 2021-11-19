@@ -4,7 +4,7 @@ import { Box } from '@strapi/design-system/Box';
 import { Main } from '@strapi/design-system/Main';
 import { Flex } from '@strapi/design-system/Flex';
 import { Link } from '@strapi/design-system/Link';
-import { H1, Text } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import UnauthenticatedLayout, {
   Column,
   LayoutContent,
@@ -21,27 +21,27 @@ const ForgotPasswordSuccess = () => {
           <Column>
             <Logo />
             <Box paddingTop={6} paddingBottom={7}>
-              <H1>
+              <Typography as="h1" variant="alpha">
                 {formatMessage({
                   id: 'app.containers.AuthPage.ForgotPasswordSuccess.title',
                   defaultMessage: 'Email sent',
                 })}
-              </H1>
+              </Typography>
             </Box>
-            <Text>
+            <Typography>
               {formatMessage({
                 id: 'app.containers.AuthPage.ForgotPasswordSuccess.text.email',
                 defaultMessage: 'It can take a few minutes to receive your password recovery link.',
               })}
-            </Text>
+            </Typography>
             <Box paddingTop={4}>
-              <Text>
+              <Typography>
                 {formatMessage({
                   id: 'app.containers.AuthPage.ForgotPasswordSuccess.text.contact-admin',
                   defaultMessage:
                     'If you do not receive this link, please contact your administrator.',
                 })}
-              </Text>
+              </Typography>
             </Box>
           </Column>
         </LayoutContent>

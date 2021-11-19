@@ -4,7 +4,7 @@ import { useIntl } from 'react-intl';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faQuestion, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { Box } from '@strapi/design-system/Box';
-import { Text } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { FocusTrap } from '@strapi/design-system/FocusTrap';
 import { useConfigurations } from '../../../hooks';
 
@@ -52,12 +52,12 @@ const StyledLink = styled.a`
       color: ${({ theme }) => theme.colors.neutral700};
     }
 
-    ${[Text]} {
+    ${[Typography]} {
       color: ${({ theme }) => theme.colors.neutral700};
     }
   }
 
-  ${[Text]} {
+  ${[Typography]} {
     color: ${({ theme }) => theme.colors.neutral600};
   }
 `;
@@ -124,7 +124,7 @@ const Onboarding = () => {
                 href={link.destination}
               >
                 <FontAwesomeIcon icon={link.icon} />
-                <Text>{link.label}</Text>
+                <Typography>{link.label}</Typography>
               </StyledLink>
             ))}
           </LinksWrapper>

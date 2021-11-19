@@ -9,7 +9,7 @@ import { Link } from '@strapi/design-system/Link';
 import { Button } from '@strapi/design-system/Button';
 import { TextInput } from '@strapi/design-system/TextInput';
 import { Checkbox } from '@strapi/design-system/Checkbox';
-import { H1, Text, Subtitle } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { Form } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
@@ -48,25 +48,30 @@ const Login = ({ onSubmit, schema, children }) => {
               <Column>
                 <Logo />
                 <Box paddingTop={6} paddingBottom={1}>
-                  <H1>
+                  <Typography as="h1">
                     {formatMessage({
                       id: 'Auth.form.welcome.title',
                       defaultMessage: 'Welcome!',
                     })}
-                  </H1>
+                  </Typography>
                 </Box>
                 <Box paddingBottom={7}>
-                  <Subtitle textColor="neutral600">
+                  <Typography variant="epsilon" textColor="neutral600">
                     {formatMessage({
                       id: 'Auth.form.welcome.subtitle',
                       defaultMessage: 'Log in to your Strapi account',
                     })}
-                  </Subtitle>
+                  </Typography>
                 </Box>
                 {errors.errorMessage && (
-                  <Text id="global-form-error" role="alert" tabIndex={-1} textColor="danger600">
+                  <Typography
+                    id="global-form-error"
+                    role="alert"
+                    tabIndex={-1}
+                    textColor="danger600"
+                  >
                     {errors.errorMessage}
-                  </Text>
+                  </Typography>
                 )}
               </Column>
 
