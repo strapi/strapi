@@ -18,7 +18,7 @@ import { Main } from '@strapi/design-system/Main';
 import { Link } from '@strapi/design-system/Link';
 import { Flex } from '@strapi/design-system/Flex';
 import { Stack } from '@strapi/design-system/Stack';
-import { Text } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { TextInput } from '@strapi/design-system/TextInput';
 import { Textarea } from '@strapi/design-system/Textarea';
 import ArrowLeft from '@strapi/icons/ArrowLeft';
@@ -176,20 +176,20 @@ const CreatePage = () => {
                       <Flex justifyContent="space-between">
                         <Box>
                           <Box>
-                            <Text bold>
+                            <Typography fontWeight="bold">
                               {formatMessage({
                                 id: 'Settings.roles.form.title',
                                 defaultMessage: 'Details',
                               })}
-                            </Text>
+                            </Typography>
                           </Box>
                           <Box>
-                            <Text textColor="neutral600" small>
+                            <Typography variant="pi" textColor="neutral600">
                               {formatMessage({
                                 id: 'Settings.roles.form.description',
                                 defaultMessage: 'Name and description of the role',
                               })}
-                            </Text>
+                            </Typography>
                           </Box>
                         </Box>
                         <UsersRoleNumber>

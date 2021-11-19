@@ -34,12 +34,12 @@ const DisplayedFields = ({ editLayout, editLayoutRemainingFields, onRemoveField,
           </Box>
           {/* Since the drag n drop will not be available, this text will be hidden for the moment */}
           {/* <Box>
-            <Text small textColor="neutral600">
+            <Typography variant="pi" textColor="neutral600">
               {formatMessage({
                 id: 'containers.SettingPage.editSettings.description',
                 defaultMessage: 'Drag & drop the fields to build the layout',
               })}
-            </Text>
+            </Typography>
           </Box> */}
         </div>
         <LinkToCTB />

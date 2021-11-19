@@ -5,7 +5,7 @@ import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
 import { Divider } from '@strapi/design-system/Divider';
 import { Stack } from '@strapi/design-system/Stack';
-import { TableLabel } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { useIntl } from 'react-intl';
 import BaseLogin from '../../../../../../admin/src/pages/AuthPage/components/Login/BaseLogin';
 import { useAuthProviders } from '../../../../hooks';
@@ -37,9 +37,9 @@ const Login = loginProps => {
             <Flex>
               <DividerFull />
               <Box paddingLeft={3} paddingRight={3}>
-                <TableLabel textColor="neutral600">
+                <Typography variant="sigma" textColor="neutral600">
                   {formatMessage({ id: 'Auth.login.sso.divider' })}
-                </TableLabel>
+                </Typography>
               </Box>
               <DividerFull />
             </Flex>

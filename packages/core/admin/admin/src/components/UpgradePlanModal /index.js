@@ -8,7 +8,7 @@ import { IconButton } from '@strapi/design-system/IconButton';
 import { LinkButton } from '@strapi/design-system/LinkButton';
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
-import { Text, H1 } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { Stack } from '@strapi/design-system/Stack';
 import ExternalLink from '@strapi/icons/ExternalLink';
 import Cross from '@strapi/icons/Cross';
@@ -48,10 +48,6 @@ const UpgradeContainer = styled(Flex)`
   }
 `;
 
-const TextBold = styled(Text)`
-  font-weight: 700;
-`;
-
 const StackFlexStart = styled(Stack)`
   align-items: flex-start;
   max-width: ${400 / 16}rem;
@@ -82,26 +78,26 @@ const UpgradePlanModal = ({ onClose, isOpen }) => {
               <IconButton onClick={onClose} aria-label="Close" icon={<Cross />} />
             </CloseButtonContainer>
             <StackFlexStart size={6}>
-              <TextBold textColor="primary600">
+              <Typography fontWeight="bold" textColor="primary600">
                 {formatMessage({
                   id: 'app.components.UpgradePlanModal.text-ce',
                   defaultMessage: 'COMMUNITY EDITION',
                 })}
-              </TextBold>
+              </Typography>
               <Stack size={2}>
-                <H1 as="h2" id="upgrade-plan">
+                <Typography variant="alpha" as="h2" id="upgrade-plan">
                   {formatMessage({
                     id: 'app.components.UpgradePlanModal.limit-reached',
                     defaultMessage: 'You have reached the limit',
                   })}
-                </H1>
-                <Text>
+                </Typography>
+                <Typography>
                   {formatMessage({
                     id: 'app.components.UpgradePlanModal.text-power',
                     defaultMessage:
                       'Unlock the full power of Strapi by upgrading your plan to the Enterprise Edition',
                   })}
-                </Text>
+                </Typography>
               </Stack>
               <LinkButton href="https://strapi.io/pricing-self-hosted" endIcon={<ExternalLink />}>
                 {formatMessage({
