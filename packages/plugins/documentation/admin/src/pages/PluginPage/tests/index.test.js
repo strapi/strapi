@@ -202,7 +202,7 @@ describe('Plugin | Documentation | PluginPage', () => {
         background: #4945ff;
       }
 
-      .c33 {
+      .c32 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -220,7 +220,7 @@ describe('Plugin | Documentation | PluginPage', () => {
         align-items: center;
       }
 
-      .c34 {
+      .c33 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -234,21 +234,21 @@ describe('Plugin | Documentation | PluginPage', () => {
         outline: none;
       }
 
-      .c34 svg {
+      .c33 svg {
         height: 12px;
         width: 12px;
       }
 
-      .c34 svg > g,
-      .c34 svg path {
+      .c33 svg > g,
+      .c33 svg path {
         fill: #ffffff;
       }
 
-      .c34[aria-disabled='true'] {
+      .c33[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c34:after {
+      .c33:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -263,11 +263,11 @@ describe('Plugin | Documentation | PluginPage', () => {
         border: 2px solid transparent;
       }
 
-      .c34:focus-visible {
+      .c33:focus-visible {
         outline: none;
       }
 
-      .c34:focus-visible:after {
+      .c33:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -278,7 +278,7 @@ describe('Plugin | Documentation | PluginPage', () => {
         border: 2px solid #4945ff;
       }
 
-      .c35 {
+      .c34 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -296,26 +296,26 @@ describe('Plugin | Documentation | PluginPage', () => {
         border: none;
       }
 
-      .c35 svg > g,
-      .c35 svg path {
+      .c34 svg > g,
+      .c34 svg path {
         fill: #8e8ea9;
       }
 
-      .c35:hover svg > g,
-      .c35:hover svg path {
+      .c34:hover svg > g,
+      .c34:hover svg path {
         fill: #666687;
       }
 
-      .c35:active svg > g,
-      .c35:active svg path {
+      .c34:active svg > g,
+      .c34:active svg path {
         fill: #a5a5ba;
       }
 
-      .c35[aria-disabled='true'] {
+      .c34[aria-disabled='true'] {
         background-color: #eaeaef;
       }
 
-      .c35[aria-disabled='true'] svg path {
+      .c34[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
@@ -330,7 +330,7 @@ describe('Plugin | Documentation | PluginPage', () => {
         padding-left: 24px;
       }
 
-      .c31 {
+      .c30 {
         width: 50%;
       }
 
@@ -372,7 +372,7 @@ describe('Plugin | Documentation | PluginPage', () => {
         overflow-x: auto;
       }
 
-      .c30 tr:last-of-type {
+      .c29 tr:last-of-type {
         border-bottom: none;
       }
 
@@ -425,8 +425,22 @@ describe('Plugin | Documentation | PluginPage', () => {
         vertical-align: sub;
       }
 
-      .c29 svg {
+      .c28 svg {
         height: 0.25rem;
+      }
+
+      .c27 {
+        color: #666687;
+        font-weight: 600;
+        font-size: 0.6875rem;
+        line-height: 1.45;
+        text-transform: uppercase;
+      }
+
+      .c31 {
+        color: #32324d;
+        font-size: 0.875rem;
+        line-height: 1.43;
       }
 
       .c1 {
@@ -502,26 +516,6 @@ describe('Plugin | Documentation | PluginPage', () => {
 
       .c3 {
         outline: none;
-      }
-
-      .c27 {
-        color: #666687;
-        font-size: 0.875rem;
-        line-height: 1.43;
-      }
-
-      .c32 {
-        font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #32324d;
-      }
-
-      .c28 {
-        font-weight: 600;
-        font-size: 0.6875rem;
-        line-height: 1.45;
-        text-transform: uppercase;
       }
 
       <div
@@ -630,12 +624,12 @@ describe('Plugin | Documentation | PluginPage', () => {
                               class="c26"
                             >
                               <span
-                                class="c27 c28"
+                                class="c27"
                               >
                                 Version
                               </span>
                               <span
-                                class="c29"
+                                class="c28"
                               />
                             </div>
                           </th>
@@ -648,19 +642,19 @@ describe('Plugin | Documentation | PluginPage', () => {
                               class="c26"
                             >
                               <span
-                                class="c27 c28"
+                                class="c27"
                               >
                                 Last Generated
                               </span>
                               <span
-                                class="c29"
+                                class="c28"
                               />
                             </div>
                           </th>
                         </tr>
                       </thead>
                       <tbody
-                        class="c30"
+                        class="c29"
                       >
                         <tr
                           aria-rowindex="2"
@@ -668,24 +662,24 @@ describe('Plugin | Documentation | PluginPage', () => {
                         >
                           <td
                             aria-colindex="1"
-                            class="c31 c25"
+                            class="c30 c25"
                             tabindex="-1"
                             width="50%"
                           >
                             <span
-                              class="c32"
+                              class="c31"
                             >
                               1.2.0
                             </span>
                           </td>
                           <td
                             aria-colindex="2"
-                            class="c31 c25"
+                            class="c30 c25"
                             tabindex="-1"
                             width="50%"
                           >
                             <span
-                              class="c32"
+                              class="c31"
                             />
                           </td>
                           <td
@@ -694,14 +688,14 @@ describe('Plugin | Documentation | PluginPage', () => {
                           >
                             <div
                               aria-hidden="true"
-                              class="c33"
+                              class="c32"
                               role="button"
                             >
                               <span>
                                 <button
                                   aria-disabled="false"
                                   aria-labelledby="tooltip-1"
-                                  class="c34 c35"
+                                  class="c33 c34"
                                   tabindex="-1"
                                   type="button"
                                 >
@@ -729,7 +723,7 @@ describe('Plugin | Documentation | PluginPage', () => {
                                 <button
                                   aria-disabled="false"
                                   aria-labelledby="tooltip-3"
-                                  class="c34 c35"
+                                  class="c33 c34"
                                   tabindex="-1"
                                   type="button"
                                 >
@@ -753,7 +747,7 @@ describe('Plugin | Documentation | PluginPage', () => {
                                 <button
                                   aria-disabled="false"
                                   aria-labelledby="tooltip-5"
-                                  class="c34 c35"
+                                  class="c33 c34"
                                   tabindex="-1"
                                   type="button"
                                 >
@@ -780,24 +774,24 @@ describe('Plugin | Documentation | PluginPage', () => {
                         >
                           <td
                             aria-colindex="1"
-                            class="c31 c25"
+                            class="c30 c25"
                             tabindex="-1"
                             width="50%"
                           >
                             <span
-                              class="c32"
+                              class="c31"
                             >
                               1.0.0
                             </span>
                           </td>
                           <td
                             aria-colindex="2"
-                            class="c31 c25"
+                            class="c30 c25"
                             tabindex="-1"
                             width="50%"
                           >
                             <span
-                              class="c32"
+                              class="c31"
                             />
                           </td>
                           <td
@@ -806,14 +800,14 @@ describe('Plugin | Documentation | PluginPage', () => {
                           >
                             <div
                               aria-hidden="true"
-                              class="c33"
+                              class="c32"
                               role="button"
                             >
                               <span>
                                 <button
                                   aria-disabled="false"
                                   aria-labelledby="tooltip-7"
-                                  class="c34 c35"
+                                  class="c33 c34"
                                   tabindex="-1"
                                   type="button"
                                 >
@@ -841,7 +835,7 @@ describe('Plugin | Documentation | PluginPage', () => {
                                 <button
                                   aria-disabled="false"
                                   aria-labelledby="tooltip-9"
-                                  class="c34 c35"
+                                  class="c33 c34"
                                   tabindex="-1"
                                   type="button"
                                 >

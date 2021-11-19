@@ -106,6 +106,19 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         align-items: center;
       }
 
+      .c17 {
+        color: #32324d;
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+      }
+
+      .c18 {
+        color: #32324d;
+        font-size: 0.875rem;
+        line-height: 1.43;
+      }
+
       .c10 {
         outline: none;
       }
@@ -170,20 +183,6 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         left: -5px;
         right: -5px;
         border: 2px solid #4945ff;
-      }
-
-      .c17 {
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c18 {
-        font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #32324d;
       }
 
       .c5 {
@@ -431,7 +430,6 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
                 >
                   <h1
                     class="c17"
-                    id="main-content-title"
                   >
                     Oops...
                   </h1>
