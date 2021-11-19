@@ -587,8 +587,9 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
 
       .c7 {
         color: #32324d;
-        font-size: 0.875rem;
-        line-height: 1.43;
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
       }
 
       .c9 {
