@@ -48,11 +48,12 @@ function generateApp(projectName, options) {
 }
 
 async function initProject(projectName, program) {
+  await checkInstallPath(resolve(projectName));
+
   if (program.quickstart) {
     return generateApp(projectName, program);
   }
 
-  await checkInstallPath(resolve(projectName));
   const prompt = await promptUser(projectName, program.template);
 
   const directory = prompt.directory || projectName;
