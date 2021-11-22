@@ -80,7 +80,7 @@ const ApiTokenCreateView = () => {
   }
 
   const handleSubmit = async (body, actions) => {
-    trackUsageRef(isCreating ? 'willCreateToken' : 'willEditToken');
+    trackUsageRef.current(isCreating ? 'willCreateToken' : 'willEditToken');
     lockApp();
 
     try {
@@ -97,7 +97,9 @@ const ApiTokenCreateView = () => {
         message: formatMessage({ id: 'notification.success.saved', defaultMessage: 'Saved' }),
       });
 
-      trackUsageRef(isCreating ? 'didCreateToken' : 'didEditToken', { type: apiToken.type });
+      trackUsageRef.current(isCreating ? 'didCreateToken' : 'didEditToken', {
+        type: apiToken.type,
+      });
 
       if (isCreating) {
         history.replace(`/settings/api-tokens/${response.id}`, { apiToken: response });
