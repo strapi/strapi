@@ -48,7 +48,7 @@ const ApiTokenCreateView = () => {
   const isCreating = id === 'create';
 
   useEffect(() => {
-    trackUsageRef.current(isCreating ? 'didCreateTokenFromList' : 'didEditTokenFromList');
+    trackUsageRef.current(isCreating ? 'didAddTokenFromList' : 'didEditTokenFromList');
   }, [isCreating]);
 
   if (history.location.state?.apiToken.accessKey) {
