@@ -1,5 +1,5 @@
 import { isEmpty, pickBy, transform } from 'lodash';
-import request from '../../old/utils/request';
+import request from '../request';
 
 const findMatchingPermissions = (userPermissions, permissions) => {
   return transform(

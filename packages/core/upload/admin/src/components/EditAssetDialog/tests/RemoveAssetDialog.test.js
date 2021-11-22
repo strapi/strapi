@@ -506,10 +506,9 @@ describe('RemoveAssetDialog', () => {
       }
 
       .c13 {
-        font-weight: 400;
+        color: #32324d;
         font-size: 0.875rem;
         line-height: 1.43;
-        color: #32324d;
       }
 
       <body

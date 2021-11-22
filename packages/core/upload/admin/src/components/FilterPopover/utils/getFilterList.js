@@ -38,20 +38,6 @@ const getFilterList = ({ fieldSchema: { type: fieldType, mainField } }) => {
         },
         {
           intlLabel: {
-            id: 'components.FilterOptions.FILTER_TYPES.$contains',
-            defaultMessage: 'contains (sensitive)',
-          },
-          value: '$contains',
-        },
-        {
-          intlLabel: {
-            id: 'components.FilterOptions.FILTER_TYPES.$notContains',
-            defaultMessage: 'not contains (sensitive)',
-          },
-          value: '$notContains',
-        },
-        {
-          intlLabel: {
             id: 'components.FilterOptions.FILTER_TYPES.$gt',
             defaultMessage: 'is greater than',
           },

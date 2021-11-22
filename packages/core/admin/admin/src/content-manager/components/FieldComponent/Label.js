@@ -4,7 +4,7 @@ import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
-import { Text } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 
 const LabelAction = styled(Box)`
   svg path {
@@ -27,11 +27,17 @@ const Label = ({
   return (
     <Box paddingBottom={1}>
       <Flex>
-        <Text textColor="neutral800" htmlFor={id || name} small bold as="label">
+        <Typography
+          textColor="neutral800"
+          htmlFor={id || name}
+          variant="pi"
+          fontWeight="bold"
+          as="label"
+        >
           {label}
           {showNumberOfEntries && <>&nbsp;({numberOfEntries})</>}
-          {required && <Text textColor="danger600">*</Text>}
-        </Text>
+          {required && <Typography textColor="danger600">*</Typography>}
+        </Typography>
         {labelAction && <LabelAction paddingLeft={1}>{labelAction}</LabelAction>}
       </Flex>
     </Box>

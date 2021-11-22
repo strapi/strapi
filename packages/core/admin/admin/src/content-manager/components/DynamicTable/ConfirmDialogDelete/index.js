@@ -4,7 +4,7 @@ import { useIntl } from 'react-intl';
 import { Dialog, DialogBody, DialogFooter } from '@strapi/design-system/Dialog';
 import { Stack } from '@strapi/design-system/Stack';
 import { Flex } from '@strapi/design-system/Flex';
-import { Text } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { Button } from '@strapi/design-system/Button';
 import ExclamationMarkCircle from '@strapi/icons/ExclamationMarkCircle';
 import Trash from '@strapi/icons/Trash';
@@ -27,12 +27,12 @@ const ConfirmDialogDelete = ({ isConfirmButtonLoading, isOpen, onToggleDialog, o
       <DialogBody icon={<ExclamationMarkCircle />}>
         <Stack size={2}>
           <Flex justifyContent="center">
-            <Text id="confirm-description">
+            <Typography id="confirm-description">
               {formatMessage({
                 id: 'components.popUpWarning.message',
                 defaultMessage: 'Are you sure you want to delete this?',
               })}
-            </Text>
+            </Typography>
           </Flex>
           <Flex>
             <InjectionZoneList area="contentManager.listView.deleteModalAdditionalInfos" />

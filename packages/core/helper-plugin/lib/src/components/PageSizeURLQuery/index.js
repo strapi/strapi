@@ -9,7 +9,7 @@ import { useIntl } from 'react-intl';
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
 import { Select, Option } from '@strapi/design-system/Select';
-import { Text } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import PropTypes from 'prop-types';
 import useQueryParams from '../../hooks/useQueryParams';
 import useTracking from '../../hooks/useTracking';
@@ -48,12 +48,12 @@ const PageSizeURLQuery = ({ trackedEvent }) => {
         <Option value="100">100</Option>
       </Select>
       <Box paddingLeft={2}>
-        <Text textColor="neutral600" as="label" htmlFor="page-size">
+        <Typography textColor="neutral600" as="label" htmlFor="page-size">
           {formatMessage({
             id: 'components.PageFooter.select',
             defaultMessage: 'Entries per page',
           })}
-        </Text>
+        </Typography>
       </Box>
     </Flex>
   );

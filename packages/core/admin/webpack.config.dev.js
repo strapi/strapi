@@ -62,16 +62,20 @@ module.exports = () => {
         timestamp: true,
       },
     },
+
     devServer: {
       port: 4000,
-      clientLogLevel: 'none',
-      quiet: true,
+      client: {
+        logging: 'none',
+        overlay: {
+          errors: true,
+          warnings: false,
+        },
+      },
       historyApiFallback: {
         index: '/admin/',
         disableDotRule: true,
       },
-      open: false,
-      openPage: '/admin',
     },
   };
 };

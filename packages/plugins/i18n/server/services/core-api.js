@@ -182,10 +182,9 @@ const addCreateLocalizationAction = contentType => {
   strapi.api[apiName].routes[modelName].routes.push(localizationRoute);
 
   strapi.container.get('controllers').extend(`api::${apiName}.${modelName}`, controller => {
-    return {
-      ...controller,
+    return Object.assign(controller, {
       createLocalization: createLocalizationHandler(contentType),
-    };
+    });
   });
 };
 

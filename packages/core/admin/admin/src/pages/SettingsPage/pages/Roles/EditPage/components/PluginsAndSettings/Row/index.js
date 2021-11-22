@@ -17,7 +17,6 @@ const PermissionRow = ({
   pathToData,
 }) => {
   const { formatMessage } = useIntl();
-
   const handleClick = () => {
     onOpenCategory(name);
   };
@@ -29,18 +28,22 @@ const PermissionRow = ({
   }, [name]);
 
   return (
-    <Accordion expanded={isOpen} toggle={handleClick} id={`accordion-${name}`}>
+    <Accordion
+      expanded={isOpen}
+      toggle={handleClick}
+      id={`accordion-${name}`}
+      variant={isWhite ? 'primary' : 'secondary'}
+    >
       <AccordionToggle
         title={upperFirst(categoryName)}
         description={`${formatMessage(
           { id: 'Settings.permissions.category' },
           { category: categoryName }
         )} ${kind === 'plugins' ? 'plugin' : kind}`}
-        variant={isWhite ? 'primary' : 'secondary'}
       />
 
       <AccordionContent>
-        <Box padding={6} background="neutral0">
+        <Box padding={6}>
           {childrenForm.map(({ actions, subCategoryName, subCategoryId }) => (
             <SubCategory
               key={subCategoryName}

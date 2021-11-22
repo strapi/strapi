@@ -3,7 +3,7 @@ import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
 import { IconButton } from '@strapi/design-system/IconButton';
 import { Tooltip } from '@strapi/design-system/Tooltip';
 import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
-import { TableLabel } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { Th, Thead, Tr } from '@strapi/design-system/Table';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
@@ -78,14 +78,15 @@ const TableHead = ({
               }
             >
               <Tooltip label={isSortable ? sortLabel : intlLabel}>
-                <TableLabel
+                <Typography
                   textColor="neutral600"
                   as={!isSorted && isSortable ? 'button' : 'span'}
                   label={intlLabel}
                   onClick={() => handleClickSort(!isSorted)}
+                  variant="sigma"
                 >
                   {intlLabel}
-                </TableLabel>
+                </Typography>
               </Tooltip>
             </Th>
           );

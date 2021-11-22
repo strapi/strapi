@@ -11,7 +11,7 @@ const StyledBox = styled(Box)`
 const Rectangle = () => {
   return (
     <Flex justifyContent="center">
-      <StyledBox background="primary200" />
+      <StyledBox background="neutral200" />
     </Flex>
   );
 };

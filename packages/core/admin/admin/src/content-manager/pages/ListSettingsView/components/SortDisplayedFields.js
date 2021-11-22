@@ -5,7 +5,7 @@ import { useIntl } from 'react-intl';
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
 import { Stack } from '@strapi/design-system/Stack';
-import { H3 } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { SimpleMenu, MenuItem } from '@strapi/design-system/SimpleMenu';
 import { IconButton } from '@strapi/design-system/IconButton';
 import Plus from '@strapi/icons/Plus';
@@ -39,12 +39,12 @@ const SortDisplayedFields = ({
   return (
     <>
       <Box paddingBottom={4}>
-        <H3 as="h2">
+        <Typography variant="delta" as="h2">
           {formatMessage({
             id: getTrad('containers.SettingPage.view'),
             defaultMessage: 'View',
           })}
-        </H3>
+        </Typography>
       </Box>
       <Flex
         paddingTop={4}

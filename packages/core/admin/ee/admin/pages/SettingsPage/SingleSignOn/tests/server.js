@@ -4,6 +4,7 @@ import { rest } from 'msw';
 const handlers = [
   rest.get('*/providers/options', (req, res, ctx) => {
     return res(
+      ctx.delay(200),
       ctx.status(200),
       ctx.json({
         data: {
@@ -15,6 +16,7 @@ const handlers = [
   }),
   rest.get('*/admin/roles', (req, res, ctx) => {
     return res(
+      ctx.delay(200),
       ctx.status(200),
       ctx.json({
         data: [

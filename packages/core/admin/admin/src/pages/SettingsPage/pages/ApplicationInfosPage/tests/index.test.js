@@ -43,7 +43,7 @@ describe('Application page', () => {
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
-      .c23 {
+      .c22 {
         padding-top: 4px;
       }
 
@@ -66,31 +66,25 @@ describe('Application page', () => {
         margin-top: 20px;
       }
 
-      .c16 {
-        color: #666687;
-        font-size: 0.875rem;
-        line-height: 1.43;
-      }
-
       .c12 {
+        color: #32324d;
         font-weight: 500;
         font-size: 1rem;
         line-height: 1.25;
-        color: #32324d;
       }
 
-      .c18 {
-        font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #32324d;
-      }
-
-      .c17 {
+      .c16 {
+        color: #666687;
         font-weight: 600;
         font-size: 0.6875rem;
         line-height: 1.45;
         text-transform: uppercase;
+      }
+
+      .c17 {
+        color: #32324d;
+        font-size: 0.875rem;
+        line-height: 1.43;
       }
 
       .c1 {
@@ -182,7 +176,7 @@ describe('Application page', () => {
         grid-column: span 6;
       }
 
-      .c20 {
+      .c19 {
         color: #4945ff;
         font-weight: 600;
         font-size: 0.6875rem;
@@ -190,11 +184,11 @@ describe('Application page', () => {
         text-transform: uppercase;
       }
 
-      .c21 {
+      .c20 {
         padding-left: 8px;
       }
 
-      .c19 {
+      .c18 {
         display: -webkit-inline-box;
         display: -webkit-inline-flex;
         display: -ms-inline-flexbox;
@@ -210,15 +204,15 @@ describe('Application page', () => {
         outline: none;
       }
 
-      .c19 svg path {
+      .c18 svg path {
         fill: #4945ff;
       }
 
-      .c19 svg {
+      .c18 svg {
         font-size: 0.625rem;
       }
 
-      .c19:after {
+      .c18:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -233,11 +227,11 @@ describe('Application page', () => {
         border: 2px solid transparent;
       }
 
-      .c19:focus-visible {
+      .c18:focus-visible {
         outline: none;
       }
 
-      .c19:focus-visible:after {
+      .c18:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -248,7 +242,7 @@ describe('Application page', () => {
         border: 2px solid #4945ff;
       }
 
-      .c22 {
+      .c21 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -330,12 +324,12 @@ describe('Application page', () => {
                         class=""
                       >
                         <span
-                          class="c16 c17"
+                          class="c16"
                         >
                           details
                         </span>
                         <p
-                          class="c18"
+                          class="c17"
                         >
                           v
                           4.0.0
@@ -349,12 +343,12 @@ describe('Application page', () => {
                         class=""
                       >
                         <span
-                          class="c16 c17"
+                          class="c16"
                         >
                           current plan
                         </span>
                         <p
-                          class="c18"
+                          class="c17"
                         >
                           Enterprise Edition
                         </p>
@@ -371,19 +365,19 @@ describe('Application page', () => {
                         class=""
                       >
                         <a
-                          class="c19"
+                          class="c18"
                           href="https://github.com/strapi/strapi/releases/tag/v3.6.8"
                           rel="noreferrer noopener"
                           target="_blank"
                         >
                           <span
-                            class="c20"
+                            class="c19"
                           >
                             Upgrade your admin panel
                           </span>
                           <span
                             aria-hidden="true"
-                            class="c21 c22"
+                            class="c20 c21"
                           >
                             <svg
                               fill="none"
@@ -408,19 +402,19 @@ describe('Application page', () => {
                         class=""
                       >
                         <a
-                          class="c19"
+                          class="c18"
                           href="https://strapi.io/pricing-self-hosted"
                           rel="noreferrer noopener"
                           target="_blank"
                         >
                           <span
-                            class="c20"
+                            class="c19"
                           >
                             See all pricing
                           </span>
                           <span
                             aria-hidden="true"
-                            class="c21 c22"
+                            class="c20 c21"
                           >
                             <svg
                               fill="none"
@@ -440,15 +434,15 @@ describe('Application page', () => {
                     </div>
                   </div>
                   <div
-                    class="c23"
+                    class="c22"
                   >
                     <span
-                      class="c16 c17"
+                      class="c16"
                     >
                       node version
                     </span>
                     <p
-                      class="c18"
+                      class="c17"
                     />
                   </div>
                 </div>

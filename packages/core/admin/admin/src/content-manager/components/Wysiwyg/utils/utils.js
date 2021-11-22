@@ -133,16 +133,48 @@ export const markdownHandler = (editor, markdownType) => {
 };
 
 export const listHandler = (editor, listType) => {
-  let { line: currentLine } = editor.current.getCursor();
-  const listToInsert = insertListOrTitle(listType);
-  const lineContent = editor.current.getLine(currentLine);
+  const doc = editor.current.getDoc();
+  const insertion = listType === 'BulletList' ? '- ' : '1. ';
 
-  const textToInsert = listToInsert + lineContent;
-  editor.current.setSelection(
-    { line: currentLine, ch: 0 },
-    { line: currentLine, ch: lineContent.length }
-  );
-  editor.current.replaceSelection(textToInsert);
+  if (doc.somethingSelected()) {
+    const selections = doc.listSelections();
+    let remove = null;
+
+    editor.current.operation(function() {
+      selections.forEach(function(selection) {
+        const pos = [selection.head.line, selection.anchor.line].sort();
+
+        // Remove if the first text starts with it
+        if (remove == null) {
+          remove = doc.getLine(pos[0]).startsWith(insertion);
+        }
+
+        for (let i = pos[0]; i <= pos[1]; i++) {
+          if (remove) {
+            // Don't remove if we don't start with it
+            if (doc.getLine(i).startsWith(insertion)) {
+              doc.replaceRange('', { line: i, ch: 0 }, { line: i, ch: insertion.length });
+            }
+          } else {
+            const lineInsertion = listType === 'BulletList' ? '- ' : `${i + 1}. `;
+            doc.replaceRange(lineInsertion, { line: i, ch: 0 });
+          }
+        }
+      });
+    });
+  } else {
+    let { line: currentLine } = doc.getCursor();
+    const listToInsert = insertListOrTitle(listType);
+    const lineContent = editor.current.getLine(currentLine);
+
+    const textToInsert = listToInsert + lineContent;
+    editor.current.setSelection(
+      { line: currentLine, ch: 0 },
+      { line: currentLine, ch: lineContent.length }
+    );
+    editor.current.replaceSelection(textToInsert);
+  }
+
   editor.current.focus();
 };
 
@@ -160,10 +192,15 @@ export const titleHandler = (editor, titleType) => {
     { line: currentLine, ch: lineContent.length }
   );
   editor.current.replaceSelection(textToInsert);
-  setTimeout(() => editor.current.focus(), 0);
+
+  setTimeout(() => {
+    const newLastLineLength = editor.current.getLine(currentLine).length;
+    editor.current.focus();
+    editor.current.setCursor({ line: currentLine, ch: newLastLineLength });
+  }, 0);
 };
 
-export const insertImage = (editor, files) => {
+export const insertFile = (editor, files) => {
   let { line, ch } = editor.current.getCursor();
 
   files.forEach((file, i) => {
@@ -178,7 +215,12 @@ export const insertImage = (editor, files) => {
       line++;
       editor.current.replaceSelection('\n');
     }
-    editor.current.replaceSelection(`[${file.alt}](${file.url})`);
+
+    if (file.mime.includes('image')) {
+      editor.current.replaceSelection(`![${file.alt}](${file.url})`);
+    } else {
+      editor.current.replaceSelection(`[${file.alt}](${file.url})`);
+    }
   });
 
   setTimeout(() => editor.current.focus(), 0);

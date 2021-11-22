@@ -188,6 +188,7 @@ const DynamicZone = ({
             return (
               <Component
                 componentUid={componentUid}
+                formErrors={formErrors}
                 key={index}
                 index={index}
                 isOpen={isOpen}

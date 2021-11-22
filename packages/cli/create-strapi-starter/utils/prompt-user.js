@@ -9,7 +9,7 @@ const yaml = require('js-yaml');
  * @param {string|null} starterUrl - The GitHub repo of the starter
  * @returns Object containting prompt answers
  */
-module.exports = async function promptUser(projectName, starter) {
+module.exports = async function promptUser(projectName, starter, program) {
   const mainQuestions = [
     {
       type: 'input',
@@ -22,6 +22,7 @@ module.exports = async function promptUser(projectName, starter) {
       type: 'list',
       name: 'quick',
       message: 'Choose your installation type',
+      when: !program.quickstart,
       choices: [
         {
           name: 'Quickstart (recommended)',

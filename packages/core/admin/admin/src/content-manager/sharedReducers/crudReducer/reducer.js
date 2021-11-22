@@ -21,7 +21,7 @@ const crudInitialState = {
   componentsDataStructure: {},
   contentTypeDataStructure: {},
   isLoading: true,
-  data: {},
+  data: null,
   status: 'resolved',
 };
 
@@ -30,7 +30,7 @@ const crudReducer = (state = crudInitialState, action) =>
     switch (action.type) {
       case GET_DATA: {
         draftState.isLoading = true;
-        draftState.data = {};
+        draftState.data = null;
         break;
       }
       case GET_DATA_SUCCEEDED: {

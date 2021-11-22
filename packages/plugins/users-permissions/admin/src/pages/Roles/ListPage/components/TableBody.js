@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { IconButton } from '@strapi/design-system/IconButton';
-import { Text } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { Flex } from '@strapi/design-system/Flex';
 import { Tbody, Tr, Td } from '@strapi/design-system/Table';
 import Pencil from '@strapi/icons/Pencil';
@@ -34,18 +34,18 @@ const TableBody = ({ sortedRoles, canDelete, permissions, setRoleToDelete, onDel
       {sortedRoles?.map(role => (
         <Tr key={role.name} {...onRowClick({ fn: () => handleClickEdit(role.id) })}>
           <Td width="20%">
-            <Text>{role.name}</Text>
+            <Typography>{role.name}</Typography>
           </Td>
           <Td width="50%">
-            <Text>{role.description}</Text>
+            <Typography>{role.description}</Typography>
           </Td>
           <Td width="30%">
-            <Text>
+            <Typography>
               {`${role.nb_users} ${formatMessage({
                 id: getTrad('Roles.users'),
                 defaultMessage: 'users',
               }).toLowerCase()}`}
-            </Text>
+            </Typography>
           </Td>
           <Td>
             <Flex justifyContent="end" {...stopPropagation}>

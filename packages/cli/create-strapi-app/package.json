@@ -18,8 +18,6 @@
   "dependencies": {
     "commander": "6.1.0",
     "inquirer": "8.2.0",
-    "js-yaml": "4.1.0",
-    "node-fetch": "^2.6.1",
     "@strapi/generate-new": "3.6.8"
   },
   "scripts": {

@@ -34,5 +34,5 @@ export const useSelectionState = (key, initialValue) => {
     }
   };
 
-  return [selections, { selectOne, selectAll, selectOnly }];
+  return [selections, { selectOne, selectAll, selectOnly, setSelections }];
 };

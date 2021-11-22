@@ -13,7 +13,7 @@ module.exports = ({ strapi }) => {
     const utils = strapi.plugin('graphql').service('utils');
     const extension = strapi.plugin('graphql').service('extension');
 
-    const { getFiltersInputTypeName } = utils.naming;
+    const { getFiltersInputTypeName, getScalarFilterInputTypeName } = utils.naming;
     const { isStrapiScalar, isRelation } = utils.attributes;
 
     const { attributes } = contentType;
@@ -30,6 +30,15 @@ module.exports = ({ strapi }) => {
             .field(attributeName)
             .hasFiltersEnabeld()
         );
+
+        const isIDFilterEnabled = extension
+          .shadowCRUD(contentType.uid)
+          .field('id')
+          .hasFiltersEnabeld();
+        // Add an ID filter to the collection types
+        if (contentType.kind === 'collectionType' && isIDFilterEnabled) {
+          t.field('id', { type: getScalarFilterInputTypeName('ID') });
+        }
 
         // Add every defined attribute
         for (const [attributeName, attribute] of validAttributes) {

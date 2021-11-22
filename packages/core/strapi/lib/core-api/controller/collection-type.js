@@ -1,17 +1,17 @@
 'use strict';
 
+const { isObject } = require('lodash/fp');
+const { ValidationError } = require('@strapi/utils').errors;
+
 const { parseBody } = require('./transform');
 
 /**
  *
  * Returns a collection type controller to handle default core-api actions
  */
-const createCollectionTypeController = ({
-  service,
-  sanitizeInput,
-  sanitizeOutput,
-  transformResponse,
-}) => {
+const createCollectionTypeController = ({ contentType }) => {
+  const { uid } = contentType;
+
   return {
     /**
      * Retrieve records.
@@ -21,10 +21,10 @@ const createCollectionTypeController = ({
     async find(ctx) {
       const { query } = ctx;
 
-      const { results, pagination } = await service.find(query);
-      const sanitizedResults = await sanitizeOutput(results, ctx);
+      const { results, pagination } = await strapi.service(uid).find(query);
+      const sanitizedResults = await this.sanitizeOutput(results, ctx);
 
-      return transformResponse(sanitizedResults, { pagination });
+      return this.transformResponse(sanitizedResults, { pagination });
     },
 
     /**
@@ -36,10 +36,10 @@ const createCollectionTypeController = ({
       const { id } = ctx.params;
       const { query } = ctx;
 
-      const entity = await service.findOne(id, query);
-      const sanitizedEntity = await sanitizeOutput(entity, ctx);
+      const entity = await strapi.service(uid).findOne(id, query);
+      const sanitizedEntity = await this.sanitizeOutput(entity, ctx);
 
-      return transformResponse(sanitizedEntity);
+      return this.transformResponse(sanitizedEntity);
     },
 
     /**
@@ -51,12 +51,19 @@ const createCollectionTypeController = ({
       const { query } = ctx.request;
 
       const { data, files } = parseBody(ctx);
-      const sanitizedInputData = await sanitizeInput(data, ctx);
 
-      const entity = await service.create({ ...query, data: sanitizedInputData, files });
-      const sanitizedEntity = await sanitizeOutput(entity, ctx);
+      if (!isObject(data)) {
+        throw new ValidationError('Missing "data" payload in the request body');
+      }
 
-      return transformResponse(sanitizedEntity);
+      const sanitizedInputData = await this.sanitizeInput(data, ctx);
+
+      const entity = await strapi
+        .service(uid)
+        .create({ ...query, data: sanitizedInputData, files });
+      const sanitizedEntity = await this.sanitizeOutput(entity, ctx);
+
+      return this.transformResponse(sanitizedEntity);
     },
 
     /**
@@ -69,12 +76,19 @@ const createCollectionTypeController = ({
       const { query } = ctx.request;
 
       const { data, files } = parseBody(ctx);
-      const sanitizedInputData = await sanitizeInput(data, ctx);
 
-      const entity = await service.update(id, { ...query, data: sanitizedInputData, files });
-      const sanitizedEntity = await sanitizeOutput(entity, ctx);
+      if (!isObject(data)) {
+        throw new ValidationError('Missing "data" payload in the request body');
+      }
 
-      return transformResponse(sanitizedEntity);
+      const sanitizedInputData = await this.sanitizeInput(data, ctx);
+
+      const entity = await strapi
+        .service(uid)
+        .update(id, { ...query, data: sanitizedInputData, files });
+      const sanitizedEntity = await this.sanitizeOutput(entity, ctx);
+
+      return this.transformResponse(sanitizedEntity);
     },
 
     /**
@@ -86,10 +100,10 @@ const createCollectionTypeController = ({
       const { id } = ctx.params;
       const { query } = ctx;
 
-      const entity = await service.delete(id, query);
-      const sanitizedEntity = await sanitizeOutput(entity, ctx);
+      const entity = await strapi.service(uid).delete(id, query);
+      const sanitizedEntity = await this.sanitizeOutput(entity, ctx);
 
-      return transformResponse(sanitizedEntity);
+      return this.transformResponse(sanitizedEntity);
     },
   };
 };

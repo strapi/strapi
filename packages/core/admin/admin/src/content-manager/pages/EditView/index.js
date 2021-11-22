@@ -10,7 +10,7 @@ import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { LinkButton } from '@strapi/design-system/LinkButton';
 import { Main } from '@strapi/design-system/Main';
 import { Stack } from '@strapi/design-system/Stack';
-import { TableLabel } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import Layer from '@strapi/icons/Layer';
 import Pencil from '@strapi/icons/Pencil';
 import { InjectionZone } from '../../../shared/components';
@@ -244,6 +244,7 @@ const EditView = ({
                         paddingLeft={4}
                         paddingRight={4}
                         paddingTop={6}
+                        shadow="tableShadow"
                       >
                         <Informations />
                         <InjectionZone area="contentManager.editView.informations" />
@@ -259,8 +260,9 @@ const EditView = ({
                           paddingLeft={4}
                           paddingRight={4}
                           paddingTop={6}
+                          shadow="tableShadow"
                         >
-                          <TableLabel textColor="neutral600">
+                          <Typography variant="sigma" textColor="neutral600">
                             {formatMessage(
                               {
                                 id: getTrad('containers.Edit.relations'),
@@ -269,7 +271,7 @@ const EditView = ({
                               },
                               { number: displayedRelationsLength }
                             )}
-                          </TableLabel>
+                          </Typography>
                           <Box paddingTop={2} paddingBottom={6}>
                             <Divider />
                           </Box>

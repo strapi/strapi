@@ -5,7 +5,7 @@ import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import { get, has, isEmpty } from 'lodash';
 import { Flex } from '@strapi/design-system/Flex';
-import { Text } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { pxToRem } from '@strapi/helper-plugin';
 import { getTrad } from '../../utils';
 
@@ -13,7 +13,7 @@ const StyledBullet = styled.div`
   width: ${pxToRem(6)};
   height: ${pxToRem(6)};
   margin-right: ${({ theme }) => theme.spaces[2]};
-  background: ${({ theme, isDraft }) => theme.colors[isDraft ? 'secondary700' : 'success200']};
+  background: ${({ theme, isDraft }) => theme.colors[isDraft ? 'secondary600' : 'success600']};
   border-radius: 50%;
   cursor: pointer;
 `;
@@ -40,7 +40,7 @@ const Option = props => {
         <Component {...props}>
           <Flex>
             <StyledBullet title={title} isDraft={isDraft} />
-            <Text ellipsis>{props.label || '-'}</Text>
+            <Typography ellipsis>{props.label || '-'}</Typography>
           </Flex>
         </Component>
       );

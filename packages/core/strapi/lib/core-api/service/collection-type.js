@@ -22,14 +22,12 @@ const setPublishedAt = data => {
  *
  * Returns a collection type service to handle default core-api actions
  */
-const createCollectionTypeService = ({ model, strapi, utils }) => {
-  const { uid } = model;
-
-  const { getFetchParams } = utils;
+const createCollectionTypeService = ({ contentType }) => {
+  const { uid } = contentType;
 
   return {
     async find(params = {}) {
-      const fetchParams = getFetchParams(params);
+      const fetchParams = this.getFetchParams(params);
 
       const paginationInfo = getPaginationInfo(fetchParams);
 
@@ -54,13 +52,13 @@ const createCollectionTypeService = ({ model, strapi, utils }) => {
     },
 
     findOne(entityId, params = {}) {
-      return strapi.entityService.findOne(uid, entityId, getFetchParams(params));
+      return strapi.entityService.findOne(uid, entityId, this.getFetchParams(params));
     },
 
     create(params = {}) {
       const { data } = params;
 
-      if (hasDraftAndPublish(model)) {
+      if (hasDraftAndPublish(contentType)) {
         setPublishedAt(data);
       }
 

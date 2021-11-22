@@ -5,10 +5,10 @@ const crypto = require('crypto');
 const TABLE_NAME = 'strapi_database_schema';
 
 module.exports = db => {
-  const hasSchemaTable = () => db.connection.schema.hasTable(TABLE_NAME);
+  const hasSchemaTable = () => db.getSchemaConnection().hasTable(TABLE_NAME);
 
   const createSchemaTable = () => {
-    return db.connection.schema.createTable(TABLE_NAME, t => {
+    return db.getSchemaConnection().createTable(TABLE_NAME, t => {
       t.increments('id');
       t.json('schema');
       t.datetime('time', { useTz: false });
@@ -26,7 +26,8 @@ module.exports = db => {
     async read() {
       await checkTableExists();
 
-      const res = await db.connection
+      const res = await db
+        .getConnection()
         .select('*')
         .from(TABLE_NAME)
         .orderBy('time', 'DESC')
@@ -55,21 +56,24 @@ module.exports = db => {
       await checkTableExists();
 
       // NOTE: we can remove this to add history
-      await db.connection(TABLE_NAME).delete();
+      await db.getConnection(TABLE_NAME).delete();
 
       const time = new Date();
 
-      await db.connection(TABLE_NAME).insert({
-        schema: JSON.stringify(schema),
-        hash: this.hashSchema(schema),
-        time,
-      });
+      await db
+        .getConnection()
+        .insert({
+          schema: JSON.stringify(schema),
+          hash: this.hashSchema(schema),
+          time,
+        })
+        .into(TABLE_NAME);
     },
 
     async clear() {
       await checkTableExists();
 
-      await db.connection(TABLE_NAME).truncate();
+      await db.getConnection(TABLE_NAME).truncate();
     },
   };
 };

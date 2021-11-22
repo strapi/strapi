@@ -13,7 +13,7 @@ import {
   ModalBody,
   ModalFooter,
 } from '@strapi/design-system/ModalLayout';
-import { ButtonText } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { Stack } from '@strapi/design-system/Stack';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { Button } from '@strapi/design-system/Button';
@@ -36,7 +36,14 @@ const fileInfoSchema = yup.object({
   caption: yup.string(),
 });
 
-export const EditAssetDialog = ({ onClose, asset, canUpdate, canCopyLink, canDownload }) => {
+export const EditAssetDialog = ({
+  onClose,
+  asset,
+  canUpdate,
+  canCopyLink,
+  canDownload,
+  trackedLocation,
+}) => {
   const { formatMessage, formatDate } = useIntl();
   const submitButtonRef = useRef(null);
   const [isCropping, setIsCropping] = useState(false);
@@ -44,9 +51,14 @@ export const EditAssetDialog = ({ onClose, asset, canUpdate, canCopyLink, canDow
   const { editAsset, isLoading } = useEditAsset();
 
   const handleSubmit = async values => {
-    const editedAsset = await editAsset({ ...asset, ...values }, replacementFile);
+    if (asset.isLocal) {
+      const nextAsset = { ...asset, ...values };
 
-    onClose(editedAsset);
+      onClose(nextAsset);
+    } else {
+      const editedAsset = await editAsset({ ...asset, ...values }, replacementFile);
+      onClose(editedAsset);
+    }
   };
 
   const handleStartCropping = () => {
@@ -68,9 +80,9 @@ export const EditAssetDialog = ({ onClose, asset, canUpdate, canCopyLink, canDow
     <>
       <ModalLayout onClose={() => onClose()} labelledBy="title">
         <ModalHeader>
-          <ButtonText textColor="neutral800" as="h2" id="title">
+          <Typography fontWeight="bold" textColor="neutral800" as="h2" id="title">
             {formatMessage({ id: getTrad('modal.edit.title'), defaultMessage: 'Details' })}
-          </ButtonText>
+          </Typography>
         </ModalHeader>
         <ModalBody>
           <Grid gap={4}>
@@ -85,6 +97,7 @@ export const EditAssetDialog = ({ onClose, asset, canUpdate, canCopyLink, canDow
                 onCropStart={handleStartCropping}
                 onCropCancel={handleCancelCropping}
                 replacementFile={replacementFile}
+                trackedLocation={trackedLocation}
               />
             </GridItem>
             <GridItem xs={12} col={6}>
@@ -183,6 +196,7 @@ export const EditAssetDialog = ({ onClose, asset, canUpdate, canCopyLink, canDow
                 onSelectMedia={setReplacementFile}
                 acceptedMime={asset.mime}
                 disabled={formDisabled}
+                trackedLocation={trackedLocation}
               />
 
               <Button
@@ -200,10 +214,15 @@ export const EditAssetDialog = ({ onClose, asset, canUpdate, canCopyLink, canDow
   );
 };
 
+EditAssetDialog.defaultProps = {
+  trackedLocation: undefined,
+};
+
 EditAssetDialog.propTypes = {
   asset: AssetDefinition.isRequired,
   canUpdate: PropTypes.bool.isRequired,
   canCopyLink: PropTypes.bool.isRequired,
   canDownload: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
+  trackedLocation: PropTypes.string,
 };

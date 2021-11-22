@@ -1,6 +1,6 @@
 import React from 'react';
 import { useIntl } from 'react-intl';
-import { H3, Text } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { Stack } from '@strapi/design-system/Stack';
 import { GridItem } from '@strapi/design-system/Grid';
 import { get, isEmpty, takeRight, toLower, without } from 'lodash';
@@ -35,19 +35,19 @@ const Policies = () => {
         </Stack>
       ) : (
         <Stack size={2}>
-          <H3>
+          <Typography variant="delta" as="h3">
             {formatMessage({
               id: 'users-permissions.Policies.header.title',
               defaultMessage: 'Advanced settings',
             })}
-          </H3>
-          <Text as="p" textColor="neutral600">
+          </Typography>
+          <Typography as="p" textColor="neutral600">
             {formatMessage({
               id: 'users-permissions.Policies.header.hint',
               defaultMessage:
                 "Select the application's actions or the plugin's actions and click on the cog icon to display the bound route",
             })}
-          </Text>
+          </Typography>
         </Stack>
       )}
     </GridItem>

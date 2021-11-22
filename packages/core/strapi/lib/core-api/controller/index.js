@@ -10,31 +10,36 @@ const createCollectionTypeController = require('./collection-type');
 
 const getAuthFromKoaContext = getOr({}, 'state.auth');
 
-module.exports = ({ service, model }) => {
-  const ctx = {
-    model,
-    service,
+const createController = ({ contentType }) => {
+  const ctx = { contentType };
 
+  const proto = {
     transformResponse(data, meta) {
-      return transformResponse(data, meta, { contentType: model });
+      return transformResponse(data, meta, { contentType });
     },
 
     sanitizeOutput(data, ctx) {
       const auth = getAuthFromKoaContext(ctx);
 
-      return sanitize.contentAPI.output(data, strapi.getModel(model.uid), { auth });
+      return sanitize.contentAPI.output(data, contentType, { auth });
     },
 
     sanitizeInput(data, ctx) {
       const auth = getAuthFromKoaContext(ctx);
 
-      return sanitize.contentAPI.input(data, strapi.getModel(model.uid), { auth });
+      return sanitize.contentAPI.input(data, contentType, { auth });
     },
   };
 
-  if (contentTypes.isSingleType(model)) {
-    return createSingleTypeController(ctx);
+  let ctrl;
+
+  if (contentTypes.isSingleType(contentType)) {
+    ctrl = createSingleTypeController(ctx);
+  } else {
+    ctrl = createCollectionTypeController(ctx);
   }
 
-  return createCollectionTypeController(ctx);
+  return Object.assign(Object.create(proto), ctrl);
 };
+
+module.exports = { createController };

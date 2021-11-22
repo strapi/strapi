@@ -7,8 +7,6 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import cloneDeep from 'lodash/cloneDeep';
-import { formatISO } from 'date-fns';
 import { Checkbox } from '@strapi/design-system/Checkbox';
 import { DatePicker } from '@strapi/design-system/DatePicker';
 import { NumberInput } from '@strapi/design-system/NumberInput';
@@ -17,9 +15,11 @@ import { Textarea } from '@strapi/design-system/Textarea';
 import { TextInput } from '@strapi/design-system/TextInput';
 import { TimePicker } from '@strapi/design-system/TimePicker';
 import { ToggleInput } from '@strapi/design-system/ToggleInput';
+import { Icon } from '@strapi/design-system/Icon';
 import EyeStriked from '@strapi/icons/EyeStriked';
 import Eye from '@strapi/icons/Eye';
 import DateTimePicker from '../DateTimePicker';
+import NotSupported from './NotSupported';
 
 const GenericInput = ({
   autoComplete,
@@ -142,7 +142,7 @@ const GenericInput = ({
           hint={hint}
           name={name}
           onChange={date => {
-            const formattedDate = formatISO(cloneDeep(date), { representation: 'complete' });
+            const formattedDate = date.toISOString();
 
             onChange({ target: { name, value: formattedDate, type } });
           }}
@@ -166,7 +166,7 @@ const GenericInput = ({
           hint={hint}
           name={name}
           onChange={date => {
-            const formattedDate = formatISO(cloneDeep(date), { representation: 'date' });
+            const formattedDate = date.toISOString();
 
             onChange({ target: { name, value: formattedDate, type } });
           }}
@@ -194,11 +194,30 @@ const GenericInput = ({
           placeholder={formattedPlaceholder}
           required={required}
           step={step}
-          value={value || undefined}
+          value={value ?? undefined}
         />
       );
     }
-    case 'email':
+    case 'email': {
+      return (
+        <TextInput
+          autoComplete={autoComplete}
+          disabled={disabled}
+          error={errorMessage}
+          label={label}
+          labelAction={labelAction}
+          id={name}
+          hint={hint}
+          name={name}
+          onChange={onChange}
+          placeholder={formattedPlaceholder}
+          required={required}
+          type="email"
+          value={value || ''}
+        />
+      );
+    }
+    case 'timestamp':
     case 'text':
     case 'string': {
       return (
@@ -214,7 +233,7 @@ const GenericInput = ({
           onChange={onChange}
           placeholder={formattedPlaceholder}
           required={required}
-          type={type}
+          type="text"
           value={value || ''}
         />
       );
@@ -241,7 +260,11 @@ const GenericInput = ({
               }}
               type="button"
             >
-              {showPassword ? <Eye /> : <EyeStriked />}
+              {showPassword ? (
+                <Icon as={Eye} color="neutral500" />
+              ) : (
+                <Icon as={EyeStriked} color="neutral500" />
+              )}
             </button>
           }
           label={label}
@@ -340,9 +363,14 @@ const GenericInput = ({
     }
     default: {
       return (
-        <div>
-          {type} is not supported for {name}
-        </div>
+        <NotSupported
+          name={name}
+          label={label}
+          labelAction={labelAction}
+          hint={hint}
+          error={errorMessage}
+          required={required}
+        />
       );
     }
   }
