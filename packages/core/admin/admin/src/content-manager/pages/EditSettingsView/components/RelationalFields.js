@@ -8,9 +8,9 @@ import { Typography } from '@strapi/design-system/Typography';
 import { Stack } from '@strapi/design-system/Stack';
 import { SimpleMenu, MenuItem } from '@strapi/design-system/SimpleMenu';
 import Plus from '@strapi/icons/Plus';
-import { getTrad, ItemTypes } from '../../../utils';
+import { getTrad } from '../../../utils';
 import { useLayoutDnd } from '../../../hooks';
-import FieldButton from './FieldButton';
+import RelationalFieldButton from './RelationalFieldButton';
 
 const RelationalFields = ({
   relationsLayout,
@@ -32,15 +32,14 @@ const RelationalFields = ({
             })}
           </Typography>
         </Box>
-        {/* Since the drag n drop will not be available, this text will be hidden for the moment */}
-        {/* <Box>
+        <Box>
           <Typography variant="pi" textColor="neutral600">
             {formatMessage({
               id: 'containers.SettingPage.editSettings.description',
               defaultMessage: 'Drag & drop the fields to build the layout',
             })}
           </Typography>
-        </Box> */}
+        </Box>
       </div>
       <Box padding={4} hasRadius borderStyle="dashed" borderWidth="1px" borderColor="neutral300">
         <Stack size={2}>
@@ -52,17 +51,16 @@ const RelationalFields = ({
             );
 
             return (
-              <FieldButton
+              <RelationalFieldButton
                 onEditField={() => setEditFieldToSelect(relationName)}
                 onDeleteField={() => onRemoveField(index)}
                 key={relationName}
                 index={index}
                 name={relationName}
                 onMoveField={onMoveRelation}
-                itemType={ItemTypes.EDIT_RELATION}
               >
                 {relationLabel || relationName}
-              </FieldButton>
+              </RelationalFieldButton>
             );
           })}
           <SimpleMenu
