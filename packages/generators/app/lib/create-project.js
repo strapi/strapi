@@ -156,7 +156,9 @@ module.exports = async function createProject(scope, { client, connection, depen
   console.log('Available commands in your project:');
   console.log();
   console.log(`  ${cmd} develop`);
-  console.log('  Start Strapi in watch mode.');
+  console.log(
+    '  Start Strapi in watch mode. (Changes in Strapi project files will trigger a server restart)'
+  );
   console.log();
   console.log(`  ${cmd} start`);
   console.log('  Start Strapi without watch mode.');
