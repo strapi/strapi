@@ -40,10 +40,11 @@ function List({
   isSub,
   dzName,
 }) {
-  const { formatMessage } = useGlobalContext();
+  const { formatMessage, emitEvent } = useGlobalContext();
   const { isInDevelopmentMode, modifiedData } = useDataManager();
   const { openModalAddField } = useListView();
   const onClickAddField = () => {
+    emitEvent('hasClickedCTBAddFieldBanner');
     const firstComponentIcon = get(
       modifiedData,
       ['components', firstLoopComponentUid, 'schema', 'icon'],

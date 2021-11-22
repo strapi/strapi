@@ -244,7 +244,7 @@ const getTypeShape = (attribute, { modelType, attributes } = {}) => {
               if (modelType === modelTypes.COMPONENT && hasComponent(targetCompo)) {
                 return this.createError({
                   path: this.path,
-                  message: `${targetCompo.modelName} already as a nested compoent. You cannot have more than one level of nesting inside your components.`,
+                  message: `${targetCompo.modelName} already is a nested component. You cannot have more than one level of nesting inside your components.`,
                 });
               }
               return true;
