@@ -23,8 +23,6 @@
     "execa": "^1.0.0",
     "fs-extra": "9.1.0",
     "inquirer": "8.2.0",
-    "js-yaml": "4.1.0",
-    "node-fetch": "^2.6.1",
     "ora": "5.4.0"
   },
   "scripts": {
