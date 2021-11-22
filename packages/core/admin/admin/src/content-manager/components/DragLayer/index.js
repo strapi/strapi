@@ -54,8 +54,9 @@ const CustomDragLayer = () => {
     <LayoutDndProvider>
       <div style={layerStyles}>
         <div style={getItemStyles(initialOffset, currentOffset, mouseOffset)} className="col-md-2">
-          {itemType === ItemTypes.FIELD && <CardPreview labelField={item.labelField} />}
-          {itemType === ItemTypes.EDIT_RELATION && <CardPreview labelField={item.labelField} />}
+          {[ItemTypes.EDIT_RELATION, ItemTypes.EDIT_FIELD].includes(itemType) && (
+            <CardPreview labelField={item.labelField} />
+          )}
           {itemType === ItemTypes.COMPONENT && (
             <RepeatableComponentPreview displayedValue={item.displayedValue} />
           )}

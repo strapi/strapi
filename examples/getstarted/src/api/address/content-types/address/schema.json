@@ -12,11 +12,19 @@
     "draftAndPublish": false,
     "comment": ""
   },
-  "pluginOptions": {},
+  "pluginOptions": {
+    "i18n": {
+      "localized": true
+    }
+  },
   "attributes": {
     "postal_code": {
       "type": "string",
-      "pluginOptions": {},
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
       "maxLength": 2
     },
     "categories": {
@@ -34,7 +42,11 @@
         "images",
         "videos"
       ],
-      "pluginOptions": {}
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "images": {
       "type": "media",
@@ -43,17 +55,29 @@
       "allowedTypes": [
         "images"
       ],
-      "pluginOptions": {}
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "city": {
       "type": "string",
       "required": true,
       "maxLength": 200,
-      "pluginOptions": {}
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "json": {
       "type": "json",
-      "pluginOptions": {}
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "slug": {
       "type": "uid"
@@ -61,21 +85,33 @@
     "notrepeat_req": {
       "type": "component",
       "repeatable": false,
-      "pluginOptions": {},
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
       "component": "blog.test-como",
       "required": true
     },
     "repeat_req": {
       "type": "component",
       "repeatable": true,
-      "pluginOptions": {},
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
       "component": "blog.test-como",
       "required": true
     },
     "repeat_req_min": {
       "type": "component",
       "repeatable": true,
-      "pluginOptions": {},
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
       "component": "blog.test-como",
       "required": false,
       "min": 2
