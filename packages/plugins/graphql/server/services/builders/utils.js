@@ -25,6 +25,8 @@ module.exports = ({ strapi }) => {
 
       // Components
       if (modelType === 'component') {
+        if (!multiple) return {};
+
         return {
           filters: naming.getFiltersInputTypeName(contentType),
           pagination: args.PaginationArg,

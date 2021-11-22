@@ -11,7 +11,7 @@ const initialState = {
   contentTypeDataStructure: {},
   formErrors: {},
   initialData: {},
-  modifiedData: {},
+  modifiedData: null,
   shouldCheckErrors: false,
   modifiedDZName: null,
 };

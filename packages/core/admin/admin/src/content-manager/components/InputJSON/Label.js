@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
-import { Text } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
 
@@ -23,9 +23,15 @@ const Label = ({ id, intlLabel, labelAction, name }) => {
 
   return (
     <Flex>
-      <Text textColor="neutral800" htmlFor={id || name} small bold as="label">
+      <Typography
+        textColor="neutral800"
+        htmlFor={id || name}
+        variant="pi"
+        fontWeight="bold"
+        as="label"
+      >
         {label}
-      </Text>
+      </Typography>
       {labelAction && <LabelAction paddingLeft={1}>{labelAction}</LabelAction>}
     </Flex>
   );

@@ -238,7 +238,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
 
       .c27 {
         color: #32324d;
-        display: inline-block;
+        display: block;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -663,6 +663,13 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         width: fit-content;
       }
 
+      .c16 {
+        color: #32324d;
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+      }
+
       .c0 {
         outline: none;
       }
@@ -723,13 +730,6 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         color: #666687;
         font-size: 1rem;
         line-height: 1.5;
-      }
-
-      .c16 {
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
-        color: #32324d;
       }
 
       .c17 {
@@ -859,11 +859,11 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
               <div
                 class="c15"
               >
-                <h3
+                <h2
                   class="c16"
                 >
                   Settings
-                </h3>
+                </h2>
                 <div
                   class="c17"
                 >

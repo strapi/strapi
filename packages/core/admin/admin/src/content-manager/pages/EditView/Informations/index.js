@@ -3,7 +3,7 @@ import { useIntl } from 'react-intl';
 import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 import { Box } from '@strapi/design-system/Box';
 import { Divider } from '@strapi/design-system/Divider';
-import { TableLabel, Text } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { Flex } from '@strapi/design-system/Flex';
 import { Stack } from '@strapi/design-system/Stack';
 import { getTrad } from '../../../utils';
@@ -28,33 +28,33 @@ const Informations = () => {
 
   return (
     <Box>
-      <TableLabel textColor="neutral600">
+      <Typography variant="sigma" textColor="neutral600">
         {formatMessage({
           id: getTrad('containers.Edit.information'),
           defaultMessage: 'Information',
         })}
-      </TableLabel>
+      </Typography>
       <Box paddingTop={2} paddingBottom={6}>
         <Divider />
       </Box>
       <Stack size={4}>
         <Flex justifyContent="space-between">
-          <Text bold>
+          <Typography fontWeight="bold">
             {formatMessage({
               id: getTrad('containers.Edit.information.lastUpdate'),
               defaultMessage: 'Last update',
             })}
-          </Text>
-          <Text>{formatRelativeTime(value, unit, { numeric: 'auto' })}</Text>
+          </Typography>
+          <Typography>{formatRelativeTime(value, unit, { numeric: 'auto' })}</Typography>
         </Flex>
         <Flex justifyContent="space-between">
-          <Text bold>
+          <Typography fontWeight="bold">
             {formatMessage({
               id: getTrad('containers.Edit.information.by'),
               defaultMessage: 'By',
             })}
-          </Text>
-          <Text>{isCreatingEntry ? '-' : updatedBy}</Text>
+          </Typography>
+          <Typography>{isCreatingEntry ? '-' : updatedBy}</Typography>
         </Flex>
       </Stack>
     </Box>

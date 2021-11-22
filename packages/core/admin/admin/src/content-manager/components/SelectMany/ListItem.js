@@ -8,7 +8,7 @@ import has from 'lodash/has';
 import isEmpty from 'lodash/isEmpty';
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
-import { Text } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { Link } from '@strapi/design-system/Link';
 import { getTrad } from '../../utils';
 
@@ -71,7 +71,7 @@ function ListItem({
             {value || data.id}
           </Link>
         ) : (
-          <Text small>{value || data.id}</Text>
+          <Typography variant="pi">{value || data.id}</Typography>
         )}
       </Flex>
       <RemoveRoundedButton onClick={onRemove} label="Remove" style={{ cursor }} />

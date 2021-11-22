@@ -6,12 +6,10 @@ const createRouteScopeGenerator = namespace => route => {
   const prefix = namespace.endsWith('::') ? namespace : `${namespace}.`;
 
   if (typeof route.handler === 'string') {
-    const [controller, action] = route.handler.split('.');
-
     _.defaultsDeep(route, {
       config: {
         auth: {
-          scope: [`${prefix}${controller}.${action}`],
+          scope: [`${route.handler.startsWith(prefix) ? '' : prefix}${route.handler}`],
         },
       },
     });

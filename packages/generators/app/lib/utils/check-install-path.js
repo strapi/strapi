@@ -9,7 +9,7 @@ const stopProcess = require('./stop-process');
  * @param {string} rootPath
  */
 module.exports = async rootPath => {
-  if (await fse.exists(rootPath)) {
+  if (await fse.pathExists(rootPath)) {
     const stat = await fse.stat(rootPath);
 
     if (!stat.isDirectory()) {

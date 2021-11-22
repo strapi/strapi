@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { Flex } from '@strapi/design-system/Flex';
-import { TableLabel } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 
 const Wrapper = styled(Flex)`
   position: relative;
@@ -22,7 +22,9 @@ const Wrapper = styled(Flex)`
 const FileWrapper = ({ children, ...props }) => {
   return (
     <Wrapper justifyContent="center" alignItems="center" as="span" {...props}>
-      <TableLabel textColor="neutral600">{children}</TableLabel>
+      <Typography variant="sigma" textColor="neutral600">
+        {children}
+      </Typography>
     </Wrapper>
   );
 };

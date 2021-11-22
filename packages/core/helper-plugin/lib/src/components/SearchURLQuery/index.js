@@ -4,10 +4,11 @@ import { useIntl } from 'react-intl';
 import SearchIcon from '@strapi/icons/Search';
 import { Searchbar, SearchForm } from '@strapi/design-system/Searchbar';
 import { IconButton } from '@strapi/design-system/IconButton';
+import { Icon } from '@strapi/design-system/Icon';
 import useQueryParams from '../../hooks/useQueryParams';
 import useTracking from '../../hooks/useTracking';
 
-const SearchURLQuery = ({ label, trackedEvent }) => {
+const SearchURLQuery = ({ label, placeholder, trackedEvent }) => {
   const wrapperRef = useRef(null);
   const iconButtonRef = useRef(null);
 
@@ -57,6 +58,7 @@ const SearchURLQuery = ({ label, trackedEvent }) => {
             clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
             onClear={handleClear}
             size="S"
+            placeholder={placeholder}
           >
             {label}
           </Searchbar>
@@ -66,16 +68,23 @@ const SearchURLQuery = ({ label, trackedEvent }) => {
   }
 
   return (
-    <IconButton ref={iconButtonRef} icon={<SearchIcon />} label="Search" onClick={handleToggle} />
+    <IconButton
+      ref={iconButtonRef}
+      icon={<Icon as={SearchIcon} color="neutral800" />}
+      label="Search"
+      onClick={handleToggle}
+    />
   );
 };
 
 SearchURLQuery.defaultProps = {
+  placeholder: undefined,
   trackedEvent: null,
 };
 
 SearchURLQuery.propTypes = {
   label: PropTypes.string.isRequired,
+  placeholder: PropTypes.string,
   trackedEvent: PropTypes.string,
 };
 

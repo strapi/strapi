@@ -10,7 +10,7 @@ import PropTypes from 'prop-types';
 import { EmptyBodyTable, useTracking } from '@strapi/helper-plugin';
 import { Box } from '@strapi/design-system/Box';
 import { Button } from '@strapi/design-system/Button';
-import { TableLabel } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { Table, Thead, Tr, Th, TFooter } from '@strapi/design-system/Table';
 import Plus from '@strapi/icons/Plus';
 import { useIntl } from 'react-intl';
@@ -55,14 +55,14 @@ function List({
         <Thead>
           <Tr>
             <Th>
-              <TableLabel textColor="neutral600">
+              <Typography variant="sigma" textColor="neutral600">
                 {formatMessage({ id: 'table.headers.name', defaultMessage: 'Name' })}
-              </TableLabel>
+              </Typography>
             </Th>
             <Th>
-              <TableLabel textColor="neutral600">
+              <Typography variant="sigma" textColor="neutral600">
                 {formatMessage({ id: 'table.headers.type', defaultMessage: 'Type' })}
-              </TableLabel>
+              </Typography>
             </Th>
           </Tr>
         </Thead>
@@ -83,14 +83,14 @@ function List({
         <Thead>
           <Tr>
             <Th>
-              <TableLabel textColor="neutral600">
+              <Typography variant="sigma" textColor="neutral600">
                 {formatMessage({ id: 'table.headers.name', defaultMessage: 'Name' })}
-              </TableLabel>
+              </Typography>
             </Th>
             <Th>
-              <TableLabel textColor="neutral600">
+              <Typography variant="sigma" textColor="neutral600">
                 {formatMessage({ id: 'table.headers.type', defaultMessage: 'Type' })}
-              </TableLabel>
+              </Typography>
             </Th>
           </Tr>
         </Thead>
@@ -133,14 +133,14 @@ function List({
               <thead>
                 <tr>
                   <th>
-                    <TableLabel textColor="neutral600">
+                    <Typography variant="sigma" textColor="neutral600">
                       {formatMessage({ id: 'table.headers.name', defaultMessage: 'Name' })}
-                    </TableLabel>
+                    </Typography>
                   </th>
                   <th colSpan="2">
-                    <TableLabel textColor="neutral600">
+                    <Typography variant="sigma" textColor="neutral600">
                       {formatMessage({ id: 'table.headers.type', defaultMessage: 'Type' })}
-                    </TableLabel>
+                    </Typography>
                   </th>
                 </tr>
               </thead>

@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { ModalHeader } from '@strapi/design-system/ModalLayout';
-import { ButtonText } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { Divider } from '@strapi/design-system/Divider';
 import { Box } from '@strapi/design-system/Box';
 import { useIntl } from 'react-intl';
@@ -10,18 +10,18 @@ import { FromUrlForm } from './FromUrlForm';
 import { FromComputerForm } from './FromComputerForm';
 import getTrad from '../../../utils/getTrad';
 
-export const AddAssetStep = ({ onClose, onAddAsset }) => {
+export const AddAssetStep = ({ onClose, onAddAsset, trackedLocation }) => {
   const { formatMessage } = useIntl();
 
   return (
     <>
       <ModalHeader>
-        <ButtonText textColor="neutral800" as="h2" id="title">
+        <Typography fontWeight="bold" textColor="neutral800" as="h2" id="title">
           {formatMessage({
             id: getTrad('header.actions.upload-assets'),
             defaultMessage: 'Upload assets',
           })}
-        </ButtonText>
+        </Typography>
       </ModalHeader>
 
       <TabGroup
@@ -51,10 +51,18 @@ export const AddAssetStep = ({ onClose, onAddAsset }) => {
         </Box>
         <TabPanels>
           <TabPanel>
-            <FromComputerForm onClose={onClose} onAddAssets={onAddAsset} />
+            <FromComputerForm
+              onClose={onClose}
+              onAddAssets={onAddAsset}
+              trackedLocation={trackedLocation}
+            />
           </TabPanel>
           <TabPanel>
-            <FromUrlForm onClose={onClose} onAddAsset={onAddAsset} />
+            <FromUrlForm
+              onClose={onClose}
+              onAddAsset={onAddAsset}
+              trackedLocation={trackedLocation}
+            />
           </TabPanel>
         </TabPanels>
       </TabGroup>
@@ -62,7 +70,12 @@ export const AddAssetStep = ({ onClose, onAddAsset }) => {
   );
 };
 
+AddAssetStep.defaultProps = {
+  trackedLocation: undefined,
+};
+
 AddAssetStep.propTypes = {
   onClose: PropTypes.func.isRequired,
   onAddAsset: PropTypes.func.isRequired,
+  trackedLocation: PropTypes.string,
 };

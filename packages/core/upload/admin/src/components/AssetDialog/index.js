@@ -5,11 +5,12 @@ import { ModalLayout, ModalBody } from '@strapi/design-system/ModalLayout';
 import { Flex } from '@strapi/design-system/Flex';
 import { Button } from '@strapi/design-system/Button';
 import { Divider } from '@strapi/design-system/Divider';
+import { Box } from '@strapi/design-system/Box';
 import { useIntl } from 'react-intl';
 import { Tabs, Tab, TabGroup, TabPanels, TabPanel } from '@strapi/design-system/Tabs';
 import { Badge } from '@strapi/design-system/Badge';
 import { Loader } from '@strapi/design-system/Loader';
-import { NoPermissions, AnErrorOccurred, useSelectionState, NoMedia } from '@strapi/helper-plugin';
+import { NoPermissions, AnErrorOccurred, useSelectionState } from '@strapi/helper-plugin';
 import getTrad from '../../utils/getTrad';
 import { SelectedStep } from './SelectedStep';
 import { BrowseStep } from './BrowseStep';
@@ -21,6 +22,8 @@ import getAllowedFiles from '../../utils/getAllowedFiles';
 import { DialogTitle } from './DialogTitle';
 import { DialogFooter } from './DialogFooter';
 import { EditAssetDialog } from '../EditAssetDialog';
+import { EmptyAssets } from '../EmptyAssets';
+import { moveElement } from '../../utils/moveElement';
 
 export const AssetDialog = ({
   allowedTypes,
@@ -29,6 +32,7 @@ export const AssetDialog = ({
   onValidate,
   multiple,
   initiallySelectedAssets,
+  trackedLocation,
 }) => {
   const [assetToEdit, setAssetToEdit] = useState(undefined);
   const { formatMessage } = useIntl();
@@ -42,11 +46,11 @@ export const AssetDialog = ({
   } = useMediaLibraryPermissions();
   const [
     { rawQuery, queryObject },
-    { onChangePage, onChangePageSize, onChangeSort, onChangeSearch },
+    { onChangeFilters, onChangePage, onChangePageSize, onChangeSort, onChangeSearch },
   ] = useModalQueryParams();
   const { data, isLoading, error } = useModalAssets({ skipWhen: !canRead, rawQuery });
 
-  const [selectedAssets, { selectOne, selectAll, selectOnly }] = useSelectionState(
+  const [selectedAssets, { selectOne, selectAll, selectOnly, setSelections }] = useSelectionState(
     'id',
     initiallySelectedAssets
   );
@@ -111,35 +115,39 @@ export const AssetDialog = ({
     );
   }
 
-  if (canRead && assets?.length === 0 && !queryObject._q) {
+  if (canRead && assets?.length === 0 && !queryObject._q && queryObject.filters.$and.length === 0) {
     return (
       <ModalLayout onClose={onClose} labelledBy="asset-dialog-title">
         <DialogTitle />
-        <NoMedia
-          action={
-            canCreate ? (
-              <Button variant="secondary" startIcon={<PlusIcon />} onClick={onAddAsset}>
-                {formatMessage({
-                  id: getTrad('modal.header.browse'),
-                  defaultMessage: 'Upload assets',
-                })}
-              </Button>
-            ) : (
-              undefined
-            )
-          }
-          content={
-            canCreate
-              ? formatMessage({
-                  id: getTrad('list.assets.empty'),
-                  defaultMessage: 'Upload your first assets...',
-                })
-              : formatMessage({
-                  id: getTrad('list.assets.empty.no-permissions'),
-                  defaultMessage: 'The asset list is empty',
-                })
-          }
-        />
+        <Box paddingLeft={8} paddingRight={8} paddingBottom={6}>
+          <EmptyAssets
+            size="S"
+            count={6}
+            action={
+              canCreate ? (
+                <Button variant="secondary" startIcon={<PlusIcon />} onClick={onAddAsset}>
+                  {formatMessage({
+                    id: getTrad('modal.header.browse'),
+                    defaultMessage: 'Upload assets',
+                  })}
+                </Button>
+              ) : (
+                undefined
+              )
+            }
+            content={
+              canCreate
+                ? formatMessage({
+                    id: getTrad('list.assets.empty'),
+                    defaultMessage: 'Upload your first assets...',
+                  })
+                : formatMessage({
+                    id: getTrad('list.assets.empty.no-permissions'),
+                    defaultMessage: 'The asset list is empty',
+                  })
+            }
+          />
+        </Box>
         <DialogFooter onClose={onClose} />
       </ModalLayout>
     );
@@ -153,9 +161,18 @@ export const AssetDialog = ({
         canUpdate={canUpdate}
         canCopyLink={canCopyLink}
         canDownload={canDownload}
+        trackedLocation={trackedLocation}
       />
     );
   }
+
+  const handleMoveItem = (hoverIndex, destIndex) => {
+    const offset = destIndex - hoverIndex;
+    const orderedAssetsClone = selectedAssets.slice();
+    const nextAssets = moveElement(orderedAssetsClone, hoverIndex, offset);
+
+    setSelections(nextAssets);
+  };
 
   return (
     <ModalLayout onClose={onClose} labelledBy="asset-dialog-title" aria-busy={loading}>
@@ -208,6 +225,7 @@ export const AssetDialog = ({
                 onEditAsset={canUpdate ? setAssetToEdit : undefined}
                 pagination={data?.pagination}
                 queryObject={queryObject}
+                onChangeFilters={onChangeFilters}
                 onChangePage={onChangePage}
                 onChangePageSize={onChangePageSize}
                 onChangeSort={onChangeSort}
@@ -217,7 +235,11 @@ export const AssetDialog = ({
           </TabPanel>
           <TabPanel>
             <ModalBody>
-              <SelectedStep selectedAssets={selectedAssets} onSelectAsset={handleSelectAsset} />
+              <SelectedStep
+                selectedAssets={selectedAssets}
+                onSelectAsset={handleSelectAsset}
+                onReorderAsset={handleMoveItem}
+              />
             </ModalBody>
           </TabPanel>
         </TabPanels>
@@ -232,6 +254,7 @@ AssetDialog.defaultProps = {
   allowedTypes: [],
   initiallySelectedAssets: [],
   multiple: false,
+  trackedLocation: undefined,
 };
 
 AssetDialog.propTypes = {
@@ -241,4 +264,5 @@ AssetDialog.propTypes = {
   onAddAsset: PropTypes.func.isRequired,
   onClose: PropTypes.func.isRequired,
   onValidate: PropTypes.func.isRequired,
+  trackedLocation: PropTypes.string,
 };

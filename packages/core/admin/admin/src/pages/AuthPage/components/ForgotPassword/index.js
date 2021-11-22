@@ -9,7 +9,7 @@ import { Flex } from '@strapi/design-system/Flex';
 import { Link } from '@strapi/design-system/Link';
 import { Button } from '@strapi/design-system/Button';
 import { TextInput } from '@strapi/design-system/TextInput';
-import { H1, Text } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { Formik } from 'formik';
 import UnauthenticatedLayout, {
   Column,
@@ -38,20 +38,25 @@ const ForgotPassword = ({ onSubmit, schema }) => {
                 <Column>
                   <Logo />
                   <Box paddingTop={6} paddingBottom={7}>
-                    <H1>
+                    <Typography as="h1" variant="alpha">
                       {formatMessage({
                         id: 'Auth.form.button.password-recovery',
                         defaultMessage: 'Password Recovery',
                       })}
-                    </H1>
+                    </Typography>
                   </Box>
                   {errors.errorMessage && (
-                    <Text id="global-form-error" role="alert" tabIndex={-1} textColor="danger600">
+                    <Typography
+                      id="global-form-error"
+                      role="alert"
+                      tabIndex={-1}
+                      textColor="danger600"
+                    >
                       {formatMessage({
                         id: errors.errorMessage,
                         defaultMessage: 'An error occurred',
                       })}
-                    </Text>
+                    </Typography>
                   )}
                 </Column>
 

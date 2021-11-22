@@ -8,6 +8,7 @@ import {
   useRBAC,
   NoContent,
   DynamicTable,
+  useTracking,
 } from '@strapi/helper-plugin';
 import { HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
@@ -31,6 +32,7 @@ const ApiTokenListView = () => {
     allowedActions: { canCreate, canDelete, canUpdate, canRead },
   } = useRBAC(adminPermissions.settings['api-tokens']);
   const { push } = useHistory();
+  const { trackUsage } = useTracking();
 
   useEffect(() => {
     push({ search: qs.stringify({ sort: 'name:ASC' }, { encode: false }) });
@@ -39,9 +41,12 @@ const ApiTokenListView = () => {
   const { data: apiTokens, status, isFetching } = useQuery(
     ['api-tokens'],
     async () => {
+      trackUsage('willAccessTokenList');
       const {
         data: { data },
       } = await axiosInstance.get(`/admin/api-tokens`);
+
+      trackUsage('didAccessTokenList', { number: data.length });
 
       return data;
     },
@@ -67,6 +72,7 @@ const ApiTokenListView = () => {
     {
       onSuccess: async () => {
         await queryClient.invalidateQueries(['api-tokens']);
+        trackUsage('didDeleteToken');
       },
       onError: err => {
         if (err?.response?.data?.data) {
@@ -100,6 +106,7 @@ const ApiTokenListView = () => {
               data-testid="create-api-token-button"
               startIcon={<Plus />}
               size="L"
+              onClick={() => trackUsage('willAddTokenFromList')}
               to="/settings/api-tokens/create"
             >
               {formatMessage({

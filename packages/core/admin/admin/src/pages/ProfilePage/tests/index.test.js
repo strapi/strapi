@@ -257,7 +257,7 @@ describe('ADMIN | Pages | Profile page', () => {
 
       .c40 {
         color: #32324d;
-        display: inline-block;
+        display: block;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -588,15 +588,15 @@ describe('ADMIN | Pages | Profile page', () => {
         margin-top: 4px;
       }
 
-      .c0 {
-        outline: none;
-      }
-
       .c18 {
+        color: #32324d;
         font-weight: 500;
         font-size: 1rem;
         line-height: 1.25;
-        color: #32324d;
+      }
+
+      .c0 {
+        outline: none;
       }
 
       .c1 {

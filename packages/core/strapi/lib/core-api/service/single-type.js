@@ -5,10 +5,12 @@ const { ValidationError } = require('@strapi/utils').errors;
 /**
  * Returns a single type service to handle default core-api actions
  */
-const createSingleTypeService = ({ model, strapi, utils }) => {
-  const { uid } = model;
-  const { getFetchParams } = utils;
+const createSingleTypeService = ({ contentType }) => {
+  const { uid } = contentType;
 
+  /**
+   * @type {import('./').SingleTypeService}
+   */
   return {
     /**
      * Returns singleType content
@@ -16,7 +18,7 @@ const createSingleTypeService = ({ model, strapi, utils }) => {
      * @return {Promise}
      */
     find(params = {}) {
-      return strapi.entityService.findMany(uid, getFetchParams(params));
+      return strapi.entityService.findMany(uid, this.getFetchParams(params));
     },
 
     /**

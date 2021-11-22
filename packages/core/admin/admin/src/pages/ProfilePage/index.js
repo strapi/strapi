@@ -17,7 +17,7 @@ import pick from 'lodash/pick';
 import omit from 'lodash/omit';
 import { Helmet } from 'react-helmet';
 import { Main } from '@strapi/design-system/Main';
-import { H3 } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { Box } from '@strapi/design-system/Box';
 import { ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
 import { Button } from '@strapi/design-system/Button';
@@ -192,12 +192,12 @@ const ProfilePage = () => {
                       paddingRight={7}
                     >
                       <Stack size={4}>
-                        <H3 as="h2">
+                        <Typography variant="delta" as="h2">
                           {formatMessage({
                             id: 'Settings.profile.form.section.profile.title',
                             defaultMessage: 'Profile',
                           })}
-                        </H3>
+                        </Typography>
                         <Grid gap={5}>
                           <GridItem s={12} col={6}>
                             <GenericInput
@@ -261,12 +261,12 @@ const ProfilePage = () => {
                       paddingRight={7}
                     >
                       <Stack size={4}>
-                        <H3 as="h2">
+                        <Typography variant="delta" as="h2">
                           {formatMessage({
                             id: 'Settings.profile.form.section.password.title',
                             defaultMessage: 'Change password',
                           })}
-                        </H3>
+                        </Typography>
 
                         <Grid gap={5}>
                           <GridItem s={12} col={6}>
@@ -408,12 +408,12 @@ const ProfilePage = () => {
                       paddingRight={7}
                     >
                       <Stack size={4}>
-                        <H3 as="h2">
+                        <Typography variant="delta" as="h2">
                           {formatMessage({
                             id: 'Settings.profile.form.section.experience.title',
                             defaultMessage: 'Experience',
                           })}
-                        </H3>
+                        </Typography>
                         <Grid gap={5}>
                           <GridItem s={12} col={6}>
                             <Select

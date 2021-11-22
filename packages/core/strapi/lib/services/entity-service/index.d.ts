@@ -35,7 +35,7 @@ type Params<T> = {
   files?: any;
 };
 
-interface EntityService {
+export interface EntityService {
   uploadFiles<K extends keyof AllTypes, T extends AllTypes[K]>(uid: K, entity, files);
   wrapParams<K extends keyof AllTypes, T extends AllTypes[K]>(
     params: Params<T>,

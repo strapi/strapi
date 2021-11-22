@@ -8,7 +8,7 @@ import {
   ModalFooter,
   ModalBody,
 } from '@strapi/design-system/ModalLayout';
-import { ButtonText } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { Button } from '@strapi/design-system/Button';
 import { Flex } from '@strapi/design-system/Flex';
 import { Grid } from '@strapi/design-system/Grid';
@@ -48,7 +48,7 @@ const FormModal = ({ onToggle, onChange, onSubmit, type }) => {
         <ModalHeader>
           <HeaderContainer>
             <FieldTypeIcon type={getAttrType(type)} />
-            <ButtonText textColor="neutral800" as="h2" id="title">
+            <Typography fontWeight="bold" textColor="neutral800" as="h2" id="title">
               {formatMessage(
                 {
                   id: getTrad('containers.ListSettingsView.modal-form.edit-label'),
@@ -56,7 +56,7 @@ const FormModal = ({ onToggle, onChange, onSubmit, type }) => {
                 },
                 { fieldName: upperFirst(selectedField) }
               )}
-            </ButtonText>
+            </Typography>
           </HeaderContainer>
         </ModalHeader>
         <ModalBody>

@@ -3,13 +3,13 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
 import { Typography } from '@strapi/design-system/Typography';
-import { P } from '@strapi/design-system/Text';
 import { Box } from '@strapi/design-system/Box';
 import { Stack } from '@strapi/design-system/Stack';
 import { prefixFileUrlWithBackendUrl, useLibrary } from '@strapi/helper-plugin';
 import Editor from './Editor';
 import WysiwygNav from './WysiwygNav';
 import WysiwygFooter from './WysiwygFooter';
+import Hint from '../Hint';
 
 import {
   markdownHandler,
@@ -27,7 +27,7 @@ const LabelAction = styled(Box)`
 `;
 
 const Wysiwyg = ({
-  // description,
+  description,
   disabled,
   error,
   intlLabel,
@@ -118,14 +118,6 @@ const Wysiwyg = ({
       )
     : name;
 
-  // FIXME
-  // const hint = description
-  //   ? formatMessage(
-  //       { id: description.id, defaultMessage: description.defaultMessage },
-  //       { ...description.values }
-  //     )
-  //   : '';
-
   return (
     <>
       <Stack size={1}>
@@ -166,13 +158,14 @@ const Wysiwyg = ({
             <WysiwygFooter isPreviewMode={isPreviewMode} onToggleExpand={handleToggleExpand} />
           )}
         </EditorLayout>
+        <Hint description={description} name={name} error={error} />
       </Stack>
 
       {errorMessage && (
         <Box paddingTop={1}>
-          <P small textColor="danger600" data-strapi-field-error>
+          <Typography variant="pi" textColor="danger600" data-strapi-field-error>
             {errorMessage}
-          </P>
+          </Typography>
         </Box>
       )}
 

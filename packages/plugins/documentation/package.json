@@ -5,7 +5,7 @@
   "strapi": {
     "displayName": "Documentation",
     "name": "documentation",
-    "description": "documentation.plugin.description",
+    "description": "Create an OpenAPI Document and visualize your API with SWAGGER UI.",
     "kind": "plugin"
   },
   "scripts": {

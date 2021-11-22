@@ -3,7 +3,7 @@ import { useQuery } from 'react-query';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Box } from '@strapi/design-system/Box';
-import { Text } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { Loader } from '@strapi/design-system/Loader';
 import { useNotifyAT } from '@strapi/design-system/LiveRegions';
 import { axiosInstance } from '../../../../../core/utils';
@@ -52,19 +52,19 @@ const PopoverContent = ({ fieldSchema, name, rowId, targetModel, queryInfos }) =
 
         return (
           <Box as="li" key={entry.id} padding={3}>
-            <Text>
+            <Typography>
               {value ? (
                 <CellValue type={fieldSchema.schema.type} value={entry[fieldSchema.name]} />
               ) : (
                 '-'
               )}
-            </Text>
+            </Typography>
           </Box>
         );
       })}
       {data?.pagination.total > 10 && (
         <Box as="li" padding={3}>
-          <Text>[...]</Text>
+          <Typography>[...]</Typography>
         </Box>
       )}
     </ul>

@@ -1,6 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
+const { has } = require('lodash/fp');
 
 const SINGLE_TYPE = 'singleType';
 const COLLECTION_TYPE = 'collectionType';
@@ -31,8 +32,18 @@ const constants = {
   COLLECTION_TYPE,
 };
 
-const getTimestamps = () => {
-  return [CREATED_AT_ATTRIBUTE, UPDATED_AT_ATTRIBUTE];
+const getTimestamps = model => {
+  const attributes = [];
+
+  if (has(CREATED_AT_ATTRIBUTE, model.attributes)) {
+    attributes.push(CREATED_AT_ATTRIBUTE);
+  }
+
+  if (has(UPDATED_AT_ATTRIBUTE, model.attributes)) {
+    attributes.push(UPDATED_AT_ATTRIBUTE);
+  }
+
+  return attributes;
 };
 
 const getNonWritableAttributes = (model = {}) => {
@@ -42,7 +53,7 @@ const getNonWritableAttributes = (model = {}) => {
     []
   );
 
-  return _.uniq([ID_ATTRIBUTE, ...getTimestamps(), ...nonWritableAttributes]);
+  return _.uniq([ID_ATTRIBUTE, ...getTimestamps(model), ...nonWritableAttributes]);
 };
 
 const getWritableAttributes = (model = {}) => {
@@ -60,7 +71,7 @@ const getNonVisibleAttributes = model => {
     []
   );
 
-  return _.uniq([ID_ATTRIBUTE, ...getTimestamps(), ...nonVisibleAttributes]);
+  return _.uniq([ID_ATTRIBUTE, ...getTimestamps(model), ...nonVisibleAttributes]);
 };
 
 const getVisibleAttributes = model => {
@@ -137,6 +148,7 @@ module.exports = {
   isWritableAttribute,
   getNonVisibleAttributes,
   getVisibleAttributes,
+  getTimestamps,
   isVisibleAttribute,
   hasDraftAndPublish,
   isDraft,

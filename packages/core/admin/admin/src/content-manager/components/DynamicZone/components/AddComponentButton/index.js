@@ -12,7 +12,7 @@ import PlusCircle from '@strapi/icons/PlusCircle';
 import { BaseButton } from '@strapi/design-system/BaseButton';
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
-import { Text, ButtonText } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { getTrad } from '../../../../utils';
 
 const StyledAddIcon = styled(PlusCircle)`
@@ -29,8 +29,12 @@ const StyledAddIcon = styled(PlusCircle)`
 
 const StyledButton = styled(BaseButton)`
   border-radius: 26px;
+  border-color: ${({ theme }) => theme.colors.neutral150};
   background: ${({ theme }) => theme.colors.neutral0};
-  padding: ${({ theme }) => theme.spaces[3]};
+  padding-top: ${({ theme }) => theme.spaces[3]};
+  padding-right: ${({ theme }) => theme.spaces[4]};
+  padding-bottom: ${({ theme }) => theme.spaces[3]};
+  padding-left: ${({ theme }) => theme.spaces[4]};
 
   box-shadow: ${({ theme }) => theme.shadows.filterShadow};
 
@@ -43,7 +47,7 @@ const StyledButton = styled(BaseButton)`
   }
   &:hover {
     color: ${({ theme }) => theme.colors.primary600} !important;
-    ${Text} {
+    ${Typography} {
       color: ${({ theme }) => theme.colors.primary600} !important;
     }
 
@@ -57,7 +61,7 @@ const StyledButton = styled(BaseButton)`
     }
   }
   &:active {
-    ${Text} {
+    ${Typography} {
       color: ${({ theme }) => theme.colors.primary600};
     }
     ${StyledAddIcon} {
@@ -124,9 +128,13 @@ const AddComponentButton = ({
               <BoxFullHeight aria-hidden paddingRight={2}>
                 <StyledAddIcon $isOpen={isOpen} $hasError={hasError && !isOpen} />
               </BoxFullHeight>
-              <ButtonText textColor={hasError && !isOpen ? 'danger600' : 'neutral500'} small>
+              <Typography
+                variant="pi"
+                fontWeight="bold"
+                textColor={hasError && !isOpen ? 'danger600' : 'neutral500'}
+              >
                 {buttonLabel}
-              </ButtonText>
+              </Typography>
             </Flex>
           </StyledButton>
         </Box>

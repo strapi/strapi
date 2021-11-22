@@ -51,16 +51,16 @@ describe('CONTENT MANAGER | EditView | Header', () => {
     } = render(makeApp());
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c2 {
+      .c1 {
         padding-top: 8px;
         padding-bottom: 24px;
       }
 
-      .c3 {
+      .c2 {
         background: #eaeaef;
       }
 
-      .c4 {
+      .c3 {
         height: 1px;
         border: none;
         margin: 0;
@@ -68,25 +68,6 @@ describe('CONTENT MANAGER | EditView | Header', () => {
 
       .c0 {
         color: #666687;
-        font-size: 0.875rem;
-        line-height: 1.43;
-      }
-
-      .c7 {
-        font-weight: 500;
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #32324d;
-      }
-
-      .c8 {
-        font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #32324d;
-      }
-
-      .c1 {
         font-weight: 600;
         font-size: 0.6875rem;
         line-height: 1.45;
@@ -94,6 +75,19 @@ describe('CONTENT MANAGER | EditView | Header', () => {
       }
 
       .c6 {
+        font-weight: 600;
+        color: #32324d;
+        font-size: 0.875rem;
+        line-height: 1.43;
+      }
+
+      .c7 {
+        color: #32324d;
+        font-size: 0.875rem;
+        line-height: 1.43;
+      }
+
+      .c5 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -111,7 +105,7 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         align-items: center;
       }
 
-      .c5 {
+      .c4 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -121,12 +115,12 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         flex-direction: column;
       }
 
-      .c5 > * {
+      .c4 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c5 > * + * {
+      .c4 > * + * {
         margin-top: 16px;
       }
 
@@ -134,44 +128,44 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         class=""
       >
         <span
-          class="c0 c1"
+          class="c0"
         >
           Information
         </span>
         <div
-          class="c2"
+          class="c1"
         >
           <hr
-            class="c3 c4"
+            class="c2 c3"
           />
         </div>
         <div
-          class="c5"
+          class="c4"
         >
           <div
-            class="c6"
+            class="c5"
           >
             <span
-              class="c7"
+              class="c6"
             >
               Last update
             </span>
             <span
-              class="c8"
+              class="c7"
             >
               now
             </span>
           </div>
           <div
-            class="c6"
+            class="c5"
           >
             <span
-              class="c7"
+              class="c6"
             >
               By
             </span>
             <span
-              class="c8"
+              class="c7"
             >
               -
             </span>

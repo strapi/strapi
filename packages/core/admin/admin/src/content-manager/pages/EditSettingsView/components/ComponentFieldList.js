@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
 import { Link } from '@strapi/design-system/Link';
-import { Text } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import Cog from '@strapi/icons/Cog';
 import { useIntl } from 'react-intl';
 import get from 'lodash/get';
@@ -34,7 +34,7 @@ const ComponentFieldList = ({ componentUid }) => {
                   hasRadius
                   borderColor="neutral200"
                 >
-                  <Text textColor="neutral800">{rowContent.name}</Text>
+                  <Typography textColor="neutral800">{rowContent.name}</Typography>
                 </Flex>
               </Box>
             </GridItem>

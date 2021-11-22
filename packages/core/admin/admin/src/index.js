@@ -2,6 +2,7 @@ import ReactDOM from 'react-dom';
 import { Components, Fields, Middlewares, Reducers } from './core/apis';
 import { axiosInstance } from './core/utils';
 import appCustomisations from './app';
+// eslint-disable-next-line import/extensions
 import plugins from './plugins';
 import appReducers from './reducers';
 

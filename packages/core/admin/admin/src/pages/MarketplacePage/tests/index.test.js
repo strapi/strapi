@@ -2,11 +2,13 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
+import { useTracking } from '@strapi/helper-plugin';
 import MarketPlacePage from '../index';
 
 jest.mock('@strapi/helper-plugin', () => ({
   pxToRem: jest.fn(),
   CheckPagePermissions: ({ children }) => children,
+  useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
 }));
 
 const App = (
@@ -439,5 +441,13 @@ describe('Marketplace coming soon', () => {
         </div>
       </div>
     `);
+  });
+
+  it('sends an event when the user enters the marketplace', () => {
+    const trackUsage = jest.fn();
+    useTracking.mockImplementation(() => ({ trackUsage }));
+    render(App);
+
+    expect(trackUsage).toHaveBeenCalledWith('didGoToMarketplace');
   });
 });

@@ -5,7 +5,7 @@ import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import { get, has, isEmpty } from 'lodash';
 import { Flex } from '@strapi/design-system/Flex';
-import { Text } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { pxToRem } from '@strapi/helper-plugin';
 import { getTrad } from '../../utils';
 
@@ -40,7 +40,7 @@ const Option = props => {
         <Component {...props}>
           <Flex>
             <StyledBullet title={title} isDraft={isDraft} />
-            <Text ellipsis>{props.label || '-'}</Text>
+            <Typography ellipsis>{props.label || '-'}</Typography>
           </Flex>
         </Component>
       );

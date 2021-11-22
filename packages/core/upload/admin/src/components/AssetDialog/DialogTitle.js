@@ -1,5 +1,5 @@
 import React from 'react';
-import { ButtonText } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { ModalHeader } from '@strapi/design-system/ModalLayout';
 import { useIntl } from 'react-intl';
 import getTrad from '../../utils/getTrad';
@@ -9,12 +9,12 @@ export const DialogTitle = () => {
 
   return (
     <ModalHeader>
-      <ButtonText textColor="neutral800" as="h2" id="asset-dialog-title">
+      <Typography fontWeight="bold" textColor="neutral800" as="h2" id="asset-dialog-title">
         {formatMessage({
           id: getTrad('header.actions.upload-assets'),
           defaultMessage: 'Upload assets',
         })}
-      </ButtonText>
+      </Typography>
     </ModalHeader>
   );
 };

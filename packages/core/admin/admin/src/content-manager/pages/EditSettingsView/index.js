@@ -16,7 +16,7 @@ import { HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
 import { Link } from '@strapi/design-system/Link';
 import { Button } from '@strapi/design-system/Button';
 import { Box } from '@strapi/design-system/Box';
-import { H3 } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { Select, Option } from '@strapi/design-system/Select';
 import { Stack } from '@strapi/design-system/Stack';
@@ -227,12 +227,12 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
               paddingRight={7}
             >
               <Stack size={4}>
-                <H3 as="h2">
+                <Typography variant="delta" as="h2">
                   {formatMessage({
                     id: getTrad('containers.SettingPage.settings'),
                     defaultMessage: 'Settings',
                   })}
-                </H3>
+                </Typography>
                 <Grid>
                   <GridItem col={6} s={12}>
                     <Select
@@ -265,12 +265,12 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
                 <Box paddingTop={2} paddingBottom={2}>
                   <Divider />
                 </Box>
-                <H3>
+                <Typography variant="delta" as="h3">
                   {formatMessage({
                     id: getTrad('containers.SettingPage.view'),
                     defaultMessage: 'View',
                   })}
-                </H3>
+                </Typography>
                 <Grid gap={4}>
                   <GridItem col={isContentTypeView ? 8 : 12} s={12}>
                     <DisplayedFields

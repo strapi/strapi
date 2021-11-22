@@ -67,7 +67,7 @@ const applyJoin = (qb, join) => {
     orderBy,
   } = join;
 
-  qb[method]({ [alias]: referencedTable }, inner => {
+  qb[method](`${referencedTable} as ${alias}`, inner => {
     inner.on(`${rootTable}.${rootColumn}`, `${alias}.${referencedColumn}`);
 
     if (on) {

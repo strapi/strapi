@@ -67,6 +67,8 @@ const ModalForm = ({ queryName, onToggle }) => {
     try {
       await postMutation.mutateAsync(body);
     } catch (err) {
+      unlockApp();
+
       if (err?.response?.data.message === 'Email already taken') {
         setErrors({ email: err.response.data.message });
       }

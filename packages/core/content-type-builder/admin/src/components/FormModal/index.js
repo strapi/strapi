@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import {
   getYupInnerErrors,
   useTracking,
@@ -17,7 +17,7 @@ import { Box } from '@strapi/design-system/Box';
 import { Button } from '@strapi/design-system/Button';
 import { Divider } from '@strapi/design-system/Divider';
 import { ModalLayout, ModalBody, ModalFooter } from '@strapi/design-system/ModalLayout';
-import { H2 } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { Tabs, Tab, TabGroup, TabPanels, TabPanel } from '@strapi/design-system/Tabs';
 import { Flex } from '@strapi/design-system/Flex';
 import { Stack } from '@strapi/design-system/Stack';
@@ -42,6 +42,8 @@ import PluralName from '../PluralName';
 import SelectCategory from '../SelectCategory';
 import SelectComponent from '../SelectComponent';
 import SelectComponents from '../SelectComponents';
+import SelectDateType from '../SelectDateType';
+import SelectNumber from '../SelectNumber';
 import SingularName from '../SingularName';
 import TabForm from '../TabForm';
 import TextareaEnum from '../TextareaEnum';
@@ -68,7 +70,6 @@ import {
   RESET_PROPS_AND_SAVE_CURRENT_DATA,
   RESET_PROPS,
 } from './constants';
-import SelectNumber from '../SelectNumber';
 
 /* eslint-disable indent */
 /* eslint-disable react/no-array-index-key */
@@ -91,6 +92,8 @@ const FormModal = () => {
     step,
     targetUid,
   } = useFormModalNavigation();
+
+  const tabGroupRef = useRef();
 
   const formModalSelector = useMemo(makeSelectFormModal, []);
   const dispatch = useDispatch();
@@ -277,6 +280,8 @@ const FormModal = () => {
           forTarget,
         });
       }
+    } else {
+      dispatch({ type: RESET_PROPS });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
@@ -550,6 +555,8 @@ const FormModal = () => {
             dispatch({
               type: RESET_PROPS_AND_SET_THE_FORM_FOR_ADDING_A_COMPO_TO_A_DZ,
             });
+
+            tabGroupRef.current._handlers.setSelectedTabIndex(0);
 
             onNavigateToAddCompoToDZModal({ dynamicZoneTarget: modifiedData.name });
           } else {
@@ -834,6 +841,7 @@ const FormModal = () => {
       'select-components': SelectComponents,
       'select-default-boolean': BooleanDefaultValueSelect,
       'select-number': SelectNumber,
+      'select-date': SelectDateType,
       'toggle-draft-publish': DraftAndPublishToggle,
       'text-plural': PluralName,
       'text-singular': SingularName,
@@ -913,6 +921,7 @@ const FormModal = () => {
                 label="todo"
                 id="tabs"
                 variant="simple"
+                ref={tabGroupRef}
                 onTabChange={selectedTab => {
                   if (selectedTab === 1) {
                     sendAdvancedTabEvent('advanced');
@@ -920,7 +929,7 @@ const FormModal = () => {
                 }}
               >
                 <Flex justifyContent="space-between">
-                  <H2>
+                  <Typography as="h2" variant="beta">
                     {formatMessage(
                       {
                         id: getModalTitleSubHeader({
@@ -942,7 +951,7 @@ const FormModal = () => {
                         step,
                       }
                     )}
-                  </H2>
+                  </Typography>
                   <Tabs>
                     <Tab hasError={doesBaseFormHasError}>
                       {formatMessage({
