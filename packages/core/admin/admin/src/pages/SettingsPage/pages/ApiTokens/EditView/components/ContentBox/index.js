@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { useIntl } from 'react-intl';
-import { ContentBox, useNotification } from '@strapi/helper-plugin';
+import { ContentBox, useNotification, useTracking } from '@strapi/helper-plugin';
 import { IconButton } from '@strapi/design-system/IconButton';
 import Duplicate from '@strapi/icons/Duplicate';
 import PropTypes from 'prop-types';
@@ -10,6 +10,8 @@ import Key from '@strapi/icons/Key';
 const HeaderContentBox = ({ apiToken }) => {
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
+  const { trackUsage } = useTracking();
+  const trackUsageRef = useRef(trackUsage);
 
   return (
     <ContentBox
@@ -18,6 +20,7 @@ const HeaderContentBox = ({ apiToken }) => {
           <span style={{ alignSelf: 'start' }}>
             <CopyToClipboard
               onCopy={() => {
+                trackUsageRef('didCopyTokenKey');
                 toggleNotification({
                   type: 'success',
                   message: { id: 'Settings.apiTokens.notification.copied' },

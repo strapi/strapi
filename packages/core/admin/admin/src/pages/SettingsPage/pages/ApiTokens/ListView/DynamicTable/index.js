@@ -2,7 +2,13 @@ import React from 'react';
 import { Typography } from '@strapi/design-system/Typography';
 import { Tbody, Tr, Td } from '@strapi/design-system/Table';
 import { Flex } from '@strapi/design-system/Flex';
-import { RelativeTime, useQueryParams, onRowClick, pxToRem } from '@strapi/helper-plugin';
+import {
+  RelativeTime,
+  useQueryParams,
+  onRowClick,
+  pxToRem,
+  useTracking,
+} from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import { useHistory } from 'react-router-dom';
@@ -17,6 +23,7 @@ const TableRows = ({ canDelete, canUpdate, onClickDelete, withBulkActions, rows 
     push,
     location: { pathname },
   } = useHistory();
+  const { trackUsage } = useTracking();
 
   const apiTokens = rows.sort((a, b) => {
     const comparaison = a.name.localeCompare(b.name);
@@ -31,7 +38,10 @@ const TableRows = ({ canDelete, canUpdate, onClickDelete, withBulkActions, rows 
           <Tr
             key={apiToken.id}
             {...onRowClick({
-              fn: () => push(`${pathname}/${apiToken.id}`),
+              fn: () => {
+                trackUsage('willEditTokenFromList');
+                push(`${pathname}/${apiToken.id}`);
+              },
               condition: canUpdate,
             })}
           >
