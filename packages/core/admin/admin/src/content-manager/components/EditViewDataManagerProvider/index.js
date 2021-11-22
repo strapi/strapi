@@ -518,7 +518,9 @@ const EditViewDataManagerProvider = ({
               when={!isEqual(modifiedData, initialData)}
               message={formatMessage({ id: 'global.prompt.unsaved' })}
             />
-            <form onSubmit={handleSubmit}>{children}</form>
+            <form noValidate onSubmit={handleSubmit}>
+              {children}
+            </form>
           </>
         )}
       </>
