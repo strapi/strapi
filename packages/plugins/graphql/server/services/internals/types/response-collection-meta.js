@@ -25,7 +25,7 @@ module.exports = ({ strapi }) => {
             const { start, limit } = args;
 
             const total = await strapi.entityService.count(resourceUID, args);
-            const pageSize = limit === -1 ? total : limit;
+            const pageSize = limit === -1 ? total - start : limit;
             const pageCount = limit === -1 ? 1 : Math.ceil(total / limit);
             const page = limit === -1 ? 1 : Math.floor(start / limit) + 1;
 
