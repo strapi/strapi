@@ -13,18 +13,13 @@ const getLimitConfigDefaults = () => ({
 });
 
 /**
- * if there is max limit set and limit exceeds this number, return configured max limit
+ * Should maxLimit be used as the limit or not
  * @param {number} limit - limit you want to cap
  * @param {number?} maxLimit - maxlimit used has capping
- * @returns {number}
+ * @returns {boolean}
  */
-const applyMaxLimit = (limit, maxLimit = null) => {
-  if (limit === -1 || (maxLimit && limit > maxLimit)) {
-    return maxLimit || -1;
-  }
-
-  return Math.max(1, limit);
-};
+const shouldApplyMaxLimit = (limit, maxLimit = null) =>
+  limit === -1 || (maxLimit && limit > maxLimit);
 
 const shouldCount = params => {
   if (has('pagination.withCount', params)) {
@@ -81,7 +76,7 @@ const getPaginationInfo = params => {
 
     return {
       page: Math.max(1, toNumber(pagination.page || 1)),
-      pageSize: applyMaxLimit(pageSize, maxLimit),
+      pageSize: shouldApplyMaxLimit(pageSize, maxLimit) ? maxLimit || -1 : Math.max(1, pageSize),
     };
   }
 
@@ -89,7 +84,7 @@ const getPaginationInfo = params => {
 
   return {
     start: Math.max(0, toNumber(pagination.start || 0)),
-    limit: applyMaxLimit(limit, maxLimit),
+    limit: shouldApplyMaxLimit(limit, maxLimit) ? maxLimit || -1 : Math.max(1, limit),
   };
 };
 
