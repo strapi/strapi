@@ -253,7 +253,7 @@ describe('Marketplace coming soon', () => {
         text-decoration: none;
       }
 
-      .c25 .sc-bAffKu {
+      .c25 .sc-jYCGPb {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
