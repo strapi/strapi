@@ -1,7 +1,8 @@
 'use strict';
 
+const { resolve } = require('path');
 const commander = require('commander');
-const generateNewApp = require('@strapi/generate-new');
+const { checkInstallPath, generateNewApp } = require('@strapi/generate-new');
 const promptUser = require('./utils/prompt-user');
 const packageJson = require('./package.json');
 
@@ -55,6 +56,8 @@ function generateApp(projectName, options) {
 }
 
 async function initProject(projectName, program) {
+  await checkInstallPath(resolve(projectName));
+
   const hasDatabaseOptions = databaseOptions.some(opt => program[opt]);
 
   if (program.quickstart && hasDatabaseOptions) {
