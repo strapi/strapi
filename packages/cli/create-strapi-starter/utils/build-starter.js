@@ -191,7 +191,7 @@ module.exports = async function buildStarter({ projectName, starter }, program) 
     logger.warn(`Failed to create file: ${chalk.yellow('.gitignore')}`);
   }
 
-  await installWithLogs(rootPath);
+  await installWithLogs({ path: rootPath, useYarn: hasYarnInstalled });
 
   if (!ciEnv.isCI) {
     await initGit(rootPath);
