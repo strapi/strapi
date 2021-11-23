@@ -15,7 +15,7 @@ import {
 } from '@strapi/design-system/MainNav';
 import { FocusTrap } from '@strapi/design-system/FocusTrap';
 import { Box } from '@strapi/design-system/Box';
-import { Text } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { Stack } from '@strapi/design-system/Stack';
 import Write from '@strapi/icons/Write';
 import Exit from '@strapi/icons/Exit';
@@ -144,20 +144,20 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
           <FocusTrap onEscape={handleToggleUserLinks}>
             <Stack size={0}>
               <LinkUser onClick={handleToggleUserLinks} to="/me">
-                <Text>
+                <Typography>
                   {formatMessage({
                     id: 'app.components.LeftMenu.profile',
                     defaultMessage: 'Profile',
                   })}
-                </Text>
+                </Typography>
               </LinkUser>
               <LinkUser onClick={handleLogout} logout="logout" to="/auth/login">
-                <Text textColor="danger600">
+                <Typography textColor="danger600">
                   {formatMessage({
                     id: 'app.components.LeftMenu.logout',
                     defaultMessage: 'Logout',
                   })}
-                </Text>
+                </Typography>
                 <Exit />
               </LinkUser>
             </Stack>

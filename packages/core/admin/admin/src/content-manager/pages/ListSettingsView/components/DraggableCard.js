@@ -6,7 +6,7 @@ import { getEmptyImage } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
 import { Flex } from '@strapi/design-system/Flex';
 import { Box } from '@strapi/design-system/Box';
-import { ButtonText } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { Stack } from '@strapi/design-system/Stack';
 import Pencil from '@strapi/icons/Pencil';
 import Cross from '@strapi/icons/Cross';
@@ -59,7 +59,7 @@ const FieldContainer = styled(Flex)`
       }
     }
 
-    ${ButtonText} {
+    ${Typography} {
       color: ${({ theme }) => theme.colors.primary600};
     }
 
@@ -155,7 +155,7 @@ const DraggableCard = ({
           >
             <Drag />
           </DragButton>
-          <ButtonText>{cardEllipsisTitle}</ButtonText>
+          <Typography fontWeight="bold">{cardEllipsisTitle}</Typography>
         </Stack>
         <Flex paddingLeft={3}>
           <ActionButton

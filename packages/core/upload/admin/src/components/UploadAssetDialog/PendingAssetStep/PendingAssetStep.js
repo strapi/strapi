@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { ModalHeader, ModalBody, ModalFooter } from '@strapi/design-system/ModalLayout';
-import { ButtonText, Text } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { Button } from '@strapi/design-system/Button';
 import { useIntl } from 'react-intl';
 import { Flex } from '@strapi/design-system/Flex';
@@ -22,6 +22,7 @@ const Status = {
 export const PendingAssetStep = ({
   addUploadedFiles,
   onClose,
+  onEditAsset,
   assets,
   onClickAddAsset,
   onCancelUpload,
@@ -59,19 +60,19 @@ export const PendingAssetStep = ({
   return (
     <form onSubmit={handleSubmit}>
       <ModalHeader>
-        <ButtonText textColor="neutral800" as="h2" id="title">
+        <Typography fontWeight="bold" textColor="neutral800" as="h2" id="title">
           {formatMessage({
             id: getTrad('header.actions.upload-assets'),
             defaultMessage: 'Upload assets',
           })}
-        </ButtonText>
+        </Typography>
       </ModalHeader>
 
       <ModalBody>
         <Stack size={7}>
           <Flex justifyContent="space-between">
             <Stack size={0}>
-              <Text small bold textColor="neutral800">
+              <Typography variant="pi" fontWeight="bold" textColor="neutral800">
                 {formatMessage(
                   {
                     id: getTrad('list.assets.selected'),
@@ -80,13 +81,13 @@ export const PendingAssetStep = ({
                   },
                   { number: assets.length }
                 )}
-              </Text>
-              <Text small textColor="neutral600">
+              </Typography>
+              <Typography variant="pi" textColor="neutral600">
                 {formatMessage({
                   id: getTrad('modal.upload-list.sub-header-subtitle'),
                   defaultMessage: 'Manage the assets before adding them to the Media Library',
                 })}
-              </Text>
+              </Typography>
             </Stack>
             <Button size="S" onClick={onClickAddAsset}>
               {formatMessage({
@@ -121,7 +122,14 @@ export const PendingAssetStep = ({
 
                 return (
                   <GridItem col={4} key={assetKey}>
-                    <AssetCard asset={asset} size="S" key={assetKey} local alt={asset.name} />
+                    <AssetCard
+                      asset={asset}
+                      size="S"
+                      key={assetKey}
+                      local
+                      alt={asset.name}
+                      onEdit={onEditAsset}
+                    />
                   </GridItem>
                 );
               })}
@@ -160,6 +168,7 @@ PendingAssetStep.propTypes = {
   addUploadedFiles: PropTypes.func,
   assets: PropTypes.arrayOf(AssetDefinition).isRequired,
   onClose: PropTypes.func.isRequired,
+  onEditAsset: PropTypes.func.isRequired,
   onClickAddAsset: PropTypes.func.isRequired,
   onUploadSucceed: PropTypes.func.isRequired,
   onCancelUpload: PropTypes.func.isRequired,

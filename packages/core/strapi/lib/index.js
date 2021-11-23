@@ -1,3 +1,7 @@
 'use strict';
 
-module.exports = require('./Strapi');
+const Strapi = require('./Strapi');
+
+Strapi.factories = require('./factories');
+
+module.exports = Strapi;

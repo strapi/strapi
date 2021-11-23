@@ -222,7 +222,7 @@ describe('Email | Pages | Settings', () => {
 
       .c29 {
         color: #666687;
-        display: inline-block;
+        display: block;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -541,6 +541,19 @@ describe('Email | Pages | Settings', () => {
         margin-top: 4px;
       }
 
+      .c11 {
+        color: #32324d;
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+      }
+
+      .c12 {
+        color: #32324d;
+        font-size: 0.875rem;
+        line-height: 1.43;
+      }
+
       .c0 {
         outline: none;
       }
@@ -615,20 +628,6 @@ describe('Email | Pages | Settings', () => {
 
       .c34 {
         grid-column: span 7;
-      }
-
-      .c11 {
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c12 {
-        font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #32324d;
       }
 
       @media (max-width:68.75rem) {
@@ -714,7 +713,15 @@ describe('Email | Pages | Settings', () => {
                     <span
                       class="c12"
                     >
-                      Configuration
+                      The plugin is configured through the ./config/plugins.js file, checkout this 
+                      <a
+                        href="https://strapi.io/documentation/developer-docs/latest/development/plugins/email.html#configure-the-plugin"
+                        rel="noopener noreferrer"
+                        target="_blank"
+                      >
+                        link
+                      </a>
+                       for the documentation.
                     </span>
                   </div>
                   <div
@@ -959,8 +966,16 @@ describe('Email | Pages | Settings', () => {
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
-                                d="M20.727 2.97a.2.2 0 01.286 0l2.85 2.89a.2.2 0 010 .28L9.554 20.854a.2.2 0 01-.285 0l-9.13-9.243a.2.2 0 010-.281l2.85-2.892a.2.2 0 01.284 0l6.14 6.209L20.726 2.97z"
-                                fill="#212134"
+                                d="M0 2.8A.8.8 0 01.8 2h22.4a.8.8 0 01.8.8v2.71a1 1 0 01-1 1H1a1 1 0 01-1-1V2.8z"
+                                fill="#32324D"
+                              />
+                              <path
+                                d="M1.922 7.991C.197 6.675 0 6.252 0 5.289h23.953c.305 1.363-1.594 2.506-2.297 3.125-1.953 1.363-6.253 4.36-7.828 5.45-1.575 1.09-3.031.455-3.562 0-2.063-1.41-6.62-4.557-8.344-5.873zM22.8 18H1.2c-.663 0-1.2.471-1.2 1.053v1.894C0 21.529.537 22 1.2 22h21.6c.663 0 1.2-.471 1.2-1.053v-1.894c0-.582-.537-1.053-1.2-1.053z"
+                                fill="#32324D"
+                              />
+                              <path
+                                d="M0 9.555v10.972h24V9.554c-2.633 1.95-8.367 6.113-9.96 7.166-1.595 1.052-3.352.438-4.032 0L0 9.555z"
+                                fill="#32324D"
                               />
                             </svg>
                           </div>

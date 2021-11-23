@@ -4,7 +4,7 @@ import { useIntl } from 'react-intl';
 import get from 'lodash/get';
 import { Button } from '@strapi/design-system/Button';
 import { Box } from '@strapi/design-system/Box';
-import { ButtonText } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { Stack } from '@strapi/design-system/Stack';
 import { Flex } from '@strapi/design-system/Flex';
@@ -25,21 +25,21 @@ const DisplayedFields = ({ editLayout, editLayoutRemainingFields, onRemoveField,
       <Flex justifyContent="space-between">
         <div>
           <Box>
-            <ButtonText>
+            <Typography fontWeight="bold">
               {formatMessage({
                 id: getTrad('containers.ListPage.displayedFields'),
                 defaultMessage: 'Displayed fields',
               })}
-            </ButtonText>
+            </Typography>
           </Box>
           {/* Since the drag n drop will not be available, this text will be hidden for the moment */}
           {/* <Box>
-            <Text small textColor="neutral600">
+            <Typography variant="pi" textColor="neutral600">
               {formatMessage({
                 id: 'containers.SettingPage.editSettings.description',
                 defaultMessage: 'Drag & drop the fields to build the layout',
               })}
-            </Text>
+            </Typography>
           </Box> */}
         </div>
         <LinkToCTB />

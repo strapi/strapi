@@ -12,7 +12,7 @@ import { Button } from '@strapi/design-system/Button';
 import { TextInput } from '@strapi/design-system/TextInput';
 import { Checkbox } from '@strapi/design-system/Checkbox';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
-import { H1, Subtitle } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import EyeStriked from '@strapi/icons/EyeStriked';
 import Eye from '@strapi/icons/Eye';
 import { Form, useQuery, useNotification } from '@strapi/helper-plugin';
@@ -113,21 +113,21 @@ const Register = ({ fieldsToDisable, noSignin, onSubmit, schema }) => {
                 <Column>
                   <Logo />
                   <Box paddingTop={6} paddingBottom={1}>
-                    <H1>
+                    <Typography as="h1" variant="alpha">
                       {formatMessage({
                         id: 'Auth.form.welcome.title',
                         defaultMessage: 'Welcome!',
                       })}
-                    </H1>
+                    </Typography>
                   </Box>
                   <CenteredBox paddingBottom={7}>
-                    <Subtitle textColor="neutral600">
+                    <Typography variant="epsilon" textColor="neutral600">
                       {formatMessage({
                         id: 'Auth.form.register.subtitle',
                         defaultMessage:
                           'Your credentials are only used to authenticate yourself on the admin panel. All saved data will be stored in your own database.',
                       })}
-                    </Subtitle>
+                    </Typography>
                   </CenteredBox>
                 </Column>
                 <Stack size={7}>

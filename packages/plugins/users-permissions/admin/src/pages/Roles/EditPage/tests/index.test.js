@@ -579,17 +579,16 @@ describe('Admin | containers | RoleEditPage', () => {
       }
 
       .c22 {
+        color: #32324d;
         font-weight: 500;
         font-size: 1rem;
         line-height: 1.25;
-        color: #32324d;
       }
 
       .c42 {
-        font-weight: 400;
+        color: #666687;
         font-size: 0.875rem;
         line-height: 1.43;
-        color: #666687;
       }
 
       .c6 {
@@ -817,7 +816,7 @@ describe('Admin | containers | RoleEditPage', () => {
         border: 1px solid #4945ff;
       }
 
-      .c44:hover:not([aria-disabled='true']) .sc-iAjLmB {
+      .c44:hover:not([aria-disabled='true']) .sc-bQbCr {
         color: #271fe0;
       }
 

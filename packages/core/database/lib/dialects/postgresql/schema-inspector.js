@@ -139,7 +139,7 @@ class PostgresqlSchemaInspector {
   }
 
   getDatabaseSchema() {
-    return this.db.connection.client.connectionSettings.schema || 'public';
+    return this.db.connection.getSchemaName() || 'public';
   }
 
   async getTables() {

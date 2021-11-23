@@ -412,6 +412,13 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         margin-top: 4px;
       }
 
+      .c17 {
+        color: #32324d;
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+      }
+
       .c10 {
         outline: none;
       }
@@ -476,13 +483,6 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         left: -5px;
         right: -5px;
         border: 2px solid #4945ff;
-      }
-
-      .c17 {
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-        color: #32324d;
       }
 
       .c5 {
@@ -747,7 +747,6 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
                   >
                     <h1
                       class="c17"
-                      id="main-content-title"
                     >
                       Reset password
                     </h1>

@@ -6,15 +6,14 @@
     "icon": "plug",
     "name": "content-manager",
     "displayName": "Content Manager",
-    "description": "content-manager.plugin.description",
+    "description": "Quick way to see, edit and delete the data in your database.",
     "required": true,
     "kind": "plugin"
   },
   "dependencies": {
     "@sindresorhus/slugify": "1.1.0",
     "@strapi/utils": "3.6.8",
-    "lodash": "4.17.21",
-    "pluralize": "^8.0.0"
+    "lodash": "4.17.21"
   },
   "author": {
     "name": "Strapi team",

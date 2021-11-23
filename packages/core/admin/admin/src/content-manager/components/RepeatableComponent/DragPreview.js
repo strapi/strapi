@@ -1,13 +1,18 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
+import { pxToRem } from '@strapi/helper-plugin';
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
-import { Text } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { IconButton } from '@strapi/design-system/IconButton';
 import Trash from '@strapi/icons/Trash';
 import DragHandle from '@strapi/icons/Drag';
 import CarretDown from '@strapi/icons/CarretDown';
+
+const DragPreviewBox = styled(Box)`
+  border: 1px solid ${({ theme }) => theme.colors.neutral200};
+`;
 
 const DropdownIconWrapper = styled(Box)`
   height: ${32 / 16}rem;
@@ -37,14 +42,14 @@ const ToggleButton = styled.button`
 
 const DragPreview = ({ displayedValue }) => {
   return (
-    <Box
+    <DragPreviewBox
       paddingLeft={3}
       paddingRight={3}
       paddingTop={3}
       paddingBottom={3}
       hasRadius
       background="neutral0"
-      width="300px"
+      width={pxToRem(300)}
     >
       <Flex justifyContent="space-between">
         <ToggleButton type="button">
@@ -52,10 +57,10 @@ const DragPreview = ({ displayedValue }) => {
             <DropdownIconWrapper background="neutral200">
               <CarretDown />
             </DropdownIconWrapper>
-            <Box paddingLeft={6}>
-              <Text textColor="neutral700" style={{ width: '9vw' }} ellipsis>
+            <Box paddingLeft={6} maxWidth={pxToRem(150)}>
+              <Typography textColor="neutral700" ellipsis>
                 {displayedValue}
-              </Text>
+              </Typography>
             </Box>
           </Flex>
         </ToggleButton>
@@ -68,7 +73,7 @@ const DragPreview = ({ displayedValue }) => {
           </Flex>
         </Box>
       </Flex>
-    </Box>
+    </DragPreviewBox>
   );
 };
 

@@ -1,7 +1,7 @@
 import * as yup from 'yup';
 import { translatedErrors } from '@strapi/helper-plugin';
 
-const schema = {
+export const commonUserSchema = {
   firstname: yup.mixed().required(translatedErrors.required),
   lastname: yup.mixed(),
   email: yup
@@ -23,6 +23,10 @@ const schema = {
     .when('password', (password, passSchema) => {
       return password ? passSchema.required(translatedErrors.required) : passSchema;
     }),
+};
+
+const schema = {
+  ...commonUserSchema,
   currentPassword: yup
     .string()
     .when(['password', 'confirmPassword'], (password, confirmPassword, passSchema) => {

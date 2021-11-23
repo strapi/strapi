@@ -43,41 +43,15 @@ module.exports = plop => {
           return pluginsDirContent;
         },
       },
-      {
-        type: 'list',
-        name: 'kind',
-        message: 'Please choose the model type',
-        default: 'collectionType',
-        choices: [
-          { name: 'Collection Type', value: 'collectionType' },
-          { name: 'Singe Type', value: 'singleType' },
-        ],
-      },
-      {
-        type: 'confirm',
-        name: 'useDraftAndPublish',
-        default: false,
-        message: 'Use draft and publish?',
-      },
     ],
     actions(answers) {
-      let filePath;
-      if (answers.isPluginApi && answers.plugin) {
-        filePath = `plugins/{{plugin}}`;
-      } else {
-        filePath = `api/{{id}}`;
-      }
+      const filePath = answers.isPluginApi && answers.plugin ? 'plugins/{{plugin}}' : 'api/{{id}}';
 
       const baseActions = [
         {
           type: 'add',
           path: `${filePath}/controllers/{{id}}.js`,
           templateFile: 'templates/controller.js.hbs',
-        },
-        {
-          type: 'add',
-          path: `${filePath}/content-types/{{id}}/schema.json`,
-          templateFile: 'templates/content-type.schema.json.hbs',
         },
         {
           type: 'add',
@@ -90,16 +64,11 @@ module.exports = plop => {
         return baseActions;
       }
 
-      const routeType =
-        answers.kind === 'singleType'
-          ? 'single-type-routes.js.hbs'
-          : 'collection-type-routes.js.hbs';
-
       return [
         {
           type: 'add',
           path: `${filePath}/routes/{{id}}.js`,
-          templateFile: `templates/${routeType}`,
+          templateFile: `templates/single-route.js.hbs`,
         },
         ...baseActions,
       ];

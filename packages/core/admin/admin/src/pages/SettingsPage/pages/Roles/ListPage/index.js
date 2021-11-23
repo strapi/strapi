@@ -13,7 +13,7 @@ import Duplicate from '@strapi/icons/Duplicate';
 import { Button } from '@strapi/design-system/Button';
 import { ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
 import { Table, Tbody, Th, Thead, Tr, TFooter } from '@strapi/design-system/Table';
-import { TableLabel } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { Main } from '@strapi/design-system/Main';
 import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
 import { useIntl } from 'react-intl';
@@ -138,28 +138,28 @@ const RoleListPage = () => {
           <Thead>
             <Tr>
               <Th>
-                <TableLabel textColor="neutral600">
+                <Typography variant="sigma" textColor="neutral600">
                   {formatMessage({
                     id: 'Settings.roles.list.header.name',
                     defaultMessage: 'Name',
                   })}
-                </TableLabel>
+                </Typography>
               </Th>
               <Th>
-                <TableLabel textColor="neutral600">
+                <Typography variant="sigma" textColor="neutral600">
                   {formatMessage({
                     id: 'Settings.roles.list.header.description',
                     defaultMessage: 'Description',
                   })}
-                </TableLabel>
+                </Typography>
               </Th>
               <Th>
-                <TableLabel textColor="neutral600">
+                <Typography variant="sigma" textColor="neutral600">
                   {formatMessage({
                     id: 'Settings.roles.list.header.users',
                     defaultMessage: 'Users',
                   })}
-                </TableLabel>
+                </Typography>
               </Th>
               <Th>
                 <VisuallyHidden>

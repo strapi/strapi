@@ -5,7 +5,7 @@
   "strapi": {
     "displayName": "Media Library",
     "name": "upload",
-    "description": "upload.plugin.description",
+    "description": "Media file management.",
     "required": true,
     "kind": "plugin"
   },

@@ -1,11 +1,16 @@
 import React from 'react';
 import styled from 'styled-components';
-import BookIcon from '@strapi/icons/Book';
-import { Icon } from '@strapi/design-system/Icon';
+import FileIcon from '@strapi/icons/File';
+import FilePdfIcon from '@strapi/icons/FilePdf';
 import { Box } from '@strapi/design-system/Box';
+import { Flex } from '@strapi/design-system/Flex';
 import { AssetType, AssetDefinition } from '../../../constants';
 import { VideoPreview } from '../../AssetCard/VideoPreview';
 import { createAssetUrl } from '../../../utils/createAssetUrl';
+
+const DocAsset = styled(Flex)`
+  background: linear-gradient(180deg, #ffffff 0%, #f6f6f9 121.48%);
+`;
 
 const VideoPreviewWrapper = styled(Box)`
   canvas,
@@ -40,7 +45,15 @@ export const CarouselAsset = ({ asset }) => {
     );
   }
 
-  return <Icon as={BookIcon} aria-label={asset.alternativeText || asset.name} />;
+  return (
+    <DocAsset width="100%" height="100%" justifyContent="center" hasRadius>
+      {asset.ext.includes('pdf') ? (
+        <FilePdfIcon aria-label={asset.alternativeText || asset.name} width="24px" height="32px" />
+      ) : (
+        <FileIcon aria-label={asset.alternativeText || asset.name} width="24px" height="32px" />
+      )}
+    </DocAsset>
+  );
 };
 
 CarouselAsset.propTypes = {

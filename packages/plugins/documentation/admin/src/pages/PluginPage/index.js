@@ -19,7 +19,7 @@ import { Button } from '@strapi/design-system/Button';
 import { Layout, HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
 import { IconButton } from '@strapi/design-system/IconButton';
-import { Text, TableLabel } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { Flex } from '@strapi/design-system/Flex';
 import { Table, Tr, Thead, Th, Tbody, Td } from '@strapi/design-system/Table';
 
@@ -99,20 +99,20 @@ const PluginPage = () => {
               <Thead>
                 <Tr>
                   <Th>
-                    <TableLabel textColor="neutral600">
+                    <Typography variant="sigma" textColor="neutral600">
                       {formatMessage({
                         id: getTrad('pages.PluginPage.table.version'),
                         defaultMessage: 'Version',
                       })}
-                    </TableLabel>
+                    </Typography>
                   </Th>
                   <Th>
-                    <TableLabel textColor="neutral600">
+                    <Typography variant="sigma" textColor="neutral600">
                       {formatMessage({
                         id: getTrad('pages.PluginPage.table.generated'),
                         defaultMessage: 'Last Generated',
                       })}
-                    </TableLabel>
+                    </Typography>
                   </Th>
                 </Tr>
               </Thead>
@@ -122,10 +122,10 @@ const PluginPage = () => {
                   .map(doc => (
                     <Tr key={doc.version}>
                       <Td width="50%">
-                        <Text>{doc.version}</Text>
+                        <Typography>{doc.version}</Typography>
                       </Td>
                       <Td width="50%">
-                        <Text>{doc.generatedDate}</Text>
+                        <Typography>{doc.generatedDate}</Typography>
                       </Td>
                       <Td>
                         <Flex justifyContent="end" {...stopPropagation}>

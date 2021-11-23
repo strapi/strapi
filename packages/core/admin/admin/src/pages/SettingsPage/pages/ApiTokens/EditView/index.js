@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useIntl } from 'react-intl';
 import {
   SettingsPageTitle,
@@ -6,6 +6,7 @@ import {
   Form,
   useOverlayBlocker,
   useNotification,
+  useTracking,
 } from '@strapi/helper-plugin';
 import { HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
@@ -16,7 +17,7 @@ import { Link } from '@strapi/design-system/Link';
 import { Formik } from 'formik';
 import { Stack } from '@strapi/design-system/Stack';
 import { Box } from '@strapi/design-system/Box';
-import { H3 } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { TextInput } from '@strapi/design-system/TextInput';
 import { Textarea } from '@strapi/design-system/Textarea';
@@ -37,12 +38,18 @@ const ApiTokenCreateView = () => {
   const { lockApp, unlockApp } = useOverlayBlocker();
   const toggleNotification = useNotification();
   const history = useHistory();
+  const { trackUsage } = useTracking();
+  const trackUsageRef = useRef(trackUsage);
 
   const {
     params: { id },
   } = useRouteMatch('/settings/api-tokens/:id');
 
   const isCreating = id === 'create';
+
+  useEffect(() => {
+    trackUsageRef.current(isCreating ? 'didAddTokenFromList' : 'didEditTokenFromList');
+  }, [isCreating]);
 
   if (history.location.state?.apiToken.accessKey) {
     apiToken = history.location.state.apiToken;
@@ -73,6 +80,7 @@ const ApiTokenCreateView = () => {
   }
 
   const handleSubmit = async (body, actions) => {
+    trackUsageRef.current(isCreating ? 'willCreateToken' : 'willEditToken');
     lockApp();
 
     try {
@@ -87,6 +95,10 @@ const ApiTokenCreateView = () => {
       toggleNotification({
         type: 'success',
         message: formatMessage({ id: 'notification.success.saved', defaultMessage: 'Saved' }),
+      });
+
+      trackUsageRef.current(isCreating ? 'didCreateToken' : 'didEditToken', {
+        type: apiToken.type,
       });
 
       if (isCreating) {
@@ -171,12 +183,12 @@ const ApiTokenCreateView = () => {
                     paddingRight={7}
                   >
                     <Stack size={4}>
-                      <H3 as="h2">
+                      <Typography variant="delta" as="h2">
                         {formatMessage({
                           id: 'app.components.Users.ModalCreateBody.block-title.details',
                           defaultMessage: 'Details',
                         })}
-                      </H3>
+                      </Typography>
                       <Grid gap={5}>
                         <GridItem key="name" col={6} xs={12}>
                           <TextInput

@@ -4,8 +4,10 @@ const { isArray } = require('lodash/fp');
 
 const traverseEntity = require('../traverse-entity');
 const { getNonWritableAttributes } = require('../content-types');
+const pipeAsync = require('../pipe-async');
+
 const visitors = require('./visitors');
-const utils = require('./utils');
+const sanitizers = require('./sanitizers');
 
 module.exports = {
   contentAPI: {
@@ -26,7 +28,7 @@ module.exports = {
         transforms.push(traverseEntity(visitors.removeRestrictedRelations(auth), { schema }));
       }
 
-      return utils.pipeAsync(...transforms)(data);
+      return pipeAsync(...transforms)(data);
     },
 
     output(data, schema, { auth } = {}) {
@@ -34,30 +36,16 @@ module.exports = {
         return Promise.all(data.map(entry => this.output(entry, schema, { auth })));
       }
 
-      const transforms = [
-        traverseEntity(visitors.removePassword, { schema }),
-        traverseEntity(visitors.removePrivate, { schema }),
-      ];
+      const transforms = [sanitizers.defaultSanitizeOutput(schema)];
 
       if (auth) {
         transforms.push(traverseEntity(visitors.removeRestrictedRelations(auth), { schema }));
       }
 
-      return utils.pipeAsync(...transforms)(data);
+      return pipeAsync(...transforms)(data);
     },
   },
 
-  eventHub(data, schema) {
-    if (isArray(data)) {
-      return Promise.all(data.map(entry => this.eventHub(entry, schema)));
-    }
-
-    return utils.pipeAsync(
-      traverseEntity(visitors.removePassword, { schema }),
-      traverseEntity(visitors.removePrivate, { schema })
-    )(data);
-  },
-
-  utils,
+  sanitizers,
   visitors,
 };

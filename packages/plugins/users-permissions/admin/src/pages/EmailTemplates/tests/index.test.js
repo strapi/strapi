@@ -37,7 +37,7 @@ const App = (
   </QueryClientProvider>
 );
 
-describe('ADMIN | Pages | Settings | Advanced Settings', () => {
+describe('ADMIN | Pages | Settings | Email Templates', () => {
   beforeAll(() => server.listen());
 
   beforeEach(() => {
@@ -65,7 +65,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
     });
 
     expect(container.firstChild).toMatchInlineSnapshot(`
-      .c24 {
+      .c23 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -79,21 +79,21 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         outline: none;
       }
 
-      .c24 svg {
+      .c23 svg {
         height: 12px;
         width: 12px;
       }
 
-      .c24 svg > g,
-      .c24 svg path {
+      .c23 svg > g,
+      .c23 svg path {
         fill: #ffffff;
       }
 
-      .c24[aria-disabled='true'] {
+      .c23[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c24:after {
+      .c23:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -108,11 +108,11 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         border: 2px solid transparent;
       }
 
-      .c24:focus-visible {
+      .c23:focus-visible {
         outline: none;
       }
 
-      .c24:focus-visible:after {
+      .c23:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -123,7 +123,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         border: 2px solid #4945ff;
       }
 
-      .c25 {
+      .c24 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -141,26 +141,26 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         border: none;
       }
 
-      .c25 svg > g,
-      .c25 svg path {
+      .c24 svg > g,
+      .c24 svg path {
         fill: #8e8ea9;
       }
 
-      .c25:hover svg > g,
-      .c25:hover svg path {
+      .c24:hover svg > g,
+      .c24:hover svg path {
         fill: #666687;
       }
 
-      .c25:active svg > g,
-      .c25:active svg path {
+      .c24:active svg > g,
+      .c24:active svg path {
         fill: #a5a5ba;
       }
 
-      .c25[aria-disabled='true'] {
+      .c24[aria-disabled='true'] {
         background-color: #eaeaef;
       }
 
-      .c25[aria-disabled='true'] svg path {
+      .c24[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
@@ -217,7 +217,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         overflow-x: auto;
       }
 
-      .c22 tr:last-of-type {
+      .c21 tr:last-of-type {
         border-bottom: none;
       }
 
@@ -272,6 +272,20 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
 
       .c19 svg {
         height: 0.25rem;
+      }
+
+      .c20 {
+        color: #666687;
+        font-weight: 600;
+        font-size: 0.6875rem;
+        line-height: 1.45;
+        text-transform: uppercase;
+      }
+
+      .c22 {
+        color: #32324d;
+        font-size: 0.875rem;
+        line-height: 1.43;
       }
 
       .c18 {
@@ -346,26 +360,6 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         color: #666687;
         font-size: 1rem;
         line-height: 1.5;
-      }
-
-      .c20 {
-        color: #666687;
-        font-size: 0.875rem;
-        line-height: 1.43;
-      }
-
-      .c23 {
-        font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #32324d;
-      }
-
-      .c21 {
-        font-weight: 600;
-        font-size: 0.6875rem;
-        line-height: 1.45;
-        text-transform: uppercase;
       }
 
       <main
@@ -452,7 +446,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                           class="c17"
                         >
                           <span
-                            class="c20 c21"
+                            class="c20"
                           >
                             name
                           </span>
@@ -483,7 +477,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                     </tr>
                   </thead>
                   <tbody
-                    class="c22"
+                    class="c21"
                   >
                     <tr
                       aria-rowindex="2"
@@ -517,7 +511,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                         tabindex="-1"
                       >
                         <span
-                          class="c23"
+                          class="c22"
                         >
                           Reset password
                         </span>
@@ -532,7 +526,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                           <button
                             aria-disabled="false"
                             aria-labelledby="tooltip-1"
-                            class="c24 c25"
+                            class="c23 c24"
                             tabindex="-1"
                             type="button"
                           >
@@ -584,7 +578,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                         tabindex="-1"
                       >
                         <span
-                          class="c23"
+                          class="c22"
                         >
                           Email address confirmation
                         </span>
@@ -599,7 +593,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                           <button
                             aria-disabled="false"
                             aria-labelledby="tooltip-3"
-                            class="c24 c25"
+                            class="c23 c24"
                             tabindex="-1"
                             type="button"
                           >

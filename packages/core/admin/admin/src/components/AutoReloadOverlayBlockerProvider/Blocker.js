@@ -10,7 +10,6 @@ import { Link } from '@strapi/design-system/Link';
 import { Box } from '@strapi/design-system/Box';
 import { Stack } from '@strapi/design-system/Stack';
 import { Flex } from '@strapi/design-system/Flex';
-import { H1 } from '@strapi/design-system/Text';
 import { Typography } from '@strapi/design-system/Typography';
 import { Content, IconBox, Overlay } from './Overlay';
 
@@ -48,7 +47,9 @@ const Blocker = ({ displayedIcon, description, title, isOpen }) => {
         <Content size={6}>
           <Stack size={2}>
             <Flex justifyContent="center">
-              <H1>{formatMessage(title)}</H1>
+              <Typography as="h1" variant="alpha">
+                {formatMessage(title)}
+              </Typography>
             </Flex>
             <Flex justifyContent="center">
               <Typography as="h2" textColor="neutral600" fontSize={4} fontWeight="regular">

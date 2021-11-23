@@ -5,7 +5,7 @@
   "strapi": {
     "displayName": "GraphQL",
     "name": "graphql",
-    "description": "graphql.plugin.description",
+    "description": "Adds GraphQL endpoint with default API methods.",
     "kind": "plugin"
   },
   "scripts": {
@@ -29,7 +29,8 @@
     "koa-compose": "^4.1.0",
     "lodash": "4.17.21",
     "nexus": "1.1.0",
-    "pluralize": "^8.0.0"
+    "pluralize": "^8.0.0",
+    "subscriptions-transport-ws": "0.9.19"
   },
   "devDependencies": {
     "cross-env": "^7.0.3",

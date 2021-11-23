@@ -12,6 +12,8 @@ const defaults = {
     useDefaults: true,
     directives: {
       'connect-src': ["'self'", 'https:'],
+      'img-src': ["'self'", 'data:', 'blob:'],
+      'media-src': ["'self'", 'data:', 'blob:'],
     },
   },
   xssFilter: false,
@@ -30,12 +32,15 @@ const defaults = {
 module.exports = config => (ctx, next) => {
   let helmetConfig = defaultsDeep(defaults, config);
 
-  if (ctx.method === 'GET' && ['/graphql', '/documentation'].includes(ctx.path)) {
+  if (
+    ctx.method === 'GET' &&
+    ['/graphql', '/documentation'].some(str => ctx.path.startsWith(str))
+  ) {
     helmetConfig = merge(helmetConfig, {
       contentSecurityPolicy: {
         directives: {
           'script-src': ["'self'", "'unsafe-inline'", 'cdn.jsdelivr.net'],
-          'img-src': ["'self'", 'data:', 'cdn.jsdelivr.net'],
+          'img-src': ["'self'", 'data:', 'cdn.jsdelivr.net', 'strapi.io'],
         },
       },
     });

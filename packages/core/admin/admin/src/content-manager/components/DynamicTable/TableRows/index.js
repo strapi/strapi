@@ -52,7 +52,7 @@ const TableRows = ({
             key={data.id}
             {...onRowClick({
               fn: () => {
-                trackUsage('willEditEntryFromButton');
+                trackUsage('willEditEntryFromList');
                 push({
                   pathname: `${pathname}/${data.id}`,
                   state: { from: pathname },
@@ -142,7 +142,11 @@ const TableRows = ({
                   {canDelete && (
                     <Box paddingLeft={1}>
                       <IconButton
-                        onClick={() => onClickDelete(data.id)}
+                        onClick={() => {
+                          trackUsage('willDeleteEntryFromList');
+
+                          onClickDelete(data.id);
+                        }}
                         label={formatMessage(
                           { id: 'app.component.table.delete', defaultMessage: 'Delete {target}' },
                           { target: itemLineText }

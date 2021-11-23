@@ -1,15 +1,16 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+import styled from 'styled-components';
+import { pxToRem } from '@strapi/helper-plugin';
 import Check from '@strapi/icons/Check';
 import Cross from '@strapi/icons/Cross';
 import Loader from '@strapi/icons/Loader';
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
-import { Text } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { Stack } from '@strapi/design-system/Stack';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
-import { useIntl } from 'react-intl';
-import styled from 'styled-components';
 
 // Being discussed in Notion: create a <Icon /> component in Parts
 const Icon = styled.svg(
@@ -30,9 +31,9 @@ const Status = ({ isPending, statusCode }) => {
     return (
       <Stack horizontal size={2} style={{ alignItems: 'center' }}>
         <Icon as={Loader} />
-        <Text>
+        <Typography>
           {formatMessage({ id: 'Settings.webhooks.trigger.pending', defaultMessage: 'pending' })}
-        </Text>
+        </Typography>
       </Stack>
     );
   }
@@ -41,9 +42,9 @@ const Status = ({ isPending, statusCode }) => {
     return (
       <Stack horizontal size={2} style={{ alignItems: 'center' }}>
         <Icon as={Check} color="success700" />
-        <Text>
+        <Typography>
           {formatMessage({ id: 'Settings.webhooks.trigger.success', defaultMessage: 'success' })}
-        </Text>
+        </Typography>
       </Stack>
     );
   }
@@ -52,9 +53,9 @@ const Status = ({ isPending, statusCode }) => {
     return (
       <Stack horizontal size={2} style={{ alignItems: 'center' }}>
         <Icon as={Cross} color="danger700" />
-        <Text>
+        <Typography>
           {formatMessage({ id: 'Settings.error', defaultMessage: 'error' })} {statusCode}
-        </Text>
+        </Typography>
       </Stack>
     );
   }
@@ -75,29 +76,24 @@ const Message = ({ statusCode, message }) => {
   if (statusCode >= 200 && statusCode < 300) {
     return (
       <Flex justifyContent="flex-end">
-        <Text>
+        <Typography textColor="neutral600" ellipsis>
           {formatMessage({
             id: 'Settings.webhooks.trigger.success.label',
-            defaultMessage: 'success',
+            defaultMessage: 'Trigger succeeded',
           })}
-        </Text>
+        </Typography>
       </Flex>
     );
   }
 
   if (statusCode >= 300) {
     return (
-      <Flex justifyContent="flex-end" title={message}>
-        <Text
-          // ! REMOVE THIS WHEN DS IS UPDATED WITH ELLIPSIS PROP
-          style={{
-            overflow: 'hidden',
-            whiteSpace: 'nowrap',
-            textOverflow: 'ellipsis',
-          }}
-        >
-          {message}
-        </Text>
+      <Flex justifyContent="flex-end">
+        <Flex maxWidth={pxToRem(250)} justifyContent="flex-end" title={message}>
+          <Typography ellipsis textColor="neutral600">
+            {message}
+          </Typography>
+        </Flex>
       </Flex>
     );
   }
@@ -120,9 +116,9 @@ const CancelButton = ({ onCancel }) => {
     <Flex justifyContent="flex-end">
       <button onClick={onCancel} type="button">
         <Stack horizontal size={2} style={{ alignItems: 'center' }}>
-          <Text textColor="neutral400">
+          <Typography textColor="neutral400">
             {formatMessage({ id: 'Settings.webhooks.trigger.cancel', defaultMessage: 'cancel' })}
-          </Text>
+          </Typography>
           <Icon as={Cross} color="neutral400" />
         </Stack>
       </button>
@@ -140,12 +136,12 @@ const TriggerContainer = ({ isPending, onCancel, response }) => {
     <Box background="neutral0" padding={5} shadow="filterShadow" hasRadius>
       <Grid gap={4} style={{ alignItems: 'center' }}>
         <GridItem col={3}>
-          <Text>
+          <Typography>
             {formatMessage({
               id: 'Settings.webhooks.trigger.test',
-              defaultMessage: 'test-trigger',
+              defaultMessage: 'Test-trigger',
             })}
-          </Text>
+          </Typography>
         </GridItem>
         <GridItem col={3}>
           <Status isPending={isPending} statusCode={statusCode} />

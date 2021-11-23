@@ -20,7 +20,7 @@ const NonRepeatableComponent = ({ componentUid, isFromDynamicZone, isNested, nam
 
   return (
     <Box
-      background={isFromDynamicZone ? 'neutral0' : 'neutral100'}
+      background={isFromDynamicZone ? '' : 'neutral100'}
       paddingLeft={6}
       paddingRight={6}
       paddingTop={6}

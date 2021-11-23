@@ -81,6 +81,7 @@ const DynamicTable = ({
       headers={tableHeaders}
       onConfirmDelete={onConfirmDelete}
       onConfirmDeleteAll={onConfirmDeleteAll}
+      onOpenDeleteAllModalTrackedEvent="willBulkDeleteEntries"
       rows={rows}
       withBulkActions
       withMainAction={canDelete && isBulkable}
@@ -108,7 +109,6 @@ DynamicTable.propTypes = {
     contentType: PropTypes.shape({
       attributes: PropTypes.object.isRequired,
       metadatas: PropTypes.object.isRequired,
-      info: PropTypes.shape({ label: PropTypes.string.isRequired }).isRequired,
       layouts: PropTypes.shape({
         list: PropTypes.array.isRequired,
         editRelations: PropTypes.array,

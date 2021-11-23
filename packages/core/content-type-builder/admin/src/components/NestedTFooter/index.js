@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Flex } from '@strapi/design-system/Flex';
 import { Box } from '@strapi/design-system/Box';
-import { Text } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import styled from 'styled-components';
 
 const IconBox = styled(Box)`
@@ -40,9 +40,9 @@ const NestedTFooter = ({ children, icon, color, ...props }) => {
           {icon}
         </IconBox>
         <Box paddingLeft={3}>
-          <Text small bold textColor={`${color}600`}>
+          <Typography variant="pi" fontWeight="bold" textColor={`${color}600`}>
             {children}
-          </Text>
+          </Typography>
         </Box>
       </Flex>
     </ButtonBox>
