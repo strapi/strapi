@@ -3,7 +3,6 @@
 const { resolve, join, basename } = require('path');
 const os = require('os');
 const fse = require('fs-extra');
-
 const ora = require('ora');
 const ciEnv = require('ci-info');
 const chalk = require('chalk');
@@ -179,7 +178,7 @@ module.exports = async function buildStarter({ projectName, starter }, program) 
   // Install frontend dependencies
   console.log(`Creating Strapi starter frontend at ${chalk.yellow(frontendPath)}.`);
   console.log('Installing frontend dependencies');
-  await installWithLogs(frontendPath);
+  await installWithLogs({ path: frontendPath, useYarn: hasYarnInstalled });
 
   // Setup monorepo
   initPackageJson({ rootPath, projectBasename, useYarn: hasYarnInstalled });
