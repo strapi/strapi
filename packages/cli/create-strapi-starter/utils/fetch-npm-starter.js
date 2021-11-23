@@ -7,12 +7,12 @@ const stopProcess = require('./stop-process');
 
 /**
  * Gets the package version on npm. Will fail if the package does not exist
+ * @param {string} packageName Name to look up on npm, may include a specific version
  * @param {Object} options
- * @param {string} options.packageName Name to look up on npm, may include a specific version
  * @param {boolean} options.useYarn Yarn instead of npm
  * @returns {Object}
  */
-async function getPackageInfo({ packageName, useYarn }) {
+async function getPackageInfo(packageName, { useYarn }) {
   // Use yarn if possible because it's faster
   if (useYarn) {
     const { stdout } = await execa.command(`yarn info ${packageName} --json`);
@@ -40,7 +40,7 @@ async function getStarterPackageInfo(starter, useYarn) {
   // Check if starter is a shorthand
   try {
     const longhand = `@strapi/starter-${starter}`;
-    const packageInfo = await getPackageInfo({ packageName: longhand, useYarn });
+    const packageInfo = await getPackageInfo(longhand, { useYarn });
     // Hasn't crashed so it is indeed a shorthand
     return packageInfo;
   } catch (error) {
@@ -48,7 +48,7 @@ async function getStarterPackageInfo(starter, useYarn) {
   }
   // Fetch version of the non-shorthand package
   try {
-    return getPackageInfo({ packageName: starter, useYarn });
+    return getPackageInfo(starter, { useYarn });
   } catch (error) {
     stopProcess(`Could not find package ${chalk.green(starter)} on npm`);
   }

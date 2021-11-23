@@ -5,27 +5,23 @@ const execa = require('execa');
 const logger = require('./logger');
 
 /**
+ * @param {string} path Path to directory (frontend, backend)
  * @param {Object} options
- * @param {string} options.path Path to directory (frontend, backend)
  * @param {boolean} options.useYarn Use yarn instead of npm
  */
-function runInstall({ path, useYarn }) {
-  if (useYarn) {
-    return execa('yarn', ['install'], {
-      cwd: path,
-      stdin: 'ignore',
-    });
-  }
-
-  return execa('npm', ['install'], { cwd: path, stdin: 'ignore' });
+function runInstall(path, { useYarn }) {
+  return execa(useYarn ? 'yarn' : 'npm', ['install'], {
+    cwd: path,
+    stdin: 'ignore',
+  });
 }
 
 /**
+ * @param {string} rootPath
  * @param {Object} options
- * @param {string} options.rootPath
  * @param {boolean} options.useYarn
  */
-function runApp({ rootPath, useYarn }) {
+function runApp(rootPath, { useYarn }) {
   if (useYarn) {
     return execa('yarn', ['develop'], {
       stdio: 'inherit',

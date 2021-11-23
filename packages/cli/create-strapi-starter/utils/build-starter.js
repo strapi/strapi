@@ -28,12 +28,12 @@ function readStarterJson(filePath, starter) {
 }
 
 /**
+ * @param {string} rootPath - Path to the project directory
+ * @param {string} projectName - Name of the project
  * @param {Object} options
- * @param {string} options.rootPath - Path to the project directory
- * @param {string} options.projectName - Name of the project
  * @param {boolean} options.useYarn - Use yarn instead of npm
  */
-async function initPackageJson({ rootPath, projectName, useYarn }) {
+async function initPackageJson(rootPath, projectName, { useYarn } ) {
   const packageManager = useYarn ? 'yarn --cwd' : 'npm run --prefix';
 
   try {
@@ -64,11 +64,11 @@ async function initPackageJson({ rootPath, projectName, useYarn }) {
 }
 
 /**
+ * @param {string} path The directory path for install
  * @param {Object} options
- * @param {string} options.path The directory path for install
  * @param {boolean} options.useYarn Use yarn instead of npm
  */
-async function installWithLogs(options) {
+async function installWithLogs(path, options) {
   const installPrefix = chalk.yellow('Installing dependencies:');
   const loader = ora(installPrefix).start();
   const logInstall = (chunk = '') => {
@@ -78,7 +78,7 @@ async function installWithLogs(options) {
       .join(' ')}`;
   };
 
-  const runner = runInstall(options);
+  const runner = runInstall(path, options);
   runner.stdout.on('data', logInstall);
   runner.stderr.on('data', logInstall);
 
@@ -89,11 +89,11 @@ async function installWithLogs(options) {
 }
 
 /**
+ * @param {string} starter The name of the starter as provided by the user
  * @param {Object} options
- * @param {string} options.starter The name of the starter as provided by the user
  * @param {boolean} options.useYarn Use yarn instead of npm
  */
-async function getStarterInfo({ starter, useYarn }) {
+async function getStarterInfo(starter, { useYarn }) {
   const isLocalStarter = ['./', '../', '/'].some(filePrefix => starter.startsWith(filePrefix));
 
   let starterPath;
@@ -130,7 +130,7 @@ module.exports = async function buildStarter({ projectName, starter }, program) 
     starterPath,
     starterParentPath,
     starterPackageInfo,
-  } = await getStarterInfo({ starter, useYarn: hasYarnInstalled });
+  } = await getStarterInfo(starter, { useYarn: hasYarnInstalled });
 
   // Project directory
   const rootPath = resolve(projectName);
@@ -178,10 +178,10 @@ module.exports = async function buildStarter({ projectName, starter }, program) 
   // Install frontend dependencies
   console.log(`Creating Strapi starter frontend at ${chalk.yellow(frontendPath)}.`);
   console.log('Installing frontend dependencies');
-  await installWithLogs({ path: frontendPath, useYarn: hasYarnInstalled });
+  await installWithLogs(frontendPath, { useYarn: hasYarnInstalled });
 
   // Setup monorepo
-  initPackageJson({ rootPath, projectBasename, useYarn: hasYarnInstalled });
+  initPackageJson(rootPath, projectBasename, { useYarn: hasYarnInstalled });
 
   // Add gitignore
   try {
@@ -191,12 +191,12 @@ module.exports = async function buildStarter({ projectName, starter }, program) 
     logger.warn(`Failed to create file: ${chalk.yellow('.gitignore')}`);
   }
 
-  await installWithLogs({ path: rootPath, useYarn: hasYarnInstalled });
+  await installWithLogs(rootPath, { useYarn: hasYarnInstalled });
 
   if (!ciEnv.isCI) {
     await initGit(rootPath);
   }
 
   console.log(chalk.green('Starting the app'));
-  await runApp({ rootPath, useYarn: hasYarnInstalled });
+  await runApp(rootPath, { useYarn: hasYarnInstalled });
 };
