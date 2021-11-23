@@ -28,7 +28,7 @@ const Informations = () => {
 
   return (
     <Box>
-      <Typography variant="sigma" textColor="neutral600">
+      <Typography variant="sigma" textColor="neutral600" id="additional-informations">
         {formatMessage({
           id: getTrad('containers.Edit.information'),
           defaultMessage: 'Information',

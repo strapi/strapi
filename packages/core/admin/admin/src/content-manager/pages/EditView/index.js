@@ -252,7 +252,7 @@ const EditView = ({
                       {displayedRelationsLength > 0 && (
                         <Box
                           as="aside"
-                          aria-labelledby="additional-informations"
+                          aria-labelledby="relations-title"
                           background="neutral0"
                           borderColor="neutral150"
                           hasRadius
@@ -262,7 +262,7 @@ const EditView = ({
                           paddingTop={6}
                           shadow="tableShadow"
                         >
-                          <Typography variant="sigma" textColor="neutral600">
+                          <Typography variant="sigma" textColor="neutral600" id="relations-title">
                             {formatMessage(
                               {
                                 id: getTrad('containers.Edit.relations'),
@@ -283,10 +283,7 @@ const EditView = ({
                                     {...fieldSchema}
                                     {...metadatas}
                                     key={name}
-                                    description={{
-                                      id: metadatas.description,
-                                      defaultMessage: metadatas.description,
-                                    }}
+                                    description={metadatas.description}
                                     intlLabel={{
                                       id: metadatas.label,
                                       defaultMessage: metadatas.label,

@@ -50,7 +50,7 @@ const buildParams = (query, paramsToKeep) => {
   }, {});
 };
 function SelectWrapper({
-  // description,
+  description,
   editable,
   labelAction,
   intlLabel,
@@ -316,6 +316,7 @@ function SelectWrapper({
         styles={styles}
         targetModel={targetModel}
         value={value}
+        description={description}
       />
     </Stack>
   );
@@ -390,7 +391,7 @@ function SelectWrapper({
 
 SelectWrapper.defaultProps = {
   editable: true,
-  // description: '',
+  description: '',
   labelAction: null,
   isFieldAllowed: true,
   placeholder: null,
@@ -398,11 +399,7 @@ SelectWrapper.defaultProps = {
 
 SelectWrapper.propTypes = {
   editable: PropTypes.bool,
-  // description: PropTypes.shape({
-  //   id: PropTypes.string.isRequired,
-  //   defaultMessage: PropTypes.string.isRequired,
-  //   values: PropTypes.object,
-  // }),
+  description: PropTypes.string,
   intlLabel: PropTypes.shape({
     id: PropTypes.string.isRequired,
     defaultMessage: PropTypes.string.isRequired,
