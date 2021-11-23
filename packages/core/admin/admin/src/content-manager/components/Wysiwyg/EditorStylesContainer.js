@@ -5,6 +5,9 @@ import styled from 'styled-components';
 export const EditorStylesContainer = styled.div`
   cursor: ${({ disabled }) => (disabled ? 'not-allowed !important' : 'auto')};
   /* BASICS */
+  .CodeMirror-placeholder {
+    color: ${({ theme }) => theme.colors.neutral600} !important;
+  }
 
   .CodeMirror {
     /* Set height, width, borders, and global font properties here */

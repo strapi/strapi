@@ -31,13 +31,14 @@ const Editor = ({
       },
       readOnly: false,
       smartIndent: false,
+      placeholder,
     });
 
     CodeMirror.commands.newlineAndIndentContinueMarkdownList = newlineAndIndentContinueMarkdownList;
     editorRef.current.on('change', doc => {
       onChangeRef.current({ target: { name, value: doc.getValue(), type: 'wysiwyg' } });
     });
-  }, [editorRef, textareaRef, name]);
+  }, [editorRef, textareaRef, name, placeholder]);
 
   useEffect(() => {
     if (value && !editorRef.current.state.focused) {
@@ -65,7 +66,7 @@ const Editor = ({
   return (
     <EditorAndPreviewWrapper>
       <EditorStylesContainer disabled={disabled || isPreviewMode}>
-        <textarea ref={textareaRef} placeholder={placeholder} />
+        <textarea ref={textareaRef} />
       </EditorStylesContainer>
       {isPreviewMode && <PreviewWysiwyg data={value} />}
     </EditorAndPreviewWrapper>
