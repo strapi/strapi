@@ -19,7 +19,11 @@ const getRestrictRelationsTo = (contentType = {}) => {
     return ['oneWay', 'manyWay'];
   }
 
-  if (uid.startsWith(coreUids.PREFIX) || Object.values(pluginsUids).includes(uid)) {
+  if (
+    uid.startsWith(coreUids.PREFIX) ||
+    uid === pluginsUids.UPLOAD_FILE ||
+    !isContentTypeVisible(contentType)
+  ) {
     return [];
   }
 

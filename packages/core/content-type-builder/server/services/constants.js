@@ -38,8 +38,6 @@ const FORBIDDEN_ATTRIBUTE_NAMES = ['__component', '__contentType'];
 const PREFIX = 'strapi::';
 const STRAPI_USER = 'admin::user';
 const UPLOAD_FILE = 'plugin::upload.file';
-const API_TOKEN = 'admin::api-token';
-const I18N = 'plugin::i18n.locale';
 
 module.exports = {
   DEFAULT_TYPES,
@@ -59,7 +57,5 @@ module.exports = {
   },
   pluginsUids: {
     UPLOAD_FILE,
-    API_TOKEN,
-    I18N,
   },
 };

@@ -13,6 +13,9 @@ module.exports = {
     'content-manager': {
       visible: false,
     },
+    'content-type-builder': {
+      visible: false,
+    },
   },
   attributes: {
     name: {
