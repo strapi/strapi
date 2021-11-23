@@ -7,14 +7,15 @@ const stopProcess = require('./stop-process');
 
 /**
  * Gets the package version on npm. Will fail if the package does not exist
- * @param {string} packageName Name to look up on npm, may include a specific version
- * @param {boolean} useYarn Yarn instead of npm
+ * @param {Object} options
+ * @param {string} options.packageName Name to look up on npm, may include a specific version
+ * @param {boolean} options.useYarn Yarn instead of npm
  * @returns {Object}
  */
-async function getPackageInfo(packageName, useYarn) {
+async function getPackageInfo({ packageName, useYarn }) {
   // Use yarn if possible because it's faster
   if (useYarn) {
-    const { stdout } = await execa.shell(`yarn info ${packageName} --json`);
+    const { stdout } = await execa.command(`yarn info ${packageName} --json`);
     const yarnInfo = JSON.parse(stdout);
     return {
       name: yarnInfo.data.name,
@@ -23,7 +24,7 @@ async function getPackageInfo(packageName, useYarn) {
   }
 
   // Fallback to npm
-  const { stdout } = await execa.shell(`npm view ${packageName} name version --silent`);
+  const { stdout } = await execa.command(`npm view ${packageName} name version --silent`);
   // Use regex to parse name and version from CLI result
   const [name, version] = stdout.match(/(?<=')(.*?)(?=')/gm);
   return { name, version };
@@ -39,7 +40,7 @@ async function getStarterPackageInfo(starter, useYarn) {
   // Check if starter is a shorthand
   try {
     const longhand = `@strapi/starter-${starter}`;
-    const packageInfo = await getPackageInfo(longhand, useYarn);
+    const packageInfo = await getPackageInfo({ packageName: longhand, useYarn });
     // Hasn't crashed so it is indeed a shorthand
     return packageInfo;
   } catch (error) {
@@ -47,7 +48,7 @@ async function getStarterPackageInfo(starter, useYarn) {
   }
   // Fetch version of the non-shorthand package
   try {
-    return getPackageInfo(starter);
+    return getPackageInfo({ packageName: starter, useYarn });
   } catch (error) {
     stopProcess(`Could not find package ${chalk.green(starter)} on npm`);
   }
@@ -64,11 +65,11 @@ async function getStarterPackageInfo(starter, useYarn) {
 async function downloadNpmStarter({ name, version }, parentDir, useYarn) {
   // Download from npm, using yarn if possible
   if (useYarn) {
-    await execa.shell(`yarn add ${name}@${version} --no-lockfile --silent`, {
+    await execa.command(`yarn add ${name}@${version} --no-lockfile --silent`, {
       cwd: parentDir,
     });
   } else {
-    await execa.shell(`npm install ${name}@${version} --no-save --silent`, {
+    await execa.command(`npm install ${name}@${version} --no-save --silent`, {
       cwd: parentDir,
     });
   }

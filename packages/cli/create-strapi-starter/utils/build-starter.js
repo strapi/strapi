@@ -29,11 +29,12 @@ function readStarterJson(filePath, starter) {
 }
 
 /**
- * @param  {string} rootPath - Path to the project directory
- * @param  {string} projectName - Name of the project
- * @param  {boolean} useYarn - Use yarn instead of npm
+ * @param {Object} options
+ * @param {string} options.rootPath - Path to the project directory
+ * @param {string} options.projectName - Name of the project
+ * @param {boolean} options.useYarn - Use yarn instead of npm
  */
-async function initPackageJson(rootPath, projectName, useYarn) {
+async function initPackageJson({ rootPath, projectName, useYarn }) {
   const packageManager = useYarn ? 'yarn --cwd' : 'npm run --prefix';
 
   try {
@@ -64,9 +65,11 @@ async function initPackageJson(rootPath, projectName, useYarn) {
 }
 
 /**
- * @param  {string} path - The directory path for install
+ * @param {Object} options
+ * @param {string} options.path The directory path for install
+ * @param {boolean} options.useYarn Use yarn instead of npm
  */
-async function installWithLogs(path) {
+async function installWithLogs(options) {
   const installPrefix = chalk.yellow('Installing dependencies:');
   const loader = ora(installPrefix).start();
   const logInstall = (chunk = '') => {
@@ -76,7 +79,7 @@ async function installWithLogs(path) {
       .join(' ')}`;
   };
 
-  const runner = runInstall(path);
+  const runner = runInstall(options);
   runner.stdout.on('data', logInstall);
   runner.stderr.on('data', logInstall);
 
@@ -87,10 +90,11 @@ async function installWithLogs(path) {
 }
 
 /**
- * @param {string} starter The name of the starter as provided by the user
- * @param {boolean} useYarn Use yarn instead of npm
+ * @param {Object} options
+ * @param {string} options.starter The name of the starter as provided by the user
+ * @param {boolean} options.useYarn Use yarn instead of npm
  */
-async function getStarterInfo(starter, useYarn) {
+async function getStarterInfo({ starter, useYarn }) {
   const isLocalStarter = ['./', '../', '/'].some(filePrefix => starter.startsWith(filePrefix));
 
   let starterPath;
@@ -121,13 +125,13 @@ async function getStarterInfo(starter, useYarn) {
  * @param {Object} program - Commands for generating new application
  */
 module.exports = async function buildStarter({ projectName, starter }, program) {
-  const hasYarnInstalled = hasYarn();
+  const hasYarnInstalled = await hasYarn();
   const {
     isLocalStarter,
     starterPath,
     starterParentPath,
     starterPackageInfo,
-  } = await getStarterInfo(starter, hasYarnInstalled);
+  } = await getStarterInfo({ starter, useYarn: hasYarnInstalled });
 
   // Project directory
   const rootPath = resolve(projectName);
@@ -178,7 +182,7 @@ module.exports = async function buildStarter({ projectName, starter }, program) 
   await installWithLogs(frontendPath);
 
   // Setup monorepo
-  initPackageJson(rootPath, projectBasename, hasYarnInstalled);
+  initPackageJson({ rootPath, projectBasename, useYarn: hasYarnInstalled });
 
   // Add gitignore
   try {
@@ -195,5 +199,5 @@ module.exports = async function buildStarter({ projectName, starter }, program) 
   }
 
   console.log(chalk.green('Starting the app'));
-  await runApp(rootPath);
+  await runApp({ rootPath, useYarn: hasYarnInstalled });
 };
