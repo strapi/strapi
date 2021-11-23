@@ -615,6 +615,7 @@ describe('Wysiwyg render and actions buttons', () => {
         height: 290px;
         color: #32324d;
         direction: ltr;
+        font-family: --apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,Cantarell, 'Open Sans','Helvetica Neue',sans-serif;
       }
 
       .c32 .CodeMirror-lines {
@@ -916,7 +917,6 @@ describe('Wysiwyg render and actions buttons', () => {
       }
 
       .c32 span {
-        font-family: --apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,Cantarell, 'Open Sans','Helvetica Neue',sans-serif;
         color: #32324d !important;
       }
 
