@@ -29,7 +29,7 @@ import { Stack } from '@strapi/design-system/Stack';
 import ArrowLeft from '@strapi/icons/ArrowLeft';
 import Check from '@strapi/icons/Check';
 import MagicLink from 'ee_else_ce/pages/SettingsPage/pages/Users/components/MagicLink';
-import { formatAPIErrors } from '../../../../../utils';
+import { formatAPIErrors, getFullName } from '../../../../../utils';
 import { fetchUser, putUser } from './utils/api';
 import layout from './utils/layout';
 import { editValidation } from '../utils/validations/users';
@@ -89,7 +89,7 @@ const EditPage = ({ canUpdate }) => {
       if (id.toString() === userInfos.id.toString()) {
         auth.setUserInfo(data);
 
-        const userDisplayName = get(body, 'username') || `${body.firstname} ${body.lastname}`;
+        const userDisplayName = get(body, 'username') || getFullName(body.firstname, body.lastname);
 
         setUserDisplayName(userDisplayName);
       }
@@ -131,7 +131,7 @@ const EditPage = ({ canUpdate }) => {
   }, {});
 
   const headerLabelName =
-    initialData.username || `${initialData.firstname} ${initialData.lastname}`;
+    initialData.username || getFullName(initialData.firstname, initialData.lastname);
 
   const title = formatMessage(headerLabel, { name: headerLabelName });
 

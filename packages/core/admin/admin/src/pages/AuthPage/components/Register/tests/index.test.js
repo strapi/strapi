@@ -947,14 +947,8 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                                 <label
                                   class="c26"
                                   for="textinput-2"
-                                  required=""
                                 >
                                   Lastname
-                                  <span
-                                    class="c27"
-                                  >
-                                    *
-                                  </span>
                                 </label>
                               </div>
                               <div

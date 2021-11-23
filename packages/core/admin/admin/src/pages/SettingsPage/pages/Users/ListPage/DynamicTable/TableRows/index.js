@@ -11,6 +11,7 @@ import Trash from '@strapi/icons/Trash';
 import { useHistory } from 'react-router-dom';
 import { useIntl } from 'react-intl';
 import { stopPropagation, onRowClick } from '@strapi/helper-plugin';
+import { getFullName } from '../../../../../../../utils';
 
 const TableRows = ({
   canDelete,
@@ -49,7 +50,7 @@ const TableRows = ({
                       id: 'app.component.table.select.one-entry',
                       defaultMessage: `Select {target}`,
                     },
-                    { target: `${data.firstname} ${data.lastname}` }
+                    { target: getFullName(data.firstname, data.lastname) }
                   )}
                   checked={isChecked}
                   onChange={() => {
@@ -77,7 +78,7 @@ const TableRows = ({
                     onClick={() => push(`${pathname}/${data.id}`)}
                     label={formatMessage(
                       { id: 'app.component.table.edit', defaultMessage: 'Edit {target}' },
-                      { target: `${data.firstname} ${data.lastname}` }
+                      { target: getFullName(data.firstname, data.lastname) }
                     )}
                     noBorder
                     icon={<Pencil />}
@@ -89,7 +90,7 @@ const TableRows = ({
                         onClick={() => onClickDelete(data.id)}
                         label={formatMessage(
                           { id: 'app.component.table.delete', defaultMessage: 'Delete {target}' },
-                          { target: `${data.firstname} ${data.lastname}` }
+                          { target: getFullName(data.firstname, data.lastname) }
                         )}
                         noBorder
                         icon={<Trash />}
