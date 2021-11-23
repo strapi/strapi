@@ -59,7 +59,7 @@ const forms = {
     fieldsToOmit: ['userInfo.confirmPassword', 'userInfo.news', 'userInfo.email'],
     schema: yup.object().shape({
       firstname: yup.string().required(translatedErrors.required),
-      lastname: yup.string().required(translatedErrors.required),
+      lastname: yup.string(),
       password: yup
         .string()
         .min(8, translatedErrors.minLength)
@@ -83,7 +83,7 @@ const forms = {
     fieldsToOmit: ['confirmPassword', 'news'],
     schema: yup.object().shape({
       firstname: yup.string().required(translatedErrors.required),
-      lastname: yup.string().required(translatedErrors.required),
+      lastname: yup.string(),
       password: yup
         .string()
         .min(8, translatedErrors.minLength)

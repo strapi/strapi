@@ -13,6 +13,7 @@ import { useHistory } from 'react-router-dom';
 import { useIntl } from 'react-intl';
 import { usePluginsQueryParams } from '../../../hooks';
 import CellContent from '../CellContent';
+import { getFullName } from '../../../../utils';
 
 const TableRows = ({
   canCreate,
@@ -69,7 +70,7 @@ const TableRows = ({
                       id: 'app.component.table.select.one-entry',
                       defaultMessage: `Select {target}`,
                     },
-                    { target: `${data.firstname} ${data.lastname}` }
+                    { target: getFullName(data.firstname, data.lastname) }
                   )}
                   checked={isChecked}
                   onChange={() => {

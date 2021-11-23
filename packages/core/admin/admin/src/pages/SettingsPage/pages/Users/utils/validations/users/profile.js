@@ -3,7 +3,7 @@ import { translatedErrors } from '@strapi/helper-plugin';
 
 export const commonUserSchema = {
   firstname: yup.mixed().required(translatedErrors.required),
-  lastname: yup.mixed().required(translatedErrors.required),
+  lastname: yup.mixed(),
   email: yup
     .string()
     .email(translatedErrors.email)
