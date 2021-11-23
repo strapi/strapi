@@ -1,6 +1,9 @@
 'use strict';
 
 const { inputObjectType, nonNull } = require('nexus');
+const {
+  contentTypes: { isWritableAttribute },
+} = require('@strapi/utils');
 
 module.exports = context => {
   const { strapi } = context;
@@ -45,9 +48,9 @@ module.exports = context => {
               .hasInputEnabled();
           };
 
-          const validAttributes = Object.entries(attributes).filter(([attributeName]) =>
-            isFieldEnabled(attributeName)
-          );
+          const validAttributes = Object.entries(attributes).filter(([attributeName]) => {
+            return isWritableAttribute(contentType, attributeName) && isFieldEnabled(attributeName);
+          });
 
           // Add the ID for the component to enable inplace updates
           if (modelType === 'component' && isFieldEnabled('id')) {

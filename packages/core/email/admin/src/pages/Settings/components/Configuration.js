@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Stack } from '@strapi/design-system/Stack';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
-import { H3, Text } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { TextInput } from '@strapi/design-system/TextInput';
 import { Select, Option } from '@strapi/design-system/Select';
 import getTrad from '../../../utils/getTrad';
@@ -16,17 +16,18 @@ const Configuration = ({ config }) => {
   return (
     <Stack size={4}>
       <Stack size={1}>
-        <H3 as="h2">
+        <Typography variant="delta" as="h2">
           {formatMessage({
             id: getTrad('Settings.email.plugin.title.config'),
             defaultMessage: 'Configuration',
           })}
-        </H3>
-        <Text>
+        </Typography>
+        <Typography>
           {formatMessage(
             {
               id: getTrad('Settings.email.plugin.text.configuration'),
-              defaultMessage: 'Configuration',
+              defaultMessage:
+                'The plugin is configured through the {file} file, checkout this {link} for the documentation.',
             },
             {
               file: './config/plugins.js',
@@ -41,7 +42,7 @@ const Configuration = ({ config }) => {
               ),
             }
           )}
-        </Text>
+        </Typography>
       </Stack>
       <Grid gap={5}>
         <GridItem col={6} s={12}>

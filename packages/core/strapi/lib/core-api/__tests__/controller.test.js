@@ -1,15 +1,15 @@
 'use strict';
-const createController = require('../controller');
+const { createController } = require('../controller');
 
 describe('Default Controller', () => {
   test('Creates Collection Type default actions', () => {
     const service = {};
-    const model = {
+    const contentType = {
       modelName: 'testModel',
       kind: 'collectionType',
     };
 
-    const controller = createController({ service, model });
+    const controller = createController({ service, contentType });
 
     expect(controller).toEqual({
       find: expect.any(Function),
@@ -22,12 +22,12 @@ describe('Default Controller', () => {
 
   test('Creates Single Type default actions', () => {
     const service = {};
-    const model = {
+    const contentType = {
       modelName: 'testModel',
       kind: 'singleType',
     };
 
-    const controller = createController({ service, model });
+    const controller = createController({ service, contentType });
 
     expect(controller).toEqual({
       find: expect.any(Function),

@@ -5,7 +5,7 @@
   "strapi": {
     "name": "sentry",
     "displayName": "Sentry",
-    "description": "sentry.plugin.description",
+    "description": "Send Strapi error events to Sentry.",
     "kind": "plugin"
   },
   "dependencies": {

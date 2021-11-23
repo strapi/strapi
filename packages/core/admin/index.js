@@ -221,27 +221,36 @@ async function watchAdmin({ plugins, dir, host, port, browser, options }) {
 
   const webpackConfig = getCustomWebpackConfig(dir, args);
   const opts = {
-    clientLogLevel: 'silent',
-    quiet: true,
+    client: {
+      logging: 'none',
+      overlay: {
+        errors: true,
+        warnings: false,
+      },
+    },
+
     open: browser === 'true' ? true : browser,
-    publicPath: options.adminPath,
+    devMiddleware: {
+      publicPath: options.adminPath,
+    },
     historyApiFallback: {
       index: options.adminPath,
       disableDotRule: true,
     },
+
     ...webpack(webpackConfig).options.devServer,
   };
 
-  const server = new WebpackDevServer(webpack(webpackConfig), opts);
+  const server = new WebpackDevServer(opts, webpack(webpackConfig));
 
-  server.listen(port, host, function(err) {
+  server.start(port, host, function(err) {
     if (err) {
       console.log(err);
     }
 
     console.log(chalk.green('Starting the development server...'));
     console.log();
-    console.log(chalk.green(`Admin development at http://${host}:${port}${opts.publicPath}`));
+    console.log(chalk.green(`Admin development at http://${host}:${port}${options.adminPath}`));
   });
 
   watchFiles(dir);

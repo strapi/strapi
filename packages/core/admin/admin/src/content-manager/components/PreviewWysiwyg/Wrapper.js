@@ -117,6 +117,34 @@ const Wrapper = styled.div`
   .footnote-backref {
     color: #007bff;
   }
+
+  ol {
+    list-style-type: decimal;
+    margin-block-start: ${({ theme }) => theme.spaces[4]};
+    margin-block-end: ${({ theme }) => theme.spaces[4]};
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+    padding-inline-start: ${({ theme }) => theme.spaces[4]};
+    ol,
+    ul {
+      margin-block-start: 0px;
+      margin-block-end: 0px;
+    }
+  }
+
+  ul {
+    list-style-type: disc;
+    margin-block-start: ${({ theme }) => theme.spaces[4]};
+    margin-block-end: ${({ theme }) => theme.spaces[4]};
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+    padding-inline-start: ${({ theme }) => theme.spaces[4]};
+    ul,
+    ol {
+      margin-block-start: 0px;
+      margin-block-end: 0px;
+    }
+  }
 `;
 
 export default Wrapper;

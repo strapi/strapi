@@ -10,9 +10,11 @@ const getAdvancedSettings = () => {
 };
 
 const authenticate = async ctx => {
-  if (ctx.request && ctx.request.header && ctx.request.header.authorization) {
-    try {
-      const { id } = await getService('jwt').getToken(ctx);
+  try {
+    const token = await getService('jwt').getToken(ctx);
+
+    if (token) {
+      const { id } = token;
 
       if (id === undefined) {
         return { authenticated: false };
@@ -41,25 +43,25 @@ const authenticate = async ctx => {
         authenticated: true,
         credentials: user,
       };
-    } catch (err) {
+    }
+
+    const publicPermissions = await strapi.query('plugin::users-permissions.permission').findMany({
+      where: {
+        role: { type: 'public' },
+      },
+    });
+
+    if (publicPermissions.length === 0) {
       return { authenticated: false };
     }
-  }
 
-  const publicPermissions = await strapi.query('plugin::users-permissions.permission').findMany({
-    where: {
-      role: { type: 'public' },
-    },
-  });
-
-  if (publicPermissions.length === 0) {
+    return {
+      authenticated: true,
+      credentials: null,
+    };
+  } catch (err) {
     return { authenticated: false };
   }
-
-  return {
-    authenticated: true,
-    credentials: null,
-  };
 };
 
 const verify = async (auth, config) => {

@@ -1,6 +1,6 @@
 'use strict';
 
-const { setCreatorFields, sanitize } = require('@strapi/utils');
+const { setCreatorFields, pipeAsync } = require('@strapi/utils');
 
 const { getService, pickWritableAttributes } = require('../utils');
 
@@ -66,7 +66,7 @@ module.exports = {
       ? setCreatorFields({ user, isEdition: true })
       : setCreatorFields({ user });
 
-    const sanitizeFn = sanitize.utils.pipeAsync(pickWritables, pickPermittedFields, setCreator);
+    const sanitizeFn = pipeAsync(pickWritables, pickPermittedFields, setCreator);
 
     if (!entity) {
       const sanitizedBody = await sanitizeFn(body);
@@ -114,7 +114,7 @@ module.exports = {
   },
 
   async publish(ctx) {
-    const { userAbility } = ctx.state;
+    const { userAbility, user } = ctx.state;
     const { model } = ctx.params;
     const { query = {} } = ctx.request;
 
@@ -135,13 +135,17 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const publishedEntity = await entityManager.publish(entity, model);
+    const publishedEntity = await entityManager.publish(
+      entity,
+      setCreatorFields({ user, isEdition: true })({}),
+      model
+    );
 
     ctx.body = await permissionChecker.sanitizeOutput(publishedEntity);
   },
 
   async unpublish(ctx) {
-    const { userAbility } = ctx.state;
+    const { userAbility, user } = ctx.state;
     const { model } = ctx.params;
     const { query = {} } = ctx.request;
 
@@ -162,7 +166,11 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const unpublishedEntity = await entityManager.unpublish(entity, model);
+    const unpublishedEntity = await entityManager.unpublish(
+      entity,
+      setCreatorFields({ user, isEdition: true })({}),
+      model
+    );
 
     ctx.body = await permissionChecker.sanitizeOutput(unpublishedEntity);
   },

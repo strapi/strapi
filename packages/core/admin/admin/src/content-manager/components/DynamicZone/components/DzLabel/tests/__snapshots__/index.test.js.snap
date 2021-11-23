@@ -16,7 +16,10 @@ exports[`<DzLabel /> displays the labelAction correctly 1`] = `
 .c1 {
   background: #ffffff;
   color: #8e8ea9;
-  padding: 12px;
+  padding-top: 12px;
+  padding-right: 16px;
+  padding-bottom: 12px;
+  padding-left: 16px;
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
@@ -186,7 +189,10 @@ exports[`<DzLabel /> displays the name of the dz when the label is empty 1`] = `
 .c1 {
   background: #ffffff;
   color: #8e8ea9;
-  padding: 12px;
+  padding-top: 12px;
+  padding-right: 16px;
+  padding-bottom: 12px;
+  padding-left: 16px;
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
@@ -301,7 +307,10 @@ exports[`<DzLabel /> renders and matches the snapshot 1`] = `
 .c1 {
   background: #ffffff;
   color: #8e8ea9;
-  padding: 12px;
+  padding-top: 12px;
+  padding-right: 16px;
+  padding-bottom: 12px;
+  padding-left: 16px;
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 

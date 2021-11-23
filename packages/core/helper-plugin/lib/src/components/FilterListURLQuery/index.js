@@ -29,6 +29,10 @@ const FilterListURLQuery = ({ filtersSchema }) => {
       const attributeName = Object.keys(filter)[0];
       const attribute = filtersSchema.find(({ name }) => name === attributeName);
 
+      if (!attribute) {
+        return null;
+      }
+
       if (attribute.fieldSchema.type === 'relation') {
         const relationTargetAttribute = attribute.fieldSchema.mainField.name;
         const filterObj = filter[attributeName][relationTargetAttribute];

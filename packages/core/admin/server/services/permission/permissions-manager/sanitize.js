@@ -15,7 +15,7 @@ const {
   intersection,
 } = require('lodash/fp');
 
-const { contentTypes, traverseEntity, sanitize } = require('@strapi/utils');
+const { contentTypes, traverseEntity, sanitize, pipeAsync } = require('@strapi/utils');
 
 const {
   constants,
@@ -37,20 +37,20 @@ const STATIC_FIELDS = [ID_ATTRIBUTE];
 module.exports = ({ action, ability, model }) => {
   const schema = strapi.getModel(model);
 
-  const { allowedFields, removePassword } = sanitize.visitors;
+  const { allowedFields } = sanitize.visitors;
 
   const createSanitizeOutput = (options = {}) => {
     const { fields } = options;
 
     const permittedFields = fields.shouldIncludeAll ? null : getOutputFields(fields.permitted);
 
-    return sanitize.utils.pipeAsync(
+    return pipeAsync(
       // Remove roles from createdBy & updateBy fields
       omitCreatorRoles,
       // Remove not allowed fields (RBAC)
       traverseEntity(allowedFields(permittedFields), { schema }),
       // Remove all fields of type 'password'
-      traverseEntity(removePassword, { schema })
+      sanitize.sanitizers.sanitizePasswords(schema)
     );
   };
 
@@ -59,7 +59,7 @@ module.exports = ({ action, ability, model }) => {
 
     const permittedFields = fields.shouldIncludeAll ? null : getInputFields(fields.permitted);
 
-    return sanitize.utils.pipeAsync(
+    return pipeAsync(
       // Remove not allowed fields (RBAC)
       traverseEntity(allowedFields(permittedFields), { schema }),
       // Remove roles from createdBy & updateBy fields

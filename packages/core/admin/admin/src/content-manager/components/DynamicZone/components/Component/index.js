@@ -17,20 +17,32 @@ import { getTrad } from '../../../../utils';
 import FieldComponent from '../../../FieldComponent';
 import Rectangle from './Rectangle';
 
+const ActionStack = styled(Stack)`
+  svg {
+    path {
+      fill: ${({ theme, expanded }) =>
+        expanded ? theme.colors.primary600 : theme.colors.neutral600};
+    }
+  }
+`;
+
 const IconButtonCustom = styled(IconButton)`
   background-color: transparent;
 `;
 
 const StyledBox = styled(Box)`
-  > div {
-    > div:not(:first-of-type) {
-      overflow: visible;
-    }
+  > div:first-child {
+    box-shadow: ${({ theme }) => theme.shadows.tableShadow};
   }
+`;
+
+const AccordionContentRadius = styled(Box)`
+  border-radius: 0 0 ${({ theme }) => theme.spaces[1]} ${({ theme }) => theme.spaces[1]};
 `;
 
 const Component = ({
   componentUid,
+  formErrors,
   index,
   isOpen,
   isFieldAllowed,
@@ -74,15 +86,36 @@ const Component = ({
     { name: friendlyName }
   );
 
+  const formErrorsKeys = Object.keys(formErrors);
+
+  const fieldsErrors = formErrorsKeys.filter(errorKey => {
+    const errorKeysArray = errorKey.split('.');
+
+    if (`${errorKeysArray[0]}.${errorKeysArray[1]}` === `${name}.${index}`) {
+      return true;
+    }
+
+    return false;
+  });
+
+  let errorMessage;
+
+  if (fieldsErrors.length > 0) {
+    errorMessage = formatMessage({
+      id: getTrad('components.DynamicZone.error-message'),
+      defaultMessage: 'The component contains error(s)',
+    });
+  }
+
   return (
     <Box>
       <Rectangle />
-      <StyledBox shadow="tableShadow" hasRadius>
-        <Accordion expanded={isOpen} toggle={() => onToggle(index)} size="S">
+      <StyledBox hasRadius>
+        <Accordion expanded={isOpen} toggle={() => onToggle(index)} size="S" error={errorMessage}>
           <AccordionToggle
             startIcon={<FontAwesomeIcon icon={icon} />}
             action={
-              <Stack horizontal size={0}>
+              <ActionStack horizontal size={0} expanded={isOpen}>
                 {showDownIcon && (
                   <IconButtonCustom
                     noBorder
@@ -107,20 +140,22 @@ const Component = ({
                     icon={<Trash />}
                   />
                 )}
-              </Stack>
+              </ActionStack>
             }
             title={friendlyName}
             togglePosition="left"
           />
           <AccordionContent>
-            <FocusTrap onEscape={() => onToggle(index)}>
-              <FieldComponent
-                componentUid={componentUid}
-                icon={icon}
-                name={`${name}.${index}`}
-                isFromDynamicZone
-              />
-            </FocusTrap>
+            <AccordionContentRadius background="neutral0">
+              <FocusTrap onEscape={() => onToggle(index)}>
+                <FieldComponent
+                  componentUid={componentUid}
+                  icon={icon}
+                  name={`${name}.${index}`}
+                  isFromDynamicZone
+                />
+              </FocusTrap>
+            </AccordionContentRadius>
           </AccordionContent>
         </Accordion>
       </StyledBox>
@@ -130,6 +165,7 @@ const Component = ({
 
 Component.propTypes = {
   componentUid: PropTypes.string.isRequired,
+  formErrors: PropTypes.object.isRequired,
   index: PropTypes.number.isRequired,
   isFieldAllowed: PropTypes.bool.isRequired,
   isOpen: PropTypes.bool.isRequired,

@@ -1,15 +1,5 @@
 'use strict';
 
-/**
- * A set of functions called "actions" for `temp`
- */
+const { createCoreController } = require('@strapi/strapi').factories;
 
-module.exports = {
-  // exampleAction: async (ctx, next) => {
-  //   try {
-  //     ctx.body = 'ok';
-  //   } catch (err) {
-  //     ctx.body = err;
-  //   }
-  // }
-};
+module.exports = createCoreController('api::temp.temp');

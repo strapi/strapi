@@ -78,7 +78,7 @@ describe('<PageSizeURLQuery />', () => {
 
       .c8 {
         color: #32324d;
-        display: inline-block;
+        display: block;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -201,10 +201,9 @@ describe('<PageSizeURLQuery />', () => {
       }
 
       .c13 {
-        font-weight: 400;
+        color: #666687;
         font-size: 0.875rem;
         line-height: 1.43;
-        color: #666687;
       }
 
       <div

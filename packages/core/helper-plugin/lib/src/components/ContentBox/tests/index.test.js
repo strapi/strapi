@@ -69,16 +69,15 @@ describe('ContentBox', () => {
 
       .c5 {
         font-weight: 500;
+        color: #32324d;
         font-size: 0.75rem;
         line-height: 1.33;
-        color: #32324d;
       }
 
-      .c6 {
-        font-weight: 400;
+      .c7 {
+        color: #666687;
         font-size: 0.875rem;
         line-height: 1.43;
-        color: #666687;
       }
 
       .c3 {
@@ -88,6 +87,10 @@ describe('ContentBox', () => {
       .c3 svg {
         width: 2rem;
         height: 2rem;
+      }
+
+      .c6 {
+        word-break: break-all;
       }
 
       <div
@@ -103,14 +106,13 @@ describe('ContentBox', () => {
             class="c1"
           >
             <span
-              class="c5"
-              style="word-break: break-all;"
+              class="c5 c6"
             >
               Code example
             </span>
           </div>
           <span
-            class="c6"
+            class="c7"
           >
             Learn by testing real project developed by the community
           </span>

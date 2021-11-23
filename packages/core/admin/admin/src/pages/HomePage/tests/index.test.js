@@ -45,7 +45,7 @@ describe('Homepage', () => {
         padding-left: 24px;
       }
 
-      .c33 {
+      .c34 {
         background: #ffffff;
         padding-top: 24px;
         padding-right: 20px;
@@ -55,22 +55,22 @@ describe('Homepage', () => {
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
-      .c34 {
+      .c35 {
         padding-bottom: 32px;
       }
 
-      .c18 {
+      .c17 {
         font-weight: 600;
         color: #32324d;
         font-size: 0.875rem;
         line-height: 1.43;
       }
 
-      .c20 {
+      .c19 {
         padding-left: 8px;
       }
 
-      .c15 {
+      .c14 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -84,21 +84,21 @@ describe('Homepage', () => {
         outline: none;
       }
 
-      .c15 svg {
+      .c14 svg {
         height: 12px;
         width: 12px;
       }
 
-      .c15 svg > g,
-      .c15 svg path {
+      .c14 svg > g,
+      .c14 svg path {
         fill: #ffffff;
       }
 
-      .c15[aria-disabled='true'] {
+      .c14[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c15:after {
+      .c14:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -113,11 +113,11 @@ describe('Homepage', () => {
         border: 2px solid transparent;
       }
 
-      .c15:focus-visible {
+      .c14:focus-visible {
         outline: none;
       }
 
-      .c15:focus-visible:after {
+      .c14:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -128,7 +128,7 @@ describe('Homepage', () => {
         border: 2px solid #4945ff;
       }
 
-      .c16 {
+      .c15 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -140,7 +140,7 @@ describe('Homepage', () => {
         background: #4945ff;
       }
 
-      .c16 .c19 {
+      .c15 .c18 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -151,80 +151,80 @@ describe('Homepage', () => {
         align-items: center;
       }
 
-      .c16 .c17 {
+      .c15 .c16 {
         color: #ffffff;
       }
 
-      .c16[aria-disabled='true'] {
+      .c15[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c16[aria-disabled='true'] .c17 {
+      .c15[aria-disabled='true'] .c16 {
         color: #666687;
       }
 
-      .c16[aria-disabled='true'] svg > g,
-      .c16[aria-disabled='true'] svg path {
+      .c15[aria-disabled='true'] svg > g,
+      .c15[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c16[aria-disabled='true']:active {
+      .c15[aria-disabled='true']:active {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c16[aria-disabled='true']:active .c17 {
+      .c15[aria-disabled='true']:active .c16 {
         color: #666687;
       }
 
-      .c16[aria-disabled='true']:active svg > g,
-      .c16[aria-disabled='true']:active svg path {
+      .c15[aria-disabled='true']:active svg > g,
+      .c15[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
-      .c16:hover {
+      .c15:hover {
         border: 1px solid #7b79ff;
         background: #7b79ff;
       }
 
-      .c16:active {
+      .c15:active {
         border: 1px solid #4945ff;
         background: #4945ff;
       }
 
-      .c23 {
+      .c22 {
         background: #ffffff;
         padding: 24px;
         border-radius: 4px;
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
-      .c25 {
+      .c24 {
         background: #f0f0ff;
         padding: 12px;
         border-radius: 4px;
       }
 
-      .c29 {
+      .c30 {
         background: #fdf4dc;
         padding: 12px;
         border-radius: 4px;
       }
 
-      .c30 {
+      .c31 {
         background: #eaf5ff;
         padding: 12px;
         border-radius: 4px;
       }
 
-      .c31 {
+      .c32 {
         background: #f6ecfc;
         padding: 12px;
         border-radius: 4px;
       }
 
-      .c24 {
+      .c23 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -257,7 +257,7 @@ describe('Homepage', () => {
         margin-top: 20px;
       }
 
-      .c27 {
+      .c26 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -267,16 +267,16 @@ describe('Homepage', () => {
         flex-direction: column;
       }
 
-      .c27 > * {
+      .c26 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c27 > * + * {
+      .c26 > * + * {
         margin-top: 4px;
       }
 
-      .c35 {
+      .c36 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -286,55 +286,59 @@ describe('Homepage', () => {
         flex-direction: column;
       }
 
-      .c35 > * {
+      .c36 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c35 > * + * {
+      .c36 > * + * {
         margin-top: 12px;
       }
 
       .c11 {
+        color: #32324d;
         font-weight: 600;
         font-size: 2rem;
         line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c36 {
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
-        color: #32324d;
       }
 
       .c12 {
-        font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
         color: #666687;
-      }
-
-      .c28 {
-        font-weight: 500;
-        font-size: 0.75rem;
-        line-height: 1.33;
-        color: #32324d;
-      }
-
-      .c13 {
         font-size: 1rem;
         line-height: 1.5;
       }
 
-      .c26 {
+      .c27 {
+        font-weight: 500;
+        color: #32324d;
+        font-size: 0.75rem;
+        line-height: 1.33;
+      }
+
+      .c29 {
+        color: #666687;
+        font-size: 0.875rem;
+        line-height: 1.43;
+      }
+
+      .c37 {
+        color: #32324d;
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+      }
+
+      .c25 {
         margin-right: 24px;
       }
 
-      .c26 svg {
+      .c25 svg {
         width: 2rem;
         height: 2rem;
+      }
+
+      .c28 {
+        word-break: break-all;
       }
 
       .c1 {
@@ -360,7 +364,7 @@ describe('Homepage', () => {
         gap: 0px;
       }
 
-      .c21 {
+      .c20 {
         display: grid;
         grid-template-columns: repeat(12,1fr);
         gap: 24px;
@@ -370,7 +374,7 @@ describe('Homepage', () => {
         grid-column: span 8;
       }
 
-      .c32 {
+      .c33 {
         grid-column: span 4;
       }
 
@@ -674,11 +678,7 @@ describe('Homepage', () => {
         column-gap: 16px;
       }
 
-      .c37 {
-        word-break: break-word;
-      }
-
-      .c14 {
+      .c13 {
         word-break: break-word;
       }
 
@@ -689,7 +689,7 @@ describe('Homepage', () => {
         align-items: flex-start;
       }
 
-      .c22 {
+      .c21 {
         -webkit-text-decoration: none;
         text-decoration: none;
       }
@@ -717,13 +717,13 @@ describe('Homepage', () => {
       }
 
       @media (max-width:68.75rem) {
-        .c32 {
+        .c33 {
           grid-column: span 12;
         }
       }
 
       @media (max-width:34.375rem) {
-        .c32 {
+        .c33 {
           grid-column: span;
         }
       }
@@ -782,28 +782,27 @@ describe('Homepage', () => {
                         >
                           <h1
                             class="c11"
-                            id="main-content-title"
                           >
                             Welcome on board!
                           </h1>
                           <span
-                            class="c12 c13 c14"
+                            class="c12 c13"
                           >
                             Congrats! You are logged as the first administrator. To discover the powerful features provided by Strapi, we recommend you to create your first Content type!
                           </span>
                           <button
                             aria-disabled="false"
-                            class="c15 c16"
+                            class="c14 c15"
                             type="button"
                           >
                             <span
-                              class="c17 c18"
+                              class="c16 c17"
                             >
                               Create your first Content type
                             </span>
                             <div
                               aria-hidden="true"
-                              class="c19 c20"
+                              class="c18 c19"
                             >
                               <svg
                                 fill="none"
@@ -826,7 +825,7 @@ describe('Homepage', () => {
                 </div>
               </div>
               <div
-                class="c21"
+                class="c20"
               >
                 <div
                   class="c7"
@@ -838,16 +837,16 @@ describe('Homepage', () => {
                       class="c9"
                     >
                       <a
-                        class="c22"
+                        class="c21"
                         href="https://strapi.io/resource-center"
                         rel="noopener noreferrer nofollow"
                         target="_blank"
                       >
                         <div
-                          class="c23 c24"
+                          class="c22 c23"
                         >
                           <div
-                            class="c25 c24 c26"
+                            class="c24 c23 c25"
                           >
                             <svg
                               fill="none"
@@ -867,20 +866,19 @@ describe('Homepage', () => {
                             </svg>
                           </div>
                           <div
-                            class="c27"
+                            class="c26"
                           >
                             <div
-                              class="c24"
+                              class="c23"
                             >
                               <span
-                                class="c28"
-                                style="word-break: break-all;"
+                                class="c27 c28"
                               >
                                 Documentation
                               </span>
                             </div>
                             <span
-                              class="c12"
+                              class="c29"
                             >
                               Discover the essential concepts, guides and instructions.
                             </span>
@@ -888,16 +886,16 @@ describe('Homepage', () => {
                         </div>
                       </a>
                       <a
-                        class="c22"
+                        class="c21"
                         href="https://strapi.io/starters"
                         rel="noopener noreferrer nofollow"
                         target="_blank"
                       >
                         <div
-                          class="c23 c24"
+                          class="c22 c23"
                         >
                           <div
-                            class="c29 c24 c26"
+                            class="c30 c23 c25"
                           >
                             <svg
                               fill="none"
@@ -919,20 +917,19 @@ describe('Homepage', () => {
                             </svg>
                           </div>
                           <div
-                            class="c27"
+                            class="c26"
                           >
                             <div
-                              class="c24"
+                              class="c23"
                             >
                               <span
-                                class="c28"
-                                style="word-break: break-all;"
+                                class="c27 c28"
                               >
                                 Code example
                               </span>
                             </div>
                             <span
-                              class="c12"
+                              class="c29"
                             >
                               Learn by using ready-made starters for your projects.
                             </span>
@@ -940,16 +937,16 @@ describe('Homepage', () => {
                         </div>
                       </a>
                       <a
-                        class="c22"
+                        class="c21"
                         href="https://strapi.io/blog/categories/tutorials"
                         rel="noopener noreferrer nofollow"
                         target="_blank"
                       >
                         <div
-                          class="c23 c24"
+                          class="c22 c23"
                         >
                           <div
-                            class="c30 c24 c26"
+                            class="c31 c23 c25"
                           >
                             <svg
                               fill="none"
@@ -971,20 +968,19 @@ describe('Homepage', () => {
                             </svg>
                           </div>
                           <div
-                            class="c27"
+                            class="c26"
                           >
                             <div
-                              class="c24"
+                              class="c23"
                             >
                               <span
-                                class="c28"
-                                style="word-break: break-all;"
+                                class="c27 c28"
                               >
                                 Tutorials
                               </span>
                             </div>
                             <span
-                              class="c12"
+                              class="c29"
                             >
                               Follow step-by-step instructions to use and customize Strapi.
                             </span>
@@ -992,16 +988,16 @@ describe('Homepage', () => {
                         </div>
                       </a>
                       <a
-                        class="c22"
+                        class="c21"
                         href="https://strapi.io/blog"
                         rel="noopener noreferrer nofollow"
                         target="_blank"
                       >
                         <div
-                          class="c23 c24"
+                          class="c22 c23"
                         >
                           <div
-                            class="c31 c24 c26"
+                            class="c32 c23 c25"
                           >
                             <svg
                               fill="none"
@@ -1021,20 +1017,19 @@ describe('Homepage', () => {
                             </svg>
                           </div>
                           <div
-                            class="c27"
+                            class="c26"
                           >
                             <div
-                              class="c24"
+                              class="c23"
                             >
                               <span
-                                class="c28"
-                                style="word-break: break-all;"
+                                class="c27 c28"
                               >
                                 Blog
                               </span>
                             </div>
                             <span
-                              class="c12"
+                              class="c29"
                             >
                               Read the latest news about Strapi and the ecosystem.
                             </span>
@@ -1045,32 +1040,32 @@ describe('Homepage', () => {
                   </div>
                 </div>
                 <div
-                  class="c32"
+                  class="c33"
                 >
                   <div
                     class=""
                   >
                     <aside
                       aria-labelledby="join-the-community"
-                      class="c33"
+                      class="c34"
                     >
                       <div
-                        class="c34"
+                        class="c35"
                       >
                         <div
                           class="c9"
                         >
                           <div
-                            class="c35"
+                            class="c36"
                           >
                             <h2
-                              class="c36"
+                              class="c37"
                               id="join-the-community"
                             >
                               Join the community
                             </h2>
                             <span
-                              class="c12 c37"
+                              class="c29"
                             >
                               Discuss with team members, contributors and developers on different channels
                             </span>

@@ -5,22 +5,27 @@ import { ModalFooter } from '@strapi/design-system/ModalLayout';
 import { Textarea } from '@strapi/design-system/Textarea';
 import { useIntl } from 'react-intl';
 import { Button } from '@strapi/design-system/Button';
-import { Form } from '@strapi/helper-plugin';
+import { Form, useTracking } from '@strapi/helper-plugin';
 import { Formik } from 'formik';
 import getTrad from '../../../utils/getTrad';
 import { urlSchema } from '../../../utils/urlYupSchema';
 import { urlsToAssets } from '../../../utils/urlsToAssets';
 
-export const FromUrlForm = ({ onClose, onAddAsset }) => {
+export const FromUrlForm = ({ onClose, onAddAsset, trackedLocation }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(undefined);
   const { formatMessage } = useIntl();
+  const { trackUsage } = useTracking();
 
   const handleSubmit = async ({ urls }) => {
     setLoading(true);
     const urlArray = urls.split(/\r?\n/);
     try {
       const assets = await urlsToAssets(urlArray);
+
+      if (trackedLocation) {
+        trackUsage('didSelectFile', { source: 'url', location: trackedLocation });
+      }
 
       // no need to set the loading to false since the component unmounts
       onAddAsset(assets);
@@ -83,7 +88,12 @@ export const FromUrlForm = ({ onClose, onAddAsset }) => {
   );
 };
 
+FromUrlForm.defaultProps = {
+  trackedLocation: undefined,
+};
+
 FromUrlForm.propTypes = {
   onClose: PropTypes.func.isRequired,
   onAddAsset: PropTypes.func.isRequired,
+  trackedLocation: PropTypes.string,
 };

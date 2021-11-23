@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
 import { IconButton } from '@strapi/design-system/IconButton';
-import { Text } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import Drag from '@strapi/icons/Drag';
 import Pencil from '@strapi/icons/Pencil';
 import Trash from '@strapi/icons/Trash';
@@ -57,9 +57,9 @@ const FieldButton = ({ attribute, onEditField, onDeleteField, children }) => {
       <Box overflow="hidden" width="100%">
         <Flex paddingLeft={3} alignItems="baseline" justifyContent="space-between">
           <Box>
-            <Text textColor="neutral800" bold>
+            <Typography fontWeight="bold" textColor="neutral800">
               {children}
-            </Text>
+            </Typography>
           </Box>
           <Flex>
             <CustomIconButton

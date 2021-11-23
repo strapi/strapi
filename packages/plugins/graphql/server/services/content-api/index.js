@@ -5,6 +5,7 @@ const {
   makeExecutableSchema,
   addResolversToSchema,
 } = require('@graphql-tools/schema');
+const { pruneSchema } = require('@graphql-tools/utils');
 const { makeSchema } = require('nexus');
 const { prop, startsWith } = require('lodash/fp');
 
@@ -37,7 +38,7 @@ module.exports = ({ strapi }) => {
   let builders;
 
   const buildSchema = () => {
-    const isShadowCRUDEnabled = !!config('shadowCRUD', true);
+    const isShadowCRUDEnabled = !!config('shadowCRUD');
 
     // Create a new empty type registry
     registry = getGraphQLService('type-registry').new();
@@ -71,7 +72,11 @@ module.exports = ({ strapi }) => {
     // Wrap resolvers if needed (auth, middlewares, policies...) as configured in the extension
     const wrappedSchema = wrapResolvers({ schema, strapi, extension });
 
-    return wrappedSchema;
+    // Prune schema, remove unused types
+    // eg: removes registered subscriptions if they're disabled in the config)
+    const prunedSchema = pruneSchema(wrappedSchema);
+
+    return prunedSchema;
   };
 
   const buildSchemas = ({ registry }) => {

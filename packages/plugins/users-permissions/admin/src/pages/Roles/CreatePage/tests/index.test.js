@@ -580,17 +580,16 @@ describe('Admin | containers | RoleCreatePage', () => {
       }
 
       .c17 {
+        color: #32324d;
         font-weight: 500;
         font-size: 1rem;
         line-height: 1.25;
-        color: #32324d;
       }
 
       .c37 {
-        font-weight: 400;
+        color: #666687;
         font-size: 0.875rem;
         line-height: 1.43;
-        color: #666687;
       }
 
       .c32 {
@@ -739,14 +738,13 @@ describe('Admin | containers | RoleCreatePage', () => {
 
       .c39 {
         border: 1px solid #ffffff;
-        overflow: hidden;
       }
 
       .c39:hover:not([aria-disabled='true']) {
         border: 1px solid #4945ff;
       }
 
-      .c39:hover:not([aria-disabled='true']) .sc-cTwCuf {
+      .c39:hover:not([aria-disabled='true']) .sc-dmqUcu {
         color: #271fe0;
       }
 
@@ -847,6 +845,7 @@ describe('Admin | containers | RoleCreatePage', () => {
 
       .c43 {
         height: 5.5rem;
+        border-radius: 4px;
       }
 
       .c43:hover svg path {

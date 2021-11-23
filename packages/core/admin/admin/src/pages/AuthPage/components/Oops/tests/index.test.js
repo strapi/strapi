@@ -107,17 +107,16 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
       }
 
       .c17 {
+        color: #32324d;
         font-weight: 600;
         font-size: 2rem;
         line-height: 1.25;
-        color: #32324d;
       }
 
       .c18 {
-        font-weight: 400;
+        color: #32324d;
         font-size: 0.875rem;
         line-height: 1.43;
-        color: #32324d;
       }
 
       .c10 {
@@ -431,7 +430,6 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
                 >
                   <h1
                     class="c17"
-                    id="main-content-title"
                   >
                     Oops...
                   </h1>

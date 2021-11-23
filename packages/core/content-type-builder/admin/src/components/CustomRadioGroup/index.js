@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Text } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
 import { Stack } from '@strapi/design-system/Stack';
@@ -12,9 +12,9 @@ const CustomRadioGroup = ({ intlLabel, name, onChange, radios, value }) => {
 
   return (
     <Stack size={2}>
-      <Text textColor="neutral800" htmlFor={name} small bold as="label">
+      <Typography variant="pi" fontWeight="bold" textColor="neutral800" htmlFor={name} as="label">
         {formatMessage(intlLabel)}
-      </Text>
+      </Typography>
       <Wrapper horizontal size={4} style={{ alignItems: 'stretch' }}>
         {radios.map(radio => {
           return (
@@ -35,10 +35,10 @@ const CustomRadioGroup = ({ intlLabel, name, onChange, radios, value }) => {
                     <span className="checkmark" />
                   </Box>
                   <Stack size={2}>
-                    <Text bold>{formatMessage(radio.title)}</Text>
-                    <Text small textColor="neutral600">
+                    <Typography fontWeight="bold">{formatMessage(radio.title)}</Typography>
+                    <Typography variant="pi" textColor="neutral600">
                       {formatMessage(radio.description)}
-                    </Text>
+                    </Typography>
                   </Stack>
                 </Flex>
               </Box>

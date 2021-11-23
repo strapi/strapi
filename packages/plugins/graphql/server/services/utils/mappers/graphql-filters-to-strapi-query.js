@@ -1,6 +1,6 @@
 'use strict';
 
-const { has, propEq, isNil } = require('lodash/fp');
+const { has, propEq, isNil, isDate, isObject } = require('lodash/fp');
 
 // todo[v4]: Find a way to get that dynamically
 const virtualScalarAttributes = ['id'];
@@ -15,7 +15,9 @@ module.exports = ({ strapi }) => {
       return data.map(recursivelyReplaceScalarOperators);
     }
 
-    if (typeof data !== 'object') {
+    // Note: We need to make an exception for date since GraphQL
+    // automatically cast date strings to date instances in args
+    if (isDate(data) || !isObject(data)) {
       return data;
     }
 

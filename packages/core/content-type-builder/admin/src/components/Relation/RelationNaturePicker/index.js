@@ -12,7 +12,7 @@ import OneToMany from '@strapi/icons/OneToMany';
 import ManyToOne from '@strapi/icons/ManyToOne';
 import ManyToMany from '@strapi/icons/ManyToMany';
 import { Flex } from '@strapi/design-system/Flex';
-import { Text } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { KeyboardNavigable } from '@strapi/design-system/KeyboardNavigable';
 import { Stack } from '@strapi/design-system/Stack';
 import useDataManager from '../../../hooks/useDataManager';
@@ -108,11 +108,11 @@ const RelationNaturePicker = ({
         </Flex>
       </Wrapper>
       <InfosWrapper justifyContent="center">
-        <Text>{truncate(leftDisplayedValue, { length: 24 })}&nbsp;</Text>
-        <Text textColor="primary600">
+        <Typography>{truncate(leftDisplayedValue, { length: 24 })}&nbsp;</Typography>
+        <Typography textColor="primary600">
           {formatMessage({ id: getTrad(`relation.${relationType}`) })}&nbsp;
-        </Text>
-        <Text>{truncate(rightDisplayedValue, { length: 24 })}</Text>
+        </Typography>
+        <Typography>{truncate(rightDisplayedValue, { length: 24 })}</Typography>
       </InfosWrapper>
     </Flex>
   );

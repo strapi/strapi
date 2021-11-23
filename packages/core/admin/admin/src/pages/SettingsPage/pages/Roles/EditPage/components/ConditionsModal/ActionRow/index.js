@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import IS_DISABLED from 'ee_else_ce/pages/SettingsPage/pages/Roles/EditPage/components/ConditionsModal/ActionRow/utils/constants';
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
-import { TableLabel } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { MultiSelectNested } from '@strapi/design-system/Select';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
@@ -59,35 +59,26 @@ const ActionRow = ({
   return (
     <FlexWrapper as="li" background={isGrey ? 'neutral100' : 'neutral0'}>
       <Flex paddingLeft={6} style={{ width: 180 }}>
-        <TableLabel textColor="neutral600">
+        <Typography variant="sigma" textColor="neutral600">
           {formatMessage({
             id: 'Settings.permissions.conditions.can',
             defaultMessage: 'Can',
           })}
           &nbsp;
-        </TableLabel>
-        <TableLabel
-          title={label}
-          textColor="primary600"
-          // ! REMOVE THIS WHEN DS IS UPDATED WITH ELLIPSIS PROP
-          style={{
-            overflow: 'hidden',
-            whiteSpace: 'nowrap',
-            textOverflow: 'ellipsis',
-          }}
-        >
+        </Typography>
+        <Typography variant="sigma" title={label} textColor="primary600" ellipsis>
           {formatMessage({
             id: `Settings.roles.form.permissions.${label.toLowerCase()}`,
             defaultMessage: label,
           })}
-        </TableLabel>
-        <TableLabel textColor="neutral600">
+        </Typography>
+        <Typography variant="sigma" textColor="neutral600">
           &nbsp;
           {formatMessage({
             id: 'Settings.permissions.conditions.when',
             defaultMessage: 'When',
           })}
-        </TableLabel>
+        </Typography>
       </Flex>
       <Box style={{ maxWidth: 430, width: '100%' }}>
         <MultiSelectNested

@@ -12,7 +12,7 @@ import { Breadcrumbs, Crumb } from '@strapi/design-system/Breadcrumbs';
 import { Box } from '@strapi/design-system/Box';
 import { Button } from '@strapi/design-system/Button';
 import { Stack } from '@strapi/design-system/Stack';
-import { H2 } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 
 import { Formik } from 'formik';
 import { Form, GenericInput, useNotification, useOverlayBlocker } from '@strapi/helper-plugin';
@@ -67,6 +67,8 @@ const ModalForm = ({ queryName, onToggle }) => {
     try {
       await postMutation.mutateAsync(body);
     } catch (err) {
+      unlockApp();
+
       if (err?.response?.data.message === 'Email already taken') {
         setErrors({ email: err.response.data.message });
       }
@@ -113,12 +115,12 @@ const ModalForm = ({ queryName, onToggle }) => {
                 <Stack size={6}>
                   {currentStep !== 'create' && <MagicLink registrationToken={registrationToken} />}
                   <Box>
-                    <H2>
+                    <Typography variant="beta" as="h2">
                       {formatMessage({
                         id: 'app.components.Users.ModalCreateBody.block-title.details',
                         defaultMessage: 'Details',
                       })}
-                    </H2>
+                    </Typography>
                     <Box paddingTop={4}>
                       <Stack size={1}>
                         <Grid gap={5}>
@@ -142,12 +144,12 @@ const ModalForm = ({ queryName, onToggle }) => {
                     </Box>
                   </Box>
                   <Box>
-                    <H2>
+                    <Typography variant="beta" as="h2">
                       {formatMessage({
                         id: 'app.components.Users.ModalCreateBody.block-title.login',
                         defaultMessage: 'Login settings',
                       })}
-                    </H2>
+                    </Typography>
                     <Box paddingTop={4}>
                       <Grid gap={5}>
                         <GridItem col={6} xs={12}>

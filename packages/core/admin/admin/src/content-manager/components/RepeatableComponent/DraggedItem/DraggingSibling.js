@@ -5,7 +5,7 @@ import { Stack } from '@strapi/design-system/Stack';
 import { Flex } from '@strapi/design-system/Flex';
 import { TextButton } from '@strapi/design-system/TextButton';
 import { Icon } from '@strapi/design-system/Icon';
-import { Text } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import Trash from '@strapi/icons/Trash';
 import Drag from '@strapi/icons/Drag';
 import DropdownIcon from '@strapi/icons/CarretDown';
@@ -51,9 +51,9 @@ const DraggingSibling = ({ displayedValue }) => {
         </Flex>
 
         <ToggleButton onClick={() => {}} flex={1}>
-          <Text bold textColor="neutral700">
+          <Typography fontWeight="bold" textColor="neutral700">
             {displayedValue}
-          </Text>
+          </Typography>
         </ToggleButton>
       </Stack>
 

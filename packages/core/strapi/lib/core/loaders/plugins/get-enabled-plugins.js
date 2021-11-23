@@ -51,10 +51,10 @@ const getEnabledPlugins = async strapi => {
     const packageInfo = require(packagePath);
 
     validatePluginName(packageInfo.strapi.name);
-    internalPlugins[packageInfo.strapi.name] = toDetailedDeclaration({
-      enabled: true,
-      resolve: packagePath,
-    });
+    internalPlugins[packageInfo.strapi.name] = {
+      ...toDetailedDeclaration({ enabled: true, resolve: packagePath }),
+      info: packageInfo.strapi,
+    };
   }
 
   const installedPlugins = {};
@@ -64,10 +64,10 @@ const getEnabledPlugins = async strapi => {
 
     if (isStrapiPlugin(packageInfo)) {
       validatePluginName(packageInfo.strapi.name);
-      installedPlugins[packageInfo.strapi.name] = toDetailedDeclaration({
-        enabled: true,
-        resolve: packagePath,
-      });
+      installedPlugins[packageInfo.strapi.name] = {
+        ...toDetailedDeclaration({ enabled: true, resolve: packagePath }),
+        info: packageInfo.strapi,
+      };
     }
   }
 
@@ -79,7 +79,23 @@ const getEnabledPlugins = async strapi => {
 
   _.forEach(userPluginsConfig, (declaration, pluginName) => {
     validatePluginName(pluginName);
-    declaredPlugins[pluginName] = toDetailedDeclaration(declaration);
+
+    declaredPlugins[pluginName] = {
+      ...toDetailedDeclaration(declaration),
+      info: {},
+    };
+
+    const { pathToPlugin } = declaredPlugins[pluginName];
+
+    // for manually resolved plugins
+    if (pathToPlugin) {
+      const packagePath = join(pathToPlugin, 'package.json');
+      const packageInfo = require(packagePath);
+
+      if (isStrapiPlugin(packageInfo)) {
+        declaredPlugins[pluginName].info = packageInfo.strapi || {};
+      }
+    }
   });
 
   const declaredPluginsResolves = map(prop('pathToPlugin'), declaredPlugins);

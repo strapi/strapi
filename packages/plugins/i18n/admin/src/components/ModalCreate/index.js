@@ -9,7 +9,7 @@ import {
 } from '@strapi/design-system/ModalLayout';
 import { TabGroup, Tabs, Tab, TabPanels, TabPanel } from '@strapi/design-system/Tabs';
 import { Button } from '@strapi/design-system/Button';
-import { ButtonText, H2 } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { Divider } from '@strapi/design-system/Divider';
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
@@ -58,9 +58,12 @@ const ModalCreate = ({ onClose }) => {
       >
         <Form>
           <ModalHeader>
-            <ButtonText textColor="neutral800" as="h2" id="add-locale-title">
-              {formatMessage({ id: getTrad('Settings.list.actions.add') })}
-            </ButtonText>
+            <Typography fontWeight="bold" textColor="neutral800" as="h2" id="add-locale-title">
+              {formatMessage({
+                id: getTrad('Settings.list.actions.add'),
+                defaultMessage: 'Add a locale',
+              })}
+            </Typography>
           </ModalHeader>
           <ModalBody>
             <TabGroup
@@ -72,12 +75,12 @@ const ModalCreate = ({ onClose }) => {
               variant="simple"
             >
               <Flex justifyContent="space-between">
-                <H2>
+                <Typography as="h2" variant="beta">
                   {formatMessage({
                     id: getTrad('Settings.locales.modal.title'),
                     defaultMessage: 'Configurations',
                   })}
-                </H2>
+                </Typography>
                 <Tabs>
                   <Tab>
                     {formatMessage({

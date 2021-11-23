@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import CodeMirror from 'codemirror';
 import 'codemirror/addon/display/placeholder';
 import PreviewWysiwyg from '../PreviewWysiwyg';
-import EditorWrapper from './EditorWrapper';
+import { EditorStylesContainer } from './EditorStylesContainer';
 import { EditorAndPreviewWrapper } from './WysiwygStyles';
 import newlineAndIndentContinueMarkdownList from './utils/continueList';
 
@@ -25,17 +25,20 @@ const Editor = ({
       lineWrapping: true,
       extraKeys: {
         Enter: 'newlineAndIndentContinueMarkdownList',
-        Tab: false,
-        'Shift-Tab': false,
+        // Leaving this commented for now
+        // Tab: false,
+        // 'Shift-Tab': false,
       },
       readOnly: false,
+      smartIndent: false,
+      placeholder,
     });
 
     CodeMirror.commands.newlineAndIndentContinueMarkdownList = newlineAndIndentContinueMarkdownList;
     editorRef.current.on('change', doc => {
       onChangeRef.current({ target: { name, value: doc.getValue(), type: 'wysiwyg' } });
     });
-  }, [editorRef, textareaRef, name]);
+  }, [editorRef, textareaRef, name, placeholder]);
 
   useEffect(() => {
     if (value && !editorRef.current.state.focused) {
@@ -62,9 +65,9 @@ const Editor = ({
 
   return (
     <EditorAndPreviewWrapper>
-      <EditorWrapper disabled={disabled || isPreviewMode}>
-        <textarea ref={textareaRef} placeholder={placeholder} />
-      </EditorWrapper>
+      <EditorStylesContainer disabled={disabled || isPreviewMode}>
+        <textarea ref={textareaRef} />
+      </EditorStylesContainer>
       {isPreviewMode && <PreviewWysiwyg data={value} />}
     </EditorAndPreviewWrapper>
   );

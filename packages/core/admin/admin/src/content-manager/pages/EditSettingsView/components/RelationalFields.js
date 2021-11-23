@@ -4,7 +4,7 @@ import get from 'lodash/get';
 import { useIntl } from 'react-intl';
 import { Button } from '@strapi/design-system/Button';
 import { Box } from '@strapi/design-system/Box';
-import { ButtonText } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { Stack } from '@strapi/design-system/Stack';
 import { SimpleMenu, MenuItem } from '@strapi/design-system/SimpleMenu';
 import Plus from '@strapi/icons/Plus';
@@ -25,21 +25,21 @@ const RelationalFields = ({
     <Stack size={4}>
       <div>
         <Box>
-          <ButtonText>
+          <Typography fontWeight="bold">
             {formatMessage({
               id: getTrad('containers.SettingPage.relations'),
               defaultMessage: 'Relational fields',
             })}
-          </ButtonText>
+          </Typography>
         </Box>
         {/* Since the drag n drop will not be available, this text will be hidden for the moment */}
         {/* <Box>
-          <Text small textColor="neutral600">
+          <Typography variant="pi" textColor="neutral600">
             {formatMessage({
               id: 'containers.SettingPage.editSettings.description',
               defaultMessage: 'Drag & drop the fields to build the layout',
             })}
-          </Text>
+          </Typography>
         </Box> */}
       </div>
       <Box padding={4} hasRadius borderStyle="dashed" borderWidth="1px" borderColor="neutral300">

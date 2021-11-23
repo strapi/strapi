@@ -5,7 +5,6 @@ import {
   LoadingIndicatorPage,
   useFocusWhenNavigate,
   NoPermissions,
-  NoMedia,
   AnErrorOccurred,
   SearchURLQuery,
   useSelectionState,
@@ -27,6 +26,7 @@ import { Filters } from './components/Filters';
 import { PaginationFooter } from '../../components/PaginationFooter';
 import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
 import { BulkDeleteButton } from './components/BulkDeleteButton';
+import { EmptyAssets } from '../../components/EmptyAssets';
 
 const BoxWithHeight = styled(Box)`
   height: ${32 / 16}rem;
@@ -115,6 +115,11 @@ export const MediaLibrary = () => {
                       id: getTrad('bulk.select.label'),
                       defaultMessage: 'Select all assets',
                     })}
+                    indeterminate={
+                      assets?.length > 0 &&
+                      selected.length > 0 &&
+                      selected.length !== assets?.length
+                    }
                     value={assets?.length > 0 && selected.length === assets?.length}
                     onChange={() => selectAll(assets)}
                   />
@@ -143,7 +148,7 @@ export const MediaLibrary = () => {
           {error && <AnErrorOccurred />}
           {!canRead && <NoPermissions />}
           {canRead && assets && assets.length === 0 && (
-            <NoMedia
+            <EmptyAssets
               action={
                 canCreate && !isFiltering ? (
                   <Button
@@ -193,7 +198,9 @@ export const MediaLibrary = () => {
         </ContentLayout>
       </Main>
 
-      {showUploadAssetDialog && <UploadAssetDialog onClose={toggleUploadAssetDialog} />}
+      {showUploadAssetDialog && (
+        <UploadAssetDialog onClose={toggleUploadAssetDialog} trackedLocation="upload" />
+      )}
       {assetToEdit && (
         <EditAssetDialog
           onClose={() => setAssetToEdit(undefined)}
@@ -201,6 +208,7 @@ export const MediaLibrary = () => {
           canUpdate={canUpdate}
           canCopyLink={canCopyLink}
           canDownload={canDownload}
+          trackedLocation="upload"
         />
       )}
     </Layout>

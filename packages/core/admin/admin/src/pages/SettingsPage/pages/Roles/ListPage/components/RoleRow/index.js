@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
 import { Td, Tr } from '@strapi/design-system/Table';
-import { Text, EllipsisText } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { IconButton } from '@strapi/design-system/IconButton';
 import { stopPropagation, onRowClick, pxToRem } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
@@ -27,13 +27,17 @@ const RoleRow = ({ id, name, description, usersCount, icons }) => {
       })}
     >
       <Td maxWidth={pxToRem(130)}>
-        <EllipsisText textColor="neutral800">{name}</EllipsisText>
+        <Typography ellipsis textColor="neutral800">
+          {name}
+        </Typography>
       </Td>
       <Td maxWidth={pxToRem(250)}>
-        <EllipsisText textColor="neutral800">{description}</EllipsisText>
+        <Typography ellipsis textColor="neutral800">
+          {description}
+        </Typography>
       </Td>
       <Td>
-        <Text textColor="neutral800">{usersCountText}</Text>
+        <Typography textColor="neutral800">{usersCountText}</Typography>
       </Td>
       <Td>
         <Flex justifyContent="flex-end" {...stopPropagation}>
