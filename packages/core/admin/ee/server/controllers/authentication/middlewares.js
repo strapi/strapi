@@ -27,7 +27,7 @@ const authenticate = async (ctx, next) => {
       return ctx.redirect(redirectUrls.error);
     }
 
-    const user = await getService('user').findOne({ email: profile.email });
+    const user = await getService('user').findOneByEmail(profile.email);
     const scenario = user ? existingUserScenario : nonExistingUserScenario;
 
     return scenario(ctx, next)(user || profile, provider);

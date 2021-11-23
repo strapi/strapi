@@ -180,6 +180,19 @@ const findOne = async (id, populate = ['roles']) => {
   return strapi.entityService.findOne('admin::user', id, { populate });
 };
 
+/**
+ * Find one user by its email
+ * @param {string} id  email
+ * @param {string || string[] || object} populate
+ * @returns
+ */
+const findOneByEmail = async (email, populate = []) => {
+  return strapi.query('admin::user').findOne({
+    where: { email },
+    populate,
+  });
+};
+
 /** Find many users (paginated)
  * @param query
  * @returns {Promise<user>}
@@ -309,6 +322,7 @@ module.exports = {
   register,
   sanitizeUser,
   findOne,
+  findOneByEmail,
   findPage,
   deleteById,
   deleteByIds,
