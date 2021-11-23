@@ -610,6 +610,10 @@ describe('Wysiwyg render and actions buttons', () => {
         cursor: not-allowed !important;
       }
 
+      .c32 .CodeMirror-placeholder {
+        color: #666687 !important;
+      }
+
       .c32 .CodeMirror {
         font-size: 0.875rem;
         height: 290px;
@@ -1237,7 +1241,6 @@ describe('Wysiwyg render and actions buttons', () => {
               disabled=""
             >
               <textarea
-                placeholder=""
                 style="display: none;"
               />
               <div
