@@ -34,7 +34,7 @@ async function getTemplatePackageInfo(template) {
   try {
     return getPackageInfo(template);
   } catch (error) {
-    throw new Error(`Could not find package ${chalk.green(template)} on npm`);
+    throw new Error(`Could not find package ${chalk.yellow(template)} on npm`);
   }
 }
 

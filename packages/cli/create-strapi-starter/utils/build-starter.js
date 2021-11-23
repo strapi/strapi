@@ -85,26 +85,16 @@ async function installWithLogs(path) {
   console.log(`Dependencies installed ${chalk.green('successfully')}.`);
 }
 
-/**
- * @param  {Object} projectArgs - The arguments for create a project
- * @param {string|null} projectArgs.projectName - The name/path of project
- * @param {string|null} projectArgs.starter - The npm package of the starter
- * @param  {Object} program - Commands for generating new application
- */
-module.exports = async function buildStarter({ projectName, starter }, program) {
+async function getStarterInfo(starter) {
+  const isLocalStarter = ['./', '../', '/'].some(filePrefix => starter.startsWith(filePrefix));
   let starterPath;
   let starterParentPath;
   let starterPackageInfo = {};
-  const isLocalStarter = ['./', '../', '/'].some(filePrefix => starter.startsWith(filePrefix));
-
-  // Project directory
-  const rootPath = resolve(projectName);
-  const projectBasename = basename(rootPath);
 
   if (isLocalStarter) {
     // Starter is a local directory
     console.log('Installing local starter.');
-    starterPath = resolve(rootPath, '..', starter);
+    starterPath = resolve(starter);
   } else {
     // Starter should be an npm package. Fetch starter info
     starterPackageInfo = await getStarterPackageInfo(starter);
@@ -115,6 +105,21 @@ module.exports = async function buildStarter({ projectName, starter }, program) 
     starterPath = await downloadNpmStarter(starterPackageInfo, starterParentPath);
   }
 
+  return { isLocalStarter, starterPath, starterParentPath, starterPackageInfo };
+}
+
+/**
+ * @param  {Object} projectArgs - The arguments for create a project
+ * @param {string|null} projectArgs.projectName - The name/path of project
+ * @param {string|null} projectArgs.starter - The npm package of the starter
+ * @param  {Object} program - Commands for generating new application
+ */
+module.exports = async function buildStarter({ projectName, starter }, program) {
+  const { isLocalStarter, starterPath, starterParentPath, starterPackageInfo } = getStarterInfo();
+
+  // Project directory
+  const rootPath = resolve(projectName);
+  const projectBasename = basename(rootPath);
   const starterJson = readStarterJson(join(starterPath, 'starter.json'), starter);
 
   try {
@@ -152,8 +157,8 @@ module.exports = async function buildStarter({ projectName, starter }, program) 
   await generateNewApp(join(rootPath, 'backend'), generateStrapiAppOptions);
 
   // Install frontend dependencies
-  console.log(`Creating Strapi starter frontend at ${chalk.green(frontendPath)}.`);
-  console.log(`Installing ${chalk.yellow(starterPackageInfo.name)} starter`);
+  console.log(`Creating Strapi starter frontend at ${chalk.yellow(frontendPath)}.`);
+  console.log('Installing frontend dependencies');
   await installWithLogs(frontendPath);
 
   // Setup monorepo
