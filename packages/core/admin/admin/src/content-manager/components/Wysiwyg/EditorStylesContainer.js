@@ -12,6 +12,8 @@ export const EditorStylesContainer = styled.div`
     height: 290px;
     color: ${({ theme }) => theme.colors.neutral800};
     direction: ltr;
+    font-family: --apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell,
+      'Open Sans', 'Helvetica Neue', sans-serif;
   }
 
   /* PADDING */
@@ -331,8 +333,6 @@ export const EditorStylesContainer = styled.div`
   }
 
   span {
-    font-family: --apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell,
-      'Open Sans', 'Helvetica Neue', sans-serif;
     color: ${({ theme }) => theme.colors.neutral800} !important;
   }
 `;
