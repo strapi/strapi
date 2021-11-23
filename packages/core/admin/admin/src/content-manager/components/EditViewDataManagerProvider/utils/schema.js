@@ -300,7 +300,7 @@ const createYupSchemaAttribute = (type, validations, options) => {
                       return !isEmpty(value);
                     }
 
-                    return !isEmpty(value.toString());
+                    return !isEmpty(value?.toString());
                   }
 
                   return !isEmpty(value);
