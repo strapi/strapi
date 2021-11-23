@@ -97,7 +97,11 @@ function SelectMany({
           })}
         </Stack>
       </Box>
-      {description && <Typography>{description}</Typography>}
+      {description && (
+        <Typography variant="pi" textColor="neutral600">
+          {description}
+        </Typography>
+      )}
     </Stack>
   );
 }
