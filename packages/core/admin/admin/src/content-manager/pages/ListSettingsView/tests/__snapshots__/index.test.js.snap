@@ -362,7 +362,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
 
 .c55 {
   color: #32324d;
-  display: block;
+  display: inline-block;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -2161,7 +2161,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
 
 .c55 {
   color: #32324d;
-  display: block;
+  display: inline-block;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

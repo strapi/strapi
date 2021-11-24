@@ -682,7 +682,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
 .c64 {
   font-weight: 600;
   color: #32324d;
-  display: block;
+  display: inline-block;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

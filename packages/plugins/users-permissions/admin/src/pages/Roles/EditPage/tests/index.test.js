@@ -816,7 +816,7 @@ describe('Admin | containers | RoleEditPage', () => {
         border: 1px solid #4945ff;
       }
 
-      .c44:hover:not([aria-disabled='true']) .sc-hKiyAV {
+      .c44:hover:not([aria-disabled='true']) .sc-heejUR {
         color: #271fe0;
       }
 

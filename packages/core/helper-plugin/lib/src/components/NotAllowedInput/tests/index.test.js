@@ -76,7 +76,6 @@ describe('<NotAllowedInput />', () => {
         border-radius: 4px;
         padding-left: 0;
         padding-right: 16px;
-        cursor: not-allowed;
         color: #32324d;
         font-weight: 400;
         font-size: 0.875rem;

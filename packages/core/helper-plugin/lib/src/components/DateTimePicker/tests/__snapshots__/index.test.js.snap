@@ -176,7 +176,7 @@ exports[`DateTimePicker snapshots the component 1`] = `
 
 .c21 {
   color: #32324d;
-  display: block;
+  display: inline-block;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -386,7 +386,6 @@ exports[`DateTimePicker snapshots the component 1`] = `
                   class="c9"
                 >
                   <button
-                    aria-disabled="false"
                     aria-label="Date picker, current is 10/13/2021"
                     class="c10"
                     type="button"

@@ -78,7 +78,7 @@ describe('<PageSizeURLQuery />', () => {
 
       .c8 {
         color: #32324d;
-        display: block;
+        display: inline-block;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
