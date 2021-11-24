@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useReducer } from 'react';
+import React, { useReducer } from 'react';
 import { Accordion, AccordionToggle, AccordionContent } from '@strapi/design-system/Accordion';
 import { useIntl } from 'react-intl';
 import { Box } from '@strapi/design-system/Box';
@@ -15,12 +15,11 @@ const Permissions = () => {
     init(state, modifiedData)
   );
 
-  const handleToggle = useCallback(index => {
+  const handleToggle = index =>
     dispatch({
       type: 'TOGGLE_COLLAPSE',
       index,
     });
-  }, []);
 
   return (
     <>
@@ -52,4 +51,4 @@ const Permissions = () => {
   );
 };
 
-export default memo(Permissions);
+export default Permissions;

@@ -1,4 +1,4 @@
-import React, { memo, useReducer, useCallback, forwardRef, useImperativeHandle } from 'react';
+import React, { memo, useReducer, forwardRef, useImperativeHandle } from 'react';
 import PropTypes from 'prop-types';
 import { Typography } from '@strapi/design-system/Typography';
 import { Stack } from '@strapi/design-system/Stack';
@@ -31,28 +31,25 @@ const UsersPermissions = forwardRef(({ permissions, routes }, ref) => {
     },
   }));
 
-  const handleChange = useCallback(({ target: { name, value } }) => {
+  const handleChange = ({ target: { name, value } }) =>
     dispatch({
       type: 'ON_CHANGE',
       keys: name.split('.'),
       value: value === 'empty__string_value' ? '' : value,
     });
-  }, []);
 
-  const handleChangeSelectAll = useCallback(({ target: { name, value } }) => {
+  const handleChangeSelectAll = ({ target: { name, value } }) =>
     dispatch({
       type: 'ON_CHANGE_SELECT_ALL',
       keys: name.split('.'),
       value,
     });
-  }, []);
 
-  const handleSelectedAction = useCallback(actionToSelect => {
+  const handleSelectedAction = actionToSelect =>
     dispatch({
       type: 'SELECT_ACTION',
       actionToSelect,
     });
-  }, []);
 
   const providerValue = {
     ...state,
