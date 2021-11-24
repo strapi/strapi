@@ -3,7 +3,7 @@
 module.exports = {
   index(ctx) {
     ctx.body = strapi
-      .plugin('{{ id }}')
+      .plugin('{{ pluginName }}')
       .service('myService')
       .getWelcomeMessage();
   },
