@@ -92,6 +92,10 @@ module.exports = async inquirer => {
 
   if (addAttributes) {
     await createNewAttributes(inquirer);
+  } else {
+    console.warn(
+      `You won't be able to manage entries from the admin, you can still add attributes later from the content type builder.`
+    );
   }
 
   return attributes;
