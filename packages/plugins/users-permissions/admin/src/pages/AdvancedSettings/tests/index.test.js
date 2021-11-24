@@ -238,7 +238,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
 
       .c27 {
         color: #32324d;
-        display: block;
+        display: inline-block;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -468,49 +468,6 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
       }
 
       .c54:focus {
-        outline: none;
-        box-shadow: none;
-      }
-
-      .c57 {
-        border: none;
-        border-radius: 4px;
-        padding-left: 16px;
-        padding-right: 16px;
-        cursor: not-allowed;
-        color: #32324d;
-        font-weight: 400;
-        font-size: 0.875rem;
-        display: block;
-        width: 100%;
-      }
-
-      .c57::-webkit-input-placeholder {
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c57::-moz-placeholder {
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c57:-ms-input-placeholder {
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c57::placeholder {
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c57[aria-disabled='true'] {
-        background: inherit;
-        color: inherit;
-      }
-
-      .c57:focus {
         outline: none;
         box-shadow: none;
       }
@@ -1280,7 +1237,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                                 aria-describedby="email_confirmation_redirection-hint"
                                 aria-disabled="true"
                                 aria-invalid="false"
-                                class="c57"
+                                class="c54"
                                 id="email_confirmation_redirection"
                                 name="email_confirmation_redirection"
                                 placeholder="ex: https://youtfrontend.com/reset-password"

@@ -106,7 +106,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   background: #ffffff;
 }
 
-.c43 .sc-fTACoA {
+.c43 .sc-cuWdqJ {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -178,7 +178,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   background: #f0f0ff;
 }
 
-.c46 .sc-fTACoA {
+.c46 .sc-cuWdqJ {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -260,7 +260,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   background: #4945ff;
 }
 
-.c47 .sc-fTACoA {
+.c47 .sc-cuWdqJ {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;

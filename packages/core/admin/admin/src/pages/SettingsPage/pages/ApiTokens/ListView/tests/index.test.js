@@ -324,7 +324,7 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
 
       .c32 {
         color: #32324d;
-        display: block;
+        display: inline-block;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;

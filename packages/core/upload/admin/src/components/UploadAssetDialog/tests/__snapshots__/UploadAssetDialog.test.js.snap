@@ -370,7 +370,7 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
   background: #4945ff;
 }
 
-.c32 .sc-eUWgZB {
+.c32 .sc-iitrMj {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -435,7 +435,7 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
   background: #ffffff;
 }
 
-.c38 .sc-eUWgZB {
+.c38 .sc-iitrMj {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -1286,7 +1286,7 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   background: #4945ff;
 }
 
-.c33 .sc-eUWgZB {
+.c33 .sc-iitrMj {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -1351,7 +1351,7 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   background: #ffffff;
 }
 
-.c30 .sc-eUWgZB {
+.c30 .sc-iitrMj {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
