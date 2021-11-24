@@ -13,6 +13,7 @@ const {
   prop,
   uniq,
   intersection,
+  pick,
 } = require('lodash/fp');
 
 const { contentTypes, traverseEntity, sanitize, pipeAsync } = require('@strapi/utils');
@@ -45,8 +46,8 @@ module.exports = ({ action, ability, model }) => {
     const permittedFields = fields.shouldIncludeAll ? null : getOutputFields(fields.permitted);
 
     return pipeAsync(
-      // Remove roles from createdBy & updateBy fields
-      omitCreatorRoles,
+      // Remove unallowed fields from admin::user relations
+      traverseEntity(pickAllowedAdminUserFields, { schema }),
       // Remove not allowed fields (RBAC)
       traverseEntity(allowedFields(permittedFields), { schema }),
       // Remove all fields of type 'password'
@@ -105,6 +106,12 @@ module.exports = ({ action, ability, model }) => {
   };
 
   const omitCreatorRoles = omit([`${CREATED_BY_ATTRIBUTE}.roles`, `${UPDATED_BY_ATTRIBUTE}.roles`]);
+
+  const pickAllowedAdminUserFields = ({ attribute, key, value }, { set }) => {
+    if (attribute.type === 'relation' && attribute.target === 'admin::user') {
+      set(key, pick(['id', 'firstname', 'lastname', 'username'], value));
+    }
+  };
 
   const getInputFields = (fields = []) => {
     const nonVisibleAttributes = getNonVisibleAttributes(schema);
