@@ -150,12 +150,6 @@ module.exports = context => {
     const type = attribute.multiple
       ? naming.getRelationResponseCollectionName(fileContentType)
       : naming.getEntityResponseName(fileContentType);
-    const resolverPath = `${naming.getTypeName(contentType)}.${attributeName}`;
-    const resolverAuthScope = `${fileUID}.find`;
-
-    extension.use({
-      resolversConfig: { [resolverPath]: { auth: { scope: [resolverAuthScope] } } },
-    });
 
     builder.field(attributeName, { type, resolve, args });
   };
