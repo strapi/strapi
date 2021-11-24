@@ -70,7 +70,7 @@
       }
     },
     "stars": {
-      "required": false,
+      "required": true,
       "type": "integer",
       "min": 0,
       "max": 3,
