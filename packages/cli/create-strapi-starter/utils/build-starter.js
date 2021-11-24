@@ -33,7 +33,7 @@ function readStarterJson(filePath, starter) {
  * @param {Object} options
  * @param {boolean} options.useYarn - Use yarn instead of npm
  */
-async function initPackageJson(rootPath, projectName, { useYarn } ) {
+async function initPackageJson(rootPath, projectName, { useYarn } = {}) {
   const packageManager = useYarn ? 'yarn --cwd' : 'npm run --prefix';
 
   try {
@@ -93,7 +93,7 @@ async function installWithLogs(path, options) {
  * @param {Object} options
  * @param {boolean} options.useYarn Use yarn instead of npm
  */
-async function getStarterInfo(starter, { useYarn }) {
+async function getStarterInfo(starter, { useYarn } = {}) {
   const isLocalStarter = ['./', '../', '/'].some(filePrefix => starter.startsWith(filePrefix));
 
   let starterPath;

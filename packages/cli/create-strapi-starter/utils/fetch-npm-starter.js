@@ -12,7 +12,7 @@ const stopProcess = require('./stop-process');
  * @param {boolean} options.useYarn Yarn instead of npm
  * @returns {Object}
  */
-async function getPackageInfo(packageName, { useYarn }) {
+async function getPackageInfo(packageName, { useYarn } = {}) {
   // Use yarn if possible because it's faster
   if (useYarn) {
     const { stdout } = await execa.command(`yarn info ${packageName} --json`);

@@ -9,7 +9,7 @@ const logger = require('./logger');
  * @param {Object} options
  * @param {boolean} options.useYarn Use yarn instead of npm
  */
-function runInstall(path, { useYarn }) {
+function runInstall(path, { useYarn } = {}) {
   return execa(useYarn ? 'yarn' : 'npm', ['install'], {
     cwd: path,
     stdin: 'ignore',
@@ -21,7 +21,7 @@ function runInstall(path, { useYarn }) {
  * @param {Object} options
  * @param {boolean} options.useYarn
  */
-function runApp(rootPath, { useYarn }) {
+function runApp(rootPath, { useYarn } = {}) {
   if (useYarn) {
     return execa('yarn', ['develop'], {
       stdio: 'inherit',
