@@ -33,10 +33,11 @@ async function getPackageInfo(packageName, { useYarn } = {}) {
 /**
  * Get the version and full package name of the starter
  * @param {string} starter - The name of the starter as provided by the user
- * @param {boolean} useYarn - Use yarn instead of npm
+ * @param {Object} options
+ * @param {boolean} options.useYarn - Use yarn instead of npm
  * @returns {Object} - Full name and version of the starter package on npm
  */
-async function getStarterPackageInfo(starter, useYarn) {
+async function getStarterPackageInfo(starter, { useYarn } = {}) {
   // Check if starter is a shorthand
   try {
     const longhand = `@strapi/starter-${starter}`;
@@ -60,9 +61,10 @@ async function getStarterPackageInfo(starter, useYarn) {
  * @param {string} packageInfo.name
  * @param {string} packageInfo.version
  * @param {string} parentDir - Path inside of which we install the starter
- * @param {boolean} useYarn - Use yarn instead of npm
+ * @param {Object} options
+ * @param {boolean} options.useYarn - Use yarn instead of npm
  */
-async function downloadNpmStarter({ name, version }, parentDir, useYarn) {
+async function downloadNpmStarter({ name, version }, parentDir, { useYarn } = {}) {
   // Download from npm, using yarn if possible
   if (useYarn) {
     await execa.command(`yarn add ${name}@${version} --no-lockfile --silent`, {

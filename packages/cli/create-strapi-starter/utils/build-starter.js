@@ -106,12 +106,12 @@ async function getStarterInfo(starter, { useYarn } = {}) {
     starterPath = resolve(starter);
   } else {
     // Starter should be an npm package. Fetch starter info
-    starterPackageInfo = await getStarterPackageInfo(starter, useYarn);
+    starterPackageInfo = await getStarterPackageInfo(starter, { useYarn });
     console.log(`Installing ${chalk.yellow(starterPackageInfo.name)} starter.`);
 
     // Download starter repository to a temporary directory
     starterParentPath = await fse.mkdtemp(join(os.tmpdir(), 'strapi-'));
-    starterPath = await downloadNpmStarter(starterPackageInfo, starterParentPath, useYarn);
+    starterPath = await downloadNpmStarter(starterPackageInfo, starterParentPath, { useYarn });
   }
 
   return { isLocalStarter, starterPath, starterParentPath, starterPackageInfo };
