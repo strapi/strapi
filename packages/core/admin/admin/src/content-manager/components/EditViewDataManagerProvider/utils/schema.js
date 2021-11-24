@@ -103,7 +103,7 @@ const createYupSchema = (
           let componentSchema = yup.lazy(value => {
             let baseSchema = yup.array().of(componentFieldSchema);
 
-            if (min && !options.isDraft) {
+            if (min) {
               if (required) {
                 baseSchema = baseSchema.min(min, errorsTrads.min);
               } else if (required !== true && isEmpty(value)) {
@@ -152,7 +152,7 @@ const createYupSchema = (
 
         const { max, min } = attribute;
 
-        if (attribute.required && !options.isDraft) {
+        if (attribute.required) {
           dynamicZoneSchema = dynamicZoneSchema.test('required', errorsTrads.required, value => {
             if (options.isCreatingEntry) {
               return value !== null || value !== undefined;
