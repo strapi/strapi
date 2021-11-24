@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Button } from '@strapi/design-system/Button';
@@ -14,7 +14,7 @@ import LinkToCTB from './LinkToCTB';
 
 const DisplayedFields = ({ editLayout, editLayoutRemainingFields, onRemoveField, onAddField }) => {
   const { formatMessage } = useIntl();
-  
+
   return (
     <Stack size={4}>
       <Flex justifyContent="space-between">
@@ -42,11 +42,7 @@ const DisplayedFields = ({ editLayout, editLayoutRemainingFields, onRemoveField,
         <Stack size={2}>
           {editLayout.map((row, index) => (
             <React.Fragment key={row.rowId}>
-              <RowsLayout
-                row={row}
-                rowIndex={index}
-                onRemoveField={onRemoveField}
-              />
+              <RowsLayout row={row} rowIndex={index} onRemoveField={onRemoveField} />
             </React.Fragment>
           ))}
           <SimpleMenu

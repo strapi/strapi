@@ -1,5 +1,6 @@
 import React, { memo, useMemo } from 'react';
 import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
 import get from 'lodash/get';
 import omit from 'lodash/omit';
 import take from 'lodash/take';
@@ -36,6 +37,7 @@ function Inputs({
   value,
 }) {
   const { fields } = useLibrary();
+  const { formatMessage } = useIntl();
   const { contentType: currentContentTypeLayout } = useContentTypeLayout();
 
   const disabled = useMemo(() => !get(metadatas, 'editable', true), [metadatas]);
@@ -187,10 +189,14 @@ function Inputs({
       <SelectWrapper
         {...metadatas}
         {...fieldSchema}
-        description={{
-          id: metadatas.description,
-          defaultMessage: metadatas.description,
-        }}
+        description={
+          metadatas.description
+            ? formatMessage({
+                id: metadatas.description,
+                defaultMessage: metadatas.description,
+              })
+            : undefined
+        }
         intlLabel={{
           id: metadatas.label,
           defaultMessage: metadatas.label,

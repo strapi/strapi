@@ -5,7 +5,7 @@ import RowItemsLayout from './RowItemsLayout';
 
 const RowsLayout = ({ row, onRemoveField, rowIndex }) => {
   return (
-    <Grid gap={4}>
+    <Grid>
       {row.rowContent.map((rowItem, index) => {
         return (
           <RowItemsLayout
@@ -15,6 +15,7 @@ const RowsLayout = ({ row, onRemoveField, rowIndex }) => {
             rowId={row.rowId}
             onRemoveField={onRemoveField}
             rowIndex={rowIndex}
+            lastIndex={row.rowContent.length - 1}
           />
         );
       })}

@@ -4,7 +4,7 @@ import get from 'lodash/get';
 import { useLayoutDnd } from '../../../hooks';
 import DisplayedFieldButton from './DisplayedFieldButton';
 
-const RowItemsLayout = ({ rowItem, onRemoveField, rowId, rowIndex, index }) => {
+const RowItemsLayout = ({ rowItem, onRemoveField, rowId, rowIndex, index, lastIndex }) => {
   const { setEditFieldToSelect, attributes, modifiedData, moveRow, moveItem } = useLayoutDnd();
   const attribute = get(attributes, [rowItem.name], {});
   const attributeLabel = get(modifiedData, ['metadatas', rowItem.name, 'edit', 'label'], '');
@@ -15,6 +15,7 @@ const RowItemsLayout = ({ rowItem, onRemoveField, rowId, rowIndex, index }) => {
       onDeleteField={() => onRemoveField(rowId, index)}
       attribute={attribute}
       index={index}
+      lastIndex={lastIndex}
       rowIndex={rowIndex}
       name={rowItem.name}
       size={rowItem.size}
@@ -28,6 +29,7 @@ const RowItemsLayout = ({ rowItem, onRemoveField, rowId, rowIndex, index }) => {
 
 RowItemsLayout.propTypes = {
   index: PropTypes.number.isRequired,
+  lastIndex: PropTypes.number.isRequired,
   onRemoveField: PropTypes.func.isRequired,
   rowId: PropTypes.number.isRequired,
   rowIndex: PropTypes.number.isRequired,

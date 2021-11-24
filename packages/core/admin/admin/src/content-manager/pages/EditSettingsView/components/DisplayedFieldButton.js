@@ -5,7 +5,6 @@ import { useDrop, useDrag } from 'react-dnd';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { Flex } from '@strapi/design-system/Flex';
 import { GridItem } from '@strapi/design-system/Grid';
-import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
 import Drag from '@strapi/icons/Drag';
 import { ItemTypes } from '../../../utils';
 import FieldButtonContent from './FieldButtonContent';
@@ -13,17 +12,38 @@ import { useLayoutDnd } from '../../../hooks';
 
 const Wrapper = styled(Flex)`
   position: relative;
+  ${({ isFirst, isLast, hasHorizontalPadding }) => {
+    if (isFirst) {
+      return `
+        padding-right: 4px;
+      `;
+    }
+    if (isLast) {
+      return `
+        padding-left: 4px;
+      `;
+    }
+
+    if (hasHorizontalPadding) {
+      return `
+        padding: 0 4px;
+      `;
+    }
+
+    return '';
+  }}
   ${({ showRightCarret, showLeftCarret, theme }) => {
     if (showRightCarret) {
       return `
         &:after {
           content: '';
           position: absolute;
-          right: -${theme.spaces[2]};
+          right: -1px;
           background-color: ${theme.colors.primary600};
           width: 2px;
           height: 100%;
           align-self: stretch;
+          z-index: 1;
         }
       `;
     }
@@ -33,11 +53,12 @@ const Wrapper = styled(Flex)`
         &:before {
           content: '';
           position: absolute;
-          left: -${theme.spaces[2]};
+          left: -1px;
           background-color: ${theme.colors.primary600};
           width: 2px;
           height: 100%;
           align-self: stretch;
+          z-index: 1;
         }
       `;
     }
@@ -53,12 +74,12 @@ const CustomDragIcon = styled(Drag)`
   }
 `;
 const CustomFlex = styled(Flex)`
-  opacity: ${({ isDragging, isFullSize }) => {
+  opacity: ${({ isDragging, isFullSize, isHidden }) => {
     if (isDragging && !isFullSize) {
       return 0.2;
     }
 
-    if (isDragging && isFullSize) {
+    if ((isDragging && isFullSize) || isHidden) {
       return 0;
     }
 
@@ -72,13 +93,14 @@ const DragButton = styled(Flex)`
 
 const DisplayedFieldButton = ({
   attribute,
-  onEditField,
-  onDeleteField,
   children,
   index,
-  name,
+  lastIndex,
   moveItem,
   moveRow,
+  name,
+  onDeleteField,
+  onEditField,
   rowIndex,
   size,
 }) => {
@@ -271,15 +293,24 @@ const DisplayedFieldButton = ({
     return `${32 / 16}rem`;
   };
 
-  if (isHidden) {
-    return null;
+  const isFirst = index === 0 && !isFullSize;
+  const isLast = index === lastIndex && !isFullSize;
+  const hasHorizontalPadding = index !== 0 && !isFullSize;
+
+  if (name === 'slug') {
+    console.log({ showRightCarret, showLeftCarret });
   }
 
-  return isHidden ? (
-    <VisuallyHidden />
-  ) : (
+  return (
     <GridItem col={size}>
-      <Wrapper ref={refs.dropRef} showLeftCarret={showLeftCarret} showRightCarret={showRightCarret}>
+      <Wrapper
+        ref={refs.dropRef}
+        showLeftCarret={showLeftCarret}
+        showRightCarret={showRightCarret}
+        isFirst={isFirst}
+        isLast={isLast}
+        hasHorizontalPadding={hasHorizontalPadding}
+      >
         <CustomFlex
           width="100%"
           borderColor="neutral150"
@@ -289,6 +320,7 @@ const DisplayedFieldButton = ({
           alignItems="stretch"
           isDragging={isDragging}
           isFullSize={isFullSize}
+          isHidden={isHidden}
         >
           <DragButton
             as="button"
@@ -303,13 +335,15 @@ const DisplayedFieldButton = ({
           >
             <CustomDragIcon />
           </DragButton>
-          <FieldButtonContent
-            attribute={attribute}
-            onEditField={onEditField}
-            onDeleteField={onDeleteField}
-          >
-            {children}
-          </FieldButtonContent>
+          {!isHidden && (
+            <FieldButtonContent
+              attribute={attribute}
+              onEditField={onEditField}
+              onDeleteField={onDeleteField}
+            >
+              {children}
+            </FieldButtonContent>
+          )}
         </CustomFlex>
       </Wrapper>
     </GridItem>
@@ -334,6 +368,7 @@ DisplayedFieldButton.propTypes = {
   onDeleteField: PropTypes.func.isRequired,
   onEditField: PropTypes.func.isRequired,
   rowIndex: PropTypes.number.isRequired,
+  lastIndex: PropTypes.number.isRequired,
   size: PropTypes.number.isRequired,
 };
 
