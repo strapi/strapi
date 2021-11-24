@@ -21,7 +21,7 @@ const incompatibleQuickstartOptions = [
 
 program
   .version(packageJson.version)
-  .arguments('[directory], [starterurl]')
+  .arguments('[directory], [starter]')
   .option('--use-npm', 'Force usage of npm instead of yarn to create the project')
   .option('--debug', 'Display database connection error')
   .option('--quickstart', 'Quickstart app creation')
@@ -37,16 +37,16 @@ program
   .description(
     'Create a fullstack monorepo application using the strapi backend template specified in the provided starter'
   )
-  .action((directory, starterUrl, programArgs) => {
-    const projectArgs = { projectName: directory, starterUrl };
+  .action((directory, starter, programArgs) => {
+    const projectArgs = { projectName: directory, starter };
 
     initProject(projectArgs, programArgs);
   });
 
 function generateApp(projectArgs, programArgs) {
-  if (!projectArgs.projectName || !projectArgs.starterUrl) {
+  if (!projectArgs.projectName || !projectArgs.starter) {
     console.error(
-      'Please specify the <directory> and <starterurl> of your project when using --quickstart'
+      'Please specify the <directory> and <starter> of your project when using --quickstart'
     );
     // eslint-disable-next-line no-process-exit
     process.exit(1);
@@ -71,16 +71,17 @@ async function initProject(projectArgs, program) {
     program.quickstart = false; // Will disable the quickstart question because != 'undefined'
   }
 
-  const { projectName, starterUrl } = projectArgs;
+  const { projectName, starter } = projectArgs;
+
   if (program.quickstart) {
     return generateApp(projectArgs, program);
   }
 
-  const prompt = await promptUser(projectName, starterUrl, program);
+  const prompt = await promptUser(projectName, starter, program);
 
   const promptProjectArgs = {
     projectName: prompt.directory || projectName,
-    starterUrl: prompt.starter || starterUrl,
+    starter: prompt.starter || starter,
   };
 
   const programArgs = {
