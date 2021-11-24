@@ -13,11 +13,11 @@ const Policies = () => {
 
   const path = without(selectedAction.split('.'), 'controllers');
   const controllerRoutes = get(routes, path[0]);
-  const pathResolved = path.join('.');
+  const pathResolved = path.slice(1).join('.');
 
   const displayedRoutes = isEmpty(controllerRoutes)
     ? []
-    : controllerRoutes.filter(o => o.handler === pathResolved);
+    : controllerRoutes.filter(o => o.handler.endsWith(pathResolved));
 
   return (
     <GridItem
