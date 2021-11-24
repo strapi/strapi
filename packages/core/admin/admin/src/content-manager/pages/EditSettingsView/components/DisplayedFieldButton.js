@@ -1,9 +1,10 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { useDrop, useDrag } from 'react-dnd';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { Flex } from '@strapi/design-system/Flex';
+import { Box } from '@strapi/design-system/Box';
 import { GridItem } from '@strapi/design-system/Grid';
 import Drag from '@strapi/icons/Drag';
 import { ItemTypes } from '../../../utils';
@@ -74,6 +75,7 @@ const CustomDragIcon = styled(Drag)`
   }
 `;
 const CustomFlex = styled(Flex)`
+  display: ${({ dragStart }) => (dragStart ? 'none' : 'flex')};
   opacity: ${({ isDragging, isFullSize, isHidden }) => {
     if (isDragging && !isFullSize) {
       return 0.2;
@@ -104,6 +106,7 @@ const DisplayedFieldButton = ({
   rowIndex,
   size,
 }) => {
+  const [dragStart, setDragStart] = useState(false);
   const isHidden = name === '_TEMP_';
   const { setIsDraggingSibling } = useLayoutDnd();
   const isFullSize = size === 12;
@@ -297,10 +300,6 @@ const DisplayedFieldButton = ({
   const isLast = index === lastIndex && !isFullSize;
   const hasHorizontalPadding = index !== 0 && !isFullSize;
 
-  if (name === 'slug') {
-    console.log({ showRightCarret, showLeftCarret });
-  }
-
   return (
     <GridItem col={size}>
       <Wrapper
@@ -310,15 +309,34 @@ const DisplayedFieldButton = ({
         isFirst={isFirst}
         isLast={isLast}
         hasHorizontalPadding={hasHorizontalPadding}
+        onDrag={() => {
+          if (isFullSize && !dragStart) {
+            setDragStart(true);
+          }
+        }}
+        onDragEnd={() => {
+          if (isFullSize) {
+            setDragStart(false);
+          }
+        }}
       >
+        {dragStart && isFullSize && (
+          <Box
+            // style={{ display: isDragging ? 'block' : 'none' }}
+            width="100%"
+            height="2px"
+            background="primary600"
+          />
+        )}
         <CustomFlex
-          width="100%"
+          width={isFullSize && dragStart ? 0 : '100%'}
           borderColor="neutral150"
           hasRadius
           background="neutral100"
           minHeight={getHeight()}
           alignItems="stretch"
           isDragging={isDragging}
+          dragStart={dragStart}
           isFullSize={isFullSize}
           isHidden={isHidden}
         >
