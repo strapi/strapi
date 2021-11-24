@@ -100,6 +100,7 @@ const createYupSchema = (
 
         if (attribute.repeatable === true) {
           const { min, max, required } = attribute;
+
           let componentSchema = yup.lazy(value => {
             let baseSchema = yup.array().of(componentFieldSchema);
 
@@ -152,7 +153,7 @@ const createYupSchema = (
 
         const { max, min } = attribute;
 
-        if (attribute.required) {
+        if (attribute.required && !options.isDraft) {
           dynamicZoneSchema = dynamicZoneSchema.test('required', errorsTrads.required, value => {
             if (options.isCreatingEntry) {
               return value !== null || value !== undefined;
@@ -193,7 +194,17 @@ const createYupSchema = (
         } else {
           // eslint-disable-next-line no-lonely-if
           if (min) {
-            dynamicZoneSchema = dynamicZoneSchema.notEmptyMin(min);
+            dynamicZoneSchema = dynamicZoneSchema.test('min', errorsTrads.min, value => {
+              if (options.isCreatingEntry) {
+                return value && value.length >= min;
+              }
+
+              if (value === undefined) {
+                return true;
+              }
+
+              return value !== null && value.length >= min;
+            });
           }
         }
 

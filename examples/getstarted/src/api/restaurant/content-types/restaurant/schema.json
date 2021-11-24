@@ -190,7 +190,9 @@
         "i18n": {
           "localized": true
         }
-      }
+      },
+      "required": true,
+      "min": 1
     }
   }
 }
