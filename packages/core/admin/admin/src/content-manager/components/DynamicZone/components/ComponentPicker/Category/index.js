@@ -7,7 +7,7 @@ import ComponentCard from './ComponentCard';
 
 const Grid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(${140 / 16}rem, 1fr));
+  grid-template-columns: repeat(auto-fit, ${140 / 16}rem);
   grid-gap: ${({ theme }) => theme.spaces[1]};
 `;
 
