@@ -191,8 +191,7 @@
           "localized": true
         }
       },
-      "required": true,
-      "min": 1
+      "required": false
     }
   }
 }
