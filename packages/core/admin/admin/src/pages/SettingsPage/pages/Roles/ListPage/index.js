@@ -20,7 +20,7 @@ import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
 import RoleRow from './components/RoleRow';
 import EmptyRole from './components/EmptyRole';
-import UpgradePlanModal from '../../../../../components/UpgradePlanModal ';
+import UpgradePlanModal from '../../../../../components/UpgradePlanModal';
 import { useRolesList } from '../../../../../hooks';
 
 const useSortedRoles = () => {
