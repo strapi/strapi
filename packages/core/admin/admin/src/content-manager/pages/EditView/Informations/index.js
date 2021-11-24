@@ -8,6 +8,7 @@ import { Flex } from '@strapi/design-system/Flex';
 import { Stack } from '@strapi/design-system/Stack';
 import { getTrad } from '../../../utils';
 import getUnits from './utils/getUnits';
+import { getFullName } from '../../../../utils';
 
 const Informations = () => {
   const { formatMessage, formatRelativeTime } = useIntl();
@@ -17,7 +18,7 @@ const Informations = () => {
   const updatedByFirstname = initialData.updatedBy?.firstname || '';
   const updatedByLastname = initialData.updatedBy?.lastname || '';
   const updatedByUsername = initialData.updatedBy?.username;
-  const updatedBy = updatedByUsername || `${updatedByFirstname} ${updatedByLastname}`;
+  const updatedBy = updatedByUsername || getFullName(updatedByFirstname, updatedByLastname);
   const currentTime = useRef(Date.now());
   const timestamp = initialData[updatedAt]
     ? new Date(initialData[updatedAt]).getTime()
@@ -28,7 +29,7 @@ const Informations = () => {
 
   return (
     <Box>
-      <Typography variant="sigma" textColor="neutral600">
+      <Typography variant="sigma" textColor="neutral600" id="additional-informations">
         {formatMessage({
           id: getTrad('containers.Edit.information'),
           defaultMessage: 'Information',

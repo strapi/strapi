@@ -330,18 +330,13 @@ describe('Admin Auth End to End', () => {
                 path: ['userInfo', 'firstname'],
               },
               {
-                message: 'userInfo.lastname is a required field',
-                name: 'ValidationError',
-                path: ['userInfo', 'lastname'],
-              },
-              {
                 message: 'userInfo.password is a required field',
                 name: 'ValidationError',
                 path: ['userInfo', 'password'],
               },
             ],
           },
-          message: '4 errors occurred',
+          message: '3 errors occurred',
           name: 'ValidationError',
         },
       });
@@ -447,18 +442,13 @@ describe('Admin Auth End to End', () => {
                 path: ['firstname'],
               },
               {
-                message: 'lastname is a required field',
-                name: 'ValidationError',
-                path: ['lastname'],
-              },
-              {
                 message: 'password is a required field',
                 name: 'ValidationError',
                 path: ['password'],
               },
             ],
           },
-          message: '4 errors occurred',
+          message: '3 errors occurred',
           name: 'ValidationError',
         },
       });

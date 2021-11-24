@@ -155,15 +155,6 @@ const Register = ({ fieldsToDisable, noSignin, onSubmit, schema }) => {
                     <GridItem col={6}>
                       <TextInput
                         name="lastname"
-                        error={
-                          errors.lastname
-                            ? formatMessage({
-                                id: errors.lastname,
-                                defaultMessage: 'This value is required.',
-                              })
-                            : undefined
-                        }
-                        required
                         value={values.lastname}
                         onChange={handleChange}
                         label={formatMessage({

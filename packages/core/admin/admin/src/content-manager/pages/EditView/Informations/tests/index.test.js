@@ -129,6 +129,7 @@ describe('CONTENT MANAGER | EditView | Header', () => {
       >
         <span
           class="c0"
+          id="additional-informations"
         >
           Information
         </span>

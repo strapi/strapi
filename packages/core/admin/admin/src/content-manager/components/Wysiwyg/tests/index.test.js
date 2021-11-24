@@ -203,7 +203,7 @@ describe('Wysiwyg render and actions buttons', () => {
         background: #ffffff;
       }
 
-      .c28 .sc-BXpxD {
+      .c28 .sc-biOYyE {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;

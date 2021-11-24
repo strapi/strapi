@@ -5234,19 +5234,19 @@
     resolve-from "^5.0.0"
     store2 "^2.12.0"
 
-"@strapi/design-system@0.0.1-alpha.67":
-  version "0.0.1-alpha.67"
-  resolved "https://registry.yarnpkg.com/@strapi/design-system/-/design-system-0.0.1-alpha.67.tgz#38fc39836a49b239afc6e178d2edd7b06851f806"
-  integrity sha512-0nkRWKEBHx/O0tQZ70WD1201XUmryhDylZptxT1TBKBaUdO/7vwbViF7HKZi77jHBYF9xN5w5AeUVY8yOqWXBQ==
+"@strapi/design-system@0.0.1-alpha.68":
+  version "0.0.1-alpha.68"
+  resolved "https://registry.yarnpkg.com/@strapi/design-system/-/design-system-0.0.1-alpha.68.tgz#8e515b8149d190a11f944c62e12a0067e770ca5f"
+  integrity sha512-2Yj87CB1YOUCbzUf+J91C5//UAGuXPHO0oj30cqYr/of9Uq8SPOLx/QBnz01LtGtAMbSSTyMIpGZSsTJ7dZqMg==
   dependencies:
     "@internationalized/number" "^3.0.2"
     compute-scroll-into-view "^1.0.17"
     prop-types "^15.7.2"
 
-"@strapi/icons@0.0.1-alpha.67":
-  version "0.0.1-alpha.67"
-  resolved "https://registry.yarnpkg.com/@strapi/icons/-/icons-0.0.1-alpha.67.tgz#797bd7bbff4107006c93e20edb4e2736c1bc564b"
-  integrity sha512-t2BjpQpXLoX3Tc4f+HxfoQifx1Z9uSVDjwLxld360Aq3zVXknpdUiU+kJsxl8BHj/8H6PB/KS5vB2lcjl4/7Vg==
+"@strapi/icons@0.0.1-alpha.68":
+  version "0.0.1-alpha.68"
+  resolved "https://registry.yarnpkg.com/@strapi/icons/-/icons-0.0.1-alpha.68.tgz#e8797634391849b0c472213e01b0b5c17647d3c3"
+  integrity sha512-oBcWU9JXv0cZu3hknSkzbQU8P/C04nqkqu6mzgDNxITloTi5JqhjLN5HuxpKi+PtIv9okkew28XtjELMe3yANQ==
 
 "@stylelint/postcss-css-in-js@^0.37.2":
   version "0.37.2"

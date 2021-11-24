@@ -9,7 +9,7 @@ const userCreationSchema = yup
   .shape({
     email: validators.email.required(),
     firstname: validators.firstname.required(),
-    lastname: validators.lastname.required(),
+    lastname: validators.lastname,
     roles: validators.roles.min(1),
     preferedLanguage: yup.string().nullable(),
   })
@@ -20,7 +20,7 @@ const profileUpdateSchema = yup
   .shape({
     email: validators.email.notNull(),
     firstname: validators.firstname.notNull(),
-    lastname: validators.lastname.notNull(),
+    lastname: validators.lastname.nullable(),
     username: validators.username.nullable(),
     password: validators.password.notNull(),
     currentPassword: yup
@@ -36,7 +36,7 @@ const userUpdateSchema = yup
   .shape({
     email: validators.email.notNull(),
     firstname: validators.firstname.notNull(),
-    lastname: validators.lastname.notNull(),
+    lastname: validators.lastname.nullable(),
     username: validators.username.nullable(),
     password: validators.password.notNull(),
     isActive: yup.bool().notNull(),
