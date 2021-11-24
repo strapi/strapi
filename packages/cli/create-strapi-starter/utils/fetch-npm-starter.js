@@ -50,7 +50,7 @@ async function getStarterPackageInfo(starter, useYarn) {
   try {
     return getPackageInfo(starter, { useYarn });
   } catch (error) {
-    stopProcess(`Could not find package ${chalk.green(starter)} on npm`);
+    stopProcess(`Could not find package ${chalk.yellow(starter)} on npm`);
   }
 }
 
