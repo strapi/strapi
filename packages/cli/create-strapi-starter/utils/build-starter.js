@@ -166,10 +166,10 @@ module.exports = async function buildStarter({ projectName, starter }, program) 
     starter: starterPackageInfo.name,
     run: false,
   };
-  if (starterPackageInfo.version) {
-    starterPackageInfo.template = `${starterJson.template.name}@${starterJson.template.version}`;
+  if (starterJson.template.version) {
+    generateStrapiAppOptions.template = `${starterJson.template.name}@${starterJson.template.version}`;
   } else {
-    starterPackageInfo.template = starterJson.template.name;
+    generateStrapiAppOptions.template = starterJson.template.name;
   }
 
   // Create strapi app using the template
