@@ -100,10 +100,11 @@ const createYupSchema = (
 
         if (attribute.repeatable === true) {
           const { min, max, required } = attribute;
+
           let componentSchema = yup.lazy(value => {
             let baseSchema = yup.array().of(componentFieldSchema);
 
-            if (min && !options.isDraft) {
+            if (min) {
               if (required) {
                 baseSchema = baseSchema.min(min, errorsTrads.min);
               } else if (required !== true && isEmpty(value)) {
@@ -111,6 +112,8 @@ const createYupSchema = (
               } else {
                 baseSchema = baseSchema.min(min, errorsTrads.min);
               }
+            } else if (required && !options.isDraft) {
+              baseSchema = baseSchema.min(1, errorsTrads.required);
             }
 
             if (max) {
@@ -152,20 +155,8 @@ const createYupSchema = (
 
         const { max, min } = attribute;
 
-        if (attribute.required && !options.isDraft) {
-          dynamicZoneSchema = dynamicZoneSchema.test('required', errorsTrads.required, value => {
-            if (options.isCreatingEntry) {
-              return value !== null || value !== undefined;
-            }
-
-            if (value === undefined) {
-              return true;
-            }
-
-            return value !== null;
-          });
-
-          if (min) {
+        if (min) {
+          if (attribute.required) {
             dynamicZoneSchema = dynamicZoneSchema
               .test('min', errorsTrads.min, value => {
                 if (options.isCreatingEntry) {
@@ -189,12 +180,21 @@ const createYupSchema = (
 
                 return value !== null;
               });
-          }
-        } else {
-          // eslint-disable-next-line no-lonely-if
-          if (min) {
+          } else {
             dynamicZoneSchema = dynamicZoneSchema.notEmptyMin(min);
           }
+        } else if (attribute.required && !options.isDraft) {
+          dynamicZoneSchema = dynamicZoneSchema.test('required', errorsTrads.required, value => {
+            if (options.isCreatingEntry) {
+              return value !== null || value !== undefined;
+            }
+
+            if (value === undefined) {
+              return true;
+            }
+
+            return value !== null;
+          });
         }
 
         if (max) {
