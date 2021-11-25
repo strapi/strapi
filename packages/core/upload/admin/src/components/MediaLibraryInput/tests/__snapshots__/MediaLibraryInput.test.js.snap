@@ -36,13 +36,6 @@ exports[`<MediaLibraryInput /> renders and matches the snapshot 1`] = `
   align-items: center;
 }
 
-.c14 {
-  font-weight: 600;
-  color: #666687;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
 .c12 {
   color: #4945ff;
   margin-bottom: 12px;
@@ -52,6 +45,13 @@ exports[`<MediaLibraryInput /> renders and matches the snapshot 1`] = `
 
 .c13 path {
   fill: #4945ff;
+}
+
+.c14 {
+  font-weight: 600;
+  color: #666687;
+  font-size: 0.75rem;
+  line-height: 1.33;
 }
 
 .c0 {

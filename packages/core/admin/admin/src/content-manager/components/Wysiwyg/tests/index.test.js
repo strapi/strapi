@@ -203,7 +203,7 @@ describe('Wysiwyg render and actions buttons', () => {
         background: #ffffff;
       }
 
-      .c28 .sc-BXpxD {
+      .c28 .sc-biOYyE {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -484,7 +484,7 @@ describe('Wysiwyg render and actions buttons', () => {
 
       .c15 {
         color: #666687;
-        display: inline-block;
+        display: block;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;

@@ -467,7 +467,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
 
 .c32 {
   color: #32324d;
-  display: inline-block;
+  display: block;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -2359,7 +2359,7 @@ exports[`EditSettingsView should add field 1`] = `
 
 .c32 {
   color: #32324d;
-  display: inline-block;
+  display: block;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -4744,7 +4744,7 @@ exports[`EditSettingsView should add relation 1`] = `
 
 .c32 {
   color: #32324d;
-  display: inline-block;
+  display: block;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
