@@ -118,11 +118,14 @@ const createRelationValidator = createOrUpdate => (attr, data, { isDraft }) => {
   return validator;
 };
 
-const createScalarAttributeValidator = createOrUpdate => (attr, { isDraft }) => {
+const createScalarAttributeValidator = createOrUpdate => (
+  attr,
+  { isDraft, uid, attributeName, entityId }
+) => {
   let validator;
 
   if (has(attr.type, validators)) {
-    validator = validators[attr.type](attr, { isDraft });
+    validator = validators[attr.type](attr, { isDraft, uid, attributeName, entityId });
   } else {
     // No validators specified - fall back to mixed
     validator = yup.mixed();
@@ -133,13 +136,22 @@ const createScalarAttributeValidator = createOrUpdate => (attr, { isDraft }) => 
   return validator;
 };
 
-const createAttributeValidator = createOrUpdate => (attr, data, { isDraft }) => {
+const createAttributeValidator = createOrUpdate => (
+  attr,
+  data,
+  { isDraft, uid, attributeName, entityId }
+) => {
   let validator;
 
   if (isMediaAttribute(attr)) {
     validator = yup.mixed();
   } else if (isScalarAttribute(attr)) {
-    validator = createScalarAttributeValidator(createOrUpdate)(attr, { isDraft });
+    validator = createScalarAttributeValidator(createOrUpdate)(attr, {
+      isDraft,
+      uid,
+      attributeName,
+      entityId,
+    });
   } else {
     if (attr.type === 'component') {
       validator = createComponentValidator(createOrUpdate)(attr, data, { isDraft });
@@ -157,14 +169,14 @@ const createAttributeValidator = createOrUpdate => (attr, data, { isDraft }) => 
   return validator;
 };
 
-const createModelValidator = createOrUpdate => (model, data, { isDraft }) => {
+const createModelValidator = createOrUpdate => (model, data, { isDraft, entityId }) => {
   const writableAttributes = model ? getWritableAttributes(model) : [];
 
   const schema = writableAttributes.reduce((validators, attributeName) => {
     const validator = createAttributeValidator(createOrUpdate)(
       model.attributes[attributeName],
       prop(attributeName, data),
-      { isDraft }
+      { isDraft, uid: model.uid, attributeName, entityId }
     );
 
     return assoc(attributeName, validator)(validators);
@@ -173,7 +185,11 @@ const createModelValidator = createOrUpdate => (model, data, { isDraft }) => {
   return yup.object().shape(schema);
 };
 
-const createValidateEntity = createOrUpdate => async (model, data, { isDraft = false } = {}) => {
+const createValidateEntity = createOrUpdate => async (
+  model,
+  data,
+  { isDraft = false, entityId } = {}
+) => {
   if (!isObject(data)) {
     const { displayName } = model.info;
 
@@ -182,7 +198,10 @@ const createValidateEntity = createOrUpdate => async (model, data, { isDraft = f
     );
   }
 
-  const validator = createModelValidator(createOrUpdate)(model, data, { isDraft }).required();
+  const validator = createModelValidator(createOrUpdate)(model, data, {
+    isDraft,
+    entityId,
+  }).required();
   return validateYupSchema(validator, { strict: false, abortEarly: false })(data);
 };
 

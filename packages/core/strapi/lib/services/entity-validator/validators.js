@@ -7,9 +7,9 @@ const { yup } = require('@strapi/utils');
 /**
  * Utility function to compose validators
  */
-const composeValidators = (...fns) => (attr, { isDraft }) => {
+const composeValidators = (...fns) => (attr, { isDraft, uid, attributeName, entityId }) => {
   return fns.reduce((validator, fn) => {
-    return fn(attr, validator, { isDraft });
+    return fn(attr, validator, { isDraft, uid, attributeName, entityId });
   }, yup.mixed());
 };
 
@@ -71,13 +71,33 @@ const addMaxFloatValidator = ({ max }, validator) =>
 const addStringRegexValidator = ({ regex }, validator) =>
   _.isUndefined(regex) ? validator : validator.matches(new RegExp(regex));
 
+const addUniqueValidator = (attr, validator, { uid, attributeName, entityId }) => {
+  if (attr.unique) {
+    return validator.test('unique', 'This attribute must be unique', async value => {
+      let whereParams = entityId
+        ? { $and: [{ [attributeName]: value }, { $not: { id: entityId } }] }
+        : { [attributeName]: value };
+
+      const record = await strapi.db.query(uid).findOne({
+        select: ['id', attributeName],
+        where: whereParams,
+      });
+
+      return !!record;
+    });
+  }
+
+  return validator;
+};
+
 /* Type validators */
 
 const stringValidator = composeValidators(
   () => yup.string().transform((val, originalVal) => originalVal),
   addMinLengthValidator,
   addMaxLengthValidator,
-  addStringRegexValidator
+  addStringRegexValidator,
+  addUniqueValidator
 );
 
 const emailValidator = composeValidators(stringValidator, (attr, validator) => validator.email());
@@ -86,20 +106,23 @@ const uidValidator = composeValidators(stringValidator, (attr, validator) =>
   validator.matches(new RegExp('^[A-Za-z0-9-_.~]*$'))
 );
 
-const enumerationValidator = attr => {
-  return yup.string().oneOf((Array.isArray(attr.enum) ? attr.enum : [attr.enum]).concat(null));
-};
+const enumerationValidator = composeValidators(
+  attr => yup.string().oneOf((Array.isArray(attr.enum) ? attr.enum : [attr.enum]).concat(null)),
+  addUniqueValidator
+);
 
 const integerValidator = composeValidators(
   () => yup.number().integer(),
   addMinIntegerValidator,
-  addMaxIntegerValidator
+  addMaxIntegerValidator,
+  addUniqueValidator
 );
 
 const floatValidator = composeValidators(
   () => yup.number(),
   addMinFloatValidator,
-  addMaxFloatValidator
+  addMaxFloatValidator,
+  addUniqueValidator
 );
 
 module.exports = {
@@ -109,15 +132,15 @@ module.exports = {
   password: stringValidator,
   email: emailValidator,
   enumeration: enumerationValidator,
-  boolean: () => yup.boolean(),
+  boolean: () => composeValidators(() => yup.mixed(), addUniqueValidator),
   uid: uidValidator,
-  json: () => yup.mixed(),
+  json: () => composeValidators(() => yup.mixed(), addUniqueValidator),
   integer: integerValidator,
-  biginteger: () => yup.mixed(),
+  biginteger: composeValidators(() => yup.mixed(), addUniqueValidator),
   float: floatValidator,
   decimal: floatValidator,
-  date: () => yup.mixed(),
-  time: () => yup.mixed(),
-  datetime: () => yup.mixed(),
-  timestamp: () => yup.mixed(),
+  date: composeValidators(() => yup.mixed(), addUniqueValidator),
+  time: composeValidators(() => yup.mixed(), addUniqueValidator),
+  datetime: composeValidators(() => yup.mixed(), addUniqueValidator),
+  timestamp: composeValidators(() => yup.mixed(), addUniqueValidator),
 };

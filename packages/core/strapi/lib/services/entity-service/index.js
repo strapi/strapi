@@ -204,6 +204,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
 
     const validData = await entityValidator.validateEntityUpdate(model, data, {
       isDraft,
+      entityId,
     });
 
     const query = transformParamsToQuery(uid, pickSelectionParams(wrappedParams));

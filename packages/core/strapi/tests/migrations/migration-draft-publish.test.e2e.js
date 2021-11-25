@@ -159,7 +159,7 @@ describe('Migration - draft and publish', () => {
         expect(body.results[0].publishedAt).toBeUndefined();
       });
 
-      test.skip('Unique constraint is kept after disabling the feature', async () => {
+      test('Unique constraint is kept after disabling the feature', async () => {
         const dogToCreate = { code: 'sameCode' };
 
         let res = await rq({
