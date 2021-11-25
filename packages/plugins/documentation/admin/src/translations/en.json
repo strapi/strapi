@@ -27,7 +27,7 @@
   "pages.PluginPage.header.description": "Configure the documentation plugin",
   "pages.PluginPage.table.generated": "Last generated",
   "pages.PluginPage.table.icon.delete": "Delete {target}",
-  "pages.PluginPage.table.icon.regnerate": "Regenerate {target}",
+  "pages.PluginPage.table.icon.regenerate": "Regenerate {target}",
   "pages.PluginPage.table.icon.show": "Open {target}",
   "pages.PluginPage.table.version": "Version",
   "pages.SettingPage.title": "Settings",
