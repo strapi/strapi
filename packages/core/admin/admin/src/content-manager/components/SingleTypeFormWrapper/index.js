@@ -163,7 +163,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
       try {
         trackUsageRef.current('willDeleteEntry', trackerProperty);
 
-        const { data } = await axiosInstance.delete(getRequestUrl(`${slug}`));
+        const { data } = await axiosInstance.delete(getRequestUrl(`${slug}${searchToSend}`));
 
         toggleNotification({
           type: 'success',
@@ -179,7 +179,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
         return Promise.reject(err);
       }
     },
-    [slug, toggleNotification]
+    [slug, toggleNotification, searchToSend]
   );
 
   const onDeleteSucceeded = useCallback(() => {
