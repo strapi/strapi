@@ -79,7 +79,7 @@ const addUniqueValidator = (attr, validator, { uid, attributeName, entityId }) =
         : { [attributeName]: value };
 
       const record = await strapi.db.query(uid).findOne({
-        select: ['id', attributeName],
+        select: ['id'],
         where: whereParams,
       });
 
