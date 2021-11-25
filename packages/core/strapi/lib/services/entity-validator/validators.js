@@ -106,10 +106,9 @@ const uidValidator = composeValidators(stringValidator, (attr, validator) =>
   validator.matches(new RegExp('^[A-Za-z0-9-_.~]*$'))
 );
 
-const enumerationValidator = composeValidators(
-  attr => yup.string().oneOf((Array.isArray(attr.enum) ? attr.enum : [attr.enum]).concat(null)),
-  addUniqueValidator
-);
+const enumerationValidator = attr => {
+  return yup.string().oneOf((Array.isArray(attr.enum) ? attr.enum : [attr.enum]).concat(null));
+};
 
 const integerValidator = composeValidators(
   () => yup.number().integer(),
@@ -132,9 +131,9 @@ module.exports = {
   password: stringValidator,
   email: emailValidator,
   enumeration: enumerationValidator,
-  boolean: () => composeValidators(() => yup.mixed(), addUniqueValidator),
+  boolean: () => () => yup.mixed(),
   uid: uidValidator,
-  json: () => composeValidators(() => yup.mixed(), addUniqueValidator),
+  json: () => yup.mixed(),
   integer: integerValidator,
   biginteger: composeValidators(() => yup.mixed(), addUniqueValidator),
   float: floatValidator,
