@@ -1125,6 +1125,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                         </span>
                       </div>
                       <input
+                        aria-disabled="false"
                         checked=""
                         class="c42"
                         name="settings.searchable"
@@ -1182,6 +1183,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                         </span>
                       </div>
                       <input
+                        aria-disabled="false"
                         checked=""
                         class="c42"
                         name="settings.filterable"
@@ -1239,6 +1241,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                         </span>
                       </div>
                       <input
+                        aria-disabled="false"
                         class="c42"
                         name="settings.bulkable"
                         type="checkbox"
@@ -3010,6 +3013,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                           </span>
                         </div>
                         <input
+                          aria-disabled="false"
                           checked=""
                           class="c42"
                           name="settings.searchable"
@@ -3067,6 +3071,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                           </span>
                         </div>
                         <input
+                          aria-disabled="false"
                           checked=""
                           class="c42"
                           name="settings.filterable"
@@ -3124,6 +3129,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                           </span>
                         </div>
                         <input
+                          aria-disabled="false"
                           class="c42"
                           name="settings.bulkable"
                           type="checkbox"

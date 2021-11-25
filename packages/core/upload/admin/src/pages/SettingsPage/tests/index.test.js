@@ -652,6 +652,7 @@ describe('Upload | SettingsPage', () => {
                                         </span>
                                       </div>
                                       <input
+                                        aria-disabled="false"
                                         aria-label="responsiveDimensions"
                                         checked=""
                                         class="c37"
@@ -725,6 +726,7 @@ describe('Upload | SettingsPage', () => {
                                         </span>
                                       </div>
                                       <input
+                                        aria-disabled="false"
                                         aria-label="sizeOptimization"
                                         class="c37"
                                         data-testid="sizeOptimization"
@@ -791,6 +793,7 @@ describe('Upload | SettingsPage', () => {
                                         </span>
                                       </div>
                                       <input
+                                        aria-disabled="false"
                                         aria-label="autoOrientation"
                                         checked=""
                                         class="c37"

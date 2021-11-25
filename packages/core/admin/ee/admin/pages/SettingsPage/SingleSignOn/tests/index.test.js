@@ -750,6 +750,7 @@ describe('Admin | ee | SettingsPage | SSO', () => {
                                   </span>
                                 </div>
                                 <input
+                                  aria-disabled="false"
                                   aria-label="autoRegister"
                                   checked=""
                                   class="c35"
