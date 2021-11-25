@@ -149,7 +149,7 @@ const PluginPage = () => {
                               label={formatMessage(
                                 {
                                   id: getTrad('pages.PluginPage.table.icon.regenerate'),
-                                  defaultMessage: 'Regnerate {target}',
+                                  defaultMessage: 'Regenerate {target}',
                                 },
                                 { target: `${doc.version}` }
                               )}
