@@ -14,6 +14,7 @@ const defaults = {
       'connect-src': ["'self'", 'https:'],
       'img-src': ["'self'", 'data:', 'blob:'],
       'media-src': ["'self'", 'data:', 'blob:'],
+      upgradeInsecureRequests: null,
     },
   },
   xssFilter: false,
