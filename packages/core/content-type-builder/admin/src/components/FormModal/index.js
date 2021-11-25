@@ -141,7 +141,7 @@ const FormModal = () => {
   useEffect(() => {
     if (isOpen) {
       const collectionTypesForRelation = sortedContentTypesList.filter(
-        ({ kind }) => kind === 'collectionType'
+        ({ kind, visible }) => kind === 'collectionType' && visible
       );
 
       // Reset all the modification when opening the edit category modal
