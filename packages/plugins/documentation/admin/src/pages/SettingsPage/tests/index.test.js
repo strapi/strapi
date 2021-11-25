@@ -584,6 +584,7 @@ describe('Plugin | Documentation | SettingsPage', () => {
                                 </span>
                               </div>
                               <input
+                                aria-disabled="false"
                                 class="c32"
                                 name="restrictedAccess"
                                 type="checkbox"

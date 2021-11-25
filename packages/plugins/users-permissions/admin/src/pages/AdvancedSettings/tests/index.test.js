@@ -1048,6 +1048,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                                 </span>
                               </div>
                               <input
+                                aria-disabled="false"
                                 class="c46"
                                 name="unique_email"
                                 type="checkbox"
@@ -1118,6 +1119,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                                 </span>
                               </div>
                               <input
+                                aria-disabled="false"
                                 class="c46"
                                 name="allow_register"
                                 type="checkbox"
@@ -1235,6 +1237,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                                 </span>
                               </div>
                               <input
+                                aria-disabled="false"
                                 class="c46"
                                 name="email_confirmation"
                                 type="checkbox"
