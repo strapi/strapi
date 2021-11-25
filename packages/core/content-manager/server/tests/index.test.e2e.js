@@ -80,20 +80,20 @@ describe('Content Manager End to End', () => {
       data.tags.push(body);
 
       expect(body.id).toBeDefined();
-      // expect(Array.isArray(body.articles)).toBeTruthy();
+      expect(Array.isArray(body.articles)).toBeTruthy();
       expect(body.name).toBe('tag1');
-      // expect(body.createdBy).toMatchObject({
-      //   firstname: 'admin',
-      //   id: 1,
-      //   lastname: 'admin',
-      //   username: null,
-      // });
-      // expect(body.updatedBy).toMatchObject({
-      //   firstname: 'admin',
-      //   id: 1,
-      //   lastname: 'admin',
-      //   username: null,
-      // });
+      expect(body.createdBy).toMatchObject({
+        firstname: 'admin',
+        id: 1,
+        lastname: 'admin',
+        username: null,
+      });
+      expect(body.updatedBy).toMatchObject({
+        firstname: 'admin',
+        id: 1,
+        lastname: 'admin',
+        username: null,
+      });
       expect(body.publishedAt).toBeUndefined();
     });
 
@@ -109,20 +109,20 @@ describe('Content Manager End to End', () => {
       data.tags.push(body);
 
       expect(body.id).toBeDefined();
-      // expect(Array.isArray(body.articles)).toBeTruthy();
+      expect(Array.isArray(body.articles)).toBeTruthy();
       expect(body.name).toBe('tag2');
-      // expect(body.createdBy).toMatchObject({
-      //   firstname: 'admin',
-      //   id: 1,
-      //   lastname: 'admin',
-      //   username: null,
-      // });
-      // expect(body.updatedBy).toMatchObject({
-      //   firstname: 'admin',
-      //   id: 1,
-      //   lastname: 'admin',
-      //   username: null,
-      // });
+      expect(body.createdBy).toMatchObject({
+        firstname: 'admin',
+        id: 1,
+        lastname: 'admin',
+        username: null,
+      });
+      expect(body.updatedBy).toMatchObject({
+        firstname: 'admin',
+        id: 1,
+        lastname: 'admin',
+        username: null,
+      });
       expect(body.publishedAt).toBeUndefined();
     });
 
@@ -138,20 +138,20 @@ describe('Content Manager End to End', () => {
       data.tags.push(body);
 
       expect(body.id).toBeDefined();
-      // expect(Array.isArray(body.articles)).toBeTruthy();
+      expect(Array.isArray(body.articles)).toBeTruthy();
       expect(body.name).toBe('tag3');
-      // expect(body.createdBy).toMatchObject({
-      //   firstname: 'admin',
-      //   id: 1,
-      //   lastname: 'admin',
-      //   username: null,
-      // });
-      // expect(body.updatedBy).toMatchObject({
-      //   firstname: 'admin',
-      //   id: 1,
-      //   lastname: 'admin',
-      //   username: null,
-      // });
+      expect(body.createdBy).toMatchObject({
+        firstname: 'admin',
+        id: 1,
+        lastname: 'admin',
+        username: null,
+      });
+      expect(body.updatedBy).toMatchObject({
+        firstname: 'admin',
+        id: 1,
+        lastname: 'admin',
+        username: null,
+      });
       expect(body.publishedAt).toBeUndefined();
     });
 
@@ -173,20 +173,20 @@ describe('Content Manager End to End', () => {
       expect(body.id).toBeDefined();
       expect(body.title).toBe(entry.title);
       expect(body.content).toBe(entry.content);
-      // expect(Array.isArray(body.tags)).toBeTruthy();
-      // expect(body.tags.length).toBe(0);
-      // expect(body.createdBy).toMatchObject({
-      //   firstname: 'admin',
-      //   id: 1,
-      //   lastname: 'admin',
-      //   username: null,
-      // });
-      // expect(body.updatedBy).toMatchObject({
-      //   firstname: 'admin',
-      //   id: 1,
-      //   lastname: 'admin',
-      //   username: null,
-      // });
+      expect(Array.isArray(body.tags)).toBeTruthy();
+      expect(body.tags.length).toBe(0);
+      expect(body.createdBy).toMatchObject({
+        firstname: 'admin',
+        id: 1,
+        lastname: 'admin',
+        username: null,
+      });
+      expect(body.updatedBy).toMatchObject({
+        firstname: 'admin',
+        id: 1,
+        lastname: 'admin',
+        username: null,
+      });
       expect(body.publishedAt).toBeUndefined();
     });
 
