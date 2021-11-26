@@ -7,9 +7,9 @@ const { yup } = require('@strapi/utils');
 /**
  * Utility function to compose validators
  */
-const composeValidators = (...fns) => (attr, { isDraft, uid, attributeName, entityId }) => {
+const composeValidators = (...fns) => (attr, { isDraft, model, attributeName, entity, data }) => {
   return fns.reduce((validator, fn) => {
-    return fn(attr, validator, { isDraft, uid, attributeName, entityId });
+    return fn(attr, validator, { isDraft, model, attributeName, entity, data });
   }, yup.mixed());
 };
 
@@ -71,14 +71,24 @@ const addMaxFloatValidator = ({ max }, validator) =>
 const addStringRegexValidator = ({ regex }, validator) =>
   _.isUndefined(regex) ? validator : validator.matches(new RegExp(regex));
 
-const addUniqueValidator = (attr, validator, { uid, attributeName, entityId }) => {
-  if (attr.unique) {
+const addUniqueValidator = (attr, validator, { model, attributeName, entity, data }) => {
+  /**
+   * If the attribute is unchanged we skip the unique verification. This will
+   * prevent the validator to be triggered in case the user activated the
+   * unique constraint after already creating multiple entries with
+   * the same attribute value for that field.
+   */
+  if (entity && data === entity[attributeName]) {
+    return validator;
+  }
+
+  if (attr.unique || attr.type === 'uid') {
     return validator.test('unique', 'This attribute must be unique', async value => {
-      let whereParams = entityId
-        ? { $and: [{ [attributeName]: value }, { $not: { id: entityId } }] }
+      let whereParams = entity
+        ? { $and: [{ [attributeName]: value }, { $not: { id: entity.id } }] }
         : { [attributeName]: value };
 
-      const record = await strapi.db.query(uid).findOne({
+      const record = await strapi.db.query(model.uid).findOne({
         select: ['id'],
         where: whereParams,
       });
@@ -131,7 +141,7 @@ module.exports = {
   password: stringValidator,
   email: emailValidator,
   enumeration: enumerationValidator,
-  boolean: () => () => yup.mixed(),
+  boolean: () => yup.boolean(),
   uid: uidValidator,
   json: () => yup.mixed(),
   integer: integerValidator,

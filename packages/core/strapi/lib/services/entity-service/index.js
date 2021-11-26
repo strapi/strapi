@@ -202,10 +202,14 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
 
     const isDraft = contentTypesUtils.isDraft(entityToUpdate, model);
 
-    const validData = await entityValidator.validateEntityUpdate(model, data, {
-      isDraft,
-      entityId,
-    });
+    const validData = await entityValidator.validateEntityUpdate(
+      model,
+      data,
+      {
+        isDraft,
+      },
+      entityToUpdate
+    );
 
     const query = transformParamsToQuery(uid, pickSelectionParams(wrappedParams));
 

@@ -120,12 +120,13 @@ const createRelationValidator = createOrUpdate => (attr, data, { isDraft }) => {
 
 const createScalarAttributeValidator = createOrUpdate => (
   attr,
-  { isDraft, uid, attributeName, entityId }
+  data,
+  { isDraft, model, attributeName, entity }
 ) => {
   let validator;
 
   if (has(attr.type, validators)) {
-    validator = validators[attr.type](attr, { isDraft, uid, attributeName, entityId });
+    validator = validators[attr.type](attr, { isDraft, model, attributeName, entity, data });
   } else {
     // No validators specified - fall back to mixed
     validator = yup.mixed();
@@ -139,18 +140,18 @@ const createScalarAttributeValidator = createOrUpdate => (
 const createAttributeValidator = createOrUpdate => (
   attr,
   data,
-  { isDraft, uid, attributeName, entityId }
+  { isDraft, model, attributeName, entity }
 ) => {
   let validator;
 
   if (isMediaAttribute(attr)) {
     validator = yup.mixed();
   } else if (isScalarAttribute(attr)) {
-    validator = createScalarAttributeValidator(createOrUpdate)(attr, {
+    validator = createScalarAttributeValidator(createOrUpdate)(attr, data, {
       isDraft,
-      uid,
+      model,
       attributeName,
-      entityId,
+      entity,
     });
   } else {
     if (attr.type === 'component') {
@@ -169,14 +170,14 @@ const createAttributeValidator = createOrUpdate => (
   return validator;
 };
 
-const createModelValidator = createOrUpdate => (model, data, { isDraft, entityId }) => {
+const createModelValidator = createOrUpdate => (model, data, { isDraft }, entity) => {
   const writableAttributes = model ? getWritableAttributes(model) : [];
 
   const schema = writableAttributes.reduce((validators, attributeName) => {
     const validator = createAttributeValidator(createOrUpdate)(
       model.attributes[attributeName],
       prop(attributeName, data),
-      { isDraft, uid: model.uid, attributeName, entityId }
+      { isDraft, model, attributeName, entity }
     );
 
     return assoc(attributeName, validator)(validators);
@@ -188,7 +189,8 @@ const createModelValidator = createOrUpdate => (model, data, { isDraft, entityId
 const createValidateEntity = createOrUpdate => async (
   model,
   data,
-  { isDraft = false, entityId } = {}
+  { isDraft = false } = {},
+  entity = null
 ) => {
   if (!isObject(data)) {
     const { displayName } = model.info;
@@ -198,10 +200,14 @@ const createValidateEntity = createOrUpdate => async (
     );
   }
 
-  const validator = createModelValidator(createOrUpdate)(model, data, {
-    isDraft,
-    entityId,
-  }).required();
+  const validator = createModelValidator(createOrUpdate)(
+    model,
+    data,
+    {
+      isDraft,
+    },
+    entity
+  ).required();
   return validateYupSchema(validator, { strict: false, abortEarly: false })(data);
 };
 
