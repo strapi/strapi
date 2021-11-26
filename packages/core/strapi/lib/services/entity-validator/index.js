@@ -149,7 +149,10 @@ const createScalarAttributeValidator = createOrUpdate => (
 const createAttributeValidator = createOrUpdate => (
   attr,
   data,
-  { isDraft, model, attributeName, entity }
+  { isDraft },
+  model,
+  attributeName,
+  entity
 ) => {
   let validator;
 
@@ -188,7 +191,10 @@ const createModelValidator = createOrUpdate => (model, data, { isDraft }, entity
     const validator = createAttributeValidator(createOrUpdate)(
       model.attributes[attributeName],
       prop(attributeName, data),
-      { isDraft, model, attributeName, entity }
+      { isDraft },
+      model,
+      attributeName,
+      entity
     );
 
     return assoc(attributeName, validator)(validators);
