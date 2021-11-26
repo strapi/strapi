@@ -7,7 +7,7 @@
     "url": "git://github.com/strapi/strapi.git"
   },
   "scripts": {
-    "prepublishOnly": "node ./scripts/build.js",
+    "prepublishOnly": "rimraf build && node ./scripts/build.js",
     "test": "echo \"no tests yet\"",
     "create:plugin-file": "node ./scripts/create-dev-plugins-file.js",
     "develop:webpack": "cross-env NODE_ENV=development webpack serve --config webpack.config.dev.js --progress profile",
@@ -110,6 +110,7 @@
     "redux-immutable": "^4.0.0",
     "redux-saga": "^0.16.0",
     "reselect": "^4.0.0",
+    "rimraf": "3.0.2",
     "sanitize-html": "2.4.0",
     "sanitize.css": "^4.1.0",
     "semver": "7.3.5",
