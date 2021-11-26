@@ -316,7 +316,45 @@ describe('Admin | containers | RoleCreatePage', () => {
       }
 
       .c36 > * + * {
+        margin-top: 24px;
+      }
+
+      .c37 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+      }
+
+      .c37 > * {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .c37 > * + * {
         margin-top: 8px;
+      }
+
+      .c39 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+      }
+
+      .c39 > * {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .c39 > * + * {
+        margin-top: 4px;
       }
 
       .c15 {
@@ -586,7 +624,7 @@ describe('Admin | containers | RoleCreatePage', () => {
         line-height: 1.25;
       }
 
-      .c37 {
+      .c38 {
         color: #666687;
         font-size: 0.875rem;
         line-height: 1.43;
@@ -605,7 +643,7 @@ describe('Admin | containers | RoleCreatePage', () => {
         padding-left: 32px;
       }
 
-      .c58 {
+      .c60 {
         background: #eaeaef;
         padding-top: 24px;
         padding-right: 32px;
@@ -633,46 +671,46 @@ describe('Admin | containers | RoleCreatePage', () => {
         grid-column: span 7;
       }
 
-      .c57 {
+      .c59 {
         grid-column: span 5;
       }
 
-      .c49 {
+      .c51 {
         color: #4945ff;
         font-size: 0.75rem;
         line-height: 1.33;
       }
 
-      .c50 {
+      .c52 {
         color: #4a4a6a;
         font-weight: 500;
         font-size: 1rem;
         line-height: 1.25;
       }
 
-      .c51 {
+      .c53 {
         color: #666687;
         font-size: 0.875rem;
         line-height: 1.43;
       }
 
-      .c38 {
+      .c40 {
         border-radius: 4px;
       }
 
-      .c41 {
-        background: #ffffff;
+      .c43 {
+        background: #f6f6f9;
         padding-right: 24px;
         padding-left: 24px;
       }
 
-      .c44 {
+      .c46 {
         -webkit-flex: 1;
         -ms-flex: 1;
         flex: 1;
       }
 
-      .c53 {
+      .c55 {
         background: #dcdce4;
         border-radius: 50%;
         cursor: pointer;
@@ -681,12 +719,12 @@ describe('Admin | containers | RoleCreatePage', () => {
         cursor: pointer;
       }
 
-      .c55 {
+      .c57 {
         color: #666687;
         width: 0.6875rem;
       }
 
-      .c42 {
+      .c44 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -704,7 +742,7 @@ describe('Admin | containers | RoleCreatePage', () => {
         align-items: center;
       }
 
-      .c45 {
+      .c47 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -718,7 +756,7 @@ describe('Admin | containers | RoleCreatePage', () => {
         align-items: center;
       }
 
-      .c54 {
+      .c56 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -736,46 +774,46 @@ describe('Admin | containers | RoleCreatePage', () => {
         align-items: center;
       }
 
-      .c39 {
-        border: 1px solid #ffffff;
+      .c41 {
+        border: 1px solid #f6f6f9;
       }
 
-      .c39:hover:not([aria-disabled='true']) {
+      .c41:hover:not([aria-disabled='true']) {
         border: 1px solid #4945ff;
       }
 
-      .c39:hover:not([aria-disabled='true']) .sc-fAiomJ {
+      .c41:hover:not([aria-disabled='true']) .sc-fAiomJ {
         color: #271fe0;
       }
 
-      .c39:hover:not([aria-disabled='true']) .c48 {
+      .c41:hover:not([aria-disabled='true']) .c50 {
         color: #4945ff;
       }
 
-      .c39:hover:not([aria-disabled='true']) > .c40 {
+      .c41:hover:not([aria-disabled='true']) > .c42 {
         background: #f0f0ff;
       }
 
-      .c39:hover:not([aria-disabled='true']) [data-strapi-dropdown='true'] {
+      .c41:hover:not([aria-disabled='true']) [data-strapi-dropdown='true'] {
         background: #d9d8ff;
       }
 
-      .c46 {
+      .c48 {
         background: transparent;
         border: none;
         position: relative;
         outline: none;
       }
 
-      .c46[aria-disabled='true'] {
+      .c48[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c46[aria-disabled='true'] svg path {
+      .c48[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c46 svg {
+      .c48 svg {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -783,11 +821,11 @@ describe('Admin | containers | RoleCreatePage', () => {
         font-size: 0.625rem;
       }
 
-      .c46 svg path {
+      .c48 svg path {
         fill: #4945ff;
       }
 
-      .c46:after {
+      .c48:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -802,11 +840,11 @@ describe('Admin | containers | RoleCreatePage', () => {
         border: 2px solid transparent;
       }
 
-      .c46:focus-visible {
+      .c48:focus-visible {
         outline: none;
       }
 
-      .c46:focus-visible:after {
+      .c48:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -817,38 +855,38 @@ describe('Admin | containers | RoleCreatePage', () => {
         border: 2px solid #4945ff;
       }
 
-      .c52 > * {
+      .c54 > * {
         margin-left: 0;
         margin-right: 0;
       }
 
-      .c52 > * + * {
+      .c54 > * + * {
         margin-left: 12px;
       }
 
-      .c56 path {
+      .c58 path {
         fill: #666687;
       }
 
-      .c47 {
+      .c49 {
         text-align: left;
       }
 
-      .c47 svg {
+      .c49 svg {
         width: 0.875rem;
         height: 0.875rem;
       }
 
-      .c47 svg path {
+      .c49 svg path {
         fill: #8e8ea9;
       }
 
-      .c43 {
+      .c45 {
         height: 5.5rem;
         border-radius: 4px;
       }
 
-      .c43:hover svg path {
+      .c45:hover svg path {
         fill: #4945ff;
       }
 
@@ -877,13 +915,13 @@ describe('Admin | containers | RoleCreatePage', () => {
       }
 
       @media (max-width:68.75rem) {
-        .c57 {
+        .c59 {
           grid-column: span;
         }
       }
 
       @media (max-width:34.375rem) {
-        .c57 {
+        .c59 {
           grid-column: span;
         }
       }
@@ -1062,10 +1100,10 @@ describe('Admin | containers | RoleCreatePage', () => {
                     class="c35"
                   >
                     <div
-                      class="c16"
+                      class="c36"
                     >
                       <div
-                        class="c36"
+                        class="c37"
                       >
                         <h2
                           class="c17"
@@ -1073,73 +1111,77 @@ describe('Admin | containers | RoleCreatePage', () => {
                           Permissions
                         </h2>
                         <p
-                          class="c37"
+                          class="c38"
                         >
                           Only actions bound by a route are listed below.
                         </p>
                       </div>
                       <div
-                        aria-disabled="false"
-                        class="c38 c39"
-                        data-strapi-expanded="false"
+                        class="c39"
                       >
                         <div
-                          class="c40 c41 c42 c43"
-                          cursor=""
+                          aria-disabled="false"
+                          class="c40 c41"
+                          data-strapi-expanded="false"
                         >
-                          <button
-                            aria-controls="accordion-content-accordion-1"
-                            aria-disabled="false"
-                            aria-expanded="false"
-                            aria-labelledby="accordion-label-accordion-1"
-                            class="c40 c44 c45 c46 c47"
-                            data-strapi-accordion-toggle="true"
-                            type="button"
+                          <div
+                            class="c42 c43 c44 c45"
+                            cursor=""
                           >
-                            <span
-                              class="c48 c49"
+                            <button
+                              aria-controls="accordion-content-accordion-1"
+                              aria-disabled="false"
+                              aria-expanded="false"
+                              aria-labelledby="accordion-label-accordion-1"
+                              class="c42 c46 c47 c48 c49"
+                              data-strapi-accordion-toggle="true"
+                              type="button"
                             >
                               <span
-                                class="c48 c50"
-                                id="accordion-label-accordion-1"
+                                class="c50 c51"
                               >
-                                Address
+                                <span
+                                  class="c50 c52"
+                                  id="accordion-label-accordion-1"
+                                >
+                                  Address
+                                </span>
+                                <p
+                                  class="c50 c53"
+                                  id="accordion-desc-accordion-1"
+                                >
+                                  Define all allowed actions for the api::address plugin.
+                                </p>
                               </span>
-                              <p
-                                class="c48 c51"
-                                id="accordion-desc-accordion-1"
-                              >
-                                Define all allowed actions for the api::address plugin.
-                              </p>
-                            </span>
-                          </button>
-                          <div
-                            class="c40 c45 c52"
-                          >
-                            <span
-                              aria-hidden="true"
-                              class="c40 c53 c54"
-                              cursor="pointer"
-                              data-strapi-dropdown="true"
-                              height="2rem"
-                              width="2rem"
+                            </button>
+                            <div
+                              class="c42 c47 c54"
                             >
-                              <svg
-                                class="c55 c56"
-                                fill="none"
-                                height="1em"
-                                viewBox="0 0 14 8"
-                                width="0.6875rem"
-                                xmlns="http://www.w3.org/2000/svg"
+                              <span
+                                aria-hidden="true"
+                                class="c42 c55 c56"
+                                cursor="pointer"
+                                data-strapi-dropdown="true"
+                                height="2rem"
+                                width="2rem"
                               >
-                                <path
-                                  clip-rule="evenodd"
-                                  d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
-                                  fill="#32324D"
-                                  fill-rule="evenodd"
-                                />
-                              </svg>
-                            </span>
+                                <svg
+                                  class="c57 c58"
+                                  fill="none"
+                                  height="1em"
+                                  viewBox="0 0 14 8"
+                                  width="0.6875rem"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    clip-rule="evenodd"
+                                    d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                                    fill="#32324D"
+                                    fill-rule="evenodd"
+                                  />
+                                </svg>
+                              </span>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -1147,14 +1189,14 @@ describe('Admin | containers | RoleCreatePage', () => {
                   </div>
                 </div>
                 <div
-                  class="c57"
+                  class="c59"
                 >
                   <div
-                    class="c58"
+                    class="c60"
                     style="min-height: 100%;"
                   >
                     <div
-                      class="c36"
+                      class="c37"
                     >
                       <h3
                         class="c17"
@@ -1162,7 +1204,7 @@ describe('Admin | containers | RoleCreatePage', () => {
                         Advanced settings
                       </h3>
                       <p
-                        class="c37"
+                        class="c38"
                       >
                         Select the application's actions or the plugin's actions and click on the cog icon to display the bound route
                       </p>
