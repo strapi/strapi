@@ -64,7 +64,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         margin-top: 24px;
       }
 
-      .c0 {
+      .c0:focus-visible {
         outline: none;
       }
 

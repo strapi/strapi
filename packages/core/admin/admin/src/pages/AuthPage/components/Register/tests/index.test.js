@@ -80,7 +80,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
         margin-top: 32px;
       }
 
-      .c12 {
+      .c12:focus-visible {
         outline: none;
       }
 
