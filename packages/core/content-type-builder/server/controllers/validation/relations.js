@@ -1,5 +1,6 @@
 'use strict';
 
+const { isUndefined } = require('lodash/fp');
 const { yup } = require('@strapi/utils');
 const { typeKinds, coreUids } = require('../../services/constants');
 const { isValidName } = require('./common');
@@ -9,7 +10,7 @@ const STRAPI_USER_RELATIONS = ['oneToOne', 'oneToMany'];
 const isValidRelation = validNatures =>
   function(value) {
     if (this.parent.target === coreUids.STRAPI_USER) {
-      if (!validNatures.includes(value) || typeof this.parent.targetAttribute !== undefined) {
+      if (!validNatures.includes(value) || !isUndefined(this.parent.targetAttribute)) {
         return this.createError({
           path: this.path,
           message: `must be one of the following values: ${STRAPI_USER_RELATIONS.join(', ')}`,

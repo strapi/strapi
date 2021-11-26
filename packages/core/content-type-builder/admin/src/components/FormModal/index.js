@@ -48,7 +48,7 @@ import SingularName from '../SingularName';
 import TabForm from '../TabForm';
 import TextareaEnum from '../TextareaEnum';
 import findAttribute from '../../utils/findAttribute';
-import getTrad from '../../utils/getTrad';
+import { getTrad, isAllowedContentTypesForRelations } from '../../utils';
 import {
   canEditContentType,
   getAttributesToDisplay,
@@ -141,7 +141,7 @@ const FormModal = () => {
   useEffect(() => {
     if (isOpen) {
       const collectionTypesForRelation = sortedContentTypesList.filter(
-        ({ kind, visible }) => kind === 'collectionType' && visible
+        isAllowedContentTypesForRelations
       );
 
       // Reset all the modification when opening the edit category modal
