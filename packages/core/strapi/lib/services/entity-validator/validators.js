@@ -9,7 +9,7 @@ const { yup } = require('@strapi/utils');
  */
 const composeValidators = (...fns) => (attr, { isDraft, model, attributeName, entity, data }) => {
   return fns.reduce((validator, fn) => {
-    return fn(attr, validator, { isDraft, model, attributeName, entity, data });
+    return fn(attr, { isDraft, model, attributeName, entity, data }, validator);
   }, yup.mixed());
 };
 
@@ -20,7 +20,7 @@ const composeValidators = (...fns) => (attr, { isDraft, model, attributeName, en
  * @param {Object} attribute model attribute
  * @param {Object} validator yup validator
  */
-const addMinLengthValidator = ({ minLength }, validator, { isDraft }) =>
+const addMinLengthValidator = ({ minLength }, { isDraft }, validator) =>
   _.isInteger(minLength) && !isDraft ? validator.min(minLength) : validator;
 
 /**
@@ -28,7 +28,7 @@ const addMinLengthValidator = ({ minLength }, validator, { isDraft }) =>
  * @param {Object} attribute model attribute
  * @param {Object} validator yup validator
  */
-const addMaxLengthValidator = ({ maxLength }, validator) =>
+const addMaxLengthValidator = ({ maxLength }, __, validator) =>
   _.isInteger(maxLength) ? validator.max(maxLength) : validator;
 
 /**
@@ -36,7 +36,7 @@ const addMaxLengthValidator = ({ maxLength }, validator) =>
  * @param {Object} attribute model attribute
  * @param {Object} validator yup validator
  */
-const addMinIntegerValidator = ({ min }, validator) =>
+const addMinIntegerValidator = ({ min }, __, validator) =>
   _.isNumber(min) ? validator.min(_.toInteger(min)) : validator;
 
 /**
@@ -44,7 +44,7 @@ const addMinIntegerValidator = ({ min }, validator) =>
  * @param {Object} attribute model attribute
  * @param {Object} validator yup validator
  */
-const addMaxIntegerValidator = ({ max }, validator) =>
+const addMaxIntegerValidator = ({ max }, __, validator) =>
   _.isNumber(max) ? validator.max(_.toInteger(max)) : validator;
 
 /**
@@ -52,7 +52,7 @@ const addMaxIntegerValidator = ({ max }, validator) =>
  * @param {Object} attribute model attribute
  * @param {Object} validator yup validator
  */
-const addMinFloatValidator = ({ min }, validator) =>
+const addMinFloatValidator = ({ min }, __, validator) =>
   _.isNumber(min) ? validator.min(min) : validator;
 
 /**
@@ -60,7 +60,7 @@ const addMinFloatValidator = ({ min }, validator) =>
  * @param {Object} attribute model attribute
  * @param {Object} validator yup validator
  */
-const addMaxFloatValidator = ({ max }, validator) =>
+const addMaxFloatValidator = ({ max }, __, validator) =>
   _.isNumber(max) ? validator.max(max) : validator;
 
 /**
@@ -68,10 +68,18 @@ const addMaxFloatValidator = ({ max }, validator) =>
  * @param {Object} attribute model attribute
  * @param {Object} validator yup validator
  */
-const addStringRegexValidator = ({ regex }, validator) =>
+const addStringRegexValidator = ({ regex }, __, validator) =>
   _.isUndefined(regex) ? validator : validator.matches(new RegExp(regex));
 
-const addUniqueValidator = (attr, validator, { model, attributeName, entity, data }) => {
+const addUniqueValidator = (attr, { model, attributeName, entity, data }, validator) => {
+  /**
+   * If the attribute value is `null` we want to skip the unique validation.
+   * Otherwise it'll only accept a single `null` entry in the database.
+   */
+  if (data === null) {
+    return validator;
+  }
+
   /**
    * If the attribute is unchanged we skip the unique verification. This will
    * prevent the validator to be triggered in case the user activated the
@@ -93,7 +101,7 @@ const addUniqueValidator = (attr, validator, { model, attributeName, entity, dat
         where: whereParams,
       });
 
-      return !!record;
+      return !record;
     });
   }
 
@@ -110,9 +118,11 @@ const stringValidator = composeValidators(
   addUniqueValidator
 );
 
-const emailValidator = composeValidators(stringValidator, (attr, validator) => validator.email());
+const emailValidator = composeValidators(stringValidator, (attr, __, validator) =>
+  validator.email()
+);
 
-const uidValidator = composeValidators(stringValidator, (attr, validator) =>
+const uidValidator = composeValidators(stringValidator, (attr, __, validator) =>
   validator.matches(new RegExp('^[A-Za-z0-9-_.~]*$'))
 );
 
