@@ -230,7 +230,7 @@ const DisplayedFieldButton = ({
 
       return {
         index,
-        labelField: name,
+        labelField: children,
         rowIndex,
         name,
         size,
