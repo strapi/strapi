@@ -422,7 +422,7 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         line-height: 1.25;
       }
 
-      .c10 {
+      .c10:focus-visible {
         outline: none;
       }
 

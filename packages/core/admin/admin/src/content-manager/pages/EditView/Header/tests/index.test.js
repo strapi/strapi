@@ -50,12 +50,12 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         background: #f6f6f9;
         padding-top: 24px;
         padding-right: 56px;
-        padding-bottom: 56px;
+        padding-bottom: 40px;
         padding-left: 56px;
       }
 
       .c1 {
-        padding-bottom: 12px;
+        padding-bottom: 8px;
       }
 
       .c6 {

@@ -119,7 +119,7 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         line-height: 1.43;
       }
 
-      .c10 {
+      .c10:focus-visible {
         outline: none;
       }
 
