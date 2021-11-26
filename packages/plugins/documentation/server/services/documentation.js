@@ -115,11 +115,15 @@ module.exports = ({ strapi }) => {
         const apiDirPath = path.join(this.getApiDocumentationPath(api), version);
 
         const apiDocPath = path.join(apiDirPath, `${apiName}.json`);
-
-        await fs.ensureFile(apiDocPath);
         const apiPathsObject = builApiEndpointPath(api);
 
+        if (!apiPathsObject) {
+          continue;
+        }
+
+        await fs.ensureFile(apiDocPath);
         await fs.writeJson(apiDocPath, apiPathsObject, { spaces: 2 });
+
         paths = { ...paths, ...apiPathsObject.paths };
       }
 
