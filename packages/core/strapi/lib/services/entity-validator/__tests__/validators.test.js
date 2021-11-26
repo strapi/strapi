@@ -50,7 +50,30 @@ describe('Entity validator', () => {
 
       await validator('non-unique-test-data');
 
-      expect(fakeFindOne).not.toBeCalled();
+      expect(fakeFindOne).not.toHaveBeenCalled();
+    });
+
+    test('it does not validates the unique constraint if the attribute value is `null`', async () => {
+      fakeFindOne.mockResolvedValueOnce(null);
+
+      const validator = strapiUtils.validateYupSchema(
+        entityValidator
+          .string(
+            { type: 'string', unique: true },
+            {
+              isDraft: false,
+              model: fakeModel,
+              attributeName: 'attrStringUnique',
+              entity: null,
+              data: null,
+            }
+          )
+          .nullable()
+      );
+
+      await validator(null);
+
+      expect(fakeFindOne).not.toHaveBeenCalled();
     });
 
     test('it validates the unique constraint if there is no other record in the database', async () => {
@@ -194,7 +217,30 @@ describe('Entity validator', () => {
 
       await validator(1);
 
-      expect(fakeFindOne).not.toBeCalled();
+      expect(fakeFindOne).not.toHaveBeenCalled();
+    });
+
+    test('it does not validates the unique constraint if the attribute value is `null`', async () => {
+      fakeFindOne.mockResolvedValueOnce(null);
+
+      const validator = strapiUtils.validateYupSchema(
+        entityValidator
+          .integer(
+            { type: 'integer', unique: true },
+            {
+              isDraft: false,
+              model: fakeModel,
+              attributeName: 'attrIntegerUnique',
+              entity: null,
+              data: null,
+            }
+          )
+          .nullable()
+      );
+
+      await validator(null);
+
+      expect(fakeFindOne).not.toHaveBeenCalled();
     });
 
     test('it validates the unique constraint if there is no other record in the database', async () => {
@@ -338,7 +384,30 @@ describe('Entity validator', () => {
 
       await validator(1);
 
-      expect(fakeFindOne).not.toBeCalled();
+      expect(fakeFindOne).not.toHaveBeenCalled();
+    });
+
+    test('it does not validates the unique constraint if the attribute value is `null`', async () => {
+      fakeFindOne.mockResolvedValueOnce(null);
+
+      const validator = strapiUtils.validateYupSchema(
+        entityValidator
+          .biginteger(
+            { type: 'biginteger', unique: true },
+            {
+              isDraft: false,
+              model: fakeModel,
+              attributeName: 'attrBigIntegerUnique',
+              entity: null,
+              data: null,
+            }
+          )
+          .nullable()
+      );
+
+      await validator(null);
+
+      expect(fakeFindOne).not.toHaveBeenCalled();
     });
 
     test('it validates the unique constraint if there is no other record in the database', async () => {
@@ -482,7 +551,29 @@ describe('Entity validator', () => {
 
       await validator(1);
 
-      expect(fakeFindOne).not.toBeCalled();
+      expect(fakeFindOne).not.toHaveBeenCalled();
+    });
+
+    test('it does not validates the unique constraint if the attribute value is `null`', async () => {
+      fakeFindOne.mockResolvedValueOnce(null);
+
+      const validator = strapiUtils.validateYupSchema(
+        entityValidator
+          .float(
+            { type: 'float', unique: true },
+            {
+              isDraft: false,
+              model: fakeModel,
+              attributeName: 'attrFloatUnique',
+              entity: null,
+              data: null,
+            }
+          )
+          .nullable()
+      );
+
+      await validator(null);
+      expect(fakeFindOne).not.toHaveBeenCalled();
     });
 
     test('it validates the unique constraint if there is no other record in the database', async () => {
@@ -627,6 +718,29 @@ describe('Entity validator', () => {
       expect(await validator('non-unique-uid')).toBe('non-unique-uid');
     });
 
+    test('it does not validates the unique constraint if the attribute value is `null`', async () => {
+      fakeFindOne.mockResolvedValueOnce(null);
+
+      const validator = strapiUtils.validateYupSchema(
+        entityValidator
+          .uid(
+            { type: 'uid', unique: true },
+            {
+              isDraft: false,
+              model: fakeModel,
+              attributeName: 'attrUidUnique',
+              entity: null,
+              data: null,
+            }
+          )
+          .nullable()
+      );
+
+      await validator(null);
+
+      expect(fakeFindOne).not.toHaveBeenCalled();
+    });
+
     test('it always validates the unique constraint even if the attribute is not set as unique', async () => {
       fakeFindOne.mockResolvedValueOnce(null);
 
@@ -738,6 +852,670 @@ describe('Entity validator', () => {
       expect(fakeFindOne).toHaveBeenCalledWith({
         select: ['id'],
         where: { $and: [{ attrUidUnique: 'unique-uid' }, { $not: { id: 1 } }] },
+      });
+    });
+  });
+
+  describe('Date unique validator', () => {
+    const fakeModel = {
+      kind: 'contentType',
+      modelName: 'test-model',
+      uid: 'test-uid',
+      privateAttributes: [],
+      options: {},
+      attributes: {
+        attrDateUnique: { type: 'date', unique: true },
+      },
+    };
+
+    test('it does not validates the unique constraint if the attribute is not set as unique', async () => {
+      fakeFindOne.mockResolvedValueOnce(null);
+
+      const validator = strapiUtils.validateYupSchema(
+        entityValidator.date(
+          { type: 'date' },
+          {
+            isDraft: false,
+            model: fakeModel,
+            attributeName: 'attrDateUnique',
+            entity: null,
+            data: '2021-11-29',
+          }
+        )
+      );
+
+      await validator('2021-11-29');
+
+      expect(fakeFindOne).not.toHaveBeenCalled();
+    });
+
+    test('it does not validates the unique constraint if the attribute value is `null`', async () => {
+      fakeFindOne.mockResolvedValueOnce(null);
+
+      const validator = strapiUtils.validateYupSchema(
+        entityValidator
+          .date(
+            { type: 'date', unique: true },
+            {
+              isDraft: false,
+              model: fakeModel,
+              attributeName: 'attrDateUnique',
+              entity: null,
+              data: null,
+            }
+          )
+          .nullable()
+      );
+
+      await validator(null);
+      expect(fakeFindOne).not.toHaveBeenCalled();
+    });
+
+    test('it validates the unique constraint if there is no other record in the database', async () => {
+      fakeFindOne.mockResolvedValueOnce(null);
+
+      const validator = strapiUtils.validateYupSchema(
+        entityValidator.date(
+          { type: 'date', unique: true },
+          {
+            isDraft: false,
+            model: fakeModel,
+            attributeName: 'attrDateUnique',
+            entity: null,
+            data: '2021-11-29',
+          }
+        )
+      );
+
+      expect(await validator('2021-11-29')).toBe('2021-11-29');
+    });
+
+    test('it fails the validation of the unique constraint if the database contains a record with the same attribute value', async () => {
+      expect.assertions(1);
+      fakeFindOne.mockResolvedValueOnce({ attrDateUnique: '2021-11-29' });
+
+      const validator = strapiUtils.validateYupSchema(
+        entityValidator.date(
+          { type: 'date', unique: true },
+          {
+            isDraft: false,
+            model: fakeModel,
+            attributeName: 'attrDateUnique',
+            entity: null,
+            data: '2021-11-29',
+          }
+        )
+      );
+
+      try {
+        await validator('2021-11-29');
+      } catch (err) {
+        expect(err).toBeInstanceOf(YupValidationError);
+      }
+    });
+
+    test('it validates the unique constraint if the attribute data has not changed even if there is a record in the database with the same attribute value', async () => {
+      fakeFindOne.mockResolvedValueOnce({ attrDateUnique: '2021-11-29' });
+
+      const validator = strapiUtils.validateYupSchema(
+        entityValidator.date(
+          { type: 'date', unique: true },
+          {
+            isDraft: false,
+            model: fakeModel,
+            attributeName: 'attrDateUnique',
+            entity: { attrDateUnique: '2021-11-29' },
+            data: '2021-11-29',
+          }
+        )
+      );
+
+      expect(await validator('2021-11-29')).toBe('2021-11-29');
+    });
+
+    test('it checks the database for records with the same value for the checked attribute', async () => {
+      fakeFindOne.mockResolvedValueOnce(null);
+
+      const validator = strapiUtils.validateYupSchema(
+        entityValidator.date(
+          { type: 'date', unique: true },
+          {
+            isDraft: false,
+            model: fakeModel,
+            attributeName: 'attrDateUnique',
+            entity: null,
+            data: '2021-11-29',
+          }
+        )
+      );
+
+      await validator('2021-11-29');
+
+      expect(fakeFindOne).toHaveBeenCalledWith({
+        select: ['id'],
+        where: { attrDateUnique: '2021-11-29' },
+      });
+    });
+
+    test('it checks the database for records with the same value but not the same id for the checked attribute if an entity is passed', async () => {
+      fakeFindOne.mockResolvedValueOnce(null);
+
+      const validator = strapiUtils.validateYupSchema(
+        entityValidator.date(
+          { type: 'date', unique: true },
+          {
+            isDraft: false,
+            model: fakeModel,
+            attributeName: 'attrDateUnique',
+            entity: { id: 1 },
+            data: '2021-11-29',
+          }
+        )
+      );
+
+      await validator('2021-11-29');
+
+      expect(fakeFindOne).toHaveBeenCalledWith({
+        select: ['id'],
+        where: { $and: [{ attrDateUnique: '2021-11-29' }, { $not: { id: 1 } }] },
+      });
+    });
+  });
+
+  describe('DateTime unique validator', () => {
+    const fakeModel = {
+      kind: 'contentType',
+      modelName: 'test-model',
+      uid: 'test-uid',
+      privateAttributes: [],
+      options: {},
+      attributes: {
+        attrDateTimeUnique: { type: 'datetime', unique: true },
+      },
+    };
+
+    test('it does not validates the unique constraint if the attribute is not set as unique', async () => {
+      fakeFindOne.mockResolvedValueOnce(null);
+
+      const validator = strapiUtils.validateYupSchema(
+        entityValidator.datetime(
+          { type: 'datetime' },
+          {
+            isDraft: false,
+            model: fakeModel,
+            attributeName: 'attrDateTimeUnique',
+            entity: null,
+            data: '2021-11-29T00:00:00.000Z',
+          }
+        )
+      );
+
+      await validator('2021-11-29T00:00:00.000Z');
+
+      expect(fakeFindOne).not.toHaveBeenCalled();
+    });
+
+    test('it does not validates the unique constraint if the attribute value is `null`', async () => {
+      fakeFindOne.mockResolvedValueOnce(null);
+
+      const validator = strapiUtils.validateYupSchema(
+        entityValidator
+          .datetime(
+            { type: 'datetime', unique: true },
+            {
+              isDraft: false,
+              model: fakeModel,
+              attributeName: 'attrDateTimeUnique',
+              entity: null,
+              data: null,
+            }
+          )
+          .nullable()
+      );
+
+      await validator(null);
+      expect(fakeFindOne).not.toHaveBeenCalled();
+    });
+
+    test('it validates the unique constraint if there is no other record in the database', async () => {
+      fakeFindOne.mockResolvedValueOnce(null);
+
+      const validator = strapiUtils.validateYupSchema(
+        entityValidator.datetime(
+          { type: 'datetime', unique: true },
+          {
+            isDraft: false,
+            model: fakeModel,
+            attributeName: 'attrDateTimeUnique',
+            entity: null,
+            data: '2021-11-29T00:00:00.000Z',
+          }
+        )
+      );
+
+      expect(await validator('2021-11-29T00:00:00.000Z')).toBe('2021-11-29T00:00:00.000Z');
+    });
+
+    test('it fails the validation of the unique constraint if the database contains a record with the same attribute value', async () => {
+      expect.assertions(1);
+      fakeFindOne.mockResolvedValueOnce({ attrDateTimeUnique: '2021-11-29T00:00:00.000Z' });
+
+      const validator = strapiUtils.validateYupSchema(
+        entityValidator.datetime(
+          { type: 'datetime', unique: true },
+          {
+            isDraft: false,
+            model: fakeModel,
+            attributeName: 'attrDateTimeUnique',
+            entity: null,
+            data: '2021-11-29T00:00:00.000Z',
+          }
+        )
+      );
+
+      try {
+        await validator('2021-11-29T00:00:00.000Z');
+      } catch (err) {
+        expect(err).toBeInstanceOf(YupValidationError);
+      }
+    });
+
+    test('it validates the unique constraint if the attribute data has not changed even if there is a record in the database with the same attribute value', async () => {
+      fakeFindOne.mockResolvedValueOnce({ attrDateTimeUnique: '2021-11-29T00:00:00.000Z' });
+
+      const validator = strapiUtils.validateYupSchema(
+        entityValidator.datetime(
+          { type: 'datetime', unique: true },
+          {
+            isDraft: false,
+            model: fakeModel,
+            attributeName: 'attrDateTimeUnique',
+            entity: { attrDateTimeUnique: '2021-11-29T00:00:00.000Z' },
+            data: '2021-11-29T00:00:00.000Z',
+          }
+        )
+      );
+
+      expect(await validator('2021-11-29T00:00:00.000Z')).toBe('2021-11-29T00:00:00.000Z');
+    });
+
+    test('it checks the database for records with the same value for the checked attribute', async () => {
+      fakeFindOne.mockResolvedValueOnce(null);
+
+      const validator = strapiUtils.validateYupSchema(
+        entityValidator.datetime(
+          { type: 'datetime', unique: true },
+          {
+            isDraft: false,
+            model: fakeModel,
+            attributeName: 'attrDateTimeUnique',
+            entity: null,
+            data: '2021-11-29T00:00:00.000Z',
+          }
+        )
+      );
+
+      await validator('2021-11-29T00:00:00.000Z');
+
+      expect(fakeFindOne).toHaveBeenCalledWith({
+        select: ['id'],
+        where: { attrDateTimeUnique: '2021-11-29T00:00:00.000Z' },
+      });
+    });
+
+    test('it checks the database for records with the same value but not the same id for the checked attribute if an entity is passed', async () => {
+      fakeFindOne.mockResolvedValueOnce(null);
+
+      const validator = strapiUtils.validateYupSchema(
+        entityValidator.datetime(
+          { type: 'datetime', unique: true },
+          {
+            isDraft: false,
+            model: fakeModel,
+            attributeName: 'attrDateTimeUnique',
+            entity: { id: 1 },
+            data: '2021-11-29T00:00:00.000Z',
+          }
+        )
+      );
+
+      await validator('2021-11-29T00:00:00.000Z');
+
+      expect(fakeFindOne).toHaveBeenCalledWith({
+        select: ['id'],
+        where: { $and: [{ attrDateTimeUnique: '2021-11-29T00:00:00.000Z' }, { $not: { id: 1 } }] },
+      });
+    });
+  });
+
+  describe('Time unique validator', () => {
+    const fakeModel = {
+      kind: 'contentType',
+      modelName: 'test-model',
+      uid: 'test-uid',
+      privateAttributes: [],
+      options: {},
+      attributes: {
+        attrTimeUnique: { type: 'time', unique: true },
+      },
+    };
+
+    test('it does not validates the unique constraint if the attribute is not set as unique', async () => {
+      fakeFindOne.mockResolvedValueOnce(null);
+
+      const validator = strapiUtils.validateYupSchema(
+        entityValidator.time(
+          { type: 'time' },
+          {
+            isDraft: false,
+            model: fakeModel,
+            attributeName: 'attrTimeUnique',
+            entity: null,
+            data: '00:00:00.000Z',
+          }
+        )
+      );
+
+      await validator('00:00:00.000Z');
+
+      expect(fakeFindOne).not.toHaveBeenCalled();
+    });
+
+    test('it does not validates the unique constraint if the attribute value is `null`', async () => {
+      fakeFindOne.mockResolvedValueOnce(null);
+
+      const validator = strapiUtils.validateYupSchema(
+        entityValidator
+          .time(
+            { type: 'time', unique: true },
+            {
+              isDraft: false,
+              model: fakeModel,
+              attributeName: 'attrTimeUnique',
+              entity: null,
+              data: null,
+            }
+          )
+          .nullable()
+      );
+
+      await validator(null);
+      expect(fakeFindOne).not.toHaveBeenCalled();
+    });
+
+    test('it validates the unique constraint if there is no other record in the database', async () => {
+      fakeFindOne.mockResolvedValueOnce(null);
+
+      const validator = strapiUtils.validateYupSchema(
+        entityValidator.time(
+          { type: 'time', unique: true },
+          {
+            isDraft: false,
+            model: fakeModel,
+            attributeName: 'attrTimeUnique',
+            entity: null,
+            data: '00:00:00.000Z',
+          }
+        )
+      );
+
+      expect(await validator('00:00:00.000Z')).toBe('00:00:00.000Z');
+    });
+
+    test('it fails the validation of the unique constraint if the database contains a record with the same attribute value', async () => {
+      expect.assertions(1);
+      fakeFindOne.mockResolvedValueOnce({ attrTimeUnique: '00:00:00.000Z' });
+
+      const validator = strapiUtils.validateYupSchema(
+        entityValidator.time(
+          { type: 'time', unique: true },
+          {
+            isDraft: false,
+            model: fakeModel,
+            attributeName: 'attrTimeUnique',
+            entity: null,
+            data: '00:00:00.000Z',
+          }
+        )
+      );
+
+      try {
+        await validator('00:00:00.000Z');
+      } catch (err) {
+        expect(err).toBeInstanceOf(YupValidationError);
+      }
+    });
+
+    test('it validates the unique constraint if the attribute data has not changed even if there is a record in the database with the same attribute value', async () => {
+      fakeFindOne.mockResolvedValueOnce({ attrTimeUnique: '00:00:00.000Z' });
+
+      const validator = strapiUtils.validateYupSchema(
+        entityValidator.time(
+          { type: 'time', unique: true },
+          {
+            isDraft: false,
+            model: fakeModel,
+            attributeName: 'attrTimeUnique',
+            entity: { attrTimeUnique: '00:00:00.000Z' },
+            data: '00:00:00.000Z',
+          }
+        )
+      );
+
+      expect(await validator('00:00:00.000Z')).toBe('00:00:00.000Z');
+    });
+
+    test('it checks the database for records with the same value for the checked attribute', async () => {
+      fakeFindOne.mockResolvedValueOnce(null);
+
+      const validator = strapiUtils.validateYupSchema(
+        entityValidator.time(
+          { type: 'time', unique: true },
+          {
+            isDraft: false,
+            model: fakeModel,
+            attributeName: 'attrTimeUnique',
+            entity: null,
+            data: '00:00:00.000Z',
+          }
+        )
+      );
+
+      await validator('00:00:00.000Z');
+
+      expect(fakeFindOne).toHaveBeenCalledWith({
+        select: ['id'],
+        where: { attrTimeUnique: '00:00:00.000Z' },
+      });
+    });
+
+    test('it checks the database for records with the same value but not the same id for the checked attribute if an entity is passed', async () => {
+      fakeFindOne.mockResolvedValueOnce(null);
+
+      const validator = strapiUtils.validateYupSchema(
+        entityValidator.time(
+          { type: 'time', unique: true },
+          {
+            isDraft: false,
+            model: fakeModel,
+            attributeName: 'attrTimeUnique',
+            entity: { id: 1 },
+            data: '00:00:00.000Z',
+          }
+        )
+      );
+
+      await validator('00:00:00.000Z');
+
+      expect(fakeFindOne).toHaveBeenCalledWith({
+        select: ['id'],
+        where: { $and: [{ attrTimeUnique: '00:00:00.000Z' }, { $not: { id: 1 } }] },
+      });
+    });
+  });
+
+  describe('Timestamp unique validator', () => {
+    const fakeModel = {
+      kind: 'contentType',
+      modelName: 'test-model',
+      uid: 'test-uid',
+      privateAttributes: [],
+      options: {},
+      attributes: {
+        attrTimestampUnique: { type: 'timestamp', unique: true },
+      },
+    };
+
+    test('it does not validates the unique constraint if the attribute is not set as unique', async () => {
+      fakeFindOne.mockResolvedValueOnce(null);
+
+      const validator = strapiUtils.validateYupSchema(
+        entityValidator.timestamp(
+          { type: 'timestamp' },
+          {
+            isDraft: false,
+            model: fakeModel,
+            attributeName: 'attrTimestampUnique',
+            entity: null,
+            data: '1638140400',
+          }
+        )
+      );
+
+      await validator('1638140400');
+
+      expect(fakeFindOne).not.toHaveBeenCalled();
+    });
+
+    test('it does not validates the unique constraint if the attribute value is `null`', async () => {
+      fakeFindOne.mockResolvedValueOnce(null);
+
+      const validator = strapiUtils.validateYupSchema(
+        entityValidator
+          .timestamp(
+            { type: 'timestamp', unique: true },
+            {
+              isDraft: false,
+              model: fakeModel,
+              attributeName: 'attrTimestampUnique',
+              entity: null,
+              data: null,
+            }
+          )
+          .nullable()
+      );
+
+      await validator(null);
+      expect(fakeFindOne).not.toHaveBeenCalled();
+    });
+
+    test('it validates the unique constraint if there is no other record in the database', async () => {
+      fakeFindOne.mockResolvedValueOnce(null);
+
+      const validator = strapiUtils.validateYupSchema(
+        entityValidator.timestamp(
+          { type: 'timestamp', unique: true },
+          {
+            isDraft: false,
+            model: fakeModel,
+            attributeName: 'attrTimestampUnique',
+            entity: null,
+            data: '1638140400',
+          }
+        )
+      );
+
+      expect(await validator('1638140400')).toBe('1638140400');
+    });
+
+    test('it fails the validation of the unique constraint if the database contains a record with the same attribute value', async () => {
+      expect.assertions(1);
+      fakeFindOne.mockResolvedValueOnce({ attrTimestampUnique: '1638140400' });
+
+      const validator = strapiUtils.validateYupSchema(
+        entityValidator.timestamp(
+          { type: 'timestamp', unique: true },
+          {
+            isDraft: false,
+            model: fakeModel,
+            attributeName: 'attrTimestampUnique',
+            entity: null,
+            data: '1638140400',
+          }
+        )
+      );
+
+      try {
+        await validator('1638140400');
+      } catch (err) {
+        expect(err).toBeInstanceOf(YupValidationError);
+      }
+    });
+
+    test('it validates the unique constraint if the attribute data has not changed even if there is a record in the database with the same attribute value', async () => {
+      fakeFindOne.mockResolvedValueOnce({ attrTimestampUnique: '1638140400' });
+
+      const validator = strapiUtils.validateYupSchema(
+        entityValidator.timestamp(
+          { type: 'timestamp', unique: true },
+          {
+            isDraft: false,
+            model: fakeModel,
+            attributeName: 'attrTimestampUnique',
+            entity: { attrTimestampUnique: '1638140400' },
+            data: '1638140400',
+          }
+        )
+      );
+
+      expect(await validator('1638140400')).toBe('1638140400');
+    });
+
+    test('it checks the database for records with the same value for the checked attribute', async () => {
+      fakeFindOne.mockResolvedValueOnce(null);
+
+      const validator = strapiUtils.validateYupSchema(
+        entityValidator.timestamp(
+          { type: 'timestamp', unique: true },
+          {
+            isDraft: false,
+            model: fakeModel,
+            attributeName: 'attrTimestampUnique',
+            entity: null,
+            data: '1638140400',
+          }
+        )
+      );
+
+      await validator('1638140400');
+
+      expect(fakeFindOne).toHaveBeenCalledWith({
+        select: ['id'],
+        where: { attrTimestampUnique: '1638140400' },
+      });
+    });
+
+    test('it checks the database for records with the same value but not the same id for the checked attribute if an entity is passed', async () => {
+      fakeFindOne.mockResolvedValueOnce(null);
+
+      const validator = strapiUtils.validateYupSchema(
+        entityValidator.timestamp(
+          { type: 'timestamp', unique: true },
+          {
+            isDraft: false,
+            model: fakeModel,
+            attributeName: 'attrTimestampUnique',
+            entity: { id: 1 },
+            data: '1638140400',
+          }
+        )
+      );
+
+      await validator('1638140400');
+
+      expect(fakeFindOne).toHaveBeenCalledWith({
+        select: ['id'],
+        where: { $and: [{ attrTimestampUnique: '1638140400' }, { $not: { id: 1 } }] },
       });
     });
   });
