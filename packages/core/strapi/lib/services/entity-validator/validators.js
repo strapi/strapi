@@ -7,10 +7,16 @@ const { yup } = require('@strapi/utils');
 /**
  * Utility function to compose validators
  */
-const composeValidators = (...fns) => (attr, { isDraft, model, attributeName, entity, data }) => {
-  return fns.reduce((validator, fn) => {
-    return fn(attr, { isDraft, model, attributeName, entity, data }, validator);
-  }, yup.mixed());
+const composeValidators = (...fns) => (...args) => {
+  let validator = yup.mixed();
+
+  // if we receive a schema then use it as base schema for nested composition
+  if (yup.isSchema(args[0])) {
+    validator = args[0];
+    args = args.slice(1);
+  }
+
+  return fns.reduce((validator, fn) => fn(validator, ...args), validator);
 };
 
 /* Validator utils */
@@ -20,7 +26,7 @@ const composeValidators = (...fns) => (attr, { isDraft, model, attributeName, en
  * @param {Object} attribute model attribute
  * @param {Object} validator yup validator
  */
-const addMinLengthValidator = ({ minLength }, { isDraft }, validator) =>
+const addMinLengthValidator = (validator, { minLength }, { isDraft }) =>
   _.isInteger(minLength) && !isDraft ? validator.min(minLength) : validator;
 
 /**
@@ -28,7 +34,7 @@ const addMinLengthValidator = ({ minLength }, { isDraft }, validator) =>
  * @param {Object} attribute model attribute
  * @param {Object} validator yup validator
  */
-const addMaxLengthValidator = ({ maxLength }, __, validator) =>
+const addMaxLengthValidator = (validator, { maxLength }) =>
   _.isInteger(maxLength) ? validator.max(maxLength) : validator;
 
 /**
@@ -36,7 +42,7 @@ const addMaxLengthValidator = ({ maxLength }, __, validator) =>
  * @param {Object} attribute model attribute
  * @param {Object} validator yup validator
  */
-const addMinIntegerValidator = ({ min }, __, validator) =>
+const addMinIntegerValidator = (validator, { min }) =>
   _.isNumber(min) ? validator.min(_.toInteger(min)) : validator;
 
 /**
@@ -44,7 +50,7 @@ const addMinIntegerValidator = ({ min }, __, validator) =>
  * @param {Object} attribute model attribute
  * @param {Object} validator yup validator
  */
-const addMaxIntegerValidator = ({ max }, __, validator) =>
+const addMaxIntegerValidator = (validator, { max }) =>
   _.isNumber(max) ? validator.max(_.toInteger(max)) : validator;
 
 /**
@@ -52,7 +58,7 @@ const addMaxIntegerValidator = ({ max }, __, validator) =>
  * @param {Object} attribute model attribute
  * @param {Object} validator yup validator
  */
-const addMinFloatValidator = ({ min }, __, validator) =>
+const addMinFloatValidator = (validator, { min }) =>
   _.isNumber(min) ? validator.min(min) : validator;
 
 /**
@@ -60,7 +66,7 @@ const addMinFloatValidator = ({ min }, __, validator) =>
  * @param {Object} attribute model attribute
  * @param {Object} validator yup validator
  */
-const addMaxFloatValidator = ({ max }, __, validator) =>
+const addMaxFloatValidator = (validator, { max }) =>
   _.isNumber(max) ? validator.max(max) : validator;
 
 /**
@@ -68,15 +74,19 @@ const addMaxFloatValidator = ({ max }, __, validator) =>
  * @param {Object} attribute model attribute
  * @param {Object} validator yup validator
  */
-const addStringRegexValidator = ({ regex }, __, validator) =>
+const addStringRegexValidator = (validator, { regex }) =>
   _.isUndefined(regex) ? validator : validator.matches(new RegExp(regex));
 
-const addUniqueValidator = (attr, { model, attributeName, entity, data }, validator) => {
+const addUniqueValidator = (validator, attr, __, model, updatedAttribute, entity) => {
+  if (!attr.unique && attr.type !== 'uid') {
+    return validator;
+  }
+
   /**
    * If the attribute value is `null` we want to skip the unique validation.
    * Otherwise it'll only accept a single `null` entry in the database.
    */
-  if (data === null) {
+  if (updatedAttribute.value === null) {
     return validator;
   }
 
@@ -86,26 +96,22 @@ const addUniqueValidator = (attr, { model, attributeName, entity, data }, valida
    * unique constraint after already creating multiple entries with
    * the same attribute value for that field.
    */
-  if (entity && data === entity[attributeName]) {
+  if (entity && updatedAttribute.value === entity[updatedAttribute.name]) {
     return validator;
   }
 
-  if (attr.unique || attr.type === 'uid') {
-    return validator.test('unique', 'This attribute must be unique', async value => {
-      let whereParams = entity
-        ? { $and: [{ [attributeName]: value }, { $not: { id: entity.id } }] }
-        : { [attributeName]: value };
+  return validator.test('unique', 'This attribute must be unique', async value => {
+    let whereParams = entity
+      ? { $and: [{ [updatedAttribute.name]: value }, { $not: { id: entity.id } }] }
+      : { [updatedAttribute.name]: value };
 
-      const record = await strapi.db.query(model.uid).findOne({
-        select: ['id'],
-        where: whereParams,
-      });
-
-      return !record;
+    const record = await strapi.db.query(model.uid).findOne({
+      select: ['id'],
+      where: whereParams,
     });
-  }
 
-  return validator;
+    return !record;
+  });
 };
 
 /* Type validators */
@@ -118,11 +124,9 @@ const stringValidator = composeValidators(
   addUniqueValidator
 );
 
-const emailValidator = composeValidators(stringValidator, (attr, __, validator) =>
-  validator.email()
-);
+const emailValidator = composeValidators(stringValidator, validator => validator.email());
 
-const uidValidator = composeValidators(stringValidator, (attr, __, validator) =>
+const uidValidator = composeValidators(stringValidator, validator =>
   validator.matches(new RegExp('^[A-Za-z0-9-_.~]*$'))
 );
 
@@ -155,11 +159,11 @@ module.exports = {
   uid: uidValidator,
   json: () => yup.mixed(),
   integer: integerValidator,
-  biginteger: composeValidators(() => yup.mixed(), addUniqueValidator),
+  biginteger: composeValidators(addUniqueValidator),
   float: floatValidator,
   decimal: floatValidator,
-  date: composeValidators(() => yup.mixed(), addUniqueValidator),
-  time: composeValidators(() => yup.mixed(), addUniqueValidator),
-  datetime: composeValidators(() => yup.mixed(), addUniqueValidator),
-  timestamp: composeValidators(() => yup.mixed(), addUniqueValidator),
+  date: composeValidators(addUniqueValidator),
+  time: composeValidators(addUniqueValidator),
+  datetime: composeValidators(addUniqueValidator),
+  timestamp: composeValidators(addUniqueValidator),
 };

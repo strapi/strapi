@@ -121,12 +121,21 @@ const createRelationValidator = createOrUpdate => (attr, data, { isDraft }) => {
 const createScalarAttributeValidator = createOrUpdate => (
   attr,
   data,
-  { isDraft, model, attributeName, entity }
+  { isDraft },
+  model,
+  attributeName,
+  entity
 ) => {
   let validator;
 
   if (has(attr.type, validators)) {
-    validator = validators[attr.type](attr, { isDraft, model, attributeName, entity, data });
+    validator = validators[attr.type](
+      attr,
+      { isDraft },
+      model,
+      { name: attributeName, value: data },
+      entity
+    );
   } else {
     // No validators specified - fall back to mixed
     validator = yup.mixed();
@@ -147,12 +156,14 @@ const createAttributeValidator = createOrUpdate => (
   if (isMediaAttribute(attr)) {
     validator = yup.mixed();
   } else if (isScalarAttribute(attr)) {
-    validator = createScalarAttributeValidator(createOrUpdate)(attr, data, {
-      isDraft,
+    validator = createScalarAttributeValidator(createOrUpdate)(
+      attr,
+      data,
+      { isDraft },
       model,
       attributeName,
-      entity,
-    });
+      entity
+    );
   } else {
     if (attr.type === 'component') {
       validator = createComponentValidator(createOrUpdate)(attr, data, { isDraft });
