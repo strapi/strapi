@@ -84,6 +84,8 @@
   "app.components.LeftMenuFooter.documentation": "Dokumentace",
   "app.components.LeftMenuFooter.help": "Nápověda",
   "app.components.LeftMenuFooter.poweredBy": "Běží na ",
+  "app.components.LeftMenuLinkContainer.collectionTypes": "Kolekce typů",
+  "app.components.LeftMenuLinkContainer.singleTypes": "Jednoúčelové typy",
   "app.components.LeftMenuLinkContainer.configuration": "Konfigurace",
   "app.components.LeftMenuLinkContainer.general": "Obecné",
   "app.components.LeftMenuLinkContainer.installNewPlugin": "Tržiště",
