@@ -47,22 +47,22 @@ const addMaxLengthValidator = (validator, { attr }) =>
 
 /**
  * Adds min integer validator
- * @param {import('yup').Number} validator yup validator
+ * @param {import('yup').NumberSchema} validator yup validator
  * @param {Object} metas
  * @param {{ min: Number }} metas.attr model attribute
  *
- * @returns {{import('yup').StringSchema}}
+ * @returns {{import('yup').NumberSchema}}
  */
 const addMinIntegerValidator = (validator, { attr }) =>
   _.isNumber(attr.min) ? validator.min(_.toInteger(attr.min)) : validator;
 
 /**
  * Adds max integer validator
- * @param {import('yup').Number} validator yup validator
+ * @param {import('yup').NumberSchema} validator yup validator
  * @param {Object} metas
  * @param {{ max: Number }} metas.attr model attribute
  *
- * @returns {{import('yup').StringSchema}}
+ * @returns {{import('yup').NumberSchema}}
  */
 const addMaxIntegerValidator = (validator, { attr }) =>
   _.isNumber(attr.max) ? validator.max(_.toInteger(attr.max)) : validator;
@@ -73,18 +73,18 @@ const addMaxIntegerValidator = (validator, { attr }) =>
  * @param {Object} metas
  * @param {{ min: Number }} metas.attr model attribute
  *
- * @returns {{import('yup').StringSchema}}
+ * @returns {{import('yup').NumberSchema}}
  */
 const addMinFloatValidator = (validator, { attr }) =>
   _.isNumber(attr.min) ? validator.min(attr.min) : validator;
 
 /**
  * Adds max float/decimal validator
- * @param {import('yup').Number} validator yup validator
+ * @param {import('yup').NumberSchema} validator yup validator
  * @param {Object} metas model attribute
  * @param {{ max: Number }} metas.attr
  *
- * @returns {{import('yup').StringSchema}}
+ * @returns {{import('yup').NumberSchema}}
  */
 const addMaxFloatValidator = (validator, { attr }) =>
   _.isNumber(attr.max) ? validator.max(attr.max) : validator;
