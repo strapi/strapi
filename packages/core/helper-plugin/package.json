@@ -2,6 +2,11 @@
   "name": "@strapi/helper-plugin",
   "version": "3.6.8",
   "description": "Helper for Strapi plugins development",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/strapi/strapi.git",
+    "directory": "packages/core/helper-plugin"
+  },
   "license": "SEE LICENSE IN LICENSE",
   "author": {
     "name": "Strapi Solutions SAS",

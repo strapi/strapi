@@ -133,16 +133,45 @@ The administration panel will be available at http://localhost:4000/admin
 
 ---
 
-## Running the tests
+## Running the e2e tests
+
+The end-to-end tests require a Strapi app to be able to run. You can generate a "test app" using `yarn test:generate-app <database>`:
+
+```bash
+$ yarn test:generate-app sqlite
+$ yarn test:generate-app mongo
+$ yarn test:generate-app postgres
+$ yarn test:generate-app mysql
+```
+
+You require a new app every time you run the tests. Otherwise, the test suite will fail. A script is available to make this process easier: `node test/e2e.js`. It'll delete the current test app, generate a new one, and run the test suite.
 
 **Changing the database:**
 
-You can run the test suites using different databases:
+By default the script `test/e2e,js` creates an app that uses `sqlite`. But you can run the test suites using different databases:
 
 ```bash
 $ node test/e2e.js --db=sqlite
 $ node test/e2e.js --db=postgres
 $ node test/e2e.js --db=mysql
+```
+
+**Running the tests for the CE**
+
+The test suites will run the tests for the EE version of Strapi. Should you want to test the CE version you will need to use the ENV variable `STRAPI_DISABLE_EE`:
+
+```bash
+$ STRAPI_DISABLE_EE=true node test/e2e.js
+$ STRAPI_DISABLE_EE=true yarn test:e2e
+```
+
+**Specifying a license to use for the EE e2e tests**
+
+The EE tests need a valid license to run correctly. To specify which license to use you can use `STRAPI_LICENSE`. You can specify it in an env file or as a prefix to the cli command:
+
+```bash
+$ STRAPI_LICENSE=<license> node test/e2e.js
+$ STRAPI_LICENSE=<license> yarn test:e2e
 ```
 
 ---

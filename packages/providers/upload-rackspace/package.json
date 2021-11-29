@@ -2,6 +2,11 @@
   "name": "@strapi/provider-upload-rackspace",
   "version": "3.6.8",
   "description": "Rackspace provider for strapi upload",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/strapi/strapi.git",
+    "directory": "packages/providers/upload-rackspace"
+  },
   "keywords": [],
   "license": "SEE LICENSE IN LICENSE",
   "author": {

@@ -35,7 +35,7 @@
     "react-redux": "7.2.3",
     "react-router": "^5.2.0",
     "react-router-dom": "5.2.0",
-    "sharp": "0.28.1"
+    "sharp": "0.29.0"
   },
   "engines": {
     "node": ">=12.x.x <=16.x.x",
