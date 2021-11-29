@@ -33,7 +33,7 @@ const Configuration = ({ config }) => {
               file: './config/plugins.js',
               link: (
                 <a
-                  href="https://strapi.io/documentation/developer-docs/latest/development/plugins/email.html#configure-the-plugin"
+                  href="https://docs.strapi.io/developer-docs/latest/plugins/email.html"
                   target="_blank"
                   rel="noopener noreferrer"
                 >

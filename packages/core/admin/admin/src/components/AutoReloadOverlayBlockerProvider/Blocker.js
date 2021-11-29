@@ -73,7 +73,7 @@ const Blocker = ({ displayedIcon, description, title, isOpen }) => {
           <Flex justifyContent="center">
             <Box paddingTop={2}>
               <Link
-                href="https://strapi.io/documentation"
+                href="https://docs.strapi.io"
                 target="_blank"
                 rel="noopener noreferrer nofollow"
               >
