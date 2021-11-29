@@ -162,9 +162,17 @@ module.exports = {
   async connect(ctx, next) {
     const grant = require('grant-koa');
 
-    const grantConfig = await strapi
+    const providers = await strapi
       .store({ type: 'plugin', name: 'users-permissions', key: 'grant' })
       .get();
+
+    const apiPrefix = strapi.config.get('api.rest.prefix');
+    const grantConfig = {
+      defaults: {
+        prefix: `${apiPrefix}/connect`,
+      },
+      ...providers,
+    };
 
     const [requestPath] = ctx.request.url.split('?');
     const provider = requestPath.split('/connect/')[1].split('/')[0];

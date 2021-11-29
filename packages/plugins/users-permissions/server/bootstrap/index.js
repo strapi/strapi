@@ -41,9 +41,6 @@ const initGrant = async pluginStore => {
   const baseURL = `${strapi.config.server.url}/${apiPrefix}/auth`;
 
   const grantConfig = {
-    defaults: {
-      prefix: `${apiPrefix}/connect`,
-    },
     email: {
       enabled: true,
       icon: 'envelope',
