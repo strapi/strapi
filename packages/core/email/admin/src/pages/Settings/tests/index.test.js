@@ -759,7 +759,7 @@ describe('Email | Pages | Settings', () => {
                     >
                       The plugin is configured through the ./config/plugins.js file, checkout this 
                       <a
-                        href="https://strapi.io/documentation/developer-docs/latest/development/plugins/email.html#configure-the-plugin"
+                        href="https://docs.strapi.io/developer-docs/latest/plugins/email.html"
                         rel="noopener noreferrer"
                         target="_blank"
                       >
