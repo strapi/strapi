@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "private": true,
   "description": "Test utilities for the Strapi administration panel",
+  "license": "MIT",
+  "author": "Strapi Team",
   "main": "lib/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "Strapi Team",
-  "license": "MIT"
+  }
 }

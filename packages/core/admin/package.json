@@ -6,16 +6,29 @@
     "type": "git",
     "url": "git://github.com/strapi/strapi.git"
   },
-  "scripts": {
-    "prepublishOnly": "rimraf build && node ./scripts/build.js",
-    "test": "echo \"no tests yet\"",
-    "create:plugin-file": "node ./scripts/create-dev-plugins-file.js",
-    "develop:webpack": "cross-env NODE_ENV=development webpack serve --config webpack.config.dev.js --progress profile",
-    "develop": "yarn create:plugin-file && yarn develop:webpack",
-    "analyze:bundle": "ANALYZE_BUNDLE=true webpack --config webpack.config.dev.js",
-    "analyze:deps": "ANALYZE_DEPS=true webpack serve --config webpack.config.dev.js --progress profile"
+  "license": "SEE LICENSE IN LICENSE",
+  "author": {
+    "name": "Strapi",
+    "email": "",
+    "url": ""
   },
+  "maintainers": [
+    {
+      "name": "Strapi",
+      "email": "",
+      "url": ""
+    }
+  ],
   "main": "index.js",
+  "scripts": {
+    "analyze:bundle": "ANALYZE_BUNDLE=true webpack --config webpack.config.dev.js",
+    "analyze:deps": "ANALYZE_DEPS=true webpack serve --config webpack.config.dev.js --progress profile",
+    "create:plugin-file": "node ./scripts/create-dev-plugins-file.js",
+    "develop": "yarn create:plugin-file && yarn develop:webpack",
+    "develop:webpack": "cross-env NODE_ENV=development webpack serve --config webpack.config.dev.js --progress profile",
+    "prepublishOnly": "rimraf build && node ./scripts/build.js",
+    "test": "echo \"no tests yet\""
+  },
   "dependencies": {
     "@babel/core": "7.14.0",
     "@babel/plugin-proposal-async-generator-functions": "7.13.15",
@@ -125,26 +138,12 @@
     "webpackbar": "5.0.0-3",
     "yup": "^0.32.9"
   },
-  "author": {
-    "name": "Strapi",
-    "email": "",
-    "url": ""
-  },
-  "maintainers": [
-    {
-      "name": "Strapi",
-      "email": "",
-      "url": ""
-    }
-  ],
-  "engines": {
-    "node": ">=12.x.x <=16.x.x",
-    "npm": ">=6.0.0"
-  },
-  "license": "SEE LICENSE IN LICENSE",
-  "gitHead": "231263a3535658bab1e9492c6aaaed8692d62a53",
   "devDependencies": {
     "duplicate-dependencies-webpack-plugin": "0.2.0",
     "webpack-bundle-analyzer": "4.4.1"
+  },
+  "engines": {
+    "node": ">=12.x.x <=16.x.x",
+    "npm": ">=6.0.0"
   }
 }

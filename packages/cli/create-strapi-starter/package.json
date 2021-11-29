@@ -2,8 +2,6 @@
   "name": "create-strapi-starter",
   "version": "3.6.8",
   "description": "Generate a new Strapi application.",
-  "license": "SEE LICENSE IN LICENSE",
-  "homepage": "https://strapi.io",
   "keywords": [
     "create-strapi-starter",
     "create",
@@ -11,9 +9,26 @@
     "generate",
     "strapi"
   ],
+  "homepage": "https://strapi.io",
+  "bugs": {
+    "url": "https://github.com/strapi/strapi/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/strapi/strapi.git"
+  },
+  "license": "SEE LICENSE IN LICENSE",
+  "author": {
+    "name": "Strapi team",
+    "email": "hi@strapi.io",
+    "url": "https://strapi.io"
+  },
   "main": "./index.js",
   "bin": {
     "create-strapi-starter": "./index.js"
+  },
+  "scripts": {
+    "test": "echo \"no tests yet\""
   },
   "dependencies": {
     "@strapi/generate-new": "3.6.8",
@@ -25,24 +40,8 @@
     "inquirer": "8.2.0",
     "ora": "5.4.0"
   },
-  "scripts": {
-    "test": "echo \"no tests yet\""
-  },
-  "author": {
-    "email": "hi@strapi.io",
-    "name": "Strapi team",
-    "url": "https://strapi.io"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/strapi/strapi.git"
-  },
-  "bugs": {
-    "url": "https://github.com/strapi/strapi/issues"
-  },
   "engines": {
     "node": ">=12.x.x <=16.x.x",
     "npm": ">=6.0.0"
-  },
-  "gitHead": "231263a3535658bab1e9492c6aaaed8692d62a53"
+  }
 }

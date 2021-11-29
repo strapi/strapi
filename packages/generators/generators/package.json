@@ -29,13 +29,13 @@
   ],
   "main": "lib/index.js",
   "dependencies": {
+    "@sindresorhus/slugify": "1.1.0",
+    "@strapi/utils": "3.6.8",
     "chalk": "4.1.2",
     "fs-extra": "10.0.0",
     "node-plop": "0.26.3",
     "plop": "2.7.6",
-    "pluralize": "8.0.0",
-    "@strapi/utils": "3.6.8",
-    "@sindresorhus/slugify": "1.1.0"
+    "pluralize": "8.0.0"
   },
   "engines": {
     "node": ">=12.x.x <=16.x.x",

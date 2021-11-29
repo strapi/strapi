@@ -2,24 +2,24 @@
   "name": "@strapi/provider-email-amazon-ses",
   "version": "3.6.8",
   "description": "Amazon SES provider for strapi email",
-  "homepage": "https://strapi.io",
   "keywords": [
     "email",
     "strapi",
     "amazon",
     "ses"
   ],
-  "directories": {
-    "lib": "./lib"
+  "homepage": "https://strapi.io",
+  "bugs": {
+    "url": "https://github.com/strapi/strapi/issues"
   },
-  "main": "./lib",
-  "dependencies": {
-    "node-ses": "^3.0.3",
-    "@strapi/utils": "3.6.8"
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/strapi/strapi.git"
   },
+  "license": "SEE LICENSE IN LICENSE",
   "author": {
-    "email": "nikolay@tsenkov.net",
-    "name": "Nikolay tsenkov"
+    "name": "Nikolay tsenkov",
+    "email": "nikolay@tsenkov.net"
   },
   "maintainers": [
     {
@@ -28,20 +28,19 @@
       "url": "https://strapi.io"
     }
   ],
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/strapi/strapi.git"
+  "main": "./lib",
+  "directories": {
+    "lib": "./lib"
   },
-  "bugs": {
-    "url": "https://github.com/strapi/strapi/issues"
+  "scripts": {
+    "test": "echo \"no tests yet\""
+  },
+  "dependencies": {
+    "@strapi/utils": "3.6.8",
+    "node-ses": "^3.0.3"
   },
   "engines": {
     "node": ">=12.x.x <=16.x.x",
     "npm": ">=6.0.0"
-  },
-  "license": "SEE LICENSE IN LICENSE",
-  "scripts": {
-    "test": "echo \"no tests yet\""
-  },
-  "gitHead": "231263a3535658bab1e9492c6aaaed8692d62a53"
+  }
 }
