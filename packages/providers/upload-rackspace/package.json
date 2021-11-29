@@ -4,7 +4,17 @@
   "description": "Rackspace provider for strapi upload",
   "keywords": [],
   "license": "SEE LICENSE IN LICENSE",
-  "author": "Pongstr Ordillo <https://github.com/pongstr>",
+  "author": {
+    "name": "Pongstr Ordillo",
+    "url": "https://github.com/pongstr"
+  },
+  "maintainers": [
+    {
+      "name": "Strapi Solutions SAS",
+      "email": "hi@strapi.io",
+      "url": "https://strapi.io"
+    }
+  ],
   "main": "./lib",
   "scripts": {
     "test": "echo \"no tests yet\""
