@@ -9,11 +9,11 @@
 <br />
 
 <p align="center">
-  <a href="https://www.npmjs.org/package/strapi">
-    <img src="https://img.shields.io/npm/v/strapi/latest.svg" alt="NPM Version" />
+  <a href="https://www.npmjs.org/package/@strapi/strapi">
+    <img src="https://img.shields.io/npm/v/@strapi/strapi/latest.svg" alt="NPM Version" />
   </a>
-  <a href="https://www.npmjs.org/package/strapi">
-    <img src="https://img.shields.io/npm/dm/strapi.svg" alt="Monthly download on NPM" />
+  <a href="https://github.com/strapi/strapi/actions/workflows/tests.yml">
+    <img src="https://github.com/strapi/strapi/actions/workflows/tests.yml/badge.svg?branch=master" alt="Tests" />
   </a>
   <a href="https://discord.strapi.io">
     <img src="https://img.shields.io/discord/811989166782021633?label=Discord" alt="Strapi on Discord" />
@@ -24,7 +24,7 @@
 
 <p align="center">
   <a href="https://strapi.io">
-    <img src="https://raw.githubusercontent.com/strapi/strapi/master/public/assets/administration_panel.png" alt="Administration panel" />
+    <img src="../../../public/assets/administration_panel.png" alt="Administration panel" />
   </a>
 </p>
 
