@@ -80,6 +80,8 @@ async function initProject(projectName, program) {
   const prompt = await promptUser(projectName, program);
 
   const directory = prompt.directory || projectName;
+  checkInstallPath(resolve(directory));
+
   const options = {
     template: program.template,
     quickstart: prompt.quick || program.quickstart,
