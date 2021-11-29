@@ -37,14 +37,16 @@ describe('Entity validator', () => {
 
       const validator = strapiUtils.validateYupSchema(
         entityValidator.string(
-          { type: 'string' },
-          { isDraft: false },
-          fakeModel,
           {
-            name: 'attrStringUnique',
-            value: 'non-unique-test-data',
+            attr: { type: 'string' },
+            model: fakeModel,
+            updatedAttribute: {
+              name: 'attrStringUnique',
+              value: 'non-unique-test-data',
+            },
+            entity: null,
           },
-          null
+          { isDraft: false }
         )
       );
 
@@ -59,14 +61,16 @@ describe('Entity validator', () => {
       const validator = strapiUtils.validateYupSchema(
         entityValidator
           .string(
-            { type: 'string', unique: true },
-            { isDraft: false },
-            fakeModel,
             {
-              name: 'attrStringUnique',
-              value: null,
+              attr: { type: 'string', unique: true },
+              model: fakeModel,
+              updatedAttribute: {
+                name: 'attrStringUnique',
+                value: null,
+              },
+              entity: null,
             },
-            null
+            { isDraft: false }
           )
           .nullable()
       );
@@ -81,14 +85,16 @@ describe('Entity validator', () => {
 
       const validator = strapiUtils.validateYupSchema(
         entityValidator.string(
-          { type: 'string', unique: true },
-          { isDraft: false },
-          fakeModel,
           {
-            name: 'attrStringUnique',
-            value: 'non-unique-test-data',
+            attr: { type: 'string', unique: true },
+            model: fakeModel,
+            updatedAttribute: {
+              name: 'attrStringUnique',
+              value: 'non-unique-test-data',
+            },
+            entity: null,
           },
-          null
+          { isDraft: false }
         )
       );
 
@@ -101,14 +107,16 @@ describe('Entity validator', () => {
 
       const validator = strapiUtils.validateYupSchema(
         entityValidator.string(
-          { type: 'string', unique: true },
-          { isDraft: false },
-          fakeModel,
           {
-            name: 'attrStringUnique',
-            value: 'unique-test-data',
+            attr: { type: 'string', unique: true },
+            model: fakeModel,
+            updatedAttribute: {
+              name: 'attrStringUnique',
+              value: 'unique-test-data',
+            },
+            entity: null,
           },
-          null
+          { isDraft: false }
         )
       );
 
@@ -124,14 +132,16 @@ describe('Entity validator', () => {
 
       const validator = strapiUtils.validateYupSchema(
         entityValidator.string(
-          { type: 'string', unique: true },
-          { isDraft: false },
-          fakeModel,
           {
-            name: 'attrStringUnique',
-            value: 'non-updated-unique-test-data',
+            attr: { type: 'string', unique: true },
+            model: fakeModel,
+            updatedAttribute: {
+              name: 'attrStringUnique',
+              value: 'non-updated-unique-test-data',
+            },
+            entity: { id: 1, attrStringUnique: 'non-updated-unique-test-data' },
           },
-          { id: 1, attrStringUnique: 'non-updated-unique-test-data' }
+          { isDraft: false }
         )
       );
 
@@ -143,14 +153,16 @@ describe('Entity validator', () => {
 
       const validator = strapiUtils.validateYupSchema(
         entityValidator.string(
-          { type: 'string', unique: true },
-          { isDraft: false },
-          fakeModel,
           {
-            name: 'attrStringUnique',
-            value: 'test-data',
+            attr: { type: 'string', unique: true },
+            model: fakeModel,
+            updatedAttribute: {
+              name: 'attrStringUnique',
+              value: 'test-data',
+            },
+            entity: null,
           },
-          null
+          { isDraft: false }
         )
       );
 
@@ -167,14 +179,16 @@ describe('Entity validator', () => {
 
       const validator = strapiUtils.validateYupSchema(
         entityValidator.string(
-          { type: 'string', unique: true },
-          { isDraft: false },
-          fakeModel,
           {
-            name: 'attrStringUnique',
-            value: 'test-data',
+            attr: { type: 'string', unique: true },
+            model: fakeModel,
+            updatedAttribute: {
+              name: 'attrStringUnique',
+              value: 'test-data',
+            },
+            entity: { id: 1, attrStringUnique: 'other-data' },
           },
-          { id: 1, attrStringUnique: 'other-data' }
+          { isDraft: false }
         )
       );
 
@@ -204,11 +218,13 @@ describe('Entity validator', () => {
 
       const validator = strapiUtils.validateYupSchema(
         entityValidator.integer(
-          { type: 'integer' },
-          { isDraft: false },
-          fakeModel,
-          { name: 'attrIntegerUnique', value: 1 },
-          null
+          {
+            attr: { type: 'integer' },
+            model: fakeModel,
+            updatedAttribute: { name: 'attrIntegerUnique', value: 1 },
+            entity: null,
+          },
+          { isDraft: false }
         )
       );
 
@@ -223,11 +239,13 @@ describe('Entity validator', () => {
       const validator = strapiUtils.validateYupSchema(
         entityValidator
           .integer(
-            { type: 'integer', unique: true },
-            { isDraft: false },
-            fakeModel,
-            { name: 'attrIntegerUnique', value: null },
-            null
+            {
+              attr: { type: 'integer', unique: true },
+              model: fakeModel,
+              updatedAttribute: { name: 'attrIntegerUnique', value: null },
+              entity: null,
+            },
+            { isDraft: false }
           )
           .nullable()
       );
@@ -242,11 +260,13 @@ describe('Entity validator', () => {
 
       const validator = strapiUtils.validateYupSchema(
         entityValidator.integer(
-          { type: 'integer', unique: true },
-          { isDraft: false },
-          fakeModel,
-          { name: 'attrIntegerUnique', value: 2 },
-          null
+          {
+            attr: { type: 'integer', unique: true },
+            model: fakeModel,
+            updatedAttribute: { name: 'attrIntegerUnique', value: 2 },
+            entity: null,
+          },
+          { isDraft: false }
         )
       );
 
@@ -259,11 +279,13 @@ describe('Entity validator', () => {
 
       const validator = strapiUtils.validateYupSchema(
         entityValidator.integer(
-          { type: 'integer', unique: true },
-          { isDraft: false },
-          fakeModel,
-          { name: 'attrIntegerUnique', value: 2 },
-          null
+          {
+            attr: { type: 'integer', unique: true },
+            model: fakeModel,
+            updatedAttribute: { name: 'attrIntegerUnique', value: 2 },
+            entity: null,
+          },
+          { isDraft: false }
         )
       );
 
@@ -279,11 +301,13 @@ describe('Entity validator', () => {
 
       const validator = strapiUtils.validateYupSchema(
         entityValidator.integer(
-          { type: 'integer', unique: true },
-          { isDraft: false },
-          fakeModel,
-          { name: 'attrIntegerUnique', value: 3 },
-          { id: 1, attrIntegerUnique: 3 }
+          {
+            attr: { type: 'integer', unique: true },
+            model: fakeModel,
+            updatedAttribute: { name: 'attrIntegerUnique', value: 3 },
+            entity: { id: 1, attrIntegerUnique: 3 },
+          },
+          { isDraft: false }
         )
       );
 
@@ -295,11 +319,13 @@ describe('Entity validator', () => {
 
       const validator = strapiUtils.validateYupSchema(
         entityValidator.integer(
-          { type: 'integer', unique: true },
-          { isDraft: false },
-          fakeModel,
-          { name: 'attrIntegerUnique', value: 4 },
-          null
+          {
+            attr: { type: 'integer', unique: true },
+            model: fakeModel,
+            updatedAttribute: { name: 'attrIntegerUnique', value: 4 },
+            entity: null,
+          },
+          { isDraft: false }
         )
       );
 
@@ -316,11 +342,13 @@ describe('Entity validator', () => {
 
       const validator = strapiUtils.validateYupSchema(
         entityValidator.integer(
-          { type: 'integer', unique: true },
-          { isDraft: false },
-          fakeModel,
-          { name: 'attrIntegerUnique', value: 5 },
-          { id: 1, attrIntegerUnique: 42 }
+          {
+            attr: { type: 'integer', unique: true },
+            model: fakeModel,
+            updatedAttribute: { name: 'attrIntegerUnique', value: 5 },
+            entity: { id: 1, attrIntegerUnique: 42 },
+          },
+          { isDraft: false }
         )
       );
 
@@ -350,14 +378,16 @@ describe('Entity validator', () => {
 
       const validator = strapiUtils.validateYupSchema(
         entityValidator.biginteger(
-          { type: 'biginteger' },
-          { isDraft: false },
-          fakeModel,
           {
-            name: 'attrBigIntegerUnique',
-            value: 1,
+            attr: { type: 'biginteger' },
+            model: fakeModel,
+            updatedAttribute: {
+              name: 'attrBigIntegerUnique',
+              value: 1,
+            },
+            entity: null,
           },
-          null
+          { isDraft: false }
         )
       );
 
@@ -372,14 +402,16 @@ describe('Entity validator', () => {
       const validator = strapiUtils.validateYupSchema(
         entityValidator
           .biginteger(
-            { type: 'biginteger', unique: true },
-            { isDraft: false },
-            fakeModel,
             {
-              name: 'attrBigIntegerUnique',
-              value: null,
+              attr: { type: 'biginteger', unique: true },
+              model: fakeModel,
+              updatedAttribute: {
+                name: 'attrBigIntegerUnique',
+                value: null,
+              },
+              entity: null,
             },
-            null
+            { isDraft: false }
           )
           .nullable()
       );
@@ -394,14 +426,16 @@ describe('Entity validator', () => {
 
       const validator = strapiUtils.validateYupSchema(
         entityValidator.biginteger(
-          { type: 'biginteger', unique: true },
-          { isDraft: false },
-          fakeModel,
           {
-            name: 'attrBigIntegerUnique',
-            value: 1,
+            attr: { type: 'biginteger', unique: true },
+            model: fakeModel,
+            updatedAttribute: {
+              name: 'attrBigIntegerUnique',
+              value: 1,
+            },
+            entity: null,
           },
-          null
+          { isDraft: false }
         )
       );
 
@@ -414,14 +448,16 @@ describe('Entity validator', () => {
 
       const validator = strapiUtils.validateYupSchema(
         entityValidator.biginteger(
-          { type: 'biginteger', unique: true },
-          { isDraft: false },
-          fakeModel,
           {
-            name: 'attrBigIntegerUnique',
-            value: 2,
+            attr: { type: 'biginteger', unique: true },
+            model: fakeModel,
+            updatedAttribute: {
+              name: 'attrBigIntegerUnique',
+              value: 2,
+            },
+            entity: null,
           },
-          null
+          { isDraft: false }
         )
       );
 
@@ -437,14 +473,16 @@ describe('Entity validator', () => {
 
       const validator = strapiUtils.validateYupSchema(
         entityValidator.biginteger(
-          { type: 'biginteger', unique: true },
-          { isDraft: false },
-          fakeModel,
           {
-            name: 'attrBigIntegerUnique',
-            value: 3,
+            attr: { type: 'biginteger', unique: true },
+            model: fakeModel,
+            updatedAttribute: {
+              name: 'attrBigIntegerUnique',
+              value: 3,
+            },
+            entity: { id: 1, attrBigIntegerUnique: 3 },
           },
-          { id: 1, attrBigIntegerUnique: 3 }
+          { isDraft: false }
         )
       );
 
@@ -456,14 +494,16 @@ describe('Entity validator', () => {
 
       const validator = strapiUtils.validateYupSchema(
         entityValidator.biginteger(
-          { type: 'biginteger', unique: true },
-          { isDraft: false },
-          fakeModel,
           {
-            name: 'attrBigIntegerUnique',
-            value: 4,
+            attr: { type: 'biginteger', unique: true },
+            model: fakeModel,
+            updatedAttribute: {
+              name: 'attrBigIntegerUnique',
+              value: 4,
+            },
+            entity: null,
           },
-          null
+          { isDraft: false }
         )
       );
 
@@ -480,14 +520,16 @@ describe('Entity validator', () => {
 
       const validator = strapiUtils.validateYupSchema(
         entityValidator.biginteger(
-          { type: 'biginteger', unique: true },
-          { isDraft: false },
-          fakeModel,
           {
-            name: 'attrBigIntegerUnique',
-            value: 5,
+            attr: { type: 'biginteger', unique: true },
+            model: fakeModel,
+            updatedAttribute: {
+              name: 'attrBigIntegerUnique',
+              value: 5,
+            },
+            entity: { id: 1, attrBigIntegerUnique: 42 },
           },
-          { id: 1, attrBigIntegerUnique: 42 }
+          { isDraft: false }
         )
       );
 
@@ -517,14 +559,16 @@ describe('Entity validator', () => {
 
       const validator = strapiUtils.validateYupSchema(
         entityValidator.float(
-          { type: 'float' },
-          { isDraft: false },
-          fakeModel,
           {
-            name: 'attrFloatUnique',
-            value: 1,
+            attr: { type: 'float' },
+            model: fakeModel,
+            updatedAttribute: {
+              name: 'attrFloatUnique',
+              value: 1,
+            },
+            entity: null,
           },
-          null
+          { isDraft: false }
         )
       );
 
@@ -539,14 +583,16 @@ describe('Entity validator', () => {
       const validator = strapiUtils.validateYupSchema(
         entityValidator
           .float(
-            { type: 'float', unique: true },
-            { isDraft: false },
-            fakeModel,
             {
-              name: 'attrFloatUnique',
-              value: null,
+              attr: { type: 'float', unique: true },
+              model: fakeModel,
+              updatedAttribute: {
+                name: 'attrFloatUnique',
+                value: null,
+              },
+              entity: null,
             },
-            null
+            { isDraft: false }
           )
           .nullable()
       );
@@ -560,14 +606,16 @@ describe('Entity validator', () => {
 
       const validator = strapiUtils.validateYupSchema(
         entityValidator.float(
-          { type: 'float', unique: true },
-          { isDraft: false },
-          fakeModel,
           {
-            name: 'attrFloatUnique',
-            value: 1,
+            attr: { type: 'float', unique: true },
+            model: fakeModel,
+            updatedAttribute: {
+              name: 'attrFloatUnique',
+              value: 1,
+            },
+            entity: null,
           },
-          null
+          { isDraft: false }
         )
       );
 
@@ -580,14 +628,16 @@ describe('Entity validator', () => {
 
       const validator = strapiUtils.validateYupSchema(
         entityValidator.float(
-          { type: 'float', unique: true },
-          { isDraft: false },
-          fakeModel,
           {
-            name: 'attrFloatUnique',
-            value: 2,
+            attr: { type: 'float', unique: true },
+            model: fakeModel,
+            updatedAttribute: {
+              name: 'attrFloatUnique',
+              value: 2,
+            },
+            entity: null,
           },
-          null
+          { isDraft: false }
         )
       );
 
@@ -603,14 +653,16 @@ describe('Entity validator', () => {
 
       const validator = strapiUtils.validateYupSchema(
         entityValidator.float(
-          { type: 'float', unique: true },
-          { isDraft: false },
-          fakeModel,
           {
-            name: 'attrFloatUnique',
-            value: 3,
+            attr: { type: 'float', unique: true },
+            model: fakeModel,
+            updatedAttribute: {
+              name: 'attrFloatUnique',
+              value: 3,
+            },
+            entity: { id: 1, attrFloatUnique: 3 },
           },
-          { id: 1, attrFloatUnique: 3 }
+          { isDraft: false }
         )
       );
 
@@ -622,14 +674,16 @@ describe('Entity validator', () => {
 
       const validator = strapiUtils.validateYupSchema(
         entityValidator.float(
-          { type: 'float', unique: true },
-          { isDraft: false },
-          fakeModel,
           {
-            name: 'attrFloatUnique',
-            value: 4,
+            attr: { type: 'float', unique: true },
+            model: fakeModel,
+            updatedAttribute: {
+              name: 'attrFloatUnique',
+              value: 4,
+            },
+            entity: null,
           },
-          null
+          { isDraft: false }
         )
       );
 
@@ -646,14 +700,16 @@ describe('Entity validator', () => {
 
       const validator = strapiUtils.validateYupSchema(
         entityValidator.float(
-          { type: 'float', unique: true },
-          { isDraft: false },
-          fakeModel,
           {
-            name: 'attrFloatUnique',
-            value: 5,
+            attr: { type: 'float', unique: true },
+            model: fakeModel,
+            updatedAttribute: {
+              name: 'attrFloatUnique',
+              value: 5,
+            },
+            entity: { id: 1, attrFloatUnique: 42 },
           },
-          { id: 1, attrFloatUnique: 42 }
+          { isDraft: false }
         )
       );
 
@@ -683,11 +739,13 @@ describe('Entity validator', () => {
 
       const validator = strapiUtils.validateYupSchema(
         entityValidator.uid(
-          { type: 'uid', unique: true },
-          { isDraft: false },
-          fakeModel,
-          { name: 'attrUidUnique', value: 'non-unique-uid' },
-          null
+          {
+            attr: { type: 'uid', unique: true },
+            model: fakeModel,
+            updatedAttribute: { name: 'attrUidUnique', value: 'non-unique-uid' },
+            entity: null,
+          },
+          { isDraft: false }
         )
       );
 
@@ -700,11 +758,13 @@ describe('Entity validator', () => {
       const validator = strapiUtils.validateYupSchema(
         entityValidator
           .uid(
-            { type: 'uid', unique: true },
-            { isDraft: false },
-            fakeModel,
-            { name: 'attrUidUnique', value: null },
-            null
+            {
+              attr: { type: 'uid', unique: true },
+              model: fakeModel,
+              updatedAttribute: { name: 'attrUidUnique', value: null },
+              entity: null,
+            },
+            { isDraft: false }
           )
           .nullable()
       );
@@ -719,11 +779,13 @@ describe('Entity validator', () => {
 
       const validator = strapiUtils.validateYupSchema(
         entityValidator.uid(
-          { type: 'uid' },
-          { isDraft: false },
-          fakeModel,
-          { name: 'attrUidUnique', value: 'non-unique-uid' },
-          null
+          {
+            attr: { type: 'uid' },
+            model: fakeModel,
+            updatedAttribute: { name: 'attrUidUnique', value: 'non-unique-uid' },
+            entity: null,
+          },
+          { isDraft: false }
         )
       );
 
@@ -740,11 +802,13 @@ describe('Entity validator', () => {
 
       const validator = strapiUtils.validateYupSchema(
         entityValidator.uid(
-          { type: 'uid', unique: true },
-          { isDraft: false },
-          fakeModel,
-          { name: 'attrUidUnique', value: 'unique-uid' },
-          null
+          {
+            attr: { type: 'uid', unique: true },
+            model: fakeModel,
+            updatedAttribute: { name: 'attrUidUnique', value: 'unique-uid' },
+            entity: null,
+          },
+          { isDraft: false }
         )
       );
 
@@ -760,11 +824,13 @@ describe('Entity validator', () => {
 
       const validator = strapiUtils.validateYupSchema(
         entityValidator.uid(
-          { type: 'uid', unique: true },
-          { isDraft: false },
-          fakeModel,
-          { name: 'attrUidUnique', value: 'unchanged-unique-uid' },
-          { id: 1, attrUidUnique: 'unchanged-unique-uid' }
+          {
+            attr: { type: 'uid', unique: true },
+            model: fakeModel,
+            updatedAttribute: { name: 'attrUidUnique', value: 'unchanged-unique-uid' },
+            entity: { id: 1, attrUidUnique: 'unchanged-unique-uid' },
+          },
+          { isDraft: false }
         )
       );
 
@@ -776,11 +842,13 @@ describe('Entity validator', () => {
 
       const validator = strapiUtils.validateYupSchema(
         entityValidator.uid(
-          { type: 'uid', unique: true },
-          { isDraft: false },
-          fakeModel,
-          { name: 'attrUidUnique', value: 'unique-uid' },
-          null
+          {
+            attr: { type: 'uid', unique: true },
+            model: fakeModel,
+            updatedAttribute: { name: 'attrUidUnique', value: 'unique-uid' },
+            entity: null,
+          },
+          { isDraft: false }
         )
       );
 
@@ -797,11 +865,13 @@ describe('Entity validator', () => {
 
       const validator = strapiUtils.validateYupSchema(
         entityValidator.uid(
-          { type: 'uid', unique: true },
-          { isDraft: false },
-          fakeModel,
-          { name: 'attrUidUnique', value: 'unique-uid' },
-          { id: 1, attrUidUnique: 'other-uid' }
+          {
+            attr: { type: 'uid', unique: true },
+            model: fakeModel,
+            updatedAttribute: { name: 'attrUidUnique', value: 'unique-uid' },
+            entity: { id: 1, attrUidUnique: 'other-uid' },
+          },
+          { isDraft: false }
         )
       );
 
@@ -831,11 +901,13 @@ describe('Entity validator', () => {
 
       const validator = strapiUtils.validateYupSchema(
         entityValidator.date(
-          { type: 'date' },
-          { isDraft: false },
-          fakeModel,
-          { name: 'attrDateUnique', value: '2021-11-29' },
-          null
+          {
+            attr: { type: 'date' },
+            model: fakeModel,
+            updatedAttribute: { name: 'attrDateUnique', value: '2021-11-29' },
+            entity: null,
+          },
+          { isDraft: false }
         )
       );
 
@@ -850,11 +922,13 @@ describe('Entity validator', () => {
       const validator = strapiUtils.validateYupSchema(
         entityValidator
           .date(
-            { type: 'date', unique: true },
-            { isDraft: false },
-            fakeModel,
-            { name: 'attrDateUnique', value: null },
-            null
+            {
+              attr: { type: 'date', unique: true },
+              model: fakeModel,
+              updatedAttribute: { name: 'attrDateUnique', value: null },
+              entity: null,
+            },
+            { isDraft: false }
           )
           .nullable()
       );
@@ -868,11 +942,13 @@ describe('Entity validator', () => {
 
       const validator = strapiUtils.validateYupSchema(
         entityValidator.date(
-          { type: 'date', unique: true },
-          { isDraft: false },
-          fakeModel,
-          { name: 'attrDateUnique', value: '2021-11-29' },
-          null
+          {
+            attr: { type: 'date', unique: true },
+            model: fakeModel,
+            updatedAttribute: { name: 'attrDateUnique', value: '2021-11-29' },
+            entity: null,
+          },
+          { isDraft: false }
         )
       );
 
@@ -885,11 +961,13 @@ describe('Entity validator', () => {
 
       const validator = strapiUtils.validateYupSchema(
         entityValidator.date(
-          { type: 'date', unique: true },
-          { isDraft: false },
-          fakeModel,
-          { name: 'attrDateUnique', value: '2021-11-29' },
-          null
+          {
+            attr: { type: 'date', unique: true },
+            model: fakeModel,
+            updatedAttribute: { name: 'attrDateUnique', value: '2021-11-29' },
+            entity: null,
+          },
+          { isDraft: false }
         )
       );
 
@@ -905,11 +983,13 @@ describe('Entity validator', () => {
 
       const validator = strapiUtils.validateYupSchema(
         entityValidator.date(
-          { type: 'date', unique: true },
-          { isDraft: false },
-          fakeModel,
-          { name: 'attrDateUnique', value: '2021-11-29' },
-          { id: 1, attrDateUnique: '2021-11-29' }
+          {
+            attr: { type: 'date', unique: true },
+            model: fakeModel,
+            updatedAttribute: { name: 'attrDateUnique', value: '2021-11-29' },
+            entity: { id: 1, attrDateUnique: '2021-11-29' },
+          },
+          { isDraft: false }
         )
       );
 
@@ -921,11 +1001,13 @@ describe('Entity validator', () => {
 
       const validator = strapiUtils.validateYupSchema(
         entityValidator.date(
-          { type: 'date', unique: true },
-          { isDraft: false },
-          fakeModel,
-          { name: 'attrDateUnique', value: '2021-11-29' },
-          null
+          {
+            attr: { type: 'date', unique: true },
+            model: fakeModel,
+            updatedAttribute: { name: 'attrDateUnique', value: '2021-11-29' },
+            entity: null,
+          },
+          { isDraft: false }
         )
       );
 
@@ -942,11 +1024,13 @@ describe('Entity validator', () => {
 
       const validator = strapiUtils.validateYupSchema(
         entityValidator.date(
-          { type: 'date', unique: true },
-          { isDraft: false },
-          fakeModel,
-          { name: 'attrDateUnique', value: '2021-11-29' },
-          { id: 1, attrDateUnique: '2021-12-15' }
+          {
+            attr: { type: 'date', unique: true },
+            model: fakeModel,
+            updatedAttribute: { name: 'attrDateUnique', value: '2021-11-29' },
+            entity: { id: 1, attrDateUnique: '2021-12-15' },
+          },
+          { isDraft: false }
         )
       );
 
@@ -976,11 +1060,13 @@ describe('Entity validator', () => {
 
       const validator = strapiUtils.validateYupSchema(
         entityValidator.datetime(
-          { type: 'datetime' },
-          { isDraft: false },
-          fakeModel,
-          { name: 'attrDateTimeUnique', value: '2021-11-29T00:00:00.000Z' },
-          { id: 1, attrDateTimeUnique: '2021-11-29T00:00:00.000Z' }
+          {
+            attr: { type: 'datetime' },
+            model: fakeModel,
+            updatedAttribute: { name: 'attrDateTimeUnique', value: '2021-11-29T00:00:00.000Z' },
+            entity: { id: 1, attrDateTimeUnique: '2021-11-29T00:00:00.000Z' },
+          },
+          { isDraft: false }
         )
       );
 
@@ -995,11 +1081,13 @@ describe('Entity validator', () => {
       const validator = strapiUtils.validateYupSchema(
         entityValidator
           .datetime(
-            { type: 'datetime', unique: true },
-            { isDraft: false },
-            fakeModel,
-            { name: 'attrDateTimeUnique', value: null },
-            null
+            {
+              attr: { type: 'datetime', unique: true },
+              model: fakeModel,
+              updatedAttribute: { name: 'attrDateTimeUnique', value: null },
+              entity: null,
+            },
+            { isDraft: false }
           )
           .nullable()
       );
@@ -1013,11 +1101,13 @@ describe('Entity validator', () => {
 
       const validator = strapiUtils.validateYupSchema(
         entityValidator.datetime(
-          { type: 'datetime', unique: true },
-          { isDraft: false },
-          fakeModel,
-          { name: 'attrDateTimeUnique', value: '2021-11-29T00:00:00.000Z' },
-          null
+          {
+            attr: { type: 'datetime', unique: true },
+            model: fakeModel,
+            updatedAttribute: { name: 'attrDateTimeUnique', value: '2021-11-29T00:00:00.000Z' },
+            entity: null,
+          },
+          { isDraft: false }
         )
       );
 
@@ -1030,11 +1120,13 @@ describe('Entity validator', () => {
 
       const validator = strapiUtils.validateYupSchema(
         entityValidator.datetime(
-          { type: 'datetime', unique: true },
-          { isDraft: false },
-          fakeModel,
-          { name: 'attrDateTimeUnique', value: '2021-11-29T00:00:00.000Z' },
-          null
+          {
+            attr: { type: 'datetime', unique: true },
+            model: fakeModel,
+            updatedAttribute: { name: 'attrDateTimeUnique', value: '2021-11-29T00:00:00.000Z' },
+            entity: null,
+          },
+          { isDraft: false }
         )
       );
 
@@ -1050,11 +1142,13 @@ describe('Entity validator', () => {
 
       const validator = strapiUtils.validateYupSchema(
         entityValidator.datetime(
-          { type: 'datetime', unique: true },
-          { isDraft: false },
-          fakeModel,
-          { name: 'attrDateTimeUnique', value: '2021-11-29T00:00:00.000Z' },
-          { id: 1, attrDateTimeUnique: '2021-11-29T00:00:00.000Z' }
+          {
+            attr: { type: 'datetime', unique: true },
+            model: fakeModel,
+            updatedAttribute: { name: 'attrDateTimeUnique', value: '2021-11-29T00:00:00.000Z' },
+            entity: { id: 1, attrDateTimeUnique: '2021-11-29T00:00:00.000Z' },
+          },
+          { isDraft: false }
         )
       );
 
@@ -1066,11 +1160,13 @@ describe('Entity validator', () => {
 
       const validator = strapiUtils.validateYupSchema(
         entityValidator.datetime(
-          { type: 'datetime', unique: true },
-          { isDraft: false },
-          fakeModel,
-          { name: 'attrDateTimeUnique', value: '2021-11-29T00:00:00.000Z' },
-          null
+          {
+            attr: { type: 'datetime', unique: true },
+            model: fakeModel,
+            updatedAttribute: { name: 'attrDateTimeUnique', value: '2021-11-29T00:00:00.000Z' },
+            entity: null,
+          },
+          { isDraft: false }
         )
       );
 
@@ -1087,11 +1183,13 @@ describe('Entity validator', () => {
 
       const validator = strapiUtils.validateYupSchema(
         entityValidator.datetime(
-          { type: 'datetime', unique: true },
-          { isDraft: false },
-          fakeModel,
-          { name: 'attrDateTimeUnique', value: '2021-11-29T00:00:00.000Z' },
-          { id: 1, attrDateTimeUnique: '2021-12-25T00:00:00.000Z' }
+          {
+            attr: { type: 'datetime', unique: true },
+            model: fakeModel,
+            updatedAttribute: { name: 'attrDateTimeUnique', value: '2021-11-29T00:00:00.000Z' },
+            entity: { id: 1, attrDateTimeUnique: '2021-12-25T00:00:00.000Z' },
+          },
+          { isDraft: false }
         )
       );
 
@@ -1121,11 +1219,13 @@ describe('Entity validator', () => {
 
       const validator = strapiUtils.validateYupSchema(
         entityValidator.time(
-          { type: 'time' },
-          { isDraft: false },
-          fakeModel,
-          { name: 'attrTimeUnique', value: '00:00:00.000Z' },
-          null
+          {
+            attr: { type: 'time' },
+            model: fakeModel,
+            updatedAttribute: { name: 'attrTimeUnique', value: '00:00:00.000Z' },
+            entity: null,
+          },
+          { isDraft: false }
         )
       );
 
@@ -1140,11 +1240,13 @@ describe('Entity validator', () => {
       const validator = strapiUtils.validateYupSchema(
         entityValidator
           .time(
-            { type: 'time', unique: true },
-            { isDraft: false },
-            fakeModel,
-            { name: 'attrTimeUnique', value: null },
-            { id: 1, attrTimeUnique: '00:00:00.000Z' }
+            {
+              attr: { type: 'time', unique: true },
+              model: fakeModel,
+              updatedAttribute: { name: 'attrTimeUnique', value: null },
+              entity: { id: 1, attrTimeUnique: '00:00:00.000Z' },
+            },
+            { isDraft: false }
           )
           .nullable()
       );
@@ -1158,11 +1260,13 @@ describe('Entity validator', () => {
 
       const validator = strapiUtils.validateYupSchema(
         entityValidator.time(
-          { type: 'time', unique: true },
-          { isDraft: false },
-          fakeModel,
-          { name: 'attrTimeUnique', value: '00:00:00.000Z' },
-          null
+          {
+            attr: { type: 'time', unique: true },
+            model: fakeModel,
+            updatedAttribute: { name: 'attrTimeUnique', value: '00:00:00.000Z' },
+            entity: null,
+          },
+          { isDraft: false }
         )
       );
 
@@ -1175,11 +1279,13 @@ describe('Entity validator', () => {
 
       const validator = strapiUtils.validateYupSchema(
         entityValidator.time(
-          { type: 'time', unique: true },
-          { isDraft: false },
-          fakeModel,
-          { name: 'attrTimeUnique', value: '00:00:00.000Z' },
-          null
+          {
+            attr: { type: 'time', unique: true },
+            model: fakeModel,
+            updatedAttribute: { name: 'attrTimeUnique', value: '00:00:00.000Z' },
+            entity: null,
+          },
+          { isDraft: false }
         )
       );
 
@@ -1195,11 +1301,13 @@ describe('Entity validator', () => {
 
       const validator = strapiUtils.validateYupSchema(
         entityValidator.time(
-          { type: 'time', unique: true },
-          { isDraft: false },
-          fakeModel,
-          { name: 'attrTimeUnique', value: '00:00:00.000Z' },
-          { id: 1, attrTimeUnique: '00:00:00.000Z' }
+          {
+            attr: { type: 'time', unique: true },
+            model: fakeModel,
+            updatedAttribute: { name: 'attrTimeUnique', value: '00:00:00.000Z' },
+            entity: { id: 1, attrTimeUnique: '00:00:00.000Z' },
+          },
+          { isDraft: false }
         )
       );
 
@@ -1211,11 +1319,13 @@ describe('Entity validator', () => {
 
       const validator = strapiUtils.validateYupSchema(
         entityValidator.time(
-          { type: 'time', unique: true },
-          { isDraft: false },
-          fakeModel,
-          { name: 'attrTimeUnique', value: '00:00:00.000Z' },
-          null
+          {
+            attr: { type: 'time', unique: true },
+            model: fakeModel,
+            updatedAttribute: { name: 'attrTimeUnique', value: '00:00:00.000Z' },
+            entity: null,
+          },
+          { isDraft: false }
         )
       );
 
@@ -1232,11 +1342,13 @@ describe('Entity validator', () => {
 
       const validator = strapiUtils.validateYupSchema(
         entityValidator.time(
-          { type: 'time', unique: true },
-          { isDraft: false },
-          fakeModel,
-          { name: 'attrTimeUnique', value: '00:00:00.000Z' },
-          { id: 1, attrTimeUnique: '01:00:00.000Z' }
+          {
+            attr: { type: 'time', unique: true },
+            model: fakeModel,
+            updatedAttribute: { name: 'attrTimeUnique', value: '00:00:00.000Z' },
+            entity: { id: 1, attrTimeUnique: '01:00:00.000Z' },
+          },
+          { isDraft: false }
         )
       );
 
@@ -1266,14 +1378,16 @@ describe('Entity validator', () => {
 
       const validator = strapiUtils.validateYupSchema(
         entityValidator.timestamp(
-          { type: 'timestamp' },
-          { isDraft: false },
-          fakeModel,
           {
-            name: 'attrTimestampUnique',
-            value: '1638140400',
+            attr: { type: 'timestamp' },
+            model: fakeModel,
+            updatedAttribute: {
+              name: 'attrTimestampUnique',
+              value: '1638140400',
+            },
+            entity: null,
           },
-          null
+          { isDraft: false }
         )
       );
 
@@ -1288,14 +1402,16 @@ describe('Entity validator', () => {
       const validator = strapiUtils.validateYupSchema(
         entityValidator
           .timestamp(
-            { type: 'timestamp', unique: true },
-            { isDraft: false },
-            fakeModel,
             {
-              name: 'attrTimestampUnique',
-              value: null,
+              attr: { type: 'timestamp', unique: true },
+              model: fakeModel,
+              updatedAttribute: {
+                name: 'attrTimestampUnique',
+                value: null,
+              },
+              entity: null,
             },
-            null
+            { isDraft: false }
           )
           .nullable()
       );
@@ -1309,14 +1425,16 @@ describe('Entity validator', () => {
 
       const validator = strapiUtils.validateYupSchema(
         entityValidator.timestamp(
-          { type: 'timestamp', unique: true },
-          { isDraft: false },
-          fakeModel,
           {
-            name: 'attrTimestampUnique',
-            value: '1638140400',
+            attr: { type: 'timestamp', unique: true },
+            model: fakeModel,
+            updatedAttribute: {
+              name: 'attrTimestampUnique',
+              value: '1638140400',
+            },
+            entity: null,
           },
-          null
+          { isDraft: false }
         )
       );
 
@@ -1329,14 +1447,16 @@ describe('Entity validator', () => {
 
       const validator = strapiUtils.validateYupSchema(
         entityValidator.timestamp(
-          { type: 'timestamp', unique: true },
-          { isDraft: false },
-          fakeModel,
           {
-            name: 'attrTimestampUnique',
-            value: '1638140400',
+            attr: { type: 'timestamp', unique: true },
+            model: fakeModel,
+            updatedAttribute: {
+              name: 'attrTimestampUnique',
+              value: '1638140400',
+            },
+            entity: null,
           },
-          null
+          { isDraft: false }
         )
       );
 
@@ -1352,14 +1472,16 @@ describe('Entity validator', () => {
 
       const validator = strapiUtils.validateYupSchema(
         entityValidator.timestamp(
-          { type: 'timestamp', unique: true },
-          { isDraft: false },
-          fakeModel,
           {
-            name: 'attrTimestampUnique',
-            value: '1638140400',
+            attr: { type: 'timestamp', unique: true },
+            model: fakeModel,
+            updatedAttribute: {
+              name: 'attrTimestampUnique',
+              value: '1638140400',
+            },
+            entity: { id: 1, attrTimestampUnique: '1638140400' },
           },
-          { id: 1, attrTimestampUnique: '1638140400' }
+          { isDraft: false }
         )
       );
 
@@ -1371,14 +1493,16 @@ describe('Entity validator', () => {
 
       const validator = strapiUtils.validateYupSchema(
         entityValidator.timestamp(
-          { type: 'timestamp', unique: true },
-          { isDraft: false },
-          fakeModel,
           {
-            name: 'attrTimestampUnique',
-            value: '1638140400',
+            attr: { type: 'timestamp', unique: true },
+            model: fakeModel,
+            updatedAttribute: {
+              name: 'attrTimestampUnique',
+              value: '1638140400',
+            },
+            entity: null,
           },
-          null
+          { isDraft: false }
         )
       );
 
@@ -1395,14 +1519,16 @@ describe('Entity validator', () => {
 
       const validator = strapiUtils.validateYupSchema(
         entityValidator.timestamp(
-          { type: 'timestamp', unique: true },
-          { isDraft: false },
-          fakeModel,
           {
-            name: 'attrTimestampUnique',
-            value: '1638140400',
+            attr: { type: 'timestamp', unique: true },
+            model: fakeModel,
+            updatedAttribute: {
+              name: 'attrTimestampUnique',
+              value: '1638140400',
+            },
+            entity: { id: 1, attrTimestampUnique: '1000000000' },
           },
-          { id: 1, attrTimestampUnique: '1000000000' }
+          { isDraft: false }
         )
       );
 

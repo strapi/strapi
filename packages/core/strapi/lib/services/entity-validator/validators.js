@@ -23,84 +23,118 @@ const composeValidators = (...fns) => (...args) => {
 
 /**
  * Adds minLength validator
- * @param {Object} attribute model attribute
- * @param {Object} validator yup validator
+ * @param {import('yup').StringSchema} validator yup validator
+ * @param {Object} metas
+ * @param {{ minLength: Number }} metas.attr model attribute
+ * @param {Object} options
+ * @param {boolean} options.isDraft
+ *
+ * @returns {{import('yup').StringSchema}}
  */
-const addMinLengthValidator = (validator, { minLength }, { isDraft }) =>
-  _.isInteger(minLength) && !isDraft ? validator.min(minLength) : validator;
+const addMinLengthValidator = (validator, { attr }, { isDraft }) =>
+  _.isInteger(attr.minLength) && !isDraft ? validator.min(attr.minLength) : validator;
 
 /**
  * Adds maxLength validator
- * @param {Object} attribute model attribute
- * @param {Object} validator yup validator
+ * @param {import('yup').StringSchema} validator yup validator
+ * @param {Object} metas
+ * @param {{ maxLength: Number }} metas.attr model attribute
+ *
+ * @returns {{import('yup').StringSchema}}
  */
-const addMaxLengthValidator = (validator, { maxLength }) =>
-  _.isInteger(maxLength) ? validator.max(maxLength) : validator;
+const addMaxLengthValidator = (validator, { attr }) =>
+  _.isInteger(attr.maxLength) ? validator.max(attr.maxLength) : validator;
 
 /**
  * Adds min integer validator
- * @param {Object} attribute model attribute
- * @param {Object} validator yup validator
+ * @param {import('yup').Number} validator yup validator
+ * @param {Object} metas
+ * @param {{ min: Number }} metas.attr model attribute
+ *
+ * @returns {{import('yup').StringSchema}}
  */
-const addMinIntegerValidator = (validator, { min }) =>
-  _.isNumber(min) ? validator.min(_.toInteger(min)) : validator;
+const addMinIntegerValidator = (validator, { attr }) =>
+  _.isNumber(attr.min) ? validator.min(_.toInteger(attr.min)) : validator;
 
 /**
  * Adds max integer validator
- * @param {Object} attribute model attribute
- * @param {Object} validator yup validator
+ * @param {import('yup').Number} validator yup validator
+ * @param {Object} metas
+ * @param {{ max: Number }} metas.attr model attribute
+ *
+ * @returns {{import('yup').StringSchema}}
  */
-const addMaxIntegerValidator = (validator, { max }) =>
-  _.isNumber(max) ? validator.max(_.toInteger(max)) : validator;
+const addMaxIntegerValidator = (validator, { attr }) =>
+  _.isNumber(attr.max) ? validator.max(_.toInteger(attr.max)) : validator;
 
 /**
  * Adds min float/decimal validator
- * @param {Object} attribute model attribute
- * @param {Object} validator yup validator
+ * @param {import('yup').NumberSchema} validator yup validator
+ * @param {Object} metas
+ * @param {{ min: Number }} metas.attr model attribute
+ *
+ * @returns {{import('yup').StringSchema}}
  */
-const addMinFloatValidator = (validator, { min }) =>
-  _.isNumber(min) ? validator.min(min) : validator;
+const addMinFloatValidator = (validator, { attr }) =>
+  _.isNumber(attr.min) ? validator.min(attr.min) : validator;
 
 /**
  * Adds max float/decimal validator
- * @param {Object} attribute model attribute
- * @param {Object} validator yup validator
+ * @param {import('yup').Number} validator yup validator
+ * @param {Object} metas model attribute
+ * @param {{ max: Number }} metas.attr
+ *
+ * @returns {{import('yup').StringSchema}}
  */
-const addMaxFloatValidator = (validator, { max }) =>
-  _.isNumber(max) ? validator.max(max) : validator;
+const addMaxFloatValidator = (validator, { attr }) =>
+  _.isNumber(attr.max) ? validator.max(attr.max) : validator;
 
 /**
  * Adds regex validator
- * @param {Object} attribute model attribute
- * @param {Object} validator yup validator
+ * @param {import('yup').StringSchema} validator yup validator
+ * @param {Object} metas model attribute
+ * @param {{ regex: RegExp }} metas.attr
+ *
+ * @returns {{import('yup').StringSchema}}
  */
-const addStringRegexValidator = (validator, { regex }) =>
-  _.isUndefined(regex) ? validator : validator.matches(new RegExp(regex));
+const addStringRegexValidator = (validator, { attr }) =>
+  _.isUndefined(attr.regex) ? validator : validator.matches(new RegExp(attr.regex));
 
-const addUniqueValidator = (validator, attr, __, model, updatedAttribute, entity) => {
+/**
+ *
+ * @param {import('yup').AnySchema} validator
+ * @param {Object} metas
+ * @param {{ unique: Boolean, type: String }} metas.attr
+ * @param {{ uid: String }} metas.model
+ * @param {{ name: String, value: any }} metas.updatedAttribute
+ * @param {Object} metas.entity
+ *
+ * @returns {{import('yup').StringSchema}}
+ */
+const addUniqueValidator = (validator, { attr, model, updatedAttribute, entity }) => {
   if (!attr.unique && attr.type !== 'uid') {
     return validator;
   }
 
-  /**
-   * If the attribute value is `null` we want to skip the unique validation.
-   * Otherwise it'll only accept a single `null` entry in the database.
-   */
-  if (updatedAttribute.value === null) {
-    return validator;
-  }
-
-  /**
-   * If the attribute is unchanged we skip the unique verification. This will
-   * prevent the validator to be triggered in case the user activated the
-   * unique constraint after already creating multiple entries with
-   * the same attribute value for that field.
-   */
-  if (entity && updatedAttribute.value === entity[updatedAttribute.name]) {
-    return validator;
-  }
-
   return validator.test('unique', 'This attribute must be unique', async value => {
+    /**
+     * If the attribute value is `null` we want to skip the unique validation.
+     * Otherwise it'll only accept a single `null` entry in the database.
+     */
+    if (updatedAttribute.value === null) {
+      return true;
+    }
+
+    /**
+     * If the attribute is unchanged we skip the unique verification. This will
+     * prevent the validator to be triggered in case the user activated the
+     * unique constraint after already creating multiple entries with
+     * the same attribute value for that field.
+     */
+    if (entity && updatedAttribute.value === entity[updatedAttribute.name]) {
+      return true;
+    }
+
     let whereParams = entity
       ? { $and: [{ [updatedAttribute.name]: value }, { $not: { id: entity.id } }] }
       : { [updatedAttribute.name]: value };
@@ -130,7 +164,7 @@ const uidValidator = composeValidators(stringValidator, validator =>
   validator.matches(new RegExp('^[A-Za-z0-9-_.~]*$'))
 );
 
-const enumerationValidator = attr => {
+const enumerationValidator = ({ attr }) => {
   return yup.string().oneOf((Array.isArray(attr.enum) ? attr.enum : [attr.enum]).concat(null));
 };
 

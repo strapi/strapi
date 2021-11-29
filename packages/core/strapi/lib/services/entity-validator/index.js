@@ -12,8 +12,11 @@ const { yup, validateYupSchema } = strapiUtils;
 const { isMediaAttribute, isScalarAttribute, getWritableAttributes } = strapiUtils.contentTypes;
 const { ValidationError } = strapiUtils.errors;
 
-const addMinMax = (attr, validator, data) => {
-  if (Number.isInteger(attr.min) && (attr.required || (Array.isArray(data) && data.length > 0))) {
+const addMinMax = (validator, { attr, updatedAttribute }) => {
+  if (
+    Number.isInteger(attr.min) &&
+    (attr.required || (Array.isArray(updatedAttribute.value) && updatedAttribute.value.length > 0))
+  ) {
     validator = validator.min(attr.min);
   }
   if (Number.isInteger(attr.max)) {
@@ -22,7 +25,7 @@ const addMinMax = (attr, validator, data) => {
   return validator;
 };
 
-const addRequiredValidation = createOrUpdate => (required, validator) => {
+const addRequiredValidation = createOrUpdate => (validator, { attr: { required } }) => {
   if (required) {
     if (createOrUpdate === 'creation') {
       validator = validator.notNil();
@@ -35,7 +38,7 @@ const addRequiredValidation = createOrUpdate => (required, validator) => {
   return validator;
 };
 
-const addDefault = createOrUpdate => (attr, validator) => {
+const addDefault = createOrUpdate => (validator, { attr }) => {
   if (createOrUpdate === 'creation') {
     if (
       ((attr.type === 'component' && attr.repeatable) || attr.type === 'dynamiczone') &&
@@ -54,7 +57,7 @@ const addDefault = createOrUpdate => (attr, validator) => {
 
 const preventCast = validator => validator.transform((val, originalVal) => originalVal);
 
-const createComponentValidator = createOrUpdate => (attr, data, { isDraft }) => {
+const createComponentValidator = createOrUpdate => ({ attr, updatedAttribute }, { isDraft }) => {
   let validator;
 
   const model = strapi.getModel(attr.component);
@@ -66,19 +69,23 @@ const createComponentValidator = createOrUpdate => (attr, data, { isDraft }) => 
     validator = yup
       .array()
       .of(
-        yup.lazy(item => createModelValidator(createOrUpdate)(model, item, { isDraft }).notNull())
+        yup.lazy(item =>
+          createModelValidator(createOrUpdate)({ model, data: item }, { isDraft }).notNull()
+        )
       );
-    validator = addRequiredValidation(createOrUpdate)(true, validator);
-    validator = addMinMax(attr, validator, data);
+    validator = addRequiredValidation(createOrUpdate)(validator, { attr: { required: true } });
+    validator = addMinMax(validator, { attr, updatedAttribute });
   } else {
-    validator = createModelValidator(createOrUpdate)(model, data, { isDraft });
-    validator = addRequiredValidation(createOrUpdate)(!isDraft && attr.required, validator);
+    validator = createModelValidator(createOrUpdate)({ model, updatedAttribute }, { isDraft });
+    validator = addRequiredValidation(createOrUpdate)(validator, {
+      attr: { required: !isDraft && attr.required },
+    });
   }
 
   return validator;
 };
 
-const createDzValidator = createOrUpdate => (attr, data, { isDraft }) => {
+const createDzValidator = createOrUpdate => ({ attr, updatedAttribute }, { isDraft }) => {
   let validator;
 
   validator = yup.array().of(
@@ -95,106 +102,85 @@ const createDzValidator = createOrUpdate => (attr, data, { isDraft }) => {
         .notNull();
 
       return model
-        ? schema.concat(createModelValidator(createOrUpdate)(model, item, { isDraft }))
+        ? schema.concat(createModelValidator(createOrUpdate)({ model, data: item }, { isDraft }))
         : schema;
     })
   );
-  validator = addRequiredValidation(createOrUpdate)(true, validator);
-  validator = addMinMax(attr, validator, data);
+  validator = addRequiredValidation(createOrUpdate)(validator, { attr: { required: true } });
+  validator = addMinMax(validator, { attr, updatedAttribute });
 
   return validator;
 };
 
-const createRelationValidator = createOrUpdate => (attr, data, { isDraft }) => {
+const createRelationValidator = createOrUpdate => ({ attr, updatedAttribute }, { isDraft }) => {
   let validator;
 
-  if (Array.isArray(data)) {
+  if (Array.isArray(updatedAttribute.value)) {
     validator = yup.array().of(yup.mixed());
   } else {
     validator = yup.mixed();
   }
-  validator = addRequiredValidation(createOrUpdate)(!isDraft && attr.required, validator);
+
+  validator = addRequiredValidation(createOrUpdate)(validator, {
+    attr: { required: !isDraft && attr.required },
+  });
 
   return validator;
 };
 
-const createScalarAttributeValidator = createOrUpdate => (
-  attr,
-  data,
-  { isDraft },
-  model,
-  attributeName,
-  entity
-) => {
+const createScalarAttributeValidator = createOrUpdate => (metas, options) => {
   let validator;
 
-  if (has(attr.type, validators)) {
-    validator = validators[attr.type](
-      attr,
-      { isDraft },
-      model,
-      { name: attributeName, value: data },
-      entity
-    );
+  if (has(metas.attr.type, validators)) {
+    validator = validators[metas.attr.type](metas, options);
   } else {
     // No validators specified - fall back to mixed
     validator = yup.mixed();
   }
 
-  validator = addRequiredValidation(createOrUpdate)(!isDraft && attr.required, validator);
+  validator = addRequiredValidation(createOrUpdate)(validator, {
+    attr: { required: !options.isDraft && metas.attr.required },
+  });
 
   return validator;
 };
 
-const createAttributeValidator = createOrUpdate => (
-  attr,
-  data,
-  { isDraft },
-  model,
-  attributeName,
-  entity
-) => {
+const createAttributeValidator = createOrUpdate => (metas, options) => {
   let validator;
 
-  if (isMediaAttribute(attr)) {
+  if (isMediaAttribute(metas.attr)) {
     validator = yup.mixed();
-  } else if (isScalarAttribute(attr)) {
-    validator = createScalarAttributeValidator(createOrUpdate)(
-      attr,
-      data,
-      { isDraft },
-      model,
-      attributeName,
-      entity
-    );
+  } else if (isScalarAttribute(metas.attr)) {
+    validator = createScalarAttributeValidator(createOrUpdate)(metas, options);
   } else {
-    if (attr.type === 'component') {
-      validator = createComponentValidator(createOrUpdate)(attr, data, { isDraft });
-    } else if (attr.type === 'dynamiczone') {
-      validator = createDzValidator(createOrUpdate)(attr, data, { isDraft });
+    if (metas.attr.type === 'component') {
+      validator = createComponentValidator(createOrUpdate)(metas, options);
+    } else if (metas.attr.type === 'dynamiczone') {
+      validator = createDzValidator(createOrUpdate)(metas, options);
     } else {
-      validator = createRelationValidator(createOrUpdate)(attr, data, { isDraft });
+      validator = createRelationValidator(createOrUpdate)(metas, options);
     }
 
     validator = preventCast(validator);
   }
 
-  validator = addDefault(createOrUpdate)(attr, validator);
+  validator = addDefault(createOrUpdate)(validator, metas);
 
   return validator;
 };
 
-const createModelValidator = createOrUpdate => (model, data, { isDraft }, entity) => {
+const createModelValidator = createOrUpdate => ({ model, data, entity }, options) => {
   const writableAttributes = model ? getWritableAttributes(model) : [];
 
   const schema = writableAttributes.reduce((validators, attributeName) => {
     const validator = createAttributeValidator(createOrUpdate)(
-      model.attributes[attributeName],
-      prop(attributeName, data),
-      { isDraft },
-      model,
-      attributeName,
-      entity
+      {
+        attr: model.attributes[attributeName],
+        updatedAttribute: { name: attributeName, value: prop(attributeName, data) },
+        model,
+        entity,
+      },
+      options
     );
 
     return assoc(attributeName, validator)(validators);
@@ -218,12 +204,12 @@ const createValidateEntity = createOrUpdate => async (
   }
 
   const validator = createModelValidator(createOrUpdate)(
-    model,
-    data,
     {
-      isDraft,
+      model,
+      data,
+      entity,
     },
-    entity
+    { isDraft }
   ).required();
   return validateYupSchema(validator, { strict: false, abortEarly: false })(data);
 };
