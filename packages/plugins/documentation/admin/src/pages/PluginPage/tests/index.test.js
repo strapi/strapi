@@ -525,6 +525,7 @@ describe('Plugin | Documentation | PluginPage', () => {
           class="c1 c2"
         >
           <main
+            aria-busy="false"
             aria-labelledby="main-content-title"
             class="c3"
             id="main-content"

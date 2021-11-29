@@ -15,6 +15,7 @@ import {
   EmptyStateLayout,
   useFocusWhenNavigate,
 } from '@strapi/helper-plugin';
+import { Helmet } from 'react-helmet';
 import { Button } from '@strapi/design-system/Button';
 import { Layout, HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
@@ -68,14 +69,17 @@ const PluginPage = () => {
     setShowConfirmDelete(!showConfirmDelete);
   };
 
+  const title = formatMessage({
+    id: getTrad('plugin.name'),
+    defaultMessage: 'Documentation',
+  });
+
   return (
     <Layout>
-      <Main>
+      <Helmet title={title} />
+      <Main aria-busy={isLoading}>
         <HeaderLayout
-          title={formatMessage({
-            id: getTrad('plugin.name'),
-            defaultMessage: 'Documentation',
-          })}
+          title={title}
           subtitle={formatMessage({
             id: getTrad('pages.PluginPage.header.description'),
             defaultMessage: 'Configure the documentation plugin',

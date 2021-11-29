@@ -6,6 +6,8 @@
 
 import React, { Suspense, lazy } from 'react';
 import { Switch, Route } from 'react-router-dom';
+import { Helmet } from 'react-helmet';
+import { useIntl } from 'react-intl';
 import { LoadingIndicatorPage, CheckPagePermissions } from '@strapi/helper-plugin';
 import { Layout } from '@strapi/design-system/Layout';
 import pluginPermissions from '../../permissions';
@@ -19,8 +21,15 @@ import ContentTypeBuilderNav from '../../components/ContentTypeBuilderNav';
 const ListView = lazy(() => import('../ListView'));
 
 const App = () => {
+  const { formatMessage } = useIntl();
+  const title = formatMessage({
+    id: `${pluginId}.plugin.name`,
+    defaultMessage: 'Content Types Builder',
+  });
+
   return (
     <CheckPagePermissions permissions={pluginPermissions.main}>
+      <Helmet title={title} />
       <FormModalNavigationProvider>
         <DataManagerProvider allIcons={icons}>
           <Layout sideNav={<ContentTypeBuilderNav />}>
