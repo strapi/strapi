@@ -308,14 +308,14 @@ async function watchFiles(dir) {
   });
 }
 
-const hasCustomAdminCode = (dir) => {
+const hasCustomAdminCode = async (dir) => {
   const customAdminPath = path.join(dir, 'src/admin');
 
-  if (!fs.pathExistsSync(customAdminPath)) {
+  if (!(await fs.pathExists(customAdminPath))) {
     return false;
   }
 
-  const files = fs.readdirSync(customAdminPath);
+  const files = await fs.readdir(customAdminPath);
 
   return files.length > 0;
 };
@@ -336,7 +336,7 @@ const hasNonDefaultPlugins = (plugins) => {
 };
 
 async function shouldBuildAdmin({ dir, plugins }) {
-  const appHasCustomAdminCode = hasCustomAdminCode(dir);
+  const appHasCustomAdminCode = await hasCustomAdminCode(dir);
   const appHasNonDefaultPlugins = hasNonDefaultPlugins(plugins);
 
   return appHasCustomAdminCode || appHasNonDefaultPlugins;
