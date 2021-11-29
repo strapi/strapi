@@ -5,6 +5,12 @@ const _ = require('lodash');
 const { yup } = require('@strapi/utils');
 
 /**
+ * @type {import('yup').StringSchema} StringSchema
+ * @type {import('yup').NumberSchema} NumberSchema
+ * @type {import('yup').AnySchema} AnySchema
+ */
+
+/**
  * Utility function to compose validators
  */
 const composeValidators = (...fns) => (...args) => {
@@ -23,93 +29,93 @@ const composeValidators = (...fns) => (...args) => {
 
 /**
  * Adds minLength validator
- * @param {import('yup').StringSchema} validator yup validator
+ * @param {StringSchema} validator yup validator
  * @param {Object} metas
  * @param {{ minLength: Number }} metas.attr model attribute
  * @param {Object} options
  * @param {boolean} options.isDraft
  *
- * @returns {{import('yup').StringSchema}}
+ * @returns {StringSchema}
  */
 const addMinLengthValidator = (validator, { attr }, { isDraft }) =>
   _.isInteger(attr.minLength) && !isDraft ? validator.min(attr.minLength) : validator;
 
 /**
  * Adds maxLength validator
- * @param {import('yup').StringSchema} validator yup validator
+ * @param {StringSchema} validator yup validator
  * @param {Object} metas
  * @param {{ maxLength: Number }} metas.attr model attribute
  *
- * @returns {{import('yup').StringSchema}}
+ * @returns {StringSchema}
  */
 const addMaxLengthValidator = (validator, { attr }) =>
   _.isInteger(attr.maxLength) ? validator.max(attr.maxLength) : validator;
 
 /**
  * Adds min integer validator
- * @param {import('yup').NumberSchema} validator yup validator
+ * @param {NumberSchema} validator yup validator
  * @param {Object} metas
  * @param {{ min: Number }} metas.attr model attribute
  *
- * @returns {{import('yup').NumberSchema}}
+ * @returns {NumberSchema}
  */
 const addMinIntegerValidator = (validator, { attr }) =>
   _.isNumber(attr.min) ? validator.min(_.toInteger(attr.min)) : validator;
 
 /**
  * Adds max integer validator
- * @param {import('yup').NumberSchema} validator yup validator
+ * @param {NumberSchema} validator yup validator
  * @param {Object} metas
  * @param {{ max: Number }} metas.attr model attribute
  *
- * @returns {{import('yup').NumberSchema}}
+ * @returns {NumberSchema}
  */
 const addMaxIntegerValidator = (validator, { attr }) =>
   _.isNumber(attr.max) ? validator.max(_.toInteger(attr.max)) : validator;
 
 /**
  * Adds min float/decimal validator
- * @param {import('yup').NumberSchema} validator yup validator
+ * @param {NumberSchema} validator yup validator
  * @param {Object} metas
  * @param {{ min: Number }} metas.attr model attribute
  *
- * @returns {{import('yup').NumberSchema}}
+ * @returns {NumberSchema}
  */
 const addMinFloatValidator = (validator, { attr }) =>
   _.isNumber(attr.min) ? validator.min(attr.min) : validator;
 
 /**
  * Adds max float/decimal validator
- * @param {import('yup').NumberSchema} validator yup validator
+ * @param {NumberSchema} validator yup validator
  * @param {Object} metas model attribute
  * @param {{ max: Number }} metas.attr
  *
- * @returns {{import('yup').NumberSchema}}
+ * @returns {NumberSchema}
  */
 const addMaxFloatValidator = (validator, { attr }) =>
   _.isNumber(attr.max) ? validator.max(attr.max) : validator;
 
 /**
  * Adds regex validator
- * @param {import('yup').StringSchema} validator yup validator
+ * @param {StringSchema} validator yup validator
  * @param {Object} metas model attribute
  * @param {{ regex: RegExp }} metas.attr
  *
- * @returns {{import('yup').StringSchema}}
+ * @returns {StringSchema}
  */
 const addStringRegexValidator = (validator, { attr }) =>
   _.isUndefined(attr.regex) ? validator : validator.matches(new RegExp(attr.regex));
 
 /**
  *
- * @param {import('yup').AnySchema} validator
+ * @param {AnySchema} validator
  * @param {Object} metas
  * @param {{ unique: Boolean, type: String }} metas.attr
  * @param {{ uid: String }} metas.model
  * @param {{ name: String, value: any }} metas.updatedAttribute
  * @param {Object} metas.entity
  *
- * @returns {{import('yup').StringSchema}}
+ * @returns {AnySchema}
  */
 const addUniqueValidator = (validator, { attr, model, updatedAttribute, entity }) => {
   if (!attr.unique && attr.type !== 'uid') {
