@@ -43,7 +43,7 @@ const restart = async () => {
   rq = await createAuthRequest({ strapi });
 };
 
-describe.skip('Migration - unique attribute', () => {
+describe('Migration - unique attribute', () => {
   beforeAll(async () => {
     await builder
       .addContentType(dogModel)
