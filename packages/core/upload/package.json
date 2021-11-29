@@ -2,13 +2,19 @@
   "name": "@strapi/plugin-upload",
   "version": "3.6.8",
   "description": "Makes it easy to upload images and files to your Strapi Application.",
-  "strapi": {
-    "displayName": "Media Library",
-    "name": "upload",
-    "description": "Media file management.",
-    "required": true,
-    "kind": "plugin"
+  "license": "SEE LICENSE IN LICENSE",
+  "author": {
+    "name": "Strapi team",
+    "email": "hi@strapi.io",
+    "url": "https://strapi.io"
   },
+  "maintainers": [
+    {
+      "name": "Strapi team",
+      "email": "hi@strapi.io",
+      "url": "https://strapi.io"
+    }
+  ],
   "scripts": {
     "test": "echo \"no tests yet\""
   },
@@ -31,22 +37,15 @@
     "react-router-dom": "5.2.0",
     "sharp": "0.28.1"
   },
-  "author": {
-    "name": "Strapi team",
-    "email": "hi@strapi.io",
-    "url": "https://strapi.io"
-  },
-  "maintainers": [
-    {
-      "name": "Strapi team",
-      "email": "hi@strapi.io",
-      "url": "https://strapi.io"
-    }
-  ],
   "engines": {
     "node": ">=12.x.x <=16.x.x",
     "npm": ">=6.0.0"
   },
-  "license": "SEE LICENSE IN LICENSE",
-  "gitHead": "231263a3535658bab1e9492c6aaaed8692d62a53"
+  "strapi": {
+    "displayName": "Media Library",
+    "name": "upload",
+    "description": "Media file management.",
+    "required": true,
+    "kind": "plugin"
+  }
 }

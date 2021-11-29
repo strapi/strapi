@@ -2,24 +2,11 @@
   "name": "@strapi/plugin-email",
   "version": "3.6.8",
   "description": "Easily configure your Strapi application to send emails.",
-  "strapi": {
-    "name": "email",
-    "displayName": "Email",
-    "description": "Configure your application to send emails.",
-    "required": true,
-    "kind": "plugin"
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/strapi/strapi.git"
   },
-  "scripts": {
-    "test": "echo \"no tests yet\""
-  },
-  "dependencies": {
-    "lodash": "4.17.21",
-    "@strapi/provider-email-sendmail": "3.6.8",
-    "@strapi/utils": "3.6.8"
-  },
-  "devDependencies": {
-    "@strapi/helper-plugin": "3.6.8"
-  },
+  "license": "SEE LICENSE IN LICENSE",
   "author": {
     "name": "Strapi team",
     "email": "hi@strapi.io",
@@ -32,14 +19,26 @@
       "url": "https://strapi.io"
     }
   ],
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/strapi/strapi.git"
+  "scripts": {
+    "test": "echo \"no tests yet\""
+  },
+  "dependencies": {
+    "@strapi/provider-email-sendmail": "3.6.8",
+    "@strapi/utils": "3.6.8",
+    "lodash": "4.17.21"
+  },
+  "devDependencies": {
+    "@strapi/helper-plugin": "3.6.8"
   },
   "engines": {
     "node": ">=12.x.x <=16.x.x",
     "npm": ">=6.0.0"
   },
-  "license": "SEE LICENSE IN LICENSE",
-  "gitHead": "231263a3535658bab1e9492c6aaaed8692d62a53"
+  "strapi": {
+    "name": "email",
+    "displayName": "Email",
+    "description": "Configure your application to send emails.",
+    "required": true,
+    "kind": "plugin"
+  }
 }

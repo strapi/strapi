@@ -2,17 +2,7 @@
   "name": "@strapi/plugin-i18n",
   "version": "3.6.8",
   "description": "This plugin enables to create, to read and to update content in different languages, both from the Admin Panel and from the API",
-  "strapi": {
-    "displayName": "Internationalization",
-    "name": "i18n",
-    "description": "This plugin enables to create, to read and to update content in different languages, both from the Admin Panel and from the API.",
-    "required": false,
-    "kind": "plugin"
-  },
-  "dependencies": {
-    "@strapi/utils": "3.6.8",
-    "lodash": "4.17.21"
-  },
+  "license": "SEE LICENSE IN LICENSE",
   "author": {
     "name": "A Strapi developer",
     "email": "",
@@ -25,9 +15,19 @@
       "url": ""
     }
   ],
+  "dependencies": {
+    "@strapi/utils": "3.6.8",
+    "lodash": "4.17.21"
+  },
   "engines": {
     "node": ">=12.x.x <=16.x.x",
     "npm": ">=6.0.0"
   },
-  "license": "SEE LICENSE IN LICENSE"
+  "strapi": {
+    "displayName": "Internationalization",
+    "name": "i18n",
+    "description": "This plugin enables to create, to read and to update content in different languages, both from the Admin Panel and from the API.",
+    "required": false,
+    "kind": "plugin"
+  }
 }
