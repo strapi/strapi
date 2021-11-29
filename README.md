@@ -24,7 +24,7 @@
 
 <p align="center">
   <a href="https://strapi.io">
-    <img src="https://raw.githubusercontent.com/strapi/strapi/master/public/assets/administration_panel.png" alt="Administration panel" />
+    <img src="./public/assets/administration_panel.png" alt="Administration panel" />
   </a>
 </p>
 
