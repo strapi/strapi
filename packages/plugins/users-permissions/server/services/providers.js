@@ -7,6 +7,7 @@
 // Public node modules.
 const _ = require('lodash');
 const jwt = require('jsonwebtoken');
+const urlJoin = require('url-join');
 
 const { getAbsoluteServerUrl } = require('@strapi/utils');
 
@@ -167,7 +168,7 @@ module.exports = ({ strapi }) => {
                 return callback(null, {
                   username: userbody.login,
                   email: Array.isArray(emailsbody)
-                    ? emailsbody.find(email => email.primary === true).email
+                    ? emailsbody.find((email) => email.primary === true).email
                     : null,
                 });
               });
@@ -550,7 +551,7 @@ module.exports = ({ strapi }) => {
           }
 
           if (
-            !_.isEmpty(_.find(users, user => user.provider !== provider)) &&
+            !_.isEmpty(_.find(users, (user) => user.provider !== provider)) &&
             advanced.unique_email
           ) {
             return resolve([
@@ -588,7 +589,7 @@ module.exports = ({ strapi }) => {
 
   const buildRedirectUri = (provider = '') => {
     const apiPrefix = strapi.config.get('api.rest.prefix');
-    return `${getAbsoluteServerUrl(strapi.config)}/${apiPrefix}/connect/${provider}/callback`;
+    return urlJoin(getAbsoluteServerUrl(strapi.config), apiPrefix, 'connect', provider, 'callback');
   };
 
   return {

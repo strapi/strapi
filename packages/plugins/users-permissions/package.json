@@ -30,6 +30,7 @@
     "react-router-dom": "5.2.0",
     "redux-saga": "^0.16.0",
     "request": "^2.83.0",
+    "url-join": "4.0.1",
     "uuid": "^3.1.0"
   },
   "devDependencies": {
