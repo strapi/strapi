@@ -9,7 +9,7 @@ const chalk = require('chalk');
 const chokidar = require('chokidar');
 const getWebpackConfig = require('./webpack.config');
 
-const getPkgPath = name => path.dirname(require.resolve(`${name}/package.json`));
+const getPkgPath = (name) => path.dirname(require.resolve(`${name}/package.json`));
 
 function getCustomWebpackConfig(dir, config) {
   const adminConfigPath = path.join(dir, 'src', 'admin', 'webpack.config.js');
@@ -35,6 +35,10 @@ function getCustomWebpackConfig(dir, config) {
 }
 
 async function build({ plugins, dir, env, options, optimize }) {
+  if (!(await shouldBuildAdmin({ dir, plugins }))) {
+    return;
+  }
+
   // Create the cache dir containing the front-end files.
   await createCacheDir({ dir, plugins });
 
@@ -48,7 +52,7 @@ async function build({ plugins, dir, env, options, optimize }) {
     ceRoot: path.resolve(cacheDir, 'admin', 'src'),
   };
 
-  const pluginsPath = Object.keys(plugins).map(pluginName => plugins[pluginName].pathToPlugin);
+  const pluginsPath = Object.keys(plugins).map((pluginName) => plugins[pluginName].pathToPlugin);
 
   const config = getCustomWebpackConfig(dir, {
     entry,
@@ -161,11 +165,11 @@ async function createCacheDir({ dir, plugins }) {
   const cacheDir = path.resolve(dir, '.cache');
 
   const pluginsWithFront = Object.keys(plugins)
-    .filter(pluginName => {
+    .filter((pluginName) => {
       const pluginInfo = plugins[pluginName];
       return fs.existsSync(path.resolve(pluginInfo.pathToPlugin, 'strapi-admin.js'));
     })
-    .map(name => ({ name, ...plugins[name] }));
+    .map((name) => ({ name, ...plugins[name] }));
 
   // create .cache dir
   await fs.emptyDir(cacheDir);
@@ -206,7 +210,7 @@ async function watchAdmin({ plugins, dir, host, port, browser, options }) {
     ceRoot: path.resolve(cacheDir, 'admin', 'src'),
   };
 
-  const pluginsPath = Object.keys(plugins).map(pluginName => plugins[pluginName].pathToPlugin);
+  const pluginsPath = Object.keys(plugins).map((pluginName) => plugins[pluginName].pathToPlugin);
 
   const args = {
     entry,
@@ -243,7 +247,7 @@ async function watchAdmin({ plugins, dir, host, port, browser, options }) {
 
   const server = new WebpackDevServer(opts, webpack(webpackConfig));
 
-  server.start(port, host, function(err) {
+  server.start(port, host, function (err) {
     if (err) {
       console.log(err);
     }
@@ -302,6 +306,40 @@ async function watchFiles(dir) {
       }
     }
   });
+}
+
+const hasCustomAdminCode = (dir) => {
+  const customAdminPath = path.join(dir, 'src/admin');
+
+  if (!fs.pathExistsSync(customAdminPath)) {
+    return false;
+  }
+
+  const files = fs.readdirSync(customAdminPath);
+
+  return files.length > 0;
+};
+
+const DEFAULT_PLUGINS = [
+  'content-type-builder',
+  'content-manager',
+  'upload',
+  'email',
+  'i18n',
+  'users-permissions',
+];
+
+const hasNonDefaultPlugins = (plugins) => {
+  const diff = _.difference(Object.keys(plugins), DEFAULT_PLUGINS);
+
+  return diff.length > 0;
+};
+
+async function shouldBuildAdmin({ dir, plugins }) {
+  const appHasCustomAdminCode = hasCustomAdminCode(dir);
+  const appHasNonDefaultPlugins = hasNonDefaultPlugins(plugins);
+
+  return appHasCustomAdminCode || appHasNonDefaultPlugins;
 }
 
 module.exports = {

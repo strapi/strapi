@@ -15,29 +15,28 @@ const strapi = require('../index');
  * `$ strapi develop`
  *
  */
-module.exports = async function({ build, watchAdmin, polling, browser }) {
+module.exports = async function ({ build, watchAdmin, polling, browser }) {
   const dir = process.cwd();
   const config = loadConfiguration(dir);
   const logger = createLogger(config.logger, {});
 
-  const adminWatchIgnoreFiles = getOr([], 'admin.watchIgnoreFiles')(config);
-  const serveAdminPanel = getOr(true, 'admin.serveAdminPanel')(config);
-
-  const buildExists = fs.existsSync(path.join(dir, 'build'));
-  // Don't run the build process if the admin is in watch mode
-  if (build && !watchAdmin && serveAdminPanel && !buildExists) {
-    try {
-      execa.sync('npm run -s build -- --no-optimization', {
-        stdio: 'inherit',
-        shell: true,
-      });
-    } catch (err) {
-      process.exit(1);
-    }
-  }
-
   try {
     if (cluster.isMaster) {
+      const serveAdminPanel = getOr(true, 'admin.serveAdminPanel')(config);
+
+      const buildExists = fs.existsSync(path.join(dir, 'build'));
+      // Don't run the build process if the admin is in watch mode
+      if (build && !watchAdmin && serveAdminPanel && !buildExists) {
+        try {
+          execa.sync('npm run -s build -- --no-optimization', {
+            stdio: 'inherit',
+            shell: true,
+          });
+        } catch (err) {
+          process.exit(1);
+        }
+      }
+
       if (watchAdmin) {
         try {
           execa('npm', ['run', '-s', 'strapi', 'watch-admin', '--', '--browser', browser], {
@@ -74,6 +73,7 @@ module.exports = async function({ build, watchAdmin, polling, browser }) {
         serveAdminPanel: watchAdmin ? false : true,
       });
 
+      const adminWatchIgnoreFiles = getOr([], 'admin.watchIgnoreFiles')(config);
       watchFileChanges({
         dir,
         strapiInstance,
@@ -81,7 +81,7 @@ module.exports = async function({ build, watchAdmin, polling, browser }) {
         polling,
       });
 
-      process.on('message', async message => {
+      process.on('message', async (message) => {
         switch (message) {
           case 'kill':
             await strapiInstance.destroy();
@@ -140,15 +140,15 @@ function watchFileChanges({ dir, strapiInstance, watchIgnoreFiles, polling }) {
   });
 
   watcher
-    .on('add', path => {
+    .on('add', (path) => {
       strapiInstance.log.info(`File created: ${path}`);
       restart();
     })
-    .on('change', path => {
+    .on('change', (path) => {
       strapiInstance.log.info(`File changed: ${path}`);
       restart();
     })
-    .on('unlink', path => {
+    .on('unlink', (path) => {
       strapiInstance.log.info(`File deleted: ${path}`);
       restart();
     });
