@@ -4,15 +4,15 @@
   "description": "This plugin enables to create, to read and to update content in different languages, both from the Admin Panel and from the API",
   "license": "SEE LICENSE IN LICENSE",
   "author": {
-    "name": "A Strapi developer",
-    "email": "",
-    "url": ""
+    "name": "Strapi Solutions SAS",
+    "email": "hi@strapi.io",
+    "url": "https://strapi.io"
   },
   "maintainers": [
     {
-      "name": "A Strapi developer",
-      "email": "",
-      "url": ""
+      "name": "Strapi Solutions SAS",
+      "email": "hi@strapi.io",
+      "url": "https://strapi.io"
     }
   ],
   "dependencies": {

@@ -4,36 +4,15 @@
   "description": "Create an OpenAPI Document and visualize your API with SWAGGER UI.",
   "license": "SEE LICENSE IN LICENSE",
   "author": {
-    "name": "soupette",
+    "name": "Strapi Solutions SAS",
     "email": "hi@strapi.io",
     "url": "https://strapi.io"
   },
   "maintainers": [
     {
-      "name": "Strapi",
+      "name": "Strapi Solutions SAS",
       "email": "hi@strapi.io",
       "url": "https://strapi.io"
-    },
-    {
-      "name": "soupette",
-      "email": "cyril@strapi.io"
-    },
-    {
-      "name": "lauriejim",
-      "email": "jim@strapi.io"
-    }
-  ],
-  "contributors": [
-    {
-      "name": "soupette"
-    },
-    {
-      "name": "Aurelsicoko",
-      "email": "aurelien@strapi.io"
-    },
-    {
-      "name": "lauriejim",
-      "email": "jim@strapi.io"
     }
   ],
   "scripts": {

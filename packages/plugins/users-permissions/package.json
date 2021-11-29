@@ -8,13 +8,13 @@
   },
   "license": "SEE LICENSE IN LICENSE",
   "author": {
-    "name": "Strapi team",
+    "name": "Strapi Solutions SAS",
     "email": "hi@strapi.io",
     "url": "https://strapi.io"
   },
   "maintainers": [
     {
-      "name": "Strapi team",
+      "name": "Strapi Solutions SAS",
       "email": "hi@strapi.io",
       "url": "https://strapi.io"
     }

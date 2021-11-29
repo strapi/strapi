@@ -17,13 +17,13 @@
   },
   "license": "SEE LICENSE IN LICENSE",
   "author": {
-    "name": "Luca Perret",
-    "email": "perret.luca@gmail.com",
-    "url": "https://github.com/lucaperret"
+    "name": "Strapi Solutions SAS",
+    "email": "hi@strapi.io",
+    "url": "https://strapi.io"
   },
   "maintainers": [
     {
-      "name": "Strapi team",
+      "name": "Strapi Solutions SAS",
       "email": "hi@strapi.io",
       "url": "https://strapi.io"
     }
