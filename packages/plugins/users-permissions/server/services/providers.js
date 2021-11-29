@@ -28,7 +28,7 @@ module.exports = ({ strapi }) => {
   const getProfile = async (provider, query, callback) => {
     const access_token = query.access_token || query.code || query.oauth_token;
 
-    const grant = await strapi
+    const providers = await strapi
       .store({ type: 'plugin', name: 'users-permissions', key: 'grant' })
       .get();
 
@@ -168,7 +168,7 @@ module.exports = ({ strapi }) => {
                 return callback(null, {
                   username: userbody.login,
                   email: Array.isArray(emailsbody)
-                    ? emailsbody.find((email) => email.primary === true).email
+                    ? emailsbody.find(email => email.primary === true).email
                     : null,
                 });
               });
@@ -201,8 +201,8 @@ module.exports = ({ strapi }) => {
         const twitter = purest({
           provider: 'twitter',
           config: purestConfig,
-          key: grant.twitter.key,
-          secret: grant.twitter.secret,
+          key: providers.twitter.key,
+          secret: providers.twitter.secret,
         });
 
         twitter
@@ -225,8 +225,8 @@ module.exports = ({ strapi }) => {
       case 'instagram': {
         const instagram = purest({
           provider: 'instagram',
-          key: grant.instagram.key,
-          secret: grant.instagram.secret,
+          key: providers.instagram.key,
+          secret: providers.instagram.secret,
           config: purestConfig,
         });
 
@@ -298,7 +298,7 @@ module.exports = ({ strapi }) => {
 
         twitch
           .get('users')
-          .auth(access_token, grant.twitch.key)
+          .auth(access_token, providers.twitch.key)
           .request((err, res, body) => {
             if (err) {
               callback(err);
@@ -403,7 +403,7 @@ module.exports = ({ strapi }) => {
       }
       case 'auth0': {
         const purestAuth0Conf = {};
-        purestAuth0Conf[`https://${grant.auth0.subdomain}.auth0.com`] = {
+        purestAuth0Conf[`https://${providers.auth0.subdomain}.auth0.com`] = {
           __domain: {
             auth: {
               auth: { bearer: '[0]' },
@@ -442,7 +442,7 @@ module.exports = ({ strapi }) => {
         break;
       }
       case 'cas': {
-        const provider_url = 'https://' + _.get(grant['cas'], 'subdomain');
+        const provider_url = 'https://' + _.get(providers.cas, 'subdomain');
         const cas = purest({
           provider: 'cas',
           config: {
@@ -551,7 +551,7 @@ module.exports = ({ strapi }) => {
           }
 
           if (
-            !_.isEmpty(_.find(users, (user) => user.provider !== provider)) &&
+            !_.isEmpty(_.find(users, user => user.provider !== provider)) &&
             advanced.unique_email
           ) {
             return resolve([
