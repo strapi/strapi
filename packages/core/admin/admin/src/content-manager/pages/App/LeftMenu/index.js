@@ -40,10 +40,8 @@ const LeftMenu = () => {
       };
     });
 
-  const intlCollectionTypeLinks = toIntl(
-    collectionTypeLinks.filter(({ isDisplayed }) => isDisplayed)
-  );
-  const intlSingleTypeLinks = toIntl(singleTypeLinks.filter(({ isDisplayed }) => isDisplayed));
+  const intlCollectionTypeLinks = toIntl(collectionTypeLinks);
+  const intlSingleTypeLinks = toIntl(singleTypeLinks);
 
   const menu = [
     {
