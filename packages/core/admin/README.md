@@ -2,9 +2,11 @@
 
 ## Description
 
-TODO
+This is the admin panel package
 
 ## Contribute
+
+You can read the contribution guide [here](../../../CONTRIBUTING.md)
 
 ### Setup
 
