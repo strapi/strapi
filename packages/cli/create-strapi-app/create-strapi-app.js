@@ -56,7 +56,9 @@ function generateApp(projectName, options) {
 }
 
 async function initProject(projectName, program) {
-  if (projectName) await checkInstallPath(resolve(projectName));
+  if (projectName) {
+    await checkInstallPath(resolve(projectName));
+  }
 
   const hasDatabaseOptions = databaseOptions.some(opt => program[opt]);
 
@@ -80,7 +82,7 @@ async function initProject(projectName, program) {
   const prompt = await promptUser(projectName, program);
 
   const directory = prompt.directory || projectName;
-  checkInstallPath(resolve(directory));
+  await checkInstallPath(resolve(directory));
 
   const options = {
     template: program.template,
