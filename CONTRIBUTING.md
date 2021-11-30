@@ -125,7 +125,6 @@ The administration panel will be available at http://localhost:4000/admin
 - `yarn test:clean` removes the coverage.
 - `yarn test:front` runs the front-end related tests.
 - `yarn test:front:watch` runs an interactive test watcher for the front-end.
-- `yarn test:snyk` checks the dependencies vulnerabilities.
 - `yarn test:unit` runs the back-end unit tests.
 - `yarn test:e2e` runs an end-to-end test suite.
 - `yarn test:generate-app` generates a test application.
