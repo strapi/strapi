@@ -97,7 +97,7 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
   background: #f0f0ff;
 }
 
-.c13 .sc-eCstlR {
+.c13 .sc-eCImPb {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -179,7 +179,7 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
   background: #4945ff;
 }
 
-.c16 .sc-eCstlR {
+.c16 .sc-eCImPb {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;

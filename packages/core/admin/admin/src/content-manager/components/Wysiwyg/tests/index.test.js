@@ -203,7 +203,7 @@ describe('Wysiwyg render and actions buttons', () => {
         background: #ffffff;
       }
 
-      .c28 .sc-biOYyE {
+      .c28 .sc-bjeSbO {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -1257,7 +1257,7 @@ describe('Wysiwyg render and actions buttons', () => {
                     disabled=""
                     readonly=""
                     spellcheck="false"
-                    style="position: absolute; bottom: -1em; padding: 0px; width: 1000px; height: 1em; outline: none;"
+                    style="position: absolute; bottom: -1em; padding: 0px; width: 1000px; height: 1em; min-height: 1em; outline: none;"
                     tabindex="0"
                   />
                 </div>
