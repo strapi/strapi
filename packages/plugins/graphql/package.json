@@ -1,13 +1,25 @@
 {
   "name": "@strapi/plugin-graphql",
-  "version": "3.6.8",
+  "version": "4.0.0",
   "description": "Adds GraphQL endpoint with default API methods.",
-  "strapi": {
-    "displayName": "GraphQL",
-    "name": "graphql",
-    "description": "Adds GraphQL endpoint with default API methods.",
-    "kind": "plugin"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/strapi/strapi.git",
+    "directory": "packages/plugins/graphql"
   },
+  "license": "SEE LICENSE IN LICENSE",
+  "author": {
+    "name": "Strapi Solutions SAS",
+    "email": "hi@strapi.io",
+    "url": "https://strapi.io"
+  },
+  "maintainers": [
+    {
+      "name": "Strapi Solutions SAS",
+      "email": "hi@strapi.io",
+      "url": "https://strapi.io"
+    }
+  ],
   "scripts": {
     "test": "echo \"no tests yet\""
   },
@@ -15,7 +27,7 @@
     "@apollo/federation": "^0.28.0",
     "@graphql-tools/schema": "8.1.2",
     "@graphql-tools/utils": "^8.0.2",
-    "@strapi/utils": "3.6.8",
+    "@strapi/utils": "4.0.0",
     "apollo-server-core": "3.1.2",
     "apollo-server-koa": "3.1.2",
     "glob": "^7.1.7",
@@ -36,22 +48,14 @@
     "cross-env": "^7.0.3",
     "koa": "^2.13.1"
   },
-  "author": {
-    "name": "A Strapi developer",
-    "email": "",
-    "url": ""
-  },
-  "maintainers": [
-    {
-      "name": "A Strapi developer",
-      "email": "",
-      "url": ""
-    }
-  ],
   "engines": {
     "node": ">=12.x.x <=16.x.x",
     "npm": ">=6.0.0"
   },
-  "license": "SEE LICENSE IN LICENSE",
-  "gitHead": "231263a3535658bab1e9492c6aaaed8692d62a53"
+  "strapi": {
+    "displayName": "GraphQL",
+    "name": "graphql",
+    "description": "Adds GraphQL endpoint with default API methods.",
+    "kind": "plugin"
+  }
 }

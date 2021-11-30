@@ -1,51 +1,50 @@
 {
   "name": "@strapi/provider-upload-cloudinary",
-  "version": "3.6.8",
+  "version": "4.0.0",
   "description": "Cloudinary provider for strapi upload",
-  "homepage": "https://strapi.io",
   "keywords": [
     "upload",
     "cloudinary",
     "strapi"
   ],
-  "directories": {
-    "lib": "./lib"
+  "homepage": "https://strapi.io",
+  "bugs": {
+    "url": "https://github.com/strapi/strapi/issues"
   },
-  "main": "./lib",
-  "dependencies": {
-    "@strapi/utils": "3.6.8",
-    "cloudinary": "^1.25.1",
-    "into-stream": "^5.1.0"
-  },
-  "strapi": {
-    "isProvider": true
-  },
-  "author": {
-    "email": "perret.luca@gmail.com",
-    "name": "Luca Perret",
-    "url": "https://github.com/lucaperret"
-  },
-  "maintainers": [
-    {
-      "name": "Strapi team",
-      "email": "hi@strapi.io",
-      "url": "https://strapi.io"
-    }
-  ],
   "repository": {
     "type": "git",
     "url": "git://github.com/strapi/strapi.git"
   },
-  "bugs": {
-    "url": "https://github.com/strapi/strapi/issues"
+  "license": "SEE LICENSE IN LICENSE",
+  "author": {
+    "name": "Luca Perret",
+    "email": "perret.luca@gmail.com",
+    "url": "https://github.com/lucaperret"
+  },
+  "maintainers": [
+    {
+      "name": "Strapi Solutions SAS",
+      "email": "hi@strapi.io",
+      "url": "https://strapi.io"
+    }
+  ],
+  "main": "./lib",
+  "directories": {
+    "lib": "./lib"
+  },
+  "scripts": {
+    "test": "echo \"no tests yet\""
+  },
+  "dependencies": {
+    "@strapi/utils": "4.0.0",
+    "cloudinary": "^1.25.1",
+    "into-stream": "^5.1.0"
   },
   "engines": {
     "node": ">=12.x.x <=16.x.x",
     "npm": ">=6.0.0"
   },
-  "license": "SEE LICENSE IN LICENSE",
-  "scripts": {
-    "test": "echo \"no tests yet\""
-  },
-  "gitHead": "231263a3535658bab1e9492c6aaaed8692d62a53"
+  "strapi": {
+    "isProvider": true
+  }
 }

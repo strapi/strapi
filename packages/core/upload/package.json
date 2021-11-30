@@ -1,21 +1,27 @@
 {
   "name": "@strapi/plugin-upload",
-  "version": "3.6.8",
+  "version": "4.0.0",
   "description": "Makes it easy to upload images and files to your Strapi Application.",
-  "strapi": {
-    "displayName": "Media Library",
-    "name": "upload",
-    "description": "Media file management.",
-    "required": true,
-    "kind": "plugin"
+  "license": "SEE LICENSE IN LICENSE",
+  "author": {
+    "name": "Strapi Solutions SAS",
+    "email": "hi@strapi.io",
+    "url": "https://strapi.io"
   },
+  "maintainers": [
+    {
+      "name": "Strapi Solutions SAS",
+      "email": "hi@strapi.io",
+      "url": "https://strapi.io"
+    }
+  ],
   "scripts": {
     "test": "echo \"no tests yet\""
   },
   "dependencies": {
-    "@strapi/helper-plugin": "3.6.8",
-    "@strapi/provider-upload-local": "3.6.8",
-    "@strapi/utils": "3.6.8",
+    "@strapi/helper-plugin": "4.0.0",
+    "@strapi/provider-upload-local": "4.0.0",
+    "@strapi/utils": "4.0.0",
     "byte-size": "7.0.1",
     "cropperjs": "1.5.11",
     "immer": "9.0.6",
@@ -29,24 +35,17 @@
     "react-redux": "7.2.3",
     "react-router": "^5.2.0",
     "react-router-dom": "5.2.0",
-    "sharp": "0.28.1"
+    "sharp": "0.29.0"
   },
-  "author": {
-    "name": "Strapi team",
-    "email": "hi@strapi.io",
-    "url": "https://strapi.io"
-  },
-  "maintainers": [
-    {
-      "name": "Strapi team",
-      "email": "hi@strapi.io",
-      "url": "https://strapi.io"
-    }
-  ],
   "engines": {
     "node": ">=12.x.x <=16.x.x",
     "npm": ">=6.0.0"
   },
-  "license": "SEE LICENSE IN LICENSE",
-  "gitHead": "231263a3535658bab1e9492c6aaaed8692d62a53"
+  "strapi": {
+    "displayName": "Media Library",
+    "name": "upload",
+    "description": "Media file management.",
+    "required": true,
+    "kind": "plugin"
+  }
 }

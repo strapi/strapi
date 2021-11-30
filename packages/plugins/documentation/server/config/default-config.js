@@ -26,7 +26,7 @@ module.exports = {
   servers: [],
   externalDocs: {
     description: 'Find out more',
-    url: 'https://strapi.io/documentation/developer-docs/latest/getting-started/introduction.html',
+    url: 'https://docs.strapi.io/developer-docs/latest/getting-started/introduction.html',
   },
   security: [
     {

@@ -162,9 +162,17 @@ module.exports = {
   async connect(ctx, next) {
     const grant = require('grant-koa');
 
-    const grantConfig = await strapi
+    const providers = await strapi
       .store({ type: 'plugin', name: 'users-permissions', key: 'grant' })
       .get();
+
+    const apiPrefix = strapi.config.get('api.rest.prefix');
+    const grantConfig = {
+      defaults: {
+        prefix: `${apiPrefix}/connect`,
+      },
+      ...providers,
+    };
 
     const [requestPath] = ctx.request.url.split('?');
     const provider = requestPath.split('/connect/')[1].split('/')[0];
@@ -175,7 +183,7 @@ module.exports = {
 
     if (!strapi.config.server.url.startsWith('http')) {
       strapi.log.warn(
-        'You are using a third party provider for login. Make sure to set an absolute url in config/server.js. More info here: https://strapi.io/documentation/developer-docs/latest/development/plugins/users-permissions.html#setting-up-the-server-url'
+        'You are using a third party provider for login. Make sure to set an absolute url in config/server.js. More info here: https://docs.strapi.io/developer-docs/latest/plugins/users-permissions.html#setting-up-the-server-url'
       );
     }
 

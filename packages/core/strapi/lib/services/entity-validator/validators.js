@@ -127,7 +127,7 @@ const addUniqueValidator = (validator, { attr, model, updatedAttribute, entity }
      * If the attribute value is `null` we want to skip the unique validation.
      * Otherwise it'll only accept a single `null` entry in the database.
      */
-    if (updatedAttribute.value === null) {
+    if (_.isNil(updatedAttribute.value)) {
       return true;
     }
 

@@ -5,7 +5,6 @@ const _ = require('lodash');
 const validateLocaleCreation = require('./controllers/validate-locale-creation');
 const { getService } = require('./utils');
 
-// const fieldMigration = require('./migrations/field');
 const enableContentType = require('./migrations/content-type/enable');
 const disableContentType = require('./migrations/content-type/disable');
 
@@ -13,9 +12,6 @@ module.exports = ({ strapi }) => {
   extendLocalizedContentTypes(strapi);
   addContentManagerLocaleMiddleware(strapi);
   addContentTypeSyncHooks(strapi);
-
-  // TODO:
-  // strapi.db.migrations.register(fieldMigration);
 };
 
 /**
@@ -80,16 +76,10 @@ const extendLocalizedContentTypes = strapi => {
       });
 
       coreApiService.addCreateLocalizationAction(contentType);
-      // coreApiService.addGraphqlLocalizationAction(contentType); // TODO: to implement
     }
   });
 
   if (strapi.plugin('graphql')) {
     require('./graphql')({ strapi }).register();
   }
-
-  // TODO: to implement
-  // strapi.db.migrations.register(fieldMigration);
-  // strapi.db.migrations.register(enableContentTypeMigration);
-  // strapi.db.migrations.register(disableContentTypeMigration);
 };

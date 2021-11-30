@@ -213,4 +213,9 @@ program
   .description('List all the application services')
   .action(getLocalScript('services/list'));
 
+program
+  .command('controllers:list')
+  .description('List all the application controllers')
+  .action(getLocalScript('controllers/list'));
+
 program.parseAsync(process.argv);
