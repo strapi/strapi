@@ -1,26 +1,38 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { Box } from '@strapi/parts/Box';
-import { ModalFooter } from '@strapi/parts/ModalLayout';
-import { Textarea } from '@strapi/parts/Textarea';
+import { Box } from '@strapi/design-system/Box';
+import { ModalFooter } from '@strapi/design-system/ModalLayout';
+import { Textarea } from '@strapi/design-system/Textarea';
 import { useIntl } from 'react-intl';
-import { Button } from '@strapi/parts/Button';
-import { Form } from '@strapi/helper-plugin';
+import { Button } from '@strapi/design-system/Button';
+import { Form, useTracking } from '@strapi/helper-plugin';
 import { Formik } from 'formik';
-import { getTrad, urlSchema } from '../../../utils';
+import getTrad from '../../../utils/getTrad';
+import { urlSchema } from '../../../utils/urlYupSchema';
 import { urlsToAssets } from '../../../utils/urlsToAssets';
 
-export const FromUrlForm = ({ onClose, onAddAsset }) => {
+export const FromUrlForm = ({ onClose, onAddAsset, trackedLocation }) => {
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(undefined);
   const { formatMessage } = useIntl();
+  const { trackUsage } = useTracking();
 
   const handleSubmit = async ({ urls }) => {
     setLoading(true);
     const urlArray = urls.split(/\r?\n/);
-    const assets = await urlsToAssets(urlArray);
+    try {
+      const assets = await urlsToAssets(urlArray);
 
-    // no need to set the loading to false since the component unmounts
-    onAddAsset(assets);
+      if (trackedLocation) {
+        trackUsage('didSelectFile', { source: 'url', location: trackedLocation });
+      }
+
+      // no need to set the loading to false since the component unmounts
+      onAddAsset(assets);
+    } catch (e) {
+      setError(e);
+      setLoading(false);
+    }
   };
 
   return (
@@ -44,9 +56,10 @@ export const FromUrlForm = ({ onClose, onAddAsset }) => {
                 defaultMessage: 'Separate your URL links by a carriage return.',
               })}
               error={
-                errors.urls
+                error?.message ||
+                (errors.urls
                   ? formatMessage({ id: errors.urls, defaultMessage: 'An error occured' })
-                  : undefined
+                  : undefined)
               }
               onChange={handleChange}
             >
@@ -75,7 +88,12 @@ export const FromUrlForm = ({ onClose, onAddAsset }) => {
   );
 };
 
+FromUrlForm.defaultProps = {
+  trackedLocation: undefined,
+};
+
 FromUrlForm.propTypes = {
   onClose: PropTypes.func.isRequired,
   onAddAsset: PropTypes.func.isRequired,
+  trackedLocation: PropTypes.string,
 };

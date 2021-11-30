@@ -1,32 +1,30 @@
 'use strict';
 
 const { propOr } = require('lodash/fp');
-const policy = require('@strapi/utils/lib/policy');
-
-const { bodyPolicy } = policy;
+const { ForbiddenError } = require('@strapi/utils').errors;
+const { policy: policyUtils } = require('@strapi/utils');
 
 const getPoliciesConfig = propOr([], 'config.policies');
 
 const resolvePolicies = route => {
-  const { pluginName, apiName } = route.info || {};
   const policiesConfig = getPoliciesConfig(route);
+  const resolvedPolicies = policyUtils.resolve(policiesConfig, route.info);
 
   const policiesMiddleware = async (ctx, next) => {
-    const context = policy.createPolicyContext('koa', ctx);
+    const context = policyUtils.createPolicyContext('koa', ctx);
 
-    for (const policyName of policiesConfig) {
-      const resolvedPolicy = await policy.get(policyName, { pluginName, apiName });
-      const result = await resolvedPolicy({ ctx: context, strapi });
+    for (const { handler, config } of resolvedPolicies) {
+      const result = await handler(context, config, { strapi });
 
       if (![true, undefined].includes(result)) {
-        throw new Error('Policies failed.');
+        throw new ForbiddenError('Policies failed.');
       }
     }
 
     await next();
   };
 
-  return [policiesMiddleware, bodyPolicy];
+  return [policiesMiddleware];
 };
 
 module.exports = {

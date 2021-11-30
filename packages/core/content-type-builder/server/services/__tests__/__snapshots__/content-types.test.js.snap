@@ -12,15 +12,17 @@ Object {
     },
     "collectionName": "tests",
     "description": "My description",
+    "displayName": "My name",
     "draftAndPublish": false,
     "kind": "singleType",
-    "name": "My name",
     "pluginOptions": Object {
       "content-manager": Object {
         "visible": true,
       },
     },
+    "pluralName": "my-names",
     "restrictRelationsTo": null,
+    "singularName": "my-name",
     "visible": true,
   },
   "uid": "test-uid",

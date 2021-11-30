@@ -9,16 +9,16 @@ import {
   useOverlayBlocker,
   useFocusWhenNavigate,
 } from '@strapi/helper-plugin';
-import { Main } from '@strapi/parts/Main';
-import { ContentLayout } from '@strapi/parts/Layout';
-import { Stack } from '@strapi/parts/Stack';
-import { Box } from '@strapi/parts/Box';
-import { Grid, GridItem } from '@strapi/parts/Grid';
-import { H3 } from '@strapi/parts/Text';
-import { TextInput } from '@strapi/parts/TextInput';
-import { Button } from '@strapi/parts/Button';
-import { useNotifyAT } from '@strapi/parts/LiveRegions';
-import CheckIcon from '@strapi/icons/CheckIcon';
+import { Main } from '@strapi/design-system/Main';
+import { ContentLayout } from '@strapi/design-system/Layout';
+import { Stack } from '@strapi/design-system/Stack';
+import { Box } from '@strapi/design-system/Box';
+import { Grid, GridItem } from '@strapi/design-system/Grid';
+import { Typography } from '@strapi/design-system/Typography';
+import { TextInput } from '@strapi/design-system/TextInput';
+import { Button } from '@strapi/design-system/Button';
+import { useNotifyAT } from '@strapi/design-system/LiveRegions';
+import Envelop from '@strapi/icons/Envelop';
 import Configuration from './components/Configuration';
 import schema from '../../utils/schema';
 import pluginPermissions from '../../permissions';
@@ -172,12 +172,12 @@ const SettingsPage = () => {
               paddingRight={7}
             >
               <Stack size={4}>
-                <H3 as="h2">
+                <Typography variant="delta" as="h2">
                   {formatMessage({
                     id: getTrad('Settings.email.plugin.title.test'),
                     defaultMessage: 'Send a test mail',
                   })}
-                </H3>
+                </Typography>
                 <Grid gap={5} alignItems="end">
                   <GridItem col={6} s={12}>
                     <TextInput
@@ -203,8 +203,7 @@ const SettingsPage = () => {
                     />
                   </GridItem>
                   <GridItem col={7} s={12}>
-                    {/* to replace with envelope icon */}
-                    <Button loading={isSubmitting} type="submit" startIcon={<CheckIcon />}>
+                    <Button loading={isSubmitting} type="submit" startIcon={<Envelop />}>
                       Test email
                     </Button>
                   </GridItem>

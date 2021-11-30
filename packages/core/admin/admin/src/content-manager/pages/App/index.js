@@ -1,8 +1,9 @@
 import React from 'react';
+import { Helmet } from 'react-helmet';
 import { Switch, Route, useRouteMatch, Redirect, useLocation } from 'react-router-dom';
 import { CheckPagePermissions, LoadingIndicatorPage, NotFound } from '@strapi/helper-plugin';
-import { Layout, HeaderLayout } from '@strapi/parts/Layout';
-import { Main } from '@strapi/parts/Main';
+import { Layout, HeaderLayout } from '@strapi/design-system/Layout';
+import { Main } from '@strapi/design-system/Main';
 import { useIntl } from 'react-intl';
 import sortBy from 'lodash/sortBy';
 import permissions from '../../../permissions';
@@ -90,4 +91,17 @@ const App = () => {
   );
 };
 
-export default App;
+export { App };
+
+export default () => {
+  const { formatMessage } = useIntl();
+
+  return (
+    <>
+      <Helmet
+        title={formatMessage({ id: getTrad('plugin.name'), defaultMessage: 'Content Manager' })}
+      />
+      <App />
+    </>
+  );
+};

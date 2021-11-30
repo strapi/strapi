@@ -1,9 +1,9 @@
 import * as yup from 'yup';
-import profileValidation from './profile';
+import { commonUserSchema } from './profile';
 import rolesValidation from './roles';
 
 const schema = yup.object().shape({
-  ...profileValidation,
+  ...commonUserSchema,
   isActive: yup.bool(),
   ...rolesValidation,
 });

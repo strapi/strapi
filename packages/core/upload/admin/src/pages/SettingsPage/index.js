@@ -8,16 +8,16 @@ import {
   useNotification,
   useOverlayBlocker,
 } from '@strapi/helper-plugin';
-import CheckIcon from '@strapi/icons/CheckIcon';
-import { Box } from '@strapi/parts/Box';
-import { Row } from '@strapi/parts/Row';
-import { ToggleInput } from '@strapi/parts/ToggleInput';
-import { H3 } from '@strapi/parts/Text';
-import { Button } from '@strapi/parts/Button';
-import { Main } from '@strapi/parts/Main';
-import { Stack } from '@strapi/parts/Stack';
-import { Grid, GridItem } from '@strapi/parts/Grid';
-import { ContentLayout, HeaderLayout, Layout } from '@strapi/parts/Layout';
+import Check from '@strapi/icons/Check';
+import { Box } from '@strapi/design-system/Box';
+import { Flex } from '@strapi/design-system/Flex';
+import { ToggleInput } from '@strapi/design-system/ToggleInput';
+import { Typography } from '@strapi/design-system/Typography';
+import { Button } from '@strapi/design-system/Button';
+import { Main } from '@strapi/design-system/Main';
+import { Stack } from '@strapi/design-system/Stack';
+import { Grid, GridItem } from '@strapi/design-system/Grid';
+import { ContentLayout, HeaderLayout, Layout } from '@strapi/design-system/Layout';
 import axios from 'axios';
 import isEqual from 'lodash/isEqual';
 import { axiosInstance, getRequestUrl, getTrad } from '../../utils';
@@ -132,7 +132,7 @@ export const SettingsPage = () => {
               data-testid="save-button"
               loading={isSubmiting}
               type="submit"
-              startIcon={<CheckIcon />}
+              startIcon={<Check />}
               size="L"
             >
               {formatMessage({
@@ -154,14 +154,14 @@ export const SettingsPage = () => {
               <Stack size={12}>
                 <Box background="neutral0" padding={6} shadow="filterShadow" hasRadius>
                   <Stack size={4}>
-                    <Row>
-                      <H3 as="h2">
+                    <Flex>
+                      <Typography variant="delta" as="h2">
                         {formatMessage({
                           id: getTrad('settings.section.image.label'),
                           defaultMessage: 'Image',
                         })}
-                      </H3>
-                    </Row>
+                      </Typography>
+                    </Flex>
                     <Grid gap={6}>
                       <GridItem col={6} s={12}>
                         <ToggleInput

@@ -39,6 +39,7 @@ module.exports = {
     '<rootDir>/packages/strapi-helper-plugin/dist/',
     '__tests__',
   ],
+  globalSetup: '<rootDir>/test/config/front/global-setup.js',
   setupFiles: [
     '<rootDir>/packages/admin-test-utils/lib/setup/test-bundler.js',
     '<rootDir>/packages/admin-test-utils/lib/mocks/LocalStorageMock.js',

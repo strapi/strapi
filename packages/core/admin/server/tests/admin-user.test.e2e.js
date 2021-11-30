@@ -91,11 +91,20 @@ describe('Admin User CRUD (e2e)', () => {
 
     expect(res.statusCode).toBe(400);
     expect(res.body).toMatchObject({
-      statusCode: 400,
-      error: 'Bad Request',
-      message: 'ValidationError',
-      data: {
-        email: ['email is a required field'],
+      data: null,
+      error: {
+        details: {
+          errors: [
+            {
+              message: 'email is a required field',
+              name: 'ValidationError',
+              path: ['email'],
+            },
+          ],
+        },
+        message: 'email is a required field',
+        name: 'ValidationError',
+        status: 400,
       },
     });
   });
@@ -161,11 +170,20 @@ describe('Admin User CRUD (e2e)', () => {
 
     expect(res.statusCode).toBe(400);
     expect(res.body).toMatchObject({
-      statusCode: 400,
-      error: 'Bad Request',
-      message: 'ValidationError',
-      data: {
-        email: ['email must be a `string` type, but the final value was: `42`.'],
+      data: null,
+      error: {
+        details: {
+          errors: [
+            {
+              message: 'email must be a `string` type, but the final value was: `42`.',
+              name: 'ValidationError',
+              path: ['email'],
+            },
+          ],
+        },
+        message: 'email must be a `string` type, but the final value was: `42`.',
+        name: 'ValidationError',
+        status: 400,
       },
     });
   });
@@ -290,10 +308,13 @@ describe('Admin User CRUD (e2e)', () => {
 
     expect(res.statusCode).toBe(400);
     expect(res.body).toMatchObject({
-      statusCode: 400,
-      error: 'Bad Request',
-      message: 'ValidationError',
-      data: 'You must have at least one user with super admin role.',
+      data: null,
+      error: {
+        details: {},
+        message: 'You must have at least one user with super admin role.',
+        name: 'ValidationError',
+        status: 400,
+      },
     });
   });
 
@@ -308,10 +329,13 @@ describe('Admin User CRUD (e2e)', () => {
 
     expect(res.statusCode).toBe(400);
     expect(res.body).toMatchObject({
-      statusCode: 400,
-      error: 'Bad Request',
-      message: 'ValidationError',
-      data: 'You must have at least one user with super admin role.',
+      data: null,
+      error: {
+        details: {},
+        message: 'You must have at least one user with super admin role.',
+        name: 'ValidationError',
+        status: 400,
+      },
     });
   });
 
@@ -328,9 +352,12 @@ describe('Admin User CRUD (e2e)', () => {
 
     expect(res.statusCode).toBe(404);
     expect(res.body).toMatchObject({
-      error: 'Not Found',
-      message: 'User does not exist',
-      statusCode: 404,
+      error: {
+        details: {},
+        message: 'User does not exist',
+        name: 'NotFoundError',
+        status: 404,
+      },
     });
   });
 
@@ -342,9 +369,12 @@ describe('Admin User CRUD (e2e)', () => {
 
     expect(res.statusCode).toBe(404);
     expect(res.body).toMatchObject({
-      error: 'Not Found',
-      message: 'User does not exist',
-      statusCode: 404,
+      error: {
+        details: {},
+        message: 'User does not exist',
+        name: 'NotFoundError',
+        status: 404,
+      },
     });
   });
 

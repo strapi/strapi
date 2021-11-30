@@ -1,7 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { IconButton, Tbody, Text, Tr, Td, Row } from '@strapi/parts';
-import { EditIcon, DeleteIcon } from '@strapi/icons';
+import { IconButton } from '@strapi/design-system/IconButton';
+import { Typography } from '@strapi/design-system/Typography';
+import { Flex } from '@strapi/design-system/Flex';
+import { Tbody, Tr, Td } from '@strapi/design-system/Table';
+import Pencil from '@strapi/icons/Pencil';
+import Trash from '@strapi/icons/Trash';
 import { CheckPermissions, onRowClick, stopPropagation } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
@@ -30,26 +34,26 @@ const TableBody = ({ sortedRoles, canDelete, permissions, setRoleToDelete, onDel
       {sortedRoles?.map(role => (
         <Tr key={role.name} {...onRowClick({ fn: () => handleClickEdit(role.id) })}>
           <Td width="20%">
-            <Text>{role.name}</Text>
+            <Typography>{role.name}</Typography>
           </Td>
           <Td width="50%">
-            <Text>{role.description}</Text>
+            <Typography>{role.description}</Typography>
           </Td>
           <Td width="30%">
-            <Text>
+            <Typography>
               {`${role.nb_users} ${formatMessage({
                 id: getTrad('Roles.users'),
                 defaultMessage: 'users',
               }).toLowerCase()}`}
-            </Text>
+            </Typography>
           </Td>
           <Td>
-            <Row justifyContent="end" {...stopPropagation}>
+            <Flex justifyContent="end" {...stopPropagation}>
               <CheckPermissions permissions={permissions.updateRole}>
                 <IconButton
                   onClick={() => handleClickEdit(role.id)}
                   noBorder
-                  icon={<EditIcon />}
+                  icon={<Pencil />}
                   label={formatMessage(
                     { id: 'app.component.table.edit', defaultMessage: 'Edit {target}' },
                     { target: `${role.name}` }
@@ -61,7 +65,7 @@ const TableBody = ({ sortedRoles, canDelete, permissions, setRoleToDelete, onDel
                   <IconButton
                     onClick={() => handleClickDelete(role.id)}
                     noBorder
-                    icon={<DeleteIcon />}
+                    icon={<Trash />}
                     label={formatMessage(
                       { id: 'app.component.table.delete', defaultMessage: 'Delete {target}' },
                       { target: `${role.name}` }
@@ -69,7 +73,7 @@ const TableBody = ({ sortedRoles, canDelete, permissions, setRoleToDelete, onDel
                   />
                 </CheckPermissions>
               )}
-            </Row>
+            </Flex>
           </Td>
         </Tr>
       ))}

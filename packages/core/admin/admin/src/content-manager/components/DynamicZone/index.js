@@ -2,8 +2,8 @@ import React, { memo, useCallback, useMemo, useState } from 'react';
 import get from 'lodash/get';
 import isEqual from 'react-fast-compare';
 import PropTypes from 'prop-types';
-import { Stack } from '@strapi/parts/Stack';
-import { Box } from '@strapi/parts/Box';
+import { Stack } from '@strapi/design-system/Stack';
+import { Box } from '@strapi/design-system/Box';
 import { NotAllowedInput, useNotification } from '@strapi/helper-plugin';
 import { getTrad } from '../../utils';
 import connect from './utils/connect';
@@ -175,6 +175,7 @@ const DynamicZone = ({
             labelAction={labelAction}
             name={name}
             numberOfComponents={dynamicDisplayedComponentsLength}
+            required={fieldSchema.required || false}
           />
           {dynamicDisplayedComponents.map((componentUid, index) => {
             const showDownIcon =
@@ -187,6 +188,7 @@ const DynamicZone = ({
             return (
               <Component
                 componentUid={componentUid}
+                formErrors={formErrors}
                 key={index}
                 index={index}
                 isOpen={isOpen}
@@ -240,6 +242,7 @@ DynamicZone.propTypes = {
     components: PropTypes.array.isRequired,
     max: PropTypes.number,
     min: PropTypes.number,
+    required: PropTypes.bool,
   }),
   formErrors: PropTypes.object.isRequired,
   isCreatingEntry: PropTypes.bool.isRequired,
@@ -258,6 +261,9 @@ DynamicZone.propTypes = {
 
 const Memoized = memo(DynamicZone, isEqual);
 
-export default connect(Memoized, select);
+export default connect(
+  Memoized,
+  select
+);
 
 export { DynamicZone };

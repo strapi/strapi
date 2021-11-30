@@ -2,14 +2,14 @@ import React from 'react';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import { Form } from '@strapi/helper-plugin';
-import { Box } from '@strapi/parts/Box';
-import { Stack } from '@strapi/parts/Stack';
-import { Main } from '@strapi/parts/Main';
-import { Row } from '@strapi/parts/Row';
-import { Link } from '@strapi/parts/Link';
-import { Button } from '@strapi/parts/Button';
-import { TextInput } from '@strapi/parts/TextInput';
-import { H1, Text } from '@strapi/parts/Text';
+import { Box } from '@strapi/design-system/Box';
+import { Stack } from '@strapi/design-system/Stack';
+import { Main } from '@strapi/design-system/Main';
+import { Flex } from '@strapi/design-system/Flex';
+import { Link } from '@strapi/design-system/Link';
+import { Button } from '@strapi/design-system/Button';
+import { TextInput } from '@strapi/design-system/TextInput';
+import { Typography } from '@strapi/design-system/Typography';
 import { Formik } from 'formik';
 import UnauthenticatedLayout, {
   Column,
@@ -38,20 +38,25 @@ const ForgotPassword = ({ onSubmit, schema }) => {
                 <Column>
                   <Logo />
                   <Box paddingTop={6} paddingBottom={7}>
-                    <H1>
+                    <Typography as="h1" variant="alpha">
                       {formatMessage({
                         id: 'Auth.form.button.password-recovery',
                         defaultMessage: 'Password Recovery',
                       })}
-                    </H1>
+                    </Typography>
                   </Box>
                   {errors.errorMessage && (
-                    <Text id="global-form-error" role="alert" tabIndex={-1} textColor="danger600">
+                    <Typography
+                      id="global-form-error"
+                      role="alert"
+                      tabIndex={-1}
+                      textColor="danger600"
+                    >
                       {formatMessage({
                         id: errors.errorMessage,
                         defaultMessage: 'An error occurred',
                       })}
-                    </Text>
+                    </Typography>
                   )}
                 </Column>
 
@@ -86,15 +91,13 @@ const ForgotPassword = ({ onSubmit, schema }) => {
             )}
           </Formik>
         </LayoutContent>
-        <Row justifyContent="center">
+        <Flex justifyContent="center">
           <Box paddingTop={4}>
             <Link to="/auth/login">
-              <Text small>
-                {formatMessage({ id: 'Auth.link.ready', defaultMessage: 'Ready to sign in?' })}
-              </Text>
+              {formatMessage({ id: 'Auth.link.ready', defaultMessage: 'Ready to sign in?' })}
             </Link>
           </Box>
-        </Row>
+        </Flex>
       </Main>
     </UnauthenticatedLayout>
   );

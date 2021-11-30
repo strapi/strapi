@@ -1,33 +1,36 @@
 import React, { memo, useCallback, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
+import styled from 'styled-components';
 import { connect } from 'react-redux';
 import isEqual from 'react-fast-compare';
 import { bindActionCreators, compose } from 'redux';
 import { useIntl } from 'react-intl';
 import { useHistory, useLocation } from 'react-router-dom';
 import get from 'lodash/get';
-import isEmpty from 'lodash/isEmpty';
 import { stringify } from 'qs';
 import {
   NoPermissions,
-  // CheckPermissions,
-  Search,
+  CheckPermissions,
+  SearchURLQuery,
   useFocusWhenNavigate,
   useQueryParams,
   useNotification,
   useRBACProvider,
   useTracking,
 } from '@strapi/helper-plugin';
-import { Main } from '@strapi/parts/Main';
-import { ActionLayout, ContentLayout, HeaderLayout } from '@strapi/parts/Layout';
-import { useNotifyAT } from '@strapi/parts/LiveRegions';
-import { Button } from '@strapi/parts/Button';
-import Add from '@strapi/icons/Add';
+import { IconButton } from '@strapi/design-system/IconButton';
+import { Main } from '@strapi/design-system/Main';
+import { Box } from '@strapi/design-system/Box';
+import { ActionLayout, ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
+import { useNotifyAT } from '@strapi/design-system/LiveRegions';
+import { Button } from '@strapi/design-system/Button';
+import Plus from '@strapi/icons/Plus';
+import Cog from '@strapi/icons/Cog';
 import axios from 'axios';
 import { axiosInstance } from '../../../core/utils';
 import { InjectionZone } from '../../../shared/components';
 import DynamicTable from '../../components/DynamicTable';
-// import permissions from '../../../permissions';
+import permissions from '../../../permissions';
 import { getRequestUrl, getTrad } from '../../utils';
 import FieldPicker from './FieldPicker';
 import PaginationFooter from './PaginationFooter';
@@ -36,8 +39,15 @@ import makeSelectListView from './selectors';
 import { buildQueryString } from './utils';
 import AttributeFilter from '../../components/AttributeFilter';
 
-// TODO
-// const cmPermissions = permissions.contentManager;
+const cmPermissions = permissions.contentManager;
+
+const IconButtonCustom = styled(IconButton)`
+  svg {
+    path {
+      fill: ${({ theme }) => theme.colors.neutral900};
+    }
+  }
+`;
 
 /* eslint-disable react/no-array-index-key */
 function ListView({
@@ -71,6 +81,7 @@ function ListView({
 
   const [{ query }] = useQueryParams();
   const params = buildQueryString(query);
+  const pluginsQueryParams = stringify({ plugins: query.plugins }, { encode: false });
 
   const { pathname } = useLocation();
   const { push } = useHistory();
@@ -89,6 +100,7 @@ function ListView({
 
       try {
         const opts = source ? { cancelToken: source.token } : null;
+
         const {
           data: { results, pagination: paginationResult },
         } = await axiosInstance.get(endPoint, opts);
@@ -126,8 +138,6 @@ function ListView({
           return;
         }
 
-        console.log('iii');
-
         console.error(err);
         toggleNotification({
           type: 'warning',
@@ -161,18 +171,6 @@ function ListView({
   const handleConfirmDeleteData = useCallback(
     async idToDelete => {
       try {
-        let trackerProperty = {};
-
-        if (hasDraftAndPublish) {
-          const dataToDelete = data.find(obj => obj.id.toString() === idToDelete.toString());
-          const isDraftEntry = isEmpty(dataToDelete.publishedAt);
-          const status = isDraftEntry ? 'draft' : 'published';
-
-          trackerProperty = { status };
-        }
-
-        trackUsageRef.current('willDeleteEntry', trackerProperty);
-
         await axiosInstance.delete(getRequestUrl(`collection-types/${slug}/${idToDelete}`));
 
         const requestUrl = getRequestUrl(`collection-types/${slug}${params}`);
@@ -182,8 +180,6 @@ function ListView({
           type: 'success',
           message: { id: getTrad('success.record.delete') },
         });
-
-        trackUsageRef.current('didDeleteEntry', trackerProperty);
       } catch (err) {
         const errorMessage = get(
           err,
@@ -197,7 +193,7 @@ function ListView({
         });
       }
     },
-    [hasDraftAndPublish, slug, params, fetchData, toggleNotification, data, formatMessage]
+    [slug, params, fetchData, toggleNotification, formatMessage]
   );
 
   useEffect(() => {
@@ -224,8 +220,8 @@ function ListView({
     defaultMessage: 'Content',
   });
   const headerLayoutTitle = formatMessage({
-    id: contentType.info.label,
-    defaultMessage: contentType.info.label || defaultHeaderLayoutTitle,
+    id: contentType.info.displayName,
+    defaultMessage: contentType.info.displayName || defaultHeaderLayoutTitle,
   });
 
   const subtitle = canRead
@@ -246,10 +242,10 @@ function ListView({
         trackUsageRef.current('willCreateEntry', trackerProperty);
         push({
           pathname: `${pathname}/create`,
-          search: query.plugins ? stringify({ plugins: query.plugins }, { encode: false }) : '',
+          search: query.plugins ? pluginsQueryParams : '',
         });
       }}
-      startIcon={<Add />}
+      startIcon={<Plus />}
     >
       {formatMessage({
         id: getTrad('HeaderLayout.button.label-add-entry'),
@@ -264,22 +260,42 @@ function ListView({
       {!canRead && (
         <ActionLayout endActions={<InjectionZone area="contentManager.listView.actions" />} />
       )}
-      {canRead && (isSearchable || isFilterable) && (
+      {canRead && (
         <ActionLayout
           endActions={
             <>
               <InjectionZone area="contentManager.listView.actions" />
               <FieldPicker layout={layout} />
+              <CheckPermissions permissions={cmPermissions.collectionTypesConfigurations}>
+                <Box paddingTop={1} paddingBottom={1}>
+                  <IconButtonCustom
+                    onClick={() => {
+                      trackUsage('willEditListLayout');
+
+                      push({ pathname: `${slug}/configurations/list`, search: pluginsQueryParams });
+                    }}
+                    icon={<Cog />}
+                    label={formatMessage({
+                      id: 'app.links.configure-view',
+                      defaultMessage: 'Configure the view',
+                    })}
+                  />
+                </Box>
+              </CheckPermissions>
             </>
           }
           startActions={
             <>
               {isSearchable && (
-                <Search
+                <SearchURLQuery
                   label={formatMessage(
                     { id: 'app.component.search.label', defaultMessage: 'Search for {target}' },
                     { target: headerLayoutTitle }
                   )}
+                  placeholder={formatMessage({
+                    id: 'app.component.search.placeholder',
+                    defaultMessage: 'Search...',
+                  })}
                   trackedEvent="didSearch"
                 />
               )}
@@ -325,7 +341,7 @@ ListView.propTypes = {
     contentType: PropTypes.shape({
       attributes: PropTypes.object.isRequired,
       metadatas: PropTypes.object.isRequired,
-      info: PropTypes.shape({ label: PropTypes.string.isRequired }).isRequired,
+      info: PropTypes.shape({ displayName: PropTypes.string.isRequired }).isRequired,
       layouts: PropTypes.shape({
         list: PropTypes.array.isRequired,
         editRelations: PropTypes.array,
@@ -355,6 +371,9 @@ export function mapDispatchToProps(dispatch) {
     dispatch
   );
 }
-const withConnect = connect(mapStateToProps, mapDispatchToProps);
+const withConnect = connect(
+  mapStateToProps,
+  mapDispatchToProps
+);
 
 export default compose(withConnect)(memo(ListView, isEqual));

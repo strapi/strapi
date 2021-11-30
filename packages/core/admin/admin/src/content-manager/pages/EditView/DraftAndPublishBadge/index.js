@@ -2,10 +2,10 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
-import { Box } from '@strapi/parts/Box';
-import { Row } from '@strapi/parts/Row';
-import { Text } from '@strapi/parts/Text';
-import Bullet from '@strapi/icons/Bullet';
+import { Box } from '@strapi/design-system/Box';
+import { Flex } from '@strapi/design-system/Flex';
+import { Typography } from '@strapi/design-system/Typography';
+import Bullet from '@strapi/icons/Dot';
 import { pxToRem } from '@strapi/helper-plugin';
 import { getTrad } from '../../../utils';
 import { connect, select } from './utils';
@@ -36,7 +36,7 @@ const DraftAndPublishBadge = ({ hasDraftAndPublish, isPublished }) => {
     },
     published: {
       textColor: 'success700',
-      bullet: 'success600',
+      bulletColor: 'success600',
       box: {
         background: 'success100',
         borderColor: 'success200',
@@ -55,17 +55,17 @@ const DraftAndPublishBadge = ({ hasDraftAndPublish, isPublished }) => {
       paddingRight={5}
       {...colorProps.box}
     >
-      <Box as={Row}>
+      <Box as={Flex}>
         <CustomBullet $bulletColor={colorProps.bulletColor} />
         <Box paddingLeft={3}>
-          <Text textColor={colorProps.textColor}>
+          <Typography textColor={colorProps.textColor}>
             {formatMessage({
               id: getTrad('containers.Edit.information.editing'),
               defaultMessage: 'Editing',
             })}
             &nbsp;
-          </Text>
-          <Text textColor={colorProps.textColor} bold>
+          </Typography>
+          <Typography fontWeight="bold" textColor={colorProps.textColor}>
             {isPublished &&
               formatMessage({
                 id: getTrad('containers.Edit.information.publishedVersion'),
@@ -76,7 +76,7 @@ const DraftAndPublishBadge = ({ hasDraftAndPublish, isPublished }) => {
                 id: getTrad('containers.Edit.information.draftVersion'),
                 defaultMessage: 'draft version',
               })}
-          </Text>
+          </Typography>
         </Box>
       </Box>
     </Box>
@@ -88,5 +88,8 @@ DraftAndPublishBadge.propTypes = {
   isPublished: PropTypes.bool.isRequired,
 };
 
-export default connect(DraftAndPublishBadge, select);
+export default connect(
+  DraftAndPublishBadge,
+  select
+);
 export { DraftAndPublishBadge };

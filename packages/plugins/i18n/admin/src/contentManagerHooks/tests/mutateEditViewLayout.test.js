@@ -1,7 +1,6 @@
 import React from 'react';
-import I18N from '@strapi/icons/I18N';
-
-import StrikedWorld from '@strapi/icons/StrikedWorld';
+import I18N from '@strapi/icons/Earth';
+import StrikedWorld from '@strapi/icons/EarthStriked';
 import LabelAction from '../../components/LabelAction';
 import { getTrad } from '../../utils';
 import mutateEditViewLayout, {
@@ -277,7 +276,7 @@ describe('i18n | contentManagerHooks | mutateEditViewLayout', () => {
                   fieldSchema: { type: 'relation' },
                   targetModelPluginOptions: { i18n: { localized: true } },
                   queryInfos: {
-                    defaultParams: { test: true, _locale: 'en' },
+                    defaultParams: { test: true, locale: 'en' },
                     paramsToKeep: ['plugins.i18n.locale'],
                   },
                 },
@@ -299,7 +298,7 @@ describe('i18n | contentManagerHooks | mutateEditViewLayout', () => {
                   fieldSchema: { type: 'relation' },
                   targetModelPluginOptions: { i18n: { localized: true } },
                   queryInfos: {
-                    defaultParams: { test: true, _locale: 'en' },
+                    defaultParams: { test: true, locale: 'en' },
                     paramsToKeep: ['plugins.i18n.locale'],
                   },
                 },
@@ -518,7 +517,7 @@ describe('i18n | contentManagerHooks | mutateEditViewLayout', () => {
           queryInfos: {
             defaultParams: {
               test: true,
-              _locale: 'en',
+              locale: 'en',
             },
             paramsToKeep: ['plugins.i18n.locale'],
           },

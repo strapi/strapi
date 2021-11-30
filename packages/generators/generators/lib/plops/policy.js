@@ -1,6 +1,6 @@
 'use strict';
 
-const getDestinationPrompts = require('./utils/get-destination-prompts');
+const getDestinationPrompts = require('./prompts/get-destination-prompts');
 
 module.exports = plop => {
   // Policy generator
@@ -12,7 +12,7 @@ module.exports = plop => {
         name: 'id',
         message: 'Policy name',
       },
-      ...getDestinationPrompts('policy', plop.getDestBasePath()),
+      ...getDestinationPrompts('policy', plop.getDestBasePath(), { rootFolder: true }),
     ],
     actions(answers) {
       let filePath;

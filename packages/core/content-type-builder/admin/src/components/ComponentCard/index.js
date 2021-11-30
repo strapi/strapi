@@ -7,11 +7,11 @@
 import React from 'react';
 import get from 'lodash/get';
 import PropTypes from 'prop-types';
-import { Box } from '@strapi/parts/Box';
-import { Stack } from '@strapi/parts/Stack';
-import { Text } from '@strapi/parts/Text';
+import { Box } from '@strapi/design-system/Box';
+import { Stack } from '@strapi/design-system/Stack';
+import { Typography } from '@strapi/design-system/Typography';
 import { pxToRem } from '@strapi/helper-plugin';
-import Close from '@strapi/icons/Close';
+import Cross from '@strapi/icons/Cross';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import styled from 'styled-components';
 
@@ -74,16 +74,20 @@ const ComponentBox = styled(Box)`
       }
     }
 
-    ${Text} {
+    ${Typography} {
       color: ${({ theme }) => theme.colors.primary600};
     }
   }
 `;
 
+const StackCentered = styled(Stack)`
+  align-items: center;
+`;
+
 function ComponentCard({ component, dzName, index, isActive, isInDevelopmentMode, onClick }) {
   const { modifiedData, removeComponentFromDynamicZone } = useDataManager();
   const {
-    schema: { icon, name },
+    schema: { icon, displayName },
   } = get(modifiedData, ['components', component], {
     schema: { icon: null },
   });
@@ -95,13 +99,20 @@ function ComponentCard({ component, dzName, index, isActive, isInDevelopmentMode
 
   return (
     <button type="button" onClick={onClick}>
-      <ComponentBox className={isActive ? 'active' : ''} borderRadius="borderRadius">
-        <Stack size={1} style={{ justifyContent: 'center', alignItems: 'center' }}>
+      <ComponentBox
+        className={isActive ? 'active' : ''}
+        borderRadius="borderRadius"
+        paddingLeft={4}
+        paddingRight={4}
+      >
+        <StackCentered size={1}>
           <StyledFontAwesomeIcon icon={icon} />
-          <Text small bold>
-            {name}
-          </Text>
-        </Stack>
+          <Box maxWidth={`calc(${pxToRem(140)} - 32px)`}>
+            <Typography variant="pi" fontWeight="bold" ellipsis>
+              {displayName}
+            </Typography>
+          </Box>
+        </StackCentered>
         {isInDevelopmentMode && (
           <CloseButton
             role="button"
@@ -109,7 +120,7 @@ function ComponentCard({ component, dzName, index, isActive, isInDevelopmentMode
             onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && onClose(e)}
             onClick={onClose}
           >
-            <Close />
+            <Cross />
           </CloseButton>
         )}
       </ComponentBox>

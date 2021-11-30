@@ -11,17 +11,14 @@ const serveStatic = require('./serve-static');
 
 const defaults = {
   maxAge: 60000,
-  path: './public',
   defaultIndex: true,
 };
 
 /**
  * @type {import('../').MiddlewareFactory}
  */
-module.exports = (options, { strapi }) => {
-  const { defaultIndex, maxAge, path: publicPath } = defaultsDeep(defaults, options);
-
-  const staticDir = path.resolve(strapi.dirs.root, publicPath || strapi.config.paths.static);
+module.exports = (config, { strapi }) => {
+  const { defaultIndex, maxAge } = defaultsDeep(defaults, config);
 
   if (defaultIndex === true) {
     const index = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
@@ -83,7 +80,7 @@ module.exports = (options, { strapi }) => {
       {
         method: 'GET',
         path: '/(.*)',
-        handler: koaStatic(staticDir, {
+        handler: koaStatic(strapi.dirs.public, {
           maxage: maxAge,
           defer: true,
         }),
@@ -122,5 +119,5 @@ module.exports = (options, { strapi }) => {
     },
   ]);
 
-  return async (ctx, next) => next();
+  return null;
 };

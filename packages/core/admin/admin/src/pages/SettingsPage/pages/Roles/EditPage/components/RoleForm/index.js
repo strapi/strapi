@@ -1,12 +1,12 @@
 import React from 'react';
-import { Box } from '@strapi/parts/Box';
-import { Grid, GridItem } from '@strapi/parts/Grid';
-import { Row } from '@strapi/parts/Row';
-import { Stack } from '@strapi/parts/Stack';
-import { Text } from '@strapi/parts/Text';
-import { Textarea } from '@strapi/parts/Textarea';
-import { TextInput } from '@strapi/parts/TextInput';
-import { Button } from '@strapi/parts/Button';
+import { Box } from '@strapi/design-system/Box';
+import { Grid, GridItem } from '@strapi/design-system/Grid';
+import { Flex } from '@strapi/design-system/Flex';
+import { Stack } from '@strapi/design-system/Stack';
+import { Typography } from '@strapi/design-system/Typography';
+import { Textarea } from '@strapi/design-system/Textarea';
+import { TextInput } from '@strapi/design-system/TextInput';
+import { Button } from '@strapi/design-system/Button';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
@@ -17,27 +17,27 @@ const RoleForm = ({ disabled, role, values, errors, onChange, onBlur }) => {
     <>
       <Box background="neutral0" padding={6} shadow="filterShadow" hasRadius>
         <Stack size={4}>
-          <Row justifyContent="space-between">
+          <Flex justifyContent="space-between">
             <Box>
               <Box>
-                <Text bold>
+                <Typography fontWeight="bold">
                   {role
                     ? role.name
                     : formatMessage({
                         id: 'Settings.roles.form.title',
                         defaultMessage: 'Details',
                       })}
-                </Text>
+                </Typography>
               </Box>
               <Box>
-                <Text textColor="neutral500" small>
+                <Typography textColor="neutral500" variant="pi">
                   {role
                     ? role.description
                     : formatMessage({
                         id: 'Settings.roles.form.description',
                         defaultMessage: 'Name and description of the role',
                       })}
-                </Text>
+                </Typography>
               </Box>
             </Box>
             <Button disabled variant="secondary">
@@ -50,7 +50,7 @@ const RoleForm = ({ disabled, role, values, errors, onChange, onBlur }) => {
                 { number: role.usersCount }
               )}
             </Button>
-          </Row>
+          </Flex>
           <Grid gap={4}>
             <GridItem col={6}>
               <TextInput

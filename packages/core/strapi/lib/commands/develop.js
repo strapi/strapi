@@ -20,8 +20,8 @@ module.exports = async function({ build, watchAdmin, polling, browser }) {
   const config = loadConfiguration(dir);
   const logger = createLogger(config.logger, {});
 
-  const adminWatchIgnoreFiles = getOr([], 'server.admin.watchIgnoreFiles')(config);
-  const serveAdminPanel = getOr(true, 'server.admin.serveAdminPanel')(config);
+  const adminWatchIgnoreFiles = getOr([], 'admin.watchIgnoreFiles')(config);
+  const serveAdminPanel = getOr(true, 'admin.serveAdminPanel')(config);
 
   const buildExists = fs.existsSync(path.join(dir, 'build'));
   // Don't run the build process if the admin is in watch mode
@@ -52,14 +52,12 @@ module.exports = async function({ build, watchAdmin, polling, browser }) {
         switch (message) {
           case 'reload':
             logger.info('The server is restarting\n');
-            worker.send('isKilled');
+            worker.send('kill');
             break;
-          case 'kill':
-            worker.kill();
+          case 'killed':
             cluster.fork();
             break;
           case 'stop':
-            worker.kill();
             process.exit(1);
           default:
             return;
@@ -85,10 +83,10 @@ module.exports = async function({ build, watchAdmin, polling, browser }) {
 
       process.on('message', async message => {
         switch (message) {
-          case 'isKilled':
-            await strapiInstance.server.destroy();
-            process.send('kill');
-            break;
+          case 'kill':
+            await strapiInstance.destroy();
+            process.send('killed');
+            process.exit();
           default:
           // Do nothing.
         }
@@ -123,8 +121,8 @@ function watchFileChanges({ dir, strapiInstance, watchIgnoreFiles, polling }) {
     ignored: [
       /(^|[/\\])\../, // dot files
       /tmp/,
-      '**/admin',
-      '**/admin/**',
+      'admin',
+      'admin/**',
       'src/extensions/**/admin',
       'src/extensions/**/admin/**',
       '**/documentation',

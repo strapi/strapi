@@ -8,10 +8,10 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import cm from 'codemirror';
 import trimStart from 'lodash/trimStart';
-import { Stack } from '@strapi/parts/Stack';
+import { Stack } from '@strapi/design-system/Stack';
 import jsonlint from './jsonlint';
 import { EditorWrapper, StyledBox } from './components';
-import Hint from './Hint';
+import Hint from '../Hint';
 import Label from './Label';
 import FieldError from './FieldError';
 

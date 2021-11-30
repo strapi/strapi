@@ -11,7 +11,7 @@ module.exports = {
         policies: [
           {
             name: 'admin::hasPermissions',
-            options: { actions: ['plugin::content-type-builder.read'] },
+            config: { actions: ['plugin::content-type-builder.read'] },
           },
         ],
       },
@@ -24,7 +24,7 @@ module.exports = {
         policies: [
           {
             name: 'admin::hasPermissions',
-            options: { actions: ['plugin::content-type-builder.read'] },
+            config: { actions: ['plugin::content-type-builder.read'] },
           },
         ],
       },
@@ -37,7 +37,7 @@ module.exports = {
         policies: [
           {
             name: 'admin::hasPermissions',
-            options: { actions: ['plugin::content-type-builder.read'] },
+            config: { actions: ['plugin::content-type-builder.read'] },
           },
         ],
       },
@@ -50,7 +50,7 @@ module.exports = {
         policies: [
           {
             name: 'admin::hasPermissions',
-            options: { actions: ['plugin::content-type-builder.read'] },
+            config: { actions: ['plugin::content-type-builder.read'] },
           },
         ],
       },
@@ -63,7 +63,7 @@ module.exports = {
         policies: [
           {
             name: 'admin::hasPermissions',
-            options: { actions: ['plugin::content-type-builder.read'] },
+            config: { actions: ['plugin::content-type-builder.read'] },
           },
         ],
       },
@@ -76,7 +76,7 @@ module.exports = {
         policies: [
           {
             name: 'admin::hasPermissions',
-            options: { actions: ['plugin::content-type-builder.read'] },
+            config: { actions: ['plugin::content-type-builder.read'] },
           },
         ],
       },
@@ -89,7 +89,7 @@ module.exports = {
         policies: [
           {
             name: 'admin::hasPermissions',
-            options: { actions: ['plugin::content-type-builder.read'] },
+            config: { actions: ['plugin::content-type-builder.read'] },
           },
         ],
       },
@@ -102,7 +102,7 @@ module.exports = {
         policies: [
           {
             name: 'admin::hasPermissions',
-            options: { actions: ['plugin::content-type-builder.read'] },
+            config: { actions: ['plugin::content-type-builder.read'] },
           },
         ],
       },
@@ -115,7 +115,7 @@ module.exports = {
         policies: [
           {
             name: 'admin::hasPermissions',
-            options: { actions: ['plugin::content-type-builder.read'] },
+            config: { actions: ['plugin::content-type-builder.read'] },
           },
         ],
       },
@@ -128,7 +128,7 @@ module.exports = {
         policies: [
           {
             name: 'admin::hasPermissions',
-            options: { actions: ['plugin::content-type-builder.read'] },
+            config: { actions: ['plugin::content-type-builder.read'] },
           },
         ],
       },
@@ -141,7 +141,7 @@ module.exports = {
         policies: [
           {
             name: 'admin::hasPermissions',
-            options: { actions: ['plugin::content-type-builder.read'] },
+            config: { actions: ['plugin::content-type-builder.read'] },
           },
         ],
       },
@@ -154,7 +154,7 @@ module.exports = {
         policies: [
           {
             name: 'admin::hasPermissions',
-            options: { actions: ['plugin::content-type-builder.read'] },
+            config: { actions: ['plugin::content-type-builder.read'] },
           },
         ],
       },
@@ -167,7 +167,7 @@ module.exports = {
         policies: [
           {
             name: 'admin::hasPermissions',
-            options: { actions: ['plugin::content-type-builder.read'] },
+            config: { actions: ['plugin::content-type-builder.read'] },
           },
         ],
       },

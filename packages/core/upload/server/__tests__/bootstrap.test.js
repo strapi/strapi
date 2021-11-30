@@ -28,6 +28,12 @@ describe('Upload plugin bootstrap function', () => {
       plugins: {
         upload: {},
       },
+      plugin() {
+        return {};
+      },
+      service: () => ({
+        registerErrorMiddleware: jest.fn(),
+      }),
       store() {
         return {
           get() {

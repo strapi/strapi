@@ -1,12 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Row } from '@strapi/parts/Row';
-import { Stack } from '@strapi/parts/Stack';
-import { Text } from '@strapi/parts/Text';
-import customEllipsis from '../../utils/customEllipsis';
+import { Flex } from '@strapi/design-system/Flex';
+import { Stack } from '@strapi/design-system/Stack';
+import { Typography } from '@strapi/design-system/Typography';
 
-const IconWrapper = styled(Row)`
+const IconWrapper = styled(Flex)`
   margin-right: ${({ theme }) => theme.spaces[6]};
   svg {
     width: ${32 / 16}rem;
@@ -14,32 +13,35 @@ const IconWrapper = styled(Row)`
   }
 `;
 
-const ContentBox = ({ title, subtitle, icon, iconBackground, endAction }) => {
-  const firstTitleChar = title.substring(0, 4);
+const TypographyWordBreak = styled(Typography)`
+  word-break: break-all;
+`;
 
-  if (title.length > 70 && firstTitleChar === 'http') {
-    title = customEllipsis(title);
+const ContentBox = ({ title, subtitle, icon, iconBackground, endAction, titleEllipsis }) => {
+  if (title.length > 70 && titleEllipsis) {
+    title = `${title.substring(0, 70)}...`;
   }
 
   return (
-    <Row shadow="tableShadow" hasRadius padding={6} background="neutral0">
+    <Flex shadow="tableShadow" hasRadius padding={6} background="neutral0">
       <IconWrapper background={iconBackground} hasRadius padding={3}>
         {icon}
       </IconWrapper>
-      <Stack size={endAction ? '' : 1}>
-        <Row>
-          <Text small bold>
+      <Stack size={endAction ? 0 : 1}>
+        <Flex>
+          <TypographyWordBreak fontWeight="semiBold" variant="pi">
             {title}
-          </Text>
+          </TypographyWordBreak>
           {endAction}
-        </Row>
-        <Text textColor="neutral600">{subtitle}</Text>
+        </Flex>
+        <Typography textColor="neutral600">{subtitle}</Typography>
       </Stack>
-    </Row>
+    </Flex>
   );
 };
 
 ContentBox.defaultProps = {
+  titleEllipsis: false,
   title: undefined,
   subtitle: undefined,
   icon: undefined,
@@ -48,6 +50,7 @@ ContentBox.defaultProps = {
 };
 
 ContentBox.propTypes = {
+  titleEllipsis: PropTypes.bool,
   title: PropTypes.string,
   subtitle: PropTypes.string,
   icon: PropTypes.node,

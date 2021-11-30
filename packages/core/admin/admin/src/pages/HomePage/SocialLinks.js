@@ -6,21 +6,21 @@
 import React from 'react';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
-import { H3, Text } from '@strapi/parts/Text';
-import { Box } from '@strapi/parts/Box';
-import { Stack } from '@strapi/parts/Stack';
-import { Grid, GridItem } from '@strapi/parts/Grid';
-import { LinkButton } from '@strapi/parts/LinkButton';
-import { Link } from '@strapi/parts/Link';
+import { Typography } from '@strapi/design-system/Typography';
+import { Box } from '@strapi/design-system/Box';
+import { Stack } from '@strapi/design-system/Stack';
+import { Grid, GridItem } from '@strapi/design-system/Grid';
+import { LinkButton } from '@strapi/design-system/LinkButton';
+import { Link } from '@strapi/design-system/Link';
 import ExternalLink from '@strapi/icons/ExternalLink';
 import Github from '@strapi/icons/Github';
-import Slack from '@strapi/icons/Slack';
+import Discord from '@strapi/icons/Discord';
 import Reddit from '@strapi/icons/Reddit';
 import Strapi from '@strapi/icons/Strapi';
 import Twitter from '@strapi/icons/Twitter';
 import Discourse from '@strapi/icons/Discourse';
 
-const StyledDiscord = styled(Slack)`
+const StyledDiscord = styled(Discord)`
   path {
     fill: #7289da !important;
   }
@@ -138,10 +138,6 @@ const GridGap = styled(Grid)`
   column-gap: ${({ theme }) => theme.spaces[4]};
 `;
 
-const WordWrap = styled(Text)`
-  word-break: break-word;
-`;
-
 const SocialLinks = () => {
   const { formatMessage } = useIntl();
 
@@ -160,19 +156,19 @@ const SocialLinks = () => {
       <Box paddingBottom={7}>
         <Stack size={5}>
           <Stack size={3}>
-            <H3 as="h2" id="join-the-community">
+            <Typography variant="delta" as="h2" id="join-the-community">
               {formatMessage({
                 id: 'app.components.HomePage.community',
                 defaultMessage: 'Join the community',
               })}
-            </H3>
-            <WordWrap textColor="neutral600">
+            </Typography>
+            <Typography textColor="neutral600">
               {formatMessage({
                 id: 'app.components.HomePage.community.content',
                 defaultMessage:
                   'Discuss with team members, contributors and developers on different channels',
               })}
-            </WordWrap>
+            </Typography>
           </Stack>
           <Link
             href="https://portal.productboard.com/strapi/1-roadmap/tabs/2-under-consideration"

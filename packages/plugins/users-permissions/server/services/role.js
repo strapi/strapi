@@ -1,6 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
+const { NotFoundError } = require('@strapi/utils').errors;
 const { getService } = require('../utils');
 
 module.exports = ({ strapi }) => ({
@@ -40,13 +41,13 @@ module.exports = ({ strapi }) => ({
     await Promise.all(createPromises);
   },
 
-  async getRole(roleID, plugins) {
+  async getRole(roleID) {
     const role = await strapi
       .query('plugin::users-permissions.role')
       .findOne({ where: { id: roleID }, populate: ['permissions'] });
 
     if (!role) {
-      throw new Error('Role not found');
+      throw new NotFoundError('Role not found');
     }
 
     const allActions = getService('users-permissions').getActions();
@@ -59,12 +60,6 @@ module.exports = ({ strapi }) => ({
         enabled: true,
         policy: '',
       });
-
-      if (permission.action.startsWith('plugin')) {
-        const [, pluginName] = type.split('::');
-
-        allActions[type].information = plugins.find(plugin => plugin.id === pluginName) || {};
-      }
     });
 
     return {
@@ -91,7 +86,7 @@ module.exports = ({ strapi }) => ({
       .findOne({ where: { id: roleID }, populate: ['permissions'] });
 
     if (!role) {
-      throw new Error('Role not found');
+      throw new NotFoundError('Role not found');
     }
 
     await strapi.query('plugin::users-permissions.role').update({
@@ -153,7 +148,7 @@ module.exports = ({ strapi }) => ({
       .findOne({ where: { id: roleID }, populate: ['users', 'permissions'] });
 
     if (!role) {
-      throw new Error('Role not found');
+      throw new NotFoundError('Role not found');
     }
 
     // Move users to guest role.

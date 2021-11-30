@@ -10,16 +10,18 @@ import {
   useOverlayBlocker,
   useTracking,
 } from '@strapi/helper-plugin';
-import { Box } from '@strapi/parts/Box';
-import { Button } from '@strapi/parts/Button';
-import { ContentLayout, HeaderLayout } from '@strapi/parts/Layout';
-import { Grid, GridItem } from '@strapi/parts/Grid';
-import { Main } from '@strapi/parts/Main';
-import { Row } from '@strapi/parts/Row';
-import { Stack } from '@strapi/parts/Stack';
-import { Text } from '@strapi/parts/Text';
-import { TextInput } from '@strapi/parts/TextInput';
-import { Textarea } from '@strapi/parts/Textarea';
+import { Box } from '@strapi/design-system/Box';
+import { Button } from '@strapi/design-system/Button';
+import { ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
+import { Grid, GridItem } from '@strapi/design-system/Grid';
+import { Main } from '@strapi/design-system/Main';
+import { Link } from '@strapi/design-system/Link';
+import { Flex } from '@strapi/design-system/Flex';
+import { Stack } from '@strapi/design-system/Stack';
+import { Typography } from '@strapi/design-system/Typography';
+import { TextInput } from '@strapi/design-system/TextInput';
+import { Textarea } from '@strapi/design-system/Textarea';
+import ArrowLeft from '@strapi/icons/ArrowLeft';
 import { Formik } from 'formik';
 import get from 'lodash/get';
 import isEmpty from 'lodash/isEmpty';
@@ -158,28 +160,36 @@ const CreatePage = () => {
                   id: 'Settings.roles.create.description',
                   defaultMessage: 'Define the rights given to the role',
                 })}
+                navigationAction={
+                  <Link startIcon={<ArrowLeft />} to="/settings/roles">
+                    {formatMessage({
+                      id: 'app.components.go-back',
+                      defaultMessage: 'Go back',
+                    })}
+                  </Link>
+                }
               />
               <ContentLayout>
                 <Stack size={6}>
                   <Box background="neutral0" padding={6} shadow="filterShadow" hasRadius>
                     <Stack size={4}>
-                      <Row justifyContent="space-between">
+                      <Flex justifyContent="space-between">
                         <Box>
                           <Box>
-                            <Text bold>
+                            <Typography fontWeight="bold">
                               {formatMessage({
                                 id: 'Settings.roles.form.title',
                                 defaultMessage: 'Details',
                               })}
-                            </Text>
+                            </Typography>
                           </Box>
                           <Box>
-                            <Text textColor="neutral600" small>
+                            <Typography variant="pi" textColor="neutral600">
                               {formatMessage({
                                 id: 'Settings.roles.form.description',
                                 defaultMessage: 'Name and description of the role',
                               })}
-                            </Text>
+                            </Typography>
                           </Box>
                         </Box>
                         <UsersRoleNumber>
@@ -192,7 +202,7 @@ const CreatePage = () => {
                             { number: 0 }
                           )}
                         </UsersRoleNumber>
-                      </Row>
+                      </Flex>
                       <Grid gap={4}>
                         <GridItem col={6}>
                           <TextInput

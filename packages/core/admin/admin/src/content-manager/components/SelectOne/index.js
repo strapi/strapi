@@ -1,6 +1,8 @@
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
+import { Stack } from '@strapi/design-system/Stack';
+import { Typography } from '@strapi/design-system/Typography';
 import get from 'lodash/get';
 import isNull from 'lodash/isNull';
 import Select from 'react-select';
@@ -21,36 +23,46 @@ function SelectOne({
   placeholder,
   styles,
   value,
+  description,
 }) {
   const { formatMessage } = useIntl();
 
   return (
-    <Select
-      components={{
-        ...components,
-        SingleValue,
-      }}
-      id={name}
-      isClearable
-      isDisabled={isDisabled}
-      isLoading={isLoading}
-      mainField={mainField}
-      options={options}
-      onChange={onChange}
-      onInputChange={onInputChange}
-      onMenuClose={onMenuClose}
-      onMenuOpen={onMenuOpen}
-      onMenuScrollToBottom={onMenuScrollToBottom}
-      placeholder={formatMessage(
-        placeholder || { id: 'components.Select.placeholder', defaultMessage: 'Select...' }
+    <Stack size={1}>
+      <Select
+        components={{
+          ...components,
+          SingleValue,
+        }}
+        id={name}
+        isClearable
+        isDisabled={isDisabled}
+        isLoading={isLoading}
+        mainField={mainField}
+        options={options}
+        onChange={onChange}
+        onInputChange={onInputChange}
+        onMenuClose={onMenuClose}
+        onMenuOpen={onMenuOpen}
+        onMenuScrollToBottom={onMenuScrollToBottom}
+        placeholder={formatMessage(
+          placeholder || { id: 'components.Select.placeholder', defaultMessage: 'Select...' }
+        )}
+        styles={styles}
+        value={isNull(value) ? null : { label: get(value, [mainField.name], ''), value }}
+      />
+
+      {description && (
+        <Typography variant="pi" textColor="neutral600">
+          {description}
+        </Typography>
       )}
-      styles={styles}
-      value={isNull(value) ? null : { label: get(value, [mainField.name], ''), value }}
-    />
+    </Stack>
   );
 }
 
 SelectOne.defaultProps = {
+  description: '',
   components: {},
   placeholder: null,
   value: null,
@@ -79,6 +91,7 @@ SelectOne.propTypes = {
   }),
   styles: PropTypes.object.isRequired,
   value: PropTypes.object,
+  description: PropTypes.string,
 };
 
 export default memo(SelectOne);

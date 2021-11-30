@@ -12,9 +12,9 @@ import {
   CardHeader,
   CardTitle,
   CardSubtitle,
-} from '@strapi/parts/Card';
-import { IconButton } from '@strapi/parts/IconButton';
-import EditIcon from '@strapi/icons/EditIcon';
+} from '@strapi/design-system/Card';
+import { IconButton } from '@strapi/design-system/IconButton';
+import Pencil from '@strapi/icons/Pencil';
 import { useIntl } from 'react-intl';
 import { getTrad } from '../../utils';
 
@@ -32,8 +32,14 @@ export const ImageAssetCard = ({
   onSelect,
   onEdit,
   size,
+  alt,
 }) => {
   const { formatMessage } = useIntl();
+
+  // Prevents the browser from caching the URL for all sizes and allow react-query to make a smooth update
+  // instead of a full refresh
+  const optimizedCachingThumbnail =
+    width && height ? `${thumbnail}?width=${width}&height=${height}` : thumbnail;
 
   return (
     <Card>
@@ -43,18 +49,19 @@ export const ImageAssetCard = ({
           <CardAction position="end">
             <IconButton
               label={formatMessage({ id: getTrad('control-card.edit'), defaultMessage: 'Edit' })}
-              icon={<EditIcon />}
+              icon={<Pencil />}
+              onClick={onEdit}
             />
           </CardAction>
         )}
-        <CardAsset src={thumbnail} size={size} />
+        <CardAsset src={optimizedCachingThumbnail} size={size} alt={alt} />
       </CardHeader>
       <CardBody>
         <CardContent>
           <CardTitle as="h2">{name}</CardTitle>
           <CardSubtitle>
             <Extension>{extension}</Extension>
-            {height && width && `- ${height}✕${width}`}
+            {height && width && ` - ${height}✕${width}`}
           </CardSubtitle>
         </CardContent>
         <CardBadge>
@@ -75,6 +82,7 @@ ImageAssetCard.defaultProps = {
 };
 
 ImageAssetCard.propTypes = {
+  alt: PropTypes.string.isRequired,
   extension: PropTypes.string.isRequired,
   height: PropTypes.number,
   name: PropTypes.string.isRequired,

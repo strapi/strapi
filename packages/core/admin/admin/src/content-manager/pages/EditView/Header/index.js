@@ -4,17 +4,17 @@ import { useHistory } from 'react-router-dom';
 import get from 'lodash/get';
 import isEqual from 'lodash/isEqual';
 import isEmpty from 'lodash/isEmpty';
-import BackIcon from '@strapi/icons/BackIcon';
-import { HeaderLayout } from '@strapi/parts/Layout';
-import { Box } from '@strapi/parts/Box';
-import { Button } from '@strapi/parts/Button';
-import { Dialog, DialogBody, DialogFooter } from '@strapi/parts/Dialog';
-import { Link } from '@strapi/parts/Link';
-import { Row } from '@strapi/parts/Row';
-import { Text } from '@strapi/parts/Text';
-import { Stack } from '@strapi/parts/Stack';
-import AlertWarningIcon from '@strapi/icons/AlertWarningIcon';
-import CheckIcon from '@strapi/icons/CheckIcon';
+import ArrowLeft from '@strapi/icons/ArrowLeft';
+import { HeaderLayout } from '@strapi/design-system/Layout';
+import { Box } from '@strapi/design-system/Box';
+import { Button } from '@strapi/design-system/Button';
+import { Dialog, DialogBody, DialogFooter } from '@strapi/design-system/Dialog';
+import { Link } from '@strapi/design-system/Link';
+import { Flex } from '@strapi/design-system/Flex';
+import { Typography } from '@strapi/design-system/Typography';
+import { Stack } from '@strapi/design-system/Stack';
+import ExclamationMarkCircle from '@strapi/icons/ExclamationMarkCircle';
+import Check from '@strapi/icons/Check';
 import PropTypes from 'prop-types';
 import isEqualFastCompare from 'react-fast-compare';
 import { getTrad } from '../../../utils';
@@ -71,12 +71,19 @@ const Header = ({
 
   if (isCreatingEntry && canCreate) {
     primaryAction = (
-      <Button disabled={!didChangeData} isLoading={status === 'submit-pending'} type="submit">
-        {formatMessage({
-          id: getTrad('containers.Edit.submit'),
-          defaultMessage: 'Save',
-        })}
-      </Button>
+      <Stack horizontal size={2}>
+        {hasDraftAndPublish && (
+          <Button disabled startIcon={<Check />} variant="secondary">
+            {formatMessage({ id: 'app.utils.publish', defaultMessage: 'Publish' })}
+          </Button>
+        )}
+        <Button disabled={!didChangeData} isLoading={status === 'submit-pending'} type="submit">
+          {formatMessage({
+            id: getTrad('containers.Edit.submit'),
+            defaultMessage: 'Save',
+          })}
+        </Button>
+      </Stack>
     );
   }
 
@@ -103,13 +110,13 @@ const Header = ({
     /* eslint-enable indent */
 
     primaryAction = (
-      <Row>
+      <Flex>
         {shouldShowPublishButton && (
           <Button
             disabled={didChangeData}
             loading={isPublishButtonLoading}
             onClick={onClick}
-            startIcon={<CheckIcon />}
+            startIcon={<Check />}
             variant="secondary"
           >
             {formatMessage(pubishButtonLabel)}
@@ -123,7 +130,7 @@ const Header = ({
             })}
           </Button>
         </Box>
-      </Row>
+      </Flex>
     );
   }
 
@@ -149,12 +156,12 @@ const Header = ({
   return (
     <>
       <HeaderLayout
-        title={title}
+        title={title.toString()}
         primaryAction={primaryAction}
         subtitle={subtitle}
         navigationAction={
           <Link
-            startIcon={<BackIcon />}
+            startIcon={<ArrowLeft />}
             // Needed in order to redirect the user with the correct search params
             // Since parts is using a link from react-router-dom the best way to do it is to disable the
             // event
@@ -179,10 +186,10 @@ const Header = ({
           describedBy="confirm-description"
           isOpen={showWarningUnpublish}
         >
-          <DialogBody icon={<AlertWarningIcon />}>
+          <DialogBody icon={<ExclamationMarkCircle />}>
             <Stack size={2}>
-              <Row justifyContent="center" style={{ textAlign: 'center' }}>
-                <Text id="confirm-description">
+              <Flex justifyContent="center" style={{ textAlign: 'center' }}>
+                <Typography id="confirm-description">
                   {formatMessage(
                     {
                       id: getTrad('popUpWarning.warning.unpublish'),
@@ -193,16 +200,16 @@ const Header = ({
                       br: () => <br />,
                     }
                   )}
-                </Text>
-              </Row>
-              <Row justifyContent="center" style={{ textAlign: 'center' }}>
-                <Text id="confirm-description">
+                </Typography>
+              </Flex>
+              <Flex justifyContent="center" style={{ textAlign: 'center' }}>
+                <Typography id="confirm-description">
                   {formatMessage({
                     id: getTrad('popUpWarning.warning.unpublish-question'),
                     defaultMessage: 'Are you sure you want to unpublish it?',
                   })}
-                </Text>
-              </Row>
+                </Typography>
+              </Flex>
             </Stack>
           </DialogBody>
           <DialogFooter
@@ -234,10 +241,10 @@ const Header = ({
           describedBy="confirm-description"
           isOpen={showWarningDraftRelation}
         >
-          <DialogBody icon={<AlertWarningIcon />}>
+          <DialogBody icon={<ExclamationMarkCircle />}>
             <Stack size={2}>
-              <Row justifyContent="center" style={{ textAlign: 'center' }}>
-                <Text id="confirm-description">
+              <Flex justifyContent="center" style={{ textAlign: 'center' }}>
+                <Typography id="confirm-description">
                   {draftRelationsCountRef.current}
                   {formatMessage(
                     {
@@ -247,20 +254,20 @@ const Header = ({
                     },
                     {
                       br: () => <br />,
-                      b: chunks => <Text bold>{chunks}</Text>,
+                      b: chunks => <Typography fontWeight="bold">{chunks}</Typography>,
                       count: draftRelationsCountRef.current,
                     }
                   )}
-                </Text>
-              </Row>
-              <Row justifyContent="center" style={{ textAlign: 'center' }}>
-                <Text id="confirm-description">
+                </Typography>
+              </Flex>
+              <Flex justifyContent="center" style={{ textAlign: 'center' }}>
+                <Typography id="confirm-description">
                   {formatMessage({
                     id: getTrad('popUpWarning.warning.publish-question'),
                     defaultMessage: 'Do you still want to publish it?',
                   })}
-                </Text>
-              </Row>
+                </Typography>
+              </Flex>
             </Stack>
           </DialogBody>
           <DialogFooter

@@ -2,6 +2,7 @@
 
 const _ = require('lodash');
 const { contentTypes: contentTypesUtils } = require('@strapi/utils');
+const { ApplicationError, NotFoundError, ForbiddenError } = require('@strapi/utils').errors;
 const { getService } = require('../utils');
 const validateSettings = require('./validation/settings');
 const validateUploadBody = require('./validation/upload');
@@ -37,9 +38,11 @@ module.exports = {
 
     const query = pm.addPermissionsQueryTo(ctx.query);
 
-    const files = await getService('upload').fetchAll(query);
+    const { results, pagination } = await getService('upload').findPage(query);
 
-    ctx.body = pm.sanitize(files, { withPrivate: false });
+    const sanitizedResults = await pm.sanitizeOutput(results);
+
+    return { results: sanitizedResults, pagination };
   },
 
   async findOne(ctx) {
@@ -55,31 +58,12 @@ module.exports = {
       id
     );
 
-    ctx.body = pm.sanitize(file, { withPrivate: false });
-  },
-
-  async count(ctx) {
-    const pm = strapi.admin.services.permission.createPermissionsManager({
-      ability: ctx.state.userAbility,
-      action: ACTIONS.read,
-      model: fileModel,
-    });
-
-    if (!pm.isAllowed) {
-      return ctx.forbidden();
-    }
-
-    const query = pm.addPermissionsQueryTo(ctx.query);
-    const count = await getService('upload').count(query);
-
-    ctx.body = { count };
+    ctx.body = await pm.sanitizeOutput(file);
   },
 
   async destroy(ctx) {
-    const {
-      state: { userAbility },
-      params: { id },
-    } = ctx;
+    const { id } = ctx.params;
+    const { userAbility } = ctx.state;
 
     const { pm, file } = await findEntityAndCheckPermissions(
       userAbility,
@@ -90,7 +74,7 @@ module.exports = {
 
     await getService('upload').remove(file);
 
-    ctx.body = pm.sanitize(file, { action: ACTIONS.read, withPrivate: false });
+    ctx.body = await pm.sanitizeOutput(file, { action: ACTIONS.read });
   },
 
   async updateSettings(ctx) {
@@ -137,7 +121,7 @@ module.exports = {
     const data = await validateUploadBody(body);
     const file = await uploadService.updateFileInfo(id, data.fileInfo, { user });
 
-    ctx.body = pm.sanitize(file, { action: ACTIONS.read, withPrivate: false });
+    ctx.body = await pm.sanitizeOutput(file, { action: ACTIONS.read });
   },
 
   async replaceFile(ctx) {
@@ -151,17 +135,13 @@ module.exports = {
     const { pm } = await findEntityAndCheckPermissions(userAbility, ACTIONS.update, fileModel, id);
 
     if (Array.isArray(files)) {
-      throw strapi.errors.badRequest(null, {
-        errors: [
-          { id: 'Upload.replace.single', message: 'Cannot replace a file with multiple ones' },
-        ],
-      });
+      throw new ApplicationError('Cannot replace a file with multiple ones');
     }
 
     const data = await validateUploadBody(body);
     const replacedFiles = await uploadService.replace(id, { data, file: files }, { user });
 
-    ctx.body = pm.sanitize(replacedFiles, { action: ACTIONS.read, withPrivate: false });
+    ctx.body = await pm.sanitizeOutput(replacedFiles, { action: ACTIONS.read });
   },
 
   async uploadFiles(ctx) {
@@ -178,13 +158,13 @@ module.exports = {
     });
 
     if (!pm.isAllowed) {
-      throw strapi.errors.forbidden();
+      return ctx.forbidden();
     }
 
     const data = await validateUploadBody(body);
     const uploadedFiles = await uploadService.upload({ data, files }, { user });
 
-    ctx.body = pm.sanitize(uploadedFiles, { action: ACTIONS.read, withPrivate: false });
+    ctx.body = await pm.sanitizeOutput(uploadedFiles, { action: ACTIONS.read });
   },
 
   async upload(ctx) {
@@ -198,9 +178,7 @@ module.exports = {
     }
 
     if (_.isEmpty(files) || files.size === 0) {
-      throw strapi.errors.badRequest(null, {
-        errors: [{ id: 'Upload.status.empty', message: 'Files are empty' }],
-      });
+      throw new ApplicationError('Files are empty');
     }
 
     await (id ? this.replaceFile : this.uploadFiles)(ctx);
@@ -211,19 +189,17 @@ const findEntityAndCheckPermissions = async (ability, action, model, id) => {
   const file = await getService('upload').findOne(id, [CREATED_BY_ATTRIBUTE]);
 
   if (_.isNil(file)) {
-    throw strapi.errors.notFound();
+    throw new NotFoundError();
   }
 
   const pm = strapi.admin.services.permission.createPermissionsManager({ ability, action, model });
 
-  const author = await strapi.admin.services.user.findOne({ id: file[CREATED_BY_ATTRIBUTE].id }, [
-    'roles',
-  ]);
+  const author = await strapi.admin.services.user.findOne(file[CREATED_BY_ATTRIBUTE].id, ['roles']);
 
   const fileWithRoles = _.set(_.cloneDeep(file), 'createdBy', author);
 
   if (pm.ability.cannot(pm.action, pm.toSubject(fileWithRoles))) {
-    throw strapi.errors.forbidden();
+    throw new ForbiddenError();
   }
 
   return { pm, file };

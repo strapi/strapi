@@ -1,6 +1,6 @@
 'use strict';
 
-const getDestinationPrompts = require('./utils/get-destination-prompts');
+const getDestinationPrompts = require('./prompts/get-destination-prompts');
 const getFilePath = require('./utils/get-file-path');
 
 module.exports = plop => {
@@ -20,7 +20,7 @@ module.exports = plop => {
       return [
         {
           type: 'add',
-          path: `${filePath}/services/{{id}}.js`,
+          path: `${filePath}/services/{{ id }}.js`,
           templateFile: 'templates/service.js.hbs',
         },
       ];

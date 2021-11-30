@@ -1,10 +1,9 @@
 import React, { useRef, useState } from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useIntl } from 'react-intl';
 import { NavLink as Link } from 'react-router-dom';
-import { Divider } from '@strapi/parts/Divider';
+import { Divider } from '@strapi/design-system/Divider';
 import {
   MainNav,
   NavBrand,
@@ -13,22 +12,15 @@ import {
   NavSection,
   NavUser,
   NavCondense,
-} from '@strapi/parts/MainNav';
-import { FocusTrap } from '@strapi/parts/FocusTrap';
-import { Box } from '@strapi/parts/Box';
-import { Text } from '@strapi/parts/Text';
-import { Stack } from '@strapi/parts/Stack';
-import ContentIcon from '@strapi/icons/ContentIcon';
-import Logout from '@strapi/icons/Logout';
+} from '@strapi/design-system/MainNav';
+import { FocusTrap } from '@strapi/design-system/FocusTrap';
+import { Box } from '@strapi/design-system/Box';
+import { Typography } from '@strapi/design-system/Typography';
+import { Stack } from '@strapi/design-system/Stack';
+import Write from '@strapi/icons/Write';
+import Exit from '@strapi/icons/Exit';
 import { auth, usePersistentState, useAppInfos } from '@strapi/helper-plugin';
 import useConfigurations from '../../hooks/useConfigurations';
-
-// TODO: remove when font-awesome will be removed
-const IconWrapper = styled.span`
-  svg.svg-inline--fa.fa-w-20 {
-    width: 1rem;
-  }
-`;
 
 const LinkUserWrapper = styled(Box)`
   width: ${150 / 16}rem;
@@ -93,48 +85,48 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
       <NavBrand
         workplace="Workplace"
         title="Strapi Dashboard"
-        icon={<img src={menuLogo} alt="" />}
+        icon={<img src={menuLogo} alt="Strapi Dashboard" />}
       />
 
       <Divider />
 
       <NavSections>
-        <NavLink to="/content-manager" icon={<ContentIcon />}>
+        <NavLink to="/content-manager" icon={<Write />}>
           {formatMessage({ id: 'content-manager.plugin.name', defaultMessage: 'Content manager' })}
         </NavLink>
 
         {pluginsSectionLinks.length > 0 ? (
           <NavSection label="Plugins">
-            {pluginsSectionLinks.map(link => (
-              <NavLink
-                to={link.to}
-                key={link.to}
-                icon={
-                  <IconWrapper>
-                    <FontAwesomeIcon icon={link.icon} />
-                  </IconWrapper>
-                }
-              >
-                {formatMessage(link.intlLabel)}
-              </NavLink>
-            ))}
+            {pluginsSectionLinks.map(link => {
+              const Icon = link.icon;
+
+              return (
+                <NavLink to={link.to} key={link.to} icon={<Icon />}>
+                  {formatMessage(link.intlLabel)}
+                </NavLink>
+              );
+            })}
           </NavSection>
         ) : null}
 
         {generalSectionLinks.length > 0 ? (
           <NavSection label="General">
-            {generalSectionLinks.map(link => (
-              <NavLink
-                badgeContent={
-                  (link.notificationsCount > 0 && link.notificationsCount.toString()) || undefined
-                }
-                to={link.to}
-                key={link.to}
-                icon={<FontAwesomeIcon icon={link.icon} />}
-              >
-                {formatMessage(link.intlLabel)}
-              </NavLink>
-            ))}
+            {generalSectionLinks.map(link => {
+              const LinkIcon = link.icon;
+
+              return (
+                <NavLink
+                  badgeContent={
+                    (link.notificationsCount > 0 && link.notificationsCount.toString()) || undefined
+                  }
+                  to={link.to}
+                  key={link.to}
+                  icon={<LinkIcon />}
+                >
+                  {formatMessage(link.intlLabel)}
+                </NavLink>
+              );
+            })}
           </NavSection>
         ) : null}
       </NavSections>
@@ -148,25 +140,31 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
         {userDisplayName}
       </NavUser>
       {userLinksVisible && (
-        <LinkUserWrapper onBlur={handleBlur} padding={1} shadow="tableShadow" background="neutral0">
+        <LinkUserWrapper
+          onBlur={handleBlur}
+          padding={1}
+          shadow="tableShadow"
+          background="neutral0"
+          hasRadius
+        >
           <FocusTrap onEscape={handleToggleUserLinks}>
             <Stack size={0}>
               <LinkUser onClick={handleToggleUserLinks} to="/me">
-                <Text>
+                <Typography>
                   {formatMessage({
                     id: 'app.components.LeftMenu.profile',
                     defaultMessage: 'Profile',
                   })}
-                </Text>
+                </Typography>
               </LinkUser>
               <LinkUser onClick={handleLogout} logout="logout" to="/auth/login">
-                <Text textColor="danger600">
+                <Typography textColor="danger600">
                   {formatMessage({
                     id: 'app.components.LeftMenu.logout',
                     defaultMessage: 'Logout',
                   })}
-                </Text>
-                <Logout />
+                </Typography>
+                <Exit />
               </LinkUser>
             </Stack>
           </FocusTrap>

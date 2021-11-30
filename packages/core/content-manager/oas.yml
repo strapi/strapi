@@ -6,7 +6,7 @@ servers:
   - url: http://localhost:1337
     description: Local server
 externalDocs:
-  url: https://strapi.io/documentation
+  url: https://docs.strapi.io
   description: Strapi documentation
 paths:
   /content-manager/content-types:

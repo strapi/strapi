@@ -1,8 +1,8 @@
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import { CheckPermissions } from '@strapi/helper-plugin';
-import { Button } from '@strapi/parts/Button';
-import ConfigureIcon from '@strapi/icons/ConfigureIcon';
+import { Button } from '@strapi/design-system/Button';
+import Layer from '@strapi/icons/Layer';
 import { useHistory } from 'react-router-dom';
 import { useIntl } from 'react-intl';
 
@@ -27,7 +27,13 @@ const cmPermissions = {
   ],
 };
 
-const LinkToCMSettingsView = ({ isTemporary, isInContentTypeView, contentTypeKind, targetUid }) => {
+const LinkToCMSettingsView = ({
+  disabled,
+  isTemporary,
+  isInContentTypeView,
+  contentTypeKind,
+  targetUid,
+}) => {
   const { formatMessage } = useIntl();
   const { push } = useHistory();
   const {
@@ -63,10 +69,10 @@ const LinkToCMSettingsView = ({ isTemporary, isInContentTypeView, contentTypeKin
   return (
     <CheckPermissions permissions={permissionsToApply}>
       <Button
-        startIcon={<ConfigureIcon />}
+        startIcon={<Layer />}
         variant="tertiary"
         onClick={handleClick}
-        disabled={isTemporary}
+        disabled={isTemporary || disabled}
       >
         {label}
       </Button>
@@ -82,6 +88,7 @@ LinkToCMSettingsView.defaultProps = {
 };
 
 LinkToCMSettingsView.propTypes = {
+  disabled: PropTypes.bool.isRequired,
   contentTypeKind: PropTypes.string,
   isInContentTypeView: PropTypes.bool,
   isTemporary: PropTypes.bool,

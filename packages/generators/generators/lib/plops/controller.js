@@ -1,6 +1,6 @@
 'use strict';
 
-const getDestinationPrompts = require('./utils/get-destination-prompts');
+const getDestinationPrompts = require('./prompts/get-destination-prompts');
 const getFilePath = require('./utils/get-file-path');
 const validateInput = require('./utils/validate-input');
 
@@ -23,7 +23,7 @@ module.exports = plop => {
       return [
         {
           type: 'add',
-          path: `${filePath}/controllers/{{id}}.js`,
+          path: `${filePath}/controllers/{{ id }}.js`,
           templateFile: 'templates/controller.js.hbs',
         },
       ];

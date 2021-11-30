@@ -1,7 +1,7 @@
 import { nameField } from './nameField';
 
 const commonBaseForm = {
-  items: [[nameField]],
+  sections: [{ sectionTitle: null, items: [nameField] }],
 };
 
 export default commonBaseForm;

@@ -11,7 +11,7 @@ import {
   SubNavSection,
   SubNavSections,
   SubNavLink,
-} from '@strapi/parts/SubNav';
+} from '@strapi/design-system/SubNav';
 import { useSelector, shallowEqual } from 'react-redux';
 import { useIntl } from 'react-intl';
 import matchSorter from 'match-sorter';
@@ -40,10 +40,8 @@ const LeftMenu = () => {
       };
     });
 
-  const intlCollectionTypeLinks = toIntl(
-    collectionTypeLinks.filter(({ isDisplayed }) => isDisplayed)
-  );
-  const intlSingleTypeLinks = toIntl(singleTypeLinks.filter(({ isDisplayed }) => isDisplayed));
+  const intlCollectionTypeLinks = toIntl(collectionTypeLinks);
+  const intlSingleTypeLinks = toIntl(singleTypeLinks);
 
   const menu = [
     {
@@ -55,7 +53,9 @@ const LeftMenu = () => {
         values: { number: intlCollectionTypeLinks.length },
       },
       searchable: true,
-      links: sortBy(matchByTitle(intlCollectionTypeLinks, search), 'title'),
+      links: sortBy(matchByTitle(intlCollectionTypeLinks, search), object =>
+        object.title.toLowerCase()
+      ),
     },
     {
       id: 'singleTypes',
@@ -66,7 +66,9 @@ const LeftMenu = () => {
         values: { number: intlSingleTypeLinks.length },
       },
       searchable: true,
-      links: sortBy(matchByTitle(intlSingleTypeLinks, search), 'title'),
+      links: sortBy(matchByTitle(intlSingleTypeLinks, search), object =>
+        object.title.toLowerCase()
+      ),
     },
   ];
 

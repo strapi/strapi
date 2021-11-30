@@ -12,7 +12,9 @@ let uid = 'api::single-type-model.single-type-model';
 
 const ct = {
   kind: 'singleType',
-  name: 'single-type-model',
+  displayName: 'single-type-model',
+  singularName: 'single-type-model',
+  pluralName: 'single-type-models',
   attributes: {
     title: {
       type: 'string',
@@ -31,24 +33,6 @@ describe('Content Manager single types', () => {
   afterAll(async () => {
     await strapi.destroy();
     await builder.cleanup();
-  });
-
-  test('Label is not pluralized', async () => {
-    const res = await rq({
-      url: `/content-manager/content-types?kind=singleType`,
-      method: 'GET',
-    });
-
-    expect(res.statusCode).toBe(200);
-    expect(res.body.data).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          info: expect.objectContaining({
-            label: 'Single-type-model',
-          }),
-        }),
-      ])
-    );
   });
 
   test('find single type content returns 404 when not created', async () => {

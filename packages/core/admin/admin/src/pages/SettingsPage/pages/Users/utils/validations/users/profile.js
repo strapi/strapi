@@ -1,9 +1,9 @@
 import * as yup from 'yup';
 import { translatedErrors } from '@strapi/helper-plugin';
 
-const schema = {
+export const commonUserSchema = {
   firstname: yup.mixed().required(translatedErrors.required),
-  lastname: yup.mixed().required(translatedErrors.required),
+  lastname: yup.mixed(),
   email: yup
     .string()
     .email(translatedErrors.email)
@@ -22,6 +22,17 @@ const schema = {
     .oneOf([yup.ref('password'), null], 'components.Input.error.password.noMatch')
     .when('password', (password, passSchema) => {
       return password ? passSchema.required(translatedErrors.required) : passSchema;
+    }),
+};
+
+const schema = {
+  ...commonUserSchema,
+  currentPassword: yup
+    .string()
+    .when(['password', 'confirmPassword'], (password, confirmPassword, passSchema) => {
+      return password || confirmPassword
+        ? passSchema.required(translatedErrors.required)
+        : passSchema;
     }),
   preferedLanguage: yup.string().nullable(),
 };

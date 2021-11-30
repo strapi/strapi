@@ -129,9 +129,10 @@ jobs:
           - 3306:3306
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2-beta
+      - uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node }}
+          cache: yarn
       - uses: ./.github/actions/install-modules
       - uses: ./.github/actions/run-e2e-tests
         with:
@@ -164,9 +165,10 @@ jobs:
           - 3306:3306
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2-beta
+      - uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node }}
+          cache: yarn
       - uses: ./.github/actions/install-modules
       - uses: ./.github/actions/run-e2e-tests
         with:
@@ -182,9 +184,10 @@ jobs:
       max-parallel: 3
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2-beta
+      - uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node }}
+          cache: yarn
       - uses: ./.github/actions/install-modules
       - uses: ./.github/actions/run-e2e-tests
         with:
@@ -222,9 +225,10 @@ jobs:
           - 5432:5432
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2-beta
+      - uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node }}
+          cache: yarn
       - uses: ./.github/actions/install-modules
       - uses: ./.github/actions/run-e2e-tests
         with:
@@ -261,9 +265,10 @@ jobs:
           - 3306:3306
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2-beta
+      - uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node }}
+          cache: yarn
       - uses: ./.github/actions/install-modules
       - uses: ./.github/actions/run-e2e-tests
         with:
@@ -283,9 +288,10 @@ jobs:
       max-parallel: 3
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2-beta
+      - uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node }}
+          cache: yarn
       - uses: ./.github/actions/install-modules
       - uses: ./.github/actions/run-e2e-tests
         with:

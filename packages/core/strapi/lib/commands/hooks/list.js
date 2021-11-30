@@ -6,17 +6,15 @@ const chalk = require('chalk');
 const strapi = require('../../index');
 
 module.exports = async function() {
-  const app = await strapi().load();
+  const app = await strapi().register();
 
-  const list = app.hooks;
+  const list = app.container.get('hooks').keys();
 
   const infoTable = new CLITable({
     head: [chalk.blue('Name')],
   });
 
-  Object.keys(list).forEach(name => {
-    infoTable.push([name]);
-  });
+  list.forEach(name => infoTable.push([name]));
 
   console.log(infoTable.toString());
 

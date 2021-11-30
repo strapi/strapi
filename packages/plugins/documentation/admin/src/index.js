@@ -6,42 +6,54 @@
 // IF THE DOC IS NOT UPDATED THE PULL REQUEST WILL NOT BE MERGED
 import { prefixPluginTranslations } from '@strapi/helper-plugin';
 import pluginPkg from '../../package.json';
+import PluginIcon from './components/PluginIcon';
 import pluginPermissions from './permissions';
 import pluginId from './pluginId';
-import pluginLogo from './assets/images/logo.svg';
 
-const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
-const icon = pluginPkg.strapi.icon;
 const name = pluginPkg.strapi.name;
 
 export default {
   register(app) {
     app.addMenuLink({
       to: `/plugins/${pluginId}`,
-      icon,
+      icon: PluginIcon,
       intlLabel: {
         id: `${pluginId}.plugin.name`,
         defaultMessage: 'Documentation',
       },
       permissions: pluginPermissions.main,
       Component: async () => {
-        const component = await import(/* webpackChunkName: "documentation-page" */ './pages/App');
+        const component = await import(
+          /* webpackChunkName: "documentation-page" */ './pages/PluginPage'
+        );
 
         return component;
       },
     });
 
     app.registerPlugin({
-      description: pluginDescription,
-      icon,
       id: pluginId,
-      isReady: true,
-      isRequired: pluginPkg.strapi.required || false,
       name,
-      pluginLogo,
     });
   },
-  bootstrap() {},
+  bootstrap(app) {
+    app.addSettingsLink('global', {
+      intlLabel: {
+        id: `${pluginId}.plugin.name`,
+        defaultMessage: 'Documentation',
+      },
+      id: 'documentation',
+      to: `/settings/${pluginId}`,
+      Component: async () => {
+        const component = await import(
+          /* webpackChunkName: "documentation-settings" */ './pages/SettingsPage'
+        );
+
+        return component;
+      },
+      permissions: pluginPermissions.main,
+    });
+  },
   async registerTrads({ locales }) {
     const importedTrads = await Promise.all(
       locales.map(locale => {

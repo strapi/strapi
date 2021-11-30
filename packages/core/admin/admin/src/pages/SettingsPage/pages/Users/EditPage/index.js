@@ -18,16 +18,18 @@ import {
 } from '@strapi/helper-plugin';
 import { useQuery } from 'react-query';
 import { Formik } from 'formik';
-import { Box } from '@strapi/parts/Box';
-import { Button } from '@strapi/parts/Button';
-import { Grid, GridItem } from '@strapi/parts/Grid';
-import { HeaderLayout, ContentLayout } from '@strapi/parts/Layout';
-import { H3 } from '@strapi/parts/Text';
-import { Main } from '@strapi/parts/Main';
-import { Stack } from '@strapi/parts/Stack';
-import CheckIcon from '@strapi/icons/CheckIcon';
+import { Box } from '@strapi/design-system/Box';
+import { Button } from '@strapi/design-system/Button';
+import { Grid, GridItem } from '@strapi/design-system/Grid';
+import { HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
+import { Link } from '@strapi/design-system/Link';
+import { Typography } from '@strapi/design-system/Typography';
+import { Main } from '@strapi/design-system/Main';
+import { Stack } from '@strapi/design-system/Stack';
+import ArrowLeft from '@strapi/icons/ArrowLeft';
+import Check from '@strapi/icons/Check';
 import MagicLink from 'ee_else_ce/pages/SettingsPage/pages/Users/components/MagicLink';
-import { formatAPIErrors } from '../../../../../utils';
+import { formatAPIErrors, getFullName } from '../../../../../utils';
 import { fetchUser, putUser } from './utils/api';
 import layout from './utils/layout';
 import { editValidation } from '../utils/validations/users';
@@ -87,7 +89,7 @@ const EditPage = ({ canUpdate }) => {
       if (id.toString() === userInfos.id.toString()) {
         auth.setUserInfo(data);
 
-        const userDisplayName = get(body, 'username') || `${body.firstname} ${body.lastname}`;
+        const userDisplayName = get(body, 'username') || getFullName(body.firstname, body.lastname);
 
         setUserDisplayName(userDisplayName);
       }
@@ -129,7 +131,7 @@ const EditPage = ({ canUpdate }) => {
   }, {});
 
   const headerLabelName =
-    initialData.username || `${initialData.firstname} ${initialData.lastname}`;
+    initialData.username || getFullName(initialData.firstname, initialData.lastname);
 
   const title = formatMessage(headerLabel, { name: headerLabelName });
 
@@ -139,11 +141,19 @@ const EditPage = ({ canUpdate }) => {
         <SettingsPageTitle name="Users" />
         <HeaderLayout
           primaryAction={
-            <Button disabled startIcon={<CheckIcon />} type="button" size="L">
+            <Button disabled startIcon={<Check />} type="button" size="L">
               {formatMessage({ id: 'form.button.save', defaultMessage: 'Save' })}
             </Button>
           }
           title={title}
+          navigationAction={
+            <Link startIcon={<ArrowLeft />} to="/settings/users?pageSize=10&page=1&sort=firstname">
+              {formatMessage({
+                id: 'app.components.go-back',
+                defaultMessage: 'Go back',
+              })}
+            </Link>
+          }
         />
         <ContentLayout>
           <LoadingIndicatorPage />
@@ -168,7 +178,7 @@ const EditPage = ({ canUpdate }) => {
                 primaryAction={
                   <Button
                     disabled={isSubmitting || !canUpdate}
-                    startIcon={<CheckIcon />}
+                    startIcon={<Check />}
                     loading={isSubmitting}
                     type="submit"
                     size="L"
@@ -177,6 +187,17 @@ const EditPage = ({ canUpdate }) => {
                   </Button>
                 }
                 title={title}
+                navigationAction={
+                  <Link
+                    startIcon={<ArrowLeft />}
+                    to="/settings/users?pageSize=10&page=1&sort=firstname"
+                  >
+                    {formatMessage({
+                      id: 'app.components.go-back',
+                      defaultMessage: 'Go back',
+                    })}
+                  </Link>
+                }
               />
               <ContentLayout>
                 {data?.registrationToken && (
@@ -195,12 +216,12 @@ const EditPage = ({ canUpdate }) => {
                     paddingRight={7}
                   >
                     <Stack size={4}>
-                      <H3 as="h2">
+                      <Typography variant="delta" as="h2">
                         {formatMessage({
                           id: 'app.components.Users.ModalCreateBody.block-title.details',
                           defaultMessage: 'Details',
                         })}
-                      </H3>
+                      </Typography>
                       <Grid gap={5}>
                         {layout.map(row => {
                           return row.map(input => {
@@ -230,12 +251,12 @@ const EditPage = ({ canUpdate }) => {
                     paddingRight={7}
                   >
                     <Stack size={4}>
-                      <H3 as="h2">
+                      <Typography variant="delta" as="h2">
                         {formatMessage({
                           id: 'app.components.Users.ModalCreateBody.block-title.login',
                           defaultMessage: 'Login settings',
                         })}
-                      </H3>
+                      </Typography>
                       <Grid gap={5}>
                         <GridItem col={6} xs={12}>
                           <SelectRoles

@@ -24,13 +24,12 @@ global.strapi = {
 describe('Default Service', () => {
   describe('Collection Type', () => {
     test('Creates default actions', () => {
-      const strapi = {};
-      const model = {
+      const contentType = {
         modelName: 'testModel',
         kind: 'collectionType',
       };
 
-      const service = createService({ strapi, model });
+      const service = createService({ contentType });
 
       expect(service).toEqual({
         find: expect.any(Function),
@@ -44,13 +43,12 @@ describe('Default Service', () => {
 
   describe('Single Type', () => {
     test('Creates default actions', () => {
-      const strapi = {};
-      const model = {
+      const contentType = {
         modelName: 'testModel',
         kind: 'singleType',
       };
 
-      const service = createService({ strapi, model });
+      const service = createService({ contentType });
 
       expect(service).toEqual({
         find: expect.any(Function),
@@ -61,7 +59,7 @@ describe('Default Service', () => {
 
     describe('Passes the logic down to the entityService', () => {
       test('Creates data when no entity is found', async () => {
-        const strapi = {
+        global.strapi = {
           entityService: {
             findMany: jest.fn(() => Promise.resolve(null)),
             create: jest.fn(() => Promise.resolve({ id: 1 })),
@@ -71,15 +69,15 @@ describe('Default Service', () => {
           },
         };
 
-        const model = {
+        const contentType = {
           uid: 'testModel',
           kind: 'singleType',
         };
 
-        const service = createService({ strapi, model });
+        const service = createService({ contentType });
 
         const input = {};
-        await service.createOrUpdate(input);
+        await service.createOrUpdate({ data: input });
 
         expect(strapi.entityService.findMany).toHaveBeenCalledWith('testModel', {
           publicationState: 'live',
@@ -89,7 +87,7 @@ describe('Default Service', () => {
       });
 
       test('Updates data when entity is found', async () => {
-        const strapi = {
+        global.strapi = {
           entityService: {
             findMany: jest.fn(() => Promise.resolve({ id: 1 })),
             update: jest.fn(() => Promise.resolve({ id: 1 })),
@@ -99,15 +97,15 @@ describe('Default Service', () => {
           },
         };
 
-        const model = {
+        const contentType = {
           uid: 'testModel',
           kind: 'singleType',
         };
 
-        const service = createService({ strapi, model });
+        const service = createService({ contentType });
 
         const input = {};
-        await service.createOrUpdate(input);
+        await service.createOrUpdate({ data: input });
 
         expect(strapi.entityService.findMany).toHaveBeenCalledWith('testModel', {
           populate: undefined,
@@ -120,19 +118,19 @@ describe('Default Service', () => {
       });
 
       test('Delete data when entity is found', async () => {
-        const strapi = {
+        global.strapi = {
           entityService: {
             findMany: jest.fn(() => Promise.resolve({ id: 1 })),
             delete: jest.fn(() => Promise.resolve({ id: 1 })),
           },
         };
 
-        const model = {
+        const contentType = {
           uid: 'testModel',
           kind: 'singleType',
         };
 
-        const service = createService({ strapi, model });
+        const service = createService({ contentType });
 
         await service.delete();
 

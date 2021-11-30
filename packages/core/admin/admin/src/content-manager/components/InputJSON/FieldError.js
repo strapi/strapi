@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { P } from '@strapi/parts/Text';
+import { Typography } from '@strapi/design-system/Typography';
 
 export const FieldError = ({ id, error, name }) => {
   const { formatMessage } = useIntl();
@@ -12,9 +12,15 @@ export const FieldError = ({ id, error, name }) => {
   }
 
   return (
-    <P small id={`${id || name}-error`} textColor="danger600" data-strapi-field-error>
+    <Typography
+      as="p"
+      variant="pi"
+      id={`${id || name}-error`}
+      textColor="danger600"
+      data-strapi-field-error
+    >
       {errorMessage}
-    </P>
+    </Typography>
   );
 };
 

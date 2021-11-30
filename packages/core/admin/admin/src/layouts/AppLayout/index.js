@@ -1,7 +1,7 @@
 import React from 'react';
-import { Box } from '@strapi/parts/Box';
-import { Row } from '@strapi/parts/Row';
-import { SkipToContent } from '@strapi/parts/Main';
+import { Box } from '@strapi/design-system/Box';
+import { Flex } from '@strapi/design-system/Flex';
+import { SkipToContent } from '@strapi/design-system/Main';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
@@ -18,10 +18,10 @@ const AppLayout = ({ children, sideNav }) => {
       <SkipToContent>
         {formatMessage({ id: 'skipToContent', defaultMessage: 'Skip to content' })}
       </SkipToContent>
-      <Row alignItems="flex-start">
+      <Flex alignItems="flex-start">
         {sideNav}
         <FlexBox>{children}</FlexBox>
-      </Row>
+      </Flex>
     </Box>
   );
 };

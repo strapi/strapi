@@ -1,22 +1,29 @@
 import React, { useState } from 'react';
-import Hide from '@strapi/icons/Hide';
-import Show from '@strapi/icons/Show';
-import { Box } from '@strapi/parts/Box';
-import { Stack } from '@strapi/parts/Stack';
-import { Main } from '@strapi/parts/Main';
-import { Row } from '@strapi/parts/Row';
-import { Link } from '@strapi/parts/Link';
-import { Button } from '@strapi/parts/Button';
-import { TextInput } from '@strapi/parts/TextInput';
-import { Checkbox } from '@strapi/parts/Checkbox';
-import { H1, Text, Subtitle } from '@strapi/parts/Text';
+import EyeStriked from '@strapi/icons/EyeStriked';
+import Eye from '@strapi/icons/Eye';
+import { Box } from '@strapi/design-system/Box';
+import { Stack } from '@strapi/design-system/Stack';
+import { Main } from '@strapi/design-system/Main';
+import { Flex } from '@strapi/design-system/Flex';
+import { Link } from '@strapi/design-system/Link';
+import { Button } from '@strapi/design-system/Button';
+import { TextInput } from '@strapi/design-system/TextInput';
+import { Checkbox } from '@strapi/design-system/Checkbox';
+import { Typography } from '@strapi/design-system/Typography';
 import { Form } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
+import styled from 'styled-components';
 import { Formik } from 'formik';
 import { Column, LayoutContent } from '../../../../layouts/UnauthenticatedLayout';
 import Logo from '../Logo';
 import FieldActionWrapper from '../FieldActionWrapper';
+
+const PasswordInput = styled(TextInput)`
+  ::-ms-reveal {
+    display: none;
+  }
+`;
 
 const Login = ({ onSubmit, schema, children }) => {
   const [passwordShown, setPasswordShown] = useState(false);
@@ -41,25 +48,30 @@ const Login = ({ onSubmit, schema, children }) => {
               <Column>
                 <Logo />
                 <Box paddingTop={6} paddingBottom={1}>
-                  <H1>
+                  <Typography variant="alpha" as="h1">
                     {formatMessage({
                       id: 'Auth.form.welcome.title',
                       defaultMessage: 'Welcome!',
                     })}
-                  </H1>
+                  </Typography>
                 </Box>
                 <Box paddingBottom={7}>
-                  <Subtitle textColor="neutral600">
+                  <Typography variant="epsilon" textColor="neutral600">
                     {formatMessage({
                       id: 'Auth.form.welcome.subtitle',
                       defaultMessage: 'Log in to your Strapi account',
                     })}
-                  </Subtitle>
+                  </Typography>
                 </Box>
                 {errors.errorMessage && (
-                  <Text id="global-form-error" role="alert" tabIndex={-1} textColor="danger600">
+                  <Typography
+                    id="global-form-error"
+                    role="alert"
+                    tabIndex={-1}
+                    textColor="danger600"
+                  >
                     {errors.errorMessage}
-                  </Text>
+                  </Typography>
                 )}
               </Column>
 
@@ -83,7 +95,7 @@ const Login = ({ onSubmit, schema, children }) => {
                   name="email"
                   required
                 />
-                <TextInput
+                <PasswordInput
                   error={
                     errors.password
                       ? formatMessage({
@@ -118,7 +130,7 @@ const Login = ({ onSubmit, schema, children }) => {
                             }
                       )}
                     >
-                      {passwordShown ? <Show /> : <Hide />}
+                      {passwordShown ? <Eye /> : <EyeStriked />}
                     </FieldActionWrapper>
                   }
                   required
@@ -145,7 +157,7 @@ const Login = ({ onSubmit, schema, children }) => {
         </Formik>
         {children}
       </LayoutContent>
-      <Row justifyContent="center">
+      <Flex justifyContent="center">
         <Box paddingTop={4}>
           <Link to="/auth/forgot-password">
             {formatMessage({
@@ -154,7 +166,7 @@ const Login = ({ onSubmit, schema, children }) => {
             })}
           </Link>
         </Box>
-      </Row>
+      </Flex>
     </Main>
   );
 };

@@ -50,15 +50,15 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         background: #f6f6f9;
         padding-top: 24px;
         padding-right: 56px;
-        padding-bottom: 56px;
+        padding-bottom: 40px;
         padding-left: 56px;
       }
 
       .c1 {
-        padding-bottom: 12px;
+        padding-bottom: 8px;
       }
 
-      .c8 {
+      .c6 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -76,7 +76,7 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         align-items: center;
       }
 
-      .c9 {
+      .c7 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -90,30 +90,24 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         align-items: center;
       }
 
-      .c10 {
+      .c8 {
+        color: #32324d;
         font-weight: 600;
         font-size: 2rem;
         line-height: 1.25;
-        color: #32324d;
       }
 
       .c15 {
-        font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
         color: #666687;
-      }
-
-      .c16 {
         font-size: 1rem;
         line-height: 1.5;
       }
 
       .c14 {
-        font-weight: 500;
+        font-weight: 600;
+        color: #32324d;
         font-size: 0.75rem;
         line-height: 1.33;
-        color: #32324d;
       }
 
       .c11 {
@@ -126,6 +120,8 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         border-radius: 4px;
         background: #ffffff;
         border: 1px solid #dcdce4;
+        position: relative;
+        outline: none;
       }
 
       .c11 svg {
@@ -142,6 +138,36 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         pointer-events: none;
       }
 
+      .c11:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c11:focus-visible {
+        outline: none;
+      }
+
+      .c11:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
+      }
+
       .c12 {
         -webkit-align-items: center;
         -webkit-box-align: center;
@@ -154,7 +180,7 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         background: #4945ff;
       }
 
-      .c12 .sc-lmoMya {
+      .c12 .sc-dQoVA {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -208,18 +234,7 @@ describe('CONTENT MANAGER | EditView | Header', () => {
       }
 
       .c5 {
-        font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
         color: #4945ff;
-      }
-
-      .c6 {
-        font-weight: 600;
-        line-height: 1.14;
-      }
-
-      .c7 {
         font-weight: 600;
         font-size: 0.6875rem;
         line-height: 1.45;
@@ -242,6 +257,8 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         text-transform: uppercase;
         -webkit-text-decoration: none;
         text-decoration: none;
+        position: relative;
+        outline: none;
       }
 
       .c2 svg path {
@@ -252,11 +269,64 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         font-size: 0.625rem;
       }
 
+      .c2:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c2:focus-visible {
+        outline: none;
+      }
+
+      .c2:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
+      }
+
       .c4 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
         display: flex;
+      }
+
+      .c9 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c10 > * {
+        margin-left: 0;
+        margin-right: 0;
+      }
+
+      .c10 > * + * {
+        margin-left: 8px;
       }
 
       <div
@@ -292,40 +362,43 @@ describe('CONTENT MANAGER | EditView | Header', () => {
                 </svg>
               </span>
               <span
-                class="c5 c6 c7"
+                class="c5"
               >
                 Back
               </span>
             </a>
           </div>
           <div
-            class="c8"
+            class="c6"
           >
             <div
-              class="c9"
+              class="c7"
             >
               <h1
-                class="c10"
-                id="main-content-title"
+                class="c8"
               >
                 Create an entry
               </h1>
             </div>
-            <button
-              aria-disabled="true"
-              class="c11 c12"
-              disabled=""
-              type="submit"
+            <div
+              class="c9 c10"
             >
-              <span
-                class="c13 c14"
+              <button
+                aria-disabled="true"
+                class="c11 c12"
+                disabled=""
+                type="submit"
               >
-                Save
-              </span>
-            </button>
+                <span
+                  class="c13 c14"
+                >
+                  Save
+                </span>
+              </button>
+            </div>
           </div>
           <p
-            class="c15 c16"
+            class="c15"
           >
             API ID  : restaurant
           </p>

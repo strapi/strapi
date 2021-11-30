@@ -1,7 +1,5 @@
 'use strict';
 
-// FIXME
-/* eslint-disable import/extensions */
 const commander = require('commander');
 
 const packageJson = require('./package.json');
@@ -10,9 +8,20 @@ const promptUser = require('./utils/prompt-user');
 
 const program = new commander.Command(packageJson.name);
 
+const incompatibleQuickstartOptions = [
+  'dbclient',
+  'dbhost',
+  'dbport',
+  'dbname',
+  'dbusername',
+  'dbpassword',
+  'dbssl',
+  'dbfile',
+];
+
 program
   .version(packageJson.version)
-  .arguments('[directory], [starterurl]')
+  .arguments('[directory], [starter]')
   .option('--use-npm', 'Force usage of npm instead of yarn to create the project')
   .option('--debug', 'Display database connection error')
   .option('--quickstart', 'Quickstart app creation')
@@ -28,16 +37,16 @@ program
   .description(
     'Create a fullstack monorepo application using the strapi backend template specified in the provided starter'
   )
-  .action((directory, starterUrl, programArgs) => {
-    const projectArgs = { projectName: directory, starterUrl };
+  .action((directory, starter, programArgs) => {
+    const projectArgs = { projectName: directory, starter };
 
     initProject(projectArgs, programArgs);
   });
 
 function generateApp(projectArgs, programArgs) {
-  if (!projectArgs.projectName || !projectArgs.starterUrl) {
+  if (!projectArgs.projectName || !projectArgs.starter) {
     console.error(
-      'Please specify the <directory> and <starterurl> of your project when using --quickstart'
+      'Please specify the <directory> and <starter> of your project when using --quickstart'
     );
     // eslint-disable-next-line no-process-exit
     process.exit(1);
@@ -47,21 +56,37 @@ function generateApp(projectArgs, programArgs) {
 }
 
 async function initProject(projectArgs, program) {
-  const { projectName, starterUrl } = projectArgs;
+  const hasIncompatibleQuickstartOptions = incompatibleQuickstartOptions.some(opt => program[opt]);
+
+  if (program.quickstart && hasIncompatibleQuickstartOptions) {
+    console.error(
+      `The quickstart option is incompatible with the following options: ${incompatibleQuickstartOptions.join(
+        ', '
+      )}`
+    );
+    process.exit(1);
+  }
+
+  if (hasIncompatibleQuickstartOptions) {
+    program.quickstart = false; // Will disable the quickstart question because != 'undefined'
+  }
+
+  const { projectName, starter } = projectArgs;
+
   if (program.quickstart) {
     return generateApp(projectArgs, program);
   }
 
-  const prompt = await promptUser(projectName, starterUrl);
+  const prompt = await promptUser(projectName, starter, program);
 
   const promptProjectArgs = {
     projectName: prompt.directory || projectName,
-    starterUrl: prompt.starter || starterUrl,
+    starter: prompt.starter || starter,
   };
 
   const programArgs = {
     ...program,
-    quickstart: prompt.quick,
+    quickstart: prompt.quick || program.quickstart,
   };
 
   return generateApp(promptProjectArgs, programArgs);

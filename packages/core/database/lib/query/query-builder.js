@@ -29,6 +29,7 @@ const createQueryBuilder = (uid, db) => {
   return {
     alias: getAlias(),
     getAlias,
+    state,
 
     select(args) {
       state.type = 'select';
@@ -115,7 +116,7 @@ const createQueryBuilder = (uid, db) => {
     },
 
     init(params = {}) {
-      const { _q, where, select, limit, offset, orderBy, groupBy, populate } = params;
+      const { _q, filters, where, select, limit, offset, orderBy, groupBy, populate } = params;
 
       if (!_.isNil(where)) {
         this.where(where);
@@ -151,7 +152,15 @@ const createQueryBuilder = (uid, db) => {
         this.populate(populate);
       }
 
+      if (!_.isNil(filters)) {
+        this.filters(filters);
+      }
+
       return this;
+    },
+
+    filters(filters) {
+      state.filters = filters;
     },
 
     first() {
@@ -196,16 +205,32 @@ const createQueryBuilder = (uid, db) => {
       this.select('id');
       const subQB = this.getKnexQuery();
 
-      const nestedSubQuery = db.connection.select('id').from(subQB.as('subQuery'));
+      const nestedSubQuery = db
+        .getConnection()
+        .select('id')
+        .from(subQB.as('subQuery'));
 
       return db
-        .connection(tableName)
+        .getConnection(tableName)
         [state.type]()
         .whereIn('id', nestedSubQuery);
     },
 
     processState() {
       state.orderBy = helpers.processOrderBy(state.orderBy, { qb: this, uid, db });
+
+      if (!_.isNil(state.filters)) {
+        if (_.isFunction(state.filters)) {
+          const filters = state.filters({ qb: this, uid, meta, db });
+
+          if (!_.isNil(filters)) {
+            state.where.push(filters);
+          }
+        } else {
+          state.where.push(state.filters);
+        }
+      }
+
       state.where = helpers.processWhere(state.where, { qb: this, uid, db });
       state.populate = helpers.processPopulate(state.populate, { qb: this, uid, db });
       state.data = helpers.toRow(meta, state.data);
@@ -235,9 +260,9 @@ const createQueryBuilder = (uid, db) => {
         this.select('*');
       }
 
-      const aliasedTableName = this.mustUseAlias() ? { [this.alias]: tableName } : tableName;
+      const aliasedTableName = this.mustUseAlias() ? `${tableName} as ${this.alias}` : tableName;
 
-      const qb = db.connection(aliasedTableName);
+      const qb = db.getConnection(aliasedTableName);
 
       if (this.shouldUseSubQuery()) {
         return this.runSubQuery();

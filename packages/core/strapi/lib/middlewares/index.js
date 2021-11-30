@@ -7,7 +7,8 @@ const favicon = require('./favicon');
 const ip = require('./ip');
 const logger = require('./logger');
 const poweredBy = require('./powered-by');
-const request = require('./request');
+const body = require('./body');
+const query = require('./query');
 const responseTime = require('./response-time');
 const responses = require('./responses');
 const security = require('./security');
@@ -25,7 +26,8 @@ module.exports = {
   logger,
   compression,
   responses,
-  request,
+  body,
+  query,
   favicon,
   public: publicStatic,
 };

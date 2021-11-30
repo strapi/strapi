@@ -9,10 +9,10 @@ import styled from 'styled-components';
 import { Helmet } from 'react-helmet';
 import { useHistory } from 'react-router-dom';
 import { LoadingIndicatorPage } from '@strapi/helper-plugin';
-import { Layout } from '@strapi/parts/Layout';
-import { Main } from '@strapi/parts/Main';
-import { Box } from '@strapi/parts/Box';
-import { Grid, GridItem } from '@strapi/parts/Grid';
+import { Layout } from '@strapi/design-system/Layout';
+import { Main } from '@strapi/design-system/Main';
+import { Box } from '@strapi/design-system/Box';
+import { Grid, GridItem } from '@strapi/design-system/Grid';
 import Logo from '../../assets/images/homepage-logo.png';
 import { useModels } from '../../hooks';
 import SocialLinks from './SocialLinks';
@@ -36,9 +36,7 @@ const HomePage = () => {
   const handleClick = e => {
     e.preventDefault();
 
-    push(
-      '/plugins/content-type-builder/content-types/plugins::users-permissions.user?modalType=contentType&kind=collectionType&actionType=create&settingType=base&forTarget=contentType&headerId=content-type-builder.modalForm.contentType.header-create&header_icon_isCustom_1=false&header_icon_name_1=contentType&header_label_1=null'
-    );
+    push('/plugins/content-type-builder/content-types/create-content-type');
   };
 
   const hasAlreadyCreatedContentTypes = useMemo(() => {

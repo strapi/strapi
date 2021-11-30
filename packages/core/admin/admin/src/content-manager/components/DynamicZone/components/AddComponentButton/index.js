@@ -8,14 +8,14 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
-import AddIcon from '@strapi/icons/AddIconCircle';
-import { BaseButton } from '@strapi/parts/BaseButton';
-import { Box } from '@strapi/parts/Box';
-import { Row } from '@strapi/parts/Row';
-import { Text, ButtonText } from '@strapi/parts/Text';
+import PlusCircle from '@strapi/icons/PlusCircle';
+import { BaseButton } from '@strapi/design-system/BaseButton';
+import { Box } from '@strapi/design-system/Box';
+import { Flex } from '@strapi/design-system/Flex';
+import { Typography } from '@strapi/design-system/Typography';
 import { getTrad } from '../../../../utils';
 
-const StyledAddIcon = styled(AddIcon)`
+const StyledAddIcon = styled(PlusCircle)`
   transform: ${({ $isOpen }) => ($isOpen ? 'rotate(45deg)' : 'rotate(0deg)')};
   > circle {
     fill: ${({ theme, $hasError }) =>
@@ -29,8 +29,12 @@ const StyledAddIcon = styled(AddIcon)`
 
 const StyledButton = styled(BaseButton)`
   border-radius: 26px;
+  border-color: ${({ theme }) => theme.colors.neutral150};
   background: ${({ theme }) => theme.colors.neutral0};
-  padding: ${({ theme }) => theme.spaces[3]};
+  padding-top: ${({ theme }) => theme.spaces[3]};
+  padding-right: ${({ theme }) => theme.spaces[4]};
+  padding-bottom: ${({ theme }) => theme.spaces[3]};
+  padding-left: ${({ theme }) => theme.spaces[4]};
 
   box-shadow: ${({ theme }) => theme.shadows.filterShadow};
 
@@ -43,7 +47,7 @@ const StyledButton = styled(BaseButton)`
   }
   &:hover {
     color: ${({ theme }) => theme.colors.primary600} !important;
-    ${Text} {
+    ${Typography} {
       color: ${({ theme }) => theme.colors.primary600} !important;
     }
 
@@ -57,7 +61,7 @@ const StyledButton = styled(BaseButton)`
     }
   }
   &:active {
-    ${Text} {
+    ${Typography} {
       color: ${({ theme }) => theme.colors.primary600};
     }
     ${StyledAddIcon} {
@@ -117,20 +121,24 @@ const AddComponentButton = ({
 
   return (
     <>
-      <Row justifyContent="center">
+      <Flex justifyContent="center">
         <Box style={{ cursor: isDisabled ? 'not-allowed' : 'pointer' }}>
           <StyledButton type="button" onClick={onClick} disabled={isDisabled} hasError={hasError}>
-            <Row>
+            <Flex>
               <BoxFullHeight aria-hidden paddingRight={2}>
                 <StyledAddIcon $isOpen={isOpen} $hasError={hasError && !isOpen} />
               </BoxFullHeight>
-              <ButtonText textColor={hasError && !isOpen ? 'danger600' : 'neutral500'} small>
+              <Typography
+                variant="pi"
+                fontWeight="bold"
+                textColor={hasError && !isOpen ? 'danger600' : 'neutral500'}
+              >
                 {buttonLabel}
-              </ButtonText>
-            </Row>
+              </Typography>
+            </Flex>
           </StyledButton>
         </Box>
-      </Row>
+      </Flex>
     </>
   );
 };

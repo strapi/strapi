@@ -25,7 +25,9 @@ const productModel = {
       type: 'string',
     },
   },
-  name: 'product',
+  displayName: 'Product',
+  singularName: 'product',
+  pluralName: 'products',
   description: '',
   collectionName: '',
 };
@@ -101,13 +103,26 @@ describe('CRUD locales', () => {
 
       expect(res.statusCode).toBe(400);
       expect(res.body).toMatchObject({
-        data: {
-          isDefault: ['isDefault is a required field'],
-          code: ['code is a required field'],
+        data: null,
+        error: {
+          details: {
+            errors: [
+              {
+                message: 'code is a required field',
+                name: 'ValidationError',
+                path: ['code'],
+              },
+              {
+                message: 'isDefault is a required field',
+                name: 'ValidationError',
+                path: ['isDefault'],
+              },
+            ],
+          },
+          message: '2 errors occurred',
+          name: 'ValidationError',
+          status: 400,
         },
-        error: 'Bad Request',
-        message: 'ValidationError',
-        statusCode: 400,
       });
     });
 
@@ -125,7 +140,15 @@ describe('CRUD locales', () => {
       });
 
       expect(res.statusCode).toBe(400);
-      expect(res.body).toMatchObject({ message: 'This locale already exists' });
+      expect(res.body).toMatchObject({
+        data: null,
+        error: {
+          status: 400,
+          name: 'ApplicationError',
+          message: 'This locale already exists',
+          details: {},
+        },
+      });
     });
 
     test('Can create a locale even if name already exists', async () => {
@@ -233,12 +256,21 @@ describe('CRUD locales', () => {
 
       expect(res.statusCode).toBe(400);
       expect(res.body).toMatchObject({
-        data: {
-          '': ['this field has unspecified keys: code'],
+        data: null,
+        error: {
+          details: {
+            errors: [
+              {
+                path: [],
+                name: 'ValidationError',
+                message: 'this field has unspecified keys: code',
+              },
+            ],
+          },
+          message: 'this field has unspecified keys: code',
+          name: 'ValidationError',
+          status: 400,
         },
-        error: 'Bad Request',
-        message: 'ValidationError',
-        statusCode: 400,
       });
     });
 
@@ -256,12 +288,21 @@ describe('CRUD locales', () => {
 
       expect(res.statusCode).toBe(400);
       expect(res.body).toMatchObject({
-        data: {
-          '': ['this field has unspecified keys: code'],
+        data: null,
+        error: {
+          details: {
+            errors: [
+              {
+                path: [],
+                name: 'ValidationError',
+                message: 'this field has unspecified keys: code',
+              },
+            ],
+          },
+          message: 'this field has unspecified keys: code',
+          name: 'ValidationError',
+          status: 400,
         },
-        error: 'Bad Request',
-        message: 'ValidationError',
-        statusCode: 400,
       });
     });
 
@@ -330,7 +371,15 @@ describe('CRUD locales', () => {
         method: 'DELETE',
       });
       expect(res.statusCode).toBe(400);
-      expect(res.body.message).toBe('Cannot delete the default locale');
+      expect(res.body).toMatchObject({
+        data: null,
+        error: {
+          status: 400,
+          name: 'ApplicationError',
+          message: 'Cannot delete the default locale',
+          details: {},
+        },
+      });
     });
 
     test('Simply delete a locale', async () => {
@@ -407,7 +456,15 @@ describe('CRUD locales', () => {
       });
 
       expect(res.statusCode).toBe(404);
-      expect(res.body.message).toBe('locale.notFound');
+      expect(res.body).toMatchObject({
+        data: null,
+        error: {
+          status: 404,
+          name: 'NotFoundError',
+          message: 'locale.notFound',
+          details: {},
+        },
+      });
     });
   });
 });

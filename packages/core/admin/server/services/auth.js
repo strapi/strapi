@@ -3,6 +3,7 @@
 const bcrypt = require('bcryptjs');
 const _ = require('lodash');
 const { getAbsoluteAdminUrl } = require('@strapi/utils');
+const { ApplicationError } = require('@strapi/utils').errors;
 const { getService } = require('../utils');
 
 /**
@@ -16,7 +17,7 @@ const hashPassword = password => bcrypt.hash(password, 10);
  * Validate a password
  * @param {string} password
  * @param {string} hash
- * @returns {boolean} is the password valid
+ * @returns {Promise<boolean>} is the password valid
  */
 const validatePassword = (password, hash) => bcrypt.compare(password, hash);
 
@@ -71,10 +72,10 @@ const forgotPassword = async ({ email } = {}) => {
     .sendTemplatedEmail(
       {
         to: user.email,
-        from: strapi.config.get('server.admin.forgotPassword.from'),
-        replyTo: strapi.config.get('server.admin.forgotPassword.replyTo'),
+        from: strapi.config.get('admin.forgotPassword.from'),
+        replyTo: strapi.config.get('admin.forgotPassword.replyTo'),
       },
-      strapi.config.get('server.admin.forgotPassword.emailTemplate'),
+      strapi.config.get('admin.forgotPassword.emailTemplate'),
       {
         url,
         user: _.pick(user, ['email', 'firstname', 'lastname', 'username']),
@@ -98,7 +99,7 @@ const resetPassword = async ({ resetPasswordToken, password } = {}) => {
     .findOne({ where: { resetPasswordToken, isActive: true } });
 
   if (!matchingUser) {
-    throw strapi.errors.badRequest();
+    throw new ApplicationError();
   }
 
   return getService('user').updateById(matchingUser.id, {

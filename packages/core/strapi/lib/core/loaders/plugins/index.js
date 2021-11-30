@@ -1,7 +1,7 @@
 'use strict';
 
 const { join } = require('path');
-const { existsSync } = require('fs');
+const fse = require('fs-extra');
 const { defaultsDeep, getOr, get } = require('lodash/fp');
 const { env } = require('@strapi/utils');
 const loadConfigFile = require('../../app-configuration/load-config-file');
@@ -26,7 +26,7 @@ const defaultPlugin = {
 
 const applyUserExtension = async plugins => {
   const extensionsDir = strapi.dirs.extensions;
-  if (!existsSync(extensionsDir)) {
+  if (!(await fse.pathExists(extensionsDir))) {
     return;
   }
 
@@ -39,7 +39,11 @@ const applyUserExtension = async plugins => {
     for (const ctName in plugin.contentTypes) {
       const extendedSchema = get([pluginName, 'content-types', ctName, 'schema'], extendedSchemas);
       if (extendedSchema) {
-        plugin.contentTypes[ctName].schema = extendedSchema;
+        plugin.contentTypes[ctName].schema = Object.assign(
+          {},
+          plugin.contentTypes[ctName].schema,
+          extendedSchema
+        );
       }
     }
     // second: execute strapi-server extension
@@ -61,9 +65,9 @@ const formatContentTypes = plugins => {
   }
 };
 
-const applyUserConfig = plugins => {
+const applyUserConfig = async plugins => {
   const userPluginConfigPath = join(strapi.dirs.config, 'plugins.js');
-  const userPluginsConfig = existsSync(userPluginConfigPath)
+  const userPluginsConfig = (await fse.pathExists(userPluginConfigPath))
     ? loadConfigFile(userPluginConfigPath)
     : {};
 
@@ -90,14 +94,24 @@ const loadPlugins = async strapi => {
 
   const enabledPlugins = await getEnabledPlugins(strapi);
 
+  strapi.config.set('enabledPlugins', enabledPlugins);
+
   for (const pluginName in enabledPlugins) {
     const enabledPlugin = enabledPlugins[pluginName];
-    const pluginServer = loadConfigFile(join(enabledPlugin.pathToPlugin, 'strapi-server.js'));
+
+    const serverEntrypointPath = join(enabledPlugin.pathToPlugin, 'strapi-server.js');
+
+    // only load plugins with a server entrypoint
+    if (!(await fse.pathExists(serverEntrypointPath))) {
+      continue;
+    }
+
+    const pluginServer = loadConfigFile(serverEntrypointPath);
     plugins[pluginName] = defaultsDeep(defaultPlugin, pluginServer);
   }
 
   // TODO: validate plugin format
-  applyUserConfig(plugins);
+  await applyUserConfig(plugins);
   await applyUserExtension(plugins);
   formatContentTypes(plugins);
 

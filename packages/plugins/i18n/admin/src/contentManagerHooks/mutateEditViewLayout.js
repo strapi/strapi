@@ -1,7 +1,7 @@
 import React from 'react';
 import get from 'lodash/get';
-import I18N from '@strapi/icons/I18N';
-import StrikedWorld from '@strapi/icons/StrikedWorld';
+import I18N from '@strapi/icons/Earth';
+import StrikedWorld from '@strapi/icons/EarthStriked';
 import LabelAction from '../components/LabelAction';
 import { getTrad } from '../utils';
 
@@ -19,7 +19,7 @@ const enhanceRelationLayout = (layout, locale) =>
     if (get(current, ['targetModelPluginOptions', 'i18n', 'localized'], false)) {
       queryInfos = {
         ...queryInfos,
-        defaultParams: { ...queryInfos.defaultParams, _locale: locale },
+        defaultParams: { ...queryInfos.defaultParams, locale },
         paramsToKeep: ['plugins.i18n.locale'],
       };
     }
@@ -82,7 +82,7 @@ const enhanceComponentLayoutForRelations = (layout, locale) =>
       ) {
         const queryInfos = {
           ...field.queryInfos,
-          defaultParams: { ...field.queryInfos.defaultParams, _locale: locale },
+          defaultParams: { ...field.queryInfos.defaultParams, locale },
           paramsToKeep: ['plugins.i18n.locale'],
         };
 

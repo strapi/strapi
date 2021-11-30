@@ -9,12 +9,13 @@ import PluginsInitializer from '../PluginsInitializer';
 import RBACProvider from '../RBACProvider';
 import { fetchAppInfo, fetchCurrentUserPermissions, fetchStrapiLatestRelease } from './utils/api';
 import checkLatestStrapiVersion from './utils/checkLatestStrapiVersion';
+import { getFullName } from '../../utils';
 
 const strapiVersion = packageJSON.version;
 
 const AuthenticatedApp = () => {
   const userInfo = auth.getUserInfo();
-  const userName = get(userInfo, 'username') || `${userInfo.firstname} ${userInfo.lastname}`;
+  const userName = get(userInfo, 'username') || getFullName(userInfo.firstname, userInfo.lastname);
   const [userDisplayName, setUserDisplayName] = useState(userName);
   const { showReleaseNotification } = useConfigurations();
   const [

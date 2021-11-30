@@ -8,20 +8,37 @@ const createMetadata = require('./metadata');
 const { createEntityManager } = require('./entity-manager');
 const { createMigrationsProvider } = require('./migrations');
 const { createLifecyclesProvider } = require('./lifecycles');
+const errors = require('./errors');
 
 // TODO: move back into strapi
 const { transformContentTypes } = require('./utils/content-types');
+
+const createConnection = config => {
+  const knexInstance = knex(config);
+
+  return Object.assign(knexInstance, {
+    getSchemaName() {
+      return this.client.connectionSettings.schema;
+    },
+  });
+};
 
 class Database {
   constructor(config) {
     this.metadata = createMetadata(config.models);
 
-    this.config = config;
+    this.config = {
+      connection: {},
+      settings: {
+        forceMigration: true,
+      },
+      ...config,
+    };
 
     this.dialect = getDialect(this);
     this.dialect.configure();
 
-    this.connection = knex(this.config.connection);
+    this.connection = createConnection(this.config.connection);
 
     this.dialect.initialize();
 
@@ -41,6 +58,17 @@ class Database {
     return this.entityManager.getRepository(uid);
   }
 
+  getConnection(tableName) {
+    const schema = this.connection.getSchemaName();
+    const connection = tableName ? this.connection(tableName) : this.connection;
+    return schema ? connection.withSchema(schema) : connection;
+  }
+
+  getSchemaConnection(trx = this.connection) {
+    const schema = this.connection.getSchemaName();
+    return schema ? trx.schema.withSchema(schema) : trx.schema;
+  }
+
   queryBuilder(uid) {
     return this.entityManager.createQueryBuilder(uid);
   }
@@ -57,4 +85,5 @@ Database.init = async config => new Database(config);
 
 module.exports = {
   Database,
+  errors,
 };

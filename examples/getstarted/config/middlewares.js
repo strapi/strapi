@@ -8,7 +8,8 @@ module.exports = [
   'strapi::cors',
   'strapi::poweredBy',
   'strapi::logger',
-  'strapi::request',
+  'strapi::query',
+  'strapi::body',
   // 'strapi::compression',
   // 'strapi::ip',
   {

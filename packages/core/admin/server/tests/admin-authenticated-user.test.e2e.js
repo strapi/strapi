@@ -71,9 +71,20 @@ describe('Authenticated User', () => {
 
       expect(res.statusCode).toBe(400);
       expect(res.body).toMatchObject({
-        statusCode: 400,
-        error: 'Bad Request',
-        message: 'ValidationError',
+        error: {
+          details: {
+            errors: [
+              {
+                message: 'this field has unspecified keys: roles',
+                name: 'ValidationError',
+                path: [],
+              },
+            ],
+          },
+          message: 'this field has unspecified keys: roles',
+          name: 'ValidationError',
+          status: 400,
+        },
       });
     });
 
@@ -88,9 +99,20 @@ describe('Authenticated User', () => {
 
       expect(res.statusCode).toBe(400);
       expect(res.body).toMatchObject({
-        statusCode: 400,
-        error: 'Bad Request',
-        message: 'ValidationError',
+        error: {
+          details: {
+            errors: [
+              {
+                message: 'this field has unspecified keys: isActive',
+                name: 'ValidationError',
+                path: [],
+              },
+            ],
+          },
+          message: 'this field has unspecified keys: isActive',
+          name: 'ValidationError',
+          status: 400,
+        },
       });
     });
 
@@ -105,9 +127,20 @@ describe('Authenticated User', () => {
 
       expect(res.statusCode).toBe(400);
       expect(res.body).toMatchObject({
-        statusCode: 400,
-        error: 'Bad Request',
-        message: 'ValidationError',
+        error: {
+          details: {
+            errors: [
+              {
+                message: 'this field has unspecified keys: isActive',
+                name: 'ValidationError',
+                path: [],
+              },
+            ],
+          },
+          message: 'this field has unspecified keys: isActive',
+          name: 'ValidationError',
+          status: 400,
+        },
       });
     });
 
@@ -131,6 +164,63 @@ describe('Authenticated User', () => {
         lastname: input.lastname,
         username: expect.stringOrNull(),
         isActive: expect.any(Boolean),
+      });
+    });
+
+    test('Updating password requires currentPassword', async () => {
+      const input = {
+        password: 'newPassword1234',
+      };
+
+      const res = await rq({
+        url: '/admin/users/me',
+        method: 'PUT',
+        body: input,
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toMatchObject({
+        data: null,
+        error: {
+          status: 400,
+          name: 'ValidationError',
+          message: 'currentPassword is a required field',
+          details: {
+            errors: [
+              {
+                message: 'currentPassword is a required field',
+                name: 'ValidationError',
+                path: ['currentPassword'],
+              },
+            ],
+          },
+        },
+      });
+    });
+
+    test('Updating password requires currentPassword to be valid', async () => {
+      const input = {
+        password: 'newPassword1234',
+        currentPassword: 'wrongPass',
+      };
+
+      const res = await rq({
+        url: '/admin/users/me',
+        method: 'PUT',
+        body: input,
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toMatchObject({
+        data: null,
+        error: {
+          details: {
+            currentPassword: ['Invalid credentials'],
+          },
+          message: 'ValidationError',
+          name: 'BadRequestError',
+          status: 400,
+        },
       });
     });
   });

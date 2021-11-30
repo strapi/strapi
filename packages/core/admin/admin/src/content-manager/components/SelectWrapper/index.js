@@ -5,8 +5,8 @@ import {
   useIntl,
 } from 'react-intl';
 import { useLocation } from 'react-router-dom';
-import { Link } from '@strapi/parts/Link';
-import { Stack } from '@strapi/parts/Stack';
+import { Link } from '@strapi/design-system/Link';
+import { Stack } from '@strapi/design-system/Stack';
 import { useTheme } from 'styled-components';
 import findIndex from 'lodash/findIndex';
 import get from 'lodash/get';
@@ -50,7 +50,7 @@ const buildParams = (query, paramsToKeep) => {
   }, {});
 };
 function SelectWrapper({
-  // description,
+  description,
   editable,
   labelAction,
   intlLabel,
@@ -316,6 +316,7 @@ function SelectWrapper({
         styles={styles}
         targetModel={targetModel}
         value={value}
+        description={description}
       />
     </Stack>
   );
@@ -390,7 +391,7 @@ function SelectWrapper({
 
 SelectWrapper.defaultProps = {
   editable: true,
-  // description: '',
+  description: '',
   labelAction: null,
   isFieldAllowed: true,
   placeholder: null,
@@ -398,11 +399,7 @@ SelectWrapper.defaultProps = {
 
 SelectWrapper.propTypes = {
   editable: PropTypes.bool,
-  // description: PropTypes.shape({
-  //   id: PropTypes.string.isRequired,
-  //   defaultMessage: PropTypes.string.isRequired,
-  //   values: PropTypes.object,
-  // }),
+  description: PropTypes.string,
   intlLabel: PropTypes.shape({
     id: PropTypes.string.isRequired,
     defaultMessage: PropTypes.string.isRequired,

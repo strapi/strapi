@@ -9,7 +9,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
-import { ThemeProvider, lightTheme } from '@strapi/parts';
+import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import PaginationURLQuery from '../index';
 
 const messages = {
@@ -68,10 +68,10 @@ describe('<PaginationURLQuery />', () => {
       }
 
       .c7 {
-        font-weight: 500;
+        font-weight: 600;
+        color: #32324d;
         font-size: 0.75rem;
         line-height: 1.33;
-        color: #32324d;
       }
 
       .c8 {
@@ -87,6 +87,38 @@ describe('<PaginationURLQuery />', () => {
         display: -webkit-flex;
         display: -ms-flexbox;
         display: flex;
+        position: relative;
+        outline: none;
+      }
+
+      .c2:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c2:focus-visible {
+        outline: none;
+      }
+
+      .c2:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
       }
 
       .c5 {
@@ -99,6 +131,38 @@ describe('<PaginationURLQuery />', () => {
         display: -webkit-flex;
         display: -ms-flexbox;
         display: flex;
+        position: relative;
+        outline: none;
+      }
+
+      .c5:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c5:focus-visible {
+        outline: none;
+      }
+
+      .c5:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
       }
 
       .c6 {
@@ -126,7 +190,7 @@ describe('<PaginationURLQuery />', () => {
 
       <nav
         aria-label="pagination"
-        class="sc-iuAqRD"
+        class="sc-cuWdqJ"
       >
         <ul
           class="c0 c1"
@@ -200,7 +264,7 @@ describe('<PaginationURLQuery />', () => {
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <path
-                  d="M0 1.88L6.107 8 0 14.12 1.88 16l8-8-8-8L0 1.88z"
+                  d="M.12 1.88L6.227 8 .12 14.12 2 16l8-8-8-8L.12 1.88z"
                   fill="#32324D"
                 />
               </svg>

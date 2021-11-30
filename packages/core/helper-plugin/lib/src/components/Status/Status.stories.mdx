@@ -1,7 +1,8 @@
 <!--- Status.stories.mdx --->
 
 import { Meta, ArgsTable, Canvas, Story } from '@storybook/addon-docs';
-import { Row, Text } from '@strapi/parts';
+import { Flex } from '@strapi/design-system/Flex';
+import { Typography } from '@strapi/design-system/Typography';
 import Status from './index';
 
 <Meta title="components/Status" />
@@ -14,33 +15,33 @@ This component is used in order to display the status.
 
 <Canvas>
   <Story name="base">
-    <Row>
+    <Flex>
       <Status variant="primary" />
-      <Text>primary</Text>
-    </Row>
-    <Row>
+      <Typography>primary</Typography>
+    </Flex>
+    <Flex>
       <Status variant="alternative" />
-      <Text>alternative</Text>
-    </Row>
-    <Row>
+      <Typography>alternative</Typography>
+    </Flex>
+    <Flex>
       <Status variant="danger" />
-      <Text>danger</Text>
-    </Row>
-    <Row>
+      <Typography>danger</Typography>
+    </Flex>
+    <Flex>
       <Status variant="neutral" />
-      <Text>neutral</Text>
-    </Row>
-    <Row>
+      <Typography>neutral</Typography>
+    </Flex>
+    <Flex>
       <Status variant="secondary" />
-      <Text>secondary</Text>
-    </Row>
-    <Row>
+      <Typography>secondary</Typography>
+    </Flex>
+    <Flex>
       <Status variant="success" />
-      <Text>success</Text>
-    </Row>
-    <Row>
+      <Typography>success</Typography>
+    </Flex>
+    <Flex>
       <Status variant="warning" />
-      <Text>warning</Text>
-    </Row>
+      <Typography>warning</Typography>
+    </Flex>
   </Story>
 </Canvas>

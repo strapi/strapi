@@ -1,14 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Table, Thead, Tbody, Tr, Td, Th } from '@strapi/parts/Table';
-import { VisuallyHidden } from '@strapi/parts/VisuallyHidden';
-import { Text, TableLabel } from '@strapi/parts/Text';
-import { IconButton } from '@strapi/parts/IconButton';
-import EditIcon from '@strapi/icons/EditIcon';
-import Reload from '@strapi/icons/Reload';
+import { Table, Thead, Tbody, Tr, Td, Th } from '@strapi/design-system/Table';
+import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
+import { Typography } from '@strapi/design-system/Typography';
+import { IconButton } from '@strapi/design-system/IconButton';
+import Pencil from '@strapi/icons/Pencil';
+import Reload from '@strapi/icons/Refresh';
 import { onRowClick, stopPropagation } from '@strapi/helper-plugin';
-import CheckIcon from '@strapi/icons/CheckIcon';
+import Check from '@strapi/icons/Check';
 import { getTrad } from '../../../utils';
 
 const EmailTable = ({ canUpdate, onEditClick }) => {
@@ -27,12 +27,12 @@ const EmailTable = ({ canUpdate, onEditClick }) => {
             </VisuallyHidden>
           </Th>
           <Th>
-            <TableLabel textColor="neutral600">
+            <Typography variant="sigma" textColor="neutral600">
               {formatMessage({
                 id: getTrad('Email.template.table.name.label'),
                 defaultMessage: 'name',
               })}
-            </TableLabel>
+            </Typography>
           </Th>
           <Th width="1%">
             <VisuallyHidden>
@@ -55,12 +55,12 @@ const EmailTable = ({ canUpdate, onEditClick }) => {
             />
           </Td>
           <Td>
-            <Text>
+            <Typography>
               {formatMessage({
                 id: getTrad('Email.template.reset_password'),
                 defaultMessage: 'Reset password',
               })}
-            </Text>
+            </Typography>
           </Td>
           <Td {...stopPropagation}>
             <IconButton
@@ -70,13 +70,13 @@ const EmailTable = ({ canUpdate, onEditClick }) => {
                 defaultMessage: 'Edit a template',
               })}
               noBorder
-              icon={canUpdate && <EditIcon />}
+              icon={canUpdate && <Pencil />}
             />
           </Td>
         </Tr>
         <Tr {...onRowClick({ fn: () => onEditClick('email_confirmation') })}>
           <Td>
-            <CheckIcon
+            <Check
               aria-label={formatMessage({
                 id: getTrad('Email.template.email_confirmation'),
                 defaultMessage: 'Email address confirmation',
@@ -84,12 +84,12 @@ const EmailTable = ({ canUpdate, onEditClick }) => {
             />
           </Td>
           <Td>
-            <Text>
+            <Typography>
               {formatMessage({
                 id: getTrad('Email.template.email_confirmation'),
                 defaultMessage: 'Email address confirmation',
               })}
-            </Text>
+            </Typography>
           </Td>
           <Td {...stopPropagation}>
             <IconButton
@@ -99,7 +99,7 @@ const EmailTable = ({ canUpdate, onEditClick }) => {
                 defaultMessage: 'Edit a template',
               })}
               noBorder
-              icon={canUpdate && <EditIcon />}
+              icon={canUpdate && <Pencil />}
             />
           </Td>
         </Tr>

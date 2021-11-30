@@ -6,7 +6,7 @@ module.exports = [
     path: '/users/batch-delete',
     handler: 'user.deleteMany',
     config: {
-      policies: [{ name: 'admin::hasPermissions', options: { actions: ['admin::users.delete'] } }],
+      policies: [{ name: 'admin::hasPermissions', config: { actions: ['admin::users.delete'] } }],
     },
   },
   {
@@ -16,7 +16,7 @@ module.exports = [
     config: {
       policies: [
         'admin::isAuthenticatedAdmin',
-        { name: 'admin::hasPermissions', options: { actions: ['admin::roles.read'] } },
+        { name: 'admin::hasPermissions', config: { actions: ['admin::roles.read'] } },
       ],
     },
   },
@@ -27,7 +27,7 @@ module.exports = [
     config: {
       policies: [
         'admin::isAuthenticatedAdmin',
-        { name: 'admin::hasPermissions', options: { actions: ['admin::roles.update'] } },
+        { name: 'admin::hasPermissions', config: { actions: ['admin::roles.update'] } },
       ],
     },
   },
@@ -38,7 +38,7 @@ module.exports = [
     config: {
       policies: [
         'admin::isAuthenticatedAdmin',
-        { name: 'admin::hasPermissions', options: { actions: ['admin::roles.read'] } },
+        { name: 'admin::hasPermissions', config: { actions: ['admin::roles.read'] } },
       ],
     },
   },
@@ -49,7 +49,7 @@ module.exports = [
     config: {
       policies: [
         'admin::isAuthenticatedAdmin',
-        { name: 'admin::hasPermissions', options: { actions: ['admin::roles.read'] } },
+        { name: 'admin::hasPermissions', config: { actions: ['admin::roles.read'] } },
       ],
     },
   },
@@ -60,7 +60,7 @@ module.exports = [
     config: {
       policies: [
         'admin::isAuthenticatedAdmin',
-        { name: 'admin::hasPermissions', options: { actions: ['admin::roles.update'] } },
+        { name: 'admin::hasPermissions', config: { actions: ['admin::roles.update'] } },
       ],
     },
   },

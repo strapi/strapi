@@ -2,8 +2,8 @@ import React, { memo, useState } from 'react';
 import { useIntl } from 'react-intl';
 import get from 'lodash/get';
 import isEqual from 'react-fast-compare';
-import { Button } from '@strapi/parts/Button';
-import Delete from '@strapi/icons/Delete';
+import { Button } from '@strapi/design-system/Button';
+import Trash from '@strapi/icons/Trash';
 import { ConfirmDialog, useNotification } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import { getTrad } from '../../../utils';
@@ -46,7 +46,7 @@ const DeleteLink = ({ isCreatingEntry, onDelete, onDeleteSucceeded, trackerPrope
 
   return (
     <>
-      <Button onClick={toggleWarningDelete} size="S" startIcon={<Delete />} variant="danger-light">
+      <Button onClick={toggleWarningDelete} size="S" startIcon={<Trash />} variant="danger-light">
         {formatMessage({
           id: getTrad('containers.Edit.delete-entry'),
           defaultMessage: 'Delete this entry',

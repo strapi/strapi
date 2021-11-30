@@ -1,8 +1,6 @@
 const expectedData = {
   contentTypeToCreate: {
-    name: 'test content type',
-    collectionName: 'test-content-types',
-    connection: 'default',
+    displayName: 'test content type',
     description: '',
     attributes: {
       name: {
@@ -44,9 +42,7 @@ const expectedData = {
     },
   },
   contentTypeToEdit: {
-    name: 'test content type',
-    collectionName: 'test-content-types',
-    connection: 'default',
+    displayName: 'test content type',
     description: '',
     attributes: {
       name: {

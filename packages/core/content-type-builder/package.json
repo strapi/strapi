@@ -1,14 +1,24 @@
 {
   "name": "@strapi/plugin-content-type-builder",
-  "version": "3.6.8",
-  "description": "Strapi plugin to create content type (API).",
-  "strapi": {
-    "name": "content-type-builder",
-    "displayName": "Content Type Builder",
-    "icon": "paint-brush",
-    "description": "content-type-builder.plugin.description",
-    "kind": "plugin"
+  "version": "4.0.0",
+  "description": "Strapi plugin to create content type",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/strapi/strapi.git"
   },
+  "license": "SEE LICENSE IN LICENSE",
+  "author": {
+    "name": "Strapi Solutions SAS",
+    "email": "hi@strapi.io",
+    "url": "https://strapi.io"
+  },
+  "maintainers": [
+    {
+      "name": "Strapi Solutions SAS",
+      "email": "hi@strapi.io",
+      "url": "https://strapi.io"
+    }
+  ],
   "scripts": {
     "test:unit": "jest --verbose",
     "test:front": "cross-env IS_EE=true jest --config ./jest.config.front.js",
@@ -18,10 +28,9 @@
   },
   "dependencies": {
     "@sindresorhus/slugify": "1.1.0",
-    "@strapi/generators": "3.6.8",
-    "@strapi/helper-plugin": "3.6.8",
-    "@strapi/utils": "3.6.8",
-    "bootstrap": "^4.6.0",
+    "@strapi/generators": "4.0.0",
+    "@strapi/helper-plugin": "4.0.0",
+    "@strapi/utils": "4.0.0",
     "fs-extra": "^9.1.0",
     "lodash": "4.17.21",
     "pluralize": "^8.0.0",
@@ -31,31 +40,18 @@
     "react-redux": "7.2.3",
     "react-router": "^5.2.0",
     "react-router-dom": "5.2.0",
-    "reactstrap": "8.4.1",
     "redux": "^4.0.1",
     "reselect": "^4.0.0",
     "yup": "^0.32.9"
-  },
-  "author": {
-    "name": "Strapi team",
-    "email": "hi@strapi.io",
-    "url": "https://strapi.io"
-  },
-  "maintainers": [
-    {
-      "name": "Strapi team",
-      "email": "hi@strapi.io",
-      "url": "https://strapi.io"
-    }
-  ],
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/strapi/strapi.git"
   },
   "engines": {
     "node": ">=12.x.x <=16.x.x",
     "npm": ">=6.0.0"
   },
-  "license": "SEE LICENSE IN LICENSE",
-  "gitHead": "231263a3535658bab1e9492c6aaaed8692d62a53"
+  "strapi": {
+    "name": "content-type-builder",
+    "displayName": "Content Type Builder",
+    "description": "Modelize the data structure of your API. Create new fields and relations in just a minute. The files are automatically created and updated in your project.",
+    "kind": "plugin"
+  }
 }

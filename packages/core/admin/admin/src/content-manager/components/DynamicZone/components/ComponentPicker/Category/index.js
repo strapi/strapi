@@ -1,13 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Accordion, AccordionToggle, AccordionContent } from '@strapi/parts/Accordion';
-import { Box } from '@strapi/parts/Box';
+import { Accordion, AccordionToggle, AccordionContent } from '@strapi/design-system/Accordion';
+import { Box } from '@strapi/design-system/Box';
 import styled from 'styled-components';
 import ComponentCard from './ComponentCard';
 
 const Grid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(${140 / 16}rem, 1fr));
+  grid-template-columns: repeat(auto-fit, ${140 / 16}rem);
   grid-gap: ${({ theme }) => theme.spaces[1]};
 `;
 
@@ -17,7 +17,7 @@ const Category = ({ category, components, isOdd, isOpen, onAddComponent, onToggl
   };
 
   return (
-    <Accordion expanded={isOpen} toggle={handleToggle}>
+    <Accordion expanded={isOpen} toggle={handleToggle} size="S">
       <AccordionToggle
         variant={isOdd ? 'primary' : 'secondary'}
         title={category}
@@ -26,12 +26,12 @@ const Category = ({ category, components, isOdd, isOpen, onAddComponent, onToggl
       <AccordionContent>
         <Box paddingTop={4} paddingBottom={4} paddingLeft={3} paddingRight={3}>
           <Grid>
-            {components.map(({ componentUid, info: { label, icon, name } }) => {
+            {components.map(({ componentUid, info: { displayName, icon } }) => {
               return (
                 <ComponentCard
                   key={componentUid}
                   componentUid={componentUid}
-                  intlLabel={{ id: label || name, defaultMessage: label || name }}
+                  intlLabel={{ id: displayName, defaultMessage: displayName }}
                   icon={icon}
                   onClick={onAddComponent}
                 />

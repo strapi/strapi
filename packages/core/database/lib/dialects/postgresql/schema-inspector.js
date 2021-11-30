@@ -4,36 +4,39 @@ const SQL_QUERIES = {
   TABLE_LIST: /* sql */ `
     SELECT *
     FROM information_schema.tables
-    WHERE table_schema = ? AND table_type = 'BASE TABLE';
+    WHERE
+      table_schema = ?
+      AND table_type = 'BASE TABLE'
+      AND table_name != 'geometry_columns'
+      AND table_name != 'spatial_ref_sys';
   `,
   LIST_COLUMNS: /* sql */ `
     SELECT data_type, column_name, character_maximum_length, column_default, is_nullable
     FROM information_schema.columns
-    WHERE table_schema = ?
-      AND table_name = ?;
+    WHERE table_schema = ? AND table_name = ?;
   `,
   INDEX_LIST: /* sql */ `
-    select
+    SELECT
       ix.indexrelid,
       i.relname as index_name,
       a.attname as column_name,
       ix.indisunique as is_unique,
       ix.indisprimary as is_primary
-    from
+    FROM
       pg_class t,
       pg_namespace s,
       pg_class i,
       pg_index ix,
       pg_attribute a
-    where
+    WHERE
       t.oid = ix.indrelid
-      and i.oid = ix.indexrelid
-      and a.attrelid = t.oid
-      and a.attnum = ANY(ix.indkey)
-      and t.relkind = 'r'
-      and t.relnamespace = s.oid
-      and s.nspname = ?
-      and t.relname = ?;
+      AND i.oid = ix.indexrelid
+      AND a.attrelid = t.oid
+      AND a.attnum = ANY(ix.indkey)
+      AND t.relkind = 'r'
+      AND t.relnamespace = s.oid
+      AND s.nspname = ?
+      AND t.relname = ?;
   `,
   FOREIGN_KEY_LIST: /* sql */ `
     SELECT
@@ -136,7 +139,7 @@ class PostgresqlSchemaInspector {
   }
 
   getDatabaseSchema() {
-    return this.db.connection.client.connectionSettings.schema || 'public';
+    return this.db.connection.getSchemaName() || 'public';
   }
 
   async getTables() {

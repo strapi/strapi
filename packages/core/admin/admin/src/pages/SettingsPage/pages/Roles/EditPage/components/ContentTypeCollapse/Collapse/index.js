@@ -1,10 +1,10 @@
 import React, { useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
-import Down from '@strapi/icons/Down';
-import Up from '@strapi/icons/Up';
-import { BaseCheckbox } from '@strapi/parts/BaseCheckbox';
-import { Box } from '@strapi/parts/Box';
-import { Row } from '@strapi/parts/Row';
+import ChevronDown from '@strapi/icons/ChevronDown';
+import ChevronUp from '@strapi/icons/ChevronUp';
+import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
+import { Box } from '@strapi/design-system/Box';
+import { Flex } from '@strapi/design-system/Flex';
 import get from 'lodash/get';
 import omit from 'lodash/omit';
 import { useIntl } from 'react-intl';
@@ -35,6 +35,10 @@ const activeRowStyle = (theme, isActive) => `
   &:hover {
    ${activeStyle(theme)}
   }
+
+  &:focus-within {
+    ${({ theme, isActive }) => activeRowStyle(theme, isActive)}
+  }
   
 `;
 
@@ -59,13 +63,9 @@ const BoxWrapper = styled.div`
   &:hover {
     ${({ theme, isActive }) => activeRowStyle(theme, isActive)}
   }
-
-  &:focus-within {
-    ${({ theme, isActive }) => activeRowStyle(theme, isActive)}
-  }
 `;
 
-const Cell = styled(Row)`
+const Cell = styled(Flex)`
   width: ${cellWidth};
   position: relative;
 `;
@@ -161,10 +161,10 @@ const Collapse = ({
           value={hasAllActionsSelected}
           isActive={isActive}
         >
-          <Chevron paddingLeft={2}>{isActive ? <Up /> : <Down />}</Chevron>
+          <Chevron paddingLeft={2}>{isActive ? <ChevronUp /> : <ChevronDown />}</Chevron>
         </RowLabelWithCheckbox>
 
-        <Row style={{ flex: 1 }}>
+        <Flex style={{ flex: 1 }}>
           {checkboxesActions.map(
             ({
               actionId,
@@ -232,7 +232,7 @@ const Collapse = ({
               );
             }
           )}
-        </Row>
+        </Flex>
         {isModalOpen && (
           <ConditionsModal
             headerBreadCrumbs={[label, 'app.components.LeftMenuLinkContainer.settings']}

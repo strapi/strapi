@@ -98,12 +98,12 @@ const isTimestamp = (schema, name) => {
     return false;
   }
 
-  const timestampsOpt = _.get(schema, ['options', 'timestamps']);
-  if (!timestampsOpt || !Array.isArray(timestampsOpt)) {
+  const timestamps = contentTypesUtils.getTimestamps(schema);
+  if (!timestamps || !Array.isArray(timestamps)) {
     return false;
   }
 
-  if (timestampsOpt.includes(name)) {
+  if (timestamps.includes(name)) {
     return true;
   }
 };

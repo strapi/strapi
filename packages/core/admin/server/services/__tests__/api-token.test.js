@@ -41,7 +41,7 @@ describe('API Token', () => {
       const res = await apiTokenService.create(attributes);
 
       expect(create).toHaveBeenCalledWith({
-        select: ['id', 'name', 'description', 'type'],
+        select: ['id', 'name', 'description', 'type', 'createdAt'],
         data: {
           ...attributes,
           accessKey: apiTokenService.hash(mockedApiToken.hexedString),
@@ -62,9 +62,7 @@ describe('API Token', () => {
       global.strapi = {
         config: {
           get: jest.fn(() => ({
-            server: {
-              admin: { 'api-token': { salt: 'api-token_tests-salt' } },
-            },
+            admin: { apiToken: { salt: 'api-token_tests-salt' } },
           })),
           set: mockedConfigSet,
         },
@@ -96,7 +94,7 @@ describe('API Token', () => {
         `API_TOKEN_SALT=${mockedApiToken.hexedString}\n`
       );
       expect(mockedConfigSet).toHaveBeenCalledWith(
-        'server.admin.api-token.salt',
+        'admin.apiToken.salt',
         mockedApiToken.hexedString
       );
     });
@@ -147,7 +145,7 @@ describe('API Token', () => {
       const res = await apiTokenService.list();
 
       expect(findMany).toHaveBeenCalledWith({
-        select: ['id', 'name', 'description', 'type'],
+        select: ['id', 'name', 'description', 'type', 'createdAt'],
         orderBy: { name: 'ASC' },
       });
       expect(res).toEqual(tokens);
@@ -174,7 +172,7 @@ describe('API Token', () => {
       const res = await apiTokenService.revoke(token.id);
 
       expect(mockedDelete).toHaveBeenCalledWith({
-        select: ['id', 'name', 'description', 'type'],
+        select: ['id', 'name', 'description', 'type', 'createdAt'],
         where: { id: token.id },
       });
       expect(res).toEqual(token);
@@ -192,7 +190,7 @@ describe('API Token', () => {
       const res = await apiTokenService.revoke(42);
 
       expect(mockedDelete).toHaveBeenCalledWith({
-        select: ['id', 'name', 'description', 'type'],
+        select: ['id', 'name', 'description', 'type', 'createdAt'],
         where: { id: 42 },
       });
       expect(res).toEqual(null);
@@ -219,7 +217,7 @@ describe('API Token', () => {
       const res = await apiTokenService.getById(token.id);
 
       expect(findOne).toHaveBeenCalledWith({
-        select: ['id', 'name', 'description', 'type'],
+        select: ['id', 'name', 'description', 'type', 'createdAt'],
         where: { id: token.id },
       });
       expect(res).toEqual(token);
@@ -237,7 +235,7 @@ describe('API Token', () => {
       const res = await apiTokenService.getById(42);
 
       expect(findOne).toHaveBeenCalledWith({
-        select: ['id', 'name', 'description', 'type'],
+        select: ['id', 'name', 'description', 'type', 'createdAt'],
         where: { id: 42 },
       });
       expect(res).toEqual(null);
@@ -267,7 +265,7 @@ describe('API Token', () => {
       const res = await apiTokenService.update(id, attributes);
 
       expect(update).toHaveBeenCalledWith({
-        select: ['id', 'name', 'description', 'type'],
+        select: ['id', 'name', 'description', 'type', 'createdAt'],
         where: { id },
         data: attributes,
       });
@@ -294,7 +292,7 @@ describe('API Token', () => {
       const res = await apiTokenService.getByName(token.name);
 
       expect(findOne).toHaveBeenCalledWith({
-        select: ['id', 'name', 'description', 'type'],
+        select: ['id', 'name', 'description', 'type', 'createdAt'],
         where: { name: token.name },
       });
       expect(res).toEqual(token);
@@ -312,7 +310,7 @@ describe('API Token', () => {
       const res = await apiTokenService.getByName('unexistant-name');
 
       expect(findOne).toHaveBeenCalledWith({
-        select: ['id', 'name', 'description', 'type'],
+        select: ['id', 'name', 'description', 'type', 'createdAt'],
         where: { name: 'unexistant-name' },
       });
       expect(res).toEqual(null);

@@ -1,12 +1,12 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Box } from '@strapi/parts/Box';
-import { Button } from '@strapi/parts/Button';
-import { IconButtonGroup } from '@strapi/parts/IconButton';
-import { Option, Select } from '@strapi/parts/Select';
-import { Popover } from '@strapi/parts/Popover';
-import { Row } from '@strapi/parts/Row';
+import { Box } from '@strapi/design-system/Box';
+import { Button } from '@strapi/design-system/Button';
+import { IconButtonGroup } from '@strapi/design-system/IconButton';
+import { Option, Select } from '@strapi/design-system/Select';
+import { Popover } from '@strapi/design-system/Popover';
+import { Flex } from '@strapi/design-system/Flex';
 import Bold from '@strapi/icons/Bold';
 import Italic from '@strapi/icons/Italic';
 import Underline from '@strapi/icons/Underline';
@@ -14,22 +14,26 @@ import Strikethrough from '@strapi/icons/Strikethrough';
 import BulletList from '@strapi/icons/BulletList';
 import NumberList from '@strapi/icons/NumberList';
 import Code from '@strapi/icons/Code';
-import Image from '@strapi/icons/Image';
+import Image from '@strapi/icons/Picture';
 import Link from '@strapi/icons/Link';
 import Quote from '@strapi/icons/Quote';
 import More from '@strapi/icons/More';
-import { MainButtons, CustomIconButton, MoreButton, IconButtonGroupMargin } from './WysiwygStyles';
+import {
+  MainButtons,
+  CustomIconButton,
+  MoreButton,
+  IconButtonGroupMargin,
+  CustomLinkIconButton,
+} from './WysiwygStyles';
 
 const WysiwygNav = ({
   editorRef,
   isPreviewMode,
   onActionClick,
   onToggleMediaLib,
-  onTogglePopover,
   onTogglePreviewMode,
-  noPreviewMode,
-  visiblePopover,
 }) => {
+  const [visiblePopover, setVisiblePopover] = useState(false);
   const { formatMessage } = useIntl();
   const selectPlaceholder = formatMessage({
     id: 'components.Wysiwyg.selectOptions.title',
@@ -37,11 +41,13 @@ const WysiwygNav = ({
   });
   const buttonMoreRef = useRef();
 
+  const handleTogglePopover = () => setVisiblePopover(prev => !prev);
+
   if (isPreviewMode) {
     return (
       <Box padding={2} background="neutral100">
-        <Row justifyContent="space-between">
-          <Row>
+        <Flex justifyContent="space-between">
+          <Flex>
             <Select
               disabled
               id="selectTitle"
@@ -75,8 +81,8 @@ const WysiwygNav = ({
               />
             </MainButtons>
 
-            <MoreButton disabled ref={buttonMoreRef} id="more" label="more" icon={<More />} />
-          </Row>
+            <MoreButton disabled ref={buttonMoreRef} id="more" label="More" icon={<More />} />
+          </Flex>
 
           <Button onClick={onTogglePreviewMode} variant="tertiary" size="L" id="preview">
             {formatMessage({
@@ -84,15 +90,15 @@ const WysiwygNav = ({
               defaultMessage: 'Markdown mode',
             })}
           </Button>
-        </Row>
+        </Flex>
       </Box>
     );
   }
 
   return (
     <Box padding={2} background="neutral100">
-      <Row justifyContent="space-between">
-        <Row>
+      <Flex justifyContent="space-between">
+        <Flex>
           <Select
             id="selectTitle"
             placeholder={selectPlaceholder}
@@ -133,31 +139,31 @@ const WysiwygNav = ({
 
           <MoreButton
             ref={buttonMoreRef}
-            onClick={onTogglePopover}
+            onClick={handleTogglePopover}
             id="more"
-            label="more"
+            label="More"
             icon={<More />}
           />
           {visiblePopover && (
             <Popover centered source={buttonMoreRef} spacing={4} id="popover">
-              <Row>
+              <Flex>
                 <IconButtonGroupMargin>
                   <CustomIconButton
-                    onClick={() => onActionClick('Strikethrough', editorRef, onTogglePopover)}
+                    onClick={() => onActionClick('Strikethrough', editorRef, handleTogglePopover)}
                     id="Strikethrough"
                     label="Strikethrough"
                     name="Strikethrough"
                     icon={<Strikethrough />}
                   />
                   <CustomIconButton
-                    onClick={() => onActionClick('BulletList', editorRef, onTogglePopover)}
+                    onClick={() => onActionClick('BulletList', editorRef, handleTogglePopover)}
                     id="BulletList"
                     label="BulletList"
                     name="BulletList"
                     icon={<BulletList />}
                   />
                   <CustomIconButton
-                    onClick={() => onActionClick('NumberList', editorRef, onTogglePopover)}
+                    onClick={() => onActionClick('NumberList', editorRef, handleTogglePopover)}
                     id="NumberList"
                     label="NumberList"
                     name="NumberList"
@@ -166,21 +172,24 @@ const WysiwygNav = ({
                 </IconButtonGroupMargin>
                 <IconButtonGroup>
                   <CustomIconButton
-                    onClick={() => onActionClick('Code', editorRef, onTogglePopover)}
+                    onClick={() => onActionClick('Code', editorRef, handleTogglePopover)}
                     id="Code"
                     label="Code"
                     name="Code"
                     icon={<Code />}
                   />
                   <CustomIconButton
-                    onClick={onToggleMediaLib}
+                    onClick={() => {
+                      handleTogglePopover();
+                      onToggleMediaLib();
+                    }}
                     id="Image"
                     label="Image"
                     name="Image"
                     icon={<Image />}
                   />
-                  <CustomIconButton
-                    onClick={() => onActionClick('Link', editorRef, onTogglePopover)}
+                  <CustomLinkIconButton
+                    onClick={() => onActionClick('Link', editorRef, handleTogglePopover)}
                     id="Link"
                     label="Link"
                     name="Link"
@@ -188,27 +197,27 @@ const WysiwygNav = ({
                     icon={<Link />}
                   />
                   <CustomIconButton
-                    onClick={() => onActionClick('Quote', editorRef, onTogglePopover)}
+                    onClick={() => onActionClick('Quote', editorRef, handleTogglePopover)}
                     id="Quote"
                     label="Quote"
                     name="Quote"
                     icon={<Quote />}
                   />
                 </IconButtonGroup>
-              </Row>
+              </Flex>
             </Popover>
           )}
-        </Row>
+        </Flex>
 
-        {!noPreviewMode && onTogglePreviewMode && (
-          <Button onClick={onTogglePreviewMode} variant="tertiary" size="L" id="preview">
+        {onTogglePreviewMode && (
+          <Button onClick={onTogglePreviewMode} variant="tertiary" id="preview">
             {formatMessage({
               id: 'components.Wysiwyg.ToggleMode.preview-mode',
               defaultMessage: 'Preview mode',
             })}
           </Button>
         )}
-      </Row>
+      </Flex>
     </Box>
   );
 };
@@ -217,10 +226,7 @@ WysiwygNav.defaultProps = {
   isPreviewMode: false,
   onActionClick: () => {},
   onToggleMediaLib: () => {},
-  onTogglePopover: () => {},
-  onTogglePreviewMode: () => {},
-  noPreviewMode: false,
-  visiblePopover: false,
+  onTogglePreviewMode: undefined,
 };
 
 WysiwygNav.propTypes = {
@@ -228,10 +234,7 @@ WysiwygNav.propTypes = {
   isPreviewMode: PropTypes.bool,
   onActionClick: PropTypes.func,
   onToggleMediaLib: PropTypes.func,
-  onTogglePopover: PropTypes.func,
   onTogglePreviewMode: PropTypes.func,
-  visiblePopover: PropTypes.bool,
-  noPreviewMode: PropTypes.bool,
 };
 
 export default WysiwygNav;

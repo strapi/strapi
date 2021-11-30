@@ -1,12 +1,16 @@
 'use strict';
 
+const { ValidationError } = require('@strapi/utils').errors;
+
 /**
  * Returns a single type service to handle default core-api actions
  */
-const createSingleTypeService = ({ model, strapi, utils }) => {
-  const { uid } = model;
-  const { sanitizeInput, getFetchParams } = utils;
+const createSingleTypeService = ({ contentType }) => {
+  const { uid } = contentType;
 
+  /**
+   * @type {import('./').SingleTypeService}
+   */
   return {
     /**
      * Returns singleType content
@@ -14,7 +18,7 @@ const createSingleTypeService = ({ model, strapi, utils }) => {
      * @return {Promise}
      */
     find(params = {}) {
-      return strapi.entityService.findMany(uid, getFetchParams(params));
+      return strapi.entityService.findMany(uid, this.getFetchParams(params));
     },
 
     /**
@@ -22,22 +26,19 @@ const createSingleTypeService = ({ model, strapi, utils }) => {
      *
      * @return {Promise}
      */
-    async createOrUpdate(params = {}) {
+    async createOrUpdate({ data, ...params } = {}) {
       const entity = await this.find(params);
-
-      const { data } = params;
-      const sanitizedData = sanitizeInput(data);
 
       if (!entity) {
         const count = await strapi.query(uid).count();
         if (count >= 1) {
-          throw strapi.errors.badRequest('singleType.alreadyExists');
+          throw new ValidationError('singleType.alreadyExists');
         }
 
-        return strapi.entityService.create(uid, { ...params, data: sanitizedData });
+        return strapi.entityService.create(uid, { ...params, data });
       }
 
-      return strapi.entityService.update(uid, entity.id, { ...params, data: sanitizedData });
+      return strapi.entityService.update(uid, entity.id, { ...params, data });
     },
 
     /**

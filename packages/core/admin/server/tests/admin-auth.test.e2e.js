@@ -72,9 +72,13 @@ describe('Admin Auth End to End', () => {
 
       expect(res.statusCode).toBe(400);
       expect(res.body).toEqual({
-        statusCode: 400,
-        error: 'Bad Request',
-        message: 'Invalid credentials',
+        data: null,
+        error: {
+          status: 400,
+          name: 'ApplicationError',
+          message: 'Invalid credentials',
+          details: {},
+        },
       });
     });
 
@@ -90,9 +94,13 @@ describe('Admin Auth End to End', () => {
 
       expect(res.statusCode).toBe(400);
       expect(res.body).toEqual({
-        statusCode: 400,
-        error: 'Bad Request',
-        message: 'Invalid credentials',
+        data: null,
+        error: {
+          status: 400,
+          name: 'ApplicationError',
+          message: 'Invalid credentials',
+          details: {},
+        },
       });
     });
 
@@ -107,9 +115,13 @@ describe('Admin Auth End to End', () => {
 
       expect(res.statusCode).toBe(400);
       expect(res.body).toEqual({
-        statusCode: 400,
-        error: 'Bad Request',
-        message: 'Missing credentials',
+        data: null,
+        error: {
+          status: 400,
+          name: 'ApplicationError',
+          message: 'Missing credentials',
+          details: {},
+        },
       });
     });
   });
@@ -150,9 +162,13 @@ describe('Admin Auth End to End', () => {
 
       expect(res.statusCode).toBe(400);
       expect(res.body).toEqual({
-        statusCode: 400,
-        error: 'Bad Request',
-        message: 'Invalid token',
+        data: null,
+        error: {
+          status: 400,
+          name: 'ValidationError',
+          message: 'Invalid token',
+          details: {},
+        },
       });
     });
 
@@ -165,9 +181,21 @@ describe('Admin Auth End to End', () => {
 
       expect(res.statusCode).toBe(400);
       expect(res.body).toEqual({
-        statusCode: 400,
-        error: 'Bad Request',
-        message: 'Missing token',
+        data: null,
+        error: {
+          status: 400,
+          message: 'token is a required field',
+          name: 'ValidationError',
+          details: {
+            errors: [
+              {
+                message: 'token is a required field',
+                name: 'ValidationError',
+                path: ['token'],
+              },
+            ],
+          },
+        },
       });
     });
   });
@@ -219,11 +247,20 @@ describe('Admin Auth End to End', () => {
 
       expect(res.statusCode).toBe(400);
       expect(res.body).toEqual({
-        statusCode: 400,
-        error: 'Bad Request',
-        message: 'QueryError',
-        data: {
-          registrationToken: ['registrationToken is a required field'],
+        data: null,
+        error: {
+          status: 400,
+          details: {
+            errors: [
+              {
+                message: 'registrationToken is a required field',
+                name: 'ValidationError',
+                path: ['registrationToken'],
+              },
+            ],
+          },
+          message: 'registrationToken is a required field',
+          name: 'ValidationError',
         },
       });
     });
@@ -237,9 +274,13 @@ describe('Admin Auth End to End', () => {
 
       expect(res.statusCode).toBe(400);
       expect(res.body).toEqual({
-        statusCode: 400,
-        error: 'Bad Request',
-        message: 'Invalid registrationToken',
+        data: null,
+        error: {
+          status: 400,
+          name: 'ValidationError',
+          message: 'Invalid registrationToken',
+          details: {},
+        },
       });
     });
   });
@@ -273,15 +314,30 @@ describe('Admin Auth End to End', () => {
 
       expect(res.statusCode).toBe(400);
       expect(res.body).toEqual({
-        statusCode: 400,
-        error: 'Bad Request',
-        message: 'ValidationError',
-        data: {
-          registrationToken: ['registrationToken is a required field'],
-
-          'userInfo.firstname': ['userInfo.firstname is a required field'],
-          'userInfo.lastname': ['userInfo.lastname is a required field'],
-          'userInfo.password': ['userInfo.password is a required field'],
+        data: null,
+        error: {
+          status: 400,
+          details: {
+            errors: [
+              {
+                message: 'registrationToken is a required field',
+                name: 'ValidationError',
+                path: ['registrationToken'],
+              },
+              {
+                message: 'userInfo.firstname is a required field',
+                name: 'ValidationError',
+                path: ['userInfo', 'firstname'],
+              },
+              {
+                message: 'userInfo.password is a required field',
+                name: 'ValidationError',
+                path: ['userInfo', 'password'],
+              },
+            ],
+          },
+          message: '3 errors occurred',
+          name: 'ValidationError',
         },
       });
     });
@@ -302,11 +358,30 @@ describe('Admin Auth End to End', () => {
 
       expect(res.statusCode).toBe(400);
       expect(res.body).toEqual({
-        statusCode: 400,
-        error: 'Bad Request',
-        message: 'ValidationError',
-        data: {
-          'userInfo.password': ['userInfo.password must contain at least one uppercase character'],
+        data: null,
+        error: {
+          status: 400,
+          details: {
+            errors: [
+              {
+                message: 'userInfo.password must be at least 8 characters',
+                name: 'ValidationError',
+                path: ['userInfo', 'password'],
+              },
+              {
+                message: 'userInfo.password must contain at least one lowercase character',
+                name: 'ValidationError',
+                path: ['userInfo', 'password'],
+              },
+              {
+                message: 'userInfo.password must contain at least one uppercase character',
+                name: 'ValidationError',
+                path: ['userInfo', 'password'],
+              },
+            ],
+          },
+          message: '3 errors occurred',
+          name: 'ValidationError',
         },
       });
     });
@@ -351,14 +426,30 @@ describe('Admin Auth End to End', () => {
 
       expect(res.statusCode).toBe(400);
       expect(res.body).toEqual({
-        statusCode: 400,
-        error: 'Bad Request',
-        message: 'ValidationError',
-        data: {
-          email: ['email is a required field'],
-          firstname: ['firstname is a required field'],
-          lastname: ['lastname is a required field'],
-          password: ['password is a required field'],
+        data: null,
+        error: {
+          status: 400,
+          details: {
+            errors: [
+              {
+                message: 'email is a required field',
+                name: 'ValidationError',
+                path: ['email'],
+              },
+              {
+                message: 'firstname is a required field',
+                name: 'ValidationError',
+                path: ['firstname'],
+              },
+              {
+                message: 'password is a required field',
+                name: 'ValidationError',
+                path: ['password'],
+              },
+            ],
+          },
+          message: '3 errors occurred',
+          name: 'ValidationError',
         },
       });
     });
@@ -377,11 +468,30 @@ describe('Admin Auth End to End', () => {
 
       expect(res.statusCode).toBe(400);
       expect(res.body).toEqual({
-        statusCode: 400,
-        error: 'Bad Request',
-        message: 'ValidationError',
-        data: {
-          password: ['password must contain at least one uppercase character'],
+        data: null,
+        error: {
+          status: 400,
+          details: {
+            errors: [
+              {
+                message: 'password must be at least 8 characters',
+                name: 'ValidationError',
+                path: ['password'],
+              },
+              {
+                message: 'password must contain at least one lowercase character',
+                name: 'ValidationError',
+                path: ['password'],
+              },
+              {
+                message: 'password must contain at least one uppercase character',
+                name: 'ValidationError',
+                path: ['password'],
+              },
+            ],
+          },
+          message: '3 errors occurred',
+          name: 'ValidationError',
         },
       });
     });
@@ -402,9 +512,13 @@ describe('Admin Auth End to End', () => {
 
       expect(res.statusCode).toBe(400);
       expect(res.body).toEqual({
-        statusCode: 400,
-        error: 'Bad Request',
-        message: 'You cannot register a new super admin',
+        data: null,
+        error: {
+          status: 400,
+          name: 'ApplicationError',
+          message: 'You cannot register a new super admin',
+          details: {},
+        },
       });
     });
   });

@@ -1,9 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Grid, GridItem } from '@strapi/parts/Grid';
-import { Row } from '@strapi/parts/Row';
-import { Text } from '@strapi/parts/Text';
-import { Tooltip } from '@strapi/parts/Tooltip';
+import { Grid, GridItem } from '@strapi/design-system/Grid';
+import { Flex } from '@strapi/design-system/Flex';
+import { Typography } from '@strapi/design-system/Typography';
+import { Tooltip } from '@strapi/design-system/Tooltip';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
@@ -23,7 +23,7 @@ const SSOButton = styled.a`
   color: ${({ theme }) => theme.colors.neutral600};
 `;
 
-const SSOProvidersWrapper = styled(Row)`
+const SSOProvidersWrapper = styled(Flex)`
   & a:not(:first-child):not(:last-child) {
     margin: 0 ${({ theme }) => theme.spaces[2]};
   }
@@ -42,7 +42,7 @@ const SSOProviderButton = ({ provider }) => {
         {provider.icon ? (
           <img src={provider.icon} aria-hidden alt="" height="32px" />
         ) : (
-          <Text>{provider.displayName}</Text>
+          <Typography>{provider.displayName}</Typography>
         )}
       </SSOButton>
     </Tooltip>

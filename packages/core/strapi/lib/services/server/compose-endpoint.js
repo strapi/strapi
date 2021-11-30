@@ -1,6 +1,7 @@
 'use strict';
 
-const { toLower, castArray, trim, prop } = require('lodash/fp');
+const { has, toLower, castArray, trim, prop, isNil } = require('lodash/fp');
+const { UnauthorizedError, ForbiddenError } = require('@strapi/utils').errors;
 
 const compose = require('koa-compose');
 const { resolveRouteMiddlewares } = require('./middleware');
@@ -31,8 +32,6 @@ const createAuthorizeMiddleware = strapi => async (ctx, next) => {
 
     return next();
   } catch (error) {
-    const { UnauthorizedError, ForbiddenError } = authService.errors;
-
     if (error instanceof UnauthorizedError) {
       return ctx.unauthorized();
     }
@@ -47,6 +46,14 @@ const createAuthorizeMiddleware = strapi => async (ctx, next) => {
 
 const createAuthenticateMiddleware = strapi => async (ctx, next) => {
   return strapi.container.get('auth').authenticate(ctx, next);
+};
+
+const returnBodyMiddleware = async (ctx, next) => {
+  const values = await next();
+
+  if (isNil(ctx.body) && !isNil(values)) {
+    ctx.body = values;
+  }
 };
 
 module.exports = strapi => {
@@ -69,43 +76,65 @@ module.exports = strapi => {
         authorize,
         ...policies,
         ...middlewares,
+        returnBodyMiddleware,
         ...castArray(action),
       ]);
 
       router[method](path, routeHandler);
     } catch (error) {
-      throw new Error(`Error creating endpoint ${route.method} ${route.path}: ${error.message}`);
+      error.message = `Error creating endpoint ${route.method} ${route.path}: ${error.message}`;
+      throw error;
     }
   };
 };
 
 const getController = (name, { pluginName, apiName }, strapi) => {
+  let ctrl;
+
   if (pluginName) {
     if (pluginName === 'admin') {
-      return strapi.controller(`admin::${name}`);
+      ctrl = strapi.controller(`admin::${name}`);
+    } else {
+      ctrl = strapi.plugin(pluginName).controller(name);
     }
-    return strapi.plugin(pluginName).controller(name);
   } else if (apiName) {
-    return strapi.controller(`api::${apiName}.${name}`);
+    ctrl = strapi.controller(`api::${apiName}.${name}`);
   }
 
-  return strapi.controller(name);
+  if (!ctrl) {
+    return strapi.controller(name);
+  }
+
+  return ctrl;
+};
+
+const extractHandlerParts = name => {
+  const controllerName = name.slice(0, name.lastIndexOf('.'));
+  const actionName = name.slice(name.lastIndexOf('.') + 1);
+
+  return { controllerName, actionName };
 };
 
 const getAction = (route, strapi) => {
   const { handler, info = {} } = route;
-  const { pluginName, apiName } = info;
+  const { pluginName, apiName, type } = info;
 
   if (Array.isArray(handler) || typeof handler === 'function') {
     return handler;
   }
 
-  const [controllerName, actionName] = trim(handler).split('.');
+  const { controllerName, actionName } = extractHandlerParts(trim(handler));
 
-  const controller = getController(toLower(controllerName), { pluginName, apiName }, strapi);
+  const controller = getController(controllerName, { pluginName, apiName }, strapi);
 
   if (typeof controller[actionName] !== 'function') {
     throw new Error(`Handler not found "${handler}"`);
+  }
+
+  if (has(Symbol.for('__type__'), controller[actionName])) {
+    controller[actionName][Symbol.for('__type__')].push(type);
+  } else {
+    controller[actionName][Symbol.for('__type__')] = [type];
   }
 
   return controller[actionName].bind(controller);

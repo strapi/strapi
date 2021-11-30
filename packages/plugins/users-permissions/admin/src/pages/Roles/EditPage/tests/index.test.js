@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { ThemeProvider, lightTheme } from '@strapi/parts';
+import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { Router, Switch, Route } from 'react-router-dom';
 import { IntlProvider } from 'react-intl';
 import { createMemoryHistory } from 'history';
@@ -59,18 +59,22 @@ describe('Admin | containers | RoleEditPage', () => {
     expect(container.firstChild).toMatchInlineSnapshot(`
       .c1 {
         background: #f6f6f9;
-        padding-top: 56px;
+        padding-top: 24px;
         padding-right: 56px;
-        padding-bottom: 56px;
-        padding-left: 56px;
-      }
-
-      .c14 {
-        padding-right: 56px;
+        padding-bottom: 40px;
         padding-left: 56px;
       }
 
       .c2 {
+        padding-bottom: 8px;
+      }
+
+      .c18 {
+        padding-right: 56px;
+        padding-left: 56px;
+      }
+
+      .c7 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -88,7 +92,7 @@ describe('Admin | containers | RoleEditPage', () => {
         align-items: center;
       }
 
-      .c3 {
+      .c8 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -102,41 +106,35 @@ describe('Admin | containers | RoleEditPage', () => {
         align-items: center;
       }
 
-      .c4 {
+      .c9 {
+        color: #32324d;
         font-weight: 600;
         font-size: 2rem;
         line-height: 1.25;
-        color: #32324d;
       }
 
-      .c12 {
-        font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
+      .c17 {
         color: #666687;
-      }
-
-      .c13 {
         font-size: 1rem;
         line-height: 1.5;
       }
 
-      .c0 {
+      .c0:focus-visible {
         outline: none;
       }
 
-      .c11 {
-        font-weight: 500;
+      .c16 {
+        font-weight: 600;
+        color: #32324d;
         font-size: 0.75rem;
         line-height: 1.33;
-        color: #32324d;
       }
 
-      .c8 {
+      .c13 {
         padding-right: 8px;
       }
 
-      .c5 {
+      .c10 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -146,27 +144,59 @@ describe('Admin | containers | RoleEditPage', () => {
         border-radius: 4px;
         background: #ffffff;
         border: 1px solid #dcdce4;
+        position: relative;
+        outline: none;
       }
 
-      .c5 svg {
+      .c10 svg {
         height: 12px;
         width: 12px;
       }
 
-      .c5 svg > g,
-      .c5 svg path {
+      .c10 svg > g,
+      .c10 svg path {
         fill: #ffffff;
       }
 
-      .c5[aria-disabled='true'] {
+      .c10[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c9 {
+      .c10:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c10:focus-visible {
+        outline: none;
+      }
+
+      .c10:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
+      }
+
+      .c14 {
         height: 100%;
       }
 
-      .c6 {
+      .c11 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -178,7 +208,7 @@ describe('Admin | containers | RoleEditPage', () => {
         background: #4945ff;
       }
 
-      .c6 .c7 {
+      .c11 .c12 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -189,49 +219,49 @@ describe('Admin | containers | RoleEditPage', () => {
         align-items: center;
       }
 
-      .c6 .c10 {
+      .c11 .c15 {
         color: #ffffff;
       }
 
-      .c6[aria-disabled='true'] {
+      .c11[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c6[aria-disabled='true'] .c10 {
+      .c11[aria-disabled='true'] .c15 {
         color: #666687;
       }
 
-      .c6[aria-disabled='true'] svg > g,
-      .c6[aria-disabled='true'] svg path {
+      .c11[aria-disabled='true'] svg > g,
+      .c11[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c6[aria-disabled='true']:active {
+      .c11[aria-disabled='true']:active {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c6[aria-disabled='true']:active .c10 {
+      .c11[aria-disabled='true']:active .c15 {
         color: #666687;
       }
 
-      .c6[aria-disabled='true']:active svg > g,
-      .c6[aria-disabled='true']:active svg path {
+      .c11[aria-disabled='true']:active svg > g,
+      .c11[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
-      .c6:hover {
+      .c11:hover {
         border: 1px solid #7b79ff;
         background: #7b79ff;
       }
 
-      .c6:active {
+      .c11:active {
         border: 1px solid #4945ff;
         background: #4945ff;
       }
 
-      .c15 {
+      .c19 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -241,16 +271,16 @@ describe('Admin | containers | RoleEditPage', () => {
         flex-direction: column;
       }
 
-      .c15 > * {
+      .c19 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c15 > * + * {
+      .c19 > * + * {
         margin-top: 32px;
       }
 
-      .c17 {
+      .c21 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -260,16 +290,16 @@ describe('Admin | containers | RoleEditPage', () => {
         flex-direction: column;
       }
 
-      .c17 > * {
+      .c21 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c17 > * + * {
+      .c21 > * + * {
         margin-top: 16px;
       }
 
-      .c37 {
+      .c41 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -279,389 +309,32 @@ describe('Admin | containers | RoleEditPage', () => {
         flex-direction: column;
       }
 
-      .c37 > * {
+      .c41 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c37 > * + * {
-        margin-top: 8px;
-      }
-
-      .c16 {
-        background: #ffffff;
-        padding-top: 24px;
-        padding-right: 32px;
-        padding-bottom: 24px;
-        padding-left: 32px;
-        border-radius: 4px;
-        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-      }
-
-      .c24 {
-        font-weight: 500;
-        font-size: 0.75rem;
-        line-height: 1.33;
-        color: #32324d;
-      }
-
-      .c23 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c25 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-box-pack: justify;
-        -webkit-justify-content: space-between;
-        -ms-flex-pack: justify;
-        justify-content: space-between;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c27 {
-        border: none;
-        border-radius: 4px;
-        padding-left: 16px;
-        padding-right: 16px;
-        color: #32324d;
-        font-weight: 400;
-        font-size: 0.875rem;
-        display: block;
-        width: 100%;
-        height: 2.5rem;
-      }
-
-      .c27::-webkit-input-placeholder {
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c27::-moz-placeholder {
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c27:-ms-input-placeholder {
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c27::placeholder {
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c27[aria-disabled='true'] {
-        background: inherit;
-        color: inherit;
-      }
-
-      .c26 {
-        border: 1px solid #dcdce4;
-        border-radius: 4px;
-        background: #ffffff;
-      }
-
-      .c22 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-      }
-
-      .c22 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c22 > * + * {
-        margin-top: 4px;
-      }
-
-      .c21 textarea {
-        height: 5rem;
-      }
-
-      .c31 {
-        font-weight: 500;
-        font-size: 0.75rem;
-        line-height: 1.33;
-        color: #32324d;
-      }
-
-      .c30 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c32 {
-        display: block;
-        width: 100%;
-        border: 1px solid #dcdce4;
-        border-radius: 4px;
-        padding-left: 16px;
-        padding-right: 16px;
-        padding-top: 12px;
-        padding-bottom: 12px;
-        font-weight: 400;
-        font-size: 0.875rem;
-        color: #32324d;
-        background: #ffffff;
-      }
-
-      .c32::-webkit-input-placeholder {
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c32::-moz-placeholder {
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c32:-ms-input-placeholder {
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c32::placeholder {
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c29 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-      }
-
-      .c29 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c29 > * + * {
-        margin-top: 4px;
-      }
-
-      .c28 textarea {
-        height: 5rem;
-        line-height: 1.25rem;
-        font-family: -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,Cantarell,'Open Sans', 'Helvetica Neue',sans-serif;
-      }
-
-      .c28 textarea::-webkit-input-placeholder {
-        font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c28 textarea::-moz-placeholder {
-        font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c28 textarea:-ms-input-placeholder {
-        font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c28 textarea::placeholder {
-        font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c18 {
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c38 {
-        font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #666687;
-      }
-
-      .c33 {
-        background: #ffffff;
-        border-radius: 4px;
-        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-      }
-
-      .c36 {
-        padding-top: 24px;
-        padding-right: 32px;
-        padding-bottom: 24px;
-        padding-left: 32px;
-      }
-
-      .c54 {
-        background: #eaeaef;
-        padding-top: 24px;
-        padding-right: 32px;
-        padding-bottom: 24px;
-        padding-left: 32px;
-      }
-
-      .c19 {
-        display: grid;
-        grid-template-columns: repeat(12,1fr);
-        gap: 16px;
-      }
-
-      .c34 {
-        display: grid;
-        grid-template-columns: repeat(12,1fr);
-        gap: 0px;
-      }
-
-      .c20 {
-        grid-column: span 6;
-      }
-
-      .c35 {
-        grid-column: span 7;
-      }
-
-      .c53 {
-        grid-column: span 5;
-      }
-
-      .c47 {
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
-        color: #4a4a6a;
-      }
-
-      .c49 {
-        font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #666687;
-      }
-
-      .c40 {
-        border-radius: 4px;
+      .c41 > * + * {
+        margin-top: 24px;
       }
 
       .c42 {
-        background: #f6f6f9;
-        padding: 24px;
-        border-radius: 4px;
-      }
-
-      .c45 {
-        padding-right: 24px;
-      }
-
-      .c51 {
-        background: #dcdce4;
-      }
-
-      .c52 {
-        height: 2rem;
-        width: 2rem;
-        border-radius: 50%;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
         display: flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        -webkit-box-pack: center;
-        -webkit-justify-content: center;
-        -ms-flex-pack: center;
-        justify-content: center;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
       }
 
-      .c52 svg {
-        height: 0.375rem;
-        width: 0.6875rem;
+      .c42 > * {
+        margin-top: 0;
+        margin-bottom: 0;
       }
 
-      .c52 svg path {
-        fill: #666687;
-      }
-
-      .c41 {
-        border: 1px solid transparent;
-        overflow: hidden;
-      }
-
-      .c41:hover {
-        border: 1px solid #4945ff;
-      }
-
-      .c41:hover .c46 {
-        color: #271fe0;
-      }
-
-      .c41:hover .c48 {
-        color: #4945ff;
-      }
-
-      .c41:hover > .c39 {
-        background: #f0f0ff;
-      }
-
-      .c41:hover .c50 {
-        background: #d9d8ff;
-      }
-
-      .c41:hover .c50 svg path {
-        fill: #4945ff;
+      .c42 > * + * {
+        margin-top: 8px;
       }
 
       .c44 {
@@ -669,6 +342,56 @@ describe('Admin | containers | RoleEditPage', () => {
         display: -webkit-flex;
         display: -ms-flexbox;
         display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+      }
+
+      .c44 > * {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .c44 > * + * {
+        margin-top: 4px;
+      }
+
+      .c20 {
+        background: #ffffff;
+        padding-top: 24px;
+        padding-right: 32px;
+        padding-bottom: 24px;
+        padding-left: 32px;
+        border-radius: 4px;
+        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+      }
+
+      .c27 {
+        font-weight: 600;
+        color: #32324d;
+        font-size: 0.75rem;
+        line-height: 1.33;
+      }
+
+      .c26 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c28 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
@@ -682,47 +405,595 @@ describe('Admin | containers | RoleEditPage', () => {
         align-items: center;
       }
 
-      .c43 {
+      .c30 {
         border: none;
-        background: transparent;
+        border-radius: 4px;
+        padding-left: 16px;
+        padding-right: 16px;
+        color: #32324d;
+        font-weight: 400;
+        font-size: 0.875rem;
         display: block;
         width: 100%;
-        text-align: unset;
-        padding: 0;
+      }
+
+      .c30::-webkit-input-placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c30::-moz-placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c30:-ms-input-placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c30::placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c30[aria-disabled='true'] {
+        background: inherit;
+        color: inherit;
+      }
+
+      .c30:focus {
+        outline: none;
+        box-shadow: none;
+      }
+
+      .c29 {
+        border: 1px solid #dcdce4;
+        border-radius: 4px;
+        background: #ffffff;
+        height: 2.5rem;
+        outline: none;
+        box-shadow: 0;
+        -webkit-transition-property: border-color,box-shadow,fill;
+        transition-property: border-color,box-shadow,fill;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+      }
+
+      .c29:focus-within {
+        border: 1px solid #4945ff;
+        box-shadow: #4945ff 0px 0px 0px 2px;
+      }
+
+      .c25 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+      }
+
+      .c25 > * {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .c25 > * + * {
+        margin-top: 4px;
+      }
+
+      .c34 {
+        font-weight: 600;
+        color: #32324d;
+        font-size: 0.75rem;
+        line-height: 1.33;
+      }
+
+      .c33 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c35 {
+        border: 1px solid #dcdce4;
+        border-radius: 4px;
+        padding-left: 16px;
+        padding-right: 16px;
+        padding-top: 12px;
+        padding-bottom: 12px;
+        background: #ffffff;
+        outline: none;
+        box-shadow: 0;
+        -webkit-transition-property: border-color,box-shadow,fill;
+        transition-property: border-color,box-shadow,fill;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+      }
+
+      .c35:focus-within {
+        border: 1px solid #4945ff;
+        box-shadow: #4945ff 0px 0px 0px 2px;
+      }
+
+      .c36 {
+        display: block;
+        width: 100%;
+        font-weight: 400;
+        font-size: 0.875rem;
+        border: none;
+        color: #32324d;
+        resize: none;
+      }
+
+      .c36::-webkit-input-placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c36::-moz-placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c36:-ms-input-placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c36::placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c36:focus-within {
+        outline: none;
+      }
+
+      .c32 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+      }
+
+      .c32 > * {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .c32 > * + * {
+        margin-top: 4px;
+      }
+
+      .c31 textarea {
+        height: 5rem;
+        line-height: 1.25rem;
+      }
+
+      .c31 textarea::-webkit-input-placeholder {
+        font-weight: 400;
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c31 textarea::-moz-placeholder {
+        font-weight: 400;
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c31 textarea:-ms-input-placeholder {
+        font-weight: 400;
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c31 textarea::placeholder {
+        font-weight: 400;
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c22 {
+        color: #32324d;
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+      }
+
+      .c43 {
+        color: #666687;
+        font-size: 0.875rem;
+        line-height: 1.43;
+      }
+
+      .c6 {
+        color: #4945ff;
+        font-weight: 600;
+        font-size: 0.6875rem;
+        line-height: 1.45;
+        text-transform: uppercase;
+      }
+
+      .c4 {
+        padding-right: 8px;
+      }
+
+      .c3 {
+        display: -webkit-inline-box;
+        display: -webkit-inline-flex;
+        display: -ms-inline-flexbox;
+        display: inline-flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        text-transform: uppercase;
+        -webkit-text-decoration: none;
+        text-decoration: none;
+        position: relative;
+        outline: none;
+      }
+
+      .c3 svg path {
+        fill: #4945ff;
+      }
+
+      .c3 svg {
+        font-size: 0.625rem;
+      }
+
+      .c3:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c3:focus-visible {
+        outline: none;
+      }
+
+      .c3:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
+      }
+
+      .c5 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+      }
+
+      .c37 {
+        background: #ffffff;
+        border-radius: 4px;
+        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+      }
+
+      .c40 {
+        padding-top: 24px;
+        padding-right: 32px;
+        padding-bottom: 24px;
+        padding-left: 32px;
+      }
+
+      .c65 {
+        background: #eaeaef;
+        padding-top: 24px;
+        padding-right: 32px;
+        padding-bottom: 24px;
+        padding-left: 32px;
+      }
+
+      .c23 {
+        display: grid;
+        grid-template-columns: repeat(12,1fr);
+        gap: 16px;
+      }
+
+      .c38 {
+        display: grid;
+        grid-template-columns: repeat(12,1fr);
+        gap: 0px;
+      }
+
+      .c24 {
+        grid-column: span 6;
+      }
+
+      .c39 {
+        grid-column: span 7;
+      }
+
+      .c64 {
+        grid-column: span 5;
+      }
+
+      .c56 {
+        color: #4945ff;
+        font-size: 0.75rem;
+        line-height: 1.33;
+      }
+
+      .c57 {
+        color: #4a4a6a;
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+      }
+
+      .c58 {
+        color: #666687;
+        font-size: 0.875rem;
+        line-height: 1.43;
+      }
+
+      .c45 {
+        border-radius: 4px;
+      }
+
+      .c48 {
+        background: #f6f6f9;
+        padding-right: 24px;
+        padding-left: 24px;
+      }
+
+      .c51 {
+        -webkit-flex: 1;
+        -ms-flex: 1;
+        flex: 1;
+      }
+
+      .c60 {
+        background: #dcdce4;
+        border-radius: 50%;
+        cursor: pointer;
+        width: 2rem;
+        height: 2rem;
+        cursor: pointer;
+      }
+
+      .c62 {
+        color: #666687;
+        width: 0.6875rem;
+      }
+
+      .c49 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: justify;
+        -webkit-justify-content: space-between;
+        -ms-flex-pack: justify;
+        justify-content: space-between;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c52 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c61 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: center;
+        -webkit-justify-content: center;
+        -ms-flex-pack: center;
+        justify-content: center;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c46 {
+        border: 1px solid #f6f6f9;
+      }
+
+      .c46:hover:not([aria-disabled='true']) {
+        border: 1px solid #4945ff;
+      }
+
+      .c46:hover:not([aria-disabled='true']) .sc-hKiyAV {
+        color: #271fe0;
+      }
+
+      .c46:hover:not([aria-disabled='true']) .c55 {
+        color: #4945ff;
+      }
+
+      .c46:hover:not([aria-disabled='true']) > .c47 {
+        background: #f0f0ff;
+      }
+
+      .c46:hover:not([aria-disabled='true']) [data-strapi-dropdown='true'] {
+        background: #d9d8ff;
+      }
+
+      .c53 {
+        background: transparent;
+        border: none;
+        position: relative;
+        outline: none;
+      }
+
+      .c53[aria-disabled='true'] {
+        pointer-events: none;
+      }
+
+      .c53[aria-disabled='true'] svg path {
+        fill: #666687;
+      }
+
+      .c53 svg {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        font-size: 0.625rem;
+      }
+
+      .c53 svg path {
+        fill: #4945ff;
+      }
+
+      .c53:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c53:focus-visible {
+        outline: none;
+      }
+
+      .c53:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
+      }
+
+      .c59 > * {
+        margin-left: 0;
+        margin-right: 0;
+      }
+
+      .c59 > * + * {
+        margin-left: 12px;
+      }
+
+      .c63 path {
+        fill: #666687;
+      }
+
+      .c54 {
+        text-align: left;
+      }
+
+      .c54 svg {
+        width: 0.875rem;
+        height: 0.875rem;
+      }
+
+      .c54 svg path {
+        fill: #8e8ea9;
+      }
+
+      .c50 {
+        height: 5.5rem;
+        border-radius: 4px;
+      }
+
+      .c50:hover svg path {
+        fill: #4945ff;
       }
 
       @media (max-width:68.75rem) {
-        .c20 {
+        .c24 {
           grid-column: span;
         }
       }
 
       @media (max-width:34.375rem) {
-        .c20 {
+        .c24 {
           grid-column: span;
         }
       }
 
       @media (max-width:68.75rem) {
-        .c35 {
+        .c39 {
           grid-column: span;
         }
       }
 
       @media (max-width:34.375rem) {
-        .c35 {
+        .c39 {
           grid-column: span;
         }
       }
 
       @media (max-width:68.75rem) {
-        .c53 {
+        .c64 {
           grid-column: span;
         }
       }
 
       @media (max-width:34.375rem) {
-        .c53 {
+        .c64 {
           grid-column: span;
         }
       }
@@ -747,24 +1018,55 @@ describe('Admin | containers | RoleEditPage', () => {
               <div
                 class="c2"
               >
+                <a
+                  aria-current="page"
+                  class="c3 active"
+                  href="/settings/users-permissions/roles"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="c4 c5"
+                  >
+                    <svg
+                      fill="none"
+                      height="1em"
+                      viewBox="0 0 24 24"
+                      width="1em"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M24 13.3a.2.2 0 01-.2.2H5.74l8.239 8.239a.2.2 0 010 .282L12.14 23.86a.2.2 0 01-.282 0L.14 12.14a.2.2 0 010-.282L11.86.14a.2.2 0 01.282 0L13.98 1.98a.2.2 0 010 .282L5.74 10.5H23.8c.11 0 .2.09.2.2v2.6z"
+                        fill="#212134"
+                      />
+                    </svg>
+                  </span>
+                  <span
+                    class="c6"
+                  >
+                    Go back
+                  </span>
+                </a>
+              </div>
+              <div
+                class="c7"
+              >
                 <div
-                  class="c3"
+                  class="c8"
                 >
                   <h1
-                    class="c4"
-                    id="main-content-title"
+                    class="c9"
                   >
                     Authenticated
                   </h1>
                 </div>
                 <button
                   aria-disabled="false"
-                  class="c5 c6"
+                  class="c10 c11"
                   type="submit"
                 >
                   <div
                     aria-hidden="true"
-                    class="c7 c8 c9"
+                    class="c12 c13 c14"
                   >
                     <svg
                       fill="none"
@@ -780,69 +1082,67 @@ describe('Admin | containers | RoleEditPage', () => {
                     </svg>
                   </div>
                   <span
-                    class="c10 c11"
+                    class="c15 c16"
                   >
                     Save
                   </span>
                 </button>
               </div>
               <p
-                class="c12 c13"
+                class="c17"
               >
                 Default role given to authenticated user.
               </p>
             </div>
           </div>
           <div
-            class="c14"
+            class="c18"
           >
             <div
-              class="c15"
+              class="c19"
             >
               <div
-                class="c16"
+                class="c20"
               >
                 <div
-                  class="c17"
+                  class="c21"
                 >
                   <h2
-                    class="c18"
+                    class="c22"
                   >
                     Role details
                   </h2>
                   <div
-                    class="c19"
+                    class="c23"
                   >
                     <div
-                      class="c20"
+                      class="c24"
                     >
                       <div
                         class=""
                       >
-                        <div
-                          class="c21"
-                        >
+                        <div>
                           <div>
                             <div
-                              class="c22"
+                              class="c25"
                             >
                               <div
-                                class="c23"
+                                class="c26"
                               >
                                 <label
-                                  class="c24"
+                                  class="c27"
                                   for="textinput-1"
                                 >
                                   Name
                                 </label>
                               </div>
                               <div
-                                class="c25 c26"
+                                class="c28 c29"
                               >
                                 <input
                                   aria-disabled="false"
                                   aria-invalid="false"
-                                  class="c27"
+                                  class="c30"
                                   id="textinput-1"
                                   name="name"
                                   value="Authenticated"
@@ -854,36 +1154,40 @@ describe('Admin | containers | RoleEditPage', () => {
                       </div>
                     </div>
                     <div
-                      class="c20"
+                      class="c24"
                     >
                       <div
                         class=""
                       >
                         <div
-                          class="c28"
+                          class="c31"
                         >
                           <div>
                             <div
-                              class="c29"
+                              class="c32"
                             >
                               <div
-                                class="c30"
+                                class="c33"
                               >
                                 <label
-                                  class="c31"
+                                  class="c34"
                                   for="textarea-1"
                                 >
                                   Description
                                 </label>
                               </div>
-                              <textarea
-                                aria-invalid="false"
-                                class="c32"
-                                id="textarea-1"
-                                name="description"
+                              <div
+                                class="c35"
                               >
-                                Default role given to authenticated user.
-                              </textarea>
+                                <textarea
+                                  aria-invalid="false"
+                                  class="c36"
+                                  id="textarea-1"
+                                  name="description"
+                                >
+                                  Default role given to authenticated user.
+                                </textarea>
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -893,73 +1197,86 @@ describe('Admin | containers | RoleEditPage', () => {
                 </div>
               </div>
               <div
-                class="c33 c34"
+                class="c37 c38"
               >
                 <div
-                  class="c35"
+                  class="c39"
                 >
                   <div
-                    class="c36"
+                    class="c40"
                   >
                     <div
-                      class="c17"
+                      class="c41"
                     >
                       <div
-                        class="c37"
+                        class="c42"
                       >
                         <h2
-                          class="c18"
+                          class="c22"
                         >
                           Permissions
                         </h2>
                         <p
-                          class="c38"
+                          class="c43"
                         >
                           Only actions bound by a route are listed below.
                         </p>
                       </div>
                       <div
-                        class="c39 c40 c41"
+                        class="c44"
                       >
                         <div
-                          class="c39 c42"
+                          aria-disabled="false"
+                          class="c45 c46"
+                          data-strapi-expanded="false"
                         >
-                          <button
-                            aria-controls="accordion-content-accordion-1"
-                            aria-expanded="false"
-                            aria-labelledby="accordion-label-accordion-1"
-                            class="c43"
-                            data-strapi-accordion-toggle="true"
-                            type="button"
+                          <div
+                            class="c47 c48 c49 c50"
+                            cursor=""
                           >
-                            <div
-                              class="c39 c44"
+                            <button
+                              aria-controls="accordion-content-accordion-1"
+                              aria-disabled="false"
+                              aria-expanded="false"
+                              aria-labelledby="accordion-label-accordion-1"
+                              class="c47 c51 c52 c53 c54"
+                              data-strapi-accordion-toggle="true"
+                              type="button"
                             >
-                              <div
-                                class="c39 c45"
+                              <span
+                                class="c55 c56"
                               >
                                 <span
-                                  class="c46 c47"
+                                  class="c55 c57"
                                   id="accordion-label-accordion-1"
                                 >
                                   Address
                                 </span>
                                 <p
-                                  class="c48 c49"
+                                  class="c55 c58"
                                   id="accordion-desc-accordion-1"
                                 >
                                   Define all allowed actions for the api::address plugin.
                                 </p>
-                              </div>
+                              </span>
+                            </button>
+                            <div
+                              class="c47 c52 c59"
+                            >
                               <span
                                 aria-hidden="true"
-                                class="c39 c50 c51 c52"
+                                class="c47 c60 c61"
+                                cursor="pointer"
+                                data-strapi-dropdown="true"
+                                height="2rem"
+                                width="2rem"
                               >
                                 <svg
+                                  class="c62 c63"
                                   fill="none"
                                   height="1em"
                                   viewBox="0 0 14 8"
-                                  width="1em"
+                                  width="0.6875rem"
                                   xmlns="http://www.w3.org/2000/svg"
                                 >
                                   <path
@@ -971,29 +1288,29 @@ describe('Admin | containers | RoleEditPage', () => {
                                 </svg>
                               </span>
                             </div>
-                          </button>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
                 <div
-                  class="c53"
+                  class="c64"
                 >
                   <div
-                    class="c54"
+                    class="c65"
                     style="min-height: 100%;"
                   >
                     <div
-                      class="c37"
+                      class="c42"
                     >
                       <h3
-                        class="c18"
+                        class="c22"
                       >
                         Advanced settings
                       </h3>
                       <p
-                        class="c38"
+                        class="c43"
                       >
                         Select the application's actions or the plugin's actions and click on the cog icon to display the bound route
                       </p>

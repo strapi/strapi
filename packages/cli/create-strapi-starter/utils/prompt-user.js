@@ -1,15 +1,13 @@
 'use strict';
 
 const inquirer = require('inquirer');
-const fetch = require('node-fetch');
-const yaml = require('js-yaml');
 
 /**
  * @param {string|null} projectName - The name/path of project
  * @param {string|null} starterUrl - The GitHub repo of the starter
  * @returns Object containting prompt answers
  */
-module.exports = async function promptUser(projectName, starter) {
+module.exports = async function promptUser(projectName, starter, program) {
   const mainQuestions = [
     {
       type: 'input',
@@ -22,6 +20,7 @@ module.exports = async function promptUser(projectName, starter) {
       type: 'list',
       name: 'quick',
       message: 'Choose your installation type',
+      when: !program.quickstart,
       choices: [
         {
           name: 'Quickstart (recommended)',
@@ -54,50 +53,10 @@ module.exports = async function promptUser(projectName, starter) {
  * @returns Prompt question object
  */
 async function getStarterQuestion() {
-  const content = await getStarterData();
-
-  // Fallback to manual input when fetch fails
-  if (!content) {
-    return {
-      type: 'input',
-      message: 'Please provide the GitHub URL for the starter you would like to use:',
-    };
-  }
-
-  const choices = content.map(option => {
-    const name = option.title.replace('Starter', '');
-
-    return {
-      name,
-      value: `https://github.com/${option.repo}`,
-    };
-  });
-
+  // Ask user to manually input his starter
+  // TODO: find way to suggest the possible v4 starters
   return {
-    type: 'list',
-    message:
-      'Which starter would you like to use? (Starters are fullstack Strapi applications designed for a specific use case)',
-    pageSize: choices.length,
-    choices,
+    type: 'input',
+    message: 'Please provide the npm package name of the starter you want to use:',
   };
-}
-
-/**
- *
- * @returns JSON starter data
- */
-async function getStarterData() {
-  const response = await fetch(
-    `https://api.github.com/repos/strapi/community-content/contents/starters/starters.yml`
-  );
-
-  if (!response.ok) {
-    return null;
-  }
-
-  const { content } = await response.json();
-  const buff = Buffer.from(content, 'base64');
-  const stringified = buff.toString('utf-8');
-
-  return yaml.load(stringified);
 }

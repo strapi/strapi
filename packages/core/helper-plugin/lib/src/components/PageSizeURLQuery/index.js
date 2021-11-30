@@ -6,10 +6,10 @@
 
 import React from 'react';
 import { useIntl } from 'react-intl';
-import { Box } from '@strapi/parts/Box';
-import { Row } from '@strapi/parts/Row';
-import { Select, Option } from '@strapi/parts/Select';
-import { Text } from '@strapi/parts/Text';
+import { Box } from '@strapi/design-system/Box';
+import { Flex } from '@strapi/design-system/Flex';
+import { Select, Option } from '@strapi/design-system/Select';
+import { Typography } from '@strapi/design-system/Typography';
 import PropTypes from 'prop-types';
 import useQueryParams from '../../hooks/useQueryParams';
 import useTracking from '../../hooks/useTracking';
@@ -32,8 +32,9 @@ const PageSizeURLQuery = ({ trackedEvent }) => {
   const pageSize = query?.pageSize || '10';
 
   return (
-    <Row>
+    <Flex>
       <Select
+        size="S"
         aria-label={formatMessage({
           id: 'components.PageFooter.select',
           defaultMessage: 'Entries per page',
@@ -47,14 +48,14 @@ const PageSizeURLQuery = ({ trackedEvent }) => {
         <Option value="100">100</Option>
       </Select>
       <Box paddingLeft={2}>
-        <Text textColor="neutral600" as="label" htmlFor="page-size">
+        <Typography textColor="neutral600" as="label" htmlFor="page-size">
           {formatMessage({
             id: 'components.PageFooter.select',
             defaultMessage: 'Entries per page',
           })}
-        </Text>
+        </Typography>
       </Box>
-    </Row>
+    </Flex>
   );
 };
 

@@ -1,6 +1,5 @@
 'use strict';
 
-const _ = require('lodash');
 const { yup } = require('@strapi/utils');
 
 const strapiServerSchema = yup
@@ -14,9 +13,7 @@ const strapiServerSchema = yup
       if (Array.isArray(value)) {
         return yup.array();
       } else {
-        const shape = _.mapValues(value, () => yup.object({ routes: yup.array().required() }));
-
-        return yup.object(shape);
+        return yup.object();
       }
     }),
     controllers: yup.object(),

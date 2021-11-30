@@ -1,5 +1,6 @@
 'use strict';
 
+const { defaultsDeep } = require('lodash/fp');
 const cors = require('@koa/cors');
 
 const defaults = {
@@ -14,7 +15,7 @@ const defaults = {
 /**
  * @type {import('./').MiddlewareFactory}
  */
-module.exports = options => {
+module.exports = config => {
   const {
     origin,
     expose,
@@ -23,7 +24,7 @@ module.exports = options => {
     methods,
     headers,
     keepHeadersOnError,
-  } = Object.assign({}, defaults, options);
+  } = defaultsDeep(defaults, config);
 
   return cors({
     async origin(ctx) {

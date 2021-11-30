@@ -1,44 +1,42 @@
 {
   "name": "@strapi/plugin-content-manager",
-  "version": "3.6.8",
+  "version": "4.0.0",
   "description": "A powerful UI to easily manage your data.",
-  "strapi": {
-    "icon": "plug",
-    "name": "content-manager",
-    "displayName": "Content Manager",
-    "description": "content-manager.plugin.description",
-    "required": true,
-    "kind": "plugin"
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/strapi/strapi.git"
   },
-  "scripts": {
-    "test:unit": "jest --verbose"
-  },
-  "dependencies": {
-    "@sindresorhus/slugify": "1.1.0",
-    "@strapi/utils": "3.6.8",
-    "lodash": "4.17.21",
-    "pluralize": "^8.0.0"
-  },
+  "license": "SEE LICENSE IN LICENSE",
   "author": {
-    "name": "Strapi team",
+    "name": "Strapi Solutions SAS",
     "email": "hi@strapi.io",
     "url": "https://strapi.io"
   },
   "maintainers": [
     {
-      "name": "Strapi team",
+      "name": "Strapi Solutions SAS",
       "email": "hi@strapi.io",
       "url": "https://strapi.io"
     }
   ],
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/strapi/strapi.git"
+  "scripts": {
+    "test:unit": "jest --verbose"
+  },
+  "dependencies": {
+    "@sindresorhus/slugify": "1.1.0",
+    "@strapi/utils": "4.0.0",
+    "lodash": "4.17.21"
   },
   "engines": {
     "node": ">=12.x.x <=16.x.x",
     "npm": ">=6.0.0"
   },
-  "license": "SEE LICENSE IN LICENSE",
-  "gitHead": "231263a3535658bab1e9492c6aaaed8692d62a53"
+  "strapi": {
+    "icon": "plug",
+    "name": "content-manager",
+    "displayName": "Content Manager",
+    "description": "Quick way to see, edit and delete the data in your database.",
+    "required": true,
+    "kind": "plugin"
+  }
 }

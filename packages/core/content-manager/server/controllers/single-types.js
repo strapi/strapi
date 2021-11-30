@@ -1,9 +1,8 @@
 'use strict';
 
-const { pipe } = require('lodash/fp');
-const { setCreatorFields } = require('@strapi/utils');
+const { setCreatorFields, pipeAsync } = require('@strapi/utils');
 
-const { getService, wrapBadRequest, pickWritableAttributes } = require('../utils');
+const { getService, pickWritableAttributes } = require('../utils');
 
 const findEntity = async (query, model) => {
   const entityManager = getService('entity-manager');
@@ -40,7 +39,7 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    ctx.body = permissionChecker.sanitizeOutput(entity);
+    ctx.body = await permissionChecker.sanitizeOutput(entity);
   },
 
   async createOrUpdate(ctx) {
@@ -67,24 +66,24 @@ module.exports = {
       ? setCreatorFields({ user, isEdition: true })
       : setCreatorFields({ user });
 
-    const sanitizeFn = pipe([pickWritables, pickPermittedFields, setCreator]);
+    const sanitizeFn = pipeAsync(pickWritables, pickPermittedFields, setCreator);
 
-    await wrapBadRequest(async () => {
-      if (!entity) {
-        const newEntity = await entityManager.create(sanitizeFn(body), model, { params: query });
-        ctx.body = permissionChecker.sanitizeOutput(newEntity);
+    if (!entity) {
+      const sanitizedBody = await sanitizeFn(body);
+      const newEntity = await entityManager.create(sanitizedBody, model, { params: query });
+      ctx.body = await permissionChecker.sanitizeOutput(newEntity);
 
-        await strapi.telemetry.send('didCreateFirstContentTypeEntry', { model });
-        return;
-      }
+      await strapi.telemetry.send('didCreateFirstContentTypeEntry', { model });
+      return;
+    }
 
-      if (permissionChecker.cannot.update(entity)) {
-        return ctx.forbidden();
-      }
+    if (permissionChecker.cannot.update(entity)) {
+      return ctx.forbidden();
+    }
 
-      const updatedEntity = await entityManager.update(entity, sanitizeFn(body), model);
-      ctx.body = permissionChecker.sanitizeOutput(updatedEntity);
-    })();
+    const sanitizedBody = await sanitizeFn(body);
+    const updatedEntity = await entityManager.update(entity, sanitizedBody, model);
+    ctx.body = await permissionChecker.sanitizeOutput(updatedEntity);
   },
 
   async delete(ctx) {
@@ -111,11 +110,11 @@ module.exports = {
 
     const deletedEntity = await entityManager.delete(entity, model);
 
-    ctx.body = permissionChecker.sanitizeOutput(deletedEntity);
+    ctx.body = await permissionChecker.sanitizeOutput(deletedEntity);
   },
 
   async publish(ctx) {
-    const { userAbility } = ctx.state;
+    const { userAbility, user } = ctx.state;
     const { model } = ctx.params;
     const { query = {} } = ctx.request;
 
@@ -136,13 +135,17 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const publishedEntity = await entityManager.publish(entity, model);
+    const publishedEntity = await entityManager.publish(
+      entity,
+      setCreatorFields({ user, isEdition: true })({}),
+      model
+    );
 
-    ctx.body = permissionChecker.sanitizeOutput(publishedEntity);
+    ctx.body = await permissionChecker.sanitizeOutput(publishedEntity);
   },
 
   async unpublish(ctx) {
-    const { userAbility } = ctx.state;
+    const { userAbility, user } = ctx.state;
     const { model } = ctx.params;
     const { query = {} } = ctx.request;
 
@@ -163,8 +166,12 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const unpublishedEntity = await entityManager.unpublish(entity, model);
+    const unpublishedEntity = await entityManager.unpublish(
+      entity,
+      setCreatorFields({ user, isEdition: true })({}),
+      model
+    );
 
-    ctx.body = permissionChecker.sanitizeOutput(unpublishedEntity);
+    ctx.body = await permissionChecker.sanitizeOutput(unpublishedEntity);
   },
 };

@@ -6,8 +6,8 @@
 
 import React from 'react';
 import { useIntl } from 'react-intl';
-import { ToggleInput } from '@strapi/parts/ToggleInput';
-import { TextInput } from '@strapi/parts/TextInput';
+import { ToggleInput } from '@strapi/design-system/ToggleInput';
+import { TextInput } from '@strapi/design-system/TextInput';
 import PropTypes from 'prop-types';
 
 const Input = ({

@@ -2,11 +2,11 @@ import React, { useCallback, useMemo } from 'react';
 import { get } from 'lodash';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
-import { Box } from '@strapi/parts/Box';
-import { Checkbox } from '@strapi/parts/Checkbox';
-import { Row } from '@strapi/parts/Row';
-import { TableLabel } from '@strapi/parts/Text';
-import { Grid, GridItem } from '@strapi/parts/Grid';
+import { Box } from '@strapi/design-system/Box';
+import { Checkbox } from '@strapi/design-system/Checkbox';
+import { Flex } from '@strapi/design-system/Flex';
+import { Typography } from '@strapi/design-system/Typography';
+import { Grid, GridItem } from '@strapi/design-system/Grid';
 import CogIcon from '@strapi/icons/Cog';
 import { useIntl } from 'react-intl';
 import CheckboxWrapper from './CheckboxWrapper';
@@ -59,9 +59,11 @@ const SubCategory = ({ subCategory }) => {
 
   return (
     <Box>
-      <Row justifyContent="space-between" alignItems="center">
+      <Flex justifyContent="space-between" alignItems="center">
         <Box paddingRight={4}>
-          <TableLabel textColor="neutral600">{subCategory.label}</TableLabel>
+          <Typography variant="sigma" textColor="neutral600">
+            {subCategory.label}
+          </Typography>
         </Box>
         <Border />
         <Box paddingLeft={4}>
@@ -75,8 +77,8 @@ const SubCategory = ({ subCategory }) => {
             {formatMessage({ id: 'app.utils.select-all', defaultMessage: 'Select all' })}
           </Checkbox>
         </Box>
-      </Row>
-      <Row paddingTop={6} paddingBottom={6}>
+      </Flex>
+      <Flex paddingTop={6} paddingBottom={6}>
         <Grid gap={2} style={{ flex: 1 }}>
           {subCategory.actions.map(action => {
             const name = `${action.name}.enabled`;
@@ -104,7 +106,7 @@ const SubCategory = ({ subCategory }) => {
             );
           })}
         </Grid>
-      </Row>
+      </Flex>
     </Box>
   );
 };

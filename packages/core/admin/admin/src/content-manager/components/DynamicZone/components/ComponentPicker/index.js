@@ -2,10 +2,10 @@ import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import groupBy from 'lodash/groupBy';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { KeyboardNavigable } from '@strapi/parts/KeyboardNavigable';
-import { Box } from '@strapi/parts/Box';
-import { Row } from '@strapi/parts/Row';
-import { Text } from '@strapi/parts/Text';
+import { KeyboardNavigable } from '@strapi/design-system/KeyboardNavigable';
+import { Box } from '@strapi/design-system/Box';
+import { Flex } from '@strapi/design-system/Flex';
+import { Typography } from '@strapi/design-system/Typography';
 import { getTrad } from '../../../../utils';
 import { useContentTypeLayout } from '../../../../hooks';
 import Category from './Category';
@@ -70,14 +70,14 @@ const ComponentPicker = ({ components, isOpen, onClickAddComponent }) => {
         borderColor="neutral150"
         hasRadius
       >
-        <Row justifyContent="center">
-          <Text bold textColor="neutral600">
+        <Flex justifyContent="center">
+          <Typography fontWeight="bold" textColor="neutral600">
             {formatMessage({
               id: getTrad('components.DynamicZone.ComponentPicker-label'),
               defaultMessage: 'Pick one component',
             })}
-          </Text>
-        </Row>
+          </Typography>
+        </Flex>
         <Box paddingTop={2}>
           <KeyboardNavigable attributeName="data-strapi-accordion-toggle">
             {dynamicComponentCategories.map(({ category, components }, index) => {

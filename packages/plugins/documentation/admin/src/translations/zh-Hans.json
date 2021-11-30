@@ -1,11 +1,8 @@
 {
-  "components.Row.generatedDate": "上一个生成的版本",
   "components.Row.open": "打开",
   "components.Row.regenerate": "重新生成",
   "containers.HomePage.Block.title": "版本号",
-  "containers.HomePage.Button.open": "打开文档",
   "containers.HomePage.Button.update": "更新",
-  "containers.HomePage.PluginHeader.description": "配置文档插件",
   "containers.HomePage.PluginHeader.title": "文档 - 设置",
   "containers.HomePage.PopUpWarning.confirm": "我确定",
   "containers.HomePage.PopUpWarning.message": "您确定要删除此版本吗？",

@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
-import { ThemeProvider, lightTheme } from '@strapi/parts';
+import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { useAppInfos } from '@strapi/helper-plugin';
 import ApplicationInfosPage from '../index';
 
@@ -24,6 +24,7 @@ describe('Application page', () => {
       return {
         shouldUpdateStrapi: true,
         latestStrapiReleaseTag: 'v3.6.8',
+        strapiVersion: '4.0.0',
       };
     });
 
@@ -32,7 +33,7 @@ describe('Application page', () => {
     } = render(App);
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c11 {
+      .c10 {
         background: #ffffff;
         padding-top: 32px;
         padding-right: 24px;
@@ -42,11 +43,11 @@ describe('Application page', () => {
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
-      .c26 {
+      .c22 {
         padding-top: 4px;
       }
 
-      .c12 {
+      .c11 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -56,39 +57,34 @@ describe('Application page', () => {
         flex-direction: column;
       }
 
-      .c12 > * {
+      .c11 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c12 > * + * {
+      .c11 > * + * {
         margin-top: 20px;
       }
 
-      .c13 {
+      .c12 {
+        color: #32324d;
         font-weight: 500;
         font-size: 1rem;
         line-height: 1.25;
-        color: #32324d;
       }
 
-      .c17 {
-        font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #32324d;
-      }
-
-      .c18 {
-        font-weight: 600;
-        line-height: 1.14;
-      }
-
-      .c19 {
+      .c16 {
+        color: #666687;
         font-weight: 600;
         font-size: 0.6875rem;
         line-height: 1.45;
         text-transform: uppercase;
+      }
+
+      .c17 {
+        color: #32324d;
+        font-size: 0.875rem;
+        line-height: 1.43;
       }
 
       .c1 {
@@ -97,13 +93,13 @@ describe('Application page', () => {
 
       .c4 {
         background: #f6f6f9;
-        padding-top: 56px;
+        padding-top: 40px;
         padding-right: 56px;
-        padding-bottom: 56px;
+        padding-bottom: 40px;
         padding-left: 56px;
       }
 
-      .c10 {
+      .c9 {
         padding-right: 56px;
         padding-left: 56px;
       }
@@ -150,66 +146,49 @@ describe('Application page', () => {
       }
 
       .c7 {
+        color: #32324d;
         font-weight: 600;
         font-size: 2rem;
         line-height: 1.25;
-        color: #32324d;
       }
 
       .c8 {
-        font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
         color: #666687;
-      }
-
-      .c9 {
         font-size: 1rem;
         line-height: 1.5;
       }
 
-      .c3 {
+      .c3:focus-visible {
         outline: none;
       }
 
-      .c14 {
+      .c13 {
         padding-top: 4px;
       }
 
-      .c15 {
+      .c14 {
         display: grid;
         grid-template-columns: repeat(12,1fr);
         gap: 0px;
       }
 
-      .c16 {
+      .c15 {
         grid-column: span 6;
       }
 
-      .c21 {
-        font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
+      .c19 {
         color: #4945ff;
-      }
-
-      .c22 {
-        font-weight: 600;
-        line-height: 1.14;
-      }
-
-      .c23 {
         font-weight: 600;
         font-size: 0.6875rem;
         line-height: 1.45;
         text-transform: uppercase;
       }
 
-      .c24 {
+      .c20 {
         padding-left: 8px;
       }
 
-      .c20 {
+      .c18 {
         display: -webkit-inline-box;
         display: -webkit-inline-flex;
         display: -ms-inline-flexbox;
@@ -221,17 +200,49 @@ describe('Application page', () => {
         text-transform: uppercase;
         -webkit-text-decoration: none;
         text-decoration: none;
+        position: relative;
+        outline: none;
       }
 
-      .c20 svg path {
+      .c18 svg path {
         fill: #4945ff;
       }
 
-      .c20 svg {
+      .c18 svg {
         font-size: 0.625rem;
       }
 
-      .c25 {
+      .c18:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c18:focus-visible {
+        outline: none;
+      }
+
+      .c18:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
+      }
+
+      .c21 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -239,13 +250,13 @@ describe('Application page', () => {
       }
 
       @media (max-width:68.75rem) {
-        .c16 {
+        .c15 {
           grid-column: span 12;
         }
       }
 
       @media (max-width:34.375rem) {
-        .c16 {
+        .c15 {
           grid-column: span;
         }
       }
@@ -277,62 +288,62 @@ describe('Application page', () => {
                   >
                     <h1
                       class="c7"
-                      id="main-content-title"
                     >
                       Application
                     </h1>
                   </div>
                 </div>
                 <p
-                  class="c8 c9"
+                  class="c8"
                 >
                   See your project's details
                 </p>
               </div>
             </div>
             <div
-              class="c10"
+              class="c9"
             >
               <div
-                class="c11"
+                class="c10"
               >
                 <div
-                  class="c12"
+                  class="c11"
                 >
                   <h3
-                    class="c13"
+                    class="c12"
                   >
                     Information
                   </h3>
                   <div
-                    class="c14 c15"
+                    class="c13 c14"
                   >
                     <div
-                      class="c16"
+                      class="c15"
                     >
                       <div
                         class=""
                       >
                         <span
-                          class="c17 c18 c19"
+                          class="c16"
                         >
                           details
                         </span>
                         <p
                           class="c17"
                         >
-                          v3.6.8
+                          v
+                          4.0.0
                         </p>
                       </div>
                     </div>
                     <div
-                      class="c16"
+                      class="c15"
                     >
                       <div
                         class=""
                       >
                         <span
-                          class="c17 c18 c19"
+                          class="c16"
                         >
                           current plan
                         </span>
@@ -345,28 +356,28 @@ describe('Application page', () => {
                     </div>
                   </div>
                   <div
-                    class="c14 c15"
+                    class="c13 c14"
                   >
                     <div
-                      class="c16"
+                      class="c15"
                     >
                       <div
                         class=""
                       >
                         <a
-                          class="c20"
+                          class="c18"
                           href="https://github.com/strapi/strapi/releases/tag/v3.6.8"
                           rel="noreferrer noopener"
                           target="_blank"
                         >
                           <span
-                            class="c21 c22 c23"
+                            class="c19"
                           >
                             Upgrade your admin panel
                           </span>
                           <span
                             aria-hidden="true"
-                            class="c24 c25"
+                            class="c20 c21"
                           >
                             <svg
                               fill="none"
@@ -385,25 +396,25 @@ describe('Application page', () => {
                       </div>
                     </div>
                     <div
-                      class="c16"
+                      class="c15"
                     >
                       <div
                         class=""
                       >
                         <a
-                          class="c20"
+                          class="c18"
                           href="https://strapi.io/pricing-self-hosted"
                           rel="noreferrer noopener"
                           target="_blank"
                         >
                           <span
-                            class="c21 c22 c23"
+                            class="c19"
                           >
                             See all pricing
                           </span>
                           <span
                             aria-hidden="true"
-                            class="c24 c25"
+                            class="c20 c21"
                           >
                             <svg
                               fill="none"
@@ -423,10 +434,10 @@ describe('Application page', () => {
                     </div>
                   </div>
                   <div
-                    class="c26"
+                    class="c22"
                   >
                     <span
-                      class="c17 c18 c19"
+                      class="c16"
                     >
                       node version
                     </span>
@@ -448,12 +459,13 @@ describe('Application page', () => {
       return {
         shouldUpdateStrapi: true,
         latestStrapiReleaseTag: 'v3.6.8',
+        strapiVersion: '4.0.0',
       };
     });
 
     render(App);
 
-    expect(screen.getByText('v3.6.8')).toBeInTheDocument();
+    expect(screen.getByText('v4.0.0')).toBeInTheDocument();
     expect(screen.getByText('Upgrade your admin panel')).toBeInTheDocument();
   });
 

@@ -23,7 +23,7 @@ const uploadImg = () => {
 
 const components = {
   singleMedia: {
-    name: 'one-media',
+    displayName: 'one-media',
     attributes: {
       media: {
         type: 'media',
@@ -31,7 +31,7 @@ const components = {
     },
   },
   multipleMedia: {
-    name: 'many-media',
+    displayName: 'many-media',
     attributes: {
       media: {
         type: 'media',
@@ -40,7 +40,7 @@ const components = {
     },
   },
   withNested: {
-    name: 'with-nested',
+    displayName: 'with-nested',
     attributes: {
       singleMedia: {
         type: 'component',
@@ -55,7 +55,9 @@ const components = {
 };
 
 const ct = {
-  name: 'withdynamiczonemedia',
+  displayName: 'withdynamiczonemedia',
+  singularName: 'withdynamiczonemedia',
+  pluralName: 'withdynamiczonemedias',
   attributes: {
     field: {
       type: 'dynamiczone',

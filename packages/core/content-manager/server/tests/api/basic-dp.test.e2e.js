@@ -26,13 +26,15 @@ const productWithDP = {
     },
   },
   draftAndPublish: true,
-  name: 'product with DP',
+  displayName: 'product with DP',
+  singularName: 'product-with-dp',
+  pluralName: 'product-with-dps',
   description: '',
   collectionName: '',
 };
 
 const compo = {
-  name: 'compo',
+  displayName: 'compo',
   attributes: {
     name: {
       type: 'string',
@@ -177,8 +179,15 @@ describe('CM API - Basic + draftAndPublish', () => {
       method: 'POST',
     });
 
-    expect(body.statusCode).toBe(400);
-    expect(body.message).toBe('already.published');
+    expect(body).toMatchObject({
+      data: null,
+      error: {
+        status: 400,
+        name: 'ApplicationError',
+        message: 'already.published',
+        details: {},
+      },
+    });
   });
 
   test('Unpublish article1, expect article1 to be set to null', async () => {
@@ -202,8 +211,15 @@ describe('CM API - Basic + draftAndPublish', () => {
       method: 'POST',
     });
 
-    expect(body.statusCode).toBe(400);
-    expect(body.message).toBe('already.draft');
+    expect(body).toMatchObject({
+      data: null,
+      error: {
+        status: 400,
+        name: 'ApplicationError',
+        message: 'already.draft',
+        details: {},
+      },
+    });
   });
 
   test('Delete a draft', async () => {
@@ -266,9 +282,22 @@ describe('CM API - Basic + draftAndPublish', () => {
       });
 
       expect(res.statusCode).toBe(400);
-      expect(_.get(res, 'body.data.errors.description.0')).toBe(
-        'description must be at most 30 characters'
-      );
+      expect(res.body).toMatchObject({
+        data: null,
+        error: {
+          message: 'description must be at most 30 characters',
+          name: 'ValidationError',
+          details: {
+            errors: [
+              {
+                path: ['description'],
+                message: 'description must be at most 30 characters',
+                name: 'ValidationError',
+              },
+            ],
+          },
+        },
+      });
     });
   });
 });

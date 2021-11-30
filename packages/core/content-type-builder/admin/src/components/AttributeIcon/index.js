@@ -1,30 +1,31 @@
 import React from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
-import { Box } from '@strapi/parts/Box';
+import { Box } from '@strapi/design-system/Box';
 import Component from '@strapi/icons/Component';
-import CT from '@strapi/icons/Ct';
+import CollectionType from '@strapi/icons/CollectionType';
 import Date from '@strapi/icons/Date';
 import Boolean from '@strapi/icons/Boolean';
 import DynamicZone from '@strapi/icons/DynamicZone';
 import Email from '@strapi/icons/Email';
 import Enumeration from '@strapi/icons/Enumeration';
 import Json from '@strapi/icons/Json';
-import LongDescription from '@strapi/icons/LongDescription';
+import LongDescription from '@strapi/icons/RichText';
 import Media from '@strapi/icons/Media';
 import Password from '@strapi/icons/Password';
 import Relation from '@strapi/icons/Relation';
-import St from '@strapi/icons/St';
+import SingleType from '@strapi/icons/SingleType';
 import Text from '@strapi/icons/Text';
 import Uid from '@strapi/icons/Uid';
-import Numbers from '@strapi/icons/Numbers';
+import Numbers from '@strapi/icons/Number';
 import { pxToRem } from '@strapi/helper-plugin';
 
 const iconByTypes = {
   biginteger: Numbers,
   boolean: Boolean,
+  collectionType: CollectionType,
   component: Component,
-  contentType: CT,
+  contentType: CollectionType,
   date: Date,
   datetime: Date,
   decimal: Numbers,
@@ -43,7 +44,7 @@ const iconByTypes = {
   password: Password,
   relation: Relation,
   richtext: LongDescription,
-  singleType: St,
+  singleType: SingleType,
   string: Text,
   text: Text,
   time: Date,

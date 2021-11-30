@@ -1,16 +1,17 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { BaseCheckbox } from '@strapi/parts/BaseCheckbox';
-import { Box } from '@strapi/parts/Box';
-import { IconButton } from '@strapi/parts/IconButton';
-import { Row } from '@strapi/parts/Row';
-import { Text } from '@strapi/parts/Text';
-import { Tbody, Td, Tr } from '@strapi/parts/Table';
-import EditIcon from '@strapi/icons/EditIcon';
-import DeleteIcon from '@strapi/icons/DeleteIcon';
+import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
+import { Box } from '@strapi/design-system/Box';
+import { IconButton } from '@strapi/design-system/IconButton';
+import { Flex } from '@strapi/design-system/Flex';
+import { Typography } from '@strapi/design-system/Typography';
+import { Tbody, Td, Tr } from '@strapi/design-system/Table';
+import Pencil from '@strapi/icons/Pencil';
+import Trash from '@strapi/icons/Trash';
 import { useHistory } from 'react-router-dom';
 import { useIntl } from 'react-intl';
 import { stopPropagation, onRowClick } from '@strapi/helper-plugin';
+import { getFullName } from '../../../../../../../utils';
 
 const TableRows = ({
   canDelete,
@@ -49,7 +50,7 @@ const TableRows = ({
                       id: 'app.component.table.select.one-entry',
                       defaultMessage: `Select {target}`,
                     },
-                    { target: `${data.firstname} ${data.lastname}` }
+                    { target: getFullName(data.firstname, data.lastname) }
                   )}
                   checked={isChecked}
                   onChange={() => {
@@ -64,7 +65,7 @@ const TableRows = ({
                   {typeof cellFormatter === 'function' ? (
                     cellFormatter(data, { key, name, ...rest })
                   ) : (
-                    <Text textColor="neutral800">{data[name] || '-'}</Text>
+                    <Typography textColor="neutral800">{data[name] || '-'}</Typography>
                   )}
                 </Td>
               );
@@ -72,15 +73,15 @@ const TableRows = ({
 
             {withBulkActions && (
               <Td>
-                <Row justifyContent="end">
+                <Flex justifyContent="end">
                   <IconButton
                     onClick={() => push(`${pathname}/${data.id}`)}
                     label={formatMessage(
                       { id: 'app.component.table.edit', defaultMessage: 'Edit {target}' },
-                      { target: `${data.firstname} ${data.lastname}` }
+                      { target: getFullName(data.firstname, data.lastname) }
                     )}
                     noBorder
-                    icon={<EditIcon />}
+                    icon={<Pencil />}
                   />
 
                   {canDelete && (
@@ -89,14 +90,14 @@ const TableRows = ({
                         onClick={() => onClickDelete(data.id)}
                         label={formatMessage(
                           { id: 'app.component.table.delete', defaultMessage: 'Delete {target}' },
-                          { target: `${data.firstname} ${data.lastname}` }
+                          { target: getFullName(data.firstname, data.lastname) }
                         )}
                         noBorder
-                        icon={<DeleteIcon />}
+                        icon={<Trash />}
                       />
                     </Box>
                   )}
-                </Row>
+                </Flex>
               </Td>
             )}
           </Tr>

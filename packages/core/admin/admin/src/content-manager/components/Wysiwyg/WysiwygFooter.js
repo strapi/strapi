@@ -1,9 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Box } from '@strapi/parts/Box';
-import { Row } from '@strapi/parts/Row';
-import { Text } from '@strapi/parts/Text';
+import { Box } from '@strapi/design-system/Box';
+import { Flex } from '@strapi/design-system/Flex';
+import { Typography } from '@strapi/design-system/Typography';
 import Expand from '@strapi/icons/Expand';
 import { ExpandButton } from './WysiwygStyles';
 
@@ -12,17 +12,17 @@ const WysiwygFooter = ({ isPreviewMode, onToggleExpand }) => {
 
   return (
     <Box padding={2} background="neutral100" hasRadius>
-      <Row justifyContent="flex-end" alignItems="flex-end">
+      <Flex justifyContent="flex-end" alignItems="flex-end">
         <ExpandButton id="expand" disabled={isPreviewMode} onClick={onToggleExpand}>
-          <Text>
+          <Typography>
             {formatMessage({
               id: 'components.WysiwygBottomControls.fullscreen',
               defaultMessage: 'Expand',
             })}
-          </Text>
+          </Typography>
           <Expand />
         </ExpandButton>
-      </Row>
+      </Flex>
     </Box>
   );
 };

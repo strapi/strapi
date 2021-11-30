@@ -4,10 +4,10 @@ import get from 'lodash/get';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
-import { BaseCheckbox } from '@strapi/parts/BaseCheckbox';
-import { Box } from '@strapi/parts/Box';
-import { Row } from '@strapi/parts/Row';
-import { Text } from '@strapi/parts/Text';
+import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
+import { Box } from '@strapi/design-system/Box';
+import { Flex } from '@strapi/design-system/Flex';
+import { Typography } from '@strapi/design-system/Typography';
 import IS_DISABLED from 'ee_else_ce/pages/SettingsPage/pages/Roles/EditPage/components/ContentTypeCollapse/CollapsePropertyMatrix/SubActionRow/utils/constants';
 import { usePermissionsDataManager } from '../../../../../../../../../hooks';
 import CollapseLabel from '../../../CollapseLabel';
@@ -19,12 +19,12 @@ import { getCheckboxState } from '../../../utils';
 import { activeStyle } from '../../utils';
 import CarretIcon from '../CarretIcon';
 
-const Cell = styled(Row)`
+const Cell = styled(Flex)`
   width: ${cellWidth};
   position: relative;
 `;
 
-const RowWrapper = styled(Row)`
+const RowWrapper = styled(Flex)`
   height: ${rowHeight};
 `;
 
@@ -37,7 +37,7 @@ const LeftBorderTimeline = styled(Box)`
     isVisible ? `4px solid ${theme.colors.primary200}` : '4px solid transparent'};
 `;
 
-const RowStyle = styled(Row)`
+const RowStyle = styled(Flex)`
   padding-left: ${({ theme }) => theme.spaces[4]};
   width: ${({ level }) => 145 - level * 36}px;
 
@@ -111,7 +111,7 @@ const SubActionRow = ({
           <LeftBorderTimeline key={value} isVisible={isVisible}>
             <RowWrapper>
               <Curve color="primary200" />
-              <Row style={{ flex: 1 }}>
+              <Flex style={{ flex: 1 }}>
                 <RowStyle level={recursiveLevel} isActive={isActive} isCollapsable={isArrayType}>
                   <CollapseLabel
                     alignItems="center"
@@ -126,12 +126,12 @@ const SubActionRow = ({
                     })}
                     title={label}
                   >
-                    <Text ellipsis>{upperFirst(label)}</Text>
+                    <Typography ellipsis>{upperFirst(label)}</Typography>
                     {required && <RequiredSign />}
                     <CarretIcon $isActive={isActive} />
                   </CollapseLabel>
                 </RowStyle>
-                <Row style={{ flex: 1 }}>
+                <Flex style={{ flex: 1 }}>
                   {propertyActions.map(
                     ({ actionId, label: propertyLabel, isActionRelatedToCurrentProperty }) => {
                       if (!isActionRelatedToCurrentProperty) {
@@ -213,8 +213,8 @@ const SubActionRow = ({
                       );
                     }
                   )}
-                </Row>
-              </Row>
+                </Flex>
+              </Flex>
             </RowWrapper>
             {displayedRecursiveChildren && isActive && (
               <Box paddingBottom={2}>

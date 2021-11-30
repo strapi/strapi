@@ -1,12 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { TableLabel, Text } from '@strapi/parts/Text';
-import { IconButton } from '@strapi/parts/IconButton';
-import { Stack } from '@strapi/parts/Stack';
-import { VisuallyHidden } from '@strapi/parts/VisuallyHidden';
-import { Table, Thead, Tr, Th, Td, Tbody } from '@strapi/parts/Table';
-import EditIcon from '@strapi/icons/EditIcon';
-import DeleteIcon from '@strapi/icons/DeleteIcon';
+import { Typography } from '@strapi/design-system/Typography';
+import { IconButton } from '@strapi/design-system/IconButton';
+import { Stack } from '@strapi/design-system/Stack';
+import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
+import { Table, Thead, Tr, Th, Td, Tbody } from '@strapi/design-system/Table';
+import Pencil from '@strapi/icons/Pencil';
+import Trash from '@strapi/icons/Trash';
 import { useIntl } from 'react-intl';
 import { stopPropagation, onRowClick } from '@strapi/helper-plugin';
 
@@ -20,19 +20,19 @@ const LocaleTable = ({ locales, onDeleteLocale, onEditLocale }) => {
       <Thead>
         <Tr>
           <Th>
-            <TableLabel textColor="neutral600">
+            <Typography variant="sigma" textColor="neutral600">
               {formatMessage({ id: getTrad('Settings.locales.row.id') })}
-            </TableLabel>
+            </Typography>
           </Th>
           <Th>
-            <TableLabel textColor="neutral600">
+            <Typography variant="sigma" textColor="neutral600">
               {formatMessage({ id: getTrad('Settings.locales.row.displayName') })}
-            </TableLabel>
+            </Typography>
           </Th>
           <Th>
-            <TableLabel textColor="neutral600">
+            <Typography variant="sigma" textColor="neutral600">
               {formatMessage({ id: getTrad('Settings.locales.row.default-locale') })}
-            </TableLabel>
+            </Typography>
           </Th>
           <Th>
             <VisuallyHidden>Actions</VisuallyHidden>
@@ -49,17 +49,17 @@ const LocaleTable = ({ locales, onDeleteLocale, onEditLocale }) => {
             })}
           >
             <Td>
-              <Text textColor="neutral800">{locale.id}</Text>
+              <Typography textColor="neutral800">{locale.id}</Typography>
             </Td>
             <Td>
-              <Text textColor="neutral800">{locale.name}</Text>
+              <Typography textColor="neutral800">{locale.name}</Typography>
             </Td>
             <Td>
-              <Text textColor="neutral800">
+              <Typography textColor="neutral800">
                 {locale.isDefault
                   ? formatMessage({ id: getTrad('Settings.locales.row.default-locale') })
                   : null}
-              </Text>
+              </Typography>
             </Td>
             <Td>
               <Stack
@@ -72,7 +72,7 @@ const LocaleTable = ({ locales, onDeleteLocale, onEditLocale }) => {
                   <IconButton
                     onClick={() => onEditLocale(locale)}
                     label={formatMessage({ id: getTrad('Settings.list.actions.edit') })}
-                    icon={<EditIcon />}
+                    icon={<Pencil />}
                     noBorder
                   />
                 )}
@@ -80,7 +80,7 @@ const LocaleTable = ({ locales, onDeleteLocale, onEditLocale }) => {
                   <IconButton
                     onClick={() => onDeleteLocale(locale)}
                     label={formatMessage({ id: getTrad('Settings.list.actions.delete') })}
-                    icon={<DeleteIcon />}
+                    icon={<Trash />}
                     noBorder
                   />
                 )}

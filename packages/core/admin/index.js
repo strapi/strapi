@@ -92,9 +92,22 @@ async function build({ plugins, dir, env, options, optimize }) {
 async function createPluginsJs(plugins, dest) {
   const pluginsArray = plugins.map(({ pathToPlugin, name }) => {
     const shortName = _.camelCase(name);
+
+    /**
+     * path.join, on windows, it uses backslashes to resolve path.
+     * The problem is that Webpack does not windows paths
+     * With this tool, we need to rely on "/" and not "\".
+     * This is the reason why '..\\..\\..\\node_modules\\@strapi\\plugin-content-type-builder/strapi-admin.js' was not working.
+     * The regexp at line 105 aims to replace the windows backslashes by standard slash so that webpack can deal with them.
+     * Backslash looks to work only for absolute paths with webpack => https://webpack.js.org/concepts/module-resolution/#absolute-paths
+     */
+    const realPath = path
+      .join(path.relative(path.resolve(dest, 'admin', 'src'), pathToPlugin), 'strapi-admin.js')
+      .replace(/\\/g, '/');
+
     return {
       name,
-      pathToPlugin: path.relative(path.resolve(dest, 'admin/src'), pathToPlugin),
+      pathToPlugin: realPath,
       shortName,
     };
   });
@@ -102,7 +115,7 @@ async function createPluginsJs(plugins, dest) {
   const content = `
 ${pluginsArray
   .map(({ pathToPlugin, shortName }) => {
-    const req = `'${pathToPlugin}/strapi-admin.js'`;
+    const req = `'${pathToPlugin}'`;
 
     return `import ${shortName} from ${req};`;
   })
@@ -208,27 +221,36 @@ async function watchAdmin({ plugins, dir, host, port, browser, options }) {
 
   const webpackConfig = getCustomWebpackConfig(dir, args);
   const opts = {
-    clientLogLevel: 'silent',
-    quiet: true,
+    client: {
+      logging: 'none',
+      overlay: {
+        errors: true,
+        warnings: false,
+      },
+    },
+
     open: browser === 'true' ? true : browser,
-    publicPath: options.adminPath,
+    devMiddleware: {
+      publicPath: options.adminPath,
+    },
     historyApiFallback: {
       index: options.adminPath,
       disableDotRule: true,
     },
+
     ...webpack(webpackConfig).options.devServer,
   };
 
-  const server = new WebpackDevServer(webpack(webpackConfig), opts);
+  const server = new WebpackDevServer(opts, webpack(webpackConfig));
 
-  server.listen(port, host, function(err) {
+  server.start(port, host, function(err) {
     if (err) {
       console.log(err);
     }
 
     console.log(chalk.green('Starting the development server...'));
     console.log();
-    console.log(chalk.green(`Admin development at http://${host}:${port}${opts.publicPath}`));
+    console.log(chalk.green(`Admin development at http://${host}:${port}${options.adminPath}`));
   });
 
   watchFiles(dir);

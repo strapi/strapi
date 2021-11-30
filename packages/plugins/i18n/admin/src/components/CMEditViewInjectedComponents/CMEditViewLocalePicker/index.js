@@ -1,11 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import get from 'lodash/get';
-import { Box } from '@strapi/parts/Box';
-import { Divider } from '@strapi/parts/Divider';
-import { Select, Option } from '@strapi/parts/Select';
-import { TableLabel } from '@strapi/parts/Text';
-import { Stack } from '@strapi/parts/Stack';
+import { Box } from '@strapi/design-system/Box';
+import { Divider } from '@strapi/design-system/Divider';
+import { Select, Option } from '@strapi/design-system/Select';
+import { Typography } from '@strapi/design-system/Typography';
+import { Stack } from '@strapi/design-system/Stack';
 import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
 import { stringify } from 'qs';
@@ -30,6 +30,7 @@ const CMEditViewLocalePicker = ({
   const { formatMessage } = useIntl();
 
   const currentLocale = get(query, 'plugins.i18n.locale', false);
+
   const { push } = useHistory();
 
   const handleChange = value => {
@@ -86,15 +87,21 @@ const CMEditViewLocalePicker = ({
   });
 
   const filteredOptions = options.filter(({ value }) => value !== currentLocale);
+  const currentLocaleObject = appLocales.find(({ code }) => code === currentLocale);
+
   const value = options.find(({ value }) => {
     return value === currentLocale;
-  });
+  }) || { value: currentLocaleObject.code, label: currentLocaleObject.name };
+
+  if (!currentLocale) {
+    return null;
+  }
 
   return (
     <Box paddingTop={6}>
-      <TableLabel textColor="neutral600">
+      <Typography variant="sigma" textColor="neutral600">
         {formatMessage({ id: getTrad('plugin.name'), defaultMessage: 'Internationalization' })}
-      </TableLabel>
+      </Typography>
       <Box paddingTop={2} paddingBottom={6}>
         <Divider />
       </Box>
@@ -108,11 +115,11 @@ const CMEditViewLocalePicker = ({
             value={value?.value}
           >
             <Option
-              value={value.value}
+              value={value?.value}
               disabled
               startIcon={hasDraftAndPublishEnabled ? <Bullet status={currentLocaleStatus} /> : null}
             >
-              {value.label}
+              {value?.label}
             </Option>
             {filteredOptions.map(option => {
               return (

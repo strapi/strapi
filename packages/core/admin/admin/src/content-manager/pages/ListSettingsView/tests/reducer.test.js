@@ -5,8 +5,8 @@ describe('CONTENT MANAGER | CONTAINERS | ListSettingsView | reducer', () => {
 
   beforeEach(() => {
     state = {
-      labelForm: {},
-      labelToEdit: '',
+      fieldForm: {},
+      fieldToEdit: '',
       initialData: {},
       modifiedData: {},
       status: 'resolved',
@@ -72,32 +72,15 @@ describe('CONTENT MANAGER | CONTAINERS | ListSettingsView | reducer', () => {
     });
   });
 
-  describe('ON_CHANGE_LABEL_METAS', () => {
+  describe('ON_CHANGE_FIELD_METAS', () => {
     it('should set the attribute metas label in the label form', () => {
       const expected = {
         ...state,
-        labelForm: {
+        fieldForm: {
           label: 'Cover',
         },
       };
-      const action = { type: 'ON_CHANGE_LABEL_METAS', name: 'label', value: 'Cover' };
-
-      expect(reducer(state, action)).toEqual(expected);
-    });
-  });
-
-  describe('ON_RESET', () => {
-    it('should set the current modified data to the initial state', () => {
-      state.modifiedData = {
-        layouts: {
-          list: ['id', 'description', 'title'],
-        },
-      };
-      const expected = {
-        ...state,
-        modifiedData: {},
-      };
-      const action = { type: 'ON_RESET' };
+      const action = { type: 'ON_CHANGE_FIELD_METAS', name: 'label', value: 'Cover' };
 
       expect(reducer(state, action)).toEqual(expected);
     });
@@ -130,7 +113,7 @@ describe('CONTENT MANAGER | CONTAINERS | ListSettingsView | reducer', () => {
     });
   });
 
-  describe('SET_LABEL_TO_EDIT', () => {
+  describe('SET_FIELD_TO_EDIT', () => {
     it('should set the label form data of the field to edit', () => {
       state.modifiedData = {
         metadatas: {
@@ -144,8 +127,8 @@ describe('CONTENT MANAGER | CONTAINERS | ListSettingsView | reducer', () => {
       };
       const expected = {
         ...state,
-        labelToEdit: 'cover',
-        labelForm: {
+        fieldToEdit: 'cover',
+        fieldForm: {
           label: 'Cover',
           sortable: false,
         },
@@ -160,18 +143,18 @@ describe('CONTENT MANAGER | CONTAINERS | ListSettingsView | reducer', () => {
           },
         },
       };
-      const action = { type: 'SET_LABEL_TO_EDIT', labelToEdit: 'cover' };
+      const action = { type: 'SET_FIELD_TO_EDIT', fieldToEdit: 'cover' };
 
       expect(reducer(state, action)).toEqual(expected);
     });
   });
 
-  describe('UNSET_LABEL_TO_EDIT', () => {
+  describe('UNSET_FIELD_TO_EDIT', () => {
     it('should unset the label to edit and clean the label form', () => {
       state = {
         ...state,
-        labelToEdit: 'cover',
-        labelForm: {
+        fieldToEdit: 'cover',
+        fieldForm: {
           label: 'Cover',
           sortable: false,
         },
@@ -188,8 +171,8 @@ describe('CONTENT MANAGER | CONTAINERS | ListSettingsView | reducer', () => {
       };
       const expected = {
         ...state,
-        labelToEdit: '',
-        labelForm: {},
+        fieldToEdit: '',
+        fieldForm: {},
         modifiedData: {
           metadatas: {
             cover: {
@@ -201,18 +184,18 @@ describe('CONTENT MANAGER | CONTAINERS | ListSettingsView | reducer', () => {
           },
         },
       };
-      const action = { type: 'UNSET_LABEL_TO_EDIT', labelToEdit: 'cover' };
+      const action = { type: 'UNSET_FIELD_TO_EDIT', fieldToEdit: 'cover' };
 
       expect(reducer(state, action)).toEqual(expected);
     });
   });
 
-  describe('SUBMIT_LABEL_FORM', () => {
+  describe('SUBMIT_FIELD_FORM', () => {
     it('should submit the label and the sortable value of the field to edit', () => {
       state = {
         ...state,
-        labelToEdit: 'cover',
-        labelForm: {
+        fieldToEdit: 'cover',
+        fieldForm: {
           label: 'New Cover',
           sortable: true,
         },
@@ -229,8 +212,8 @@ describe('CONTENT MANAGER | CONTAINERS | ListSettingsView | reducer', () => {
       };
       const expected = {
         ...state,
-        labelToEdit: 'cover',
-        labelForm: {
+        fieldToEdit: 'cover',
+        fieldForm: {
           label: 'New Cover',
           sortable: true,
         },
@@ -245,48 +228,7 @@ describe('CONTENT MANAGER | CONTAINERS | ListSettingsView | reducer', () => {
           },
         },
       };
-      const action = { type: 'SUBMIT_LABEL_FORM', labelToEdit: 'cover' };
-
-      expect(reducer(state, action)).toEqual(expected);
-    });
-  });
-
-  describe('SUBMIT_SUCCEEDED', () => {
-    it('should submit the label and the sortable value of the field to edit', () => {
-      state.modifiedData = {
-        metadatas: {
-          cover: {
-            list: {
-              label: 'Cover',
-              sortable: false,
-            },
-          },
-        },
-      };
-      const expected = {
-        ...state,
-        initialData: {
-          metadatas: {
-            cover: {
-              list: {
-                label: 'Cover',
-                sortable: false,
-              },
-            },
-          },
-        },
-        modifiedData: {
-          metadatas: {
-            cover: {
-              list: {
-                label: 'Cover',
-                sortable: false,
-              },
-            },
-          },
-        },
-      };
-      const action = { type: 'SUBMIT_SUCCEEDED' };
+      const action = { type: 'SUBMIT_FIELD_FORM', fieldToEdit: 'cover' };
 
       expect(reducer(state, action)).toEqual(expected);
     });

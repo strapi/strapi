@@ -35,7 +35,9 @@ const productModel = {
       target: 'api::shop.shop',
     },
   },
-  name: 'product',
+  displayName: 'Product',
+  singularName: 'product',
+  pluralName: 'products',
 };
 
 const categoryModel = {
@@ -45,7 +47,9 @@ const categoryModel = {
       unique: true,
     },
   },
-  name: 'category',
+  displayName: 'Category',
+  singularName: 'category',
+  pluralName: 'categories',
 };
 
 const shopModel = {
@@ -58,7 +62,9 @@ const shopModel = {
       type: 'string',
     },
   },
-  name: 'shop',
+  displayName: 'Shop',
+  singularName: 'shop',
+  pluralName: 'shops',
 };
 
 const PRODUCT_SHOP_COUNT = 12;
@@ -105,20 +111,20 @@ const getUID = modelName => `api::${modelName}.${modelName}`;
 const getCMPrefixUrl = modelName => `/content-manager/collection-types/${getUID(modelName)}`;
 
 describe('x-to-many RF Preview', () => {
-  const cmProductUrl = getCMPrefixUrl(productModel.name);
+  const cmProductUrl = getCMPrefixUrl(productModel.singularName);
 
   beforeAll(async () => {
     await builder
       .addContentTypes([shopModel, categoryModel, productModel])
-      .addFixtures(shopModel.name, fixtures.shop)
-      .addFixtures(categoryModel.name, fixtures.category)
-      .addFixtures(productModel.name, fixtures.product)
+      .addFixtures(shopModel.singularName, fixtures.shop)
+      .addFixtures(categoryModel.singularName, fixtures.category)
+      .addFixtures(productModel.singularName, fixtures.product)
       .build();
 
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
 
-    Object.assign(data, builder.sanitizedFixtures(strapi));
+    Object.assign(data, await builder.sanitizedFixtures(strapi));
   });
 
   afterAll(async () => {
@@ -132,28 +138,50 @@ describe('x-to-many RF Preview', () => {
       const { body, statusCode } = await rq.get(`${cmProductUrl}/${product.id}/${field}`);
 
       expect(statusCode).toBe(400);
-      expect(body.error).toBe('Bad Request');
-      expect(body.message).toBe('Invalid target field');
+      expect(body).toMatchObject({
+        data: null,
+        error: {
+          status: 400,
+          name: 'BadRequestError',
+          message: 'Invalid target field',
+          details: {},
+        },
+      });
     });
 
     test('Throws if the entity does not exist', async () => {
       const { body, statusCode } = await rq.get(`${cmProductUrl}/${data.shop[11].id}/categories`);
 
       expect(statusCode).toBe(404);
-      expect(body.error).toBe('Not Found');
+      expect(body).toMatchObject({
+        data: null,
+        error: {
+          status: 404,
+          name: 'NotFoundError',
+          message: 'Not Found',
+          details: {},
+        },
+      });
     });
   });
 
   describe('Relation Nature', () => {
     test(`Throws if the relation's nature is not a x-to-many`, async () => {
-      const url = getCMPrefixUrl(categoryModel.name);
+      const url = getCMPrefixUrl(categoryModel.singularName);
       const id = data.category[0].id;
 
       const { body, statusCode } = await rq.get(`${url}/${id}/product`);
 
       expect(statusCode).toBe(400);
-      expect(body.error).toBe('Bad Request');
-      expect(body.message).toBe('Invalid target field');
+      expect(body).toMatchObject({
+        data: null,
+        error: {
+          status: 400,
+          name: 'BadRequestError',
+          message: 'Invalid target field',
+          details: {},
+        },
+      });
     });
   });
 
@@ -180,26 +208,25 @@ describe('x-to-many RF Preview', () => {
   });
 
   describe('Pagination', () => {
-    test.each([
-      [1, 10],
-      [2, 10],
-      [5, 1],
-      [4, 2],
-      [1, 100],
-    ])('Custom pagination (%s, %s)', async (page, pageSize) => {
-      const product = data.product[0];
+    test.each([[1, 10], [2, 10], [5, 1], [4, 2], [1, 100]])(
+      'Custom pagination (%s, %s)',
+      async (page, pageSize) => {
+        const product = data.product[0];
 
-      const { body, statusCode } = await rq.get(
-        `${cmProductUrl}/${product.id}/shops?page=${page}&pageSize=${pageSize}`
-      );
+        const { body, statusCode } = await rq.get(
+          `${cmProductUrl}/${product.id}/shops?page=${page}&pageSize=${pageSize}`
+        );
 
-      expect(statusCode).toBe(200);
+        expect(statusCode).toBe(200);
 
-      const { pagination, results } = body;
+        const { pagination, results } = body;
 
-      expect(pagination.page).toBe(page);
-      expect(pagination.pageSize).toBe(pageSize);
-      expect(results).toHaveLength(Math.min(pageSize, PRODUCT_SHOP_COUNT - pageSize * (page - 1)));
-    });
+        expect(pagination.page).toBe(page);
+        expect(pagination.pageSize).toBe(pageSize);
+        expect(results).toHaveLength(
+          Math.min(pageSize, PRODUCT_SHOP_COUNT - pageSize * (page - 1))
+        );
+      }
+    );
   });
 });

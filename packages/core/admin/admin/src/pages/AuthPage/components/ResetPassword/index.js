@@ -2,16 +2,17 @@ import React, { useState } from 'react';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import { Form } from '@strapi/helper-plugin';
-import { Box } from '@strapi/parts/Box';
-import { Stack } from '@strapi/parts/Stack';
-import { Main } from '@strapi/parts/Main';
-import { Row } from '@strapi/parts/Row';
-import { Link } from '@strapi/parts/Link';
-import { Button } from '@strapi/parts/Button';
-import { TextInput } from '@strapi/parts/TextInput';
-import { H1, Text } from '@strapi/parts/Text';
-import Hide from '@strapi/icons/Hide';
-import Show from '@strapi/icons/Show';
+import { Box } from '@strapi/design-system/Box';
+import { Stack } from '@strapi/design-system/Stack';
+import { Main } from '@strapi/design-system/Main';
+import { Flex } from '@strapi/design-system/Flex';
+import { Link } from '@strapi/design-system/Link';
+import { Button } from '@strapi/design-system/Button';
+import { TextInput } from '@strapi/design-system/TextInput';
+import { Typography } from '@strapi/design-system/Typography';
+import EyeStriked from '@strapi/icons/EyeStriked';
+import Eye from '@strapi/icons/Eye';
+import styled from 'styled-components';
 import { Formik } from 'formik';
 import UnauthenticatedLayout, {
   Column,
@@ -19,6 +20,12 @@ import UnauthenticatedLayout, {
 } from '../../../../layouts/UnauthenticatedLayout';
 import Logo from '../Logo';
 import FieldActionWrapper from '../FieldActionWrapper';
+
+const PasswordInput = styled(TextInput)`
+  ::-ms-reveal {
+    display: none;
+  }
+`;
 
 const ForgotPassword = ({ onSubmit, schema }) => {
   const [passwordShown, setPasswordShown] = useState(false);
@@ -44,25 +51,30 @@ const ForgotPassword = ({ onSubmit, schema }) => {
                 <Column>
                   <Logo />
                   <Box paddingTop={6} paddingBottom={7}>
-                    <H1>
+                    <Typography as="h1" variant="alpha">
                       {formatMessage({
                         id: 'Auth.reset-password.title',
                         defaultMessage: 'Reset password',
                       })}
-                    </H1>
+                    </Typography>
                   </Box>
                   {errors.errorMessage && (
-                    <Text id="global-form-error" role="alert" tabIndex={-1} textColor="danger600">
+                    <Typography
+                      id="global-form-error"
+                      role="alert"
+                      tabIndex={-1}
+                      textColor="danger600"
+                    >
                       {formatMessage({
                         id: errors.errorMessage,
                         defaultMessage: 'An error occurred',
                       })}
-                    </Text>
+                    </Typography>
                   )}
                 </Column>
 
                 <Stack size={6}>
-                  <TextInput
+                  <PasswordInput
                     name="password"
                     onChange={handleChange}
                     value={values.password}
@@ -92,7 +104,7 @@ const ForgotPassword = ({ onSubmit, schema }) => {
                               }
                         )}
                       >
-                        {passwordShown ? <Show /> : <Hide />}
+                        {passwordShown ? <Eye /> : <EyeStriked />}
                       </FieldActionWrapper>
                     }
                     hint={formatMessage({
@@ -107,7 +119,7 @@ const ForgotPassword = ({ onSubmit, schema }) => {
                     })}
                     type={passwordShown ? 'text' : 'password'}
                   />
-                  <TextInput
+                  <PasswordInput
                     name="confirmPassword"
                     onChange={handleChange}
                     value={values.confirmPassword}
@@ -137,7 +149,7 @@ const ForgotPassword = ({ onSubmit, schema }) => {
                               }
                         )}
                       >
-                        {confirmPasswordShown ? <Show /> : <Hide />}
+                        {confirmPasswordShown ? <Eye /> : <EyeStriked />}
                       </FieldActionWrapper>
                     }
                     required
@@ -158,15 +170,13 @@ const ForgotPassword = ({ onSubmit, schema }) => {
             )}
           </Formik>
         </LayoutContent>
-        <Row justifyContent="center">
+        <Flex justifyContent="center">
           <Box paddingTop={4}>
             <Link to="/auth/login">
-              <Text small>
-                {formatMessage({ id: 'Auth.link.ready', defaultMessage: 'Ready to sign in?' })}
-              </Text>
+              {formatMessage({ id: 'Auth.link.ready', defaultMessage: 'Ready to sign in?' })}
             </Link>
           </Box>
-        </Row>
+        </Flex>
       </Main>
     </UnauthenticatedLayout>
   );

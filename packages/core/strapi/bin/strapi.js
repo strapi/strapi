@@ -127,7 +127,7 @@ program
 
 // `$ strapi generate:template <directory>`
 program
-  .command('generate:template <directory>')
+  .command('templates:generate <directory>')
   .description('Generate template from Strapi project')
   .action(getLocalScript('generate-template'));
 
@@ -207,5 +207,15 @@ program
   .command('hooks:list')
   .description('List all the application hooks')
   .action(getLocalScript('hooks/list'));
+
+program
+  .command('services:list')
+  .description('List all the application services')
+  .action(getLocalScript('services/list'));
+
+program
+  .command('controllers:list')
+  .description('List all the application controllers')
+  .action(getLocalScript('controllers/list'));
 
 program.parseAsync(process.argv);

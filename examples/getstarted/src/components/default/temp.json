@@ -1,7 +1,7 @@
 {
   "collectionName": "components_default_temps",
   "info": {
-    "name": "temp",
+    "displayName": "temp",
     "icon": "adjust",
     "description": ""
   },

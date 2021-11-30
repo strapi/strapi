@@ -6,27 +6,20 @@
 // IF THE DOC IS NOT UPDATED THE PULL REQUEST WILL NOT BE MERGED
 import { prefixPluginTranslations } from '@strapi/helper-plugin';
 import pluginPkg from '../../package.json';
-import pluginLogo from './assets/images/logo.svg';
+import PluginIcon from './components/PluginIcon';
 import pluginPermissions from './permissions';
-import Initializer from './components/Initializer';
-import InputMedia from './components/InputMedia';
-import InputModalStepper from './components/InputModalStepper';
-import reducers from './reducers';
+import { MediaLibraryInput } from './components/MediaLibraryInput';
+import { MediaLibraryDialog } from './components/MediaLibraryDialog';
 import pluginId from './pluginId';
-import { getTrad } from './utils';
+import getTrad from './utils/getTrad';
 
-const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
-const icon = pluginPkg.strapi.icon;
 const name = pluginPkg.strapi.name;
 
 export default {
   register(app) {
-    // TODO update doc and guides
-    app.addComponents({ name: 'media-library', Component: InputModalStepper });
-
     app.addMenuLink({
       to: `/plugins/${pluginId}`,
-      icon,
+      icon: PluginIcon,
       intlLabel: {
         id: `${pluginId}.plugin.name`,
         defaultMessage: 'Media Library',
@@ -39,20 +32,12 @@ export default {
       },
     });
 
-    app.addFields({ type: 'media', Component: InputMedia });
-
-    app.addReducers(reducers);
+    app.addFields({ type: 'media', Component: MediaLibraryInput });
+    app.addComponents([{ name: 'media-library', Component: MediaLibraryDialog }]);
 
     app.registerPlugin({
-      description: pluginDescription,
-      icon,
       id: pluginId,
-      initializer: Initializer,
-
-      isReady: false,
-      isRequired: pluginPkg.strapi.required || false,
       name,
-      pluginLogo,
     });
   },
   bootstrap(app) {

@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
-import { Accordion, AccordionContent, AccordionToggle } from '@strapi/parts/Accordion';
-import { Box } from '@strapi/parts/Box';
+import { Accordion, AccordionContent, AccordionToggle } from '@strapi/design-system/Accordion';
+import { Box } from '@strapi/design-system/Box';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
 import SubCategory from '../SubCategory';
@@ -17,7 +17,6 @@ const PermissionRow = ({
   pathToData,
 }) => {
   const { formatMessage } = useIntl();
-
   const handleClick = () => {
     onOpenCategory(name);
   };
@@ -29,14 +28,18 @@ const PermissionRow = ({
   }, [name]);
 
   return (
-    <Accordion expanded={isOpen} toggle={handleClick} id={`accordion-${name}`}>
+    <Accordion
+      expanded={isOpen}
+      toggle={handleClick}
+      id={`accordion-${name}`}
+      variant={isWhite ? 'primary' : 'secondary'}
+    >
       <AccordionToggle
         title={upperFirst(categoryName)}
         description={`${formatMessage(
           { id: 'Settings.permissions.category' },
           { category: categoryName }
         )} ${kind === 'plugins' ? 'plugin' : kind}`}
-        variant={isWhite ? 'primary' : 'secondary'}
       />
 
       <AccordionContent>

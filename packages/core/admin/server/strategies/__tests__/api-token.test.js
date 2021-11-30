@@ -112,7 +112,7 @@ describe('API Token Auth Strategy', () => {
       expect(
         apiTokenStrategy.verify(
           { credentials: readOnlyApiToken },
-          { scope: 'api::model.model.find' }
+          { scope: ['api::model.model.find'] }
         )
       ).toBeUndefined();
     });
@@ -125,7 +125,7 @@ describe('API Token Auth Strategy', () => {
       expect(
         apiTokenStrategy.verify(
           { credentials: fullAccessApiToken },
-          { scope: 'api::model.model.create' }
+          { scope: ['api::model.model.create'] }
         )
       ).toBeUndefined();
     });
@@ -140,7 +140,7 @@ describe('API Token Auth Strategy', () => {
       try {
         apiTokenStrategy.verify(
           { credentials: { readOnlyApiToken } },
-          { scope: 'api::model.model.create' }
+          { scope: ['api::model.model.create'] }
         );
       } catch (err) {
         expect(err).toBeInstanceOf(Error);
@@ -155,7 +155,7 @@ describe('API Token Auth Strategy', () => {
       expect.assertions(1);
 
       try {
-        apiTokenStrategy.verify({}, { scope: 'api::model.model.create' });
+        apiTokenStrategy.verify({}, { scope: ['api::model.model.create'] });
       } catch (err) {
         expect(err).toBeInstanceOf(Error);
       }

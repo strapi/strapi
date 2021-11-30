@@ -1,6 +1,6 @@
 'use strict';
 
-const { yup, formatYupErrors } = require('@strapi/utils');
+const { yup, validateYupSchema } = require('@strapi/utils');
 const validators = require('../common-validators');
 
 const registrationSchema = yup
@@ -11,19 +11,13 @@ const registrationSchema = yup
       .object()
       .shape({
         firstname: validators.firstname.required(),
-        lastname: validators.lastname.required(),
+        lastname: validators.lastname,
         password: validators.password.required(),
       })
       .required()
       .noUnknown(),
   })
   .noUnknown();
-
-const validateRegistrationInput = data => {
-  return registrationSchema
-    .validate(data, { strict: true, abortEarly: false })
-    .catch(error => Promise.reject(formatYupErrors(error)));
-};
 
 const registrationInfoQuerySchema = yup
   .object()
@@ -33,31 +27,19 @@ const registrationInfoQuerySchema = yup
   .required()
   .noUnknown();
 
-const validateRegistrationInfoQuery = query => {
-  return registrationInfoQuerySchema
-    .validate(query, { strict: true, abortEarly: false })
-    .catch(error => Promise.reject(formatYupErrors(error)));
-};
-
 const adminRegistrationSchema = yup
   .object()
   .shape({
     email: validators.email.required(),
     firstname: validators.firstname.required(),
-    lastname: validators.lastname.required(),
+    lastname: validators.lastname,
     password: validators.password.required(),
   })
   .required()
   .noUnknown();
 
-const validateAdminRegistrationInput = data => {
-  return adminRegistrationSchema
-    .validate(data, { strict: true, abortEarly: false })
-    .catch(error => Promise.reject(formatYupErrors(error)));
-};
-
 module.exports = {
-  validateRegistrationInput,
-  validateAdminRegistrationInput,
-  validateRegistrationInfoQuery,
+  validateRegistrationInput: validateYupSchema(registrationSchema),
+  validateRegistrationInfoQuery: validateYupSchema(registrationInfoQuerySchema),
+  validateAdminRegistrationInput: validateYupSchema(adminRegistrationSchema),
 };

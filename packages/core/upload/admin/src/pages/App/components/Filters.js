@@ -1,40 +1,28 @@
 import React, { useState, useRef } from 'react';
-import { Button } from '@strapi/parts/Button';
-import { FilterPopoverURLQuery } from '@strapi/helper-plugin';
-import FilterIcon from '@strapi/icons/FilterIcon';
+import { Button } from '@strapi/design-system/Button';
+import { useQueryParams } from '@strapi/helper-plugin';
+import FilterIcon from '@strapi/icons/Filter';
 import { useIntl } from 'react-intl';
-
-const displayedFilters = [
-  {
-    name: 'createdAt',
-    fieldSchema: {
-      type: 'date',
-    },
-    metadatas: { label: 'createdAt' },
-  },
-  {
-    name: 'updatedAt',
-    fieldSchema: {
-      type: 'date',
-    },
-    metadatas: { label: 'updatedAt' },
-  },
-  {
-    name: 'type',
-    fieldSchema: {
-      type: 'enumeration',
-      options: ['image', 'video', 'file'],
-    },
-    metadatas: { label: 'type' },
-  },
-];
+import FilterList from '../../../components/FilterList';
+import FilterPopover from '../../../components/FilterPopover';
+import displayedFilters from '../../../utils/displayedFilters';
 
 export const Filters = () => {
   const buttonRef = useRef(null);
   const [isVisible, setVisible] = useState(false);
   const { formatMessage } = useIntl();
+  const [{ query }, setQuery] = useQueryParams();
+  const filters = query?.filters?.$and || [];
 
   const toggleFilter = () => setVisible(prev => !prev);
+
+  const handleRemoveFilter = nextFilters => {
+    setQuery({ filters: { $and: nextFilters }, page: 1 });
+  };
+
+  const handleSubmit = filters => {
+    setQuery({ filters: { $and: filters }, page: 1 });
+  };
 
   return (
     <>
@@ -47,15 +35,20 @@ export const Filters = () => {
       >
         {formatMessage({ id: 'app.utils.filters', defaultMessage: 'Filters' })}
       </Button>
-
       {isVisible && (
-        <FilterPopoverURLQuery
+        <FilterPopover
           displayedFilters={displayedFilters}
-          isVisible={isVisible}
+          filters={filters}
+          onSubmit={handleSubmit}
           onToggle={toggleFilter}
           source={buttonRef}
         />
       )}
+      <FilterList
+        appliedFilters={filters}
+        filtersSchema={displayedFilters}
+        onRemoveFilter={handleRemoveFilter}
+      />
     </>
   );
 };

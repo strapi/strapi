@@ -1,23 +1,26 @@
 'use strict';
 
 const _ = require('lodash');
-const { sanitizeEntity } = require('@strapi/utils');
+const utils = require('@strapi/utils');
 const { getService } = require('../utils');
 const validateSettings = require('./validation/settings');
 const validateUploadBody = require('./validation/upload');
 
-const sanitize = (data, options = {}) => {
-  return sanitizeEntity(data, {
-    model: strapi.getModel('plugin::upload.file'),
-    ...options,
-  });
+const { sanitize } = utils;
+const { ValidationError } = utils.errors;
+
+const sanitizeOutput = (data, ctx) => {
+  const schema = strapi.getModel('plugin::upload.file');
+  const { auth } = ctx.state;
+
+  return sanitize.contentAPI.output(data, schema, { auth });
 };
 
 module.exports = {
   async find(ctx) {
-    const files = await getService('upload').fetchAll(ctx.query);
+    const files = await getService('upload').findMany(ctx.query);
 
-    ctx.body = sanitize(files);
+    ctx.body = await sanitizeOutput(files, ctx);
   },
 
   async findOne(ctx) {
@@ -31,7 +34,7 @@ module.exports = {
       return ctx.notFound('file.notFound');
     }
 
-    ctx.body = sanitize(file);
+    ctx.body = await sanitizeOutput(file, ctx);
   },
 
   async count(ctx) {
@@ -51,7 +54,7 @@ module.exports = {
 
     await getService('upload').remove(file);
 
-    ctx.body = sanitize(file);
+    ctx.body = await sanitizeOutput(file, ctx);
   },
 
   async updateSettings(ctx) {
@@ -81,7 +84,7 @@ module.exports = {
 
     const result = await getService('upload').updateFileInfo(id, data.fileInfo);
 
-    ctx.body = sanitize(result);
+    ctx.body = await sanitizeOutput(result, ctx);
   },
 
   async replaceFile(ctx) {
@@ -92,11 +95,7 @@ module.exports = {
 
     // cannot replace with more than one file
     if (Array.isArray(files)) {
-      throw strapi.errors.badRequest(null, {
-        errors: [
-          { id: 'Upload.replace.single', message: 'Cannot replace a file with multiple ones' },
-        ],
-      });
+      throw new ValidationError('Cannot replace a file with multiple ones');
     }
 
     const replacedFiles = await getService('upload').replace(id, {
@@ -104,7 +103,7 @@ module.exports = {
       file: files,
     });
 
-    ctx.body = sanitize(replacedFiles);
+    ctx.body = await sanitizeOutput(replacedFiles, ctx);
   },
 
   async uploadFiles(ctx) {
@@ -117,7 +116,7 @@ module.exports = {
       files,
     });
 
-    ctx.body = sanitize(uploadedFiles);
+    ctx.body = await sanitizeOutput(uploadedFiles, ctx);
   },
 
   async upload(ctx) {
@@ -131,9 +130,7 @@ module.exports = {
     }
 
     if (_.isEmpty(files) || files.size === 0) {
-      throw strapi.errors.badRequest(null, {
-        errors: [{ id: 'Upload.status.empty', message: 'Files are empty' }],
-      });
+      throw new ValidationError('Files are empty');
     }
 
     await (id ? this.replaceFile : this.uploadFiles)(ctx);
@@ -141,13 +138,12 @@ module.exports = {
 
   async search(ctx) {
     const { id } = ctx.params;
-    const model = strapi.getModel('plugin::upload.file');
     const entries = await strapi.query('plugin::upload.file').findMany({
       where: {
         $or: [{ hash: { $contains: id } }, { name: { $contains: id } }],
       },
     });
 
-    ctx.body = sanitizeEntity(entries, { model });
+    ctx.body = await sanitizeOutput(entries, ctx);
   },
 };

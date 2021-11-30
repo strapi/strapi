@@ -1,13 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { DatePicker } from '@strapi/parts/DatePicker';
-import { Field, FieldInput } from '@strapi/parts/Field';
-import { NumberInput } from '@strapi/parts/NumberInput';
-import { TimePicker } from '@strapi/parts/TimePicker';
-import { Select, Option } from '@strapi/parts/Select';
+import { DatePicker } from '@strapi/design-system/DatePicker';
+import { Field, FieldInput } from '@strapi/design-system/Field';
+import { NumberInput } from '@strapi/design-system/NumberInput';
+import { TimePicker } from '@strapi/design-system/TimePicker';
+import { Select, Option } from '@strapi/design-system/Select';
 import { useIntl } from 'react-intl';
-import { formatISO } from 'date-fns';
-import cloneDeep from 'lodash/cloneDeep';
+import DateTimePicker from '../DateTimePicker';
 
 const Inputs = ({ label, onChange, options, type, value }) => {
   const { formatMessage } = useIntl();
@@ -30,16 +29,25 @@ const Inputs = ({ label, onChange, options, type, value }) => {
     return (
       <DatePicker
         clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
-        aria-label={label}
+        ariaLabel={label}
         name="datepicker"
-        onChange={date => {
-          const formattedDate = formatISO(cloneDeep(date), { representation: 'date' });
-
-          onChange(formattedDate);
-        }}
-        onClear={() => onChange('')}
-        // selectedDate={value || null}
+        onChange={date => onChange(date.toISOString())}
+        onClear={() => onChange(null)}
         selectedDate={value ? new Date(value) : null}
+        selectedDateLabel={formattedDate => `Date picker, current is ${formattedDate}`}
+      />
+    );
+  }
+
+  if (type === 'datetime') {
+    return (
+      <DateTimePicker
+        clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
+        ariaLabel={label}
+        name="datetimepicker"
+        onChange={date => onChange(date.toISOString())}
+        onClear={() => onChange(null)}
+        value={value ? new Date(value) : null}
         selectedDateLabel={formattedDate => `Date picker, current is ${formattedDate}`}
       />
     );
@@ -93,7 +101,7 @@ const Inputs = ({ label, onChange, options, type, value }) => {
         aria-label={formatMessage({ id: 'app.utils.filter-value', defaultMessage: 'Filter value' })}
         onChange={({ target: { value } }) => onChange(value)}
         value={value}
-        size="S"
+        size="M"
       />
     </Field>
   );

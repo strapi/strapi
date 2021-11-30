@@ -5,7 +5,7 @@
   "private": true,
   "strapi": {
     "name": "my-plugin",
-    "icon": "plug",
-    "description": "Description of my plugin."
+    "description": "Description of my plugin.",
+    "kind": "plugin"
   }
 }

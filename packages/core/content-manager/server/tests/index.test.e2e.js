@@ -56,36 +56,6 @@ describe('Content Manager End to End', () => {
     await builder.cleanup();
   });
 
-  describe('Content Types api', () => {
-    test('Label is pluralized', async () => {
-      const res = await rq({
-        url: `/content-manager/content-types`,
-        method: 'GET',
-      });
-
-      expect(res.statusCode).toBe(200);
-      expect(res.body.data).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
-            info: expect.objectContaining({
-              label: 'Articles',
-            }),
-          }),
-          expect.objectContaining({
-            info: expect.objectContaining({
-              label: 'Tags',
-            }),
-          }),
-          expect.objectContaining({
-            info: expect.objectContaining({
-              label: 'Categories',
-            }),
-          }),
-        ])
-      );
-    });
-  });
-
   describe('Test manyToMany relation (article - tag) with Content Manager', () => {
     beforeAll(async () => {
       data = {
@@ -110,10 +80,20 @@ describe('Content Manager End to End', () => {
       data.tags.push(body);
 
       expect(body.id).toBeDefined();
-      // expect(Array.isArray(body.articles)).toBeTruthy();
+      expect(Array.isArray(body.articles)).toBeTruthy();
       expect(body.name).toBe('tag1');
-      // expect(body.createdBy).toMatchObject({ email: 'admin@strapi.io' });
-      // expect(body.updatedBy).toMatchObject({ email: 'admin@strapi.io' });
+      expect(body.createdBy).toMatchObject({
+        firstname: 'admin',
+        id: 1,
+        lastname: 'admin',
+        username: null,
+      });
+      expect(body.updatedBy).toMatchObject({
+        firstname: 'admin',
+        id: 1,
+        lastname: 'admin',
+        username: null,
+      });
       expect(body.publishedAt).toBeUndefined();
     });
 
@@ -129,10 +109,20 @@ describe('Content Manager End to End', () => {
       data.tags.push(body);
 
       expect(body.id).toBeDefined();
-      // expect(Array.isArray(body.articles)).toBeTruthy();
+      expect(Array.isArray(body.articles)).toBeTruthy();
       expect(body.name).toBe('tag2');
-      // expect(body.createdBy).toMatchObject({ email: 'admin@strapi.io' });
-      // expect(body.updatedBy).toMatchObject({ email: 'admin@strapi.io' });
+      expect(body.createdBy).toMatchObject({
+        firstname: 'admin',
+        id: 1,
+        lastname: 'admin',
+        username: null,
+      });
+      expect(body.updatedBy).toMatchObject({
+        firstname: 'admin',
+        id: 1,
+        lastname: 'admin',
+        username: null,
+      });
       expect(body.publishedAt).toBeUndefined();
     });
 
@@ -148,10 +138,20 @@ describe('Content Manager End to End', () => {
       data.tags.push(body);
 
       expect(body.id).toBeDefined();
-      // expect(Array.isArray(body.articles)).toBeTruthy();
+      expect(Array.isArray(body.articles)).toBeTruthy();
       expect(body.name).toBe('tag3');
-      // expect(body.createdBy).toMatchObject({ email: 'admin@strapi.io' });
-      // expect(body.updatedBy).toMatchObject({ email: 'admin@strapi.io' });
+      expect(body.createdBy).toMatchObject({
+        firstname: 'admin',
+        id: 1,
+        lastname: 'admin',
+        username: null,
+      });
+      expect(body.updatedBy).toMatchObject({
+        firstname: 'admin',
+        id: 1,
+        lastname: 'admin',
+        username: null,
+      });
       expect(body.publishedAt).toBeUndefined();
     });
 
@@ -173,10 +173,20 @@ describe('Content Manager End to End', () => {
       expect(body.id).toBeDefined();
       expect(body.title).toBe(entry.title);
       expect(body.content).toBe(entry.content);
-      // expect(Array.isArray(body.tags)).toBeTruthy();
-      // expect(body.tags.length).toBe(0);
-      // expect(body.createdBy).toMatchObject({ email: 'admin@strapi.io' });
-      // expect(body.updatedBy).toMatchObject({ email: 'admin@strapi.io' });
+      expect(Array.isArray(body.tags)).toBeTruthy();
+      expect(body.tags.length).toBe(0);
+      expect(body.createdBy).toMatchObject({
+        firstname: 'admin',
+        id: 1,
+        lastname: 'admin',
+        username: null,
+      });
+      expect(body.updatedBy).toMatchObject({
+        firstname: 'admin',
+        id: 1,
+        lastname: 'admin',
+        username: null,
+      });
       expect(body.publishedAt).toBeUndefined();
     });
 
@@ -201,8 +211,18 @@ describe('Content Manager End to End', () => {
       expect(Array.isArray(body.tags)).toBeTruthy();
       expect(body.tags.length).toBe(1);
       expect(body.tags[0].id).toBe(data.tags[0].id);
-      expect(body.createdBy).toMatchObject({ email: 'admin@strapi.io' });
-      expect(body.updatedBy).toMatchObject({ email: 'admin@strapi.io' });
+      expect(body.createdBy).toMatchObject({
+        firstname: 'admin',
+        id: 1,
+        lastname: 'admin',
+        username: null,
+      });
+      expect(body.updatedBy).toMatchObject({
+        firstname: 'admin',
+        id: 1,
+        lastname: 'admin',
+        username: null,
+      });
       expect(body.publishedAt).toBeUndefined();
     });
 
@@ -227,8 +247,18 @@ describe('Content Manager End to End', () => {
       expect(Array.isArray(body.tags)).toBeTruthy();
       expect(body.tags.length).toBe(1);
       expect(body.tags[0].id).toBe(data.tags[1].id);
-      expect(body.createdBy).toMatchObject({ email: 'admin@strapi.io' });
-      expect(body.updatedBy).toMatchObject({ email: 'admin@strapi.io' });
+      expect(body.createdBy).toMatchObject({
+        firstname: 'admin',
+        id: 1,
+        lastname: 'admin',
+        username: null,
+      });
+      expect(body.updatedBy).toMatchObject({
+        firstname: 'admin',
+        id: 1,
+        lastname: 'admin',
+        username: null,
+      });
       expect(body.publishedAt).toBeUndefined();
     });
 
@@ -254,8 +284,18 @@ describe('Content Manager End to End', () => {
       expect(body.content).toBe(entry.content);
       expect(Array.isArray(body.tags)).toBeTruthy();
       expect(body.tags.length).toBe(3);
-      expect(body.createdBy).toMatchObject({ email: 'admin@strapi.io' });
-      expect(body.updatedBy).toMatchObject({ email: 'admin@strapi.io' });
+      expect(body.createdBy).toMatchObject({
+        firstname: 'admin',
+        id: 1,
+        lastname: 'admin',
+        username: null,
+      });
+      expect(body.updatedBy).toMatchObject({
+        firstname: 'admin',
+        id: 1,
+        lastname: 'admin',
+        username: null,
+      });
       expect(body.publishedAt).toBeUndefined();
     });
 
@@ -278,8 +318,18 @@ describe('Content Manager End to End', () => {
       expect(body.content).toBe(entry.content);
       expect(Array.isArray(body.tags)).toBeTruthy();
       expect(body.tags.length).toBe(2);
-      expect(body.createdBy).toMatchObject({ email: 'admin@strapi.io' });
-      expect(body.updatedBy).toMatchObject({ email: 'admin@strapi.io' });
+      expect(body.createdBy).toMatchObject({
+        firstname: 'admin',
+        id: 1,
+        lastname: 'admin',
+        username: null,
+      });
+      expect(body.updatedBy).toMatchObject({
+        firstname: 'admin',
+        id: 1,
+        lastname: 'admin',
+        username: null,
+      });
       expect(body.publishedAt).toBeUndefined();
     });
 
@@ -303,8 +353,18 @@ describe('Content Manager End to End', () => {
       expect(body.content).toBe(entry.content);
       expect(Array.isArray(body.tags)).toBeTruthy();
       expect(body.tags.length).toBe(0);
-      expect(body.createdBy).toMatchObject({ email: 'admin@strapi.io' });
-      expect(body.updatedBy).toMatchObject({ email: 'admin@strapi.io' });
+      expect(body.createdBy).toMatchObject({
+        firstname: 'admin',
+        id: 1,
+        lastname: 'admin',
+        username: null,
+      });
+      expect(body.updatedBy).toMatchObject({
+        firstname: 'admin',
+        id: 1,
+        lastname: 'admin',
+        username: null,
+      });
       expect(body.publishedAt).toBeUndefined();
     });
 
@@ -414,8 +474,18 @@ describe('Content Manager End to End', () => {
       expect(Array.isArray(body.tags)).toBeTruthy();
       expect(body.tags.length).toBe(1);
       expect(body.tags[0].id).toBe(data.tags[0].id);
-      expect(body.createdBy).toMatchObject({ email: 'admin@strapi.io' });
-      expect(body.updatedBy).toMatchObject({ email: 'admin@strapi.io' });
+      expect(body.createdBy).toMatchObject({
+        firstname: 'admin',
+        id: 1,
+        lastname: 'admin',
+        username: null,
+      });
+      expect(body.updatedBy).toMatchObject({
+        firstname: 'admin',
+        id: 1,
+        lastname: 'admin',
+        username: null,
+      });
     });
   });
 
@@ -445,8 +515,18 @@ describe('Content Manager End to End', () => {
       expect(body.id).toBeDefined();
       expect(Array.isArray(body.articles)).toBeTruthy();
       expect(body.name).toBe('cat1');
-      expect(body.createdBy).toMatchObject({ email: 'admin@strapi.io' });
-      expect(body.updatedBy).toMatchObject({ email: 'admin@strapi.io' });
+      expect(body.createdBy).toMatchObject({
+        firstname: 'admin',
+        id: 1,
+        lastname: 'admin',
+        username: null,
+      });
+      expect(body.updatedBy).toMatchObject({
+        firstname: 'admin',
+        id: 1,
+        lastname: 'admin',
+        username: null,
+      });
       expect(body.publishedAt).toBeUndefined();
     });
 
@@ -464,8 +544,18 @@ describe('Content Manager End to End', () => {
       expect(body.id).toBeDefined();
       expect(Array.isArray(body.articles)).toBeTruthy();
       expect(body.name).toBe('cat2');
-      expect(body.createdBy).toMatchObject({ email: 'admin@strapi.io' });
-      expect(body.updatedBy).toMatchObject({ email: 'admin@strapi.io' });
+      expect(body.createdBy).toMatchObject({
+        firstname: 'admin',
+        id: 1,
+        lastname: 'admin',
+        username: null,
+      });
+      expect(body.updatedBy).toMatchObject({
+        firstname: 'admin',
+        id: 1,
+        lastname: 'admin',
+        username: null,
+      });
       expect(body.publishedAt).toBeUndefined();
     });
 
@@ -489,8 +579,18 @@ describe('Content Manager End to End', () => {
       expect(body.content).toBe(entry.content);
       expect(body.category.name).toBe(data.categories[0].name);
       expect(Array.isArray(body.tags)).toBeTruthy();
-      expect(body.createdBy).toMatchObject({ email: 'admin@strapi.io' });
-      expect(body.updatedBy).toMatchObject({ email: 'admin@strapi.io' });
+      expect(body.createdBy).toMatchObject({
+        firstname: 'admin',
+        id: 1,
+        lastname: 'admin',
+        username: null,
+      });
+      expect(body.updatedBy).toMatchObject({
+        firstname: 'admin',
+        id: 1,
+        lastname: 'admin',
+        username: null,
+      });
     });
 
     test('Update article1 with cat2', async () => {
@@ -513,8 +613,18 @@ describe('Content Manager End to End', () => {
       expect(body.content).toBe(entry.content);
       expect(body.category.name).toBe(data.categories[1].name);
       expect(Array.isArray(body.tags)).toBeTruthy();
-      expect(body.createdBy).toMatchObject({ email: 'admin@strapi.io' });
-      expect(body.updatedBy).toMatchObject({ email: 'admin@strapi.io' });
+      expect(body.createdBy).toMatchObject({
+        firstname: 'admin',
+        id: 1,
+        lastname: 'admin',
+        username: null,
+      });
+      expect(body.updatedBy).toMatchObject({
+        firstname: 'admin',
+        id: 1,
+        lastname: 'admin',
+        username: null,
+      });
     });
 
     test('Create article2', async () => {
@@ -535,8 +645,18 @@ describe('Content Manager End to End', () => {
       expect(body.title).toBe(entry.title);
       expect(body.content).toBe(entry.content);
       expect(Array.isArray(body.tags)).toBeTruthy();
-      expect(body.createdBy).toMatchObject({ email: 'admin@strapi.io' });
-      expect(body.updatedBy).toMatchObject({ email: 'admin@strapi.io' });
+      expect(body.createdBy).toMatchObject({
+        firstname: 'admin',
+        id: 1,
+        lastname: 'admin',
+        username: null,
+      });
+      expect(body.updatedBy).toMatchObject({
+        firstname: 'admin',
+        id: 1,
+        lastname: 'admin',
+        username: null,
+      });
     });
 
     test('Update article2 with cat2', async () => {
@@ -559,8 +679,18 @@ describe('Content Manager End to End', () => {
       expect(body.content).toBe(entry.content);
       expect(body.category.name).toBe(data.categories[1].name);
       expect(Array.isArray(body.tags)).toBeTruthy();
-      expect(body.createdBy).toMatchObject({ email: 'admin@strapi.io' });
-      expect(body.updatedBy).toMatchObject({ email: 'admin@strapi.io' });
+      expect(body.createdBy).toMatchObject({
+        firstname: 'admin',
+        id: 1,
+        lastname: 'admin',
+        username: null,
+      });
+      expect(body.updatedBy).toMatchObject({
+        firstname: 'admin',
+        id: 1,
+        lastname: 'admin',
+        username: null,
+      });
     });
 
     test('Update cat1 with article1', async () => {
@@ -582,8 +712,18 @@ describe('Content Manager End to End', () => {
       expect(Array.isArray(body.articles)).toBeTruthy();
       expect(body.articles.length).toBe(1);
       expect(body.name).toBe(entry.name);
-      expect(body.createdBy).toMatchObject({ email: 'admin@strapi.io' });
-      expect(body.updatedBy).toMatchObject({ email: 'admin@strapi.io' });
+      expect(body.createdBy).toMatchObject({
+        firstname: 'admin',
+        id: 1,
+        lastname: 'admin',
+        username: null,
+      });
+      expect(body.updatedBy).toMatchObject({
+        firstname: 'admin',
+        id: 1,
+        lastname: 'admin',
+        username: null,
+      });
     });
 
     test('Create cat3 with article1', async () => {
@@ -604,8 +744,18 @@ describe('Content Manager End to End', () => {
       expect(Array.isArray(body.articles)).toBeTruthy();
       expect(body.articles.length).toBe(1);
       expect(body.name).toBe(entry.name);
-      expect(body.createdBy).toMatchObject({ email: 'admin@strapi.io' });
-      expect(body.updatedBy).toMatchObject({ email: 'admin@strapi.io' });
+      expect(body.createdBy).toMatchObject({
+        firstname: 'admin',
+        id: 1,
+        lastname: 'admin',
+        username: null,
+      });
+      expect(body.updatedBy).toMatchObject({
+        firstname: 'admin',
+        id: 1,
+        lastname: 'admin',
+        username: null,
+      });
     });
 
     test('Get article1 with cat3', async () => {
@@ -616,8 +766,18 @@ describe('Content Manager End to End', () => {
 
       expect(body.id).toBeDefined();
       expect(body.category.id).toBe(data.categories[2].id);
-      expect(body.createdBy).toMatchObject({ email: 'admin@strapi.io' });
-      expect(body.updatedBy).toMatchObject({ email: 'admin@strapi.io' });
+      expect(body.createdBy).toMatchObject({
+        firstname: 'admin',
+        id: 1,
+        lastname: 'admin',
+        username: null,
+      });
+      expect(body.updatedBy).toMatchObject({
+        firstname: 'admin',
+        id: 1,
+        lastname: 'admin',
+        username: null,
+      });
     });
 
     test('Get article2 with cat2', async () => {
@@ -628,8 +788,18 @@ describe('Content Manager End to End', () => {
 
       expect(body.id).toBeDefined();
       expect(body.category.id).toBe(data.categories[1].id);
-      expect(body.createdBy).toMatchObject({ email: 'admin@strapi.io' });
-      expect(body.updatedBy).toMatchObject({ email: 'admin@strapi.io' });
+      expect(body.createdBy).toMatchObject({
+        firstname: 'admin',
+        id: 1,
+        lastname: 'admin',
+        username: null,
+      });
+      expect(body.updatedBy).toMatchObject({
+        firstname: 'admin',
+        id: 1,
+        lastname: 'admin',
+        username: null,
+      });
     });
 
     test('Get cat1 without relations', async () => {
@@ -640,8 +810,18 @@ describe('Content Manager End to End', () => {
 
       expect(body.id).toBeDefined();
       expect(body.articles.length).toBe(0);
-      expect(body.createdBy).toMatchObject({ email: 'admin@strapi.io' });
-      expect(body.updatedBy).toMatchObject({ email: 'admin@strapi.io' });
+      expect(body.createdBy).toMatchObject({
+        firstname: 'admin',
+        id: 1,
+        lastname: 'admin',
+        username: null,
+      });
+      expect(body.updatedBy).toMatchObject({
+        firstname: 'admin',
+        id: 1,
+        lastname: 'admin',
+        username: null,
+      });
     });
 
     test('Get cat2 with article2', async () => {
@@ -653,8 +833,18 @@ describe('Content Manager End to End', () => {
       expect(body.id).toBeDefined();
       expect(body.articles.length).toBe(1);
       expect(body.articles[0].id).toBe(data.articles[1].id);
-      expect(body.createdBy).toMatchObject({ email: 'admin@strapi.io' });
-      expect(body.updatedBy).toMatchObject({ email: 'admin@strapi.io' });
+      expect(body.createdBy).toMatchObject({
+        firstname: 'admin',
+        id: 1,
+        lastname: 'admin',
+        username: null,
+      });
+      expect(body.updatedBy).toMatchObject({
+        firstname: 'admin',
+        id: 1,
+        lastname: 'admin',
+        username: null,
+      });
     });
 
     test('Get cat3 with article1', async () => {
@@ -666,8 +856,18 @@ describe('Content Manager End to End', () => {
       expect(body.id).toBeDefined();
       expect(body.articles.length).toBe(1);
       expect(body.articles[0].id).toBe(data.articles[0].id);
-      expect(body.createdBy).toMatchObject({ email: 'admin@strapi.io' });
-      expect(body.updatedBy).toMatchObject({ email: 'admin@strapi.io' });
+      expect(body.createdBy).toMatchObject({
+        firstname: 'admin',
+        id: 1,
+        lastname: 'admin',
+        username: null,
+      });
+      expect(body.updatedBy).toMatchObject({
+        firstname: 'admin',
+        id: 1,
+        lastname: 'admin',
+        username: null,
+      });
     });
   });
 
@@ -696,8 +896,18 @@ describe('Content Manager End to End', () => {
 
       expect(body.id).toBeDefined();
       expect(body.name).toBe('ref1');
-      expect(body.createdBy).toMatchObject({ email: 'admin@strapi.io' });
-      expect(body.updatedBy).toMatchObject({ email: 'admin@strapi.io' });
+      expect(body.createdBy).toMatchObject({
+        firstname: 'admin',
+        id: 1,
+        lastname: 'admin',
+        username: null,
+      });
+      expect(body.updatedBy).toMatchObject({
+        firstname: 'admin',
+        id: 1,
+        lastname: 'admin',
+        username: null,
+      });
     });
 
     test('Create article1', async () => {
@@ -717,8 +927,18 @@ describe('Content Manager End to End', () => {
       expect(body.id).toBeDefined();
       expect(body.title).toBe(entry.title);
       expect(body.content).toBe(entry.content);
-      expect(body.createdBy).toMatchObject({ email: 'admin@strapi.io' });
-      expect(body.updatedBy).toMatchObject({ email: 'admin@strapi.io' });
+      expect(body.createdBy).toMatchObject({
+        firstname: 'admin',
+        id: 1,
+        lastname: 'admin',
+        username: null,
+      });
+      expect(body.updatedBy).toMatchObject({
+        firstname: 'admin',
+        id: 1,
+        lastname: 'admin',
+        username: null,
+      });
       expect(body.publishedAt).toBeUndefined();
     });
 
@@ -741,8 +961,18 @@ describe('Content Manager End to End', () => {
       expect(body.title).toBe(entry.title);
       expect(body.content).toBe(entry.content);
       expect(body.reference.id).toBe(entry.reference);
-      expect(body.createdBy).toMatchObject({ email: 'admin@strapi.io' });
-      expect(body.updatedBy).toMatchObject({ email: 'admin@strapi.io' });
+      expect(body.createdBy).toMatchObject({
+        firstname: 'admin',
+        id: 1,
+        lastname: 'admin',
+        username: null,
+      });
+      expect(body.updatedBy).toMatchObject({
+        firstname: 'admin',
+        id: 1,
+        lastname: 'admin',
+        username: null,
+      });
     });
 
     test('Create article2 with ref1', async () => {
@@ -764,8 +994,18 @@ describe('Content Manager End to End', () => {
       expect(body.title).toBe(entry.title);
       expect(body.content).toBe(entry.content);
       expect(body.reference.id).toBe(entry.reference);
-      expect(body.createdBy).toMatchObject({ email: 'admin@strapi.io' });
-      expect(body.updatedBy).toMatchObject({ email: 'admin@strapi.io' });
+      expect(body.createdBy).toMatchObject({
+        firstname: 'admin',
+        id: 1,
+        lastname: 'admin',
+        username: null,
+      });
+      expect(body.updatedBy).toMatchObject({
+        firstname: 'admin',
+        id: 1,
+        lastname: 'admin',
+        username: null,
+      });
     });
   });
 

@@ -1,34 +1,21 @@
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { pxToRem } from '@strapi/helper-plugin';
+import { pxToRem, RemoveRoundedButton } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { useLocation } from 'react-router-dom';
 import has from 'lodash/has';
 import isEmpty from 'lodash/isEmpty';
-import { IconButton } from '@strapi/parts/IconButton';
-import { Box } from '@strapi/parts/Box';
-import { Row } from '@strapi/parts/Row';
-import { Text } from '@strapi/parts/Text';
-import { Link } from '@strapi/parts/Link';
-import BaseMinus from '@strapi/icons/Minus';
+import { Box } from '@strapi/design-system/Box';
+import { Flex } from '@strapi/design-system/Flex';
+import { Typography } from '@strapi/design-system/Typography';
+import { Link } from '@strapi/design-system/Link';
 import { getTrad } from '../../utils';
 
-const Minus = styled(IconButton)`
-  padding: 0;
-  border: 0;
-  width: 20px;
-  height: 20px;
-  svg {
-    width: 20px;
-    height: 20px;
-  }
-`;
 const StyledBullet = styled.div`
   width: ${pxToRem(6)};
   height: ${pxToRem(6)};
-  margin-right: ${({ theme }) => theme.spaces[2]};
-  background: ${({ theme, isDraft }) => theme.colors[isDraft ? 'secondary700' : 'success200']};
+  background: ${({ theme, isDraft }) => theme.colors[isDraft ? 'secondary600' : 'success600']};
   border-radius: 50%;
   cursor: pointer;
 `;
@@ -69,10 +56,10 @@ function ListItem({
   const { pathname } = useLocation();
 
   return (
-    <Row as="li" alignItems="center">
-      <Row style={{ flex: 1 }} alignItems="center">
+    <Flex as="li" alignItems="center">
+      <Flex style={{ flex: 1 }} alignItems="center">
         {hasDraftAndPublish && (
-          <Box paddingLeft={1} paddingRight={2}>
+          <Box paddingRight={2}>
             <StyledBullet isDraft={isDraft} title={title} />
           </Box>
         )}
@@ -84,11 +71,11 @@ function ListItem({
             {value || data.id}
           </Link>
         ) : (
-          <Text small>{value || data.id}</Text>
+          <Typography variant="pi">{value || data.id}</Typography>
         )}
-      </Row>
-      <Minus onClick={onRemove} icon={<BaseMinus />} label="Remove" style={{ cursor }} />
-    </Row>
+      </Flex>
+      <RemoveRoundedButton onClick={onRemove} label="Remove" style={{ cursor }} />
+    </Flex>
   );
 }
 

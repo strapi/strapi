@@ -1,6 +1,6 @@
 import React from 'react';
-import AddIcon from '@strapi/icons/AddIcon';
-import { Box } from '@strapi/parts/Box';
+import Plus from '@strapi/icons/Plus';
+import { Box } from '@strapi/design-system/Box';
 import {
   SubNav,
   SubNavHeader,
@@ -8,8 +8,8 @@ import {
   SubNavLinkSection,
   SubNavSection,
   SubNavSections,
-} from '@strapi/parts/SubNav';
-import { TextButton } from '@strapi/parts/TextButton';
+} from '@strapi/design-system/SubNav';
+import { TextButton } from '@strapi/design-system/TextButton';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
 import useContentTypeBuilderMenu from './useContentTypeBuilderMenu';
@@ -44,7 +44,7 @@ const ContentTypeBuilderNav = () => {
           return (
             <React.Fragment key={section.name}>
               <SubNavSection
-                label={formatMessage({ id: title, defaultMessage: title.defaultMessage })}
+                label={formatMessage({ id: title, defaultMessage: title })}
                 collapsable
                 badgeLabel={section.links.length.toString()}
               >
@@ -72,7 +72,7 @@ const ContentTypeBuilderNav = () => {
               </SubNavSection>
               {section.customLink && (
                 <Box as="li" paddingLeft={7}>
-                  <TextButton onClick={section.customLink.onClick} startIcon={<AddIcon />}>
+                  <TextButton onClick={section.customLink.onClick} startIcon={<Plus />}>
                     {formatMessage({
                       id: section.customLink.id,
                       defaultMessage: section.customLink.defaultMessage,

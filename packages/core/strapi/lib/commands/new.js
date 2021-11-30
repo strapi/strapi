@@ -1,5 +1,7 @@
 'use strict';
 
+const { generateNewApp } = require('@strapi/generate-new');
+
 /**
  * `$ strapi new`
  *
@@ -7,5 +9,5 @@
  */
 
 module.exports = function(...args) {
-  return require('@strapi/generate-new')(...args);
+  return generateNewApp(...args);
 };

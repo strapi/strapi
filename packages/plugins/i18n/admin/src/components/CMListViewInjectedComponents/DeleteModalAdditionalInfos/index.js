@@ -1,6 +1,6 @@
 import React from 'react';
 import { useIntl } from 'react-intl';
-import { Text } from '@strapi/parts/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import { getTrad } from '../../../utils';
 import useHasI18n from '../../../hooks/useHasI18n';
 
@@ -13,7 +13,7 @@ const DeleteModalAdditionalInfos = () => {
   }
 
   return (
-    <Text textColor="danger500">
+    <Typography textColor="danger500">
       {formatMessage(
         {
           id: getTrad('Settings.list.actions.deleteAdditionalInfos'),
@@ -22,13 +22,13 @@ const DeleteModalAdditionalInfos = () => {
         },
         {
           em: chunks => (
-            <Text textColor="danger500" bold>
+            <Typography fontWeight="semiBold" textColor="danger500">
               {chunks}
-            </Text>
+            </Typography>
           ),
         }
       )}
-    </Text>
+    </Typography>
   );
 };
 

@@ -1,11 +1,11 @@
 import React from 'react';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
-import { Stack } from '@strapi/parts/Stack';
-import ReadDoc from '@strapi/icons/ReadDoc';
-import CodeExample from '@strapi/icons/CodeExample';
-import Tutorial from '@strapi/icons/Tutorial';
-import Blog from '@strapi/icons/Blog';
+import { Stack } from '@strapi/design-system/Stack';
+import InformationSquare from '@strapi/icons/InformationSquare';
+import CodeSquare from '@strapi/icons/CodeSquare';
+import PlaySquare from '@strapi/icons/PlaySquare';
+import FeatherSquare from '@strapi/icons/FeatherSquare';
 import { ContentBox } from '@strapi/helper-plugin';
 
 const BlockLink = styled.a`
@@ -25,13 +25,13 @@ const ContentBlocks = () => {
         <ContentBox
           title={formatMessage({
             id: 'app.components.BlockLink.documentation',
-            defaultMessage: 'Read the documentation',
+            defaultMessage: 'Documentation',
           })}
           subtitle={formatMessage({
             id: 'app.components.BlockLink.documentation.content',
-            defaultMessage: 'Discover the concepts, reference, guides and tutorials',
+            defaultMessage: 'Discover the essential concepts, guides and instructions.',
           })}
-          icon={<ReadDoc />}
+          icon={<InformationSquare />}
           iconBackground="primary100"
         />
       </BlockLink>
@@ -47,9 +47,9 @@ const ContentBlocks = () => {
           })}
           subtitle={formatMessage({
             id: 'app.components.BlockLink.code.content',
-            defaultMessage: 'Learn by testing real project developed by the community',
+            defaultMessage: 'Learn by using ready-made starters for your projects.',
           })}
-          icon={<CodeExample />}
+          icon={<CodeSquare />}
           iconBackground="warning100"
         />
       </BlockLink>
@@ -61,13 +61,13 @@ const ContentBlocks = () => {
         <ContentBox
           title={formatMessage({
             id: 'app.components.BlockLink.tutorial',
-            defaultMessage: 'Tutorial',
+            defaultMessage: 'Tutorials',
           })}
           subtitle={formatMessage({
             id: 'app.components.BlockLink.tutorial.content',
-            defaultMessage: 'Discover the concepts, reference, guides and tutorials',
+            defaultMessage: 'Follow step-by-step instructions to use and customize Strapi.',
           })}
-          icon={<Tutorial />}
+          icon={<PlaySquare />}
           iconBackground="secondary100"
         />
       </BlockLink>
@@ -79,9 +79,9 @@ const ContentBlocks = () => {
           })}
           subtitle={formatMessage({
             id: 'app.components.BlockLink.blog.content',
-            defaultMessage: 'Discover the concepts, reference, guides and tutorials',
+            defaultMessage: 'Read the latest news about Strapi and the ecosystem.',
           })}
-          icon={<Blog />}
+          icon={<FeatherSquare />}
           iconBackground="alternative100"
         />
       </BlockLink>

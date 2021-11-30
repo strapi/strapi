@@ -3,8 +3,9 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import isEmpty from 'lodash/isEmpty';
 import Select, { createFilter } from 'react-select';
-import { Box } from '@strapi/parts/Box';
-import { Stack } from '@strapi/parts/Stack';
+import { Box } from '@strapi/design-system/Box';
+import { Stack } from '@strapi/design-system/Stack';
+import { Typography } from '@strapi/design-system/Typography';
 import ListItem from './ListItem';
 
 function SelectMany({
@@ -26,6 +27,7 @@ function SelectMany({
   styles,
   targetModel,
   value,
+  description,
 }) {
   const { formatMessage } = useIntl();
 
@@ -37,7 +39,7 @@ function SelectMany({
   };
 
   return (
-    <>
+    <Stack size={1}>
       <Select
         components={components}
         isDisabled={isDisabled}
@@ -73,8 +75,8 @@ function SelectMany({
         styles={styles}
         value={[]}
       />
-      <Box paddingTop={3}>
-        <Stack as="ul" size={4} style={{ maxHeight: '128px', overflowY: 'auto' }}>
+      <Box paddingTop={3} style={{ overflow: 'auto' }}>
+        <Stack as="ul" size={4} style={{ maxHeight: '128px', overflowX: 'hidden' }}>
           {value?.map((data, index) => {
             return (
               <ListItem
@@ -95,11 +97,17 @@ function SelectMany({
           })}
         </Stack>
       </Box>
-    </>
+      {description && (
+        <Typography variant="pi" textColor="neutral600">
+          {description}
+        </Typography>
+      )}
+    </Stack>
   );
 }
 
 SelectMany.defaultProps = {
+  description: '',
   components: {},
   placeholder: null,
   searchToPersist: null,
@@ -133,6 +141,7 @@ SelectMany.propTypes = {
   styles: PropTypes.object.isRequired,
   targetModel: PropTypes.string.isRequired,
   value: PropTypes.array,
+  description: PropTypes.string,
 };
 
 export default memo(SelectMany);

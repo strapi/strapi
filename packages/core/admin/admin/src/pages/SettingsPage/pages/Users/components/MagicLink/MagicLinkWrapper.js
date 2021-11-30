@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { IconButton } from '@strapi/parts/IconButton';
+import { IconButton } from '@strapi/design-system/IconButton';
 import { useNotification, ContentBox } from '@strapi/helper-plugin';
 import Duplicate from '@strapi/icons/Duplicate';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
@@ -44,6 +44,7 @@ const MagicLinkWrapper = ({ children, target }) => {
         </CopyToClipboard>
       }
       title={target}
+      titleEllipsis
       subtitle={children}
       icon={<Envelope />}
       iconBackground="neutral100"

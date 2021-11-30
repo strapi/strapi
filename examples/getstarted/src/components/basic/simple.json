@@ -1,8 +1,8 @@
 {
   "collectionName": "components_basic_simples",
   "info": {
-    "name": "simple",
-    "icon": "address-card",
+    "displayName": "simple",
+    "icon": "ambulance",
     "description": ""
   },
   "options": {},

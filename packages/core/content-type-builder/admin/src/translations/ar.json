@@ -33,7 +33,6 @@
   "form.button.save": "حفظ",
   "from": "من",
   "modelPage.attribute.relationWith": "علاقة مع",
-  "modelPage.contentHeader.emptyDescription.description": "لا يوجد وصف لنوع المحتوى هذا",
   "plugin.description.long": "قم بتجميع هيكل البيانات الخاص بـ API الخاص بك. إنشاء حقول وعلاقات جديدة في دقيقة واحدة فقط. يتم إنشاء الملفات وتحديثها تلقائيًا في مشروعك.",
   "plugin.description.short": "قم بتجميع هيكل البيانات الخاص بـ API الخاص بك.",
   "popUpForm.navContainer.advanced": "إعدادات متقدمة",

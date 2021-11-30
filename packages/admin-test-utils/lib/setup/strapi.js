@@ -22,3 +22,7 @@ global.strapi = {
   },
   projectType: 'Community',
 };
+
+global.prompt = jest.fn();
+
+global.URL.createObjectURL = file => `http://localhost:4000/assets/${file.name}`;

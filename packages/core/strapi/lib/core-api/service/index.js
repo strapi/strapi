@@ -1,10 +1,7 @@
 'use strict';
 
-const _ = require('lodash');
-
 const {
   isSingleType,
-  getNonWritableAttributes,
   constants: { DP_PUB_STATE_LIVE },
 } = require('@strapi/utils').contentTypes;
 
@@ -16,14 +13,18 @@ const createCollectionTypeService = require('./collection-type');
  * @param {{ model: object, strapi: object }} context
  * @returns {object}
  */
-const createService = ({ model, strapi }) => {
-  const utils = createUtils({ model });
+const createService = ({ contentType }) => {
+  const proto = { getFetchParams };
 
-  if (isSingleType(model)) {
-    return createSingleTypeService({ model, strapi, utils });
+  let service;
+
+  if (isSingleType(contentType)) {
+    service = createSingleTypeService({ contentType });
+  } else {
+    service = createCollectionTypeService({ contentType });
   }
 
-  return createCollectionTypeService({ model, strapi, utils });
+  return Object.assign(Object.create(proto), service);
 };
 
 /**
@@ -35,17 +36,6 @@ const getFetchParams = (params = {}) => {
   return {
     publicationState: DP_PUB_STATE_LIVE,
     ...params,
-  };
-};
-
-/**
- * Mixins
- */
-const createUtils = ({ model }) => {
-  return {
-    // make sure to keep the call to getNonWritableAttributes dynamic
-    sanitizeInput: data => _.omit(data, getNonWritableAttributes(model)),
-    getFetchParams,
   };
 };
 

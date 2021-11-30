@@ -3,6 +3,7 @@
 const _ = require('lodash');
 const { defaults } = require('lodash/fp');
 const { stringIncludes } = require('@strapi/utils');
+const { ValidationError } = require('@strapi/utils').errors;
 const { createUser, hasSuperAdminRole } = require('../domain/user');
 const { password: passwordValidator } = require('../validation/common-validators');
 const { getService } = require('../utils');
@@ -59,10 +60,7 @@ const updateById = async (id, attributes) => {
     const willRemoveSuperAdminRole = !stringIncludes(attributes.roles, superAdminRole.id);
 
     if (lastAdminUser && willRemoveSuperAdminRole) {
-      throw strapi.errors.badRequest(
-        'ValidationError',
-        'You must have at least one user with super admin role.'
-      );
+      throw new ValidationError('You must have at least one user with super admin role.');
     }
   }
 
@@ -70,10 +68,7 @@ const updateById = async (id, attributes) => {
   if (attributes.isActive === false) {
     const lastAdminUser = await isLastSuperAdminUser(id);
     if (lastAdminUser) {
-      throw strapi.errors.badRequest(
-        'ValidationError',
-        'You must have at least one active user with super admin role.'
-      );
+      throw new ValidationError('You must have at least one user with super admin role.');
     }
   }
 
@@ -113,7 +108,7 @@ const resetPasswordByEmail = async (email, password) => {
   try {
     await passwordValidator.validate(password);
   } catch (error) {
-    throw new Error(
+    throw new ValidationError(
       'Invalid password. Expected a minimum of 8 characters with at least one number and one uppercase letter'
     );
   }
@@ -166,7 +161,7 @@ const register = async ({ registrationToken, userInfo }) => {
   const matchingUser = await strapi.query('admin::user').findOne({ where: { registrationToken } });
 
   if (!matchingUser) {
-    throw strapi.errors.badRequest('Invalid registration info');
+    throw new ValidationError('Invalid registration info');
   }
 
   return getService('user').updateById(matchingUser.id, {
@@ -183,6 +178,19 @@ const register = async ({ registrationToken, userInfo }) => {
  */
 const findOne = async (id, populate = ['roles']) => {
   return strapi.entityService.findOne('admin::user', id, { populate });
+};
+
+/**
+ * Find one user by its email
+ * @param {string} id  email
+ * @param {string || string[] || object} populate
+ * @returns
+ */
+const findOneByEmail = async (email, populate = []) => {
+  return strapi.query('admin::user').findOne({
+    where: { email },
+    populate,
+  });
 };
 
 /** Find many users (paginated)
@@ -213,10 +221,7 @@ const deleteById = async id => {
     if (userToDelete.roles.some(r => r.code === SUPER_ADMIN_CODE)) {
       const superAdminRole = await getService('role').getSuperAdminWithUsersCount();
       if (superAdminRole.usersCount === 1) {
-        throw strapi.errors.badRequest(
-          'ValidationError',
-          'You must have at least one user with super admin role.'
-        );
+        throw new ValidationError('You must have at least one user with super admin role.');
       }
     }
   }
@@ -239,10 +244,7 @@ const deleteByIds = async ids => {
   });
 
   if (superAdminRole.usersCount === nbOfSuperAdminToDelete) {
-    throw strapi.errors.badRequest(
-      'ValidationError',
-      'You must have at least one user with super admin role.'
-    );
+    throw new ValidationError('You must have at least one user with super admin role.');
   }
 
   const deletedUsers = [];
@@ -320,6 +322,7 @@ module.exports = {
   register,
   sanitizeUser,
   findOne,
+  findOneByEmail,
   findPage,
   deleteById,
   deleteByIds,

@@ -6,9 +6,9 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Box } from '@strapi/parts/Box';
-import { Text } from '@strapi/parts/Text';
-import { Stack } from '@strapi/parts/Stack';
+import { Box } from '@strapi/design-system/Box';
+import { Typography } from '@strapi/design-system/Typography';
+import { Stack } from '@strapi/design-system/Stack';
 import { pxToRem } from '@strapi/helper-plugin';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import styled from 'styled-components';
@@ -47,7 +47,7 @@ const ComponentBox = styled(Box)`
       }
     }
 
-    ${Text} {
+    ${Typography} {
       color: ${({ theme }) => theme.colors.primary600};
     }
   }
@@ -64,9 +64,9 @@ function ComponentCard({ componentUid, intlLabel, icon, onClick }) {
       <ComponentBox borderRadius="borderRadius">
         <Stack size={1} style={{ justifyContent: 'center', alignItems: 'center' }}>
           <StyledFontAwesomeIcon icon={icon} />
-          <Text small bold textColor="neutral600">
+          <Typography variant="pi" fontWeight="bold" textColor="neutral600">
             {formatMessage(intlLabel)}
-          </Text>
+          </Typography>
         </Stack>
       </ComponentBox>
     </button>

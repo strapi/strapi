@@ -123,10 +123,6 @@ class MysqlSchemaInspector {
     return schema;
   }
 
-  getDatabaseSchema() {
-    return this.db.connection.client.connectionSettings.schema || 'public';
-  }
-
   async getTables() {
     const [rows] = await this.db.connection.raw(SQL_QUERIES.TABLE_LIST);
 

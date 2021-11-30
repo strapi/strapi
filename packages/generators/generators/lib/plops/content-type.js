@@ -1,137 +1,66 @@
 'use strict';
 
-const getDestinationPrompts = require('./utils/get-destination-prompts');
+const { join } = require('path');
+const slugify = require('@sindresorhus/slugify');
+const fs = require('fs-extra');
+const { isKebabCase } = require('@strapi/utils');
+
+const getDestinationPrompts = require('./prompts/get-destination-prompts');
 const getFilePath = require('./utils/get-file-path');
-const validateInput = require('./utils/validate-input');
-
-const DEFAULT_TYPES = [
-  // advanced types
-  'media',
-
-  // scalar types
-  'string',
-  'text',
-  'richtext',
-  'json',
-  'enumeration',
-  'password',
-  'email',
-  'integer',
-  'biginteger',
-  'float',
-  'decimal',
-  'date',
-  'time',
-  'datetime',
-  'timestamp',
-  'boolean',
-];
-
-const promptConfigQuestions = (plop, inquirer) => {
-  return inquirer.prompt([
-    {
-      type: 'input',
-      name: 'id',
-      message: 'Content type name',
-      validate: input => validateInput(input),
-    },
-    {
-      type: 'list',
-      name: 'kind',
-      message: 'Please choose the model type',
-      default: 'collectionType',
-      choices: [
-        { name: 'Collection Type', value: 'collectionType' },
-        { name: 'Singe Type', value: 'singleType' },
-      ],
-      validate: input => validateInput(input),
-    },
-    ...getDestinationPrompts('model', plop.getDestBasePath()),
-    {
-      type: 'confirm',
-      name: 'useDraftAndPublish',
-      default: false,
-      message: 'Use draft and publish?',
-    },
-    {
-      type: 'confirm',
-      name: 'addAttributes',
-      message: 'Do you want to add attributes?',
-    },
-  ]);
-};
-
-const promptAttributeQuestions = inquirer => {
-  return inquirer.prompt([
-    {
-      type: 'input',
-      name: 'attributeName',
-      message: 'Name of attribute',
-      validate: input => validateInput(input),
-    },
-    {
-      type: 'list',
-      name: 'attributeType',
-      message: 'What type of attribute',
-      pageSize: DEFAULT_TYPES.length,
-      choices: DEFAULT_TYPES.map(type => {
-        return { name: type, value: type };
-      }),
-    },
-    {
-      when: answers => answers.attributeType === 'enumeration',
-      type: 'input',
-      name: 'enum',
-      message: 'Add values separated by a comma',
-    },
-    {
-      when: answers => answers.attributeType === 'media',
-      type: 'list',
-      name: 'multiple',
-      message: 'Choose media type',
-      choices: [
-        { name: 'Multiple', value: true },
-        { name: 'Single', value: false },
-      ],
-    },
-    {
-      type: 'confirm',
-      name: 'addAttributes',
-      message: 'Do you want to add another attribute?',
-    },
-  ]);
-};
+const ctNamesPrompts = require('./prompts/ct-names-prompts');
+const kindPrompts = require('./prompts/kind-prompts');
+const draftAndPublishPrompts = require('./prompts/draft-and-publish-prompts');
+const getAttributesPrompts = require('./prompts/get-attributes-prompts');
+const bootstrapApiPrompts = require('./prompts/bootstrap-api-prompts');
 
 module.exports = plop => {
   // Model generator
   plop.setGenerator('content-type', {
     description: 'Generate a content type for an API',
     async prompts(inquirer) {
-      const config = await promptConfigQuestions(plop, inquirer);
+      const config = await inquirer.prompt([
+        ...ctNamesPrompts,
+        ...kindPrompts,
+        ...draftAndPublishPrompts,
+      ]);
+      const attributes = await getAttributesPrompts(inquirer);
 
-      if (!config.addAttributes) {
-        return {
-          ...config,
-          attributes: [],
-        };
-      }
+      const api = await inquirer.prompt([
+        ...getDestinationPrompts('model', plop.getDestBasePath()),
+        {
+          when: answers => answers.destination === 'new',
+          type: 'input',
+          name: 'id',
+          default: config.singularName,
+          message: 'Name of the new API?',
+          async validate(input) {
+            if (!isKebabCase(input)) {
+              return 'Value must be in kebab-case';
+            }
 
-      const attributes = [];
+            const apiPath = join(plop.getDestBasePath(), 'api');
+            const exists = await fs.pathExists(apiPath);
 
-      const genAttribute = async () => {
-        const answers = await promptAttributeQuestions(inquirer);
+            if (!exists) {
+              return true;
+            }
 
-        attributes.push(answers);
+            const apiDir = await fs.readdir(apiPath, { withFileTypes: true });
+            const apiDirContent = apiDir.filter(fd => fd.isDirectory());
 
-        if (answers.addAttributes) {
-          return genAttribute();
-        }
-      };
+            if (apiDirContent.findIndex(api => api.name === input) !== -1) {
+              throw new Error('This name is already taken.');
+            }
 
-      await genAttribute();
+            return true;
+          },
+        },
+        ...bootstrapApiPrompts,
+      ]);
 
       return {
         ...config,
+        ...api,
         attributes,
       };
     },
@@ -153,22 +82,64 @@ module.exports = plop => {
 
       const filePath = getFilePath(answers.destination);
 
-      return [
+      const baseActions = [
         {
           type: 'add',
-          path: `${filePath}/content-types/{{id}}/schema.json`,
-          templateFile: 'templates/model.schema.json.hbs',
+          path: `${filePath}/content-types/{{ singularName }}/schema.json`,
+          templateFile: 'templates/content-type.schema.json.hbs',
+          data: {
+            collectionName: slugify(answers.pluralName, { separator: '_' }),
+          },
         },
-        {
+      ];
+
+      if (attributes.lenght > 0) {
+        baseActions.push({
           type: 'modify',
-          path: `${filePath}/content-types/{{id}}/schema.json`,
+          path: `${filePath}/content-types/{{ singularName }}/schema.json`,
           transform(template) {
             const parsedTemplate = JSON.parse(template);
             parsedTemplate.attributes = attributes;
             return JSON.stringify(parsedTemplate, null, 2);
           },
-        },
-      ];
+        });
+      }
+
+      if (answers.bootstrapApi) {
+        const { singularName } = answers;
+
+        let uid;
+        if (answers.destination === 'new') {
+          uid = `api::${answers.id}.${singularName}`;
+        } else if (answers.api) {
+          uid = `api::${answers.api}.${singularName}`;
+        } else if (answers.plugin) {
+          uid = `plugin::${answers.plugin}.${singularName}`;
+        }
+
+        baseActions.push(
+          {
+            type: 'add',
+            path: `${filePath}/controllers/{{singularName}}.js`,
+            templateFile: 'templates/core-controller.js.hbs',
+            data: { uid },
+          },
+          {
+            type: 'add',
+            path: `${filePath}/services/{{singularName}}.js`,
+            templateFile: 'templates/core-service.js.hbs',
+            data: { uid },
+          },
+          {
+            type: 'add',
+            path: `${filePath}/routes/{{singularName}}.js`,
+            templateFile: `templates/core-router.js.hbs`,
+            data: { uid },
+          }
+        );
+      }
+
+      return baseActions;
     },
   });
 };

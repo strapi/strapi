@@ -1,20 +1,12 @@
 import React, { useMemo, useState } from 'react';
-import {
-  Button,
-  HeaderLayout,
-  Layout,
-  Main,
-  Table,
-  Tr,
-  Thead,
-  Th,
-  TableLabel,
-  useNotifyAT,
-  ContentLayout,
-  ActionLayout,
-  VisuallyHidden,
-} from '@strapi/parts';
-import AddIcon from '@strapi/icons/AddIcon';
+import { Button } from '@strapi/design-system/Button';
+import { HeaderLayout, Layout, ContentLayout, ActionLayout } from '@strapi/design-system/Layout';
+import { Main } from '@strapi/design-system/Main';
+import { Table, Tr, Thead, Th } from '@strapi/design-system/Table';
+import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
+import { Typography } from '@strapi/design-system/Typography';
+import { useNotifyAT } from '@strapi/design-system/LiveRegions';
+import Plus from '@strapi/icons/Plus';
 import {
   useTracking,
   SettingsPageTitle,
@@ -23,7 +15,8 @@ import {
   useRBAC,
   NoPermissions,
   LoadingIndicatorPage,
-  Search,
+  SearchURLQuery,
+  useFocusWhenNavigate,
   useQueryParams,
   EmptyStateLayout,
   ConfirmDialog,
@@ -50,6 +43,7 @@ const RoleListPage = () => {
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [isConfirmButtonLoading, setIsConfirmButtonLoading] = useState(false);
   const [roleToDelete, setRoleToDelete] = useState();
+  useFocusWhenNavigate();
 
   const queryClient = useQueryClient();
 
@@ -137,7 +131,7 @@ const RoleListPage = () => {
           })}
           primaryAction={
             <CheckPermissions permissions={permissions.createRole}>
-              <Button onClick={handleNewRoleClick} startIcon={<AddIcon />}>
+              <Button onClick={handleNewRoleClick} startIcon={<Plus />} size="L">
                 {formatMessage({
                   id: getTrad('List.button.roles'),
                   defaultMessage: 'Add new role',
@@ -149,7 +143,7 @@ const RoleListPage = () => {
 
         <ActionLayout
           startActions={
-            <Search
+            <SearchURLQuery
               label={formatMessage({
                 id: 'app.component.search.label',
                 defaultMessage: 'Search',
@@ -166,25 +160,25 @@ const RoleListPage = () => {
               <Thead>
                 <Tr>
                   <Th>
-                    <TableLabel textColor="neutral600">
+                    <Typography variant="sigma" textColor="neutral600">
                       {formatMessage({ id: getTrad('Roles.name'), defaultMessage: 'Name' })}
-                    </TableLabel>
+                    </Typography>
                   </Th>
                   <Th>
-                    <TableLabel textColor="neutral600">
+                    <Typography variant="sigma" textColor="neutral600">
                       {formatMessage({
                         id: getTrad('Roles.description'),
                         defaultMessage: 'Description',
                       })}
-                    </TableLabel>
+                    </Typography>
                   </Th>
                   <Th>
-                    <TableLabel textColor="neutral600">
+                    <Typography variant="sigma" textColor="neutral600">
                       {formatMessage({
                         id: getTrad('Roles.users'),
                         defaultMessage: 'Users',
                       })}
-                    </TableLabel>
+                    </Typography>
                   </Th>
                   <Th>
                     <VisuallyHidden>

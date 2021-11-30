@@ -2,14 +2,14 @@ import React from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Subtitle, H1 } from '@strapi/parts/Text';
-import { Link } from '@strapi/parts/Link';
-import { Stack } from '@strapi/parts/Stack';
-import { Box } from '@strapi/parts/Box';
-import { Button } from '@strapi/parts/Button';
-import NextIcon from '@strapi/icons/NextIcon';
+import { Typography } from '@strapi/design-system/Typography';
+import { Link } from '@strapi/design-system/Link';
+import { Stack } from '@strapi/design-system/Stack';
+import { Box } from '@strapi/design-system/Box';
+import { Button } from '@strapi/design-system/Button';
+import ArrowRight from '@strapi/icons/ArrowRight';
 
-const WordWrap = styled(Subtitle)`
+const WordWrap = styled(Typography)`
   word-break: break-word;
 `;
 
@@ -24,7 +24,7 @@ const HomeHeader = ({ hasCreatedContentType, onCreateCT }) => {
     <div>
       <Box paddingLeft={6} paddingBottom={10}>
         <StackCustom size={5}>
-          <H1>
+          <Typography as="h1" variant="alpha">
             {hasCreatedContentType
               ? formatMessage({
                   id: 'app.components.HomePage.welcome.again',
@@ -34,8 +34,8 @@ const HomeHeader = ({ hasCreatedContentType, onCreateCT }) => {
                   id: 'app.components.HomePage.welcome',
                   defaultMessage: 'Welcome on board!',
                 })}
-          </H1>
-          <WordWrap textColor="neutral600">
+          </Typography>
+          <WordWrap textColor="neutral600" variant="epsilon">
             {hasCreatedContentType
               ? formatMessage({
                   id: 'app.components.HomePage.welcomeBlock.content.again',
@@ -56,7 +56,7 @@ const HomeHeader = ({ hasCreatedContentType, onCreateCT }) => {
               })}
             </Link>
           ) : (
-            <Button size="L" onClick={onCreateCT} endIcon={<NextIcon />}>
+            <Button size="L" onClick={onCreateCT} endIcon={<ArrowRight />}>
               {formatMessage({
                 id: 'app.components.HomePage.create',
                 defaultMessage: 'Create your first Content type',

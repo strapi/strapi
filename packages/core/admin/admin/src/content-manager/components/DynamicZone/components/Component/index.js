@@ -1,33 +1,48 @@
 import React, { memo, useMemo } from 'react';
 import PropTypes from 'prop-types';
-import isEqual from 'react-fast-compare';
 import styled from 'styled-components';
+import isEqual from 'react-fast-compare';
 import { useIntl } from 'react-intl';
-import { Accordion, AccordionToggle, AccordionContent } from '@strapi/parts/Accordion';
-import { IconButton } from '@strapi/parts/IconButton';
-import { FocusTrap } from '@strapi/parts/FocusTrap';
-import { Box } from '@strapi/parts/Box';
-import { Stack } from '@strapi/parts/Stack';
-import DeleteIcon from '@strapi/icons/DeleteIcon';
-import DownIcon from '@strapi/icons/DownIcon1';
-import UpIcon from '@strapi/icons/UpIcon1';
-// import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Accordion, AccordionToggle, AccordionContent } from '@strapi/design-system/Accordion';
+import { IconButton } from '@strapi/design-system/IconButton';
+import { FocusTrap } from '@strapi/design-system/FocusTrap';
+import { Box } from '@strapi/design-system/Box';
+import { Stack } from '@strapi/design-system/Stack';
+import Trash from '@strapi/icons/Trash';
+import ArrowDown from '@strapi/icons/ArrowDown';
+import ArrowUp from '@strapi/icons/ArrowUp';
 import { useContentTypeLayout } from '../../../../hooks';
 import { getTrad } from '../../../../utils';
 import FieldComponent from '../../../FieldComponent';
 import Rectangle from './Rectangle';
 
-// FIXME
-// Temporary workaround to remove the overflow until we migrate the react-select for the relations
-// to the DS one
-const StyledBox = styled(Box)`
-  > div {
-    overflow: visible;
+const ActionStack = styled(Stack)`
+  svg {
+    path {
+      fill: ${({ theme, expanded }) =>
+        expanded ? theme.colors.primary600 : theme.colors.neutral600};
+    }
   }
+`;
+
+const IconButtonCustom = styled(IconButton)`
+  background-color: transparent;
+`;
+
+const StyledBox = styled(Box)`
+  > div:first-child {
+    box-shadow: ${({ theme }) => theme.shadows.tableShadow};
+  }
+`;
+
+const AccordionContentRadius = styled(Box)`
+  border-radius: 0 0 ${({ theme }) => theme.spaces[1]} ${({ theme }) => theme.spaces[1]};
 `;
 
 const Component = ({
   componentUid,
+  formErrors,
   index,
   isOpen,
   isFieldAllowed,
@@ -43,10 +58,10 @@ const Component = ({
   const { getComponentLayout } = useContentTypeLayout();
   const { icon, friendlyName } = useMemo(() => {
     const {
-      info: { icon, name },
+      info: { icon, displayName },
     } = getComponentLayout(componentUid);
 
-    return { friendlyName: name, icon };
+    return { friendlyName: displayName, icon };
   }, [componentUid, getComponentLayout]);
 
   const handleMoveComponentDown = () => moveComponentDown(name, index);
@@ -71,49 +86,86 @@ const Component = ({
     { name: friendlyName }
   );
 
-  return (
-    <StyledBox>
-      <Rectangle />
+  const formErrorsKeys = Object.keys(formErrors);
 
-      <Accordion expanded={isOpen} toggle={() => onToggle(index)}>
-        <AccordionToggle
-          action={
-            <Stack horizontal size={2}>
-              {showDownIcon && (
-                <IconButton
-                  label={downLabel}
-                  onClick={handleMoveComponentDown}
-                  icon={<DownIcon />}
+  const fieldsErrors = formErrorsKeys.filter(errorKey => {
+    const errorKeysArray = errorKey.split('.');
+
+    if (`${errorKeysArray[0]}.${errorKeysArray[1]}` === `${name}.${index}`) {
+      return true;
+    }
+
+    return false;
+  });
+
+  let errorMessage;
+
+  if (fieldsErrors.length > 0) {
+    errorMessage = formatMessage({
+      id: getTrad('components.DynamicZone.error-message'),
+      defaultMessage: 'The component contains error(s)',
+    });
+  }
+
+  return (
+    <Box>
+      <Rectangle />
+      <StyledBox hasRadius>
+        <Accordion expanded={isOpen} toggle={() => onToggle(index)} size="S" error={errorMessage}>
+          <AccordionToggle
+            startIcon={<FontAwesomeIcon icon={icon} />}
+            action={
+              <ActionStack horizontal size={0} expanded={isOpen}>
+                {showDownIcon && (
+                  <IconButtonCustom
+                    noBorder
+                    label={downLabel}
+                    onClick={handleMoveComponentDown}
+                    icon={<ArrowDown />}
+                  />
+                )}
+                {showUpIcon && (
+                  <IconButtonCustom
+                    noBorder
+                    label={upLabel}
+                    onClick={handleMoveComponentUp}
+                    icon={<ArrowUp />}
+                  />
+                )}
+                {isFieldAllowed && (
+                  <IconButtonCustom
+                    noBorder
+                    label={deleteLabel}
+                    onClick={handleRemove}
+                    icon={<Trash />}
+                  />
+                )}
+              </ActionStack>
+            }
+            title={friendlyName}
+            togglePosition="left"
+          />
+          <AccordionContent>
+            <AccordionContentRadius background="neutral0">
+              <FocusTrap onEscape={() => onToggle(index)}>
+                <FieldComponent
+                  componentUid={componentUid}
+                  icon={icon}
+                  name={`${name}.${index}`}
+                  isFromDynamicZone
                 />
-              )}
-              {showUpIcon && (
-                <IconButton label={upLabel} onClick={handleMoveComponentUp} icon={<UpIcon />} />
-              )}
-              {isFieldAllowed && (
-                <IconButton label={deleteLabel} onClick={handleRemove} icon={<DeleteIcon />} />
-              )}
-            </Stack>
-          }
-          title={friendlyName}
-          togglePosition="left"
-        />
-        <AccordionContent>
-          <FocusTrap onEscape={() => onToggle(index)}>
-            <FieldComponent
-              componentUid={componentUid}
-              icon={icon}
-              name={`${name}.${index}`}
-              isFromDynamicZone
-            />
-          </FocusTrap>
-        </AccordionContent>
-      </Accordion>
-    </StyledBox>
+              </FocusTrap>
+            </AccordionContentRadius>
+          </AccordionContent>
+        </Accordion>
+      </StyledBox>
+    </Box>
   );
 };
 
 Component.propTypes = {
   componentUid: PropTypes.string.isRequired,
+  formErrors: PropTypes.object.isRequired,
   index: PropTypes.number.isRequired,
   isFieldAllowed: PropTypes.bool.isRequired,
   isOpen: PropTypes.bool.isRequired,

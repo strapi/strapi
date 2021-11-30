@@ -32,7 +32,7 @@ module.exports = [
     config: {
       policies: [
         'admin::isAuthenticatedAdmin',
-        { name: 'admin::hasPermissions', options: { actions: ['admin::users.create'] } },
+        { name: 'admin::hasPermissions', config: { actions: ['admin::users.create'] } },
       ],
     },
   },
@@ -43,7 +43,7 @@ module.exports = [
     config: {
       policies: [
         'admin::isAuthenticatedAdmin',
-        { name: 'admin::hasPermissions', options: { actions: ['admin::users.read'] } },
+        { name: 'admin::hasPermissions', config: { actions: ['admin::users.read'] } },
       ],
     },
   },
@@ -54,7 +54,7 @@ module.exports = [
     config: {
       policies: [
         'admin::isAuthenticatedAdmin',
-        { name: 'admin::hasPermissions', options: { actions: ['admin::users.read'] } },
+        { name: 'admin::hasPermissions', config: { actions: ['admin::users.read'] } },
       ],
     },
   },
@@ -65,7 +65,7 @@ module.exports = [
     config: {
       policies: [
         'admin::isAuthenticatedAdmin',
-        { name: 'admin::hasPermissions', options: { actions: ['admin::users.update'] } },
+        { name: 'admin::hasPermissions', config: { actions: ['admin::users.update'] } },
       ],
     },
   },
@@ -74,7 +74,7 @@ module.exports = [
     path: '/users/:id',
     handler: 'user.deleteOne',
     config: {
-      policies: [{ name: 'admin::hasPermissions', options: { actions: ['admin::users.delete'] } }],
+      policies: [{ name: 'admin::hasPermissions', config: { actions: ['admin::users.delete'] } }],
     },
   },
   {
@@ -82,7 +82,7 @@ module.exports = [
     path: '/users/batch-delete',
     handler: 'user.deleteMany',
     config: {
-      policies: [{ name: 'admin::hasPermissions', options: { actions: ['admin::users.delete'] } }],
+      policies: [{ name: 'admin::hasPermissions', config: { actions: ['admin::users.delete'] } }],
     },
   },
 ];

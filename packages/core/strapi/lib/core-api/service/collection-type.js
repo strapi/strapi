@@ -22,14 +22,12 @@ const setPublishedAt = data => {
  *
  * Returns a collection type service to handle default core-api actions
  */
-const createCollectionTypeService = ({ model, strapi, utils }) => {
-  const { uid } = model;
-
-  const { sanitizeInput, getFetchParams } = utils;
+const createCollectionTypeService = ({ contentType }) => {
+  const { uid } = contentType;
 
   return {
     async find(params = {}) {
-      const fetchParams = getFetchParams(params);
+      const fetchParams = this.getFetchParams(params);
 
       const paginationInfo = getPaginationInfo(fetchParams);
 
@@ -54,25 +52,23 @@ const createCollectionTypeService = ({ model, strapi, utils }) => {
     },
 
     findOne(entityId, params = {}) {
-      return strapi.entityService.findOne(uid, entityId, getFetchParams(params));
+      return strapi.entityService.findOne(uid, entityId, this.getFetchParams(params));
     },
 
     create(params = {}) {
       const { data } = params;
-      const sanitizedData = sanitizeInput(data);
 
-      if (hasDraftAndPublish(model)) {
-        setPublishedAt(sanitizedData);
+      if (hasDraftAndPublish(contentType)) {
+        setPublishedAt(data);
       }
 
-      return strapi.entityService.create(uid, { ...params, data: sanitizedData });
+      return strapi.entityService.create(uid, { ...params, data });
     },
 
     update(entityId, params = {}) {
       const { data } = params;
-      const sanitizedData = sanitizeInput(data);
 
-      return strapi.entityService.update(uid, entityId, { ...params, data: sanitizedData });
+      return strapi.entityService.update(uid, entityId, { ...params, data });
     },
 
     delete(entityId, params = {}) {

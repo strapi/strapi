@@ -18,10 +18,10 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
 }
 
 .c4 {
-  font-weight: 500;
+  font-weight: 600;
+  color: #32324d;
   font-size: 0.75rem;
   line-height: 1.33;
-  color: #32324d;
 }
 
 .c1 {
@@ -29,6 +29,11 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
   color: #4945ff;
   padding-right: 12px;
   padding-left: 12px;
+  border-radius: 4px;
+  border-style: solid;
+  border-width: 1px;
+  border-color: #d9d8ff;
+  height: 2rem;
 }
 
 .c6 {
@@ -47,12 +52,6 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
-}
-
-.c2 {
-  border: 1px solid #d9d8ff;
-  border-radius: 4px;
-  height: 2rem;
 }
 
 .c2 svg {
@@ -74,7 +73,9 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
     class="c0"
   >
     <button
+      aria-disabled="false"
       class="c1 c2"
+      height="2rem"
     >
       <div
         class="c3"
@@ -82,11 +83,7 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
         <span
           class="c4 c5"
         >
-          Boolean
-           
-          is
-           
-          true
+          Boolean is true
         </span>
         <div
           class="c6"
@@ -103,7 +100,7 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
             >
               <path
                 d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
-                fill="#32324D"
+                fill="#212134"
               />
             </svg>
           </div>
@@ -115,7 +112,9 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
     class="c0"
   >
     <button
+      aria-disabled="false"
       class="c1 c2"
+      height="2rem"
     >
       <div
         class="c3"
@@ -123,11 +122,7 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
         <span
           class="c4 c5"
         >
-          Date
-           
-          is not
-           
-          Wednesday, September 1, 2021
+          Date is not Wednesday, September 1, 2021
         </span>
         <div
           class="c6"
@@ -144,7 +139,7 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
             >
               <path
                 d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
-                fill="#32324D"
+                fill="#212134"
               />
             </svg>
           </div>
@@ -156,7 +151,9 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
     class="c0"
   >
     <button
+      aria-disabled="false"
       class="c1 c2"
+      height="2rem"
     >
       <div
         class="c3"
@@ -164,9 +161,7 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
         <span
           class="c4 c5"
         >
-          city
-           
-          is null
+          city is null 
         </span>
         <div
           class="c6"
@@ -183,7 +178,7 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
             >
               <path
                 d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
-                fill="#32324D"
+                fill="#212134"
               />
             </svg>
           </div>
@@ -195,7 +190,9 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
     class="c0"
   >
     <button
+      aria-disabled="false"
       class="c1 c2"
+      height="2rem"
     >
       <div
         class="c3"
@@ -203,9 +200,7 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
         <span
           class="c4 c5"
         >
-          country
-           
-          is not null
+          country is not null 
         </span>
         <div
           class="c6"
@@ -222,7 +217,7 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
             >
               <path
                 d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
-                fill="#32324D"
+                fill="#212134"
               />
             </svg>
           </div>
@@ -234,7 +229,9 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
     class="c0"
   >
     <button
+      aria-disabled="false"
       class="c1 c2"
+      height="2rem"
     >
       <div
         class="c3"
@@ -242,11 +239,7 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
         <span
           class="c4 c5"
         >
-          time
-           
-          contains (case sensitive)
-           
-          12:45 AM
+          time contains (case sensitive) 12:45 AM
         </span>
         <div
           class="c6"
@@ -263,7 +256,7 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
             >
               <path
                 d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
-                fill="#32324D"
+                fill="#212134"
               />
             </svg>
           </div>
@@ -275,7 +268,9 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
     class="c0"
   >
     <button
+      aria-disabled="false"
       class="c1 c2"
+      height="2rem"
     >
       <div
         class="c3"
@@ -283,11 +278,7 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
         <span
           class="c4 c5"
         >
-          many to one
-           
-          does not contain (case sensitive)
-           
-          test
+          many to one does not contain (case sensitive) test
         </span>
         <div
           class="c6"
@@ -304,7 +295,7 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
             >
               <path
                 d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
-                fill="#32324D"
+                fill="#212134"
               />
             </svg>
           </div>
@@ -316,7 +307,9 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
     class="c0"
   >
     <button
+      aria-disabled="false"
       class="c1 c2"
+      height="2rem"
     >
       <div
         class="c3"
@@ -324,11 +317,7 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
         <span
           class="c4 c5"
         >
-          many to one
-           
-          is
-           
-          test
+          many to one is test
         </span>
         <div
           class="c6"
@@ -345,7 +334,7 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
             >
               <path
                 d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
-                fill="#32324D"
+                fill="#212134"
               />
             </svg>
           </div>
@@ -357,7 +346,9 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
     class="c0"
   >
     <button
+      aria-disabled="false"
       class="c1 c2"
+      height="2rem"
     >
       <div
         class="c3"
@@ -365,11 +356,7 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
         <span
           class="c4 c5"
         >
-          city
-           
-          starts with
-           
-          paris
+          city starts with paris
         </span>
         <div
           class="c6"
@@ -386,7 +373,7 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
             >
               <path
                 d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
-                fill="#32324D"
+                fill="#212134"
               />
             </svg>
           </div>
@@ -398,7 +385,9 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
     class="c0"
   >
     <button
+      aria-disabled="false"
       class="c1 c2"
+      height="2rem"
     >
       <div
         class="c3"
@@ -406,11 +395,7 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
         <span
           class="c4 c5"
         >
-          country
-           
-          ends with
-           
-          france
+          country ends with france
         </span>
         <div
           class="c6"
@@ -427,7 +412,7 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
             >
               <path
                 d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
-                fill="#32324D"
+                fill="#212134"
               />
             </svg>
           </div>
@@ -439,7 +424,9 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
     class="c0"
   >
     <button
+      aria-disabled="false"
       class="c1 c2"
+      height="2rem"
     >
       <div
         class="c3"
@@ -447,11 +434,7 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
         <span
           class="c4 c5"
         >
-          number
-           
-          is greater than
-           
-          2
+          number is greater than 2
         </span>
         <div
           class="c6"
@@ -468,7 +451,7 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
             >
               <path
                 d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
-                fill="#32324D"
+                fill="#212134"
               />
             </svg>
           </div>
@@ -480,7 +463,9 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
     class="c0"
   >
     <button
+      aria-disabled="false"
       class="c1 c2"
+      height="2rem"
     >
       <div
         class="c3"
@@ -488,11 +473,7 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
         <span
           class="c4 c5"
         >
-          Float
-           
-          is greater than or equal to
-           
-          1
+          Float is greater than or equal to 1
         </span>
         <div
           class="c6"
@@ -509,7 +490,7 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
             >
               <path
                 d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
-                fill="#32324D"
+                fill="#212134"
               />
             </svg>
           </div>
@@ -521,7 +502,9 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
     class="c0"
   >
     <button
+      aria-disabled="false"
       class="c1 c2"
+      height="2rem"
     >
       <div
         class="c3"
@@ -529,11 +512,7 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
         <span
           class="c4 c5"
         >
-          Float
-           
-          is lower than or equal to
-           
-          3
+          Float is lower than or equal to 3
         </span>
         <div
           class="c6"
@@ -550,7 +529,7 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
             >
               <path
                 d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
-                fill="#32324D"
+                fill="#212134"
               />
             </svg>
           </div>
@@ -562,7 +541,9 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
     class="c0"
   >
     <button
+      aria-disabled="false"
       class="c1 c2"
+      height="2rem"
     >
       <div
         class="c3"
@@ -570,11 +551,7 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
         <span
           class="c4 c5"
         >
-          Float
-           
-          is lower than
-           
-          4
+          Float is lower than 4
         </span>
         <div
           class="c6"
@@ -591,7 +568,7 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
             >
               <path
                 d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
-                fill="#32324D"
+                fill="#212134"
               />
             </svg>
           </div>

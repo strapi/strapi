@@ -44,7 +44,9 @@ describe('Content type validator', () => {
     test('Throws when reserved names are used', async () => {
       const data = {
         contentType: {
-          name: 'test',
+          singularName: 'test',
+          pluralName: 'tests',
+          displayName: 'Test',
           attributes: {
             thisIsReserved: {
               type: 'string',
@@ -54,32 +56,22 @@ describe('Content type validator', () => {
         },
       };
 
+      expect.assertions(1);
+
       await validateUpdateContentTypeInput(data).catch(err => {
         expect(err).toMatchObject({
-          'contentType.attributes.thisIsReserved': [
-            expect.stringMatching('Attribute keys cannot be one of'),
-          ],
-        });
-      });
-    });
-  });
-
-  describe('Prevents use of names without plural form', () => {
-    test('Throws when using name without plural form', async () => {
-      const data = {
-        contentType: {
-          name: 'news',
-          attributes: {
-            title: {
-              type: 'string',
-            },
+          name: 'ValidationError',
+          message: 'Attribute keys cannot be one of __component, __contentType, thisIsReserved',
+          details: {
+            errors: [
+              {
+                path: ['contentType', 'attributes', 'thisIsReserved'],
+                message:
+                  'Attribute keys cannot be one of __component, __contentType, thisIsReserved',
+                name: 'ValidationError',
+              },
+            ],
           },
-        },
-      };
-
-      await validateContentTypeInput(data).catch(err => {
-        expect(err).toMatchObject({
-          'contentType.name': [expect.stringMatching('cannot be pluralized')],
         });
       });
     });
@@ -89,7 +81,9 @@ describe('Content type validator', () => {
     test('Can use custom keys', async () => {
       const input = {
         contentType: {
-          name: 'test',
+          displayName: 'test',
+          singularName: 'test',
+          pluralName: 'tests',
           attributes: {
             views: {
               type: 'integer',
@@ -115,7 +109,9 @@ describe('Content type validator', () => {
     test('Deletes empty defaults', async () => {
       const data = {
         contentType: {
-          name: 'test',
+          displayName: 'test',
+          singularName: 'test',
+          pluralName: 'tests',
           attributes: {
             slug: {
               type: 'string',
@@ -127,7 +123,7 @@ describe('Content type validator', () => {
           {
             uid: 'edit',
             icon: 'star',
-            name: 'test',
+            displayName: 'test',
             category: 'test',
             attributes: {
               title: {
@@ -139,7 +135,7 @@ describe('Content type validator', () => {
           {
             tmpUID: 'random',
             icon: 'star',
-            name: 'test2',
+            displayName: 'test2',
             category: 'test',
             attributes: {
               title: {
@@ -161,7 +157,9 @@ describe('Content type validator', () => {
     test('Deleted UID target fields are removed from input data', async () => {
       const data = {
         contentType: {
-          name: 'test',
+          displayName: 'test',
+          singularName: 'test',
+          pluralName: 'tests',
           attributes: {
             slug: {
               type: 'uid',
@@ -181,7 +179,9 @@ describe('Content type validator', () => {
     test('Can use custom keys', async () => {
       const input = {
         contentType: {
-          name: 'test',
+          displayName: 'test',
+          singularName: 'test',
+          pluralName: 'tests',
           attributes: {
             views: {
               type: 'integer',

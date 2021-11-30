@@ -1,7 +1,7 @@
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
-import { ThemeProvider, lightTheme } from '@strapi/parts';
+import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { useRBAC } from '@strapi/helper-plugin';
@@ -38,9 +38,9 @@ describe('Admin | containers | ListView', () => {
 
   afterAll(() => server.close());
 
-  it('renders and matches the snapshot', () => {
+  it('renders and matches the snapshot', async () => {
     useRBAC.mockImplementation(() => ({
-      isLoading: true,
+      isLoading: false,
       allowedActions: { canUpdate: true, canCreate: true, canRead: true, canDelete: true },
     }));
 
@@ -48,15 +48,415 @@ describe('Admin | containers | ListView', () => {
       container: { firstChild },
     } = render(App);
 
+    await waitFor(() => {
+      expect(screen.getByText('http:://strapi.io')).toBeInTheDocument();
+    });
+
     expect(firstChild).toMatchInlineSnapshot(`
-      .c11 {
+      .c26 {
+        margin: 0;
+        height: 18px;
+        min-width: 18px;
+        border-radius: 4px;
+        border: 1px solid #c0c0cf;
+        -webkit-appearance: none;
+        background-color: #ffffff;
+        cursor: pointer;
+      }
+
+      .c26:checked {
+        background-color: #4945ff;
+        border: 1px solid #4945ff;
+      }
+
+      .c26:checked:after {
+        content: '';
+        display: block;
+        position: relative;
+        background: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEwIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPHBhdGgKICAgIGQ9Ik04LjU1MzIzIDAuMzk2OTczQzguNjMxMzUgMC4zMTYzNTUgOC43NjA1MSAwLjMxNTgxMSA4LjgzOTMxIDAuMzk1NzY4TDkuODYyNTYgMS40MzQwN0M5LjkzODkzIDEuNTExNTcgOS45MzkzNSAxLjYzNTkgOS44NjM0OSAxLjcxMzlMNC4wNjQwMSA3LjY3NzI0QzMuOTg1OSA3Ljc1NzU1IDMuODU3MDcgNy43NTgwNSAzLjc3ODM0IDcuNjc4MzRMMC4xMzg2NiAzLjk5MzMzQzAuMDYxNzc5OCAzLjkxNTQ5IDAuMDYxNzEwMiAzLjc5MDMyIDAuMTM4NTA0IDMuNzEyNEwxLjE2MjEzIDIuNjczNzJDMS4yNDAzOCAyLjU5NDMyIDEuMzY4NDMgMi41OTQyMiAxLjQ0NjggMi42NzM0OEwzLjkyMTc0IDUuMTc2NDdMOC41NTMyMyAwLjM5Njk3M1oiCiAgICBmaWxsPSJ3aGl0ZSIKICAvPgo8L3N2Zz4=) no-repeat no-repeat center center;
+        width: 10px;
+        height: 10px;
+        left: 50%;
+        top: 50%;
+        -webkit-transform: translateX(-50%) translateY(-50%);
+        -ms-transform: translateX(-50%) translateY(-50%);
+        transform: translateX(-50%) translateY(-50%);
+      }
+
+      .c26:checked:disabled:after {
+        background: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEwIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPHBhdGgKICAgIGQ9Ik04LjU1MzIzIDAuMzk2OTczQzguNjMxMzUgMC4zMTYzNTUgOC43NjA1MSAwLjMxNTgxMSA4LjgzOTMxIDAuMzk1NzY4TDkuODYyNTYgMS40MzQwN0M5LjkzODkzIDEuNTExNTcgOS45MzkzNSAxLjYzNTkgOS44NjM0OSAxLjcxMzlMNC4wNjQwMSA3LjY3NzI0QzMuOTg1OSA3Ljc1NzU1IDMuODU3MDcgNy43NTgwNSAzLjc3ODM0IDcuNjc4MzRMMC4xMzg2NiAzLjk5MzMzQzAuMDYxNzc5OCAzLjkxNTQ5IDAuMDYxNzEwMiAzLjc5MDMyIDAuMTM4NTA0IDMuNzEyNEwxLjE2MjEzIDIuNjczNzJDMS4yNDAzOCAyLjU5NDMyIDEuMzY4NDMgMi41OTQyMiAxLjQ0NjggMi42NzM0OEwzLjkyMTc0IDUuMTc2NDdMOC41NTMyMyAwLjM5Njk3M1oiCiAgICBmaWxsPSIjOEU4RUE5IgogIC8+Cjwvc3ZnPg==) no-repeat no-repeat center center;
+      }
+
+      .c26:disabled {
+        background-color: #dcdce4;
+        border: 1px solid #c0c0cf;
+      }
+
+      .c26:indeterminate {
+        background-color: #4945ff;
+        border: 1px solid #4945ff;
+      }
+
+      .c26:indeterminate:after {
+        content: '';
+        display: block;
+        position: relative;
+        color: white;
+        height: 2px;
+        width: 10px;
+        background-color: #ffffff;
+        left: 50%;
+        top: 50%;
+        -webkit-transform: translateX(-50%) translateY(-50%);
+        -ms-transform: translateX(-50%) translateY(-50%);
+        transform: translateX(-50%) translateY(-50%);
+      }
+
+      .c26:indeterminate:disabled {
+        background-color: #dcdce4;
+        border: 1px solid #c0c0cf;
+      }
+
+      .c26:indeterminate:disabled:after {
+        background-color: #8e8ea9;
+      }
+
+      .c35 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c43 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 4px;
         background: #ffffff;
-        padding: 24px;
+        border: 1px solid #dcdce4;
+        position: relative;
+        outline: none;
+      }
+
+      .c43 svg {
+        height: 12px;
+        width: 12px;
+      }
+
+      .c43 svg > g,
+      .c43 svg path {
+        fill: #ffffff;
+      }
+
+      .c43[aria-disabled='true'] {
+        pointer-events: none;
+      }
+
+      .c43:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c43:focus-visible {
+        outline: none;
+      }
+
+      .c43:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
+      }
+
+      .c44 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        -webkit-box-pack: center;
+        -webkit-justify-content: center;
+        -ms-flex-pack: center;
+        justify-content: center;
+        height: 2rem;
+        width: 2rem;
+        border: none;
+      }
+
+      .c44 svg > g,
+      .c44 svg path {
+        fill: #8e8ea9;
+      }
+
+      .c44:hover svg > g,
+      .c44:hover svg path {
+        fill: #666687;
+      }
+
+      .c44:active svg > g,
+      .c44:active svg path {
+        fill: #a5a5ba;
+      }
+
+      .c44[aria-disabled='true'] {
+        background-color: #eaeaef;
+      }
+
+      .c44[aria-disabled='true'] svg path {
+        fill: #666687;
+      }
+
+      .c41 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c42 > * {
+        margin-left: 0;
+        margin-right: 0;
+      }
+
+      .c42 > * + * {
+        margin-left: 4px;
+      }
+
+      .c16 {
+        background: #ffffff;
         border-radius: 4px;
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
-      .c14 {
+      .c19 {
+        padding-right: 24px;
+        padding-left: 24px;
+      }
+
+      .c28 {
+        width: 20%;
+      }
+
+      .c30 {
+        width: 60%;
+      }
+
+      .c46 {
+        background: #eaeaef;
+      }
+
+      .c48 {
+        background: #f0f0ff;
+        padding: 20px;
+      }
+
+      .c50 {
+        background: #d9d8ff;
+      }
+
+      .c52 {
+        padding-left: 12px;
+      }
+
+      .c17 {
+        overflow: hidden;
+      }
+
+      .c21 {
+        width: 100%;
+        white-space: nowrap;
+      }
+
+      .c18 {
+        position: relative;
+      }
+
+      .c18:before {
+        background: linear-gradient(90deg,#c0c0cf 0%,rgba(0,0,0,0) 100%);
+        opacity: 0.2;
+        position: absolute;
+        height: 100%;
+        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+        width: 8px;
+        left: 0;
+      }
+
+      .c18:after {
+        background: linear-gradient(270deg,#c0c0cf 0%,rgba(0,0,0,0) 100%);
+        opacity: 0.2;
+        position: absolute;
+        height: 100%;
+        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+        width: 8px;
+        right: 0;
+        top: 0;
+      }
+
+      .c20 {
+        overflow-x: auto;
+      }
+
+      .c32 tr:last-of-type {
+        border-bottom: none;
+      }
+
+      .c22 {
+        border-bottom: 1px solid #eaeaef;
+      }
+
+      .c23 {
+        border-bottom: 1px solid #eaeaef;
+      }
+
+      .c23 td,
+      .c23 th {
+        padding: 16px;
+      }
+
+      .c23 td:first-of-type,
+      .c23 th:first-of-type {
+        padding: 0 4px;
+      }
+
+      .c23 th {
+        padding-top: 0;
+        padding-bottom: 0;
+        height: 3.5rem;
+      }
+
+      .c25 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c24 {
+        vertical-align: middle;
+        text-align: left;
+        color: #666687;
+        outline-offset: -4px;
+      }
+
+      .c24 input {
+        vertical-align: sub;
+      }
+
+      .c27 svg {
+        height: 0.25rem;
+      }
+
+      .c47 {
+        height: 1px;
+        border: none;
+        margin: 0;
+      }
+
+      .c53 {
+        font-weight: 600;
+        color: #4945ff;
+        font-size: 0.75rem;
+        line-height: 1.33;
+      }
+
+      .c51 {
+        height: 1.5rem;
+        width: 1.5rem;
+        border-radius: 50%;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-box-pack: center;
+        -webkit-justify-content: center;
+        -ms-flex-pack: center;
+        justify-content: center;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c51 svg {
+        height: 0.625rem;
+        width: 0.625rem;
+      }
+
+      .c51 svg path {
+        fill: #4945ff;
+      }
+
+      .c49 {
+        border-radius: 0 0 4px 4px;
+        display: block;
+        width: 100%;
+        border: none;
+      }
+
+      .c29 {
+        color: #666687;
+        font-weight: 600;
+        font-size: 0.6875rem;
+        line-height: 1.45;
+        text-transform: uppercase;
+      }
+
+      .c33 {
+        font-weight: 500;
+        color: #32324d;
+        font-size: 0.875rem;
+        line-height: 1.43;
+      }
+
+      .c34 {
+        color: #32324d;
+        font-size: 0.875rem;
+        line-height: 1.43;
+      }
+
+      .c31 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
@@ -68,46 +468,19 @@ describe('Admin | containers | ListView', () => {
         width: 1px;
       }
 
-      .c15 {
-        -webkit-animation: gzYjWD 1s infinite linear;
-        animation: gzYjWD 1s infinite linear;
-      }
-
-      .c12 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-box-pack: space-around;
-        -webkit-justify-content: space-around;
-        -ms-flex-pack: space-around;
-        justify-content: space-around;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c13 {
-        height: 100vh;
-      }
-
       .c1 {
         padding-bottom: 56px;
       }
 
       .c4 {
         background: #f6f6f9;
-        padding-top: 56px;
+        padding-top: 40px;
         padding-right: 56px;
-        padding-bottom: 56px;
+        padding-bottom: 40px;
         padding-left: 56px;
       }
 
-      .c10 {
+      .c15 {
         padding-right: 56px;
         padding-left: 56px;
       }
@@ -154,26 +527,230 @@ describe('Admin | containers | ListView', () => {
       }
 
       .c7 {
+        color: #32324d;
         font-weight: 600;
         font-size: 2rem;
         line-height: 1.25;
-        color: #32324d;
       }
 
-      .c8 {
-        font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
+      .c14 {
         color: #666687;
-      }
-
-      .c9 {
         font-size: 1rem;
         line-height: 1.5;
       }
 
-      .c3 {
+      .c40 {
+        color: #328048;
+        padding-left: 8px;
+      }
+
+      .c45 {
+        color: #d02b20;
+        padding-left: 8px;
+      }
+
+      .c37 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c39 {
+        background: #ee5e52;
+        border: none;
+        border-radius: 16px;
+        position: relative;
+        height: 1.5rem;
+        width: 2.5rem;
+      }
+
+      .c39 span {
+        font-size: 0;
+      }
+
+      .c39:before {
+        content: '';
+        background: #ffffff;
+        width: 1rem;
+        height: 1rem;
+        border-radius: 50%;
+        position: absolute;
+        -webkit-transition: all 0.5s;
+        transition: all 0.5s;
+        left: 4px;
+        top: 4px;
+      }
+
+      .c36 {
+        background: transparent;
+        padding: 0;
+        border: none;
+      }
+
+      .c36[aria-checked='true'] .c38 {
+        background: #5cb176;
+      }
+
+      .c36[aria-checked='true'] .c38:before {
+        -webkit-transform: translateX(1rem);
+        -ms-transform: translateX(1rem);
+        transform: translateX(1rem);
+      }
+
+      .c3:focus-visible {
         outline: none;
+      }
+
+      .c13 {
+        font-weight: 600;
+        color: #32324d;
+        font-size: 0.875rem;
+        line-height: 1.43;
+      }
+
+      .c11 {
+        padding-right: 8px;
+      }
+
+      .c8 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 4px;
+        background: #ffffff;
+        border: 1px solid #dcdce4;
+        position: relative;
+        outline: none;
+      }
+
+      .c8 svg {
+        height: 12px;
+        width: 12px;
+      }
+
+      .c8 svg > g,
+      .c8 svg path {
+        fill: #ffffff;
+      }
+
+      .c8[aria-disabled='true'] {
+        pointer-events: none;
+      }
+
+      .c8:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c8:focus-visible {
+        outline: none;
+      }
+
+      .c8:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
+      }
+
+      .c9 {
+        padding: 10px 16px;
+        background: #4945ff;
+        border: none;
+        border-radius: 4px;
+        border: 1px solid #4945ff;
+        background: #4945ff;
+        display: -webkit-inline-box;
+        display: -webkit-inline-flex;
+        display: -ms-inline-flexbox;
+        display: inline-flex;
+        -webkit-text-decoration: none;
+        text-decoration: none;
+      }
+
+      .c9 .c10 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c9 .c12 {
+        color: #ffffff;
+      }
+
+      .c9[aria-disabled='true'] {
+        border: 1px solid #dcdce4;
+        background: #eaeaef;
+      }
+
+      .c9[aria-disabled='true'] .c12 {
+        color: #666687;
+      }
+
+      .c9[aria-disabled='true'] svg > g,
+      .c9[aria-disabled='true'] svg path {
+        fill: #666687;
+      }
+
+      .c9[aria-disabled='true']:active {
+        border: 1px solid #dcdce4;
+        background: #eaeaef;
+      }
+
+      .c9[aria-disabled='true']:active .c12 {
+        color: #666687;
+      }
+
+      .c9[aria-disabled='true']:active svg > g,
+      .c9[aria-disabled='true']:active svg path {
+        fill: #666687;
+      }
+
+      .c9:hover {
+        border: 1px solid #7b79ff;
+        background: #7b79ff;
+      }
+
+      .c9:active {
+        border: 1px solid #4945ff;
+        background: #4945ff;
+      }
+
+      @media (prefers-reduced-motion:reduce) {
+        .c39:before {
+          -webkit-transition: none;
+          transition: none;
+        }
       }
 
       <div
@@ -183,7 +760,7 @@ describe('Admin | containers | ListView', () => {
           class="c1 c2"
         >
           <main
-            aria-busy="true"
+            aria-busy="false"
             aria-labelledby="main-content-title"
             class="c3"
             id="main-content"
@@ -204,44 +781,493 @@ describe('Admin | containers | ListView', () => {
                   >
                     <h1
                       class="c7"
-                      id="main-content-title"
                     >
                       Webhooks
                     </h1>
                   </div>
+                  <a
+                    aria-disabled="false"
+                    class="c8 c9"
+                    href="//create"
+                    variant="default"
+                  >
+                    <div
+                      aria-hidden="true"
+                      class="c10 c11"
+                    >
+                      <svg
+                        fill="none"
+                        height="1em"
+                        viewBox="0 0 24 24"
+                        width="1em"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M24 13.604a.3.3 0 01-.3.3h-9.795V23.7a.3.3 0 01-.3.3h-3.21a.3.3 0 01-.3-.3v-9.795H.3a.3.3 0 01-.3-.3v-3.21a.3.3 0 01.3-.3h9.795V.3a.3.3 0 01.3-.3h3.21a.3.3 0 01.3.3v9.795H23.7a.3.3 0 01.3.3v3.21z"
+                          fill="#212134"
+                        />
+                      </svg>
+                    </div>
+                    <span
+                      class="c12 c13"
+                    >
+                      Add new webhook
+                    </span>
+                  </a>
                 </div>
                 <p
-                  class="c8 c9"
+                  class="c14"
                 >
                   Get POST changes notifications.
                 </p>
               </div>
             </div>
             <div
-              class="c10"
+              class="c15"
             >
               <div
-                class="c11"
+                class="c16 c17"
               >
                 <div
-                  class="c12 c13"
-                  data-testid="loader"
+                  class="c18"
                 >
                   <div
-                    aria-live="assertive"
-                    role="alert"
+                    class="c19 c20"
+                  >
+                    <table
+                      aria-colcount="5"
+                      aria-rowcount="3"
+                      class="c21"
+                    >
+                      <thead
+                        class="c22"
+                      >
+                        <tr
+                          aria-rowindex="1"
+                          class="c23"
+                        >
+                          <th
+                            aria-colindex="1"
+                            class="c24"
+                          >
+                            <div
+                              class="c25"
+                            >
+                              <input
+                                aria-label="Select all entries"
+                                class="c26"
+                                tabindex="0"
+                                type="checkbox"
+                              />
+                              <span
+                                class="c27"
+                              />
+                            </div>
+                          </th>
+                          <th
+                            aria-colindex="2"
+                            class="c28 c24"
+                            tabindex="-1"
+                            width="20%"
+                          >
+                            <div
+                              class="c25"
+                            >
+                              <span
+                                class="c29"
+                              >
+                                Name
+                              </span>
+                              <span
+                                class="c27"
+                              />
+                            </div>
+                          </th>
+                          <th
+                            aria-colindex="3"
+                            class="c30 c24"
+                            tabindex="-1"
+                            width="60%"
+                          >
+                            <div
+                              class="c25"
+                            >
+                              <span
+                                class="c29"
+                              >
+                                URL
+                              </span>
+                              <span
+                                class="c27"
+                              />
+                            </div>
+                          </th>
+                          <th
+                            aria-colindex="4"
+                            class="c28 c24"
+                            tabindex="-1"
+                            width="20%"
+                          >
+                            <div
+                              class="c25"
+                            >
+                              <span
+                                class="c29"
+                              >
+                                Status
+                              </span>
+                              <span
+                                class="c27"
+                              />
+                            </div>
+                          </th>
+                          <th
+                            aria-colindex="5"
+                            class="c24"
+                            tabindex="-1"
+                          >
+                            <div
+                              class="c25"
+                            >
+                              <div
+                                class="c31"
+                              >
+                                Actions
+                              </div>
+                              <span
+                                class="c27"
+                              />
+                            </div>
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody
+                        class="c32"
+                      >
+                        <tr
+                          aria-rowindex="2"
+                          class="c23"
+                          style="cursor: pointer;"
+                        >
+                          <td
+                            aria-colindex="1"
+                            aria-hidden="true"
+                            class="c24"
+                            role="button"
+                          >
+                            <input
+                              aria-label="Select test"
+                              class="c26"
+                              id="select"
+                              name="select"
+                              tabindex="-1"
+                              type="checkbox"
+                            />
+                          </td>
+                          <td
+                            aria-colindex="2"
+                            class="c24"
+                            tabindex="-1"
+                          >
+                            <span
+                              class="c33"
+                            >
+                              test
+                            </span>
+                          </td>
+                          <td
+                            aria-colindex="3"
+                            class="c24"
+                            tabindex="-1"
+                          >
+                            <span
+                              class="c34"
+                            >
+                              http:://strapi.io
+                            </span>
+                          </td>
+                          <td
+                            aria-colindex="4"
+                            class="c24"
+                          >
+                            <div
+                              aria-hidden="true"
+                              class="c35"
+                              role="button"
+                            >
+                              <button
+                                aria-checked="true"
+                                aria-label="test Status"
+                                class="c36"
+                                role="switch"
+                                tabindex="-1"
+                                type="button"
+                              >
+                                <div
+                                  class="c37"
+                                >
+                                  <div
+                                    class="c38 c39"
+                                  >
+                                    <span>
+                                      Enabled
+                                    </span>
+                                    <span>
+                                      Disabled
+                                    </span>
+                                  </div>
+                                  <span
+                                    aria-hidden="true"
+                                    class="c40"
+                                  >
+                                    Enabled
+                                  </span>
+                                </div>
+                              </button>
+                            </div>
+                          </td>
+                          <td
+                            aria-colindex="5"
+                            class="c24"
+                          >
+                            <div
+                              aria-hidden="true"
+                              class="c41 c42"
+                              role="button"
+                            >
+                              <span>
+                                <button
+                                  aria-disabled="false"
+                                  aria-labelledby="tooltip-1"
+                                  class="c43 c44"
+                                  tabindex="-1"
+                                  type="button"
+                                >
+                                  <svg
+                                    fill="none"
+                                    height="1em"
+                                    viewBox="0 0 24 24"
+                                    width="1em"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  >
+                                    <path
+                                      clip-rule="evenodd"
+                                      d="M23.605 3.514c.527.528.527 1.36 0 1.887l-2.623 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.119 3.118zM0 24v-4.989l14.2-14.2L19.19 9.8 4.99 24H0z"
+                                      fill="#212134"
+                                      fill-rule="evenodd"
+                                    />
+                                  </svg>
+                                </button>
+                              </span>
+                              <span>
+                                <button
+                                  aria-disabled="false"
+                                  aria-labelledby="tooltip-3"
+                                  class="c43 c44"
+                                  id="delete-1"
+                                  tabindex="-1"
+                                  type="button"
+                                >
+                                  <svg
+                                    fill="none"
+                                    height="1em"
+                                    viewBox="0 0 24 24"
+                                    width="1em"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  >
+                                    <path
+                                      d="M3.236 6.149a.2.2 0 00-.197.233L6 24h12l2.96-17.618a.2.2 0 00-.196-.233H3.236zM21.8 1.983c.11 0 .2.09.2.2v1.584a.2.2 0 01-.2.2H2.2a.2.2 0 01-.2-.2V2.183c0-.11.09-.2.2-.2h5.511c.9 0 1.631-1.09 1.631-1.983h5.316c0 .894.73 1.983 1.631 1.983H21.8z"
+                                      fill="#32324D"
+                                    />
+                                  </svg>
+                                </button>
+                              </span>
+                            </div>
+                          </td>
+                        </tr>
+                        <tr
+                          aria-rowindex="3"
+                          class="c23"
+                          style="cursor: pointer;"
+                        >
+                          <td
+                            aria-colindex="1"
+                            aria-hidden="true"
+                            class="c24"
+                            role="button"
+                          >
+                            <input
+                              aria-label="Select test2"
+                              class="c26"
+                              id="select"
+                              name="select"
+                              tabindex="-1"
+                              type="checkbox"
+                            />
+                          </td>
+                          <td
+                            aria-colindex="2"
+                            class="c24"
+                            tabindex="-1"
+                          >
+                            <span
+                              class="c33"
+                            >
+                              test2
+                            </span>
+                          </td>
+                          <td
+                            aria-colindex="3"
+                            class="c24"
+                            tabindex="-1"
+                          >
+                            <span
+                              class="c34"
+                            >
+                              http://me.io
+                            </span>
+                          </td>
+                          <td
+                            aria-colindex="4"
+                            class="c24"
+                          >
+                            <div
+                              aria-hidden="true"
+                              class="c35"
+                              role="button"
+                            >
+                              <button
+                                aria-checked="false"
+                                aria-label="test2 Status"
+                                class="c36"
+                                role="switch"
+                                tabindex="-1"
+                                type="button"
+                              >
+                                <div
+                                  class="c37"
+                                >
+                                  <div
+                                    class="c38 c39"
+                                  >
+                                    <span>
+                                      Enabled
+                                    </span>
+                                    <span>
+                                      Disabled
+                                    </span>
+                                  </div>
+                                  <span
+                                    aria-hidden="true"
+                                    class="c45"
+                                  >
+                                    Disabled
+                                  </span>
+                                </div>
+                              </button>
+                            </div>
+                          </td>
+                          <td
+                            aria-colindex="5"
+                            class="c24"
+                          >
+                            <div
+                              aria-hidden="true"
+                              class="c41 c42"
+                              role="button"
+                            >
+                              <span>
+                                <button
+                                  aria-disabled="false"
+                                  aria-labelledby="tooltip-5"
+                                  class="c43 c44"
+                                  tabindex="-1"
+                                  type="button"
+                                >
+                                  <svg
+                                    fill="none"
+                                    height="1em"
+                                    viewBox="0 0 24 24"
+                                    width="1em"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  >
+                                    <path
+                                      clip-rule="evenodd"
+                                      d="M23.605 3.514c.527.528.527 1.36 0 1.887l-2.623 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.119 3.118zM0 24v-4.989l14.2-14.2L19.19 9.8 4.99 24H0z"
+                                      fill="#212134"
+                                      fill-rule="evenodd"
+                                    />
+                                  </svg>
+                                </button>
+                              </span>
+                              <span>
+                                <button
+                                  aria-disabled="false"
+                                  aria-labelledby="tooltip-7"
+                                  class="c43 c44"
+                                  id="delete-2"
+                                  tabindex="-1"
+                                  type="button"
+                                >
+                                  <svg
+                                    fill="none"
+                                    height="1em"
+                                    viewBox="0 0 24 24"
+                                    width="1em"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  >
+                                    <path
+                                      d="M3.236 6.149a.2.2 0 00-.197.233L6 24h12l2.96-17.618a.2.2 0 00-.196-.233H3.236zM21.8 1.983c.11 0 .2.09.2.2v1.584a.2.2 0 01-.2.2H2.2a.2.2 0 01-.2-.2V2.183c0-.11.09-.2.2-.2h5.511c.9 0 1.631-1.09 1.631-1.983h5.316c0 .894.73 1.983 1.631 1.983H21.8z"
+                                      fill="#32324D"
+                                    />
+                                  </svg>
+                                </button>
+                              </span>
+                            </div>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+                <div>
+                  <hr
+                    class="c46 c47"
+                  />
+                  <button
+                    class="c48 c49"
                   >
                     <div
-                      class="c14"
+                      class="c25"
                     >
-                      Loading content.
+                      <div
+                        aria-hidden="true"
+                        class="c50 c51"
+                      >
+                        <svg
+                          fill="none"
+                          height="1em"
+                          viewBox="0 0 24 24"
+                          width="1em"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M24 13.604a.3.3 0 01-.3.3h-9.795V23.7a.3.3 0 01-.3.3h-3.21a.3.3 0 01-.3-.3v-9.795H.3a.3.3 0 01-.3-.3v-3.21a.3.3 0 01.3-.3h9.795V.3a.3.3 0 01.3-.3h3.21a.3.3 0 01.3.3v9.795H23.7a.3.3 0 01.3.3v3.21z"
+                            fill="#212134"
+                          />
+                        </svg>
+                      </div>
+                      <div
+                        class="c52"
+                      >
+                        <span
+                          class="c53"
+                        >
+                          Add new webhook
+                        </span>
+                      </div>
                     </div>
-                    <img
-                      aria-hidden="true"
-                      class="c15"
-                      src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjMiIGhlaWdodD0iNjMiIHZpZXdCb3g9IjAgMCA2MyA2MyIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTQyLjU1NjMgMTEuOTgxNkMzOS40ODQgMTAuMzA3MSAzNS44NTc1IDkuMjkwOTcgMzIuMzM1NCA5LjEzNTIxQzI4LjY0NDMgOC45Mjg4OCAyNC44Mjk1IDkuNzIzMTggMjEuMzMzNiAxMS40MTI5QzIwLjkxMjMgMTEuNTkwMSAyMC41Mzc2IDExLjgxMDEgMjAuMTcyMiAxMi4wMjQ5TDIwLjAxMDggMTIuMTE3OUMxOS44Nzc0IDEyLjE5NTEgMTkuNzQ0MSAxMi4yNzI0IDE5LjYwOCAxMi4zNTM2QzE5LjMyNTMgMTIuNTE0NiAxOS4wNDkyIDEyLjY3NDQgMTguNzU0NCAxMi44NzkyQzE4LjU0NjMgMTMuMDMyOSAxOC4zMzk1IDEzLjE3NTkgMTguMTMwMSAxMy4zMjNDMTcuNTY1OCAxMy43MjA4IDE2Ljk4NjggMTQuMTMxNyAxNi40OTgzIDE0LjU5NzlDMTQuODQ3NiAxNS45NTI0IDEzLjU1NzEgMTcuNjA3NSAxMi42MDcxIDE4LjkyMTRDMTAuNDM2NSAyMi4xNTY2IDkuMDg2MjIgMjUuOTU2NyA4LjgwNzAyIDI5LjYxNDNMOC43NzY0IDMwLjE1ODhDOC43MzMyOCAzMC45MTk2IDguNjg0NzYgMzEuNzA1NyA4Ljc1MzUzIDMyLjQ1NTVDOC43NjY0OCAzMi42MDg0IDguNzY2MSAzMi43NjM4IDguNzc1MDYgMzIuOTE0QzguNzg4OTUgMzMuMjI5IDguODAxNTIgMzMuNTM3MyA4Ljg0NiAzMy44NjcyTDkuMDczOTYgMzUuNDIyMUM5LjA5NzU2IDM1LjU3NjQgOS4xMTk4IDM1Ljc0MTMgOS4xNjMzIDM1LjkyNjNMOS42NTkxOSAzNy45MjcyTDEwLjEzOCAzOS4yODIzQzEwLjI3MjkgMzkuNjY3MyAxMC40MTU4IDQwLjA3NTEgMTAuNiA0MC40M0MxMi4wMjkyIDQzLjYzNyAxNC4xNDI1IDQ2LjQ1NzggMTYuNzA2MyA0OC41ODVDMTkuMDUwOCA1MC41Mjk2IDIxLjgyNCA1Mi4wMDIzIDI0Ljc0OTEgNTIuODQ1MkwyNi4yMzcxIDUzLjIzNzZDMjYuMzc4MSA1My4yNjkzIDI2LjQ5MjYgNTMuMjg4OSAyNi42MDMxIDUzLjMwNThMMjYuNzc3NSA1My4zMzExQzI3LjAwNTIgNTMuMzYzNiAyNy4yMTk1IDUzLjM5ODYgMjcuNDQ0NSA1My40MzVDMjcuODU5OCA1My41MDc2IDI4LjI2NzIgNTMuNTc0OCAyOC43MDc5IDUzLjYxODNMMzAuNTY0MSA1My43MjI5QzMwLjk1MTYgNTMuNzI0OSAzMS4zMzUyIDUzLjcwNjggMzEuNzA4MSA1My42ODc0QzMxLjkwMzkgNTMuNjgxIDMyLjA5ODQgNTMuNjY4MSAzMi4zMjg4IDUzLjY2MkMzNC41MjUzIDUzLjQ3NzIgMzYuNTEwNiA1My4wNjM0IDM4LjA1MTYgNTIuNDY1MkMzOC4xNzY5IDUyLjQxNzEgMzguMzAwOCA1Mi4zNzk2IDM4LjQyMzQgNTIuMzM1NUMzOC42NzI3IDUyLjI0OTkgMzguOTI1OSA1Mi4xNjcgMzkuMTQzMiA1Mi4wNTk5TDQwLjg1OTEgNTEuMjYyNkw0Mi41NzAyIDUwLjI2NkM0Mi45MDA5IDUwLjA2ODIgNDMuMDIwNSA0OS42NDE0IDQyLjgyODIgNDkuMjk4NEM0Mi42MzIgNDguOTUyNiA0Mi4yMDM0IDQ4LjgzMDggNDEuODYzNCA0OS4wMTY2TDQwLjE3OTIgNDkuOTIxOEwzOC40OTk1IDUwLjYyMjRDMzguMzE2OSA1MC42OTUzIDM4LjEyMSA1MC43NTM0IDM3LjkyMjQgNTAuODE1NUMzNy43ODM4IDUwLjg0ODkgMzcuNjUxOCA1MC44OTgzIDM3LjUwMTIgNTAuOTQwOEMzNi4wNzExIDUxLjQzNSAzNC4yNDQ1IDUxLjc0MjUgMzIuMjQ0IDUxLjgzNDZDMzIuMDQ0MiA1MS44MzgzIDMxLjg0NzEgNTEuODM3OSAzMS42NTQgNTEuODQwM0MzMS4zMDUxIDUxLjg0MTQgMzAuOTYwMiA1MS44NDUxIDMwLjYzOTIgNTEuODMwNUwyOC45MTc3IDUxLjY3MjVDMjguNTQ3NiA1MS42MTkgMjguMTY5NSA1MS41NDI3IDI3Ljc4NDggNTEuNDY3OEMyNy41NjM5IDUxLjQxNjcgMjcuMzM3NiA1MS4zNzM3IDI3LjEyOTkgNTEuMzM3NEwyNi45NTI5IDUxLjI5ODdDMjYuODcwNCA1MS4yODM0IDI2Ljc3NzIgNTEuMjY2NyAyNi43MzMzIDUxLjI1NDNMMjUuMzQ2NiA1MC44MzIyQzIyLjc2NTEgNDkuOTc4OSAyMC4zMyA0OC41NzI5IDE4LjI5NDIgNDYuNzU1N0MxNi4xMDU2IDQ0Ljc5NTEgMTQuMzMzOSA0Mi4yMzM1IDEzLjE3NDIgMzkuMzU4MkMxMi4wMjc2IDM2LjYwMTMgMTEuNTk4OCAzMy4yNzkyIDExLjk3MTYgMzAuMDA3NkMxMi4zMTQ1IDI3LjAyMTMgMTMuMzk0OCAyNC4xNjM1IDE1LjE4NTggMjEuNTA4M0MxNS4zMDM0IDIxLjMzMzkgMTUuNDIxIDIxLjE1OTYgMTUuNTIxMiAyMS4wMTk2QzE2LjQzMDkgMTkuODY4OCAxNy41NDA4IDE4LjU1ODkgMTguOTQ4MyAxNy40OTZDMTkuMzM2NyAxNy4xNTI1IDE5Ljc4NjIgMTYuODU2IDIwLjI2MTEgMTYuNTQ3OEMyMC40ODc4IDE2LjQwMDkgMjAuNzA3OSAxNi4yNTUzIDIwLjg5MDcgMTYuMTMwNkMyMS4wOTc0IDE2LjAwNDggMjEuMzE4OCAxNS44ODMxIDIxLjUzNDggMTUuNzY5NEMyMS42NzYxIDE1LjY5NzUgMjEuODE2MiAxNS42MTkgMjEuOTM4OCAxNS41NTc2TDIyLjEwMDIgMTUuNDY0NkMyMi40MDAyIDE1LjMwMzcgMjIuNjc0OSAxNS4xNTQ2IDIyLjk5MDggMTUuMDM5TDI0LjExODYgMTQuNTcxNUMyNC4zMzk5IDE0LjQ4NDQgMjQuNTcxOCAxNC40MTU5IDI0Ljc5OTcgMTQuMzQ0N0MyNC45NTMgMTQuMjk4MiAyNS4wOTgyIDE0LjI2MzUgMjUuMjYzNSAxNC4yMDc4QzI1Ljc4NiAxNC4wMTgyIDI2LjMyODMgMTMuOTExMiAyNi45MTA1IDEzLjc5NjVDMjcuMTE3IDEzLjc1NzEgMjcuMzMwMiAxMy43MTYzIDI3LjU2MDggMTMuNjU4NUMyNy43NTUzIDEzLjYxMSAyNy45NzM3IDEzLjU5NjkgMjguMjA4MiAxMy41NzYyQzI4LjM2NCAxMy41NjAzIDI4LjUxNzIgMTMuNTQ4MyAyOC42MzE4IDEzLjUzMzNDMjguNzg3NiAxMy41MTczIDI4LjkzNDIgMTMuNTA2NiAyOS4wOTI3IDEzLjQ4NjdDMjkuMzI4NSAxMy40NTU1IDI5LjU0NTYgMTMuNDM0NyAyOS43NDk0IDEzLjQzMzdDMzAuMDIzNyAxMy40NCAzMC4yOTk0IDEzLjQzNTcgMzAuNTc3NyAxMy40Mjc0QzMxLjA4MTEgMTMuNDIxIDMxLjU1NzkgMTMuNDE5NyAzMi4wMzE4IDEzLjQ5MTRDMzQuOTY2NCAxMy43MzUyIDM3LjcxNDQgMTQuNjA4NSA0MC4yMDUyIDE2LjA4NjhDNDIuMzQ4OSAxNy4zNjU1IDQ0LjI3MTYgMTkuMTUyNSA0NS43NjA3IDIxLjI2NEM0Ny4wMjU1IDIzLjA2MjggNDcuOTc1NiAyNS4wNTI4IDQ4LjQ5MjggMjcuMDM5M0M0OC41NzIgMjcuMzE3NiA0OC42Mjk5IDI3LjU5MzEgNDguNjgzOSAyNy44NjU5QzQ4LjcxNTQgMjguMDQyOCA0OC43NTYzIDI4LjIxNDUgNDguNzg5MiAyOC4zNjM2QzQ4LjgwMzcgMjguNDU0MSA0OC44MjA4IDI4LjU0MDYgNDguODQ0NSAyOC42MjU4QzQ4Ljg3NDkgMjguNzQ0MyA0OC44OTg2IDI4Ljg2NCA0OC45MTE2IDI4Ljk2NTFMNDguOTc5MyAyOS42MDQ3QzQ4Ljk5MjIgMjkuNzc0OCA0OS4wMTMyIDI5LjkzMzEgNDkuMDMwMSAzMC4wODg3QzQ5LjA2NjggMzAuMzI2OCA0OS4wODg5IDMwLjU2MDggNDkuMDk2NCAzMC43NTYxTDQ5LjEwODMgMzEuOTAwMUM0OS4xMzEyIDMyLjMzMDcgNDkuMDg5IDMyLjcxMTYgNDkuMDUyMiAzMy4wNjczQzQ5LjAzODQgMzMuMjU5OCA0OS4wMTI2IDMzLjQ0NDMgNDkuMDEyMyAzMy41ODI0QzQ4Ljk5NjEgMzMuNjkyNiA0OC45OTE4IDMzLjc5MzUgNDguOTgzNiAzMy44OTE3QzQ4Ljk3NTMgMzQuMDA3MiA0OC45NzI0IDM0LjExNDggNDguOTQxNCAzNC4yNTU0TDQ4LjU0NDkgMzYuMzA1OUM0OC4zMTM0IDM3Ljg2MjMgNDkuMzc5MyAzOS4zMzY1IDUwLjk0ODggMzkuNTgyMkM1Mi4wNDE3IDM5Ljc2MDEgNTMuMTUzNiAzOS4yODE5IDUzLjc3MTEgMzguMzY2NEM1NC4wMDYzIDM4LjAxNzYgNTQuMTYwNCAzNy42MjU3IDU0LjIyMjcgMzcuMjA2NEw1NC41MjE3IDM1LjI1NzRDNTQuNTUxNCAzNS4wNzU2IDU0LjU3MiAzNC44MyA1NC41ODQ2IDM0LjU3OTFMNTQuNjAyOCAzNC4yMzM4QzU0LjYwOTggMzQuMDU5OCA1NC42MjIzIDMzLjg3NzkgNTQuNjM0NyAzMy42Nzg4QzU0LjY3MzQgMzMuMTA1MiA1NC43MTYzIDMyLjQ0NzkgNTQuNjYxOSAzMS44MDU4TDU0LjU4NjcgMzAuNDI4OUM1NC41NjIyIDMwLjA5NTIgNTQuNTA5NyAyOS43NiA1NC40NTU5IDI5LjQxODFDNTQuNDMxIDI5LjI1NzIgNTQuNDA0OCAyOS4wODk2IDU0LjM4MjYgMjguOTA3NEw1NC4yNjg3IDI4LjEwNEM1NC4yMzMyIDI3LjkyNDQgNTQuMTgwNCAyNy43MjczIDU0LjEzMjkgMjcuNTM5Nkw1NC4wNjQzIDI3LjI0NTRDNTQuMDE5NSAyNy4wNzEgNTMuOTc3MyAyNi44OTI3IDUzLjkzMzggMjYuNzA3NkM1My44NDU1IDI2LjMzMDkgNTMuNzQ3OSAyNS45NDIyIDUzLjYxMyAyNS41NTcxQzUyLjg0IDIzLjAyOTIgNTEuNTM4MyAyMC41MTk0IDQ5LjgzMzggMTguMjc5OUM0Ny44NTQ0IDE1LjY4MiA0NS4zMzMzIDEzLjUwODcgNDIuNTU2MyAxMS45ODE2WiIgZmlsbD0iIzQ5NDVGRiIvPgo8L3N2Zz4K"
-                    />
-                  </div>
+                  </button>
                 </div>
               </div>
             </div>

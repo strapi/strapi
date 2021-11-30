@@ -3,11 +3,11 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
-import { Row } from '@strapi/parts/Row';
-import { Box } from '@strapi/parts/Box';
-import { Tooltip } from '@strapi/parts/Tooltip';
-import { Text } from '@strapi/parts/Text';
-import { Popover } from '@strapi/parts/Popover';
+import { Flex } from '@strapi/design-system/Flex';
+import { Box } from '@strapi/design-system/Box';
+import { Tooltip } from '@strapi/design-system/Tooltip';
+import { Typography } from '@strapi/design-system/Typography';
+import { Popover } from '@strapi/design-system/Popover';
 import { SortIcon, stopPropagation } from '@strapi/helper-plugin';
 import get from 'lodash/get';
 import selectI18NLocales from '../../selectors/selectI18nLocales';
@@ -93,7 +93,7 @@ const LocaleListCell = ({ localizations, locale: currentLocaleCode, id }) => {
   const localesNames = localesArray.join(', ');
 
   return (
-    <Row {...stopPropagation}>
+    <Flex {...stopPropagation}>
       <Tooltip
         label={formatMessage({
           id: getTrad('CMListView.popover.display-locales.label'),
@@ -101,8 +101,8 @@ const LocaleListCell = ({ localizations, locale: currentLocaleCode, id }) => {
         })}
       >
         <Button type="button" onClick={handleTogglePopover} ref={buttonRef}>
-          <Row>
-            <Text
+          <Flex>
+            <Typography
               style={{ maxWidth: '252px', cursor: 'pointer' }}
               data-for={elId}
               data-tip={localesNames}
@@ -110,7 +110,7 @@ const LocaleListCell = ({ localizations, locale: currentLocaleCode, id }) => {
               ellipsis
             >
               {localesNames}
-            </Text>
+            </Typography>
             <ActionWrapper>
               <SortIcon />
 
@@ -119,17 +119,17 @@ const LocaleListCell = ({ localizations, locale: currentLocaleCode, id }) => {
                   <ul>
                     {localesArray.map(name => (
                       <Box key={name} padding={3} as="li">
-                        <Text>{name}</Text>
+                        <Typography>{name}</Typography>
                       </Box>
                     ))}
                   </ul>
                 </Popover>
               )}
             </ActionWrapper>
-          </Row>
+          </Flex>
         </Button>
       </Tooltip>
-    </Row>
+    </Flex>
   );
 };
 

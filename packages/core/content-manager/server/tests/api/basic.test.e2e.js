@@ -1,6 +1,5 @@
 'use strict';
 
-const _ = require('lodash');
 const { createStrapiInstance } = require('../../../../../../test/helpers/strapi');
 const { createTestBuilder } = require('../../../../../../test/helpers/builder');
 const { createAuthRequest } = require('../../../../../../test/helpers/request');
@@ -24,7 +23,9 @@ const product = {
       maxLength: 30,
     },
   },
-  name: 'product',
+  displayName: 'Product',
+  singularName: 'product',
+  pluralName: 'products',
   description: '',
   collectionName: '',
 };
@@ -123,9 +124,22 @@ describe('CM API - Basic', () => {
       });
 
       expect(res.statusCode).toBe(400);
-      expect(_.get(res, 'body.data.errors.description.0')).toBe(
-        'description must be at least 4 characters'
-      );
+      expect(res.body).toMatchObject({
+        data: null,
+        error: {
+          message: 'description must be at least 4 characters',
+          name: 'ValidationError',
+          details: {
+            errors: [
+              {
+                path: ['description'],
+                message: 'description must be at least 4 characters',
+                name: 'ValidationError',
+              },
+            ],
+          },
+        },
+      });
     });
 
     test('Cannot create a product - required', async () => {
@@ -139,7 +153,22 @@ describe('CM API - Basic', () => {
       });
 
       expect(res.statusCode).toBe(400);
-      expect(_.get(res, 'body.data.errors.name.0')).toBe('name must be defined.');
+      expect(res.body).toMatchObject({
+        data: null,
+        error: {
+          message: 'name must be defined.',
+          name: 'ValidationError',
+          details: {
+            errors: [
+              {
+                path: ['name'],
+                message: 'name must be defined.',
+                name: 'ValidationError',
+              },
+            ],
+          },
+        },
+      });
     });
 
     test('Cannot create a product - maxLength', async () => {
@@ -154,9 +183,22 @@ describe('CM API - Basic', () => {
       });
 
       expect(res.statusCode).toBe(400);
-      expect(_.get(res, 'body.data.errors.description.0')).toBe(
-        'description must be at most 30 characters'
-      );
+      expect(res.body).toMatchObject({
+        data: null,
+        error: {
+          message: 'description must be at most 30 characters',
+          name: 'ValidationError',
+          details: {
+            errors: [
+              {
+                path: ['description'],
+                message: 'description must be at most 30 characters',
+                name: 'ValidationError',
+              },
+            ],
+          },
+        },
+      });
     });
   });
 });

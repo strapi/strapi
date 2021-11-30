@@ -1,10 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Row } from '@strapi/parts/Row';
-import { TableLabel } from '@strapi/parts/Text';
+import { Flex } from '@strapi/design-system/Flex';
+import { Typography } from '@strapi/design-system/Typography';
 
-const Wrapper = styled(Row)`
+const Wrapper = styled(Flex)`
   position: relative;
   border-radius: 50%;
   width: 26px;
@@ -22,7 +22,9 @@ const Wrapper = styled(Row)`
 const FileWrapper = ({ children, ...props }) => {
   return (
     <Wrapper justifyContent="center" alignItems="center" as="span" {...props}>
-      <TableLabel textColor="neutral600">{children}</TableLabel>
+      <Typography variant="sigma" textColor="neutral600">
+        {children}
+      </Typography>
     </Wrapper>
   );
 };

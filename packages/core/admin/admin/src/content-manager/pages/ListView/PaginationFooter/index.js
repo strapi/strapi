@@ -1,16 +1,16 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Box } from '@strapi/parts/Box';
-import { Row } from '@strapi/parts/Row';
+import { Box } from '@strapi/design-system/Box';
+import { Flex } from '@strapi/design-system/Flex';
 import { PaginationURLQuery, PageSizeURLQuery } from '@strapi/helper-plugin';
 
 const PaginationFooter = ({ pagination }) => {
   return (
-    <Box paddingTop={6}>
-      <Row alignItems="flex-end" justifyContent="space-between">
+    <Box paddingTop={4}>
+      <Flex alignItems="flex-end" justifyContent="space-between">
         <PageSizeURLQuery trackedEvent="willChangeNumberOfEntriesPerPage" />
         <PaginationURLQuery pagination={pagination} />
-      </Row>
+      </Flex>
     </Box>
   );
 };

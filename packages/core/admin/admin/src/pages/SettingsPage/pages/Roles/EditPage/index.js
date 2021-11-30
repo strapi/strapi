@@ -1,3 +1,4 @@
+import React, { useRef, useState } from 'react';
 import {
   request,
   useNotification,
@@ -6,14 +7,15 @@ import {
   LoadingIndicatorPage,
   SettingsPageTitle,
 } from '@strapi/helper-plugin';
-import { Box } from '@strapi/parts/Box';
-import { Button } from '@strapi/parts/Button';
-import { ContentLayout, HeaderLayout } from '@strapi/parts/Layout';
-import { Main } from '@strapi/parts/Main';
-import { Stack } from '@strapi/parts/Stack';
+import { Box } from '@strapi/design-system/Box';
+import { Button } from '@strapi/design-system/Button';
+import { ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
+import { Main } from '@strapi/design-system/Main';
+import { Stack } from '@strapi/design-system/Stack';
 import { Formik } from 'formik';
+import { Link } from '@strapi/design-system/Link';
+import ArrowLeft from '@strapi/icons/ArrowLeft';
 import get from 'lodash/get';
-import React, { useRef, useState } from 'react';
 import { useIntl } from 'react-intl';
 import { useRouteMatch } from 'react-router-dom';
 import { Permissions, RoleForm } from './components';
@@ -102,26 +104,12 @@ const EditPage = () => {
         validationSchema={schema}
         validateOnChange={false}
       >
-        {({ handleSubmit, values, errors, handleReset, handleChange, handleBlur }) => (
+        {({ handleSubmit, values, errors, handleChange, handleBlur }) => (
           <form onSubmit={handleSubmit}>
             <>
               <HeaderLayout
                 primaryAction={
                   <Stack horizontal size={2}>
-                    <Button
-                      variant="secondary"
-                      disabled={role.code === 'strapi-super-admin'}
-                      onClick={() => {
-                        handleReset();
-                        permissionsRef.current.resetForm();
-                      }}
-                      size="L"
-                    >
-                      {formatMessage({
-                        id: 'app.components.Button.reset',
-                        defaultMessage: 'Reset',
-                      })}
-                    </Button>
                     <Button
                       disabled={role.code === 'strapi-super-admin'}
                       onClick={handleSubmit}
@@ -143,6 +131,14 @@ const EditPage = () => {
                   id: 'Settings.roles.create.description',
                   defaultMessage: 'Define the rights given to the role',
                 })}
+                navigationAction={
+                  <Link startIcon={<ArrowLeft />} to="/settings/roles">
+                    {formatMessage({
+                      id: 'app.components.go-back',
+                      defaultMessage: 'Go back',
+                    })}
+                  </Link>
+                }
               />
               <ContentLayout>
                 <Stack size={6}>

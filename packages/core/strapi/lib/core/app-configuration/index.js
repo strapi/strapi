@@ -11,15 +11,8 @@ dotenv.config({ path: process.env.ENV_PATH });
 process.env.NODE_ENV = process.env.NODE_ENV || 'development';
 
 const loadConfigDir = require('./config-loader');
-const loadFunction = require('./load-functions');
 
 const { version: strapiVersion } = require(path.join(__dirname, '../../../package.json'));
-
-const CONFIG_PATHS = {
-  config: 'config',
-  static: 'public',
-  views: 'views',
-};
 
 const defaultConfig = {
   server: {
@@ -30,6 +23,11 @@ const defaultConfig = {
     admin: { autoOpen: false },
   },
   admin: {},
+  api: {
+    rest: {
+      prefix: '/api',
+    },
+  },
 };
 
 module.exports = (dir, initialConfig = {}) => {
@@ -41,8 +39,6 @@ module.exports = (dir, initialConfig = {}) => {
 
   const rootConfig = {
     launchedAt: Date.now(),
-    appPath: dir,
-    paths: CONFIG_PATHS,
     serveAdminPanel,
     autoReload,
     environment: process.env.NODE_ENV,
@@ -52,7 +48,6 @@ module.exports = (dir, initialConfig = {}) => {
       ...pkgJSON,
       strapi: strapiVersion,
     },
-    functions: loadFunction(path.join(configDir, 'functions')),
   };
 
   const baseConfig = omit('plugins', loadConfigDir(configDir)); // plugin config will be loaded later

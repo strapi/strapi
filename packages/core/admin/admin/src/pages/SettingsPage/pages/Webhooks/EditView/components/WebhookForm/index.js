@@ -1,16 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { Form } from '@strapi/helper-plugin';
-import BackIcon from '@strapi/icons/BackIcon';
-import CheckIcon from '@strapi/icons/CheckIcon';
-import Publish from '@strapi/icons/Publish';
-import { ContentLayout, HeaderLayout } from '@strapi/parts/Layout';
-import { Box } from '@strapi/parts/Box';
-import { Button } from '@strapi/parts/Button';
-import { Link } from '@strapi/parts/Link';
-import { Stack } from '@strapi/parts/Stack';
-import { TextInput } from '@strapi/parts/TextInput';
-import { Grid, GridItem } from '@strapi/parts/Grid';
+import ArrowLeft from '@strapi/icons/ArrowLeft';
+import Check from '@strapi/icons/Check';
+import Publish from '@strapi/icons/Play';
+import { ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
+import { Box } from '@strapi/design-system/Box';
+import { Button } from '@strapi/design-system/Button';
+import { Link } from '@strapi/design-system/Link';
+import { Stack } from '@strapi/design-system/Stack';
+import { TextInput } from '@strapi/design-system/TextInput';
+import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { Field, Formik } from 'formik';
 
 import { useIntl } from 'react-intl';
@@ -25,11 +25,11 @@ const WebhookForm = ({
   triggerWebhook,
   isCreating,
   isTriggering,
-  isTriggerIdle,
   triggerResponse,
   isDraftAndPublishEvents,
 }) => {
   const { formatMessage } = useIntl();
+  const [showTriggerResponse, setShowTriggerResponse] = useState(false);
 
   return (
     <Formik
@@ -46,13 +46,16 @@ const WebhookForm = ({
       validateOnChange={false}
       validateOnBlur={false}
     >
-      {({ handleSubmit, errors, handleReset }) => (
+      {({ handleSubmit, errors }) => (
         <Form noValidate>
           <HeaderLayout
             primaryAction={
               <Stack horizontal size={2}>
                 <Button
-                  onClick={triggerWebhook}
+                  onClick={() => {
+                    triggerWebhook();
+                    setShowTriggerResponse(true);
+                  }}
                   variant="tertiary"
                   startIcon={<Publish />}
                   disabled={isCreating || isTriggering}
@@ -63,13 +66,7 @@ const WebhookForm = ({
                     defaultMessage: 'Trigger',
                   })}
                 </Button>
-                <Button variant="secondary" onClick={handleReset} size="L">
-                  {formatMessage({
-                    id: 'app.components.Button.reset',
-                    defaultMessage: 'Reset',
-                  })}
-                </Button>
-                <Button startIcon={<CheckIcon />} onClick={handleSubmit} type="submit" size="L">
+                <Button startIcon={<Check />} onClick={handleSubmit} type="submit" size="L">
                   {formatMessage({
                     id: 'app.components.Button.save',
                     defaultMessage: 'Save',
@@ -86,7 +83,7 @@ const WebhookForm = ({
                 : data?.name
             }
             navigationAction={
-              <Link startIcon={<BackIcon />} to="/settings/webhooks">
+              <Link startIcon={<ArrowLeft />} to="/settings/webhooks">
                 {formatMessage({
                   id: 'app.components.go-back',
                   defaultMessage: 'Go back',
@@ -96,12 +93,12 @@ const WebhookForm = ({
           />
           <ContentLayout>
             <Stack size={4}>
-              {(isTriggering || !isTriggerIdle) && (
+              {showTriggerResponse && (
                 <div className="trigger-wrapper">
                   <TriggerContainer
                     isPending={isTriggering}
                     response={triggerResponse}
-                    onCancel={triggerResponse?.cancel}
+                    onCancel={() => setShowTriggerResponse(false)}
                   />
                 </div>
               )}
@@ -150,7 +147,6 @@ WebhookForm.propTypes = {
   isCreating: PropTypes.bool.isRequired,
   isDraftAndPublishEvents: PropTypes.bool.isRequired,
   isTriggering: PropTypes.bool.isRequired,
-  isTriggerIdle: PropTypes.bool.isRequired,
   triggerResponse: PropTypes.object,
 };
 

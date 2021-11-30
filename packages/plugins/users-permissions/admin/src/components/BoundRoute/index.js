@@ -1,12 +1,18 @@
 import React from 'react';
-import { Stack } from '@strapi/parts/Stack';
-import { Box } from '@strapi/parts/Box';
-import { H3, Text } from '@strapi/parts/Text';
+import styled from 'styled-components';
+import { Stack } from '@strapi/design-system/Stack';
+import { Box } from '@strapi/design-system/Box';
+import { Typography } from '@strapi/design-system/Typography';
 import map from 'lodash/map';
 import tail from 'lodash/tail';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import getMethodColor from './getMethodColor';
+
+const MethodBox = styled(Box)`
+  margin: -1px;
+  border-radius: ${({ theme }) => theme.spaces[1]} 0 0 ${({ theme }) => theme.spaces[1]};
+`;
 
 function BoundRoute({ route }) {
   const { formatMessage } = useIntl();
@@ -18,41 +24,31 @@ function BoundRoute({ route }) {
 
   return (
     <Stack size={2}>
-      <H3>
+      <Typography variant="delta" as="h3">
         {formatMessage({
           id: 'users-permissions.BoundRoute.title',
           defaultMessage: 'Bound route to',
         })}
         &nbsp;
         <span>{controller}</span>
-        <Text style={{ fontSize: 'inherit', fontWeight: 'inherit' }} textColor="primary600">
+        <Typography variant="delta" textColor="primary600">
           .{action}
-        </Text>
-      </H3>
-      <Box hasRadius background="neutral0" borderColor="neutral200">
-        <Box
-          color={colors.text}
-          background={colors.background}
-          borderColor={colors.border}
-          padding={2}
-          hasRadius
-          style={{
-            display: 'inline-block',
-            margin: '-1px',
-            borderTopRightRadius: 0,
-            borderBottomRightRadius: 0,
-          }}
-        >
-          <Text bold>{method}</Text>
-        </Box>
-        <Box style={{ display: 'inline-block' }} paddingLeft={2} paddingRight={2}>
+        </Typography>
+      </Typography>
+      <Stack horizontal hasRadius background="neutral0" borderColor="neutral200" size={0}>
+        <MethodBox background={colors.background} borderColor={colors.border} padding={2}>
+          <Typography fontWeight="bold" textColor={colors.text}>
+            {method}
+          </Typography>
+        </MethodBox>
+        <Box paddingLeft={2} paddingRight={2}>
           {map(formattedRoute, value => (
-            <Text key={value} textColor={value.includes(':') ? 'neutral600' : 'neutral900'}>
+            <Typography key={value} textColor={value.includes(':') ? 'neutral600' : 'neutral900'}>
               /{value}
-            </Text>
+            </Typography>
           ))}
         </Box>
-      </Box>
+      </Stack>
     </Stack>
   );
 }

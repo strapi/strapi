@@ -3,6 +3,7 @@
 const { get, getOr, isFunction, first, isNil } = require('lodash/fp');
 
 const { GraphQLObjectType } = require('graphql');
+const { ForbiddenError } = require('@strapi/utils').errors;
 const { createPoliciesMiddleware } = require('./policy');
 
 const introspectionQueries = [
@@ -32,8 +33,6 @@ const wrapResolvers = ({ schema, strapi, extension = {} }) => {
 
   const typeMap = schema.getTypeMap();
 
-  // Iterate over every field from every type within the
-  // schema's type map and wrap its resolve attribute if needed
   Object.entries(typeMap).forEach(([type, definition]) => {
     const isGraphQLObjectType = definition instanceof GraphQLObjectType;
     const isIgnoredType = introspectionQueries.includes(type);
@@ -81,17 +80,16 @@ const wrapResolvers = ({ schema, strapi, extension = {} }) => {
         const authConfig = get('auth', resolverConfig);
         const authContext = get('state.auth', context);
 
-        const isMutationOrQuery = ['Mutation', 'Query'].includes(type);
+        const isValidType = ['Mutation', 'Query', 'Subscription'].includes(type);
         const hasConfig = !isNil(authConfig);
 
         const isAuthDisabled = authConfig === false;
 
-        if ((isMutationOrQuery || hasConfig) && !isAuthDisabled) {
+        if ((isValidType || hasConfig) && !isAuthDisabled) {
           try {
             await strapi.auth.verify(authContext, authConfig);
           } catch (error) {
-            // TODO: [v4] Throw GraphQL Error instead
-            throw new Error('Forbidden access');
+            throw new ForbiddenError();
           }
         }
       };

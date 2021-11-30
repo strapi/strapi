@@ -1,11 +1,11 @@
 import React, { useMemo, useState } from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
-import { Grid, GridItem } from '@strapi/parts/Grid';
-import { Box } from '@strapi/parts/Box';
-import { Checkbox } from '@strapi/parts/Checkbox';
-import { Row } from '@strapi/parts/Row';
-import { TableLabel } from '@strapi/parts/Text';
+import { Grid, GridItem } from '@strapi/design-system/Grid';
+import { Box } from '@strapi/design-system/Box';
+import { Checkbox } from '@strapi/design-system/Checkbox';
+import { Flex } from '@strapi/design-system/Flex';
+import { Typography } from '@strapi/design-system/Typography';
 import { useIntl } from 'react-intl';
 import get from 'lodash/get';
 import IS_DISABLED from 'ee_else_ce/pages/SettingsPage/pages/Roles/EditPage/components/PluginsAndSettings/SubCategory/utils/constants';
@@ -74,9 +74,11 @@ const SubCategory = ({ categoryName, isFormDisabled, subCategoryName, actions, p
   return (
     <>
       <Box>
-        <Row justifyContent="space-between" alignItems="center">
+        <Flex justifyContent="space-between" alignItems="center">
           <Box paddingRight={4}>
-            <TableLabel textColor="neutral600">{subCategoryName}</TableLabel>
+            <Typography variant="sigma" textColor="neutral600">
+              {subCategoryName}
+            </Typography>
           </Box>
           <Border />
           <Box paddingLeft={4}>
@@ -98,8 +100,8 @@ const SubCategory = ({ categoryName, isFormDisabled, subCategoryName, actions, p
               {formatMessage({ id: 'app.utils.select-all', defaultMessage: 'Select all' })}
             </Checkbox>
           </Box>
-        </Row>
-        <Row paddingTop={6} paddingBottom={6}>
+        </Flex>
+        <Flex paddingTop={6} paddingBottom={6}>
           <Grid gap={2} style={{ flex: 1 }}>
             {formattedActions.map(({ checkboxName, value, action, displayName, hasConditions }) => {
               return (
@@ -133,7 +135,7 @@ const SubCategory = ({ categoryName, isFormDisabled, subCategoryName, actions, p
             hasConditions={doesButtonHasCondition}
             onClick={handleToggleModalIsOpen}
           />
-        </Row>
+        </Flex>
       </Box>
       {isModalOpen && (
         <ConditionsModal

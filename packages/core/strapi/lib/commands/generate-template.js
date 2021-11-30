@@ -6,7 +6,7 @@ const chalk = require('chalk');
 const inquirer = require('inquirer');
 
 // All directories that a template could need
-const TEMPLATE_CONTENT = ['api', 'components', 'config/functions/bootstrap.js', 'data'];
+const TEMPLATE_CONTENT = ['src', 'data'];
 
 /**
  *
@@ -54,10 +54,9 @@ async function writeTemplateJson(rootPath) {
  * @returns boolean
  */
 async function templateConfigExists(rootPath) {
-  const jsonConfig = await fse.pathExists(join(rootPath, 'template.json'));
-  const functionConfig = await fse.pathExists(join(rootPath, 'template.js'));
-
-  return jsonConfig || functionConfig;
+  const configExists = await fse.pathExists(join(rootPath, 'template.json'));
+  console.log(`checking: ${join(rootPath, 'template.json')}. result ${configExists}`);
+  return configExists;
 }
 
 module.exports = async function generateTemplate(directory) {

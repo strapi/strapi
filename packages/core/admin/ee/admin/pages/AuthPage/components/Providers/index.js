@@ -1,15 +1,15 @@
 import React from 'react';
 import { Redirect, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
-import { Divider } from '@strapi/parts/Divider';
-import { Stack } from '@strapi/parts/Stack';
-import { Row } from '@strapi/parts/Row';
-import { Box } from '@strapi/parts/Box';
-import { Button } from '@strapi/parts/Button';
-import { Link } from '@strapi/parts/Link';
-import { Loader } from '@strapi/parts/Loader';
-import { TableLabel, H1, Text, Subtitle } from '@strapi/parts/Text';
-import { Main } from '@strapi/parts/Main';
+import { Divider } from '@strapi/design-system/Divider';
+import { Stack } from '@strapi/design-system/Stack';
+import { Flex } from '@strapi/design-system/Flex';
+import { Box } from '@strapi/design-system/Box';
+import { Button } from '@strapi/design-system/Button';
+import { Link } from '@strapi/design-system/Link';
+import { Loader } from '@strapi/design-system/Loader';
+import { Typography } from '@strapi/design-system/Typography';
+import { Main } from '@strapi/design-system/Main';
 import { useIntl } from 'react-intl';
 import { useAuthProviders } from '../../../../hooks';
 import UnauthenticatedLayout, {
@@ -45,41 +45,47 @@ const Providers = () => {
           <Column>
             <Logo />
             <Box paddingTop={6} paddingBottom={1}>
-              <H1>{formatMessage({ id: 'Auth.form.welcome.title' })}</H1>
+              <Typography as="h1" variant="alpha">
+                {formatMessage({ id: 'Auth.form.welcome.title' })}
+              </Typography>
             </Box>
             <Box paddingBottom={7}>
-              <Subtitle textColor="neutral600">
+              <Typography variant="epsilon" textColor="neutral600">
                 {formatMessage({ id: 'Auth.login.sso.subtitle' })}
-              </Subtitle>
+              </Typography>
             </Box>
           </Column>
           <Stack size={7}>
             {isLoading ? (
-              <Row justifyContent="center">
+              <Flex justifyContent="center">
                 <Loader>{formatMessage({ id: 'Auth.login.sso.loading' })}</Loader>
-              </Row>
+              </Flex>
             ) : (
               <SSOProviders providers={providers} />
             )}
-            <Row>
+            <Flex>
               <DividerFull />
               <Box paddingLeft={3} paddingRight={3}>
-                <TableLabel textColor="neutral600">{formatMessage({ id: 'or' })}</TableLabel>
+                <Typography variant="sigma" textColor="neutral600">
+                  {formatMessage({ id: 'or' })}
+                </Typography>
               </Box>
               <DividerFull />
-            </Row>
+            </Flex>
             <Button fullWidth size="L" onClick={handleClick}>
               {formatMessage({ id: 'Auth.form.button.login.strapi' })}
             </Button>
           </Stack>
         </LayoutContent>
-        <Row justifyContent="center">
+        <Flex justifyContent="center">
           <Box paddingTop={4}>
             <Link to="/auth/forgot-password">
-              <Text small>{formatMessage({ id: 'Auth.link.forgot-password' })}</Text>
+              <Typography variant="pi">
+                {formatMessage({ id: 'Auth.link.forgot-password' })}
+              </Typography>
             </Link>
           </Box>
-        </Row>
+        </Flex>
       </Main>
     </UnauthenticatedLayout>
   );

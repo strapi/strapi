@@ -2,8 +2,8 @@ import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
 import { useIntl } from 'react-intl';
-import { Select, Option } from '@strapi/parts/Select';
-import { Box } from '@strapi/parts/Box';
+import { Select, Option } from '@strapi/design-system/Select';
+import { Box } from '@strapi/design-system/Box';
 import { useTracking } from '@strapi/helper-plugin';
 import { onChangeListHeaders } from '../actions';
 import { selectDisplayedHeaders } from '../selectors';
@@ -26,6 +26,8 @@ const FieldPicker = ({ layout }) => {
   const values = displayedHeaders.map(({ name }) => name);
 
   const handleChange = updatedValues => {
+    trackUsage('didChangeDisplayedFields');
+
     // removing a header
     if (updatedValues.length < values.length) {
       const removedHeader = values.filter(value => {
@@ -34,7 +36,6 @@ const FieldPicker = ({ layout }) => {
 
       dispatch(onChangeListHeaders({ name: removedHeader[0], value: true }));
     } else {
-      trackUsage('didChangeDisplayedFields');
       const addedHeader = updatedValues.filter(value => {
         return values.indexOf(value) === -1;
       });
@@ -44,7 +45,7 @@ const FieldPicker = ({ layout }) => {
   };
 
   return (
-    <Box paddingLeft={3}>
+    <Box paddingTop={1} paddingBottom={1}>
       <Select
         aria-label="change displayed fields"
         value={values}
@@ -73,7 +74,6 @@ FieldPicker.propTypes = {
     contentType: PropTypes.shape({
       attributes: PropTypes.object.isRequired,
       metadatas: PropTypes.object.isRequired,
-      info: PropTypes.shape({ label: PropTypes.string.isRequired }).isRequired,
       layouts: PropTypes.shape({
         list: PropTypes.array.isRequired,
         editRelations: PropTypes.array,

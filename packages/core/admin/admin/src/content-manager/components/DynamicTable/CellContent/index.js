@@ -1,19 +1,19 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Text } from '@strapi/parts/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import Media from './Media';
 import MultipleMedias from './MultipleMedias';
 import Relation from './Relation';
 import CellValue from './CellValue';
 
-const TextMaxWidth = styled(Text)`
+const TypographyMaxWidth = styled(Typography)`
   max-width: 300px;
 `;
 
 const CellContent = ({ content, fieldSchema, metadatas, name, queryInfos, rowId }) => {
   if (content === null || content === undefined) {
-    return <Text textColor="neutral800">-</Text>;
+    return <Typography textColor="neutral800">-</Typography>;
   }
 
   if (fieldSchema.type === 'media' && !fieldSchema.multiple) {
@@ -38,9 +38,9 @@ const CellContent = ({ content, fieldSchema, metadatas, name, queryInfos, rowId 
   }
 
   return (
-    <TextMaxWidth ellipsis textColor="neutral800">
+    <TypographyMaxWidth ellipsis textColor="neutral800">
       <CellValue type={fieldSchema.type} value={content} />
-    </TextMaxWidth>
+    </TypographyMaxWidth>
   );
 };
 

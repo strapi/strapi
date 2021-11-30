@@ -6,8 +6,6 @@
 const getFilterList = ({ fieldSchema: { type: fieldType, mainField } }) => {
   const type = mainField?.schema.type ? mainField.schema.type : fieldType;
 
-  // TODO needs to be improved for the CM
-  // TODO translate
   switch (type) {
     case 'email':
     case 'text':
@@ -162,6 +160,61 @@ const getFilterList = ({ fieldSchema: { type: fieldType, mainField } }) => {
             defaultMessage: 'not contains (sensitive)',
           },
           value: '$notContains',
+        },
+        {
+          intlLabel: {
+            id: 'components.FilterOptions.FILTER_TYPES.$gt',
+            defaultMessage: 'is greater than',
+          },
+          value: '$gt',
+        },
+        {
+          intlLabel: {
+            id: 'components.FilterOptions.FILTER_TYPES.$gte',
+            defaultMessage: 'is greater than or equal to',
+          },
+          value: '$gte',
+        },
+        {
+          intlLabel: {
+            id: 'components.FilterOptions.FILTER_TYPES.$lt',
+            defaultMessage: 'is less than',
+          },
+          value: '$lt',
+        },
+        {
+          intlLabel: {
+            id: 'components.FilterOptions.FILTER_TYPES.$lte',
+            defaultMessage: 'is less than or equal to',
+          },
+          value: '$lte',
+        },
+      ];
+    }
+
+    case 'datetime': {
+      return [
+        {
+          intlLabel: { id: 'components.FilterOptions.FILTER_TYPES.$eq', defaultMessage: 'is' },
+          value: '$eq',
+        },
+        {
+          intlLabel: { id: 'components.FilterOptions.FILTER_TYPES.$neq', defaultMessage: 'is not' },
+          value: '$ne',
+        },
+        {
+          intlLabel: {
+            id: 'components.FilterOptions.FILTER_TYPES.$null',
+            defaultMessage: 'is null',
+          },
+          value: '$null',
+        },
+        {
+          intlLabel: {
+            id: 'components.FilterOptions.FILTER_TYPES.$notNull',
+            defaultMessage: 'is not null',
+          },
+          value: '$notNull',
         },
         {
           intlLabel: {

@@ -21,28 +21,25 @@ module.exports = {
     path: '/documentation',
     showGeneratedFiles: true,
     generateDefaultResponse: true,
+    plugins: ['email', 'upload'],
   },
-  servers: [
-    {
-      url: 'http://localhost:1337',
-      description: 'Development server',
-    },
-    {
-      url: 'YOUR_STAGING_SERVER',
-      description: 'Staging server',
-    },
-    {
-      url: 'YOUR_PRODUCTION_SERVER',
-      description: 'Production server',
-    },
-  ],
+  servers: [],
   externalDocs: {
     description: 'Find out more',
-    url: 'https://strapi.io/documentation/developer-docs/latest/getting-started/introduction.html',
+    url: 'https://docs.strapi.io/developer-docs/latest/getting-started/introduction.html',
   },
   security: [
     {
       bearerAuth: [],
     },
   ],
+  components: {
+    securitySchemes: {
+      bearerAuth: {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+      },
+    },
+  },
 };

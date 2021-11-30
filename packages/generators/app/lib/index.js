@@ -13,24 +13,13 @@ const checkRequirements = require('./utils/check-requirements');
 const { trackError, captureException } = require('./utils/usage');
 const parseDatabaseArguments = require('./utils/parse-db-arguments');
 const generateNew = require('./generate-new');
+const checkInstallPath = require('./utils/check-install-path');
 
 sentry.init({
   dsn: 'https://841d2b2c9b4d4b43a4cde92794cb705a@sentry.io/1762059',
 });
 
-// TODO: to remove after the templates are updated for V4
-const warnTemplatesAreDisabled = cliArguments => {
-  if (cliArguments.template) {
-    console.log(
-      '❌ Templates have been disabled for the Beta version of V4 and will be re-enabled soon!'
-    );
-    process.exit();
-  }
-};
-
-module.exports = (projectDirectory, cliArguments) => {
-  warnTemplatesAreDisabled(cliArguments);
-
+const generateNewApp = (projectDirectory, cliArguments) => {
   checkRequirements();
 
   const rootPath = resolve(projectDirectory);
@@ -113,3 +102,8 @@ function initCancelCatcher() {
     process.exit(1);
   });
 }
+
+module.exports = {
+  generateNewApp,
+  checkInstallPath,
+};

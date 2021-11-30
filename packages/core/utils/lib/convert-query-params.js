@@ -2,13 +2,14 @@
 
 /**
  * Converts the standard Strapi REST query params to a more usable format for querying
- * You can read more here: https://strapi.io/documentation/developer-docs/latest/developer-resources/content-api/content-api.html#filters
+ * You can read more here: https://docs.strapi.io/developer-docs/latest/developer-resources/database-apis-reference/rest-api.html#filters
  */
-
+const { has } = require('lodash/fp');
 const _ = require('lodash');
 const parseType = require('./parse-type');
+const contentTypesUtils = require('./content-types');
 
-const QUERY_OPERATORS = ['_where', '_or', '_and'];
+const { PUBLISHED_AT_ATTRIBUTE } = contentTypesUtils.constants;
 
 class InvalidOrderError extends Error {
   constructor() {
@@ -132,13 +133,15 @@ const convertPopulateQueryParams = (populate, depth = 0) => {
 
   if (Array.isArray(populate)) {
     // map convert
-    return populate.flatMap(value => {
-      if (typeof value !== 'string') {
-        throw new InvalidPopulateError();
-      }
+    return _.uniq(
+      populate.flatMap(value => {
+        if (typeof value !== 'string') {
+          throw new InvalidPopulateError();
+        }
 
-      return value.split(',').map(value => _.trim(value));
-    });
+        return value.split(',').map(value => _.trim(value));
+      })
+    );
   }
 
   if (_.isPlainObject(populate)) {
@@ -146,6 +149,7 @@ const convertPopulateQueryParams = (populate, depth = 0) => {
     for (const key in populate) {
       transformedPopulate[key] = convertNestedPopulate(populate[key]);
     }
+
     return transformedPopulate;
   }
 
@@ -212,8 +216,30 @@ const convertFieldsQueryParams = (fields, depth = 0) => {
   throw new Error('Invalid fields parameter. Expected a string or an array of strings');
 };
 
-// NOTE: We could validate the parameters are on existing / non private attributes
 const convertFiltersQueryParams = filters => filters;
+
+const convertPublicationStateParams = (type, params = {}, query = {}) => {
+  if (!type) {
+    return;
+  }
+
+  const { publicationState } = params;
+
+  if (!_.isNil(publicationState)) {
+    if (!contentTypesUtils.constants.DP_PUB_STATES.includes(publicationState)) {
+      throw new Error(
+        `Invalid publicationState. Expected one of 'preview','live' received: ${publicationState}.`
+      );
+    }
+
+    // NOTE: this is the query layer filters not the entity service filters
+    query.filters = ({ meta }) => {
+      if (publicationState === 'live' && has(PUBLISHED_AT_ATTRIBUTE, meta.attributes)) {
+        return { [PUBLISHED_AT_ATTRIBUTE]: { $notNull: true } };
+      }
+    };
+  }
+};
 
 module.exports = {
   convertSortQueryParams,
@@ -222,5 +248,5 @@ module.exports = {
   convertPopulateQueryParams,
   convertFiltersQueryParams,
   convertFieldsQueryParams,
-  QUERY_OPERATORS,
+  convertPublicationStateParams,
 };

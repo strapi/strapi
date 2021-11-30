@@ -24,7 +24,7 @@ describe('metrics', () => {
       server: {
         use,
       },
-    });
+    }).register();
 
     expect(use).toHaveBeenCalled();
   });
@@ -46,7 +46,7 @@ describe('metrics', () => {
       server: {
         use,
       },
-    });
+    }).register();
 
     expect(use).not.toHaveBeenCalled();
   });
@@ -80,6 +80,7 @@ describe('metrics', () => {
         projectType: 'Community',
       },
     });
+
     fetch.mockClear();
   });
 

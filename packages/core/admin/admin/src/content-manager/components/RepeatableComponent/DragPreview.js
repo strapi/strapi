@@ -1,13 +1,18 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Box } from '@strapi/parts/Box';
-import { Row } from '@strapi/parts/Row';
-import { Text } from '@strapi/parts/Text';
-import { IconButton } from '@strapi/parts/IconButton';
-import DeleteIcon from '@strapi/icons/DeleteIcon';
+import { pxToRem } from '@strapi/helper-plugin';
+import { Box } from '@strapi/design-system/Box';
+import { Flex } from '@strapi/design-system/Flex';
+import { Typography } from '@strapi/design-system/Typography';
+import { IconButton } from '@strapi/design-system/IconButton';
+import Trash from '@strapi/icons/Trash';
 import DragHandle from '@strapi/icons/Drag';
-import DropdownIcon from '@strapi/icons/FilterDropdown';
+import CarretDown from '@strapi/icons/CarretDown';
+
+const DragPreviewBox = styled(Box)`
+  border: 1px solid ${({ theme }) => theme.colors.neutral200};
+`;
 
 const DropdownIconWrapper = styled(Box)`
   height: ${32 / 16}rem;
@@ -21,7 +26,7 @@ const DropdownIconWrapper = styled(Box)`
     height: ${6 / 16}rem;
     width: ${11 / 16}rem;
     > path {
-      fill: ${({ theme }) => theme.colors.primary600};
+      fill: ${({ theme }) => theme.colors.neutral600};
     }
   }
 `;
@@ -37,38 +42,38 @@ const ToggleButton = styled.button`
 
 const DragPreview = ({ displayedValue }) => {
   return (
-    <Box
+    <DragPreviewBox
       paddingLeft={3}
       paddingRight={3}
       paddingTop={3}
       paddingBottom={3}
       hasRadius
-      background="primary100"
-      style={{ width: '20vw' }}
+      background="neutral0"
+      width={pxToRem(300)}
     >
-      <Row justifyContent="space-between">
+      <Flex justifyContent="space-between">
         <ToggleButton type="button">
-          <Row>
-            <DropdownIconWrapper background="primary200">
-              <DropdownIcon />
+          <Flex>
+            <DropdownIconWrapper background="neutral200">
+              <CarretDown />
             </DropdownIconWrapper>
-            <Box paddingLeft={6}>
-              <Text textColor="primary700" style={{ width: '9vw' }} ellipsis>
+            <Box paddingLeft={6} maxWidth={pxToRem(150)}>
+              <Typography textColor="neutral700" ellipsis>
                 {displayedValue}
-              </Text>
+              </Typography>
             </Box>
-          </Row>
+          </Flex>
         </ToggleButton>
         <Box paddingLeft={3}>
-          <Row>
-            <IconButton icon={<DeleteIcon />} />
+          <Flex>
+            <IconButton icon={<Trash />} />
             <Box paddingLeft={2}>
               <IconButton icon={<DragHandle />} />
             </Box>
-          </Row>
+          </Flex>
         </Box>
-      </Row>
-    </Box>
+      </Flex>
+    </DragPreviewBox>
   );
 };
 

@@ -32,8 +32,6 @@
   "list.assets-empty.subtitle": "Adicione o primeiro à lista.",
   "list.assets-empty.title": "Ainda não existem arquivos",
   "list.assets-empty.title-withSearch": "Não existem arquivos com os filtros aplicados",
-  "list.assets.selected.plural": "{number} arquivos selecionados",
-  "list.assets.selected.singular": "{number} arquivo selecionado",
   "list.assets.type-not-allowed": "Esse tipo de arquivo não é permitido.",
   "modal.file-details.date": "Data",
   "modal.file-details.dimensions": "Dimensões",

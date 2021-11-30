@@ -43,12 +43,6 @@ const fixtures = {
 
 const data = { product: [], category: [], country: [] };
 
-const pluralizedModels = {
-  product: 'products',
-  country: 'countries',
-  category: 'categories',
-};
-
 const contentTypes = {
   product: {
     attributes: {
@@ -67,7 +61,9 @@ const contentTypes = {
       },
     },
     draftAndPublish: true,
-    name: 'product',
+    displayName: 'Product',
+    singularName: 'product',
+    pluralName: 'products',
     description: '',
     collectionName: '',
   },
@@ -78,7 +74,9 @@ const contentTypes = {
       },
     },
     draftAndPublish: true,
-    name: 'country',
+    displayName: 'Country',
+    singularName: 'country',
+    pluralName: 'countries',
     description: '',
     collectionName: '',
   },
@@ -89,7 +87,9 @@ const contentTypes = {
       },
     },
     draftAndPublish: true,
-    name: 'category',
+    displayName: 'Category',
+    singularName: 'category',
+    pluralName: 'categories',
     description: '',
     collectionName: '',
   },
@@ -97,7 +97,7 @@ const contentTypes = {
 
 const components = {
   comp: {
-    name: 'comp',
+    displayName: 'comp',
     attributes: {
       countries: {
         type: 'relation',
@@ -135,9 +135,9 @@ describe('Publication State', () => {
       .addContentType(contentTypes.country)
       .addComponent(components.comp)
       .addContentTypes([contentTypes.category, contentTypes.product])
-      .addFixtures(contentTypes.country.name, fixtures.country)
-      .addFixtures(contentTypes.category.name, fixtures.category)
-      .addFixtures(contentTypes.product.name, f =>
+      .addFixtures(contentTypes.country.singularName, fixtures.country)
+      .addFixtures(contentTypes.category.singularName, fixtures.category)
+      .addFixtures(contentTypes.product.singularName, f =>
         fixtures.product.map(product => ({
           name: product.name,
           categories: product.categories.map(name => f.category.find(cat => cat.name === name).id),
@@ -154,7 +154,7 @@ describe('Publication State', () => {
     strapi = await createStrapiInstance();
     rq = await createContentAPIRequest({ strapi });
 
-    Object.assign(data, builder.sanitizedFixtures(strapi));
+    Object.assign(data, await builder.sanitizedFixtures(strapi));
   });
 
   afterAll(async () => {
@@ -164,13 +164,14 @@ describe('Publication State', () => {
 
   describe.each(['default', 'live', 'preview'])('Mode: "%s"', mode => {
     describe.each(['country', 'category', 'product'])('For %s', modelName => {
-      const baseUrl = `/${pluralizedModels[modelName]}`;
+      const baseUrl = `/${contentTypes[modelName].pluralName}`;
       const query = getQueryFromMode(mode);
 
       test('Can get entries', async () => {
         const res = await rq({ method: 'GET', url: `${baseUrl}${query}` });
 
         expect(res.body.data).toHaveLength(lengthFor(modelName, { mode }));
+
         expect(res.body.meta.pagination.total).toBe(lengthFor(modelName, { mode }));
       });
     });
@@ -179,55 +180,48 @@ describe('Publication State', () => {
   describe('Advanced checks', () => {
     describe('Nested level of relations (live mode)', () => {
       let products;
-      const pluralizedModelName = pluralizedModels[contentTypes.product.name];
 
       beforeEach(async () => {
         const res = await rq({
           method: 'GET',
-          url: `/${pluralizedModelName}?publicationState=live`,
+          url: `/${contentTypes.product.pluralName}?publicationState=live`,
           qs: {
             populate: ['categories', 'comp.countries'],
           },
         });
 
-        products = res.body.data.map(res => ({ id: res.id, ...res.attributes }));
+        products = res.body.data;
       });
 
       test('Payload integrity', () => {
-        expect(products).toHaveLength(lengthFor(contentTypes.product.name));
+        expect(products).toHaveLength(lengthFor(contentTypes.product.singularName));
       });
 
       test('Root level', () => {
         products.forEach(product => {
-          expect(product.publishedAt).toBeISODate();
+          expect(product.attributes.publishedAt).toBeISODate();
         });
       });
 
-      // const getApiRef = id => data.product.find(product => product.id === id);
+      test('First level (categories) to be published only', () => {
+        products.forEach(({ attributes }) => {
+          const categories = attributes.categories.data;
 
-      test.todo('First level (categories)');
+          categories.forEach(category => {
+            expect(category.attributes.publishedAt).toBeISODate();
+          });
+        });
+      });
 
-      //   products.forEach(({ id, categories }) => {
-      //     const length = getApiRef(id).categories.filter(c => c.publishedAt !== null).length;
-      //     expect(categories).toHaveLength(length);
+      test('Second level through component (countries) to be published only', () => {
+        products.forEach(({ attributes }) => {
+          const countries = attributes.comp.countries.data;
 
-      //     categories.forEach(category => {
-      //       expect(category.publishedAt).toBeISODate();
-      //     });
-      //   });
-      // });
-
-      test.todo('Second level through component (countries)');
-
-      //   products.forEach(({ id, comp: { countries } }) => {
-      //     const length = getApiRef(id).comp.countries.filter(c => c.publishedAt !== null).length;
-      //     expect(countries).toHaveLength(length);
-
-      //     countries.forEach(country => {
-      //       expect(country.publishedAt).toBeISODate();
-      //     });
-      //   });
-      // });
+          countries.forEach(country => {
+            expect(country.attributes.publishedAt).toBeISODate();
+          });
+        });
+      });
     });
   });
 });

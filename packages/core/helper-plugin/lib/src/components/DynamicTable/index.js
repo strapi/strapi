@@ -1,19 +1,20 @@
 import React, { Children, cloneElement, useState } from 'react';
 import PropTypes from 'prop-types';
-import { Box } from '@strapi/parts/Box';
-import { Row } from '@strapi/parts/Row';
-import { Button } from '@strapi/parts/Button';
-import { Subtitle } from '@strapi/parts/Text';
-import { Table as TableCompo } from '@strapi/parts/Table';
+import { Box } from '@strapi/design-system/Box';
+import { Flex } from '@strapi/design-system/Flex';
+import { Button } from '@strapi/design-system/Button';
+import { Typography } from '@strapi/design-system/Typography';
+import { Table as TableCompo } from '@strapi/design-system/Table';
 import { useIntl } from 'react-intl';
-import DeleteIcon from '@strapi/icons/DeleteIcon';
+import Trash from '@strapi/icons/Trash';
 import styled from 'styled-components';
 import useQueryParams from '../../hooks/useQueryParams';
+import useTracking from '../../hooks/useTracking';
 import ConfirmDialog from '../ConfirmDialog';
 import EmptyBodyTable from '../EmptyBodyTable';
 import TableHead from './TableHead';
 
-const BlockActions = styled(Row)`
+const BlockActions = styled(Flex)`
   & > * + * {
     margin-left: ${({ theme }) => theme.spaces[2]};
   }
@@ -29,6 +30,7 @@ const Table = ({
   isLoading,
   onConfirmDeleteAll,
   onConfirmDelete,
+  onOpenDeleteAllModalTrackedEvent,
   rows,
   withBulkActions,
   withMainAction,
@@ -40,6 +42,7 @@ const Table = ({
   const [isConfirmButtonLoading, setIsConfirmButtonLoading] = useState(false);
   const [{ query }] = useQueryParams();
   const { formatMessage } = useIntl();
+  const { trackUsage } = useTracking();
   const ROW_COUNT = rows.length + 1;
   const COL_COUNT = headers.length + (withBulkActions ? 1 : 0) + (withMainAction ? 1 : 0);
   const hasFilters = query?.filters !== undefined;
@@ -88,6 +91,10 @@ const Table = ({
   };
 
   const handleToggleConfirmDeleteAll = () => {
+    if (!showConfirmDeleteAll && onOpenDeleteAllModalTrackedEvent) {
+      trackUsage(onOpenDeleteAllModalTrackedEvent);
+    }
+
     setShowConfirmDeleteAll(prev => !prev);
   };
 
@@ -127,9 +134,9 @@ const Table = ({
       {entriesToDelete.length > 0 && (
         <Box>
           <Box paddingBottom={4}>
-            <Row justifyContent="space-between">
+            <Flex justifyContent="space-between">
               <BlockActions>
-                <Subtitle textColor="neutral600">
+                <Typography variant="epsilon" textColor="neutral600">
                   {formatMessage(
                     {
                       id: 'content-manager.components.TableDelete.label',
@@ -137,17 +144,17 @@ const Table = ({
                     },
                     { number: entriesToDelete.length }
                   )}
-                </Subtitle>
+                </Typography>
                 <Button
                   onClick={handleToggleConfirmDeleteAll}
-                  startIcon={<DeleteIcon />}
+                  startIcon={<Trash />}
                   size="L"
                   variant="danger-light"
                 >
                   {formatMessage({ id: 'app.utils.delete', defaultMessage: 'Delete' })}
                 </Button>
               </BlockActions>
-            </Row>
+            </Flex>
           </Box>
         </Box>
       )}
@@ -203,6 +210,7 @@ Table.defaultProps = {
   isLoading: false,
   onConfirmDeleteAll: () => {},
   onConfirmDelete: () => {},
+  onOpenDeleteAllModalTrackedEvent: undefined,
   rows: [],
   withBulkActions: false,
   withMainAction: false,
@@ -229,6 +237,7 @@ Table.propTypes = {
   isLoading: PropTypes.bool,
   onConfirmDeleteAll: PropTypes.func,
   onConfirmDelete: PropTypes.func,
+  onOpenDeleteAllModalTrackedEvent: PropTypes.string,
   rows: PropTypes.array,
   withBulkActions: PropTypes.bool,
   withMainAction: PropTypes.bool,

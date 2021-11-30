@@ -19,7 +19,7 @@ describe('Content-Manager', () => {
         entityValidator: {
           validateEntityCreation() {},
         },
-        eventHub: { emit: jest.fn() },
+        eventHub: { emit: jest.fn(), sanitizeEntity: entity => entity },
         getModel: jest.fn(() => fakeModel),
       };
       entityManager = entityManagerLoader({ strapi });
@@ -32,7 +32,7 @@ describe('Content-Manager', () => {
     test('Publish a content-type', async () => {
       const uid = 'api::test.test';
       const entity = { id: 1, publishedAt: null };
-      await entityManager.publish(entity, uid);
+      await entityManager.publish(entity, {}, uid);
 
       expect(strapi.entityService.update).toBeCalledWith(uid, entity.id, {
         data: { publishedAt: expect.any(Date) },
@@ -47,7 +47,7 @@ describe('Content-Manager', () => {
         entityService: {
           update: jest.fn(),
         },
-        eventHub: { emit: jest.fn() },
+        eventHub: { emit: jest.fn(), sanitizeEntity: entity => entity },
         getModel: jest.fn(() => fakeModel),
       };
       entityManager = entityManagerLoader({ strapi });
@@ -60,7 +60,7 @@ describe('Content-Manager', () => {
     test('Unpublish a content-type', async () => {
       const uid = 'api::test.test';
       const entity = { id: 1, publishedAt: new Date() };
-      await entityManager.unpublish(entity, uid);
+      await entityManager.unpublish(entity, {}, uid);
 
       expect(strapi.entityService.update).toHaveBeenCalledWith(uid, entity.id, {
         data: { publishedAt: null },

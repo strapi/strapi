@@ -28,7 +28,7 @@ module.exports = [
     config: {
       policies: [
         'admin::isAuthenticatedAdmin',
-        { name: 'admin::hasPermissions', options: { actions: ['admin::marketplace.read'] } },
+        { name: 'admin::hasPermissions', config: { actions: ['admin::marketplace.read'] } },
       ],
     },
   },
@@ -41,7 +41,7 @@ module.exports = [
         'admin::isAuthenticatedAdmin',
         {
           name: 'admin::hasPermissions',
-          options: { actions: ['admin::marketplace.plugins.install'] },
+          config: { actions: ['admin::marketplace.plugins.install'] },
         },
       ],
     },
@@ -55,7 +55,7 @@ module.exports = [
         'admin::isAuthenticatedAdmin',
         {
           name: 'admin::hasPermissions',
-          options: { actions: ['admin::marketplace.plugins.uninstall'] },
+          config: { actions: ['admin::marketplace.plugins.uninstall'] },
         },
       ],
     },

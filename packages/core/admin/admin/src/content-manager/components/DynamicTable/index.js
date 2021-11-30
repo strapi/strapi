@@ -34,12 +34,25 @@ const DynamicTable = ({
       layout,
     });
 
+    const formattedHeaders = headers.displayedHeaders.map(header => {
+      if (header.fieldSchema.type === 'relation') {
+        const sortFieldValue = `${header.name}.${header.metadatas.mainField.name}`;
+
+        return {
+          ...header,
+          name: sortFieldValue,
+        };
+      }
+
+      return header;
+    });
+
     if (!hasDraftAndPublish) {
-      return headers.displayedHeaders;
+      return formattedHeaders;
     }
 
     return [
-      ...headers.displayedHeaders,
+      ...formattedHeaders,
       {
         key: '__published_at_temp_key__',
         name: 'publishedAt',
@@ -68,6 +81,7 @@ const DynamicTable = ({
       headers={tableHeaders}
       onConfirmDelete={onConfirmDelete}
       onConfirmDeleteAll={onConfirmDeleteAll}
+      onOpenDeleteAllModalTrackedEvent="willBulkDeleteEntries"
       rows={rows}
       withBulkActions
       withMainAction={canDelete && isBulkable}
@@ -95,7 +109,6 @@ DynamicTable.propTypes = {
     contentType: PropTypes.shape({
       attributes: PropTypes.object.isRequired,
       metadatas: PropTypes.object.isRequired,
-      info: PropTypes.shape({ label: PropTypes.string.isRequired }).isRequired,
       layouts: PropTypes.shape({
         list: PropTypes.array.isRequired,
         editRelations: PropTypes.array,

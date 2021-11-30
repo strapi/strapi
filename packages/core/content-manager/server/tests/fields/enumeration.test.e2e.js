@@ -9,7 +9,9 @@ let strapi;
 let rq;
 
 const ct = {
-  name: 'withenumeration',
+  displayName: 'withenumeration',
+  singularName: 'withenumeration',
+  pluralName: 'withenumerations',
   attributes: {
     field: {
       type: 'enumeration',

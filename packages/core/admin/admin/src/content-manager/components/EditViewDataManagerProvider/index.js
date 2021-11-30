@@ -3,7 +3,7 @@ import { cloneDeep, get, isEmpty, isEqual, set } from 'lodash';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Prompt, Redirect } from 'react-router-dom';
-import { Main } from '@strapi/parts/Main';
+import { Main } from '@strapi/design-system/Main';
 import {
   LoadingIndicatorPage,
   ContentManagerEditViewDataManagerContext,
@@ -122,10 +122,12 @@ const EditViewDataManagerProvider = ({
   }, [componentsDataStructure, contentTypeDataStructure]);
 
   useEffect(() => {
-    dispatch({
-      type: 'INIT_FORM',
-      initialValues,
-    });
+    if (initialValues) {
+      dispatch({
+        type: 'INIT_FORM',
+        initialValues,
+      });
+    }
   }, [initialValues]);
 
   const addComponentToDynamicZone = useCallback((keys, componentUid, shouldCheckErrors = false) => {
@@ -300,8 +302,8 @@ const EditViewDataManagerProvider = ({
           onPut(formData, trackerProperty);
         }
       } catch (err) {
-        console.error('ValidationError');
-        console.error(err);
+        console.log('ValidationError');
+        console.log(err);
 
         errors = getYupInnerErrors(err);
 
@@ -464,6 +466,10 @@ const EditViewDataManagerProvider = ({
     return <Redirect to={from} />;
   }
 
+  if (!modifiedData) {
+    return null;
+  }
+
   return (
     <ContentManagerEditViewDataManagerContext.Provider
       value={{
@@ -512,7 +518,9 @@ const EditViewDataManagerProvider = ({
               when={!isEqual(modifiedData, initialData)}
               message={formatMessage({ id: 'global.prompt.unsaved' })}
             />
-            <form onSubmit={handleSubmit}>{children}</form>
+            <form noValidate onSubmit={handleSubmit}>
+              {children}
+            </form>
           </>
         )}
       </>
@@ -522,6 +530,7 @@ const EditViewDataManagerProvider = ({
 
 EditViewDataManagerProvider.defaultProps = {
   from: '/',
+  initialValues: null,
   redirectToPreviousPage: () => {},
 };
 
@@ -533,7 +542,7 @@ EditViewDataManagerProvider.propTypes = {
   contentTypeDataStructure: PropTypes.object.isRequired,
   createActionAllowedFields: PropTypes.array.isRequired,
   from: PropTypes.string,
-  initialValues: PropTypes.object.isRequired,
+  initialValues: PropTypes.object,
   isCreatingEntry: PropTypes.bool.isRequired,
   isLoadingForData: PropTypes.bool.isRequired,
   isSingleType: PropTypes.bool.isRequired,

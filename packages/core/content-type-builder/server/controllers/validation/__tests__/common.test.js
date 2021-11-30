@@ -1,6 +1,6 @@
 'use strict';
 
-const yup = require('yup');
+const { yup } = require('@strapi/utils');
 const { isValidName } = require('../common');
 
 function runTest(test, value) {

@@ -3,18 +3,18 @@ import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 import get from 'lodash/get';
 import omit from 'lodash/omit';
-import { Box } from '@strapi/parts/Box';
-import { Stack } from '@strapi/parts/Stack';
-import { Main } from '@strapi/parts/Main';
-import { Row } from '@strapi/parts/Row';
-import { Link } from '@strapi/parts/Link';
-import { Button } from '@strapi/parts/Button';
-import { TextInput } from '@strapi/parts/TextInput';
-import { Checkbox } from '@strapi/parts/Checkbox';
-import { Grid, GridItem } from '@strapi/parts/Grid';
-import { H1, Subtitle } from '@strapi/parts/Text';
-import Hide from '@strapi/icons/Hide';
-import Show from '@strapi/icons/Show';
+import { Box } from '@strapi/design-system/Box';
+import { Stack } from '@strapi/design-system/Stack';
+import { Main } from '@strapi/design-system/Main';
+import { Flex } from '@strapi/design-system/Flex';
+import { Link } from '@strapi/design-system/Link';
+import { Button } from '@strapi/design-system/Button';
+import { TextInput } from '@strapi/design-system/TextInput';
+import { Checkbox } from '@strapi/design-system/Checkbox';
+import { Grid, GridItem } from '@strapi/design-system/Grid';
+import { Typography } from '@strapi/design-system/Typography';
+import EyeStriked from '@strapi/icons/EyeStriked';
+import Eye from '@strapi/icons/Eye';
 import { Form, useQuery, useNotification } from '@strapi/helper-plugin';
 import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
@@ -32,6 +32,12 @@ const CenteredBox = styled(Box)`
 `;
 const A = styled.a`
   color: ${({ theme }) => theme.colors.primary600};
+`;
+
+const PasswordInput = styled(TextInput)`
+  ::-ms-reveal {
+    display: none;
+  }
 `;
 
 const Register = ({ fieldsToDisable, noSignin, onSubmit, schema }) => {
@@ -107,21 +113,21 @@ const Register = ({ fieldsToDisable, noSignin, onSubmit, schema }) => {
                 <Column>
                   <Logo />
                   <Box paddingTop={6} paddingBottom={1}>
-                    <H1>
+                    <Typography as="h1" variant="alpha">
                       {formatMessage({
                         id: 'Auth.form.welcome.title',
                         defaultMessage: 'Welcome!',
                       })}
-                    </H1>
+                    </Typography>
                   </Box>
                   <CenteredBox paddingBottom={7}>
-                    <Subtitle textColor="neutral600">
+                    <Typography variant="epsilon" textColor="neutral600">
                       {formatMessage({
                         id: 'Auth.form.register.subtitle',
                         defaultMessage:
                           'Your credentials are only used to authenticate yourself on the admin panel. All saved data will be stored in your own database.',
                       })}
-                    </Subtitle>
+                    </Typography>
                   </CenteredBox>
                 </Column>
                 <Stack size={7}>
@@ -149,15 +155,6 @@ const Register = ({ fieldsToDisable, noSignin, onSubmit, schema }) => {
                     <GridItem col={6}>
                       <TextInput
                         name="lastname"
-                        error={
-                          errors.lastname
-                            ? formatMessage({
-                                id: errors.lastname,
-                                defaultMessage: 'This value is required.',
-                              })
-                            : undefined
-                        }
-                        required
                         value={values.lastname}
                         onChange={handleChange}
                         label={formatMessage({
@@ -184,7 +181,7 @@ const Register = ({ fieldsToDisable, noSignin, onSubmit, schema }) => {
                     label={formatMessage({ id: 'Auth.form.email.label', defaultMessage: 'Email' })}
                     type="email"
                   />
-                  <TextInput
+                  <PasswordInput
                     name="password"
                     onChange={handleChange}
                     value={values.password}
@@ -215,7 +212,7 @@ const Register = ({ fieldsToDisable, noSignin, onSubmit, schema }) => {
                               }
                         )}
                       >
-                        {passwordShown ? <Show /> : <Hide />}
+                        {passwordShown ? <Eye /> : <EyeStriked />}
                       </FieldActionWrapper>
                     }
                     hint={formatMessage({
@@ -230,7 +227,7 @@ const Register = ({ fieldsToDisable, noSignin, onSubmit, schema }) => {
                     })}
                     type={passwordShown ? 'text' : 'password'}
                   />
-                  <TextInput
+                  <PasswordInput
                     name="confirmPassword"
                     onChange={handleChange}
                     value={values.confirmPassword}
@@ -261,7 +258,7 @@ const Register = ({ fieldsToDisable, noSignin, onSubmit, schema }) => {
                               }
                         )}
                       >
-                        {confirmPasswordShown ? <Show /> : <Hide />}
+                        {confirmPasswordShown ? <Eye /> : <EyeStriked />}
                       </FieldActionWrapper>
                     }
                     required
@@ -318,14 +315,14 @@ const Register = ({ fieldsToDisable, noSignin, onSubmit, schema }) => {
         </Formik>
         {!noSignin && (
           <Box paddingTop={4}>
-            <Row justifyContent="center">
+            <Flex justifyContent="center">
               <Link label="Auth.link.signin" to="/auth/login">
                 {formatMessage({
                   id: 'Auth.link.signin.account',
                   defaultMessage: 'Already have an account?',
                 })}
               </Link>
-            </Row>
+            </Flex>
           </Box>
         )}
       </LayoutContent>
