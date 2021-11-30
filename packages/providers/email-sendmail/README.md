@@ -45,10 +45,12 @@ npm install strapi-provider-email-sendmail --save
 module.exports = ({ env }) => ({
   // ...
   email: {
-    provider: 'sendmail',
-    settings: {
-      defaultFrom: 'myemail@protonmail.com',
-      defaultReplyTo: 'myemail@protonmail.com',
+    config: {
+      provider: 'sendmail',
+      settings: {
+        defaultFrom: 'myemail@protonmail.com',
+        defaultReplyTo: 'myemail@protonmail.com',
+      },
     },
   },
   // ...

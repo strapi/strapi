@@ -14,13 +14,15 @@ See the [using a provider](https://docs.strapi.io/developer-docs/latest/plugins/
 module.exports = ({ env }) => ({
   // ...
   upload: {
-    provider: 'aws-s3',
-    providerOptions: {
-      accessKeyId: env('AWS_ACCESS_KEY_ID'),
-      secretAccessKey: env('AWS_ACCESS_SECRET'),
-      region: env('AWS_REGION'),
-      params: {
-        Bucket: env('AWS_BUCKET'),
+    config: {
+      provider: 'aws-s3',
+      providerOptions: {
+        accessKeyId: env('AWS_ACCESS_KEY_ID'),
+        secretAccessKey: env('AWS_ACCESS_SECRET'),
+        region: env('AWS_REGION'),
+        params: {
+          Bucket: env('AWS_BUCKET'),
+        },
       },
     },
   },
