@@ -29,7 +29,7 @@ const ApplicationInfosPage = () => {
           title={formatMessage({ id: 'Settings.application.title', defaultMessage: 'Overview' })}
           subtitle={formatMessage({
             id: 'Settings.application.description',
-            defaultMessage: "See your project's details",
+            defaultMessage: 'Administration panel’s global information',
           })}
         />
         <ContentLayout>
@@ -45,8 +45,8 @@ const ApplicationInfosPage = () => {
             <Stack size={5}>
               <Typography variant="delta" as="h3">
                 {formatMessage({
-                  id: 'Settings.application.information',
-                  defaultMessage: 'Information',
+                  id: 'Settings.application.details',
+                  defaultMessage: 'Details',
                 })}
               </Typography>
 
@@ -54,8 +54,8 @@ const ApplicationInfosPage = () => {
                 <GridItem col={6} s={12}>
                   <Typography variant="sigma" textColor="neutral600">
                     {formatMessage({
-                      id: 'Settings.application.details',
-                      defaultMessage: 'details',
+                      id: 'Settings.application.strapiVersion',
+                      defaultMessage: 'strapi version',
                     })}
                   </Typography>
                   <Typography as="p">v{strapiVersion}</Typography>

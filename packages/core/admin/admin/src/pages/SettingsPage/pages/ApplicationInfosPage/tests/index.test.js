@@ -296,7 +296,7 @@ describe('Application page', () => {
                 <p
                   class="c8"
                 >
-                  See your project's details
+                  Administration panel’s global information
                 </p>
               </div>
             </div>
@@ -312,7 +312,7 @@ describe('Application page', () => {
                   <h3
                     class="c12"
                   >
-                    Information
+                    Details
                   </h3>
                   <div
                     class="c13 c14"
@@ -326,7 +326,7 @@ describe('Application page', () => {
                         <span
                           class="c16"
                         >
-                          details
+                          strapi version
                         </span>
                         <p
                           class="c17"
