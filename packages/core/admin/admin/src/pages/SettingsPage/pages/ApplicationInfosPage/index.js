@@ -26,7 +26,7 @@ const ApplicationInfosPage = () => {
       <SettingsPageTitle name="Application" />
       <Main>
         <HeaderLayout
-          title={formatMessage({ id: 'Settings.application.title', defaultMessage: 'Application' })}
+          title={formatMessage({ id: 'Settings.application.title', defaultMessage: 'Overview' })}
           subtitle={formatMessage({
             id: 'Settings.application.description',
             defaultMessage: "See your project's details",

@@ -111,7 +111,7 @@
   "Settings.application.link-upgrade": "Upgrade your admin panel",
   "Settings.application.node-version": "node version",
   "Settings.application.strapi-version": "strapi version",
-  "Settings.application.title": "Application",
+  "Settings.application.title": "Overview",
   "Settings.error": "Error",
   "Settings.global": "Global Settings",
   "Settings.permissions": "Administration panel",

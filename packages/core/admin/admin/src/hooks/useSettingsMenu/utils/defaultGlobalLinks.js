@@ -2,7 +2,7 @@ import adminPermissions from '../../../permissions';
 
 const defaultGlobalLinks = [
   {
-    intlLabel: { id: 'Settings.application.title', defaultMessage: 'Application' },
+    intlLabel: { id: 'Settings.application.title', defaultMessage: 'Overview' },
     to: '/settings/application-infos',
     id: '000-application-infos',
     isDisplayed: false,

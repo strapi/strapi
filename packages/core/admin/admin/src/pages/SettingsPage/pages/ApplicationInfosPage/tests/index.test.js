@@ -289,7 +289,7 @@ describe('Application page', () => {
                     <h1
                       class="c7"
                     >
-                      Application
+                      Overview
                     </h1>
                   </div>
                 </div>
