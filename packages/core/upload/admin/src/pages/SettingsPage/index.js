@@ -124,7 +124,7 @@ export const SettingsPage = () => {
         <HeaderLayout
           title={formatMessage({
             id: getTrad('settings.header.label'),
-            defaultMessage: 'Media Library - Settings',
+            defaultMessage: 'Media Library',
           })}
           primaryAction={
             <Button
@@ -143,7 +143,7 @@ export const SettingsPage = () => {
           }
           subtitle={formatMessage({
             id: getTrad('settings.sub-header.label'),
-            defaultMessage: 'Configure the settings for the media library',
+            defaultMessage: 'Configure the settings for the Media Library',
           })}
         />
         <ContentLayout>
@@ -157,8 +157,8 @@ export const SettingsPage = () => {
                     <Flex>
                       <Typography variant="delta" as="h2">
                         {formatMessage({
-                          id: getTrad('settings.section.image.label'),
-                          defaultMessage: 'Image',
+                          id: getTrad('settings.blockTitle'),
+                          defaultMessage: 'Asset management',
                         })}
                       </Typography>
                     </Flex>
@@ -171,11 +171,11 @@ export const SettingsPage = () => {
                           hint={formatMessage({
                             id: getTrad('settings.form.responsiveDimensions.description'),
                             defaultMessage:
-                              'It automatically generates multiple formats (large, medium, small) of the uploaded asset',
+                              'Enabling this option will generate multiple formats (small, medium and large) of the uploaded asset.',
                           })}
                           label={formatMessage({
                             id: getTrad('settings.form.responsiveDimensions.label'),
-                            defaultMessage: 'Enable responsive friendly upload',
+                            defaultMessage: 'Responsive friendly upload',
                           })}
                           name="responsiveDimensions"
                           offLabel={formatMessage({
@@ -198,9 +198,14 @@ export const SettingsPage = () => {
                           aria-label="sizeOptimization"
                           data-testid="sizeOptimization"
                           checked={modifiedData.sizeOptimization}
+                          hint={formatMessage({
+                            id: getTrad('settings.form.sizeOptimization.description'),
+                            defaultMessage:
+                              'Enabling this option will optimize the file size without compromising on the quality.',
+                          })}
                           label={formatMessage({
                             id: getTrad('settings.form.sizeOptimization.label'),
-                            defaultMessage: 'Enable size optimization (without quality loss)',
+                            defaultMessage: 'Size optimization (without quality loss)',
                           })}
                           name="sizeOptimization"
                           offLabel={formatMessage({
@@ -226,11 +231,11 @@ export const SettingsPage = () => {
                           hint={formatMessage({
                             id: getTrad('settings.form.autoOrientation.description'),
                             defaultMessage:
-                              'Automatically rotate image according to EXIF orientation tag',
+                              'Enabling this option will automatically rotate the image according to EXIF orientation tag.',
                           })}
                           label={formatMessage({
                             id: getTrad('settings.form.autoOrientation.label'),
-                            defaultMessage: 'Enable auto orientation',
+                            defaultMessage: 'Auto orientation',
                           })}
                           name="autoOrientation"
                           offLabel={formatMessage({
