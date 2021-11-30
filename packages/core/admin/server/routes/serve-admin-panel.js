@@ -4,14 +4,14 @@ const path = require('path');
 const fse = require('fs-extra');
 const koaStatic = require('koa-static');
 
-const serveAdmin = ({ strapi }) => {
+const registerAdminPanelRoute = ({ strapi }) => {
   let buildDir = path.resolve(strapi.dirs.root, 'build');
 
   if (!fse.pathExistsSync(buildDir)) {
     buildDir = path.resolve(__dirname, '../../build');
   }
 
-  const serveAdmin = async (ctx, next) => {
+  const serveAdminMiddleware = async (ctx, next) => {
     await next();
 
     if (ctx.method !== 'HEAD' && ctx.method !== 'GET') {
@@ -31,7 +31,7 @@ const serveAdmin = ({ strapi }) => {
       method: 'GET',
       path: `${strapi.config.admin.path}/:path*`,
       handler: [
-        serveAdmin,
+        serveAdminMiddleware,
         serveStatic(buildDir, { maxage: 60000, defer: false, index: 'index.html' }),
       ],
       config: { auth: false },
@@ -56,4 +56,4 @@ const serveStatic = (filesDir, koaStaticOptions = {}) => {
   };
 };
 
-module.exports = serveAdmin;
+module.exports = registerAdminPanelRoute;

@@ -1,6 +1,6 @@
 'use strict';
 
-const serveAdmin = require('./routes/serve-admin');
+const registerAdminPanelRoute = require('./routes/serve-admin-panel');
 const adminAuthStrategy = require('./strategies/admin');
 const apiTokenAuthStrategy = require('./strategies/api-token');
 
@@ -12,6 +12,6 @@ module.exports = ({ strapi }) => {
   strapi.container.get('auth').register('content-api', apiTokenAuthStrategy);
 
   if (strapi.config.serveAdminPanel) {
-    serveAdmin({ strapi });
+    registerAdminPanelRoute({ strapi });
   }
 };
