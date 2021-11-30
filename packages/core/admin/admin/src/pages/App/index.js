@@ -77,7 +77,7 @@ function App() {
               body: JSON.stringify({
                 event: 'didInitializeAdministration',
                 uuid,
-                deviceId,
+                deviceId: `web-fingerprint-${deviceId}`,
               }),
               headers: {
                 'Content-Type': 'application/json',
