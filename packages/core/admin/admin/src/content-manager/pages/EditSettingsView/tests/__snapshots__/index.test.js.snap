@@ -1139,7 +1139,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
             <span
               class="c6"
             >
-              Go back
+              Back
             </span>
           </a>
         </div>
@@ -3031,7 +3031,7 @@ exports[`EditSettingsView should add field 1`] = `
               <span
                 class="c6"
               >
-                Go back
+                Back
               </span>
             </a>
           </div>
@@ -5417,7 +5417,7 @@ exports[`EditSettingsView should add relation 1`] = `
               <span
                 class="c6"
               >
-                Go back
+                Back
               </span>
             </a>
           </div>

@@ -150,7 +150,7 @@ const EditPage = ({ canUpdate }) => {
             <Link startIcon={<ArrowLeft />} to="/settings/users?pageSize=10&page=1&sort=firstname">
               {formatMessage({
                 id: 'app.components.go-back',
-                defaultMessage: 'Go back',
+                defaultMessage: 'Back',
               })}
             </Link>
           }
@@ -194,7 +194,7 @@ const EditPage = ({ canUpdate }) => {
                   >
                     {formatMessage({
                       id: 'app.components.go-back',
-                      defaultMessage: 'Go back',
+                      defaultMessage: 'Back',
                     })}
                   </Link>
                 }

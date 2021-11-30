@@ -163,7 +163,7 @@ const ListView = () => {
           <Link startIcon={<ArrowLeft />} to="/plugins/content-type-builder/">
             {formatMessage({
               id: 'app.components.go-back',
-              defaultMessage: 'Go back',
+              defaultMessage: 'Back',
             })}
           </Link>
         }

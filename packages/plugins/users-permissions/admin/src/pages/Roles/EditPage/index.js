@@ -109,7 +109,7 @@ const EditPage = () => {
                 <Link startIcon={<ArrowLeft />} to="/settings/users-permissions/roles">
                   {formatMessage({
                     id: 'app.components.go-back',
-                    defaultMessage: 'Go back',
+                    defaultMessage: 'Back',
                   })}
                 </Link>
               }

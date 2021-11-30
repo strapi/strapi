@@ -165,7 +165,7 @@ const ApiTokenCreateView = () => {
                   <Link startIcon={<ArrowLeft />} to="/settings/api-tokens">
                     {formatMessage({
                       id: 'app.components.go-back',
-                      defaultMessage: 'Go back',
+                      defaultMessage: 'Back',
                     })}
                   </Link>
                 }
