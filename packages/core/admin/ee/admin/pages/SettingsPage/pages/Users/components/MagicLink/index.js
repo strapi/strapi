@@ -15,7 +15,7 @@ const MagicLink = ({ registrationToken }) => {
       >
         {formatMessage({
           id: 'app.components.Users.MagicLink.connect',
-          defaultMessage: 'Send this link to the user for them to connect.',
+          defaultMessage: 'Copy and share this link to give access to this user',
         })}
       </MagicLinkWrapper>
     );

@@ -104,7 +104,7 @@ const ListPage = () => {
     >
       {formatMessage({
         id: 'Settings.permissions.users.create',
-        defaultMessage: 'Create new user',
+        defaultMessage: 'Invite new user',
       })}
     </Button>
   ) : (
@@ -120,7 +120,7 @@ const ListPage = () => {
         subtitle={formatMessage(
           {
             id: 'Settings.permissions.users.listview.header.subtitle',
-            defaultMessage: '{number, plural, =0 {# users} one {# user} other {# users}} found',
+            defaultMessage: 'All the users who have access to the Strapi admin panel',
           },
           { number: total }
         )}

@@ -254,7 +254,7 @@ const EditPage = ({ canUpdate }) => {
                       <Typography variant="delta" as="h2">
                         {formatMessage({
                           id: 'app.components.Users.ModalCreateBody.block-title.login',
-                          defaultMessage: 'Login settings',
+                          defaultMessage: "User's role",
                         })}
                       </Typography>
                       <Grid gap={5}>
