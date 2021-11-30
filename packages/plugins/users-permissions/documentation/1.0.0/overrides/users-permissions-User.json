@@ -1,0 +1,325 @@
+{
+  "paths": {
+    "/auth/local/register": {
+      "post": {
+        "tags": ["Authentication"],
+        "security": [],
+        "externalDocs": {
+          "description": "Find out more in the strapi's documentation",
+          "url": "https://docs.strapi.io/developer-docs/latest/plugins/users-permissions.html#registration"
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully register a user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Users-PermissionsRegisterResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "description": "",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "required": ["username", "email", "password"],
+                "properties": {
+                  "username": {
+                    "type": "string",
+                    "minLength": 3
+                  },
+                  "email": {
+                    "type": "string",
+                    "minLength": 6
+                  },
+                  "password": {
+                    "type": "string",
+                    "minLength": 6
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/email-confirmation": {
+      "get": {
+        "tags": ["Authentication"],
+        "security": []
+      }
+    },
+    "/auth/send-email-confirmation": {
+      "post": {
+        "security": [],
+        "externalDocs": {
+          "description": "Find out more in the strapi's documentation",
+          "url": "https://docs.strapi.io/developer-docs/latest/plugins/users-permissions.html#email-validation"
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully sent email",
+            "content": {
+              "application/json": {
+                "email": {
+                  "type": "string"
+                },
+                "sent": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "description": "",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "required": ["email"],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "minLength": 6
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users-permissions/search/{id}": {
+      "get": {
+        "summary": "Retrieve a list of users by searching for their username or email",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "A string matching a user's email or username",
+            "deprecated": false,
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/connect/*": {
+      "get": {
+        "summary": "Authenticate your user with a custom provider",
+        "tags": ["Authentication"],
+        "security": [],
+        "parameters": [
+          {
+            "name": "provider",
+            "in": "path",
+            "required": true,
+            "deprecated": false,
+            "description": "The name of the provider you want to use",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "externalDocs": {
+          "description": "Find out more about the authentication flow in the strapi documentation",
+          "url": "https://docs.strapi.io/developer-docs/latest/plugins/users-permissions.html#providers"
+        },
+        "responses": {
+          "200": {
+            "description": "Your user is redirected"
+          }
+        }
+      }
+    },
+    "/auth/local": {
+      "post": {
+        "externalDocs": {
+          "description": "Find out more in the strapi's documentation",
+          "url": "https://docs.strapi.io/developer-docs/latest/plugins/users-permissions.html#login"
+        },
+        "tags": ["Authentication"],
+        "security": [],
+        "requestBody": {
+          "description": "The identifier param can either be an email or a username",
+          "content": {
+            "application/json": {
+              "schema": {
+                "required": ["identifier", "password"],
+                "properties": {
+                  "identifier": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "identifier": "hi@strapi.io",
+                "password": "superSecure123"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Users-PermissionsRegisterResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/{provider}/callback": {
+      "get": {
+        "tags": ["Authentication"],
+        "externalDocs": {
+          "description": "Find out more in the strapi's documentation",
+          "url": "https://docs.strapi.io/developer-docs/latest/plugins/users-permissions.html#providers"
+        },
+        "parameters": [
+          {
+            "name": "provider",
+            "in": "path",
+            "description": "The provider used to authenticate your user",
+            "deprecated": false,
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfull redirection after approving a provider",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Users-PermissionsRegisterResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/forgot-password": {
+      "post": {
+        "tags": ["Authentication"],
+        "security": [],
+        "summary": "Send an email to reset your password",
+        "externalDocs": {
+          "description": "Find out more in the strapi's documentation",
+          "url": "https://docs.strapi.io/developer-docs/latest/plugins/users-permissions.html#forgotten-reset-password"
+        },
+        "requestBody": {
+          "description": "",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "email": {
+                    "type": "string"
+                  },
+                  "url": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "email": "hi@strapi.io",
+                "url": "http://mon-site.com/rest-password"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Email sent"
+          }
+        }
+      }
+    },
+    "/auth/reset-password": {
+      "post": {
+        "tags": ["Authentication"],
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Users-PermissionsRegisterResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "description": "",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "required": ["code", "password", "passwordConfirmation"],
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  },
+                  "passwordConfirmation": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Users-PermissionsRegisterResponse": {
+        "properties": {
+          "jwt": {
+            "type": "string"
+          },
+          "user": {
+            "$ref": "#/components/schemas/Users-PermissionsUser"
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Authentication",
+      "description": "All the routes related to the authentication",
+      "externalDocs": {
+        "description": "Find out more in strapi's documentation",
+        "url": "https://docs.strapi.io/developer-docs/latest/plugins/users-permissions.html"
+      }
+    },
+    {
+      "name": "Users-Permissions - User"
+    }
+  ]
+}

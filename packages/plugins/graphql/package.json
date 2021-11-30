@@ -1,0 +1,61 @@
+{
+  "name": "@strapi/plugin-graphql",
+  "version": "4.0.0",
+  "description": "Adds GraphQL endpoint with default API methods.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/strapi/strapi.git",
+    "directory": "packages/plugins/graphql"
+  },
+  "license": "SEE LICENSE IN LICENSE",
+  "author": {
+    "name": "Strapi Solutions SAS",
+    "email": "hi@strapi.io",
+    "url": "https://strapi.io"
+  },
+  "maintainers": [
+    {
+      "name": "Strapi Solutions SAS",
+      "email": "hi@strapi.io",
+      "url": "https://strapi.io"
+    }
+  ],
+  "scripts": {
+    "test": "echo \"no tests yet\""
+  },
+  "dependencies": {
+    "@apollo/federation": "^0.28.0",
+    "@graphql-tools/schema": "8.1.2",
+    "@graphql-tools/utils": "^8.0.2",
+    "@strapi/utils": "4.0.0",
+    "apollo-server-core": "3.1.2",
+    "apollo-server-koa": "3.1.2",
+    "glob": "^7.1.7",
+    "graphql": "15.5.1",
+    "graphql-depth-limit": "^1.1.0",
+    "graphql-iso-date": "^3.6.1",
+    "graphql-playground-middleware-koa": "^1.6.21",
+    "graphql-type-json": "^0.3.2",
+    "graphql-type-long": "^0.1.1",
+    "graphql-upload": "12.0.0",
+    "koa-compose": "^4.1.0",
+    "lodash": "4.17.21",
+    "nexus": "1.1.0",
+    "pluralize": "^8.0.0",
+    "subscriptions-transport-ws": "0.9.19"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3",
+    "koa": "^2.13.1"
+  },
+  "engines": {
+    "node": ">=12.x.x <=16.x.x",
+    "npm": ">=6.0.0"
+  },
+  "strapi": {
+    "displayName": "GraphQL",
+    "name": "graphql",
+    "description": "Adds GraphQL endpoint with default API methods.",
+    "kind": "plugin"
+  }
+}

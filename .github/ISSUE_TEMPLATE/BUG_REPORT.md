@@ -43,11 +43,11 @@ If applicable, add code samples to help explain your problem.
 
 ### System
 
-- Node.js version: 
-- NPM version: 
-- Strapi version: 
-- Database: 
-- Operating system: 
+- Node.js version: <!-- Please ensure you are using the Node LTS version (v12, v14, v16) -->
+- NPM version:
+- Strapi version: <!-- v3 is not supported unless it is a critical/high security issue -->
+- Database:
+- Operating system:
 
 ### Additional context
 

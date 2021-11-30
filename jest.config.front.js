@@ -5,15 +5,23 @@ const moduleNameMapper = {
   '.*\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga|ico)$':
     '<rootDir>/test/config/front/mocks/image.js',
   '^ee_else_ce(/.*)$': [
-    '<rootDir>/packages/strapi-admin/admin/src$1',
-    '<rootDir>/packages/strapi-plugin-*/admin/src$1',
+    '<rootDir>/packages/core/admin/admin/src$1',
+    '<rootDir>/packages/core/content-manager/admin/src$1',
+    '<rootDir>/packages/core/content-type-builder/admin/src$1',
+    '<rootDir>/packages/core/upload/admin/src$1',
+    '<rootDir>/packages/core/email/admin/src$1',
+    '<rootDir>/packages/plugins/*/admin/src$1',
   ],
 };
 
 if (IS_EE) {
   const rootDirEE = [
-    '<rootDir>/packages/strapi-admin/ee/admin$1',
-    '<rootDir>/packages/strapi-plugin-*/ee/admin$1',
+    '<rootDir>/packages/core/admin/ee/admin$1',
+    '<rootDir>/packages/core/content-manager/ee/admin/src$1',
+    '<rootDir>/packages/core/content-type-builder/ee/admin/src$1',
+    '<rootDir>/packages/core/upload/ee/admin/src$1',
+    '<rootDir>/packages/core/email/ee/admin/src$1',
+    '<rootDir>/packages/plugins/*/ee/admin/src$1',
   ];
 
   Object.assign(moduleNameMapper, {
@@ -23,28 +31,22 @@ if (IS_EE) {
 
 module.exports = {
   collectCoverageFrom: [
-    'packages/strapi-admin/admin/src/**/**/*.js',
-    '!packages/strapi-admin/admin/src/*.js',
-    '!packages/strapi-admin/admin/src/utils/*.js',
-    'packages/strapi-plugin-*/admin/src/**/**/*.js',
-    'packages/strapi-plugin-*/admin/src/InjectedComponents/tests/*.js',
-    '!packages/strapi-plugin-content-type-builder/admin/src/components/TableList/*.js',
-    '!packages/strapi-plugin-content-type-builder/admin/src/components/TableListRow/*.js',
-    'packages/strapi-plugin-*/admin/src/utils/*.js',
-    '!packages/strapi-plugin-*/admin/src/lifecycles/*.js',
-    '!packages/strapi-plugin-*/admin/src/**/**/tests/*.test.{js,jsx}',
+    'packages/core/*/admin/src/**/*.js',
+    'packages/plugins/*/admin/src/**/*.js',
   ],
   globals: {
     __webpack_public_path__: 'http://localhost:4000',
     strapi: {
       backendURL: 'http://localhost:1337',
+      isEE: false,
+      features: [],
+      projectType: 'Community',
     },
     BACKEND_URL: 'http://localhost:1337',
-    MODE: 'host',
-    PUBLIC_PATH: '/admin',
-    REMOTE_URL: '/',
+    ADMIN_PATH: '/admin',
     NODE_ENV: 'test',
-    ENABLED_EE_FEATURES: [],
+
+    // FIXME create a clean config file
   },
   moduleDirectories: [
     'node_modules',
@@ -53,10 +55,16 @@ module.exports = {
   ],
   moduleNameMapper,
   rootDir: process.cwd(),
-  setupFiles: ['<rootDir>/test/config/front/test-bundler.js'],
+  setupFiles: [
+    '<rootDir>/test/config/front/test-bundler.js',
+    '<rootDir>/packages/admin-test-utils/lib/mocks/LocalStorageMock.js',
+    '<rootDir>/packages/admin-test-utils/lib/mocks/IntersectionObserver.js',
+    '<rootDir>/packages/admin-test-utils/lib/mocks/ResizeObserver.js',
+  ],
   testPathIgnorePatterns: [
     '/node_modules/',
     '<rootDir>/examples/getstarted/',
+    '<rootDir>/examples/kitchensink/',
     '<rootDir>/packages/strapi-helper-plugin/dist/',
     '/OLD/',
     '__tests__',
@@ -73,4 +81,5 @@ module.exports = {
   },
   transformIgnorePatterns: ['node_modules/(?!(react-dnd|dnd-core|react-dnd-html5-backend)/)'],
   testURL: 'http://localhost:4000/admin',
+  globalSetup: '<rootDir>/test/config/front/global-setup.js',
 };

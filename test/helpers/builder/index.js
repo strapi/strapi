@@ -2,9 +2,8 @@
 
 const { get } = require('lodash/fp');
 
-const _ = require('lodash');
 const modelsUtils = require('../models');
-const { sanitizeEntity } = require('../../../packages/strapi-utils');
+const { sanitize } = require('../../../packages/core/utils');
 const actionRegistry = require('./action-registry');
 const { createContext } = require('./context');
 
@@ -21,15 +20,21 @@ const createTestBuilder = (options = {}) => {
       return ctx.state.fixtures;
     },
 
-    sanitizedFixtures(strapi) {
-      return _.mapValues(this.fixtures, (value, key) => this.sanitizedFixturesFor(key, strapi));
+    async sanitizedFixtures(strapi) {
+      const fixtures = this.fixtures;
+
+      for (const key of Object.keys(fixtures)) {
+        fixtures[key] = await this.sanitizedFixturesFor(key, strapi);
+      }
+
+      return fixtures;
     },
 
     sanitizedFixturesFor(modelName, strapi) {
-      const model = strapi.getModel(modelName);
+      const model = strapi.getModel(modelsUtils.toUID(modelName));
       const fixtures = this.fixturesFor(modelName);
 
-      return sanitizeEntity(fixtures, { model });
+      return sanitize.contentAPI.output(fixtures, model);
     },
 
     fixturesFor(modelName) {
@@ -77,7 +82,7 @@ const createTestBuilder = (options = {}) => {
 
       if (enableTestDataAutoCleanup) {
         for (const model of models.reverse()) {
-          await modelsUtils.cleanupModel(model.uid || model.modelName);
+          await modelsUtils.cleanupModel(model.uid);
         }
       }
 

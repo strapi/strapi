@@ -62,7 +62,7 @@ The core team will review your pull request and will either merge it, request ch
 
 ## Contribution Prerequisites
 
-- You have [Node](https://nodejs.org/en/) at >= v10 and <= v14 and [Yarn](https://yarnpkg.com/en/) at v1.2.0+.
+- You have [Node](https://nodejs.org/en/) at >= v12 and <= v16 and [Yarn](https://yarnpkg.com/en/) at v1.2.0+.
 - You are familiar with Git.
 
 ## Development Workflow
@@ -71,7 +71,7 @@ _For users running on Apple Silicon M1, you may encounter errors thrown by `shar
 
 To facilitate the contribution, we have drastically reduced the amount of commands necessary to install the entire development environment.
 
-First of all, you need to check if you're using the [required versions of Node.js and npm](https://strapi.io/documentation/developer-docs/latest/setup-deployment-guides/deployment.html#recommended-requirements).
+First of all, you need to check if you're using the [required versions of Node.js and npm](https://docs.strapi.io/developer-docs/latest/setup-deployment-guides/deployment.html).
 
 Then, please follow the instructions below:
 
@@ -152,7 +152,6 @@ By default the script `test/e2e,js` creates an app that uses `sqlite`. But you c
 
 ```bash
 $ node test/e2e.js --db=sqlite
-$ node test/e2e.js --db=mongo
 $ node test/e2e.js --db=postgres
 $ node test/e2e.js --db=mysql
 ```
