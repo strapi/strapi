@@ -193,6 +193,19 @@ module.exports = ({ strapi }) => {
         ['Mutation.createUploadFile']: { auth: { scope: 'plugin::upload.content-api.upload' } },
         ['Mutation.updateUploadFile']: { auth: { scope: 'plugin::upload.content-api.upload' } },
         ['Mutation.deleteUploadFile']: { auth: { scope: 'plugin::upload.content-api.destroy' } },
+
+        [`Mutation.${UPLOAD_MUTATION_NAME}`]: {
+          auth: { scope: 'plugin::upload.content-api.upload' },
+        },
+        [`Mutation.${MULTIPLE_UPLOAD_MUTATION_NAME}`]: {
+          auth: { scope: 'plugin::upload.content-api.upload' },
+        },
+        [`Mutation.${UPDATE_FILE_INFO_MUTATION_NAME}`]: {
+          auth: { scope: 'plugin::upload.content-api.upload' },
+        },
+        [`Mutation.${DELETE_FILE_MUTATION_NAME}`]: {
+          auth: { scope: 'plugin::upload.content-api.destroy' },
+        },
       },
     };
   });
