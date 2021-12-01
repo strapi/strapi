@@ -180,7 +180,7 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         background: #4945ff;
       }
 
-      .c12 .sc-dQoVA {
+      .c12 .sc-egiyK {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
