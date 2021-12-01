@@ -110,6 +110,7 @@
   "Settings.application.details": "Details",
   "Settings.application.link-pricing": "See all pricing",
   "Settings.application.link-upgrade": "Upgrade your admin panel",
+  "Settings.application.get-help": "Get help",
   "Settings.application.node-version": "node version",
   "Settings.application.strapi-version": "strapi version",
   "Settings.application.title": "Overview",
