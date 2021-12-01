@@ -31,36 +31,40 @@ const DragButton = styled(ActionBox)`
 const FieldContainer = styled(Flex)`
   display: inline-flex;
   max-height: ${32 / 16}rem;
-  background-color: ${({ theme }) => theme.colors.primary100};
-  border-color: ${({ theme }) => theme.colors.primary200};
+  opacity: ${({ transparent }) => (transparent ? 0 : 1)};
+  background-color: ${({ theme, isSibling }) =>
+    isSibling ? theme.colors.neutral100 : theme.colors.primary100};
+  border: 1px solid
+    ${({ theme, isSibling }) => (isSibling ? theme.colors.neutral150 : theme.colors.primary200)};
 
   svg {
     width: ${10 / 16}rem;
     height: ${10 / 16}rem;
 
     path {
-      fill: ${({ theme }) => theme.colors.primary600};
+      fill: ${({ theme, isSibling }) => (isSibling ? undefined : theme.colors.primary600)};
     }
   }
 
   ${Typography} {
-    color: ${({ theme }) => theme.colors.primary600};
+    color: ${({ theme, isSibling }) => (isSibling ? undefined : theme.colors.primary600)};
   }
 
   ${DragButton} {
-    border-right: 1px solid ${({ theme }) => theme.colors.primary200};
+    border-right: 1px solid
+      ${({ theme, isSibling }) => (isSibling ? theme.colors.neutral150 : theme.colors.primary200)};
   }
 `;
 
-const CardPreview = ({ labelField }) => {
+const CardPreview = ({ labelField, transparent, isSibling }) => {
   const cardEllipsisTitle = ellipsisCardTitle(labelField);
 
   return (
     <FieldContainer
-      borderColor="neutral150"
-      background="neutral100"
       hasRadius
       justifyContent="space-between"
+      transparent={transparent}
+      isSibling={isSibling}
     >
       <Stack horizontal size={3}>
         <DragButton alignItems="center">
@@ -80,8 +84,15 @@ const CardPreview = ({ labelField }) => {
   );
 };
 
+CardPreview.defaultProps = {
+  isSibling: false,
+  transparent: false,
+};
+
 CardPreview.propTypes = {
+  isSibling: PropTypes.bool,
   labelField: PropTypes.string.isRequired,
+  transparent: PropTypes.bool,
 };
 
 export default CardPreview;
