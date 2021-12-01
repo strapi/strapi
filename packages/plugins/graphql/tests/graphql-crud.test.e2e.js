@@ -23,6 +23,10 @@ const postModel = {
     nullable: {
       type: 'string',
     },
+    category: {
+      type: 'enumeration',
+      enum: ['BLOG', 'PRODUCT', 'TUTORIALS'],
+    },
   },
   singularName: 'post',
   pluralName: 'posts',
@@ -54,8 +58,8 @@ describe('Test Graphql API End to End', () => {
 
   describe('Test CRUD', () => {
     const postsPayload = [
-      { name: 'post 1', bigint: 1316130638171, nullable: 'value' },
-      { name: 'post 2', bigint: 1416130639261, nullable: null },
+      { name: 'post 1', bigint: 1316130638171, nullable: 'value', category: 'BLOG' },
+      { name: 'post 2', bigint: 1416130639261, nullable: null, category: 'PRODUCT' },
     ];
     let data = {
       posts: [],
@@ -271,6 +275,12 @@ describe('Test Graphql API End to End', () => {
       ],
       [
         {
+          category: { eq: 'BLOG' },
+        },
+        [postsPayload[0]],
+      ],
+      [
+        {
           name: { not: { eq: 'post 1' } },
           bigint: { not: { eq: 1316130638171 } },
         },
@@ -281,6 +291,12 @@ describe('Test Graphql API End to End', () => {
           name: { contains: 'post' },
         },
         postsPayload,
+      ],
+      [
+        {
+          category: { contains: 'PRO' },
+        },
+        [postsPayload[1]],
       ],
       [
         {
