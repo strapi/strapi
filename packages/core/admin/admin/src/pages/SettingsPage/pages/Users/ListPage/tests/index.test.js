@@ -964,9 +964,9 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
 
       .c1 {
         background: #f6f6f9;
-        padding-top: 56px;
+        padding-top: 40px;
         padding-right: 56px;
-        padding-bottom: 56px;
+        padding-bottom: 40px;
         padding-left: 56px;
       }
 
@@ -1063,7 +1063,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         line-height: 1.5;
       }
 
-      .c0 {
+      .c0:focus-visible {
         outline: none;
       }
 
@@ -1562,7 +1562,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
               </div>
               <nav
                 aria-label="pagination"
-                class="sc-euMpEg"
+                class="sc-evcjhq"
               >
                 <ul
                   class="c62 c63"

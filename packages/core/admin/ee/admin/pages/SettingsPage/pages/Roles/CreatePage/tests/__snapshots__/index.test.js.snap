@@ -97,7 +97,7 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
   background: #f0f0ff;
 }
 
-.c13 .sc-eCstlR {
+.c13 .sc-eCImPb {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -179,7 +179,7 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
   background: #4945ff;
 }
 
-.c16 .sc-eCstlR {
+.c16 .sc-eCImPb {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -617,12 +617,12 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
   background: #f6f6f9;
   padding-top: 24px;
   padding-right: 56px;
-  padding-bottom: 56px;
+  padding-bottom: 40px;
   padding-left: 56px;
 }
 
 .c2 {
-  padding-bottom: 12px;
+  padding-bottom: 8px;
 }
 
 .c18 {
@@ -685,7 +685,7 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
   grid-column: span 6;
 }
 
-.c0 {
+.c0:focus-visible {
   outline: none;
 }
 

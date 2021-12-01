@@ -1,6 +1,8 @@
 import React, { useEffect, useReducer } from 'react';
 import axios from 'axios';
-import { camelCase, get, omit } from 'lodash';
+import camelCase from 'lodash/camelCase';
+import get from 'lodash/get';
+import omit from 'lodash/omit';
 import { Redirect, useRouteMatch, useHistory } from 'react-router-dom';
 import { auth, useQuery } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
@@ -117,7 +119,11 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
       push('/');
     } catch (err) {
       if (err.response) {
-        const errorMessage = get(err, ['response', 'data', 'message'], 'Something went wrong');
+        const errorMessage = get(
+          err,
+          ['response', 'data', 'error', 'message'],
+          'Something went wrong'
+        );
 
         if (camelCase(errorMessage).toLowerCase() === 'usernotactive') {
           push('/auth/oops');

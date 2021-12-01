@@ -121,8 +121,8 @@ function watchFileChanges({ dir, strapiInstance, watchIgnoreFiles, polling }) {
     ignored: [
       /(^|[/\\])\../, // dot files
       /tmp/,
-      '**/admin',
-      '**/admin/**',
+      'admin',
+      'admin/**',
       'src/extensions/**/admin',
       'src/extensions/**/admin/**',
       '**/documentation',

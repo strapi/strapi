@@ -354,7 +354,7 @@ describe('Homepage', () => {
         overflow-x: hidden;
       }
 
-      .c3 {
+      .c3:focus-visible {
         outline: none;
       }
 

@@ -1,34 +1,41 @@
 {
   "name": "@strapi/logger",
-  "version": "3.6.8",
+  "version": "4.0.0",
   "description": "Strapi's logger",
   "homepage": "https://strapi.io",
-  "main": "./lib/index.js",
-  "scripts": {
-    "test": "echo \"no tests yet\""
-  },
-  "directories": {
-    "lib": "./lib"
-  },
-  "author": {
-    "name": "Strapi team",
-    "email": "hi@strapi.io",
-    "url": "https://strapi.io"
+  "bugs": {
+    "url": "https://github.com/strapi/strapi/issues"
   },
   "repository": {
     "type": "git",
     "url": "git://github.com/strapi/strapi.git"
   },
-  "bugs": {
-    "url": "https://github.com/strapi/strapi/issues"
+  "license": "SEE LICENSE IN LICENSE",
+  "author": {
+    "name": "Strapi Solutions SAS",
+    "email": "hi@strapi.io",
+    "url": "https://strapi.io"
+  },
+  "maintainers": [
+    {
+      "name": "Strapi Solutions SAS",
+      "email": "hi@strapi.io",
+      "url": "https://strapi.io"
+    }
+  ],
+  "main": "./lib/index.js",
+  "directories": {
+    "lib": "./lib"
+  },
+  "scripts": {
+    "test": "echo \"no tests yet\""
+  },
+  "dependencies": {
+    "lodash": "4.17.21",
+    "winston": "3.3.3"
   },
   "engines": {
     "node": ">=12.x.x <=16.x.x",
     "npm": ">=6.0.0"
-  },
-  "license": "SEE LICENSE IN LICENSE",
-  "dependencies": {
-    "winston": "3.3.3",
-    "lodash": "4.17.21"
   }
 }

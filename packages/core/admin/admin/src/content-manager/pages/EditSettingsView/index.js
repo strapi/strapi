@@ -23,7 +23,6 @@ import { Stack } from '@strapi/design-system/Stack';
 import { Divider } from '@strapi/design-system/Divider';
 import ArrowLeft from '@strapi/icons/ArrowLeft';
 import Check from '@strapi/icons/Check';
-import { Helmet } from 'react-helmet';
 import { getTrad } from '../../utils';
 import reducer, { initialState } from './reducer';
 import init from './init';
@@ -220,15 +219,6 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
       setIsDraggingSibling={setIsDraggingSibling}
     >
       <Main>
-        <Helmet
-          title={formatMessage(
-            {
-              id: getTrad('components.SettingsViewWrapper.pluginHeader.title'),
-              defaultMessage: `Configure the view - ${upperFirst(modelName)}`,
-            },
-            { name: upperFirst(modelName) }
-          )}
-        />
         <form onSubmit={handleSubmit}>
           <HeaderLayout
             title={formatMessage(

@@ -9,7 +9,7 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 import { render, screen } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import Theme from '../../../../components/Theme';
-import ContentManagerApp from '..';
+import { App as ContentManagerApp } from '..';
 import cmReducers from '../../../../reducers';
 import useModels from '../useModels';
 

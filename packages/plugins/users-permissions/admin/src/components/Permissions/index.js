@@ -2,6 +2,7 @@ import React, { useReducer } from 'react';
 import { Accordion, AccordionToggle, AccordionContent } from '@strapi/design-system/Accordion';
 import { useIntl } from 'react-intl';
 import { Box } from '@strapi/design-system/Box';
+import { Stack } from '@strapi/design-system/Stack';
 import { useUsersPermissions } from '../../contexts/UsersPermissionsContext';
 import formatPluginName from '../../utils/formatPluginName';
 import PermissionRow from './PermissionRow';
@@ -22,12 +23,13 @@ const Permissions = () => {
     });
 
   return (
-    <>
+    <Stack size={1}>
       {collapses.map((collapse, index) => (
         <Accordion
           expanded={collapse.isOpen}
           toggle={() => handleToggle(index)}
           key={collapse.name}
+          variant={index % 2 === 0 ? 'secondary' : undefined}
         >
           <AccordionToggle
             title={formatPluginName(collapse.name)}
@@ -41,13 +43,13 @@ const Permissions = () => {
             variant={index % 2 ? 'primary' : 'secondary'}
           />
           <AccordionContent>
-            <Box background="neutral0">
+            <Box>
               <PermissionRow permissions={modifiedData[collapse.name]} name={collapse.name} />
             </Box>
           </AccordionContent>
         </Accordion>
       ))}
-    </>
+    </Stack>
   );
 };
 

@@ -653,7 +653,18 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   line-height: 1.33;
 }
 
-.c0 {
+.c65 {
+  font-weight: 500;
+  color: #32324d;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.875rem;
+  line-height: 1.43;
+}
+
+.c0:focus-visible {
   outline: none;
 }
 
@@ -661,12 +672,12 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   background: #f6f6f9;
   padding-top: 24px;
   padding-right: 56px;
-  padding-bottom: 56px;
+  padding-bottom: 40px;
   padding-left: 56px;
 }
 
 .c2 {
-  padding-bottom: 12px;
+  padding-bottom: 8px;
 }
 
 .c18 {
@@ -828,13 +839,6 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   height: 1px;
   border: none;
   margin: 0;
-}
-
-.c65 {
-  font-weight: 500;
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #32324d;
 }
 
 .c68 {
@@ -1449,15 +1453,11 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                                   <div
                                     class="c63 c64"
                                   >
-                                    <div
-                                      class=""
+                                    <span
+                                      class="c65"
                                     >
-                                      <span
-                                        class="c65"
-                                      >
-                                        postal_code
-                                      </span>
-                                    </div>
+                                      postal_code
+                                    </span>
                                     <div
                                       class="c54"
                                     >
@@ -1580,15 +1580,11 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                                   <div
                                     class="c63 c64"
                                   >
-                                    <div
-                                      class=""
+                                    <span
+                                      class="c65"
                                     >
-                                      <span
-                                        class="c65"
-                                      >
-                                        city
-                                      </span>
-                                    </div>
+                                      city
+                                    </span>
                                     <div
                                       class="c54"
                                     >
@@ -1779,15 +1775,11 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                           <div
                             class="c63 c64"
                           >
-                            <div
-                              class=""
+                            <span
+                              class="c65"
                             >
-                              <span
-                                class="c65"
-                              >
-                                categories
-                              </span>
-                            </div>
+                              categories
+                            </span>
                             <div
                               class="c54"
                             >
@@ -2545,7 +2537,18 @@ exports[`EditSettingsView should add field 1`] = `
   line-height: 1.33;
 }
 
-.c0 {
+.c65 {
+  font-weight: 500;
+  color: #32324d;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.875rem;
+  line-height: 1.43;
+}
+
+.c0:focus-visible {
   outline: none;
 }
 
@@ -2553,12 +2556,12 @@ exports[`EditSettingsView should add field 1`] = `
   background: #f6f6f9;
   padding-top: 24px;
   padding-right: 56px;
-  padding-bottom: 56px;
+  padding-bottom: 40px;
   padding-left: 56px;
 }
 
 .c2 {
-  padding-bottom: 12px;
+  padding-bottom: 8px;
 }
 
 .c18 {
@@ -2720,13 +2723,6 @@ exports[`EditSettingsView should add field 1`] = `
   height: 1px;
   border: none;
   margin: 0;
-}
-
-.c65 {
-  font-weight: 500;
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #32324d;
 }
 
 .c68 {
@@ -3341,15 +3337,11 @@ exports[`EditSettingsView should add field 1`] = `
                                     <div
                                       class="c63 c64"
                                     >
-                                      <div
-                                        class=""
+                                      <span
+                                        class="c65"
                                       >
-                                        <span
-                                          class="c65"
-                                        >
-                                          postal_code
-                                        </span>
-                                      </div>
+                                        postal_code
+                                      </span>
                                       <div
                                         class="c54"
                                       >
@@ -3472,15 +3464,11 @@ exports[`EditSettingsView should add field 1`] = `
                                     <div
                                       class="c63 c64"
                                     >
-                                      <div
-                                        class=""
+                                      <span
+                                        class="c65"
                                       >
-                                        <span
-                                          class="c65"
-                                        >
-                                          city
-                                        </span>
-                                      </div>
+                                        city
+                                      </span>
                                       <div
                                         class="c54"
                                       >
@@ -3671,15 +3659,11 @@ exports[`EditSettingsView should add field 1`] = `
                             <div
                               class="c63 c64"
                             >
-                              <div
-                                class=""
+                              <span
+                                class="c65"
                               >
-                                <span
-                                  class="c65"
-                                >
-                                  categories
-                                </span>
-                              </div>
+                                categories
+                              </span>
                               <div
                                 class="c54"
                               >
@@ -4930,7 +4914,18 @@ exports[`EditSettingsView should add relation 1`] = `
   line-height: 1.33;
 }
 
-.c0 {
+.c65 {
+  font-weight: 500;
+  color: #32324d;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.875rem;
+  line-height: 1.43;
+}
+
+.c0:focus-visible {
   outline: none;
 }
 
@@ -4938,12 +4933,12 @@ exports[`EditSettingsView should add relation 1`] = `
   background: #f6f6f9;
   padding-top: 24px;
   padding-right: 56px;
-  padding-bottom: 56px;
+  padding-bottom: 40px;
   padding-left: 56px;
 }
 
 .c2 {
-  padding-bottom: 12px;
+  padding-bottom: 8px;
 }
 
 .c18 {
@@ -5105,13 +5100,6 @@ exports[`EditSettingsView should add relation 1`] = `
   height: 1px;
   border: none;
   margin: 0;
-}
-
-.c65 {
-  font-weight: 500;
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #32324d;
 }
 
 .c68 {
@@ -5727,15 +5715,11 @@ exports[`EditSettingsView should add relation 1`] = `
                                     <div
                                       class="c63 c64"
                                     >
-                                      <div
-                                        class=""
+                                      <span
+                                        class="c65"
                                       >
-                                        <span
-                                          class="c65"
-                                        >
-                                          postal_code
-                                        </span>
-                                      </div>
+                                        postal_code
+                                      </span>
                                       <div
                                         class="c54"
                                       >
@@ -5858,15 +5842,11 @@ exports[`EditSettingsView should add relation 1`] = `
                                     <div
                                       class="c63 c64"
                                     >
-                                      <div
-                                        class=""
+                                      <span
+                                        class="c65"
                                       >
-                                        <span
-                                          class="c65"
-                                        >
-                                          city
-                                        </span>
-                                      </div>
+                                        city
+                                      </span>
                                       <div
                                         class="c54"
                                       >
@@ -6057,15 +6037,11 @@ exports[`EditSettingsView should add relation 1`] = `
                             <div
                               class="c63 c64"
                             >
-                              <div
-                                class=""
+                              <span
+                                class="c65"
                               >
-                                <span
-                                  class="c65"
-                                >
-                                  categories
-                                </span>
-                              </div>
+                                categories
+                              </span>
                               <div
                                 class="c54"
                               >

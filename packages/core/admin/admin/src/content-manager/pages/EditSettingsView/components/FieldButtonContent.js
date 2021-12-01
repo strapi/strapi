@@ -5,7 +5,7 @@ import { useIntl } from 'react-intl';
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
 import { IconButton } from '@strapi/design-system/IconButton';
-import { Text } from '@strapi/design-system/Text';
+import { Typography } from '@strapi/design-system/Typography';
 import Pencil from '@strapi/icons/Pencil';
 import Trash from '@strapi/icons/Trash';
 import { getTrad } from '../../../utils';
@@ -25,11 +25,9 @@ const FieldButtonContent = ({ attribute, onEditField, onDeleteField, children })
   return (
     <Box overflow="hidden" width="100%">
       <Flex paddingLeft={3} alignItems="baseline" justifyContent="space-between">
-        <Box>
-          <Text textColor="neutral800" bold>
-            {children}
-          </Text>
-        </Box>
+        <Typography fontWeight="semiBold" textColor="neutral800" ellipsis>
+          {children}
+        </Typography>
         <Flex>
           <CustomIconButton
             label={formatMessage(

@@ -474,9 +474,9 @@ describe('Admin | containers | ListView', () => {
 
       .c4 {
         background: #f6f6f9;
-        padding-top: 56px;
+        padding-top: 40px;
         padding-right: 56px;
-        padding-bottom: 56px;
+        padding-bottom: 40px;
         padding-left: 56px;
       }
 
@@ -605,7 +605,7 @@ describe('Admin | containers | ListView', () => {
         transform: translateX(1rem);
       }
 
-      .c3 {
+      .c3:focus-visible {
         outline: none;
       }
 

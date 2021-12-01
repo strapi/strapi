@@ -9,11 +9,11 @@
 <br />
 
 <p align="center">
-  <a href="https://www.npmjs.org/package/strapi">
-    <img src="https://img.shields.io/npm/v/strapi/latest.svg" alt="NPM Version" />
+  <a href="https://www.npmjs.org/package/@strapi/strapi">
+    <img src="https://img.shields.io/npm/v/@strapi/strapi/latest.svg" alt="NPM Version" />
   </a>
-  <a href="https://www.npmjs.org/package/strapi">
-    <img src="https://img.shields.io/npm/dm/strapi.svg" alt="Monthly download on NPM" />
+  <a href="https://github.com/strapi/strapi/actions/workflows/tests.yml">
+    <img src="https://github.com/strapi/strapi/actions/workflows/tests.yml/badge.svg?branch=master" alt="Tests" />
   </a>
   <a href="https://discord.strapi.io">
     <img src="https://img.shields.io/discord/811989166782021633?label=Discord" alt="Strapi on Discord" />
@@ -24,7 +24,7 @@
 
 <p align="center">
   <a href="https://strapi.io">
-    <img src="https://raw.githubusercontent.com/strapi/strapi/master/public/assets/administration_panel.png" alt="Administration panel" />
+    <img src="https://raw.githubusercontent.com/strapi/strapi/0bcebf77b37182fe021cb59cc19be8f5db4a18ac/public/assets/administration_panel.png" alt="Administration panel" />
   </a>
 </p>
 
@@ -39,7 +39,7 @@ Strapi is a free and open-source headless CMS delivering your content anywhere y
 
 ## Getting Started
 
-<a href="https://strapi.io/documentation/developer-docs/latest/getting-started/quick-start.html" target="_blank">Read the Getting Started tutorial</a> or follow the steps below:
+<a href="https://docs.strapi.io/developer-docs/latest/getting-started/quick-start.html" target="_blank">Read the Getting Started tutorial</a> or follow the steps below:
 
 ### ⏳ Installation
 
@@ -65,7 +65,7 @@ Enjoy 🎉
 
 ### 🖐 Requirements
 
-Complete installation requirements can be found in the documentation under <a href="https://strapi.io/documentation/developer-docs/latest/setup-deployment-guides/deployment.html#recommended-requirements">Installation Requirements</a>.
+Complete installation requirements can be found in the documentation under <a href="https://docs.strapi.io/developer-docs/latest/setup-deployment-guides/deployment.html">Installation Requirements</a>.
 
 **Supported operating systems**:
 
@@ -79,7 +79,7 @@ Complete installation requirements can be found in the documentation under <a hr
 
 **Node:**
 
-- NodeJS >= 10.16 <=14
+- NodeJS >= 12 <= 16
 - NPM >= 6.x
 
 **Database:**
@@ -109,7 +109,7 @@ Please read our [Contributing Guide](./CONTRIBUTING.md) before submitting a Pull
 
 ## Community support
 
-For general help using Strapi, please refer to [the official Strapi documentation](https://strapi.io/documentation/). For additional help, you can use one of these channels to ask a question:
+For general help using Strapi, please refer to [the official Strapi documentation](https://docs.strapi.io). For additional help, you can use one of these channels to ask a question:
 
 - [Discord](https://discord.strapi.io) (For live discussion with the Community and Strapi team)
 - [GitHub](https://github.com/strapi/strapi) (Bug reports, Contributions)
@@ -122,7 +122,7 @@ For general help using Strapi, please refer to [the official Strapi documentatio
 
 ## Migration
 
-Follow our [migration guides](https://strapi.io/documentation/developer-docs/latest/update-migration-guides/migration-guides.html) on the documentation to keep your projects up-to-date.
+Follow our [migration guides](https://docs.strapi.io/developer-docs/latest/update-migration-guides/migration-guides.html) on the documentation to keep your projects up-to-date.
 
 ## Roadmap
 
@@ -132,8 +132,8 @@ Check out our [roadmap](https://portal.productboard.com/strapi) to get informed 
 
 See our dedicated [repository](https://github.com/strapi/documentation) for the Strapi documentation, or view our documentation live:
 
-- [Developer docs](https://strapi.io/documentation/developer-docs/latest/getting-started/introduction.html)
-- [User docs](https://strapi.io/documentation/user-docs/latest/getting-started/introduction.html)
+- [Developer docs](https://docs.strapi.io/developer-docs/latest/getting-started/introduction.html)
+- [User guide](https://docs.strapi.io/user-docs/latest/getting-started/introduction.html)
 
 ## Try live demo
 

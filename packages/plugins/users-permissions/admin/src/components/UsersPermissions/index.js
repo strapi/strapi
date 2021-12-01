@@ -62,7 +62,7 @@ const UsersPermissions = forwardRef(({ permissions, routes }, ref) => {
     <UsersPermissionsProvider value={providerValue}>
       <Grid gap={0} shadow="filterShadow" hasRadius background="neutral0">
         <GridItem col={7} paddingTop={6} paddingBottom={6} paddingLeft={7} paddingRight={7}>
-          <Stack size={4}>
+          <Stack size={6}>
             <Stack size={2}>
               <Typography variant="delta" as="h2">
                 {formatMessage({
