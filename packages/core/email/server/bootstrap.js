@@ -11,7 +11,15 @@ const createProvider = emailConfig => {
     modulePath = require.resolve(`@strapi/provider-email-${providerName}`);
   } catch (error) {
     if (error.code === 'MODULE_NOT_FOUND') {
-      modulePath = providerName;
+      try {
+        modulePath = require.resolve(`strapi-provider-email-${providerName}`);
+      } catch (error) {
+        if (error.code === 'MODULE_NOT_FOUND') {
+          modulePath = providerName;
+        } else {
+          throw error;
+        }
+      }
     } else {
       throw error;
     }
