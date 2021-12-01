@@ -2,7 +2,7 @@
 
 ## Resources
 
-- [LICENSE](https://github.com/strapi/strapi/blob/master/packages/providers/email-amazon-ses/LICENSE)
+- [LICENSE](LICENSE)
 
 ## Links
 
