@@ -251,7 +251,7 @@ function ListView({
       >
         {formatMessage({
           id: getTrad('HeaderLayout.button.label-add-entry'),
-          defaultMessage: 'Add new entry',
+          defaultMessage: 'Create new entry',
         })}
       </Button>
     ) : null;

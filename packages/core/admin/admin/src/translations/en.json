@@ -452,7 +452,7 @@
   "content-manager.App.schemas.data-loaded": "The schemas have been successfully loaded",
   "content-manager.DynamicTable.relation-loaded": "The relations have been loaded",
   "content-manager.EditRelations.title": "Relational data",
-  "content-manager.HeaderLayout.button.label-add-entry": "Add new entry",
+  "content-manager.HeaderLayout.button.label-add-entry": "Create new entry",
   "content-manager.api.id": "API ID",
   "content-manager.components.AddFilterCTA.add": "Filters",
   "content-manager.components.AddFilterCTA.hide": "Filters",
