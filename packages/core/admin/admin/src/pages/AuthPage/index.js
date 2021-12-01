@@ -1,6 +1,8 @@
 import React, { useEffect, useReducer } from 'react';
 import axios from 'axios';
-import { camelCase, get, omit } from 'lodash';
+import camelCase from 'lodash/camelCase';
+import get from 'lodash/get';
+import omit from 'lodash/omit';
 import { Redirect, useRouteMatch, useHistory } from 'react-router-dom';
 import { auth, useQuery } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
