@@ -47,6 +47,7 @@
   "Settings.locales.row.default-locale": "Default locale",
   "Settings.locales.row.displayName": "Display name",
   "Settings.locales.row.id": "ID",
+  "Settings.locales.default": "Default",
   "Settings.permissions.loading": "Loading permissions",
   "Settings.permissions.read.denied.description": "In order to be able to read this, make sure to get in touch with the administrator of your system.",
   "Settings.permissions.read.denied.title": "You don't have the permissions to access this content.",

@@ -330,7 +330,7 @@
   "app.components.Users.MagicLink.connect": "Copy and share this link to give access to this user",
   "app.components.Users.MagicLink.connect.sso": "Send this link to the user, the first login can be made via a SSO provider",
   "app.components.Users.ModalCreateBody.block-title.details": "User details",
-  "app.components.Users.ModalCreateBody.block-title.login": "User's role",
+  "app.components.Users.ModalCreateBody.block-title.login": "Assign role",
   "app.components.Users.ModalCreateBody.block-title.roles": "User's roles",
   "app.components.Users.ModalCreateBody.block-title.roles.description": "A user can have one or several roles",
   "app.components.Users.SortPicker.button-label": "Sort by",

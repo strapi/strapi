@@ -157,7 +157,7 @@ const ListView = () => {
         title={upperFirst(label)}
         subtitle={formatMessage({
           id: getTrad('listView.headerLayout.description'),
-          defaultMessage: 'Build the data architecture of your content.',
+          defaultMessage: 'Build the data architecture of your content',
         })}
         navigationAction={
           <Link startIcon={<ArrowLeft />} to="/plugins/content-type-builder/">

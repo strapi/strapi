@@ -1330,7 +1330,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
       <p
         class="c21"
       >
-        Build the data architecture of your content.
+        Build the data architecture of your content
       </p>
     </div>
   </div>
