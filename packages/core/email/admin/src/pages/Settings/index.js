@@ -43,6 +43,7 @@ const SettingsPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [testAddress, setTestAddress] = useState('');
+  const [isTestAddressValid, setIsTestAddressValid] = useState(false);
   const [config, setConfig] = useState({
     provider: '',
     settings: { defaultFrom: '', defaultReplyTo: '', testAddress: '' },
@@ -86,6 +87,13 @@ const SettingsPage = () => {
       input.focus();
     }
   }, [formErrors]);
+
+  useEffect(() => {
+    schema
+      .validate({ email: testAddress }, { abortEarly: false })
+      .then(() => setIsTestAddressValid(true))
+      .catch(() => setIsTestAddressValid(false));
+  }, [testAddress]);
 
   const handleChange = e => {
     setTestAddress(() => e.target.value);
@@ -203,7 +211,12 @@ const SettingsPage = () => {
                     />
                   </GridItem>
                   <GridItem col={7} s={12}>
-                    <Button loading={isSubmitting} type="submit" startIcon={<Envelop />}>
+                    <Button
+                      loading={isSubmitting}
+                      disabled={!isTestAddressValid}
+                      type="submit"
+                      startIcon={<Envelop />}
+                    >
                       Send test email
                     </Button>
                   </GridItem>
