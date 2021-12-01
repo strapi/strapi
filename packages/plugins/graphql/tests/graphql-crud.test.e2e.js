@@ -75,6 +75,7 @@ describe('Test Graphql API End to End', () => {
                   name
                   bigint
                   nullable
+                  category
                 }
               }
             }
@@ -110,6 +111,7 @@ describe('Test Graphql API End to End', () => {
                   name
                   bigint
                   nullable
+                  category
                 }
               }
             }
@@ -146,6 +148,7 @@ describe('Test Graphql API End to End', () => {
                   name
                   bigint
                   nullable
+                  category
                 }
               }
             }
@@ -181,6 +184,7 @@ describe('Test Graphql API End to End', () => {
                   name
                   bigint
                   nullable
+                  category
                 }
               }
             }
@@ -214,6 +218,7 @@ describe('Test Graphql API End to End', () => {
                   name
                   bigint
                   nullable
+                  category
                 }
               }
             }
@@ -249,6 +254,7 @@ describe('Test Graphql API End to End', () => {
                   name
                   bigint
                   nullable
+                  category
                 }
               }
             }
@@ -363,6 +369,7 @@ describe('Test Graphql API End to End', () => {
                   name
                   bigint
                   nullable
+                  category
                 }
               }
             }
@@ -404,6 +411,7 @@ describe('Test Graphql API End to End', () => {
                   name
                   bigint
                   nullable
+                  category
                 }
               }
             }
@@ -484,6 +492,7 @@ describe('Test Graphql API End to End', () => {
                     name
                     nullable
                     bigint
+                    category
                   }
                 }
               }
