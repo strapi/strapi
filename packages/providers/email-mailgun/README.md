@@ -1,27 +1,24 @@
-# strapi-provider-email-mailgun
+# @strapi/provider-email-mailgun
 
 ## Resources
 
-- [License](LICENSE)
+- [LICENSE](https://github.com/strapi/strapi/blob/master/packages/providers/email-mailgun/LICENSE)
 
 ## Links
 
 - [Strapi website](https://strapi.io/)
-- [Strapi community on Slack](https://slack.strapi.io)
+- [Strapi documentation](https://docs.strapi.io)
+- [Strapi community on Discord](https://discord.strapi.io)
 - [Strapi news on Twitter](https://twitter.com/strapijs)
-
-## Prerequisites
-
-You need to have the plugin `strapi-plugin-email` installed in you Strapi project.
 
 ## Installation
 
 ```bash
 # using yarn
-yarn add strapi-provider-email-mailgun
+yarn add @strapi/provider-email-mailgun
 
 # using npm
-npm install strapi-provider-email-mailgun --save
+npm install @strapi/provider-email-mailgun --save
 ```
 
 ## Configuration
