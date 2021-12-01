@@ -204,7 +204,7 @@ const SettingsPage = () => {
                   </GridItem>
                   <GridItem col={7} s={12}>
                     <Button loading={isSubmitting} type="submit" startIcon={<Envelop />}>
-                      Test email
+                      Send test email
                     </Button>
                   </GridItem>
                 </Grid>

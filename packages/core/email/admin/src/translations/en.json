@@ -1,5 +1,5 @@
 {
-  "Settings.email.plugin.button.test-email": "Test email",
+  "Settings.email.plugin.button.test-email": "Send test email",
   "Settings.email.plugin.label.defaultFrom": "Default shipper email",
   "Settings.email.plugin.label.defaultReplyTo": "Default response  email",
   "Settings.email.plugin.label.provider": "Email provider",
@@ -11,9 +11,9 @@
   "Settings.email.plugin.placeholder.defaultFrom": "ex: Strapi No-Reply <no-reply@strapi.io>",
   "Settings.email.plugin.placeholder.defaultReplyTo": "ex: Strapi <example@strapi.io>",
   "Settings.email.plugin.placeholder.testAddress": "ex: developer@example.com",
-  "Settings.email.plugin.subTitle": "Test the settings for the email plugin",
+  "Settings.email.plugin.subTitle": "Test the settings for the Email plugin",
   "Settings.email.plugin.text.configuration": "The plugin is configured through the {file} file, checkout this {link} for the documentation.",
-  "Settings.email.plugin.title": "Email settings",
+  "Settings.email.plugin.title": "Configuration",
   "Settings.email.plugin.title.config": "Configuration",
   "Settings.email.plugin.title.test": "Send a test email",
   "SettingsNav.link.settings": "Settings",

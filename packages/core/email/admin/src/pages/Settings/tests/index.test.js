@@ -722,14 +722,14 @@ describe('Email | Pages | Settings', () => {
                   class="c4"
                   id="title"
                 >
-                  Email settings
+                  Configuration
                 </h1>
               </div>
             </div>
             <p
               class="c5"
             >
-              Test the settings for the email plugin
+              Test the settings for the Email plugin
             </p>
           </div>
         </div>
@@ -1027,7 +1027,7 @@ describe('Email | Pages | Settings', () => {
                           <span
                             class="c41 c42"
                           >
-                            Test email
+                            Send test email
                           </span>
                         </button>
                       </div>
