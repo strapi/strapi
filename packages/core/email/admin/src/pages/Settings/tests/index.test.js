@@ -995,8 +995,9 @@ describe('Email | Pages | Settings', () => {
                         class=""
                       >
                         <button
-                          aria-disabled="false"
+                          aria-disabled="true"
                           class="c36 c37"
+                          disabled=""
                           type="submit"
                         >
                           <div
