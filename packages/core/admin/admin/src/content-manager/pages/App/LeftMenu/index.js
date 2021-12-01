@@ -50,8 +50,7 @@ const LeftMenu = () => {
       id: 'collectionTypes',
       title: {
         id: getTrad('components.LeftMenu.collection-types'),
-        defaultMessage:
-          '{number, plural, =0 {Collection Types} one {Collection Type } other {Collection Types}}',
+        defaultMessage: 'Collection Types',
         values: { number: intlCollectionTypeLinks.length },
       },
       searchable: true,
@@ -63,8 +62,7 @@ const LeftMenu = () => {
       id: 'singleTypes',
       title: {
         id: getTrad('components.LeftMenu.single-types'),
-        defaultMessage:
-          '{number, plural, =0 {Single Types} one {Single Type } other {Single Types}}',
+        defaultMessage: 'Single Types',
         values: { number: intlSingleTypeLinks.length },
       },
       searchable: true,
