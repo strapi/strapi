@@ -14,12 +14,14 @@ See the [using a provider](https://docs.strapi.io/developer-docs/latest/plugins/
 module.exports = ({ env }) => ({
   // ...
   upload: {
-    provider: 'rackspace',
-    providerOptions: {
-      username: env('RACKSPACE_USERNAME'),
-      apiKey: env('RACKSPACE_KEY'),
-      region: env('RACKSPACE_REGION'),
-      container: env('RACKSPACE_CONTAINER'),
+    config: {
+      provider: 'rackspace',
+      providerOptions: {
+        username: env('RACKSPACE_USERNAME'),
+        apiKey: env('RACKSPACE_KEY'),
+        region: env('RACKSPACE_REGION'),
+        container: env('RACKSPACE_CONTAINER'),
+      },
     },
   },
   // ...
