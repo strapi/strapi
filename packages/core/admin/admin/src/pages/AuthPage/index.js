@@ -117,7 +117,11 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
       push('/');
     } catch (err) {
       if (err.response) {
-        const errorMessage = get(err, ['response', 'data', 'message'], 'Something went wrong');
+        const errorMessage = get(
+          err,
+          ['response', 'data', 'error', 'message'],
+          'Something went wrong'
+        );
 
         if (camelCase(errorMessage).toLowerCase() === 'usernotactive') {
           push('/auth/oops');
