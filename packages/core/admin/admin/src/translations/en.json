@@ -145,6 +145,8 @@
   "Settings.profile.form.section.experience.clear.select": "Clear the interface language selected",
   "Settings.profile.form.section.experience.interfaceLanguage": "Interface language",
   "Settings.profile.form.section.experience.interfaceLanguage.hint": "This will only display your own interface in the chosen language.",
+  "Settings.profile.form.section.experience.interfaceLanguageHelp": "Selection will change the interface language only for you. Please refer to this {documentation} to make other languages available for your team.",
+  "Settings.profile.form.section.experience.documentation": "documentation",
   "Settings.profile.form.section.experience.title": "Experience",
   "Settings.profile.form.section.helmet.title": "User profile",
   "Settings.profile.form.section.password.title": "Change password",
