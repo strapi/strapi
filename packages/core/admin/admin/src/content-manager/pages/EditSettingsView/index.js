@@ -23,7 +23,6 @@ import { Stack } from '@strapi/design-system/Stack';
 import { Divider } from '@strapi/design-system/Divider';
 import ArrowLeft from '@strapi/icons/ArrowLeft';
 import Check from '@strapi/icons/Check';
-import { Helmet } from 'react-helmet';
 import { getTrad } from '../../utils';
 import reducer, { initialState } from './reducer';
 import init from './init';
@@ -38,6 +37,7 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
   const [reducerState, dispatch] = useReducer(reducer, initialState, () =>
     init(initialState, mainLayout, components)
   );
+  const [isDraggingSibling, setIsDraggingSibling] = useState(false);
   const { trackUsage } = useTracking();
   const toggleNotification = useNotification();
   const { goBack } = useHistory();
@@ -151,6 +151,50 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
     submitMutation.mutate(body);
   };
 
+  const handleMoveRelation = (fromIndex, toIndex) => {
+    dispatch({
+      type: 'MOVE_RELATION',
+      fromIndex,
+      toIndex,
+    });
+  };
+
+  const handleMoveField = (fromIndex, toIndex) => {
+    dispatch({
+      type: 'MOVE_FIELD',
+      fromIndex,
+      toIndex,
+    });
+  };
+
+  const moveItem = (dragIndex, hoverIndex, dragRowIndex, hoverRowIndex) => {
+    // Same row = just reorder
+    if (dragRowIndex === hoverRowIndex) {
+      dispatch({
+        type: 'REORDER_ROW',
+        dragRowIndex,
+        dragIndex,
+        hoverIndex,
+      });
+    } else {
+      dispatch({
+        type: 'REORDER_DIFF_ROW',
+        dragIndex,
+        hoverIndex,
+        dragRowIndex,
+        hoverRowIndex,
+      });
+    }
+  };
+
+  const moveRow = (fromIndex, toIndex) => {
+    dispatch({
+      type: 'MOVE_ROW',
+      fromIndex,
+      toIndex,
+    });
+  };
+
   return (
     <LayoutDndProvider
       isContentTypeView={isContentTypeView}
@@ -160,6 +204,10 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
       componentLayouts={componentLayouts}
       selectedField={metaToEdit}
       fieldForm={metaForm}
+      onMoveRelation={handleMoveRelation}
+      onMoveField={handleMoveField}
+      moveRow={moveRow}
+      moveItem={moveItem}
       setEditFieldToSelect={name => {
         dispatch({
           type: 'SET_FIELD_TO_EDIT',
@@ -167,17 +215,10 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
         });
         handleToggleModal();
       }}
+      isDraggingSibling={isDraggingSibling}
+      setIsDraggingSibling={setIsDraggingSibling}
     >
       <Main>
-        <Helmet
-          title={formatMessage(
-            {
-              id: getTrad('components.SettingsViewWrapper.pluginHeader.title'),
-              defaultMessage: `Configure the view - ${upperFirst(modelName)}`,
-            },
-            { name: upperFirst(modelName) }
-          )}
-        />
         <form onSubmit={handleSubmit}>
           <HeaderLayout
             title={formatMessage(

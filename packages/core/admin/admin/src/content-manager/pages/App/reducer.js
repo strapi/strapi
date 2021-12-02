@@ -25,8 +25,12 @@ const mainReducer = (state = initialState, action) =>
         return initialState;
       }
       case SET_CONTENT_TYPE_LINKS: {
-        draftState.collectionTypeLinks = action.data.authorizedCtLinks;
-        draftState.singleTypeLinks = action.data.authorizedStLinks;
+        draftState.collectionTypeLinks = action.data.authorizedCtLinks.filter(
+          ({ isDisplayed }) => isDisplayed
+        );
+        draftState.singleTypeLinks = action.data.authorizedStLinks.filter(
+          ({ isDisplayed }) => isDisplayed
+        );
         draftState.components = action.data.components;
         draftState.models = action.data.contentTypeSchemas;
         draftState.status = 'resolved';

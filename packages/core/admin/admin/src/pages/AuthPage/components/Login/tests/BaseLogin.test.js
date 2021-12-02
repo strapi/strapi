@@ -64,7 +64,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         margin-top: 24px;
       }
 
-      .c0 {
+      .c0:focus-visible {
         outline: none;
       }
 
@@ -248,7 +248,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         width: 100%;
       }
 
-      .c30 .sc-kstqJO {
+      .c30 .sc-ksdxgE {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;

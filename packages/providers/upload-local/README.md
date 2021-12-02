@@ -6,18 +6,24 @@ This provider has only one parameter: `sizeLimit`.
 
 **Example**
 
-`./extensions/upload/config/settings.json`
+`./config/plugins.js`
 
-```json
-{
-  "provider": "local",
-  "providerOptions": {
-    "sizeLimit": 100000
-  }
-}
+```js
+module.exports = ({ env }) => ({
+  // ...
+  upload: {
+    config: {
+      provider: 'local',
+      providerOptions: {
+        sizeLimit: 100000,
+      },
+    },
+  },
+  // ...
+});
 ```
 
-The `sizeLimit` parameter must be a number. Be aware that the unit is in bytes, and the default is 1000000. When setting this value high, you should make sure to also configure the body parser middleware `maxFileSize` so the file can be sent and processed. Read more [here](https://strapi.io/documentation/developer-docs/latest/development/plugins/upload.html#configuration)
+The `sizeLimit` parameter must be a number. Be aware that the unit is in bytes, and the default is 1000000. When setting this value high, you should make sure to also configure the body parser middleware `maxFileSize` so the file can be sent and processed. Read more [here](https://docs.strapi.io/developer-docs/latest/plugins/upload.html#configuration)
 
 ## Resources
 

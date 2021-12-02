@@ -140,7 +140,13 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
         {userDisplayName}
       </NavUser>
       {userLinksVisible && (
-        <LinkUserWrapper onBlur={handleBlur} padding={1} shadow="tableShadow" background="neutral0">
+        <LinkUserWrapper
+          onBlur={handleBlur}
+          padding={1}
+          shadow="tableShadow"
+          background="neutral0"
+          hasRadius
+        >
           <FocusTrap onEscape={handleToggleUserLinks}>
             <Stack size={0}>
               <LinkUser onClick={handleToggleUserLinks} to="/me">

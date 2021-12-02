@@ -4,6 +4,8 @@ import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 import { ThemeProvider } from '@strapi/design-system/ThemeProvider';
 import { lightTheme } from '@strapi/design-system/themes';
 import EditSettingsView from '../index';
@@ -57,12 +59,14 @@ const makeApp = (history, layout) => {
       <QueryClientProvider client={client}>
         <IntlProvider messages={{ en: {} }} textComponent="span" locale="en">
           <ThemeProvider theme={lightTheme}>
-            <EditSettingsView
-              mainLayout={layout || mainLayout}
-              components={components}
-              isContentTypeView
-              slug="api::address.address"
-            />
+            <DndProvider backend={HTML5Backend}>
+              <EditSettingsView
+                mainLayout={layout || mainLayout}
+                components={components}
+                isContentTypeView
+                slug="api::address.address"
+              />
+            </DndProvider>
           </ThemeProvider>
         </IntlProvider>
       </QueryClientProvider>

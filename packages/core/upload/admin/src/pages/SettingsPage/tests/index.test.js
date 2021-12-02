@@ -406,7 +406,7 @@ describe('Upload | SettingsPage', () => {
         line-height: 1.25;
       }
 
-      .c0 {
+      .c0:focus-visible {
         outline: none;
       }
 
@@ -422,9 +422,9 @@ describe('Upload | SettingsPage', () => {
 
       .c1 {
         background: #f6f6f9;
-        padding-top: 56px;
+        padding-top: 40px;
         padding-right: 56px;
-        padding-bottom: 56px;
+        padding-bottom: 40px;
         padding-left: 56px;
       }
 
@@ -652,6 +652,7 @@ describe('Upload | SettingsPage', () => {
                                         </span>
                                       </div>
                                       <input
+                                        aria-disabled="false"
                                         aria-label="responsiveDimensions"
                                         checked=""
                                         class="c37"
@@ -725,6 +726,7 @@ describe('Upload | SettingsPage', () => {
                                         </span>
                                       </div>
                                       <input
+                                        aria-disabled="false"
                                         aria-label="sizeOptimization"
                                         class="c37"
                                         data-testid="sizeOptimization"
@@ -791,6 +793,7 @@ describe('Upload | SettingsPage', () => {
                                         </span>
                                       </div>
                                       <input
+                                        aria-disabled="false"
                                         aria-label="autoOrientation"
                                         checked=""
                                         class="c37"

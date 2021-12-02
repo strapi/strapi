@@ -78,7 +78,7 @@ const Onboarding = () => {
         id: 'app.components.LeftMenuFooter.documentation',
         defaultMessage: 'Documentation',
       }),
-      destination: 'https://strapi.io/documentation',
+      destination: 'https://docs.strapi.io',
     },
     {
       icon: 'file',

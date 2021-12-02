@@ -46,7 +46,7 @@ const advancedForm = {
             id: getTrad('form.attribute.item.settings.name'),
             defaultMessage: 'Settings',
           },
-          items: [options.required, options.unique, options.private],
+          items: [options.required, options.private],
         },
       ],
     };
@@ -209,7 +209,7 @@ const advancedForm = {
             id: getTrad('form.attribute.item.settings.name'),
             defaultMessage: 'Settings',
           },
-          items: [options.required, options.unique, options.private],
+          items: [options.required, options.private],
         },
       ],
     };
@@ -222,7 +222,7 @@ const advancedForm = {
             id: getTrad('form.attribute.item.settings.name'),
             defaultMessage: 'Settings',
           },
-          items: [options.required, options.unique, options.private],
+          items: [options.required, options.private],
         },
       ],
     };
@@ -297,13 +297,7 @@ const advancedForm = {
             id: getTrad('form.attribute.item.settings.name'),
             defaultMessage: 'Settings',
           },
-          items: [
-            options.required,
-            options.unique,
-            options.maxLength,
-            options.minLength,
-            options.private,
-          ],
+          items: [options.required, options.maxLength, options.minLength, options.private],
         },
       ],
     };
@@ -330,13 +324,7 @@ const advancedForm = {
             id: getTrad('form.attribute.item.settings.name'),
             defaultMessage: 'Settings',
           },
-          items: [
-            options.required,
-            options.unique,
-            options.maxLength,
-            options.minLength,
-            options.private,
-          ],
+          items: [options.required, options.maxLength, options.minLength, options.private],
         },
       ],
     };

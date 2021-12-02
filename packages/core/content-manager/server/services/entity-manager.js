@@ -212,7 +212,12 @@ module.exports = ({ strapi }) => ({
     }
 
     // validate the entity is valid for publication
-    await strapi.entityValidator.validateEntityCreation(strapi.getModel(uid), entity);
+    await strapi.entityValidator.validateEntityCreation(
+      strapi.getModel(uid),
+      entity,
+      undefined,
+      entity
+    );
 
     const data = { ...body, [PUBLISHED_AT_ATTRIBUTE]: new Date() };
 

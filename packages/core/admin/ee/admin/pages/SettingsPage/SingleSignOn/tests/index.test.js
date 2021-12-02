@@ -521,9 +521,9 @@ describe('Admin | ee | SettingsPage | SSO', () => {
 
       .c4 {
         background: #f6f6f9;
-        padding-top: 56px;
+        padding-top: 40px;
         padding-right: 56px;
-        padding-bottom: 56px;
+        padding-bottom: 40px;
         padding-left: 56px;
       }
 
@@ -586,7 +586,7 @@ describe('Admin | ee | SettingsPage | SSO', () => {
         line-height: 1.5;
       }
 
-      .c3 {
+      .c3:focus-visible {
         outline: none;
       }
 
@@ -750,6 +750,7 @@ describe('Admin | ee | SettingsPage | SSO', () => {
                                   </span>
                                 </div>
                                 <input
+                                  aria-disabled="false"
                                   aria-label="autoRegister"
                                   checked=""
                                   class="c35"

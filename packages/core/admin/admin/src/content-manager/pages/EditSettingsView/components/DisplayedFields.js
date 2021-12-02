@@ -1,24 +1,19 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import get from 'lodash/get';
 import { Button } from '@strapi/design-system/Button';
 import { Box } from '@strapi/design-system/Box';
 import { Typography } from '@strapi/design-system/Typography';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { Stack } from '@strapi/design-system/Stack';
 import { Flex } from '@strapi/design-system/Flex';
-import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
 import { SimpleMenu, MenuItem } from '@strapi/design-system/SimpleMenu';
 import Plus from '@strapi/icons/Plus';
 import { getTrad } from '../../../utils';
-import { useLayoutDnd } from '../../../hooks';
-import FieldButton from './FieldButton';
+import RowsLayout from './RowsLayout';
 import LinkToCTB from './LinkToCTB';
 
 const DisplayedFields = ({ editLayout, editLayoutRemainingFields, onRemoveField, onAddField }) => {
   const { formatMessage } = useIntl();
-  const { setEditFieldToSelect, attributes, modifiedData } = useLayoutDnd();
 
   return (
     <Stack size={4}>
@@ -32,47 +27,23 @@ const DisplayedFields = ({ editLayout, editLayoutRemainingFields, onRemoveField,
               })}
             </Typography>
           </Box>
-          {/* Since the drag n drop will not be available, this text will be hidden for the moment */}
-          {/* <Box>
+          <Box>
             <Typography variant="pi" textColor="neutral600">
               {formatMessage({
                 id: 'containers.SettingPage.editSettings.description',
                 defaultMessage: 'Drag & drop the fields to build the layout',
               })}
             </Typography>
-          </Box> */}
+          </Box>
         </div>
         <LinkToCTB />
       </Flex>
       <Box padding={4} hasRadius borderStyle="dashed" borderWidth="1px" borderColor="neutral300">
         <Stack size={2}>
-          {editLayout.map(row => (
-            <Grid gap={4} key={row.rowId}>
-              {row.rowContent.map((rowItem, index) => {
-                const attribute = get(attributes, [rowItem.name], {});
-                const attributeLabel = get(
-                  modifiedData,
-                  ['metadatas', rowItem.name, 'edit', 'label'],
-                  ''
-                );
-
-                return (
-                  <GridItem key={rowItem.name} col={rowItem.size}>
-                    {rowItem.name !== '_TEMP_' ? (
-                      <FieldButton
-                        onEditField={() => setEditFieldToSelect(rowItem.name)}
-                        onDeleteField={() => onRemoveField(row.rowId, index)}
-                        attribute={attribute}
-                      >
-                        {attributeLabel || rowItem.name}
-                      </FieldButton>
-                    ) : (
-                      <VisuallyHidden />
-                    )}
-                  </GridItem>
-                );
-              })}
-            </Grid>
+          {editLayout.map((row, index) => (
+            <React.Fragment key={row.rowId}>
+              <RowsLayout row={row} rowIndex={index} onRemoveField={onRemoveField} />
+            </React.Fragment>
           ))}
           <SimpleMenu
             id="label"

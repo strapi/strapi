@@ -1,11 +1,26 @@
 {
   "name": "@strapi/provider-upload-rackspace",
-  "version": "3.6.8",
+  "version": "4.0.0",
   "description": "Rackspace provider for strapi upload",
-  "main": "./lib",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/strapi/strapi.git",
+    "directory": "packages/providers/upload-rackspace"
+  },
   "keywords": [],
-  "author": "Pongstr Ordillo <https://github.com/pongstr>",
   "license": "SEE LICENSE IN LICENSE",
+  "author": {
+    "name": "Pongstr Ordillo",
+    "url": "https://github.com/pongstr"
+  },
+  "maintainers": [
+    {
+      "name": "Strapi Solutions SAS",
+      "email": "hi@strapi.io",
+      "url": "https://strapi.io"
+    }
+  ],
+  "main": "./lib",
   "scripts": {
     "test": "echo \"no tests yet\""
   },
@@ -16,6 +31,5 @@
   "engines": {
     "node": ">=12.x.x <=16.x.x",
     "npm": ">=6.0.0"
-  },
-  "gitHead": "231263a3535658bab1e9492c6aaaed8692d62a53"
+  }
 }

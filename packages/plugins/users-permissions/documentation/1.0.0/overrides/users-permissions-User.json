@@ -6,7 +6,7 @@
         "security": [],
         "externalDocs": {
           "description": "Find out more in the strapi's documentation",
-          "url": "https://strapi.io/documentation/developer-docs/latest/development/plugins/users-permissions.html#registration"
+          "url": "https://docs.strapi.io/developer-docs/latest/plugins/users-permissions.html#registration"
         },
         "responses": {
           "200": {
@@ -58,7 +58,7 @@
         "security": [],
         "externalDocs": {
           "description": "Find out more in the strapi's documentation",
-          "url": "https://strapi.io/documentation/developer-docs/latest/development/plugins/users-permissions.html#email-validation"
+          "url": "https://docs.strapi.io/developer-docs/latest/plugins/users-permissions.html#email-validation"
         },
         "responses": {
           "200": {
@@ -130,7 +130,7 @@
         ],
         "externalDocs": {
           "description": "Find out more about the authentication flow in the strapi documentation",
-          "url": "https://strapi.io/documentation/developer-docs/latest/development/plugins/users-permissions.html#setting-up-the-provider-examples"
+          "url": "https://docs.strapi.io/developer-docs/latest/plugins/users-permissions.html#providers"
         },
         "responses": {
           "200": {
@@ -143,7 +143,7 @@
       "post": {
         "externalDocs": {
           "description": "Find out more in the strapi's documentation",
-          "url": "https://strapi.io/documentation/developer-docs/latest/development/plugins/users-permissions.html#login"
+          "url": "https://docs.strapi.io/developer-docs/latest/plugins/users-permissions.html#login"
         },
         "tags": ["Authentication"],
         "security": [],
@@ -188,7 +188,7 @@
         "tags": ["Authentication"],
         "externalDocs": {
           "description": "Find out more in the strapi's documentation",
-          "url": "https://strapi.io/documentation/developer-docs/latest/development/plugins/users-permissions.html#setting-up-the-provider-examples"
+          "url": "https://docs.strapi.io/developer-docs/latest/plugins/users-permissions.html#providers"
         },
         "parameters": [
           {
@@ -223,7 +223,7 @@
         "summary": "Send an email to reset your password",
         "externalDocs": {
           "description": "Find out more in the strapi's documentation",
-          "url": "https://strapi.io/documentation/developer-docs/latest/development/plugins/users-permissions.html#forgotten-reset-password"
+          "url": "https://docs.strapi.io/developer-docs/latest/plugins/users-permissions.html#forgotten-reset-password"
         },
         "requestBody": {
           "description": "",
@@ -315,7 +315,7 @@
       "description": "All the routes related to the authentication",
       "externalDocs": {
         "description": "Find out more in strapi's documentation",
-        "url": "https://strapi.io/documentation/developer-docs/latest/development/plugins/users-permissions.html"
+        "url": "https://docs.strapi.io/developer-docs/latest/plugins/users-permissions.html"
       }
     },
     {

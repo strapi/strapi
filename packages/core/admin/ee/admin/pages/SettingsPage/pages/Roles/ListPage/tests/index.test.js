@@ -93,7 +93,7 @@ describe('<ListPage />', () => {
         height: 100vh;
       }
 
-      .c0 {
+      .c0:focus-visible {
         outline: none;
       }
 

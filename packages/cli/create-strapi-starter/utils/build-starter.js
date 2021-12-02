@@ -3,7 +3,6 @@
 const { resolve, join, basename } = require('path');
 const os = require('os');
 const fse = require('fs-extra');
-
 const ora = require('ora');
 const ciEnv = require('ci-info');
 const chalk = require('chalk');
@@ -12,28 +11,30 @@ const { generateNewApp } = require('@strapi/generate-new');
 
 const hasYarn = require('./has-yarn');
 const { runInstall, runApp, initGit } = require('./child-process');
-const { getRepoInfo, downloadGitHubRepo } = require('./fetch-github');
+const { getStarterPackageInfo, downloadNpmStarter } = require('./fetch-npm-starter');
 const logger = require('./logger');
 const stopProcess = require('./stop-process');
 
 /**
  * @param  {string} - filePath Path to starter.json file
  */
-function readStarterJson(filePath, starterUrl) {
+function readStarterJson(filePath, starter) {
   try {
     const data = fse.readFileSync(filePath);
     return JSON.parse(data);
   } catch (err) {
-    stopProcess(`Could not find ${chalk.yellow('starter.json')} in ${chalk.yellow(starterUrl)}`);
+    stopProcess(`Could not find ${chalk.yellow('starter.json')} in ${chalk.yellow(starter)}`);
   }
 }
 
 /**
- * @param  {string} rootPath - Path to the project directory
- * @param  {string} projectName - Name of the project
+ * @param {string} rootPath - Path to the project directory
+ * @param {string} projectName - Name of the project
+ * @param {Object} options
+ * @param {boolean} options.useYarn - Use yarn instead of npm
  */
-async function initPackageJson(rootPath, projectName) {
-  const packageManager = hasYarn() ? 'yarn --cwd' : 'npm run --prefix';
+async function initPackageJson(rootPath, projectName, { useYarn } = {}) {
+  const packageManager = useYarn ? 'yarn --cwd' : 'npm run --prefix';
 
   try {
     await fse.writeJson(
@@ -63,9 +64,11 @@ async function initPackageJson(rootPath, projectName) {
 }
 
 /**
- * @param  {string} path - The directory path for install
+ * @param {string} path The directory path for install
+ * @param {Object} options
+ * @param {boolean} options.useYarn Use yarn instead of npm
  */
-async function installWithLogs(path) {
+async function installWithLogs(path, options) {
   const installPrefix = chalk.yellow('Installing dependencies:');
   const loader = ora(installPrefix).start();
   const logInstall = (chunk = '') => {
@@ -75,7 +78,7 @@ async function installWithLogs(path) {
       .join(' ')}`;
   };
 
-  const runner = runInstall(path);
+  const runner = runInstall(path, options);
   runner.stdout.on('data', logInstall);
   runner.stderr.on('data', logInstall);
 
@@ -86,29 +89,53 @@ async function installWithLogs(path) {
 }
 
 /**
- * @param  {Object} projectArgs - The arguments for create a project
- * @param {string|null} projectArgs.projectName - The name/path of project
- * @param {string|null} projectArgs.starterUrl - The GitHub repo of the starter
- * @param  {Object} program - Commands for generating new application
+ * @param {string} starter The name of the starter as provided by the user
+ * @param {Object} options
+ * @param {boolean} options.useYarn Use yarn instead of npm
  */
-module.exports = async function buildStarter(programArgs, program) {
-  let { projectName, starterUrl } = programArgs;
+async function getStarterInfo(starter, { useYarn } = {}) {
+  const isLocalStarter = ['./', '../', '/'].some(filePrefix => starter.startsWith(filePrefix));
 
-  // Fetch repo info
-  const repoInfo = await getRepoInfo(starterUrl);
-  const { fullName } = repoInfo;
+  let starterPath;
+  let starterParentPath;
+  let starterPackageInfo = {};
 
-  // Create temporary directory for starter
-  const tmpDir = await fse.mkdtemp(join(os.tmpdir(), 'strapi-'));
+  if (isLocalStarter) {
+    // Starter is a local directory
+    console.log('Installing local starter.');
+    starterPath = resolve(starter);
+  } else {
+    // Starter should be an npm package. Fetch starter info
+    starterPackageInfo = await getStarterPackageInfo(starter, { useYarn });
+    console.log(`Installing ${chalk.yellow(starterPackageInfo.name)} starter.`);
 
-  // Download repo inside temporary directory
-  await downloadGitHubRepo(repoInfo, tmpDir);
+    // Download starter repository to a temporary directory
+    starterParentPath = await fse.mkdtemp(join(os.tmpdir(), 'strapi-'));
+    starterPath = await downloadNpmStarter(starterPackageInfo, starterParentPath, { useYarn });
+  }
 
-  const starterJson = readStarterJson(join(tmpDir, 'starter.json'), starterUrl);
+  return { isLocalStarter, starterPath, starterParentPath, starterPackageInfo };
+}
+
+/**
+ * @param {Object} projectArgs - The arguments for create a project
+ * @param {string|null} projectArgs.projectName - The name/path of project
+ * @param {string|null} projectArgs.starter - The npm package of the starter
+ * @param {Object} program - Commands for generating new application
+ */
+module.exports = async function buildStarter({ projectName, starter }, program) {
+  const hasYarnInstalled = await hasYarn();
+  const {
+    isLocalStarter,
+    starterPath,
+    starterParentPath,
+    starterPackageInfo,
+  } = await getStarterInfo(starter, { useYarn: hasYarnInstalled });
 
   // Project directory
   const rootPath = resolve(projectName);
   const projectBasename = basename(rootPath);
+  const starterJson = readStarterJson(join(starterPath, 'starter.json'), starter);
 
   try {
     await fse.ensureDir(rootPath);
@@ -119,10 +146,8 @@ module.exports = async function buildStarter(programArgs, program) {
   // Copy the downloaded frontend folder to the project folder
   const frontendPath = join(rootPath, 'frontend');
 
-  const starterDir = (await fse.pathExists(join(tmpDir, 'starter'))) ? 'starter' : 'frontend';
-
   try {
-    await fse.copy(join(tmpDir, starterDir), frontendPath, {
+    await fse.copy(join(starterPath, 'starter'), frontendPath, {
       overwrite: true,
       recursive: true,
     });
@@ -130,28 +155,33 @@ module.exports = async function buildStarter(programArgs, program) {
     stopProcess(`Failed to create ${chalk.yellow(frontendPath)}: ${error.message}`);
   }
 
-  // Delete temporary directory
-  await fse.remove(tmpDir);
+  // Delete the starter directory if it was downloaded
+  if (!isLocalStarter) {
+    await fse.remove(starterParentPath);
+  }
 
-  const fullUrl = `https://github.com/${fullName}`;
   // Set command options for Strapi app
   const generateStrapiAppOptions = {
     ...program,
-    starter: fullUrl,
-    template: starterJson.template,
+    starter: starterPackageInfo.name,
     run: false,
   };
+  if (starterJson.template.version) {
+    generateStrapiAppOptions.template = `${starterJson.template.name}@${starterJson.template.version}`;
+  } else {
+    generateStrapiAppOptions.template = starterJson.template.name;
+  }
 
   // Create strapi app using the template
   await generateNewApp(join(rootPath, 'backend'), generateStrapiAppOptions);
 
   // Install frontend dependencies
-  console.log(`Creating Strapi starter frontend at ${chalk.green(frontendPath)}.`);
-  console.log(`Installing ${chalk.yellow(fullName)} starter`);
-  await installWithLogs(frontendPath);
+  console.log(`Creating Strapi starter frontend at ${chalk.yellow(frontendPath)}.`);
+  console.log('Installing frontend dependencies');
+  await installWithLogs(frontendPath, { useYarn: hasYarnInstalled });
 
   // Setup monorepo
-  initPackageJson(rootPath, projectBasename);
+  initPackageJson(rootPath, projectBasename, { useYarn: hasYarnInstalled });
 
   // Add gitignore
   try {
@@ -161,12 +191,12 @@ module.exports = async function buildStarter(programArgs, program) {
     logger.warn(`Failed to create file: ${chalk.yellow('.gitignore')}`);
   }
 
-  await installWithLogs(rootPath);
+  await installWithLogs(rootPath, { useYarn: hasYarnInstalled });
 
   if (!ciEnv.isCI) {
     await initGit(rootPath);
   }
 
   console.log(chalk.green('Starting the app'));
-  await runApp(rootPath);
+  await runApp(rootPath, { useYarn: hasYarnInstalled });
 };

@@ -30,18 +30,48 @@ describe('Content Manager | App | reducer', () => {
   });
 
   it('should handle the getData action correctly', () => {
+    const collectionTypeLinks = [
+      {
+        name: 'authorizedCt',
+        isDisplayed: true,
+      },
+      {
+        name: 'authorizedCt1',
+        isDisplayed: false,
+      },
+    ];
+    const singleTypeLinks = [
+      {
+        name: 'authorizedSt',
+        isDisplayed: false,
+      },
+      {
+        name: 'authorizedSt1',
+        isDisplayed: true,
+      },
+    ];
     const expected = produce(state, draft => {
       draft.status = 'resolved';
       draft.components = ['test'];
       draft.models = ['test'];
-      draft.collectionTypeLinks = ['authorizedCt'];
-      draft.singleTypeLinks = ['authorizedSt'];
+      draft.collectionTypeLinks = [
+        {
+          name: 'authorizedCt',
+          isDisplayed: true,
+        },
+      ];
+      draft.singleTypeLinks = [
+        {
+          name: 'authorizedSt1',
+          isDisplayed: true,
+        },
+      ];
     });
 
     expect(
       mainReducer(
         state,
-        setContentTypeLinks(['authorizedCt'], ['authorizedSt'], ['test'], ['test'])
+        setContentTypeLinks(collectionTypeLinks, singleTypeLinks, ['test'], ['test'])
       )
     ).toEqual(expected);
   });

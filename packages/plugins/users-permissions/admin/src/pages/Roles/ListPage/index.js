@@ -16,6 +16,7 @@ import {
   NoPermissions,
   LoadingIndicatorPage,
   SearchURLQuery,
+  useFocusWhenNavigate,
   useQueryParams,
   EmptyStateLayout,
   ConfirmDialog,
@@ -42,6 +43,7 @@ const RoleListPage = () => {
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [isConfirmButtonLoading, setIsConfirmButtonLoading] = useState(false);
   const [roleToDelete, setRoleToDelete] = useState();
+  useFocusWhenNavigate();
 
   const queryClient = useQueryClient();
 

@@ -51,7 +51,6 @@ const getTypeShape = (attribute, { modelType, attributes } = {}) => {
       return {
         multiple: yup.boolean(),
         required: validators.required,
-        unique: validators.unique,
         allowedTypes: yup
           .array()
           .of(yup.string().oneOf(['images', 'videos', 'files']))
@@ -129,7 +128,6 @@ const getTypeShape = (attribute, { modelType, attributes } = {}) => {
       return {
         default: yup.mixed().test(isValidDefaultJSON),
         required: validators.required,
-        unique: validators.unique,
       };
     }
     case 'enumeration': {
@@ -148,7 +146,6 @@ const getTypeShape = (attribute, { modelType, attributes } = {}) => {
         default: yup.string().when('enum', enumVal => yup.string().oneOf(enumVal)),
         enumName: yup.string().test(isValidName),
         required: validators.required,
-        unique: validators.unique,
       };
     }
     case 'password': {
@@ -225,7 +222,6 @@ const getTypeShape = (attribute, { modelType, attributes } = {}) => {
       return {
         default: yup.boolean(),
         required: validators.required,
-        unique: validators.unique,
       };
     }
 

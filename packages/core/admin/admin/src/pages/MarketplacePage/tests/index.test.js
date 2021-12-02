@@ -32,9 +32,9 @@ describe('Marketplace coming soon', () => {
 
       .c4 {
         background: #f6f6f9;
-        padding-top: 56px;
+        padding-top: 40px;
         padding-right: 56px;
-        padding-bottom: 56px;
+        padding-bottom: 40px;
         padding-left: 56px;
       }
 
@@ -253,7 +253,7 @@ describe('Marketplace coming soon', () => {
         text-decoration: none;
       }
 
-      .c25 .sc-jYCGPb {
+      .c25 .sc-jYmNlR {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -306,7 +306,7 @@ describe('Marketplace coming soon', () => {
         background: #4945ff;
       }
 
-      .c3 {
+      .c3:focus-visible {
         outline: none;
       }
 

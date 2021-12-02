@@ -138,7 +138,7 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         background: #4945ff;
       }
 
-      .c33 .sc-eCstlR {
+      .c33 .sc-eCImPb {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -422,7 +422,7 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         line-height: 1.25;
       }
 
-      .c10 {
+      .c10:focus-visible {
         outline: none;
       }
 

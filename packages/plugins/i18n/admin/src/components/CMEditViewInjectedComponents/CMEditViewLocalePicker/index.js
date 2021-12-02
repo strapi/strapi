@@ -30,6 +30,7 @@ const CMEditViewLocalePicker = ({
   const { formatMessage } = useIntl();
 
   const currentLocale = get(query, 'plugins.i18n.locale', false);
+
   const { push } = useHistory();
 
   const handleChange = value => {
@@ -86,9 +87,15 @@ const CMEditViewLocalePicker = ({
   });
 
   const filteredOptions = options.filter(({ value }) => value !== currentLocale);
+  const currentLocaleObject = appLocales.find(({ code }) => code === currentLocale);
+
   const value = options.find(({ value }) => {
     return value === currentLocale;
-  });
+  }) || { value: currentLocaleObject.code, label: currentLocaleObject.name };
+
+  if (!currentLocale) {
+    return null;
+  }
 
   return (
     <Box paddingTop={6}>
@@ -108,11 +115,11 @@ const CMEditViewLocalePicker = ({
             value={value?.value}
           >
             <Option
-              value={value.value}
+              value={value?.value}
               disabled
               startIcon={hasDraftAndPublishEnabled ? <Bullet status={currentLocaleStatus} /> : null}
             >
-              {value.label}
+              {value?.label}
             </Option>
             {filteredOptions.map(option => {
               return (
