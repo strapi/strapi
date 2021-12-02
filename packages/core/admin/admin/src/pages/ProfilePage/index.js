@@ -409,12 +409,38 @@ const ProfilePage = () => {
                       paddingRight={7}
                     >
                       <Stack size={4}>
-                        <Typography variant="delta" as="h2">
-                          {formatMessage({
-                            id: 'Settings.profile.form.section.experience.title',
-                            defaultMessage: 'Experience',
-                          })}
-                        </Typography>
+                        <Stack size={1}>
+                          <Typography variant="delta" as="h2">
+                            {formatMessage({
+                              id: 'Settings.profile.form.section.experience.title',
+                              defaultMessage: 'Experience',
+                            })}
+                          </Typography>
+                          <Typography>
+                            {formatMessage(
+                              {
+                                id:
+                                  'Settings.profile.form.section.experience.interfaceLanguageHelp',
+                                defaultMessage:
+                                  'Selection will change the interface language only for you. Please refer to this {documentation} to make other languages available for your team.',
+                              },
+                              {
+                                documentation: (
+                                  <a
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    href="https://docs.strapi.io/developer-docs/latest/development/admin-customization.html#locales"
+                                  >
+                                    {formatMessage({
+                                      id: 'Settings.profile.form.section.experience.documentation',
+                                      defaultMessage: 'documentation',
+                                    })}
+                                  </a>
+                                ),
+                              }
+                            )}
+                          </Typography>
+                        </Stack>
                         <Grid gap={5}>
                           <GridItem s={12} col={6}>
                             <Select
