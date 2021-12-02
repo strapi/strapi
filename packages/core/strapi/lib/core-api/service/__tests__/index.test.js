@@ -1,6 +1,6 @@
 'use strict';
 
-const { createService } = require('..');
+const { createService } = require('../index');
 
 describe('Default Service', () => {
   describe('Collection Type', () => {
