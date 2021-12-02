@@ -1,7 +1,7 @@
 'use strict';
 
 const path = require('path');
-const { readFile, rm, stat } = require('fs/promises');
+const { readFile, rm, stat } = require('fs-extra');
 const strapiGenerators = require('../../index');
 
 describe('Content Type Generator', () => {
