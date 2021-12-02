@@ -26,7 +26,8 @@
     "create:plugin-file": "node ./scripts/create-dev-plugins-file.js",
     "develop": "yarn create:plugin-file && yarn develop:webpack",
     "develop:webpack": "cross-env NODE_ENV=development webpack serve --config webpack.config.dev.js --progress profile",
-    "prepublishOnly": "rimraf build && node ./scripts/build.js",
+    "prepublishOnly": "yarn build",
+    "build": "rimraf build && node ./scripts/build.js",
     "test": "echo \"no tests yet\""
   },
   "dependencies": {
