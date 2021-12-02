@@ -49,7 +49,6 @@ const LeftMenu = () => {
       title: {
         id: getTrad('components.LeftMenu.collection-types'),
         defaultMessage: 'Collection Types',
-        values: { number: intlCollectionTypeLinks.length },
       },
       searchable: true,
       links: sortBy(matchByTitle(intlCollectionTypeLinks, search), object =>
@@ -61,7 +60,6 @@ const LeftMenu = () => {
       title: {
         id: getTrad('components.LeftMenu.single-types'),
         defaultMessage: 'Single Types',
-        values: { number: intlSingleTypeLinks.length },
       },
       searchable: true,
       links: sortBy(matchByTitle(intlSingleTypeLinks, search), object =>
