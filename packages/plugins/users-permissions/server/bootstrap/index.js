@@ -160,6 +160,16 @@ const initGrant = async pluginStore => {
       scope: ['openid email'], // scopes should be space delimited
       subdomain: 'my.subdomain.com/cas',
     },
+    crossid: {
+      enabled: false,
+      icon: '',
+      key: '',
+      secret: '',
+      state: true,
+      callback: `${baseURL}/crossid/callback`,
+      subdomain: 'my-tenant',
+      scope: ['openid', 'email', 'profile'],
+    },
   };
 
   const prevGrantConfig = (await pluginStore.get({ key: 'grant' })) || {};
