@@ -1,33 +1,46 @@
 'use strict';
 
 const path = require('path');
-const _ = require('lodash');
+const { defaultsDeep, isEmpty, get, isObject, has, isString, assign } = require('lodash/fp');
 const session = require('koa-session');
 
+const defaults = {
+  enabled: true,
+  client: 'cookie',
+  key: 'strapi.sid',
+  prefix: 'strapi:sess:',
+  ttl: 864000000,
+  rolling: false,
+  secretKeys: ['mySecretKey1', 'mySecretKey2'],
+  cookie: {
+    path: '/',
+    httpOnly: true,
+    maxAge: 864000000,
+    rewrite: true,
+    signed: false,
+  },
+};
+
 /**
- * Session middleware
+ * @type {import('../').MiddlewareFactory}
  */
-module.exports = strapi => {
+module.exports = (config, { strapi }) => {
+  let sessionConfig = defaultsDeep(defaults, config);
+
   const requireStore = store => {
     return require(path.resolve(strapi.dirs.root, 'node_modules', 'koa-' + store));
   };
 
   const defineStore = session => {
-    if (_.isEmpty(_.get(session, 'client'))) {
-      return strapi.log.error(
-        '(middleware:session) please provide a valid client to store session'
-      );
-    } else if (_.isEmpty(_.get(session, 'connection'))) {
-      return strapi.log.error(
-        '(middleware:session) please provide connection for the session store'
-      );
-    } else if (!strapi.config.get(`database.connections.${session.connection}`)) {
-      return strapi.log.error(
+    if (isEmpty(get('client', session))) {
+      throw strapi.log.error('(middleware:session) please provide a valid client to store session');
+    } else if (!get('database.connection.connection', strapi.config)) {
+      throw strapi.log.error(
         '(middleware:session) please provide a valid connection for the session store'
       );
     }
 
-    session.settings = strapi.config.get(`database.connections.${session.connection}`);
+    session.settings = get('database.connection.connection', strapi.config);
 
     // Define correct store name to avoid require to failed.
     switch (session.client.toLowerCase()) {
@@ -73,13 +86,13 @@ module.exports = strapi => {
       case 'sqlite': {
         const Store = requireStore('sqlite3-session');
 
-        return new Store(session.fileName, session.options);
+        return new Store(session.settings.filename, session.options);
       }
       case 'sequelize': {
         const Store = requireStore('generic-session-sequelize');
 
         // Sequelize needs to be instantiated.
-        if (!_.isObject(strapi.sequelize)) {
+        if (!isObject(strapi.sequelize)) {
           return null;
         }
 
@@ -91,50 +104,46 @@ module.exports = strapi => {
     }
   };
 
-  return {
-    initialize() {
-      strapi.server.app.keys = strapi.config.get('middleware.settings.session.secretKeys');
+  strapi.server.app.keys = sessionConfig.secretKeys;
 
-      if (
-        _.has(strapi.config.middleware.settings.session, 'client') &&
-        _.isString(strapi.config.middleware.settings.session.client) &&
-        strapi.config.middleware.settings.session.client !== 'cookie'
-      ) {
-        const store = defineStore(strapi.config.middleware.settings.session);
+  if (
+    has('client', sessionConfig) &&
+    isString(sessionConfig.client) &&
+    sessionConfig.client !== 'cookie'
+  ) {
+    const store = defineStore(sessionConfig);
 
-        if (!_.isEmpty(store)) {
-          // Options object contains the defined store, the custom middlewares configurations
-          // and also the function which are located to `./config/functions/session.js`
-          const options = _.assign(
-            {
-              store,
-            },
-            strapi.config.middleware.settings.session
-          );
+    if (!isEmpty(store)) {
+      // Options object contains the defined store, the custom middlewares configurations
+      // and also the function which are located to `./config/functions/session.js`
+      const options = assign(
+        {
+          store,
+        },
+        sessionConfig
+      );
 
-          strapi.server.use(session(options, strapi.server.app));
-          strapi.server.use((ctx, next) => {
-            ctx.state = ctx.state || {};
-            ctx.state.session = ctx.session || {};
+      strapi.server.use(session(options, strapi.server.app));
+      strapi.server.use((ctx, next) => {
+        ctx.state = ctx.state || {};
+        ctx.state.session = ctx.session || {};
 
-            return next();
-          });
-        }
-      } else if (
-        _.has(strapi.config.middleware.settings.session, 'client') &&
-        _.isString(strapi.config.middleware.settings.session.client) &&
-        strapi.config.middleware.settings.session.client === 'cookie'
-      ) {
-        const options = _.assign(strapi.config.middleware.settings.session);
+        return next();
+      });
+    }
+  } else if (
+    has('client', sessionConfig) &&
+    isString(sessionConfig.client) &&
+    sessionConfig.client === 'cookie'
+  ) {
+    const options = assign(sessionConfig);
 
-        strapi.server.use(session(options, strapi.server.app));
-        strapi.server.use((ctx, next) => {
-          ctx.state = ctx.state || {};
-          ctx.state.session = ctx.session || {};
+    strapi.server.use(session(options, strapi.server.app));
+    strapi.server.use((ctx, next) => {
+      ctx.state = ctx.state || {};
+      ctx.state.session = ctx.session || {};
 
-          return next();
-        });
-      }
-    },
-  };
+      return next();
+    });
+  }
 };

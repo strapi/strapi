@@ -39,24 +39,32 @@ describe('Session middleware', () => {
       },
       config: {
         database: {
-          connections: {
-            mysql: {},
+          connection: {
+            client: 'mysql',
+            connection: {
+              host: 'host',
+              port: 3306,
+              database: 'test',
+              username: 'user',
+              password: 'password',
+            },
+            useNullAsDefault: true,
           },
         },
-        middleware: {
-          settings: {
-            session: {
+        middlewares: [
+          {
+            name: 'strapi::session',
+            config: {
               client: 'mysql',
-              connection: 'mysql',
             },
           },
-        },
+        ],
       },
     };
     mockStrapi.config = configProvider(mockStrapi.config);
 
-    const middleware = createMiddleware(mockStrapi);
-    middleware.initialize();
+    createMiddleware(mockStrapi.config.middlewares[0].config, { strapi: mockStrapi });
+
     expect(mockKoaMySqlSessionCalled).toBe(true);
   });
 });
