@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { useDrag, useDrop } from 'react-dnd';
@@ -11,6 +11,7 @@ import { Stack } from '@strapi/design-system/Stack';
 import Pencil from '@strapi/icons/Pencil';
 import Cross from '@strapi/icons/Cross';
 import Drag from '@strapi/icons/Drag';
+import CardPreview from './CardPreview';
 import ellipsisCardTitle from '../utils/ellipsisCardTitle';
 import { getTrad, ItemTypes } from '../../../utils';
 
@@ -38,7 +39,6 @@ const DragButton = styled(ActionButton)`
 const FieldContainer = styled(Flex)`
   max-height: ${32 / 16}rem;
   cursor: pointer;
-  opacity: ${({ isDragging }) => (isDragging ? 0 : 1)};
 
   svg {
     width: ${10 / 16}rem;
@@ -77,14 +77,18 @@ const FieldWrapper = styled(Box)`
 
 const DraggableCard = ({
   index,
+  isDraggingSibling,
   labelField,
   onClickEditField,
   onMoveField,
   onRemoveField,
   name,
+  setIsDraggingSibling,
 }) => {
   const { formatMessage } = useIntl();
-  const ref = useRef(null);
+  const dragRef = useRef(null);
+  const dropRef = useRef(null);
+  const [, forceRerenderAfterDnd] = useState(false);
   const editButtonRef = useRef();
   const cardEllipsisTitle = ellipsisCardTitle(labelField);
 
@@ -96,8 +100,8 @@ const DraggableCard = ({
 
   const [, drop] = useDrop({
     accept: ItemTypes.FIELD,
-    hover(item) {
-      if (!ref.current) {
+    hover(item, monitor) {
+      if (!dropRef.current) {
         return;
       }
       const dragIndex = item.index;
@@ -105,6 +109,27 @@ const DraggableCard = ({
 
       // Don't replace items with themselves
       if (dragIndex === hoverIndex) {
+        return;
+      }
+
+      // Determine rectangle on screen
+      const hoverBoundingRect = dropRef.current.getBoundingClientRect();
+      // Get vertical middle
+      const hoverMiddleX = (hoverBoundingRect.right - hoverBoundingRect.left) / 2;
+      // Determine mouse position
+      const clientOffset = monitor.getClientOffset();
+      // Get pixels to the top
+      const hoverClientX = clientOffset.x - hoverBoundingRect.left;
+
+      // Only perform the move when the mouse has crossed half of the items height
+      // When dragging downwards, only move when the cursor is below 50%
+      // When dragging upwards, only move when the cursor is above 50%
+      // Dragging downwards
+      if (dragIndex > hoverIndex && hoverClientX > hoverMiddleX) {
+        return;
+      }
+      // Dragging upwards
+      if (dragIndex < hoverIndex && hoverClientX < hoverMiddleX) {
         return;
       }
 
@@ -122,86 +147,117 @@ const DraggableCard = ({
     collect: monitor => ({
       isDragging: monitor.isDragging(),
     }),
+    end: () => {
+      setIsDraggingSibling(false);
+    },
   });
 
   useEffect(() => {
-    preview(getEmptyImage(), { captureDraggingState: true });
+    preview(getEmptyImage(), { captureDraggingState: false });
   }, [preview]);
 
-  drag(drop(ref));
+  useEffect(() => {
+    if (isDragging) {
+      setIsDraggingSibling(true);
+    }
+  }, [isDragging, setIsDraggingSibling]);
+
+  // Effect in order to force a rerender after reordering the components
+  // Since we are removing the Accordion when doing the DnD  we are losing the dragRef, therefore the replaced element cannot be dragged
+  // anymore, this hack forces a rerender in order to apply the dragRef
+  useEffect(() => {
+    if (!isDraggingSibling) {
+      forceRerenderAfterDnd(prev => !prev);
+    }
+  }, [isDraggingSibling]);
+
+  // Create the refs
+  // We need 1 for the drop target
+  // 1 for the drag target
+  const refs = {
+    dragRef: drag(dragRef),
+    dropRef: drop(dropRef),
+  };
 
   return (
-    <FieldWrapper>
-      <FieldContainer
-        borderColor="neutral150"
-        background="neutral100"
-        hasRadius
-        justifyContent="space-between"
-        onClick={handleClickEditRow}
-        isDragging={isDragging}
-      >
-        <Stack horizontal size={3}>
-          <DragButton
-            aria-label={formatMessage(
-              {
-                id: getTrad('components.DraggableCard.move.field'),
-                defaultMessage: 'Move {item}',
-              },
-              { item: name }
-            )}
-            onClick={e => e.stopPropagation()}
-            ref={ref}
-            type="button"
-          >
-            <Drag />
-          </DragButton>
-          <Typography fontWeight="bold">{cardEllipsisTitle}</Typography>
-        </Stack>
-        <Flex paddingLeft={3}>
-          <ActionButton
-            ref={editButtonRef}
-            onClick={e => {
-              e.stopPropagation();
-              onClickEditField(name);
-            }}
-            aria-label={formatMessage(
-              {
-                id: getTrad('components.DraggableCard.edit.field'),
-                defaultMessage: 'Edit {item}',
-              },
-              { item: name }
-            )}
-            type="button"
-          >
-            <Pencil />
-          </ActionButton>
-          <ActionButton
-            onClick={onRemoveField}
-            data-testid={`delete-${name}`}
-            aria-label={formatMessage(
-              {
-                id: getTrad('components.DraggableCard.delete.field'),
-                defaultMessage: 'Delete {item}',
-              },
-              { item: name }
-            )}
-            type="button"
-          >
-            <Cross />
-          </ActionButton>
-        </Flex>
-      </FieldContainer>
+    <FieldWrapper ref={refs ? refs.dropRef : null}>
+      {isDragging && <CardPreview transparent labelField={cardEllipsisTitle} />}
+      {!isDragging && isDraggingSibling && <CardPreview isSibling labelField={cardEllipsisTitle} />}
+
+      {!isDragging && !isDraggingSibling && (
+        <FieldContainer
+          borderColor="neutral150"
+          background="neutral100"
+          hasRadius
+          justifyContent="space-between"
+          onClick={handleClickEditRow}
+          isDragging={isDragging}
+        >
+          <Stack horizontal size={3}>
+            <DragButton
+              aria-label={formatMessage(
+                {
+                  id: getTrad('components.DraggableCard.move.field'),
+                  defaultMessage: 'Move {item}',
+                },
+                { item: name }
+              )}
+              onClick={e => e.stopPropagation()}
+              ref={refs.dragRef}
+              type="button"
+            >
+              <Drag />
+            </DragButton>
+            <Typography fontWeight="bold">{cardEllipsisTitle}</Typography>
+          </Stack>
+          <Flex paddingLeft={3}>
+            <ActionButton
+              ref={editButtonRef}
+              onClick={e => {
+                e.stopPropagation();
+                onClickEditField(name);
+              }}
+              aria-label={formatMessage(
+                {
+                  id: getTrad('components.DraggableCard.edit.field'),
+                  defaultMessage: 'Edit {item}',
+                },
+                { item: name }
+              )}
+              type="button"
+            >
+              <Pencil />
+            </ActionButton>
+            <ActionButton
+              onClick={onRemoveField}
+              data-testid={`delete-${name}`}
+              aria-label={formatMessage(
+                {
+                  id: getTrad('components.DraggableCard.delete.field'),
+                  defaultMessage: 'Delete {item}',
+                },
+                { item: name }
+              )}
+              type="button"
+            >
+              <Cross />
+            </ActionButton>
+          </Flex>
+        </FieldContainer>
+      )}
     </FieldWrapper>
   );
 };
 
 DraggableCard.propTypes = {
   index: PropTypes.number.isRequired,
+  isDraggingSibling: PropTypes.bool.isRequired,
   labelField: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
   onClickEditField: PropTypes.func.isRequired,
   onMoveField: PropTypes.func.isRequired,
   onRemoveField: PropTypes.func.isRequired,
+  setIsDraggingSibling: PropTypes.func.isRequired,
 };
 
 export default DraggableCard;
