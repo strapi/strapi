@@ -878,7 +878,6 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
 .c73 {
   max-height: 2rem;
   cursor: pointer;
-  opacity: 1;
 }
 
 .c73 svg {
@@ -2766,7 +2765,6 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
 .c73 {
   max-height: 2rem;
   cursor: pointer;
-  opacity: 1;
 }
 
 .c73 svg {
