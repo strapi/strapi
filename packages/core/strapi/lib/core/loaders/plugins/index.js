@@ -65,7 +65,7 @@ const formatContentTypes = plugins => {
   }
 };
 
-const getUserPluginConfigPath = async () => {
+const getUserPluginsConfig = async () => {
   const globalUserConfigPath = join(strapi.dirs.config, 'plugins.js');
   const currentEnvUserConfigPath = join(
     strapi.dirs.config,
@@ -82,7 +82,7 @@ const getUserPluginConfigPath = async () => {
 };
 
 const applyUserConfig = async plugins => {
-  const userPluginsConfig = await getUserPluginConfigPath();
+  const userPluginsConfig = await getUserPluginsConfig();
 
   for (const pluginName in plugins) {
     const plugin = plugins[pluginName];
