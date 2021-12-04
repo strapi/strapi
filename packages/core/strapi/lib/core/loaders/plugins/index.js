@@ -65,11 +65,24 @@ const formatContentTypes = plugins => {
   }
 };
 
+const getUserPluginConfigPath = async () => {
+  const globalUserConfigPath = join(strapi.dirs.config, 'plugins.js');
+  const currentEnvUserConfigPath = join(
+    strapi.dirs.config,
+    `env/${process.env.NODE_ENV}/plugins.js`
+  );
+
+  if (await fse.pathExists(currentEnvUserConfigPath)) {
+    return loadConfigFile(currentEnvUserConfigPath);
+  } else if (await fse.pathExists(globalUserConfigPath)) {
+    return loadConfigFile(globalUserConfigPath);
+  } else {
+    return {};
+  }
+};
+
 const applyUserConfig = async plugins => {
-  const userPluginConfigPath = join(strapi.dirs.config, 'plugins.js');
-  const userPluginsConfig = (await fse.pathExists(userPluginConfigPath))
-    ? loadConfigFile(userPluginConfigPath)
-    : {};
+  const userPluginsConfig = await getUserPluginConfigPath();
 
   for (const pluginName in plugins) {
     const plugin = plugins[pluginName];
