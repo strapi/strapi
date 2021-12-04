@@ -52,7 +52,12 @@ export const EditAssetDialog = ({
 
   const handleSubmit = async values => {
     if (asset.isLocal) {
-      const nextAsset = { ...asset, ...values };
+      const nextAsset = {
+        ...asset,
+        ...values,
+        // update name of File object
+        rawFile: new File([asset.rawFile], values.name, { type: asset.rawFile.type }),
+      };
 
       onClose(nextAsset);
     } else {
