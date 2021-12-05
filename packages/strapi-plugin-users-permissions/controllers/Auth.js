@@ -404,6 +404,17 @@ module.exports = {
       );
     }
 
+    // Username is required.
+    if (!params.username) {
+      return ctx.badRequest(
+        null,
+        formatError({
+          id: 'Auth.form.error.username.provide',
+          message: 'Please provide your username.',
+        })
+      );
+    }
+
     // Email is required.
     if (!params.email) {
       return ctx.badRequest(
@@ -474,6 +485,21 @@ module.exports = {
     }
 
     if (user && user.provider !== params.provider && settings.unique_email) {
+      return ctx.badRequest(
+        null,
+        formatError({
+          id: 'Auth.form.error.email.taken',
+          message: 'Email is already taken.',
+        })
+      );
+    }
+
+    // Make The Username Unique
+    const username = await strapi.query('user', 'users-permissions').findOne({
+      username: params.username,
+    });
+
+    if (username) {
       return ctx.badRequest(
         null,
         formatError({
