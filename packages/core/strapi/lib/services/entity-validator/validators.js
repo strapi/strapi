@@ -104,7 +104,9 @@ const addMaxFloatValidator = (validator, { attr }) =>
  * @returns {StringSchema}
  */
 const addStringRegexValidator = (validator, { attr }) =>
-  _.isUndefined(attr.regex) ? validator : validator.matches(new RegExp(attr.regex));
+  _.isUndefined(attr.regex)
+    ? validator
+    : validator.matches(new RegExp(attr.regex), { excludeEmptyString: attr.required !== true });
 
 /**
  *
