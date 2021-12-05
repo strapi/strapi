@@ -63,7 +63,7 @@ This command generates a brand new project with the default features (authentica
 
 Enjoy 🎉
 
-### 🖐 Requirements
+### 📑 Requirements
 
 Complete installation requirements can be found in the documentation under <a href="https://docs.strapi.io/developer-docs/latest/setup-deployment-guides/deployment.html">Installation Requirements</a>.
 
