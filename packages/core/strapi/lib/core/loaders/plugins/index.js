@@ -60,7 +60,7 @@ const formatContentTypes = plugins => {
     for (const contentTypeName in plugin.contentTypes) {
       const ctSchema = plugin.contentTypes[contentTypeName].schema;
       ctSchema.plugin = pluginName;
-      ctSchema.uid = `plugin::${pluginName}.${ctSchema.singularName}`;
+      ctSchema.uid = `plugin::${pluginName}.${ctSchema.info.singularName}`;
     }
   }
 };
