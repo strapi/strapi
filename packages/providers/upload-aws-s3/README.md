@@ -76,6 +76,7 @@ module.exports = [
   },
   // ...
 ];
+```
 
 ## Required AWS Policy Actions
 
