@@ -2,7 +2,7 @@
 
 const responseHandlers = require('./src/response-handlers');
 
-module.exports = [
+module.exports = ({ env }) => [
   'strapi::errors',
   'strapi::security',
   'strapi::cors',
@@ -10,6 +10,12 @@ module.exports = [
   'strapi::logger',
   'strapi::query',
   'strapi::body',
+  {
+    name: 'strapi::session',
+    config: {
+      secretKeys: env('SESSION_SECRET_KEYS'),
+    },
+  },
   // 'strapi::compression',
   // 'strapi::ip',
   {

@@ -32,6 +32,9 @@ module.exports = async ({ strapi }) => {
 
     if (!process.env.JWT_SECRET) {
       strapi.fs.appendFile(process.env.ENV_PATH || '.env', `JWT_SECRET=${jwtSecret}\n`);
+      console.log(
+        'ℹ️  The Users & Permissions plugin automatically generated a jwt secret and stored it in your .env file under the name JWT_SECRET.'
+      );
     }
   }
 };
