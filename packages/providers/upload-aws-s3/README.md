@@ -57,18 +57,18 @@ Due to the default settings in the Strapi Security Middleware you will need to m
 
 `./config/middlewares.js`
 
-````js
+```js
 module.exports = [
   // ...
   {
-    name: "strapi::security",
+    name: 'strapi::security',
     config: {
       contentSecurityPolicy: {
         useDefaults: true,
         directives: {
-          "connect-src": ["'self'", "https:"],
-          "img-src": ["'self'", "data:", "blob:", "yourBucketName.s3.yourRegion.amazonaws.com"],
-          "media-src": ["'self'", "data:", "blob:", "yourBucketName.s3.yourRegion.amazonaws.com"],
+          'connect-src': ["'self'", 'https:'],
+          'img-src': ["'self'", 'data:', 'blob:', 'yourBucketName.s3.yourRegion.amazonaws.com'],
+          'media-src': ["'self'", 'data:', 'blob:', 'yourBucketName.s3.yourRegion.amazonaws.com'],
           upgradeInsecureRequests: null,
         },
       },
@@ -76,6 +76,7 @@ module.exports = [
   },
   // ...
 ];
+```
 
 ## Required AWS Policy Actions
 
@@ -89,4 +90,4 @@ These are the minimum amount of permissions needed for this provider to work.
   "s3:DeleteObject",
   "s3:PutObjectAcl"
 ],
-````
+```
