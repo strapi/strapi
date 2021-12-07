@@ -693,7 +693,7 @@ describe('Upload | SettingsPage', () => {
                                       class="c27"
                                       for="field-2"
                                     >
-                                      Size optimization (without quality loss)
+                                      Size optimization
                                     </label>
                                   </div>
                                   <label
@@ -702,7 +702,7 @@ describe('Upload | SettingsPage', () => {
                                     <div
                                       class="c29"
                                     >
-                                      Size optimization (without quality loss)
+                                      Size optimization
                                     </div>
                                     <div
                                       class="c30 c31"

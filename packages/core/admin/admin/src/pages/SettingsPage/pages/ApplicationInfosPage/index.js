@@ -109,7 +109,7 @@ const ApplicationInfosPage = () => {
                   <Link href="https://strapi.io/pricing-self-hosted" endIcon={<ExternalLink />}>
                     {formatMessage({
                       id: 'Settings.application.link-pricing',
-                      defaultMessage: 'See all pricing',
+                      defaultMessage: 'See all pricing plans',
                     })}
                   </Link>
                 </GridItem>

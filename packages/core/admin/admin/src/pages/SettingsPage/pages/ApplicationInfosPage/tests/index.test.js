@@ -439,7 +439,7 @@ describe('Application page', () => {
                           <span
                             class="c19"
                           >
-                            See all pricing
+                            See all pricing plans
                           </span>
                           <span
                             aria-hidden="true"

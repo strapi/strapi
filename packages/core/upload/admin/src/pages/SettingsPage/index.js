@@ -205,7 +205,7 @@ export const SettingsPage = () => {
                           })}
                           label={formatMessage({
                             id: getTrad('settings.form.sizeOptimization.label'),
-                            defaultMessage: 'Size optimization (without quality loss)',
+                            defaultMessage: 'Size optimization',
                           })}
                           name="sizeOptimization"
                           offLabel={formatMessage({

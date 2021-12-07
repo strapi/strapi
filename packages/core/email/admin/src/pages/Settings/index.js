@@ -194,7 +194,7 @@ const SettingsPage = () => {
                       onChange={handleChange}
                       label={formatMessage({
                         id: getTrad('Settings.email.plugin.label.testAddress'),
-                        defaultMessage: 'Test delivery email address',
+                        defaultMessage: 'Recipient email',
                       })}
                       value={testAddress}
                       error={

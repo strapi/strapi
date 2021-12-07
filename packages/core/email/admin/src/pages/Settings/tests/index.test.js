@@ -42,7 +42,7 @@ describe('Email | Pages | Settings', () => {
     const { container } = render(App);
 
     await waitFor(() => {
-      expect(screen.getByText('Test delivery email address')).toBeInTheDocument();
+      expect(screen.getByText('Recipient email')).toBeInTheDocument();
     });
 
     expect(container.firstChild).toMatchInlineSnapshot(`
@@ -789,7 +789,7 @@ describe('Email | Pages | Settings', () => {
                                   class="c17"
                                   for="textinput-3"
                                 >
-                                  Default shipper email
+                                  Default sender email
                                 </label>
                               </div>
                               <div
@@ -967,7 +967,7 @@ describe('Email | Pages | Settings', () => {
                                   class="c17"
                                   for="test-address-input"
                                 >
-                                  Test delivery email address
+                                  Recipient email
                                 </label>
                               </div>
                               <div
