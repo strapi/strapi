@@ -141,10 +141,11 @@ function SelectWrapper({
 
       setIsLoading(true);
 
-      const params = { _limit: state._limit, ...defaultParams };
+      const params = { limit: state._limit, ...defaultParams };
 
       if (state._contains) {
-        params[containsKey] = state._contains;
+        const [fieldName] = containsKey.split('_')
+        params[`filters[${fieldName}][$contains]`] = state._contains;
       }
 
       try {
