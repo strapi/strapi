@@ -30,11 +30,11 @@ module.exports = {
     expect: false,
     assert: false,
     chai: false,
+    ENABLED_EE_FEATURES: false,
     // TODO: put all this in process.env in webpack to avoid having to set them here
-    REMOTE_URL: true,
+    ADMIN_PATH: true,
     BACKEND_URL: true,
     PUBLIC_PATH: true,
-    MODE: true,
     NODE_ENV: true,
   },
   settings: {
@@ -66,6 +66,7 @@ module.exports = {
     'import/no-extraneous-dependencies': 0,
     'import/no-named-as-default': 0,
     'import/order': 2,
+    'import/prefer-default-export': 'off',
     'jsx-a11y/click-events-have-key-events': 1,
     'max-len': [
       2,
@@ -89,6 +90,7 @@ module.exports = {
     'no-underscore-dangle': 0,
     'no-use-before-define': ['error', { functions: false, classes: false, variables: false }],
     'object-curly-newline': [2, { multiline: true, consistent: true }],
+    'one-var': ['error', 'never'],
     'operator-linebreak': 0,
     'padding-line-between-statements': [
       'error',
@@ -117,5 +119,6 @@ module.exports = {
     'react/state-in-constructor': 0,
     'react/static-property-placement': 0,
     'react/display-name': 0,
+    'react/jsx-wrap-multilines': 0,
   },
 };

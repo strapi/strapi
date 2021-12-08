@@ -11,7 +11,7 @@ const createAgent = (strapi, initialState = {}) => {
 
   const agent = options => {
     const { method, url, body, formData, qs: queryString } = options;
-    const supertestAgent = request.agent(strapi.server);
+    const supertestAgent = request.agent(strapi.server.httpServer);
 
     if (has('token', state)) {
       supertestAgent.auth(state.token, { type: 'bearer' });

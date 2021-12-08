@@ -13,19 +13,8 @@ services:
     ports:
       - '5432:5432'
 
-  mongo:
-    image: mongo
-    restart: always
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: strapi
-    volumes:
-      - mongodata:/data/db
-    ports:
-      - '27017:27017'
-
   mysql:
-    image: mysql
+    image: mysql:5
     restart: always
     command: --default-authentication-plugin=mysql_native_password
     environment:
@@ -41,5 +30,4 @@ services:
 
 volumes:
   pgdata:
-  mongodata:
   mysqldata:

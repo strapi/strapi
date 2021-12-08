@@ -1,5 +1,6 @@
 'use strict';
 
+const path = require('path');
 const execa = require('execa');
 const yargs = require('yargs');
 const { cleanTestApp, generateTestApp } = require('./helpers/test-app-generator');
@@ -7,41 +8,40 @@ const { cleanTestApp, generateTestApp } = require('./helpers/test-app-generator'
 const appName = 'testApp';
 
 const databases = {
-  mongo: {
-    client: 'mongo',
-    host: '127.0.0.1',
-    port: 27017,
-    database: 'strapi_test',
-    username: 'root',
-    password: 'strapi',
-  },
   postgres: {
     client: 'postgres',
-    host: '127.0.0.1',
-    port: 5432,
-    database: 'strapi_test',
-    username: 'strapi',
-    password: 'strapi',
+    connection: {
+      host: '127.0.0.1',
+      port: 5432,
+      database: 'strapi_test',
+      username: 'strapi',
+      password: 'strapi',
+    },
   },
   mysql: {
     client: 'mysql',
-    host: '127.0.0.1',
-    port: 3306,
-    database: 'strapi_test',
-    username: 'strapi',
-    password: 'strapi',
+    connection: {
+      host: '127.0.0.1',
+      port: 3306,
+      database: 'strapi_test',
+      username: 'strapi',
+      password: 'strapi',
+    },
   },
   sqlite: {
     client: 'sqlite',
-    filename: './tmp/data.db',
+    connection: {
+      filename: './tmp/data.db',
+    },
+    useNullAsDefault: true,
   },
 };
 
 const runAllTests = async args => {
-  return execa('yarn', ['-s', 'test:e2e', 'test/all.test.e2e.js'], {
+  return execa('yarn', ['test:e2e', ...args], {
     stdio: 'inherit',
+    cwd: path.resolve(__dirname, '..'),
     env: {
-      STRAPI_TEST_PATHS: args,
       FORCE_COLOR: 1,
     },
   });
@@ -60,6 +60,7 @@ const main = async (database, args) => {
 
     process.exit(0);
   } catch (error) {
+    console.error(error);
     process.stdout.write('Tests failed\n', () => {
       process.exit(1);
     });
@@ -81,7 +82,7 @@ yargs
     argv => {
       const { database, _: args } = argv;
 
-      main(databases[database], args.join(' '));
+      main(databases[database], args);
     }
   )
   .help().argv;

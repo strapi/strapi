@@ -1,0 +1,31 @@
+<!--- CheckPermissions.stories.mdx --->
+
+import { ArgsTable, Meta } from '@storybook/addon-docs';
+import CheckPermissions from './index';
+
+<Meta title="components/CheckPermissions" />
+
+# CheckPermissions
+
+This component is used in order to apply RBAC to a component. If the user does not have the permissions to view a component it will be hidden.
+
+## Usage
+
+```
+import { CheckPermissions } from '@strapi/helper-plugin';
+
+const permissions = [{ action: 'plugins::my-plugin.read', subject: null }];
+
+const HomePage = () => {
+  return (
+    <main>
+      <h1>This is the homepage</h1>
+      <CheckPermissions permissions={permissions}>
+        You can see this if you have the right to.
+      </CheckPermissions>
+    </main>
+  );
+};
+```
+
+<ArgsTable of={CheckPermissions} />
