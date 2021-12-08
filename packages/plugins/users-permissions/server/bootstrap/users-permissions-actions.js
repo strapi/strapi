@@ -5,6 +5,7 @@ module.exports = {
     {
       // Roles
       section: 'plugins',
+      category: 'User-permissions',
       displayName: 'Create',
       uid: 'roles.create',
       subCategory: 'roles',
@@ -12,6 +13,7 @@ module.exports = {
     },
     {
       section: 'plugins',
+      category: 'User-permissions',
       displayName: 'Read',
       uid: 'roles.read',
       subCategory: 'roles',
@@ -19,6 +21,7 @@ module.exports = {
     },
     {
       section: 'plugins',
+      category: 'User-permissions',
       displayName: 'Update',
       uid: 'roles.update',
       subCategory: 'roles',
@@ -26,6 +29,7 @@ module.exports = {
     },
     {
       section: 'plugins',
+      category: 'User-permissions',
       displayName: 'Delete',
       uid: 'roles.delete',
       subCategory: 'roles',
@@ -34,6 +38,7 @@ module.exports = {
     {
       // providers
       section: 'plugins',
+      category: 'User-permissions',
       displayName: 'Read',
       uid: 'providers.read',
       subCategory: 'providers',
@@ -41,6 +46,7 @@ module.exports = {
     },
     {
       section: 'plugins',
+      category: 'User-permissions',
       displayName: 'Edit',
       uid: 'providers.update',
       subCategory: 'providers',
@@ -49,6 +55,7 @@ module.exports = {
     {
       // emailTemplates
       section: 'plugins',
+      category: 'User-permissions',
       displayName: 'Read',
       uid: 'email-templates.read',
       subCategory: 'emailTemplates',
@@ -56,6 +63,7 @@ module.exports = {
     },
     {
       section: 'plugins',
+      category: 'User-permissions',
       displayName: 'Edit',
       uid: 'email-templates.update',
       subCategory: 'emailTemplates',
@@ -64,6 +72,7 @@ module.exports = {
     {
       // advancedSettings
       section: 'plugins',
+      category: 'User-permissions',
       displayName: 'Read',
       uid: 'advanced-settings.read',
       subCategory: 'advancedSettings',
@@ -71,6 +80,7 @@ module.exports = {
     },
     {
       section: 'plugins',
+      category: 'User-permissions',
       displayName: 'Edit',
       uid: 'advanced-settings.update',
       subCategory: 'advancedSettings',

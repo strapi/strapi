@@ -5,28 +5,31 @@
 const RBAC_ACTIONS = [
   {
     section: 'plugins',
+    category: 'Documentation',
     displayName: 'Access the Documentation',
     uid: 'read',
     pluginName: 'documentation',
   },
   {
     section: 'plugins',
+    category: 'Documentation',
     displayName: 'Update and delete',
     uid: 'settings.update',
     pluginName: 'documentation',
   },
   {
     section: 'plugins',
+    category: 'Documentation',
     displayName: 'Regenerate',
     uid: 'settings.regenerate',
     pluginName: 'documentation',
   },
   {
     section: 'settings',
+    category: 'Documentation',
     displayName: 'Access the documentation settings page',
     uid: 'settings.read',
     pluginName: 'documentation',
-    category: 'documentation',
   },
 ];
 

@@ -38,13 +38,13 @@ const registerProviderActionSchema = yup
         }),
         displayName: yup.string().required(),
         category: yup.mixed().when('section', {
-          is: 'settings',
+          is: section => ['settings', 'plugins'].includes(section),
           then: yup.string().required(),
           otherwise: yup
             .mixed()
             .test(
               'settingsCategory',
-              'category should only be defined for the "settings" section',
+              'category should only be defined for the "plugins" and "settings" sections',
               cat => cat === undefined
             ),
         }),

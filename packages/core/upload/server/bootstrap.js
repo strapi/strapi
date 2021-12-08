@@ -76,12 +76,14 @@ const registerPermissionActions = async () => {
   const actions = [
     {
       section: 'plugins',
+      category: 'Media Library',
       displayName: 'Access the Media Library',
       uid: 'read',
       pluginName: 'upload',
     },
     {
       section: 'plugins',
+      category: 'Media Library',
       displayName: 'Create (upload)',
       uid: 'assets.create',
       subCategory: 'assets',
@@ -89,6 +91,7 @@ const registerPermissionActions = async () => {
     },
     {
       section: 'plugins',
+      category: 'Media Library',
       displayName: 'Update (crop, details, replace) + delete',
       uid: 'assets.update',
       subCategory: 'assets',
@@ -96,6 +99,7 @@ const registerPermissionActions = async () => {
     },
     {
       section: 'plugins',
+      category: 'Media Library',
       displayName: 'Download',
       uid: 'assets.download',
       subCategory: 'assets',
@@ -103,6 +107,7 @@ const registerPermissionActions = async () => {
     },
     {
       section: 'plugins',
+      category: 'Media Library',
       displayName: 'Copy link',
       uid: 'assets.copy-link',
       subCategory: 'assets',
@@ -110,9 +115,9 @@ const registerPermissionActions = async () => {
     },
     {
       section: 'settings',
+      category: 'Media Library',
       displayName: 'Access the Media Library settings page',
       uid: 'settings.read',
-      category: 'media library',
       pluginName: 'upload',
     },
   ];

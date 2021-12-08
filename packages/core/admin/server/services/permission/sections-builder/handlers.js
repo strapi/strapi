@@ -47,11 +47,12 @@ const settings = ({ action, section }) => {
  * @param {ActionArraySection} section
  */
 const plugins = ({ action, section }) => {
-  const { pluginName, subCategory, displayName, actionId } = action;
+  const { pluginName, category, subCategory, displayName, actionId } = action;
 
   section.push({
     displayName,
     plugin: pluginName,
+    category,
     subCategory,
     action: actionId,
   });

@@ -68,6 +68,7 @@ module.exports = ({ strapi }) => ({
       },
       {
         section: 'plugins',
+        category: 'Content Manager',
         displayName: 'Configure view',
         uid: 'single-types.configure-view',
         subCategory: 'single types',
@@ -75,6 +76,7 @@ module.exports = ({ strapi }) => ({
       },
       {
         section: 'plugins',
+        category: 'Content Manager',
         displayName: 'Configure view',
         uid: 'collection-types.configure-view',
         subCategory: 'collection types',
@@ -82,6 +84,7 @@ module.exports = ({ strapi }) => ({
       },
       {
         section: 'plugins',
+        category: 'Content Manager',
         displayName: 'Configure Layout',
         uid: 'components.configure-layout',
         subCategory: 'components',

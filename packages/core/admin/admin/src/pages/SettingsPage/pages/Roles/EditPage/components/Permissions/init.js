@@ -11,7 +11,7 @@ const init = (layout, permissions) => {
   const layouts = {
     collectionTypes,
     singleTypes,
-    plugins: formatLayoutForSettingsAndPlugins(plugins, 'plugin'),
+    plugins: formatLayoutForSettingsAndPlugins(plugins, 'category'),
     settings: formatLayoutForSettingsAndPlugins(settings, 'category'),
   };
   const defaultForm = {
