@@ -68,8 +68,7 @@ const formatContentTypes = plugins => {
 const getUserPluginsConfig = async () => {
   const globalUserConfigPath = join(strapi.dirs.config, 'plugins.js');
   const currentEnvUserConfigPath = join(
-    strapi.dirs.config,
-    `env/${process.env.NODE_ENV}/plugins.js`
+    strapi.dirs.config, 'env', process.env.NODE_ENV, 'plugins.js'
   );
   let config = {};
 
