@@ -12,18 +12,18 @@ const EmailHeader = () => {
       <SettingsPageTitle
         name={formatMessage({
           id: getTrad('Settings.email.plugin.title'),
-          defaultMessage: 'Email settings',
+          defaultMessage: 'Configuration',
         })}
       />
       <HeaderLayout
         id="title"
         title={formatMessage({
           id: getTrad('Settings.email.plugin.title'),
-          defaultMessage: 'Email settings',
+          defaultMessage: 'Configuration',
         })}
         subtitle={formatMessage({
           id: getTrad('Settings.email.plugin.subTitle'),
-          defaultMessage: 'Test the settings for the email plugin',
+          defaultMessage: 'Test the settings for the Email plugin',
         })}
       />
     </>

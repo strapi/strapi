@@ -39,7 +39,7 @@ const tableHeaders = [
   {
     key: 'isActive',
     name: 'isActive',
-    metadatas: { label: 'Active User', sortable: false },
+    metadatas: { label: 'User status', sortable: false },
     // eslint-disable-next-line react/prop-types
     cellFormatter: ({ isActive }) => {
       return (

@@ -811,14 +811,14 @@ describe('Admin | containers | ListView', () => {
                     <span
                       class="c12 c13"
                     >
-                      Add new webhook
+                      Create new webhook
                     </span>
                   </a>
                 </div>
                 <p
                   class="c14"
                 >
-                  Get POST changes notifications.
+                  Get POST changes notifications
                 </p>
               </div>
             </div>
@@ -1263,7 +1263,7 @@ describe('Admin | containers | ListView', () => {
                         <span
                           class="c53"
                         >
-                          Add new webhook
+                          Create new webhook
                         </span>
                       </div>
                     </div>
