@@ -2,8 +2,7 @@
 
 const { join } = require('path');
 const fse = require('fs-extra');
-const { defaultsDeep, getOr, get } = require('lodash/fp');
-const { merge } = require('lodash');
+const { defaultsDeep, getOr, get, merge } = require('lodash/fp');
 const { env } = require('@strapi/utils');
 const loadConfigFile = require('../../app-configuration/load-config-file');
 const loadFiles = require('../../../load/load-files');
