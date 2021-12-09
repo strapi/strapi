@@ -42,7 +42,7 @@ describe('Email | Pages | Settings', () => {
     const { container } = render(App);
 
     await waitFor(() => {
-      expect(screen.getByText('Test delivery email address')).toBeInTheDocument();
+      expect(screen.getByText('Recipient email')).toBeInTheDocument();
     });
 
     expect(container.firstChild).toMatchInlineSnapshot(`
@@ -722,14 +722,14 @@ describe('Email | Pages | Settings', () => {
                   class="c4"
                   id="title"
                 >
-                  Email settings
+                  Configuration
                 </h1>
               </div>
             </div>
             <p
               class="c5"
             >
-              Test the settings for the email plugin
+              Test the settings for the Email plugin
             </p>
           </div>
         </div>
@@ -789,7 +789,7 @@ describe('Email | Pages | Settings', () => {
                                   class="c17"
                                   for="textinput-3"
                                 >
-                                  Default shipper email
+                                  Default sender email
                                 </label>
                               </div>
                               <div
@@ -967,7 +967,7 @@ describe('Email | Pages | Settings', () => {
                                   class="c17"
                                   for="test-address-input"
                                 >
-                                  Test delivery email address
+                                  Recipient email
                                 </label>
                               </div>
                               <div
@@ -995,8 +995,9 @@ describe('Email | Pages | Settings', () => {
                         class=""
                       >
                         <button
-                          aria-disabled="false"
+                          aria-disabled="true"
                           class="c36 c37"
+                          disabled=""
                           type="submit"
                         >
                           <div
@@ -1027,7 +1028,7 @@ describe('Email | Pages | Settings', () => {
                           <span
                             class="c41 c42"
                           >
-                            Test email
+                            Send test email
                           </span>
                         </button>
                       </div>

@@ -93,7 +93,7 @@ module.exports = plop => {
         },
       ];
 
-      if (attributes.lenght > 0) {
+      if (Object.entries(attributes).length > 0) {
         baseActions.push({
           type: 'modify',
           path: `${filePath}/content-types/{{ singularName }}/schema.json`,
