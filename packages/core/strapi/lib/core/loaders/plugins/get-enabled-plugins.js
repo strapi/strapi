@@ -5,7 +5,7 @@ const { statSync, existsSync } = require('fs');
 const _ = require('lodash');
 const { get, has, pick, pickBy, defaultsDeep, map, prop, pipe } = require('lodash/fp');
 const { isKebabCase } = require('@strapi/utils');
-const loadConfigFile = require('../../app-configuration/load-config-file');
+const getUserPluginsConfig = require('./get-user-plugins-config');
 
 const isStrapiPlugin = info => get('strapi.kind', info) === 'plugin';
 const INTERNAL_PLUGINS = [
@@ -72,10 +72,7 @@ const getEnabledPlugins = async strapi => {
   }
 
   const declaredPlugins = {};
-  const userPluginConfigPath = join(strapi.dirs.config, 'plugins.js');
-  const userPluginsConfig = existsSync(userPluginConfigPath)
-    ? loadConfigFile(userPluginConfigPath)
-    : {};
+  const userPluginsConfig = await getUserPluginsConfig();
 
   _.forEach(userPluginsConfig, (declaration, pluginName) => {
     validatePluginName(pluginName);
@@ -106,6 +103,7 @@ const getEnabledPlugins = async strapi => {
 
   const enabledPlugins = pipe(
     defaultsDeep(declaredPlugins),
+    pickBy((pValue, pName) => _.get(declaredPlugins, [pName, 'enabled'], true)),
     defaultsDeep(installedPluginsNotAlreadyUsed),
     pickBy(p => p.enabled)
   )(internalPlugins);
