@@ -3,6 +3,7 @@
 const { join } = require('path');
 const fse = require('fs-extra');
 const { defaultsDeep, getOr, get } = require('lodash/fp');
+const { merge } = require('lodash');
 const { env } = require('@strapi/utils');
 const loadConfigFile = require('../../app-configuration/load-config-file');
 const loadFiles = require('../../../load/load-files');
@@ -71,14 +72,19 @@ const getUserPluginsConfig = async () => {
     strapi.dirs.config,
     `env/${process.env.NODE_ENV}/plugins.js`
   );
+  let config = {};
 
-  if (await fse.pathExists(currentEnvUserConfigPath)) {
-    return loadConfigFile(currentEnvUserConfigPath);
-  } else if (await fse.pathExists(globalUserConfigPath)) {
-    return loadConfigFile(globalUserConfigPath);
-  } else {
-    return {};
+  // assign global user config if exists
+  if (await fse.pathExists(globalUserConfigPath)) {
+    config = loadConfigFile(globalUserConfigPath);
   }
+
+  // and merge user config by environment if exists
+  if (await fse.pathExists(currentEnvUserConfigPath)) {
+    config = merge(config, loadConfigFile(currentEnvUserConfigPath));
+  }
+
+  return config;
 };
 
 const applyUserConfig = async plugins => {
