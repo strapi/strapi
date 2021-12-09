@@ -152,7 +152,7 @@ const useContentTypeBuilderMenu = () => {
         id: `${getTrad('menu.section.components.name.plural')}`,
         defaultMessage: 'Components',
       },
-      customLink: {
+      customLink: isInDevelopmentMode && {
         id: `${getTrad('button.component.create')}`,
         defaultMessage: 'Create a new component',
         onClick: handleClickOpenModalCreateComponent,
