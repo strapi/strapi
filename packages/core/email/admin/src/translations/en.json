@@ -15,7 +15,7 @@
   "Settings.email.plugin.text.configuration": "The plugin is configured through the {file} file, checkout this {link} for the documentation.",
   "Settings.email.plugin.title": "Configuration",
   "Settings.email.plugin.title.config": "Configuration",
-  "Settings.email.plugin.title.test": "Send test email",
+  "Settings.email.plugin.title.test": "Test email delivery",
   "SettingsNav.link.settings": "Settings",
   "SettingsNav.section-label": "Email plugin",
   "components.Input.error.validation.email": "This is an invalid email"
