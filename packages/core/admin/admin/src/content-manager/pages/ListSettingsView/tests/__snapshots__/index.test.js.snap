@@ -1004,7 +1004,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                 <span
                   class="c9"
                 >
-                  Go back
+                  Back
                 </span>
               </a>
             </div>
@@ -2892,7 +2892,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                   <span
                     class="c9"
                   >
-                    Go back
+                    Back
                   </span>
                 </a>
               </div>

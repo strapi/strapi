@@ -40,18 +40,18 @@ const Notification = ({ dispatch, notification }) => {
     variant = 'default';
     alertTitle = formatMessage({
       id: 'notification.default.title',
-      defaultMessage: 'Information Alert:',
+      defaultMessage: 'Information:',
     });
   } else if (type === 'warning') {
     alertTitle = formatMessage({
       id: 'notification.warning.title',
-      defaultMessage: 'Warning Alert:',
+      defaultMessage: 'Warning:',
     });
     variant = 'danger';
   } else {
     alertTitle = formatMessage({
       id: 'notification.success.title',
-      defaultMessage: 'Success Alert:',
+      defaultMessage: 'Success:',
     });
     variant = 'success';
   }

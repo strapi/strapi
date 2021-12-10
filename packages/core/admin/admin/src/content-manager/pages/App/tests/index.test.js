@@ -569,7 +569,7 @@ describe('Content manager | App | main', () => {
                         <span
                           class="c4 c20"
                         >
-                          Collection Type 
+                          Collection Types
                         </span>
                       </div>
                     </div>
@@ -641,7 +641,7 @@ describe('Content manager | App | main', () => {
                         <span
                           class="c4 c20"
                         >
-                          Single Type 
+                          Single Types
                         </span>
                       </div>
                     </div>

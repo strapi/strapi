@@ -1043,7 +1043,7 @@ describe('Admin | containers | RoleEditPage', () => {
                   <span
                     class="c6"
                   >
-                    Go back
+                    Back
                   </span>
                 </a>
               </div>
