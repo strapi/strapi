@@ -117,14 +117,8 @@ describe('Test Graphql Users API End to End', () => {
     test('Update a user', async () => {
       const res = await graphqlQuery({
         query: /* GraphQL */ `
-          mutation updateUser(
-            $id: ID!
-            $data: UsersPermissionsUserInput!
-          ) {
-            updateUsersPermissionsUser(
-              id: $id
-              data: $data
-            ) {
+          mutation updateUser($id: ID!, $data: UsersPermissionsUserInput!) {
+            updateUsersPermissionsUser(id: $id, data: $data) {
               data {
                 attributes {
                   username
@@ -136,7 +130,7 @@ describe('Test Graphql Users API End to End', () => {
         `,
         variables: {
           id: data.user.id,
-          data: { username: "User Test" },
+          data: { username: 'User Test' },
         },
       });
 
@@ -145,7 +139,7 @@ describe('Test Graphql Users API End to End', () => {
       expect(res.statusCode).toBe(200);
       expect(body).toMatchObject({
         data: {
-          deleteUsersPermissionsUser: {
+          updateUsersPermissionsUser: {
             data: {
               attributes: {
                 username: 'User Test',
