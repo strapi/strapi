@@ -164,7 +164,7 @@ const CreatePage = () => {
                   <Link startIcon={<ArrowLeft />} to="/settings/roles">
                     {formatMessage({
                       id: 'app.components.go-back',
-                      defaultMessage: 'Go back',
+                      defaultMessage: 'Back',
                     })}
                   </Link>
                 }

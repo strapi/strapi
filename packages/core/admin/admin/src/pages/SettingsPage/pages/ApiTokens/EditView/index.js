@@ -165,7 +165,7 @@ const ApiTokenCreateView = () => {
                   <Link startIcon={<ArrowLeft />} to="/settings/api-tokens">
                     {formatMessage({
                       id: 'app.components.go-back',
-                      defaultMessage: 'Go back',
+                      defaultMessage: 'Back',
                     })}
                   </Link>
                 }
@@ -185,7 +185,7 @@ const ApiTokenCreateView = () => {
                     <Stack size={4}>
                       <Typography variant="delta" as="h2">
                         {formatMessage({
-                          id: 'app.components.Users.ModalCreateBody.block-title.details',
+                          id: 'Settings.apiTokens.details',
                           defaultMessage: 'Details',
                         })}
                       </Typography>

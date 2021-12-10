@@ -39,7 +39,7 @@ const ContentTypeBuilderNav = () => {
       />
       <SubNavSections>
         {menu.map(section => {
-          const title = `${section.title.id}${section.links.length > 1 ? 'plural' : 'singular'}`;
+          const title = section.title.id;
 
           return (
             <React.Fragment key={section.name}>
