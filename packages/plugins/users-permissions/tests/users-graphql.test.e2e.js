@@ -114,6 +114,49 @@ describe('Test Graphql Users API End to End', () => {
       data.user = res.body.data.login.user;
     });
 
+    test('Update a user', async () => {
+      const res = await graphqlQuery({
+        query: /* GraphQL */ `
+          mutation updateUser(
+            $id: ID!
+            $data: UsersPermissionsUserInput!
+          ) {
+            updateUsersPermissionsUser(
+              id: $id
+              data: $data
+            ) {
+              data {
+                attributes {
+                  username
+                  email
+                }
+              }
+            }
+          }
+        `,
+        variables: {
+          id: data.user.id,
+          data: { username: "User Test" },
+        },
+      });
+
+      const { body } = res;
+
+      expect(res.statusCode).toBe(200);
+      expect(body).toMatchObject({
+        data: {
+          deleteUsersPermissionsUser: {
+            data: {
+              attributes: {
+                username: 'User Test',
+                email: data.user.email,
+              },
+            },
+          },
+        },
+      });
+    });
+
     test('Delete a user', async () => {
       const res = await graphqlQuery({
         query: /* GraphQL */ `
@@ -121,6 +164,7 @@ describe('Test Graphql Users API End to End', () => {
             deleteUsersPermissionsUser(id: $id) {
               data {
                 attributes {
+                  username
                   email
                 }
               }
@@ -140,6 +184,7 @@ describe('Test Graphql Users API End to End', () => {
           deleteUsersPermissionsUser: {
             data: {
               attributes: {
+                username: 'User Test',
                 email: data.user.email,
               },
             },
