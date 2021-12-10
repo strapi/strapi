@@ -60,12 +60,12 @@ const getEnabledPlugins = async strapi => {
   const installedPlugins = {};
   for (const dep in strapi.config.get('info.dependencies', {})) {
     const packagePath = join(dep, 'package.json');
-    let packageInfo
+    let packageInfo;
     try {
       packageInfo = require(packagePath);
     } catch {
       // Some packages, including firebase-admin, do not export package.json.
-      continue
+      continue;
     }
 
     if (isStrapiPlugin(packageInfo)) {
