@@ -42,7 +42,9 @@ describe('Upload | SettingsPage', () => {
 
     await waitFor(() =>
       expect(
-        getByText('Automatically rotate image according to EXIF orientation tag')
+        getByText(
+          'Enabling this option will automatically rotate the image according to EXIF orientation tag.'
+        )
       ).toBeInTheDocument()
     );
 
@@ -527,7 +529,7 @@ describe('Upload | SettingsPage', () => {
                     <h1
                       class="c4"
                     >
-                      Media Library - Settings
+                      Media Library
                     </h1>
                   </div>
                   <button
@@ -564,7 +566,7 @@ describe('Upload | SettingsPage', () => {
                 <p
                   class="c12"
                 >
-                  Configure the settings for the media library
+                  Configure the settings for the Media Library
                 </p>
               </div>
             </div>
@@ -592,7 +594,7 @@ describe('Upload | SettingsPage', () => {
                           <h2
                             class="c21"
                           >
-                            Image
+                            Asset management
                           </h2>
                         </div>
                         <div
@@ -617,7 +619,7 @@ describe('Upload | SettingsPage', () => {
                                       class="c27"
                                       for="field-1"
                                     >
-                                      Enable responsive friendly upload
+                                      Responsive friendly upload
                                     </label>
                                   </div>
                                   <label
@@ -626,7 +628,7 @@ describe('Upload | SettingsPage', () => {
                                     <div
                                       class="c29"
                                     >
-                                      Enable responsive friendly upload
+                                      Responsive friendly upload
                                     </div>
                                     <div
                                       class="c30 c31"
@@ -666,7 +668,7 @@ describe('Upload | SettingsPage', () => {
                                     class="c38"
                                     id="field-1-hint"
                                   >
-                                    It automatically generates multiple formats (large, medium, small) of the uploaded asset
+                                    Enabling this option will generate multiple formats (small, medium and large) of the uploaded asset.
                                   </p>
                                 </div>
                               </div>
@@ -691,7 +693,7 @@ describe('Upload | SettingsPage', () => {
                                       class="c27"
                                       for="field-2"
                                     >
-                                      Enable size optimization (without quality loss)
+                                      Size optimization
                                     </label>
                                   </div>
                                   <label
@@ -700,7 +702,7 @@ describe('Upload | SettingsPage', () => {
                                     <div
                                       class="c29"
                                     >
-                                      Enable size optimization (without quality loss)
+                                      Size optimization
                                     </div>
                                     <div
                                       class="c30 c31"
@@ -735,6 +737,12 @@ describe('Upload | SettingsPage', () => {
                                       />
                                     </div>
                                   </label>
+                                  <p
+                                    class="c38"
+                                    id="field-2-hint"
+                                  >
+                                    Enabling this option will optimize the file size without compromising on the quality.
+                                  </p>
                                 </div>
                               </div>
                             </div>
@@ -758,7 +766,7 @@ describe('Upload | SettingsPage', () => {
                                       class="c27"
                                       for="field-3"
                                     >
-                                      Enable auto orientation
+                                      Auto orientation
                                     </label>
                                   </div>
                                   <label
@@ -767,7 +775,7 @@ describe('Upload | SettingsPage', () => {
                                     <div
                                       class="c29"
                                     >
-                                      Enable auto orientation
+                                      Auto orientation
                                     </div>
                                     <div
                                       class="c30 c31"
@@ -807,7 +815,7 @@ describe('Upload | SettingsPage', () => {
                                     class="c38"
                                     id="field-3-hint"
                                   >
-                                    Automatically rotate image according to EXIF orientation tag
+                                    Enabling this option will automatically rotate the image according to EXIF orientation tag.
                                   </p>
                                 </div>
                               </div>

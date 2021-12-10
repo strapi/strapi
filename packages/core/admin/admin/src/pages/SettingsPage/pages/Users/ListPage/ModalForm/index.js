@@ -58,7 +58,7 @@ const ModalForm = ({ queryName, onToggle }) => {
 
   const headerTitle = formatMessage({
     id: 'Settings.permissions.users.create',
-    defaultMessage: 'Create new user',
+    defaultMessage: 'Invite new user',
   });
 
   const handleSubmit = async (body, { setErrors }) => {
@@ -118,7 +118,7 @@ const ModalForm = ({ queryName, onToggle }) => {
                     <Typography variant="beta" as="h2">
                       {formatMessage({
                         id: 'app.components.Users.ModalCreateBody.block-title.details',
-                        defaultMessage: 'Details',
+                        defaultMessage: 'User details',
                       })}
                     </Typography>
                     <Box paddingTop={4}>
@@ -147,7 +147,7 @@ const ModalForm = ({ queryName, onToggle }) => {
                     <Typography variant="beta" as="h2">
                       {formatMessage({
                         id: 'app.components.Users.ModalCreateBody.block-title.login',
-                        defaultMessage: 'Login settings',
+                        defaultMessage: "User's role",
                       })}
                     </Typography>
                     <Box paddingTop={4}>

@@ -50,7 +50,7 @@ const Configuration = ({ config }) => {
             name="shipper-email"
             label={formatMessage({
               id: getTrad('Settings.email.plugin.label.defaultFrom'),
-              defaultMessage: 'Default shipper email',
+              defaultMessage: 'Default sender email',
             })}
             placeholder={formatMessage({
               id: getTrad('Settings.email.plugin.placeholder.defaultFrom'),

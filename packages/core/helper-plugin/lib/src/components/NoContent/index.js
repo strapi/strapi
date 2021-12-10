@@ -22,7 +22,7 @@ const NoContent = ({ content, ...rest }) => {
 NoContent.defaultProps = {
   content: {
     id: 'app.components.EmptyStateLayout.content-document',
-    defaultMessage: "You don't have any content yet...",
+    defaultMessage: 'No content found',
     values: {},
   },
 };

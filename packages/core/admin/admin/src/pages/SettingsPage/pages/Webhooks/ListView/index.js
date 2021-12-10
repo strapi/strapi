@@ -247,7 +247,7 @@ const ListView = () => {
           title={formatMessage({ id: 'Settings.webhooks.title', defaultMessage: 'Webhooks' })}
           subtitle={formatMessage({
             id: 'Settings.webhooks.list.description',
-            defaultMessage: 'Get POST changes notifications.',
+            defaultMessage: 'Get POST changes notifications',
           })}
           primaryAction={
             canCreate &&
@@ -255,7 +255,7 @@ const ListView = () => {
               <LinkButton startIcon={<Plus />} variant="default" to={`${pathname}/create`} size="L">
                 {formatMessage({
                   id: 'Settings.webhooks.list.button.add',
-                  defaultMessage: 'Add new webhook',
+                  defaultMessage: 'Create new webhook',
                 })}
               </LinkButton>
             )
@@ -305,7 +305,7 @@ const ListView = () => {
                     >
                       {formatMessage({
                         id: 'Settings.webhooks.list.button.add',
-                        defaultMessage: 'Add new webhook',
+                        defaultMessage: 'Create new webhook',
                       })}
                     </TFooter>
                   }
@@ -447,7 +447,7 @@ const ListView = () => {
                   icon={<EmptyDocuments width="160px" />}
                   content={formatMessage({
                     id: 'Settings.webhooks.list.empty.description',
-                    defaultMessage: 'Add your first webhook',
+                    defaultMessage: 'No webhooks found',
                   })}
                   action={
                     <Button
@@ -457,7 +457,7 @@ const ListView = () => {
                     >
                       {formatMessage({
                         id: 'Settings.webhooks.list.button.add',
-                        defaultMessage: 'Add new webhook',
+                        defaultMessage: 'Create new webhook',
                       })}
                     </Button>
                   }
