@@ -31,6 +31,7 @@ const Informations = () => {
   };
 
   const updated = getFieldInfo('updatedAt', 'updatedBy');
+  const created = getFieldInfo('createdAt', 'createdBy');
 
   return (
     <Box>
@@ -44,6 +45,24 @@ const Informations = () => {
         <Divider />
       </Box>
       <Stack size={4}>
+        <Flex justifyContent="space-between">
+          <Typography fontWeight="bold">
+            {formatMessage({
+              id: getTrad('containers.Edit.information.created'),
+              defaultMessage: 'Created',
+            })}
+          </Typography>
+          <Typography>{created.at}</Typography>
+        </Flex>
+        <Flex justifyContent="space-between">
+          <Typography fontWeight="bold">
+            {formatMessage({
+              id: getTrad('containers.Edit.information.by'),
+              defaultMessage: 'By',
+            })}
+          </Typography>
+          <Typography>{created.by}</Typography>
+        </Flex>
         <Flex justifyContent="space-between">
           <Typography fontWeight="bold">
             {formatMessage({
