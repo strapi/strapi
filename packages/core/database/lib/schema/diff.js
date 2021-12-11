@@ -137,9 +137,7 @@ module.exports = db => {
   const diffColumns = (oldColumn, column) => {
     const changes = [];
 
-    const isIgnoredType = ['increments', 'enum'].includes(column.type);
-
-    // NOTE: enum aren't updated, they need to be dropped & recreated. Knex doesn't handle it
+    const isIgnoredType = ['increments'].includes(column.type);
     const oldType = oldColumn.type;
     const type = db.dialect.getSqlType(column.type);
 

@@ -243,7 +243,7 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
               >
                 {formatMessage({
                   id: 'app.components.go-back',
-                  defaultMessage: 'Go back',
+                  defaultMessage: 'Back',
                 })}
               </Link>
             }

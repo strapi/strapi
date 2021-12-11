@@ -1127,14 +1127,14 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                 <span
                   class="c10 c11"
                 >
-                  Create new user
+                  Invite new user
                 </span>
               </button>
             </div>
             <p
               class="c12"
             >
-              0 users found
+              All the users who have access to the Strapi admin panel
             </p>
           </div>
         </div>
@@ -1403,10 +1403,10 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                             <span
                               aria-labelledby="tooltip-11"
                               class="c37"
-                              label="Active User"
+                              label="User status"
                               tabindex="-1"
                             >
-                              Active User
+                              User status
                             </span>
                           </span>
                           <span
