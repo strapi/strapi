@@ -340,7 +340,7 @@ const createYupSchemaAttribute = (type, validations, options) => {
         case 'regex':
           schema = schema.matches(new RegExp(validationValue), {
             message: errorsTrads.regex,
-            excludeEmptyString: validations.required !== true,
+            excludeEmptyString: !validations.required,
           });
           break;
         case 'lowercase':
