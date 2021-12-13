@@ -20,7 +20,7 @@ describe('Entity validator', () => {
     fakeFindOne.mockReset();
   });
 
-  describe('String RegExp validaor', () => {
+  describe('String RegExp validator', () => {
     const fakeModel = {
       kind: 'contentType',
       modelName: 'test-model',
@@ -28,12 +28,12 @@ describe('Entity validator', () => {
       privateAttributes: [],
       options: {},
       attributes: {
-        attrStringRequiredRegex: { type: 'string', required: false },
+        attrStringRequiredRegex: { type: 'string', required: true },
         attrStringNotRequiredRegex: { type: 'string', required: false },
       },
     };
 
-    test('Empty string in required field', () => {
+    test('It fails the validation of an empty string for a required field', () => {
       const validator = strapiUtils.validateYupSchema(
         entityValidator.string(
           {
@@ -52,7 +52,7 @@ describe('Entity validator', () => {
       return expect(validator('')).rejects.toBeInstanceOf(YupValidationError);
     });
 
-    test('Valid regex in required field', () => {
+    test('It validates successfully for a string that follows regex for a required field', () => {
       const value = '1234';
 
       const validator = strapiUtils.validateYupSchema(
@@ -73,7 +73,7 @@ describe('Entity validator', () => {
       return expect(validator(value)).resolves.toEqual(value);
     });
 
-    test('Empty string in not required field', async () => {
+    test('It validates empty string successfully for non-required field with regex constraint', () => {
       const value = '';
 
       const validator = strapiUtils.validateYupSchema(
@@ -94,7 +94,7 @@ describe('Entity validator', () => {
       return expect(validator(value)).resolves.toEqual(value);
     });
 
-    test('Valid regex in not required field', () => {
+    test('It validates successfully for string that follows regex for a non-required field', () => {
       const value = '1234';
 
       const validator = strapiUtils.validateYupSchema(
