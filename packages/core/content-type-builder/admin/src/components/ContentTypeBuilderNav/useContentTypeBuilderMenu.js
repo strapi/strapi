@@ -123,7 +123,7 @@ const useContentTypeBuilderMenu = () => {
     {
       name: 'models',
       title: {
-        id: `${getTrad('menu.section.models.name.')}`,
+        id: `${getTrad('menu.section.models.name.plural')}`,
         defaultMessage: 'Collection Types',
       },
       customLink: isInDevelopmentMode && {
@@ -136,7 +136,7 @@ const useContentTypeBuilderMenu = () => {
     {
       name: 'singleTypes',
       title: {
-        id: `${getTrad('menu.section.single-types.name.')}`,
+        id: `${getTrad('menu.section.single-types.name.plural')}`,
         defaultMessage: 'Single Types',
       },
       customLink: isInDevelopmentMode && {
@@ -149,10 +149,10 @@ const useContentTypeBuilderMenu = () => {
     {
       name: 'components',
       title: {
-        id: `${getTrad('menu.section.components.name.')}`,
+        id: `${getTrad('menu.section.components.name.plural')}`,
         defaultMessage: 'Components',
       },
-      customLink: {
+      customLink: isInDevelopmentMode && {
         id: `${getTrad('button.component.create')}`,
         defaultMessage: 'Create a new component',
         onClick: handleClickOpenModalCreateComponent,

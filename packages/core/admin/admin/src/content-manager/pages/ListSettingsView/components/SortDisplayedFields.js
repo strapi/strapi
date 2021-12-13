@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import { PropTypes } from 'prop-types';
 import { useIntl } from 'react-intl';
@@ -35,6 +35,7 @@ const SortDisplayedFields = ({
   onRemoveField,
 }) => {
   const { formatMessage } = useIntl();
+  const [isDraggingSibling, setIsDraggingSibling] = useState(false);
 
   return (
     <>
@@ -61,11 +62,13 @@ const SortDisplayedFields = ({
               <DraggableCard
                 key={field}
                 index={index}
+                isDraggingSibling={isDraggingSibling}
                 onMoveField={onMoveField}
                 onClickEditField={onClickEditField}
                 onRemoveField={e => onRemoveField(e, index)}
                 name={field}
                 labelField={metadatas[field].list.label || field}
+                setIsDraggingSibling={setIsDraggingSibling}
               />
             ))}
           </Stack>

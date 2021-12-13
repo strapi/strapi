@@ -1,27 +1,24 @@
-# strapi-provider-email-amazon-ses
+# @strapi/provider-email-amazon-ses
 
 ## Resources
 
-- [License](LICENSE)
+- [LICENSE](LICENSE)
 
 ## Links
 
 - [Strapi website](https://strapi.io/)
-- [Strapi community on Slack](https://slack.strapi.io)
+- [Strapi documentation](https://docs.strapi.io)
+- [Strapi community on Discord](https://discord.strapi.io)
 - [Strapi news on Twitter](https://twitter.com/strapijs)
-
-## Prerequisites
-
-You need to have the plugin `strapi-plugin-email` installed in you Strapi project.
 
 ## Installation
 
 ```bash
 # using yarn
-yarn add strapi-provider-email-amazon-ses
+yarn add @strapi/provider-email-amazon-ses
 
 # using npm
-npm install strapi-provider-email-amazon-ses --save
+npm install @strapi/provider-email-amazon-ses --save
 ```
 
 ## Configuration
@@ -38,21 +35,23 @@ npm install strapi-provider-email-amazon-ses --save
 
 ### Example
 
-**Path -** `config/plugins.js`
+**Path -** `./config/plugins.js`
 
 ```js
 module.exports = ({ env }) => ({
   // ...
   email: {
-    provider: 'amazon-ses',
-    providerOptions: {
-      key: env('AWS_SES_KEY'),
-      secret: env('AWS_SES_SECRET'),
-      amazon: 'https://email.us-east-1.amazonaws.com',
-    },
-    settings: {
-      defaultFrom: 'myemail@protonmail.com',
-      defaultReplyTo: 'myemail@protonmail.com',
+    config: {
+      provider: 'amazon-ses',
+      providerOptions: {
+        key: env('AWS_SES_KEY'),
+        secret: env('AWS_SES_SECRET'),
+        amazon: 'https://email.us-east-1.amazonaws.com',
+      },
+      settings: {
+        defaultFrom: 'myemail@protonmail.com',
+        defaultReplyTo: 'myemail@protonmail.com',
+      },
     },
   },
   // ...

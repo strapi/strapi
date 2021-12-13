@@ -63,7 +63,7 @@ const toStrapiType = column => {
       return { type: 'bigInteger' };
     }
     case 'enum': {
-      return { type: 'enum' };
+      return { type: 'string' };
     }
     case 'tinyint': {
       return { type: 'boolean' };

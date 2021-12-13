@@ -1,27 +1,24 @@
-# strapi-provider-email-nodemailer
+# @strapi/provider-email-nodemailer
 
 ## Resources
 
-- [License](LICENSE)
+- [LICENSE](LICENSE)
 
 ## Links
 
 - [Strapi website](https://strapi.io/)
-- [Strapi community on Slack](https://slack.strapi.io)
+- [Strapi documentation](https://docs.strapi.io)
+- [Strapi community on Discord](https://discord.strapi.io)
 - [Strapi news on Twitter](https://twitter.com/strapijs)
-
-## Prerequisites
-
-You need to have the plugin `strapi-plugin-email` installed in your Strapi project.
 
 ## Installation
 
 ```bash
 # using yarn
-yarn add strapi-provider-email-nodemailer
+yarn add @strapi/provider-email-nodemailer
 
 # using npm
-npm install strapi-provider-email-nodemailer --save
+npm install @strapi/provider-email-nodemailer --save
 ```
 
 ## Example
@@ -30,22 +27,26 @@ npm install strapi-provider-email-nodemailer --save
 
 ```js
 module.exports = ({ env }) => ({
+  // ...
   email: {
-    provider: 'nodemailer',
-    providerOptions: {
-      host: env('SMTP_HOST', 'smtp.example.com'),
-      port: env('SMTP_PORT', 587),
-      auth: {
-        user: env('SMTP_USERNAME'),
-        pass: env('SMTP_PASSWORD'),
+    config: {
+      provider: 'nodemailer',
+      providerOptions: {
+        host: env('SMTP_HOST', 'smtp.example.com'),
+        port: env('SMTP_PORT', 587),
+        auth: {
+          user: env('SMTP_USERNAME'),
+          pass: env('SMTP_PASSWORD'),
+        },
+        // ... any custom nodemailer options
       },
-      // ... any custom nodemailer options
-    },
-    settings: {
-      defaultFrom: 'hello@example.com',
-      defaultReplyTo: 'hello@example.com',
+      settings: {
+        defaultFrom: 'hello@example.com',
+        defaultReplyTo: 'hello@example.com',
+      },
     },
   },
+  // ...
 });
 ```
 

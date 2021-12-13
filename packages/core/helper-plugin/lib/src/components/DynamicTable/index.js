@@ -26,6 +26,7 @@ const Table = ({
   children,
   contentType,
   components,
+  action,
   headers,
   isLoading,
   onConfirmDeleteAll,
@@ -168,7 +169,12 @@ const Table = ({
           withBulkActions={withBulkActions}
         />
         {!rows.length || isLoading ? (
-          <EmptyBodyTable colSpan={COL_COUNT} content={content} isLoading={isLoading} />
+          <EmptyBodyTable
+            colSpan={COL_COUNT}
+            content={content}
+            isLoading={isLoading}
+            action={action}
+          />
         ) : (
           Children.toArray(children).map(child =>
             cloneElement(child, {
@@ -206,6 +212,7 @@ Table.defaultProps = {
     ConfirmDialogDeleteAll: undefined,
     ConfirmDialogDelete: undefined,
   },
+  action: undefined,
   headers: [],
   isLoading: false,
   onConfirmDeleteAll: () => {},
@@ -223,6 +230,7 @@ Table.propTypes = {
     ConfirmDialogDelete: PropTypes.oneOfType([PropTypes.func, PropTypes.element]),
     ConfirmDialogDeleteAll: PropTypes.oneOfType([PropTypes.func, PropTypes.element]),
   }),
+  action: PropTypes.node,
   headers: PropTypes.arrayOf(
     PropTypes.shape({
       cellFormatter: PropTypes.func,

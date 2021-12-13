@@ -1,27 +1,24 @@
-# strapi-provider-email-mailgun
+# @strapi/provider-email-mailgun
 
 ## Resources
 
-- [License](LICENSE)
+- [LICENSE](LICENSE)
 
 ## Links
 
 - [Strapi website](https://strapi.io/)
-- [Strapi community on Slack](https://slack.strapi.io)
+- [Strapi documentation](https://docs.strapi.io)
+- [Strapi community on Discord](https://discord.strapi.io)
 - [Strapi news on Twitter](https://twitter.com/strapijs)
-
-## Prerequisites
-
-You need to have the plugin `strapi-plugin-email` installed in you Strapi project.
 
 ## Installation
 
 ```bash
 # using yarn
-yarn add strapi-provider-email-mailgun
+yarn add @strapi/provider-email-mailgun
 
 # using npm
-npm install strapi-provider-email-mailgun --save
+npm install @strapi/provider-email-mailgun --save
 ```
 
 ## Configuration
@@ -44,15 +41,17 @@ npm install strapi-provider-email-mailgun --save
 module.exports = ({ env }) => ({
   // ...
   email: {
-    provider: 'mailgun',
-    providerOptions: {
-      apiKey: env('MAILGUN_API_KEY'),
-      domain: env('MAILGUN_DOMAIN'), //Required if you have an account with multiple domains
-      host: env('MAILGUN_HOST', 'api.mailgun.net'), //Optional. If domain region is Europe use 'api.eu.mailgun.net'
-    },
-    settings: {
-      defaultFrom: 'myemail@protonmail.com',
-      defaultReplyTo: 'myemail@protonmail.com',
+    config: {
+      provider: 'mailgun',
+      providerOptions: {
+        apiKey: env('MAILGUN_API_KEY'),
+        domain: env('MAILGUN_DOMAIN'), //Required if you have an account with multiple domains
+        host: env('MAILGUN_HOST', 'api.mailgun.net'), //Optional. If domain region is Europe use 'api.eu.mailgun.net'
+      },
+      settings: {
+        defaultFrom: 'myemail@protonmail.com',
+        defaultReplyTo: 'myemail@protonmail.com',
+      },
     },
   },
   // ...
