@@ -64,7 +64,6 @@ const getEnabledPlugins = async strapi => {
     try {
       packageInfo = require(packagePath);
     } catch {
-      // Some packages, including firebase-admin, do not export package.json.
       continue;
     }
 
