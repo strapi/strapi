@@ -11,9 +11,10 @@ const AWS = require('aws-sdk');
 
 module.exports = {
   init(config) {
+    const { baseUrl, ...AWSConfig } = config
     const S3 = new AWS.S3({
       apiVersion: '2006-03-01',
-      ...config,
+      ...AWSConfig,
     });
 
     return {
@@ -35,7 +36,7 @@ module.exports = {
               }
 
               // set the bucket file url
-              file.url = data.Location;
+              file.url = `${baseUrl}${data.Location}`;
 
               resolve();
             }
