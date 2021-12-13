@@ -20,6 +20,102 @@ describe('Entity validator', () => {
     fakeFindOne.mockReset();
   });
 
+  describe('String RegExp validator', () => {
+    const fakeModel = {
+      kind: 'contentType',
+      modelName: 'test-model',
+      uid: 'test-uid',
+      privateAttributes: [],
+      options: {},
+      attributes: {
+        attrStringRequiredRegex: { type: 'string', required: true },
+        attrStringNotRequiredRegex: { type: 'string', required: false },
+      },
+    };
+
+    test('It fails the validation of an empty string for a required field', () => {
+      const validator = strapiUtils.validateYupSchema(
+        entityValidator.string(
+          {
+            attr: { type: 'string', required: true, regex: '^\\d+$' },
+            model: fakeModel,
+            updatedAttribute: {
+              name: 'attrStringRequiredRegex',
+              value: '',
+            },
+            entity: null,
+          },
+          { isDraft: false }
+        )
+      );
+
+      return expect(validator('')).rejects.toBeInstanceOf(YupValidationError);
+    });
+
+    test('It validates successfully for a string that follows regex for a required field', () => {
+      const value = '1234';
+
+      const validator = strapiUtils.validateYupSchema(
+        entityValidator.string(
+          {
+            attr: { type: 'string', required: true, regex: '^\\d+$' },
+            model: fakeModel,
+            updatedAttribute: {
+              name: 'attrStringRequiredRegex',
+              value,
+            },
+            entity: null,
+          },
+          { isDraft: false }
+        )
+      );
+
+      return expect(validator(value)).resolves.toEqual(value);
+    });
+
+    test('It validates empty string successfully for non-required field with regex constraint', () => {
+      const value = '';
+
+      const validator = strapiUtils.validateYupSchema(
+        entityValidator.string(
+          {
+            attr: { type: 'string', required: false, regex: '^\\d+$' },
+            model: fakeModel,
+            updatedAttribute: {
+              name: 'attrStringNotRequiredRegex',
+              value,
+            },
+            entity: null,
+          },
+          { isDraft: false }
+        )
+      );
+
+      return expect(validator(value)).resolves.toEqual(value);
+    });
+
+    test('It validates successfully for string that follows regex for a non-required field', () => {
+      const value = '1234';
+
+      const validator = strapiUtils.validateYupSchema(
+        entityValidator.string(
+          {
+            attr: { type: 'string', required: false, regex: '^\\d+$' },
+            model: fakeModel,
+            updatedAttribute: {
+              name: 'attrStringNotRequiredRegex',
+              value,
+            },
+            entity: null,
+          },
+          { isDraft: false }
+        )
+      );
+
+      return expect(validator(value)).resolves.toEqual(value);
+    });
+  });
+
   describe('String unique validator', () => {
     const fakeModel = {
       kind: 'contentType',
