@@ -27,11 +27,29 @@ const CellValue = ({ type, value }) => {
     });
   }
 
-  if (['float', 'integer', 'biginteger', 'decimal'].includes(type)) {
-    formattedValue = formatNumber(value);
+  if (['float', 'decimal'].includes(type)) {
+    const numberOfDecimals = getNumberOfDecimals(value);
+
+    formattedValue = formatNumber(value, {
+      minimumFractionDigits: numberOfDecimals,
+      maximumFractionDigits: numberOfDecimals,
+    });
+  }
+
+  if (['integer', 'biginteger'].includes(type)) {
+    formattedValue = formatNumber(value, { maximumFractionDigits: 0 });
   }
 
   return toString(formattedValue);
+};
+
+const getNumberOfDecimals = value => {
+  if (value % 1 !== 0) {
+    // value has decimals
+    return value.toString().split('.')[1].length;
+  }
+
+  return 0;
 };
 
 CellValue.propTypes = {
