@@ -11,7 +11,7 @@ const AWS = require('aws-sdk');
 
 module.exports = {
   init(config) {
-    const { baseUrl, ...AWSConfig } = config
+    const { baseUrl = '', ...AWSConfig } = config
     const S3 = new AWS.S3({
       apiVersion: '2006-03-01',
       ...AWSConfig,
