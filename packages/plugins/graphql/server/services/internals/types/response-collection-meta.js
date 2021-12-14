@@ -23,11 +23,12 @@ module.exports = ({ strapi }) => {
           async resolve(parent) {
             const { args, resourceUID } = parent;
             const { start, limit } = args;
+            const safeLimit = Math.max(limit, 1);
 
             const total = await strapi.entityService.count(resourceUID, args);
-            const pageSize = limit === -1 ? total - start : limit;
-            const pageCount = limit === -1 ? 1 : Math.ceil(total / limit);
-            const page = limit === -1 ? 1 : Math.floor(start / limit) + 1;
+            const pageSize = limit === -1 ? total - start : safeLimit;
+            const pageCount = limit === -1 ? safeLimit : Math.ceil(total / safeLimit);
+            const page = limit === -1 ? safeLimit : Math.floor(start / safeLimit) + 1;
 
             return { total, page, pageSize, pageCount };
           },
