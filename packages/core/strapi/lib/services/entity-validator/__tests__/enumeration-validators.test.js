@@ -2,7 +2,7 @@
 
 const strapiUtils = require('@strapi/utils');
 const { YupValidationError } = require('@strapi/utils/lib/errors');
-const entityValidator = require('../validators');
+const validators = require('../validators');
 
 describe('Enumeration validator', () => {
   describe('oneOf', () => {
@@ -10,7 +10,7 @@ describe('Enumeration validator', () => {
       expect.assertions(1);
 
       const validator = strapiUtils.validateYupSchema(
-        entityValidator.enumeration(
+        validators.enumeration(
           {
             attr: { type: 'enum', enum: ['strapi', 'headless'] },
           },
@@ -27,7 +27,7 @@ describe('Enumeration validator', () => {
 
     test('it validates the value if it is part of the allowed values', async () => {
       const validator = strapiUtils.validateYupSchema(
-        entityValidator.enumeration(
+        validators.enumeration(
           {
             attr: { type: 'enumeration', enum: ['strapi', 'headless'] },
           },

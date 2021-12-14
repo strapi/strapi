@@ -2,7 +2,7 @@
 
 const strapiUtils = require('@strapi/utils');
 const { YupValidationError } = require('@strapi/utils/lib/errors');
-const entityValidator = require('../validators');
+const validators = require('../validators');
 
 describe('Email validator', () => {
   describe('email', () => {
@@ -10,7 +10,7 @@ describe('Email validator', () => {
       expect.assertions(1);
 
       const validator = strapiUtils.validateYupSchema(
-        entityValidator.email(
+        validators.email(
           {
             attr: { type: 'string' },
           },
@@ -27,7 +27,7 @@ describe('Email validator', () => {
 
     test('it validates the email if it is valid', async () => {
       const validator = strapiUtils.validateYupSchema(
-        entityValidator.email(
+        validators.email(
           {
             attr: { type: 'string' },
           },

@@ -2,7 +2,7 @@
 
 const strapiUtils = require('@strapi/utils');
 const { YupValidationError } = require('@strapi/utils/lib/errors');
-const entityValidator = require('../validators');
+const validators = require('../validators');
 
 describe('String validator', () => {
   describe('unique', () => {
@@ -36,7 +36,7 @@ describe('String validator', () => {
       fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        entityValidator.string(
+        validators.string(
           {
             attr: { type: 'string' },
             model: fakeModel,
@@ -59,7 +59,7 @@ describe('String validator', () => {
       fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        entityValidator
+        validators
           .string(
             {
               attr: { type: 'string', unique: true },
@@ -84,7 +84,7 @@ describe('String validator', () => {
       fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        entityValidator.string(
+        validators.string(
           {
             attr: { type: 'string', unique: true },
             model: fakeModel,
@@ -106,7 +106,7 @@ describe('String validator', () => {
       fakeFindOne.mockResolvedValueOnce({ attrStringUnique: 'unique-test-data' });
 
       const validator = strapiUtils.validateYupSchema(
-        entityValidator.string(
+        validators.string(
           {
             attr: { type: 'string', unique: true },
             model: fakeModel,
@@ -131,7 +131,7 @@ describe('String validator', () => {
       fakeFindOne.mockResolvedValueOnce({ attrStringUnique: 'non-updated-unique-test-data' });
 
       const validator = strapiUtils.validateYupSchema(
-        entityValidator.string(
+        validators.string(
           {
             attr: { type: 'string', unique: true },
             model: fakeModel,
@@ -152,7 +152,7 @@ describe('String validator', () => {
       fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        entityValidator.string(
+        validators.string(
           {
             attr: { type: 'string', unique: true },
             model: fakeModel,
@@ -178,7 +178,7 @@ describe('String validator', () => {
       fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        entityValidator.string(
+        validators.string(
           {
             attr: { type: 'string', unique: true },
             model: fakeModel,
@@ -204,7 +204,7 @@ describe('String validator', () => {
   describe('minLength', () => {
     test('it does not validates the minLength constraint if the attribute minLength is not an integer', async () => {
       const validator = strapiUtils.validateYupSchema(
-        entityValidator.string(
+        validators.string(
           {
             attr: { type: 'string', minLength: '123' },
           },
@@ -217,7 +217,7 @@ describe('String validator', () => {
 
     test('it does not validates the minLength constraint if it is a draft', async () => {
       const validator = strapiUtils.validateYupSchema(
-        entityValidator.string(
+        validators.string(
           {
             attr: { type: 'string', minLength: 3 },
           },
@@ -232,7 +232,7 @@ describe('String validator', () => {
       expect.assertions(1);
 
       const validator = strapiUtils.validateYupSchema(
-        entityValidator.string(
+        validators.string(
           {
             attr: { type: 'string', minLength: 3 },
           },
@@ -249,7 +249,7 @@ describe('String validator', () => {
 
     test('it validates the minLength constraint if the string is longer than the define minLength', async () => {
       const validator = strapiUtils.validateYupSchema(
-        entityValidator.string(
+        validators.string(
           {
             attr: { type: 'string', minLength: 3 },
           },
@@ -266,7 +266,7 @@ describe('String validator', () => {
   describe('maxLength', () => {
     test('it does not validates the maxLength constraint if the attribute maxLength is not an integer', async () => {
       const validator = strapiUtils.validateYupSchema(
-        entityValidator.string(
+        validators.string(
           {
             attr: { type: 'string', maxLength: '123' },
           },
@@ -281,7 +281,7 @@ describe('String validator', () => {
       expect.assertions(1);
 
       const validator = strapiUtils.validateYupSchema(
-        entityValidator.string(
+        validators.string(
           {
             attr: { type: 'string', maxLength: 3 },
           },
@@ -298,7 +298,7 @@ describe('String validator', () => {
 
     test('it validates the maxLength constraint if the string is shorter than the define maxLength', async () => {
       const validator = strapiUtils.validateYupSchema(
-        entityValidator.string(
+        validators.string(
           {
             attr: { type: 'string', maxLength: 3 },
           },
@@ -315,7 +315,7 @@ describe('String validator', () => {
       expect.assertions(1);
 
       const validator = strapiUtils.validateYupSchema(
-        entityValidator.string(
+        validators.string(
           {
             attr: { type: 'string', required: true, regex: '^\\w+$' },
           },
@@ -332,7 +332,7 @@ describe('String validator', () => {
 
     test('it validates a string for required field according to the regex constraint', async () => {
       const validator = strapiUtils.validateYupSchema(
-        entityValidator.string(
+        validators.string(
           {
             attr: { type: 'string', required: true, regex: '^\\w+$' },
           },
@@ -345,7 +345,7 @@ describe('String validator', () => {
 
     test('it validates an empty string for non-required field with a regex constraint', async () => {
       const validator = strapiUtils.validateYupSchema(
-        entityValidator.string(
+        validators.string(
           {
             attr: { type: 'string', required: false, regex: '^\\w+$' },
           },
@@ -358,7 +358,7 @@ describe('String validator', () => {
 
     test('it validates a string for non-required field according to the regex constraint', async () => {
       const validator = strapiUtils.validateYupSchema(
-        entityValidator.string(
+        validators.string(
           {
             attr: { type: 'string', required: false, regex: '^\\w+$' },
           },

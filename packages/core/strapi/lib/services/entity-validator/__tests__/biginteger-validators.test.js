@@ -2,7 +2,7 @@
 
 const strapiUtils = require('@strapi/utils');
 const { YupValidationError } = require('@strapi/utils/lib/errors');
-const entityValidator = require('../validators');
+const validators = require('../validators');
 
 describe('BigInteger validator', () => {
   describe('unique', () => {
@@ -36,7 +36,7 @@ describe('BigInteger validator', () => {
       fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        entityValidator.biginteger(
+        validators.biginteger(
           {
             attr: { type: 'biginteger' },
             model: fakeModel,
@@ -59,7 +59,7 @@ describe('BigInteger validator', () => {
       fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        entityValidator
+        validators
           .biginteger(
             {
               attr: { type: 'biginteger', unique: true },
@@ -84,7 +84,7 @@ describe('BigInteger validator', () => {
       fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        entityValidator.biginteger(
+        validators.biginteger(
           {
             attr: { type: 'biginteger', unique: true },
             model: fakeModel,
@@ -106,7 +106,7 @@ describe('BigInteger validator', () => {
       fakeFindOne.mockResolvedValueOnce({ attrBigIntegerUnique: 2 });
 
       const validator = strapiUtils.validateYupSchema(
-        entityValidator.biginteger(
+        validators.biginteger(
           {
             attr: { type: 'biginteger', unique: true },
             model: fakeModel,
@@ -131,7 +131,7 @@ describe('BigInteger validator', () => {
       fakeFindOne.mockResolvedValueOnce({ attrBigIntegerUnique: 3 });
 
       const validator = strapiUtils.validateYupSchema(
-        entityValidator.biginteger(
+        validators.biginteger(
           {
             attr: { type: 'biginteger', unique: true },
             model: fakeModel,
@@ -152,7 +152,7 @@ describe('BigInteger validator', () => {
       fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        entityValidator.biginteger(
+        validators.biginteger(
           {
             attr: { type: 'biginteger', unique: true },
             model: fakeModel,
@@ -178,7 +178,7 @@ describe('BigInteger validator', () => {
       fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        entityValidator.biginteger(
+        validators.biginteger(
           {
             attr: { type: 'biginteger', unique: true },
             model: fakeModel,
