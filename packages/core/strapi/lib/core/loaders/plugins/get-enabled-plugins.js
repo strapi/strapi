@@ -60,7 +60,12 @@ const getEnabledPlugins = async strapi => {
   const installedPlugins = {};
   for (const dep in strapi.config.get('info.dependencies', {})) {
     const packagePath = join(dep, 'package.json');
-    const packageInfo = require(packagePath);
+    let packageInfo;
+    try {
+      packageInfo = require(packagePath);
+    } catch {
+      continue;
+    }
 
     if (isStrapiPlugin(packageInfo)) {
       validatePluginName(packageInfo.strapi.name);
