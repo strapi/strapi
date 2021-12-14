@@ -1,25 +1,6 @@
 'use strict';
 
-const _ = require('lodash');
-const { createService } = require('../service');
-
-const maxLimit = 50;
-const defaultLimit = 20;
-
-// init global strapi
-global.strapi = {
-  config: {
-    get(path, defaultValue) {
-      return _.get(this, path, defaultValue);
-    },
-    api: {
-      rest: {
-        defaultLimit,
-        maxLimit,
-      },
-    },
-  },
-};
+const { createService } = require('../index');
 
 describe('Default Service', () => {
   describe('Collection Type', () => {
