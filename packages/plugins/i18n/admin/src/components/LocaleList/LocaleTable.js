@@ -57,7 +57,7 @@ const LocaleTable = ({ locales, onDeleteLocale, onEditLocale }) => {
             <Td>
               <Typography textColor="neutral800">
                 {locale.isDefault
-                  ? formatMessage({ id: getTrad('Settings.locales.row.default-locale') })
+                  ? formatMessage({ id: getTrad('Settings.locales.default') })
                   : null}
               </Typography>
             </Td>

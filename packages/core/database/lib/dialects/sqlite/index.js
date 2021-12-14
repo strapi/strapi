@@ -34,7 +34,6 @@ class SqliteDialect extends Dialect {
 
   getSqlType(type) {
     switch (type) {
-      // FIXME: enum must be dealt separately
       case 'enum': {
         return 'text';
       }
