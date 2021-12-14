@@ -183,7 +183,7 @@ const SettingsPage = () => {
                 <Typography variant="delta" as="h2">
                   {formatMessage({
                     id: getTrad('Settings.email.plugin.title.test'),
-                    defaultMessage: 'Send a test mail',
+                    defaultMessage: 'Test email delivery',
                   })}
                 </Typography>
                 <Grid gap={5} alignItems="end">
