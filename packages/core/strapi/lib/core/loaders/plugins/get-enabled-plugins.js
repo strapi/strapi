@@ -103,7 +103,6 @@ const getEnabledPlugins = async strapi => {
 
   const enabledPlugins = pipe(
     defaultsDeep(declaredPlugins),
-    pickBy((pValue, pName) => _.get(declaredPlugins, [pName, 'enabled'], true)),
     defaultsDeep(installedPluginsNotAlreadyUsed),
     pickBy(p => p.enabled)
   )(internalPlugins);
