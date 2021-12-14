@@ -22,9 +22,11 @@ module.exports = {
         return new Promise((resolve, reject) => {
           // upload file on S3 bucket
           const path = file.path ? `${file.path}/` : '';
+          const key = `${path}${file.hash}${file.ext}`;
+
           S3.upload(
             {
-              Key: `${path}${file.hash}${file.ext}`,
+              Key: key,
               Body: Buffer.from(file.buffer, 'binary'),
               ACL: 'public-read',
               ContentType: file.mime,
@@ -36,7 +38,7 @@ module.exports = {
               }
 
               // set the bucket file url
-              file.url = `${baseUrl}${data.Location}`;
+              file.url = baseUrl ? `${baseUrl}/${key}` : data.Location;
 
               resolve();
             }
@@ -52,7 +54,7 @@ module.exports = {
               Key: `${path}${file.hash}${file.ext}`,
               ...customParams,
             },
-            (err, data) => {
+            (err) => {
               if (err) {
                 return reject(err);
               }
