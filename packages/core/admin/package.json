@@ -27,7 +27,11 @@
     "develop": "yarn create:plugin-file && yarn develop:webpack",
     "develop:webpack": "cross-env NODE_ENV=development webpack serve --config webpack.config.dev.js --progress profile",
     "prepublishOnly": "rimraf build && node ./scripts/build.js",
-    "test": "echo \"no tests yet\""
+    "test:unit": "jest --verbose",
+    "test:front": "cross-env IS_EE=true jest --config ./jest.config.front.js",
+    "test:front:watch": "cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",
+    "test:front:ce": "cross-env IS_EE=false jest --config ./jest.config.front.js",
+    "test:front:watch:ce": "cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll"
   },
   "dependencies": {
     "@babel/core": "7.14.0",

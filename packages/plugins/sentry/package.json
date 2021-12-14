@@ -20,6 +20,9 @@
       "url": "https://strapi.io"
     }
   ],
+  "scripts": {
+    "test:unit": "jest --verbose"
+  },
   "dependencies": {
     "@sentry/node": "6.7.1"
   },

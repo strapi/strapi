@@ -1,6 +1,6 @@
 'use strict';
 
-const baseConfig = require('../../../jest.base-config');
+const baseConfig = require('../../../jest.base-config.front');
 const pkg = require('./package');
 
 module.exports = {

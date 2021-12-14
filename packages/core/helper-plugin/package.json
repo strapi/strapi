@@ -34,7 +34,8 @@
     "create:index": "node ./createBuildIndex.js",
     "prepublishOnly": "npm run build",
     "storybook": "start-storybook -p 6006",
-    "test": "echo \"no tests yet\"",
+    "test:front": "jest --config ./jest.config.front.js",
+    "test:front:watch": "jest --config ./jest.config.front.js --watchAll",
     "watch": "yarn create:index && cross-env NODE_ENV=development webpack-cli -w"
   },
   "dependencies": {
