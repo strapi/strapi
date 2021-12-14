@@ -92,7 +92,7 @@ const AccordionGroupCustom = ({ children, footer, label, labelAction, error }) =
       {error && (
         <Box paddingTop={1}>
           <Typography variant="pi" textColor="danger600">
-            {formatMessage({ id: error.id, defaultMessage: error.defaultMessage }, error.values)}
+            {formatMessage({ id: error.id, defaultMessage: error.id })}
           </Typography>
         </Box>
       )}
@@ -111,8 +111,6 @@ AccordionGroupCustom.propTypes = {
   children: PropTypes.node.isRequired,
   error: PropTypes.shape({
     id: PropTypes.string.isRequired,
-    defaultMessage: PropTypes.string.isRequired,
-    values: PropTypes.object,
   }),
   footer: PropTypes.node,
   label: PropTypes.string,
