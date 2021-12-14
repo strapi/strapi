@@ -80,7 +80,7 @@ module.exports = ({ strapi }) => ({
    * @return {Promise}
    */
   fetchAll(params, populate) {
-    return strapi.entityService.findMany('plugin::users-permissions.user', { ...params, populate });
+    return strapi.query('plugin::users-permissions.user').findMany({ where: params, populate });
   },
 
   hashPassword(user = {}) {
