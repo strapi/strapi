@@ -25,12 +25,10 @@ const getUserPluginsConfig = async () => {
   if (await fse.pathExists(globalUserConfigPath)) {
     config = loadConfigFile(globalUserConfigPath);
   }
-  console.log('global', config);
 
   // and merge user config by environment if exists
   if (await fse.pathExists(currentEnvUserConfigPath)) {
     config = merge(config, loadConfigFile(currentEnvUserConfigPath));
-    console.log('env', config);
   }
 
   return config;
