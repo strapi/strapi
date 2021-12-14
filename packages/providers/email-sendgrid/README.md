@@ -1,27 +1,24 @@
-# strapi-provider-email-sendgrid
+# @strapi/provider-email-sendgrid
 
 ## Resources
 
-- [License](LICENSE)
+- [LICENSE](LICENSE)
 
 ## Links
 
 - [Strapi website](https://strapi.io/)
-- [Strapi community on Slack](https://slack.strapi.io)
+- [Strapi documentation](https://docs.strapi.io)
+- [Strapi community on Discord](https://discord.strapi.io)
 - [Strapi news on Twitter](https://twitter.com/strapijs)
-
-## Prerequisites
-
-You need to have the plugin `strapi-plugin-email` installed in you Strapi project.
 
 ## Installation
 
 ```bash
 # using yarn
-yarn add strapi-provider-email-sendgrid
+yarn add @strapi/provider-email-sendgrid
 
 # using npm
-npm install strapi-provider-email-sendgrid --save
+npm install @strapi/provider-email-sendgrid --save
 ```
 
 ## Configuration

@@ -101,7 +101,7 @@ const HeadersInput = () => {
                 >
                   {formatMessage({
                     id: 'Settings.webhooks.create.header',
-                    defaultMessage: 'Create a new header',
+                    defaultMessage: 'Create new header',
                   })}
                 </TextButton>
               </GridItem>

@@ -229,7 +229,7 @@ describe('ADMIN | Pages | Profile page', () => {
         align-items: center;
       }
 
-      .c36 {
+      .c38 {
         position: absolute;
         left: 0;
         right: 0;
@@ -240,22 +240,22 @@ describe('ADMIN | Pages | Profile page', () => {
         border: none;
       }
 
-      .c36:focus {
+      .c38:focus {
         outline: none;
       }
 
-      .c36[aria-disabled='true'] {
+      .c38[aria-disabled='true'] {
         cursor: not-allowed;
       }
 
-      .c33 {
+      .c35 {
         font-weight: 600;
         color: #32324d;
         font-size: 0.75rem;
         line-height: 1.33;
       }
 
-      .c40 {
+      .c42 {
         color: #32324d;
         display: block;
         white-space: nowrap;
@@ -265,22 +265,22 @@ describe('ADMIN | Pages | Profile page', () => {
         line-height: 1.43;
       }
 
-      .c44 {
+      .c46 {
         color: #666687;
         font-size: 0.75rem;
         line-height: 1.33;
       }
 
-      .c39 {
+      .c41 {
         padding-right: 16px;
         padding-left: 16px;
       }
 
-      .c42 {
+      .c44 {
         padding-left: 12px;
       }
 
-      .c34 {
+      .c36 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -294,7 +294,7 @@ describe('ADMIN | Pages | Profile page', () => {
         align-items: center;
       }
 
-      .c37 {
+      .c39 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -312,7 +312,7 @@ describe('ADMIN | Pages | Profile page', () => {
         align-items: center;
       }
 
-      .c32 {
+      .c34 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -322,16 +322,16 @@ describe('ADMIN | Pages | Profile page', () => {
         flex-direction: column;
       }
 
-      .c32 > * {
+      .c34 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c32 > * + * {
+      .c34 > * + * {
         margin-top: 4px;
       }
 
-      .c35 {
+      .c37 {
         position: relative;
         border: 1px solid #dcdce4;
         padding-right: 12px;
@@ -347,28 +347,28 @@ describe('ADMIN | Pages | Profile page', () => {
         transition-duration: 0.2s;
       }
 
-      .c35:focus-within {
+      .c37:focus-within {
         border: 1px solid #4945ff;
         box-shadow: #4945ff 0px 0px 0px 2px;
       }
 
-      .c41 {
+      .c43 {
         background: transparent;
         border: none;
         position: relative;
         z-index: 1;
       }
 
-      .c41 svg {
+      .c43 svg {
         height: 0.6875rem;
         width: 0.6875rem;
       }
 
-      .c41 svg path {
+      .c43 svg path {
         fill: #666687;
       }
 
-      .c43 {
+      .c45 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -377,11 +377,11 @@ describe('ADMIN | Pages | Profile page', () => {
         border: none;
       }
 
-      .c43 svg {
+      .c45 svg {
         width: 0.375rem;
       }
 
-      .c38 {
+      .c40 {
         width: 100%;
       }
 
@@ -421,6 +421,25 @@ describe('ADMIN | Pages | Profile page', () => {
 
       .c17 > * + * {
         margin-top: 16px;
+      }
+
+      .c32 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+      }
+
+      .c32 > * {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .c32 > * + * {
+        margin-top: 4px;
       }
 
       .c23 {
@@ -593,6 +612,12 @@ describe('ADMIN | Pages | Profile page', () => {
         font-weight: 500;
         font-size: 1rem;
         line-height: 1.25;
+      }
+
+      .c33 {
+        color: #32324d;
+        font-size: 0.875rem;
+        line-height: 1.43;
       }
 
       .c0:focus-visible {
@@ -1152,11 +1177,28 @@ describe('ADMIN | Pages | Profile page', () => {
                   <div
                     class="c17"
                   >
-                    <h2
-                      class="c18"
+                    <div
+                      class="c32"
                     >
-                      Experience
-                    </h2>
+                      <h2
+                        class="c18"
+                      >
+                        Experience
+                      </h2>
+                      <span
+                        class="c33"
+                      >
+                        Selection will change the interface language only for you. Please refer to this 
+                        <a
+                          href="https://docs.strapi.io/developer-docs/latest/development/admin-customization.html#locales"
+                          rel="noopener noreferrer"
+                          target="_blank"
+                        >
+                          documentation
+                        </a>
+                         to make other languages available for your team.
+                      </span>
+                    </div>
                     <div
                       class="c19"
                     >
@@ -1168,17 +1210,17 @@ describe('ADMIN | Pages | Profile page', () => {
                         >
                           <div>
                             <div
-                              class="c32"
+                              class="c34"
                             >
                               <span
-                                class="c33"
+                                class="c35"
                                 for="select-1"
                                 id="select-1-label"
                               >
                                 Interface language
                               </span>
                               <div
-                                class="c34 c35"
+                                class="c36 c37"
                               >
                                 <button
                                   aria-describedby="select-1-hint"
@@ -1186,21 +1228,21 @@ describe('ADMIN | Pages | Profile page', () => {
                                   aria-expanded="false"
                                   aria-haspopup="listbox"
                                   aria-labelledby="select-1-label select-1-content"
-                                  class="c36"
+                                  class="c38"
                                   id="select-1"
                                   type="button"
                                 />
                                 <div
-                                  class="c37 c38"
+                                  class="c39 c40"
                                 >
                                   <div
-                                    class="c34"
+                                    class="c36"
                                   >
                                     <div
-                                      class="c39"
+                                      class="c41"
                                     >
                                       <span
-                                        class="c40"
+                                        class="c42"
                                         id="select-1-content"
                                       >
                                         Select
@@ -1208,12 +1250,12 @@ describe('ADMIN | Pages | Profile page', () => {
                                     </div>
                                   </div>
                                   <div
-                                    class="c34"
+                                    class="c36"
                                   >
                                     <button
                                       aria-disabled="false"
                                       aria-label="Clear the interface language selected"
-                                      class="c41"
+                                      class="c43"
                                     >
                                       <svg
                                         fill="none"
@@ -1230,7 +1272,7 @@ describe('ADMIN | Pages | Profile page', () => {
                                     </button>
                                     <button
                                       aria-hidden="true"
-                                      class="c42 c41 c43"
+                                      class="c44 c43 c45"
                                       tabindex="-1"
                                       type="button"
                                     >
@@ -1253,7 +1295,7 @@ describe('ADMIN | Pages | Profile page', () => {
                                 </div>
                               </div>
                               <p
-                                class="c44"
+                                class="c46"
                                 id="select-1-hint"
                               >
                                 This will only display your own interface in the chosen language.
