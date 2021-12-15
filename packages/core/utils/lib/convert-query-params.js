@@ -4,7 +4,7 @@
  * Converts the standard Strapi REST query params to a more usable format for querying
  * You can read more here: https://docs.strapi.io/developer-docs/latest/developer-resources/database-apis-reference/rest-api.html#filters
  */
-const { has } = require('lodash/fp');
+const { has, isEmpty } = require('lodash/fp');
 const _ = require('lodash');
 const parseType = require('./parse-type');
 const contentTypesUtils = require('./content-types');
@@ -218,7 +218,74 @@ const convertFieldsQueryParams = (fields, depth = 0) => {
   throw new Error('Invalid fields parameter. Expected a string or an array of strings');
 };
 
-const convertFiltersQueryParams = filters => filters;
+const convertFiltersQueryParams = (filters, type) => {
+  const sanitizeFilters = (filters, type) => {
+    if (Array.isArray(filters)) {
+      return filters.map(filter => sanitizeFilters(filter, type));
+    }
+
+    for (const operator in filters) {
+      const attribute = type.attributes[operator];
+
+      if (attribute) {
+        if (attribute.type === 'password') {
+          delete filters[operator];
+        }
+
+        if (attribute.type === 'relation') {
+          sanitizeFilters(filters[operator], strapi.getModel(attribute.target));
+
+          if (isEmpty(filters[operator])) {
+            delete filters[operator];
+          }
+        }
+
+        continue;
+      }
+
+      if (!Array.isArray(filters[operator])) {
+        throw new Error(`You can't filter on an attribute that doens't exists`);
+      }
+
+      filters[operator] = filters[operator].filter(filter => {
+        if (isEmpty(filter)) {
+          return false;
+        }
+
+        const key = Object.keys(filter)[0];
+
+        if (['$and', '$or', '$not'].includes(key)) {
+          sanitizeFilters(filter, type);
+          return true;
+        }
+
+        const attribute = type.attributes[key];
+
+        if (!attribute) {
+          throw new Error(`You can't filter on an attribute that doens't exists`);
+        }
+
+        if (attribute.type === 'password') {
+          return false;
+        }
+
+        if (attribute.type === 'relation') {
+          sanitizeFilters(filter[key], strapi.getModel(attribute.target));
+
+          if (isEmpty(filter)) {
+            return false;
+          }
+        }
+
+        return true;
+      });
+    }
+
+    return filters;
+  };
+
+  return sanitizeFilters(filters, type);
+};
 
 const convertPublicationStateParams = (type, params = {}, query = {}) => {
   if (!type) {
