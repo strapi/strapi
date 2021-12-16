@@ -149,6 +149,34 @@ describe('CONTENT MANAGER | EditView | Header', () => {
             <span
               class="c6"
             >
+              Created
+            </span>
+            <span
+              class="c7"
+            >
+              now
+            </span>
+          </div>
+          <div
+            class="c5"
+          >
+            <span
+              class="c6"
+            >
+              By
+            </span>
+            <span
+              class="c7"
+            >
+              -
+            </span>
+          </div>
+          <div
+            class="c5"
+          >
+            <span
+              class="c6"
+            >
               Last update
             </span>
             <span

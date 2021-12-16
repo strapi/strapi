@@ -523,6 +523,7 @@
   "content-manager.containers.Edit.information.by": "By",
   "content-manager.containers.Edit.information.draftVersion": "draft version",
   "content-manager.containers.Edit.information.editing": "Editing",
+  "content-manager.containers.Edit.information.created": "Created",
   "content-manager.containers.Edit.information.lastUpdate": "Last update",
   "content-manager.containers.Edit.information.publishedVersion": "published version",
   "content-manager.containers.Edit.pluginHeader.title.new": "Create an entry",
