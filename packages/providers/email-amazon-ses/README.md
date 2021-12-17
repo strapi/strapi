@@ -53,6 +53,7 @@ module.exports = ({ env }) => ({
         key: env('AWS_SES_KEY'),
         secret: env('AWS_SES_SECRET'),
         region: 'us-east-1',
+        endpoint: 'https://email.us-east-1.amazonaws.com', // Optional. The default endpoint is built from the configured region. The endpoint should be a string like 'https://{service}.{region}.amazonaws.com' or an Endpoint object.
       },
       settings: {
         defaultFrom: 'myemail@protonmail.com',
