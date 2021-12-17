@@ -34,7 +34,7 @@ EmptyStateLayout.defaultProps = {
   action: undefined,
   content: {
     id: 'app.components.EmptyStateLayout.content-document',
-    defaultMessage: "You don't have any content yet...",
+    defaultMessage: 'No content found',
     values: {},
   },
   hasRadius: true,

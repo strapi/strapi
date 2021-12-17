@@ -8,3 +8,6 @@ package-lock.json
 .DS_Store
 npm-debug.log
 .idea
+
+# Tests related folders
+**/__tests__/output
