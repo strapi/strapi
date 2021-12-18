@@ -266,7 +266,7 @@
   "app.components.HomePage.roadmap": "Voir notre roadmap",
   "app.components.HomePage.welcome": "Bienvenue à bord !",
   "app.components.HomePage.welcome.again": "Bienvenue ",
-  "app.components.HomePage.welcomeBlock.content": "Nous sommes heureux de vous compter parmi nos membres. Nous sommes à l'écoute de vos retours alors, n'hésitez pas à nous envoyer des DM sur ",
+  "app.components.HomePage.welcomeBlock.content": "Félicitations! Vous êtes connecté en tant que tout premier administrateur. Pour découvrir les puissantes fonctionnalités fournies par Strapi, nous vous recommandons de créer votre premier Type de Contenu !",
   "app.components.HomePage.welcomeBlock.content.again": "Nous espérons que votre projet avance bien... Découvrez les derniers articles à propos de Strapi. Nous faisons de notre mieux pour améliorer le produit selon vos retours.",
   "app.components.HomePage.welcomeBlock.content.issues": "issues",
   "app.components.HomePage.welcomeBlock.content.raise": " ou soumettez des ",
