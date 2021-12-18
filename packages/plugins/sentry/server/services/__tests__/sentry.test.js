@@ -2,7 +2,8 @@
 
 const INVALID_DSN = 'an_invalid_dsn';
 const VALID_DSN = 'a_valid_dsn';
-const captureException = jest.fn();
+const mockCaptureException = jest.fn();
+
 // FIXME
 /* eslint-disable import/extensions */
 jest.mock('@sentry/node', () => {
@@ -12,7 +13,7 @@ jest.mock('@sentry/node', () => {
         throw Error();
       }
     },
-    captureException,
+    captureException: mockCaptureException,
     withScope(configureScope) {
       configureScope();
     },
@@ -83,7 +84,7 @@ describe('Sentry service', () => {
     const configureScope = jest.fn();
     sentryService.sendError(error, configureScope);
     expect(configureScope).toHaveBeenCalled();
-    expect(captureException).toHaveBeenCalled();
+    expect(mockCaptureException).toHaveBeenCalled();
   });
 
   it('does not not send metadata when the option is disabled', () => {

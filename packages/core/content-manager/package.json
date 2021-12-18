@@ -19,6 +19,9 @@
       "url": "https://strapi.io"
     }
   ],
+  "scripts": {
+    "test:unit": "jest --verbose"
+  },
   "dependencies": {
     "@sindresorhus/slugify": "1.1.0",
     "@strapi/utils": "4.0.0",

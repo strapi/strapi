@@ -25,7 +25,7 @@ export const CarouselAsset = ({ asset }) => {
     return (
       <VideoPreviewWrapper height="100%">
         <VideoPreview
-          url={createAssetUrl(asset)}
+          url={createAssetUrl(asset, true)}
           mime={asset.mime}
           alt={asset.alternativeText || asset.name}
         />
@@ -39,7 +39,7 @@ export const CarouselAsset = ({ asset }) => {
         as="img"
         maxHeight="100%"
         maxWidth="100%"
-        src={createAssetUrl(asset)}
+        src={createAssetUrl(asset, true)}
         alt={asset.alternativeText || asset.name}
       />
     );

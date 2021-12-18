@@ -57,13 +57,10 @@ const ComponentInitializer = ({ error, isReadOnly, onClick }) => {
       </Box>
       {error?.id && (
         <Typography textColor="danger600" variant="pi">
-          {formatMessage(
-            {
-              id: error.id,
-              defaultMessage: error.defaultMessage,
-            },
-            error.values
-          )}
+          {formatMessage({
+            id: error.id,
+            defaultMessage: error.id,
+          })}
         </Typography>
       )}
     </>
@@ -78,8 +75,6 @@ ComponentInitializer.defaultProps = {
 ComponentInitializer.propTypes = {
   error: PropTypes.shape({
     id: PropTypes.string.isRequired,
-    defaultMessage: PropTypes.string.isRequired,
-    values: PropTypes.object,
   }),
   isReadOnly: PropTypes.bool,
   onClick: PropTypes.func.isRequired,

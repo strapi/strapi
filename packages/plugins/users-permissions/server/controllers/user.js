@@ -134,7 +134,7 @@ module.exports = {
    * @return {Object|Array}
    */
   async find(ctx, next, { populate } = {}) {
-    const users = await getService('user').fetchAll(ctx.query, populate);
+    const users = await getService('user').fetchAll(ctx.query.filters, populate);
 
     ctx.body = await Promise.all(users.map(user => sanitizeOutput(user, ctx)));
   },
