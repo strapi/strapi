@@ -1,6 +1,6 @@
 'use strict';
 
-const uuid = require('uuid/v4');
+const crypto = require('crypto');
 const { defaultsDeep, isEmpty, omit, has } = require('lodash/fp');
 const session = require('koa-session');
 
@@ -28,11 +28,11 @@ module.exports = (userConfig, { strapi }) => {
     } else {
       // auto generate secret keys if they are not provided
       for (let i = 0; i < 4; i++) {
-        secretKeys.push(uuid());
+        secretKeys.push(crypto.randomBytes(64).toString('hex'));
       }
       strapi.fs.appendFile('.env', `SESSION_SECRET_KEYS=${secretKeys.join(',')}\n`);
-      console.log(
-        'ℹ️  The session middleware automatically generated some secret keys and stored them in your .env file under the name SESSION_SECRET_KEYS.'
+      strapi.log.info(
+        'The session middleware automatically generated some secret keys and stored them in your .env file under the name SESSION_SECRET_KEYS.'
       );
     }
 
@@ -42,9 +42,4 @@ module.exports = (userConfig, { strapi }) => {
   const config = defaultsDeep(defaultConfig, omit('secretKeys', userConfig));
 
   strapi.server.use(session(config, strapi.server.app));
-  strapi.server.use((ctx, next) => {
-    ctx.state = defaultsDeep({ session: {} }, ctx.state);
-
-    return next();
-  });
 };
