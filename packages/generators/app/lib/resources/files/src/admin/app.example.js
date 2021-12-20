@@ -2,7 +2,7 @@ export default {
   config: {
     locales: [
       // 'ar',
-      'fr',
+      // 'fr',
       // 'cs',
       // 'de',
       // 'dk',
@@ -29,5 +29,7 @@ export default {
       // 'zh',
     ],
   },
-  bootstrap() {},
+  bootstrap(app) {
+    console.log(app);
+  },
 };
