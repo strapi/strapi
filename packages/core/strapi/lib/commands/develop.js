@@ -10,6 +10,7 @@ const { getOr } = require('lodash/fp');
 const { createLogger } = require('@strapi/logger');
 const loadConfiguration = require('../core/app-configuration');
 const strapi = require('../index');
+const buildAdmin = require('./build');
 
 /**
  * `$ strapi develop`
@@ -28,10 +29,7 @@ module.exports = async function({ build, watchAdmin, polling, browser }) {
       // Don't run the build process if the admin is in watch mode
       if (build && !watchAdmin && serveAdminPanel && !buildExists) {
         try {
-          execa.sync('npm run -s build -- --no-optimization --use-default-build', {
-            stdio: 'inherit',
-            shell: true,
-          });
+          await buildAdmin({ clean: false, optimization: false, forceBuild: false });
         } catch (err) {
           process.exit(1);
         }

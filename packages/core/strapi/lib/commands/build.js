@@ -12,7 +12,7 @@ const getEnabledPlugins = require('../core/loaders/plugins/get-enabled-plugins')
 /**
  * `$ strapi build`
  */
-module.exports = async ({ clean, optimization, useDefaultBuild }) => {
+module.exports = async ({ clean, optimization, forceBuild = true }) => {
   const dir = process.cwd();
 
   const strapiInstance = strapi({
@@ -36,7 +36,7 @@ module.exports = async ({ clean, optimization, useDefaultBuild }) => {
 
   return strapiAdmin
     .build({
-      useDefaultBuild,
+      forceBuild,
       dir,
       plugins,
       // front end build env is always production for now
@@ -49,8 +49,6 @@ module.exports = async ({ clean, optimization, useDefaultBuild }) => {
     })
     .then(() => {
       console.log('Admin UI build successfully');
-
-      process.exit();
     })
     .catch(err => {
       console.error(err);

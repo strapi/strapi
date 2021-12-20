@@ -43,10 +43,10 @@ function getCustomWebpackConfig(dir, config) {
   return webpackConfig;
 }
 
-async function build({ plugins, dir, env, options, optimize, useDefaultBuild }) {
+async function build({ plugins, dir, env, options, optimize, forceBuild }) {
   const buildAdmin = await shouldBuildAdmin({ dir, plugins });
 
-  if (!buildAdmin && useDefaultBuild) {
+  if (!buildAdmin && !forceBuild) {
     return;
   }
 
