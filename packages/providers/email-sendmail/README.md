@@ -1,27 +1,24 @@
-# strapi-provider-email-sendmail
+# @strapi/provider-email-sendmail
 
 ## Resources
 
-- [License](LICENSE)
+- [LICENSE](LICENSE)
 
 ## Links
 
 - [Strapi website](https://strapi.io/)
-- [Strapi community on Slack](https://slack.strapi.io)
+- [Strapi documentation](https://docs.strapi.io)
+- [Strapi community on Discord](https://discord.strapi.io)
 - [Strapi news on Twitter](https://twitter.com/strapijs)
-
-## Prerequisites
-
-You need to have the plugin `strapi-plugin-email` installed in you Strapi project.
 
 ## Installation
 
 ```bash
 # using yarn
-yarn add strapi-provider-email-sendmail
+yarn add @strapi/provider-email-sendmail
 
 # using npm
-npm install strapi-provider-email-sendmail --save
+npm install @strapi/provider-email-sendmail --save
 ```
 
 ## Configuration
@@ -45,10 +42,12 @@ npm install strapi-provider-email-sendmail --save
 module.exports = ({ env }) => ({
   // ...
   email: {
-    provider: 'sendmail',
-    settings: {
-      defaultFrom: 'myemail@protonmail.com',
-      defaultReplyTo: 'myemail@protonmail.com',
+    config: {
+      provider: 'sendmail',
+      settings: {
+        defaultFrom: 'myemail@protonmail.com',
+        defaultReplyTo: 'myemail@protonmail.com',
+      },
     },
   },
   // ...

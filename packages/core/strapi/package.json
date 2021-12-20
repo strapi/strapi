@@ -74,7 +74,8 @@
     "bin": "./bin"
   },
   "scripts": {
-    "postinstall": "node lib/utils/success.js"
+    "postinstall": "node lib/utils/success.js",
+    "test:unit": "jest --verbose"
   },
   "dependencies": {
     "@koa/cors": "3.1.0",

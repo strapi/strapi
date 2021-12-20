@@ -16,6 +16,7 @@ const DynamicTable = ({
   canCreate,
   canDelete,
   contentTypeName,
+  action,
   isBulkable,
   isLoading,
   onConfirmDelete,
@@ -77,6 +78,7 @@ const DynamicTable = ({
     <Table
       components={{ ConfirmDialogDelete, ConfirmDialogDeleteAll }}
       contentType={contentTypeName}
+      action={action}
       isLoading={isLoading}
       headers={tableHeaders}
       onConfirmDelete={onConfirmDelete}
@@ -98,10 +100,15 @@ const DynamicTable = ({
   );
 };
 
+DynamicTable.defaultProps = {
+  action: undefined,
+};
+
 DynamicTable.propTypes = {
   canCreate: PropTypes.bool.isRequired,
   canDelete: PropTypes.bool.isRequired,
   contentTypeName: PropTypes.string.isRequired,
+  action: PropTypes.node,
   isBulkable: PropTypes.bool.isRequired,
   isLoading: PropTypes.bool.isRequired,
   layout: PropTypes.exact({

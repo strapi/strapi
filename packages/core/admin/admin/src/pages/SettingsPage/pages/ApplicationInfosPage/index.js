@@ -26,10 +26,10 @@ const ApplicationInfosPage = () => {
       <SettingsPageTitle name="Application" />
       <Main>
         <HeaderLayout
-          title={formatMessage({ id: 'Settings.application.title', defaultMessage: 'Application' })}
+          title={formatMessage({ id: 'Settings.application.title', defaultMessage: 'Overview' })}
           subtitle={formatMessage({
             id: 'Settings.application.description',
-            defaultMessage: "See your project's details",
+            defaultMessage: 'Administration panel’s global information',
           })}
         />
         <ContentLayout>
@@ -45,8 +45,8 @@ const ApplicationInfosPage = () => {
             <Stack size={5}>
               <Typography variant="delta" as="h3">
                 {formatMessage({
-                  id: 'Settings.application.information',
-                  defaultMessage: 'Information',
+                  id: 'Settings.application.details',
+                  defaultMessage: 'Details',
                 })}
               </Typography>
 
@@ -54,11 +54,24 @@ const ApplicationInfosPage = () => {
                 <GridItem col={6} s={12}>
                   <Typography variant="sigma" textColor="neutral600">
                     {formatMessage({
-                      id: 'Settings.application.details',
-                      defaultMessage: 'details',
+                      id: 'Settings.application.strapiVersion',
+                      defaultMessage: 'strapi version',
                     })}
                   </Typography>
                   <Typography as="p">v{strapiVersion}</Typography>
+                  <Link
+                    href={
+                      appInfos.communityEdition
+                        ? 'https://discord.strapi.io'
+                        : 'https://support.strapi.io/support/home'
+                    }
+                    endIcon={<ExternalLink />}
+                  >
+                    {formatMessage({
+                      id: 'Settings.application.get-help',
+                      defaultMessage: 'Get help',
+                    })}
+                  </Link>
                 </GridItem>
                 <GridItem col={6} s={12}>
                   <Typography variant="sigma" textColor="neutral600">
@@ -96,7 +109,7 @@ const ApplicationInfosPage = () => {
                   <Link href="https://strapi.io/pricing-self-hosted" endIcon={<ExternalLink />}>
                     {formatMessage({
                       id: 'Settings.application.link-pricing',
-                      defaultMessage: 'See all pricing',
+                      defaultMessage: 'See all pricing plans',
                     })}
                   </Link>
                 </GridItem>

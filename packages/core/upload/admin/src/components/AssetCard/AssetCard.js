@@ -27,7 +27,7 @@ export const AssetCard = ({ allowedTypes, asset, isSelected, onSelect, onEdit, s
         key={asset.id}
         name={asset.name}
         extension={getFileExtension(asset.ext)}
-        url={local ? asset.url : createAssetUrl(asset)}
+        url={local ? asset.url : createAssetUrl(asset, true)}
         mime={asset.mime}
         onEdit={onEdit ? () => onEdit(asset) : undefined}
         onSelect={handleSelect}

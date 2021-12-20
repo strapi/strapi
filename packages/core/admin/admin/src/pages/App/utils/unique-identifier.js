@@ -4,7 +4,9 @@ const getUniqueIdentifier = async () => {
   const fp = await FingerprintJS.load();
   const result = await fp.get();
 
-  return result.visitorId;
+  const deviceId = `web-fingerprint-${result.visitorId}`;
+
+  return deviceId;
 };
 
 export default getUniqueIdentifier;

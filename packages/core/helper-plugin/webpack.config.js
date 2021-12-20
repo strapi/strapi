@@ -41,9 +41,11 @@ module.exports = {
 
       {
         test: /\.(png|svg|jpg|gif)$/,
-        loader: 'url-loader',
-        options: {
-          limit: 8192,
+        type: 'asset',
+        parser: {
+          dataUrlCondition: {
+            maxSize: 8192,
+          },
         },
       },
     ],

@@ -41,7 +41,8 @@ export const PreviewBox = ({
 }) => {
   const { trackUsage } = useTracking();
   const previewRef = useRef(null);
-  const [assetUrl, setAssetUrl] = useState(createAssetUrl(asset));
+  const [assetUrl, setAssetUrl] = useState(createAssetUrl(asset, false));
+  const [thumbnailUrl, setThumbnailUrl] = useState(createAssetUrl(asset, true));
   const { formatMessage } = useIntl();
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const {
@@ -73,6 +74,7 @@ export const PreviewBox = ({
         asset.url = fileLocalUrl;
       }
       setAssetUrl(fileLocalUrl);
+      setThumbnailUrl(fileLocalUrl);
     }
   }, [replacementFile, asset]);
 
@@ -83,16 +85,19 @@ export const PreviewBox = ({
     // Making sure that when persisting the new asset, the URL changes with width and height
     // So that the browser makes a request and handle the image caching correctly at the good size
     let optimizedCachingImage;
+    let optimizedCachingThumbnailImage;
 
     if (asset.isLocal) {
       optimizedCachingImage = URL.createObjectURL(file);
+      optimizedCachingThumbnailImage = optimizedCachingImage;
       asset.url = optimizedCachingImage;
       asset.rawFile = file;
 
       trackUsage('didCropFile', { duplicatedFile: null, location: trackedLocation });
     } else {
       const updatedAsset = await editAsset(nextAsset, file);
-      optimizedCachingImage = createAssetUrl(updatedAsset);
+      optimizedCachingImage = createAssetUrl(updatedAsset, false);
+      optimizedCachingThumbnailImage = createAssetUrl(updatedAsset, true);
 
       trackUsage('didCropFile', { duplicatedFile: false, location: trackedLocation });
     }
@@ -100,6 +105,7 @@ export const PreviewBox = ({
     stopCropping();
     onCropCancel();
     setAssetUrl(optimizedCachingImage);
+    setThumbnailUrl(optimizedCachingThumbnailImage);
   };
 
   const isInCroppingMode = isCropping && !isLoading;
@@ -192,7 +198,7 @@ export const PreviewBox = ({
             </UploadProgressWrapper>
           )}
 
-          <AssetPreview ref={previewRef} mime={asset.mime} name={asset.name} url={assetUrl} />
+          <AssetPreview ref={previewRef} mime={asset.mime} name={asset.name} url={thumbnailUrl} />
         </Wrapper>
 
         <ActionRow

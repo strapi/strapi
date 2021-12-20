@@ -23,7 +23,9 @@ const cmPermissions = permissions.contentManager;
 const App = () => {
   const contentTypeMatch = useRouteMatch(`/content-manager/:kind/:uid`);
   const { status, collectionTypeLinks, singleTypeLinks, models, refetchData } = useModels();
-  const authorisedModels = sortBy([...collectionTypeLinks, ...singleTypeLinks], 'title');
+  const authorisedModels = sortBy([...collectionTypeLinks, ...singleTypeLinks], model =>
+    model.title.toLowerCase()
+  );
   const { pathname } = useLocation();
   const { formatMessage } = useIntl();
 
