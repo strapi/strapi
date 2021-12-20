@@ -96,7 +96,34 @@ module.exports = {
       strapi.log.error(e);
     }
   },
+  async getApiSpecJson(ctx) {
+    const { major, minor, patch } = ctx.params;
+    const version =
+      major && minor && patch
+        ? `${major}.${minor}.${patch}`
+        : strapi
+            .plugin('documentation')
+            .service('documentation')
+            .getDocumentationVersion();
 
+    const openAPISpecsPath = path.join(
+      strapi.dirs.extensions,
+      'documentation',
+      'documentation',
+      version,
+      'full_documentation.json'
+    );
+    try {
+      const documentation = fs.readFileSync(openAPISpecsPath, 'utf8');
+      return JSON.parse(documentation);
+    } catch (err) {
+      if (err && err.code === 'ENOENT') {
+        ctx.response.status = 404;
+        return;
+      }
+      throw err;
+    }
+  },
   async loginView(ctx, next) {
     // lazy require cheerio
     const cheerio = require('cheerio');

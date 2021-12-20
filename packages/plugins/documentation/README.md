@@ -70,6 +70,17 @@ It has the following structure
   "components": {} // Default generated components and custom ones
 }
 ```
+### `swagger.json` and `openapi.json` files
+
+This plugin is able to serve up these files. The endpoints exposed are (assuming you use the default `/documentation` base
+URL):
+
+- `/documentation/swagger.json` or `/documentation/openapi.json`: the OpenAPI
+  spec for the latest version of your API. Both endpoints serve the same
+  document.
+- `/documentation/vN.N.N/swagger.json` or
+  `/documentation/vN.N.N/openapi.json`: request the spec for a specific
+  version of your API. For example: `/documentation/v1.0.0/openapi.json`
 
 ### Overriding the suggested documentation
 

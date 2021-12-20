@@ -80,4 +80,40 @@ module.exports = [
       policies: [],
     },
   },
+  {
+    method: "GET",
+    path: "/v:major(\\d+).:minor(\\d+).:patch(\\d+)/swagger.json",
+    handler: "documentation.getApiSpecJson",
+    config: {
+      auth: false,
+      middlewares: [restrictAccess],
+    },
+  },
+  {
+    method: "GET",
+    path: "/v:major(\\d+).:minor(\\d+).:patch(\\d+)/openapi.json",
+    handler: "documentation.getApiSpecJson",
+    config: {
+      auth: false,
+      middlewares: [restrictAccess],
+    },
+  },
+  {
+    method: "GET",
+    path: "/swagger.json",
+    handler: "documentation.getApiSpecJson",
+    config: {
+      auth: false,
+      middlewares: [restrictAccess],
+    },
+  },
+  {
+    method: "GET",
+    path: "/openapi.json",
+    handler: "documentation.getApiSpecJson",
+    config: {
+      auth: false,
+      middlewares: [restrictAccess],
+    },
+  },
 ];
