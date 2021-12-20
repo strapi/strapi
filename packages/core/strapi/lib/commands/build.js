@@ -48,7 +48,7 @@ module.exports = async ({ clean, optimization, forceBuild = true }) => {
       },
     })
     .then(() => {
-      console.log('Admin UI build successfully');
+      console.log('Admin UI built successfully');
     })
     .catch(err => {
       console.error(err);
