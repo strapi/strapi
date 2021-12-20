@@ -25,7 +25,7 @@ module.exports = {
             config.filename = `${file.hash}${file.ext}`;
           }
 
-          const upload_stream = cloudinary.uploader.upload_stream(
+          const upload_stream = cloudinary.uploader.upload_chunked_stream(
             { ...config, ...customConfig },
             (err, image) => {
               if (err) {
