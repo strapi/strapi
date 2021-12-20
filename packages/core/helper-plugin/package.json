@@ -34,7 +34,8 @@
     "create:index": "node ./createBuildIndex.js",
     "prepublishOnly": "npm run build",
     "storybook": "start-storybook -p 6006",
-    "test": "echo \"no tests yet\"",
+    "test:front": "jest --config ./jest.config.front.js",
+    "test:front:watch": "jest --config ./jest.config.front.js --watchAll",
     "watch": "yarn create:index && cross-env NODE_ENV=development webpack-cli -w"
   },
   "dependencies": {
@@ -51,6 +52,7 @@
     "invariant": "^2.2.1",
     "lodash": "4.17.21",
     "match-sorter": "^4.0.2",
+    "mini-css-extract-plugin": "2.4.4",
     "moment": "^2.29.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",

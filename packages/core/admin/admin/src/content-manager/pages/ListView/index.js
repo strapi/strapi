@@ -24,6 +24,8 @@ import { Box } from '@strapi/design-system/Box';
 import { ActionLayout, ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
 import { useNotifyAT } from '@strapi/design-system/LiveRegions';
 import { Button } from '@strapi/design-system/Button';
+import { Link } from '@strapi/design-system/Link';
+import ArrowLeft from '@strapi/icons/ArrowLeft';
 import Plus from '@strapi/icons/Plus';
 import Cog from '@strapi/icons/Cog';
 import axios from 'axios';
@@ -234,29 +236,43 @@ function ListView({
       )
     : null;
 
-  const createAction = canCreate ? (
-    <Button
-      onClick={() => {
-        const trackerProperty = hasDraftAndPublish ? { status: 'draft' } : {};
+  const getCreateAction = props =>
+    canCreate ? (
+      <Button
+        {...props}
+        onClick={() => {
+          const trackerProperty = hasDraftAndPublish ? { status: 'draft' } : {};
 
-        trackUsageRef.current('willCreateEntry', trackerProperty);
-        push({
-          pathname: `${pathname}/create`,
-          search: query.plugins ? pluginsQueryParams : '',
-        });
-      }}
-      startIcon={<Plus />}
-    >
-      {formatMessage({
-        id: getTrad('HeaderLayout.button.label-add-entry'),
-        defaultMessage: 'Add new entry',
-      })}
-    </Button>
-  ) : null;
+          trackUsageRef.current('willCreateEntry', trackerProperty);
+          push({
+            pathname: `${pathname}/create`,
+            search: query.plugins ? pluginsQueryParams : '',
+          });
+        }}
+        startIcon={<Plus />}
+      >
+        {formatMessage({
+          id: getTrad('HeaderLayout.button.label-add-entry'),
+          defaultMessage: 'Create new entry',
+        })}
+      </Button>
+    ) : null;
 
   return (
     <Main aria-busy={isLoading}>
-      <HeaderLayout primaryAction={createAction} subtitle={subtitle} title={headerLayoutTitle} />
+      <HeaderLayout
+        primaryAction={getCreateAction()}
+        subtitle={subtitle}
+        title={headerLayoutTitle}
+        navigationAction={
+          <Link startIcon={<ArrowLeft />} to="/content-manager/">
+            {formatMessage({
+              id: 'app.components.HeaderLayout.link.go-back',
+              defaultMessage: 'Back',
+            })}
+          </Link>
+        }
+      />
       {!canRead && (
         <ActionLayout endActions={<InjectionZone area="contentManager.listView.actions" />} />
       )}
@@ -320,6 +336,7 @@ function ListView({
               // FIXME: remove the layout props drilling
               layout={layout}
               rows={data}
+              action={getCreateAction({ variant: 'secondary' })}
             />
             <PaginationFooter pagination={{ pageCount: pagination?.pageCount || 1 }} />
           </>

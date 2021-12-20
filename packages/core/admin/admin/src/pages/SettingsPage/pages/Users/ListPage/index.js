@@ -16,7 +16,6 @@ import Envelop from '@strapi/icons/Envelop';
 import { useLocation } from 'react-router-dom';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
-import get from 'lodash/get';
 import adminPermissions from '../../../../../permissions';
 import TableRows from './DynamicTable/TableRows';
 import Filters from './Filters';
@@ -73,8 +72,6 @@ const ListPage = () => {
     setIsModalOpen(prev => !prev);
   };
 
-  const total = get(data, 'pagination.total', 0);
-
   const deleteAllMutation = useMutation(ids => deleteData(ids), {
     onSuccess: async () => {
       await queryClient.invalidateQueries(queryName);
@@ -104,7 +101,7 @@ const ListPage = () => {
     >
       {formatMessage({
         id: 'Settings.permissions.users.create',
-        defaultMessage: 'Create new user',
+        defaultMessage: 'Invite new user',
       })}
     </Button>
   ) : (
@@ -117,13 +114,10 @@ const ListPage = () => {
       <HeaderLayout
         primaryAction={createAction}
         title={title}
-        subtitle={formatMessage(
-          {
-            id: 'Settings.permissions.users.listview.header.subtitle',
-            defaultMessage: '{number, plural, =0 {# users} one {# user} other {# users}} found',
-          },
-          { number: total }
-        )}
+        subtitle={formatMessage({
+          id: 'Settings.permissions.users.listview.header.subtitle',
+          defaultMessage: 'All the users who have access to the Strapi admin panel',
+        })}
       />
       {canRead && (
         <ActionLayout

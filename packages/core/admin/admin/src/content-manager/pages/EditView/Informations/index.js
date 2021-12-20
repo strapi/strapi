@@ -13,19 +13,25 @@ import { getFullName } from '../../../../utils';
 const Informations = () => {
   const { formatMessage, formatRelativeTime } = useIntl();
   const { initialData, isCreatingEntry } = useCMEditViewDataManager();
-
-  const updatedAt = 'updatedAt';
-  const updatedByFirstname = initialData.updatedBy?.firstname || '';
-  const updatedByLastname = initialData.updatedBy?.lastname || '';
-  const updatedByUsername = initialData.updatedBy?.username;
-  const updatedBy = updatedByUsername || getFullName(updatedByFirstname, updatedByLastname);
   const currentTime = useRef(Date.now());
-  const timestamp = initialData[updatedAt]
-    ? new Date(initialData[updatedAt]).getTime()
-    : Date.now();
-  const elapsed = timestamp - currentTime.current;
 
-  const { unit, value } = getUnits(-elapsed);
+  const getFieldInfo = (atField, byField) => {
+    const userFirstname = initialData[byField]?.firstname || '';
+    const userLastname = initialData[byField]?.lastname || '';
+    const userUsername = initialData[byField]?.username;
+    const user = userUsername || getFullName(userFirstname, userLastname);
+    const timestamp = initialData[atField] ? new Date(initialData[atField]).getTime() : Date.now();
+    const elapsed = timestamp - currentTime.current;
+    const { unit, value } = getUnits(-elapsed);
+
+    return {
+      at: formatRelativeTime(value, unit, { numeric: 'auto' }),
+      by: isCreatingEntry ? '-' : user,
+    };
+  };
+
+  const updated = getFieldInfo('updatedAt', 'updatedBy');
+  const created = getFieldInfo('createdAt', 'createdBy');
 
   return (
     <Box>
@@ -42,11 +48,11 @@ const Informations = () => {
         <Flex justifyContent="space-between">
           <Typography fontWeight="bold">
             {formatMessage({
-              id: getTrad('containers.Edit.information.lastUpdate'),
-              defaultMessage: 'Last update',
+              id: getTrad('containers.Edit.information.created'),
+              defaultMessage: 'Created',
             })}
           </Typography>
-          <Typography>{formatRelativeTime(value, unit, { numeric: 'auto' })}</Typography>
+          <Typography>{created.at}</Typography>
         </Flex>
         <Flex justifyContent="space-between">
           <Typography fontWeight="bold">
@@ -55,7 +61,25 @@ const Informations = () => {
               defaultMessage: 'By',
             })}
           </Typography>
-          <Typography>{isCreatingEntry ? '-' : updatedBy}</Typography>
+          <Typography>{created.by}</Typography>
+        </Flex>
+        <Flex justifyContent="space-between">
+          <Typography fontWeight="bold">
+            {formatMessage({
+              id: getTrad('containers.Edit.information.lastUpdate'),
+              defaultMessage: 'Last update',
+            })}
+          </Typography>
+          <Typography>{updated.at}</Typography>
+        </Flex>
+        <Flex justifyContent="space-between">
+          <Typography fontWeight="bold">
+            {formatMessage({
+              id: getTrad('containers.Edit.information.by'),
+              defaultMessage: 'By',
+            })}
+          </Typography>
+          <Typography>{updated.by}</Typography>
         </Flex>
       </Stack>
     </Box>

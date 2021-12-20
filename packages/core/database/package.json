@@ -28,7 +28,7 @@
     "lib": "./lib"
   },
   "scripts": {
-    "test": "echo \"no tests yet\""
+    "test:unit": "jest --verbose"
   },
   "dependencies": {
     "date-fns": "2.22.1",

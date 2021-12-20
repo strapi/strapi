@@ -113,7 +113,8 @@ const getColumnType = attribute => {
     // We might want to convert email/password to string types before going into the orm with specific validators & transformers
     case 'password':
     case 'email':
-    case 'string': {
+    case 'string':
+    case 'enumeration': {
       return { type: 'string' };
     }
     case 'uid': {
@@ -131,15 +132,6 @@ const getColumnType = attribute => {
     }
     case 'json': {
       return { type: 'jsonb' };
-    }
-    case 'enumeration': {
-      return {
-        type: 'enum',
-        args: [
-          attribute.enum,
-          /*,{ useNative: true, existingType: true, enumName: 'foo_type', schemaName: 'public' }*/
-        ],
-      };
     }
     case 'integer': {
       return { type: 'integer' };

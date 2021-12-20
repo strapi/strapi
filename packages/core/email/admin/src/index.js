@@ -24,7 +24,7 @@ export default {
       [
         {
           intlLabel: {
-            id: getTrad('SettingsNav.link.settings'),
+            id: getTrad('Settings.email.plugin.title'),
             defaultMessage: 'Settings',
           },
           id: 'settings',

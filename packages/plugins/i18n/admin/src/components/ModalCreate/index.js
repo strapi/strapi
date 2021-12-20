@@ -61,7 +61,7 @@ const ModalCreate = ({ onClose }) => {
             <Typography fontWeight="bold" textColor="neutral800" as="h2" id="add-locale-title">
               {formatMessage({
                 id: getTrad('Settings.list.actions.add'),
-                defaultMessage: 'Add a locale',
+                defaultMessage: 'Add new locale',
               })}
             </Typography>
           </ModalHeader>
