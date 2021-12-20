@@ -200,10 +200,10 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
 
   const displayErrors = useCallback(
     err => {
-      const errorPayload = err.response.payload;
+      const errorPayload = err.response.data;
       console.error(errorPayload);
 
-      let errorMessage = get(errorPayload, ['message'], 'Bad Request');
+      let errorMessage = get(errorPayload, ['error', 'message'], 'Bad Request');
 
       // TODO handle errors correctly when back-end ready
       if (Array.isArray(errorMessage)) {
