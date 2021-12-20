@@ -15,7 +15,7 @@ const strapi = require('../index');
  * `$ strapi develop`
  *
  */
-module.exports = async function ({ build, watchAdmin, polling, browser }) {
+module.exports = async function({ build, watchAdmin, polling, browser }) {
   const dir = process.cwd();
   const config = loadConfiguration(dir);
   const logger = createLogger(config.logger, {});
@@ -28,7 +28,7 @@ module.exports = async function ({ build, watchAdmin, polling, browser }) {
       // Don't run the build process if the admin is in watch mode
       if (build && !watchAdmin && serveAdminPanel && !buildExists) {
         try {
-          execa.sync('npm run -s build -- --no-optimization', {
+          execa.sync('npm run -s build -- --no-optimization --use-default-build', {
             stdio: 'inherit',
             shell: true,
           });
@@ -81,7 +81,7 @@ module.exports = async function ({ build, watchAdmin, polling, browser }) {
         polling,
       });
 
-      process.on('message', async (message) => {
+      process.on('message', async message => {
         switch (message) {
           case 'kill':
             await strapiInstance.destroy();
@@ -140,15 +140,15 @@ function watchFileChanges({ dir, strapiInstance, watchIgnoreFiles, polling }) {
   });
 
   watcher
-    .on('add', (path) => {
+    .on('add', path => {
       strapiInstance.log.info(`File created: ${path}`);
       restart();
     })
-    .on('change', (path) => {
+    .on('change', path => {
       strapiInstance.log.info(`File changed: ${path}`);
       restart();
     })
-    .on('unlink', (path) => {
+    .on('unlink', path => {
       strapiInstance.log.info(`File deleted: ${path}`);
       restart();
     });

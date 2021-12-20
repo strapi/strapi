@@ -43,9 +43,10 @@ function getCustomWebpackConfig(dir, config) {
   return webpackConfig;
 }
 
-async function build({ plugins, dir, env, options, optimize }) {
+async function build({ plugins, dir, env, options, optimize, useDefaultBuild }) {
   const buildAdmin = await shouldBuildAdmin({ dir, plugins });
-  if (!buildAdmin) {
+
+  if (!buildAdmin && useDefaultBuild) {
     return;
   }
 
@@ -319,15 +320,14 @@ async function watchFiles(dir) {
 }
 
 const hasCustomAdminCode = async dir => {
-  const customAdminPath = path.join(dir, 'src/admin');
+  const customAdminPath = path.join(dir, 'src', 'admin');
+  const customAdminConfigFile = path.join(customAdminPath, 'app.js');
+  const customAdminWebpackFile = path.join(customAdminPath, 'webpack.config.js');
 
-  if (!(await fs.pathExists(customAdminPath))) {
-    return false;
-  }
+  const hasCustomConfigFile = await fs.pathExists(customAdminConfigFile);
+  const hasCustomWebpackFile = await fs.pathExists(customAdminWebpackFile);
 
-  const files = await fs.readdir(customAdminPath);
-
-  return files.length > 0;
+  return hasCustomConfigFile || hasCustomWebpackFile;
 };
 
 const hasNonDefaultPlugins = plugins => {
