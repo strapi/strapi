@@ -4,14 +4,16 @@ const crypto = require('crypto');
 const _ = require('lodash');
 const jwt = require('jsonwebtoken');
 
-const defaultJwtOptions = { expiresIn: '30d' };
+const defaultSignOptions = { expiresIn: '30d' };
+const defaultVerifyOptions = {};
 
 const getTokenOptions = () => {
-  const { options, secret } = strapi.config.get('admin.auth', {});
+  const { secret, signOptions, verifyOptions } = strapi.config.get('admin.auth', {});
 
   return {
     secret,
-    options: _.merge(defaultJwtOptions, options),
+    signOptions: _.merge(_.cloneDeep(defaultSignOptions), signOptions),
+    verifyOptions: _.merge(_.cloneDeep(defaultVerifyOptions), verifyOptions),
   };
 };
 
@@ -28,9 +30,9 @@ const createToken = () => {
  * @param {object} user - admin user
  */
 const createJwtToken = user => {
-  const { options, secret } = getTokenOptions();
+  const { signOptions, secret } = getTokenOptions();
 
-  return jwt.sign({ id: user.id }, secret, options);
+  return jwt.sign({ id: user.id }, secret, signOptions);
 };
 
 /**
@@ -39,10 +41,10 @@ const createJwtToken = user => {
  * @return {Object} decodeInfo - the decoded info
  */
 const decodeJwtToken = token => {
-  const { secret } = getTokenOptions();
+  const { secret, verifyOptions } = getTokenOptions();
 
   try {
-    const payload = jwt.verify(token, secret);
+    const payload = jwt.verify(token, secret, verifyOptions);
     return { payload, isValid: true };
   } catch (err) {
     return { payload: null, isValid: false };
