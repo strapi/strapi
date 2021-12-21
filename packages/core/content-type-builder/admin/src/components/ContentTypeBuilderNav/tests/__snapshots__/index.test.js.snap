@@ -597,7 +597,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                     <span
                       class="c4 c20"
                     >
-                      content-type-builder.menu.section.models.name.plural
+                      content-type-builder.menu.section.models.name.
                     </span>
                   </div>
                   <div
@@ -756,7 +756,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                     <span
                       class="c4 c20"
                     >
-                      content-type-builder.menu.section.single-types.name.singular
+                      content-type-builder.menu.section.single-types.name.
                     </span>
                   </div>
                   <div
@@ -880,7 +880,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                     <span
                       class="c4 c20"
                     >
-                      content-type-builder.menu.section.components.name.plural
+                      content-type-builder.menu.section.components.name.
                     </span>
                   </div>
                   <div

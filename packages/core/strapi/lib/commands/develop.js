@@ -10,6 +10,7 @@ const { getOr } = require('lodash/fp');
 const { createLogger } = require('@strapi/logger');
 const loadConfiguration = require('../core/app-configuration');
 const strapi = require('../index');
+const buildAdmin = require('./build');
 
 /**
  * `$ strapi develop`
@@ -20,24 +21,20 @@ module.exports = async function({ build, watchAdmin, polling, browser }) {
   const config = loadConfiguration(dir);
   const logger = createLogger(config.logger, {});
 
-  const adminWatchIgnoreFiles = getOr([], 'admin.watchIgnoreFiles')(config);
-  const serveAdminPanel = getOr(true, 'admin.serveAdminPanel')(config);
-
-  const buildExists = fs.existsSync(path.join(dir, 'build'));
-  // Don't run the build process if the admin is in watch mode
-  if (build && !watchAdmin && serveAdminPanel && !buildExists) {
-    try {
-      execa.sync('npm run -s build -- --no-optimization', {
-        stdio: 'inherit',
-        shell: true,
-      });
-    } catch (err) {
-      process.exit(1);
-    }
-  }
-
   try {
     if (cluster.isMaster) {
+      const serveAdminPanel = getOr(true, 'admin.serveAdminPanel')(config);
+
+      const buildExists = fs.existsSync(path.join(dir, 'build'));
+      // Don't run the build process if the admin is in watch mode
+      if (build && !watchAdmin && serveAdminPanel && !buildExists) {
+        try {
+          await buildAdmin({ clean: false, optimization: false, forceBuild: false });
+        } catch (err) {
+          process.exit(1);
+        }
+      }
+
       if (watchAdmin) {
         try {
           execa('npm', ['run', '-s', 'strapi', 'watch-admin', '--', '--browser', browser], {
@@ -74,6 +71,7 @@ module.exports = async function({ build, watchAdmin, polling, browser }) {
         serveAdminPanel: watchAdmin ? false : true,
       });
 
+      const adminWatchIgnoreFiles = getOr([], 'admin.watchIgnoreFiles')(config);
       watchFileChanges({
         dir,
         strapiInstance,

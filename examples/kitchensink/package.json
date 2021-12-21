@@ -13,9 +13,6 @@
   },
   "dependencies": {
     "@strapi/admin": "4.0.0",
-    "@strapi/plugin-documentation": "4.0.0",
-    "@strapi/plugin-graphql": "4.0.0",
-    "@strapi/plugin-i18n": "4.0.0",
     "@strapi/provider-email-mailgun": "4.0.0",
     "@strapi/provider-upload-aws-s3": "4.0.0",
     "@strapi/provider-upload-cloudinary": "4.0.0",

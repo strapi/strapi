@@ -134,7 +134,7 @@
   "form.button.single-type.description": "Best for single instance like about us, homepage, etc.",
   "form.contentType.divider.draft-publish": "Draft/Publish",
   "from": "from",
-  "listView.headerLayout.description": "Build the data architecture of your content.",
+  "listView.headerLayout.description": "Build the data architecture of your content",
   "menu.section.components.name.plural": "Components",
   "menu.section.components.name.singular": "Component",
   "menu.section.models.name.plural": "Collection Types",

@@ -110,6 +110,8 @@ const convertLimitQueryParams = limitQuery => {
     throw new Error(`convertLimitQueryParams expected a positive integer got ${limitAsANumber}`);
   }
 
+  if (limitAsANumber === -1) return null;
+
   return limitAsANumber;
 };
 

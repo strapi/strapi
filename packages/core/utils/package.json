@@ -31,6 +31,9 @@
   "directories": {
     "lib": "./lib"
   },
+  "scripts": {
+    "test:unit": "jest --verbose"
+  },
   "dependencies": {
     "@sindresorhus/slugify": "1.1.0",
     "date-fns": "2.24.0",
