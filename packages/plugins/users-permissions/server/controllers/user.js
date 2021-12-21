@@ -137,7 +137,7 @@ module.exports = {
   async find(ctx) {
     const users = await getService('user').fetchAll(
       ctx.query.filters,
-      convertPopulateQueryParams(ctx.query.populate)
+      convertPopulateQueryParams(ctx.query.populate || {})
     );
 
     ctx.body = await Promise.all(users.map(user => sanitizeOutput(user, ctx)));
@@ -151,7 +151,7 @@ module.exports = {
     const { id } = ctx.params;
     let data = await getService('user').fetch(
       { id },
-      convertPopulateQueryParams(ctx.query.populate)
+      convertPopulateQueryParams(ctx.query.populate || {})
     );
 
     if (data) {
