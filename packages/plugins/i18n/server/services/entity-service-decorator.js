@@ -4,7 +4,7 @@ const { has, omit, isArray } = require('lodash/fp');
 const { ApplicationError } = require('@strapi/utils').errors;
 const { getService } = require('../utils');
 
-const LOCALE_QUERY_FILTER = 'locale';
+const LOCALE_QUERY_FILTER = '_locale';
 const SINGLE_ENTRY_ACTIONS = ['findOne', 'update', 'delete'];
 const BULK_ACTIONS = ['delete'];
 
