@@ -135,7 +135,7 @@ describe('i18n - Content API', () => {
     test('Can filter on any locale', async () => {
       const res = await rq({
         method: 'GET',
-        url: '/categories?_locale=ko',
+        url: '/categories?locale=ko',
       });
 
       const { statusCode, body } = res;
@@ -149,7 +149,7 @@ describe('i18n - Content API', () => {
     test('Can filter on all locale', async () => {
       const res = await rq({
         method: 'GET',
-        url: '/categories?_locale=all',
+        url: '/categories?locale=all',
       });
 
       const { statusCode, body } = res;
@@ -179,7 +179,7 @@ describe('i18n - Content API', () => {
     test('Can filter on any locale', async () => {
       const res = await rq({
         method: 'GET',
-        url: '/homepage?_locale=ko',
+        url: '/homepage?locale=ko',
       });
 
       const { statusCode, body } = res;
@@ -191,7 +191,7 @@ describe('i18n - Content API', () => {
     test('Can filter on all locale', async () => {
       const res = await rq({
         method: 'GET',
-        url: '/homepage?_locale=all',
+        url: '/homepage?locale=all',
       });
 
       const { statusCode, body } = res;
