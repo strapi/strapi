@@ -148,7 +148,7 @@ describe('Entity service decorator', () => {
       const service = decorator(defaultService);
 
       const input = {
-        _locale: 'fr',
+        locale: 'fr',
         populate: ['test'],
       };
       const output = await service.wrapParams(input, { uid: 'test-model' });

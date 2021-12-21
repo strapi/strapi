@@ -4,7 +4,7 @@ const { has, omit, isArray } = require('lodash/fp');
 const { ApplicationError } = require('@strapi/utils').errors;
 const { getService } = require('../utils');
 
-const LOCALE_QUERY_FILTER = '_locale';
+const LOCALE_QUERY_FILTERS = ['locale', '_locale'];
 const SINGLE_ENTRY_ACTIONS = ['findOne', 'update', 'delete'];
 const BULK_ACTIONS = ['delete'];
 
@@ -23,15 +23,16 @@ const paramsContain = (key, params) => {
 const wrapParams = async (params = {}, ctx = {}) => {
   const { action } = ctx;
 
-  if (has(LOCALE_QUERY_FILTER, params)) {
-    if (params[LOCALE_QUERY_FILTER] === 'all') {
-      return omit(LOCALE_QUERY_FILTER, params);
+  if (LOCALE_QUERY_FILTERS.some(key => has(key, params))) {
+    const localeKey = LOCALE_QUERY_FILTERS.find(key => has(key, params));
+    if (params[localeKey] === 'all') {
+      return omit(localeKey, params);
     }
 
     return {
-      ...omit(LOCALE_QUERY_FILTER, params),
+      ...omit(localeKey, params),
       filters: {
-        $and: [{ locale: params[LOCALE_QUERY_FILTER] }].concat(params.filters || []),
+        $and: [{ locale: params[localeKey] }].concat(params.filters || []),
       },
     };
   }
