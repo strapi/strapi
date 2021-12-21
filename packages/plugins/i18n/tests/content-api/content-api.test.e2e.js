@@ -118,7 +118,7 @@ describe('i18n - Content API', () => {
   });
 
   describe('Test collection type', () => {
-    test('Can filter on default locale', async () => {
+    test('Filter using the default locale when no parameter is specified', async () => {
       const res = await rq({
         method: 'GET',
         url: '/categories',
@@ -164,7 +164,7 @@ describe('i18n - Content API', () => {
   });
 
   describe('Test single type', () => {
-    test('Can filter on default locale', async () => {
+    test('Filter using the default locale when no parameter is specified', async () => {
       const res = await rq({
         method: 'GET',
         url: '/homepage',
