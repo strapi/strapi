@@ -5,6 +5,7 @@ const { permittedFieldsOf } = require('@casl/ability/extra');
 const {
   defaults,
   omit,
+  isObject,
   isArray,
   isEmpty,
   isNil,
@@ -48,6 +49,8 @@ module.exports = ({ action, ability, model }) => {
     return pipeAsync(
       // Remove unallowed fields from admin::user relations
       traverseEntity(pickAllowedAdminUserFields, { schema }),
+      // Remove private CM fields
+      traverseEntity(removeRelationPrivateFields, { schema }),
       // Remove not allowed fields (RBAC)
       traverseEntity(allowedFields(permittedFields), { schema }),
       // Remove all fields of type 'password'
@@ -111,6 +114,25 @@ module.exports = ({ action, ability, model }) => {
     if (attribute.type === 'relation' && attribute.target === 'admin::user') {
       set(key, pick(['id', 'firstname', 'lastname', 'username'], value));
     }
+  };
+
+  const removeRelationPrivateFields = ({ attribute, key, value }, { set }) => {
+    const isValidObject = isObject(value) && !isArray(value);
+
+    // Only look at valid relation values
+    if (attribute.type !== 'relation' || !isValidObject) {
+      return;
+    }
+
+    const targetModel = strapi.getModel(attribute.target);
+
+    // Filter out private attributes
+    const allowedKeys = Object.keys(value).filter(
+      attributeName => !contentTypes.isPrivateAttribute(targetModel, attributeName)
+    );
+
+    // Update the value
+    set(key, pick(allowedKeys, value));
   };
 
   const getInputFields = (fields = []) => {
