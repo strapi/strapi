@@ -5,7 +5,7 @@ const { propOr, isArray, isNil } = require('lodash/fp');
 
 const getMiddlewareConfig = propOr([], 'config.middlewares');
 
-const instanciateMiddleware = (middlewareFactory, name, config, strapi) => {
+const instantiateMiddleware = (middlewareFactory, name, config, strapi) => {
   try {
     return middlewareFactory(config, { strapi });
   } catch (e) {
@@ -53,7 +53,7 @@ const resolveMiddlewares = (config, strapi) => {
 
       middlewares.push({
         name: item,
-        handler: instanciateMiddleware(middlewareFactory, item, {}, strapi),
+        handler: instantiateMiddleware(middlewareFactory, item, {}, strapi),
       });
 
       continue;
@@ -66,7 +66,7 @@ const resolveMiddlewares = (config, strapi) => {
         const middlewareFactory = strapi.middleware(name);
         middlewares.push({
           name,
-          handler: instanciateMiddleware(middlewareFactory, name, config, strapi),
+          handler: instantiateMiddleware(middlewareFactory, name, config, strapi),
         });
 
         continue;
@@ -76,7 +76,7 @@ const resolveMiddlewares = (config, strapi) => {
         const resolvedMiddlewareFactory = resolveCustomMiddleware(resolve, strapi);
         middlewares.push({
           name: resolve,
-          handler: instanciateMiddleware(resolvedMiddlewareFactory, item, config, strapi),
+          handler: instantiateMiddleware(resolvedMiddlewareFactory, item, config, strapi),
         });
 
         continue;
