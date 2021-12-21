@@ -1,7 +1,7 @@
 'use strict';
 
 const crypto = require('crypto');
-const { defaultsDeep, isEmpty, omit, has } = require('lodash/fp');
+const { defaultsDeep, isEmpty, isString, omit, has } = require('lodash/fp');
 const session = require('koa-session');
 
 const defaultConfig = {
@@ -22,7 +22,9 @@ module.exports = (userConfig, { strapi }) => {
     let secretKeys = [];
 
     if (has('secretKeys', userConfig)) {
-      secretKeys = userConfig.secretKeys;
+      secretKeys = isString(userConfig.secretKeys)
+        ? userConfig.secretKeys.split(',')
+        : userConfig.secretKeys;
     } else if (has('SESSION_SECRET_KEYS', process.env)) {
       secretKeys = process.env.SESSION_SECRET_KEYS.split(',');
     } else {
@@ -38,7 +40,6 @@ module.exports = (userConfig, { strapi }) => {
 
     strapi.server.app.keys = secretKeys;
   }
-
   const config = defaultsDeep(defaultConfig, omit('secretKeys', userConfig));
 
   strapi.server.use(session(config, strapi.server.app));
