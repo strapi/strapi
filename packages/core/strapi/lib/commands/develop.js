@@ -126,6 +126,8 @@ function watchFileChanges({ dir, strapiInstance, watchIgnoreFiles, polling }) {
       '**/node_modules',
       '**/node_modules/**',
       '**/plugins.json',
+      '**/build',
+      '**/build/**',
       '**/index.html',
       '**/public',
       '**/public/**',
