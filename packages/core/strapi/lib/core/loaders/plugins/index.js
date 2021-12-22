@@ -54,17 +54,6 @@ const applyUserExtension = async plugins => {
   }
 };
 
-const formatContentTypes = plugins => {
-  for (const pluginName in plugins) {
-    const plugin = plugins[pluginName];
-    for (const contentTypeName in plugin.contentTypes) {
-      const ctSchema = plugin.contentTypes[contentTypeName].schema;
-      ctSchema.plugin = pluginName;
-      ctSchema.uid = `plugin::${pluginName}.${ctSchema.info.singularName}`;
-    }
-  }
-};
-
 const applyUserConfig = async plugins => {
   const userPluginConfigPath = join(strapi.dirs.config, 'plugins.js');
   const userPluginsConfig = (await fse.pathExists(userPluginConfigPath))
@@ -113,7 +102,6 @@ const loadPlugins = async strapi => {
   // TODO: validate plugin format
   await applyUserConfig(plugins);
   await applyUserExtension(plugins);
-  formatContentTypes(plugins);
 
   for (const pluginName in plugins) {
     strapi.container.get('plugins').add(pluginName, plugins[pluginName]);
