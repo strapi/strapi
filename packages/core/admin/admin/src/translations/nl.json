@@ -25,7 +25,7 @@
   "Auth.form.forgot-password.email.label.success": "E-mail succesvol verstuurt naar",
   "Auth.form.password.label": "Wachtwoord",
   "Auth.form.register.news.label": "Houd me op de hoogte van de nieuwe functionaliteiten en aankomende verbeteringen (door dit te doen accepteer je de {terms} en het {policy}).",
-  "Auth.form.rememberMe.label": "Onthoudt mij",
+  "Auth.form.rememberMe.label": "Onthoud mij",
   "Auth.form.username.label": "Gebruikersnaam",
   "Auth.form.username.placeholder": "Kai Doe",
   "Auth.link.forgot-password": "Wachtwoord vergeten?",

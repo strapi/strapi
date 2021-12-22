@@ -7,6 +7,7 @@ const { env } = require('@strapi/utils');
 const loadConfigFile = require('../../app-configuration/load-config-file');
 const loadFiles = require('../../../load/load-files');
 const getEnabledPlugins = require('./get-enabled-plugins');
+const getUserPluginsConfig = require('./get-user-plugins-config');
 
 const defaultPlugin = {
   bootstrap() {},
@@ -55,10 +56,7 @@ const applyUserExtension = async plugins => {
 };
 
 const applyUserConfig = async plugins => {
-  const userPluginConfigPath = join(strapi.dirs.config, 'plugins.js');
-  const userPluginsConfig = (await fse.pathExists(userPluginConfigPath))
-    ? loadConfigFile(userPluginConfigPath)
-    : {};
+  const userPluginsConfig = await getUserPluginsConfig();
 
   for (const pluginName in plugins) {
     const plugin = plugins[pluginName];

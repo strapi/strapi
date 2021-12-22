@@ -30,7 +30,7 @@
   "pages.PluginPage.table.icon.regenerate": "Regenerate {target}",
   "pages.PluginPage.table.icon.show": "Open {target}",
   "pages.PluginPage.table.version": "Version",
-  "pages.SettingPage.title": "Settings",
+  "pages.SettingsPage.title": "Settings",
   "pages.SettingsPage.Button.description": "Configure the documentation plugin",
   "pages.SettingsPage.header.save": "Save",
   "pages.SettingsPage.password.label": "Password",

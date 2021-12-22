@@ -185,7 +185,7 @@ const generateRelationQueryInfos = (contentTypeConfiguration, fieldName, models)
 
   const queryInfos = {
     endPoint,
-    containsKey: `${mainField}_contains`,
+    containsKey: `${mainField}`,
     defaultParams: {},
     shouldDisplayRelationLink,
   };
@@ -210,7 +210,7 @@ const generateRelationQueryInfosForComponents = (
 
   const queryInfos = {
     endPoint,
-    containsKey: `${mainField}_contains`,
+    containsKey: `${mainField}`,
     defaultParams: {
       _component: contentTypeConfiguration.uid,
     },

@@ -8,7 +8,7 @@ const { createContentAPIRequest } = require('../../../../../test/helpers/request
 let strapi;
 let rq;
 
-let data = {};
+const data = {};
 
 describe('Users API', () => {
   beforeAll(async () => {
@@ -40,6 +40,53 @@ describe('Users API', () => {
     });
 
     data.user = res.body;
+  });
+
+  describe('Read users', () => {
+    test('without filter', async () => {
+      const res = await rq({
+        method: 'GET',
+        url: '/users',
+      });
+
+      const { statusCode, body } = res;
+
+      expect(statusCode).toBe(200);
+      expect(Array.isArray(body)).toBe(true);
+      expect(body).toHaveLength(1);
+      expect(body).toMatchObject([
+        {
+          id: expect.anything(),
+          username: data.user.username,
+          email: data.user.email,
+        },
+      ]);
+    });
+
+    test('with filter equals', async () => {
+      const res = await rq({
+        method: 'GET',
+        url: '/users',
+        qs: {
+          filters: {
+            username: 'User 1',
+          },
+        },
+      });
+
+      const { statusCode, body } = res;
+
+      expect(statusCode).toBe(200);
+      expect(Array.isArray(body)).toBe(true);
+      expect(body).toHaveLength(1);
+      expect(body).toMatchObject([
+        {
+          id: expect.anything(),
+          username: data.user.username,
+          email: data.user.email,
+        },
+      ]);
+    });
   });
 
   test('Delete user', async () => {

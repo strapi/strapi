@@ -58,7 +58,7 @@ describe('Content Manager | hooks | useFetchContentTypeLayout | utils ', () => {
           },
           queryInfos: {
             endPoint: '/content-manager/relations/api::address.address/categories',
-            containsKey: 'name_contains',
+            containsKey: 'name',
             defaultParams: {},
             shouldDisplayRelationLink: true,
           },
@@ -124,10 +124,7 @@ describe('Content Manager | hooks | useFetchContentTypeLayout | utils ', () => {
             uid: 'compo',
             layouts: {
               edit: [
-                [
-                  { name: 'full_name', size: 6 },
-                  { name: 'city', size: 6 },
-                ],
+                [{ name: 'full_name', size: 6 }, { name: 'city', size: 6 }],
                 [{ name: 'compo', size: 12 }],
               ],
             },
@@ -169,10 +166,7 @@ describe('Content Manager | hooks | useFetchContentTypeLayout | utils ', () => {
             editRelations: [],
             edit: [
               [{ name: 'dz', size: 12 }],
-              [
-                { name: 'full_name', size: 6 },
-                { name: 'city', size: 6 },
-              ],
+              [{ name: 'full_name', size: 6 }, { name: 'city', size: 6 }],
               [{ name: 'compo', size: 12 }],
             ],
           },
@@ -370,10 +364,7 @@ describe('Content Manager | hooks | useFetchContentTypeLayout | utils ', () => {
         layouts: {
           edit: [
             [{ name: 'dz', size: 12 }],
-            [
-              { name: 'full_name', size: 6 },
-              { name: 'city', size: 6 },
-            ],
+            [{ name: 'full_name', size: 6 }, { name: 'city', size: 6 }],
             [{ name: 'compo', size: 12 }],
           ],
         },
@@ -552,7 +543,7 @@ describe('Content Manager | hooks | useFetchContentTypeLayout | utils ', () => {
     it('should return an object with the correct keys', () => {
       expect(generateRelationQueryInfos(addressSchema, 'categories', simpleModels)).toEqual({
         endPoint: '/content-manager/relations/api::address.address/categories',
-        containsKey: 'name_contains',
+        containsKey: 'name',
         defaultParams: {},
         shouldDisplayRelationLink: true,
       });
@@ -570,7 +561,7 @@ describe('Content Manager | hooks | useFetchContentTypeLayout | utils ', () => {
         )
       ).toEqual({
         endPoint: '/content-manager/relations/api::address.address/categories',
-        containsKey: 'name_contains',
+        containsKey: 'name',
         defaultParams: {
           _component: 'api::address.address',
         },
@@ -581,10 +572,7 @@ describe('Content Manager | hooks | useFetchContentTypeLayout | utils ', () => {
 
   describe('getDisplayedModels', () => {
     it('should return an array containing only the displayable models', () => {
-      const models = [
-        { uid: 'test', isDisplayed: false },
-        { uid: 'testtest', isDisplayed: true },
-      ];
+      const models = [{ uid: 'test', isDisplayed: false }, { uid: 'testtest', isDisplayed: true }];
 
       expect(getDisplayedModels([])).toHaveLength(0);
       expect(getDisplayedModels(models)).toHaveLength(1);

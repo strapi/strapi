@@ -44,7 +44,7 @@ const SelectRoles = ({ disabled, error, onChange, value }) => {
   });
   const hint = formatMessage({
     id: 'app.components.Users.ModalCreateBody.block-title.roles.description',
-    defaultMessage: 'Your user can have one or several roles',
+    defaultMessage: 'A user can have one or several roles',
   });
   const placeholder = formatMessage({
     id: 'app.components.Select.placeholder',
