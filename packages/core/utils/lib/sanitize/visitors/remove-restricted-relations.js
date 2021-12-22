@@ -1,6 +1,6 @@
 'use strict';
 
-const ACTIONS_TO_VERIFY = ['find'];
+const ACTIONS_TO_VERIFY = ['find', 'getRole'];
 
 module.exports = auth => async ({ data, key, attribute }, { remove, set }) => {
   const isRelation = attribute.type === 'relation';
