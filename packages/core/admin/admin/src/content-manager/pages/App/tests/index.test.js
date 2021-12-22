@@ -591,7 +591,7 @@ describe('Content manager | App | main', () => {
                     <a
                       aria-current="page"
                       class="c24 c25 active"
-                      href="/content-manager/collectionType/category?undefined"
+                      href="/content-manager/collectionType/category"
                     >
                       <div
                         class="c17"
@@ -662,7 +662,7 @@ describe('Content manager | App | main', () => {
                   <li>
                     <a
                       class="c24 c25"
-                      href="/homepage?undefined"
+                      href="/homepage"
                     >
                       <div
                         class="c17"
