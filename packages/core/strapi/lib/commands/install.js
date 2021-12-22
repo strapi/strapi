@@ -4,7 +4,6 @@ const { join } = require('path');
 const { existsSync } = require('fs-extra');
 const ora = require('ora');
 const execa = require('execa');
-const findPackagePath = require('../load/package-path');
 
 module.exports = async plugins => {
   const loader = ora();
@@ -25,21 +24,6 @@ module.exports = async plugins => {
     }
 
     loader.succeed();
-
-    // check if rebuild is necessary
-    let shouldRebuild = false;
-    for (let name of plugins) {
-      let pkgPath = findPackagePath(`@strapi/plugin-${name}`);
-      if (existsSync(join(pkgPath, 'admin', 'src', 'index.js'))) {
-        shouldRebuild = true;
-      }
-    }
-
-    if (shouldRebuild) {
-      loader.start(`Rebuilding admin UI`);
-      await execa('npm', ['run', 'build']);
-      loader.succeed();
-    }
   } catch (err) {
     loader.clear();
     console.error(err.message);
