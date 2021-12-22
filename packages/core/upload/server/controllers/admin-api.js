@@ -194,7 +194,10 @@ const findEntityAndCheckPermissions = async (ability, action, model, id) => {
 
   const pm = strapi.admin.services.permission.createPermissionsManager({ ability, action, model });
 
-  const author = await strapi.admin.services.user.findOne(file[CREATED_BY_ATTRIBUTE].id, ['roles']);
+  const author = await strapi.admin.services.user.findOne(
+    _.get(file, [CREATED_BY_ATTRIBUTE, 'id'], ''),
+    ['roles']
+  );
 
   const fileWithRoles = _.set(_.cloneDeep(file), 'createdBy', author);
 
