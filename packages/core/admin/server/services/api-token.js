@@ -86,7 +86,7 @@ const createSaltIfNotDefined = () => {
   }
 
   const salt = crypto.randomBytes(16).toString('hex');
-  strapi.fs.appendFile('.env', `API_TOKEN_SALT=${salt}\n`);
+  strapi.fs.appendFile(process.env.ENV_PATH || '.env', `API_TOKEN_SALT=${salt}\n`);
   strapi.config.set('admin.apiToken.salt', salt);
 };
 
