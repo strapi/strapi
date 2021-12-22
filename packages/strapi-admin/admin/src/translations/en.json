@@ -370,5 +370,6 @@
   "notification.success.saved": "Saved",
   "notification.version.update.message": "A new version of Strapi is available!",
   "notification.version.update.link": "See more",
-  "request.error.model.unknown": "This model doesn't exist"
+  "request.error.model.unknown": "This model doesn't exist",
+  "Auth.form.currentPassword.label": "Current Password"
 }

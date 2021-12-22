@@ -87,6 +87,16 @@ const ProfilePage = () => {
                   title={formatMessage({ id: 'Settings.profile.form.section.password.title' })}
                 >
                   <SizedInput
+                    label="Auth.form.currentPassword.label"
+                    type="password"
+                    validations={{}}
+                    error={formErrors.currentPassword}
+                    name="currentPassword"
+                    onChange={handleChange}
+                    value={get(modifiedData, 'currentPassword', '')}
+                  />
+                  <Col size={6} />
+                  <SizedInput
                     label="Auth.form.password.label"
                     type="password"
                     autoComplete="new-password"
