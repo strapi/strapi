@@ -4,8 +4,7 @@
  * `{{id}}` policy.
  */
 
-module.exports = (config, { strapi }) => {
-  return policyCtx => {
+module.exports = (policyContext, config, { strapi }) => {
     // Add your own logic here.
     strapi.log.info('In {{id}} policy.');
 
@@ -16,5 +15,4 @@ module.exports = (config, { strapi }) => {
     }
 
     return false;
-  };
 };
