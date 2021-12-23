@@ -61,7 +61,6 @@ module.exports = context => {
             // Enums
             if (isEnumeration(attribute)) {
               const enumTypeName = getEnumName(contentType, attributeName);
-              console.log(attributeName, enumTypeName);
 
               t.field(attributeName, { type: enumTypeName });
             }
