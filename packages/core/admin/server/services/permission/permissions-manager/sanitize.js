@@ -109,7 +109,11 @@ module.exports = ({ action, ability, model }) => {
 
   const pickAllowedAdminUserFields = ({ attribute, key, value }, { set }) => {
     if (attribute.type === 'relation' && attribute.target === 'admin::user') {
-      set(key, pick(['id', 'firstname', 'lastname', 'username'], value));
+      if (Array.isArray(value)) {
+        set(key, value.map(val => pick(['id', 'firstname', 'lastname', 'username'], val)), value);
+      } else {
+        set(key, pick(['id', 'firstname', 'lastname', 'username'], value));
+      }
     }
   };
 
