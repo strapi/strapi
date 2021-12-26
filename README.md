@@ -1,8 +1,6 @@
-<p align="center">
-  <a href="https://strapi.io">
-    <img src="https://strapi.io/assets/strapi-logo-dark.svg" width="318px" alt="Strapi logo" />
-  </a>
-</p>
+[![Strapi](https://strapi.io/assets/strapi-logo-dark.svg#gh-light-mode-only)](https://strapi.io)
+[![Strapi](https://strapi.io/assets/strapi-logo-light.svg#gh-dark-mode-only)](https://strapi.io)
+
 <h3 align="center">API creation made simple, secure and fast.</h3>
 <p align="center">The most advanced open-source headless CMS to build powerful APIs with no effort.</p>
 <p align="center"><a href="https://strapi.io/demo">Try live demo</a></p>
