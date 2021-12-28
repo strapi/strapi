@@ -7,17 +7,18 @@ import pluginId from '../pluginId';
 
 const endpoint = `/${pluginId}`;
 
-const uploadAsset = (file, cancelToken, onProgress) => {
+const uploadAsset = (asset, cancelToken, onProgress) => {
+  const { rawFile, caption, name, alternativeText } = asset;
   const formData = new FormData();
 
-  formData.append('files', file);
+  formData.append('files', rawFile);
 
   formData.append(
     'fileInfo',
     JSON.stringify({
-      alternativeText: file.name,
-      caption: file.name,
-      name: file.name,
+      name,
+      caption: caption || name,
+      alternativeText: alternativeText || name,
     })
   );
 
