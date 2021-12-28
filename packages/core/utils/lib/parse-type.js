@@ -7,6 +7,7 @@ const timeRegex = new RegExp('^(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])(.[0-
 
 const parseTime = value => {
   if (dates.isDate(value)) return dates.format(value, 'HH:mm:ss.SSS');
+  if (value === 'now()') return dates.format(new Date(), 'HH:mm:ss.SSS');
 
   if (typeof value !== 'string') {
     throw new Error(`Expected a string, got a ${typeof value}`);
@@ -25,6 +26,8 @@ const parseTime = value => {
 
 const parseDate = value => {
   if (dates.isDate(value)) return dates.format(value, 'yyyy-MM-dd');
+  if (value === 'now()') return dates.format(new Date(), 'yyyy-MM-dd');
+
   try {
     let date = dates.parseISO(value);
 
@@ -38,6 +41,8 @@ const parseDate = value => {
 
 const parseDateTimeOrTimestamp = value => {
   if (dates.isDate(value)) return value;
+  if (value === 'now()') return new Date();
+
   try {
     const date = dates.parseISO(value);
     if (dates.isValid(date)) return date;
