@@ -1,5 +1,5 @@
-[![Strapi](https://strapi.io/assets/strapi-logo-dark.svg#gh-light-mode-only)](https://strapi.io)
-[![Strapi](https://strapi.io/assets/strapi-logo-light.svg#gh-dark-mode-only)](https://strapi.io)
+[![Strapi](https://strapi.io/assets/strapi-logo-dark.svg)](https://strapi.io/#gh-light-mode-only)
+[![Strapi](https://strapi.io/assets/strapi-logo-light.svg)](https://strapi.io/#gh-dark-mode-only)
 
 <h3 align="center">API creation made simple, secure and fast.</h3>
 <p align="center">The most advanced open-source headless CMS to build powerful APIs with no effort.</p>
