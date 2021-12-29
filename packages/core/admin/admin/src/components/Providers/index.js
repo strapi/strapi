@@ -5,6 +5,7 @@ import { LibraryProvider, StrapiAppProvider } from '@strapi/helper-plugin';
 import { Provider } from 'react-redux';
 import { AdminContext, ConfigurationsContext } from '../../contexts';
 import LanguageProvider from '../LanguageProvider';
+import GuidedTour from '../GuidedTour';
 import AutoReloadOverlayBlockerProvider from '../AutoReloadOverlayBlockerProvider';
 import Notifications from '../Notifications';
 import OverlayBlocker from '../OverlayBlocker';
@@ -58,7 +59,9 @@ const Providers = ({
                 <LanguageProvider messages={messages} localeNames={localeNames}>
                   <AutoReloadOverlayBlockerProvider>
                     <OverlayBlocker>
-                      <Notifications>{children}</Notifications>
+                      <GuidedTour>
+                        <Notifications>{children}</Notifications>
+                      </GuidedTour>
                     </OverlayBlocker>
                   </AutoReloadOverlayBlockerProvider>
                 </LanguageProvider>
