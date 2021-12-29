@@ -19,7 +19,7 @@ module.exports = plop => {
       if (answers.destination === 'api') {
         filePath = `api/{{api}}`;
       } else if (answers.destination === 'plugin') {
-        filePath = `plugins/{{plugin}}`;
+        filePath = `plugins/{{plugin}}/server`;
       } else {
         filePath = `./`;
       }
