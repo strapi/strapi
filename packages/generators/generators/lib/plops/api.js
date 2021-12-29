@@ -45,7 +45,7 @@ module.exports = plop => {
       },
     ],
     actions(answers) {
-      const filePath = answers.isPluginApi && answers.plugin ? 'plugins/{{plugin}}' : 'api/{{id}}';
+      const filePath = answers.isPluginApi && answers.plugin ? 'plugins/{{plugin}}/server' : 'api/{{id}}';
 
       const baseActions = [
         {
