@@ -27,26 +27,18 @@ const Extension = styled.span`
   text-transform: uppercase;
 `;
 
-export const UploadingAssetCard = ({
-  name,
-  extension,
-  assetType,
-  file,
-  onCancel,
-  onStatusChange,
-  addUploadedFiles,
-}) => {
-  const { upload, cancel, error, progress, status } = useUpload();
+export const UploadingAssetCard = ({ asset, onCancel, onStatusChange, addUploadedFiles }) => {
+  const { upload, cancel, error, progress, status } = useUpload(asset);
   const { formatMessage } = useIntl();
 
   let badgeContent;
 
-  if (assetType === AssetType.Image) {
+  if (asset.type === AssetType.Image) {
     badgeContent = formatMessage({
       id: getTrad('settings.section.image.label'),
       defaultMessage: 'Image',
     });
-  } else if (assetType === AssetType.Video) {
+  } else if (asset.type === AssetType.Video) {
     badgeContent = formatMessage({
       id: getTrad('settings.section.video.label'),
       defaultMessage: 'Video',
@@ -60,7 +52,7 @@ export const UploadingAssetCard = ({
 
   useEffect(() => {
     const uploadFile = async () => {
-      const files = await upload(file);
+      const files = await upload(asset);
 
       if (addUploadedFiles) {
         addUploadedFiles(files);
@@ -77,7 +69,7 @@ export const UploadingAssetCard = ({
 
   const handleCancel = () => {
     cancel();
-    onCancel(file);
+    onCancel(asset.rawFile);
   };
 
   return (
@@ -90,9 +82,9 @@ export const UploadingAssetCard = ({
         </CardHeader>
         <CardBody>
           <CardContent>
-            <CardTitle as="h2">{name}</CardTitle>
+            <CardTitle as="h2">{asset.name}</CardTitle>
             <CardSubtitle>
-              <Extension>{extension}</Extension>
+              <Extension>{asset.ext}</Extension>
             </CardSubtitle>
           </CardContent>
           <CardBadge>{badgeContent}</CardBadge>
@@ -115,10 +107,12 @@ UploadingAssetCard.defaultProps = {
 
 UploadingAssetCard.propTypes = {
   addUploadedFiles: PropTypes.func,
-  assetType: PropTypes.oneOf(Object.values(AssetType)).isRequired,
-  extension: PropTypes.string.isRequired,
-  name: PropTypes.string.isRequired,
-  file: PropTypes.instanceOf(File).isRequired,
+  asset: PropTypes.shape({
+    name: PropTypes.string,
+    ext: PropTypes.string,
+    rawFile: PropTypes.instanceOf(File),
+    type: PropTypes.oneOf(Object.values(AssetType)),
+  }).isRequired,
   onCancel: PropTypes.func.isRequired,
   onStatusChange: PropTypes.func.isRequired,
 };
