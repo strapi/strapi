@@ -29,7 +29,7 @@ module.exports = async function({ build, watchAdmin, polling, browser }) {
       // Don't run the build process if the admin is in watch mode
       if (build && !watchAdmin && serveAdminPanel && !buildExists) {
         try {
-          await buildAdmin({ clean: false, optimization: false, forceBuild: false });
+          await buildAdmin({ optimization: false, forceBuild: false });
         } catch (err) {
           process.exit(1);
         }
@@ -126,6 +126,8 @@ function watchFileChanges({ dir, strapiInstance, watchIgnoreFiles, polling }) {
       '**/node_modules',
       '**/node_modules/**',
       '**/plugins.json',
+      '**/build',
+      '**/build/**',
       '**/index.html',
       '**/public',
       '**/public/**',

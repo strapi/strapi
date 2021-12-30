@@ -43,14 +43,20 @@ const App = () => {
     );
   }
 
+  // Array of models that are displayed in the content manager
+  const supportedModelsToDisplay = models.filter(({ isDisplayed }) => isDisplayed);
+
   // Redirect the user to the 403 page
-  // FIXME when changing the routing
-  if (authorisedModels.length === 0 && models.length > 0 && pathname !== '/content-manager/403') {
+  if (
+    authorisedModels.length === 0 &&
+    supportedModelsToDisplay.length > 0 &&
+    pathname !== '/content-manager/403'
+  ) {
     return <Redirect to="/content-manager/403" />;
   }
 
   // Redirect the user to the create content type page
-  if (models.length === 0 && pathname !== '/content-manager/no-content-types') {
+  if (supportedModelsToDisplay.length === 0 && pathname !== '/content-manager/no-content-types') {
     return <Redirect to="/content-manager/no-content-types" />;
   }
 

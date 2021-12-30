@@ -107,11 +107,8 @@ export const PendingAssetStep = ({
                       <UploadingAssetCard
                         // Props used to store the newly uploaded files
                         addUploadedFiles={addUploadedFiles}
-                        assetType={asset.type}
-                        extension={asset.ext}
-                        file={asset.rawFile}
+                        asset={asset}
                         id={assetKey}
-                        name={asset.name}
                         onCancel={onCancelUpload}
                         onStatusChange={status => handleStatusChange(status, asset.rawFile)}
                         size="S"
