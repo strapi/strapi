@@ -12,12 +12,8 @@ const Content = ({ id, defaultMessage }) => {
       {formatMessage(
         { id, defaultMessage },
         {
-          b: children => (
-            <Typography fontWeight={600} fontColor="success600">
-              {children}
-            </Typography>
-          ),
-          p: children => <Typography fontColor="success600">{children}</Typography>,
+          b: children => <Typography fontWeight={600}>{children}</Typography>,
+          p: children => <Typography>{children}</Typography>,
         }
       )}
     </Stack>

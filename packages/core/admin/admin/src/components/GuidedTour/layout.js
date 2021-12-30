@@ -1,3 +1,5 @@
+// TODO: create the modal to consume create and success content
+
 const layout = {
   contentTypeBuilder: {
     home: {

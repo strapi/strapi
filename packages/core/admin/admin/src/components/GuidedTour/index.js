@@ -4,7 +4,7 @@ import { GuidedTourProvider } from '@strapi/helper-plugin';
 import reducer, { initialState } from './reducer';
 
 const GuidedTour = ({ children }) => {
-  const [{ currentStep }, dispatch] = useReducer(reducer, initialState);
+  const [{ currentStep, guidedTourState }, dispatch] = useReducer(reducer, initialState);
 
   const setStep = step => {
     dispatch({
@@ -14,7 +14,11 @@ const GuidedTour = ({ children }) => {
   };
 
   return (
-    <GuidedTourProvider currentStep={currentStep} setStep={setStep}>
+    <GuidedTourProvider
+      guidedTourState={guidedTourState}
+      currentStep={currentStep}
+      setStep={setStep}
+    >
       {children}
     </GuidedTourProvider>
   );
