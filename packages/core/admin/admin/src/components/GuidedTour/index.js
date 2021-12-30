@@ -1,11 +1,3 @@
-/*
- *
- * GuidedTour
- *
- * this component connects the redux state language locale to the
- * IntlProvider component and i18n messages (loaded from `app/translations`)
- */
-
 import React, { useReducer } from 'react';
 import PropTypes from 'prop-types';
 import { GuidedTourProvider } from '@strapi/helper-plugin';

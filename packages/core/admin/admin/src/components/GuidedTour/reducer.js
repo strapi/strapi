@@ -3,6 +3,32 @@ import produce from 'immer';
 
 export const initialState = {
   currentStep: null,
+  guidedTourState: {
+    contentTypeBuilder: {
+      create: {
+        closed: false,
+      },
+      success: {
+        closed: false,
+      },
+    },
+    contentManager: {
+      create: {
+        closed: false,
+      },
+      success: {
+        closed: false,
+      },
+    },
+    apiTokens: {
+      create: {
+        closed: false,
+      },
+      success: {
+        closed: false,
+      },
+    },
+  },
 };
 
 const reducer = (state = initialState, action) =>
