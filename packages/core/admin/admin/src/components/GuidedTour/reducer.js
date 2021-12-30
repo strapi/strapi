@@ -8,8 +8,8 @@ export const initialState = {
 const reducer = (state = initialState, action) =>
   produce(state, draftState => {
     switch (action.type) {
-      case 'SET_STEP': {
-        // console.log(action, state, draftState);
+      case 'SET_CURRENT_STEP': {
+        draftState.currentStep = action.step;
         break;
       }
       default: {

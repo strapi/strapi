@@ -16,7 +16,7 @@ const GuidedTour = ({ children }) => {
 
   const setStep = step => {
     dispatch({
-      type: 'SET_STEP',
+      type: 'SET_CURRENT_STEP',
       step,
     });
   };
