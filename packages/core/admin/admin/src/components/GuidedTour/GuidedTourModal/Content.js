@@ -12,7 +12,7 @@ const Content = ({ id, defaultMessage }) => {
       {formatMessage(
         { id, defaultMessage },
         {
-          b: children => <Typography fontWeight={600}>{children}</Typography>,
+          b: children => <Typography fontWeight="semiBold">{children}</Typography>,
           p: children => <Typography>{children}</Typography>,
         }
       )}
