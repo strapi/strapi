@@ -20,10 +20,6 @@ export const CustomIconButton = styled(IconButton)`
   }
 `;
 
-export const DragHandleWrapper = styled(CustomIconButton)`
-  cursor: move;
-`;
-
 export const CustomIconButtonSibling = styled(IconButton)`
   background-color: transparent;
 
