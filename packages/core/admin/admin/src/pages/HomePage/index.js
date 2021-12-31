@@ -73,9 +73,6 @@ const HomePage = () => {
             <GridItem col={8} s={12}>
               <ContentBlocks />
             </GridItem>
-            <GridItem col={4} s={12}>
-              <SocialLinks />
-            </GridItem>
           </Grid>
         </Box>
       </Main>

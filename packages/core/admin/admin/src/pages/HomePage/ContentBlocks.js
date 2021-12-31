@@ -18,9 +18,7 @@ const ContentBlocks = () => {
   return (
     <Stack size={5}>
       <BlockLink
-        href="https://strapi.io/resource-center"
-        target="_blank"
-        rel="noopener noreferrer nofollow"
+        href="/plugin/wiki"
       >
         <ContentBox
           title={formatMessage({
@@ -33,56 +31,6 @@ const ContentBlocks = () => {
           })}
           icon={<InformationSquare />}
           iconBackground="primary100"
-        />
-      </BlockLink>
-      <BlockLink
-        href="https://strapi.io/starters"
-        target="_blank"
-        rel="noopener noreferrer nofollow"
-      >
-        <ContentBox
-          title={formatMessage({
-            id: 'app.components.BlockLink.code',
-            defaultMessage: 'Code example',
-          })}
-          subtitle={formatMessage({
-            id: 'app.components.BlockLink.code.content',
-            defaultMessage: 'Learn by using ready-made starters for your projects.',
-          })}
-          icon={<CodeSquare />}
-          iconBackground="warning100"
-        />
-      </BlockLink>
-      <BlockLink
-        href="https://strapi.io/blog/categories/tutorials"
-        target="_blank"
-        rel="noopener noreferrer nofollow"
-      >
-        <ContentBox
-          title={formatMessage({
-            id: 'app.components.BlockLink.tutorial',
-            defaultMessage: 'Tutorials',
-          })}
-          subtitle={formatMessage({
-            id: 'app.components.BlockLink.tutorial.content',
-            defaultMessage: 'Follow step-by-step instructions to use and customize Strapi.',
-          })}
-          icon={<PlaySquare />}
-          iconBackground="secondary100"
-        />
-      </BlockLink>
-      <BlockLink href="https://strapi.io/blog" target="_blank" rel="noopener noreferrer nofollow">
-        <ContentBox
-          title={formatMessage({
-            id: 'app.components.BlockLink.blog',
-            defaultMessage: 'Blog',
-          })}
-          subtitle={formatMessage({
-            id: 'app.components.BlockLink.blog.content',
-            defaultMessage: 'Read the latest news about Strapi and the ecosystem.',
-          })}
-          icon={<FeatherSquare />}
-          iconBackground="alternative100"
         />
       </BlockLink>
     </Stack>

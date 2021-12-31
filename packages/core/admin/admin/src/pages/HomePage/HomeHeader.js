@@ -48,21 +48,6 @@ const HomeHeader = ({ hasCreatedContentType, onCreateCT }) => {
                     'Congrats! You are logged as the first administrator. To discover the powerful features provided by Strapi, we recommend you to create your first Content type!',
                 })}
           </WordWrap>
-          {hasCreatedContentType ? (
-            <Link href="https://strapi.io/blog">
-              {formatMessage({
-                id: 'app.components.HomePage.button.blog',
-                defaultMessage: 'See more on the blog',
-              })}
-            </Link>
-          ) : (
-            <Button size="L" onClick={onCreateCT} endIcon={<ArrowRight />}>
-              {formatMessage({
-                id: 'app.components.HomePage.create',
-                defaultMessage: 'Create your first Content type',
-              })}
-            </Button>
-          )}
         </StackCustom>
       </Box>
     </div>
