@@ -289,6 +289,7 @@
   "components.Input.error.contain.lowercase": "Das Passwort muss mindestens einen Kleinbuchstaben enthalten",
   "components.Input.error.contain.number": "Das Passwort muss mindestens eine Zahl enthalten",
   "components.Input.error.contain.uppercase": "Das Passwort muss mindestens einen Großbuchstaben enthalten",
+  "components.Input.error.contain.specialCharacter": "Das Passwort muss mindestens einen Großbuchstaben enthalten",
   "components.Input.error.contentTypeName.taken": "Dieser Name existiert bereits",
   "components.Input.error.custom-error": "{errorMessage} ",
   "components.Input.error.password.noMatch": "Passwörter stimmen nicht überein",

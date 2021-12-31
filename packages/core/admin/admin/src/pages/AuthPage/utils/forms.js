@@ -62,9 +62,10 @@ const forms = {
       lastname: yup.string(),
       password: yup
         .string()
-        .min(8, translatedErrors.minLength)
+        .min(10, translatedErrors.minLength)
         .matches(/[a-z]/, 'components.Input.error.contain.lowercase')
         .matches(/[A-Z]/, 'components.Input.error.contain.uppercase')
+        .matches(/\W|_/, 'components.Input.error.contain.specialCharacter')
         .matches(/\d/, 'components.Input.error.contain.number')
         .required(translatedErrors.required),
       confirmPassword: yup
@@ -86,9 +87,10 @@ const forms = {
       lastname: yup.string(),
       password: yup
         .string()
-        .min(8, translatedErrors.minLength)
+        .min(10, translatedErrors.minLength)
         .matches(/[a-z]/, 'components.Input.error.contain.lowercase')
         .matches(/[A-Z]/, 'components.Input.error.contain.uppercase')
+        .matches(/\W|_/, 'components.Input.error.contain.specialCharacter')
         .matches(/\d/, 'components.Input.error.contain.number')
         .required(translatedErrors.required),
       email: yup
@@ -110,9 +112,10 @@ const forms = {
     schema: yup.object().shape({
       password: yup
         .string()
-        .min(8, translatedErrors.minLength)
+        .min(10, translatedErrors.minLength)
         .matches(/[a-z]/, 'components.Input.error.contain.lowercase')
         .matches(/[A-Z]/, 'components.Input.error.contain.uppercase')
+        .matches(/\W|_/, 'components.Input.error.contain.specialCharacter')
         .matches(/\d/, 'components.Input.error.contain.number')
         .required(translatedErrors.required),
       confirmPassword: yup
