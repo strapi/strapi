@@ -239,6 +239,8 @@
   "app.component.table.edit": "Edit {target}",
   "app.component.table.select.all-entries": "Select all entries",
   "app.component.table.select.one-entry": "Select {target}",
+  "app.components.menuBrand.title": "Strapi Dashboard",
+  "app.components.menuBrand.workplace": "Workplace",
   "app.components.BlockLink.blog": "Blog",
   "app.components.BlockLink.blog.content": "Read the latest news about Strapi and the ecosystem.",
   "app.components.BlockLink.code": "Code examples",

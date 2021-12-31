@@ -80,12 +80,20 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
     }
   };
 
+  const menuTitle = formatMessage({
+    id: 'content-manager.plugin.name',
+    defaultMessage: 'Strapi Dashboard',
+  });
+
   return (
     <MainNav condensed={condensed}>
       <NavBrand
-        workplace="Workplace"
-        title="Strapi Dashboard"
-        icon={<img src={menuLogo} alt="Strapi Dashboard" />}
+        workplace={formatMessage({
+          id: 'content-manager.plugin.name',
+          defaultMessage: 'Workplace',
+        })}
+        title={menuTitle}
+        icon={<img src={menuLogo} alt={menuTitle} />}
       />
 
       <Divider />
