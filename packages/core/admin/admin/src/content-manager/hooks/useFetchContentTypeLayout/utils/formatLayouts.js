@@ -40,7 +40,7 @@ const formatLayouts = (initialData, models) => {
   const formattedCTEditLayout = formatLayoutWithMetas(data.contentType, null, models);
   const ctUid = data.contentType.uid;
   const formattedEditRelationsLayout = formatEditRelationsLayoutWithMetas(data.contentType, models);
-  const formattedListLayout = formatListLayoutWithMetas(data.contentType, models);
+  const formattedListLayout = formatListLayoutWithMetas(data.contentType, data.components);
 
   set(data, ['contentType', 'layouts', 'edit'], formattedCTEditLayout);
   set(data, ['contentType', 'layouts', 'editRelations'], formattedEditRelationsLayout);
@@ -146,7 +146,7 @@ const formatLayoutWithMetas = (contentTypeConfiguration, ctUid, models) => {
   return formatted;
 };
 
-const formatListLayoutWithMetas = contentTypeConfiguration => {
+const formatListLayoutWithMetas = (contentTypeConfiguration, components) => {
   const formatted = contentTypeConfiguration.layouts.list.reduce((acc, current) => {
     const fieldSchema = get(contentTypeConfiguration, ['attributes', current], {});
     const metadatas = get(contentTypeConfiguration, ['metadatas', current, 'list'], {});
@@ -160,6 +160,20 @@ const formatListLayoutWithMetas = contentTypeConfiguration => {
       };
 
       acc.push({ key: `__${current}_key__`, name: current, fieldSchema, metadatas, queryInfos });
+
+      return acc;
+    }
+
+    if (type === 'component') {
+      acc.push({
+        key: `__${current}_key__`,
+        name: current,
+        fieldSchema,
+        metadatas: {
+          ...metadatas,
+          mainField: components[fieldSchema.component].settings.mainField,
+        },
+      });
 
       return acc;
     }

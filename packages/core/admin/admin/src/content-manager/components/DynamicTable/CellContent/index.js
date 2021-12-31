@@ -5,43 +5,57 @@ import { Typography } from '@strapi/design-system/Typography';
 import Media from './Media';
 import MultipleMedias from './MultipleMedias';
 import Relation from './Relation';
+import RepeatableComponent from './RepeatableComponent';
 import CellValue from './CellValue';
+import hasContent from './utils/hasContent';
 
 const TypographyMaxWidth = styled(Typography)`
   max-width: 300px;
 `;
 
-const CellContent = ({ content, fieldSchema, metadatas, name, queryInfos, rowId }) => {
-  if (content === null || content === undefined) {
+const CellContent = ({ content, fieldSchema, metadatas, name, queryInfos, rowId, layout }) => {
+  const { type } = fieldSchema;
+
+  if (!hasContent(type, content, metadatas, fieldSchema)) {
     return <Typography textColor="neutral800">-</Typography>;
   }
 
-  if (fieldSchema.type === 'media' && !fieldSchema.multiple) {
-    return <Media {...content} />;
-  }
+  switch (type) {
+    case 'media':
+      if (!fieldSchema.multiple) {
+        return <Media {...content} />;
+      }
 
-  if (fieldSchema.type === 'media' && fieldSchema.multiple) {
-    return <MultipleMedias value={content} />;
-  }
+      return <MultipleMedias value={content} />;
 
-  if (fieldSchema.type === 'relation') {
-    return (
-      <Relation
-        fieldSchema={fieldSchema}
-        queryInfos={queryInfos}
-        metadatas={metadatas}
-        value={content}
-        name={name}
-        rowId={rowId}
-      />
-    );
-  }
+    case 'relation':
+      return (
+        <Relation
+          fieldSchema={fieldSchema}
+          queryInfos={queryInfos}
+          metadatas={metadatas}
+          value={content}
+          name={name}
+          rowId={rowId}
+        />
+      );
 
-  return (
-    <TypographyMaxWidth ellipsis textColor="neutral800">
-      <CellValue type={fieldSchema.type} value={content} />
-    </TypographyMaxWidth>
-  );
+    case 'component':
+      return (
+        <RepeatableComponent
+          value={content}
+          metadatas={metadatas}
+          component={layout?.components?.[fieldSchema.component]}
+        />
+      );
+
+    default:
+      return (
+        <TypographyMaxWidth ellipsis textColor="neutral800">
+          <CellValue type={type} value={content} />
+        </TypographyMaxWidth>
+      );
+  }
 };
 
 CellContent.defaultProps = {
@@ -51,12 +65,19 @@ CellContent.defaultProps = {
 
 CellContent.propTypes = {
   content: PropTypes.any,
-  fieldSchema: PropTypes.shape({ multiple: PropTypes.bool, type: PropTypes.string.isRequired })
-    .isRequired,
+  fieldSchema: PropTypes.shape({
+    component: PropTypes.string,
+    multiple: PropTypes.bool,
+    type: PropTypes.string.isRequired,
+    repeatable: PropTypes.bool,
+  }).isRequired,
   metadatas: PropTypes.object.isRequired,
   name: PropTypes.string.isRequired,
   rowId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
   queryInfos: PropTypes.shape({ endPoint: PropTypes.string.isRequired }),
+  layout: PropTypes.shape({
+    components: PropTypes.object,
+  }).isRequired,
 };
 
 export default CellContent;

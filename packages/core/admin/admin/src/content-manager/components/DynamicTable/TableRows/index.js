@@ -25,6 +25,7 @@ const TableRows = ({
   withMainAction,
   withBulkActions,
   rows,
+  layout,
 }) => {
   const {
     push,
@@ -90,6 +91,7 @@ const TableRows = ({
                       name={name}
                       {...rest}
                       rowId={data.id}
+                      layout={layout}
                     />
                   )}
                 </Td>
@@ -185,6 +187,7 @@ TableRows.propTypes = {
   onClickDelete: PropTypes.func,
   onSelectRow: PropTypes.func,
   rows: PropTypes.array,
+  layout: PropTypes.object.isRequired,
   withBulkActions: PropTypes.bool,
   withMainAction: PropTypes.bool,
 };
