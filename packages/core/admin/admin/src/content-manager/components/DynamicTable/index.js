@@ -95,6 +95,7 @@ const DynamicTable = ({
         rows={rows}
         withBulkActions
         withMainAction={canDelete && isBulkable}
+        layout={layout}
       />
     </Table>
   );
