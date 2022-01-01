@@ -15,10 +15,10 @@ To install this plugin, you need to add an NPM dependency to your Strapi applica
 
 ```sh
 # Using Yarn
-yarn add strapi-plugin-sentry
+yarn add @strapi/plugin-sentry
 
 # Or using NPM
-npm install strapi-plugin-sentry
+npm install @strapi/plugin-sentry
 ```
 
 ## Configuration
@@ -37,11 +37,14 @@ npm install strapi-plugin-sentry
 module.exports = ({ env }) => ({
   // ...
   sentry: {
-    dsn: env('SENTRY_DSN'),
-    sendMetadata: true,
+    enabled: true,
+    config: {
+      dsn: env('SENTRY_DSN', null),
+      sendMetadata: true,
+    }
   },
   // ...
-});
+})
 ```
 
 ## Global Sentry service
@@ -130,8 +133,12 @@ You can also completely disable this plugin (both the middleware and the service
 module.exports = ({ env }) => ({
   // ...
   sentry: {
-    dsn: env('NODE_ENV') === 'development' ? null : env('SENTRY_DSN'),
+    enabled: true,
+    config: {
+      dsn:  env('NODE_ENV') === 'development' ? null : env('SENTRY_DSN'),
+      sendMetadata: true,
+    }
   },
   // ...
-});
+})
 ```
