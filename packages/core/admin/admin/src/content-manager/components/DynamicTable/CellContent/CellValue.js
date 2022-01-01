@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import toString from 'lodash/toString';
+import { getNumberOfDecimals } from './utils/getNumberOfDecimals';
 
 const CellValue = ({ type, value }) => {
   const { formatDate, formatTime, formatNumber } = useIntl();
@@ -41,15 +42,6 @@ const CellValue = ({ type, value }) => {
   }
 
   return toString(formattedValue);
-};
-
-const getNumberOfDecimals = value => {
-  if (value % 1 !== 0) {
-    // value has decimals
-    return value.toString().split('.')[1].length;
-  }
-
-  return 0;
 };
 
 CellValue.propTypes = {
