@@ -20,6 +20,10 @@ module.exports = ({ strapi }) => {
       return path.join(strapi.dirs.extensions, 'documentation', 'documentation');
     },
 
+    getCustomDocumentationPath() {
+      return path.join(strapi.dirs.extensions, 'documentation', 'config', 'settings.json');
+    },
+
     getDocumentationVersions() {
       return fs
         .readdirSync(this.getFullDocumentationPath())
@@ -133,7 +137,13 @@ module.exports = ({ strapi }) => {
         'full_documentation.json'
       );
 
-      const settings = _.cloneDeep(defaultConfig);
+      const getCustomSettings = async () => {
+        const path = this.getCustomDocumentationPath();
+        await fs.ensureFile(path);
+        return fs.readJson(path);
+      };
+      const customSettings = await getCustomSettings();
+      const settings = _.merge(_.cloneDeep(defaultConfig), customSettings);
 
       const serverUrl = getAbsoluteServerUrl(strapi.config);
       const apiPath = strapi.config.get('api.rest.prefix');
