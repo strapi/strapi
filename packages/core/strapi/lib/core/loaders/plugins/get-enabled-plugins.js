@@ -106,13 +106,17 @@ const getEnabledPlugins = async strapi => {
     installedPlugins
   );
 
-  const enabledPlugins = pipe(
+  let enabledPlugins = pipe(
     defaultsDeep(declaredPlugins),
     defaultsDeep(installedPluginsNotAlreadyUsed),
     pickBy(p => p.enabled)
   )(internalPlugins);
 
-  return enabledPlugins;
+  const orderedPlugins = {};
+  enabledPlugins = _.orderBy(Object.values(enabledPlugins), item => item.info.weight, ['desc']);
+  enabledPlugins.map((plugin) => orderedPlugins[plugin.info.name] = plugin);
+
+  return orderedPlugins;
 };
 
 module.exports = getEnabledPlugins;
