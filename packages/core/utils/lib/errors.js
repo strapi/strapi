@@ -69,7 +69,7 @@ class UnauthorizedError extends ApplicationError {
   }
 }
 
-class PolicyError extends ApplicationError {
+class PolicyError extends ForbiddenError {
   constructor(message, details) {
     super(message, details);
     this.name = 'PolicyError';
