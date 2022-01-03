@@ -22,7 +22,7 @@ const StepNumber = ({ type, number }) => {
     );
   }
 
-  if (type === 'isCurrent') {
+  if (type === 'isActive') {
     return (
       <Flex
         background="primary600"
@@ -64,7 +64,7 @@ StepNumber.defaultProps = {
 
 StepNumber.propTypes = {
   number: PropTypes.number,
-  type: PropTypes.oneOf(['isCurrent', 'isDone', 'isNotDone']),
+  type: PropTypes.oneOf(['isActive', 'isDone', 'isNotDone']),
 };
 
 export default StepNumber;
