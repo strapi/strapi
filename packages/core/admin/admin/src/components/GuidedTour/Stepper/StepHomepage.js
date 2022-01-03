@@ -12,7 +12,7 @@ const GridItemAlignCenter = styled(Box)`
   align-self: center;
 `;
 
-const GridItemJustifyCenter = styled(GridItemAlignCenter)`
+const GridItemJustifyCenter = styled(Box)`
   height: 100%;
   justify-self: center;
 `;
@@ -22,18 +22,18 @@ const StepHomepage = ({ type, title, number, content, hasLine }) => {
 
   return (
     <>
-      <GridItemAlignCenter>
+      <Box>
         <StepNumber type={type} number={number} />
-      </GridItemAlignCenter>
+      </Box>
       <GridItemAlignCenter>
         <Typography variant="delta" as="h3">
           {formatMessage(title)}
         </Typography>
       </GridItemAlignCenter>
-      <GridItemJustifyCenter background="neutral100">
+      <GridItemJustifyCenter>
         {hasLine && <StepLine minHeight={pxToRem(64)} />}
       </GridItemJustifyCenter>
-      <GridItemAlignCenter>{type === 'isActive' && content}</GridItemAlignCenter>
+      <Box>{type === 'isActive' && content}</Box>
     </>
   );
 };
