@@ -944,7 +944,7 @@ describe('Email | Pages | Settings', () => {
                   <h2
                     class="c11"
                   >
-                    Send a test mail
+                    Test email delivery
                   </h2>
                   <div
                     class="c13"

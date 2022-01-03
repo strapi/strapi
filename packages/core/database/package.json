@@ -1,6 +1,6 @@
 {
   "name": "@strapi/database",
-  "version": "4.0.0",
+  "version": "4.0.2",
   "description": "Strapi's database layer",
   "homepage": "https://strapi.io",
   "bugs": {
@@ -28,7 +28,7 @@
     "lib": "./lib"
   },
   "scripts": {
-    "test": "echo \"no tests yet\""
+    "test:unit": "jest --verbose"
   },
   "dependencies": {
     "date-fns": "2.22.1",
