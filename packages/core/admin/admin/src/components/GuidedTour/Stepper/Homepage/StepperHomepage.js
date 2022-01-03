@@ -1,15 +1,19 @@
 import React from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
+import { pxToRem } from '@strapi/helper-plugin';
 import { Grid } from '@strapi/design-system/Grid';
 import StepHomepage from './StepHomepage';
 
 const GridCustom = styled(Grid)`
-  gap: 12px 20px;
-  grid-template-columns: 30px 1fr;
+  gap: ${({ theme }) => `${theme.spaces[3]} ${theme.spaces[4]}`};
+  grid-template-columns: ${pxToRem(30)} 1fr;
 `;
 
 const getType = (activeSectionIndex, index) => {
+  if (activeSectionIndex === -1) {
+    return 'isDone';
+  }
   if (index < activeSectionIndex) {
     return 'isDone';
   }
@@ -20,7 +24,7 @@ const getType = (activeSectionIndex, index) => {
   return 'isActive';
 }
 
-const Stepper = ({ sections, currentSectionKey }) => {
+const StepperHomepage = ({ sections, currentSectionKey }) => {
   const activeSectionIndex = sections.findIndex(section => section.key === currentSectionKey);
 
   return (
@@ -39,7 +43,11 @@ const Stepper = ({ sections, currentSectionKey }) => {
   );
 };
 
-Stepper.propTypes = {
+StepperHomepage.defaultProps = {
+  currentSectionKey: undefined,
+};
+
+StepperHomepage.propTypes = {
   sections: PropTypes.arrayOf(
     PropTypes.shape({
       key: PropTypes.string.isRequired,
@@ -50,7 +58,7 @@ Stepper.propTypes = {
       content: PropTypes.node,
     })
   ).isRequired,
-  currentSectionKey: PropTypes.string.isRequired,
+  currentSectionKey: PropTypes.string,
 };
 
-export default Stepper;
+export default StepperHomepage;

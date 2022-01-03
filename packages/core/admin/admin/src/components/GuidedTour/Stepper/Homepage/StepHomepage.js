@@ -5,15 +5,14 @@ import PropTypes from 'prop-types';
 import { pxToRem } from '@strapi/helper-plugin';
 import { Typography } from '@strapi/design-system/Typography';
 import { Box } from '@strapi/design-system/Box';
-import StepNumber from './StepNumber';
-import StepLine from './StepLine';
+import StepNumber from '../StepNumber';
+import StepLine from '../StepLine';
 
 const GridItemAlignCenter = styled(Box)`
   align-self: center;
 `;
 
 const GridItemJustifyCenter = styled(Box)`
-  height: 100%;
   justify-self: center;
 `;
 
@@ -30,7 +29,7 @@ const StepHomepage = ({ type, title, number, content, hasLine }) => {
           {formatMessage(title)}
         </Typography>
       </GridItemAlignCenter>
-      <GridItemJustifyCenter>
+      <GridItemJustifyCenter height="100%">
         {hasLine && <StepLine minHeight={pxToRem(64)} />}
       </GridItemJustifyCenter>
       <Box>{type === 'isActive' && content}</Box>
