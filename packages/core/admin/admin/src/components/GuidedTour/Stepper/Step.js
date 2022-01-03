@@ -27,7 +27,8 @@ const Step = ({ type, title, number, content, modal }) => {
         </Typography>
       </GridItemAlignCenter>
       <GridItemJustifyCenter background="neutral100">
-        <StepLine />
+        {content && 
+          <StepLine />}
       </GridItemJustifyCenter>
       <GridItemAlignCenter>{content}</GridItemAlignCenter>
     </>

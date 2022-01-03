@@ -5,11 +5,11 @@ export const initialState = {
   currentStep: null,
   guidedTourState: {
     contentTypeBuilder: {
-      create: false,
-      success: false,
+      create: true,
+      success: true,
     },
     contentManager: {
-      create: false,
+      create: true,
       success: false,
     },
     apiTokens: {

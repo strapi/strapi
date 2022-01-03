@@ -29,15 +29,26 @@ const GuidedTourHomepage = () => {
     ...section,
   }));
 
-  const activeSection = enrichedSections.find(section => !section.isDone).key;
+  const sectionWithTypes = sections.map(section => {
+    const guidedTourSection = guidedTourState[section.key];
+    const isNotDone = !guidedTourSection.create && !guidedTourSection.success;
+    const isCurrent = guidedTourSection.create && !guidedTourSection.success;
+    const isDone = guidedTourSection.create && guidedTourSection.success;
 
-  const stepType = (key, isActive) => {
-    if (key === isActive) {
-      return 'isCurrent';
-    }
+    // console.log(section.key, {isNotDone, isCurrent, isDone})
 
-    return null;
-  };
+    return ({...section});
+  });
+
+  // const activeSection = enrichedSections.find(section => !section.isDone).key;
+
+  // const stepType = (key, isActive) => {
+  //   if (key === isActive) {
+  //     return 'isCurrent';
+  //   }
+
+  //   return null;
+  // };
 
   return (
     <Stack size={6} hasRadius shadow="tableShadow" padding={7} background="neutral0">
@@ -48,7 +59,7 @@ const GuidedTourHomepage = () => {
         {enrichedSections.map((section, index) => (
           <Step
             key={section.key}
-            type={stepType(section.key, activeSection)}
+            // type={stepType(section.key, activeSection)}
             title={formatMessage(section.title)}
             // content={step.content}
             number={index + 1}
