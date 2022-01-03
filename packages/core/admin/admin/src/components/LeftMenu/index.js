@@ -81,7 +81,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
   };
 
   const menuTitle = formatMessage({
-    id: 'content-manager.plugin.name',
+    id: 'app.components.LeftMenu.navbrand.title',
     defaultMessage: 'Strapi Dashboard',
   });
 
@@ -89,7 +89,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
     <MainNav condensed={condensed}>
       <NavBrand
         workplace={formatMessage({
-          id: 'content-manager.plugin.name',
+          id: 'app.components.LeftMenu.navbrand.workplace',
           defaultMessage: 'Workplace',
         })}
         title={menuTitle}
