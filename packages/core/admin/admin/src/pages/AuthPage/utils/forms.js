@@ -94,6 +94,8 @@ const forms = {
       email: yup
         .string()
         .email(translatedErrors.email)
+        .strict()
+        .lowercase(translatedErrors.lowercase)
         .required(translatedErrors.required),
       confirmPassword: yup
         .string()
