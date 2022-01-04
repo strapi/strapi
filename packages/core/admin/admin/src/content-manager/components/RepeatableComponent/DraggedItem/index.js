@@ -3,12 +3,14 @@ import React, { memo, useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useDrag, useDrop } from 'react-dnd';
 import { getEmptyImage } from 'react-dnd-html5-backend';
+import styled from 'styled-components';
 import { useIntl } from 'react-intl';
 import toString from 'lodash/toString';
 import { Accordion, AccordionToggle, AccordionContent } from '@strapi/design-system/Accordion';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { Stack } from '@strapi/design-system/Stack';
 import { Box } from '@strapi/design-system/Box';
+import { Tooltip } from '@strapi/design-system/Tooltip';
 import Trash from '@strapi/icons/Trash';
 import Drag from '@strapi/icons/Drag';
 import ItemTypes from '../../../utils/ItemTypes';
@@ -17,8 +19,22 @@ import Inputs from '../../Inputs';
 import FieldComponent from '../../FieldComponent';
 import Preview from './Preview';
 import DraggingSibling from './DraggingSibling';
-import { CustomIconButton, DragHandleWrapper } from './IconButtonCustoms';
+import { CustomIconButton } from './IconButtonCustoms';
 import { connect, select } from './utils';
+
+const DragButton = styled.span`
+  display: flex;
+  align-items: center;
+  height: ${({ theme }) => theme.spaces[7]};
+
+  padding: 0 ${({ theme }) => theme.spaces[3]};
+  cursor: all-scroll;
+
+  svg {
+    width: ${12 / 16}rem;
+    height: ${12 / 16}rem;
+  }
+`;
 
 /* eslint-disable react/no-array-index-key */
 
@@ -40,7 +56,7 @@ const DraggedItem = ({
   // Retrieved from the select function
   moveComponentField,
   removeRepeatableField,
-  setIsDraggingSiblig,
+  setIsDraggingSibling,
   triggerFormValidation,
   // checkFormErrors,
   displayedValue,
@@ -125,7 +141,7 @@ const DraggedItem = ({
     end: () => {
       // Update the errors
       triggerFormValidation();
-      setIsDraggingSiblig(false);
+      setIsDraggingSibling(false);
     },
     collect: monitor => ({
       isDragging: monitor.isDragging(),
@@ -138,9 +154,9 @@ const DraggedItem = ({
 
   useEffect(() => {
     if (isDragging) {
-      setIsDraggingSiblig(true);
+      setIsDraggingSibling(true);
     }
-  }, [isDragging, setIsDraggingSiblig]);
+  }, [isDragging, setIsDraggingSibling]);
 
   // Effect in order to force a rerender after reordering the components
   // Since we are removing the Accordion when doing the DnD  we are losing the dragRef, therefore the replaced element cannot be dragged
@@ -195,16 +211,22 @@ const DraggedItem = ({
                     })}
                     icon={<Trash />}
                   />
-                  <DragHandleWrapper
-                    expanded={isOpen}
-                    icon={<Drag />}
-                    label={formatMessage({
+                  {/* react-dnd is broken in firefox with our IconButton, maybe a ref issue */}
+                  <Tooltip
+                    description={formatMessage({
                       id: getTrad('components.DragHandle-label'),
                       defaultMessage: 'Drag',
                     })}
-                    noBorder
-                    ref={refs.dragRef}
-                  />
+                  >
+                    <DragButton
+                      role="button"
+                      tabIndex={-1}
+                      ref={refs.dragRef}
+                      onClick={e => e.stopPropagation()}
+                    >
+                      <Drag />
+                    </DragButton>
+                  </Tooltip>
                 </Stack>
               )
             }
@@ -268,7 +290,7 @@ const DraggedItem = ({
 DraggedItem.defaultProps = {
   isDraggingSibling: false,
   isOpen: false,
-  setIsDraggingSiblig: () => {},
+  setIsDraggingSibling: () => {},
   toggleCollapses: () => {},
 };
 
@@ -284,7 +306,7 @@ DraggedItem.propTypes = {
   toggleCollapses: PropTypes.func,
   moveComponentField: PropTypes.func.isRequired,
   removeRepeatableField: PropTypes.func.isRequired,
-  setIsDraggingSiblig: PropTypes.func,
+  setIsDraggingSibling: PropTypes.func,
   triggerFormValidation: PropTypes.func.isRequired,
   // checkFormErrors: PropTypes.func.isRequired,
   displayedValue: PropTypes.string.isRequired,
