@@ -137,13 +137,9 @@ module.exports = ({ strapi }) => {
         'full_documentation.json'
       );
 
-      const getCustomSettings = async () => {
-        const path = this.getCustomDocumentationPath();
-        await fs.ensureFile(path);
-        return fs.readJson(path);
-      };
-      const customSettings = await getCustomSettings();
-      const settings = _.merge(_.cloneDeep(defaultConfig), customSettings);
+      const path = this.getCustomDocumentationPath();
+      const custom = (await fs.pathExists(path)) ? await fs.readJson(path) : {};
+      const settings = _.merge(_.cloneDeep(defaultConfig), custom);
 
       const serverUrl = getAbsoluteServerUrl(strapi.config);
       const apiPath = strapi.config.get('api.rest.prefix');
