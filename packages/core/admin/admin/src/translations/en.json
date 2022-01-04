@@ -407,6 +407,7 @@
   "components.Input.error.password.noMatch": "Passwords do not match",
   "components.Input.error.validation.email": "This is an invalid email",
   "components.Input.error.validation.json": "This doesn't match the JSON format",
+  "components.Input.error.validation.lowercase": "The value must be a lowercase string",
   "components.Input.error.validation.max": "The value is too high.",
   "components.Input.error.validation.maxLength": "The value is too long.",
   "components.Input.error.validation.min": "The value is too low.",
