@@ -91,7 +91,7 @@ const RelationalFieldButton = ({
       isDragging={isDragging}
     >
       <DragButton
-        as="button"
+        as="span"
         type="button"
         ref={dragButtonRef}
         onClick={e => e.stopPropagation()}

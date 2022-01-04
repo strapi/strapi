@@ -149,7 +149,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
         >
           <FocusTrap onEscape={handleToggleUserLinks}>
             <Stack size={0}>
-              <LinkUser onClick={handleToggleUserLinks} to="/me">
+              <LinkUser tabIndex={0} onClick={handleToggleUserLinks} to="/me">
                 <Typography>
                   {formatMessage({
                     id: 'app.components.LeftMenu.profile',
@@ -157,7 +157,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
                   })}
                 </Typography>
               </LinkUser>
-              <LinkUser onClick={handleLogout} logout="logout" to="/auth/login">
+              <LinkUser tabIndex={0} onClick={handleLogout} logout="logout" to="/auth/login">
                 <Typography textColor="danger600">
                   {formatMessage({
                     id: 'app.components.LeftMenu.logout',
