@@ -443,8 +443,6 @@ describe('Advanced Test GraphQL Users API End to End', () => {
         },
       });
 
-      console.log('res', res);
-
       const { body } = res;
 
       expect(res.statusCode).toBe(200);
