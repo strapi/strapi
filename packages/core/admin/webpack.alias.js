@@ -7,8 +7,6 @@ const alias = [
   'whatwg-fetch',
   '@fortawesome/fontawesome-svg-core',
   '@fortawesome/free-solid-svg-icons',
-  '@strapi/design-system',
-  '@strapi/icons',
   'history',
   'hoist-non-react-statics',
   'immer',
