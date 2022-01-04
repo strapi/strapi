@@ -41,6 +41,7 @@ module.exports = ({ strapi }) => {
    * @return {Promise<object>}
    */
   const formatFile = async (upload, extraInfo, metas) => {
+    // ICI
     const { filename, mimetype, createReadStream } = await upload;
 
     const readBuffer = await streamToBuffer(createReadStream());

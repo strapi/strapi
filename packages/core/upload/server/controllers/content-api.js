@@ -2,6 +2,7 @@
 
 const _ = require('lodash');
 const utils = require('@strapi/utils');
+const rimraf = require('rimraf');
 const { getService } = require('../utils');
 const validateSettings = require('./validation/settings');
 const validateUploadBody = require('./validation/upload');
@@ -125,15 +126,23 @@ module.exports = {
       request: { files: { files } = {} },
     } = ctx;
 
-    if (id && (_.isEmpty(files) || files.size === 0)) {
-      return this.updateFileInfo(ctx);
-    }
+    try {
+      if (id && (_.isEmpty(files) || files.size === 0)) {
+        return this.updateFileInfo(ctx);
+      }
 
-    if (_.isEmpty(files) || files.size === 0) {
-      throw new ValidationError('Files are empty');
-    }
+      if (_.isEmpty(files) || files.size === 0) {
+        throw new ValidationError('Files are empty');
+      }
 
-    await (id ? this.replaceFile : this.uploadFiles)(ctx);
+      await (id ? this.replaceFile : this.uploadFiles)(ctx);
+    } finally {
+      if (Array.isArray(files)) {
+        files.map(file => rimraf(file.path, () => {}));
+      } else if (files.path) {
+        rimraf(files.path, () => {});
+      }
+    }
   },
 
   async search(ctx) {

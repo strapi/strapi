@@ -2,20 +2,35 @@
 /**
  * Image manipulation functions
  */
+const fs = require('fs');
+const { join } = require('path');
 const sharp = require('sharp');
 
 const { getService } = require('../utils');
 const { bytesToKbytes } = require('../utils/file');
 
-const getMetadatas = buffer =>
-  sharp(buffer)
-    .metadata()
-    .catch(() => ({})); // ignore errors
+const writeStreamToFile = (stream, path) =>
+  new Promise((resolve, reject) => {
+    const writeStream = fs.createWriteStream(path);
+    stream.pipe(writeStream);
+    writeStream.on('close', resolve);
+    writeStream.on('error', reject);
+  });
 
-const getDimensions = buffer =>
-  getMetadatas(buffer)
-    .then(({ width = null, height = null }) => ({ width, height }))
-    .catch(() => ({})); // ignore errors
+const getMetadata = file =>
+  new Promise((resolve, reject) => {
+    const pipeline = sharp();
+    pipeline
+      .metadata()
+      .then(resolve)
+      .catch(reject);
+    file.getStream().pipe(pipeline);
+  });
+
+const getDimensions = async file => {
+  const { width = null, height = null } = await getMetadata(file);
+  return { width, height };
+};
 
 const THUMBNAIL_RESIZE_OPTIONS = {
   width: 245,
@@ -23,69 +38,71 @@ const THUMBNAIL_RESIZE_OPTIONS = {
   fit: 'inside',
 };
 
-const resizeTo = (buffer, options) =>
-  sharp(buffer)
-    .withMetadata()
-    .resize(options)
-    .toBuffer()
-    .catch(() => null);
+const resizeFileTo = async (file, options, { name, hash }, { tmpFolderPath }) => {
+  const filePath = join(tmpFolderPath, hash);
+  await writeStreamToFile(file.getStream().pipe(sharp().resize(options)), filePath);
 
-const generateThumbnail = async file => {
-  if (!(await canBeProccessed(file.buffer))) {
+  const newFile = {
+    name,
+    hash,
+    ext: file.ext,
+    mime: file.mime,
+    path: file.path || null,
+    getStream: () => fs.createReadStream(filePath),
+  };
+
+  const { width, height, size } = await getMetadata(newFile);
+
+  Object.assign(newFile, { width, height, size: bytesToKbytes(size) });
+  return newFile;
+};
+
+const generateThumbnail = async (file, { tmpFolderPath }) => {
+  if (!(await canBeProccessed(file))) {
     return null;
   }
 
-  const { width, height } = await getDimensions(file.buffer);
-
-  if (width > THUMBNAIL_RESIZE_OPTIONS.width || height > THUMBNAIL_RESIZE_OPTIONS.height) {
-    const newBuff = await resizeTo(file.buffer, THUMBNAIL_RESIZE_OPTIONS);
-
-    if (newBuff) {
-      const { width, height, size } = await getMetadatas(newBuff);
-
-      return {
+  if (
+    file.width > THUMBNAIL_RESIZE_OPTIONS.width ||
+    file.height > THUMBNAIL_RESIZE_OPTIONS.height
+  ) {
+    const newFile = await resizeFileTo(
+      file,
+      THUMBNAIL_RESIZE_OPTIONS,
+      {
         name: `thumbnail_${file.name}`,
         hash: `thumbnail_${file.hash}`,
-        ext: file.ext,
-        mime: file.mime,
-        width,
-        height,
-        size: bytesToKbytes(size),
-        buffer: newBuff,
-        path: file.path ? file.path : null,
-      };
-    }
+      },
+      { tmpFolderPath }
+    );
+    return newFile;
   }
 
   return null;
 };
 
-const optimize = async buffer => {
+const optimize = async (file, { tmpFolderPath }) => {
   const { sizeOptimization = false, autoOrientation = false } = await getService(
     'upload'
   ).getSettings();
 
-  if (!sizeOptimization || !(await canBeProccessed(buffer))) {
-    return { buffer };
+  const newFile = { ...file };
+
+  if (!sizeOptimization || !(await canBeProccessed(file))) {
+    return newFile;
   }
 
-  const sharpInstance = autoOrientation ? sharp(buffer).rotate() : sharp(buffer);
+  if (autoOrientation) {
+    const filePath = join(tmpFolderPath, `optimized-${file.hash}`);
 
-  return sharpInstance
-    .toBuffer({ resolveWithObject: true })
-    .then(({ data, info }) => {
-      const output = buffer.length < data.length ? buffer : data;
+    await writeStreamToFile(file.getStream().pipe(sharp().rotate()), filePath);
+    newFile.getStream = () => fs.createReadStream(filePath);
+  }
 
-      return {
-        buffer: output,
-        info: {
-          width: info.width,
-          height: info.height,
-          size: bytesToKbytes(output.length),
-        },
-      };
-    })
-    .catch(() => ({ buffer }));
+  const { width, height, size } = await getMetadata(newFile);
+
+  Object.assign(newFile, { width, height, size: bytesToKbytes(size) });
+  return newFile;
 };
 
 const DEFAULT_BREAKPOINTS = {
@@ -96,16 +113,16 @@ const DEFAULT_BREAKPOINTS = {
 
 const getBreakpoints = () => strapi.config.get('plugin.upload.breakpoints', DEFAULT_BREAKPOINTS);
 
-const generateResponsiveFormats = async file => {
+const generateResponsiveFormats = async (file, { tmpFolderPath }) => {
   const { responsiveDimensions = false } = await getService('upload').getSettings();
 
   if (!responsiveDimensions) return [];
 
-  if (!(await canBeProccessed(file.buffer))) {
+  if (!(await canBeProccessed(file))) {
     return [];
   }
 
-  const originalDimensions = await getDimensions(file.buffer);
+  const originalDimensions = await getDimensions(file);
 
   const breakpoints = getBreakpoints();
   return Promise.all(
@@ -113,37 +130,30 @@ const generateResponsiveFormats = async file => {
       const breakpoint = breakpoints[key];
 
       if (breakpointSmallerThan(breakpoint, originalDimensions)) {
-        return generateBreakpoint(key, { file, breakpoint, originalDimensions });
+        return generateBreakpoint(key, { file, breakpoint, originalDimensions }, { tmpFolderPath });
       }
     })
   );
 };
 
-const generateBreakpoint = async (key, { file, breakpoint }) => {
-  const newBuff = await resizeTo(file.buffer, {
-    width: breakpoint,
-    height: breakpoint,
-    fit: 'inside',
-  });
-
-  if (newBuff) {
-    const { width, height, size } = await getMetadatas(newBuff);
-
-    return {
-      key,
-      file: {
-        name: `${key}_${file.name}`,
-        hash: `${key}_${file.hash}`,
-        ext: file.ext,
-        mime: file.mime,
-        width,
-        height,
-        size: bytesToKbytes(size),
-        buffer: newBuff,
-        path: file.path ? file.path : null,
-      },
-    };
-  }
+const generateBreakpoint = async (key, { file, breakpoint }, { tmpFolderPath }) => {
+  const newFile = await resizeFileTo(
+    file,
+    {
+      width: breakpoint,
+      height: breakpoint,
+      fit: 'inside',
+    },
+    {
+      name: `${key}_${file.name}`,
+      hash: `${key}_${file.hash}`,
+    },
+    { tmpFolderPath }
+  );
+  return {
+    key,
+    file: newFile,
+  };
 };
 
 const breakpointSmallerThan = (breakpoint, { width, height }) => {
@@ -151,8 +161,8 @@ const breakpointSmallerThan = (breakpoint, { width, height }) => {
 };
 
 const formatsToProccess = ['jpeg', 'png', 'webp', 'tiff'];
-const canBeProccessed = async buffer => {
-  const { format } = await getMetadatas(buffer);
+const canBeProccessed = async file => {
+  const { format } = await getMetadata(file);
   return format && formatsToProccess.includes(format);
 };
 

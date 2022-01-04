@@ -7,9 +7,11 @@
  */
 
 const fs = require('fs');
+const os = require('os');
+const { mkdtemp } = require('fs').promises;
 const path = require('path');
 const crypto = require('crypto');
-const util = require('util');
+const rimraf = require('rimraf');
 const _ = require('lodash');
 const {
   sanitize,
@@ -17,7 +19,7 @@ const {
   contentTypes: contentTypesUtils,
   webhook: webhookUtils,
 } = require('@strapi/utils');
-const { PayloadTooLargeError, NotFoundError } = require('@strapi/utils').errors;
+const { NotFoundError } = require('@strapi/utils').errors;
 
 const { MEDIA_UPDATE, MEDIA_CREATE, MEDIA_DELETE } = webhookUtils.webhookEvents;
 
@@ -87,22 +89,8 @@ module.exports = ({ strapi }) => ({
     return entity;
   },
 
-  async enhanceFile(file, fileInfo = {}, metas = {}) {
-    let readBuffer;
-    try {
-      readBuffer = await util.promisify(fs.readFile)(file.path);
-    } catch (e) {
-      if (e.code === 'ERR_FS_FILE_TOO_LARGE') {
-        throw new PayloadTooLargeError(`The file \`${file.name}\` is bigger than the limit size`);
-      }
-      throw e;
-    }
-
-    const { optimize } = strapi.plugin('upload').service('image-manipulation');
-
-    const { buffer, info } = await optimize(readBuffer);
-
-    const formattedFile = this.formatFileInfo(
+  async enhanceFile(file, fileInfo = {}, metas = {}, { tmpFolderPath }) {
+    const currentFile = this.formatFileInfo(
       {
         filename: file.name,
         type: file.type,
@@ -111,60 +99,70 @@ module.exports = ({ strapi }) => ({
       fileInfo,
       metas
     );
+    currentFile.getStream = () => fs.createReadStream(file.path);
 
-    return _.assign(formattedFile, info, {
-      buffer,
-    });
+    const { optimize } = strapi.plugin('upload').service('image-manipulation');
+
+    const newFile = await optimize(currentFile, { tmpFolderPath });
+    return newFile;
   },
 
   async upload({ data, files }, { user } = {}) {
-    const { fileInfo, ...metas } = data;
+    // create temporary folder to store files for stream manipulation
+    const tmpFolderPath = await mkdtemp(path.join(os.tmpdir(), 'strapi-upload-'));
+    let uploadedFiles = [];
 
-    const fileArray = Array.isArray(files) ? files : [files];
-    const fileInfoArray = Array.isArray(fileInfo) ? fileInfo : [fileInfo];
+    try {
+      const { fileInfo, ...metas } = data;
 
-    const doUpload = async (file, fileInfo) => {
-      const fileData = await this.enhanceFile(file, fileInfo, metas);
+      const fileArray = Array.isArray(files) ? files : [files];
+      const fileInfoArray = Array.isArray(fileInfo) ? fileInfo : [fileInfo];
 
-      return this.uploadFileAndPersist(fileData, { user });
-    };
+      const doUpload = async (file, fileInfo) => {
+        const fileData = await this.enhanceFile(file, fileInfo, metas, { tmpFolderPath });
 
-    return Promise.all(fileArray.map((file, idx) => doUpload(file, fileInfoArray[idx] || {})));
+        return this.uploadFileAndPersist(fileData, { user }, { tmpFolderPath });
+      };
+
+      uploadedFiles = await Promise.all(
+        fileArray.map((file, idx) => doUpload(file, fileInfoArray[idx] || {}))
+      );
+    } finally {
+      // delete temporary folder
+      rimraf(tmpFolderPath, () => {});
+    }
+
+    return uploadedFiles;
   },
 
-  async uploadFileAndPersist(fileData, { user } = {}) {
+  async uploadFileAndPersist(fileData, { user } = {}, { tmpFolderPath }) {
     const config = strapi.config.get('plugin.upload');
 
     const { getDimensions, generateThumbnail, generateResponsiveFormats } = getService(
       'image-manipulation'
     );
+    getService('provider').upload(fileData);
 
-    await strapi.plugin('upload').provider.upload(fileData);
-
-    const thumbnailFile = await generateThumbnail(fileData);
+    const thumbnailFile = await generateThumbnail(fileData, { tmpFolderPath });
     if (thumbnailFile) {
-      await strapi.plugin('upload').provider.upload(thumbnailFile);
-      delete thumbnailFile.buffer;
+      getService('provider').upload(thumbnailFile);
       _.set(fileData, 'formats.thumbnail', thumbnailFile);
     }
 
-    const formats = await generateResponsiveFormats(fileData);
+    const formats = await generateResponsiveFormats(fileData, { tmpFolderPath });
     if (Array.isArray(formats) && formats.length > 0) {
       for (const format of formats) {
         if (!format) continue;
 
         const { key, file } = format;
 
-        await strapi.plugin('upload').provider.upload(file);
-        delete file.buffer;
+        getService('provider').upload(file);
 
         _.set(fileData, ['formats', key], file);
       }
     }
 
-    const { width, height } = await getDimensions(fileData.buffer);
-
-    delete fileData.buffer;
+    const { width, height } = await getDimensions(fileData);
 
     _.assign(fileData, {
       provider: config.provider,
@@ -226,15 +224,14 @@ module.exports = ({ strapi }) => ({
       }
     }
 
-    await strapi.plugin('upload').provider.upload(fileData);
+    getService('provider').upload(fileData);
 
     // clear old formats
     _.set(fileData, 'formats', {});
 
     const thumbnailFile = await generateThumbnail(fileData);
     if (thumbnailFile) {
-      await strapi.plugin('upload').provider.upload(thumbnailFile);
-      delete thumbnailFile.buffer;
+      getService('provider').upload(thumbnailFile);
       _.set(fileData, 'formats.thumbnail', thumbnailFile);
     }
 
@@ -245,15 +242,13 @@ module.exports = ({ strapi }) => ({
 
         const { key, file } = format;
 
-        await strapi.plugin('upload').provider.upload(file);
-        delete file.buffer;
+        getService('provider').upload(file);
 
         _.set(fileData, ['formats', key], file);
       }
     }
 
-    const { width, height } = await getDimensions(fileData.buffer);
-    delete fileData.buffer;
+    const { width, height } = await getDimensions(fileData);
 
     _.assign(fileData, {
       provider: config.provider,
