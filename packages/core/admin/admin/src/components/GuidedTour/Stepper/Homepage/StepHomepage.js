@@ -30,7 +30,7 @@ const StepHomepage = ({ type, title, number, content, hasLine }) => {
         </Typography>
       </GridItemAlignCenter>
       <GridItemJustifyCenter height="100%">
-        {hasLine && <StepLine minHeight={pxToRem(64)} />}
+        {hasLine && <StepLine type={type} minHeight={pxToRem(64)} />}
       </GridItemJustifyCenter>
       <Box>{type === 'isActive' && content}</Box>
     </>
