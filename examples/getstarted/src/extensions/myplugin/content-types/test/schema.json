@@ -1,0 +1,23 @@
+{
+  "kind": "collectionType",
+  "info": {
+    "displayName": "Test",
+    "singularName": "test",
+    "pluralName": "tests",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "type": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    "uidTest": {
+      "type": "uid",
+      "required": true
+    }
+  }
+}
