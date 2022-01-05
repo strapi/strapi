@@ -140,11 +140,11 @@ module.exports = ({ strapi }) => ({
     const { getDimensions, generateThumbnail, generateResponsiveFormats } = getService(
       'image-manipulation'
     );
-    getService('provider').upload(fileData);
+    await getService('provider').upload(fileData);
 
     const thumbnailFile = await generateThumbnail(fileData, { tmpFolderPath });
     if (thumbnailFile) {
-      getService('provider').upload(thumbnailFile);
+      await getService('provider').upload(thumbnailFile);
       _.set(fileData, 'formats.thumbnail', thumbnailFile);
     }
 
@@ -155,7 +155,7 @@ module.exports = ({ strapi }) => ({
 
         const { key, file } = format;
 
-        getService('provider').upload(file);
+        await getService('provider').upload(file);
 
         _.set(fileData, ['formats', key], file);
       }
