@@ -15,10 +15,9 @@ import { Box } from '@strapi/design-system/Box';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
 import Logo from '../../assets/images/homepage-logo.png';
 import { useModels } from '../../hooks';
-import GuidedTourHomepage from '../../components/GuidedTour/GuidedTourHomepage';
 import SocialLinks from './SocialLinks';
 import HomeHeader from './HomeHeader';
-// import ContentBlocks from './ContentBlocks';
+import ContentBlocks from './ContentBlocks';
 
 const LogoContainer = styled(Box)`
   position: absolute;
@@ -72,8 +71,7 @@ const HomePage = () => {
           </Grid>
           <Grid gap={6}>
             <GridItem col={8} s={12}>
-              {/* <ContentBlocks /> */}
-              <GuidedTourHomepage />
+              <ContentBlocks />
             </GridItem>
             <GridItem col={4} s={12}>
               <SocialLinks />
