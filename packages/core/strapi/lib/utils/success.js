@@ -4,8 +4,8 @@
  * Module dependencies
  */
 
-const fetch = require('node-fetch');
 const { machineIdSync } = require('node-machine-id');
+const { itly } = require('../itly');
 
 /*
  * No need to worry about this file, we only retrieve anonymous data here.
@@ -17,14 +17,9 @@ try {
     process.env.npm_config_global === 'true' ||
     JSON.parse(process.env.npm_config_argv).original.includes('global')
   ) {
-    fetch('https://analytics.strapi.io/track', {
-      method: 'POST',
-      body: JSON.stringify({
-        event: 'didInstallStrapi',
-        deviceId: machineIdSync(),
-      }),
-      headers: { 'Content-Type': 'application/json' },
-    }).catch(() => {});
+    itly.didInstallStrapi('', {
+      deviceId: machineIdSync(),
+    });
   }
 } catch (e) {
   //...

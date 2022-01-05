@@ -125,7 +125,10 @@
     "qs": "6.10.1",
     "resolve-cwd": "3.0.0",
     "semver": "7.3.5",
-    "statuses": "2.0.1"
+    "statuses": "2.0.1",
+    "@itly/plugin-amplitude": "^2.5.0",
+    "@itly/plugin-schema-validator": "^2.4.0",
+    "@itly/sdk": "^2.4.0" 
   },
   "devDependencies": {
     "supertest": "^6.1.6"
