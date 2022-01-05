@@ -1988,6 +1988,24 @@
   resolved "https://registry.yarnpkg.com/@istanbuljs/schema/-/schema-0.1.3.tgz#e45e384e4b8ec16bce2fd903af78450f6bf7ec98"
   integrity sha512-ZXRY4jNvVgSVQ8DL3LTcakaAtXwTVUxE81hslsyD2AtoXW/wVob10HkOJ1X/pAlcI7D+2YoZKg5do8G/w6RYgA==
 
+"@itly/plugin-amplitude@^2.5.0":
+  version "2.5.0"
+  resolved "https://registry.yarnpkg.com/@itly/plugin-amplitude/-/plugin-amplitude-2.5.0.tgz#924af16269437c191eeadaa7e241edff1abc4f02"
+  integrity sha512-em24rmVT8AP26snJWZrh5PcVC+7rPwjoP0VqvkLWTuZUKx8iJZV5zyfXv7kEXced10mYhBrNgL+4EjpJeNG3Pg==
+
+"@itly/plugin-schema-validator@^2.4.0":
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/@itly/plugin-schema-validator/-/plugin-schema-validator-2.4.0.tgz#6eaed63f1d72a34a5f2e8a8898e4f6d99784ecee"
+  integrity sha512-qh1q4cMp0tPmHRMAJzKe2Fmh21a4cekyCtxVEzXJrjuwZzo6JxA1SAgt9dZKugZzsx209VFp2tJRoJ9kIeI8bw==
+  dependencies:
+    jsonschema "^1.4.0"
+    url "^0.11.0"
+
+"@itly/sdk@^2.4.0":
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/@itly/sdk/-/sdk-2.4.0.tgz#c4eb2be572daf7fe01e9877894740162752bd980"
+  integrity sha512-EnJii6kCCNVgjRmDEzGi+E5CnSkqHvTiUGMyyt2CuzFjp0ipULP5VRNi42mRzGYF02qbYUiBhAXcJtPbm3wX7A==
+
 "@jest/console@^26.6.2":
   version "26.6.2"
   resolved "https://registry.yarnpkg.com/@jest/console/-/console-26.6.2.tgz#4e04bc464014358b03ab4937805ee36a0aeb98f2"
@@ -14813,6 +14831,11 @@ jsonparse@^1.2.0:
   version "1.3.1"
   resolved "https://registry.yarnpkg.com/jsonparse/-/jsonparse-1.3.1.tgz#3f4dae4a91fac315f71062f8521cc239f1366280"
   integrity sha1-P02uSpH6wxX3EGL4UhzCOfE2YoA=
+
+jsonschema@^1.4.0:
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/jsonschema/-/jsonschema-1.4.0.tgz#1afa34c4bc22190d8e42271ec17ac8b3404f87b2"
+  integrity sha512-/YgW6pRMr6M7C+4o8kS+B/2myEpHCrxO4PEWnqJNBFMjn7EWXqlQ4tGwL6xTHeRplwuZmcAncdvfOad1nT2yMw==
 
 jsonwebtoken@8.5.1, jsonwebtoken@^8.1.0:
   version "8.5.1"
