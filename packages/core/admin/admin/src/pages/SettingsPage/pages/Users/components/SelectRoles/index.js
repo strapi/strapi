@@ -68,6 +68,7 @@ const SelectRoles = ({ disabled, error, onChange, value }) => {
       startIcon={startIcon}
       value={value}
       withTags
+      required
     >
       {(data || []).map(role => {
         return (
