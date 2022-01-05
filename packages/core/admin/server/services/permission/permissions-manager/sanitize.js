@@ -117,7 +117,6 @@ module.exports = ({ action, ability, model }) => {
         set(key, pickAllowedFields(value));
       }
     }
-    }
   };
 
   const getInputFields = (fields = []) => {
