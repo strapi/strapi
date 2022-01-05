@@ -1,8 +1,8 @@
 'use strict';
 
+const fse = require('fs-extra');
 const _ = require('lodash');
 const utils = require('@strapi/utils');
-const rimraf = require('rimraf');
 const { getService } = require('../utils');
 const validateSettings = require('./validation/settings');
 const validateUploadBody = require('./validation/upload');
@@ -138,9 +138,9 @@ module.exports = {
       await (id ? this.replaceFile : this.uploadFiles)(ctx);
     } finally {
       if (Array.isArray(files)) {
-        files.map(file => rimraf(file.path, () => {}));
+        await Promise.all(files.map(file => fse.remove(file.path)));
       } else if (files.path) {
-        rimraf(files.path, () => {});
+        await fse.remove(files.path);
       }
     }
   },

@@ -6,12 +6,11 @@
  * @description: A set of functions similar to controller's actions to avoid code duplication.
  */
 
-const fs = require('fs');
 const os = require('os');
-const { mkdtemp } = require('fs').promises;
 const path = require('path');
 const crypto = require('crypto');
-const rimraf = require('rimraf');
+const fs = require('fs');
+const fse = require('fs-extra');
 const _ = require('lodash');
 const {
   sanitize,
@@ -109,7 +108,7 @@ module.exports = ({ strapi }) => ({
 
   async upload({ data, files }, { user } = {}) {
     // create temporary folder to store files for stream manipulation
-    const tmpFolderPath = await mkdtemp(path.join(os.tmpdir(), 'strapi-upload-'));
+    const tmpFolderPath = await fse.mkdtemp(path.join(os.tmpdir(), 'strapi-upload-'));
     let uploadedFiles = [];
 
     try {
@@ -129,7 +128,7 @@ module.exports = ({ strapi }) => ({
       );
     } finally {
       // delete temporary folder
-      rimraf(tmpFolderPath, () => {});
+      await fse.remove(tmpFolderPath);
     }
 
     return uploadedFiles;
