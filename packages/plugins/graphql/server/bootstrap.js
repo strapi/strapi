@@ -57,7 +57,7 @@ module.exports = async ({ strapi }) => {
     bodyParserConfig: true,
 
     plugins: [
-      process.env.NODE_ENV === 'production'
+      process.env.NODE_ENV === 'production' && !config('playgroundAlways')
         ? ApolloServerPluginLandingPageDisabled()
         : ApolloServerPluginLandingPageGraphQLPlayground(),
     ],
