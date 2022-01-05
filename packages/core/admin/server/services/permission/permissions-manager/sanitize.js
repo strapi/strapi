@@ -108,12 +108,15 @@ module.exports = ({ action, ability, model }) => {
   const omitCreatorRoles = omit([`${CREATED_BY_ATTRIBUTE}.roles`, `${UPDATED_BY_ATTRIBUTE}.roles`]);
 
   const pickAllowedAdminUserFields = ({ attribute, key, value }, { set }) => {
+    const pickAllowedFields = pick(['id', 'firstname', 'lastname', 'username']);
+
     if (attribute.type === 'relation' && attribute.target === 'admin::user' && value) {
       if (Array.isArray(value)) {
-        set(key, value.map(val => pick(['id', 'firstname', 'lastname', 'username'], val)), value);
+        set(key, value.map(pickAllowedFields));
       } else {
-        set(key, pick(['id', 'firstname', 'lastname', 'username'], value));
+        set(key, pickAllowedFields(value));
       }
+    }
     }
   };
 
