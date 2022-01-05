@@ -12,7 +12,13 @@ const sendDidUpdateRolePermissions = async () => {
   strapi.telemetry.send('didUpdateRolePermissions');
 };
 
+const sendDidChangeInterfaceLanguage = async () => {
+  const languagesInUse = await getService('user').getLanguagesInUse();
+  strapi.telemetry.send('didChangeInterfaceLanguage', { languagesInUse });
+};
+
 module.exports = {
   sendDidInviteUser,
   sendDidUpdateRolePermissions,
+  sendDidChangeInterfaceLanguage,
 };

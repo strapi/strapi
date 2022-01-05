@@ -2,6 +2,7 @@
 
 const { validateProfileUpdateInput } = require('../validation/user');
 const { getService } = require('../utils');
+const { sendDidChangeInterfaceLanguage } = require('../services/metrics');
 
 module.exports = {
   async getMe(ctx) {
@@ -33,6 +34,10 @@ module.exports = {
     }
 
     const updatedUser = await userService.updateById(ctx.state.user.id, userInfo);
+
+    if (ctx.state.user.preferedLanguage !== updatedUser.preferedLanguage) {
+      sendDidChangeInterfaceLanguage();
+    }
 
     ctx.body = {
       data: userService.sanitizeUser(updatedUser),
