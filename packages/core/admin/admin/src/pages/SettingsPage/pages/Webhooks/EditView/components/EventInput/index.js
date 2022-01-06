@@ -100,7 +100,7 @@ const EventInput = ({ isDraftAndPublish }) => {
 
   return (
     <Stack size={1}>
-      <FieldLabel>
+      <FieldLabel required>
         {formatMessage({
           id: 'Settings.webhooks.form.events',
           defaultMessage: 'Events',

@@ -32,6 +32,7 @@ const InputUID = ({
   onChange,
   value,
   placeholder,
+  required,
 }) => {
   const { modifiedData, initialData, layout } = useCMEditViewDataManager();
   const [isLoading, setIsLoading] = useState(false);
@@ -244,6 +245,7 @@ const InputUID = ({
       onChange={handleChange}
       placeholder={formattedPlaceholder}
       value={value || ''}
+      required={required}
     />
   );
 };
@@ -275,6 +277,7 @@ InputUID.propTypes = {
     defaultMessage: PropTypes.string.isRequired,
     values: PropTypes.object,
   }),
+  required: PropTypes.bool,
 };
 
 InputUID.defaultProps = {
@@ -284,6 +287,7 @@ InputUID.defaultProps = {
   labelAction: undefined,
   placeholder: undefined,
   value: '',
+  required: false,
 };
 
 export default InputUID;

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { ModalLayout } from '@strapi/design-system/ModalLayout';
+import { useIntl } from 'react-intl';
 import { AddAssetStep } from './AddAssetStep/AddAssetStep';
 import { PendingAssetStep } from './PendingAssetStep/PendingAssetStep';
 import { EditAssetDialog } from '../EditAssetDialog';
@@ -17,6 +18,7 @@ export const UploadAssetDialog = ({
   addUploadedFiles,
   trackedLocation,
 }) => {
+  const { formatMessage } = useIntl();
   const [step, setStep] = useState(initialAssetsToAdd ? Steps.PendingAsset : Steps.AddAsset);
   const [assets, setAssets] = useState(initialAssetsToAdd || []);
   const [assetToEdit, setAssetToEdit] = useState(undefined);
@@ -58,8 +60,26 @@ export const UploadAssetDialog = ({
     setAssetToEdit(undefined);
   };
 
+  const handleClose = () => {
+    if (step === Steps.PendingAsset && assets.length > 0) {
+      // eslint-disable-next-line no-alert
+      const confirm = window.confirm(
+        formatMessage({
+          id: 'window.confirm.close-modal.files',
+          defaultMessage: 'Are you sure? You have some files that have not been uploaded yet.',
+        })
+      );
+
+      if (confirm) {
+        onClose();
+      }
+    } else {
+      onClose();
+    }
+  };
+
   return (
-    <ModalLayout onClose={onClose} labelledBy="title">
+    <ModalLayout onClose={handleClose} labelledBy="title">
       {step === Steps.AddAsset && (
         <AddAssetStep
           onClose={onClose}
@@ -70,7 +90,7 @@ export const UploadAssetDialog = ({
 
       {step === Steps.PendingAsset && (
         <PendingAssetStep
-          onClose={onClose}
+          onClose={handleClose}
           assets={assets}
           onEditAsset={setAssetToEdit}
           onClickAddAsset={moveToAddAsset}
