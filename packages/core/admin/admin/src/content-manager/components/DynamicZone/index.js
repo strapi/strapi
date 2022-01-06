@@ -191,6 +191,7 @@ const DynamicZone = ({
       {dynamicDisplayedComponentsLength > 0 && (
         <Box>
           <DzLabel
+            description={metadatas.description}
             label={metadatas.label}
             labelAction={labelAction}
             name={name}
