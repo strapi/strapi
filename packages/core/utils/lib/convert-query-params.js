@@ -218,73 +218,71 @@ const convertFieldsQueryParams = (fields, depth = 0) => {
   throw new Error('Invalid fields parameter. Expected a string or an array of strings');
 };
 
-const convertFiltersQueryParams = (filters, type) => {
-  const sanitizeFilters = (filters, type) => {
+const convertFiltersQueryParams = (filters, schema) => {
+  // Filters need to be either an array or an object
+  // Here we're only checking for 'object' type since typeof [] => object and typeof {} => object
+  if (typeof filters !== 'object') {
+    throw new Error('The filters parameter must be an object or an array');
+  }
+
+  const sanitizeFilters = (filters, schema) => {
     if (Array.isArray(filters)) {
-      return filters.map(filter => sanitizeFilters(filter, type));
+      return (
+        filters
+          // Sanitize each filter
+          .map(filter => sanitizeFilters(filter, schema))
+          // Filter out empty filters
+          .filter(filter => !isEmpty(filter))
+      );
     }
 
-    for (const operator in filters) {
-      const attribute = type.attributes[operator];
+    // Here, `key` can either be an operator or an attribute name
+    for (const [key, value] of Object.entries(filters)) {
+      const removeOperator = () => delete filters[key];
+      const attribute = schema.attributes[key];
 
+      // Handle attributes
       if (attribute) {
+        console.log(key, attribute.type);
+        // Always remove password attributes from filters object
         if (attribute.type === 'password') {
-          delete filters[operator];
+          removeOperator();
         }
 
+        // Relations
         if (attribute.type === 'relation') {
-          sanitizeFilters(filters[operator], strapi.getModel(attribute.target));
-
-          if (isEmpty(filters[operator])) {
-            delete filters[operator];
-          }
+          filters[key] = sanitizeFilters(value, strapi.getModel(attribute.target));
         }
 
-        continue;
+        // Components
+        else if (attribute.type === 'component') {
+          filters[key] = sanitizeFilters(value, strapi.getModel(attribute.component));
+        }
+
+        // Media
+        else if (attribute.type === 'media') {
+          filters[key] = sanitizeFilters(value, strapi.getModel('plugin::upload.file'));
+        }
       }
 
-      if (!Array.isArray(filters[operator])) {
-        throw new Error(`You can't filter on an attribute that doens't exists`);
+      // Handle operators
+      else {
+        if (typeof value !== 'object') {
+          throw new Error(`Invalid value supplied for "${key}"`);
+        }
+
+        filters[key] = sanitizeFilters(value, schema);
       }
 
-      filters[operator] = filters[operator].filter(filter => {
-        if (isEmpty(filter)) {
-          return false;
-        }
-
-        const key = Object.keys(filter)[0];
-
-        if (['$and', '$or', '$not'].includes(key)) {
-          sanitizeFilters(filter, type);
-          return true;
-        }
-
-        const attribute = type.attributes[key];
-
-        if (!attribute) {
-          throw new Error(`You can't filter on an attribute that doens't exists`);
-        }
-
-        if (attribute.type === 'password') {
-          return false;
-        }
-
-        if (attribute.type === 'relation') {
-          sanitizeFilters(filter[key], strapi.getModel(attribute.target));
-
-          if (isEmpty(filter)) {
-            return false;
-          }
-        }
-
-        return true;
-      });
+      if (isEmpty(filters[key])) {
+        removeOperator();
+      }
     }
 
     return filters;
   };
 
-  return sanitizeFilters(filters, type);
+  return sanitizeFilters(filters, schema);
 };
 
 const convertPublicationStateParams = (type, params = {}, query = {}) => {
