@@ -1530,7 +1530,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                       <div
                         class="c68 c69"
                       >
-                        <button
+                        <span
                           aria-label="Move id"
                           class="c74 c75 c76"
                           draggable="true"
@@ -1572,7 +1572,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                               fill="#212134"
                             />
                           </svg>
-                        </button>
+                        </span>
                         <span
                           class="c24 c77"
                         >
@@ -1633,7 +1633,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                       <div
                         class="c68 c69"
                       >
-                        <button
+                        <span
                           aria-label="Move address"
                           class="c74 c75 c76"
                           draggable="true"
@@ -1675,7 +1675,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                               fill="#212134"
                             />
                           </svg>
-                        </button>
+                        </span>
                         <span
                           class="c24 c77"
                         >
@@ -3417,7 +3417,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                         <div
                           class="c68 c69"
                         >
-                          <button
+                          <span
                             aria-label="Move cover"
                             class="c74 c75 c76"
                             draggable="true"
@@ -3459,7 +3459,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                                 fill="#212134"
                               />
                             </svg>
-                          </button>
+                          </span>
                           <span
                             class="c24 c77"
                           >
@@ -3520,7 +3520,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                         <div
                           class="c68 c69"
                         >
-                          <button
+                          <span
                             aria-label="Move id"
                             class="c74 c75 c76"
                             draggable="true"
@@ -3562,7 +3562,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                                 fill="#212134"
                               />
                             </svg>
-                          </button>
+                          </span>
                           <span
                             class="c24 c77"
                           >
@@ -3623,7 +3623,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                         <div
                           class="c68 c69"
                         >
-                          <button
+                          <span
                             aria-label="Move address"
                             class="c74 c75 c76"
                             draggable="true"
@@ -3665,7 +3665,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                                 fill="#212134"
                               />
                             </svg>
-                          </button>
+                          </span>
                           <span
                             class="c24 c77"
                           >

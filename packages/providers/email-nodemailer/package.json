@@ -1,6 +1,6 @@
 {
   "name": "@strapi/provider-email-nodemailer",
-  "version": "4.0.2",
+  "version": "4.0.3",
   "description": "Nodemailer provider for Strapi 3",
   "keywords": [
     "strapi",
@@ -53,7 +53,7 @@
     "nodemailer": "6.5.0"
   },
   "engines": {
-    "node": ">=12.x.x <=16.x.x",
+    "node": ">=12.22.0 <=16.x.x",
     "npm": ">=6.0.0"
   }
 }

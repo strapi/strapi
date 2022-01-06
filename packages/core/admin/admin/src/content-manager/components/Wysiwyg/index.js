@@ -26,6 +26,10 @@ const LabelAction = styled(Box)`
   }
 `;
 
+const TypographyAsterisk = styled(Typography)`
+  line-height: 0;
+`;
+
 const Wysiwyg = ({
   description,
   disabled,
@@ -36,6 +40,7 @@ const Wysiwyg = ({
   onChange,
   placeholder,
   value,
+  required,
 }) => {
   const { formatMessage } = useIntl();
   const textareaRef = useRef(null);
@@ -124,6 +129,7 @@ const Wysiwyg = ({
         <Stack horizontal size={1}>
           <Typography variant="pi" fontWeight="bold" textColor="neutral800">
             {label}
+            {required && <TypographyAsterisk textColor="danger600">*</TypographyAsterisk>}
           </Typography>
           {labelAction && <LabelAction paddingLeft={1}>{labelAction}</LabelAction>}
         </Stack>
@@ -182,6 +188,7 @@ Wysiwyg.defaultProps = {
   error: '',
   labelAction: undefined,
   placeholder: null,
+  required: false,
   value: '',
 };
 
@@ -206,6 +213,7 @@ Wysiwyg.propTypes = {
     defaultMessage: PropTypes.string.isRequired,
     values: PropTypes.object,
   }),
+  required: PropTypes.bool,
   value: PropTypes.string,
 };
 
