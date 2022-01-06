@@ -64,7 +64,7 @@ const Content = ({ appLocales, currentLocale, localizations, readPermissions }) 
       const { data: response } = await axiosInstance.get(requestURL);
 
       const cleanedData = cleanData(response, allLayoutData, localizations);
-      ['createdBy', 'updatedBy', 'publishedAt', 'id', '_id', 'createdAt'].forEach(key => {
+      ['createdBy', 'updatedBy', 'publishedAt', 'id', 'createdAt'].forEach(key => {
         if (!initialData[key]) return;
         cleanedData[key] = initialData[key];
       });
