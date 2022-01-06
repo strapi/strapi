@@ -263,6 +263,11 @@ const convertFiltersQueryParams = (filters, schema) => {
         else if (attribute.type === 'media') {
           filters[key] = sanitizeFilters(value, strapi.getModel('plugin::upload.file'));
         }
+
+        // Dynamic Zones
+        else if (attribute.type === 'dynamiczone') {
+          removeOperator();
+        }
       }
 
       // Handle operators
