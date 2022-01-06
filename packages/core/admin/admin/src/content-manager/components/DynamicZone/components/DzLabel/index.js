@@ -17,7 +17,7 @@ const StyledBox = styled(Box)`
   border-radius: ${pxToRem(26)};
 `;
 
-const DzLabel = ({ label, labelAction, name, numberOfComponents, required, description }) => {
+const DzLabel = ({ label, labelAction, name, numberOfComponents, required, intlDescription }) => {
   const { formatMessage } = useIntl();
   const intlLabel = formatMessage({ id: label || name, defaultMessage: label || name });
 
@@ -44,10 +44,10 @@ const DzLabel = ({ label, labelAction, name, numberOfComponents, required, descr
               {required && <Typography textColor="danger600">*</Typography>}
               {labelAction && <Box paddingLeft={1}>{labelAction}</Box>}
             </Flex>
-            {description && (
+            {intlDescription && (
               <Box paddingTop={1} maxWidth={pxToRem(356)}>
                 <Typography variant="pi" textColor="neutral600" ellipsis>
-                  {description}
+                  {formatMessage(intlDescription)}
                 </Typography>
               </Box>
             )}
@@ -59,14 +59,17 @@ const DzLabel = ({ label, labelAction, name, numberOfComponents, required, descr
 };
 
 DzLabel.defaultProps = {
-  description: undefined,
+  intlDescription: undefined,
   label: '',
   labelAction: undefined,
   required: false,
 };
 
 DzLabel.propTypes = {
-  description: PropTypes.string,
+  intlDescription: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    defaultMessage: PropTypes.string.isRequired,
+  }),
   label: PropTypes.string,
   labelAction: PropTypes.element,
   name: PropTypes.string.isRequired,
