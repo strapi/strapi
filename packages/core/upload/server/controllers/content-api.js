@@ -139,7 +139,7 @@ module.exports = {
     } finally {
       if (Array.isArray(files)) {
         await Promise.all(files.map(file => fse.remove(file.path)));
-      } else if (files.path) {
+      } else if (files && files.path) {
         await fse.remove(files.path);
       }
     }
