@@ -20,6 +20,14 @@ const registerAdminConditions = () => {
   getService('permission').conditionProvider.registerMany(adminConditions.conditions);
 };
 
+const registerModelHooks = () => {
+  strapi.db.lifecycles.subscribe({
+    models: ['admin::user'],
+    afterCreate: getService('metrics').sendDidChangeInterfaceLanguage,
+    afterUpdate: getService('metrics').sendDidChangeInterfaceLanguage,
+  })
+}
+
 const syncAuthSettings = async () => {
   const adminStore = await strapi.store({ type: 'core', name: 'admin' });
   const adminAuthSettings = await adminStore.get({ key: 'auth' });
@@ -40,6 +48,7 @@ const syncAuthSettings = async () => {
 module.exports = async () => {
   registerAdminConditions();
   registerPermissionActions();
+  registerModelHooks();
 
   const permissionService = getService('permission');
   const userService = getService('user');
