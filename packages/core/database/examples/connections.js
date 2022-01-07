@@ -9,6 +9,15 @@ const postgres = {
   },
   // debug: true,
 };
+const cockroachdb = {
+  client: 'cockroachdb',
+  connection: {
+    database: 'strapi',
+    user: 'strapi',
+    password: 'strapi',
+  },
+  // debug: true,
+};
 
 const mysql = {
   client: 'mysql',
@@ -33,4 +42,5 @@ module.exports = {
   sqlite,
   postgres,
   mysql,
+  cockroachdb,
 };

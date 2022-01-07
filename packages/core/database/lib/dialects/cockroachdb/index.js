@@ -2,14 +2,14 @@
 
 const errors = require('../../errors');
 const { Dialect } = require('../dialect');
-const PostgresqlSchemaInspector = require('./schema-inspector');
+const CockroachdbSchemaInspector = require('./schema-inspector');
 
-class PostgresDialect extends Dialect {
+class CockroachDialect extends Dialect {
   constructor(db) {
     super(db);
-    console.log('PostgresDialect');
+    console.log('CockroachDialect');
 
-    this.schemaInspector = new PostgresqlSchemaInspector(db);
+    this.schemaInspector = new CockroachdbSchemaInspector(db);
   }
 
   useReturning() {
@@ -47,4 +47,4 @@ class PostgresDialect extends Dialect {
   }
 }
 
-module.exports = PostgresDialect;
+module.exports = CockroachDialect;

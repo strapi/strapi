@@ -353,6 +353,9 @@ const fieldLowerFn = qb => {
   if (qb.client.config.client === 'postgres') {
     return 'LOWER(CAST(?? AS VARCHAR))';
   }
+  if (qb.client.config.client === 'cockroach') {
+    return 'LOWER(CAST(?? AS VARCHAR))';
+  }
 
   return 'LOWER(??)';
 };
