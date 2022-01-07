@@ -3,9 +3,12 @@
 const path = require('path');
 const execa = require('execa');
 const yargs = require('yargs');
-const { cleanTestApp, generateTestApp } = require('./helpers/test-app-generator');
 
 const appName = 'testApp';
+process.env.ENV_PATH = path.resolve(__dirname, '..', appName, '.env');
+
+const { cleanTestApp, generateTestApp } = require('./helpers/test-app-generator');
+const { createStrapiInstance } = require('./helpers/strapi');
 
 const databases = {
   postgres: {
@@ -38,11 +41,16 @@ const databases = {
 };
 
 const runAllTests = async args => {
+  // start and destroy instance once so it correctly generate env variables without concurrent instances
+  await createStrapiInstance();
+  await strapi.destroy();
+
   return execa('yarn', ['test:e2e', ...args], {
     stdio: 'inherit',
     cwd: path.resolve(__dirname, '..'),
     env: {
       FORCE_COLOR: 1,
+      ENV_PATH: process.env.ENV_PATH,
     },
   });
 };
