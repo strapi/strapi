@@ -284,6 +284,8 @@
   "app.components.LeftMenu.expand": "Expand the navbar",
   "app.components.LeftMenu.logout": "Logout",
   "app.components.LeftMenu.profile": "Profile",
+  "app.components.LeftMenu.navbrand.title": "Strapi Dashboard",
+  "app.components.LeftMenu.navbrand.workplace": "Workplace",
   "app.components.LeftMenuFooter.documentation": "Documentation",
   "app.components.LeftMenuFooter.help": "Help",
   "app.components.LeftMenuFooter.poweredBy": "Powered by ",
