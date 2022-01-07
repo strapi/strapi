@@ -58,8 +58,15 @@ module.exports = context => {
           }
 
           validAttributes.forEach(([attributeName, attribute]) => {
+            // Enums
+            if (isEnumeration(attribute)) {
+              const enumTypeName = getEnumName(contentType, attributeName);
+
+              t.field(attributeName, { type: enumTypeName });
+            }
+
             // Scalars
-            if (isStrapiScalar(attribute)) {
+            else if (isStrapiScalar(attribute)) {
               const gqlScalar = mappers.strapiScalarToGraphQLScalar(attribute.type);
 
               t.field(attributeName, { type: gqlScalar });
@@ -85,13 +92,6 @@ module.exports = context => {
               const isToManyRelation = attribute.relation.endsWith('Many');
 
               isToManyRelation ? t.list.id(attributeName) : t.id(attributeName);
-            }
-
-            // Enums
-            else if (isEnumeration(attribute)) {
-              const enumTypeName = getEnumName(contentType, attributeName);
-
-              t.field(attributeName, { type: enumTypeName });
             }
 
             // Components
