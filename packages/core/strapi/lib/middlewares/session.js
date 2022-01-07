@@ -1,7 +1,6 @@
 'use strict';
 
-const crypto = require('crypto');
-const { defaultsDeep, isEmpty, isString, omit, has } = require('lodash/fp');
+const { defaultsDeep, isEmpty, isArray } = require('lodash/fp');
 const session = require('koa-session');
 
 const defaultConfig = {
@@ -13,34 +12,17 @@ const defaultConfig = {
   signed: true,
   rolling: false,
   renew: false,
-  secure: false,
+  secure: process.env.NODE_ENV === 'production' ? true : false,
   sameSite: null,
 };
 
 module.exports = (userConfig, { strapi }) => {
-  if (isEmpty(strapi.server.app.keys)) {
-    let secretKeys = [];
-
-    if (has('secretKeys', userConfig)) {
-      secretKeys = isString(userConfig.secretKeys)
-        ? userConfig.secretKeys.split(',')
-        : userConfig.secretKeys;
-    } else if (has('SESSION_SECRET_KEYS', process.env)) {
-      secretKeys = process.env.SESSION_SECRET_KEYS.split(',');
-    } else {
-      // auto generate secret keys if they are not provided
-      for (let i = 0; i < 4; i++) {
-        secretKeys.push(crypto.randomBytes(64).toString('hex'));
-      }
-      strapi.fs.appendFile('.env', `SESSION_SECRET_KEYS=${secretKeys.join(',')}\n`);
-      strapi.log.info(
-        'The session middleware automatically generated some secret keys and stored them in your .env file under the name SESSION_SECRET_KEYS.'
-      );
-    }
-
-    strapi.server.app.keys = secretKeys;
+  const keys = strapi.server.app.keys;
+  if (!isArray(keys) || isEmpty(keys) || keys.some(isEmpty)) {
+    throw new Error(`App keys are required. Please set app.keys in config/server.js (ex: keys: ['myKeyA', 'myKeyB'])`);
   }
-  const config = defaultsDeep(defaultConfig, omit('secretKeys', userConfig));
+
+  const config = defaultsDeep(defaultConfig, userConfig);
 
   strapi.server.use(session(config, strapi.server.app));
 };

@@ -10,12 +10,7 @@ module.exports = ({ env }) => [
   'strapi::logger',
   'strapi::query',
   'strapi::body',
-  {
-    name: 'strapi::session',
-    config: {
-      secretKeys: env('SESSION_SECRET_KEYS'),
-    },
-  },
+  'strapi::session',
   // 'strapi::compression',
   // 'strapi::ip',
   {
