@@ -1,6 +1,6 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 //  TODO: DS add loader
-import { auth, LoadingIndicatorPage, AppInfosContext } from '@strapi/helper-plugin';
+import { auth, LoadingIndicatorPage, AppInfosContext, useGuidedTour } from '@strapi/helper-plugin';
 import { useQueries } from 'react-query';
 import get from 'lodash/get';
 import packageJSON from '../../../../package.json';
@@ -10,11 +10,13 @@ import RBACProvider from '../RBACProvider';
 import { fetchAppInfo, fetchCurrentUserPermissions, fetchStrapiLatestRelease } from './utils/api';
 import checkLatestStrapiVersion from './utils/checkLatestStrapiVersion';
 import { getFullName } from '../../utils';
+import { handleGuidedTourVisibility } from '../GuidedTour/utils/handleGuidedTourVisibility';
 
 const strapiVersion = packageJSON.version;
 
 const AuthenticatedApp = () => {
   const userInfo = auth.getUserInfo();
+  const { setGuidedTourVisibility } = useGuidedTour();
   const userName = get(userInfo, 'username') || getFullName(userInfo.firstname, userInfo.lastname);
   const [userDisplayName, setUserDisplayName] = useState(userName);
   const { showReleaseNotification } = useConfigurations();
@@ -40,6 +42,10 @@ const AuthenticatedApp = () => {
   const shouldUpdateStrapi = useMemo(() => checkLatestStrapiVersion(strapiVersion, tag_name), [
     tag_name,
   ]);
+
+  useEffect(() => {
+    handleGuidedTourVisibility(setGuidedTourVisibility);
+  }, [setGuidedTourVisibility]);
 
   // We don't need to wait for the release query to be fetched before rendering the plugins
   // however, we need the appInfos and the permissions
