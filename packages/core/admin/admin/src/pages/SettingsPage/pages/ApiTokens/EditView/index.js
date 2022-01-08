@@ -208,6 +208,7 @@ const ApiTokenCreateView = () => {
                             })}
                             onChange={handleChange}
                             value={values.name}
+                            required
                           />
                         </GridItem>
                         <GridItem key="description" col={6} xs={12}>

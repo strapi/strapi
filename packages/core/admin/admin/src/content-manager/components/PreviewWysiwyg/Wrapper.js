@@ -47,6 +47,10 @@ const Wrapper = styled.div`
     font-weight: 800;
   }
 
+  em {
+    font-style: italic;
+  }
+
   blockquote {
     margin-top: 41px;
     margin-bottom: 34px;
