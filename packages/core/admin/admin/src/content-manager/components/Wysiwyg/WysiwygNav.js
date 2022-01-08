@@ -84,7 +84,7 @@ const WysiwygNav = ({
             <MoreButton disabled ref={buttonMoreRef} id="more" label="More" icon={<More />} />
           </Flex>
 
-          <Button onClick={onTogglePreviewMode} variant="tertiary" size="L" id="preview">
+          <Button onClick={onTogglePreviewMode} variant="tertiary" id="preview">
             {formatMessage({
               id: 'components.Wysiwyg.ToggleMode.markdown-mode',
               defaultMessage: 'Markdown mode',
