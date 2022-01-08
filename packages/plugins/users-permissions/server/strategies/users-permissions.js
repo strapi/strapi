@@ -1,7 +1,7 @@
 'use strict';
 
 const { castArray, map } = require('lodash/fp');
-const { ForbiddenError } = require('@strapi/utils').errors;
+const { ForbiddenError, UnauthorizedError } = require('@strapi/utils').errors;
 
 const { getService } = require('../utils');
 
@@ -66,6 +66,11 @@ const authenticate = async ctx => {
 
 const verify = async (auth, config) => {
   const { credentials: user } = auth;
+
+  // A non authenticated user cannot access routes that do not have a scope
+  if (!user && !config.scope) {
+    throw new UnauthorizedError();
+  }
 
   let allowedActions = auth.allowedActions;
 
