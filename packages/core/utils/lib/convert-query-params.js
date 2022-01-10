@@ -4,7 +4,7 @@
  * Converts the standard Strapi REST query params to a more usable format for querying
  * You can read more here: https://docs.strapi.io/developer-docs/latest/developer-resources/database-apis-reference/rest-api.html#filters
  */
-const { has, isEmpty } = require('lodash/fp');
+const { has, isEmpty, isObject } = require('lodash/fp');
 const _ = require('lodash');
 const parseType = require('./parse-type');
 const contentTypesUtils = require('./content-types');
@@ -221,11 +221,15 @@ const convertFieldsQueryParams = (fields, depth = 0) => {
 const convertFiltersQueryParams = (filters, schema) => {
   // Filters need to be either an array or an object
   // Here we're only checking for 'object' type since typeof [] => object and typeof {} => object
-  if (typeof filters !== 'object') {
+  if (!isObject(filters)) {
     throw new Error('The filters parameter must be an object or an array');
   }
 
   const sanitizeFilters = (filters, schema) => {
+    if (!isObject(filters)) {
+      return filters;
+    }
+
     if (Array.isArray(filters)) {
       return (
         filters
@@ -243,7 +247,6 @@ const convertFiltersQueryParams = (filters, schema) => {
 
       // Handle attributes
       if (attribute) {
-        console.log(key, attribute.type);
         // Always remove password attributes from filters object
         if (attribute.type === 'password') {
           removeOperator();
@@ -271,15 +274,12 @@ const convertFiltersQueryParams = (filters, schema) => {
       }
 
       // Handle operators
-      else {
-        if (typeof value !== 'object') {
-          throw new Error(`Invalid value supplied for "${key}"`);
-        }
-
+      else if (isObject(value)) {
         filters[key] = sanitizeFilters(value, schema);
       }
 
-      if (isEmpty(filters[key])) {
+      // Remove empty objects & arrays
+      if (isObject(filters[key]) && isEmpty(filters[key])) {
         removeOperator();
       }
     }
