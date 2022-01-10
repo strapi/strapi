@@ -4478,7 +4478,7 @@
     better-opn "^2.1.1"
     boxen "^5.1.2"
     chalk "^4.1.0"
-    cli-table3 "0.6.0"
+    cli-table3 "0.6.1"
     commander "^6.2.1"
     compression "^1.7.4"
     core-js "^3.8.2"
@@ -8098,9 +8098,9 @@ cli-spinners@^2.0.0, cli-spinners@^2.5.0:
   resolved "https://registry.npmjs.org/cli-spinners/-/cli-spinners-2.6.1.tgz"
   integrity sha512-x/5fWmGMnbKQAaNwN+UZlV79qBLM9JFnJuJ03gIi5whrob0xV0ofNVHy9DhwGdsMJQc2OKv0oGmLzvaqvAVv+g==
 
-cli-table3@0.6.0:
-  version "0.6.0"
-  resolved "https://registry.npmjs.org/cli-table3/-/cli-table3-0.6.0.tgz"
+cli-table3@0.6.1:
+  version "0.6.1"
+  resolved "https://registry.npmjs.org/cli-table3/-/cli-table3-0.6.1.tgz"
   integrity sha512-gnB85c3MGC7Nm9I/FkiasNBOKjOiO1RNuXXarQms37q4QMpWdlbBgD/VnOStA2faG1dpXMv31RFApjX1/QdgWQ==
   dependencies:
     object-assign "^4.1.0"
