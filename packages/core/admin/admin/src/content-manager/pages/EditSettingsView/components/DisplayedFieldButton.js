@@ -341,7 +341,7 @@ const DisplayedFieldButton = ({
           isHidden={isHidden}
         >
           <DragButton
-            as="button"
+            as="span"
             type="button"
             ref={refs.dragRef}
             onClick={e => e.stopPropagation()}
