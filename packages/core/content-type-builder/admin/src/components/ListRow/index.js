@@ -1,7 +1,6 @@
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import get from 'lodash/get';
-import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
 import { IconButton } from '@strapi/design-system/IconButton';
 import { Flex } from '@strapi/design-system/Flex';
@@ -94,7 +93,7 @@ function ListRow({
         {loopNumber !== 0 && <Curve color={isFromDynamicZone ? 'primary200' : 'neutral150'} />}
         <Stack paddingLeft={2} size={4} horizontal>
           <AttributeIcon key={src} type={src} />
-          <Typography fontWeight="bold">{upperFirst(name)}</Typography>
+          <Typography fontWeight="bold">{name}</Typography>
         </Stack>
       </td>
       <td>

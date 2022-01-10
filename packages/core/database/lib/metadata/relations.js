@@ -390,7 +390,7 @@ const createJoinTable = (metadata, { attributeName, attribute, meta }) => {
   const targetMeta = metadata.get(attribute.target);
 
   if (!targetMeta) {
-    throw new Error(`Unknow target ${attribute.target}`);
+    throw new Error(`Unknown target ${attribute.target}`);
   }
 
   const joinTableName = _.snakeCase(`${meta.tableName}_${attributeName}_links`);
