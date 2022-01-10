@@ -1,6 +1,7 @@
 'use strict';
 
 const path = require('path');
+const fs = require('fs');
 const fse = require('fs-extra');
 const Umzug = require('umzug');
 
@@ -26,6 +27,7 @@ const createUmzugProvider = db => {
   const migrationDir = path.join(strapi.dirs.root, 'database/migrations');
 
   fse.ensureDirSync(migrationDir);
+  if (fs.readdirSync(migrationDir).length === 0) fse.writeFileSync(migrationDir + '/.gitkeep', '');
 
   const wrapFn = fn => db => db.getConnection().transaction(trx => Promise.resolve(fn(trx)));
   const storage = createStorage({ db, tableName: 'strapi_migrations' });
