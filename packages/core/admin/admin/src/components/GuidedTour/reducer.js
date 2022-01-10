@@ -17,7 +17,7 @@ export const initialState = {
       success: false,
     },
   },
-  guidedTourVisibility: false,
+  isGuidedTourVisible: false,
 };
 
 const reducer = (state = initialState, action) =>
@@ -28,7 +28,7 @@ const reducer = (state = initialState, action) =>
         break;
       }
       case 'SET_GUIDED_TOUR_VISIBILITY': {
-        draftState.guidedTourVisibility = action.value;
+        draftState.isGuidedTourVisible = action.value;
         break;
       }
       default: {

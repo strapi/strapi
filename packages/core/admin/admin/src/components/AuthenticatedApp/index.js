@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useRef } from 'react';
 //  TODO: DS add loader
 import { auth, LoadingIndicatorPage, AppInfosContext, useGuidedTour } from '@strapi/helper-plugin';
 import { useQueries } from 'react-query';
@@ -7,7 +7,12 @@ import packageJSON from '../../../../package.json';
 import { useConfigurations } from '../../hooks';
 import PluginsInitializer from '../PluginsInitializer';
 import RBACProvider from '../RBACProvider';
-import { fetchAppInfo, fetchCurrentUserPermissions, fetchStrapiLatestRelease } from './utils/api';
+import {
+  fetchAppInfo,
+  fetchCurrentUserPermissions,
+  fetchStrapiLatestRelease,
+  fetchUserRoles,
+} from './utils/api';
 import checkLatestStrapiVersion from './utils/checkLatestStrapiVersion';
 import { getFullName } from '../../utils';
 import { handleGuidedTourVisibility } from '../GuidedTour/utils/handleGuidedTourVisibility';
@@ -15,8 +20,9 @@ import { handleGuidedTourVisibility } from '../GuidedTour/utils/handleGuidedTour
 const strapiVersion = packageJSON.version;
 
 const AuthenticatedApp = () => {
-  const userInfo = auth.getUserInfo();
   const { setGuidedTourVisibility } = useGuidedTour();
+  const setGuidedTourVisibilityRef = useRef(setGuidedTourVisibility);
+  const userInfo = auth.getUserInfo();
   const userName = get(userInfo, 'username') || getFullName(userInfo.firstname, userInfo.lastname);
   const [userDisplayName, setUserDisplayName] = useState(userName);
   const { showReleaseNotification } = useConfigurations();
@@ -24,6 +30,7 @@ const AuthenticatedApp = () => {
     { data: appInfos, status },
     { data: tag_name, isLoading },
     { data: permissions, status: fetchPermissionsStatus, refetch, isFetched, isFetching },
+    { data: userRoles },
   ] = useQueries([
     { queryKey: 'app-infos', queryFn: fetchAppInfo },
     {
@@ -37,6 +44,10 @@ const AuthenticatedApp = () => {
       queryFn: fetchCurrentUserPermissions,
       initialData: [],
     },
+    {
+      queryKey: 'user-roles',
+      queryFn: fetchUserRoles,
+    },
   ]);
 
   const shouldUpdateStrapi = useMemo(() => checkLatestStrapiVersion(strapiVersion, tag_name), [
@@ -44,8 +55,10 @@ const AuthenticatedApp = () => {
   ]);
 
   useEffect(() => {
-    handleGuidedTourVisibility(setGuidedTourVisibility);
-  }, [setGuidedTourVisibility]);
+    if (userRoles) {
+      handleGuidedTourVisibility(userRoles, setGuidedTourVisibilityRef.current);
+    }
+  }, [userRoles]);
 
   // We don't need to wait for the release query to be fetched before rendering the plugins
   // however, we need the appInfos and the permissions
