@@ -166,7 +166,9 @@ const stringValidator = composeValidators(
   addUniqueValidator
 );
 
-const emailValidator = composeValidators(stringValidator, validator => validator.email());
+const emailValidator = composeValidators(stringValidator, validator =>
+  validator.email().required()
+);
 
 const uidValidator = composeValidators(stringValidator, validator =>
   validator.matches(new RegExp('^[A-Za-z0-9-_.~]*$'))
