@@ -98,10 +98,17 @@ program
   .description('Create a new application')
   .action(require('../lib/commands/new'));
 
+// `$ strapi migrate`
+program
+  .command('migrate')
+  .description('Migrate your Strapi application DB')
+  .action(getLocalScript('migrate'));
+
 // `$ strapi start`
 program
   .command('start')
   .description('Start your Strapi application')
+  .option('--no-migrate', 'Disable running migrations during startup', false)
   .action(getLocalScript('start'));
 
 // `$ strapi develop`

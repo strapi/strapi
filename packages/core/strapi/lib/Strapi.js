@@ -337,6 +337,30 @@ class Strapi {
   }
 
   async bootstrap() {
+    await this.bootstrapDatabase();
+
+    const cronTasks = this.config.get('server.cron.tasks', {});
+    this.cron.add(cronTasks);
+
+    this.telemetry.bootstrap();
+
+    if (this.config.get('migrate')) {
+      await this.applyMigrations();
+    }
+
+    await this.startWebhooks();
+
+    await this.server.initMiddlewares();
+    await this.server.initRouting();
+
+    await this.runLifecyclesFunctions(LIFECYCLES.BOOTSTRAP);
+
+    this.cron.start();
+
+    return this;
+  }
+
+  async bootstrapDatabase() {
     const contentTypes = [
       coreStoreModel,
       webhookModel,
@@ -359,11 +383,12 @@ class Strapi {
       eventHub: this.eventHub,
       entityValidator: this.entityValidator,
     });
+  }
 
-    const cronTasks = this.config.get('server.cron.tasks', {});
-    this.cron.add(cronTasks);
-
-    this.telemetry.bootstrap();
+  async applyMigrations() {
+    if (!this.db) {
+      await this.bootstrapDatabase();
+    }
 
     let oldContentTypes;
     if (await this.db.getSchemaConnection().hasTable(coreStoreModel.collectionName)) {
@@ -392,17 +417,11 @@ class Strapi {
       key: 'schema',
       value: strapi.contentTypes,
     });
+  }
 
-    await this.startWebhooks();
-
-    await this.server.initMiddlewares();
-    await this.server.initRouting();
-
-    await this.runLifecyclesFunctions(LIFECYCLES.BOOTSTRAP);
-
-    this.cron.start();
-
-    return this;
+  async migrate() {
+    await this.register();
+    await this.applyMigrations();
   }
 
   async load() {

@@ -60,7 +60,6 @@ const createSchemaProvider = db => {
     },
 
     // TODO: support options to migrate softly or forcefully
-    // TODO: support option to disable auto migration & run a CLI command instead to avoid doing it at startup
     // TODO: Allow keeping extra indexes / extra tables / extra columns (globally or on a per table basis)
     async sync() {
       if (await db.migrations.shouldRun()) {

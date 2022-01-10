@@ -31,7 +31,7 @@ const defaultConfig = {
 };
 
 module.exports = (dir, initialConfig = {}) => {
-  const { autoReload = false, serveAdminPanel = true } = initialConfig;
+  const { autoReload = false, serveAdminPanel = true, migrate = true } = initialConfig;
 
   const pkgJSON = require(path.resolve(dir, 'package.json'));
 
@@ -41,6 +41,7 @@ module.exports = (dir, initialConfig = {}) => {
     launchedAt: Date.now(),
     serveAdminPanel,
     autoReload,
+    migrate,
     environment: process.env.NODE_ENV,
     uuid: _.get(pkgJSON, 'strapi.uuid'),
     packageJsonStrapi: _.omit(_.get(pkgJSON, 'strapi', {}), 'uuid'),
