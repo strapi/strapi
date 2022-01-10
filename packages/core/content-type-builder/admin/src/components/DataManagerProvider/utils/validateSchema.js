@@ -3,10 +3,6 @@ const validateSchema = schema => {
     ({ type }) => type === 'dynamiczone'
   );
 
-  if (dynamicZoneAttributes.length === 0) {
-    return true;
-  }
-
   return dynamicZoneAttributes.every(
     ({ components }) => Array.isArray(components) && components.length > 0
   );
