@@ -3,6 +3,7 @@
 const _ = require('lodash');
 
 const { yup } = require('@strapi/utils');
+const { ValidationError } = require('@strapi/utils/lib/errors');
 
 /**
  * @type {import('yup').StringSchema} StringSchema
@@ -159,7 +160,14 @@ const addUniqueValidator = (validator, { attr, model, updatedAttribute, entity }
 /* Type validators */
 
 const stringValidator = composeValidators(
-  () => yup.string().transform((val, originalVal) => originalVal),
+  () =>
+    yup.string().transform((val, originalVal) => {
+      if (!_.isEmpty(originalVal) && !_.isNull(originalVal)) {
+        return originalVal;
+      } else {
+        throw new ValidationError(`Expected non-empty string`);
+      }
+    }),
   addMinLengthValidator,
   addMaxLengthValidator,
   addStringRegexValidator,
