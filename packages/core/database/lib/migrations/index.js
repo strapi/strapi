@@ -27,7 +27,7 @@ const createUmzugProvider = db => {
   const migrationDir = path.join(strapi.dirs.root, 'database/migrations');
 
   fse.ensureDirSync(migrationDir);
-  if (fs.readdirSync(migrationDir).length === 0) fse.writeFileSync(migrationDir + '/.gitkeep', '');
+  if (fs.readdirSync(migrationDir).length === 0) fse.ensureFile(migrationDir + '/.gitkeep');
 
   const wrapFn = fn => db => db.getConnection().transaction(trx => Promise.resolve(fn(trx)));
   const storage = createStorage({ db, tableName: 'strapi_migrations' });
