@@ -3,9 +3,9 @@
 const os = require('os');
 const _ = require('lodash');
 const isDocker = require('is-docker');
-const { machineIdSync } = require('node-machine-id');
 const fetch = require('node-fetch');
 const ciEnv = require('ci-info');
+const machineID = require('../../utils/machine-id');
 const ee = require('../../utils/ee');
 const stringifyDeep = require('./stringify-deep');
 
@@ -14,7 +14,7 @@ const defaultQueryOpts = {
   headers: { 'Content-Type': 'application/json' },
 };
 
-const ANALYTICS_URI = 'https://analytics.strapi.io';
+const ANALYTICS_URI = 'http://localhost:4000';
 
 /**
  * Add properties from the package.json strapi key in the metadata
@@ -31,9 +31,10 @@ const addPackageJsonStrapiMetadata = (metadata, strapi) => {
  * @param {Object} strapi strapi app
  * @returns {Function} (event, payload) -> Promise{boolean}
  */
+
 module.exports = strapi => {
   const { uuid } = strapi.config;
-  const deviceId = machineIdSync();
+  const deviceId = machineID();
   const isEE = strapi.EE === true && ee.isEE === true;
 
   const anonymous_metadata = {
