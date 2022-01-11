@@ -12,12 +12,16 @@ const strapiVersion = packageJSON.version;
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   auth: { getUserInfo: () => ({ firstname: 'kai', lastname: 'doe' }) },
+  useGuidedTour: jest.fn(() => ({
+    setGuidedTourVisibility: jest.fn(),
+  })),
 }));
 
 jest.mock('../utils/api', () => ({
   fetchStrapiLatestRelease: jest.fn(),
   fetchAppInfo: jest.fn(),
   fetchCurrentUserPermissions: jest.fn(),
+  fetchUserRoles: jest.fn(() => [{ name: 'Super Admin' }]),
 }));
 
 jest.mock('../../PluginsInitializer', () => () => <div>PluginsInitializer</div>);
@@ -48,7 +52,7 @@ describe('Admin | components | AuthenticatedApp', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    jest.restoreAllMocks();
   });
 
   it('should not crash', () => {

@@ -17,6 +17,7 @@ export const initialState = {
       success: false,
     },
   },
+  isGuidedTourVisible: false,
 };
 
 const reducer = (state = initialState, action) =>
@@ -24,6 +25,10 @@ const reducer = (state = initialState, action) =>
     switch (action.type) {
       case 'SET_CURRENT_STEP': {
         draftState.currentStep = action.step;
+        break;
+      }
+      case 'SET_GUIDED_TOUR_VISIBILITY': {
+        draftState.isGuidedTourVisible = action.value;
         break;
       }
       default: {

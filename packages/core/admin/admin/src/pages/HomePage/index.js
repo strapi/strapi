@@ -8,13 +8,15 @@ import { FormattedMessage } from 'react-intl';
 import styled from 'styled-components';
 import { Helmet } from 'react-helmet';
 import { useHistory } from 'react-router-dom';
-import { LoadingIndicatorPage } from '@strapi/helper-plugin';
+import { LoadingIndicatorPage, useGuidedTour } from '@strapi/helper-plugin';
 import { Layout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
 import { Box } from '@strapi/design-system/Box';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
 import Logo from '../../assets/images/homepage-logo.png';
 import { useModels } from '../../hooks';
+import { isGuidedTourComplete } from '../../components/GuidedTour/utils/isGuidedTourComplete';
+import GuidedTourHomepage from '../../components/GuidedTour/GuidedTourHomepage';
 import SocialLinks from './SocialLinks';
 import HomeHeader from './HomeHeader';
 import ContentBlocks from './ContentBlocks';
@@ -31,6 +33,9 @@ const LogoContainer = styled(Box)`
 const HomePage = () => {
   // // Temporary until we develop the menu API
   const { collectionTypes, singleTypes, isLoading: isLoadingForModels } = useModels();
+  const { guidedTourState, isGuidedTourVisible } = useGuidedTour();
+
+  const showGuidedTour = !isGuidedTourComplete(guidedTourState) && isGuidedTourVisible;
 
   const { push } = useHistory();
   const handleClick = e => {
@@ -71,7 +76,7 @@ const HomePage = () => {
           </Grid>
           <Grid gap={6}>
             <GridItem col={8} s={12}>
-              <ContentBlocks />
+              {showGuidedTour ? <GuidedTourHomepage /> : <ContentBlocks />}
             </GridItem>
             <GridItem col={4} s={12}>
               <SocialLinks />

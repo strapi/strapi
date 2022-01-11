@@ -7,9 +7,24 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import GuidedTourContext from '../../contexts/GuidedTourContext';
 
-const GuidedTourProvider = ({ children, currentStep, setStep, guidedTourState }) => {
+const GuidedTourProvider = ({
+  children,
+  currentStep,
+  setStep,
+  guidedTourState,
+  setGuidedTourVisibility,
+  isGuidedTourVisible,
+}) => {
   return (
-    <GuidedTourContext.Provider value={{ currentStep, guidedTourState, setStep }}>
+    <GuidedTourContext.Provider
+      value={{
+        currentStep,
+        guidedTourState,
+        setStep,
+        setGuidedTourVisibility,
+        isGuidedTourVisible,
+      }}
+    >
       {children}
     </GuidedTourContext.Provider>
   );
@@ -17,6 +32,7 @@ const GuidedTourProvider = ({ children, currentStep, setStep, guidedTourState })
 
 GuidedTourProvider.defaultProps = {
   currentStep: null,
+  isGuidedTourVisible: false,
 };
 
 GuidedTourProvider.propTypes = {
@@ -28,7 +44,9 @@ GuidedTourProvider.propTypes = {
       success: PropTypes.bool,
     })
   ).isRequired,
+  isGuidedTourVisible: PropTypes.bool,
   setStep: PropTypes.func.isRequired,
+  setGuidedTourVisibility: PropTypes.func.isRequired,
 };
 
 export default GuidedTourProvider;

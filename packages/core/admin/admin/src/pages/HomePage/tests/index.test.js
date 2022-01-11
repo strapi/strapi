@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
+import { useGuidedTour } from '@strapi/helper-plugin';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import HomePage from '../index';
 import { useModels } from '../../../hooks';
@@ -10,6 +11,7 @@ import { useModels } from '../../../hooks';
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useGuidedTour: jest.fn(() => ({
+    isGuidedTourVisible: false,
     guidedTourState: {
       apiTokens: {
         create: false,
@@ -1503,5 +1505,65 @@ describe('Homepage', () => {
         'We hope you are making progress on your project! Feel free to read the latest news about Strapi. We are giving our best to improve the product based on your feedback.'
       )
     ).toBeInTheDocument();
+  });
+
+  it('should show guided tour when guided tour not complete', () => {
+    useModels.mockImplementation(() => ({
+      isLoading: false,
+      collectionTypes: [],
+      singleTypes: [],
+    }));
+
+    useGuidedTour.mockImplementation(() => ({
+      isGuidedTourVisible: true,
+      guidedTourState: {
+        apiTokens: {
+          create: false,
+          success: false,
+        },
+        contentManager: {
+          create: false,
+          success: false,
+        },
+        contentTypeBuilder: {
+          create: false,
+          success: false,
+        },
+      },
+    }));
+
+    render(App);
+
+    expect(screen.getByText('Build the content structure')).toBeInTheDocument();
+  });
+
+  it("shouldn't show guided tour when guided tour is completed", () => {
+    useModels.mockImplementation(() => ({
+      isLoading: false,
+      collectionTypes: [],
+      singleTypes: [],
+    }));
+
+    useGuidedTour.mockImplementation(() => ({
+      isGuidedTourVisible: true,
+      guidedTourState: {
+        apiTokens: {
+          create: true,
+          success: true,
+        },
+        contentManager: {
+          create: true,
+          success: true,
+        },
+        contentTypeBuilder: {
+          create: true,
+          success: true,
+        },
+      },
+    }));
+
+    const { queryByText } = render(App);
+
+    expect(queryByText('Build the content structure')).not.toBeInTheDocument();
   });
 });
