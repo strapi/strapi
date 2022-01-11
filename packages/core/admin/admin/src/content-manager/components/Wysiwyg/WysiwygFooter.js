@@ -7,13 +7,13 @@ import { Typography } from '@strapi/design-system/Typography';
 import Expand from '@strapi/icons/Expand';
 import { ExpandButton } from './WysiwygStyles';
 
-const WysiwygFooter = ({ isPreviewMode, onToggleExpand }) => {
+const WysiwygFooter = ({ onToggleExpand }) => {
   const { formatMessage } = useIntl();
 
   return (
     <Box padding={2} background="neutral100" hasRadius>
       <Flex justifyContent="flex-end" alignItems="flex-end">
-        <ExpandButton id="expand" disabled={isPreviewMode} onClick={onToggleExpand}>
+        <ExpandButton id="expand" onClick={onToggleExpand}>
           <Typography>
             {formatMessage({
               id: 'components.WysiwygBottomControls.fullscreen',
@@ -29,12 +29,10 @@ const WysiwygFooter = ({ isPreviewMode, onToggleExpand }) => {
 
 WysiwygFooter.defaultProps = {
   onToggleExpand: () => {},
-  isPreviewMode: false,
 };
 
 WysiwygFooter.propTypes = {
   onToggleExpand: PropTypes.func,
-  isPreviewMode: PropTypes.bool,
 };
 
 export default WysiwygFooter;

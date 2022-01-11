@@ -68,6 +68,7 @@ export const EditorLayout = ({ children, isExpandMode, error, previewContent, on
             bottom={0}
             zIndex={4}
             justifyContent="center"
+            onClick={onCollapse}
           >
             <Box
               id="wysiwyg-expand"
@@ -77,6 +78,7 @@ export const EditorLayout = ({ children, isExpandMode, error, previewContent, on
               overflow="hidden"
               width="70%"
               height="70%"
+              onClick={e => e.stopPropagation()}
             >
               <Flex height="100%" alignItems="flex-start">
                 <BoxWithBorder flex="1" height="100%">
