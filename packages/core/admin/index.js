@@ -331,7 +331,9 @@ const hasCustomAdminCode = async dir => {
 };
 
 const hasNonDefaultPlugins = plugins => {
-  const diff = _.difference(Object.keys(plugins), DEFAULT_PLUGINS);
+  const diff = Object.keys(plugins)
+    .filter(x => !DEFAULT_PLUGINS.includes(x))
+    .concat(DEFAULT_PLUGINS.filter(x => !Object.keys(plugins).includes(x)));
 
   return diff.length > 0;
 };
