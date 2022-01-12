@@ -21,9 +21,22 @@ module.exports = {
       return ctx.badRequest('ValidationError', err);
     }
 
+    const { currentPassword, ...userInfo } = input;
+
+    const authService = getService('auth');
     const userService = getService('user');
 
-    const updatedUser = await userService.updateById(ctx.state.user.id, input);
+    if (currentPassword && userInfo.password) {
+      const isValid = await authService.validatePassword(currentPassword, ctx.state.user.password);
+
+      if (!isValid) {
+        return ctx.badRequest('ValidationError', {
+          currentPassword: ['Invalid credentials'],
+        });
+      }
+    }
+
+    const updatedUser = await userService.updateById(ctx.state.user.id, userInfo);
 
     ctx.body = {
       data: userService.sanitizeUser(updatedUser),
