@@ -147,7 +147,7 @@
   "Settings.profile.form.section.experience.clear.select": "Limpar a linguagem da interface selecionada",
   "Settings.profile.form.section.experience.interfaceLanguage": "Linguagem da interface",
   "Settings.profile.form.section.experience.interfaceLanguage.hint": "Somente sua interface será exibida com a lingaugem selecionada.",
-  "Settings.profile.form.section.experience.interfaceLanguageHelp": "A nova linguagem seleciona só sera exibida a você. Por favor, leia essa {documentation} para disponibilizar outras linguagens para sua equipe.",
+  "Settings.profile.form.section.experience.interfaceLanguageHelp": "A nova linguagem seleciona só será exibida a você. Por favor, leia essa {documentation} para disponibilizar outras linguagens para sua equipe.",
   "Settings.profile.form.section.experience.documentation": "documentação",
   "Settings.profile.form.section.experience.title": "Experiência",
   "Settings.profile.form.section.helmet.title": "Perfil do usuário",
