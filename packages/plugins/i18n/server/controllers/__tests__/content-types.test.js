@@ -7,7 +7,7 @@ const ctService = require('../../services/content-types')();
 describe('i18n - Controller - content-types', () => {
   describe('getNonLocalizedAttributes', () => {
     beforeEach(() => {
-      const getModel = () => {};
+      const getModel = () => ({});
       global.strapi = {
         getModel,
         plugins: { i18n: { services: { 'content-types': ctService } } },

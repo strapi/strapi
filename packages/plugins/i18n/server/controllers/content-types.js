@@ -20,9 +20,15 @@ module.exports = {
 
     await validateGetNonLocalizedAttributesInput({ model, id, locale });
 
-    const modelDef = strapi.getModel(model);
-    const { copyNonLocalizedAttributes, isLocalizedContentType } = getService('content-types');
+    const {
+      copyNonLocalizedAttributes,
+      isLocalizedContentType,
+      getNonLocalizedMediaAttributes,
+    } = getService('content-types');
     const { READ_ACTION, CREATE_ACTION } = strapi.admin.services.constants;
+
+    const modelDef = strapi.getModel(model);
+    const nonLocalizedMediaAttributes = getNonLocalizedMediaAttributes(modelDef);
 
     if (!isLocalizedContentType(modelDef)) {
       throw new ApplicationError('model.not.localized');
@@ -32,7 +38,7 @@ module.exports = {
 
     const entity = await strapi
       .query(model)
-      .findOne({ where: params, populate: ['localizations'] });
+      .findOne({ where: params, populate: [...nonLocalizedMediaAttributes, 'localizations'] });
 
     if (!entity) {
       return ctx.notFound();

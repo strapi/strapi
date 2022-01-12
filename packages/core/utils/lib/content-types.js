@@ -107,10 +107,7 @@ const isScalarAttribute = attribute => {
   return !['component', 'relation', 'dynamiczone'].includes(attribute.type);
 };
 
-const isMediaAttribute = attr => {
-  return attr.type === 'media';
-};
-
+const isMediaAttribute = attribute => attribute.type === 'media';
 const isRelationalAttribute = attribute => attribute.type === 'relation';
 const isComponentAttribute = attribute => ['component', 'dynamiczone'].includes(attribute.type);
 
