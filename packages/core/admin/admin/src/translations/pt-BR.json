@@ -84,7 +84,7 @@
   "ResetPasswordToken": "Redefinir o token de senha",
   "Role": "Papel",
   "Roles & Permissions": "Papéis & Permissões",
-  "Roles.ListPage.notification.delete-all-not-allowed": "Alguns papéis não puderam ser removidos por estarem assciados a alguns usuários",
+  "Roles.ListPage.notification.delete-all-not-allowed": "Alguns papéis não puderam ser removidos por estarem associados a alguns usuários",
   "Roles.ListPage.notification.delete-not-allowed": "O papel não pode ser removido se ainda estiver associado a algum usuário",
   "Roles.RoleRow.select-all": "Selecione {name} para ações em massa",
   "Roles.RoleRow.user-count.plural": "{number} usuários",
