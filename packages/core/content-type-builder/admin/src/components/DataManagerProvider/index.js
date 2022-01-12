@@ -28,6 +28,7 @@ import retrieveComponentsFromSchema from './utils/retrieveComponentsFromSchema';
 import retrieveNestedComponents from './utils/retrieveNestedComponents';
 import { retrieveComponentsThatHaveComponents } from './utils/retrieveComponentsThatHaveComponents';
 import { getComponentsToPost, formatMainDataType, sortContentType } from './utils/cleanData';
+import validateSchema from './utils/validateSchema';
 
 import {
   ADD_ATTRIBUTE,
@@ -439,6 +440,21 @@ const DataManagerProvider = ({
           },
           initialData.contentType
         );
+
+        const isValidSchema = validateSchema(contentType);
+
+        if (!isValidSchema) {
+          toggleNotification({
+            type: 'warning',
+            message: {
+              id: getTrad('notification.error.dynamiczone-min.validation'),
+              defaultMessage:
+                'At least one component is required in a dynamic zone to be able to save a content type',
+            },
+          });
+
+          return;
+        }
 
         body.contentType = contentType;
 
