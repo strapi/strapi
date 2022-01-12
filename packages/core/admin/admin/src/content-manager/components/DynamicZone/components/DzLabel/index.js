@@ -17,7 +17,7 @@ const StyledBox = styled(Box)`
   border-radius: ${pxToRem(26)};
 `;
 
-const DzLabel = ({ label, labelAction, name, numberOfComponents, required }) => {
+const DzLabel = ({ label, labelAction, name, numberOfComponents, required, intlDescription }) => {
   const { formatMessage } = useIntl();
   const intlLabel = formatMessage({ id: label || name, defaultMessage: label || name });
 
@@ -33,12 +33,24 @@ const DzLabel = ({ label, labelAction, name, numberOfComponents, required }) => 
           shadow="filterShadow"
           color="neutral500"
         >
-          <Flex>
-            <Typography fontSize={0} lineHeight={0} textColor="neutral600" fontWeight="bold">
-              {intlLabel}&nbsp;({numberOfComponents})
-            </Typography>
-            {required && <Typography textColor="danger600">*</Typography>}
-            {labelAction && <Box paddingLeft={1}>{labelAction}</Box>}
+          <Flex direction="column" justifyContent="center">
+            <Flex maxWidth={pxToRem(356)}>
+              <Typography variant="pi" textColor="neutral600" fontWeight="bold" ellipsis>
+                {intlLabel}&nbsp;
+              </Typography>
+              <Typography variant="pi" textColor="neutral600" fontWeight="bold">
+                ({numberOfComponents})
+              </Typography>
+              {required && <Typography textColor="danger600">*</Typography>}
+              {labelAction && <Box paddingLeft={1}>{labelAction}</Box>}
+            </Flex>
+            {intlDescription && (
+              <Box paddingTop={1} maxWidth={pxToRem(356)}>
+                <Typography variant="pi" textColor="neutral600" ellipsis>
+                  {formatMessage(intlDescription)}
+                </Typography>
+              </Box>
+            )}
           </Flex>
         </StyledBox>
       </Box>
@@ -47,12 +59,17 @@ const DzLabel = ({ label, labelAction, name, numberOfComponents, required }) => 
 };
 
 DzLabel.defaultProps = {
+  intlDescription: undefined,
   label: '',
   labelAction: undefined,
   required: false,
 };
 
 DzLabel.propTypes = {
+  intlDescription: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    defaultMessage: PropTypes.string.isRequired,
+  }),
   label: PropTypes.string,
   labelAction: PropTypes.element,
   name: PropTypes.string.isRequired,
