@@ -236,7 +236,7 @@ const convertFiltersQueryParams = (filters, schema) => {
           // Sanitize each filter
           .map(filter => sanitizeFilters(filter, schema))
           // Filter out empty filters
-          .filter(filter => !isEmpty(filter))
+          .filter(filter => !isObject(filter) || !isEmpty(filter))
       );
     }
 
