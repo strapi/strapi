@@ -330,8 +330,19 @@ const hasCustomAdminCode = async dir => {
   return hasCustomConfigFile || hasCustomWebpackFile;
 };
 
+/**
+ * Checks if the project's installed plugins are not the same as a default one.
+ * @param {Object} plugins
+ * @returns {boolean}
+ */
 const hasNonDefaultPlugins = plugins => {
-  const diff = _.difference(Object.keys(plugins), DEFAULT_PLUGINS);
+  // List of plugins that are not the ones installed in a generated app
+  const installedPlugins = Object.keys(plugins).filter(x => !DEFAULT_PLUGINS.includes(x));
+
+  // List of default plugins uninstalled from a generated app
+  const missingPlugins = DEFAULT_PLUGINS.filter(x => !Object.keys(plugins).includes(x));
+
+  const diff = [...installedPlugins, ...missingPlugins];
 
   return diff.length > 0;
 };
