@@ -63,7 +63,7 @@ const EventInput = ({ isDraftAndPublish }) => {
     : displayedData.events.default;
 
   const { formatMessage } = useIntl();
-  const { values, errors, handleChange: onChange } = useFormikContext();
+  const { values, handleChange: onChange } = useFormikContext();
 
   const inputName = 'events';
   const inputValue = values.events;
@@ -100,7 +100,7 @@ const EventInput = ({ isDraftAndPublish }) => {
 
   return (
     <Stack size={1}>
-      <FieldLabel required>
+      <FieldLabel>
         {formatMessage({
           id: 'Settings.webhooks.form.events',
           defaultMessage: 'Events',
@@ -154,14 +154,6 @@ const EventInput = ({ isDraftAndPublish }) => {
           })}
         </tbody>
       </StyledTable>
-      {errors.events && (
-        <Typography variant="pi" textColor="danger600" data-strapi-field-error>
-          {formatMessage({
-            id: 'components.Input.error.validation.required',
-            defaultMessage: 'This value is required',
-          })}
-        </Typography>
-      )}
     </Stack>
   );
 };
