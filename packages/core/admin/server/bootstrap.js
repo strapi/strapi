@@ -21,12 +21,15 @@ const registerAdminConditions = () => {
 };
 
 const registerModelHooks = () => {
+  const { sendDidChangeInterfaceLanguage } = getService('metrics');
+
   strapi.db.lifecycles.subscribe({
     models: ['admin::user'],
-    afterCreate: getService('metrics').sendDidChangeInterfaceLanguage,
-    afterUpdate: getService('metrics').sendDidChangeInterfaceLanguage,
-  })
-}
+    afterCreate: sendDidChangeInterfaceLanguage,
+    afterUpdate: sendDidChangeInterfaceLanguage,
+    afterDelete: sendDidChangeInterfaceLanguage,
+  });
+};
 
 const syncAuthSettings = async () => {
   const adminStore = await strapi.store({ type: 'core', name: 'admin' });
