@@ -155,6 +155,7 @@ function ListView({
       try {
         await axiosInstance.post(getRequestUrl(`collection-types/${slug}/actions/bulkDelete`), {
           ids,
+          params,
         });
 
         const requestUrl = getRequestUrl(`collection-types/${slug}${params}`);

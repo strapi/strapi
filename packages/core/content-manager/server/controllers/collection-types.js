@@ -216,6 +216,7 @@ module.exports = {
     const { model } = ctx.params;
     const { query, body } = ctx.request;
     const { ids } = body;
+    const { params } = body;
 
     await validateBulkDeleteInput(body);
 
@@ -225,20 +226,20 @@ module.exports = {
     if (permissionChecker.cannot.delete()) {
       return ctx.forbidden();
     }
-
     // TODO: fix
     const permissionQuery = permissionChecker.buildDeleteQuery(query);
-
     const idsWhereClause = { id: { $in: ids } };
-    const params = {
+    const params_local = {
       ...permissionQuery,
       filters: {
         $and: [idsWhereClause].concat(permissionQuery.filters || []),
       },
     };
 
-    const { count } = await entityManager.deleteMany(params, model);
-
+    if (params && params.includes('locale')) {
+      params_local['locale'] = params.slice(params.indexOf('locale=') + 7);
+    }
+    const { count } = await entityManager.deleteMany(params_local, model);
     ctx.body = { count };
   },
 
