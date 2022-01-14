@@ -9,6 +9,7 @@ const GuidedTourProvider = ({
   guidedTourState,
   setGuidedTourVisibility,
   setStepState,
+  startSection,
   isGuidedTourVisible,
 }) => {
   return (
@@ -19,6 +20,7 @@ const GuidedTourProvider = ({
         setCurrentStep,
         setStepState,
         setGuidedTourVisibility,
+        startSection,
         isGuidedTourVisible,
       }}
     >
@@ -45,6 +47,7 @@ GuidedTourProvider.propTypes = {
   setCurrentStep: PropTypes.func.isRequired,
   setGuidedTourVisibility: PropTypes.func.isRequired,
   setStepState: PropTypes.func.isRequired,
+  startSection: PropTypes.func.isRequired,
 };
 
 export default GuidedTourProvider;

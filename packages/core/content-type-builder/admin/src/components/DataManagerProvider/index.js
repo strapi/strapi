@@ -10,6 +10,7 @@ import {
   useAutoReloadOverlayBlocker,
   useAppInfos,
   useRBACProvider,
+  useGuidedTour,
 } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { useLocation, useRouteMatch, Redirect } from 'react-router-dom';
@@ -62,6 +63,7 @@ const DataManagerProvider = ({
   const dispatch = useDispatch();
   const toggleNotification = useNotification();
   const { lockAppWithAutoreload, unlockAppWithAutoreload } = useAutoReloadOverlayBlocker();
+  const { setCurrentStep } = useGuidedTour();
 
   const { getPlugin } = useStrapiApp();
 
@@ -460,6 +462,10 @@ const DataManagerProvider = ({
       await request(requestURL, { method, body }, true);
 
       unlockAppWithAutoreload();
+
+      if (isCreating) {
+        setCurrentStep('contentTypeBuilder.success');
+      }
 
       await updatePermissions();
 

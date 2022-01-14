@@ -4,11 +4,11 @@
  *
  */
 
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense, lazy, useEffect, useRef } from 'react';
 import { Switch, Route } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
-import { LoadingIndicatorPage, CheckPagePermissions } from '@strapi/helper-plugin';
+import { LoadingIndicatorPage, CheckPagePermissions, useGuidedTour } from '@strapi/helper-plugin';
 import { Layout } from '@strapi/design-system/Layout';
 import pluginPermissions from '../../permissions';
 import pluginId from '../../pluginId';
@@ -21,11 +21,27 @@ import ContentTypeBuilderNav from '../../components/ContentTypeBuilderNav';
 const ListView = lazy(() => import('../ListView'));
 
 const App = () => {
+  const { startSection, guidedTourState, currentStep, setCurrentStep } = useGuidedTour();
+  const guidedTourStateRef = useRef(guidedTourState);
+  const startSectionRef = useRef(startSection);
+  const currentStepRef = useRef(currentStep);
+  const setCurrentStepRef = useRef(setCurrentStep);
   const { formatMessage } = useIntl();
   const title = formatMessage({
     id: `${pluginId}.plugin.name`,
     defaultMessage: 'Content Types Builder',
   });
+
+  useEffect(() => {
+    if (startSectionRef.current) {
+      startSectionRef.current(
+        'contentTypeBuilder',
+        guidedTourStateRef.current,
+        currentStepRef.current,
+        setCurrentStepRef.current
+      );
+    }
+  }, []);
 
   return (
     <CheckPagePermissions permissions={pluginPermissions.main}>

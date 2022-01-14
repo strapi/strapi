@@ -1,7 +1,8 @@
 import React, { useReducer } from 'react';
 import PropTypes from 'prop-types';
 import { GuidedTourProvider } from '@strapi/helper-plugin';
-import setStateToLocaleStorage from './utils/setStateToLocaleStorage';
+import { setStateToLocaleStorage } from './utils/setStateToLocaleStorage';
+import startSection from './utils/startSection';
 import reducer, { initialState } from './reducer';
 import init from './init';
 
@@ -44,6 +45,7 @@ const GuidedTour = ({ children }) => {
       setCurrentStep={setCurrentStep}
       setGuidedTourVisibility={setGuidedTourVisibility}
       setStepState={setStepState}
+      startSection={startSection}
       isGuidedTourVisible={isGuidedTourVisible}
     >
       {children}
