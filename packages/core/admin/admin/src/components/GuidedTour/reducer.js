@@ -2,7 +2,7 @@
 import produce from 'immer';
 
 export const initialState = {
-  currentStep: null,
+  currentStep: 'contentTypeBuilder.create',
   guidedTourState: {
     contentTypeBuilder: {
       create: false,
@@ -25,6 +25,10 @@ const reducer = (state = initialState, action) =>
     switch (action.type) {
       case 'SET_CURRENT_STEP': {
         draftState.currentStep = action.step;
+        break;
+      }
+      case 'SET_STEP_STATE': {
+        draftState.guidedTourState[action.section][action.step] = action.value;
         break;
       }
       case 'SET_GUIDED_TOUR_VISIBILITY': {
