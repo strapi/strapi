@@ -2,12 +2,16 @@ import React, { useReducer } from 'react';
 import PropTypes from 'prop-types';
 import { GuidedTourProvider } from '@strapi/helper-plugin';
 import reducer, { initialState } from './reducer';
+import init from './init';
 
 const GuidedTour = ({ children }) => {
   const [{ currentStep, guidedTourState, isGuidedTourVisible }, dispatch] = useReducer(
     reducer,
-    initialState
+    initialState,
+    init
   );
+
+  console.log(currentStep);
 
   const setCurrentStep = step => {
     dispatch({

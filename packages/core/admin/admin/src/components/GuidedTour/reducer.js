@@ -2,7 +2,7 @@
 import produce from 'immer';
 
 export const initialState = {
-  currentStep: 'contentTypeBuilder.create',
+  currentStep: null,
   guidedTourState: {
     contentTypeBuilder: {
       create: false,
