@@ -28,16 +28,12 @@ const webhookValidator = yup
         )
         .required();
     }),
-    events: yup
-      .array()
-      .of(
-        yup
-          .string()
-          .oneOf(_.values(webhookUtils.webhookEvents))
-          .required()
-      )
-      .min(1)
-      .required(),
+    events: yup.array().of(
+      yup
+        .string()
+        .oneOf(_.values(webhookUtils.webhookEvents))
+        .required()
+    ),
   })
   .noUnknown();
 
