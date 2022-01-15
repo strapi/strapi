@@ -113,33 +113,36 @@ const createEntityManager = db => {
 
   return {
     async findOne(uid, params) {
-      await db.lifecycles.run('beforeFindOne', uid, { params });
+      const event = { params };
+      await db.lifecycles.run('beforeFindOne', uid, event);
 
       const result = await this.createQueryBuilder(uid)
         .init(params)
         .first()
         .execute();
 
-      await db.lifecycles.run('afterFindOne', uid, { params, result });
+      await db.lifecycles.run('afterFindOne', uid, { ...event, result });
 
       return result;
     },
 
     // should we name it findOne because people are used to it ?
     async findMany(uid, params) {
-      await db.lifecycles.run('beforeFindMany', uid, { params });
+      const event = { params };
+      await db.lifecycles.run('beforeFindMany', uid, event);
 
       const result = await this.createQueryBuilder(uid)
         .init(params)
         .execute();
 
-      await db.lifecycles.run('afterFindMany', uid, { params, result });
+      await db.lifecycles.run('afterFindMany', uid, { ...event, result });
 
       return result;
     },
 
     async count(uid, params = {}) {
-      await db.lifecycles.run('beforeCount', uid, { params });
+      const event = { params };
+      await db.lifecycles.run('beforeCount', uid, event);
 
       const res = await this.createQueryBuilder(uid)
         .init(_.pick(['_q', 'where', 'filters'], params))
@@ -149,13 +152,14 @@ const createEntityManager = db => {
 
       const result = Number(res.count);
 
-      await db.lifecycles.run('afterCount', uid, { params, result });
+      await db.lifecycles.run('afterCount', uid, { ...event, result });
 
       return result;
     },
 
     async create(uid, params = {}) {
-      await db.lifecycles.run('beforeCreate', uid, { params });
+      const event = { params };
+      await db.lifecycles.run('beforeCreate', uid, event);
 
       const metadata = db.metadata.get(uid);
       const { data } = params;
@@ -182,14 +186,15 @@ const createEntityManager = db => {
         populate: params.populate,
       });
 
-      await db.lifecycles.run('afterCreate', uid, { params, result });
+      await db.lifecycles.run('afterCreate', uid, { ...event, result });
 
       return result;
     },
 
     // TODO: where do we handle relation processing for many queries ?
     async createMany(uid, params = {}) {
-      await db.lifecycles.run('beforeCreateMany', uid, { params });
+      const event = { params };
+      await db.lifecycles.run('beforeCreateMany', uid, event);
 
       const metadata = db.metadata.get(uid);
       const { data } = params;
@@ -210,13 +215,14 @@ const createEntityManager = db => {
 
       const result = { count: data.length };
 
-      await db.lifecycles.run('afterCreateMany', uid, { params, result });
+      await db.lifecycles.run('afterCreateMany', uid, { ...event, result });
 
       return result;
     },
 
     async update(uid, params = {}) {
-      await db.lifecycles.run('beforeUpdate', uid, { params });
+      const event = { params };
+      await db.lifecycles.run('beforeUpdate', uid, event);
 
       const metadata = db.metadata.get(uid);
       const { where, data } = params;
@@ -259,14 +265,15 @@ const createEntityManager = db => {
         populate: params.populate,
       });
 
-      await db.lifecycles.run('afterUpdate', uid, { params, result });
+      await db.lifecycles.run('afterUpdate', uid, { ...event, result });
 
       return result;
     },
 
     // TODO: where do we handle relation processing for many queries ?
     async updateMany(uid, params = {}) {
-      await db.lifecycles.run('beforeUpdateMany', uid, { params });
+      const event = { params };
+      await db.lifecycles.run('beforeUpdateMany', uid, event);
 
       const metadata = db.metadata.get(uid);
       const { where, data } = params;
@@ -284,13 +291,14 @@ const createEntityManager = db => {
 
       const result = { count: updatedRows };
 
-      await db.lifecycles.run('afterUpdateMany', uid, { params, result });
+      await db.lifecycles.run('afterUpdateMany', uid, { ...event, result });
 
       return result;
     },
 
     async delete(uid, params = {}) {
-      await db.lifecycles.run('beforeDelete', uid, { params });
+      const event = { params };
+      await db.lifecycles.run('beforeDelete', uid, event);
 
       const { where, select, populate } = params;
 
@@ -318,14 +326,15 @@ const createEntityManager = db => {
 
       await this.deleteRelations(uid, id);
 
-      await db.lifecycles.run('afterDelete', uid, { params, result: entity });
+      await db.lifecycles.run('afterDelete', uid, { ...event, result: entity });
 
       return entity;
     },
 
     // TODO: where do we handle relation processing for many queries ?
     async deleteMany(uid, params = {}) {
-      await db.lifecycles.run('beforeDeleteMany', uid, { params });
+      const event = { params };
+      await db.lifecycles.run('beforeDeleteMany', uid, event);
 
       const { where } = params;
 
@@ -336,7 +345,7 @@ const createEntityManager = db => {
 
       const result = { count: deletedRows };
 
-      await db.lifecycles.run('afterDelete', uid, { params, result });
+      await db.lifecycles.run('afterDelete', uid, { ...event, result });
 
       return result;
     },
