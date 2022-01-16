@@ -30,21 +30,26 @@ const createLifecyclesProvider = db => {
       subscribers = [];
     },
 
-    createEvent(action, uid, properties) {
+    createEvent(action, uid, properties, state) {
       const model = db.metadata.get(uid);
 
       return {
         action,
         model,
+        state,
         ...properties,
       };
     },
 
-    async run(action, uid, properties) {
-      for (const subscriber of subscribers) {
+    async run(action, uid, properties, states) {
+      for (let i = 0; i < subscribers.length; i++) {
+        const subscriber = subscribers[i];
         if (typeof subscriber === 'function') {
-          const event = this.createEvent(action, uid, properties);
+          const event = this.createEvent(action, uid, properties, states[i]);
           await subscriber(event);
+          if (event.state) {
+            states[i] = event.state;
+          }
           continue;
         }
 
@@ -52,9 +57,12 @@ const createLifecyclesProvider = db => {
         const hasModel = !subscriber.models || subscriber.models.includes(uid);
 
         if (hasAction && hasModel) {
-          const event = this.createEvent(action, uid, properties);
+          const event = this.createEvent(action, uid, properties, states[i]);
 
           await subscriber[action](event);
+          if (event.state) {
+            states[i] = event.state;
+          }
         }
       }
     },
