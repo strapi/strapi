@@ -25,7 +25,7 @@
     "sqlite3": "5.0.2"
   },
   "strapi": {
-    "uuid": "getstarted"
+    "uuid": "kitchensink"
   },
   "engines": {
     "node": ">=12.22.0 <=16.x.x",
