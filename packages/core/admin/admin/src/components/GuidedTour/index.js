@@ -9,7 +9,7 @@ const GuidedTour = ({ children }) => {
     initialState
   );
 
-  const setStep = step => {
+  const setCurrentStep = step => {
     dispatch({
       type: 'SET_CURRENT_STEP',
       step,
@@ -23,12 +23,21 @@ const GuidedTour = ({ children }) => {
     });
   };
 
+  const setStepState = (currentStep, value) => {
+    dispatch({
+      type: 'SET_STEP_STATE',
+      currentStep,
+      value,
+    });
+  };
+
   return (
     <GuidedTourProvider
       guidedTourState={guidedTourState}
       currentStep={currentStep}
-      setStep={setStep}
+      setCurrentStep={setCurrentStep}
       setGuidedTourVisibility={setGuidedTourVisibility}
+      setStepState={setStepState}
       isGuidedTourVisible={isGuidedTourVisible}
     >
       {children}
