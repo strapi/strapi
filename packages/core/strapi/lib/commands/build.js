@@ -12,7 +12,7 @@ const getEnabledPlugins = require('../core/loaders/plugins/get-enabled-plugins')
 /**
  * `$ strapi build`
  */
-module.exports = async ({ clean, optimization, forceBuild = true }) => {
+module.exports = async ({ optimization, forceBuild = true }) => {
   const dir = process.cwd();
 
   const strapiInstance = strapi({
@@ -28,9 +28,8 @@ module.exports = async ({ clean, optimization, forceBuild = true }) => {
 
   console.log(`Building your admin UI with ${green(env)} configuration ...`);
 
-  if (clean) {
-    await strapiAdmin.clean({ dir });
-  }
+  // Always remove the .cache and build folders
+  await strapiAdmin.clean({ dir });
 
   ee({ dir });
 

@@ -108,8 +108,10 @@ const LeftMenu = () => {
               badgeLabel={section.links.length.toString()}
             >
               {section.links.map(link => {
+                const search = link.search ? `?${link.search}` : '';
+
                 return (
-                  <SubNavLink key={link.uid} to={`${link.to}?${link.search}`}>
+                  <SubNavLink key={link.uid} to={`${link.to}${search}`}>
                     {link.title}
                   </SubNavLink>
                 );

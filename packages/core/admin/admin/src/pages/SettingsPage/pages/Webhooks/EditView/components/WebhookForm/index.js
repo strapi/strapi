@@ -114,6 +114,7 @@ const WebhookForm = ({
                           id: 'Settings.webhooks.form.name',
                           defaultMessage: 'Name',
                         })}
+                        required
                       />
                     </GridItem>
                     <GridItem col={12}>
@@ -125,6 +126,7 @@ const WebhookForm = ({
                           id: 'Settings.roles.form.input.url',
                           defaultMessage: 'Url',
                         })}
+                        required
                       />
                     </GridItem>
                   </Grid>

@@ -39,6 +39,9 @@ const DynamicZone = ({
   const [isOpen, setIsOpen] = useState(false);
   const [shouldOpenAddedComponent, setShouldOpenAddedComponent] = useState(false);
   const dynamicDisplayedComponentsLength = dynamicDisplayedComponents.length;
+  const intlDescription = metadatas.description
+    ? { id: metadatas.description, defaultMessage: metadatas.description }
+    : null;
 
   const [componentCollapses, setComponentsCollapses] = useState(
     createCollapses(dynamicDisplayedComponentsLength)
@@ -159,11 +162,7 @@ const DynamicZone = ({
   if (!isFieldAllowed && isCreatingEntry) {
     return (
       <NotAllowedInput
-        description={
-          metadatas.description
-            ? { id: metadatas.description, defaultMessage: metadatas.description }
-            : null
-        }
+        description={intlDescription}
         intlLabel={{ id: metadatas.label, defaultMessage: metadatas.label }}
         labelAction={labelAction}
         name={name}
@@ -174,11 +173,7 @@ const DynamicZone = ({
   if (!isFieldAllowed && !isFieldReadable && !isCreatingEntry) {
     return (
       <NotAllowedInput
-        description={
-          metadatas.description
-            ? { id: metadatas.description, defaultMessage: metadatas.description }
-            : null
-        }
+        description={intlDescription}
         intlLabel={{ id: metadatas.label, defaultMessage: metadatas.label }}
         labelAction={labelAction}
         name={name}
@@ -191,6 +186,7 @@ const DynamicZone = ({
       {dynamicDisplayedComponentsLength > 0 && (
         <Box>
           <DzLabel
+            intlDescription={intlDescription}
             label={metadatas.label}
             labelAction={labelAction}
             name={name}

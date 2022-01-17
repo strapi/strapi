@@ -143,7 +143,7 @@ async function checkTemplateContentsStructure(templateContentsPath) {
         await checkPathContents(itemPath, nextParents);
       } else {
         throw Error(
-          `Illegal template structure, unknow file ${chalk.green(nextParents.join('/'))}`
+          `Illegal template structure, unknown file ${chalk.green(nextParents.join('/'))}`
         );
       }
     }
