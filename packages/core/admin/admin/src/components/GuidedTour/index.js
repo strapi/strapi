@@ -4,7 +4,7 @@ import get from 'lodash/get';
 import { GuidedTourProvider } from '@strapi/helper-plugin';
 import setStateToLocaleStorage from './utils/setStateToLocaleStorage';
 import setCurrentStepToLocaleStorage from './utils/setCurrentStepToLocaleStorage';
-import startSection from './utils/startSection';
+import arePreviousSectionsDone from './utils/arePreviousSectionsDone';
 import reducer, { initialState } from './reducer';
 import init from './init';
 
@@ -46,6 +46,20 @@ const GuidedTour = ({ children }) => {
       step,
       value,
     });
+  };
+
+  const startSection = sectionName => {
+    const isSectionToShow = arePreviousSectionsDone(sectionName, guidedTourState);
+
+    const sectionSteps = get(guidedTourState, sectionName);
+    const firstStep = Object.keys(sectionSteps)[0];
+    const isFirstStepDone = sectionSteps[firstStep];
+
+    if (isSectionToShow && !currentStep && !isFirstStepDone) {
+      return setCurrentStep(`${sectionName}.${firstStep}`);
+    }
+
+    return null;
   };
 
   return (

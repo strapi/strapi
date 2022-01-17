@@ -21,11 +21,8 @@ import ContentTypeBuilderNav from '../../components/ContentTypeBuilderNav';
 const ListView = lazy(() => import('../ListView'));
 
 const App = () => {
-  const { startSection, guidedTourState, currentStep, setCurrentStep } = useGuidedTour();
-  const guidedTourStateRef = useRef(guidedTourState);
+  const { startSection } = useGuidedTour();
   const startSectionRef = useRef(startSection);
-  const currentStepRef = useRef(currentStep);
-  const setCurrentStepRef = useRef(setCurrentStep);
   const { formatMessage } = useIntl();
   const title = formatMessage({
     id: `${pluginId}.plugin.name`,
@@ -34,12 +31,7 @@ const App = () => {
 
   useEffect(() => {
     if (startSectionRef.current) {
-      startSectionRef.current(
-        'contentTypeBuilder',
-        guidedTourStateRef.current,
-        currentStepRef.current,
-        setCurrentStepRef.current
-      );
+      startSectionRef.current('contentTypeBuilder');
     }
   }, []);
 

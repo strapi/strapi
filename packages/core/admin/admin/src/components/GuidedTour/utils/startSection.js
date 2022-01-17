@@ -3,10 +3,13 @@ import arePreviousSectionsDone from './arePreviousSectionsDone';
 
 const startSection = (sectionName, guidedTourState, currentStep, setCurrentStep) => {
   const isSectionToShow = arePreviousSectionsDone(sectionName, guidedTourState);
-  const isFirstStepDone = get(guidedTourState, `${sectionName}['create']`);
+
+  const sectionSteps = get(guidedTourState, sectionName);
+  const firstStep = Object.keys(sectionSteps)[0];
+  const isFirstStepDone = sectionSteps[firstStep];
 
   if (isSectionToShow && !currentStep && !isFirstStepDone) {
-    return setCurrentStep('contentTypeBuilder.create');
+    return setCurrentStep(`${sectionName}.${firstStep}`);
   }
 
   return null;
