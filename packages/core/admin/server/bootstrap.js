@@ -26,8 +26,12 @@ const registerModelHooks = () => {
   strapi.db.lifecycles.subscribe({
     models: ['admin::user'],
     afterCreate: sendDidChangeInterfaceLanguage,
-    afterUpdate: sendDidChangeInterfaceLanguage,
     afterDelete: sendDidChangeInterfaceLanguage,
+    afterUpdate({ params }) {
+      if (params.data.preferedLanguage) {
+        sendDidChangeInterfaceLanguage();
+      }
+    },
   });
 };
 
