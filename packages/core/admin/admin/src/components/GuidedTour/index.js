@@ -1,5 +1,6 @@
 import React, { useReducer } from 'react';
 import PropTypes from 'prop-types';
+import get from 'lodash/get';
 import { GuidedTourProvider } from '@strapi/helper-plugin';
 import { setStateToLocaleStorage } from './utils/setStateToLocaleStorage';
 import startSection from './utils/startSection';
@@ -14,7 +15,13 @@ const GuidedTour = ({ children }) => {
   );
 
   const setCurrentStep = step => {
-    dispatch({
+    const isStepAlreadyDone = get(guidedTourState, step);
+
+    if (isStepAlreadyDone) {
+      return null;
+    }
+
+    return dispatch({
       type: 'SET_CURRENT_STEP',
       step,
     });
