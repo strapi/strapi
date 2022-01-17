@@ -32,7 +32,7 @@ describe('BigInteger validator', () => {
       },
     };
 
-    test('it does not validates the unique constraint if the attribute is not set as unique', async () => {
+    test('it does not validate the unique constraint if the attribute is not set as unique', async () => {
       fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
@@ -55,7 +55,7 @@ describe('BigInteger validator', () => {
       expect(fakeFindOne).not.toHaveBeenCalled();
     });
 
-    test('it does not validates the unique constraint if the attribute value is `null`', async () => {
+    test('it does not validate the unique constraint if the attribute value is `null`', async () => {
       fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(

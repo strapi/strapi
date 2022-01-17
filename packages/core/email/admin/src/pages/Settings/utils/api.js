@@ -1,4 +1,4 @@
-import { axiosInstance } from '../../../../../../admin/admin/src/core/utils';
+import axiosInstance from '../../../utils/axiosInstance';
 
 const fetchEmailSettings = async () => {
   const { data } = await axiosInstance.get('/email/settings');

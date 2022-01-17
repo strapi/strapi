@@ -1,5 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
@@ -108,12 +109,16 @@ const renderCompo = (
 
 describe('<EditAssetDialog />', () => {
   const RealNow = Date.now;
+  let confirmSpy;
 
   beforeAll(() => {
+    confirmSpy = jest.spyOn(window, 'confirm');
+    confirmSpy.mockImplementation(jest.fn(() => true));
     global.Date.now = jest.fn(() => new Date('2021-09-20').getTime());
   });
 
   afterAll(() => {
+    confirmSpy.mockRestore();
     global.Date.now = RealNow;
   });
 
@@ -130,6 +135,15 @@ describe('<EditAssetDialog />', () => {
       expect(screen.getByLabelText('File name')).toHaveValue('Screenshot 2.png');
       expect(screen.getByLabelText('Alternative text')).toHaveValue('');
       expect(screen.getByLabelText('Caption')).toHaveValue('');
+    });
+
+    it('open confirm box on close if data has changed', () => {
+      renderCompo();
+
+      userEvent.type(screen.getByLabelText('Alternative text'), 'Test');
+      fireEvent.click(screen.getByText('Cancel'));
+
+      expect(window.confirm).toBeCalled();
     });
 
     it('disables all the actions and field when the user is not allowed to update', () => {

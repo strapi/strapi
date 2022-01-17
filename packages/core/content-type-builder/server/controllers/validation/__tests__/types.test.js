@@ -43,6 +43,42 @@ describe('Type validators', () => {
     });
   });
 
+  describe('Dynamiczone type validator', () => {
+    test('Components cannot be empty', () => {
+      const attributes = {
+        dz: {
+          type: 'dynamiczone',
+          components: [],
+        },
+      };
+
+      const validator = getTypeValidator(attributes.dz, {
+        types: ['dynamiczone'],
+        modelType: 'collectionType',
+        attributes,
+      });
+
+      expect(validator.isValidSync(attributes.dz)).toBeFalsy();
+    });
+
+    test('Components must have at least one item', () => {
+      const attributes = {
+        dz: {
+          type: 'dynamiczone',
+          components: ['compoA', 'compoB'],
+        },
+      };
+
+      const validator = getTypeValidator(attributes.dz, {
+        types: ['dynamiczone'],
+        modelType: 'collectionType',
+        attributes,
+      });
+
+      expect(validator.isValidSync(attributes.dz)).toBeTruthy();
+    });
+  });
+
   describe('UID type validator', () => {
     test('Target field can be null', () => {
       const attributes = {

@@ -123,7 +123,7 @@ module.exports = {
       ...ctx.request.body,
     };
 
-    const data = await getService('user').edit({ id }, updateData);
+    const data = await getService('user').edit(user.id, updateData);
     const sanitizedData = await sanitizeOutput(data, ctx);
 
     ctx.send(sanitizedData);
