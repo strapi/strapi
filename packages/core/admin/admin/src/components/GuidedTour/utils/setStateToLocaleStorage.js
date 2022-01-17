@@ -1,6 +1,12 @@
-const setStateToLocaleStorage = (section, step) => {
+const setStateToLocaleStorage = currentStep => {
   const localeStorageState = JSON.parse(localStorage.getItem('GUIDED_TOUR_COMPLETED_STEPS')) || [];
-  localeStorageState.push(`${section}.${step}`);
+  const isAlreadyStored = localeStorageState.includes(currentStep);
+
+  if (isAlreadyStored) {
+    return;
+  }
+
+  localeStorageState.push(currentStep);
   localStorage.setItem('GUIDED_TOUR_COMPLETED_STEPS', JSON.stringify(localeStorageState));
 };
 

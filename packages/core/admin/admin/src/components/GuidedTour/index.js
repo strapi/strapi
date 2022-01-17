@@ -37,8 +37,8 @@ const GuidedTour = ({ children }) => {
     });
   };
 
-  const setStepState = (section, step, value) => {
-    setStateToLocaleStorage(section, step);
+  const setStepState = (currentStep, value) => {
+    setStateToLocaleStorage(currentStep);
 
     dispatch({
       type: 'SET_STEP_STATE',
