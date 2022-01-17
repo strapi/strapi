@@ -42,8 +42,7 @@ const GuidedTour = ({ children }) => {
 
     dispatch({
       type: 'SET_STEP_STATE',
-      section,
-      step,
+      currentStep,
       value,
     });
   };

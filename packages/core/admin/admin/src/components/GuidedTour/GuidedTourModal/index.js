@@ -39,8 +39,7 @@ const GuidedTourModal = () => {
   }, [currentStep]);
 
   const handleCTA = () => {
-    const [section, step] = currentStep.split('.');
-    setStepState(section, step, true);
+    setStepState(currentStep, true);
 
     setCurrentStep(null);
   };
