@@ -1,4 +1,10 @@
-# @strapi/provider-email-amazon-ses
+# [DEPRECATED] @strapi/provider-email-amazon-ses
+
+This plugin is deprecated. Please use `@strapi/provider-email-nodemailer` provider instead.
+
+## Why is this provider deprecated?
+
+We decided to extend the existing nodeemailer provider instead of using the [node-ses](https://github.com/aheckmann/node-ses) package, which has not been maintained for long time.
 
 ## Resources
 
@@ -23,21 +29,15 @@ npm install @strapi/provider-email-amazon-ses --save
 
 ## Configuration
 
-| Variable                | Type             | Description                                                                                                                                                       | Required | Default   |
-| ----------------------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | --------- |
-| provider                | string           | The name of the provider you use                                                                                                                                  | yes      |           |
-| providerOptions         | object           | Will be directly given to `aws.SES` object. Please refer to [AWS SES](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/SES.html#constructor-property) doc. | yes      |           |
-| settings                | object           | Settings                                                                                                                                                          | no       | {}        |
-| settings.defaultFrom    | string           | Default sender mail address                                                                                                                                       | no       | undefined |
-| settings.defaultReplyTo | string, string[] | Default address or addresses the receiver is asked to reply to                                                                                                    | no       | undefined |
+| Variable                | Type                    | Description                                                                                                                | Required | Default   |
+| ----------------------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------- | -------- | --------- |
+| provider                | string                  | The name of the provider you use                                                                                           | yes      |           |
+| providerOptions         | object                  | Will be directly given to `createClient` function. Please refer to [node-ses](https://www.npmjs.com/package/node-ses) doc. | yes      |           |
+| settings                | object                  | Settings                                                                                                                   | no       | {}        |
+| settings.defaultFrom    | string                  | Default sender mail address                                                                                                | no       | undefined |
+| settings.defaultReplyTo | string \| array<string> | Default address or addresses the receiver is asked to reply to                                                             | no       | undefined |
 
 > :warning: The Shipper Email (or defaultfrom) may also need to be changed in the `Email Templates` tab on the admin panel for emails to send properly
-
-## Callback
-
-| Variable  | Type   | Description                                    |
-| --------- | ------ | ---------------------------------------------- |
-| messageId | string | The Message-ID of the email that was just sent |
 
 ### Example
 
@@ -52,8 +52,7 @@ module.exports = ({ env }) => ({
       providerOptions: {
         key: env('AWS_SES_KEY'),
         secret: env('AWS_SES_SECRET'),
-        region: 'us-east-1',
-        endpoint: 'https://email.us-east-1.amazonaws.com', // Optional. The default endpoint is built from the configured region. The endpoint should be a string like 'https://{service}.{region}.amazonaws.com' or an Endpoint object.
+        amazon: 'https://email.us-east-1.amazonaws.com',
       },
       settings: {
         defaultFrom: 'myemail@protonmail.com',
