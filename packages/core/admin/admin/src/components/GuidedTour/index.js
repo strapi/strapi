@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import get from 'lodash/get';
 import { GuidedTourProvider } from '@strapi/helper-plugin';
 import setStateToLocaleStorage from './utils/setStateToLocaleStorage';
+import setCurrentStepToLocaleStorage from './utils/setCurrentStepToLocaleStorage';
 import startSection from './utils/startSection';
 import reducer, { initialState } from './reducer';
 import init from './init';
@@ -20,6 +21,8 @@ const GuidedTour = ({ children }) => {
     if (isStepAlreadyDone) {
       return null;
     }
+
+    setCurrentStepToLocaleStorage(step);
 
     return dispatch({
       type: 'SET_CURRENT_STEP',
