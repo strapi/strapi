@@ -29,6 +29,11 @@ function getCustomWebpackConfig(dir, config) {
     const webpackAdminConfig = require(path.resolve(adminConfigPath));
 
     if (_.isFunction(webpackAdminConfig)) {
+      // Expose the devServer configuration
+      if (config.devServer) {
+        webpackConfig.devServer = config.devServer;
+      }
+
       webpackConfig = webpackAdminConfig(webpackConfig, webpack);
 
       if (!webpackConfig) {
@@ -232,41 +237,42 @@ async function watchAdmin({ plugins, dir, host, port, browser, options }) {
     port,
     options,
     roots,
+    devServer: {
+      port,
+      client: {
+        logging: 'none',
+        overlay: {
+          errors: true,
+          warnings: false,
+        },
+      },
+
+      open: browser === 'true' ? true : browser,
+      devMiddleware: {
+        publicPath: options.adminPath,
+      },
+      historyApiFallback: {
+        index: options.adminPath,
+        disableDotRule: true,
+      },
+    },
   };
 
   const webpackConfig = getCustomWebpackConfig(dir, args);
-  const opts = {
-    client: {
-      logging: 'none',
-      overlay: {
-        errors: true,
-        warnings: false,
-      },
-    },
 
-    open: browser === 'true' ? true : browser,
-    devMiddleware: {
-      publicPath: options.adminPath,
-    },
-    historyApiFallback: {
-      index: options.adminPath,
-      disableDotRule: true,
-    },
+  const compiler = webpack(webpackConfig);
 
-    ...webpack(webpackConfig).options.devServer,
-  };
+  const server = new WebpackDevServer(compiler.options.devServer, compiler);
 
-  const server = new WebpackDevServer(opts, webpack(webpackConfig));
-
-  server.start(port, host, function(err) {
-    if (err) {
-      console.log(err);
-    }
-
+  const runServer = async () => {
     console.log(chalk.green('Starting the development server...'));
     console.log();
     console.log(chalk.green(`Admin development at http://${host}:${port}${options.adminPath}`));
-  });
+
+    await server.start();
+  };
+
+  runServer();
 
   watchFiles(dir);
 }
