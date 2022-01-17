@@ -54,7 +54,10 @@ const Wysiwyg = ({
 
   const handleToggleMediaLib = () => setMediaLibVisible(prev => !prev);
   const handleTogglePreviewMode = () => setIsPreviewMode(prev => !prev);
-  const handleToggleExpand = () => setIsExpandMode(prev => !prev);
+  const handleToggleExpand = () => {
+    setIsPreviewMode(false);
+    setIsExpandMode(prev => !prev);
+  };
 
   const handleActionClick = (value, currentEditorRef, togglePopover) => {
     switch (value) {
@@ -160,9 +163,7 @@ const Wysiwyg = ({
             value={value}
           />
 
-          {!isExpandMode && (
-            <WysiwygFooter isPreviewMode={isPreviewMode} onToggleExpand={handleToggleExpand} />
-          )}
+          {!isExpandMode && <WysiwygFooter onToggleExpand={handleToggleExpand} />}
         </EditorLayout>
         <Hint description={description} name={name} error={error} />
       </Stack>
