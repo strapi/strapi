@@ -15,7 +15,7 @@ import { Box } from '@strapi/design-system/Box';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
 import Logo from '../../assets/images/homepage-logo.png';
 import { useModels } from '../../hooks';
-import { isGuidedTourComplete } from '../../components/GuidedTour/utils/isGuidedTourComplete';
+import isGuidedTourComplete from '../../components/GuidedTour/utils/isGuidedTourComplete';
 import GuidedTourHomepage from '../../components/GuidedTour/GuidedTourHomepage';
 import SocialLinks from './SocialLinks';
 import HomeHeader from './HomeHeader';

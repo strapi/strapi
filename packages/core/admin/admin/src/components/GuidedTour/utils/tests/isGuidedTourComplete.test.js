@@ -1,4 +1,4 @@
-import { isGuidedTourComplete } from '../isGuidedTourComplete';
+import isGuidedTourComplete from '../isGuidedTourComplete';
 
 describe('Guided Tour | utils | isGuidedTourComplete', () => {
   it('should return false with uncomplete state', () => {

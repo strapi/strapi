@@ -1,4 +1,4 @@
-export const arePreviousSectionsDone = (sectionName, guidedTourState) => {
+const arePreviousSectionsDone = (sectionName, guidedTourState) => {
   const guidedTourArray = Object.entries(guidedTourState);
 
   // Find current section position in the guidedTourArray
@@ -11,3 +11,5 @@ export const arePreviousSectionsDone = (sectionName, guidedTourState) => {
     Object.entries(sectionValue).every(([, stepValue]) => stepValue)
   );
 };
+
+export default arePreviousSectionsDone;

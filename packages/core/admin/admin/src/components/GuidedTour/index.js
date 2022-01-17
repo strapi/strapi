@@ -2,7 +2,7 @@ import React, { useReducer } from 'react';
 import PropTypes from 'prop-types';
 import get from 'lodash/get';
 import { GuidedTourProvider } from '@strapi/helper-plugin';
-import { setStateToLocaleStorage } from './utils/setStateToLocaleStorage';
+import setStateToLocaleStorage from './utils/setStateToLocaleStorage';
 import startSection from './utils/startSection';
 import reducer, { initialState } from './reducer';
 import init from './init';

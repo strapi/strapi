@@ -1,4 +1,4 @@
-import { handleGuidedTourVisibility } from '../handleGuidedTourVisibility';
+import handleGuidedTourVisibility from '../handleGuidedTourVisibility';
 
 describe('Guided Tour | utils | handleGuidedTourVisibility', () => {
   it('should call the callback function', () => {

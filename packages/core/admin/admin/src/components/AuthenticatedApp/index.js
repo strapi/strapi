@@ -15,7 +15,7 @@ import {
 } from './utils/api';
 import checkLatestStrapiVersion from './utils/checkLatestStrapiVersion';
 import { getFullName } from '../../utils';
-import { handleGuidedTourVisibility } from '../GuidedTour/utils/handleGuidedTourVisibility';
+import handleGuidedTourVisibility from '../GuidedTour/utils/handleGuidedTourVisibility';
 
 const strapiVersion = packageJSON.version;
 
