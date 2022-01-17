@@ -49,6 +49,7 @@
     "test": "echo \"no tests yet\""
   },
   "dependencies": {
+    "@aws-sdk/client-ses": "^3.47.0",
     "lodash": "4.17.21",
     "nodemailer": "6.5.0"
   },
