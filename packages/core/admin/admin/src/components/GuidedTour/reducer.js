@@ -28,7 +28,8 @@ const reducer = (state = initialState, action) =>
         break;
       }
       case 'SET_STEP_STATE': {
-        draftState.guidedTourState[action.section][action.step] = action.value;
+        const [section, step] = action.currentStep.split('.');
+        draftState.guidedTourState[section][step] = action.value;
         break;
       }
       case 'SET_GUIDED_TOUR_VISIBILITY': {
