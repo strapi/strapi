@@ -2,7 +2,7 @@ import set from 'lodash/set';
 
 const init = initialState => {
   const guidedTourLocaleStorage = JSON.parse(localStorage.getItem('GUIDED_TOUR_COMPLETED_STEPS'));
-  const currentStepLocaleStorage = localStorage.getItem('GUIDED_TOUR_CURRENT_STEP');
+  const currentStepLocaleStorage = JSON.parse(localStorage.getItem('GUIDED_TOUR_CURRENT_STEP'));
 
   if (guidedTourLocaleStorage) {
     guidedTourLocaleStorage.forEach(step => {
