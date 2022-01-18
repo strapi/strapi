@@ -34,6 +34,9 @@ const Modal = ({ onClose, children }) => {
             hasRadius
             padding={4}
             size={8}
+            role="dialog"
+            aria-modal
+            onClick={e => e.stopPropagation()}
           >
             <Flex justifyContent="flex-end">
               <IconButton
