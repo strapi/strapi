@@ -1,7 +1,7 @@
 /**
- * NotFoundPage
+ * InternalErrorPage
  *
- * This is the page we show when the user visits a url that doesn't have a route
+ * This is the page we show when the user gets a 500 error
  *
  */
 import React from 'react';
@@ -14,7 +14,7 @@ import EmptyPictures from '@strapi/icons/EmptyPictures';
 import ArrowRight from '@strapi/icons/ArrowRight';
 import { useIntl } from 'react-intl';
 
-const NoContentType = () => {
+const InternalErrorPage = () => {
   const { formatMessage } = useIntl();
   useFocusWhenNavigate();
 
@@ -30,7 +30,7 @@ const NoContentType = () => {
       <ContentLayout>
         <EmptyStateLayout
           action={
-            <LinkButton variant="secondary" endIcon={<ArrowRight />} to="/">
+            <LinkButton size="M" variant="secondary" endIcon={<ArrowRight />} to="/">
               {formatMessage({
                 id: 'app.components.NotFoundPage.back',
                 defaultMessage: 'Back to homepage',
@@ -38,8 +38,8 @@ const NoContentType = () => {
             </LinkButton>
           }
           content={formatMessage({
-            id: 'app.page.not.found',
-            defaultMessage: "Oops! We can't seem to find the page you're looging for...",
+            id: 'notification.error',
+            defaultMessage: 'An error occured',
           })}
           hasRadius
           icon={<EmptyPictures width="10rem" />}
@@ -50,4 +50,4 @@ const NoContentType = () => {
   );
 };
 
-export default NoContentType;
+export default InternalErrorPage;
