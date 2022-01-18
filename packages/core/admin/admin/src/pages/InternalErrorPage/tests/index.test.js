@@ -84,8 +84,8 @@ describe('InternalErrorPage', () => {
       .c16 {
         font-weight: 600;
         color: #32324d;
-        font-size: 0.875rem;
-        line-height: 1.43;
+        font-size: 0.75rem;
+        line-height: 1.33;
       }
 
       .c18 {
@@ -151,7 +151,7 @@ describe('InternalErrorPage', () => {
       }
 
       .c14 {
-        padding: 10px 16px;
+        padding: 8px 16px;
         background: #4945ff;
         border: none;
         border-radius: 4px;

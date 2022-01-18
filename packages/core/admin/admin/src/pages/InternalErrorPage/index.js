@@ -30,7 +30,7 @@ const InternalErrorPage = () => {
       <ContentLayout>
         <EmptyStateLayout
           action={
-            <LinkButton size="M" variant="secondary" endIcon={<ArrowRight />} to="/">
+            <LinkButton variant="secondary" endIcon={<ArrowRight />} to="/">
               {formatMessage({
                 id: 'app.components.NotFoundPage.back',
                 defaultMessage: 'Back to homepage',
