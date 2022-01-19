@@ -11,6 +11,15 @@ const getWebpackConfig = require('./webpack.config');
 
 const getPkgPath = name => path.dirname(require.resolve(`${name}/package.json`));
 
+const DEFAULT_PLUGINS = [
+  'content-type-builder',
+  'content-manager',
+  'upload',
+  'email',
+  'i18n',
+  'users-permissions',
+];
+
 function getCustomWebpackConfig(dir, config) {
   const adminConfigPath = path.join(dir, 'src', 'admin', 'webpack.config.js');
 
@@ -34,7 +43,13 @@ function getCustomWebpackConfig(dir, config) {
   return webpackConfig;
 }
 
-async function build({ plugins, dir, env, options, optimize }) {
+async function build({ plugins, dir, env, options, optimize, forceBuild }) {
+  const buildAdmin = await shouldBuildAdmin({ dir, plugins });
+
+  if (!buildAdmin && !forceBuild) {
+    return;
+  }
+
   // Create the cache dir containing the front-end files.
   await createCacheDir({ dir, plugins });
 
@@ -302,6 +317,41 @@ async function watchFiles(dir) {
       }
     }
   });
+}
+
+const hasCustomAdminCode = async dir => {
+  const customAdminPath = path.join(dir, 'src', 'admin');
+  const customAdminConfigFile = path.join(customAdminPath, 'app.js');
+  const customAdminWebpackFile = path.join(customAdminPath, 'webpack.config.js');
+
+  const hasCustomConfigFile = await fs.pathExists(customAdminConfigFile);
+  const hasCustomWebpackFile = await fs.pathExists(customAdminWebpackFile);
+
+  return hasCustomConfigFile || hasCustomWebpackFile;
+};
+
+/**
+ * Checks if the project's installed plugins are not the same as a default one.
+ * @param {Object} plugins
+ * @returns {boolean}
+ */
+const hasNonDefaultPlugins = plugins => {
+  // List of plugins that are not the ones installed in a generated app
+  const installedPlugins = Object.keys(plugins).filter(x => !DEFAULT_PLUGINS.includes(x));
+
+  // List of default plugins uninstalled from a generated app
+  const missingPlugins = DEFAULT_PLUGINS.filter(x => !Object.keys(plugins).includes(x));
+
+  const diff = [...installedPlugins, ...missingPlugins];
+
+  return diff.length > 0;
+};
+
+async function shouldBuildAdmin({ dir, plugins }) {
+  const appHasCustomAdminCode = await hasCustomAdminCode(dir);
+  const appHasNonDefaultPlugins = hasNonDefaultPlugins(plugins);
+
+  return appHasCustomAdminCode || appHasNonDefaultPlugins;
 }
 
 module.exports = {

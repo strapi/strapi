@@ -386,7 +386,7 @@ module.exports = {
       throw new ValidationError('token.invalid');
     }
 
-    await userService.edit({ id: user.id }, { confirmed: true, confirmationToken: null });
+    await userService.edit(user.id, { confirmed: true, confirmationToken: null });
 
     if (returnUser) {
       ctx.send({

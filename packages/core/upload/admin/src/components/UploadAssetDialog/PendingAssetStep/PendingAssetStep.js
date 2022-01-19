@@ -107,11 +107,8 @@ export const PendingAssetStep = ({
                       <UploadingAssetCard
                         // Props used to store the newly uploaded files
                         addUploadedFiles={addUploadedFiles}
-                        assetType={asset.type}
-                        extension={asset.ext}
-                        file={asset.rawFile}
+                        asset={asset}
                         id={assetKey}
-                        name={asset.name}
                         onCancel={onCancelUpload}
                         onStatusChange={status => handleStatusChange(status, asset.rawFile)}
                         size="S"
@@ -148,7 +145,9 @@ export const PendingAssetStep = ({
           <Button type="submit" loading={uploadStatus === Status.Uploading}>
             {formatMessage(
               {
-                id: getTrad('modal.upload-list.footer.button.singular'),
+                id: getTrad(
+                  `modal.upload-list.footer.button.${assets.length > 1 ? 'plural' : 'singular'}`
+                ),
                 defaultMessage: 'Upload assets',
               },
               { number: assets.length }

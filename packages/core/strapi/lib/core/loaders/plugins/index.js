@@ -7,6 +7,7 @@ const { env } = require('@strapi/utils');
 const loadConfigFile = require('../../app-configuration/load-config-file');
 const loadFiles = require('../../../load/load-files');
 const getEnabledPlugins = require('./get-enabled-plugins');
+const getUserPluginsConfig = require('./get-user-plugins-config');
 
 const defaultPlugin = {
   bootstrap() {},
@@ -54,22 +55,8 @@ const applyUserExtension = async plugins => {
   }
 };
 
-const formatContentTypes = plugins => {
-  for (const pluginName in plugins) {
-    const plugin = plugins[pluginName];
-    for (const contentTypeName in plugin.contentTypes) {
-      const ctSchema = plugin.contentTypes[contentTypeName].schema;
-      ctSchema.plugin = pluginName;
-      ctSchema.uid = `plugin::${pluginName}.${ctSchema.singularName}`;
-    }
-  }
-};
-
 const applyUserConfig = async plugins => {
-  const userPluginConfigPath = join(strapi.dirs.config, 'plugins.js');
-  const userPluginsConfig = (await fse.pathExists(userPluginConfigPath))
-    ? loadConfigFile(userPluginConfigPath)
-    : {};
+  const userPluginsConfig = await getUserPluginsConfig();
 
   for (const pluginName in plugins) {
     const plugin = plugins[pluginName];
@@ -113,7 +100,6 @@ const loadPlugins = async strapi => {
   // TODO: validate plugin format
   await applyUserConfig(plugins);
   await applyUserExtension(plugins);
-  formatContentTypes(plugins);
 
   for (const pluginName in plugins) {
     strapi.container.get('plugins').add(pluginName, plugins[pluginName]);

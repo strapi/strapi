@@ -84,8 +84,8 @@ Complete installation requirements can be found in the documentation under <a hr
 
 **Database:**
 
-- MySQL >= 5.6
-- MariaDB >= 10.1
+- MySQL >= 5.7.8
+- MariaDB >= 10.2.7
 - PostgreSQL >= 10
 - SQLite >= 3
 

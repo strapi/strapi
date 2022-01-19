@@ -29,9 +29,9 @@ import { connect, select } from './utils';
 import getSelectStyles from './utils/getSelectStyles';
 
 const initialPaginationState = {
-  _contains: '',
-  _limit: 20,
-  _start: 0,
+  contains: '',
+  limit: 20,
+  start: 0,
 };
 
 const buildParams = (query, paramsToKeep) => {
@@ -141,10 +141,10 @@ function SelectWrapper({
 
       setIsLoading(true);
 
-      const params = { _limit: state._limit, ...defaultParams };
+      const params = { limit: state.limit, ...defaultParams, start: state.start };
 
-      if (state._contains) {
-        params[containsKey] = state._contains;
+      if (state.contains) {
+        params[`filters[${containsKey}][$contains]`] = state.contains;
       }
 
       try {
@@ -183,10 +183,9 @@ function SelectWrapper({
       isFieldAllowed,
       isMorph,
       mainField.name,
-      setIsLoading,
-      setOptions,
-      state._contains,
-      state._limit,
+      state.contains,
+      state.limit,
+      state.start,
     ]
   );
 
@@ -204,11 +203,11 @@ function SelectWrapper({
   const handleInputChange = (inputValue, { action }) => {
     if (action === 'input-change') {
       setState(prevState => {
-        if (prevState._contains === inputValue) {
+        if (prevState.contains === inputValue) {
           return prevState;
         }
 
-        return { ...prevState, _contains: inputValue, _start: 0 };
+        return { ...prevState, contains: inputValue, start: 0 };
       });
     }
 
@@ -216,7 +215,10 @@ function SelectWrapper({
   };
 
   const handleMenuScrollToBottom = () => {
-    setState(prevState => ({ ...prevState, _limit: prevState._limit + 20 }));
+    setState(prevState => ({
+      ...prevState,
+      start: prevState.start + 20,
+    }));
   };
 
   const handleMenuClose = () => {
@@ -304,7 +306,6 @@ function SelectWrapper({
         move={moveRelation}
         name={name}
         options={filteredOptions}
-        // options={temp}
         onChange={handleChange}
         onInputChange={handleInputChange}
         onMenuClose={handleMenuClose}
@@ -320,73 +321,6 @@ function SelectWrapper({
       />
     </Stack>
   );
-
-  // return (
-  //   <Padded>
-  //     <BaselineAlignment />
-  //     <Flex justifyContent="space-between">
-  //       <Flex>
-  //         <Text fontWeight="semiBold">
-  //           <span>
-  //             {label}
-  //             {!isSingle && ` (${associationsLength})`}
-  //           </span>
-  //         </Text>
-  //         {labelIconformatted && (
-  //           <div style={{ lineHeight: '13px' }}>
-  //             <LabelIconWrapper title={labelIconformatted.title}>
-  //               {labelIconformatted.icon}
-  //             </LabelIconWrapper>
-  //           </div>
-  //         )}
-  //       </Flex>
-  //       {isSingle && link}
-  //     </Flex>
-  //     {!isEmpty(description) && (
-  //       <Padded top size="xs">
-  //         <BaselineAlignment />
-  //         <Text fontSize="sm" color="grey" lineHeight="12px" ellipsis>
-  //           {description}
-  //         </Text>
-  //       </Padded>
-  //     )}
-  //     <Padded top size="sm">
-  //       <BaselineAlignment />
-
-  // <Component
-  //   addRelation={handleAddRelation}
-  //   components={{ ClearIndicator, DropdownIndicator, IndicatorSeparator, Option }}
-  //   displayNavigationLink={shouldDisplayRelationLink}
-  //   id={name}
-  //   isDisabled={isDisabled}
-  //   isLoading={isLoading}
-  //   isClearable
-  //   mainField={mainField}
-  //   move={moveRelation}
-  //   name={name}
-  //   options={filteredOptions}
-  //   onChange={handleChange}
-  //   onInputChange={handleInputChange}
-  //   onMenuClose={handleMenuClose}
-  //   onMenuOpen={handleMenuOpen}
-  //   onMenuScrollToBottom={handleMenuScrollToBottom}
-  //   onRemove={onRemoveRelation}
-  //   placeholder={
-  //     isEmpty(placeholder) ? (
-  //       <FormattedMessage id={getTrad('containers.Edit.addAnItem')} />
-  //     ) : (
-  //       placeholder
-  //     )
-  //   }
-  //   searchToPersist={searchToPersist}
-  //   styles={styles}
-  //   targetModel={targetModel}
-  //   value={value}
-  // />
-  //     </Padded>
-  //     <div style={{ marginBottom: 28 }} />
-  //   </Padded>
-  // );
 }
 
 SelectWrapper.defaultProps = {

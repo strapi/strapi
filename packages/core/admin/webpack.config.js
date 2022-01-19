@@ -88,9 +88,6 @@ module.exports = ({
             },
           },
           parallel: !isWsl,
-          // Enable file caching
-          cache: true,
-          sourceMap: false,
         }),
       ],
       runtimeChunk: true,
@@ -144,13 +141,15 @@ module.exports = ({
         },
         {
           test: /\.(svg|eot|otf|ttf|woff|woff2)$/,
-          use: 'file-loader',
+          type: 'asset/resource',
         },
         {
           test: [/\.bmp$/, /\.gif$/, /\.jpe?g$/, /\.png$/, /\.ico$/],
-          loader: require.resolve('url-loader'),
-          options: {
-            limit: 1000,
+          type: 'asset',
+          parser: {
+            dataUrlCondition: {
+              maxSize: 1000,
+            },
           },
         },
         {
@@ -160,9 +159,11 @@ module.exports = ({
         },
         {
           test: /\.(mp4|webm)$/,
-          loader: require.resolve('url-loader'),
-          options: {
-            limit: 10000,
+          type: 'asset',
+          parser: {
+            dataUrlCondition: {
+              maxSize: 10000,
+            },
           },
         },
       ],
@@ -172,6 +173,7 @@ module.exports = ({
       symlinks: false,
       extensions: ['.js', '.jsx', '.react.js'],
       mainFields: ['browser', 'jsnext:main', 'main'],
+      modules: ['node_modules', path.resolve(__dirname, 'node_modules')],
     },
     plugins: [
       new HtmlWebpackPlugin({

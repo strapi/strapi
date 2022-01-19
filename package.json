@@ -42,12 +42,12 @@
     "prettier:code": "prettier \"**/*.js\"",
     "prettier:other": "prettier \"**/*.{md,css,scss,yaml,yml}\"",
     "test:clean": "rimraf ./coverage",
-    "test:front": "npm run test:clean && cross-env NODE_ENV=test IS_EE=true jest --config ./jest.config.front.js",
-    "test:front:watch": "cross-env NODE_ENV=test IS_EE=true jest --config ./jest.config.front.js --watchAll",
-    "test:front:update": "cross-env NODE_ENV=test IS_EE=true jest --config ./jest.config.front.js --u",
-    "test:front:ce": "npm run test:clean && cross-env NODE_ENV=test IS_EE=false jest --config ./jest.config.front.js --coverage",
-    "test:front:watch:ce": "cross-env NODE_ENV=test IS_EE=false jest --config ./jest.config.front.js --watchAll",
-    "test:front:update:ce": "cross-env NODE_ENV=test IS_EE=false jest --config ./jest.config.front.js --u",
+    "test:front": "npm run test:clean && cross-env IS_EE=true jest --config ./jest.config.front.js",
+    "test:front:watch": "cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",
+    "test:front:update": "cross-env IS_EE=true jest --config ./jest.config.front.js --u",
+    "test:front:ce": "npm run test:clean && cross-env IS_EE=false jest --config ./jest.config.front.js --coverage",
+    "test:front:watch:ce": "cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll",
+    "test:front:update:ce": "cross-env IS_EE=false jest --config ./jest.config.front.js --u",
     "test:unit": "jest --verbose",
     "test:e2e": "FORCE_COLOR=true jest --config jest.config.e2e.js --verbose --runInBand --testRunner=jest-circus/runner --forceExit --detectOpenHandles",
     "test:generate-app": "node test/create-test-app.js",
@@ -71,7 +71,6 @@
   },
   "devDependencies": {
     "@swc-node/jest": "1.1.0",
-    "@testing-library/jest-dom": "5.11.10",
     "@testing-library/react": "11.2.6",
     "@testing-library/react-hooks": "3.4.2",
     "@testing-library/user-event": "13.1.9",
@@ -102,7 +101,6 @@
     "jest": "26.6.3",
     "jest-circus": "26.6.3",
     "jest-cli": "26.0.1",
-    "jest-styled-components": "7.0.2",
     "lerna": "3.13.1",
     "lint-staged": "10.5.4",
     "lodash": "4.17.21",
@@ -123,7 +121,7 @@
     "yargs": "13.2.2"
   },
   "engines": {
-    "node": ">=12.x.x <=16.x.x",
+    "node": ">=12.22.0 <=16.x.x",
     "npm": ">=6.0.0"
   }
 }

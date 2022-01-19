@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useMemo, useState } from 'react';
+import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
 import get from 'lodash/get';
 import isEqual from 'react-fast-compare';
 import PropTypes from 'prop-types';
@@ -37,10 +37,35 @@ const DynamicZone = ({
 }) => {
   const toggleNotification = useNotification();
   const [isOpen, setIsOpen] = useState(false);
+  const [shouldOpenAddedComponent, setShouldOpenAddedComponent] = useState(false);
   const dynamicDisplayedComponentsLength = dynamicDisplayedComponents.length;
+  const intlDescription = metadatas.description
+    ? { id: metadatas.description, defaultMessage: metadatas.description }
+    : null;
+
   const [componentCollapses, setComponentsCollapses] = useState(
     createCollapses(dynamicDisplayedComponentsLength)
   );
+
+  useEffect(() => {
+    setComponentsCollapses(createCollapses(dynamicDisplayedComponentsLength));
+  }, [dynamicDisplayedComponentsLength]);
+
+  useEffect(() => {
+    if (shouldOpenAddedComponent) {
+      setComponentsCollapses(prev =>
+        prev.map((collapse, index) => {
+          if (index === prev.length - 1) {
+            return { ...collapse, isOpen: true };
+          }
+
+          return collapse;
+        })
+      );
+
+      setShouldOpenAddedComponent(false);
+    }
+  }, [shouldOpenAddedComponent]);
 
   // We cannot use the default props here
   const { max = Infinity, min = -Infinity } = fieldSchema;
@@ -68,7 +93,7 @@ const DynamicZone = ({
       setIsOpen(false);
 
       addComponentToDynamicZone(name, componentUid, hasError);
-      setComponentsCollapses(prev => [...prev, { isOpen: true }]);
+      setShouldOpenAddedComponent(true);
     },
     [addComponentToDynamicZone, hasError, name]
   );
@@ -132,18 +157,12 @@ const DynamicZone = ({
 
   const handleRemoveComponent = (name, currentIndex) => {
     removeComponentFromDynamicZone(name, currentIndex);
-
-    setComponentsCollapses(prev => prev.filter((_, index) => index !== currentIndex));
   };
 
   if (!isFieldAllowed && isCreatingEntry) {
     return (
       <NotAllowedInput
-        description={
-          metadatas.description
-            ? { id: metadatas.description, defaultMessage: metadatas.description }
-            : null
-        }
+        description={intlDescription}
         intlLabel={{ id: metadatas.label, defaultMessage: metadatas.label }}
         labelAction={labelAction}
         name={name}
@@ -154,11 +173,7 @@ const DynamicZone = ({
   if (!isFieldAllowed && !isFieldReadable && !isCreatingEntry) {
     return (
       <NotAllowedInput
-        description={
-          metadatas.description
-            ? { id: metadatas.description, defaultMessage: metadatas.description }
-            : null
-        }
+        description={intlDescription}
         intlLabel={{ id: metadatas.label, defaultMessage: metadatas.label }}
         labelAction={labelAction}
         name={name}
@@ -171,6 +186,7 @@ const DynamicZone = ({
       {dynamicDisplayedComponentsLength > 0 && (
         <Box>
           <DzLabel
+            intlDescription={intlDescription}
             label={metadatas.label}
             labelAction={labelAction}
             name={name}
@@ -183,7 +199,7 @@ const DynamicZone = ({
               dynamicDisplayedComponentsLength > 0 &&
               index < dynamicDisplayedComponentsLength - 1;
             const showUpIcon = isFieldAllowed && dynamicDisplayedComponentsLength > 0 && index > 0;
-            const isOpen = componentCollapses[index].isOpen;
+            const isOpen = componentCollapses[index]?.isOpen || false;
 
             return (
               <Component

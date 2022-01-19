@@ -47,7 +47,7 @@ const RepeatableComponent = ({
   const toggleNotification = useNotification();
   const { formatMessage } = useIntl();
   const [collapseToOpen, setCollapseToOpen] = useState('');
-  const [isDraggingSibling, setIsDraggingSiblig] = useState(false);
+  const [isDraggingSibling, setIsDraggingSibling] = useState(false);
   const [, drop] = useDrop({ accept: ItemTypes.COMPONENT });
   const { getComponentLayout } = useContentTypeLayout();
   const componentLayoutData = useMemo(() => getComponentLayout(componentUid), [
@@ -173,7 +173,7 @@ const RepeatableComponent = ({
               }}
               parentName={name}
               schema={componentLayoutData}
-              setIsDraggingSiblig={setIsDraggingSiblig}
+              setIsDraggingSibling={setIsDraggingSibling}
               toggleCollapses={toggleCollapses}
             />
           );

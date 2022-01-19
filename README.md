@@ -1,8 +1,12 @@
 <p align="center">
-  <a href="https://strapi.io">
+  <a href="https://strapi.io/#gh-light-mode-only">
     <img src="https://strapi.io/assets/strapi-logo-dark.svg" width="318px" alt="Strapi logo" />
   </a>
+  <a href="https://strapi.io/#gh-dark-mode-only">
+    <img src="https://strapi.io/assets/strapi-logo-light.svg" width="318px" alt="Strapi logo" />
+  </a>
 </p>
+
 <h3 align="center">API creation made simple, secure and fast.</h3>
 <p align="center">The most advanced open-source headless CMS to build powerful APIs with no effort.</p>
 <p align="center"><a href="https://strapi.io/demo">Try live demo</a></p>
@@ -84,8 +88,8 @@ Complete installation requirements can be found in the documentation under <a hr
 
 **Database:**
 
-- MySQL >= 5.6
-- MariaDB >= 10.1
+- MySQL >= 5.7.8
+- MariaDB >= 10.2.7
 - PostgreSQL >= 10
 - SQLite >= 3
 

@@ -24,29 +24,6 @@ module.exports = async function createQuickStartProject(scope) {
 
   if (scope.runQuickstartApp !== true) return;
 
-  try {
-    await trackUsage({ event: 'willBuildAdmin', scope });
-
-    await execa('npm', ['run', 'build', '--', '--no-optimization'], {
-      stdio: 'inherit',
-      cwd: scope.rootPath,
-      env: {
-        FORCE_COLOR: 1,
-      },
-    });
-
-    await trackUsage({ event: 'didBuildAdmin', scope });
-  } catch (error) {
-    await trackUsage({
-      event: 'didNotBuildAdmin',
-      scope,
-      error,
-    });
-
-    await captureStderr('didNotBuildAdmin', error);
-    process.exit(1);
-  }
-
   console.log(`Running your Strapi application.`);
 
   try {
