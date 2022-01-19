@@ -5,11 +5,6 @@ import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import NotFoundPage from '../index';
-import { useModels } from '../../../hooks';
-
-jest.mock('../../../hooks', () => ({
-  useModels: jest.fn(),
-}));
 
 const history = createMemoryHistory();
 
@@ -24,12 +19,6 @@ const App = (
 );
 
 describe('NotFoundPage', () => {
-  useModels.mockImplementation(() => ({
-    isLoading: false,
-    collectionTypes: [],
-    singleTypes: [],
-  }));
-
   it('renders and matches the snapshot', () => {
     const {
       container: { firstChild },
