@@ -2,7 +2,7 @@
 
 const responseHandlers = require('./src/response-handlers');
 
-module.exports = ({ env }) => [
+module.exports = [
   'strapi::errors',
   'strapi::security',
   'strapi::cors',
