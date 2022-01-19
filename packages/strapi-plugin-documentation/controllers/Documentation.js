@@ -165,7 +165,7 @@ module.exports = {
     let querystring = '?error=password';
 
     if (isValid) {
-      ctx.session.documentation = password;
+      ctx.session.token = await strapi.plugins['documentation'].services.token.create();
       querystring = '';
     }
 

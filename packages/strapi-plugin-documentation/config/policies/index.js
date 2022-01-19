@@ -8,24 +8,26 @@ module.exports = async (ctx, next) => {
   });
   const config = await pluginStore.get({ key: 'config' });
 
+  const redirectToLogin = () => {
+    const querystring = ctx.querystring ? `?${ctx.querystring}` : '';
+    ctx.redirect(
+      `${strapi.config.server.url}${strapi.plugins.documentation.config['x-strapi-config'].path}/login${querystring}`
+    );
+  };
+
   if (!config.restrictedAccess) {
     return await next();
   }
 
-  if (!ctx.session.documentation) {
-    const querystring = ctx.querystring ? `?${ctx.querystring}` : '';
-
-    return ctx.redirect(
-      `${strapi.config.server.url}${strapi.plugins.documentation.config['x-strapi-config'].path}/login${querystring}`
-    );
+  if (!ctx.session.token) {
+    return redirectToLogin();
   }
-  const isValid = await strapi.plugins['users-permissions'].services.user.validatePassword(
-    ctx.session.documentation,
-    config.password
-  );
+
+  const isValid = await strapi.plugins['documentation'].services.token.validate(ctx.session.token);
 
   if (!isValid) {
-    ctx.session.documentation = null;
+    ctx.session.token = null;
+    return redirectToLogin();
   }
 
   // Execute the action.
