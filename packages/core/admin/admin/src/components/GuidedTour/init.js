@@ -1,8 +1,12 @@
 import set from 'lodash/set';
+import persistStateToLocaleStorage, {
+  COMPLETED_STEPS,
+  CURRENT_STEP,
+} from './utils/persistStateToLocaleStorage';
 
 const init = initialState => {
-  const guidedTourLocaleStorage = JSON.parse(localStorage.getItem('GUIDED_TOUR_COMPLETED_STEPS'));
-  const currentStepLocaleStorage = JSON.parse(localStorage.getItem('GUIDED_TOUR_CURRENT_STEP'));
+  const guidedTourLocaleStorage = persistStateToLocaleStorage.get(COMPLETED_STEPS);
+  const currentStepLocaleStorage = persistStateToLocaleStorage.get(CURRENT_STEP);
 
   if (guidedTourLocaleStorage) {
     guidedTourLocaleStorage.forEach(step => {

@@ -2,8 +2,7 @@ import React, { useReducer } from 'react';
 import PropTypes from 'prop-types';
 import get from 'lodash/get';
 import { GuidedTourProvider } from '@strapi/helper-plugin';
-import setStateToLocaleStorage from './utils/setStateToLocaleStorage';
-import setCurrentStepToLocaleStorage from './utils/setCurrentStepToLocaleStorage';
+import persistStateToLocaleStorage from './utils/persistStateToLocaleStorage';
 import arePreviousSectionsDone from './utils/arePreviousSectionsDone';
 import reducer, { initialState } from './reducer';
 import init from './init';
@@ -22,7 +21,7 @@ const GuidedTour = ({ children }) => {
       return null;
     }
 
-    setCurrentStepToLocaleStorage(step);
+    persistStateToLocaleStorage.addCurrentStep(step);
 
     return dispatch({
       type: 'SET_CURRENT_STEP',
@@ -38,7 +37,7 @@ const GuidedTour = ({ children }) => {
   };
 
   const setStepState = (currentStep, value) => {
-    setStateToLocaleStorage(currentStep);
+    persistStateToLocaleStorage.addCompletedStep(currentStep);
 
     dispatch({
       type: 'SET_STEP_STATE',
