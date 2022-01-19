@@ -3,6 +3,15 @@
 const format = require('date-fns/format');
 const parseType = require('../parse-type');
 
+beforeAll(() => {
+  jest.useFakeTimers('modern');
+  jest.setSystemTime(new Date('2022-01-19T11:07:59.125Z'));
+});
+
+afterAll(() => {
+  jest.useRealTimers();
+});
+
 describe('parseType', () => {
   describe('boolean', () => {
     it('Handles string booleans', () => {
@@ -34,6 +43,10 @@ describe('parseType', () => {
       expect(parseType({ type: 'time', value: '12:31:11.319' })).toBe('12:31:11.319');
     });
 
+    it("Input 'now()' returns current time the same time format", () => {
+      expect(parseType({ type: 'time', value: 'now()' })).toBe('12:07:59.125');
+    });
+
     it('Throws on  invalid time format', () => {
       expect(() => parseType({ type: 'time', value: '25:12:09' })).toThrow();
       expect(() => parseType({ type: 'time', value: '23:78:09' })).toThrow();
@@ -59,6 +72,10 @@ describe('parseType', () => {
       expect(parseType({ type: 'date', value: isoDateFormat })).toBe(expectedDateFormat);
     });
 
+    it("Input 'now()' returns current date the same date format", () => {
+      expect(parseType({ type: 'date', value: 'now()' })).toBe('2022-01-19');
+    });
+
     it('Throws on invalid formator dates', () => {
       expect(() => parseType({ type: 'date', value: '-1029-11-02' })).toThrow();
       expect(() => parseType({ type: 'date', value: '2019-13-02' })).toThrow();
@@ -74,6 +91,12 @@ describe('parseType', () => {
         const r = parseType({ type: 'datetime', value });
         expect(r instanceof Date).toBe(true);
       }
+    );
+  });
+
+  it("Input 'now()' returns current datetime the same datetime format", () => {
+    expect(parseType({ type: 'datetime', value: 'now()' })).toStrictEqual(
+      new Date('2022-01-19T11:07:59.125Z')
     );
   });
 });
