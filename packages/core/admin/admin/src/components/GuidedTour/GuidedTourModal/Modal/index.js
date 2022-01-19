@@ -29,7 +29,7 @@ const Modal = ({ onClose, children }) => {
         <FocusTrap onEscape={onClose}>
           <Stack
             background="neutral0"
-            width={pxToRem(830)}
+            width={pxToRem(660)}
             shadow="popupShadow"
             hasRadius
             padding={4}
@@ -49,7 +49,12 @@ const Modal = ({ onClose, children }) => {
               {children}
             </Box>
             <Flex justifyContent="flex-end">
-              <Button variant="tertiary">Skip</Button>
+              <Button variant="tertiary">
+                {formatMessage({
+                  id: 'app.components.GuidedTour.modal.skip',
+                  defaultMessage: 'Skip',
+                })}
+              </Button>
             </Flex>
           </Stack>
         </FocusTrap>

@@ -1,18 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import at from 'lodash/at';
-import { useIntl } from 'react-intl';
-import { Typography } from '@strapi/design-system/Typography';
-import { Button } from '@strapi/design-system/Button';
 import { useGuidedTour } from '@strapi/helper-plugin';
 import layout from '../layout';
-import Content from './Content';
 import Modal from './Modal';
+import StepperModal from '../Stepper/Modal/StepperModal';
 
 const GuidedTourModal = () => {
-  const { formatMessage } = useIntl();
   const { currentStep, guidedTourState, setCurrentStep, setStepState } = useGuidedTour();
   const [stepContent, setStepContent] = useState();
   const [isVisible, setIsVisible] = useState(currentStep);
+
+  const [sectionIndex, setSectionIndex] = useState(null);
+  const [stepIndex, setStepIndex] = useState(null);
+  const [hasSectionAfter, setHasSectionAfter] = useState(null);
 
   useEffect(() => {
     if (!currentStep) {
@@ -29,9 +29,18 @@ const GuidedTourModal = () => {
   useEffect(() => {
     if (currentStep) {
       const [content] = at(layout, currentStep);
+      const sectionKeys = Object.keys(guidedTourState);
+      const [sectionName, stepName] = currentStep.split('.');
+      const newSectionIndex = sectionKeys.indexOf(sectionName);
+      const newStepIndex = Object.keys(guidedTourState[sectionName]).indexOf(stepName);
+      const newHasSectionAfter = newSectionIndex < sectionKeys.length - 1;
+
       setStepContent(content);
+      setSectionIndex(newSectionIndex);
+      setStepIndex(newStepIndex);
+      setHasSectionAfter(newHasSectionAfter);
     }
-  }, [currentStep]);
+  }, [currentStep, guidedTourState]);
 
   const handleCTA = () => {
     setStepState(currentStep, true);
@@ -41,12 +50,15 @@ const GuidedTourModal = () => {
 
   if (isVisible && stepContent) {
     return (
-      <Modal onClose={handleCTA} title="3 simple steps">
-        <Typography variant="alpha" fontWeight="bold" textColor="neutral800" as="h3" id="title">
-          {formatMessage(stepContent.title)}
-        </Typography>
-        <Content {...stepContent.content} />
-        <Button onClick={handleCTA}>{formatMessage(stepContent.cta.title)}</Button>
+      <Modal onClose={handleCTA}>
+        <StepperModal
+          {...stepContent}
+          onCTA={handleCTA}
+          currentStep={currentStep}
+          sectionIndex={sectionIndex}
+          stepIndex={stepIndex}
+          hasSectionAfter={hasSectionAfter}
+        />
       </Modal>
     );
   }
