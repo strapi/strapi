@@ -4,7 +4,7 @@
  *
  */
 
-import React, { Suspense, lazy, useEffect, useRef } from 'react';
+import React, { Suspense, lazy, useEffect } from 'react';
 import { Switch, Route } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
@@ -22,7 +22,6 @@ const ListView = lazy(() => import('../ListView'));
 
 const App = () => {
   const { startSection } = useGuidedTour();
-  const startSectionRef = useRef(startSection);
   const { formatMessage } = useIntl();
   const title = formatMessage({
     id: `${pluginId}.plugin.name`,
@@ -30,10 +29,8 @@ const App = () => {
   });
 
   useEffect(() => {
-    if (startSectionRef.current) {
-      startSectionRef.current('contentTypeBuilder');
-    }
-  }, []);
+    startSection('contentTypeBuilder');
+  }, [startSection]);
 
   return (
     <CheckPagePermissions permissions={pluginPermissions.main}>

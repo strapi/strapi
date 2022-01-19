@@ -5,21 +5,22 @@ import persistStateToLocaleStorage, {
 } from './utils/persistStateToLocaleStorage';
 
 const init = initialState => {
+  const copyInitialState = { ...initialState };
   const guidedTourLocaleStorage = persistStateToLocaleStorage.get(COMPLETED_STEPS);
   const currentStepLocaleStorage = persistStateToLocaleStorage.get(CURRENT_STEP);
 
   if (guidedTourLocaleStorage) {
     guidedTourLocaleStorage.forEach(step => {
       const [pluginName, completedStepName] = step.split('.');
-      set(initialState, ['guidedTourState', pluginName, completedStepName], true);
+      set(copyInitialState, ['guidedTourState', pluginName, completedStepName], true);
     });
   }
 
   if (currentStepLocaleStorage) {
-    set(initialState, 'currentStep', currentStepLocaleStorage);
+    set(copyInitialState, 'currentStep', currentStepLocaleStorage);
   }
 
-  return initialState;
+  return copyInitialState;
 };
 
 export default init;

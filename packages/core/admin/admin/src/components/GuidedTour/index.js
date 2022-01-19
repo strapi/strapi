@@ -47,14 +47,16 @@ const GuidedTour = ({ children }) => {
   };
 
   const startSection = sectionName => {
-    const isSectionToShow = arePreviousSectionsDone(sectionName, guidedTourState);
-
     const sectionSteps = get(guidedTourState, sectionName);
-    const firstStep = Object.keys(sectionSteps)[0];
-    const isFirstStepDone = sectionSteps[firstStep];
 
-    if (isSectionToShow && !currentStep && !isFirstStepDone) {
-      return setCurrentStep(`${sectionName}.${firstStep}`);
+    if (sectionSteps) {
+      const isSectionToShow = arePreviousSectionsDone(sectionName, guidedTourState);
+      const firstStep = Object.keys(sectionSteps)[0];
+      const isFirstStepDone = sectionSteps[firstStep];
+
+      if (isSectionToShow && !currentStep && !isFirstStepDone) {
+        return setCurrentStep(`${sectionName}.${firstStep}`);
+      }
     }
 
     return null;
