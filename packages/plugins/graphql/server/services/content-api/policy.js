@@ -2,7 +2,7 @@
 
 const { propOr } = require('lodash/fp');
 const { policy: policyUtils } = require('@strapi/utils');
-const { ForbiddenError } = require('@strapi/utils').errors;
+const { PolicyError } = require('@strapi/utils').errors;
 
 const getPoliciesConfig = propOr([], 'policies');
 
@@ -19,7 +19,7 @@ const createPoliciesMiddleware = (resolverConfig, { strapi }) => {
       const result = await handler(context, config, { strapi });
 
       if (![true, undefined].includes(result)) {
-        throw new ForbiddenError('Policies failed.');
+        throw new PolicyError();
       }
     }
 
