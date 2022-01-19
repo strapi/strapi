@@ -47,7 +47,7 @@ const GuidedTour = ({ children }) => {
   };
 
   const startSection = sectionName => {
-    const sectionSteps = get(guidedTourState, sectionName);
+    const sectionSteps = guidedTourState[sectionName];
 
     if (sectionSteps) {
       const isSectionToShow = arePreviousSectionsDone(sectionName, guidedTourState);
