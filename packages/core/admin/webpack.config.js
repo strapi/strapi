@@ -88,9 +88,6 @@ module.exports = ({
             },
           },
           parallel: !isWsl,
-          // Enable file caching
-          cache: true,
-          sourceMap: false,
         }),
       ],
       runtimeChunk: true,
@@ -176,6 +173,7 @@ module.exports = ({
       symlinks: false,
       extensions: ['.js', '.jsx', '.react.js'],
       mainFields: ['browser', 'jsnext:main', 'main'],
+      modules: ['node_modules', path.resolve(__dirname, 'node_modules')],
     },
     plugins: [
       new HtmlWebpackPlugin({

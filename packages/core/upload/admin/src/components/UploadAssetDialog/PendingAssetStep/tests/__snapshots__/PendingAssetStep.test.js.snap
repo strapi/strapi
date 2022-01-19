@@ -1041,7 +1041,7 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
             <span
               class="c15 c16"
             >
-              Upload {number} asset to the library
+              Upload {number} assets to the library
             </span>
           </button>
         </div>

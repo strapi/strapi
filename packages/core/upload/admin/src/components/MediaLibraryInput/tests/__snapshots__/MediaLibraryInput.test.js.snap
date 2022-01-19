@@ -87,16 +87,6 @@ exports[`<MediaLibraryInput /> renders and matches the snapshot 1`] = `
   line-height: 1.33;
 }
 
-.c4 {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  grid-template-areas: 'startAction slides endAction';
-}
-
-.c6 {
-  grid-area: slides;
-}
-
 .c8 {
   display: -webkit-box;
   display: -webkit-flex;
@@ -113,6 +103,16 @@ exports[`<MediaLibraryInput /> renders and matches the snapshot 1`] = `
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
+}
+
+.c4 {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas: 'startAction slides endAction';
+}
+
+.c6 {
+  grid-area: slides;
 }
 
 .c9 {
