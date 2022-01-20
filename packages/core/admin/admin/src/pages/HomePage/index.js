@@ -15,7 +15,7 @@ import { Box } from '@strapi/design-system/Box';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
 import Logo from '../../assets/images/homepage-logo.png';
 import { useModels } from '../../hooks';
-import { isGuidedTourComplete } from '../../components/GuidedTour/utils/isGuidedTourComplete';
+import isGuidedTourCompleted from '../../components/GuidedTour/utils/isGuidedTourCompleted';
 import GuidedTourHomepage from '../../components/GuidedTour/GuidedTourHomepage';
 import SocialLinks from './SocialLinks';
 import HomeHeader from './HomeHeader';
@@ -35,7 +35,7 @@ const HomePage = () => {
   const { collectionTypes, singleTypes, isLoading: isLoadingForModels } = useModels();
   const { guidedTourState, isGuidedTourVisible } = useGuidedTour();
 
-  const showGuidedTour = !isGuidedTourComplete(guidedTourState) && isGuidedTourVisible;
+  const showGuidedTour = !isGuidedTourCompleted(guidedTourState) && isGuidedTourVisible;
 
   const { push } = useHistory();
   const handleClick = e => {

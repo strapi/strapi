@@ -1,4 +1,4 @@
-import { isGuidedTourComplete } from '../isGuidedTourComplete';
+import isGuidedTourCompleted from '../isGuidedTourCompleted';
 
 describe('Guided Tour | utils | isGuidedTourComplete', () => {
   it('should return false with uncomplete state', () => {
@@ -13,7 +13,7 @@ describe('Guided Tour | utils | isGuidedTourComplete', () => {
       },
     };
 
-    const result = isGuidedTourComplete(state);
+    const result = isGuidedTourCompleted(state);
 
     expect(result).toBe(false);
   });
@@ -30,7 +30,7 @@ describe('Guided Tour | utils | isGuidedTourComplete', () => {
       },
     };
 
-    const result = isGuidedTourComplete(state);
+    const result = isGuidedTourCompleted(state);
 
     expect(result).toBe(false);
   });
@@ -47,7 +47,7 @@ describe('Guided Tour | utils | isGuidedTourComplete', () => {
       },
     };
 
-    const result = isGuidedTourComplete(state);
+    const result = isGuidedTourCompleted(state);
 
     expect(result).toBe(true);
   });

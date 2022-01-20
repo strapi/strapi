@@ -15,7 +15,6 @@ import {
 } from './utils/api';
 import checkLatestStrapiVersion from './utils/checkLatestStrapiVersion';
 import { getFullName } from '../../utils';
-import { handleGuidedTourVisibility } from '../GuidedTour/utils/handleGuidedTourVisibility';
 
 const strapiVersion = packageJSON.version;
 
@@ -56,7 +55,11 @@ const AuthenticatedApp = () => {
 
   useEffect(() => {
     if (userRoles) {
-      handleGuidedTourVisibility(userRoles, setGuidedTourVisibilityRef.current);
+      const isUserSuperAdmin = userRoles.find(({ code }) => code === 'strapi-super-admin');
+
+      if (isUserSuperAdmin) {
+        setGuidedTourVisibilityRef.current(true);
+      }
     }
   }, [userRoles]);
 
