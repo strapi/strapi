@@ -60,7 +60,8 @@ const main = async (database, args) => {
     await cleanTestApp(appName);
     await generateTestApp({ appName, database });
 
-    await runAllTests(args).catch(() => {
+    await runAllTests(args).catch(e => {
+      console.error(e);
       process.stdout.write('Tests failed\n', () => {
         process.exit(1);
       });
