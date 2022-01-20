@@ -76,6 +76,14 @@ module.exports = ({ action, ability, model }) => {
 
       const { subject, action: actionOverride } = getDefaultOptions(data, options);
 
+      // #TODO
+      //
+      // All usages of permittedFieldsOf needs to be adapted to the
+      // breaking change between version 4.x and 5.x of @casl/ability.
+      // In version 5.x the "fieldsFrom" option is mandatory.
+      //
+      // Breaking changelog:
+      // https://github.com/stalniy/casl/blob/master/packages/casl-ability/CHANGELOG.md#510-2020-12-26
       const permittedFields = permittedFieldsOf(ability, actionOverride, subject);
 
       const hasAtLeastOneRegistered = some(
