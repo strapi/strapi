@@ -11,13 +11,17 @@ const init = initialState => {
 
   if (guidedTourLocaleStorage) {
     guidedTourLocaleStorage.forEach(step => {
-      const [pluginName, completedStepName] = step.split('.');
-      set(copyInitialState, ['guidedTourState', pluginName, completedStepName], true);
+      const [sectionName, stepName] = step.split('.');
+      set(copyInitialState, ['guidedTourState', sectionName, stepName], true);
     });
   }
 
+  // if current step when initializing mark it as done
   if (currentStepLocaleStorage) {
-    set(copyInitialState, 'currentStep', currentStepLocaleStorage);
+    const [sectionName, stepName] = currentStepLocaleStorage.split('.');
+    set(copyInitialState, ['guidedTourState', sectionName, stepName], true);
+    persistStateToLocaleStorage.addCompletedStep(currentStepLocaleStorage);
+    persistStateToLocaleStorage.addCurrentStep(null);
   }
 
   return copyInitialState;
