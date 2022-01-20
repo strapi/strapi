@@ -20,7 +20,6 @@ const persistStateToLocaleStorage = {
     localStorage.setItem(COMPLETED_STEPS, stringify(currentSteps));
   },
   addCurrentStep: currentStep => {
-    console.log('yopo');
     localStorage.setItem(CURRENT_STEP, stringify(currentStep));
   },
   get: item => {
