@@ -6,7 +6,13 @@ import Modal from './Modal';
 import StepperModal from '../Stepper/Modal/StepperModal';
 
 const GuidedTourModal = () => {
-  const { currentStep, guidedTourState, setCurrentStep, setStepState } = useGuidedTour();
+  const {
+    currentStep,
+    guidedTourState,
+    setCurrentStep,
+    setStepState,
+    isGuidedTourVisible,
+  } = useGuidedTour();
   const [stepContent, setStepContent] = useState();
   const [isVisible, setIsVisible] = useState(currentStep);
 
@@ -23,8 +29,8 @@ const GuidedTourModal = () => {
 
     const [isStepDone] = at(guidedTourState, currentStep);
 
-    setIsVisible(!isStepDone);
-  }, [currentStep, guidedTourState]);
+    setIsVisible(!isStepDone && isGuidedTourVisible);
+  }, [currentStep, guidedTourState, isGuidedTourVisible]);
 
   useEffect(() => {
     if (currentStep) {
