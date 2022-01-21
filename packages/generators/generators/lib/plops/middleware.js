@@ -1,6 +1,7 @@
 'use strict';
 
 const getDestinationPrompts = require('./prompts/get-destination-prompts');
+const validateInput = require('./utils/validate-input');
 
 module.exports = plop => {
   // middleware generator
@@ -11,6 +12,7 @@ module.exports = plop => {
         type: 'input',
         name: 'name',
         message: 'Middleware name',
+        validate: input => validateInput(input),
       },
       ...getDestinationPrompts('middleware', plop.getDestBasePath(), { rootFolder: true }),
     ],

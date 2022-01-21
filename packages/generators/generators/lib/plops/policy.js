@@ -1,6 +1,7 @@
 'use strict';
 
 const getDestinationPrompts = require('./prompts/get-destination-prompts');
+const validateInput = require('./utils/validate-input');
 
 module.exports = plop => {
   // Policy generator
@@ -11,6 +12,7 @@ module.exports = plop => {
         type: 'input',
         name: 'id',
         message: 'Policy name',
+        validate: input => validateInput(input),
       },
       ...getDestinationPrompts('policy', plop.getDestBasePath(), { rootFolder: true }),
     ],
