@@ -31,7 +31,7 @@ module.exports = async ({ strapi }) => {
     strapi.config.set('plugin.users-permissions.jwtSecret', jwtSecret);
 
     if (!process.env.JWT_SECRET) {
-      strapi.fs.appendFile('.env', `JWT_SECRET=${jwtSecret}\n`);
+      strapi.fs.appendFile(process.env.ENV_PATH || '.env', `JWT_SECRET=${jwtSecret}\n`);
     }
   }
 };

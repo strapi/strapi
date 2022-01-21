@@ -211,6 +211,7 @@ const ProfilePage = () => {
                               value={values.firstname || ''}
                               type="text"
                               name="firstname"
+                              required
                             />
                           </GridItem>
                           <GridItem s={12} col={6}>
@@ -234,6 +235,7 @@ const ProfilePage = () => {
                               value={values.email || ''}
                               type="email"
                               name="email"
+                              required
                             />
                           </GridItem>
                           <GridItem s={12} col={6}>

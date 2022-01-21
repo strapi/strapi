@@ -113,9 +113,8 @@ const getNonLocalizedAttributes = model => {
 };
 
 const removeId = value => {
-  if (typeof value === 'object' && (has('id', value) || has('_id', value))) {
+  if (typeof value === 'object' && has('id', value)) {
     delete value.id;
-    delete value._id;
   }
 };
 

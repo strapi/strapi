@@ -700,4 +700,35 @@ describe('User', () => {
       }
     );
   });
+
+  describe('getLanguagesInUse', () => {
+    test('Returns array of language codes', () => {
+      const findMany = jest.fn(() =>
+        Promise.resolve([
+          {
+            id: 1,
+            preferedLanguage: 'en',
+          },
+          {
+            id: 2,
+            preferedLanguage: 'fr',
+          },
+          {
+            id: 3,
+            preferedLanguage: 'en',
+          },
+        ])
+      );
+
+      global.strapi = {
+        query() {
+          return {
+            findMany,
+          };
+        },
+      };
+
+      expect(userService.getLanguagesInUse()).resolves.toEqual(['en', 'fr', 'en']);
+    });
+  });
 });

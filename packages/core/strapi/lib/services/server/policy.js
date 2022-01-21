@@ -1,7 +1,7 @@
 'use strict';
 
 const { propOr } = require('lodash/fp');
-const { ForbiddenError } = require('@strapi/utils').errors;
+const { PolicyError } = require('@strapi/utils').errors;
 const { policy: policyUtils } = require('@strapi/utils');
 
 const getPoliciesConfig = propOr([], 'config.policies');
@@ -17,7 +17,7 @@ const resolvePolicies = route => {
       const result = await handler(context, config, { strapi });
 
       if (![true, undefined].includes(result)) {
-        throw new ForbiddenError('Policies failed.');
+        throw new PolicyError();
       }
     }
 

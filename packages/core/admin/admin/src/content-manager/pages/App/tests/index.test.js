@@ -72,9 +72,15 @@ describe('Content manager | App | main', () => {
         {
           kind: 'collectionType',
           uid: 'category',
+          isDisplayed: true,
           info: { label: 'Categories', name: 'category' },
         },
-        { kind: 'singleType', uid: 'homepage', info: { label: 'Home page', name: 'homepage' } },
+        {
+          kind: 'singleType',
+          isDisplayed: true,
+          uid: 'homepage',
+          info: { label: 'Home page', name: 'homepage' },
+        },
       ],
       components: [],
       status: 'resolved',
@@ -751,8 +757,14 @@ describe('Content manager | App | main', () => {
           kind: 'collectionType',
           uid: 'category',
           info: { label: 'Categories', name: 'category' },
+          isDisplayed: true,
         },
-        { kind: 'singleType', uid: 'homepage', info: { label: 'Home page', name: 'homepage' } },
+        {
+          kind: 'singleType',
+          isDisplayed: true,
+          uid: 'homepage',
+          info: { label: 'Home page', name: 'homepage' },
+        },
       ],
       components: [],
       status: 'resolved',
@@ -789,6 +801,7 @@ describe('Content manager | App | main', () => {
         {
           kind: 'collectionType',
           uid: 'category',
+          isDisplayed: true,
           info: { label: 'Categories', name: 'category' },
         },
         { kind: 'singleType', uid: 'homepage', info: { label: 'Home page', name: 'homepage' } },
@@ -828,7 +841,14 @@ describe('Content manager | App | main', () => {
     const contentManagerState = {
       collectionTypeLinks: [],
       singleTypeLinks: [],
-      models: [],
+      models: [
+        {
+          kind: 'collectionType',
+          uid: 'category',
+          info: { label: 'Categories', name: 'category' },
+          isDisplayed: false,
+        },
+      ],
       components: [],
       status: 'resolved',
     };
