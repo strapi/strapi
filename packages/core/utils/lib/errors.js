@@ -69,6 +69,15 @@ class UnauthorizedError extends ApplicationError {
   }
 }
 
+class PolicyError extends ForbiddenError {
+  constructor(message, details) {
+    super(message, details);
+    this.name = 'PolicyError';
+    this.message = message || 'Policy Failed';
+    this.details = details || {};
+  }
+}
+
 module.exports = {
   HttpError,
   ApplicationError,
@@ -79,4 +88,5 @@ module.exports = {
   ForbiddenError,
   PayloadTooLargeError,
   UnauthorizedError,
+  PolicyError,
 };
