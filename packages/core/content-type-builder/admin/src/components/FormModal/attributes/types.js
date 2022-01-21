@@ -1,7 +1,9 @@
+import _ from 'lodash';
 import * as yup from 'yup';
 import { translatedErrors as errorsTrads } from '@strapi/helper-plugin';
 import getTrad from '../../../utils/getTrad';
 import getRelationType from '../../../utils/getRelationType';
+import toGraphQLName from '../../../utils/toGraphQLName';
 import {
   alreadyUsedAttributeNames,
   createTextShape,
@@ -156,10 +158,23 @@ const types = {
           },
         })
         .test({
-          name: 'valuesMatchesRegex',
-          message: errorsTrads.regex,
-          test: values => {
-            return values.every(val => val === '' || ENUM_REGEX.test(val));
+          name: 'valuesCollide',
+          message: 'Some values collide when normalized',
+          test(values) {
+            const normalizedEnum = values.map(toGraphQLName);
+            const duplicates = _(normalizedEnum)
+              .groupBy()
+              .pickBy(x => x.length > 1)
+              .keys()
+              .value();
+
+            if (duplicates.length) {
+              const message = `Some values collide when normalized: ${duplicates.join(', ')}`;
+
+              return this.createError({ message });
+            }
+
+            return true;
           },
         })
         .test({

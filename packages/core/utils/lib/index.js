@@ -19,6 +19,7 @@ const {
   stringEquals,
   isKebabCase,
   isCamelCase,
+  toGraphQLName,
 } = require('./string-formatting');
 const { removeUndefined } = require('./object-formatting');
 const { getConfigUrls, getAbsoluteAdminUrl, getAbsoluteServerUrl } = require('./config');
@@ -47,6 +48,7 @@ module.exports = {
   traverseEntity,
   parseType,
   nameToSlug,
+  toGraphQLName,
   nameToCollectionName,
   getCommonBeginning,
   getConfigUrls,

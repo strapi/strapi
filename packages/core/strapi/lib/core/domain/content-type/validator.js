@@ -1,7 +1,7 @@
 'use strict';
 
-const { keyBy, mapValues } = require('lodash');
-const { yup } = require('@strapi/utils');
+const _ = require('lodash');
+const { yup, toGraphQLName } = require('@strapi/utils');
 
 const LIFECYCLES = [
   'beforeCreate',
@@ -24,7 +24,7 @@ const LIFECYCLES = [
   'afterDeleteMany',
 ];
 
-const lifecyclesShape = mapValues(keyBy(LIFECYCLES), () =>
+const lifecyclesShape = _.mapValues(_.keyBy(LIFECYCLES), () =>
   yup
     .mixed()
     .nullable()
@@ -47,6 +47,33 @@ const contentTypeSchemaValidator = yup.object().shape({
           .required(),
       })
       .required(),
+    attributes: yup.object().test({
+      name: 'valuesCollide',
+      message: 'Some values collide when normalized',
+      test(attributes) {
+        for (const attrName in attributes) {
+          const attr = attributes[attrName];
+          if (attr.type === 'enumeration') {
+            const normalizedEnum = attr.enum.map(toGraphQLName);
+            const duplicates = _(normalizedEnum)
+              .groupBy()
+              .pickBy(x => x.length > 1)
+              .keys()
+              .value();
+
+            if (duplicates.length) {
+              const message = `Some enum values of the field '${attrName}' collide when normalized: ${duplicates.join(
+                ', '
+              )}. Please modify your enumeration.`;
+
+              return this.createError({ message });
+            }
+          }
+        }
+
+        return true;
+      },
+    }),
   }),
   actions: yup.object().onlyContainsFunctions(),
   lifecycles: yup

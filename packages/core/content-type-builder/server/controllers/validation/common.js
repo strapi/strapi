@@ -19,7 +19,6 @@ const validators = {
 const NAME_REGEX = new RegExp('^[A-Za-z][_0-9A-Za-z]*$');
 const COLLECTION_NAME_REGEX = new RegExp('^[A-Za-z][-_0-9A-Za-z]*$');
 const CATEGORY_NAME_REGEX = new RegExp('^[A-Za-z][-_0-9A-Za-z]*$');
-const ENUM_REGEX = new RegExp('^[_A-Za-z][_0-9A-Za-z]*$');
 const ICON_REGEX = new RegExp('^[A-Za-z0-9][-A-Za-z0-9]*$');
 const UID_REGEX = new RegExp('^[A-Za-z0-9-_.~]*$');
 
@@ -58,12 +57,6 @@ const isValidKey = key => ({
   message: `Attribute name '${key}' must match the following regex: ${NAME_REGEX}`,
   test: () => NAME_REGEX.test(key),
 });
-
-const isValidEnum = {
-  name: 'isValidEnum',
-  message: '${path} must match the following regex: ' + ENUM_REGEX,
-  test: val => val === '' || ENUM_REGEX.test(val),
-};
 
 const areEnumValuesUnique = {
   name: 'areEnumValuesUnique',
@@ -112,7 +105,6 @@ module.exports = {
   isValidName,
   isValidIcon,
   isValidKey,
-  isValidEnum,
   isValidUID,
   isValidRegExpPattern,
 };

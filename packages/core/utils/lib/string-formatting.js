@@ -6,6 +6,13 @@ const nameToSlug = (name, options = { separator: '-' }) => slugify(name, options
 
 const nameToCollectionName = name => slugify(name, { separator: '_' });
 
+const toGraphQLName = value =>
+  slugify(value, {
+    decamelize: false,
+    lowercase: false,
+    separator: '_',
+  });
+
 const getCommonBeginning = (...strings) =>
   _.takeWhile(strings[0], (char, index) => strings.every(string => string[index] === char)).join(
     ''
@@ -46,4 +53,5 @@ module.exports = {
   stringEquals,
   isCamelCase,
   isKebabCase,
+  toGraphQLName,
 };
