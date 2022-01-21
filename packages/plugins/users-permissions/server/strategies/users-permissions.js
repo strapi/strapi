@@ -67,9 +67,14 @@ const authenticate = async ctx => {
 const verify = async (auth, config) => {
   const { credentials: user } = auth;
 
-  // A non authenticated user cannot access routes that do not have a scope
-  if (!user && !config.scope) {
-    throw new UnauthorizedError();
+  if (!config.scope) {
+    if (!user) {
+      // A non authenticated user cannot access routes that do not have a scope
+      throw new UnauthorizedError();
+    } else {
+      // An authenticated user can access non scoped routes
+      return;
+    }
   }
 
   let allowedActions = auth.allowedActions;
