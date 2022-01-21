@@ -11,12 +11,15 @@ const CardAsset = styled(Flex)`
   border-radius: ${({ theme }) => theme.borderRadius} ${({ theme }) => theme.borderRadius} 0 0;
   background: linear-gradient(180deg, #ffffff 0%, #f6f6f9 121.48%);
 `;
+const Img = styled.img``;
 
 export const AssetPreview = forwardRef(({ mime, url, name }, ref) => {
   const [lang] = usePersistentState('strapi-admin-language', 'en');
 
   if (mime.includes(AssetType.Image)) {
-    return <img ref={ref} src={url} alt={name} />;
+    console.log(mime);
+
+    return <Img ref={ref} src={url} alt={name} />;
   }
 
   if (mime.includes(AssetType.Video)) {
