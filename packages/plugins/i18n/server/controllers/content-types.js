@@ -23,12 +23,12 @@ module.exports = {
     const {
       copyNonLocalizedAttributes,
       isLocalizedContentType,
-      getNonLocalizedMediaAttributes,
+      getNonLocalizedAttributes,
     } = getService('content-types');
     const { READ_ACTION, CREATE_ACTION } = strapi.admin.services.constants;
 
     const modelDef = strapi.getModel(model);
-    const nonLocalizedMediaAttributes = getNonLocalizedMediaAttributes(modelDef);
+    const nonLocalizedMediaAttributes = getNonLocalizedAttributes(modelDef);
 
     if (!isLocalizedContentType(modelDef)) {
       throw new ApplicationError('model.not.localized');

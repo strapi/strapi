@@ -5,7 +5,6 @@ const { pick, pipe, has, prop, isNil, cloneDeep, isArray } = require('lodash/fp'
 const {
   isRelationalAttribute,
   getVisibleAttributes,
-  isMediaAttribute,
   isTypedAttribute,
 } = require('@strapi/utils').contentTypes;
 const { ApplicationError } = require('@strapi/utils').errors;
@@ -110,19 +109,6 @@ const getNonLocalizedAttributes = model => {
   );
 };
 
-/**
- * Returns the list of media attribute names that are not localized
- * @param {object} model
- * @returns {string[]}
- */
-const getNonLocalizedMediaAttributes = model => {
-  return getVisibleAttributes(model).filter(
-    attrName =>
-      isMediaAttribute(model.attributes[attrName]) &&
-      !isLocalizedAttribute(model.attributes[attrName])
-  );
-};
-
 const removeId = value => {
   if (typeof value === 'object' && has('id', value)) {
     delete value.id;
@@ -217,5 +203,4 @@ module.exports = () => ({
   copyNonLocalizedAttributes,
   getAndValidateRelatedEntity,
   fillNonLocalizedAttributes,
-  getNonLocalizedMediaAttributes,
 });
