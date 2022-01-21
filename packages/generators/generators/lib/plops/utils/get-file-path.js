@@ -9,5 +9,9 @@ module.exports = destination => {
     return `plugins/{{ plugin }}/server`;
   }
 
+  if (destination === 'root') {
+    return './';
+  }
+
   return `api/{{ id }}`;
 };
