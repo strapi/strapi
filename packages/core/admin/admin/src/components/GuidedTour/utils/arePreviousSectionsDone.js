@@ -7,9 +7,7 @@ const arePreviousSectionsDone = (sectionName, guidedTourState) => {
   const previousSections = guidedTourArray.slice(0, currentSectionIndex);
 
   // Check if every steps from previous section are done
-  return previousSections.every(([, sectionValue]) =>
-    Object.entries(sectionValue).every(([, stepValue]) => stepValue)
-  );
+  return previousSections.every(([, sectionValue]) => Object.values(sectionValue).every(Boolean));
 };
 
 export default arePreviousSectionsDone;

@@ -1,21 +1,30 @@
 import set from 'lodash/set';
+import persistStateToLocaleStorage, {
+  COMPLETED_STEPS,
+  CURRENT_STEP,
+} from './utils/persistStateToLocaleStorage';
 
 const init = initialState => {
-  const guidedTourLocaleStorage = JSON.parse(localStorage.getItem('GUIDED_TOUR_COMPLETED_STEPS'));
-  const currentStepLocaleStorage = JSON.parse(localStorage.getItem('GUIDED_TOUR_CURRENT_STEP'));
+  const copyInitialState = { ...initialState };
+  const guidedTourLocaleStorage = persistStateToLocaleStorage.get(COMPLETED_STEPS);
+  const currentStepLocaleStorage = persistStateToLocaleStorage.get(CURRENT_STEP);
 
   if (guidedTourLocaleStorage) {
     guidedTourLocaleStorage.forEach(step => {
-      const [pluginName, completedStepName] = step.split('.');
-      set(initialState, ['guidedTourState', pluginName, completedStepName], true);
+      const [sectionName, stepName] = step.split('.');
+      set(copyInitialState, ['guidedTourState', sectionName, stepName], true);
     });
   }
 
+  // if current step when initializing mark it as done
   if (currentStepLocaleStorage) {
-    set(initialState, 'currentStep', currentStepLocaleStorage);
+    const [sectionName, stepName] = currentStepLocaleStorage.split('.');
+    set(copyInitialState, ['guidedTourState', sectionName, stepName], true);
+    persistStateToLocaleStorage.addCompletedStep(currentStepLocaleStorage);
+    persistStateToLocaleStorage.addCurrentStep(null);
   }
 
-  return initialState;
+  return copyInitialState;
 };
 
 export default init;
