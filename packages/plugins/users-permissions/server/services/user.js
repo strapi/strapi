@@ -8,6 +8,7 @@
 
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
+const urlJoin = require('url-join');
 
 const { getAbsoluteServerUrl, sanitize } = require('@strapi/utils');
 const { getService } = require('../utils');
@@ -45,16 +46,19 @@ module.exports = ({ strapi }) => ({
 
   /**
    * Promise to edit a/an user.
+   * @param {string} userId
+   * @param {object} params
    * @return {Promise}
    */
-  async edit(params, values) {
-    if (values.password) {
-      values.password = await getService('user').hashPassword(values);
+  async edit(userId, params = {}) {
+    if (params.password) {
+      params.password = await getService('user').hashPassword(params);
     }
 
-    return strapi
-      .query('plugin::users-permissions.user')
-      .update({ where: params, data: values, populate: ['role'] });
+    return strapi.entityService.update('plugin::users-permissions.user', userId, {
+      data: params,
+      populate: ['role'],
+    });
   },
 
   /**
@@ -132,10 +136,11 @@ module.exports = ({ strapi }) => ({
 
     const confirmationToken = crypto.randomBytes(20).toString('hex');
 
-    await this.edit({ id: user.id }, { confirmationToken });
+    await this.edit(user.id, { confirmationToken });
 
+    const apiPrefix = strapi.config.get('api.rest.prefix');
     settings.message = await userPermissionService.template(settings.message, {
-      URL: `${getAbsoluteServerUrl(strapi.config)}/auth/email-confirmation`,
+      URL: urlJoin(getAbsoluteServerUrl(strapi.config), apiPrefix, '/auth/email-confirmation'),
       USER: sanitizedUserInfo,
       CODE: confirmationToken,
     });

@@ -178,7 +178,10 @@ const Register = ({ fieldsToDisable, noSignin, onSubmit, schema }) => {
                         : undefined
                     }
                     required
-                    label={formatMessage({ id: 'Auth.form.email.label', defaultMessage: 'Email' })}
+                    label={formatMessage({
+                      id: 'Auth.form.email.label',
+                      defaultMessage: 'Email',
+                    })}
                     type="email"
                   />
                   <PasswordInput

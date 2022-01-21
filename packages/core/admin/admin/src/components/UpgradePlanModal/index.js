@@ -70,9 +70,14 @@ const UpgradePlanModal = ({ onClose, isOpen }) => {
 
   return (
     <Portal>
-      <UpgradeWrapper>
+      <UpgradeWrapper onClick={onClose}>
         <FocusTrap onEscape={onClose}>
-          <UpgradeContainer aria-labelledby="upgrade-plan" background="neutral0" hasRadius>
+          <UpgradeContainer
+            onClick={e => e.stopPropagation()}
+            aria-labelledby="upgrade-plan"
+            background="neutral0"
+            hasRadius
+          >
             <img src={AirBalloon} alt="air-balloon" />
             <CloseButtonContainer>
               <IconButton onClick={onClose} aria-label="Close" icon={<Cross />} />
