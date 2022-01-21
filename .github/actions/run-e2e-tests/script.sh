@@ -5,9 +5,6 @@ fi
 
 export ENV_PATH="$(pwd)/testApp/.env"
 
-echo "env path :"
-echo $ENV_PATH
-
 opts=($DB_OPTIONS)
 
 yarn run -s test:generate-app "${opts[@]}" $@
