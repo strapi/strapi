@@ -65,7 +65,6 @@ module.exports = plop => {
       };
     },
     actions(answers) {
-      const resolveFilePath = (isPlugin,filePath) => isPlugin ? `${filePath}/server` : filePath;
       const attributes = answers.attributes.reduce((object, answer) => {
         const val = { type: answer.attributeType };
 
@@ -81,7 +80,7 @@ module.exports = plop => {
         return Object.assign(object, { [answer.attributeName]: val }, {});
       }, {});
 
-      const filePath = resolveFilePath(answers.plugin,getFilePath(answers.destination));
+      const filePath = getFilePath(answers.destination);
 
       const baseActions = [
         {
