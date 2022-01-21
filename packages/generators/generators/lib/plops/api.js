@@ -2,6 +2,7 @@
 
 const { join } = require('path');
 const fs = require('fs-extra');
+const getFilePath = require('./utils/get-file-path');
 const validateInput = require('./utils/validate-input');
 
 module.exports = plop => {
@@ -45,7 +46,8 @@ module.exports = plop => {
       },
     ],
     actions(answers) {
-      const filePath = answers.isPluginApi && answers.plugin ? 'plugins/{{plugin}}/server' : 'api/{{id}}';
+      const answerDestination = answers.isPluginApi && answers.plugin ? 'plugin' : 'api';
+      const filePath = getFilePath(answerDestination);
 
       const baseActions = [
         {

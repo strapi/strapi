@@ -6,7 +6,7 @@ module.exports = destination => {
   }
 
   if (destination === 'plugin') {
-    return `plugins/{{ plugin }}`;
+    return `plugins/{{ plugin }}/server`;
   }
 
   return `api/{{ id }}`;
