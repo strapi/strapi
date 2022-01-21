@@ -16,7 +16,7 @@ const ModalWrapper = styled(Flex)`
   position: fixed;
   z-index: 4;
   inset: 0;
-  // this is theme.colors.neutral800 with opacity
+  /* this is theme.colors.neutral800 with opacity */
   background: rgb(50, 50, 77, 0.2);
 `;
 
