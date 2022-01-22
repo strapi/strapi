@@ -2,17 +2,18 @@
 
 const GraphQLJSON = require('graphql-type-json');
 const GraphQLLong = require('graphql-type-long');
-const { GraphQLDateTime, GraphQLDate } = require('graphql-iso-date/dist');
 const { GraphQLUpload } = require('graphql-upload');
 const { asNexusMethod } = require('nexus');
 
+const DateScalar = require('./date');
+const DateTimeScalar = require('./datetime');
 const TimeScalar = require('./time');
 
 module.exports = () => ({
   JSON: asNexusMethod(GraphQLJSON, 'json'),
-  DateTime: asNexusMethod(GraphQLDateTime, 'dateTime'),
+  DateTime: asNexusMethod(DateTimeScalar, 'dateTime'),
   Time: asNexusMethod(TimeScalar, 'time'),
-  Date: asNexusMethod(GraphQLDate, 'date'),
+  Date: asNexusMethod(DateScalar, 'date'),
   Long: asNexusMethod(GraphQLLong, 'long'),
   Upload: asNexusMethod(GraphQLUpload, 'upload'),
 });
