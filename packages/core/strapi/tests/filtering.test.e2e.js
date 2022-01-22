@@ -38,6 +38,18 @@ const product = {
     isChecked: {
       type: 'boolean',
     },
+    specific_time: {
+      type: 'time',
+    },
+    launch_date: {
+      type: 'date',
+    },
+    campaign_start: {
+      type: 'datetime',
+    },
+    campaign_end: {
+      type: 'datetime',
+    },
   },
   displayName: 'Product',
   singularName: 'product',
@@ -55,6 +67,10 @@ const productFixtures = [
     rank: 42,
     big_rank: '345678912983',
     isChecked: true,
+    specific_time: '12:30:00.000',
+    launch_date: '2020-06-01',
+    campaign_start: '2021-01-01T13:00:00.000Z',
+    campaign_end: '2021-06-01T13:00:00.000Z',
   },
   {
     name: 'Product 2',
@@ -64,6 +80,10 @@ const productFixtures = [
     rank: 82,
     big_rank: '926371623421',
     isChecked: false,
+    specific_time: '12:45:00.000',
+    launch_date: '2021-01-01',
+    campaign_start: '2021-01-01T13:00:00.000Z',
+    campaign_end: '2022-01-01T13:00:00.000Z',
   },
   {
     name: 'Product 3',
@@ -73,6 +93,10 @@ const productFixtures = [
     rank: 91,
     big_rank: '926372323421',
     isChecked: true,
+    specific_time: '13:37:00.000',
+    launch_date: '2021-06-01',
+    campaign_start: '2022-01-01T13:00:00.000Z',
+    campaign_end: '2022-06-01T13:00:00.000Z',
   },
   {
     name: 'Product 4',
@@ -82,6 +106,10 @@ const productFixtures = [
     rank: 99,
     big_rank: '999999999999',
     isChecked: false,
+    specific_time: '15:30:00.000',
+    launch_date: '2022-01-01',
+    campaign_start: '2022-01-01T13:00:00.000Z',
+    campaign_end: '2022-06-01T13:00:00.000Z',
   },
   {
     name: 'Продукт 5, Product 5',
@@ -91,6 +119,10 @@ const productFixtures = [
     rank: 142,
     big_rank: 345678912983,
     isChecked: true,
+    specific_time: '16:00:00.000',
+    launch_date: '2022-06-01',
+    campaign_start: '2022-06-01T13:00:00.000Z',
+    campaign_end: '2022-12-25T13:00:00.000Z',
   },
 ];
 
@@ -107,11 +139,15 @@ describe('Filtering API', () => {
     const sanitizedFixtures = await builder.sanitizedFixtures(strapi);
 
     Object.assign(data, _.mapValues(sanitizedFixtures, value => transformToRESTResource(value)));
+
+    jest.useFakeTimers('modern');
+    jest.setSystemTime(new Date('2022-01-22T13:00:00.000Z'));
   });
 
   afterAll(async () => {
     await strapi.destroy();
     await builder.cleanup();
+    jest.useRealTimers();
   });
 
   describe('Basic filters', () => {
@@ -1519,6 +1555,142 @@ describe('Filtering API', () => {
         expect(res.body.data).toEqual(
           expect.arrayContaining(expectedIds.map(id => data.product[id]))
         );
+      });
+    });
+  });
+
+  describe('Date/datetime/time filters', () => {
+    describe('Filter on date', () => {
+      test('Should return an empty array', async () => {
+        const res = await rq({
+          method: 'GET',
+          url: '/products',
+          qs: {
+            filters: {
+              launch_date: { $lte: '2020-01-01' },
+            },
+          },
+        });
+
+        expect(res.body.data).toEqual([]);
+      });
+
+      test('Should return an array with two matching entities', async () => {
+        const res = await rq({
+          method: 'GET',
+          url: '/products',
+          qs: {
+            filters: {
+              launch_date: { $gte: '2022-01-22' },
+            },
+          },
+        });
+
+        expect(res.body.data).toEqual([data.product[4]]);
+      });
+
+      test('Should return an array with two matching entities', async () => {
+        const res = await rq({
+          method: 'GET',
+          url: '/products',
+          qs: {
+            filters: {
+              launch_date: { $gte: 'now()' },
+            },
+          },
+        });
+
+        expect(res.body.data).toEqual([data.product[4]]);
+      });
+    });
+
+    describe('Filter on time', () => {
+      test('Should return an empty array', async () => {
+        const res = await rq({
+          method: 'GET',
+          url: '/products',
+          qs: {
+            filters: {
+              specific_time: { $gte: '17:00:00:000' },
+            },
+          },
+        });
+
+        expect(res.body.data).toEqual([]);
+      });
+
+      test('Should return an array with two matching entities', async () => {
+        const res = await rq({
+          method: 'GET',
+          url: '/products',
+          qs: {
+            filters: {
+              specific_time: { $gte: '13:00:00.000' },
+            },
+          },
+        });
+
+        expect(res.body.data).toEqual([data.product[2], data.product[3], data.product[4]]);
+      });
+
+      test('Should return an array with two matching entities, filtering with "now()"', async () => {
+        const res = await rq({
+          method: 'GET',
+          url: '/products',
+          qs: {
+            filters: {
+              specific_time: { $gte: 'now()' },
+            },
+          },
+        });
+
+        expect(new Date()).toEqual(new Date('2022-01-22T13:00:00.000Z'));
+
+        expect(res.body.data).toEqual([data.product[2], data.product[3], data.product[4]]);
+      });
+    });
+
+    describe('Filter on datetime', () => {
+      test('Should return an empty array', async () => {
+        const res = await rq({
+          method: 'GET',
+          url: '/products',
+          qs: {
+            filters: {
+              campaign_end: { $lte: '1999-01-01T01:30:00.000Z' },
+            },
+          },
+        });
+
+        expect(res.body.data).toEqual([]);
+      });
+
+      test('Should return an array with matching entities', async () => {
+        const res = await rq({
+          method: 'GET',
+          url: '/products',
+          qs: {
+            filters: {
+              campaign_end: { $gte: '2022-01-22T13:00:00.000Z' },
+            },
+          },
+        });
+
+        expect(res.body.data).toEqual([data.product[2], data.product[3], data.product[4]]);
+      });
+
+      test('Should return an array with matching entities, Filter with "now()"', async () => {
+        const res = await rq({
+          method: 'GET',
+          url: '/products',
+          qs: {
+            filters: {
+              campaign_end: { $gte: 'now()' },
+            },
+          },
+        });
+
+        expect(res.body.data).toEqual([data.product[2], data.product[3], data.product[4]]);
       });
     });
   });
