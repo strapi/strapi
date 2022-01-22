@@ -322,8 +322,13 @@ module.exports = context => {
                */
               const options = { builder, attributeName, attribute, contentType, context };
 
+              // Enums
+              if (isEnumeration(attribute)) {
+                addEnumAttribute(options);
+              }
+
               // Scalars
-              if (isStrapiScalar(attribute)) {
+              else if (isStrapiScalar(attribute)) {
                 addScalarAttribute(options);
               }
 
@@ -335,11 +340,6 @@ module.exports = context => {
               // Dynamic Zones
               else if (isDynamicZone(attribute)) {
                 addDynamicZoneAttribute(options);
-              }
-
-              // Enums
-              else if (isEnumeration(attribute)) {
-                addEnumAttribute(options);
               }
 
               // Media

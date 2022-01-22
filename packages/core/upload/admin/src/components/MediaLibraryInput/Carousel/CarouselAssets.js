@@ -34,6 +34,7 @@ export const CarouselAssets = ({
     <>
       <Carousel
         label={label}
+        secondaryLabel={currentAsset?.name}
         selectedSlide={selectedAssetIndex}
         previousLabel={formatMessage({
           id: getTrad('mediaLibraryInput.actions.previousSlide'),
