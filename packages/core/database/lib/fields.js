@@ -1,5 +1,6 @@
 'use strict';
 
+const { parseType } = require('@strapi/utils');
 const _ = require('lodash/fp');
 const dateFns = require('date-fns');
 const { InvalidTimeError, InvalidDateError, InvalidDateTimeError } = require('./errors');
@@ -97,57 +98,13 @@ class BigIntegerField extends NumberField {
   }
 }
 
-const timeRegex = new RegExp('^(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])(.[0-9]{1,3})?$');
-
-const parseTime = value => {
-  if (dateFns.isDate(value)) return dateFns.format(value, 'HH:mm:ss.SSS');
-
-  if (typeof value !== 'string') {
-    throw new InvalidTimeError(`Expected a string, got a ${typeof value}`);
-  }
-  const result = value.match(timeRegex);
-
-  if (result === null) {
-    throw new InvalidTimeError('Invalid time format, expected HH:mm:ss.SSS');
-  }
-
-  const [, hours, minutes, seconds, fraction = '.000'] = result;
-  const fractionPart = _.padCharsEnd('0', 3, fraction.slice(1));
-
-  return `${hours}:${minutes}:${seconds}.${fractionPart}`;
-};
-
-const parseDate = value => {
-  if (dateFns.isDate(value)) return dateFns.format(value, 'yyyy-MM-dd');
-  try {
-    let date = dateFns.parseISO(value);
-
-    if (dateFns.isValid(date)) return dateFns.format(date, 'yyyy-MM-dd');
-
-    throw new InvalidDateError(`Invalid format, expected an ISO compatible date`);
-  } catch (error) {
-    throw new InvalidDateError(`Invalid format, expected an ISO compatible date`);
-  }
-};
-
-const parseDateTimeOrTimestamp = value => {
-  if (dateFns.isDate(value)) return value;
-  try {
-    const date = dateFns.parseISO(value);
-    if (dateFns.isValid(date)) return date;
-
-    const milliUnixDate = dateFns.parse(value, 'T', new Date());
-    if (dateFns.isValid(milliUnixDate)) return milliUnixDate;
-
-    throw new InvalidDateTimeError(`Invalid format, expected a timestamp or an ISO date`);
-  } catch (error) {
-    throw new InvalidDateTimeError(`Invalid format, expected a timestamp or an ISO date`);
-  }
-};
-
 class DateField extends Field {
   toDB(value) {
-    return parseDate(value);
+    try {
+      return parseType({ type: 'date', value });
+    } catch (err) {
+      throw new InvalidDateError(err.message);
+    }
   }
 
   fromDB(value) {
@@ -157,7 +114,11 @@ class DateField extends Field {
 }
 class DatetimeField extends Field {
   toDB(value) {
-    return parseDateTimeOrTimestamp(value);
+    try {
+      return parseType({ type: 'datetime', value });
+    } catch (err) {
+      throw new InvalidDateTimeError(err.message);
+    }
   }
 
   fromDB(value) {
@@ -168,7 +129,11 @@ class DatetimeField extends Field {
 
 class TimeField extends Field {
   toDB(value) {
-    return parseTime(value);
+    try {
+      return parseType({ type: 'time', value });
+    } catch (err) {
+      throw new InvalidTimeError(err.message);
+    }
   }
 
   fromDB(value) {
@@ -178,7 +143,11 @@ class TimeField extends Field {
 }
 class TimestampField extends Field {
   toDB(value) {
-    return parseDateTimeOrTimestamp(value);
+    try {
+      return parseType({ type: 'datetime', value });
+    } catch (err) {
+      throw new InvalidDateTimeError(err.message);
+    }
   }
 
   fromDB(value) {
