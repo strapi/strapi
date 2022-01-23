@@ -34,7 +34,7 @@ module.exports = {
       configurable: false,
     },
     password: {
-      type: 'password',
+      type: 'string',
       minLength: 6,
       configurable: false,
       private: true,
