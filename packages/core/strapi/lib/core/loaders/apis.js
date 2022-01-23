@@ -126,7 +126,7 @@ const loadContentTypes = async dir => {
 };
 
 const loadDir = async dir => {
-  if (!(await fse.pathExists(dir))) {
+  if (!(await fse.pathExists(dir)) || fse.stat(dir).isFile()) {
     return;
   }
 
