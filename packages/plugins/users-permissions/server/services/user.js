@@ -35,10 +35,6 @@ module.exports = ({ strapi }) => ({
    * @return {Promise}
    */
   async add(values) {
-    if (values.password) {
-      values.password = await getService('user').hashPassword(values);
-    }
-
     return strapi
       .query('plugin::users-permissions.user')
       .create({ data: values, populate: ['role'] });
@@ -51,10 +47,6 @@ module.exports = ({ strapi }) => ({
    * @return {Promise}
    */
   async edit(userId, params = {}) {
-    if (params.password) {
-      params.password = await getService('user').hashPassword(params);
-    }
-
     return strapi.entityService.update('plugin::users-permissions.user', userId, {
       data: params,
       populate: ['role'],
@@ -85,29 +77,6 @@ module.exports = ({ strapi }) => ({
    */
   fetchAll(params, populate) {
     return strapi.query('plugin::users-permissions.user').findMany({ where: params, populate });
-  },
-
-  hashPassword(user = {}) {
-    return new Promise((resolve, reject) => {
-      if (!user.password || this.isHashed(user.password)) {
-        resolve(null);
-      } else {
-        bcrypt.hash(`${user.password}`, 10, (err, hash) => {
-          if (err) {
-            return reject(err);
-          }
-          resolve(hash);
-        });
-      }
-    });
-  },
-
-  isHashed(password) {
-    if (typeof password !== 'string' || !password) {
-      return false;
-    }
-
-    return password.split('$').length === 4;
   },
 
   /**
