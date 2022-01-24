@@ -4,7 +4,7 @@
  * Converts the standard Strapi REST query params to a more usable format for querying
  * You can read more here: https://docs.strapi.io/developer-docs/latest/developer-resources/database-apis-reference/rest-api.html#filters
  */
-const { has, isEmpty, isObject } = require('lodash/fp');
+const { has, isEmpty, isObject, cloneDeep } = require('lodash/fp');
 const _ = require('lodash');
 const parseType = require('./parse-type');
 const contentTypesUtils = require('./content-types');
@@ -287,7 +287,10 @@ const convertFiltersQueryParams = (filters, schema) => {
     return filters;
   };
 
-  return sanitizeFilters(filters, schema);
+  // Don't mutate the original object
+  const filtersCopy = cloneDeep(filters);
+
+  return sanitizeFilters(filtersCopy, schema);
 };
 
 const convertPublicationStateParams = (type, params = {}, query = {}) => {
