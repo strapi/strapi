@@ -28,7 +28,9 @@ import {
 } from './WysiwygStyles';
 
 const WysiwygNav = ({
+  disabled,
   editorRef,
+  isExpandMode,
   isPreviewMode,
   onActionClick,
   onToggleMediaLib,
@@ -46,7 +48,7 @@ const WysiwygNav = ({
     setVisiblePopover(prev => !prev);
   };
 
-  if (isPreviewMode) {
+  if (disabled || isPreviewMode) {
     return (
       <Box padding={2} background="neutral100">
         <Flex justifyContent="space-between">
@@ -87,12 +89,14 @@ const WysiwygNav = ({
             <MoreButton disabled id="more" label="More" icon={<More />} />
           </Flex>
 
-          <Button onClick={onTogglePreviewMode} variant="tertiary" id="preview">
-            {formatMessage({
-              id: 'components.Wysiwyg.ToggleMode.markdown-mode',
-              defaultMessage: 'Markdown mode',
-            })}
-          </Button>
+          {!isExpandMode && (
+            <Button onClick={onTogglePreviewMode} variant="tertiary" id="preview">
+              {formatMessage({
+                id: 'components.Wysiwyg.ToggleMode.markdown-mode',
+                defaultMessage: 'Markdown mode',
+              })}
+            </Button>
+          )}
         </Flex>
       </Box>
     );
@@ -149,7 +153,7 @@ const WysiwygNav = ({
           />
           {visiblePopover && (
             <Popover centered source={buttonMoreRef} spacing={4} id="popover">
-              <FocusTrap onEscape={handleTogglePopover}>
+              <FocusTrap onEscape={handleTogglePopover} restoreFocus={false}>
                 <Flex>
                   <IconButtonGroupMargin>
                     <CustomIconButton
@@ -235,7 +239,9 @@ WysiwygNav.defaultProps = {
 };
 
 WysiwygNav.propTypes = {
+  disabled: PropTypes.bool.isRequired,
   editorRef: PropTypes.shape({ current: PropTypes.any }).isRequired,
+  isExpandMode: PropTypes.bool.isRequired,
   isPreviewMode: PropTypes.bool,
   onActionClick: PropTypes.func,
   onToggleMediaLib: PropTypes.func,

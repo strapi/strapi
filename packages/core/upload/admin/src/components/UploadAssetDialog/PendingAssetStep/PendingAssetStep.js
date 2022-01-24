@@ -62,8 +62,8 @@ export const PendingAssetStep = ({
       <ModalHeader>
         <Typography fontWeight="bold" textColor="neutral800" as="h2" id="title">
           {formatMessage({
-            id: getTrad('header.actions.upload-assets'),
-            defaultMessage: 'Upload assets',
+            id: getTrad('header.actions.add-assets'),
+            defaultMessage: 'Add new assets',
           })}
         </Typography>
       </ModalHeader>
@@ -85,14 +85,14 @@ export const PendingAssetStep = ({
               <Typography variant="pi" textColor="neutral600">
                 {formatMessage({
                   id: getTrad('modal.upload-list.sub-header-subtitle'),
-                  defaultMessage: 'Manage the assets before adding them to the Media Library',
+                  defaultMessage: 'Manage the assets before uploading them to the Media Library',
                 })}
               </Typography>
             </Stack>
             <Button size="S" onClick={onClickAddAsset}>
               {formatMessage({
-                id: getTrad('header.actions.upload-new-asset'),
-                defaultMessage: 'Upload new asset',
+                id: getTrad('header.actions.add-assets'),
+                defaultMessage: 'Add new assets',
               })}
             </Button>
           </Flex>

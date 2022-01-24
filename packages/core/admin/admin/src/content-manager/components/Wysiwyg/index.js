@@ -144,11 +144,13 @@ const Wysiwyg = ({
           onCollapse={handleToggleExpand}
         >
           <WysiwygNav
+            isExpandMode={isExpandMode}
             editorRef={editorRef}
             isPreviewMode={isPreviewMode}
             onActionClick={handleActionClick}
             onToggleMediaLib={handleToggleMediaLib}
             onTogglePreviewMode={isExpandMode ? undefined : handleTogglePreviewMode}
+            disabled={disabled}
           />
 
           <Editor

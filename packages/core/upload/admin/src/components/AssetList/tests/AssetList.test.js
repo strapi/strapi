@@ -130,7 +130,7 @@ describe('MediaLibrary / AssetList', () => {
     );
 
     expect(container).toMatchInlineSnapshot(`
-      .c31 {
+      .c32 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
@@ -142,12 +142,16 @@ describe('MediaLibrary / AssetList', () => {
         width: 1px;
       }
 
-      .c26 {
+      .c11 {
+        padding-top: 4px;
+      }
+
+      .c27 {
         width: 100%;
         height: 10.25rem;
       }
 
-      .c27 {
+      .c28 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -165,7 +169,7 @@ describe('MediaLibrary / AssetList', () => {
         align-items: center;
       }
 
-      .c21 {
+      .c22 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
@@ -190,13 +194,13 @@ describe('MediaLibrary / AssetList', () => {
         padding-left: 12px;
       }
 
-      .c15 {
+      .c16 {
         background: #f6f6f9;
         padding: 4px;
         border-radius: 4px;
       }
 
-      .c22 {
+      .c23 {
         background: #32324d;
         color: #ffffff;
         padding: 4px;
@@ -241,7 +245,7 @@ describe('MediaLibrary / AssetList', () => {
         align-items: flex-start;
       }
 
-      .c19 {
+      .c20 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -276,20 +280,20 @@ describe('MediaLibrary / AssetList', () => {
         background: repeating-conic-gradient(#f6f6f9 0% 25%,transparent 0% 50%) 50% / 20px 20px;
       }
 
-      .c11 {
+      .c12 {
         font-weight: 600;
         color: #32324d;
         font-size: 0.75rem;
         line-height: 1.33;
       }
 
-      .c12 {
+      .c13 {
         color: #666687;
         font-size: 0.75rem;
         line-height: 1.33;
       }
 
-      .c18 {
+      .c19 {
         color: #666687;
         font-weight: 600;
         font-size: 0.6875rem;
@@ -297,24 +301,24 @@ describe('MediaLibrary / AssetList', () => {
         text-transform: uppercase;
       }
 
-      .c24 {
+      .c25 {
         color: #ffffff;
         font-size: 0.75rem;
         line-height: 1.33;
       }
 
-      .c16 {
+      .c17 {
         display: inline-block;
       }
 
-      .c14 {
+      .c15 {
         margin-left: auto;
         -webkit-flex-shrink: 0;
         -ms-flex-negative: 0;
         flex-shrink: 0;
       }
 
-      .c17 {
+      .c18 {
         margin-left: 4px;
       }
 
@@ -395,36 +399,36 @@ describe('MediaLibrary / AssetList', () => {
         border-bottom: 1px solid #eaeaef;
       }
 
-      .c23 {
+      .c24 {
         position: absolute;
         bottom: 4px;
         right: 4px;
       }
 
-      .c13 {
+      .c14 {
         text-transform: uppercase;
       }
 
-      .c25 {
+      .c26 {
         text-transform: uppercase;
       }
 
-      .c20 canvas,
-      .c20 video {
+      .c21 canvas,
+      .c21 video {
         display: block;
         max-width: 100%;
         max-height: 10.25rem;
       }
 
-      .c30 {
+      .c31 {
         text-transform: uppercase;
       }
 
-      .c29 svg {
+      .c30 svg {
         font-size: 3rem;
       }
 
-      .c28 {
+      .c29 {
         border-radius: 4px 4px 0 0;
         background: linear-gradient(180deg,#ffffff 0%,#f6f6f9 121.48%);
       }
@@ -479,17 +483,21 @@ describe('MediaLibrary / AssetList', () => {
                   <div
                     class="c10"
                   >
-                    <h2
-                      class="c11"
-                      id="card-1-title"
-                    >
-                      strapi-cover_1fabc982ce.png
-                    </h2>
                     <div
-                      class="c12"
+                      class="c11"
+                    >
+                      <h2
+                        class="c12"
+                        id="card-1-title"
+                      >
+                        strapi-cover_1fabc982ce.png
+                      </h2>
+                    </div>
+                    <div
+                      class="c13"
                     >
                       <span
-                        class="c13"
+                        class="c14"
                       >
                         png
                       </span>
@@ -497,13 +505,13 @@ describe('MediaLibrary / AssetList', () => {
                     </div>
                   </div>
                   <div
-                    class="c14"
+                    class="c15"
                   >
                     <div
-                      class="c15 c16 c17"
+                      class="c16 c17 c18"
                     >
                       <span
-                        class="c18"
+                        class="c19"
                       >
                         Image
                       </span>
@@ -533,10 +541,10 @@ describe('MediaLibrary / AssetList', () => {
                   class="c6"
                 >
                   <div
-                    class="c19"
+                    class="c20"
                   >
                     <div
-                      class="c20"
+                      class="c21"
                     >
                       <figure
                         class=""
@@ -550,7 +558,7 @@ describe('MediaLibrary / AssetList', () => {
                           />
                         </video>
                         <figcaption
-                          class="c21"
+                          class="c22"
                         >
                           mov_bbb.mp4
                         </figcaption>
@@ -559,10 +567,10 @@ describe('MediaLibrary / AssetList', () => {
                   </div>
                 </div>
                 <time
-                  class="c22 c23"
+                  class="c23 c24"
                 >
                   <span
-                    class="c24"
+                    class="c25"
                   >
                     ...
                   </span>
@@ -577,30 +585,34 @@ describe('MediaLibrary / AssetList', () => {
                   <div
                     class="c10"
                   >
-                    <h2
-                      class="c11"
-                      id="card-2-title"
-                    >
-                      mov_bbb.mp4
-                    </h2>
                     <div
-                      class="c12"
+                      class="c11"
+                    >
+                      <h2
+                        class="c12"
+                        id="card-2-title"
+                      >
+                        mov_bbb.mp4
+                      </h2>
+                    </div>
+                    <div
+                      class="c13"
                     >
                       <span
-                        class="c25"
+                        class="c26"
                       >
                         mp4
                       </span>
                     </div>
                   </div>
                   <div
-                    class="c14"
+                    class="c15"
                   >
                     <div
-                      class="c15 c16 c17"
+                      class="c16 c17 c18"
                     >
                       <span
-                        class="c18"
+                        class="c19"
                       >
                         Video
                       </span>
@@ -627,12 +639,12 @@ describe('MediaLibrary / AssetList', () => {
                   />
                 </div>
                 <div
-                  class="c26 c27 c28"
+                  class="c27 c28 c29"
                   height="10.25rem"
                   width="100%"
                 >
                   <span
-                    class="c29"
+                    class="c30"
                   >
                     <svg
                       aria-label="CARTE MARIAGE AVS - Printemps.pdf"
@@ -665,30 +677,34 @@ describe('MediaLibrary / AssetList', () => {
                   <div
                     class="c10"
                   >
-                    <h2
-                      class="c11"
-                      id="card-3-title"
-                    >
-                      CARTE MARIAGE AVS - Printemps.pdf
-                    </h2>
                     <div
-                      class="c12"
+                      class="c11"
+                    >
+                      <h2
+                        class="c12"
+                        id="card-3-title"
+                      >
+                        CARTE MARIAGE AVS - Printemps.pdf
+                      </h2>
+                    </div>
+                    <div
+                      class="c13"
                     >
                       <span
-                        class="c30"
+                        class="c31"
                       >
                         pdf
                       </span>
                     </div>
                   </div>
                   <div
-                    class="c14"
+                    class="c15"
                   >
                     <div
-                      class="c15 c16 c17"
+                      class="c16 c17 c18"
                     >
                       <span
-                        class="c18"
+                        class="c19"
                       >
                         Doc
                       </span>
@@ -718,7 +734,7 @@ describe('MediaLibrary / AssetList', () => {
           </div>
         </div>
         <div
-          class="c31"
+          class="c32"
         >
           <p
             aria-live="polite"

@@ -560,6 +560,8 @@ describe('Wysiwyg render and actions buttons', () => {
         background: #ffffff;
         overflow: hidden;
         min-height: 2rem;
+        color: #666687;
+        background: #eaeaef;
         outline: none;
         box-shadow: 0;
         -webkit-transition-property: border-color,box-shadow,fill;
@@ -596,6 +598,7 @@ describe('Wysiwyg render and actions buttons', () => {
         display: flex;
         background: none;
         border: none;
+        cursor: not-allowed;
       }
 
       .c18 svg {
@@ -1059,11 +1062,13 @@ describe('Wysiwyg render and actions buttons', () => {
                   >
                     <div
                       class="c9 c10"
+                      disabled=""
                     >
                       <button
-                        aria-disabled="false"
+                        aria-disabled="true"
                         aria-expanded="false"
                         aria-haspopup="listbox"
+                        aria-label="Add a title"
                         aria-labelledby="selectTitle-label selectTitle-content"
                         class="c11"
                         id="selectTitle"
@@ -1092,6 +1097,7 @@ describe('Wysiwyg render and actions buttons', () => {
                           <button
                             aria-hidden="true"
                             class="c16 c17 c18"
+                            disabled=""
                             tabindex="-1"
                             type="button"
                           >
@@ -1120,7 +1126,7 @@ describe('Wysiwyg render and actions buttons', () => {
                 >
                   <span>
                     <button
-                      aria-disabled="false"
+                      aria-disabled="true"
                       aria-labelledby="tooltip-1"
                       class="c22 c23 c24 c25"
                       id="Bold"
@@ -1146,7 +1152,7 @@ describe('Wysiwyg render and actions buttons', () => {
                   </span>
                   <span>
                     <button
-                      aria-disabled="false"
+                      aria-disabled="true"
                       aria-labelledby="tooltip-3"
                       class="c22 c23 c24 c25"
                       id="Italic"
@@ -1172,7 +1178,7 @@ describe('Wysiwyg render and actions buttons', () => {
                   </span>
                   <span>
                     <button
-                      aria-disabled="false"
+                      aria-disabled="true"
                       aria-labelledby="tooltip-5"
                       class="c22 c23 c24 c25"
                       id="Underline"
@@ -1197,7 +1203,7 @@ describe('Wysiwyg render and actions buttons', () => {
                 </div>
                 <span>
                   <button
-                    aria-disabled="false"
+                    aria-disabled="true"
                     aria-labelledby="tooltip-7"
                     class="c22 c23 c24 c26"
                     id="more"
@@ -1228,7 +1234,7 @@ describe('Wysiwyg render and actions buttons', () => {
                 <span
                   class="c29 c30"
                 >
-                  Preview mode
+                  Markdown mode
                 </span>
               </button>
             </div>
@@ -1663,7 +1669,7 @@ describe('Wysiwyg render actions with initial value', () => {
     renderedContainer = container;
   });
 
-  it('should add markdown with initial value', async () => {
+  it.only('should add markdown with initial value', async () => {
     await waitFor(() => renderedContainer.querySelector('.CodeMirror-cursor'));
     expect(returnedValue).toEqual('hello world');
     const expected = `${returnedValue}**Bold**`;
