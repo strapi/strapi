@@ -126,8 +126,6 @@
   "Settings.permissions.conditions.no-actions": "You first need to select actions (create, read, update, ...) before defining conditions on them.",
   "Settings.permissions.conditions.none-selected": "Anytime",
   "Settings.permissions.conditions.or": "OR",
-  "Settings.permissions.conditions.selected.plural": "{number} conditions selected",
-  "Settings.permissions.conditions.selected.singular": "{number} condition selected",
   "Settings.permissions.conditions.when": "When",
   "Settings.permissions.menu.link.roles.label": "Roles",
   "Settings.permissions.menu.link.users.label": "Users",
