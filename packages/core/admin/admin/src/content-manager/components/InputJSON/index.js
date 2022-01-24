@@ -164,6 +164,7 @@ class InputJSON extends React.Component {
           intlLabel={this.props.intlLabel}
           labelAction={this.props.labelAction}
           name={this.props.name}
+          required={this.props.required}
         />
         <StyledBox error={this.props.error}>
           <EditorWrapper disabled={this.props.disabled}>
@@ -196,6 +197,7 @@ InputJSON.defaultProps = {
   labelAction: undefined,
   onChange: () => {},
   value: null,
+  required: false,
 };
 
 InputJSON.propTypes = {
@@ -216,6 +218,7 @@ InputJSON.propTypes = {
   name: PropTypes.string.isRequired,
   onChange: PropTypes.func,
   value: PropTypes.any,
+  required: PropTypes.bool,
 };
 
 export default InputJSON;

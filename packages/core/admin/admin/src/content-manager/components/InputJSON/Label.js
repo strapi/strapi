@@ -12,7 +12,11 @@ const LabelAction = styled(Box)`
   }
 `;
 
-const Label = ({ id, intlLabel, labelAction, name }) => {
+const TypographyAsterisk = styled(Typography)`
+  line-height: 0;
+`;
+
+const Label = ({ id, intlLabel, labelAction, name, required }) => {
   const { formatMessage } = useIntl();
   const label = intlLabel?.id
     ? formatMessage(
@@ -31,6 +35,7 @@ const Label = ({ id, intlLabel, labelAction, name }) => {
         as="label"
       >
         {label}
+        {required && <TypographyAsterisk textColor="danger600">*</TypographyAsterisk>}
       </Typography>
       {labelAction && <LabelAction paddingLeft={1}>{labelAction}</LabelAction>}
     </Flex>
@@ -41,6 +46,7 @@ Label.defaultProps = {
   id: undefined,
   intlLabel: undefined,
   labelAction: undefined,
+  required: false,
 };
 
 Label.propTypes = {
@@ -52,6 +58,7 @@ Label.propTypes = {
   }),
   labelAction: PropTypes.element,
   name: PropTypes.string.isRequired,
+  required: PropTypes.bool,
 };
 
 export default Label;
