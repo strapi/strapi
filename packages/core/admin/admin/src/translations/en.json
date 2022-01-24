@@ -174,8 +174,6 @@
   "Settings.roles.list.header.description": "Description",
   "Settings.roles.list.header.name": "Name",
   "Settings.roles.list.header.users": "Users",
-  "Settings.roles.list.title.plural": "{number} roles",
-  "Settings.roles.list.title.singular": "{number} role",
   "Settings.roles.title": "Roles",
   "Settings.roles.title.singular": "role",
   "Settings.sso.description": "Configure the settings for the Single Sign-On feature.",
