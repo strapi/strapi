@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
-import { Typography } from '@strapi/design-system/Typography';
+import { FieldLabel } from '@strapi/design-system/Field';
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
 
@@ -12,11 +12,7 @@ const LabelAction = styled(Box)`
   }
 `;
 
-const TypographyAsterisk = styled(Typography)`
-  line-height: 0;
-`;
-
-const Label = ({ id, intlLabel, labelAction, name, required }) => {
+const Label = ({ intlLabel, labelAction, name, required }) => {
   const { formatMessage } = useIntl();
   const label = intlLabel?.id
     ? formatMessage(
@@ -27,16 +23,7 @@ const Label = ({ id, intlLabel, labelAction, name, required }) => {
 
   return (
     <Flex>
-      <Typography
-        textColor="neutral800"
-        htmlFor={id || name}
-        variant="pi"
-        fontWeight="bold"
-        as="label"
-      >
-        {label}
-        {required && <TypographyAsterisk textColor="danger600">*</TypographyAsterisk>}
-      </Typography>
+      <FieldLabel required={required}>{label}</FieldLabel>
       {labelAction && <LabelAction paddingLeft={1}>{labelAction}</LabelAction>}
     </Flex>
   );
