@@ -3,8 +3,8 @@ import PropTypes from 'prop-types';
 import { Accordion, AccordionToggle, AccordionContent } from '@strapi/design-system/Accordion';
 import { Box } from '@strapi/design-system/Box';
 import styled from 'styled-components';
-import ComponentCard from './ComponentCard';
 import { useIntl } from 'react-intl';
+import ComponentCard from './ComponentCard';
 
 const Grid = styled.div`
   display: grid;
