@@ -74,20 +74,13 @@ const create = async attributes => {
 /**
  * @returns {void}
  */
-const createSaltIfNotDefined = () => {
-  if (strapi.config.get('admin.apiToken.salt')) {
-    return;
-  }
-
-  if (process.env.API_TOKEN_SALT) {
+const checkSaltIsDefined = () => {
+  if (!strapi.config.get('admin.apiToken.salt')) {
+    const secretExample = crypto.randomBytes(16).toString('base64');
     throw new Error(
-      `There's something wrong with the configuration of your api-token salt. If you have changed the env variable used in the configuration file, please verify that you have created and set the variable in your .env file.`
+      `Missing admin.apiToken.salt. Please set admin.apiToken.salt in config/admin.js (ex: ${secretExample})`
     );
   }
-
-  const salt = crypto.randomBytes(16).toString('hex');
-  strapi.fs.appendFile(process.env.ENV_PATH || '.env', `API_TOKEN_SALT=${salt}\n`);
-  strapi.config.set('admin.apiToken.salt', salt);
 };
 
 /**
@@ -162,7 +155,7 @@ const getBy = async (whereParams = {}) => {
 module.exports = {
   create,
   exists,
-  createSaltIfNotDefined,
+  checkSaltIsDefined,
   hash,
   list,
   revoke,

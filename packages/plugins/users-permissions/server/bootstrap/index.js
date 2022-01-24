@@ -7,9 +7,9 @@
  * This gives you an opportunity to set up your data model,
  * run jobs, or perform some special logic.
  */
+const crypto = require('crypto');
 const _ = require('lodash');
 const urljoin = require('url-join');
-const uuid = require('uuid/v4');
 const { getService } = require('../utils');
 const getGrantConfig = require('./grant-config');
 
@@ -29,7 +29,14 @@ module.exports = async ({ strapi }) => {
   await getService('users-permissions').initialize();
 
   if (!strapi.config.get('plugin.users-permissions.jwtSecret')) {
-    const jwtSecret = uuid();
+    const jwtSecret = crypto.randomBytes(16).toString('base64');
+
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error(
+        `[Users & Permissions] Missing jwtSecret. Please set jwtSecret in your config or set environment variable JWT_SECRET (ex: ${jwtSecret}).`
+      );
+    }
+
     strapi.config.set('plugin.users-permissions.jwtSecret', jwtSecret);
 
     if (!process.env.JWT_SECRET) {
