@@ -4,6 +4,7 @@ import { Accordion, AccordionToggle, AccordionContent } from '@strapi/design-sys
 import { Box } from '@strapi/design-system/Box';
 import styled from 'styled-components';
 import ComponentCard from './ComponentCard';
+import { useIntl } from 'react-intl';
 
 const Grid = styled.div`
   display: grid;
@@ -12,6 +13,8 @@ const Grid = styled.div`
 `;
 
 const Category = ({ category, components, isOdd, isOpen, onAddComponent, onToggle }) => {
+  const { formatMessage } = useIntl();
+
   const handleToggle = () => {
     onToggle(category);
   };
@@ -20,7 +23,7 @@ const Category = ({ category, components, isOdd, isOpen, onAddComponent, onToggl
     <Accordion expanded={isOpen} toggle={handleToggle} size="S">
       <AccordionToggle
         variant={isOdd ? 'primary' : 'secondary'}
-        title={category}
+        title={formatMessage({ id: category, defaultMessage: category })}
         togglePosition="left"
       />
       <AccordionContent>
