@@ -3,7 +3,6 @@
 const { join, resolve, basename } = require('path');
 const os = require('os');
 const crypto = require('crypto');
-const { machineIdSync } = require('node-machine-id');
 const uuid = require('uuid/v4');
 const sentry = require('@sentry/node');
 // FIXME
@@ -14,6 +13,7 @@ const { trackError, captureException } = require('./utils/usage');
 const parseDatabaseArguments = require('./utils/parse-db-arguments');
 const generateNew = require('./generate-new');
 const checkInstallPath = require('./utils/check-install-path');
+const machineID = require('./utils/machine-id');
 
 sentry.init({
   dsn: 'https://841d2b2c9b4d4b43a4cde92794cb705a@sentry.io/1762059',
@@ -44,7 +44,7 @@ const generateNewApp = (projectDirectory, cliArguments) => {
     },
     uuid: (process.env.STRAPI_UUID_PREFIX || '') + uuid(),
     docker: process.env.DOCKER === 'true',
-    deviceId: machineIdSync(),
+    deviceId: machineID(),
     tmpPath,
     // use yarn if available and --use-npm isn't true
     useYarn: !useNpm && hasYarn(),
