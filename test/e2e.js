@@ -8,7 +8,6 @@ const appName = 'testApp';
 process.env.ENV_PATH = path.resolve(__dirname, '..', appName, '.env');
 
 const { cleanTestApp, generateTestApp } = require('./helpers/test-app-generator');
-const { createStrapiInstance } = require('./helpers/strapi');
 
 const databases = {
   postgres: {
@@ -41,10 +40,6 @@ const databases = {
 };
 
 const runAllTests = async args => {
-  // start and destroy instance once so it correctly generate env variables without concurrent instances
-  await createStrapiInstance();
-  await strapi.destroy();
-
   return execa('yarn', ['test:e2e', ...args], {
     stdio: 'inherit',
     cwd: path.resolve(__dirname, '..'),
@@ -60,8 +55,7 @@ const main = async (database, args) => {
     await cleanTestApp(appName);
     await generateTestApp({ appName, database });
 
-    await runAllTests(args).catch(e => {
-      console.error(e);
+    await runAllTests(args).catch(() => {
       process.stdout.write('Tests failed\n', () => {
         process.exit(1);
       });
