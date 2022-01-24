@@ -5,13 +5,16 @@ describe('translations', () => {
     it('should avoid .plural/.singular syntax', () => {
       Object.keys(translations).forEach(translationKey => {
         const keyParts = translationKey.split('.');
-
-        // Skip if the key can not be splitted
-        if (keyParts.length < 2) return;
-
         const lastKeyPart = keyParts.pop();
-        expect(lastKeyPart).not.toBe('singular');
-        expect(lastKeyPart).not.toBe('plural');
+
+        // Skip if the key cannot be splitted
+        // Fail only if a PAIR of .singular/.plural keys is found
+        if (keyParts.length > 1 && lastKeyPart === 'singular') {
+          keyParts.push('plural');
+          const pluralKey = keyParts.join('.');
+
+          expect(translations[pluralKey]).toBeUndefined();
+        }
       });
     });
   });
