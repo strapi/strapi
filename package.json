@@ -94,7 +94,7 @@
     "eslint-plugin-react-hooks": "4.2.0",
     "eslint-plugin-redux-saga": "1.2.1",
     "execa": "1.0.0",
-    "fs-extra": "9.1.0",
+    "fs-extra": "10.0.0",
     "get-port": "5.1.1",
     "glob": "7.2.0",
     "husky": "3.0.0",
