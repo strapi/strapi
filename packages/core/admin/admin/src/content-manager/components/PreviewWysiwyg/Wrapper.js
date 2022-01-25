@@ -12,7 +12,7 @@ const Wrapper = styled.div`
   z-index: 2;
   cursor: not-allowed;
   color: ${({ theme }) => theme.colors.neutral800};
-
+  white-space: pre-wrap;
   h1,
   h2,
   h3,
