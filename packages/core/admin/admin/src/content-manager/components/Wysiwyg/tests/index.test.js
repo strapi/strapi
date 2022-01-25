@@ -1,7 +1,8 @@
 import * as React from 'react';
 import { IntlProvider } from 'react-intl';
 import { render, waitFor, fireEvent } from '@testing-library/react';
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { ThemeProvider } from '@strapi/design-system/ThemeProvider';
+import { lightTheme } from '@strapi/design-system/themes';
 import Wysiwyg from '../index';
 
 jest.mock('@strapi/helper-plugin', () => ({
@@ -39,6 +40,7 @@ describe('Wysiwyg render and actions buttons', () => {
             name="rich-text"
             intlLabel={{ id: 'hello world', defaultMessage: 'hello world' }}
             onChange={onChange}
+            disabled={false}
           />
         </IntlProvider>
       </ThemeProvider>
@@ -203,7 +205,7 @@ describe('Wysiwyg render and actions buttons', () => {
         background: #ffffff;
       }
 
-      .c28 .sc-bjeSbO {
+      .c28 .sc-pVTFL {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -560,8 +562,6 @@ describe('Wysiwyg render and actions buttons', () => {
         background: #ffffff;
         overflow: hidden;
         min-height: 2rem;
-        color: #666687;
-        background: #eaeaef;
         outline: none;
         box-shadow: 0;
         -webkit-transition-property: border-color,box-shadow,fill;
@@ -598,7 +598,6 @@ describe('Wysiwyg render and actions buttons', () => {
         display: flex;
         background: none;
         border: none;
-        cursor: not-allowed;
       }
 
       .c18 svg {
@@ -610,7 +609,7 @@ describe('Wysiwyg render and actions buttons', () => {
       }
 
       .c32 {
-        cursor: not-allowed !important;
+        cursor: auto;
       }
 
       .c32 .CodeMirror-placeholder {
@@ -1062,13 +1061,11 @@ describe('Wysiwyg render and actions buttons', () => {
                   >
                     <div
                       class="c9 c10"
-                      disabled=""
                     >
                       <button
-                        aria-disabled="true"
+                        aria-disabled="false"
                         aria-expanded="false"
                         aria-haspopup="listbox"
-                        aria-label="Add a title"
                         aria-labelledby="selectTitle-label selectTitle-content"
                         class="c11"
                         id="selectTitle"
@@ -1097,7 +1094,6 @@ describe('Wysiwyg render and actions buttons', () => {
                           <button
                             aria-hidden="true"
                             class="c16 c17 c18"
-                            disabled=""
                             tabindex="-1"
                             type="button"
                           >
@@ -1126,7 +1122,7 @@ describe('Wysiwyg render and actions buttons', () => {
                 >
                   <span>
                     <button
-                      aria-disabled="true"
+                      aria-disabled="false"
                       aria-labelledby="tooltip-1"
                       class="c22 c23 c24 c25"
                       id="Bold"
@@ -1152,7 +1148,7 @@ describe('Wysiwyg render and actions buttons', () => {
                   </span>
                   <span>
                     <button
-                      aria-disabled="true"
+                      aria-disabled="false"
                       aria-labelledby="tooltip-3"
                       class="c22 c23 c24 c25"
                       id="Italic"
@@ -1178,7 +1174,7 @@ describe('Wysiwyg render and actions buttons', () => {
                   </span>
                   <span>
                     <button
-                      aria-disabled="true"
+                      aria-disabled="false"
                       aria-labelledby="tooltip-5"
                       class="c22 c23 c24 c25"
                       id="Underline"
@@ -1203,7 +1199,7 @@ describe('Wysiwyg render and actions buttons', () => {
                 </div>
                 <span>
                   <button
-                    aria-disabled="true"
+                    aria-disabled="false"
                     aria-labelledby="tooltip-7"
                     class="c22 c23 c24 c26"
                     id="more"
@@ -1234,7 +1230,7 @@ describe('Wysiwyg render and actions buttons', () => {
                 <span
                   class="c29 c30"
                 >
-                  Markdown mode
+                  Preview mode
                 </span>
               </button>
             </div>
@@ -1244,7 +1240,6 @@ describe('Wysiwyg render and actions buttons', () => {
           >
             <div
               class="c32"
-              disabled=""
             >
               <textarea
                 style="display: none;"
@@ -1260,8 +1255,6 @@ describe('Wysiwyg render and actions buttons', () => {
                     aria-label="Editor"
                     autocapitalize="off"
                     autocorrect="off"
-                    disabled=""
-                    readonly=""
                     spellcheck="false"
                     style="position: absolute; bottom: -1em; padding: 0px; width: 1000px; height: 1em; min-height: 1em; outline: none;"
                     tabindex="0"
@@ -1669,7 +1662,7 @@ describe('Wysiwyg render actions with initial value', () => {
     renderedContainer = container;
   });
 
-  it.only('should add markdown with initial value', async () => {
+  it('should add markdown with initial value', async () => {
     await waitFor(() => renderedContainer.querySelector('.CodeMirror-cursor'));
     expect(returnedValue).toEqual('hello world');
     const expected = `${returnedValue}**Bold**`;

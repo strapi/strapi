@@ -187,7 +187,7 @@ const Wysiwyg = ({
 
 Wysiwyg.defaultProps = {
   description: null,
-  disabled: true,
+  disabled: false,
   error: '',
   labelAction: undefined,
   placeholder: null,
