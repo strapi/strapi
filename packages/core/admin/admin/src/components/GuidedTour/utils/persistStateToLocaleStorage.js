@@ -1,5 +1,6 @@
 export const CURRENT_STEP = 'GUIDED_TOUR_CURRENT_STEP';
 export const COMPLETED_STEPS = 'GUIDED_TOUR_COMPLETED_STEPS';
+export const SKIPPED = 'GUIDED_TOUR_SKIPPED';
 const parse = JSON.parse;
 const stringify = JSON.stringify;
 
@@ -22,8 +23,11 @@ const persistStateToLocaleStorage = {
   addCurrentStep: currentStep => {
     localStorage.setItem(CURRENT_STEP, stringify(currentStep));
   },
+  setSkipped: value => {
+    localStorage.setItem(SKIPPED, stringify(value));
+  },
   get: item => {
-    return JSON.parse(localStorage.getItem(item));
+    return parse(localStorage.getItem(item));
   },
 };
 
