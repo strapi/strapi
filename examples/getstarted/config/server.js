@@ -11,6 +11,6 @@ module.exports = ({ env }) => ({
     tasks: cronTasks,
   },
   app: {
-    keys: env.array('APP_SECRETS', ['toBeModified1', 'toBeModified2']),
+    keys: env.array('APP_KEYS', ['toBeModified1', 'toBeModified2']),
   },
 });
