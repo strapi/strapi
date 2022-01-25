@@ -27,6 +27,7 @@ const MarketplacePage = lazy(() =>
   import(/* webpackChunkName: "Admin_marketplace" */ '../MarketplacePage')
 );
 const NotFoundPage = lazy(() => import('../NotFoundPage'));
+const InternalErrorPage = lazy(() => import('../InternalErrorPage'));
 
 const ProfilePage = lazy(() =>
   import(/* webpackChunkName: "Admin_profilePage" */ '../ProfilePage')
@@ -87,6 +88,7 @@ const Admin = () => {
               <InstalledPluginsPage />
             </Route>
             <Route path="/404" component={NotFoundPage} />
+            <Route path="/500" component={InternalErrorPage} />
             <Route path="" component={NotFoundPage} />
           </Switch>
         </Suspense>
