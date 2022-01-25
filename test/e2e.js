@@ -43,6 +43,7 @@ const runAllTests = async args => {
     cwd: path.resolve(__dirname, '..'),
     env: {
       FORCE_COLOR: 1,
+      TZ: 'UTC',
     },
   });
 };
