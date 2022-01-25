@@ -610,6 +610,7 @@ describe('Wysiwyg render and actions buttons', () => {
 
       .c32 {
         cursor: auto;
+        height: 100%;
       }
 
       .c32 .CodeMirror-placeholder {
@@ -1010,6 +1011,7 @@ describe('Wysiwyg render and actions buttons', () => {
 
       .c31 {
         position: relative;
+        height: calc(100% - 48px);
       }
 
       .c36 {

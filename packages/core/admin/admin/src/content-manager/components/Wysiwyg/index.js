@@ -155,6 +155,7 @@ const Wysiwyg = ({
 
           <Editor
             disabled={disabled}
+            isExpandMode={isExpandMode}
             editorRef={editorRef}
             error={errorMessage}
             isPreviewMode={isPreviewMode}
