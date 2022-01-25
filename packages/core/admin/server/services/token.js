@@ -56,7 +56,7 @@ const checkSecretIsDefined = () => {
   if (strapi.config.serveAdminPanel && !strapi.config.get('admin.auth.secret')) {
     const secretExample = crypto.randomBytes(16).toString('base64');
     throw new Error(
-      `Missing admin.auth.secret. Please set admin.auth.secret in config/admin.js (ex: ${secretExample})`
+      `Missing auth.secret. Please set auth.secret in config/admin.js (ex: ${secretExample})`
     );
   }
 };

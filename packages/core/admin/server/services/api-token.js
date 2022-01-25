@@ -78,7 +78,7 @@ const checkSaltIsDefined = () => {
   if (!strapi.config.get('admin.apiToken.salt')) {
     const secretExample = crypto.randomBytes(16).toString('base64');
     throw new Error(
-      `Missing admin.apiToken.salt. Please set admin.apiToken.salt in config/admin.js (ex: ${secretExample})`
+      `Missing apiToken.salt. Please set apiToken.salt in config/admin.js (ex: ${secretExample})`
     );
   }
 };
