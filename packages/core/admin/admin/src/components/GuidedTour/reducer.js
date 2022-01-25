@@ -18,6 +18,7 @@ export const initialState = {
     },
   },
   isGuidedTourVisible: false,
+  isSkipped: false,
 };
 
 const reducer = (state = initialState, action) =>
@@ -30,6 +31,10 @@ const reducer = (state = initialState, action) =>
       case 'SET_STEP_STATE': {
         const [section, step] = action.currentStep.split('.');
         draftState.guidedTourState[section][step] = action.value;
+        break;
+      }
+      case 'SET_SKIPPED': {
+        draftState.isSkipped = action.value;
         break;
       }
       case 'SET_GUIDED_TOUR_VISIBILITY': {
