@@ -79,6 +79,7 @@
     "chalk": "4.1.1",
     "chokidar": "3.5.1",
     "cross-env": "7.0.3",
+    "dotenv": "14.2.0",
     "enzyme": "3.9.0",
     "enzyme-adapter-react-16": "1.15.6",
     "eslint": "7.25.0",
