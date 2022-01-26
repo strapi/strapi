@@ -1,6 +1,7 @@
 'use strict';
 
 const chalk = require('chalk');
+const { isKebabCase } = require('@strapi/utils');
 
 const logInstructions = pluginName => {
   const maxLength = `    resolve: './src/plugins/${pluginName}'`.length;
@@ -32,6 +33,7 @@ module.exports = plop => {
         type: 'input',
         name: 'pluginName',
         message: 'Plugin name',
+        validate: value => isKebabCase(value) || 'Value must be in kebab-case',
       },
     ],
     actions(answers) {
