@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import styled from 'styled-components';
 import { useIntl } from 'react-intl';
 import { pxToRem } from '@strapi/helper-plugin';
 import { Typography } from '@strapi/design-system/Typography';
@@ -10,11 +9,6 @@ import { Flex } from '@strapi/design-system/Flex';
 import Content from '../../GuidedTourModal/Content';
 import StepLine from '../StepLine';
 import StepNumberWithPadding from './StepNumberWithPadding';
-
-const LeftSideBox = styled(Flex)`
-  margin-right: ${({ theme }) => theme.spaces[8]};
-  flex-shrink: 0;
-`;
 
 const StepperModal = ({ title, content, cta, onCTA, sectionIndex, stepIndex, hasSectionAfter }) => {
   const { formatMessage } = useIntl();
@@ -26,9 +20,9 @@ const StepperModal = ({ title, content, cta, onCTA, sectionIndex, stepIndex, has
   return (
     <>
       <Flex alignItems="stretch">
-        <LeftSideBox justifyContent="center" width={pxToRem(30)}>
+        <Flex marginRight={8} justifyContent="center" minWidth={pxToRem(30)}>
           {hasSectionBefore && <StepLine type="isDone" minHeight={pxToRem(24)} />}
-        </LeftSideBox>
+        </Flex>
         <Typography variant="sigma" textColor="primary600">
           {formatMessage({
             id: 'app.components.GuidedTour.modal.title',
@@ -37,18 +31,18 @@ const StepperModal = ({ title, content, cta, onCTA, sectionIndex, stepIndex, has
         </Typography>
       </Flex>
       <Flex>
-        <LeftSideBox width={pxToRem(30)}>
+        <Flex marginRight={8} minWidth={pxToRem(30)}>
           <StepNumberWithPadding
             number={sectionIndex + 1}
             type={hasStepsBefore ? 'isDone' : 'isActive'}
           />
-        </LeftSideBox>
+        </Flex>
         <Typography variant="alpha" fontWeight="bold" textColor="neutral800" as="h3" id="title">
           {formatMessage(title)}
         </Typography>
       </Flex>
       <Flex alignItems="stretch">
-        <LeftSideBox direction="column" justifyContent="center" width={pxToRem(30)}>
+        <Flex marginRight={8} direction="column" justifyContent="center" minWidth={pxToRem(30)}>
           {hasSectionAfter && (
             <>
               <StepLine type="isDone" />
@@ -57,7 +51,7 @@ const StepperModal = ({ title, content, cta, onCTA, sectionIndex, stepIndex, has
               )}
             </>
           )}
-        </LeftSideBox>
+        </Flex>
         <Box>
           <Content {...content} />
           <Button onClick={onCTA}>{formatMessage(cta.title)}</Button>
@@ -65,9 +59,9 @@ const StepperModal = ({ title, content, cta, onCTA, sectionIndex, stepIndex, has
       </Flex>
       {hasStepsBefore && hasSectionAfter && (
         <Box paddingTop={3}>
-          <LeftSideBox justifyContent="center" width={pxToRem(30)}>
+          <Flex marginRight={8} justifyContent="center" minWidth={pxToRem(30)}>
             <StepLine type="isDone" minHeight={pxToRem(24)} />
-          </LeftSideBox>
+          </Flex>
         </Box>
       )}
     </>
