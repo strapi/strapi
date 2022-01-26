@@ -28,12 +28,12 @@ const Input = ({
 
   const label = formatMessage(
     { id: intlLabel.id, defaultMessage: intlLabel.defaultMessage },
-    { ...intlLabel.values }
+    { provider: providerToEditName, ...intlLabel.values }
   );
   const hint = description
     ? formatMessage(
         { id: description.id, defaultMessage: description.defaultMessage },
-        { ...description.values }
+        { provider: providerToEditName, ...description.values }
       )
     : '';
 

@@ -10,6 +10,7 @@ module.exports = [
   'strapi::logger',
   'strapi::query',
   'strapi::body',
+  'strapi::session',
   // 'strapi::compression',
   // 'strapi::ip',
   {
