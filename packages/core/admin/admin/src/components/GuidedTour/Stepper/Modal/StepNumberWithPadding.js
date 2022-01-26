@@ -4,7 +4,7 @@ import { Box } from '@strapi/design-system/Box';
 import StepNumber from '../StepNumber';
 
 const StepNumberWithPadding = ({ number, last, type }) => (
-  <Box paddingTop={3} paddingBottom={last ? undefined : 3}>
+  <Box paddingTop={3} paddingBottom={last ? 0 : 3}>
     <StepNumber number={number} type={type} />
   </Box>
 );
