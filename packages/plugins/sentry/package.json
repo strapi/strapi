@@ -26,6 +26,9 @@
   "dependencies": {
     "@sentry/node": "6.7.1"
   },
+  "peerDependencies": {
+    "@strapi/strapi": "^4.0.0"
+  },
   "engines": {
     "node": ">=12.22.0 <=16.x.x",
     "npm": ">=6.0.0"
