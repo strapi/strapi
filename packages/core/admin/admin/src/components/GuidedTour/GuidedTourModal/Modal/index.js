@@ -20,7 +20,7 @@ const ModalWrapper = styled(Flex)`
   background: rgb(50, 50, 77, 0.2);
 `;
 
-const Modal = ({ onClose, children }) => {
+const Modal = ({ onClose, onSkip, children }) => {
   const { formatMessage } = useIntl();
 
   return (
@@ -49,7 +49,7 @@ const Modal = ({ onClose, children }) => {
               {children}
             </Box>
             <Flex justifyContent="flex-end">
-              <Button variant="tertiary">
+              <Button variant="tertiary" onClick={onSkip}>
                 {formatMessage({
                   id: 'app.components.GuidedTour.modal.skip',
                   defaultMessage: 'Skip',
@@ -66,6 +66,7 @@ const Modal = ({ onClose, children }) => {
 Modal.propTypes = {
   children: PropTypes.node.isRequired,
   onClose: PropTypes.func.isRequired,
+  onSkip: PropTypes.func.isRequired,
 };
 
 export default Modal;

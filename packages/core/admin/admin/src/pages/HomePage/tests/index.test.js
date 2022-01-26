@@ -1566,4 +1566,35 @@ describe('Homepage', () => {
 
     expect(queryByText('Build the content structure')).not.toBeInTheDocument();
   });
+
+  it("shouldn't show guided tour when guided tour is skipped", () => {
+    useModels.mockImplementation(() => ({
+      isLoading: false,
+      collectionTypes: [],
+      singleTypes: [],
+    }));
+
+    useGuidedTour.mockImplementation(() => ({
+      isSkipped: true,
+      isGuidedTourVisible: true,
+      guidedTourState: {
+        apiTokens: {
+          create: false,
+          success: false,
+        },
+        contentManager: {
+          create: false,
+          success: false,
+        },
+        contentTypeBuilder: {
+          create: false,
+          success: false,
+        },
+      },
+    }));
+
+    const { queryByText } = render(App);
+
+    expect(queryByText('Build the content structure')).not.toBeInTheDocument();
+  });
 });

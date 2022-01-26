@@ -16,6 +16,9 @@ jest.mock('@strapi/helper-plugin', () => ({
   useRBAC: jest.fn(() => ({
     allowedActions: { canCreate: true, canDelete: true, canRead: true, canUpdate: true },
   })),
+  useGuidedTour: jest.fn(() => ({
+    startSection: jest.fn(),
+  })),
 }));
 
 jest.spyOn(axiosInstance, 'get').mockResolvedValue({

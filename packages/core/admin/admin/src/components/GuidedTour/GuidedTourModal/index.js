@@ -12,6 +12,7 @@ const GuidedTourModal = () => {
     setCurrentStep,
     setStepState,
     isGuidedTourVisible,
+    setSkipped,
   } = useGuidedTour();
   const [stepContent, setStepContent] = useState();
   const [isVisible, setIsVisible] = useState(currentStep);
@@ -54,9 +55,14 @@ const GuidedTourModal = () => {
     setCurrentStep(null);
   };
 
+  const handleSkip = () => {
+    setSkipped(true);
+    setCurrentStep(null);
+  };
+
   if (isVisible && stepContent) {
     return (
-      <Modal onClose={handleCTA}>
+      <Modal onSkip={handleSkip} onClose={handleCTA}>
         <StepperModal
           {...stepContent}
           onCTA={handleCTA}

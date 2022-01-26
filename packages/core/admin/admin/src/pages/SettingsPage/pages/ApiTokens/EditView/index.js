@@ -7,6 +7,7 @@ import {
   useOverlayBlocker,
   useNotification,
   useTracking,
+  useGuidedTour,
 } from '@strapi/helper-plugin';
 import { HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
@@ -40,6 +41,7 @@ const ApiTokenCreateView = () => {
   const history = useHistory();
   const { trackUsage } = useTracking();
   const trackUsageRef = useRef(trackUsage);
+  const { setCurrentStep } = useGuidedTour();
 
   const {
     params: { id },
@@ -103,6 +105,7 @@ const ApiTokenCreateView = () => {
 
       if (isCreating) {
         history.replace(`/settings/api-tokens/${response.id}`, { apiToken: response });
+        setCurrentStep('apiTokens.success');
       }
     } catch (err) {
       const errors = formatAPIErrors(err.response.data);

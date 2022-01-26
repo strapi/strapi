@@ -25,13 +25,16 @@ jest.mock('@fortawesome/react-fontawesome', () => ({
 
 jest.mock('../../NoContentType', () => () => <div>NoContentType</div>);
 
+jest.mock('@strapi/helper-plugin', () => ({
+  ...jest.requireActual('@strapi/helper-plugin'),
+  useGuidedTour: jest.fn(() => ({
+    startSection: jest.fn(),
+  })),
+}));
+
 describe('Content manager | App | main', () => {
   beforeEach(() => {
     jest.resetModules(); // Most important - it clears the cache
-  });
-
-  afterEach(() => {
-    jest.resetAllMocks();
   });
 
   it('should not crash', () => {
