@@ -5,9 +5,10 @@ import { Flex } from '@strapi/design-system/Flex';
 import { Typography } from '@strapi/design-system/Typography';
 import { Icon } from '@strapi/design-system/Icon';
 import Check from '@strapi/icons/Check';
+import { IS_DONE, IS_ACTIVE, IS_NOT_DONE } from '../constants';
 
 const StepNumber = ({ type, number }) => {
-  if (type === 'isDone') {
+  if (type === IS_DONE) {
     return (
       <Flex
         background="primary600"
@@ -22,7 +23,7 @@ const StepNumber = ({ type, number }) => {
     );
   }
 
-  if (type === 'isActive') {
+  if (type === IS_ACTIVE) {
     return (
       <Flex
         background="primary600"
@@ -59,12 +60,12 @@ const StepNumber = ({ type, number }) => {
 
 StepNumber.defaultProps = {
   number: undefined,
-  type: 'isNotDone',
+  type: IS_NOT_DONE,
 };
 
 StepNumber.propTypes = {
   number: PropTypes.number,
-  type: PropTypes.oneOf(['isActive', 'isDone', 'isNotDone']),
+  type: PropTypes.oneOf([IS_ACTIVE, IS_DONE, IS_NOT_DONE]),
 };
 
 export default StepNumber;

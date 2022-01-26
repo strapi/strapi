@@ -9,6 +9,7 @@ import { Flex } from '@strapi/design-system/Flex';
 import Content from '../../GuidedTourModal/Content';
 import StepLine from '../StepLine';
 import StepNumberWithPadding from './StepNumberWithPadding';
+import { IS_DONE, IS_ACTIVE } from '../../constants';
 
 const StepperModal = ({ title, content, cta, onCTA, sectionIndex, stepIndex, hasSectionAfter }) => {
   const { formatMessage } = useIntl();
@@ -21,7 +22,7 @@ const StepperModal = ({ title, content, cta, onCTA, sectionIndex, stepIndex, has
     <>
       <Flex alignItems="stretch">
         <Flex marginRight={8} justifyContent="center" minWidth={pxToRem(30)}>
-          {hasSectionBefore && <StepLine type="isDone" minHeight={pxToRem(24)} />}
+          {hasSectionBefore && <StepLine type={IS_DONE} minHeight={pxToRem(24)} />}
         </Flex>
         <Typography variant="sigma" textColor="primary600">
           {formatMessage({
@@ -34,7 +35,7 @@ const StepperModal = ({ title, content, cta, onCTA, sectionIndex, stepIndex, has
         <Flex marginRight={8} minWidth={pxToRem(30)}>
           <StepNumberWithPadding
             number={sectionIndex + 1}
-            type={hasStepsBefore ? 'isDone' : 'isActive'}
+            type={hasStepsBefore ? IS_DONE : IS_ACTIVE}
           />
         </Flex>
         <Typography variant="alpha" fontWeight="bold" textColor="neutral800" as="h3" id="title">
@@ -45,9 +46,9 @@ const StepperModal = ({ title, content, cta, onCTA, sectionIndex, stepIndex, has
         <Flex marginRight={8} direction="column" justifyContent="center" minWidth={pxToRem(30)}>
           {hasSectionAfter && (
             <>
-              <StepLine type="isDone" />
+              <StepLine type={IS_DONE} />
               {hasStepsBefore && (
-                <StepNumberWithPadding number={nextSectionIndex + 1} type="isActive" last />
+                <StepNumberWithPadding number={nextSectionIndex + 1} type={IS_ACTIVE} last />
               )}
             </>
           )}
@@ -60,7 +61,7 @@ const StepperModal = ({ title, content, cta, onCTA, sectionIndex, stepIndex, has
       {hasStepsBefore && hasSectionAfter && (
         <Box paddingTop={3}>
           <Flex marginRight={8} justifyContent="center" minWidth={pxToRem(30)}>
-            <StepLine type="isDone" minHeight={pxToRem(24)} />
+            <StepLine type={IS_DONE} minHeight={pxToRem(24)} />
           </Flex>
         </Box>
       )}

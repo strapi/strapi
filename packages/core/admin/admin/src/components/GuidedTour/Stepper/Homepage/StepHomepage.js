@@ -7,6 +7,7 @@ import { Typography } from '@strapi/design-system/Typography';
 import { Box } from '@strapi/design-system/Box';
 import StepNumber from '../StepNumber';
 import StepLine from '../StepLine';
+import { IS_DONE, IS_ACTIVE, IS_NOT_DONE } from '../../constants';
 
 const GridItemAlignCenter = styled(Box)`
   align-self: center;
@@ -32,7 +33,7 @@ const StepHomepage = ({ type, title, number, content, hasLine }) => {
       <GridItemJustifyCenter height="100%">
         {hasLine && <StepLine type={type} minHeight={pxToRem(64)} />}
       </GridItemJustifyCenter>
-      <Box>{type === 'isActive' && content}</Box>
+      <Box>{type === IS_ACTIVE && content}</Box>
     </>
   );
 };
@@ -40,7 +41,7 @@ const StepHomepage = ({ type, title, number, content, hasLine }) => {
 StepHomepage.defaultProps = {
   content: undefined,
   number: undefined,
-  type: 'isNotDone',
+  type: IS_NOT_DONE,
   hasLine: true,
 };
 
@@ -51,7 +52,7 @@ StepHomepage.propTypes = {
     id: PropTypes.string,
     defaultMessage: PropTypes.string,
   }).isRequired,
-  type: PropTypes.oneOf(['isActive', 'isDone', 'isNotDone']),
+  type: PropTypes.oneOf([IS_ACTIVE, IS_DONE, IS_NOT_DONE]),
   hasLine: PropTypes.bool,
 };
 
