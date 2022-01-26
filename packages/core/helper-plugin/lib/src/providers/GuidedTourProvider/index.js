@@ -8,9 +8,11 @@ const GuidedTourProvider = ({
   setCurrentStep,
   guidedTourState,
   setGuidedTourVisibility,
+  setSkipped,
   setStepState,
   startSection,
   isGuidedTourVisible,
+  isSkipped,
 }) => {
   return (
     <GuidedTourContext.Provider
@@ -18,10 +20,12 @@ const GuidedTourProvider = ({
         currentStep,
         guidedTourState,
         setCurrentStep,
+        setSkipped,
         setStepState,
         setGuidedTourVisibility,
         startSection,
         isGuidedTourVisible,
+        isSkipped,
       }}
     >
       {children}
@@ -44,8 +48,10 @@ GuidedTourProvider.propTypes = {
     })
   ).isRequired,
   isGuidedTourVisible: PropTypes.bool,
+  isSkipped: PropTypes.bool.isRequired,
   setCurrentStep: PropTypes.func.isRequired,
   setGuidedTourVisibility: PropTypes.func.isRequired,
+  setSkipped: PropTypes.func.isRequired,
   setStepState: PropTypes.func.isRequired,
   startSection: PropTypes.func.isRequired,
 };

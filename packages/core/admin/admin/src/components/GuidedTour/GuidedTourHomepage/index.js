@@ -2,14 +2,17 @@ import React from 'react';
 import { useGuidedTour } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { Stack } from '@strapi/design-system/Stack';
+import { Flex } from '@strapi/design-system/Flex';
+import { Box } from '@strapi/design-system/Box';
 import { Typography } from '@strapi/design-system/Typography';
 import { LinkButton } from '@strapi/design-system/LinkButton';
+import { Button } from '@strapi/design-system/Button';
 import ArrowRight from '@strapi/icons/ArrowRight';
 import StepperHomepage from '../Stepper/Homepage/StepperHomepage';
 import layout from '../layout';
 
 const GuidedTourHomepage = () => {
-  const { guidedTourState } = useGuidedTour();
+  const { guidedTourState, setSkipped } = useGuidedTour();
   const { formatMessage } = useIntl();
 
   const sections = Object.entries(layout).map(([key, val]) => ({
@@ -30,12 +33,27 @@ const GuidedTourHomepage = () => {
   const activeSection = enrichedSections.find(section => !section.isDone)?.key;
 
   return (
-    <Stack size={6} hasRadius shadow="tableShadow" padding={7} background="neutral0">
-      <Typography variant="beta" as="h2">
-        Guided tour
-      </Typography>
-      <StepperHomepage sections={sections} currentSectionKey={activeSection} />
-    </Stack>
+    <Box
+      hasRadius
+      shadow="tableShadow"
+      paddingTop={7}
+      paddingRight={4}
+      paddingLeft={7}
+      paddingBottom={4}
+      background="neutral0"
+    >
+      <Stack size={6}>
+        <Typography variant="beta" as="h2">
+          Guided tour
+        </Typography>
+        <StepperHomepage sections={sections} currentSectionKey={activeSection} />
+      </Stack>
+      <Flex justifyContent="flex-end">
+        <Button variant="tertiary" onClick={() => setSkipped(true)}>
+          Skip
+        </Button>
+      </Flex>
+    </Box>
   );
 };
 

@@ -8,7 +8,7 @@ import reducer, { initialState } from './reducer';
 import init from './init';
 
 const GuidedTour = ({ children }) => {
-  const [{ currentStep, guidedTourState, isGuidedTourVisible }, dispatch] = useReducer(
+  const [{ currentStep, guidedTourState, isGuidedTourVisible, isSkipped }, dispatch] = useReducer(
     reducer,
     initialState,
     init
@@ -17,7 +17,7 @@ const GuidedTour = ({ children }) => {
   const setCurrentStep = step => {
     const isStepAlreadyDone = get(guidedTourState, step);
 
-    if (isStepAlreadyDone) {
+    if (isStepAlreadyDone || isSkipped) {
       return null;
     }
 
@@ -62,15 +62,26 @@ const GuidedTour = ({ children }) => {
     return null;
   };
 
+  const setSkipped = value => {
+    persistStateToLocaleStorage.setSkipped(value);
+
+    dispatch({
+      type: 'SET_SKIPPED',
+      value,
+    });
+  };
+
   return (
     <GuidedTourProvider
       guidedTourState={guidedTourState}
       currentStep={currentStep}
       setCurrentStep={setCurrentStep}
       setGuidedTourVisibility={setGuidedTourVisibility}
+      setSkipped={setSkipped}
       setStepState={setStepState}
       startSection={startSection}
       isGuidedTourVisible={isGuidedTourVisible}
+      isSkipped={isSkipped}
     >
       {children}
     </GuidedTourProvider>

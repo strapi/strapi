@@ -15,7 +15,13 @@ import Content from './Content';
 
 const GuidedTourModal = () => {
   const { formatMessage } = useIntl();
-  const { currentStep, guidedTourState, setCurrentStep, setStepState } = useGuidedTour();
+  const {
+    currentStep,
+    guidedTourState,
+    setCurrentStep,
+    setStepState,
+    setSkipped,
+  } = useGuidedTour();
   const [stepContent, setStepContent] = useState();
   const [isVisible, setIsVisible] = useState(currentStep);
 
@@ -44,6 +50,11 @@ const GuidedTourModal = () => {
     setCurrentStep(null);
   };
 
+  const handleSkip = () => {
+    setSkipped(true);
+    setCurrentStep(null);
+  };
+
   if (isVisible && stepContent) {
     return (
       <ModalLayout onClose={() => {}} labelledBy="title">
@@ -56,7 +67,12 @@ const GuidedTourModal = () => {
           <Content {...stepContent.content} />
         </ModalBody>
         <ModalFooter
-          endActions={<Button onClick={handleCTA}>{formatMessage(stepContent.cta.title)}</Button>}
+          endActions={
+            <>
+              <Button onClick={handleCTA}>{formatMessage(stepContent.cta.title)}</Button>
+              <Button onClick={handleSkip}>Skip</Button>
+            </>
+          }
         />
       </ModalLayout>
     );
