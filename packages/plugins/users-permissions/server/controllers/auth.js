@@ -339,6 +339,16 @@ module.exports = {
       throw new ApplicationError('Email is already taken');
     }
 
+    if (params.username) {
+      const userWithUsername = await strapi.query('plugin::users-permissions.user').findOne({
+        where: { username: params.username },
+      });
+
+      if (userWithUsername) {
+        throw new ApplicationError('Username is already taken');
+      }
+    }
+
     try {
       if (!settings.email_confirmation) {
         params.confirmed = true;
