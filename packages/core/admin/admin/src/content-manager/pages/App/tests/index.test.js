@@ -28,7 +28,7 @@ jest.mock('../../NoContentType', () => () => <div>NoContentType</div>);
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useGuidedTour: jest.fn(() => ({
-    startSection: jest.fn()
+    startSection: jest.fn(),
   })),
 }));
 

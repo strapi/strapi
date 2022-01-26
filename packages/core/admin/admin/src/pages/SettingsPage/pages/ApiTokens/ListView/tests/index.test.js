@@ -17,7 +17,7 @@ jest.mock('@strapi/helper-plugin', () => ({
     allowedActions: { canCreate: true, canDelete: true, canRead: true, canUpdate: true },
   })),
   useGuidedTour: jest.fn(() => ({
-    startSection: jest.fn()
+    startSection: jest.fn(),
   })),
 }));
 

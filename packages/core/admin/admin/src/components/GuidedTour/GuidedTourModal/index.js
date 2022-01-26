@@ -1,29 +1,25 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useReducer } from 'react';
 import at from 'lodash/at';
-import { useIntl } from 'react-intl';
-import {
-  ModalLayout,
-  ModalBody,
-  ModalHeader,
-  ModalFooter,
-} from '@strapi/design-system/ModalLayout';
-import { Typography } from '@strapi/design-system/Typography';
-import { Button } from '@strapi/design-system/Button';
 import { useGuidedTour } from '@strapi/helper-plugin';
 import layout from '../layout';
-import Content from './Content';
+import Modal from './Modal';
+import reducer, { initialState } from './reducer';
+import StepperModal from '../Stepper/Modal/StepperModal';
 
 const GuidedTourModal = () => {
-  const { formatMessage } = useIntl();
   const {
     currentStep,
     guidedTourState,
     setCurrentStep,
     setStepState,
+    isGuidedTourVisible,
     setSkipped,
   } = useGuidedTour();
-  const [stepContent, setStepContent] = useState();
   const [isVisible, setIsVisible] = useState(currentStep);
+  const [{ stepContent, sectionIndex, stepIndex, hasSectionAfter }, dispatch] = useReducer(
+    reducer,
+    initialState
+  );
 
   useEffect(() => {
     if (!currentStep) {
@@ -34,17 +30,29 @@ const GuidedTourModal = () => {
 
     const [isStepDone] = at(guidedTourState, currentStep);
 
-    setIsVisible(!isStepDone);
-  }, [currentStep, guidedTourState]);
+    setIsVisible(!isStepDone && isGuidedTourVisible);
+  }, [currentStep, guidedTourState, isGuidedTourVisible]);
 
   useEffect(() => {
     if (currentStep) {
       const [content] = at(layout, currentStep);
-      setStepContent(content);
-    }
-  }, [currentStep]);
+      const sectionKeys = Object.keys(guidedTourState);
+      const [sectionName, stepName] = currentStep.split('.');
+      const newSectionIndex = sectionKeys.indexOf(sectionName);
+      const newStepIndex = Object.keys(guidedTourState[sectionName]).indexOf(stepName);
+      const newHasSectionAfter = newSectionIndex < sectionKeys.length - 1;
 
-  const handleCTA = () => {
+      dispatch({
+        type: 'UPDATE_MODAL',
+        content,
+        newSectionIndex,
+        newStepIndex,
+        newHasSectionAfter,
+      });
+    }
+  }, [currentStep, guidedTourState]);
+
+  const handleCtaClick = () => {
     setStepState(currentStep, true);
 
     setCurrentStep(null);
@@ -57,24 +65,16 @@ const GuidedTourModal = () => {
 
   if (isVisible && stepContent) {
     return (
-      <ModalLayout onClose={() => {}} labelledBy="title">
-        <ModalHeader>
-          <Typography fontWeight="bold" textColor="neutral800" as="h3" id="title">
-            {formatMessage(stepContent.title)}
-          </Typography>
-        </ModalHeader>
-        <ModalBody>
-          <Content {...stepContent.content} />
-        </ModalBody>
-        <ModalFooter
-          endActions={
-            <>
-              <Button onClick={handleCTA}>{formatMessage(stepContent.cta.title)}</Button>
-              <Button onClick={handleSkip}>Skip</Button>
-            </>
-          }
+      <Modal onSkip={handleSkip} onClose={handleCtaClick}>
+        <StepperModal
+          {...stepContent}
+          onCtaClick={handleCtaClick}
+          currentStep={currentStep}
+          sectionIndex={sectionIndex}
+          stepIndex={stepIndex}
+          hasSectionAfter={hasSectionAfter}
         />
-      </ModalLayout>
+      </Modal>
     );
   }
 

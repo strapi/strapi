@@ -1534,7 +1534,7 @@ describe('Homepage', () => {
 
     render(App);
 
-    expect(screen.getByText('Build the content structure')).toBeInTheDocument();
+    expect(screen.getByText('🧠 Build the content structure')).toBeInTheDocument();
   });
 
   it("shouldn't show guided tour when guided tour is completed", () => {

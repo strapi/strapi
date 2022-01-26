@@ -1,11 +1,9 @@
-// TODO: create the modal to consume create and success content
-
 const layout = {
   contentTypeBuilder: {
     home: {
       title: {
         id: 'app.components.GuidedTour.home.CTB.title',
-        defaultMessage: 'Build the content structure',
+        defaultMessage: '🧠 Build the content structure',
       },
       cta: {
         title: {
@@ -19,7 +17,7 @@ const layout = {
     create: {
       title: {
         id: 'app.components.GuidedTour.CTB.create.title',
-        defaultMessage: 'Create a first Collection-type',
+        defaultMessage: '🧠 Create a first Collection-type',
       },
       content: {
         id: 'app.components.GuidedTour.CTB.create.content',
@@ -71,7 +69,7 @@ const layout = {
     create: {
       title: {
         id: 'app.components.GuidedTour.CM.create.title',
-        defaultMessage: 'Create sample content',
+        defaultMessage: '⚡️ Create sample content',
       },
       content: {
         id: 'app.components.GuidedTour.CM.create.content',
@@ -108,7 +106,7 @@ const layout = {
   apiTokens: {
     home: {
       title: {
-        id: 'app.components.GuidedTour.home.apiTokens.title',
+        id: 'app.components.GuidedTour.apiTokens.create.title',
         defaultMessage: '🚀 See content in action',
       },
       cta: {
@@ -123,7 +121,7 @@ const layout = {
     create: {
       title: {
         id: 'app.components.GuidedTour.apiTokens.create.title',
-        defaultMessage: 'See content in action',
+        defaultMessage: '🚀 See content in action',
       },
       content: {
         id: 'app.components.GuidedTour.apiTokens.create.content',

@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import { pxToRem } from '@strapi/helper-plugin';
 import { Grid } from '@strapi/design-system/Grid';
 import StepHomepage from './StepHomepage';
+import { IS_DONE, IS_ACTIVE, IS_NOT_DONE } from '../../constants';
 
 const GridCustom = styled(Grid)`
   gap: ${({ theme }) => `${theme.spaces[3]} ${theme.spaces[4]}`};
@@ -12,17 +13,17 @@ const GridCustom = styled(Grid)`
 
 const getType = (activeSectionIndex, index) => {
   if (activeSectionIndex === -1) {
-    return 'isDone';
+    return IS_DONE;
   }
   if (index < activeSectionIndex) {
-    return 'isDone';
+    return IS_DONE;
   }
   if (index > activeSectionIndex) {
-    return 'isNotDone';
+    return IS_NOT_DONE;
   }
 
-  return 'isActive';
-}
+  return IS_ACTIVE;
+};
 
 const StepperHomepage = ({ sections, currentSectionKey }) => {
   const activeSectionIndex = sections.findIndex(section => section.key === currentSectionKey);
