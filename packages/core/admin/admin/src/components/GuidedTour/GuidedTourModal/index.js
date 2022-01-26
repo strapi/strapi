@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useReducer } from 'react';
 import at from 'lodash/at';
 import { useGuidedTour } from '@strapi/helper-plugin';
 import layout from '../layout';
 import Modal from './Modal';
+import reducer, { initialState } from './reducer';
 import StepperModal from '../Stepper/Modal/StepperModal';
 
 const GuidedTourModal = () => {
@@ -14,12 +15,11 @@ const GuidedTourModal = () => {
     isGuidedTourVisible,
     setSkipped,
   } = useGuidedTour();
-  const [stepContent, setStepContent] = useState();
   const [isVisible, setIsVisible] = useState(currentStep);
-
-  const [sectionIndex, setSectionIndex] = useState(null);
-  const [stepIndex, setStepIndex] = useState(null);
-  const [hasSectionAfter, setHasSectionAfter] = useState(null);
+  const [{ stepContent, sectionIndex, stepIndex, hasSectionAfter }, dispatch] = useReducer(
+    reducer,
+    initialState
+  );
 
   useEffect(() => {
     if (!currentStep) {
@@ -42,10 +42,13 @@ const GuidedTourModal = () => {
       const newStepIndex = Object.keys(guidedTourState[sectionName]).indexOf(stepName);
       const newHasSectionAfter = newSectionIndex < sectionKeys.length - 1;
 
-      setStepContent(content);
-      setSectionIndex(newSectionIndex);
-      setStepIndex(newStepIndex);
-      setHasSectionAfter(newHasSectionAfter);
+      dispatch({
+        type: 'UPDATE_MODAL',
+        content,
+        newSectionIndex,
+        newStepIndex,
+        newHasSectionAfter,
+      });
     }
   }, [currentStep, guidedTourState]);
 
