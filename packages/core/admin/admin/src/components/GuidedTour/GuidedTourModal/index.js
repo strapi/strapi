@@ -49,7 +49,7 @@ const GuidedTourModal = () => {
     }
   }, [currentStep, guidedTourState]);
 
-  const handleCTA = () => {
+  const handleCtaClick = () => {
     setStepState(currentStep, true);
 
     setCurrentStep(null);
@@ -62,10 +62,10 @@ const GuidedTourModal = () => {
 
   if (isVisible && stepContent) {
     return (
-      <Modal onSkip={handleSkip} onClose={handleCTA}>
+      <Modal onSkip={handleSkip} onClose={handleCtaClick}>
         <StepperModal
           {...stepContent}
-          onCTA={handleCTA}
+          onCtaClick={handleCtaClick}
           currentStep={currentStep}
           sectionIndex={sectionIndex}
           stepIndex={stepIndex}

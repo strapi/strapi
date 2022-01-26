@@ -11,7 +11,7 @@ import StepLine from '../StepLine';
 import StepNumberWithPadding from './StepNumberWithPadding';
 import { IS_DONE, IS_ACTIVE } from '../../constants';
 
-const StepperModal = ({ title, content, cta, onCTA, sectionIndex, stepIndex, hasSectionAfter }) => {
+const StepperModal = ({ title, content, cta, onCtaClick, sectionIndex, stepIndex, hasSectionAfter }) => {
   const { formatMessage } = useIntl();
 
   const hasSectionBefore = sectionIndex > 0;
@@ -55,7 +55,7 @@ const StepperModal = ({ title, content, cta, onCTA, sectionIndex, stepIndex, has
         </Flex>
         <Box>
           <Content {...content} />
-          <Button onClick={onCTA}>{formatMessage(cta.title)}</Button>
+          <Button onClick={onCtaClick}>{formatMessage(cta.title)}</Button>
         </Box>
       </Flex>
       {hasStepsBefore && hasSectionAfter && (
@@ -89,7 +89,7 @@ StepperModal.propTypes = {
     }),
   }).isRequired,
   currentStep: PropTypes.string,
-  onCTA: PropTypes.func.isRequired,
+  onCtaClick: PropTypes.func.isRequired,
   title: PropTypes.shape({
     id: PropTypes.string.isRequired,
     defaultMessage: PropTypes.string.isRequired,
