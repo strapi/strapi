@@ -15,6 +15,7 @@ const defaultConfig = [
   'strapi::security',
   'strapi::cors',
   'strapi::poweredBy',
+  'strapi::session',
   'strapi::logger',
   'strapi::query',
   'strapi::body',
