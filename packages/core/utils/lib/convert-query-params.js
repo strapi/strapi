@@ -225,72 +225,73 @@ const convertFiltersQueryParams = (filters, schema) => {
     throw new Error('The filters parameter must be an object or an array');
   }
 
-  const sanitizeFilters = (filters, schema) => {
-    if (!isObject(filters)) {
-      return filters;
-    }
-
-    if (Array.isArray(filters)) {
-      return (
-        filters
-          // Sanitize each filter
-          .map(filter => sanitizeFilters(filter, schema))
-          // Filter out empty filters
-          .filter(filter => !isObject(filter) || !isEmpty(filter))
-      );
-    }
-
-    // Here, `key` can either be an operator or an attribute name
-    for (const [key, value] of Object.entries(filters)) {
-      const removeOperator = () => delete filters[key];
-      const attribute = schema.attributes[key];
-
-      // Handle attributes
-      if (attribute) {
-        // Always remove password attributes from filters object
-        if (attribute.type === 'password') {
-          removeOperator();
-        }
-
-        // Relations
-        if (attribute.type === 'relation') {
-          filters[key] = sanitizeFilters(value, strapi.getModel(attribute.target));
-        }
-
-        // Components
-        else if (attribute.type === 'component') {
-          filters[key] = sanitizeFilters(value, strapi.getModel(attribute.component));
-        }
-
-        // Media
-        else if (attribute.type === 'media') {
-          filters[key] = sanitizeFilters(value, strapi.getModel('plugin::upload.file'));
-        }
-
-        // Dynamic Zones
-        else if (attribute.type === 'dynamiczone') {
-          removeOperator();
-        }
-      }
-
-      // Handle operators
-      else if (isObject(value)) {
-        filters[key] = sanitizeFilters(value, schema);
-      }
-
-      // Remove empty objects & arrays
-      if (isObject(filters[key]) && isEmpty(filters[key])) {
-        removeOperator();
-      }
-    }
-
-    return filters;
-  };
-
   // Don't mutate the original object
   const filtersCopy = cloneDeep(filters);
 
   return sanitizeFilters(filtersCopy, schema);
+};
+
+const sanitizeFilters = (filters, schema) => {
+  if (!isObject(filters)) {
+    return filters;
+  }
+
+  if (Array.isArray(filters)) {
+    return (
+      filters
+        // Sanitize each filter
+        .map(filter => sanitizeFilters(filter, schema))
+        // Filter out empty filters
+        .filter(filter => !isObject(filter) || !isEmpty(filter))
+    );
+  }
+
+  const removeOperator = operator => delete filters[operator];
+
+  // Here, `key` can either be an operator or an attribute name
+  for (const [key, value] of Object.entries(filters)) {
+    const attribute = schema.attributes[key];
+
+    // Handle attributes
+    if (attribute) {
+      // Always remove password attributes from filters object
+      if (attribute.type === 'password') {
+        removeOperator(key);
+      }
+
+      // Relations
+      if (attribute.type === 'relation') {
+        filters[key] = sanitizeFilters(value, strapi.getModel(attribute.target));
+      }
+
+      // Components
+      else if (attribute.type === 'component') {
+        filters[key] = sanitizeFilters(value, strapi.getModel(attribute.component));
+      }
+
+      // Media
+      else if (attribute.type === 'media') {
+        filters[key] = sanitizeFilters(value, strapi.getModel('plugin::upload.file'));
+      }
+
+      // Dynamic Zones
+      else if (attribute.type === 'dynamiczone') {
+        removeOperator(key);
+      }
+    }
+
+    // Handle operators
+    else if (isObject(value)) {
+      filters[key] = sanitizeFilters(value, schema);
+    }
+
+    // Remove empty objects & arrays
+    if (isObject(filters[key]) && isEmpty(filters[key])) {
+      removeOperator(key);
+    }
+  }
+
+  return filters;
 };
 
 const convertPublicationStateParams = (type, params = {}, query = {}) => {
