@@ -144,15 +144,7 @@ const layout = {
       content: {
         id: 'app.components.GuidedTour.apiTokens.success.content',
         defaultMessage: 'You successfully finished the guided tour.',
-      },
-      cta: {
-        title: {
-          id: 'app.components.GuidedTour.apiTokens.success.cta.title',
-          defaultMessage: 'Go back to homepage',
-        },
-        type: 'REDIRECT',
-        target: '/',
-      },
+      }
     },
   },
 };
