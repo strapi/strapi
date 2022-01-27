@@ -4,6 +4,7 @@ import { useIntl } from 'react-intl';
 import { pxToRem } from '@strapi/helper-plugin';
 import { Typography } from '@strapi/design-system/Typography';
 import { Button } from '@strapi/design-system/Button';
+import { LinkButton } from '@strapi/design-system/LinkButton';
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
 import Content from '../../GuidedTourModal/Content';
@@ -11,7 +12,15 @@ import StepLine from '../StepLine';
 import StepNumberWithPadding from './StepNumberWithPadding';
 import { IS_DONE, IS_ACTIVE } from '../../constants';
 
-const StepperModal = ({ title, content, cta, onCtaClick, sectionIndex, stepIndex, hasSectionAfter }) => {
+const StepperModal = ({
+  title,
+  content,
+  cta,
+  onCtaClick,
+  sectionIndex,
+  stepIndex,
+  hasSectionAfter,
+}) => {
   const { formatMessage } = useIntl();
 
   const hasSectionBefore = sectionIndex > 0;
@@ -55,12 +64,19 @@ const StepperModal = ({ title, content, cta, onCtaClick, sectionIndex, stepIndex
         </Flex>
         <Box>
           <Content {...content} />
-          <Button onClick={onCtaClick}>{formatMessage(cta.title)}</Button>
+          {cta &&
+            (cta.target ? (
+              <LinkButton onClick={onCtaClick} to={cta.target}>
+                {formatMessage(cta.title)}
+              </LinkButton>
+            ) : (
+              <Button onClick={onCtaClick}>{formatMessage(cta.title)}</Button>
+            ))}
         </Box>
       </Flex>
       {hasStepsBefore && hasSectionAfter && (
         <Box paddingTop={3}>
-          <Flex marginRight={8} justifyContent="center" minWidth={pxToRem(30)}>
+          <Flex marginRight={8} justifyContent="center" width={pxToRem(30)}>
             <StepLine type={IS_DONE} minHeight={pxToRem(24)} />
           </Flex>
         </Box>
