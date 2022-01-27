@@ -35,9 +35,10 @@ module.exports = ({ strapi }) => ({
    * @return {Promise}
    */
   async add(values) {
-    return strapi
-      .query('plugin::users-permissions.user')
-      .create({ data: values, populate: ['role'] });
+    return strapi.entityService.create('plugin::users-permissions.user', {
+      data: values,
+      populate: ['role'],
+    });
   },
 
   /**
