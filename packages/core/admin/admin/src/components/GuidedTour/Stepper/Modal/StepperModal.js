@@ -65,7 +65,7 @@ const StepperModal = ({
         <Box>
           <Content {...content} />
           {cta &&
-            (cta && cta.target ? (
+            (cta.target ? (
               <LinkButton onClick={onCtaClick} to={cta.target}>
                 {formatMessage(cta.title)}
               </LinkButton>
