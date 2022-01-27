@@ -44,13 +44,16 @@ const GuidedTourHomepage = () => {
     >
       <Stack size={6}>
         <Typography variant="beta" as="h2">
-          Guided tour
+          {formatMessage({
+            id: 'app.components.GuidedTour.title',
+            defaultMessage: '3 simple steps',
+          })}
         </Typography>
         <StepperHomepage sections={sections} currentSectionKey={activeSection} />
       </Stack>
       <Flex justifyContent="flex-end">
         <Button variant="tertiary" onClick={() => setSkipped(true)}>
-          Skip
+          {formatMessage({ id: 'app.components.GuidedTour.skip', defaultMessage: 'Skip' })}
         </Button>
       </Flex>
     </Box>
