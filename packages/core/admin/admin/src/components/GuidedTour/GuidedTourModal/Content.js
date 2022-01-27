@@ -18,7 +18,7 @@ const Content = ({ id, defaultMessage }) => {
       {formatMessage(
         { id, defaultMessage },
         {
-          a: children => (
+          documentationLink: children => (
             <a
               target="_blank"
               rel="noopener noreferrer"

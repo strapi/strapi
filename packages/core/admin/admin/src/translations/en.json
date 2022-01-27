@@ -255,7 +255,7 @@
   "app.components.GuidedTour.apiTokens.create.content": "Generate an authentication token here and retrieve the content you just created",
   "app.components.GuidedTour.apiTokens.create.cta.title": "Create sample content",
   "app.components.GuidedTour.apiTokens.success.title": "Step 3: Completed ✅",
-  "app.components.GuidedTour.apiTokens.success.content": "You successfully finished the guided tour.",
+  "app.components.GuidedTour.apiTokens.success.content": "<p>See content in action by making an HTTP request:</p><ul><li><p>To this URL: <light>https://'<'YOUR_DOMAIN'>'/api/'<'YOUR_CT'>'</light></p></li><li><p>With the header: <light>Authorization: bearer '<'YOUR_API_TOKEN'>'</light></p></li></ul><p>For more ways to interact with content, see the <documentationLink>documentation</documentationLink>.</p>",
   "app.components.GuidedTour.apiTokens.success.cta.title": "Go back to homepage",
   "app.component.CopyToClipboard.label": "Copy to clipboard",
   "app.component.search.label": "Search for {target}",

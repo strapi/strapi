@@ -142,14 +142,12 @@ const layout = {
         defaultMessage: 'Step 3: Completed ✅',
       },
       content: {
-        id: 'app.components.GuidedTour.apiTokens.su',
+        id: 'app.components.GuidedTour.apiTokens.success.content',
         defaultMessage:
-          '<p>See content in action by making an HTTP request:</p><ul><li><p>To this URL: <light>https://YOUR_DOMAIN/api/YOUR_CT</light></p></li><li><p>With the header: <light>Authorization: bearer YOUR_API_TOKEN</light></p></li></ul><p>For more ways to interact with content, see the <a>documentation</a>.</p>',
+          "<p>See content in action by making an HTTP request:</p><ul><li><p>To this URL: <light>https://'<'YOUR_DOMAIN'>'/api/'<'YOUR_CT'>'</light></p></li><li><p>With the header: <light>Authorization: bearer '<'YOUR_API_TOKEN'>'</light></p></li></ul><p>For more ways to interact with content, see the <documentationLink>documentation</documentationLink>.</p>",
       },
     },
   },
 };
 
 export default layout;
-
-// defaultMessage: '<p>See content in action by making an HTTP request:</p><ul><li><p>To this URL: <light>https://<YOUR_DOMAIN>/api/<YOUR_CT></light></p></li><li><p>With the header: <light>Authorization: bearer <YOUR_API_TOKEN></light></p></li></ul><p>For more ways to interact with content, see the documentation</p>',
