@@ -17,6 +17,7 @@ const mergeTemplate = require('./utils/merge-template.js');
 const packageJSON = require('./resources/json/package.json');
 const createDatabaseConfig = require('./resources/templates/database.js');
 const createAdminConfig = require('./resources/templates/admin-config.js');
+const createEnvFile = require('./resources/templates/env.js');
 
 module.exports = async function createProject(scope, { client, connection, dependencies }) {
   console.log(`Creating a new Strapi application at ${chalk.green(scope.rootPath)}.`);
@@ -30,6 +31,7 @@ module.exports = async function createProject(scope, { client, connection, depen
     await fse.copy(join(resources, 'files'), rootPath);
 
     // copy dot files
+    await fse.writeFile(join(rootPath, '.env'), createEnvFile());
     const dotFiles = await fse.readdir(join(resources, 'dot-files'));
     await Promise.all(
       dotFiles.map(name => {

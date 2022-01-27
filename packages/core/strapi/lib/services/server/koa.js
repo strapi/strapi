@@ -53,8 +53,9 @@ const addCustomMethods = app => {
   return app;
 };
 
-const createKoaApp = ({ proxy }) => {
+const createKoaApp = ({ proxy, keys }) => {
   const app = new Koa({ proxy });
+  app.keys = keys;
 
   addCustomMethods(app);
 
