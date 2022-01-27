@@ -39,7 +39,7 @@ const layout = {
       },
       content: {
         id: 'app.components.GuidedTour.CTB.success.content',
-        defaultMessage: '<p>Good going!</p><b>What would you like to share with the world? ⚡️</b>',
+        defaultMessage: '<p>Good going!</p><b>⚡️ What would you like to share with the world?</b>',
       },
       cta: {
         title: {
@@ -126,12 +126,12 @@ const layout = {
       content: {
         id: 'app.components.GuidedTour.apiTokens.create.content',
         defaultMessage:
-          'Generate an authentication token here and retrieve the content you just created',
+          '<p>Generate an authentication token here and retrieve the content you just created.</p>',
       },
       cta: {
         title: {
           id: 'app.components.GuidedTour.apiTokens.create.cta.title',
-          defaultMessage: 'Create sample content',
+          defaultMessage: 'Generate an API Token',
         },
         type: 'CLOSE',
       },
@@ -143,8 +143,9 @@ const layout = {
       },
       content: {
         id: 'app.components.GuidedTour.apiTokens.success.content',
-        defaultMessage: 'You successfully finished the guided tour.',
-      }
+        defaultMessage:
+          "<p>See content in action by making an HTTP request:</p><ul><li><p>To this URL: <light>https://'<'YOUR_DOMAIN'>'/api/'<'YOUR_CT'>'</light></p></li><li><p>With the header: <light>Authorization: bearer '<'YOUR_API_TOKEN'>'</light></p></li></ul><p>For more ways to interact with content, see the <documentationLink>documentation</documentationLink>.</p>",
+      },
     },
   },
 };

@@ -506,7 +506,7 @@ describe('<GuidedTourModal />', () => {
       }
 
       .c21 > * + * {
-        margin-top: 20px;
+        margin-top: 16px;
       }
 
       .c13 {

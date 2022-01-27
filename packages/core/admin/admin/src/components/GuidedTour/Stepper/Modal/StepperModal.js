@@ -35,7 +35,7 @@ const StepperModal = ({
         </Flex>
         <Typography variant="sigma" textColor="primary600">
           {formatMessage({
-            id: 'app.components.GuidedTour.modal.title',
+            id: 'app.components.GuidedTour.title',
             defaultMessage: '3 simple step',
           })}
         </Typography>

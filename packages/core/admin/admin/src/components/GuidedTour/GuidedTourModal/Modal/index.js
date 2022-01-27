@@ -51,7 +51,7 @@ const Modal = ({ onClose, onSkip, children }) => {
             <Flex justifyContent="flex-end">
               <Button variant="tertiary" onClick={onSkip}>
                 {formatMessage({
-                  id: 'app.components.GuidedTour.modal.skip',
+                  id: 'app.components.GuidedTour.skip',
                   defaultMessage: 'Skip',
                 })}
               </Button>
