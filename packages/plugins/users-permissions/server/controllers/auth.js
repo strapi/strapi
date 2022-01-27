@@ -188,7 +188,10 @@ module.exports = {
     }
 
     // Ability to pass OAuth callback dynamically
-    grantConfig[provider].callback = _.get(ctx, 'query.callback') || grantConfig[provider].callback;
+    grantConfig[provider].callback =
+      _.get(ctx, 'query.callback') ||
+      _.get(ctx, 'session.grant.dynamic.callback') ||
+      grantConfig[provider].callback;
     grantConfig[provider].redirect_uri = getService('providers').buildRedirectUri(provider);
 
     return grant(grantConfig)(ctx, next);
