@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Box } from '@strapi/design-system/Box';
-import StepNumber from '../StepNumber';
+import StepNumber from '../../Stepper/StepNumber';
 
 const StepNumberWithPadding = ({ number, last, type }) => (
   <Box paddingTop={3} paddingBottom={last ? 0 : 3}>

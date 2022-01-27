@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { pxToRem } from '@strapi/helper-plugin';
 import { Grid } from '@strapi/design-system/Grid';
-import StepHomepage from './StepHomepage';
+import StepHomepage from './Step';
 import { IS_DONE, IS_ACTIVE, IS_NOT_DONE } from '../../constants';
 
 const GridCustom = styled(Grid)`

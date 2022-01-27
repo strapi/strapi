@@ -5,8 +5,8 @@ import PropTypes from 'prop-types';
 import { pxToRem } from '@strapi/helper-plugin';
 import { Typography } from '@strapi/design-system/Typography';
 import { Box } from '@strapi/design-system/Box';
-import StepNumber from '../StepNumber';
-import StepLine from '../StepLine';
+import StepNumber from '../../Stepper/StepNumber';
+import StepLine from '../../Stepper/StepLine';
 import { IS_DONE, IS_ACTIVE, IS_NOT_DONE } from '../../constants';
 
 const GridItemAlignCenter = styled(Box)`
