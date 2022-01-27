@@ -463,11 +463,7 @@ const DataManagerProvider = ({
 
       unlockAppWithAutoreload();
 
-      if (
-        isCreating &&
-        initialData.contentType &&
-        initialData.contentType.schema.kind === 'collectionType'
-      ) {
+      if (isCreating && initialData.contentType?.schema.kind === 'collectionType') {
         setCurrentStep('contentTypeBuilder.success');
       }
 
