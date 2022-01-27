@@ -23,9 +23,6 @@ const keyLabel = { id: getTrad('PopUpForm.Providers.key.label'), defaultMessage:
 const hintLabel = {
   id: getTrad('PopUpForm.Providers.redirectURL.label'),
   defaultMessage: 'The redirect URL to add in your {provider} application configurations',
-  values: {
-    provider: 'VK',
-  },
 };
 const textPlaceholder = {
   id: getTrad('PopUpForm.Providers.key.placeholder'),

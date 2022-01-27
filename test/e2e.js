@@ -3,9 +3,11 @@
 const path = require('path');
 const execa = require('execa');
 const yargs = require('yargs');
-const { cleanTestApp, generateTestApp } = require('./helpers/test-app-generator');
 
 const appName = 'testApp';
+process.env.ENV_PATH = path.resolve(__dirname, '..', appName, '.env');
+
+const { cleanTestApp, generateTestApp } = require('./helpers/test-app-generator');
 
 const databases = {
   postgres: {
@@ -43,6 +45,7 @@ const runAllTests = async args => {
     cwd: path.resolve(__dirname, '..'),
     env: {
       FORCE_COLOR: 1,
+      ENV_PATH: process.env.ENV_PATH,
     },
   });
 };

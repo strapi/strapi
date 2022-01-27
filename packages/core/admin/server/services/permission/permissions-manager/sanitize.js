@@ -1,6 +1,6 @@
 'use strict';
 
-const { subject: asSubject } = require('@casl/ability');
+const { subject: asSubject, detectSubjectType } = require('@casl/ability');
 const { permittedFieldsOf } = require('@casl/ability/extra');
 const {
   defaults,
@@ -76,11 +76,13 @@ module.exports = ({ action, ability, model }) => {
 
       const { subject, action: actionOverride } = getDefaultOptions(data, options);
 
-      const permittedFields = permittedFieldsOf(ability, actionOverride, subject);
+      const permittedFields = permittedFieldsOf(ability, actionOverride, subject, {
+        fieldsFrom: rule => rule.fields || [],
+      });
 
       const hasAtLeastOneRegistered = some(
         fields => !isNil(fields),
-        flatMap(prop('fields'), ability.rulesFor(actionOverride, subject))
+        flatMap(prop('fields'), ability.rulesFor(actionOverride, detectSubjectType(subject)))
       );
       const shouldIncludeAllFields = isEmpty(permittedFields) && !hasAtLeastOneRegistered;
 
