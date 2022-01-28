@@ -87,6 +87,7 @@ const StepperModal = ({
 
 StepperModal.defaultProps = {
   currentStep: null,
+  cta: undefined,
 };
 
 StepperModal.propTypes = {
@@ -103,7 +104,7 @@ StepperModal.propTypes = {
       id: PropTypes.string.isRequired,
       defaultMessage: PropTypes.string.isRequired,
     }),
-  }).isRequired,
+  }),
   currentStep: PropTypes.string,
   onCtaClick: PropTypes.func.isRequired,
   title: PropTypes.shape({

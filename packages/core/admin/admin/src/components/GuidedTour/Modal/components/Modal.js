@@ -20,7 +20,7 @@ const ModalWrapper = styled(Flex)`
   background: ${({ theme }) => `${theme.colors.neutral800}33`};
 `;
 
-const Modal = ({ onClose, onSkip, children }) => {
+const Modal = ({ onClose, onSkip, children, hideSkip }) => {
   const { formatMessage } = useIntl();
 
   return (
@@ -45,17 +45,19 @@ const Modal = ({ onClose, onSkip, children }) => {
                 icon={<Cross />}
               />
             </Flex>
-            <Box paddingLeft={7} paddingRight={7}>
+            <Box paddingLeft={7} paddingRight={7} paddingBottom={hideSkip ? 8 : 0}>
               {children}
             </Box>
-            <Flex justifyContent="flex-end">
-              <Button variant="tertiary" onClick={onSkip}>
-                {formatMessage({
-                  id: 'app.components.GuidedTour.skip',
-                  defaultMessage: 'Skip',
-                })}
-              </Button>
-            </Flex>
+            {!hideSkip && (
+              <Flex justifyContent="flex-end">
+                <Button variant="tertiary" onClick={onSkip}>
+                  {formatMessage({
+                    id: 'app.components.GuidedTour.skip',
+                    defaultMessage: 'Skip',
+                  })}
+                </Button>
+              </Flex>
+            )}
           </Stack>
         </FocusTrap>
       </ModalWrapper>
@@ -67,6 +69,7 @@ Modal.propTypes = {
   children: PropTypes.node.isRequired,
   onClose: PropTypes.func.isRequired,
   onSkip: PropTypes.func.isRequired,
+  hideSkip: PropTypes.bool.isRequired,
 };
 
 export default Modal;
