@@ -149,10 +149,7 @@ module.exports = ({ strapi }) => {
         'full_documentation.json'
       );
 
-      const settings = {
-        ..._.cloneDeep(defaultConfig),
-        ...this.getDocumentationSettings()
-      };
+      const settings = _.merge(_.cloneDeep(defaultConfig), this.getDocumentationSettings());
 
       const serverUrl = getAbsoluteServerUrl(strapi.config);
       const apiPath = strapi.config.get('api.rest.prefix');
