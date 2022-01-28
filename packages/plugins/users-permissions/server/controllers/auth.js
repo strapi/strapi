@@ -422,6 +422,10 @@ module.exports = {
       where: { email: params.email },
     });
 
+    if (!user) {
+      throw new ApplicationError('user.not.found');
+    }
+
     if (user.confirmed) {
       throw new ApplicationError('already.confirmed');
     }
