@@ -22,6 +22,7 @@ export const CarouselAssets = ({
   onEditAsset,
   onNext,
   onPrevious,
+  required,
   selectedAssetIndex,
   trackedLocation,
 }) => {
@@ -48,6 +49,7 @@ export const CarouselAssets = ({
         onPrevious={onPrevious}
         hint={hint}
         error={error}
+        required={required}
         actions={
           currentAsset ? (
             <CarouselAssetActions
@@ -119,6 +121,7 @@ CarouselAssets.defaultProps = {
   error: undefined,
   hint: undefined,
   onDropAsset: undefined,
+  required: false,
   trackedLocation: undefined,
 };
 
@@ -135,6 +138,7 @@ CarouselAssets.propTypes = {
   onEditAsset: PropTypes.func.isRequired,
   onNext: PropTypes.func.isRequired,
   onPrevious: PropTypes.func.isRequired,
+  required: PropTypes.bool,
   selectedAssetIndex: PropTypes.number.isRequired,
   trackedLocation: PropTypes.string,
 };
