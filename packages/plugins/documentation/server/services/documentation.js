@@ -16,8 +16,24 @@ module.exports = ({ strapi }) => {
       return _.get(config, 'info.version');
     },
 
+    getDocumentationSettingsPath() {
+      return path.join(strapi.dirs.extensions, 'documentation', 'config');
+    },
+
     getFullDocumentationPath() {
       return path.join(strapi.dirs.extensions, 'documentation', 'documentation');
+    },
+
+    getDocumentationSettings() {
+      try {
+        return JSON.parse(
+          fs.readFileSync(
+            path.resolve(this.getDocumentationSettingsPath(), 'settings.json')
+          )
+        );
+      } catch (err) {
+        return null;
+      }
     },
 
     getDocumentationVersions() {
@@ -133,17 +149,22 @@ module.exports = ({ strapi }) => {
         'full_documentation.json'
       );
 
-      const settings = _.cloneDeep(defaultConfig);
+      const settings = {
+        ..._.cloneDeep(defaultConfig),
+        ...this.getDocumentationSettings()
+      };
 
       const serverUrl = getAbsoluteServerUrl(strapi.config);
       const apiPath = strapi.config.get('api.rest.prefix');
 
-      _.set(settings, 'servers', [
-        {
-          url: `${serverUrl}${apiPath}`,
-          description: 'Development server',
-        },
-      ]);
+      if(_.isEmpty(settings.servers)) {
+        _.set(settings, 'servers', [
+          {
+            url: `${serverUrl}${apiPath}`,
+            description: 'Development server',
+          },
+        ]);
+      }
 
       _.set(settings, ['info', 'x-generation-date'], new Date().toISOString());
       _.set(settings, ['info', 'version'], version);
