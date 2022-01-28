@@ -2,7 +2,7 @@ import AuthResponse from '../../AuthResponse';
 
 const customRoutes = [
   {
-    Component: AuthResponse,
+    Component: () => ({ default: AuthResponse }),
     to: '/auth/login/:authResponse',
     exact: true,
   },
