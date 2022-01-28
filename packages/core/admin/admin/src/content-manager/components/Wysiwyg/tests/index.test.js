@@ -1,7 +1,8 @@
 import * as React from 'react';
 import { IntlProvider } from 'react-intl';
 import { render, waitFor, fireEvent } from '@testing-library/react';
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { ThemeProvider } from '@strapi/design-system/ThemeProvider';
+import { lightTheme } from '@strapi/design-system/themes';
 import Wysiwyg from '../index';
 
 jest.mock('@strapi/helper-plugin', () => ({
@@ -39,6 +40,7 @@ describe('Wysiwyg render and actions buttons', () => {
             name="rich-text"
             intlLabel={{ id: 'hello world', defaultMessage: 'hello world' }}
             onChange={onChange}
+            disabled={false}
           />
         </IntlProvider>
       </ThemeProvider>
@@ -203,7 +205,7 @@ describe('Wysiwyg render and actions buttons', () => {
         background: #ffffff;
       }
 
-      .c28 .sc-BHvUt {
+      .c28 .sc-pVTFL {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -607,7 +609,8 @@ describe('Wysiwyg render and actions buttons', () => {
       }
 
       .c32 {
-        cursor: not-allowed !important;
+        cursor: auto;
+        height: 100%;
       }
 
       .c32 .CodeMirror-placeholder {
@@ -1008,6 +1011,7 @@ describe('Wysiwyg render and actions buttons', () => {
 
       .c31 {
         position: relative;
+        height: calc(100% - 48px);
       }
 
       .c36 {
@@ -1238,7 +1242,6 @@ describe('Wysiwyg render and actions buttons', () => {
           >
             <div
               class="c32"
-              disabled=""
             >
               <textarea
                 style="display: none;"
@@ -1254,8 +1257,6 @@ describe('Wysiwyg render and actions buttons', () => {
                     aria-label="Editor"
                     autocapitalize="off"
                     autocorrect="off"
-                    disabled=""
-                    readonly=""
                     spellcheck="false"
                     style="position: absolute; bottom: -1em; padding: 0px; width: 1000px; height: 1em; min-height: 1em; outline: none;"
                     tabindex="0"

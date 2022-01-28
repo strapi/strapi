@@ -29,7 +29,7 @@ describe('DocAssetCard', () => {
     );
 
     expect(container).toMatchInlineSnapshot(`
-      .c23 {
+      .c24 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
@@ -54,7 +54,7 @@ describe('DocAssetCard', () => {
         padding-left: 12px;
       }
 
-      .c19 {
+      .c20 {
         background: #f6f6f9;
         padding: 4px;
         border-radius: 4px;
@@ -105,7 +105,7 @@ describe('DocAssetCard', () => {
         align-items: flex-start;
       }
 
-      .c20 {
+      .c21 {
         display: -webkit-inline-box;
         display: -webkit-inline-flex;
         display: -ms-inline-flexbox;
@@ -123,20 +123,20 @@ describe('DocAssetCard', () => {
         align-items: center;
       }
 
-      .c15 {
+      .c16 {
         font-weight: 600;
         color: #32324d;
         font-size: 0.75rem;
         line-height: 1.33;
       }
 
-      .c16 {
+      .c17 {
         color: #666687;
         font-size: 0.75rem;
         line-height: 1.33;
       }
 
-      .c22 {
+      .c23 {
         color: #666687;
         font-weight: 600;
         font-size: 0.6875rem;
@@ -144,14 +144,14 @@ describe('DocAssetCard', () => {
         text-transform: uppercase;
       }
 
-      .c18 {
+      .c19 {
         margin-left: auto;
         -webkit-flex-shrink: 0;
         -ms-flex-negative: 0;
         flex-shrink: 0;
       }
 
-      .c21 {
+      .c22 {
         margin-left: 4px;
       }
 
@@ -230,6 +230,10 @@ describe('DocAssetCard', () => {
       .c2 {
         position: relative;
         border-bottom: 1px solid #eaeaef;
+      }
+
+      .c15 {
+        padding-top: 4px;
       }
 
       .c8 {
@@ -353,7 +357,7 @@ describe('DocAssetCard', () => {
         fill: #666687;
       }
 
-      .c17 {
+      .c18 {
         text-transform: uppercase;
       }
 
@@ -447,30 +451,34 @@ describe('DocAssetCard', () => {
               <div
                 class="c14"
               >
-                <h2
-                  class="c15"
-                  id="card-1-title"
-                >
-                  hello.png
-                </h2>
                 <div
-                  class="c16"
+                  class="c15"
+                >
+                  <h2
+                    class="c16"
+                    id="card-1-title"
+                  >
+                    hello.png
+                  </h2>
+                </div>
+                <div
+                  class="c17"
                 >
                   <span
-                    class="c17"
+                    class="c18"
                   >
                     png
                   </span>
                 </div>
               </div>
               <div
-                class="c18"
+                class="c19"
               >
                 <div
-                  class="c19 c20 c21"
+                  class="c20 c21 c22"
                 >
                   <span
-                    class="c22"
+                    class="c23"
                   >
                     Doc
                   </span>
@@ -480,7 +488,7 @@ describe('DocAssetCard', () => {
           </div>
         </article>
         <div
-          class="c23"
+          class="c24"
         >
           <p
             aria-live="polite"

@@ -47,19 +47,18 @@ const ModalForm = ({ onChange }) => {
   return formToDisplay.map(meta => {
     const formType = get(attributes, [selectedField, 'type']);
 
-    if (formType === 'dynamiczone' && !['label', 'description'].includes(meta)) {
+    if (
+      formType === 'dynamiczone' ||
+      (formType === 'component' && !['label', 'description'].includes(meta))
+    ) {
       return null;
     }
 
-    if ((formType === 'component' || formType === 'media') && meta !== 'label') {
+    if (formType === 'component' && meta !== 'label') {
       return null;
     }
 
-    if ((formType === 'json' || formType === 'boolean') && meta === 'placeholder') {
-      return null;
-    }
-
-    if (formType === 'richtext' && meta === 'editable') {
+    if (['media', 'json', 'boolean'].includes(formType) && meta === 'placeholder') {
       return null;
     }
 

@@ -598,7 +598,7 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
                 class="c7"
                 id="title"
               >
-                Upload assets
+                Add new assets
               </h2>
               <button
                 aria-disabled="false"
@@ -1434,7 +1434,7 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
                 class="c6"
                 id="title"
               >
-                Upload assets
+                Add new assets
               </h2>
               <button
                 aria-disabled="false"
