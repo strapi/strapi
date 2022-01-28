@@ -6,6 +6,7 @@ export const initialState = {
   sectionIndex: null,
   stepIndex: null,
   hasSectionAfter: false,
+  hasStepAfter: false,
 };
 
 const reducer = (state = initialState, action) =>
@@ -16,6 +17,7 @@ const reducer = (state = initialState, action) =>
         draftState.sectionIndex = action.newSectionIndex;
         draftState.stepIndex = action.newStepIndex;
         draftState.hasSectionAfter = action.newHasSectionAfter;
+        draftState.hasStepAfter = action.newHasStepAfter;
         break;
       }
       default: {

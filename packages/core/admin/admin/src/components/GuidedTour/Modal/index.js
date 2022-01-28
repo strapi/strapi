@@ -16,10 +16,10 @@ const GuidedTourModal = () => {
     setSkipped,
   } = useGuidedTour();
   const [isVisible, setIsVisible] = useState(currentStep);
-  const [{ stepContent, sectionIndex, stepIndex, hasSectionAfter }, dispatch] = useReducer(
-    reducer,
-    initialState
-  );
+  const [
+    { stepContent, sectionIndex, stepIndex, hasSectionAfter, hasStepAfter },
+    dispatch,
+  ] = useReducer(reducer, initialState);
 
   useEffect(() => {
     if (!currentStep) {
@@ -41,6 +41,7 @@ const GuidedTourModal = () => {
       const newSectionIndex = sectionKeys.indexOf(sectionName);
       const newStepIndex = Object.keys(guidedTourState[sectionName]).indexOf(stepName);
       const newHasSectionAfter = newSectionIndex < sectionKeys.length - 1;
+      const newHasStepAfter = newStepIndex < Object.keys(guidedTourState[sectionName]).length - 1;
 
       dispatch({
         type: 'UPDATE_MODAL',
@@ -48,6 +49,7 @@ const GuidedTourModal = () => {
         newSectionIndex,
         newStepIndex,
         newHasSectionAfter,
+        newHasStepAfter,
       });
     }
   }, [currentStep, guidedTourState]);
@@ -65,7 +67,11 @@ const GuidedTourModal = () => {
 
   if (isVisible && stepContent) {
     return (
-      <Modal onSkip={handleSkip} onClose={handleCtaClick}>
+      <Modal
+        hideSkip={!hasStepAfter && !hasSectionAfter}
+        onSkip={handleSkip}
+        onClose={handleCtaClick}
+      >
         <StepperModal
           {...stepContent}
           onCtaClick={handleCtaClick}
