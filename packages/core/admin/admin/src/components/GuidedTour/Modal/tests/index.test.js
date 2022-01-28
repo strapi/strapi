@@ -44,6 +44,7 @@ describe('<GuidedTourModal />', () => {
     expect(document.body).toMatchInlineSnapshot(`
       .c9 {
         padding-right: 32px;
+        padding-bottom: 0px;
         padding-left: 32px;
       }
 
