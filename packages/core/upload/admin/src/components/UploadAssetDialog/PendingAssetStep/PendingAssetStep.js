@@ -145,10 +145,9 @@ export const PendingAssetStep = ({
           <Button type="submit" loading={uploadStatus === Status.Uploading}>
             {formatMessage(
               {
-                id: getTrad(
-                  `modal.upload-list.footer.button.${assets.length > 1 ? 'plural' : 'singular'}`
-                ),
-                defaultMessage: 'Upload assets',
+                id: getTrad('modal.upload-list.footer.button'),
+                defaultMessage:
+                  'Upload {number, plural, one {# asset} other {# assets}} to the library',
               },
               { number: assets.length }
             )}
