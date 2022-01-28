@@ -196,6 +196,7 @@ describe('Content manager | App | main', () => {
         background: #eaeaef;
         padding: 4px;
         border-radius: 4px;
+        min-width: 20px;
       }
 
       .c24 {
@@ -265,6 +266,24 @@ describe('Content manager | App | main', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c22 {
+        display: -webkit-inline-box;
+        display: -webkit-inline-flex;
+        display: -ms-inline-flexbox;
+        display: inline-flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: center;
+        -webkit-justify-content: center;
+        -ms-flex-pack: center;
+        justify-content: center;
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -448,10 +467,6 @@ describe('Content manager | App | main', () => {
 
       .c26 * {
         fill: #666687;
-      }
-
-      .c22 {
-        display: inline-block;
       }
 
       .c18 {

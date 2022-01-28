@@ -274,7 +274,7 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
   background: #4945ff;
 }
 
-.c14 .sc-ciFQTS {
+.c14 .sc-kJpAUB {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -339,7 +339,7 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
   background: #ffffff;
 }
 
-.c50 .sc-ciFQTS {
+.c50 .sc-kJpAUB {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -517,6 +517,7 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
   background: #f6f6f9;
   padding: 4px;
   border-radius: 4px;
+  min-width: 20px;
 }
 
 .c43 {
@@ -556,6 +557,24 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
   -webkit-box-align: flex-start;
   -ms-flex-align: flex-start;
   align-items: flex-start;
+}
+
+.c32 {
+  display: -webkit-inline-box;
+  display: -webkit-inline-flex;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
 }
 
 .c40 {
@@ -618,10 +637,6 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
   color: #ffffff;
   font-size: 0.75rem;
   line-height: 1.33;
-}
-
-.c32 {
-  display: inline-block;
 }
 
 .c30 {
