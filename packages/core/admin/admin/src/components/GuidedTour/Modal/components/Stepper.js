@@ -7,8 +7,8 @@ import { Button } from '@strapi/design-system/Button';
 import { LinkButton } from '@strapi/design-system/LinkButton';
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
-import Content from '../../GuidedTourModal/Content';
-import StepLine from '../StepLine';
+import Content from './Content';
+import StepLine from '../../Stepper/StepLine';
 import StepNumberWithPadding from './StepNumberWithPadding';
 import { IS_DONE, IS_ACTIVE } from '../../constants';
 

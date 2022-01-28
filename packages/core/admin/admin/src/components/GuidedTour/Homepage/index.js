@@ -8,7 +8,7 @@ import { Typography } from '@strapi/design-system/Typography';
 import { LinkButton } from '@strapi/design-system/LinkButton';
 import { Button } from '@strapi/design-system/Button';
 import ArrowRight from '@strapi/icons/ArrowRight';
-import StepperHomepage from '../Stepper/Homepage/StepperHomepage';
+import StepperHomepage from './components/Stepper';
 import layout from '../layout';
 
 const GuidedTourHomepage = () => {

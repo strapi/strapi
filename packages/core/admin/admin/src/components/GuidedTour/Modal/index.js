@@ -2,9 +2,9 @@ import React, { useEffect, useState, useReducer } from 'react';
 import at from 'lodash/at';
 import { useGuidedTour } from '@strapi/helper-plugin';
 import layout from '../layout';
-import Modal from './Modal';
+import Modal from './components/Modal';
 import reducer, { initialState } from './reducer';
-import StepperModal from '../Stepper/Modal/StepperModal';
+import StepperModal from './components/Stepper';
 
 const GuidedTourModal = () => {
   const {
