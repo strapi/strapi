@@ -44,6 +44,9 @@
     "reselect": "^4.0.0",
     "swagger-ui-dist": "3.47.1"
   },
+  "peerDependencies": {
+    "@strapi/strapi": "^4.0.0"
+  },
   "engines": {
     "node": ">=12.22.0 <=16.x.x",
     "npm": ">=6.0.0"
