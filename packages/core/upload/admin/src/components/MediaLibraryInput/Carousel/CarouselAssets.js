@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Carousel, CarouselSlide } from '@strapi/design-system/Carousel';
+import { CarouselInput, CarouselSlide } from '@strapi/design-system/CarouselInput';
 import getTrad from '../../../utils/getTrad';
 import { AssetDefinition } from '../../../constants';
 import { CarouselAssetActions } from './CarouselAssetActions';
@@ -32,7 +32,7 @@ export const CarouselAssets = ({
 
   return (
     <>
-      <Carousel
+      <CarouselInput
         label={label}
         secondaryLabel={currentAsset?.name}
         selectedSlide={selectedAssetIndex}
@@ -87,7 +87,7 @@ export const CarouselAssets = ({
             </CarouselSlide>
           ))
         )}
-      </Carousel>
+      </CarouselInput>
 
       {isEditingAsset && (
         <EditAssetDialog
