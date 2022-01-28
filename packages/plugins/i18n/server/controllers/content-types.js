@@ -1,11 +1,12 @@
 'use strict';
 
-const { pick, uniq, prop, getOr, flatten, pipe, map } = require('lodash/fp');
+const { pick, uniq, prop, getOr, flatten, pipe, map, difference } = require('lodash/fp');
 const { contentTypes: contentTypesUtils } = require('@strapi/utils');
 const { ApplicationError } = require('@strapi/utils').errors;
 const { getService } = require('../utils');
 const { validateGetNonLocalizedAttributesInput } = require('../validation/content-types');
 
+const { getScalarAttributes } = contentTypesUtils;
 const { PUBLISHED_AT_ATTRIBUTE } = contentTypesUtils.constants;
 
 const getLocalesProperty = getOr([], 'properties.locales');
@@ -28,7 +29,9 @@ module.exports = {
     const { READ_ACTION, CREATE_ACTION } = strapi.admin.services.constants;
 
     const modelDef = strapi.getModel(model);
-    const nonLocalizedMediaAttributes = getNonLocalizedAttributes(modelDef);
+    const scalarAttributes = getScalarAttributes(modelDef);
+    const nonLocalizedAttributes = getNonLocalizedAttributes(modelDef);
+    const attributesToPopulate = difference(nonLocalizedAttributes, scalarAttributes);
 
     if (!isLocalizedContentType(modelDef)) {
       throw new ApplicationError('model.not.localized');
@@ -38,7 +41,7 @@ module.exports = {
 
     const entity = await strapi
       .query(model)
-      .findOne({ where: params, populate: [...nonLocalizedMediaAttributes, 'localizations'] });
+      .findOne({ where: params, populate: [...attributesToPopulate, 'localizations'] });
 
     if (!entity) {
       return ctx.notFound();
