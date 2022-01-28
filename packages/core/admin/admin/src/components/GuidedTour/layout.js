@@ -115,7 +115,7 @@ const layout = {
           defaultMessage: 'Test the API',
         },
         type: 'REDIRECT',
-        target: '/content-manager',
+        target: '/settings/api-tokens',
       },
     },
     create: {
