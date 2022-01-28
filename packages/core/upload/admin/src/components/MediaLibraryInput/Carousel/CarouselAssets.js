@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Carousel, CarouselSlide } from '@strapi/design-system/Carousel';
+import { CarouselInput, CarouselSlide } from '@strapi/design-system/CarouselInput';
 import getTrad from '../../../utils/getTrad';
 import { AssetDefinition } from '../../../constants';
 import { CarouselAssetActions } from './CarouselAssetActions';
@@ -22,6 +22,7 @@ export const CarouselAssets = ({
   onEditAsset,
   onNext,
   onPrevious,
+  required,
   selectedAssetIndex,
   trackedLocation,
 }) => {
@@ -32,7 +33,7 @@ export const CarouselAssets = ({
 
   return (
     <>
-      <Carousel
+      <CarouselInput
         label={label}
         secondaryLabel={currentAsset?.name}
         selectedSlide={selectedAssetIndex}
@@ -48,6 +49,7 @@ export const CarouselAssets = ({
         onPrevious={onPrevious}
         hint={hint}
         error={error}
+        required={required}
         actions={
           currentAsset ? (
             <CarouselAssetActions
@@ -87,7 +89,7 @@ export const CarouselAssets = ({
             </CarouselSlide>
           ))
         )}
-      </Carousel>
+      </CarouselInput>
 
       {isEditingAsset && (
         <EditAssetDialog
@@ -119,6 +121,7 @@ CarouselAssets.defaultProps = {
   error: undefined,
   hint: undefined,
   onDropAsset: undefined,
+  required: false,
   trackedLocation: undefined,
 };
 
@@ -135,6 +138,7 @@ CarouselAssets.propTypes = {
   onEditAsset: PropTypes.func.isRequired,
   onNext: PropTypes.func.isRequired,
   onPrevious: PropTypes.func.isRequired,
+  required: PropTypes.bool,
   selectedAssetIndex: PropTypes.number.isRequired,
   trackedLocation: PropTypes.string,
 };

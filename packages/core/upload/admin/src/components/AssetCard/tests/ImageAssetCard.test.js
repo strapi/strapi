@@ -64,6 +64,7 @@ describe('ImageAssetCard', () => {
         background: #f6f6f9;
         padding: 4px;
         border-radius: 4px;
+        min-width: 20px;
       }
 
       .c3 {
@@ -110,6 +111,24 @@ describe('ImageAssetCard', () => {
         align-items: flex-start;
       }
 
+      .c19 {
+        display: -webkit-inline-box;
+        display: -webkit-inline-flex;
+        display: -ms-inline-flexbox;
+        display: inline-flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: center;
+        -webkit-justify-content: center;
+        -ms-flex-pack: center;
+        justify-content: center;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
       .c9 {
         margin: 0;
         padding: 0;
@@ -150,10 +169,6 @@ describe('ImageAssetCard', () => {
         font-size: 0.6875rem;
         line-height: 1.45;
         text-transform: uppercase;
-      }
-
-      .c19 {
-        display: inline-block;
       }
 
       .c17 {

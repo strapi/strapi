@@ -198,6 +198,7 @@ describe('MediaLibrary / AssetList', () => {
         background: #f6f6f9;
         padding: 4px;
         border-radius: 4px;
+        min-width: 20px;
       }
 
       .c23 {
@@ -243,6 +244,24 @@ describe('MediaLibrary / AssetList', () => {
         -webkit-box-align: flex-start;
         -ms-flex-align: flex-start;
         align-items: flex-start;
+      }
+
+      .c17 {
+        display: -webkit-inline-box;
+        display: -webkit-inline-flex;
+        display: -ms-inline-flexbox;
+        display: inline-flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: center;
+        -webkit-justify-content: center;
+        -ms-flex-pack: center;
+        justify-content: center;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
       }
 
       .c20 {
@@ -305,10 +324,6 @@ describe('MediaLibrary / AssetList', () => {
         color: #ffffff;
         font-size: 0.75rem;
         line-height: 1.33;
-      }
-
-      .c17 {
-        display: inline-block;
       }
 
       .c15 {
