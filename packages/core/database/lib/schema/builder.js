@@ -309,6 +309,7 @@ const createHelpers = db => {
           updatedColumn.name === 'created_by_id' ||
           updatedColumn.name === 'updated_by_id'
         ) {
+          console.log('skipping');
           continue;
         }
 
