@@ -12,8 +12,7 @@ const query = require('./query');
 const responseTime = require('./response-time');
 const responses = require('./responses');
 const security = require('./security');
-// TODO: add back ?
-// session: require('./session'),
+const session = require('./session');
 const publicStatic = require('./public');
 
 module.exports = {
@@ -23,6 +22,7 @@ module.exports = {
   cors,
   responseTime,
   poweredBy,
+  session,
   logger,
   compression,
   responses,

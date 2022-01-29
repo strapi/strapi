@@ -1445,7 +1445,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                       <span
                         class="c28 c34"
                       >
-                        Postal_code
+                        postal_code
                       </span>
                     </div>
                   </td>
@@ -1549,7 +1549,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                       <span
                         class="c28 c34"
                       >
-                        Categories
+                        categories
                       </span>
                     </div>
                   </td>
@@ -1663,7 +1663,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                       <span
                         class="c28 c34"
                       >
-                        Cover
+                        cover
                       </span>
                     </div>
                   </td>
@@ -1771,7 +1771,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                       <span
                         class="c28 c34"
                       >
-                        Images
+                        images
                       </span>
                     </div>
                   </td>
@@ -1877,7 +1877,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                       <span
                         class="c28 c34"
                       >
-                        City
+                        city
                       </span>
                     </div>
                   </td>
@@ -1985,7 +1985,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                       <span
                         class="c28 c34"
                       >
-                        Json
+                        json
                       </span>
                     </div>
                   </td>
@@ -2087,7 +2087,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                       <span
                         class="c28 c34"
                       >
-                        Slug
+                        slug
                       </span>
                     </div>
                   </td>
@@ -2199,7 +2199,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                       <span
                         class="c28 c34"
                       >
-                        Notrepeat_req
+                        notrepeat_req
                       </span>
                     </div>
                   </td>
@@ -2338,7 +2338,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                   <span
                                     class="c28 c34"
                                   >
-                                    Name
+                                    name
                                   </span>
                                 </div>
                               </td>
@@ -2463,7 +2463,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                   <span
                                     class="c28 c34"
                                   >
-                                    Popo
+                                    popo
                                   </span>
                                 </div>
                               </td>
@@ -2588,7 +2588,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                   <span
                                     class="c28 c34"
                                   >
-                                    Poq
+                                    poq
                                   </span>
                                 </div>
                               </td>
@@ -2880,7 +2880,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                   <span
                                     class="c28 c34"
                                   >
-                                    Dede
+                                    dede
                                   </span>
                                 </div>
                               </td>
@@ -3005,7 +3005,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                   <span
                                     class="c28 c34"
                                   >
-                                    Dada
+                                    dada
                                   </span>
                                 </div>
                               </td>
@@ -3130,7 +3130,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                   <span
                                     class="c28 c34"
                                   >
-                                    Papi
+                                    papi
                                   </span>
                                 </div>
                               </td>
@@ -3673,7 +3673,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               <span
                                                 class="c28 c34"
                                               >
-                                                Name
+                                                name
                                               </span>
                                             </div>
                                           </td>
@@ -3798,7 +3798,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               <span
                                                 class="c28 c34"
                                               >
-                                                Mail
+                                                mail
                                               </span>
                                             </div>
                                           </td>
@@ -3923,7 +3923,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               <span
                                                 class="c28 c34"
                                               >
-                                                Phone
+                                                phone
                                               </span>
                                             </div>
                                           </td>
@@ -4112,7 +4112,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               <span
                                                 class="c28 c34"
                                               >
-                                                Name
+                                                name
                                               </span>
                                             </div>
                                           </td>
@@ -4237,7 +4237,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               <span
                                                 class="c28 c34"
                                               >
-                                                Description
+                                                description
                                               </span>
                                             </div>
                                           </td>
@@ -4362,7 +4362,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               <span
                                                 class="c28 c34"
                                               >
-                                                Price
+                                                price
                                               </span>
                                             </div>
                                           </td>
@@ -4489,7 +4489,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               <span
                                                 class="c28 c34"
                                               >
-                                                Picture
+                                                picture
                                               </span>
                                             </div>
                                           </td>
@@ -4616,7 +4616,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               <span
                                                 class="c28 c34"
                                               >
-                                                Very_long_description
+                                                very_long_description
                                               </span>
                                             </div>
                                           </td>
@@ -4739,7 +4739,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               <span
                                                 class="c28 c34"
                                               >
-                                                Categories
+                                                categories
                                               </span>
                                             </div>
                                           </td>
@@ -4934,7 +4934,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               <span
                                                 class="c28 c34"
                                               >
-                                                Label
+                                                label
                                               </span>
                                             </div>
                                           </td>
@@ -5059,7 +5059,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               <span
                                                 class="c28 c34"
                                               >
-                                                Time
+                                                time
                                               </span>
                                             </div>
                                           </td>
@@ -5190,7 +5190,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               <span
                                                 class="c28 c34"
                                               >
-                                                Dishrep
+                                                dishrep
                                               </span>
                                             </div>
                                           </td>
@@ -5330,7 +5330,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                           <span
                                                             class="c28 c34"
                                                           >
-                                                            Name
+                                                            name
                                                           </span>
                                                         </div>
                                                       </td>
@@ -5455,7 +5455,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                           <span
                                                             class="c28 c34"
                                                           >
-                                                            Description
+                                                            description
                                                           </span>
                                                         </div>
                                                       </td>
@@ -5580,7 +5580,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                           <span
                                                             class="c28 c34"
                                                           >
-                                                            Price
+                                                            price
                                                           </span>
                                                         </div>
                                                       </td>
@@ -5707,7 +5707,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                           <span
                                                             class="c28 c34"
                                                           >
-                                                            Picture
+                                                            picture
                                                           </span>
                                                         </div>
                                                       </td>
@@ -5834,7 +5834,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                           <span
                                                             class="c28 c34"
                                                           >
-                                                            Very_long_description
+                                                            very_long_description
                                                           </span>
                                                         </div>
                                                       </td>
@@ -5957,7 +5957,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                           <span
                                                             class="c28 c34"
                                                           >
-                                                            Categories
+                                                            categories
                                                           </span>
                                                         </div>
                                                       </td>
@@ -6193,7 +6193,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               <span
                                                 class="c28 c34"
                                               >
-                                                Name
+                                                name
                                               </span>
                                             </div>
                                           </td>
@@ -6320,7 +6320,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               <span
                                                 class="c28 c34"
                                               >
-                                                Media
+                                                media
                                               </span>
                                             </div>
                                           </td>
@@ -6445,7 +6445,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               <span
                                                 class="c28 c34"
                                               >
-                                                Is_available
+                                                is_available
                                               </span>
                                             </div>
                                           </td>

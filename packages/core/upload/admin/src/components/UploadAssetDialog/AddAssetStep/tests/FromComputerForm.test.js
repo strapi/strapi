@@ -183,7 +183,7 @@ describe('FromComputerForm', () => {
         background: #4945ff;
       }
 
-      .c13 .sc-fTxOGA {
+      .c13 .sc-hRMWxn {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -248,7 +248,7 @@ describe('FromComputerForm', () => {
         background: #ffffff;
       }
 
-      .c21 .sc-fTxOGA {
+      .c21 .sc-hRMWxn {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;

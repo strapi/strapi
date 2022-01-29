@@ -11,8 +11,8 @@ export const DialogTitle = () => {
     <ModalHeader>
       <Typography fontWeight="bold" textColor="neutral800" as="h2" id="asset-dialog-title">
         {formatMessage({
-          id: getTrad('header.actions.upload-assets'),
-          defaultMessage: 'Upload assets',
+          id: getTrad('header.actions.add-assets'),
+          defaultMessage: 'Add new assets',
         })}
       </Typography>
     </ModalHeader>

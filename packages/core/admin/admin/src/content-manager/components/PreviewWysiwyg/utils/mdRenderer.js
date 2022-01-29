@@ -20,7 +20,7 @@ loadCss();
 const md = new Markdown({
   html: true, // Enable HTML tags in source
   xhtmlOut: false,
-  breaks: false,
+  breaks: true,
   langPrefix: 'language-',
   linkify: true,
   typographer: true,

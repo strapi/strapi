@@ -2,6 +2,7 @@
 
 const _ = require('lodash');
 const { filter, map, pipe, prop } = require('lodash/fp');
+const urlJoin = require('url-join');
 
 const { getService } = require('../utils');
 
@@ -112,9 +113,10 @@ module.exports = ({ strapi }) => ({
         return;
       }
 
+      const apiPrefix = strapi.config.get('api.rest.prefix');
       routesMap[`api::${apiName}`] = routes.map(route => ({
         ...route,
-        path: `/api${route.path}`,
+        path: urlJoin(apiPrefix, route.path),
       }));
     });
 
@@ -133,9 +135,10 @@ module.exports = ({ strapi }) => ({
         return;
       }
 
+      const apiPrefix = strapi.config.get('api.rest.prefix');
       routesMap[`plugin::${pluginName}`] = routes.map(route => ({
         ...route,
-        path: `/api${route.path}`,
+        path: urlJoin(apiPrefix, route.path),
       }));
     });
 

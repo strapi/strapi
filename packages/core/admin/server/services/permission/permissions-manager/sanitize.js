@@ -1,6 +1,6 @@
 'use strict';
 
-const { subject: asSubject } = require('@casl/ability');
+const { subject: asSubject, detectSubjectType } = require('@casl/ability');
 const { permittedFieldsOf } = require('@casl/ability/extra');
 const {
   defaults,
@@ -76,11 +76,13 @@ module.exports = ({ action, ability, model }) => {
 
       const { subject, action: actionOverride } = getDefaultOptions(data, options);
 
-      const permittedFields = permittedFieldsOf(ability, actionOverride, subject);
+      const permittedFields = permittedFieldsOf(ability, actionOverride, subject, {
+        fieldsFrom: rule => rule.fields || [],
+      });
 
       const hasAtLeastOneRegistered = some(
         fields => !isNil(fields),
-        flatMap(prop('fields'), ability.rulesFor(actionOverride, subject))
+        flatMap(prop('fields'), ability.rulesFor(actionOverride, detectSubjectType(subject)))
       );
       const shouldIncludeAllFields = isEmpty(permittedFields) && !hasAtLeastOneRegistered;
 
@@ -108,8 +110,14 @@ module.exports = ({ action, ability, model }) => {
   const omitCreatorRoles = omit([`${CREATED_BY_ATTRIBUTE}.roles`, `${UPDATED_BY_ATTRIBUTE}.roles`]);
 
   const pickAllowedAdminUserFields = ({ attribute, key, value }, { set }) => {
-    if (attribute.type === 'relation' && attribute.target === 'admin::user') {
-      set(key, pick(['id', 'firstname', 'lastname', 'username'], value));
+    const pickAllowedFields = pick(['id', 'firstname', 'lastname', 'username']);
+
+    if (attribute.type === 'relation' && attribute.target === 'admin::user' && value) {
+      if (Array.isArray(value)) {
+        set(key, value.map(pickAllowedFields));
+      } else {
+        set(key, pickAllowedFields(value));
+      }
     }
   };
 
