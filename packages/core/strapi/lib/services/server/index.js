@@ -28,7 +28,10 @@ const healthCheck = async ctx => {
  * @returns {Server}
  */
 const createServer = strapi => {
-  const app = createKoaApp({ proxy: strapi.config.get('server.proxy') });
+  const app = createKoaApp({
+    proxy: strapi.config.get('server.proxy'),
+    keys:  strapi.config.get('server.app.keys'),
+  });
 
   const router = new Router();
 
