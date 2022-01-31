@@ -176,7 +176,12 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
       // Redirect to the homePage
       setSubmitting(false);
       setHasAdmin(true);
-      push('/usecase');
+      push({
+        pathname: '/usecase',
+        state: {
+          fromRegister: true,
+        },
+      });
     } catch (err) {
       if (err.response) {
         const { data } = err.response;

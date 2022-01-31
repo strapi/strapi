@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
@@ -12,29 +12,22 @@ import { Select, Option } from '@strapi/design-system/Select';
 import { TextInput } from '@strapi/design-system/TextInput';
 import { Link } from '@strapi/design-system/Link';
 import { Button } from '@strapi/design-system/Button';
+import options from './options';
 import Logo from '../AuthPage/components/Logo';
 import UnauthenticatedLayout, { LayoutContent } from '../../layouts/UnauthenticatedLayout';
-
-const options = [
-  'Front-end developer',
-  'Back-end developer',
-  'Full-stack developer',
-  'Content Manager',
-  'Content Creator',
-  'Other',
-];
 
 const TypographyCenter = styled(Typography)`
   text-align: center;
 `;
 
 const Usecase = () => {
-  const { push } = useHistory();
+  const { push, location } = useHistory();
   const { formatMessage } = useIntl();
   const [workType, setWorkType] = useState();
   const [otherValue, setOtherValue] = useState();
 
   const isOther = workType === 'Other';
+  const isComingFromRegister = location.state?.fromRegister;
 
   const handleSubmit = () => {
     if (workType) {
@@ -43,6 +36,16 @@ const Usecase = () => {
 
     push('/');
   };
+
+  useEffect(() => {
+    if (!isComingFromRegister) {
+      push('/');
+    }
+  }, [isComingFromRegister, push]);
+
+  if (!isComingFromRegister) {
+    return null;
+  }
 
   return (
     <UnauthenticatedLayout>
