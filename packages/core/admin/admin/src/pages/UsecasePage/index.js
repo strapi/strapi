@@ -28,7 +28,7 @@ const TypographyCenter = styled(Typography)`
   text-align: center;
 `;
 
-const Usecase = () => {
+const UsecasePage = () => {
   const { push, location } = useHistory();
   const { formatMessage } = useIntl();
   const [workType, setWorkType] = useState();
@@ -120,4 +120,4 @@ const Usecase = () => {
   );
 };
 
-export default Usecase;
+export default UsecasePage;

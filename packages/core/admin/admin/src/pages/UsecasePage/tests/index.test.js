@@ -4,7 +4,7 @@ import { IntlProvider } from 'react-intl';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import Usecase from '../index';
+import UsecasePage from '../index';
 
 jest.mock('../../../components/LocalesProvider/useLocalesProvider', () => () => ({
   changeLocale: () => {},
@@ -18,13 +18,13 @@ const App = (
   <IntlProvider messages={{}} textComponent="span" locale="en">
     <ThemeProvider theme={lightTheme}>
       <Router history={history}>
-        <Usecase />
+        <UsecasePage />
       </Router>
     </ThemeProvider>
   </IntlProvider>
 );
 
-describe('Admin | Usecase', () => {
+describe('Admin | UsecasePage', () => {
   it('renders and matches the snapshot', () => {
     history.location.state = {
       fromRegister: true,

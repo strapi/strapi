@@ -19,7 +19,7 @@ import PrivateRoute from '../../components/PrivateRoute';
 import { createRoute, makeUniqueRoutes } from '../../utils';
 import AuthPage from '../AuthPage';
 import NotFoundPage from '../NotFoundPage';
-import Usecase from '../Usecase';
+import UsecasePage from '../UsecasePage';
 import { getUID } from './utils';
 import routes from './utils/routes';
 
@@ -120,7 +120,7 @@ function App() {
             )}
             exact
           />
-          <PrivateRoute path="/usecase" component={Usecase} />
+          <PrivateRoute path="/usecase" component={UsecasePage} />
           <PrivateRoute path="/" component={AuthenticatedApp} />
           <Route path="" component={NotFoundPage} />
         </Switch>
