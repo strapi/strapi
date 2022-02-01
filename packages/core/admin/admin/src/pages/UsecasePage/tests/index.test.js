@@ -12,6 +12,11 @@ jest.mock('../../../components/LocalesProvider/useLocalesProvider', () => () => 
   messages: ['test'],
 }));
 
+jest.mock('@strapi/helper-plugin', () => ({
+  ...jest.requireActual('@strapi/helper-plugin'),
+  useNotification: jest.fn(),
+}));
+
 const history = createMemoryHistory();
 
 const App = (

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
-import { pxToRem } from '@strapi/helper-plugin';
+import { pxToRem, useNotification } from '@strapi/helper-plugin';
 import { Main } from '@strapi/design-system/Main';
 import { Flex } from '@strapi/design-system/Flex';
 import { Box } from '@strapi/design-system/Box';
@@ -29,6 +29,7 @@ const TypographyCenter = styled(Typography)`
 `;
 
 const UsecasePage = () => {
+  const toggleNotification = useNotification();
   const { push, location } = useHistory();
   const { formatMessage } = useIntl();
   const [workType, setWorkType] = useState();
@@ -42,6 +43,13 @@ const UsecasePage = () => {
       console.log('data sent');
     }
 
+    toggleNotification({
+      type: 'success',
+      message: {
+        id: 'Usecase.notification.success.project-created',
+        defaultMessage: 'Project has been successfully created',
+      },
+    });
     push('/');
   };
 
