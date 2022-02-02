@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
@@ -39,18 +40,38 @@ const UsecasePage = () => {
   const isComingFromRegister = location.state?.fromRegister;
 
   const handleSubmit = () => {
-    if (workType) {
-      console.log('data sent');
-    }
+    try {
+      const {
+        state: { email, firstAdmin, firstname },
+      } = location;
+      const workTypeData = { workType };
 
-    toggleNotification({
-      type: 'success',
-      message: {
-        id: 'Usecase.notification.success.project-created',
-        defaultMessage: 'Project has been successfully created',
-      },
-    });
-    push('/');
+      if (workType === 'Other' && otherValue) {
+        workTypeData.details = otherValue;
+      }
+
+      axios({
+        method: 'POST',
+        url: 'https://analytics.strapi.io/register',
+        data: {
+          email,
+          username: firstname,
+          firstAdmin,
+          workTypeData,
+        },
+      });
+
+      toggleNotification({
+        type: 'success',
+        message: {
+          id: 'Usecase.notification.success.project-created',
+          defaultMessage: 'Project has been successfully created',
+        },
+      });
+      push('/');
+    } catch (err) {
+      // Silent
+    }
   };
 
   useEffect(() => {
