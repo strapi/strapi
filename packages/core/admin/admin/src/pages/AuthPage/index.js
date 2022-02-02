@@ -165,17 +165,6 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
         (authType === 'register' && body.userInfo.news === true) ||
         (authType === 'register-admin' && body.news === true)
       ) {
-        // axios({
-        //   method: 'POST',
-        //   url: 'https://analytics.strapi.io/register',
-        //   data: {
-        //     email: user.email,
-        //     username: user.firstname,
-        //     firstAdmin: !hasAdmin,
-        //   },
-        //   cancelToken: source.token,
-        // });
-
         push({
           pathname: '/usecase',
           state: {
@@ -188,6 +177,7 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
 
         return;
       }
+
       // Redirect to the homePage
       push('/');
     } catch (err) {

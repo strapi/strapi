@@ -39,16 +39,28 @@ const UsecasePage = () => {
   const isOther = workType === 'Other';
   const isComingFromRegister = location.state?.fromRegister;
 
+  const CancelToken = axios.CancelToken;
+  const source = CancelToken.source();
+
+  useEffect(() => {
+    // Cancel request on unmount
+    return () => {
+      source.cancel('Component unmounted');
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (!isComingFromRegister) {
+      push('/');
+    }
+  }, [isComingFromRegister, push]);
+
   const handleSubmit = () => {
     try {
       const {
         state: { email, firstAdmin, firstname },
       } = location;
-      const workTypeData = { workType };
-
-      if (workType === 'Other' && otherValue) {
-        workTypeData.details = otherValue;
-      }
 
       axios({
         method: 'POST',
@@ -57,8 +69,10 @@ const UsecasePage = () => {
           email,
           username: firstname,
           firstAdmin,
-          workTypeData,
+          workType,
+          otherValue,
         },
+        cancelToken: source.token,
       });
 
       toggleNotification({
@@ -73,12 +87,6 @@ const UsecasePage = () => {
       // Silent
     }
   };
-
-  useEffect(() => {
-    if (!isComingFromRegister) {
-      push('/');
-    }
-  }, [isComingFromRegister, push]);
 
   if (!isComingFromRegister) {
     return null;
