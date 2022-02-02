@@ -70,7 +70,9 @@ export const VideoAssetCard = ({
       </CardHeader>
       <CardBody>
         <CardContent>
-          <CardTitle as="h2">{name}</CardTitle>
+          <Box paddingTop={1}>
+            <CardTitle as="h2">{name}</CardTitle>
+          </Box>
           <CardSubtitle>
             <Extension>{extension}</Extension>
           </CardSubtitle>

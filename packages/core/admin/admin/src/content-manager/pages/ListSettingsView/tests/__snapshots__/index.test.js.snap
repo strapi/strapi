@@ -1087,7 +1087,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                   >
                     <label
                       class="c32"
-                      for="field-1"
+                      for="toggleinput-1"
                     >
                       Enable search
                     </label>
@@ -1127,6 +1127,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                         aria-disabled="false"
                         checked=""
                         class="c42"
+                        id="toggleinput-1"
                         name="settings.searchable"
                         type="checkbox"
                       />
@@ -1145,7 +1146,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                   >
                     <label
                       class="c32"
-                      for="field-2"
+                      for="toggleinput-2"
                     >
                       Enable filters
                     </label>
@@ -1185,6 +1186,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                         aria-disabled="false"
                         checked=""
                         class="c42"
+                        id="toggleinput-2"
                         name="settings.filterable"
                         type="checkbox"
                       />
@@ -1203,7 +1205,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                   >
                     <label
                       class="c32"
-                      for="field-3"
+                      for="toggleinput-3"
                     >
                       Enable bulk actions
                     </label>
@@ -1242,6 +1244,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                       <input
                         aria-disabled="false"
                         class="c42"
+                        id="toggleinput-3"
                         name="settings.bulkable"
                         type="checkbox"
                       />
@@ -2974,7 +2977,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                     >
                       <label
                         class="c32"
-                        for="field-10"
+                        for="toggleinput-10"
                       >
                         Enable search
                       </label>
@@ -3014,6 +3017,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                           aria-disabled="false"
                           checked=""
                           class="c42"
+                          id="toggleinput-10"
                           name="settings.searchable"
                           type="checkbox"
                         />
@@ -3032,7 +3036,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                     >
                       <label
                         class="c32"
-                        for="field-11"
+                        for="toggleinput-11"
                       >
                         Enable filters
                       </label>
@@ -3072,6 +3076,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                           aria-disabled="false"
                           checked=""
                           class="c42"
+                          id="toggleinput-11"
                           name="settings.filterable"
                           type="checkbox"
                         />
@@ -3090,7 +3095,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                     >
                       <label
                         class="c32"
-                        for="field-12"
+                        for="toggleinput-12"
                       >
                         Enable bulk actions
                       </label>
@@ -3129,6 +3134,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                         <input
                           aria-disabled="false"
                           class="c42"
+                          id="toggleinput-12"
                           name="settings.bulkable"
                           type="checkbox"
                         />

@@ -146,6 +146,7 @@ const GenericInput = ({
 
             onChange({ target: { name, value: formattedDate, type } });
           }}
+          step={step}
           onClear={() => onChange({ target: { name, value: '', type } })}
           placeholder={formattedPlaceholder}
           required={required}

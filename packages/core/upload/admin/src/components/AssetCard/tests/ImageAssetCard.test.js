@@ -31,7 +31,7 @@ describe('ImageAssetCard', () => {
     );
 
     expect(container).toMatchInlineSnapshot(`
-      .c21 {
+      .c22 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
@@ -41,6 +41,10 @@ describe('ImageAssetCard', () => {
         padding: 0;
         position: absolute;
         width: 1px;
+      }
+
+      .c13 {
+        padding-top: 4px;
       }
 
       .c0 {
@@ -56,10 +60,11 @@ describe('ImageAssetCard', () => {
         padding-left: 12px;
       }
 
-      .c17 {
+      .c18 {
         background: #f6f6f9;
         padding: 4px;
         border-radius: 4px;
+        min-width: 20px;
       }
 
       .c3 {
@@ -106,6 +111,24 @@ describe('ImageAssetCard', () => {
         align-items: flex-start;
       }
 
+      .c19 {
+        display: -webkit-inline-box;
+        display: -webkit-inline-flex;
+        display: -ms-inline-flexbox;
+        display: inline-flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: center;
+        -webkit-justify-content: center;
+        -ms-flex-pack: center;
+        justify-content: center;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
       .c9 {
         margin: 0;
         padding: 0;
@@ -127,20 +150,20 @@ describe('ImageAssetCard', () => {
         background: repeating-conic-gradient(#f6f6f9 0% 25%,transparent 0% 50%) 50% / 20px 20px;
       }
 
-      .c13 {
+      .c14 {
         font-weight: 600;
         color: #32324d;
         font-size: 0.75rem;
         line-height: 1.33;
       }
 
-      .c14 {
+      .c15 {
         color: #666687;
         font-size: 0.75rem;
         line-height: 1.33;
       }
 
-      .c20 {
+      .c21 {
         color: #666687;
         font-weight: 600;
         font-size: 0.6875rem;
@@ -148,18 +171,14 @@ describe('ImageAssetCard', () => {
         text-transform: uppercase;
       }
 
-      .c18 {
-        display: inline-block;
-      }
-
-      .c16 {
+      .c17 {
         margin-left: auto;
         -webkit-flex-shrink: 0;
         -ms-flex-negative: 0;
         flex-shrink: 0;
       }
 
-      .c19 {
+      .c20 {
         margin-left: 4px;
       }
 
@@ -338,7 +357,7 @@ describe('ImageAssetCard', () => {
         fill: #666687;
       }
 
-      .c15 {
+      .c16 {
         text-transform: uppercase;
       }
 
@@ -407,17 +426,21 @@ describe('ImageAssetCard', () => {
               <div
                 class="c12"
               >
-                <h2
-                  class="c13"
-                  id="card-1-title"
-                >
-                  hello.png
-                </h2>
                 <div
-                  class="c14"
+                  class="c13"
+                >
+                  <h2
+                    class="c14"
+                    id="card-1-title"
+                  >
+                    hello.png
+                  </h2>
+                </div>
+                <div
+                  class="c15"
                 >
                   <span
-                    class="c15"
+                    class="c16"
                   >
                     png
                   </span>
@@ -425,13 +448,13 @@ describe('ImageAssetCard', () => {
                 </div>
               </div>
               <div
-                class="c16"
+                class="c17"
               >
                 <div
-                  class="c17 c18 c19"
+                  class="c18 c19 c20"
                 >
                   <span
-                    class="c20"
+                    class="c21"
                   >
                     Image
                   </span>
@@ -441,7 +464,7 @@ describe('ImageAssetCard', () => {
           </div>
         </article>
         <div
-          class="c21"
+          class="c22"
         >
           <p
             aria-live="polite"

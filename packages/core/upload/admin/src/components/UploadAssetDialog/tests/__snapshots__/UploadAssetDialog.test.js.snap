@@ -370,7 +370,7 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
   background: #4945ff;
 }
 
-.c32 .sc-eVmaCL {
+.c32 .sc-dYPfWK {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -435,7 +435,7 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
   background: #ffffff;
 }
 
-.c38 .sc-eVmaCL {
+.c38 .sc-dYPfWK {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -598,7 +598,7 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
                 class="c7"
                 id="title"
               >
-                Upload assets
+                Add new assets
               </h2>
               <button
                 aria-disabled="false"
@@ -1286,7 +1286,7 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   background: #4945ff;
 }
 
-.c33 .sc-eVmaCL {
+.c33 .sc-dYPfWK {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -1351,7 +1351,7 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   background: #ffffff;
 }
 
-.c30 .sc-eVmaCL {
+.c30 .sc-dYPfWK {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -1434,7 +1434,7 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
                 class="c6"
                 id="title"
               >
-                Upload assets
+                Add new assets
               </h2>
               <button
                 aria-disabled="false"

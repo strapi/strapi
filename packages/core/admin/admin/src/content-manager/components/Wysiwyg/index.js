@@ -144,15 +144,18 @@ const Wysiwyg = ({
           onCollapse={handleToggleExpand}
         >
           <WysiwygNav
+            isExpandMode={isExpandMode}
             editorRef={editorRef}
             isPreviewMode={isPreviewMode}
             onActionClick={handleActionClick}
             onToggleMediaLib={handleToggleMediaLib}
             onTogglePreviewMode={isExpandMode ? undefined : handleTogglePreviewMode}
+            disabled={disabled}
           />
 
           <Editor
             disabled={disabled}
+            isExpandMode={isExpandMode}
             editorRef={editorRef}
             error={errorMessage}
             isPreviewMode={isPreviewMode}
@@ -185,7 +188,7 @@ const Wysiwyg = ({
 
 Wysiwyg.defaultProps = {
   description: null,
-  disabled: true,
+  disabled: false,
   error: '',
   labelAction: undefined,
   placeholder: null,
