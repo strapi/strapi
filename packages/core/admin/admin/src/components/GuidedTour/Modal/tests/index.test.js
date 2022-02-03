@@ -68,6 +68,10 @@ describe('<GuidedTourModal />', () => {
         line-height: 1.33;
       }
 
+      .c28 {
+        padding-left: 8px;
+      }
+
       .c23 {
         display: -webkit-box;
         display: -webkit-flex;
@@ -138,7 +142,7 @@ describe('<GuidedTourModal />', () => {
         background: #4945ff;
       }
 
-      .c24 .sc-hKwDye {
+      .c24 .c27 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -191,7 +195,7 @@ describe('<GuidedTourModal />', () => {
         background: #4945ff;
       }
 
-      .c27 {
+      .c29 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -203,7 +207,7 @@ describe('<GuidedTourModal />', () => {
         background: #ffffff;
       }
 
-      .c27 .sc-hKwDye {
+      .c29 .c27 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -214,52 +218,52 @@ describe('<GuidedTourModal />', () => {
         align-items: center;
       }
 
-      .c27 .c25 {
+      .c29 .c25 {
         color: #ffffff;
       }
 
-      .c27[aria-disabled='true'] {
+      .c29[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c27[aria-disabled='true'] .c25 {
+      .c29[aria-disabled='true'] .c25 {
         color: #666687;
       }
 
-      .c27[aria-disabled='true'] svg > g,
-      .c27[aria-disabled='true'] svg path {
+      .c29[aria-disabled='true'] svg > g,
+      .c29[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c27[aria-disabled='true']:active {
+      .c29[aria-disabled='true']:active {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c27[aria-disabled='true']:active .c25 {
+      .c29[aria-disabled='true']:active .c25 {
         color: #666687;
       }
 
-      .c27[aria-disabled='true']:active svg > g,
-      .c27[aria-disabled='true']:active svg path {
+      .c29[aria-disabled='true']:active svg > g,
+      .c29[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
-      .c27:hover {
+      .c29:hover {
         background-color: #f6f6f9;
       }
 
-      .c27:active {
+      .c29:active {
         background-color: #eaeaef;
       }
 
-      .c27 .c25 {
+      .c29 .c25 {
         color: #32324d;
       }
 
-      .c27 svg > g,
-      .c27 svg path {
+      .c29 svg > g,
+      .c29 svg path {
         fill: #32324d;
       }
 
@@ -703,6 +707,23 @@ describe('<GuidedTourModal />', () => {
                         >
                           Build a Collection-type
                         </span>
+                        <div
+                          aria-hidden="true"
+                          class="c27 c28"
+                        >
+                          <svg
+                            fill="none"
+                            height="1em"
+                            viewBox="0 0 24 24"
+                            width="1em"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M0 10.7c0-.11.09-.2.2-.2h18.06l-8.239-8.239a.2.2 0 010-.282L11.86.14a.2.2 0 01.282 0L23.86 11.86a.2.2 0 010 .282L12.14 23.86a.2.2 0 01-.282 0L10.02 22.02a.2.2 0 010-.282L18.26 13.5H.2a.2.2 0 01-.2-.2v-2.6z"
+                              fill="#212134"
+                            />
+                          </svg>
+                        </div>
                       </button>
                     </div>
                   </div>
@@ -712,7 +733,7 @@ describe('<GuidedTourModal />', () => {
                 >
                   <button
                     aria-disabled="false"
-                    class="c23 c27"
+                    class="c23 c29"
                     type="button"
                   >
                     <span
