@@ -1875,6 +1875,10 @@ Array [
     "name": "Turkish (tr)",
   },
   Object {
+    "code": "tk",
+    "name": "Turkmen (tk)",
+  },
+  Object {
     "code": "tr-TR",
     "name": "Turkish (Turkey) (tr-TR)",
   },

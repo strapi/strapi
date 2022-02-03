@@ -137,13 +137,8 @@ module.exports = {
         throw new ValidationError('Incorrect code provided');
       }
 
-      const password = await getService('user').hashPassword({ password: params.password });
-
+      await getService('user').edit(user.id, { resetPasswordToken: null, password: params.password });
       // Update the user.
-      await strapi
-        .query('plugin::users-permissions.user')
-        .update({ where: { id: user.id }, data: { resetPasswordToken: null, password } });
-
       ctx.send({
         jwt: getService('jwt').issue({ id: user.id }),
         user: await sanitizeUser(user, ctx),
@@ -325,7 +320,6 @@ module.exports = {
     }
 
     params.role = role.id;
-    params.password = await getService('user').hashPassword(params);
 
     const user = await strapi.query('plugin::users-permissions.user').findOne({
       where: { email: params.email },
@@ -344,7 +338,7 @@ module.exports = {
         params.confirmed = true;
       }
 
-      const user = await strapi.query('plugin::users-permissions.user').create({ data: params });
+    const user = await getService('user').add(params);
 
       const sanitizedUser = await sanitizeUser(user, ctx);
 
@@ -367,8 +361,11 @@ module.exports = {
     } catch (err) {
       if (_.includes(err.message, 'username')) {
         throw new ApplicationError('Username already taken');
-      } else {
+      } else if (_.includes(err.message, 'email')) {
         throw new ApplicationError('Email already taken');
+      } else {
+        strapi.log.error(err);
+        throw new ApplicationError('An error occurred during account creation');
       }
     }
   },
