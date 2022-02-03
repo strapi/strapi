@@ -1,4 +1,5 @@
 import React, { useMemo, useCallback } from 'react';
+import PropTypes from 'prop-types';
 import get from 'lodash/get';
 import { GridItem } from '@strapi/design-system/Grid';
 import { Select, Option } from '@strapi/design-system/Select';
@@ -120,12 +121,17 @@ const ModalForm = ({ onMetaChange, onSizeChange }) => {
         </Option>
       ))}
     </Select>
-                    </GridItem>;
+  </GridItem>;
 
   return <>
     {metaFields}
     {canResize && sizeField}
   </>
+};
+
+ModalForm.propTypes = {
+  onMetaChange: PropTypes.func.isRequired,
+  onSizeChange: PropTypes.func.isRequired,
 };
 
 export default ModalForm;
