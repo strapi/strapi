@@ -309,7 +309,7 @@ const createHelpers = db => {
           continue;
         }
 
-        createColumn(tableBuilder, object).alter({ alterNullable, alterType: false });
+        createColumn(tableBuilder, object).alter({ alterNullable, alterType: true });
       }
 
       for (const updatedForeignKey of table.foreignKeys.updated) {

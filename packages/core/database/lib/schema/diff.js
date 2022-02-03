@@ -361,8 +361,12 @@ module.exports = db => {
     console.log(hasChanged);
     console.log('Added Tables');
     console.log(addedTables);
+
+    console.log('first index');
+    console.log(updatedTables[0].columns.updated);
     console.log('Updated Tables');
     console.log(updatedTables);
+
     // console.log(JSON.stringify(updatedTables, null, 2));
     // console.log("Unchanged Tables")
     // console.log(unchangedTables);
