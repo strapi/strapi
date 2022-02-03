@@ -47,7 +47,7 @@ const createComponents = async (uid, data) => {
         );
 
         // TODO: add order
-        componentBody[attributeName] = components.map(({ id }, idx) => {
+        componentBody[attributeName] = components.filter(e => e).map(({ id }, idx) => {
           return {
             id,
             __pivot: {
