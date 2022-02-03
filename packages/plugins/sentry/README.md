@@ -100,7 +100,7 @@ const sentryInstance = strapi
 
 ## Disabling
 
-This plugin can be disabled in the plugins configuration file. And with the `env` utility, it is also possible to disable it depending on the environment.
+This plugin can be disabled in the plugins configuration file. With the `env` utility, it is also possible to disable it depending on the environment.
 
 **Example**
 
