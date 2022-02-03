@@ -295,25 +295,25 @@ const createHelpers = db => {
       }
 
       // Update existing columns / foreign keys / indexes
-      console.log('tables');
-      console.log(JSON.stringify(table, null, 2));
+      // console.log('tables');
+      // console.log(JSON.stringify(table, null, 2));
       for (const updatedColumn of table.columns.updated) {
         debug(`Updating column ${updatedColumn.name}`);
         console.log(`Updating column ${updatedColumn.name}`);
         const { object } = updatedColumn;
         console.log('updating column');
         console.log(updatedColumn);
-
+        let alterNullable = false;
         if (
           updatedColumn.name === 'id' ||
           updatedColumn.name === 'created_by_id' ||
           updatedColumn.name === 'updated_by_id'
         ) {
-          console.log('skipping');
+          alterNullable = true;
           continue;
         }
 
-        createColumn(tableBuilder, object).alter();
+        createColumn(tableBuilder, object).alter({ alterNullable });
       }
 
       for (const updatedForeignKey of table.foreignKeys.updated) {
