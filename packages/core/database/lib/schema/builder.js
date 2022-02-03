@@ -304,16 +304,12 @@ const createHelpers = db => {
         console.log('updating column');
         console.log(updatedColumn);
         let alterNullable = false;
-        if (
-          updatedColumn.name === 'id' ||
-          updatedColumn.name === 'created_by_id' ||
-          updatedColumn.name === 'updated_by_id'
-        ) {
+        if (updatedColumn.name === 'id') {
           alterNullable = true;
           continue;
         }
 
-        createColumn(tableBuilder, object).alter({ alterNullable });
+        createColumn(tableBuilder, object).alter({ alterNullable, alterType: false });
       }
 
       for (const updatedForeignKey of table.foreignKeys.updated) {
