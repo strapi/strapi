@@ -28,7 +28,7 @@ module.exports = {
     } = getService('content-types');
     const { READ_ACTION, CREATE_ACTION } = strapi.admin.services.constants;
 
-    const modelDef = strapi.getModel(model);
+    const modelDef = strapi.contentType(model);
     const scalarAttributes = getScalarAttributes(modelDef);
     const nonLocalizedAttributes = getNonLocalizedAttributes(modelDef);
     const attributesToPopulate = difference(nonLocalizedAttributes, scalarAttributes);
