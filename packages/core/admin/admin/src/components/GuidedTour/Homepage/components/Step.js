@@ -1,40 +1,42 @@
 import React from 'react';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { pxToRem } from '@strapi/helper-plugin';
 import { Typography } from '@strapi/design-system/Typography';
 import { Box } from '@strapi/design-system/Box';
+import { Flex } from '@strapi/design-system/Flex';
 import StepNumber from '../../Stepper/StepNumber';
 import StepLine from '../../Stepper/StepLine';
 import { IS_DONE, IS_ACTIVE, IS_NOT_DONE } from '../../constants';
-
-const GridItemAlignCenter = styled(Box)`
-  align-self: center;
-`;
-
-const GridItemJustifyCenter = styled(Box)`
-  justify-self: center;
-`;
 
 const StepHomepage = ({ type, title, number, content, hasLine }) => {
   const { formatMessage } = useIntl();
 
   return (
-    <>
-      <Box>
-        <StepNumber type={type} number={number} />
-      </Box>
-      <GridItemAlignCenter>
+    <Box>
+      <Flex>
+        <Box minWidth={pxToRem(30)} marginRight={5}>
+          <StepNumber type={type} number={number} />
+        </Box>
         <Typography variant="delta" as="h3">
           {formatMessage(title)}
         </Typography>
-      </GridItemAlignCenter>
-      <GridItemJustifyCenter height="100%">
-        {hasLine && <StepLine type={type} minHeight={pxToRem(64)} />}
-      </GridItemJustifyCenter>
-      <Box>{type === IS_ACTIVE && content}</Box>
-    </>
+      </Flex>
+      <Flex alignItems="flex-start">
+        <Flex
+          justifyContent="center"
+          minWidth={pxToRem(30)}
+          marginBottom={3}
+          marginTop={3}
+          marginRight={5}
+        >
+          {hasLine && (
+            <StepLine type={type} minHeight={type === IS_ACTIVE ? pxToRem(85) : pxToRem(65)} />
+          )}
+        </Flex>
+        <Box marginTop={2}>{type === IS_ACTIVE && content}</Box>
+      </Flex>
+    </Box>
   );
 };
 

@@ -1,15 +1,8 @@
 import React from 'react';
-import styled from 'styled-components';
 import PropTypes from 'prop-types';
-import { pxToRem } from '@strapi/helper-plugin';
-import { Grid } from '@strapi/design-system/Grid';
+import { Box } from '@strapi/design-system/Box';
 import StepHomepage from './Step';
 import { IS_DONE, IS_ACTIVE, IS_NOT_DONE } from '../../constants';
-
-const GridCustom = styled(Grid)`
-  gap: ${({ theme }) => `${theme.spaces[3]} ${theme.spaces[4]}`};
-  grid-template-columns: ${pxToRem(30)} 1fr;
-`;
 
 const getType = (activeSectionIndex, index) => {
   if (activeSectionIndex === -1) {
@@ -29,7 +22,7 @@ const StepperHomepage = ({ sections, currentSectionKey }) => {
   const activeSectionIndex = sections.findIndex(section => section.key === currentSectionKey);
 
   return (
-    <GridCustom>
+    <Box>
       {sections.map((section, index) => (
         <StepHomepage
           key={section.key}
@@ -40,7 +33,7 @@ const StepperHomepage = ({ sections, currentSectionKey }) => {
           hasLine={index !== sections.length - 1}
         />
       ))}
-    </GridCustom>
+    </Box>
   );
 };
 

@@ -7,6 +7,7 @@ import { Button } from '@strapi/design-system/Button';
 import { LinkButton } from '@strapi/design-system/LinkButton';
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
+import ArrowRight from '@strapi/icons/ArrowRight';
 import Content from './Content';
 import StepLine from '../../Stepper/StepLine';
 import StepNumberWithPadding from './StepNumberWithPadding';
@@ -66,11 +67,13 @@ const StepperModal = ({
           <Content {...content} />
           {cta &&
             (cta.target ? (
-              <LinkButton onClick={onCtaClick} to={cta.target}>
+              <LinkButton endIcon={<ArrowRight />} onClick={onCtaClick} to={cta.target}>
                 {formatMessage(cta.title)}
               </LinkButton>
             ) : (
-              <Button onClick={onCtaClick}>{formatMessage(cta.title)}</Button>
+              <Button endIcon={<ArrowRight />} onClick={onCtaClick}>
+                {formatMessage(cta.title)}
+              </Button>
             ))}
         </Box>
       </Flex>
