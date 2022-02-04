@@ -24,7 +24,7 @@ Before contributing larger chunks of code that might affect core functionalities
 
 ## Code of Conduct
 
-This project and everyone participating in it, are governed by the [Strapi Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold it. Make sure to read the [full text](CODE_OF_CONDUCT.md), to understand which type of actions may or may not be tolerated.
+This project, and everyone participating in it, are governed by the [Strapi Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold it. Make sure to read the [full text](CODE_OF_CONDUCT.md) to understand which type of actions may or may not be tolerated.
 
 ## Contributor License Agreement (CLA)
 
