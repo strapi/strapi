@@ -1,18 +1,12 @@
 # Contribute to Strapi
 
-Strapi is an open-source project administered by [the Strapi team](https://strapi.io/about-us). We appreciate your interest and efforts to contribute to Strapi.
+Strapi is an open-source project administered by [the Strapi team](https://strapi.io/about-us). We appreciate your interest and efforts to contribute to Strapi. See the [LICENSE](https://github.com/strapi/strapi/blob/master/LICENSE) licensing information. All work done is available on GitHub.
 
-All efforts to contribute are highly appreciated, we recommend you talk to a maintainer prior to spending a lot of time making a pull request that may not align with the project roadmap.
-
-## Open Development & Community Driven
-
-Strapi is an open-source project. See the [LICENSE](https://github.com/strapi/strapi/blob/master/LICENSE) file for licensing information. All the work done is available on GitHub.
-
-The core team and the contributors send pull requests which go through the same validation process.
+We highly appreciate your effort to contribute, but we recommend you to talk to a maintainer prior to spending a lot of time making a pull request that may not align with the project roadmap. Every pull request, whether is from strapi or contributors, goes through the same process.
 
 ## Feature Requests
 
-Feature Requests by the community are highly encouraged. Please feel free to submit a [feature request](https://portal.productboard.com/strapi) or to upvote 👍 [an existing feature request](https://portal.productboard.com/strapi) in the ProductBoard.
+Feature Requests by the community are highly encouraged. Feel free to submit a new one or upvote an existing feature request on [ProductBoard](https://portal.productboard.com/strapi).
 
 ## Request For Comments (RFCs)
 
