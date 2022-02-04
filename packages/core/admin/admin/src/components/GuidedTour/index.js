@@ -4,6 +4,7 @@ import get from 'lodash/get';
 import { GuidedTourProvider } from '@strapi/helper-plugin';
 import persistStateToLocaleStorage from './utils/persistStateToLocaleStorage';
 import arePreviousSectionsDone from './utils/arePreviousSectionsDone';
+import arePreviousStepsDone from './utils/arePreviousStepsDone';
 import reducer, { initialState } from './reducer';
 import init from './init';
 
@@ -15,10 +16,14 @@ const GuidedTour = ({ children }) => {
   );
 
   const setCurrentStep = step => {
-    const isStepAlreadyDone = get(guidedTourState, step);
+    // if step is null it is intentional, we need to dispatch it
+    if (step !== null) {
+      const isStepAlreadyDone = get(guidedTourState, step);
+      const isStepToShow = arePreviousStepsDone(step, guidedTourState);
 
-    if (isStepAlreadyDone || isSkipped) {
-      return null;
+      if (isStepAlreadyDone || isSkipped || !isStepToShow) {
+        return null;
+      }
     }
 
     persistStateToLocaleStorage.addCurrentStep(step);
