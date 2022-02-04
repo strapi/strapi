@@ -10,7 +10,7 @@ Feature Requests by the community are highly encouraged. Feel free to submit a n
 
 ## Request For Comments (RFCs)
 
-Larger changes in Strapi require a thourough design phase before starting working on a PR.
+Larger changes in Strapi require a thorough design phase before starting working on a PR.
 
 The Request For Comments (RFC) process will help us create consensus among the core team and include as much feedback as possible from the community, for these upcoming changes.
 
@@ -18,13 +18,13 @@ Before contributing larger chunks of code that might affect core functionalities
 
 ## Code of Conduct
 
-This project and everyone participating in it, are governed by the [Strapi Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold it. Make sure to read the [full text](CODE_OF_CONDUCT.md), to understand which type of actions may or may not be tolerated.
+This project, and everyone participating in it, are governed by the [Strapi Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold it. Make sure to read the [full text](CODE_OF_CONDUCT.md) to understand which type of actions may or may not be tolerated.
 
 ## Contributor License Agreement (CLA)
 
 ### Individual
 
-In order to accept your pull request, we need you to submit a CLA. You only need to do this once. If you are submitting a pull request for the first time, you can complete your CLA [here](https://cla.strapi.io/strapi/strapi) or just submit a pull request and our CLA Bot will ask you to sign the CLA before merging it.
+In order to accept your pull request, we need you to submit a CLA. You only need to do this once. If you are submitting a pull request for the first time, you can complete your CLA [here](https://cla.strapi.io/strapi/strapi) or just submit a pull request and our CLA bot will ask you to sign the CLA before merging it.
 
 ### Company
 
