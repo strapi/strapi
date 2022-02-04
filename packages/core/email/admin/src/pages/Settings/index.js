@@ -205,7 +205,7 @@ const SettingsPage = () => {
                         })
                       }
                       placeholder={formatMessage({
-                        id: 'Settings.email.plugin.placeholder.testAddress',
+                        id: getTrad('Settings.email.plugin.placeholder.testAddress'),
                         defaultMessage: 'ex: developer@example.com',
                       })}
                     />
@@ -217,7 +217,10 @@ const SettingsPage = () => {
                       type="submit"
                       startIcon={<Envelop />}
                     >
-                      Send test email
+                      {formatMessage({
+                        id: getTrad('Settings.email.plugin.button.test-email'),
+                        defaultMessage: 'Send test email',
+                      })}
                     </Button>
                   </GridItem>
                 </Grid>
