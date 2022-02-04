@@ -11,19 +11,9 @@ import { makeSelectModelAndComponentSchemas } from '../../App/selectors';
 import getTrad from '../../../utils/getTrad';
 import GenericInput from './GenericInput';
 
-const FIELD_SIZES = [
-  [4, '33%'],
-  [6, '50%'],
-  [8, '66%'],
-  [12, '100%']
-];
+const FIELD_SIZES = [[4, '33%'], [6, '50%'], [8, '66%'], [12, '100%']];
 
-const NON_RESIZABLE_FIELD_TYPES = [
-  'dynamiczone',
-  'component',
-  'json',
-  'richtext'
-];
+const NON_RESIZABLE_FIELD_TYPES = ['dynamiczone', 'component', 'json', 'richtext'];
 
 const ModalForm = ({ onMetaChange, onSizeChange }) => {
   const { formatMessage } = useIntl();
@@ -103,30 +93,34 @@ const ModalForm = ({ onMetaChange, onSizeChange }) => {
 
   const canResize = !NON_RESIZABLE_FIELD_TYPES.includes(attributes[selectedField].type);
 
-  const sizeField = <GridItem col={6} key="size">
-    <Select
-      value={fieldForm?.size}
-      name="size"
-      onChange={(value) => {
-        onSizeChange({ name: selectedField, value });
-      }}
-      label={formatMessage({
-        id: getTrad('containers.SettingPage.editSettings.size.label'),
-        defaultMessage: "Size"
-      })}
-    >
-      {FIELD_SIZES.map(([value, label]) => (
-        <Option key={value} value={value}>
-          {label}
-        </Option>
-      ))}
-    </Select>
-  </GridItem>;
+  const sizeField = (
+    <GridItem col={6} key="size">
+      <Select
+        value={fieldForm?.size}
+        name="size"
+        onChange={value => {
+          onSizeChange({ name: selectedField, value });
+        }}
+        label={formatMessage({
+          id: getTrad('containers.SettingPage.editSettings.size.label'),
+          defaultMessage: 'Size',
+        })}
+      >
+        {FIELD_SIZES.map(([value, label]) => (
+          <Option key={value} value={value}>
+            {label}
+          </Option>
+        ))}
+      </Select>
+    </GridItem>
+  );
 
-  return <>
-    {metaFields}
-    {canResize && sizeField}
-  </>
+  return (
+    <>
+      {metaFields}
+      {canResize && sizeField}
+    </>
+  );
 };
 
 ModalForm.propTypes = {
