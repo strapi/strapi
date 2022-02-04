@@ -65,7 +65,7 @@ module.exports = ({ strapi }) => {
     const nexusSchema = makeSchema({
       // Build the schema from the merged GraphQL schema.
       // Since we're passing the schema to the mergeSchema property, it'll transform our SDL type definitions
-      // into Nexus type definition, thus allowing them to be handled bu Nexus plugins & other processing
+      // into Nexus type definition, thus allowing them to be handled by  Nexus plugins & other processing
       mergeSchema: { schema: schemaWithResolvers },
 
       // Apply user-defined plugins
