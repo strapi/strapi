@@ -16,7 +16,7 @@ Feature Requests by the community are highly encouraged. Please feel free to sub
 
 ## Request For Comments (RFCs)
 
-Larger changes in Strapi require a thourough design phase before starting working on a PR.
+Larger changes in Strapi require a thorough design phase before starting working on a PR.
 
 The Request For Comments (RFC) process will help us create consensus among the core team and include as much feedback as possible from the community, for these upcoming changes.
 
