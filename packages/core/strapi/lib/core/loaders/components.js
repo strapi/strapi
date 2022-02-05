@@ -10,7 +10,7 @@ module.exports = async strapi => {
     return {};
   }
 
-  const map = await loadFiles(strapi.dirs.components, '*/*.*(js|json)');
+  const map = await loadFiles(strapi.dirs.components, '*/*.*(js|ts|cjs|mjs|json)');
 
   return Object.keys(map).reduce((acc, category) => {
     Object.keys(map[category]).forEach(key => {

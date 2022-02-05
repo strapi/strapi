@@ -98,14 +98,10 @@ const loadAPI = async dir => {
 };
 
 const loadIndex = async dir => {
-  if (await fse.pathExists(join(dir, 'index.js'))) {
-    return loadFile(join(dir, 'index.js'));
-  } else if (await fse.pathExists(join(dir, 'index.cjs'))) {
-    return loadFile(join(dir, 'index.cjs'));
-  } else if (await fse.pathExists(join(dir, 'index.mjs'))) {
-    return loadFile(join(dir, 'index.mjs'));
-  } else if (await fse.pathExists(join(dir, 'index.ts'))) {
-    return loadFile(join(dir, 'index.ts'));
+  for (const file of ['index.js', 'index.ts', 'index.mjs', 'index.cjs']) {
+    if (await fse.pathExists(join(dir, file))) {
+      return loadFile(join(dir, file));
+    }
   }
 };
 

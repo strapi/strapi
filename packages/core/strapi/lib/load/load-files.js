@@ -3,6 +3,7 @@
 const path = require('path');
 const _ = require('lodash');
 const fse = require('fs-extra');
+const jiti = require('jiti')(__dirname);
 const glob = require('./glob');
 const filePathToPath = require('./filepath-to-prop-path');
 
@@ -26,15 +27,34 @@ const loadFiles = async (
 
   for (let file of files) {
     const absolutePath = path.resolve(dir, file);
+    const ext = path.extname(absolutePath);
 
     // load module
     delete require.cache[absolutePath];
     let mod;
 
-    if (path.extname(absolutePath) === '.json') {
-      mod = await fse.readJson(absolutePath);
-    } else {
-      mod = requireFn(absolutePath);
+    switch (ext) {
+      case '.js':
+      case '.cjs':
+        mod = requireFn(absolutePath);
+        break;
+      case '.ts':
+      case '.mjs':
+        try {
+          const esModule = jiti(absolutePath);
+
+          if (!esModule || !esModule.default) {
+            throw new Error(`The file has no default export`);
+          }
+
+          mod = esModule.default;
+        } catch (error) {
+          throw new Error(`Could not load es/ts module config file ${file}: ${error.message}`);
+        }
+        break;
+      case '.json':
+        mod = await fse.readJson(absolutePath);
+        break;
     }
 
     Object.defineProperty(mod, '__filename__', {

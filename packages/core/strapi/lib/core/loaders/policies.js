@@ -2,6 +2,7 @@
 
 const { join, extname, basename } = require('path');
 const fse = require('fs-extra');
+const jiti = require('jiti')(__dirname);
 
 // TODO:: allow folders with index.js inside for bigger policies
 module.exports = async function loadPolicies(strapi) {
@@ -18,9 +19,28 @@ module.exports = async function loadPolicies(strapi) {
     const { name } = fd;
     const fullPath = join(dir, name);
 
-    if (fd.isFile() && extname(name) === '.js') {
-      const key = basename(name, '.js');
-      policies[key] = require(fullPath);
+    if (fd.isFile()) {
+      const ext = extname(name);
+      switch (ext) {
+        case '.js':
+        case '.cjs':
+          policies[basename(name, ext)] = require(fullPath);
+          break;
+        case '.mjs':
+        case '.ts':
+          try {
+            const esModule = jiti(fullPath);
+
+            if (!esModule || !esModule.default) {
+              throw new Error(`The file has no default export`);
+            }
+
+            policies[basename(name, ext)] = esModule.default;
+          } catch (error) {
+            throw new Error(`Could not load es/ts module policy ${fullPath}: ${error.message}`);
+          }
+          break;
+      }
     }
   }
 

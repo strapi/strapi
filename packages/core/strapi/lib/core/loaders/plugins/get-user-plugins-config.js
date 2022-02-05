@@ -12,23 +12,24 @@ const loadConfigFile = require('../../app-configuration/load-config-file');
  * @return {Promise<{}>}
  */
 const getUserPluginsConfig = async () => {
-  const globalUserConfigPath = join(strapi.dirs.config, 'plugins.js');
-  const currentEnvUserConfigPath = join(
-    strapi.dirs.config,
-    'env',
-    process.env.NODE_ENV,
-    'plugins.js'
-  );
   let config = {};
 
   // assign global user config if exists
-  if (await fse.pathExists(globalUserConfigPath)) {
-    config = loadConfigFile(globalUserConfigPath);
+  for (const file of ['plugins.js', 'plugins.ts', 'plugins.mjs', 'plugins.cjs']) {
+    const filepath = join(strapi.dirs.config, file);
+    if (await fse.pathExists(filepath)) {
+      config = loadConfigFile(filepath);
+      break;
+    }
   }
 
   // and merge user config by environment if exists
-  if (await fse.pathExists(currentEnvUserConfigPath)) {
-    config = merge(config, loadConfigFile(currentEnvUserConfigPath));
+  for (const file of ['plugins.js', 'plugins.ts', 'plugins.mjs', 'plugins.cjs']) {
+    let filepath = join(strapi.dirs.config, 'env', process.env.NODE_ENV, file);
+    if (await fse.pathExists(filepath)) {
+      config = merge(config, loadConfigFile(filepath));
+      break;
+    }
   }
 
   return config;

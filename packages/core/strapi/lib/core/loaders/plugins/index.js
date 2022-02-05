@@ -32,7 +32,7 @@ const applyUserExtension = async plugins => {
   }
 
   const extendedSchemas = await loadFiles(extensionsDir, '**/content-types/**/schema.json');
-  const strapiServers = await loadFiles(extensionsDir, '**/strapi-server.js');
+  const strapiServers = await loadFiles(extensionsDir, '**/strapi-server.(js|ts|cjs|mjs)');
 
   for (const pluginName in plugins) {
     const plugin = plugins[pluginName];
@@ -86,15 +86,23 @@ const loadPlugins = async strapi => {
   for (const pluginName in enabledPlugins) {
     const enabledPlugin = enabledPlugins[pluginName];
 
-    const serverEntrypointPath = join(enabledPlugin.pathToPlugin, 'strapi-server.js');
+    for (const file of [
+      'strapi-server.js',
+      'strapi-server.ts',
+      'strapi-server.mjs',
+      'strapi-server.cjs',
+    ]) {
+      const serverEntrypointPath = join(enabledPlugin.pathToPlugin, file);
 
-    // only load plugins with a server entrypoint
-    if (!(await fse.pathExists(serverEntrypointPath))) {
-      continue;
+      // only load plugins with a server entrypoint
+      if (!(await fse.pathExists(serverEntrypointPath))) {
+        continue;
+      }
+
+      const pluginServer = loadConfigFile(serverEntrypointPath);
+      plugins[pluginName] = defaultsDeep(defaultPlugin, pluginServer);
+      break;
     }
-
-    const pluginServer = loadConfigFile(serverEntrypointPath);
-    plugins[pluginName] = defaultsDeep(defaultPlugin, pluginServer);
   }
 
   // TODO: validate plugin format
