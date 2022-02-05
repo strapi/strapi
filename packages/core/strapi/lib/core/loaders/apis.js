@@ -5,6 +5,7 @@ const { existsSync } = require('fs-extra');
 const _ = require('lodash');
 const fse = require('fs-extra');
 const { isKebabCase } = require('@strapi/utils');
+const jiti = require('jiti')(__dirname);
 
 // to handle names with numbers in it we first check if it is already in kebabCase
 const normalizeName = name => (isKebabCase(name) ? name : _.kebabCase(name));
@@ -99,6 +100,12 @@ const loadAPI = async dir => {
 const loadIndex = async dir => {
   if (await fse.pathExists(join(dir, 'index.js'))) {
     return loadFile(join(dir, 'index.js'));
+  } else if (await fse.pathExists(join(dir, 'index.cjs'))) {
+    return loadFile(join(dir, 'index.cjs'));
+  } else if (await fse.pathExists(join(dir, 'index.mjs'))) {
+    return loadFile(join(dir, 'index.mjs'));
+  } else if (await fse.pathExists(join(dir, 'index.ts'))) {
+    return loadFile(join(dir, 'index.ts'));
   }
 };
 
@@ -150,7 +157,21 @@ const loadFile = file => {
 
   switch (ext) {
     case '.js':
+    case '.cjs':
       return require(file);
+    case '.ts':
+    case '.mjs':
+      try {
+        const esModule = jiti(file);
+
+        if (!esModule || !esModule.default) {
+          throw new Error(`The file has no default export`);
+        }
+
+        return esModule.default;
+      } catch (error) {
+        throw new Error(`Could not load es/ts module config file ${file}: ${error.message}`);
+      }
     case '.json':
       return fse.readJSON(file);
     default:
