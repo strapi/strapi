@@ -262,7 +262,7 @@ async function watchAdmin({ plugins, dir, host, port, browser, options }) {
 
   const compiler = webpack(webpackConfig);
 
-  const server = new WebpackDevServer(compiler.options.devServer, compiler);
+  const server = new WebpackDevServer(args.devServer, compiler);
 
   const runServer = async () => {
     console.log(chalk.green('Starting the development server...'));
