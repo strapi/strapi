@@ -582,7 +582,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         modifiedData: {
           type: 'media',
           multiple: true,
-          allowedTypes: ['images', 'files', 'videos'],
+          allowedTypes: ['images', 'files', 'videos', 'audios'],
         },
       };
 

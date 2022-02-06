@@ -4,6 +4,7 @@ import { prefixFileUrlWithBackendUrl, getFileExtension } from '@strapi/helper-pl
 import { ImageAssetCard } from './ImageAssetCard';
 import { VideoAssetCard } from './VideoAssetCard';
 import { DocAssetCard } from './DocAssetCard';
+import { AudioAssetCard } from './AudioAssetCard';
 import { AssetType, AssetDefinition } from '../../constants';
 import { createAssetUrl } from '../../utils/createAssetUrl';
 import toSingularTypes from '../../utils/toSingularTypes';
@@ -64,7 +65,31 @@ export const AssetCard = ({
     );
   }
 
-  const canSelectAsset = singularTypes.includes('file') && !['video', 'image'].includes(fileType);
+  if (asset.mime.includes(AssetType.Audio)) {
+    const canSelectAsset = singularTypes.includes(fileType);
+
+    if (!canSelectAsset && !isSelected) {
+      handleSelect = undefined;
+    }
+
+    return (
+      <AudioAssetCard
+        id={asset.id}
+        key={asset.id}
+        name={asset.name}
+        extension={getFileExtension(asset.ext)}
+        url={local ? asset.url : createAssetUrl(asset, true)}
+        mime={asset.mime}
+        onEdit={onEdit ? () => onEdit(asset) : undefined}
+        onSelect={handleSelect}
+        selected={isSelected}
+        size={size}
+      />
+    );
+  }
+
+  const canSelectAsset =
+    singularTypes.includes('file') && !['video', 'image', 'audio'].includes(fileType);
 
   if (!canSelectAsset && !isSelected) {
     handleSelect = undefined;
@@ -74,7 +99,7 @@ export const AssetCard = ({
 };
 
 AssetCard.defaultProps = {
-  allowedTypes: ['images', 'files', 'videos'],
+  allowedTypes: ['images', 'files', 'videos', 'audios'],
   isSelected: false,
   // Determine if the asset is loaded locally or from a remote resource
   local: false,

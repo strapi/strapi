@@ -6,6 +6,7 @@ import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
 import { AssetType, AssetDefinition } from '../../../constants';
 import { VideoPreview } from '../../AssetCard/VideoPreview';
+import { AudioPreview } from '../../AssetCard/AudioPreview';
 import { createAssetUrl } from '../../../utils/createAssetUrl';
 
 const DocAsset = styled(Flex)`
@@ -30,6 +31,16 @@ export const CarouselAsset = ({ asset }) => {
           alt={asset.alternativeText || asset.name}
         />
       </VideoPreviewWrapper>
+    );
+  }
+
+  if (asset.mime.includes(AssetType.Audio)) {
+    return (
+      <AudioPreview
+        url={createAssetUrl(asset, true)}
+        mime={asset.mime}
+        alt={asset.alternativeText || asset.name}
+      />
     );
   }
 

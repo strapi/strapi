@@ -27,6 +27,14 @@ export const AssetPreview = forwardRef(({ mime, url, name }, ref) => {
     );
   }
 
+  if (mime.includes(AssetType.Audio)) {
+    return (
+      <audio controls src={url} ref={ref}>
+        <track label={name} default kind="captions" srcLang={lang} src="" />
+      </audio>
+    );
+  }
+
   if (mime.includes('pdf')) {
     return (
       <CardAsset justifyContent="center">
