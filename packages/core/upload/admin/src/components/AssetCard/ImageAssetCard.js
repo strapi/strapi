@@ -16,11 +16,20 @@ import {
 } from '@strapi/design-system/Card';
 import { IconButton } from '@strapi/design-system/IconButton';
 import Pencil from '@strapi/icons/Pencil';
+import Trash from '@strapi/icons/Trash';
 import { useIntl } from 'react-intl';
 import { getTrad } from '../../utils';
 
 const Extension = styled.span`
   text-transform: uppercase;
+`;
+
+const CardActions = styled(CardAction)`
+  display: flex;
+
+  > * + * {
+    margin-left: ${6.4 / 16}rem;
+  }
 `;
 
 export const ImageAssetCard = ({
@@ -32,6 +41,7 @@ export const ImageAssetCard = ({
   selected,
   onSelect,
   onEdit,
+  onRemove,
   size,
   alt,
 }) => {
@@ -46,14 +56,27 @@ export const ImageAssetCard = ({
     <Card>
       <CardHeader>
         {onSelect && <CardCheckbox value={selected} onValueChange={onSelect} />}
-        {onEdit && (
-          <CardAction position="end">
-            <IconButton
-              label={formatMessage({ id: getTrad('control-card.edit'), defaultMessage: 'Edit' })}
-              icon={<Pencil />}
-              onClick={onEdit}
-            />
-          </CardAction>
+        {(onRemove || onEdit) && (
+          <CardActions position="end">
+            {onRemove && (
+              <IconButton
+                label={formatMessage({
+                  id: getTrad('control-card.remove-selection'),
+                  defaultMessage: 'Remove from selection',
+                })}
+                icon={<Trash />}
+                onClick={onRemove}
+              />
+            )}
+
+            {onEdit && (
+              <IconButton
+                label={formatMessage({ id: getTrad('control-card.edit'), defaultMessage: 'Edit' })}
+                icon={<Pencil />}
+                onClick={onEdit}
+              />
+            )}
+          </CardActions>
         )}
         <CardAsset src={optimizedCachingThumbnail} size={size} alt={alt} />
       </CardHeader>
@@ -81,6 +104,7 @@ ImageAssetCard.defaultProps = {
   selected: false,
   onEdit: undefined,
   onSelect: undefined,
+  onRemove: undefined,
   size: 'M',
 };
 
@@ -91,6 +115,7 @@ ImageAssetCard.propTypes = {
   name: PropTypes.string.isRequired,
   onEdit: PropTypes.func,
   onSelect: PropTypes.func,
+  onRemove: PropTypes.func,
   width: PropTypes.number,
   thumbnail: PropTypes.string.isRequired,
   selected: PropTypes.bool,

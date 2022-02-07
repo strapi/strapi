@@ -8,7 +8,16 @@ import { AssetType, AssetDefinition } from '../../constants';
 import { createAssetUrl } from '../../utils/createAssetUrl';
 import toSingularTypes from '../../utils/toSingularTypes';
 
-export const AssetCard = ({ allowedTypes, asset, isSelected, onSelect, onEdit, size, local }) => {
+export const AssetCard = ({
+  allowedTypes,
+  asset,
+  isSelected,
+  onSelect,
+  onEdit,
+  onRemove,
+  size,
+  local,
+}) => {
   const singularTypes = toSingularTypes(allowedTypes);
 
   let handleSelect = onSelect ? () => onSelect(asset) : undefined;
@@ -31,6 +40,7 @@ export const AssetCard = ({ allowedTypes, asset, isSelected, onSelect, onEdit, s
         mime={asset.mime}
         onEdit={onEdit ? () => onEdit(asset) : undefined}
         onSelect={handleSelect}
+        onRemove={onRemove ? () => onRemove(asset) : undefined}
         selected={isSelected}
         size={size}
       />
@@ -56,6 +66,7 @@ export const AssetCard = ({ allowedTypes, asset, isSelected, onSelect, onEdit, s
         thumbnail={prefixFileUrlWithBackendUrl(asset?.formats?.thumbnail?.url || asset.url)}
         onEdit={onEdit ? () => onEdit(asset) : undefined}
         onSelect={handleSelect}
+        onRemove={onRemove ? () => onRemove(asset) : undefined}
         selected={isSelected}
         size={size}
       />
@@ -76,6 +87,7 @@ export const AssetCard = ({ allowedTypes, asset, isSelected, onSelect, onEdit, s
       extension={getFileExtension(asset.ext)}
       onEdit={onEdit ? () => onEdit(asset) : undefined}
       onSelect={handleSelect}
+      onRemove={onRemove ? () => onRemove(asset) : undefined}
       selected={isSelected}
       size={size}
     />
@@ -89,6 +101,7 @@ AssetCard.defaultProps = {
   local: false,
   onSelect: undefined,
   onEdit: undefined,
+  onRemove: undefined,
   size: 'M',
 };
 
@@ -98,6 +111,7 @@ AssetCard.propTypes = {
   local: PropTypes.bool,
   onSelect: PropTypes.func,
   onEdit: PropTypes.func,
+  onRemove: PropTypes.func,
   isSelected: PropTypes.bool,
   size: PropTypes.oneOf(['S', 'M']),
 };
