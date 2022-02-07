@@ -32,7 +32,7 @@ const transformParamsToQuery = (uid, params) => {
   }
 
   if (!isNil(filters)) {
-    query.where = convertFiltersQueryParams(filters);
+    query.where = convertFiltersQueryParams(filters, type);
   }
 
   if (!isNil(fields)) {
