@@ -28,7 +28,7 @@ const CardActions = styled(CardAction)`
   display: flex;
 
   > * + * {
-    margin-left: ${6.4 / 16}rem;
+    margin-left: ${({ theme }) => theme.spaces[2]};
   }
 `;
 

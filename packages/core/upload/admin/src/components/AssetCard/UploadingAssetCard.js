@@ -84,7 +84,7 @@ export const UploadingAssetCard = ({ asset, onCancel, onStatusChange, addUploade
         <CardBody>
           <CardContent>
             <Box paddingTop={1}>
-              <CardTitle as="h2">{asset.name} lol</CardTitle>
+              <CardTitle as="h2">{asset.name}</CardTitle>
             </Box>
             <CardSubtitle>
               <Extension>{asset.ext}</Extension>
