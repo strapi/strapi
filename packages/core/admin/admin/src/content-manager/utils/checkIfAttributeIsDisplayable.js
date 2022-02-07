@@ -3,10 +3,6 @@ import { toLower } from 'lodash';
 const checkIfAttributeIsDisplayable = attribute => {
   const type = attribute.type;
 
-  if (type === 'component') {
-    return attribute.repeatable;
-  }
-
   if (type === 'relation') {
     return !toLower(attribute.relationType).includes('morph');
   }
