@@ -22,6 +22,18 @@ export const AssetCard = ({
 
   let handleSelect = onSelect ? () => onSelect(asset) : undefined;
   const fileType = asset.mime.split('/')[0];
+  const commonAssetCardProps = {
+    id: asset.id,
+    key: asset.id,
+    name: asset.name,
+    url: local ? asset.url : createAssetUrl(asset, true),
+    mime: asset.mime,
+    onEdit: onEdit ? () => onEdit(asset) : undefined,
+    onSelect: handleSelect,
+    onRemove: onRemove ? () => onRemove(asset) : undefined,
+    selected: isSelected,
+    size,
+  };
 
   if (asset.mime.includes(AssetType.Video)) {
     const canSelectAsset = singularTypes.includes(fileType);
@@ -30,21 +42,7 @@ export const AssetCard = ({
       handleSelect = undefined;
     }
 
-    return (
-      <VideoAssetCard
-        id={asset.id}
-        key={asset.id}
-        name={asset.name}
-        extension={getFileExtension(asset.ext)}
-        url={local ? asset.url : createAssetUrl(asset, true)}
-        mime={asset.mime}
-        onEdit={onEdit ? () => onEdit(asset) : undefined}
-        onSelect={handleSelect}
-        onRemove={onRemove ? () => onRemove(asset) : undefined}
-        selected={isSelected}
-        size={size}
-      />
-    );
+    return <VideoAssetCard {...commonAssetCardProps} extension={getFileExtension(asset.ext)} />;
   }
 
   if (asset.mime.includes(AssetType.Image)) {
@@ -56,19 +54,11 @@ export const AssetCard = ({
 
     return (
       <ImageAssetCard
-        id={asset.id}
-        key={asset.id}
-        name={asset.name}
+        {...commonAssetCardProps}
         alt={asset.alternativeText || asset.name}
-        extension={getFileExtension(asset.ext)}
         height={asset.height}
-        width={asset.width}
         thumbnail={prefixFileUrlWithBackendUrl(asset?.formats?.thumbnail?.url || asset.url)}
-        onEdit={onEdit ? () => onEdit(asset) : undefined}
-        onSelect={handleSelect}
-        onRemove={onRemove ? () => onRemove(asset) : undefined}
-        selected={isSelected}
-        size={size}
+        width={asset.width}
       />
     );
   }
@@ -79,19 +69,7 @@ export const AssetCard = ({
     handleSelect = undefined;
   }
 
-  return (
-    <DocAssetCard
-      id={asset.id}
-      key={asset.id}
-      name={asset.name}
-      extension={getFileExtension(asset.ext)}
-      onEdit={onEdit ? () => onEdit(asset) : undefined}
-      onSelect={handleSelect}
-      onRemove={onRemove ? () => onRemove(asset) : undefined}
-      selected={isSelected}
-      size={size}
-    />
-  );
+  return <DocAssetCard {...commonAssetCardProps} extension={getFileExtension(asset.ext)} />;
 };
 
 AssetCard.defaultProps = {
