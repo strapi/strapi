@@ -6,6 +6,7 @@ import Media from './Media';
 import MultipleMedias from './MultipleMedias';
 import Relation from './Relation';
 import RepeatableComponent from './RepeatableComponent';
+import SingleComponent from './SingleComponent';
 import CellValue from './CellValue';
 import hasContent from './utils/hasContent';
 
@@ -41,8 +42,18 @@ const CellContent = ({ content, fieldSchema, metadatas, name, queryInfos, rowId,
       );
 
     case 'component':
+      if (fieldSchema.repeatable === true) {
+        return (
+          <RepeatableComponent
+            value={content}
+            metadatas={metadatas}
+            component={layout?.components?.[fieldSchema.component]}
+          />
+        );
+      }
+
       return (
-        <RepeatableComponent
+        <SingleComponent
           value={content}
           metadatas={metadatas}
           component={layout?.components?.[fieldSchema.component]}
