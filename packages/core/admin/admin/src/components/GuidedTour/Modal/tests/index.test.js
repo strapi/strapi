@@ -641,7 +641,7 @@ describe('<GuidedTourModal />', () => {
                     <span
                       class="c13"
                     >
-                      3 simple step
+                      3 steps to get started
                     </span>
                   </div>
                   <div
@@ -773,7 +773,7 @@ describe('<GuidedTourModal />', () => {
 
     const { queryByText } = render(App);
 
-    expect(queryByText('3 simple step')).not.toBeInTheDocument();
+    expect(queryByText('3 steps to get started')).not.toBeInTheDocument();
   });
 
   it('should not render modal when currentStep but isGuidedTourVisible is false', () => {
@@ -798,6 +798,6 @@ describe('<GuidedTourModal />', () => {
 
     const { queryByText } = render(App);
 
-    expect(queryByText('3 simple step')).not.toBeInTheDocument();
+    expect(queryByText('3 steps to get started')).not.toBeInTheDocument();
   });
 });

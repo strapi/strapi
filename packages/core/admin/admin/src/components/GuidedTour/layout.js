@@ -43,8 +43,8 @@ const layout = {
       },
       cta: {
         title: {
-          id: 'app.components.GuidedTour.CTB.success.cta.title',
-          defaultMessage: 'Create sample content',
+          id: 'app.components.GuidedTour.create-content',
+          defaultMessage: 'Create content',
         },
         type: 'REDIRECT',
         target: '/content-manager',
@@ -60,7 +60,7 @@ const layout = {
       cta: {
         title: {
           id: 'app.components.GuidedTour.home.CM.cta.title',
-          defaultMessage: 'Create sample data',
+          defaultMessage: 'Create data',
         },
         type: 'REDIRECT',
         target: '/content-manager',
@@ -69,7 +69,7 @@ const layout = {
     create: {
       title: {
         id: 'app.components.GuidedTour.CM.create.title',
-        defaultMessage: '⚡️ Create sample content',
+        defaultMessage: '⚡️ Create content',
       },
       content: {
         id: 'app.components.GuidedTour.CM.create.content',
@@ -78,8 +78,8 @@ const layout = {
       },
       cta: {
         title: {
-          id: 'app.components.GuidedTour.CM.create.ctaTitle',
-          defaultMessage: 'Create sample content',
+          id: 'app.components.GuidedTour.create-content',
+          defaultMessage: 'Create content',
         },
         type: 'CLOSE',
       },
