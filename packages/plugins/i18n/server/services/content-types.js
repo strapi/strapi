@@ -5,7 +5,6 @@ const { pick, pipe, has, prop, isNil, cloneDeep, isArray } = require('lodash/fp'
 const {
   isRelationalAttribute,
   getVisibleAttributes,
-  isMediaAttribute,
   isTypedAttribute,
 } = require('@strapi/utils').contentTypes;
 const { ApplicationError } = require('@strapi/utils').errors;
@@ -82,12 +81,10 @@ const getAndValidateRelatedEntity = async (relatedEntityId, model, locale) => {
  * @param {*} attribute
  * @returns
  */
-const isLocalizedAttribute = (model, attributeName) => {
-  const attribute = model.attributes[attributeName];
-
+const isLocalizedAttribute = attribute => {
   return (
     hasLocalizedOption(attribute) ||
-    (isRelationalAttribute(attribute) && !isMediaAttribute(attribute)) ||
+    isRelationalAttribute(attribute) ||
     isTypedAttribute(attribute, 'uid')
   );
 };
@@ -108,7 +105,7 @@ const isLocalizedContentType = model => {
  */
 const getNonLocalizedAttributes = model => {
   return getVisibleAttributes(model).filter(
-    attributeName => !isLocalizedAttribute(model, attributeName)
+    attrName => !isLocalizedAttribute(model.attributes[attrName])
   );
 };
 
@@ -170,8 +167,8 @@ const copyNonLocalizedAttributes = (model, entry) => {
  * @returns {string[]}
  */
 const getLocalizedAttributes = model => {
-  return getVisibleAttributes(model).filter(attributeName =>
-    isLocalizedAttribute(model, attributeName)
+  return getVisibleAttributes(model).filter(attrName =>
+    isLocalizedAttribute(model.attributes[attrName])
   );
 };
 
