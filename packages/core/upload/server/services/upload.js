@@ -100,10 +100,13 @@ module.exports = ({ strapi }) => ({
     );
     currentFile.getStream = () => fs.createReadStream(file.path);
 
-    const { optimize } = strapi.plugin('upload').service('image-manipulation');
+    const { optimize, isSupportedImage } = strapi.plugin('upload').service('image-manipulation');
 
-    const newFile = await optimize(currentFile, { tmpFolderPath });
-    return newFile;
+    if (!(await isSupportedImage(currentFile))) {
+      return currentFile;
+    }
+
+    return optimize(currentFile, { tmpFolderPath });
   },
 
   async upload({ data, files }, { user } = {}) {
@@ -137,37 +140,42 @@ module.exports = ({ strapi }) => ({
   async uploadFileAndPersist(fileData, { user } = {}, { tmpFolderPath }) {
     const config = strapi.config.get('plugin.upload');
 
-    const { getDimensions, generateThumbnail, generateResponsiveFormats } = getService(
-      'image-manipulation'
-    );
+    const {
+      getDimensions,
+      generateThumbnail,
+      generateResponsiveFormats,
+      isSupportedImage,
+    } = getService('image-manipulation');
     await getService('provider').upload(fileData);
 
-    const thumbnailFile = await generateThumbnail(fileData, { tmpFolderPath });
-    if (thumbnailFile) {
-      await getService('provider').upload(thumbnailFile);
-      _.set(fileData, 'formats.thumbnail', thumbnailFile);
-    }
-
-    const formats = await generateResponsiveFormats(fileData, { tmpFolderPath });
-    if (Array.isArray(formats) && formats.length > 0) {
-      for (const format of formats) {
-        if (!format) continue;
-
-        const { key, file } = format;
-
-        await getService('provider').upload(file);
-
-        _.set(fileData, ['formats', key], file);
+    if (await isSupportedImage(fileData)) {
+      const thumbnailFile = await generateThumbnail(fileData, { tmpFolderPath });
+      if (thumbnailFile) {
+        await getService('provider').upload(thumbnailFile);
+        _.set(fileData, 'formats.thumbnail', thumbnailFile);
       }
+
+      const formats = await generateResponsiveFormats(fileData, { tmpFolderPath });
+      if (Array.isArray(formats) && formats.length > 0) {
+        for (const format of formats) {
+          if (!format) continue;
+
+          const { key, file } = format;
+
+          await getService('provider').upload(file);
+
+          _.set(fileData, ['formats', key], file);
+        }
+      }
+
+      const { width, height } = await getDimensions(fileData);
+
+      _.assign(fileData, {
+        provider: config.provider,
+        width,
+        height,
+      });
     }
-
-    const { width, height } = await getDimensions(fileData);
-
-    _.assign(fileData, {
-      provider: config.provider,
-      width,
-      height,
-    });
 
     return this.add(fileData, { user });
   },
@@ -228,32 +236,36 @@ module.exports = ({ strapi }) => ({
     // clear old formats
     _.set(fileData, 'formats', {});
 
-    const thumbnailFile = await generateThumbnail(fileData);
-    if (thumbnailFile) {
-      getService('provider').upload(thumbnailFile);
-      _.set(fileData, 'formats.thumbnail', thumbnailFile);
-    }
+    const { isSupportedImage } = getService('image-manipulation');
 
-    const formats = await generateResponsiveFormats(fileData);
-    if (Array.isArray(formats) && formats.length > 0) {
-      for (const format of formats) {
-        if (!format) continue;
-
-        const { key, file } = format;
-
-        getService('provider').upload(file);
-
-        _.set(fileData, ['formats', key], file);
+    if (await isSupportedImage(fileData)) {
+      const thumbnailFile = await generateThumbnail(fileData);
+      if (thumbnailFile) {
+        getService('provider').upload(thumbnailFile);
+        _.set(fileData, 'formats.thumbnail', thumbnailFile);
       }
+
+      const formats = await generateResponsiveFormats(fileData);
+      if (Array.isArray(formats) && formats.length > 0) {
+        for (const format of formats) {
+          if (!format) continue;
+
+          const { key, file } = format;
+
+          getService('provider').upload(file);
+
+          _.set(fileData, ['formats', key], file);
+        }
+      }
+
+      const { width, height } = await getDimensions(fileData);
+
+      _.assign(fileData, {
+        provider: config.provider,
+        width,
+        height,
+      });
     }
-
-    const { width, height } = await getDimensions(fileData);
-
-    _.assign(fileData, {
-      provider: config.provider,
-      width,
-      height,
-    });
 
     return this.update(id, fileData, { user });
   },
