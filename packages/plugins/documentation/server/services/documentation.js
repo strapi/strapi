@@ -149,22 +149,22 @@ module.exports = ({ strapi }) => {
         'full_documentation.json'
       );
 
-      const settings = _.merge(_.cloneDeep(defaultConfig), this.getDocumentationSettings());
+      const defaultSettings = _.cloneDeep(defaultConfig);
 
       const serverUrl = getAbsoluteServerUrl(strapi.config);
       const apiPath = strapi.config.get('api.rest.prefix');
 
-      if(_.isEmpty(settings.servers)) {
-        _.set(settings, 'servers', [
-          {
-            url: `${serverUrl}${apiPath}`,
-            description: 'Development server',
-          },
-        ]);
-      }
+      _.set(defaultSettings, 'servers', [
+        {
+          url: `${serverUrl}${apiPath}`,
+          description: 'Development server',
+        },
+      ]);
 
-      _.set(settings, ['info', 'x-generation-date'], new Date().toISOString());
-      _.set(settings, ['info', 'version'], version);
+      _.set(defaultSettings, ['info', 'x-generation-date'], new Date().toISOString());
+      _.set(defaultSettings, ['info', 'version'], version);
+
+      const settings = _.merge(defaultSettings, this.getDocumentationSettings());
 
       await fs.ensureFile(fullDocJsonPath);
       await fs.writeJson(fullDocJsonPath, { ...settings, paths }, { spaces: 2 });
