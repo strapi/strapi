@@ -24,6 +24,7 @@ export const AssetCard = ({
   const fileType = asset.mime.split('/')[0];
   const commonAssetCardProps = {
     id: asset.id,
+    extension: getFileExtension(asset.ext),
     key: asset.id,
     name: asset.name,
     url: local ? asset.url : createAssetUrl(asset, true),
@@ -42,7 +43,7 @@ export const AssetCard = ({
       handleSelect = undefined;
     }
 
-    return <VideoAssetCard {...commonAssetCardProps} extension={getFileExtension(asset.ext)} />;
+    return <VideoAssetCard {...commonAssetCardProps} />;
   }
 
   if (asset.mime.includes(AssetType.Image)) {
@@ -69,7 +70,7 @@ export const AssetCard = ({
     handleSelect = undefined;
   }
 
-  return <DocAssetCard {...commonAssetCardProps} extension={getFileExtension(asset.ext)} />;
+  return <DocAssetCard {...commonAssetCardProps} />;
 };
 
 AssetCard.defaultProps = {
