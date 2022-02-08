@@ -17,12 +17,12 @@ import Logo from '../AuthPage/components/Logo';
 import UnauthenticatedLayout, { LayoutContent } from '../../layouts/UnauthenticatedLayout';
 
 export const options = [
-  'Front-end developer',
-  'Back-end developer',
-  'Full-stack developer',
-  'Content Manager',
-  'Content Creator',
-  'Other',
+  { label: 'Front-end developer', value: 'front-end-developer' },
+  { label: 'Back-end developer', value: 'back-end-developer' },
+  { label: 'Full-stack developer', value: 'full-stack-developer' },
+  { label: 'Content Manager', value: 'content-manager' },
+  { label: 'Content Creator', value: 'content-creator' },
+  { label: 'Other', value: 'other' },
 ];
 
 const TypographyCenter = styled(Typography)`
@@ -33,10 +33,10 @@ const UsecasePage = () => {
   const toggleNotification = useNotification();
   const { push, location } = useHistory();
   const { formatMessage } = useIntl();
-  const [workType, setWorkType] = useState();
-  const [otherValue, setOtherValue] = useState();
+  const [obUserPersona, setObUserPersona] = useState();
+  const [obUserPersonaOther, setObUserPersonaOther] = useState('');
 
-  const isOther = workType === 'Other';
+  const isOther = obUserPersona === 'other';
   const isComingFromRegister = location.state?.fromRegister;
 
   const CancelToken = axios.CancelToken;
@@ -69,8 +69,8 @@ const UsecasePage = () => {
           email,
           username: firstname,
           firstAdmin,
-          workType,
-          otherValue,
+          obUserPersona,
+          obUserPersonaOther,
         },
         cancelToken: source.token,
       });
@@ -116,14 +116,14 @@ const UsecasePage = () => {
                   id: 'Usecase.input.work-type',
                   defaultMessage: 'What type of work do you do?',
                 })}
-                onClear={() => setWorkType(null)}
+                onClear={() => setObUserPersona(null)}
                 clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
-                onChange={setWorkType}
-                value={workType}
+                onChange={setObUserPersona}
+                value={obUserPersona}
               >
-                {options.map(option => (
-                  <Option key={option} value={option}>
-                    {option}
+                {options.map(({ label, value }) => (
+                  <Option key={value} value={value}>
+                    {label}
                   </Option>
                 ))}
               </Select>
@@ -131,8 +131,8 @@ const UsecasePage = () => {
                 <TextInput
                   name="other"
                   label={formatMessage({ id: 'Usecase.input.other', defaultMessage: 'Other' })}
-                  value={otherValue}
-                  onChange={e => setOtherValue(e.target.value)}
+                  value={obUserPersonaOther}
+                  onChange={e => setObUserPersonaOther(e.target.value)}
                   data-testid="other"
                 />
               )}
