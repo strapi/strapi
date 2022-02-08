@@ -53,7 +53,7 @@ const Modal = ({ onClose, onSkip, children, hideSkip }) => {
                 <Button variant="tertiary" onClick={onSkip}>
                   {formatMessage({
                     id: 'app.components.GuidedTour.skip',
-                    defaultMessage: 'Skip',
+                    defaultMessage: 'Skip the tour',
                   })}
                 </Button>
               </Flex>

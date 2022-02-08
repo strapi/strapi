@@ -53,7 +53,7 @@ const GuidedTourHomepage = () => {
       </Stack>
       <Flex justifyContent="flex-end">
         <Button variant="tertiary" onClick={() => setSkipped(true)}>
-          {formatMessage({ id: 'app.components.GuidedTour.skip', defaultMessage: 'Skip' })}
+          {formatMessage({ id: 'app.components.GuidedTour.skip', defaultMessage: 'Skip the tour' })}
         </Button>
       </Flex>
     </Box>

@@ -739,7 +739,7 @@ describe('<GuidedTourModal />', () => {
                     <span
                       class="c25 c26"
                     >
-                      Skip
+                      Skip the tour
                     </span>
                   </button>
                 </div>

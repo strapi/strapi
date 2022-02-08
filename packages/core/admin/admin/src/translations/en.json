@@ -232,7 +232,7 @@
   "Users.components.List.empty.withFilters": "There is no users with the applied filters...",
   "Users.components.List.empty.withSearch": "There is no users corresponding to the search ({search})...",
   "anErrorOccurred": "Woops! Something went wrong. Please, try again.",
-  "app.components.GuidedTour.skip": "Skip",
+  "app.components.GuidedTour.skip": "Skip the tour",
   "app.components.GuidedTour.title": "3 steps to get started",
   "app.components.GuidedTour.create-content": "Create content",
   "app.components.GuidedTour.home.CTB.title": "🧠 Build the content structure",
