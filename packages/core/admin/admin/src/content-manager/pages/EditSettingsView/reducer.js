@@ -191,7 +191,7 @@ const reducer = (state = initialState, action) =>
         const nextLayoutValue = setFieldSize(state.metaToEdit, state.metaForm.size, layoutsCopy);
 
         if (nextLayoutValue.length > 0) {
-          set(draftState, layoutPathEdit, nextLayoutValue);
+          set(draftState, layoutPathEdit, formatLayout(nextLayoutValue));
         }
 
         break;
