@@ -19,7 +19,7 @@ function createDefaultMetadatas(schema) {
     id: {
       edit: {},
       list: {
-        label: 'Id',
+        label: 'id',
         searchable: true,
         sortable: true,
       },
@@ -29,7 +29,7 @@ function createDefaultMetadatas(schema) {
 
 function createDefaultMetadata(schema, name) {
   const edit = {
-    label: _.upperFirst(name),
+    label: name,
     description: '',
     placeholder: '',
     visible: isVisible(schema, name),
@@ -59,7 +59,7 @@ function createDefaultMetadata(schema, name) {
   );
 
   const list = {
-    label: _.upperFirst(name),
+    label: name,
     searchable: isSearchable(schema, name),
     sortable: isSortable(schema, name),
     ..._.pick(_.get(schema, ['config', 'metadatas', name, 'list'], {}), [

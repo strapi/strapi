@@ -86,7 +86,7 @@
   "Settings.apiTokens.copy.editMessage": "For security reasons, you can only see your token once.",
   "Settings.apiTokens.copy.editTitle": "This token isn’t accessible anymore.",
   "Settings.apiTokens.copy.lastWarning": "Make sure to copy this token, you won’t be able to see it again!",
-  "Settings.apiTokens.create": "Add Entry",
+  "Settings.apiTokens.create": "Create new API Token",
   "Settings.apiTokens.description": "List of generated tokens to consume the API",
   "Settings.apiTokens.details": "Details",
   "Settings.apiTokens.emptyStateLayout": "You don’t have any content yet...",
