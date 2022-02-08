@@ -39,7 +39,7 @@ describe('<GuidedTourModal />', () => {
   it('should match the snapshot with contentTypeBuilder.create layout', async () => {
     render(App);
 
-    expect(screen.getByText('🧠 Create a first Collection-type')).toBeInTheDocument();
+    expect(screen.getByText('🧠 Create a first Collection type')).toBeInTheDocument();
 
     expect(document.body).toMatchInlineSnapshot(`
       .c9 {
@@ -670,7 +670,7 @@ describe('<GuidedTourModal />', () => {
                       class="c18"
                       id="title"
                     >
-                      🧠 Create a first Collection-type
+                      🧠 Create a first Collection type
                     </h3>
                   </div>
                   <div
@@ -688,13 +688,13 @@ describe('<GuidedTourModal />', () => {
                         <span
                           class="c22"
                         >
-                          Collection-types help you manage several entries, Single-types are suitable to manage only one entry.
+                          Collection types help you manage several entries, Single types are suitable to manage only one entry.
                         </span>
                          
                         <span
                           class="c22"
                         >
-                          Ex: For a website, articles would be a Collection type and homepage would be a Single type.
+                          Ex: For a Blog website, Articles would be a Collection type and Homepage would be a Single type.
                         </span>
                       </div>
                       <button
@@ -705,7 +705,7 @@ describe('<GuidedTourModal />', () => {
                         <span
                           class="c25 c26"
                         >
-                          Build a Collection-type
+                          Build a Collection type
                         </span>
                         <div
                           aria-hidden="true"

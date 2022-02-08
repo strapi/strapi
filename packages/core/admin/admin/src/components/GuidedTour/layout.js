@@ -8,7 +8,7 @@ const layout = {
       cta: {
         title: {
           id: 'app.components.GuidedTour.home.CTB.cta.title',
-          defaultMessage: 'Go to the Content-type Builder',
+          defaultMessage: 'Go to the Content type Builder',
         },
         type: 'REDIRECT',
         target: '/plugins/content-type-builder',
@@ -17,17 +17,17 @@ const layout = {
     create: {
       title: {
         id: 'app.components.GuidedTour.CTB.create.title',
-        defaultMessage: '🧠 Create a first Collection-type',
+        defaultMessage: '🧠 Create a first Collection type',
       },
       content: {
         id: 'app.components.GuidedTour.CTB.create.content',
         defaultMessage:
-          '<p>Collection-types help you manage several entries, Single-types are suitable to manage only one entry.</p> <p>Ex: For a website, articles would be a Collection type and homepage would be a Single type.</p>',
+          '<p>Collection types help you manage several entries, Single types are suitable to manage only one entry.</p> <p>Ex: For a Blog website, Articles would be a Collection type and Homepage would be a Single type.</p>',
       },
       cta: {
         title: {
           id: 'app.components.GuidedTour.CTB.create.cta.title',
-          defaultMessage: 'Build a Collection-type',
+          defaultMessage: 'Build a Collection type',
         },
         type: 'CLOSE',
       },
