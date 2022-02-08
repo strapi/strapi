@@ -102,10 +102,6 @@
   "form.button.save": "保存",
   "form.button.select-component": "选择一个组件",
   "from": "来自",
-  "menu.section.components.name.plural": "组件",
-  "menu.section.components.name.singular": "组件",
-  "menu.section.models.name.plural": "Collection Types",
-  "menu.section.models.name.singular": "Collection Type",
   "modalForm.attribute.form.base.name": "名称",
   "modalForm.attribute.form.base.name.description": "属性名称不允许使用空格",
   "modalForm.attribute.text.type-selection": "类型",
@@ -142,7 +138,5 @@
   "relation.manyWay": "有很多",
   "relation.oneToMany": "属于很多",
   "relation.oneToOne": "有一个",
-  "relation.oneWay": "有一个",
-  "table.attributes.title.plural": "{number} 字段",
-  "table.attributes.title.singular": "{number} 字段"
+  "relation.oneWay": "有一个"
 }
