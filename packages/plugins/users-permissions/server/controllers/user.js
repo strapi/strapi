@@ -145,7 +145,7 @@ module.exports = {
    */
   async findOne(ctx) {
     const { id } = ctx.params;
-    let data = await getService('user').fetch({ id });
+    let data = await getService('user').fetch({ id }, ['role']);
 
     if (data) {
       data = await sanitizeOutput(data, ctx);
