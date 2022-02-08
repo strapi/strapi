@@ -29,7 +29,7 @@ describe('DocAssetCard', () => {
     );
 
     expect(container).toMatchInlineSnapshot(`
-      .c28 {
+      .c24 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
@@ -47,26 +47,30 @@ describe('DocAssetCard', () => {
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
-      .c3 {
-        position: start;
-      }
-
-      .c8 {
-        position: end;
-      }
-
-      .c16 {
+      .c12 {
         padding-top: 8px;
         padding-right: 12px;
         padding-bottom: 8px;
         padding-left: 12px;
       }
 
-      .c24 {
+      .c20 {
         background: #f6f6f9;
         padding: 4px;
         border-radius: 4px;
         min-width: 20px;
+      }
+
+      .c3 {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+      }
+
+      .c5 {
+        position: absolute;
+        top: 12px;
+        right: 12px;
       }
 
       .c1 {
@@ -87,21 +91,7 @@ describe('DocAssetCard', () => {
         align-items: center;
       }
 
-      .c4 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c17 {
+      .c13 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -115,7 +105,7 @@ describe('DocAssetCard', () => {
         align-items: flex-start;
       }
 
-      .c25 {
+      .c21 {
         display: -webkit-inline-box;
         display: -webkit-inline-flex;
         display: -ms-inline-flexbox;
@@ -133,41 +123,20 @@ describe('DocAssetCard', () => {
         align-items: center;
       }
 
-      .c5 > * {
-        margin-left: 0;
-        margin-right: 0;
-      }
-
-      .c5 > * + * {
-        margin-left: 8px;
-      }
-
-      .c6 {
-        position: absolute;
-        top: 12px;
-        left: 12px;
-      }
-
-      .c9 {
-        position: absolute;
-        top: 12px;
-        right: 12px;
-      }
-
-      .c20 {
+      .c16 {
         font-weight: 600;
         color: #32324d;
         font-size: 0.75rem;
         line-height: 1.33;
       }
 
-      .c21 {
+      .c17 {
         color: #666687;
         font-size: 0.75rem;
         line-height: 1.33;
       }
 
-      .c27 {
+      .c23 {
         color: #666687;
         font-weight: 600;
         font-size: 0.6875rem;
@@ -175,18 +144,18 @@ describe('DocAssetCard', () => {
         text-transform: uppercase;
       }
 
-      .c23 {
+      .c19 {
         margin-left: auto;
         -webkit-flex-shrink: 0;
         -ms-flex-negative: 0;
         flex-shrink: 0;
       }
 
-      .c26 {
+      .c22 {
         margin-left: 4px;
       }
 
-      .c7 {
+      .c4 {
         margin: 0;
         height: 18px;
         min-width: 18px;
@@ -197,12 +166,12 @@ describe('DocAssetCard', () => {
         cursor: pointer;
       }
 
-      .c7:checked {
+      .c4:checked {
         background-color: #4945ff;
         border: 1px solid #4945ff;
       }
 
-      .c7:checked:after {
+      .c4:checked:after {
         content: '';
         display: block;
         position: relative;
@@ -216,21 +185,21 @@ describe('DocAssetCard', () => {
         transform: translateX(-50%) translateY(-50%);
       }
 
-      .c7:checked:disabled:after {
+      .c4:checked:disabled:after {
         background: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEwIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPHBhdGgKICAgIGQ9Ik04LjU1MzIzIDAuMzk2OTczQzguNjMxMzUgMC4zMTYzNTUgOC43NjA1MSAwLjMxNTgxMSA4LjgzOTMxIDAuMzk1NzY4TDkuODYyNTYgMS40MzQwN0M5LjkzODkzIDEuNTExNTcgOS45MzkzNSAxLjYzNTkgOS44NjM0OSAxLjcxMzlMNC4wNjQwMSA3LjY3NzI0QzMuOTg1OSA3Ljc1NzU1IDMuODU3MDcgNy43NTgwNSAzLjc3ODM0IDcuNjc4MzRMMC4xMzg2NiAzLjk5MzMzQzAuMDYxNzc5OCAzLjkxNTQ5IDAuMDYxNzEwMiAzLjc5MDMyIDAuMTM4NTA0IDMuNzEyNEwxLjE2MjEzIDIuNjczNzJDMS4yNDAzOCAyLjU5NDMyIDEuMzY4NDMgMi41OTQyMiAxLjQ0NjggMi42NzM0OEwzLjkyMTc0IDUuMTc2NDdMOC41NTMyMyAwLjM5Njk3M1oiCiAgICBmaWxsPSIjOEU4RUE5IgogIC8+Cjwvc3ZnPg==) no-repeat no-repeat center center;
       }
 
-      .c7:disabled {
+      .c4:disabled {
         background-color: #dcdce4;
         border: 1px solid #c0c0cf;
       }
 
-      .c7:indeterminate {
+      .c4:indeterminate {
         background-color: #4945ff;
         border: 1px solid #4945ff;
       }
 
-      .c7:indeterminate:after {
+      .c4:indeterminate:after {
         content: '';
         display: block;
         position: relative;
@@ -245,16 +214,16 @@ describe('DocAssetCard', () => {
         transform: translateX(-50%) translateY(-50%);
       }
 
-      .c7:indeterminate:disabled {
+      .c4:indeterminate:disabled {
         background-color: #dcdce4;
         border: 1px solid #c0c0cf;
       }
 
-      .c7:indeterminate:disabled:after {
+      .c4:indeterminate:disabled:after {
         background-color: #8e8ea9;
       }
 
-      .c18 {
+      .c14 {
         word-break: break-all;
       }
 
@@ -263,16 +232,16 @@ describe('DocAssetCard', () => {
         border-bottom: 1px solid #eaeaef;
       }
 
-      .c19 {
+      .c15 {
         padding-top: 4px;
       }
 
-      .c12 {
+      .c8 {
         width: 100%;
         height: 5.5rem;
       }
 
-      .c13 {
+      .c9 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -290,7 +259,7 @@ describe('DocAssetCard', () => {
         align-items: center;
       }
 
-      .c10 {
+      .c6 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -304,21 +273,21 @@ describe('DocAssetCard', () => {
         outline: none;
       }
 
-      .c10 svg {
+      .c6 svg {
         height: 12px;
         width: 12px;
       }
 
-      .c10 svg > g,
-      .c10 svg path {
+      .c6 svg > g,
+      .c6 svg path {
         fill: #ffffff;
       }
 
-      .c10[aria-disabled='true'] {
+      .c6[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c10:after {
+      .c6:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -333,11 +302,11 @@ describe('DocAssetCard', () => {
         border: 2px solid transparent;
       }
 
-      .c10:focus-visible {
+      .c6:focus-visible {
         outline: none;
       }
 
-      .c10:focus-visible:after {
+      .c6:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -348,7 +317,7 @@ describe('DocAssetCard', () => {
         border: 2px solid #4945ff;
       }
 
-      .c11 {
+      .c7 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -365,38 +334,38 @@ describe('DocAssetCard', () => {
         width: 2rem;
       }
 
-      .c11 svg > g,
-      .c11 svg path {
+      .c7 svg > g,
+      .c7 svg path {
         fill: #8e8ea9;
       }
 
-      .c11:hover svg > g,
-      .c11:hover svg path {
+      .c7:hover svg > g,
+      .c7:hover svg path {
         fill: #666687;
       }
 
-      .c11:active svg > g,
-      .c11:active svg path {
+      .c7:active svg > g,
+      .c7:active svg path {
         fill: #a5a5ba;
       }
 
-      .c11[aria-disabled='true'] {
+      .c7[aria-disabled='true'] {
         background-color: #eaeaef;
       }
 
-      .c11[aria-disabled='true'] svg path {
+      .c7[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c22 {
+      .c18 {
         text-transform: uppercase;
       }
 
-      .c15 svg {
+      .c11 svg {
         font-size: 3rem;
       }
 
-      .c14 {
+      .c10 {
         border-radius: 4px 4px 0 0;
         background: linear-gradient(180deg,#ffffff 0%,#f6f6f9 121.48%);
       }
@@ -411,22 +380,22 @@ describe('DocAssetCard', () => {
             class="c1 c2"
           >
             <div
-              class="c3 c4 c5 c6"
+              class="c3"
             >
               <input
                 aria-labelledby="card-1-title"
-                class="c7"
+                class="c4"
                 type="checkbox"
               />
             </div>
             <div
-              class="c8 c4 c5 c9"
+              class="c5"
             >
               <span>
                 <button
                   aria-disabled="false"
                   aria-labelledby="tooltip-1"
-                  class="c10 c11"
+                  class="c6 c7"
                   tabindex="0"
                   type="button"
                 >
@@ -448,12 +417,12 @@ describe('DocAssetCard', () => {
               </span>
             </div>
             <div
-              class="c12 c13 c14"
+              class="c8 c9 c10"
               height="5.5rem"
               width="100%"
             >
               <span
-                class="c15"
+                class="c11"
               >
                 <svg
                   aria-label="hello.png"
@@ -474,42 +443,42 @@ describe('DocAssetCard', () => {
             </div>
           </div>
           <div
-            class="c16"
+            class="c12"
           >
             <div
-              class="c17"
+              class="c13"
             >
               <div
-                class="c18"
+                class="c14"
               >
                 <div
-                  class="c19"
+                  class="c15"
                 >
                   <h2
-                    class="c20"
+                    class="c16"
                     id="card-1-title"
                   >
                     hello.png
                   </h2>
                 </div>
                 <div
-                  class="c21"
+                  class="c17"
                 >
                   <span
-                    class="c22"
+                    class="c18"
                   >
                     png
                   </span>
                 </div>
               </div>
               <div
-                class="c23"
+                class="c19"
               >
                 <div
-                  class="c24 c25 c26"
+                  class="c20 c21 c22"
                 >
                   <span
-                    class="c27"
+                    class="c23"
                   >
                     Doc
                   </span>
@@ -519,7 +488,7 @@ describe('DocAssetCard', () => {
           </div>
         </article>
         <div
-          class="c28"
+          class="c24"
         >
           <p
             aria-live="polite"

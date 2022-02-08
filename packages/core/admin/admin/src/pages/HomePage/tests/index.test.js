@@ -372,17 +372,14 @@ describe('Homepage', () => {
 
       .c7 {
         grid-column: span 8;
-        max-width: 100%;
       }
 
       .c33 {
         grid-column: span 4;
-        max-width: 100%;
       }
 
       .c43 {
         grid-column: span 6;
-        max-width: 100%;
       }
 
       .c50 {

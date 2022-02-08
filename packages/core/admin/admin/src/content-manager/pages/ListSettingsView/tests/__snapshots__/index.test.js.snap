@@ -838,12 +838,10 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
 
 .c46 {
   grid-column: span 6;
-  max-width: 100%;
 }
 
 .c60 {
   grid-column: span 3;
-  max-width: 100%;
 }
 
 .c28 {
@@ -2644,12 +2642,10 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
 
 .c46 {
   grid-column: span 6;
-  max-width: 100%;
 }
 
 .c60 {
   grid-column: span 3;
-  max-width: 100%;
 }
 
 .c28 {

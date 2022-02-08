@@ -174,7 +174,6 @@ describe('Application page', () => {
 
       .c15 {
         grid-column: span 6;
-        max-width: 100%;
       }
 
       .c19 {

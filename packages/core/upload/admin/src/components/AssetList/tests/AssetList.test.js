@@ -130,7 +130,7 @@ describe('MediaLibrary / AssetList', () => {
     );
 
     expect(container).toMatchInlineSnapshot(`
-      .c34 {
+      .c32 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
@@ -142,16 +142,16 @@ describe('MediaLibrary / AssetList', () => {
         width: 1px;
       }
 
-      .c14 {
+      .c11 {
         padding-top: 4px;
       }
 
-      .c29 {
+      .c27 {
         width: 100%;
         height: 10.25rem;
       }
 
-      .c30 {
+      .c28 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -169,7 +169,7 @@ describe('MediaLibrary / AssetList', () => {
         align-items: center;
       }
 
-      .c24 {
+      .c22 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
@@ -187,29 +187,31 @@ describe('MediaLibrary / AssetList', () => {
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
-      .c4 {
-        position: start;
-      }
-
-      .c11 {
+      .c8 {
         padding-top: 8px;
         padding-right: 12px;
         padding-bottom: 8px;
         padding-left: 12px;
       }
 
-      .c19 {
+      .c16 {
         background: #f6f6f9;
         padding: 4px;
         border-radius: 4px;
         min-width: 20px;
       }
 
-      .c25 {
+      .c23 {
         background: #32324d;
         color: #ffffff;
         padding: 4px;
         border-radius: 4px;
+      }
+
+      .c4 {
+        position: absolute;
+        top: 12px;
+        left: 12px;
       }
 
       .c2 {
@@ -230,21 +232,7 @@ describe('MediaLibrary / AssetList', () => {
         align-items: center;
       }
 
-      .c5 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c12 {
+      .c9 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -258,7 +246,7 @@ describe('MediaLibrary / AssetList', () => {
         align-items: flex-start;
       }
 
-      .c20 {
+      .c17 {
         display: -webkit-inline-box;
         display: -webkit-inline-flex;
         display: -ms-inline-flexbox;
@@ -276,29 +264,28 @@ describe('MediaLibrary / AssetList', () => {
         align-items: center;
       }
 
-      .c6 > * {
-        margin-left: 0;
-        margin-right: 0;
-      }
-
-      .c6 > * + * {
-        margin-left: 8px;
+      .c20 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
       }
 
       .c7 {
-        position: absolute;
-        top: 12px;
-        left: 12px;
-      }
-
-      .c10 {
         margin: 0;
         padding: 0;
         max-height: 100%;
         max-width: 100%;
       }
 
-      .c9 {
+      .c6 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -312,20 +299,20 @@ describe('MediaLibrary / AssetList', () => {
         background: repeating-conic-gradient(#f6f6f9 0% 25%,transparent 0% 50%) 50% / 20px 20px;
       }
 
-      .c15 {
+      .c12 {
         font-weight: 600;
         color: #32324d;
         font-size: 0.75rem;
         line-height: 1.33;
       }
 
-      .c16 {
+      .c13 {
         color: #666687;
         font-size: 0.75rem;
         line-height: 1.33;
       }
 
-      .c22 {
+      .c19 {
         color: #666687;
         font-weight: 600;
         font-size: 0.6875rem;
@@ -333,24 +320,24 @@ describe('MediaLibrary / AssetList', () => {
         text-transform: uppercase;
       }
 
-      .c27 {
+      .c25 {
         color: #ffffff;
         font-size: 0.75rem;
         line-height: 1.33;
       }
 
-      .c18 {
+      .c15 {
         margin-left: auto;
         -webkit-flex-shrink: 0;
         -ms-flex-negative: 0;
         flex-shrink: 0;
       }
 
-      .c21 {
+      .c18 {
         margin-left: 4px;
       }
 
-      .c8 {
+      .c5 {
         margin: 0;
         height: 18px;
         min-width: 18px;
@@ -361,12 +348,12 @@ describe('MediaLibrary / AssetList', () => {
         cursor: pointer;
       }
 
-      .c8:checked {
+      .c5:checked {
         background-color: #4945ff;
         border: 1px solid #4945ff;
       }
 
-      .c8:checked:after {
+      .c5:checked:after {
         content: '';
         display: block;
         position: relative;
@@ -380,21 +367,21 @@ describe('MediaLibrary / AssetList', () => {
         transform: translateX(-50%) translateY(-50%);
       }
 
-      .c8:checked:disabled:after {
+      .c5:checked:disabled:after {
         background: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEwIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPHBhdGgKICAgIGQ9Ik04LjU1MzIzIDAuMzk2OTczQzguNjMxMzUgMC4zMTYzNTUgOC43NjA1MSAwLjMxNTgxMSA4LjgzOTMxIDAuMzk1NzY4TDkuODYyNTYgMS40MzQwN0M5LjkzODkzIDEuNTExNTcgOS45MzkzNSAxLjYzNTkgOS44NjM0OSAxLjcxMzlMNC4wNjQwMSA3LjY3NzI0QzMuOTg1OSA3Ljc1NzU1IDMuODU3MDcgNy43NTgwNSAzLjc3ODM0IDcuNjc4MzRMMC4xMzg2NiAzLjk5MzMzQzAuMDYxNzc5OCAzLjkxNTQ5IDAuMDYxNzEwMiAzLjc5MDMyIDAuMTM4NTA0IDMuNzEyNEwxLjE2MjEzIDIuNjczNzJDMS4yNDAzOCAyLjU5NDMyIDEuMzY4NDMgMi41OTQyMiAxLjQ0NjggMi42NzM0OEwzLjkyMTc0IDUuMTc2NDdMOC41NTMyMyAwLjM5Njk3M1oiCiAgICBmaWxsPSIjOEU4RUE5IgogIC8+Cjwvc3ZnPg==) no-repeat no-repeat center center;
       }
 
-      .c8:disabled {
+      .c5:disabled {
         background-color: #dcdce4;
         border: 1px solid #c0c0cf;
       }
 
-      .c8:indeterminate {
+      .c5:indeterminate {
         background-color: #4945ff;
         border: 1px solid #4945ff;
       }
 
-      .c8:indeterminate:after {
+      .c5:indeterminate:after {
         content: '';
         display: block;
         position: relative;
@@ -409,16 +396,16 @@ describe('MediaLibrary / AssetList', () => {
         transform: translateX(-50%) translateY(-50%);
       }
 
-      .c8:indeterminate:disabled {
+      .c5:indeterminate:disabled {
         background-color: #dcdce4;
         border: 1px solid #c0c0cf;
       }
 
-      .c8:indeterminate:disabled:after {
+      .c5:indeterminate:disabled:after {
         background-color: #8e8ea9;
       }
 
-      .c13 {
+      .c10 {
         word-break: break-all;
       }
 
@@ -427,36 +414,36 @@ describe('MediaLibrary / AssetList', () => {
         border-bottom: 1px solid #eaeaef;
       }
 
-      .c26 {
+      .c24 {
         position: absolute;
         bottom: 4px;
         right: 4px;
       }
 
-      .c17 {
+      .c14 {
         text-transform: uppercase;
       }
 
-      .c28 {
+      .c26 {
         text-transform: uppercase;
       }
 
-      .c23 canvas,
-      .c23 video {
+      .c21 canvas,
+      .c21 video {
         display: block;
         max-width: 100%;
         max-height: 10.25rem;
       }
 
-      .c33 {
+      .c31 {
         text-transform: uppercase;
       }
 
-      .c32 svg {
+      .c30 svg {
         font-size: 3rem;
       }
 
-      .c31 {
+      .c29 {
         border-radius: 4px 4px 0 0;
         background: linear-gradient(180deg,#ffffff 0%,#f6f6f9 121.48%);
       }
@@ -483,49 +470,49 @@ describe('MediaLibrary / AssetList', () => {
                 class="c2 c3"
               >
                 <div
-                  class="c4 c5 c6 c7"
+                  class="c4"
                 >
                   <input
                     aria-labelledby="card-1-title"
-                    class="c8"
+                    class="c5"
                     type="checkbox"
                   />
                 </div>
                 <div
-                  class="c9"
+                  class="c6"
                 >
                   <img
                     alt="strapi-cover_1fabc982ce.png"
                     aria-hidden="true"
-                    class="c10"
+                    class="c7"
                     src="http://localhost:1337/uploads/thumbnail_strapi_cover_1fabc982ce_5b43615ed5.png?width=1066&height=551"
                   />
                 </div>
               </div>
               <div
-                class="c11"
+                class="c8"
               >
                 <div
-                  class="c12"
+                  class="c9"
                 >
                   <div
-                    class="c13"
+                    class="c10"
                   >
                     <div
-                      class="c14"
+                      class="c11"
                     >
                       <h2
-                        class="c15"
+                        class="c12"
                         id="card-1-title"
                       >
                         strapi-cover_1fabc982ce.png
                       </h2>
                     </div>
                     <div
-                      class="c16"
+                      class="c13"
                     >
                       <span
-                        class="c17"
+                        class="c14"
                       >
                         png
                       </span>
@@ -533,13 +520,13 @@ describe('MediaLibrary / AssetList', () => {
                     </div>
                   </div>
                   <div
-                    class="c18"
+                    class="c15"
                   >
                     <div
-                      class="c19 c20 c21"
+                      class="c16 c17 c18"
                     >
                       <span
-                        class="c22"
+                        class="c19"
                       >
                         Image
                       </span>
@@ -557,22 +544,22 @@ describe('MediaLibrary / AssetList', () => {
                 class="c2 c3"
               >
                 <div
-                  class="c4 c5 c6 c7"
+                  class="c4"
                 >
                   <input
                     aria-labelledby="card-2-title"
-                    class="c8"
+                    class="c5"
                     type="checkbox"
                   />
                 </div>
                 <div
-                  class="c9"
+                  class="c6"
                 >
                   <div
-                    class="c5"
+                    class="c20"
                   >
                     <div
-                      class="c23"
+                      class="c21"
                     >
                       <figure
                         class=""
@@ -586,7 +573,7 @@ describe('MediaLibrary / AssetList', () => {
                           />
                         </video>
                         <figcaption
-                          class="c24"
+                          class="c22"
                         >
                           mov_bbb.mp4
                         </figcaption>
@@ -595,52 +582,52 @@ describe('MediaLibrary / AssetList', () => {
                   </div>
                 </div>
                 <time
-                  class="c25 c26"
+                  class="c23 c24"
                 >
                   <span
-                    class="c27"
+                    class="c25"
                   >
                     ...
                   </span>
                 </time>
               </div>
               <div
-                class="c11"
+                class="c8"
               >
                 <div
-                  class="c12"
+                  class="c9"
                 >
                   <div
-                    class="c13"
+                    class="c10"
                   >
                     <div
-                      class="c14"
+                      class="c11"
                     >
                       <h2
-                        class="c15"
+                        class="c12"
                         id="card-2-title"
                       >
                         mov_bbb.mp4
                       </h2>
                     </div>
                     <div
-                      class="c16"
+                      class="c13"
                     >
                       <span
-                        class="c28"
+                        class="c26"
                       >
                         mp4
                       </span>
                     </div>
                   </div>
                   <div
-                    class="c18"
+                    class="c15"
                   >
                     <div
-                      class="c19 c20 c21"
+                      class="c16 c17 c18"
                     >
                       <span
-                        class="c22"
+                        class="c19"
                       >
                         Video
                       </span>
@@ -658,21 +645,21 @@ describe('MediaLibrary / AssetList', () => {
                 class="c2 c3"
               >
                 <div
-                  class="c4 c5 c6 c7"
+                  class="c4"
                 >
                   <input
                     aria-labelledby="card-3-title"
-                    class="c8"
+                    class="c5"
                     type="checkbox"
                   />
                 </div>
                 <div
-                  class="c29 c30 c31"
+                  class="c27 c28 c29"
                   height="10.25rem"
                   width="100%"
                 >
                   <span
-                    class="c32"
+                    class="c30"
                   >
                     <svg
                       aria-label="CARTE MARIAGE AVS - Printemps.pdf"
@@ -697,42 +684,42 @@ describe('MediaLibrary / AssetList', () => {
                 </div>
               </div>
               <div
-                class="c11"
+                class="c8"
               >
                 <div
-                  class="c12"
+                  class="c9"
                 >
                   <div
-                    class="c13"
+                    class="c10"
                   >
                     <div
-                      class="c14"
+                      class="c11"
                     >
                       <h2
-                        class="c15"
+                        class="c12"
                         id="card-3-title"
                       >
                         CARTE MARIAGE AVS - Printemps.pdf
                       </h2>
                     </div>
                     <div
-                      class="c16"
+                      class="c13"
                     >
                       <span
-                        class="c33"
+                        class="c31"
                       >
                         pdf
                       </span>
                     </div>
                   </div>
                   <div
-                    class="c18"
+                    class="c15"
                   >
                     <div
-                      class="c19 c20 c21"
+                      class="c16 c17 c18"
                     >
                       <span
-                        class="c22"
+                        class="c19"
                       >
                         Doc
                       </span>
@@ -762,7 +749,7 @@ describe('MediaLibrary / AssetList', () => {
           </div>
         </div>
         <div
-          class="c34"
+          class="c32"
         >
           <p
             aria-live="polite"

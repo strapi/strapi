@@ -598,7 +598,6 @@ describe('Admin | ee | SettingsPage | SSO', () => {
 
       .c21 {
         grid-column: span 6;
-        max-width: 100%;
       }
 
       @media (max-width:68.75rem) {
