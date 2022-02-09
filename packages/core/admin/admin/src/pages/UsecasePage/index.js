@@ -64,7 +64,7 @@ const UsecasePage = () => {
 
       axios({
         method: 'POST',
-        url: 'http://localhost:1338/register',
+        url: 'https://analytics.strapi.io/register',
         data: {
           email,
           username: firstname,
