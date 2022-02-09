@@ -919,7 +919,7 @@ describe('Admin | UsecasePage', () => {
     fireEvent.mouseDown(selectInput);
     await waitFor(() => container.querySelector('[role="listbox"]'));
 
-    fireEvent.click(document.querySelector('[data-strapi-value="Front-end developer"]'));
+    fireEvent.click(document.querySelector('[data-strapi-value="front_end_developer"]'));
 
     expect(queryByTestId('other')).not.toBeInTheDocument();
   });
@@ -936,7 +936,7 @@ describe('Admin | UsecasePage', () => {
     fireEvent.mouseDown(selectInput);
     await waitFor(() => container.querySelector('[role="listbox"]'));
 
-    fireEvent.click(document.querySelector('[data-strapi-value="Other"]'));
+    fireEvent.click(document.querySelector('[data-strapi-value="other"]'));
 
     expect(queryByTestId('other')).toBeInTheDocument();
   });
