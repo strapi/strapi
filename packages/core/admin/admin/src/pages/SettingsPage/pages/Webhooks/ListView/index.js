@@ -281,7 +281,10 @@ const ListView = () => {
                   size="L"
                   variant="danger-light"
                 >
-                  Delete
+                  {formatMessage({
+                    id: 'Settings.webhooks.events.delete',
+                    defaultMessage: 'Delete',
+                  })}
                 </Button>
               </>
             }

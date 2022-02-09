@@ -681,7 +681,7 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
                 <span
                   class="c9 c10"
                 >
-                  Add Entry
+                  Create new API Token
                 </span>
               </a>
             </div>

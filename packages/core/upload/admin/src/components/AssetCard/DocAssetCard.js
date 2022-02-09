@@ -12,6 +12,7 @@ import {
   CardTitle,
   CardSubtitle,
 } from '@strapi/design-system/Card';
+import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
 import { IconButton } from '@strapi/design-system/IconButton';
 import Pencil from '@strapi/icons/Pencil';
@@ -68,7 +69,9 @@ export const DocAssetCard = ({ name, extension, selected, onSelect, onEdit, size
       </CardHeader>
       <CardBody>
         <CardContent>
-          <CardTitle as="h2">{name}</CardTitle>
+          <Box paddingTop={1}>
+            <CardTitle as="h2">{name}</CardTitle>
+          </Box>
           <CardSubtitle>
             <Extension>{extension}</Extension>
           </CardSubtitle>

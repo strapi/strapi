@@ -9,7 +9,7 @@ const getDialectClass = client => {
     case 'sqlite':
       return require('./sqlite');
     default:
-      throw new Error(`Unknow dialect ${client}`);
+      throw new Error(`Unknown dialect ${client}`);
   }
 };
 

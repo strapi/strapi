@@ -117,7 +117,7 @@ const ApiTokenListView = () => {
             >
               {formatMessage({
                 id: 'Settings.apiTokens.create',
-                defaultMessage: 'Add Entry',
+                defaultMessage: 'Create new API Token',
               })}
             </LinkButton>
           ) : (

@@ -26,6 +26,10 @@ const LabelAction = styled(Box)`
   }
 `;
 
+const TypographyAsterisk = styled(Typography)`
+  line-height: 0;
+`;
+
 const Wysiwyg = ({
   description,
   disabled,
@@ -36,6 +40,7 @@ const Wysiwyg = ({
   onChange,
   placeholder,
   value,
+  required,
 }) => {
   const { formatMessage } = useIntl();
   const textareaRef = useRef(null);
@@ -49,7 +54,10 @@ const Wysiwyg = ({
 
   const handleToggleMediaLib = () => setMediaLibVisible(prev => !prev);
   const handleTogglePreviewMode = () => setIsPreviewMode(prev => !prev);
-  const handleToggleExpand = () => setIsExpandMode(prev => !prev);
+  const handleToggleExpand = () => {
+    setIsPreviewMode(false);
+    setIsExpandMode(prev => !prev);
+  };
 
   const handleActionClick = (value, currentEditorRef, togglePopover) => {
     switch (value) {
@@ -124,6 +132,7 @@ const Wysiwyg = ({
         <Stack horizontal size={1}>
           <Typography variant="pi" fontWeight="bold" textColor="neutral800">
             {label}
+            {required && <TypographyAsterisk textColor="danger600">*</TypographyAsterisk>}
           </Typography>
           {labelAction && <LabelAction paddingLeft={1}>{labelAction}</LabelAction>}
         </Stack>
@@ -135,15 +144,18 @@ const Wysiwyg = ({
           onCollapse={handleToggleExpand}
         >
           <WysiwygNav
+            isExpandMode={isExpandMode}
             editorRef={editorRef}
             isPreviewMode={isPreviewMode}
             onActionClick={handleActionClick}
             onToggleMediaLib={handleToggleMediaLib}
             onTogglePreviewMode={isExpandMode ? undefined : handleTogglePreviewMode}
+            disabled={disabled}
           />
 
           <Editor
             disabled={disabled}
+            isExpandMode={isExpandMode}
             editorRef={editorRef}
             error={errorMessage}
             isPreviewMode={isPreviewMode}
@@ -154,9 +166,7 @@ const Wysiwyg = ({
             value={value}
           />
 
-          {!isExpandMode && (
-            <WysiwygFooter isPreviewMode={isPreviewMode} onToggleExpand={handleToggleExpand} />
-          )}
+          {!isExpandMode && <WysiwygFooter onToggleExpand={handleToggleExpand} />}
         </EditorLayout>
         <Hint description={description} name={name} error={error} />
       </Stack>
@@ -178,10 +188,11 @@ const Wysiwyg = ({
 
 Wysiwyg.defaultProps = {
   description: null,
-  disabled: true,
+  disabled: false,
   error: '',
   labelAction: undefined,
   placeholder: null,
+  required: false,
   value: '',
 };
 
@@ -206,6 +217,7 @@ Wysiwyg.propTypes = {
     defaultMessage: PropTypes.string.isRequired,
     values: PropTypes.object,
   }),
+  required: PropTypes.bool,
   value: PropTypes.string,
 };
 

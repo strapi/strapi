@@ -80,12 +80,20 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
     }
   };
 
+  const menuTitle = formatMessage({
+    id: 'app.components.LeftMenu.navbrand.title',
+    defaultMessage: 'Strapi Dashboard',
+  });
+
   return (
     <MainNav condensed={condensed}>
       <NavBrand
-        workplace="Workplace"
-        title="Strapi Dashboard"
-        icon={<img src={menuLogo} alt="Strapi Dashboard" />}
+        workplace={formatMessage({
+          id: 'app.components.LeftMenu.navbrand.workplace',
+          defaultMessage: 'Workplace',
+        })}
+        title={menuTitle}
+        icon={<img src={menuLogo} alt={menuTitle} />}
       />
 
       <Divider />
@@ -149,7 +157,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
         >
           <FocusTrap onEscape={handleToggleUserLinks}>
             <Stack size={0}>
-              <LinkUser onClick={handleToggleUserLinks} to="/me">
+              <LinkUser tabIndex={0} onClick={handleToggleUserLinks} to="/me">
                 <Typography>
                   {formatMessage({
                     id: 'app.components.LeftMenu.profile',
@@ -157,7 +165,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
                   })}
                 </Typography>
               </LinkUser>
-              <LinkUser onClick={handleLogout} logout="logout" to="/auth/login">
+              <LinkUser tabIndex={0} onClick={handleLogout} logout="logout" to="/auth/login">
                 <Typography textColor="danger600">
                   {formatMessage({
                     id: 'app.components.LeftMenu.logout',

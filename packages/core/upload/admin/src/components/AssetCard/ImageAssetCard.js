@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
+import { Box } from '@strapi/design-system/Box';
 import {
   Card,
   CardAction,
@@ -58,7 +59,9 @@ export const ImageAssetCard = ({
       </CardHeader>
       <CardBody>
         <CardContent>
-          <CardTitle as="h2">{name}</CardTitle>
+          <Box paddingTop={1}>
+            <CardTitle as="h2">{name}</CardTitle>
+          </Box>
           <CardSubtitle>
             <Extension>{extension}</Extension>
             {height && width && ` - ${height}✕${width}`}

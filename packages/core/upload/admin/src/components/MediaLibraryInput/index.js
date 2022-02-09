@@ -22,6 +22,7 @@ export const MediaLibraryInput = ({
   name,
   onChange,
   value,
+  required,
 }) => {
   const fieldAllowedTypes = allowedTypes || ['files', 'images', 'videos'];
   const [uploadedFiles, setUploadedFiles] = useState([]);
@@ -149,6 +150,7 @@ export const MediaLibraryInput = ({
         onPrevious={handlePrevious}
         error={errorMessage}
         hint={hint}
+        required={required}
         selectedAssetIndex={selectedIndex}
         trackedLocation="content-manager"
       />
@@ -184,6 +186,7 @@ MediaLibraryInput.defaultProps = {
   error: undefined,
   intlLabel: undefined,
   multiple: false,
+  required: false,
   value: [],
 };
 
@@ -200,5 +203,6 @@ MediaLibraryInput.propTypes = {
   multiple: PropTypes.bool,
   onChange: PropTypes.func.isRequired,
   name: PropTypes.string.isRequired,
+  required: PropTypes.bool,
   value: PropTypes.oneOfType([PropTypes.arrayOf(AssetDefinition), AssetDefinition]),
 };

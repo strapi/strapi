@@ -24,7 +24,7 @@ const FieldButtonContent = ({ attribute, onEditField, onDeleteField, children })
 
   return (
     <Box overflow="hidden" width="100%">
-      <Flex paddingLeft={3} alignItems="baseline" justifyContent="space-between">
+      <Flex paddingLeft={3} alignItems="center" justifyContent="space-between">
         <Typography fontWeight="semiBold" textColor="neutral800" ellipsis>
           {children}
         </Typography>

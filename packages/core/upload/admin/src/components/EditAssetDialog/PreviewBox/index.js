@@ -114,7 +114,7 @@ export const PreviewBox = ({
     const nextAsset = { ...asset, width, height };
     const file = await produceFile(nextAsset.name, nextAsset.mime, nextAsset.updatedAt);
 
-    await upload(file);
+    await upload({ name: file.name, rawFile: file });
 
     trackUsage('didCropFile', { duplicatedFile: true, location: trackedLocation });
 

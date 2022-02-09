@@ -34,4 +34,25 @@ describe('Metrics', () => {
 
     expect(send).toHaveBeenCalledWith('didUpdateRolePermissions');
   });
+
+  test('didChangeInterfaceLanguage', async () => {
+    const getLanguagesInUse = jest.fn(() => Promise.resolve(['en', 'fr', 'en']));
+    const send = jest.fn(() => Promise.resolve());
+
+    global.strapi = {
+      telemetry: { send },
+      admin: {
+        services: {
+          user: { getLanguagesInUse },
+        },
+      },
+    };
+
+    await metricsService.sendDidChangeInterfaceLanguage();
+
+    expect(getLanguagesInUse).toHaveBeenCalledWith();
+    expect(send).toHaveBeenCalledWith('didChangeInterfaceLanguage', {
+      languagesInUse: ['en', 'fr', 'en'],
+    });
+  });
 });

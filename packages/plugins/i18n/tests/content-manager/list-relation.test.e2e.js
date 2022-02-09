@@ -114,7 +114,7 @@ describe('i18n - Relation-list route', () => {
     });
 
     expect(res.body).toHaveLength(1);
-    expect(res.body[0]).toStrictEqual(pick(['_id', 'id', 'name'], data.products[1]));
+    expect(res.body[0]).toStrictEqual(pick(['id', 'name'], data.products[1]));
   });
 
   test('Can filter on any locale', async () => {
@@ -125,6 +125,6 @@ describe('i18n - Relation-list route', () => {
     });
 
     expect(res.body).toHaveLength(1);
-    expect(res.body[0]).toStrictEqual(pick(['_id', 'id', 'name'], data.products[0]));
+    expect(res.body[0]).toStrictEqual(pick(['id', 'name'], data.products[0]));
   });
 });

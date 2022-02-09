@@ -41,9 +41,7 @@ const DisplayedFields = ({ editLayout, editLayoutRemainingFields, onRemoveField,
       <Box padding={4} hasRadius borderStyle="dashed" borderWidth="1px" borderColor="neutral300">
         <Stack size={2}>
           {editLayout.map((row, index) => (
-            <React.Fragment key={row.rowId}>
-              <RowsLayout row={row} rowIndex={index} onRemoveField={onRemoveField} />
-            </React.Fragment>
+            <RowsLayout key={row.rowId} row={row} rowIndex={index} onRemoveField={onRemoveField} />
           ))}
           <SimpleMenu
             id="label"
