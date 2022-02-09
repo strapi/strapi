@@ -50,6 +50,25 @@ module.exports = ({ env }) => ({
   // ...
 });
 ```
+### Override Base URL
+
+By default the file path is set to the S3 provided Location url, if you like to override this behavior use
+the optional setting `baseUrl` to override with a custom provided URL.
+
+```js 
+module.exports = ({ env }) => ({
+  // ...
+  upload: {
+    config: {
+      provider: 'aws-s3',
+      baseUrl: env('AWS_BASE_URL'),
+      // ...
+      },
+    },
+  },
+  // ...
+});
+```
 
 ### Security Middleware Configuration
 
