@@ -21,6 +21,13 @@ const VideoPreviewWrapper = styled(Box)`
   }
 `;
 
+const AudioPreviewWrapper = styled(Box)`
+  canvas,
+  audio {
+    max-width: 100%;
+  }
+`;
+
 export const CarouselAsset = ({ asset }) => {
   if (asset.mime.includes(AssetType.Video)) {
     return (
@@ -36,11 +43,13 @@ export const CarouselAsset = ({ asset }) => {
 
   if (asset.mime.includes(AssetType.Audio)) {
     return (
-      <AudioPreview
-        url={createAssetUrl(asset, true)}
-        mime={asset.mime}
-        alt={asset.alternativeText || asset.name}
-      />
+      <AudioPreviewWrapper>
+        <AudioPreview
+          url={createAssetUrl(asset, true)}
+          mime={asset.mime}
+          alt={asset.alternativeText || asset.name}
+        />
+      </AudioPreviewWrapper>
     );
   }
 
