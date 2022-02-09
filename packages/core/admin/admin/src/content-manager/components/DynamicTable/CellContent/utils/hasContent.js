@@ -7,7 +7,7 @@ export default function hasContent(type, content, metadatas, fieldSchema) {
     } = metadatas;
 
     if (fieldSchema?.repeatable) {
-      return content.some(item => !isEmpty(item[mainFieldName]));
+      return content.some(item => !isEmpty(item));
     }
 
     return !isEmpty(content[mainFieldName]);

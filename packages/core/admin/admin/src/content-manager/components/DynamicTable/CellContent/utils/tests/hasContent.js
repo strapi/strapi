@@ -51,13 +51,13 @@ describe('hasContent', () => {
       { mainField: { name: 'content_2' } },
       { repeatable: true }
     );
-    expect(normalizedContent).toEqual(false);
+    expect(normalizedContent).toEqual(true);
   });
 
-  it('extracts content from repeatable components without content in the first component', () => {
+  it('extracts content from repeatable components without content', () => {
     const normalizedContent = hasContent(
       'component',
-      [{ name: 'content_2', value: '' }, { name: 'content_2', value: 'something' }],
+      [{}, {}],
       { mainField: { name: 'content_2' } },
       { repeatable: true }
     );
