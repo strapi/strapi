@@ -17,11 +17,11 @@ import Logo from '../AuthPage/components/Logo';
 import UnauthenticatedLayout, { LayoutContent } from '../../layouts/UnauthenticatedLayout';
 
 export const options = [
-  { label: 'Front-end developer', value: 'front-end-developer' },
-  { label: 'Back-end developer', value: 'back-end-developer' },
-  { label: 'Full-stack developer', value: 'full-stack-developer' },
-  { label: 'Content Manager', value: 'content-manager' },
-  { label: 'Content Creator', value: 'content-creator' },
+  { label: 'Front-end developer', value: 'front_end_developer' },
+  { label: 'Back-end developer', value: 'back_end_developer' },
+  { label: 'Full-stack developer', value: 'full_stack_developer' },
+  { label: 'Content Manager', value: 'content_manager' },
+  { label: 'Content Creator', value: 'content_creator' },
   { label: 'Other', value: 'other' },
 ];
 
@@ -33,10 +33,10 @@ const UsecasePage = () => {
   const toggleNotification = useNotification();
   const { push, location } = useHistory();
   const { formatMessage } = useIntl();
-  const [obUserPersona, setObUserPersona] = useState();
-  const [obUserPersonaOther, setObUserPersonaOther] = useState('');
+  const [persona, setPersona] = useState();
+  const [personaOther, setPersonaOther] = useState('');
 
-  const isOther = obUserPersona === 'other';
+  const isOther = persona === 'other';
   const isComingFromRegister = location.state?.fromRegister;
 
   const CancelToken = axios.CancelToken;
@@ -64,13 +64,13 @@ const UsecasePage = () => {
 
       axios({
         method: 'POST',
-        url: 'https://analytics.strapi.io/register',
+        url: 'http://localhost:1338/register',
         data: {
           email,
           username: firstname,
           firstAdmin,
-          obUserPersona,
-          obUserPersonaOther,
+          persona,
+          personaOther,
         },
         cancelToken: source.token,
       });
@@ -116,10 +116,10 @@ const UsecasePage = () => {
                   id: 'Usecase.input.work-type',
                   defaultMessage: 'What type of work do you do?',
                 })}
-                onClear={() => setObUserPersona(null)}
+                onClear={() => setPersona(null)}
                 clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
-                onChange={setObUserPersona}
-                value={obUserPersona}
+                onChange={setPersona}
+                value={persona}
               >
                 {options.map(({ label, value }) => (
                   <Option key={value} value={value}>
@@ -131,8 +131,8 @@ const UsecasePage = () => {
                 <TextInput
                   name="other"
                   label={formatMessage({ id: 'Usecase.input.other', defaultMessage: 'Other' })}
-                  value={obUserPersonaOther}
-                  onChange={e => setObUserPersonaOther(e.target.value)}
+                  value={personaOther}
+                  onChange={e => setPersonaOther(e.target.value)}
                   data-testid="other"
                 />
               )}
