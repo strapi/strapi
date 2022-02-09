@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
+import { useIntl } from 'react-intl';
 import { Flex } from '@strapi/design-system/Flex';
 import { Box } from '@strapi/design-system/Box';
 import { Tooltip } from '@strapi/design-system/Tooltip';
@@ -8,6 +9,7 @@ import { Typography } from '@strapi/design-system/Typography';
 import { Popover } from '@strapi/design-system/Popover';
 import { FocusTrap } from '@strapi/design-system/FocusTrap';
 import { SortIcon, stopPropagation } from '@strapi/helper-plugin';
+import { getTrad } from '../../../../utils';
 
 import CellValue from '../CellValue';
 
@@ -49,6 +51,7 @@ const ActionWrapper = styled.div`
 
 const RepeatableComponentCell = ({ value, metadatas }) => {
   const [visible, setVisible] = useState(false);
+  const { formatMessage } = useIntl();
   const buttonRef = useRef();
   const {
     mainField: { type: mainFieldType, name: mainFieldName },
@@ -59,7 +62,12 @@ const RepeatableComponentCell = ({ value, metadatas }) => {
 
   return (
     <Flex {...stopPropagation}>
-      <Tooltip label="Display repeatable values">
+      <Tooltip
+        label={formatMessage({
+          id: getTrad('DynamicTable.component.repeatable.toggle'),
+          defaultMessage: 'Toggle repeatable values',
+        })}
+      >
         <Button type="button" onClick={handleTogglePopover} ref={buttonRef}>
           <Flex>
             <Typography
