@@ -33,7 +33,8 @@ module.exports = async ({ strapi }) => {
 
     if (process.env.NODE_ENV === 'production') {
       throw new Error(
-        `[Users & Permissions] Missing jwtSecret. Please, in config/plugins.js, set config.jwtSecret for the users-permissions plugin or set environment variable JWT_SECRET (ex: ${jwtSecret}).`
+        `[Users & Permissions] Missing jwtSecret. Please, in config/plugins.js, set config.jwtSecret for the users-permissions plugin or set environment variable JWT_SECRET (ex: ${jwtSecret}).
+For security reasons, prefere storing the secret in a environment variable. See https://docs.strapi.io/developer-docs/latest/setup-deployment-guides/configurations/optional/environment.html#configuration-using-environment-variables.`
       );
     }
 

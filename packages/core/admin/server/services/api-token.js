@@ -78,7 +78,8 @@ const checkSaltIsDefined = () => {
   if (!strapi.config.get('admin.apiToken.salt')) {
     const secretExample = crypto.randomBytes(16).toString('base64');
     throw new Error(
-      `Missing apiToken.salt. Please set apiToken.salt in config/admin.js (ex: ${secretExample})`
+      `Missing apiToken.salt. Please set apiToken.salt in config/admin.js (ex: ${secretExample}).
+For security reasons, prefere storing the secret in a environment variable. See https://docs.strapi.io/developer-docs/latest/setup-deployment-guides/configurations/optional/environment.html#configuration-using-environment-variables.`
     );
   }
 };
