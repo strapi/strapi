@@ -1,19 +1,17 @@
+import isEmpty from 'lodash/isEmpty';
+
 export default function hasContent(type, content, metadatas, fieldSchema) {
-  let normalizedContent = content;
-
   if (type === 'component') {
-    const { mainField } = metadatas;
+    const {
+      mainField: { name: mainFieldName },
+    } = metadatas;
 
-    if (fieldSchema.repeatable) {
-      normalizedContent = content?.[0]?.[mainField];
-    } else {
-      normalizedContent = content?.[mainField];
+    if (fieldSchema?.repeatable) {
+      return content.some(item => !isEmpty(item[mainFieldName]));
     }
+
+    return !isEmpty(content[mainFieldName]);
   }
 
-  if (normalizedContent === undefined || content?.length === 0) {
-    normalizedContent = null;
-  }
-
-  return !!normalizedContent;
+  return !isEmpty(content);
 }

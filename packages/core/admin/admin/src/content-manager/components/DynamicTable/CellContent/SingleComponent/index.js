@@ -7,16 +7,15 @@ import { stopPropagation } from '@strapi/helper-plugin';
 
 import CellValue from '../CellValue';
 
-const SingleComponentCell = ({ value, metadatas, component }) => {
+const SingleComponentCell = ({ value, metadatas }) => {
   const { mainField } = metadatas;
-  const content = value?.[mainField];
-  const type = component?.attributes?.[mainField]?.type;
+  const content = value[mainField.name];
 
   return (
     <Flex {...stopPropagation}>
       <Tooltip label={content}>
         <Typography textColor="neutral800" ellipsis>
-          <CellValue type={type} value={content} />
+          <CellValue type={mainField.type} value={content} />
         </Typography>
       </Tooltip>
     </Flex>
@@ -25,16 +24,13 @@ const SingleComponentCell = ({ value, metadatas, component }) => {
 
 SingleComponentCell.propTypes = {
   metadatas: PropTypes.shape({
-    mainField: PropTypes.string.isRequired,
+    mainField: PropTypes.shape({
+      name: PropTypes.string,
+      type: PropTypes.string,
+      value: PropTypes.string,
+    }),
   }).isRequired,
   value: PropTypes.object.isRequired,
-  component: PropTypes.shape({
-    attributes: PropTypes.arrayOf(
-      PropTypes.shape({
-        type: PropTypes.string.isRequired,
-      })
-    ).isRequired,
-  }).isRequired,
 };
 
 export default SingleComponentCell;

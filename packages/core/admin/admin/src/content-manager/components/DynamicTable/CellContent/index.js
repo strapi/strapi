@@ -14,7 +14,7 @@ const TypographyMaxWidth = styled(Typography)`
   max-width: 300px;
 `;
 
-const CellContent = ({ content, fieldSchema, metadatas, name, queryInfos, rowId, layout }) => {
+const CellContent = ({ content, fieldSchema, metadatas, name, queryInfos, rowId }) => {
   const { type } = fieldSchema;
 
   if (!hasContent(type, content, metadatas, fieldSchema)) {
@@ -43,22 +43,10 @@ const CellContent = ({ content, fieldSchema, metadatas, name, queryInfos, rowId,
 
     case 'component':
       if (fieldSchema.repeatable === true) {
-        return (
-          <RepeatableComponent
-            value={content}
-            metadatas={metadatas}
-            component={layout?.components?.[fieldSchema.component]}
-          />
-        );
+        return <RepeatableComponent value={content} metadatas={metadatas} />;
       }
 
-      return (
-        <SingleComponent
-          value={content}
-          metadatas={metadatas}
-          component={layout?.components?.[fieldSchema.component]}
-        />
-      );
+      return <SingleComponent value={content} metadatas={metadatas} />;
 
     default:
       return (
@@ -86,9 +74,6 @@ CellContent.propTypes = {
   name: PropTypes.string.isRequired,
   rowId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
   queryInfos: PropTypes.shape({ endPoint: PropTypes.string.isRequired }),
-  layout: PropTypes.shape({
-    components: PropTypes.object,
-  }).isRequired,
 };
 
 export default CellContent;

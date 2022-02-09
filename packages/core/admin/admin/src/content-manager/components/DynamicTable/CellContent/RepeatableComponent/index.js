@@ -47,12 +47,13 @@ const ActionWrapper = styled.div`
   }
 `;
 
-const RepeatableComponentCell = ({ value, metadatas, component }) => {
+const RepeatableComponentCell = ({ value, metadatas }) => {
   const [visible, setVisible] = useState(false);
   const buttonRef = useRef();
-  const { mainField } = metadatas;
-  const type = component?.attributes?.[mainField]?.type;
-  const subValues = [...value.slice(1)];
+  const {
+    mainField: { type: mainFieldType, name: mainFieldName },
+  } = metadatas;
+  const subItems = [...value.slice(1)];
 
   const handleTogglePopover = () => setVisible(prev => !prev);
 
@@ -66,26 +67,22 @@ const RepeatableComponentCell = ({ value, metadatas, component }) => {
               textColor="neutral800"
               ellipsis
             >
-              <CellValue type={type} value={value?.[0]?.[mainField]} />
+              <CellValue type={mainFieldType} value={value[0][mainFieldName] || '[TBD]'} />
             </Typography>
             <ActionWrapper>
               <SortIcon />
 
-              {visible && subValues.length > 0 && (
+              {visible && subItems.length > 0 && (
                 <Popover source={buttonRef} spacing={16} centered>
                   <FocusTrap onEscape={handleTogglePopover}>
                     <ul>
-                      {subValues.map(entry => {
-                        const entryType = component?.attributes?.[mainField]?.type;
-
-                        return (
-                          <Box key={entry.id} tabIndex={0} padding={3} as="li">
-                            <Typography>
-                              <CellValue type={entryType} value={entry[mainField]} />
-                            </Typography>
-                          </Box>
-                        );
-                      })}
+                      {subItems.map(item => (
+                        <Box key={item.id} tabIndex={0} padding={3} as="li">
+                          <Typography>
+                            <CellValue type={mainFieldType} value={item[mainFieldName]} />
+                          </Typography>
+                        </Box>
+                      ))}
                     </ul>
                   </FocusTrap>
                 </Popover>
@@ -100,16 +97,13 @@ const RepeatableComponentCell = ({ value, metadatas, component }) => {
 
 RepeatableComponentCell.propTypes = {
   metadatas: PropTypes.shape({
-    mainField: PropTypes.string.isRequired,
+    mainField: PropTypes.shape({
+      name: PropTypes.string,
+      type: PropTypes.string,
+      value: PropTypes.string,
+    }),
   }).isRequired,
   value: PropTypes.array.isRequired,
-  component: PropTypes.shape({
-    attributes: PropTypes.arrayOf(
-      PropTypes.shape({
-        type: PropTypes.string.isRequired,
-      })
-    ).isRequired,
-  }).isRequired,
 };
 
 export default RepeatableComponentCell;
