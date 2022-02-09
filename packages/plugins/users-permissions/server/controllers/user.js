@@ -40,7 +40,7 @@ module.exports = {
       .findOne({ where: { username } });
 
     if (userWithSameUsername) {
-      if (!email) throw new ApplicationError('Username already taken');
+      throw new ApplicationError('Username already taken');
     }
 
     if (advanced.unique_email) {
