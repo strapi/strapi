@@ -37,7 +37,7 @@ describe('Admin | UsecasePage', () => {
     const { container: firstChild } = render(App);
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c40 {
+      .c41 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
@@ -452,39 +452,54 @@ describe('Admin | UsecasePage', () => {
         outline: none;
       }
 
-      .c39 {
+      .c40 {
         color: #4945ff;
-        font-weight: 600;
-        font-size: 0.6875rem;
-        line-height: 1.45;
-        text-transform: uppercase;
+        font-size: 0.75rem;
+        line-height: 1.33;
       }
 
       .c38 {
-        display: -webkit-inline-box;
-        display: -webkit-inline-flex;
-        display: -ms-inline-flexbox;
-        display: inline-flex;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
-        text-transform: uppercase;
-        -webkit-text-decoration: none;
-        text-decoration: none;
+      }
+
+      .c39 {
+        background: transparent;
+        border: none;
         position: relative;
         outline: none;
       }
 
-      .c38 svg path {
-        fill: #4945ff;
+      .c39[aria-disabled='true'] {
+        pointer-events: none;
       }
 
-      .c38 svg {
+      .c39[aria-disabled='true'] svg path {
+        fill: #666687;
+      }
+
+      .c39 svg {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
         font-size: 0.625rem;
       }
 
-      .c38:after {
+      .c39 svg path {
+        fill: #4945ff;
+      }
+
+      .c39:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -499,11 +514,11 @@ describe('Admin | UsecasePage', () => {
         border: 2px solid transparent;
       }
 
-      .c38:focus-visible {
+      .c39:focus-visible {
         outline: none;
       }
 
-      .c38:focus-visible:after {
+      .c39:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -858,24 +873,24 @@ describe('Admin | UsecasePage', () => {
                 <div
                   class="c37"
                 >
-                  <a
-                    aria-current="page"
-                    class="c38 active"
-                    href="/"
+                  <button
+                    aria-disabled="false"
+                    class="c38 c39"
+                    type="button"
                   >
                     <span
-                      class="c39"
+                      class="c40"
                     >
                       Skip this question
                     </span>
-                  </a>
+                  </button>
                 </div>
               </div>
             </main>
           </div>
         </div>
         <div
-          class="c40"
+          class="c41"
         >
           <p
             aria-live="polite"
