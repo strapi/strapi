@@ -16,9 +16,6 @@ const extractToken = ctx => {
 
     return parts[1];
   }
-  if (ctx.query.access_token) {
-    return ctx.query.access_token;
-  }
 
   return null;
 };

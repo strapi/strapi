@@ -12,6 +12,7 @@ import {
 } from '@strapi/design-system/Card';
 import { Typography } from '@strapi/design-system/Typography';
 import { Stack } from '@strapi/design-system/Stack';
+import { Box } from '@strapi/design-system/Box';
 import { useIntl } from 'react-intl';
 import { getTrad } from '../../utils';
 import { AssetType } from '../../constants';
@@ -82,7 +83,9 @@ export const UploadingAssetCard = ({ asset, onCancel, onStatusChange, addUploade
         </CardHeader>
         <CardBody>
           <CardContent>
-            <CardTitle as="h2">{asset.name}</CardTitle>
+            <Box paddingTop={1}>
+              <CardTitle as="h2">{asset.name}</CardTitle>
+            </Box>
             <CardSubtitle>
               <Extension>{asset.ext}</Extension>
             </CardSubtitle>

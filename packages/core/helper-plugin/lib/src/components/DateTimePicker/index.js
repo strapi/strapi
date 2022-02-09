@@ -38,6 +38,7 @@ const DateTimePicker = ({
   name,
   required,
   size,
+  step,
   value,
   ...props
 }) => {
@@ -146,6 +147,7 @@ const DateTimePicker = ({
             onClear={onClear && handleTimeClear}
             clearLabel={clearLabel}
             disabled={disabled}
+            step={step}
           />
         </Stack>
         <FieldHint />
@@ -168,6 +170,7 @@ DateTimePicker.defaultProps = {
   onClear: undefined,
   required: false,
   size: 'M',
+  step: 1,
   value: undefined,
 };
 
@@ -184,6 +187,7 @@ DateTimePicker.propTypes = {
   onClear: PropTypes.func,
   required: PropTypes.bool,
   size: PropTypes.oneOf(['S', 'M']),
+  step: PropTypes.number,
   value: PropTypes.instanceOf(Date),
 };
 

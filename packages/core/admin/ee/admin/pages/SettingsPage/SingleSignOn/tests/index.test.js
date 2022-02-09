@@ -713,7 +713,7 @@ describe('Admin | ee | SettingsPage | SSO', () => {
                             >
                               <label
                                 class="c25"
-                                for="field-1"
+                                for="toggleinput-1"
                               >
                                 Auto-registration
                               </label>
@@ -755,6 +755,7 @@ describe('Admin | ee | SettingsPage | SSO', () => {
                                   checked=""
                                   class="c35"
                                   data-testid="autoRegister"
+                                  id="toggleinput-1"
                                   name="autoRegister"
                                   type="checkbox"
                                 />
@@ -762,7 +763,7 @@ describe('Admin | ee | SettingsPage | SSO', () => {
                             </label>
                             <p
                               class="c36"
-                              id="field-1-hint"
+                              id="toggleinput-1-hint"
                             >
                               Create new user on SSO login if no account exists
                             </p>
