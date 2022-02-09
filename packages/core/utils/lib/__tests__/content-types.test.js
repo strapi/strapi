@@ -6,6 +6,7 @@ const {
   getPrivateAttributes,
   getVisibleAttributes,
   getNonWritableAttributes,
+  getScalarAttributes,
   constants,
 } = require('../content-types');
 
@@ -194,6 +195,59 @@ describe('Content types utils', () => {
 
     test('Returns false if type do not match', () => {
       expect(isTypedAttribute({ type: 'test' }, 'other-type')).toBe(false);
+    });
+  });
+
+  describe('getScalarAttributes', () => {
+    test('returns only scalar attributes', () => {
+      const schema = {
+        attributes: {
+          mediaField: { type: 'media' },
+          componentField: { type: 'component' },
+          relationField: { type: 'relation' },
+          dynamiczoneField: { type: 'dynamiczone' },
+          stringField: { type: 'string' },
+          textField: { type: 'text' },
+          richtextField: { type: 'richtext' },
+          enumerationField: { type: 'enumeration' },
+          emailField: { type: 'email' },
+          passwordField: { type: 'password' },
+          uidField: { type: 'uid' },
+          dateField: { type: 'date' },
+          timeField: { type: 'time' },
+          datetimeField: { type: 'datetime' },
+          timestampField: { type: 'timestamp' },
+          integerField: { type: 'integer' },
+          bigintegerField: { type: 'biginteger' },
+          floatField: { type: 'float' },
+          decimalField: { type: 'decimal' },
+          booleanField: { type: 'boolean' },
+          arrayField: { type: 'array' },
+          jsonField: { type: 'json' },
+        },
+      };
+
+      const scalarAttributes = getScalarAttributes(schema);
+      expect(scalarAttributes).toEqual([
+        'stringField',
+        'textField',
+        'richtextField',
+        'enumerationField',
+        'emailField',
+        'passwordField',
+        'uidField',
+        'dateField',
+        'timeField',
+        'datetimeField',
+        'timestampField',
+        'integerField',
+        'bigintegerField',
+        'floatField',
+        'decimalField',
+        'booleanField',
+        'arrayField',
+        'jsonField',
+      ]);
     });
   });
 });

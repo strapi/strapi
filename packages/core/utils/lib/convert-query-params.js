@@ -4,7 +4,7 @@
  * Converts the standard Strapi REST query params to a more usable format for querying
  * You can read more here: https://docs.strapi.io/developer-docs/latest/developer-resources/database-apis-reference/rest-api.html#filters
  */
-const { has } = require('lodash/fp');
+const { has, isEmpty, isObject, cloneDeep } = require('lodash/fp');
 const _ = require('lodash');
 const parseType = require('./parse-type');
 const contentTypesUtils = require('./content-types');
@@ -218,7 +218,81 @@ const convertFieldsQueryParams = (fields, depth = 0) => {
   throw new Error('Invalid fields parameter. Expected a string or an array of strings');
 };
 
-const convertFiltersQueryParams = filters => filters;
+const convertFiltersQueryParams = (filters, schema) => {
+  // Filters need to be either an array or an object
+  // Here we're only checking for 'object' type since typeof [] => object and typeof {} => object
+  if (!isObject(filters)) {
+    throw new Error('The filters parameter must be an object or an array');
+  }
+
+  // Don't mutate the original object
+  const filtersCopy = cloneDeep(filters);
+
+  return sanitizeFilters(filtersCopy, schema);
+};
+
+const sanitizeFilters = (filters, schema) => {
+  if (!isObject(filters)) {
+    return filters;
+  }
+
+  if (Array.isArray(filters)) {
+    return (
+      filters
+        // Sanitize each filter
+        .map(filter => sanitizeFilters(filter, schema))
+        // Filter out empty filters
+        .filter(filter => !isObject(filter) || !isEmpty(filter))
+    );
+  }
+
+  const removeOperator = operator => delete filters[operator];
+
+  // Here, `key` can either be an operator or an attribute name
+  for (const [key, value] of Object.entries(filters)) {
+    const attribute = schema.attributes[key];
+
+    // Handle attributes
+    if (attribute) {
+      // Always remove password attributes from filters object
+      if (attribute.type === 'password') {
+        removeOperator(key);
+      }
+
+      // Relations
+      if (attribute.type === 'relation') {
+        filters[key] = sanitizeFilters(value, strapi.getModel(attribute.target));
+      }
+
+      // Components
+      else if (attribute.type === 'component') {
+        filters[key] = sanitizeFilters(value, strapi.getModel(attribute.component));
+      }
+
+      // Media
+      else if (attribute.type === 'media') {
+        filters[key] = sanitizeFilters(value, strapi.getModel('plugin::upload.file'));
+      }
+
+      // Dynamic Zones
+      else if (attribute.type === 'dynamiczone') {
+        removeOperator(key);
+      }
+    }
+
+    // Handle operators
+    else if (isObject(value)) {
+      filters[key] = sanitizeFilters(value, schema);
+    }
+
+    // Remove empty objects & arrays
+    if (isObject(filters[key]) && isEmpty(filters[key])) {
+      removeOperator(key);
+    }
+  }
+
+  return filters;
+};
 
 const convertPublicationStateParams = (type, params = {}, query = {}) => {
   if (!type) {

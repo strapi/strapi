@@ -15,10 +15,10 @@ To install this plugin, you need to add an NPM dependency to your Strapi applica
 
 ```sh
 # Using Yarn
-yarn add strapi-plugin-sentry
+yarn add @strapi/plugin-sentry
 
 # Or using NPM
-npm install strapi-plugin-sentry
+npm install @strapi/plugin-sentry
 ```
 
 ## Configuration
@@ -37,8 +37,11 @@ npm install strapi-plugin-sentry
 module.exports = ({ env }) => ({
   // ...
   sentry: {
-    dsn: env('SENTRY_DSN'),
-    sendMetadata: true,
+    enabled: true,
+    config: {
+      dsn: env('SENTRY_DSN'),
+      sendMetadata: true,
+    },
   },
   // ...
 });
@@ -97,30 +100,7 @@ const sentryInstance = strapi
 
 ## Disabling
 
-### Disabling only the middleware
-
-By default, this plugin uses a middleware that logs all your unhandled API errors to Sentry. You can disable this feature by turning off the `sentry` middleware in your app's config.
-
-**Example**
-
-`./config/middleware.js`
-
-```js
-module.exports = {
-  //...
-  settings: {
-    sentry: {
-      enabled: false,
-    },
-  },
-};
-```
-
-Only the middleware will be disabled. You will still have access to the Sentry service.
-
-### Disabling the plugin entirely
-
-You can also completely disable this plugin (both the middleware and the service). If you omit the `dsn` property of your plugin's settings, or if you give it a null value, the Sentry plugin will be ignored. You can use the `env` utility to disable it depending on the environment.
+This plugin can be disabled in the plugins configuration file. With the `env` utility, it is also possible to disable it depending on the environment.
 
 **Example**
 
@@ -130,7 +110,8 @@ You can also completely disable this plugin (both the middleware and the service
 module.exports = ({ env }) => ({
   // ...
   sentry: {
-    dsn: env('NODE_ENV') === 'development' ? null : env('SENTRY_DSN'),
+    // Only enable Sentry in production
+    enabled: env('NODE_ENV') === 'production',
   },
   // ...
 });
