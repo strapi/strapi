@@ -23,7 +23,10 @@ npm install @strapi/provider-upload-local --save
 
 ## Configurations
 
-This provider has only one parameter: `sizeLimit`.
+This provider has two parameters:
+
+- `sizeLimit` that defines the max size of the file
+- `publicUrlPrefix` that allows for a custom base URL
 
 ### Provider Configuration
 
@@ -37,6 +40,7 @@ module.exports = ({ env }) => ({
       provider: 'local',
       providerOptions: {
         sizeLimit: 100000,
+        publicUrlPrefix: 'http://localhost:1337',
       },
     },
   },

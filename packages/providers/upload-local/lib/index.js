@@ -10,7 +10,7 @@ const path = require('path');
 const { PayloadTooLargeError } = require('@strapi/utils').errors;
 
 module.exports = {
-  init({ sizeLimit = 1000000 } = {}) {
+  init({ sizeLimit = 1000000, publicUrlPrefix = '' } = {}) {
     const verifySize = file => {
       if (file.size > sizeLimit) {
         throw new PayloadTooLargeError();
@@ -33,7 +33,7 @@ module.exports = {
                 return reject(err);
               }
 
-              file.url = `/uploads/${file.hash}${file.ext}`;
+              file.url = `${publicUrlPrefix}/uploads/${file.hash}${file.ext}`;
 
               resolve();
             }
