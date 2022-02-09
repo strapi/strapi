@@ -49,6 +49,18 @@ const ActionWrapper = styled.div`
   }
 `;
 
+function getMainFieldValue(field, name) {
+  return field[name] || field.id;
+}
+
+function getMainFieldType(field, name, defaultType) {
+  if (field[name]) {
+    return defaultType;
+  }
+
+  return 'text';
+}
+
 const RepeatableComponentCell = ({ value, metadatas }) => {
   const [visible, setVisible] = useState(false);
   const { formatMessage } = useIntl();
@@ -75,7 +87,10 @@ const RepeatableComponentCell = ({ value, metadatas }) => {
               textColor="neutral800"
               ellipsis
             >
-              <CellValue type={mainFieldType} value={value[0][mainFieldName] || '[TBD]'} />
+              <CellValue
+                type={getMainFieldType(value[0], mainFieldName, mainFieldType)}
+                value={getMainFieldValue(value[0], mainFieldName)}
+              />
             </Typography>
             <ActionWrapper>
               <SortIcon />
@@ -87,7 +102,10 @@ const RepeatableComponentCell = ({ value, metadatas }) => {
                       {subItems.map(item => (
                         <Box key={item.id} tabIndex={0} padding={3} as="li">
                           <Typography>
-                            <CellValue type={mainFieldType} value={item[mainFieldName]} />
+                            <CellValue
+                              type={getMainFieldType(item, mainFieldName, mainFieldType)}
+                              value={getMainFieldValue(item, mainFieldName)}
+                            />
                           </Typography>
                         </Box>
                       ))}
