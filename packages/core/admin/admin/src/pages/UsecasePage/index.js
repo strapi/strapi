@@ -11,7 +11,7 @@ import { Stack } from '@strapi/design-system/Stack';
 import { Typography } from '@strapi/design-system/Typography';
 import { Select, Option } from '@strapi/design-system/Select';
 import { TextInput } from '@strapi/design-system/TextInput';
-import { Link } from '@strapi/design-system/Link';
+import { TextButton } from '@strapi/design-system/TextButton';
 import { Button } from '@strapi/design-system/Button';
 import Logo from '../AuthPage/components/Logo';
 import UnauthenticatedLayout, { LayoutContent } from '../../layouts/UnauthenticatedLayout';
@@ -56,7 +56,7 @@ const UsecasePage = () => {
     }
   }, [isComingFromRegister, push]);
 
-  const handleSubmit = () => {
+  const handleSubmit = skip => {
     try {
       const {
         state: { email, firstAdmin, firstname },
@@ -69,8 +69,8 @@ const UsecasePage = () => {
           email,
           username: firstname,
           firstAdmin,
-          persona,
-          personaOther,
+          persona: skip ? undefined : persona,
+          personaOther: skip ? undefined : personaOther,
         },
         cancelToken: source.token,
       });
@@ -136,7 +136,7 @@ const UsecasePage = () => {
                   data-testid="other"
                 />
               )}
-              <Button type="submit" size="L" fullWidth onClick={handleSubmit}>
+              <Button type="submit" size="L" fullWidth>
                 {formatMessage({ id: 'form.button.finish', defaultMessage: 'Finish' })}
               </Button>
             </Stack>
@@ -144,12 +144,12 @@ const UsecasePage = () => {
         </LayoutContent>
         <Flex justifyContent="center">
           <Box paddingTop={4}>
-            <Link to="/">
+            <TextButton onClick={() => handleSubmit('skip')}>
               {formatMessage({
                 id: 'Usecase.button.skip',
                 defaultMessage: 'Skip this question',
               })}
-            </Link>
+            </TextButton>
           </Box>
         </Flex>
       </Main>
