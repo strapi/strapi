@@ -556,6 +556,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
 
       .c23 {
         grid-column: span 6;
+        max-width: 100%;
       }
 
       .c17 {

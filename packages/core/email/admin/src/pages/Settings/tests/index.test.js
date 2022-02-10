@@ -668,10 +668,12 @@ describe('Email | Pages | Settings', () => {
 
       .c14 {
         grid-column: span 6;
+        max-width: 100%;
       }
 
       .c35 {
         grid-column: span 7;
+        max-width: 100%;
       }
 
       @media (max-width:68.75rem) {

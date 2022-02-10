@@ -799,18 +799,22 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
 
 .c23 {
   grid-column: span 6;
+  max-width: 100%;
 }
 
 .c41 {
   grid-column: span 8;
+  max-width: 100%;
 }
 
 .c53 {
   grid-column: span 6;
+  max-width: 100%;
 }
 
 .c70 {
   grid-column: span 4;
+  max-width: 100%;
 }
 
 .c38 {
@@ -2665,18 +2669,22 @@ exports[`EditSettingsView should add field 1`] = `
 
 .c23 {
   grid-column: span 6;
+  max-width: 100%;
 }
 
 .c41 {
   grid-column: span 8;
+  max-width: 100%;
 }
 
 .c53 {
   grid-column: span 6;
+  max-width: 100%;
 }
 
 .c70 {
   grid-column: span 4;
+  max-width: 100%;
 }
 
 .c38 {
@@ -5024,18 +5032,22 @@ exports[`EditSettingsView should add relation 1`] = `
 
 .c23 {
   grid-column: span 6;
+  max-width: 100%;
 }
 
 .c41 {
   grid-column: span 8;
+  max-width: 100%;
 }
 
 .c53 {
   grid-column: span 6;
+  max-width: 100%;
 }
 
 .c70 {
   grid-column: span 4;
+  max-width: 100%;
 }
 
 .c38 {

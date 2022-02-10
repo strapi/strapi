@@ -700,6 +700,7 @@ describe('ADMIN | Pages | Profile page', () => {
 
       .c20 {
         grid-column: span 6;
+        max-width: 100%;
       }
 
       .c30::-ms-reveal {
