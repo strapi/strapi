@@ -32,6 +32,6 @@ module.exports = ({ strapi }) => {
     // User
     [`Mutation.${createUser}`]: { auth: { scope: [`${userUID}.create`] } },
     [`Mutation.${updateUser}`]: { auth: { scope: [`${userUID}.update`] } },
-    [`Mutation.${deleteUser}`]: { auth: { scope: [`${userUID}.delete`] } },
+    [`Mutation.${deleteUser}`]: { auth: { scope: [`${userUID}.destroy`] } },
   };
 };
