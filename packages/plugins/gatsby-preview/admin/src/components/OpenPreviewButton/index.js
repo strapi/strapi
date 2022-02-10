@@ -36,7 +36,7 @@ const OpenPreviewButton = () => {
   }
 
   const handleClick = () => {
-    const url = `${data.contentSyncURL}/${uid}-${initialData.id}-${initialData.updatedAt}`;
+    const url = `${data.contentSyncURL}/gatsby-source-strapi/${uid}-${initialData.id}-${initialData.updatedAt}/${initialData.id}/`;
 
     window.open(url, '_blank').focus();
   };
