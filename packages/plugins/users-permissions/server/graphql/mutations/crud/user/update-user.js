@@ -25,7 +25,7 @@ module.exports = ({ nexus, strapi }) => {
       data: nonNull(userInputName),
     },
 
-    description: 'Update an existing user',
+    description: 'Delete an existing user',
 
     async resolve(parent, args, context) {
       const { koaContext } = context;
