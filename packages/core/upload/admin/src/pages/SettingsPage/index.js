@@ -201,7 +201,7 @@ export const SettingsPage = () => {
                           hint={formatMessage({
                             id: getTrad('settings.form.sizeOptimization.description'),
                             defaultMessage:
-                              'Enabling this option will optimize the file size without compromising on the quality.',
+                              'Enabling this option will reduce the image size and slightly reduce its quality.',
                           })}
                           label={formatMessage({
                             id: getTrad('settings.form.sizeOptimization.label'),

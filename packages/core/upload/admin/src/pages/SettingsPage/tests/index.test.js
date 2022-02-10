@@ -744,7 +744,7 @@ describe('Upload | SettingsPage', () => {
                                     class="c38"
                                     id="toggleinput-2-hint"
                                   >
-                                    Enabling this option will optimize the file size without compromising on the quality.
+                                    Enabling this option will reduce the image size and slightly reduce its quality.
                                   </p>
                                 </div>
                               </div>
