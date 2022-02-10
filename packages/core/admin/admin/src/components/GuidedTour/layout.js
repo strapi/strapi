@@ -59,8 +59,8 @@ const layout = {
       },
       cta: {
         title: {
-          id: 'app.components.GuidedTour.home.CM.cta.title',
-          defaultMessage: 'Create data',
+          id: 'app.components.GuidedTour.create-content',
+          defaultMessage: 'Create content',
         },
         type: 'REDIRECT',
         target: '/content-manager',
@@ -74,7 +74,7 @@ const layout = {
       content: {
         id: 'app.components.GuidedTour.CM.create.content',
         defaultMessage:
-          '<p>Create and manage all the content here in the Content Manager.</p><p>Ex: Taking the blog website example further, one can write an article, save and publish it as they like.</p>',
+          '<p>Create and manage all the content here in the Content Manager.</p><p>Ex: Taking the Blog website example further, one can write an Article, save and publish it as they like.</p>',
       },
       cta: {
         title: {
