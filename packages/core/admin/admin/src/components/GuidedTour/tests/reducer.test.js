@@ -59,6 +59,23 @@ describe('Admin | Components | GuidedTour | reducer', () => {
     });
   });
 
+  describe('SET_SKIPPED', () => {
+    it('should skip the guidedTourState', () => {
+      const state = { ...initialState };
+
+      const skipped = true;
+
+      const action = {
+        type: 'SET_SKIPPED',
+        value: skipped,
+      };
+
+      const updatedState = reducer(state, action);
+
+      expect(updatedState.isSkipped).toEqual(skipped);
+    });
+  });
+
   describe('SET_GUIDED_TOUR_VISIBILITY', () => {
     it('should update isGuidedTourVisible', () => {
       const state = { ...initialState };
