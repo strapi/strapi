@@ -6,6 +6,7 @@ import {
   formatComponentData,
   useQueryParams,
   useNotification,
+  useGuidedTour,
 } from '@strapi/helper-plugin';
 import { useSelector, useDispatch } from 'react-redux';
 import PropTypes from 'prop-types';
@@ -29,6 +30,7 @@ import buildQueryString from '../../pages/ListView/utils/buildQueryString';
 const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
   const { trackUsage } = useTracking();
   const { push } = useHistory();
+  const { setCurrentStep } = useGuidedTour();
   const trackUsageRef = useRef(trackUsage);
   const [isCreatingEntry, setIsCreatingEntry] = useState(true);
   const [{ query, rawQuery }] = useQueryParams();
@@ -203,6 +205,8 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
           message: { id: getTrad('success.record.save') },
         });
 
+        setCurrentStep('contentManager.success');
+
         dispatch(submitSucceeded(cleanReceivedData(data)));
         setIsCreatingEntry(false);
 
@@ -215,7 +219,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
         dispatch(setStatus('resolved'));
       }
     },
-    [cleanReceivedData, displayErrors, slug, dispatch, rawQuery, toggleNotification]
+    [cleanReceivedData, displayErrors, slug, dispatch, rawQuery, toggleNotification, setCurrentStep]
   );
   const onPublish = useCallback(async () => {
     try {
