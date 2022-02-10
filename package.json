@@ -70,7 +70,7 @@
     "@babel/polyfill": "7.12.1"
   },
   "devDependencies": {
-    "@swc-node/jest": "1.1.0",
+    "@swc-node/jest": "1.4.3",
     "@testing-library/react": "11.2.6",
     "@testing-library/react-hooks": "3.4.2",
     "@testing-library/user-event": "13.5.0",
