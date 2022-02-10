@@ -2305,6 +2305,90 @@
   dependencies:
     "@napi-rs/triples" "^1.1.0"
 
+"@node-rs/xxhash-android-arm-eabi@1.1.4":
+  version "1.1.4"
+  resolved "https://registry.yarnpkg.com/@node-rs/xxhash-android-arm-eabi/-/xxhash-android-arm-eabi-1.1.4.tgz#6255ec6f6fd6516b4d8b9ebcc65c0b21c5a552c6"
+  integrity sha512-LcS+SAwEI0ncR1ynGKhV5pL62xjDn0kly+ppWKLNHj7Q58JFEP8GrLlPSQf4KjrKSfR7fK61L6ei43ZXcJkx3A==
+
+"@node-rs/xxhash-android-arm64@1.1.4":
+  version "1.1.4"
+  resolved "https://registry.yarnpkg.com/@node-rs/xxhash-android-arm64/-/xxhash-android-arm64-1.1.4.tgz#037f0ccc38703c24ed912da3c3f3c43c7d5511a0"
+  integrity sha512-eziz3oLUCPXY3S0t/5U+EPSlUf8QL9I86ltO0i6vTxewoqZs6UrmCYtF/sIos2mvJIt+xmtFZ/VyUfyaqofkwQ==
+
+"@node-rs/xxhash-darwin-arm64@1.1.4":
+  version "1.1.4"
+  resolved "https://registry.yarnpkg.com/@node-rs/xxhash-darwin-arm64/-/xxhash-darwin-arm64-1.1.4.tgz#c29d3ca825ab7e59c12502610c169a90527d2e01"
+  integrity sha512-qFfr3iEBu5ISaxSDJ56xEg4ljtD8ElvaGGfCzhBu1l9v5XUUkmP0F+cV2TD8zqKNSN9DMlPq82LB6HUEIf/mbg==
+
+"@node-rs/xxhash-darwin-x64@1.1.4":
+  version "1.1.4"
+  resolved "https://registry.yarnpkg.com/@node-rs/xxhash-darwin-x64/-/xxhash-darwin-x64-1.1.4.tgz#e747178d9a84b7cf937163cee6c24b2f78e95b60"
+  integrity sha512-rA5k6XFVX+RmIr4tdRPhPCNdr+ohidzFbiyzuJeQBPLTt9R80gGVCp/fiToLIXInh/P2W/dBiWwP4ts7zbGdDQ==
+
+"@node-rs/xxhash-freebsd-x64@1.1.4":
+  version "1.1.4"
+  resolved "https://registry.yarnpkg.com/@node-rs/xxhash-freebsd-x64/-/xxhash-freebsd-x64-1.1.4.tgz#2f36cf62325997d680f63f0131b66c897a6dc333"
+  integrity sha512-c7wlMA8J8cCJ8riM1CLKFj995Qrs1xYc8KS7sb3XJ8c1UfVFJHFQEKg832NvmYSlwsDlAqn5cl3rw1qNvPXJlg==
+
+"@node-rs/xxhash-linux-arm-gnueabihf@1.1.4":
+  version "1.1.4"
+  resolved "https://registry.yarnpkg.com/@node-rs/xxhash-linux-arm-gnueabihf/-/xxhash-linux-arm-gnueabihf-1.1.4.tgz#d32aaaaf173f128a8d2cb5a72203da0d087e446e"
+  integrity sha512-lWEqiULqlxKft9m4C1Ct+cv72oo+B2bSuNHblGfJzAajjK02RebXIRd8qB85YdxPCp8e7/dekVJJDJpEttei9A==
+
+"@node-rs/xxhash-linux-arm64-gnu@1.1.4":
+  version "1.1.4"
+  resolved "https://registry.yarnpkg.com/@node-rs/xxhash-linux-arm64-gnu/-/xxhash-linux-arm64-gnu-1.1.4.tgz#7e089177c4e62f005cf39109e5bb9475548bcd5d"
+  integrity sha512-S8pxFLaHe3Zec1d4bLGf3XcAdy3qVGBnq2R/2q2DRfVFjndN+prPL4fEgPedzx1dWiDy1Gjb8WMz2gPLqC6WyQ==
+
+"@node-rs/xxhash-linux-arm64-musl@1.1.4":
+  version "1.1.4"
+  resolved "https://registry.yarnpkg.com/@node-rs/xxhash-linux-arm64-musl/-/xxhash-linux-arm64-musl-1.1.4.tgz#f9ffd51af3c55399e2ebfbad9d1a4d12effb1eac"
+  integrity sha512-d67A2ZddMSScrTrSPvnvhXoElkkBJMA5lxg7vrg9wIZmcm26/1br6LVe0UjPgRRf1gNO6HNfN6iYEgGXcRGgFw==
+
+"@node-rs/xxhash-linux-x64-gnu@1.1.4":
+  version "1.1.4"
+  resolved "https://registry.yarnpkg.com/@node-rs/xxhash-linux-x64-gnu/-/xxhash-linux-x64-gnu-1.1.4.tgz#f46d5c494521ea1c6fd8c7b60e649f6b076849a9"
+  integrity sha512-K5TPHOvXoYuE4z2EB1lU2jffvSLJAtfQ7OP+2ZKzUpdU2pY9PkEHj1R0AwQAW004CHbtQfGwJ8s/791Iy92/8Q==
+
+"@node-rs/xxhash-linux-x64-musl@1.1.4":
+  version "1.1.4"
+  resolved "https://registry.yarnpkg.com/@node-rs/xxhash-linux-x64-musl/-/xxhash-linux-x64-musl-1.1.4.tgz#71142b75d9c9503a1c23daf9c93e367059e4498a"
+  integrity sha512-fCPA6cuffYuyYI/mDn6rvuhO7LAEfdMPbiskESzx0NVFyx/6qDCsAHxYDO4FWcAacgOEecyzOQ507e4Hrn10IQ==
+
+"@node-rs/xxhash-win32-arm64-msvc@1.1.4":
+  version "1.1.4"
+  resolved "https://registry.yarnpkg.com/@node-rs/xxhash-win32-arm64-msvc/-/xxhash-win32-arm64-msvc-1.1.4.tgz#fbf9b51c682ebed59edb24afa71b4fefb74ec8f6"
+  integrity sha512-lnZ20IESF3wX4uGihnFYrerXq/XxTopWqpCTRPN4H/QfzKZ8vYXz/nuW5YNfQ05aeQFN49cHNOeclyip3hPeEg==
+
+"@node-rs/xxhash-win32-ia32-msvc@1.1.4":
+  version "1.1.4"
+  resolved "https://registry.yarnpkg.com/@node-rs/xxhash-win32-ia32-msvc/-/xxhash-win32-ia32-msvc-1.1.4.tgz#4b24980f70d9385de292bd7489226d680bea9214"
+  integrity sha512-XauyNhda+j6nJixr3VOJih8K7JaZZ//ZX1iHvXbLv0qd+SwjfmtgsbtqWYoqA8oIos7SBV1EuOE8AnqoZwRsdg==
+
+"@node-rs/xxhash-win32-x64-msvc@1.1.4":
+  version "1.1.4"
+  resolved "https://registry.yarnpkg.com/@node-rs/xxhash-win32-x64-msvc/-/xxhash-win32-x64-msvc-1.1.4.tgz#41c647eb5b3c75c281094ade9c1f0f3b881cec67"
+  integrity sha512-5htB+WXoIrckcjWNTw4M6JN9lai3GdxZXNH1ECFLjVSfxbY/Alf+OUJSDtMWz83otP8WLLfpxPZ8aNLsGJUy6g==
+
+"@node-rs/xxhash@^1.0.1":
+  version "1.1.4"
+  resolved "https://registry.yarnpkg.com/@node-rs/xxhash/-/xxhash-1.1.4.tgz#59054feabb1d1e71bd7e605ff7d10eabec1f0abe"
+  integrity sha512-2C97wUtNphuCXLjFKm9tacrca5cP7dbRBZLxORy9uvYSoPl9J3yPia82Fub8NWMCwNANR7YB4Qaq5SJUEw2g8w==
+  optionalDependencies:
+    "@node-rs/xxhash-android-arm-eabi" "1.1.4"
+    "@node-rs/xxhash-android-arm64" "1.1.4"
+    "@node-rs/xxhash-darwin-arm64" "1.1.4"
+    "@node-rs/xxhash-darwin-x64" "1.1.4"
+    "@node-rs/xxhash-freebsd-x64" "1.1.4"
+    "@node-rs/xxhash-linux-arm-gnueabihf" "1.1.4"
+    "@node-rs/xxhash-linux-arm64-gnu" "1.1.4"
+    "@node-rs/xxhash-linux-arm64-musl" "1.1.4"
+    "@node-rs/xxhash-linux-x64-gnu" "1.1.4"
+    "@node-rs/xxhash-linux-x64-musl" "1.1.4"
+    "@node-rs/xxhash-win32-arm64-msvc" "1.1.4"
+    "@node-rs/xxhash-win32-ia32-msvc" "1.1.4"
+    "@node-rs/xxhash-win32-x64-msvc" "1.1.4"
+
 "@nodelib/fs.scandir@2.1.5":
   version "2.1.5"
   resolved "https://registry.yarnpkg.com/@nodelib/fs.scandir/-/fs.scandir-2.1.5.tgz#7619c2eb21b25483f6d167548b4cfd5a7488c3d5"
@@ -3243,19 +3327,20 @@
     remark "^13.0.0"
     unist-util-find-all-after "^3.0.2"
 
-"@swc-node/core@^1.2.0":
+"@swc-node/core@^1.8.2":
   version "1.8.2"
   resolved "https://registry.yarnpkg.com/@swc-node/core/-/core-1.8.2.tgz#950ad394a8e8385658e6a951ec554bbf61a1693e"
   integrity sha512-IoJ7tGHQ6JOMSmFe4VhP64uLmFKMNasS0QEgUrLFQ0h/dTvpQMynnoGBEJoPL6LfsebZ/q4uKqbpWrth6/yrAA==
   dependencies:
     "@swc/core" "^1.2.119"
 
-"@swc-node/jest@1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@swc-node/jest/-/jest-1.1.0.tgz#78b8fd75218203eb6061d54cd7f6f4f5b180b378"
-  integrity sha512-vNskHzLTu3YLgdmrF7+i78uMpFIN9AMf5uqBVsoy0cZS6mXA/hlE4YHxqoAjF2P5Gr5W7o2gVHMyw+a/kFT+XA==
+"@swc-node/jest@1.4.3":
+  version "1.4.3"
+  resolved "https://registry.yarnpkg.com/@swc-node/jest/-/jest-1.4.3.tgz#e43d01ce8bc392ccabf8c969fc5335cf5e4d6664"
+  integrity sha512-pMWida9hKd/c6fUor+Sd+Oikxl7X23o9U/MmXsaPEt2gWx5Ar9JjGo0h0Vd30h5Cua2F0FD4/42qeAmMj0qskw==
   dependencies:
-    "@swc-node/core" "^1.2.0"
+    "@node-rs/xxhash" "^1.0.1"
+    "@swc-node/core" "^1.8.2"
 
 "@swc/core-android-arm-eabi@1.2.130":
   version "1.2.130"
