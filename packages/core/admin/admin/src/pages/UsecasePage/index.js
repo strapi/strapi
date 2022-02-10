@@ -56,7 +56,7 @@ const UsecasePage = () => {
     }
   }, [isComingFromRegister, push]);
 
-  const handleSubmit = skip => {
+  const handleSubmit = skipPersona => {
     try {
       const {
         state: { email, firstAdmin, firstname },
@@ -69,8 +69,8 @@ const UsecasePage = () => {
           email,
           username: firstname,
           firstAdmin,
-          persona: skip ? undefined : persona,
-          personaOther: skip ? undefined : personaOther,
+          persona: skipPersona ? undefined : persona,
+          personaOther: skipPersona ? undefined : personaOther,
         },
         cancelToken: source.token,
       });
@@ -96,7 +96,7 @@ const UsecasePage = () => {
     <UnauthenticatedLayout>
       <Main>
         <LayoutContent>
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={() => handleSubmit(false)}>
             <Flex direction="column" paddingBottom={7}>
               <Logo />
               <Box paddingTop={6} paddingBottom={1} width={pxToRem(250)}>
@@ -144,7 +144,7 @@ const UsecasePage = () => {
         </LayoutContent>
         <Flex justifyContent="center">
           <Box paddingTop={4}>
-            <TextButton onClick={() => handleSubmit('skip')}>
+            <TextButton onClick={() => handleSubmit(true)}>
               {formatMessage({
                 id: 'Usecase.button.skip',
                 defaultMessage: 'Skip this question',
