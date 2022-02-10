@@ -39,17 +39,6 @@ const UsecasePage = () => {
   const isOther = persona === 'other';
   const isComingFromRegister = location.state?.fromRegister;
 
-  const CancelToken = axios.CancelToken;
-  const source = CancelToken.source();
-
-  useEffect(() => {
-    // Cancel request on unmount
-    return () => {
-      source.cancel('Component unmounted');
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   useEffect(() => {
     if (!isComingFromRegister) {
       push('/');
@@ -72,7 +61,6 @@ const UsecasePage = () => {
           persona: skipPersona ? undefined : persona,
           personaOther: skipPersona ? undefined : personaOther,
         },
-        cancelToken: source.token,
       });
 
       toggleNotification({
