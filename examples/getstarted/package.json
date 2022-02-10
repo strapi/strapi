@@ -14,6 +14,7 @@
   "dependencies": {
     "@strapi/admin": "4.0.7",
     "@strapi/plugin-documentation": "4.0.7",
+    "@strapi/plugin-gatsby-preview": "4.0.7",
     "@strapi/plugin-graphql": "4.0.7",
     "@strapi/plugin-i18n": "4.0.7",
     "@strapi/plugin-sentry": "4.0.7",

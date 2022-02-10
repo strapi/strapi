@@ -21,8 +21,18 @@
     }
   ],
   "dependencies": {},
+  "peerDependencies": {
+    "@strapi/strapi": "^4.0.0",
+    "@strapi/utils": "^4.0.7"
+  },
   "engines": {
     "node": ">=12.x. <=16.x.x",
     "npm": ">=6.0.0"
+  },
+  "strapi": {
+    "name": "gatsby-preview",
+    "displayName": "Gatsby preview",
+    "description": "Enable CMS preview for Gatsby cloud",
+    "kind": "plugin"
   }
 }
