@@ -22,7 +22,7 @@ const layout = {
       content: {
         id: 'app.components.GuidedTour.CTB.create.content',
         defaultMessage:
-          '<p>Collection types help you manage several entries, Single types are suitable to manage only one entry.</p> <p>Ex: For a Blog website, Articles would be a Collection type and Homepage would be a Single type.</p>',
+          '<p>Collection types help you manage several entries, Single types are suitable to manage only one entry.</p> <p>Ex: For a Blog website, Articles would be a Collection type whereas a Homepage would be a Single type.</p>',
       },
       cta: {
         title: {

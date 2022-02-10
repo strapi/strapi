@@ -694,7 +694,7 @@ describe('<GuidedTourModal />', () => {
                         <span
                           class="c22"
                         >
-                          Ex: For a Blog website, Articles would be a Collection type and Homepage would be a Single type.
+                          Ex: For a Blog website, Articles would be a Collection type whereas a Homepage would be a Single type.
                         </span>
                       </div>
                       <button
