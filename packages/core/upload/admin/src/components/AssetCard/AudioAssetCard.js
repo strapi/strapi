@@ -33,16 +33,7 @@ const AudioPreviewWrapper = styled(Box)`
   }
 `;
 
-export const AudioAssetCard = ({
-  name,
-  extension,
-  url,
-  mime,
-  selected,
-  onSelect,
-  onEdit,
-  size,
-}) => {
+export const AudioAssetCard = ({ name, extension, url, selected, onSelect, onEdit, size }) => {
   const { formatMessage } = useIntl();
 
   return (
@@ -50,7 +41,7 @@ export const AudioAssetCard = ({
       <CardHeader>
         <CardAsset size={size}>
           <AudioPreviewWrapper size={size}>
-            <AudioPreview url={url} mime={mime} alt={name} />
+            <AudioPreview url={url} alt={name} />
           </AudioPreviewWrapper>
         </CardAsset>
         {onSelect && <CardCheckbox value={selected} onValueChange={onSelect} />}
@@ -90,7 +81,6 @@ AudioAssetCard.defaultProps = {
 
 AudioAssetCard.propTypes = {
   extension: PropTypes.string.isRequired,
-  mime: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
   onSelect: PropTypes.func,
   onEdit: PropTypes.func,

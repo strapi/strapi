@@ -44,11 +44,7 @@ export const CarouselAsset = ({ asset }) => {
   if (asset.mime.includes(AssetType.Audio)) {
     return (
       <AudioPreviewWrapper>
-        <AudioPreview
-          url={createAssetUrl(asset, true)}
-          mime={asset.mime}
-          alt={asset.alternativeText || asset.name}
-        />
+        <AudioPreview url={createAssetUrl(asset, true)} alt={asset.alternativeText || asset.name} />
       </AudioPreviewWrapper>
     );
   }

@@ -2,15 +2,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Box } from '@strapi/design-system/Box';
-import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
 
-export const AudioPreview = ({ url, mime, alt }) => {
+export const AudioPreview = ({ url, alt }) => {
   return (
     <Box>
-      <audio controls>
-        <source src={url} type={mime} />
+      <audio controls src={url}>
+        {alt}
       </audio>
-      <VisuallyHidden as="figcaption">{alt}</VisuallyHidden>
     </Box>
   );
 };
@@ -20,5 +18,4 @@ AudioPreview.defaultProps = {};
 AudioPreview.propTypes = {
   alt: PropTypes.string.isRequired,
   url: PropTypes.string.isRequired,
-  mime: PropTypes.string.isRequired,
 };
