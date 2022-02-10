@@ -3,7 +3,6 @@
 const _ = require('lodash/fp');
 const dateFns = require('date-fns');
 const { InvalidTimeError, InvalidDateError, InvalidDateTimeError } = require('./errors');
-const { parseBoolean } = require('./utils/boolean');
 
 class Field {
   constructor(config) {
@@ -42,7 +41,17 @@ class JSONField extends Field {
 
 class BooleanField extends Field {
   toDB(value) {
-    return parseBoolean(value);
+    if (typeof value === 'boolean') return value;
+
+    if (['true', 't', '1', 1].includes(value)) {
+      return true;
+    }
+
+    if (['false', 'f', '0', 0].includes(value)) {
+      return false;
+    }
+
+    return Boolean(value);
   }
 
   fromDB(value) {

@@ -3,7 +3,6 @@
 const _ = require('lodash/fp');
 
 const types = require('../../types');
-const { parseBoolean } = require('../../utils/boolean');
 const { createField } = require('../../fields');
 const { createJoin } = require('./join');
 const { toColumnName } = require('./transform');
@@ -248,7 +247,7 @@ const applyOperator = (qb, column, operator, value) => {
       break;
     }
     case '$null': {
-      if (parseBoolean(value)) {
+      if (value) {
         qb.whereNull(column);
       } else {
         qb.whereNotNull(column);
@@ -256,7 +255,7 @@ const applyOperator = (qb, column, operator, value) => {
       break;
     }
     case '$notNull': {
-      if (parseBoolean(value)) {
+      if (value) {
         qb.whereNotNull(column);
       } else {
         qb.whereNull(column);
