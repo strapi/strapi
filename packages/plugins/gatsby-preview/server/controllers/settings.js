@@ -34,7 +34,7 @@ module.exports = ({ strapi }) => {
 
       await validateContentSyncURL(body);
 
-      await pluginStore.set({ key: 'content-sync-url', value: body.url });
+      await pluginStore.set({ key: 'content-sync-url', value: body.contentSyncURL });
 
       ctx.body = { data: body };
     },

@@ -1,1 +1,12 @@
-{}
+{
+  "Settings.title": "Gatsby",
+  "Settings.description": "Preview content changes from your team before it gets deployed to production",
+  "Settings.section-label": "Gatsby preview plugin",
+  "Settings.link-name": "Configuration",
+  "Settings.list-empty": "You don't have any content yet, we recommend you to create your first Content-Type.",
+  "Setting.table.header-name": "Name",
+  "Setting.table.header-preview": "Enable preview",
+  "Settings.table.th-status": "Status",
+  "Settings.save-sucess": "Settings have been updated",
+  "Settings.sync-content.url-label": "Gatsby Content Sync url "
+}

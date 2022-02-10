@@ -26,7 +26,7 @@ const createPreviewContentTypesSchema = contentTypes => {
 const contentSyncSchema = yup
   .object()
   .shape({
-    url: yup
+    contentSyncURL: yup
       .string()
       .url()
       .required(),
