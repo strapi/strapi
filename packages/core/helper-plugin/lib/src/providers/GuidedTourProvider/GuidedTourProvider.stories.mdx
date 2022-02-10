@@ -6,11 +6,11 @@ import { Meta } from '@storybook/addon-docs';
 
 # GuidedTourProvider
 
-This Provider is used to create a new context for the GuidedTour.
+This Provider is used to create a new context for the GuidedTour. The example uses a reducer to handle the state.
 
 ## Usage
 
-```
+``` js
 import { GuidedTourProvider } from '@strapi/helper-plugin';
 const initialState = {
   currentStep: null,
@@ -65,6 +65,7 @@ const GuidedTour = ({ children }) => {
 
   const startSection = sectionName => {
     // Add conditions for the section to start, which will allow the ModalGuidedTour to be visible
+    
     return setCurrentStep(`${sectionName}.${step-to-show}`);
   };
 
