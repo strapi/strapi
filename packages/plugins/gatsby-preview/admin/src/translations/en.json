@@ -8,5 +8,6 @@
   "Setting.table.header-preview": "Enable preview",
   "Settings.table.th-status": "Status",
   "Settings.save-sucess": "Settings have been updated",
-  "Settings.sync-content.url-label": "Gatsby Content Sync url "
+  "Settings.sync-content.url-label": "Gatsby Content Sync url ",
+  "preview-button": "Open Gatsby preview"
 }

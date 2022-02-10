@@ -25,3 +25,5 @@ export const fetchSettings = async () => {
     throw new Error(error);
   }
 };
+
+export const putSettings = body => axiosInstance.put(`/${pluginId}/content-sync-url`, body);

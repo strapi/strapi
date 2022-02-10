@@ -1,5 +1,6 @@
 import { prefixPluginTranslations } from '@strapi/helper-plugin';
 import pluginPkg from '../../package.json';
+import OpenPreviewButton from './components/OpenPreviewButton';
 import pluginId from './pluginId';
 import getTrad from './utils/getTrad';
 
@@ -40,7 +41,12 @@ export default {
       name,
     });
   },
-  bootstrap() {},
+  bootstrap(app) {
+    app.injectContentManagerComponent('editView', 'right-links', {
+      name: 'gatsby-preview-button',
+      Component: OpenPreviewButton,
+    });
+  },
   async registerTrads({ locales }) {
     const importedTrads = await Promise.all(
       locales.map(locale => {

@@ -13,10 +13,9 @@ import {
 import EmptyDocuments from '@strapi/icons/EmptyDocuments';
 import { useQueries, useMutation, useQueryClient } from 'react-query';
 import pluginId from '../../pluginId';
-import axiosInstance from '../../utils/axiosInstance';
 import getTrad from '../../utils/getTrad';
 import SettingsList from '../../components/SettingsList';
-import { fetchContentTypes, fetchSettings } from './utils/api';
+import { fetchContentTypes, fetchSettings, putSettings } from './utils/api';
 import contentSyncSchema from './utils/schema';
 
 const SettingsPage = () => {
@@ -39,34 +38,29 @@ const SettingsPage = () => {
 
   useFocusWhenNavigate();
 
-  const mutation = useMutation(
-    body => {
-      return axiosInstance.put(`/${pluginId}/content-sync-url`, body);
+  const mutation = useMutation(putSettings, {
+    onMutate: async body => {
+      await queryClient.cancelQueries(`${pluginId}-settings`);
+
+      const previousResponse = queryClient.getQueryData(`${pluginId}-settings`);
+
+      queryClient.setQueryData(`${pluginId}-settings`, old => ({
+        ...old,
+        contentSyncURL: body.contentSyncURL,
+      }));
+
+      return { previousResponse };
     },
-    {
-      onMutate: async body => {
-        await queryClient.cancelQueries(`${pluginId}-settings`);
-
-        const previousResponse = queryClient.getQueryData(`${pluginId}-settings`);
-
-        queryClient.setQueryData(`${pluginId}-settings`, old => ({
-          ...old,
-          contentSyncURL: body.contentSyncURL,
-        }));
-
-        return { previousResponse };
-      },
-      onSuccess: () => {
-        toggleNotification({
-          type: 'success',
-          message: {
-            id: getTrad('Settings.save-sucess'),
-            defaultMessage: 'Settings have been updated',
-          },
-        });
-      },
-    }
-  );
+    onSuccess: () => {
+      toggleNotification({
+        type: 'success',
+        message: {
+          id: getTrad('Settings.save-sucess'),
+          defaultMessage: 'Settings have been updated',
+        },
+      });
+    },
+  });
 
   const handleSubmit = async e => {
     e.preventDefault();
@@ -100,7 +94,7 @@ const SettingsPage = () => {
   }
 
   const primaryAction = shouldDisplaySaveButton ? (
-    <Button onClick={() => {}} size="S">
+    <Button size="S" type="submit">
       {formatMessage({ id: getTrad('form.button.save'), defaultMessage: 'Save' })}
     </Button>
   ) : null;
