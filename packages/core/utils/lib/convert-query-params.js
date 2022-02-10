@@ -292,7 +292,7 @@ const convertAndSanitizeFilters = (filters, schema) => {
         filters[key] = convertAndSanitizeFilters(value, schema);
       } else if (['$null', '$notNull'].includes(key)) {
         try {
-          filters[key] = parseType({ type: 'boolean', value: filters[key], forceCast: true });
+          filters[key] = parseType({ type: 'boolean', value: filters[key] });
         } catch (e) {
           throw new ApplicationError(e.message);
         }
