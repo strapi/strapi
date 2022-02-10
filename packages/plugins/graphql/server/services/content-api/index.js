@@ -3,7 +3,7 @@
 const { mergeSchemas, addResolversToSchema } = require('@graphql-tools/schema');
 const { pruneSchema } = require('@graphql-tools/utils');
 const { makeSchema } = require('nexus');
-const { prop, startsWith } = require('lodash/fp');
+const { prop, startsWith, negate, eq } = require('lodash/fp');
 
 const { wrapResolvers } = require('./wrap-resolvers');
 const {
@@ -62,6 +62,12 @@ module.exports = ({ strapi }) => {
     // Add the extension's resolvers to the final schema
     const schemaWithResolvers = addResolversToSchema(schema, extension.resolvers);
 
+    // Create a configuration object for the artifacts generation
+    const outputs = {
+      schema: config('artifacts.schema', false),
+      typegen: config('artifacts.typegen', false),
+    };
+
     const nexusSchema = makeSchema({
       // Build the schema from the merged GraphQL schema.
       // Since we're passing the schema to the mergeSchema property, it'll transform our SDL type definitions
@@ -70,6 +76,12 @@ module.exports = ({ strapi }) => {
 
       // Apply user-defined plugins
       plugins: extension.plugins,
+
+      // Generate artifacts only if one of the configuration has been set
+      shouldGenerateArtifacts: Object.values(outputs).some(negate(eq(false))),
+
+      // Artifacts generation configuration
+      outputs,
     });
 
     // Wrap resolvers if needed (auth, middlewares, policies...) as configured in the extension
