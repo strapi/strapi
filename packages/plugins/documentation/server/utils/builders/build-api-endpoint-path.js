@@ -97,7 +97,6 @@ const getPaths = ({ routeInfo, attributes, tag }) => {
       responses,
       tags: [_.upperFirst(tag)],
       parameters: [],
-      requestBody: {},
     };
 
     if (isListOfEntities) {
