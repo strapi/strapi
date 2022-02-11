@@ -2,7 +2,6 @@
 
 const { join } = require('path');
 const fs = require('fs-extra');
-const getFilePath = require('./utils/get-file-path');
 const validateInput = require('./utils/validate-input');
 
 module.exports = plop => {
