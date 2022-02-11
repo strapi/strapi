@@ -42,7 +42,7 @@ module.exports = async ({ strapi }) => {
 
 const initGrant = async pluginStore => {
   const apiPrefix = strapi.config.get('api.rest.prefix');
-  const baseURL = urljoin(`${strapi.config.server.url}/`, apiPrefix, '/auth');
+  const baseURL = urljoin(strapi.config.server.url, apiPrefix, 'auth');
 
   const grantConfig = {
     email: {
