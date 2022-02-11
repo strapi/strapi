@@ -13,7 +13,7 @@ import { Select, Option } from '@strapi/design-system/Select';
 import { TextInput } from '@strapi/design-system/TextInput';
 import { TextButton } from '@strapi/design-system/TextButton';
 import { Button } from '@strapi/design-system/Button';
-import Logo from '../AuthPage/components/Logo';
+import Logo from '../../components/UnauthenticatedLogo';
 import UnauthenticatedLayout, { LayoutContent } from '../../layouts/UnauthenticatedLayout';
 
 export const options = [
