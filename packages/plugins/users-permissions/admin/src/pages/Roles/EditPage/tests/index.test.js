@@ -737,14 +737,17 @@ describe('Admin | containers | RoleEditPage', () => {
 
       .c24 {
         grid-column: span 6;
+        max-width: 100%;
       }
 
       .c39 {
         grid-column: span 7;
+        max-width: 100%;
       }
 
       .c64 {
         grid-column: span 5;
+        max-width: 100%;
       }
 
       .c56 {

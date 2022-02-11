@@ -1,34 +1,30 @@
-import { createLayout, formatLayout, getInputSize, getRowSize, unformatLayout } from '../layout';
+import {
+  createLayout,
+  formatLayout,
+  getDefaultInputSize,
+  getFieldSize,
+  setFieldSize,
+  getRowSize,
+  unformatLayout,
+} from '../layout';
 
 describe('Content Manager | containers | EditSettingsView | utils | layout', () => {
   describe('createLayout', () => {
     it('should return an array of object with keys rowId and rowContent', () => {
       const data = [
-        [
-          { name: 'test', size: 4 },
-          { name: 'test1', size: 4 },
-        ],
+        [{ name: 'test', size: 4 }, { name: 'test1', size: 4 }],
         [{ name: 'test2', size: 12 }],
-        [
-          { name: 'test3', size: 6 },
-          { name: 'test4', size: 1 },
-        ],
+        [{ name: 'test3', size: 6 }, { name: 'test4', size: 1 }],
       ];
       const expected = [
         {
           rowId: 0,
-          rowContent: [
-            { name: 'test', size: 4 },
-            { name: 'test1', size: 4 },
-          ],
+          rowContent: [{ name: 'test', size: 4 }, { name: 'test1', size: 4 }],
         },
         { rowId: 1, rowContent: [{ name: 'test2', size: 12 }] },
         {
           rowId: 2,
-          rowContent: [
-            { name: 'test3', size: 6 },
-            { name: 'test4', size: 1 },
-          ],
+          rowContent: [{ name: 'test3', size: 6 }, { name: 'test4', size: 1 }],
         },
       ];
 
@@ -41,18 +37,12 @@ describe('Content Manager | containers | EditSettingsView | utils | layout', () 
       const data = [
         {
           rowId: 0,
-          rowContent: [
-            { name: 'test', size: 4 },
-            { name: 'test1', size: 4 },
-          ],
+          rowContent: [{ name: 'test', size: 4 }, { name: 'test1', size: 4 }],
         },
         { rowId: 1, rowContent: [{ name: 'test2', size: 12 }] },
         {
           rowId: 2,
-          rowContent: [
-            { name: 'test3', size: 6 },
-            { name: 'test4', size: 1 },
-          ],
+          rowContent: [{ name: 'test3', size: 6 }, { name: 'test4', size: 1 }],
         },
       ];
       const expected = [
@@ -99,10 +89,7 @@ describe('Content Manager | containers | EditSettingsView | utils | layout', () 
         },
         {
           rowId: 3,
-          rowContent: [
-            { name: 'test5', size: 6 },
-            { name: 'test6', size: 6 },
-          ],
+          rowContent: [{ name: 'test5', size: 6 }, { name: 'test6', size: 6 }],
         },
       ];
 
@@ -110,21 +97,94 @@ describe('Content Manager | containers | EditSettingsView | utils | layout', () 
     });
   });
 
-  describe('getInputSize', () => {
+  describe('getDefaultInputSize', () => {
     it('Should return 6 if the type is unknown, undefined or text', () => {
-      expect(getInputSize(undefined)).toBe(6);
-      expect(getInputSize('unkown')).toBe(6);
-      expect(getInputSize('text')).toBe(6);
+      expect(getDefaultInputSize(undefined)).toBe(6);
+      expect(getDefaultInputSize('unkown')).toBe(6);
+      expect(getDefaultInputSize('text')).toBe(6);
     });
 
     it('Should return 12 if the type is either json, component or richtext', () => {
-      expect(getInputSize('json')).toBe(12);
-      expect(getInputSize('richtext')).toBe(12);
-      expect(getInputSize('component')).toBe(12);
+      expect(getDefaultInputSize('json')).toBe(12);
+      expect(getDefaultInputSize('richtext')).toBe(12);
+      expect(getDefaultInputSize('component')).toBe(12);
     });
 
     it('Should return 4 if the type is boolean', () => {
-      expect(getInputSize('boolean')).toBe(4);
+      expect(getDefaultInputSize('boolean')).toBe(4);
+    });
+  });
+
+  describe('getFieldSize', () => {
+    const fixture = [
+      {
+        rowContent: [
+          {
+            name: 'test_1',
+            size: 6,
+          },
+        ],
+      },
+
+      {
+        rowContent: [
+          {
+            name: 'test_2',
+            size: 12,
+          },
+        ],
+      },
+    ];
+
+    const expected = [
+      {
+        name: 'test_1',
+        value: 6,
+      },
+
+      {
+        name: 'test_2',
+        value: 12,
+      },
+
+      {
+        name: 'test_3',
+        value: null,
+      },
+    ];
+
+    expected.forEach(({ name, value }) => {
+      it(`Should return the proper field size for ${name}`, () => {
+        expect(getFieldSize(name, fixture)).toBe(value);
+      });
+    });
+  });
+
+  describe('setFieldSize', () => {
+    const fixture = [
+      {
+        rowContent: [
+          {
+            name: 'test_1',
+            size: 6,
+          },
+        ],
+      },
+    ];
+
+    const expected = [
+      {
+        name: 'test_1',
+        value: 12,
+      },
+    ];
+
+    expected.forEach(({ name, value }) => {
+      it(`Should set the proper field size for ${name}`, () => {
+        const newLayout = setFieldSize(name, value, [...fixture]);
+
+        expect(newLayout[0].rowContent[0].size).toBe(value);
+      });
     });
   });
 
@@ -178,10 +238,7 @@ describe('Content Manager | containers | EditSettingsView | utils | layout', () 
         },
       ];
       const expected = [
-        [
-          { name: 'name', size: 6 },
-          { name: 'test', size: 4 },
-        ],
+        [{ name: 'name', size: 6 }, { name: 'test', size: 4 }],
         [{ name: 'name1', size: 4 }],
       ];
 

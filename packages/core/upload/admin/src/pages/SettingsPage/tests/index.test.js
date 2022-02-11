@@ -420,6 +420,7 @@ describe('Upload | SettingsPage', () => {
 
       .c23 {
         grid-column: span 6;
+        max-width: 100%;
       }
 
       .c1 {

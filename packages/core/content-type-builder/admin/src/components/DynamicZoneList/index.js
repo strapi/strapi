@@ -80,7 +80,7 @@ function DynamicZoneList({ customRowComponent, components, addComponent, name, t
               <button type="button" onClick={handleClickAdd}>
                 <ComponentStack size={1}>
                   <StyledAddIcon />
-                  <Typography varian="pi" fontWeight="bold" textColor="primary600">
+                  <Typography variant="pi" fontWeight="bold" textColor="primary600">
                     {formatMessage({
                       id: getTrad('button.component.add'),
                       formatMessage: 'Add a component',

@@ -887,6 +887,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
 
 .c13 {
   grid-column: span 6;
+  max-width: 100%;
 }
 
 .c15 {
