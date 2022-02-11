@@ -7,6 +7,7 @@ import { Redirect, useRouteMatch, useHistory } from 'react-router-dom';
 import { auth, useQuery } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import forms from 'ee_else_ce/pages/AuthPage/utils/forms';
+import persistStateToLocaleStorage from '../../components/GuidedTour/utils/persistStateToLocaleStorage';
 import useLocalesProvider from '../../components/LocalesProvider/useLocalesProvider';
 import formatAPIErrors from '../../utils/formatAPIErrors';
 import init from './init';
@@ -157,6 +158,15 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
 
       auth.setToken(token, false);
       auth.setUserInfo(user, false);
+      const { roles } = user;
+
+      if (roles) {
+        const isUserSuperAdmin = roles.find(({ code }) => code === 'strapi-super-admin');
+
+        if (isUserSuperAdmin) {
+          persistStateToLocaleStorage.setGuidedTourVisible(true);
+        }
+      }
 
       if (
         (authType === 'register' && body.userInfo.news === true) ||
