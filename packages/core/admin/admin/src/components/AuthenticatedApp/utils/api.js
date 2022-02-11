@@ -45,18 +45,4 @@ const fetchCurrentUserPermissions = async () => {
   }
 };
 
-const fetchUserRoles = async () => {
-  try {
-    const {
-      data: {
-        data: { roles },
-      },
-    } = await axiosInstance.get('/admin/users/me');
-
-    return roles;
-  } catch (err) {
-    throw new Error(err);
-  }
-};
-
-export { fetchAppInfo, fetchCurrentUserPermissions, fetchStrapiLatestRelease, fetchUserRoles };
+export { fetchAppInfo, fetchCurrentUserPermissions, fetchStrapiLatestRelease };
