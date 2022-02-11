@@ -84,7 +84,8 @@ const verify = async (auth, config) => {
       where: { role: user ? user.role.id : { type: 'public' } },
     });
 
-    allowedActions = auth.allowedActions = map('action', permissions);
+    allowedActions = map('action', permissions);
+    auth.allowedActions = allowedActions;
   }
 
   const isAllowed = castArray(config.scope).every(scope => allowedActions.includes(scope));
