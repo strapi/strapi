@@ -4,7 +4,7 @@ import camelCase from 'lodash/camelCase';
 import get from 'lodash/get';
 import omit from 'lodash/omit';
 import { Redirect, useRouteMatch, useHistory } from 'react-router-dom';
-import { auth, useQuery } from '@strapi/helper-plugin';
+import { auth, useQuery, useGuidedTour } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import forms from 'ee_else_ce/pages/AuthPage/utils/forms';
 import persistStateToLocaleStorage from '../../components/GuidedTour/utils/persistStateToLocaleStorage';
@@ -16,6 +16,7 @@ import { initialState, reducer } from './reducer';
 const AuthPage = ({ hasAdmin, setHasAdmin }) => {
   const { push } = useHistory();
   const { changeLocale } = useLocalesProvider();
+  const { setGuidedTourVisibility } = useGuidedTour();
   const {
     params: { authType },
   } = useRouteMatch('/auth/:authType');
@@ -165,6 +166,7 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
 
         if (isUserSuperAdmin) {
           persistStateToLocaleStorage.setGuidedTourVisible(true);
+          setGuidedTourVisibility(true);
         }
       }
 

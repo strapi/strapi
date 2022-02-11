@@ -3,6 +3,7 @@ import persistStateToLocaleStorage, {
   COMPLETED_STEPS,
   CURRENT_STEP,
   SKIPPED,
+  VISIBLE,
 } from './utils/persistStateToLocaleStorage';
 
 const init = initialState => {
@@ -10,6 +11,12 @@ const init = initialState => {
   const guidedTourLocaleStorage = persistStateToLocaleStorage.get(COMPLETED_STEPS);
   const currentStepLocaleStorage = persistStateToLocaleStorage.get(CURRENT_STEP);
   const skippedLocaleStorage = persistStateToLocaleStorage.get(SKIPPED);
+  const isVisibleLocaleStorage = persistStateToLocaleStorage.get(VISIBLE);
+  console.log({ isVisibleLocaleStorage });
+
+  if (isVisibleLocaleStorage) {
+    set(copyInitialState, 'isGuidedTourVisible', true);
+  }
 
   if (guidedTourLocaleStorage) {
     guidedTourLocaleStorage.forEach(step => {
