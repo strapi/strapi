@@ -935,7 +935,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
 .c39.dynamiczone-row > td:first-of-type::before {
   content: '';
   width: 0.25rem;
-  height: calc(100% - 15px);
+  height: calc(100% - 40px);
   position: absolute;
   top: -7px;
   left: 1.625rem;
@@ -968,7 +968,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
 .c50.dynamiczone-row > td:first-of-type::before {
   content: '';
   width: 0.25rem;
-  height: calc(100% - 15px);
+  height: calc(100% - 40px);
   position: absolute;
   top: -7px;
   left: 1.625rem;
