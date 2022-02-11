@@ -60,7 +60,7 @@
   "settings.form.autoOrientation.label": "Activer l'orientation automatique",
   "settings.form.responsiveDimensions.description": "Génère automatiquement plusieurs formats (grand, moyen, petit) du média importé",
   "settings.form.responsiveDimensions.label": "Activer le téléchargement \"responsive friendly\"",
-  "settings.form.sizeOptimization.description": "Activer cette option réduira la taille des images et baissera légèrement leur qualité",
+  "settings.form.sizeOptimization.description": "Activer cette option réduira la taille des images en baissant légèrement leur qualité",
   "settings.form.sizeOptimization.label": "Optimisation de la taille",
   "settings.form.videoPreview.description": "Génère un aperçu de six secondes de la vidéo (GIF)",
   "settings.form.videoPreview.label": "Aperçu",
