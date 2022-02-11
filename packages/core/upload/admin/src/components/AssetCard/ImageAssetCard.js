@@ -24,14 +24,6 @@ const Extension = styled.span`
   text-transform: uppercase;
 `;
 
-const CardActions = styled(CardAction)`
-  display: flex;
-
-  > * + * {
-    margin-left: ${({ theme }) => theme.spaces[2]};
-  }
-`;
-
 export const ImageAssetCard = ({
   name,
   extension,
@@ -57,7 +49,7 @@ export const ImageAssetCard = ({
       <CardHeader>
         {onSelect && <CardCheckbox value={selected} onValueChange={onSelect} />}
         {(onRemove || onEdit) && (
-          <CardActions position="end">
+          <CardAction position="end">
             {onRemove && (
               <IconButton
                 label={formatMessage({
@@ -76,7 +68,7 @@ export const ImageAssetCard = ({
                 onClick={onEdit}
               />
             )}
-          </CardActions>
+          </CardAction>
         )}
         <CardAsset src={optimizedCachingThumbnail} size={size} alt={alt} />
       </CardHeader>
