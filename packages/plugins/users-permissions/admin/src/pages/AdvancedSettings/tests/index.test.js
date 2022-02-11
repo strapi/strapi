@@ -783,14 +783,17 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
 
       .c18 {
         grid-column: span 6;
+        max-width: 100%;
       }
 
       .c32 {
         grid-column: span 12;
+        max-width: 100%;
       }
 
       .c48 {
         grid-column: span 6;
+        max-width: 100%;
       }
 
       @media (max-width:68.75rem) {
