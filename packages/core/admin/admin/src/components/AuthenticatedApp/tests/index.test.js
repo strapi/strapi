@@ -1,14 +1,8 @@
 import React from 'react';
-import { render, waitFor } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { QueryClientProvider, QueryClient } from 'react-query';
-import { useGuidedTour } from '@strapi/helper-plugin';
 import { ConfigurationsContext } from '../../../contexts';
-import {
-  fetchAppInfo,
-  fetchCurrentUserPermissions,
-  fetchStrapiLatestRelease,
-  fetchUserRoles,
-} from '../utils/api';
+import { fetchAppInfo, fetchCurrentUserPermissions, fetchStrapiLatestRelease } from '../utils/api';
 import packageJSON from '../../../../../package.json';
 import Theme from '../../Theme';
 import AuthenticatedApp from '..';
@@ -18,16 +12,12 @@ const strapiVersion = packageJSON.version;
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   auth: { getUserInfo: () => ({ firstname: 'kai', lastname: 'doe' }) },
-  useGuidedTour: jest.fn(() => ({
-    setGuidedTourVisibility: jest.fn(),
-  })),
 }));
 
 jest.mock('../utils/api', () => ({
   fetchStrapiLatestRelease: jest.fn(),
   fetchAppInfo: jest.fn(),
   fetchCurrentUserPermissions: jest.fn(),
-  fetchUserRoles: jest.fn(() => [{ code: 'strapi-super-admin' }]),
 }));
 
 jest.mock('../../PluginsInitializer', () => () => <div>PluginsInitializer</div>);
@@ -143,23 +133,5 @@ describe('Admin | components | AuthenticatedApp', () => {
     render(app);
 
     expect(fetchStrapiLatestRelease).not.toHaveBeenCalled();
-  });
-
-  it('should call setGuidedTourVisibility when user is super admin', async () => {
-    const setGuidedTourVisibility = jest.fn();
-    useGuidedTour.mockImplementation(() => ({ setGuidedTourVisibility }));
-    render(app);
-
-    await waitFor(() => expect(setGuidedTourVisibility).toHaveBeenCalledWith(true));
-  });
-
-  it.only('should not setGuidedTourVisibility when user is not super admin', async () => {
-    fetchUserRoles.mockImplementation(() => [{ code: 'strapi-editor' }]);
-    const setGuidedTourVisibility = jest.fn();
-    useGuidedTour.mockImplementation(() => ({ setGuidedTourVisibility }));
-
-    render(app);
-
-    await waitFor(() => expect(setGuidedTourVisibility).not.toHaveBeenCalled());
   });
 });
