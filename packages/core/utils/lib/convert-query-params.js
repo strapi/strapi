@@ -8,7 +8,6 @@ const { has, isEmpty, isObject, cloneDeep, get } = require('lodash/fp');
 const _ = require('lodash');
 const parseType = require('./parse-type');
 const contentTypesUtils = require('./content-types');
-const { ApplicationError } = require('./errors');
 
 const { PUBLISHED_AT_ATTRIBUTE } = contentTypesUtils.constants;
 
@@ -291,11 +290,7 @@ const convertAndSanitizeFilters = (filters, schema) => {
       if (isObject(value)) {
         filters[key] = convertAndSanitizeFilters(value, schema);
       } else if (['$null', '$notNull'].includes(key)) {
-        try {
-          filters[key] = parseType({ type: 'boolean', value: filters[key] });
-        } catch (e) {
-          throw new ApplicationError(e.message);
-        }
+        filters[key] = parseType({ type: 'boolean', value: filters[key], forceCast: true });
       }
     }
 
