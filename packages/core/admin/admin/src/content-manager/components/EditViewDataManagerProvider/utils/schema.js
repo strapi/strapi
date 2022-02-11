@@ -13,6 +13,8 @@ import {
 import * as yup from 'yup';
 import { translatedErrors as errorsTrads } from '@strapi/helper-plugin';
 
+import isValidJSONString from './isValidJSONString';
+
 yup.addMethod(yup.mixed, 'defined', function() {
   return this.test('defined', errorsTrads.required, value => value !== undefined);
 });
@@ -224,7 +226,13 @@ const createYupSchemaAttribute = (type, validations, options) => {
           return true;
         }
 
-        if (isNumber(value) || isNull(value) || isObject(value) || isArray(value)) {
+        if (
+          isValidJSONString(value) ||
+          isNumber(value) ||
+          isNull(value) ||
+          isObject(value) ||
+          isArray(value)
+        ) {
           return true;
         }
 
