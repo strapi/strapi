@@ -21,7 +21,7 @@ module.exports = async function({ browser }) {
 
   const { adminPath } = getConfigUrls(strapiInstance.config, true);
 
-  const adminPort = strapiInstance.config.get('admin.port', 8000);
+  const adminPort = strapiInstance.config.get('admin.port', 8080);
   const adminHost = strapiInstance.config.get('admin.host', 'localhost');
   const adminWatchIgnoreFiles = strapiInstance.config.get('admin.watchIgnoreFiles', []);
 
