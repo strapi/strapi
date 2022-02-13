@@ -14,10 +14,12 @@ import { Loader } from '@strapi/design-system/Loader';
 import Trash from '@strapi/icons/Trash';
 import ArrowDown from '@strapi/icons/ArrowDown';
 import ArrowUp from '@strapi/icons/ArrowUp';
+import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 import { useContentTypeLayout } from '../../../../hooks';
 import { getTrad } from '../../../../utils';
 import FieldComponent from '../../../FieldComponent';
 import Rectangle from './Rectangle';
+import useMainValue from './util';
 
 const ActionStack = styled(Stack)`
   svg {
@@ -58,6 +60,21 @@ const Component = ({
 }) => {
   const { formatMessage } = useIntl();
   const { getComponentLayout } = useContentTypeLayout();
+  const { modifiedData } = useCMEditViewDataManager();
+  const componentLayoutData = useMemo(() => {
+    const layout = getComponentLayout(componentUid);
+
+    console.log('DZone/Component componentLayoutData', {
+      componentUid,
+      layout,
+      name,
+      index,
+      modifiedData,
+    });
+
+    return layout;
+  }, [componentUid, getComponentLayout, index, name, modifiedData]);
+  const mainValue = useMainValue(componentLayoutData, `${name}.${index}`);
   const { icon, friendlyName } = useMemo(() => {
     const {
       info: { icon, displayName },
@@ -144,7 +161,7 @@ const Component = ({
                 )}
               </ActionStack>
             }
-            title={friendlyName}
+            title={`${friendlyName} - ${mainValue}`}
             togglePosition="left"
           />
           <AccordionContent>
