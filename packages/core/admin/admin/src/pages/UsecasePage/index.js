@@ -78,10 +78,6 @@ const UsecasePage = () => {
     }
   };
 
-  if (!isComingFromRegister) {
-    return null;
-  }
-
   return (
     <UnauthenticatedLayout>
       <Main>
