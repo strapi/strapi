@@ -14,7 +14,7 @@ Views middleware to enable server-side rendering for the Strapi framework. It wi
 
 Hello, we've some news to share!
 
-We released Strapi V4 in Q4 2021 and Strapi V3 will reach end-of-support around Q3 2022.
+We released Strapi V4 in Q4 2021 and Strapi V3 will reach end-of-support around the end of Q3 2022.
 
 Since this package won't be ported in V4, we took the decision to deprecate it.
 
