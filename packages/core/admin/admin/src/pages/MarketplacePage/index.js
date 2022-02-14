@@ -40,6 +40,11 @@ const MarketPlacePage = () => {
   const toggleNotification = useNotification();
   const { notifyStatus } = useNotifyAT();
 
+  const title = formatMessage({
+    id: 'admin.pages.MarketPlacePage.title',
+    defaultMessage: 'Marketplace',
+  });
+
   const notifyLoad = () => {
     notifyStatus(
       formatMessage(
@@ -47,7 +52,7 @@ const MarketPlacePage = () => {
           id: 'app.utils.notify.data-loaded',
           defaultMessage: 'The {target} has loaded',
         },
-        { target: 'test' }
+        { target: title }
       )
     );
   };
@@ -62,7 +67,6 @@ const MarketPlacePage = () => {
   });
 
   const isLoading = status !== 'success' && status !== 'error';
-  console.log('plugins', data);
 
   useEffect(() => {
     trackUsage('didGoToMarketplace');
