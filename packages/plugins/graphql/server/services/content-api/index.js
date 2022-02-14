@@ -68,6 +68,8 @@ module.exports = ({ strapi }) => {
       typegen: config('artifacts.typegen', false),
     };
 
+    const currentEnv = strapi.config.get('environment');
+
     const nexusSchema = makeSchema({
       // Build the schema from the merged GraphQL schema.
       // Since we're passing the schema to the mergeSchema property, it'll transform our SDL type definitions
@@ -79,7 +81,7 @@ module.exports = ({ strapi }) => {
 
       // Whether to generate artifacts (GraphQL schema, TS types definitions) or not.
       // By default, we generate artifacts only on development environment
-      shouldGenerateArtifacts: config('generateArtifacts', process.env.NODE_ENV === 'development'),
+      shouldGenerateArtifacts: config('generateArtifacts', currentEnv === 'development'),
 
       // Artifacts generation configuration
       outputs,
