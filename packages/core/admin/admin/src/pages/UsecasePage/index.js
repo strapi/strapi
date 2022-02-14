@@ -143,9 +143,9 @@ const UsecasePage = () => {
                 onChange={setRole}
                 value={role}
               >
-                {options.map(({ label, value }) => (
+                {options.map(({ intlLabel, value }) => (
                   <Option key={value} value={value}>
-                    {label}
+                    {formatMessage(intlLabel)}
                   </Option>
                 ))}
               </Select>
