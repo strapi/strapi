@@ -208,10 +208,13 @@ describe('Filtering API', () => {
         [{ $null: '1' }],
         [{ $null: 't' }],
         [{ $null: 'anything' }],
+        [{ $null: '[]' }],
+        [{ $null: '{}' }],
         [{ $notNull: false }],
         [{ $notNull: 'false' }],
         [{ $notNull: '0' }],
         [{ $notNull: 'f' }],
+        [{ $notNull: '' }],
       ])('Should return only matching items (%s)', async priceFilter => {
         const res = await rq({
           method: 'GET',
@@ -231,15 +234,18 @@ describe('Filtering API', () => {
       });
 
       test.each([
-        { $notNull: true },
-        { $notNull: 'true' },
-        { $notNull: '1' },
-        { $notNull: 't' },
-        { $notNull: 'anything' },
-        { $null: false },
-        { $null: 'false' },
-        { $null: '0' },
-        { $null: 'f' },
+        [{ $notNull: true }],
+        [{ $notNull: 'true' }],
+        [{ $notNull: '1' }],
+        [{ $notNull: 't' }],
+        [{ $notNull: 'anything' }],
+        [{ $notNull: '[]' }],
+        [{ $notNull: '{}' }],
+        [{ $null: false }],
+        [{ $null: 'false' }],
+        [{ $null: '0' }],
+        [{ $null: 'f' }],
+        [{ $null: '' }],
       ])('Should return three matches (%s)', async priceFilter => {
         const res = await rq({
           method: 'GET',
