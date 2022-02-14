@@ -1,8 +1,16 @@
 import React, { useEffect } from 'react';
 import { useIntl } from 'react-intl';
+import { useQuery } from 'react-query';
 import styled from 'styled-components';
 import { Helmet } from 'react-helmet';
-import { pxToRem, CheckPagePermissions, useTracking } from '@strapi/helper-plugin';
+import {
+  pxToRem,
+  CheckPagePermissions,
+  useTracking,
+  LoadingIndicatorPage,
+  useNotification,
+} from '@strapi/helper-plugin';
+import { useNotifyAT } from '@strapi/design-system/LiveRegions';
 import { Layout, HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
 import { Flex } from '@strapi/design-system/Flex';
 import { Box } from '@strapi/design-system/Box';
@@ -10,6 +18,7 @@ import { Stack } from '@strapi/design-system/Stack';
 import { LinkButton } from '@strapi/design-system/LinkButton';
 import { Main } from '@strapi/design-system/Main';
 import { Typography } from '@strapi/design-system/Typography';
+import { fetchPlugins } from './utils/api';
 import adminPermissions from '../../permissions';
 import MarketplacePicture from './assets/marketplace-coming-soon.png';
 
@@ -28,10 +37,46 @@ const StackCentered = styled(Stack)`
 const MarketPlacePage = () => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
+  const toggleNotification = useNotification();
+  const { notifyStatus } = useNotifyAT();
+
+  const notifyLoad = () => {
+    notifyStatus(
+      formatMessage(
+        {
+          id: 'app.utils.notify.data-loaded',
+          defaultMessage: 'The {target} has loaded',
+        },
+        { target: 'test' }
+      )
+    );
+  };
+
+  const { status, data } = useQuery('list-plugins', () => fetchPlugins(notifyLoad), {
+    onError: () => {
+      toggleNotification({
+        type: 'warning',
+        message: { id: 'notification.error', defaultMessage: 'An error occured' },
+      });
+    },
+  });
+
+  const isLoading = status !== 'success' && status !== 'error';
+  console.log('plugins', data);
 
   useEffect(() => {
     trackUsage('didGoToMarketplace');
   }, [trackUsage]);
+
+  if (isLoading) {
+    return (
+      <Layout>
+        <Main aria-busy>
+          <LoadingIndicatorPage />
+        </Main>
+      </Layout>
+    );
+  }
 
   return (
     <CheckPagePermissions permissions={adminPermissions.marketplace.main}>
