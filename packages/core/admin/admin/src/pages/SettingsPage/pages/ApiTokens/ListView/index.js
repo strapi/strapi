@@ -38,7 +38,7 @@ const ApiTokenListView = () => {
 
   useEffect(() => {
     startSection('apiTokens');
-  });
+  }, [startSection]);
 
   useEffect(() => {
     push({ search: qs.stringify({ sort: 'name:ASC' }, { encode: false }) });
