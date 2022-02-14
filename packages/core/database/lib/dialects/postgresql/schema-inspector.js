@@ -101,7 +101,7 @@ const toStrapiType = column => {
     case 'bigint': {
       return { type: 'bigInteger' };
     }
-    case 'jsonb': {
+    case 'json': {
       return { type: 'jsonb' };
     }
     default: {
