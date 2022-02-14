@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
-import { pxToRem, useNotification } from '@strapi/helper-plugin';
+import { pxToRem, useNotification, LoadingIndicatorPage } from '@strapi/helper-plugin';
 import { Main } from '@strapi/design-system/Main';
 import { Flex } from '@strapi/design-system/Flex';
 import { Box } from '@strapi/design-system/Box';
@@ -113,6 +113,10 @@ const UsecasePage = () => {
       // Silent
     }
   };
+
+  if (!isComingFromRegister) {
+    return <LoadingIndicatorPage />;
+  }
 
   return (
     <UnauthenticatedLayout>
