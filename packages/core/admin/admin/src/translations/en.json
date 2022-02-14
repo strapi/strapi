@@ -234,7 +234,7 @@
   "Usecase.content-manager": "Content Manager", 
   "Usecase.content-creator": "Content Creator", 
   "Usecase.other": "Other", 
-  "Usecase.title": "Tell us a bit more about yourself?", 
+  "Usecase.title": "Tell us a bit more about yourself", 
   "Usecase.input.work-type": "What type of work do you do?", 
   "Usecase.button.skip": "Skip this question",
   "Usecase.notification.success.project-created": "Project has been successfully created",

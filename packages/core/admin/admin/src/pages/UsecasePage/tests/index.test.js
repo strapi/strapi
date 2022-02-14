@@ -776,7 +776,7 @@ describe('Admin | UsecasePage', () => {
                       <h1
                         class="c17 c18"
                       >
-                        Tell us a bit more about yourself?
+                        Tell us a bit more about yourself
                       </h1>
                     </div>
                   </div>
@@ -919,7 +919,7 @@ describe('Admin | UsecasePage', () => {
     history.location.state = undefined;
     const { queryByText } = render(App);
 
-    expect(queryByText('Tell us a bit more about yourself?')).not.toBeInTheDocument();
+    expect(queryByText('Tell us a bit more about yourself')).not.toBeInTheDocument();
   });
 
   it('should not show Other input if select value is not Other', async () => {

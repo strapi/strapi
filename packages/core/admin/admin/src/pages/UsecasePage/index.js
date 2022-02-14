@@ -129,7 +129,7 @@ const UsecasePage = () => {
                 <TypographyCenter variant="alpha" as="h1">
                   {formatMessage({
                     id: 'Usecase.title',
-                    defaultMessage: 'Tell us a bit more about yourself?',
+                    defaultMessage: 'Tell us a bit more about yourself',
                   })}
                 </TypographyCenter>
               </Box>
