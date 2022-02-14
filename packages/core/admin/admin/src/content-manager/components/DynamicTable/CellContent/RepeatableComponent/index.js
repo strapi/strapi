@@ -1,53 +1,13 @@
-import React, { useState, useRef } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
-import styled from 'styled-components';
 import { useIntl } from 'react-intl';
-import { Flex } from '@strapi/design-system/Flex';
+import { Badge } from '@strapi/design-system/Badge';
 import { Box } from '@strapi/design-system/Box';
-import { Tooltip } from '@strapi/design-system/Tooltip';
 import { Typography } from '@strapi/design-system/Typography';
-import { Popover } from '@strapi/design-system/Popover';
-import { FocusTrap } from '@strapi/design-system/FocusTrap';
-import { SortIcon, stopPropagation } from '@strapi/helper-plugin';
-import { getTrad } from '../../../../utils';
+import { SimpleMenu, MenuItem } from '@strapi/design-system/SimpleMenu';
+import { stopPropagation } from '@strapi/helper-plugin';
 
 import CellValue from '../CellValue';
-
-const Button = styled.button`
-  svg {
-    > g,
-    path {
-      fill: ${({ theme }) => theme.colors.neutral500};
-    }
-  }
-  &:hover {
-    svg {
-      > g,
-      path {
-        fill: ${({ theme }) => theme.colors.neutral600};
-      }
-    }
-  }
-  &:active {
-    svg {
-      > g,
-      path {
-        fill: ${({ theme }) => theme.colors.neutral400};
-      }
-    }
-  }
-`;
-
-const ActionWrapper = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: ${32 / 16}rem;
-  width: ${32 / 16}rem;
-  svg {
-    height: ${4 / 16}rem;
-  }
-`;
 
 function getMainFieldValue(field, name) {
   return field[name] || field.id;
@@ -62,62 +22,39 @@ function getMainFieldType(field, name, defaultType) {
 }
 
 const RepeatableComponentCell = ({ value, metadatas }) => {
-  const [visible, setVisible] = useState(false);
   const { formatMessage } = useIntl();
-  const buttonRef = useRef();
   const {
     mainField: { type: mainFieldType, name: mainFieldName },
   } = metadatas;
-  const subItems = [...value.slice(1)];
 
-  const handleTogglePopover = () => setVisible(prev => !prev);
+  const Label = (
+    <>
+      <Badge>{value.length}</Badge>{' '}
+      {formatMessage(
+        {
+          id: 'content-manager.containers.ListPage.items',
+          defaultMessage: '{number, plural, =0 {items} one {item} other {items}}',
+        },
+        { number: value.length }
+      )}
+    </>
+  );
 
   return (
-    <Flex {...stopPropagation}>
-      <Tooltip
-        label={formatMessage({
-          id: getTrad('DynamicTable.component.repeatable.toggle'),
-          defaultMessage: 'Toggle repeatable values',
-        })}
-      >
-        <Button type="button" onClick={handleTogglePopover} ref={buttonRef}>
-          <Flex>
-            <Typography
-              style={{ maxWidth: '252px', cursor: 'pointer' }}
-              textColor="neutral800"
-              ellipsis
-            >
+    <Box {...stopPropagation}>
+      <SimpleMenu label={Label}>
+        {value.map(item => (
+          <MenuItem key={item.id} aria-disabled>
+            <Typography>
               <CellValue
-                type={getMainFieldType(value[0], mainFieldName, mainFieldType)}
-                value={getMainFieldValue(value[0], mainFieldName)}
+                type={getMainFieldType(item, mainFieldName, mainFieldType)}
+                value={getMainFieldValue(item, mainFieldName)}
               />
             </Typography>
-            <ActionWrapper>
-              <SortIcon />
-
-              {visible && subItems.length > 0 && (
-                <Popover source={buttonRef} spacing={16} centered>
-                  <FocusTrap onEscape={handleTogglePopover}>
-                    <ul>
-                      {subItems.map(item => (
-                        <Box key={item.id} tabIndex={0} padding={3} as="li">
-                          <Typography>
-                            <CellValue
-                              type={getMainFieldType(item, mainFieldName, mainFieldType)}
-                              value={getMainFieldValue(item, mainFieldName)}
-                            />
-                          </Typography>
-                        </Box>
-                      ))}
-                    </ul>
-                  </FocusTrap>
-                </Popover>
-              )}
-            </ActionWrapper>
-          </Flex>
-        </Button>
-      </Tooltip>
-    </Flex>
+          </MenuItem>
+        ))}
+      </SimpleMenu>
+    </Box>
   );
 };
 
