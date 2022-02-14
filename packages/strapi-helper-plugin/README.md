@@ -12,7 +12,7 @@ After years of iterations, Strapi is going to V4 and we won’t maintain V3 pack
 
 If you’ve been using `strapi-helper-plugin` and have migrated to V4 (or if you want to), you can find the equivalent and updated version of this package at this [URL](https://github.com/strapi/strapi/tree/master/packages/core/helper-plugin) and with the following name on NPM: `@strapi/helper-plugin`.
 
-If you’ve contributed to the development of this package, thank you again for that! We hope to see you on the V4 version soon.
+If you’ve contributed to the development of this package, thank you again for that! We hope to see you on the V4 soon.
 
 The Strapi team
 

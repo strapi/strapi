@@ -18,7 +18,7 @@ We released Strapi V4 in Q4 2021 and Strapi V3 will reach end-of-support around 
 
 Since this package won't be ported in V4, we took the decision to deprecate it.
 
-If you’ve contributed to the development of this package, thank you again for that! We hope to see you on the V4 version soon.
+If you’ve contributed to the development of this package, thank you again for that! We hope to see you on the V4 soon.
 
 The Strapi team
 
