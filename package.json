@@ -71,7 +71,7 @@
   },
   "devDependencies": {
     "@swc-node/jest": "1.4.3",
-    "@testing-library/react": "11.2.6",
+    "@testing-library/react": "11.2.7",
     "@testing-library/react-hooks": "3.4.2",
     "@testing-library/user-event": "13.5.0",
     "axios-mock-adapter": "1.19.0",
