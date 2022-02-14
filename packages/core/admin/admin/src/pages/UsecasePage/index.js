@@ -17,12 +17,48 @@ import Logo from '../../components/UnauthenticatedLogo';
 import UnauthenticatedLayout, { LayoutContent } from '../../layouts/UnauthenticatedLayout';
 
 export const options = [
-  { label: 'Front-end developer', value: 'front_end_developer' },
-  { label: 'Back-end developer', value: 'back_end_developer' },
-  { label: 'Full-stack developer', value: 'full_stack_developer' },
-  { label: 'Content Manager', value: 'content_manager' },
-  { label: 'Content Creator', value: 'content_creator' },
-  { label: 'Other', value: 'other' },
+  {
+    intlLabel: {
+      id: 'Usecase.front-end',
+      defaultMessage: 'Front-end developer',
+    },
+    value: 'front_end_developer',
+  },
+  {
+    intlLabel: {
+      id: 'Usecase.back-end',
+      defaultMessage: 'Back-end developer',
+    },
+    value: 'back_end_developer',
+  },
+  {
+    intlLabel: {
+      id: 'Usecase.full-stack',
+      defaultMessage: 'Full-stack developer',
+    },
+    value: 'full_stack_developer',
+  },
+  {
+    intlLabel: {
+      id: 'Usecase.content-manager',
+      defaultMessage: 'Content Manager',
+    },
+    value: 'content_manager',
+  },
+  {
+    intlLabel: {
+      id: 'Usecase.content-creator',
+      defaultMessage: 'Content Creator',
+    },
+    value: 'content_creator',
+  },
+  {
+    intlLabel: {
+      id: 'Usecase.other',
+      defaultMessage: 'Other',
+    },
+    value: 'other',
+  },
 ];
 
 const TypographyCenter = styled(Typography)`
@@ -116,7 +152,7 @@ const UsecasePage = () => {
               {isOther && (
                 <TextInput
                   name="other"
-                  label={formatMessage({ id: 'Usecase.input.other', defaultMessage: 'Other' })}
+                  label={formatMessage({ id: 'Usecase.other', defaultMessage: 'Other' })}
                   value={otherRole}
                   onChange={e => setOtherRole(e.target.value)}
                   data-testid="other"
