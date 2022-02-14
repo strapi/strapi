@@ -1,5 +1,23 @@
 # strapi-provider-email-sendmail
 
+---
+
+## Deprecation Warning :warning:
+
+Hello! We have some news to share,
+
+We’ve decided it’ll soon be time to end the support for `strapi-provider-email-sendmail`.
+
+After years of iterations, Strapi is going to V4 and we won’t maintain V3 packages when it’ll reach its end-of-support milestone (~end of Q3 2022).
+
+If you’ve been using `strapi-provider-email-sendmail` and have migrated to V4 (or if you want to), you can find the equivalent and updated version of this package at this [URL](https://github.com/strapi/strapi/tree/master/packages/providers/email-sendmail) and with the following name on NPM: `@strapi/provider-email-sendmail`.
+
+If you’ve contributed to the development of this package, thank you again for that! We hope to see you on the V4 soon.
+
+The Strapi team
+
+---
+
 ## Resources
 
 - [License](LICENSE)
@@ -26,16 +44,17 @@ npm install strapi-provider-email-sendmail --save
 
 ## Configuration
 
-| Variable                | Type               | Description                                                  | Required | Default   |
-| ----------------------- | ------------------ | ------------------------------------------------------------ | -------- | --------- |
-| provider                | string             | The name of the provider you use                             | yes      |           |
-| providerOptions         | object             | Will be directly given to `require('sendmail')`. Please refer to [sendmail](https://www.npmjs.com/package/sendmail) doc. | no       | {}        |
-| settings                | object             | Settings                                                     | no       | {}        |
-| settings.defaultFrom    | string             | Default sender mail address                                  | no       | undefined |
-| settings.defaultReplyTo | string \| array    | Default address or addresses the receiver is asked to reply to | no       | undefined |
-| providerOptions.dkim    | object  \| boolean | DKIM parameters having two properties: { privateKey, keySelector } | no       | false     |
+| Variable                | Type              | Description                                                                                                              | Required | Default   |
+| ----------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------ | -------- | --------- |
+| provider                | string            | The name of the provider you use                                                                                         | yes      |           |
+| providerOptions         | object            | Will be directly given to `require('sendmail')`. Please refer to [sendmail](https://www.npmjs.com/package/sendmail) doc. | no       | {}        |
+| settings                | object            | Settings                                                                                                                 | no       | {}        |
+| settings.defaultFrom    | string            | Default sender mail address                                                                                              | no       | undefined |
+| settings.defaultReplyTo | string \| array   | Default address or addresses the receiver is asked to reply to                                                           | no       | undefined |
+| providerOptions.dkim    | object \| boolean | DKIM parameters having two properties: { privateKey, keySelector }                                                       | no       | false     |
 
 > :warning: The Shipper Email (or defaultfrom) may also need to be changed in the `Email Templates` tab on the admin panel for emails to send properly
+
 ### Example
 
 **Path -** `config/plugins.js`
@@ -56,7 +75,7 @@ module.exports = ({ env }) => ({
 
 ### Example with DKIM
 
-Using **DKIM** (DomainKeys Identified Mail) can prevent  emails from being considered as spam. More details about this subject  can be found in the discussion on the Strapi forum:  [Unsolved problem: emails goes to spam!](https://forum.strapi.io/t/unsolved-problem-emails-goes-to-spam/512?u=soringfs)
+Using **DKIM** (DomainKeys Identified Mail) can prevent emails from being considered as spam. More details about this subject can be found in the discussion on the Strapi forum: [Unsolved problem: emails goes to spam!](https://forum.strapi.io/t/unsolved-problem-emails-goes-to-spam/512?u=soringfs)
 
 #### Generate the keys using OpenSSL
 
@@ -76,7 +95,7 @@ module.exports = ({ env }) => ({
       dkim: {
         privateKey: 'replace-with-dkim-private-key',
         keySelector: 'abcd', // the same as the one set in DNS txt record, use online dns lookup tools to be sure that is retreivable
-      }
+      },
     },
     settings: {
       defaultFrom: 'myemail@protonmail.com',

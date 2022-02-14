@@ -1,5 +1,23 @@
 # strapi-provider-upload-cloudinary
 
+---
+
+## Deprecation Warning :warning:
+
+Hello! We have some news to share,
+
+We’ve decided it’ll soon be time to end the support for `strapi-provider-upload-cloudinary`.
+
+After years of iterations, Strapi is going to V4 and we won’t maintain V3 packages when it’ll reach its end-of-support milestone (~end of Q3 2022).
+
+If you’ve been using `strapi-provider-upload-cloudinary` and have migrated to V4 (or if you want to), you can find the equivalent and updated version of this package at this [URL](https://github.com/strapi/strapi/tree/master/packages/providers/upload-cloudinary) and with the following name on NPM: `@strapi/provider-upload-cloudinary`.
+
+If you’ve contributed to the development of this package, thank you again for that! We hope to see you on the V4 soon.
+
+The Strapi team
+
+---
+
 ## Configurations
 
 Your configuration is passed down to the cloudinary configuration. (e.g: `cloudinary.config(config)`). You can see the complete list of options [here](https://cloudinary.com/documentation/cloudinary_sdks#configuration_parameters)

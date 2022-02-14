@@ -8,6 +8,22 @@
 
 Views middleware to enable server-side rendering for the Strapi framework. It will let you use [koa-views](https://www.npmjs.com/package/koa-views) and [consolidate](https://github.com/tj/consolidate.js/).
 
+---
+
+## Deprecation Warning :warning:
+
+Hello, we've some news to share!
+
+We released Strapi V4 in Q4 2021 and Strapi V3 will reach end-of-support around the end of Q3 2022.
+
+Since this package won't be ported in V4, we took the decision to deprecate it.
+
+If you’ve contributed to the development of this package, thank you again for that! We hope to see you on the V4 soon.
+
+The Strapi team
+
+---
+
 ## Resources
 
 - [License](LICENSE)

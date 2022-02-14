@@ -8,6 +8,22 @@
 
 This built-in hook allows you to use the EJS template engine with custom options.
 
+---
+
+## Deprecation Warning :warning:
+
+Hello, we've some news to share!
+
+We released Strapi V4 in Q4 2021 and Strapi V3 will reach end-of-support around the end of Q3 2022.
+
+Since this package won't be ported in V4, we took the decision to deprecate it.
+
+If you’ve contributed to the development of this package, thank you again for that! We hope to see you on the V4 soon.
+
+The Strapi team
+
+---
+
 ## Configuration
 
 To configure your hook with custom options, you need to edit your `./config/hook.json` file in your Strapi app.
