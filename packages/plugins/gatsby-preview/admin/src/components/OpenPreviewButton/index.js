@@ -27,11 +27,11 @@ const OpenPreviewButton = () => {
     return null;
   }
 
-  if (!data.contentSyncURL) {
+  if (!data.previews[uid]) {
     return null;
   }
 
-  if (!data.previews[uid]) {
+  if (!data.contentSyncURL) {
     return null;
   }
 
@@ -42,7 +42,13 @@ const OpenPreviewButton = () => {
   };
 
   return (
-    <Button disabled={isCreatingEntry} onClick={handleClick} startIcon={<Eye />} type="button">
+    <Button
+      disabled={isCreatingEntry}
+      onClick={handleClick}
+      startIcon={<Eye />}
+      type="button"
+      fullWidth
+    >
       {formatMessage({ id: getTrad('preview-button'), defaultMessage: 'Open Gatsby preview' })}
     </Button>
   );

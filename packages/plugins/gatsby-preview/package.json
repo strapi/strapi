@@ -32,7 +32,7 @@
   "strapi": {
     "name": "gatsby-preview",
     "displayName": "Gatsby preview",
-    "description": "Enable CMS preview for Gatsby cloud",
+    "description": "Preview content changes from your team in Gatsby Cloud before they get deployed to production",
     "kind": "plugin"
   }
 }

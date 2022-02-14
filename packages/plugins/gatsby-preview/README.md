@@ -4,7 +4,7 @@ The official plugin to integrate Strapi with Gatsby Cloud
 
 ## Features
 
-Insert a preview button in the Content Manager to preview content in Gatsby Cloud.
+The plugin inserts a preview button in the Content Manager to preview content in Gatsby Cloud.
 
 ## Installation
 
@@ -22,4 +22,4 @@ npm install --save @strapi/plugin-gatsby-preview
 
 ## Configuration
 
-In the Settings page enable the preview on the Content Types that are used in your Gatsby application and set the Content Sync URL that you can find in your Site Settings => Content Sync.
+In the Settings page enable the preview on all the Content Types that are used in your Gatsby application and set the Content Sync URL that you can find in your Gatsby Cloud Site Settings => Content Sync.

@@ -65,7 +65,7 @@ const SettingsPage = () => {
   const handleSubmit = async e => {
     e.preventDefault();
 
-    if (ref.current?.getContentSyncURL) {
+    if (ref?.current?.getContentSyncURL) {
       const body = ref.current.getContentSyncURL();
 
       let errors = {};
@@ -108,7 +108,7 @@ const SettingsPage = () => {
           subtitle={formatMessage({
             id: getTrad('Settings.description'),
             defaultMessage:
-              'Preview content changes from your team before it gets deployed to production',
+              'Preview content changes from your team in you Gatsby Cloud before it gets deployed to production',
           })}
         />
         <ContentLayout>

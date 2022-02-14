@@ -14,7 +14,7 @@ const SyncSettings = ({ contentSyncURL, formErrors, onChange }) => {
   return (
     <Box paddingTop={7} paddingLeft={6} paddingRight={6} paddingBottom={11}>
       <Grid>
-        <GridItem s={12} col={4}>
+        <GridItem s={12} col={8}>
           <TextInput
             id="label-input"
             label={formatMessage({

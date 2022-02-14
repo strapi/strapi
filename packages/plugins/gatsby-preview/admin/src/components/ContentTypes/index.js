@@ -62,11 +62,11 @@ const ContentTypes = ({ contentTypes, modifiedData, onChange }) => {
                 <Flex>
                   <Switch
                     onLabel={formatMessage({
-                      id: 'Settings.webhooks.enabled',
+                      id: 'Settings.content-type.enabled',
                       defaultMessage: 'Enabled',
                     })}
                     offLabel={formatMessage({
-                      id: 'Settings.webhooks.disabled',
+                      id: 'Settings.content-type.disabled',
                       defaultMessage: 'Disabled',
                     })}
                     label={`${singularName} ${formatMessage({
