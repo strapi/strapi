@@ -33,10 +33,10 @@ const UsecasePage = () => {
   const toggleNotification = useNotification();
   const { push, location } = useHistory();
   const { formatMessage } = useIntl();
-  const [persona, setPersona] = useState();
-  const [personaOther, setPersonaOther] = useState('');
+  const [role, setRole] = useState();
+  const [otherRole, setOtherRole] = useState('');
 
-  const isOther = persona === 'other';
+  const isOther = role === 'other';
   const isComingFromRegister = location.state?.fromRegister;
 
   useEffect(() => {
@@ -58,8 +58,10 @@ const UsecasePage = () => {
           email,
           username: firstname,
           firstAdmin,
-          persona: skipPersona ? undefined : persona,
-          personaOther: skipPersona ? undefined : personaOther,
+          persona: {
+            role: skipPersona ? undefined : role,
+            otherRole: skipPersona ? undefined : otherRole,
+          },
         },
       });
 
@@ -104,10 +106,10 @@ const UsecasePage = () => {
                   id: 'Usecase.input.work-type',
                   defaultMessage: 'What type of work do you do?',
                 })}
-                onClear={() => setPersona(null)}
+                onClear={() => setRole(null)}
                 clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
-                onChange={setPersona}
-                value={persona}
+                onChange={setRole}
+                value={role}
               >
                 {options.map(({ label, value }) => (
                   <Option key={value} value={value}>
@@ -119,8 +121,8 @@ const UsecasePage = () => {
                 <TextInput
                   name="other"
                   label={formatMessage({ id: 'Usecase.input.other', defaultMessage: 'Other' })}
-                  value={personaOther}
-                  onChange={e => setPersonaOther(e.target.value)}
+                  value={otherRole}
+                  onChange={e => setOtherRole(e.target.value)}
                   data-testid="other"
                 />
               )}
