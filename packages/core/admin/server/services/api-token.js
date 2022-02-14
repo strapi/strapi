@@ -76,11 +76,18 @@ const create = async attributes => {
  */
 const checkSaltIsDefined = () => {
   if (!strapi.config.get('admin.apiToken.salt')) {
-    const secretExample = crypto.randomBytes(16).toString('base64');
-    throw new Error(
-      `Missing apiToken.salt. Please set apiToken.salt in config/admin.js (ex: ${secretExample}).
+    // TODO V5: stop reading API_TOKEN_SALT
+    if (process.env.API_TOKEN_SALT) {
+      process.emitWarning(`[deprecated] In future versions Strapi will stop reading directly the env variable API_TOKEN_SALT. Please set apiToken.salt in config/admin.js instead.
+For security reasons, keep storing the secret in a environment variable and use env() to read it in config/admin.js (ex: \`apiToken: { salt: env('API_TOKEN_SALT') }\`). See https://docs.strapi.io/developer-docs/latest/setup-deployment-guides/configurations/optional/environment.html#configuration-using-environment-variables.`);
+      strapi.config.set('admin.apiToken.salt', process.env.API_TOKEN_SALT);
+    } else {
+      const secretExample = crypto.randomBytes(16).toString('base64');
+      throw new Error(
+        `Missing apiToken.salt. Please set apiToken.salt in config/admin.js (ex: ${secretExample}).
 For security reasons, prefere storing the secret in a environment variable. See https://docs.strapi.io/developer-docs/latest/setup-deployment-guides/configurations/optional/environment.html#configuration-using-environment-variables.`
-    );
+      );
+    }
   }
 };
 
