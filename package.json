@@ -111,7 +111,7 @@
     "prettier": "1.18.2",
     "qs": "6.10.1",
     "react-test-renderer": "17.0.2",
-    "request": "2.87.0",
+    "request": "2.88.2",
     "request-promise-native": "1.0.9",
     "rimraf": "3.0.2",
     "stylelint": "13.13.1",
