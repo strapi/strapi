@@ -42,7 +42,7 @@ describe('GuidedTour init', () => {
       JSON.stringify(['contentTypeBuilder.create', 'contentTypeBuilder.success'])
     );
 
-    const expectedState = { ...cloneDeep(initialState) };
+    const expectedState = cloneDeep(initialState);
     expectedState.guidedTourState.contentTypeBuilder.create = true;
     expectedState.guidedTourState.contentTypeBuilder.success = true;
 
@@ -53,7 +53,7 @@ describe('GuidedTour init', () => {
   it('should set state for currentStep to done and set currentStep itself to null', () => {
     localStorage.setItem('GUIDED_TOUR_CURRENT_STEP', JSON.stringify('contentTypeBuilder.create'));
 
-    const expectedState = { ...cloneDeep(initialState) };
+    const expectedState = cloneDeep(initialState);
     expectedState.guidedTourState.contentTypeBuilder.create = true;
 
     const loadedState = init(cloneDeep(initialState));
@@ -64,7 +64,7 @@ describe('GuidedTour init', () => {
   it('should load isSkipped into state', () => {
     localStorage.setItem('GUIDED_TOUR_SKIPPED', JSON.stringify(true));
 
-    const expectedState = { ...cloneDeep(initialState) };
+    const expectedState = cloneDeep(initialState);
     expectedState.isSkipped = true;
 
     const loadedState = init(cloneDeep(initialState));
