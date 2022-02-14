@@ -19,7 +19,7 @@ module.exports = [
   {
     method: 'GET',
     path: '/roles',
-    handler: 'role.getRoles',
+    handler: 'role.find',
     config: {
       policies: [
         {

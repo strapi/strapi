@@ -9,7 +9,7 @@ module.exports = [
   {
     method: 'GET',
     path: '/roles',
-    handler: 'role.getRoles',
+    handler: 'role.find',
   },
   {
     method: 'POST',

@@ -33,7 +33,7 @@ module.exports = {
     ctx.send({ role });
   },
 
-  async getRoles(ctx) {
+  async find(ctx) {
     const roles = await getService('role').getRoles();
 
     ctx.send({ roles });
