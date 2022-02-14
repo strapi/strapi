@@ -82,6 +82,9 @@ const MarketPlacePage = () => {
     );
   }
 
+  // TODO: Remove when using data, logging for now to avoid lint error
+  console.log('plugins', data);
+
   return (
     <CheckPagePermissions permissions={adminPermissions.marketplace.main}>
       <Layout>
