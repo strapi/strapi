@@ -3,7 +3,7 @@
 const { mergeSchemas, addResolversToSchema } = require('@graphql-tools/schema');
 const { pruneSchema } = require('@graphql-tools/utils');
 const { makeSchema } = require('nexus');
-const { prop, startsWith, negate, eq } = require('lodash/fp');
+const { prop, startsWith } = require('lodash/fp');
 
 const { wrapResolvers } = require('./wrap-resolvers');
 const {
@@ -77,8 +77,9 @@ module.exports = ({ strapi }) => {
       // Apply user-defined plugins
       plugins: extension.plugins,
 
-      // Generate artifacts only if one of the configuration has been set
-      shouldGenerateArtifacts: Object.values(outputs).some(negate(eq(false))),
+      // Whether to generate artifacts (GraphQL schema, TS types definitions) or not.
+      // By default, we generate artifacts only on development environment
+      shouldGenerateArtifacts: config('generateArtifacts', process.env.NODE_ENV === 'development'),
 
       // Artifacts generation configuration
       outputs,
