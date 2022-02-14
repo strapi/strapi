@@ -4,7 +4,4 @@ module.exports = ({ env }) => ({
   app: {
     keys: env.array('APP_KEYS', ['toBeModified1', 'toBeModified2']),
   },
-  app: {
-    keys: env.array('APP_KEYS', ['toBeModified1', 'toBeModified2']),
-  },
 });
