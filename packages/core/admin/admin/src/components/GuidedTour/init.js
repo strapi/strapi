@@ -26,8 +26,8 @@ const init = initialState => {
     persistStateToLocaleStorage.addCurrentStep(null);
   }
 
-  if (skippedLocaleStorage) {
-    set(copyInitialState, 'isSkipped', true);
+  if (skippedLocaleStorage !== null) {
+    set(copyInitialState, 'isSkipped', skippedLocaleStorage);
   }
 
   return copyInitialState;

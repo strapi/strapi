@@ -65,7 +65,11 @@ describe('GuidedTour', () => {
 
   it('should update currentStep with setCurrentStep', () => {
     const Test = () => {
-      const { setCurrentStep, currentStep } = useGuidedTour();
+      const { setCurrentStep, currentStep, setSkipped } = useGuidedTour();
+
+      useEffect(() => {
+        setSkipped(false);
+      }, [setSkipped]);
 
       return (
         <div>
