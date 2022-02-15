@@ -18,7 +18,7 @@ export const initialState = {
     },
   },
   isGuidedTourVisible: false,
-  isSkipped: false,
+  isSkipped: true,
 };
 
 const reducer = (state = initialState, action) =>
