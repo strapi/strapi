@@ -62,31 +62,46 @@ const listViewReducer = (state = initialState, action) =>
             key: `__${name}_key__`,
           };
 
-          if (attributes[name].type === 'component') {
-            const componentName = attributes[name].component;
-            const mainField = get(
-              state,
-              ['components', componentName, 'settings', 'mainField'],
-              null
-            );
+          switch (attributes[name].type) {
+            case 'component': {
+              const componentName = attributes[name].component;
+              const mainFieldName = get(
+                state,
+                ['components', componentName, 'settings', 'mainField'],
+                null
+              );
+              const mainFieldAttributes = get(state, [
+                'components',
+                componentName,
+                'attributes',
+                mainFieldName,
+              ]);
 
-            draftState.displayedHeaders.push({
-              ...header,
-              metadatas: {
-                ...metas,
-                mainField,
-              },
-            });
-          } else if (attributes[name].type === 'relation') {
-            draftState.displayedHeaders.push({
-              ...header,
-              queryInfos: {
-                defaultParams: {},
-                endPoint: `collection-types/${uid}`,
-              },
-            });
-          } else {
-            draftState.displayedHeaders.push(header);
+              draftState.displayedHeaders.push({
+                ...header,
+                metadatas: {
+                  ...metas,
+                  mainField: {
+                    ...mainFieldAttributes,
+                    name: mainFieldName,
+                  },
+                },
+              });
+              break;
+            }
+
+            case 'relation':
+              draftState.displayedHeaders.push({
+                ...header,
+                queryInfos: {
+                  defaultParams: {},
+                  endPoint: `collection-types/${uid}`,
+                },
+              });
+              break;
+
+            default:
+              draftState.displayedHeaders.push(header);
           }
         } else {
           draftState.displayedHeaders = state.displayedHeaders.filter(
