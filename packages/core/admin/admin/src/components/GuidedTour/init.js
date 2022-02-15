@@ -13,10 +13,6 @@ const init = initialState => {
   const skippedLocaleStorage = persistStateToLocaleStorage.get(SKIPPED);
   const isVisibleLocaleStorage = persistStateToLocaleStorage.get(VISIBLE);
 
-  if (isVisibleLocaleStorage) {
-    set(copyInitialState, 'isGuidedTourVisible', true);
-  }
-
   if (guidedTourLocaleStorage) {
     guidedTourLocaleStorage.forEach(step => {
       const [sectionName, stepName] = step.split('.');
@@ -32,8 +28,12 @@ const init = initialState => {
     persistStateToLocaleStorage.addCurrentStep(null);
   }
 
-  if (skippedLocaleStorage) {
-    set(copyInitialState, 'isSkipped', true);
+  if (skippedLocaleStorage !== null) {
+    set(copyInitialState, 'isSkipped', skippedLocaleStorage);
+  }
+
+  if (isVisibleLocaleStorage !== null) {
+    set(copyInitialState, 'isGuidedTourVisible', isVisibleLocaleStorage);
   }
 
   return copyInitialState;

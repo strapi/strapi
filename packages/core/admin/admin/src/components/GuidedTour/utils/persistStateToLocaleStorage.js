@@ -27,8 +27,8 @@ const persistStateToLocaleStorage = {
   setSkipped: value => {
     localStorage.setItem(SKIPPED, stringify(value));
   },
-  setGuidedTourVisible: value => {
-    localStorage.setItem(VISIBLE, stringify(value));
+  setGuidedTourVisible: () => {
+    localStorage.setItem(VISIBLE, true);
   },
   get: item => {
     return parse(localStorage.getItem(item));

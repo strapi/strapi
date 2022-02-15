@@ -10,9 +10,10 @@ const GuidedTourModal = () => {
   const {
     currentStep,
     guidedTourState,
+    isGuidedTourVisible,
+    isSkipped,
     setCurrentStep,
     setStepState,
-    isGuidedTourVisible,
     setSkipped,
   } = useGuidedTour();
   const [isVisible, setIsVisible] = useState(currentStep);
@@ -30,8 +31,8 @@ const GuidedTourModal = () => {
 
     const [isStepDone] = at(guidedTourState, currentStep);
 
-    setIsVisible(!isStepDone && isGuidedTourVisible);
-  }, [currentStep, guidedTourState, isGuidedTourVisible]);
+    setIsVisible(!isStepDone && !isSkipped && isGuidedTourVisible);
+  }, [currentStep, guidedTourState, isSkipped, isGuidedTourVisible]);
 
   useEffect(() => {
     if (currentStep) {

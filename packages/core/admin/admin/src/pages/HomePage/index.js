@@ -33,10 +33,10 @@ const LogoContainer = styled(Box)`
 const HomePage = () => {
   // // Temporary until we develop the menu API
   const { collectionTypes, singleTypes, isLoading: isLoadingForModels } = useModels();
-  const { guidedTourState, isGuidedTourVisible, isSkipped } = useGuidedTour();
+  const { guidedTourState, isSkipped, isGuidedTourVisible } = useGuidedTour();
 
   const showGuidedTour =
-    !isGuidedTourCompleted(guidedTourState) && isGuidedTourVisible && !isSkipped;
+    !isGuidedTourCompleted(guidedTourState) && !isSkipped && isGuidedTourVisible;
 
   const { push } = useHistory();
   const handleClick = e => {

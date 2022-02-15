@@ -16,7 +16,7 @@ import { initialState, reducer } from './reducer';
 const AuthPage = ({ hasAdmin, setHasAdmin }) => {
   const { push } = useHistory();
   const { changeLocale } = useLocalesProvider();
-  const { setGuidedTourVisibility } = useGuidedTour();
+  const { setSkipped } = useGuidedTour();
   const {
     params: { authType },
   } = useRouteMatch('/auth/:authType');
@@ -185,8 +185,8 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
         const isUserSuperAdmin = roles.find(({ code }) => code === 'strapi-super-admin');
 
         if (isUserSuperAdmin) {
-          persistStateToLocaleStorage.setGuidedTourVisible(true);
-          setGuidedTourVisibility(true);
+          persistStateToLocaleStorage.setSkipped(false);
+          setSkipped(false);
         }
       }
 
