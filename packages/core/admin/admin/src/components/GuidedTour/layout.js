@@ -74,7 +74,7 @@ const layout = {
       content: {
         id: 'app.components.GuidedTour.CM.create.content',
         defaultMessage:
-          '<p>Create and manage all the content here in the Content Manager.</p><p>Ex: Taking the Blog website example further, one can write an Article, save and publish it as they like.</p>',
+          "<p>Create and manage all the content here in the Content Manager.</p><p>Ex: Taking the Blog website example further, one can write an Article, save and publish it as they like.</p><p>💡 Quick tip - Don't forget to hit publish on the content you create.</p>",
       },
       cta: {
         title: {
