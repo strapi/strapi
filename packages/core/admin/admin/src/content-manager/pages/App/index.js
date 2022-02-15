@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Helmet } from 'react-helmet';
 import { Switch, Route, useRouteMatch, Redirect, useLocation } from 'react-router-dom';
 import {
@@ -34,10 +34,13 @@ const App = () => {
   const { pathname } = useLocation();
   const { formatMessage } = useIntl();
   const { startSection } = useGuidedTour();
+  const startSectionRef = useRef(startSection);
 
   useEffect(() => {
-    startSection('contentManager');
-  }, [startSection]);
+    if (startSectionRef.current) {
+      startSectionRef.current('contentManager');
+    }
+  }, []);
 
   if (status === 'loading') {
     return (

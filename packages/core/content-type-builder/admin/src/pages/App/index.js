@@ -4,7 +4,7 @@
  *
  */
 
-import React, { Suspense, lazy, useEffect } from 'react';
+import React, { Suspense, lazy, useEffect, useRef } from 'react';
 import { Switch, Route } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
@@ -21,16 +21,19 @@ import ContentTypeBuilderNav from '../../components/ContentTypeBuilderNav';
 const ListView = lazy(() => import('../ListView'));
 
 const App = () => {
-  const { startSection } = useGuidedTour();
   const { formatMessage } = useIntl();
   const title = formatMessage({
     id: `${pluginId}.plugin.name`,
     defaultMessage: 'Content Types Builder',
   });
+  const { startSection } = useGuidedTour();
+  const startSectionRef = useRef(startSection);
 
   useEffect(() => {
-    startSection('contentTypeBuilder');
-  }, [startSection]);
+    if (startSectionRef.current) {
+      startSectionRef.current('contentTypeBuilder');
+    }
+  }, []);
 
   return (
     <CheckPagePermissions permissions={pluginPermissions.main}>
