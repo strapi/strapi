@@ -180,6 +180,10 @@ describe('Marketplace coming soon', () => {
         line-height: 1.43;
       }
 
+      .c29 {
+        padding-left: 8px;
+      }
+
       .c24 {
         display: -webkit-box;
         display: -webkit-flex;
@@ -253,7 +257,7 @@ describe('Marketplace coming soon', () => {
         text-decoration: none;
       }
 
-      .c25 .sc-bzPmhk {
+      .c25 .c28 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -304,6 +308,91 @@ describe('Marketplace coming soon', () => {
       .c25:active {
         border: 1px solid #4945ff;
         background: #4945ff;
+      }
+
+      .c30 {
+        padding: 10px 16px;
+        background: #4945ff;
+        border: none;
+        border-radius: 4px;
+        border: 1px solid #d9d8ff;
+        background: #f0f0ff;
+        display: -webkit-inline-box;
+        display: -webkit-inline-flex;
+        display: -ms-inline-flexbox;
+        display: inline-flex;
+        -webkit-text-decoration: none;
+        text-decoration: none;
+      }
+
+      .c30 .c28 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c30 .c26 {
+        color: #ffffff;
+      }
+
+      .c30[aria-disabled='true'] {
+        border: 1px solid #dcdce4;
+        background: #eaeaef;
+      }
+
+      .c30[aria-disabled='true'] .c26 {
+        color: #666687;
+      }
+
+      .c30[aria-disabled='true'] svg > g,
+      .c30[aria-disabled='true'] svg path {
+        fill: #666687;
+      }
+
+      .c30[aria-disabled='true']:active {
+        border: 1px solid #dcdce4;
+        background: #eaeaef;
+      }
+
+      .c30[aria-disabled='true']:active .c26 {
+        color: #666687;
+      }
+
+      .c30[aria-disabled='true']:active svg > g,
+      .c30[aria-disabled='true']:active svg path {
+        fill: #666687;
+      }
+
+      .c30:hover {
+        background-color: #ffffff;
+      }
+
+      .c30:active {
+        background-color: #ffffff;
+        border: 1px solid #4945ff;
+      }
+
+      .c30:active .c26 {
+        color: #4945ff;
+      }
+
+      .c30:active svg > g,
+      .c30:active svg path {
+        fill: #4945ff;
+      }
+
+      .c30 .c26 {
+        color: #271fe0;
+      }
+
+      .c30 svg > g,
+      .c30 svg path {
+        fill: #271fe0;
       }
 
       .c3:focus-visible {
@@ -407,7 +496,7 @@ describe('Marketplace coming soon', () => {
                 <span
                   class="c16"
                 >
-                  A new way to make Strapi awesome.
+                  Finally here.
                 </span>
                 <div
                   class="c17 c18"
@@ -415,7 +504,7 @@ describe('Marketplace coming soon', () => {
                   <span
                     class="c19 c20"
                   >
-                    The new marketplace will help you get more out of Strapi. We are working hard to offer the best experience to discover and install plugins.
+                    The web marketplace helps you get the most of Strapi. In addition, we are working hard to offer the best experience to discover and install plugins, directly from the app.
                   </span>
                 </div>
                 <div
@@ -424,14 +513,44 @@ describe('Marketplace coming soon', () => {
                   <a
                     aria-disabled="false"
                     class="c24 c25"
-                    href="https://strapi.io/blog/strapi-market-is-coming-soon"
+                    href="https://market.strapi.io"
                     rel="noreferrer noopener"
                     target="_blank"
                   >
                     <span
                       class="c26 c27"
                     >
-                      Read our blog post
+                      Visit the web marketplace
+                    </span>
+                    <div
+                      aria-hidden="true"
+                      class="c28 c29"
+                    >
+                      <svg
+                        fill="none"
+                        height="1em"
+                        viewBox="0 0 24 24"
+                        width="1em"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M16.235 2.824a1.412 1.412 0 010-2.824h6.353C23.368 0 24 .633 24 1.412v6.353a1.412 1.412 0 01-2.823 0V4.82l-8.179 8.178a1.412 1.412 0 01-1.996-1.996l8.178-8.178h-2.945zm4.942 10.588a1.412 1.412 0 012.823 0v9.176c0 .78-.632 1.412-1.412 1.412H1.412C.632 24 0 23.368 0 22.588V1.412C0 .632.632 0 1.412 0h9.176a1.412 1.412 0 010 2.824H2.824v18.353h18.353v-7.765z"
+                          fill="#32324D"
+                        />
+                      </svg>
+                    </div>
+                  </a>
+                  <a
+                    aria-disabled="false"
+                    class="c24 c30"
+                    href="https://market.strapi.io/submit-plugin"
+                    rel="noreferrer noopener"
+                    target="_blank"
+                  >
+                    <span
+                      class="c26 c27"
+                    >
+                      Submit your plugin
                     </span>
                   </a>
                 </div>

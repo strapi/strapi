@@ -62,6 +62,14 @@ module.exports = ({ strapi }) => {
     // Add the extension's resolvers to the final schema
     const schemaWithResolvers = addResolversToSchema(schema, extension.resolvers);
 
+    // Create a configuration object for the artifacts generation
+    const outputs = {
+      schema: config('artifacts.schema', false),
+      typegen: config('artifacts.typegen', false),
+    };
+
+    const currentEnv = strapi.config.get('environment');
+
     const nexusSchema = makeSchema({
       // Build the schema from the merged GraphQL schema.
       // Since we're passing the schema to the mergeSchema property, it'll transform our SDL type definitions
@@ -70,6 +78,13 @@ module.exports = ({ strapi }) => {
 
       // Apply user-defined plugins
       plugins: extension.plugins,
+
+      // Whether to generate artifacts (GraphQL schema, TS types definitions) or not.
+      // By default, we generate artifacts only on development environment
+      shouldGenerateArtifacts: config('generateArtifacts', currentEnv === 'development'),
+
+      // Artifacts generation configuration
+      outputs,
     });
 
     // Wrap resolvers if needed (auth, middlewares, policies...) as configured in the extension
