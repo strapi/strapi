@@ -8,21 +8,15 @@ module.exports = async ({ strapi }) => {
 };
 
 const initPreviewContentType = async (pluginStore, strapi) => {
-  const contentTypesWithPreview = Object.values(strapi.contentTypes).reduce((acc, current) => {
-    acc[current.uid] = false;
+  const KEY = 'preview-content-types';
+
+  const storedEnabledContentTypes = (await pluginStore.get({ key: KEY })) || {};
+
+  const contentTypesWithPreview = Object.keys(strapi.contentTypes).reduce((acc, uid) => {
+    acc[uid] = storedEnabledContentTypes[uid] || false;
 
     return acc;
   }, {});
-
-  const KEY = 'preview-content-types';
-
-  const storedEnabledContentTypes = await pluginStore.get({ key: KEY });
-
-  if (storedEnabledContentTypes) {
-    Object.keys(contentTypesWithPreview).forEach(uid => {
-      contentTypesWithPreview[uid] = storedEnabledContentTypes[uid] || false;
-    });
-  }
 
   await pluginStore.set({ key: KEY, value: contentTypesWithPreview });
 };
