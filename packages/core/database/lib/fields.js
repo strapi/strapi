@@ -120,14 +120,14 @@ const parseTime = value => {
 };
 
 const parseDate = value => {
-  const found = _.isString(value) ? value.match(partialDateRegex) : [];
+  const found = _.isString(value) ? value.match(partialDateRegex) || [] : [];
   const extractedValue = found[0];
 
   if (extractedValue && !dateRegex.test(value)) {
     // TODO V5: throw an error when format yyyy-MM-dd is not respected
     // throw new InvalidDateError(`Invalid format, expected yyyy-MM-dd`);
     process.emitWarning(
-      `[deprecated] Using a date format other than yyyy-MM-dd will be deprecated. Use format yyyy-MM-dd instead. Value found: ${value}. Date kept: ${extractedValue}.`
+      `[deprecated] Using a date format other than YYYY-MM-DD will be removed in future versions. Date received: ${value}. Date stored: ${extractedValue}.`
     );
   }
 
