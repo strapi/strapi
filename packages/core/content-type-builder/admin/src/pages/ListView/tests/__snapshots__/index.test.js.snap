@@ -3390,7 +3390,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                             >
                               <svg
                                 aria-hidden="true"
-                                class="svg-inline--fa fa-adjust fa-w-16 c61 c62"
+                                class="svg-inline--fa fa-adjust c61 c62"
                                 data-icon="adjust"
                                 data-prefix="fas"
                                 focusable="false"
@@ -3442,7 +3442,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                             >
                               <svg
                                 aria-hidden="true"
-                                class="svg-inline--fa fa-address-book fa-w-14 c61 c62"
+                                class="svg-inline--fa fa-address-book c61 c62"
                                 data-icon="address-book"
                                 data-prefix="fas"
                                 focusable="false"
@@ -3494,7 +3494,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                             >
                               <svg
                                 aria-hidden="true"
-                                class="svg-inline--fa fa-calendar fa-w-14 c61 c62"
+                                class="svg-inline--fa fa-calendar c61 c62"
                                 data-icon="calendar"
                                 data-prefix="fas"
                                 focusable="false"
@@ -3546,7 +3546,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                             >
                               <svg
                                 aria-hidden="true"
-                                class="svg-inline--fa fa-cannabis fa-w-16 c61 c62"
+                                class="svg-inline--fa fa-cannabis c61 c62"
                                 data-icon="cannabis"
                                 data-prefix="fas"
                                 focusable="false"
