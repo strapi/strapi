@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/media-has-caption */
 import React, { forwardRef } from 'react';
 import PropTypes from 'prop-types';
 import FileIcon from '@strapi/icons/File';
@@ -30,7 +31,7 @@ export const AssetPreview = forwardRef(({ mime, url, name }, ref) => {
   if (mime.includes(AssetType.Audio)) {
     return (
       <audio controls src={url} ref={ref}>
-        <track label={name} default kind="captions" srcLang={lang} src="" />
+        {name}
       </audio>
     );
   }

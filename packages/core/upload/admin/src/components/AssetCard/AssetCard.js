@@ -72,20 +72,7 @@ export const AssetCard = ({
       handleSelect = undefined;
     }
 
-    return (
-      <AudioAssetCard
-        id={asset.id}
-        key={asset.id}
-        name={asset.name}
-        extension={getFileExtension(asset.ext)}
-        url={local ? asset.url : createAssetUrl(asset, true)}
-        mime={asset.mime}
-        onEdit={onEdit ? () => onEdit(asset) : undefined}
-        onSelect={handleSelect}
-        selected={isSelected}
-        size={size}
-      />
-    );
+    return <AudioAssetCard {...commonAssetCardProps} />;
   }
 
   const canSelectAsset =
