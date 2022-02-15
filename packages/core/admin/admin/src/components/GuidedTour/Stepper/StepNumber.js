@@ -18,7 +18,7 @@ const StepNumber = ({ type, number }) => {
         height={pxToRem(30)}
         justifyContent="center"
       >
-        <Icon as={Check} aria-hidden width="16px" color="neutral0" />
+        <Icon as={Check} aria-hidden width={pxToRem(16)} color="neutral0" />
       </Flex>
     );
   }

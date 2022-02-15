@@ -404,7 +404,7 @@ describe('GuidedTour Stepper', () => {
 
       .c4 {
         color: #ffffff;
-        width: 16px;
+        width: 1rem;
       }
 
       .c5 path {
@@ -455,7 +455,7 @@ describe('GuidedTour Stepper', () => {
                   fill="none"
                   height="1em"
                   viewBox="0 0 24 24"
-                  width="16px"
+                  width="1rem"
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
@@ -664,7 +664,7 @@ describe('GuidedTour Stepper', () => {
 
       .c4 {
         color: #ffffff;
-        width: 16px;
+        width: 1rem;
       }
 
       .c5 path {
@@ -701,7 +701,7 @@ describe('GuidedTour Stepper', () => {
                   fill="none"
                   height="1em"
                   viewBox="0 0 24 24"
-                  width="16px"
+                  width="1rem"
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
@@ -754,7 +754,7 @@ describe('GuidedTour Stepper', () => {
                   fill="none"
                   height="1em"
                   viewBox="0 0 24 24"
-                  width="16px"
+                  width="1rem"
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
@@ -807,7 +807,7 @@ describe('GuidedTour Stepper', () => {
                   fill="none"
                   height="1em"
                   viewBox="0 0 24 24"
-                  width="16px"
+                  width="1rem"
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
