@@ -65,6 +65,7 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
 
 .c5 {
   border-right: 1px solid #d9d8ff;
+  color: inherit;
   padding-right: 8px;
 }
 
