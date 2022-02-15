@@ -8,19 +8,19 @@ describe('hasContent', () => {
 
   it('returns false for empty text content', () => {
     const normalizedContent = hasContent('text', '');
-    expect(normalizedContent).toEqual(true);
+    expect(normalizedContent).toEqual(false);
   });
 
   it('returns false for undefined text content', () => {
     const normalizedContent = hasContent('text', undefined);
-    expect(normalizedContent).toEqual(true);
+    expect(normalizedContent).toEqual(false);
   });
 
   it('extracts content from single components with content', () => {
     const normalizedContent = hasContent(
       'component',
       { name: 'content' },
-      { mainField: { name: 'content', value: 'something' } }
+      { mainField: { name: 'name' } }
     );
     expect(normalizedContent).toEqual(true);
   });
@@ -28,8 +28,8 @@ describe('hasContent', () => {
   it('extracts content from single components without content', () => {
     const normalizedContent = hasContent(
       'component',
-      { name: 'content' },
-      { mainField: { name: 'content', value: '' } }
+      { name: '' },
+      { mainField: { name: 'name' } }
     );
     expect(normalizedContent).toEqual(false);
   });
