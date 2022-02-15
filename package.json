@@ -76,7 +76,7 @@
     "@testing-library/user-event": "13.5.0",
     "axios-mock-adapter": "1.20.0",
     "babel-eslint": "10.1.0",
-    "chalk": "4.1.1",
+    "chalk": "4.1.2",
     "chokidar": "3.5.3",
     "cross-env": "7.0.3",
     "dotenv": "14.2.0",
