@@ -2,7 +2,7 @@
 
 const { join } = require('path');
 
-const getDirs = root => ({
+const getDirs = (root, { strapi }) => ({
   root,
   src: join(root, 'src'),
   api: join(root, 'src', 'api'),
@@ -11,7 +11,13 @@ const getDirs = root => ({
   policies: join(root, 'src', 'policies'),
   middlewares: join(root, 'src', 'middlewares'),
   config: join(root, 'config'),
-  public: join(root, 'public'),
+  get public() {
+    // TODO V5: to be removed
+    process.emitWarning(
+      `[Deprecated] strapi.dirs.public will not exist in future versions. Prefere using strapi.config.get('server.public.path') instead.`
+    );
+    return strapi.config.get('server.public.path');
+  },
 });
 
 module.exports = getDirs;

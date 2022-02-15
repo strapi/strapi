@@ -1,6 +1,7 @@
 'use strict';
 
 const { getConfigUrls } = require('@strapi/utils');
+const fse = require('fs-extra');
 
 module.exports = function({ strapi }) {
   strapi.config.port = strapi.config.get('server.port') || strapi.config.port;
@@ -22,4 +23,7 @@ module.exports = function({ strapi }) {
   if (!shouldServeAdmin) {
     strapi.config.serveAdminPanel = false;
   }
+
+  // ensure public repository exists
+  fse.ensureDir(strapi.config.get('server.public.path'));
 };

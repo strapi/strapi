@@ -6,6 +6,7 @@ const fs = require('fs-extra');
 const chokidar = require('chokidar');
 const execa = require('execa');
 const { getOr } = require('lodash/fp');
+const urlJoin = require('url-join');
 
 const { createLogger } = require('@strapi/logger');
 const loadConfiguration = require('../core/app-configuration');
@@ -131,6 +132,8 @@ function watchFileChanges({ dir, strapiInstance, watchIgnoreFiles, polling }) {
       '**/index.html',
       '**/public',
       '**/public/**',
+      strapiInstance.config.get('server.public.path'),
+      urlJoin(strapiInstance.config.get('server.public.path'), '**'),
       '**/*.db*',
       '**/exports/**',
       ...watchIgnoreFiles,

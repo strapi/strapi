@@ -21,6 +21,7 @@ const defaultConfig = {
     proxy: false,
     cron: { enabled: false },
     admin: { autoOpen: false },
+    public: { path: './public' },
   },
   admin: {},
   api: {
@@ -55,5 +56,9 @@ module.exports = (dir, initialConfig = {}) => {
   const envDir = path.resolve(configDir, 'env', process.env.NODE_ENV);
   const envConfig = loadConfigDir(envDir);
 
-  return _.merge(rootConfig, defaultConfig, baseConfig, envConfig);
+  const config = _.merge(rootConfig, defaultConfig, baseConfig, envConfig);
+
+  config.server.public.path = path.resolve(dir, config.server.public.path);
+
+  return config;
 };

@@ -7,7 +7,10 @@
 // Public node modules.
 const fs = require('fs');
 const path = require('path');
+const fse = require('fs-extra');
 const { PayloadTooLargeError } = require('@strapi/utils').errors;
+
+const UPLOADS_FOLDER_NAME = 'uploads';
 
 module.exports = {
   init({ sizeLimit = 1000000 } = {}) {
@@ -17,7 +20,11 @@ module.exports = {
       }
     };
 
-    const publicDir = strapi.dirs.public;
+    const publicDir = strapi.config.get('server.public.path');
+
+    // Ensure uploads folder exists
+    const uploadPath = path.resolve(publicDir, UPLOADS_FOLDER_NAME);
+    fse.ensureDirSync(uploadPath);
 
     return {
       upload(file) {
@@ -25,19 +32,15 @@ module.exports = {
 
         return new Promise((resolve, reject) => {
           // write file in public/assets folder
-          fs.writeFile(
-            path.join(publicDir, `/uploads/${file.hash}${file.ext}`),
-            file.buffer,
-            err => {
-              if (err) {
-                return reject(err);
-              }
-
-              file.url = `/uploads/${file.hash}${file.ext}`;
-
-              resolve();
+          fs.writeFile(path.join(uploadPath, `${file.hash}${file.ext}`), file.buffer, err => {
+            if (err) {
+              return reject(err);
             }
-          );
+
+            file.url = `/${UPLOADS_FOLDER_NAME}/${file.hash}${file.ext}`;
+
+            resolve();
+          });
         });
       },
       delete(file) {

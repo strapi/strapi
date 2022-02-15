@@ -127,6 +127,7 @@
     "resolve-cwd": "3.0.0",
     "semver": "7.3.5",
     "statuses": "2.0.1",
+    "url-join": "4.0.1",
     "uuid": "^3.3.2"
   },
   "devDependencies": {
