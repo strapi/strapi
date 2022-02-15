@@ -10,6 +10,7 @@ import { Stack } from '@strapi/design-system/Stack';
 import { LinkButton } from '@strapi/design-system/LinkButton';
 import { Main } from '@strapi/design-system/Main';
 import { Typography } from '@strapi/design-system/Typography';
+import ExternalLink from '@strapi/icons/ExternalLink';
 import adminPermissions from '../../permissions';
 import MarketplacePicture from './assets/marketplace-coming-soon.png';
 
@@ -79,31 +80,30 @@ const MarketPlacePage = () => {
               </Typography>
               <Typography variant="alpha" textColor="primary700">
                 {formatMessage({
-                  id: 'admin.pages.MarketPlacePage.coming-soon.2',
-                  defaultMessage: 'A new way to make Strapi awesome.',
+                  id: 'admin.pages.MarketPlacePage.published',
+                  defaultMessage: 'Finally here.',
                 })}
               </Typography>
-              <Flex maxWidth={pxToRem(580)} paddingTop={3}>
+              <Flex maxWidth={pxToRem(620)} paddingTop={3}>
                 <CenterTypography variant="epsilon" textColor="neutral600">
                   {formatMessage({
-                    id: 'admin.pages.MarketPlacePage.content.subtitle',
+                    id: 'admin.pages.MarketPlacePage.content.subtitle.published',
                     defaultMessage:
-                      'The new marketplace will help you get more out of Strapi. We are working hard to offer the best experience to discover and install plugins.',
+                      'The web marketplace helps you get the most of Strapi. In addition, we are working hard to offer the best experience to discover and install plugins, directly from the app.',
                   })}
                 </CenterTypography>
               </Flex>
               <Stack paddingTop={6} horizontal size={2}>
-                {/* Temporarily hidden until we have the right URL for the link */}
-                {/* <LinkButton href="https://strapi.io/" size="L" variant="secondary">
+                <LinkButton href="https://market.strapi.io" size="L" variant="primary" endIcon={<ExternalLink />}>
+                  {formatMessage({
+                    id: 'admin.pages.MarketPlacePage.submit.market.link',
+                    defaultMessage: 'Visit the web marketplace',
+                  })}
+                </LinkButton>
+                <LinkButton href="https://market.strapi.io/submit-plugin" size="L" variant="secondary">
                   {formatMessage({
                     id: 'admin.pages.MarketPlacePage.submit.plugin.link',
                     defaultMessage: 'Submit your plugin',
-                  })}
-                </LinkButton> */}
-                <LinkButton href="https://strapi.io/blog/strapi-market-is-coming-soon" size="L">
-                  {formatMessage({
-                    id: 'admin.pages.MarketPlacePage.blog.link',
-                    defaultMessage: 'Read our blog post',
                   })}
                 </LinkButton>
               </Stack>
