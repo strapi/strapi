@@ -17,7 +17,7 @@ module.exports = plop => {
     ],
     actions(answers) {
       const filePath = getFilePath(answers.destination);
-      
+
       return [
         {
           type: 'add',
