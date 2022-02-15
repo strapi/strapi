@@ -31,10 +31,6 @@ const OpenPreviewButton = () => {
     return null;
   }
 
-  if (!data.contentSyncURL) {
-    return null;
-  }
-
   const handleClick = () => {
     const url = `${data.contentSyncURL}/gatsby-source-strapi/${uid}-${initialData.id}-${initialData.updatedAt}/${initialData.id}/`;
 
@@ -43,7 +39,7 @@ const OpenPreviewButton = () => {
 
   return (
     <Button
-      disabled={isCreatingEntry}
+      disabled={!data.contentSyncURL || isCreatingEntry}
       onClick={handleClick}
       startIcon={<Eye />}
       type="button"
