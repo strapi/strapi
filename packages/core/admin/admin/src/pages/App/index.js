@@ -19,7 +19,7 @@ import PrivateRoute from '../../components/PrivateRoute';
 import { createRoute, makeUniqueRoutes } from '../../utils';
 import AuthPage from '../AuthPage';
 import NotFoundPage from '../NotFoundPage';
-import UseCasePage from '../UsecasePage';
+import UseCasePage from '../UseCasePage';
 import { getUID } from './utils';
 import routes from './utils/routes';
 
