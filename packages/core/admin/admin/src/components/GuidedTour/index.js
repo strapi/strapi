@@ -1,4 +1,4 @@
-import React, { useCallback, useReducer } from 'react';
+import React, { useReducer } from 'react';
 import PropTypes from 'prop-types';
 import get from 'lodash/get';
 import { GuidedTourProvider } from '@strapi/helper-plugin';
@@ -15,27 +15,24 @@ const GuidedTour = ({ children }) => {
     init
   );
 
-  const setCurrentStep = useCallback(
-    step => {
-      // if step is null it is intentional, we need to dispatch it
-      if (step !== null) {
-        const isStepAlreadyDone = get(guidedTourState, step);
-        const isStepToShow = arePreviousStepsDone(step, guidedTourState);
+  const setCurrentStep = step => {
+    // if step is null it is intentional, we need to dispatch it
+    if (step !== null) {
+      const isStepAlreadyDone = get(guidedTourState, step);
+      const isStepToShow = arePreviousStepsDone(step, guidedTourState);
 
-        if (isStepAlreadyDone || isSkipped || !isStepToShow) {
-          return null;
-        }
+      if (isStepAlreadyDone || isSkipped || !isStepToShow) {
+        return null;
       }
+    }
 
-      persistStateToLocaleStorage.addCurrentStep(step);
+    persistStateToLocaleStorage.addCurrentStep(step);
 
-      return dispatch({
-        type: 'SET_CURRENT_STEP',
-        step,
-      });
-    },
-    [guidedTourState, isSkipped]
-  );
+    return dispatch({
+      type: 'SET_CURRENT_STEP',
+      step,
+    });
+  };
 
   const setGuidedTourVisibility = value => {
     dispatch({
@@ -54,24 +51,21 @@ const GuidedTour = ({ children }) => {
     });
   };
 
-  const startSection = useCallback(
-    sectionName => {
-      const sectionSteps = guidedTourState[sectionName];
+  const startSection = sectionName => {
+    const sectionSteps = guidedTourState[sectionName];
 
-      if (sectionSteps) {
-        const isSectionToShow = arePreviousSectionsDone(sectionName, guidedTourState);
-        const firstStep = Object.keys(sectionSteps)[0];
-        const isFirstStepDone = sectionSteps[firstStep];
+    if (sectionSteps) {
+      const isSectionToShow = arePreviousSectionsDone(sectionName, guidedTourState);
+      const firstStep = Object.keys(sectionSteps)[0];
+      const isFirstStepDone = sectionSteps[firstStep];
 
-        if (isSectionToShow && !currentStep && !isFirstStepDone) {
-          return setCurrentStep(`${sectionName}.${firstStep}`);
-        }
+      if (isSectionToShow && !currentStep && !isFirstStepDone) {
+        return setCurrentStep(`${sectionName}.${firstStep}`);
       }
+    }
 
-      return null;
-    },
-    [currentStep, guidedTourState, setCurrentStep]
-  );
+    return null;
+  };
 
   const setSkipped = value => {
     persistStateToLocaleStorage.setSkipped(value);
