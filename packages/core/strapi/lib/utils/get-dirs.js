@@ -14,7 +14,7 @@ const getDirs = (root, { strapi }) => ({
   get public() {
     // TODO V5: to be removed
     process.emitWarning(
-      `[Deprecated] strapi.dirs.public will be removed in a future version. Prefere using strapi.config.get('server.public.path') instead.`
+      `[Deprecated] strapi.dirs.public will be removed in a future version. Prefer using strapi.config.get('server.public.path') instead.`
     );
     return strapi.config.get('server.public.path');
   },
