@@ -1,38 +1,20 @@
 import React, { useEffect } from 'react';
 import { useIntl } from 'react-intl';
 import { useQuery } from 'react-query';
-import styled from 'styled-components';
 import { Helmet } from 'react-helmet';
 import {
-  pxToRem,
   CheckPagePermissions,
   useTracking,
   LoadingIndicatorPage,
   useNotification,
 } from '@strapi/helper-plugin';
 import { useNotifyAT } from '@strapi/design-system/LiveRegions';
-import { Layout, HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
-import { Flex } from '@strapi/design-system/Flex';
+import { GridLayout, Layout, HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
+
 import { Box } from '@strapi/design-system/Box';
-import { Stack } from '@strapi/design-system/Stack';
-import { LinkButton } from '@strapi/design-system/LinkButton';
 import { Main } from '@strapi/design-system/Main';
-import { Typography } from '@strapi/design-system/Typography';
 import { fetchPlugins } from './utils/api';
 import adminPermissions from '../../permissions';
-import MarketplacePicture from './assets/marketplace-coming-soon.png';
-
-const CenterTypography = styled(Typography)`
-  text-align: center;
-`;
-
-const Img = styled.img`
-  width: ${190 / 16}rem;
-`;
-
-const StackCentered = styled(Stack)`
-  align-items: center;
-`;
 
 const MarketPlacePage = () => {
   const { formatMessage } = useIntl();
@@ -57,14 +39,18 @@ const MarketPlacePage = () => {
     );
   };
 
-  const { status, data } = useQuery('list-plugins', () => fetchPlugins(notifyLoad), {
-    onError: () => {
-      toggleNotification({
-        type: 'warning',
-        message: { id: 'notification.error', defaultMessage: 'An error occured' },
-      });
-    },
-  });
+  const { status, data: pluginsResponse } = useQuery(
+    'list-plugins',
+    () => fetchPlugins(notifyLoad),
+    {
+      onError: () => {
+        toggleNotification({
+          type: 'warning',
+          message: { id: 'notification.error', defaultMessage: 'An error occured' },
+        });
+      },
+    }
+  );
 
   const isLoading = status !== 'success' && status !== 'error';
 
@@ -83,7 +69,7 @@ const MarketPlacePage = () => {
   }
 
   // TODO: Remove when using data, logging for now to avoid lint error
-  console.log('plugins', data);
+  console.log('plugins', pluginsResponse);
 
   return (
     <CheckPagePermissions permissions={adminPermissions.marketplace.main}>
@@ -106,60 +92,19 @@ const MarketPlacePage = () => {
             })}
           />
           <ContentLayout>
-            <StackCentered
-              size={0}
-              hasRadius
-              background="neutral0"
-              shadow="tableShadow"
-              paddingTop={10}
-              paddingBottom={10}
-            >
-              <Box paddingBottom={7}>
-                <Img
-                  alt={formatMessage({
-                    id: 'admin.pages.MarketPlacePage.illustration',
-                    defaultMessage: 'marketplace illustration',
-                  })}
-                  src={MarketplacePicture}
-                />
-              </Box>
-              <Typography variant="alpha">
-                {formatMessage({
-                  id: 'admin.pages.MarketPlacePage.coming-soon.1',
-                  defaultMessage: 'A new way to make Strapi awesome.',
-                })}
-              </Typography>
-              <Typography variant="alpha" textColor="primary700">
-                {formatMessage({
-                  id: 'admin.pages.MarketPlacePage.coming-soon.2',
-                  defaultMessage: 'A new way to make Strapi awesome.',
-                })}
-              </Typography>
-              <Flex maxWidth={pxToRem(580)} paddingTop={3}>
-                <CenterTypography variant="epsilon" textColor="neutral600">
-                  {formatMessage({
-                    id: 'admin.pages.MarketPlacePage.content.subtitle',
-                    defaultMessage:
-                      'The new marketplace will help you get more out of Strapi. We are working hard to offer the best experience to discover and install plugins.',
-                  })}
-                </CenterTypography>
-              </Flex>
-              <Stack paddingTop={6} horizontal size={2}>
-                {/* Temporarily hidden until we have the right URL for the link */}
-                {/* <LinkButton href="https://strapi.io/" size="L" variant="secondary">
-                  {formatMessage({
-                    id: 'admin.pages.MarketPlacePage.submit.plugin.link',
-                    defaultMessage: 'Submit your plugin',
-                  })}
-                </LinkButton> */}
-                <LinkButton href="https://strapi.io/blog/strapi-market-is-coming-soon" size="L">
-                  {formatMessage({
-                    id: 'admin.pages.MarketPlacePage.blog.link',
-                    defaultMessage: 'Read our blog post',
-                  })}
-                </LinkButton>
-              </Stack>
-            </StackCentered>
+            <GridLayout>
+              {pluginsResponse.data.map(plugin => (
+                <Box
+                  padding={4}
+                  hasRadius
+                  background="neutral0"
+                  key={plugin.id}
+                  shadow="tableShadow"
+                >
+                  {plugin.attributes.name}
+                </Box>
+              ))}
+            </GridLayout>
           </ContentLayout>
         </Main>
       </Layout>
