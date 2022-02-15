@@ -50,7 +50,7 @@ const LIFECYCLES = {
 class Strapi {
   constructor(opts = {}) {
     destroyOnSignal(this);
-    this.dirs = utils.getDirs(opts.dir || process.cwd(), { strapi: this });
+    this.dirs = utils.getDirs(opts.dir || process.cwd());
     const appConfig = loadConfiguration(this.dirs.root, opts);
     this.container = createContainer(this);
     this.container.register('config', createConfigProvider(appConfig));
