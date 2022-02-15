@@ -159,16 +159,6 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
 
       auth.setToken(token, false);
       auth.setUserInfo(user, false);
-      const { roles } = user;
-
-      if (roles) {
-        const isUserSuperAdmin = roles.find(({ code }) => code === 'strapi-super-admin');
-
-        if (isUserSuperAdmin) {
-          persistStateToLocaleStorage.setGuidedTourVisible(true);
-          setGuidedTourVisibility(true);
-        }
-      }
 
       if (
         (authType === 'register' && body.userInfo.news === true) ||
@@ -188,6 +178,18 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
       // Redirect to the homePage
       setSubmitting(false);
       setHasAdmin(true);
+
+      const { roles } = user;
+
+      if (roles) {
+        const isUserSuperAdmin = roles.find(({ code }) => code === 'strapi-super-admin');
+
+        if (isUserSuperAdmin) {
+          persistStateToLocaleStorage.setGuidedTourVisible(true);
+          setGuidedTourVisibility(true);
+        }
+      }
+
       push('/');
     } catch (err) {
       if (err.response) {
