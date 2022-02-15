@@ -4,7 +4,7 @@ import { IntlProvider } from 'react-intl';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import UsecasePage from '../index';
+import UseCasePage from '../index';
 
 jest.mock('../../../components/LocalesProvider/useLocalesProvider', () => () => ({
   changeLocale: () => {},
@@ -23,13 +23,13 @@ const App = (
   <IntlProvider messages={{}} textComponent="span" locale="en">
     <ThemeProvider theme={lightTheme}>
       <Router history={history}>
-        <UsecasePage />
+        <UseCasePage />
       </Router>
     </ThemeProvider>
   </IntlProvider>
 );
 
-describe('Admin | UsecasePage', () => {
+describe('Admin | UseCasePage', () => {
   it('renders and matches the snapshot', () => {
     history.location.state = {
       fromRegister: true,
@@ -752,7 +752,7 @@ describe('Admin | UsecasePage', () => {
             class="c9"
           >
             <main
-              aria-labelledby="main-content-title"
+              aria-labelledby="usecase-title"
               class="c10"
               id="main-content"
               tabindex="-1"
@@ -775,6 +775,7 @@ describe('Admin | UsecasePage', () => {
                     >
                       <h1
                         class="c17 c18"
+                        id="usecase-title"
                       >
                         Tell us a bit more about yourself
                       </h1>
@@ -854,8 +855,9 @@ describe('Admin | UsecasePage', () => {
                       </div>
                     </div>
                     <button
-                      aria-disabled="false"
+                      aria-disabled="true"
                       class="c32 c33"
+                      disabled=""
                       type="submit"
                     >
                       <span

@@ -65,7 +65,7 @@ const TypographyCenter = styled(Typography)`
   text-align: center;
 `;
 
-const UsecasePage = () => {
+const UseCasePage = () => {
   const toggleNotification = useNotification();
   const { push, location } = useHistory();
   const { formatMessage } = useIntl();
@@ -120,13 +120,13 @@ const UsecasePage = () => {
 
   return (
     <UnauthenticatedLayout>
-      <Main>
+      <Main labelledBy="usecase-title">
         <LayoutContent>
           <form onSubmit={() => handleSubmit(false)}>
             <Flex direction="column" paddingBottom={7}>
               <Logo />
               <Box paddingTop={6} paddingBottom={1} width={pxToRem(250)}>
-                <TypographyCenter variant="alpha" as="h1">
+                <TypographyCenter variant="alpha" as="h1" id="usecase-title">
                   {formatMessage({
                     id: 'Usecase.title',
                     defaultMessage: 'Tell us a bit more about yourself',
@@ -162,7 +162,7 @@ const UsecasePage = () => {
                   data-testid="other"
                 />
               )}
-              <Button type="submit" size="L" fullWidth>
+              <Button type="submit" size="L" fullWidth disabled={!role}>
                 {formatMessage({ id: 'form.button.finish', defaultMessage: 'Finish' })}
               </Button>
             </Stack>
@@ -183,4 +183,4 @@ const UsecasePage = () => {
   );
 };
 
-export default UsecasePage;
+export default UseCasePage;
