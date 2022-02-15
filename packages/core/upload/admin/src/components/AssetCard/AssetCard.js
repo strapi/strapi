@@ -8,11 +8,33 @@ import { AssetType, AssetDefinition } from '../../constants';
 import { createAssetUrl } from '../../utils/createAssetUrl';
 import toSingularTypes from '../../utils/toSingularTypes';
 
-export const AssetCard = ({ allowedTypes, asset, isSelected, onSelect, onEdit, size, local }) => {
+export const AssetCard = ({
+  allowedTypes,
+  asset,
+  isSelected,
+  onSelect,
+  onEdit,
+  onRemove,
+  size,
+  local,
+}) => {
   const singularTypes = toSingularTypes(allowedTypes);
 
   let handleSelect = onSelect ? () => onSelect(asset) : undefined;
   const fileType = asset.mime.split('/')[0];
+  const commonAssetCardProps = {
+    id: asset.id,
+    extension: getFileExtension(asset.ext),
+    key: asset.id,
+    name: asset.name,
+    url: local ? asset.url : createAssetUrl(asset, true),
+    mime: asset.mime,
+    onEdit: onEdit ? () => onEdit(asset) : undefined,
+    onSelect: handleSelect,
+    onRemove: onRemove ? () => onRemove(asset) : undefined,
+    selected: isSelected,
+    size,
+  };
 
   if (asset.mime.includes(AssetType.Video)) {
     const canSelectAsset = singularTypes.includes(fileType);
@@ -21,20 +43,7 @@ export const AssetCard = ({ allowedTypes, asset, isSelected, onSelect, onEdit, s
       handleSelect = undefined;
     }
 
-    return (
-      <VideoAssetCard
-        id={asset.id}
-        key={asset.id}
-        name={asset.name}
-        extension={getFileExtension(asset.ext)}
-        url={local ? asset.url : createAssetUrl(asset, true)}
-        mime={asset.mime}
-        onEdit={onEdit ? () => onEdit(asset) : undefined}
-        onSelect={handleSelect}
-        selected={isSelected}
-        size={size}
-      />
-    );
+    return <VideoAssetCard {...commonAssetCardProps} />;
   }
 
   if (asset.mime.includes(AssetType.Image)) {
@@ -46,18 +55,11 @@ export const AssetCard = ({ allowedTypes, asset, isSelected, onSelect, onEdit, s
 
     return (
       <ImageAssetCard
-        id={asset.id}
-        key={asset.id}
-        name={asset.name}
+        {...commonAssetCardProps}
         alt={asset.alternativeText || asset.name}
-        extension={getFileExtension(asset.ext)}
         height={asset.height}
-        width={asset.width}
         thumbnail={prefixFileUrlWithBackendUrl(asset?.formats?.thumbnail?.url || asset.url)}
-        onEdit={onEdit ? () => onEdit(asset) : undefined}
-        onSelect={handleSelect}
-        selected={isSelected}
-        size={size}
+        width={asset.width}
       />
     );
   }
@@ -68,18 +70,7 @@ export const AssetCard = ({ allowedTypes, asset, isSelected, onSelect, onEdit, s
     handleSelect = undefined;
   }
 
-  return (
-    <DocAssetCard
-      id={asset.id}
-      key={asset.id}
-      name={asset.name}
-      extension={getFileExtension(asset.ext)}
-      onEdit={onEdit ? () => onEdit(asset) : undefined}
-      onSelect={handleSelect}
-      selected={isSelected}
-      size={size}
-    />
-  );
+  return <DocAssetCard {...commonAssetCardProps} />;
 };
 
 AssetCard.defaultProps = {
@@ -89,6 +80,7 @@ AssetCard.defaultProps = {
   local: false,
   onSelect: undefined,
   onEdit: undefined,
+  onRemove: undefined,
   size: 'M',
 };
 
@@ -98,6 +90,7 @@ AssetCard.propTypes = {
   local: PropTypes.bool,
   onSelect: PropTypes.func,
   onEdit: PropTypes.func,
+  onRemove: PropTypes.func,
   isSelected: PropTypes.bool,
   size: PropTypes.oneOf(['S', 'M']),
 };
