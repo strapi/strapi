@@ -27,11 +27,11 @@ const Wrapper = styled(Box)`
 
   .description {
     margin-top: ${({ theme }) => theme.spaces[3]};
-    /* eslint-disable */
+    /* stylelint-disable value-no-vendor-prefix, property-no-vendor-prefix */
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
-    /* eslint-enable */
+    /* stylelint-enable value-no-vendor-prefix, property-no-vendor-prefix */
     overflow: hidden;
   }
 `;
