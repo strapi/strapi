@@ -9,19 +9,12 @@ import {
   useNotification,
 } from '@strapi/helper-plugin';
 import { useNotifyAT } from '@strapi/design-system/LiveRegions';
-import { Box } from '@strapi/design-system/Box';
+import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { Layout, HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
-import styled from 'styled-components';
 import { fetchPlugins } from './utils/api';
 import adminPermissions from '../../permissions';
 import PluginCard from './PluginCard';
-
-const GridLayout = styled(Box)`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-  grid-gap: ${({ theme }) => theme.spaces[4]};
-`;
 
 const MarketPlacePage = () => {
   const { formatMessage } = useIntl();
@@ -96,13 +89,13 @@ const MarketPlacePage = () => {
             })}
           />
           <ContentLayout>
-            <GridLayout>
-              {pluginsResponse.data
-                .filter(plugin => plugin.attributes.strapiCompatibility === 'v4')
-                .map(plugin => (
-                  <PluginCard plugin={plugin} key={plugin.id} />
-                ))}
-            </GridLayout>
+            <Grid gap={4}>
+              {pluginsResponse.data.map(plugin => (
+                <GridItem col={4} key={plugin.id}>
+                  <PluginCard plugin={plugin} />
+                </GridItem>
+              ))}
+            </Grid>
           </ContentLayout>
         </Main>
       </Layout>

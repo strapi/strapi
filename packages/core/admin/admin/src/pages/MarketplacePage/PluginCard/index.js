@@ -11,29 +11,21 @@ import { Flex } from '@strapi/design-system/Flex';
 import ExternalLink from '@strapi/icons/ExternalLink';
 import Duplicate from '@strapi/icons/Duplicate';
 
-const Wrapper = styled(Box)`
-  .logo {
-    display: block;
-    width: 64px;
-    height: 64px;
-    object-fit: contain;
-    border-radius: 6px;
-  }
+const PluginLogo = styled.img`
+  display: block;
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  border-radius: 6px;
+`;
 
-  .name {
-    display: block;
-    margin-top: ${({ theme }) => theme.spaces[5]};
-  }
-
-  .description {
-    margin-top: ${({ theme }) => theme.spaces[3]};
-    /* stylelint-disable value-no-vendor-prefix, property-no-vendor-prefix */
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-    /* stylelint-enable value-no-vendor-prefix, property-no-vendor-prefix */
-    overflow: hidden;
-  }
+const PluginDescription = styled.p`
+  /* stylelint-disable value-no-vendor-prefix, property-no-vendor-prefix */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  /* stylelint-enable value-no-vendor-prefix, property-no-vendor-prefix */
+  overflow: hidden;
 `;
 
 const PluginCard = ({ plugin }) => {
@@ -41,7 +33,16 @@ const PluginCard = ({ plugin }) => {
   const { formatMessage } = useIntl();
 
   return (
-    <Wrapper padding={5} hasRadius background="neutral0" key={id} shadow="tableShadow">
+    <Box
+      paddingLeft={6}
+      paddingRight={6}
+      paddingTop={4}
+      paddingBottom={4}
+      hasRadius
+      background="neutral0"
+      key={id}
+      shadow="tableShadow"
+    >
       <Flex
         justifyContent="space-between"
         direction="column"
@@ -49,13 +50,19 @@ const PluginCard = ({ plugin }) => {
         style={{ height: '100%' }}
       >
         <div style={{ width: '100%' }}>
-          <img className="logo" src={attributes.logo.url} alt={`${attributes.name} logo`} />
-          <Typography variant="delta" className="name">
-            {attributes.name}
-          </Typography>
-          <Typography variant="omega" className="description" textColor="neutral600">
-            {attributes.description}
-          </Typography>
+          <PluginLogo className="logo" src={attributes.logo.url} alt={`${attributes.name} logo`} />
+          <Box paddingTop={5}>
+            <Typography variant="delta" className="name">
+              {attributes.name}
+            </Typography>
+          </Box>
+          <Box paddingTop={3}>
+            <PluginDescription>
+              <Typography variant="omega" className="description" textColor="neutral600">
+                {attributes.description}
+              </Typography>
+            </PluginDescription>
+          </Box>
         </div>
         <Stack horizontal size={2} paddingTop={3}>
           <LinkButton
@@ -77,7 +84,7 @@ const PluginCard = ({ plugin }) => {
           </Button>
         </Stack>
       </Flex>
-    </Wrapper>
+    </Box>
   );
 };
 
