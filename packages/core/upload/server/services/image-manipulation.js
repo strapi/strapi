@@ -40,8 +40,8 @@ const THUMBNAIL_RESIZE_OPTIONS = {
   fit: 'inside',
 };
 
-const resizeFileTo = async (file, options, { name, hash }, { tmpFolderPath }) => {
-  const filePath = join(tmpFolderPath, hash);
+const resizeFileTo = async (file, options, { name, hash }) => {
+  const filePath = join(file.tmpWorkingDirectory, hash);
   await writeStreamToFile(file.getStream().pipe(sharp().resize(options)), filePath);
 
   const newFile = {
@@ -59,27 +59,22 @@ const resizeFileTo = async (file, options, { name, hash }, { tmpFolderPath }) =>
   return newFile;
 };
 
-const generateThumbnail = async (file, { tmpFolderPath }) => {
+const generateThumbnail = async file => {
   if (
     file.width > THUMBNAIL_RESIZE_OPTIONS.width ||
     file.height > THUMBNAIL_RESIZE_OPTIONS.height
   ) {
-    const newFile = await resizeFileTo(
-      file,
-      THUMBNAIL_RESIZE_OPTIONS,
-      {
-        name: `thumbnail_${file.name}`,
-        hash: `thumbnail_${file.hash}`,
-      },
-      { tmpFolderPath }
-    );
+    const newFile = await resizeFileTo(file, THUMBNAIL_RESIZE_OPTIONS, {
+      name: `thumbnail_${file.name}`,
+      hash: `thumbnail_${file.hash}`,
+    });
     return newFile;
   }
 
   return null;
 };
 
-const optimize = async (file, { tmpFolderPath }) => {
+const optimize = async file => {
   const { sizeOptimization = false, autoOrientation = false } = await getService(
     'upload'
   ).getSettings();
@@ -95,7 +90,7 @@ const optimize = async (file, { tmpFolderPath }) => {
       transformer.rotate();
     }
 
-    const filePath = join(tmpFolderPath, `optimized-${file.hash}`);
+    const filePath = join(file.tmpWorkingDirectory, `optimized-${file.hash}`);
     await writeStreamToFile(file.getStream().pipe(transformer), filePath);
     newFile.getStream = () => fs.createReadStream(filePath);
   }
@@ -122,7 +117,7 @@ const DEFAULT_BREAKPOINTS = {
 
 const getBreakpoints = () => strapi.config.get('plugin.upload.breakpoints', DEFAULT_BREAKPOINTS);
 
-const generateResponsiveFormats = async (file, { tmpFolderPath }) => {
+const generateResponsiveFormats = async file => {
   const { responsiveDimensions = false } = await getService('upload').getSettings();
 
   if (!responsiveDimensions) return [];
@@ -135,13 +130,13 @@ const generateResponsiveFormats = async (file, { tmpFolderPath }) => {
       const breakpoint = breakpoints[key];
 
       if (breakpointSmallerThan(breakpoint, originalDimensions)) {
-        return generateBreakpoint(key, { file, breakpoint, originalDimensions }, { tmpFolderPath });
+        return generateBreakpoint(key, { file, breakpoint, originalDimensions });
       }
     })
   );
 };
 
-const generateBreakpoint = async (key, { file, breakpoint }, { tmpFolderPath }) => {
+const generateBreakpoint = async (key, { file, breakpoint }) => {
   const newFile = await resizeFileTo(
     file,
     {
@@ -152,8 +147,7 @@ const generateBreakpoint = async (key, { file, breakpoint }, { tmpFolderPath }) 
     {
       name: `${key}_${file.name}`,
       hash: `${key}_${file.hash}`,
-    },
-    { tmpFolderPath }
+    }
   );
   return {
     key,

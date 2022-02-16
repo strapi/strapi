@@ -85,10 +85,14 @@ module.exports = ({ strapi }) => ({
       entity.path = metas.path;
     }
 
+    if (metas.tmpWorkingDirectory) {
+      entity.tmpWorkingDirectory = metas.tmpWorkingDirectory;
+    }
+
     return entity;
   },
 
-  async enhanceFile(file, fileInfo = {}, metas = {}, { tmpFolderPath }) {
+  async enhanceFile(file, fileInfo = {}, metas = {}) {
     const currentFile = this.formatFileInfo(
       {
         filename: file.name,
@@ -96,7 +100,10 @@ module.exports = ({ strapi }) => ({
         size: file.size,
       },
       fileInfo,
-      metas
+      {
+        ...metas,
+        tmpWorkingDirectory: file.tmpWorkingDirectory,
+      }
     );
     currentFile.getStream = () => fs.createReadStream(file.path);
 
@@ -106,12 +113,15 @@ module.exports = ({ strapi }) => ({
       return currentFile;
     }
 
-    return optimize(currentFile, { tmpFolderPath });
+    return optimize(currentFile);
   },
 
   async upload({ data, files }, { user } = {}) {
     // create temporary folder to store files for stream manipulation
-    const tmpFolderPath = await fse.mkdtemp(path.join(os.tmpdir(), 'strapi-upload-'));
+    const tmpWorkingDirectory = await fse.mkdtemp(path.join(os.tmpdir(), 'strapi-upload-'));
+    Array.isArray(files)
+      ? files.forEach(f => (f.tmpWorkingDirectory = tmpWorkingDirectory))
+      : (files.tmpWorkingDirectory = tmpWorkingDirectory);
     let uploadedFiles = [];
 
     try {
@@ -121,9 +131,9 @@ module.exports = ({ strapi }) => ({
       const fileInfoArray = Array.isArray(fileInfo) ? fileInfo : [fileInfo];
 
       const doUpload = async (file, fileInfo) => {
-        const fileData = await this.enhanceFile(file, fileInfo, metas, { tmpFolderPath });
+        const fileData = await this.enhanceFile(file, fileInfo, metas);
 
-        return this.uploadFileAndPersist(fileData, { user }, { tmpFolderPath });
+        return this.uploadFileAndPersist(fileData, { user });
       };
 
       uploadedFiles = await Promise.all(
@@ -131,13 +141,13 @@ module.exports = ({ strapi }) => ({
       );
     } finally {
       // delete temporary folder
-      await fse.remove(tmpFolderPath);
+      await fse.remove(tmpWorkingDirectory);
     }
 
     return uploadedFiles;
   },
 
-  async uploadFileAndPersist(fileData, { user } = {}, { tmpFolderPath }) {
+  async uploadFileAndPersist(fileData, { user } = {}) {
     const config = strapi.config.get('plugin.upload');
 
     const {
@@ -149,13 +159,13 @@ module.exports = ({ strapi }) => ({
     await getService('provider').upload(fileData);
 
     if (await isSupportedImage(fileData)) {
-      const thumbnailFile = await generateThumbnail(fileData, { tmpFolderPath });
+      const thumbnailFile = await generateThumbnail(fileData);
       if (thumbnailFile) {
         await getService('provider').upload(thumbnailFile);
         _.set(fileData, 'formats.thumbnail', thumbnailFile);
       }
 
-      const formats = await generateResponsiveFormats(fileData, { tmpFolderPath });
+      const formats = await generateResponsiveFormats(fileData);
       if (Array.isArray(formats) && formats.length > 0) {
         for (const format of formats) {
           if (!format) continue;
@@ -209,62 +219,72 @@ module.exports = ({ strapi }) => ({
       throw new NotFoundError();
     }
 
-    const { fileInfo } = data;
-    const fileData = await this.enhanceFile(file, fileInfo);
+    // create temporary folder to store files for stream manipulation
+    const tmpWorkingDirectory = await fse.mkdtemp(path.join(os.tmpdir(), 'strapi-upload-'));
+    file.tmpWorkingDirectory = tmpWorkingDirectory;
+    let fileData;
 
-    // keep a constant hash
-    _.assign(fileData, {
-      hash: dbFile.hash,
-      ext: dbFile.ext,
-    });
+    try {
+      const { fileInfo } = data;
+      fileData = await this.enhanceFile(file, fileInfo);
 
-    // execute delete function of the provider
-    if (dbFile.provider === config.provider) {
-      await strapi.plugin('upload').provider.delete(dbFile);
+      // keep a constant hash
+      _.assign(fileData, {
+        hash: dbFile.hash,
+        ext: dbFile.ext,
+      });
 
-      if (dbFile.formats) {
-        await Promise.all(
-          Object.keys(dbFile.formats).map(key => {
-            return strapi.plugin('upload').provider.delete(dbFile.formats[key]);
-          })
-        );
-      }
-    }
+      // execute delete function of the provider
+      if (dbFile.provider === config.provider) {
+        await strapi.plugin('upload').provider.delete(dbFile);
 
-    getService('provider').upload(fileData);
-
-    // clear old formats
-    _.set(fileData, 'formats', {});
-
-    const { isSupportedImage } = getService('image-manipulation');
-
-    if (await isSupportedImage(fileData)) {
-      const thumbnailFile = await generateThumbnail(fileData);
-      if (thumbnailFile) {
-        getService('provider').upload(thumbnailFile);
-        _.set(fileData, 'formats.thumbnail', thumbnailFile);
-      }
-
-      const formats = await generateResponsiveFormats(fileData);
-      if (Array.isArray(formats) && formats.length > 0) {
-        for (const format of formats) {
-          if (!format) continue;
-
-          const { key, file } = format;
-
-          getService('provider').upload(file);
-
-          _.set(fileData, ['formats', key], file);
+        if (dbFile.formats) {
+          await Promise.all(
+            Object.keys(dbFile.formats).map(key => {
+              return strapi.plugin('upload').provider.delete(dbFile.formats[key]);
+            })
+          );
         }
       }
 
-      const { width, height } = await getDimensions(fileData);
+      getService('provider').upload(fileData);
 
-      _.assign(fileData, {
-        provider: config.provider,
-        width,
-        height,
-      });
+      // clear old formats
+      _.set(fileData, 'formats', {});
+
+      const { isSupportedImage } = getService('image-manipulation');
+
+      if (await isSupportedImage(fileData)) {
+        const thumbnailFile = await generateThumbnail(fileData);
+        if (thumbnailFile) {
+          getService('provider').upload(thumbnailFile);
+          _.set(fileData, 'formats.thumbnail', thumbnailFile);
+        }
+
+        const formats = await generateResponsiveFormats(fileData);
+        if (Array.isArray(formats) && formats.length > 0) {
+          for (const format of formats) {
+            if (!format) continue;
+
+            const { key, file } = format;
+
+            getService('provider').upload(file);
+
+            _.set(fileData, ['formats', key], file);
+          }
+        }
+
+        const { width, height } = await getDimensions(fileData);
+
+        _.assign(fileData, {
+          provider: config.provider,
+          width,
+          height,
+        });
+      }
+    } finally {
+      // delete temporary folder
+      await fse.remove(tmpWorkingDirectory);
     }
 
     return this.update(id, fileData, { user });

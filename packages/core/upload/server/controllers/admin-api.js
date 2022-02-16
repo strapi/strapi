@@ -1,6 +1,5 @@
 'use strict';
 
-const fse = require('fs-extra');
 const _ = require('lodash');
 const { contentTypes: contentTypesUtils } = require('@strapi/utils');
 const { ApplicationError, NotFoundError, ForbiddenError } = require('@strapi/utils').errors;
@@ -174,23 +173,15 @@ module.exports = {
       request: { files: { files } = {} },
     } = ctx;
 
-    try {
-      if (id && (_.isEmpty(files) || files.size === 0)) {
-        return this.updateFileInfo(ctx);
-      }
-
-      if (_.isEmpty(files) || files.size === 0) {
-        throw new ApplicationError('Files are empty');
-      }
-
-      await (id ? this.replaceFile : this.uploadFiles)(ctx);
-    } finally {
-      if (Array.isArray(files)) {
-        await Promise.all(files.map(file => fse.remove(file.path)));
-      } else if (files && files.path) {
-        await fse.remove(files.path);
-      }
+    if (id && (_.isEmpty(files) || files.size === 0)) {
+      return this.updateFileInfo(ctx);
     }
+
+    if (_.isEmpty(files) || files.size === 0) {
+      throw new ApplicationError('Files are empty');
+    }
+
+    await (id ? this.replaceFile : this.uploadFiles)(ctx);
   },
 };
 
