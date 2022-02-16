@@ -6,6 +6,8 @@
 
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
+import parseISO from 'date-fns/parseISO';
+import formatISO from 'date-fns/formatISO';
 import { useIntl } from 'react-intl';
 import { Checkbox } from '@strapi/design-system/Checkbox';
 import { DatePicker } from '@strapi/design-system/DatePicker';
@@ -147,7 +149,7 @@ const GenericInput = ({
             onChange({ target: { name, value: formattedDate, type } });
           }}
           step={step}
-          onClear={() => onChange({ target: { name, value: '', type } })}
+          onClear={() => onChange({ target: { name, value: null, type } })}
           placeholder={formattedPlaceholder}
           required={required}
           value={value ? new Date(value) : null}
@@ -156,6 +158,12 @@ const GenericInput = ({
       );
     }
     case 'date': {
+      let selectedDate = null;
+
+      if (value) {
+        selectedDate = parseISO(value);
+      }
+
       return (
         <DatePicker
           clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
@@ -167,14 +175,14 @@ const GenericInput = ({
           hint={hint}
           name={name}
           onChange={date => {
-            const formattedDate = date.toISOString();
-
-            onChange({ target: { name, value: formattedDate, type } });
+            onChange({
+              target: { name, value: formatISO(date, { representation: 'date' }), type },
+            });
           }}
-          onClear={() => onChange({ target: { name, value: '', type } })}
+          onClear={() => onChange({ target: { name, value: null, type } })}
           placeholder={formattedPlaceholder}
           required={required}
-          selectedDate={value ? new Date(value) : null}
+          selectedDate={selectedDate}
           selectedDateLabel={formattedDate => `Date picker, current is ${formattedDate}`}
         />
       );

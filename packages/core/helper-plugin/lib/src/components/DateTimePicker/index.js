@@ -96,11 +96,15 @@ const DateTimePicker = ({
   const handleTimeClear = () => {
     setTimeValue(undefined);
 
-    if (dateValue && onChange) {
-      const dateToSet = new Date(dateValue);
+    let dateToSet;
+
+    if (dateValue) {
+      dateToSet = new Date(dateValue);
       dateToSet.setHours('00');
       dateToSet.setMinutes('00');
+    }
 
+    if (onChange) {
       onChange(dateToSet);
     }
   };

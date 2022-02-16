@@ -78,6 +78,11 @@ export const UploadAssetDialog = ({
     }
   };
 
+  const handleRemoveAsset = assetToRemove => {
+    const nextAssets = assets.filter(asset => asset !== assetToRemove);
+    setAssets(nextAssets);
+  };
+
   return (
     <ModalLayout onClose={handleClose} labelledBy="title">
       {step === Steps.AddAsset && (
@@ -93,6 +98,7 @@ export const UploadAssetDialog = ({
           onClose={handleClose}
           assets={assets}
           onEditAsset={setAssetToEdit}
+          onRemoveAsset={handleRemoveAsset}
           onClickAddAsset={moveToAddAsset}
           onCancelUpload={handleCancelUpload}
           onUploadSucceed={handleUploadSuccess}

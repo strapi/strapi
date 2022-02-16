@@ -23,6 +23,7 @@ export const PendingAssetStep = ({
   addUploadedFiles,
   onClose,
   onEditAsset,
+  onRemoveAsset,
   assets,
   onClickAddAsset,
   onCancelUpload,
@@ -126,6 +127,7 @@ export const PendingAssetStep = ({
                       local
                       alt={asset.name}
                       onEdit={onEditAsset}
+                      onRemove={onRemoveAsset}
                     />
                   </GridItem>
                 );
@@ -167,6 +169,7 @@ PendingAssetStep.propTypes = {
   assets: PropTypes.arrayOf(AssetDefinition).isRequired,
   onClose: PropTypes.func.isRequired,
   onEditAsset: PropTypes.func.isRequired,
+  onRemoveAsset: PropTypes.func.isRequired,
   onClickAddAsset: PropTypes.func.isRequired,
   onUploadSucceed: PropTypes.func.isRequired,
   onCancelUpload: PropTypes.func.isRequired,

@@ -486,6 +486,7 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
 
 .c18 {
   grid-column: span 4;
+  max-width: 100%;
 }
 
 .c27 {
