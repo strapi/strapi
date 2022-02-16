@@ -20,7 +20,7 @@ module.exports = {
       }
     };
 
-    const publicDir = strapi.config.get('server.public.path');
+    const publicDir = strapi.config.get('server.dirs.public');
 
     // Ensure uploads folder exists
     const uploadPath = path.resolve(publicDir, UPLOADS_FOLDER_NAME);
