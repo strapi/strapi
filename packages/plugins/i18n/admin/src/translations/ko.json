@@ -19,8 +19,6 @@
   "Settings.locales.list.sort.default": "Sort by the default locale",
   "Settings.locales.list.sort.displayName": "Sort by display name",
   "Settings.locales.list.sort.id": "Sort by ID",
-  "Settings.locales.list.title.plural": "{number} 로케일",
-  "Settings.locales.list.title.singular": "{number} 로케일",
   "Settings.locales.modal.advanced": "고급 설정",
   "Settings.locales.modal.advanced.setAsDefault": "기본 로케일로 설정",
   "Settings.locales.modal.advanced.setAsDefault.hint": "하나의 기본 로케일은 필수입니다.",

@@ -123,12 +123,6 @@
   "form.button.select-component": "Vybrať komponent",
   "form.button.single-type.description": "Ideálne pre jednorazové inštancie ako sú napríklad domovská stránka, atď.",
   "from": "od",
-  "menu.section.components.name.plural": "Komponenty",
-  "menu.section.components.name.singular": "Komponent",
-  "menu.section.models.name.plural": "Typy obsahu",
-  "menu.section.models.name.singular": "Typ obsahu",
-  "menu.section.single-types.name.plural": "Jednorazové Typy",
-  "menu.section.single-types.name.singular": "Jednorazový Typ",
   "modalForm.attribute.form.base.name": "Meno",
   "modalForm.attribute.form.base.name.description": "Medzery nie sú povolené v názve políčka",
   "modalForm.attribute.form.base.name.placeholder": "napr. slug, SEO URL, kanonická URL",
@@ -174,7 +168,5 @@
   "relation.manyWay": "má viacero",
   "relation.oneToMany": "patrí viacerým",
   "relation.oneToOne": "má jeden a patrí jednému",
-  "relation.oneWay": "má jeden",
-  "table.attributes.title.plural": "Políčka: {number}",
-  "table.attributes.title.singular": "Políčka: {number}"
+  "relation.oneWay": "má jeden"
 }
