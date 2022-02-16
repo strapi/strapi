@@ -15,6 +15,12 @@ jest.mock('../../../components/LocalesProvider/useLocalesProvider', () => () => 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useNotification: jest.fn(),
+  auth: {
+    getUserInfo: jest.fn(() => ({
+      firstname: 'Michka',
+      email: 'michka@ronronscelestes.com',
+    })),
+  },
 }));
 
 const history = createMemoryHistory();
@@ -31,9 +37,6 @@ const App = (
 
 describe('Admin | UseCasePage', () => {
   it('renders and matches the snapshot', () => {
-    history.location.state = {
-      fromRegister: true,
-    };
     const { container: firstChild } = render(App);
 
     expect(firstChild).toMatchInlineSnapshot(`
@@ -917,18 +920,7 @@ describe('Admin | UseCasePage', () => {
     `);
   });
 
-  it('should not show Usecase if no fromRegister location state', () => {
-    history.location.state = undefined;
-    const { queryByText } = render(App);
-
-    expect(queryByText('Tell us a bit more about yourself')).not.toBeInTheDocument();
-  });
-
   it('should not show Other input if select value is not Other', async () => {
-    history.location.state = {
-      fromRegister: true,
-    };
-
     const { container, queryByTestId } = render(App);
 
     const selectInput = screen.getByTestId('usecase');
@@ -942,10 +934,6 @@ describe('Admin | UseCasePage', () => {
   });
 
   it('should show Other input if select value is Other', async () => {
-    history.location.state = {
-      fromRegister: true,
-    };
-
     const { container, queryByTestId } = render(App);
 
     const selectInput = screen.getByTestId('usecase');
