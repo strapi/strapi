@@ -5,6 +5,7 @@ const getDialectClass = client => {
     case 'postgres':
       return require('./postgresql');
     case 'mysql':
+    case 'mysql2':
       return require('./mysql');
     case 'sqlite':
       return require('./sqlite');
