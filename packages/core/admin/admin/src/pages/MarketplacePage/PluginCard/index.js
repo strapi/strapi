@@ -27,9 +27,11 @@ const Wrapper = styled(Box)`
 
   .description {
     margin-top: ${({ theme }) => theme.spaces[3]};
+    /* eslint-disable */
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
+    /* eslint-enable */
     overflow: hidden;
   }
 `;
