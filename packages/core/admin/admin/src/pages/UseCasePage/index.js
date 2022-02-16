@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
 import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
-import { pxToRem, useNotification, LoadingIndicatorPage } from '@strapi/helper-plugin';
+import { parse } from 'qs';
+import { pxToRem, useNotification, auth } from '@strapi/helper-plugin';
 import { Main } from '@strapi/design-system/Main';
 import { Flex } from '@strapi/design-system/Flex';
 import { Box } from '@strapi/design-system/Box';
@@ -71,29 +72,19 @@ const UseCasePage = () => {
   const { formatMessage } = useIntl();
   const [role, setRole] = useState();
   const [otherRole, setOtherRole] = useState('');
-
+  const { firstname, email } = auth.getUserInfo();
+  const { hasAdmin } = parse(location?.search, { ignoreQueryPrefix: true });
   const isOther = role === 'other';
-  const isComingFromRegister = location.state?.fromRegister;
-
-  useEffect(() => {
-    if (!isComingFromRegister) {
-      push('/');
-    }
-  }, [isComingFromRegister, push]);
 
   const handleSubmit = skipPersona => {
     try {
-      const {
-        state: { email, firstAdmin, firstname },
-      } = location;
-
       axios({
         method: 'POST',
         url: 'https://analytics.strapi.io/register',
         data: {
           email,
           username: firstname,
-          firstAdmin,
+          firstAdmin: Boolean(hasAdmin),
           persona: {
             role: skipPersona ? undefined : role,
             otherRole: skipPersona ? undefined : otherRole,
@@ -113,10 +104,6 @@ const UseCasePage = () => {
       // Silent
     }
   };
-
-  if (!isComingFromRegister) {
-    return <LoadingIndicatorPage />;
-  }
 
   return (
     <UnauthenticatedLayout>

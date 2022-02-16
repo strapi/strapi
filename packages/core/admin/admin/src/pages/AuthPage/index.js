@@ -167,12 +167,7 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
       ) {
         push({
           pathname: '/usecase',
-          state: {
-            fromRegister: true,
-            email: user.email,
-            firstname: user.firstname,
-            firstAdmin: !hasAdmin,
-          },
+          search: `?hasAdmin=${hasAdmin}`,
         });
 
         return;
