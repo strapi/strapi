@@ -44,6 +44,11 @@ export const UploadingAssetCard = ({ asset, onCancel, onStatusChange, addUploade
       id: getTrad('settings.section.video.label'),
       defaultMessage: 'Video',
     });
+  } else if (asset.type === AssetType.Audio) {
+    badgeContent = formatMessage({
+      id: getTrad('settings.section.audio.label'),
+      defaultMessage: 'Audio',
+    });
   } else {
     badgeContent = formatMessage({
       id: getTrad('settings.section.doc.label'),

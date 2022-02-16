@@ -24,7 +24,7 @@ export const MediaLibraryInput = ({
   value,
   required,
 }) => {
-  const fieldAllowedTypes = allowedTypes || ['files', 'images', 'videos'];
+  const fieldAllowedTypes = allowedTypes || ['files', 'images', 'videos', 'audios'];
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [step, setStep] = useState(undefined);
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -180,7 +180,7 @@ export const MediaLibraryInput = ({
 };
 
 MediaLibraryInput.defaultProps = {
-  attribute: { allowedTypes: ['videos', 'files', 'images'] },
+  attribute: { allowedTypes: ['videos', 'files', 'images', 'audios'] },
   disabled: false,
   description: undefined,
   error: undefined,

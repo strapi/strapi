@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import {
@@ -12,34 +12,32 @@ import {
   CardHeader,
   CardTitle,
   CardSubtitle,
-  CardTimer,
 } from '@strapi/design-system/Card';
 import { IconButton } from '@strapi/design-system/IconButton';
 import Pencil from '@strapi/icons/Pencil';
 import Trash from '@strapi/icons/Trash';
 import { useIntl } from 'react-intl';
 import { Box } from '@strapi/design-system/Box';
-import { VideoPreview } from './VideoPreview';
-import { getTrad, formatDuration } from '../../utils';
+import { AudioPreview } from './AudioPreview';
+import { getTrad } from '../../utils';
 
 const Extension = styled.span`
   text-transform: uppercase;
 `;
 
-const VideoPreviewWrapper = styled(Box)`
+const AudioPreviewWrapper = styled(Box)`
   canvas,
-  video {
+  audio {
     display: block;
     max-width: 100%;
     max-height: ${({ size }) => (size === 'M' ? 164 / 16 : 88 / 16)}rem;
   }
 `;
 
-export const VideoAssetCard = ({
+export const AudioAssetCard = ({
   name,
   extension,
   url,
-  mime,
   selected,
   onSelect,
   onEdit,
@@ -47,12 +45,15 @@ export const VideoAssetCard = ({
   size,
 }) => {
   const { formatMessage } = useIntl();
-  const [duration, setDuration] = useState();
-  const formattedDuration = duration ? formatDuration(duration) : undefined;
 
   return (
     <Card>
       <CardHeader>
+        <CardAsset size={size}>
+          <AudioPreviewWrapper size={size}>
+            <AudioPreview url={url} alt={name} />
+          </AudioPreviewWrapper>
+        </CardAsset>
         {onSelect && <CardCheckbox value={selected} onValueChange={onSelect} />}
         {(onRemove || onEdit) && (
           <CardAction position="end">
@@ -76,12 +77,6 @@ export const VideoAssetCard = ({
             )}
           </CardAction>
         )}
-        <CardAsset size={size}>
-          <VideoPreviewWrapper size={size}>
-            <VideoPreview url={url} mime={mime} onLoadDuration={setDuration} alt={name} />
-          </VideoPreviewWrapper>
-        </CardAsset>
-        <CardTimer>{formattedDuration || '...'}</CardTimer>
       </CardHeader>
       <CardBody>
         <CardContent>
@@ -93,14 +88,14 @@ export const VideoAssetCard = ({
           </CardSubtitle>
         </CardContent>
         <CardBadge>
-          {formatMessage({ id: getTrad('settings.section.video.label'), defaultMessage: 'Video' })}
+          {formatMessage({ id: getTrad('settings.section.audio.label'), defaultMessage: 'Audio' })}
         </CardBadge>
       </CardBody>
     </Card>
   );
 };
 
-VideoAssetCard.defaultProps = {
+AudioAssetCard.defaultProps = {
   onSelect: undefined,
   onEdit: undefined,
   onRemove: undefined,
@@ -108,9 +103,8 @@ VideoAssetCard.defaultProps = {
   size: 'M',
 };
 
-VideoAssetCard.propTypes = {
+AudioAssetCard.propTypes = {
   extension: PropTypes.string.isRequired,
-  mime: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
   onSelect: PropTypes.func,
   onEdit: PropTypes.func,
