@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
+import { useIntl } from 'react-intl';
 import { Box } from '@strapi/design-system/Box';
 import { Stack } from '@strapi/design-system/Stack';
 import { Typography } from '@strapi/design-system/Typography';
@@ -35,6 +36,7 @@ const Wrapper = styled(Box)`
 
 const PluginCard = ({ plugin }) => {
   const { id, attributes } = plugin;
+  const { formatMessage } = useIntl();
 
   return (
     <Wrapper padding={5} hasRadius background="neutral0" key={id} shadow="tableShadow">
@@ -60,10 +62,16 @@ const PluginCard = ({ plugin }) => {
             endIcon={<ExternalLink />}
             variant="tertiary"
           >
-            Learn more
+            {formatMessage({
+              id: 'admin.pages.MarketPlacePage.plugin.info',
+              defaultMessage: 'Learn more',
+            })}
           </LinkButton>
           <Button size="S" endIcon={<Duplicate />} variant="secondary">
-            Copy install command
+            {formatMessage({
+              id: 'admin.pages.MarketPlacePage.plugin.copy',
+              defaultMessage: 'Copy install command',
+            })}
           </Button>
         </Stack>
       </Flex>
