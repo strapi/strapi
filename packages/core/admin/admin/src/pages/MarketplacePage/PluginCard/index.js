@@ -42,6 +42,7 @@ const PluginCard = ({ plugin }) => {
       background="neutral0"
       key={id}
       shadow="tableShadow"
+      style={{ height: '100%' }}
     >
       <Flex
         justifyContent="space-between"
