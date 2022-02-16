@@ -4,6 +4,7 @@ const sqlClientModule = {
   mysql: { mysql: '2.18.1' },
   postgres: { pg: '8.6.0' },
   sqlite: { '@vscode/sqlite3': '5.0.7' },
+  'better-sqlite3': { 'better-sqlite3': '7.5.0' },
 };
 
 /**
@@ -12,6 +13,7 @@ const sqlClientModule = {
 module.exports = ({ client }) => {
   switch (client) {
     case 'sqlite':
+    case 'better-sqlite3':
     case 'postgres':
     case 'mysql':
       return {
