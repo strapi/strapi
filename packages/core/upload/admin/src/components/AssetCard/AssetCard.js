@@ -20,9 +20,12 @@ export const AssetCard = ({
   local,
 }) => {
   const singularTypes = toSingularTypes(allowedTypes);
-
-  let handleSelect = onSelect ? () => onSelect(asset) : undefined;
   const fileType = asset.mime.split('/')[0];
+  const handleSelect = onSelect ? () => onSelect(asset) : undefined;
+  const canSelectAsset =
+    singularTypes.includes(fileType) ||
+    (singularTypes.includes('file') && !['video', 'image', 'audio'].includes(fileType));
+
   const commonAssetCardProps = {
     id: asset.id,
     extension: getFileExtension(asset.ext),
@@ -31,29 +34,17 @@ export const AssetCard = ({
     url: local ? asset.url : createAssetUrl(asset, true),
     mime: asset.mime,
     onEdit: onEdit ? () => onEdit(asset) : undefined,
-    onSelect: handleSelect,
+    onSelect: !canSelectAsset && !isSelected ? undefined : handleSelect,
     onRemove: onRemove ? () => onRemove(asset) : undefined,
     selected: isSelected,
     size,
   };
 
   if (asset.mime.includes(AssetType.Video)) {
-    const canSelectAsset = singularTypes.includes(fileType);
-
-    if (!canSelectAsset && !isSelected) {
-      handleSelect = undefined;
-    }
-
     return <VideoAssetCard {...commonAssetCardProps} />;
   }
 
   if (asset.mime.includes(AssetType.Image)) {
-    const canSelectAsset = singularTypes.includes(fileType);
-
-    if (!canSelectAsset && !isSelected) {
-      handleSelect = undefined;
-    }
-
     return (
       <ImageAssetCard
         {...commonAssetCardProps}
@@ -66,20 +57,7 @@ export const AssetCard = ({
   }
 
   if (asset.mime.includes(AssetType.Audio)) {
-    const canSelectAsset = singularTypes.includes(fileType);
-
-    if (!canSelectAsset && !isSelected) {
-      handleSelect = undefined;
-    }
-
     return <AudioAssetCard {...commonAssetCardProps} />;
-  }
-
-  const canSelectAsset =
-    singularTypes.includes('file') && !['video', 'image', 'audio'].includes(fileType);
-
-  if (!canSelectAsset && !isSelected) {
-    handleSelect = undefined;
   }
 
   return <DocAssetCard {...commonAssetCardProps} />;

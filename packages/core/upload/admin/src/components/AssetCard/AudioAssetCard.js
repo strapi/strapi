@@ -15,6 +15,7 @@ import {
 } from '@strapi/design-system/Card';
 import { IconButton } from '@strapi/design-system/IconButton';
 import Pencil from '@strapi/icons/Pencil';
+import Trash from '@strapi/icons/Trash';
 import { useIntl } from 'react-intl';
 import { Box } from '@strapi/design-system/Box';
 import { AudioPreview } from './AudioPreview';
@@ -33,7 +34,16 @@ const AudioPreviewWrapper = styled(Box)`
   }
 `;
 
-export const AudioAssetCard = ({ name, extension, url, selected, onSelect, onEdit, size }) => {
+export const AudioAssetCard = ({
+  name,
+  extension,
+  url,
+  selected,
+  onSelect,
+  onEdit,
+  onRemove,
+  size,
+}) => {
   const { formatMessage } = useIntl();
 
   return (
@@ -45,13 +55,26 @@ export const AudioAssetCard = ({ name, extension, url, selected, onSelect, onEdi
           </AudioPreviewWrapper>
         </CardAsset>
         {onSelect && <CardCheckbox value={selected} onValueChange={onSelect} />}
-        {onEdit && (
+        {(onRemove || onEdit) && (
           <CardAction position="end">
-            <IconButton
-              label={formatMessage({ id: getTrad('control-card.edit'), defaultMessage: 'Edit' })}
-              icon={<Pencil />}
-              onClick={onEdit}
-            />
+            {onRemove && (
+              <IconButton
+                label={formatMessage({
+                  id: getTrad('control-card.remove-selection'),
+                  defaultMessage: 'Remove from selection',
+                })}
+                icon={<Trash />}
+                onClick={onRemove}
+              />
+            )}
+
+            {onEdit && (
+              <IconButton
+                label={formatMessage({ id: getTrad('control-card.edit'), defaultMessage: 'Edit' })}
+                icon={<Pencil />}
+                onClick={onEdit}
+              />
+            )}
           </CardAction>
         )}
       </CardHeader>
@@ -75,6 +98,7 @@ export const AudioAssetCard = ({ name, extension, url, selected, onSelect, onEdi
 AudioAssetCard.defaultProps = {
   onSelect: undefined,
   onEdit: undefined,
+  onRemove: undefined,
   selected: false,
   size: 'M',
 };
@@ -84,6 +108,7 @@ AudioAssetCard.propTypes = {
   name: PropTypes.string.isRequired,
   onSelect: PropTypes.func,
   onEdit: PropTypes.func,
+  onRemove: PropTypes.func,
   url: PropTypes.string.isRequired,
   selected: PropTypes.bool,
   size: PropTypes.oneOf(['S', 'M']),
