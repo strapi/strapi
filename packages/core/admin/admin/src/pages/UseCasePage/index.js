@@ -129,8 +129,8 @@ const UseCasePage = () => {
                   id: 'Usecase.input.work-type',
                   defaultMessage: 'What type of work do you do?',
                 })}
-                onClear={() => setRole(null)}
-                clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
+                // onClear={() => setRole(null)}
+                // clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
                 onChange={setRole}
                 value={role}
               >
