@@ -84,7 +84,7 @@ const UseCasePage = () => {
         data: {
           email,
           username: firstname,
-          firstAdmin: Boolean(hasAdmin),
+          firstAdmin: Boolean(!hasAdmin),
           persona: {
             role: skipPersona ? undefined : role,
             otherRole: skipPersona ? undefined : otherRole,
