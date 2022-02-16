@@ -42,7 +42,7 @@ module.exports = ({ strapi }) => {
    * @param {object} metas
    * @return {Promise<object>}
    */
-  const formatFile = async (upload, extraInfo, metas, { tmpFolderPath }) => {
+  const formatFile = async (upload, extraInfo, metas) => {
     const uploadService = getUploadService('upload');
     const { filename, mimetype, createReadStream } = await upload;
 
@@ -57,7 +57,7 @@ module.exports = ({ strapi }) => {
     );
     currentFile.getStream = createReadStream;
 
-    const newFile = await optimize(currentFile, { tmpFolderPath });
+    const newFile = await optimize(currentFile);
     return newFile;
   };
 
@@ -98,25 +98,21 @@ module.exports = ({ strapi }) => {
 
           async resolve(parent, args) {
             // create temporary folder to store files for stream manipulation
-            const tmpFolderPath = await fse.mkdtemp(path.join(os.tmpdir(), 'strapi-upload-'));
+            const tmpWorkingDirectory = await fse.mkdtemp(path.join(os.tmpdir(), 'strapi-upload-'));
             let sanitizedEntity;
 
             try {
-              const { file: upload, info, ...fields } = args;
+              const { file: upload, info, ...metas } = args;
 
-              const file = await formatFile(upload, info, fields, { tmpFolderPath });
-              const uploadedFile = await getUploadService('upload').uploadFileAndPersist(
-                file,
-                {},
-                { tmpFolderPath }
-              );
+              const file = await formatFile(upload, info, { ...metas, tmpWorkingDirectory });
+              const uploadedFile = await getUploadService('upload').uploadFileAndPersist(file, {});
               sanitizedEntity = await toEntityResponse(uploadedFile, {
                 args,
                 resourceUID: fileTypeName,
               });
             } finally {
               // delete temporary folder
-              await fse.remove(tmpFolderPath);
+              await fse.remove(tmpWorkingDirectory);
             }
 
             return sanitizedEntity;
@@ -138,20 +134,20 @@ module.exports = ({ strapi }) => {
 
           async resolve(parent, args) {
             // create temporary folder to store files for stream manipulation
-            const tmpFolderPath = await fse.mkdtemp(path.join(os.tmpdir(), 'strapi-upload-'));
+            const tmpWorkingDirectory = await fse.mkdtemp(path.join(os.tmpdir(), 'strapi-upload-'));
             let sanitizedEntities = [];
 
             try {
-              const { files: uploads, ...fields } = args;
+              const { files: uploads, ...metas } = args;
 
               const files = await Promise.all(
-                uploads.map(upload => formatFile(upload, {}, fields, { tmpFolderPath }))
+                uploads.map(upload => formatFile(upload, {}, { ...metas, tmpWorkingDirectory }))
               );
 
               const uploadService = getUploadService('upload');
 
               const uploadedFiles = await Promise.all(
-                files.map(file => uploadService.uploadFileAndPersist(file, {}, { tmpFolderPath }))
+                files.map(file => uploadService.uploadFileAndPersist(file, {}))
               );
 
               sanitizedEntities = uploadedFiles.map(file =>
@@ -159,7 +155,7 @@ module.exports = ({ strapi }) => {
               );
             } finally {
               // delete temporary folder
-              await fse.remove(tmpFolderPath);
+              await fse.remove(tmpWorkingDirectory);
             }
 
             return sanitizedEntities;
