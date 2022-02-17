@@ -250,43 +250,44 @@ const convertAndSanitizeFilters = (filters, schema) => {
 
   // Here, `key` can either be an operator or an attribute name
   for (const [key, value] of Object.entries(filters)) {
-    const attribute = get('key', schema.attributes);
+    if (schema && Object.prototype.hasOwnProperty.call(schema, 'attributes')) {
+      const attribute = get('key', schema.attributes);
 
-    // Handle attributes
-    if (attribute) {
-      // Relations
-      if (attribute.type === 'relation') {
-        filters[key] = convertAndSanitizeFilters(value, strapi.getModel(attribute.target));
-      }
+      // Handle attributes
+      if (attribute) {
+        // Relations
+        if (attribute.type === 'relation') {
+          filters[key] = convertAndSanitizeFilters(value, strapi.getModel(attribute.target));
+        }
 
-      // Components
-      else if (attribute.type === 'component') {
-        filters[key] = convertAndSanitizeFilters(value, strapi.getModel(attribute.component));
-      }
+        // Components
+        else if (attribute.type === 'component') {
+          filters[key] = convertAndSanitizeFilters(value, strapi.getModel(attribute.component));
+        }
 
-      // Media
-      else if (attribute.type === 'media') {
-        filters[key] = convertAndSanitizeFilters(value, strapi.getModel('plugin::upload.file'));
-      }
+        // Media
+        else if (attribute.type === 'media') {
+          filters[key] = convertAndSanitizeFilters(value, strapi.getModel('plugin::upload.file'));
+        }
 
-      // Dynamic Zones
-      else if (attribute.type === 'dynamiczone') {
-        removeOperator(key);
-      }
-
-      // Scalar attributes
-      else {
-        // Always remove password attributes from filters object
-        if (attribute.type === 'password') {
+        // Dynamic Zones
+        else if (attribute.type === 'dynamiczone') {
           removeOperator(key);
-        } else {
-          filters[key] = convertAndSanitizeFilters(value);
+        }
+
+        // Scalar attributes
+        else {
+          // Always remove password attributes from filters object
+          if (attribute.type === 'password') {
+            removeOperator(key);
+          } else {
+            filters[key] = convertAndSanitizeFilters(value);
+          }
         }
       }
-    }
 
-    // Handle operators
-    else {
+      // Handle operators
+    } else {
       if (['$null', '$notNull'].includes(key)) {
         filters[key] = parseType({ type: 'boolean', value: filters[key], forceCast: true });
       } else if (isObject(value)) {
