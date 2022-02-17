@@ -240,7 +240,7 @@
   "app.components.BlockLink.blog.content": "Lire les dernières actualités à propos de Strapi et de son écosystème",
   "app.components.BlockLink.code": "Apps d'exemple",
   "app.components.BlockLink.code.content": "Apprenez en testant des projets réels développés par la communauté.",
-  "app.components.BlockLink.tation": "Documentation",
+  "app.components.BlockLink.documentation": "Documentation",
   "app.components.BlockLink.documentation.content": "Découvrir les concepts essentials, guides et instructions.",
   "app.components.BlockLink.tutorial": "Tutoriels",
   "app.components.BlockLink.tutorial.content": "Suivre les instructions étapes par étapes pour utiliser et personnaliser Strapi.",
