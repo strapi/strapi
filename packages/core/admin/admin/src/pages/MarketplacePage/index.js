@@ -91,7 +91,7 @@ const MarketPlacePage = () => {
           <ContentLayout>
             <Grid gap={4}>
               {pluginsResponse.data.map(plugin => (
-                <GridItem col={4} s={6} xs={12} key={plugin.id} style={{ height: '100%' }}>
+                <GridItem col={4} s={6} xs={12} style={{ height: '100%' }} key={plugin.id}>
                   <PluginCard plugin={plugin} />
                 </GridItem>
               ))}
