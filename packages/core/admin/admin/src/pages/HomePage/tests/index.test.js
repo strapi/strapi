@@ -7,6 +7,27 @@ import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import HomePage from '../index';
 import { useModels } from '../../../hooks';
 
+jest.mock('@strapi/helper-plugin', () => ({
+  ...jest.requireActual('@strapi/helper-plugin'),
+  useGuidedTour: jest.fn(() => ({
+    isGuidedTourVisible: false,
+    guidedTourState: {
+      apiTokens: {
+        create: false,
+        success: false,
+      },
+      contentManager: {
+        create: false,
+        success: false,
+      },
+      contentTypeBuilder: {
+        create: false,
+        success: false,
+      },
+    },
+  })),
+}));
+
 jest.mock('../../../hooks', () => ({
   useModels: jest.fn(),
 }));
