@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import styled from 'styled-components';
 import { useIntl } from 'react-intl';
 import { Box } from '@strapi/design-system/Box';
 import { Stack } from '@strapi/design-system/Stack';
@@ -10,23 +9,6 @@ import { LinkButton } from '@strapi/design-system/LinkButton';
 import { Flex } from '@strapi/design-system/Flex';
 import ExternalLink from '@strapi/icons/ExternalLink';
 import Duplicate from '@strapi/icons/Duplicate';
-
-const PluginLogo = styled.img`
-  display: block;
-  width: 64px;
-  height: 64px;
-  object-fit: contain;
-  border-radius: 6px;
-`;
-
-const PluginDescription = styled.p`
-  /* stylelint-disable value-no-vendor-prefix, property-no-vendor-prefix */
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  /* stylelint-enable value-no-vendor-prefix, property-no-vendor-prefix */
-  overflow: hidden;
-`;
 
 const PluginCard = ({ plugin }) => {
   const { id, attributes } = plugin;
@@ -51,18 +33,33 @@ const PluginCard = ({ plugin }) => {
         style={{ height: '100%' }}
       >
         <div style={{ width: '100%' }}>
-          <PluginLogo className="logo" src={attributes.logo.url} alt={`${attributes.name} logo`} />
+          <Box
+            as="img"
+            src={attributes.logo.url}
+            alt={`${attributes.name} logo`}
+            hasRadius
+            style={{
+              width: '64px',
+              height: '64px',
+              objectFit: 'contain',
+            }}
+          />
           <Box paddingTop={5}>
-            <Typography variant="delta" className="name">
-              {attributes.name}
-            </Typography>
+            <Typography variant="delta">{attributes.name}</Typography>
           </Box>
           <Box paddingTop={3}>
-            <PluginDescription>
-              <Typography variant="omega" className="description" textColor="neutral600">
-                {attributes.description}
-              </Typography>
-            </PluginDescription>
+            <Typography
+              variant="omega"
+              textColor="neutral600"
+              style={{
+                display: ' -webkit-box',
+                WebkitBoxOrient: 'vertical',
+                WebkitLineClamp: 2,
+                overflow: 'hidden',
+              }}
+            >
+              {attributes.description}
+            </Typography>
           </Box>
         </div>
         <Stack horizontal size={2} paddingTop={3}>
