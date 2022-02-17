@@ -30,6 +30,9 @@ import FieldActionWrapper from '../FieldActionWrapper';
 const CenteredBox = styled(Box)`
   text-align: center;
 `;
+
+// Experiment only until the next release
+// To uncomment then
 // const A = styled.a`
 //   color: ${({ theme }) => theme.colors.primary600};
 // `;
@@ -271,7 +274,8 @@ const Register = ({ fieldsToDisable, noSignin, onSubmit, schema }) => {
                     })}
                     type={confirmPasswordShown ? 'text' : 'password'}
                   />
-                  {/* To uncomment in the next release */}
+                  {/* Experiment only until the next release
+                  To uncomment then */}
                   {/* <Checkbox
                     onValueChange={checked => {
                       handleChange({ target: { value: checked, name: 'news' } });
