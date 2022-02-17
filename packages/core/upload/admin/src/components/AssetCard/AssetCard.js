@@ -4,6 +4,7 @@ import { prefixFileUrlWithBackendUrl, getFileExtension } from '@strapi/helper-pl
 import { ImageAssetCard } from './ImageAssetCard';
 import { VideoAssetCard } from './VideoAssetCard';
 import { DocAssetCard } from './DocAssetCard';
+import { AudioAssetCard } from './AudioAssetCard';
 import { AssetType, AssetDefinition } from '../../constants';
 import { createAssetUrl } from '../../utils/createAssetUrl';
 import toSingularTypes from '../../utils/toSingularTypes';
@@ -19,9 +20,12 @@ export const AssetCard = ({
   local,
 }) => {
   const singularTypes = toSingularTypes(allowedTypes);
-
-  let handleSelect = onSelect ? () => onSelect(asset) : undefined;
   const fileType = asset.mime.split('/')[0];
+  const handleSelect = onSelect ? () => onSelect(asset) : undefined;
+  const canSelectAsset =
+    singularTypes.includes(fileType) ||
+    (singularTypes.includes('file') && !['video', 'image', 'audio'].includes(fileType));
+
   const commonAssetCardProps = {
     id: asset.id,
     extension: getFileExtension(asset.ext),
@@ -30,29 +34,17 @@ export const AssetCard = ({
     url: local ? asset.url : createAssetUrl(asset, true),
     mime: asset.mime,
     onEdit: onEdit ? () => onEdit(asset) : undefined,
-    onSelect: handleSelect,
+    onSelect: !canSelectAsset && !isSelected ? undefined : handleSelect,
     onRemove: onRemove ? () => onRemove(asset) : undefined,
     selected: isSelected,
     size,
   };
 
   if (asset.mime.includes(AssetType.Video)) {
-    const canSelectAsset = singularTypes.includes(fileType);
-
-    if (!canSelectAsset && !isSelected) {
-      handleSelect = undefined;
-    }
-
     return <VideoAssetCard {...commonAssetCardProps} />;
   }
 
   if (asset.mime.includes(AssetType.Image)) {
-    const canSelectAsset = singularTypes.includes(fileType);
-
-    if (!canSelectAsset && !isSelected) {
-      handleSelect = undefined;
-    }
-
     return (
       <ImageAssetCard
         {...commonAssetCardProps}
@@ -64,17 +56,15 @@ export const AssetCard = ({
     );
   }
 
-  const canSelectAsset = singularTypes.includes('file') && !['video', 'image'].includes(fileType);
-
-  if (!canSelectAsset && !isSelected) {
-    handleSelect = undefined;
+  if (asset.mime.includes(AssetType.Audio)) {
+    return <AudioAssetCard {...commonAssetCardProps} />;
   }
 
   return <DocAssetCard {...commonAssetCardProps} />;
 };
 
 AssetCard.defaultProps = {
-  allowedTypes: ['images', 'files', 'videos'],
+  allowedTypes: ['images', 'files', 'videos', 'audios'],
   isSelected: false,
   // Determine if the asset is loaded locally or from a remote resource
   local: false,

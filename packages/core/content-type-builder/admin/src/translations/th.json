@@ -121,12 +121,6 @@
   "form.button.select-component": "เลือกคอมโพเนนต์",
   "form.button.single-type.description": "ที่ดีที่สุดสำหรับอินสแตนซ์เดี่ยวเช่น เกี่ยวกับเรา, โฮมเพจ, เป็นต้น",
   "from": "จาก",
-  "menu.section.components.name.plural": "คอมโพเนนต์",
-  "menu.section.components.name.singular": "คอมโพเนนต์",
-  "menu.section.models.name.plural": "ชนิดของคอลเล็กชัน",
-  "menu.section.models.name.singular": "ชนิดคอลเล็กชัน",
-  "menu.section.single-types.name.plural": "ชนิดเดียว",
-  "menu.section.single-types.name.singular": "ชนิดเดียว",
   "modalForm.attribute.form.base.name": "ชื่อ",
   "modalForm.attribute.form.base.name.description": "ไม่มีพื้นที่ว่างที่อนุญาตให้ใช้สำหรับชื่อของแอ็ตทริบิวต์",
   "modalForm.attribute.form.base.name.placeholder": "เช่น Slug, SEO URL, Canonical URL",
@@ -169,7 +163,5 @@
   "relation.manyWay": "มีจำนวนมาก",
   "relation.oneToMany": "เป็นของหลาย",
   "relation.oneToOne": "มีและเป็นของหนึ่ง",
-  "relation.oneWay": "มีหนึ่ง",
-  "table.attributes.title.plural": "{number} ฟิลด์",
-  "table.attributes.title.singular": "ฟิลด์ {number}"
+  "relation.oneWay": "มีหนึ่ง"
 }

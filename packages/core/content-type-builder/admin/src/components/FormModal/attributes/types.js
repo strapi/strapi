@@ -215,7 +215,7 @@ const types = {
       required: validators.required(),
       allowedTypes: yup
         .array()
-        .of(yup.string().oneOf(['images', 'videos', 'files']))
+        .of(yup.string().oneOf(['images', 'videos', 'files', 'audios']))
         .min(1)
         .nullable(),
     };

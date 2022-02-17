@@ -27,7 +27,7 @@ export const MediaLibraryDialog = ({ onClose, onSelectAssets, allowedTypes }) =>
 };
 
 MediaLibraryDialog.defaultProps = {
-  allowedTypes: ['files', 'images', 'videos'],
+  allowedTypes: ['files', 'images', 'videos', 'audios'],
 };
 
 MediaLibraryDialog.propTypes = {

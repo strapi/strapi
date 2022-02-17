@@ -15,6 +15,7 @@ import AppLayout from '../../layouts/AppLayout';
 import { useMenu, useReleaseNotification } from '../../hooks';
 import Onboarding from './Onboarding';
 import { createRoute } from '../../utils';
+import GuidedTourModal from '../../components/GuidedTour/Modal';
 
 const CM = lazy(() =>
   import(/* webpackChunkName: "content-manager" */ '../../content-manager/pages/App')
@@ -92,6 +93,7 @@ const Admin = () => {
             <Route path="" component={NotFoundPage} />
           </Switch>
         </Suspense>
+        <GuidedTourModal />
         <Onboarding />
       </AppLayout>
     </DndProvider>

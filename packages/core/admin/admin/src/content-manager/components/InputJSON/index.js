@@ -80,7 +80,7 @@ class InputJSON extends React.Component {
     try {
       if (value === null) return this.codeMirror.setValue('');
 
-      const nextValue = typeof value !== 'string' ? stringify(value, null, 2) : value;
+      const nextValue = stringify(value, null, 2);
 
       return this.codeMirror.setValue(nextValue);
     } catch (err) {

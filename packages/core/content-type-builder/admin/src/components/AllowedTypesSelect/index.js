@@ -11,7 +11,8 @@ const options = [
     children: [
       { label: 'images (JPEG, PNG, GIF, SVG, TIFF, ICO, DVU)', value: 'images' },
       { label: 'videos (MPEG, MP4, Quicktime, WMV, AVI, FLV)', value: 'videos' },
-      { label: 'files (CSV, ZIP, MP3, PDF, Excel, JSON, ...)', value: 'files' },
+      { label: 'audios (MP3, WAV, OGG)', value: 'audios' },
+      { label: 'files (CSV, ZIP, PDF, Excel, JSON, ...)', value: 'files' },
     ],
   },
 ];
