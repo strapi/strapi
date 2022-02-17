@@ -14,7 +14,7 @@ import { Layout, HeaderLayout, ContentLayout } from '@strapi/design-system/Layou
 import { Main } from '@strapi/design-system/Main';
 import { fetchPlugins } from './utils/api';
 import adminPermissions from '../../permissions';
-import PluginCard from './PluginCard';
+import PluginCard from './components/PluginCard';
 
 const MarketPlacePage = () => {
   const { formatMessage } = useIntl();
