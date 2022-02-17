@@ -64,6 +64,8 @@
   "admin.pages.MarketPlacePage.plugin.info.text": "Learn more",
   "admin.pages.MarketPlacePage.plugin.info.label": "Learn more about {pluginName}",
   "admin.pages.MarketPlacePage.plugin.copy": "Copy install command",
+  "admin.pages.MarketPlacePage.plugin.installed": "Installed",
+  "admin.pages.MarketPlacePage.plugin.info": "Learn more",
   "admin.pages.MarketPlacePage.submit.plugin.link": "Submit your plugin",
   "Content Manager": "Content Manager",
   "Content Type Builder": "Content-Types Builder",

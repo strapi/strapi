@@ -12,7 +12,7 @@ import { useNotifyAT } from '@strapi/design-system/LiveRegions';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { Layout, HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
-import { fetchPlugins } from './utils/api';
+import { fetchPlugins, fetchInstalledPlugins } from './utils/api';
 import adminPermissions from '../../permissions';
 import PluginCard from './components/PluginCard';
 
@@ -39,6 +39,19 @@ const MarketPlacePage = () => {
     );
   };
 
+  const { status: installedPluginsStatus, data: installedPluginsResponse } = useQuery(
+    'list-installed-plugins',
+    () => fetchInstalledPlugins(notifyLoad),
+    {
+      onError: () => {
+        toggleNotification({
+          type: 'warning',
+          message: { id: 'notification.error', defaultMessage: 'An error occured' },
+        });
+      },
+    }
+  );
+
   const { status, data: pluginsResponse } = useQuery(
     'list-plugins',
     () => fetchPlugins(notifyLoad),
@@ -52,7 +65,9 @@ const MarketPlacePage = () => {
     }
   );
 
-  const isLoading = status !== 'success' && status !== 'error';
+  const isLoading =
+    (status !== 'success' && status !== 'error') ||
+    (installedPluginsStatus !== 'success' && installedPluginsStatus !== 'error');
 
   useEffect(() => {
     trackUsage('didGoToMarketplace');
@@ -67,6 +82,10 @@ const MarketPlacePage = () => {
       </Layout>
     );
   }
+
+  const installedPlugins = installedPluginsResponse.plugins.map(plugin => {
+    return plugin.displayName.toLowerCase();
+  });
 
   return (
     <CheckPagePermissions permissions={adminPermissions.marketplace.main}>
@@ -92,7 +111,7 @@ const MarketPlacePage = () => {
             <Grid gap={4}>
               {pluginsResponse.data.map(plugin => (
                 <GridItem col={4} s={6} xs={12} style={{ height: '100%' }} key={plugin.id}>
-                  <PluginCard plugin={plugin} />
+                  <PluginCard plugin={plugin} installedPlugins={installedPlugins} />
                 </GridItem>
               ))}
             </Grid>
