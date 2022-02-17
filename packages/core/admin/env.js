@@ -25,8 +25,6 @@ const getClientEnvironment = options => {
         ADMIN_PATH: options.adminPath,
         NODE_ENV: options.env || 'development',
         STRAPI_ADMIN_BACKEND_URL: options.backend,
-        STRAPI_ADMIN_MARKETPLACE_API_URL:
-          process.env.STRAPI_ADMIN_MARKETPLACE_API_URL || 'https://market-api.strapi.io',
       }
     );
 
