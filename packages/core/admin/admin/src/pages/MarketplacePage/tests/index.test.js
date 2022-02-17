@@ -56,6 +56,10 @@ describe('Marketplace page', () => {
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
+      .c14 {
+        border-radius: 4px;
+      }
+
       .c15 {
         padding-top: 20px;
       }
@@ -64,18 +68,18 @@ describe('Marketplace page', () => {
         padding-top: 12px;
       }
 
-      .c32 {
+      .c31 {
         font-weight: 600;
         color: #32324d;
         font-size: 0.75rem;
         line-height: 1.33;
       }
 
-      .c34 {
+      .c33 {
         padding-left: 8px;
       }
 
-      .c29 {
+      .c28 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -89,21 +93,21 @@ describe('Marketplace page', () => {
         outline: none;
       }
 
-      .c29 svg {
+      .c28 svg {
         height: 12px;
         width: 12px;
       }
 
-      .c29 svg > g,
-      .c29 svg path {
+      .c28 svg > g,
+      .c28 svg path {
         fill: #ffffff;
       }
 
-      .c29[aria-disabled='true'] {
+      .c28[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c29:after {
+      .c28:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -118,11 +122,11 @@ describe('Marketplace page', () => {
         border: 2px solid transparent;
       }
 
-      .c29:focus-visible {
+      .c28:focus-visible {
         outline: none;
       }
 
-      .c29:focus-visible:after {
+      .c28:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -133,7 +137,7 @@ describe('Marketplace page', () => {
         border: 2px solid #4945ff;
       }
 
-      .c30 {
+      .c29 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -145,7 +149,7 @@ describe('Marketplace page', () => {
         background: #f0f0ff;
       }
 
-      .c30 .c33 {
+      .c29 .c32 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -156,62 +160,62 @@ describe('Marketplace page', () => {
         align-items: center;
       }
 
-      .c30 .c31 {
+      .c29 .c30 {
         color: #ffffff;
       }
 
-      .c30[aria-disabled='true'] {
+      .c29[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c30[aria-disabled='true'] .c31 {
+      .c29[aria-disabled='true'] .c30 {
         color: #666687;
       }
 
-      .c30[aria-disabled='true'] svg > g,
-      .c30[aria-disabled='true'] svg path {
+      .c29[aria-disabled='true'] svg > g,
+      .c29[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c30[aria-disabled='true']:active {
+      .c29[aria-disabled='true']:active {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c30[aria-disabled='true']:active .c31 {
+      .c29[aria-disabled='true']:active .c30 {
         color: #666687;
       }
 
-      .c30[aria-disabled='true']:active svg > g,
-      .c30[aria-disabled='true']:active svg path {
+      .c29[aria-disabled='true']:active svg > g,
+      .c29[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
-      .c30:hover {
+      .c29:hover {
         background-color: #ffffff;
       }
 
-      .c30:active {
+      .c29:active {
         background-color: #ffffff;
         border: 1px solid #4945ff;
       }
 
-      .c30:active .c31 {
+      .c29:active .c30 {
         color: #4945ff;
       }
 
-      .c30:active svg > g,
-      .c30:active svg path {
+      .c29:active svg > g,
+      .c29:active svg path {
         fill: #4945ff;
       }
 
-      .c30 .c31 {
+      .c29 .c30 {
         color: #271fe0;
       }
 
-      .c30 svg > g,
-      .c30 svg path {
+      .c29 svg > g,
+      .c29 svg path {
         fill: #271fe0;
       }
 
@@ -233,11 +237,11 @@ describe('Marketplace page', () => {
         align-items: flex-end;
       }
 
-      .c20 {
+      .c19 {
         padding-top: 12px;
       }
 
-      .c21 {
+      .c20 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -251,12 +255,12 @@ describe('Marketplace page', () => {
         align-items: center;
       }
 
-      .c22 > * {
+      .c21 > * {
         margin-left: 0;
         margin-right: 0;
       }
 
-      .c22 > * + * {
+      .c21 > * + * {
         margin-left: 8px;
       }
 
@@ -267,7 +271,7 @@ describe('Marketplace page', () => {
         line-height: 1.25;
       }
 
-      .c19 {
+      .c18 {
         color: #666687;
         font-size: 0.875rem;
         line-height: 1.43;
@@ -359,18 +363,18 @@ describe('Marketplace page', () => {
         outline: none;
       }
 
-      .c26 {
+      .c25 {
         font-weight: 600;
         color: #32324d;
         font-size: 0.75rem;
         line-height: 1.33;
       }
 
-      .c28 {
+      .c27 {
         padding-left: 8px;
       }
 
-      .c23 {
+      .c22 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -384,21 +388,21 @@ describe('Marketplace page', () => {
         outline: none;
       }
 
-      .c23 svg {
+      .c22 svg {
         height: 12px;
         width: 12px;
       }
 
-      .c23 svg > g,
-      .c23 svg path {
+      .c22 svg > g,
+      .c22 svg path {
         fill: #ffffff;
       }
 
-      .c23[aria-disabled='true'] {
+      .c22[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c23:after {
+      .c22:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -413,11 +417,11 @@ describe('Marketplace page', () => {
         border: 2px solid transparent;
       }
 
-      .c23:focus-visible {
+      .c22:focus-visible {
         outline: none;
       }
 
-      .c23:focus-visible:after {
+      .c22:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -428,7 +432,7 @@ describe('Marketplace page', () => {
         border: 2px solid #4945ff;
       }
 
-      .c24 {
+      .c23 {
         padding: 8px 16px;
         background: #4945ff;
         border: none;
@@ -443,7 +447,7 @@ describe('Marketplace page', () => {
         text-decoration: none;
       }
 
-      .c24 .c27 {
+      .c23 .c26 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -454,68 +458,53 @@ describe('Marketplace page', () => {
         align-items: center;
       }
 
-      .c24 .c25 {
+      .c23 .c24 {
         color: #ffffff;
       }
 
-      .c24[aria-disabled='true'] {
+      .c23[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c24[aria-disabled='true'] .c25 {
+      .c23[aria-disabled='true'] .c24 {
         color: #666687;
       }
 
-      .c24[aria-disabled='true'] svg > g,
-      .c24[aria-disabled='true'] svg path {
+      .c23[aria-disabled='true'] svg > g,
+      .c23[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c24[aria-disabled='true']:active {
+      .c23[aria-disabled='true']:active {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c24[aria-disabled='true']:active .c25 {
+      .c23[aria-disabled='true']:active .c24 {
         color: #666687;
       }
 
-      .c24[aria-disabled='true']:active svg > g,
-      .c24[aria-disabled='true']:active svg path {
+      .c23[aria-disabled='true']:active svg > g,
+      .c23[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
-      .c24:hover {
+      .c23:hover {
         background-color: #f6f6f9;
       }
 
-      .c24:active {
+      .c23:active {
         background-color: #eaeaef;
       }
 
-      .c24 .c25 {
+      .c23 .c24 {
         color: #32324d;
       }
 
-      .c24 svg > g,
-      .c24 svg path {
+      .c23 svg > g,
+      .c23 svg path {
         fill: #32324d;
-      }
-
-      .c14 {
-        display: block;
-        width: 64px;
-        height: 64px;
-        object-fit: contain;
-        border-radius: 6px;
-      }
-
-      .c18 {
-        display: -webkit-box;
-        -webkit-box-orient: vertical;
-        -webkit-line-clamp: 2;
-        overflow: hidden;
       }
 
       @media (max-width:68.75rem) {
@@ -595,14 +584,15 @@ describe('Marketplace page', () => {
                         >
                           <img
                             alt="Comments logo"
-                            class="c14 logo"
+                            class="c14"
                             src="https://dl.airtable.com/.attachments/eb4cd59876565af77c9c3e5966b59f10/2111bfc8/vl_strapi-comments.png"
+                            style="width: 64px; height: 64px; object-fit: contain;"
                           />
                           <div
                             class="c15"
                           >
                             <span
-                              class="c16 name"
+                              class="c16"
                             >
                               Comments
                             </span>
@@ -610,35 +600,32 @@ describe('Marketplace page', () => {
                           <div
                             class="c17"
                           >
-                            <p
+                            <span
                               class="c18"
+                              style="display: -webkit-box; overflow: hidden;"
                             >
-                              <span
-                                class="c19 description"
-                              >
-                                Powerful Strapi based comments moderation tool for you and your users
-                              </span>
-                            </p>
+                              Powerful Strapi based comments moderation tool for you and your users
+                            </span>
                           </div>
                         </div>
                         <div
-                          class="c20 c21 c22"
+                          class="c19 c20 c21"
                         >
                           <a
                             aria-disabled="false"
-                            class="c23 c24"
+                            class="c22 c23"
                             href="https://market.strapi.io/plugins/strapi-plugin-comments"
                             rel="noreferrer noopener"
                             target="_blank"
                           >
                             <span
-                              class="c25 c26"
+                              class="c24 c25"
                             >
                               Learn more
                             </span>
                             <div
                               aria-hidden="true"
-                              class="c27 c28"
+                              class="c26 c27"
                             >
                               <svg
                                 fill="none"
@@ -656,17 +643,17 @@ describe('Marketplace page', () => {
                           </a>
                           <button
                             aria-disabled="false"
-                            class="c29 c30"
+                            class="c28 c29"
                             type="button"
                           >
                             <span
-                              class="c31 c32"
+                              class="c30 c31"
                             >
                               Copy install command
                             </span>
                             <div
                               aria-hidden="true"
-                              class="c33 c34"
+                              class="c32 c33"
                             >
                               <svg
                                 fill="none"
@@ -711,14 +698,15 @@ describe('Marketplace page', () => {
                         >
                           <img
                             alt="Config Sync logo"
-                            class="c14 logo"
+                            class="c14"
                             src="https://dl.airtable.com/.attachments/e23a7231d12cce89cb4b05cbfe759d45/96f5f496/Screenshot2021-12-09at22.15.37.png"
+                            style="width: 64px; height: 64px; object-fit: contain;"
                           />
                           <div
                             class="c15"
                           >
                             <span
-                              class="c16 name"
+                              class="c16"
                             >
                               Config Sync
                             </span>
@@ -726,35 +714,32 @@ describe('Marketplace page', () => {
                           <div
                             class="c17"
                           >
-                            <p
+                            <span
                               class="c18"
+                              style="display: -webkit-box; overflow: hidden;"
                             >
-                              <span
-                                class="c19 description"
-                              >
-                                Migrate your config data across environments using the CLI or Strapi admin panel.
-                              </span>
-                            </p>
+                              Migrate your config data across environments using the CLI or Strapi admin panel.
+                            </span>
                           </div>
                         </div>
                         <div
-                          class="c20 c21 c22"
+                          class="c19 c20 c21"
                         >
                           <a
                             aria-disabled="false"
-                            class="c23 c24"
+                            class="c22 c23"
                             href="https://market.strapi.io/plugins/strapi-plugin-config-sync"
                             rel="noreferrer noopener"
                             target="_blank"
                           >
                             <span
-                              class="c25 c26"
+                              class="c24 c25"
                             >
                               Learn more
                             </span>
                             <div
                               aria-hidden="true"
-                              class="c27 c28"
+                              class="c26 c27"
                             >
                               <svg
                                 fill="none"
@@ -772,17 +757,17 @@ describe('Marketplace page', () => {
                           </a>
                           <button
                             aria-disabled="false"
-                            class="c29 c30"
+                            class="c28 c29"
                             type="button"
                           >
                             <span
-                              class="c31 c32"
+                              class="c30 c31"
                             >
                               Copy install command
                             </span>
                             <div
                               aria-hidden="true"
-                              class="c33 c34"
+                              class="c32 c33"
                             >
                               <svg
                                 fill="none"
@@ -827,14 +812,15 @@ describe('Marketplace page', () => {
                         >
                           <img
                             alt="Content Versioning logo"
-                            class="c14 logo"
+                            class="c14"
                             src="https://dl.airtable.com/.attachments/0b86f18e2606ed7f53bd54d536a1bea5/13a87f30/Artboard7copy.png"
+                            style="width: 64px; height: 64px; object-fit: contain;"
                           />
                           <div
                             class="c15"
                           >
                             <span
-                              class="c16 name"
+                              class="c16"
                             >
                               Content Versioning
                             </span>
@@ -842,35 +828,32 @@ describe('Marketplace page', () => {
                           <div
                             class="c17"
                           >
-                            <p
+                            <span
                               class="c18"
+                              style="display: -webkit-box; overflow: hidden;"
                             >
-                              <span
-                                class="c19 description"
-                              >
-                                This plugin enables you to versioning Content Types. It allows multiple draft versions✅ Keeps history of all changes (with time travel) ✅ 
-                              </span>
-                            </p>
+                              This plugin enables you to versioning Content Types. It allows multiple draft versions✅ Keeps history of all changes (with time travel) ✅ 
+                            </span>
                           </div>
                         </div>
                         <div
-                          class="c20 c21 c22"
+                          class="c19 c20 c21"
                         >
                           <a
                             aria-disabled="false"
-                            class="c23 c24"
+                            class="c22 c23"
                             href="https://market.strapi.io/plugins/@notum-cz-strapi-plugin-content-versioning"
                             rel="noreferrer noopener"
                             target="_blank"
                           >
                             <span
-                              class="c25 c26"
+                              class="c24 c25"
                             >
                               Learn more
                             </span>
                             <div
                               aria-hidden="true"
-                              class="c27 c28"
+                              class="c26 c27"
                             >
                               <svg
                                 fill="none"
@@ -888,17 +871,17 @@ describe('Marketplace page', () => {
                           </a>
                           <button
                             aria-disabled="false"
-                            class="c29 c30"
+                            class="c28 c29"
                             type="button"
                           >
                             <span
-                              class="c31 c32"
+                              class="c30 c31"
                             >
                               Copy install command
                             </span>
                             <div
                               aria-hidden="true"
-                              class="c33 c34"
+                              class="c32 c33"
                             >
                               <svg
                                 fill="none"
@@ -943,14 +926,15 @@ describe('Marketplace page', () => {
                         >
                           <img
                             alt="Documentation logo"
-                            class="c14 logo"
+                            class="c14"
                             src="https://dl.airtable.com/.attachments/b6998ac52e8b0460b8a14ced8074b788/2a4d4a90/swagger.png"
+                            style="width: 64px; height: 64px; object-fit: contain;"
                           />
                           <div
                             class="c15"
                           >
                             <span
-                              class="c16 name"
+                              class="c16"
                             >
                               Documentation
                             </span>
@@ -958,35 +942,32 @@ describe('Marketplace page', () => {
                           <div
                             class="c17"
                           >
-                            <p
+                            <span
                               class="c18"
+                              style="display: -webkit-box; overflow: hidden;"
                             >
-                              <span
-                                class="c19 description"
-                              >
-                                Create an OpenAPI Document and visualize your API with SWAGGER UI
-                              </span>
-                            </p>
+                              Create an OpenAPI Document and visualize your API with SWAGGER UI
+                            </span>
                           </div>
                         </div>
                         <div
-                          class="c20 c21 c22"
+                          class="c19 c20 c21"
                         >
                           <a
                             aria-disabled="false"
-                            class="c23 c24"
+                            class="c22 c23"
                             href="https://market.strapi.io/plugins/@strapi-plugin-documentation"
                             rel="noreferrer noopener"
                             target="_blank"
                           >
                             <span
-                              class="c25 c26"
+                              class="c24 c25"
                             >
                               Learn more
                             </span>
                             <div
                               aria-hidden="true"
-                              class="c27 c28"
+                              class="c26 c27"
                             >
                               <svg
                                 fill="none"
@@ -1004,17 +985,17 @@ describe('Marketplace page', () => {
                           </a>
                           <button
                             aria-disabled="false"
-                            class="c29 c30"
+                            class="c28 c29"
                             type="button"
                           >
                             <span
-                              class="c31 c32"
+                              class="c30 c31"
                             >
                               Copy install command
                             </span>
                             <div
                               aria-hidden="true"
-                              class="c33 c34"
+                              class="c32 c33"
                             >
                               <svg
                                 fill="none"
@@ -1059,14 +1040,15 @@ describe('Marketplace page', () => {
                         >
                           <img
                             alt="Transformer logo"
-                            class="c14 logo"
+                            class="c14"
                             src="https://dl.airtable.com/.attachments/5ffd1782a2fabf423ccd6f56c562f31a/b8f8598f/transformer-logo.png"
+                            style="width: 64px; height: 64px; object-fit: contain;"
                           />
                           <div
                             class="c15"
                           >
                             <span
-                              class="c16 name"
+                              class="c16"
                             >
                               Transformer
                             </span>
@@ -1074,35 +1056,32 @@ describe('Marketplace page', () => {
                           <div
                             class="c17"
                           >
-                            <p
+                            <span
                               class="c18"
+                              style="display: -webkit-box; overflow: hidden;"
                             >
-                              <span
-                                class="c19 description"
-                              >
-                                A plugin for Strapi Headless CMS that provides the ability to transform the API response. 
-                              </span>
-                            </p>
+                              A plugin for Strapi Headless CMS that provides the ability to transform the API response. 
+                            </span>
                           </div>
                         </div>
                         <div
-                          class="c20 c21 c22"
+                          class="c19 c20 c21"
                         >
                           <a
                             aria-disabled="false"
-                            class="c23 c24"
+                            class="c22 c23"
                             href="https://market.strapi.io/plugins/strapi-plugin-transformer"
                             rel="noreferrer noopener"
                             target="_blank"
                           >
                             <span
-                              class="c25 c26"
+                              class="c24 c25"
                             >
                               Learn more
                             </span>
                             <div
                               aria-hidden="true"
-                              class="c27 c28"
+                              class="c26 c27"
                             >
                               <svg
                                 fill="none"
@@ -1120,17 +1099,17 @@ describe('Marketplace page', () => {
                           </a>
                           <button
                             aria-disabled="false"
-                            class="c29 c30"
+                            class="c28 c29"
                             type="button"
                           >
                             <span
-                              class="c31 c32"
+                              class="c30 c31"
                             >
                               Copy install command
                             </span>
                             <div
                               aria-hidden="true"
-                              class="c33 c34"
+                              class="c32 c33"
                             >
                               <svg
                                 fill="none"
