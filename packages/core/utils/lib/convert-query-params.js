@@ -124,7 +124,7 @@ class InvalidPopulateError extends Error {
 }
 
 // NOTE: we could support foo.* or foo.bar.* etc later on
-const convertPopulateQueryParams = (populate, depth = 0) => {
+const convertPopulateQueryParams = (populate, schema, depth = 0) => {
   if (depth === 0 && populate === '*') {
     return true;
   }
@@ -146,10 +146,18 @@ const convertPopulateQueryParams = (populate, depth = 0) => {
     );
   }
 
+  const { attributes } = schema;
+
   if (_.isPlainObject(populate)) {
     const transformedPopulate = {};
     for (const key in populate) {
-      transformedPopulate[key] = convertNestedPopulate(populate[key]);
+      const targetSchema = strapi.getModel(attributes[key].target);
+
+      if (!targetSchema) {
+        continue;
+      }
+
+      transformedPopulate[key] = convertNestedPopulate(populate[key], targetSchema);
     }
 
     return transformedPopulate;
@@ -158,7 +166,7 @@ const convertPopulateQueryParams = (populate, depth = 0) => {
   throw new InvalidPopulateError();
 };
 
-const convertNestedPopulate = subPopulate => {
+const convertNestedPopulate = (subPopulate, schema) => {
   if (subPopulate === '*') {
     return true;
   }
@@ -181,7 +189,7 @@ const convertNestedPopulate = subPopulate => {
   }
 
   if (filters) {
-    query.where = convertFiltersQueryParams(filters);
+    query.where = convertFiltersQueryParams(filters, schema);
   }
 
   if (fields) {
@@ -189,7 +197,7 @@ const convertNestedPopulate = subPopulate => {
   }
 
   if (populate) {
-    query.populate = convertPopulateQueryParams(populate);
+    query.populate = convertPopulateQueryParams(populate, schema);
   }
 
   if (count) {
