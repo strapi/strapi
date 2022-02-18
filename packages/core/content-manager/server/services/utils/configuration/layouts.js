@@ -90,7 +90,7 @@ function syncLayouts(configuration, schema) {
       /* if the type of a field was changed (ex: string -> json) or a new field was added in the schema
          and the new type doesn't allow the size of the previous type, append the field at the end of layouts
       */
-      if (!el.size || !isAllowedFieldSize(schema.attributes[el.name].type, el.size)) {
+      if (!isAllowedFieldSize(schema.attributes[el.name].type, el.size)) {
         elementsToReAppend.push(el.name);
         continue;
       }
