@@ -184,17 +184,8 @@ const convertPopulateObject = (populate, schema) => {
       };
     }
 
-    if (attribute.type === 'media') {
-      const fileSchema = strapi.getModel('plugin::upoad.file');
-
-      return {
-        ...acc,
-        [key]: convertNestedPopulate(subPopulate, fileSchema),
-      };
-    }
-
     // NOTE: Retrieve the target schema UID.
-    // Only handles basic relations and component since it's not possible
+    // Only handles basic relations, medias and component since it's not possible
     // to populate with options for a dynamic zone or a polymorphic relation
     let targetSchemaUID;
 
@@ -202,6 +193,8 @@ const convertPopulateObject = (populate, schema) => {
       targetSchemaUID = attribute.target;
     } else if (attribute.type === 'component') {
       targetSchemaUID = attribute.component;
+    } else if (attribute.type === 'media') {
+      targetSchemaUID = 'plugin::upload.file';
     } else {
       return acc;
     }
