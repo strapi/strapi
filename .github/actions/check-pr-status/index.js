@@ -1,16 +1,19 @@
 const core = require('@actions/core');
-const { context } = require('@actions/github');
+const github = require('@actions/github');
 
 const BLOCKING_LABELS = [`flag: 💥 Breaking change`, `flag: don't merge`];
 
 async function main() {
   try {
-    const labels = context.payload.pull_request?.labels;
+    const labels = github.context.payload.pull_request?.labels ?? [];
 
-    const hasBlockingLabel = labels.some(label => BLOCKING_LABELS.includes(label.name));
-    if (hasBlockingLabel) {
+    const blockingLabels = labels.filter(label => BLOCKING_LABELS.includes(label.name));
+
+    if (blockingLabels.length > 0) {
       core.setFailed(
-        `The PR has been labelled with a blocking label (${BLOCKING_LABELS.join(', ')}).`
+        `The PR has been labelled with a blocking label (${blockingLabels
+          .map(label => label.name)
+          .join(', ')}).`
       );
 
       return;
@@ -41,4 +44,10 @@ async function main() {
   }
 }
 
-main();
+main.BLOCKING_LABELS = BLOCKING_LABELS;
+
+if (require.main === module) {
+  main();
+} else {
+  module.exports = main;
+}
