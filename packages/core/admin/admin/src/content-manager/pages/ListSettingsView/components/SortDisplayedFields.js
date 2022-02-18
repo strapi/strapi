@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
+import last from 'lodash/last';
 import { PropTypes } from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Box } from '@strapi/design-system/Box';
@@ -36,6 +37,21 @@ const SortDisplayedFields = ({
 }) => {
   const { formatMessage } = useIntl();
   const [isDraggingSibling, setIsDraggingSibling] = useState(false);
+  const [fieldWasAdded, setFieldWasAdded] = useState(false);
+  const fieldRefMap = useRef([]);
+
+  function handleAddField(field) {
+    onAddField(field);
+    setFieldWasAdded(true);
+  }
+
+  useEffect(() => {
+    if (fieldWasAdded) {
+      const lastField = last(fieldRefMap.current);
+
+      lastField.scrollIntoView();
+    }
+  }, [displayedFields, fieldWasAdded]);
 
   return (
     <>
@@ -69,6 +85,7 @@ const SortDisplayedFields = ({
                 name={field}
                 labelField={metadatas[field].list.label || field}
                 setIsDraggingSibling={setIsDraggingSibling}
+                ref={el => fieldRefMap.current.push(el)}
               />
             ))}
           </Stack>
@@ -85,7 +102,7 @@ const SortDisplayedFields = ({
             data-testid="add-field"
           >
             {listRemainingFields.map(field => (
-              <MenuItem key={field} onClick={() => onAddField(field)}>
+              <MenuItem key={field} onClick={() => handleAddField(field)}>
                 {field}
               </MenuItem>
             ))}
