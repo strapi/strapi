@@ -13,7 +13,7 @@ import { useNotifyAT } from '@strapi/design-system/LiveRegions';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { Layout, HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
-import { fetchPlugins, fetchDependencies } from './utils/api';
+import { fetchPlugins, fetchAppInformation } from './utils/api';
 import adminPermissions from '../../permissions';
 import PluginCard from './components/PluginCard';
 
@@ -41,8 +41,8 @@ const MarketPlacePage = () => {
   };
 
   const { status: installedDependenciesStatus, data: installedDependenciesResponse } = useQuery(
-    'list-dependencies',
-    () => fetchDependencies(notifyLoad),
+    'app-information',
+    () => fetchAppInformation(notifyLoad),
     {
       onError: () => {
         toggleNotification({
@@ -91,7 +91,11 @@ const MarketPlacePage = () => {
     );
   }
 
-  const installedPackages = Object.keys(installedDependenciesResponse.data.dependencies);
+  const { dependencies, useYarn } = installedDependenciesResponse.data;
+  const installedPackages = Object.keys(dependencies);
+
+  // TODO: implement and remove
+  console.log({ useYarn });
 
   return (
     <CheckPagePermissions permissions={adminPermissions.marketplace.main}>

@@ -1,7 +1,9 @@
 'use strict';
 
+const path = require('path');
 const execa = require('execa');
 const _ = require('lodash');
+const { exists } = require('fs-extra');
 const { ValidationError } = require('@strapi/utils').errors;
 // eslint-disable-next-line node/no-extraneous-require
 const ee = require('@strapi/strapi/lib/utils/ee');
@@ -48,6 +50,7 @@ module.exports = {
     const dependencies = strapi.config.get('info.dependencies', {});
     const nodeVersion = process.version;
     const communityEdition = !strapi.EE;
+    const useYarn = await exists(path.join(process.cwd(), 'yarn.lock'));
 
     return {
       data: {
@@ -57,6 +60,7 @@ module.exports = {
         nodeVersion,
         communityEdition,
         dependencies,
+        useYarn,
       },
     };
   },

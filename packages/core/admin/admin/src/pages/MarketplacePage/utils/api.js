@@ -17,7 +17,7 @@ const fetchPlugins = async notify => {
   return filteredResponse;
 };
 
-const fetchDependencies = async notify => {
+const fetchAppInformation = async notify => {
   const { data } = await axiosInstance.get('/admin/information');
 
   notify();
@@ -25,4 +25,4 @@ const fetchDependencies = async notify => {
   return data;
 };
 
-export { fetchPlugins, fetchDependencies };
+export { fetchPlugins, fetchAppInformation };
