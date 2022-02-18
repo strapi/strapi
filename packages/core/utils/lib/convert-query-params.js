@@ -150,14 +150,43 @@ const convertPopulateQueryParams = (populate, schema, depth = 0) => {
 
   if (_.isPlainObject(populate)) {
     const transformedPopulate = {};
+
     for (const key in populate) {
-      const targetSchema = strapi.getModel(attributes[key].target);
+      const attribute = attributes[key];
+      const subPopulate = populate[key];
+
+      if (!attribute) {
+        continue;
+      }
+
+      // Retrieve the target schema UID.
+      // This flows only handle basic relations and component since it's
+      // not possible to populate with params for a dynamic zone or polymorphic relations.
+
+      let targetSchemaUID;
+
+      // Relations
+      if (attribute.type === 'relation') {
+        targetSchemaUID = attribute.target;
+      }
+
+      // Components
+      else if (attribute.type === 'component') {
+        targetSchemaUID = attribute.component;
+      }
+
+      // Fallback
+      else {
+        continue;
+      }
+
+      const targetSchema = strapi.getModel(targetSchemaUID);
 
       if (!targetSchema) {
         continue;
       }
 
-      transformedPopulate[key] = convertNestedPopulate(populate[key], targetSchema);
+      transformedPopulate[key] = convertNestedPopulate(subPopulate, targetSchema);
     }
 
     return transformedPopulate;
