@@ -146,53 +146,77 @@ const convertPopulateQueryParams = (populate, schema, depth = 0) => {
     );
   }
 
-  const { attributes } = schema;
-
   if (_.isPlainObject(populate)) {
-    const transformedPopulate = {};
-
-    for (const key in populate) {
-      const attribute = attributes[key];
-      const subPopulate = populate[key];
-
-      if (!attribute) {
-        continue;
-      }
-
-      // Retrieve the target schema UID.
-      // This flows only handle basic relations and component since it's
-      // not possible to populate with params for a dynamic zone or polymorphic relations.
-
-      let targetSchemaUID;
-
-      // Relations
-      if (attribute.type === 'relation') {
-        targetSchemaUID = attribute.target;
-      }
-
-      // Components
-      else if (attribute.type === 'component') {
-        targetSchemaUID = attribute.component;
-      }
-
-      // Fallback
-      else {
-        continue;
-      }
-
-      const targetSchema = strapi.getModel(targetSchemaUID);
-
-      if (!targetSchema) {
-        continue;
-      }
-
-      transformedPopulate[key] = convertNestedPopulate(subPopulate, targetSchema);
-    }
-
-    return transformedPopulate;
+    return convertPopulateObject(populate, schema);
   }
 
   throw new InvalidPopulateError();
+};
+
+const convertPopulateObject = (populate, schema) => {
+  if (!schema) {
+    return {};
+  }
+
+  const { attributes } = schema;
+
+  return Object.entries(populate).reduce((acc, [key, subPopulate]) => {
+    const attribute = attributes[key];
+
+    if (!attribute) {
+      return acc;
+    }
+
+    // TODO: This is a temporary solution for dynamic zones that should be
+    // fixed when we'll implement a more accurate way to query dynamic zones
+    if (attribute.type === 'dynamiczone') {
+      const generatedFakeDynamicZoneSchema = {
+        uid: `${schema.uid}.${key}`,
+        attributes: attribute.components
+          .map(uid => strapi.getModel(uid))
+          .map(component => component.attributes)
+          .reduce((acc, componentAttributes) => ({ ...acc, ...componentAttributes }), {}),
+      };
+
+      return {
+        ...acc,
+        [key]: convertNestedPopulate(subPopulate, generatedFakeDynamicZoneSchema),
+      };
+    }
+
+    if (attribute.type === 'media') {
+      const fileSchema = strapi.getModel('plugin::upoad.file');
+
+      return {
+        ...acc,
+        [key]: convertNestedPopulate(subPopulate, fileSchema),
+      };
+    }
+
+    // NOTE: Retrieve the target schema UID.
+    // Only handles basic relations and component since it's not possible
+    // to populate with options for a dynamic zone or a polymorphic relation
+    let targetSchemaUID;
+
+    if (attribute.type === 'relation') {
+      targetSchemaUID = attribute.target;
+    } else if (attribute.type === 'component') {
+      targetSchemaUID = attribute.component;
+    } else {
+      return acc;
+    }
+
+    const targetSchema = strapi.getModel(targetSchemaUID);
+
+    if (!targetSchema) {
+      return acc;
+    }
+
+    return {
+      ...acc,
+      [key]: convertNestedPopulate(subPopulate, targetSchema),
+    };
+  }, {});
 };
 
 const convertNestedPopulate = (subPopulate, schema) => {
