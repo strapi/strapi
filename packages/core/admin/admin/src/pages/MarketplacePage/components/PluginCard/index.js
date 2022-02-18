@@ -41,7 +41,7 @@ const PluginCard = ({ plugin }) => {
           }}
         />
         <Stack paddingTop={5} size={3}>
-          <Typography as="p" variant="delta">
+          <Typography as="h3" variant="delta">
             {attributes.name}
           </Typography>
           <Typography
@@ -64,10 +64,17 @@ const PluginCard = ({ plugin }) => {
           size="S"
           href={`https://market.strapi.io/plugins/${attributes.slug}`}
           endIcon={<ExternalLink />}
+          aria-label={formatMessage(
+            {
+              id: 'admin.pages.MarketPlacePage.plugin.info.label',
+              defaultMessage: 'Learn more about {pluginName}',
+            },
+            { pluginName: attributes.name }
+          )}
           variant="tertiary"
         >
           {formatMessage({
-            id: 'admin.pages.MarketPlacePage.plugin.info',
+            id: 'admin.pages.MarketPlacePage.plugin.info.text',
             defaultMessage: 'Learn more',
           })}
         </LinkButton>

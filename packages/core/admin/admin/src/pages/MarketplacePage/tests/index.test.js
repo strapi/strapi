@@ -600,11 +600,11 @@ describe('Marketplace page', () => {
                         <div
                           class="c15 c16"
                         >
-                          <p
+                          <h3
                             class="c17"
                           >
                             Comments
-                          </p>
+                          </h3>
                           <p
                             class="c18"
                             style="display: -webkit-box; overflow: hidden;"
@@ -619,6 +619,7 @@ describe('Marketplace page', () => {
                       >
                         <a
                           aria-disabled="false"
+                          aria-label="Learn more about Comments"
                           class="c22 c23"
                           href="https://market.strapi.io/plugins/strapi-plugin-comments"
                           rel="noreferrer noopener"
@@ -704,11 +705,11 @@ describe('Marketplace page', () => {
                         <div
                           class="c15 c16"
                         >
-                          <p
+                          <h3
                             class="c17"
                           >
                             Config Sync
-                          </p>
+                          </h3>
                           <p
                             class="c18"
                             style="display: -webkit-box; overflow: hidden;"
@@ -723,6 +724,7 @@ describe('Marketplace page', () => {
                       >
                         <a
                           aria-disabled="false"
+                          aria-label="Learn more about Config Sync"
                           class="c22 c23"
                           href="https://market.strapi.io/plugins/strapi-plugin-config-sync"
                           rel="noreferrer noopener"
@@ -808,11 +810,11 @@ describe('Marketplace page', () => {
                         <div
                           class="c15 c16"
                         >
-                          <p
+                          <h3
                             class="c17"
                           >
                             Content Versioning
-                          </p>
+                          </h3>
                           <p
                             class="c18"
                             style="display: -webkit-box; overflow: hidden;"
@@ -827,6 +829,7 @@ describe('Marketplace page', () => {
                       >
                         <a
                           aria-disabled="false"
+                          aria-label="Learn more about Content Versioning"
                           class="c22 c23"
                           href="https://market.strapi.io/plugins/@notum-cz-strapi-plugin-content-versioning"
                           rel="noreferrer noopener"
@@ -912,11 +915,11 @@ describe('Marketplace page', () => {
                         <div
                           class="c15 c16"
                         >
-                          <p
+                          <h3
                             class="c17"
                           >
                             Documentation
-                          </p>
+                          </h3>
                           <p
                             class="c18"
                             style="display: -webkit-box; overflow: hidden;"
@@ -931,6 +934,7 @@ describe('Marketplace page', () => {
                       >
                         <a
                           aria-disabled="false"
+                          aria-label="Learn more about Documentation"
                           class="c22 c23"
                           href="https://market.strapi.io/plugins/@strapi-plugin-documentation"
                           rel="noreferrer noopener"
@@ -1016,11 +1020,11 @@ describe('Marketplace page', () => {
                         <div
                           class="c15 c16"
                         >
-                          <p
+                          <h3
                             class="c17"
                           >
                             Transformer
-                          </p>
+                          </h3>
                           <p
                             class="c18"
                             style="display: -webkit-box; overflow: hidden;"
@@ -1035,6 +1039,7 @@ describe('Marketplace page', () => {
                       >
                         <a
                           aria-disabled="false"
+                          aria-label="Learn more about Transformer"
                           class="c22 c23"
                           href="https://market.strapi.io/plugins/strapi-plugin-transformer"
                           rel="noreferrer noopener"
