@@ -45,11 +45,19 @@ module.exports = {
     const currentEnvironment = strapi.config.get('environment');
     const autoReload = strapi.config.get('autoReload', false);
     const strapiVersion = strapi.config.get('info.strapi', null);
+    const dependencies = strapi.config.get('info.dependencies', {});
     const nodeVersion = process.version;
     const communityEdition = !strapi.EE;
 
     return {
-      data: { currentEnvironment, autoReload, strapiVersion, nodeVersion, communityEdition },
+      data: {
+        currentEnvironment,
+        autoReload,
+        strapiVersion,
+        nodeVersion,
+        communityEdition,
+        dependencies,
+      },
     };
   },
 

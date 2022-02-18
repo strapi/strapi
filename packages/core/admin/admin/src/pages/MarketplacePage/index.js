@@ -3,6 +3,7 @@ import { useIntl } from 'react-intl';
 import { useQuery } from 'react-query';
 import { Helmet } from 'react-helmet';
 import {
+  AnErrorOccurred,
   CheckPagePermissions,
   useTracking,
   LoadingIndicatorPage,
@@ -12,7 +13,7 @@ import { useNotifyAT } from '@strapi/design-system/LiveRegions';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { Layout, HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
-import { fetchPlugins, fetchInstalledPlugins } from './utils/api';
+import { fetchPlugins, fetchDependencies } from './utils/api';
 import adminPermissions from '../../permissions';
 import PluginCard from './components/PluginCard';
 
@@ -39,9 +40,9 @@ const MarketPlacePage = () => {
     );
   };
 
-  const { status: installedPluginsStatus, data: installedPluginsResponse } = useQuery(
-    'list-installed-plugins',
-    () => fetchInstalledPlugins(notifyLoad),
+  const { status: installedDependenciesStatus, data: installedDependenciesResponse } = useQuery(
+    'list-dependencies',
+    () => fetchDependencies(notifyLoad),
     {
       onError: () => {
         toggleNotification({
@@ -52,7 +53,7 @@ const MarketPlacePage = () => {
     }
   );
 
-  const { status, data: pluginsResponse } = useQuery(
+  const { status: pluginsStatus, data: pluginsResponse } = useQuery(
     'list-plugins',
     () => fetchPlugins(notifyLoad),
     {
@@ -65,13 +66,20 @@ const MarketPlacePage = () => {
     }
   );
 
-  const isLoading =
-    (status !== 'success' && status !== 'error') ||
-    (installedPluginsStatus !== 'success' && installedPluginsStatus !== 'error');
+  const isLoading = pluginsStatus === 'loading' || installedDependenciesStatus === 'loading';
+  const hasFailed = pluginsStatus === 'error' || installedDependenciesStatus === 'error';
 
   useEffect(() => {
     trackUsage('didGoToMarketplace');
   }, [trackUsage]);
+
+  if (hasFailed) {
+    return (
+      <Layout>
+        <AnErrorOccurred />
+      </Layout>
+    );
+  }
 
   if (isLoading) {
     return (
@@ -83,9 +91,7 @@ const MarketPlacePage = () => {
     );
   }
 
-  const installedPlugins = installedPluginsResponse.plugins.map(plugin => {
-    return plugin.displayName.toLowerCase();
-  });
+  const installedPackages = Object.keys(installedDependenciesResponse.data.dependencies);
 
   return (
     <CheckPagePermissions permissions={adminPermissions.marketplace.main}>
@@ -111,7 +117,7 @@ const MarketPlacePage = () => {
             <Grid gap={4}>
               {pluginsResponse.data.map(plugin => (
                 <GridItem col={4} s={6} xs={12} style={{ height: '100%' }} key={plugin.id}>
-                  <PluginCard plugin={plugin} installedPlugins={installedPlugins} />
+                  <PluginCard plugin={plugin} installedPackages={installedPackages} />
                 </GridItem>
               ))}
             </Grid>

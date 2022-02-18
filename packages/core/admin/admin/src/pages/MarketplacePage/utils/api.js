@@ -17,12 +17,12 @@ const fetchPlugins = async notify => {
   return filteredResponse;
 };
 
-const fetchInstalledPlugins = async notify => {
-  const { data } = await axiosInstance.get('/admin/plugins');
+const fetchDependencies = async notify => {
+  const { data } = await axiosInstance.get('/admin/information');
 
   notify();
 
   return data;
 };
 
-export { fetchPlugins, fetchInstalledPlugins };
+export { fetchPlugins, fetchDependencies };

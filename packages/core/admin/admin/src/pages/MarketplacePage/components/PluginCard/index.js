@@ -12,11 +12,11 @@ import ExternalLink from '@strapi/icons/ExternalLink';
 import Duplicate from '@strapi/icons/Duplicate';
 import Check from '@strapi/icons/Check';
 
-const PluginCard = ({ plugin, installedPlugins }) => {
+const PluginCard = ({ plugin, installedPackages }) => {
   const { attributes } = plugin;
   const { formatMessage } = useIntl();
 
-  const isInstalled = installedPlugins.includes(attributes.name.toLowerCase());
+  const isInstalled = installedPackages.includes(attributes.npmPackageName);
 
   return (
     <Flex
@@ -121,7 +121,7 @@ PluginCard.propTypes = {
       strapiCompatibility: PropTypes.oneOf(['v3', 'v4']).isRequired,
     }).isRequired,
   }).isRequired,
-  installedPlugins: PropTypes.array.isRequired,
+  installedPackages: PropTypes.array.isRequired,
 };
 
 export default PluginCard;
