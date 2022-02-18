@@ -20,7 +20,6 @@ test.each(action.BLOCKING_LABELS)('Test blocking labels %s', async label => {
   await action();
 
   expect(setFailed).toHaveBeenCalled();
-  console.log(setFailed.mock.calls[0][0]);
   expect(setFailed.mock.calls[0][0]).toContain(`The PR has been labelled with a blocking label`);
 
   setFailed.mockRestore();
