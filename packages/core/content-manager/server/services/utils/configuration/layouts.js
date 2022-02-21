@@ -69,20 +69,12 @@ function syncLayouts(configuration, schema) {
 
   let cleanEditRelations = editRelations.filter(attr => hasRelationAttribute(schema, attr));
 
-  let elementsToReAppend = [];
   let cleanEdit = [];
   for (let row of edit) {
     let newRow = [];
 
     for (let el of row) {
       if (!hasEditableAttribute(schema, el.name)) continue;
-
-      // if size of the element has changed (type changes)
-      if (typeToSize(schema.attributes[el.name].type) !== el.size) {
-        elementsToReAppend.push(el.name);
-        continue;
-      }
-
       newRow.push(el);
     }
 
@@ -90,8 +82,6 @@ function syncLayouts(configuration, schema) {
       cleanEdit.push(newRow);
     }
   }
-
-  cleanEdit = appendToEditLayout(cleanEdit, elementsToReAppend, schema);
 
   const newAttributes = _.difference(
     Object.keys(schema.attributes),
