@@ -6,7 +6,7 @@ const {
   stringEquals,
   getCommonBeginning,
   getCommonPath,
-  toGraphQLName,
+  toRegressedEnumValue,
 } = require('../string-formatting');
 
 describe('string-formatting', () => {
@@ -99,7 +99,7 @@ describe('string-formatting', () => {
     });
   });
 
-  describe('toGraphQLName', () => {
+  describe('toRegressedEnumValue', () => {
     test.each([
       ['', ''],
       ['a', 'a'],
@@ -118,7 +118,7 @@ describe('string-formatting', () => {
       ['Baden-Württemberg', 'Baden_Wuerttemberg'],
       ['test_test', 'test_test'],
     ])('%s => %s', (string, expectedResult) => {
-      expect(toGraphQLName(string)).toBe(expectedResult);
+      expect(toRegressedEnumValue(string)).toBe(expectedResult);
     });
   });
 });

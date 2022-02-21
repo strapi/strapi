@@ -2,7 +2,7 @@
 
 const { enumType } = require('nexus');
 const { set } = require('lodash/fp');
-const { toGraphQLName } = require('@strapi/utils');
+const { toRegressedEnumValue } = require('@strapi/utils');
 
 /**
  * Build a Nexus enum type from a Strapi enum attribute
@@ -14,7 +14,10 @@ const { toGraphQLName } = require('@strapi/utils');
 const buildEnumTypeDefinition = (definition, name) => {
   return enumType({
     name,
-    members: definition.enum.reduce((acc, value) => set(toGraphQLName(value), value, acc), {}),
+    members: definition.enum.reduce(
+      (acc, value) => set(toRegressedEnumValue(value), value, acc),
+      {}
+    ),
   });
 };
 

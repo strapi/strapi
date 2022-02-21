@@ -1,6 +1,6 @@
 'use strict';
 
-const { yup } = require('@strapi/utils');
+const { yup, startsWithANumber } = require('@strapi/utils');
 const _ = require('lodash');
 
 const validators = {
@@ -58,6 +58,12 @@ const isValidKey = key => ({
   test: () => NAME_REGEX.test(key),
 });
 
+const isValidEnum = {
+  name: 'isValidEnum',
+  message: '${path} should not start with number',
+  test: val => val === '' || !startsWithANumber(val),
+};
+
 const areEnumValuesUnique = {
   name: 'areEnumValuesUnique',
   message: '${path} cannot contain duplicate values',
@@ -105,6 +111,7 @@ module.exports = {
   isValidName,
   isValidIcon,
   isValidKey,
+  isValidEnum,
   isValidUID,
   isValidRegExpPattern,
 };

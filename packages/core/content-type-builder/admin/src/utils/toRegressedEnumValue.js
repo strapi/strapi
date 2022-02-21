@@ -1,10 +1,10 @@
 import slugify from '@sindresorhus/slugify';
 
-const toGraphQLName = value =>
+const toRegressedEnumValue = value =>
   slugify(value, {
     decamelize: false,
     lowercase: false,
     separator: '_',
   });
 
-export default toGraphQLName;
+export default toRegressedEnumValue;

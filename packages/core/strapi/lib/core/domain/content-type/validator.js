@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const { yup, toGraphQLName } = require('@strapi/utils');
+const { yup, toRegressedEnumValue, startsWithANumber } = require('@strapi/utils');
 
 const LIFECYCLES = [
   'beforeCreate',
@@ -54,7 +54,15 @@ const contentTypeSchemaValidator = yup.object().shape({
         for (const attrName in attributes) {
           const attr = attributes[attrName];
           if (attr.type === 'enumeration') {
-            const normalizedEnum = attr.enum.map(toGraphQLName);
+            // should not start by a number
+            if (attr.enum.some(startsWithANumber)) {
+              const message = `Enum values should not start with a number. Please modify your enumeration '${attrName}'.`;
+
+              return this.createError({ message });
+            }
+
+            // should not collide
+            const normalizedEnum = attr.enum.map(toRegressedEnumValue);
             const duplicates = _(normalizedEnum)
               .groupBy()
               .pickBy(x => x.length > 1)

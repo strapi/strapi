@@ -10,6 +10,7 @@ const {
   areEnumValuesUnique,
   isValidDefaultJSON,
   isValidName,
+  isValidEnum,
   isValidUID,
   isValidRegExpPattern,
 } = require('./common');
@@ -133,7 +134,12 @@ const getTypeShape = (attribute, { modelType, attributes } = {}) => {
       return {
         enum: yup
           .array()
-          .of(yup.string().required())
+          .of(
+            yup
+              .string()
+              .test(isValidEnum)
+              .required()
+          )
           .min(1)
           .test(areEnumValuesUnique)
           .required(),

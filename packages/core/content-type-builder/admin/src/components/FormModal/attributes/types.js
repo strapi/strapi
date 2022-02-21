@@ -3,7 +3,8 @@ import * as yup from 'yup';
 import { translatedErrors as errorsTrads } from '@strapi/helper-plugin';
 import getTrad from '../../../utils/getTrad';
 import getRelationType from '../../../utils/getRelationType';
-import toGraphQLName from '../../../utils/toGraphQLName';
+import toRegressedEnumValue from '../../../utils/toRegressedEnumValue';
+import startsWithANumber from '../../../utils/startsWithANumber';
 import {
   alreadyUsedAttributeNames,
   createTextShape,
@@ -151,36 +152,26 @@ const types = {
         .test({
           name: 'areEnumValuesUnique',
           message: getTrad('error.validation.enum-duplicate'),
-          test: values => {
-            const filtered = [...new Set(values)];
-
-            return filtered.length === values.length;
-          },
-        })
-        .test({
-          name: 'valuesCollide',
-          message: 'Some values collide when normalized',
           test(values) {
-            const normalizedEnum = values.map(toGraphQLName);
+            const normalizedEnum = values.map(toRegressedEnumValue);
             const duplicates = _(normalizedEnum)
               .groupBy()
               .pickBy(x => x.length > 1)
               .keys()
               .value();
 
-            if (duplicates.length) {
-              const message = `Some values collide when normalized: ${duplicates.join(', ')}`;
-
-              return this.createError({ message });
-            }
-
-            return true;
+            return !duplicates.length;
           },
         })
         .test({
           name: 'doesNotHaveEmptyValues',
           message: getTrad('error.validation.enum-empty-string'),
           test: values => !values.some(val => val === ''),
+        })
+        .test({
+          name: 'doesNotStartWithANumber',
+          message: getTrad('error.validation.enum-number'),
+          test: values => !values.some(startsWithANumber),
         }),
       enumName: yup.string().nullable(),
     };
