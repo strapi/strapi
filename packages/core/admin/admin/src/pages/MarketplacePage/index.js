@@ -4,6 +4,7 @@ import { useQuery } from 'react-query';
 import { Helmet } from 'react-helmet';
 import {
   CheckPagePermissions,
+  useFocusWhenNavigate,
   useTracking,
   LoadingIndicatorPage,
   useNotification,
@@ -21,6 +22,8 @@ const MarketPlacePage = () => {
   const { trackUsage } = useTracking();
   const toggleNotification = useNotification();
   const { notifyStatus } = useNotifyAT();
+
+  useFocusWhenNavigate();
 
   const title = formatMessage({
     id: 'admin.pages.MarketPlacePage.title',
@@ -40,7 +43,7 @@ const MarketPlacePage = () => {
   };
 
   const { status, data: pluginsResponse } = useQuery(
-    'list-plugins',
+    'list-marketplace-plugins',
     () => fetchPlugins(notifyLoad),
     {
       onError: () => {
@@ -69,38 +72,43 @@ const MarketPlacePage = () => {
   }
 
   return (
-    <CheckPagePermissions permissions={adminPermissions.marketplace.main}>
-      <Layout>
-        <Main>
-          <Helmet
-            title={formatMessage({
-              id: 'admin.pages.MarketPlacePage.helmet',
-              defaultMessage: 'Marketplace - Plugins',
-            })}
-          />
-          <HeaderLayout
-            title={formatMessage({
-              id: 'admin.pages.MarketPlacePage.title',
-              defaultMessage: 'Marketplace',
-            })}
-            subtitle={formatMessage({
-              id: 'admin.pages.MarketPlacePage.subtitle',
-              defaultMessage: 'Get more out of Strapi',
-            })}
-          />
-          <ContentLayout>
-            <Grid gap={4}>
-              {pluginsResponse.data.map(plugin => (
-                <GridItem col={4} s={6} xs={12} style={{ height: '100%' }} key={plugin.id}>
-                  <PluginCard plugin={plugin} />
-                </GridItem>
-              ))}
-            </Grid>
-          </ContentLayout>
-        </Main>
-      </Layout>
-    </CheckPagePermissions>
+    <Layout>
+      <Main>
+        <Helmet
+          title={formatMessage({
+            id: 'admin.pages.MarketPlacePage.helmet',
+            defaultMessage: 'Marketplace - Plugins',
+          })}
+        />
+        <HeaderLayout
+          title={formatMessage({
+            id: 'admin.pages.MarketPlacePage.title',
+            defaultMessage: 'Marketplace',
+          })}
+          subtitle={formatMessage({
+            id: 'admin.pages.MarketPlacePage.subtitle',
+            defaultMessage: 'Get more out of Strapi',
+          })}
+        />
+        <ContentLayout>
+          <Grid gap={4}>
+            {pluginsResponse.data.map(plugin => (
+              <GridItem col={4} s={6} xs={12} style={{ height: '100%' }} key={plugin.id}>
+                <PluginCard plugin={plugin} />
+              </GridItem>
+            ))}
+          </Grid>
+        </ContentLayout>
+      </Main>
+    </Layout>
   );
 };
 
-export default MarketPlacePage;
+const ProtectedMarketPlace = () => (
+  <CheckPagePermissions permissions={adminPermissions.marketplace.main}>
+    <MarketPlacePage />
+  </CheckPagePermissions>
+);
+
+export { MarketPlacePage };
+export default ProtectedMarketPlace;

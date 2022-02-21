@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
+import styled from 'styled-components';
 import { Box } from '@strapi/design-system/Box';
 import { Stack } from '@strapi/design-system/Stack';
 import { Typography } from '@strapi/design-system/Typography';
@@ -10,56 +11,54 @@ import { Flex } from '@strapi/design-system/Flex';
 import ExternalLink from '@strapi/icons/ExternalLink';
 import Duplicate from '@strapi/icons/Duplicate';
 
+// Custom component to have an ellipsis after the 2nd line
+const EllipsisText = styled(Typography)`
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+`;
+
 const PluginCard = ({ plugin }) => {
   const { attributes } = plugin;
   const { formatMessage } = useIntl();
 
   return (
     <Flex
-      paddingLeft={6}
-      paddingRight={6}
+      direction="column"
+      justifyContent="space-between"
       paddingTop={4}
+      paddingRight={6}
       paddingBottom={4}
+      paddingLeft={6}
       hasRadius
       background="neutral0"
       shadow="tableShadow"
-      justifyContent="space-between"
-      direction="column"
-      alignItems="stretch"
-      style={{ height: '100%' }}
+      height="100%"
+      alignItems="normal"
     >
-      <div>
+      <Box>
         <Box
           as="img"
           src={attributes.logo.url}
           alt={`${attributes.name} logo`}
           hasRadius
-          style={{
-            width: '64px',
-            height: '64px',
-            objectFit: 'contain',
-          }}
+          width={11}
+          height={11}
         />
-        <Stack paddingTop={5} size={3}>
+        <Box paddingTop={5}>
           <Typography as="h3" variant="delta">
             {attributes.name}
           </Typography>
-          <Typography
-            as="p"
-            variant="omega"
-            textColor="neutral600"
-            style={{
-              display: ' -webkit-box',
-              WebkitBoxOrient: 'vertical',
-              WebkitLineClamp: 2,
-              overflow: 'hidden',
-            }}
-          >
+        </Box>
+        <Box paddingTop={2}>
+          <EllipsisText as="p" variant="omega" textColor="neutral600">
             {attributes.description}
-          </Typography>
-        </Stack>
-      </div>
-      <Stack horizontal size={2} paddingTop={3} style={{ alignSelf: 'flex-end' }}>
+          </EllipsisText>
+        </Box>
+      </Box>
+
+      <Stack horizontal size={2} style={{ alignSelf: 'flex-end' }} paddingTop={3}>
         <LinkButton
           size="S"
           href={`https://market.strapi.io/plugins/${attributes.slug}`}
