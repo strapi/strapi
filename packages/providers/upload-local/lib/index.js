@@ -20,10 +20,8 @@ module.exports = {
       }
     };
 
-    const publicDir = strapi.config.get('server.dirs.public');
-
     // Ensure uploads folder exists
-    const uploadPath = path.resolve(publicDir, UPLOADS_FOLDER_NAME);
+    const uploadPath = path.resolve(strapi.dirs.public, UPLOADS_FOLDER_NAME);
     fse.ensureDirSync(uploadPath);
 
     return {
@@ -45,7 +43,7 @@ module.exports = {
       },
       delete(file) {
         return new Promise((resolve, reject) => {
-          const filePath = path.join(publicDir, `/uploads/${file.hash}${file.ext}`);
+          const filePath = path.join(uploadPath, `${file.hash}${file.ext}`);
 
           if (!fs.existsSync(filePath)) {
             return resolve("File doesn't exist");

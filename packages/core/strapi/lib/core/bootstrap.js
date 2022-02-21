@@ -25,5 +25,5 @@ module.exports = function({ strapi }) {
   }
 
   // ensure public repository exists
-  fse.ensureDir(strapi.config.get('server.dirs.public'));
+  fse.ensureDir(strapi.dirs.public);
 };

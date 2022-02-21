@@ -36,7 +36,7 @@ module.exports = (dir, initialConfig = {}) => {
 
   const pkgJSON = require(path.resolve(dir, 'package.json'));
 
-  const configDir = path.resolve(dir || process.cwd(), 'config');
+  const configDir = path.resolve(dir, 'config');
 
   const rootConfig = {
     launchedAt: Date.now(),
@@ -56,9 +56,5 @@ module.exports = (dir, initialConfig = {}) => {
   const envDir = path.resolve(configDir, 'env', process.env.NODE_ENV);
   const envConfig = loadConfigDir(envDir);
 
-  const config = _.merge(rootConfig, defaultConfig, baseConfig, envConfig);
-
-  config.server.dirs.public = path.resolve(dir, config.server.dirs.public);
-
-  return config;
+  return _.merge(rootConfig, defaultConfig, baseConfig, envConfig);
 };
