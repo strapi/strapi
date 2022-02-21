@@ -24,7 +24,8 @@
   "workspaces": [
     "packages/*",
     "packages/*/*",
-    "examples/*"
+    "examples/*",
+    ".github/actions/*"
   ],
   "scripts": {
     "setup": "yarn && yarn build",
