@@ -1,5 +1,7 @@
 'use strict';
 
+const { join } = require('path');
+
 const bootstrap = require('../bootstrap');
 
 describe('Upload plugin bootstrap function', () => {
@@ -8,7 +10,7 @@ describe('Upload plugin bootstrap function', () => {
     const registerMany = jest.fn(() => {});
 
     global.strapi = {
-      dirs: { root: process.cwd() },
+      dirs: { root: process.cwd(), public: join(process.cwd(), 'public') },
       admin: {
         services: { permission: { actionProvider: { registerMany } } },
       },
@@ -16,10 +18,7 @@ describe('Upload plugin bootstrap function', () => {
         error() {},
       },
       config: {
-        get: jest
-          .fn()
-          .mockReturnValueOnce({ provider: 'local' })
-          .mockReturnValueOnce('public'),
+        get: jest.fn().mockReturnValueOnce({ provider: 'local' }),
         paths: {},
         info: {
           dependencies: {},
