@@ -32,7 +32,7 @@ const Plugins = () => {
     );
   };
 
-  const { status, data } = useQuery('list-plugins', () => fetchPlugins(notifyLoad), {
+  const { status, data } = useQuery('list-installed-plugins', () => fetchPlugins(notifyLoad), {
     onError: () => {
       toggleNotification({
         type: 'warning',
