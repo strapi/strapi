@@ -13,9 +13,11 @@ import Duplicate from '@strapi/icons/Duplicate';
 
 // Custom component to have an ellipsis after the 2nd line
 const EllipsisText = styled(Typography)`
+  /* stylelint-disable value-no-vendor-prefix, property-no-vendor-prefix */
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
+  /* stylelint-enable value-no-vendor-prefix, property-no-vendor-prefix */
   overflow: hidden;
 `;
 
