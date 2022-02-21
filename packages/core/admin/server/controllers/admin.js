@@ -94,6 +94,7 @@ module.exports = {
       name: plugin.info.name || key,
       displayName: plugin.info.displayName || plugin.info.name || key,
       description: plugin.info.description || '',
+      packageName: plugin.info.packageName,
     }));
 
     ctx.send({ plugins });

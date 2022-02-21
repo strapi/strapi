@@ -1,73 +1,51 @@
 import React, { useEffect } from 'react';
 import { useIntl } from 'react-intl';
-import { useQuery } from 'react-query';
 import { Helmet } from 'react-helmet';
 import {
   AnErrorOccurred,
   CheckPagePermissions,
+  useFocusWhenNavigate,
   useTracking,
   LoadingIndicatorPage,
-  useNotification,
 } from '@strapi/helper-plugin';
-import { useNotifyAT } from '@strapi/design-system/LiveRegions';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { Layout, HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
-import { fetchPlugins, fetchAppInformation } from './utils/api';
 import adminPermissions from '../../permissions';
 import PluginCard from './components/PluginCard';
+import useFetchInstalledPlugins from '../../hooks/useFetchInstalledPlugins';
+import useFetchMarketplacePlugins from '../../hooks/useFetchMarketplacePlugins';
 
 const MarketPlacePage = () => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
-  const toggleNotification = useNotification();
-  const { notifyStatus } = useNotifyAT();
 
-  const title = formatMessage({
+  useFocusWhenNavigate();
+
+  const marketplaceTitle = formatMessage({
     id: 'admin.pages.MarketPlacePage.title',
     defaultMessage: 'Marketplace',
   });
 
-  const notifyLoad = () => {
-    notifyStatus(
-      formatMessage(
-        {
-          id: 'app.utils.notify.data-loaded',
-          defaultMessage: 'The {target} has loaded',
-        },
-        { target: title }
-      )
-    );
-  };
-
-  const { status: installedDependenciesStatus, data: installedDependenciesResponse } = useQuery(
-    'app-information',
-    () => fetchAppInformation(notifyLoad),
+  const pluginsTitle = formatMessage(
     {
-      onError: () => {
-        toggleNotification({
-          type: 'warning',
-          message: { id: 'notification.error', defaultMessage: 'An error occured' },
-        });
-      },
-    }
+      id: 'app.utils.notify.data-loaded',
+      defaultMessage: 'The {target} has loaded',
+    },
+    { target: marketplaceTitle }
   );
 
-  const { status: pluginsStatus, data: pluginsResponse } = useQuery(
-    'list-plugins',
-    () => fetchPlugins(notifyLoad),
-    {
-      onError: () => {
-        toggleNotification({
-          type: 'warning',
-          message: { id: 'notification.error', defaultMessage: 'An error occured' },
-        });
-      },
-    }
-  );
+  const {
+    status: marketplacePluginsStatus,
+    data: marketplacePluginsResponse,
+  } = useFetchMarketplacePlugins(pluginsTitle);
+  const {
+    status: installedPluginsStatus,
+    data: installedPluginsResponse,
+  } = useFetchInstalledPlugins();
 
-  const isLoading = pluginsStatus === 'loading' || installedDependenciesStatus === 'loading';
-  const hasFailed = pluginsStatus === 'error' || installedDependenciesStatus === 'error';
+  const isLoading = marketplacePluginsStatus === 'loading' || installedPluginsStatus === 'loading';
+  const hasFailed = marketplacePluginsStatus === 'error' || installedPluginsStatus === 'error';
 
   useEffect(() => {
     trackUsage('didGoToMarketplace');
@@ -91,45 +69,46 @@ const MarketPlacePage = () => {
     );
   }
 
-  const { dependencies, useYarn } = installedDependenciesResponse.data;
-  const installedPackages = Object.keys(dependencies);
-
-  // TODO: implement and remove
-  console.log({ useYarn });
+  const installedPlugins = installedPluginsResponse.plugins.map(plugin => plugin.packageName);
 
   return (
-    <CheckPagePermissions permissions={adminPermissions.marketplace.main}>
-      <Layout>
-        <Main>
-          <Helmet
-            title={formatMessage({
-              id: 'admin.pages.MarketPlacePage.helmet',
-              defaultMessage: 'Marketplace - Plugins',
-            })}
-          />
-          <HeaderLayout
-            title={formatMessage({
-              id: 'admin.pages.MarketPlacePage.title',
-              defaultMessage: 'Marketplace',
-            })}
-            subtitle={formatMessage({
-              id: 'admin.pages.MarketPlacePage.subtitle',
-              defaultMessage: 'Get more out of Strapi',
-            })}
-          />
-          <ContentLayout>
-            <Grid gap={4}>
-              {pluginsResponse.data.map(plugin => (
-                <GridItem col={4} s={6} xs={12} style={{ height: '100%' }} key={plugin.id}>
-                  <PluginCard plugin={plugin} installedPackages={installedPackages} />
-                </GridItem>
-              ))}
-            </Grid>
-          </ContentLayout>
-        </Main>
-      </Layout>
-    </CheckPagePermissions>
+    <Layout>
+      <Main>
+        <Helmet
+          title={formatMessage({
+            id: 'admin.pages.MarketPlacePage.helmet',
+            defaultMessage: 'Marketplace - Plugins',
+          })}
+        />
+        <HeaderLayout
+          title={formatMessage({
+            id: 'admin.pages.MarketPlacePage.title',
+            defaultMessage: 'Marketplace',
+          })}
+          subtitle={formatMessage({
+            id: 'admin.pages.MarketPlacePage.subtitle',
+            defaultMessage: 'Get more out of Strapi',
+          })}
+        />
+        <ContentLayout>
+          <Grid gap={4}>
+            {marketplacePluginsResponse.data.map(plugin => (
+              <GridItem col={4} s={6} xs={12} style={{ height: '100%' }} key={plugin.id}>
+                <PluginCard plugin={plugin} installedPlugins={installedPlugins} />
+              </GridItem>
+            ))}
+          </Grid>
+        </ContentLayout>
+      </Main>
+    </Layout>
   );
 };
 
-export default MarketPlacePage;
+const ProtectedMarketPlace = () => (
+  <CheckPagePermissions permissions={adminPermissions.marketplace.main}>
+    <MarketPlacePage />
+  </CheckPagePermissions>
+);
+
+export { MarketPlacePage };
+export default ProtectedMarketPlace;
