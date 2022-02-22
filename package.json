@@ -24,7 +24,8 @@
   "workspaces": [
     "packages/*",
     "packages/*/*",
-    "examples/*"
+    "examples/*",
+    ".github/actions/*"
   ],
   "scripts": {
     "setup": "yarn && yarn build",
@@ -72,7 +73,7 @@
   "devDependencies": {
     "@swc-node/jest": "1.4.3",
     "@testing-library/react": "11.2.7",
-    "@testing-library/react-hooks": "3.4.2",
+    "@testing-library/react-hooks": "3.7.0",
     "@testing-library/user-event": "13.5.0",
     "axios-mock-adapter": "1.20.0",
     "babel-eslint": "10.1.0",
@@ -86,7 +87,7 @@
     "eslint-config-airbnb": "18.2.1",
     "eslint-config-airbnb-base": "14.2.1",
     "eslint-config-prettier": "6.15.0",
-    "eslint-plugin-import": "2.22.1",
+    "eslint-plugin-import": "2.25.4",
     "eslint-plugin-jsdoc": "36.1.1",
     "eslint-plugin-jsx-a11y": "6.4.1",
     "eslint-plugin-node": "11.1.0",
@@ -107,9 +108,9 @@
     "lodash": "4.17.21",
     "msw": "0.36.8",
     "npm-run-all": "4.1.5",
-    "plop": "2.7.4",
-    "prettier": "1.18.2",
-    "qs": "6.10.1",
+    "plop": "2.7.6",
+    "prettier": "1.19.1",
+    "qs": "6.10.3",
     "react-test-renderer": "17.0.2",
     "request": "2.88.2",
     "request-promise-native": "1.0.9",
