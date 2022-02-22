@@ -167,14 +167,14 @@ const convertPopulateObject = (populate, schema) => {
       return acc;
     }
 
-    // TODO: This is a temporary solution for dynamic zones that should be
-    // fixed when we'll implement a more accurate way to query dynamic zones
+    // FIXME: This is a temporary solution for dynamic zones that should be
+    // fixed when we'll implement a more accurate way to query them
     if (attribute.type === 'dynamiczone') {
       const generatedFakeDynamicZoneSchema = {
         uid: `${schema.uid}.${key}`,
         attributes: attribute.components
-          .map(uid => strapi.getModel(uid))
-          .map(component => component.attributes)
+          .sort()
+          .map(uid => strapi.getModel(uid).attributes)
           .reduce((acc, componentAttributes) => ({ ...acc, ...componentAttributes }), {}),
       };
 
