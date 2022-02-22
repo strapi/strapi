@@ -3913,7 +3913,7 @@
   dependencies:
     "@types/koa" "*"
 
-"@types/liftoff@^2.5.0", "@types/liftoff@^2.5.1":
+"@types/liftoff@^2.5.1":
   version "2.5.1"
   resolved "https://registry.yarnpkg.com/@types/liftoff/-/liftoff-2.5.1.tgz#2eb4c1f86e9d5ee85571e56db0084b26af129ced"
   integrity sha512-nB3R6Q9CZcM07JgiTK6ibxqrG1reiHE+UX7em/W1DKwVBxDlfKWOefQjk4jubY5xX+GDxVsWR2KD1SenPby8ow==
@@ -12719,7 +12719,7 @@ node-notifier@^8.0.0:
     uuid "^8.3.0"
     which "^2.0.2"
 
-node-plop@0.26.3, node-plop@^0.26.3, node-plop@~0.26.2:
+node-plop@0.26.3, node-plop@^0.26.3:
   version "0.26.3"
   resolved "https://registry.yarnpkg.com/node-plop/-/node-plop-0.26.3.tgz#d6fa7e71393c8b940513ba8c4868f8aaa6dea9df"
   integrity sha512-Cov028YhBZ5aB7MdMWJEmwyBig43aGL5WT4vdoB28Oitau1zZAcHUn8Sgfk9HM33TqhtLJ9PlM/O0Mv+QpV/4Q==
@@ -13969,20 +13969,6 @@ please-upgrade-node@^3.2.0:
   integrity sha512-gQR3WpIgNIKwBMVLkpMUeR3e1/E1y42bqDQZfql+kDeXd8COYfM8PQA4X6y7a8u9Ua9FHmsrrmirW2vHs45hWg==
   dependencies:
     semver-compare "^1.0.0"
-
-plop@2.7.4:
-  version "2.7.4"
-  resolved "https://registry.yarnpkg.com/plop/-/plop-2.7.4.tgz#835280aef3541102063b758f5116cce899e1c72b"
-  integrity sha512-SaqN3mwug/Ur2RE/ryo05oLTLy+8qZGwosNt9JnrFWca+dLCsPJR1j2ZXwjrccmNu6LA7eB56lRyk/G0fKf9HA==
-  dependencies:
-    "@types/liftoff" "^2.5.0"
-    chalk "^1.1.3"
-    interpret "^1.2.0"
-    liftoff "^2.5.0"
-    minimist "^1.2.0"
-    node-plop "~0.26.2"
-    ora "^3.4.0"
-    v8flags "^2.0.10"
 
 plop@2.7.6:
   version "2.7.6"
