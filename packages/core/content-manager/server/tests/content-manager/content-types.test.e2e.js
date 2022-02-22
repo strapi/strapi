@@ -1,5 +1,8 @@
 'use strict';
 
+const cloneDeep = require('lodash/cloneDeep');
+const merge = require('lodash/merge');
+
 // Helpers.
 const { createTestBuilder } = require('../../../../../../test/helpers/builder');
 const { createStrapiInstance } = require('../../../../../../test/helpers/strapi');
@@ -14,6 +17,14 @@ const restart = async () => {
   await strapi.destroy();
   strapi = await createStrapiInstance();
   rq = await createAuthRequest({ strapi });
+};
+
+const transformLayout = (layout, partialNewLayout) => {
+  return partialNewLayout.reduce((acc, row, rowIndex) => {
+    acc[rowIndex] = row.map((column, columnIndex) => merge(acc[rowIndex][columnIndex], column));
+
+    return acc;
+  }, layout);
 };
 
 const FIXTURE_DEFAULT_LAYOUT = [
@@ -64,8 +75,20 @@ describe('Content Manager - Update Layout', () => {
   });
 
   test('Update field size', async () => {
-    const payload = [...FIXTURE_DEFAULT_LAYOUT];
-    payload[0][0].size = 12;
+    const transformation = [
+      [
+        {
+          name: 'title',
+          size: 8,
+        },
+
+        {
+          name: 'date',
+          size: 4,
+        },
+      ],
+    ];
+    const payload = transformLayout(cloneDeep(FIXTURE_DEFAULT_LAYOUT), transformation);
 
     await rq({
       url: '/content-manager/content-types/api::article.article/configuration',
@@ -84,14 +107,33 @@ describe('Content Manager - Update Layout', () => {
       method: 'GET',
     });
 
-    expect(body.data.contentType.layouts.edit[0][0].size).toBe(12);
+    const expectation = transformLayout(cloneDeep(FIXTURE_DEFAULT_LAYOUT), transformation);
+
+    expect(body.data.contentType.layouts.edit).toStrictEqual(expectation);
   });
 
   test('Update field size with server restart and invalid JSON size', async () => {
-    const payload = [...FIXTURE_DEFAULT_LAYOUT];
-    payload[0][0].size = 8; // title
-    payload[0][1].size = 4; // date
-    payload[1][0].size = 6; // jsonField
+    const transformation = [
+      [
+        {
+          name: 'title',
+          size: 8,
+        },
+
+        {
+          name: 'date',
+          size: 4,
+        },
+      ],
+
+      [
+        {
+          name: 'jsonField',
+          size: 6,
+        },
+      ],
+    ];
+    const payload = transformLayout(cloneDeep(FIXTURE_DEFAULT_LAYOUT), transformation);
 
     await rq({
       url: '/content-manager/content-types/api::article.article/configuration',
@@ -112,20 +154,52 @@ describe('Content Manager - Update Layout', () => {
       method: 'GET',
     });
 
-    expect(body.data.contentType.layouts.edit[0][0].name).toBe('title');
-    expect(body.data.contentType.layouts.edit[0][0].size).toBe(8);
+    const expectation = [
+      [
+        {
+          name: 'title',
+          size: 8,
+        },
 
-    expect(body.data.contentType.layouts.edit[0][1].name).toBe('date');
-    expect(body.data.contentType.layouts.edit[0][1].size).toBe(4);
+        {
+          name: 'date',
+          size: 4,
+        },
+      ],
 
-    expect(body.data.contentType.layouts.edit[2][0].name).toBe('jsonField');
-    expect(body.data.contentType.layouts.edit[2][0].size).toBe(12);
+      [
+        {
+          name: 'content',
+          size: 12,
+        },
+      ],
+
+      [
+        {
+          name: 'jsonField',
+          size: 12,
+        },
+      ],
+    ];
+
+    expect(body.data.contentType.layouts.edit).toStrictEqual(expectation);
   });
 
   test('Update field size with server restart and invalid date size', async () => {
-    const payload = [...FIXTURE_DEFAULT_LAYOUT];
-    payload[0][0].size = 12; // title
-    payload[0][1].size = 14; // date
+    const transformation = [
+      [
+        {
+          name: 'title',
+          size: 12,
+        },
+
+        {
+          name: 'date',
+          size: 14,
+        },
+      ],
+    ];
+    const payload = transformLayout(cloneDeep(FIXTURE_DEFAULT_LAYOUT), transformation);
 
     await rq({
       url: '/content-manager/content-types/api::article.article/configuration',
@@ -146,10 +220,34 @@ describe('Content Manager - Update Layout', () => {
       method: 'GET',
     });
 
-    expect(body.data.contentType.layouts.edit[0][0].name).toBe('title');
-    expect(body.data.contentType.layouts.edit[0][0].size).toBe(12);
+    const expectation = [
+      [
+        {
+          name: 'title',
+          size: 12,
+        },
+      ],
+      [
+        {
+          name: 'jsonField',
+          size: 12,
+        },
+      ],
+      [
+        {
+          name: 'content',
+          size: 12,
+        },
+      ],
 
-    expect(body.data.contentType.layouts.edit[2][0].name).toBe('date');
-    expect(body.data.contentType.layouts.edit[2][0].size).toBe(4);
+      [
+        {
+          name: 'date',
+          size: 4,
+        },
+      ],
+    ];
+
+    expect(body.data.contentType.layouts.edit).toStrictEqual(expectation);
   });
 });
