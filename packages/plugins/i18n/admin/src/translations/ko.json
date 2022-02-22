@@ -42,7 +42,7 @@
   "Settings.locales.modal.locales.label": "로케일",
   "Settings.locales.modal.locales.loaded": "로케일 목록을 불러왔습니다.",
   "Settings.locales.modal.title": "설정",
-  "Settings.locales.row.default-locale": "Default",
+  "Settings.locales.row.default-locale": "기본값",
   "Settings.locales.row.displayName": "표시 이름",
   "Settings.locales.row.id": "ID",
   "Settings.permissions.loading": "권한을 불러오는 중",
