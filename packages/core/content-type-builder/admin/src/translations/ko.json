@@ -44,10 +44,10 @@
   "components.componentSelect.value-component": "{number} component selected (type to search for a component)",
   "components.componentSelect.value-components": "{number} 개의 컴포넌트 선택됨",
   "configurations": "설정",
-  "contentType.apiId-plural.description": "Pluralized API ID",
-  "contentType.apiId-plural.label": "API ID (단수)",
+  "contentType.apiId-plural.description": "복수 형식의 API ID",
+  "contentType.apiId-plural.label": "API ID (복수)",
   "contentType.apiId-singular.description": "UID는 API 경로 및 데이터베이스 테이블/ 컬렉션을 생성하는 데 사용됩니다.",
-  "contentType.apiId-singular.label": "API ID (복수)",
+  "contentType.apiId-singular.label": "API ID (단수)",
   "contentType.collectionName.description": "콘텐츠 타입과 테이블 이름이 다를 때 유용합니다.",
   "contentType.collectionName.label": "콜렉션 이름",
   "contentType.displayName.label": "표시 이름",
@@ -115,7 +115,7 @@
   "form.attribute.text.option.long-text.description": "설명, 이야기에 적합합니다. 정확한 검색(Exact search)은 불가능합니다.",
   "form.attribute.text.option.short-text": "짧은 텍스트",
   "form.attribute.text.option.short-text.description": "제목, 이름, 링크(URL)에 적합합니다. 또한 필드에서 정확한 검색(Exact search)이 가능합니다.",
-  "form.button.add-components-to-dynamiczone": "Add components to the zone",
+  "form.button.add-components-to-dynamiczone": "다이나믹 존에 컴포넌트 추가",
   "form.button.add-field": "다른 필드 추가",
   "form.button.add-first-field-to-created-component": "컴포넌트에 첫 필드 만들기",
   "form.button.add.field.to.collectionType": "이 콜렉션 타입에 다른 필드 추가하기",
@@ -187,6 +187,6 @@
   "table.content.create-first-content-type": "첫 콜렉션 타입을 만들어보세요.",
   "table.content.no-fields.collection-type": "콜렉션 타입에 첫 필드를 추가해보세요.",
   "table.content.no-fields.component": "컴포넌트에 첫 필드를 추가해보세요.",
-  "table.headers.name": "Name",
-  "table.headers.type": "Type"
+  "table.headers.name": "이름",
+  "table.headers.type": "타입"
 }

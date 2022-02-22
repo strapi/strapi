@@ -1,6 +1,7 @@
 'use strict';
 const commander = require('commander');
 
+// eslint-disable-next-line import/extensions
 const packageJson = require('./package.json');
 const buildStarter = require('./utils/build-starter');
 const promptUser = require('./utils/prompt-user');
