@@ -1,9 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import styled from 'styled-components';
 import { Tooltip } from '@strapi/design-system/Tooltip';
 import { Typography } from '@strapi/design-system/Typography';
 
 import CellValue from '../CellValue';
+
+const TypographyMaxWidth = styled(Typography)`
+  max-width: 250px;
+`;
 
 const SingleComponentCell = ({ value, metadatas }) => {
   const { mainField } = metadatas;
@@ -11,9 +16,9 @@ const SingleComponentCell = ({ value, metadatas }) => {
 
   return (
     <Tooltip label={content}>
-      <Typography textColor="neutral800" ellipsis>
+      <TypographyMaxWidth textColor="neutral800" ellipsis>
         <CellValue type={mainField.type} value={content} />
-      </Typography>
+      </TypographyMaxWidth>
     </Tooltip>
   );
 };
