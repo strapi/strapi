@@ -6,8 +6,10 @@ export default function hasContent(type, content, metadatas, fieldSchema) {
       mainField: { name: mainFieldName },
     } = metadatas;
 
+    // Repeatable fields show the ID as fallback, in case the mainField
+    // doesn't have any content
     if (fieldSchema?.repeatable) {
-      return content.some(item => !isEmpty(item));
+      return content.length > 0;
     }
 
     return !isEmpty(content[mainFieldName]);

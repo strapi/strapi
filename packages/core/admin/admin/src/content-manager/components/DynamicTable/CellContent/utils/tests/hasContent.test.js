@@ -19,7 +19,7 @@ describe('hasContent', () => {
   it('extracts content from single components with content', () => {
     const normalizedContent = hasContent(
       'component',
-      { name: 'content' },
+      { name: 'content', id: 1 },
       { mainField: { name: 'name' } }
     );
     expect(normalizedContent).toEqual(true);
@@ -28,7 +28,7 @@ describe('hasContent', () => {
   it('extracts content from single components without content', () => {
     const normalizedContent = hasContent(
       'component',
-      { name: '' },
+      { name: '', id: 1 },
       { mainField: { name: 'name' } }
     );
     expect(normalizedContent).toEqual(false);
@@ -37,7 +37,7 @@ describe('hasContent', () => {
   it('extracts content from repeatable components with content', () => {
     const normalizedContent = hasContent(
       'component',
-      [{ name: 'content_2', value: 'truthy' }],
+      [{ name: 'content_2', value: 'truthy', id: 1 }],
       { mainField: { name: 'content_2' } },
       { repeatable: true }
     );
@@ -47,7 +47,7 @@ describe('hasContent', () => {
   it('extracts content from repeatable components without content', () => {
     const normalizedContent = hasContent(
       'component',
-      [{ name: 'content_2', value: '' }],
+      [{ name: 'content_2', value: '', id: 1 }],
       { mainField: { name: 'content_2' } },
       { repeatable: true }
     );
@@ -57,7 +57,17 @@ describe('hasContent', () => {
   it('extracts content from repeatable components without content', () => {
     const normalizedContent = hasContent(
       'component',
-      [{}, {}],
+      [{ id: 1 }, { id: 2 }],
+      { mainField: { name: 'content_2' } },
+      { repeatable: true }
+    );
+    expect(normalizedContent).toEqual(true);
+  });
+
+  it('extracts content from repeatable components without content', () => {
+    const normalizedContent = hasContent(
+      'component',
+      [],
       { mainField: { name: 'content_2' } },
       { repeatable: true }
     );
