@@ -21,12 +21,15 @@ async function main() {
 
     const sourceLabelCount = labels.filter(label => label.name.startsWith('source: ')).length;
     const issueLabelCount = labels.filter(label => label.name.startsWith('issue-type: ')).length;
+    const hasSourceDependenciesLabel = !!labels.find(
+      label => label.name === 'source: dependencies'
+    );
 
     if (sourceLabelCount !== 1) {
       core.setFailed(`The PR must have one and only one 'source:' label.`);
     }
 
-    if (issueLabelCount !== 1) {
+    if (issueLabelCount !== 1 && !hasSourceDependenciesLabel) {
       core.setFailed(`The PR must have one and only one 'issue-type:' label.`);
     }
 

@@ -44,6 +44,24 @@ test('Test missing source label', async () => {
   setFailed.mockRestore();
 });
 
+test('Test source label dependencies', async () => {
+  github.context = {
+    payload: {
+      pull_request: {
+        labels: [{ name: 'source: dependencies' }],
+      },
+    },
+  };
+
+  const setFailed = jest.spyOn(core, 'setFailed');
+
+  await action();
+
+  expect(setFailed).not.toHaveBeenCalled();
+
+  setFailed.mockRestore();
+});
+
 test('Test too many source label', async () => {
   github.context = {
     payload: {
