@@ -141,7 +141,7 @@ export const EditAssetDialog = ({
                     <AssetMeta
                       size={formatBytes(asset.size)}
                       dimension={
-                        asset.height && asset.width ? `${asset.height}✕${asset.width}` : ''
+                        asset.height && asset.width ? `${asset.width}✕${asset.height}` : ''
                       }
                       date={formatDate(new Date(asset.createdAt))}
                       extension={getFileExtension(asset.ext)}
