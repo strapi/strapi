@@ -17,6 +17,10 @@ const readTranslationFile = filePath => ({
   fileContent: JSON.parse(fs.readFileSync(filePath).toString('utf-8')),
 });
 
+const writeTranslationFile = file => {
+  fs.writeFileSync(file.filePath, JSON.stringify(file.fileContent, null, 2) + '\n');
+};
+
 const readAllTranslationFiles = () => {
   const translationFilesPaths = [
     ...glob.sync(path.join(PACKAGES_DIR_PATH, 'core/*/', TRANSLATION_FILE_PATH)),
@@ -26,7 +30,13 @@ const readAllTranslationFiles = () => {
   return translationFilesPaths.map(readTranslationFile);
 };
 
+const writeAllTranslationFiles = files => {
+  files.forEach(writeTranslationFile);
+};
+
 module.exports = {
   readTranslationFile,
+  writeTranslationFile,
   readAllTranslationFiles,
+  writeAllTranslationFiles,
 };
