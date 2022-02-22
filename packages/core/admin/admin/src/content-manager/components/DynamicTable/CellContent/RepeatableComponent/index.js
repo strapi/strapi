@@ -9,18 +9,6 @@ import { stopPropagation } from '@strapi/helper-plugin';
 
 import CellValue from '../CellValue';
 
-function getMainFieldValue(field, name) {
-  return field[name] || field.id;
-}
-
-function getMainFieldType(field, name, defaultType) {
-  if (field[name]) {
-    return defaultType;
-  }
-
-  return 'text';
-}
-
 const RepeatableComponentCell = ({ value, metadatas }) => {
   const { formatMessage } = useIntl();
   const {
@@ -46,10 +34,7 @@ const RepeatableComponentCell = ({ value, metadatas }) => {
         {value.map(item => (
           <MenuItem key={item.id} aria-disabled>
             <Typography>
-              <CellValue
-                type={getMainFieldType(item, mainFieldName, mainFieldType)}
-                value={getMainFieldValue(item, mainFieldName)}
-              />
+              <CellValue type={mainFieldType} value={item[mainFieldName] || item.id} />
             </Typography>
           </MenuItem>
         ))}
