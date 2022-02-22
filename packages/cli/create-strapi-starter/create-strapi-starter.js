@@ -1,10 +1,10 @@
 'use strict';
-
 const commander = require('commander');
 
 const packageJson = require('./package.json');
 const buildStarter = require('./utils/build-starter');
 const promptUser = require('./utils/prompt-user');
+const sanitizeInput = require('./utils/sanitize-input');
 
 const program = new commander.Command(packageJson.name);
 
@@ -52,7 +52,12 @@ function generateApp(projectArgs, programArgs) {
     process.exit(1);
   }
 
-  return buildStarter(projectArgs, programArgs);
+  const sanitizedProjectArgs = {
+    ...projectArgs,
+    starter: sanitizeInput(projectArgs.starter),
+  };
+
+  return buildStarter(sanitizedProjectArgs, programArgs);
 }
 
 async function initProject(projectArgs, program) {

@@ -4,6 +4,7 @@ const { resolve } = require('path');
 const commander = require('commander');
 const { checkInstallPath, generateNewApp } = require('@strapi/generate-new');
 const promptUser = require('./utils/prompt-user');
+const sanitizeInput = require('./utils/sanitize-input');
 const packageJson = require('./package.json');
 
 const program = new commander.Command(packageJson.name);
@@ -38,7 +39,11 @@ program
   .option('--template <templateurl>', 'Specify a Strapi template')
   .description('create a new application')
   .action(directory => {
-    initProject(directory, program);
+    const programArgs = program.template
+      ? { ...program, template: sanitizeInput(program.template) }
+      : program;
+
+    initProject(directory, programArgs);
   })
   .parse(process.argv);
 

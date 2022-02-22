@@ -40,7 +40,8 @@
   "dependencies": {
     "@strapi/generate-new": "4.1.0",
     "commander": "6.1.0",
-    "inquirer": "8.2.0"
+    "inquirer": "8.2.0",
+    "shell-quote": "1.7.3"
   },
   "engines": {
     "node": ">=12.22.0 <=16.x.x",

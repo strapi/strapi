@@ -3,7 +3,6 @@
 const path = require('path');
 const execa = require('execa');
 const chalk = require('chalk');
-const quote = require('shell-quote').quote;
 
 /**
  * Gets the package version on npm. Will fail if the package does not exist
@@ -11,8 +10,7 @@ const quote = require('shell-quote').quote;
  * @returns {Object}
  */
 async function getPackageInfo(packageName) {
-  const sanitizedCommand = quote(['npm', 'view', packageName, 'name', 'version', '--silent']);
-  const { stdout } = await execa.shell(sanitizedCommand);
+  const { stdout } = await execa.shell(`npm view ${packageName} name version --silent`);
   // Use regex to parse name and version from CLI result
   const [name, version] = stdout.match(/(?<=')(.*?)(?=')/gm);
   return { name, version };
