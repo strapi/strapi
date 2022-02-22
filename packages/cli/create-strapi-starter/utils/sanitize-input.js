@@ -3,6 +3,7 @@
 const quote = require('shell-quote').quote;
 
 module.exports = input => {
+  // Match exactly '@<letters and numbers>/'
   const scopedPackageRegex = /^@[a-zA-Z0-9]+\/$/;
   // Avoid escaping @ character
   if (scopedPackageRegex.test(input)) {
