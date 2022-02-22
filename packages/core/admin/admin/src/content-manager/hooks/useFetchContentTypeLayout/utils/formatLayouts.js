@@ -167,7 +167,7 @@ const formatListLayoutWithMetas = (contentTypeConfiguration, components) => {
     if (type === 'component') {
       const component = components[fieldSchema.component];
       const mainFieldName = component.settings.mainField;
-      const mainFieldAttributes = component.attributes[mainFieldName];
+      const mainFieldAttribute = component.attributes[mainFieldName];
 
       acc.push({
         key: `__${current}_key__`,
@@ -176,8 +176,8 @@ const formatListLayoutWithMetas = (contentTypeConfiguration, components) => {
         metadatas: {
           ...metadatas,
           mainField: {
+            ...mainFieldAttribute,
             name: mainFieldName,
-            ...mainFieldAttributes,
           },
         },
       });

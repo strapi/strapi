@@ -70,7 +70,7 @@ const listViewReducer = (state = initialState, action) =>
                 ['components', componentName, 'settings', 'mainField'],
                 null
               );
-              const mainFieldAttributes = get(state, [
+              const mainFieldAttribute = get(state, [
                 'components',
                 componentName,
                 'attributes',
@@ -82,7 +82,7 @@ const listViewReducer = (state = initialState, action) =>
                 metadatas: {
                   ...metas,
                   mainField: {
-                    ...mainFieldAttributes,
+                    ...mainFieldAttribute,
                     name: mainFieldName,
                   },
                 },
