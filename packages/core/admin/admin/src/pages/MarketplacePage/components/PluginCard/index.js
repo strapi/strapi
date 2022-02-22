@@ -32,14 +32,10 @@ const PluginCard = ({ plugin, installedPlugins, useYarn }) => {
   const trackUsageRef = useRef(trackUsage);
 
   const isInstalled = installedPlugins.includes(attributes.npmPackageName);
-  // TODO: Remove this temp test boolean
-  const useYarn = true;
+
   const commandToCopy = useYarn
     ? `yarn add ${attributes.npmPackageName}`
     : `npm install ${attributes.npmPackageName}`;
-
-  // TODO: remove and use
-  console.log(useYarn);
 
   return (
     <Flex
