@@ -21,9 +21,9 @@ function escapeArgument(str) {
  * @returns {Object}
  */
 async function getPackageInfo(packageName) {
-  const escapedArgument = escapeArgument(packageName);
+  const escapedPackageName = escapeArgument(packageName);
 
-  const { stdout } = await execa.shell(`npm view ${escapedArgument} name version --silent`);
+  const { stdout } = await execa.shell(`npm view ${escapedPackageName} name version --silent`);
   // Use regex to parse name and version from CLI result
   const [name, version] = stdout.match(/(?<=')(.*?)(?=')/gm);
   return { name, version };
