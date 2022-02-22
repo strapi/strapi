@@ -4,13 +4,26 @@ const path = require('path');
 const execa = require('execa');
 const chalk = require('chalk');
 
+function escapeArgument(str) {
+  if (str === '') return "''";
+
+  const regex = new RegExp(/[^%+,-./:=@_0-9A-Za-z]/);
+  // Return the string if it doesn't contain special characters or spaces
+  if (!regex.test(str)) return str;
+
+  const sanitized = str.replace(/'/g, "'\"'");
+  return "'" + sanitized + "'";
+}
+
 /**
  * Gets the package version on npm. Will fail if the package does not exist
  * @param {string} packageName - Name to look up on npm, may include a specific version
  * @returns {Object}
  */
 async function getPackageInfo(packageName) {
-  const { stdout } = await execa.shell(`npm view ${packageName} name version --silent`);
+  const escapedArgument = escapeArgument(packageName);
+
+  const { stdout } = await execa.shell(`npm view ${escapedArgument} name version --silent`);
   // Use regex to parse name and version from CLI result
   const [name, version] = stdout.match(/(?<=')(.*?)(?=')/gm);
   return { name, version };
