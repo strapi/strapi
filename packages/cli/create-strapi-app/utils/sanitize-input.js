@@ -3,8 +3,9 @@
 const quote = require('shell-quote').quote;
 
 module.exports = input => {
+  const scopedPackageRegex = /^@[a-zA-Z0-9]+\/$/;
   // Avoid escaping @ character
-  if (input.startsWith('@')) {
+  if (scopedPackageRegex.test(input)) {
     // Split the @<scoped> off the package name it's safe
     const [scopedStrapiStarter, ...rest] = input.split('/');
     // Sanitize the rest
