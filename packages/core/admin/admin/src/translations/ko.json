@@ -132,7 +132,7 @@
   "Settings.profile.form.section.experience.clear.select": "Clear the interface language selected",
   "Settings.profile.form.section.experience.interfaceLanguage": "인터페이스 언어",
   "Settings.profile.form.section.experience.interfaceLanguage.hint": "선택한 언어로 인터페이스의 언어가 변경됩니다.",
-  "Settings.profile.form.section.experience.interfaceLanguageHelp": "선택하면 이 계정에서만 인터페이스 언어가 변경됩니다. 팀에서 다른 언어를 사용할 수 있도록 하려면 이 {문서}를 참조해주세요.",
+  "Settings.profile.form.section.experience.interfaceLanguageHelp": "선택하면 이 계정에서만 인터페이스 언어가 변경됩니다. 팀에서 다른 언어를 사용할 수 있도록 하려면 이 {documentation}를 참조해주세요.",
   "Settings.profile.form.section.experience.title": "사용자 경험",
   "Settings.profile.form.section.helmet.title": "사용자 프로필",
   "Settings.profile.form.section.password.title": "비밀번호 변경",
