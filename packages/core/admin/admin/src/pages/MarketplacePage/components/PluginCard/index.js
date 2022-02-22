@@ -24,7 +24,7 @@ const EllipsisText = styled(Typography)`
   overflow: hidden;
 `;
 
-const PluginCard = ({ plugin, installedPlugins }) => {
+const PluginCard = ({ plugin, installedPlugins, useYarn }) => {
   const { attributes } = plugin;
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
@@ -37,6 +37,9 @@ const PluginCard = ({ plugin, installedPlugins }) => {
   const commandToCopy = useYarn
     ? `yarn add ${attributes.npmPackageName}`
     : `npm install ${attributes.npmPackageName}`;
+
+  // TODO: remove and use
+  console.log(useYarn);
 
   return (
     <Flex
@@ -144,6 +147,7 @@ PluginCard.propTypes = {
     }).isRequired,
   }).isRequired,
   installedPlugins: PropTypes.arrayOf(PropTypes.string).isRequired,
+  useYarn: PropTypes.bool.isRequired,
 };
 
 export default PluginCard;
