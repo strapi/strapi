@@ -9,6 +9,18 @@ const attributeOptions = {
       defaultMessage: 'Default value',
     },
   },
+  hidden: {
+    name: 'adminOptions.hidden',
+    type: 'checkbox',
+    intlLabel: {
+      id: getTrad('form.attribute.item.admin-hidden-field'),
+      defaultMessage: 'Hidden field',
+    },
+    description: {
+      id: getTrad('form.attribute.item.privateField.description'),
+      defaultMessage: 'This field will not show up in the API response',
+    },
+  },
   max: {
     name: 'max',
     type: 'checkbox-with-number-field',

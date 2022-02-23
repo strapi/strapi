@@ -134,6 +134,7 @@ const FormModal = () => {
     isCreatingComponentWhileAddingAField,
     modifiedData,
   } = reducerState;
+  console.log({ modifiedData });
 
   const pathToSchema =
     forTarget === 'contentType' || forTarget === 'component' ? [forTarget] : [forTarget, targetUid];

@@ -37,7 +37,6 @@ const advancedForm = {
                   metadatas: { intlLabel: { id: 'false', defaultMessage: 'false' } },
                 },
               ],
-              // validations: {},
             },
           ],
         },
@@ -46,7 +45,7 @@ const advancedForm = {
             id: getTrad('form.attribute.item.settings.name'),
             defaultMessage: 'Settings',
           },
-          items: [options.required, options.private],
+          items: [options.required, options.private, options.hidden],
         },
       ],
     };
@@ -64,7 +63,7 @@ const advancedForm = {
               id: getTrad('form.attribute.item.settings.name'),
               defaultMessage: 'Settings',
             },
-            items: [options.required, options.private, options.max, options.min],
+            items: [options.required, options.private, options.hidden, options.max, options.min],
           },
         ],
       };
@@ -77,7 +76,7 @@ const advancedForm = {
             id: getTrad('form.attribute.item.settings.name'),
             defaultMessage: 'Settings',
           },
-          items: [options.required, options.private],
+          items: [options.required, options.private, options.hidden],
         },
       ],
     };
@@ -103,7 +102,7 @@ const advancedForm = {
             id: getTrad('form.attribute.item.settings.name'),
             defaultMessage: 'Settings',
           },
-          items: [options.required, options.unique, options.private],
+          items: [options.required, options.unique, options.private, options.hidden],
         },
       ],
     };
@@ -145,6 +144,7 @@ const advancedForm = {
             options.maxLength,
             options.minLength,
             options.private,
+            options.hidden,
           ],
         },
       ],
@@ -209,7 +209,7 @@ const advancedForm = {
             id: getTrad('form.attribute.item.settings.name'),
             defaultMessage: 'Settings',
           },
-          items: [options.required, options.private],
+          items: [options.required, options.private, options.hidden],
         },
       ],
     };
@@ -222,7 +222,7 @@ const advancedForm = {
             id: getTrad('form.attribute.item.settings.name'),
             defaultMessage: 'Settings',
           },
-          items: [options.required, options.private],
+          items: [options.required, options.private, options.hidden],
         },
       ],
     };
@@ -282,7 +282,14 @@ const advancedForm = {
             id: getTrad('form.attribute.item.settings.name'),
             defaultMessage: 'Settings',
           },
-          items: [options.required, options.unique, options.max, options.min, options.private],
+          items: [
+            options.required,
+            options.unique,
+            options.max,
+            options.min,
+            options.private,
+            options.hidden,
+          ],
         },
       ],
     };
@@ -297,7 +304,13 @@ const advancedForm = {
             id: getTrad('form.attribute.item.settings.name'),
             defaultMessage: 'Settings',
           },
-          items: [options.required, options.maxLength, options.minLength, options.private],
+          items: [
+            options.required,
+            options.maxLength,
+            options.minLength,
+            options.private,
+            options.hidden,
+          ],
         },
       ],
     };
@@ -310,7 +323,7 @@ const advancedForm = {
             id: getTrad('form.attribute.item.settings.name'),
             defaultMessage: 'Settings',
           },
-          items: [options.private],
+          items: [options.private, options.hidden],
         },
       ],
     };
@@ -345,6 +358,7 @@ const advancedForm = {
             options.maxLength,
             options.minLength,
             options.private,
+            options.hidden,
           ],
         },
       ],
@@ -363,7 +377,13 @@ const advancedForm = {
             id: getTrad('form.attribute.item.settings.name'),
             defaultMessage: 'Settings',
           },
-          items: [options.required, options.maxLength, options.minLength, options.private],
+          items: [
+            options.required,
+            options.maxLength,
+            options.minLength,
+            options.private,
+            options.hidden,
+          ],
         },
       ],
     };
