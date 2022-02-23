@@ -36,7 +36,7 @@ class MysqlDialect extends Dialect {
     try {
       await this.db.connection.raw(`set session sql_require_primary_key = 0;`);
     } catch (err) {
-      console.error({ err });
+      // Ignore error due to lack of session permissions
     }
   }
 
