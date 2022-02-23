@@ -642,6 +642,8 @@
   "content-manager.success.record.save": "Saved",
   "content-manager.success.record.unpublish": "Unpublished",
   "content-manager.utils.data-loaded": "The {number, plural, =1 {entry has} other {entries have}} successfully been loaded",
+  "content-manager.apiError.This attribute must be unique": "{fieldName} must be unique",
+  "form.button.continue": "Continue",
   "form.button.done": "Done",
   "global.actions": "Actions",
   "global.back": "Back",

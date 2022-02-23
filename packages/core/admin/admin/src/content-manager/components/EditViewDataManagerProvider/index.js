@@ -14,6 +14,7 @@ import {
 import { getTrad, removeKeyInObject } from '../../utils';
 import reducer, { initialState } from './reducer';
 import { cleanData, createYupSchema, getYupInnerErrors } from './utils';
+import { handleAPIError } from './utils/handleAPIError';
 
 const EditViewDataManagerProvider = ({
   allLayoutData,
@@ -290,30 +291,25 @@ const EditViewDataManagerProvider = ({
       e.preventDefault();
       let errors = {};
 
-      // First validate the form
       try {
         await yupSchema.validate(modifiedData, { abortEarly: false });
+      } catch (err) {
+        errors = getYupInnerErrors(err);
+      }
 
+      try {
         const formData = createFormData(modifiedData);
 
         if (isCreatingEntry) {
-          onPost(formData, trackerProperty);
+          await onPost(formData, trackerProperty);
         } else {
-          onPut(formData, trackerProperty);
+          await onPut(formData, trackerProperty);
         }
       } catch (err) {
-        console.log('ValidationError');
-        console.log(err);
-
-        errors = getYupInnerErrors(err);
-
-        toggleNotification({
-          type: 'warning',
-          message: {
-            id: getTrad('containers.EditView.notification.errors'),
-            defaultMessage: 'The form contains some errors',
-          },
-        });
+        errors = {
+          ...errors,
+          ...handleAPIError(err),
+        };
       }
 
       dispatch({
@@ -321,16 +317,7 @@ const EditViewDataManagerProvider = ({
         errors,
       });
     },
-    [
-      createFormData,
-      isCreatingEntry,
-      modifiedData,
-      onPost,
-      onPut,
-      toggleNotification,
-      trackerProperty,
-      yupSchema,
-    ]
+    [createFormData, isCreatingEntry, modifiedData, onPost, onPut, trackerProperty, yupSchema]
   );
 
   const handlePublish = useCallback(async () => {
@@ -345,15 +332,18 @@ const EditViewDataManagerProvider = ({
     let errors = {};
 
     try {
-      // Validate the form using yup
       await schema.validate(modifiedData, { abortEarly: false });
-
-      onPublish();
     } catch (err) {
-      console.error('ValidationError');
-      console.error(err);
-
       errors = getYupInnerErrors(err);
+    }
+
+    try {
+      await onPublish();
+    } catch (err) {
+      errors = {
+        ...errors,
+        ...handleAPIError(err),
+      };
     }
 
     dispatch({
