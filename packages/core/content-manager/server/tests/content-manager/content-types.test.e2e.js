@@ -1,6 +1,5 @@
 'use strict';
 
-const cloneDeep = require('lodash/cloneDeep');
 const merge = require('lodash/merge');
 
 // Helpers.
@@ -17,14 +16,6 @@ const restart = async () => {
   await strapi.destroy();
   strapi = await createStrapiInstance();
   rq = await createAuthRequest({ strapi });
-};
-
-const transformLayout = (layout, partialNewLayout) => {
-  return partialNewLayout.reduce((acc, row, rowIndex) => {
-    acc[rowIndex] = row.map((column, columnIndex) => merge(acc[rowIndex][columnIndex], column));
-
-    return acc;
-  }, layout);
 };
 
 const FIXTURE_DEFAULT_LAYOUT = [
@@ -88,7 +79,7 @@ describe('Content Manager - Update Layout', () => {
         },
       ],
     ];
-    const payload = transformLayout(cloneDeep(FIXTURE_DEFAULT_LAYOUT), transformation);
+    const payload = merge([], FIXTURE_DEFAULT_LAYOUT, transformation);
 
     await rq({
       url: '/content-manager/content-types/api::article.article/configuration',
@@ -107,7 +98,7 @@ describe('Content Manager - Update Layout', () => {
       method: 'GET',
     });
 
-    const expectation = transformLayout(cloneDeep(FIXTURE_DEFAULT_LAYOUT), transformation);
+    const expectation = merge([], FIXTURE_DEFAULT_LAYOUT, transformation);
 
     expect(body.data.contentType.layouts.edit).toStrictEqual(expectation);
   });
@@ -133,7 +124,7 @@ describe('Content Manager - Update Layout', () => {
         },
       ],
     ];
-    const payload = transformLayout(cloneDeep(FIXTURE_DEFAULT_LAYOUT), transformation);
+    const payload = merge([], FIXTURE_DEFAULT_LAYOUT, transformation);
 
     await rq({
       url: '/content-manager/content-types/api::article.article/configuration',
@@ -199,7 +190,7 @@ describe('Content Manager - Update Layout', () => {
         },
       ],
     ];
-    const payload = transformLayout(cloneDeep(FIXTURE_DEFAULT_LAYOUT), transformation);
+    const payload = merge([], FIXTURE_DEFAULT_LAYOUT, transformation);
 
     await rq({
       url: '/content-manager/content-types/api::article.article/configuration',
