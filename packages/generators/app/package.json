@@ -39,7 +39,7 @@
     "@sentry/node": "6.3.0",
     "chalk": "^4.1.1",
     "execa": "^1.0.0",
-    "fs-extra": "^9.1.0",
+    "fs-extra": "10.0.0",
     "inquirer": "8.2.0",
     "lodash": "4.17.21",
     "node-fetch": "^2.6.1",
