@@ -14,6 +14,11 @@ const TypographyMaxWidth = styled(Typography)`
   max-width: 500px;
 `;
 
+const SimpleMenuAdapted = styled(SimpleMenu)`
+  margin-left: -6px;
+  padding-left: 4px;
+`;
+
 const RepeatableComponentCell = ({ value, metadatas }) => {
   const { formatMessage } = useIntl();
   const {
@@ -35,7 +40,7 @@ const RepeatableComponentCell = ({ value, metadatas }) => {
 
   return (
     <Box {...stopPropagation}>
-      <SimpleMenu label={Label}>
+      <SimpleMenuAdapted label={Label}>
         {value.map(item => (
           <MenuItem key={item.id} aria-disabled>
             <TypographyMaxWidth ellipsis>
@@ -43,7 +48,7 @@ const RepeatableComponentCell = ({ value, metadatas }) => {
             </TypographyMaxWidth>
           </MenuItem>
         ))}
-      </SimpleMenu>
+      </SimpleMenuAdapted>
     </Box>
   );
 };
