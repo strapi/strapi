@@ -79,6 +79,33 @@ describe('CTB | components | FormModal | reducer | actions', () => {
 
       expect(reducer(state, action)).toEqual(expected);
     });
+
+    it('should remove the required value when enabling adminOptions.hidden', () => {
+      const state = {
+        ...initialState,
+        modifiedData: {
+          name: 'field',
+          type: 'text',
+          required: true,
+        },
+      };
+      const action = {
+        type: actions.ON_CHANGE,
+        keys: ['adminOptions', 'hidden'],
+        value: true,
+      };
+
+      const expected = {
+        ...initialState,
+        modifiedData: {
+          name: 'field',
+          type: 'text',
+          adminOptions: { hidden: true },
+        },
+      };
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
   });
 
   describe('ON_CHANGE_RELATION_TARGET', () => {
