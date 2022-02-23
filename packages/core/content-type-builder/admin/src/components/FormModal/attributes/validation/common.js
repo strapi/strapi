@@ -91,7 +91,18 @@ const validators = {
       .matches(NAME_REGEX, errorsTrads.regex)
       .required(errorsTrads.required);
   },
-  required: () => yup.boolean(),
+  required: () =>
+    yup.boolean().test({
+      name: 'requiredOption',
+      message: getTrad('error.validation.required'),
+      test(value) {
+        if (this.parent.adminOptions?.hidden) {
+          return !value;
+        }
+
+        return true;
+      },
+    }),
   type: () => yup.string().required(errorsTrads.required),
   unique: () => yup.boolean().nullable(),
 };
