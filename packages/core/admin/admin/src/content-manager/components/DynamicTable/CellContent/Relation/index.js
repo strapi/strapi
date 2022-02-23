@@ -19,6 +19,11 @@ const TypographyMaxWidth = styled(Typography)`
   max-width: 500px;
 `;
 
+const SimpleMenuAdapted = styled(SimpleMenu)`
+  margin-left: -6px;
+  padding-left: 4px;
+`;
+
 const fetchRelation = async (endPoint, notifyStatus) => {
   const {
     data: { results, pagination },
@@ -80,7 +85,11 @@ const Relation = ({ fieldSchema, metadatas, queryInfos, name, rowId, value }) =>
 
   return (
     <Box {...stopPropagation}>
-      <SimpleMenu label={Label} onOpen={() => setIsOpen(true)} onClose={() => setIsOpen(false)}>
+      <SimpleMenuAdapted
+        label={Label}
+        onOpen={() => setIsOpen(true)}
+        onClose={() => setIsOpen(false)}
+      >
         {status !== 'success' && (
           <MenuItem aria-disabled>
             <TypographyMaxWidth ellipsis>Loading ...</TypographyMaxWidth>
@@ -104,7 +113,7 @@ const Relation = ({ fieldSchema, metadatas, queryInfos, name, rowId, value }) =>
             <Typography>[...]</Typography>
           </MenuItem>
         )}
-      </SimpleMenu>
+      </SimpleMenuAdapted>
     </Box>
   );
 };
