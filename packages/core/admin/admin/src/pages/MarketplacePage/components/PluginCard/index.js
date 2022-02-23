@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
@@ -29,7 +29,6 @@ const PluginCard = ({ plugin, installedPlugins, useYarn }) => {
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
   const { trackUsage } = useTracking();
-  const trackUsageRef = useRef(trackUsage);
 
   const isInstalled = installedPlugins.includes(attributes.npmPackageName);
 
@@ -85,7 +84,7 @@ const PluginCard = ({ plugin, installedPlugins, useYarn }) => {
             { pluginName: attributes.name }
           )}
           variant="tertiary"
-          onClick={() => trackUsageRef.current('didLearnMore')}
+          onClick={() => trackUsage('didLearnMore')}
         >
           {formatMessage({
             id: 'admin.pages.MarketPlacePage.plugin.info.text',
@@ -105,7 +104,7 @@ const PluginCard = ({ plugin, installedPlugins, useYarn }) => {
         ) : (
           <CopyToClipboard
             onCopy={() => {
-              trackUsageRef.current('willInstallPlugin');
+              trackUsage('willInstallPlugin');
               toggleNotification({
                 type: 'success',
                 message: { id: 'admin.pages.MarketPlacePage.plugin.copy.success' },
