@@ -30,7 +30,6 @@ import AttributeOptions from '../AttributeOptions';
 import DraftAndPublishToggle from '../DraftAndPublishToggle';
 import FormModalHeader from '../FormModalHeader';
 import FormModalEndActions from '../FormModalEndActions';
-
 import BooleanDefaultValueSelect from '../BooleanDefaultValueSelect';
 import BooleanRadioGroup from '../BooleanRadioGroup';
 import CheckboxWithNumberField from '../CheckboxWithNumberField';
@@ -38,6 +37,7 @@ import CustomRadioGroup from '../CustomRadioGroup';
 import ContentTypeRadioGroup from '../ContentTypeRadioGroup';
 import ComponentIconPicker from '../ComponentIconPicker';
 import Relation from '../Relation';
+import RequiredCheckbox from '../RequiredCheckbox';
 import PluralName from '../PluralName';
 import SelectCategory from '../SelectCategory';
 import SelectComponent from '../SelectComponent';
@@ -134,7 +134,6 @@ const FormModal = () => {
     isCreatingComponentWhileAddingAField,
     modifiedData,
   } = reducerState;
-  console.log({ modifiedData });
 
   const pathToSchema =
     forTarget === 'contentType' || forTarget === 'component' ? [forTarget] : [forTarget, targetUid];
@@ -837,6 +836,7 @@ const FormModal = () => {
       'content-type-radio-group': ContentTypeRadioGroup,
       'radio-group': CustomRadioGroup,
       relation: Relation,
+      'required-checkbox': RequiredCheckbox,
       'select-category': SelectCategory,
       'select-component': SelectComponent,
       'select-components': SelectComponents,

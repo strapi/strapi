@@ -79,7 +79,7 @@ const attributeOptions = {
   },
   required: {
     name: 'required',
-    type: 'checkbox',
+    type: 'required-checkbox',
     intlLabel: {
       id: getTrad('form.attribute.item.requiredField'),
       defaultMessage: 'Required field',

@@ -30,9 +30,13 @@ const reducer = (state = initialState, action) =>
           const previousType = obj.type;
 
           if (previousType && ['date', 'datetime', 'time'].includes(previousType)) {
-            // return obj.updateIn(keys, () => value).remove('default');
             delete draftState.modifiedData.default;
           }
+        }
+
+        // Remove the required option when enabling the hidden field feature
+        if (keys.join('.') === 'adminOptions.hidden') {
+          delete draftState.modifiedData.required;
         }
 
         set(draftState, ['modifiedData', ...keys], value);
