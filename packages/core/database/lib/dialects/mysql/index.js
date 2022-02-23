@@ -33,7 +33,11 @@ class MysqlDialect extends Dialect {
   }
 
   async initialize() {
-    await this.db.connection.raw(`set session sql_require_primary_key = 0;`);
+    try {
+      await this.db.connection.raw(`set session sql_require_primary_key = 0;`);
+    } catch (err) {
+      console.error({ err });
+    }
   }
 
   async startSchemaUpdate() {
