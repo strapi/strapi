@@ -1,88 +1,111 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
+import { useQuery } from 'react-query';
 import { useIntl } from 'react-intl';
-import { IconButton } from '@strapi/design-system/IconButton';
 import { Typography } from '@strapi/design-system/Typography';
 import { Box } from '@strapi/design-system/Box';
 import { Badge } from '@strapi/design-system/Badge';
-import { Flex } from '@strapi/design-system/Flex';
-import { Popover } from '@strapi/design-system/Popover';
-import { SortIcon, stopPropagation } from '@strapi/helper-plugin';
+import { SimpleMenu, MenuItem } from '@strapi/design-system/SimpleMenu';
 import styled from 'styled-components';
-import PopoverContent from './PopoverContent';
+import { useNotifyAT } from '@strapi/design-system/LiveRegions';
+import { stopPropagation } from '@strapi/helper-plugin';
 import CellValue from '../CellValue';
+import { axiosInstance } from '../../../../../core/utils';
+import { getRequestUrl, getTrad } from '../../../../utils';
 
 const SINGLE_RELATIONS = ['oneToOne', 'manyToOne'];
 
-const ActionWrapper = styled.span`
-  svg {
-    height: ${4 / 16}rem;
-  }
+const TypographyMaxWidth = styled(Typography)`
+  max-width: 500px;
 `;
 
-const RelationCountBadge = styled(Badge)`
-  display: flex;
-  align-items: center;
-  height: ${20 / 16}rem;
-  width: ${16 / 16}rem;
-`;
+const fetchRelation = async (endPoint, notifyStatus) => {
+  const {
+    data: { results, pagination },
+  } = await axiosInstance.get(endPoint);
+
+  notifyStatus();
+
+  return { results, pagination };
+};
 
 const Relation = ({ fieldSchema, metadatas, queryInfos, name, rowId, value }) => {
   const { formatMessage } = useIntl();
-  const [visible, setVisible] = useState(false);
-  const buttonRef = useRef();
+  const { notifyStatus } = useNotifyAT();
+  const requestURL = getRequestUrl(`${queryInfos.endPoint}/${rowId}/${name.split('.')[0]}`);
+  const [isOpen, setIsOpen] = useState(false);
+
+  const Label = (
+    <>
+      <Badge>{value.count}</Badge>{' '}
+      {formatMessage(
+        {
+          id: 'content-manager.containers.ListPage.items',
+          defaultMessage: '{number, plural, =0 {items} one {item} other {items}}',
+        },
+        { number: value.count }
+      )}
+    </>
+  );
+
+  const notify = () => {
+    const message = formatMessage({
+      id: getTrad('DynamicTable.relation-loaded'),
+      defaultMessage: 'The relations have been loaded',
+    });
+    notifyStatus(message);
+  };
+
+  const { data, status } = useQuery(
+    [fieldSchema.targetModel, rowId],
+    () => fetchRelation(requestURL, notify),
+    {
+      staleTime: 0,
+    },
+    {
+      enabled: isOpen,
+    }
+  );
 
   if (SINGLE_RELATIONS.includes(fieldSchema.relation)) {
     return (
       <Typography textColor="neutral800">
-        <CellValue type={metadatas.mainField.schema.type} value={value[metadatas.mainField.name]} />
+        <CellValue
+          type={metadatas.mainField.schema.type}
+          value={value[metadatas.mainField.name] || value.id}
+        />
       </Typography>
     );
   }
 
-  const handleTogglePopover = () => setVisible(prev => !prev);
-
   return (
-    <Flex {...stopPropagation}>
-      <RelationCountBadge>{value.count}</RelationCountBadge>
-      <Box paddingLeft={2}>
-        <Typography textColor="neutral800">
-          {formatMessage(
-            {
-              id: 'content-manager.containers.ListPage.items',
-              defaultMessage: '{number, plural, =0 {items} one {item} other {items}}',
-            },
-            { number: value.count }
-          )}
-        </Typography>
-      </Box>
-      {value.count > 0 && (
-        <ActionWrapper>
-          <IconButton
-            onClick={handleTogglePopover}
-            ref={buttonRef}
-            noBorder
-            label={formatMessage({
-              id: 'content-manager.popover.display-relations.label',
-              defaultMessage: 'Display relations',
-            })}
-            icon={<SortIcon isUp={visible} />}
-          />
-          {visible && (
-            <Popover source={buttonRef} spacing={16} centered>
-              <PopoverContent
-                queryInfos={queryInfos}
-                name={name}
-                fieldSchema={metadatas.mainField}
-                targetModel={fieldSchema.targetModel}
-                rowId={rowId}
-                count={value.count}
-              />
-            </Popover>
-          )}
-        </ActionWrapper>
-      )}
-    </Flex>
+    <Box {...stopPropagation}>
+      <SimpleMenu label={Label} onOpen={() => setIsOpen(true)} onClose={() => setIsOpen(false)}>
+        {status !== 'success' && (
+          <MenuItem aria-disabled>
+            <TypographyMaxWidth ellipsis>Loading ...</TypographyMaxWidth>
+          </MenuItem>
+        )}
+
+        {status === 'success' &&
+          data?.results.map(entry => (
+            <MenuItem key={entry.id} aria-disabled>
+              <TypographyMaxWidth ellipsis>
+                <CellValue
+                  type={metadatas.mainField.schema.type}
+                  value={entry[metadatas.mainField.name] || entry.id}
+                />
+              </TypographyMaxWidth>
+            </MenuItem>
+          ))}
+
+        {status === 'success' && data?.pagination.total > 10 && (
+          <MenuItem aria-disabled>
+            <Typography>[...]</Typography>
+          </MenuItem>
+        )}
+      </SimpleMenu>
+    </Box>
   );
 };
 
