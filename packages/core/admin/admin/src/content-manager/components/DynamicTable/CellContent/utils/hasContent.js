@@ -15,5 +15,9 @@ export default function hasContent(type, content, metadatas, fieldSchema) {
     return !isEmpty(content[mainFieldName]);
   }
 
+  if (type === 'relation') {
+    return content.count > 0;
+  }
+
   return !isEmpty(content);
 }

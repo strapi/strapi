@@ -73,4 +73,14 @@ describe('hasContent', () => {
     );
     expect(normalizedContent).toEqual(false);
   });
+
+  it('extracts content from relations with content', () => {
+    const normalizedContent = hasContent('relation', { count: 1 });
+    expect(normalizedContent).toEqual(true);
+  });
+
+  it('extracts content from relations without content', () => {
+    const normalizedContent = hasContent('relation', { count: 0 });
+    expect(normalizedContent).toEqual(false);
+  });
 });
