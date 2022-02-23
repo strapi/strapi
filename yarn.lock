@@ -3299,13 +3299,6 @@
   resolved "https://registry.yarnpkg.com/@protobufjs/utf8/-/utf8-1.1.0.tgz#a777360b5b39a1a2e5106f8e858f2fd2d060c570"
   integrity sha1-p3c2C1s5oaLlEG+OhY8v0tBgxXA=
 
-"@purest/config@^1.0.0":
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/@purest/config/-/config-1.0.1.tgz#d7dc6a0629032fd98d4ae5f59bec26ba1465c8e0"
-  integrity sha512-cEG7U0X26a25SVrHsja5TohAfnkd0jjkjNu0bPX6cQdrSe16j/WeOuX1+TXbkDuZcirIDv7gjHSMe5vfCnW2og==
-  dependencies:
-    extend "^3.0.0"
-
 "@purest/providers@^1.0.2":
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/@purest/providers/-/providers-1.0.4.tgz#e405971181d903b1c9b513c13d9e670666120396"
@@ -9389,11 +9382,6 @@ dedent@^0.7.0:
   resolved "https://registry.yarnpkg.com/dedent/-/dedent-0.7.0.tgz#2495ddbaf6eb874abb0e1be9df22d2e5a544326c"
   integrity sha1-JJXduvbrh0q7Dhvp3yLS5aVEMmw=
 
-deep-copy@^1.1.2:
-  version "1.4.2"
-  resolved "https://registry.yarnpkg.com/deep-copy/-/deep-copy-1.4.2.tgz#0622719257e4bd60240e401ea96718211c5c4697"
-  integrity sha512-VxZwQ/1+WGQPl5nE67uLhh7OqdrmqI1OazrraO9Bbw/M8Bt6Mol/RxzDA6N6ZgRXpsG/W9PgUj8E1LHHBEq2GQ==
-
 deep-equal@^1.0.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/deep-equal/-/deep-equal-1.1.1.tgz#b5c98c942ceffaf7cb051e24e1434a25a2e6076a"
@@ -9415,6 +9403,10 @@ deep-extend@^0.6.0:
   version "0.6.0"
   resolved "https://registry.yarnpkg.com/deep-extend/-/deep-extend-0.6.0.tgz#c4fa7c95404a17a9c3e8ca7e1537312b736330ac"
   integrity sha512-LOHxIOaPYdHlJRtCQfDIVZtfw/ufM8+rVj649RIHzcm/vGwQRXFt6OPqIFWsm2XEMrNIEtWR64sY1LEKD2vAOA==
+
+"deep-extend@github:simov/node-deep-extend#purest":
+  version "0.6.0"
+  resolved "https://codeload.github.com/simov/node-deep-extend/tar.gz/e26b5aca2535299db00cbc35cd891c0923a01fd6"
 
 deep-is@^0.1.3, deep-is@~0.1.3:
   version "0.1.4"
@@ -16086,6 +16078,14 @@ multimatch@^5.0.0:
     arrify "^2.0.1"
     minimatch "^3.0.4"
 
+multistream@^4.0.1:
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/multistream/-/multistream-4.1.0.tgz#7bf00dfd119556fbc153cff3de4c6d477909f5a8"
+  integrity sha512-J1XDiAmmNpRCBfIWJv+n0ymC4ABcf/Pl+5YvC5B/D2f/2+8PtHvCNxMPKiQcZyi922Hq69J2YOpb1pTywfifyw==
+  dependencies:
+    once "^1.4.0"
+    readable-stream "^3.6.0"
+
 mute-stream@0.0.8, mute-stream@~0.0.4:
   version "0.0.8"
   resolved "https://registry.yarnpkg.com/mute-stream/-/mute-stream-0.0.8.tgz#1630c42b2251ff81e2a283de96a5497ea92e5e0d"
@@ -18327,14 +18327,16 @@ punycode@^2.1.0, punycode@^2.1.1:
   resolved "https://registry.yarnpkg.com/punycode/-/punycode-2.1.1.tgz#b58b010ac40c22c5657616c8d2c2c02c7bf479ec"
   integrity sha512-XRsRjdf+j5ml+y/6GKHPZbrF/8p2Yga0JPtdqTIY2Xe5ohJPD9saDJJLPvp9+NSBprVvevdXZybnj2cv8OEd0A==
 
-purest@3.1.0:
-  version "3.1.0"
-  resolved "https://registry.yarnpkg.com/purest/-/purest-3.1.0.tgz#cca72a8f4717d46053d677059f9b357b59ee5cb7"
-  integrity sha512-9slCC5je2UNERS/YNcrs1/7K5Bh7Uvl6OY1S+XZ6iDNMCwk8Fio6VBdrklo7eMzt5M/Wt2fQlwXRjn4puBccRQ==
+purest@4.0.1:
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/purest/-/purest-4.0.1.tgz#b2f440b02f227ed3256de62150064e394f6f77ae"
+  integrity sha512-yS/9GyC0fAJLqITZz1ykBfzC97dWPBrA024jlCVc7uzVXPp2rgpUfQ16D/6r1gFnTEgGQPZIKPsAUffkUWZYTg==
   dependencies:
-    "@purest/config" "^1.0.0"
-    "@request/api" "^0.6.0"
-    extend "^3.0.0"
+    deep-extend "github:simov/node-deep-extend#purest"
+    qs "^6.9.6"
+    request-compose "^2.1.1"
+    request-multipart "^1.0.0"
+    request-oauth "^1.0.1"
 
 q@^1.5.1:
   version "1.5.1"
@@ -19334,7 +19336,7 @@ repeat-string@^1.0.0, repeat-string@^1.5.4, repeat-string@^1.6.1:
   resolved "https://registry.yarnpkg.com/repeat-string/-/repeat-string-1.6.1.tgz#8dcae470e1c88abc2d600fff4a776286da75e637"
   integrity sha1-jcrkcOHIirwtYA//Sndihtp15jc=
 
-request-compose@^2.1.4:
+request-compose@^2.1.1, request-compose@^2.1.4:
   version "2.1.4"
   resolved "https://registry.yarnpkg.com/request-compose/-/request-compose-2.1.4.tgz#d427d614d31c0300e5893cbeaf86e51da1dff445"
   integrity sha512-F8xik9Dxd5i2aHZ0/L/oIrCM1kKSgvp9BKYxGXk91lSWF9TbicWpnuxdOchxIhEWwvLdSBWZIAbCOeXfGfqaqA==
@@ -19345,6 +19347,17 @@ request-ip@2.1.3:
   integrity sha512-J3qdE/IhVM3BXkwMIVO4yFrvhJlU3H7JH16+6yHucadT4fePnR8dyh+vEs6FIx0S2x5TCt2ptiPfHcn0sqhbYQ==
   dependencies:
     is_js "^0.9.0"
+
+request-multipart@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/request-multipart/-/request-multipart-1.0.0.tgz#26fe57634e379a5686eb499788ecd8b4fd51deaf"
+  integrity sha512-dazx88T19dIKFNc0XdlZV8H46D2RmNFdR4mipcbrFOaN70PSSSMM3urVY+eVbrpraf/fHXccxFhLvG1wkSUtKQ==
+  dependencies:
+    bl "^4.0.3"
+    isstream "^0.1.2"
+    mime-types "^2.1.28"
+    multistream "^4.0.1"
+    uuid "^8.3.2"
 
 request-oauth@^1.0.1:
   version "1.0.1"
