@@ -529,7 +529,7 @@ describe('MediaLibrary / AssetList', () => {
                       >
                         png
                       </span>
-                       - 551✕1066
+                       - 1066✕551
                     </div>
                   </div>
                   <div
