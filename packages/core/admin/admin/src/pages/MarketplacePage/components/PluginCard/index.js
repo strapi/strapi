@@ -12,7 +12,8 @@ import { Icon } from '@strapi/design-system/Icon';
 import ExternalLink from '@strapi/icons/ExternalLink';
 import Duplicate from '@strapi/icons/Duplicate';
 import Check from '@strapi/icons/Check';
-
+import { useNotification, useTracking } from '@strapi/helper-plugin';
+import { CopyToClipboard } from 'react-copy-to-clipboard';
 // Custom component to have an ellipsis after the 2nd line
 const EllipsisText = styled(Typography)`
   /* stylelint-disable value-no-vendor-prefix, property-no-vendor-prefix */
@@ -26,11 +27,14 @@ const EllipsisText = styled(Typography)`
 const PluginCard = ({ plugin, installedPlugins, useYarn }) => {
   const { attributes } = plugin;
   const { formatMessage } = useIntl();
+  const toggleNotification = useNotification();
+  const { trackUsage } = useTracking();
 
   const isInstalled = installedPlugins.includes(attributes.npmPackageName);
 
-  // TODO: remove and use
-  console.log(useYarn);
+  const commandToCopy = useYarn
+    ? `yarn add ${attributes.npmPackageName}`
+    : `npm install ${attributes.npmPackageName}`;
 
   return (
     <Flex
@@ -80,6 +84,7 @@ const PluginCard = ({ plugin, installedPlugins, useYarn }) => {
             { pluginName: attributes.name }
           )}
           variant="tertiary"
+          onClick={() => trackUsage('didLearnMore')}
         >
           {formatMessage({
             id: 'admin.pages.MarketPlacePage.plugin.info.text',
@@ -97,12 +102,23 @@ const PluginCard = ({ plugin, installedPlugins, useYarn }) => {
             </Typography>
           </Box>
         ) : (
-          <Button size="S" endIcon={<Duplicate />} variant="secondary">
-            {formatMessage({
-              id: 'admin.pages.MarketPlacePage.plugin.copy',
-              defaultMessage: 'Copy install command',
-            })}
-          </Button>
+          <CopyToClipboard
+            onCopy={() => {
+              trackUsage('willInstallPlugin');
+              toggleNotification({
+                type: 'success',
+                message: { id: 'admin.pages.MarketPlacePage.plugin.copy.success' },
+              });
+            }}
+            text={commandToCopy}
+          >
+            <Button size="S" endIcon={<Duplicate />} variant="secondary">
+              {formatMessage({
+                id: 'admin.pages.MarketPlacePage.plugin.copy',
+                defaultMessage: 'Copy install command',
+              })}
+            </Button>
+          </CopyToClipboard>
         )}
       </Stack>
     </Flex>
