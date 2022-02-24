@@ -197,7 +197,7 @@ describe('i18n - Content API', () => {
       const { statusCode, body } = res;
 
       expect(statusCode).toBe(200);
-      expect(body.data).toMatchObject(transformToRESTResource(data.homepages[0]));
+      expect(body.data).toMatchObject(transformToRESTResource(data.homepages));
     });
   });
 });
