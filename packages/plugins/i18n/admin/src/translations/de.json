@@ -1,7 +1,7 @@
 {
   "CMEditViewCopyLocale.copy-failure": "Beim Kopieren der Übersetzungen ist ein Fehler aufgetreten",
   "CMEditViewCopyLocale.copy-success": "Übersetzungen kopiert",
-  "CMEditViewCopyLocale.copy-text": "Aus einer anderen Übersetzung ausfüllen",
+  "CMEditViewCopyLocale.copy-text": "Von anderer Übersetzung übernehmen",
   "CMEditViewCopyLocale.submit-text": "Ja, ausfüllen",
   "CMListView.popover.display-locales.label": "Übersetzungen anzeigen",
   "CheckboxConfirmation.Modal.body": "Möchtest du die Lokalisierung deaktivieren?",
