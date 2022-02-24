@@ -63,15 +63,13 @@ const MarketPlacePage = () => {
     }
   );
 
-  const isLoading =
-    marketplacePluginsStatus === 'loading' ||
-    installedPluginsStatus === 'loading' ||
-    appInfoStatus === 'loading';
+  const isLoading = [marketplacePluginsStatus, installedPluginsStatus, appInfoStatus].includes(
+    'loading'
+  );
 
-  const hasFailed =
-    marketplacePluginsStatus === 'error' ||
-    installedPluginsStatus === 'error' ||
-    appInfoStatus === 'error';
+  const hasFailed = [marketplacePluginsStatus, installedPluginsStatus, appInfoStatus].includes(
+    'error'
+  );
 
   useEffect(() => {
     trackUsageRef.current('didGoToMarketplace');
