@@ -2,9 +2,13 @@ import React from 'react';
 import { render, waitFor, screen } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
+import { lightTheme } from '@strapi/design-system';
 import ProfilePage from '../index';
 import server from './utils/server';
+import ThemeToggleProvider from '../../../components/ThemeToggleProvider';
+import Theme from '../../../components/Theme';
+
+window.matchMedia = jest.fn(() => false);
 
 jest.mock('../../../components/LocalesProvider/useLocalesProvider', () => () => ({
   changeLocale: () => {},
@@ -31,9 +35,11 @@ const client = new QueryClient({
 const App = (
   <QueryClientProvider client={client}>
     <IntlProvider messages={{}} textComponent="span" locale="en">
-      <ThemeProvider theme={lightTheme}>
-        <ProfilePage />
-      </ThemeProvider>
+      <ThemeToggleProvider themes={{ light: lightTheme }}>
+        <Theme>
+          <ProfilePage />
+        </Theme>
+      </ThemeToggleProvider>
     </IntlProvider>
   </QueryClientProvider>
 );
@@ -1322,6 +1328,90 @@ describe('ADMIN | Pages | Profile page', () => {
                                 id="select-1-hint"
                               >
                                 This will only display your own interface in the chosen language.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div
+                        class="c20"
+                      >
+                        <div
+                          class=""
+                        >
+                          <div>
+                            <div
+                              class="c36"
+                            >
+                              <span
+                                class="c37"
+                                for="select-2"
+                                id="select-2-label"
+                              >
+                                Interface mode
+                              </span>
+                              <div
+                                class="c38 c39"
+                              >
+                                <button
+                                  aria-describedby="select-2-hint"
+                                  aria-disabled="false"
+                                  aria-expanded="false"
+                                  aria-haspopup="listbox"
+                                  aria-labelledby="select-2-label select-2-content"
+                                  class="c40"
+                                  id="select-2"
+                                  type="button"
+                                />
+                                <div
+                                  class="c41 c42"
+                                >
+                                  <div
+                                    class="c38"
+                                  >
+                                    <div
+                                      class="c43"
+                                    >
+                                      <span
+                                        class="c44"
+                                        id="select-2-content"
+                                      >
+                                        Light mode
+                                      </span>
+                                    </div>
+                                  </div>
+                                  <div
+                                    class="c38"
+                                  >
+                                    <button
+                                      aria-hidden="true"
+                                      class="c46 c45 c47"
+                                      tabindex="-1"
+                                      type="button"
+                                    >
+                                      <svg
+                                        fill="none"
+                                        height="1em"
+                                        viewBox="0 0 14 8"
+                                        width="1em"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                      >
+                                        <path
+                                          clip-rule="evenodd"
+                                          d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                                          fill="#32324D"
+                                          fill-rule="evenodd"
+                                        />
+                                      </svg>
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                              <p
+                                class="c48"
+                                id="select-2-hint"
+                              >
+                                Displays your interface in the chosen mode.
                               </p>
                             </div>
                           </div>
