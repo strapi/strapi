@@ -4,6 +4,8 @@ import { Components, Fields } from '../core/apis';
 import StrapiApp from '../StrapiApp';
 import appReducers from '../reducers';
 
+window.matchMedia = jest.fn(() => false);
+
 const library = { fields: Fields(), components: Components() };
 const middlewares = { middlewares: [] };
 const reducers = { reducers: appReducers };
@@ -299,7 +301,7 @@ describe('ADMIN | StrapiApp', () => {
 
       app.createCustomConfigurations();
 
-      expect(app.configurations.theme.main.colors.red).toBe('black');
+      expect(app.configurations.themes.custom.main.colors.red).toBe('black');
     });
 
     it('should override the tutorials', () => {
