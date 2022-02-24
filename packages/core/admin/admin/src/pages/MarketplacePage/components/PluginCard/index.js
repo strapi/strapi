@@ -100,7 +100,7 @@ const PluginCard = ({ plugin, installedPluginNames, useYarn }) => {
             { pluginName: attributes.name }
           )}
           variant="tertiary"
-          onClick={() => trackUsage('didLearnMore')}
+          onClick={() => trackUsage('didPluginLearnMore')}
         >
           {formatMessage({
             id: 'admin.pages.MarketPlacePage.plugin.info.text',
