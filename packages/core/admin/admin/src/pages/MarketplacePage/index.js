@@ -32,23 +32,15 @@ const MarketPlacePage = () => {
     defaultMessage: 'Marketplace',
   });
 
-  const pluginsTitle = formatMessage(
-    {
-      id: 'app.utils.notify.data-loaded',
-      defaultMessage: 'The {target} has loaded',
-    },
-    { target: marketplaceTitle }
-  );
-
   const {
     status: marketplacePluginsStatus,
     data: marketplacePluginsResponse,
-  } = useFetchMarketplacePlugins(pluginsTitle);
+  } = useFetchMarketplacePlugins(marketplaceTitle);
 
   const {
     status: installedPluginsStatus,
     data: installedPluginsResponse,
-  } = useFetchInstalledPlugins(marketplaceTitle);
+  } = useFetchInstalledPlugins();
 
   const { data: appInfoResponse, status: appInfoStatus } = useQuery(
     'app-information',
