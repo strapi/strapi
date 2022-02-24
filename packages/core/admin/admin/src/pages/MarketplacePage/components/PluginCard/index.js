@@ -62,16 +62,18 @@ const PluginCard = ({ plugin, installedPlugins, useYarn }) => {
           height={11}
         />
         <Box paddingTop={5}>
-          <Flex alignItems="center">
-            <Typography as="h3" variant="delta">
+          <Typography as="h3" variant="delta">
+            <Flex alignItems="center">
               {attributes.name}
-            </Typography>
-            {attributes.validated && (
-              <Tooltip description="Plugin verified by Strapi">
-                <Icon as={CheckCircle} marginLeft={2} color="success600" />
-              </Tooltip>
-            )}
-          </Flex>
+              {attributes.validated && (
+                <Tooltip description="Plugin verified by Strapi">
+                  <Flex>
+                    <Icon as={CheckCircle} marginLeft={2} color="success600" />
+                  </Flex>
+                </Tooltip>
+              )}
+            </Flex>
+          </Typography>
         </Box>
         <Box paddingTop={2}>
           <EllipsisText as="p" variant="omega" textColor="neutral600">
