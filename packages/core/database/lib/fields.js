@@ -120,8 +120,18 @@ const parseTime = value => {
 };
 
 const parseDate = value => {
-  const found = _.isString(value) ? value.match(partialDateRegex) || [] : [];
-  const extractedValue = found[0];
+  let found;
+  if (_.isString(value)) {
+    found = value.match(partialDateRegex) || [];
+  } else if (_.isDate(value)) {
+    found =
+      value
+        .toISOString()
+        .slice(0, 10)
+        .match(partialDateRegex) || [];
+  }
+
+  const [extractedValue] = found;
 
   if (extractedValue && !dateRegex.test(value)) {
     // TODO V5: throw an error when format yyyy-MM-dd is not respected
