@@ -109,7 +109,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
 
     const query = transformParamsToQuery(uid, wrappedParams);
 
-    if (kind === 'singleType' && opts.locale !== 'all') {
+    if (kind === 'singleType' && (opts || {}).locale !== 'all') {
       return db.query(uid).findOne(query);
     }
 
