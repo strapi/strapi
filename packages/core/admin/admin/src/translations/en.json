@@ -64,7 +64,7 @@
   "admin.pages.MarketPlacePage.plugin.info.text": "Learn more",
   "admin.pages.MarketPlacePage.plugin.info.label": "Learn more about {pluginName}",
   "admin.pages.MarketPlacePage.plugin.copy": "Copy install command",
-  "admin.pages.MarketPlacePage.plugin.copy.success": "install command copied",
+  "admin.pages.MarketPlacePage.plugin.copy.success": "Install command ready to pasted in your terminal",
   "admin.pages.MarketPlacePage.plugin.installed": "Installed",
   "admin.pages.MarketPlacePage.plugin.info": "Learn more",
   "admin.pages.MarketPlacePage.submit.plugin.link": "Submit your plugin",
