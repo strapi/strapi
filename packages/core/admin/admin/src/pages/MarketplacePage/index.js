@@ -93,7 +93,7 @@ const MarketPlacePage = () => {
     );
   }
 
-  const installedPlugins = installedPluginsResponse.plugins.map(plugin => plugin.packageName);
+  const installedPluginNames = installedPluginsResponse.plugins.map(plugin => plugin.packageName);
 
   return (
     <Layout>
@@ -120,7 +120,7 @@ const MarketPlacePage = () => {
               <GridItem col={4} s={6} xs={12} style={{ height: '100%' }} key={plugin.id}>
                 <PluginCard
                   plugin={plugin}
-                  installedPlugins={installedPlugins}
+                  installedPluginNames={installedPluginNames}
                   useYarn={appInfoResponse.data.useYarn}
                 />
               </GridItem>
