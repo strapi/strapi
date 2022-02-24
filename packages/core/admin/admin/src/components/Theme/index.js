@@ -4,12 +4,16 @@ import PropTypes from 'prop-types';
 import { lightTheme } from '@strapi/design-system/themes';
 import GlobalStyle from '../GlobalStyle';
 
-const Theme = ({ children, theme }) => (
+const Theme = ({ children, theme }) => {
+  console.log(theme);
+  
+return (
   <ThemeProvider theme={theme}>
     {children}
     <GlobalStyle />
   </ThemeProvider>
-);
+  );
+};
 
 Theme.propTypes = {
   children: PropTypes.element.isRequired,

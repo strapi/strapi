@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { lightTheme } from '@strapi/design-system/themes';
+import cloneDeep from 'lodash/cloneDeep';
 import merge from 'lodash/merge';
 import pick from 'lodash/pick';
 import isFunction from 'lodash/isFunction';
@@ -22,6 +23,7 @@ import {
   MUTATE_SINGLE_TYPES_LINKS,
 } from './exposedHooks';
 import injectionZones from './injectionZones';
+import darkTheme from './temp-dark-theme';
 import favicon from './favicon.ico';
 
 class StrapiApp {
@@ -34,7 +36,7 @@ class StrapiApp {
       locales: ['en'],
       menuLogo: MenuLogo,
       notifications: { releases: true },
-      theme: lightTheme,
+      themes: { light: lightTheme, dark: darkTheme, custom: null },
       translations: {},
       tutorials: true,
     };
@@ -226,7 +228,10 @@ class StrapiApp {
     }
 
     if (this.customConfigurations?.theme) {
-      this.configurations.theme = merge(this.configurations.theme, this.customConfigurations.theme);
+      this.configurations.themes.custom = merge(
+        cloneDeep(this.configurations.themes.light),
+        this.customConfigurations.theme
+      );
     }
 
     if (this.customConfigurations?.notifications?.releases !== undefined) {
@@ -427,7 +432,7 @@ class StrapiApp {
     } = this.library;
 
     return (
-      <Theme theme={this.configurations.theme}>
+      <Theme theme={this.configurations.themes.light}>
         <Providers
           authLogo={this.configurations.authLogo}
           components={components}
@@ -444,6 +449,7 @@ class StrapiApp {
             return this.runHookWaterfall(name, initialValue, async, store);
           }}
           runHookSeries={this.runHookSeries}
+          themes={this.configurations.themes}
           settings={this.settings}
           showTutorials={this.configurations.tutorials}
           showReleaseNotification={this.configurations.notifications.releases}
