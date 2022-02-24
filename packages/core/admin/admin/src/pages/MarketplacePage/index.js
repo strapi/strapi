@@ -43,10 +43,12 @@ const MarketPlacePage = () => {
     status: marketplacePluginsStatus,
     data: marketplacePluginsResponse,
   } = useFetchMarketplacePlugins(pluginsTitle);
+
   const {
     status: installedPluginsStatus,
     data: installedPluginsResponse,
-  } = useFetchInstalledPlugins();
+  } = useFetchInstalledPlugins(marketplaceTitle);
+
   const { data: appInfoResponse, status: appInfoStatus } = useQuery(
     'app-information',
     fetchAppInformation,
@@ -64,6 +66,7 @@ const MarketPlacePage = () => {
     marketplacePluginsStatus === 'loading' ||
     installedPluginsStatus === 'loading' ||
     appInfoStatus === 'loading';
+
   const hasFailed =
     marketplacePluginsStatus === 'error' ||
     installedPluginsStatus === 'error' ||

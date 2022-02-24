@@ -9,9 +9,11 @@ import { Button } from '@strapi/design-system/Button';
 import { LinkButton } from '@strapi/design-system/LinkButton';
 import { Flex } from '@strapi/design-system/Flex';
 import { Icon } from '@strapi/design-system/Icon';
+import { Tooltip } from '@strapi/design-system/Tooltip';
 import ExternalLink from '@strapi/icons/ExternalLink';
 import Duplicate from '@strapi/icons/Duplicate';
 import Check from '@strapi/icons/Check';
+import CheckCircle from '@strapi/icons/CheckCircle';
 import { useNotification, useTracking } from '@strapi/helper-plugin';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 // Custom component to have an ellipsis after the 2nd line
@@ -60,9 +62,16 @@ const PluginCard = ({ plugin, installedPlugins, useYarn }) => {
           height={11}
         />
         <Box paddingTop={5}>
-          <Typography as="h3" variant="delta">
-            {attributes.name}
-          </Typography>
+          <Flex alignItems="center">
+            <Typography as="h3" variant="delta">
+              {attributes.name}
+            </Typography>
+            {attributes.validated && (
+              <Tooltip description="Plugin verified by Strapi">
+                <Icon as={CheckCircle} marginLeft={2} color="success600" />
+              </Tooltip>
+            )}
+          </Flex>
         </Box>
         <Box paddingTop={2}>
           <EllipsisText as="p" variant="omega" textColor="neutral600">
