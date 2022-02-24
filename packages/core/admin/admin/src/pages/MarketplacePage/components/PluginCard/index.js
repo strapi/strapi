@@ -66,7 +66,12 @@ const PluginCard = ({ plugin, installedPlugins, useYarn }) => {
             <Flex alignItems="center">
               {attributes.name}
               {attributes.validated && (
-                <Tooltip description="Plugin verified by Strapi">
+                <Tooltip
+                  description={formatMessage({
+                    id: 'admin.pages.MarketPlacePage.plugin.tooltip.verified',
+                    defaultMessage: 'Plugin verified by Strapi',
+                  })}
+                >
                   <Flex>
                     <Icon as={CheckCircle} marginLeft={2} color="success600" />
                   </Flex>
