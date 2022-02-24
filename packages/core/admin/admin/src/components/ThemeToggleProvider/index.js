@@ -9,14 +9,14 @@ import PropTypes from 'prop-types';
 import { ThemeToggleContext } from '../../contexts';
 
 const ThemeToggleProvider = ({ children, themes }) => {
-  const [currentTheme, setCurrentTheme] = useState(themes.light);
+  const [currentTheme, setCurrentTheme] = useState('light');
 
   const handleChangeTheme = nextTheme => {
-    setCurrentTheme(themes[nextTheme]);
+    setCurrentTheme(nextTheme);
   };
 
   return (
-    <ThemeToggleContext.Provider value={{ currentTheme, onChangeTheme: handleChangeTheme }}>
+    <ThemeToggleContext.Provider value={{ currentTheme, onChangeTheme: handleChangeTheme, themes }}>
       {children}
     </ThemeToggleContext.Provider>
   );

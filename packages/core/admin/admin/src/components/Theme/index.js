@@ -5,10 +5,10 @@ import { useThemeToggle } from '../../hooks';
 import GlobalStyle from '../GlobalStyle';
 
 const Theme = ({ children }) => {
-  const { currentTheme } = useThemeToggle();
+  const { currentTheme, themes } = useThemeToggle();
 
   return (
-    <ThemeProvider theme={currentTheme}>
+    <ThemeProvider theme={themes[currentTheme] || themes.light}>
       {children}
       <GlobalStyle />
     </ThemeProvider>
