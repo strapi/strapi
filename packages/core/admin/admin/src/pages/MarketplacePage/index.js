@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useIntl } from 'react-intl';
 import { Helmet } from 'react-helmet';
 import { useQuery } from 'react-query';
@@ -22,6 +22,7 @@ import useFetchMarketplacePlugins from '../../hooks/useFetchMarketplacePlugins';
 const MarketPlacePage = () => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
+  const trackUsageRef = useRef(trackUsage);
   const toggleNotification = useNotification();
 
   useFocusWhenNavigate();
@@ -73,8 +74,8 @@ const MarketPlacePage = () => {
     appInfoStatus === 'error';
 
   useEffect(() => {
-    trackUsage('didGoToMarketplace');
-  }, [trackUsage]);
+    trackUsageRef.current('didGoToMarketplace');
+  }, []);
 
   if (hasFailed) {
     return (
