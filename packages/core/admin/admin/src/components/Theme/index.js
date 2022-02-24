@@ -1,27 +1,22 @@
 import React from 'react';
 import { ThemeProvider } from '@strapi/design-system/ThemeProvider';
 import PropTypes from 'prop-types';
-import { lightTheme } from '@strapi/design-system/themes';
+import { useThemeToggle } from '../../hooks';
 import GlobalStyle from '../GlobalStyle';
 
-const Theme = ({ children, theme }) => {
-  console.log(theme);
-  
-return (
-  <ThemeProvider theme={theme}>
-    {children}
-    <GlobalStyle />
-  </ThemeProvider>
+const Theme = ({ children }) => {
+  const { currentTheme } = useThemeToggle();
+
+  return (
+    <ThemeProvider theme={currentTheme}>
+      {children}
+      <GlobalStyle />
+    </ThemeProvider>
   );
 };
 
 Theme.propTypes = {
   children: PropTypes.element.isRequired,
-  theme: PropTypes.object,
-};
-
-Theme.defaultProps = {
-  theme: lightTheme,
 };
 
 export default Theme;

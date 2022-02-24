@@ -10,6 +10,7 @@ import AutoReloadOverlayBlockerProvider from '../AutoReloadOverlayBlockerProvide
 import Notifications from '../Notifications';
 import OverlayBlocker from '../OverlayBlocker';
 import ThemeToggleProvider from '../ThemeToggleProvider';
+import Theme from '../Theme';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -42,37 +43,39 @@ const Providers = ({
 }) => {
   return (
     <ThemeToggleProvider themes={themes}>
-      <QueryClientProvider client={queryClient}>
-        <Provider store={store}>
-          <AdminContext.Provider value={{ getAdminInjectedComponents }}>
-            <ConfigurationsContext.Provider
-              value={{ authLogo, menuLogo, showReleaseNotification, showTutorials }}
-            >
-              <StrapiAppProvider
-                getPlugin={getPlugin}
-                menu={menu}
-                plugins={plugins}
-                runHookParallel={runHookParallel}
-                runHookWaterfall={runHookWaterfall}
-                runHookSeries={runHookSeries}
-                settings={settings}
+      <Theme>
+        <QueryClientProvider client={queryClient}>
+          <Provider store={store}>
+            <AdminContext.Provider value={{ getAdminInjectedComponents }}>
+              <ConfigurationsContext.Provider
+                value={{ authLogo, menuLogo, showReleaseNotification, showTutorials }}
               >
-                <LibraryProvider components={components} fields={fields}>
-                  <LanguageProvider messages={messages} localeNames={localeNames}>
-                    <AutoReloadOverlayBlockerProvider>
-                      <OverlayBlocker>
-                        <GuidedTour>
-                          <Notifications>{children}</Notifications>
-                        </GuidedTour>
-                      </OverlayBlocker>
-                    </AutoReloadOverlayBlockerProvider>
-                  </LanguageProvider>
-                </LibraryProvider>
-              </StrapiAppProvider>
-            </ConfigurationsContext.Provider>
-          </AdminContext.Provider>
-        </Provider>
-      </QueryClientProvider>
+                <StrapiAppProvider
+                  getPlugin={getPlugin}
+                  menu={menu}
+                  plugins={plugins}
+                  runHookParallel={runHookParallel}
+                  runHookWaterfall={runHookWaterfall}
+                  runHookSeries={runHookSeries}
+                  settings={settings}
+                >
+                  <LibraryProvider components={components} fields={fields}>
+                    <LanguageProvider messages={messages} localeNames={localeNames}>
+                      <AutoReloadOverlayBlockerProvider>
+                        <OverlayBlocker>
+                          <GuidedTour>
+                            <Notifications>{children}</Notifications>
+                          </GuidedTour>
+                        </OverlayBlocker>
+                      </AutoReloadOverlayBlockerProvider>
+                    </LanguageProvider>
+                  </LibraryProvider>
+                </StrapiAppProvider>
+              </ConfigurationsContext.Provider>
+            </AdminContext.Provider>
+          </Provider>
+        </QueryClientProvider>
+      </Theme>
     </ThemeToggleProvider>
   );
 };

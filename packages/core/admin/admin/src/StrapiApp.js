@@ -14,7 +14,6 @@ import App from './pages/App';
 import AuthLogo from './assets/images/logo_strapi_auth_v4.png';
 import MenuLogo from './assets/images/logo_strapi_menu.png';
 import Providers from './components/Providers';
-import Theme from './components/Theme';
 import languageNativeNames from './translations/languageNativeNames';
 import {
   INJECT_COLUMN_IN_TABLE,
@@ -432,45 +431,43 @@ class StrapiApp {
     } = this.library;
 
     return (
-      <Theme theme={this.configurations.themes.light}>
-        <Providers
-          authLogo={this.configurations.authLogo}
-          components={components}
-          fields={fields}
-          localeNames={localeNames}
-          getAdminInjectedComponents={this.getAdminInjectedComponents}
-          getPlugin={this.getPlugin}
-          messages={this.configurations.translations}
-          menu={this.menu}
-          menuLogo={this.configurations.menuLogo}
-          plugins={this.plugins}
-          runHookParallel={this.runHookParallel}
-          runHookWaterfall={(name, initialValue, async = false) => {
-            return this.runHookWaterfall(name, initialValue, async, store);
-          }}
-          runHookSeries={this.runHookSeries}
-          themes={this.configurations.themes}
-          settings={this.settings}
-          showTutorials={this.configurations.tutorials}
-          showReleaseNotification={this.configurations.notifications.releases}
-          store={store}
-        >
-          <>
-            <Helmet
-              link={[
-                {
-                  rel: 'icon',
-                  type: 'image/png',
-                  href: this.configurations.head.favicon,
-                },
-              ]}
-            />
-            <BrowserRouter basename={basename}>
-              <App store={store} />
-            </BrowserRouter>
-          </>
-        </Providers>
-      </Theme>
+      <Providers
+        authLogo={this.configurations.authLogo}
+        components={components}
+        fields={fields}
+        localeNames={localeNames}
+        getAdminInjectedComponents={this.getAdminInjectedComponents}
+        getPlugin={this.getPlugin}
+        messages={this.configurations.translations}
+        menu={this.menu}
+        menuLogo={this.configurations.menuLogo}
+        plugins={this.plugins}
+        runHookParallel={this.runHookParallel}
+        runHookWaterfall={(name, initialValue, async = false) => {
+          return this.runHookWaterfall(name, initialValue, async, store);
+        }}
+        runHookSeries={this.runHookSeries}
+        themes={this.configurations.themes}
+        settings={this.settings}
+        showTutorials={this.configurations.tutorials}
+        showReleaseNotification={this.configurations.notifications.releases}
+        store={store}
+      >
+        <>
+          <Helmet
+            link={[
+              {
+                rel: 'icon',
+                type: 'image/png',
+                href: this.configurations.head.favicon,
+              },
+            ]}
+          />
+          <BrowserRouter basename={basename}>
+            <App store={store} />
+          </BrowserRouter>
+        </>
+      </Providers>
     );
   }
 }
