@@ -8,11 +8,21 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { ThemeToggleContext } from '../../contexts';
 
+const THEME_KEY = 'STRAPI_THEME';
+
+const getDefaultTheme = () => {
+  const browserTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  const persistedTheme = localStorage.getItem(THEME_KEY);
+
+  return persistedTheme || browserTheme;
+};
+
 const ThemeToggleProvider = ({ children, themes }) => {
-  const [currentTheme, setCurrentTheme] = useState('light');
+  const [currentTheme, setCurrentTheme] = useState(getDefaultTheme());
 
   const handleChangeTheme = nextTheme => {
     setCurrentTheme(nextTheme);
+    localStorage.setItem(THEME_KEY, nextTheme);
   };
 
   return (
