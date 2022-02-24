@@ -1,6 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
+const { pick } = require('lodash/fp');
 const delegate = require('delegates');
 const {
   InvalidTimeError,
@@ -141,7 +142,10 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
   async findOne(uid, entityId, opts) {
     const wrappedParams = await this.wrapParams(opts, { uid, action: 'findOne' });
 
-    const query = transformParamsToQuery(uid, pickSelectionParams(wrappedParams));
+    const query = transformParamsToQuery(
+      uid,
+      pick(['fields', 'populate', 'publicationState'], wrappedParams)
+    );
 
     return db.query(uid).findOne({ ...query, where: { id: entityId } });
   },

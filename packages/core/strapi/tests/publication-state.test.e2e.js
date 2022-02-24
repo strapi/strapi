@@ -177,6 +177,17 @@ describe('Publication State', () => {
     });
   });
 
+  describe.each(['country', 'category', 'product'])('For %s', modelName => {
+    const baseUrl = `/${contentTypes[modelName].pluralName}`;
+
+    test('Should not get draft entry', async () => {
+      const draftEntry = data[modelName].find(n => !n.publishedAt);
+      const res = await rq({ method: 'GET', url: `${baseUrl}/${draftEntry.id}` });
+
+      expect(res.body.data).toBe(null);
+    });
+  });
+
   describe('Advanced checks', () => {
     describe('Nested level of relations (live mode)', () => {
       let products;
