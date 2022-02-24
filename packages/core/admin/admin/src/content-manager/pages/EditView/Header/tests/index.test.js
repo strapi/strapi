@@ -8,10 +8,14 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { MemoryRouter } from 'react-router-dom';
+import { lightTheme } from '@strapi/design-system';
 import Theme from '../../../../../components/Theme';
+import ThemeToggleProvider from '../../../../../components/ThemeToggleProvider';
 import { Header } from '../index';
 import components from '../utils/tests/data/compos-schema.json';
 import ct from '../utils/tests/data/ct-schema.json';
+
+window.matchMedia = jest.fn(() => false);
 
 const defaultProps = {
   allowedActions: { canUpdate: true, canCreate: true, canPublish: true },
@@ -31,9 +35,11 @@ const makeApp = (props = defaultProps) => {
   return (
     <MemoryRouter>
       <IntlProvider locale="en" defaultLocale="en" messages={{}}>
-        <Theme>
-          <Header {...props} />
-        </Theme>
+        <ThemeToggleProvider themes={{ light: lightTheme }}>
+          <Theme>
+            <Header {...props} />
+          </Theme>
+        </ThemeToggleProvider>
       </IntlProvider>
     </MemoryRouter>
   );

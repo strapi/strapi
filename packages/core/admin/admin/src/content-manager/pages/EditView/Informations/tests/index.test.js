@@ -8,8 +8,12 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { useCMEditViewDataManager } from '@strapi/helper-plugin';
+import { lightTheme } from '@strapi/design-system';
 import Theme from '../../../../../components/Theme';
+import ThemeToggleProvider from '../../../../../components/ThemeToggleProvider';
 import Informations from '../index';
+
+window.matchMedia = jest.fn(() => false);
 
 jest.mock('@strapi/helper-plugin', () => ({
   useCMEditViewDataManager: jest.fn(),
@@ -22,9 +26,11 @@ const makeApp = () => {
       defaultLocale="en"
       messages={{ 'containers.Edit.information': 'Information' }}
     >
-      <Theme>
-        <Informations />
-      </Theme>
+      <ThemeToggleProvider themes={{ light: lightTheme }}>
+        <Theme>
+          <Informations />
+        </Theme>
+      </ThemeToggleProvider>
     </IntlProvider>
   );
 };

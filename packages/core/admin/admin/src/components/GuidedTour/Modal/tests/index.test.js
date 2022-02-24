@@ -2,8 +2,12 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { useGuidedTour } from '@strapi/helper-plugin';
+import { lightTheme } from '@strapi/design-system';
 import Theme from '../../../Theme';
+import ThemeToggleProvider from '../../../ThemeToggleProvider';
 import GuidedTourModal from '../index';
+
+window.matchMedia = jest.fn(() => false);
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -28,11 +32,13 @@ jest.mock('@strapi/helper-plugin', () => ({
 }));
 
 const App = (
-  <Theme>
-    <IntlProvider locale="en" messages={{}} defaultLocale="en" textComponent="span">
-      <GuidedTourModal />
-    </IntlProvider>
-  </Theme>
+  <ThemeToggleProvider themes={{ light: lightTheme }}>
+    <Theme>
+      <IntlProvider locale="en" messages={{}} defaultLocale="en" textComponent="span">
+        <GuidedTourModal />
+      </IntlProvider>
+    </Theme>
+  </ThemeToggleProvider>
 );
 
 describe('<GuidedTourModal />', () => {

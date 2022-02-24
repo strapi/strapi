@@ -3,10 +3,14 @@ import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
+import { lightTheme } from '@strapi/design-system';
 import en from '../../../../../../../../translations/en.json';
 import Theme from '../../../../../../../../components/Theme';
+import ThemeToggleProvider from '../../../../../../../../components/ThemeToggleProvider';
 import LanguageProvider from '../../../../../../../../components/LanguageProvider';
 import WebhookForm from '../index';
+
+window.matchMedia = jest.fn(() => false);
 
 const makeApp = component => {
   const history = createMemoryHistory();
@@ -15,9 +19,11 @@ const makeApp = component => {
 
   return (
     <LanguageProvider messages={messages} localeNames={localeNames}>
-      <Theme>
-        <Router history={history}>{component}</Router>
-      </Theme>
+      <ThemeToggleProvider themes={{ light: lightTheme }}>
+        <Theme>
+          <Router history={history}>{component}</Router>
+        </Theme>
+      </ThemeToggleProvider>
     </LanguageProvider>
   );
 };

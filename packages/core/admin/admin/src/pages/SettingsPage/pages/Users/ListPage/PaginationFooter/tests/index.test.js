@@ -3,19 +3,25 @@ import { render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { createMemoryHistory } from 'history';
 import { Router, Route } from 'react-router-dom';
+import { lightTheme } from '@strapi/design-system';
 import Theme from '../../../../../../../components/Theme';
+import ThemeToggleProvider from '../../../../../../../components/ThemeToggleProvider';
 import PaginationFooter from '../index';
+
+window.matchMedia = jest.fn(() => false);
 
 const makeApp = (history, pagination) => {
   return (
     <IntlProvider messages={{}} textComponent="span" locale="en" defaultLocale="en">
-      <Theme>
-        <Router history={history}>
-          <Route path="/settings/user">
-            <PaginationFooter pagination={pagination} />
-          </Route>
-        </Router>
-      </Theme>
+      <ThemeToggleProvider themes={{ light: lightTheme }}>
+        <Theme>
+          <Router history={history}>
+            <Route path="/settings/user">
+              <PaginationFooter pagination={pagination} />
+            </Route>
+          </Router>
+        </Theme>
+      </ThemeToggleProvider>
     </IntlProvider>
   );
 };

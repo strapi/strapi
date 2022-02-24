@@ -3,8 +3,12 @@ import { render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
+import { lightTheme } from '@strapi/design-system';
 import Theme from '../../../../components/Theme';
+import ThemeToggleProvider from '../../../../components/ThemeToggleProvider';
 import NoContentType from '../index';
+
+window.matchMedia = jest.fn(() => false);
 
 jest.mock('@strapi/helper-plugin', () => ({
   useFocusWhenNavigate: jest.fn(),
@@ -17,9 +21,11 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
     } = render(
       <Router history={createMemoryHistory()}>
         <IntlProvider messages={{}} defaultLocale="en" textComponent="span" locale="en">
-          <Theme>
-            <NoContentType />
-          </Theme>
+          <ThemeToggleProvider themes={{ light: lightTheme }}>
+            <Theme>
+              <NoContentType />
+            </Theme>
+          </ThemeToggleProvider>
         </IntlProvider>
       </Router>
     );

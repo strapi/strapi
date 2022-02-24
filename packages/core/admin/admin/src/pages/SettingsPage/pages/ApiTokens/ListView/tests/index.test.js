@@ -5,9 +5,13 @@ import { Router, Route } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { useRBAC } from '@strapi/helper-plugin';
 import { QueryClient, QueryClientProvider } from 'react-query';
+import { lightTheme } from '@strapi/design-system';
 import { axiosInstance } from '../../../../../../core/utils';
 import Theme from '../../../../../../components/Theme';
+import ThemeToggleProvider from '../../../../../../components/ThemeToggleProvider';
 import ListView from '../index';
+
+window.matchMedia = jest.fn(() => false);
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -49,13 +53,15 @@ const makeApp = history => {
   return (
     <QueryClientProvider client={client}>
       <IntlProvider messages={{}} defaultLocale="en" textComponent="span" locale="en">
-        <Theme>
-          <Router history={history}>
-            <Route path="/settings/api-tokens">
-              <ListView />
-            </Route>
-          </Router>
-        </Theme>
+        <ThemeToggleProvider themes={{ light: lightTheme }}>
+          <Theme>
+            <Router history={history}>
+              <Route path="/settings/api-tokens">
+                <ListView />
+              </Route>
+            </Router>
+          </Theme>
+        </ThemeToggleProvider>
       </IntlProvider>
     </QueryClientProvider>
   );

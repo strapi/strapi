@@ -2,6 +2,7 @@ import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { QueryClientProvider, QueryClient } from 'react-query';
 import { useGuidedTour } from '@strapi/helper-plugin';
+import { lightTheme } from '@strapi/design-system';
 import { ConfigurationsContext } from '../../../contexts';
 import {
   fetchAppInfo,
@@ -11,7 +12,10 @@ import {
 } from '../utils/api';
 import packageJSON from '../../../../../package.json';
 import Theme from '../../Theme';
+import ThemeToggleProvider from '../../ThemeToggleProvider';
 import AuthenticatedApp from '..';
+
+window.matchMedia = jest.fn(() => false);
 
 const strapiVersion = packageJSON.version;
 
@@ -43,13 +47,15 @@ const queryClient = new QueryClient({
 });
 
 const app = (
-  <Theme>
-    <QueryClientProvider client={queryClient}>
-      <ConfigurationsContext.Provider value={{ showReleaseNotification: false }}>
-        <AuthenticatedApp />
-      </ConfigurationsContext.Provider>
-    </QueryClientProvider>
-  </Theme>
+  <ThemeToggleProvider themes={{ light: lightTheme }}>
+    <Theme>
+      <QueryClientProvider client={queryClient}>
+        <ConfigurationsContext.Provider value={{ showReleaseNotification: false }}>
+          <AuthenticatedApp />
+        </ConfigurationsContext.Provider>
+      </QueryClientProvider>
+    </Theme>
+  </ThemeToggleProvider>
 );
 
 describe('Admin | components | AuthenticatedApp', () => {

@@ -10,10 +10,14 @@ import { createMemoryHistory } from 'history';
 import { Router } from 'react-router-dom';
 import { IntlProvider } from 'react-intl';
 import { useRBAC } from '@strapi/helper-plugin';
+import { lightTheme } from '@strapi/design-system';
 import { useRolesList } from '../../../../../../hooks';
 
 import Theme from '../../../../../../components/Theme';
+import ThemeToggleProvider from '../../../../../../components/ThemeToggleProvider';
 import ListPage from '../index';
+
+window.matchMedia = jest.fn(() => false);
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -31,11 +35,13 @@ jest.mock('../../../../../../hooks', () => ({
 
 const makeApp = history => (
   <IntlProvider messages={{}} defaultLocale="en" textComponent="span" locale="en">
-    <Theme>
-      <Router history={history}>
-        <ListPage />
-      </Router>
-    </Theme>
+    <ThemeToggleProvider themes={{ light: lightTheme }}>
+      <Theme>
+        <Router history={history}>
+          <ListPage />
+        </Router>
+      </Theme>
+    </ThemeToggleProvider>
   </IntlProvider>
 );
 

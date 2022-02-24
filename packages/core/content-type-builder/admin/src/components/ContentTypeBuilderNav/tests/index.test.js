@@ -4,16 +4,19 @@
  *
  */
 
-import { Layout } from '@strapi/design-system';
+import { Layout, lightTheme } from '@strapi/design-system';
 import { render } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import React from 'react';
 import { Router } from 'react-router-dom';
 import LanguageProvider from '../../../../../../admin/admin/src/components/LanguageProvider';
 import Theme from '../../../../../../admin/admin/src/components/Theme';
+import ThemeToggleProvider from '../../../../../../admin/admin/src/components/ThemeToggleProvider';
 import en from '../../../../../../admin/admin/src/translations/en.json';
 import ContentTypeBuilderNav from '../index';
 import mockData from './mockData';
+
+window.matchMedia = jest.fn(() => false);
 
 jest.mock('../useContentTypeBuilderMenu.js', () => {
   return jest.fn(() => ({
@@ -30,13 +33,15 @@ const makeApp = () => {
 
   return (
     <LanguageProvider messages={messages} localeNames={localeNames}>
-      <Theme>
-        <Router history={history}>
-          <Layout sideNav={<ContentTypeBuilderNav />}>
-            <div />
-          </Layout>
-        </Router>
-      </Theme>
+      <ThemeToggleProvider themes={{ light: lightTheme }}>
+        <Theme>
+          <Router history={history}>
+            <Layout sideNav={<ContentTypeBuilderNav />}>
+              <div />
+            </Layout>
+          </Router>
+        </Theme>
+      </ThemeToggleProvider>
     </LanguageProvider>
   );
 };
