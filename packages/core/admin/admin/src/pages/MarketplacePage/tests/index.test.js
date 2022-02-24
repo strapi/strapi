@@ -244,7 +244,7 @@ describe('Marketplace page', () => {
         align-items: normal;
       }
 
-      .c16 {
+      .c17 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -301,7 +301,7 @@ describe('Marketplace page', () => {
         margin-left: 8px;
       }
 
-      .c17 {
+      .c16 {
         color: #32324d;
         font-weight: 500;
         font-size: 1rem;
@@ -329,7 +329,6 @@ describe('Marketplace page', () => {
 
       .c11 {
         grid-column: span 4;
-        max-width: 100%;
       }
 
       .c1 {
@@ -639,15 +638,15 @@ describe('Marketplace page', () => {
                         <div
                           class="c15"
                         >
-                          <div
+                          <h3
                             class="c16"
                           >
-                            <h3
+                            <div
                               class="c17"
                             >
                               Comments
-                            </h3>
-                          </div>
+                            </div>
+                          </h3>
                         </div>
                         <div
                           class="c18"
@@ -754,34 +753,38 @@ describe('Marketplace page', () => {
                         <div
                           class="c15"
                         >
-                          <div
+                          <h3
                             class="c16"
                           >
-                            <h3
+                            <div
                               class="c17"
                             >
                               Config Sync
-                            </h3>
-                            <span>
-                              <svg
-                                aria-describedby="tooltip-1"
-                                class="c36 c37"
-                                fill="none"
-                                height="1em"
-                                tabindex="0"
-                                viewBox="0 0 24 24"
-                                width="1em"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  clip-rule="evenodd"
-                                  d="M12 24c6.627 0 12-5.373 12-12S18.627 0 12 0 0 5.373 0 12s5.373 12 12 12zm-1.438-11.066L16.158 7.5 18 9.245l-7.438 7.18-4.462-4.1 1.84-1.745 2.622 2.354z"
-                                  fill="#212134"
-                                  fill-rule="evenodd"
-                                />
-                              </svg>
-                            </span>
-                          </div>
+                              <span>
+                                <div
+                                  aria-describedby="tooltip-1"
+                                  class="c17"
+                                  tabindex="0"
+                                >
+                                  <svg
+                                    class="c36 c37"
+                                    fill="none"
+                                    height="1em"
+                                    viewBox="0 0 24 24"
+                                    width="1em"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  >
+                                    <path
+                                      clip-rule="evenodd"
+                                      d="M12 24c6.627 0 12-5.373 12-12S18.627 0 12 0 0 5.373 0 12s5.373 12 12 12zm-1.438-11.066L16.158 7.5 18 9.245l-7.438 7.18-4.462-4.1 1.84-1.745 2.622 2.354z"
+                                      fill="#212134"
+                                      fill-rule="evenodd"
+                                    />
+                                  </svg>
+                                </div>
+                              </span>
+                            </div>
+                          </h3>
                         </div>
                         <div
                           class="c18"
@@ -888,15 +891,15 @@ describe('Marketplace page', () => {
                         <div
                           class="c15"
                         >
-                          <div
+                          <h3
                             class="c16"
                           >
-                            <h3
+                            <div
                               class="c17"
                             >
                               Content Versioning
-                            </h3>
-                          </div>
+                            </div>
+                          </h3>
                         </div>
                         <div
                           class="c18"
@@ -1003,34 +1006,38 @@ describe('Marketplace page', () => {
                         <div
                           class="c15"
                         >
-                          <div
+                          <h3
                             class="c16"
                           >
-                            <h3
+                            <div
                               class="c17"
                             >
                               Documentation
-                            </h3>
-                            <span>
-                              <svg
-                                aria-describedby="tooltip-3"
-                                class="c36 c37"
-                                fill="none"
-                                height="1em"
-                                tabindex="0"
-                                viewBox="0 0 24 24"
-                                width="1em"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  clip-rule="evenodd"
-                                  d="M12 24c6.627 0 12-5.373 12-12S18.627 0 12 0 0 5.373 0 12s5.373 12 12 12zm-1.438-11.066L16.158 7.5 18 9.245l-7.438 7.18-4.462-4.1 1.84-1.745 2.622 2.354z"
-                                  fill="#212134"
-                                  fill-rule="evenodd"
-                                />
-                              </svg>
-                            </span>
-                          </div>
+                              <span>
+                                <div
+                                  aria-describedby="tooltip-3"
+                                  class="c17"
+                                  tabindex="0"
+                                >
+                                  <svg
+                                    class="c36 c37"
+                                    fill="none"
+                                    height="1em"
+                                    viewBox="0 0 24 24"
+                                    width="1em"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  >
+                                    <path
+                                      clip-rule="evenodd"
+                                      d="M12 24c6.627 0 12-5.373 12-12S18.627 0 12 0 0 5.373 0 12s5.373 12 12 12zm-1.438-11.066L16.158 7.5 18 9.245l-7.438 7.18-4.462-4.1 1.84-1.745 2.622 2.354z"
+                                      fill="#212134"
+                                      fill-rule="evenodd"
+                                    />
+                                  </svg>
+                                </div>
+                              </span>
+                            </div>
+                          </h3>
                         </div>
                         <div
                           class="c18"
@@ -1127,15 +1134,15 @@ describe('Marketplace page', () => {
                         <div
                           class="c15"
                         >
-                          <div
+                          <h3
                             class="c16"
                           >
-                            <h3
+                            <div
                               class="c17"
                             >
                               Transformer
-                            </h3>
-                          </div>
+                            </div>
+                          </h3>
                         </div>
                         <div
                           class="c18"
