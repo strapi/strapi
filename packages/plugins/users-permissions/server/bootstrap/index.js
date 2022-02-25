@@ -146,6 +146,15 @@ const initGrant = async pluginStore => {
       callback: `${baseURL}/reddit/callback`,
       scope: ['identity'],
     },
+    authing: {
+      enabled: false,
+      icon: '',
+      key: '',
+      secret: '',
+      subdomain: 'your-app.authing.cn',
+      callback: `${baseURL}/authing/callback`,
+      scope: ['openid', 'email', 'profile'],
+    },
     auth0: {
       enabled: false,
       icon: '',

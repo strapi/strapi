@@ -401,6 +401,46 @@ module.exports = ({ strapi }) => {
           });
         break;
       }
+      case 'authing': {
+        const purestAuthingConf = {};
+        purestAuthingConf[`https://${providers.authing.subdomain}`] = {
+          __domain: {
+            auth: {
+              auth: { bearer: '[0]' },
+            },
+          },
+          '{endpoint}': {
+            __path: {
+              alias: '__default',
+            },
+          },
+        };
+        const authing = purest({
+          provider: 'authing',
+          config: {
+            authing: purestAuthingConf,
+          },
+        });
+
+        authing
+          .get('userinfo')
+          .auth(access_token)
+          .request((err, res, body) => {
+            if (err) {
+              callback(err);
+            } else {
+              const username =
+                body.username || body.nickname || body.name || body.email.split('@')[0];
+              const email = body.email || `${username.replace(/\s+/g, '.')}@strapi.io`;
+
+              callback(null, {
+                username,
+                email,
+              });
+            }
+          });
+        break;
+      }
       case 'auth0': {
         const purestAuth0Conf = {};
         purestAuth0Conf[`https://${providers.auth0.subdomain}.auth0.com`] = {
