@@ -60,19 +60,19 @@ describe('Marketplace page', () => {
         padding-top: 8px;
       }
 
-      .c38 {
+      .c39 {
         padding-left: 16px;
       }
 
-      .c33 {
+      .c36 {
         font-weight: 600;
         color: #32324d;
         font-size: 0.75rem;
         line-height: 1.33;
       }
 
-      .c35 {
-        padding-left: 8px;
+      .c33 {
+        padding-right: 8px;
       }
 
       .c30 {
@@ -133,6 +133,10 @@ describe('Marketplace page', () => {
         border: 2px solid #4945ff;
       }
 
+      .c34 {
+        height: 100%;
+      }
+
       .c31 {
         -webkit-align-items: center;
         -webkit-box-align: center;
@@ -145,7 +149,7 @@ describe('Marketplace page', () => {
         background: #f0f0ff;
       }
 
-      .c31 .c34 {
+      .c31 .c32 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -156,7 +160,7 @@ describe('Marketplace page', () => {
         align-items: center;
       }
 
-      .c31 .c32 {
+      .c31 .c35 {
         color: #ffffff;
       }
 
@@ -165,7 +169,7 @@ describe('Marketplace page', () => {
         background: #eaeaef;
       }
 
-      .c31[aria-disabled='true'] .c32 {
+      .c31[aria-disabled='true'] .c35 {
         color: #666687;
       }
 
@@ -179,7 +183,7 @@ describe('Marketplace page', () => {
         background: #eaeaef;
       }
 
-      .c31[aria-disabled='true']:active .c32 {
+      .c31[aria-disabled='true']:active .c35 {
         color: #666687;
       }
 
@@ -197,7 +201,7 @@ describe('Marketplace page', () => {
         border: 1px solid #4945ff;
       }
 
-      .c31:active .c32 {
+      .c31:active .c35 {
         color: #4945ff;
       }
 
@@ -206,7 +210,7 @@ describe('Marketplace page', () => {
         fill: #4945ff;
       }
 
-      .c31 .c32 {
+      .c31 .c35 {
         color: #271fe0;
       }
 
@@ -258,19 +262,19 @@ describe('Marketplace page', () => {
         align-items: center;
       }
 
-      .c36 {
+      .c37 {
         color: #328048;
         margin-left: 8px;
       }
 
-      .c39 {
+      .c40 {
         color: #328048;
         margin-right: 8px;
         width: 12;
         height: 12;
       }
 
-      .c37 path {
+      .c38 path {
         fill: #328048;
       }
 
@@ -314,7 +318,7 @@ describe('Marketplace page', () => {
         line-height: 1.43;
       }
 
-      .c40 {
+      .c41 {
         font-weight: 600;
         color: #328048;
         font-size: 0.875rem;
@@ -699,14 +703,9 @@ describe('Marketplace page', () => {
                           class="c30 c31"
                           type="button"
                         >
-                          <span
-                            class="c32 c33"
-                          >
-                            Copy install command
-                          </span>
                           <div
                             aria-hidden="true"
-                            class="c34 c35"
+                            class="c32 c33 c34"
                           >
                             <svg
                               fill="none"
@@ -725,6 +724,11 @@ describe('Marketplace page', () => {
                               />
                             </svg>
                           </div>
+                          <span
+                            class="c35 c36"
+                          >
+                            Copy install command
+                          </span>
                         </button>
                       </div>
                     </div>
@@ -768,7 +772,7 @@ describe('Marketplace page', () => {
                                   tabindex="0"
                                 >
                                   <svg
-                                    class="c36 c37"
+                                    class="c37 c38"
                                     fill="none"
                                     height="1em"
                                     viewBox="0 0 24 24"
@@ -837,14 +841,9 @@ describe('Marketplace page', () => {
                           class="c30 c31"
                           type="button"
                         >
-                          <span
-                            class="c32 c33"
-                          >
-                            Copy install command
-                          </span>
                           <div
                             aria-hidden="true"
-                            class="c34 c35"
+                            class="c32 c33 c34"
                           >
                             <svg
                               fill="none"
@@ -863,6 +862,11 @@ describe('Marketplace page', () => {
                               />
                             </svg>
                           </div>
+                          <span
+                            class="c35 c36"
+                          >
+                            Copy install command
+                          </span>
                         </button>
                       </div>
                     </div>
@@ -952,14 +956,9 @@ describe('Marketplace page', () => {
                           class="c30 c31"
                           type="button"
                         >
-                          <span
-                            class="c32 c33"
-                          >
-                            Copy install command
-                          </span>
                           <div
                             aria-hidden="true"
-                            class="c34 c35"
+                            class="c32 c33 c34"
                           >
                             <svg
                               fill="none"
@@ -978,6 +977,11 @@ describe('Marketplace page', () => {
                               />
                             </svg>
                           </div>
+                          <span
+                            class="c35 c36"
+                          >
+                            Copy install command
+                          </span>
                         </button>
                       </div>
                     </div>
@@ -1021,7 +1025,7 @@ describe('Marketplace page', () => {
                                   tabindex="0"
                                 >
                                   <svg
-                                    class="c36 c37"
+                                    class="c37 c38"
                                     fill="none"
                                     height="1em"
                                     viewBox="0 0 24 24"
@@ -1086,10 +1090,10 @@ describe('Marketplace page', () => {
                           </div>
                         </a>
                         <div
-                          class="c38"
+                          class="c39"
                         >
                           <svg
-                            class="c39 c37"
+                            class="c40 c38"
                             fill="none"
                             height="12"
                             viewBox="0 0 24 24"
@@ -1102,7 +1106,7 @@ describe('Marketplace page', () => {
                             />
                           </svg>
                           <span
-                            class="c40"
+                            class="c41"
                           >
                             Installed
                           </span>
@@ -1195,14 +1199,9 @@ describe('Marketplace page', () => {
                           class="c30 c31"
                           type="button"
                         >
-                          <span
-                            class="c32 c33"
-                          >
-                            Copy install command
-                          </span>
                           <div
                             aria-hidden="true"
-                            class="c34 c35"
+                            class="c32 c33 c34"
                           >
                             <svg
                               fill="none"
@@ -1221,6 +1220,11 @@ describe('Marketplace page', () => {
                               />
                             </svg>
                           </div>
+                          <span
+                            class="c35 c36"
+                          >
+                            Copy install command
+                          </span>
                         </button>
                       </div>
                     </div>
