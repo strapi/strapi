@@ -304,7 +304,7 @@ const convertAndSanitizeFilters = (filters, schema) => {
 
   // Here, `key` can either be an operator or an attribute name
   for (const [key, value] of Object.entries(filters)) {
-    const attribute = get('key', schema.attributes);
+    const attribute = get(key, schema.attributes);
 
     // Handle attributes
     if (attribute) {
