@@ -4,8 +4,6 @@ import { Components, Fields } from '../core/apis';
 import StrapiApp from '../StrapiApp';
 import appReducers from '../reducers';
 
-window.matchMedia = jest.fn(() => false);
-
 const library = { fields: Fields(), components: Components() };
 const middlewares = { middlewares: [] };
 const reducers = { reducers: appReducers };

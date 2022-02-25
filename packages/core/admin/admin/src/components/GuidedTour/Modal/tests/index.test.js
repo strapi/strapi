@@ -7,8 +7,6 @@ import Theme from '../../../Theme';
 import ThemeToggleProvider from '../../../ThemeToggleProvider';
 import GuidedTourModal from '../index';
 
-window.matchMedia = jest.fn(() => false);
-
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useGuidedTour: jest.fn(() => ({

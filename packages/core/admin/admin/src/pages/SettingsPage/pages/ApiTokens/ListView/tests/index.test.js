@@ -11,8 +11,6 @@ import Theme from '../../../../../../components/Theme';
 import ThemeToggleProvider from '../../../../../../components/ThemeToggleProvider';
 import ListView from '../index';
 
-window.matchMedia = jest.fn(() => false);
-
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useNotification: jest.fn(),

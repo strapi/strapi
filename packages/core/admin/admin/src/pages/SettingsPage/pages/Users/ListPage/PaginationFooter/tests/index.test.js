@@ -8,8 +8,6 @@ import Theme from '../../../../../../../components/Theme';
 import ThemeToggleProvider from '../../../../../../../components/ThemeToggleProvider';
 import PaginationFooter from '../index';
 
-window.matchMedia = jest.fn(() => false);
-
 const makeApp = (history, pagination) => {
   return (
     <IntlProvider messages={{}} textComponent="span" locale="en" defaultLocale="en">

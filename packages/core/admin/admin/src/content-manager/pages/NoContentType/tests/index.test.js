@@ -8,8 +8,6 @@ import Theme from '../../../../components/Theme';
 import ThemeToggleProvider from '../../../../components/ThemeToggleProvider';
 import NoContentType from '../index';
 
-window.matchMedia = jest.fn(() => false);
-
 jest.mock('@strapi/helper-plugin', () => ({
   useFocusWhenNavigate: jest.fn(),
 }));

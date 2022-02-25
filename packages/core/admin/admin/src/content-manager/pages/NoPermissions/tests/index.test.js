@@ -12,8 +12,6 @@ import Theme from '../../../../components/Theme';
 import ThemeToggleProvider from '../../../../components/ThemeToggleProvider';
 import NoPermissions from '../index';
 
-window.matchMedia = jest.fn(() => false);
-
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useFocusWhenNavigate: jest.fn(),

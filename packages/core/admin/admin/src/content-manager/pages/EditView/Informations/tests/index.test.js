@@ -13,8 +13,6 @@ import Theme from '../../../../../components/Theme';
 import ThemeToggleProvider from '../../../../../components/ThemeToggleProvider';
 import Informations from '../index';
 
-window.matchMedia = jest.fn(() => false);
-
 jest.mock('@strapi/helper-plugin', () => ({
   useCMEditViewDataManager: jest.fn(),
 }));

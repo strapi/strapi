@@ -8,8 +8,6 @@ import server from './utils/server';
 import ThemeToggleProvider from '../../../components/ThemeToggleProvider';
 import Theme from '../../../components/Theme';
 
-window.matchMedia = jest.fn(() => false);
-
 jest.mock('../../../components/LocalesProvider/useLocalesProvider', () => () => ({
   changeLocale: () => {},
   localeNames: ['en'],

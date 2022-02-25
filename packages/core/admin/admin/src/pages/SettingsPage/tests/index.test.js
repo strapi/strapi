@@ -10,8 +10,6 @@ import ThemeToggleProvider from '../../../components/ThemeToggleProvider';
 import { SettingsPage } from '..';
 import { useSettingsMenu } from '../../../hooks';
 
-window.matchMedia = jest.fn(() => false);
-
 jest.mock('../../../hooks', () => ({
   useSettingsMenu: jest.fn(() => ({ isLoading: false, menu: [] })),
   useAppInfos: jest.fn(() => ({ shouldUpdateStrapi: false })),

@@ -14,8 +14,6 @@ import Theme from '../../Theme';
 import ThemeToggleProvider from '../../ThemeToggleProvider';
 import Notifications from '../index';
 
-window.matchMedia = jest.fn(() => false);
-
 const messages = {};
 
 describe('<Notifications />', () => {

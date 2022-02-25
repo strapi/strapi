@@ -15,8 +15,6 @@ import { Header } from '../index';
 import components from '../utils/tests/data/compos-schema.json';
 import ct from '../utils/tests/data/ct-schema.json';
 
-window.matchMedia = jest.fn(() => false);
-
 const defaultProps = {
   allowedActions: { canUpdate: true, canCreate: true, canPublish: true },
   componentLayouts: components,

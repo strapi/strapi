@@ -15,8 +15,6 @@ import { App as ContentManagerApp } from '..';
 import cmReducers from '../../../../reducers';
 import useModels from '../useModels';
 
-window.matchMedia = jest.fn(() => false);
-
 jest.mock('../useModels', () =>
   jest.fn(() => {
     return {};

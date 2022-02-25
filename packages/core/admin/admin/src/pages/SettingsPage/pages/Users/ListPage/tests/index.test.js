@@ -11,8 +11,6 @@ import ThemeToggleProvider from '../../../../../../components/ThemeToggleProvide
 import ListPage from '../index';
 import server from './utils/server';
 
-window.matchMedia = jest.fn(() => false);
-
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useNotification: jest.fn(),

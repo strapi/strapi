@@ -10,8 +10,6 @@ import ThemeToggleProvider from '../../../../../../../../components/ThemeToggleP
 import LanguageProvider from '../../../../../../../../components/LanguageProvider';
 import WebhookForm from '../index';
 
-window.matchMedia = jest.fn(() => false);
-
 const makeApp = component => {
   const history = createMemoryHistory();
   const messages = { en };

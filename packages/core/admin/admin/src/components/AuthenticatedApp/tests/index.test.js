@@ -15,8 +15,6 @@ import Theme from '../../Theme';
 import ThemeToggleProvider from '../../ThemeToggleProvider';
 import AuthenticatedApp from '..';
 
-window.matchMedia = jest.fn(() => false);
-
 const strapiVersion = packageJSON.version;
 
 jest.mock('@strapi/helper-plugin', () => ({

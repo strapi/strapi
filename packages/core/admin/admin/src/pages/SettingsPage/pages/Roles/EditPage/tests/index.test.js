@@ -16,8 +16,6 @@ import ThemeToggleProvider from '../../../../../../components/ThemeToggleProvide
 
 import EditPage from '../index';
 
-window.matchMedia = jest.fn(() => false);
-
 jest.mock('moment', () => {
   const mMoment = {
     format: jest.fn().mockReturnThis(),

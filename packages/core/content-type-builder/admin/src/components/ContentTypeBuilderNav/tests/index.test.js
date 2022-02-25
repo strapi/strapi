@@ -16,8 +16,6 @@ import en from '../../../../../../admin/admin/src/translations/en.json';
 import ContentTypeBuilderNav from '../index';
 import mockData from './mockData';
 
-window.matchMedia = jest.fn(() => false);
-
 jest.mock('../useContentTypeBuilderMenu.js', () => {
   return jest.fn(() => ({
     menu: mockData,

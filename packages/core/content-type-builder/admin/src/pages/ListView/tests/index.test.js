@@ -20,8 +20,6 @@ import getTrad from '../../../utils/getTrad';
 import ListView from '../index';
 import mockData from './mockData';
 
-window.matchMedia = jest.fn(() => false);
-
 jest.mock('../../../hooks/useDataManager', () => {
   return jest.fn(() => ({
     initialData: mockData,
