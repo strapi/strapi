@@ -62,12 +62,11 @@ const contentTypeSchemaValidator = yup.object().shape({
             }
 
             // should not collide
-            const normalizedEnum = attr.enum.map(toRegressedEnumValue);
-            const duplicates = _(normalizedEnum)
-              .groupBy()
-              .pickBy(x => x.length > 1)
-              .keys()
-              .value();
+            const duplicates = _.uniq(
+              attr.enum
+                .map(toRegressedEnumValue)
+                .filter((value, index, values) => values.indexOf(value) !== index)
+            );
 
             if (duplicates.length) {
               const message = `Some enum values of the field '${attrName}' collide when normalized: ${duplicates.join(
