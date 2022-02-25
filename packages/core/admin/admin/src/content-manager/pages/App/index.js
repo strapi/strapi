@@ -1,7 +1,12 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Helmet } from 'react-helmet';
 import { Switch, Route, useRouteMatch, Redirect, useLocation } from 'react-router-dom';
-import { CheckPagePermissions, LoadingIndicatorPage, NotFound } from '@strapi/helper-plugin';
+import {
+  CheckPagePermissions,
+  LoadingIndicatorPage,
+  NotFound,
+  useGuidedTour,
+} from '@strapi/helper-plugin';
 import { Layout, HeaderLayout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
 import { useIntl } from 'react-intl';
@@ -28,6 +33,14 @@ const App = () => {
   );
   const { pathname } = useLocation();
   const { formatMessage } = useIntl();
+  const { startSection } = useGuidedTour();
+  const startSectionRef = useRef(startSection);
+
+  useEffect(() => {
+    if (startSectionRef.current) {
+      startSectionRef.current('contentManager');
+    }
+  }, []);
 
   if (status === 'loading') {
     return (

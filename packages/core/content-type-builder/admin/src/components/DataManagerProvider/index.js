@@ -10,6 +10,7 @@ import {
   useAutoReloadOverlayBlocker,
   useAppInfos,
   useRBACProvider,
+  useGuidedTour,
 } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { useLocation, useRouteMatch, Redirect } from 'react-router-dom';
@@ -63,6 +64,7 @@ const DataManagerProvider = ({
   const dispatch = useDispatch();
   const toggleNotification = useNotification();
   const { lockAppWithAutoreload, unlockAppWithAutoreload } = useAutoReloadOverlayBlocker();
+  const { setCurrentStep } = useGuidedTour();
 
   const { getPlugin } = useStrapiApp();
 
@@ -477,6 +479,14 @@ const DataManagerProvider = ({
 
       unlockAppWithAutoreload();
 
+      if (
+        isCreating &&
+        (initialData.contentType?.schema.kind === 'collectionType' ||
+          initialData.contentType?.schema.kind === 'singleType')
+      ) {
+        setCurrentStep('contentTypeBuilder.success');
+      }
+
       await updatePermissions();
 
       // Submit ct tracking success
@@ -590,9 +600,6 @@ DataManagerProvider.propTypes = {
 };
 
 const mapStateToProps = makeSelectDataManagerProvider();
-const withConnect = connect(
-  mapStateToProps,
-  null
-);
+const withConnect = connect(mapStateToProps, null);
 
 export default compose(withConnect)(memo(DataManagerProvider));

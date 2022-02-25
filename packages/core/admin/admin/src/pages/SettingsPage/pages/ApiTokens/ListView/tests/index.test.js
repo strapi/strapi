@@ -16,6 +16,9 @@ jest.mock('@strapi/helper-plugin', () => ({
   useRBAC: jest.fn(() => ({
     allowedActions: { canCreate: true, canDelete: true, canRead: true, canUpdate: true },
   })),
+  useGuidedTour: jest.fn(() => ({
+    startSection: jest.fn(),
+  })),
 }));
 
 jest.spyOn(axiosInstance, 'get').mockResolvedValue({
@@ -557,10 +560,8 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
 
       .c37 {
         color: #4945ff;
-        font-weight: 600;
-        font-size: 0.6875rem;
-        line-height: 1.45;
-        text-transform: uppercase;
+        font-size: 0.75rem;
+        line-height: 1.33;
       }
 
       .c35 {
@@ -572,7 +573,6 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
-        text-transform: uppercase;
         -webkit-text-decoration: none;
         text-decoration: none;
         position: relative;
@@ -929,7 +929,7 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
                               >
                                 <path
                                   clip-rule="evenodd"
-                                  d="M23.605 3.514c.527.528.527 1.36 0 1.887l-2.623 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.119 3.118zM0 24v-4.989l14.2-14.2L19.19 9.8 4.99 24H0z"
+                                  d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
                                   fill="#212134"
                                   fill-rule="evenodd"
                                 />

@@ -121,6 +121,10 @@ const DraggedItem = ({
       if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) {
         return;
       }
+      // If They are not in the same level, should not move
+      if (dragPath.split('.').length !== hoverPath.split('.').length) {
+        return;
+      }
       // Time to actually perform the action in the data
       moveComponentField(pathToComponentArray, dragIndex, hoverIndex);
 
@@ -314,9 +318,6 @@ DraggedItem.propTypes = {
 
 const Memoized = memo(DraggedItem);
 
-export default connect(
-  Memoized,
-  select
-);
+export default connect(Memoized, select);
 
 export { DraggedItem };

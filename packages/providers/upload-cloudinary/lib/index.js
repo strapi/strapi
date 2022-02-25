@@ -13,49 +13,55 @@ module.exports = {
   init(config) {
     cloudinary.config(config);
 
-    return {
-      upload(file, customConfig = {}) {
-        return new Promise(resolve => {
-          const config = {
-            resource_type: 'auto',
-            public_id: file.hash,
-          };
+    const upload = (file, customConfig = {}) =>
+      new Promise(resolve => {
+        const config = {
+          resource_type: 'auto',
+          public_id: file.hash,
+        };
 
-          if (file.ext) {
-            config.filename = `${file.hash}${file.ext}`;
-          }
+        if (file.ext) {
+          config.filename = `${file.hash}${file.ext}`;
+        }
 
-          const upload_stream = cloudinary.uploader.upload_stream(
-            { ...config, ...customConfig },
-            (err, image) => {
-              if (err) {
-                if (err.message.includes('File size too large')) {
-                  throw new PayloadTooLargeError();
-                }
-                throw new Error(`Error uploading to cloudinary: ${err.message}`);
+        const upload_stream = cloudinary.uploader.upload_stream(
+          { ...config, ...customConfig },
+          (err, image) => {
+            if (err) {
+              if (err.message.includes('File size too large')) {
+                throw new PayloadTooLargeError();
               }
-
-              if (image.resource_type === 'video') {
-                file.previewUrl = cloudinary.url(`${image.public_id}.gif`, {
-                  video_sampling: 6,
-                  delay: 200,
-                  width: 250,
-                  crop: 'scale',
-                  resource_type: 'video',
-                });
-              }
-
-              file.url = image.secure_url;
-              file.provider_metadata = {
-                public_id: image.public_id,
-                resource_type: image.resource_type,
-              };
-              resolve();
+              throw new Error(`Error uploading to cloudinary: ${err.message}`);
             }
-          );
 
-          intoStream(file.buffer).pipe(upload_stream);
-        });
+            if (image.resource_type === 'video') {
+              file.previewUrl = cloudinary.url(`${image.public_id}.gif`, {
+                video_sampling: 6,
+                delay: 200,
+                width: 250,
+                crop: 'scale',
+                resource_type: 'video',
+              });
+            }
+
+            file.url = image.secure_url;
+            file.provider_metadata = {
+              public_id: image.public_id,
+              resource_type: image.resource_type,
+            };
+            resolve();
+          }
+        );
+
+        file.stream ? file.stream.pipe(upload_stream) : intoStream(file.buffer).pipe(upload_stream);
+      });
+
+    return {
+      uploadStream(file, customConfig = {}) {
+        return upload(file, customConfig);
+      },
+      upload(file, customConfig = {}) {
+        return upload(file, customConfig);
       },
       async delete(file, customConfig = {}) {
         try {

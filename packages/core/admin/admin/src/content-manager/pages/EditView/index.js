@@ -309,6 +309,7 @@ const EditView = ({
                       )}
                       <Box as="aside" aria-labelledby="links">
                         <Stack size={2}>
+                          <InjectionZone area="contentManager.editView.right-links" slug={slug} />
                           {slug !== 'strapi::administrator' && (
                             <CheckPermissions permissions={ctbPermissions}>
                               <LinkButton
@@ -343,7 +344,7 @@ const EditView = ({
                               })}
                             </LinkButton>
                           </CheckPermissions>
-                          <InjectionZone area="contentManager.editView.right-links" slug={slug} />
+
                           {allowedActions.canDelete && (
                             <DeleteLink
                               isCreatingEntry={isCreatingEntry}

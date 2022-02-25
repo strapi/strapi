@@ -124,12 +124,6 @@
   "form.button.single-type.description": "Indicato per entità uniche come home page, chi siamo, ecc...",
   "form.contentType.divider.draft-publish": "Draft/Publish",
   "from": "da",
-  "menu.section.components.name.plural": "Componenti",
-  "menu.section.components.name.singular": "Componente",
-  "menu.section.models.name.plural": "Collezioni",
-  "menu.section.models.name.singular": "Collezione",
-  "menu.section.single-types.name.plural": "Entità singole",
-  "menu.section.single-types.name.singular": "Entità singola",
   "modalForm.attribute.form.base.name": "Nome",
   "modalForm.attribute.form.base.name.description": "Spazi non ammessi per il nome dell'attributo",
   "modalForm.attribute.form.base.name.placeholder": "Es: Slug, URL SEO, URL Canonico",
@@ -175,7 +169,5 @@
   "relation.manyWay": "ha molti",
   "relation.oneToMany": "appartiene a molti",
   "relation.oneToOne": "ha e appartiene a un",
-  "relation.oneWay": "ha un",
-  "table.attributes.title.plural": "{number} campi",
-  "table.attributes.title.singular": "{number} campo"
+  "relation.oneWay": "ha un"
 }

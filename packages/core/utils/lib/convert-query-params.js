@@ -4,7 +4,7 @@
  * Converts the standard Strapi REST query params to a more usable format for querying
  * You can read more here: https://docs.strapi.io/developer-docs/latest/developer-resources/database-apis-reference/rest-api.html#filters
  */
-const { has, isEmpty, isObject, cloneDeep } = require('lodash/fp');
+const { has, isEmpty, isObject, cloneDeep, get } = require('lodash/fp');
 const _ = require('lodash');
 const parseType = require('./parse-type');
 const contentTypesUtils = require('./content-types');
@@ -228,10 +228,10 @@ const convertFiltersQueryParams = (filters, schema) => {
   // Don't mutate the original object
   const filtersCopy = cloneDeep(filters);
 
-  return sanitizeFilters(filtersCopy, schema);
+  return convertAndSanitizeFilters(filtersCopy, schema);
 };
 
-const sanitizeFilters = (filters, schema) => {
+const convertAndSanitizeFilters = (filters, schema) => {
   if (!isObject(filters)) {
     return filters;
   }
@@ -240,7 +240,7 @@ const sanitizeFilters = (filters, schema) => {
     return (
       filters
         // Sanitize each filter
-        .map(filter => sanitizeFilters(filter, schema))
+        .map(filter => convertAndSanitizeFilters(filter, schema))
         // Filter out empty filters
         .filter(filter => !isObject(filter) || !isEmpty(filter))
     );
@@ -250,39 +250,48 @@ const sanitizeFilters = (filters, schema) => {
 
   // Here, `key` can either be an operator or an attribute name
   for (const [key, value] of Object.entries(filters)) {
-    const attribute = schema.attributes[key];
+    const attribute = get('key', schema.attributes);
 
     // Handle attributes
     if (attribute) {
-      // Always remove password attributes from filters object
-      if (attribute.type === 'password') {
-        removeOperator(key);
-      }
-
       // Relations
       if (attribute.type === 'relation') {
-        filters[key] = sanitizeFilters(value, strapi.getModel(attribute.target));
+        filters[key] = convertAndSanitizeFilters(value, strapi.getModel(attribute.target));
       }
 
       // Components
       else if (attribute.type === 'component') {
-        filters[key] = sanitizeFilters(value, strapi.getModel(attribute.component));
+        filters[key] = convertAndSanitizeFilters(value, strapi.getModel(attribute.component));
       }
 
       // Media
       else if (attribute.type === 'media') {
-        filters[key] = sanitizeFilters(value, strapi.getModel('plugin::upload.file'));
+        filters[key] = convertAndSanitizeFilters(value, strapi.getModel('plugin::upload.file'));
       }
 
       // Dynamic Zones
       else if (attribute.type === 'dynamiczone') {
         removeOperator(key);
       }
+
+      // Scalar attributes
+      else {
+        // Always remove password attributes from filters object
+        if (attribute.type === 'password') {
+          removeOperator(key);
+        } else {
+          filters[key] = convertAndSanitizeFilters(value);
+        }
+      }
     }
 
     // Handle operators
-    else if (isObject(value)) {
-      filters[key] = sanitizeFilters(value, schema);
+    else {
+      if (['$null', '$notNull'].includes(key)) {
+        filters[key] = parseType({ type: 'boolean', value: filters[key], forceCast: true });
+      } else if (isObject(value)) {
+        filters[key] = convertAndSanitizeFilters(value, schema);
+      }
     }
 
     // Remove empty objects & arrays
