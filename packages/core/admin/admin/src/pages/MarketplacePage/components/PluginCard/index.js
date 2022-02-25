@@ -128,7 +128,7 @@ const PluginCard = ({ plugin, installedPluginNames, useYarn }) => {
             }}
             text={commandToCopy}
           >
-            <Button size="S" endIcon={<Duplicate />} variant="secondary">
+            <Button size="S" startIcon={<Duplicate />} variant="secondary">
               {formatMessage({
                 id: 'admin.pages.MarketPlacePage.plugin.copy',
                 defaultMessage: 'Copy install command',
