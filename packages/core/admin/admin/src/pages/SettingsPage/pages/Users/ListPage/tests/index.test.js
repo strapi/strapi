@@ -5,7 +5,9 @@ import { Router, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { createMemoryHistory } from 'history';
 import { useRBAC } from '@strapi/helper-plugin';
+import { lightTheme } from '@strapi/design-system';
 import Theme from '../../../../../../components/Theme';
+import ThemeToggleProvider from '../../../../../../components/ThemeToggleProvider';
 import ListPage from '../index';
 import server from './utils/server';
 
@@ -30,13 +32,15 @@ const makeApp = history => {
   return (
     <QueryClientProvider client={client}>
       <IntlProvider messages={{}} defaultLocale="en" textComponent="span" locale="en">
-        <Theme>
-          <Router history={history}>
-            <Route path="/settings/user">
-              <ListPage />
-            </Route>
-          </Router>
-        </Theme>
+        <ThemeToggleProvider themes={{ light: lightTheme }}>
+          <Theme>
+            <Router history={history}>
+              <Route path="/settings/user">
+                <ListPage />
+              </Route>
+            </Router>
+          </Theme>
+        </ThemeToggleProvider>
       </IntlProvider>
     </QueryClientProvider>
   );

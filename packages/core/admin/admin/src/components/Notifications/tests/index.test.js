@@ -9,7 +9,9 @@ import { render, fireEvent, screen } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { useNotification } from '@strapi/helper-plugin';
 import { act } from 'react-dom/test-utils';
+import { lightTheme } from '@strapi/design-system';
 import Theme from '../../Theme';
+import ThemeToggleProvider from '../../ThemeToggleProvider';
 import Notifications from '../index';
 
 const messages = {};
@@ -19,13 +21,15 @@ describe('<Notifications />', () => {
     const {
       container: { firstChild },
     } = render(
-      <Theme>
-        <IntlProvider locale="en" messages={messages} defaultLocale="en" textComponent="span">
-          <Notifications>
-            <div />
-          </Notifications>
-        </IntlProvider>
-      </Theme>
+      <ThemeToggleProvider themes={{ light: lightTheme }}>
+        <Theme>
+          <IntlProvider locale="en" messages={messages} defaultLocale="en" textComponent="span">
+            <Notifications>
+              <div />
+            </Notifications>
+          </IntlProvider>
+        </Theme>
+      </ThemeToggleProvider>
     );
 
     expect(firstChild).toMatchInlineSnapshot(`
@@ -80,13 +84,15 @@ describe('<Notifications />', () => {
     };
 
     render(
-      <Theme>
-        <IntlProvider locale="en" defaultLocale="en" messages={messages} textComponent="span">
-          <Notifications>
-            <Button />
-          </Notifications>
-        </IntlProvider>
-      </Theme>
+      <ThemeToggleProvider themes={{ light: lightTheme }}>
+        <Theme>
+          <IntlProvider locale="en" defaultLocale="en" messages={messages} textComponent="span">
+            <Notifications>
+              <Button />
+            </Notifications>
+          </IntlProvider>
+        </Theme>
+      </ThemeToggleProvider>
     );
 
     // Click button
@@ -121,13 +127,15 @@ describe('<Notifications />', () => {
     };
 
     render(
-      <Theme>
-        <IntlProvider locale="en" defaultLocale="en" messages={messages} textComponent="span">
-          <Notifications>
-            <Button />
-          </Notifications>
-        </IntlProvider>
-      </Theme>
+      <ThemeToggleProvider themes={{ light: lightTheme }}>
+        <Theme>
+          <IntlProvider locale="en" defaultLocale="en" messages={messages} textComponent="span">
+            <Notifications>
+              <Button />
+            </Notifications>
+          </IntlProvider>
+        </Theme>
+      </ThemeToggleProvider>
     );
 
     // Click button

@@ -299,7 +299,7 @@ describe('ADMIN | StrapiApp', () => {
 
       app.createCustomConfigurations();
 
-      expect(app.configurations.theme.main.colors.red).toBe('black');
+      expect(app.configurations.themes.custom.main.colors.red).toBe('black');
     });
 
     it('should override the tutorials', () => {
