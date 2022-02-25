@@ -1,17 +1,16 @@
 import { useQuery } from 'react-query';
 import { useNotification } from '@strapi/helper-plugin';
-import { useNotifyAT } from '@strapi/design-system/LiveRegions';
 import { fetchMarketplacePlugins } from './utils/api';
 
-const useFetchMarketplacePlugins = title => {
+const useFetchMarketplacePlugins = notifyLoad => {
   const toggleNotification = useNotification();
 
-  const { notifyStatus } = useNotifyAT();
-  const notifyLoad = () => {
-    notifyStatus(title);
-  };
-
-  return useQuery('list-marketplace-plugins', () => fetchMarketplacePlugins(notifyLoad), {
+  return useQuery('list-marketplace-plugins', () => fetchMarketplacePlugins(), {
+    onSuccess: () => {
+      if (notifyLoad) {
+        notifyLoad();
+      }
+    },
     onError: () => {
       toggleNotification({
         type: 'warning',

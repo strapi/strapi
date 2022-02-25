@@ -13,6 +13,7 @@ import {
 import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { Layout, HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
+import { useNotifyAT } from '@strapi/design-system/LiveRegions';
 import adminPermissions from '../../permissions';
 import PluginCard from './components/PluginCard';
 import { fetchAppInformation } from './utils/api';
@@ -22,6 +23,7 @@ import useFetchMarketplacePlugins from '../../hooks/useFetchMarketplacePlugins';
 const MarketPlacePage = () => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
+  const { notifyStatus } = useNotifyAT();
   const trackUsageRef = useRef(trackUsage);
   const toggleNotification = useNotification();
 
@@ -32,10 +34,22 @@ const MarketPlacePage = () => {
     defaultMessage: 'Marketplace',
   });
 
+  const notifyMarketplaceLoad = () => {
+    notifyStatus(
+      formatMessage(
+        {
+          id: 'app.utils.notify.data-loaded',
+          defaultMessage: 'The {target} has loaded',
+        },
+        { target: marketplaceTitle }
+      )
+    );
+  };
+
   const {
     status: marketplacePluginsStatus,
     data: marketplacePluginsResponse,
-  } = useFetchMarketplacePlugins(marketplaceTitle);
+  } = useFetchMarketplacePlugins(notifyMarketplaceLoad);
 
   const {
     status: installedPluginsStatus,

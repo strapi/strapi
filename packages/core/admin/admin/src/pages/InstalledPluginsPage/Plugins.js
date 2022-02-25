@@ -1,6 +1,7 @@
 import React from 'react';
 import { useIntl } from 'react-intl';
 import { LoadingIndicatorPage, useFocusWhenNavigate } from '@strapi/helper-plugin';
+import { useNotifyAT } from '@strapi/design-system/LiveRegions';
 import { Layout, HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
 import { Typography } from '@strapi/design-system/Typography';
@@ -9,6 +10,7 @@ import useFetchInstalledPlugins from '../../hooks/useFetchInstalledPlugins';
 
 const Plugins = () => {
   const { formatMessage } = useIntl();
+  const { notifyStatus } = useNotifyAT();
   useFocusWhenNavigate();
 
   const title = formatMessage({
@@ -16,7 +18,19 @@ const Plugins = () => {
     defaultMessage: 'Plugins',
   });
 
-  const { status, data } = useFetchInstalledPlugins(title);
+  const notifyPluginPageLoad = () => {
+    notifyStatus(
+      formatMessage(
+        {
+          id: 'app.utils.notify.data-loaded',
+          defaultMessage: 'The {target} has loaded',
+        },
+        { target: title }
+      )
+    );
+  };
+
+  const { status, data } = useFetchInstalledPlugins(notifyPluginPageLoad);
 
   const isLoading = status !== 'success' && status !== 'error';
 
