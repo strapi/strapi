@@ -329,6 +329,7 @@ describe('Marketplace page', () => {
 
       .c11 {
         grid-column: span 4;
+        max-width: 100%;
       }
 
       .c1 {
