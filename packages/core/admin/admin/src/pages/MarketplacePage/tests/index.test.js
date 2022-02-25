@@ -1233,11 +1233,12 @@ describe('Marketplace page', () => {
     `);
   });
 
-  it('sends an event when the user enters the marketplace', () => {
+  it('sends a single tracking event when the user enters the marketplace', () => {
     const trackUsage = jest.fn();
     useTracking.mockImplementation(() => ({ trackUsage }));
     render(App);
 
     expect(trackUsage).toHaveBeenCalledWith('didGoToMarketplace');
+    expect(trackUsage).toHaveBeenCalledTimes(1);
   });
 });
