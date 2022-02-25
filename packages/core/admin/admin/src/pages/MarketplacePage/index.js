@@ -1,50 +1,64 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useIntl } from 'react-intl';
-import { useQuery } from 'react-query';
 import { Helmet } from 'react-helmet';
+import { useQuery } from 'react-query';
 import {
+  AnErrorOccurred,
   CheckPagePermissions,
   useFocusWhenNavigate,
   useTracking,
   LoadingIndicatorPage,
   useNotification,
 } from '@strapi/helper-plugin';
-import { useNotifyAT } from '@strapi/design-system/LiveRegions';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { Layout, HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
-import { fetchPlugins } from './utils/api';
+import { useNotifyAT } from '@strapi/design-system/LiveRegions';
 import adminPermissions from '../../permissions';
 import PluginCard from './components/PluginCard';
+import { fetchAppInformation } from './utils/api';
+import useFetchInstalledPlugins from '../../hooks/useFetchInstalledPlugins';
+import useFetchMarketplacePlugins from '../../hooks/useFetchMarketplacePlugins';
 
 const MarketPlacePage = () => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
-  const toggleNotification = useNotification();
   const { notifyStatus } = useNotifyAT();
+  const trackUsageRef = useRef(trackUsage);
+  const toggleNotification = useNotification();
 
   useFocusWhenNavigate();
 
-  const title = formatMessage({
+  const marketplaceTitle = formatMessage({
     id: 'admin.pages.MarketPlacePage.title',
     defaultMessage: 'Marketplace',
   });
 
-  const notifyLoad = () => {
+  const notifyMarketplaceLoad = () => {
     notifyStatus(
       formatMessage(
         {
           id: 'app.utils.notify.data-loaded',
           defaultMessage: 'The {target} has loaded',
         },
-        { target: title }
+        { target: marketplaceTitle }
       )
     );
   };
 
-  const { status, data: pluginsResponse } = useQuery(
-    'list-marketplace-plugins',
-    () => fetchPlugins(notifyLoad),
+  const {
+    status: marketplacePluginsStatus,
+    data: marketplacePluginsResponse,
+  } = useFetchMarketplacePlugins(notifyMarketplaceLoad);
+
+  const {
+    status: installedPluginsStatus,
+    data: installedPluginsResponse,
+  } = useFetchInstalledPlugins();
+
+  const { data: appInfoResponse, status: appInfoStatus } = useQuery(
+    'app-information',
+    fetchAppInformation,
     {
       onError: () => {
         toggleNotification({
@@ -55,11 +69,25 @@ const MarketPlacePage = () => {
     }
   );
 
-  const isLoading = status !== 'success' && status !== 'error';
+  const isLoading = [marketplacePluginsStatus, installedPluginsStatus, appInfoStatus].includes(
+    'loading'
+  );
+
+  const hasFailed = [marketplacePluginsStatus, installedPluginsStatus, appInfoStatus].includes(
+    'error'
+  );
 
   useEffect(() => {
-    trackUsage('didGoToMarketplace');
-  }, [trackUsage]);
+    trackUsageRef.current('didGoToMarketplace');
+  }, []);
+
+  if (hasFailed) {
+    return (
+      <Layout>
+        <AnErrorOccurred />
+      </Layout>
+    );
+  }
 
   if (isLoading) {
     return (
@@ -70,6 +98,8 @@ const MarketPlacePage = () => {
       </Layout>
     );
   }
+
+  const installedPluginNames = installedPluginsResponse.plugins.map(plugin => plugin.packageName);
 
   return (
     <Layout>
@@ -92,9 +122,13 @@ const MarketPlacePage = () => {
         />
         <ContentLayout>
           <Grid gap={4}>
-            {pluginsResponse.data.map(plugin => (
+            {marketplacePluginsResponse.data.map(plugin => (
               <GridItem col={4} s={6} xs={12} style={{ height: '100%' }} key={plugin.id}>
-                <PluginCard plugin={plugin} />
+                <PluginCard
+                  plugin={plugin}
+                  installedPluginNames={installedPluginNames}
+                  useYarn={appInfoResponse.data.useYarn}
+                />
               </GridItem>
             ))}
           </Grid>

@@ -8,9 +8,14 @@ import { Typography } from '@strapi/design-system/Typography';
 import { Button } from '@strapi/design-system/Button';
 import { LinkButton } from '@strapi/design-system/LinkButton';
 import { Flex } from '@strapi/design-system/Flex';
+import { Icon } from '@strapi/design-system/Icon';
+import { Tooltip } from '@strapi/design-system/Tooltip';
 import ExternalLink from '@strapi/icons/ExternalLink';
 import Duplicate from '@strapi/icons/Duplicate';
-
+import Check from '@strapi/icons/Check';
+import CheckCircle from '@strapi/icons/CheckCircle';
+import { useNotification, useTracking } from '@strapi/helper-plugin';
+import { CopyToClipboard } from 'react-copy-to-clipboard';
 // Custom component to have an ellipsis after the 2nd line
 const EllipsisText = styled(Typography)`
   /* stylelint-disable value-no-vendor-prefix, property-no-vendor-prefix */
@@ -21,9 +26,17 @@ const EllipsisText = styled(Typography)`
   overflow: hidden;
 `;
 
-const PluginCard = ({ plugin }) => {
+const PluginCard = ({ plugin, installedPluginNames, useYarn }) => {
   const { attributes } = plugin;
   const { formatMessage } = useIntl();
+  const toggleNotification = useNotification();
+  const { trackUsage } = useTracking();
+
+  const isInstalled = installedPluginNames.includes(attributes.npmPackageName);
+
+  const commandToCopy = useYarn
+    ? `yarn add ${attributes.npmPackageName}`
+    : `npm install ${attributes.npmPackageName}`;
 
   return (
     <Flex
@@ -50,7 +63,21 @@ const PluginCard = ({ plugin }) => {
         />
         <Box paddingTop={5}>
           <Typography as="h3" variant="delta">
-            {attributes.name}
+            <Flex alignItems="center">
+              {attributes.name}
+              {attributes.validated && (
+                <Tooltip
+                  description={formatMessage({
+                    id: 'admin.pages.MarketPlacePage.plugin.tooltip.verified',
+                    defaultMessage: 'Plugin verified by Strapi',
+                  })}
+                >
+                  <Flex>
+                    <Icon as={CheckCircle} marginLeft={2} color="success600" />
+                  </Flex>
+                </Tooltip>
+              )}
+            </Flex>
           </Typography>
         </Box>
         <Box paddingTop={2}>
@@ -73,18 +100,42 @@ const PluginCard = ({ plugin }) => {
             { pluginName: attributes.name }
           )}
           variant="tertiary"
+          onClick={() => trackUsage('didPluginLearnMore')}
         >
           {formatMessage({
             id: 'admin.pages.MarketPlacePage.plugin.info.text',
             defaultMessage: 'Learn more',
           })}
         </LinkButton>
-        <Button size="S" endIcon={<Duplicate />} variant="secondary">
-          {formatMessage({
-            id: 'admin.pages.MarketPlacePage.plugin.copy',
-            defaultMessage: 'Copy install command',
-          })}
-        </Button>
+        {isInstalled ? (
+          <Box paddingLeft={4}>
+            <Icon as={Check} marginRight={2} width={12} height={12} color="success600" />
+            <Typography variant="omega" textColor="success600" fontWeight="bold">
+              {formatMessage({
+                id: 'admin.pages.MarketPlacePage.plugin.installed',
+                defaultMessage: 'Installed',
+              })}
+            </Typography>
+          </Box>
+        ) : (
+          <CopyToClipboard
+            onCopy={() => {
+              trackUsage('willInstallPlugin');
+              toggleNotification({
+                type: 'success',
+                message: { id: 'admin.pages.MarketPlacePage.plugin.copy.success' },
+              });
+            }}
+            text={commandToCopy}
+          >
+            <Button size="S" endIcon={<Duplicate />} variant="secondary">
+              {formatMessage({
+                id: 'admin.pages.MarketPlacePage.plugin.copy',
+                defaultMessage: 'Copy install command',
+              })}
+            </Button>
+          </CopyToClipboard>
+        )}
       </Stack>
     </Flex>
   );
@@ -106,6 +157,8 @@ PluginCard.propTypes = {
       strapiCompatibility: PropTypes.oneOf(['v3', 'v4']).isRequired,
     }).isRequired,
   }).isRequired,
+  installedPluginNames: PropTypes.arrayOf(PropTypes.string).isRequired,
+  useYarn: PropTypes.bool.isRequired,
 };
 
 export default PluginCard;
