@@ -101,6 +101,7 @@
     "mini-css-extract-plugin": "2.4.4",
     "moment": "^2.29.1",
     "node-polyfill-webpack-plugin": "1.1.4",
+    "object-assign": "4.1.1",
     "p-map": "4.0.0",
     "passport-local": "1.0.0",
     "prop-types": "^15.7.2",
@@ -114,6 +115,7 @@
     "react-fast-compare": "^3.2.0",
     "react-helmet": "^6.1.0",
     "react-intl": "5.20.2",
+    "react-is": "17.0.2",
     "react-query": "3.24.3",
     "react-redux": "7.2.3",
     "react-router": "5.2.0",
@@ -134,6 +136,7 @@
     "webpack-cli": "4.9.1",
     "webpack-dev-server": "4.7.3",
     "webpackbar": "5.0.0-3",
+    "whatwg-fetch": "3.6.2"
     "yup": "^0.32.9"
   },
   "devDependencies": {
