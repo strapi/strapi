@@ -1,0 +1,60 @@
+{
+  "kind": "collectionType",
+  "collectionName": "countries",
+  "info": {
+    "displayName": "Country",
+    "singularName": "country",
+    "pluralName": "countries",
+    "description": "",
+    "name": "Country"
+  },
+  "options": {
+    "draftAndPublish": false,
+    "comment": ""
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": true
+    }
+  },
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true,
+      "minLength": 3,
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "code": {
+      "type": "string",
+      "maxLength": 3,
+      "unique": true,
+      "minLength": 2,
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "description": {
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "type": "string",
+      "maxLength": 3
+    },
+    "time": {
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "type": "time"
+    }
+  }
+}

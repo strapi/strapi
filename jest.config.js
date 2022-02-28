@@ -1,14 +1,8 @@
+'use strict';
+
+const baseConfig = require('./jest.base-config');
+
 module.exports = {
-  name: 'setup',
-  displayName: 'Setup',
-  testMatch: ['**/test/?(*.)+(spec|test).js'],
-  testPathIgnorePatterns: [
-    '<rootDir>/packages/',
-  ],
-  coveragePathIgnorePatterns: [
-    '<rootDir>/dist/',
-    '<rootDir>/node_modules/',
-    '<rootDir>/out-tsc/',
-    '<rootDir>/test/'
-  ]
+  ...baseConfig,
+  projects: ['<rootDir>/.github', '<rootDir>/packages/**/jest.config.js'],
 };

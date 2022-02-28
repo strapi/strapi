@@ -1,163 +1,206 @@
 # Contribute to Strapi
 
-First off, thanks for taking the time to contribute! 🎉👍
+Strapi is an open-source project administered by [the Strapi team](https://strapi.io/company). We appreciate your interest and efforts to contribute to Strapi.
 
-The following is a set of guidelines for contributing to Strapi and its packages.
+All efforts to contribute are highly appreciated, we recommend you talk to a maintainer prior to spending a lot of time making a pull request that may not align with the project roadmap.
 
-Strapi is an open-source project administered by [the Strapi team](https://strapi.io/company).
+## Open Development & Community Driven
 
-Before contributing, ensure that your effort is aligned with the project's roadmap by talking to the maintainers, especially if you are going to spend a lot of time on it. Feel free to [join us on Slack](http://slack.strapi.io) if you are interested in helping us or [drop us an email](mailto:hi@strapi.io) if you are interested in working with us.
+Strapi is an open-source project. See the [LICENSE](https://github.com/strapi/strapi/blob/master/LICENSE) file for licensing information. All the work done is available on GitHub.
+
+The core team and the contributors send pull requests which go through the same validation process.
+
+## Feature Requests
+
+Feature Requests by the community are highly encouraged. Please feel free to submit a [feature request](https://portal.productboard.com/strapi) or to upvote 👍 [an existing feature request](https://portal.productboard.com/strapi) in the ProductBoard.
+
+## RFCs
+
+Some important changes in Strapi require some thoughts to be put into the design phase before starting working on a PR.
+
+The RFC (Request For Comments) process will help us create consensus among the core team and include as much feedback as possible from the community, for these upcoming changes.
+
+Before contributing, you will probably have to create a RFC on this [strapi/rfcs](https://github.com/strapi/rfcs) repo.
 
 ## Code of Conduct
 
-This project and everyone participating in it is governed by the [Strapi Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please report unacceptable behavior to [hi@strapi.io](mailto:hi@strapi.io).
+This project and everyone participating in it are governed by the [Strapi Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please read the [full text](CODE_OF_CONDUCT.md) so that you can read which actions may or may not be tolerated.
 
-## Open Development & Community Driven
-Strapi is open-source under the [MIT license](https://github.com/strapi/strapi/blob/master/LICENSE.md). All the work done is available on GitHub.
-The core team and the contributors send pull requests which go through the same validation process.
+## Contributor License Agreement (CLA)
 
-Every user can send a feature request using the [issues](https://github.com/strapi/strapi/issues/new?template=FEATURE_REQUEST.md) on GitHub. Feel free to upvote 👍 [existing feature request](https://portal.productboard.com/strapi)
+### Individual
 
-## Repository Organization
-We made the choice to use a monorepo design such as [React](https://github.com/facebook/react/tree/master/packages), [Babel](https://github.com/babel/babel/tree/master/packages), [Meteor](https://github.com/meteor/meteor/tree/devel/packages) or [Ember](https://github.com/emberjs/ember.js/tree/master/packages) do. It allows the community to easily maintain the whole ecosystem up-to-date and consistent.
+In order to accept your pull request, we need you to submit a CLA. You only need to do this once. If you are submitting a pull request for the first time, you can complete your CLA [here](https://cla.strapi.io/strapi/strapi) or just submit a Pull Request and our CLA Bot will ask you to sign the CLA before merging your Pull Request.
 
-The Babel team wrote an excellent short post about [the pros and cons of the monorepo design](https://github.com/babel/babel/blob/master/doc/design/monorepo.md).
+### Company
 
-We will do our best to keep the master branch as clean as possible, with tests passing all the times. However, it can happen that the master branch moves faster than the release cycle. To ensure you have the latest stable version, please refer to the [release on npm](https://www.npmjs.com/package/strapi).
+If you are making contributions to our repositories on behalf of your company, then we will need a Corporate Contributor License Agreement (CLA) signed. In order to do that, please contact us at [contributions@strapi.io](mailto:contributions@strapi.io).
 
-If you send a pull request, please do it against the `master` branch. We are developing upcoming versions separately to ensure non-breaking changes from master to the latest stable major version.
+## Documentation
 
-***
+Pull requests relating to fixing documentation for the latest release should be directed towards the [documentation repo](https://github.com/strapi/documentation). Please see the documentation [contributing guide](https://github.com/strapi/documentation/blob/main/CONTRIBUTING.md) for more information on how to make the documentation pull request.
 
-## Setup Development Environment
-To facilitate the contribution, we drastically reduce the amount of commands necessary to install the entire development environment. First of all, you need to check if you're using the [required versions of Node.js and npm](https://strapi.io/documentation/3.x.x/getting-started/installation.html#requirements)
+## Bugs
 
-**Note: Fish shell users** - due to the way fish shell deals with symlinks, the following steps will not work.
+We are using [GitHub Issues](https://github.com/strapi/strapi/issues) to manage our public bugs. We keep a close eye on this so before filing a new issue, try to make sure the problem does not already exist.
+
+---
+
+## Before Submitting a Pull Request
+
+The core team will review your pull request and will either merge it, request changes to it, or close it.
+
+**Before submitting your pull request** make sure the following requirements are fulfilled:
+
+- Fork the repository and create your branch from `master`.
+- Run `yarn setup` in the repository root.
+- If you’ve fixed a bug or added code that should be tested, add the tests and then link the corresponding issue in either your commit or your PR!
+- Ensure the test suites are passing:
+  - `yarn test:unit`
+  - `yarn test:front`
+- Make sure your code lints (`yarn lint`).
+
+## Contribution Prerequisites
+
+- You have [Node](https://nodejs.org/en/) at >= v12 and <= v16 and [Yarn](https://yarnpkg.com/en/) at v1.2.0+.
+- You are familiar with Git.
+
+## Development Workflow
+
+_For users running on Apple Silicon M1, you may encounter errors thrown by `sharp`. You may need to re-install `libvps` or to build `sharp` manually following [this issue comment](https://github.com/lovell/sharp/issues/2460#issuecomment-751491241) in order to start the project._
+
+To facilitate the contribution, we have drastically reduced the amount of commands necessary to install the entire development environment.
+
+First of all, you need to check if you're using the [required versions of Node.js and npm](https://docs.strapi.io/developer-docs/latest/setup-deployment-guides/deployment.html).
 
 Then, please follow the instructions below:
 
-#### 1. ▪️ Fork the repository
+#### 1. Fork the [repository](https://github.com/strapi/strapi)
 
 [Go to the repository](https://github.com/strapi/strapi) and fork it to your own GitHub account.
 
-#### 2. 💿 Clone from your repository
+#### 2. Clone from your repository
 
 ```bash
 git clone git@github.com:YOUR_USERNAME/strapi.git
 ```
 
-#### 3. ⏳ Installation
+#### 3. Install the dependencies
 
 Go to the root of the repository.
+
 ```bash
-cd strapi
+cd strapi && yarn setup
 ```
 
-**Two setup are available... with or without the front-end builds.**
+#### 4. Start the example application
 
-Without the front-end builds, you won't be able to access the administration panel via http://localhost:1337/admin. You'll have to run the administration separately and access it through http://localhost:4000/admin.
+To start a test example application to test your changes quickly and also for the next step.
 
-<br>
-
-Without the front-end builds (recommended)
 ```bash
-npm run setup
-```
-or with the front-end builds
-```bash
-npm run setup:build
+cd strapi/examples/getstarted && yarn develop
 ```
 
-> ⚠️  If the installation failed, please remove the global packages related to Strapi. The command `npm ls strapi` will help you to find where your packages are installed globally.
+Read the `getstarted` application README [here](./examples/getstarted/README.md) for more details.
 
-#### 4. 🏗 Create a new project
+#### 5. Running the administration panel in development mode
 
-You can open a new terminal window and go into any folder you want for the next steps.
+**Start the administration panel server for development**
+
 ```bash
-cd ../workspace/
+cd strapi/packages/strapi-admin
+yarn develop
 ```
 
-The command to generate a project is the same, except you have to add the `--dev` argument at the end of line.
-```bash
-strapi new my-project --dev
-```
-
-#### 5. 🚀 Start the project
-
-First, you have to start the server.
-```bash
-cd ./my-project
-strapi start
-```
-
-The server (API) is available at http://localhost:1337
-
-> ⚠️  If you've followed the recommended setup, you should not be able to reach the administration panel at http://localhost:1337/admin.
-
-Then, you have to start the Webpack server to build and run the administration.
-```bash
-cd ./my-project/admin
-npm run start
-```
-
-The administration panel is available at http://localhost:4000/admin
+The administration panel will be available at http://localhost:4000/admin
 
 **Awesome! You are now able to contribute to Strapi.**
 
----
+#### 6. Available commands
 
-## Plugin Development Setup
-
-To create a new plugin, you'll have to run the following commands:
-
-#### 1. 🏗 Generate a new plugin
-
-```bash
-cd ./my-project
-strapi generate:plugin my-plugin
-```
-
-#### 2. ✅ Verify the symlink
-
-Make you that the `strapi-helper-plugin` is linked to your project.
-
-Please run this command in the repository folder where Strapi is cloned:
-```bash
-cd /repository/strapi/packages/strapi-helper-plugin
-npm link
-```
-
-Link the `strapi-helper-plugin` node_modules in the plugin folder:
-```bash
-cd ./my-project/plugins/my-plugin
-npm link strapi-helper-plugin
-```
-
-#### 3. 🚀 Start the project
-
-```bash
-cd ./my-project/admin
-npm run start
-```
-
-The administration panel is available at http://localhost:4000/admin
+- `yarn watch` starts yarn watch in all packages.
+- `yarn build` builds the `strapi-helper-plugin` (use this command when you develop in the administration panel).
+- `yarn setup` installs the dependencies.
+- `yarn lint` lints the codebase.
+- `yarn test:clean` removes the coverage.
+- `yarn test:front` runs the front-end related tests.
+- `yarn test:front:watch` runs an interactive test watcher for the front-end.
+- `yarn test:unit` runs the back-end unit tests.
+- `yarn test:e2e` runs an end-to-end test suite.
+- `yarn test:generate-app` generates a test application.
+- `yarn test:start-app` starts the test application.
 
 ---
 
-## Reporting an issue
+## Running the e2e tests
 
-Before reporting an issue you need to make sure:
-- You are experiencing a concrete technical issue with Strapi (ideas and feature proposals should happen [on Slack](http://slack.strapi.io)).
-- You are not asking a question about how to use Strapi or about whether or not Strapi has a certain feature. For general help using Strapi, please refer to [the official Strapi documentation](http://strapi.io). For additional help, ask a question on [StackOverflow](http://stackoverflow.com/questions/tagged/strapi).
-- You have already searched for related [issues](https://github.com/strapi/strapi/issues), and found none open (if you found a related _closed_ issue, please link to it in your post).
+The end-to-end tests require a Strapi app to be able to run. You can generate a "test app" using `yarn test:generate-app <database>`:
+
+```bash
+$ yarn test:generate-app sqlite
+$ yarn test:generate-app mongo
+$ yarn test:generate-app postgres
+$ yarn test:generate-app mysql
+```
+
+You require a new app every time you run the tests. Otherwise, the test suite will fail. A script is available to make this process easier: `node test/e2e.js`. It'll delete the current test app, generate a new one, and run the test suite.
+
+**Changing the database:**
+
+By default the script `test/e2e,js` creates an app that uses `sqlite`. But you can run the test suites using different databases:
+
+```bash
+$ node test/e2e.js --db=sqlite
+$ node test/e2e.js --db=postgres
+$ node test/e2e.js --db=mysql
+```
+
+**Running the tests for the CE**
+
+The test suites will run the tests for the EE version of Strapi. Should you want to test the CE version you will need to use the ENV variable `STRAPI_DISABLE_EE`:
+
+```bash
+$ STRAPI_DISABLE_EE=true node test/e2e.js
+$ STRAPI_DISABLE_EE=true yarn test:e2e
+```
+
+**Specifying a license to use for the EE e2e tests**
+
+The EE tests need a valid license to run correctly. To specify which license to use you can use `STRAPI_LICENSE`. You can specify it in an env file or as a prefix to the cli command:
+
+```bash
+$ STRAPI_LICENSE=<license> node test/e2e.js
+$ STRAPI_LICENSE=<license> yarn test:e2e
+```
+
+---
+
+## Miscellaneous
+
+### Repository Organization
+
+We chose to use a monorepo design that exploits [Yarn Workspaces](https://yarnpkg.com/en/docs/workspaces) in the way [React](https://github.com/facebook/react/tree/master/packages) or [Babel](https://github.com/babel/babel/tree/master/packages) does. This allows the community to easily maintain the whole ecosystem, keep it up-to-date and consistent.
+
+We do our best to keep the master branch as clean as possible, with tests passing at all times. However, it may happen that the master branch moves faster than the release cycle. Therefore check the [releases on npm](https://www.npmjs.com/package/strapi) so that you're always up-to-date with the latest stable version.
+
+### Reporting an issue
+
+Before submitting an issue you need to make sure:
+
+- You are experiencing a concrete technical issue with Strapi.
+- You have already searched for related [issues](https://github.com/strapi/strapi/issues), and found none open (if you found a related _closed_ issue, please link to it from your post).
+- You are not asking a question about how to use Strapi or about whether or not Strapi has a certain feature. For general help using Strapi, you may:
+  - Refer to [the official Strapi documentation](https://strapi.io).
+  - Ask a member of the community in the [Strapi Discord Community](https://discord.strapi.io/).
+  - Ask a question on [our community forum](https://forum.strapi.io).
 - Your issue title is concise, on-topic and polite.
-- You can provide steps to reproduce this issue that others can follow.
+- You can and do provide steps to reproduce your issue.
 - You have tried all the following (if relevant) and your issue remains:
   - Make sure you have the right application started.
+  - Make sure the [issue template](.github/ISSUE_TEMPLATE) is respected.
+  - Make sure your issue body is readable and [well formatted](https://guides.github.com/features/mastering-markdown).
   - Make sure you've killed the Strapi server with CTRL+C and started it again.
-  - Make sure you closed any open browser tabs pointed at `localhost` before starting Strapi.
-  - Make sure you do not have any other Strapi applications running in other terminal windows.
   - Make sure the application you are using to reproduce the issue has a clean `node_modules` directory, meaning:
-    * no dependencies are linked (e.g. you haven't run `npm link`)
-    * that you haven't made any inline changes to files in the `node_modules` folder
-    * that you don't have any weird global dependency loops. The easiest way to double-check any of the above, if you aren't sure, is to run: `$ rm -rf node_modules && npm cache clear && npm install`.
+    - no dependencies are linked (e.g. you haven't run `yarn link`)
+    - that you haven't made any inline changes to files in the `node_modules` folder
+    - that you don't have any weird global dependency loops. The easiest way to double-check any of the above, if you aren't sure, is to run: `$ rm -rf node_modules && yarn cache clean && yarn`.

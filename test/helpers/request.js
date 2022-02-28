@@ -1,29 +1,30 @@
-let request = require('request');
+'use strict';
 
-request = request.defaults({
-  baseUrl: 'http://localhost:1337'
-});
+const { createAgent } = require('./agent');
+const { superAdmin } = require('./strapi');
 
-module.exports = function (options) {
-  const params = JSON.parse(JSON.stringify(options));
+const createRequest = ({ strapi } = {}) => createAgent(strapi);
 
-  for (let key in params.formData) {
-    if (typeof params.formData[key] === 'object') {
-      params.formData[key] = JSON.stringify(params.formData[key]);
-    }
-  }
-
-  return new Promise((resolve, reject) => {
-    request(params, (err, res, body) => {
-      if (err || res.statusCode < 200 || res.statusCode >= 300) {
-        return reject(err || body);
-      }
-
-      return resolve(body);
-    });
-  });
+const createContentAPIRequest = ({ strapi } = {}) => {
+  return createAgent(strapi, { urlPrefix: '/api', token: 'test-token' });
 };
 
-module.exports.defaults = function (options) {
-  request = request.defaults(options);
-}
+const createAuthRequest = ({ strapi, userInfo = superAdmin.credentials }) => {
+  return createAgent(strapi).login(userInfo);
+};
+
+const transformToRESTResource = input => {
+  if (Array.isArray(input)) {
+    return input.map(value => transformToRESTResource(value));
+  }
+
+  const { id, ...attributes } = input;
+  return { id, attributes };
+};
+
+module.exports = {
+  createRequest,
+  createContentAPIRequest,
+  createAuthRequest,
+  transformToRESTResource,
+};

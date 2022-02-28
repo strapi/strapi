@@ -1,0 +1,3865 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1`] = `
+.c22 {
+  background: #ffffff;
+  padding-top: 24px;
+  padding-right: 32px;
+  padding-bottom: 24px;
+  padding-left: 32px;
+  border-radius: 4px;
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+}
+
+.c23 {
+  padding-bottom: 16px;
+}
+
+.c61 {
+  padding-top: 24px;
+  padding-bottom: 24px;
+}
+
+.c19 {
+  font-weight: 600;
+  color: #32324d;
+  font-size: 0.875rem;
+  line-height: 1.43;
+}
+
+.c16 {
+  padding-right: 8px;
+}
+
+.c13 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  background: #ffffff;
+  border: 1px solid #dcdce4;
+  position: relative;
+  outline: none;
+}
+
+.c13 svg {
+  height: 12px;
+  width: 12px;
+}
+
+.c13 svg > g,
+.c13 svg path {
+  fill: #ffffff;
+}
+
+.c13[aria-disabled='true'] {
+  pointer-events: none;
+}
+
+.c13:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c13:focus-visible {
+  outline: none;
+}
+
+.c13:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c17 {
+  height: 100%;
+}
+
+.c14 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  padding: 10px 16px;
+  background: #4945ff;
+  border: none;
+  border: 1px solid #4945ff;
+  background: #4945ff;
+}
+
+.c14 .c15 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c14 .c18 {
+  color: #ffffff;
+}
+
+.c14[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c14[aria-disabled='true'] .c18 {
+  color: #666687;
+}
+
+.c14[aria-disabled='true'] svg > g,
+.c14[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c14[aria-disabled='true']:active {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c14[aria-disabled='true']:active .c18 {
+  color: #666687;
+}
+
+.c14[aria-disabled='true']:active svg > g,
+.c14[aria-disabled='true']:active svg path {
+  fill: #666687;
+}
+
+.c14:hover {
+  border: 1px solid #7b79ff;
+  background: #7b79ff;
+}
+
+.c14:active {
+  border: 1px solid #4945ff;
+  background: #4945ff;
+}
+
+.c26 {
+  padding-bottom: 24px;
+}
+
+.c64 {
+  padding-top: 16px;
+  padding-right: 16px;
+  padding-left: 16px;
+  border-radius: 4px;
+  border-style: dashed;
+  border-width: 1px;
+  border-color: #c0c0cf;
+}
+
+.c71 {
+  background: #f6f6f9;
+  border-radius: 4px;
+  border-color: #eaeaef;
+  border: 1px solid #eaeaef;
+}
+
+.c78 {
+  padding-left: 12px;
+}
+
+.c27 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-flex-wrap: wrap;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+}
+
+.c65 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c72 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c81 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  background: #ffffff;
+  border: 1px solid #dcdce4;
+  position: relative;
+  outline: none;
+}
+
+.c81 svg {
+  height: 12px;
+  width: 12px;
+}
+
+.c81 svg > g,
+.c81 svg path {
+  fill: #ffffff;
+}
+
+.c81[aria-disabled='true'] {
+  pointer-events: none;
+}
+
+.c81:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c81:focus-visible {
+  outline: none;
+}
+
+.c81:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c82 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  height: 2rem;
+  width: 2rem;
+}
+
+.c82 svg > g,
+.c82 svg path {
+  fill: #8e8ea9;
+}
+
+.c82:hover svg > g,
+.c82:hover svg path {
+  fill: #666687;
+}
+
+.c82:active svg > g,
+.c82:active svg path {
+  fill: #a5a5ba;
+}
+
+.c82[aria-disabled='true'] {
+  background-color: #eaeaef;
+}
+
+.c82[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c51 {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  width: 100%;
+  background: transparent;
+  border: none;
+}
+
+.c51:focus {
+  outline: none;
+}
+
+.c51[aria-disabled='true'] {
+  cursor: not-allowed;
+}
+
+.c48 {
+  font-weight: 600;
+  color: #32324d;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c55 {
+  color: #32324d;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.875rem;
+  line-height: 1.43;
+}
+
+.c59 {
+  color: #666687;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c54 {
+  padding-right: 16px;
+  padding-left: 16px;
+}
+
+.c56 {
+  padding-left: 12px;
+}
+
+.c49 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c52 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c47 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+}
+
+.c47 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c47 > * + * {
+  margin-top: 4px;
+}
+
+.c50 {
+  position: relative;
+  border: 1px solid #dcdce4;
+  padding-right: 12px;
+  border-radius: 4px;
+  background: #ffffff;
+  overflow: hidden;
+  min-height: 2.5rem;
+  outline: none;
+  box-shadow: 0;
+  -webkit-transition-property: border-color,box-shadow,fill;
+  transition-property: border-color,box-shadow,fill;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+}
+
+.c50:focus-within {
+  border: 1px solid #4945ff;
+  box-shadow: #4945ff 0px 0px 0px 2px;
+}
+
+.c57 {
+  background: transparent;
+  border: none;
+  position: relative;
+  z-index: 1;
+}
+
+.c57 svg {
+  height: 0.6875rem;
+  width: 0.6875rem;
+}
+
+.c57 svg path {
+  fill: #666687;
+}
+
+.c58 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  background: none;
+  border: none;
+}
+
+.c58 svg {
+  width: 0.375rem;
+}
+
+.c53 {
+  width: 100%;
+}
+
+.c68 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c69 > * {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.c69 > * + * {
+  margin-left: 12px;
+}
+
+.c32 {
+  font-weight: 600;
+  color: #32324d;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c41 {
+  font-weight: 600;
+  color: #271fe0;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c44 {
+  font-weight: 600;
+  color: #b72b1a;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c35 {
+  background: #ffffff;
+  border-radius: 4px;
+}
+
+.c37 {
+  background: #ffffff;
+  padding-right: 32px;
+  padding-left: 32px;
+}
+
+.c39 {
+  background: #f0f0ff;
+  padding-right: 32px;
+  padding-left: 32px;
+}
+
+.c43 {
+  background: #fcecea;
+  padding-right: 32px;
+  padding-left: 32px;
+}
+
+.c31 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c30 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+}
+
+.c30 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c30 > * + * {
+  margin-top: 4px;
+}
+
+.c34 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c33 {
+  position: relative;
+  display: inline-block;
+}
+
+.c36 {
+  height: 2.5rem;
+  border: 1px solid #dcdce4;
+  display: -webkit-inline-box;
+  display: -webkit-inline-flex;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  overflow: hidden;
+  outline: none;
+  box-shadow: 0;
+  -webkit-transition-property: border-color,box-shadow,fill;
+  transition-property: border-color,box-shadow,fill;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+}
+
+.c36:focus-within {
+  border: 1px solid #4945ff;
+  box-shadow: #4945ff 0px 0px 0px 2px;
+}
+
+.c40 {
+  text-transform: uppercase;
+  position: relative;
+  z-index: 2;
+}
+
+.c38 {
+  text-transform: uppercase;
+  border-right: 1px solid #dcdce4;
+  position: relative;
+  z-index: 2;
+}
+
+.c42 {
+  position: absolute;
+  z-index: 1;
+  left: 4px;
+  top: 4px;
+}
+
+.c29 {
+  width: -webkit-fit-content;
+  width: -moz-fit-content;
+  width: fit-content;
+}
+
+.c25 {
+  color: #32324d;
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+}
+
+.c77 {
+  font-weight: 600;
+  color: #32324d;
+  font-size: 0.875rem;
+  line-height: 1.43;
+}
+
+.c62 {
+  background: #eaeaef;
+}
+
+.c63 {
+  height: 1px;
+  border: none;
+  margin: 0;
+}
+
+.c1 {
+  padding-bottom: 56px;
+}
+
+.c4 {
+  background: #f6f6f9;
+  padding-top: 24px;
+  padding-right: 56px;
+  padding-bottom: 40px;
+  padding-left: 56px;
+}
+
+.c5 {
+  padding-bottom: 8px;
+}
+
+.c21 {
+  padding-right: 56px;
+  padding-left: 56px;
+}
+
+.c0 {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+.c2 {
+  overflow-x: hidden;
+}
+
+.c10 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c11 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c12 {
+  color: #32324d;
+  font-weight: 600;
+  font-size: 2rem;
+  line-height: 1.25;
+}
+
+.c20 {
+  color: #666687;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.c9 {
+  color: #4945ff;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c7 {
+  padding-right: 8px;
+}
+
+.c6 {
+  display: -webkit-inline-box;
+  display: -webkit-inline-flex;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-text-decoration: none;
+  text-decoration: none;
+  position: relative;
+  outline: none;
+}
+
+.c6 svg path {
+  fill: #4945ff;
+}
+
+.c6 svg {
+  font-size: 0.625rem;
+}
+
+.c6:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c6:focus-visible {
+  outline: none;
+}
+
+.c6:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c8 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+}
+
+.c3:focus-visible {
+  outline: none;
+}
+
+.c45 {
+  display: grid;
+  grid-template-columns: repeat(12,1fr);
+  gap: 16px;
+}
+
+.c46 {
+  grid-column: span 6;
+  max-width: 100%;
+}
+
+.c60 {
+  grid-column: span 3;
+  max-width: 100%;
+}
+
+.c28 {
+  gap: 16px;
+}
+
+.c75 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  height: 32px;
+}
+
+.c75:last-child {
+  padding: 0 12px;
+}
+
+.c76 {
+  padding: 0 12px;
+  border-right: 1px solid #eaeaef;
+  cursor: all-scroll;
+}
+
+.c76 svg {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+.c73 {
+  max-height: 2rem;
+  cursor: pointer;
+}
+
+.c73 svg {
+  width: 0.625rem;
+  height: 0.625rem;
+}
+
+.c73 svg path {
+  fill: #666687;
+}
+
+.c73:hover {
+  background-color: #f0f0ff;
+  border-color: #d9d8ff;
+}
+
+.c73:hover svg path {
+  fill: #4945ff;
+}
+
+.c73:hover .c24 {
+  color: #4945ff;
+}
+
+.c73:hover .c74 {
+  border-right: 1px solid #d9d8ff;
+}
+
+.c70:last-child {
+  padding-right: 12px;
+}
+
+.c66 {
+  -webkit-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+}
+
+.c79 {
+  -webkit-flex: auto;
+  -ms-flex: auto;
+  flex: auto;
+}
+
+.c67 {
+  overflow-x: scroll;
+  overflow-y: hidden;
+}
+
+.c80 {
+  max-width: 2rem;
+}
+
+@media (max-width:68.75rem) {
+  .c46 {
+    grid-column: span 12;
+  }
+}
+
+@media (max-width:34.375rem) {
+  .c46 {
+    grid-column: span;
+  }
+}
+
+@media (max-width:68.75rem) {
+  .c60 {
+    grid-column: span 12;
+  }
+}
+
+@media (max-width:34.375rem) {
+  .c60 {
+    grid-column: span;
+  }
+}
+
+<div
+  class="c0"
+>
+  <div
+    class="c1 c2"
+  >
+    <main
+      aria-busy="false"
+      aria-labelledby="main-content-title"
+      class="c3"
+      id="main-content"
+      tabindex="-1"
+    >
+      <form>
+        <div
+          style="height: 0px;"
+        >
+          <div
+            class="c4"
+            data-strapi-header="true"
+          >
+            <div
+              class="c5"
+            >
+              <a
+                class="c6"
+                href="/content-manager/undefined/api::restaurant.restaurant?page=1&pageSize=10&sort=id:ASC"
+                id="go-back"
+              >
+                <span
+                  aria-hidden="true"
+                  class="c7 c8"
+                >
+                  <svg
+                    fill="none"
+                    height="1em"
+                    viewBox="0 0 24 24"
+                    width="1em"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M24 13.3a.2.2 0 01-.2.2H5.74l8.239 8.239a.2.2 0 010 .282L12.14 23.86a.2.2 0 01-.282 0L.14 12.14a.2.2 0 010-.282L11.86.14a.2.2 0 01.282 0L13.98 1.98a.2.2 0 010 .282L5.74 10.5H23.8c.11 0 .2.09.2.2v2.6z"
+                      fill="#212134"
+                    />
+                  </svg>
+                </span>
+                <span
+                  class="c9"
+                >
+                  Back
+                </span>
+              </a>
+            </div>
+            <div
+              class="c10"
+            >
+              <div
+                class="c11"
+              >
+                <h1
+                  class="c12"
+                >
+                  Configure the view - Michka
+                </h1>
+              </div>
+              <button
+                aria-disabled="true"
+                class="c13 c14"
+                disabled=""
+                type="submit"
+              >
+                <div
+                  aria-hidden="true"
+                  class="c15 c16 c17"
+                >
+                  <svg
+                    fill="none"
+                    height="1em"
+                    viewBox="0 0 24 24"
+                    width="1em"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M20.727 2.97a.2.2 0 01.286 0l2.85 2.89a.2.2 0 010 .28L9.554 20.854a.2.2 0 01-.285 0l-9.13-9.243a.2.2 0 010-.281l2.85-2.892a.2.2 0 01.284 0l6.14 6.209L20.726 2.97z"
+                      fill="#212134"
+                    />
+                  </svg>
+                </div>
+                <span
+                  class="c18 c19"
+                >
+                  Save
+                </span>
+              </button>
+            </div>
+            <p
+              class="c20"
+            >
+              Define the settings of the list view.
+            </p>
+          </div>
+        </div>
+        <div
+          class="c21"
+        >
+          <div
+            class="c22"
+          >
+            <div
+              class="c23"
+            >
+              <h2
+                class="c24 c25"
+              >
+                Settings
+              </h2>
+            </div>
+            <div
+              class="c26 c27 c28"
+              wrap="wrap"
+            >
+              <div
+                class="c29"
+              >
+                <div
+                  class="c30"
+                >
+                  <div
+                    class="c31"
+                  >
+                    <label
+                      class="c32"
+                      for="toggleinput-1"
+                    >
+                      Enable search
+                    </label>
+                  </div>
+                  <label
+                    class="c33"
+                  >
+                    <div
+                      class="c34"
+                    >
+                      Enable search
+                    </div>
+                    <div
+                      class="c35 c36"
+                    >
+                      <div
+                        aria-hidden="true"
+                        class="c37 c31 c38"
+                      >
+                        <span
+                          class="c32"
+                        >
+                          off
+                        </span>
+                      </div>
+                      <div
+                        aria-hidden="true"
+                        class="c39 c31 c40"
+                      >
+                        <span
+                          class="c41"
+                        >
+                          on
+                        </span>
+                      </div>
+                      <input
+                        aria-disabled="false"
+                        checked=""
+                        class="c42"
+                        id="toggleinput-1"
+                        name="settings.searchable"
+                        type="checkbox"
+                      />
+                    </div>
+                  </label>
+                </div>
+              </div>
+              <div
+                class="c29"
+              >
+                <div
+                  class="c30"
+                >
+                  <div
+                    class="c31"
+                  >
+                    <label
+                      class="c32"
+                      for="toggleinput-2"
+                    >
+                      Enable filters
+                    </label>
+                  </div>
+                  <label
+                    class="c33"
+                  >
+                    <div
+                      class="c34"
+                    >
+                      Enable filters
+                    </div>
+                    <div
+                      class="c35 c36"
+                    >
+                      <div
+                        aria-hidden="true"
+                        class="c37 c31 c38"
+                      >
+                        <span
+                          class="c32"
+                        >
+                          off
+                        </span>
+                      </div>
+                      <div
+                        aria-hidden="true"
+                        class="c39 c31 c40"
+                      >
+                        <span
+                          class="c41"
+                        >
+                          on
+                        </span>
+                      </div>
+                      <input
+                        aria-disabled="false"
+                        checked=""
+                        class="c42"
+                        id="toggleinput-2"
+                        name="settings.filterable"
+                        type="checkbox"
+                      />
+                    </div>
+                  </label>
+                </div>
+              </div>
+              <div
+                class="c29"
+              >
+                <div
+                  class="c30"
+                >
+                  <div
+                    class="c31"
+                  >
+                    <label
+                      class="c32"
+                      for="toggleinput-3"
+                    >
+                      Enable bulk actions
+                    </label>
+                  </div>
+                  <label
+                    class="c33"
+                  >
+                    <div
+                      class="c34"
+                    >
+                      Enable bulk actions
+                    </div>
+                    <div
+                      class="c35 c36"
+                    >
+                      <div
+                        aria-hidden="true"
+                        class="c43 c31 c38"
+                      >
+                        <span
+                          class="c44"
+                        >
+                          off
+                        </span>
+                      </div>
+                      <div
+                        aria-hidden="true"
+                        class="c37 c31 c40"
+                      >
+                        <span
+                          class="c32"
+                        >
+                          on
+                        </span>
+                      </div>
+                      <input
+                        aria-disabled="false"
+                        class="c42"
+                        id="toggleinput-3"
+                        name="settings.bulkable"
+                        type="checkbox"
+                      />
+                    </div>
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div
+              class="c45"
+            >
+              <div
+                class="c46"
+              >
+                <div
+                  class=""
+                >
+                  <div>
+                    <div
+                      class="c47"
+                    >
+                      <span
+                        class="c48"
+                        for="select-1"
+                        id="select-1-label"
+                      >
+                        Entries per page
+                      </span>
+                      <div
+                        class="c49 c50"
+                      >
+                        <button
+                          aria-describedby="select-1-hint"
+                          aria-disabled="false"
+                          aria-expanded="false"
+                          aria-haspopup="listbox"
+                          aria-labelledby="select-1-label select-1-content"
+                          class="c51"
+                          id="select-1"
+                          name="settings.pageSize"
+                          type="button"
+                        />
+                        <div
+                          class="c52 c53"
+                        >
+                          <div
+                            class="c49"
+                          >
+                            <div
+                              class="c54"
+                            >
+                              <span
+                                class="c55"
+                                id="select-1-content"
+                              >
+                                10
+                              </span>
+                            </div>
+                          </div>
+                          <div
+                            class="c49"
+                          >
+                            <button
+                              aria-hidden="true"
+                              class="c56 c57 c58"
+                              tabindex="-1"
+                              type="button"
+                            >
+                              <svg
+                                fill="none"
+                                height="1em"
+                                viewBox="0 0 14 8"
+                                width="1em"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  clip-rule="evenodd"
+                                  d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                                  fill="#32324D"
+                                  fill-rule="evenodd"
+                                />
+                              </svg>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                      <p
+                        class="c59"
+                        id="select-1-hint"
+                      >
+                        Note: You can override this value in the Collection Type settings page.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="c60"
+              >
+                <div
+                  class=""
+                >
+                  <div>
+                    <div
+                      class="c47"
+                    >
+                      <span
+                        class="c48"
+                        for="select-2"
+                        id="select-2-label"
+                      >
+                        Default sort attribute
+                      </span>
+                      <div
+                        class="c49 c50"
+                      >
+                        <button
+                          aria-disabled="false"
+                          aria-expanded="false"
+                          aria-haspopup="listbox"
+                          aria-labelledby="select-2-label select-2-content"
+                          class="c51"
+                          id="select-2"
+                          name="settings.defaultSortBy"
+                          type="button"
+                        />
+                        <div
+                          class="c52 c53"
+                        >
+                          <div
+                            class="c49"
+                          >
+                            <div
+                              class="c54"
+                            >
+                              <span
+                                class="c55"
+                                id="select-2-content"
+                              >
+                                id
+                              </span>
+                            </div>
+                          </div>
+                          <div
+                            class="c49"
+                          >
+                            <button
+                              aria-hidden="true"
+                              class="c56 c57 c58"
+                              tabindex="-1"
+                              type="button"
+                            >
+                              <svg
+                                fill="none"
+                                height="1em"
+                                viewBox="0 0 14 8"
+                                width="1em"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  clip-rule="evenodd"
+                                  d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                                  fill="#32324D"
+                                  fill-rule="evenodd"
+                                />
+                              </svg>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="c60"
+              >
+                <div
+                  class=""
+                >
+                  <div>
+                    <div
+                      class="c47"
+                    >
+                      <span
+                        class="c48"
+                        for="select-3"
+                        id="select-3-label"
+                      >
+                        Default sort order
+                      </span>
+                      <div
+                        class="c49 c50"
+                      >
+                        <button
+                          aria-disabled="false"
+                          aria-expanded="false"
+                          aria-haspopup="listbox"
+                          aria-labelledby="select-3-label select-3-content"
+                          class="c51"
+                          id="select-3"
+                          name="settings.defaultSortOrder"
+                          type="button"
+                        />
+                        <div
+                          class="c52 c53"
+                        >
+                          <div
+                            class="c49"
+                          >
+                            <div
+                              class="c54"
+                            >
+                              <span
+                                class="c55"
+                                id="select-3-content"
+                              >
+                                ASC
+                              </span>
+                            </div>
+                          </div>
+                          <div
+                            class="c49"
+                          >
+                            <button
+                              aria-hidden="true"
+                              class="c56 c57 c58"
+                              tabindex="-1"
+                              type="button"
+                            >
+                              <svg
+                                fill="none"
+                                height="1em"
+                                viewBox="0 0 14 8"
+                                width="1em"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  clip-rule="evenodd"
+                                  d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                                  fill="#32324D"
+                                  fill-rule="evenodd"
+                                />
+                              </svg>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="c61"
+            >
+              <hr
+                class="c62 c63"
+              />
+            </div>
+            <div
+              class="c23"
+            >
+              <h2
+                class="c24 c25"
+              >
+                View
+              </h2>
+            </div>
+            <div
+              class="c64 c65"
+            >
+              <div
+                class="c23 c66 c67"
+                size="1"
+              >
+                <div
+                  class="c68 c69"
+                >
+                  <div
+                    class="c70"
+                  >
+                    <div
+                      class="c71 c72 c73"
+                    >
+                      <div
+                        class="c68 c69"
+                      >
+                        <span
+                          aria-label="Move id"
+                          class="c74 c75 c76"
+                          draggable="true"
+                          type="button"
+                        >
+                          <svg
+                            fill="none"
+                            height="1em"
+                            viewBox="0 0 24 24"
+                            width="1em"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M16.563 5.587a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                              fill="#212134"
+                            />
+                            <path
+                              d="M18.487 3.083c-.012.788-.487 1.513-1.229 1.797a1.954 1.954 0 01-2.184-.574A1.943 1.943 0 0114.9 2.11c.4-.684 1.2-1.066 1.981-.927a1.954 1.954 0 011.606 1.9c.011.748 1.17.748 1.158 0A3.138 3.138 0 0017.565.17c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.674 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.006zM16.563 14.372a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                              fill="#212134"
+                            />
+                            <path
+                              d="M18.487 11.867c-.012.789-.487 1.513-1.229 1.797a1.954 1.954 0 01-2.184-.574 1.943 1.943 0 01-.174-2.196c.4-.684 1.2-1.066 1.981-.927.928.156 1.588.968 1.606 1.9.011.748 1.17.748 1.158 0a3.138 3.138 0 00-2.08-2.914c-1.176-.423-2.567-.029-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.675 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.005zM16.563 23.392a2.503 2.503 0 100-5.006 2.503 2.503 0 000 5.006z"
+                              fill="#212134"
+                            />
+                            <path
+                              d="M18.487 20.89c-.012.787-.487 1.512-1.229 1.796a1.954 1.954 0 01-2.184-.574 1.943 1.943 0 01-.174-2.196c.4-.684 1.2-1.066 1.981-.927.928.156 1.588.967 1.606 1.9.011.748 1.17.748 1.158 0a3.138 3.138 0 00-2.08-2.914c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.674 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.006zM7.378 5.622a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                              fill="#212134"
+                            />
+                            <path
+                              d="M9.302 3.119c-.011.788-.486 1.512-1.228 1.796a1.954 1.954 0 01-2.185-.574 1.943 1.943 0 01-.173-2.196c.4-.684 1.199-1.066 1.981-.927a1.943 1.943 0 011.605 1.9c.012.748 1.17.748 1.16 0A3.138 3.138 0 008.38.205c-1.176-.423-2.567-.029-3.36.933-.83 1.002-.968 2.45-.285 3.575.678 1.124 1.994 1.675 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.159-.005zM7.378 14.406a2.503 2.503 0 100-5.006 2.503 2.503 0 000 5.006z"
+                              fill="#212134"
+                            />
+                            <path
+                              d="M9.302 11.902c-.011.788-.486 1.513-1.228 1.797a1.954 1.954 0 01-2.185-.574 1.943 1.943 0 01-.173-2.196c.4-.684 1.199-1.066 1.981-.927a1.943 1.943 0 011.605 1.9c.012.748 1.17.748 1.16 0A3.138 3.138 0 008.38 8.988c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.285 3.575.678 1.124 1.994 1.674 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.159-.006zM7.378 23.427a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                              fill="#212134"
+                            />
+                            <path
+                              d="M9.302 20.924c-.011.788-.486 1.513-1.228 1.797a1.954 1.954 0 01-2.185-.574 1.943 1.943 0 01-.173-2.196c.4-.684 1.199-1.066 1.981-.927.933.156 1.594.967 1.605 1.9.012.748 1.17.748 1.16 0A3.139 3.139 0 008.38 18.01c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.285 3.569.678 1.124 1.994 1.675 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.747-1.147-.747-1.159 0z"
+                              fill="#212134"
+                            />
+                          </svg>
+                        </span>
+                        <span
+                          class="c24 c77"
+                        >
+                          hey
+                        </span>
+                      </div>
+                      <div
+                        class="c78 c65"
+                      >
+                        <button
+                          aria-label="Edit id"
+                          class="c75"
+                          type="button"
+                        >
+                          <svg
+                            fill="none"
+                            height="1em"
+                            viewBox="0 0 24 24"
+                            width="1em"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              clip-rule="evenodd"
+                              d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
+                              fill="#212134"
+                              fill-rule="evenodd"
+                            />
+                          </svg>
+                        </button>
+                        <button
+                          aria-label="Delete id"
+                          class="c75"
+                          data-testid="delete-id"
+                          type="button"
+                        >
+                          <svg
+                            fill="none"
+                            height="1em"
+                            viewBox="0 0 24 24"
+                            width="1em"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
+                              fill="#212134"
+                            />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    class="c70"
+                  >
+                    <div
+                      class="c71 c72 c73"
+                    >
+                      <div
+                        class="c68 c69"
+                      >
+                        <span
+                          aria-label="Move address"
+                          class="c74 c75 c76"
+                          draggable="true"
+                          type="button"
+                        >
+                          <svg
+                            fill="none"
+                            height="1em"
+                            viewBox="0 0 24 24"
+                            width="1em"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M16.563 5.587a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                              fill="#212134"
+                            />
+                            <path
+                              d="M18.487 3.083c-.012.788-.487 1.513-1.229 1.797a1.954 1.954 0 01-2.184-.574A1.943 1.943 0 0114.9 2.11c.4-.684 1.2-1.066 1.981-.927a1.954 1.954 0 011.606 1.9c.011.748 1.17.748 1.158 0A3.138 3.138 0 0017.565.17c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.674 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.006zM16.563 14.372a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                              fill="#212134"
+                            />
+                            <path
+                              d="M18.487 11.867c-.012.789-.487 1.513-1.229 1.797a1.954 1.954 0 01-2.184-.574 1.943 1.943 0 01-.174-2.196c.4-.684 1.2-1.066 1.981-.927.928.156 1.588.968 1.606 1.9.011.748 1.17.748 1.158 0a3.138 3.138 0 00-2.08-2.914c-1.176-.423-2.567-.029-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.675 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.005zM16.563 23.392a2.503 2.503 0 100-5.006 2.503 2.503 0 000 5.006z"
+                              fill="#212134"
+                            />
+                            <path
+                              d="M18.487 20.89c-.012.787-.487 1.512-1.229 1.796a1.954 1.954 0 01-2.184-.574 1.943 1.943 0 01-.174-2.196c.4-.684 1.2-1.066 1.981-.927.928.156 1.588.967 1.606 1.9.011.748 1.17.748 1.158 0a3.138 3.138 0 00-2.08-2.914c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.674 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.006zM7.378 5.622a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                              fill="#212134"
+                            />
+                            <path
+                              d="M9.302 3.119c-.011.788-.486 1.512-1.228 1.796a1.954 1.954 0 01-2.185-.574 1.943 1.943 0 01-.173-2.196c.4-.684 1.199-1.066 1.981-.927a1.943 1.943 0 011.605 1.9c.012.748 1.17.748 1.16 0A3.138 3.138 0 008.38.205c-1.176-.423-2.567-.029-3.36.933-.83 1.002-.968 2.45-.285 3.575.678 1.124 1.994 1.675 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.159-.005zM7.378 14.406a2.503 2.503 0 100-5.006 2.503 2.503 0 000 5.006z"
+                              fill="#212134"
+                            />
+                            <path
+                              d="M9.302 11.902c-.011.788-.486 1.513-1.228 1.797a1.954 1.954 0 01-2.185-.574 1.943 1.943 0 01-.173-2.196c.4-.684 1.199-1.066 1.981-.927a1.943 1.943 0 011.605 1.9c.012.748 1.17.748 1.16 0A3.138 3.138 0 008.38 8.988c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.285 3.575.678 1.124 1.994 1.674 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.159-.006zM7.378 23.427a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                              fill="#212134"
+                            />
+                            <path
+                              d="M9.302 20.924c-.011.788-.486 1.513-1.228 1.797a1.954 1.954 0 01-2.185-.574 1.943 1.943 0 01-.173-2.196c.4-.684 1.199-1.066 1.981-.927.933.156 1.594.967 1.605 1.9.012.748 1.17.748 1.16 0A3.139 3.139 0 008.38 18.01c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.285 3.569.678 1.124 1.994 1.675 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.747-1.147-.747-1.159 0z"
+                              fill="#212134"
+                            />
+                          </svg>
+                        </span>
+                        <span
+                          class="c24 c77"
+                        >
+                          address
+                        </span>
+                      </div>
+                      <div
+                        class="c78 c65"
+                      >
+                        <button
+                          aria-label="Edit address"
+                          class="c75"
+                          type="button"
+                        >
+                          <svg
+                            fill="none"
+                            height="1em"
+                            viewBox="0 0 24 24"
+                            width="1em"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              clip-rule="evenodd"
+                              d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
+                              fill="#212134"
+                              fill-rule="evenodd"
+                            />
+                          </svg>
+                        </button>
+                        <button
+                          aria-label="Delete address"
+                          class="c75"
+                          data-testid="delete-address"
+                          type="button"
+                        >
+                          <svg
+                            fill="none"
+                            height="1em"
+                            viewBox="0 0 24 24"
+                            width="1em"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
+                              fill="#212134"
+                            />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="c23 c79 c80"
+              >
+                <div>
+                  <span>
+                    <button
+                      aria-controls="simplemenu-1"
+                      aria-disabled="false"
+                      aria-expanded="false"
+                      aria-haspopup="true"
+                      aria-labelledby="tooltip-1"
+                      class="c81 c82"
+                      data-testid="add-field"
+                      tabindex="0"
+                      type="button"
+                    >
+                      <svg
+                        fill="none"
+                        height="1em"
+                        viewBox="0 0 24 24"
+                        width="1em"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M24 13.604a.3.3 0 01-.3.3h-9.795V23.7a.3.3 0 01-.3.3h-3.21a.3.3 0 01-.3-.3v-9.795H.3a.3.3 0 01-.3-.3v-3.21a.3.3 0 01.3-.3h9.795V.3a.3.3 0 01.3-.3h3.21a.3.3 0 01.3.3v9.795H23.7a.3.3 0 01.3.3v3.21z"
+                          fill="#212134"
+                        />
+                      </svg>
+                    </button>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </main>
+  </div>
+</div>
+`;
+
+exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
+.c83 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c22 {
+  background: #ffffff;
+  padding-top: 24px;
+  padding-right: 32px;
+  padding-bottom: 24px;
+  padding-left: 32px;
+  border-radius: 4px;
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+}
+
+.c23 {
+  padding-bottom: 16px;
+}
+
+.c61 {
+  padding-top: 24px;
+  padding-bottom: 24px;
+}
+
+.c19 {
+  font-weight: 600;
+  color: #32324d;
+  font-size: 0.875rem;
+  line-height: 1.43;
+}
+
+.c16 {
+  padding-right: 8px;
+}
+
+.c13 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  background: #ffffff;
+  border: 1px solid #dcdce4;
+  position: relative;
+  outline: none;
+}
+
+.c13 svg {
+  height: 12px;
+  width: 12px;
+}
+
+.c13 svg > g,
+.c13 svg path {
+  fill: #ffffff;
+}
+
+.c13[aria-disabled='true'] {
+  pointer-events: none;
+}
+
+.c13:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c13:focus-visible {
+  outline: none;
+}
+
+.c13:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c17 {
+  height: 100%;
+}
+
+.c14 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  padding: 10px 16px;
+  background: #4945ff;
+  border: none;
+  border: 1px solid #4945ff;
+  background: #4945ff;
+}
+
+.c14 .c15 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c14 .c18 {
+  color: #ffffff;
+}
+
+.c14[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c14[aria-disabled='true'] .c18 {
+  color: #666687;
+}
+
+.c14[aria-disabled='true'] svg > g,
+.c14[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c14[aria-disabled='true']:active {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c14[aria-disabled='true']:active .c18 {
+  color: #666687;
+}
+
+.c14[aria-disabled='true']:active svg > g,
+.c14[aria-disabled='true']:active svg path {
+  fill: #666687;
+}
+
+.c14:hover {
+  border: 1px solid #7b79ff;
+  background: #7b79ff;
+}
+
+.c14:active {
+  border: 1px solid #4945ff;
+  background: #4945ff;
+}
+
+.c26 {
+  padding-bottom: 24px;
+}
+
+.c64 {
+  padding-top: 16px;
+  padding-right: 16px;
+  padding-left: 16px;
+  border-radius: 4px;
+  border-style: dashed;
+  border-width: 1px;
+  border-color: #c0c0cf;
+}
+
+.c71 {
+  background: #f6f6f9;
+  border-radius: 4px;
+  border-color: #eaeaef;
+  border: 1px solid #eaeaef;
+}
+
+.c78 {
+  padding-left: 12px;
+}
+
+.c27 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-flex-wrap: wrap;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+}
+
+.c65 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c72 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c84 {
+  background: #212134;
+  padding: 8px;
+  border-radius: 4px;
+}
+
+.c86 {
+  font-weight: 600;
+  color: #ffffff;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c85 {
+  position: absolute;
+  z-index: 4;
+  display: none;
+}
+
+.c81 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  background: #ffffff;
+  border: 1px solid #dcdce4;
+  position: relative;
+  outline: none;
+}
+
+.c81 svg {
+  height: 12px;
+  width: 12px;
+}
+
+.c81 svg > g,
+.c81 svg path {
+  fill: #ffffff;
+}
+
+.c81[aria-disabled='true'] {
+  pointer-events: none;
+}
+
+.c81:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c81:focus-visible {
+  outline: none;
+}
+
+.c81:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c82 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  height: 2rem;
+  width: 2rem;
+}
+
+.c82 svg > g,
+.c82 svg path {
+  fill: #8e8ea9;
+}
+
+.c82:hover svg > g,
+.c82:hover svg path {
+  fill: #666687;
+}
+
+.c82:active svg > g,
+.c82:active svg path {
+  fill: #a5a5ba;
+}
+
+.c82[aria-disabled='true'] {
+  background-color: #eaeaef;
+}
+
+.c82[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c51 {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  width: 100%;
+  background: transparent;
+  border: none;
+}
+
+.c51:focus {
+  outline: none;
+}
+
+.c51[aria-disabled='true'] {
+  cursor: not-allowed;
+}
+
+.c48 {
+  font-weight: 600;
+  color: #32324d;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c55 {
+  color: #32324d;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.875rem;
+  line-height: 1.43;
+}
+
+.c59 {
+  color: #666687;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c54 {
+  padding-right: 16px;
+  padding-left: 16px;
+}
+
+.c56 {
+  padding-left: 12px;
+}
+
+.c49 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c52 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c47 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+}
+
+.c47 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c47 > * + * {
+  margin-top: 4px;
+}
+
+.c50 {
+  position: relative;
+  border: 1px solid #dcdce4;
+  padding-right: 12px;
+  border-radius: 4px;
+  background: #ffffff;
+  overflow: hidden;
+  min-height: 2.5rem;
+  outline: none;
+  box-shadow: 0;
+  -webkit-transition-property: border-color,box-shadow,fill;
+  transition-property: border-color,box-shadow,fill;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+}
+
+.c50:focus-within {
+  border: 1px solid #4945ff;
+  box-shadow: #4945ff 0px 0px 0px 2px;
+}
+
+.c57 {
+  background: transparent;
+  border: none;
+  position: relative;
+  z-index: 1;
+}
+
+.c57 svg {
+  height: 0.6875rem;
+  width: 0.6875rem;
+}
+
+.c57 svg path {
+  fill: #666687;
+}
+
+.c58 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  background: none;
+  border: none;
+}
+
+.c58 svg {
+  width: 0.375rem;
+}
+
+.c53 {
+  width: 100%;
+}
+
+.c68 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c69 > * {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.c69 > * + * {
+  margin-left: 12px;
+}
+
+.c32 {
+  font-weight: 600;
+  color: #32324d;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c41 {
+  font-weight: 600;
+  color: #271fe0;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c44 {
+  font-weight: 600;
+  color: #b72b1a;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c35 {
+  background: #ffffff;
+  border-radius: 4px;
+}
+
+.c37 {
+  background: #ffffff;
+  padding-right: 32px;
+  padding-left: 32px;
+}
+
+.c39 {
+  background: #f0f0ff;
+  padding-right: 32px;
+  padding-left: 32px;
+}
+
+.c43 {
+  background: #fcecea;
+  padding-right: 32px;
+  padding-left: 32px;
+}
+
+.c31 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c30 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+}
+
+.c30 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c30 > * + * {
+  margin-top: 4px;
+}
+
+.c34 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c33 {
+  position: relative;
+  display: inline-block;
+}
+
+.c36 {
+  height: 2.5rem;
+  border: 1px solid #dcdce4;
+  display: -webkit-inline-box;
+  display: -webkit-inline-flex;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  overflow: hidden;
+  outline: none;
+  box-shadow: 0;
+  -webkit-transition-property: border-color,box-shadow,fill;
+  transition-property: border-color,box-shadow,fill;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+}
+
+.c36:focus-within {
+  border: 1px solid #4945ff;
+  box-shadow: #4945ff 0px 0px 0px 2px;
+}
+
+.c40 {
+  text-transform: uppercase;
+  position: relative;
+  z-index: 2;
+}
+
+.c38 {
+  text-transform: uppercase;
+  border-right: 1px solid #dcdce4;
+  position: relative;
+  z-index: 2;
+}
+
+.c42 {
+  position: absolute;
+  z-index: 1;
+  left: 4px;
+  top: 4px;
+}
+
+.c29 {
+  width: -webkit-fit-content;
+  width: -moz-fit-content;
+  width: fit-content;
+}
+
+.c25 {
+  color: #32324d;
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+}
+
+.c77 {
+  font-weight: 600;
+  color: #32324d;
+  font-size: 0.875rem;
+  line-height: 1.43;
+}
+
+.c62 {
+  background: #eaeaef;
+}
+
+.c63 {
+  height: 1px;
+  border: none;
+  margin: 0;
+}
+
+.c1 {
+  padding-bottom: 56px;
+}
+
+.c4 {
+  background: #f6f6f9;
+  padding-top: 24px;
+  padding-right: 56px;
+  padding-bottom: 40px;
+  padding-left: 56px;
+}
+
+.c5 {
+  padding-bottom: 8px;
+}
+
+.c21 {
+  padding-right: 56px;
+  padding-left: 56px;
+}
+
+.c0 {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+.c2 {
+  overflow-x: hidden;
+}
+
+.c10 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c11 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c12 {
+  color: #32324d;
+  font-weight: 600;
+  font-size: 2rem;
+  line-height: 1.25;
+}
+
+.c20 {
+  color: #666687;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.c9 {
+  color: #4945ff;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c7 {
+  padding-right: 8px;
+}
+
+.c6 {
+  display: -webkit-inline-box;
+  display: -webkit-inline-flex;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-text-decoration: none;
+  text-decoration: none;
+  position: relative;
+  outline: none;
+}
+
+.c6 svg path {
+  fill: #4945ff;
+}
+
+.c6 svg {
+  font-size: 0.625rem;
+}
+
+.c6:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c6:focus-visible {
+  outline: none;
+}
+
+.c6:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c8 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+}
+
+.c3:focus-visible {
+  outline: none;
+}
+
+.c45 {
+  display: grid;
+  grid-template-columns: repeat(12,1fr);
+  gap: 16px;
+}
+
+.c46 {
+  grid-column: span 6;
+  max-width: 100%;
+}
+
+.c60 {
+  grid-column: span 3;
+  max-width: 100%;
+}
+
+.c28 {
+  gap: 16px;
+}
+
+.c94 {
+  color: #32324d;
+  font-size: 0.875rem;
+  line-height: 1.43;
+}
+
+.c87 {
+  background: #ffffff;
+  padding: 4px;
+  border-radius: 4px;
+}
+
+.c90 {
+  padding: 4px;
+}
+
+.c93 {
+  padding: 8px;
+}
+
+.c91 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c88 {
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+  position: absolute;
+  z-index: 4;
+  border: 1px solid #eaeaef;
+  background: #ffffff;
+}
+
+.c89 {
+  max-height: 15rem;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.c89::-webkit-scrollbar {
+  -webkit-appearance: none;
+  width: 4px;
+}
+
+.c89::-webkit-scrollbar-track {
+  background: #ffffff;
+}
+
+.c89::-webkit-scrollbar-thumb {
+  background: #eaeaef;
+  border-radius: 4px;
+  margin-right: 10px;
+}
+
+.c92 {
+  border: none;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  color: #32324d;
+  border-radius: 4px;
+}
+
+.c92:focus {
+  background-color: #f0f0ff;
+}
+
+.c92:not([aria-disabled]):hover {
+  background-color: #f0f0ff;
+}
+
+.c75 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  height: 32px;
+}
+
+.c75:last-child {
+  padding: 0 12px;
+}
+
+.c76 {
+  padding: 0 12px;
+  border-right: 1px solid #eaeaef;
+  cursor: all-scroll;
+}
+
+.c76 svg {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+.c73 {
+  max-height: 2rem;
+  cursor: pointer;
+}
+
+.c73 svg {
+  width: 0.625rem;
+  height: 0.625rem;
+}
+
+.c73 svg path {
+  fill: #666687;
+}
+
+.c73:hover {
+  background-color: #f0f0ff;
+  border-color: #d9d8ff;
+}
+
+.c73:hover svg path {
+  fill: #4945ff;
+}
+
+.c73:hover .c24 {
+  color: #4945ff;
+}
+
+.c73:hover .c74 {
+  border-right: 1px solid #d9d8ff;
+}
+
+.c70:last-child {
+  padding-right: 12px;
+}
+
+.c66 {
+  -webkit-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+}
+
+.c79 {
+  -webkit-flex: auto;
+  -ms-flex: auto;
+  flex: auto;
+}
+
+.c67 {
+  overflow-x: scroll;
+  overflow-y: hidden;
+}
+
+.c80 {
+  max-width: 2rem;
+}
+
+@media (max-width:68.75rem) {
+  .c46 {
+    grid-column: span 12;
+  }
+}
+
+@media (max-width:34.375rem) {
+  .c46 {
+    grid-column: span;
+  }
+}
+
+@media (max-width:68.75rem) {
+  .c60 {
+    grid-column: span 12;
+  }
+}
+
+@media (max-width:34.375rem) {
+  .c60 {
+    grid-column: span;
+  }
+}
+
+<body>
+  <div
+    class="c0"
+  >
+    <div
+      class="c1 c2"
+    >
+      <main
+        aria-busy="false"
+        aria-labelledby="main-content-title"
+        class="c3"
+        id="main-content"
+        tabindex="-1"
+      >
+        <form>
+          <div
+            style="height: 0px;"
+          >
+            <div
+              class="c4"
+              data-strapi-header="true"
+            >
+              <div
+                class="c5"
+              >
+                <a
+                  class="c6"
+                  href="/content-manager/undefined/api::restaurant.restaurant?page=1&pageSize=10&sort=id:ASC"
+                  id="go-back"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="c7 c8"
+                  >
+                    <svg
+                      fill="none"
+                      height="1em"
+                      viewBox="0 0 24 24"
+                      width="1em"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M24 13.3a.2.2 0 01-.2.2H5.74l8.239 8.239a.2.2 0 010 .282L12.14 23.86a.2.2 0 01-.282 0L.14 12.14a.2.2 0 010-.282L11.86.14a.2.2 0 01.282 0L13.98 1.98a.2.2 0 010 .282L5.74 10.5H23.8c.11 0 .2.09.2.2v2.6z"
+                        fill="#212134"
+                      />
+                    </svg>
+                  </span>
+                  <span
+                    class="c9"
+                  >
+                    Back
+                  </span>
+                </a>
+              </div>
+              <div
+                class="c10"
+              >
+                <div
+                  class="c11"
+                >
+                  <h1
+                    class="c12"
+                  >
+                    Configure the view - Michka
+                  </h1>
+                </div>
+                <button
+                  aria-disabled="false"
+                  class="c13 c14"
+                  type="submit"
+                >
+                  <div
+                    aria-hidden="true"
+                    class="c15 c16 c17"
+                  >
+                    <svg
+                      fill="none"
+                      height="1em"
+                      viewBox="0 0 24 24"
+                      width="1em"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M20.727 2.97a.2.2 0 01.286 0l2.85 2.89a.2.2 0 010 .28L9.554 20.854a.2.2 0 01-.285 0l-9.13-9.243a.2.2 0 010-.281l2.85-2.892a.2.2 0 01.284 0l6.14 6.209L20.726 2.97z"
+                        fill="#212134"
+                      />
+                    </svg>
+                  </div>
+                  <span
+                    class="c18 c19"
+                  >
+                    Save
+                  </span>
+                </button>
+              </div>
+              <p
+                class="c20"
+              >
+                Define the settings of the list view.
+              </p>
+            </div>
+          </div>
+          <div
+            class="c21"
+          >
+            <div
+              class="c22"
+            >
+              <div
+                class="c23"
+              >
+                <h2
+                  class="c24 c25"
+                >
+                  Settings
+                </h2>
+              </div>
+              <div
+                class="c26 c27 c28"
+                wrap="wrap"
+              >
+                <div
+                  class="c29"
+                >
+                  <div
+                    class="c30"
+                  >
+                    <div
+                      class="c31"
+                    >
+                      <label
+                        class="c32"
+                        for="toggleinput-10"
+                      >
+                        Enable search
+                      </label>
+                    </div>
+                    <label
+                      class="c33"
+                    >
+                      <div
+                        class="c34"
+                      >
+                        Enable search
+                      </div>
+                      <div
+                        class="c35 c36"
+                      >
+                        <div
+                          aria-hidden="true"
+                          class="c37 c31 c38"
+                        >
+                          <span
+                            class="c32"
+                          >
+                            off
+                          </span>
+                        </div>
+                        <div
+                          aria-hidden="true"
+                          class="c39 c31 c40"
+                        >
+                          <span
+                            class="c41"
+                          >
+                            on
+                          </span>
+                        </div>
+                        <input
+                          aria-disabled="false"
+                          checked=""
+                          class="c42"
+                          id="toggleinput-10"
+                          name="settings.searchable"
+                          type="checkbox"
+                        />
+                      </div>
+                    </label>
+                  </div>
+                </div>
+                <div
+                  class="c29"
+                >
+                  <div
+                    class="c30"
+                  >
+                    <div
+                      class="c31"
+                    >
+                      <label
+                        class="c32"
+                        for="toggleinput-11"
+                      >
+                        Enable filters
+                      </label>
+                    </div>
+                    <label
+                      class="c33"
+                    >
+                      <div
+                        class="c34"
+                      >
+                        Enable filters
+                      </div>
+                      <div
+                        class="c35 c36"
+                      >
+                        <div
+                          aria-hidden="true"
+                          class="c37 c31 c38"
+                        >
+                          <span
+                            class="c32"
+                          >
+                            off
+                          </span>
+                        </div>
+                        <div
+                          aria-hidden="true"
+                          class="c39 c31 c40"
+                        >
+                          <span
+                            class="c41"
+                          >
+                            on
+                          </span>
+                        </div>
+                        <input
+                          aria-disabled="false"
+                          checked=""
+                          class="c42"
+                          id="toggleinput-11"
+                          name="settings.filterable"
+                          type="checkbox"
+                        />
+                      </div>
+                    </label>
+                  </div>
+                </div>
+                <div
+                  class="c29"
+                >
+                  <div
+                    class="c30"
+                  >
+                    <div
+                      class="c31"
+                    >
+                      <label
+                        class="c32"
+                        for="toggleinput-12"
+                      >
+                        Enable bulk actions
+                      </label>
+                    </div>
+                    <label
+                      class="c33"
+                    >
+                      <div
+                        class="c34"
+                      >
+                        Enable bulk actions
+                      </div>
+                      <div
+                        class="c35 c36"
+                      >
+                        <div
+                          aria-hidden="true"
+                          class="c43 c31 c38"
+                        >
+                          <span
+                            class="c44"
+                          >
+                            off
+                          </span>
+                        </div>
+                        <div
+                          aria-hidden="true"
+                          class="c37 c31 c40"
+                        >
+                          <span
+                            class="c32"
+                          >
+                            on
+                          </span>
+                        </div>
+                        <input
+                          aria-disabled="false"
+                          class="c42"
+                          id="toggleinput-12"
+                          name="settings.bulkable"
+                          type="checkbox"
+                        />
+                      </div>
+                    </label>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="c45"
+              >
+                <div
+                  class="c46"
+                >
+                  <div
+                    class=""
+                  >
+                    <div>
+                      <div
+                        class="c47"
+                      >
+                        <span
+                          class="c48"
+                          for="select-10"
+                          id="select-10-label"
+                        >
+                          Entries per page
+                        </span>
+                        <div
+                          class="c49 c50"
+                        >
+                          <button
+                            aria-describedby="select-10-hint"
+                            aria-disabled="false"
+                            aria-expanded="false"
+                            aria-haspopup="listbox"
+                            aria-labelledby="select-10-label select-10-content"
+                            class="c51"
+                            id="select-10"
+                            name="settings.pageSize"
+                            type="button"
+                          />
+                          <div
+                            class="c52 c53"
+                          >
+                            <div
+                              class="c49"
+                            >
+                              <div
+                                class="c54"
+                              >
+                                <span
+                                  class="c55"
+                                  id="select-10-content"
+                                >
+                                  10
+                                </span>
+                              </div>
+                            </div>
+                            <div
+                              class="c49"
+                            >
+                              <button
+                                aria-hidden="true"
+                                class="c56 c57 c58"
+                                tabindex="-1"
+                                type="button"
+                              >
+                                <svg
+                                  fill="none"
+                                  height="1em"
+                                  viewBox="0 0 14 8"
+                                  width="1em"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    clip-rule="evenodd"
+                                    d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                                    fill="#32324D"
+                                    fill-rule="evenodd"
+                                  />
+                                </svg>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                        <p
+                          class="c59"
+                          id="select-10-hint"
+                        >
+                          Note: You can override this value in the Collection Type settings page.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="c60"
+                >
+                  <div
+                    class=""
+                  >
+                    <div>
+                      <div
+                        class="c47"
+                      >
+                        <span
+                          class="c48"
+                          for="select-11"
+                          id="select-11-label"
+                        >
+                          Default sort attribute
+                        </span>
+                        <div
+                          class="c49 c50"
+                        >
+                          <button
+                            aria-disabled="false"
+                            aria-expanded="false"
+                            aria-haspopup="listbox"
+                            aria-labelledby="select-11-label select-11-content"
+                            class="c51"
+                            id="select-11"
+                            name="settings.defaultSortBy"
+                            type="button"
+                          />
+                          <div
+                            class="c52 c53"
+                          >
+                            <div
+                              class="c49"
+                            >
+                              <div
+                                class="c54"
+                              >
+                                <span
+                                  class="c55"
+                                  id="select-11-content"
+                                >
+                                  id
+                                </span>
+                              </div>
+                            </div>
+                            <div
+                              class="c49"
+                            >
+                              <button
+                                aria-hidden="true"
+                                class="c56 c57 c58"
+                                tabindex="-1"
+                                type="button"
+                              >
+                                <svg
+                                  fill="none"
+                                  height="1em"
+                                  viewBox="0 0 14 8"
+                                  width="1em"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    clip-rule="evenodd"
+                                    d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                                    fill="#32324D"
+                                    fill-rule="evenodd"
+                                  />
+                                </svg>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="c60"
+                >
+                  <div
+                    class=""
+                  >
+                    <div>
+                      <div
+                        class="c47"
+                      >
+                        <span
+                          class="c48"
+                          for="select-12"
+                          id="select-12-label"
+                        >
+                          Default sort order
+                        </span>
+                        <div
+                          class="c49 c50"
+                        >
+                          <button
+                            aria-disabled="false"
+                            aria-expanded="false"
+                            aria-haspopup="listbox"
+                            aria-labelledby="select-12-label select-12-content"
+                            class="c51"
+                            id="select-12"
+                            name="settings.defaultSortOrder"
+                            type="button"
+                          />
+                          <div
+                            class="c52 c53"
+                          >
+                            <div
+                              class="c49"
+                            >
+                              <div
+                                class="c54"
+                              >
+                                <span
+                                  class="c55"
+                                  id="select-12-content"
+                                >
+                                  ASC
+                                </span>
+                              </div>
+                            </div>
+                            <div
+                              class="c49"
+                            >
+                              <button
+                                aria-hidden="true"
+                                class="c56 c57 c58"
+                                tabindex="-1"
+                                type="button"
+                              >
+                                <svg
+                                  fill="none"
+                                  height="1em"
+                                  viewBox="0 0 14 8"
+                                  width="1em"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    clip-rule="evenodd"
+                                    d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                                    fill="#32324D"
+                                    fill-rule="evenodd"
+                                  />
+                                </svg>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="c61"
+              >
+                <hr
+                  class="c62 c63"
+                />
+              </div>
+              <div
+                class="c23"
+              >
+                <h2
+                  class="c24 c25"
+                >
+                  View
+                </h2>
+              </div>
+              <div
+                class="c64 c65"
+              >
+                <div
+                  class="c23 c66 c67"
+                  size="1"
+                >
+                  <div
+                    class="c68 c69"
+                  >
+                    <div
+                      class="c70"
+                    >
+                      <div
+                        class="c71 c72 c73"
+                      >
+                        <div
+                          class="c68 c69"
+                        >
+                          <span
+                            aria-label="Move id"
+                            class="c74 c75 c76"
+                            draggable="true"
+                            type="button"
+                          >
+                            <svg
+                              fill="none"
+                              height="1em"
+                              viewBox="0 0 24 24"
+                              width="1em"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M16.563 5.587a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                fill="#212134"
+                              />
+                              <path
+                                d="M18.487 3.083c-.012.788-.487 1.513-1.229 1.797a1.954 1.954 0 01-2.184-.574A1.943 1.943 0 0114.9 2.11c.4-.684 1.2-1.066 1.981-.927a1.954 1.954 0 011.606 1.9c.011.748 1.17.748 1.158 0A3.138 3.138 0 0017.565.17c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.674 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.006zM16.563 14.372a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                fill="#212134"
+                              />
+                              <path
+                                d="M18.487 11.867c-.012.789-.487 1.513-1.229 1.797a1.954 1.954 0 01-2.184-.574 1.943 1.943 0 01-.174-2.196c.4-.684 1.2-1.066 1.981-.927.928.156 1.588.968 1.606 1.9.011.748 1.17.748 1.158 0a3.138 3.138 0 00-2.08-2.914c-1.176-.423-2.567-.029-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.675 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.005zM16.563 23.392a2.503 2.503 0 100-5.006 2.503 2.503 0 000 5.006z"
+                                fill="#212134"
+                              />
+                              <path
+                                d="M18.487 20.89c-.012.787-.487 1.512-1.229 1.796a1.954 1.954 0 01-2.184-.574 1.943 1.943 0 01-.174-2.196c.4-.684 1.2-1.066 1.981-.927.928.156 1.588.967 1.606 1.9.011.748 1.17.748 1.158 0a3.138 3.138 0 00-2.08-2.914c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.674 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.006zM7.378 5.622a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                fill="#212134"
+                              />
+                              <path
+                                d="M9.302 3.119c-.011.788-.486 1.512-1.228 1.796a1.954 1.954 0 01-2.185-.574 1.943 1.943 0 01-.173-2.196c.4-.684 1.199-1.066 1.981-.927a1.943 1.943 0 011.605 1.9c.012.748 1.17.748 1.16 0A3.138 3.138 0 008.38.205c-1.176-.423-2.567-.029-3.36.933-.83 1.002-.968 2.45-.285 3.575.678 1.124 1.994 1.675 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.159-.005zM7.378 14.406a2.503 2.503 0 100-5.006 2.503 2.503 0 000 5.006z"
+                                fill="#212134"
+                              />
+                              <path
+                                d="M9.302 11.902c-.011.788-.486 1.513-1.228 1.797a1.954 1.954 0 01-2.185-.574 1.943 1.943 0 01-.173-2.196c.4-.684 1.199-1.066 1.981-.927a1.943 1.943 0 011.605 1.9c.012.748 1.17.748 1.16 0A3.138 3.138 0 008.38 8.988c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.285 3.575.678 1.124 1.994 1.674 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.159-.006zM7.378 23.427a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                fill="#212134"
+                              />
+                              <path
+                                d="M9.302 20.924c-.011.788-.486 1.513-1.228 1.797a1.954 1.954 0 01-2.185-.574 1.943 1.943 0 01-.173-2.196c.4-.684 1.199-1.066 1.981-.927.933.156 1.594.967 1.605 1.9.012.748 1.17.748 1.16 0A3.139 3.139 0 008.38 18.01c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.285 3.569.678 1.124 1.994 1.675 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.747-1.147-.747-1.159 0z"
+                                fill="#212134"
+                              />
+                            </svg>
+                          </span>
+                          <span
+                            class="c24 c77"
+                          >
+                            hey
+                          </span>
+                        </div>
+                        <div
+                          class="c78 c65"
+                        >
+                          <button
+                            aria-label="Edit id"
+                            class="c75"
+                            type="button"
+                          >
+                            <svg
+                              fill="none"
+                              height="1em"
+                              viewBox="0 0 24 24"
+                              width="1em"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                clip-rule="evenodd"
+                                d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
+                                fill="#212134"
+                                fill-rule="evenodd"
+                              />
+                            </svg>
+                          </button>
+                          <button
+                            aria-label="Delete id"
+                            class="c75"
+                            data-testid="delete-id"
+                            type="button"
+                          >
+                            <svg
+                              fill="none"
+                              height="1em"
+                              viewBox="0 0 24 24"
+                              width="1em"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
+                                fill="#212134"
+                              />
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      class="c70"
+                    >
+                      <div
+                        class="c71 c72 c73"
+                      >
+                        <div
+                          class="c68 c69"
+                        >
+                          <span
+                            aria-label="Move address"
+                            class="c74 c75 c76"
+                            draggable="true"
+                            type="button"
+                          >
+                            <svg
+                              fill="none"
+                              height="1em"
+                              viewBox="0 0 24 24"
+                              width="1em"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M16.563 5.587a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                fill="#212134"
+                              />
+                              <path
+                                d="M18.487 3.083c-.012.788-.487 1.513-1.229 1.797a1.954 1.954 0 01-2.184-.574A1.943 1.943 0 0114.9 2.11c.4-.684 1.2-1.066 1.981-.927a1.954 1.954 0 011.606 1.9c.011.748 1.17.748 1.158 0A3.138 3.138 0 0017.565.17c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.674 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.006zM16.563 14.372a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                fill="#212134"
+                              />
+                              <path
+                                d="M18.487 11.867c-.012.789-.487 1.513-1.229 1.797a1.954 1.954 0 01-2.184-.574 1.943 1.943 0 01-.174-2.196c.4-.684 1.2-1.066 1.981-.927.928.156 1.588.968 1.606 1.9.011.748 1.17.748 1.158 0a3.138 3.138 0 00-2.08-2.914c-1.176-.423-2.567-.029-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.675 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.005zM16.563 23.392a2.503 2.503 0 100-5.006 2.503 2.503 0 000 5.006z"
+                                fill="#212134"
+                              />
+                              <path
+                                d="M18.487 20.89c-.012.787-.487 1.512-1.229 1.796a1.954 1.954 0 01-2.184-.574 1.943 1.943 0 01-.174-2.196c.4-.684 1.2-1.066 1.981-.927.928.156 1.588.967 1.606 1.9.011.748 1.17.748 1.158 0a3.138 3.138 0 00-2.08-2.914c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.674 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.006zM7.378 5.622a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                fill="#212134"
+                              />
+                              <path
+                                d="M9.302 3.119c-.011.788-.486 1.512-1.228 1.796a1.954 1.954 0 01-2.185-.574 1.943 1.943 0 01-.173-2.196c.4-.684 1.199-1.066 1.981-.927a1.943 1.943 0 011.605 1.9c.012.748 1.17.748 1.16 0A3.138 3.138 0 008.38.205c-1.176-.423-2.567-.029-3.36.933-.83 1.002-.968 2.45-.285 3.575.678 1.124 1.994 1.675 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.159-.005zM7.378 14.406a2.503 2.503 0 100-5.006 2.503 2.503 0 000 5.006z"
+                                fill="#212134"
+                              />
+                              <path
+                                d="M9.302 11.902c-.011.788-.486 1.513-1.228 1.797a1.954 1.954 0 01-2.185-.574 1.943 1.943 0 01-.173-2.196c.4-.684 1.199-1.066 1.981-.927a1.943 1.943 0 011.605 1.9c.012.748 1.17.748 1.16 0A3.138 3.138 0 008.38 8.988c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.285 3.575.678 1.124 1.994 1.674 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.159-.006zM7.378 23.427a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                fill="#212134"
+                              />
+                              <path
+                                d="M9.302 20.924c-.011.788-.486 1.513-1.228 1.797a1.954 1.954 0 01-2.185-.574 1.943 1.943 0 01-.173-2.196c.4-.684 1.199-1.066 1.981-.927.933.156 1.594.967 1.605 1.9.012.748 1.17.748 1.16 0A3.139 3.139 0 008.38 18.01c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.285 3.569.678 1.124 1.994 1.675 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.747-1.147-.747-1.159 0z"
+                                fill="#212134"
+                              />
+                            </svg>
+                          </span>
+                          <span
+                            class="c24 c77"
+                          >
+                            address
+                          </span>
+                        </div>
+                        <div
+                          class="c78 c65"
+                        >
+                          <button
+                            aria-label="Edit address"
+                            class="c75"
+                            type="button"
+                          >
+                            <svg
+                              fill="none"
+                              height="1em"
+                              viewBox="0 0 24 24"
+                              width="1em"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                clip-rule="evenodd"
+                                d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
+                                fill="#212134"
+                                fill-rule="evenodd"
+                              />
+                            </svg>
+                          </button>
+                          <button
+                            aria-label="Delete address"
+                            class="c75"
+                            data-testid="delete-address"
+                            type="button"
+                          >
+                            <svg
+                              fill="none"
+                              height="1em"
+                              viewBox="0 0 24 24"
+                              width="1em"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
+                                fill="#212134"
+                              />
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      class="c70"
+                    >
+                      <div
+                        class="c71 c72 c73"
+                      >
+                        <div
+                          class="c68 c69"
+                        >
+                          <span
+                            aria-label="Move cover"
+                            class="c74 c75 c76"
+                            draggable="true"
+                            type="button"
+                          >
+                            <svg
+                              fill="none"
+                              height="1em"
+                              viewBox="0 0 24 24"
+                              width="1em"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M16.563 5.587a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                fill="#212134"
+                              />
+                              <path
+                                d="M18.487 3.083c-.012.788-.487 1.513-1.229 1.797a1.954 1.954 0 01-2.184-.574A1.943 1.943 0 0114.9 2.11c.4-.684 1.2-1.066 1.981-.927a1.954 1.954 0 011.606 1.9c.011.748 1.17.748 1.158 0A3.138 3.138 0 0017.565.17c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.674 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.006zM16.563 14.372a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                fill="#212134"
+                              />
+                              <path
+                                d="M18.487 11.867c-.012.789-.487 1.513-1.229 1.797a1.954 1.954 0 01-2.184-.574 1.943 1.943 0 01-.174-2.196c.4-.684 1.2-1.066 1.981-.927.928.156 1.588.968 1.606 1.9.011.748 1.17.748 1.158 0a3.138 3.138 0 00-2.08-2.914c-1.176-.423-2.567-.029-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.675 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.005zM16.563 23.392a2.503 2.503 0 100-5.006 2.503 2.503 0 000 5.006z"
+                                fill="#212134"
+                              />
+                              <path
+                                d="M18.487 20.89c-.012.787-.487 1.512-1.229 1.796a1.954 1.954 0 01-2.184-.574 1.943 1.943 0 01-.174-2.196c.4-.684 1.2-1.066 1.981-.927.928.156 1.588.967 1.606 1.9.011.748 1.17.748 1.158 0a3.138 3.138 0 00-2.08-2.914c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.674 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.006zM7.378 5.622a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                fill="#212134"
+                              />
+                              <path
+                                d="M9.302 3.119c-.011.788-.486 1.512-1.228 1.796a1.954 1.954 0 01-2.185-.574 1.943 1.943 0 01-.173-2.196c.4-.684 1.199-1.066 1.981-.927a1.943 1.943 0 011.605 1.9c.012.748 1.17.748 1.16 0A3.138 3.138 0 008.38.205c-1.176-.423-2.567-.029-3.36.933-.83 1.002-.968 2.45-.285 3.575.678 1.124 1.994 1.675 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.159-.005zM7.378 14.406a2.503 2.503 0 100-5.006 2.503 2.503 0 000 5.006z"
+                                fill="#212134"
+                              />
+                              <path
+                                d="M9.302 11.902c-.011.788-.486 1.513-1.228 1.797a1.954 1.954 0 01-2.185-.574 1.943 1.943 0 01-.173-2.196c.4-.684 1.199-1.066 1.981-.927a1.943 1.943 0 011.605 1.9c.012.748 1.17.748 1.16 0A3.138 3.138 0 008.38 8.988c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.285 3.575.678 1.124 1.994 1.674 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.159-.006zM7.378 23.427a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                fill="#212134"
+                              />
+                              <path
+                                d="M9.302 20.924c-.011.788-.486 1.513-1.228 1.797a1.954 1.954 0 01-2.185-.574 1.943 1.943 0 01-.173-2.196c.4-.684 1.199-1.066 1.981-.927.933.156 1.594.967 1.605 1.9.012.748 1.17.748 1.16 0A3.139 3.139 0 008.38 18.01c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.285 3.569.678 1.124 1.994 1.675 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.747-1.147-.747-1.159 0z"
+                                fill="#212134"
+                              />
+                            </svg>
+                          </span>
+                          <span
+                            class="c24 c77"
+                          >
+                            michka
+                          </span>
+                        </div>
+                        <div
+                          class="c78 c65"
+                        >
+                          <button
+                            aria-label="Edit cover"
+                            class="c75"
+                            type="button"
+                          >
+                            <svg
+                              fill="none"
+                              height="1em"
+                              viewBox="0 0 24 24"
+                              width="1em"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                clip-rule="evenodd"
+                                d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
+                                fill="#212134"
+                                fill-rule="evenodd"
+                              />
+                            </svg>
+                          </button>
+                          <button
+                            aria-label="Delete cover"
+                            class="c75"
+                            data-testid="delete-cover"
+                            type="button"
+                          >
+                            <svg
+                              fill="none"
+                              height="1em"
+                              viewBox="0 0 24 24"
+                              width="1em"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
+                                fill="#212134"
+                              />
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="c23 c79 c80"
+                >
+                  <div>
+                    <span>
+                      <button
+                        aria-controls="simplemenu-4"
+                        aria-disabled="false"
+                        aria-expanded="true"
+                        aria-haspopup="true"
+                        aria-labelledby="tooltip-7"
+                        class="c81 c82"
+                        data-testid="add-field"
+                        tabindex="0"
+                        type="button"
+                      >
+                        <svg
+                          fill="none"
+                          height="1em"
+                          viewBox="0 0 24 24"
+                          width="1em"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M24 13.604a.3.3 0 01-.3.3h-9.795V23.7a.3.3 0 01-.3.3h-3.21a.3.3 0 01-.3-.3v-9.795H.3a.3.3 0 01-.3-.3v-3.21a.3.3 0 01.3-.3h9.795V.3a.3.3 0 01.3-.3h3.21a.3.3 0 01.3.3v9.795H23.7a.3.3 0 01.3.3v3.21z"
+                            fill="#212134"
+                          />
+                        </svg>
+                      </button>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </main>
+    </div>
+  </div>
+  <div
+    class="c83"
+  >
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-log"
+      role="log"
+    />
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-status"
+      role="status"
+    />
+    <p
+      aria-live="assertive"
+      aria-relevant="all"
+      id="live-region-alert"
+      role="alert"
+    />
+  </div>
+  <div
+    data-react-portal="true"
+  >
+    <div
+      class="c84 c85"
+      id="tooltip-7"
+      role="tooltip"
+      style="left: 0px; top: -8px;"
+    >
+      <p
+        class="c86"
+      >
+        Add a field
+      </p>
+    </div>
+  </div>
+  <div
+    data-react-portal="true"
+  >
+    <div
+      class="c87 c88"
+      style="left: 0px; top: 4px;"
+    >
+      <div
+        class="c89"
+      >
+        <ul
+          class="c90"
+          id="simplemenu-4"
+          role="menu"
+        >
+          <li
+            class="c91"
+            role="menuitem"
+          >
+            <button
+              class="c92"
+              role="menuitem"
+              tabindex="0"
+              type="button"
+            >
+              <div
+                class="c93"
+              >
+                <span
+                  class="c94"
+                >
+                  averagePrice
+                </span>
+              </div>
+            </button>
+          </li>
+          <li
+            class="c91"
+            role="menuitem"
+          >
+            <button
+              class="c92"
+              role="menuitem"
+              tabindex="-1"
+              type="button"
+            >
+              <div
+                class="c93"
+              >
+                <span
+                  class="c94"
+                >
+                  since
+                </span>
+              </div>
+            </button>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</body>
+`;

@@ -1,0 +1,15 @@
+{
+  "collectionName": "components_blog_test_comos",
+  "info": {
+    "displayName": "test comp",
+    "icon": "air-freshener",
+    "description": ""
+  },
+  "options": {},
+  "attributes": {
+    "name": {
+      "type": "string",
+      "default": "toto"
+    }
+  }
+}

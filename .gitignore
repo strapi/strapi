@@ -95,6 +95,8 @@ node_modules
 .node_history
 package-lock.json
 **/package-lock.json
+!docs/package-lock.json
+*.heapsnapshot
 
 
 ############################
@@ -117,5 +119,20 @@ dist
 # Builds
 ############################
 
-packages/strapi-generate-new/files/public/
-packages/*/yarn.lock
+packages/generators/app/files/public/
+schema.graphql
+
+############################
+# Example app
+############################
+
+.dev
+# *.cache
+
+############################
+# Visual Studio Code
+############################
+
+front-workspace.code-workspace
+.yarn
+.yarnrc

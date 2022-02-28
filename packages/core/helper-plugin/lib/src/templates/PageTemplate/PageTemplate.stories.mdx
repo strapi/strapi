@@ -1,0 +1,83 @@
+<!--- EmptyStateLayout.stories.mdx --->
+
+import { Meta, ArgsTable, Canvas, Story } from '@storybook/addon-docs';
+import {
+  Main,
+  Layout,
+  HeaderLayout,
+  Button,
+  ActionLayout,
+  ContentLayout,
+  Box,
+} from '@strapi/design-system';
+import Plus from '@strapi/icons/Plus';
+import Pencil from '@strapi/icons/Pencil';
+import LoadingIndicatorPage from '../../components/LoadingIndicatorPage';
+import NoContent from '../../components/NoContent';
+import NoPermissions from '../../components/NoPermissions';
+
+<Meta title="templates/PageTemplate" />
+
+# PageTemplate
+
+This component is used to display an empty state.
+
+## Imports
+
+```js
+import { Main } from '@strapi/design-system/Main';
+import { ActionLayout, ContentLayout, HeaderLayout, Layout } from '@strapi/design-system/Layout';
+import { Button } from '@strapi/design-system/Button';
+import { Box } from '@strapi/design-system/Box';
+import { LoadingIndicatorPage, NoContent, NoPermissions } from '@strapi/helper-plugin';
+```
+
+## Usage
+
+<Canvas>
+  <Story name="base">
+    {() => {
+      const canRead = false;
+      const isLoading = true;
+      const data = [];
+      return (
+        <Box background="neutral100">
+          <Layout>
+            <Main aria-busy={isLoading}>
+              <HeaderLayout
+                primaryAction={<Button startIcon={<Plus />}>Add an entry</Button>}
+                secondaryAction={
+                  <Button variant="tertiary" startIcon={<Pencil />}>
+                    Edit
+                  </Button>
+                }
+                title="Other CT"
+                subtitle="36 entries found"
+              />
+              <ActionLayout
+                startActions={
+                  <>
+                    <Button variant="tertiary">Search</Button>
+                    <Button variant="tertiary">Filter</Button>
+                  </>
+                }
+                endActions={
+                  <>
+                    <Button variant="tertiary">Settings</Button>
+                  </>
+                }
+              />
+              <ContentLayout>
+                {!canRead && <NoPermissions />}
+                {canRead && data && data.length === 0 && (
+                  <NoContent content="No content available" action={<Button>Add content</Button>} />
+                )}
+                {isLoading && <LoadingIndicatorPage />}
+              </ContentLayout>
+            </Main>
+          </Layout>
+        </Box>
+      );
+    }}
+  </Story>
+</Canvas>

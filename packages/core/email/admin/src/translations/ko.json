@@ -1,0 +1,22 @@
+{
+  "Settings.email.plugin.button.test-email": "테스트 발송",
+  "Settings.email.plugin.label.defaultFrom": "기본 발송자 이메일",
+  "Settings.email.plugin.label.defaultReplyTo": "기본 수신자 이메일",
+  "Settings.email.plugin.label.provider": "이메일 프로바이더",
+  "Settings.email.plugin.label.testAddress": "테스트 이메일 주소",
+  "Settings.email.plugin.notification.config.error": "이메일 설정을 불러오는데 실패했습니다.",
+  "Settings.email.plugin.notification.data.loaded": "이메일 설정을 불러왔습니다.",
+  "Settings.email.plugin.notification.test.error": "{to}로 테스트 이메일 보내는 데 실패했습니다.",
+  "Settings.email.plugin.notification.test.success": "이메일 테스트 성공. {to} 메일함을 확인해주세요.",
+  "Settings.email.plugin.placeholder.defaultFrom": "예: Strapi No-Reply <no-reply@strapi.io>",
+  "Settings.email.plugin.placeholder.defaultReplyTo": "예: Strapi <example@strapi.io>",
+  "Settings.email.plugin.placeholder.testAddress": "예: developer@example.com",
+  "Settings.email.plugin.subTitle": "이메일 플러그인에 대한 설정을 테스트합니다.",
+  "Settings.email.plugin.text.configuration": "플러그인이 {file} 파일을 통해 구성되었습니다. 문서를 확인하시려면 {link}를 참조해주세요.",
+  "Settings.email.plugin.title": "이메일 설정",
+  "Settings.email.plugin.title.config": "설정",
+  "Settings.email.plugin.title.test": "테스트 이메일 발송",
+  "SettingsNav.link.settings": "설정",
+  "SettingsNav.section-label": "이메일 플러그인",
+  "components.Input.error.validation.email": "유효하지 않은 이메일입니다."
+}

@@ -1,41 +1,54 @@
 ---
 name: 🐛 Bug Report
-about: Create a report to help us improve 🤔.
+about: Create a report to help us improve Strapi.
 ---
 
-<!-- ⚠️ If you do not respect this template your issue will be closed. -->
+<!--
+Hello 👋 Thank you for submitting an issue.
 
-<!-- =============================================================================== -->
-<!-- ⚠️ If you are not using the current Strapi release, you will be asked to update. -->
-<!-- Please see the wiki for guides on upgrading to the latest release. -->
-<!-- =============================================================================== -->
+Before you start, please make sure your issue is understandable and reproducible.
+To make your issue readable make sure you use valid Markdown syntax.
 
-<!-- ⚠️ Make sure to browse the opened and closed issues before submitting your issue. -->
+https://guides.github.com/features/mastering-markdown/
 
-<!-- ⚠️ Before writing your issue make sure you are using:-->
-<!-- Node 10.x.x -->
-<!-- npm 6.x.x -->
-<!-- The latest version of Strapi. -->
+Please ensure you have also read and understand the contributing guide.
 
-**Informations**
-- **Node.js version**: <!-- Please ensure you are using the Node LTS version (v10) -->
-- **NPM version**: 
-- **Strapi version**: <!-- Please make sure you are on the latest version -->
-- **Database**: 
-- **Operating system**: 
-- **(Optional) Link to your Project**: <!-- To speedup support, if you have your project on github/gitlab you can provide a link -->
+https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md#reporting-an-issue
+-->
 
+## Bug report
 
-**What is the current behavior?**
+### Describe the bug
 
+A clear and concise description of what the bug is.
 
+### Steps to reproduce the behavior
 
-**Steps to reproduce the problem**
+1. Go to '...'
+2. Click on '....'
+3. Scroll down to '....'
+4. See error
 
+### Expected behavior
 
+A clear and concise description of what you expected to happen.
 
-**What is the expected behavior?**
+### Screenshots
 
+If applicable, add screenshots to help explain your problem.
 
+### Code snippets
 
-**Suggested solutions**
+If applicable, add code samples to help explain your problem.
+
+### System
+
+- Node.js version: <!-- Please ensure you are using the Node LTS version (v12, v14, v16) -->
+- NPM version:
+- Strapi version: <!-- v3 is not supported unless it is a critical/high security issue -->
+- Database:
+- Operating system:
+
+### Additional context
+
+Add any other context about the problem here.

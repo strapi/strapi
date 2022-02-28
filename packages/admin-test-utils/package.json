@@ -1,0 +1,35 @@
+{
+  "name": "@strapi/admin-test-utils",
+  "version": "4.1.1",
+  "private": true,
+  "description": "Test utilities for the Strapi administration panel",
+  "license": "MIT",
+  "author": {
+    "name": "Strapi Solutions SAS",
+    "email": "hi@strapi.io",
+    "url": "https://strapi.io"
+  },
+  "maintainers": [
+    {
+      "name": "Strapi Solutions SAS",
+      "email": "hi@strapi.io",
+      "url": "https://strapi.io"
+    }
+  ],
+  "main": "lib/index.js",
+  "dependencies": {
+    "@babel/polyfill": "7.12.1"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "5.16.2",
+    "enzyme": "3.11.0",
+    "enzyme-adapter-react-16": "1.15.6",
+    "jest-styled-components": "7.0.2"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "engines": {
+    "node": ">=12.x.x <=16.x.x"
+  }
+}

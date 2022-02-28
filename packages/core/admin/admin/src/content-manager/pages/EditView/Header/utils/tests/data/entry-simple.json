@@ -1,0 +1,68 @@
+{
+  "id": 1,
+  "name": "teststest",
+  "slug": "teststest",
+  "price_range": "very_cheap",
+  "contact_email": "contact@email.com",
+  "stars": 1,
+  "averagePrice": 1,
+  "address": {
+    "id": 9,
+    "postal_coder": "rzerz",
+    "city": "rzzerze",
+    "publishedAt": "2020-08-31T13:29:02.118Z",
+    "createdBy": 1,
+    "updatedBy": 1,
+    "createdAt": "2020-08-31T12:35:46.553Z",
+    "updatedAt": "2020-08-31T13:29:02.136Z",
+    "cover": null,
+    "images": []
+  },
+  "timestamp": null,
+  "short_description": "test test",
+  "since": "2020-09-02",
+  "description": "test test test test ",
+  "menu": {
+    "id": 1,
+    "description": "menu1",
+    "restaurant": 1,
+    "createdBy": 1,
+    "updatedBy": 1,
+    "createdAt": "2020-09-01T14:47:10.654Z",
+    "updatedAt": "2020-09-01T14:47:53.568Z"
+  },
+  "createdBy": { "id": 1, "firstname": "cyril", "lastname": "lopez", "username": null },
+  "updatedBy": { "id": 1, "firstname": "cyril", "lastname": "lopez", "username": null },
+  "createdAt": "2020-09-01T14:47:53.257Z",
+  "updatedAt": "2020-09-01T14:47:53.627Z",
+
+  "categories": [
+    {
+      "id": 3,
+      "name": "cat3",
+      "publishedAt": null,
+      "createdBy": 1,
+      "updatedBy": 1,
+      "createdAt": "2020-09-01T12:05:51.438Z",
+      "updatedAt": "2020-09-01T12:05:51.444Z"
+    },
+    {
+      "id": 1,
+      "name": "cat1",
+      "publishedAt": null,
+      "createdBy": 1,
+      "updatedBy": 1,
+      "createdAt": "2020-09-01T08:37:15.012Z",
+      "updatedAt": "2020-09-01T12:37:33.249Z"
+    },
+    {
+      "id": 2,
+      "name": "cat2",
+      "publishedAt": "2020-09-01T13:07:04.235Z",
+      "createdBy": 1,
+      "updatedBy": 1,
+      "createdAt": "2020-09-01T12:05:46.798Z",
+      "updatedAt": "2020-09-01T13:07:04.253Z"
+    }
+  ]
+}

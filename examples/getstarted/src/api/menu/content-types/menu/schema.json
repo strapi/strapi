@@ -1,0 +1,31 @@
+{
+  "kind": "collectionType",
+  "collectionName": "menus",
+  "info": {
+    "description": "",
+    "displayName": "Menu",
+    "singularName": "menu",
+    "pluralName": "menus"
+  },
+  "options": {
+    "draftAndPublish": false,
+    "comment": ""
+  },
+  "attributes": {
+    "description": {
+      "type": "text"
+    },
+    "menusections": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::menusection.menusection",
+      "mappedBy": "menu"
+    },
+    "restaurant": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::restaurant.restaurant",
+      "mappedBy": "menu"
+    }
+  }
+}

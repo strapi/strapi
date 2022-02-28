@@ -1,0 +1,18 @@
+{
+  "collectionName": "components_basic_simples",
+  "info": {
+    "displayName": "simple",
+    "icon": "ambulance",
+    "description": ""
+  },
+  "options": {},
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "test": {
+      "type": "string"
+    }
+  }
+}
