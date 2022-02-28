@@ -36,6 +36,10 @@ import { fetchUser, putUser } from './utils/api';
 import schema from './utils/schema';
 import { getFullName } from '../../utils';
 
+const DocumentationLink = styled.a`
+  color: ${({ theme }) => theme.colors.primary600};
+`;
+
 const PasswordInput = styled(TextInput)`
   ::-ms-reveal {
     display: none;
@@ -444,7 +448,7 @@ const ProfilePage = () => {
                               },
                               {
                                 documentation: (
-                                  <a
+                                  <DocumentationLink
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     href="https://docs.strapi.io/developer-docs/latest/development/admin-customization.html#locales"
@@ -453,7 +457,7 @@ const ProfilePage = () => {
                                       id: 'Settings.profile.form.section.experience.documentation',
                                       defaultMessage: 'documentation',
                                     })}
-                                  </a>
+                                  </DocumentationLink>
                                 ),
                               }
                             )}
