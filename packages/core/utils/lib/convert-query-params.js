@@ -334,7 +334,7 @@ const convertAndSanitizeFilters = (filters, schema) => {
         if (attribute.type === 'password') {
           removeOperator(key);
         } else {
-          filters[key] = convertAndSanitizeFilters(value);
+          filters[key] = convertAndSanitizeFilters(value, schema);
         }
       }
     }
