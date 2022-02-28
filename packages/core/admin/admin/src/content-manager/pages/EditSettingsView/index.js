@@ -51,8 +51,6 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
   const entryTitleOptions = Object.keys(attributes).filter(attr => {
     const type = get(attributes, [attr, 'type'], '');
 
-    console.log(type);
-
     return (
       ![
         'dynamiczone',
