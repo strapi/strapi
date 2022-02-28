@@ -2,6 +2,18 @@ import { useMemo } from 'react';
 import { get, toString } from 'lodash';
 import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 
+function getRelationDisplay({ schema, modifiedData, mainField, componentFieldName }) {
+  const relationMainFieldName = get(schema, ['metadatas', mainField, 'edit', 'mainField', 'name']);
+
+  return toString(
+    get(modifiedData, [...componentFieldName.split('.'), mainField, relationMainFieldName], '')
+  );
+}
+
+function getStandardDisplayValue({ modifiedData, mainField, componentFieldName }) {
+  return toString(get(modifiedData, [...componentFieldName.split('.'), mainField], ''));
+}
+
 function useSelect({ schema, componentFieldName }) {
   const {
     checkFormErrors,
@@ -12,13 +24,11 @@ function useSelect({ schema, componentFieldName }) {
   } = useCMEditViewDataManager();
 
   const mainField = useMemo(() => get(schema, ['settings', 'mainField'], 'id'), [schema]);
-  const nestedObjectTitle = schema.layouts.edit?.[0]?.[0]?.metadatas?.mainField?.name;
-  const nestedObjectField = schema.layouts.edit?.[0]?.[0]?.name;
-  const displayValuePath =
-    mainField === 'id' && !!nestedObjectTitle
-      ? [...componentFieldName.split('.'), nestedObjectField, nestedObjectTitle]
-      : [...componentFieldName.split('.'), mainField];
-  const displayedValue = toString(get(modifiedData, displayValuePath, ''));
+  const isMainFieldRelationType = get(schema, ['attributes', mainField, 'type']) === 'relation';
+
+  const displayedValue = isMainFieldRelationType
+    ? getRelationDisplay({ schema, modifiedData, mainField, componentFieldName })
+    : getStandardDisplayValue({ modifiedData, mainField, componentFieldName });
 
   return {
     displayedValue,
