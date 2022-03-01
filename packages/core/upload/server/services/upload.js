@@ -45,12 +45,8 @@ const sendMediaMetrics = data => {
   }
 };
 
-const addTmpWorkingDirectory = async (files, providedTmpWorkingDirectory) => {
-  let tmpWorkingDirectory = providedTmpWorkingDirectory;
-
-  if (!tmpWorkingDirectory) {
-    tmpWorkingDirectory = await fse.mkdtemp(path.join(os.tmpdir(), 'strapi-upload-'));
-  }
+const createAndAssignTmpWorkingDirectoryToFiles = async files => {
+  const tmpWorkingDirectory = await fse.mkdtemp(path.join(os.tmpdir(), 'strapi-upload-'));
 
   Array.isArray(files)
     ? files.forEach(file => (file.tmpWorkingDirectory = tmpWorkingDirectory))
@@ -132,7 +128,7 @@ module.exports = ({ strapi }) => ({
 
   async upload({ data, files }, { user } = {}) {
     // create temporary folder to store files for stream manipulation
-    const tmpWorkingDirectory = await addTmpWorkingDirectory(files);
+    const tmpWorkingDirectory = await createAndAssignTmpWorkingDirectoryToFiles(files);
 
     let uploadedFiles = [];
 
@@ -232,7 +228,7 @@ module.exports = ({ strapi }) => ({
     }
 
     // create temporary folder to store files for stream manipulation
-    const tmpWorkingDirectory = await addTmpWorkingDirectory(file);
+    const tmpWorkingDirectory = await createAndAssignTmpWorkingDirectoryToFiles(file);
 
     let fileData;
 
@@ -372,7 +368,7 @@ module.exports = ({ strapi }) => ({
     const { id, model, field } = params;
 
     // create temporary folder to store files for stream manipulation
-    const tmpWorkingDirectory = await addTmpWorkingDirectory(files);
+    const tmpWorkingDirectory = await createAndAssignTmpWorkingDirectoryToFiles(files);
 
     const arr = Array.isArray(files) ? files : [files];
 
