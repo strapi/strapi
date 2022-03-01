@@ -22,7 +22,7 @@
   "Settings.locales.list.sort.id": "Sortierung nach ID",
   "Settings.locales.modal.advanced": "Fortgeschrittene Einstellungen",
   "Settings.locales.modal.advanced.setAsDefault": "Als Standard-Übersetzung verwenden",
-  "Settings.locales.modal.advanced.setAsDefault.hint": "Es muss eine Standard-Übersetzung geben, ändere diese, indem eine andere Übersetzung als Standard-Übersetzung gewählt wird.",
+  "Settings.locales.modal.advanced.setAsDefault.hint": "Eine Standardsprache muss ausgewählt sein",
   "Settings.locales.modal.advanced.settings": "Einstellungen",
   "Settings.locales.modal.base": "Grundeinstellungen",
   "Settings.locales.modal.create.alreadyExist": "Diese Übersetzung existiert bereits",
