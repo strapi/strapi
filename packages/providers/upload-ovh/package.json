@@ -1,0 +1,48 @@
+{
+  "name": "@strapi/provider-upload-ovh",
+  "version": "4.1.1",
+  "description": "OVH provider for strapi upload",
+  "keywords": [
+    "upload",
+    "ovh",
+    "object storage",
+    "strapi"
+  ],
+  "homepage": "https://strapi.io",
+  "bugs": {
+    "url": "https://github.com/strapi/strapi/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/strapi/strapi.git",
+    "directory": "packages/providers/upload-ovh"
+  },
+  "license": "SEE LICENSE IN LICENSE",
+  "author": {
+    "name": "Arthur Jacquemin",
+    "email": "arthur@akatek.io",
+    "url": "https://akatek.io"
+  },
+  "maintainers": [
+    {
+      "name": "Strapi Solutions SAS",
+      "email": "hi@strapi.io",
+      "url": "https://strapi.io"
+    }
+  ],
+  "main": "./lib",
+  "directories": {
+    "lib": "./lib"
+  },
+  "scripts": {
+    "test": "echo \"no tests yet\""
+  },
+  "dependencies": {
+    "pkgcloud": "^2.2.0",
+    "streamifier": "^0.1.1"
+  },
+  "engines": {
+    "node": ">=12.22.0 <=16.x.x",
+    "npm": ">=6.0.0"
+  }
+}
