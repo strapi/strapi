@@ -293,13 +293,13 @@ describe('ADMIN | StrapiApp', () => {
 
     it('should override the theme', () => {
       const adminConfig = {
-        config: { theme: { main: { colors: { red: 'black' } } } },
+        config: { theme: { colors: { red: 'black' } } },
       };
       const app = StrapiApp({ middlewares, reducers, library, adminConfig });
 
       app.createCustomConfigurations();
 
-      expect(app.configurations.themes.custom.main.colors.red).toBe('black');
+      expect(app.configurations.themes.light.colors.red).toBe('black');
     });
 
     it('should override the tutorials', () => {

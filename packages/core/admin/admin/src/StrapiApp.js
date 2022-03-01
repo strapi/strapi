@@ -1,7 +1,6 @@
 import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { lightTheme } from '@strapi/design-system/themes';
-import cloneDeep from 'lodash/cloneDeep';
 import merge from 'lodash/merge';
 import pick from 'lodash/pick';
 import isFunction from 'lodash/isFunction';
@@ -35,7 +34,7 @@ class StrapiApp {
       locales: ['en'],
       menuLogo: MenuLogo,
       notifications: { releases: true },
-      themes: { light: lightTheme, dark: darkTheme, custom: null },
+      themes: { light: lightTheme, dark: darkTheme },
       translations: {},
       tutorials: true,
     };
@@ -227,10 +226,7 @@ class StrapiApp {
     }
 
     if (this.customConfigurations?.theme) {
-      this.configurations.themes.custom = merge(
-        cloneDeep(this.configurations.themes.light),
-        this.customConfigurations.theme
-      );
+      merge(this.configurations.themes.light, this.customConfigurations.theme);
     }
 
     if (this.customConfigurations?.notifications?.releases !== undefined) {
