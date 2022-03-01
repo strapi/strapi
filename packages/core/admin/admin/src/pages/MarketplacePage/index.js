@@ -94,13 +94,22 @@ const MarketPlacePage = () => {
                 </CenterTypography>
               </Flex>
               <Stack paddingTop={6} horizontal size={2}>
-                <LinkButton href="https://market.strapi.io" size="L" variant="primary" endIcon={<ExternalLink />}>
+                <LinkButton
+                  href="https://market.strapi.io"
+                  size="L"
+                  variant="primary"
+                  endIcon={<ExternalLink />}
+                >
                   {formatMessage({
                     id: 'admin.pages.MarketPlacePage.submit.market.link',
                     defaultMessage: 'Visit the web marketplace',
                   })}
                 </LinkButton>
-                <LinkButton href="https://market.strapi.io/submit-plugin" size="L" variant="secondary">
+                <LinkButton
+                  href="https://market.strapi.io/submit-plugin"
+                  size="L"
+                  variant="secondary"
+                >
                   {formatMessage({
                     id: 'admin.pages.MarketPlacePage.submit.plugin.link',
                     defaultMessage: 'Submit your plugin',
