@@ -124,7 +124,7 @@ class InvalidPopulateError extends Error {
 }
 
 // NOTE: we could support foo.* or foo.bar.* etc later on
-const convertPopulateQueryParams = (populate, depth = 0) => {
+const convertPopulateQueryParams = (populate, schema, depth = 0) => {
   if (depth === 0 && populate === '*') {
     return true;
   }
@@ -147,18 +147,72 @@ const convertPopulateQueryParams = (populate, depth = 0) => {
   }
 
   if (_.isPlainObject(populate)) {
-    const transformedPopulate = {};
-    for (const key in populate) {
-      transformedPopulate[key] = convertNestedPopulate(populate[key]);
-    }
-
-    return transformedPopulate;
+    return convertPopulateObject(populate, schema);
   }
 
   throw new InvalidPopulateError();
 };
 
-const convertNestedPopulate = subPopulate => {
+const convertPopulateObject = (populate, schema) => {
+  if (!schema) {
+    return {};
+  }
+
+  const { attributes } = schema;
+
+  return Object.entries(populate).reduce((acc, [key, subPopulate]) => {
+    const attribute = attributes[key];
+
+    if (!attribute) {
+      return acc;
+    }
+
+    // FIXME: This is a temporary solution for dynamic zones that should be
+    // fixed when we'll implement a more accurate way to query them
+    if (attribute.type === 'dynamiczone') {
+      const generatedFakeDynamicZoneSchema = {
+        uid: `${schema.uid}.${key}`,
+        attributes: attribute.components
+          .sort()
+          .map(uid => strapi.getModel(uid).attributes)
+          .reduce((acc, componentAttributes) => ({ ...acc, ...componentAttributes }), {}),
+      };
+
+      return {
+        ...acc,
+        [key]: convertNestedPopulate(subPopulate, generatedFakeDynamicZoneSchema),
+      };
+    }
+
+    // NOTE: Retrieve the target schema UID.
+    // Only handles basic relations, medias and component since it's not possible
+    // to populate with options for a dynamic zone or a polymorphic relation
+    let targetSchemaUID;
+
+    if (attribute.type === 'relation') {
+      targetSchemaUID = attribute.target;
+    } else if (attribute.type === 'component') {
+      targetSchemaUID = attribute.component;
+    } else if (attribute.type === 'media') {
+      targetSchemaUID = 'plugin::upload.file';
+    } else {
+      return acc;
+    }
+
+    const targetSchema = strapi.getModel(targetSchemaUID);
+
+    if (!targetSchema) {
+      return acc;
+    }
+
+    return {
+      ...acc,
+      [key]: convertNestedPopulate(subPopulate, targetSchema),
+    };
+  }, {});
+};
+
+const convertNestedPopulate = (subPopulate, schema) => {
   if (subPopulate === '*') {
     return true;
   }
@@ -181,7 +235,7 @@ const convertNestedPopulate = subPopulate => {
   }
 
   if (filters) {
-    query.where = convertFiltersQueryParams(filters);
+    query.where = convertFiltersQueryParams(filters, schema);
   }
 
   if (fields) {
@@ -189,7 +243,7 @@ const convertNestedPopulate = subPopulate => {
   }
 
   if (populate) {
-    query.populate = convertPopulateQueryParams(populate);
+    query.populate = convertPopulateQueryParams(populate, schema);
   }
 
   if (count) {
@@ -250,7 +304,7 @@ const convertAndSanitizeFilters = (filters, schema) => {
 
   // Here, `key` can either be an operator or an attribute name
   for (const [key, value] of Object.entries(filters)) {
-    const attribute = get('key', schema.attributes);
+    const attribute = get(key, schema.attributes);
 
     // Handle attributes
     if (attribute) {
@@ -280,7 +334,7 @@ const convertAndSanitizeFilters = (filters, schema) => {
         if (attribute.type === 'password') {
           removeOperator(key);
         } else {
-          filters[key] = convertAndSanitizeFilters(value);
+          filters[key] = convertAndSanitizeFilters(value, schema);
         }
       }
     }
