@@ -134,7 +134,12 @@ module.exports = ({
             },
           },
         },
-
+        {
+          test: /\.tsx?$/,
+          use: require.resolve('ts-loader'),
+          include: [cacheDir, ...pluginsPath],
+          exclude: /node_modules/,
+        },
         {
           test: /\.css$/i,
           use: ['style-loader', 'css-loader'],
@@ -171,7 +176,7 @@ module.exports = ({
     resolve: {
       alias,
       symlinks: false,
-      extensions: ['.js', '.jsx', '.react.js'],
+      extensions: ['.js', '.jsx', '.react.js', '.ts', '.tsx'],
       mainFields: ['browser', 'jsnext:main', 'main'],
       modules: ['node_modules', path.resolve(__dirname, 'node_modules')],
     },
