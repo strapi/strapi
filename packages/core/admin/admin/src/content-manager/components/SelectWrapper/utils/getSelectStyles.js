@@ -49,6 +49,7 @@ const getSelectStyles = theme => {
         ...base,
         width: '100%',
         marginTop: theme.spaces[1],
+        backgroundColor: theme.colors.neutral0,
         borderRadius: '4px !important',
         borderTopLeftRadius: '4px !important',
         borderTopRightRadius: '4px !important',
