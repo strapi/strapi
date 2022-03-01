@@ -16,14 +16,14 @@ const buildAdmin = require('./build');
  * `$ strapi develop`
  *
  */
-module.exports = async function({ build, watchAdmin, polling, browser }) {
+module.exports = async function({ build, watchAdmin, adminPanel, polling, browser }) {
   const dir = process.cwd();
   const config = loadConfiguration(dir);
   const logger = createLogger(config.logger, {});
 
   try {
     if (cluster.isMaster || cluster.isPrimary) {
-      const serveAdminPanel = getOr(true, 'admin.serveAdminPanel')(config);
+      const serveAdminPanel = !adminPanel ? false : getOr(true, 'admin.serveAdminPanel')(config);
 
       const buildExists = fs.existsSync(path.join(dir, 'build'));
       // Don't run the build process if the admin is in watch mode
@@ -68,7 +68,7 @@ module.exports = async function({ build, watchAdmin, polling, browser }) {
       const strapiInstance = strapi({
         dir,
         autoReload: true,
-        serveAdminPanel: watchAdmin ? false : true,
+        serveAdminPanel: !adminPanel ? false : (watchAdmin ? false : true),
       });
 
       const adminWatchIgnoreFiles = getOr([], 'admin.watchIgnoreFiles')(config);
