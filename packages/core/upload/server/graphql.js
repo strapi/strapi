@@ -1,7 +1,9 @@
 'use strict';
 
-const _ = require('lodash');
-const { streamToBuffer } = require('./utils/file');
+const path = require('path');
+const os = require('os');
+const fse = require('fs-extra');
+const { getStreamSize } = require('./utils/file');
 
 const UPLOAD_MUTATION_NAME = 'upload';
 const MULTIPLE_UPLOAD_MUTATION_NAME = 'multipleUpload';
@@ -30,7 +32,7 @@ module.exports = ({ strapi }) => {
   const fileTypeName = getTypeName(fileModel);
   const fileEntityResponseType = getEntityResponseName(fileModel);
 
-  const { optimize } = getUploadService('image-manipulation');
+  const { optimize, isSupportedImage } = getUploadService('image-manipulation');
 
   /**
    * Optimize and format a file using the upload services
@@ -41,25 +43,24 @@ module.exports = ({ strapi }) => {
    * @return {Promise<object>}
    */
   const formatFile = async (upload, extraInfo, metas) => {
-    const { filename, mimetype, createReadStream } = await upload;
-
-    const readBuffer = await streamToBuffer(createReadStream());
-
-    const { buffer, info } = await optimize(readBuffer);
-
     const uploadService = getUploadService('upload');
-
-    const fileInfo = uploadService.formatFileInfo(
+    const { filename, mimetype, createReadStream } = await upload;
+    const currentFile = uploadService.formatFileInfo(
       {
         filename,
         type: mimetype,
-        size: buffer.length,
+        size: await getStreamSize(createReadStream()),
       },
       extraInfo || {},
       metas
     );
+    currentFile.getStream = createReadStream;
 
-    return _.assign(fileInfo, info, { buffer });
+    if (!(await isSupportedImage(currentFile))) {
+      return currentFile;
+    }
+
+    return optimize(currentFile);
   };
 
   /**
@@ -98,12 +99,25 @@ module.exports = ({ strapi }) => {
           },
 
           async resolve(parent, args) {
-            const { file: upload, info, ...fields } = args;
+            // create temporary folder to store files for stream manipulation
+            const tmpWorkingDirectory = await fse.mkdtemp(path.join(os.tmpdir(), 'strapi-upload-'));
+            let sanitizedEntity;
 
-            const file = await formatFile(upload, info, fields);
-            const uploadedFile = await getUploadService('upload').uploadFileAndPersist(file);
+            try {
+              const { file: upload, info, ...metas } = args;
 
-            return toEntityResponse(uploadedFile, { args, resourceUID: fileTypeName });
+              const file = await formatFile(upload, info, { ...metas, tmpWorkingDirectory });
+              const uploadedFile = await getUploadService('upload').uploadFileAndPersist(file, {});
+              sanitizedEntity = await toEntityResponse(uploadedFile, {
+                args,
+                resourceUID: fileTypeName,
+              });
+            } finally {
+              // delete temporary folder
+              await fse.remove(tmpWorkingDirectory);
+            }
+
+            return sanitizedEntity;
           },
         });
 
@@ -121,19 +135,32 @@ module.exports = ({ strapi }) => {
           },
 
           async resolve(parent, args) {
-            const { files: uploads, ...fields } = args;
+            // create temporary folder to store files for stream manipulation
+            const tmpWorkingDirectory = await fse.mkdtemp(path.join(os.tmpdir(), 'strapi-upload-'));
+            let sanitizedEntities = [];
 
-            const files = await Promise.all(uploads.map(upload => formatFile(upload, {}, fields)));
+            try {
+              const { files: uploads, ...metas } = args;
 
-            const uploadService = getUploadService('upload');
+              const files = await Promise.all(
+                uploads.map(upload => formatFile(upload, {}, { ...metas, tmpWorkingDirectory }))
+              );
 
-            const uploadedFiles = await Promise.all(
-              files.map(file => uploadService.uploadFileAndPersist(file))
-            );
+              const uploadService = getUploadService('upload');
 
-            return uploadedFiles.map(file =>
-              toEntityResponse(file, { args, resourceUID: fileTypeName })
-            );
+              const uploadedFiles = await Promise.all(
+                files.map(file => uploadService.uploadFileAndPersist(file, {}))
+              );
+
+              sanitizedEntities = uploadedFiles.map(file =>
+                toEntityResponse(file, { args, resourceUID: fileTypeName })
+              );
+            } finally {
+              // delete temporary folder
+              await fse.remove(tmpWorkingDirectory);
+            }
+
+            return sanitizedEntities;
           },
         });
 

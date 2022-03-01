@@ -116,14 +116,14 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
         align-items: center;
       }
 
-      .c41 {
+      .c47 {
         font-weight: 600;
         color: #32324d;
         font-size: 0.875rem;
         line-height: 1.43;
       }
 
-      .c38 {
+      .c44 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -137,21 +137,21 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
         outline: none;
       }
 
-      .c38 svg {
+      .c44 svg {
         height: 12px;
         width: 12px;
       }
 
-      .c38 svg > g,
-      .c38 svg path {
+      .c44 svg > g,
+      .c44 svg path {
         fill: #ffffff;
       }
 
-      .c38[aria-disabled='true'] {
+      .c44[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c38:after {
+      .c44:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -166,11 +166,11 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
         border: 2px solid transparent;
       }
 
-      .c38:focus-visible {
+      .c44:focus-visible {
         outline: none;
       }
 
-      .c38:focus-visible:after {
+      .c44:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -181,7 +181,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
         border: 2px solid #4945ff;
       }
 
-      .c39 {
+      .c45 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -202,7 +202,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
         width: 100%;
       }
 
-      .c39 .sc-ksdxgE {
+      .c45 .sc-ksdxgE {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -213,44 +213,44 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
         align-items: center;
       }
 
-      .c39 .c40 {
+      .c45 .c46 {
         color: #ffffff;
       }
 
-      .c39[aria-disabled='true'] {
+      .c45[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c39[aria-disabled='true'] .c40 {
+      .c45[aria-disabled='true'] .c46 {
         color: #666687;
       }
 
-      .c39[aria-disabled='true'] svg > g,
-      .c39[aria-disabled='true'] svg path {
+      .c45[aria-disabled='true'] svg > g,
+      .c45[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c39[aria-disabled='true']:active {
+      .c45[aria-disabled='true']:active {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c39[aria-disabled='true']:active .c40 {
+      .c45[aria-disabled='true']:active .c46 {
         color: #666687;
       }
 
-      .c39[aria-disabled='true']:active svg > g,
-      .c39[aria-disabled='true']:active svg path {
+      .c45[aria-disabled='true']:active svg > g,
+      .c45[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
-      .c39:hover {
+      .c45:hover {
         border: 1px solid #7b79ff;
         background: #7b79ff;
       }
 
-      .c39:active {
+      .c45:active {
         border: 1px solid #4945ff;
         background: #4945ff;
       }
@@ -434,6 +434,118 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
 
       .c24 > * + * {
         margin-top: 4px;
+      }
+
+      .c41 {
+        margin: 0;
+        height: 18px;
+        min-width: 18px;
+        border-radius: 4px;
+        border: 1px solid #c0c0cf;
+        -webkit-appearance: none;
+        background-color: #ffffff;
+        cursor: pointer;
+      }
+
+      .c41:checked {
+        background-color: #4945ff;
+        border: 1px solid #4945ff;
+      }
+
+      .c41:checked:after {
+        content: '';
+        display: block;
+        position: relative;
+        background: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEwIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPHBhdGgKICAgIGQ9Ik04LjU1MzIzIDAuMzk2OTczQzguNjMxMzUgMC4zMTYzNTUgOC43NjA1MSAwLjMxNTgxMSA4LjgzOTMxIDAuMzk1NzY4TDkuODYyNTYgMS40MzQwN0M5LjkzODkzIDEuNTExNTcgOS45MzkzNSAxLjYzNTkgOS44NjM0OSAxLjcxMzlMNC4wNjQwMSA3LjY3NzI0QzMuOTg1OSA3Ljc1NzU1IDMuODU3MDcgNy43NTgwNSAzLjc3ODM0IDcuNjc4MzRMMC4xMzg2NiAzLjk5MzMzQzAuMDYxNzc5OCAzLjkxNTQ5IDAuMDYxNzEwMiAzLjc5MDMyIDAuMTM4NTA0IDMuNzEyNEwxLjE2MjEzIDIuNjczNzJDMS4yNDAzOCAyLjU5NDMyIDEuMzY4NDMgMi41OTQyMiAxLjQ0NjggMi42NzM0OEwzLjkyMTc0IDUuMTc2NDdMOC41NTMyMyAwLjM5Njk3M1oiCiAgICBmaWxsPSJ3aGl0ZSIKICAvPgo8L3N2Zz4=) no-repeat no-repeat center center;
+        width: 10px;
+        height: 10px;
+        left: 50%;
+        top: 50%;
+        -webkit-transform: translateX(-50%) translateY(-50%);
+        -ms-transform: translateX(-50%) translateY(-50%);
+        transform: translateX(-50%) translateY(-50%);
+      }
+
+      .c41:checked:disabled:after {
+        background: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEwIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPHBhdGgKICAgIGQ9Ik04LjU1MzIzIDAuMzk2OTczQzguNjMxMzUgMC4zMTYzNTUgOC43NjA1MSAwLjMxNTgxMSA4LjgzOTMxIDAuMzk1NzY4TDkuODYyNTYgMS40MzQwN0M5LjkzODkzIDEuNTExNTcgOS45MzkzNSAxLjYzNTkgOS44NjM0OSAxLjcxMzlMNC4wNjQwMSA3LjY3NzI0QzMuOTg1OSA3Ljc1NzU1IDMuODU3MDcgNy43NTgwNSAzLjc3ODM0IDcuNjc4MzRMMC4xMzg2NiAzLjk5MzMzQzAuMDYxNzc5OCAzLjkxNTQ5IDAuMDYxNzEwMiAzLjc5MDMyIDAuMTM4NTA0IDMuNzEyNEwxLjE2MjEzIDIuNjczNzJDMS4yNDAzOCAyLjU5NDMyIDEuMzY4NDMgMi41OTQyMiAxLjQ0NjggMi42NzM0OEwzLjkyMTc0IDUuMTc2NDdMOC41NTMyMyAwLjM5Njk3M1oiCiAgICBmaWxsPSIjOEU4RUE5IgogIC8+Cjwvc3ZnPg==) no-repeat no-repeat center center;
+      }
+
+      .c41:disabled {
+        background-color: #dcdce4;
+        border: 1px solid #c0c0cf;
+      }
+
+      .c41:indeterminate {
+        background-color: #4945ff;
+        border: 1px solid #4945ff;
+      }
+
+      .c41:indeterminate:after {
+        content: '';
+        display: block;
+        position: relative;
+        color: white;
+        height: 2px;
+        width: 10px;
+        background-color: #ffffff;
+        left: 50%;
+        top: 50%;
+        -webkit-transform: translateX(-50%) translateY(-50%);
+        -ms-transform: translateX(-50%) translateY(-50%);
+        transform: translateX(-50%) translateY(-50%);
+      }
+
+      .c41:indeterminate:disabled {
+        background-color: #dcdce4;
+        border: 1px solid #c0c0cf;
+      }
+
+      .c41:indeterminate:disabled:after {
+        background-color: #8e8ea9;
+      }
+
+      .c42 {
+        padding-left: 8px;
+      }
+
+      .c38 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+      }
+
+      .c38 > * {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .c38 > * + * {
+        margin-top: 4px;
+      }
+
+      .c39 {
+        color: #32324d;
+        font-size: 0.875rem;
+        line-height: 1.43;
+      }
+
+      .c40 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: flex-start;
+        -webkit-box-align: flex-start;
+        -ms-flex-align: flex-start;
+        align-items: flex-start;
+      }
+
+      .c40 * {
+        cursor: pointer;
       }
 
       .c22 {
@@ -660,6 +772,10 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
 
       .c19 {
         text-align: center;
+      }
+
+      .c43 {
+        color: #4945ff;
       }
 
       .c33::-ms-reveal {
@@ -1019,13 +1135,53 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                       </div>
                     </div>
                   </div>
+                  <div>
+                    <div
+                      class="c38"
+                    >
+                      <label
+                        class="c39 c40"
+                      >
+                        <input
+                          aria-label="news"
+                          class="c41"
+                          id="checkbox-1"
+                          name="news"
+                          type="checkbox"
+                        />
+                        <div
+                          class="c42"
+                        >
+                          Keep me updated about the new features and upcoming improvements (by doing this you accept the 
+                          <a
+                            class="c43"
+                            href="https://strapi.io/terms"
+                            rel="noreferrer"
+                            target="_blank"
+                          >
+                            terms
+                          </a>
+                           and the 
+                          <a
+                            class="c43"
+                            href="https://strapi.io/privacy"
+                            rel="noreferrer"
+                            target="_blank"
+                          >
+                            policy
+                          </a>
+                          ).
+                        </div>
+                      </label>
+                    </div>
+                  </div>
                   <button
                     aria-disabled="false"
-                    class="c38 c39"
+                    class="c44 c45"
                     type="submit"
                   >
                     <span
-                      class="c40 c41"
+                      class="c46 c47"
                     >
                       Let's start
                     </span>
