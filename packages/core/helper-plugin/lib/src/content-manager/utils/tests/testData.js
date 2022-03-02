@@ -7,8 +7,6 @@ const testData = {
       dz: { type: 'dynamiczone', components: ['compos.test-compo', 'compos.sub-compo'] },
       id: { type: 'integer' },
       name: { type: 'string' },
-      jsonString: { type: 'json' },
-      jsonObject: { type: 'json' },
       notrepeatable: {
         type: 'component',
         repeatable: false,
@@ -27,8 +25,6 @@ const testData = {
         id: { type: 'integer' },
         name: { type: 'string' },
         password: { type: 'password' },
-        jsonString: { type: 'json' },
-        jsonObject: { type: 'json' },
       },
     },
     'compos.test-compo': {
@@ -59,8 +55,6 @@ const testData = {
         id: 7,
         name: 'name',
         password: 'password',
-        jsonString: 'hello',
-        jsonObject: { hello: true },
       },
       {
         id: 4,
@@ -101,8 +95,6 @@ const testData = {
       ],
     },
     password: 'password',
-    jsonString: 'hello',
-    jsonObject: { hello: true },
     repeatable: [
       {
         id: 2,
@@ -181,8 +173,6 @@ const testData = {
         __component: 'compos.sub-compo',
         name: 'name',
         password: 'password',
-        jsonString: 'hello',
-        jsonObject: { hello: true },
       },
       {
         name: 'name',
@@ -206,8 +196,6 @@ const testData = {
         __component: 'compos.test-compo',
       },
     ],
-    jsonString: 'hello',
-    jsonObject: { hello: true },
     name: 'name',
     notrepeatable: {
       name: 'name',
