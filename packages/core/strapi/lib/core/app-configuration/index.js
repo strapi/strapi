@@ -36,7 +36,7 @@ module.exports = (dir, initialConfig = {}) => {
 
   const pkgJSON = require(path.resolve(dir, 'package.json'));
 
-  const configDir = path.resolve(dir, 'config');
+  const configDir = path.resolve(dir || process.cwd(), 'config');
 
   const rootConfig = {
     launchedAt: Date.now(),

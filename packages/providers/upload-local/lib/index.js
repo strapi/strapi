@@ -23,11 +23,9 @@ module.exports = {
 
     // Ensure uploads folder exists
     const uploadPath = path.resolve(strapi.dirs.public, UPLOADS_FOLDER_NAME);
-    try {
-      fse.ensureDirSync(uploadPath);
-    } catch (e) {
+    if (!fse.pathExistsSync(uploadPath)) {
       throw new Error(
-        `The upload folder (${uploadPath}) doesn't exist. Please make sure it exists.`
+        `The upload folder (${uploadPath}) doesn't exist or is not accessible. Please make sure it exists.`
       );
     }
 
