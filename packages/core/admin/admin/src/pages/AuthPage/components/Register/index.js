@@ -10,7 +10,7 @@ import { Flex } from '@strapi/design-system/Flex';
 import { Link } from '@strapi/design-system/Link';
 import { Button } from '@strapi/design-system/Button';
 import { TextInput } from '@strapi/design-system/TextInput';
-// import { Checkbox } from '@strapi/design-system/Checkbox';
+import { Checkbox } from '@strapi/design-system/Checkbox';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { Typography } from '@strapi/design-system/Typography';
 import EyeStriked from '@strapi/icons/EyeStriked';
@@ -24,18 +24,16 @@ import UnauthenticatedLayout, {
   Column,
   LayoutContent,
 } from '../../../../layouts/UnauthenticatedLayout';
-import Logo from '../Logo';
+import Logo from '../../../../components/UnauthenticatedLogo';
 import FieldActionWrapper from '../FieldActionWrapper';
 
 const CenteredBox = styled(Box)`
   text-align: center;
 `;
 
-// Experiment only until the next release
-// To uncomment then
-// const A = styled.a`
-//   color: ${({ theme }) => theme.colors.primary600};
-// `;
+const A = styled.a`
+  color: ${({ theme }) => theme.colors.primary600};
+`;
 
 const PasswordInput = styled(TextInput)`
   ::-ms-reveal {
@@ -274,9 +272,7 @@ const Register = ({ fieldsToDisable, noSignin, onSubmit, schema }) => {
                     })}
                     type={confirmPasswordShown ? 'text' : 'password'}
                   />
-                  {/* Experiment only until the next release
-                  To uncomment then */}
-                  {/* <Checkbox
+                  <Checkbox
                     onValueChange={checked => {
                       handleChange({ target: { value: checked, name: 'news' } });
                     }}
@@ -309,7 +305,7 @@ const Register = ({ fieldsToDisable, noSignin, onSubmit, schema }) => {
                         ),
                       }
                     )}
-                  </Checkbox> */}
+                  </Checkbox>
                   <Button fullWidth size="L" type="submit">
                     {formatMessage({
                       id: 'Auth.form.button.register',
