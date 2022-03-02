@@ -32,6 +32,14 @@ class MysqlDialect extends Dialect {
     };
   }
 
+  async initialize() {
+    try {
+      await this.db.connection.raw(`set session sql_require_primary_key = 0;`);
+    } catch (err) {
+      // Ignore error due to lack of session permissions
+    }
+  }
+
   async startSchemaUpdate() {
     await this.db.connection.raw(`set foreign_key_checks = 0;`);
   }

@@ -5,6 +5,7 @@
  */
 
 // Public node modules.
+const { pipeline } = require('stream');
 const fs = require('fs');
 const path = require('path');
 const fse = require('fs-extra');
@@ -31,6 +32,25 @@ module.exports = {
     }
 
     return {
+      uploadStream(file) {
+        verifySize(file);
+
+        return new Promise((resolve, reject) => {
+          pipeline(
+            file.stream,
+            fs.createWriteStream(path.join(uploadPath, `${file.hash}${file.ext}`)),
+            err => {
+              if (err) {
+                return reject(err);
+              }
+
+              file.url = `/uploads/${file.hash}${file.ext}`;
+
+              resolve();
+            }
+          );
+        });
+      },
       upload(file) {
         verifySize(file);
 

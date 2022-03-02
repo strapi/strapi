@@ -1,6 +1,6 @@
 {
   "name": "@strapi/provider-email-mailgun",
-  "version": "4.1.0",
+  "version": "4.1.1",
   "description": "Mailgun provider for strapi email plugin",
   "keywords": [
     "email",
@@ -36,7 +36,7 @@
     "test": "echo \"no tests yet\""
   },
   "dependencies": {
-    "@strapi/utils": "4.1.0",
+    "@strapi/utils": "4.1.1",
     "mailgun-js": "0.22.0"
   },
   "engines": {
