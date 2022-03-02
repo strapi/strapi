@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useIntl } from 'react-intl';
 import { Helmet } from 'react-helmet';
 import { useQuery } from 'react-query';
+import FlexSearch from 'flexsearch';
 import {
   AnErrorOccurred,
   CheckPagePermissions,
@@ -15,12 +16,13 @@ import { Layout, HeaderLayout, ContentLayout, ActionLayout } from '@strapi/desig
 import { Main } from '@strapi/design-system/Main';
 import { Searchbar } from '@strapi/design-system/Searchbar';
 import { useNotifyAT } from '@strapi/design-system/LiveRegions';
-import FlexSearch from 'flexsearch';
-import adminPermissions from '../../permissions';
+
 import PluginCard from './components/PluginCard';
+import { EmptyPluginSearch } from './components/EmptyPluginSearch';
 import { fetchAppInformation } from './utils/api';
 import useFetchInstalledPlugins from '../../hooks/useFetchInstalledPlugins';
 import useFetchMarketplacePlugins from '../../hooks/useFetchMarketplacePlugins';
+import adminPermissions from '../../permissions';
 
 const MarketPlacePage = () => {
   const { formatMessage } = useIntl();
@@ -157,25 +159,43 @@ const MarketPlacePage = () => {
               onClear={() => handleInputChange('')}
               value={searchQuery}
               onChange={(e) => handleInputChange(e.target.value)}
-              clearLabel="Clearing the plugin search"
-              placeholder="Search"
+              clearLabel={formatMessage({
+                id: 'admin.pages.MarketPlacePage.search.clear',
+                defaultMessage: 'Clear the plugin search',
+              })}
+              placeholder={formatMessage({
+                id: 'admin.pages.MarketPlacePage.search.placeholder',
+                defaultMessage: 'Search',
+              })}
             >
               Searching for a plugin
             </Searchbar>
           }
         />
         <ContentLayout>
-          <Grid gap={4}>
-            {displayedPlugins.map((plugin) => (
-              <GridItem col={4} s={6} xs={12} style={{ height: '100%' }} key={plugin.id}>
-                <PluginCard
-                  plugin={plugin}
-                  installedPluginNames={installedPluginNames}
-                  useYarn={appInfoResponse.data.useYarn}
-                />
-              </GridItem>
-            ))}
-          </Grid>
+          {searchQuery.length > 0 && !searchResults.length ? (
+            <EmptyPluginSearch
+              content={formatMessage(
+                {
+                  id: 'admin.pages.MarketPlacePage.search.empty',
+                  defaultMessage: 'No result for "{target}"',
+                },
+                { target: searchQuery }
+              )}
+            />
+          ) : (
+            <Grid gap={4}>
+              {displayedPlugins.map((plugin) => (
+                <GridItem col={4} s={6} xs={12} style={{ height: '100%' }} key={plugin.id}>
+                  <PluginCard
+                    plugin={plugin}
+                    installedPluginNames={installedPluginNames}
+                    useYarn={appInfoResponse.data.useYarn}
+                  />
+                </GridItem>
+              ))}
+            </Grid>
+          )}
         </ContentLayout>
       </Main>
     </Layout>
