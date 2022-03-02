@@ -168,7 +168,10 @@ const MarketPlacePage = () => {
                 defaultMessage: 'Search',
               })}
             >
-              Searching for a plugin
+              {formatMessage({
+                id: 'admin.pages.MarketPlacePage.search.placeholder',
+                defaultMessage: 'Search',
+              })}
             </Searchbar>
           }
         />

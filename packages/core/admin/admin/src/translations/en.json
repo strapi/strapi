@@ -69,7 +69,7 @@
   "admin.pages.MarketPlacePage.plugin.info": "Learn more",
   "admin.pages.MarketPlacePage.submit.plugin.link": "Submit your plugin",
   "admin.pages.MarketPlacePage.plugin.tooltip.verified": "Plugin verified by Strapi",
-  "admin.pages.MarketPlacePage.search.placeholder": "Search",
+  "admin.pages.MarketPlacePage.search.placeholder": "Search for a plugin",
   "admin.pages.MarketPlacePage.search.clear": "Clear the plugin search",
   "admin.pages.MarketPlacePage.search.empty": "No result for \"{target}\"",
   "Content Manager": "Content Manager",
