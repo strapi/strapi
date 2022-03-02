@@ -75,7 +75,10 @@ const fixtures = {
         number: 4,
         field: 'text',
       },
-      barRefs: [{ title: 'john doe', field: '1234' }, { title: 'jane doe', field: '5678' }],
+      barRefs: [
+        { title: 'john doe', field: '1234' },
+        { title: 'jane doe', field: '5678' },
+      ],
     },
     {
       name: 'second',
