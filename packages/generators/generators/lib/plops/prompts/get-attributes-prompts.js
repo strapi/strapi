@@ -50,7 +50,7 @@ module.exports = async inquirer => {
         type: 'input',
         name: 'attributeName',
         message: 'Name of attribute',
-        validate: input => validateInput(input),
+        validate: input => validateInput(input, true),
       },
       {
         type: 'list',
