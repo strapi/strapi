@@ -120,7 +120,7 @@ function watchFileChanges({ dir, strapiInstance, watchIgnoreFiles, polling }) {
       /(^|[/\\])\../, // dot files
       /tmp/,
       '**/src/admin/**',
-      '**/src/plugins/**/admin/',
+      '**/src/plugins/**/admin/**',
       '**/documentation',
       '**/documentation/**',
       '**/node_modules',

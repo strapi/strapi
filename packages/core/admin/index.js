@@ -264,8 +264,8 @@ async function watchAdmin({ plugins, dir, host, port, browser, options }) {
 
   const devServerArgs = {
     ...args.devServer,
-    ...webpackConfig.devServer
-  }
+    ...webpackConfig.devServer,
+  };
 
   const server = new WebpackDevServer(devServerArgs, compiler);
 
