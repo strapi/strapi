@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useIntl } from 'react-intl';
 import { Helmet } from 'react-helmet';
 import { useQuery } from 'react-query';
@@ -11,9 +11,11 @@ import {
   useNotification,
 } from '@strapi/helper-plugin';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
-import { Layout, HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
+import { Layout, HeaderLayout, ContentLayout, ActionLayout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
+import { Searchbar } from '@strapi/design-system/Searchbar';
 import { useNotifyAT } from '@strapi/design-system/LiveRegions';
+import FlexSearch from 'flexsearch';
 import adminPermissions from '../../permissions';
 import PluginCard from './components/PluginCard';
 import { fetchAppInformation } from './utils/api';
@@ -26,6 +28,13 @@ const MarketPlacePage = () => {
   const { notifyStatus } = useNotifyAT();
   const trackUsageRef = useRef(trackUsage);
   const toggleNotification = useNotification();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const flexIndex = FlexSearch.Index({
+    profile: 'speed',
+    tokenize: 'forward',
+  });
+  const [searchIndex, setSearchIndex] = useState(flexIndex);
 
   useFocusWhenNavigate();
 
@@ -46,15 +55,11 @@ const MarketPlacePage = () => {
     );
   };
 
-  const {
-    status: marketplacePluginsStatus,
-    data: marketplacePluginsResponse,
-  } = useFetchMarketplacePlugins(notifyMarketplaceLoad);
+  const { status: marketplacePluginsStatus, data: marketplacePluginsResponse } =
+    useFetchMarketplacePlugins(notifyMarketplaceLoad);
 
-  const {
-    status: installedPluginsStatus,
-    data: installedPluginsResponse,
-  } = useFetchInstalledPlugins();
+  const { status: installedPluginsStatus, data: installedPluginsResponse } =
+    useFetchInstalledPlugins();
 
   const { data: appInfoResponse, status: appInfoStatus } = useQuery(
     'app-information',
@@ -76,6 +81,23 @@ const MarketPlacePage = () => {
   const hasFailed = [marketplacePluginsStatus, installedPluginsStatus, appInfoStatus].includes(
     'error'
   );
+
+  const handleInputChange = (input) => {
+    setSearchQuery(input);
+    setSearchResults(searchIndex.search(input));
+  };
+
+  useEffect(() => {
+    if (isLoading) return;
+    marketplacePluginsResponse.data.forEach((plugin) => {
+      const fieldsToIndex = JSON.stringify({
+        name: plugin.attributes.name,
+        description: plugin.attributes.description,
+      });
+
+      setSearchIndex(searchIndex.add(plugin.id, fieldsToIndex));
+    });
+  }, [isLoading, marketplacePluginsResponse, searchIndex]);
 
   useEffect(() => {
     trackUsageRef.current('didGoToMarketplace');
@@ -99,7 +121,15 @@ const MarketPlacePage = () => {
     );
   }
 
-  const installedPluginNames = installedPluginsResponse.plugins.map(plugin => plugin.packageName);
+  const searchResultPlugins = searchResults.map((result) =>
+    marketplacePluginsResponse.data.find((plugin) => plugin.id === result)
+  );
+
+  const displayedPlugins = searchResultPlugins.length
+    ? searchResultPlugins
+    : marketplacePluginsResponse.data;
+
+  const installedPluginNames = installedPluginsResponse.plugins.map((plugin) => plugin.packageName);
 
   return (
     <Layout>
@@ -120,9 +150,23 @@ const MarketPlacePage = () => {
             defaultMessage: 'Get more out of Strapi',
           })}
         />
+        <ActionLayout
+          startActions={
+            <Searchbar
+              name="searchbar"
+              onClear={() => handleInputChange('')}
+              value={searchQuery}
+              onChange={(e) => handleInputChange(e.target.value)}
+              clearLabel="Clearing the plugin search"
+              placeholder="Search"
+            >
+              Searching for a plugin
+            </Searchbar>
+          }
+        />
         <ContentLayout>
           <Grid gap={4}>
-            {marketplacePluginsResponse.data.map(plugin => (
+            {displayedPlugins.map((plugin) => (
               <GridItem col={4} s={6} xs={12} style={{ height: '100%' }} key={plugin.id}>
                 <PluginCard
                   plugin={plugin}
