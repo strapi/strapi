@@ -58,9 +58,17 @@ class Database {
     return this.entityManager.getRepository(uid);
   }
 
-  getConnection(tableName) {
+  async transaction(cb) {
+    await this.connection.transaction(async trx => {
+      const em = createEntityManager(this, trx);
+      await cb(em);
+    });
+  }
+
+  getConnection(tableName, trx) {
     const schema = this.connection.getSchemaName();
-    const connection = tableName ? this.connection(tableName) : this.connection;
+    const connOrTrx = trx ? trx : this.connection;
+    const connection = tableName ? connOrTrx(tableName) : connOrTrx;
     return schema ? connection.withSchema(schema) : connection;
   }
 

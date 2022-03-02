@@ -108,38 +108,43 @@ const processData = (metadata, data = {}, { withDefaults = false } = {}) => {
   return obj;
 };
 
-const createEntityManager = db => {
+const createEntityManager = (db, trx) => {
   const repoMap = {};
 
-  return {
+  const rundblifecycle = async (type, uid, data) => {
+    data.em = em;
+    await db.lifecycles.run(type, uid, data);
+  };
+
+  const em = {
     async findOne(uid, params) {
-      await db.lifecycles.run('beforeFindOne', uid, { params });
+      await rundblifecycle('beforeFindOne', uid, { params });
 
       const result = await this.createQueryBuilder(uid)
         .init(params)
         .first()
         .execute();
 
-      await db.lifecycles.run('afterFindOne', uid, { params, result });
+      await rundblifecycle('afterFindOne', uid, { params, result });
 
       return result;
     },
 
     // should we name it findOne because people are used to it ?
     async findMany(uid, params) {
-      await db.lifecycles.run('beforeFindMany', uid, { params });
+      await rundblifecycle('beforeFindMany', uid, { params });
 
       const result = await this.createQueryBuilder(uid)
         .init(params)
         .execute();
 
-      await db.lifecycles.run('afterFindMany', uid, { params, result });
+      await rundblifecycle('afterFindMany', uid, { params, result });
 
       return result;
     },
 
     async count(uid, params = {}) {
-      await db.lifecycles.run('beforeCount', uid, { params });
+      await rundblifecycle('beforeCount', uid, { params });
 
       const res = await this.createQueryBuilder(uid)
         .init(_.pick(['_q', 'where', 'filters'], params))
@@ -149,13 +154,13 @@ const createEntityManager = db => {
 
       const result = Number(res.count);
 
-      await db.lifecycles.run('afterCount', uid, { params, result });
+      await rundblifecycle('afterCount', uid, { params, result });
 
       return result;
     },
 
     async create(uid, params = {}) {
-      await db.lifecycles.run('beforeCreate', uid, { params });
+      await rundblifecycle('beforeCreate', uid, { params });
 
       const metadata = db.metadata.get(uid);
       const { data } = params;
@@ -180,14 +185,14 @@ const createEntityManager = db => {
         populate: params.populate,
       });
 
-      await db.lifecycles.run('afterCreate', uid, { params, result });
+      await rundblifecycle('afterCreate', uid, { params, result });
 
       return result;
     },
 
     // TODO: where do we handle relation processing for many queries ?
     async createMany(uid, params = {}) {
-      await db.lifecycles.run('beforeCreateMany', uid, { params });
+      await rundblifecycle('beforeCreateMany', uid, { params });
 
       const metadata = db.metadata.get(uid);
       const { data } = params;
@@ -208,13 +213,13 @@ const createEntityManager = db => {
 
       const result = { count: data.length };
 
-      await db.lifecycles.run('afterCreateMany', uid, { params, result });
+      await rundblifecycle('afterCreateMany', uid, { params, result });
 
       return result;
     },
 
     async update(uid, params = {}) {
-      await db.lifecycles.run('beforeUpdate', uid, { params });
+      await rundblifecycle('beforeUpdate', uid, { params });
 
       const metadata = db.metadata.get(uid);
       const { where, data } = params;
@@ -257,14 +262,14 @@ const createEntityManager = db => {
         populate: params.populate,
       });
 
-      await db.lifecycles.run('afterUpdate', uid, { params, result });
+      await rundblifecycle('afterUpdate', uid, { params, result });
 
       return result;
     },
 
     // TODO: where do we handle relation processing for many queries ?
     async updateMany(uid, params = {}) {
-      await db.lifecycles.run('beforeUpdateMany', uid, { params });
+      await rundblifecycle('beforeUpdateMany', uid, { params });
 
       const metadata = db.metadata.get(uid);
       const { where, data } = params;
@@ -282,13 +287,13 @@ const createEntityManager = db => {
 
       const result = { count: updatedRows };
 
-      await db.lifecycles.run('afterUpdateMany', uid, { params, result });
+      await rundblifecycle('afterUpdateMany', uid, { params, result });
 
       return result;
     },
 
     async delete(uid, params = {}) {
-      await db.lifecycles.run('beforeDelete', uid, { params });
+      await rundblifecycle('beforeDelete', uid, { params });
 
       const { where, select, populate } = params;
 
@@ -316,14 +321,14 @@ const createEntityManager = db => {
 
       await this.deleteRelations(uid, id);
 
-      await db.lifecycles.run('afterDelete', uid, { params, result: entity });
+      await rundblifecycle('afterDelete', uid, { params, result: entity });
 
       return entity;
     },
 
     // TODO: where do we handle relation processing for many queries ?
     async deleteMany(uid, params = {}) {
-      await db.lifecycles.run('beforeDeleteMany', uid, { params });
+      await rundblifecycle('beforeDeleteMany', uid, { params });
 
       const { where } = params;
 
@@ -334,7 +339,7 @@ const createEntityManager = db => {
 
       const result = { count: deletedRows };
 
-      await db.lifecycles.run('afterDelete', uid, { params, result });
+      await rundblifecycle('afterDelete', uid, { params, result });
 
       return result;
     },
@@ -863,12 +868,12 @@ const createEntityManager = db => {
     // -> private
 
     createQueryBuilder(uid) {
-      return createQueryBuilder(uid, db);
+      return createQueryBuilder(uid, db, trx);
     },
 
     getRepository(uid) {
       if (!repoMap[uid]) {
-        repoMap[uid] = createRepository(uid, db);
+        repoMap[uid] = createRepository(uid, { entityManager: em });
       }
 
       return repoMap[uid];
@@ -878,6 +883,8 @@ const createEntityManager = db => {
       repoMap.clear();
     },
   };
+
+  return em;
 };
 
 module.exports = {

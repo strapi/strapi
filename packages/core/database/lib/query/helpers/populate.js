@@ -112,8 +112,9 @@ const pickPopulateParams = _.pick([
 // TODO: handle count for join columns
 // TODO: cleanup count
 const applyPopulate = async (results, populate, ctx) => {
-  const { db, uid, qb } = ctx;
+  const { db, uid, qb, trx } = ctx;
   const meta = db.metadata.get(uid);
+  const queryBuilder = uid => require('../query-builder')(uid, db, trx);
 
   if (_.isEmpty(results)) {
     return results;
@@ -151,8 +152,7 @@ const applyPopulate = async (results, populate, ctx) => {
           continue;
         }
 
-        const rows = await db.entityManager
-          .createQueryBuilder(targetMeta.uid)
+        const rows = await queryBuilder(targetMeta.uid)
           .init(populateValue)
           .addSelect(`${qb.alias}.${referencedColumnName}`)
           .where({ [referencedColumnName]: referencedValues })
@@ -170,7 +170,7 @@ const applyPopulate = async (results, populate, ctx) => {
       if (attribute.joinTable) {
         const { joinTable } = attribute;
 
-        const qb = db.entityManager.createQueryBuilder(targetMeta.uid);
+        const qb = queryBuilder(targetMeta.uid);
 
         const {
           name: joinColumnName,
@@ -234,8 +234,7 @@ const applyPopulate = async (results, populate, ctx) => {
           continue;
         }
 
-        const rows = await db.entityManager
-          .createQueryBuilder(targetMeta.uid)
+        const rows = await queryBuilder(targetMeta.uid)
           .init(populateValue)
           .addSelect(`${qb.alias}.${referencedColumnName}`)
           .where({ [referencedColumnName]: referencedValues })
@@ -253,7 +252,7 @@ const applyPopulate = async (results, populate, ctx) => {
       if (attribute.joinTable) {
         const { joinTable } = attribute;
 
-        const qb = db.entityManager.createQueryBuilder(targetMeta.uid);
+        const qb = queryBuilder(targetMeta.uid);
 
         const {
           name: joinColumnName,
@@ -336,7 +335,7 @@ const applyPopulate = async (results, populate, ctx) => {
     } else if (attribute.relation === 'manyToMany') {
       const { joinTable } = attribute;
 
-      const qb = db.entityManager.createQueryBuilder(targetMeta.uid);
+      const qb = queryBuilder(targetMeta.uid);
 
       const { name: joinColumnName, referencedColumn: referencedColumnName } = joinTable.joinColumn;
 
@@ -430,8 +429,7 @@ const applyPopulate = async (results, populate, ctx) => {
           continue;
         }
 
-        const rows = await db.entityManager
-          .createQueryBuilder(target)
+        const rows = await queryBuilder(target)
           .init(populateValue)
           // .addSelect(`${qb.alias}.${idColumn.referencedColumn}`)
           .where({ [idColumn.name]: referencedValues, [typeColumn.name]: uid })
@@ -467,7 +465,7 @@ const applyPopulate = async (results, populate, ctx) => {
         }
 
         // find with join table
-        const qb = db.entityManager.createQueryBuilder(target);
+        const qb = queryBuilder(target);
 
         const alias = qb.getAlias();
 
@@ -518,7 +516,7 @@ const applyPopulate = async (results, populate, ctx) => {
         results.map(r => r[joinColumn.referencedColumn]).filter(value => !_.isNil(value))
       );
 
-      const qb = db.entityManager.createQueryBuilder(joinTable.name);
+      const qb = queryBuilder(joinTable.name);
 
       const joinRows = await qb
         .where({
@@ -557,7 +555,7 @@ const applyPopulate = async (results, populate, ctx) => {
           continue;
         }
 
-        const qb = db.entityManager.createQueryBuilder(type);
+        const qb = queryBuilder(type);
 
         const rows = await qb
           .init(populateValue)
@@ -621,7 +619,7 @@ const applyPopulate = async (results, populate, ctx) => {
           continue;
         }
 
-        const qb = db.entityManager.createQueryBuilder(type);
+        const qb = queryBuilder(type);
 
         const rows = await qb
           .init(populateValue)

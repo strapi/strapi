@@ -4,7 +4,7 @@ const _ = require('lodash/fp');
 
 const helpers = require('./helpers');
 
-const createQueryBuilder = (uid, db) => {
+const createQueryBuilder = (uid, db, trx) => {
   const meta = db.metadata.get(uid);
   const { tableName } = meta;
 
@@ -206,12 +206,12 @@ const createQueryBuilder = (uid, db) => {
       const subQB = this.getKnexQuery();
 
       const nestedSubQuery = db
-        .getConnection()
+        .getConnection(null, trx)
         .select('id')
         .from(subQB.as('subQuery'));
 
       return db
-        .getConnection(tableName)
+        .getConnection(tableName, trx)
         [state.type]()
         .whereIn('id', nestedSubQuery);
     },
@@ -262,7 +262,7 @@ const createQueryBuilder = (uid, db) => {
 
       const aliasedTableName = this.mustUseAlias() ? `${tableName} as ${this.alias}` : tableName;
 
-      const qb = db.getConnection(aliasedTableName);
+      const qb = db.getConnection(aliasedTableName, trx);
 
       if (this.shouldUseSubQuery()) {
         return this.runSubQuery();
@@ -354,7 +354,12 @@ const createQueryBuilder = (uid, db) => {
         const rows = await qb;
 
         if (state.populate && !_.isNil(rows)) {
-          await helpers.applyPopulate(_.castArray(rows), state.populate, { qb: this, uid, db });
+          await helpers.applyPopulate(_.castArray(rows), state.populate, {
+            qb: this,
+            uid,
+            db,
+            trx,
+          });
         }
 
         let results = rows;
