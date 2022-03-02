@@ -4,7 +4,7 @@ import camelCase from 'lodash/camelCase';
 import get from 'lodash/get';
 import omit from 'lodash/omit';
 import { Redirect, useRouteMatch, useHistory } from 'react-router-dom';
-import { auth, useQuery, useGuidedTour } from '@strapi/helper-plugin';
+import { auth, useQuery, useGuidedTour, useTracking } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import forms from 'ee_else_ce/pages/AuthPage/utils/forms';
 import persistStateToLocaleStorage from '../../components/GuidedTour/utils/persistStateToLocaleStorage';
@@ -17,6 +17,7 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
   const { push } = useHistory();
   const { changeLocale } = useLocalesProvider();
   const { setSkipped } = useGuidedTour();
+  const { trackUsage } = useTracking();
   const {
     params: { authType },
   } = useRouteMatch('/auth/:authType');
@@ -146,6 +147,8 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
 
   const registerRequest = async (body, requestURL, { setSubmitting, setErrors }) => {
     try {
+      trackUsage('willCreateFirstAdmin');
+
       const {
         data: {
           data: { token, user },
@@ -189,6 +192,8 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
       // Redirect to the homePage
       push('/');
     } catch (err) {
+      trackUsage('didNotCreateFirstAdmin');
+      
       if (err.response) {
         const { data } = err.response;
         const apiErrors = formatAPIErrors(data);
