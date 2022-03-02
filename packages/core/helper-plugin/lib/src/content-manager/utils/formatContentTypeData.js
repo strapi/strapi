@@ -4,7 +4,7 @@
 import get from 'lodash/get';
 import { getType, getOtherInfos } from './getAttributeInfos';
 
-const formatComponentData = (data, ct, composSchema) => {
+const formatContentTypeData = (data, ct, composSchema) => {
   const recursiveFormatData = (data, schema) => {
     return Object.keys(data).reduce((acc, current) => {
       const type = getType(schema, current);
@@ -14,6 +14,12 @@ const formatComponentData = (data, ct, composSchema) => {
 
       if (!value) {
         acc[current] = value;
+
+        return acc;
+      }
+
+      if (type === 'json') {
+        acc[current] = JSON.stringify(value, null, 2);
 
         return acc;
       }
@@ -58,4 +64,4 @@ const formatComponentData = (data, ct, composSchema) => {
   return recursiveFormatData(data, ct);
 };
 
-export default formatComponentData;
+export default formatContentTypeData;

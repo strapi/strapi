@@ -1,14 +1,21 @@
-import formatComponentData from '../formatComponentData';
+import formatContentTypeData from '../formatContentTypeData';
 import testData from './testData';
 
 const { contentType, components, modifiedData } = testData;
 
-describe('STRAPI_HELPER_PLUGIN | utils | formatComponentData', () => {
-  it('should add the __temp_key__ property to each repeatable component object', () => {
+describe('STRAPI_HELPER_PLUGIN | utils | formatContentTypeData', () => {
+  it('should add the __temp_key__ property to each repeatable component object && stringify json fields', () => {
     const expected = {
       createdAt: '2020-04-28T13:22:13.033Z',
       dz: [
-        { __component: 'compos.sub-compo', id: 7, name: 'name', password: 'password' },
+        {
+          __component: 'compos.sub-compo',
+          id: 7,
+          name: 'name',
+          password: 'password',
+          jsonString: '"hello"',
+          jsonObject: '{\n  "hello": true\n}',
+        },
         {
           id: 4,
           name: 'name',
@@ -48,6 +55,8 @@ describe('STRAPI_HELPER_PLUGIN | utils | formatComponentData', () => {
         ],
       },
       password: 'password',
+      jsonString: '"hello"',
+      jsonObject: '{\n  "hello": true\n}',
       repeatable: [
         {
           id: 2,
@@ -69,6 +78,6 @@ describe('STRAPI_HELPER_PLUGIN | utils | formatComponentData', () => {
       updatedAt: '2020-04-28T13:22:13.033Z',
     };
 
-    expect(formatComponentData(modifiedData, contentType, components)).toEqual(expected);
+    expect(formatContentTypeData(modifiedData, contentType, components)).toEqual(expected);
   });
 });

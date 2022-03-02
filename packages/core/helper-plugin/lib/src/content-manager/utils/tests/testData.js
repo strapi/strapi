@@ -7,6 +7,8 @@ const testData = {
       dz: { type: 'dynamiczone', components: ['compos.test-compo', 'compos.sub-compo'] },
       id: { type: 'integer' },
       name: { type: 'string' },
+      jsonString: { type: 'json' },
+      jsonObject: { type: 'json' },
       notrepeatable: {
         type: 'component',
         repeatable: false,
@@ -25,6 +27,8 @@ const testData = {
         id: { type: 'integer' },
         name: { type: 'string' },
         password: { type: 'password' },
+        jsonString: { type: 'json' },
+        jsonObject: { type: 'json' },
       },
     },
     'compos.test-compo': {
@@ -50,7 +54,14 @@ const testData = {
   modifiedData: {
     createdAt: '2020-04-28T13:22:13.033Z',
     dz: [
-      { __component: 'compos.sub-compo', id: 7, name: 'name', password: 'password' },
+      {
+        __component: 'compos.sub-compo',
+        id: 7,
+        name: 'name',
+        password: 'password',
+        jsonString: 'hello',
+        jsonObject: { hello: true },
+      },
       {
         id: 4,
         name: 'name',
@@ -90,6 +101,8 @@ const testData = {
       ],
     },
     password: 'password',
+    jsonString: 'hello',
+    jsonObject: { hello: true },
     repeatable: [
       {
         id: 2,
@@ -140,7 +153,11 @@ const testData = {
       id: 1,
       name: 'name',
       subcomponotrepeatable: { id: 4, name: 'name' },
-      subrepeatable: [{ id: 1, name: 'name' }, { id: 2, name: 'name' }, { id: 3, name: 'name' }],
+      subrepeatable: [
+        { id: 1, name: 'name' },
+        { id: 2, name: 'name' },
+        { id: 3, name: 'name' },
+      ],
     },
     repeatable: [
       {
@@ -160,7 +177,13 @@ const testData = {
   },
   expectedNoFieldsModifiedData: {
     dz: [
-      { __component: 'compos.sub-compo', name: 'name', password: 'password' },
+      {
+        __component: 'compos.sub-compo',
+        name: 'name',
+        password: 'password',
+        jsonString: 'hello',
+        jsonObject: { hello: true },
+      },
       {
         name: 'name',
         password: 'password',
@@ -183,6 +206,8 @@ const testData = {
         __component: 'compos.test-compo',
       },
     ],
+    jsonString: 'hello',
+    jsonObject: { hello: true },
     name: 'name',
     notrepeatable: {
       name: 'name',
