@@ -33,8 +33,13 @@ module.exports = {
               return reject(err);
             }
 
-            // set the bucket file url
-            file.url = data.Location;
+            if (S3.config.cdn) {
+              // Use the CDN url
+              file.url = `${S3.config.cdn}${data.Key}`;
+            } else {
+              // This is the configured endpoint
+              file.url = data.Location;
+            }
 
             resolve();
           }
