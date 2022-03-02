@@ -1,7 +1,12 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Helmet } from 'react-helmet';
 import { Switch, Route, useRouteMatch, Redirect, useLocation } from 'react-router-dom';
-import { CheckPagePermissions, LoadingIndicatorPage, NotFound } from '@strapi/helper-plugin';
+import {
+  CheckPagePermissions,
+  LoadingIndicatorPage,
+  NotFound,
+  useGuidedTour,
+} from '@strapi/helper-plugin';
 import { Layout, HeaderLayout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
 import { useIntl } from 'react-intl';
@@ -28,6 +33,14 @@ const App = () => {
   );
   const { pathname } = useLocation();
   const { formatMessage } = useIntl();
+  const { startSection } = useGuidedTour();
+  const startSectionRef = useRef(startSection);
+
+  useEffect(() => {
+    if (startSectionRef.current) {
+      startSectionRef.current('contentManager');
+    }
+  }, []);
 
   if (status === 'loading') {
     return (
@@ -43,14 +56,20 @@ const App = () => {
     );
   }
 
+  // Array of models that are displayed in the content manager
+  const supportedModelsToDisplay = models.filter(({ isDisplayed }) => isDisplayed);
+
   // Redirect the user to the 403 page
-  // FIXME when changing the routing
-  if (authorisedModels.length === 0 && models.length > 0 && pathname !== '/content-manager/403') {
+  if (
+    authorisedModels.length === 0 &&
+    supportedModelsToDisplay.length > 0 &&
+    pathname !== '/content-manager/403'
+  ) {
     return <Redirect to="/content-manager/403" />;
   }
 
   // Redirect the user to the create content type page
-  if (models.length === 0 && pathname !== '/content-manager/no-content-types') {
+  if (supportedModelsToDisplay.length === 0 && pathname !== '/content-manager/no-content-types') {
     return <Redirect to="/content-manager/no-content-types" />;
   }
 

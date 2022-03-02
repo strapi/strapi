@@ -189,15 +189,13 @@ class Strapi {
   }
 
   sendStartupTelemetry() {
-    // Get database clients
-    const databaseClients = _.map(this.config.get('connections'), _.property('settings.client'));
-
     // Emit started event.
     // do not await to avoid slower startup
     this.telemetry.send('didStartServer', {
-      database: databaseClients,
-      plugins: this.config.installedPlugins,
-      providers: this.config.installedProviders,
+      database: strapi.config.get('database.connection.client'),
+      plugins: Object.keys(strapi.plugins),
+      // TODO: to add back
+      // providers: this.config.installedProviders,
     });
   }
 

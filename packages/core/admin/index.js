@@ -29,6 +29,11 @@ function getCustomWebpackConfig(dir, config) {
     const webpackAdminConfig = require(path.resolve(adminConfigPath));
 
     if (_.isFunction(webpackAdminConfig)) {
+      // Expose the devServer configuration
+      if (config.devServer) {
+        webpackConfig.devServer = config.devServer;
+      }
+
       webpackConfig = webpackAdminConfig(webpackConfig, webpack);
 
       if (!webpackConfig) {
@@ -232,41 +237,47 @@ async function watchAdmin({ plugins, dir, host, port, browser, options }) {
     port,
     options,
     roots,
+    devServer: {
+      port,
+      client: {
+        logging: 'none',
+        overlay: {
+          errors: true,
+          warnings: false,
+        },
+      },
+
+      open: browser === 'true' ? true : browser,
+      devMiddleware: {
+        publicPath: options.adminPath,
+      },
+      historyApiFallback: {
+        index: options.adminPath,
+        disableDotRule: true,
+      },
+    },
   };
 
   const webpackConfig = getCustomWebpackConfig(dir, args);
-  const opts = {
-    client: {
-      logging: 'none',
-      overlay: {
-        errors: true,
-        warnings: false,
-      },
-    },
 
-    open: browser === 'true' ? true : browser,
-    devMiddleware: {
-      publicPath: options.adminPath,
-    },
-    historyApiFallback: {
-      index: options.adminPath,
-      disableDotRule: true,
-    },
+  const compiler = webpack(webpackConfig);
 
-    ...webpack(webpackConfig).options.devServer,
-  };
+  const devServerArgs = {
+    ...args.devServer,
+    ...webpackConfig.devServer
+  }
 
-  const server = new WebpackDevServer(opts, webpack(webpackConfig));
+  const server = new WebpackDevServer(devServerArgs, compiler);
 
-  server.start(port, host, function(err) {
-    if (err) {
-      console.log(err);
-    }
-
+  const runServer = async () => {
     console.log(chalk.green('Starting the development server...'));
     console.log();
     console.log(chalk.green(`Admin development at http://${host}:${port}${options.adminPath}`));
-  });
+
+    await server.start();
+  };
+
+  runServer();
 
   watchFiles(dir);
 }
@@ -330,8 +341,19 @@ const hasCustomAdminCode = async dir => {
   return hasCustomConfigFile || hasCustomWebpackFile;
 };
 
+/**
+ * Checks if the project's installed plugins are not the same as a default one.
+ * @param {Object} plugins
+ * @returns {boolean}
+ */
 const hasNonDefaultPlugins = plugins => {
-  const diff = _.difference(Object.keys(plugins), DEFAULT_PLUGINS);
+  // List of plugins that are not the ones installed in a generated app
+  const installedPlugins = Object.keys(plugins).filter(x => !DEFAULT_PLUGINS.includes(x));
+
+  // List of default plugins uninstalled from a generated app
+  const missingPlugins = DEFAULT_PLUGINS.filter(x => !Object.keys(plugins).includes(x));
+
+  const diff = [...installedPlugins, ...missingPlugins];
 
   return diff.length > 0;
 };

@@ -53,7 +53,7 @@ const getTypeShape = (attribute, { modelType, attributes } = {}) => {
         required: validators.required,
         allowedTypes: yup
           .array()
-          .of(yup.string().oneOf(['images', 'videos', 'files']))
+          .of(yup.string().oneOf(['images', 'videos', 'files', 'audios']))
           .min(1),
       };
     }
@@ -258,7 +258,8 @@ const getTypeShape = (attribute, { modelType, attributes } = {}) => {
         components: yup
           .array()
           .of(yup.string().required())
-          .test('isArray', '${path} must be an array', value => Array.isArray(value)),
+          .test('isArray', '${path} must be an array', value => Array.isArray(value))
+          .min(1),
         min: yup.number(),
         max: yup.number(),
       };

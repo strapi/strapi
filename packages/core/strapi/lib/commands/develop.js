@@ -22,14 +22,14 @@ module.exports = async function({ build, watchAdmin, polling, browser }) {
   const logger = createLogger(config.logger, {});
 
   try {
-    if (cluster.isMaster) {
+    if (cluster.isMaster || cluster.isPrimary) {
       const serveAdminPanel = getOr(true, 'admin.serveAdminPanel')(config);
 
       const buildExists = fs.existsSync(path.join(dir, 'build'));
       // Don't run the build process if the admin is in watch mode
       if (build && !watchAdmin && serveAdminPanel && !buildExists) {
         try {
-          await buildAdmin({ clean: false, optimization: false, forceBuild: false });
+          await buildAdmin({ optimization: false, forceBuild: false });
         } catch (err) {
           process.exit(1);
         }
@@ -119,15 +119,15 @@ function watchFileChanges({ dir, strapiInstance, watchIgnoreFiles, polling }) {
     ignored: [
       /(^|[/\\])\../, // dot files
       /tmp/,
-      'admin',
-      'admin/**',
-      'src/extensions/**/admin',
-      'src/extensions/**/admin/**',
+      '**/src/admin/**',
+      '**/src/plugins/**/admin/',
       '**/documentation',
       '**/documentation/**',
       '**/node_modules',
       '**/node_modules/**',
       '**/plugins.json',
+      '**/build',
+      '**/build/**',
       '**/index.html',
       '**/public',
       '**/public/**',

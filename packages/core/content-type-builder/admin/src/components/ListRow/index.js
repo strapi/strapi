@@ -1,16 +1,16 @@
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import get from 'lodash/get';
-import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
 import { IconButton } from '@strapi/design-system/IconButton';
 import { Flex } from '@strapi/design-system/Flex';
 import { Stack } from '@strapi/design-system/Stack';
 import { Typography } from '@strapi/design-system/Typography';
+import { Box } from '@strapi/design-system/Box';
+import Lock from '@strapi/icons/Lock';
 import Pencil from '@strapi/icons/Pencil';
 import Trash from '@strapi/icons/Trash';
-import { stopPropagation, onRowClick } from '@strapi/helper-plugin';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { stopPropagation, onRowClick, pxToRem } from '@strapi/helper-plugin';
 import useDataManager from '../../hooks/useDataManager';
 import getTrad from '../../utils/getTrad';
 import Curve from '../../icons/Curve';
@@ -94,7 +94,7 @@ function ListRow({
         {loopNumber !== 0 && <Curve color={isFromDynamicZone ? 'primary200' : 'neutral150'} />}
         <Stack paddingLeft={2} size={4} horizontal>
           <AttributeIcon key={src} type={src} />
-          <Typography fontWeight="bold">{upperFirst(name)}</Typography>
+          <Typography fontWeight="bold">{name}</Typography>
         </Stack>
       </td>
       <td>
@@ -133,7 +133,7 @@ function ListRow({
         )}
       </td>
       <td>
-        {isInDevelopmentMode && (
+        {isInDevelopmentMode ? (
           <Flex justifyContent="flex-end" {...stopPropagation}>
             {configurable ? (
               <Stack horizontal size={1}>
@@ -166,10 +166,16 @@ function ListRow({
                 />
               </Stack>
             ) : (
-              // ! TODO ASK DESIGN TO PUT LOCK ICON INSIDE DS
-              <FontAwesomeIcon icon="lock" />
+              <Lock />
             )}
           </Flex>
+        ) : (
+          /*
+            In production mode the edit icons aren't visible, therefore
+            we need to reserve the same space, otherwise the height of the
+            row might collapse, leading to bad positioned curve icons
+          */
+          <Box height={pxToRem(32)} />
         )}
       </td>
     </BoxWrapper>

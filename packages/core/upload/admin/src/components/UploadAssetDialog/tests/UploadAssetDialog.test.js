@@ -31,9 +31,17 @@ const render = (props = { onClose: () => {} }) =>
   );
 
 describe('UploadAssetDialog', () => {
-  beforeAll(() => server.listen());
+  let confirmSpy;
+  beforeAll(() => {
+    confirmSpy = jest.spyOn(window, 'confirm');
+    confirmSpy.mockImplementation(jest.fn(() => true));
+    server.listen();
+  });
   afterEach(() => server.resetHandlers());
-  afterAll(() => server.close());
+  afterAll(() => {
+    confirmSpy.mockRestore();
+    server.close();
+  });
 
   describe('from computer', () => {
     it('snapshots the component', () => {
@@ -51,7 +59,7 @@ describe('UploadAssetDialog', () => {
       expect(onCloseSpy).toBeCalled();
     });
 
-    it('closes the dialog when clicking on cancel on the pending asset step', () => {
+    it('open confirm box when clicking on cancel on the pending asset step', () => {
       const file = new File(['Some stuff'], 'test.png', { type: 'image/png' });
       const onCloseSpy = jest.fn();
 
@@ -63,7 +71,7 @@ describe('UploadAssetDialog', () => {
       fireEvent.change(container.querySelector('[type="file"]'), { target: { files: fileList } });
       fireEvent.click(screen.getByText('app.components.Button.cancel'));
 
-      expect(onCloseSpy).toBeCalled();
+      expect(window.confirm).toBeCalled();
     });
 
     [
@@ -86,14 +94,14 @@ describe('UploadAssetDialog', () => {
           target: { files: fileList },
         });
 
-        expect(screen.getByText('Upload new asset')).toBeInTheDocument();
+        expect(screen.getAllByText(`Add new assets`).length).toBe(2);
         expect(
           screen.getByText(
-            '{number, plural, =0 {No asset} one {1 asset} other {# assets}} selected'
+            '{number, plural, =0 {No asset} one {1 asset} other {# assets}} ready to upload'
           )
         ).toBeInTheDocument();
         expect(
-          screen.getByText('Manage the assets before adding them to the Media Library')
+          screen.getByText('Manage the assets before uploading them to the Media Library')
         ).toBeInTheDocument();
         expect(screen.getAllByText(`test.${ext}`).length).toBe(number);
         expect(screen.getByText(ext)).toBeInTheDocument();
@@ -185,13 +193,13 @@ describe('UploadAssetDialog', () => {
       await waitFor(() =>
         expect(
           screen.getByText(
-            '{number, plural, =0 {No asset} one {1 asset} other {# assets}} selected'
+            '{number, plural, =0 {No asset} one {1 asset} other {# assets}} ready to upload'
           )
         ).toBeInTheDocument()
       );
-      expect(screen.getByText('Upload new asset')).toBeInTheDocument();
+      expect(screen.getAllByText(`Add new assets`).length).toBe(2);
       expect(
-        screen.getByText('Manage the assets before adding them to the Media Library')
+        screen.getByText('Manage the assets before uploading them to the Media Library')
       ).toBeInTheDocument();
 
       assets.forEach(asset => {

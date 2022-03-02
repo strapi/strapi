@@ -23,6 +23,10 @@ const Wrapper = styled.div`
     margin-block-end: 10px;
   }
 
+  p {
+    margin-bottom: 10px;
+  }
+
   h1 {
     font-size: ${36 / 16}rem;
     font-weight: 600;
@@ -45,6 +49,10 @@ const Wrapper = styled.div`
 
   strong {
     font-weight: 800;
+  }
+
+  em {
+    font-style: italic;
   }
 
   blockquote {

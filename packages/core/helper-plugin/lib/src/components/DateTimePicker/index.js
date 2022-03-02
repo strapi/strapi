@@ -38,6 +38,7 @@ const DateTimePicker = ({
   name,
   required,
   size,
+  step,
   value,
   ...props
 }) => {
@@ -95,11 +96,15 @@ const DateTimePicker = ({
   const handleTimeClear = () => {
     setTimeValue(undefined);
 
-    if (dateValue && onChange) {
-      const dateToSet = new Date(dateValue);
+    let dateToSet;
+
+    if (dateValue) {
+      dateToSet = new Date(dateValue);
       dateToSet.setHours('00');
       dateToSet.setMinutes('00');
+    }
 
+    if (onChange) {
       onChange(dateToSet);
     }
   };
@@ -146,6 +151,7 @@ const DateTimePicker = ({
             onClear={onClear && handleTimeClear}
             clearLabel={clearLabel}
             disabled={disabled}
+            step={step}
           />
         </Stack>
         <FieldHint />
@@ -168,6 +174,7 @@ DateTimePicker.defaultProps = {
   onClear: undefined,
   required: false,
   size: 'M',
+  step: 1,
   value: undefined,
 };
 
@@ -184,6 +191,7 @@ DateTimePicker.propTypes = {
   onClear: PropTypes.func,
   required: PropTypes.bool,
   size: PropTypes.oneOf(['S', 'M']),
+  step: PropTypes.number,
   value: PropTypes.instanceOf(Date),
 };
 

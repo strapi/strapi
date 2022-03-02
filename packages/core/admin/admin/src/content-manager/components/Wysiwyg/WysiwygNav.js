@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
+import { FocusTrap } from '@strapi/design-system/FocusTrap';
 import { Box } from '@strapi/design-system/Box';
 import { Button } from '@strapi/design-system/Button';
 import { IconButtonGroup } from '@strapi/design-system/IconButton';
@@ -27,7 +28,9 @@ import {
 } from './WysiwygStyles';
 
 const WysiwygNav = ({
+  disabled,
   editorRef,
+  isExpandMode,
   isPreviewMode,
   onActionClick,
   onToggleMediaLib,
@@ -41,9 +44,11 @@ const WysiwygNav = ({
   });
   const buttonMoreRef = useRef();
 
-  const handleTogglePopover = () => setVisiblePopover(prev => !prev);
+  const handleTogglePopover = () => {
+    setVisiblePopover(prev => !prev);
+  };
 
-  if (isPreviewMode) {
+  if (disabled || isPreviewMode) {
     return (
       <Box padding={2} background="neutral100">
         <Flex justifyContent="space-between">
@@ -81,15 +86,17 @@ const WysiwygNav = ({
               />
             </MainButtons>
 
-            <MoreButton disabled ref={buttonMoreRef} id="more" label="More" icon={<More />} />
+            <MoreButton disabled id="more" label="More" icon={<More />} />
           </Flex>
 
-          <Button onClick={onTogglePreviewMode} variant="tertiary" size="L" id="preview">
-            {formatMessage({
-              id: 'components.Wysiwyg.ToggleMode.markdown-mode',
-              defaultMessage: 'Markdown mode',
-            })}
-          </Button>
+          {!isExpandMode && (
+            <Button onClick={onTogglePreviewMode} variant="tertiary" id="preview">
+              {formatMessage({
+                id: 'components.Wysiwyg.ToggleMode.markdown-mode',
+                defaultMessage: 'Markdown mode',
+              })}
+            </Button>
+          )}
         </Flex>
       </Box>
     );
@@ -146,65 +153,67 @@ const WysiwygNav = ({
           />
           {visiblePopover && (
             <Popover centered source={buttonMoreRef} spacing={4} id="popover">
-              <Flex>
-                <IconButtonGroupMargin>
-                  <CustomIconButton
-                    onClick={() => onActionClick('Strikethrough', editorRef, handleTogglePopover)}
-                    id="Strikethrough"
-                    label="Strikethrough"
-                    name="Strikethrough"
-                    icon={<Strikethrough />}
-                  />
-                  <CustomIconButton
-                    onClick={() => onActionClick('BulletList', editorRef, handleTogglePopover)}
-                    id="BulletList"
-                    label="BulletList"
-                    name="BulletList"
-                    icon={<BulletList />}
-                  />
-                  <CustomIconButton
-                    onClick={() => onActionClick('NumberList', editorRef, handleTogglePopover)}
-                    id="NumberList"
-                    label="NumberList"
-                    name="NumberList"
-                    icon={<NumberList />}
-                  />
-                </IconButtonGroupMargin>
-                <IconButtonGroup>
-                  <CustomIconButton
-                    onClick={() => onActionClick('Code', editorRef, handleTogglePopover)}
-                    id="Code"
-                    label="Code"
-                    name="Code"
-                    icon={<Code />}
-                  />
-                  <CustomIconButton
-                    onClick={() => {
-                      handleTogglePopover();
-                      onToggleMediaLib();
-                    }}
-                    id="Image"
-                    label="Image"
-                    name="Image"
-                    icon={<Image />}
-                  />
-                  <CustomLinkIconButton
-                    onClick={() => onActionClick('Link', editorRef, handleTogglePopover)}
-                    id="Link"
-                    label="Link"
-                    name="Link"
-                    // eslint-disable-next-line jsx-a11y/anchor-is-valid
-                    icon={<Link />}
-                  />
-                  <CustomIconButton
-                    onClick={() => onActionClick('Quote', editorRef, handleTogglePopover)}
-                    id="Quote"
-                    label="Quote"
-                    name="Quote"
-                    icon={<Quote />}
-                  />
-                </IconButtonGroup>
-              </Flex>
+              <FocusTrap onEscape={handleTogglePopover} restoreFocus={false}>
+                <Flex>
+                  <IconButtonGroupMargin>
+                    <CustomIconButton
+                      onClick={() => onActionClick('Strikethrough', editorRef, handleTogglePopover)}
+                      id="Strikethrough"
+                      label="Strikethrough"
+                      name="Strikethrough"
+                      icon={<Strikethrough />}
+                    />
+                    <CustomIconButton
+                      onClick={() => onActionClick('BulletList', editorRef, handleTogglePopover)}
+                      id="BulletList"
+                      label="BulletList"
+                      name="BulletList"
+                      icon={<BulletList />}
+                    />
+                    <CustomIconButton
+                      onClick={() => onActionClick('NumberList', editorRef, handleTogglePopover)}
+                      id="NumberList"
+                      label="NumberList"
+                      name="NumberList"
+                      icon={<NumberList />}
+                    />
+                  </IconButtonGroupMargin>
+                  <IconButtonGroup>
+                    <CustomIconButton
+                      onClick={() => onActionClick('Code', editorRef, handleTogglePopover)}
+                      id="Code"
+                      label="Code"
+                      name="Code"
+                      icon={<Code />}
+                    />
+                    <CustomIconButton
+                      onClick={() => {
+                        handleTogglePopover();
+                        onToggleMediaLib();
+                      }}
+                      id="Image"
+                      label="Image"
+                      name="Image"
+                      icon={<Image />}
+                    />
+                    <CustomLinkIconButton
+                      onClick={() => onActionClick('Link', editorRef, handleTogglePopover)}
+                      id="Link"
+                      label="Link"
+                      name="Link"
+                      // eslint-disable-next-line jsx-a11y/anchor-is-valid
+                      icon={<Link />}
+                    />
+                    <CustomIconButton
+                      onClick={() => onActionClick('Quote', editorRef, handleTogglePopover)}
+                      id="Quote"
+                      label="Quote"
+                      name="Quote"
+                      icon={<Quote />}
+                    />
+                  </IconButtonGroup>
+                </Flex>
+              </FocusTrap>
             </Popover>
           )}
         </Flex>
@@ -230,7 +239,9 @@ WysiwygNav.defaultProps = {
 };
 
 WysiwygNav.propTypes = {
+  disabled: PropTypes.bool.isRequired,
   editorRef: PropTypes.shape({ current: PropTypes.any }).isRequired,
+  isExpandMode: PropTypes.bool.isRequired,
   isPreviewMode: PropTypes.bool,
   onActionClick: PropTypes.func,
   onToggleMediaLib: PropTypes.func,

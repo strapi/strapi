@@ -179,7 +179,7 @@ describe('Media library homepage', () => {
 
         renderML();
 
-        await waitFor(() => expect(screen.queryByText(`Upload assets`)).not.toBeInTheDocument());
+        await waitFor(() => expect(screen.queryByText(`Add new assets`)).not.toBeInTheDocument());
       });
 
       it('shows the "Upload assets" button when the user does have the permissions to', async () => {
@@ -193,7 +193,7 @@ describe('Media library homepage', () => {
 
         renderML();
 
-        await waitFor(() => expect(screen.getByText(`Upload assets`)).toBeInTheDocument());
+        await waitFor(() => expect(screen.getByText(`Add new assets`)).toBeInTheDocument());
       });
     });
 

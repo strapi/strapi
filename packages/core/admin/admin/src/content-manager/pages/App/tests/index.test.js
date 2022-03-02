@@ -25,13 +25,16 @@ jest.mock('@fortawesome/react-fontawesome', () => ({
 
 jest.mock('../../NoContentType', () => () => <div>NoContentType</div>);
 
+jest.mock('@strapi/helper-plugin', () => ({
+  ...jest.requireActual('@strapi/helper-plugin'),
+  useGuidedTour: jest.fn(() => ({
+    startSection: jest.fn(),
+  })),
+}));
+
 describe('Content manager | App | main', () => {
   beforeEach(() => {
     jest.resetModules(); // Most important - it clears the cache
-  });
-
-  afterEach(() => {
-    jest.resetAllMocks();
   });
 
   it('should not crash', () => {
@@ -72,9 +75,15 @@ describe('Content manager | App | main', () => {
         {
           kind: 'collectionType',
           uid: 'category',
+          isDisplayed: true,
           info: { label: 'Categories', name: 'category' },
         },
-        { kind: 'singleType', uid: 'homepage', info: { label: 'Home page', name: 'homepage' } },
+        {
+          kind: 'singleType',
+          isDisplayed: true,
+          uid: 'homepage',
+          info: { label: 'Home page', name: 'homepage' },
+        },
       ],
       components: [],
       status: 'resolved',
@@ -190,6 +199,7 @@ describe('Content manager | App | main', () => {
         background: #eaeaef;
         padding: 4px;
         border-radius: 4px;
+        min-width: 20px;
       }
 
       .c24 {
@@ -259,6 +269,24 @@ describe('Content manager | App | main', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c22 {
+        display: -webkit-inline-box;
+        display: -webkit-inline-flex;
+        display: -ms-inline-flexbox;
+        display: inline-flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: center;
+        -webkit-justify-content: center;
+        -ms-flex-pack: center;
+        justify-content: center;
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -444,10 +472,6 @@ describe('Content manager | App | main', () => {
         fill: #666687;
       }
 
-      .c22 {
-        display: inline-block;
-      }
-
       .c18 {
         border: none;
         padding: 0;
@@ -591,7 +615,7 @@ describe('Content manager | App | main', () => {
                     <a
                       aria-current="page"
                       class="c24 c25 active"
-                      href="/content-manager/collectionType/category?undefined"
+                      href="/content-manager/collectionType/category"
                     >
                       <div
                         class="c17"
@@ -662,7 +686,7 @@ describe('Content manager | App | main', () => {
                   <li>
                     <a
                       class="c24 c25"
-                      href="/homepage?undefined"
+                      href="/homepage"
                     >
                       <div
                         class="c17"
@@ -751,8 +775,14 @@ describe('Content manager | App | main', () => {
           kind: 'collectionType',
           uid: 'category',
           info: { label: 'Categories', name: 'category' },
+          isDisplayed: true,
         },
-        { kind: 'singleType', uid: 'homepage', info: { label: 'Home page', name: 'homepage' } },
+        {
+          kind: 'singleType',
+          isDisplayed: true,
+          uid: 'homepage',
+          info: { label: 'Home page', name: 'homepage' },
+        },
       ],
       components: [],
       status: 'resolved',
@@ -789,6 +819,7 @@ describe('Content manager | App | main', () => {
         {
           kind: 'collectionType',
           uid: 'category',
+          isDisplayed: true,
           info: { label: 'Categories', name: 'category' },
         },
         { kind: 'singleType', uid: 'homepage', info: { label: 'Home page', name: 'homepage' } },
@@ -828,7 +859,14 @@ describe('Content manager | App | main', () => {
     const contentManagerState = {
       collectionTypeLinks: [],
       singleTypeLinks: [],
-      models: [],
+      models: [
+        {
+          kind: 'collectionType',
+          uid: 'category',
+          info: { label: 'Categories', name: 'category' },
+          isDisplayed: false,
+        },
+      ],
       components: [],
       status: 'resolved',
     };

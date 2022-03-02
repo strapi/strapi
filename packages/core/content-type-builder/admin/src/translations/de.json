@@ -124,12 +124,6 @@
   "form.button.single-type.description": "Nützlich für einzelne Instanz wie Über uns, Startseite, etc.",
   "form.contentType.divider.draft-publish": "ENTWURF/VERÖFFENTLICHEN",
   "from": "von",
-  "menu.section.components.name.plural": "Komponenten",
-  "menu.section.components.name.singular": "Komponente",
-  "menu.section.models.name.plural": "Sammlungen",
-  "menu.section.models.name.singular": "Sammlung",
-  "menu.section.single-types.name.plural": "Einzel-Einträge",
-  "menu.section.single-types.name.singular": "Einzel-Eintrag",
   "modalForm.attribute.form.base.name": "Name",
   "modalForm.attribute.form.base.name.description": "Leerzeichen sind im Name eines Attributs nicht erlaubt",
   "modalForm.attribute.form.base.name.placeholder": "z.B. Slug, SEO URL, Canonical URL",
@@ -175,7 +169,5 @@
   "relation.manyWay": "hat viele",
   "relation.oneToMany": "gehört zu vielen",
   "relation.oneToOne": "hat und gehört zu ein(-er/-em)",
-  "relation.oneWay": "hat ein(-e/-en)",
-  "table.attributes.title.plural": "{number} Felder",
-  "table.attributes.title.singular": "{number} Feld"
+  "relation.oneWay": "hat ein(-e/-en)"
 }

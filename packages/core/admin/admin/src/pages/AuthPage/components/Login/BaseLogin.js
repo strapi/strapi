@@ -16,7 +16,7 @@ import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 import { Formik } from 'formik';
 import { Column, LayoutContent } from '../../../../layouts/UnauthenticatedLayout';
-import Logo from '../Logo';
+import Logo from '../../../../components/UnauthenticatedLogo';
 import FieldActionWrapper from '../FieldActionWrapper';
 
 const PasswordInput = styled(TextInput)`

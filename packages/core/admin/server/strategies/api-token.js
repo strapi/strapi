@@ -16,9 +16,6 @@ const extractToken = ctx => {
 
     return parts[1];
   }
-  if (ctx.query.access_token) {
-    return ctx.query.access_token;
-  }
 
   return null;
 };
@@ -60,7 +57,8 @@ const verify = (auth, config) => {
    * scopes. If the route has no scope, then you can't get access to it.
    */
 
-  if (config.scope && config.scope.every(isReadScope)) {
+  const scopes = Array.isArray(config.scope) ? config.scope : [config.scope];
+  if (config.scope && scopes.every(isReadScope)) {
     return;
   }
 

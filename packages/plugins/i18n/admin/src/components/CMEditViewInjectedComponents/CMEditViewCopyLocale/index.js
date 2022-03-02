@@ -45,7 +45,7 @@ const Content = ({ appLocales, currentLocale, localizations, readPermissions }) 
   const toggleNotification = useNotification();
   const { formatMessage } = useIntl();
   const dispatch = useDispatch();
-  const { allLayoutData, slug } = useCMEditViewDataManager();
+  const { allLayoutData, initialData, slug } = useCMEditViewDataManager();
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [value, setValue] = useState(options[0]?.value || '');
@@ -59,12 +59,15 @@ const Content = ({ appLocales, currentLocale, localizations, readPermissions }) 
 
     const requestURL = `/content-manager/collection-types/${slug}/${value}`;
 
+    setIsLoading(true);
     try {
-      setIsLoading(true);
-
       const { data: response } = await axiosInstance.get(requestURL);
 
       const cleanedData = cleanData(response, allLayoutData, localizations);
+      ['createdBy', 'updatedBy', 'publishedAt', 'id', 'createdAt'].forEach(key => {
+        if (!initialData[key]) return;
+        cleanedData[key] = initialData[key];
+      });
 
       dispatch({ type: 'ContentManager/CrudReducer/GET_DATA_SUCCEEDED', data: cleanedData });
 

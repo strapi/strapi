@@ -24,12 +24,13 @@ import UnauthenticatedLayout, {
   Column,
   LayoutContent,
 } from '../../../../layouts/UnauthenticatedLayout';
-import Logo from '../Logo';
+import Logo from '../../../../components/UnauthenticatedLogo';
 import FieldActionWrapper from '../FieldActionWrapper';
 
 const CenteredBox = styled(Box)`
   text-align: center;
 `;
+
 const A = styled.a`
   color: ${({ theme }) => theme.colors.primary600};
 `;
@@ -178,7 +179,10 @@ const Register = ({ fieldsToDisable, noSignin, onSubmit, schema }) => {
                         : undefined
                     }
                     required
-                    label={formatMessage({ id: 'Auth.form.email.label', defaultMessage: 'Email' })}
+                    label={formatMessage({
+                      id: 'Auth.form.email.label',
+                      defaultMessage: 'Email',
+                    })}
                     type="email"
                   />
                   <PasswordInput

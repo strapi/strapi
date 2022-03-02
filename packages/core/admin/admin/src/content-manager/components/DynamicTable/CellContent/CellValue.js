@@ -1,13 +1,15 @@
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import toString from 'lodash/toString';
+import parseISO from 'date-fns/parseISO';
+import { getNumberOfDecimals } from './utils/getNumberOfDecimals';
 
 const CellValue = ({ type, value }) => {
   const { formatDate, formatTime, formatNumber } = useIntl();
   let formattedValue = value;
 
   if (type === 'date') {
-    formattedValue = formatDate(value, { dateStyle: 'full' });
+    formattedValue = formatDate(parseISO(value), { dateStyle: 'full' });
   }
 
   if (type === 'datetime') {
@@ -27,8 +29,17 @@ const CellValue = ({ type, value }) => {
     });
   }
 
-  if (['float', 'integer', 'biginteger', 'decimal'].includes(type)) {
-    formattedValue = formatNumber(value);
+  if (['float', 'decimal'].includes(type)) {
+    const numberOfDecimals = getNumberOfDecimals(value);
+
+    formattedValue = formatNumber(value, {
+      minimumFractionDigits: numberOfDecimals,
+      maximumFractionDigits: numberOfDecimals,
+    });
+  }
+
+  if (['integer', 'biginteger'].includes(type)) {
+    formattedValue = formatNumber(value, { maximumFractionDigits: 0 });
   }
 
   return toString(formattedValue);

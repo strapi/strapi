@@ -17,7 +17,7 @@ import UnauthenticatedLayout, {
   LayoutContent,
 } from '../../../../../../admin/src/layouts/UnauthenticatedLayout';
 import SSOProviders from './SSOProviders';
-import Logo from '../../../../../../admin/src/pages/AuthPage/components/Logo';
+import Logo from '../../../../../../admin/src/components/UnauthenticatedLogo';
 
 const DividerFull = styled(Divider)`
   flex: 1;

@@ -106,7 +106,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   background: #ffffff;
 }
 
-.c43 .sc-fTQvRK {
+.c43 .sc-cvlWTT {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -178,7 +178,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   background: #f0f0ff;
 }
 
-.c46 .sc-fTQvRK {
+.c46 .sc-cvlWTT {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -260,7 +260,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   background: #4945ff;
 }
 
-.c47 .sc-fTQvRK {
+.c47 .sc-cvlWTT {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -887,6 +887,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
 
 .c13 {
   grid-column: span 6;
+  max-width: 100%;
 }
 
 .c15 {
@@ -1210,7 +1211,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                                 <span
                                   class="c29"
                                 >
-                                  780✕1476
+                                  1476✕780
                                 </span>
                               </div>
                             </div>

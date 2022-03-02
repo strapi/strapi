@@ -12,6 +12,7 @@ const Editor = ({
   editorRef,
   error,
   isPreviewMode,
+  isExpandMode,
   name,
   onChange,
   placeholder,
@@ -25,9 +26,8 @@ const Editor = ({
       lineWrapping: true,
       extraKeys: {
         Enter: 'newlineAndIndentContinueMarkdownList',
-        // Leaving this commented for now
-        // Tab: false,
-        // 'Shift-Tab': false,
+        Tab: false,
+        'Shift-Tab': false,
       },
       readOnly: false,
       smartIndent: false,
@@ -65,7 +65,7 @@ const Editor = ({
 
   return (
     <EditorAndPreviewWrapper>
-      <EditorStylesContainer disabled={disabled || isPreviewMode}>
+      <EditorStylesContainer isExpandMode={isExpandMode} disabled={disabled || isPreviewMode}>
         <textarea ref={textareaRef} />
       </EditorStylesContainer>
       {isPreviewMode && <PreviewWysiwyg data={value} />}
@@ -77,6 +77,7 @@ Editor.defaultProps = {
   disabled: false,
   error: undefined,
   isPreviewMode: false,
+  isExpandMode: false,
   placeholder: '',
   value: '',
 };
@@ -86,6 +87,7 @@ Editor.propTypes = {
   editorRef: PropTypes.shape({ current: PropTypes.any }).isRequired,
   error: PropTypes.string,
   isPreviewMode: PropTypes.bool,
+  isExpandMode: PropTypes.bool,
   name: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
   placeholder: PropTypes.string,
