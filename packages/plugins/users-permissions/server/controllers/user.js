@@ -90,7 +90,7 @@ module.exports = {
     const { id } = ctx.params;
     const { email, username, password } = ctx.request.body;
 
-    const user = await getService('user').fetch({ id });
+    const user = await getService('user').fetch(id);
 
     await validateUpdateUserBody(ctx.request.body);
 
