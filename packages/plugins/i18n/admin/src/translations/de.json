@@ -25,7 +25,7 @@
   "Settings.locales.modal.advanced.setAsDefault.hint": "Eine Standardsprache muss ausgewählt sein",
   "Settings.locales.modal.advanced.settings": "Einstellungen",
   "Settings.locales.modal.base": "Grundeinstellungen",
-  "Settings.locales.modal.create.alreadyExist": "Diese Übersetzung existiert bereits",
+  "Settings.locales.modal.create.alreadyExist": "Diese Sprache existiert bereits",
   "Settings.locales.modal.create.defaultLocales.loading": "Verfügbare Übersetzungen werden geladen...",
   "Settings.locales.modal.create.success": "Übersetzung hinzugefügt",
   "Settings.locales.modal.create.tab.label": "Wechseln zwischen den Grundeinstellungen und den fortgeschrittenen Einstellungen",
