@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useIntl } from 'react-intl';
 import { Helmet } from 'react-helmet';
 import { useQuery } from 'react-query';
-import FlexSearch from 'flexsearch';
+import matchSorter from 'match-sorter';
 import {
   AnErrorOccurred,
   CheckPagePermissions,
@@ -31,12 +31,6 @@ const MarketPlacePage = () => {
   const trackUsageRef = useRef(trackUsage);
   const toggleNotification = useNotification();
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState([]);
-  const flexIndex = FlexSearch.Index({
-    profile: 'speed',
-    tokenize: 'forward',
-  });
-  const searchIndex = useRef(flexIndex);
 
   useFocusWhenNavigate();
 
@@ -57,11 +51,15 @@ const MarketPlacePage = () => {
     );
   };
 
-  const { status: marketplacePluginsStatus, data: marketplacePluginsResponse } =
-    useFetchMarketplacePlugins(notifyMarketplaceLoad);
+  const {
+    status: marketplacePluginsStatus,
+    data: marketplacePluginsResponse,
+  } = useFetchMarketplacePlugins(notifyMarketplaceLoad);
 
-  const { status: installedPluginsStatus, data: installedPluginsResponse } =
-    useFetchInstalledPlugins();
+  const {
+    status: installedPluginsStatus,
+    data: installedPluginsResponse,
+  } = useFetchInstalledPlugins();
 
   const { data: appInfoResponse, status: appInfoStatus } = useQuery(
     'app-information',
@@ -84,20 +82,9 @@ const MarketPlacePage = () => {
     'error'
   );
 
-  const handleInputChange = (input) => {
+  const handleInputChange = input => {
     setSearchQuery(input);
-    setSearchResults(searchIndex.current.search(input));
   };
-
-  useEffect(() => {
-    if (!isLoading) {
-      marketplacePluginsResponse.data.forEach((plugin) => {
-        const fieldsToIndex = [plugin.attributes.name, plugin.attributes.description].join(' ');
-
-        searchIndex.current.add(plugin.id, fieldsToIndex);
-      });
-    }
-  }, [isLoading, marketplacePluginsResponse]);
 
   useEffect(() => {
     trackUsageRef.current('didGoToMarketplace');
@@ -121,15 +108,13 @@ const MarketPlacePage = () => {
     );
   }
 
-  const searchResultPlugins = searchResults.map((result) =>
-    marketplacePluginsResponse.data.find((plugin) => plugin.id === result)
-  );
+  const searchResults = matchSorter(marketplacePluginsResponse.data, searchQuery, {
+    keys: ['attributes.name', 'attributes.description'],
+  });
 
-  const displayedPlugins = searchResultPlugins.length
-    ? searchResultPlugins
-    : marketplacePluginsResponse.data;
+  const displayedPlugins = searchResults.length ? searchResults : marketplacePluginsResponse.data;
 
-  const installedPluginNames = installedPluginsResponse.plugins.map((plugin) => plugin.packageName);
+  const installedPluginNames = installedPluginsResponse.plugins.map(plugin => plugin.packageName);
 
   return (
     <Layout>
@@ -156,7 +141,7 @@ const MarketPlacePage = () => {
               name="searchbar"
               onClear={() => handleInputChange('')}
               value={searchQuery}
-              onChange={(e) => handleInputChange(e.target.value)}
+              onChange={e => handleInputChange(e.target.value)}
               clearLabel={formatMessage({
                 id: 'admin.pages.MarketPlacePage.search.clear',
                 defaultMessage: 'Clear the plugin search',
@@ -186,7 +171,7 @@ const MarketPlacePage = () => {
             />
           ) : (
             <Grid gap={4}>
-              {displayedPlugins.map((plugin) => (
+              {displayedPlugins.map(plugin => (
                 <GridItem col={4} s={6} xs={12} style={{ height: '100%' }} key={plugin.id}>
                   <PluginCard
                     plugin={plugin}
