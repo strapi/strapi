@@ -12,14 +12,14 @@ const EnhancedStack = styled(Stack)`
   align-items: center;
 `;
 
-export const EmptyPluginSearch = ({ icon, content, size, count }) => {
+export const EmptyPluginSearch = ({ content }) => {
   return (
     <Box position="relative">
-      <EmptyPluginGrid size={size} count={count} />
+      <EmptyPluginGrid />
       <Box position="absolute" top={11} width="100%">
         <EnhancedStack size={4} textAlign="center">
           <EnhancedStack size={6}>
-            <Icon as={icon || EmptyStateDocument} color="" width="160px" height="88px" />
+            <Icon as={EmptyStateDocument} color="" width="160px" height="88px" />
             <Typography variant="delta" as="p" textColor="neutral600">
               {content}
             </Typography>
@@ -30,15 +30,6 @@ export const EmptyPluginSearch = ({ icon, content, size, count }) => {
   );
 };
 
-EmptyPluginSearch.defaultProps = {
-  icon: undefined,
-  size: 'M',
-  count: 12,
-};
-
 EmptyPluginSearch.propTypes = {
-  icon: PropTypes.func,
   content: PropTypes.string.isRequired,
-  size: PropTypes.string,
-  count: PropTypes.number,
 };

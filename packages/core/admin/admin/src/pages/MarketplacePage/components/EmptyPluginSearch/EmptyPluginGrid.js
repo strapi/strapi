@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { Box } from '@strapi/design-system/Box';
 import { GridLayout } from '@strapi/design-system/Layout';
@@ -9,29 +8,19 @@ const EmptyPluginCard = styled(Box)`
   opacity: 0.33;
 `;
 
-const PlaceholderSize = {
-  S: 138,
-  M: 234,
-};
-
-export const EmptyPluginGrid = ({ count, size }) => {
+export const EmptyPluginGrid = () => {
   return (
     <GridLayout>
-      {Array(count)
+      {Array(12)
         .fill(null)
         .map((_, idx) => (
           <EmptyPluginCard
             // eslint-disable-next-line react/no-array-index-key
             key={`empty-plugin-card-${idx}`}
-            height={`${PlaceholderSize[size]}px`}
+            height="234px"
             hasRadius
           />
         ))}
     </GridLayout>
   );
-};
-
-EmptyPluginGrid.propTypes = {
-  count: PropTypes.number.isRequired,
-  size: PropTypes.string.isRequired,
 };
