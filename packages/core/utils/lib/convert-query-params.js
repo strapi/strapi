@@ -10,6 +10,7 @@ const parseType = require('./parse-type');
 const contentTypesUtils = require('./content-types');
 
 const { PUBLISHED_AT_ATTRIBUTE } = contentTypesUtils.constants;
+const avoidFinalClasses = ['Date']
 
 class InvalidOrderError extends Error {
   constructor() {
@@ -344,12 +345,17 @@ const convertAndSanitizeFilters = (filters, schema) => {
       if (['$null', '$notNull'].includes(key)) {
         filters[key] = parseType({ type: 'boolean', value: filters[key], forceCast: true });
       } else if (isObject(value)) {
-        filters[key] = convertAndSanitizeFilters(value, schema);
+        // Skip final classes
+        if (avoidFinalClasses.includes(value.constructor.name)) {
+          filters[key] = value
+        } else {
+          filters[key] = convertAndSanitizeFilters(value, schema);
+        }
       }
     }
 
     // Remove empty objects & arrays
-    if (isObject(filters[key]) && isEmpty(filters[key])) {
+    if (isObject(filters[key]) && isEmpty(filters[key]) && !avoidFinalClasses.includes(filters[key].constructor.name)) {
       removeOperator(key);
     }
   }
