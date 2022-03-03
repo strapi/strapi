@@ -100,7 +100,7 @@ program
 
 // `$ strapi start`
 program
-  .command('start')
+  .command('start [dir]')
   .description('Start your Strapi application')
   .action(getLocalScript('start'));
 

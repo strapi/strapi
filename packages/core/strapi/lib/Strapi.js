@@ -1,5 +1,6 @@
 'use strict';
 
+const path = require('path');
 const _ = require('lodash');
 const { isFunction } = require('lodash/fp');
 const { createLogger } = require('@strapi/logger');
@@ -50,8 +51,10 @@ const LIFECYCLES = {
 class Strapi {
   constructor(opts = {}) {
     destroyOnSignal(this);
-    const rootDir = opts.dir || process.cwd();
+
+    const rootDir = opts.dir ? path.resolve(process.cwd(), opts.dir) : process.cwd();
     const appConfig = loadConfiguration(rootDir, opts);
+
     this.container = createContainer(this);
     this.container.register('config', createConfigProvider(appConfig));
     this.container.register('content-types', contentTypesRegistry(this));
