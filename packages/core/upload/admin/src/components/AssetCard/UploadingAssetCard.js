@@ -79,7 +79,7 @@ export const UploadingAssetCard = ({ asset, onCancel, onStatusChange, addUploade
   };
 
   return (
-    <Stack size={1}>
+    <Stack spacing={1}>
       <Card borderColor={error ? 'danger600' : undefined}>
         <CardHeader>
           <UploadProgressWrapper>

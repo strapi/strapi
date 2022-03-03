@@ -79,7 +79,7 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
     });
 
     expect(container.firstChild).toMatchInlineSnapshot(`
-      .c38 {
+      .c39 {
         padding-left: 4px;
       }
 
@@ -198,6 +198,69 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
 
       .c26[aria-disabled='true'] svg path {
         fill: #666687;
+      }
+
+      .c38 {
+        color: #4945ff;
+        font-size: 0.75rem;
+        line-height: 1.33;
+      }
+
+      .c35 {
+        cursor: pointer;
+      }
+
+      .c36 {
+        display: -webkit-inline-box;
+        display: -webkit-inline-flex;
+        display: -ms-inline-flexbox;
+        display: inline-flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        -webkit-text-decoration: none;
+        text-decoration: none;
+        position: relative;
+        outline: none;
+      }
+
+      .c36 svg path {
+        fill: #4945ff;
+      }
+
+      .c36 svg {
+        font-size: 0.625rem;
+      }
+
+      .c36:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c36:focus-visible {
+        outline: none;
+      }
+
+      .c36:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
       }
 
       .c13 {
@@ -558,70 +621,16 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
         background: #4945ff;
       }
 
-      .c37 {
-        color: #4945ff;
-        font-size: 0.75rem;
-        line-height: 1.33;
+      .c6 svg > g,
+      .c6 svg path {
+        fill: #ffffff;
       }
 
-      .c35 {
-        display: -webkit-inline-box;
-        display: -webkit-inline-flex;
-        display: -ms-inline-flexbox;
-        display: inline-flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        -webkit-text-decoration: none;
-        text-decoration: none;
-        position: relative;
-        outline: none;
-      }
-
-      .c35 svg path {
-        fill: #4945ff;
-      }
-
-      .c35 svg {
-        font-size: 0.625rem;
-      }
-
-      .c35:after {
-        -webkit-transition-property: all;
-        transition-property: all;
-        -webkit-transition-duration: 0.2s;
-        transition-duration: 0.2s;
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -4px;
-        bottom: -4px;
-        left: -4px;
-        right: -4px;
-        border: 2px solid transparent;
-      }
-
-      .c35:focus-visible {
-        outline: none;
-      }
-
-      .c35:focus-visible:after {
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -5px;
-        bottom: -5px;
-        left: -5px;
-        right: -5px;
-        border: 2px solid #4945ff;
-      }
-
-      .c36 svg path {
+      .c37 svg path {
         fill: #8e8ea9;
       }
 
-      .c36:hover svg path {
+      .c37:hover svg path {
         fill: #32324d;
       }
 
@@ -912,13 +921,14 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
                           class="c34"
                         >
                           <a
-                            class="c35 c36"
-                            href="/settings/api-tokens/1"
+                            class="c35 c36 c37"
                             tabindex="-1"
+                            target="_self"
                             title="Edit My super token"
+                            to="/settings/api-tokens/1"
                           >
                             <span
-                              class="c37"
+                              class="c38"
                             >
                               <svg
                                 fill="none"
@@ -938,7 +948,7 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
                           </a>
                           <div
                             aria-hidden="true"
-                            class="c38"
+                            class="c39"
                             role="button"
                           >
                             <span>

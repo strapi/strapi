@@ -1,4 +1,5 @@
 import React from 'react';
+import { NavLink } from 'react-router-dom';
 import { useFocusWhenNavigate } from '@strapi/helper-plugin';
 import { Main } from '@strapi/design-system/Main';
 import { LinkButton } from '@strapi/design-system/LinkButton';
@@ -25,6 +26,7 @@ const NoContentType = () => {
         <EmptyStateLayout
           action={
             <LinkButton
+              as={NavLink}
               variant="secondary"
               startIcon={<Plus />}
               to="/plugins/content-type-builder/content-types/create-content-type"

@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { Form } from '@strapi/helper-plugin';
+import { Form, Link } from '@strapi/helper-plugin';
 import ArrowLeft from '@strapi/icons/ArrowLeft';
 import Check from '@strapi/icons/Check';
 import Publish from '@strapi/icons/Play';
 import { ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
 import { Box } from '@strapi/design-system/Box';
 import { Button } from '@strapi/design-system/Button';
-import { Link } from '@strapi/design-system/Link';
 import { Stack } from '@strapi/design-system/Stack';
 import { TextInput } from '@strapi/design-system/TextInput';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
@@ -50,7 +49,7 @@ const WebhookForm = ({
         <Form noValidate>
           <HeaderLayout
             primaryAction={
-              <Stack horizontal size={2}>
+              <Stack horizontal spacing={2}>
                 <Button
                   onClick={() => {
                     triggerWebhook();
@@ -92,7 +91,7 @@ const WebhookForm = ({
             }
           />
           <ContentLayout>
-            <Stack size={4}>
+            <Stack spacing={4}>
               {showTriggerResponse && (
                 <div className="trigger-wrapper">
                   <TriggerContainer
@@ -103,7 +102,7 @@ const WebhookForm = ({
                 </div>
               )}
               <Box background="neutral0" padding={8} shadow="filterShadow" hasRadius>
-                <Stack size={6}>
+                <Stack spacing={6}>
                   <Grid gap={6}>
                     <GridItem col={6}>
                       <Field

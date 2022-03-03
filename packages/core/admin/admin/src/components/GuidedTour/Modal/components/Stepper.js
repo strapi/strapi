@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { pxToRem } from '@strapi/helper-plugin';
+import { NavLink } from 'react-router-dom';
 import { Typography } from '@strapi/design-system/Typography';
 import { Button } from '@strapi/design-system/Button';
 import { LinkButton } from '@strapi/design-system/LinkButton';
@@ -67,7 +68,12 @@ const StepperModal = ({
           <Content {...content} />
           {cta &&
             (cta.target ? (
-              <LinkButton endIcon={<ArrowRight />} onClick={onCtaClick} to={cta.target}>
+              <LinkButton
+                as={NavLink}
+                endIcon={<ArrowRight />}
+                onClick={onCtaClick}
+                to={cta.target}
+              >
                 {formatMessage(cta.title)}
               </LinkButton>
             ) : (

@@ -7,6 +7,7 @@
 import React from 'react';
 import { useFocusWhenNavigate } from '@strapi/helper-plugin';
 import { Main } from '@strapi/design-system/Main';
+import { NavLink } from 'react-router-dom';
 import { LinkButton } from '@strapi/design-system/LinkButton';
 import { ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
 import { EmptyStateLayout } from '@strapi/design-system/EmptyStateLayout';
@@ -30,7 +31,7 @@ const InternalErrorPage = () => {
       <ContentLayout>
         <EmptyStateLayout
           action={
-            <LinkButton variant="secondary" endIcon={<ArrowRight />} to="/">
+            <LinkButton as={NavLink} variant="secondary" endIcon={<ArrowRight />} to="/">
               {formatMessage({
                 id: 'app.components.NotFoundPage.back',
                 defaultMessage: 'Back to homepage',

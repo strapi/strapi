@@ -6,6 +6,7 @@ import {
   useTracking,
   LoadingIndicatorPage,
   SettingsPageTitle,
+  Link,
 } from '@strapi/helper-plugin';
 import { Box } from '@strapi/design-system/Box';
 import { Button } from '@strapi/design-system/Button';
@@ -13,7 +14,6 @@ import { ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
 import { Stack } from '@strapi/design-system/Stack';
 import { Formik } from 'formik';
-import { Link } from '@strapi/design-system/Link';
 import ArrowLeft from '@strapi/icons/ArrowLeft';
 import get from 'lodash/get';
 import { useIntl } from 'react-intl';
@@ -109,7 +109,7 @@ const EditPage = () => {
             <>
               <HeaderLayout
                 primaryAction={
-                  <Stack horizontal size={2}>
+                  <Stack horizontal spacing={2}>
                     <Button
                       disabled={role.code === 'strapi-super-admin'}
                       onClick={handleSubmit}
@@ -141,7 +141,7 @@ const EditPage = () => {
                 }
               />
               <ContentLayout>
-                <Stack size={6}>
+                <Stack spacing={6}>
                   <RoleForm
                     isLoading={isRoleLoading}
                     disabled={isFormDisabled}

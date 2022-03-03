@@ -160,10 +160,6 @@ describe('Marketplace coming soon', () => {
         margin-bottom: 0;
       }
 
-      .c11 > * + * {
-        margin-top: 0px;
-      }
-
       .c23 > * {
         margin-left: 0;
         margin-right: 0;
@@ -173,18 +169,18 @@ describe('Marketplace coming soon', () => {
         margin-left: 8px;
       }
 
-      .c27 {
+      .c28 {
         font-weight: 600;
         color: #32324d;
         font-size: 0.875rem;
         line-height: 1.43;
       }
 
-      .c29 {
+      .c30 {
         padding-left: 8px;
       }
 
-      .c24 {
+      .c25 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -198,21 +194,21 @@ describe('Marketplace coming soon', () => {
         outline: none;
       }
 
-      .c24 svg {
+      .c25 svg {
         height: 12px;
         width: 12px;
       }
 
-      .c24 svg > g,
-      .c24 svg path {
+      .c25 svg > g,
+      .c25 svg path {
         fill: #ffffff;
       }
 
-      .c24[aria-disabled='true'] {
+      .c25[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c24:after {
+      .c25:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -227,11 +223,11 @@ describe('Marketplace coming soon', () => {
         border: 2px solid transparent;
       }
 
-      .c24:focus-visible {
+      .c25:focus-visible {
         outline: none;
       }
 
-      .c24:focus-visible:after {
+      .c25:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -242,7 +238,11 @@ describe('Marketplace coming soon', () => {
         border: 2px solid #4945ff;
       }
 
-      .c25 {
+      .c24 {
+        cursor: pointer;
+      }
+
+      .c26 {
         padding: 10px 16px;
         background: #4945ff;
         border: none;
@@ -257,7 +257,7 @@ describe('Marketplace coming soon', () => {
         text-decoration: none;
       }
 
-      .c25 .c28 {
+      .c26 .c29 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -268,49 +268,54 @@ describe('Marketplace coming soon', () => {
         align-items: center;
       }
 
-      .c25 .c26 {
+      .c26 .c27 {
         color: #ffffff;
       }
 
-      .c25[aria-disabled='true'] {
+      .c26[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c25[aria-disabled='true'] .c26 {
+      .c26[aria-disabled='true'] .c27 {
         color: #666687;
       }
 
-      .c25[aria-disabled='true'] svg > g,
-      .c25[aria-disabled='true'] svg path {
+      .c26[aria-disabled='true'] svg > g,
+      .c26[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c25[aria-disabled='true']:active {
+      .c26[aria-disabled='true']:active {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c25[aria-disabled='true']:active .c26 {
+      .c26[aria-disabled='true']:active .c27 {
         color: #666687;
       }
 
-      .c25[aria-disabled='true']:active svg > g,
-      .c25[aria-disabled='true']:active svg path {
+      .c26[aria-disabled='true']:active svg > g,
+      .c26[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
-      .c25:hover {
+      .c26:hover {
         border: 1px solid #7b79ff;
         background: #7b79ff;
       }
 
-      .c25:active {
+      .c26:active {
         border: 1px solid #4945ff;
         background: #4945ff;
       }
 
-      .c30 {
+      .c26 svg > g,
+      .c26 svg path {
+        fill: #ffffff;
+      }
+
+      .c31 {
         padding: 10px 16px;
         background: #4945ff;
         border: none;
@@ -325,7 +330,7 @@ describe('Marketplace coming soon', () => {
         text-decoration: none;
       }
 
-      .c30 .c28 {
+      .c31 .c29 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -336,62 +341,62 @@ describe('Marketplace coming soon', () => {
         align-items: center;
       }
 
-      .c30 .c26 {
+      .c31 .c27 {
         color: #ffffff;
       }
 
-      .c30[aria-disabled='true'] {
+      .c31[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c30[aria-disabled='true'] .c26 {
+      .c31[aria-disabled='true'] .c27 {
         color: #666687;
       }
 
-      .c30[aria-disabled='true'] svg > g,
-      .c30[aria-disabled='true'] svg path {
+      .c31[aria-disabled='true'] svg > g,
+      .c31[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c30[aria-disabled='true']:active {
+      .c31[aria-disabled='true']:active {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c30[aria-disabled='true']:active .c26 {
+      .c31[aria-disabled='true']:active .c27 {
         color: #666687;
       }
 
-      .c30[aria-disabled='true']:active svg > g,
-      .c30[aria-disabled='true']:active svg path {
+      .c31[aria-disabled='true']:active svg > g,
+      .c31[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
-      .c30:hover {
+      .c31:hover {
         background-color: #ffffff;
       }
 
-      .c30:active {
+      .c31:active {
         background-color: #ffffff;
         border: 1px solid #4945ff;
       }
 
-      .c30:active .c26 {
+      .c31:active .c27 {
         color: #4945ff;
       }
 
-      .c30:active svg > g,
-      .c30:active svg path {
+      .c31:active svg > g,
+      .c31:active svg path {
         fill: #4945ff;
       }
 
-      .c30 .c26 {
+      .c31 .c27 {
         color: #271fe0;
       }
 
-      .c30 svg > g,
-      .c30 svg path {
+      .c31 svg > g,
+      .c31 svg path {
         fill: #271fe0;
       }
 
@@ -509,22 +514,23 @@ describe('Marketplace coming soon', () => {
                 </div>
                 <div
                   class="c21 c22 c23"
+                  spacing="2"
                 >
                   <a
                     aria-disabled="false"
-                    class="c24 c25"
+                    class="c24 c25 c26"
                     href="https://market.strapi.io"
                     rel="noreferrer noopener"
                     target="_blank"
                   >
                     <span
-                      class="c26 c27"
+                      class="c27 c28"
                     >
                       Visit the web marketplace
                     </span>
                     <div
                       aria-hidden="true"
-                      class="c28 c29"
+                      class="c29 c30"
                     >
                       <svg
                         fill="none"
@@ -542,13 +548,13 @@ describe('Marketplace coming soon', () => {
                   </a>
                   <a
                     aria-disabled="false"
-                    class="c24 c30"
+                    class="c24 c25 c31"
                     href="https://market.strapi.io/submit-plugin"
                     rel="noreferrer noopener"
                     target="_blank"
                   >
                     <span
-                      class="c26 c27"
+                      class="c27 c28"
                     >
                       Submit your plugin
                     </span>

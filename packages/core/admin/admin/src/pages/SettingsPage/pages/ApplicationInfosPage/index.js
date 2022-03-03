@@ -42,7 +42,7 @@ const ApplicationInfosPage = () => {
             paddingRight={6}
             paddingLeft={6}
           >
-            <Stack size={5}>
+            <Stack spacing={5}>
               <Typography variant="delta" as="h3">
                 {formatMessage({
                   id: 'Settings.application.details',
@@ -60,6 +60,7 @@ const ApplicationInfosPage = () => {
                   </Typography>
                   <Typography as="p">v{strapiVersion}</Typography>
                   <Link
+                    isExternal
                     href={
                       appInfos.communityEdition
                         ? 'https://discord.strapi.io'
@@ -95,6 +96,7 @@ const ApplicationInfosPage = () => {
                 <GridItem col={6} s={12}>
                   {shouldUpdateStrapi && (
                     <Link
+                      isExternal
                       href={`https://github.com/strapi/strapi/releases/tag/${latestStrapiReleaseTag}`}
                       endIcon={<ExternalLink />}
                     >
@@ -106,7 +108,11 @@ const ApplicationInfosPage = () => {
                   )}
                 </GridItem>
                 <GridItem col={6} s={12}>
-                  <Link href="https://strapi.io/pricing-self-hosted" endIcon={<ExternalLink />}>
+                  <Link
+                    isExternal
+                    href="https://strapi.io/pricing-self-hosted"
+                    endIcon={<ExternalLink />}
+                  >
                     {formatMessage({
                       id: 'Settings.application.link-pricing',
                       defaultMessage: 'See all pricing plans',

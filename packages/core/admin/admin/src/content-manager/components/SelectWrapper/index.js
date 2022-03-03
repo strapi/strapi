@@ -5,7 +5,6 @@ import {
   useIntl,
 } from 'react-intl';
 import { useLocation } from 'react-router-dom';
-import { Link } from '@strapi/design-system/Link';
 import { Stack } from '@strapi/design-system/Stack';
 import { useTheme } from 'styled-components';
 import findIndex from 'lodash/findIndex';
@@ -13,7 +12,12 @@ import get from 'lodash/get';
 import isArray from 'lodash/isArray';
 import isEmpty from 'lodash/isEmpty';
 import set from 'lodash/set';
-import { NotAllowedInput, useCMEditViewDataManager, useQueryParams } from '@strapi/helper-plugin';
+import {
+  NotAllowedInput,
+  useCMEditViewDataManager,
+  useQueryParams,
+  Link,
+} from '@strapi/helper-plugin';
 import { stringify } from 'qs';
 import axios from 'axios';
 import { axiosInstance } from '../../../core/utils';
@@ -280,7 +284,7 @@ function SelectWrapper({
   const styles = getSelectStyles(theme);
 
   return (
-    <Stack size={1}>
+    <Stack spacing={1}>
       <Label
         intlLabel={intlLabel}
         isSingle={isSingle}
@@ -368,7 +372,4 @@ SelectWrapper.propTypes = {
 
 const Memoized = memo(SelectWrapper);
 
-export default connect(
-  Memoized,
-  select
-);
+export default connect(Memoized, select);

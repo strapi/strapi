@@ -33,7 +33,7 @@ const Modal = ({ onClose, onSkip, children, hideSkip }) => {
             shadow="popupShadow"
             hasRadius
             padding={4}
-            size={8}
+            spacing={8}
             role="dialog"
             aria-modal
             onClick={e => e.stopPropagation()}

@@ -7,6 +7,7 @@
 import React from 'react';
 import { useTracking, CheckPermissions } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
+import { NavLink } from 'react-router-dom';
 import get from 'lodash/get';
 import { LinkButton } from '@strapi/design-system/LinkButton';
 import Pencil from '@strapi/icons/Pencil';
@@ -40,6 +41,7 @@ const LinkToCTB = () => {
   return (
     <CheckPermissions permissions={permissions}>
       <LinkButton
+        as={NavLink}
         to={`${baseUrl}/${suffixUrl}`}
         onClick={handleClick}
         size="S"

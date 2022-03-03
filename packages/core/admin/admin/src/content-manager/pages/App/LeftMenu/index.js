@@ -12,6 +12,7 @@ import {
   SubNavSections,
   SubNavLink,
 } from '@strapi/design-system/SubNav';
+import { NavLink } from 'react-router-dom';
 import { useSelector, shallowEqual } from 'react-redux';
 import { useIntl } from 'react-intl';
 import matchSorter from 'match-sorter';
@@ -111,7 +112,7 @@ const LeftMenu = () => {
                 const search = link.search ? `?${link.search}` : '';
 
                 return (
-                  <SubNavLink key={link.uid} to={`${link.to}${search}`}>
+                  <SubNavLink as={NavLink} key={link.uid} to={`${link.to}${search}`}>
                     {link.title}
                   </SubNavLink>
                 );

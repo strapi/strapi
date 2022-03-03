@@ -10,8 +10,8 @@ export const SelectedStep = ({ selectedAssets, onSelectAsset, onReorderAsset }) 
   const { formatMessage } = useIntl();
 
   return (
-    <Stack size={4}>
-      <Stack size={0}>
+    <Stack spacing={4}>
+      <Stack spacing={0}>
         <Typography variant="pi" fontWeight="bold" textColor="neutral800">
           {formatMessage(
             {

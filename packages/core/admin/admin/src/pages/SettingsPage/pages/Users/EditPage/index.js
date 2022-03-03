@@ -15,6 +15,7 @@ import {
   useNotification,
   useOverlayBlocker,
   LoadingIndicatorPage,
+  Link,
 } from '@strapi/helper-plugin';
 import { useQuery } from 'react-query';
 import { Formik } from 'formik';
@@ -22,7 +23,6 @@ import { Box } from '@strapi/design-system/Box';
 import { Button } from '@strapi/design-system/Button';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
-import { Link } from '@strapi/design-system/Link';
 import { Typography } from '@strapi/design-system/Typography';
 import { Main } from '@strapi/design-system/Main';
 import { Stack } from '@strapi/design-system/Stack';
@@ -205,7 +205,7 @@ const EditPage = ({ canUpdate }) => {
                     <MagicLink registrationToken={data.registrationToken} />
                   </Box>
                 )}
-                <Stack size={7}>
+                <Stack spacing={7}>
                   <Box
                     background="neutral0"
                     hasRadius
@@ -215,7 +215,7 @@ const EditPage = ({ canUpdate }) => {
                     paddingLeft={7}
                     paddingRight={7}
                   >
-                    <Stack size={4}>
+                    <Stack spacing={4}>
                       <Typography variant="delta" as="h2">
                         {formatMessage({
                           id: 'app.components.Users.ModalCreateBody.block-title.details',
@@ -250,7 +250,7 @@ const EditPage = ({ canUpdate }) => {
                     paddingLeft={7}
                     paddingRight={7}
                   >
-                    <Stack size={4}>
+                    <Stack spacing={4}>
                       <Typography variant="delta" as="h2">
                         {formatMessage({
                           id: 'app.components.Users.ModalCreateBody.block-title.login',

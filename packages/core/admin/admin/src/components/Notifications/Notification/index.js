@@ -60,7 +60,7 @@ const Notification = ({ dispatch, notification }) => {
     <Alert
       action={
         link ? (
-          <Link href={link.url} target="_blank">
+          <Link isExternal href={link.url} target="_blank">
             {formatMessage({
               id: link.label?.id || link.label,
               defaultMessage: link.label?.defaultMessage || link.label?.id || link.label,

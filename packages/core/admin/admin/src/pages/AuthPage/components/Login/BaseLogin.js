@@ -5,12 +5,11 @@ import { Box } from '@strapi/design-system/Box';
 import { Stack } from '@strapi/design-system/Stack';
 import { Main } from '@strapi/design-system/Main';
 import { Flex } from '@strapi/design-system/Flex';
-import { Link } from '@strapi/design-system/Link';
 import { Button } from '@strapi/design-system/Button';
 import { TextInput } from '@strapi/design-system/TextInput';
 import { Checkbox } from '@strapi/design-system/Checkbox';
 import { Typography } from '@strapi/design-system/Typography';
-import { Form } from '@strapi/helper-plugin';
+import { Form, Link } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
@@ -75,7 +74,7 @@ const Login = ({ onSubmit, schema, children }) => {
                 )}
               </Column>
 
-              <Stack size={6}>
+              <Stack spacing={6}>
                 <TextInput
                   error={
                     errors.email

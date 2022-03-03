@@ -23,7 +23,7 @@ const HomeHeader = ({ hasCreatedContentType, onCreateCT }) => {
   return (
     <div>
       <Box paddingLeft={6} paddingBottom={10}>
-        <StackCustom size={5}>
+        <StackCustom spacing={5}>
           <Typography as="h1" variant="alpha">
             {hasCreatedContentType
               ? formatMessage({
@@ -49,7 +49,7 @@ const HomeHeader = ({ hasCreatedContentType, onCreateCT }) => {
                 })}
           </WordWrap>
           {hasCreatedContentType ? (
-            <Link href="https://strapi.io/blog">
+            <Link isExternal href="https://strapi.io/blog">
               {formatMessage({
                 id: 'app.components.HomePage.button.blog',
                 defaultMessage: 'See more on the blog',

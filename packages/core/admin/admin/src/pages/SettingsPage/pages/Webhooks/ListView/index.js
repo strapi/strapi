@@ -5,7 +5,7 @@
  */
 
 import React, { useEffect, useReducer, useRef, useState } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useHistory, useLocation, NavLink } from 'react-router-dom';
 import { useIntl } from 'react-intl';
 import {
   request,
@@ -252,7 +252,13 @@ const ListView = () => {
           primaryAction={
             canCreate &&
             !loadingWebhooks && (
-              <LinkButton startIcon={<Plus />} variant="default" to={`${pathname}/create`} size="L">
+              <LinkButton
+                as={NavLink}
+                startIcon={<Plus />}
+                variant="default"
+                to={`${pathname}/create`}
+                size="L"
+              >
                 {formatMessage({
                   id: 'Settings.webhooks.list.button.add',
                   defaultMessage: 'Create new webhook',
@@ -413,7 +419,7 @@ const ListView = () => {
                           </Flex>
                         </Td>
                         <Td>
-                          <Stack horizontal size={1} {...stopPropagation}>
+                          <Stack horizontal spacing={1} {...stopPropagation}>
                             {canUpdate && (
                               <IconButton
                                 onClick={() => {

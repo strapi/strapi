@@ -128,8 +128,8 @@ const Wysiwyg = ({
 
   return (
     <>
-      <Stack size={1}>
-        <Stack horizontal size={1}>
+      <Stack spacing={1}>
+        <Stack horizontal spacing={1}>
           <Typography variant="pi" fontWeight="bold" textColor="neutral800">
             {label}
             {required && <TypographyAsterisk textColor="danger600">*</TypographyAsterisk>}

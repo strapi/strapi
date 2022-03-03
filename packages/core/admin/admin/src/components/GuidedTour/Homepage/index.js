@@ -1,5 +1,6 @@
 import React from 'react';
 import { useGuidedTour } from '@strapi/helper-plugin';
+import { NavLink } from 'react-router-dom';
 import { useIntl } from 'react-intl';
 import { Stack } from '@strapi/design-system/Stack';
 import { Flex } from '@strapi/design-system/Flex';
@@ -19,7 +20,7 @@ const GuidedTourHomepage = () => {
     key,
     title: val.home.title,
     content: (
-      <LinkButton to={val.home.cta.target} endIcon={<ArrowRight />}>
+      <LinkButton as={NavLink} to={val.home.cta.target} endIcon={<ArrowRight />}>
         {formatMessage(val.home.cta.title)}
       </LinkButton>
     ),
@@ -42,7 +43,7 @@ const GuidedTourHomepage = () => {
       paddingBottom={4}
       background="neutral0"
     >
-      <Stack size={6}>
+      <Stack spacing={6}>
         <Typography variant="beta" as="h2">
           {formatMessage({
             id: 'app.components.GuidedTour.title',

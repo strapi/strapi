@@ -160,7 +160,7 @@ class InputJSON extends React.Component {
 
     return (
       <FieldWrapper name={this.props.name} hint={this.props.description} error={this.props.error}>
-        <Stack size={1}>
+        <Stack spacing={1}>
           <Label
             intlLabel={this.props.intlLabel}
             labelAction={this.props.labelAction}

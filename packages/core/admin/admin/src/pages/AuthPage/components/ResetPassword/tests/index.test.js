@@ -191,6 +191,11 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         background: #4945ff;
       }
 
+      .c33 svg > g,
+      .c33 svg path {
+        fill: #ffffff;
+      }
+
       .c29 {
         border: none;
         background: transparent;
@@ -257,175 +262,6 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         align-items: center;
       }
 
-      .c18 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-      }
-
-      .c18 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c18 > * + * {
-        margin-top: 24px;
-      }
-
-      .c21 {
-        font-weight: 600;
-        color: #32324d;
-        font-size: 0.75rem;
-        line-height: 1.33;
-      }
-
-      .c22 {
-        color: #d02b20;
-        font-size: 0.875rem;
-        line-height: 1.43;
-      }
-
-      .c31 {
-        color: #666687;
-        font-size: 0.75rem;
-        line-height: 1.33;
-      }
-
-      .c23 {
-        line-height: 0;
-      }
-
-      .c28 {
-        padding-right: 12px;
-        padding-left: 8px;
-      }
-
-      .c20 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c24 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-box-pack: justify;
-        -webkit-justify-content: space-between;
-        -ms-flex-pack: justify;
-        justify-content: space-between;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c26 {
-        border: none;
-        border-radius: 4px;
-        padding-left: 16px;
-        padding-right: 0;
-        color: #32324d;
-        font-weight: 400;
-        font-size: 0.875rem;
-        display: block;
-        width: 100%;
-      }
-
-      .c26::-webkit-input-placeholder {
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c26::-moz-placeholder {
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c26:-ms-input-placeholder {
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c26::placeholder {
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c26[aria-disabled='true'] {
-        background: inherit;
-        color: inherit;
-      }
-
-      .c26:focus {
-        outline: none;
-        box-shadow: none;
-      }
-
-      .c25 {
-        border: 1px solid #dcdce4;
-        border-radius: 4px;
-        background: #ffffff;
-        height: 2.5rem;
-        outline: none;
-        box-shadow: 0;
-        -webkit-transition-property: border-color,box-shadow,fill;
-        transition-property: border-color,box-shadow,fill;
-        -webkit-transition-duration: 0.2s;
-        transition-duration: 0.2s;
-      }
-
-      .c25:focus-within {
-        border: 1px solid #4945ff;
-        box-shadow: #4945ff 0px 0px 0px 2px;
-      }
-
-      .c19 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-      }
-
-      .c19 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c19 > * + * {
-        margin-top: 4px;
-      }
-
-      .c17 {
-        color: #32324d;
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-      }
-
-      .c10:focus-visible {
-        outline: none;
-      }
-
       .c39 {
         color: #4945ff;
         font-size: 0.75rem;
@@ -483,6 +319,175 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         left: -5px;
         right: -5px;
         border: 2px solid #4945ff;
+      }
+
+      .c18 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+      }
+
+      .c18 > * {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .c18 > * + * {
+        margin-top: 24px;
+      }
+
+      .c28 {
+        padding-right: 12px;
+        padding-left: 8px;
+      }
+
+      .c21 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c24 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: justify;
+        -webkit-justify-content: space-between;
+        -ms-flex-pack: justify;
+        justify-content: space-between;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c20 {
+        font-weight: 600;
+        color: #32324d;
+        font-size: 0.75rem;
+        line-height: 1.33;
+      }
+
+      .c22 {
+        color: #d02b20;
+        font-size: 0.875rem;
+        line-height: 1.43;
+      }
+
+      .c31 {
+        color: #666687;
+        font-size: 0.75rem;
+        line-height: 1.33;
+      }
+
+      .c23 {
+        line-height: 0;
+      }
+
+      .c26 {
+        border: none;
+        border-radius: 4px;
+        padding-left: 16px;
+        padding-right: 0;
+        color: #32324d;
+        font-weight: 400;
+        font-size: 0.875rem;
+        display: block;
+        width: 100%;
+        background: inherit;
+      }
+
+      .c26::-webkit-input-placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c26::-moz-placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c26:-ms-input-placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c26::placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c26[aria-disabled='true'] {
+        color: inherit;
+      }
+
+      .c26:focus {
+        outline: none;
+        box-shadow: none;
+      }
+
+      .c25 {
+        border: 1px solid #dcdce4;
+        border-radius: 4px;
+        background: #ffffff;
+        height: 2.5rem;
+        outline: none;
+        box-shadow: 0;
+        -webkit-transition-property: border-color,box-shadow,fill;
+        transition-property: border-color,box-shadow,fill;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+      }
+
+      .c25:focus-within {
+        border: 1px solid #4945ff;
+        box-shadow: #4945ff 0px 0px 0px 2px;
+      }
+
+      .c19 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+      }
+
+      .c19 > * {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .c19 > * + * {
+        margin-top: 4px;
+      }
+
+      .c17 {
+        color: #32324d;
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+      }
+
+      .c10:focus-visible {
+        outline: none;
       }
 
       .c5 {
@@ -754,19 +759,21 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
                 </div>
                 <div
                   class="c18"
+                  spacing="6"
                 >
                   <div>
                     <div>
                       <div
                         class="c19"
+                        spacing="1"
                       >
-                        <div
+                        <label
                           class="c20"
+                          for="textinput-1"
+                          required=""
                         >
-                          <label
+                          <div
                             class="c21"
-                            for="textinput-1"
-                            required=""
                           >
                             Password
                             <span
@@ -774,8 +781,8 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
                             >
                               *
                             </span>
-                          </label>
-                        </div>
+                          </div>
+                        </label>
                         <div
                           class="c24 c25"
                         >
@@ -825,14 +832,15 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
                     <div>
                       <div
                         class="c19"
+                        spacing="1"
                       >
-                        <div
+                        <label
                           class="c20"
+                          for="textinput-2"
+                          required=""
                         >
-                          <label
+                          <div
                             class="c21"
-                            for="textinput-2"
-                            required=""
                           >
                             Confirmation Password
                             <span
@@ -840,8 +848,8 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
                             >
                               *
                             </span>
-                          </label>
-                        </div>
+                          </div>
+                        </label>
                         <div
                           class="c24 c25"
                         >

@@ -1,6 +1,7 @@
 import React from 'react';
 import Plus from '@strapi/icons/Plus';
 import { Box } from '@strapi/design-system/Box';
+import { NavLink } from 'react-router-dom';
 import {
   SubNav,
   SubNavHeader,
@@ -53,7 +54,12 @@ const ContentTypeBuilderNav = () => {
                     return (
                       <SubNavLinkSection key={link.name} label={upperFirst(link.title)}>
                         {link.links.map(subLink => (
-                          <SubNavLink to={subLink.to} active={subLink.active} key={subLink.name}>
+                          <SubNavLink
+                            as={NavLink}
+                            to={subLink.to}
+                            active={subLink.active}
+                            key={subLink.name}
+                          >
                             {upperFirst(
                               formatMessage({ id: subLink.name, defaultMessage: subLink.title })
                             )}
@@ -64,14 +70,14 @@ const ContentTypeBuilderNav = () => {
                   }
 
                   return (
-                    <SubNavLink to={link.to} active={link.active} key={link.name}>
+                    <SubNavLink as={NavLink} to={link.to} active={link.active} key={link.name}>
                       {upperFirst(formatMessage({ id: link.name, defaultMessage: link.title }))}
                     </SubNavLink>
                   );
                 })}
               </SubNavSection>
               {section.customLink && (
-                <Box as="li" paddingLeft={7}>
+                <Box paddingLeft={7}>
                   <TextButton onClick={section.customLink.onClick} startIcon={<Plus />}>
                     {formatMessage({
                       id: section.customLink.id,

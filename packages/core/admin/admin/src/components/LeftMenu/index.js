@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { NavLink as Link } from 'react-router-dom';
+import { NavLink as RouterLink } from 'react-router-dom';
 import { Divider } from '@strapi/design-system/Divider';
 import {
   MainNav,
@@ -29,7 +29,7 @@ const LinkUserWrapper = styled(Box)`
   left: ${({ theme }) => theme.spaces[5]};
 `;
 
-const LinkUser = styled(Link)`
+const LinkUser = styled(RouterLink)`
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -88,10 +88,12 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
   return (
     <MainNav condensed={condensed}>
       <NavBrand
+        as={RouterLink}
         workplace={formatMessage({
           id: 'app.components.LeftMenu.navbrand.workplace',
           defaultMessage: 'Workplace',
         })}
+        to="/"
         title={menuTitle}
         icon={<img src={menuLogo} alt={menuTitle} />}
       />
@@ -99,7 +101,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
       <Divider />
 
       <NavSections>
-        <NavLink to="/content-manager" icon={<Write />}>
+        <NavLink as={RouterLink} to="/content-manager" icon={<Write />}>
           {formatMessage({ id: 'content-manager.plugin.name', defaultMessage: 'Content manager' })}
         </NavLink>
 
@@ -109,7 +111,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
               const Icon = link.icon;
 
               return (
-                <NavLink to={link.to} key={link.to} icon={<Icon />}>
+                <NavLink as={RouterLink} to={link.to} key={link.to} icon={<Icon />}>
                   {formatMessage(link.intlLabel)}
                 </NavLink>
               );
@@ -127,6 +129,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
                   badgeContent={
                     (link.notificationsCount > 0 && link.notificationsCount.toString()) || undefined
                   }
+                  as={RouterLink}
                   to={link.to}
                   key={link.to}
                   icon={<LinkIcon />}
@@ -156,7 +159,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
           hasRadius
         >
           <FocusTrap onEscape={handleToggleUserLinks}>
-            <Stack size={0}>
+            <Stack spacing={0}>
               <LinkUser tabIndex={0} onClick={handleToggleUserLinks} to="/me">
                 <Typography>
                   {formatMessage({

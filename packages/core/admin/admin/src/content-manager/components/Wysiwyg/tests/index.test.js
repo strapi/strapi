@@ -484,16 +484,6 @@ describe('Wysiwyg render and actions buttons', () => {
         cursor: not-allowed;
       }
 
-      .c15 {
-        color: #666687;
-        display: block;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        font-size: 0.875rem;
-        line-height: 1.43;
-      }
-
       .c14 {
         padding-right: 16px;
         padding-left: 16px;
@@ -535,6 +525,16 @@ describe('Wysiwyg render and actions buttons', () => {
         align-items: center;
       }
 
+      .c15 {
+        color: #666687;
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: 0.875rem;
+        line-height: 1.43;
+      }
+
       .c8 {
         display: -webkit-box;
         display: -webkit-flex;
@@ -548,10 +548,6 @@ describe('Wysiwyg render and actions buttons', () => {
       .c8 > * {
         margin-top: 0;
         margin-bottom: 0;
-      }
-
-      .c8 > * + * {
-        margin-top: 0px;
       }
 
       .c10 {
@@ -1035,9 +1031,11 @@ describe('Wysiwyg render and actions buttons', () => {
 
       <div
         class="c0"
+        spacing="1"
       >
         <div
           class="c1 c2"
+          spacing="1"
         >
           <span
             class="c3"

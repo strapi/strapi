@@ -2,9 +2,7 @@ import { getType, getOtherInfos } from './content-manager/utils/getAttributeInfo
 
 // Contexts
 export { default as AppInfosContext } from './contexts/AppInfosContext';
-export {
-  default as AutoReloadOverlayBockerContext,
-} from './contexts/AutoReloadOverlayBockerContext';
+export { default as AutoReloadOverlayBockerContext } from './contexts/AutoReloadOverlayBockerContext';
 export { default as NotificationsContext } from './contexts/NotificationsContext';
 export { default as OverlayBlockerContext } from './contexts/OverlayBlockerContext';
 
@@ -46,6 +44,7 @@ export { default as ConfirmDialog } from './components/ConfirmDialog';
 export { default as ContentBox } from './components/ContentBox';
 export { default as DynamicTable } from './components/DynamicTable';
 export { default as EmptyStateLayout } from './components/EmptyStateLayout';
+export { default as Link } from './components/Link';
 export { default as NoContent } from './components/NoContent';
 export { default as NoMedia } from './components/NoMedia';
 export { default as NoPermissions } from './components/NoPermissions';
@@ -71,21 +70,15 @@ export { default as SortIcon } from './icons/SortIcon';
 export { default as RemoveRoundedButton } from './icons/RemoveRoundedButton';
 
 // content-manager
-export {
-  default as ContentManagerEditViewDataManagerContext,
-} from './content-manager/contexts/ContentManagerEditViewDataManagerContext';
-export {
-  default as useCMEditViewDataManager,
-} from './content-manager/hooks/useCMEditViewDataManager';
+export { default as ContentManagerEditViewDataManagerContext } from './content-manager/contexts/ContentManagerEditViewDataManagerContext';
+export { default as useCMEditViewDataManager } from './content-manager/hooks/useCMEditViewDataManager';
 export { getType };
 export { getOtherInfos };
 
 // Utils
 export { default as auth } from './utils/auth';
 export { default as hasPermissions } from './utils/hasPermissions';
-export {
-  default as prefixFileUrlWithBackendUrl,
-} from './utils/prefixFileUrlWithBackendUrl/prefixFileUrlWithBackendUrl';
+export { default as prefixFileUrlWithBackendUrl } from './utils/prefixFileUrlWithBackendUrl/prefixFileUrlWithBackendUrl';
 export { default as prefixPluginTranslations } from './utils/prefixPluginTranslations';
 export { default as pxToRem } from './utils/pxToRem';
 export { default as to } from './utils/await-to-js';
@@ -93,9 +86,7 @@ export { default as setHexOpacity } from './utils/setHexOpacity';
 export { default as translatedErrors } from './utils/translatedErrors';
 export { default as formatComponentData } from './content-manager/utils/formatComponentData';
 export { findMatchingPermissions } from './utils/hasPermissions';
-export {
-  default as contentManagementUtilRemoveFieldsFromData,
-} from './content-manager/utils/contentManagementUtilRemoveFieldsFromData';
+export { default as contentManagementUtilRemoveFieldsFromData } from './content-manager/utils/contentManagementUtilRemoveFieldsFromData';
 export { default as getFileExtension } from './utils/getFileExtension/getFileExtension';
 export * from './utils/stopPropagation';
 export { default as difference } from './utils/difference';

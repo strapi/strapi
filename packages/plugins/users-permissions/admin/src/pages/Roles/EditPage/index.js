@@ -9,7 +9,6 @@ import { Textarea } from '@strapi/design-system/Textarea';
 import { Typography } from '@strapi/design-system/Typography';
 import ArrowLeft from '@strapi/icons/ArrowLeft';
 import Check from '@strapi/icons/Check';
-import { Link } from '@strapi/design-system/Link';
 import { GridItem, Grid } from '@strapi/design-system/Grid';
 import { Formik } from 'formik';
 import { useIntl } from 'react-intl';
@@ -20,6 +19,7 @@ import {
   LoadingIndicatorPage,
   Form,
   useNotification,
+  Link,
 } from '@strapi/helper-plugin';
 import UsersPermissions from '../../../components/UsersPermissions';
 import getTrad from '../../../utils/getTrad';
@@ -115,7 +115,7 @@ const EditPage = () => {
               }
             />
             <ContentLayout>
-              <Stack size={7}>
+              <Stack spacing={7}>
                 <Box
                   background="neutral0"
                   hasRadius
@@ -125,7 +125,7 @@ const EditPage = () => {
                   paddingLeft={7}
                   paddingRight={7}
                 >
-                  <Stack size={4}>
+                  <Stack spacing={4}>
                     <Typography variant="delta" as="h2">
                       {formatMessage({
                         id: getTrad('EditPage.form.roles'),

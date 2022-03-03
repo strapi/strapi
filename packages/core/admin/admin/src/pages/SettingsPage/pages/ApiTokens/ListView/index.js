@@ -17,7 +17,7 @@ import { Button } from '@strapi/design-system/Button';
 import { LinkButton } from '@strapi/design-system/LinkButton';
 import Plus from '@strapi/icons/Plus';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
-import { useHistory } from 'react-router-dom';
+import { useHistory, NavLink } from 'react-router-dom';
 import qs from 'qs';
 import { axiosInstance } from '../../../../../core/utils';
 import adminPermissions from '../../../../../permissions';
@@ -112,6 +112,7 @@ const ApiTokenListView = () => {
         primaryAction={
           canCreate ? (
             <LinkButton
+              as={NavLink}
               data-testid="create-api-token-button"
               startIcon={<Plus />}
               size="L"

@@ -190,7 +190,7 @@ describe('<PaginationURLQuery />', () => {
 
       <nav
         aria-label="pagination"
-        class="sc-lhMiDA"
+        class="sc-ehIJor"
       >
         <ul
           class="c0 c1"
@@ -200,7 +200,7 @@ describe('<PaginationURLQuery />', () => {
               aria-current="page"
               aria-disabled="true"
               class="c2 c3 active"
-              href="/"
+              href="/?page=0"
               tabindex="-1"
             >
               <div
@@ -247,7 +247,7 @@ describe('<PaginationURLQuery />', () => {
               aria-current="page"
               aria-disabled="true"
               class="c2 c3 active"
-              href="/"
+              href="/?page=1"
               tabindex="-1"
             >
               <div

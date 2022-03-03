@@ -7,7 +7,6 @@ import { Box } from '@strapi/design-system/Box';
 import { Stack } from '@strapi/design-system/Stack';
 import { Main } from '@strapi/design-system/Main';
 import { Flex } from '@strapi/design-system/Flex';
-import { Link } from '@strapi/design-system/Link';
 import { Button } from '@strapi/design-system/Button';
 import { TextInput } from '@strapi/design-system/TextInput';
 import { Checkbox } from '@strapi/design-system/Checkbox';
@@ -15,7 +14,7 @@ import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { Typography } from '@strapi/design-system/Typography';
 import EyeStriked from '@strapi/icons/EyeStriked';
 import Eye from '@strapi/icons/Eye';
-import { Form, useQuery, useNotification } from '@strapi/helper-plugin';
+import { Form, useQuery, useNotification, Link } from '@strapi/helper-plugin';
 import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { Formik } from 'formik';
@@ -131,7 +130,7 @@ const Register = ({ fieldsToDisable, noSignin, onSubmit, schema }) => {
                     </Typography>
                   </CenteredBox>
                 </Column>
-                <Stack size={7}>
+                <Stack spacing={7}>
                   <Grid gap={4}>
                     <GridItem col={6}>
                       <TextInput
