@@ -72,6 +72,7 @@
   "admin.pages.MarketPlacePage.search.placeholder": "Search for a plugin",
   "admin.pages.MarketPlacePage.search.clear": "Clear the plugin search",
   "admin.pages.MarketPlacePage.search.empty": "No result for \"{target}\"",
+  "admin.pages.MarketPlacePage.plugin.tooltip.madeByStrapi": "Made by Strapi",
   "Content Manager": "Content Manager",
   "Content Type Builder": "Content-Types Builder",
   "Documentation": "Documentation",

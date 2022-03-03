@@ -61,6 +61,12 @@ describe('Marketplace page', () => {
       }
 
       .c54 {
+        margin-left: 4px;
+        width: 24px;
+        height: auto;
+      }
+
+      .c55 {
         padding-left: 16px;
       }
 
@@ -267,7 +273,7 @@ describe('Marketplace page', () => {
         margin-left: 8px;
       }
 
-      .c55 {
+      .c56 {
         color: #328048;
         margin-right: 8px;
         width: 12;
@@ -466,7 +472,7 @@ describe('Marketplace page', () => {
         line-height: 1.43;
       }
 
-      .c56 {
+      .c57 {
         font-weight: 600;
         color: #328048;
         font-size: 0.875rem;
@@ -1284,21 +1290,13 @@ describe('Marketplace page', () => {
                                   class="c32"
                                   tabindex="0"
                                 >
-                                  <svg
-                                    class="c52 c53"
-                                    fill="none"
-                                    height="1em"
-                                    viewBox="0 0 24 24"
-                                    width="1em"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                  >
-                                    <path
-                                      clip-rule="evenodd"
-                                      d="M12 24c6.627 0 12-5.373 12-12S18.627 0 12 0 0 5.373 0 12s5.373 12 12 12zm-1.438-11.066L16.158 7.5 18 9.245l-7.438 7.18-4.462-4.1 1.84-1.745 2.622 2.354z"
-                                      fill="#212134"
-                                      fill-rule="evenodd"
-                                    />
-                                  </svg>
+                                  <img
+                                    alt="Made by Strapi"
+                                    class="c54"
+                                    height="auto"
+                                    src="IMAGE_MOCK"
+                                    width="6"
+                                  />
                                 </div>
                               </span>
                             </div>
@@ -1350,10 +1348,10 @@ describe('Marketplace page', () => {
                           </div>
                         </a>
                         <div
-                          class="c54"
+                          class="c55"
                         >
                           <svg
-                            class="c55 c53"
+                            class="c56 c53"
                             fill="none"
                             height="12"
                             viewBox="0 0 24 24"
@@ -1366,7 +1364,7 @@ describe('Marketplace page', () => {
                             />
                           </svg>
                           <span
-                            class="c56"
+                            class="c57"
                           >
                             Installed
                           </span>
