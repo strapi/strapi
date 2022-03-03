@@ -14,7 +14,7 @@
   "Settings.list.actions.deleteAdditionalInfos": "Dies wird die aktive Übersetzung löschen.",
   "Settings.list.actions.edit": "Übersetzung bearbeiten",
   "Settings.list.description": "Einstellungen für das Internationalisierung Plugin anpassen",
-  "Settings.list.empty.description": "Das ist ein unerwartetes Verhalten. Möglicherweise hast du die Datenbank manuell modifiziert. Stelle sicher, dass mindestens eine Übersetzung in der Datenbank existiert, um Strapi nutzen zu können",
+  "Settings.list.empty.description": "Das ist ein unerwartetes Verhalten. Möglicherweise wurde die Datenbank manuell modifiziert. Es sollte mindestens eine Sprache in der Datenbank existieren, um Strapi nutzen zu können",
   "Settings.list.empty.title": "Keine Übersetzungen vorhanden",
   "Settings.locales.default": "Standard",
   "Settings.locales.list.sort.default": "Sortierung nach Standard-Übersetzung",
