@@ -38,7 +38,7 @@
   "Settings.locales.modal.edit.success": "Übersetzung bearbeitet",
   "Settings.locales.modal.edit.tab.label": "Wechseln zwischen den Grundeinstellungen und den fortgeschrittenen Einstellungen",
   "Settings.locales.modal.locales.displayName": "Anzeigename",
-  "Settings.locales.modal.locales.displayName.description": "Die Übersetzungen wird unter diesem Namen im Admin-Panel angezeigt",
+  "Settings.locales.modal.locales.displayName.description": "Unter diesem Namen wird die Sprache im Admin-Panel angezeigt",
   "Settings.locales.modal.locales.displayName.error": "Der Anzeigename kann aus max. 50 Zeichen bestehen.",
   "Settings.locales.modal.locales.label": "Übersetzung",
   "Settings.locales.modal.locales.loaded": "Übersetzungen geladen",
