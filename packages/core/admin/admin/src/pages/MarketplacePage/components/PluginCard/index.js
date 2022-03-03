@@ -16,6 +16,8 @@ import Check from '@strapi/icons/Check';
 import CheckCircle from '@strapi/icons/CheckCircle';
 import { useNotification, useTracking } from '@strapi/helper-plugin';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
+import madeByStrapiIcon from '../../../../assets/images/icon_made-by-strapi.svg';
+
 // Custom component to have an ellipsis after the 2nd line
 const EllipsisText = styled(Typography)`
   /* stylelint-disable value-no-vendor-prefix, property-no-vendor-prefix */
@@ -37,6 +39,11 @@ const PluginCard = ({ plugin, installedPluginNames, useYarn }) => {
   const commandToCopy = useYarn
     ? `yarn add ${attributes.npmPackageName}`
     : `npm install ${attributes.npmPackageName}`;
+
+  const madeByStrapiMessage = formatMessage({
+    id: 'admin.pages.MarketPlacePage.plugin.tooltip.madeByStrapi',
+    defaultMessage: 'Made by Strapi',
+  });
 
   return (
     <Flex
@@ -65,7 +72,7 @@ const PluginCard = ({ plugin, installedPluginNames, useYarn }) => {
           <Typography as="h3" variant="delta">
             <Flex alignItems="center">
               {attributes.name}
-              {attributes.validated && (
+              {attributes.validated && !attributes.madeByStrapi && (
                 <Tooltip
                   description={formatMessage({
                     id: 'admin.pages.MarketPlacePage.plugin.tooltip.verified',
@@ -74,6 +81,20 @@ const PluginCard = ({ plugin, installedPluginNames, useYarn }) => {
                 >
                   <Flex>
                     <Icon as={CheckCircle} marginLeft={2} color="success600" />
+                  </Flex>
+                </Tooltip>
+              )}
+              {attributes.madeByStrapi && (
+                <Tooltip description={madeByStrapiMessage}>
+                  <Flex>
+                    <Box
+                      as="img"
+                      src={madeByStrapiIcon}
+                      alt={madeByStrapiMessage}
+                      marginLeft={1}
+                      width={6}
+                      height="auto"
+                    />
                   </Flex>
                 </Tooltip>
               )}
@@ -154,6 +175,7 @@ PluginCard.propTypes = {
       logo: PropTypes.object.isRequired,
       developerName: PropTypes.string.isRequired,
       validated: PropTypes.bool.isRequired,
+      madeByStrapi: PropTypes.bool.isRequired,
       strapiCompatibility: PropTypes.oneOf(['v3', 'v4']).isRequired,
     }).isRequired,
   }).isRequired,
