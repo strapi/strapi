@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
-import isEmpty from 'lodash/isEmpty';
 import get from 'lodash/get';
 import omit from 'lodash/omit';
 import { Box } from '@strapi/design-system/Box';
@@ -16,7 +15,13 @@ import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { Typography } from '@strapi/design-system/Typography';
 import EyeStriked from '@strapi/icons/EyeStriked';
 import Eye from '@strapi/icons/Eye';
-import { Form, useQuery, useNotification, useTracking } from '@strapi/helper-plugin';
+import {
+  Form,
+  useQuery,
+  useNotification,
+  useTracking,
+  getYupInnerErrors,
+} from '@strapi/helper-plugin';
 import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { Formik } from 'formik';
@@ -42,11 +47,12 @@ const PasswordInput = styled(TextInput)`
   }
 `;
 
-const Register = ({ fieldsToDisable, noSignin, onSubmit, schema }) => {
+const Register = ({ authType, fieldsToDisable, noSignin, onSubmit, schema }) => {
   const toggleNotification = useNotification();
   const { push } = useHistory();
   const [passwordShown, setPasswordShown] = useState(false);
   const [confirmPasswordShown, setConfirmPasswordShown] = useState(false);
+  const [submitCount, setSubmitCount] = useState(0);
   const [userInfo, setUserInfo] = useState({});
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
@@ -99,22 +105,35 @@ const Register = ({ fieldsToDisable, noSignin, onSubmit, schema }) => {
             registrationToken: registrationToken || undefined,
             news: false,
           }}
-          onSubmit={(data, formik) => {
-            if (registrationToken) {
-              // We need to pass the registration token in the url param to the api in order to submit another admin user
-              onSubmit({ userInfo: omit(data, ['registrationToken']), registrationToken }, formik);
-            } else {
-              onSubmit(data, formik);
+          onSubmit={async (data, formik) => {
+            try {
+              await schema.validate(data, { abortEarly: false });
+
+              if (submitCount > 0 && authType === 'register-admin') {
+                trackUsage('didSubmitWithErrorsFirstAdmin', { count: submitCount.toString() });
+              }
+
+              if (registrationToken) {
+                // We need to pass the registration token in the url param to the api in order to submit another admin user
+                onSubmit(
+                  { userInfo: omit(data, ['registrationToken']), registrationToken },
+                  formik
+                );
+              } else {
+                onSubmit(data, formik);
+              }
+            } catch (err) {
+              const errors = getYupInnerErrors(err);
+              setSubmitCount(submitCount + 1);
+
+              formik.setErrors(errors);
             }
           }}
-          validationSchema={schema}
+          // Leaving this part commented when we remove the tracking for the submitCount
+          // validationSchema={schema}
           validateOnChange={false}
         >
-          {({ values, errors, handleChange, submitCount }) => {
-            if (submitCount > 1 && isEmpty(errors)) {
-              trackUsage('didSubmitWithErrorsFirstAdmin', { count: submitCount });
-            }
-
+          {({ values, errors, handleChange }) => {
             return (
               <Form noValidate>
                 <Main>
@@ -145,14 +164,7 @@ const Register = ({ fieldsToDisable, noSignin, onSubmit, schema }) => {
                           name="firstname"
                           required
                           value={values.firstname}
-                          error={
-                            errors.firstname
-                              ? formatMessage({
-                                  id: errors.firstname,
-                                  defaultMessage: 'This value is required.',
-                                })
-                              : undefined
-                          }
+                          error={errors.firstname ? formatMessage(errors.firstname) : undefined}
                           onChange={handleChange}
                           label={formatMessage({
                             id: 'Auth.form.firstname.label',
@@ -177,14 +189,7 @@ const Register = ({ fieldsToDisable, noSignin, onSubmit, schema }) => {
                       disabled={fieldsToDisable.includes('email')}
                       value={values.email}
                       onChange={handleChange}
-                      error={
-                        errors.email
-                          ? formatMessage({
-                              id: errors.email,
-                              defaultMessage: 'This value is required.',
-                            })
-                          : undefined
-                      }
+                      error={errors.email ? formatMessage(errors.email) : undefined}
                       required
                       label={formatMessage({
                         id: 'Auth.form.email.label',
@@ -196,14 +201,7 @@ const Register = ({ fieldsToDisable, noSignin, onSubmit, schema }) => {
                       name="password"
                       onChange={handleChange}
                       value={values.password}
-                      error={
-                        errors.password
-                          ? formatMessage({
-                              id: errors.password,
-                              defaultMessage: 'This value is required',
-                            })
-                          : undefined
-                      }
+                      error={errors.password ? formatMessage(errors.password) : undefined}
                       endAction={
                         // eslint-disable-next-line react/jsx-wrap-multilines
                         <FieldActionWrapper
@@ -243,12 +241,7 @@ const Register = ({ fieldsToDisable, noSignin, onSubmit, schema }) => {
                       onChange={handleChange}
                       value={values.confirmPassword}
                       error={
-                        errors.confirmPassword
-                          ? formatMessage({
-                              id: errors.confirmPassword,
-                              defaultMessage: 'This value is required.',
-                            })
-                          : undefined
+                        errors.confirmPassword ? formatMessage(errors.confirmPassword) : undefined
                       }
                       endAction={
                         // eslint-disable-next-line react/jsx-wrap-multilines
@@ -349,10 +342,14 @@ Register.defaultProps = {
 };
 
 Register.propTypes = {
+  authType: PropTypes.string.isRequired,
   fieldsToDisable: PropTypes.array,
   noSignin: PropTypes.bool,
   onSubmit: PropTypes.func,
-  schema: PropTypes.shape({ type: PropTypes.string.isRequired }).isRequired,
+  schema: PropTypes.shape({
+    validate: PropTypes.func.isRequired,
+    type: PropTypes.string.isRequired,
+  }).isRequired,
 };
 
 export default Register;

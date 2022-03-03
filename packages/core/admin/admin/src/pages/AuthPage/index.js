@@ -193,7 +193,7 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
       push('/');
     } catch (err) {
       trackUsage('didNotCreateFirstAdmin');
-      
+
       if (err.response) {
         const { data } = err.response;
         const apiErrors = formatAPIErrors(data);
@@ -254,6 +254,7 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
   return (
     <Component
       {...rest}
+      authType={authType}
       fieldsToDisable={fieldsToDisable}
       formErrors={formErrors}
       inputsPrefix={inputsPrefix}
