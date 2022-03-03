@@ -36,7 +36,7 @@ const MarketPlacePage = () => {
     profile: 'speed',
     tokenize: 'forward',
   });
-  const [searchIndex, setSearchIndex] = useState(flexIndex);
+  const searchIndex = useRef(flexIndex);
 
   useFocusWhenNavigate();
 
@@ -86,20 +86,18 @@ const MarketPlacePage = () => {
 
   const handleInputChange = (input) => {
     setSearchQuery(input);
-    setSearchResults(searchIndex.search(input));
+    setSearchResults(searchIndex.current.search(input));
   };
 
   useEffect(() => {
-    if (isLoading) return;
-    marketplacePluginsResponse.data.forEach((plugin) => {
-      const fieldsToIndex = JSON.stringify({
-        name: plugin.attributes.name,
-        description: plugin.attributes.description,
-      });
+    if (!isLoading) {
+      marketplacePluginsResponse.data.forEach((plugin) => {
+        const fieldsToIndex = [plugin.attributes.name, plugin.attributes.description].join(' ');
 
-      setSearchIndex(searchIndex.add(plugin.id, fieldsToIndex));
-    });
-  }, [isLoading, marketplacePluginsResponse, searchIndex]);
+        searchIndex.current.add(plugin.id, fieldsToIndex);
+      });
+    }
+  }, [isLoading, marketplacePluginsResponse]);
 
   useEffect(() => {
     trackUsageRef.current('didGoToMarketplace');
