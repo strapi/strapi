@@ -27,11 +27,7 @@ import adminPermissions from '../../permissions';
 
 const matchSearch = (plugins, search) => {
   return matchSorter(plugins, toLower(search), {
-    keys: [
-      item => {
-        return [toLower(item.attributes.name), toLower(item.attributes.description)];
-      },
-    ],
+    keys: [item => toLower(item.attributes.name), item => toLower(item.attributes.description)],
   });
 };
 
