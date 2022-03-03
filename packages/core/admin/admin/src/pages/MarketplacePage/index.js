@@ -24,6 +24,12 @@ import useFetchInstalledPlugins from '../../hooks/useFetchInstalledPlugins';
 import useFetchMarketplacePlugins from '../../hooks/useFetchMarketplacePlugins';
 import adminPermissions from '../../permissions';
 
+const matchSearch = (plugins, search) => {
+  return matchSorter(plugins, search, {
+    keys: ['attributes.name', 'attributes.description'],
+  });
+};
+
 const MarketPlacePage = () => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
@@ -104,9 +110,7 @@ const MarketPlacePage = () => {
     );
   }
 
-  const searchResults = matchSorter(marketplacePluginsResponse.data, searchQuery, {
-    keys: ['attributes.name', 'attributes.description'],
-  });
+  const searchResults = matchSearch(marketplacePluginsResponse.data, searchQuery);
 
   const displayedPlugins =
     searchResults.length && searchQuery.length ? searchResults : marketplacePluginsResponse.data;
