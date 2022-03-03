@@ -35,7 +35,7 @@
   "Settings.locales.modal.delete.success": "Sprache gelöscht",
   "Settings.locales.modal.edit.confirmation": "Fertig",
   "Settings.locales.modal.edit.locales.label": "Sprache",
-  "Settings.locales.modal.edit.success": "Übersetzung bearbeitet",
+  "Settings.locales.modal.edit.success": "Sprache bearbeitet",
   "Settings.locales.modal.edit.tab.label": "Wechseln zwischen den Grundeinstellungen und den fortgeschrittenen Einstellungen",
   "Settings.locales.modal.locales.displayName": "Anzeigename",
   "Settings.locales.modal.locales.displayName.description": "Unter diesem Namen wird die Sprache im Admin-Panel angezeigt",
