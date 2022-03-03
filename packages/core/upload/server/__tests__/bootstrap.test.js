@@ -4,8 +4,10 @@ const { join } = require('path');
 
 const bootstrap = require('../bootstrap');
 
+jest.mock('@strapi/provider-upload-local', () => ({ init() {} }));
+
 describe('Upload plugin bootstrap function', () => {
-  test('Sets default config if id does not exist', async () => {
+  test('Sets default config if it does not exist', async () => {
     const setStore = jest.fn(() => {});
     const registerMany = jest.fn(() => {});
 
