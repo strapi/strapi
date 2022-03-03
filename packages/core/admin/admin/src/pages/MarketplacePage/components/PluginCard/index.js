@@ -13,10 +13,10 @@ import { Tooltip } from '@strapi/design-system/Tooltip';
 import ExternalLink from '@strapi/icons/ExternalLink';
 import Duplicate from '@strapi/icons/Duplicate';
 import Check from '@strapi/icons/Check';
-import CheckCircle from '@strapi/icons/CheckCircle';
 import { useNotification, useTracking } from '@strapi/helper-plugin';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
-import madeByStrapiIcon from '../../../../assets/images/icon_made-by-strapi.svg';
+import madeByStrapiIcon from '../../../../assets/images/icon_plugin-made-by-strapi.svg';
+import verifiedIcon from '../../../../assets/images/icon_plugin-verified.svg';
 
 // Custom component to have an ellipsis after the 2nd line
 const EllipsisText = styled(Typography)`
@@ -43,6 +43,11 @@ const PluginCard = ({ plugin, installedPluginNames, useYarn }) => {
   const madeByStrapiMessage = formatMessage({
     id: 'admin.pages.MarketPlacePage.plugin.tooltip.madeByStrapi',
     defaultMessage: 'Made by Strapi',
+  });
+
+  const verifiedMessage = formatMessage({
+    id: 'admin.pages.MarketPlacePage.plugin.tooltip.verified',
+    defaultMessage: 'Plugin verified by Strapi',
   });
 
   return (
@@ -73,14 +78,16 @@ const PluginCard = ({ plugin, installedPluginNames, useYarn }) => {
             <Flex alignItems="center">
               {attributes.name}
               {attributes.validated && !attributes.madeByStrapi && (
-                <Tooltip
-                  description={formatMessage({
-                    id: 'admin.pages.MarketPlacePage.plugin.tooltip.verified',
-                    defaultMessage: 'Plugin verified by Strapi',
-                  })}
-                >
+                <Tooltip description={verifiedMessage}>
                   <Flex>
-                    <Icon as={CheckCircle} marginLeft={2} color="success600" />
+                    <Box
+                      as="img"
+                      src={verifiedIcon}
+                      alt={verifiedMessage}
+                      marginLeft={1}
+                      width={6}
+                      height="auto"
+                    />
                   </Flex>
                 </Tooltip>
               )}
@@ -91,7 +98,7 @@ const PluginCard = ({ plugin, installedPluginNames, useYarn }) => {
                       as="img"
                       src={madeByStrapiIcon}
                       alt={madeByStrapiMessage}
-                      marginLeft={2}
+                      marginLeft={1}
                       width={6}
                       height="auto"
                     />
