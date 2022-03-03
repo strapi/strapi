@@ -82,10 +82,6 @@ const MarketPlacePage = () => {
     'error'
   );
 
-  const handleInputChange = input => {
-    setSearchQuery(input);
-  };
-
   useEffect(() => {
     trackUsageRef.current('didGoToMarketplace');
   }, []);
@@ -139,9 +135,9 @@ const MarketPlacePage = () => {
           startActions={
             <Searchbar
               name="searchbar"
-              onClear={() => handleInputChange('')}
+              onClear={() => setSearchQuery('')}
               value={searchQuery}
-              onChange={e => handleInputChange(e.target.value)}
+              onChange={e => setSearchQuery(e.target.value)}
               clearLabel={formatMessage({
                 id: 'admin.pages.MarketPlacePage.search.clear',
                 defaultMessage: 'Clear the plugin search',
