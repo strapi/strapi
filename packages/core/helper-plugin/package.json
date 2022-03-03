@@ -58,8 +58,7 @@
     "react-intl": "5.20.2",
     "react-router": "^5.2.0",
     "react-router-dom": "5.2.0",
-    "styled-components": "^5.2.3",
-    "whatwg-fetch": "^3.6.2"
+    "styled-components": "^5.2.3"
   },
   "devDependencies": {
     "@babel/core": "7.16.7",

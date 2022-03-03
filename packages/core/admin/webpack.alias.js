@@ -3,8 +3,6 @@
 const path = require('path');
 
 const alias = [
-  'object-assign',
-  'whatwg-fetch',
   '@fortawesome/fontawesome-svg-core',
   '@fortawesome/free-solid-svg-icons',
   'history',
