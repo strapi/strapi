@@ -6,7 +6,7 @@
   "CMListView.popover.display-locales.label": "Übersetzungen anzeigen",
   "CheckboxConfirmation.Modal.body": "Möchtest du die Lokalisierung deaktivieren?",
   "CheckboxConfirmation.Modal.button-confirm": "Ja, deaktivieren",
-  "CheckboxConfirmation.Modal.content": "Wenn Du die Lokalisierung deaktivierst, werden alle Ihre Inhalte mit Ausnahme des Inhalts, der Ihrem Standardgebietsschema zugeordnet ist (sofern vorhanden), gelöscht.",
+  "CheckboxConfirmation.Modal.content": "Wenn die Lokalisierung deaktiviert wird, werden alle ihr zugeordneten Inhalte gelöscht. Die Inhalte der Standardsprache (sofern vorhanden) bleiben erhalten.",
   "Field.localized": "Dieser Wert ist einzigartig für die ausgewählte Übersetzung",
   "Field.not-localized": "Dieser Wert ist für alle Übersetzungen gleich",
   "Settings.list.actions.add": "Neue Übersetzung hinzufügen",
