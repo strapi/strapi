@@ -69,6 +69,7 @@
   "admin.pages.MarketPlacePage.plugin.info": "Learn more",
   "admin.pages.MarketPlacePage.submit.plugin.link": "Submit your plugin",
   "admin.pages.MarketPlacePage.plugin.tooltip.verified": "Plugin verified by Strapi",
+  "admin.pages.MarketPlacePage.plugin.tooltip.madeByStrapi": "Made by Strapi",
   "Content Manager": "Content Manager",
   "Content Type Builder": "Content-Types Builder",
   "Documentation": "Documentation",
