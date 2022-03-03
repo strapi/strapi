@@ -3,6 +3,7 @@ import { useIntl } from 'react-intl';
 import { Helmet } from 'react-helmet';
 import { useQuery } from 'react-query';
 import matchSorter from 'match-sorter';
+import toLower from 'lodash/toLower';
 import {
   AnErrorOccurred,
   CheckPagePermissions,
@@ -23,6 +24,16 @@ import { fetchAppInformation } from './utils/api';
 import useFetchInstalledPlugins from '../../hooks/useFetchInstalledPlugins';
 import useFetchMarketplacePlugins from '../../hooks/useFetchMarketplacePlugins';
 import adminPermissions from '../../permissions';
+
+const matchSearch = (plugins, search) => {
+  return matchSorter(plugins, toLower(search), {
+    keys: [
+      item => {
+        return [toLower(item.attributes.name), toLower(item.attributes.description)];
+      },
+    ],
+  });
+};
 
 const MarketPlacePage = () => {
   const { formatMessage } = useIntl();
@@ -104,11 +115,10 @@ const MarketPlacePage = () => {
     );
   }
 
-  const searchResults = matchSorter(marketplacePluginsResponse.data, searchQuery, {
-    keys: ['attributes.name', 'attributes.description'],
-  });
+  const searchResults = matchSearch(marketplacePluginsResponse.data, searchQuery);
 
-  const displayedPlugins = searchResults.length ? searchResults : marketplacePluginsResponse.data;
+  const displayedPlugins =
+    searchResults.length && searchQuery.length ? searchResults : marketplacePluginsResponse.data;
 
   const installedPluginNames = installedPluginsResponse.plugins.map(plugin => plugin.packageName);
 
