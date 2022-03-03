@@ -36,7 +36,10 @@ module.exports = {
         return Promise.all(data.map(entry => this.output(entry, schema, { auth })));
       }
 
-      const transforms = [sanitizers.defaultSanitizeOutput(schema)];
+      const transforms = [
+        sanitizers.defaultSanitizeOutput(schema),
+        sanitizers.sanitizeUserRelationFromRoleEntities(schema),
+      ];
 
       if (auth) {
         transforms.push(traverseEntity(visitors.removeRestrictedRelations(auth), { schema }));
