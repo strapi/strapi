@@ -18,7 +18,7 @@ import { useContentTypeLayout } from '../../../../hooks';
 import { getTrad } from '../../../../utils';
 import FieldComponent from '../../../FieldComponent';
 import Rectangle from './Rectangle';
-import useMainValue from './util';
+import useMainValue from './utils/useMainValue';
 
 const ActionStack = styled(Stack)`
   svg {
