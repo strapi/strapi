@@ -31,7 +31,7 @@
   "Settings.locales.modal.create.tab.label": "Wechseln zwischen den Grundeinstellungen und den fortgeschrittenen Einstellungen",
   "Settings.locales.modal.delete.confirm": "Ja, löschen",
   "Settings.locales.modal.delete.message": "Beim Löschen dieser Sprache werden alle zugeordneten Inhalte ebenfalls gelöscht. Um Inhalte zu behalten müssen diese zunächst in eine andere Sprache kopiert werden",
-  "Settings.locales.modal.delete.secondMessage": "Übersetzung löschen?",
+  "Settings.locales.modal.delete.secondMessage": "Sprache löschen?",
   "Settings.locales.modal.delete.success": "Übersetzung gelöscht",
   "Settings.locales.modal.edit.confirmation": "Fertig",
   "Settings.locales.modal.edit.locales.label": "Übersetzung",
