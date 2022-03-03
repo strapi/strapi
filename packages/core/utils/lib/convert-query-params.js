@@ -339,6 +339,11 @@ const convertAndSanitizeFilters = (filters, schema) => {
       }
     }
 
+    // Handle dates
+    else if (value instanceof Date) {
+      return filters;
+    }
+
     // Handle operators
     else {
       if (['$null', '$notNull'].includes(key)) {

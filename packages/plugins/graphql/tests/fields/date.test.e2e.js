@@ -113,5 +113,37 @@ describe('Test Graphql API End to End', () => {
         });
       }
     );
+
+    test.each(['2022-03-17', null])('Can filter query with date: %s', async value => {
+      const res = await graphqlQuery({
+        query: /* GraphQL */ `
+          query posts($data: PostInput!) {
+            posts(filters: { myDate: { gt: $data } }) {
+              data {
+                attributes {
+                  myDate
+                }
+              }
+            }
+          }
+        `,
+        variables: {
+          data: {
+            myDate: value,
+          },
+        },
+      });
+
+      const { body } = res;
+
+      expect(res.statusCode).toBe(200);
+      expect(body).toEqual({
+        data: {
+          posts: {
+            data: {},
+          },
+        },
+      });
+    });
   });
 });
