@@ -897,7 +897,6 @@ describe('Marketplace page', () => {
                 >
                   <div
                     class=""
-                    data-testid="search-results"
                     style="height: 100%;"
                   >
                     <div
@@ -1013,7 +1012,6 @@ describe('Marketplace page', () => {
                 >
                   <div
                     class=""
-                    data-testid="search-results"
                     style="height: 100%;"
                   >
                     <div
@@ -1152,7 +1150,6 @@ describe('Marketplace page', () => {
                 >
                   <div
                     class=""
-                    data-testid="search-results"
                     style="height: 100%;"
                   >
                     <div
@@ -1268,7 +1265,6 @@ describe('Marketplace page', () => {
                 >
                   <div
                     class=""
-                    data-testid="search-results"
                     style="height: 100%;"
                   >
                     <div
@@ -1389,7 +1385,6 @@ describe('Marketplace page', () => {
                 >
                   <div
                     class=""
-                    data-testid="search-results"
                     style="height: 100%;"
                   >
                     <div
