@@ -14,7 +14,7 @@ export const EmptyPluginSearch = ({ content }) => {
       <Box position="absolute" top={11} width="100%">
         <Flex alignItems="center" justifyContent="center" direction="column">
           <Icon as={EmptyStateDocument} color="" width="160px" height="88px" />
-          <Box marginTop={6}>
+          <Box paddingTop={6}>
             <Typography variant="delta" as="p" textColor="neutral600">
               {content}
             </Typography>
