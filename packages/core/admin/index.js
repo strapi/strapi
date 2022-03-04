@@ -79,6 +79,7 @@ async function build({ plugins, dir, env, options, optimize, forceBuild, useType
     options,
     optimize,
     roots,
+    useTypeScript,
   });
 
   const compiler = webpack(config);
@@ -253,6 +254,7 @@ async function watchAdmin({ plugins, dir, host, port, browser, options, useTypeS
     port,
     options,
     roots,
+    useTypeScript,
     devServer: {
       port,
       client: {
