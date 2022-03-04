@@ -117,9 +117,6 @@ const MarketPlacePage = () => {
   }
 
   const searchResults = matchSearch(marketplacePluginsResponse.data, searchQuery);
-  const displayedPlugins =
-    searchResults.length && searchQuery.length ? searchResults : marketplacePluginsResponse.data;
-
   const installedPluginNames = installedPluginsResponse.plugins.map(plugin => plugin.packageName);
 
   return (
@@ -154,12 +151,12 @@ const MarketPlacePage = () => {
               })}
               placeholder={formatMessage({
                 id: 'admin.pages.MarketPlacePage.search.placeholder',
-                defaultMessage: 'Search',
+                defaultMessage: 'Search for a plugin',
               })}
             >
               {formatMessage({
                 id: 'admin.pages.MarketPlacePage.search.placeholder',
-                defaultMessage: 'Search',
+                defaultMessage: 'Search for a plugin',
               })}
             </Searchbar>
           }
@@ -177,7 +174,7 @@ const MarketPlacePage = () => {
             />
           ) : (
             <Grid gap={4}>
-              {displayedPlugins.map(plugin => (
+              {searchResults.map(plugin => (
                 <GridItem col={4} s={6} xs={12} style={{ height: '100%' }} key={plugin.id}>
                   <PluginCard
                     plugin={plugin}

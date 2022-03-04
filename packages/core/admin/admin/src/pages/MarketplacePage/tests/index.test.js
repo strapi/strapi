@@ -1,5 +1,12 @@
 import React from 'react';
-import { render, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
+import {
+  render,
+  waitFor,
+  waitForElementToBeRemoved,
+  getByPlaceholderText,
+  fireEvent,
+  screen,
+} from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
@@ -834,7 +841,7 @@ describe('Marketplace page', () => {
                             class="c16"
                             for="field-1"
                           >
-                            Search
+                            Search for a plugin
                           </label>
                         </div>
                         <div
@@ -869,7 +876,7 @@ describe('Marketplace page', () => {
                             class="c24"
                             id="field-1"
                             name="searchbar"
-                            placeholder="Search"
+                            placeholder="Search for a plugin"
                             value=""
                           />
                         </div>
@@ -890,6 +897,7 @@ describe('Marketplace page', () => {
                 >
                   <div
                     class=""
+                    data-testid="search-results"
                     style="height: 100%;"
                   >
                     <div
@@ -1005,6 +1013,7 @@ describe('Marketplace page', () => {
                 >
                   <div
                     class=""
+                    data-testid="search-results"
                     style="height: 100%;"
                   >
                     <div
@@ -1143,6 +1152,7 @@ describe('Marketplace page', () => {
                 >
                   <div
                     class=""
+                    data-testid="search-results"
                     style="height: 100%;"
                   >
                     <div
@@ -1258,6 +1268,7 @@ describe('Marketplace page', () => {
                 >
                   <div
                     class=""
+                    data-testid="search-results"
                     style="height: 100%;"
                   >
                     <div
@@ -1378,6 +1389,7 @@ describe('Marketplace page', () => {
                 >
                   <div
                     class=""
+                    data-testid="search-results"
                     style="height: 100%;"
                   >
                     <div
@@ -1503,5 +1515,26 @@ describe('Marketplace page', () => {
 
     expect(trackUsage).toHaveBeenCalledWith('didGoToMarketplace');
     expect(trackUsage).toHaveBeenCalledTimes(1);
+  });
+
+  it('should return search results', async () => {
+    const { container } = render(App);
+    const input = await getByPlaceholderText(container, 'Search for a plugin');
+    fireEvent.change(input, { target: { value: 'documentation' } });
+    const match = screen.getByText('Documentation');
+    const notMatch = screen.queryByText('Sentry');
+
+    expect(match).toBeVisible();
+    expect(notMatch).toEqual(null);
+  });
+
+  it('should not return search results', async () => {
+    const { container } = render(App);
+    const input = await getByPlaceholderText(container, 'Search for a plugin');
+    const badQuery = 'asdf';
+    fireEvent.change(input, { target: { value: badQuery } });
+    const noResult = screen.getByText(`No result for "${badQuery}"`);
+
+    expect(noResult).toBeVisible();
   });
 });
