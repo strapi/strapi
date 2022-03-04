@@ -33,6 +33,9 @@ module.exports = async ({ optimization, forceBuild = true }) => {
 
   ee({ dir });
 
+  // @convly we need to update this with the real check
+  const useTypeScript = true;
+
   return strapiAdmin
     .build({
       forceBuild,
@@ -45,6 +48,7 @@ module.exports = async ({ optimization, forceBuild = true }) => {
         backend: serverUrl,
         adminPath: addSlash(adminPath),
       },
+      useTypeScript,
     })
     .then(() => {
       console.log('Admin UI built successfully');

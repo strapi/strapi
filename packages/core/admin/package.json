@@ -27,7 +27,7 @@
     "develop": "yarn create:plugin-file && yarn develop:webpack",
     "develop:webpack": "cross-env NODE_ENV=development webpack serve --config webpack.config.dev.js --progress profile",
     "prepublishOnly": "yarn build",
-    "build": "rimraf build && node ./scripts/build.js",
+    "builde": "rimraf build && node ./scripts/build.js",
     "test": "echo \"no tests yet\"",
     "test:unit": "jest --verbose",
     "test:front": "cross-env IS_EE=true jest --config ./jest.config.front.js",
@@ -145,5 +145,6 @@
   "engines": {
     "node": ">=12.22.0 <=16.x.x",
     "npm": ">=6.0.0"
-  }
+  },
+  "types": "./admin/src/index.d.ts"
 }

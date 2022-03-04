@@ -48,15 +48,15 @@ function getCustomWebpackConfig(dir, config) {
   return webpackConfig;
 }
 
-async function build({ plugins, dir, env, options, optimize, forceBuild }) {
-  const buildAdmin = await shouldBuildAdmin({ dir, plugins });
+async function build({ plugins, dir, env, options, optimize, forceBuild, useTypeScript }) {
+  const buildAdmin = await shouldBuildAdmin({ dir, plugins, useTypeScript });
 
   if (!buildAdmin && !forceBuild) {
     return;
   }
 
   // Create the cache dir containing the front-end files.
-  await createCacheDir({ dir, plugins });
+  await createCacheDir({ dir, plugins, useTypeScript });
 
   const cacheDir = path.resolve(dir, '.cache');
   const entry = path.resolve(cacheDir, 'admin', 'src');
@@ -177,7 +177,7 @@ async function copyAdmin(dest) {
   await fs.copy(path.resolve(adminPath, 'package.json'), path.resolve(dest, 'package.json'));
 }
 
-async function createCacheDir({ dir, plugins }) {
+async function createCacheDir({ dir, plugins, useTypeScript }) {
   const cacheDir = path.resolve(dir, '.cache');
 
   const pluginsWithFront = Object.keys(plugins)
@@ -193,11 +193,27 @@ async function createCacheDir({ dir, plugins }) {
   // copy admin core code
   await copyAdmin(cacheDir);
 
-  // Copy app.js
-  const customAdminConfigFilePath = path.join(dir, 'src', 'admin', 'app.js');
+  // Copy app.js or app.tsx if typescript is enabled
+  const customAdminConfigJSFilePath = path.join(dir, 'src', 'admin', 'app.js');
+  const customAdminConfigTSXFilePath = path.join(dir, 'src', 'admin', 'app.tsx');
+  const customAdminConfigFilePath = useTypeScript
+    ? customAdminConfigTSXFilePath
+    : customAdminConfigJSFilePath;
 
   if (fs.existsSync(customAdminConfigFilePath)) {
-    await fs.copy(customAdminConfigFilePath, path.resolve(cacheDir, 'admin', 'src', 'app.js'));
+    const defaultAdminConfigFilePath = path.resolve(cacheDir, 'admin', 'src', 'app.js');
+
+    if (useTypeScript) {
+      // Remove the default config file
+      await fs.remove(defaultAdminConfigFilePath);
+      // Copy the custom one
+      await fs.copy(
+        customAdminConfigTSXFilePath,
+        path.resolve(cacheDir, 'admin', 'src', 'app.tsx')
+      );
+    } else {
+      await fs.copy(customAdminConfigFilePath, path.resolve(cacheDir, 'admin', 'src', 'app.js'));
+    }
   }
 
   // Copy admin extensions folder
@@ -211,10 +227,10 @@ async function createCacheDir({ dir, plugins }) {
   await createPluginsJs(pluginsWithFront, cacheDir);
 }
 
-async function watchAdmin({ plugins, dir, host, port, browser, options }) {
+async function watchAdmin({ plugins, dir, host, port, browser, options, useTypeScript }) {
   // Create the cache dir containing the front-end files.
   const cacheDir = path.join(dir, '.cache');
-  await createCacheDir({ dir, plugins });
+  await createCacheDir({ dir, plugins, useTypeScript });
 
   const entry = path.join(cacheDir, 'admin', 'src');
   const dest = path.join(dir, 'build');
@@ -279,7 +295,7 @@ async function watchAdmin({ plugins, dir, host, port, browser, options }) {
 
   runServer();
 
-  watchFiles(dir);
+  watchFiles(dir, useTypeScript);
 }
 
 /**
@@ -287,9 +303,10 @@ async function watchAdmin({ plugins, dir, host, port, browser, options }) {
  * when using the dev mode
  * @param {string} dir
  */
-async function watchFiles(dir) {
+async function watchFiles(dir, useTypeScript) {
   const cacheDir = path.join(dir, '.cache');
-  const appExtensionFile = path.join(dir, 'src', 'admin', 'app.js');
+  const targetExtensionFile = useTypeScript ? 'app.tsx' : 'app.js';
+  const appExtensionFile = path.join(dir, 'src', 'admin', targetExtensionFile);
   const extensionsPath = path.join(dir, 'src', 'admin', 'extensions');
 
   // Only watch the admin/app.js file and the files that are in the ./admin/extensions/folder
@@ -306,7 +323,7 @@ async function watchFiles(dir) {
     // The app.js file needs to be copied in the .cache/admin/src/app.js and the other ones needs to
     // be copied in the .cache/admin/src/extensions folder
     const targetPath = isAppFile
-      ? path.join(path.normalize(filePath.split(appExtensionFile)[1]), 'app.js')
+      ? path.join(path.normalize(filePath.split(appExtensionFile)[1]), targetExtensionFile)
       : path.join('extensions', path.normalize(filePath.split(extensionsPath)[1]));
 
     const destFolder = path.join(cacheDir, 'admin', 'src');
@@ -330,9 +347,10 @@ async function watchFiles(dir) {
   });
 }
 
-const hasCustomAdminCode = async dir => {
+const hasCustomAdminCode = async (dir, useTypeScript) => {
   const customAdminPath = path.join(dir, 'src', 'admin');
-  const customAdminConfigFile = path.join(customAdminPath, 'app.js');
+  const customAdminConfigFileExtension = useTypeScript ? 'app.tsx' : 'app.js';
+  const customAdminConfigFile = path.join(customAdminPath, customAdminConfigFileExtension);
   const customAdminWebpackFile = path.join(customAdminPath, 'webpack.config.js');
 
   const hasCustomConfigFile = await fs.pathExists(customAdminConfigFile);
@@ -358,8 +376,8 @@ const hasNonDefaultPlugins = plugins => {
   return diff.length > 0;
 };
 
-async function shouldBuildAdmin({ dir, plugins }) {
-  const appHasCustomAdminCode = await hasCustomAdminCode(dir);
+async function shouldBuildAdmin({ dir, plugins, useTypeScript }) {
+  const appHasCustomAdminCode = await hasCustomAdminCode(dir, useTypeScript);
   const appHasNonDefaultPlugins = hasNonDefaultPlugins(plugins);
 
   return appHasCustomAdminCode || appHasNonDefaultPlugins;

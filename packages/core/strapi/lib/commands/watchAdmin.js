@@ -29,6 +29,9 @@ module.exports = async function({ browser }) {
 
   ee({ dir });
 
+  // @convly we need to update this with the real check
+  const useTypeScript = true;
+
   strapiAdmin.watchAdmin({
     dir,
     plugins,
@@ -41,5 +44,6 @@ module.exports = async function({ browser }) {
       watchIgnoreFiles: adminWatchIgnoreFiles,
       features: ee.isEE ? ee.features.getEnabled() : [],
     },
+    useTypeScript,
   });
 };
