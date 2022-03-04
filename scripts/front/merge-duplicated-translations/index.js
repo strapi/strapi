@@ -1,3 +1,4 @@
+/* eslint-disable node/no-extraneous-require */
 'use strict';
 
 const path = require('path');
