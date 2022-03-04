@@ -27,6 +27,7 @@ module.exports = ({
     eeRoot: './ee/admin',
     ceRoot: './admin/src',
   },
+  useTypeScript,
 }) => {
   const isProduction = env === 'production';
 
@@ -44,6 +45,20 @@ module.exports = ({
           ignoreOrder: true,
         }),
         new WebpackBar(),
+      ]
+    : [];
+
+  // webpack is quite slow to compile so it is best not to use the ts loader when
+  // it is not needed in javascript apps.
+  // Users can still add it by using the custom webpack config.
+  const typescriptRules = useTypeScript
+    ? [
+        {
+          test: /\.tsx?$/,
+          use: require.resolve('ts-loader'),
+          include: [cacheDir, ...pluginsPath],
+          exclude: /node_modules/,
+        },
       ]
     : [];
 
@@ -134,12 +149,7 @@ module.exports = ({
             },
           },
         },
-        {
-          test: /\.tsx?$/,
-          use: require.resolve('ts-loader'),
-          include: [cacheDir, ...pluginsPath],
-          exclude: /node_modules/,
-        },
+
         {
           test: /\.css$/i,
           use: ['style-loader', 'css-loader'],
@@ -171,6 +181,7 @@ module.exports = ({
             },
           },
         },
+        ...typescriptRules,
       ],
     },
     resolve: {
