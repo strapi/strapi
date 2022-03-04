@@ -114,11 +114,11 @@ describe('Test Graphql API End to End', () => {
       }
     );
 
-    test.each(['2022-03-17', null])('Can filter query with date: %s', async value => {
+    test.each(['2022-03-17'])('Can filter query with date: %s', async value => {
       const res = await graphqlQuery({
         query: /* GraphQL */ `
-          query posts($data: PostInput!) {
-            posts(filters: { myDate: { gt: $data } }) {
+          query posts($myDate: Date!) {
+            posts(filters: { myDate: { gt: $myDate } }) {
               data {
                 attributes {
                   myDate
@@ -128,9 +128,7 @@ describe('Test Graphql API End to End', () => {
           }
         `,
         variables: {
-          data: {
-            myDate: value,
-          },
+          myDate: value,
         },
       });
 
@@ -140,7 +138,7 @@ describe('Test Graphql API End to End', () => {
       expect(body).toEqual({
         data: {
           posts: {
-            data: {},
+            data: [],
           },
         },
       });
