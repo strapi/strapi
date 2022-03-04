@@ -1512,7 +1512,7 @@ describe('Marketplace page', () => {
     expect(trackUsage).toHaveBeenCalledTimes(1);
   });
 
-  it('should return search results', async () => {
+  it('should return search results matching the query', async () => {
     const { container } = render(App);
     const input = await getByPlaceholderText(container, 'Search for a plugin');
     fireEvent.change(input, { target: { value: 'documentation' } });
@@ -1523,7 +1523,7 @@ describe('Marketplace page', () => {
     expect(notMatch).toEqual(null);
   });
 
-  it('should not return search results', async () => {
+  it('should return empty search results given a bad query', async () => {
     const { container } = render(App);
     const input = await getByPlaceholderText(container, 'Search for a plugin');
     const badQuery = 'asdf';
