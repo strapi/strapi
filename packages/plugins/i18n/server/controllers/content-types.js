@@ -1,12 +1,11 @@
 'use strict';
 
-const { pick, uniq, prop, getOr, flatten, pipe, map, difference } = require('lodash/fp');
+const { pick, uniq, prop, getOr, flatten, pipe, map } = require('lodash/fp');
 const { contentTypes: contentTypesUtils } = require('@strapi/utils');
 const { ApplicationError } = require('@strapi/utils').errors;
 const { getService } = require('../utils');
 const { validateGetNonLocalizedAttributesInput } = require('../validation/content-types');
 
-const { getScalarAttributes } = contentTypesUtils;
 const { PUBLISHED_AT_ATTRIBUTE } = contentTypesUtils.constants;
 
 const getLocalesProperty = getOr([], 'properties.locales');
@@ -24,14 +23,12 @@ module.exports = {
     const {
       copyNonLocalizedAttributes,
       isLocalizedContentType,
-      getNonLocalizedAttributes,
+      getNestedPopulateOfNonLocalizedAttributes,
     } = getService('content-types');
     const { READ_ACTION, CREATE_ACTION } = strapi.admin.services.constants;
 
     const modelDef = strapi.contentType(model);
-    const scalarAttributes = getScalarAttributes(modelDef);
-    const nonLocalizedAttributes = getNonLocalizedAttributes(modelDef);
-    const attributesToPopulate = difference(nonLocalizedAttributes, scalarAttributes);
+    const attributesToPopulate = getNestedPopulateOfNonLocalizedAttributes(model);
 
     if (!isLocalizedContentType(modelDef)) {
       throw new ApplicationError('model.not.localized');
@@ -61,11 +58,7 @@ module.exports = {
       .filter(perm => getLocalesProperty(perm).includes(locale))
       .map(getFieldsProperty);
 
-    const permittedFields = pipe(
-      flatten,
-      getFirstLevelPath,
-      uniq
-    )(localePermissions);
+    const permittedFields = pipe(flatten, getFirstLevelPath, uniq)(localePermissions);
 
     const nonLocalizedFields = copyNonLocalizedAttributes(modelDef, entity);
     const sanitizedNonLocalizedFields = pick(permittedFields, nonLocalizedFields);

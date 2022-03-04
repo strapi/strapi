@@ -44,7 +44,7 @@ const formatGraphqlError = error => {
 
   // Internal server error
   strapi.log.error(originalError);
-  return ApolloError('Internal Server Error', 'INTERNAL_SERVER_ERROR');
+  return new ApolloError('Internal Server Error', 'INTERNAL_SERVER_ERROR');
 };
 
 module.exports = formatGraphqlError;

@@ -486,6 +486,7 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
 
 .c18 {
   grid-column: span 4;
+  max-width: 100%;
 }
 
 .c27 {
@@ -1072,7 +1073,7 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
             <span
               class="c15 c16"
             >
-              Upload {number} assets to the library
+              Upload {number, plural, one {# asset} other {# assets}} to the library
             </span>
           </button>
         </div>

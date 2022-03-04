@@ -14,6 +14,16 @@ jest.mock('@strapi/helper-plugin', () => ({
   useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
   NotFound: () => <div>not found</div>,
   CheckPagePermissions: ({ children }) => children,
+  useGuidedTour: jest.fn(() => ({
+    guidedTourState: {
+      contentTypeBuilder: {
+        create: false,
+        success: false,
+      },
+    },
+    currentStep: null,
+    isGuidedTourVisible: false,
+  })),
 }));
 
 jest.mock('../../../hooks', () => ({

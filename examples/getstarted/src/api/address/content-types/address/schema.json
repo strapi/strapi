@@ -32,7 +32,8 @@
       "allowedTypes": [
         "files",
         "images",
-        "videos"
+        "videos",
+        "audios"
       ],
       "pluginOptions": {}
     },

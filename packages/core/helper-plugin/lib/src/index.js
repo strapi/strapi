@@ -12,6 +12,7 @@ export { default as RBACProviderContext } from './contexts/RBACProviderContext';
 export { default as TrackingContext } from './contexts/TrackingContext';
 
 // Hooks
+export { default as useGuidedTour } from './hooks/useGuidedTour';
 export { default as useAppInfos } from './hooks/useAppInfos';
 
 export { default as useQuery } from './hooks/useQuery';
@@ -31,6 +32,7 @@ export { default as useFocusWhenNavigate } from './hooks/useFocusWhenNavigate';
 export { default as useLockScroll } from './hooks/useLockScroll';
 
 // Providers
+export { default as GuidedTourProvider } from './providers/GuidedTourProvider';
 export { default as LibraryProvider } from './providers/LibraryProvider';
 export { default as NotificationsProvider } from './providers/NotificationsProvider';
 export { default as StrapiAppProvider } from './providers/StrapiAppProvider';

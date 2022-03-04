@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<ListView /> renders and matches the snapshot 1`] = `
-.c81 {
+.c80 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -566,24 +566,24 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   margin-left: 4px;
 }
 
-.c72 {
+.c71 {
   background: #eaeaef;
 }
 
-.c74 {
+.c73 {
   background: #f0f0ff;
   padding: 20px;
 }
 
-.c77 {
+.c76 {
   background: #d9d8ff;
 }
 
-.c79 {
+.c78 {
   padding-left: 12px;
 }
 
-.c76 {
+.c75 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -597,20 +597,20 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   align-items: center;
 }
 
-.c73 {
+.c72 {
   height: 1px;
   border: none;
   margin: 0;
 }
 
-.c80 {
+.c79 {
   font-weight: 600;
   color: #4945ff;
   font-size: 0.75rem;
   line-height: 1.33;
 }
 
-.c78 {
+.c77 {
   height: 1.5rem;
   width: 1.5rem;
   border-radius: 50%;
@@ -628,16 +628,16 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   align-items: center;
 }
 
-.c78 svg {
+.c77 svg {
   height: 0.625rem;
   width: 0.625rem;
 }
 
-.c78 svg path {
+.c77 svg path {
   fill: #4945ff;
 }
 
-.c75 {
+.c74 {
   border-radius: 0 0 4px 4px;
   display: block;
   width: 100%;
@@ -675,8 +675,8 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
 .c57 {
   font-weight: 600;
   color: #4945ff;
-  font-size: 0.875rem;
-  line-height: 1.43;
+  font-size: 0.75rem;
+  line-height: 1.33;
 }
 
 .c64 {
@@ -690,19 +690,10 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   line-height: 1.33;
 }
 
-.c71 {
-  font-weight: 600;
+.c5 {
   color: #4945ff;
   font-size: 0.75rem;
   line-height: 1.33;
-}
-
-.c5 {
-  color: #4945ff;
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
 }
 
 .c3 {
@@ -718,7 +709,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
-  text-transform: uppercase;
   -webkit-text-decoration: none;
   text-decoration: none;
   position: relative;
@@ -942,7 +932,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
 .c39.dynamiczone-row > td:first-of-type::before {
   content: '';
   width: 0.25rem;
-  height: calc(100% - 15px);
+  height: calc(100% - 40px);
   position: absolute;
   top: -7px;
   left: 1.625rem;
@@ -975,7 +965,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
 .c50.dynamiczone-row > td:first-of-type::before {
   content: '';
   width: 0.25rem;
-  height: calc(100% - 15px);
+  height: calc(100% - 40px);
   position: absolute;
   top: -7px;
   left: 1.625rem;
@@ -1251,7 +1241,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                 >
                   <path
                     clip-rule="evenodd"
-                    d="M23.605 3.514c.527.528.527 1.36 0 1.887l-2.623 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.119 3.118zM0 24v-4.989l14.2-14.2L19.19 9.8 4.99 24H0z"
+                    d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
                     fill="#212134"
                     fill-rule="evenodd"
                   />
@@ -1483,7 +1473,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                             >
                               <path
                                 clip-rule="evenodd"
-                                d="M23.605 3.514c.527.528.527 1.36 0 1.887l-2.623 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.119 3.118zM0 24v-4.989l14.2-14.2L19.19 9.8 4.99 24H0z"
+                                d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
                                 fill="#212134"
                                 fill-rule="evenodd"
                               />
@@ -1593,7 +1583,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                             >
                               <path
                                 clip-rule="evenodd"
-                                d="M23.605 3.514c.527.528.527 1.36 0 1.887l-2.623 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.119 3.118zM0 24v-4.989l14.2-14.2L19.19 9.8 4.99 24H0z"
+                                d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
                                 fill="#212134"
                                 fill-rule="evenodd"
                               />
@@ -1701,7 +1691,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                             >
                               <path
                                 clip-rule="evenodd"
-                                d="M23.605 3.514c.527.528.527 1.36 0 1.887l-2.623 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.119 3.118zM0 24v-4.989l14.2-14.2L19.19 9.8 4.99 24H0z"
+                                d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
                                 fill="#212134"
                                 fill-rule="evenodd"
                               />
@@ -1809,7 +1799,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                             >
                               <path
                                 clip-rule="evenodd"
-                                d="M23.605 3.514c.527.528.527 1.36 0 1.887l-2.623 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.119 3.118zM0 24v-4.989l14.2-14.2L19.19 9.8 4.99 24H0z"
+                                d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
                                 fill="#212134"
                                 fill-rule="evenodd"
                               />
@@ -1915,7 +1905,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                             >
                               <path
                                 clip-rule="evenodd"
-                                d="M23.605 3.514c.527.528.527 1.36 0 1.887l-2.623 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.119 3.118zM0 24v-4.989l14.2-14.2L19.19 9.8 4.99 24H0z"
+                                d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
                                 fill="#212134"
                                 fill-rule="evenodd"
                               />
@@ -2023,7 +2013,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                             >
                               <path
                                 clip-rule="evenodd"
-                                d="M23.605 3.514c.527.528.527 1.36 0 1.887l-2.623 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.119 3.118zM0 24v-4.989l14.2-14.2L19.19 9.8 4.99 24H0z"
+                                d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
                                 fill="#212134"
                                 fill-rule="evenodd"
                               />
@@ -2125,7 +2115,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                             >
                               <path
                                 clip-rule="evenodd"
-                                d="M23.605 3.514c.527.528.527 1.36 0 1.887l-2.623 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.119 3.118zM0 24v-4.989l14.2-14.2L19.19 9.8 4.99 24H0z"
+                                d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
                                 fill="#212134"
                                 fill-rule="evenodd"
                               />
@@ -2237,7 +2227,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                             >
                               <path
                                 clip-rule="evenodd"
-                                d="M23.605 3.514c.527.528.527 1.36 0 1.887l-2.623 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.119 3.118zM0 24v-4.989l14.2-14.2L19.19 9.8 4.99 24H0z"
+                                d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
                                 fill="#212134"
                                 fill-rule="evenodd"
                               />
@@ -2376,7 +2366,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                         >
                                           <path
                                             clip-rule="evenodd"
-                                            d="M23.605 3.514c.527.528.527 1.36 0 1.887l-2.623 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.119 3.118zM0 24v-4.989l14.2-14.2L19.19 9.8 4.99 24H0z"
+                                            d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
                                             fill="#212134"
                                             fill-rule="evenodd"
                                           />
@@ -2501,7 +2491,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                         >
                                           <path
                                             clip-rule="evenodd"
-                                            d="M23.605 3.514c.527.528.527 1.36 0 1.887l-2.623 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.119 3.118zM0 24v-4.989l14.2-14.2L19.19 9.8 4.99 24H0z"
+                                            d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
                                             fill="#212134"
                                             fill-rule="evenodd"
                                           />
@@ -2626,7 +2616,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                         >
                                           <path
                                             clip-rule="evenodd"
-                                            d="M23.605 3.514c.527.528.527 1.36 0 1.887l-2.623 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.119 3.118zM0 24v-4.989l14.2-14.2L19.19 9.8 4.99 24H0z"
+                                            d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
                                             fill="#212134"
                                             fill-rule="evenodd"
                                           />
@@ -2779,7 +2769,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                             >
                               <path
                                 clip-rule="evenodd"
-                                d="M23.605 3.514c.527.528.527 1.36 0 1.887l-2.623 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.119 3.118zM0 24v-4.989l14.2-14.2L19.19 9.8 4.99 24H0z"
+                                d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
                                 fill="#212134"
                                 fill-rule="evenodd"
                               />
@@ -2918,7 +2908,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                         >
                                           <path
                                             clip-rule="evenodd"
-                                            d="M23.605 3.514c.527.528.527 1.36 0 1.887l-2.623 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.119 3.118zM0 24v-4.989l14.2-14.2L19.19 9.8 4.99 24H0z"
+                                            d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
                                             fill="#212134"
                                             fill-rule="evenodd"
                                           />
@@ -3043,7 +3033,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                         >
                                           <path
                                             clip-rule="evenodd"
-                                            d="M23.605 3.514c.527.528.527 1.36 0 1.887l-2.623 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.119 3.118zM0 24v-4.989l14.2-14.2L19.19 9.8 4.99 24H0z"
+                                            d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
                                             fill="#212134"
                                             fill-rule="evenodd"
                                           />
@@ -3168,7 +3158,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                         >
                                           <path
                                             clip-rule="evenodd"
-                                            d="M23.605 3.514c.527.528.527 1.36 0 1.887l-2.623 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.119 3.118zM0 24v-4.989l14.2-14.2L19.19 9.8 4.99 24H0z"
+                                            d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
                                             fill="#212134"
                                             fill-rule="evenodd"
                                           />
@@ -3315,7 +3305,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                             >
                               <path
                                 clip-rule="evenodd"
-                                d="M23.605 3.514c.527.528.527 1.36 0 1.887l-2.623 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.119 3.118zM0 24v-4.989l14.2-14.2L19.19 9.8 4.99 24H0z"
+                                d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
                                 fill="#212134"
                                 fill-rule="evenodd"
                               />
@@ -3397,7 +3387,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                             >
                               <svg
                                 aria-hidden="true"
-                                class="svg-inline--fa fa-adjust fa-w-16 c61 c62"
+                                class="svg-inline--fa fa-adjust c61 c62"
                                 data-icon="adjust"
                                 data-prefix="fas"
                                 focusable="false"
@@ -3449,7 +3439,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                             >
                               <svg
                                 aria-hidden="true"
-                                class="svg-inline--fa fa-address-book fa-w-14 c61 c62"
+                                class="svg-inline--fa fa-address-book c61 c62"
                                 data-icon="address-book"
                                 data-prefix="fas"
                                 focusable="false"
@@ -3501,7 +3491,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                             >
                               <svg
                                 aria-hidden="true"
-                                class="svg-inline--fa fa-calendar fa-w-14 c61 c62"
+                                class="svg-inline--fa fa-calendar c61 c62"
                                 data-icon="calendar"
                                 data-prefix="fas"
                                 focusable="false"
@@ -3553,7 +3543,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                             >
                               <svg
                                 aria-hidden="true"
-                                class="svg-inline--fa fa-cannabis fa-w-16 c61 c62"
+                                class="svg-inline--fa fa-cannabis c61 c62"
                                 data-icon="cannabis"
                                 data-prefix="fas"
                                 focusable="false"
@@ -3711,7 +3701,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                     >
                                                       <path
                                                         clip-rule="evenodd"
-                                                        d="M23.605 3.514c.527.528.527 1.36 0 1.887l-2.623 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.119 3.118zM0 24v-4.989l14.2-14.2L19.19 9.8 4.99 24H0z"
+                                                        d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
                                                         fill="#212134"
                                                         fill-rule="evenodd"
                                                       />
@@ -3836,7 +3826,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                     >
                                                       <path
                                                         clip-rule="evenodd"
-                                                        d="M23.605 3.514c.527.528.527 1.36 0 1.887l-2.623 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.119 3.118zM0 24v-4.989l14.2-14.2L19.19 9.8 4.99 24H0z"
+                                                        d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
                                                         fill="#212134"
                                                         fill-rule="evenodd"
                                                       />
@@ -3961,7 +3951,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                     >
                                                       <path
                                                         clip-rule="evenodd"
-                                                        d="M23.605 3.514c.527.528.527 1.36 0 1.887l-2.623 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.119 3.118zM0 24v-4.989l14.2-14.2L19.19 9.8 4.99 24H0z"
+                                                        d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
                                                         fill="#212134"
                                                         fill-rule="evenodd"
                                                       />
@@ -4025,7 +4015,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                         class="c48"
                                       >
                                         <span
-                                          class="c28 c71"
+                                          class="c28 c57"
                                         >
                                           Add another field to this component
                                         </span>
@@ -4150,7 +4140,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                     >
                                                       <path
                                                         clip-rule="evenodd"
-                                                        d="M23.605 3.514c.527.528.527 1.36 0 1.887l-2.623 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.119 3.118zM0 24v-4.989l14.2-14.2L19.19 9.8 4.99 24H0z"
+                                                        d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
                                                         fill="#212134"
                                                         fill-rule="evenodd"
                                                       />
@@ -4275,7 +4265,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                     >
                                                       <path
                                                         clip-rule="evenodd"
-                                                        d="M23.605 3.514c.527.528.527 1.36 0 1.887l-2.623 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.119 3.118zM0 24v-4.989l14.2-14.2L19.19 9.8 4.99 24H0z"
+                                                        d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
                                                         fill="#212134"
                                                         fill-rule="evenodd"
                                                       />
@@ -4400,7 +4390,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                     >
                                                       <path
                                                         clip-rule="evenodd"
-                                                        d="M23.605 3.514c.527.528.527 1.36 0 1.887l-2.623 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.119 3.118zM0 24v-4.989l14.2-14.2L19.19 9.8 4.99 24H0z"
+                                                        d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
                                                         fill="#212134"
                                                         fill-rule="evenodd"
                                                       />
@@ -4527,7 +4517,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                     >
                                                       <path
                                                         clip-rule="evenodd"
-                                                        d="M23.605 3.514c.527.528.527 1.36 0 1.887l-2.623 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.119 3.118zM0 24v-4.989l14.2-14.2L19.19 9.8 4.99 24H0z"
+                                                        d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
                                                         fill="#212134"
                                                         fill-rule="evenodd"
                                                       />
@@ -4654,7 +4644,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                     >
                                                       <path
                                                         clip-rule="evenodd"
-                                                        d="M23.605 3.514c.527.528.527 1.36 0 1.887l-2.623 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.119 3.118zM0 24v-4.989l14.2-14.2L19.19 9.8 4.99 24H0z"
+                                                        d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
                                                         fill="#212134"
                                                         fill-rule="evenodd"
                                                       />
@@ -4783,7 +4773,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                     >
                                                       <path
                                                         clip-rule="evenodd"
-                                                        d="M23.605 3.514c.527.528.527 1.36 0 1.887l-2.623 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.119 3.118zM0 24v-4.989l14.2-14.2L19.19 9.8 4.99 24H0z"
+                                                        d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
                                                         fill="#212134"
                                                         fill-rule="evenodd"
                                                       />
@@ -4847,7 +4837,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                         class="c48"
                                       >
                                         <span
-                                          class="c28 c71"
+                                          class="c28 c57"
                                         >
                                           Add another field to this component
                                         </span>
@@ -4972,7 +4962,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                     >
                                                       <path
                                                         clip-rule="evenodd"
-                                                        d="M23.605 3.514c.527.528.527 1.36 0 1.887l-2.623 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.119 3.118zM0 24v-4.989l14.2-14.2L19.19 9.8 4.99 24H0z"
+                                                        d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
                                                         fill="#212134"
                                                         fill-rule="evenodd"
                                                       />
@@ -5097,7 +5087,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                     >
                                                       <path
                                                         clip-rule="evenodd"
-                                                        d="M23.605 3.514c.527.528.527 1.36 0 1.887l-2.623 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.119 3.118zM0 24v-4.989l14.2-14.2L19.19 9.8 4.99 24H0z"
+                                                        d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
                                                         fill="#212134"
                                                         fill-rule="evenodd"
                                                       />
@@ -5229,7 +5219,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                     >
                                                       <path
                                                         clip-rule="evenodd"
-                                                        d="M23.605 3.514c.527.528.527 1.36 0 1.887l-2.623 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.119 3.118zM0 24v-4.989l14.2-14.2L19.19 9.8 4.99 24H0z"
+                                                        d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
                                                         fill="#212134"
                                                         fill-rule="evenodd"
                                                       />
@@ -5368,7 +5358,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                                 >
                                                                   <path
                                                                     clip-rule="evenodd"
-                                                                    d="M23.605 3.514c.527.528.527 1.36 0 1.887l-2.623 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.119 3.118zM0 24v-4.989l14.2-14.2L19.19 9.8 4.99 24H0z"
+                                                                    d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
                                                                     fill="#212134"
                                                                     fill-rule="evenodd"
                                                                   />
@@ -5493,7 +5483,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                                 >
                                                                   <path
                                                                     clip-rule="evenodd"
-                                                                    d="M23.605 3.514c.527.528.527 1.36 0 1.887l-2.623 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.119 3.118zM0 24v-4.989l14.2-14.2L19.19 9.8 4.99 24H0z"
+                                                                    d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
                                                                     fill="#212134"
                                                                     fill-rule="evenodd"
                                                                   />
@@ -5618,7 +5608,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                                 >
                                                                   <path
                                                                     clip-rule="evenodd"
-                                                                    d="M23.605 3.514c.527.528.527 1.36 0 1.887l-2.623 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.119 3.118zM0 24v-4.989l14.2-14.2L19.19 9.8 4.99 24H0z"
+                                                                    d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
                                                                     fill="#212134"
                                                                     fill-rule="evenodd"
                                                                   />
@@ -5745,7 +5735,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                                 >
                                                                   <path
                                                                     clip-rule="evenodd"
-                                                                    d="M23.605 3.514c.527.528.527 1.36 0 1.887l-2.623 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.119 3.118zM0 24v-4.989l14.2-14.2L19.19 9.8 4.99 24H0z"
+                                                                    d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
                                                                     fill="#212134"
                                                                     fill-rule="evenodd"
                                                                   />
@@ -5872,7 +5862,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                                 >
                                                                   <path
                                                                     clip-rule="evenodd"
-                                                                    d="M23.605 3.514c.527.528.527 1.36 0 1.887l-2.623 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.119 3.118zM0 24v-4.989l14.2-14.2L19.19 9.8 4.99 24H0z"
+                                                                    d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
                                                                     fill="#212134"
                                                                     fill-rule="evenodd"
                                                                   />
@@ -6001,7 +5991,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                                 >
                                                                   <path
                                                                     clip-rule="evenodd"
-                                                                    d="M23.605 3.514c.527.528.527 1.36 0 1.887l-2.623 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.119 3.118zM0 24v-4.989l14.2-14.2L19.19 9.8 4.99 24H0z"
+                                                                    d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
                                                                     fill="#212134"
                                                                     fill-rule="evenodd"
                                                                   />
@@ -6106,7 +6096,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                         class="c48"
                                       >
                                         <span
-                                          class="c28 c71"
+                                          class="c28 c57"
                                         >
                                           Add another field to this component
                                         </span>
@@ -6231,7 +6221,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                     >
                                                       <path
                                                         clip-rule="evenodd"
-                                                        d="M23.605 3.514c.527.528.527 1.36 0 1.887l-2.623 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.119 3.118zM0 24v-4.989l14.2-14.2L19.19 9.8 4.99 24H0z"
+                                                        d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
                                                         fill="#212134"
                                                         fill-rule="evenodd"
                                                       />
@@ -6358,7 +6348,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                     >
                                                       <path
                                                         clip-rule="evenodd"
-                                                        d="M23.605 3.514c.527.528.527 1.36 0 1.887l-2.623 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.119 3.118zM0 24v-4.989l14.2-14.2L19.19 9.8 4.99 24H0z"
+                                                        d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
                                                         fill="#212134"
                                                         fill-rule="evenodd"
                                                       />
@@ -6483,7 +6473,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                     >
                                                       <path
                                                         clip-rule="evenodd"
-                                                        d="M23.605 3.514c.527.528.527 1.36 0 1.887l-2.623 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.119 3.118zM0 24v-4.989l14.2-14.2L19.19 9.8 4.99 24H0z"
+                                                        d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
                                                         fill="#212134"
                                                         fill-rule="evenodd"
                                                       />
@@ -6547,7 +6537,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                         class="c48"
                                       >
                                         <span
-                                          class="c28 c71"
+                                          class="c28 c57"
                                         >
                                           Add another field to this component
                                         </span>
@@ -6568,17 +6558,17 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
           </div>
           <div>
             <hr
-              class="c72 c73"
+              class="c71 c72"
             />
             <button
-              class="c74 c75"
+              class="c73 c74"
             >
               <div
-                class="c76"
+                class="c75"
               >
                 <div
                   aria-hidden="true"
-                  class="c77 c78"
+                  class="c76 c77"
                 >
                   <svg
                     fill="none"
@@ -6594,10 +6584,10 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                   </svg>
                 </div>
                 <div
-                  class="c79"
+                  class="c78"
                 >
                   <span
-                    class="c80"
+                    class="c79"
                   >
                     Add another field to this collection type
                   </span>
@@ -6610,7 +6600,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
     </div>
   </div>
   <div
-    class="c81"
+    class="c80"
   >
     <p
       aria-live="polite"

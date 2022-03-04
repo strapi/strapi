@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { useConfigurations } from '../../../../hooks';
+import { useConfigurations } from '../../hooks';
 
 const Img = styled.img`
   height: ${72 / 16}rem;

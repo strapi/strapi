@@ -57,6 +57,7 @@ module.exports = (attributes, route, isListOfEntities = false) => {
   return {
     responses: {
       '200': {
+        description: 'OK',
         content: {
           'application/json': {
             schema,

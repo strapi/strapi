@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
 import { PropTypes } from 'prop-types';
 import { useIntl } from 'react-intl';
@@ -36,6 +36,24 @@ const SortDisplayedFields = ({
 }) => {
   const { formatMessage } = useIntl();
   const [isDraggingSibling, setIsDraggingSibling] = useState(false);
+  const [lastAction, setLastAction] = useState(null);
+  const scrollableContainerRef = useRef();
+
+  function handleAddField(...args) {
+    setLastAction('add');
+    onAddField(...args);
+  }
+
+  function handleRemoveField(...args) {
+    setLastAction('remove');
+    onRemoveField(...args);
+  }
+
+  useEffect(() => {
+    if (lastAction === 'add' && scrollableContainerRef?.current) {
+      scrollableContainerRef.current.scrollLeft = scrollableContainerRef.current.scrollWidth;
+    }
+  }, [displayedFields, lastAction]);
 
   return (
     <>
@@ -56,7 +74,7 @@ const SortDisplayedFields = ({
         borderWidth="1px"
         hasRadius
       >
-        <ScrollableContainer size="1" paddingBottom={4}>
+        <ScrollableContainer size="1" paddingBottom={4} ref={scrollableContainerRef}>
           <Stack horizontal size={3}>
             {displayedFields.map((field, index) => (
               <DraggableCard
@@ -65,7 +83,7 @@ const SortDisplayedFields = ({
                 isDraggingSibling={isDraggingSibling}
                 onMoveField={onMoveField}
                 onClickEditField={onClickEditField}
-                onRemoveField={e => onRemoveField(e, index)}
+                onRemoveField={e => handleRemoveField(e, index)}
                 name={field}
                 labelField={metadatas[field].list.label || field}
                 setIsDraggingSibling={setIsDraggingSibling}
@@ -85,7 +103,7 @@ const SortDisplayedFields = ({
             data-testid="add-field"
           >
             {listRemainingFields.map(field => (
-              <MenuItem key={field} onClick={() => onAddField(field)}>
+              <MenuItem key={field} onClick={() => handleAddField(field)}>
                 {field}
               </MenuItem>
             ))}

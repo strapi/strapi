@@ -98,6 +98,8 @@ class BigIntegerField extends NumberField {
 }
 
 const timeRegex = new RegExp('^(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])(.[0-9]{1,3})?$');
+const dateRegex = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/;
+const partialDateRegex = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])/g;
 
 const parseTime = value => {
   if (dateFns.isDate(value)) return dateFns.format(value, 'HH:mm:ss.SSS');
@@ -118,16 +120,23 @@ const parseTime = value => {
 };
 
 const parseDate = value => {
-  if (dateFns.isDate(value)) return dateFns.format(value, 'yyyy-MM-dd');
-  try {
-    let date = dateFns.parseISO(value);
+  const found = _.isString(value) ? value.match(partialDateRegex) || [] : [];
+  const extractedValue = found[0];
 
-    if (dateFns.isValid(date)) return dateFns.format(date, 'yyyy-MM-dd');
-
-    throw new InvalidDateError(`Invalid format, expected an ISO compatible date`);
-  } catch (error) {
-    throw new InvalidDateError(`Invalid format, expected an ISO compatible date`);
+  if (extractedValue && !dateRegex.test(value)) {
+    // TODO V5: throw an error when format yyyy-MM-dd is not respected
+    // throw new InvalidDateError(`Invalid format, expected yyyy-MM-dd`);
+    process.emitWarning(
+      `[deprecated] Using a date format other than YYYY-MM-DD will be removed in future versions. Date received: ${value}. Date stored: ${extractedValue}.`
+    );
   }
+
+  let date = dateFns.parseISO(extractedValue);
+  if (!dateFns.isValid(date)) {
+    throw new InvalidDateError(`Invalid date`);
+  }
+
+  return extractedValue;
 };
 
 const parseDateTimeOrTimestamp = value => {
@@ -151,8 +160,7 @@ class DateField extends Field {
   }
 
   fromDB(value) {
-    const cast = new Date(value);
-    return dateFns.isValid(cast) ? dateFns.formatISO(cast, { representation: 'date' }) : null;
+    return value;
   }
 }
 class DatetimeField extends Field {

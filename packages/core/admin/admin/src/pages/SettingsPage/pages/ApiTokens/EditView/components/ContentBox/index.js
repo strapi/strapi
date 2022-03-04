@@ -20,7 +20,7 @@ const HeaderContentBox = ({ apiToken }) => {
           <span style={{ alignSelf: 'start' }}>
             <CopyToClipboard
               onCopy={() => {
-                trackUsageRef('didCopyTokenKey');
+                trackUsageRef.current('didCopyTokenKey');
                 toggleNotification({
                   type: 'success',
                   message: { id: 'Settings.apiTokens.notification.copied' },
