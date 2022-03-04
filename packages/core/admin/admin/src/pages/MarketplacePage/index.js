@@ -26,7 +26,13 @@ import adminPermissions from '../../permissions';
 
 const matchSearch = (plugins, search) => {
   return matchSorter(plugins, search, {
-    keys: ['attributes.name', 'attributes.description'],
+    keys: [
+      {
+        threshold: matchSorter.rankings.WORD_STARTS_WITH,
+        key: 'attributes.name',
+      },
+      { threshold: matchSorter.rankings.WORD_STARTS_WITH, key: 'attributes.description' },
+    ],
   });
 };
 
@@ -111,7 +117,6 @@ const MarketPlacePage = () => {
   }
 
   const searchResults = matchSearch(marketplacePluginsResponse.data, searchQuery);
-
   const displayedPlugins =
     searchResults.length && searchQuery.length ? searchResults : marketplacePluginsResponse.data;
 
