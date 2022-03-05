@@ -32,7 +32,7 @@ const registerAdminPanelRoute = ({ strapi }) => {
       path: `${strapi.config.admin.path}/:path*`,
       handler: [
         serveAdminMiddleware,
-        serveStatic(buildDir, { maxage: 60000, defer: false, index: 'index.html' }),
+        serveStatic(buildDir, { maxage: 31536000, defer: false, index: 'index.html' }),
       ],
       config: { auth: false },
     },
@@ -46,6 +46,13 @@ const serveStatic = (filesDir, koaStaticOptions = {}) => {
   return async (ctx, next) => {
     const prev = ctx.path;
     const newPath = path.basename(ctx.path);
+    const ext = path.extname(ctx.path);
+
+    // publicly cache static files to avoid unnecessary network & disk access
+    if (ext === '.css' || ext === '.js') {
+      ctx.set('cache-control', 'public, max-age=31536000, immutable');
+    }
+
     ctx.path = newPath;
     await serve(ctx, async () => {
       ctx.path = prev;
