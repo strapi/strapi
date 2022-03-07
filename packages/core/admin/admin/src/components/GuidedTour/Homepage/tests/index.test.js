@@ -308,53 +308,6 @@ describe('GuidedTour Homepage', () => {
         align-items: center;
       }
 
-      .c1 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-      }
-
-      .c1 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c1 > * + * {
-        margin-top: 24px;
-      }
-
-      .c2 {
-        color: #32324d;
-        font-weight: 600;
-        font-size: 1.125rem;
-        line-height: 1.22;
-      }
-
-      .c7 {
-        font-weight: 500;
-        color: #ffffff;
-        font-size: 0.875rem;
-        line-height: 1.43;
-      }
-
-      .c8 {
-        color: #32324d;
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
-      }
-
-      .c20 {
-        font-weight: 500;
-        color: #666687;
-        font-size: 0.875rem;
-        line-height: 1.43;
-      }
-
       .c16 {
         font-weight: 600;
         color: #32324d;
@@ -495,6 +448,53 @@ describe('GuidedTour Homepage', () => {
       .c14 svg > g,
       .c14 svg path {
         fill: #ffffff;
+      }
+
+      .c1 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+      }
+
+      .c1 > * {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .c1 > * + * {
+        margin-top: 24px;
+      }
+
+      .c2 {
+        color: #32324d;
+        font-weight: 600;
+        font-size: 1.125rem;
+        line-height: 1.22;
+      }
+
+      .c7 {
+        font-weight: 500;
+        color: #ffffff;
+        font-size: 0.875rem;
+        line-height: 1.43;
+      }
+
+      .c8 {
+        color: #32324d;
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+      }
+
+      .c20 {
+        font-weight: 500;
+        color: #666687;
+        font-size: 0.875rem;
+        line-height: 1.43;
       }
 
       <div

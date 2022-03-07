@@ -1,12 +1,10 @@
 import React from 'react';
-import { useGuidedTour } from '@strapi/helper-plugin';
-import { NavLink } from 'react-router-dom';
+import { useGuidedTour, LinkButton } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { Stack } from '@strapi/design-system/Stack';
 import { Flex } from '@strapi/design-system/Flex';
 import { Box } from '@strapi/design-system/Box';
 import { Typography } from '@strapi/design-system/Typography';
-import { LinkButton } from '@strapi/design-system/LinkButton';
 import { Button } from '@strapi/design-system/Button';
 import ArrowRight from '@strapi/icons/ArrowRight';
 import StepperHomepage from './components/Stepper';
@@ -20,7 +18,7 @@ const GuidedTourHomepage = () => {
     key,
     title: val.home.title,
     content: (
-      <LinkButton as={NavLink} to={val.home.cta.target} endIcon={<ArrowRight />}>
+      <LinkButton to={val.home.cta.target} endIcon={<ArrowRight />}>
         {formatMessage(val.home.cta.title)}
       </LinkButton>
     ),

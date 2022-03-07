@@ -263,6 +263,148 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
         border: 2px solid #4945ff;
       }
 
+      .c10 {
+        font-weight: 600;
+        color: #32324d;
+        font-size: 0.875rem;
+        line-height: 1.43;
+      }
+
+      .c8 {
+        padding-right: 8px;
+      }
+
+      .c5 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 4px;
+        background: #ffffff;
+        border: 1px solid #dcdce4;
+        position: relative;
+        outline: none;
+      }
+
+      .c5 svg {
+        height: 12px;
+        width: 12px;
+      }
+
+      .c5 svg > g,
+      .c5 svg path {
+        fill: #ffffff;
+      }
+
+      .c5[aria-disabled='true'] {
+        pointer-events: none;
+      }
+
+      .c5:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c5:focus-visible {
+        outline: none;
+      }
+
+      .c5:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
+      }
+
+      .c6 {
+        padding: 10px 16px;
+        background: #4945ff;
+        border: none;
+        border-radius: 4px;
+        border: 1px solid #4945ff;
+        background: #4945ff;
+        display: -webkit-inline-box;
+        display: -webkit-inline-flex;
+        display: -ms-inline-flexbox;
+        display: inline-flex;
+        -webkit-text-decoration: none;
+        text-decoration: none;
+      }
+
+      .c6 .c7 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c6 .c9 {
+        color: #ffffff;
+      }
+
+      .c6[aria-disabled='true'] {
+        border: 1px solid #dcdce4;
+        background: #eaeaef;
+      }
+
+      .c6[aria-disabled='true'] .c9 {
+        color: #666687;
+      }
+
+      .c6[aria-disabled='true'] svg > g,
+      .c6[aria-disabled='true'] svg path {
+        fill: #666687;
+      }
+
+      .c6[aria-disabled='true']:active {
+        border: 1px solid #dcdce4;
+        background: #eaeaef;
+      }
+
+      .c6[aria-disabled='true']:active .c9 {
+        color: #666687;
+      }
+
+      .c6[aria-disabled='true']:active svg > g,
+      .c6[aria-disabled='true']:active svg path {
+        fill: #666687;
+      }
+
+      .c6:hover {
+        border: 1px solid #7b79ff;
+        background: #7b79ff;
+      }
+
+      .c6:active {
+        border: 1px solid #4945ff;
+        background: #4945ff;
+      }
+
+      .c6 svg > g,
+      .c6 svg path {
+        fill: #ffffff;
+      }
+
       .c13 {
         background: #ffffff;
         border-radius: 4px;
@@ -482,148 +624,6 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
 
       .c0:focus-visible {
         outline: none;
-      }
-
-      .c10 {
-        font-weight: 600;
-        color: #32324d;
-        font-size: 0.875rem;
-        line-height: 1.43;
-      }
-
-      .c8 {
-        padding-right: 8px;
-      }
-
-      .c5 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        cursor: pointer;
-        padding: 8px;
-        border-radius: 4px;
-        background: #ffffff;
-        border: 1px solid #dcdce4;
-        position: relative;
-        outline: none;
-      }
-
-      .c5 svg {
-        height: 12px;
-        width: 12px;
-      }
-
-      .c5 svg > g,
-      .c5 svg path {
-        fill: #ffffff;
-      }
-
-      .c5[aria-disabled='true'] {
-        pointer-events: none;
-      }
-
-      .c5:after {
-        -webkit-transition-property: all;
-        transition-property: all;
-        -webkit-transition-duration: 0.2s;
-        transition-duration: 0.2s;
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -4px;
-        bottom: -4px;
-        left: -4px;
-        right: -4px;
-        border: 2px solid transparent;
-      }
-
-      .c5:focus-visible {
-        outline: none;
-      }
-
-      .c5:focus-visible:after {
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -5px;
-        bottom: -5px;
-        left: -5px;
-        right: -5px;
-        border: 2px solid #4945ff;
-      }
-
-      .c6 {
-        padding: 10px 16px;
-        background: #4945ff;
-        border: none;
-        border-radius: 4px;
-        border: 1px solid #4945ff;
-        background: #4945ff;
-        display: -webkit-inline-box;
-        display: -webkit-inline-flex;
-        display: -ms-inline-flexbox;
-        display: inline-flex;
-        -webkit-text-decoration: none;
-        text-decoration: none;
-      }
-
-      .c6 .c7 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c6 .c9 {
-        color: #ffffff;
-      }
-
-      .c6[aria-disabled='true'] {
-        border: 1px solid #dcdce4;
-        background: #eaeaef;
-      }
-
-      .c6[aria-disabled='true'] .c9 {
-        color: #666687;
-      }
-
-      .c6[aria-disabled='true'] svg > g,
-      .c6[aria-disabled='true'] svg path {
-        fill: #666687;
-      }
-
-      .c6[aria-disabled='true']:active {
-        border: 1px solid #dcdce4;
-        background: #eaeaef;
-      }
-
-      .c6[aria-disabled='true']:active .c9 {
-        color: #666687;
-      }
-
-      .c6[aria-disabled='true']:active svg > g,
-      .c6[aria-disabled='true']:active svg path {
-        fill: #666687;
-      }
-
-      .c6:hover {
-        border: 1px solid #7b79ff;
-        background: #7b79ff;
-      }
-
-      .c6:active {
-        border: 1px solid #4945ff;
-        background: #4945ff;
-      }
-
-      .c6 svg > g,
-      .c6 svg path {
-        fill: #ffffff;
       }
 
       .c37 svg path {

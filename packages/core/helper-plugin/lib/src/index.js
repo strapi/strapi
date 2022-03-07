@@ -45,6 +45,7 @@ export { default as ContentBox } from './components/ContentBox';
 export { default as DynamicTable } from './components/DynamicTable';
 export { default as EmptyStateLayout } from './components/EmptyStateLayout';
 export { default as Link } from './components/Link';
+export { default as LinkButton } from './components/LinkButton';
 export { default as NoContent } from './components/NoContent';
 export { default as NoMedia } from './components/NoMedia';
 export { default as NoPermissions } from './components/NoPermissions';

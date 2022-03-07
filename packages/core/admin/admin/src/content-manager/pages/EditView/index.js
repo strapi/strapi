@@ -1,14 +1,12 @@
 import React, { memo, useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import get from 'lodash/get';
-import { CheckPermissions, useTracking } from '@strapi/helper-plugin';
+import { CheckPermissions, useTracking, LinkButton } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
-import { NavLink } from 'react-router-dom';
 import { ContentLayout } from '@strapi/design-system/Layout';
 import { Box } from '@strapi/design-system/Box';
 import { Divider } from '@strapi/design-system/Divider';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
-import { LinkButton } from '@strapi/design-system/LinkButton';
 import { Main } from '@strapi/design-system/Main';
 import { Stack } from '@strapi/design-system/Stack';
 import { Typography } from '@strapi/design-system/Typography';
@@ -314,7 +312,6 @@ const EditView = ({
                           {slug !== 'strapi::administrator' && (
                             <CheckPermissions permissions={ctbPermissions}>
                               <LinkButton
-                                as={NavLink}
                                 onClick={() => {
                                   trackUsage('willEditEditLayout');
                                 }}
@@ -335,7 +332,6 @@ const EditView = ({
                           <CheckPermissions permissions={configurationPermissions}>
                             <LinkButton
                               size="S"
-                              as={NavLink}
                               startIcon={<Layer />}
                               style={{ width: '100%' }}
                               to={configurationsURL}

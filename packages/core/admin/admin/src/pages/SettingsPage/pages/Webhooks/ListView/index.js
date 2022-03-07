@@ -5,7 +5,7 @@
  */
 
 import React, { useEffect, useReducer, useRef, useState } from 'react';
-import { useHistory, useLocation, NavLink } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import { useIntl } from 'react-intl';
 import {
   request,
@@ -17,6 +17,7 @@ import {
   ConfirmDialog,
   onRowClick,
   stopPropagation,
+  LinkButton,
 } from '@strapi/helper-plugin';
 import { HeaderLayout, Layout, ContentLayout, ActionLayout } from '@strapi/design-system/Layout';
 import { EmptyStateLayout } from '@strapi/design-system/EmptyStateLayout';
@@ -30,7 +31,6 @@ import { Button } from '@strapi/design-system/Button';
 import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
 import { Switch } from '@strapi/design-system/Switch';
 import { Main } from '@strapi/design-system/Main';
-import { LinkButton } from '@strapi/design-system/LinkButton';
 import { useNotifyAT } from '@strapi/design-system/LiveRegions';
 import { Box } from '@strapi/design-system/Box';
 import Plus from '@strapi/icons/Plus';
@@ -252,13 +252,7 @@ const ListView = () => {
           primaryAction={
             canCreate &&
             !loadingWebhooks && (
-              <LinkButton
-                as={NavLink}
-                startIcon={<Plus />}
-                variant="default"
-                to={`${pathname}/create`}
-                size="L"
-              >
+              <LinkButton startIcon={<Plus />} variant="default" to={`${pathname}/create`} size="L">
                 {formatMessage({
                   id: 'Settings.webhooks.list.button.add',
                   defaultMessage: 'Create new webhook',
