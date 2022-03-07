@@ -1563,7 +1563,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
               </div>
               <nav
                 aria-label="pagination"
-                class="sc-kYHfwS"
+                class="sc-fXEqDS"
               >
                 <ul
                   class="c62 c63"
