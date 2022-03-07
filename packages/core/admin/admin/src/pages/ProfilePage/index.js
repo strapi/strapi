@@ -9,6 +9,7 @@ import {
   useNotification,
   useOverlayBlocker,
   auth,
+  useTracking,
 } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { Formik } from 'formik';
@@ -64,6 +65,7 @@ const ProfilePage = () => {
   const { setUserDisplayName } = useAppInfos();
   const queryClient = useQueryClient();
   const { formatMessage } = useIntl();
+  const { trackUsage } = useTracking();
   const toggleNotification = useNotification();
   const { lockApp, unlockApp } = useOverlayBlocker();
   const { notifyStatus } = useNotifyAT();
@@ -100,6 +102,7 @@ const ProfilePage = () => {
       setUserDisplayName(userDisplayName);
       changeLocale(data.preferedLanguage);
       onChangeTheme(data.currentTheme);
+      trackUsage('didChangeMode', { newMode: data.currentTheme });
 
       toggleNotification({
         type: 'success',
