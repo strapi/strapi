@@ -26,10 +26,7 @@ module.exports = async function({ build, watchAdmin, polling, browser }) {
     dir = path.join(dir, 'dist');
   }
 
-  // FIXME: Currently, it'll fail if the dist folder doesn't exist
-  // because we need the built configuration to create a logger instance
-  const config = loadConfiguration(dir);
-  const logger = createLogger(config.logger, {});
+  const logger = createLogger();
 
   try {
     if (cluster.isMaster || cluster.isPrimary) {
@@ -37,6 +34,7 @@ module.exports = async function({ build, watchAdmin, polling, browser }) {
         await tsUtils.commands.develop(process.cwd());
       }
 
+      const config = loadConfiguration(dir);
       const serveAdminPanel = getOr(true, 'admin.serveAdminPanel')(config);
 
       const buildExists = fs.existsSync(path.join(dir, 'build'));
@@ -85,7 +83,7 @@ module.exports = async function({ build, watchAdmin, polling, browser }) {
         serveAdminPanel: watchAdmin ? false : true,
       });
 
-      const adminWatchIgnoreFiles = getOr([], 'admin.watchIgnoreFiles')(config);
+      const adminWatchIgnoreFiles = strapiInstance.config.get('admin.watchIgnoreFiles', []);
       watchFileChanges({
         dir,
         strapiInstance,
