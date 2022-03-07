@@ -118,6 +118,7 @@ module.exports = ({ strapi }) => ({
     const apiPrefix = strapi.config.get('api.rest.prefix');
     settings.message = await userPermissionService.template(settings.message, {
       URL: urlJoin(getAbsoluteServerUrl(strapi.config), apiPrefix, '/auth/email-confirmation'),
+      SERVER_URL: getAbsoluteServerUrl(strapi.config),
       USER: sanitizedUserInfo,
       CODE: confirmationToken,
     });

@@ -240,6 +240,7 @@ module.exports = {
 
     settings.message = await getService('users-permissions').template(settings.message, {
       URL: advanced.email_reset_password,
+      SERVER_URL: getAbsoluteServerUrl(strapi.config),
       USER: userInfo,
       TOKEN: resetPasswordToken,
     });
