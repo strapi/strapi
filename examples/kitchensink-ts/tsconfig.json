@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "lib": ["es2019", "es2020.promise", "es2020.bigint", "es2020.string"],
+    "module": "commonjs",
+    "target": "es2019",
+    "strict": false,
+    "noImplicitAny": false,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "allowJs": true,
+    "outDir": "dist",
+    "noEmitOnError": true
+  },
+
+  "exclude": [
+    // Misc
+    "node_modules/",
+    "dist/",
+    // Admin Directories
+    "src/admin",
+    "src/plugins/**/admin",
+    "src/extensions/**/admin" // to verify
+  ]
+}
