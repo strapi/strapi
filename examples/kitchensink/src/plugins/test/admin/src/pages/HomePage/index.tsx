@@ -5,14 +5,13 @@
  */
 
 import React from 'react';
-// import PropTypes from 'prop-types';
 import pluginId from '../../pluginId';
 
-const HomePage = () => {
+const HomePage: React.VoidFunctionComponent = () => {
   return (
     <div>
       <h1>{pluginId}&apos;s HomePage</h1>
-      <p>Happy coding</p>
+      <p>Happy codineg</p>
     </div>
   );
 };
