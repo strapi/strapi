@@ -14,12 +14,10 @@
   },
 
   "exclude": [
-    // Misc
     "node_modules/",
     "dist/",
-    // Admin Directories
     "src/admin",
     "src/plugins/**/admin",
-    "src/extensions/**/admin" // to verify
+    "src/extensions/**/admin"
   ]
 }
