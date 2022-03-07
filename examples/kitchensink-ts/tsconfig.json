@@ -13,11 +13,5 @@
     "noEmitOnError": true
   },
 
-  "exclude": [
-    "node_modules/",
-    "dist/",
-    "src/admin",
-    "src/plugins/**/admin",
-    "src/extensions/**/admin"
-  ]
+  "exclude": ["node_modules/", "dist/", "src/admin", "src/plugins/**/admin"]
 }
