@@ -7,11 +7,10 @@ const chokidar = require('chokidar');
 const execa = require('execa');
 const { getOr } = require('lodash/fp');
 
-const { createLogger } = require('@strapi/logger');
 const loadConfiguration = require('../core/app-configuration');
 const strapi = require('../index');
 const tsUtils = require('../utils/typescript');
-const buildAdmin = require('./build');
+const { buildTypeScript, buildAdmin } = require('./builders');
 
 /**
  * `$ strapi develop`
@@ -20,94 +19,101 @@ const buildAdmin = require('./build');
 module.exports = async function({ build, watchAdmin, polling, browser }) {
   let dir = process.cwd();
 
-  const isTSProject = tsUtils.isTypeScriptProject(dir);
-
-  if (isTSProject) {
+  if (tsUtils.isTypeScriptProject(dir)) {
     dir = path.join(dir, 'dist');
   }
 
-  const logger = createLogger();
-
   try {
     if (cluster.isMaster || cluster.isPrimary) {
-      if (isTSProject) {
-        await tsUtils.commands.develop(process.cwd());
-      }
-
-      const config = loadConfiguration(dir);
-      const serveAdminPanel = getOr(true, 'admin.serveAdminPanel')(config);
-
-      const buildExists = fs.existsSync(path.join(dir, 'build'));
-      // Don't run the build process if the admin is in watch mode
-      if (build && !watchAdmin && serveAdminPanel && !buildExists) {
-        try {
-          await buildAdmin({ optimization: false, forceBuild: false });
-        } catch (err) {
-          process.exit(1);
-        }
-      }
-
-      if (watchAdmin) {
-        try {
-          execa('npm', ['run', '-s', 'strapi', 'watch-admin', '--', '--browser', browser], {
-            stdio: 'inherit',
-          });
-        } catch (err) {
-          process.exit(1);
-        }
-      }
-
-      cluster.on('message', (worker, message) => {
-        switch (message) {
-          case 'reload':
-            logger.info('The server is restarting\n');
-            worker.send('kill');
-            break;
-          case 'killed':
-            cluster.fork();
-            break;
-          case 'stop':
-            process.exit(1);
-          default:
-            return;
-        }
-      });
-
-      cluster.fork();
+      return masterProcess({ dir, build, browser });
     }
 
     if (cluster.isWorker) {
-      const strapiInstance = strapi({
-        dir,
-        autoReload: true,
-        serveAdminPanel: watchAdmin ? false : true,
-      });
-
-      const adminWatchIgnoreFiles = strapiInstance.config.get('admin.watchIgnoreFiles', []);
-      watchFileChanges({
-        dir,
-        strapiInstance,
-        watchIgnoreFiles: adminWatchIgnoreFiles,
-        polling,
-      });
-
-      process.on('message', async message => {
-        switch (message) {
-          case 'kill':
-            await strapiInstance.destroy();
-            process.send('killed');
-            process.exit();
-          default:
-          // Do nothing.
-        }
-      });
-
-      return strapiInstance.start();
+      return workerProcess({ dir, watchAdmin, polling });
     }
   } catch (e) {
-    logger.error(e);
+    console.error(e);
     process.exit(1);
   }
+};
+
+const masterProcess = async ({ dir, build, watchAdmin, browser }) => {
+  const currentDirectory = process.cwd();
+
+  if (tsUtils.isTypeScriptProject(currentDirectory)) {
+    await buildTypeScript({ srcDir: currentDirectory, watch: true });
+  }
+
+  const config = loadConfiguration(dir);
+  const serveAdminPanel = getOr(true, 'admin.serveAdminPanel')(config);
+
+  const buildExists = fs.existsSync(path.join(dir, 'build'));
+
+  // Don't run the build process if the admin is in watch mode
+  if (build && !watchAdmin && serveAdminPanel && !buildExists) {
+    try {
+      await buildAdmin({ dir, optimization: false, forceBuild: false });
+    } catch (err) {
+      process.exit(1);
+    }
+  }
+
+  if (watchAdmin) {
+    try {
+      execa('npm', ['run', '-s', 'strapi', 'watch-admin', '--', '--browser', browser], {
+        stdio: 'inherit',
+      });
+    } catch (err) {
+      process.exit(1);
+    }
+  }
+
+  cluster.on('message', (worker, message) => {
+    switch (message) {
+      case 'reload':
+        console.info('The server is restarting\n');
+        worker.send('kill');
+        break;
+      case 'killed':
+        cluster.fork();
+        break;
+      case 'stop':
+        process.exit(1);
+      default:
+        return;
+    }
+  });
+
+  cluster.fork();
+};
+
+const workerProcess = ({ dir, watchAdmin, polling }) => {
+  const strapiInstance = strapi({
+    dir,
+    autoReload: true,
+    serveAdminPanel: watchAdmin ? false : true,
+  });
+
+  const adminWatchIgnoreFiles = strapiInstance.config.get('admin.watchIgnoreFiles', []);
+  watchFileChanges({
+    dir,
+    strapiInstance,
+    watchIgnoreFiles: adminWatchIgnoreFiles,
+    polling,
+  });
+
+  process.on('message', async message => {
+    switch (message) {
+      case 'kill':
+        await strapiInstance.destroy();
+        process.send('killed');
+        process.exit();
+      default:
+      // Do nothing.
+    }
+  });
+
+  return strapiInstance.start();
 };
 
 /**

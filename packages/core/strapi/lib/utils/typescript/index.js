@@ -6,9 +6,9 @@ const reportDiagnostics = require('./report-diagnostics');
 const resolveConfigOptions = require('./resolve-config-options');
 const copyResources = require('./copy-resources');
 const formatHost = require('./format-host');
+const compile = require('./compile');
 
 const compilers = require('./compilers');
-const commands = require('./commands');
 
 module.exports = {
   isTypeScriptProject,
@@ -17,7 +17,7 @@ module.exports = {
   resolveConfigOptions,
   copyResources,
   formatHost,
+  compile,
 
   compilers,
-  commands,
 };
