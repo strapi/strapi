@@ -1,7 +1,8 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useIntl } from 'react-intl';
 import { Helmet } from 'react-helmet';
 import { useQuery } from 'react-query';
+import matchSorter from 'match-sorter';
 import {
   AnErrorOccurred,
   CheckPagePermissions,
@@ -11,14 +12,29 @@ import {
   useNotification,
 } from '@strapi/helper-plugin';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
-import { Layout, HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
+import { Layout, HeaderLayout, ContentLayout, ActionLayout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
+import { Searchbar } from '@strapi/design-system/Searchbar';
 import { useNotifyAT } from '@strapi/design-system/LiveRegions';
-import adminPermissions from '../../permissions';
+
 import PluginCard from './components/PluginCard';
+import { EmptyPluginSearch } from './components/EmptyPluginSearch';
 import { fetchAppInformation } from './utils/api';
 import useFetchInstalledPlugins from '../../hooks/useFetchInstalledPlugins';
 import useFetchMarketplacePlugins from '../../hooks/useFetchMarketplacePlugins';
+import adminPermissions from '../../permissions';
+
+const matchSearch = (plugins, search) => {
+  return matchSorter(plugins, search, {
+    keys: [
+      {
+        threshold: matchSorter.rankings.WORD_STARTS_WITH,
+        key: 'attributes.name',
+      },
+      { threshold: matchSorter.rankings.WORD_STARTS_WITH, key: 'attributes.description' },
+    ],
+  });
+};
 
 const MarketPlacePage = () => {
   const { formatMessage } = useIntl();
@@ -26,6 +42,7 @@ const MarketPlacePage = () => {
   const { notifyStatus } = useNotifyAT();
   const trackUsageRef = useRef(trackUsage);
   const toggleNotification = useNotification();
+  const [searchQuery, setSearchQuery] = useState('');
 
   useFocusWhenNavigate();
 
@@ -99,6 +116,7 @@ const MarketPlacePage = () => {
     );
   }
 
+  const searchResults = matchSearch(marketplacePluginsResponse.data, searchQuery);
   const installedPluginNames = installedPluginsResponse.plugins.map(plugin => plugin.packageName);
 
   return (
@@ -120,18 +138,53 @@ const MarketPlacePage = () => {
             defaultMessage: 'Get more out of Strapi',
           })}
         />
+        <ActionLayout
+          startActions={
+            <Searchbar
+              name="searchbar"
+              onClear={() => setSearchQuery('')}
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              clearLabel={formatMessage({
+                id: 'admin.pages.MarketPlacePage.search.clear',
+                defaultMessage: 'Clear the plugin search',
+              })}
+              placeholder={formatMessage({
+                id: 'admin.pages.MarketPlacePage.search.placeholder',
+                defaultMessage: 'Search for a plugin',
+              })}
+            >
+              {formatMessage({
+                id: 'admin.pages.MarketPlacePage.search.placeholder',
+                defaultMessage: 'Search for a plugin',
+              })}
+            </Searchbar>
+          }
+        />
         <ContentLayout>
-          <Grid gap={4}>
-            {marketplacePluginsResponse.data.map(plugin => (
-              <GridItem col={4} s={6} xs={12} style={{ height: '100%' }} key={plugin.id}>
-                <PluginCard
-                  plugin={plugin}
-                  installedPluginNames={installedPluginNames}
-                  useYarn={appInfoResponse.data.useYarn}
-                />
-              </GridItem>
-            ))}
-          </Grid>
+          {searchQuery.length > 0 && !searchResults.length ? (
+            <EmptyPluginSearch
+              content={formatMessage(
+                {
+                  id: 'admin.pages.MarketPlacePage.search.empty',
+                  defaultMessage: 'No result for "{target}"',
+                },
+                { target: searchQuery }
+              )}
+            />
+          ) : (
+            <Grid gap={4}>
+              {searchResults.map(plugin => (
+                <GridItem col={4} s={6} xs={12} style={{ height: '100%' }} key={plugin.id}>
+                  <PluginCard
+                    plugin={plugin}
+                    installedPluginNames={installedPluginNames}
+                    useYarn={appInfoResponse.data.useYarn}
+                  />
+                </GridItem>
+              ))}
+            </Grid>
+          )}
         </ContentLayout>
       </Main>
     </Layout>
