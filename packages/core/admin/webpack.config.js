@@ -3,6 +3,7 @@
 const path = require('path');
 const webpack = require('webpack');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const ForkTsCheckerPlugin = require('fork-ts-checker-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
 const WebpackBar = require('webpackbar');
@@ -48,19 +49,33 @@ module.exports = ({
       ]
     : [];
 
+  if (useTypeScript) {
+    const tsChecker = new ForkTsCheckerPlugin({
+      typescript: {
+        configFile: path.join(cacheDir, 'admin', 'src', 'tsconfig.json'),
+      },
+    });
+
+    webpackPlugins.push(tsChecker);
+  }
+
+  const rules = [];
+
   // webpack is quite slow to compile so it is best not to use the ts loader when
   // it is not needed in javascript apps.
   // Users can still add it by using the custom webpack config.
-  const typescriptRules = useTypeScript
-    ? [
-        {
-          test: /\.tsx?$/,
-          use: require.resolve('ts-loader'),
-          include: [cacheDir, ...pluginsPath],
-          exclude: /node_modules/,
-        },
-      ]
-    : [];
+  if (useTypeScript) {
+    rules.push({
+      test: /\.tsx?$/,
+      loader: require.resolve('esbuild-loader'),
+      include: [cacheDir, ...pluginsPath],
+      exclude: /node_modules/,
+      options: {
+        loader: 'tsx',
+        target: 'es2015',
+      },
+    });
+  }
 
   return {
     mode: isProduction ? 'production' : 'development',
@@ -181,7 +196,7 @@ module.exports = ({
             },
           },
         },
-        ...typescriptRules,
+        ...rules,
       ],
     },
     resolve: {
