@@ -10,6 +10,7 @@ const { getOr } = require('lodash/fp');
 const { createLogger } = require('@strapi/logger');
 const loadConfiguration = require('../core/app-configuration');
 const strapi = require('../index');
+const tsUtils = require('../utils/typescript');
 const buildAdmin = require('./build');
 
 /**
@@ -17,12 +18,25 @@ const buildAdmin = require('./build');
  *
  */
 module.exports = async function({ build, watchAdmin, polling, browser }) {
-  const dir = process.cwd();
+  let dir = process.cwd();
+
+  const isTSProject = tsUtils.isTypeScriptProject(dir);
+
+  if (isTSProject) {
+    dir = path.join(dir, 'dist');
+  }
+
+  // FIXME: Currently, it'll fail if the dist folder doesn't exist
+  // because we need the built configuration to create a logger instance
   const config = loadConfiguration(dir);
   const logger = createLogger(config.logger, {});
 
   try {
     if (cluster.isMaster || cluster.isPrimary) {
+      if (isTSProject) {
+        await tsUtils.commands.develop(process.cwd());
+      }
+
       const serveAdminPanel = getOr(true, 'admin.serveAdminPanel')(config);
 
       const buildExists = fs.existsSync(path.join(dir, 'build'));

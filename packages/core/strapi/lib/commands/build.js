@@ -1,4 +1,5 @@
 'use strict';
+const path = require('path');
 const { green } = require('chalk');
 
 const strapiAdmin = require('@strapi/admin');
@@ -6,6 +7,7 @@ const { getConfigUrls } = require('@strapi/utils');
 
 const ee = require('../utils/ee');
 const addSlash = require('../utils/addSlash');
+const tsUtils = require('../utils/typescript');
 const strapi = require('../index');
 const getEnabledPlugins = require('../core/loaders/plugins/get-enabled-plugins');
 
@@ -13,7 +15,17 @@ const getEnabledPlugins = require('../core/loaders/plugins/get-enabled-plugins')
  * `$ strapi build`
  */
 module.exports = async ({ optimization, forceBuild = true }) => {
-  const dir = process.cwd();
+  let dir = process.cwd();
+
+  const isTSProject = tsUtils.isTypeScriptProject(dir);
+
+  // Handle TypeScript projects
+  if (isTSProject) {
+    await tsUtils.commands.build(dir);
+
+    // Update the dir path for the next steps
+    dir = path.join(dir, 'dist');
+  }
 
   const strapiInstance = strapi({
     dir,
@@ -26,7 +38,7 @@ module.exports = async ({ optimization, forceBuild = true }) => {
   const env = strapiInstance.config.get('environment');
   const { serverUrl, adminPath } = getConfigUrls(strapiInstance.config, true);
 
-  console.log(`Building your admin UI with ${green(env)} configuration ...`);
+  console.log(`Building your admin UI with ${green(env)} configuration...`);
 
   // Always remove the .cache and build folders
   await strapiAdmin.clean({ dir });
