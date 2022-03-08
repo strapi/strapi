@@ -10,7 +10,7 @@ const addSlash = require('../../utils/addSlash');
 const strapi = require('../../index');
 const getEnabledPlugins = require('../../core/loaders/plugins/get-enabled-plugins');
 
-module.exports = async ({ dir, optimization, forceBuild = true }) => {
+module.exports = async ({ dir, optimization, forceBuild = true, isTSProject }) => {
   const strapiInstance = strapi({
     dir,
     autoReload: true,
@@ -41,6 +41,7 @@ module.exports = async ({ dir, optimization, forceBuild = true }) => {
         backend: serverUrl,
         adminPath: addSlash(adminPath),
       },
+      useTypescript: isTSProject,
     })
     .then(() => {
       console.log('Admin UI built successfully');

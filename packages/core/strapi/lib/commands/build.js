@@ -20,7 +20,5 @@ module.exports = async ({ optimization, forceBuild = true }) => {
     dir = path.join(dir, 'dist');
   }
 
-  if (forceBuild) {
-    await buildAdmin({ dir, optimization, forceBuild });
-  }
+  await buildAdmin({ dir, optimization, forceBuild, isTSProject });
 };

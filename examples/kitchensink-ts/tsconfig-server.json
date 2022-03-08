@@ -10,6 +10,7 @@
     "forceConsistentCasingInFileNames": true,
     "allowJs": true,
     "outDir": "dist",
+    "rootDir": ".",
     "noEmitOnError": true
   },
 
