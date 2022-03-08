@@ -15,7 +15,9 @@ import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { Layout, HeaderLayout, ContentLayout, ActionLayout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
 import { Searchbar } from '@strapi/design-system/Searchbar';
+import { LinkButton } from '@strapi/design-system/LinkButton';
 import { useNotifyAT } from '@strapi/design-system/LiveRegions';
+import Plus from '@strapi/icons/Plus';
 
 import PluginCard from './components/PluginCard';
 import { EmptyPluginSearch } from './components/EmptyPluginSearch';
@@ -137,6 +139,18 @@ const MarketPlacePage = () => {
             id: 'admin.pages.MarketPlacePage.subtitle',
             defaultMessage: 'Get more out of Strapi',
           })}
+          primaryAction={
+            <LinkButton
+              startIcon={<Plus />}
+              variant="tertiary"
+              href="https://market.strapi.io/submit-plugin"
+            >
+              {formatMessage({
+                id: 'admin.pages.MarketPlacePage.submit.plugin.link',
+                defaultMessage: 'Submit your plugin',
+              })}
+            </LinkButton>
+          }
         />
         <ActionLayout
           startActions={
