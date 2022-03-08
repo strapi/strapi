@@ -2,6 +2,7 @@
 
 const { enumType } = require('nexus');
 const { set } = require('lodash/fp');
+const { toRegressedEnumValue } = require('@strapi/utils');
 
 /**
  * Build a Nexus enum type from a Strapi enum attribute
@@ -13,9 +14,10 @@ const { set } = require('lodash/fp');
 const buildEnumTypeDefinition = (definition, name) => {
   return enumType({
     name,
-    // In Strapi V3, the key of an enum is also its value
-    // todo[V4]: allow passing an object of key/value instead of an array
-    members: definition.enum.reduce((acc, value) => set(value, value, acc), {}),
+    members: definition.enum.reduce(
+      (acc, value) => set(toRegressedEnumValue(value), value, acc),
+      {}
+    ),
   });
 };
 

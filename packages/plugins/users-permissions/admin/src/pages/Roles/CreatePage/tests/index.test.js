@@ -665,14 +665,17 @@ describe('Admin | containers | RoleCreatePage', () => {
 
       .c19 {
         grid-column: span 6;
+        max-width: 100%;
       }
 
       .c34 {
         grid-column: span 7;
+        max-width: 100%;
       }
 
       .c59 {
         grid-column: span 5;
+        max-width: 100%;
       }
 
       .c51 {

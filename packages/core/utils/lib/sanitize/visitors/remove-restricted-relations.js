@@ -2,6 +2,7 @@
 
 const ACTIONS_TO_VERIFY = ['find'];
 
+// FIXME: Support populating creator fields
 module.exports = auth => async ({ data, key, attribute }, { remove, set }) => {
   const isRelation = attribute.type === 'relation';
 

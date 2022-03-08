@@ -33,8 +33,6 @@
   "form.button.continue": "Devam",
   "form.button.save": "Kaydet",
   "from": "kimden",
-  "menu.section.models.name.plural": "İçerik Türleri",
-  "menu.section.models.name.singular": "İçerik Türü",
   "modelPage.attribute.relationWith": "İlişkili",
   "plugin.description.long": "Servisinizin veri yapısını modelleyin. Bir dakika içinde yeni alanlar ve ilişkiler yaratın. Dosyalar, projenizde otomatik olarak oluşturulur ve güncellenir.",
   "plugin.description.short": "Servisinizin veri yapısını modelleyin.",

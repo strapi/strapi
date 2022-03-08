@@ -121,12 +121,6 @@
   "form.button.select-component": "Вибрати компонент",
   "form.button.single-type.description": "Підходить для поодиноких об'єктів, як-то домашня сторінка, про нас тощо",
   "from": "з",
-  "menu.section.components.name.plural": "Компоненти",
-  "menu.section.components.name.singular": "Компонент",
-  "menu.section.models.name.plural": "Collection Types",
-  "menu.section.models.name.singular": "Collection Type",
-  "menu.section.single-types.name.plural": "Single Types",
-  "menu.section.single-types.name.singular": "Single Type",
   "modalForm.attribute.form.base.name": "Назва",
   "modalForm.attribute.form.base.name.description": "Для назви атрибута не допускається пробілів",
   "modalForm.attribute.form.base.name.placeholder": "наприклад, Slug, SEO URL, Canonical URL",
@@ -169,7 +163,5 @@
   "relation.manyWay": "містить багато",
   "relation.oneToMany": "належить до багатьох",
   "relation.oneToOne": "містить і належить до однієї",
-  "relation.oneWay": "містить одне",
-  "table.attributes.title.plural": "{number} полів",
-  "table.attributes.title.singular": "{number} поле"
+  "relation.oneWay": "містить одне"
 }

@@ -887,6 +887,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
 
 .c13 {
   grid-column: span 6;
+  max-width: 100%;
 }
 
 .c15 {
@@ -1210,7 +1211,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                                 <span
                                   class="c29"
                                 >
-                                  780✕1476
+                                  1476✕780
                                 </span>
                               </div>
                             </div>

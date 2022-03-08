@@ -195,7 +195,7 @@ const DraggableCard = ({
         >
           <Stack horizontal size={3}>
             <DragButton
-              as='span'
+              as="span"
               aria-label={formatMessage(
                 {
                   id: getTrad('components.DraggableCard.move.field'),

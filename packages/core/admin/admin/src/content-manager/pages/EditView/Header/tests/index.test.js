@@ -235,10 +235,8 @@ describe('CONTENT MANAGER | EditView | Header', () => {
 
       .c5 {
         color: #4945ff;
-        font-weight: 600;
-        font-size: 0.6875rem;
-        line-height: 1.45;
-        text-transform: uppercase;
+        font-size: 0.75rem;
+        line-height: 1.33;
       }
 
       .c3 {
@@ -254,7 +252,6 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
-        text-transform: uppercase;
         -webkit-text-decoration: none;
         text-decoration: none;
         position: relative;

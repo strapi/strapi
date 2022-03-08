@@ -102,10 +102,6 @@
   "form.button.save": "Zapisz",
   "form.button.select-component": "Wybierz komponent",
   "from": "z",
-  "menu.section.components.name.plural": "Komponenty",
-  "menu.section.components.name.singular": "Komponent",
-  "menu.section.models.name.plural": "Modele",
-  "menu.section.models.name.singular": "Model",
   "modalForm.attribute.form.base.name": "Nazwa",
   "modalForm.attribute.form.base.name.description": "Spacja nie jest dozwolona dla nazwy atrybutu",
   "modalForm.attribute.text.type-selection": "Typ",
@@ -141,7 +137,5 @@
   "relation.manyWay": "ma wiele",
   "relation.oneToMany": "należy do wielu",
   "relation.oneToOne": "zawiera i należy do",
-  "relation.oneWay": "zawiera",
-  "table.attributes.title.plural": "pól: {number}",
-  "table.attributes.title.singular": "{number} pole"
+  "relation.oneWay": "zawiera"
 }

@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<MediaLibraryInput /> renders and matches the snapshot 1`] = `
-.c15 {
+.c16 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -13,12 +13,12 @@ exports[`<MediaLibraryInput /> renders and matches the snapshot 1`] = `
   width: 1px;
 }
 
-.c9 {
+.c10 {
   width: 100%;
   height: 100%;
 }
 
-.c10 {
+.c11 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -36,25 +36,25 @@ exports[`<MediaLibraryInput /> renders and matches the snapshot 1`] = `
   align-items: center;
 }
 
-.c11 {
+.c12 {
   color: #4945ff;
   margin-bottom: 12px;
   width: 30px;
   height: 24px;
 }
 
-.c12 path {
+.c13 path {
   fill: #4945ff;
 }
 
-.c13 {
+.c14 {
   font-weight: 600;
   color: #666687;
   font-size: 0.75rem;
   line-height: 1.33;
 }
 
-.c1 {
+.c2 {
   background: #f6f6f9;
   padding: 8px;
   border-radius: 4px;
@@ -62,28 +62,28 @@ exports[`<MediaLibraryInput /> renders and matches the snapshot 1`] = `
   border: 1px solid #dcdce4;
 }
 
-.c2 {
+.c3 {
   position: relative;
 }
 
-.c4 {
+.c5 {
   padding-right: 8px;
   padding-left: 8px;
   width: 100%;
 }
 
-.c6 {
+.c7 {
   height: 124px;
 }
 
-.c0 {
+.c1 {
   font-weight: 600;
   color: #32324d;
   font-size: 0.75rem;
   line-height: 1.33;
 }
 
-.c7 {
+.c8 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -101,24 +101,43 @@ exports[`<MediaLibraryInput /> renders and matches the snapshot 1`] = `
   align-items: center;
 }
 
-.c3 {
+.c4 {
   display: grid;
   grid-template-columns: auto 1fr auto;
   grid-template-areas: 'startAction slides endAction';
 }
 
-.c5 {
+.c6 {
   grid-area: slides;
 }
 
-.c8 {
+.c0 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+}
+
+.c0 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c0 > * + * {
+  margin-top: 4px;
+}
+
+.c9 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
 }
 
-.c14 {
+.c15 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -127,76 +146,80 @@ exports[`<MediaLibraryInput /> renders and matches the snapshot 1`] = `
 
 <body>
   <div>
-    <label
-      class="c0"
-      for="carouselinput-1"
-    >
-      default
-    </label>
     <div
-      class=""
-      id="carouselinput-1"
+      class="c0"
     >
-      <div
+      <label
         class="c1"
+        for="carouselinput-1"
       >
-        <section
-          aria-label="default"
-          aria-roledescription="carousel"
-          class="c2 c3"
+        default
+      </label>
+      <div
+        class=""
+        id="carouselinput-1"
+      >
+        <div
+          class="c2"
         >
-          <div
-            aria-live="polite"
-            class="c4 c5"
-            width="100%"
+          <section
+            aria-label="default"
+            aria-roledescription="carousel"
+            class="c3 c4"
           >
             <div
-              aria-label="upload.mediaLibraryInput.slideCount"
-              aria-roledescription="slide"
-              class="c6 c7 c8"
-              height="124px"
-              role="group"
+              aria-live="polite"
+              class="c5 c6"
+              width="100%"
             >
-              <button
-                class="c9 c10"
-                height="100%"
-                style="cursor: pointer;"
-                type="button"
-                width="100%"
+              <div
+                aria-label="upload.mediaLibraryInput.slideCount"
+                aria-roledescription="slide"
+                class="c7 c8 c9"
+                height="124px"
+                role="group"
               >
-                <svg
-                  aria-hidden="true"
-                  class="c11 c12"
-                  fill="none"
-                  height="24px"
-                  viewBox="0 0 24 20"
-                  width="30px"
-                  xmlns="http://www.w3.org/2000/svg"
+                <button
+                  class="c10 c11"
+                  height="100%"
+                  style="cursor: pointer;"
+                  type="button"
+                  width="100%"
                 >
-                  <path
-                    d="M21.525 2.394H7.814v1.582h13.711c.47 0 .824.498.824 1.091v9.834l-2.785-3.165c-.2-.233-.453-.42-.738-.549a2.21 2.21 0 00-.91-.194 2.209 2.209 0 00-.91.19 2.126 2.126 0 00-.739.545l-2.925 3.378-2.967-3.354a2.143 2.143 0 00-.739-.543 2.226 2.226 0 00-.909-.193c-.315.002-.626.07-.911.2-.285.13-.536.318-.737.552l-2.925 3.425V7.637H2.505v9.874c.023.153.059.304.107.451v.127l.042.095c.056.142.125.28.206.411l.099.15c.074.106.157.207.247.301l.123.119c.13.118.274.221.429.308h.025c.358.214.772.327 1.195.325h16.481a2.47 2.47 0 001.037-.239c.322-.153.605-.375.826-.648.222-.263.392-.564.502-.886.067-.216.108-.439.124-.664V5.067a2.493 2.493 0 00-.65-1.805 2.7 2.7 0 00-1.773-.868z"
-                    fill="#32324D"
-                  />
-                  <path
-                    d="M12.526 9.18c.91 0 1.648-.708 1.648-1.582 0-.874-.738-1.582-1.648-1.582-.91 0-1.648.708-1.648 1.582 0 .874.738 1.582 1.648 1.582zM3.297 6.395h.823V3.988h2.473v-.79-.792H4.12V0h-.823c-.219 0-.849.002-.825 0v2.406H0v1.582h2.472v2.407h.825z"
-                    fill="#32324D"
-                  />
-                </svg>
-                <span
-                  class="c13 c14"
-                  style="text-align: center;"
-                >
-                  upload.mediaLibraryInput.placeholder
-                </span>
-              </button>
+                  <svg
+                    aria-hidden="true"
+                    class="c12 c13"
+                    fill="none"
+                    height="24px"
+                    viewBox="0 0 24 20"
+                    width="30px"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M21.569 2.398H7.829v1.586h13.74c.47 0 .826.5.826 1.094v9.853l-2.791-3.17a2.13 2.13 0 00-.74-.55 2.214 2.214 0 00-.912-.196 2.215 2.215 0 00-.912.191 2.131 2.131 0 00-.74.546l-2.93 3.385-2.973-3.36a2.147 2.147 0 00-.741-.545 2.228 2.228 0 00-1.824.007c-.286.13-.538.319-.739.553l-2.931 3.432V7.653H2.51v9.894c.023.153.06.304.108.452v.127l.041.095c.057.142.126.28.207.412l.099.15c.074.107.157.207.247.302l.124.119c.13.118.275.222.43.309h.024c.36.214.775.327 1.198.325h16.515c.36-.004.716-.085 1.039-.24.323-.153.606-.375.827-.648a2.78 2.78 0 00.504-.888c.066-.217.108-.44.124-.666V5.078a2.497 2.497 0 00-.652-1.81 2.706 2.706 0 00-1.776-.87z"
+                      fill="#32324D"
+                    />
+                    <path
+                      d="M12.552 9.199c.912 0 1.651-.71 1.651-1.585 0-.876-.74-1.586-1.651-1.586-.912 0-1.652.71-1.652 1.586 0 .875.74 1.585 1.652 1.585zM3.303 6.408h.826V3.997h2.477v-.793-.793H4.129V0h-.826c-.219 0-.85.002-.826 0v2.411H0v1.586h2.477v2.41h.826z"
+                      fill="#32324D"
+                    />
+                  </svg>
+                  <span
+                    class="c14 c15"
+                    style="text-align: center;"
+                  >
+                    upload.mediaLibraryInput.placeholder
+                  </span>
+                </button>
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        </div>
       </div>
     </div>
   </div>
   <div
-    class="c15"
+    class="c16"
   >
     <p
       aria-live="polite"
