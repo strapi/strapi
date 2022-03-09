@@ -27,7 +27,7 @@ module.exports = async function({ build, watchAdmin, polling, browser }) {
 
   try {
     if (cluster.isMaster || cluster.isPrimary) {
-      return primaryProcess({ dir, build, browser });
+      return primaryProcess({ dir, build, browser, watchAdmin });
     }
 
     if (cluster.isWorker) {
@@ -141,7 +141,7 @@ function watchFileChanges({ dir, strapiInstance, watchIgnoreFiles, polling }) {
       /(^|[/\\])\../, // dot files
       /tmp/,
       '**/src/admin/**',
-      '**/src/plugins/**/admin/',
+      '**/src/plugins/**/admin/**',
       '**/documentation',
       '**/documentation/**',
       '**/node_modules',
