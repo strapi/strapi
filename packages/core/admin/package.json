@@ -140,7 +140,6 @@
   "devDependencies": {
     "duplicate-dependencies-webpack-plugin": "0.2.0",
     "fork-ts-checker-webpack-plugin": "7.2.1",
-    "typescript": "4.6.2",
     "webpack-bundle-analyzer": "4.4.1"
   },
   "engines": {
