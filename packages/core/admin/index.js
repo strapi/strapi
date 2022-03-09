@@ -94,16 +94,22 @@ async function clean({ appDir, buildDestDir }) {
   fs.removeSync(cacheDir);
 }
 
-async function watchAdmin({ appDir, plugins, dir, host, port, browser, options, useTypeScript }) {
-  console.log({ appDir });
-  // TODO appDir
-
+async function watchAdmin({
+  appDir,
+  browser,
+  buildDestDir,
+  host,
+  options,
+  plugins,
+  port,
+  useTypeScript,
+}) {
   // Create the cache dir containing the front-end files.
-  const cacheDir = path.join(dir, '.cache');
+  const cacheDir = path.join(appDir, '.cache');
   await createCacheDir({ appDir, plugins, useTypeScript });
 
   const entry = path.join(cacheDir, 'admin', 'src');
-  const dest = path.join(dir, 'build');
+  const dest = path.join(buildDestDir, 'build');
   const env = 'development';
 
   // Roots for the @strapi/babel-plugin-switch-ee-ce
@@ -115,15 +121,15 @@ async function watchAdmin({ appDir, plugins, dir, host, port, browser, options, 
   const pluginsPath = Object.keys(plugins).map(pluginName => plugins[pluginName].pathToPlugin);
 
   const args = {
-    entry,
+    appDir,
     cacheDir,
-    pluginsPath,
     dest,
+    entry,
     env,
-    port,
     options,
+    pluginsPath,
+    // port,
     roots,
-    useTypeScript,
     devServer: {
       port,
       client: {
@@ -143,9 +149,10 @@ async function watchAdmin({ appDir, plugins, dir, host, port, browser, options, 
         disableDotRule: true,
       },
     },
+    useTypeScript,
   };
 
-  const webpackConfig = getCustomWebpackConfig(dir, args);
+  const webpackConfig = getCustomWebpackConfig(appDir, args);
 
   const compiler = webpack(webpackConfig);
 
@@ -161,7 +168,7 @@ async function watchAdmin({ appDir, plugins, dir, host, port, browser, options, 
 
   runServer();
 
-  watchAdminFiles(dir, useTypeScript);
+  watchAdminFiles(appDir, useTypeScript);
 }
 
 module.exports = {

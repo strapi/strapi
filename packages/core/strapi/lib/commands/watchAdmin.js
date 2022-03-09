@@ -1,18 +1,21 @@
 'use strict';
 
+const path = require('path');
 const strapiAdmin = require('@strapi/admin');
 const { getConfigUrls, getAbsoluteServerUrl } = require('@strapi/utils');
-
-const ee = require('../utils/ee');
-const addSlash = require('../utils/addSlash');
-const strapi = require('../index');
 const getEnabledPlugins = require('../core/loaders/plugins/get-enabled-plugins');
+const addSlash = require('../utils/addSlash');
+const tsUtils = require('../utils/typescript');
+const strapi = require('../index');
 
 module.exports = async function({ browser }) {
-  const dir = process.cwd();
+  const currentDirectory = process.cwd();
+
+  const isTSProject = await tsUtils.isTypeScriptProject(currentDirectory);
+  const buildDestDir = isTSProject ? path.join(currentDirectory, 'dist') : currentDirectory;
 
   const strapiInstance = strapi({
-    dir,
+    dir: buildDestDir,
     autoReload: true,
     serveAdminPanel: false,
   });
@@ -23,17 +26,12 @@ module.exports = async function({ browser }) {
 
   const adminPort = strapiInstance.config.get('admin.port', 8000);
   const adminHost = strapiInstance.config.get('admin.host', 'localhost');
-  const adminWatchIgnoreFiles = strapiInstance.config.get('admin.watchIgnoreFiles', []);
 
   const backendURL = getAbsoluteServerUrl(strapiInstance.config, true);
 
-  ee({ dir });
-
-  // @convly we need to update this with the real check
-  const useTypeScript = false;
-
   strapiAdmin.watchAdmin({
-    dir,
+    appDir: currentDirectory,
+    buildDestDir,
     plugins,
     port: adminPort,
     host: adminHost,
@@ -41,9 +39,7 @@ module.exports = async function({ browser }) {
     options: {
       backend: backendURL,
       adminPath: addSlash(adminPath),
-      watchIgnoreFiles: adminWatchIgnoreFiles,
-      features: ee.isEE ? ee.features.getEnabled() : [],
     },
-    useTypeScript,
+    useTypeScript: isTSProject,
   });
 };

@@ -8,8 +8,8 @@ const DEFAULT_PLUGINS = [
   'content-manager',
   'upload',
   'email',
-  // 'i18n',
-  // 'users-permissions',
+  'i18n',
+  'users-permissions',
 ];
 
 /**
