@@ -10,9 +10,10 @@ const addSlash = require('../../utils/addSlash');
 const strapi = require('../../index');
 const getEnabledPlugins = require('../../core/loaders/plugins/get-enabled-plugins');
 
-module.exports = async ({ dir, optimization, forceBuild = true, isTSProject }) => {
+module.exports = async ({ buildDestDir, forceBuild = true, isTSProject, optimization, srcDir }) => {
   const strapiInstance = strapi({
-    dir,
+    // TODO check if this is working @convly
+    dir: buildDestDir,
     autoReload: true,
     serveAdminPanel: false,
   });
@@ -25,23 +26,27 @@ module.exports = async ({ dir, optimization, forceBuild = true, isTSProject }) =
   console.log(`Building your admin UI with ${green(env)} configuration...`);
 
   // Always remove the .cache and build folders
-  await strapiAdmin.clean({ dir });
+  // FIXME the BE should remove the build dir and the admin should only
+  // be responsible of removing the .cache dir.
+  await strapiAdmin.clean({ appDir: srcDir, buildDestDir });
 
-  ee({ dir });
+  // @convly shouldn't we use the app dir here?
+  ee({ dir: buildDestDir });
 
   return strapiAdmin
     .build({
-      forceBuild,
-      dir,
-      plugins,
+      appDir: srcDir,
+      buildDestDir,
       // front end build env is always production for now
       env: 'production',
+      forceBuild,
+      plugins,
       optimize: optimization,
       options: {
         backend: serverUrl,
         adminPath: addSlash(adminPath),
       },
-      useTypescript: isTSProject,
+      useTypeScript: isTSProject,
     })
     .then(() => {
       console.log('Admin UI built successfully');

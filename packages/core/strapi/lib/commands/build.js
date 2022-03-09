@@ -8,17 +8,24 @@ const { buildAdmin, buildTypeScript } = require('./builders');
  * `$ strapi build`
  */
 module.exports = async ({ optimization, forceBuild = true }) => {
-  let dir = process.cwd();
+  let buildDestDir = process.cwd();
+  const srcDir = process.cwd();
 
-  const isTSProject = await tsUtils.isTypeScriptProject(dir);
+  const isTSProject = await tsUtils.isTypeScriptProject(srcDir);
 
   // Typescript
   if (isTSProject) {
-    await buildTypeScript({ srcDir: dir, watch: false });
+    await buildTypeScript({ srcDir, watch: false });
 
     // Update the dir path for the next steps
-    dir = path.join(dir, 'dist');
+    buildDestDir = path.join(srcDir, 'dist');
   }
 
-  await buildAdmin({ dir, optimization, forceBuild, isTSProject });
+  await buildAdmin({
+    buildDestDir,
+    forceBuild,
+    isTSProject,
+    optimization,
+    srcDir,
+  });
 };

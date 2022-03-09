@@ -13,12 +13,13 @@ const alias = require('./webpack.alias');
 const getClientEnvironment = require('./env');
 
 module.exports = ({
-  entry,
+  appDir,
   cacheDir,
-  pluginsPath,
   dest,
+  entry,
   env,
   optimize,
+  pluginsPath,
   options = {
     backend: 'http://localhost:1337',
     adminPath: '/admin/',
@@ -53,7 +54,7 @@ module.exports = ({
     const tsChecker = new ForkTsCheckerPlugin({
       typescript: {
         // FIXME
-        configFile: path.join(cacheDir, '..', 'tsconfig.admin.json'),
+        configFile: path.join(appDir, 'tsconfig-admin.json'),
       },
     });
 
