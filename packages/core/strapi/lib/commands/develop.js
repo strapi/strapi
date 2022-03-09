@@ -28,7 +28,7 @@ module.exports = async function({ build, watchAdmin, polling, browser }) {
 
   try {
     if (cluster.isMaster || cluster.isPrimary) {
-      return primaryProcess({ dir, build, browser });
+      return primaryProcess({ dir, build, browser, watchAdmin });
     }
 
     if (cluster.isWorker) {

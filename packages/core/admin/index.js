@@ -1,52 +1,16 @@
 'use strict';
 
 const path = require('path');
-const _ = require('lodash');
 const fs = require('fs-extra');
 const webpack = require('webpack');
 const WebpackDevServer = require('webpack-dev-server');
 const chalk = require('chalk');
-const chokidar = require('chokidar');
-const getWebpackConfig = require('./webpack.config');
-
-const getPkgPath = name => path.dirname(require.resolve(`${name}/package.json`));
-
-const DEFAULT_PLUGINS = [
-  'content-type-builder',
-  'content-manager',
-  'upload',
-  'email',
-  'i18n',
-  'users-permissions',
-];
-
-function getCustomWebpackConfig(dir, config) {
-  const adminConfigPath = path.join(dir, 'src', 'admin', 'webpack.config.js');
-
-  let webpackConfig = getWebpackConfig(config);
-
-  if (fs.existsSync(adminConfigPath)) {
-    const webpackAdminConfig = require(path.resolve(adminConfigPath));
-
-    if (_.isFunction(webpackAdminConfig)) {
-      // Expose the devServer configuration
-      if (config.devServer) {
-        webpackConfig.devServer = config.devServer;
-      }
-
-      webpackConfig = webpackAdminConfig(webpackConfig, webpack);
-
-      if (!webpackConfig) {
-        console.error(
-          `${chalk.red('Error:')} Nothing was returned from your custom webpack configuration`
-        );
-        process.exit(1);
-      }
-    }
-  }
-
-  return webpackConfig;
-}
+const {
+  createCacheDir,
+  getCustomWebpackConfig,
+  shouldBuildAdmin,
+  watchAdminFiles,
+} = require('./utils');
 
 async function build({ plugins, dir, env, options, optimize, forceBuild, useTypeScript }) {
   const buildAdmin = await shouldBuildAdmin({ dir, plugins, useTypeScript });
@@ -110,122 +74,12 @@ async function build({ plugins, dir, env, options, optimize, forceBuild, useType
   });
 }
 
-async function createPluginsJs(plugins, dest) {
-  const pluginsArray = plugins.map(({ pathToPlugin, name }) => {
-    const shortName = _.camelCase(name);
-
-    /**
-     * path.join, on windows, it uses backslashes to resolve path.
-     * The problem is that Webpack does not windows paths
-     * With this tool, we need to rely on "/" and not "\".
-     * This is the reason why '..\\..\\..\\node_modules\\@strapi\\plugin-content-type-builder/strapi-admin.js' was not working.
-     * The regexp at line 105 aims to replace the windows backslashes by standard slash so that webpack can deal with them.
-     * Backslash looks to work only for absolute paths with webpack => https://webpack.js.org/concepts/module-resolution/#absolute-paths
-     */
-    const realPath = path
-      .join(path.relative(path.resolve(dest, 'admin', 'src'), pathToPlugin), 'strapi-admin.js')
-      .replace(/\\/g, '/');
-
-    return {
-      name,
-      pathToPlugin: realPath,
-      shortName,
-    };
-  });
-
-  const content = `
-${pluginsArray
-  .map(({ pathToPlugin, shortName }) => {
-    const req = `'${pathToPlugin}'`;
-
-    return `import ${shortName} from ${req};`;
-  })
-  .join('\n')}
-
-
-const plugins = {
-${[...pluginsArray]
-  .map(({ name, shortName }) => {
-    return `  '${name}': ${shortName},`;
-  })
-  .join('\n')}
-};
-
-export default plugins;
-`;
-
-  return fs.writeFile(path.resolve(dest, 'admin', 'src', 'plugins.js'), content);
-}
-
 async function clean({ dir }) {
   const buildDir = path.join(dir, 'build');
   const cacheDir = path.join(dir, '.cache');
 
   fs.removeSync(buildDir);
   fs.removeSync(cacheDir);
-}
-
-async function copyAdmin(dest) {
-  const adminPath = getPkgPath('@strapi/admin');
-
-  // TODO copy ee folders for plugins
-  await fs.copy(path.resolve(adminPath, 'ee', 'admin'), path.resolve(dest, 'ee', 'admin'));
-
-  await fs.ensureDir(path.resolve(dest, 'config'));
-  await fs.copy(path.resolve(adminPath, 'admin'), path.resolve(dest, 'admin'));
-
-  // Copy package.json
-  await fs.copy(path.resolve(adminPath, 'package.json'), path.resolve(dest, 'package.json'));
-}
-
-async function createCacheDir({ dir, plugins, useTypeScript }) {
-  const cacheDir = path.resolve(dir, '.cache');
-
-  const pluginsWithFront = Object.keys(plugins)
-    .filter(pluginName => {
-      const pluginInfo = plugins[pluginName];
-      return fs.existsSync(path.resolve(pluginInfo.pathToPlugin, 'strapi-admin.js'));
-    })
-    .map(name => ({ name, ...plugins[name] }));
-
-  // create .cache dir
-  await fs.emptyDir(cacheDir);
-
-  // copy admin core code
-  await copyAdmin(cacheDir);
-
-  // Copy app.js or app.tsx if typescript is enabled
-  const customAdminConfigJSFilePath = path.join(dir, 'src', 'admin', 'app.js');
-  const customAdminConfigTSXFilePath = path.join(dir, 'src', 'admin', 'app.tsx');
-  const customAdminConfigFilePath = useTypeScript
-    ? customAdminConfigTSXFilePath
-    : customAdminConfigJSFilePath;
-
-  if (fs.existsSync(customAdminConfigFilePath)) {
-    const defaultAdminConfigFilePath = path.resolve(cacheDir, 'admin', 'src', 'app.js');
-
-    if (useTypeScript) {
-      // Remove the default config file
-      await fs.remove(defaultAdminConfigFilePath);
-      // Copy the custom one
-      await fs.copy(
-        customAdminConfigTSXFilePath,
-        path.resolve(cacheDir, 'admin', 'src', 'app.tsx')
-      );
-    } else {
-      await fs.copy(customAdminConfigFilePath, path.resolve(cacheDir, 'admin', 'src', 'app.js'));
-    }
-  }
-
-  // Copy admin extensions folder
-  const adminExtensionFolder = path.join(dir, 'src', 'admin', 'extensions');
-
-  if (fs.existsSync(adminExtensionFolder)) {
-    await fs.copy(adminExtensionFolder, path.resolve(cacheDir, 'admin', 'src', 'extensions'));
-  }
-
-  // create plugins.js with plugins requires
-  await createPluginsJs(pluginsWithFront, cacheDir);
 }
 
 async function watchAdmin({ plugins, dir, host, port, browser, options, useTypeScript }) {
@@ -297,92 +151,7 @@ async function watchAdmin({ plugins, dir, host, port, browser, options, useTypeS
 
   runServer();
 
-  watchFiles(dir, useTypeScript);
-}
-
-/**
- * Listen to files change and copy the changed files in the .cache/admin folder
- * when using the dev mode
- * @param {string} dir
- */
-async function watchFiles(dir, useTypeScript) {
-  const cacheDir = path.join(dir, '.cache');
-  const targetExtensionFile = useTypeScript ? 'app.tsx' : 'app.js';
-  const appExtensionFile = path.join(dir, 'src', 'admin', targetExtensionFile);
-  const extensionsPath = path.join(dir, 'src', 'admin', 'extensions');
-
-  // Only watch the admin/app.js file and the files that are in the ./admin/extensions/folder
-  const filesToWatch = [appExtensionFile, extensionsPath];
-
-  const watcher = chokidar.watch(filesToWatch, {
-    ignoreInitial: true,
-    ignorePermissionErrors: true,
-  });
-
-  watcher.on('all', async (event, filePath) => {
-    const isAppFile = filePath.includes(appExtensionFile);
-
-    // The app.js file needs to be copied in the .cache/admin/src/app.js and the other ones needs to
-    // be copied in the .cache/admin/src/extensions folder
-    const targetPath = isAppFile
-      ? path.join(path.normalize(filePath.split(appExtensionFile)[1]), targetExtensionFile)
-      : path.join('extensions', path.normalize(filePath.split(extensionsPath)[1]));
-
-    const destFolder = path.join(cacheDir, 'admin', 'src');
-
-    if (event === 'unlink' || event === 'unlinkDir') {
-      // Remove the file or folder
-      // We need to copy the original files when deleting an override one
-      try {
-        fs.removeSync(path.join(destFolder, targetPath));
-      } catch (err) {
-        console.log('An error occured while deleting the file', err);
-      }
-    } else {
-      // In any other case just copy the file into the .cache/admin/src folder
-      try {
-        await fs.copy(filePath, path.join(destFolder, targetPath));
-      } catch (err) {
-        console.log(err);
-      }
-    }
-  });
-}
-
-const hasCustomAdminCode = async (dir, useTypeScript) => {
-  const customAdminPath = path.join(dir, 'src', 'admin');
-  const customAdminConfigFileExtension = useTypeScript ? 'app.tsx' : 'app.js';
-  const customAdminConfigFile = path.join(customAdminPath, customAdminConfigFileExtension);
-  const customAdminWebpackFile = path.join(customAdminPath, 'webpack.config.js');
-
-  const hasCustomConfigFile = await fs.pathExists(customAdminConfigFile);
-  const hasCustomWebpackFile = await fs.pathExists(customAdminWebpackFile);
-
-  return hasCustomConfigFile || hasCustomWebpackFile;
-};
-
-/**
- * Checks if the project's installed plugins are not the same as a default one.
- * @param {Object} plugins
- * @returns {boolean}
- */
-const hasNonDefaultPlugins = plugins => {
-  // List of plugins that are not the ones installed in a generated app
-  const installedPlugins = Object.keys(plugins).filter(x => !DEFAULT_PLUGINS.includes(x));
-
-  // List of default plugins uninstalled from a generated app
-  const missingPlugins = DEFAULT_PLUGINS.filter(x => !Object.keys(plugins).includes(x));
-
-  const diff = [...installedPlugins, ...missingPlugins];
-
-  return diff.length > 0;
-};
-
-async function shouldBuildAdmin({ dir, plugins, useTypeScript }) {
-  const appHasCustomAdminCode = await hasCustomAdminCode(dir, useTypeScript);
-  const appHasNonDefaultPlugins = hasNonDefaultPlugins(plugins);
-
-  return appHasCustomAdminCode || appHasNonDefaultPlugins;
+  watchAdminFiles(dir, useTypeScript);
 }
 
 module.exports = {

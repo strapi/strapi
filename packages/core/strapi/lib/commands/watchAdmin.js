@@ -30,7 +30,7 @@ module.exports = async function({ browser }) {
   ee({ dir });
 
   // @convly we need to update this with the real check
-  const useTypeScript = true;
+  const useTypeScript = false;
 
   strapiAdmin.watchAdmin({
     dir,
