@@ -16,6 +16,5 @@
     "resolveJsonModule": true
   },
   "include": ["src/plugins/**/*.json", "./"],
-
   "exclude": ["node_modules/", "dist/", "src/admin", ".cache/", ".tmp/"]
 }

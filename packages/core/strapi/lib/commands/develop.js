@@ -152,6 +152,9 @@ function watchFileChanges({ dir, strapiInstance, watchIgnoreFiles, polling }) {
       /tmp/,
       '**/src/admin/**',
       '**/src/plugins/**/admin/**',
+      // FIXME pass the plugin path to the strapiAdmin.build and strapiAdmin.watch in order to stop copying
+      // the FE files when using TS
+      '**/dist/src/plugins/test/admin/**',
       '**/documentation',
       '**/documentation/**',
       '**/node_modules',
