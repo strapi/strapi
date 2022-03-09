@@ -55,7 +55,7 @@ const generateNewApp = (projectDirectory, cliArguments) => {
       '@strapi/plugin-i18n',
     ],
     additionalsDependencies: {},
-    useTypeScript: Boolean(cliArguments.typescript),
+    useTypescript: Boolean(cliArguments.typescript),
   };
 
   sentry.configureScope(function(sentryScope) {
