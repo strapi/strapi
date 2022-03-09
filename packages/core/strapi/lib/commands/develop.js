@@ -18,21 +18,25 @@ const { buildTypeScript, buildAdmin } = require('./builders');
  *
  */
 module.exports = async function({ build, watchAdmin, polling, browser }) {
-  let dir = process.cwd();
+  const currentDirectory = process.cwd();
 
-  const isTSProject = await tsUtils.isTypeScriptProject(dir);
-
-  if (isTSProject) {
-    dir = path.join(dir, 'dist');
-  }
+  const isTSProject = await tsUtils.isTypeScriptProject(currentDirectory);
+  const buildDestDir = isTSProject ? path.join(currentDirectory, 'dist') : currentDirectory;
 
   try {
     if (cluster.isMaster || cluster.isPrimary) {
-      return primaryProcess({ dir, build, browser, watchAdmin });
+      return primaryProcess({
+        buildDestDir,
+        currentDirectory,
+        dir: buildDestDir,
+        build,
+        browser,
+        watchAdmin,
+      });
     }
 
     if (cluster.isWorker) {
-      return workerProcess({ dir, watchAdmin, polling });
+      return workerProcess({ dir: buildDestDir, watchAdmin, polling });
     }
   } catch (e) {
     console.error(e);
@@ -40,23 +44,28 @@ module.exports = async function({ build, watchAdmin, polling, browser }) {
   }
 };
 
-const primaryProcess = async ({ dir, build, watchAdmin, browser }) => {
-  const currentDirectory = process.cwd();
+const primaryProcess = async ({ buildDestDir, currentDirectory, build, watchAdmin, browser }) => {
   const isTSProject = await tsUtils.isTypeScriptProject(currentDirectory);
 
   if (isTSProject) {
     await buildTypeScript({ srcDir: currentDirectory, watch: true });
   }
 
-  const config = loadConfiguration(dir);
+  const config = loadConfiguration(buildDestDir);
   const serveAdminPanel = getOr(true, 'admin.serveAdminPanel')(config);
 
-  const buildExists = fs.existsSync(path.join(dir, 'build'));
+  const buildExists = fs.existsSync(path.join(buildDestDir, 'build'));
 
   // Don't run the build process if the admin is in watch mode
   if (build && !watchAdmin && serveAdminPanel && !buildExists) {
     try {
-      await buildAdmin({ dir, optimization: false, forceBuild: false });
+      await buildAdmin({
+        buildDestDir,
+        forceBuild: false,
+        isTSProject,
+        optimization: false,
+        srcDir: currentDirectory,
+      });
     } catch (err) {
       process.exit(1);
     }
