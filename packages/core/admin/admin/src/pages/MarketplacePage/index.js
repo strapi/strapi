@@ -144,6 +144,7 @@ const MarketPlacePage = () => {
               startIcon={<Plus />}
               variant="tertiary"
               href="https://market.strapi.io/submit-plugin"
+              onClick={() => trackUsage('didSubmitPlugin')}
             >
               {formatMessage({
                 id: 'admin.pages.MarketPlacePage.submit.plugin.link',
