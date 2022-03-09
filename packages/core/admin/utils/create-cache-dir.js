@@ -66,8 +66,8 @@ async function copyAdmin(dest) {
   await fs.copy(path.resolve(adminPath, 'package.json'), path.resolve(dest, 'package.json'));
 }
 
-async function createCacheDir({ dir, plugins, useTypeScript }) {
-  const cacheDir = path.resolve(dir, '.cache');
+async function createCacheDir({ appDir, plugins, useTypeScript }) {
+  const cacheDir = path.resolve(appDir, '.cache');
 
   const pluginsWithFront = Object.keys(plugins)
     .filter(pluginName => {
@@ -83,8 +83,8 @@ async function createCacheDir({ dir, plugins, useTypeScript }) {
   await copyAdmin(cacheDir);
 
   // Copy app.js or app.tsx if typescript is enabled
-  const customAdminConfigJSFilePath = path.join(dir, 'src', 'admin', 'app.js');
-  const customAdminConfigTSXFilePath = path.join(dir, 'src', 'admin', 'app.tsx');
+  const customAdminConfigJSFilePath = path.join(appDir, 'src', 'admin', 'app.js');
+  const customAdminConfigTSXFilePath = path.join(appDir, 'src', 'admin', 'app.tsx');
   const customAdminConfigFilePath = useTypeScript
     ? customAdminConfigTSXFilePath
     : customAdminConfigJSFilePath;
@@ -106,7 +106,7 @@ async function createCacheDir({ dir, plugins, useTypeScript }) {
   }
 
   // Copy admin extensions folder
-  const adminExtensionFolder = path.join(dir, 'src', 'admin', 'extensions');
+  const adminExtensionFolder = path.join(appDir, 'src', 'admin', 'extensions');
 
   if (fs.existsSync(adminExtensionFolder)) {
     await fs.copy(adminExtensionFolder, path.resolve(cacheDir, 'admin', 'src', 'extensions'));

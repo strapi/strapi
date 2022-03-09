@@ -8,8 +8,8 @@ const DEFAULT_PLUGINS = [
   'content-manager',
   'upload',
   'email',
-  'i18n',
-  'users-permissions',
+  // 'i18n',
+  // 'users-permissions',
 ];
 
 /**
@@ -41,8 +41,8 @@ const hasCustomAdminCode = async (dir, useTypeScript) => {
   return hasCustomConfigFile || hasCustomWebpackFile;
 };
 
-const shouldBuildAdmin = async ({ dir, plugins, useTypeScript }) => {
-  const appHasCustomAdminCode = await hasCustomAdminCode(dir, useTypeScript);
+const shouldBuildAdmin = async ({ appDir, plugins, useTypeScript }) => {
+  const appHasCustomAdminCode = await hasCustomAdminCode(appDir, useTypeScript);
   const appHasNonDefaultPlugins = hasNonDefaultPlugins(plugins);
 
   return appHasCustomAdminCode || appHasNonDefaultPlugins;

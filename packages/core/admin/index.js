@@ -12,19 +12,28 @@ const {
   watchAdminFiles,
 } = require('./utils');
 
-async function build({ plugins, dir, env, options, optimize, forceBuild, useTypeScript }) {
-  const buildAdmin = await shouldBuildAdmin({ dir, plugins, useTypeScript });
+async function build({
+  appDir,
+  buildDestDir,
+  env,
+  forceBuild,
+  optimize,
+  options,
+  plugins,
+  useTypeScript,
+}) {
+  const buildAdmin = await shouldBuildAdmin({ appDir, plugins, useTypeScript });
 
   if (!buildAdmin && !forceBuild) {
     return;
   }
 
   // Create the cache dir containing the front-end files.
-  await createCacheDir({ dir, plugins, useTypeScript });
+  await createCacheDir({ appDir, plugins, useTypeScript });
 
-  const cacheDir = path.resolve(dir, '.cache');
+  const cacheDir = path.resolve(appDir, '.cache');
   const entry = path.resolve(cacheDir, 'admin', 'src');
-  const dest = path.resolve(dir, 'build');
+  const dest = path.resolve(buildDestDir, 'build');
 
   // Roots for the @strapi/babel-plugin-switch-ee-ce
   const roots = {
@@ -34,14 +43,15 @@ async function build({ plugins, dir, env, options, optimize, forceBuild, useType
 
   const pluginsPath = Object.keys(plugins).map(pluginName => plugins[pluginName].pathToPlugin);
 
-  const config = getCustomWebpackConfig(dir, {
-    entry,
-    pluginsPath,
+  const config = getCustomWebpackConfig(appDir, {
+    appDir,
     cacheDir,
     dest,
+    entry,
     env,
-    options,
     optimize,
+    options,
+    pluginsPath,
     roots,
     useTypeScript,
   });
@@ -74,18 +84,23 @@ async function build({ plugins, dir, env, options, optimize, forceBuild, useType
   });
 }
 
-async function clean({ dir }) {
-  const buildDir = path.join(dir, 'build');
-  const cacheDir = path.join(dir, '.cache');
+async function clean({ appDir, buildDestDir }) {
+  // FIXME rename admin build dir and path to build dir
+  const buildDir = path.join(buildDestDir, 'build');
+  // .cache dir is always located at the root of the app
+  const cacheDir = path.join(appDir, '.cache');
 
   fs.removeSync(buildDir);
   fs.removeSync(cacheDir);
 }
 
-async function watchAdmin({ plugins, dir, host, port, browser, options, useTypeScript }) {
+async function watchAdmin({ appDir, plugins, dir, host, port, browser, options, useTypeScript }) {
+  console.log({ appDir });
+  // TODO appDir
+
   // Create the cache dir containing the front-end files.
   const cacheDir = path.join(dir, '.cache');
-  await createCacheDir({ dir, plugins, useTypeScript });
+  await createCacheDir({ appDir, plugins, useTypeScript });
 
   const entry = path.join(cacheDir, 'admin', 'src');
   const dest = path.join(dir, 'build');
