@@ -3,7 +3,7 @@
 const chalk = require('chalk');
 const { merge } = require('lodash/fp');
 const { readAllTranslationFiles } = require('../utils/translation-files');
-const keysBlacklist = require('./keys-blacklist');
+const allowedKeys = require('./allowed-keys');
 
 const printResults = results => {
   let valuesCount = 0;
@@ -42,13 +42,13 @@ const findDuplicates = (file1, file2, { sameFile } = { sameFile: false }) => {
   // Find in file2 duplicates of every file1 value
   // Format a duplicate object and add it to the dupValues object with translation value as key
   Object.entries(file1.fileContent)
-    .filter(([f1Key]) => !keysBlacklist.includes(f1Key))
+    .filter(([f1Key]) => !allowedKeys.includes(f1Key))
     .forEach(([f1Key, f1Value]) => {
       // Match translations with the same value
       // Skip translations with identical key in a same file (avoid matching itself)
       // Get an array of keys
       const f2Keys = Object.entries(file2.fileContent)
-        .filter(([f2Key]) => !keysBlacklist.includes(f2Key))
+        .filter(([f2Key]) => !allowedKeys.includes(f2Key))
         .filter(([, f2Value]) => f2Value === f1Value)
         .filter(([f2Key]) => !sameFile || f1Key !== f2Key)
         .map(([f2Key]) => f2Key);
