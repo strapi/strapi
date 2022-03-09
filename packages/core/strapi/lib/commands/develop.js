@@ -19,7 +19,9 @@ const { buildTypeScript, buildAdmin } = require('./builders');
 module.exports = async function({ build, watchAdmin, polling, browser }) {
   let dir = process.cwd();
 
-  if (tsUtils.isTypeScriptProject(dir)) {
+  const isTSProject = await tsUtils.isTypeScriptProject(dir);
+
+  if (isTSProject) {
     dir = path.join(dir, 'dist');
   }
 
@@ -39,8 +41,9 @@ module.exports = async function({ build, watchAdmin, polling, browser }) {
 
 const primaryProcess = async ({ dir, build, watchAdmin, browser }) => {
   const currentDirectory = process.cwd();
+  const isTSProject = await tsUtils.isTypeScriptProject(currentDirectory);
 
-  if (tsUtils.isTypeScriptProject(currentDirectory)) {
+  if (isTSProject) {
     await buildTypeScript({ srcDir: currentDirectory, watch: true });
   }
 

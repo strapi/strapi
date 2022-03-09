@@ -11,8 +11,10 @@
     "allowJs": true,
     "outDir": "dist",
     "rootDir": ".",
-    "noEmitOnError": true
+    "noEmitOnError": true,
+    "resolveJsonModule": true
   },
+  "include": ["src/plugins/**/*.json"],
 
   "exclude": ["node_modules/", "dist/", "src/admin", "src/plugins/**/admin"]
 }
