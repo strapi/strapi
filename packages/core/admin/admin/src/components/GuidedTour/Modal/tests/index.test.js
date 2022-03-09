@@ -563,7 +563,7 @@ describe('<GuidedTourModal />', () => {
         position: fixed;
         z-index: 4;
         inset: 0;
-        background: #32324d33;
+        background: #32324d1F;
       }
 
       <body>
