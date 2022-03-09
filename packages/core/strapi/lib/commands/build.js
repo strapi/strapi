@@ -10,7 +10,7 @@ const { buildAdmin, buildTypeScript } = require('./builders');
 module.exports = async ({ optimization, forceBuild = true }) => {
   let dir = process.cwd();
 
-  const isTSProject = tsUtils.isTypeScriptProject(dir);
+  const isTSProject = await tsUtils.isTypeScriptProject(dir);
 
   // Typescript
   if (isTSProject) {

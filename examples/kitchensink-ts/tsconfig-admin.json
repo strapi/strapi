@@ -13,6 +13,5 @@
     "noEmit": false,
     "incremental": true
   },
-
   "exclude": ["node_modules", "**/*.test.js", "*.js"]
 }
