@@ -447,10 +447,10 @@ const ProfilePage = () => {
                                 id:
                                   'Settings.profile.form.section.experience.interfaceLanguageHelp',
                                 defaultMessage:
-                                  'Selection will change the interface language only for you. Please refer to this {documentation} to make other languages available for your team.',
+                                  'Preference changes will apply only to you. More information is available {here}.',
                               },
                               {
-                                documentation: (
+                                here: (
                                   <DocumentationLink
                                     target="_blank"
                                     rel="noopener noreferrer"
@@ -458,7 +458,7 @@ const ProfilePage = () => {
                                   >
                                     {formatMessage({
                                       id: 'Settings.profile.form.section.experience.documentation',
-                                      defaultMessage: 'documentation',
+                                      defaultMessage: 'here',
                                     })}
                                   </DocumentationLink>
                                 ),

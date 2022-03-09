@@ -1219,16 +1219,16 @@ describe('ADMIN | Pages | Profile page', () => {
                       <span
                         class="c35"
                       >
-                        Selection will change the interface language only for you. Please refer to this 
+                        Preference changes will apply only to you. More information is available 
                         <a
                           class="c36"
                           href="https://docs.strapi.io/developer-docs/latest/development/admin-customization.html#locales"
                           rel="noopener noreferrer"
                           target="_blank"
                         >
-                          documentation
+                          here
                         </a>
-                         to make other languages available for your team.
+                        .
                       </span>
                     </div>
                     <div

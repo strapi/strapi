@@ -17,7 +17,7 @@ const ModalWrapper = styled(Flex)`
   z-index: 4;
   inset: 0;
   /* this is theme.colors.neutral800 with opacity */
-  background: ${({ theme }) => `${theme.colors.neutral800}33`};
+  background: ${({ theme }) => `${theme.colors.neutral800}1F`};
 `;
 
 const Modal = ({ onClose, onSkip, children, hideSkip }) => {

@@ -631,7 +631,7 @@ describe('Wysiwyg render and actions buttons', () => {
 
       .c32 .CodeMirror-scrollbar-filler,
       .c32 .CodeMirror-gutter-filler {
-        background-color: white;
+        background-color: #ffffff;
       }
 
       .c32 .CodeMirror-gutters {
@@ -754,7 +754,7 @@ describe('Wysiwyg render and actions buttons', () => {
       .c32 .CodeMirror {
         position: relative;
         overflow: hidden;
-        background: white;
+        background: #ffffff;
       }
 
       .c32 .CodeMirror-scroll {
@@ -880,6 +880,7 @@ describe('Wysiwyg render and actions buttons', () => {
       .c32 .CodeMirror-cursor {
         position: absolute;
         pointer-events: none;
+        border-color: #32324d;
       }
 
       .c32 .CodeMirror-measure pre {
