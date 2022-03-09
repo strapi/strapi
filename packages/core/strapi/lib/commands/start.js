@@ -5,4 +5,4 @@ const strapi = require('../index');
 /**
  * `$ strapi start`
  */
-module.exports = () => strapi().start();
+module.exports = dir => strapi({ dir }).start();

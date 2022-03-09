@@ -19,7 +19,7 @@ const validateSrcIndex = srcIndex => {
 
 module.exports = strapi => {
   if (!existsSync(strapi.dirs.src)) {
-    throw new Error('Missing src folder. Please create one at `./src`');
+    return;
   }
 
   const pathToSrcIndex = resolve(strapi.dirs.src, 'index.js');

@@ -6,6 +6,8 @@ const _ = require('lodash');
 const fse = require('fs-extra');
 const { isKebabCase } = require('@strapi/utils');
 
+const __importDefault = require('../../utils/import-default');
+
 // to handle names with numbers in it we first check if it is already in kebabCase
 const normalizeName = name => (isKebabCase(name) ? name : _.kebabCase(name));
 
@@ -17,7 +19,7 @@ const DEFAULT_CONTENT_TYPE = {
 
 module.exports = async strapi => {
   if (!existsSync(strapi.dirs.api)) {
-    throw new Error('Missing api folder. Please create one at `./src/api`');
+    return;
   }
 
   const apisFDs = await fse.readdir(strapi.dirs.api, { withFileTypes: true });
@@ -150,7 +152,7 @@ const loadFile = file => {
 
   switch (ext) {
     case '.js':
-      return require(file);
+      return __importDefault(require(file)).default;
     case '.json':
       return fse.readJSON(file);
     default:
