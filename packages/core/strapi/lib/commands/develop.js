@@ -26,7 +26,7 @@ module.exports = async function({ build, watchAdmin, polling, browser }) {
 
   try {
     if (cluster.isMaster || cluster.isPrimary) {
-      return masterProcess({ dir, build, browser });
+      return primaryProcess({ dir, build, browser });
     }
 
     if (cluster.isWorker) {
@@ -38,7 +38,7 @@ module.exports = async function({ build, watchAdmin, polling, browser }) {
   }
 };
 
-const masterProcess = async ({ dir, build, watchAdmin, browser }) => {
+const primaryProcess = async ({ dir, build, watchAdmin, browser }) => {
   const currentDirectory = process.cwd();
 
   if (tsUtils.isTypeScriptProject(currentDirectory)) {
