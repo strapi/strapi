@@ -57,9 +57,10 @@ module.exports = {
       });
 
     return {
-      uploadStream(file, customConfig = {}) {
-        return upload(file, customConfig);
-      },
+      // Remove uploadStream so that `upload` is used instead with the correct arguments
+      // uploadStream(file, customConfig = {}) {
+      //   return upload(file, customConfig);
+      // },
       upload(file, customConfig = {}) {
         return upload(file, customConfig);
       },

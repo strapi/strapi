@@ -49,8 +49,16 @@ const createProvider = config => {
 
   const providerInstance = provider.init(providerOptions);
 
+  let optionalUploadStream;
+  if (providerInstance.uploadStream) {
+    optionalUploadStream = (file, options = actionOptions.upload) => {
+      return providerInstance.uploadStream(file, options);
+    };
+  }
+
   return Object.assign(Object.create(baseProvider), {
-    ...providerInstance,
+    ...providerInstance,    
+    uploadStream: optionalUploadStream,
     upload(file, options = actionOptions.upload) {
       return providerInstance.upload(file, options);
     },
