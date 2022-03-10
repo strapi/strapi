@@ -338,7 +338,7 @@ module.exports = {
         params.confirmed = true;
       }
 
-    const user = await getService('user').add(params);
+      const user = await getService('user').add(params);
 
       const sanitizedUser = await sanitizeUser(user, ctx);
 
@@ -420,7 +420,10 @@ module.exports = {
     });
 
     if (!user) {
-      throw new ApplicationError('user.not.found');
+      return ctx.send({
+        email: params.email,
+        sent: true
+      });
     }
 
     if (user.confirmed) {
