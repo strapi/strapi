@@ -182,7 +182,7 @@ const DynamicZone = ({
   }
 
   return (
-    <Stack size={6}>
+    <Stack spacing={6}>
       {dynamicDisplayedComponentsLength > 0 && (
         <Box>
           <DzLabel
@@ -277,9 +277,6 @@ DynamicZone.propTypes = {
 
 const Memoized = memo(DynamicZone, isEqual);
 
-export default connect(
-  Memoized,
-  select
-);
+export default connect(Memoized, select);
 
 export { DynamicZone };

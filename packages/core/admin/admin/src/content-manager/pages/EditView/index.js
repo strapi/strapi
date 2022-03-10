@@ -137,7 +137,7 @@ const EditView = ({
               <ContentLayout>
                 <Grid gap={4}>
                   <GridItem col={9} s={12}>
-                    <Stack size={6}>
+                    <Stack spacing={6}>
                       {formattedContentTypeLayout.map((row, index) => {
                         if (isDynamicZone(row)) {
                           const {
@@ -174,7 +174,7 @@ const EditView = ({
                             paddingBottom={6}
                             borderColor="neutral150"
                           >
-                            <Stack size={6}>
+                            <Stack spacing={6}>
                               {row.map((grid, gridIndex) => {
                                 return (
                                   <Grid gap={4} key={gridIndex}>
@@ -232,7 +232,7 @@ const EditView = ({
                     </Stack>
                   </GridItem>
                   <GridItem col={3} s={12}>
-                    <Stack size={2}>
+                    <Stack spacing={2}>
                       <DraftAndPublishBadge />
                       <Box
                         as="aside"
@@ -275,7 +275,7 @@ const EditView = ({
                           <Box paddingTop={2} paddingBottom={6}>
                             <Divider />
                           </Box>
-                          <Stack size={4}>
+                          <Stack spacing={4}>
                             {relationsLayout.map(
                               ({ name, fieldSchema, labelAction, metadatas, queryInfos }) => {
                                 return (
@@ -308,7 +308,7 @@ const EditView = ({
                         </Box>
                       )}
                       <Box as="aside" aria-labelledby="links">
-                        <Stack size={2}>
+                        <Stack spacing={2}>
                           <InjectionZone area="contentManager.editView.right-links" slug={slug} />
                           {slug !== 'strapi::administrator' && (
                             <CheckPermissions permissions={ctbPermissions}>

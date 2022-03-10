@@ -35,13 +35,6 @@ describe('<Input />', () => {
 
     expect(firstChild).toMatchInlineSnapshot(`
       .c2 {
-        font-weight: 600;
-        color: #32324d;
-        font-size: 0.75rem;
-        line-height: 1.33;
-      }
-
-      .c1 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -73,6 +66,13 @@ describe('<Input />', () => {
         align-items: center;
       }
 
+      .c1 {
+        font-weight: 600;
+        color: #32324d;
+        font-size: 0.75rem;
+        line-height: 1.33;
+      }
+
       .c5 {
         border: none;
         border-radius: 4px;
@@ -83,6 +83,7 @@ describe('<Input />', () => {
         font-size: 0.875rem;
         display: block;
         width: 100%;
+        background: inherit;
       }
 
       .c5::-webkit-input-placeholder {
@@ -106,7 +107,6 @@ describe('<Input />', () => {
       }
 
       .c5[aria-disabled='true'] {
-        background: inherit;
         color: inherit;
       }
 
@@ -156,17 +156,18 @@ describe('<Input />', () => {
         <div>
           <div
             class="c0"
+            spacing="1"
           >
-            <div
+            <label
               class="c1"
+              for="textinput-1"
             >
-              <label
+              <div
                 class="c2"
-                for="textinput-1"
               >
                 Enabled
-              </label>
-            </div>
+              </div>
+            </label>
             <div
               class="c3 c4"
             >

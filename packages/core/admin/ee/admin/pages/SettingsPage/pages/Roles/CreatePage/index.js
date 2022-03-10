@@ -130,7 +130,7 @@ const CreatePage = () => {
             <>
               <HeaderLayout
                 primaryAction={
-                  <Stack horizontal size={2}>
+                  <Stack horizontal spacing={2}>
                     <Button
                       variant="secondary"
                       onClick={() => {
@@ -170,9 +170,9 @@ const CreatePage = () => {
                 }
               />
               <ContentLayout>
-                <Stack size={6}>
+                <Stack spacing={6}>
                   <Box background="neutral0" padding={6} shadow="filterShadow" hasRadius>
-                    <Stack size={4}>
+                    <Stack spacing={4}>
                       <Flex justifyContent="space-between">
                         <Box>
                           <Box>

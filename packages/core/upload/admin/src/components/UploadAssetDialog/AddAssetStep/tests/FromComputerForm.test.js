@@ -183,7 +183,7 @@ describe('FromComputerForm', () => {
         background: #4945ff;
       }
 
-      .c13 .sc-hRMWxn {
+      .c13 .sc-hJhJFJ {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -236,6 +236,11 @@ describe('FromComputerForm', () => {
         background: #4945ff;
       }
 
+      .c13 svg > g,
+      .c13 svg path {
+        fill: #ffffff;
+      }
+
       .c21 {
         -webkit-align-items: center;
         -webkit-box-align: center;
@@ -248,7 +253,7 @@ describe('FromComputerForm', () => {
         background: #ffffff;
       }
 
-      .c21 .sc-hRMWxn {
+      .c21 .sc-hJhJFJ {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;

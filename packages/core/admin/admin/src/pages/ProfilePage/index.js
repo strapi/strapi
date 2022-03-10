@@ -182,7 +182,7 @@ const ProfilePage = () => {
               />
               <Box paddingBottom={10}>
                 <ContentLayout>
-                  <Stack size={6}>
+                  <Stack spacing={6}>
                     <Box
                       background="neutral0"
                       hasRadius
@@ -192,7 +192,7 @@ const ProfilePage = () => {
                       paddingLeft={7}
                       paddingRight={7}
                     >
-                      <Stack size={4}>
+                      <Stack spacing={4}>
                         <Typography variant="delta" as="h2">
                           {formatMessage({
                             id: 'Settings.profile.form.section.profile.title',
@@ -263,7 +263,7 @@ const ProfilePage = () => {
                       paddingLeft={7}
                       paddingRight={7}
                     >
-                      <Stack size={4}>
+                      <Stack spacing={4}>
                         <Typography variant="delta" as="h2">
                           {formatMessage({
                             id: 'Settings.profile.form.section.password.title',
@@ -410,8 +410,8 @@ const ProfilePage = () => {
                       paddingLeft={7}
                       paddingRight={7}
                     >
-                      <Stack size={4}>
-                        <Stack size={1}>
+                      <Stack spacing={4}>
+                        <Stack spacing={1}>
                           <Typography variant="delta" as="h2">
                             {formatMessage({
                               id: 'Settings.profile.form.section.experience.title',

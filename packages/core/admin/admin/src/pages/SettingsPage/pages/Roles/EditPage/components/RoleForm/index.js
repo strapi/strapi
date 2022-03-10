@@ -16,7 +16,7 @@ const RoleForm = ({ disabled, role, values, errors, onChange, onBlur }) => {
   return (
     <>
       <Box background="neutral0" padding={6} shadow="filterShadow" hasRadius>
-        <Stack size={4}>
+        <Stack spacing={4}>
           <Flex justifyContent="space-between">
             <Box>
               <Box>

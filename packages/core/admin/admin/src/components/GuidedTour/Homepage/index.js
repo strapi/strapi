@@ -42,7 +42,7 @@ const GuidedTourHomepage = () => {
       paddingBottom={4}
       background="neutral0"
     >
-      <Stack size={6}>
+      <Stack spacing={6}>
         <Typography variant="beta" as="h2">
           {formatMessage({
             id: 'app.components.GuidedTour.title',

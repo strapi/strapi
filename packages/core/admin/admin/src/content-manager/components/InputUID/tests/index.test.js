@@ -77,19 +77,12 @@ describe('<InputUID />', () => {
         align-items: center;
       }
 
-      .c2 {
-        font-weight: 600;
-        color: #32324d;
-        font-size: 0.75rem;
-        line-height: 1.33;
-      }
-
       .c6 {
         padding-right: 12px;
         padding-left: 8px;
       }
 
-      .c1 {
+      .c2 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -121,6 +114,13 @@ describe('<InputUID />', () => {
         align-items: center;
       }
 
+      .c1 {
+        font-weight: 600;
+        color: #32324d;
+        font-size: 0.75rem;
+        line-height: 1.33;
+      }
+
       .c5 {
         border: none;
         border-radius: 4px;
@@ -131,6 +131,7 @@ describe('<InputUID />', () => {
         font-size: 0.875rem;
         display: block;
         width: 100%;
+        background: inherit;
       }
 
       .c5::-webkit-input-placeholder {
@@ -154,7 +155,6 @@ describe('<InputUID />', () => {
       }
 
       .c5[aria-disabled='true'] {
-        background: inherit;
         color: inherit;
       }
 
@@ -226,17 +226,18 @@ describe('<InputUID />', () => {
         <div>
           <div
             class="c0"
+            spacing="1"
           >
-            <div
+            <label
               class="c1"
+              for="textinput-1"
             >
-              <label
+              <div
                 class="c2"
-                for="textinput-1"
               >
                 test
-              </label>
-            </div>
+              </div>
+            </label>
             <div
               class="c3 c4"
             >

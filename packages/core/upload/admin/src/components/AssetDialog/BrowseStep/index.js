@@ -57,7 +57,7 @@ export const BrowseStep = ({
 
   return (
     <>
-      <Stack size={4}>
+      <Stack spacing={4}>
         {onSelectAllAsset && (
           <Box>
             <Box paddingBottom={4}>
