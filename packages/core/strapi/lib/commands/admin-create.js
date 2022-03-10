@@ -1,12 +1,48 @@
 'use strict';
 
+const { yup } = require('@strapi/utils');
 const _ = require('lodash');
 const inquirer = require('inquirer');
 const strapi = require('../index');
 
+const emailValidator = yup
+  .string()
+  .email('Invalid email address')
+  .lowercase();
+
+const passwordValidator = yup
+  .string()
+  .min(8, 'Password must be at least 8 characters long')
+  .matches(/[a-z]/, 'Password must contain at least one lowercase character')
+  .matches(/[A-Z]/, 'Password must contain at least one uppercase character')
+  .matches(/\d/, 'Password must contain at least one number');
+
+const adminCreateSchema = yup.object().shape({
+  email: emailValidator,
+  password: passwordValidator,
+  firstname: yup.string().required('First name is required'),
+  lastname: yup.string(),
+});
+
 const promptQuestions = [
-  { type: 'input', name: 'email', message: 'Admin email?' },
-  { type: 'password', name: 'password', message: 'Admin password?' },
+  {
+    type: 'input',
+    name: 'email',
+    message: 'Admin email?',
+    async validate(value) {
+      const validEmail = await emailValidator.validate(value);
+      return validEmail === value || validEmail;
+    },
+  },
+  {
+    type: 'password',
+    name: 'password',
+    message: 'Admin password?',
+    async validate(value) {
+      const validPassword = await passwordValidator.validate(value);
+      return validPassword === value || validPassword;
+    },
+  },
   { type: 'input', name: 'firstname', message: 'First name?' },
   { type: 'input', name: 'lastname', message: 'Last name?' },
   {
@@ -43,8 +79,10 @@ module.exports = async function(cmdOptions = {}) {
     ({ email, password, firstname, lastname } = inquiry);
   }
 
-  if (_.isEmpty(email) || _.isEmpty(firstname)) {
-    console.error('Missing one of required options `email` or `firstname`');
+  try {
+    await adminCreateSchema.validate({ email, password, firstname, lastname });
+  } catch (err) {
+    console.error(err.errors[0]);
     process.exit(1);
   }
 
