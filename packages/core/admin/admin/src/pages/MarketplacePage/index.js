@@ -56,7 +56,7 @@ const MarketPlacePage = () => {
           />
           <ContentLayout>
             <StackCentered
-              size={0}
+              spacing={0}
               hasRadius
               background="neutral0"
               shadow="tableShadow"
@@ -93,7 +93,7 @@ const MarketPlacePage = () => {
                   })}
                 </CenterTypography>
               </Flex>
-              <Stack paddingTop={6} horizontal size={2}>
+              <Stack paddingTop={6} horizontal spacing={2}>
                 <LinkButton
                   href="https://market.strapi.io"
                   size="L"

@@ -42,7 +42,7 @@ const ApplicationInfosPage = () => {
             paddingRight={6}
             paddingLeft={6}
           >
-            <Stack size={5}>
+            <Stack spacing={5}>
               <Typography variant="delta" as="h3">
                 {formatMessage({
                   id: 'Settings.application.details',

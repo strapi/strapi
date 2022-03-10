@@ -100,7 +100,7 @@ export const SingleSignOn = () => {
             {showLoader ? (
               <LoadingIndicatorPage />
             ) : (
-              <Stack size={4} background="neutral0" padding={6} shadow="filterShadow" hasRadius>
+              <Stack spacing={4} background="neutral0" padding={6} shadow="filterShadow" hasRadius>
                 <Typography variant="delta" as="h2">
                   {formatMessage({
                     id: 'Settings.sso.form.settings.title',
