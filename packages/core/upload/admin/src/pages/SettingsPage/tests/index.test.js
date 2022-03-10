@@ -49,7 +49,7 @@ describe('Upload | SettingsPage', () => {
     );
 
     expect(container).toMatchInlineSnapshot(`
-      .c41 {
+      .c40 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
@@ -206,6 +206,11 @@ describe('Upload | SettingsPage', () => {
         background: #4945ff;
       }
 
+      .c6 svg > g,
+      .c6 svg path {
+        fill: #ffffff;
+      }
+
       .c20 {
         display: -webkit-box;
         display: -webkit-flex;
@@ -254,54 +259,23 @@ describe('Upload | SettingsPage', () => {
         margin-top: 16px;
       }
 
-      .c27 {
-        font-weight: 600;
-        color: #32324d;
-        font-size: 0.75rem;
-        line-height: 1.33;
-      }
-
-      .c36 {
-        font-weight: 600;
-        color: #271fe0;
-        font-size: 0.75rem;
-        line-height: 1.33;
-      }
-
-      .c38 {
-        color: #666687;
-        font-size: 0.75rem;
-        line-height: 1.33;
-      }
-
-      .c40 {
-        font-weight: 600;
-        color: #b72b1a;
-        font-size: 0.75rem;
-        line-height: 1.33;
-      }
-
       .c30 {
-        background: #ffffff;
+        background: #f6f6f9;
+        padding: 4px;
         border-radius: 4px;
+        border-style: solid;
+        border-width: 1px;
+        border-color: #dcdce4;
+        display: -webkit-inline-box;
+        display: -webkit-inline-flex;
+        display: -ms-inline-flexbox;
+        display: inline-flex;
       }
 
       .c32 {
-        background: #ffffff;
         padding-right: 32px;
         padding-left: 32px;
-      }
-
-      .c34 {
-        background: #f0f0ff;
-        padding-right: 32px;
-        padding-left: 32px;
-      }
-
-      .c39 {
-        background: #fcecea;
-        padding-right: 32px;
-        padding-left: 32px;
+        border-radius: 4px;
       }
 
       .c26 {
@@ -316,6 +290,43 @@ describe('Upload | SettingsPage', () => {
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
+      }
+
+      .c27 {
+        font-weight: 600;
+        color: #32324d;
+        font-size: 0.75rem;
+        line-height: 1.33;
+      }
+
+      .c34 {
+        font-weight: 600;
+        color: #666687;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        line-height: 1.33;
+      }
+
+      .c36 {
+        font-weight: 600;
+        color: #4945ff;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        line-height: 1.33;
+      }
+
+      .c38 {
+        color: #666687;
+        font-size: 0.75rem;
+        line-height: 1.33;
+      }
+
+      .c39 {
+        font-weight: 600;
+        color: #b72b1a;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        line-height: 1.33;
       }
 
       .c25 {
@@ -356,11 +367,6 @@ describe('Upload | SettingsPage', () => {
 
       .c31 {
         height: 2.5rem;
-        border: 1px solid #dcdce4;
-        display: -webkit-inline-box;
-        display: -webkit-inline-flex;
-        display: -ms-inline-flexbox;
-        display: inline-flex;
         overflow: hidden;
         outline: none;
         box-shadow: 0;
@@ -375,24 +381,36 @@ describe('Upload | SettingsPage', () => {
         box-shadow: #4945ff 0px 0px 0px 2px;
       }
 
-      .c35 {
-        text-transform: uppercase;
+      .c33 {
+        background-color: transparent;
+        border: 1px solid #f6f6f9;
         position: relative;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
         z-index: 2;
       }
 
-      .c33 {
-        text-transform: uppercase;
-        border-right: 1px solid #dcdce4;
+      .c35 {
+        background-color: #ffffff;
+        border: 1px solid #dcdce4;
         position: relative;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
         z-index: 2;
       }
 
       .c37 {
+        height: 100%;
+        left: 0;
+        opacity: 0;
         position: absolute;
+        top: 0;
         z-index: 1;
-        left: 4px;
-        top: 4px;
+        width: 100%;
       }
 
       .c24 {
@@ -582,12 +600,14 @@ describe('Upload | SettingsPage', () => {
                 >
                   <div
                     class="c17"
+                    spacing="12"
                   >
                     <div
                       class="c18"
                     >
                       <div
                         class="c19"
+                        spacing="4"
                       >
                         <div
                           class="c20"
@@ -612,6 +632,7 @@ describe('Upload | SettingsPage', () => {
                               >
                                 <div
                                   class="c25"
+                                  spacing="1"
                                 >
                                   <div
                                     class="c26"
@@ -620,7 +641,11 @@ describe('Upload | SettingsPage', () => {
                                       class="c27"
                                       for="toggleinput-1"
                                     >
-                                      Responsive friendly upload
+                                      <div
+                                        class="c26"
+                                      >
+                                        Responsive friendly upload
+                                      </div>
                                     </label>
                                   </div>
                                   <label
@@ -633,20 +658,21 @@ describe('Upload | SettingsPage', () => {
                                     </div>
                                     <div
                                       class="c30 c31"
+                                      display="inline-flex"
                                     >
                                       <div
                                         aria-hidden="true"
                                         class="c32 c26 c33"
                                       >
                                         <span
-                                          class="c27"
+                                          class="c34"
                                         >
                                           Off
                                         </span>
                                       </div>
                                       <div
                                         aria-hidden="true"
-                                        class="c34 c26 c35"
+                                        class="c32 c26 c35"
                                       >
                                         <span
                                           class="c36"
@@ -687,6 +713,7 @@ describe('Upload | SettingsPage', () => {
                               >
                                 <div
                                   class="c25"
+                                  spacing="1"
                                 >
                                   <div
                                     class="c26"
@@ -695,7 +722,11 @@ describe('Upload | SettingsPage', () => {
                                       class="c27"
                                       for="toggleinput-2"
                                     >
-                                      Size optimization
+                                      <div
+                                        class="c26"
+                                      >
+                                        Size optimization
+                                      </div>
                                     </label>
                                   </div>
                                   <label
@@ -708,23 +739,24 @@ describe('Upload | SettingsPage', () => {
                                     </div>
                                     <div
                                       class="c30 c31"
+                                      display="inline-flex"
                                     >
                                       <div
                                         aria-hidden="true"
-                                        class="c39 c26 c33"
+                                        class="c32 c26 c35"
                                       >
                                         <span
-                                          class="c40"
+                                          class="c39"
                                         >
                                           Off
                                         </span>
                                       </div>
                                       <div
                                         aria-hidden="true"
-                                        class="c32 c26 c35"
+                                        class="c32 c26 c33"
                                       >
                                         <span
-                                          class="c27"
+                                          class="c34"
                                         >
                                           On
                                         </span>
@@ -761,6 +793,7 @@ describe('Upload | SettingsPage', () => {
                               >
                                 <div
                                   class="c25"
+                                  spacing="1"
                                 >
                                   <div
                                     class="c26"
@@ -769,7 +802,11 @@ describe('Upload | SettingsPage', () => {
                                       class="c27"
                                       for="toggleinput-3"
                                     >
-                                      Auto orientation
+                                      <div
+                                        class="c26"
+                                      >
+                                        Auto orientation
+                                      </div>
                                     </label>
                                   </div>
                                   <label
@@ -782,20 +819,21 @@ describe('Upload | SettingsPage', () => {
                                     </div>
                                     <div
                                       class="c30 c31"
+                                      display="inline-flex"
                                     >
                                       <div
                                         aria-hidden="true"
                                         class="c32 c26 c33"
                                       >
                                         <span
-                                          class="c27"
+                                          class="c34"
                                         >
                                           Off
                                         </span>
                                       </div>
                                       <div
                                         aria-hidden="true"
-                                        class="c34 c26 c35"
+                                        class="c32 c26 c35"
                                       >
                                         <span
                                           class="c36"
@@ -835,7 +873,7 @@ describe('Upload | SettingsPage', () => {
           </form>
         </main>
         <div
-          class="c41"
+          class="c40"
         >
           <p
             aria-live="polite"

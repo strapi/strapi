@@ -156,7 +156,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
           hasRadius
         >
           <FocusTrap onEscape={handleToggleUserLinks}>
-            <Stack size={0}>
+            <Stack spacing={0}>
               <LinkUser tabIndex={0} onClick={handleToggleUserLinks} to="/me">
                 <Typography>
                   {formatMessage({

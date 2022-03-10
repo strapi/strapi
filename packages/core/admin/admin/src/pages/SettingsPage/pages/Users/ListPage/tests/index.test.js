@@ -299,6 +299,11 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         background: #4945ff;
       }
 
+      .c6 svg > g,
+      .c6 svg path {
+        fill: #ffffff;
+      }
+
       .c23 {
         -webkit-align-items: center;
         -webkit-box-align: center;
@@ -704,16 +709,6 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         cursor: not-allowed;
       }
 
-      .c56 {
-        color: #32324d;
-        display: block;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        font-size: 0.875rem;
-        line-height: 1.43;
-      }
-
       .c55 {
         padding-right: 16px;
         padding-left: 16px;
@@ -755,6 +750,16 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         align-items: center;
       }
 
+      .c56 {
+        color: #32324d;
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: 0.875rem;
+        line-height: 1.43;
+      }
+
       .c49 {
         display: -webkit-box;
         display: -webkit-flex;
@@ -768,10 +773,6 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
       .c49 > * {
         margin-top: 0;
         margin-bottom: 0;
-      }
-
-      .c49 > * + * {
-        margin-top: 0px;
       }
 
       .c51 {
@@ -1566,7 +1567,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
               </div>
               <nav
                 aria-label="pagination"
-                class="sc-evcjhq"
+                class="sc-XxNYO"
               >
                 <ul
                   class="c62 c63"

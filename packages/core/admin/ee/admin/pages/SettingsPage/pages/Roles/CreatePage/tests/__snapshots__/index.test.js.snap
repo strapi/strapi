@@ -97,7 +97,7 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
   background: #f0f0ff;
 }
 
-.c13 .sc-fTQvRK {
+.c13 .sc-dwFVFH {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -179,7 +179,7 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
   background: #4945ff;
 }
 
-.c16 .sc-fTQvRK {
+.c16 .sc-dwFVFH {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -230,6 +230,11 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
 .c16:active {
   border: 1px solid #4945ff;
   background: #4945ff;
+}
+
+.c16 svg > g,
+.c16 svg path {
+  fill: #ffffff;
 }
 
 .c22 {
@@ -347,13 +352,6 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
 }
 
 .c30 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c29 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -385,6 +383,13 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
   align-items: center;
 }
 
+.c29 {
+  font-weight: 600;
+  color: #32324d;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
 .c33 {
   border: none;
   border-radius: 4px;
@@ -395,6 +400,7 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
   font-size: 0.875rem;
   display: block;
   width: 100%;
+  background: inherit;
 }
 
 .c33::-webkit-input-placeholder {
@@ -418,7 +424,6 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
 }
 
 .c33[aria-disabled='true'] {
-  background: inherit;
   color: inherit;
 }
 
@@ -464,13 +469,6 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
   margin-top: 4px;
 }
 
-.c37 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
 .c36 {
   display: -webkit-box;
   display: -webkit-flex;
@@ -483,6 +481,13 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
+}
+
+.c37 {
+  font-weight: 600;
+  color: #32324d;
+  font-size: 0.75rem;
+  line-height: 1.33;
 }
 
 .c38 {
@@ -514,6 +519,7 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
   border: none;
   color: #32324d;
   resize: none;
+  background: inherit;
 }
 
 .c39::-webkit-input-placeholder {
@@ -844,6 +850,7 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
             </div>
             <div
               class="c10 c11"
+              spacing="2"
             >
               <button
                 aria-disabled="false"
@@ -881,12 +888,14 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
       >
         <div
           class="c19"
+          spacing="6"
         >
           <div
             class="c20"
           >
             <div
               class="c21"
+              spacing="4"
             >
               <div
                 class="c22"
@@ -932,17 +941,18 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
                       <div>
                         <div
                           class="c28"
+                          spacing="1"
                         >
-                          <div
+                          <label
                             class="c29"
+                            for="textinput-1"
                           >
-                            <label
+                            <div
                               class="c30"
-                              for="textinput-1"
                             >
                               Name
-                            </label>
-                          </div>
+                            </div>
+                          </label>
                           <div
                             class="c31 c32"
                           >
@@ -972,6 +982,7 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
                       <div>
                         <div
                           class="c35"
+                          spacing="1"
                         >
                           <div
                             class="c36"
@@ -980,7 +991,11 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
                               class="c37"
                               for="textarea-1"
                             >
-                              Description
+                              <div
+                                class="c36"
+                              >
+                                Description
+                              </div>
                             </label>
                           </div>
                           <div

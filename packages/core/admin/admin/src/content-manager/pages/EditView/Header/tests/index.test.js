@@ -127,7 +127,7 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         background: #4945ff;
       }
 
-      .c12 .sc-fTQvRK {
+      .c12 .sc-dwFVFH {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -178,6 +178,11 @@ describe('CONTENT MANAGER | EditView | Header', () => {
       .c12:active {
         border: 1px solid #4945ff;
         background: #4945ff;
+      }
+
+      .c12 svg > g,
+      .c12 svg path {
+        fill: #ffffff;
       }
 
       .c9 {
@@ -383,6 +388,7 @@ describe('CONTENT MANAGER | EditView | Header', () => {
             </div>
             <div
               class="c9 c10"
+              spacing="2"
             >
               <button
                 aria-disabled="true"

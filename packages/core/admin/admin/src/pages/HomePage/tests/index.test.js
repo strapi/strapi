@@ -214,6 +214,11 @@ describe('Homepage', () => {
         background: #4945ff;
       }
 
+      .c15 svg > g,
+      .c15 svg path {
+        fill: #ffffff;
+      }
+
       .c22 {
         background: #ffffff;
         padding: 24px;
@@ -796,6 +801,7 @@ describe('Homepage', () => {
                       >
                         <div
                           class="c9 c10"
+                          spacing="5"
                         >
                           <h1
                             class="c11"
@@ -852,6 +858,7 @@ describe('Homepage', () => {
                   >
                     <div
                       class="c9"
+                      spacing="5"
                     >
                       <a
                         class="c21"
@@ -884,6 +891,7 @@ describe('Homepage', () => {
                           </div>
                           <div
                             class="c26"
+                            spacing="1"
                           >
                             <div
                               class="c23"
@@ -935,6 +943,7 @@ describe('Homepage', () => {
                           </div>
                           <div
                             class="c26"
+                            spacing="1"
                           >
                             <div
                               class="c23"
@@ -986,6 +995,7 @@ describe('Homepage', () => {
                           </div>
                           <div
                             class="c26"
+                            spacing="1"
                           >
                             <div
                               class="c23"
@@ -1035,6 +1045,7 @@ describe('Homepage', () => {
                           </div>
                           <div
                             class="c26"
+                            spacing="1"
                           >
                             <div
                               class="c23"
@@ -1071,9 +1082,11 @@ describe('Homepage', () => {
                       >
                         <div
                           class="c9"
+                          spacing="5"
                         >
                           <div
                             class="c36"
+                            spacing="3"
                           >
                             <h2
                               class="c37"

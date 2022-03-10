@@ -165,6 +165,7 @@ describe('ImageAssetCard', () => {
         padding: 0;
         max-height: 100%;
         max-width: 100%;
+        object-fit: contain;
       }
 
       .c12 {
@@ -403,6 +404,7 @@ describe('ImageAssetCard', () => {
           >
             <div
               class="c3 c4 c5 c6"
+              spacing="2"
             >
               <input
                 aria-labelledby="card-1-title"
@@ -412,6 +414,7 @@ describe('ImageAssetCard', () => {
             </div>
             <div
               class="c8 c4 c5 c9"
+              spacing="2"
             >
               <span>
                 <button

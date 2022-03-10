@@ -146,6 +146,7 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         </div>
         <div
           class="c4"
+          spacing="4"
         >
           <div
             class="c5"

@@ -562,6 +562,11 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
         background: #4945ff;
       }
 
+      .c6 svg > g,
+      .c6 svg path {
+        fill: #ffffff;
+      }
+
       .c37 {
         color: #4945ff;
         font-size: 0.75rem;

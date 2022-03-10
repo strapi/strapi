@@ -356,273 +356,290 @@ describe('SettingsPage || components || SettingsNav', () => {
         >
           <ul
             class="c10"
+            spacing="2"
           >
             <li>
               <div
-                class="c11 c12"
+                class=""
               >
                 <div
-                  class="c13"
+                  class="c11 c12"
                 >
                   <div
-                    class="c14 c15"
+                    class="c13"
                   >
                     <div
-                      class="c16"
+                      class="c14 c15"
                     >
-                      <span
-                        class="c3 c17"
-                      >
-                        Global Settings
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <ul
-                id="subnav-list-2"
-              >
-                <li>
-                  <a
-                    class="c18 c19"
-                    href="/settings/application-infos"
-                  >
-                    <div
-                      class="c14"
-                    >
-                      <svg
-                        class="c20"
-                        fill="none"
-                        height="1em"
-                        viewBox="0 0 4 4"
-                        width="1em"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <rect
-                          fill="#A5A5BA"
-                          height="4"
-                          rx="2"
-                          width="4"
-                        />
-                      </svg>
                       <div
-                        class="c21"
+                        class="c16"
                       >
                         <span
-                          class="c3 c22"
+                          class="c3 c17"
                         >
-                          Overview
+                          Global Settings
                         </span>
                       </div>
                     </div>
-                    <div
-                      class="c14 sc-gVkuDy c23"
+                  </div>
+                </div>
+                <ul
+                  id="subnav-list-2"
+                >
+                  <li>
+                    <a
+                      class="c18 c19"
+                      href="/settings/application-infos"
                     >
-                      <svg
-                        class="c24"
-                        fill="none"
-                        height="1em"
-                        viewBox="0 0 4 4"
-                        width="1em"
-                        xmlns="http://www.w3.org/2000/svg"
+                      <div
+                        class="c14"
                       >
-                        <rect
-                          fill="#A5A5BA"
-                          height="4"
-                          rx="2"
-                          width="4"
-                        />
-                      </svg>
-                    </div>
-                  </a>
-                </li>
-              </ul>
+                        <svg
+                          class="c20"
+                          fill="none"
+                          height="1em"
+                          viewBox="0 0 4 4"
+                          width="1em"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <rect
+                            fill="#A5A5BA"
+                            height="4"
+                            rx="2"
+                            width="4"
+                          />
+                        </svg>
+                        <div
+                          class="c21"
+                        >
+                          <span
+                            class="c3 c22"
+                          >
+                            Overview
+                          </span>
+                        </div>
+                      </div>
+                      <div
+                        class="c14 sc-ehIJor c23"
+                      >
+                        <svg
+                          class="c24"
+                          fill="none"
+                          height="1em"
+                          viewBox="0 0 4 4"
+                          width="1em"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <rect
+                            fill="#A5A5BA"
+                            height="4"
+                            rx="2"
+                            width="4"
+                          />
+                        </svg>
+                      </div>
+                    </a>
+                  </li>
+                </ul>
+              </div>
             </li>
             <li>
               <div
-                class="c11 c12"
+                class=""
               >
                 <div
-                  class="c13"
+                  class="c11 c12"
                 >
                   <div
-                    class="c14 c15"
+                    class="c13"
                   >
                     <div
-                      class="c16"
+                      class="c14 c15"
                     >
-                      <span
-                        class="c3 c17"
-                      >
-                        Administration Panel
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <ul
-                id="subnav-list-3"
-              >
-                <li>
-                  <a
-                    class="c18 c19"
-                    href="/settings/roles"
-                  >
-                    <div
-                      class="c14"
-                    >
-                      <svg
-                        class="c20"
-                        fill="none"
-                        height="1em"
-                        viewBox="0 0 4 4"
-                        width="1em"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <rect
-                          fill="#A5A5BA"
-                          height="4"
-                          rx="2"
-                          width="4"
-                        />
-                      </svg>
                       <div
-                        class="c21"
+                        class="c16"
                       >
                         <span
-                          class="c3 c22"
+                          class="c3 c17"
                         >
-                          Roles
+                          Administration Panel
                         </span>
                       </div>
                     </div>
-                  </a>
-                </li>
-              </ul>
+                  </div>
+                </div>
+                <ul
+                  id="subnav-list-3"
+                >
+                  <li>
+                    <a
+                      class="c18 c19"
+                      href="/settings/roles"
+                    >
+                      <div
+                        class="c14"
+                      >
+                        <svg
+                          class="c20"
+                          fill="none"
+                          height="1em"
+                          viewBox="0 0 4 4"
+                          width="1em"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <rect
+                            fill="#A5A5BA"
+                            height="4"
+                            rx="2"
+                            width="4"
+                          />
+                        </svg>
+                        <div
+                          class="c21"
+                        >
+                          <span
+                            class="c3 c22"
+                          >
+                            Roles
+                          </span>
+                        </div>
+                      </div>
+                    </a>
+                  </li>
+                </ul>
+              </div>
             </li>
             <li>
               <div
-                class="c11 c12"
+                class=""
               >
                 <div
-                  class="c13"
+                  class="c11 c12"
                 >
                   <div
-                    class="c14 c15"
+                    class="c13"
                   >
                     <div
-                      class="c16"
+                      class="c14 c15"
                     >
-                      <span
-                        class="c3 c17"
-                      >
-                        Email Plugin
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <ul
-                id="subnav-list-4"
-              >
-                <li>
-                  <a
-                    class="c18 c19"
-                    href="/settings/email"
-                  >
-                    <div
-                      class="c14"
-                    >
-                      <svg
-                        class="c20"
-                        fill="none"
-                        height="1em"
-                        viewBox="0 0 4 4"
-                        width="1em"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <rect
-                          fill="#A5A5BA"
-                          height="4"
-                          rx="2"
-                          width="4"
-                        />
-                      </svg>
                       <div
-                        class="c21"
+                        class="c16"
                       >
                         <span
-                          class="c3 c22"
+                          class="c3 c17"
                         >
-                          Settings
+                          Email Plugin
                         </span>
                       </div>
                     </div>
-                  </a>
-                </li>
-              </ul>
+                  </div>
+                </div>
+                <ul
+                  id="subnav-list-4"
+                >
+                  <li>
+                    <a
+                      class="c18 c19"
+                      href="/settings/email"
+                    >
+                      <div
+                        class="c14"
+                      >
+                        <svg
+                          class="c20"
+                          fill="none"
+                          height="1em"
+                          viewBox="0 0 4 4"
+                          width="1em"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <rect
+                            fill="#A5A5BA"
+                            height="4"
+                            rx="2"
+                            width="4"
+                          />
+                        </svg>
+                        <div
+                          class="c21"
+                        >
+                          <span
+                            class="c3 c22"
+                          >
+                            Settings
+                          </span>
+                        </div>
+                      </div>
+                    </a>
+                  </li>
+                </ul>
+              </div>
             </li>
             <li>
               <div
-                class="c11 c12"
+                class=""
               >
                 <div
-                  class="c13"
+                  class="c11 c12"
                 >
                   <div
-                    class="c14 c15"
+                    class="c13"
                   >
                     <div
-                      class="c16"
+                      class="c14 c15"
                     >
-                      <span
-                        class="c3 c17"
-                      >
-                        Users & Permissions plugin
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <ul
-                id="subnav-list-5"
-              >
-                <li>
-                  <a
-                    class="c18 c19"
-                    href="/settings/users-permissions/roles"
-                  >
-                    <div
-                      class="c14"
-                    >
-                      <svg
-                        class="c20"
-                        fill="none"
-                        height="1em"
-                        viewBox="0 0 4 4"
-                        width="1em"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <rect
-                          fill="#A5A5BA"
-                          height="4"
-                          rx="2"
-                          width="4"
-                        />
-                      </svg>
                       <div
-                        class="c21"
+                        class="c16"
                       >
                         <span
-                          class="c3 c22"
+                          class="c3 c17"
                         >
-                          Roles
+                          Users & Permissions plugin
                         </span>
                       </div>
                     </div>
-                  </a>
-                </li>
-              </ul>
+                  </div>
+                </div>
+                <ul
+                  id="subnav-list-5"
+                >
+                  <li>
+                    <a
+                      class="c18 c19"
+                      href="/settings/users-permissions/roles"
+                    >
+                      <div
+                        class="c14"
+                      >
+                        <svg
+                          class="c20"
+                          fill="none"
+                          height="1em"
+                          viewBox="0 0 4 4"
+                          width="1em"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <rect
+                            fill="#A5A5BA"
+                            height="4"
+                            rx="2"
+                            width="4"
+                          />
+                        </svg>
+                        <div
+                          class="c21"
+                        >
+                          <span
+                            class="c3 c22"
+                          >
+                            Roles
+                          </span>
+                        </div>
+                      </div>
+                    </a>
+                  </li>
+                </ul>
+              </div>
             </li>
           </ul>
         </div>

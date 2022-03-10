@@ -6,7 +6,7 @@ import {
   useTracking,
   useNotification,
   useQueryParams,
-  formatComponentData,
+  formatContentTypeData,
   contentManagementUtilRemoveFieldsFromData,
   useGuidedTour,
 } from '@strapi/helper-plugin';
@@ -88,7 +88,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
       allLayoutDataRef.current.components
     );
 
-    return formatComponentData(
+    return formatContentTypeData(
       cleaned,
       allLayoutDataRef.current.contentType,
       allLayoutDataRef.current.components
@@ -103,7 +103,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
         allLayoutData.components
       );
 
-      acc[current] = formatComponentData(
+      acc[current] = formatContentTypeData(
         defaultComponentForm,
         allLayoutData.components[current],
         allLayoutData.components
@@ -117,7 +117,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
       allLayoutData.components
     );
 
-    const contentTypeDataStructureFormatted = formatComponentData(
+    const contentTypeDataStructureFormatted = formatContentTypeData(
       contentTypeDataStructure,
       allLayoutData.contentType,
       allLayoutData.components

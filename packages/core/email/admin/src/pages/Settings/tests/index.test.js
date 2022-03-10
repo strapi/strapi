@@ -194,6 +194,11 @@ describe('Email | Pages | Settings', () => {
         background: #4945ff;
       }
 
+      .c38 svg > g,
+      .c38 svg path {
+        fill: #ffffff;
+      }
+
       .c26 {
         position: absolute;
         left: 0;
@@ -211,23 +216,6 @@ describe('Email | Pages | Settings', () => {
 
       .c26[aria-disabled='true'] {
         cursor: not-allowed;
-      }
-
-      .c23 {
-        font-weight: 600;
-        color: #32324d;
-        font-size: 0.75rem;
-        line-height: 1.33;
-      }
-
-      .c30 {
-        color: #666687;
-        display: block;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        font-size: 0.875rem;
-        line-height: 1.43;
       }
 
       .c29 {
@@ -269,6 +257,23 @@ describe('Email | Pages | Settings', () => {
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
+      }
+
+      .c23 {
+        font-weight: 600;
+        color: #32324d;
+        font-size: 0.75rem;
+        line-height: 1.33;
+      }
+
+      .c30 {
+        color: #666687;
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: 0.875rem;
+        line-height: 1.43;
       }
 
       .c22 {
@@ -405,13 +410,6 @@ describe('Email | Pages | Settings', () => {
       }
 
       .c18 {
-        font-weight: 600;
-        color: #32324d;
-        font-size: 0.75rem;
-        line-height: 1.33;
-      }
-
-      .c17 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -443,6 +441,13 @@ describe('Email | Pages | Settings', () => {
         align-items: center;
       }
 
+      .c17 {
+        font-weight: 600;
+        color: #32324d;
+        font-size: 0.75rem;
+        line-height: 1.33;
+      }
+
       .c21 {
         border: none;
         border-radius: 4px;
@@ -454,6 +459,7 @@ describe('Email | Pages | Settings', () => {
         font-size: 0.875rem;
         display: block;
         width: 100%;
+        background: inherit;
       }
 
       .c21::-webkit-input-placeholder {
@@ -477,7 +483,6 @@ describe('Email | Pages | Settings', () => {
       }
 
       .c21[aria-disabled='true'] {
-        background: inherit;
         color: inherit;
       }
 
@@ -496,6 +501,7 @@ describe('Email | Pages | Settings', () => {
         font-size: 0.875rem;
         display: block;
         width: 100%;
+        background: inherit;
       }
 
       .c35::-webkit-input-placeholder {
@@ -519,7 +525,6 @@ describe('Email | Pages | Settings', () => {
       }
 
       .c35[aria-disabled='true'] {
-        background: inherit;
         color: inherit;
       }
 
@@ -745,15 +750,18 @@ describe('Email | Pages | Settings', () => {
           <form>
             <div
               class="c7"
+              spacing="7"
             >
               <div
                 class="c8"
               >
                 <div
                   class="c9"
+                  spacing="4"
                 >
                   <div
                     class="c10"
+                    spacing="1"
                   >
                     <h2
                       class="c11"
@@ -788,17 +796,18 @@ describe('Email | Pages | Settings', () => {
                           <div>
                             <div
                               class="c16"
+                              spacing="1"
                             >
-                              <div
+                              <label
                                 class="c17"
+                                for="textinput-3"
                               >
-                                <label
+                                <div
                                   class="c18"
-                                  for="textinput-3"
                                 >
                                   Default sender email
-                                </label>
-                              </div>
+                                </div>
+                              </label>
                               <div
                                 class="c19 c20"
                                 disabled=""
@@ -828,17 +837,18 @@ describe('Email | Pages | Settings', () => {
                           <div>
                             <div
                               class="c16"
+                              spacing="1"
                             >
-                              <div
+                              <label
                                 class="c17"
+                                for="textinput-4"
                               >
-                                <label
+                                <div
                                   class="c18"
-                                  for="textinput-4"
                                 >
                                   Default response email
-                                </label>
-                              </div>
+                                </div>
+                              </label>
                               <div
                                 class="c19 c20"
                                 disabled=""
@@ -867,13 +877,18 @@ describe('Email | Pages | Settings', () => {
                         <div>
                           <div
                             class="c22"
+                            spacing="1"
                           >
                             <span
                               class="c23"
                               for="select-2"
                               id="select-2-label"
                             >
-                              Email provider
+                              <div
+                                class="c24"
+                              >
+                                Email provider
+                              </div>
                             </span>
                             <div
                               class="c24 c25"
@@ -947,6 +962,7 @@ describe('Email | Pages | Settings', () => {
               >
                 <div
                   class="c9"
+                  spacing="4"
                 >
                   <h2
                     class="c11"
@@ -966,17 +982,18 @@ describe('Email | Pages | Settings', () => {
                           <div>
                             <div
                               class="c16"
+                              spacing="1"
                             >
-                              <div
+                              <label
                                 class="c17"
+                                for="test-address-input"
                               >
-                                <label
+                                <div
                                   class="c18"
-                                  for="test-address-input"
                                 >
                                   Recipient email
-                                </label>
-                              </div>
+                                </div>
+                              </label>
                               <div
                                 class="c19 c34"
                               >

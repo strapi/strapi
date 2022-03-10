@@ -104,7 +104,7 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   background: #4945ff;
 }
 
-.c13 .sc-fTQvRK {
+.c13 .sc-dwFVFH {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -157,6 +157,11 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   background: #4945ff;
 }
 
+.c13 svg > g,
+.c13 svg path {
+  fill: #ffffff;
+}
+
 .c24 {
   -webkit-align-items: center;
   -webkit-box-align: center;
@@ -169,7 +174,7 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   background: #f0f0ff;
 }
 
-.c24 .sc-fTQvRK {
+.c24 .sc-dwFVFH {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -354,13 +359,6 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
 }
 
 .c30 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c29 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -392,6 +390,13 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   align-items: center;
 }
 
+.c29 {
+  font-weight: 600;
+  color: #32324d;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
 .c33 {
   border: none;
   border-radius: 4px;
@@ -402,6 +407,7 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   font-size: 0.875rem;
   display: block;
   width: 100%;
+  background: inherit;
 }
 
 .c33::-webkit-input-placeholder {
@@ -425,7 +431,6 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
 }
 
 .c33[aria-disabled='true'] {
-  background: inherit;
   color: inherit;
 }
 
@@ -471,13 +476,6 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   margin-top: 4px;
 }
 
-.c37 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
 .c36 {
   display: -webkit-box;
   display: -webkit-flex;
@@ -490,6 +488,13 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
+}
+
+.c37 {
+  font-weight: 600;
+  color: #32324d;
+  font-size: 0.75rem;
+  line-height: 1.33;
 }
 
 .c38 {
@@ -521,6 +526,7 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   border: none;
   color: #32324d;
   resize: none;
+  background: inherit;
 }
 
 .c39::-webkit-input-placeholder {
@@ -838,6 +844,7 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
             </div>
             <div
               class="c10 c11"
+              spacing="2"
             >
               <button
                 aria-disabled="false"
@@ -864,12 +871,14 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
       >
         <div
           class="c18"
+          spacing="6"
         >
           <div
             class="c19"
           >
             <div
               class="c20"
+              spacing="4"
             >
               <div
                 class="c21"
@@ -918,17 +927,18 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
                       <div>
                         <div
                           class="c28"
+                          spacing="1"
                         >
-                          <div
+                          <label
                             class="c29"
+                            for="textinput-1"
                           >
-                            <label
+                            <div
                               class="c30"
-                              for="textinput-1"
                             >
                               Name
-                            </label>
-                          </div>
+                            </div>
+                          </label>
                           <div
                             class="c31 c32"
                           >
@@ -958,6 +968,7 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
                       <div>
                         <div
                           class="c35"
+                          spacing="1"
                         >
                           <div
                             class="c36"
@@ -966,7 +977,11 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
                               class="c37"
                               for="textarea-1"
                             >
-                              Description
+                              <div
+                                class="c36"
+                              >
+                                Description
+                              </div>
                             </label>
                           </div>
                           <div

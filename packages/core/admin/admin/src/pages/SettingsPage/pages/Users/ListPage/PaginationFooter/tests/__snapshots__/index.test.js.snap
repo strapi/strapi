@@ -250,16 +250,6 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
   cursor: not-allowed;
 }
 
-.c10 {
-  color: #32324d;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 0.875rem;
-  line-height: 1.43;
-}
-
 .c9 {
   padding-right: 16px;
   padding-left: 16px;
@@ -301,6 +291,16 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
   align-items: center;
 }
 
+.c10 {
+  color: #32324d;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.875rem;
+  line-height: 1.43;
+}
+
 .c3 {
   display: -webkit-box;
   display: -webkit-flex;
@@ -314,10 +314,6 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
 .c3 > * {
   margin-top: 0;
   margin-bottom: 0;
-}
-
-.c3 > * + * {
-  margin-top: 0px;
 }
 
 .c5 {
@@ -466,7 +462,7 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
       </div>
       <nav
         aria-label="pagination"
-        class="sc-jwQYvw"
+        class="sc-ljMRFG"
       >
         <ul
           class="c16 c17"

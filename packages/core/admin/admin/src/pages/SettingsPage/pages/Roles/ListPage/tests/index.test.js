@@ -197,6 +197,11 @@ describe('<ListPage />', () => {
         background: #4945ff;
       }
 
+      .c6 svg > g,
+      .c6 svg path {
+        fill: #ffffff;
+      }
+
       .c14 {
         background: #ffffff;
         border-radius: 4px;
