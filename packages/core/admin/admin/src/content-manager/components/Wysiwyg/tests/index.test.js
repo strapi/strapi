@@ -818,7 +818,7 @@ describe('Wysiwyg render and actions buttons', () => {
         margin: 0;
         white-space: pre;
         word-wrap: normal;
-        line-height: inherit;
+        line-height: 1.5;
         color: inherit;
         position: relative;
         overflow: visible;
