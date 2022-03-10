@@ -1263,6 +1263,10 @@ Array [
     "name": "Meru (Kenya) (mer-KE)",
   },
   Object {
+    "code": "mn",
+    "name": "Mongolian (mn)",
+  },
+  Object {
     "code": "mfe",
     "name": "Morisyen (mfe)",
   },

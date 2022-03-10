@@ -18,7 +18,7 @@ import UnauthenticatedLayout, {
   Column,
   LayoutContent,
 } from '../../../../layouts/UnauthenticatedLayout';
-import Logo from '../Logo';
+import Logo from '../../../../components/UnauthenticatedLogo';
 import FieldActionWrapper from '../FieldActionWrapper';
 
 const PasswordInput = styled(TextInput)`

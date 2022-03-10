@@ -8,8 +8,10 @@ describe('i18n - Controller - content-types', () => {
   describe('getNonLocalizedAttributes', () => {
     beforeEach(() => {
       const contentType = () => ({});
+      const getModel = () => ({});
       global.strapi = {
         contentType,
+        getModel,
         plugins: { i18n: { services: { 'content-types': ctService } } },
         admin: { services: { constants: { READ_ACTION: 'read', CREATE_ACTION: 'create' } } },
       };

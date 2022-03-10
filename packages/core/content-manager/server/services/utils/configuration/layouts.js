@@ -138,7 +138,9 @@ function syncLayouts(configuration, schema) {
     list: cleanList.length > 0 ? cleanList : createDefaultListLayout(schema),
     edit: cleanEdit.length > 0 ? cleanEdit : createDefaultEditLayout(schema),
     editRelations:
-      cleanEditRelations.length > 0 ? cleanEditRelations : createDefaultEditRelationsLayout(schema),
+      editRelations.length === 0 || cleanEditRelations.length > 0
+        ? cleanEditRelations
+        : createDefaultEditRelationsLayout(schema),
   };
 }
 

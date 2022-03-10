@@ -225,7 +225,7 @@ export const EditorStylesContainer = styled.div`
     margin: 0;
     white-space: pre;
     word-wrap: normal;
-    line-height: inherit;
+    line-height: 1.5;
     color: inherit;
     /* z-index: 2; */
     position: relative;
