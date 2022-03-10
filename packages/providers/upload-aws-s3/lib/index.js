@@ -10,7 +10,7 @@ const _ = require('lodash');
 const AWS = require('aws-sdk');
 
 module.exports = {
-  init(config) {
+  init({ customDomain, ...config }) {
     const S3 = new AWS.S3({
       apiVersion: '2006-03-01',
       ...config,
@@ -20,9 +20,11 @@ module.exports = {
       new Promise((resolve, reject) => {
         // upload file on S3 bucket
         const path = file.path ? `${file.path}/` : '';
+        const fileKey = `${path}${file.hash}${file.ext}`
+        
         S3.upload(
           {
-            Key: `${path}${file.hash}${file.ext}`,
+            Key: fileKey,
             Body: file.stream || Buffer.from(file.buffer, 'binary'),
             ACL: 'public-read',
             ContentType: file.mime,
@@ -34,7 +36,7 @@ module.exports = {
             }
 
             // set the bucket file url
-            file.url = data.Location;
+            file.url = customDomain ? `${customDomain}/${fileKey}` : data.Location;
 
             resolve();
           }
