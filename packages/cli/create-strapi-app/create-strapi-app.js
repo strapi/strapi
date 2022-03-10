@@ -81,7 +81,6 @@ async function initProject(projectName, program) {
   }
 
   const prompt = await promptUser(projectName, program, hasDatabaseOptions);
-  console.log(prompt);
   const directory = prompt.directory || projectName;
   await checkInstallPath(resolve(directory));
 
