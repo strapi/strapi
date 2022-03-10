@@ -128,7 +128,6 @@ async function watchAdmin({
     env,
     options,
     pluginsPath,
-    // port,
     roots,
     devServer: {
       port,
@@ -139,7 +138,6 @@ async function watchAdmin({
           warnings: false,
         },
       },
-
       open: browser === 'true' ? true : browser,
       devMiddleware: {
         publicPath: options.adminPath,

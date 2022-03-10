@@ -30,6 +30,7 @@ module.exports = async function({ build, watchAdmin, polling, browser }) {
         dir: buildDestDir,
         build,
         browser,
+        isTSProject,
         watchAdmin,
       });
     }
@@ -43,9 +44,14 @@ module.exports = async function({ build, watchAdmin, polling, browser }) {
   }
 };
 
-const primaryProcess = async ({ buildDestDir, currentDirectory, build, watchAdmin, browser }) => {
-  const isTSProject = await tsUtils.isTypeScriptProject(currentDirectory);
-
+const primaryProcess = async ({
+  buildDestDir,
+  currentDirectory,
+  build,
+  isTSProject,
+  watchAdmin,
+  browser,
+}) => {
   if (isTSProject) {
     await buildTypeScript({ srcDir: currentDirectory, watch: true });
   }
