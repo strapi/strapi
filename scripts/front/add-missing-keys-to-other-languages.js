@@ -1,3 +1,9 @@
+// Add missing keys to non-english languages from `en.json`.
+// This script eases the process of translating strapi to other languages.
+// Usage:
+//   node scripts/front/add-missing-keys-to-other-languages.js [language]
+// Example:
+//   node scripts/front/add-missing-keys-to-other-languages.js vi
 'use strict';
 
 const { join, dirname } = require('path');
