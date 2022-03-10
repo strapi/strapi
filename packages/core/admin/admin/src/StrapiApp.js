@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
-import { lightTheme } from '@strapi/design-system/themes';
+import { lightTheme, darkTheme } from '@strapi/design-system/themes';
 import merge from 'lodash/merge';
 import pick from 'lodash/pick';
 import isFunction from 'lodash/isFunction';
@@ -21,7 +21,6 @@ import {
   MUTATE_SINGLE_TYPES_LINKS,
 } from './exposedHooks';
 import injectionZones from './injectionZones';
-import darkTheme from './temp-dark-theme';
 import favicon from './favicon.ico';
 
 class StrapiApp {

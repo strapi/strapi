@@ -21,7 +21,7 @@ const Button = styled.button`
   box-shadow: ${({ theme }) => theme.shadows.tableShadow};
   border-radius: 50%;
   svg {
-    color: ${({ theme }) => theme.colors.neutral0};
+    color: ${({ theme }) => theme.colors.buttonNeutral0};
   }
 `;
 

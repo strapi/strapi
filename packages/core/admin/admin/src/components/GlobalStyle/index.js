@@ -15,9 +15,6 @@ const GlobalStyle = createGlobalStyle`
   body {
     background: ${({ theme }) => theme.colors.neutral100};
   }
-  input, textarea {
-    background-color: inherit;
-  }
 `;
 
 export default GlobalStyle;
