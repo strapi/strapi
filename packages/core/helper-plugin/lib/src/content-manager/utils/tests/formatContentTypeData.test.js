@@ -1,14 +1,19 @@
-import formatComponentData from '../formatComponentData';
+import formatContentTypeData from '../formatContentTypeData';
 import testData from './testData';
 
 const { contentType, components, modifiedData } = testData;
 
-describe('STRAPI_HELPER_PLUGIN | utils | formatComponentData', () => {
+describe('STRAPI_HELPER_PLUGIN | utils | formatContentTypeData', () => {
   it('should add the __temp_key__ property to each repeatable component object', () => {
     const expected = {
       createdAt: '2020-04-28T13:22:13.033Z',
       dz: [
-        { __component: 'compos.sub-compo', id: 7, name: 'name', password: 'password' },
+        {
+          __component: 'compos.sub-compo',
+          id: 7,
+          name: 'name',
+          password: 'password',
+        },
         {
           id: 4,
           name: 'name',
@@ -69,6 +74,70 @@ describe('STRAPI_HELPER_PLUGIN | utils | formatComponentData', () => {
       updatedAt: '2020-04-28T13:22:13.033Z',
     };
 
-    expect(formatComponentData(modifiedData, contentType, components)).toEqual(expected);
+    expect(formatContentTypeData(modifiedData, contentType, components)).toEqual(expected);
+  });
+
+  it('should stringify json fields', () => {
+    const contentType = {
+      uid: 'api::test.test',
+      apiID: 'test',
+      attributes: {
+        id: { type: 'integer' },
+        name: { type: 'string' },
+        dz: { type: 'dynamiczone', components: ['compos.sub-compo'] },
+        jsonString: { type: 'json' },
+        jsonObject: { type: 'json' },
+      },
+    };
+
+    const components = {
+      'compos.sub-compo': {
+        uid: 'compos.sub-compo',
+        category: 'compos',
+        attributes: {
+          id: { type: 'integer' },
+          name: { type: 'string' },
+          password: { type: 'password' },
+          jsonString: { type: 'json' },
+          jsonObject: { type: 'json' },
+        },
+      },
+    };
+
+    const data = {
+      id: 1,
+      name: 'name',
+      dz: [
+        {
+          __component: 'compos.sub-compo',
+          id: 7,
+          name: 'name',
+          password: 'password',
+          jsonString: 'hello',
+          jsonObject: { hello: true },
+        },
+      ],
+      jsonString: 'hello',
+      jsonObject: { hello: true },
+    };
+
+    const expected = {
+      id: 1,
+      name: 'name',
+      dz: [
+        {
+          __component: 'compos.sub-compo',
+          id: 7,
+          name: 'name',
+          password: 'password',
+          jsonString: '"hello"',
+          jsonObject: '{\n  "hello": true\n}',
+        },
+      ],
+      jsonString: '"hello"',
+      jsonObject: '{\n  "hello": true\n}',
+    };
+
+    expect(formatContentTypeData(data, contentType, components)).toEqual(expected);
   });
 });

@@ -4,7 +4,7 @@ import cloneDeep from 'lodash/cloneDeep';
 import { parse } from 'qs';
 import {
   request,
-  formatComponentData,
+  formatContentTypeData,
   contentManagementUtilRemoveFieldsFromData,
 } from '@strapi/helper-plugin';
 import pluginId from '../pluginId';
@@ -66,7 +66,7 @@ const addCommonFieldsToInitialDataMiddleware = () => ({ getState, dispatch }) =>
       );
       cleanedMerged.localizations = localizations;
 
-      action.data = formatComponentData(
+      action.data = formatContentTypeData(
         cleanedMerged,
         currentLayout.contentType,
         currentLayout.components
