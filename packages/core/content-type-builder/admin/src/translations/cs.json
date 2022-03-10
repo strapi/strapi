@@ -101,10 +101,6 @@
   "form.button.save": "Uložit",
   "form.button.select-component": "Vybrat komponent",
   "from": "od",
-  "menu.section.components.name.plural": "Komponenty",
-  "menu.section.components.name.singular": "Komponent",
-  "menu.section.models.name.plural": "Typy obsahu",
-  "menu.section.models.name.singular": "Typ obsahu",
   "modalForm.attribute.form.base.name": "Jméno",
   "modalForm.attribute.form.base.name.description": "Mezery v názvu pole nejsou povoleny",
   "modalForm.attribute.text.type-selection": "Typ",
@@ -140,7 +136,5 @@
   "relation.manyWay": "má víc",
   "relation.oneToMany": "patří více",
   "relation.oneToOne": "má jeden a patří jednomu",
-  "relation.oneWay": "má jeden",
-  "table.attributes.title.plural": "Pole: {number}",
-  "table.attributes.title.singular": "Pole: {number}"
+  "relation.oneWay": "má jeden"
 }

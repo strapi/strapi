@@ -4,7 +4,7 @@ import get from 'lodash/get';
 import cloneDeep from 'lodash/cloneDeep';
 
 import { arrayMoveItem } from '../../utils';
-import { formatLayout, getInputSize } from './utils/layout';
+import { formatLayout, getDefaultInputSize, getFieldSize, setFieldSize } from './utils/layout';
 
 const initialState = {
   fieldForm: {},
@@ -45,7 +45,7 @@ const reducer = (state = initialState, action) =>
       }
       case 'ON_ADD_FIELD': {
         const newState = cloneDeep(state);
-        const size = getInputSize(
+        const size = getDefaultInputSize(
           get(newState, ['modifiedData', 'attributes', action.name, 'type'], '')
         );
         const listSize = get(newState, layoutPathEdit, []).length;
@@ -76,7 +76,11 @@ const reducer = (state = initialState, action) =>
         break;
       }
       case 'ON_CHANGE_META': {
-        set(draftState, ['metaForm', ...action.keys], action.value);
+        set(draftState, ['metaForm', 'metadata', ...action.keys], action.value);
+        break;
+      }
+      case 'ON_CHANGE_SIZE': {
+        set(draftState, ['metaForm', 'size'], action.value);
         break;
       }
       case 'ON_RESET': {
@@ -168,11 +172,28 @@ const reducer = (state = initialState, action) =>
       }
       case 'SET_FIELD_TO_EDIT': {
         draftState.metaToEdit = action.name;
-        draftState.metaForm = get(state, ['modifiedData', 'metadatas', action.name, 'edit'], {});
+        draftState.metaForm = {
+          metadata: get(state, ['modifiedData', 'metadatas', action.name, 'edit'], {}),
+          size:
+            getFieldSize(action.name, state.modifiedData?.layouts?.edit) ?? getDefaultInputSize(),
+        };
+
         break;
       }
       case 'SUBMIT_META_FORM': {
-        set(draftState, ['modifiedData', 'metadatas', state.metaToEdit, 'edit'], state.metaForm);
+        set(
+          draftState,
+          ['modifiedData', 'metadatas', state.metaToEdit, 'edit'],
+          state.metaForm.metadata
+        );
+
+        const layoutsCopy = cloneDeep(get(state, layoutPathEdit, []));
+        const nextLayoutValue = setFieldSize(state.metaToEdit, state.metaForm.size, layoutsCopy);
+
+        if (nextLayoutValue.length > 0) {
+          set(draftState, layoutPathEdit, formatLayout(nextLayoutValue));
+        }
+
         break;
       }
       case 'SUBMIT_SUCCEEDED': {

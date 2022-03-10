@@ -123,12 +123,6 @@
   "form.button.single-type.description": "Terbaik untuk satu contoh seperti tentang kami, beranda, dll.",
   "form.contentType.divider.draft-publish": "DRAF/TERBIT",
   "from": "dari",
-  "menu.section.components.name.plural": "Komponent",
-  "menu.section.components.name.singular": "Komponent",
-  "menu.section.models.name.plural": "Jenis Koleksi",
-  "menu.section.models.name.singular": "Jenis Koleksi",
-  "menu.section.single-types.name.plural": "Jenis Tunggal",
-  "menu.section.single-types.name.singular": "Jenis Tunggal",
   "modalForm.attribute.form.base.name": "Nama",
   "modalForm.attribute.form.base.name.description": "Tidak ada spasi yang diperbolehkan untuk nama atribut",
   "modalForm.attribute.form.base.name.placeholder": "Misalnya Siput, URL SEO, URL Kanonis",
@@ -174,7 +168,5 @@
   "relation.manyWay": "memiliki banyak",
   "relation.oneToMany": "memiliki banyak orang",
   "relation.oneToOne": "memiliki dan menjadi milik satu",
-  "relation.oneWay": "memiliki satu",
-  "table.attributes.title.plural": "{number} bidang",
-  "table.attributes.title.singular": "{number} bidang"
+  "relation.oneWay": "memiliki satu"
 }

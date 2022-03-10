@@ -4,20 +4,36 @@ const fs = require('fs');
 const path = require('path');
 
 // Helpers.
+const { createTestBuilder } = require('../../../../test/helpers/builder');
 const { createStrapiInstance } = require('../../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../../test/helpers/request');
 
+const builder = createTestBuilder();
 let strapi;
 let rq;
 
+const dogModel = {
+  displayName: 'Dog',
+  singularName: 'dog',
+  pluralName: 'dogs',
+  kind: 'collectionType',
+  attributes: {
+    profilePicture: {
+      type: 'media',
+    },
+  },
+};
+
 describe('Upload plugin end to end tests', () => {
   beforeAll(async () => {
+    await builder.addContentType(dogModel).build();
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
   });
 
   afterAll(async () => {
     await strapi.destroy();
+    await builder.cleanup();
   });
 
   describe('GET /upload/settings => Get settings for an environment', () => {
@@ -162,6 +178,57 @@ describe('Upload plugin end to end tests', () => {
     });
   });
 
+  describe('POST /api/:uid => Create an entity with a file', () => {
+    test('With an image', async () => {
+      const res = await rq({
+        method: 'POST',
+        url: '/api/dogs?populate=*',
+        formData: {
+          data: '{}',
+          'files.profilePicture': fs.createReadStream(path.join(__dirname, 'rec.jpg')),
+        },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toMatchObject({
+        data: {
+          attributes: {
+            profilePicture: {
+              data: {
+                id: expect.anything(),
+              },
+            },
+          },
+          id: expect.anything(),
+        },
+      });
+    });
+
+    test('With a pdf', async () => {
+      const res = await rq({
+        method: 'POST',
+        url: '/api/dogs?populate=*',
+        formData: {
+          data: '{}',
+          'files.profilePicture': fs.createReadStream(path.join(__dirname, 'rec.pdf')),
+        },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toMatchObject({
+        data: {
+          attributes: {
+            profilePicture: {
+              data: {
+                id: expect.anything(),
+              },
+            },
+          },
+          id: expect.anything(),
+        },
+      });
+    });
+  });
   test.todo('GET /upload/files/:id => Find one file');
   test.todo('GET /upload/search/:id => Search files');
   test.todo('DELETE /upload/files/:id => Delete a file');

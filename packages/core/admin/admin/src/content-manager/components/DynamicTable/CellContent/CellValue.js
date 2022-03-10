@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import toString from 'lodash/toString';
+import parseISO from 'date-fns/parseISO';
 import { getNumberOfDecimals } from './utils/getNumberOfDecimals';
 
 const CellValue = ({ type, value }) => {
@@ -8,7 +9,7 @@ const CellValue = ({ type, value }) => {
   let formattedValue = value;
 
   if (type === 'date') {
-    formattedValue = formatDate(value, { dateStyle: 'full' });
+    formattedValue = formatDate(parseISO(value), { dateStyle: 'full' });
   }
 
   if (type === 'datetime') {

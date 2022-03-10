@@ -33,8 +33,6 @@
   "form.button.continue": "Continuar",
   "form.button.save": "Guardar",
   "from": "de",
-  "menu.section.models.name.plural": "Tipos de Conteúdos",
-  "menu.section.models.name.singular": "Tipo de Conteúdo",
   "modelPage.attribute.relationWith": "Relação com",
   "plugin.description.long": "Modelize a estrutura de dados da sua API. Crie novos campos e relações em apenas um minuto. Os arquivos são automaticamente criados e actualizados no seu projecto.",
   "plugin.description.short": "Modelize a estrutura de dados da sua API.",

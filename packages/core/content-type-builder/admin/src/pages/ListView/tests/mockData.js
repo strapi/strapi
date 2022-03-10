@@ -36,7 +36,7 @@ export default {
           type: 'media',
           multiple: false,
           required: false,
-          allowedTypes: ['files', 'images', 'videos'],
+          allowedTypes: ['files', 'images', 'videos', 'audios'],
           pluginOptions: {
             i18n: {
               localized: true,

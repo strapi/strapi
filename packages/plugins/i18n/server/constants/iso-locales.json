@@ -1260,6 +1260,10 @@
     "name":"Meru (Kenya) (mer-KE)"
   },
   {
+    "code":"mn",
+    "name":"Mongolian (mn)"
+  },
+  {
     "code":"mfe",
     "name":"Morisyen (mfe)"
   },
@@ -1870,6 +1874,10 @@
   {
     "code":"tr",
     "name":"Turkish (tr)"
+  },
+  {
+    "code":"tk",
+    "name":"Turkmen (tk)"
   },
   {
     "code":"tr-TR",

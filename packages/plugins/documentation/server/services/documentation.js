@@ -20,6 +20,10 @@ module.exports = ({ strapi }) => {
       return path.join(strapi.dirs.extensions, 'documentation', 'documentation');
     },
 
+    getCustomDocumentationPath() {
+      return path.join(strapi.dirs.extensions, 'documentation', 'config', 'settings.json');
+    },
+
     getDocumentationVersions() {
       return fs
         .readdirSync(this.getFullDocumentationPath())
@@ -103,6 +107,16 @@ module.exports = ({ strapi }) => {
       return [...apisToDocument, ...pluginsToDocument];
     },
 
+    async getCustomSettings() {
+      const customConfigPath = this.getCustomDocumentationPath();
+      const pathExists = await fs.pathExists(customConfigPath);
+      if (pathExists) {
+        return fs.readJson(customConfigPath);
+      }
+
+      return {};
+    },
+
     /**
      * @description - Creates the Swagger json files
      */
@@ -133,20 +147,24 @@ module.exports = ({ strapi }) => {
         'full_documentation.json'
       );
 
-      const settings = _.cloneDeep(defaultConfig);
+      const defaultSettings = _.cloneDeep(defaultConfig);
 
       const serverUrl = getAbsoluteServerUrl(strapi.config);
       const apiPath = strapi.config.get('api.rest.prefix');
 
-      _.set(settings, 'servers', [
+      _.set(defaultSettings, 'servers', [
         {
           url: `${serverUrl}${apiPath}`,
           description: 'Development server',
         },
       ]);
 
-      _.set(settings, ['info', 'x-generation-date'], new Date().toISOString());
-      _.set(settings, ['info', 'version'], version);
+      _.set(defaultSettings, ['info', 'x-generation-date'], new Date().toISOString());
+      _.set(defaultSettings, ['info', 'version'], version);
+
+      const customSettings = await this.getCustomSettings();
+
+      const settings = _.merge(defaultSettings, customSettings);
 
       await fs.ensureFile(fullDocJsonPath);
       await fs.writeJson(fullDocJsonPath, { ...settings, paths }, { spaces: 2 });

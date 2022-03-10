@@ -4,7 +4,7 @@
  * Converts the standard Strapi REST query params to a more usable format for querying
  * You can read more here: https://docs.strapi.io/developer-docs/latest/developer-resources/database-apis-reference/rest-api.html#filters
  */
-const { has } = require('lodash/fp');
+const { has, isEmpty, isObject, cloneDeep, get } = require('lodash/fp');
 const _ = require('lodash');
 const parseType = require('./parse-type');
 const contentTypesUtils = require('./content-types');
@@ -124,7 +124,7 @@ class InvalidPopulateError extends Error {
 }
 
 // NOTE: we could support foo.* or foo.bar.* etc later on
-const convertPopulateQueryParams = (populate, depth = 0) => {
+const convertPopulateQueryParams = (populate, schema, depth = 0) => {
   if (depth === 0 && populate === '*') {
     return true;
   }
@@ -147,18 +147,72 @@ const convertPopulateQueryParams = (populate, depth = 0) => {
   }
 
   if (_.isPlainObject(populate)) {
-    const transformedPopulate = {};
-    for (const key in populate) {
-      transformedPopulate[key] = convertNestedPopulate(populate[key]);
-    }
-
-    return transformedPopulate;
+    return convertPopulateObject(populate, schema);
   }
 
   throw new InvalidPopulateError();
 };
 
-const convertNestedPopulate = subPopulate => {
+const convertPopulateObject = (populate, schema) => {
+  if (!schema) {
+    return {};
+  }
+
+  const { attributes } = schema;
+
+  return Object.entries(populate).reduce((acc, [key, subPopulate]) => {
+    const attribute = attributes[key];
+
+    if (!attribute) {
+      return acc;
+    }
+
+    // FIXME: This is a temporary solution for dynamic zones that should be
+    // fixed when we'll implement a more accurate way to query them
+    if (attribute.type === 'dynamiczone') {
+      const generatedFakeDynamicZoneSchema = {
+        uid: `${schema.uid}.${key}`,
+        attributes: attribute.components
+          .sort()
+          .map(uid => strapi.getModel(uid).attributes)
+          .reduce((acc, componentAttributes) => ({ ...acc, ...componentAttributes }), {}),
+      };
+
+      return {
+        ...acc,
+        [key]: convertNestedPopulate(subPopulate, generatedFakeDynamicZoneSchema),
+      };
+    }
+
+    // NOTE: Retrieve the target schema UID.
+    // Only handles basic relations, medias and component since it's not possible
+    // to populate with options for a dynamic zone or a polymorphic relation
+    let targetSchemaUID;
+
+    if (attribute.type === 'relation') {
+      targetSchemaUID = attribute.target;
+    } else if (attribute.type === 'component') {
+      targetSchemaUID = attribute.component;
+    } else if (attribute.type === 'media') {
+      targetSchemaUID = 'plugin::upload.file';
+    } else {
+      return acc;
+    }
+
+    const targetSchema = strapi.getModel(targetSchemaUID);
+
+    if (!targetSchema) {
+      return acc;
+    }
+
+    return {
+      ...acc,
+      [key]: convertNestedPopulate(subPopulate, targetSchema),
+    };
+  }, {});
+};
+
+const convertNestedPopulate = (subPopulate, schema) => {
   if (subPopulate === '*') {
     return true;
   }
@@ -181,7 +235,7 @@ const convertNestedPopulate = subPopulate => {
   }
 
   if (filters) {
-    query.where = convertFiltersQueryParams(filters);
+    query.where = convertFiltersQueryParams(filters, schema);
   }
 
   if (fields) {
@@ -189,7 +243,7 @@ const convertNestedPopulate = subPopulate => {
   }
 
   if (populate) {
-    query.populate = convertPopulateQueryParams(populate);
+    query.populate = convertPopulateQueryParams(populate, schema);
   }
 
   if (count) {
@@ -218,7 +272,90 @@ const convertFieldsQueryParams = (fields, depth = 0) => {
   throw new Error('Invalid fields parameter. Expected a string or an array of strings');
 };
 
-const convertFiltersQueryParams = filters => filters;
+const convertFiltersQueryParams = (filters, schema) => {
+  // Filters need to be either an array or an object
+  // Here we're only checking for 'object' type since typeof [] => object and typeof {} => object
+  if (!isObject(filters)) {
+    throw new Error('The filters parameter must be an object or an array');
+  }
+
+  // Don't mutate the original object
+  const filtersCopy = cloneDeep(filters);
+
+  return convertAndSanitizeFilters(filtersCopy, schema);
+};
+
+const convertAndSanitizeFilters = (filters, schema) => {
+  if (!isObject(filters)) {
+    return filters;
+  }
+
+  if (Array.isArray(filters)) {
+    return (
+      filters
+        // Sanitize each filter
+        .map(filter => convertAndSanitizeFilters(filter, schema))
+        // Filter out empty filters
+        .filter(filter => !isObject(filter) || !isEmpty(filter))
+    );
+  }
+
+  const removeOperator = operator => delete filters[operator];
+
+  // Here, `key` can either be an operator or an attribute name
+  for (const [key, value] of Object.entries(filters)) {
+    const attribute = get(key, schema.attributes);
+
+    // Handle attributes
+    if (attribute) {
+      // Relations
+      if (attribute.type === 'relation') {
+        filters[key] = convertAndSanitizeFilters(value, strapi.getModel(attribute.target));
+      }
+
+      // Components
+      else if (attribute.type === 'component') {
+        filters[key] = convertAndSanitizeFilters(value, strapi.getModel(attribute.component));
+      }
+
+      // Media
+      else if (attribute.type === 'media') {
+        filters[key] = convertAndSanitizeFilters(value, strapi.getModel('plugin::upload.file'));
+      }
+
+      // Dynamic Zones
+      else if (attribute.type === 'dynamiczone') {
+        removeOperator(key);
+      }
+
+      // Scalar attributes
+      else {
+        // Always remove password attributes from filters object
+        if (attribute.type === 'password') {
+          removeOperator(key);
+        } else {
+          filters[key] = convertAndSanitizeFilters(value, schema);
+        }
+      }
+    }
+
+    // Handle operators
+    else {
+      if (['$null', '$notNull'].includes(key)) {
+        filters[key] = parseType({ type: 'boolean', value: filters[key], forceCast: true });
+      } else if (isObject(value)) {
+        filters[key] = convertAndSanitizeFilters(value, schema);
+      }
+    }
+
+    // Remove empty objects & arrays
+    if (isObject(filters[key]) && isEmpty(filters[key])) {
+      removeOperator(key);
+    }
+  }
+
+  return filters;
+};
 
 const convertPublicationStateParams = (type, params = {}, query = {}) => {
   if (!type) {

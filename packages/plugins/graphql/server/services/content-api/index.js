@@ -1,10 +1,6 @@
 'use strict';
 
-const {
-  mergeSchemas,
-  makeExecutableSchema,
-  addResolversToSchema,
-} = require('@graphql-tools/schema');
+const { mergeSchemas, addResolversToSchema } = require('@graphql-tools/schema');
 const { pruneSchema } = require('@graphql-tools/utils');
 const { makeSchema } = require('nexus');
 const { prop, startsWith } = require('lodash/fp');
@@ -54,11 +50,8 @@ module.exports = ({ strapi }) => {
       shadowCRUD();
     }
 
-    // Build a collection of schema based on the type registry (& temporary generated extension)
-    const schemas = buildSchemas({ registry });
-
-    // Merge every created schema into a single one
-    const mergedSchema = mergeSchemas({ schemas });
+    // Build a merged schema from both Nexus types & SDL type definitions
+    const schema = buildMergedSchema({ registry });
 
     // Generate the extension configuration for the content API.
     // This extension instance needs to be generated after the Nexus schema's
@@ -67,42 +60,58 @@ module.exports = ({ strapi }) => {
     const extension = extensionService.generate({ typeRegistry: registry });
 
     // Add the extension's resolvers to the final schema
-    const schema = addResolversToSchema(mergedSchema, extension.resolvers);
+    const schemaWithResolvers = addResolversToSchema(schema, extension.resolvers);
+
+    // Create a configuration object for the artifacts generation
+    const outputs = {
+      schema: config('artifacts.schema', false),
+      typegen: config('artifacts.typegen', false),
+    };
+
+    const currentEnv = strapi.config.get('environment');
+
+    const nexusSchema = makeSchema({
+      // Build the schema from the merged GraphQL schema.
+      // Since we're passing the schema to the mergeSchema property, it'll transform our SDL type definitions
+      // into Nexus type definition, thus allowing them to be handled by  Nexus plugins & other processing
+      mergeSchema: { schema: schemaWithResolvers },
+
+      // Apply user-defined plugins
+      plugins: extension.plugins,
+
+      // Whether to generate artifacts (GraphQL schema, TS types definitions) or not.
+      // By default, we generate artifacts only on development environment
+      shouldGenerateArtifacts: config('generateArtifacts', currentEnv === 'development'),
+
+      // Artifacts generation configuration
+      outputs,
+    });
 
     // Wrap resolvers if needed (auth, middlewares, policies...) as configured in the extension
-    const wrappedSchema = wrapResolvers({ schema, strapi, extension });
+    const wrappedNexusSchema = wrapResolvers({ schema: nexusSchema, strapi, extension });
 
     // Prune schema, remove unused types
     // eg: removes registered subscriptions if they're disabled in the config)
-    const prunedSchema = pruneSchema(wrappedSchema);
+    const prunedNexusSchema = pruneSchema(wrappedNexusSchema);
 
-    return prunedSchema;
+    return prunedNexusSchema;
   };
 
-  const buildSchemas = ({ registry }) => {
+  const buildMergedSchema = ({ registry }) => {
     // Here we extract types, plugins & typeDefs from a temporary generated
     // extension since there won't be any addition allowed after schemas generation
-    const { types, plugins, typeDefs = [] } = extensionService.generate({ typeRegistry: registry });
+    const { types, typeDefs = [] } = extensionService.generate({ typeRegistry: registry });
 
-    // Create a new Nexus schema (shadow CRUD) & add it to the schemas collection
-    const nexusSchema = makeSchema({
-      types: [
-        // Add the auto-generated Nexus types (shadow CRUD)
-        registry.definitions,
-        // Add every Nexus type registered using the extension service
-        types,
-      ],
+    // Nexus schema built with user-defined & shadow CRUD auto generated Nexus types
+    const nexusSchema = makeSchema({ types: [registry.definitions, types] });
 
-      plugins: [
-        // Add every plugin registered using the extension service
-        ...plugins,
-      ],
+    // Merge type definitions with the Nexus schema
+    return mergeSchemas({
+      typeDefs,
+      // Give access to the shadowCRUD & nexus based types
+      // Note: This is necessary so that types defined in SDL can reference types defined with Nexus
+      schemas: [nexusSchema],
     });
-
-    // Build schemas based on SDL type definitions (defined in the extension)
-    const sdlSchemas = typeDefs.map(sdl => makeExecutableSchema({ typeDefs: sdl }));
-
-    return [nexusSchema, ...sdlSchemas];
   };
 
   const shadowCRUD = () => {

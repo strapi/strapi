@@ -57,7 +57,7 @@ const parseDateTimeOrTimestamp = value => {
  * @param {string} options.type - type of the atribute
  * @param {*} options.value - value tu cast
  */
-const parseType = ({ type, value }) => {
+const parseType = ({ type, value, forceCast = false }) => {
   switch (type) {
     case 'boolean': {
       if (typeof value === 'boolean') return value;
@@ -68,6 +68,10 @@ const parseType = ({ type, value }) => {
 
       if (['false', 'f', '0', 0].includes(value)) {
         return false;
+      }
+
+      if (forceCast) {
+        return Boolean(value);
       }
 
       throw new Error('Invalid boolean input. Expected "t","1","true","false","0","f"');
