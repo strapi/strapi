@@ -160,10 +160,6 @@ describe('Marketplace coming soon', () => {
         margin-bottom: 0;
       }
 
-      .c11 > * + * {
-        margin-top: 0px;
-      }
-
       .c23 > * {
         margin-left: 0;
         margin-right: 0;
@@ -308,6 +304,11 @@ describe('Marketplace coming soon', () => {
       .c25:active {
         border: 1px solid #4945ff;
         background: #4945ff;
+      }
+
+      .c25 svg > g,
+      .c25 svg path {
+        fill: #ffffff;
       }
 
       .c30 {
@@ -509,6 +510,7 @@ describe('Marketplace coming soon', () => {
                 </div>
                 <div
                   class="c21 c22 c23"
+                  spacing="2"
                 >
                   <a
                     aria-disabled="false"

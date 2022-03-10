@@ -70,9 +70,9 @@ export const PendingAssetStep = ({
       </ModalHeader>
 
       <ModalBody>
-        <Stack size={7}>
+        <Stack spacing={7}>
           <Flex justifyContent="space-between">
-            <Stack size={0}>
+            <Stack spacing={0}>
               <Typography variant="pi" fontWeight="bold" textColor="neutral800">
                 {formatMessage(
                   {

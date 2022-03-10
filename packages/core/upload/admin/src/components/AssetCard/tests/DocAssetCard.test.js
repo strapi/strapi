@@ -412,6 +412,7 @@ describe('DocAssetCard', () => {
           >
             <div
               class="c3 c4 c5 c6"
+              spacing="2"
             >
               <input
                 aria-labelledby="card-1-title"
@@ -421,6 +422,7 @@ describe('DocAssetCard', () => {
             </div>
             <div
               class="c8 c4 c5 c9"
+              spacing="2"
             >
               <span>
                 <button

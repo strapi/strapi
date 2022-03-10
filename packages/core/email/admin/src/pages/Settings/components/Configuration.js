@@ -14,8 +14,8 @@ const Configuration = ({ config }) => {
   const { formatMessage } = useIntl();
 
   return (
-    <Stack size={4}>
-      <Stack size={1}>
+    <Stack spacing={4}>
+      <Stack spacing={1}>
         <Typography variant="delta" as="h2">
           {formatMessage({
             id: getTrad('Settings.email.plugin.title.config'),

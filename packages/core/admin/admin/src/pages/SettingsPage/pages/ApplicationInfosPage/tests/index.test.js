@@ -306,6 +306,7 @@ describe('Application page', () => {
               >
                 <div
                   class="c11"
+                  spacing="5"
                 >
                   <h3
                     class="c12"

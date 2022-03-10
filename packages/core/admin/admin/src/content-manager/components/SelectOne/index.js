@@ -28,7 +28,7 @@ function SelectOne({
   const { formatMessage } = useIntl();
 
   return (
-    <Stack size={1}>
+    <Stack spacing={1}>
       <Select
         components={{
           ...components,

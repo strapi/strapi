@@ -746,6 +746,11 @@ describe('Admin | containers | ListView', () => {
         background: #4945ff;
       }
 
+      .c9 svg > g,
+      .c9 svg path {
+        fill: #ffffff;
+      }
+
       @media (prefers-reduced-motion:reduce) {
         .c39:before {
           -webkit-transition: none;
@@ -1034,6 +1039,7 @@ describe('Admin | containers | ListView', () => {
                               aria-hidden="true"
                               class="c41 c42"
                               role="button"
+                              spacing="1"
                             >
                               <span>
                                 <button
@@ -1175,6 +1181,7 @@ describe('Admin | containers | ListView', () => {
                               aria-hidden="true"
                               class="c41 c42"
                               role="button"
+                              spacing="1"
                             >
                               <span>
                                 <button

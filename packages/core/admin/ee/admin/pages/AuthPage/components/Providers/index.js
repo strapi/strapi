@@ -55,7 +55,7 @@ const Providers = () => {
               </Typography>
             </Box>
           </Column>
-          <Stack size={7}>
+          <Stack spacing={7}>
             {isLoading ? (
               <Flex justifyContent="center">
                 <Loader>{formatMessage({ id: 'Auth.login.sso.loading' })}</Loader>
