@@ -213,6 +213,11 @@ describe('ADMIN | Pages | Profile page', () => {
         background: #4945ff;
       }
 
+      .c6 svg > g,
+      .c6 svg path {
+        fill: #ffffff;
+      }
+
       .c32 {
         border: none;
         background: transparent;
@@ -246,29 +251,6 @@ describe('ADMIN | Pages | Profile page', () => {
 
       .c40[aria-disabled='true'] {
         cursor: not-allowed;
-      }
-
-      .c37 {
-        font-weight: 600;
-        color: #32324d;
-        font-size: 0.75rem;
-        line-height: 1.33;
-      }
-
-      .c44 {
-        color: #32324d;
-        display: block;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        font-size: 0.875rem;
-        line-height: 1.43;
-      }
-
-      .c48 {
-        color: #666687;
-        font-size: 0.75rem;
-        line-height: 1.33;
       }
 
       .c43 {
@@ -310,6 +292,29 @@ describe('ADMIN | Pages | Profile page', () => {
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
+      }
+
+      .c37 {
+        font-weight: 600;
+        color: #32324d;
+        font-size: 0.75rem;
+        line-height: 1.33;
+      }
+
+      .c44 {
+        color: #32324d;
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: 0.875rem;
+        line-height: 1.43;
+      }
+
+      .c48 {
+        color: #666687;
+        font-size: 0.75rem;
+        line-height: 1.33;
       }
 
       .c36 {
@@ -442,29 +447,12 @@ describe('ADMIN | Pages | Profile page', () => {
         margin-top: 4px;
       }
 
-      .c23 {
-        font-weight: 600;
-        color: #32324d;
-        font-size: 0.75rem;
-        line-height: 1.33;
-      }
-
-      .c24 {
-        color: #d02b20;
-        font-size: 0.875rem;
-        line-height: 1.43;
-      }
-
-      .c25 {
-        line-height: 0;
-      }
-
       .c31 {
         padding-right: 12px;
         padding-left: 8px;
       }
 
-      .c22 {
+      .c23 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -496,6 +484,23 @@ describe('ADMIN | Pages | Profile page', () => {
         align-items: center;
       }
 
+      .c22 {
+        font-weight: 600;
+        color: #32324d;
+        font-size: 0.75rem;
+        line-height: 1.33;
+      }
+
+      .c24 {
+        color: #d02b20;
+        font-size: 0.875rem;
+        line-height: 1.43;
+      }
+
+      .c25 {
+        line-height: 0;
+      }
+
       .c28 {
         border: none;
         border-radius: 4px;
@@ -506,6 +511,7 @@ describe('ADMIN | Pages | Profile page', () => {
         font-size: 0.875rem;
         display: block;
         width: 100%;
+        background: inherit;
       }
 
       .c28::-webkit-input-placeholder {
@@ -529,7 +535,6 @@ describe('ADMIN | Pages | Profile page', () => {
       }
 
       .c28[aria-disabled='true'] {
-        background: inherit;
         color: inherit;
       }
 
@@ -548,6 +553,7 @@ describe('ADMIN | Pages | Profile page', () => {
         font-size: 0.875rem;
         display: block;
         width: 100%;
+        background: inherit;
       }
 
       .c29::-webkit-input-placeholder {
@@ -571,7 +577,6 @@ describe('ADMIN | Pages | Profile page', () => {
       }
 
       .c29[aria-disabled='true'] {
-        background: inherit;
         color: inherit;
       }
 
@@ -800,12 +805,14 @@ describe('ADMIN | Pages | Profile page', () => {
             >
               <div
                 class="c15"
+                spacing="6"
               >
                 <div
                   class="c16"
                 >
                   <div
                     class="c17"
+                    spacing="4"
                   >
                     <h2
                       class="c18"
@@ -825,14 +832,15 @@ describe('ADMIN | Pages | Profile page', () => {
                             <div>
                               <div
                                 class="c21"
+                                spacing="1"
                               >
-                                <div
+                                <label
                                   class="c22"
+                                  for="firstname"
+                                  required=""
                                 >
-                                  <label
+                                  <div
                                     class="c23"
-                                    for="firstname"
-                                    required=""
                                   >
                                     First name
                                     <span
@@ -840,8 +848,8 @@ describe('ADMIN | Pages | Profile page', () => {
                                     >
                                       *
                                     </span>
-                                  </label>
-                                </div>
+                                  </div>
+                                </label>
                                 <div
                                   class="c26 c27"
                                 >
@@ -871,17 +879,18 @@ describe('ADMIN | Pages | Profile page', () => {
                             <div>
                               <div
                                 class="c21"
+                                spacing="1"
                               >
-                                <div
+                                <label
                                   class="c22"
+                                  for="lastname"
                                 >
-                                  <label
+                                  <div
                                     class="c23"
-                                    for="lastname"
                                   >
                                     Last name
-                                  </label>
-                                </div>
+                                  </div>
+                                </label>
                                 <div
                                   class="c26 c27"
                                 >
@@ -911,14 +920,15 @@ describe('ADMIN | Pages | Profile page', () => {
                             <div>
                               <div
                                 class="c21"
+                                spacing="1"
                               >
-                                <div
+                                <label
                                   class="c22"
+                                  for="email"
+                                  required=""
                                 >
-                                  <label
+                                  <div
                                     class="c23"
-                                    for="email"
-                                    required=""
                                   >
                                     Email
                                     <span
@@ -926,8 +936,8 @@ describe('ADMIN | Pages | Profile page', () => {
                                     >
                                       *
                                     </span>
-                                  </label>
-                                </div>
+                                  </div>
+                                </label>
                                 <div
                                   class="c26 c27"
                                 >
@@ -957,17 +967,18 @@ describe('ADMIN | Pages | Profile page', () => {
                             <div>
                               <div
                                 class="c21"
+                                spacing="1"
                               >
-                                <div
+                                <label
                                   class="c22"
+                                  for="username"
                                 >
-                                  <label
+                                  <div
                                     class="c23"
-                                    for="username"
                                   >
                                     Username
-                                  </label>
-                                </div>
+                                  </div>
+                                </label>
                                 <div
                                   class="c26 c27"
                                 >
@@ -995,6 +1006,7 @@ describe('ADMIN | Pages | Profile page', () => {
                 >
                   <div
                     class="c17"
+                    spacing="4"
                   >
                     <h2
                       class="c18"
@@ -1014,17 +1026,18 @@ describe('ADMIN | Pages | Profile page', () => {
                             <div>
                               <div
                                 class="c21"
+                                spacing="1"
                               >
-                                <div
+                                <label
                                   class="c22"
+                                  for="textinput-1"
                                 >
-                                  <label
+                                  <div
                                     class="c23"
-                                    for="textinput-1"
                                   >
                                     Current Password
-                                  </label>
-                                </div>
+                                  </div>
+                                </label>
                                 <div
                                   class="c26 c27"
                                 >
@@ -1079,17 +1092,18 @@ describe('ADMIN | Pages | Profile page', () => {
                             <div>
                               <div
                                 class="c21"
+                                spacing="1"
                               >
-                                <div
+                                <label
                                   class="c22"
+                                  for="textinput-2"
                                 >
-                                  <label
+                                  <div
                                     class="c23"
-                                    for="textinput-2"
                                   >
                                     Password
-                                  </label>
-                                </div>
+                                  </div>
+                                </label>
                                 <div
                                   class="c26 c27"
                                 >
@@ -1140,17 +1154,18 @@ describe('ADMIN | Pages | Profile page', () => {
                             <div>
                               <div
                                 class="c21"
+                                spacing="1"
                               >
-                                <div
+                                <label
                                   class="c22"
+                                  for="textinput-3"
                                 >
-                                  <label
+                                  <div
                                     class="c23"
-                                    for="textinput-3"
                                   >
                                     Password confirmation
-                                  </label>
-                                </div>
+                                  </div>
+                                </label>
                                 <div
                                   class="c26 c27"
                                 >
@@ -1199,9 +1214,11 @@ describe('ADMIN | Pages | Profile page', () => {
                 >
                   <div
                     class="c17"
+                    spacing="4"
                   >
                     <div
                       class="c34"
+                      spacing="1"
                     >
                       <h2
                         class="c18"
@@ -1234,13 +1251,18 @@ describe('ADMIN | Pages | Profile page', () => {
                           <div>
                             <div
                               class="c36"
+                              spacing="1"
                             >
                               <span
                                 class="c37"
                                 for="select-1"
                                 id="select-1-label"
                               >
-                                Interface language
+                                <div
+                                  class="c38"
+                                >
+                                  Interface language
+                                </div>
                               </span>
                               <div
                                 class="c38 c39"
@@ -1279,6 +1301,7 @@ describe('ADMIN | Pages | Profile page', () => {
                                       aria-disabled="false"
                                       aria-label="Clear the interface language selected"
                                       class="c45"
+                                      type="button"
                                     >
                                       <svg
                                         fill="none"

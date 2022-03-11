@@ -83,7 +83,7 @@ export { default as pxToRem } from './utils/pxToRem';
 export { default as to } from './utils/await-to-js';
 export { default as setHexOpacity } from './utils/setHexOpacity';
 export { default as translatedErrors } from './utils/translatedErrors';
-export { default as formatComponentData } from './content-manager/utils/formatComponentData';
+export { default as formatContentTypeData } from './content-manager/utils/formatContentTypeData';
 export { findMatchingPermissions } from './utils/hasPermissions';
 export { default as contentManagementUtilRemoveFieldsFromData } from './content-manager/utils/contentManagementUtilRemoveFieldsFromData';
 export { default as getFileExtension } from './utils/getFileExtension/getFileExtension';

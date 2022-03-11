@@ -85,7 +85,7 @@ const DraftAndPublishToggle = ({
       {showWarning && (
         <Dialog onClose={handleToggle} title="Confirmation" isOpen={showWarning}>
           <DialogBody icon={<ExclamationMarkCircle />}>
-            <Stack size={2}>
+            <Stack spacing={2}>
               <Flex justifyContent="center">
                 <TypographyTextAlign id="confirm-description">
                   {formatMessage({

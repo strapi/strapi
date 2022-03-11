@@ -587,6 +587,7 @@ describe('RemoveAssetDialog', () => {
                     </div>
                     <div
                       class="c11"
+                      spacing="2"
                     >
                       <div
                         class="c12"
@@ -605,6 +606,7 @@ describe('RemoveAssetDialog', () => {
                   >
                     <div
                       class="c16 c17"
+                      spacing="2"
                     >
                       <button
                         aria-disabled="false"

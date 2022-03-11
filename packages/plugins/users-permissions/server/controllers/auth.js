@@ -137,7 +137,10 @@ module.exports = {
         throw new ValidationError('Incorrect code provided');
       }
 
-      await getService('user').edit(user.id, { resetPasswordToken: null, password: params.password });
+      await getService('user').edit(user.id, {
+        resetPasswordToken: null,
+        password: params.password,
+      });
       // Update the user.
       ctx.send({
         jwt: getService('jwt').issue({ id: user.id }),
@@ -338,7 +341,7 @@ module.exports = {
         params.confirmed = true;
       }
 
-    const user = await getService('user').add(params);
+      const user = await getService('user').add(params);
 
       const sanitizedUser = await sanitizeUser(user, ctx);
 
@@ -418,6 +421,13 @@ module.exports = {
     const user = await strapi.query('plugin::users-permissions.user').findOne({
       where: { email: params.email },
     });
+
+    if (!user) {
+      return ctx.send({
+        email: params.email,
+        sent: true,
+      });
+    }
 
     if (user.confirmed) {
       throw new ApplicationError('already.confirmed');

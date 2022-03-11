@@ -291,19 +291,26 @@ describe('Marketplace page', () => {
         fill: #328048;
       }
 
-      .c22 {
-        font-weight: 600;
-        color: #32324d;
-        font-size: 0.75rem;
-        line-height: 1.33;
-      }
-
-      .c26 {
+      .c27 {
         padding-right: 8px;
         padding-left: 12px;
       }
 
-      .c24 {
+      .c23 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c25 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -321,18 +328,11 @@ describe('Marketplace page', () => {
         align-items: center;
       }
 
-      .c28 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
+      .c22 {
+        font-weight: 600;
+        color: #32324d;
+        font-size: 0.75rem;
+        line-height: 1.33;
       }
 
       .c30 {
@@ -345,6 +345,7 @@ describe('Marketplace page', () => {
         font-size: 0.875rem;
         display: block;
         width: 100%;
+        background: inherit;
       }
 
       .c30::-webkit-input-placeholder {
@@ -368,7 +369,6 @@ describe('Marketplace page', () => {
       }
 
       .c30[aria-disabled='true'] {
-        background: inherit;
         color: inherit;
       }
 
@@ -377,7 +377,7 @@ describe('Marketplace page', () => {
         box-shadow: none;
       }
 
-      .c25 {
+      .c26 {
         border: 1px solid #dcdce4;
         border-radius: 4px;
         background: #ffffff;
@@ -390,7 +390,7 @@ describe('Marketplace page', () => {
         transition-duration: 0.2s;
       }
 
-      .c25:focus-within {
+      .c26:focus-within {
         border: 1px solid #4945ff;
         box-shadow: #4945ff 0px 0px 0px 2px;
       }
@@ -426,15 +426,15 @@ describe('Marketplace page', () => {
         transition-duration: 0.2s;
       }
 
-      .c20:focus-within .c27 svg path {
+      .c20:focus-within .c28 svg path {
         fill: #4945ff;
       }
 
-      .c20 .c23 {
+      .c20 .c24 {
         border: 1px solid transparent;
       }
 
-      .c20 .c23:focus-within {
+      .c20 .c24:focus-within {
         border: 1px solid #4945ff;
         box-shadow: #4945ff 0px 0px 0px 2px;
       }
@@ -875,17 +875,21 @@ describe('Marketplace page', () => {
                             class="c22"
                             for="field-1"
                           >
-                            Search for a plugin
+                            <div
+                              class="c23"
+                            >
+                              Search for a plugin
+                            </div>
                           </label>
                         </div>
                         <div
-                          class="c23 c24 c25"
+                          class="c24 c25 c26"
                         >
                           <div
-                            class="c26"
+                            class="c27"
                           >
                             <div
-                              class="c27 c28 c29"
+                              class="c28 c23 c29"
                             >
                               <svg
                                 aria-hidden="true"
@@ -972,6 +976,7 @@ describe('Marketplace page', () => {
                       </div>
                       <div
                         class="c42 c43 c44"
+                        spacing="2"
                         style="align-self: flex-end;"
                       >
                         <a
@@ -1110,6 +1115,7 @@ describe('Marketplace page', () => {
                       </div>
                       <div
                         class="c42 c43 c44"
+                        spacing="2"
                         style="align-self: flex-end;"
                       >
                         <a
@@ -1225,6 +1231,7 @@ describe('Marketplace page', () => {
                       </div>
                       <div
                         class="c42 c43 c44"
+                        spacing="2"
                         style="align-self: flex-end;"
                       >
                         <a
@@ -1355,6 +1362,7 @@ describe('Marketplace page', () => {
                       </div>
                       <div
                         class="c42 c43 c44"
+                        spacing="2"
                         style="align-self: flex-end;"
                       >
                         <a
@@ -1460,6 +1468,7 @@ describe('Marketplace page', () => {
                       </div>
                       <div
                         class="c42 c43 c44"
+                        spacing="2"
                         style="align-self: flex-end;"
                       >
                         <a

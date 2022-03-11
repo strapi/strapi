@@ -31,7 +31,7 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
   position: fixed;
   z-index: 4;
   inset: 0;
-  background: rgb(220,220,228,0.8);
+  background: #32324d1F;
   padding: 0 40px;
   display: -webkit-box;
   display: -webkit-flex;
@@ -370,7 +370,7 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
   background: #4945ff;
 }
 
-.c32 .sc-dYPfWK {
+.c32 .sc-eJRTFu {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -423,6 +423,11 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
   background: #4945ff;
 }
 
+.c32 svg > g,
+.c32 svg path {
+  fill: #ffffff;
+}
+
 .c38 {
   -webkit-align-items: center;
   -webkit-box-align: center;
@@ -435,7 +440,7 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
   background: #ffffff;
 }
 
-.c38 .sc-dYPfWK {
+.c38 .sc-eJRTFu {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -845,7 +850,7 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   position: fixed;
   z-index: 4;
   inset: 0;
-  background: rgb(220,220,228,0.8);
+  background: #32324d1F;
   padding: 0 40px;
   display: -webkit-box;
   display: -webkit-flex;
@@ -1071,19 +1076,6 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   cursor: not-allowed;
 }
 
-.c22 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c25 {
-  color: #666687;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
 .c21 {
   display: -webkit-box;
   display: -webkit-flex;
@@ -1096,6 +1088,19 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
+}
+
+.c22 {
+  font-weight: 600;
+  color: #32324d;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c25 {
+  color: #666687;
+  font-size: 0.75rem;
+  line-height: 1.33;
 }
 
 .c23 {
@@ -1127,6 +1132,7 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   border: none;
   color: #32324d;
   resize: none;
+  background: inherit;
 }
 
 .c24::-webkit-input-placeholder {
@@ -1286,7 +1292,7 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   background: #4945ff;
 }
 
-.c33 .sc-dYPfWK {
+.c33 .sc-eJRTFu {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -1339,6 +1345,11 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   background: #4945ff;
 }
 
+.c33 svg > g,
+.c33 svg path {
+  fill: #ffffff;
+}
+
 .c30 {
   -webkit-align-items: center;
   -webkit-box-align: center;
@@ -1351,7 +1362,7 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   background: #ffffff;
 }
 
-.c30 .sc-dYPfWK {
+.c30 .sc-eJRTFu {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -1529,6 +1540,7 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
                       <div>
                         <div
                           class="c20"
+                          spacing="1"
                         >
                           <div
                             class="c21"
@@ -1537,7 +1549,11 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
                               class="c22"
                               for="textarea-1"
                             >
-                              URL
+                              <div
+                                class="c21"
+                              >
+                                URL
+                              </div>
                             </label>
                           </div>
                           <div

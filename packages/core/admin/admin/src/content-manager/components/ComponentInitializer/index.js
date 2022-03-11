@@ -39,7 +39,7 @@ const ComponentInitializer = ({ error, isReadOnly, onClick }) => {
         paddingBottom={9}
         type="button"
       >
-        <Stack size={2}>
+        <Stack spacing={2}>
           <Flex justifyContent="center" style={{ cursor: isReadOnly ? 'not-allowed' : 'inherit' }}>
             <IconWrapper>
               <PlusCircle />

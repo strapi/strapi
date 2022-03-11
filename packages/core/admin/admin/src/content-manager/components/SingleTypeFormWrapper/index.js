@@ -3,7 +3,7 @@ import { useHistory } from 'react-router-dom';
 import get from 'lodash/get';
 import {
   useTracking,
-  formatComponentData,
+  formatContentTypeData,
   useQueryParams,
   useNotification,
   useGuidedTour,
@@ -55,7 +55,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
       );
 
       // This is needed in order to add a unique id for the repeatable components, in order to make the reorder easier
-      return formatComponentData(cleaned, allLayoutData.contentType, allLayoutData.components);
+      return formatContentTypeData(cleaned, allLayoutData.contentType, allLayoutData.components);
     },
     [allLayoutData]
   );
@@ -73,7 +73,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
         allLayoutData.components
       );
 
-      acc[current] = formatComponentData(
+      acc[current] = formatContentTypeData(
         defaultComponentForm,
         allLayoutData.components[current],
         allLayoutData.components
@@ -86,7 +86,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
       allLayoutData.contentType.attributes,
       allLayoutData.components
     );
-    const contentTypeDataStructureFormatted = formatComponentData(
+    const contentTypeDataStructureFormatted = formatContentTypeData(
       contentTypeDataStructure,
       allLayoutData.contentType,
       allLayoutData.components

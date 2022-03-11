@@ -193,7 +193,7 @@ const DraggableCard = ({
           onClick={handleClickEditRow}
           isDragging={isDragging}
         >
-          <Stack horizontal size={3}>
+          <Stack horizontal spacing={3}>
             <DragButton
               as="span"
               aria-label={formatMessage(

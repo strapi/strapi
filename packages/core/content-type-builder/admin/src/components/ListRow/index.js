@@ -92,7 +92,7 @@ function ListRow({
     >
       <td style={{ position: 'relative' }}>
         {loopNumber !== 0 && <Curve color={isFromDynamicZone ? 'primary200' : 'neutral150'} />}
-        <Stack paddingLeft={2} size={4} horizontal>
+        <Stack paddingLeft={2} spacing={4} horizontal>
           <AttributeIcon key={src} type={src} />
           <Typography fontWeight="bold">{name}</Typography>
         </Stack>
@@ -136,7 +136,7 @@ function ListRow({
         {isInDevelopmentMode ? (
           <Flex justifyContent="flex-end" {...stopPropagation}>
             {configurable ? (
-              <Stack horizontal size={1}>
+              <Stack horizontal spacing={1}>
                 {!isMorph && (
                   <IconButton
                     onClick={handleClick}

@@ -174,7 +174,7 @@ const ApiTokenCreateView = () => {
                 }
               />
               <ContentLayout>
-                <Stack size={6}>
+                <Stack spacing={6}>
                   {Boolean(apiToken?.name) && <HeaderContentBox apiToken={apiToken.accessKey} />}
                   <Box
                     background="neutral0"
@@ -185,7 +185,7 @@ const ApiTokenCreateView = () => {
                     paddingLeft={7}
                     paddingRight={7}
                   >
-                    <Stack size={4}>
+                    <Stack spacing={4}>
                       <Typography variant="delta" as="h2">
                         {formatMessage({
                           id: 'Settings.apiTokens.details',

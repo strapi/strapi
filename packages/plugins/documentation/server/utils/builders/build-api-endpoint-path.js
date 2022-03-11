@@ -149,6 +149,7 @@ module.exports = api => {
   }
 
   // An api could have multiple contentTypes
+  let paths = {};
   for (const contentTypeName of api.ctNames) {
     // Get the attributes found on the api's contentType
     const uid = `${api.getter}::${api.name}.${contentTypeName}`;
@@ -169,6 +170,11 @@ module.exports = api => {
       tag,
     };
 
-    return getPaths(apiInfo);
+    paths = {
+      ...paths,
+      ...getPaths(apiInfo).paths,
+    };
   }
+
+  return { paths };
 };
