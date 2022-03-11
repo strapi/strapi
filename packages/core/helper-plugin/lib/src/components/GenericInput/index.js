@@ -113,6 +113,7 @@ const GenericInput = ({
           disabled={disabled}
           hint={hint}
           label={label}
+          error={errorMessage}
           labelAction={labelAction}
           name={name}
           offLabel={formatMessage({
