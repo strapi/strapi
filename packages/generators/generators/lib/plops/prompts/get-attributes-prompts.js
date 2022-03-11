@@ -1,6 +1,6 @@
 'use strict';
 
-const validateInput = require('../utils/validate-input');
+const validateInputForAttribute = require('../utils/validate-input');
 
 const DEFAULT_TYPES = [
   // advanced types
@@ -50,7 +50,7 @@ module.exports = async inquirer => {
         type: 'input',
         name: 'attributeName',
         message: 'Name of attribute',
-        validate: input => validateInput(input, true),
+        validate: input => validateInputForAttribute(input),
       },
       {
         type: 'list',
