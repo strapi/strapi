@@ -55,9 +55,7 @@ const getDeepPopulate = (uid, populate, depth = 0) => {
     const attribute = attributes[attributeName];
 
     if (attribute.type === 'relation') {
-      populateAcc[attributeName] = attribute.target
-        ? { populate: getDeepPopulate(attribute.target, null, depth + 1) }
-        : true;
+      populateAcc[attributeName] = true; // Only populate first level of relations
     }
 
     if (attribute.type === 'component') {

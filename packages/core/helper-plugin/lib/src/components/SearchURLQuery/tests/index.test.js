@@ -222,19 +222,26 @@ describe('<SearchURLQuery />', () => {
         width: 1px;
       }
 
-      .c2 {
-        font-weight: 600;
-        color: #32324d;
-        font-size: 0.75rem;
-        line-height: 1.33;
-      }
-
-      .c6 {
+      .c7 {
         padding-right: 8px;
         padding-left: 12px;
       }
 
-      .c4 {
+      .c3 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c5 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -252,18 +259,11 @@ describe('<SearchURLQuery />', () => {
         align-items: center;
       }
 
-      .c8 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
+      .c2 {
+        font-weight: 600;
+        color: #32324d;
+        font-size: 0.75rem;
+        line-height: 1.33;
       }
 
       .c10 {
@@ -276,6 +276,7 @@ describe('<SearchURLQuery />', () => {
         font-size: 0.875rem;
         display: block;
         width: 100%;
+        background: inherit;
       }
 
       .c10::-webkit-input-placeholder {
@@ -299,7 +300,6 @@ describe('<SearchURLQuery />', () => {
       }
 
       .c10[aria-disabled='true'] {
-        background: inherit;
         color: inherit;
       }
 
@@ -308,7 +308,7 @@ describe('<SearchURLQuery />', () => {
         box-shadow: none;
       }
 
-      .c5 {
+      .c6 {
         border: 1px solid #dcdce4;
         border-radius: 4px;
         background: #ffffff;
@@ -321,7 +321,7 @@ describe('<SearchURLQuery />', () => {
         transition-duration: 0.2s;
       }
 
-      .c5:focus-within {
+      .c6:focus-within {
         border: 1px solid #4945ff;
         box-shadow: #4945ff 0px 0px 0px 2px;
       }
@@ -357,15 +357,15 @@ describe('<SearchURLQuery />', () => {
         transition-duration: 0.2s;
       }
 
-      .c0:focus-within .c7 svg path {
+      .c0:focus-within .c8 svg path {
         fill: #4945ff;
       }
 
-      .c0 .c3 {
+      .c0 .c4 {
         border: 1px solid transparent;
       }
 
-      .c0 .c3:focus-within {
+      .c0 .c4:focus-within {
         border: 1px solid #4945ff;
         box-shadow: #4945ff 0px 0px 0px 2px;
       }
@@ -386,17 +386,21 @@ describe('<SearchURLQuery />', () => {
                     class="c2"
                     for="field-1"
                   >
-                    Search label
+                    <div
+                      class="c3"
+                    >
+                      Search label
+                    </div>
                   </label>
                 </div>
                 <div
-                  class="c3 c4 c5"
+                  class="c4 c5 c6"
                 >
                   <div
-                    class="c6"
+                    class="c7"
                   >
                     <div
-                      class="c7 c8 c9"
+                      class="c8 c3 c9"
                     >
                       <svg
                         aria-hidden="true"

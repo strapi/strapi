@@ -17,7 +17,7 @@ const pickSelectionParams = pick(['fields', 'populate']);
 
 const transformParamsToQuery = (uid, params) => {
   // NOTE: can be a CT, a Compo or nothing in the case of polymorphism (DZ & morph relations)
-  const type = strapi.getModel(uid);
+  const schema = strapi.getModel(uid);
 
   const query = {};
 
@@ -32,7 +32,7 @@ const transformParamsToQuery = (uid, params) => {
   }
 
   if (!isNil(filters)) {
-    query.where = convertFiltersQueryParams(filters, type);
+    query.where = convertFiltersQueryParams(filters, schema);
   }
 
   if (!isNil(fields)) {
@@ -40,7 +40,7 @@ const transformParamsToQuery = (uid, params) => {
   }
 
   if (!isNil(populate)) {
-    query.populate = convertPopulateQueryParams(populate);
+    query.populate = convertPopulateQueryParams(populate, schema);
   }
 
   const isPagePagination = !isNil(page) || !isNil(pageSize);
@@ -84,7 +84,7 @@ const transformParamsToQuery = (uid, params) => {
     query.limit = convertLimitQueryParams(limit);
   }
 
-  convertPublicationStateParams(type, params, query);
+  convertPublicationStateParams(schema, params, query);
 
   return query;
 };

@@ -144,7 +144,7 @@ export const PreviewBox = ({
         )}
 
         <ActionRow paddingLeft={3} paddingRight={3} justifyContent="flex-end">
-          <Stack size={1} horizontal>
+          <Stack spacing={1} horizontal>
             {canUpdate && !asset.isLocal && (
               <IconButton
                 label={formatMessage({
