@@ -1,6 +1,5 @@
 'use strict';
 
-const _ = require('lodash');
 const jwt = require('jsonwebtoken');
 // Purest strategies.
 const purest = require('purest');
@@ -85,7 +84,7 @@ module.exports = async ({ provider, access_token, query, providers }) => {
             };
           }
           // Get the email with Github's user/emails API
-          github
+          return github
             .get('user/emails')
             .auth(access_token)
             .request()
@@ -236,8 +235,7 @@ module.exports = async ({ provider, access_token, query, providers }) => {
         .auth(access_token)
         .request()
         .then(({ body }) => {
-          const username =
-            body.username || body.nickname || body.name || body.email.split('@')[0];
+          const username = body.username || body.nickname || body.name || body.email.split('@')[0];
           const email = body.email || `${username.replace(/\s+/g, '.')}@strapi.io`;
 
           return {
