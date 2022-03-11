@@ -6,6 +6,7 @@ import { Typography } from '@strapi/design-system/Typography';
 import { Box } from '@strapi/design-system/Box';
 import { Badge } from '@strapi/design-system/Badge';
 import { SimpleMenu, MenuItem } from '@strapi/design-system/SimpleMenu';
+import { Loader } from '@strapi/design-system/Loader';
 import styled from 'styled-components';
 import { useNotifyAT } from '@strapi/design-system/LiveRegions';
 import { stopPropagation } from '@strapi/helper-plugin';
@@ -17,11 +18,6 @@ const SINGLE_RELATIONS = ['oneToOne', 'manyToOne'];
 
 const TypographyMaxWidth = styled(Typography)`
   max-width: 500px;
-`;
-
-const SimpleMenuAdapted = styled(SimpleMenu)`
-  margin-left: -6px;
-  padding-left: 4px;
 `;
 
 const fetchRelation = async (endPoint, notifyStatus) => {
@@ -65,10 +61,8 @@ const Relation = ({ fieldSchema, metadatas, queryInfos, name, rowId, value }) =>
     [fieldSchema.targetModel, rowId],
     () => fetchRelation(requestURL, notify),
     {
-      staleTime: 0,
-    },
-    {
       enabled: isOpen,
+      staleTime: 0,
     }
   );
 
@@ -85,14 +79,20 @@ const Relation = ({ fieldSchema, metadatas, queryInfos, name, rowId, value }) =>
 
   return (
     <Box {...stopPropagation}>
-      <SimpleMenuAdapted
+      <SimpleMenu
         label={Label}
+        size="S"
         onOpen={() => setIsOpen(true)}
         onClose={() => setIsOpen(false)}
       >
         {status !== 'success' && (
           <MenuItem aria-disabled>
-            <TypographyMaxWidth ellipsis>Loading ...</TypographyMaxWidth>
+            <Loader small>
+              {formatMessage({
+                id: getTrad('DynamicTable.relation-loading'),
+                defaultMessage: 'The relations are loading',
+              })}
+            </Loader>
           </MenuItem>
         )}
 
@@ -109,11 +109,17 @@ const Relation = ({ fieldSchema, metadatas, queryInfos, name, rowId, value }) =>
           ))}
 
         {status === 'success' && data?.pagination.total > 10 && (
-          <MenuItem aria-disabled>
-            <Typography>[...]</Typography>
+          <MenuItem
+            aria-disabled
+            aria-label={formatMessage({
+              id: getTrad('DynamicTable.relation-more'),
+              defaultMessage: 'This relation contains more entities than displayed',
+            })}
+          >
+            <Typography>...</Typography>
           </MenuItem>
         )}
-      </SimpleMenuAdapted>
+      </SimpleMenu>
     </Box>
   );
 };
