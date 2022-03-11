@@ -1,9 +1,10 @@
 {
   "compilerOptions": {
-    "lib": ["es2019", "es2020.promise", "es2020.bigint", "es2020.string"],
+    "lib": ["es2019", "es2020.promise", "es2020.bigint", "es2020.string", "DOM"],
     "module": "commonjs",
     "target": "es2019",
     "strict": false,
+    "jsx": "react",
     "noImplicitAny": false,
     "esModuleInterop": true,
     "skipLibCheck": true,
@@ -11,8 +12,10 @@
     "allowJs": true,
     "outDir": "dist",
     "rootDir": ".",
-    "noEmitOnError": true
+    "noEmitOnError": true,
+    "resolveJsonModule": true
   },
-
-  "exclude": ["node_modules/", "dist/", "src/admin", "src/plugins/**/admin"]
+  // TODO remove the include when we fix the pluginsPath
+  "include": ["src/plugins/**/*.json", "./"],
+  "exclude": ["node_modules/", "dist/", "src/admin", ".cache/", ".tmp/"]
 }

@@ -68,9 +68,11 @@
     "css-loader": "6.5.1",
     "date-fns": "2.22.1",
     "dotenv": "8.5.1",
+    "esbuild-loader": "2.18.0",
     "execa": "^1.0.0",
     "fast-deep-equal": "3.1.3",
     "font-awesome": "^4.7.0",
+    "fork-ts-checker-webpack-plugin": "7.2.1",
     "formik": "^2.2.6",
     "fs-extra": "10.0.0",
     "highlight.js": "^10.4.1",
@@ -138,8 +140,6 @@
   },
   "devDependencies": {
     "duplicate-dependencies-webpack-plugin": "0.2.0",
-    "ts-loader": "9.2.6",
-    "typescript": "4.6.2",
     "webpack-bundle-analyzer": "4.4.1"
   },
   "engines": {

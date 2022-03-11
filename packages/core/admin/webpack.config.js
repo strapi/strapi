@@ -3,6 +3,7 @@
 const path = require('path');
 const webpack = require('webpack');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const ForkTsCheckerPlugin = require('fork-ts-checker-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
 const WebpackBar = require('webpackbar');
@@ -12,12 +13,13 @@ const alias = require('./webpack.alias');
 const getClientEnvironment = require('./env');
 
 module.exports = ({
-  entry,
+  appDir,
   cacheDir,
-  pluginsPath,
   dest,
+  entry,
   env,
   optimize,
+  pluginsPath,
   options = {
     backend: 'http://localhost:1337',
     adminPath: '/admin/',
@@ -27,6 +29,7 @@ module.exports = ({
     eeRoot: './ee/admin',
     ceRoot: './admin/src',
   },
+  useTypeScript,
 }) => {
   const isProduction = env === 'production';
 
@@ -46,6 +49,35 @@ module.exports = ({
         new WebpackBar(),
       ]
     : [];
+
+  if (useTypeScript) {
+    const tsChecker = new ForkTsCheckerPlugin({
+      typescript: {
+        // FIXME
+        configFile: path.join(appDir, 'tsconfig-admin.json'),
+      },
+    });
+
+    webpackPlugins.push(tsChecker);
+  }
+
+  const rules = [];
+
+  // webpack is quite slow to compile so it is best not to use the ts loader when
+  // it is not needed in javascript apps.
+  // Users can still add it by using the custom webpack config.
+  if (useTypeScript) {
+    rules.push({
+      test: /\.tsx?$/,
+      loader: require.resolve('esbuild-loader'),
+      include: [cacheDir, ...pluginsPath],
+      exclude: /node_modules/,
+      options: {
+        loader: 'tsx',
+        target: 'es2015',
+      },
+    });
+  }
 
   return {
     mode: isProduction ? 'production' : 'development',
@@ -134,12 +166,7 @@ module.exports = ({
             },
           },
         },
-        {
-          test: /\.tsx?$/,
-          use: require.resolve('ts-loader'),
-          include: [cacheDir, ...pluginsPath],
-          exclude: /node_modules/,
-        },
+
         {
           test: /\.css$/i,
           use: ['style-loader', 'css-loader'],
@@ -171,6 +198,7 @@ module.exports = ({
             },
           },
         },
+        ...rules,
       ],
     },
     resolve: {

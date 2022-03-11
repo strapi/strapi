@@ -1,7 +1,8 @@
 {
   "compilerOptions": {
+    "lib": ["es2019", "es2020.promise", "es2020.bigint", "es2020.string", "DOM"],
     "noImplicitAny": false,
-    "module": "es6",
+    "module": "es2020",
     "target": "es5",
     "jsx": "react",
     "allowJs": true,

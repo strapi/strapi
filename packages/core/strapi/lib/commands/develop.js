@@ -17,19 +17,26 @@ const { buildTypeScript, buildAdmin } = require('./builders');
  *
  */
 module.exports = async function({ build, watchAdmin, polling, browser }) {
-  let dir = process.cwd();
+  const currentDirectory = process.cwd();
 
-  if (tsUtils.isTypeScriptProject(dir)) {
-    dir = path.join(dir, 'dist');
-  }
+  const isTSProject = await tsUtils.isTypeScriptProject(currentDirectory);
+  const buildDestDir = isTSProject ? path.join(currentDirectory, 'dist') : currentDirectory;
 
   try {
     if (cluster.isMaster || cluster.isPrimary) {
-      return primaryProcess({ dir, build, browser });
+      return primaryProcess({
+        buildDestDir,
+        currentDirectory,
+        dir: buildDestDir,
+        build,
+        browser,
+        isTSProject,
+        watchAdmin,
+      });
     }
 
     if (cluster.isWorker) {
-      return workerProcess({ dir, watchAdmin, polling });
+      return workerProcess({ dir: buildDestDir, watchAdmin, polling });
     }
   } catch (e) {
     console.error(e);
@@ -37,22 +44,33 @@ module.exports = async function({ build, watchAdmin, polling, browser }) {
   }
 };
 
-const primaryProcess = async ({ dir, build, watchAdmin, browser }) => {
-  const currentDirectory = process.cwd();
-
-  if (tsUtils.isTypeScriptProject(currentDirectory)) {
+const primaryProcess = async ({
+  buildDestDir,
+  currentDirectory,
+  build,
+  isTSProject,
+  watchAdmin,
+  browser,
+}) => {
+  if (isTSProject) {
     await buildTypeScript({ srcDir: currentDirectory, watch: true });
   }
 
-  const config = loadConfiguration(dir);
+  const config = loadConfiguration(buildDestDir);
   const serveAdminPanel = getOr(true, 'admin.serveAdminPanel')(config);
 
-  const buildExists = fs.existsSync(path.join(dir, 'build'));
+  const buildExists = fs.existsSync(path.join(buildDestDir, 'build'));
 
   // Don't run the build process if the admin is in watch mode
   if (build && !watchAdmin && serveAdminPanel && !buildExists) {
     try {
-      await buildAdmin({ dir, optimization: false, forceBuild: false });
+      await buildAdmin({
+        buildDestDir,
+        forceBuild: false,
+        isTSProject,
+        optimization: false,
+        srcDir: currentDirectory,
+      });
     } catch (err) {
       process.exit(1);
     }
@@ -138,7 +156,10 @@ function watchFileChanges({ dir, strapiInstance, watchIgnoreFiles, polling }) {
       /(^|[/\\])\../, // dot files
       /tmp/,
       '**/src/admin/**',
-      '**/src/plugins/**/admin/',
+      '**/src/plugins/**/admin/**',
+      // FIXME pass the plugin path to the strapiAdmin.build and strapiAdmin.watch in order to stop copying
+      // the FE files when using TS
+      '**/dist/src/plugins/test/admin/**',
       '**/documentation',
       '**/documentation/**',
       '**/node_modules',
