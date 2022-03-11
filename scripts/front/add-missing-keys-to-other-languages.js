@@ -59,7 +59,7 @@ const addMissingKeys = async lang => {
 
 if (process.argv.length < 3) {
   console.log(
-    'Please provide a language. For examples:\nnode scripts/front/add-missing-keys-to-other-languages.js vi'
+    'Please provide a language. For example:\nnode scripts/front/add-missing-keys-to-other-languages.js vi'
   );
   process.exit(1);
 }
