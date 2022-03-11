@@ -30,7 +30,7 @@ const addMissingKeyForSingleFile = async filePath => {
       return acc;
     }, {});
     await fs.writeJson(filePath, updatedFile, { spaces: 2 });
-    console.log('Added missing keys to ', filePath);
+    console.log('Added missing keys to', filePath);
     return Promise.resolve();
   } catch (err) {
     return Promise.reject(err);
@@ -59,7 +59,7 @@ const addMissingKeys = async lang => {
 
 if (process.argv.length < 3) {
   console.log(
-    'Please provide a language.For examples:\nnode scripts/front/add-missing-keys-to-other-languages.js vi'
+    'Please provide a language. For examples:\nnode scripts/front/add-missing-keys-to-other-languages.js vi'
   );
   process.exit(1);
 }
