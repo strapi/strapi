@@ -108,7 +108,7 @@ Read the `getstarted` application README [here](./examples/getstarted/README.md)
 **Start the administration panel server for development**
 
 ```bash
-cd strapi/packages/strapi-admin
+cd strapi/packages/core/admin
 yarn develop
 ```
 
