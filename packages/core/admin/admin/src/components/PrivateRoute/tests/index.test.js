@@ -54,7 +54,7 @@ describe('PrivateRoute', () => {
       expect(screen.getByText('Please login')).toBeInTheDocument();
     });
 
-    // Visit /settings/application-infos
+    // Visit /settings/application-infos (no search params)
     history.push('/settings/application-infos');
     // Should redirected to `/auth/login` and preserve the `/settings/application-infos` path
     await waitFor(() => {
@@ -62,6 +62,17 @@ describe('PrivateRoute', () => {
       // Should preserve url in the params
       expect(history.location.search).toBe(
         `?redirectTo=${encodeURIComponent('/settings/application-infos')}`
+      );
+      expect(screen.getByText('Please login')).toBeInTheDocument();
+    });
+
+    // Visit /settings/application-infos (have search params)
+    history.push('/settings/application-infos?hello=world');
+    await waitFor(() => {
+      expect(history.location.pathname).toBe('/auth/login');
+      // Should preserve search params
+      expect(history.location.search).toBe(
+        `?redirectTo=${encodeURIComponent('/settings/application-infos?hello=world')}`
       );
       expect(screen.getByText('Please login')).toBeInTheDocument();
     });
