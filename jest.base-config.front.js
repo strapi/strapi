@@ -59,4 +59,5 @@ module.exports = {
   transformIgnorePatterns: ['node_modules/(?!(react-dnd|dnd-core|react-dnd-html5-backend)/)'],
   testMatch: ['/**/tests/**/?(*.)+(spec|test).[jt]s?(x)'],
   testURL: 'http://localhost:1337/admin',
+  watchPlugins: ['jest-watch-typeahead/filename', 'jest-watch-typeahead/testname'],
 };
