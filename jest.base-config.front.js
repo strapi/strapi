@@ -59,5 +59,7 @@ module.exports = {
   transformIgnorePatterns: ['node_modules/(?!(react-dnd|dnd-core|react-dnd-html5-backend)/)'],
   testMatch: ['/**/tests/**/?(*.)+(spec|test).[jt]s?(x)'],
   testURL: 'http://localhost:1337/admin',
+  // Use `jest-watch-typeahead` version 0.6.5. Newest version 1.0.0 does not support jest@26
+  // Reference: https://github.com/jest-community/jest-watch-typeahead/releases/tag/v1.0.0
   watchPlugins: ['jest-watch-typeahead/filename', 'jest-watch-typeahead/testname'],
 };
