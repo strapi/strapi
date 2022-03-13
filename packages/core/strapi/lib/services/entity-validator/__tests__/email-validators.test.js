@@ -37,5 +37,18 @@ describe('Email validator', () => {
 
       expect(await validator('valid@email.com')).toBe('valid@email.com');
     });
+
+    test('it validates non-empty email required field', async () => {
+      const validator = strapiUtils.validateYupSchema(
+        validators.email(
+          {
+            attr: { type: 'string', required: true },
+          },
+          { isDraft: false }
+        )
+      );
+
+      expect(await validator('valid@email.com')).not.toBe('');
+    });
   });
 });
