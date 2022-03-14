@@ -1,9 +1,9 @@
 // Add missing keys to non-english languages from `en.json`.
 // This script eases the process of translating strapi to other languages.
 // Usage:
-//   node scripts/front/add-missing-keys-to-other-languages.js [language]
+//   node scripts/front/add-missing-keys-to-other-language.js [language]
 // Example:
-//   node scripts/front/add-missing-keys-to-other-languages.js vi
+//   node scripts/front/add-missing-keys-to-other-language.js vi
 'use strict';
 
 const { join, dirname } = require('path');
@@ -61,7 +61,7 @@ const addMissingKeys = async (lang) => {
 if (process.argv.length < 3) {
   console.warn(
     chalk.yellow(
-      'Please provide a language. For example:\nnode scripts/front/add-missing-keys-to-other-languages.js vi'
+      'Please provide a language. For example:\nnode scripts/front/add-missing-keys-to-other-language.js vi'
     )
   );
   process.exit(1);

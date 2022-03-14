@@ -1,11 +1,13 @@
 'use strict';
 
 const fs = require('fs-extra');
-const { addMissingKeyForSingleFile } = require('../add-missing-keys-to-other-languages');
+const { addMissingKeyForSingleFile } = require('../add-missing-keys-to-other-language');
 
 // Do not run this test in --watch mode.
 // Since `addMissingKeyForSingleFile` makes changes to the files (`en.json`, `vi.json`),
 // accidentally triggering this test to re-run infinite times (because of jest watch mode)
+// You can use run `yarn test:unit scripts/front/__tests__/add-missing-keys-to-other-language.test.js`
+// if you want to focus on this test.
 describe('addMissingKeyForSingleFile', () => {
   it('should add missing keys from en.json to translation file', async () => {
     const TARGET_TRANSLATION_FILE_PATH = 'scripts/front/__tests__/vi.json';
