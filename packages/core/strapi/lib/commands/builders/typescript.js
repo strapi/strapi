@@ -1,6 +1,6 @@
 'use strict';
 
-const tsUtils = require('../../utils/typescript');
+const tsUtils = require('@strapi/typescript-utils');
 
 module.exports = async ({ srcDir, watch = false }) => {
   const isTSProject = await tsUtils.isTypeScriptProject(srcDir);

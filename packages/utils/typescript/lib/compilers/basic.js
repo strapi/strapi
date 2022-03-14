@@ -2,8 +2,8 @@
 
 const ts = require('typescript');
 
-const reportDiagnostics = require('../report-diagnostics');
-const resolveConfigOptions = require('../resolve-config-options');
+const reportDiagnostics = require('../utils/report-diagnostics');
+const resolveConfigOptions = require('../utils/resolve-config-options');
 
 module.exports = {
   /**
