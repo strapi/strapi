@@ -19,6 +19,8 @@
     "@strapi/strapi": "4.1.7",
     "@strapi/utils": "4.1.7",
     "@strapi/typescript-utils": "4.1.7",
+    "@strapi/plugin-users-permissions": "4.1.7",
+    "@strapi/plugin-i18n": "4.1.7",
     "lodash": "4.17.21",
     "mysql": "2.18.1",
     "passport-google-oauth2": "0.2.0",
