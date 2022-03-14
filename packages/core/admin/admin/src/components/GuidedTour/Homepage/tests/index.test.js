@@ -492,11 +492,17 @@ describe('GuidedTour Homepage', () => {
         background: #4945ff;
       }
 
+      .c14 svg > g,
+      .c14 svg path {
+        fill: #ffffff;
+      }
+
       <div
         class="c0"
       >
         <div
           class="c1"
+          spacing="6"
         >
           <h2
             class="c2"

@@ -75,7 +75,7 @@ const Login = ({ onSubmit, schema, children }) => {
                 )}
               </Column>
 
-              <Stack size={6}>
+              <Stack spacing={6}>
                 <TextInput
                   error={
                     errors.email

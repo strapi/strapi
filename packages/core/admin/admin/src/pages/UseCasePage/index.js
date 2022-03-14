@@ -121,7 +121,7 @@ const UseCasePage = () => {
                 </TypographyCenter>
               </Box>
             </Flex>
-            <Stack size={6}>
+            <Stack spacing={6}>
               <Select
                 id="usecase"
                 data-testid="usecase"

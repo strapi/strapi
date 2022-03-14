@@ -147,6 +147,8 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
 
   const registerRequest = async (body, requestURL, { setSubmitting, setErrors }) => {
     try {
+      trackUsage('willCreateFirstAdmin');
+
       const {
         data: {
           data: { token, user },
@@ -191,6 +193,8 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
       // Redirect to the homePage
       push('/');
     } catch (err) {
+      trackUsage('didNotCreateFirstAdmin');
+
       if (err.response) {
         const { data } = err.response;
         const apiErrors = formatAPIErrors(data);
@@ -251,6 +255,7 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
   return (
     <Component
       {...rest}
+      authType={authType}
       fieldsToDisable={fieldsToDisable}
       formErrors={formErrors}
       inputsPrefix={inputsPrefix}

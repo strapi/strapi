@@ -190,7 +190,7 @@ describe('<PaginationURLQuery />', () => {
 
       <nav
         aria-label="pagination"
-        class="sc-lhMiDA"
+        class="sc-iukxot"
       >
         <ul
           class="c0 c1"

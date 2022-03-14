@@ -73,7 +73,7 @@ const ForgotPassword = ({ onSubmit, schema }) => {
                   )}
                 </Column>
 
-                <Stack size={6}>
+                <Stack spacing={6}>
                   <PasswordInput
                     name="password"
                     onChange={handleChange}

@@ -154,8 +154,8 @@ const SocialLinks = () => {
       shadow="tableShadow"
     >
       <Box paddingBottom={7}>
-        <Stack size={5}>
-          <Stack size={3}>
+        <Stack spacing={5}>
+          <Stack spacing={3}>
             <Typography variant="delta" as="h2" id="join-the-community">
               {formatMessage({
                 id: 'app.components.HomePage.community',
