@@ -7,10 +7,10 @@ const chokidar = require('chokidar');
 const execa = require('execa');
 const { getOr } = require('lodash/fp');
 const { joinBy } = require('@strapi/utils');
+const tsUtils = require('@strapi/typescript-utils');
 
 const loadConfiguration = require('../core/app-configuration');
 const strapi = require('../index');
-const tsUtils = require('../utils/typescript');
 const { buildTypeScript, buildAdmin } = require('./builders');
 
 /**

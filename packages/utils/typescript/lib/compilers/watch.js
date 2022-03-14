@@ -2,9 +2,9 @@
 
 const ts = require('typescript');
 
-const reportDiagnostics = require('../report-diagnostics');
-const formatHost = require('../format-host');
-const resolveConfigOptions = require('../resolve-config-options');
+const reportDiagnostics = require('../utils/report-diagnostics');
+const formatHost = require('../utils/format-host');
+const resolveConfigOptions = require('../utils/resolve-config-options');
 
 /**
  * Prints a diagnostic every time the watch status changes.

@@ -2,10 +2,11 @@
 
 const path = require('path');
 const strapiAdmin = require('@strapi/admin');
+const tsUtils = require('@strapi/typescript-utils');
 const { getConfigUrls, getAbsoluteServerUrl } = require('@strapi/utils');
+
 const getEnabledPlugins = require('../core/loaders/plugins/get-enabled-plugins');
 const addSlash = require('../utils/addSlash');
-const tsUtils = require('../utils/typescript');
 const strapi = require('../index');
 
 module.exports = async function({ browser }) {
