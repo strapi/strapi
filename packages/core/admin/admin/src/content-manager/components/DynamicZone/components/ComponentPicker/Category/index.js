@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { Accordion, AccordionToggle, AccordionContent } from '@strapi/design-system/Accordion';
 import { Box } from '@strapi/design-system/Box';
 import styled from 'styled-components';
+import { useIntl } from 'react-intl';
 import ComponentCard from './ComponentCard';
 
 const Grid = styled.div`
@@ -12,6 +13,8 @@ const Grid = styled.div`
 `;
 
 const Category = ({ category, components, isOdd, isOpen, onAddComponent, onToggle }) => {
+  const { formatMessage } = useIntl();
+
   const handleToggle = () => {
     onToggle(category);
   };
@@ -20,7 +23,7 @@ const Category = ({ category, components, isOdd, isOpen, onAddComponent, onToggl
     <Accordion expanded={isOpen} onToggle={handleToggle} size="S">
       <AccordionToggle
         variant={isOdd ? 'primary' : 'secondary'}
-        title={category}
+        title={formatMessage({ id: category, defaultMessage: category })}
         togglePosition="left"
       />
       <AccordionContent>

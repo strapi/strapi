@@ -338,7 +338,7 @@ module.exports = {
         params.confirmed = true;
       }
 
-    const user = await getService('user').add(params);
+      const user = await getService('user').add(params);
 
       const sanitizedUser = await sanitizeUser(user, ctx);
 
@@ -418,6 +418,13 @@ module.exports = {
     const user = await strapi.query('plugin::users-permissions.user').findOne({
       where: { email: params.email },
     });
+
+    if (!user) {
+      return ctx.send({
+        email: params.email,
+        sent: true
+      });
+    }
 
     if (user.confirmed) {
       throw new ApplicationError('already.confirmed');

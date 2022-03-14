@@ -48,7 +48,7 @@ module.exports = {
     '<rootDir>/packages/admin-test-utils/lib/mocks/windowMatchMedia.js',
   ],
   setupFilesAfterEnv: [
-    '<rootDir>/packages/admin-test-utils/lib/setup/enzyme-setup.js',
+    '<rootDir>/packages/admin-test-utils/lib/setup/styled-components.js',
     '<rootDir>/packages/admin-test-utils/lib/setup/strapi.js',
   ],
   transform: {

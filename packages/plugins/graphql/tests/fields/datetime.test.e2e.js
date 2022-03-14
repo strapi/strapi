@@ -12,8 +12,8 @@ let graphqlQuery;
 
 const postModel = {
   attributes: {
-    myDate: {
-      type: 'date',
+    myDatetime: {
+      type: 'datetime',
     },
   },
   singularName: 'post',
@@ -44,43 +44,9 @@ describe('Test Graphql API End to End', () => {
     await builder.cleanup();
   });
 
-  describe('GraphQL - Date field', () => {
-    test.each(['2022-03-17', null])('Can create an entity with date equals: %s', async value => {
-      const res = await graphqlQuery({
-        query: /* GraphQL */ `
-          mutation createPost($data: PostInput!) {
-            createPost(data: $data) {
-              data {
-                attributes {
-                  myDate
-                }
-              }
-            }
-          }
-        `,
-        variables: {
-          data: {
-            myDate: value,
-          },
-        },
-      });
-
-      const { body } = res;
-
-      expect(res.statusCode).toBe(200);
-      expect(body).toEqual({
-        data: {
-          createPost: {
-            data: {
-              attributes: { myDate: value },
-            },
-          },
-        },
-      });
-    });
-
-    test.each(['2022-03-17T15:06:57.878Z', {}, [], 'something'])(
-      'Cannot create an entity with date equals: %s',
+  describe('GraphQL - Datetime field', () => {
+    test.each(['2022-03-17T15:06:57.000Z', null])(
+      'Can create an entity with datetime equals: %s',
       async value => {
         const res = await graphqlQuery({
           query: /* GraphQL */ `
@@ -88,7 +54,7 @@ describe('Test Graphql API End to End', () => {
               createPost(data: $data) {
                 data {
                   attributes {
-                    myDate
+                    myDatetime
                   }
                 }
               }
@@ -96,7 +62,44 @@ describe('Test Graphql API End to End', () => {
           `,
           variables: {
             data: {
-              myDate: value,
+              myDatetime: value,
+            },
+          },
+        });
+
+        const { body } = res;
+
+        expect(res.statusCode).toBe(200);
+        expect(body).toEqual({
+          data: {
+            createPost: {
+              data: {
+                attributes: { myDatetime: value },
+              },
+            },
+          },
+        });
+      }
+    );
+
+    test.each(['2022-03-17', {}, [], 'something'])(
+      'Cannot create an entity with datetime equals: %s',
+      async value => {
+        const res = await graphqlQuery({
+          query: /* GraphQL */ `
+            mutation createPost($data: PostInput!) {
+              createPost(data: $data) {
+                data {
+                  attributes {
+                    myDatetime
+                  }
+                }
+              }
+            }
+          `,
+          variables: {
+            data: {
+              myDatetime: value,
             },
           },
         });
@@ -114,21 +117,21 @@ describe('Test Graphql API End to End', () => {
       }
     );
 
-    test.each(['2022-03-17'])('Can filter query with date: %s', async value => {
+    test.each(['2022-03-17T15:06:57.878Z'])('Can filter query with datetime: %s', async value => {
       const res = await graphqlQuery({
         query: /* GraphQL */ `
-          query posts($myDate: Date!) {
-            posts(filters: { myDate: { gt: $myDate } }) {
+          query posts($myDatetime: DateTime!) {
+            posts(filters: { myDatetime: { gt: $myDatetime } }) {
               data {
                 attributes {
-                  myDate
+                  myDatetime
                 }
               }
             }
           }
         `,
         variables: {
-          myDate: value,
+          myDatetime: value,
         },
       });
 
