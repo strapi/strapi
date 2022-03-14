@@ -23,7 +23,7 @@ const migrationResolver = path => {
 };
 
 const createUmzugProvider = db => {
-  const migrationDir = path.join(strapi.dirs.root, 'database/migrations');
+  const migrationDir = path.join(strapi.dirs.app.root, 'database/migrations');
 
   fse.ensureDirSync(migrationDir);
 

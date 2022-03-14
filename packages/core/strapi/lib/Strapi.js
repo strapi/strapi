@@ -51,8 +51,11 @@ const LIFECYCLES = {
 class Strapi {
   constructor(opts = {}) {
     destroyOnSignal(this);
-    this.dirs = utils.getDirs(opts.dir ? path.resolve(process.cwd(), opts.dir) : process.cwd());
-    const appConfig = loadConfiguration(this.dirs.root, opts);
+    this.dirs = utils.getDirs({
+      appDir: process.cwd(),
+      distDir: opts.dir ? path.resolve(process.cwd(), opts.dir) : process.cwd(),
+    });
+    const appConfig = loadConfiguration(this.dirs.dist.root, opts);
     this.container = createContainer(this);
     this.container.register('config', createConfigProvider(appConfig));
     this.container.register('content-types', contentTypesRegistry(this));
@@ -85,7 +88,7 @@ class Strapi {
   }
 
   get EE() {
-    return ee({ dir: this.dirs.root, logger: this.log });
+    return ee({ dir: this.dirs.dist.root, logger: this.log });
   }
 
   get services() {

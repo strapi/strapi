@@ -13,7 +13,7 @@ module.exports = async function loadMiddlewares(strapi) {
 };
 
 const loadLocalMiddlewares = async strapi => {
-  const dir = strapi.dirs.middlewares;
+  const dir = strapi.dirs.dist.middlewares;
 
   if (!(await fse.pathExists(dir))) {
     return {};

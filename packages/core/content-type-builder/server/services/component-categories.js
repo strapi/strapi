@@ -34,7 +34,7 @@ const editCategory = async (name, infos) => {
     // only edit the components in this specific category
     if (component.category !== name) return;
 
-    component.setUID(newUID).setDir(join(strapi.dirs.components, newName));
+    component.setUID(newUID).setDir(join(strapi.dirs.app.components, newName));
 
     builder.components.forEach(compo => {
       compo.updateComponent(oldUID, newUID);
