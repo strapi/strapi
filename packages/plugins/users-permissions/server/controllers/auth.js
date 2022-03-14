@@ -17,7 +17,7 @@ const {
   validateSendEmailConfirmationBody,
 } = require('./validation/auth');
 
-const { sanitize } = utils;
+const { getAbsoluteServerUrl, sanitize } = utils;
 const { ApplicationError, ValidationError } = utils.errors;
 
 const emailRegExp = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
