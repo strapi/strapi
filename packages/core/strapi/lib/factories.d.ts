@@ -43,6 +43,6 @@ interface Router {
   routes: Route[];
 }
 
-export function createCoreRouter(uid: string, cfg: RouterConfig): () => Router;
-export function createCoreController(uid: string, cfg: ControllerConfig): () => Controller;
-export function createCoreService(uid: string, cfg: ServiceConfig): () => Service;
+export function createCoreRouter(uid: string, cfg?: RouterConfig = {}): () => Router;
+export function createCoreController(uid: string, cfg?: ControllerConfig = {}): () => Controller;
+export function createCoreService(uid: string, cfg?: ServiceConfig = {}): () => Service;
