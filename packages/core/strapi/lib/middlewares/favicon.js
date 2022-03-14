@@ -15,5 +15,5 @@ const defaults = {
 module.exports = (config, { strapi }) => {
   const { maxAge, path: faviconPath } = defaultsDeep(defaults, config);
 
-  return favicon(resolve(strapi.dirs.root, faviconPath), { maxAge });
+  return favicon(resolve(strapi.dirs.app.root, faviconPath), { maxAge });
 };

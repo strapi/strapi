@@ -71,6 +71,7 @@ module.exports = (config, { strapi }) => {
       {
         method: 'GET',
         path: '/assets/images/(.*)',
+        // Why do we use the __dirname and not strapi.dirs here? @alexandrebodin
         handler: serveStatic(path.resolve(__dirname, 'assets/images'), {
           maxage: maxAge,
           defer: true,
@@ -80,7 +81,7 @@ module.exports = (config, { strapi }) => {
       {
         method: 'GET',
         path: '/(.*)',
-        handler: koaStatic(strapi.dirs.public, {
+        handler: koaStatic(strapi.dirs.app.public, {
           maxage: maxAge,
           defer: true,
         }),

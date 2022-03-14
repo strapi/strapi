@@ -18,11 +18,11 @@ const validateSrcIndex = srcIndex => {
 };
 
 module.exports = strapi => {
-  if (!existsSync(strapi.dirs.src)) {
+  if (!existsSync(strapi.dirs.dist.src)) {
     return;
   }
 
-  const pathToSrcIndex = resolve(strapi.dirs.src, 'index.js');
+  const pathToSrcIndex = resolve(strapi.dirs.dist.src, 'index.js');
   if (!existsSync(pathToSrcIndex) || statSync(pathToSrcIndex).isDirectory()) {
     return {};
   }

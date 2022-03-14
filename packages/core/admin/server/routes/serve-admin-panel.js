@@ -5,7 +5,7 @@ const fse = require('fs-extra');
 const koaStatic = require('koa-static');
 
 const registerAdminPanelRoute = ({ strapi }) => {
-  let buildDir = resolve(strapi.dirs.root, 'build');
+  let buildDir = resolve(strapi.dirs.dist.root, 'build');
 
   if (!fse.pathExistsSync(buildDir)) {
     buildDir = resolve(__dirname, '../../build');

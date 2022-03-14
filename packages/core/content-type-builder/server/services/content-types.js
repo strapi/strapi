@@ -141,7 +141,7 @@ const generateAPI = ({ singularName, kind = 'collectionType', pluralName, displa
       bootstrapApi: true,
       attributes: [],
     },
-    { dir: strapi.dirs.root }
+    { dir: strapi.dirs.app.root }
   );
 };
 

@@ -52,8 +52,8 @@ class Strapi {
   constructor(opts = {}) {
     destroyOnSignal(this);
 
-    const rootDir = opts.dir ? path.resolve(process.cwd(), opts.dir) : process.cwd();
-    const appConfig = loadConfiguration(rootDir, opts);
+    const distRootDir = opts.dir ? path.resolve(process.cwd(), opts.dir) : process.cwd();
+    const appConfig = loadConfiguration(distRootDir, opts);
 
     this.container = createContainer(this);
     this.container.register('config', createConfigProvider(appConfig));
@@ -68,7 +68,13 @@ class Strapi {
     this.container.register('apis', apisRegistry(this));
     this.container.register('auth', createAuth(this));
 
-    this.dirs = utils.getDirs(rootDir, { strapi: this });
+    this.dirs = utils.getDirs(
+      {
+        appDir: process.cwd(),
+        distDir: distRootDir,
+      },
+      { strapi: this }
+    );
 
     this.isLoaded = false;
     this.reload = this.reload();
@@ -89,7 +95,7 @@ class Strapi {
   }
 
   get EE() {
-    return ee({ dir: this.dirs.root, logger: this.log });
+    return ee({ dir: this.dirs.dist.root, logger: this.log });
   }
 
   get services() {
