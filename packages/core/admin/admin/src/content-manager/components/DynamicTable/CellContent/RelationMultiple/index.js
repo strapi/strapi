@@ -14,8 +14,6 @@ import CellValue from '../CellValue';
 import { axiosInstance } from '../../../../../core/utils';
 import { getRequestUrl, getTrad } from '../../../../utils';
 
-const SINGLE_RELATIONS = ['oneToOne', 'manyToOne'];
-
 const TypographyMaxWidth = styled(Typography)`
   max-width: 500px;
 `;
@@ -30,7 +28,7 @@ const fetchRelation = async (endPoint, notifyStatus) => {
   return { results, pagination };
 };
 
-const Relation = ({ fieldSchema, metadatas, queryInfos, name, rowId, value }) => {
+const RelationMultiple = ({ fieldSchema, metadatas, queryInfos, name, rowId, value }) => {
   const { formatMessage } = useIntl();
   const { notifyStatus } = useNotifyAT();
   const requestURL = getRequestUrl(`${queryInfos.endPoint}/${rowId}/${name.split('.')[0]}`);
@@ -66,17 +64,6 @@ const Relation = ({ fieldSchema, metadatas, queryInfos, name, rowId, value }) =>
     }
   );
 
-  if (SINGLE_RELATIONS.includes(fieldSchema.relation)) {
-    return (
-      <Typography textColor="neutral800">
-        <CellValue
-          type={metadatas.mainField.schema.type}
-          value={value[metadatas.mainField.name] || value.id}
-        />
-      </Typography>
-    );
-  }
-
   return (
     <Box {...stopPropagation}>
       <SimpleMenu
@@ -96,35 +83,38 @@ const Relation = ({ fieldSchema, metadatas, queryInfos, name, rowId, value }) =>
           </MenuItem>
         )}
 
-        {status === 'success' &&
-          data?.results.map(entry => (
-            <MenuItem key={entry.id} aria-disabled>
-              <TypographyMaxWidth ellipsis>
-                <CellValue
-                  type={metadatas.mainField.schema.type}
-                  value={entry[metadatas.mainField.name] || entry.id}
-                />
-              </TypographyMaxWidth>
-            </MenuItem>
-          ))}
+        {status === 'success' && (
+          <>
+            {data?.results.map(entry => (
+              <MenuItem key={entry.id} aria-disabled>
+                <TypographyMaxWidth ellipsis>
+                  <CellValue
+                    type={metadatas.mainField.schema.type}
+                    value={entry[metadatas.mainField.name] || entry.id}
+                  />
+                </TypographyMaxWidth>
+              </MenuItem>
+            ))}
 
-        {status === 'success' && data?.pagination.total > 10 && (
-          <MenuItem
-            aria-disabled
-            aria-label={formatMessage({
-              id: getTrad('DynamicTable.relation-more'),
-              defaultMessage: 'This relation contains more entities than displayed',
-            })}
-          >
-            <Typography>...</Typography>
-          </MenuItem>
+            {data?.pagination.total > 10 && (
+              <MenuItem
+                aria-disabled
+                aria-label={formatMessage({
+                  id: getTrad('DynamicTable.relation-more'),
+                  defaultMessage: 'This relation contains more entities than displayed',
+                })}
+              >
+                <Typography>...</Typography>
+              </MenuItem>
+            )}
+          </>
         )}
       </SimpleMenu>
     </Box>
   );
 };
 
-Relation.propTypes = {
+RelationMultiple.propTypes = {
   fieldSchema: PropTypes.shape({
     relation: PropTypes.string,
     targetModel: PropTypes.string,
@@ -142,4 +132,4 @@ Relation.propTypes = {
   value: PropTypes.object.isRequired,
 };
 
-export default Relation;
+export default RelationMultiple;

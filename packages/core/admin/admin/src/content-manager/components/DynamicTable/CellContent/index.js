@@ -4,7 +4,8 @@ import styled from 'styled-components';
 import { Typography } from '@strapi/design-system/Typography';
 import Media from './Media';
 import MultipleMedias from './MultipleMedias';
-import Relation from './Relation';
+import RelationMultiple from './RelationMultiple';
+import RelationSingle from './RelationSingle';
 import RepeatableComponent from './RepeatableComponent';
 import SingleComponent from './SingleComponent';
 import CellValue from './CellValue';
@@ -29,9 +30,15 @@ const CellContent = ({ content, fieldSchema, metadatas, name, queryInfos, rowId 
 
       return <MultipleMedias value={content} />;
 
-    case 'relation':
+    case 'relation': {
+      const SINGLE_RELATIONS = ['oneToOne', 'manyToOne'];
+
+      if (SINGLE_RELATIONS.includes(fieldSchema.relation)) {
+        return <RelationSingle metadatas={metadatas} value={content} />;
+      }
+
       return (
-        <Relation
+        <RelationMultiple
           fieldSchema={fieldSchema}
           queryInfos={queryInfos}
           metadatas={metadatas}
@@ -40,6 +47,7 @@ const CellContent = ({ content, fieldSchema, metadatas, name, queryInfos, rowId 
           rowId={rowId}
         />
       );
+    }
 
     case 'component':
       if (fieldSchema.repeatable === true) {
@@ -69,6 +77,7 @@ CellContent.propTypes = {
     multiple: PropTypes.bool,
     type: PropTypes.string.isRequired,
     repeatable: PropTypes.bool,
+    relation: PropTypes.string,
   }).isRequired,
   metadatas: PropTypes.object.isRequired,
   name: PropTypes.string.isRequired,

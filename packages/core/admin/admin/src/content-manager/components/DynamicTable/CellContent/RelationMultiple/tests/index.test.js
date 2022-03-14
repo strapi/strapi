@@ -5,7 +5,7 @@ import { IntlProvider } from 'react-intl';
 import { QueryClientProvider, QueryClient } from 'react-query';
 
 import { axiosInstance } from '../../../../../../core/utils';
-import Relation from '../index';
+import RelationMultiple from '../index';
 
 jest.spyOn(axiosInstance, 'get').mockResolvedValue({
   data: {
@@ -53,14 +53,14 @@ const ComponentFixture = () => {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={lightTheme}>
         <IntlProvider locale="en" messages={{}} defaultLocale="en">
-          <Relation {...DEFAULT_PROPS_FIXTURE} />
+          <RelationMultiple {...DEFAULT_PROPS_FIXTURE} />
         </IntlProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );
 };
 
-describe('DynamicTabe / Cellcontent / Relation', () => {
+describe('DynamicTabe / Cellcontent / RelationMultiple', () => {
   it('renders and matches the snapshot', async () => {
     const { container } = render(<ComponentFixture />);
     expect(container).toMatchSnapshot();
