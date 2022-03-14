@@ -7,7 +7,7 @@ import controllers from './controllers';
 import routes from './routes';
 import middlewares from './middlewares';
 import policies from './policies';
-import services from './services/indextjs';
+import services from './services';
 
 export default {
   register,
