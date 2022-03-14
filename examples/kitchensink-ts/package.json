@@ -18,6 +18,7 @@
     "@strapi/provider-upload-cloudinary": "4.1.1",
     "@strapi/strapi": "4.1.1",
     "@strapi/utils": "4.1.1",
+    "@strapi/typescript-utils": "4.1.1",
     "lodash": "4.17.21",
     "mysql": "2.18.1",
     "passport-google-oauth2": "0.2.0",
