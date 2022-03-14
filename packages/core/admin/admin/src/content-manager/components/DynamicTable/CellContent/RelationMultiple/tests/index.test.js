@@ -12,7 +12,7 @@ jest.spyOn(axiosInstance, 'get').mockResolvedValue({
     results: [
       {
         id: 1,
-        name: 'relation entity 1',
+        name: 'Relation entity 1',
       },
     ],
 
@@ -73,8 +73,8 @@ describe('DynamicTabe / Cellcontent / RelationMultiple', () => {
 
     fireEvent(button, new MouseEvent('mousedown', { bubbles: true }));
 
-    expect(screen.getByText('The relations are loading')).toBeInTheDocument();
+    expect(screen.getByText('Relations are loading')).toBeInTheDocument();
     expect(axiosInstance.get).toHaveBeenCalledTimes(1);
-    await waitFor(() => expect(screen.getByText('relation entity 1')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('Relation entity 1')).toBeInTheDocument());
   });
 });
