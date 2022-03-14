@@ -3,14 +3,16 @@
 const chalk = require('chalk');
 const tsUtils = require('@strapi/typescript-utils');
 
-const logInstructions = pluginName => {
+const logInstructions = (pluginName, { language }) => {
   const maxLength = `    resolve: './src/plugins/${pluginName}'`.length;
   const separator = Array(maxLength)
     .fill('─')
     .join('');
 
   return `
-You can now enable your plugin by adding the following in ${chalk.yellow('./config/plugins.js')}.
+You can now enable your plugin by adding the following in ${chalk.yellow(
+    `./config/plugins.${language}`
+  )}
 ${separator}
 module.exports = {
   ${chalk.gray('// ...')}
@@ -58,7 +60,7 @@ module.exports = plop => {
           path: 'plugins/{{ pluginName }}/package.json',
           templateFile: `templates/${language}/plugin-package.json.hbs`,
         },
-        () => plop.renderString(logInstructions(answers.pluginName)),
+        () => plop.renderString(logInstructions(answers.pluginName, { language })),
       ];
     },
   });
