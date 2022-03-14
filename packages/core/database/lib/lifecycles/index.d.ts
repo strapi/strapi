@@ -43,8 +43,8 @@ export interface Event {
 export interface LifecycleProvider {
   subscribe(subscriber: Subscriber): () => void;
   clear(): void;
-  run(action: Action, uid: string, properties: any): Promise<void>;
-  createEvent(action: Action, uid: string, properties: any): Event;
+  run(action: Action, uid: string, properties: any, state: any): Promise<void>;
+  createEvent(action: Action, uid: string, properties: any, state: any): Event;
 }
 
 export function createLifecyclesProvider(db: Database): LifecycleProvider;
