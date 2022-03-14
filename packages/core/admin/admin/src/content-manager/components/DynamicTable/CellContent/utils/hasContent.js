@@ -16,6 +16,10 @@ export default function hasContent(type, content, metadatas, fieldSchema) {
   }
 
   if (type === 'relation') {
+    if (['oneToOne', 'manyToOne'].includes(fieldSchema.relation)) {
+      return !isEmpty(content);
+    }
+
     return content.count > 0;
   }
 

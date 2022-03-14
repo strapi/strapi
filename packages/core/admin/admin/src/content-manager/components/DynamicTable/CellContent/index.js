@@ -31,9 +31,7 @@ const CellContent = ({ content, fieldSchema, metadatas, name, queryInfos, rowId 
       return <MultipleMedias value={content} />;
 
     case 'relation': {
-      const SINGLE_RELATIONS = ['oneToOne', 'manyToOne'];
-
-      if (SINGLE_RELATIONS.includes(fieldSchema.relation)) {
+      if (['oneToOne', 'manyToOne'].includes(fieldSchema.relation)) {
         return <RelationSingle metadatas={metadatas} value={content} />;
       }
 
