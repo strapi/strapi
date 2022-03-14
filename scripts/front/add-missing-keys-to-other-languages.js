@@ -10,6 +10,7 @@ const { join, dirname } = require('path');
 const { promisify } = require('util');
 const fs = require('fs-extra');
 const glob = promisify(require('glob').glob);
+const chalk = require('chalk');
 
 const addMissingKeyForSingleFile = async filePath => {
   console.log('Start adding missing keys to', filePath);
@@ -58,9 +59,18 @@ const addMissingKeys = async lang => {
 };
 
 if (process.argv.length < 3) {
-  console.log(
-    'Please provide a language. For example:\nnode scripts/front/add-missing-keys-to-other-languages.js vi'
+  console.warn(
+    chalk.yellow(
+      'Please provide a language. For example:\nnode scripts/front/add-missing-keys-to-other-languages.js vi'
+    )
   );
   process.exit(1);
 }
-addMissingKeys(process.argv[2]).catch(err => console.error(err));
+
+if (require.main === module) {
+  addMissingKeys(process.argv[2]).catch((err) => console.error(err));
+}
+
+module.exports = {
+  addMissingKeyForSingleFile,
+};
