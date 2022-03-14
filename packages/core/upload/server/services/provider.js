@@ -5,7 +5,7 @@ const { streamToBuffer } = require('../utils/file');
 
 module.exports = ({ strapi }) => ({
   async upload(file) {
-    if (isFunction(strapi.plugin('upload').provider.uploadStream)) {
+    if (isFunction(strapi.plugin('upload').provider.original.uploadStream)) {
       file.stream = file.getStream();
       await strapi.plugin('upload').provider.uploadStream(file);
       delete file.stream;

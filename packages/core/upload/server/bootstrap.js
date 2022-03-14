@@ -51,6 +51,10 @@ const createProvider = config => {
 
   return Object.assign(Object.create(baseProvider), {
     ...providerInstance,
+    original: providerInstance,
+    uploadStream(file, options = actionOptions.upload) {
+      return providerInstance.uploadStream(file, options);
+    },
     upload(file, options = actionOptions.upload) {
       return providerInstance.upload(file, options);
     },
@@ -63,6 +67,9 @@ const createProvider = config => {
 const baseProvider = {
   extend(obj) {
     Object.assign(this, obj);
+  },
+  uploadStream() {
+    throw new Error('Provider uploadStream method is not implemented');
   },
   upload() {
     throw new Error('Provider upload method is not implemented');
