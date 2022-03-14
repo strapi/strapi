@@ -52,7 +52,7 @@ const Relation = ({ fieldSchema, metadatas, queryInfos, name, rowId, value }) =>
   const notify = () => {
     const message = formatMessage({
       id: getTrad('DynamicTable.relation-loaded'),
-      defaultMessage: 'The relations have been loaded',
+      defaultMessage: 'Relations have been loaded',
     });
     notifyStatus(message);
   };
@@ -90,7 +90,7 @@ const Relation = ({ fieldSchema, metadatas, queryInfos, name, rowId, value }) =>
             <Loader small>
               {formatMessage({
                 id: getTrad('DynamicTable.relation-loading'),
-                defaultMessage: 'The relations are loading',
+                defaultMessage: 'Relations are loading',
               })}
             </Loader>
           </MenuItem>
