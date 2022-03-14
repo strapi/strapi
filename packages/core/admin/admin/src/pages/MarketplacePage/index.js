@@ -17,7 +17,7 @@ import { Main } from '@strapi/design-system/Main';
 import { Searchbar } from '@strapi/design-system/Searchbar';
 import { LinkButton } from '@strapi/design-system/LinkButton';
 import { useNotifyAT } from '@strapi/design-system/LiveRegions';
-import Plus from '@strapi/icons/Plus';
+import Upload from '@strapi/icons/Upload';
 
 import PluginCard from './components/PluginCard';
 import { EmptyPluginSearch } from './components/EmptyPluginSearch';
@@ -141,7 +141,7 @@ const MarketPlacePage = () => {
           })}
           primaryAction={
             <LinkButton
-              startIcon={<Plus />}
+              startIcon={<Upload />}
               variant="tertiary"
               href="https://market.strapi.io/submit-plugin"
               onClick={() => trackUsage('didSubmitPlugin')}
