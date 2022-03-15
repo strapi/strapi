@@ -21,6 +21,9 @@ jest.mock('@strapi/helper-plugin', () => ({
   useGuidedTour: jest.fn(() => ({
     setGuidedTourVisibility: jest.fn(),
   })),
+  useNotification: jest.fn(() => ({
+    toggleNotification: jest.fn(),
+  })),
 }));
 
 jest.mock('../utils/api', () => ({

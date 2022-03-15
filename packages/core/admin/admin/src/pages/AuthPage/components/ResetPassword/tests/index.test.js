@@ -191,6 +191,11 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         background: #4945ff;
       }
 
+      .c33 svg > g,
+      .c33 svg path {
+        fill: #ffffff;
+      }
+
       .c29 {
         border: none;
         background: transparent;
@@ -276,35 +281,12 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         margin-top: 24px;
       }
 
-      .c21 {
-        font-weight: 600;
-        color: #32324d;
-        font-size: 0.75rem;
-        line-height: 1.33;
-      }
-
-      .c22 {
-        color: #d02b20;
-        font-size: 0.875rem;
-        line-height: 1.43;
-      }
-
-      .c31 {
-        color: #666687;
-        font-size: 0.75rem;
-        line-height: 1.33;
-      }
-
-      .c23 {
-        line-height: 0;
-      }
-
       .c28 {
         padding-right: 12px;
         padding-left: 8px;
       }
 
-      .c20 {
+      .c21 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -336,6 +318,29 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         align-items: center;
       }
 
+      .c20 {
+        font-weight: 600;
+        color: #32324d;
+        font-size: 0.75rem;
+        line-height: 1.33;
+      }
+
+      .c22 {
+        color: #d02b20;
+        font-size: 0.875rem;
+        line-height: 1.43;
+      }
+
+      .c31 {
+        color: #666687;
+        font-size: 0.75rem;
+        line-height: 1.33;
+      }
+
+      .c23 {
+        line-height: 0;
+      }
+
       .c26 {
         border: none;
         border-radius: 4px;
@@ -346,6 +351,7 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         font-size: 0.875rem;
         display: block;
         width: 100%;
+        background: inherit;
       }
 
       .c26::-webkit-input-placeholder {
@@ -369,7 +375,6 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
       }
 
       .c26[aria-disabled='true'] {
-        background: inherit;
         color: inherit;
       }
 
@@ -754,19 +759,21 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
                 </div>
                 <div
                   class="c18"
+                  spacing="6"
                 >
                   <div>
                     <div>
                       <div
                         class="c19"
+                        spacing="1"
                       >
-                        <div
+                        <label
                           class="c20"
+                          for="textinput-1"
+                          required=""
                         >
-                          <label
+                          <div
                             class="c21"
-                            for="textinput-1"
-                            required=""
                           >
                             Password
                             <span
@@ -774,8 +781,8 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
                             >
                               *
                             </span>
-                          </label>
-                        </div>
+                          </div>
+                        </label>
                         <div
                           class="c24 c25"
                         >
@@ -825,14 +832,15 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
                     <div>
                       <div
                         class="c19"
+                        spacing="1"
                       >
-                        <div
+                        <label
                           class="c20"
+                          for="textinput-2"
+                          required=""
                         >
-                          <label
+                          <div
                             class="c21"
-                            for="textinput-2"
-                            required=""
                           >
                             Confirmation Password
                             <span
@@ -840,8 +848,8 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
                             >
                               *
                             </span>
-                          </label>
-                        </div>
+                          </div>
+                        </label>
                         <div
                           class="c24 c25"
                         >

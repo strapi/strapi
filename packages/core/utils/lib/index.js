@@ -19,6 +19,8 @@ const {
   stringEquals,
   isKebabCase,
   isCamelCase,
+  toRegressedEnumValue,
+  startsWithANumber,
 } = require('./string-formatting');
 const { removeUndefined } = require('./object-formatting');
 const { getConfigUrls, getAbsoluteAdminUrl, getAbsoluteServerUrl } = require('./config');
@@ -47,6 +49,8 @@ module.exports = {
   traverseEntity,
   parseType,
   nameToSlug,
+  toRegressedEnumValue,
+  startsWithANumber,
   nameToCollectionName,
   getCommonBeginning,
   getConfigUrls,

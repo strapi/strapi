@@ -117,7 +117,7 @@ const DateTimePicker = ({
       hint={hint}
       error={error}
     >
-      <Stack size={1}>
+      <Stack spacing={1}>
         {label && (
           <Flex>
             <FieldLabel required={required} id="datetime-label">
@@ -126,7 +126,7 @@ const DateTimePicker = ({
             {labelAction && <LabelAction paddingLeft={1}>{labelAction}</LabelAction>}
           </Flex>
         )}
-        <Stack horizontal size={2}>
+        <Stack horizontal spacing={2}>
           <DatePicker
             data-testid="datetimepicker-date"
             name={name}

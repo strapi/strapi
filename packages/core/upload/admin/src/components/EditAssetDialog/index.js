@@ -137,7 +137,7 @@ export const EditAssetDialog = ({
               </GridItem>
               <GridItem xs={12} col={6}>
                 <Form noValidate>
-                  <Stack size={3}>
+                  <Stack spacing={3}>
                     <AssetMeta
                       size={formatBytes(asset.size)}
                       dimension={
