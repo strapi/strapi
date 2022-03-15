@@ -3,10 +3,12 @@
 const { join, extname, basename } = require('path');
 const fse = require('fs-extra');
 
+const { importDefault } = require('../../utils');
+
 // TODO:: allow folders with index.js inside for bigger policies
 module.exports = async function loadMiddlewares(strapi) {
   const localMiddlewares = await loadLocalMiddlewares(strapi);
-  const internalMiddlewares = require('../../middlewares');
+  const internalMiddlewares = importDefault(require('../../middlewares')).default;
 
   strapi.container.get('middlewares').add(`global::`, localMiddlewares);
   strapi.container.get('middlewares').add(`strapi::`, internalMiddlewares);
@@ -28,7 +30,7 @@ const loadLocalMiddlewares = async strapi => {
 
     if (fd.isFile() && extname(name) === '.js') {
       const key = basename(name, '.js');
-      middlewares[key] = require(fullPath);
+      middlewares[key] = importDefault(require(fullPath)).default;
     }
   }
 
