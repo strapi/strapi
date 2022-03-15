@@ -15,7 +15,7 @@
     "noEmitOnError": true,
     "resolveJsonModule": true
   },
-  // TODO remove the include when we fix the pluginsPath
-  "include": ["src/plugins/**/*.json", "./"],
-  "exclude": ["node_modules/", "dist/", "src/admin", ".cache/", ".tmp/"]
+
+  "include": ["src/**/*.json", "./"],
+  "exclude": ["node_modules/", "build/", "dist/", "src/admin", ".cache/", ".tmp/"]
 }

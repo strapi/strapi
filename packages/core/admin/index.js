@@ -41,7 +41,7 @@ async function build({
     ceRoot: path.resolve(cacheDir, 'admin', 'src'),
   };
 
-  const pluginsPath = Object.keys(plugins).map(pluginName => plugins[pluginName].pathToPlugin);
+  const pluginsPath = Object.keys(plugins).map(pluginName => plugins[pluginName].appPathToPlugin  );
 
   const config = getCustomWebpackConfig(appDir, {
     appDir,
@@ -118,7 +118,7 @@ async function watchAdmin({
     ceRoot: path.resolve(cacheDir, 'admin', 'src'),
   };
 
-  const pluginsPath = Object.keys(plugins).map(pluginName => plugins[pluginName].pathToPlugin);
+  const pluginsPath = Object.keys(plugins).map(pluginName => plugins[pluginName].appPathToPlugin);
 
   const args = {
     appDir,
