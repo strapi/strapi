@@ -17,6 +17,7 @@ const { buildTypeScript, buildAdmin } = require('./builders');
  * `$ strapi develop`
  *
  */
+
 module.exports = async function({ build, watchAdmin, polling, browser }) {
   const appDir = process.cwd();
 
@@ -46,7 +47,7 @@ module.exports = async function({ build, watchAdmin, polling, browser }) {
 
 const primaryProcess = async ({ distDir, appDir, build, isTSProject, watchAdmin, browser }) => {
   if (isTSProject) {
-    await buildTypeScript({ srcDir: appDir, watch: false });
+    await buildTypeScript({ srcDir: appDir, distDir, watch: false });
   }
 
   const config = loadConfiguration(distDir);
@@ -79,10 +80,15 @@ const primaryProcess = async ({ distDir, appDir, build, isTSProject, watchAdmin,
     }
   }
 
-  cluster.on('message', (worker, message) => {
+  cluster.on('message', async (worker, message) => {
     switch (message) {
       case 'reload':
+        if (isTSProject) {
+          await buildTypeScript({ srcDir: appDir, distDir, watch: false });
+        }
+
         console.info('The server is restarting\n');
+
         worker.send('kill');
         break;
       case 'killed':
@@ -135,19 +141,15 @@ const workerProcess = ({ appDir, distDir, watchAdmin, polling, isTSProject }) =>
  * @param {Strapi} options.strapi - Strapi instance
  * @param {array} options.watchIgnoreFiles - Array of custom file paths that should not be watched
  */
-function watchFileChanges({ appDir, strapiInstance, watchIgnoreFiles, polling, isTSProject }) {
+function watchFileChanges({ appDir, strapiInstance, watchIgnoreFiles, polling }) {
   const restart = async () => {
     if (strapiInstance.reload.isWatching && !strapiInstance.reload.isReloading) {
       strapiInstance.reload.isReloading = true;
-
-      if (isTSProject) {
-        await tsUtils.compile(appDir);
-      }
-
       strapiInstance.reload();
     }
   };
 
+  // @soupette should we keep watching the dist dir (for the watch admin?)
   const watcher = chokidar.watch(appDir, {
     ignoreInitial: true,
     usePolling: polling,
