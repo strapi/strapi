@@ -209,13 +209,9 @@ class MysqlSchemaInspector {
       ]);
 
       for (const fkReference of fkReferences) {
-        if (ret[fkReference.constraint_name]) {
-          ret[fkReference.constraint_name].referencedTable = fkReference.referenced_table_name;
-          ret[fkReference.constraint_name].columns.push(fkReference.column_name);
-          ret[fkReference.constraint_name].referencedColumns.push(
-            fkReference.referenced_column_name
-          );
-        }
+        ret[fkReference.constraint_name].referencedTable = fkReference.referenced_table_name;
+        ret[fkReference.constraint_name].columns.push(fkReference.column_name);
+        ret[fkReference.constraint_name].referencedColumns.push(fkReference.referenced_column_name);
       }
 
       const [
@@ -226,14 +222,12 @@ class MysqlSchemaInspector {
       ]);
 
       for (const fkReferentialConstraint of fkReferentialConstraints) {
-        if (ret[fkReferentialConstraint.constraint_name]) {
-          ret[
-            fkReferentialConstraint.constraint_name
-          ].onUpdate = fkReferentialConstraint.on_update.toUpperCase();
-          ret[
-            fkReferentialConstraint.constraint_name
-          ].onDelete = fkReferentialConstraint.on_delete.toUpperCase();
-        }
+        ret[
+          fkReferentialConstraint.constraint_name
+        ].onUpdate = fkReferentialConstraint.on_update.toUpperCase();
+        ret[
+          fkReferentialConstraint.constraint_name
+        ].onDelete = fkReferentialConstraint.on_delete.toUpperCase();
       }
     }
 
