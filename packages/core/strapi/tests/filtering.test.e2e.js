@@ -106,7 +106,10 @@ describe('Filtering API', () => {
 
     const sanitizedFixtures = await builder.sanitizedFixtures(strapi);
 
-    Object.assign(data, _.mapValues(sanitizedFixtures, value => transformToRESTResource(value)));
+    Object.assign(
+      data,
+      _.mapValues(sanitizedFixtures, value => transformToRESTResource(value))
+    );
   });
 
   afterAll(async () => {

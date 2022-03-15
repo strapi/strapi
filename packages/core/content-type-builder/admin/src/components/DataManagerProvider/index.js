@@ -600,9 +600,6 @@ DataManagerProvider.propTypes = {
 };
 
 const mapStateToProps = makeSelectDataManagerProvider();
-const withConnect = connect(
-  mapStateToProps,
-  null
-);
+const withConnect = connect(mapStateToProps, null);
 
 export default compose(withConnect)(memo(DataManagerProvider));
