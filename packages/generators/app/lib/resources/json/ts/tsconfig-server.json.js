@@ -16,5 +16,5 @@ module.exports = () => ({
     noEmitOnError: true,
   },
 
-  exclude: ['node_modules/', 'dist/', 'src/admin', 'src/plugins/**/admin'],
+  exclude: ['node_modules/', 'build/', 'dist/', 'src/admin', 'src/plugins/**/admin'],
 });

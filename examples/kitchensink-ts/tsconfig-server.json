@@ -17,5 +17,5 @@
   },
   // TODO remove the include when we fix the pluginsPath
   "include": ["src/plugins/**/*.json", "./"],
-  "exclude": ["node_modules/", "dist/", "src/admin", ".cache/", ".tmp/"]
+  "exclude": ["node_modules/", "build/", "dist/", "src/admin", ".cache/", ".tmp/"]
 }
