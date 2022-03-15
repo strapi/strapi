@@ -104,7 +104,11 @@ const MarketPlacePage = () => {
   if (hasFailed) {
     return (
       <Layout>
-        <AnErrorOccurred />
+        <ContentLayout>
+          <Box paddingTop={8}>
+            <AnErrorOccurred />
+          </Box>
+        </ContentLayout>
       </Layout>
     );
   }
