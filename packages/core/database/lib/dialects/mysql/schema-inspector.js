@@ -190,25 +190,34 @@ class MysqlSchemaInspector {
     const ret = {};
 
     for (const fk of rows) {
-
-      const [[references]] = await this.db.connection.raw(SQL_QUERIES.FOREIGN_KEY_REFERENCES, [fk.constraint_name, tableName]);
-      const [[referentialConstraints]] = await this.db.connection.raw(SQL_QUERIES.FOREIGN_KEY_REFERENTIALS_CONSTRAINTS, [fk.constraint_name, tableName]);
+      const [fkReferences] = await this.db.connection.raw(SQL_QUERIES.FOREIGN_KEY_REFERENCES, [
+        fk.constraint_name,
+        tableName,
+      ]);
+      const [
+        [fkReferentialConstraints],
+      ] = await this.db.connection.raw(SQL_QUERIES.FOREIGN_KEY_REFERENTIALS_CONSTRAINTS, [
+        fk.constraint_name,
+        tableName,
+      ]);
 
       if (!ret[fk.constraint_name]) {
         ret[fk.constraint_name] = {
           name: fk.constraint_name,
-          columns: [references.column_name],
-          referencedColumns: [references.referenced_column_name],
-          referencedTable: references.referenced_table_name,
-          onUpdate: referentialConstraints.on_update.toUpperCase(),
-          onDelete: referentialConstraints.on_delete.toUpperCase(),
+          columns: [],
+          referencedColumns: [],
+          referencedTable: fkReferences[0].referenced_table_name,
+          onUpdate: fkReferentialConstraints.on_update.toUpperCase(),
+          onDelete: fkReferentialConstraints.on_delete.toUpperCase(),
         };
-      } else {
-        ret[fk.constraint_name].columns.push(fk.column_name);
-        ret[fk.constraint_name].referencedColumns.push(fk.referenced_column_name);
+      }
+
+      for (const fkReference of fkReferences) {
+        ret[fk.constraint_name].columns.push(fkReference.column_name);
+        ret[fk.constraint_name].referencedColumns.push(fkReference.referenced_column_name);
       }
     }
-    
+
     return Object.values(ret);
   }
 }
