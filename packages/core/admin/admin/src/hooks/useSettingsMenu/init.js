@@ -10,7 +10,7 @@ const init = (initialState, { settings, shouldUpdateStrapi }) => {
   // Sort the links by name
   const sortedGlobalLinks = sortLinks([...pluginsGlobalLinks, ...globalLinks]).map(link => ({
     ...link,
-    hasNotification: link.id === 'application-infos' && shouldUpdateStrapi,
+    hasNotification: link.id === '000-application-infos' && shouldUpdateStrapi,
   }));
 
   const otherSections = Object.values(omit(settings, 'global'));
@@ -25,7 +25,7 @@ const init = (initialState, { settings, shouldUpdateStrapi }) => {
       intlLabel: { id: 'Settings.permissions', defaultMessage: 'Administration Panel' },
       links: [
         {
-          intlLabel: { id: 'Settings.permissions.menu.link.roles.label' },
+          intlLabel: { id: 'Settings.permissions.menu.link.roles.label', defaultMessage: 'Roles' },
           to: '/settings/roles',
           id: 'roles',
           isDisplayed: false,

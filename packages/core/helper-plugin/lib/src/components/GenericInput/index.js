@@ -39,6 +39,7 @@ const GenericInput = ({
   step,
   type,
   value,
+  isNullable,
   ...rest
 }) => {
   const { formatMessage } = useIntl();
@@ -91,26 +92,43 @@ const GenericInput = ({
 
   switch (type) {
     case 'bool': {
+      const clearProps = {
+        clearLabel:
+          isNullable &&
+          formatMessage({
+            id: 'app.components.ToggleCheckbox.clear-label',
+            defaultMessage: 'Clear',
+          }),
+
+        onClear:
+          isNullable &&
+          (() => {
+            onChange({ target: { name, value: null } });
+          }),
+      };
+
       return (
         <ToggleInput
           checked={value === null ? null : value || false}
           disabled={disabled}
           hint={hint}
           label={label}
+          error={errorMessage}
           labelAction={labelAction}
           name={name}
           offLabel={formatMessage({
             id: 'app.components.ToggleCheckbox.off-label',
-            defaultMessage: 'Off',
+            defaultMessage: 'False',
           })}
           onLabel={formatMessage({
             id: 'app.components.ToggleCheckbox.on-label',
-            defaultMessage: 'On',
+            defaultMessage: 'True',
           })}
           onChange={e => {
             onChange({ target: { name, value: e.target.checked } });
           }}
           required={required}
+          {...clearProps}
         />
       );
     }
@@ -391,6 +409,7 @@ GenericInput.defaultProps = {
   description: null,
   disabled: false,
   error: '',
+  isNullable: undefined,
   labelAction: undefined,
   placeholder: null,
   required: false,
@@ -414,6 +433,7 @@ GenericInput.propTypes = {
     defaultMessage: PropTypes.string.isRequired,
     values: PropTypes.object,
   }).isRequired,
+  isNullable: PropTypes.bool,
   labelAction: PropTypes.element,
   name: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,

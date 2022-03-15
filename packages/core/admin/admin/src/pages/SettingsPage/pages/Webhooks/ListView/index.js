@@ -413,7 +413,7 @@ const ListView = () => {
                           </Flex>
                         </Td>
                         <Td>
-                          <Stack horizontal size={1} {...stopPropagation}>
+                          <Stack horizontal spacing={1} {...stopPropagation}>
                             {canUpdate && (
                               <IconButton
                                 onClick={() => {

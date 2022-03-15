@@ -195,6 +195,11 @@ describe('<GuidedTourModal />', () => {
         background: #4945ff;
       }
 
+      .c24 svg > g,
+      .c24 svg path {
+        fill: #ffffff;
+      }
+
       .c29 {
         -webkit-align-items: center;
         -webkit-box-align: center;
@@ -598,6 +603,7 @@ describe('<GuidedTourModal />', () => {
                 aria-modal="true"
                 class="c4 c5"
                 role="dialog"
+                spacing="8"
                 width="41.25rem"
               >
                 <div
@@ -684,6 +690,7 @@ describe('<GuidedTourModal />', () => {
                     >
                       <div
                         class="c20 c21"
+                        spacing="4"
                       >
                         <span
                           class="c22"

@@ -233,6 +233,11 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         background: #4945ff;
       }
 
+      .c12 svg > g,
+      .c12 svg path {
+        fill: #ffffff;
+      }
+
       .c5 {
         color: #4945ff;
         font-size: 0.75rem;
@@ -379,6 +384,7 @@ describe('CONTENT MANAGER | EditView | Header', () => {
             </div>
             <div
               class="c9 c10"
+              spacing="2"
             >
               <button
                 aria-disabled="true"

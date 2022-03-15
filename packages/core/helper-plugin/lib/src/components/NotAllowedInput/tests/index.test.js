@@ -27,19 +27,12 @@ describe('<NotAllowedInput />', () => {
     );
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c2 {
-        font-weight: 600;
-        color: #32324d;
-        font-size: 0.75rem;
-        line-height: 1.33;
-      }
-
       .c5 {
         padding-right: 8px;
         padding-left: 12px;
       }
 
-      .c1 {
+      .c2 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -71,6 +64,13 @@ describe('<NotAllowedInput />', () => {
         align-items: center;
       }
 
+      .c1 {
+        font-weight: 600;
+        color: #32324d;
+        font-size: 0.75rem;
+        line-height: 1.33;
+      }
+
       .c7 {
         border: none;
         border-radius: 4px;
@@ -82,6 +82,7 @@ describe('<NotAllowedInput />', () => {
         font-size: 0.875rem;
         display: block;
         width: 100%;
+        background: inherit;
       }
 
       .c7::-webkit-input-placeholder {
@@ -105,7 +106,6 @@ describe('<NotAllowedInput />', () => {
       }
 
       .c7[aria-disabled='true'] {
-        background: inherit;
         color: inherit;
       }
 
@@ -161,17 +161,18 @@ describe('<NotAllowedInput />', () => {
         <div>
           <div
             class="c0"
+            spacing="1"
           >
-            <div
+            <label
               class="c1"
+              for="test"
             >
-              <label
+              <div
                 class="c2"
-                for="test"
               >
                 test
-              </label>
-            </div>
+              </div>
+            </label>
             <div
               class="c3 c4"
               disabled=""

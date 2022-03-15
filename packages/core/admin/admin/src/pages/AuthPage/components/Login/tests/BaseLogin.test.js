@@ -298,21 +298,9 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         background: #4945ff;
       }
 
-      .c13 {
-        font-weight: 600;
-        color: #32324d;
-        font-size: 0.75rem;
-        line-height: 1.33;
-      }
-
-      .c14 {
-        color: #d02b20;
-        font-size: 0.875rem;
-        line-height: 1.43;
-      }
-
-      .c15 {
-        line-height: 0;
+      .c30 svg > g,
+      .c30 svg path {
+        fill: #ffffff;
       }
 
       .c21 {
@@ -320,7 +308,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         padding-left: 8px;
       }
 
-      .c12 {
+      .c13 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -352,6 +340,23 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         align-items: center;
       }
 
+      .c12 {
+        font-weight: 600;
+        color: #32324d;
+        font-size: 0.75rem;
+        line-height: 1.33;
+      }
+
+      .c14 {
+        color: #d02b20;
+        font-size: 0.875rem;
+        line-height: 1.43;
+      }
+
+      .c15 {
+        line-height: 0;
+      }
+
       .c18 {
         border: none;
         border-radius: 4px;
@@ -362,6 +367,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         font-size: 0.875rem;
         display: block;
         width: 100%;
+        background: inherit;
       }
 
       .c18::-webkit-input-placeholder {
@@ -385,7 +391,6 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
       }
 
       .c18[aria-disabled='true'] {
-        background: inherit;
         color: inherit;
       }
 
@@ -404,6 +409,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         font-size: 0.875rem;
         display: block;
         width: 100%;
+        background: inherit;
       }
 
       .c19::-webkit-input-placeholder {
@@ -427,7 +433,6 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
       }
 
       .c19[aria-disabled='true'] {
-        background: inherit;
         color: inherit;
       }
 
@@ -684,19 +689,21 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
             </div>
             <div
               class="c10"
+              spacing="6"
             >
               <div>
                 <div>
                   <div
                     class="c11"
+                    spacing="1"
                   >
-                    <div
+                    <label
                       class="c12"
+                      for="textinput-1"
+                      required=""
                     >
-                      <label
+                      <div
                         class="c13"
-                        for="textinput-1"
-                        required=""
                       >
                         Email
                         <span
@@ -704,8 +711,8 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
                         >
                           *
                         </span>
-                      </label>
-                    </div>
+                      </div>
+                    </label>
                     <div
                       class="c16 c17"
                     >
@@ -726,14 +733,15 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
                 <div>
                   <div
                     class="c11"
+                    spacing="1"
                   >
-                    <div
+                    <label
                       class="c12"
+                      for="textinput-2"
+                      required=""
                     >
-                      <label
+                      <div
                         class="c13"
-                        for="textinput-2"
-                        required=""
                       >
                         Password
                         <span
@@ -741,8 +749,8 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
                         >
                           *
                         </span>
-                      </label>
-                    </div>
+                      </div>
+                    </label>
                     <div
                       class="c16 c17"
                     >
@@ -784,6 +792,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
               <div>
                 <div
                   class="c24"
+                  spacing="1"
                 >
                   <label
                     class="c25 c26"

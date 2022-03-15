@@ -1,16 +1,11 @@
 import get from 'lodash/get';
 import isBoolean from 'lodash/isBoolean';
-import isNumber from 'lodash/isNumber';
-import isNull from 'lodash/isNull';
-import isObject from 'lodash/isObject';
 import isEmpty from 'lodash/isEmpty';
 import isNaN from 'lodash/isNaN';
 import toNumber from 'lodash/toNumber';
 
 import * as yup from 'yup';
 import { translatedErrors as errorsTrads } from '@strapi/helper-plugin';
-
-import isValidJSONString from './isValidJSONString';
 
 yup.addMethod(yup.mixed, 'defined', function() {
   return this.test('defined', errorsTrads.required, value => value !== undefined);
@@ -220,10 +215,6 @@ const createYupSchemaAttribute = (type, validations, options) => {
       .mixed(errorsTrads.json)
       .test('isJSON', errorsTrads.json, value => {
         if (value === undefined) {
-          return true;
-        }
-
-        if (isValidJSONString(value) || isNumber(value) || isNull(value) || isObject(value)) {
           return true;
         }
 

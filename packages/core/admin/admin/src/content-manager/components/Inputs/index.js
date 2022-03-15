@@ -224,6 +224,8 @@ function Inputs({
       attribute={fieldSchema}
       autoComplete="new-password"
       intlLabel={{ id: label, defaultMessage: label }}
+      // in case the default value of the boolean is null, attribute.default doesn't exist
+      isNullable={inputType === 'bool' && [null, undefined].includes(fieldSchema.default)}
       description={description ? { id: description, defaultMessage: description } : null}
       disabled={shouldDisableField}
       error={errorId}
@@ -279,7 +281,4 @@ Inputs.propTypes = {
 
 const Memoized = memo(Inputs, isEqual);
 
-export default connect(
-  Memoized,
-  select
-);
+export default connect(Memoized, select);
