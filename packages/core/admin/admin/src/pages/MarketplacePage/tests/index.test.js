@@ -68,7 +68,7 @@ describe('Marketplace page', () => {
         padding-top: 16px;
       }
 
-      .c38 {
+      .c36 {
         padding-top: 8px;
       }
 
@@ -82,18 +82,18 @@ describe('Marketplace page', () => {
         padding-left: 16px;
       }
 
-      .c51 {
+      .c49 {
         font-weight: 600;
         color: #32324d;
         font-size: 0.75rem;
         line-height: 1.33;
       }
 
-      .c48 {
+      .c46 {
         padding-right: 8px;
       }
 
-      .c45 {
+      .c43 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -107,21 +107,21 @@ describe('Marketplace page', () => {
         outline: none;
       }
 
-      .c45 svg {
+      .c43 svg {
         height: 12px;
         width: 12px;
       }
 
-      .c45 svg > g,
-      .c45 svg path {
+      .c43 svg > g,
+      .c43 svg path {
         fill: #ffffff;
       }
 
-      .c45[aria-disabled='true'] {
+      .c43[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c45:after {
+      .c43:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -136,11 +136,11 @@ describe('Marketplace page', () => {
         border: 2px solid transparent;
       }
 
-      .c45:focus-visible {
+      .c43:focus-visible {
         outline: none;
       }
 
-      .c45:focus-visible:after {
+      .c43:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -151,11 +151,11 @@ describe('Marketplace page', () => {
         border: 2px solid #4945ff;
       }
 
-      .c49 {
+      .c47 {
         height: 100%;
       }
 
-      .c46 {
+      .c44 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -167,7 +167,7 @@ describe('Marketplace page', () => {
         background: #f0f0ff;
       }
 
-      .c46 .c47 {
+      .c44 .c45 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -178,62 +178,62 @@ describe('Marketplace page', () => {
         align-items: center;
       }
 
-      .c46 .c50 {
+      .c44 .c48 {
         color: #ffffff;
       }
 
-      .c46[aria-disabled='true'] {
+      .c44[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c46[aria-disabled='true'] .c50 {
+      .c44[aria-disabled='true'] .c48 {
         color: #666687;
       }
 
-      .c46[aria-disabled='true'] svg > g,
-      .c46[aria-disabled='true'] svg path {
+      .c44[aria-disabled='true'] svg > g,
+      .c44[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c46[aria-disabled='true']:active {
+      .c44[aria-disabled='true']:active {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c46[aria-disabled='true']:active .c50 {
+      .c44[aria-disabled='true']:active .c48 {
         color: #666687;
       }
 
-      .c46[aria-disabled='true']:active svg > g,
-      .c46[aria-disabled='true']:active svg path {
+      .c44[aria-disabled='true']:active svg > g,
+      .c44[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
-      .c46:hover {
+      .c44:hover {
         background-color: #ffffff;
       }
 
-      .c46:active {
+      .c44:active {
         background-color: #ffffff;
         border: 1px solid #4945ff;
       }
 
-      .c46:active .c50 {
+      .c44:active .c48 {
         color: #4945ff;
       }
 
-      .c46:active svg > g,
-      .c46:active svg path {
+      .c44:active svg > g,
+      .c44:active svg path {
         fill: #4945ff;
       }
 
-      .c46 .c50 {
+      .c44 .c48 {
         color: #271fe0;
       }
 
-      .c46 svg > g,
-      .c46 svg path {
+      .c44 svg > g,
+      .c44 svg path {
         fill: #271fe0;
       }
 
@@ -280,7 +280,7 @@ describe('Marketplace page', () => {
         align-items: center;
       }
 
-      .c36 {
+      .c50 {
         color: #328048;
         margin-left: 8px;
       }
@@ -292,7 +292,7 @@ describe('Marketplace page', () => {
         height: 12;
       }
 
-      .c37 path {
+      .c51 path {
         fill: #328048;
       }
 
@@ -444,11 +444,11 @@ describe('Marketplace page', () => {
         box-shadow: #4945ff 0px 0px 0px 2px;
       }
 
-      .c41 {
+      .c39 {
         padding-top: 24px;
       }
 
-      .c42 {
+      .c40 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -462,12 +462,12 @@ describe('Marketplace page', () => {
         align-items: center;
       }
 
-      .c43 > * {
+      .c41 > * {
         margin-left: 0;
         margin-right: 0;
       }
 
-      .c43 > * + * {
+      .c41 > * + * {
         margin-left: 8px;
       }
 
@@ -478,7 +478,7 @@ describe('Marketplace page', () => {
         line-height: 1.25;
       }
 
-      .c39 {
+      .c37 {
         color: #666687;
         font-size: 0.875rem;
         line-height: 1.43;
@@ -588,7 +588,7 @@ describe('Marketplace page', () => {
         padding-right: 8px;
       }
 
-      .c44 {
+      .c42 {
         padding-left: 8px;
       }
 
@@ -725,7 +725,7 @@ describe('Marketplace page', () => {
         fill: #32324d;
       }
 
-      .c40 {
+      .c38 {
         display: -webkit-box;
         -webkit-box-orient: vertical;
         -webkit-line-clamp: 2;
@@ -913,44 +913,21 @@ describe('Marketplace page', () => {
                               class="c35"
                             >
                               Comments
-                              <span>
-                                <div
-                                  aria-describedby="tooltip-1"
-                                  class="c35"
-                                  tabindex="0"
-                                >
-                                  <svg
-                                    class="c36 c37"
-                                    fill="none"
-                                    height="1em"
-                                    viewBox="0 0 24 24"
-                                    width="1em"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                  >
-                                    <path
-                                      clip-rule="evenodd"
-                                      d="M12 24c6.627 0 12-5.373 12-12S18.627 0 12 0 0 5.373 0 12s5.373 12 12 12zm-1.438-11.066L16.158 7.5 18 9.245l-7.438 7.18-4.462-4.1 1.84-1.745 2.622 2.354z"
-                                      fill="#212134"
-                                      fill-rule="evenodd"
-                                    />
-                                  </svg>
-                                </div>
-                              </span>
                             </div>
                           </h3>
                         </div>
                         <div
-                          class="c38"
+                          class="c36"
                         >
                           <p
-                            class="c39 c40"
+                            class="c37 c38"
                           >
                             Powerful Strapi based comments moderation tool for you and your users
                           </p>
                         </div>
                       </div>
                       <div
-                        class="c41 c42 c43"
+                        class="c39 c40 c41"
                         spacing="2"
                         style="align-self: flex-end;"
                       >
@@ -969,7 +946,7 @@ describe('Marketplace page', () => {
                           </span>
                           <div
                             aria-hidden="true"
-                            class="c10 c44"
+                            class="c10 c42"
                           >
                             <svg
                               fill="none"
@@ -987,12 +964,12 @@ describe('Marketplace page', () => {
                         </a>
                         <button
                           aria-disabled="false"
-                          class="c45 c46"
+                          class="c43 c44"
                           type="button"
                         >
                           <div
                             aria-hidden="true"
-                            class="c47 c48 c49"
+                            class="c45 c46 c47"
                           >
                             <svg
                               fill="none"
@@ -1012,7 +989,7 @@ describe('Marketplace page', () => {
                             </svg>
                           </div>
                           <span
-                            class="c50 c51"
+                            class="c48 c49"
                           >
                             Copy install command
                           </span>
@@ -1054,12 +1031,12 @@ describe('Marketplace page', () => {
                               Config Sync
                               <span>
                                 <div
-                                  aria-describedby="tooltip-3"
+                                  aria-describedby="tooltip-1"
                                   class="c35"
                                   tabindex="0"
                                 >
                                   <svg
-                                    class="c36 c37"
+                                    class="c50 c51"
                                     fill="none"
                                     height="1em"
                                     viewBox="0 0 24 24"
@@ -1079,17 +1056,17 @@ describe('Marketplace page', () => {
                           </h3>
                         </div>
                         <div
-                          class="c38"
+                          class="c36"
                         >
                           <p
-                            class="c39 c40"
+                            class="c37 c38"
                           >
                             Migrate your config data across environments using the CLI or Strapi admin panel.
                           </p>
                         </div>
                       </div>
                       <div
-                        class="c41 c42 c43"
+                        class="c39 c40 c41"
                         spacing="2"
                         style="align-self: flex-end;"
                       >
@@ -1108,7 +1085,7 @@ describe('Marketplace page', () => {
                           </span>
                           <div
                             aria-hidden="true"
-                            class="c10 c44"
+                            class="c10 c42"
                           >
                             <svg
                               fill="none"
@@ -1126,12 +1103,12 @@ describe('Marketplace page', () => {
                         </a>
                         <button
                           aria-disabled="false"
-                          class="c45 c46"
+                          class="c43 c44"
                           type="button"
                         >
                           <div
                             aria-hidden="true"
-                            class="c47 c48 c49"
+                            class="c45 c46 c47"
                           >
                             <svg
                               fill="none"
@@ -1151,7 +1128,7 @@ describe('Marketplace page', () => {
                             </svg>
                           </div>
                           <span
-                            class="c50 c51"
+                            class="c48 c49"
                           >
                             Copy install command
                           </span>
@@ -1195,17 +1172,17 @@ describe('Marketplace page', () => {
                           </h3>
                         </div>
                         <div
-                          class="c38"
+                          class="c36"
                         >
                           <p
-                            class="c39 c40"
+                            class="c37 c38"
                           >
-                            This plugin enables content versioning.
+                            This plugin enables you to versioning Content Types. It allows multiple draft versions✅ Keeps history of all changes (with time travel) ✅ 
                           </p>
                         </div>
                       </div>
                       <div
-                        class="c41 c42 c43"
+                        class="c39 c40 c41"
                         spacing="2"
                         style="align-self: flex-end;"
                       >
@@ -1224,7 +1201,7 @@ describe('Marketplace page', () => {
                           </span>
                           <div
                             aria-hidden="true"
-                            class="c10 c44"
+                            class="c10 c42"
                           >
                             <svg
                               fill="none"
@@ -1242,12 +1219,12 @@ describe('Marketplace page', () => {
                         </a>
                         <button
                           aria-disabled="false"
-                          class="c45 c46"
+                          class="c43 c44"
                           type="button"
                         >
                           <div
                             aria-hidden="true"
-                            class="c47 c48 c49"
+                            class="c45 c46 c47"
                           >
                             <svg
                               fill="none"
@@ -1267,123 +1244,7 @@ describe('Marketplace page', () => {
                             </svg>
                           </div>
                           <span
-                            class="c50 c51"
-                          >
-                            Copy install command
-                          </span>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div
-                  class="c29"
-                >
-                  <div
-                    class=""
-                    style="height: 100%;"
-                  >
-                    <div
-                      class="c30 c31"
-                      height="100%"
-                    >
-                      <div
-                        class=""
-                      >
-                        <img
-                          alt="DeepL logo"
-                          class="c32"
-                          height="11"
-                          src="https://dl.airtable.com/.attachments/48aeaaa64b52ecc05d7c42d5fa58592b/8a277b42/deepl-logo-blue.png"
-                          width="11"
-                        />
-                        <div
-                          class="c33"
-                        >
-                          <h3
-                            class="c34"
-                          >
-                            <div
-                              class="c35"
-                            >
-                              DeepL
-                            </div>
-                          </h3>
-                        </div>
-                        <div
-                          class="c38"
-                        >
-                          <p
-                            class="c39 c40"
-                          >
-                            Integration with the DeepL-API to provide quick automated translation of content fields
-                          </p>
-                        </div>
-                      </div>
-                      <div
-                        class="c41 c42 c43"
-                        spacing="2"
-                        style="align-self: flex-end;"
-                      >
-                        <a
-                          aria-disabled="false"
-                          aria-label="Learn more about DeepL"
-                          class="c8 c9"
-                          href="https://market.strapi.io/plugins/strapi-plugin-deepl"
-                          rel="noreferrer noopener"
-                          target="_blank"
-                        >
-                          <span
-                            class="c12 c13"
-                          >
-                            Learn more
-                          </span>
-                          <div
-                            aria-hidden="true"
-                            class="c10 c44"
-                          >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M16.235 2.824a1.412 1.412 0 010-2.824h6.353C23.368 0 24 .633 24 1.412v6.353a1.412 1.412 0 01-2.823 0V4.82l-8.179 8.178a1.412 1.412 0 01-1.996-1.996l8.178-8.178h-2.945zm4.942 10.588a1.412 1.412 0 012.823 0v9.176c0 .78-.632 1.412-1.412 1.412H1.412C.632 24 0 23.368 0 22.588V1.412C0 .632.632 0 1.412 0h9.176a1.412 1.412 0 010 2.824H2.824v18.353h18.353v-7.765z"
-                                fill="#32324D"
-                              />
-                            </svg>
-                          </div>
-                        </a>
-                        <button
-                          aria-disabled="false"
-                          class="c45 c46"
-                          type="button"
-                        >
-                          <div
-                            aria-hidden="true"
-                            class="c47 c48 c49"
-                          >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24z"
-                                fill="#212134"
-                              />
-                              <path
-                                d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0024 16.962V1.056A1.056 1.056 0 0022.944 0H7.038a1.056 1.056 0 00-1.056 1.056v2.252h2.112V2.11z"
-                                fill="#212134"
-                              />
-                            </svg>
-                          </div>
-                          <span
-                            class="c50 c51"
+                            class="c48 c49"
                           >
                             Copy install command
                           </span>
@@ -1425,7 +1286,7 @@ describe('Marketplace page', () => {
                               Documentation
                               <span>
                                 <div
-                                  aria-describedby="tooltip-5"
+                                  aria-describedby="tooltip-3"
                                   class="c35"
                                   tabindex="0"
                                 >
@@ -1442,17 +1303,17 @@ describe('Marketplace page', () => {
                           </h3>
                         </div>
                         <div
-                          class="c38"
+                          class="c36"
                         >
                           <p
-                            class="c39 c40"
+                            class="c37 c38"
                           >
                             Create an OpenAPI Document and visualize your API with SWAGGER UI
                           </p>
                         </div>
                       </div>
                       <div
-                        class="c41 c42 c43"
+                        class="c39 c40 c41"
                         spacing="2"
                         style="align-self: flex-end;"
                       >
@@ -1471,7 +1332,7 @@ describe('Marketplace page', () => {
                           </span>
                           <div
                             aria-hidden="true"
-                            class="c10 c44"
+                            class="c10 c42"
                           >
                             <svg
                               fill="none"
@@ -1491,7 +1352,7 @@ describe('Marketplace page', () => {
                           class="c53"
                         >
                           <svg
-                            class="c54 c37"
+                            class="c54 c51"
                             fill="none"
                             height="12"
                             viewBox="0 0 24 24"
@@ -1509,2811 +1370,6 @@ describe('Marketplace page', () => {
                             Installed
                           </span>
                         </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div
-                  class="c29"
-                >
-                  <div
-                    class=""
-                    style="height: 100%;"
-                  >
-                    <div
-                      class="c30 c31"
-                      height="100%"
-                    >
-                      <div
-                        class=""
-                      >
-                        <img
-                          alt="Email Designer logo"
-                          class="c32"
-                          height="11"
-                          src="https://dl.airtable.com/.attachments/69216d074c5bee89866bda553e658abc/a6fc4ae6/email-designer-icon.jpg"
-                          width="11"
-                        />
-                        <div
-                          class="c33"
-                        >
-                          <h3
-                            class="c34"
-                          >
-                            <div
-                              class="c35"
-                            >
-                              Email Designer
-                            </div>
-                          </h3>
-                        </div>
-                        <div
-                          class="c38"
-                        >
-                          <p
-                            class="c39 c40"
-                          >
-                            Design your own email templates directly from the admin panel and use the magic to send programmatically email from your controllers / services.
-                          </p>
-                        </div>
-                      </div>
-                      <div
-                        class="c41 c42 c43"
-                        spacing="2"
-                        style="align-self: flex-end;"
-                      >
-                        <a
-                          aria-disabled="false"
-                          aria-label="Learn more about Email Designer"
-                          class="c8 c9"
-                          href="https://market.strapi.io/plugins/strapi-plugin-email-designer"
-                          rel="noreferrer noopener"
-                          target="_blank"
-                        >
-                          <span
-                            class="c12 c13"
-                          >
-                            Learn more
-                          </span>
-                          <div
-                            aria-hidden="true"
-                            class="c10 c44"
-                          >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M16.235 2.824a1.412 1.412 0 010-2.824h6.353C23.368 0 24 .633 24 1.412v6.353a1.412 1.412 0 01-2.823 0V4.82l-8.179 8.178a1.412 1.412 0 01-1.996-1.996l8.178-8.178h-2.945zm4.942 10.588a1.412 1.412 0 012.823 0v9.176c0 .78-.632 1.412-1.412 1.412H1.412C.632 24 0 23.368 0 22.588V1.412C0 .632.632 0 1.412 0h9.176a1.412 1.412 0 010 2.824H2.824v18.353h18.353v-7.765z"
-                                fill="#32324D"
-                              />
-                            </svg>
-                          </div>
-                        </a>
-                        <button
-                          aria-disabled="false"
-                          class="c45 c46"
-                          type="button"
-                        >
-                          <div
-                            aria-hidden="true"
-                            class="c47 c48 c49"
-                          >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24z"
-                                fill="#212134"
-                              />
-                              <path
-                                d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0024 16.962V1.056A1.056 1.056 0 0022.944 0H7.038a1.056 1.056 0 00-1.056 1.056v2.252h2.112V2.11z"
-                                fill="#212134"
-                              />
-                            </svg>
-                          </div>
-                          <span
-                            class="c50 c51"
-                          >
-                            Copy install command
-                          </span>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div
-                  class="c29"
-                >
-                  <div
-                    class=""
-                    style="height: 100%;"
-                  >
-                    <div
-                      class="c30 c31"
-                      height="100%"
-                    >
-                      <div
-                        class=""
-                      >
-                        <img
-                          alt="Entity Relationship Chart logo"
-                          class="c32"
-                          height="11"
-                          src="https://dl.airtable.com/.attachments/854647efd1c8942df6071108aa42e576/a7f89388/160.png"
-                          width="11"
-                        />
-                        <div
-                          class="c33"
-                        >
-                          <h3
-                            class="c34"
-                          >
-                            <div
-                              class="c35"
-                            >
-                              Entity Relationship Chart
-                            </div>
-                          </h3>
-                        </div>
-                        <div
-                          class="c38"
-                        >
-                          <p
-                            class="c39 c40"
-                          >
-                            Generates and displays Entity Relationship Diagram of all Strapi models, fields and relations.
-                          </p>
-                        </div>
-                      </div>
-                      <div
-                        class="c41 c42 c43"
-                        spacing="2"
-                        style="align-self: flex-end;"
-                      >
-                        <a
-                          aria-disabled="false"
-                          aria-label="Learn more about Entity Relationship Chart"
-                          class="c8 c9"
-                          href="https://market.strapi.io/plugins/strapi-plugin-entity-relationship-chart"
-                          rel="noreferrer noopener"
-                          target="_blank"
-                        >
-                          <span
-                            class="c12 c13"
-                          >
-                            Learn more
-                          </span>
-                          <div
-                            aria-hidden="true"
-                            class="c10 c44"
-                          >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M16.235 2.824a1.412 1.412 0 010-2.824h6.353C23.368 0 24 .633 24 1.412v6.353a1.412 1.412 0 01-2.823 0V4.82l-8.179 8.178a1.412 1.412 0 01-1.996-1.996l8.178-8.178h-2.945zm4.942 10.588a1.412 1.412 0 012.823 0v9.176c0 .78-.632 1.412-1.412 1.412H1.412C.632 24 0 23.368 0 22.588V1.412C0 .632.632 0 1.412 0h9.176a1.412 1.412 0 010 2.824H2.824v18.353h18.353v-7.765z"
-                                fill="#32324D"
-                              />
-                            </svg>
-                          </div>
-                        </a>
-                        <button
-                          aria-disabled="false"
-                          class="c45 c46"
-                          type="button"
-                        >
-                          <div
-                            aria-hidden="true"
-                            class="c47 c48 c49"
-                          >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24z"
-                                fill="#212134"
-                              />
-                              <path
-                                d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0024 16.962V1.056A1.056 1.056 0 0022.944 0H7.038a1.056 1.056 0 00-1.056 1.056v2.252h2.112V2.11z"
-                                fill="#212134"
-                              />
-                            </svg>
-                          </div>
-                          <span
-                            class="c50 c51"
-                          >
-                            Copy install command
-                          </span>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div
-                  class="c29"
-                >
-                  <div
-                    class=""
-                    style="height: 100%;"
-                  >
-                    <div
-                      class="c30 c31"
-                      height="100%"
-                    >
-                      <div
-                        class=""
-                      >
-                        <img
-                          alt="EZ Forms logo"
-                          class="c32"
-                          height="11"
-                          src="https://dl.airtable.com/.attachments/cd916c4f8065799710962c08ae21e795/9eeeccd9/EZForms.png"
-                          width="11"
-                        />
-                        <div
-                          class="c33"
-                        >
-                          <h3
-                            class="c34"
-                          >
-                            <div
-                              class="c35"
-                            >
-                              EZ Forms
-                            </div>
-                          </h3>
-                        </div>
-                        <div
-                          class="c38"
-                        >
-                          <p
-                            class="c39 c40"
-                          >
-                            This plugin allows you to easily consume forms from your front end and automatically reject spam, send out notifications, and store the data in your database.
-                          </p>
-                        </div>
-                      </div>
-                      <div
-                        class="c41 c42 c43"
-                        spacing="2"
-                        style="align-self: flex-end;"
-                      >
-                        <a
-                          aria-disabled="false"
-                          aria-label="Learn more about EZ Forms"
-                          class="c8 c9"
-                          href="https://market.strapi.io/plugins/strapi-plugin-ezforms"
-                          rel="noreferrer noopener"
-                          target="_blank"
-                        >
-                          <span
-                            class="c12 c13"
-                          >
-                            Learn more
-                          </span>
-                          <div
-                            aria-hidden="true"
-                            class="c10 c44"
-                          >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M16.235 2.824a1.412 1.412 0 010-2.824h6.353C23.368 0 24 .633 24 1.412v6.353a1.412 1.412 0 01-2.823 0V4.82l-8.179 8.178a1.412 1.412 0 01-1.996-1.996l8.178-8.178h-2.945zm4.942 10.588a1.412 1.412 0 012.823 0v9.176c0 .78-.632 1.412-1.412 1.412H1.412C.632 24 0 23.368 0 22.588V1.412C0 .632.632 0 1.412 0h9.176a1.412 1.412 0 010 2.824H2.824v18.353h18.353v-7.765z"
-                                fill="#32324D"
-                              />
-                            </svg>
-                          </div>
-                        </a>
-                        <button
-                          aria-disabled="false"
-                          class="c45 c46"
-                          type="button"
-                        >
-                          <div
-                            aria-hidden="true"
-                            class="c47 c48 c49"
-                          >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24z"
-                                fill="#212134"
-                              />
-                              <path
-                                d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0024 16.962V1.056A1.056 1.056 0 0022.944 0H7.038a1.056 1.056 0 00-1.056 1.056v2.252h2.112V2.11z"
-                                fill="#212134"
-                              />
-                            </svg>
-                          </div>
-                          <span
-                            class="c50 c51"
-                          >
-                            Copy install command
-                          </span>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div
-                  class="c29"
-                >
-                  <div
-                    class=""
-                    style="height: 100%;"
-                  >
-                    <div
-                      class="c30 c31"
-                      height="100%"
-                    >
-                      <div
-                        class=""
-                      >
-                        <img
-                          alt="Gatsby Preview logo"
-                          class="c32"
-                          height="11"
-                          src="https://dl.airtable.com/.attachments/63d4628fdf2c15c0daa343c1df1b964e/74c1a508/Gatsby-logo.png"
-                          width="11"
-                        />
-                        <div
-                          class="c33"
-                        >
-                          <h3
-                            class="c34"
-                          >
-                            <div
-                              class="c35"
-                            >
-                              Gatsby Preview
-                              <span>
-                                <div
-                                  aria-describedby="tooltip-7"
-                                  class="c35"
-                                  tabindex="0"
-                                >
-                                  <img
-                                    alt="Made by Strapi"
-                                    class="c52"
-                                    height="auto"
-                                    src="IMAGE_MOCK"
-                                    width="6"
-                                  />
-                                </div>
-                              </span>
-                            </div>
-                          </h3>
-                        </div>
-                        <div
-                          class="c38"
-                        >
-                          <p
-                            class="c39 c40"
-                          >
-                            The official plugin to integrate Strapi with Gatsby Cloud
-                          </p>
-                        </div>
-                      </div>
-                      <div
-                        class="c41 c42 c43"
-                        spacing="2"
-                        style="align-self: flex-end;"
-                      >
-                        <a
-                          aria-disabled="false"
-                          aria-label="Learn more about Gatsby Preview"
-                          class="c8 c9"
-                          href="https://market.strapi.io/plugins/@strapi-plugin-gatsby-preview"
-                          rel="noreferrer noopener"
-                          target="_blank"
-                        >
-                          <span
-                            class="c12 c13"
-                          >
-                            Learn more
-                          </span>
-                          <div
-                            aria-hidden="true"
-                            class="c10 c44"
-                          >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M16.235 2.824a1.412 1.412 0 010-2.824h6.353C23.368 0 24 .633 24 1.412v6.353a1.412 1.412 0 01-2.823 0V4.82l-8.179 8.178a1.412 1.412 0 01-1.996-1.996l8.178-8.178h-2.945zm4.942 10.588a1.412 1.412 0 012.823 0v9.176c0 .78-.632 1.412-1.412 1.412H1.412C.632 24 0 23.368 0 22.588V1.412C0 .632.632 0 1.412 0h9.176a1.412 1.412 0 010 2.824H2.824v18.353h18.353v-7.765z"
-                                fill="#32324D"
-                              />
-                            </svg>
-                          </div>
-                        </a>
-                        <button
-                          aria-disabled="false"
-                          class="c45 c46"
-                          type="button"
-                        >
-                          <div
-                            aria-hidden="true"
-                            class="c47 c48 c49"
-                          >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24z"
-                                fill="#212134"
-                              />
-                              <path
-                                d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0024 16.962V1.056A1.056 1.056 0 0022.944 0H7.038a1.056 1.056 0 00-1.056 1.056v2.252h2.112V2.11z"
-                                fill="#212134"
-                              />
-                            </svg>
-                          </div>
-                          <span
-                            class="c50 c51"
-                          >
-                            Copy install command
-                          </span>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div
-                  class="c29"
-                >
-                  <div
-                    class=""
-                    style="height: 100%;"
-                  >
-                    <div
-                      class="c30 c31"
-                      height="100%"
-                    >
-                      <div
-                        class=""
-                      >
-                        <img
-                          alt="GraphQL logo"
-                          class="c32"
-                          height="11"
-                          src="https://dl.airtable.com/.attachments/089c61fcb87f4b158e7ec602b0878666/1b7f4122/graphql.png"
-                          width="11"
-                        />
-                        <div
-                          class="c33"
-                        >
-                          <h3
-                            class="c34"
-                          >
-                            <div
-                              class="c35"
-                            >
-                              GraphQL
-                              <span>
-                                <div
-                                  aria-describedby="tooltip-9"
-                                  class="c35"
-                                  tabindex="0"
-                                >
-                                  <img
-                                    alt="Made by Strapi"
-                                    class="c52"
-                                    height="auto"
-                                    src="IMAGE_MOCK"
-                                    width="6"
-                                  />
-                                </div>
-                              </span>
-                            </div>
-                          </h3>
-                        </div>
-                        <div
-                          class="c38"
-                        >
-                          <p
-                            class="c39 c40"
-                          >
-                            Adds GraphQL endpoint with default API methods.
-                          </p>
-                        </div>
-                      </div>
-                      <div
-                        class="c41 c42 c43"
-                        spacing="2"
-                        style="align-self: flex-end;"
-                      >
-                        <a
-                          aria-disabled="false"
-                          aria-label="Learn more about GraphQL"
-                          class="c8 c9"
-                          href="https://market.strapi.io/plugins/@strapi-plugin-graphql"
-                          rel="noreferrer noopener"
-                          target="_blank"
-                        >
-                          <span
-                            class="c12 c13"
-                          >
-                            Learn more
-                          </span>
-                          <div
-                            aria-hidden="true"
-                            class="c10 c44"
-                          >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M16.235 2.824a1.412 1.412 0 010-2.824h6.353C23.368 0 24 .633 24 1.412v6.353a1.412 1.412 0 01-2.823 0V4.82l-8.179 8.178a1.412 1.412 0 01-1.996-1.996l8.178-8.178h-2.945zm4.942 10.588a1.412 1.412 0 012.823 0v9.176c0 .78-.632 1.412-1.412 1.412H1.412C.632 24 0 23.368 0 22.588V1.412C0 .632.632 0 1.412 0h9.176a1.412 1.412 0 010 2.824H2.824v18.353h18.353v-7.765z"
-                                fill="#32324D"
-                              />
-                            </svg>
-                          </div>
-                        </a>
-                        <div
-                          class="c53"
-                        >
-                          <svg
-                            class="c54 c37"
-                            fill="none"
-                            height="12"
-                            viewBox="0 0 24 24"
-                            width="12"
-                            xmlns="http://www.w3.org/2000/svg"
-                          >
-                            <path
-                              d="M20.727 2.97a.2.2 0 01.286 0l2.85 2.89a.2.2 0 010 .28L9.554 20.854a.2.2 0 01-.285 0l-9.13-9.243a.2.2 0 010-.281l2.85-2.892a.2.2 0 01.284 0l6.14 6.209L20.726 2.97z"
-                              fill="#212134"
-                            />
-                          </svg>
-                          <span
-                            class="c55"
-                          >
-                            Installed
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div
-                  class="c29"
-                >
-                  <div
-                    class=""
-                    style="height: 100%;"
-                  >
-                    <div
-                      class="c30 c31"
-                      height="100%"
-                    >
-                      <div
-                        class=""
-                      >
-                        <img
-                          alt="Internationalization (i18n) logo"
-                          class="c32"
-                          height="11"
-                          src="https://dl.airtable.com/.attachments/41aa19ed064e03a856c9ad0c0e406d4b/84ed8c9d/globe.png"
-                          width="11"
-                        />
-                        <div
-                          class="c33"
-                        >
-                          <h3
-                            class="c34"
-                          >
-                            <div
-                              class="c35"
-                            >
-                              Internationalization (i18n)
-                              <span>
-                                <div
-                                  aria-describedby="tooltip-11"
-                                  class="c35"
-                                  tabindex="0"
-                                >
-                                  <img
-                                    alt="Made by Strapi"
-                                    class="c52"
-                                    height="auto"
-                                    src="IMAGE_MOCK"
-                                    width="6"
-                                  />
-                                </div>
-                              </span>
-                            </div>
-                          </h3>
-                        </div>
-                        <div
-                          class="c38"
-                        >
-                          <p
-                            class="c39 c40"
-                          >
-                            The Internationalization (i18n) plugin allows Strapi users to create, manage and distribute localized content in different languages, called "locales".
-                          </p>
-                        </div>
-                      </div>
-                      <div
-                        class="c41 c42 c43"
-                        spacing="2"
-                        style="align-self: flex-end;"
-                      >
-                        <a
-                          aria-disabled="false"
-                          aria-label="Learn more about Internationalization (i18n)"
-                          class="c8 c9"
-                          href="https://market.strapi.io/plugins/@strapi-plugin-i18n"
-                          rel="noreferrer noopener"
-                          target="_blank"
-                        >
-                          <span
-                            class="c12 c13"
-                          >
-                            Learn more
-                          </span>
-                          <div
-                            aria-hidden="true"
-                            class="c10 c44"
-                          >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M16.235 2.824a1.412 1.412 0 010-2.824h6.353C23.368 0 24 .633 24 1.412v6.353a1.412 1.412 0 01-2.823 0V4.82l-8.179 8.178a1.412 1.412 0 01-1.996-1.996l8.178-8.178h-2.945zm4.942 10.588a1.412 1.412 0 012.823 0v9.176c0 .78-.632 1.412-1.412 1.412H1.412C.632 24 0 23.368 0 22.588V1.412C0 .632.632 0 1.412 0h9.176a1.412 1.412 0 010 2.824H2.824v18.353h18.353v-7.765z"
-                                fill="#32324D"
-                              />
-                            </svg>
-                          </div>
-                        </a>
-                        <div
-                          class="c53"
-                        >
-                          <svg
-                            class="c54 c37"
-                            fill="none"
-                            height="12"
-                            viewBox="0 0 24 24"
-                            width="12"
-                            xmlns="http://www.w3.org/2000/svg"
-                          >
-                            <path
-                              d="M20.727 2.97a.2.2 0 01.286 0l2.85 2.89a.2.2 0 010 .28L9.554 20.854a.2.2 0 01-.285 0l-9.13-9.243a.2.2 0 010-.281l2.85-2.892a.2.2 0 01.284 0l6.14 6.209L20.726 2.97z"
-                              fill="#212134"
-                            />
-                          </svg>
-                          <span
-                            class="c55"
-                          >
-                            Installed
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div
-                  class="c29"
-                >
-                  <div
-                    class=""
-                    style="height: 100%;"
-                  >
-                    <div
-                      class="c30 c31"
-                      height="100%"
-                    >
-                      <div
-                        class=""
-                      >
-                        <img
-                          alt="Measurement Protocol logo"
-                          class="c32"
-                          height="11"
-                          src="https://dl.airtable.com/.attachments/ec0b48056669ec3e03e40e7f5e514b41/536ab075/measurement-protocol.png"
-                          width="11"
-                        />
-                        <div
-                          class="c33"
-                        >
-                          <h3
-                            class="c34"
-                          >
-                            <div
-                              class="c35"
-                            >
-                              Measurement Protocol
-                            </div>
-                          </h3>
-                        </div>
-                        <div
-                          class="c38"
-                        >
-                          <p
-                            class="c39 c40"
-                          >
-                            Send data to Google Analytics with Measurement Protocol.
-                          </p>
-                        </div>
-                      </div>
-                      <div
-                        class="c41 c42 c43"
-                        spacing="2"
-                        style="align-self: flex-end;"
-                      >
-                        <a
-                          aria-disabled="false"
-                          aria-label="Learn more about Measurement Protocol"
-                          class="c8 c9"
-                          href="https://market.strapi.io/plugins/strapi-plugin-measurement-protocol"
-                          rel="noreferrer noopener"
-                          target="_blank"
-                        >
-                          <span
-                            class="c12 c13"
-                          >
-                            Learn more
-                          </span>
-                          <div
-                            aria-hidden="true"
-                            class="c10 c44"
-                          >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M16.235 2.824a1.412 1.412 0 010-2.824h6.353C23.368 0 24 .633 24 1.412v6.353a1.412 1.412 0 01-2.823 0V4.82l-8.179 8.178a1.412 1.412 0 01-1.996-1.996l8.178-8.178h-2.945zm4.942 10.588a1.412 1.412 0 012.823 0v9.176c0 .78-.632 1.412-1.412 1.412H1.412C.632 24 0 23.368 0 22.588V1.412C0 .632.632 0 1.412 0h9.176a1.412 1.412 0 010 2.824H2.824v18.353h18.353v-7.765z"
-                                fill="#32324D"
-                              />
-                            </svg>
-                          </div>
-                        </a>
-                        <button
-                          aria-disabled="false"
-                          class="c45 c46"
-                          type="button"
-                        >
-                          <div
-                            aria-hidden="true"
-                            class="c47 c48 c49"
-                          >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24z"
-                                fill="#212134"
-                              />
-                              <path
-                                d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0024 16.962V1.056A1.056 1.056 0 0022.944 0H7.038a1.056 1.056 0 00-1.056 1.056v2.252h2.112V2.11z"
-                                fill="#212134"
-                              />
-                            </svg>
-                          </div>
-                          <span
-                            class="c50 c51"
-                          >
-                            Copy install command
-                          </span>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div
-                  class="c29"
-                >
-                  <div
-                    class=""
-                    style="height: 100%;"
-                  >
-                    <div
-                      class="c30 c31"
-                      height="100%"
-                    >
-                      <div
-                        class=""
-                      >
-                        <img
-                          alt="Menus logo"
-                          class="c32"
-                          height="11"
-                          src="https://dl.airtable.com/.attachments/1ed36c74312507853740287860035919/4665ecd0/logo.jpg"
-                          width="11"
-                        />
-                        <div
-                          class="c33"
-                        >
-                          <h3
-                            class="c34"
-                          >
-                            <div
-                              class="c35"
-                            >
-                              Menus
-                            </div>
-                          </h3>
-                        </div>
-                        <div
-                          class="c38"
-                        >
-                          <p
-                            class="c39 c40"
-                          >
-                            Customize the structure of menus and menu items, typically to render a navigation menu on a frontend app.
-                          </p>
-                        </div>
-                      </div>
-                      <div
-                        class="c41 c42 c43"
-                        spacing="2"
-                        style="align-self: flex-end;"
-                      >
-                        <a
-                          aria-disabled="false"
-                          aria-label="Learn more about Menus"
-                          class="c8 c9"
-                          href="https://market.strapi.io/plugins/strapi-plugin-menus"
-                          rel="noreferrer noopener"
-                          target="_blank"
-                        >
-                          <span
-                            class="c12 c13"
-                          >
-                            Learn more
-                          </span>
-                          <div
-                            aria-hidden="true"
-                            class="c10 c44"
-                          >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M16.235 2.824a1.412 1.412 0 010-2.824h6.353C23.368 0 24 .633 24 1.412v6.353a1.412 1.412 0 01-2.823 0V4.82l-8.179 8.178a1.412 1.412 0 01-1.996-1.996l8.178-8.178h-2.945zm4.942 10.588a1.412 1.412 0 012.823 0v9.176c0 .78-.632 1.412-1.412 1.412H1.412C.632 24 0 23.368 0 22.588V1.412C0 .632.632 0 1.412 0h9.176a1.412 1.412 0 010 2.824H2.824v18.353h18.353v-7.765z"
-                                fill="#32324D"
-                              />
-                            </svg>
-                          </div>
-                        </a>
-                        <button
-                          aria-disabled="false"
-                          class="c45 c46"
-                          type="button"
-                        >
-                          <div
-                            aria-hidden="true"
-                            class="c47 c48 c49"
-                          >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24z"
-                                fill="#212134"
-                              />
-                              <path
-                                d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0024 16.962V1.056A1.056 1.056 0 0022.944 0H7.038a1.056 1.056 0 00-1.056 1.056v2.252h2.112V2.11z"
-                                fill="#212134"
-                              />
-                            </svg>
-                          </div>
-                          <span
-                            class="c50 c51"
-                          >
-                            Copy install command
-                          </span>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div
-                  class="c29"
-                >
-                  <div
-                    class=""
-                    style="height: 100%;"
-                  >
-                    <div
-                      class="c30 c31"
-                      height="100%"
-                    >
-                      <div
-                        class=""
-                      >
-                        <img
-                          alt="Migrations logo"
-                          class="c32"
-                          height="11"
-                          src="https://dl.airtable.com/.attachments/d43ca42a3544cac844f55d929a24c57b/ce8ceb21/Fichier5-100.jpg"
-                          width="11"
-                        />
-                        <div
-                          class="c33"
-                        >
-                          <h3
-                            class="c34"
-                          >
-                            <div
-                              class="c35"
-                            >
-                              Migrations
-                              <span>
-                                <div
-                                  aria-describedby="tooltip-13"
-                                  class="c35"
-                                  tabindex="0"
-                                >
-                                  <svg
-                                    class="c36 c37"
-                                    fill="none"
-                                    height="1em"
-                                    viewBox="0 0 24 24"
-                                    width="1em"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                  >
-                                    <path
-                                      clip-rule="evenodd"
-                                      d="M12 24c6.627 0 12-5.373 12-12S18.627 0 12 0 0 5.373 0 12s5.373 12 12 12zm-1.438-11.066L16.158 7.5 18 9.245l-7.438 7.18-4.462-4.1 1.84-1.745 2.622 2.354z"
-                                      fill="#212134"
-                                      fill-rule="evenodd"
-                                    />
-                                  </svg>
-                                </div>
-                              </span>
-                            </div>
-                          </h3>
-                        </div>
-                        <div
-                          class="c38"
-                        >
-                          <p
-                            class="c39 c40"
-                          >
-                            A plugin to initialize or update automatically your data for all of your environments
-                          </p>
-                        </div>
-                      </div>
-                      <div
-                        class="c41 c42 c43"
-                        spacing="2"
-                        style="align-self: flex-end;"
-                      >
-                        <a
-                          aria-disabled="false"
-                          aria-label="Learn more about Migrations"
-                          class="c8 c9"
-                          href="https://market.strapi.io/plugins/strapi-plugin-migrations"
-                          rel="noreferrer noopener"
-                          target="_blank"
-                        >
-                          <span
-                            class="c12 c13"
-                          >
-                            Learn more
-                          </span>
-                          <div
-                            aria-hidden="true"
-                            class="c10 c44"
-                          >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M16.235 2.824a1.412 1.412 0 010-2.824h6.353C23.368 0 24 .633 24 1.412v6.353a1.412 1.412 0 01-2.823 0V4.82l-8.179 8.178a1.412 1.412 0 01-1.996-1.996l8.178-8.178h-2.945zm4.942 10.588a1.412 1.412 0 012.823 0v9.176c0 .78-.632 1.412-1.412 1.412H1.412C.632 24 0 23.368 0 22.588V1.412C0 .632.632 0 1.412 0h9.176a1.412 1.412 0 010 2.824H2.824v18.353h18.353v-7.765z"
-                                fill="#32324D"
-                              />
-                            </svg>
-                          </div>
-                        </a>
-                        <button
-                          aria-disabled="false"
-                          class="c45 c46"
-                          type="button"
-                        >
-                          <div
-                            aria-hidden="true"
-                            class="c47 c48 c49"
-                          >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24z"
-                                fill="#212134"
-                              />
-                              <path
-                                d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0024 16.962V1.056A1.056 1.056 0 0022.944 0H7.038a1.056 1.056 0 00-1.056 1.056v2.252h2.112V2.11z"
-                                fill="#212134"
-                              />
-                            </svg>
-                          </div>
-                          <span
-                            class="c50 c51"
-                          >
-                            Copy install command
-                          </span>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div
-                  class="c29"
-                >
-                  <div
-                    class=""
-                    style="height: 100%;"
-                  >
-                    <div
-                      class="c30 c31"
-                      height="100%"
-                    >
-                      <div
-                        class=""
-                      >
-                        <img
-                          alt="Moesif logo"
-                          class="c32"
-                          height="11"
-                          src="https://dl.airtable.com/.attachments/2744c529ed355f02d347189c16e3f9d5/9d492f63/download1.png"
-                          width="11"
-                        />
-                        <div
-                          class="c33"
-                        >
-                          <h3
-                            class="c34"
-                          >
-                            <div
-                              class="c35"
-                            >
-                              Moesif
-                              <span>
-                                <div
-                                  aria-describedby="tooltip-15"
-                                  class="c35"
-                                  tabindex="0"
-                                >
-                                  <svg
-                                    class="c36 c37"
-                                    fill="none"
-                                    height="1em"
-                                    viewBox="0 0 24 24"
-                                    width="1em"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                  >
-                                    <path
-                                      clip-rule="evenodd"
-                                      d="M12 24c6.627 0 12-5.373 12-12S18.627 0 12 0 0 5.373 0 12s5.373 12 12 12zm-1.438-11.066L16.158 7.5 18 9.245l-7.438 7.18-4.462-4.1 1.84-1.745 2.622 2.354z"
-                                      fill="#212134"
-                                      fill-rule="evenodd"
-                                    />
-                                  </svg>
-                                </div>
-                              </span>
-                            </div>
-                          </h3>
-                        </div>
-                        <div
-                          class="c38"
-                        >
-                          <p
-                            class="c39 c40"
-                          >
-                            Add Moesif API Analytics and Monitoring to Strapi
-                          </p>
-                        </div>
-                      </div>
-                      <div
-                        class="c41 c42 c43"
-                        spacing="2"
-                        style="align-self: flex-end;"
-                      >
-                        <a
-                          aria-disabled="false"
-                          aria-label="Learn more about Moesif"
-                          class="c8 c9"
-                          href="https://market.strapi.io/plugins/strapi-plugin-moesif"
-                          rel="noreferrer noopener"
-                          target="_blank"
-                        >
-                          <span
-                            class="c12 c13"
-                          >
-                            Learn more
-                          </span>
-                          <div
-                            aria-hidden="true"
-                            class="c10 c44"
-                          >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M16.235 2.824a1.412 1.412 0 010-2.824h6.353C23.368 0 24 .633 24 1.412v6.353a1.412 1.412 0 01-2.823 0V4.82l-8.179 8.178a1.412 1.412 0 01-1.996-1.996l8.178-8.178h-2.945zm4.942 10.588a1.412 1.412 0 012.823 0v9.176c0 .78-.632 1.412-1.412 1.412H1.412C.632 24 0 23.368 0 22.588V1.412C0 .632.632 0 1.412 0h9.176a1.412 1.412 0 010 2.824H2.824v18.353h18.353v-7.765z"
-                                fill="#32324D"
-                              />
-                            </svg>
-                          </div>
-                        </a>
-                        <button
-                          aria-disabled="false"
-                          class="c45 c46"
-                          type="button"
-                        >
-                          <div
-                            aria-hidden="true"
-                            class="c47 c48 c49"
-                          >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24z"
-                                fill="#212134"
-                              />
-                              <path
-                                d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0024 16.962V1.056A1.056 1.056 0 0022.944 0H7.038a1.056 1.056 0 00-1.056 1.056v2.252h2.112V2.11z"
-                                fill="#212134"
-                              />
-                            </svg>
-                          </div>
-                          <span
-                            class="c50 c51"
-                          >
-                            Copy install command
-                          </span>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div
-                  class="c29"
-                >
-                  <div
-                    class=""
-                    style="height: 100%;"
-                  >
-                    <div
-                      class="c30 c31"
-                      height="100%"
-                    >
-                      <div
-                        class=""
-                      >
-                        <img
-                          alt="Mux Video Uploader logo"
-                          class="c32"
-                          height="11"
-                          src="https://dl.airtable.com/.attachments/aeb71ee6f1c0a8055ce53164307beed9/182e2ca4/mux-logo-160.jpg"
-                          width="11"
-                        />
-                        <div
-                          class="c33"
-                        >
-                          <h3
-                            class="c34"
-                          >
-                            <div
-                              class="c35"
-                            >
-                              Mux Video Uploader
-                            </div>
-                          </h3>
-                        </div>
-                        <div
-                          class="c38"
-                        >
-                          <p
-                            class="c39 c40"
-                          >
-                            A plugin for uploading video and audio files to Mux (https://www.mux.com) and managing them within Strapi.
-                          </p>
-                        </div>
-                      </div>
-                      <div
-                        class="c41 c42 c43"
-                        spacing="2"
-                        style="align-self: flex-end;"
-                      >
-                        <a
-                          aria-disabled="false"
-                          aria-label="Learn more about Mux Video Uploader"
-                          class="c8 c9"
-                          href="https://market.strapi.io/plugins/strapi-plugin-mux-video-uploader"
-                          rel="noreferrer noopener"
-                          target="_blank"
-                        >
-                          <span
-                            class="c12 c13"
-                          >
-                            Learn more
-                          </span>
-                          <div
-                            aria-hidden="true"
-                            class="c10 c44"
-                          >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M16.235 2.824a1.412 1.412 0 010-2.824h6.353C23.368 0 24 .633 24 1.412v6.353a1.412 1.412 0 01-2.823 0V4.82l-8.179 8.178a1.412 1.412 0 01-1.996-1.996l8.178-8.178h-2.945zm4.942 10.588a1.412 1.412 0 012.823 0v9.176c0 .78-.632 1.412-1.412 1.412H1.412C.632 24 0 23.368 0 22.588V1.412C0 .632.632 0 1.412 0h9.176a1.412 1.412 0 010 2.824H2.824v18.353h18.353v-7.765z"
-                                fill="#32324D"
-                              />
-                            </svg>
-                          </div>
-                        </a>
-                        <button
-                          aria-disabled="false"
-                          class="c45 c46"
-                          type="button"
-                        >
-                          <div
-                            aria-hidden="true"
-                            class="c47 c48 c49"
-                          >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24z"
-                                fill="#212134"
-                              />
-                              <path
-                                d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0024 16.962V1.056A1.056 1.056 0 0022.944 0H7.038a1.056 1.056 0 00-1.056 1.056v2.252h2.112V2.11z"
-                                fill="#212134"
-                              />
-                            </svg>
-                          </div>
-                          <span
-                            class="c50 c51"
-                          >
-                            Copy install command
-                          </span>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div
-                  class="c29"
-                >
-                  <div
-                    class=""
-                    style="height: 100%;"
-                  >
-                    <div
-                      class="c30 c31"
-                      height="100%"
-                    >
-                      <div
-                        class=""
-                      >
-                        <img
-                          alt="Navigation logo"
-                          class="c32"
-                          height="11"
-                          src="https://dl.airtable.com/.attachments/6b3aebdd277f97f58b811d4d3beb5b7a/10404b8b/navigation.png"
-                          width="11"
-                        />
-                        <div
-                          class="c33"
-                        >
-                          <h3
-                            class="c34"
-                          >
-                            <div
-                              class="c35"
-                            >
-                              Navigation
-                            </div>
-                          </h3>
-                        </div>
-                        <div
-                          class="c38"
-                        >
-                          <p
-                            class="c39 c40"
-                          >
-                            Create consumable navigation with a simple and straightforward visual builder
-                          </p>
-                        </div>
-                      </div>
-                      <div
-                        class="c41 c42 c43"
-                        spacing="2"
-                        style="align-self: flex-end;"
-                      >
-                        <a
-                          aria-disabled="false"
-                          aria-label="Learn more about Navigation"
-                          class="c8 c9"
-                          href="https://market.strapi.io/plugins/strapi-plugin-navigation"
-                          rel="noreferrer noopener"
-                          target="_blank"
-                        >
-                          <span
-                            class="c12 c13"
-                          >
-                            Learn more
-                          </span>
-                          <div
-                            aria-hidden="true"
-                            class="c10 c44"
-                          >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M16.235 2.824a1.412 1.412 0 010-2.824h6.353C23.368 0 24 .633 24 1.412v6.353a1.412 1.412 0 01-2.823 0V4.82l-8.179 8.178a1.412 1.412 0 01-1.996-1.996l8.178-8.178h-2.945zm4.942 10.588a1.412 1.412 0 012.823 0v9.176c0 .78-.632 1.412-1.412 1.412H1.412C.632 24 0 23.368 0 22.588V1.412C0 .632.632 0 1.412 0h9.176a1.412 1.412 0 010 2.824H2.824v18.353h18.353v-7.765z"
-                                fill="#32324D"
-                              />
-                            </svg>
-                          </div>
-                        </a>
-                        <button
-                          aria-disabled="false"
-                          class="c45 c46"
-                          type="button"
-                        >
-                          <div
-                            aria-hidden="true"
-                            class="c47 c48 c49"
-                          >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24z"
-                                fill="#212134"
-                              />
-                              <path
-                                d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0024 16.962V1.056A1.056 1.056 0 0022.944 0H7.038a1.056 1.056 0 00-1.056 1.056v2.252h2.112V2.11z"
-                                fill="#212134"
-                              />
-                            </svg>
-                          </div>
-                          <span
-                            class="c50 c51"
-                          >
-                            Copy install command
-                          </span>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div
-                  class="c29"
-                >
-                  <div
-                    class=""
-                    style="height: 100%;"
-                  >
-                    <div
-                      class="c30 c31"
-                      height="100%"
-                    >
-                      <div
-                        class=""
-                      >
-                        <img
-                          alt="Notes logo"
-                          class="c32"
-                          height="11"
-                          src="https://dl.airtable.com/.attachments/85c36b1eca1ca457ce37d6a0dc46f387/e6a706ee/logo-notes.png"
-                          width="11"
-                        />
-                        <div
-                          class="c33"
-                        >
-                          <h3
-                            class="c34"
-                          >
-                            <div
-                              class="c35"
-                            >
-                              Notes
-                            </div>
-                          </h3>
-                        </div>
-                        <div
-                          class="c38"
-                        >
-                          <p
-                            class="c39 c40"
-                          >
-                            A plugin for Strapi Headless CMS that provides the ability to add notes to entity records. 
-                          </p>
-                        </div>
-                      </div>
-                      <div
-                        class="c41 c42 c43"
-                        spacing="2"
-                        style="align-self: flex-end;"
-                      >
-                        <a
-                          aria-disabled="false"
-                          aria-label="Learn more about Notes"
-                          class="c8 c9"
-                          href="https://market.strapi.io/plugins/strapi-plugin-notes"
-                          rel="noreferrer noopener"
-                          target="_blank"
-                        >
-                          <span
-                            class="c12 c13"
-                          >
-                            Learn more
-                          </span>
-                          <div
-                            aria-hidden="true"
-                            class="c10 c44"
-                          >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M16.235 2.824a1.412 1.412 0 010-2.824h6.353C23.368 0 24 .633 24 1.412v6.353a1.412 1.412 0 01-2.823 0V4.82l-8.179 8.178a1.412 1.412 0 01-1.996-1.996l8.178-8.178h-2.945zm4.942 10.588a1.412 1.412 0 012.823 0v9.176c0 .78-.632 1.412-1.412 1.412H1.412C.632 24 0 23.368 0 22.588V1.412C0 .632.632 0 1.412 0h9.176a1.412 1.412 0 010 2.824H2.824v18.353h18.353v-7.765z"
-                                fill="#32324D"
-                              />
-                            </svg>
-                          </div>
-                        </a>
-                        <button
-                          aria-disabled="false"
-                          class="c45 c46"
-                          type="button"
-                        >
-                          <div
-                            aria-hidden="true"
-                            class="c47 c48 c49"
-                          >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24z"
-                                fill="#212134"
-                              />
-                              <path
-                                d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0024 16.962V1.056A1.056 1.056 0 0022.944 0H7.038a1.056 1.056 0 00-1.056 1.056v2.252h2.112V2.11z"
-                                fill="#212134"
-                              />
-                            </svg>
-                          </div>
-                          <span
-                            class="c50 c51"
-                          >
-                            Copy install command
-                          </span>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div
-                  class="c29"
-                >
-                  <div
-                    class=""
-                    style="height: 100%;"
-                  >
-                    <div
-                      class="c30 c31"
-                      height="100%"
-                    >
-                      <div
-                        class=""
-                      >
-                        <img
-                          alt="Passwordless logo"
-                          class="c32"
-                          height="11"
-                          src="https://dl.airtable.com/.attachments/67fcf89bc15119f588567654546c4b30/f19bd6a5/passworless-logo.jpg"
-                          width="11"
-                        />
-                        <div
-                          class="c33"
-                        >
-                          <h3
-                            class="c34"
-                          >
-                            <div
-                              class="c35"
-                            >
-                              Passwordless
-                            </div>
-                          </h3>
-                        </div>
-                        <div
-                          class="c38"
-                        >
-                          <p
-                            class="c39 c40"
-                          >
-                            Enables a secure and seamless emailed link authentication experience.
-                          </p>
-                        </div>
-                      </div>
-                      <div
-                        class="c41 c42 c43"
-                        spacing="2"
-                        style="align-self: flex-end;"
-                      >
-                        <a
-                          aria-disabled="false"
-                          aria-label="Learn more about Passwordless"
-                          class="c8 c9"
-                          href="https://market.strapi.io/plugins/strapi-plugin-passwordless"
-                          rel="noreferrer noopener"
-                          target="_blank"
-                        >
-                          <span
-                            class="c12 c13"
-                          >
-                            Learn more
-                          </span>
-                          <div
-                            aria-hidden="true"
-                            class="c10 c44"
-                          >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M16.235 2.824a1.412 1.412 0 010-2.824h6.353C23.368 0 24 .633 24 1.412v6.353a1.412 1.412 0 01-2.823 0V4.82l-8.179 8.178a1.412 1.412 0 01-1.996-1.996l8.178-8.178h-2.945zm4.942 10.588a1.412 1.412 0 012.823 0v9.176c0 .78-.632 1.412-1.412 1.412H1.412C.632 24 0 23.368 0 22.588V1.412C0 .632.632 0 1.412 0h9.176a1.412 1.412 0 010 2.824H2.824v18.353h18.353v-7.765z"
-                                fill="#32324D"
-                              />
-                            </svg>
-                          </div>
-                        </a>
-                        <button
-                          aria-disabled="false"
-                          class="c45 c46"
-                          type="button"
-                        >
-                          <div
-                            aria-hidden="true"
-                            class="c47 c48 c49"
-                          >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24z"
-                                fill="#212134"
-                              />
-                              <path
-                                d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0024 16.962V1.056A1.056 1.056 0 0022.944 0H7.038a1.056 1.056 0 00-1.056 1.056v2.252h2.112V2.11z"
-                                fill="#212134"
-                              />
-                            </svg>
-                          </div>
-                          <span
-                            class="c50 c51"
-                          >
-                            Copy install command
-                          </span>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div
-                  class="c29"
-                >
-                  <div
-                    class=""
-                    style="height: 100%;"
-                  >
-                    <div
-                      class="c30 c31"
-                      height="100%"
-                    >
-                      <div
-                        class=""
-                      >
-                        <img
-                          alt="Preview Button logo"
-                          class="c32"
-                          height="11"
-                          src="https://dl.airtable.com/.attachments/79025b7c6d4d72436c1ad853afe75611/21be9157/logo.jpg"
-                          width="11"
-                        />
-                        <div
-                          class="c33"
-                        >
-                          <h3
-                            class="c34"
-                          >
-                            <div
-                              class="c35"
-                            >
-                              Preview Button
-                            </div>
-                          </h3>
-                        </div>
-                        <div
-                          class="c38"
-                        >
-                          <p
-                            class="c39 c40"
-                          >
-                            Add a preview button and live view button to the content manager edit view to connect with your frontend app.
-                          </p>
-                        </div>
-                      </div>
-                      <div
-                        class="c41 c42 c43"
-                        spacing="2"
-                        style="align-self: flex-end;"
-                      >
-                        <a
-                          aria-disabled="false"
-                          aria-label="Learn more about Preview Button"
-                          class="c8 c9"
-                          href="https://market.strapi.io/plugins/strapi-plugin-preview-button"
-                          rel="noreferrer noopener"
-                          target="_blank"
-                        >
-                          <span
-                            class="c12 c13"
-                          >
-                            Learn more
-                          </span>
-                          <div
-                            aria-hidden="true"
-                            class="c10 c44"
-                          >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M16.235 2.824a1.412 1.412 0 010-2.824h6.353C23.368 0 24 .633 24 1.412v6.353a1.412 1.412 0 01-2.823 0V4.82l-8.179 8.178a1.412 1.412 0 01-1.996-1.996l8.178-8.178h-2.945zm4.942 10.588a1.412 1.412 0 012.823 0v9.176c0 .78-.632 1.412-1.412 1.412H1.412C.632 24 0 23.368 0 22.588V1.412C0 .632.632 0 1.412 0h9.176a1.412 1.412 0 010 2.824H2.824v18.353h18.353v-7.765z"
-                                fill="#32324D"
-                              />
-                            </svg>
-                          </div>
-                        </a>
-                        <button
-                          aria-disabled="false"
-                          class="c45 c46"
-                          type="button"
-                        >
-                          <div
-                            aria-hidden="true"
-                            class="c47 c48 c49"
-                          >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24z"
-                                fill="#212134"
-                              />
-                              <path
-                                d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0024 16.962V1.056A1.056 1.056 0 0022.944 0H7.038a1.056 1.056 0 00-1.056 1.056v2.252h2.112V2.11z"
-                                fill="#212134"
-                              />
-                            </svg>
-                          </div>
-                          <span
-                            class="c50 c51"
-                          >
-                            Copy install command
-                          </span>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div
-                  class="c29"
-                >
-                  <div
-                    class=""
-                    style="height: 100%;"
-                  >
-                    <div
-                      class="c30 c31"
-                      height="100%"
-                    >
-                      <div
-                        class=""
-                      >
-                        <img
-                          alt="Publisher logo"
-                          class="c32"
-                          height="11"
-                          src="https://dl.airtable.com/.attachments/5d1dde259f76bc8076c093141da343e3/c4287a01/logo-publisher.png"
-                          width="11"
-                        />
-                        <div
-                          class="c33"
-                        >
-                          <h3
-                            class="c34"
-                          >
-                            <div
-                              class="c35"
-                            >
-                              Publisher
-                            </div>
-                          </h3>
-                        </div>
-                        <div
-                          class="c38"
-                        >
-                          <p
-                            class="c39 c40"
-                          >
-                            A plugin for Strapi Headless CMS that provides the ability to schedule publishing for any content type.
-                          </p>
-                        </div>
-                      </div>
-                      <div
-                        class="c41 c42 c43"
-                        spacing="2"
-                        style="align-self: flex-end;"
-                      >
-                        <a
-                          aria-disabled="false"
-                          aria-label="Learn more about Publisher"
-                          class="c8 c9"
-                          href="https://market.strapi.io/plugins/strapi-plugin-publisher"
-                          rel="noreferrer noopener"
-                          target="_blank"
-                        >
-                          <span
-                            class="c12 c13"
-                          >
-                            Learn more
-                          </span>
-                          <div
-                            aria-hidden="true"
-                            class="c10 c44"
-                          >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M16.235 2.824a1.412 1.412 0 010-2.824h6.353C23.368 0 24 .633 24 1.412v6.353a1.412 1.412 0 01-2.823 0V4.82l-8.179 8.178a1.412 1.412 0 01-1.996-1.996l8.178-8.178h-2.945zm4.942 10.588a1.412 1.412 0 012.823 0v9.176c0 .78-.632 1.412-1.412 1.412H1.412C.632 24 0 23.368 0 22.588V1.412C0 .632.632 0 1.412 0h9.176a1.412 1.412 0 010 2.824H2.824v18.353h18.353v-7.765z"
-                                fill="#32324D"
-                              />
-                            </svg>
-                          </div>
-                        </a>
-                        <button
-                          aria-disabled="false"
-                          class="c45 c46"
-                          type="button"
-                        >
-                          <div
-                            aria-hidden="true"
-                            class="c47 c48 c49"
-                          >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24z"
-                                fill="#212134"
-                              />
-                              <path
-                                d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0024 16.962V1.056A1.056 1.056 0 0022.944 0H7.038a1.056 1.056 0 00-1.056 1.056v2.252h2.112V2.11z"
-                                fill="#212134"
-                              />
-                            </svg>
-                          </div>
-                          <span
-                            class="c50 c51"
-                          >
-                            Copy install command
-                          </span>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div
-                  class="c29"
-                >
-                  <div
-                    class=""
-                    style="height: 100%;"
-                  >
-                    <div
-                      class="c30 c31"
-                      height="100%"
-                    >
-                      <div
-                        class=""
-                      >
-                        <img
-                          alt="REST Cache logo"
-                          class="c32"
-                          height="11"
-                          src="https://dl.airtable.com/.attachments/427fcde1d9791d017c98bb03caa0e274/f8189e9d/rest-cache.png"
-                          width="11"
-                        />
-                        <div
-                          class="c33"
-                        >
-                          <h3
-                            class="c34"
-                          >
-                            <div
-                              class="c35"
-                            >
-                              REST Cache
-                            </div>
-                          </h3>
-                        </div>
-                        <div
-                          class="c38"
-                        >
-                          <p
-                            class="c39 c40"
-                          >
-                            Speed-up HTTP requests with LRU cache
-                          </p>
-                        </div>
-                      </div>
-                      <div
-                        class="c41 c42 c43"
-                        spacing="2"
-                        style="align-self: flex-end;"
-                      >
-                        <a
-                          aria-disabled="false"
-                          aria-label="Learn more about REST Cache"
-                          class="c8 c9"
-                          href="https://market.strapi.io/plugins/strapi-plugin-rest-cache"
-                          rel="noreferrer noopener"
-                          target="_blank"
-                        >
-                          <span
-                            class="c12 c13"
-                          >
-                            Learn more
-                          </span>
-                          <div
-                            aria-hidden="true"
-                            class="c10 c44"
-                          >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M16.235 2.824a1.412 1.412 0 010-2.824h6.353C23.368 0 24 .633 24 1.412v6.353a1.412 1.412 0 01-2.823 0V4.82l-8.179 8.178a1.412 1.412 0 01-1.996-1.996l8.178-8.178h-2.945zm4.942 10.588a1.412 1.412 0 012.823 0v9.176c0 .78-.632 1.412-1.412 1.412H1.412C.632 24 0 23.368 0 22.588V1.412C0 .632.632 0 1.412 0h9.176a1.412 1.412 0 010 2.824H2.824v18.353h18.353v-7.765z"
-                                fill="#32324D"
-                              />
-                            </svg>
-                          </div>
-                        </a>
-                        <button
-                          aria-disabled="false"
-                          class="c45 c46"
-                          type="button"
-                        >
-                          <div
-                            aria-hidden="true"
-                            class="c47 c48 c49"
-                          >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24z"
-                                fill="#212134"
-                              />
-                              <path
-                                d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0024 16.962V1.056A1.056 1.056 0 0022.944 0H7.038a1.056 1.056 0 00-1.056 1.056v2.252h2.112V2.11z"
-                                fill="#212134"
-                              />
-                            </svg>
-                          </div>
-                          <span
-                            class="c50 c51"
-                          >
-                            Copy install command
-                          </span>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div
-                  class="c29"
-                >
-                  <div
-                    class=""
-                    style="height: 100%;"
-                  >
-                    <div
-                      class="c30 c31"
-                      height="100%"
-                    >
-                      <div
-                        class=""
-                      >
-                        <img
-                          alt="Scheduler logo"
-                          class="c32"
-                          height="11"
-                          src="https://dl.airtable.com/.attachments/ef32eb851950819b11c9ef833c421123/a7637824/strapi-plugin-icon.jpg"
-                          width="11"
-                        />
-                        <div
-                          class="c33"
-                        >
-                          <h3
-                            class="c34"
-                          >
-                            <div
-                              class="c35"
-                            >
-                              Scheduler
-                            </div>
-                          </h3>
-                        </div>
-                        <div
-                          class="c38"
-                        >
-                          <p
-                            class="c39 c40"
-                          >
-                            This plugin allows you to publish or depublish any collection type in the future.
-                          </p>
-                        </div>
-                      </div>
-                      <div
-                        class="c41 c42 c43"
-                        spacing="2"
-                        style="align-self: flex-end;"
-                      >
-                        <a
-                          aria-disabled="false"
-                          aria-label="Learn more about Scheduler"
-                          class="c8 c9"
-                          href="https://market.strapi.io/plugins/@webbio-strapi-plugin-scheduler"
-                          rel="noreferrer noopener"
-                          target="_blank"
-                        >
-                          <span
-                            class="c12 c13"
-                          >
-                            Learn more
-                          </span>
-                          <div
-                            aria-hidden="true"
-                            class="c10 c44"
-                          >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M16.235 2.824a1.412 1.412 0 010-2.824h6.353C23.368 0 24 .633 24 1.412v6.353a1.412 1.412 0 01-2.823 0V4.82l-8.179 8.178a1.412 1.412 0 01-1.996-1.996l8.178-8.178h-2.945zm4.942 10.588a1.412 1.412 0 012.823 0v9.176c0 .78-.632 1.412-1.412 1.412H1.412C.632 24 0 23.368 0 22.588V1.412C0 .632.632 0 1.412 0h9.176a1.412 1.412 0 010 2.824H2.824v18.353h18.353v-7.765z"
-                                fill="#32324D"
-                              />
-                            </svg>
-                          </div>
-                        </a>
-                        <button
-                          aria-disabled="false"
-                          class="c45 c46"
-                          type="button"
-                        >
-                          <div
-                            aria-hidden="true"
-                            class="c47 c48 c49"
-                          >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24z"
-                                fill="#212134"
-                              />
-                              <path
-                                d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0024 16.962V1.056A1.056 1.056 0 0022.944 0H7.038a1.056 1.056 0 00-1.056 1.056v2.252h2.112V2.11z"
-                                fill="#212134"
-                              />
-                            </svg>
-                          </div>
-                          <span
-                            class="c50 c51"
-                          >
-                            Copy install command
-                          </span>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div
-                  class="c29"
-                >
-                  <div
-                    class=""
-                    style="height: 100%;"
-                  >
-                    <div
-                      class="c30 c31"
-                      height="100%"
-                    >
-                      <div
-                        class=""
-                      >
-                        <img
-                          alt="Sentry logo"
-                          class="c32"
-                          height="11"
-                          src="https://dl.airtable.com/.attachments/40568860b2765cba0b22ddf4761e8cc3/5a06ef7f/sentry.png"
-                          width="11"
-                        />
-                        <div
-                          class="c33"
-                        >
-                          <h3
-                            class="c34"
-                          >
-                            <div
-                              class="c35"
-                            >
-                              Sentry
-                              <span>
-                                <div
-                                  aria-describedby="tooltip-17"
-                                  class="c35"
-                                  tabindex="0"
-                                >
-                                  <img
-                                    alt="Made by Strapi"
-                                    class="c52"
-                                    height="auto"
-                                    src="IMAGE_MOCK"
-                                    width="6"
-                                  />
-                                </div>
-                              </span>
-                            </div>
-                          </h3>
-                        </div>
-                        <div
-                          class="c38"
-                        >
-                          <p
-                            class="c39 c40"
-                          >
-                            Track your Strapi errors in Sentry
-                          </p>
-                        </div>
-                      </div>
-                      <div
-                        class="c41 c42 c43"
-                        spacing="2"
-                        style="align-self: flex-end;"
-                      >
-                        <a
-                          aria-disabled="false"
-                          aria-label="Learn more about Sentry"
-                          class="c8 c9"
-                          href="https://market.strapi.io/plugins/@strapi-plugin-sentry"
-                          rel="noreferrer noopener"
-                          target="_blank"
-                        >
-                          <span
-                            class="c12 c13"
-                          >
-                            Learn more
-                          </span>
-                          <div
-                            aria-hidden="true"
-                            class="c10 c44"
-                          >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M16.235 2.824a1.412 1.412 0 010-2.824h6.353C23.368 0 24 .633 24 1.412v6.353a1.412 1.412 0 01-2.823 0V4.82l-8.179 8.178a1.412 1.412 0 01-1.996-1.996l8.178-8.178h-2.945zm4.942 10.588a1.412 1.412 0 012.823 0v9.176c0 .78-.632 1.412-1.412 1.412H1.412C.632 24 0 23.368 0 22.588V1.412C0 .632.632 0 1.412 0h9.176a1.412 1.412 0 010 2.824H2.824v18.353h18.353v-7.765z"
-                                fill="#32324D"
-                              />
-                            </svg>
-                          </div>
-                        </a>
-                        <div
-                          class="c53"
-                        >
-                          <svg
-                            class="c54 c37"
-                            fill="none"
-                            height="12"
-                            viewBox="0 0 24 24"
-                            width="12"
-                            xmlns="http://www.w3.org/2000/svg"
-                          >
-                            <path
-                              d="M20.727 2.97a.2.2 0 01.286 0l2.85 2.89a.2.2 0 010 .28L9.554 20.854a.2.2 0 01-.285 0l-9.13-9.243a.2.2 0 010-.281l2.85-2.892a.2.2 0 01.284 0l6.14 6.209L20.726 2.97z"
-                              fill="#212134"
-                            />
-                          </svg>
-                          <span
-                            class="c55"
-                          >
-                            Installed
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div
-                  class="c29"
-                >
-                  <div
-                    class=""
-                    style="height: 100%;"
-                  >
-                    <div
-                      class="c30 c31"
-                      height="100%"
-                    >
-                      <div
-                        class=""
-                      >
-                        <img
-                          alt="SEO logo"
-                          class="c32"
-                          height="11"
-                          src="https://dl.airtable.com/.attachments/da2757a154f0af9378be0916d92d6dfa/eee7a19b/seo-logo.png"
-                          width="11"
-                        />
-                        <div
-                          class="c33"
-                        >
-                          <h3
-                            class="c34"
-                          >
-                            <div
-                              class="c35"
-                            >
-                              SEO
-                              <span>
-                                <div
-                                  aria-describedby="tooltip-19"
-                                  class="c35"
-                                  tabindex="0"
-                                >
-                                  <img
-                                    alt="Made by Strapi"
-                                    class="c52"
-                                    height="auto"
-                                    src="IMAGE_MOCK"
-                                    width="6"
-                                  />
-                                </div>
-                              </span>
-                            </div>
-                          </h3>
-                        </div>
-                        <div
-                          class="c38"
-                        >
-                          <p
-                            class="c39 c40"
-                          >
-                            The official plugin to make your Strapi content SEO friendly
-                          </p>
-                        </div>
-                      </div>
-                      <div
-                        class="c41 c42 c43"
-                        spacing="2"
-                        style="align-self: flex-end;"
-                      >
-                        <a
-                          aria-disabled="false"
-                          aria-label="Learn more about SEO"
-                          class="c8 c9"
-                          href="https://market.strapi.io/plugins/@strapi-plugin-seo"
-                          rel="noreferrer noopener"
-                          target="_blank"
-                        >
-                          <span
-                            class="c12 c13"
-                          >
-                            Learn more
-                          </span>
-                          <div
-                            aria-hidden="true"
-                            class="c10 c44"
-                          >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M16.235 2.824a1.412 1.412 0 010-2.824h6.353C23.368 0 24 .633 24 1.412v6.353a1.412 1.412 0 01-2.823 0V4.82l-8.179 8.178a1.412 1.412 0 01-1.996-1.996l8.178-8.178h-2.945zm4.942 10.588a1.412 1.412 0 012.823 0v9.176c0 .78-.632 1.412-1.412 1.412H1.412C.632 24 0 23.368 0 22.588V1.412C0 .632.632 0 1.412 0h9.176a1.412 1.412 0 010 2.824H2.824v18.353h18.353v-7.765z"
-                                fill="#32324D"
-                              />
-                            </svg>
-                          </div>
-                        </a>
-                        <button
-                          aria-disabled="false"
-                          class="c45 c46"
-                          type="button"
-                        >
-                          <div
-                            aria-hidden="true"
-                            class="c47 c48 c49"
-                          >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24z"
-                                fill="#212134"
-                              />
-                              <path
-                                d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0024 16.962V1.056A1.056 1.056 0 0022.944 0H7.038a1.056 1.056 0 00-1.056 1.056v2.252h2.112V2.11z"
-                                fill="#212134"
-                              />
-                            </svg>
-                          </div>
-                          <span
-                            class="c50 c51"
-                          >
-                            Copy install command
-                          </span>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div
-                  class="c29"
-                >
-                  <div
-                    class=""
-                    style="height: 100%;"
-                  >
-                    <div
-                      class="c30 c31"
-                      height="100%"
-                    >
-                      <div
-                        class=""
-                      >
-                        <img
-                          alt="Sitemap logo"
-                          class="c32"
-                          height="11"
-                          src="https://dl.airtable.com/.attachments/9c956c2d2b46c348465cac2091eb851c/fa7601b7/Screenshot2021-12-18at11.17.23.png"
-                          width="11"
-                        />
-                        <div
-                          class="c33"
-                        >
-                          <h3
-                            class="c34"
-                          >
-                            <div
-                              class="c35"
-                            >
-                              Sitemap
-                              <span>
-                                <div
-                                  aria-describedby="tooltip-21"
-                                  class="c35"
-                                  tabindex="0"
-                                >
-                                  <svg
-                                    class="c36 c37"
-                                    fill="none"
-                                    height="1em"
-                                    viewBox="0 0 24 24"
-                                    width="1em"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                  >
-                                    <path
-                                      clip-rule="evenodd"
-                                      d="M12 24c6.627 0 12-5.373 12-12S18.627 0 12 0 0 5.373 0 12s5.373 12 12 12zm-1.438-11.066L16.158 7.5 18 9.245l-7.438 7.18-4.462-4.1 1.84-1.745 2.622 2.354z"
-                                      fill="#212134"
-                                      fill-rule="evenodd"
-                                    />
-                                  </svg>
-                                </div>
-                              </span>
-                            </div>
-                          </h3>
-                        </div>
-                        <div
-                          class="c38"
-                        >
-                          <p
-                            class="c39 c40"
-                          >
-                            Generate a highly customizable sitemap XML
-                          </p>
-                        </div>
-                      </div>
-                      <div
-                        class="c41 c42 c43"
-                        spacing="2"
-                        style="align-self: flex-end;"
-                      >
-                        <a
-                          aria-disabled="false"
-                          aria-label="Learn more about Sitemap"
-                          class="c8 c9"
-                          href="https://market.strapi.io/plugins/strapi-plugin-sitemap"
-                          rel="noreferrer noopener"
-                          target="_blank"
-                        >
-                          <span
-                            class="c12 c13"
-                          >
-                            Learn more
-                          </span>
-                          <div
-                            aria-hidden="true"
-                            class="c10 c44"
-                          >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M16.235 2.824a1.412 1.412 0 010-2.824h6.353C23.368 0 24 .633 24 1.412v6.353a1.412 1.412 0 01-2.823 0V4.82l-8.179 8.178a1.412 1.412 0 01-1.996-1.996l8.178-8.178h-2.945zm4.942 10.588a1.412 1.412 0 012.823 0v9.176c0 .78-.632 1.412-1.412 1.412H1.412C.632 24 0 23.368 0 22.588V1.412C0 .632.632 0 1.412 0h9.176a1.412 1.412 0 010 2.824H2.824v18.353h18.353v-7.765z"
-                                fill="#32324D"
-                              />
-                            </svg>
-                          </div>
-                        </a>
-                        <button
-                          aria-disabled="false"
-                          class="c45 c46"
-                          type="button"
-                        >
-                          <div
-                            aria-hidden="true"
-                            class="c47 c48 c49"
-                          >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24z"
-                                fill="#212134"
-                              />
-                              <path
-                                d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0024 16.962V1.056A1.056 1.056 0 0022.944 0H7.038a1.056 1.056 0 00-1.056 1.056v2.252h2.112V2.11z"
-                                fill="#212134"
-                              />
-                            </svg>
-                          </div>
-                          <span
-                            class="c50 c51"
-                          >
-                            Copy install command
-                          </span>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div
-                  class="c29"
-                >
-                  <div
-                    class=""
-                    style="height: 100%;"
-                  >
-                    <div
-                      class="c30 c31"
-                      height="100%"
-                    >
-                      <div
-                        class=""
-                      >
-                        <img
-                          alt="Slugify logo"
-                          class="c32"
-                          height="11"
-                          src="https://dl.airtable.com/.attachments/ba203d42274b877ddfe1ac0bf4034c04/275356e2/logo-slugify.png"
-                          width="11"
-                        />
-                        <div
-                          class="c33"
-                        >
-                          <h3
-                            class="c34"
-                          >
-                            <div
-                              class="c35"
-                            >
-                              Slugify
-                              <span>
-                                <div
-                                  aria-describedby="tooltip-23"
-                                  class="c35"
-                                  tabindex="0"
-                                >
-                                  <svg
-                                    class="c36 c37"
-                                    fill="none"
-                                    height="1em"
-                                    viewBox="0 0 24 24"
-                                    width="1em"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                  >
-                                    <path
-                                      clip-rule="evenodd"
-                                      d="M12 24c6.627 0 12-5.373 12-12S18.627 0 12 0 0 5.373 0 12s5.373 12 12 12zm-1.438-11.066L16.158 7.5 18 9.245l-7.438 7.18-4.462-4.1 1.84-1.745 2.622 2.354z"
-                                      fill="#212134"
-                                      fill-rule="evenodd"
-                                    />
-                                  </svg>
-                                </div>
-                              </span>
-                            </div>
-                          </h3>
-                        </div>
-                        <div
-                          class="c38"
-                        >
-                          <p
-                            class="c39 c40"
-                          >
-                            A plugin for Strapi Headless CMS that provides the ability to auto slugify a field for any content type. 
-                          </p>
-                        </div>
-                      </div>
-                      <div
-                        class="c41 c42 c43"
-                        spacing="2"
-                        style="align-self: flex-end;"
-                      >
-                        <a
-                          aria-disabled="false"
-                          aria-label="Learn more about Slugify"
-                          class="c8 c9"
-                          href="https://market.strapi.io/plugins/strapi-plugin-slugify"
-                          rel="noreferrer noopener"
-                          target="_blank"
-                        >
-                          <span
-                            class="c12 c13"
-                          >
-                            Learn more
-                          </span>
-                          <div
-                            aria-hidden="true"
-                            class="c10 c44"
-                          >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M16.235 2.824a1.412 1.412 0 010-2.824h6.353C23.368 0 24 .633 24 1.412v6.353a1.412 1.412 0 01-2.823 0V4.82l-8.179 8.178a1.412 1.412 0 01-1.996-1.996l8.178-8.178h-2.945zm4.942 10.588a1.412 1.412 0 012.823 0v9.176c0 .78-.632 1.412-1.412 1.412H1.412C.632 24 0 23.368 0 22.588V1.412C0 .632.632 0 1.412 0h9.176a1.412 1.412 0 010 2.824H2.824v18.353h18.353v-7.765z"
-                                fill="#32324D"
-                              />
-                            </svg>
-                          </div>
-                        </a>
-                        <button
-                          aria-disabled="false"
-                          class="c45 c46"
-                          type="button"
-                        >
-                          <div
-                            aria-hidden="true"
-                            class="c47 c48 c49"
-                          >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24z"
-                                fill="#212134"
-                              />
-                              <path
-                                d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0024 16.962V1.056A1.056 1.056 0 0022.944 0H7.038a1.056 1.056 0 00-1.056 1.056v2.252h2.112V2.11z"
-                                fill="#212134"
-                              />
-                            </svg>
-                          </div>
-                          <span
-                            class="c50 c51"
-                          >
-                            Copy install command
-                          </span>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div
-                  class="c29"
-                >
-                  <div
-                    class=""
-                    style="height: 100%;"
-                  >
-                    <div
-                      class="c30 c31"
-                      height="100%"
-                    >
-                      <div
-                        class=""
-                      >
-                        <img
-                          alt="Tiptap editor logo"
-                          class="c32"
-                          height="11"
-                          src="https://dl.airtable.com/.attachments/c14641a99006b7c4bd4056339d864f71/deabe93b/strapi-editor-logo.jpg"
-                          width="11"
-                        />
-                        <div
-                          class="c33"
-                        >
-                          <h3
-                            class="c34"
-                          >
-                            <div
-                              class="c35"
-                            >
-                              Tiptap editor
-                            </div>
-                          </h3>
-                        </div>
-                        <div
-                          class="c38"
-                        >
-                          <p
-                            class="c39 c40"
-                          >
-                            It's a dead simple, and easy to use drop-in replacement for the built in strapi WYSIWYG editor. It's build upon the TipTap editor. It saves as plain HTML, making it easy to use with various frontends.
-                          </p>
-                        </div>
-                      </div>
-                      <div
-                        class="c41 c42 c43"
-                        spacing="2"
-                        style="align-self: flex-end;"
-                      >
-                        <a
-                          aria-disabled="false"
-                          aria-label="Learn more about Tiptap editor"
-                          class="c8 c9"
-                          href="https://market.strapi.io/plugins/strapi-tiptap-editor"
-                          rel="noreferrer noopener"
-                          target="_blank"
-                        >
-                          <span
-                            class="c12 c13"
-                          >
-                            Learn more
-                          </span>
-                          <div
-                            aria-hidden="true"
-                            class="c10 c44"
-                          >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M16.235 2.824a1.412 1.412 0 010-2.824h6.353C23.368 0 24 .633 24 1.412v6.353a1.412 1.412 0 01-2.823 0V4.82l-8.179 8.178a1.412 1.412 0 01-1.996-1.996l8.178-8.178h-2.945zm4.942 10.588a1.412 1.412 0 012.823 0v9.176c0 .78-.632 1.412-1.412 1.412H1.412C.632 24 0 23.368 0 22.588V1.412C0 .632.632 0 1.412 0h9.176a1.412 1.412 0 010 2.824H2.824v18.353h18.353v-7.765z"
-                                fill="#32324D"
-                              />
-                            </svg>
-                          </div>
-                        </a>
-                        <button
-                          aria-disabled="false"
-                          class="c45 c46"
-                          type="button"
-                        >
-                          <div
-                            aria-hidden="true"
-                            class="c47 c48 c49"
-                          >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24z"
-                                fill="#212134"
-                              />
-                              <path
-                                d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0024 16.962V1.056A1.056 1.056 0 0022.944 0H7.038a1.056 1.056 0 00-1.056 1.056v2.252h2.112V2.11z"
-                                fill="#212134"
-                              />
-                            </svg>
-                          </div>
-                          <span
-                            class="c50 c51"
-                          >
-                            Copy install command
-                          </span>
-                        </button>
                       </div>
                     </div>
                   </div>
@@ -4336,7 +1392,7 @@ describe('Marketplace page', () => {
                           alt="Transformer logo"
                           class="c32"
                           height="11"
-                          src="https://dl.airtable.com/.attachments/490bddc3b5bcfc5dd1a218edd34ea3f7/4acb8119/logo-transformer.png"
+                          src="https://dl.airtable.com/.attachments/5ffd1782a2fabf423ccd6f56c562f31a/b8f8598f/transformer-logo.png"
                           width="11"
                         />
                         <div
@@ -4353,17 +1409,17 @@ describe('Marketplace page', () => {
                           </h3>
                         </div>
                         <div
-                          class="c38"
+                          class="c36"
                         >
                           <p
-                            class="c39 c40"
+                            class="c37 c38"
                           >
                             A plugin for Strapi Headless CMS that provides the ability to transform the API response. 
                           </p>
                         </div>
                       </div>
                       <div
-                        class="c41 c42 c43"
+                        class="c39 c40 c41"
                         spacing="2"
                         style="align-self: flex-end;"
                       >
@@ -4382,7 +1438,7 @@ describe('Marketplace page', () => {
                           </span>
                           <div
                             aria-hidden="true"
-                            class="c10 c44"
+                            class="c10 c42"
                           >
                             <svg
                               fill="none"
@@ -4400,12 +1456,12 @@ describe('Marketplace page', () => {
                         </a>
                         <button
                           aria-disabled="false"
-                          class="c45 c46"
+                          class="c43 c44"
                           type="button"
                         >
                           <div
                             aria-hidden="true"
-                            class="c47 c48 c49"
+                            class="c45 c46 c47"
                           >
                             <svg
                               fill="none"
@@ -4425,123 +1481,7 @@ describe('Marketplace page', () => {
                             </svg>
                           </div>
                           <span
-                            class="c50 c51"
-                          >
-                            Copy install command
-                          </span>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div
-                  class="c29"
-                >
-                  <div
-                    class=""
-                    style="height: 100%;"
-                  >
-                    <div
-                      class="c30 c31"
-                      height="100%"
-                    >
-                      <div
-                        class=""
-                      >
-                        <img
-                          alt="Website Builder logo"
-                          class="c32"
-                          height="11"
-                          src="https://dl.airtable.com/.attachments/5232b4caa6f6b1fb90092b6711b42f0b/9d2aad9c/logo-webiste-builder.png"
-                          width="11"
-                        />
-                        <div
-                          class="c33"
-                        >
-                          <h3
-                            class="c34"
-                          >
-                            <div
-                              class="c35"
-                            >
-                              Website Builder
-                            </div>
-                          </h3>
-                        </div>
-                        <div
-                          class="c38"
-                        >
-                          <p
-                            class="c39 c40"
-                          >
-                            A plugin for Strapi Headless CMS that provides the ability to trigger website builds manually, periodically or through model events. 
-                          </p>
-                        </div>
-                      </div>
-                      <div
-                        class="c41 c42 c43"
-                        spacing="2"
-                        style="align-self: flex-end;"
-                      >
-                        <a
-                          aria-disabled="false"
-                          aria-label="Learn more about Website Builder"
-                          class="c8 c9"
-                          href="https://market.strapi.io/plugins/strapi-plugin-website-builder"
-                          rel="noreferrer noopener"
-                          target="_blank"
-                        >
-                          <span
-                            class="c12 c13"
-                          >
-                            Learn more
-                          </span>
-                          <div
-                            aria-hidden="true"
-                            class="c10 c44"
-                          >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M16.235 2.824a1.412 1.412 0 010-2.824h6.353C23.368 0 24 .633 24 1.412v6.353a1.412 1.412 0 01-2.823 0V4.82l-8.179 8.178a1.412 1.412 0 01-1.996-1.996l8.178-8.178h-2.945zm4.942 10.588a1.412 1.412 0 012.823 0v9.176c0 .78-.632 1.412-1.412 1.412H1.412C.632 24 0 23.368 0 22.588V1.412C0 .632.632 0 1.412 0h9.176a1.412 1.412 0 010 2.824H2.824v18.353h18.353v-7.765z"
-                                fill="#32324D"
-                              />
-                            </svg>
-                          </div>
-                        </a>
-                        <button
-                          aria-disabled="false"
-                          class="c45 c46"
-                          type="button"
-                        >
-                          <div
-                            aria-hidden="true"
-                            class="c47 c48 c49"
-                          >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24z"
-                                fill="#212134"
-                              />
-                              <path
-                                d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0024 16.962V1.056A1.056 1.056 0 0022.944 0H7.038a1.056 1.056 0 00-1.056 1.056v2.252h2.112V2.11z"
-                                fill="#212134"
-                              />
-                            </svg>
-                          </div>
-                          <span
-                            class="c50 c51"
+                            class="c48 c49"
                           >
                             Copy install command
                           </span>
