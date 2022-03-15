@@ -26,19 +26,32 @@ const SQL_QUERIES = {
   `,
   FOREIGN_KEY_LIST: /* sql */ `
     SELECT
-      tc.constraint_name as constraint_name,
-      kcu.column_name as column_name,
-      kcu.referenced_table_name as referenced_table_name,
-      kcu.referenced_column_name as referenced_column_name,
-      rc.update_rule as on_update,
-      rc.delete_rule as on_delete
+      tc.constraint_name as constraint_name
     FROM information_schema.table_constraints tc
-    INNER JOIN information_schema.key_column_usage kcu ON tc.constraint_name = kcu.constraint_name
-    INNER JOIN information_schema.referential_constraints AS rc ON kcu.constraint_name = rc.constraint_name
-    WHERE constraint_type = 'FOREIGN KEY'
+    WHERE tc.constraint_type = 'FOREIGN KEY'
     AND tc.table_schema = database()
     AND tc.table_name = ?;
-
+  `,
+  FOREIGN_KEY_REFERENCES: /* sql */ `
+    SELECT
+      kcu.constraint_name as constraint_name,
+      kcu.column_name as column_name,
+      kcu.referenced_table_name as referenced_table_name,
+      kcu.referenced_column_name as referenced_column_name
+    FROM information_schema.key_column_usage kcu
+    WHERE kcu.constraint_name = ?
+    AND kcu.table_schema = database()
+    AND kcu.table_name = ?;
+  `,
+  FOREIGN_KEY_REFERENTIALS_CONSTRAINTS: /* sql */ `
+    SELECT
+      rc.constraint_name as constraint_name,
+      rc.update_rule as on_update,
+      rc.delete_rule as on_delete
+    FROM information_schema.referential_constraints AS rc
+    WHERE rc.constraint_name = ?
+    AND rc.constraint_schema = database()
+    AND rc.table_name = ?;
   `,
 };
 
@@ -177,21 +190,25 @@ class MysqlSchemaInspector {
     const ret = {};
 
     for (const fk of rows) {
+
+      const [[references]] = await this.db.connection.raw(SQL_QUERIES.FOREIGN_KEY_REFERENCES, [fk.constraint_name, tableName]);
+      const [[referentialConstraints]] = await this.db.connection.raw(SQL_QUERIES.FOREIGN_KEY_REFERENTIALS_CONSTRAINTS, [fk.constraint_name, tableName]);
+
       if (!ret[fk.constraint_name]) {
         ret[fk.constraint_name] = {
           name: fk.constraint_name,
-          columns: [fk.column_name],
-          referencedColumns: [fk.referenced_column_name],
-          referencedTable: fk.referenced_table_name,
-          onUpdate: fk.on_update.toUpperCase(),
-          onDelete: fk.on_delete.toUpperCase(),
+          columns: [references.column_name],
+          referencedColumns: [references.referenced_column_name],
+          referencedTable: references.referenced_table_name,
+          onUpdate: referentialConstraints.on_update.toUpperCase(),
+          onDelete: referentialConstraints.on_delete.toUpperCase(),
         };
       } else {
         ret[fk.constraint_name].columns.push(fk.column_name);
         ret[fk.constraint_name].referencedColumns.push(fk.referenced_column_name);
       }
     }
-
+    
     return Object.values(ret);
   }
 }
