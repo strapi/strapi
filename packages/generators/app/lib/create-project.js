@@ -81,7 +81,7 @@ module.exports = async function createProject(scope, { client, connection, depen
 
     if (useTypescript) {
       const tsJSONDir = join(__dirname, 'resources', 'json', 'ts');
-      const files = ['tsconfig-admin.json.js', 'tsconfig-server.json.js', 'tslint.json.js'];
+      const files = ['tsconfig-admin.json.js', 'tsconfig-server.json.js'];
 
       files.forEach(file => {
         const srcPath = join(tsJSONDir, file);
