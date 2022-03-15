@@ -12,12 +12,13 @@ import {
   useNotification,
 } from '@strapi/helper-plugin';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
-import { Layout, HeaderLayout, ContentLayout, ActionLayout } from '@strapi/design-system/Layout';
+import { Layout, HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
 import { Searchbar } from '@strapi/design-system/Searchbar';
+import { Box } from '@strapi/design-system/Box';
 import { LinkButton } from '@strapi/design-system/LinkButton';
 import { useNotifyAT } from '@strapi/design-system/LiveRegions';
-import Plus from '@strapi/icons/Plus';
+import Upload from '@strapi/icons/Upload';
 
 import PluginCard from './components/PluginCard';
 import { EmptyPluginSearch } from './components/EmptyPluginSearch';
@@ -103,7 +104,11 @@ const MarketPlacePage = () => {
   if (hasFailed) {
     return (
       <Layout>
-        <AnErrorOccurred />
+        <ContentLayout>
+          <Box paddingTop={8}>
+            <AnErrorOccurred />
+          </Box>
+        </ContentLayout>
       </Layout>
     );
   }
@@ -141,7 +146,7 @@ const MarketPlacePage = () => {
           })}
           primaryAction={
             <LinkButton
-              startIcon={<Plus />}
+              startIcon={<Upload />}
               variant="tertiary"
               href="https://market.strapi.io/submit-plugin"
               onClick={() => trackUsage('didSubmitPlugin')}
@@ -153,8 +158,8 @@ const MarketPlacePage = () => {
             </LinkButton>
           }
         />
-        <ActionLayout
-          startActions={
+        <ContentLayout>
+          <Box width="25%" paddingBottom={4}>
             <Searchbar
               name="searchbar"
               onClear={() => setSearchQuery('')}
@@ -174,9 +179,7 @@ const MarketPlacePage = () => {
                 defaultMessage: 'Search for a plugin',
               })}
             </Searchbar>
-          }
-        />
-        <ContentLayout>
+          </Box>
           {searchQuery.length > 0 && !searchResults.length ? (
             <EmptyPluginSearch
               content={formatMessage(

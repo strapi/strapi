@@ -68,7 +68,7 @@ const PluginCard = ({ plugin, installedPluginNames, useYarn }) => {
           width={11}
           height={11}
         />
-        <Box paddingTop={5}>
+        <Box paddingTop={4}>
           <Typography as="h3" variant="delta">
             <Flex alignItems="center">
               {attributes.name}
@@ -108,7 +108,7 @@ const PluginCard = ({ plugin, installedPluginNames, useYarn }) => {
         </Box>
       </Box>
 
-      <Stack horizontal size={2} style={{ alignSelf: 'flex-end' }} paddingTop={3}>
+      <Stack horizontal spacing={2} style={{ alignSelf: 'flex-end' }} paddingTop={6}>
         <LinkButton
           size="S"
           href={`https://market.strapi.io/plugins/${attributes.slug}`}
