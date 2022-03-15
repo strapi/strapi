@@ -108,7 +108,7 @@ const primaryProcess = async ({
 
 const workerProcess = ({ dir, watchAdmin, polling }) => {
   const strapiInstance = strapi({
-    dir,
+    distDir: dir,
     autoReload: true,
     serveAdminPanel: watchAdmin ? false : true,
   });

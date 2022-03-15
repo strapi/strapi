@@ -36,7 +36,7 @@ const loadFiles = async (
     if (path.extname(absolutePath) === '.json') {
       mod = await fse.readJson(absolutePath);
     } else {
-      mod = importDefault(requireFn(absolutePath));
+      mod = importDefault(requireFn(absolutePath)).default;
     }
 
     Object.defineProperty(mod, '__filename__', {
