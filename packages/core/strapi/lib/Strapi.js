@@ -211,7 +211,6 @@ class Strapi {
       } catch (e) {
         this.telemetry.send('didNotOpenTab');
       }
-     ;
     }
   }
 

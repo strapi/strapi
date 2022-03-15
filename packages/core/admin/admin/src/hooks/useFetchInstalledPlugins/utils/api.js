@@ -1,11 +1,9 @@
 import { axiosInstance } from '../../../core/utils';
 
-const fetchPlugins = async notify => {
+const fetchInstalledPlugins = async () => {
   const { data } = await axiosInstance.get('/admin/plugins');
-
-  notify();
 
   return data;
 };
 
-export { fetchPlugins };
+export { fetchInstalledPlugins };

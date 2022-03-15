@@ -137,7 +137,10 @@ module.exports = {
         throw new ValidationError('Incorrect code provided');
       }
 
-      await getService('user').edit(user.id, { resetPasswordToken: null, password: params.password });
+      await getService('user').edit(user.id, {
+        resetPasswordToken: null,
+        password: params.password,
+      });
       // Update the user.
       ctx.send({
         jwt: getService('jwt').issue({ id: user.id }),
@@ -422,7 +425,7 @@ module.exports = {
     if (!user) {
       return ctx.send({
         email: params.email,
-        sent: true
+        sent: true,
       });
     }
 
