@@ -12,7 +12,7 @@ module.exports = strapi => {
 
     const normalizedPath = path.normalize(filePath).replace(/^\/?(\.\/|\.\.\/)+/, '');
 
-    return path.resolve(strapi.dirs.root, normalizedPath);
+    return path.resolve(strapi.dirs.app.root, normalizedPath);
   }
 
   const strapiFS = {

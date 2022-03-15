@@ -6,10 +6,10 @@ const fs = require('fs-extra');
 const chokidar = require('chokidar');
 const execa = require('execa');
 const { getOr } = require('lodash/fp');
+const tsUtils = require('@strapi/typescript-utils');
 
 const loadConfiguration = require('../core/app-configuration');
 const strapi = require('../index');
-const tsUtils = require('../utils/typescript');
 const { buildTypeScript, buildAdmin } = require('./builders');
 
 /**

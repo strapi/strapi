@@ -1,0 +1,8 @@
+export default ({ strapi }) => ({
+  index(ctx) {
+    ctx.body = strapi
+      .plugin('{{ pluginName }}')
+      .service('myService')
+      .getWelcomeMessage();
+  },
+});

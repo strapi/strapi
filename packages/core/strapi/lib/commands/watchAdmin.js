@@ -2,10 +2,11 @@
 
 const path = require('path');
 const strapiAdmin = require('@strapi/admin');
+const tsUtils = require('@strapi/typescript-utils');
 const { getConfigUrls, getAbsoluteServerUrl } = require('@strapi/utils');
+
 const getEnabledPlugins = require('../core/loaders/plugins/get-enabled-plugins');
 const addSlash = require('../utils/addSlash');
-const tsUtils = require('../utils/typescript');
 const strapi = require('../index');
 
 module.exports = async function({ browser }) {
@@ -15,7 +16,7 @@ module.exports = async function({ browser }) {
   const buildDestDir = isTSProject ? path.join(currentDirectory, 'dist') : currentDirectory;
 
   const strapiInstance = strapi({
-    dir: buildDestDir,
+    distDir: buildDestDir,
     autoReload: true,
     serveAdminPanel: false,
   });

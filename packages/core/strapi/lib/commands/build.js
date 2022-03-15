@@ -1,7 +1,7 @@
 'use strict';
 const path = require('path');
 
-const tsUtils = require('../utils/typescript');
+const tsUtils = require('@strapi/typescript-utils');
 const { buildAdmin, buildTypeScript } = require('./builders');
 
 /**
