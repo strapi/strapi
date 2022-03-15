@@ -1,5 +1,7 @@
 import isEmpty from 'lodash/isEmpty';
 
+import isSingleRelation from './isSingleRelation';
+
 export default function hasContent(type, content, metadatas, fieldSchema) {
   if (type === 'component') {
     const {
@@ -16,7 +18,7 @@ export default function hasContent(type, content, metadatas, fieldSchema) {
   }
 
   if (type === 'relation') {
-    if (['oneToOne', 'manyToOne'].includes(fieldSchema.relation)) {
+    if (isSingleRelation(fieldSchema.relation)) {
       return !isEmpty(content);
     }
 

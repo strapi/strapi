@@ -10,6 +10,7 @@ import RepeatableComponent from './RepeatableComponent';
 import SingleComponent from './SingleComponent';
 import CellValue from './CellValue';
 import hasContent from './utils/hasContent';
+import isSingleRelation from './utils/isSingleRelation';
 
 const TypographyMaxWidth = styled(Typography)`
   max-width: 300px;
@@ -31,7 +32,7 @@ const CellContent = ({ content, fieldSchema, metadatas, name, queryInfos, rowId 
       return <MultipleMedias value={content} />;
 
     case 'relation': {
-      if (['oneToOne', 'manyToOne'].includes(fieldSchema.relation)) {
+      if (isSingleRelation(fieldSchema.relation)) {
         return <RelationSingle metadatas={metadatas} value={content} />;
       }
 
