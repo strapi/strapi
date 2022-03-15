@@ -18,7 +18,7 @@ module.exports = {
       }
     };
 
-    const publicDir = strapi.dirs.public;
+    const publicDir = strapi.dirs.app.public;
 
     return {
       uploadStream(file) {

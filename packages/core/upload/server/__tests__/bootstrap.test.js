@@ -8,7 +8,7 @@ describe('Upload plugin bootstrap function', () => {
     const registerMany = jest.fn(() => {});
 
     global.strapi = {
-      dirs: { root: process.cwd() },
+      dirs: { dist: { root: process.cwd() }, app: { root: process.cwd() } },
       admin: {
         services: { permission: { actionProvider: { registerMany } } },
       },

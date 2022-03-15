@@ -18,18 +18,18 @@ const DEFAULT_CONTENT_TYPE = {
 };
 
 module.exports = async strapi => {
-  if (!existsSync(strapi.dirs.api)) {
+  if (!existsSync(strapi.dirs.dist.api)) {
     return;
   }
 
-  const apisFDs = await fse.readdir(strapi.dirs.api, { withFileTypes: true });
+  const apisFDs = await fse.readdir(strapi.dirs.dist.api, { withFileTypes: true });
   const apis = {};
 
   // only load folders
   for (const apiFD of apisFDs) {
     if (apiFD.isDirectory()) {
       const apiName = normalizeName(apiFD.name);
-      const api = await loadAPI(join(strapi.dirs.api, apiFD.name));
+      const api = await loadAPI(join(strapi.dirs.dist.api, apiFD.name));
 
       apis[apiName] = api;
     }
