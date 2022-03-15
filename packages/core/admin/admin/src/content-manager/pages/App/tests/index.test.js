@@ -8,7 +8,9 @@ import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { render, screen } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
+import { lightTheme } from '@strapi/design-system';
 import Theme from '../../../../components/Theme';
+import ThemeToggleProvider from '../../../../components/ThemeToggleProvider';
 import { App as ContentManagerApp } from '..';
 import cmReducers from '../../../../reducers';
 import useModels from '../useModels';
@@ -96,15 +98,17 @@ describe('Content manager | App | main', () => {
 
     const { container } = render(
       <IntlProvider messages={{}} defaultLocale="en" locale="en">
-        <Theme>
-          <DndProvider backend={HTML5Backend}>
-            <Provider store={store}>
-              <Router history={history}>
-                <ContentManagerApp />
-              </Router>
-            </Provider>
-          </DndProvider>
-        </Theme>
+        <ThemeToggleProvider themes={{ light: lightTheme }}>
+          <Theme>
+            <DndProvider backend={HTML5Backend}>
+              <Provider store={store}>
+                <Router history={history}>
+                  <ContentManagerApp />
+                </Router>
+              </Provider>
+            </DndProvider>
+          </Theme>
+        </ThemeToggleProvider>
       </IntlProvider>
     );
 
@@ -804,15 +808,17 @@ describe('Content manager | App | main', () => {
 
     render(
       <IntlProvider messages={{}} defaultLocale="en" locale="en">
-        <Theme>
-          <DndProvider backend={HTML5Backend}>
-            <Provider store={store}>
-              <Router history={history}>
-                <ContentManagerApp />
-              </Router>
-            </Provider>
-          </DndProvider>
-        </Theme>
+        <ThemeToggleProvider themes={{ light: lightTheme }}>
+          <Theme>
+            <DndProvider backend={HTML5Backend}>
+              <Provider store={store}>
+                <Router history={history}>
+                  <ContentManagerApp />
+                </Router>
+              </Provider>
+            </DndProvider>
+          </Theme>
+        </ThemeToggleProvider>
       </IntlProvider>
     );
 
@@ -848,15 +854,17 @@ describe('Content manager | App | main', () => {
 
     render(
       <IntlProvider messages={{}} defaultLocale="en" locale="en">
-        <Theme>
-          <DndProvider backend={HTML5Backend}>
-            <Provider store={store}>
-              <Router history={history}>
-                <ContentManagerApp />
-              </Router>
-            </Provider>
-          </DndProvider>
-        </Theme>
+        <ThemeToggleProvider themes={{ light: lightTheme }}>
+          <Theme>
+            <DndProvider backend={HTML5Backend}>
+              <Provider store={store}>
+                <Router history={history}>
+                  <ContentManagerApp />
+                </Router>
+              </Provider>
+            </DndProvider>
+          </Theme>
+        </ThemeToggleProvider>
       </IntlProvider>
     );
 
@@ -891,15 +899,17 @@ describe('Content manager | App | main', () => {
 
     render(
       <IntlProvider messages={{}} defaultLocale="en" locale="en">
-        <Theme>
-          <DndProvider backend={HTML5Backend}>
-            <Provider store={store}>
-              <Router history={history}>
-                <ContentManagerApp />
-              </Router>
-            </Provider>
-          </DndProvider>
-        </Theme>
+        <ThemeToggleProvider themes={{ light: lightTheme }}>
+          <Theme>
+            <DndProvider backend={HTML5Backend}>
+              <Provider store={store}>
+                <Router history={history}>
+                  <ContentManagerApp />
+                </Router>
+              </Provider>
+            </DndProvider>
+          </Theme>
+        </ThemeToggleProvider>
       </IntlProvider>
     );
 
