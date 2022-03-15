@@ -79,7 +79,7 @@ export const EmptyStateAsset = ({ disabled, onClick, onDropAsset }) => {
       >
         {formatMessage({
           id: getTrad('mediaLibraryInput.placeholder'),
-          defaultMessage: 'Click to select an asset or drag and drop one in this area',
+          defaultMessage: 'Click to add an asset or drag and drop one in this area',
         })}
       </TextAlignTypography>
     </Flex>

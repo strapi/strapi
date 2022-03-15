@@ -23,6 +23,7 @@ export const PendingAssetStep = ({
   addUploadedFiles,
   onClose,
   onEditAsset,
+  onRemoveAsset,
   assets,
   onClickAddAsset,
   onCancelUpload,
@@ -62,8 +63,8 @@ export const PendingAssetStep = ({
       <ModalHeader>
         <Typography fontWeight="bold" textColor="neutral800" as="h2" id="title">
           {formatMessage({
-            id: getTrad('header.actions.upload-assets'),
-            defaultMessage: 'Upload assets',
+            id: getTrad('header.actions.add-assets'),
+            defaultMessage: 'Add new assets',
           })}
         </Typography>
       </ModalHeader>
@@ -85,14 +86,14 @@ export const PendingAssetStep = ({
               <Typography variant="pi" textColor="neutral600">
                 {formatMessage({
                   id: getTrad('modal.upload-list.sub-header-subtitle'),
-                  defaultMessage: 'Manage the assets before adding them to the Media Library',
+                  defaultMessage: 'Manage the assets before uploading them to the Media Library',
                 })}
               </Typography>
             </Stack>
             <Button size="S" onClick={onClickAddAsset}>
               {formatMessage({
-                id: getTrad('header.actions.upload-new-asset'),
-                defaultMessage: 'Upload new asset',
+                id: getTrad('header.actions.add-assets'),
+                defaultMessage: 'Add new assets',
               })}
             </Button>
           </Flex>
@@ -126,6 +127,7 @@ export const PendingAssetStep = ({
                       local
                       alt={asset.name}
                       onEdit={onEditAsset}
+                      onRemove={onRemoveAsset}
                     />
                   </GridItem>
                 );
@@ -145,10 +147,9 @@ export const PendingAssetStep = ({
           <Button type="submit" loading={uploadStatus === Status.Uploading}>
             {formatMessage(
               {
-                id: getTrad(
-                  `modal.upload-list.footer.button.${assets.length > 1 ? 'plural' : 'singular'}`
-                ),
-                defaultMessage: 'Upload assets',
+                id: getTrad('modal.upload-list.footer.button'),
+                defaultMessage:
+                  'Upload {number, plural, one {# asset} other {# assets}} to the library',
               },
               { number: assets.length }
             )}
@@ -168,6 +169,7 @@ PendingAssetStep.propTypes = {
   assets: PropTypes.arrayOf(AssetDefinition).isRequired,
   onClose: PropTypes.func.isRequired,
   onEditAsset: PropTypes.func.isRequired,
+  onRemoveAsset: PropTypes.func.isRequired,
   onClickAddAsset: PropTypes.func.isRequired,
   onUploadSucceed: PropTypes.func.isRequired,
   onCancelUpload: PropTypes.func.isRequired,

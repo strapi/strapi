@@ -1,12 +1,12 @@
 'use strict';
 
 const _ = require('lodash');
-const { pick, pipe, has, prop, isNil, cloneDeep, isArray } = require('lodash/fp');
+const { pick, pipe, has, prop, isNil, cloneDeep, isArray, difference } = require('lodash/fp');
 const {
   isRelationalAttribute,
   getVisibleAttributes,
-  isMediaAttribute,
   isTypedAttribute,
+  getScalarAttributes,
 } = require('@strapi/utils').contentTypes;
 const { ApplicationError } = require('@strapi/utils').errors;
 const { getService } = require('../utils');
@@ -82,12 +82,10 @@ const getAndValidateRelatedEntity = async (relatedEntityId, model, locale) => {
  * @param {*} attribute
  * @returns
  */
-const isLocalizedAttribute = (model, attributeName) => {
-  const attribute = model.attributes[attributeName];
-
+const isLocalizedAttribute = attribute => {
   return (
     hasLocalizedOption(attribute) ||
-    (isRelationalAttribute(attribute) && !isMediaAttribute(attribute)) ||
+    isRelationalAttribute(attribute) ||
     isTypedAttribute(attribute, 'uid')
   );
 };
@@ -108,7 +106,7 @@ const isLocalizedContentType = model => {
  */
 const getNonLocalizedAttributes = model => {
   return getVisibleAttributes(model).filter(
-    attributeName => !isLocalizedAttribute(model, attributeName)
+    attrName => !isLocalizedAttribute(model.attributes[attrName])
   );
 };
 
@@ -158,10 +156,7 @@ const removeIdsMut = (model, entry) => {
 const copyNonLocalizedAttributes = (model, entry) => {
   const nonLocalizedAttributes = getNonLocalizedAttributes(model);
 
-  return pipe(
-    pick(nonLocalizedAttributes),
-    removeIds(model)
-  )(entry);
+  return pipe(pick(nonLocalizedAttributes), removeIds(model))(entry);
 };
 
 /**
@@ -170,8 +165,8 @@ const copyNonLocalizedAttributes = (model, entry) => {
  * @returns {string[]}
  */
 const getLocalizedAttributes = model => {
-  return getVisibleAttributes(model).filter(attributeName =>
-    isLocalizedAttribute(model, attributeName)
+  return getVisibleAttributes(model).filter(attrName =>
+    isLocalizedAttribute(model.attributes[attrName])
   );
 };
 
@@ -197,6 +192,37 @@ const fillNonLocalizedAttributes = (entry, relatedEntry, { model }) => {
   });
 };
 
+/**
+ * build the populate param to
+ * @param {String} modelUID uid of the model, could be of a content-type or a component
+ */
+const getNestedPopulateOfNonLocalizedAttributes = modelUID => {
+  const schema = strapi.getModel(modelUID);
+  const scalarAttributes = getScalarAttributes(schema);
+  const nonLocalizedAttributes = getNonLocalizedAttributes(schema);
+  const currentAttributesToPopulate = difference(nonLocalizedAttributes, scalarAttributes);
+  const attributesToPopulate = [...currentAttributesToPopulate];
+
+  for (let attrName of currentAttributesToPopulate) {
+    const attr = schema.attributes[attrName];
+    if (attr.type === 'component') {
+      const nestedPopulate = getNestedPopulateOfNonLocalizedAttributes(attr.component).map(
+        nestedAttr => `${attrName}.${nestedAttr}`
+      );
+      attributesToPopulate.push(...nestedPopulate);
+    } else if (attr.type === 'dynamiczone') {
+      attr.components.forEach(componentName => {
+        const nestedPopulate = getNestedPopulateOfNonLocalizedAttributes(componentName).map(
+          nestedAttr => `${attrName}.${nestedAttr}`
+        );
+        attributesToPopulate.push(...nestedPopulate);
+      });
+    }
+  }
+
+  return attributesToPopulate;
+};
+
 module.exports = () => ({
   isLocalizedContentType,
   getValidLocale,
@@ -206,4 +232,5 @@ module.exports = () => ({
   copyNonLocalizedAttributes,
   getAndValidateRelatedEntity,
   fillNonLocalizedAttributes,
+  getNestedPopulateOfNonLocalizedAttributes,
 });

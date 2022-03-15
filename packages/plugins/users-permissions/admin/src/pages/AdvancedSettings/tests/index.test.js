@@ -783,14 +783,17 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
 
       .c18 {
         grid-column: span 6;
+        max-width: 100%;
       }
 
       .c32 {
         grid-column: span 12;
+        max-width: 100%;
       }
 
       .c48 {
         grid-column: span 6;
+        max-width: 100%;
       }
 
       @media (max-width:68.75rem) {
@@ -1011,7 +1014,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                           >
                             <label
                               class="c36"
-                              for="field-1"
+                              for="toggleinput-1"
                             >
                               One account per email address
                             </label>
@@ -1050,6 +1053,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                               <input
                                 aria-disabled="false"
                                 class="c46"
+                                id="toggleinput-1"
                                 name="unique_email"
                                 type="checkbox"
                               />
@@ -1057,7 +1061,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                           </label>
                           <p
                             class="c47"
-                            id="field-1-hint"
+                            id="toggleinput-1-hint"
                           >
                             Disallow the user to create multiple accounts using the same email address with different authentication providers.
                           </p>
@@ -1082,7 +1086,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                           >
                             <label
                               class="c36"
-                              for="field-2"
+                              for="toggleinput-2"
                             >
                               Enable sign-ups
                             </label>
@@ -1121,6 +1125,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                               <input
                                 aria-disabled="false"
                                 class="c46"
+                                id="toggleinput-2"
                                 name="allow_register"
                                 type="checkbox"
                               />
@@ -1128,7 +1133,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                           </label>
                           <p
                             class="c47"
-                            id="field-2-hint"
+                            id="toggleinput-2-hint"
                           >
                             When disabled (OFF), the registration process is forbidden. No one can subscribe anymore no matter the used provider.
                           </p>
@@ -1200,7 +1205,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                           >
                             <label
                               class="c36"
-                              for="field-3"
+                              for="toggleinput-3"
                             >
                               Enable email confirmation
                             </label>
@@ -1239,6 +1244,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                               <input
                                 aria-disabled="false"
                                 class="c46"
+                                id="toggleinput-3"
                                 name="email_confirmation"
                                 type="checkbox"
                               />
@@ -1246,7 +1252,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                           </label>
                           <p
                             class="c47"
-                            id="field-3-hint"
+                            id="toggleinput-3-hint"
                           >
                             When enabled (ON), new registered users receive a confirmation email.
                           </p>

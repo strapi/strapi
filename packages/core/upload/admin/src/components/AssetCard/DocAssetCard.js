@@ -12,11 +12,13 @@ import {
   CardTitle,
   CardSubtitle,
 } from '@strapi/design-system/Card';
+import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
 import { IconButton } from '@strapi/design-system/IconButton';
 import Pencil from '@strapi/icons/Pencil';
 import FileIcon from '@strapi/icons/File';
 import FilePdfIcon from '@strapi/icons/FilePdf';
+import Trash from '@strapi/icons/Trash';
 import { pxToRem } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { getTrad } from '../../utils';
@@ -36,20 +38,33 @@ const CardAsset = styled(Flex)`
   background: linear-gradient(180deg, #ffffff 0%, #f6f6f9 121.48%);
 `;
 
-export const DocAssetCard = ({ name, extension, selected, onSelect, onEdit, size }) => {
+export const DocAssetCard = ({ name, extension, selected, onSelect, onEdit, onRemove, size }) => {
   const { formatMessage } = useIntl();
 
   return (
     <Card>
       <CardHeader>
         {onSelect && <CardCheckbox value={selected} onValueChange={onSelect} />}
-        {onEdit && (
+        {(onRemove || onEdit) && (
           <CardAction position="end">
-            <IconButton
-              label={formatMessage({ id: getTrad('control-card.edit'), defaultMessage: 'Edit' })}
-              icon={<Pencil />}
-              onClick={onEdit}
-            />
+            {onRemove && (
+              <IconButton
+                label={formatMessage({
+                  id: getTrad('control-card.remove-selection'),
+                  defaultMessage: 'Remove from selection',
+                })}
+                icon={<Trash />}
+                onClick={onRemove}
+              />
+            )}
+
+            {onEdit && (
+              <IconButton
+                label={formatMessage({ id: getTrad('control-card.edit'), defaultMessage: 'Edit' })}
+                icon={<Pencil />}
+                onClick={onEdit}
+              />
+            )}
           </CardAction>
         )}
         <CardAsset
@@ -68,7 +83,9 @@ export const DocAssetCard = ({ name, extension, selected, onSelect, onEdit, size
       </CardHeader>
       <CardBody>
         <CardContent>
-          <CardTitle as="h2">{name}</CardTitle>
+          <Box paddingTop={1}>
+            <CardTitle as="h2">{name}</CardTitle>
+          </Box>
           <CardSubtitle>
             <Extension>{extension}</Extension>
           </CardSubtitle>
@@ -85,6 +102,7 @@ DocAssetCard.defaultProps = {
   selected: false,
   onEdit: undefined,
   onSelect: undefined,
+  onRemove: undefined,
   size: 'M',
 };
 
@@ -92,6 +110,7 @@ DocAssetCard.propTypes = {
   extension: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
   onEdit: PropTypes.func,
+  onRemove: PropTypes.func,
   onSelect: PropTypes.func,
   selected: PropTypes.bool,
   size: PropTypes.oneOf(['S', 'M']),

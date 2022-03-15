@@ -8,6 +8,7 @@
  * run jobs, or perform some special logic.
  */
 const _ = require('lodash');
+const urljoin = require('url-join');
 const uuid = require('uuid/v4');
 const { getService } = require('../utils');
 
@@ -31,14 +32,17 @@ module.exports = async ({ strapi }) => {
     strapi.config.set('plugin.users-permissions.jwtSecret', jwtSecret);
 
     if (!process.env.JWT_SECRET) {
-      strapi.fs.appendFile('.env', `JWT_SECRET=${jwtSecret}\n`);
+      strapi.fs.appendFile(process.env.ENV_PATH || '.env', `JWT_SECRET=${jwtSecret}\n`);
+      strapi.log.info(
+        'The Users & Permissions plugin automatically generated a jwt secret and stored it in your .env file under the name JWT_SECRET.'
+      );
     }
   }
 };
 
 const initGrant = async pluginStore => {
   const apiPrefix = strapi.config.get('api.rest.prefix');
-  const baseURL = `${strapi.config.server.url}/${apiPrefix}/auth`;
+  const baseURL = urljoin(strapi.config.server.url, apiPrefix, 'auth');
 
   const grantConfig = {
     email: {

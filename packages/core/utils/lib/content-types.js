@@ -104,13 +104,21 @@ const isPrivateAttribute = (model = {}, attributeName) => {
 };
 
 const isScalarAttribute = attribute => {
-  return !['component', 'relation', 'dynamiczone'].includes(attribute.type);
+  return !['media', 'component', 'relation', 'dynamiczone'].includes(attribute.type);
 };
 
-const isMediaAttribute = attr => {
-  return attr.type === 'media';
+const getScalarAttributes = schema => {
+  return _.reduce(
+    schema.attributes,
+    (acc, attr, attrName) => {
+      if (isScalarAttribute(attr)) acc.push(attrName);
+      return acc;
+    },
+    []
+  );
 };
 
+const isMediaAttribute = attribute => attribute.type === 'media';
 const isRelationalAttribute = attribute => attribute.type === 'relation';
 const isComponentAttribute = attribute => ['component', 'dynamiczone'].includes(attribute.type);
 
@@ -144,6 +152,7 @@ module.exports = {
   isPrivateAttribute,
   constants,
   getNonWritableAttributes,
+  getScalarAttributes,
   getWritableAttributes,
   isWritableAttribute,
   getNonVisibleAttributes,

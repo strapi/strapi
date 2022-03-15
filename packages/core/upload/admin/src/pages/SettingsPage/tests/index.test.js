@@ -420,6 +420,7 @@ describe('Upload | SettingsPage', () => {
 
       .c23 {
         grid-column: span 6;
+        max-width: 100%;
       }
 
       .c1 {
@@ -617,7 +618,7 @@ describe('Upload | SettingsPage', () => {
                                   >
                                     <label
                                       class="c27"
-                                      for="field-1"
+                                      for="toggleinput-1"
                                     >
                                       Responsive friendly upload
                                     </label>
@@ -659,6 +660,7 @@ describe('Upload | SettingsPage', () => {
                                         checked=""
                                         class="c37"
                                         data-testid="responsiveDimensions"
+                                        id="toggleinput-1"
                                         name="responsiveDimensions"
                                         type="checkbox"
                                       />
@@ -666,7 +668,7 @@ describe('Upload | SettingsPage', () => {
                                   </label>
                                   <p
                                     class="c38"
-                                    id="field-1-hint"
+                                    id="toggleinput-1-hint"
                                   >
                                     Enabling this option will generate multiple formats (small, medium and large) of the uploaded asset.
                                   </p>
@@ -691,7 +693,7 @@ describe('Upload | SettingsPage', () => {
                                   >
                                     <label
                                       class="c27"
-                                      for="field-2"
+                                      for="toggleinput-2"
                                     >
                                       Size optimization
                                     </label>
@@ -732,6 +734,7 @@ describe('Upload | SettingsPage', () => {
                                         aria-label="sizeOptimization"
                                         class="c37"
                                         data-testid="sizeOptimization"
+                                        id="toggleinput-2"
                                         name="sizeOptimization"
                                         type="checkbox"
                                       />
@@ -739,9 +742,9 @@ describe('Upload | SettingsPage', () => {
                                   </label>
                                   <p
                                     class="c38"
-                                    id="field-2-hint"
+                                    id="toggleinput-2-hint"
                                   >
-                                    Enabling this option will optimize the file size without compromising on the quality.
+                                    Enabling this option will reduce the image size and slightly reduce its quality.
                                   </p>
                                 </div>
                               </div>
@@ -764,7 +767,7 @@ describe('Upload | SettingsPage', () => {
                                   >
                                     <label
                                       class="c27"
-                                      for="field-3"
+                                      for="toggleinput-3"
                                     >
                                       Auto orientation
                                     </label>
@@ -806,6 +809,7 @@ describe('Upload | SettingsPage', () => {
                                         checked=""
                                         class="c37"
                                         data-testid="autoOrientation"
+                                        id="toggleinput-3"
                                         name="autoOrientation"
                                         type="checkbox"
                                       />
@@ -813,7 +817,7 @@ describe('Upload | SettingsPage', () => {
                                   </label>
                                   <p
                                     class="c38"
-                                    id="field-3-hint"
+                                    id="toggleinput-3-hint"
                                   >
                                     Enabling this option will automatically rotate the image according to EXIF orientation tag.
                                   </p>

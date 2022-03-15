@@ -5,28 +5,38 @@ const { isListable, hasEditableAttribute, hasRelationAttribute } = require('./at
 
 const DEFAULT_LIST_LENGTH = 4;
 const MAX_ROW_SIZE = 12;
+const FIELD_TYPES_FULL_SIZE = ['dynamiczone', 'component', 'json', 'richtext'];
+const FIELD_TYPES_SMALL = [
+  'checkbox',
+  'boolean',
+  'date',
+  'time',
+  'biginteger',
+  'decimal',
+  'float',
+  'integer',
+  'number',
+];
 
-const typeToSize = type => {
-  switch (type) {
-    case 'checkbox':
-    case 'boolean':
-    case 'date':
-    case 'time':
-    case 'biginteger':
-    case 'decimal':
-    case 'float':
-    case 'integer':
-    case 'number':
-      return MAX_ROW_SIZE / 3;
-    case 'json':
-    case 'component':
-    case 'richtext':
-    case 'dynamiczone':
-      return MAX_ROW_SIZE;
-
-    default:
-      return MAX_ROW_SIZE / 2;
+const isAllowedFieldSize = (type, size) => {
+  if (FIELD_TYPES_FULL_SIZE.includes(type)) {
+    return size === MAX_ROW_SIZE;
   }
+
+  // validate, whether the field has 4, 6, 8 or 12 columns?
+  return size <= MAX_ROW_SIZE;
+};
+
+const getDefaultFieldSize = type => {
+  if (FIELD_TYPES_FULL_SIZE.includes(type)) {
+    return MAX_ROW_SIZE;
+  }
+
+  if (FIELD_TYPES_SMALL.includes(type)) {
+    return MAX_ROW_SIZE / 3;
+  }
+
+  return MAX_ROW_SIZE / 2;
 };
 
 async function createDefaultLayouts(schema) {
@@ -77,8 +87,10 @@ function syncLayouts(configuration, schema) {
     for (let el of row) {
       if (!hasEditableAttribute(schema, el.name)) continue;
 
-      // if size of the element has changed (type changes)
-      if (typeToSize(schema.attributes[el.name].type) !== el.size) {
+      /* if the type of a field was changed (ex: string -> json) or a new field was added in the schema
+         and the new type doesn't allow the size of the previous type, append the field at the end of layouts
+      */
+      if (!isAllowedFieldSize(schema.attributes[el.name].type, el.size)) {
         elementsToReAppend.push(el.name);
         continue;
       }
@@ -141,7 +153,8 @@ const appendToEditLayout = (layout = [], keysToAppend, schema) => {
 
   for (let key of keysToAppend) {
     const attribute = schema.attributes[key];
-    const attributeSize = typeToSize(attribute.type);
+
+    const attributeSize = getDefaultFieldSize(attribute.type);
     let currenRowSize = rowSize(layout[currentRowIndex]);
 
     if (currenRowSize + attributeSize > MAX_ROW_SIZE) {

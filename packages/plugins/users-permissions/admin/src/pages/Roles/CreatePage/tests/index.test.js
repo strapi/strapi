@@ -665,14 +665,17 @@ describe('Admin | containers | RoleCreatePage', () => {
 
       .c19 {
         grid-column: span 6;
+        max-width: 100%;
       }
 
       .c34 {
         grid-column: span 7;
+        max-width: 100%;
       }
 
       .c59 {
         grid-column: span 5;
+        max-width: 100%;
       }
 
       .c51 {
@@ -782,7 +785,7 @@ describe('Admin | containers | RoleCreatePage', () => {
         border: 1px solid #4945ff;
       }
 
-      .c41:hover:not([aria-disabled='true']) .sc-fAyhPT {
+      .c41:hover:not([aria-disabled='true']) .sc-iAzEPL {
         color: #271fe0;
       }
 
