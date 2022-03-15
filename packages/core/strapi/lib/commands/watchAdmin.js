@@ -16,7 +16,7 @@ module.exports = async function({ browser }) {
   const buildDestDir = isTSProject ? path.join(currentDirectory, 'dist') : currentDirectory;
 
   const strapiInstance = strapi({
-    dir: buildDestDir,
+    distDir: buildDestDir,
     autoReload: true,
     serveAdminPanel: false,
   });
