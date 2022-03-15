@@ -158,7 +158,7 @@ function ListRow({
                     );
                   }}
                   label={`${formatMessage({
-                    id: 'app.utils.delete',
+                    id: 'global.delete',
                     defaultMessage: 'Delete',
                   })} ${name}`}
                   noBorder

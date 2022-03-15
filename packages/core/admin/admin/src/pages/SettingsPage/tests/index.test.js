@@ -167,7 +167,7 @@ describe('ADMIN | pages | SettingsPage', () => {
         class="c0"
       >
         <nav
-          aria-label="app.components.LeftMenuLinkContainer.settings"
+          aria-label="global.settings"
           class="c1"
         >
           <div
@@ -179,7 +179,7 @@ describe('ADMIN | pages | SettingsPage', () => {
               <h2
                 class="c4"
               >
-                app.components.LeftMenuLinkContainer.settings
+                global.settings
               </h2>
             </div>
             <div

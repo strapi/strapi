@@ -148,7 +148,7 @@ export const PreviewBox = ({
             {canUpdate && !asset.isLocal && (
               <IconButton
                 label={formatMessage({
-                  id: getTrad('app.utils.delete'),
+                  id: 'global.delete',
                   defaultMessage: 'Delete',
                 })}
                 icon={<Trash />}

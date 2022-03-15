@@ -25,14 +25,14 @@ const init = (initialState, { settings, shouldUpdateStrapi }) => {
       intlLabel: { id: 'Settings.permissions', defaultMessage: 'Administration Panel' },
       links: [
         {
-          intlLabel: { id: 'Settings.permissions.menu.link.roles.label', defaultMessage: 'Roles' },
+          intlLabel: { id: 'global.roles', defaultMessage: 'Roles' },
           to: '/settings/roles',
           id: 'roles',
           isDisplayed: false,
           permissions: adminPermissions.settings.roles.main,
         },
         {
-          intlLabel: { id: 'Settings.permissions.menu.link.users.label' },
+          intlLabel: { id: 'global.users' },
           // Init the search params directly
           to: '/settings/users?pageSize=10&page=1&sort=firstname',
           id: 'users',

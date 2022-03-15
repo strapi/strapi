@@ -135,7 +135,7 @@ const ListView = () => {
                 disabled={isEqual(modifiedData, initialData)}
               >
                 {formatMessage({
-                  id: getTrad('form.button.save'),
+                  id: 'global.save',
                   defaultMessage: 'Save',
                 })}
               </Button>
@@ -162,7 +162,7 @@ const ListView = () => {
         navigationAction={
           <Link startIcon={<ArrowLeft />} to="/plugins/content-type-builder/">
             {formatMessage({
-              id: 'app.components.go-back',
+              id: 'global.back',
               defaultMessage: 'Back',
             })}
           </Link>

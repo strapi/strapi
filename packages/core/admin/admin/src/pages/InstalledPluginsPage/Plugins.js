@@ -16,7 +16,7 @@ const Plugins = () => {
   const toggleNotification = useNotification();
 
   const title = formatMessage({
-    id: 'app.components.ListPluginsPage.title',
+    id: 'global.plugins',
     defaultMessage: 'Plugins',
   });
 
@@ -70,7 +70,7 @@ const Plugins = () => {
                 <Th>
                   <Typography variant="sigma" textColor="neutral600">
                     {formatMessage({
-                      id: 'Settings.roles.list.header.name',
+                      id: 'global.name',
                       defaultMessage: 'Name',
                     })}
                   </Typography>
@@ -78,7 +78,7 @@ const Plugins = () => {
                 <Th>
                   <Typography variant="sigma" textColor="neutral600">
                     {formatMessage({
-                      id: 'Settings.roles.list.header.description',
+                      id: 'global.description',
                       defaultMessage: 'description',
                     })}
                   </Typography>

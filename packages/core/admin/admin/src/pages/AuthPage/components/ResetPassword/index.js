@@ -53,7 +53,7 @@ const ForgotPassword = ({ onSubmit, schema }) => {
                   <Box paddingTop={6} paddingBottom={7}>
                     <Typography as="h1" variant="alpha">
                       {formatMessage({
-                        id: 'Auth.reset-password.title',
+                        id: 'global.reset-password',
                         defaultMessage: 'Reset password',
                       })}
                     </Typography>
@@ -114,7 +114,7 @@ const ForgotPassword = ({ onSubmit, schema }) => {
                     })}
                     required
                     label={formatMessage({
-                      id: 'Auth.form.password.label',
+                      id: 'global.password',
                       defaultMessage: 'Password',
                     })}
                     type={passwordShown ? 'text' : 'password'}
@@ -161,7 +161,7 @@ const ForgotPassword = ({ onSubmit, schema }) => {
                   />
                   <Button fullwidth type="submit">
                     {formatMessage({
-                      id: 'Auth.form.button.reset-password',
+                      id: 'global.change-password',
                       defaultMessage: 'Change password',
                     })}
                   </Button>
