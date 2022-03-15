@@ -15,7 +15,7 @@ const stopProcess = require('./stop-process');
 async function getPackageInfo(packageName, { useYarn } = {}) {
   // Use yarn if possible because it's faster
   if (useYarn) {
-    const { stdout } = await execa.command(`yarn info ${packageName} --json`);
+    const { stdout } = await execa('yarn', ['info', packageName, '--json']);
     const yarnInfo = JSON.parse(stdout);
     return {
       name: yarnInfo.data.name,
@@ -24,7 +24,7 @@ async function getPackageInfo(packageName, { useYarn } = {}) {
   }
 
   // Fallback to npm
-  const { stdout } = await execa.command(`npm view ${packageName} name version --silent`);
+  const { stdout } = await execa('npm', ['view', packageName, 'name', 'version', '--silent']);
   // Use regex to parse name and version from CLI result
   const [name, version] = stdout.match(/(?<=')(.*?)(?=')/gm);
   return { name, version };
@@ -67,11 +67,11 @@ async function getStarterPackageInfo(starter, { useYarn } = {}) {
 async function downloadNpmStarter({ name, version }, parentDir, { useYarn } = {}) {
   // Download from npm, using yarn if possible
   if (useYarn) {
-    await execa.command(`yarn add ${name}@${version} --no-lockfile --silent`, {
+    await execa('yarn', ['add', `${name}@${version}`, '--no-lockfile', '--silent'], {
       cwd: parentDir,
     });
   } else {
-    await execa.command(`npm install ${name}@${version} --no-save --silent`, {
+    await execa('npm', ['install', `${name}@${version}`, '--no-save', '--silent'], {
       cwd: parentDir,
     });
   }

@@ -71,7 +71,7 @@ const ContentTypeBuilderNav = () => {
                 })}
               </SubNavSection>
               {section.customLink && (
-                <Box as="li" paddingLeft={7}>
+                <Box paddingLeft={7}>
                   <TextButton onClick={section.customLink.onClick} startIcon={<Plus />}>
                     {formatMessage({
                       id: section.customLink.id,

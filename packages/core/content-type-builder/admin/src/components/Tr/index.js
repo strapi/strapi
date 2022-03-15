@@ -19,7 +19,7 @@ const Tr = styled.tr`
       &::before {
         content: '';
         width: ${pxToRem(4)};
-        height: calc(100% - 15px);
+        height: calc(100% - 40px);
         position: absolute;
         top: -7px;
         left: 1.625rem;

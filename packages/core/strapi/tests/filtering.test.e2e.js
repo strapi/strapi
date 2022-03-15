@@ -202,13 +202,26 @@ describe('Filtering API', () => {
     });
 
     describe('Filter null', () => {
-      test('Should return only matching items', async () => {
+      test.each([
+        [{ $null: true }],
+        [{ $null: 'true' }],
+        [{ $null: '1' }],
+        [{ $null: 't' }],
+        [{ $null: 'anything' }],
+        [{ $null: ['anything'] }],
+        [{ $null: { anything: 'anything' } }],
+        [{ $notNull: false }],
+        [{ $notNull: 'false' }],
+        [{ $notNull: '0' }],
+        [{ $notNull: 'f' }],
+        [{ $notNull: '' }],
+      ])('Should return only matching items (%s)', async priceFilter => {
         const res = await rq({
           method: 'GET',
           url: '/products',
           qs: {
             filters: {
-              price: { $null: true },
+              price: priceFilter,
             },
           },
         });
@@ -220,15 +233,26 @@ describe('Filtering API', () => {
         expect(res.body.data).toEqual(expect.arrayContaining(matching));
       });
 
-      test('Should return three matches', async () => {
+      test.each([
+        [{ $notNull: true }],
+        [{ $notNull: 'true' }],
+        [{ $notNull: '1' }],
+        [{ $notNull: 't' }],
+        [{ $notNull: 'anything' }],
+        [{ $notNull: ['anything'] }],
+        [{ $notNull: { anything: 'anything' } }],
+        [{ $null: false }],
+        [{ $null: 'false' }],
+        [{ $null: '0' }],
+        [{ $null: 'f' }],
+        [{ $null: '' }],
+      ])('Should return three matches (%s)', async priceFilter => {
         const res = await rq({
           method: 'GET',
           url: '/products',
           qs: {
             filters: {
-              price: {
-                $notNull: true,
-              },
+              price: priceFilter,
             },
           },
         });

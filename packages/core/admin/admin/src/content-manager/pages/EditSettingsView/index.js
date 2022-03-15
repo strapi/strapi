@@ -110,6 +110,14 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
     });
   };
 
+  const handleSizeChange = ({ name, value }) => {
+    dispatch({
+      type: 'ON_CHANGE_SIZE',
+      name,
+      value,
+    });
+  };
+
   const handleMetaSubmit = e => {
     e.preventDefault();
     dispatch({
@@ -267,7 +275,7 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
               paddingLeft={7}
               paddingRight={7}
             >
-              <Stack size={4}>
+              <Stack spacing={4}>
                 <Typography variant="delta" as="h2">
                   {formatMessage({
                     id: getTrad('containers.SettingPage.settings'),
@@ -365,7 +373,8 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
             onSubmit={handleMetaSubmit}
             onToggle={handleToggleModal}
             type={get(attributes, [metaToEdit, 'type'], '')}
-            onChange={handleMetaChange}
+            onMetaChange={handleMetaChange}
+            onSizeChange={handleSizeChange}
           />
         )}
       </Main>

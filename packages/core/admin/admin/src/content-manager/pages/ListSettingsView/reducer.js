@@ -17,7 +17,7 @@ const reducer = (state = initialState, action) =>
     switch (action.type) {
       case 'ADD_FIELD': {
         const layoutFieldList = get(state, layoutFieldListPath, []);
-        set(draftState, layoutFieldListPath, [action.item, ...layoutFieldList]);
+        set(draftState, layoutFieldListPath, [...layoutFieldList, action.item]);
         break;
       }
       case 'MOVE_FIELD': {

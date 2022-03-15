@@ -5,6 +5,7 @@
  */
 
 // Public node modules.
+const { pipeline } = require('stream');
 const fs = require('fs');
 const path = require('path');
 const { PayloadTooLargeError } = require('@strapi/utils').errors;
@@ -20,11 +21,29 @@ module.exports = {
     const publicDir = strapi.dirs.public;
 
     return {
+      uploadStream(file) {
+        verifySize(file);
+
+        return new Promise((resolve, reject) => {
+          pipeline(
+            file.stream,
+            fs.createWriteStream(path.join(publicDir, `/uploads/${file.hash}${file.ext}`)),
+            err => {
+              if (err) {
+                return reject(err);
+              }
+
+              file.url = `/uploads/${file.hash}${file.ext}`;
+
+              resolve();
+            }
+          );
+        });
+      },
       upload(file) {
         verifySize(file);
 
         return new Promise((resolve, reject) => {
-          // write file in public/assets folder
           fs.writeFile(
             path.join(publicDir, `/uploads/${file.hash}${file.ext}`),
             file.buffer,

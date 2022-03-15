@@ -3,9 +3,10 @@ import { useHistory } from 'react-router-dom';
 import get from 'lodash/get';
 import {
   useTracking,
-  formatComponentData,
+  formatContentTypeData,
   useQueryParams,
   useNotification,
+  useGuidedTour,
 } from '@strapi/helper-plugin';
 import { useSelector, useDispatch } from 'react-redux';
 import PropTypes from 'prop-types';
@@ -29,6 +30,7 @@ import buildQueryString from '../../pages/ListView/utils/buildQueryString';
 const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
   const { trackUsage } = useTracking();
   const { push } = useHistory();
+  const { setCurrentStep } = useGuidedTour();
   const trackUsageRef = useRef(trackUsage);
   const [isCreatingEntry, setIsCreatingEntry] = useState(true);
   const [{ query, rawQuery }] = useQueryParams();
@@ -53,7 +55,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
       );
 
       // This is needed in order to add a unique id for the repeatable components, in order to make the reorder easier
-      return formatComponentData(cleaned, allLayoutData.contentType, allLayoutData.components);
+      return formatContentTypeData(cleaned, allLayoutData.contentType, allLayoutData.components);
     },
     [allLayoutData]
   );
@@ -71,7 +73,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
         allLayoutData.components
       );
 
-      acc[current] = formatComponentData(
+      acc[current] = formatContentTypeData(
         defaultComponentForm,
         allLayoutData.components[current],
         allLayoutData.components
@@ -84,7 +86,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
       allLayoutData.contentType.attributes,
       allLayoutData.components
     );
-    const contentTypeDataStructureFormatted = formatComponentData(
+    const contentTypeDataStructureFormatted = formatContentTypeData(
       contentTypeDataStructure,
       allLayoutData.contentType,
       allLayoutData.components
@@ -203,6 +205,8 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
           message: { id: getTrad('success.record.save') },
         });
 
+        setCurrentStep('contentManager.success');
+
         dispatch(submitSucceeded(cleanReceivedData(data)));
         setIsCreatingEntry(false);
 
@@ -215,7 +219,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
         dispatch(setStatus('resolved'));
       }
     },
-    [cleanReceivedData, displayErrors, slug, dispatch, rawQuery, toggleNotification]
+    [cleanReceivedData, displayErrors, slug, dispatch, rawQuery, toggleNotification, setCurrentStep]
   );
   const onPublish = useCallback(async () => {
     try {

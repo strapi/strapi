@@ -121,6 +121,10 @@ const DraggedItem = ({
       if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) {
         return;
       }
+      // If They are not in the same level, should not move
+      if (dragPath.split('.').length !== hoverPath.split('.').length) {
+        return;
+      }
       // Time to actually perform the action in the data
       moveComponentField(pathToComponentArray, dragIndex, hoverIndex);
 
@@ -190,14 +194,14 @@ const DraggedItem = ({
           error={accordionHasError}
           hasErrorMessage={hasErrorMessage}
           expanded={isOpen}
-          toggle={onClickToggle}
+          onToggle={onClickToggle}
           id={componentFieldName}
           size="S"
         >
           <AccordionToggle
             action={
               isReadOnly ? null : (
-                <Stack horizontal size={0}>
+                <Stack horizontal spacing={0}>
                   <CustomIconButton
                     expanded={isOpen}
                     noBorder
@@ -234,7 +238,7 @@ const DraggedItem = ({
             togglePosition="left"
           />
           <AccordionContent>
-            <Stack background="neutral100" padding={6} size={6}>
+            <Stack background="neutral100" padding={6} spacing={6}>
               {fields.map((fieldRow, key) => {
                 return (
                   <Grid gap={4} key={key}>
@@ -314,9 +318,6 @@ DraggedItem.propTypes = {
 
 const Memoized = memo(DraggedItem);
 
-export default connect(
-  Memoized,
-  select
-);
+export default connect(Memoized, select);
 
 export { DraggedItem };

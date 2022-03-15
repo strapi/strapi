@@ -1,6 +1,7 @@
 'use strict';
 
-const { defaultsDeep } = require('lodash/fp');
+const fse = require('fs-extra');
+const { defaultsDeep, get } = require('lodash/fp');
 const body = require('koa-body');
 
 const defaults = {
@@ -28,6 +29,19 @@ module.exports = config => {
       }
 
       throw e;
+    }
+
+    // clean any file that was uploaded
+    const files = get('request.files.files', ctx);
+    if (files) {
+      if (Array.isArray(files)) {
+        // not awaiting to not slow the request
+        Promise.all(files.map(file => fse.remove(file.path)));
+      } else if (files && files.path) {
+        // not awaiting to not slow the request
+        fse.remove(files.path);
+      }
+      delete ctx.request.files;
     }
   };
 };

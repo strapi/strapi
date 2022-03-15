@@ -4,9 +4,10 @@ import camelCase from 'lodash/camelCase';
 import get from 'lodash/get';
 import omit from 'lodash/omit';
 import { Redirect, useRouteMatch, useHistory } from 'react-router-dom';
-import { auth, useQuery } from '@strapi/helper-plugin';
+import { auth, useQuery, useGuidedTour, useTracking } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import forms from 'ee_else_ce/pages/AuthPage/utils/forms';
+import persistStateToLocaleStorage from '../../components/GuidedTour/utils/persistStateToLocaleStorage';
 import useLocalesProvider from '../../components/LocalesProvider/useLocalesProvider';
 import formatAPIErrors from '../../utils/formatAPIErrors';
 import init from './init';
@@ -15,6 +16,8 @@ import { initialState, reducer } from './reducer';
 const AuthPage = ({ hasAdmin, setHasAdmin }) => {
   const { push } = useHistory();
   const { changeLocale } = useLocalesProvider();
+  const { setSkipped } = useGuidedTour();
+  const { trackUsage } = useTracking();
   const {
     params: { authType },
   } = useRouteMatch('/auth/:authType');
@@ -144,6 +147,8 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
 
   const registerRequest = async (body, requestURL, { setSubmitting, setErrors }) => {
     try {
+      trackUsage('willCreateFirstAdmin');
+
       const {
         data: {
           data: { token, user },
@@ -158,26 +163,37 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
       auth.setToken(token, false);
       auth.setUserInfo(user, false);
 
+      setSubmitting(false);
+      setHasAdmin(true);
+
+      const { roles } = user;
+
+      if (roles) {
+        const isUserSuperAdmin = roles.find(({ code }) => code === 'strapi-super-admin');
+
+        if (isUserSuperAdmin) {
+          persistStateToLocaleStorage.setSkipped(false);
+          setSkipped(false);
+        }
+      }
+
       if (
         (authType === 'register' && body.userInfo.news === true) ||
         (authType === 'register-admin' && body.news === true)
       ) {
-        axios({
-          method: 'POST',
-          url: 'https://analytics.strapi.io/register',
-          data: {
-            email: user.email,
-            username: user.firstname,
-            firstAdmin: !hasAdmin,
-          },
-          cancelToken: source.token,
+        push({
+          pathname: '/usecase',
+          search: `?hasAdmin=${hasAdmin}`,
         });
+
+        return;
       }
+
       // Redirect to the homePage
-      setSubmitting(false);
-      setHasAdmin(true);
       push('/');
     } catch (err) {
+      trackUsage('didNotCreateFirstAdmin');
+
       if (err.response) {
         const { data } = err.response;
         const apiErrors = formatAPIErrors(data);
@@ -238,6 +254,7 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
   return (
     <Component
       {...rest}
+      authType={authType}
       fieldsToDisable={fieldsToDisable}
       formErrors={formErrors}
       inputsPrefix={inputsPrefix}

@@ -124,8 +124,7 @@ const InputUID = ({
     if (
       debouncedValue &&
       debouncedValue.trim().match(UID_REGEX) &&
-      debouncedValue !== initialValue &&
-      !value
+      debouncedValue !== initialValue
     ) {
       checkAvailability();
     }
