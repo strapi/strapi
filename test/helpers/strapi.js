@@ -24,7 +24,10 @@ const createStrapiInstance = async ({
 } = {}) => {
   // read .env file as it could have been updated
   dotenv.config({ path: process.env.ENV_PATH });
-  const options = { dir: TEST_APP_URL };
+  const options = {
+    appDir: TEST_APP_URL,
+    distDir: TEST_APP_URL,
+  };
   const instance = strapi(options);
 
   if (bypassAuth) {

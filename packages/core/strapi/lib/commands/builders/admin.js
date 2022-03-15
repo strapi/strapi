@@ -13,7 +13,7 @@ const getEnabledPlugins = require('../../core/loaders/plugins/get-enabled-plugin
 module.exports = async ({ buildDestDir, forceBuild = true, isTSProject, optimization, srcDir }) => {
   const strapiInstance = strapi({
     // TODO check if this is working @convly
-    dir: buildDestDir,
+    distDir: buildDestDir,
     autoReload: true,
     serveAdminPanel: false,
   });

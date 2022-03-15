@@ -2,7 +2,7 @@
 
 const { join, resolve } = require('path');
 
-const getDirs = ({ appDir, distDir }) => ({
+const getDirs = ({ app: appDir, dist: distDir }, { strapi }) => ({
   dist: {
     root: distDir,
     src: join(distDir, 'src'),

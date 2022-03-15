@@ -25,9 +25,9 @@ module.exports = async function({ strapi }) {
   }
 
   // ensure public repository exists
-  if (!(await fse.pathExists(strapi.dirs.public))) {
+  if (!(await fse.pathExists(strapi.dirs.static.public))) {
     throw new Error(
-      `The public folder (${strapi.dirs.public}) doesn't exist or is not accessible. Please make sure it exists.`
+      `The public folder (${strapi.dirs.static.public}) doesn't exist or is not accessible. Please make sure it exists.`
     );
   }
 };
