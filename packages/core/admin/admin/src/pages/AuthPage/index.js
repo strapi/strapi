@@ -174,6 +174,7 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
         if (isUserSuperAdmin) {
           persistStateToLocaleStorage.setSkipped(false);
           setSkipped(false);
+          trackUsage('didLaunchGuidedtour');
         }
       }
 
