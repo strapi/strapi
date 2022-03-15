@@ -2,9 +2,11 @@ import React from 'react';
 import { render, waitFor, screen } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
+import { lightTheme } from '@strapi/design-system';
 import ProfilePage from '../index';
 import server from './utils/server';
+import ThemeToggleProvider from '../../../components/ThemeToggleProvider';
+import Theme from '../../../components/Theme';
 
 jest.mock('../../../components/LocalesProvider/useLocalesProvider', () => () => ({
   changeLocale: () => {},
@@ -31,9 +33,11 @@ const client = new QueryClient({
 const App = (
   <QueryClientProvider client={client}>
     <IntlProvider messages={{}} textComponent="span" locale="en">
-      <ThemeProvider theme={lightTheme}>
-        <ProfilePage />
-      </ThemeProvider>
+      <ThemeToggleProvider themes={{ light: lightTheme }}>
+        <Theme>
+          <ProfilePage />
+        </Theme>
+      </ThemeToggleProvider>
     </IntlProvider>
   </QueryClientProvider>
 );
@@ -234,7 +238,7 @@ describe('ADMIN | Pages | Profile page', () => {
         align-items: center;
       }
 
-      .c40 {
+      .c41 {
         position: absolute;
         left: 0;
         right: 0;
@@ -245,24 +249,24 @@ describe('ADMIN | Pages | Profile page', () => {
         border: none;
       }
 
-      .c40:focus {
+      .c41:focus {
         outline: none;
       }
 
-      .c40[aria-disabled='true'] {
+      .c41[aria-disabled='true'] {
         cursor: not-allowed;
       }
 
-      .c43 {
+      .c44 {
         padding-right: 16px;
         padding-left: 16px;
       }
 
-      .c46 {
+      .c47 {
         padding-left: 12px;
       }
 
-      .c38 {
+      .c39 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -276,7 +280,7 @@ describe('ADMIN | Pages | Profile page', () => {
         align-items: center;
       }
 
-      .c41 {
+      .c42 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -294,14 +298,14 @@ describe('ADMIN | Pages | Profile page', () => {
         align-items: center;
       }
 
-      .c37 {
+      .c38 {
         font-weight: 600;
         color: #32324d;
         font-size: 0.75rem;
         line-height: 1.33;
       }
 
-      .c44 {
+      .c45 {
         color: #32324d;
         display: block;
         white-space: nowrap;
@@ -311,13 +315,13 @@ describe('ADMIN | Pages | Profile page', () => {
         line-height: 1.43;
       }
 
-      .c48 {
+      .c49 {
         color: #666687;
         font-size: 0.75rem;
         line-height: 1.33;
       }
 
-      .c36 {
+      .c37 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -327,16 +331,16 @@ describe('ADMIN | Pages | Profile page', () => {
         flex-direction: column;
       }
 
-      .c36 > * {
+      .c37 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c36 > * + * {
+      .c37 > * + * {
         margin-top: 4px;
       }
 
-      .c39 {
+      .c40 {
         position: relative;
         border: 1px solid #dcdce4;
         padding-right: 12px;
@@ -352,28 +356,28 @@ describe('ADMIN | Pages | Profile page', () => {
         transition-duration: 0.2s;
       }
 
-      .c39:focus-within {
+      .c40:focus-within {
         border: 1px solid #4945ff;
         box-shadow: #4945ff 0px 0px 0px 2px;
       }
 
-      .c45 {
+      .c46 {
         background: transparent;
         border: none;
         position: relative;
         z-index: 1;
       }
 
-      .c45 svg {
+      .c46 svg {
         height: 0.6875rem;
         width: 0.6875rem;
       }
 
-      .c45 svg path {
+      .c46 svg path {
         fill: #666687;
       }
 
-      .c47 {
+      .c48 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -382,11 +386,11 @@ describe('ADMIN | Pages | Profile page', () => {
         border: none;
       }
 
-      .c47 svg {
+      .c48 svg {
         width: 0.375rem;
       }
 
-      .c42 {
+      .c43 {
         width: 100%;
       }
 
@@ -706,6 +710,10 @@ describe('ADMIN | Pages | Profile page', () => {
       .c20 {
         grid-column: span 6;
         max-width: 100%;
+      }
+
+      .c36 {
+        color: #4945ff;
       }
 
       .c30::-ms-reveal {
@@ -1228,15 +1236,16 @@ describe('ADMIN | Pages | Profile page', () => {
                       <span
                         class="c35"
                       >
-                        Selection will change the interface language only for you. Please refer to this 
+                        Preference changes will apply only to you. More information is available 
                         <a
+                          class="c36"
                           href="https://docs.strapi.io/developer-docs/latest/development/admin-customization.html#locales"
                           rel="noopener noreferrer"
                           target="_blank"
                         >
-                          documentation
+                          here
                         </a>
-                         to make other languages available for your team.
+                        .
                       </span>
                     </div>
                     <div
@@ -1250,22 +1259,22 @@ describe('ADMIN | Pages | Profile page', () => {
                         >
                           <div>
                             <div
-                              class="c36"
+                              class="c37"
                               spacing="1"
                             >
                               <span
-                                class="c37"
+                                class="c38"
                                 for="select-1"
                                 id="select-1-label"
                               >
                                 <div
-                                  class="c38"
+                                  class="c39"
                                 >
                                   Interface language
                                 </div>
                               </span>
                               <div
-                                class="c38 c39"
+                                class="c39 c40"
                               >
                                 <button
                                   aria-describedby="select-1-hint"
@@ -1273,21 +1282,21 @@ describe('ADMIN | Pages | Profile page', () => {
                                   aria-expanded="false"
                                   aria-haspopup="listbox"
                                   aria-labelledby="select-1-label select-1-content"
-                                  class="c40"
+                                  class="c41"
                                   id="select-1"
                                   type="button"
                                 />
                                 <div
-                                  class="c41 c42"
+                                  class="c42 c43"
                                 >
                                   <div
-                                    class="c38"
+                                    class="c39"
                                   >
                                     <div
-                                      class="c43"
+                                      class="c44"
                                     >
                                       <span
-                                        class="c44"
+                                        class="c45"
                                         id="select-1-content"
                                       >
                                         Select
@@ -1295,12 +1304,12 @@ describe('ADMIN | Pages | Profile page', () => {
                                     </div>
                                   </div>
                                   <div
-                                    class="c38"
+                                    class="c39"
                                   >
                                     <button
                                       aria-disabled="false"
                                       aria-label="Clear the interface language selected"
-                                      class="c45"
+                                      class="c46"
                                       type="button"
                                     >
                                       <svg
@@ -1318,7 +1327,7 @@ describe('ADMIN | Pages | Profile page', () => {
                                     </button>
                                     <button
                                       aria-hidden="true"
-                                      class="c46 c45 c47"
+                                      class="c47 c46 c48"
                                       tabindex="-1"
                                       type="button"
                                     >
@@ -1341,10 +1350,99 @@ describe('ADMIN | Pages | Profile page', () => {
                                 </div>
                               </div>
                               <p
-                                class="c48"
+                                class="c49"
                                 id="select-1-hint"
                               >
                                 This will only display your own interface in the chosen language.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div
+                        class="c20"
+                      >
+                        <div
+                          class=""
+                        >
+                          <div>
+                            <div
+                              class="c37"
+                              spacing="1"
+                            >
+                              <span
+                                class="c38"
+                                for="select-2"
+                                id="select-2-label"
+                              >
+                                <div
+                                  class="c39"
+                                >
+                                  Interface mode
+                                </div>
+                              </span>
+                              <div
+                                class="c39 c40"
+                              >
+                                <button
+                                  aria-describedby="select-2-hint"
+                                  aria-disabled="false"
+                                  aria-expanded="false"
+                                  aria-haspopup="listbox"
+                                  aria-labelledby="select-2-label select-2-content"
+                                  class="c41"
+                                  id="select-2"
+                                  type="button"
+                                />
+                                <div
+                                  class="c42 c43"
+                                >
+                                  <div
+                                    class="c39"
+                                  >
+                                    <div
+                                      class="c44"
+                                    >
+                                      <span
+                                        class="c45"
+                                        id="select-2-content"
+                                      >
+                                        Light mode
+                                      </span>
+                                    </div>
+                                  </div>
+                                  <div
+                                    class="c39"
+                                  >
+                                    <button
+                                      aria-hidden="true"
+                                      class="c47 c46 c48"
+                                      tabindex="-1"
+                                      type="button"
+                                    >
+                                      <svg
+                                        fill="none"
+                                        height="1em"
+                                        viewBox="0 0 14 8"
+                                        width="1em"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                      >
+                                        <path
+                                          clip-rule="evenodd"
+                                          d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                                          fill="#32324D"
+                                          fill-rule="evenodd"
+                                        />
+                                      </svg>
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                              <p
+                                class="c49"
+                                id="select-2-hint"
+                              >
+                                Displays your interface in the chosen mode.
                               </p>
                             </div>
                           </div>
