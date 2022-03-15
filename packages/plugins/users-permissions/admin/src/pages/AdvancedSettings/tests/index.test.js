@@ -1072,7 +1072,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                                 <span
                                   class="c43"
                                 >
-                                  Off
+                                  False
                                 </span>
                               </div>
                               <div
@@ -1082,7 +1082,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                                 <span
                                   class="c45"
                                 >
-                                  On
+                                  True
                                 </span>
                               </div>
                               <input
@@ -1150,7 +1150,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                                 <span
                                   class="c43"
                                 >
-                                  Off
+                                  False
                                 </span>
                               </div>
                               <div
@@ -1160,7 +1160,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                                 <span
                                   class="c45"
                                 >
-                                  On
+                                  True
                                 </span>
                               </div>
                               <input
@@ -1276,7 +1276,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                                 <span
                                   class="c43"
                                 >
-                                  Off
+                                  False
                                 </span>
                               </div>
                               <div
@@ -1286,7 +1286,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                                 <span
                                   class="c45"
                                 >
-                                  On
+                                  True
                                 </span>
                               </div>
                               <input
