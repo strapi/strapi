@@ -101,4 +101,25 @@ describe('hasContent', () => {
     });
     expect(normalizedContent).toEqual(false);
   });
+
+  it('returns oneToManyMorph relations as false with content', () => {
+    const normalizedContent = hasContent('relation', { id: 1 }, undefined, {
+      relation: 'oneToManyMorph',
+    });
+    expect(normalizedContent).toEqual(false);
+  });
+
+  it('extracts content from oneToManyMorph relations with content', () => {
+    const normalizedContent = hasContent('relation', { id: 1 }, undefined, {
+      relation: 'oneToOneMorph',
+    });
+    expect(normalizedContent).toEqual(true);
+  });
+
+  it('extracts content from oneToManyMorph relations with content', () => {
+    const normalizedContent = hasContent('relation', null, undefined, {
+      relation: 'oneToOneMorph',
+    });
+    expect(normalizedContent).toEqual(false);
+  });
 });
