@@ -4,6 +4,8 @@ const { resolve } = require('path');
 const { statSync, existsSync } = require('fs');
 const { yup } = require('@strapi/utils');
 
+const { importDefault } = require('../../utils');
+
 const srcSchema = yup
   .object()
   .shape({
@@ -27,7 +29,7 @@ module.exports = strapi => {
     return {};
   }
 
-  const srcIndex = require(pathToSrcIndex);
+  const srcIndex = importDefault(require(pathToSrcIndex)).default;
 
   try {
     validateSrcIndex(srcIndex);

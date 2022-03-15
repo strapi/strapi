@@ -3,6 +3,8 @@
 const path = require('path');
 const _ = require('lodash');
 const fse = require('fs-extra');
+
+const { importDefault } = require('../utils');
 const glob = require('./glob');
 const filePathToPath = require('./filepath-to-prop-path');
 
@@ -34,7 +36,7 @@ const loadFiles = async (
     if (path.extname(absolutePath) === '.json') {
       mod = await fse.readJson(absolutePath);
     } else {
-      mod = requireFn(absolutePath);
+      mod = importDefault(requireFn(absolutePath));
     }
 
     Object.defineProperty(mod, '__filename__', {
