@@ -12,25 +12,30 @@ const fs = require('fs-extra');
 const glob = promisify(require('glob').glob);
 const chalk = require('chalk');
 
-const addMissingKeyForSingleFile = async (filePath) => {
+const updateMissingKeysToJSON = async filePath => {
+  // Read translation file
+  const currentTranslationFileJSON = await fs.readJSON(filePath);
+  // Read en.json
+  const mainTranslationFile = join(dirname(filePath), 'en.json');
+  const mainTranslationFileJSON = await fs.readJSON(mainTranslationFile);
+  // Add missing keys from en.json to translation file
+  const updatedFileJSON = Object.keys(mainTranslationFileJSON).reduce((acc, current) => {
+    if (currentTranslationFileJSON[current]) {
+      acc[current] = currentTranslationFileJSON[current];
+    } else {
+      acc[current] = mainTranslationFileJSON[current];
+    }
+
+    return acc;
+  }, {});
+  return updatedFileJSON;
+};
+
+const addMissingKeyForSingleFile = async filePath => {
   console.log('Start adding missing keys to', filePath);
   try {
-    // Read translation file
-    const currentTranslationFileJSON = await fs.readJSON(filePath);
-    // Read en.json
-    const mainTranslationFile = join(dirname(filePath), 'en.json');
-    const mainTranslationFileJSON = await fs.readJSON(mainTranslationFile);
-    // Add missing keys from en.json to translation file
-    const updatedFile = Object.keys(mainTranslationFileJSON).reduce((acc, current) => {
-      if (currentTranslationFileJSON[current]) {
-        acc[current] = currentTranslationFileJSON[current];
-      } else {
-        acc[current] = mainTranslationFileJSON[current];
-      }
-
-      return acc;
-    }, {});
-    await fs.writeJson(filePath, updatedFile, { spaces: 2 });
+    const updatedFileJSON = await updateMissingKeysToJSON(filePath);
+    await fs.writeJson(filePath, updatedFileJSON, { spaces: 2 });
     console.log('Added missing keys to', filePath);
     return Promise.resolve();
   } catch (err) {
@@ -38,7 +43,7 @@ const addMissingKeyForSingleFile = async (filePath) => {
   }
 };
 
-const addMissingKeys = async (lang) => {
+const addMissingKeys = async lang => {
   // Get translation files
   const corePackageDirs = await glob('packages/core/*');
   const pluginsPackageDirs = await glob('packages/plugins/*');
@@ -46,10 +51,10 @@ const addMissingKeys = async (lang) => {
   const pathToTranslationsFolder = ['admin', 'src', 'translations'];
 
   const translationFiles = packageDirs
-    .filter((dir) => {
+    .filter(dir => {
       return fs.existsSync(join(dir, ...pathToTranslationsFolder, `${lang}.json`));
     })
-    .map((dir) => {
+    .map(dir => {
       return join(dir, ...pathToTranslationsFolder, `${lang}.json`);
     });
   console.log('List of files to add missing keys', translationFiles, '\n');
@@ -68,9 +73,9 @@ if (process.argv.length < 3) {
 }
 
 if (require.main === module) {
-  addMissingKeys(process.argv[2]).catch((err) => console.error(err));
+  addMissingKeys(process.argv[2]).catch(err => console.error(err));
 }
 
 module.exports = {
-  addMissingKeyForSingleFile,
+  updateMissingKeysToJSON,
 };
