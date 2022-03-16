@@ -68,7 +68,7 @@
   "modal.remove.success-label": "The asset has been successfully removed.",
   "modal.selected-list.sub-header-subtitle": "Drag & drop to reorder the assets in the field",
   "modal.upload-list.footer.button": "Upload {number, plural, one {# asset} other {# assets}} to the library",
-  "modal.upload-list.sub-header-subtitle": "Manage the assets before uploading them to the Media Library",
+  "modal.upload-list.sub-header-subtitle": "Manage the assets before adding them to the Media Library",
   "modal.upload-list.sub-header.button": "Add more assets",
   "modal.upload.cancelled": "Upload manually aborted.",
   "page.title": "Settings - Media Library",
