@@ -78,7 +78,7 @@ export const PendingAssetStep = ({
                   {
                     id: getTrad('list.assets.selected'),
                     defaultMessage:
-                      '{number, plural, =0 {No asset} one {1 asset} other {# assets}} selected',
+                      '{number, plural, =0 {No asset} one {1 asset} other {# assets}} ready to upload',
                   },
                   { number: assets.length }
                 )}
@@ -86,7 +86,7 @@ export const PendingAssetStep = ({
               <Typography variant="pi" textColor="neutral600">
                 {formatMessage({
                   id: getTrad('modal.upload-list.sub-header-subtitle'),
-                  defaultMessage: 'Manage the assets before uploading them to the Media Library',
+                  defaultMessage: 'Manage the assets before adding them to the Media Library',
                 })}
               </Typography>
             </Stack>
