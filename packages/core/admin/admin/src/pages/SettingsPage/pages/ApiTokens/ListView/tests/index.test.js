@@ -5,7 +5,7 @@ import { Router, Route } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { useRBAC } from '@strapi/helper-plugin';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { lightTheme } from '@strapi/design-system';
+import { lightTheme, darkTheme } from '@strapi/design-system';
 import { axiosInstance } from '../../../../../../core/utils';
 import Theme from '../../../../../../components/Theme';
 import ThemeToggleProvider from '../../../../../../components/ThemeToggleProvider';
@@ -51,7 +51,7 @@ const makeApp = history => {
   return (
     <QueryClientProvider client={client}>
       <IntlProvider messages={{}} defaultLocale="en" textComponent="span" locale="en">
-        <ThemeToggleProvider themes={{ light: lightTheme }}>
+        <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
           <Theme>
             <Router history={history}>
               <Route path="/settings/api-tokens">

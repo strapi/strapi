@@ -2,7 +2,7 @@ import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { QueryClientProvider, QueryClient } from 'react-query';
 import { useGuidedTour } from '@strapi/helper-plugin';
-import { lightTheme } from '@strapi/design-system';
+import { lightTheme, darkTheme } from '@strapi/design-system';
 import { ConfigurationsContext } from '../../../contexts';
 import {
   fetchAppInfo,
@@ -48,7 +48,7 @@ const queryClient = new QueryClient({
 });
 
 const app = (
-  <ThemeToggleProvider themes={{ light: lightTheme }}>
+  <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
     <Theme>
       <QueryClientProvider client={queryClient}>
         <ConfigurationsContext.Provider value={{ showReleaseNotification: false }}>

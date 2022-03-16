@@ -8,7 +8,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { MemoryRouter } from 'react-router-dom';
-import { lightTheme } from '@strapi/design-system';
+import { lightTheme, darkTheme } from '@strapi/design-system';
 import Theme from '../../../../../components/Theme';
 import ThemeToggleProvider from '../../../../../components/ThemeToggleProvider';
 import { Header } from '../index';
@@ -33,7 +33,7 @@ const makeApp = (props = defaultProps) => {
   return (
     <MemoryRouter>
       <IntlProvider locale="en" defaultLocale="en" messages={{}}>
-        <ThemeToggleProvider themes={{ light: lightTheme }}>
+        <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
           <Theme>
             <Header {...props} />
           </Theme>

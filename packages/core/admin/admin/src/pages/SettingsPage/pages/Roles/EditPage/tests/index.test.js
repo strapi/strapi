@@ -10,7 +10,7 @@ import { IntlProvider } from 'react-intl';
 import { Router, Switch, Route } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import moment from 'moment';
-import { lightTheme } from '@strapi/design-system';
+import { lightTheme, darkTheme } from '@strapi/design-system';
 import Theme from '../../../../../../components/Theme';
 import ThemeToggleProvider from '../../../../../../components/ThemeToggleProvider';
 
@@ -39,7 +39,7 @@ const makeApp = history => (
     locale="en"
     defaultLocale="en"
   >
-    <ThemeToggleProvider themes={{ light: lightTheme }}>
+    <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
       <Theme>
         <Router history={history}>
           <Switch>

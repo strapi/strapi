@@ -4,7 +4,7 @@ import { StrapiAppProvider, AppInfosContext } from '@strapi/helper-plugin';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryHistory } from 'history';
-import { lightTheme } from '@strapi/design-system';
+import { lightTheme, darkTheme } from '@strapi/design-system';
 import Theme from '../../../components/Theme';
 import ThemeToggleProvider from '../../../components/ThemeToggleProvider';
 import { SettingsPage } from '..';
@@ -27,7 +27,7 @@ jest.mock('react-intl', () => ({
 jest.mock('../pages/ApplicationInfosPage', () => () => <h1>App infos</h1>);
 
 const makeApp = (history, settings) => (
-  <ThemeToggleProvider themes={{ light: lightTheme }}>
+  <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
     <Theme>
       <AppInfosContext.Provider value={{ shouldUpdateStrapi: false }}>
         <StrapiAppProvider

@@ -4,7 +4,7 @@
  *
  */
 
-import { Layout, lightTheme } from '@strapi/design-system';
+import { Layout, lightTheme, darkTheme } from '@strapi/design-system';
 import { render } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import React from 'react';
@@ -31,7 +31,7 @@ const makeApp = () => {
 
   return (
     <LanguageProvider messages={messages} localeNames={localeNames}>
-      <ThemeToggleProvider themes={{ light: lightTheme }}>
+      <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
         <Theme>
           <Router history={history}>
             <Layout sideNav={<ContentTypeBuilderNav />}>

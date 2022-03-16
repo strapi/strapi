@@ -10,7 +10,7 @@ import { createMemoryHistory } from 'history';
 import { Router } from 'react-router-dom';
 import { IntlProvider } from 'react-intl';
 import { useRBAC } from '@strapi/helper-plugin';
-import { lightTheme } from '@strapi/design-system';
+import { lightTheme, darkTheme } from '@strapi/design-system';
 import { useRolesList } from '../../../../../../../../admin/src/hooks';
 
 import Theme from '../../../../../../../../admin/src/components/Theme';
@@ -33,7 +33,7 @@ jest.mock('../../../../../../../../admin/src/hooks', () => ({
 
 const makeApp = history => (
   <IntlProvider messages={{}} textComponent="span" locale="en">
-    <ThemeToggleProvider themes={{ light: lightTheme }}>
+    <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
       <Theme>
         <Router history={history}>
           <ListPage />

@@ -2,7 +2,7 @@ import React from 'react';
 import { render, waitFor, screen } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { lightTheme } from '@strapi/design-system';
+import { lightTheme, darkTheme } from '@strapi/design-system';
 import ProfilePage from '../index';
 import server from './utils/server';
 import ThemeToggleProvider from '../../../components/ThemeToggleProvider';
@@ -33,7 +33,7 @@ const client = new QueryClient({
 const App = (
   <QueryClientProvider client={client}>
     <IntlProvider messages={{}} textComponent="span" locale="en">
-      <ThemeToggleProvider themes={{ light: lightTheme }}>
+      <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
         <Theme>
           <ProfilePage />
         </Theme>

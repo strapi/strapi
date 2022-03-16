@@ -8,7 +8,7 @@ import { render } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import React from 'react';
 import { Router } from 'react-router-dom';
-import { lightTheme } from '@strapi/design-system';
+import { lightTheme, darkTheme } from '@strapi/design-system';
 import LanguageProvider from '../../../../../../admin/admin/src/components/LanguageProvider';
 import Theme from '../../../../../../admin/admin/src/components/Theme';
 import ThemeToggleProvider from '../../../../../../admin/admin/src/components/ThemeToggleProvider';
@@ -54,7 +54,7 @@ const makeApp = () => {
 
   return (
     <LanguageProvider messages={messages} localeNames={localeNames}>
-      <ThemeToggleProvider themes={{ light: lightTheme }}>
+      <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
         <Theme>
           <Router history={history}>
             <FormModalNavigationProvider>
