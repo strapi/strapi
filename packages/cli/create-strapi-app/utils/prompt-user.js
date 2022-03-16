@@ -30,7 +30,7 @@ async function getPromptQuestions(projectName, program) {
       type: 'list',
       name: 'quick',
       message: 'Choose your installation type',
-      when: !program.quickstart,
+      when: typeof program.quickstart === 'undefined',
       choices: [
         {
           name: 'Quickstart (recommended)',
