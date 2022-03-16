@@ -22,7 +22,7 @@ const RelationalFields = ({
   const { setEditFieldToSelect, modifiedData, onMoveRelation } = useLayoutDnd();
 
   return (
-    <Stack size={4}>
+    <Stack spacing={4}>
       <div>
         <Box>
           <Typography fontWeight="bold">
@@ -42,7 +42,7 @@ const RelationalFields = ({
         </Box>
       </div>
       <Box padding={4} hasRadius borderStyle="dashed" borderWidth="1px" borderColor="neutral300">
-        <Stack size={2}>
+        <Stack spacing={2}>
           {relationsLayout.map((relationName, index) => {
             const relationLabel = get(
               modifiedData,

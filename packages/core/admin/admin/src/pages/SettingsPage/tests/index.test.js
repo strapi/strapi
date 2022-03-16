@@ -195,6 +195,7 @@ describe('ADMIN | pages | SettingsPage', () => {
           >
             <ul
               class="c10"
+              spacing="2"
             />
           </div>
         </nav>

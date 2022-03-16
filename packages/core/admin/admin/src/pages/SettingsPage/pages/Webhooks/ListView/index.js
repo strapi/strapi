@@ -281,7 +281,10 @@ const ListView = () => {
                   size="L"
                   variant="danger-light"
                 >
-                  Delete
+                  {formatMessage({
+                    id: 'Settings.webhooks.events.delete',
+                    defaultMessage: 'Delete',
+                  })}
                 </Button>
               </>
             }
@@ -410,7 +413,7 @@ const ListView = () => {
                           </Flex>
                         </Td>
                         <Td>
-                          <Stack horizontal size={1} {...stopPropagation}>
+                          <Stack horizontal spacing={1} {...stopPropagation}>
                             {canUpdate && (
                               <IconButton
                                 onClick={() => {

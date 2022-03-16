@@ -76,16 +76,6 @@ describe('<PageSizeURLQuery />', () => {
         cursor: not-allowed;
       }
 
-      .c8 {
-        color: #32324d;
-        display: block;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        font-size: 0.875rem;
-        line-height: 1.43;
-      }
-
       .c7 {
         padding-right: 16px;
         padding-left: 16px;
@@ -127,6 +117,16 @@ describe('<PageSizeURLQuery />', () => {
         align-items: center;
       }
 
+      .c8 {
+        color: #32324d;
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: 0.875rem;
+        line-height: 1.43;
+      }
+
       .c1 {
         display: -webkit-box;
         display: -webkit-flex;
@@ -140,10 +140,6 @@ describe('<PageSizeURLQuery />', () => {
       .c1 > * {
         margin-top: 0;
         margin-bottom: 0;
-      }
-
-      .c1 > * + * {
-        margin-top: 0px;
       }
 
       .c3 {

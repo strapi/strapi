@@ -112,12 +112,6 @@
   "form.button.select-component": "Selecteer een component",
   "form.button.single-type.description": "Het beste voor een enkele instantie zoals over ons, homepage, enz.",
   "from": "van",
-  "menu.section.components.name.plural": "Componenten",
-  "menu.section.components.name.singular": "Component",
-  "menu.section.models.name.plural": "Collectie types",
-  "menu.section.models.name.singular": "Collectie type",
-  "menu.section.single-types.name.plural": "Enkel types",
-  "menu.section.single-types.name.singular": "Enkel type",
   "modalForm.attribute.form.base.name": "Naam",
   "modalForm.attribute.form.base.name.description": "Er is geen ruimte toegestaan voor de naam van het attribuut",
   "modalForm.attribute.form.base.name.placeholder": "Bijv.: Slug, SEO URL, Canonical URL",
@@ -160,7 +154,5 @@
   "relation.manyWay": "heeft veel",
   "relation.oneToMany": "behoort tot vele",
   "relation.oneToOne": "heeft en behoort tot één",
-  "relation.oneWay": "heeft één",
-  "table.attributes.title.plural": "{number} velden",
-  "table.attributes.title.singular": "{number} veld"
+  "relation.oneWay": "heeft één"
 }

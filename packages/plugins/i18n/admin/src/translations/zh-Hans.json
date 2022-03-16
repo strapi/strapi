@@ -15,8 +15,6 @@
   "Settings.list.description": "国际化插件设置",
   "Settings.list.empty.description": "这不是一个常规的动作，您动手修改了数据库。为了能正确使用Strapi，请确保至少保存一种语言在您的数据库中",
   "Settings.list.empty.title": "暂无语言",
-  "Settings.locales.list.title.plural": "共{number}种语言",
-  "Settings.locales.list.title.singular": "{number}语言",
   "Settings.locales.modal.advanced": "高级设置",
   "Settings.locales.modal.advanced.setAsDefault": "设置为默认语言",
   "Settings.locales.modal.advanced.setAsDefault.hint": "系统中必须有一个默认语言，可以通过选中另一个非默认语言来设置",

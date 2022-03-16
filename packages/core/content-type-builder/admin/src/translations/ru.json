@@ -125,12 +125,6 @@
   "form.button.single-type.description": "Лучше всего подходит для одного экземпляра, например, о нас, домашняя страница и т.д.",
   "form.contentType.divider.draft-publish": "ЧЕРНОВИК/ПУБЛИКАЦИЯ",
   "from": "из",
-  "menu.section.components.name.plural": "Компоненты",
-  "menu.section.components.name.singular": "Компонент",
-  "menu.section.models.name.plural": "Типы коллекций",
-  "menu.section.models.name.singular": "Тип коллекции",
-  "menu.section.single-types.name.plural": "Одиночные типы",
-  "menu.section.single-types.name.singular": "Одиночный тип",
   "modalForm.attribute.form.base.name": "Имя",
   "modalForm.attribute.form.base.name.description": "Пробелы в имени атрибута недопустимы",
   "modalForm.attribute.form.base.name.placeholder": "e.g. Slug, SEO URL, Canonical URL",
@@ -176,7 +170,5 @@
   "relation.manyWay": "имеет много",
   "relation.oneToMany": "принадлежит многим",
   "relation.oneToOne": "имеет один и принадлежит одному",
-  "relation.oneWay": "имеет один",
-  "table.attributes.title.plural": "Полей - {number}",
-  "table.attributes.title.singular": "Поле - {number}"
+  "relation.oneWay": "имеет один"
 }

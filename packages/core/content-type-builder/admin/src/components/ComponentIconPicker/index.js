@@ -69,7 +69,7 @@ const ComponentIconPicker = ({ error, isCreating, intlLabel, name, onChange, val
 
   return (
     <Box>
-      <Stack size={1}>
+      <Stack spacing={1}>
         <Flex justifyContent="space-between">
           <Typography
             variant="pi"
@@ -113,7 +113,7 @@ const ComponentIconPicker = ({ error, isCreating, intlLabel, name, onChange, val
             <IconButton onClick={toggleSearch} aria-label="Edit" icon={<Search />} noBorder />
           )}
         </Flex>
-        <Stack size={1}>
+        <Stack spacing={1}>
           <Box background="neutral100" borderColor={error ? 'danger600' : ''} hasRadius>
             <Box>
               <AutoSizer disableHeight>

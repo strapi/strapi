@@ -6,6 +6,8 @@
 
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
+import parseISO from 'date-fns/parseISO';
+import formatISO from 'date-fns/formatISO';
 import { useIntl } from 'react-intl';
 import { Checkbox } from '@strapi/design-system/Checkbox';
 import { DatePicker } from '@strapi/design-system/DatePicker';
@@ -37,6 +39,7 @@ const GenericInput = ({
   step,
   type,
   value,
+  isNullable,
   ...rest
 }) => {
   const { formatMessage } = useIntl();
@@ -89,26 +92,43 @@ const GenericInput = ({
 
   switch (type) {
     case 'bool': {
+      const clearProps = {
+        clearLabel:
+          isNullable &&
+          formatMessage({
+            id: 'app.components.ToggleCheckbox.clear-label',
+            defaultMessage: 'Clear',
+          }),
+
+        onClear:
+          isNullable &&
+          (() => {
+            onChange({ target: { name, value: null } });
+          }),
+      };
+
       return (
         <ToggleInput
           checked={value === null ? null : value || false}
           disabled={disabled}
           hint={hint}
           label={label}
+          error={errorMessage}
           labelAction={labelAction}
           name={name}
           offLabel={formatMessage({
             id: 'app.components.ToggleCheckbox.off-label',
-            defaultMessage: 'Off',
+            defaultMessage: 'False',
           })}
           onLabel={formatMessage({
             id: 'app.components.ToggleCheckbox.on-label',
-            defaultMessage: 'On',
+            defaultMessage: 'True',
           })}
           onChange={e => {
             onChange({ target: { name, value: e.target.checked } });
           }}
           required={required}
+          {...clearProps}
         />
       );
     }
@@ -146,7 +166,8 @@ const GenericInput = ({
 
             onChange({ target: { name, value: formattedDate, type } });
           }}
-          onClear={() => onChange({ target: { name, value: '', type } })}
+          step={step}
+          onClear={() => onChange({ target: { name, value: null, type } })}
           placeholder={formattedPlaceholder}
           required={required}
           value={value ? new Date(value) : null}
@@ -155,6 +176,12 @@ const GenericInput = ({
       );
     }
     case 'date': {
+      let selectedDate = null;
+
+      if (value) {
+        selectedDate = parseISO(value);
+      }
+
       return (
         <DatePicker
           clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
@@ -166,14 +193,14 @@ const GenericInput = ({
           hint={hint}
           name={name}
           onChange={date => {
-            const formattedDate = date.toISOString();
-
-            onChange({ target: { name, value: formattedDate, type } });
+            onChange({
+              target: { name, value: formatISO(date, { representation: 'date' }), type },
+            });
           }}
-          onClear={() => onChange({ target: { name, value: '', type } })}
+          onClear={() => onChange({ target: { name, value: null, type } })}
           placeholder={formattedPlaceholder}
           required={required}
-          selectedDate={value ? new Date(value) : null}
+          selectedDate={selectedDate}
           selectedDateLabel={formattedDate => `Date picker, current is ${formattedDate}`}
         />
       );
@@ -382,6 +409,7 @@ GenericInput.defaultProps = {
   description: null,
   disabled: false,
   error: '',
+  isNullable: undefined,
   labelAction: undefined,
   placeholder: null,
   required: false,
@@ -405,6 +433,7 @@ GenericInput.propTypes = {
     defaultMessage: PropTypes.string.isRequired,
     values: PropTypes.object,
   }).isRequired,
+  isNullable: PropTypes.bool,
   labelAction: PropTypes.element,
   name: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,

@@ -9,10 +9,19 @@ module.exports = (action, basePath, { rootFolder = false } = {}) => {
       name: 'destination',
       message: `Where do you want to add this ${action}?`,
       choices: [
-        {
-          name: `Add ${action} to ${rootFolder ? 'root of project' : 'new API'}`,
-          value: 'new',
-        },
+        ...(rootFolder
+          ? [
+              {
+                name: `Add ${action} to root of project`,
+                value: 'root',
+              },
+            ]
+          : [
+              {
+                name: `Add ${action} to new API`,
+                value: 'new',
+              },
+            ]),
         { name: `Add ${action} to an existing API`, value: 'api' },
         { name: `Add ${action} to an existing plugin`, value: 'plugin' },
       ],

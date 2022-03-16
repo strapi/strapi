@@ -9,14 +9,13 @@ import PropTypes from 'prop-types';
 import cm from 'codemirror';
 import trimStart from 'lodash/trimStart';
 import { Stack } from '@strapi/design-system/Stack';
+import { FieldHint, FieldError } from '@strapi/design-system/Field';
 import jsonlint from './jsonlint';
 import { EditorWrapper, StyledBox } from './components';
-import Hint from '../Hint';
 import Label from './Label';
-import FieldError from './FieldError';
+import FieldWrapper from './FieldWrapper';
 
 const WAIT = 600;
-const stringify = JSON.stringify;
 const DEFAULT_THEME = 'blackboard';
 
 const loadCss = async () => {
@@ -80,9 +79,7 @@ class InputJSON extends React.Component {
     try {
       if (value === null) return this.codeMirror.setValue('');
 
-      const nextValue = typeof value !== 'string' ? stringify(value, null, 2) : value;
-
-      return this.codeMirror.setValue(nextValue);
+      return this.codeMirror.setValue(value);
     } catch (err) {
       return this.setState({ error: true });
     }
@@ -159,30 +156,28 @@ class InputJSON extends React.Component {
     }
 
     return (
-      <Stack size={1}>
-        <Label
-          intlLabel={this.props.intlLabel}
-          labelAction={this.props.labelAction}
-          name={this.props.name}
-        />
-        <StyledBox error={this.props.error}>
-          <EditorWrapper disabled={this.props.disabled}>
-            <textarea
-              ref={this.editor}
-              autoComplete="off"
-              id={this.props.id || this.props.name}
-              defaultValue=""
-            />
-          </EditorWrapper>
-        </StyledBox>
-        <Hint
-          description={this.props.description}
-          name={this.props.name}
-          id={this.props.id}
-          error={this.props.error}
-        />
-        <FieldError id={this.props.id} name={this.props.name} error={this.props.error} />
-      </Stack>
+      <FieldWrapper name={this.props.name} hint={this.props.description} error={this.props.error}>
+        <Stack spacing={1}>
+          <Label
+            intlLabel={this.props.intlLabel}
+            labelAction={this.props.labelAction}
+            name={this.props.name}
+            required={this.props.required}
+          />
+          <StyledBox error={this.props.error}>
+            <EditorWrapper disabled={this.props.disabled}>
+              <textarea
+                ref={this.editor}
+                autoComplete="off"
+                id={this.props.id || this.props.name}
+                defaultValue=""
+              />
+            </EditorWrapper>
+          </StyledBox>
+          <FieldHint />
+          <FieldError />
+        </Stack>
+      </FieldWrapper>
     );
   }
 }
@@ -196,6 +191,7 @@ InputJSON.defaultProps = {
   labelAction: undefined,
   onChange: () => {},
   value: null,
+  required: false,
 };
 
 InputJSON.propTypes = {
@@ -216,6 +212,7 @@ InputJSON.propTypes = {
   name: PropTypes.string.isRequired,
   onChange: PropTypes.func,
   value: PropTypes.any,
+  required: PropTypes.bool,
 };
 
 export default InputJSON;

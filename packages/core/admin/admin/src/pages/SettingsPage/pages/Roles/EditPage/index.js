@@ -109,7 +109,7 @@ const EditPage = () => {
             <>
               <HeaderLayout
                 primaryAction={
-                  <Stack horizontal size={2}>
+                  <Stack horizontal spacing={2}>
                     <Button
                       disabled={role.code === 'strapi-super-admin'}
                       onClick={handleSubmit}
@@ -141,7 +141,7 @@ const EditPage = () => {
                 }
               />
               <ContentLayout>
-                <Stack size={6}>
+                <Stack spacing={6}>
                   <RoleForm
                     isLoading={isRoleLoading}
                     disabled={isFormDisabled}

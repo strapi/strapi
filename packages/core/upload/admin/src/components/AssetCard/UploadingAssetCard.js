@@ -12,6 +12,7 @@ import {
 } from '@strapi/design-system/Card';
 import { Typography } from '@strapi/design-system/Typography';
 import { Stack } from '@strapi/design-system/Stack';
+import { Box } from '@strapi/design-system/Box';
 import { useIntl } from 'react-intl';
 import { getTrad } from '../../utils';
 import { AssetType } from '../../constants';
@@ -43,6 +44,11 @@ export const UploadingAssetCard = ({ asset, onCancel, onStatusChange, addUploade
       id: getTrad('settings.section.video.label'),
       defaultMessage: 'Video',
     });
+  } else if (asset.type === AssetType.Audio) {
+    badgeContent = formatMessage({
+      id: getTrad('settings.section.audio.label'),
+      defaultMessage: 'Audio',
+    });
   } else {
     badgeContent = formatMessage({
       id: getTrad('settings.section.doc.label'),
@@ -73,7 +79,7 @@ export const UploadingAssetCard = ({ asset, onCancel, onStatusChange, addUploade
   };
 
   return (
-    <Stack size={1}>
+    <Stack spacing={1}>
       <Card borderColor={error ? 'danger600' : undefined}>
         <CardHeader>
           <UploadProgressWrapper>
@@ -82,7 +88,9 @@ export const UploadingAssetCard = ({ asset, onCancel, onStatusChange, addUploade
         </CardHeader>
         <CardBody>
           <CardContent>
-            <CardTitle as="h2">{asset.name}</CardTitle>
+            <Box paddingTop={1}>
+              <CardTitle as="h2">{asset.name}</CardTitle>
+            </Box>
             <CardSubtitle>
               <Extension>{asset.ext}</Extension>
             </CardSubtitle>
