@@ -242,9 +242,14 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
   };
 
   const redirectToPreviousLocation = () => {
-    const locationBeforeAuthenticated = decodeURIComponent(query.get('redirectTo'));
-    const redirectUrl = locationBeforeAuthenticated || '/';
-    push(redirectUrl);
+    if (authType === 'login') {
+      const redirectTo = query.get('redirectTo');
+      const redirectUrl = redirectTo ? decodeURIComponent(redirectTo) : '/';
+
+      push(redirectUrl);
+    } else {
+      push('/');
+    }
   };
 
   // Redirect the user to the login page if
