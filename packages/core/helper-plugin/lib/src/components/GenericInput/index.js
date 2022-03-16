@@ -216,12 +216,12 @@ const GenericInput = ({
           hint={hint}
           name={name}
           onValueChange={value => {
-            onChange({ target: { name, value, type } });
+            onChange({ target: { name, value: value ?? null, type } });
           }}
           placeholder={formattedPlaceholder}
           required={required}
           step={step}
-          value={value ?? undefined}
+          value={value ?? null}
         />
       );
     }
