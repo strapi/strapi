@@ -25,7 +25,13 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
       <IntlProvider locale="en" messages={{}} textComponent="span">
         <ThemeProvider theme={lightTheme}>
           <Router history={history}>
-            <Register fieldsToDisable={[]} noSignin onSubmit={() => {}} schema={yup.object()} />
+            <Register
+              authType="register-admin"
+              fieldsToDisable={[]}
+              noSignin
+              onSubmit={() => {}}
+              schema={yup.object()}
+            />
           </Router>
         </ThemeProvider>
       </IntlProvider>
