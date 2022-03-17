@@ -100,6 +100,17 @@ describe('GenericInput', () => {
       });
     });
 
+    test('does call onChange callback with number (0) value', () => {
+      const spy = jest.fn();
+      const { input } = setupNumber({ value: null, onChange: spy });
+
+      fireEvent.change(input, { target: { value: '0' } });
+
+      expect(spy).toHaveBeenCalledWith({
+        target: { name: 'number', type: 'number', value: 0 },
+      });
+    });
+
     test('does call onChange callback with null on empty value', () => {
       const spy = jest.fn();
       const { input } = setupNumber({ value: 1, onChange: spy });
