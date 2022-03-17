@@ -118,7 +118,7 @@ const baseForm = {
                   metadatas: {
                     intlLabel: {
                       id: getTrad('form.attribute.item.date.type.datetime'),
-                      defaultMessage: 'datetime (ex: 01/01/{currentYear} 00:00AM)',
+                      defaultMessage: 'datetime (ex: 01/01/{currentYear} 00:00 AM)',
                       values: { currentYear: new Date().getFullYear() },
                     },
                   },
@@ -129,7 +129,7 @@ const baseForm = {
                   metadatas: {
                     intlLabel: {
                       id: getTrad('form.attribute.item.date.type.time'),
-                      defaultMessage: 'time (ex: 00:00AM)',
+                      defaultMessage: 'time (ex: 00:00 AM)',
                     },
                   },
                 },
