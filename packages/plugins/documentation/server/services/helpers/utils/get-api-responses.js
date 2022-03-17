@@ -1,9 +1,6 @@
 'use strict';
 
-const getSchemaData = require('../get-schema-data');
-const cleanSchemaAttributes = require('../clean-schema-attributes');
-const errorResponse = require('../error-response');
-
+const pascalCase = require('./pascal-case');
 /**
  *
  * @param {boolean} isSingleEntity - Checks for a single entity
@@ -29,6 +26,31 @@ const getMeta = isListOfEntities => {
   return { type: 'object' };
 };
 
+const getSchemaAsArrayOrObject = (isListOfEntities, name) => {
+  if (isListOfEntities) {
+    return {
+      properties: {
+        data: {
+          type: 'array',
+          items: {
+            $ref: `#/components/schemas/${pascalCase(name)}`,
+          },
+        },
+        meta: getMeta(isListOfEntities),
+      },
+    };
+  }
+
+  return {
+    properties: {
+      data: {
+        $ref: `#/components/schemas/${pascalCase(name)}`,
+      },
+      meta: getMeta(isListOfEntities),
+    },
+  };
+};
+
 /**
  * @description - Builds the Swagger response object for a given api
  *
@@ -38,7 +60,7 @@ const getMeta = isListOfEntities => {
  *
  * @returns The Swagger responses
  */
-module.exports = (attributes, route, isListOfEntities = false) => {
+module.exports = (name, route, isListOfEntities = false) => {
   let schema;
   if (route.method === 'DELETE') {
     schema = {
@@ -46,12 +68,7 @@ module.exports = (attributes, route, isListOfEntities = false) => {
       format: 'int64',
     };
   } else {
-    schema = {
-      properties: {
-        data: getSchemaData(isListOfEntities, cleanSchemaAttributes(attributes)),
-        meta: getMeta(isListOfEntities),
-      },
-    };
+    schema = getSchemaAsArrayOrObject(isListOfEntities, name);
   }
 
   return {
@@ -68,7 +85,9 @@ module.exports = (attributes, route, isListOfEntities = false) => {
         description: 'Bad Request',
         content: {
           'application/json': {
-            schema: errorResponse,
+            schema: {
+              $ref: '#/components/schemas/Error',
+            },
           },
         },
       },
@@ -76,7 +95,9 @@ module.exports = (attributes, route, isListOfEntities = false) => {
         description: 'Unauthorized',
         content: {
           'application/json': {
-            schema: errorResponse,
+            schema: {
+              $ref: '#/components/schemas/Error',
+            },
           },
         },
       },
@@ -84,7 +105,9 @@ module.exports = (attributes, route, isListOfEntities = false) => {
         description: 'Forbidden',
         content: {
           'application/json': {
-            schema: errorResponse,
+            schema: {
+              $ref: '#/components/schemas/Error',
+            },
           },
         },
       },
@@ -92,7 +115,9 @@ module.exports = (attributes, route, isListOfEntities = false) => {
         description: 'Not Found',
         content: {
           'application/json': {
-            schema: errorResponse,
+            schema: {
+              $ref: '#/components/schemas/Error',
+            },
           },
         },
       },
@@ -100,7 +125,9 @@ module.exports = (attributes, route, isListOfEntities = false) => {
         description: 'Internal Server Error',
         content: {
           'application/json': {
-            schema: errorResponse,
+            schema: {
+              $ref: '#/components/schemas/Error',
+            },
           },
         },
       },

@@ -41,5 +41,34 @@ module.exports = {
         bearerFormat: 'JWT',
       },
     },
+    schemas: {
+      Error: {
+        type: 'object',
+        required: ['error'],
+        properties: {
+          data: {
+            nullable: true,
+            oneOf: [{ type: 'object' }, { type: 'array' }],
+          },
+          error: {
+            type: 'object',
+            properties: {
+              status: {
+                type: 'integer',
+              },
+              name: {
+                type: 'string',
+              },
+              message: {
+                type: 'string',
+              },
+              details: {
+                type: 'object',
+              },
+            },
+          },
+        },
+      },
+    },
   },
 };

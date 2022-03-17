@@ -3,9 +3,10 @@
 const _ = require('lodash');
 const pathToRegexp = require('path-to-regexp');
 
-const queryParams = require('../query-params');
-const buildApiRequests = require('./build-api-requests');
-const buildApiResponses = require('./build-api-responses');
+const pascalCase = require('./utils/pascal-case');
+const queryParams = require('./utils/query-params');
+const loopContentTypeNames = require('./utils/loop-content-type-names');
+const getApiResponses = require('./utils/get-api-responses');
 
 /**
  * @description Parses a route with ':variable'
@@ -69,17 +70,15 @@ const getPathWithPrefix = (prefix, path) => {
 };
 
 /**
+ * @description Get's all paths based on routes
  *
- * @param {object} api - Information about the api
- * @param {object} api.routeInfo - The routes for a given api or plugin
- * @param {string} api.routeInfo.prefix - The prefix for all routes
- * @param {array}  api.routeInfo.routes - The routes for the current api
- * @param {object} api.attributes - The attributes for a given api or plugin
- * @param {string} api.tag - A descriptor for OpenAPI
+ * @param {object} apiInfo
+ * @property {object} apiInfo.routeInfo - The api routes object
+ * @property {string} apiInfo.uniqueName - Content type name | Api name + Content type name
  *
  * @returns {object}
  */
-const getPaths = ({ routeInfo, attributes, tag }) => {
+const getPaths = ({ routeInfo, uniqueName }) => {
   const paths = routeInfo.routes.reduce((acc, route) => {
     // TODO: Find a more reliable way to determine list of entities vs a single entity
     const isListOfEntities = route.handler.split('.').pop() === 'find';
@@ -91,11 +90,11 @@ const getPaths = ({ routeInfo, attributes, tag }) => {
       : route.path;
     const routePath = hasPathParams ? parsePathWithVariables(pathWithPrefix) : pathWithPrefix;
 
-    const { responses } = buildApiResponses(attributes, route, isListOfEntities);
+    const { responses } = getApiResponses(uniqueName, route, isListOfEntities);
 
     const swaggerConfig = {
       responses,
-      tags: [_.upperFirst(tag)],
+      tags: [_.upperFirst(uniqueName)],
       parameters: [],
       operationId: `${methodVerb}${routePath}`,
     };
@@ -110,7 +109,16 @@ const getPaths = ({ routeInfo, attributes, tag }) => {
     }
 
     if (['post', 'put'].includes(methodVerb)) {
-      const { requestBody } = buildApiRequests(attributes, route);
+      const requestBody = {
+        required: true,
+        content: {
+          'application/json': {
+            schema: {
+              $ref: `#/components/schemas/New${pascalCase(uniqueName)}`,
+            },
+          },
+        },
+      };
 
       swaggerConfig.requestBody = requestBody;
     }
@@ -120,7 +128,61 @@ const getPaths = ({ routeInfo, attributes, tag }) => {
     return acc;
   }, {});
 
-  return { paths };
+  return paths;
+};
+
+/**
+ * @decription Gets all open api paths object for a given content type
+ *
+ * @param {object} apiInfo
+ * @property {string} apiInfo.name - The name of the api
+ * @property {string} apiInfo.getter - api | plugin
+ * @property {array} apiInfo.ctNames - All contentType names on the api
+ * @property {string} apiInfo.uniqueName - Api name | Api name + Content type name
+ * @property {object} apiInfo.attributes - Attributes on content type
+ * @property {object} apiInfo.routeInfo - The routes for the api
+ *
+ * @returns {object} Open API paths
+ */
+const getAllPathsForContentType = ({
+  name,
+  getter,
+  ctNames,
+  uniqueName,
+  routeInfo,
+  attributes,
+}) => {
+  let paths = {};
+  if (!ctNames.length && getter === 'plugin') {
+    const routeInfo = strapi.plugin(name).routes['admin'];
+
+    const apiInfo = {
+      routeInfo,
+      uniqueName,
+    };
+
+    paths = {
+      ...paths,
+      ...getPaths(apiInfo),
+    };
+
+    return getPaths(apiInfo);
+  }
+
+  const apiInfo = {
+    routeInfo,
+    attributes,
+    uniqueName,
+  };
+
+  const pathsObject = getPaths(apiInfo);
+
+  paths = {
+    ...paths,
+    ...pathsObject,
+  };
+
+  return paths;
 };
 
 /**
@@ -133,48 +195,8 @@ const getPaths = ({ routeInfo, attributes, tag }) => {
  *
  * @returns {object}
  */
-module.exports = api => {
-  if (!api.ctNames.length && api.getter === 'plugin') {
-    // Set arbitrary attributes
-    const attributes = { foo: { type: 'string' } };
-    const routeInfo = strapi.plugin(api.name).routes['admin'];
-
-    const apiInfo = {
-      routeInfo,
-      attributes,
-      tag: api.name,
-    };
-
-    return getPaths(apiInfo);
-  }
-
-  // An api could have multiple contentTypes
-  let paths = {};
-  for (const contentTypeName of api.ctNames) {
-    // Get the attributes found on the api's contentType
-    const uid = `${api.getter}::${api.name}.${contentTypeName}`;
-    const ct = strapi.contentType(uid);
-    const attributes = ct.attributes;
-
-    // Get the routes for the current api
-    const routeInfo =
-      api.getter === 'plugin'
-        ? strapi.plugin(api.name).routes['content-api']
-        : strapi.api[api.name].routes[contentTypeName];
-
-    // Parse an identifier for OpenAPI tag if the api name and contentType name don't match
-    const tag = api.name === contentTypeName ? api.name : `${api.name} - ${contentTypeName}`;
-    const apiInfo = {
-      routeInfo,
-      attributes,
-      tag,
-    };
-
-    paths = {
-      ...paths,
-      ...getPaths(apiInfo).paths,
-    };
-  }
-
-  return { paths };
+const buildApiEndpointPath = api => {
+  return loopContentTypeNames(api, getAllPathsForContentType);
 };
+
+module.exports = buildApiEndpointPath;
