@@ -8,7 +8,7 @@ import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { render, screen } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
-import { lightTheme } from '@strapi/design-system';
+import { lightTheme, darkTheme } from '@strapi/design-system';
 import Theme from '../../../../components/Theme';
 import ThemeToggleProvider from '../../../../components/ThemeToggleProvider';
 import { App as ContentManagerApp } from '..';
@@ -98,7 +98,7 @@ describe('Content manager | App | main', () => {
 
     const { container } = render(
       <IntlProvider messages={{}} defaultLocale="en" locale="en">
-        <ThemeToggleProvider themes={{ light: lightTheme }}>
+        <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
           <Theme>
             <DndProvider backend={HTML5Backend}>
               <Provider store={store}>
@@ -808,7 +808,7 @@ describe('Content manager | App | main', () => {
 
     render(
       <IntlProvider messages={{}} defaultLocale="en" locale="en">
-        <ThemeToggleProvider themes={{ light: lightTheme }}>
+        <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
           <Theme>
             <DndProvider backend={HTML5Backend}>
               <Provider store={store}>
@@ -854,7 +854,7 @@ describe('Content manager | App | main', () => {
 
     render(
       <IntlProvider messages={{}} defaultLocale="en" locale="en">
-        <ThemeToggleProvider themes={{ light: lightTheme }}>
+        <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
           <Theme>
             <DndProvider backend={HTML5Backend}>
               <Provider store={store}>
@@ -899,7 +899,7 @@ describe('Content manager | App | main', () => {
 
     render(
       <IntlProvider messages={{}} defaultLocale="en" locale="en">
-        <ThemeToggleProvider themes={{ light: lightTheme }}>
+        <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
           <Theme>
             <DndProvider backend={HTML5Backend}>
               <Provider store={store}>
