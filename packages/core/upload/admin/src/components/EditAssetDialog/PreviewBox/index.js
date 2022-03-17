@@ -41,6 +41,8 @@ export const PreviewBox = ({
 }) => {
   const { trackUsage } = useTracking();
   const previewRef = useRef(null);
+  const [cropImageReady, setCropImageReady] = useState(false);
+  const [cropIntent, setCropIntent] = useState(false);
   const [assetUrl, setAssetUrl] = useState(createAssetUrl(asset, false));
   const [thumbnailUrl, setThumbnailUrl] = useState(createAssetUrl(asset, true));
   const { formatMessage } = useIntl();
@@ -123,14 +125,22 @@ export const PreviewBox = ({
   };
 
   const handleCropCancel = () => {
+    setCropIntent(false);
+    setCropImageReady(false);
     stopCropping();
     onCropCancel();
   };
 
   const handleCropStart = () => {
-    crop(previewRef.current);
-    onCropStart();
+    setCropIntent(true);
   };
+
+  useEffect(() => {
+    if (cropIntent && cropImageReady) {
+      crop(previewRef.current);
+      onCropStart();
+    }
+  }, [cropImageReady, cropIntent, onCropStart, crop]);
 
   return (
     <>
@@ -198,7 +208,17 @@ export const PreviewBox = ({
             </UploadProgressWrapper>
           )}
 
-          <AssetPreview ref={previewRef} mime={asset.mime} name={asset.name} url={thumbnailUrl} />
+          <AssetPreview
+            ref={previewRef}
+            mime={asset.mime}
+            name={asset.name}
+            url={cropIntent ? assetUrl : thumbnailUrl}
+            onLoad={() => {
+              if (cropIntent) {
+                setCropImageReady(true);
+              }
+            }}
+          />
         </Wrapper>
 
         <ActionRow
