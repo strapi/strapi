@@ -113,6 +113,7 @@
     "request": "2.88.2",
     "request-promise-native": "1.0.9",
     "rimraf": "3.0.2",
+    "speed-measure-webpack-plugin": "1.5.0",
     "stylelint": "13.13.1",
     "stylelint-config-recommended": "3.0.0",
     "stylelint-config-styled-components": "0.1.1",
