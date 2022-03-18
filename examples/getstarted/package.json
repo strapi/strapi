@@ -1,7 +1,11 @@
 {
   "name": "getstarted",
   "private": true,
+<<<<<<< HEAD
   "version": "4.1.7",
+=======
+  "version": "4.1.4",
+>>>>>>> Add option to mesure webpack speed
   "description": "A Strapi application.",
   "scripts": {
     "develop": "strapi develop",
