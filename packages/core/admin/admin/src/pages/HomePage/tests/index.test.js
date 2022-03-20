@@ -633,10 +633,6 @@ describe('Homepage', () => {
         fill: #ff4500;
       }
 
-      .c52 > path:last-child {
-        fill: #ffffff;
-      }
-
       .c55 > path:first-child {
         fill: #8e75ff;
       }
