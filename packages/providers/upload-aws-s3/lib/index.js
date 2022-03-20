@@ -24,7 +24,7 @@ module.exports = {
           {
             Key: `${path}${file.hash}${file.ext}`,
             Body: file.stream || Buffer.from(file.buffer, 'binary'),
-            ACL: 'public-read',
+            ACL: config.params.ACL || 'public-read',
             ContentType: file.mime,
             ...customParams,
           },
