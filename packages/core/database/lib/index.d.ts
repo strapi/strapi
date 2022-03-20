@@ -72,6 +72,8 @@ interface EntityManager {
   deleteMany<K extends keyof AllTypes>(uid: K, params: any): Promise<{ count: number }>;
 
   count<K extends keyof AllTypes>(uid: K, params: any): Promise<number>;
+  sum<K extends keyof AllTypes>(uid: K, params: any): Promise<number>;
+  avg<K extends keyof AllTypes>(uid: K, params: any): Promise<number>;
 
   attachRelations<K extends keyof AllTypes>(uid: K, id: ID, data: any): Promise<any>;
   updateRelations<K extends keyof AllTypes>(uid: K, id: ID, data: any): Promise<any>;
@@ -107,6 +109,8 @@ interface QueryFromContentType<T extends keyof AllTypes> {
   deleteMany(params: any): Promise<{ count: number }>;
 
   count(params: any): Promise<number>;
+  sum(field: string, params: any): Promise<number>;
+  avg(field: string, params: any): Promise<number>;
 
   attachRelations(id: ID, data: any): Promise<any>;
   updateRelations(id: ID, data: any): Promise<any>;

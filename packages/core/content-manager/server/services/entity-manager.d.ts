@@ -4,6 +4,8 @@ interface EntityManager {
   findPage(): any;
   findWithRelationCounts(): any;
   count(): any;
+  sum(): any;
+  avg(): any;
   findOne(): any;
   findOneWithCreatorRoles(): any;
   create(): any;

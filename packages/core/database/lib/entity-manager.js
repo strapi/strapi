@@ -154,6 +154,46 @@ const createEntityManager = db => {
       return result;
     },
 
+    async sum(uid, field, params = {}) {
+      await db.lifecycles.run('beforeSum', uid, { params });
+
+      if (!_.isString(field) || _.isEmpty(field)) {
+        throw new Error('Expects a field name to sum');
+      }
+
+      const res = await this.createQueryBuilder(uid)
+        .init(_.pick(['_q', 'where', 'filters'], params))
+        .sum(field)
+        .first()
+        .execute();
+
+      const result = Number(res.sum);
+
+      await db.lifecycles.run('afterSum', uid, { params, result });
+
+      return result;
+    },
+
+    async avg(uid, field, params = {}) {
+      await db.lifecycles.run('beforeAvg', uid, { params });
+
+      if (!_.isString(field) || _.isEmpty(field)) {
+        throw new Error('Expects a field name to average');
+      }
+
+      const res = await this.createQueryBuilder(uid)
+        .init(_.pick(['_q', 'where', 'filters'], params))
+        .avg(field)
+        .first()
+        .execute();
+
+      const result = Number(res.avg);
+
+      await db.lifecycles.run('afterAvg', uid, { params, result });
+
+      return result;
+    },
+
     async create(uid, params = {}) {
       await db.lifecycles.run('beforeCreate', uid, { params });
 

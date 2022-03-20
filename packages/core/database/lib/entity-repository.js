@@ -83,6 +83,14 @@ const createRepository = (uid, db) => {
       return db.entityManager.count(uid, params);
     },
 
+    sum(field, params) {
+      return db.entityManager.sum(uid, field, params);
+    },
+
+    avg(field, params) {
+      return db.entityManager.avg(uid, field, params);
+    },
+
     attachRelations(id, data) {
       return db.entityManager.attachRelations(uid, id, data);
     },
