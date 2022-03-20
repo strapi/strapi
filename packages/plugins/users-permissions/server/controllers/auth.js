@@ -120,6 +120,63 @@ module.exports = {
     }
   },
 
+  async changePassword(ctx) {
+    const params = _.assign({}, ctx.request.body, ctx.params);
+
+    if (!_.get(ctx, 'state.user.id')) {
+      throw new ApplicationError('You must be authenticated to reset your password');
+    }
+
+    if (
+      params.currentPassword &&
+      params.password &&
+      params.passwordConfirmation &&
+      params.passwordConfirmation === params.password
+    ) {
+      const user = await strapi.entityService.findOne(
+        'plugin::users-permissions.user',
+        ctx.state.user.id
+      );
+
+      if (!user) {
+        throw new ValidationError('User not found');
+      }
+
+      const validPassword = await getService('user').validatePassword(
+        params.currentPassword,
+        user.password
+      );
+
+      if (!validPassword) {
+        throw new ValidationError('Your current password is invalid');
+      }
+
+      if (params.currentPassword === params.password) {
+        throw new ValidationError('Your new password must be different than your current password');
+      }
+
+      await getService('user').edit(user.id, {
+        resetPasswordToken: null,
+        password: params.password,
+      });
+
+      ctx.send({
+        jwt: getService('jwt').issue({ id: user.id }),
+        user: await sanitizeUser(user, ctx),
+      });
+    } else if (!params.currentPassword) {
+      throw new ValidationError('You must provider your current password in order to change it');
+    } else if (
+      params.password &&
+      params.passwordConfirmation &&
+      params.password !== params.passwordConfirmation
+    ) {
+      throw new ValidationError('Passwords do not match');
+    } else {
+      throw new ValidationError('Incorrect params provided');
+    }
+  },
+
   async resetPassword(ctx) {
     const params = _.assign({}, ctx.request.body, ctx.params);
 

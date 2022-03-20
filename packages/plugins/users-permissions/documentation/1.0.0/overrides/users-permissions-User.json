@@ -254,6 +254,46 @@
         }
       }
     },
+    "/auth/change-password": {
+      "post": {
+        "tags": ["Authentication"],
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Users-PermissionsRegisterResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "description": "",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "required": ["currentPassword", "password", "passwordConfirmation"],
+                "properties": {
+                  "currentPassword": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  },
+                  "passwordConfirmation": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/auth/reset-password": {
       "post": {
         "tags": ["Authentication"],
