@@ -23,10 +23,11 @@ const BlockActions = styled(Flex)`
 `;
 
 const Table = ({
+  action,
   children,
   contentType,
   components,
-  action,
+  footer,
   headers,
   isLoading,
   onConfirmDeleteAll,
@@ -159,7 +160,7 @@ const Table = ({
           </Box>
         </Box>
       )}
-      <TableCompo colCount={COL_COUNT} rowCount={ROW_COUNT}>
+      <TableCompo colCount={COL_COUNT} rowCount={ROW_COUNT} footer={footer}>
         <TableHead
           areAllEntriesSelected={areAllEntriesSelected}
           entriesToDelete={entriesToDelete}
@@ -207,12 +208,13 @@ const Table = ({
 };
 
 Table.defaultProps = {
+  action: undefined,
   children: undefined,
   components: {
     ConfirmDialogDeleteAll: undefined,
     ConfirmDialogDelete: undefined,
   },
-  action: undefined,
+  footer: undefined,
   headers: [],
   isLoading: false,
   onConfirmDeleteAll: () => {},
@@ -224,13 +226,14 @@ Table.defaultProps = {
 };
 
 Table.propTypes = {
+  action: PropTypes.node,
   children: PropTypes.node,
   contentType: PropTypes.string.isRequired,
   components: PropTypes.shape({
     ConfirmDialogDelete: PropTypes.oneOfType([PropTypes.func, PropTypes.element]),
     ConfirmDialogDeleteAll: PropTypes.oneOfType([PropTypes.func, PropTypes.element]),
   }),
-  action: PropTypes.node,
+  footer: PropTypes.node,
   headers: PropTypes.arrayOf(
     PropTypes.shape({
       cellFormatter: PropTypes.func,
