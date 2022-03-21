@@ -5,6 +5,7 @@ const _ = require('lodash');
 const invalidPatternsRegexes = [/<%[^=]([^<>%]*)%>/m, /\${([^{}]*)}/m];
 const authorizedKeys = [
   'URL',
+  'ADMIN_URL',
   'SERVER_URL',
   'CODE',
   'USER',

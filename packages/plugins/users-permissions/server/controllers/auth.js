@@ -17,7 +17,7 @@ const {
   validateSendEmailConfirmationBody,
 } = require('./validation/auth');
 
-const { getAbsoluteServerUrl, sanitize } = utils;
+const { getAbsoluteAdminUrl, getAbsoluteServerUrl, sanitize } = utils;
 const { ApplicationError, ValidationError } = utils.errors;
 
 const emailRegExp = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -137,7 +137,10 @@ module.exports = {
         throw new ValidationError('Incorrect code provided');
       }
 
-      await getService('user').edit(user.id, { resetPasswordToken: null, password: params.password });
+      await getService('user').edit(user.id, {
+        resetPasswordToken: null,
+        password: params.password,
+      });
       // Update the user.
       ctx.send({
         jwt: getService('jwt').issue({ id: user.id }),
@@ -241,6 +244,7 @@ module.exports = {
     settings.message = await getService('users-permissions').template(settings.message, {
       URL: advanced.email_reset_password,
       SERVER_URL: getAbsoluteServerUrl(strapi.config),
+      ADMIN_URL: getAbsoluteAdminUrl(strapi.config),
       USER: userInfo,
       TOKEN: resetPasswordToken,
     });
@@ -339,7 +343,7 @@ module.exports = {
         params.confirmed = true;
       }
 
-    const user = await getService('user').add(params);
+      const user = await getService('user').add(params);
 
       const sanitizedUser = await sanitizeUser(user, ctx);
 
