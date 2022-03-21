@@ -40,8 +40,8 @@ const databases = {
       password: 'strapi',
     },
   },
-  sqlite: {
-    client: 'sqlite',
+  sqlite3: {
+    client: 'sqlite3',
     connection: {
       filename: './tmp/data.db',
     },
@@ -96,7 +96,7 @@ yargs
         alias: 'db',
         describe: 'choose a database',
         choices: Object.keys(databases),
-        default: 'sqlite',
+        default: 'better-sqlite3',
       });
     },
     argv => {

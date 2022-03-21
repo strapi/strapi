@@ -62,7 +62,7 @@ const filename = () => ({
 });
 
 module.exports = {
-  sqlite: [filename],
+  sqlite3: [filename],
   'better-sqlite3': [filename],
   postgres: [database, host, port, username, password, ssl],
   mysql: [database, host, port, username, password, ssl],

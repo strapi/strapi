@@ -172,10 +172,10 @@ jobs:
         with:
           dbOptions: '--dbclient=mysql --dbhost=localhost --dbport=3306 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
 
-  e2e_ce_sqlite:
+  e2e_ce_sqlite3:
     runs-on: ubuntu-latest
     needs: [lint, unit_back, unit_front]
-    name: '[CE] E2E (sqlite, node: ${{ matrix.node }})'
+    name: '[CE] E2E (sqlite3, node: ${{ matrix.node }})'
     strategy:
       matrix:
         node: [14, 16]
@@ -189,12 +189,12 @@ jobs:
       - uses: ./.github/actions/install-modules
       - uses: ./.github/actions/run-e2e-tests
         with:
-          dbOptions: '--dbclient=sqlite --dbfile=./tmp/data.db'
+          dbOptions: '--dbclient=sqlite3 --dbfile=./tmp/data.db'
 
-  e2e_ce_better_sqlite:
+  e2e_ce_better_sqlite3:
     runs-on: ubuntu-latest
     needs: [lint, unit_back, unit_front]
-    name: '[CE] E2E (better_sqlite, node: ${{ matrix.node }})'
+    name: '[CE] E2E (better_sqlite3, node: ${{ matrix.node }})'
     strategy:
       matrix:
         node: [14, 16]
@@ -295,7 +295,7 @@ jobs:
   e2e_ee_sqlite:
     runs-on: ubuntu-latest
     needs: [lint, unit_back, unit_front]
-    name: '[EE] E2E (sqlite, node: ${{ matrix.node }})'
+    name: '[EE] E2E (sqlite3, node: ${{ matrix.node }})'
     if: github.event.pull_request.head.repo.full_name == github.repository && !(github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]')
     env:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
@@ -312,13 +312,13 @@ jobs:
       - uses: ./.github/actions/install-modules
       - uses: ./.github/actions/run-e2e-tests
         with:
-          dbOptions: '--dbclient=sqlite --dbfile=./tmp/data.db'
+          dbOptions: '--dbclient=sqlite3 --dbfile=./tmp/data.db'
           runEE: true
 
   e2e_ee_better_sqlite:
     runs-on: ubuntu-latest
     needs: [lint, unit_back, unit_front]
-    name: '[EE] E2E (better_sqlite, node: ${{ matrix.node }})'
+    name: '[EE] E2E (better_sqlite3, node: ${{ matrix.node }})'
     if: github.event.pull_request.head.repo.full_name == github.repository && !(github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]')
     env:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}

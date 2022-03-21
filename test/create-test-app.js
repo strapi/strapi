@@ -36,7 +36,7 @@ const databases = {
       password: 'root',
     },
   },
-  sqlite: {
+  sqlite3: {
     client: 'sqlite3',
     connection: {
       filename: './tmp/data.db',

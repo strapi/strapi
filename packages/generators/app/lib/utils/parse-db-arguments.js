@@ -5,7 +5,7 @@ const stopProcess = require('./stop-process');
 
 const DB_ARGS = ['dbclient', 'dbhost', 'dbport', 'dbname', 'dbusername', 'dbpassword'];
 
-const VALID_CLIENTS = ['sqlite', 'better-sqlite3', 'mysql', 'mysql2', 'postgres'];
+const VALID_CLIENTS = ['sqlite3', 'better-sqlite3', 'mysql', 'mysql2', 'postgres'];
 
 module.exports = function parseDatabaseArguments({ scope, args }) {
   const argKeys = Object.keys(args);
@@ -16,7 +16,7 @@ module.exports = function parseDatabaseArguments({ scope, args }) {
 
   if (
     matchingArgs.length !== DB_ARGS.length &&
-    args.dbclient !== 'sqlite' &&
+    args.dbclient !== 'sqlite3' &&
     args.dbclient !== 'better-sqlite3'
   ) {
     return stopProcess(`Required database arguments are missing: ${missingArgs.join(', ')}.`);

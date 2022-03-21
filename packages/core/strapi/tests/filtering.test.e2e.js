@@ -386,7 +386,7 @@ describe('Filtering API', () => {
       });
     });
 
-    // FIXME: Not working on sqlite due to https://www.sqlite.org/draft/pragma.html#pragma_case_sensitive_like
+    // FIXME: Not working on sqlite3 due to https://www.sqlite.org/draft/pragma.html#pragma_case_sensitive_like
     describe('Filter contains sensitive', () => {
       test.skip('Should return empty if the case does not match', async () => {
         const res = await rq({
@@ -421,7 +421,7 @@ describe('Filtering API', () => {
       });
     });
 
-    // FIXME: Not working on sqlite due to https://www.sqlite.org/draft/pragma.html#pragma_case_sensitive_like
+    // FIXME: Not working on sqlite3 due to https://www.sqlite.org/draft/pragma.html#pragma_case_sensitive_like
     describe('Filter not contains sensitive', () => {
       test.skip('Should return the entities if the case does not match', async () => {
         const res = await rq({

@@ -93,7 +93,7 @@ program
   .option('--dbusername <dbusername>', 'Database username')
   .option('--dbpassword <dbpassword>', 'Database password')
   .option('--dbssl <dbssl>', 'Database SSL')
-  .option('--dbfile <dbfile>', 'Database file path for sqlite')
+  .option('--dbfile <dbfile>', 'Database file path for sqlite3')
   .option('--dbforce', 'Allow overwriting existing database content')
   .description('Create a new application')
   .action(require('../lib/commands/new'));

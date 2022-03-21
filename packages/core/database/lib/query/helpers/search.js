@@ -41,7 +41,7 @@ const applySearch = (knex, query, ctx) => {
 
       break;
     }
-    case 'sqlite':
+    case 'sqlite3':
     case 'better-sqlite3': {
       searchColumns.forEach(attr => {
         const columnName = toColumnName(meta, attr);

@@ -125,7 +125,7 @@ The administration panel should now be available at http://localhost:4000/admin.
 The end-to-end tests require a Strapi app to be able to run. You can generate a "test app" using `yarn test:generate-app <database>`:
 
 ```bash
-$ yarn test:generate-app sqlite
+$ yarn test:generate-app sqlite3
 $ yarn test:generate-app postgres
 $ yarn test:generate-app mysql
 $ yarn test:generate-app mysql2
@@ -135,10 +135,10 @@ A new app is required every time you run the end-to-end tests otherwise, the tes
 
 ### Changing the database
 
-By default the script `test/e2e,js` creates an app that uses `sqlite`. But you can run the test suites using different databases:
+By default the script `test/e2e,js` creates an app that uses `sqlite3`. But you can run the test suites using different databases:
 
 ```bash
-$ node test/e2e.js --db=sqlite
+$ node test/e2e.js --db=sqlite3
 $ node test/e2e.js --db=postgres
 $ node test/e2e.js --db=mysql
 $ node test/e2e.js --db=mysql2

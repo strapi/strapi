@@ -23,7 +23,7 @@ module.exports = async scope => {
     return createCLIDatabaseProject(scope);
   }
 
-  // if cli quickstart create project with default sqlite options
+  // if cli quickstart create project with default sqlite3 options
   if (scope.quick === true) {
     return createQuickStartProject(scope);
   }

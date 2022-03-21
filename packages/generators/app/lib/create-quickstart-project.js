@@ -12,7 +12,7 @@ module.exports = async function createQuickStartProject(scope) {
   console.log('Creating a quickstart project.');
   await trackUsage({ event: 'didChooseQuickstart', scope });
 
-  // get default sqlite config
+  // get default sqlite3 config
   const client = 'better-sqlite3';
   const configuration = {
     client,

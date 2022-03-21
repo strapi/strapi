@@ -34,7 +34,7 @@ program
   .option('--dbusername <dbusername>', 'Database username')
   .option('--dbpassword <dbpassword>', 'Database password')
   .option('--dbssl <dbssl>', 'Database SSL')
-  .option('--dbfile <dbfile>', 'Database file path for sqlite')
+  .option('--dbfile <dbfile>', 'Database file path for sqlite3')
   .option('--dbforce', 'Overwrite database content if any')
   .option('--template <templateurl>', 'Specify a Strapi template')
   .description('create a new application')

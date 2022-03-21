@@ -33,7 +33,7 @@ program
   .option('--dbusername <dbusername>', 'Database username')
   .option('--dbpassword <dbpassword>', 'Database password')
   .option('--dbssl <dbssl>', 'Database SSL')
-  .option('--dbfile <dbfile>', 'Database file path for sqlite')
+  .option('--dbfile <dbfile>', 'Database file path for sqlite3')
   .option('--dbforce', 'Overwrite database content if any')
   .description(
     'Create a fullstack monorepo application using the strapi backend template specified in the provided starter'

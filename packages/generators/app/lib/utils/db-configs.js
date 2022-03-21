@@ -4,7 +4,7 @@
  * Default db infos
  */
 module.exports = {
-  sqlite: {
+  sqlite3: {
     connection: {
       filename: '.tmp/data.db',
     },

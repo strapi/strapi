@@ -92,7 +92,7 @@ async function askDbInfosAndTest(scope) {
 async function testDatabaseConnection({ scope, configuration }) {
   const { client } = configuration;
 
-  if (client === 'sqlite' || client === 'better-sqlite3') return;
+  if (client === 'sqlite3' || client === 'better-sqlite3') return;
 
   return;
 
@@ -122,7 +122,7 @@ async function askDatabaseInfos(scope) {
       type: 'list',
       name: 'client',
       message: 'Choose your default database client',
-      choices: ['better-sqlite3', 'sqlite', 'postgres', 'mysql', 'mysql2'],
+      choices: ['better-sqlite3', 'sqlite3', 'postgres', 'mysql', 'mysql2'],
       default: 'better-sqlite3',
     },
   ]);
