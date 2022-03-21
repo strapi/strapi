@@ -407,6 +407,12 @@ const createJoinTable = (metadata, { attributeName, attribute, meta }) => {
     uid: joinTableName,
     tableName: joinTableName,
     attributes: {
+      id: {
+        type: 'integer',
+        column: {
+          unsigned: true,
+        },
+      },
       [joinColumnName]: {
         type: 'integer',
         column: {
@@ -422,6 +428,11 @@ const createJoinTable = (metadata, { attributeName, attribute, meta }) => {
       // TODO: add extra pivot attributes -> user should use an intermediate entity
     },
     indexes: [
+      {
+        name: `${joinTableName}_pkey`,
+        columns: ['id'],
+        type: 'primary',
+      },
       {
         name: `${joinTableName}_fk`,
         columns: [joinColumnName],
