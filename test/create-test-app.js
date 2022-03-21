@@ -26,8 +26,24 @@ const databases = {
       password: 'root',
     },
   },
+  mysql2: {
+    client: 'mysql2',
+    connection: {
+      host: '127.0.0.1',
+      port: 3306,
+      database: 'strapi-test',
+      username: 'root',
+      password: 'root',
+    },
+  },
   sqlite: {
-    client: 'sqlite',
+    client: 'sqlite3',
+    connection: {
+      filename: './tmp/data.db',
+    },
+  },
+  'better-sqlite3': {
+    client: 'better-sqlite3',
     connection: {
       filename: './tmp/data.db',
     },

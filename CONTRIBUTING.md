@@ -128,6 +128,7 @@ The end-to-end tests require a Strapi app to be able to run. You can generate a 
 $ yarn test:generate-app sqlite
 $ yarn test:generate-app postgres
 $ yarn test:generate-app mysql
+$ yarn test:generate-app mysql2
 ```
 
 A new app is required every time you run the end-to-end tests otherwise, the test suite will fail. A script is available to make this process easier: `node test/e2e.js`. It will delete the current test app, generate a new one and run the test suite.
@@ -140,6 +141,7 @@ By default the script `test/e2e,js` creates an app that uses `sqlite`. But you c
 $ node test/e2e.js --db=sqlite
 $ node test/e2e.js --db=postgres
 $ node test/e2e.js --db=mysql
+$ node test/e2e.js --db=mysql2
 ```
 
 ### Running the tests for the Community Editon (CE)\*\*
