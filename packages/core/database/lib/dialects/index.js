@@ -5,8 +5,10 @@ const getDialectClass = client => {
     case 'postgres':
       return require('./postgresql');
     case 'mysql':
+    case 'mysql2':
       return require('./mysql');
     case 'sqlite':
+    case 'better-sqlite3':
       return require('./sqlite');
     default:
       throw new Error(`Unknown dialect ${client}`);
