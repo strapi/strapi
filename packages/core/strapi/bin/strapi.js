@@ -227,4 +227,10 @@ program
   .description('List all the application controllers')
   .action(getLocalScript('controllers/list'));
 
+//    `$ strapi opt-out-telemetry`
+program
+  .command('opt-out-telemetry')
+  .description('Stops Strapi from sending anonymous telemetry and metadata')
+  .action(getLocalScript('opt-out-telemetry'));
+
 program.parseAsync(process.argv);
