@@ -50,20 +50,21 @@ export const MediaLibrary = () => {
     skipWhen: !canRead,
   });
 
-  const handleChangeSort = value => {
+  const handleChangeSort = (value) => {
     setQuery({ sort: value });
   };
 
   const [showUploadAssetDialog, setShowUploadAssetDialog] = useState(false);
   const [assetToEdit, setAssetToEdit] = useState(undefined);
   const [selected, { selectOne, selectAll }] = useSelectionState('id', []);
-  const toggleUploadAssetDialog = () => setShowUploadAssetDialog(prev => !prev);
+  const toggleUploadAssetDialog = () => setShowUploadAssetDialog((prev) => !prev);
 
   useFocusWhenNavigate();
 
   const loading = isLoadingPermissions || isLoading;
   const assets = data?.results;
   const assetCount = data?.pagination?.total || 0;
+  const folderCount = 0;
   const isFiltering = Boolean(query._q || query.filters);
 
   return (
@@ -76,14 +77,11 @@ export const MediaLibrary = () => {
           })}
           subtitle={formatMessage(
             {
-              id: getTrad(
-                assetCount > 0
-                  ? 'header.content.assets-multiple'
-                  : 'header.content.assets.assets-single'
-              ),
-              defaultMessage: '0 assets',
+              id: getTrad('header.content.assets'),
+              defaultMessage:
+                '{numberFolders, plural, one {1 folder} other {# folders}} - {numberAssets, plural, one {1 asset} other {# assets}}',
             },
-            { number: assetCount }
+            { numberAssets: assetCount, numberFolders: folderCount }
           )}
           primaryAction={
             canCreate ? (
@@ -93,9 +91,7 @@ export const MediaLibrary = () => {
                   defaultMessage: 'Add new assets',
                 })}
               </Button>
-            ) : (
-              undefined
-            )
+            ) : undefined
           }
         />
 
@@ -161,9 +157,7 @@ export const MediaLibrary = () => {
                       defaultMessage: 'Add new assets',
                     })}
                   </Button>
-                ) : (
-                  undefined
-                )
+                ) : undefined
               }
               content={
                 // eslint-disable-next-line no-nested-ternary
