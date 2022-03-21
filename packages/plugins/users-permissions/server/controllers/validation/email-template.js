@@ -3,7 +3,16 @@
 const _ = require('lodash');
 
 const invalidPatternsRegexes = [/<%[^=]([^<>%]*)%>/m, /\${([^{}]*)}/m];
-const authorizedKeys = ['URL', 'CODE', 'USER', 'USER.email', 'USER.username', 'TOKEN'];
+const authorizedKeys = [
+  'URL',
+  'ADMIN_URL',
+  'SERVER_URL',
+  'CODE',
+  'USER',
+  'USER.email',
+  'USER.username',
+  'TOKEN',
+];
 
 const matchAll = (pattern, src) => {
   const matches = [];

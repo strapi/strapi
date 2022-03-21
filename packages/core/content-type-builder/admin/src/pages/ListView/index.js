@@ -148,7 +148,7 @@ const ListView = () => {
           !isCreatingFirstContentType && (
             <Button startIcon={<Pencil />} variant="tertiary" onClick={onEdit}>
               {formatMessage({
-                id: getTrad('app.utils.edit'),
+                id: 'app.utils.edit',
                 defaultMessage: 'Edit',
               })}
             </Button>

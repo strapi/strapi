@@ -30,9 +30,6 @@ const StyledReddit = styled(Reddit)`
   > path:first-child {
     fill: #ff4500;
   }
-  > path:last-child {
-    fill: ${({ theme }) => theme.colors.neutral0};
-  }
 `;
 const StyledStrapi = styled(Strapi)`
   > path:first-child {
