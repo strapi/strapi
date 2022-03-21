@@ -1,21 +1,38 @@
 'use strict';
 
-const mailgunFactory = require('mailgun-js');
+const formData = require('form-data');
+const Mailgun = require('mailgun.js');
 const { removeUndefined } = require('@strapi/utils');
+
+const optionsMap = {
+  apiKey: { field: 'key', fn: value => value },
+  domain: { field: 'domain', fn: value => value },
+  host: { field: 'url', fn: value => `https://${value || 'api.mailgun.net'}` },
+};
+
+const convertProviderOptions = (providerOptions = {}) => {
+  const newOptions = {};
+  if (typeof providerOptions === 'object') {
+    Object.keys(providerOptions).forEach(key => {
+      if (Object.keys(optionsMap).includes(key)) {
+        newOptions[optionsMap[key].field] = optionsMap[key].fn(providerOptions[key]);
+      }
+    });
+  }
+  return newOptions;
+};
 
 module.exports = {
   init(providerOptions = {}, settings = {}) {
-    const mailgun = mailgunFactory({
-      mute: false,
-      ...providerOptions,
-    });
+    const mailgun = new Mailgun(formData);
+    const mg = mailgun.client({ username: 'api', ...convertProviderOptions(providerOptions) });
 
     return {
       send(options) {
         return new Promise((resolve, reject) => {
           const { from, to, cc, bcc, replyTo, subject, text, html, ...rest } = options;
 
-          let msg = {
+          let data = {
             from: from || settings.defaultFrom,
             to,
             cc,
@@ -27,13 +44,10 @@ module.exports = {
             ...rest,
           };
 
-          mailgun.messages().send(removeUndefined(msg), function(err) {
-            if (err) {
-              reject(err);
-            } else {
-              resolve();
-            }
-          });
+          mg.messages
+            .create(providerOptions.domain, removeUndefined(data))
+            .then(() => resolve())
+            .catch(err => reject(err));
         });
       },
     };
