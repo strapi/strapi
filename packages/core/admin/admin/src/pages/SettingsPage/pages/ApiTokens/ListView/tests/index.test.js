@@ -16,6 +16,9 @@ jest.mock('@strapi/helper-plugin', () => ({
   useRBAC: jest.fn(() => ({
     allowedActions: { canCreate: true, canDelete: true, canRead: true, canUpdate: true },
   })),
+  useGuidedTour: jest.fn(() => ({
+    startSection: jest.fn(),
+  })),
 }));
 
 jest.spyOn(axiosInstance, 'get').mockResolvedValue({
@@ -553,6 +556,11 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
       .c6:active {
         border: 1px solid #4945ff;
         background: #4945ff;
+      }
+
+      .c6 svg > g,
+      .c6 svg path {
+        fill: #ffffff;
       }
 
       .c37 {

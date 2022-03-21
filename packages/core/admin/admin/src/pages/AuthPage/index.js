@@ -4,17 +4,23 @@ import camelCase from 'lodash/camelCase';
 import get from 'lodash/get';
 import omit from 'lodash/omit';
 import { Redirect, useRouteMatch, useHistory } from 'react-router-dom';
-import { auth, useQuery } from '@strapi/helper-plugin';
+import { auth, useQuery, useGuidedTour, useTracking } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import forms from 'ee_else_ce/pages/AuthPage/utils/forms';
+import persistStateToLocaleStorage from '../../components/GuidedTour/utils/persistStateToLocaleStorage';
 import useLocalesProvider from '../../components/LocalesProvider/useLocalesProvider';
 import formatAPIErrors from '../../utils/formatAPIErrors';
 import init from './init';
 import { initialState, reducer } from './reducer';
 
 const AuthPage = ({ hasAdmin, setHasAdmin }) => {
-  const { push } = useHistory();
+  const {
+    push,
+    location: { search },
+  } = useHistory();
   const { changeLocale } = useLocalesProvider();
+  const { setSkipped } = useGuidedTour();
+  const { trackUsage } = useTracking();
   const {
     params: { authType },
   } = useRouteMatch('/auth/:authType');
@@ -116,7 +122,7 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
       auth.setToken(token, body.rememberMe);
       auth.setUserInfo(user, body.rememberMe);
 
-      push('/');
+      redirectToPreviousLocation();
     } catch (err) {
       if (err.response) {
         const errorMessage = get(
@@ -144,6 +150,8 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
 
   const registerRequest = async (body, requestURL, { setSubmitting, setErrors }) => {
     try {
+      trackUsage('willCreateFirstAdmin');
+
       const {
         data: {
           data: { token, user },
@@ -158,26 +166,37 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
       auth.setToken(token, false);
       auth.setUserInfo(user, false);
 
+      setSubmitting(false);
+      setHasAdmin(true);
+
+      const { roles } = user;
+
+      if (roles) {
+        const isUserSuperAdmin = roles.find(({ code }) => code === 'strapi-super-admin');
+
+        if (isUserSuperAdmin) {
+          persistStateToLocaleStorage.setSkipped(false);
+          setSkipped(false);
+          trackUsage('didLaunchGuidedtour');
+        }
+      }
+
       if (
         (authType === 'register' && body.userInfo.news === true) ||
         (authType === 'register-admin' && body.news === true)
       ) {
-        axios({
-          method: 'POST',
-          url: 'https://analytics.strapi.io/register',
-          data: {
-            email: user.email,
-            username: user.firstname,
-            firstAdmin: !hasAdmin,
-          },
-          cancelToken: source.token,
+        push({
+          pathname: '/usecase',
+          search: `?hasAdmin=${hasAdmin}`,
         });
+
+        return;
       }
-      // Redirect to the homePage
-      setSubmitting(false);
-      setHasAdmin(true);
-      push('/');
+
+      redirectToPreviousLocation();
     } catch (err) {
+      trackUsage('didNotCreateFirstAdmin');
+
       if (err.response) {
         const { data } = err.response;
         const apiErrors = formatAPIErrors(data);
@@ -222,6 +241,17 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
     }
   };
 
+  const redirectToPreviousLocation = () => {
+    if (authType === 'login') {
+      const redirectTo = query.get('redirectTo');
+      const redirectUrl = redirectTo ? decodeURIComponent(redirectTo) : '/';
+
+      push(redirectUrl);
+    } else {
+      push('/');
+    }
+  };
+
   // Redirect the user to the login page if
   // the endpoint does not exist or
   // there is already an admin user oo
@@ -232,12 +262,22 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
 
   // Redirect the user to the register-admin if it is the first user
   if (!hasAdmin && authType !== 'register-admin') {
-    return <Redirect to="/auth/register-admin" />;
+    return (
+      <Redirect
+        to={{
+          pathname: '/auth/register-admin',
+          // Forward the `?redirectTo` from /auth/login
+          // /abc => /auth/login?redirectTo=%2Fabc => /auth/register-admin?redirectTo=%2Fabc
+          search,
+        }}
+      />
+    );
   }
 
   return (
     <Component
       {...rest}
+      authType={authType}
       fieldsToDisable={fieldsToDisable}
       formErrors={formErrors}
       inputsPrefix={inputsPrefix}

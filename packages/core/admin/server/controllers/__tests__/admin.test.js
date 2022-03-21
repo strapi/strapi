@@ -81,6 +81,7 @@ describe('Admin Controller', () => {
         strapiVersion: '1.0.0',
         nodeVersion: process.version,
         communityEdition: false,
+        useYarn: true,
       });
     });
   });

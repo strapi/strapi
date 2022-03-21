@@ -115,7 +115,7 @@ const ListView = () => {
         id="title"
         primaryAction={
           isInDevelopmentMode && (
-            <Stack horizontal size={2}>
+            <Stack horizontal spacing={2}>
               {/* DON'T display the add field button when the content type has not been created */}
               {!isCreatingFirstContentType && (
                 <Button
@@ -148,7 +148,7 @@ const ListView = () => {
           !isCreatingFirstContentType && (
             <Button startIcon={<Pencil />} variant="tertiary" onClick={onEdit}>
               {formatMessage({
-                id: getTrad('app.utils.edit'),
+                id: 'app.utils.edit',
                 defaultMessage: 'Edit',
               })}
             </Button>
@@ -169,9 +169,9 @@ const ListView = () => {
         }
       />
       <ContentLayout>
-        <Stack size={4}>
+        <Stack spacing={4}>
           <Flex justifyContent="flex-end">
-            <Stack horizontal size={2}>
+            <Stack horizontal spacing={2}>
               <LinkToCMSettingsView
                 key="link-to-cm-settings-view"
                 targetUid={targetUid}

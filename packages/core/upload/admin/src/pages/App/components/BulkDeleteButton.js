@@ -22,7 +22,7 @@ export const BulkDeleteButton = ({ selectedAssets, onSuccess }) => {
 
   return (
     <>
-      <Stack horizontal size={2} paddingBottom={5}>
+      <Stack horizontal spacing={2} paddingBottom={5}>
         <Typography variant="epsilon" textColor="neutral600">
           {formatMessage(
             {

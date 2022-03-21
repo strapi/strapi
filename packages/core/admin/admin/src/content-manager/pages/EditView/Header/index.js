@@ -71,7 +71,7 @@ const Header = ({
 
   if (isCreatingEntry && canCreate) {
     primaryAction = (
-      <Stack horizontal size={2}>
+      <Stack horizontal spacing={2}>
         {hasDraftAndPublish && (
           <Button disabled startIcon={<Check />} variant="secondary">
             {formatMessage({ id: 'app.utils.publish', defaultMessage: 'Publish' })}
@@ -187,7 +187,7 @@ const Header = ({
           isOpen={showWarningUnpublish}
         >
           <DialogBody icon={<ExclamationMarkCircle />}>
-            <Stack size={2}>
+            <Stack spacing={2}>
               <Flex justifyContent="center" style={{ textAlign: 'center' }}>
                 <Typography id="confirm-description">
                   {formatMessage(
@@ -242,7 +242,7 @@ const Header = ({
           isOpen={showWarningDraftRelation}
         >
           <DialogBody icon={<ExclamationMarkCircle />}>
-            <Stack size={2}>
+            <Stack spacing={2}>
               <Flex justifyContent="center" style={{ textAlign: 'center' }}>
                 <Typography id="confirm-description">
                   {draftRelationsCountRef.current}
@@ -314,8 +314,5 @@ Header.propTypes = {
 
 const Memoized = memo(Header, isEqualFastCompare);
 
-export default connect(
-  Memoized,
-  select
-);
+export default connect(Memoized, select);
 export { Header };

@@ -196,6 +196,11 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
         background: #4945ff;
       }
 
+      .c9 svg > g,
+      .c9 svg path {
+        fill: #ffffff;
+      }
+
       .c34 {
         color: #666687;
         font-weight: 500;

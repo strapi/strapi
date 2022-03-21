@@ -167,6 +167,11 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   background: #4945ff;
 }
 
+.c11 svg > g,
+.c11 svg path {
+  fill: #ffffff;
+}
+
 .c69 {
   -webkit-align-items: center;
   -webkit-box-align: center;
@@ -440,29 +445,6 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   cursor: not-allowed;
 }
 
-.c25 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c32 {
-  color: #32324d;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 0.875rem;
-  line-height: 1.43;
-}
-
-.c36 {
-  color: #666687;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
 .c31 {
   padding-right: 16px;
   padding-left: 16px;
@@ -502,6 +484,29 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
+}
+
+.c25 {
+  font-weight: 600;
+  color: #32324d;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c32 {
+  color: #32324d;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.875rem;
+  line-height: 1.43;
+}
+
+.c36 {
+  color: #666687;
+  font-size: 0.75rem;
+  line-height: 1.33;
 }
 
 .c24 {
@@ -1187,6 +1192,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
       >
         <div
           class="c20"
+          spacing="4"
         >
           <h2
             class="c21"
@@ -1205,13 +1211,18 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                 <div>
                   <div
                     class="c24"
+                    spacing="1"
                   >
                     <span
                       class="c25"
                       for="select-1"
                       id="select-1-label"
                     >
-                      Entry title
+                      <div
+                        class="c26"
+                      >
+                        Entry title
+                      </div>
                     </span>
                     <div
                       class="c26 c27"
@@ -1304,6 +1315,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
               >
                 <div
                   class="c20"
+                  spacing="4"
                 >
                   <div
                     class="c42"
@@ -1367,6 +1379,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                   >
                     <div
                       class="c52"
+                      spacing="2"
                     >
                       <div
                         class="c22"
@@ -1675,6 +1688,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
               >
                 <div
                   class="c20"
+                  spacing="4"
                 >
                   <div>
                     <div
@@ -1701,6 +1715,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                   >
                     <div
                       class="c52"
+                      spacing="2"
                     >
                       <div
                         class="c56 c57 c71"
@@ -2034,6 +2049,11 @@ exports[`EditSettingsView should add field 1`] = `
   background: #4945ff;
 }
 
+.c11 svg > g,
+.c11 svg path {
+  fill: #ffffff;
+}
+
 .c69 {
   -webkit-align-items: center;
   -webkit-box-align: center;
@@ -2307,29 +2327,6 @@ exports[`EditSettingsView should add field 1`] = `
   cursor: not-allowed;
 }
 
-.c25 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c32 {
-  color: #32324d;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 0.875rem;
-  line-height: 1.43;
-}
-
-.c36 {
-  color: #666687;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
 .c31 {
   padding-right: 16px;
   padding-left: 16px;
@@ -2369,6 +2366,29 @@ exports[`EditSettingsView should add field 1`] = `
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
+}
+
+.c25 {
+  font-weight: 600;
+  color: #32324d;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c32 {
+  color: #32324d;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.875rem;
+  line-height: 1.43;
+}
+
+.c36 {
+  color: #666687;
+  font-size: 0.75rem;
+  line-height: 1.33;
 }
 
 .c24 {
@@ -3054,6 +3074,7 @@ exports[`EditSettingsView should add field 1`] = `
         >
           <div
             class="c20"
+            spacing="4"
           >
             <h2
               class="c21"
@@ -3072,13 +3093,18 @@ exports[`EditSettingsView should add field 1`] = `
                   <div>
                     <div
                       class="c24"
+                      spacing="1"
                     >
                       <span
                         class="c25"
                         for="select-3"
                         id="select-3-label"
                       >
-                        Entry title
+                        <div
+                          class="c26"
+                        >
+                          Entry title
+                        </div>
                       </span>
                       <div
                         class="c26 c27"
@@ -3171,6 +3197,7 @@ exports[`EditSettingsView should add field 1`] = `
                 >
                   <div
                     class="c20"
+                    spacing="4"
                   >
                     <div
                       class="c42"
@@ -3234,6 +3261,7 @@ exports[`EditSettingsView should add field 1`] = `
                     >
                       <div
                         class="c52"
+                        spacing="2"
                       >
                         <div
                           class="c22"
@@ -3542,6 +3570,7 @@ exports[`EditSettingsView should add field 1`] = `
                 >
                   <div
                     class="c20"
+                    spacing="4"
                   >
                     <div>
                       <div
@@ -3568,6 +3597,7 @@ exports[`EditSettingsView should add field 1`] = `
                     >
                       <div
                         class="c52"
+                        spacing="2"
                       >
                         <div
                           class="c56 c57 c71"
@@ -4375,6 +4405,11 @@ exports[`EditSettingsView should add relation 1`] = `
   background: #4945ff;
 }
 
+.c11 svg > g,
+.c11 svg path {
+  fill: #ffffff;
+}
+
 .c69 {
   -webkit-align-items: center;
   -webkit-box-align: center;
@@ -4667,29 +4702,6 @@ exports[`EditSettingsView should add relation 1`] = `
   cursor: not-allowed;
 }
 
-.c25 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c32 {
-  color: #32324d;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 0.875rem;
-  line-height: 1.43;
-}
-
-.c36 {
-  color: #666687;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
 .c31 {
   padding-right: 16px;
   padding-left: 16px;
@@ -4729,6 +4741,29 @@ exports[`EditSettingsView should add relation 1`] = `
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
+}
+
+.c25 {
+  font-weight: 600;
+  color: #32324d;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c32 {
+  color: #32324d;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.875rem;
+  line-height: 1.43;
+}
+
+.c36 {
+  color: #666687;
+  font-size: 0.75rem;
+  line-height: 1.33;
 }
 
 .c24 {
@@ -5415,6 +5450,7 @@ exports[`EditSettingsView should add relation 1`] = `
         >
           <div
             class="c20"
+            spacing="4"
           >
             <h2
               class="c21"
@@ -5433,13 +5469,18 @@ exports[`EditSettingsView should add relation 1`] = `
                   <div>
                     <div
                       class="c24"
+                      spacing="1"
                     >
                       <span
                         class="c25"
                         for="select-2"
                         id="select-2-label"
                       >
-                        Entry title
+                        <div
+                          class="c26"
+                        >
+                          Entry title
+                        </div>
                       </span>
                       <div
                         class="c26 c27"
@@ -5532,6 +5573,7 @@ exports[`EditSettingsView should add relation 1`] = `
                 >
                   <div
                     class="c20"
+                    spacing="4"
                   >
                     <div
                       class="c42"
@@ -5595,6 +5637,7 @@ exports[`EditSettingsView should add relation 1`] = `
                     >
                       <div
                         class="c52"
+                        spacing="2"
                       >
                         <div
                           class="c22"
@@ -5903,6 +5946,7 @@ exports[`EditSettingsView should add relation 1`] = `
                 >
                   <div
                     class="c20"
+                    spacing="4"
                   >
                     <div>
                       <div
@@ -5929,6 +5973,7 @@ exports[`EditSettingsView should add relation 1`] = `
                     >
                       <div
                         class="c52"
+                        spacing="2"
                       >
                         <div
                           class="c56 c57 c71"

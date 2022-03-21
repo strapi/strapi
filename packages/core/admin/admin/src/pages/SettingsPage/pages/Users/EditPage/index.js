@@ -205,7 +205,7 @@ const EditPage = ({ canUpdate }) => {
                     <MagicLink registrationToken={data.registrationToken} />
                   </Box>
                 )}
-                <Stack size={7}>
+                <Stack spacing={7}>
                   <Box
                     background="neutral0"
                     hasRadius
@@ -215,7 +215,7 @@ const EditPage = ({ canUpdate }) => {
                     paddingLeft={7}
                     paddingRight={7}
                   >
-                    <Stack size={4}>
+                    <Stack spacing={4}>
                       <Typography variant="delta" as="h2">
                         {formatMessage({
                           id: 'app.components.Users.ModalCreateBody.block-title.details',
@@ -250,7 +250,7 @@ const EditPage = ({ canUpdate }) => {
                     paddingLeft={7}
                     paddingRight={7}
                   >
-                    <Stack size={4}>
+                    <Stack spacing={4}>
                       <Typography variant="delta" as="h2">
                         {formatMessage({
                           id: 'app.components.Users.ModalCreateBody.block-title.login',

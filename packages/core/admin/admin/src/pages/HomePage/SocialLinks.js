@@ -30,9 +30,6 @@ const StyledReddit = styled(Reddit)`
   > path:first-child {
     fill: #ff4500;
   }
-  > path:last-child {
-    fill: ${({ theme }) => theme.colors.neutral0};
-  }
 `;
 const StyledStrapi = styled(Strapi)`
   > path:first-child {
@@ -154,8 +151,8 @@ const SocialLinks = () => {
       shadow="tableShadow"
     >
       <Box paddingBottom={7}>
-        <Stack size={5}>
-          <Stack size={3}>
+        <Stack spacing={5}>
+          <Stack spacing={3}>
             <Typography variant="delta" as="h2" id="join-the-community">
               {formatMessage({
                 id: 'app.components.HomePage.community',

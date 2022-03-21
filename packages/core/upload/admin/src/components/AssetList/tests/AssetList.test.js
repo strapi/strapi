@@ -296,6 +296,7 @@ describe('MediaLibrary / AssetList', () => {
         padding: 0;
         max-height: 100%;
         max-width: 100%;
+        object-fit: contain;
       }
 
       .c9 {
@@ -484,6 +485,7 @@ describe('MediaLibrary / AssetList', () => {
               >
                 <div
                   class="c4 c5 c6 c7"
+                  spacing="2"
                 >
                   <input
                     aria-labelledby="card-1-title"
@@ -529,7 +531,7 @@ describe('MediaLibrary / AssetList', () => {
                       >
                         png
                       </span>
-                       - 551✕1066
+                       - 1066✕551
                     </div>
                   </div>
                   <div
@@ -558,6 +560,7 @@ describe('MediaLibrary / AssetList', () => {
               >
                 <div
                   class="c4 c5 c6 c7"
+                  spacing="2"
                 >
                   <input
                     aria-labelledby="card-2-title"
@@ -659,6 +662,7 @@ describe('MediaLibrary / AssetList', () => {
               >
                 <div
                   class="c4 c5 c6 c7"
+                  spacing="2"
                 >
                   <input
                     aria-labelledby="card-3-title"

@@ -205,7 +205,12 @@ class Strapi {
       this.config.get('admin.autoOpen', true) !== false;
 
     if (shouldOpenAdmin && !isInitialized) {
-      await utils.openBrowser(this.config);
+      try {
+        await utils.openBrowser(this.config);
+        this.telemetry.send('didOpenTab');
+      } catch (e) {
+        this.telemetry.send('didNotOpenTab');
+      }
     }
   }
 

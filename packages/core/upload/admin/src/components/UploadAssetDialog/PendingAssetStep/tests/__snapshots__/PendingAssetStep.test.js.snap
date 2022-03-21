@@ -274,7 +274,7 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
   background: #4945ff;
 }
 
-.c14 .sc-kJpAUB {
+.c14 .sc-fivaXQ {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -327,6 +327,11 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
   background: #4945ff;
 }
 
+.c14 svg > g,
+.c14 svg path {
+  fill: #ffffff;
+}
+
 .c51 {
   -webkit-align-items: center;
   -webkit-box-align: center;
@@ -339,7 +344,7 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
   background: #ffffff;
 }
 
-.c51 .sc-kJpAUB {
+.c51 .sc-fivaXQ {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -474,10 +479,6 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
   margin-bottom: 0;
 }
 
-.c10 > * + * {
-  margin-top: 0px;
-}
-
 .c17 {
   display: grid;
   grid-template-columns: repeat(12,1fr);
@@ -601,6 +602,7 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
   padding: 0;
   max-height: 100%;
   max-width: 100%;
+  object-fit: contain;
 }
 
 .c22 {
@@ -750,6 +752,7 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
     >
       <div
         class="c8"
+        spacing="7"
       >
         <div
           class="c9"
@@ -765,7 +768,7 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
             <span
               class="c12"
             >
-              Manage the assets before uploading them to the Media Library
+              Manage the assets before adding them to the Media Library
             </span>
           </div>
           <button

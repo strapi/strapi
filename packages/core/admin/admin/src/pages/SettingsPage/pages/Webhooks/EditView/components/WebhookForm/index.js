@@ -50,7 +50,7 @@ const WebhookForm = ({
         <Form noValidate>
           <HeaderLayout
             primaryAction={
-              <Stack horizontal size={2}>
+              <Stack horizontal spacing={2}>
                 <Button
                   onClick={() => {
                     triggerWebhook();
@@ -92,7 +92,7 @@ const WebhookForm = ({
             }
           />
           <ContentLayout>
-            <Stack size={4}>
+            <Stack spacing={4}>
               {showTriggerResponse && (
                 <div className="trigger-wrapper">
                   <TriggerContainer
@@ -103,7 +103,7 @@ const WebhookForm = ({
                 </div>
               )}
               <Box background="neutral0" padding={8} shadow="filterShadow" hasRadius>
-                <Stack size={6}>
+                <Stack spacing={6}>
                   <Grid gap={6}>
                     <GridItem col={6}>
                       <Field

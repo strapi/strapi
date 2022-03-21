@@ -7,6 +7,27 @@ import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import HomePage from '../index';
 import { useModels } from '../../../hooks';
 
+jest.mock('@strapi/helper-plugin', () => ({
+  ...jest.requireActual('@strapi/helper-plugin'),
+  useGuidedTour: jest.fn(() => ({
+    isGuidedTourVisible: false,
+    guidedTourState: {
+      apiTokens: {
+        create: false,
+        success: false,
+      },
+      contentManager: {
+        create: false,
+        success: false,
+      },
+      contentTypeBuilder: {
+        create: false,
+        success: false,
+      },
+    },
+  })),
+}));
+
 jest.mock('../../../hooks', () => ({
   useModels: jest.fn(),
 }));
@@ -191,6 +212,11 @@ describe('Homepage', () => {
       .c15:active {
         border: 1px solid #4945ff;
         background: #4945ff;
+      }
+
+      .c15 svg > g,
+      .c15 svg path {
+        fill: #ffffff;
       }
 
       .c22 {
@@ -607,10 +633,6 @@ describe('Homepage', () => {
         fill: #ff4500;
       }
 
-      .c52 > path:last-child {
-        fill: #ffffff;
-      }
-
       .c55 > path:first-child {
         fill: #8e75ff;
       }
@@ -779,6 +801,7 @@ describe('Homepage', () => {
                       >
                         <div
                           class="c9 c10"
+                          spacing="5"
                         >
                           <h1
                             class="c11"
@@ -835,6 +858,7 @@ describe('Homepage', () => {
                   >
                     <div
                       class="c9"
+                      spacing="5"
                     >
                       <a
                         class="c21"
@@ -867,6 +891,7 @@ describe('Homepage', () => {
                           </div>
                           <div
                             class="c26"
+                            spacing="1"
                           >
                             <div
                               class="c23"
@@ -918,6 +943,7 @@ describe('Homepage', () => {
                           </div>
                           <div
                             class="c26"
+                            spacing="1"
                           >
                             <div
                               class="c23"
@@ -969,6 +995,7 @@ describe('Homepage', () => {
                           </div>
                           <div
                             class="c26"
+                            spacing="1"
                           >
                             <div
                               class="c23"
@@ -1018,6 +1045,7 @@ describe('Homepage', () => {
                           </div>
                           <div
                             class="c26"
+                            spacing="1"
                           >
                             <div
                               class="c23"
@@ -1054,9 +1082,11 @@ describe('Homepage', () => {
                       >
                         <div
                           class="c9"
+                          spacing="5"
                         >
                           <div
                             class="c36"
+                            spacing="3"
                           >
                             <h2
                               class="c37"
