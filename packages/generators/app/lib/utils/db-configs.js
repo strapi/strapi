@@ -10,6 +10,13 @@ module.exports = {
     },
     useNullAsDefault: true,
   },
+  'better-sqlite3': {
+    connection: {
+      filename: '.tmp/data.db',
+    },
+    useNullAsDefault: true,
+  },
   postgres: {},
   mysql: {},
+  mysql2: {},
 };

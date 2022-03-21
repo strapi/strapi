@@ -41,7 +41,8 @@ const applySearch = (knex, query, ctx) => {
 
       break;
     }
-    case 'sqlite': {
+    case 'sqlite':
+    case 'better-sqlite3': {
       searchColumns.forEach(attr => {
         const columnName = toColumnName(meta, attr);
         return knex.orWhereRaw(`?? LIKE ? ESCAPE '\\'`, [
@@ -51,7 +52,8 @@ const applySearch = (knex, query, ctx) => {
       });
       break;
     }
-    case 'mysql': {
+    case 'mysql':
+    case 'mysql2': {
       searchColumns.forEach(attr => {
         const columnName = toColumnName(meta, attr);
         return knex.orWhereRaw(`?? LIKE ?`, [

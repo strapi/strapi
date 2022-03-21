@@ -3,6 +3,7 @@
 const DEFAULT_PORTS = {
   postgres: 5432,
   mysql: 3306,
+  mysql2: 3306,
 };
 
 const database = ({ scope }) => ({
@@ -62,6 +63,8 @@ const filename = () => ({
 
 module.exports = {
   sqlite: [filename],
+  'better-sqlite3': [filename],
   postgres: [database, host, port, username, password, ssl],
   mysql: [database, host, port, username, password, ssl],
+  mysql2: [database, host, port, username, password, ssl],
 };

@@ -20,7 +20,26 @@ const mysql = {
   // debug: true,
 };
 
+const mysql2 = {
+  client: 'mysql2',
+  connection: {
+    database: 'strapi',
+    user: 'strapi',
+    password: 'strapi',
+  },
+  // debug: true,
+};
+
 const sqlite = {
+  client: 'sqlite',
+  connection: {
+    filename: 'data.sqlite',
+  },
+  useNullAsDefault: true,
+  // debug: true,
+};
+
+const betterSqlite3 = {
   client: 'sqlite',
   connection: {
     filename: 'data.sqlite',
@@ -31,6 +50,8 @@ const sqlite = {
 
 module.exports = {
   sqlite,
+  betterSqlite3,
   postgres,
   mysql,
+  mysql2,
 };

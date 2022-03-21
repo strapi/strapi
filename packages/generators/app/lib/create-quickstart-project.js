@@ -13,7 +13,7 @@ module.exports = async function createQuickStartProject(scope) {
   await trackUsage({ event: 'didChooseQuickstart', scope });
 
   // get default sqlite config
-  const client = 'sqlite';
+  const client = 'better-sqlite3';
   const configuration = {
     client,
     connection: defaultConfigs[client],

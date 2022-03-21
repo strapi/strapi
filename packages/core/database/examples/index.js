@@ -70,4 +70,4 @@ function log(res) {
   console.log(util.inspect(res, null, null, true));
 }
 
-main(connections.sqlite);
+main(connections.betterSqlite3);

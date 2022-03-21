@@ -24,7 +24,7 @@ const updateFromTmpTable = async ({ model, attributesToMigrate }, { transacting:
     bindings.push(TMP_TABLE_NAME, collectionName, TMP_TABLE_NAME);
 
     await trx.raw(`UPDATE ?? SET ${substitutes} FROM ?? WHERE ??.id = ??.id;`, bindings);
-  } else if (model.client === 'mysql') {
+  } else if (model.client === 'mysql' || model.client === 'mysql2') {
     const substitutes = attributesToMigrate.map(() => '??.?? = ??.??').join(',');
     const bindings = [collectionName, TMP_TABLE_NAME, collectionName, TMP_TABLE_NAME];
     attributesToMigrate.forEach(attr => bindings.push(collectionName, attr, TMP_TABLE_NAME, attr));
@@ -51,7 +51,7 @@ const migrateForBookshelf = async ({ ORM, model, attributesToMigrate }) => {
   const onlyScalarAttrs = areScalarAttributesOnly({ model, attributes: attributesToMigrate });
 
   // optimize migration for pg and mysql when there are only scalar attributes to migrate
-  if (onlyScalarAttrs && ['pg', 'mysql'].includes(model.client)) {
+  if (onlyScalarAttrs && ['pg', 'mysql', 'mysql2'].includes(model.client)) {
     // create table outside of the transaction because mysql doesn't accept the creation inside
     await createTmpTable({ ORM, attributesToMigrate, model });
     await ORM.knex.transaction(async transacting => {
