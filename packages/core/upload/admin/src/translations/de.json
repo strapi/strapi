@@ -22,8 +22,6 @@
   "form.upload-url.error.url.invalids": "{number} URLs sind ungültig",
   "header.actions.add-assets": "Neue Dateien hinzufügen",
   "header.actions.upload-assets": "Dateien hochladen",
-  "header.actions.upload-new-asset": "Neue Dateien hochladen",
-  "header.content.assets-empty": "Keine Dateien",
   "header.content.assets": "{numberFolders} Ordner - {numberAssets, plural, one {1 Datei} other {# Dateien}}",
   "input.button.label": "Dateien durchsuchen",
   "input.label": "Dateien hierhin ziehen oder",
