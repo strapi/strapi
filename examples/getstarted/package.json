@@ -17,6 +17,7 @@
   },
   "dependencies": {
 <<<<<<< HEAD
+<<<<<<< HEAD
     "@strapi/admin": "4.1.7",
     "@strapi/plugin-documentation": "4.1.7",
     "@strapi/plugin-graphql": "4.1.7",
@@ -31,6 +32,8 @@
     "@vscode/sqlite3": "5.0.8",
     "better-sqlite3": "7.4.6",
 =======
+=======
+>>>>>>> Fixes #12896
     "@strapi/admin": "4.1.4",
     "@strapi/plugin-documentation": "4.1.4",
     "@strapi/plugin-graphql": "4.1.4",
@@ -42,7 +45,10 @@
     "@strapi/provider-upload-cloudinary": "4.1.4",
     "@strapi/strapi": "4.1.4",
     "@strapi/utils": "4.1.4",
+<<<<<<< HEAD
 >>>>>>> Speed up webpack config by using esbuild-loader
+=======
+>>>>>>> Fixes #12896
     "lodash": "4.17.21",
     "mysql": "2.18.1",
     "passport-google-oauth2": "0.2.0",
