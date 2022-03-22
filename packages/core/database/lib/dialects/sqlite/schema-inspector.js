@@ -16,7 +16,7 @@ const toStrapiType = column => {
   switch (rootType) {
     case 'integer': {
       if (column.pk) {
-        return { type: 'increments', args: [{ primary: true }] };
+        return { type: 'increments', args: [{ primary: true, primaryKey: true }] };
       }
 
       return { type: 'integer' };
