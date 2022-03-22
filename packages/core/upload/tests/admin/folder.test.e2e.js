@@ -123,9 +123,9 @@ describe('Folder', () => {
             children: { count: 1 },
             createdAt: expect.anything(),
             createdBy: {
-              firstname: 'admin',
+              firstname: expect.anything(),
               id: expect.anything(),
-              lastname: 'admin',
+              lastname: expect.anything(),
               username: null,
             },
             files: { count: 0 },
@@ -136,9 +136,9 @@ describe('Folder', () => {
             uid: expect.anything(),
             updatedAt: expect.anything(),
             updatedBy: {
-              firstname: 'admin',
+              firstname: expect.anything(),
               id: expect.anything(),
-              lastname: 'admin',
+              lastname: expect.anything(),
               username: null,
             },
           },
@@ -146,14 +146,12 @@ describe('Folder', () => {
             children: { count: 0 },
             createdAt: expect.anything(),
             createdBy: {
-              firstname: 'admin',
+              firstname: expect.anything(),
               id: expect.anything(),
-              lastname: 'admin',
+              lastname: expect.anything(),
               username: null,
             },
-            files: {
-              count: 0,
-            },
+            files: { count: 0 },
             id: expect.anything(),
             name: 'folder-2',
             parent: {
@@ -168,9 +166,9 @@ describe('Folder', () => {
             uid: expect.anything(),
             updatedAt: expect.anything(),
             updatedBy: {
-              firstname: 'admin',
+              firstname: expect.anything(),
               id: expect.anything(),
-              lastname: 'admin',
+              lastname: expect.anything(),
               username: null,
             },
           },
