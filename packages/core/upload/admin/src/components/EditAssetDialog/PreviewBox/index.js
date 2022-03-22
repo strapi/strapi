@@ -41,8 +41,8 @@ export const PreviewBox = ({
 }) => {
   const { trackUsage } = useTracking();
   const previewRef = useRef(null);
-  const [cropImageReady, setCropImageReady] = useState(false);
-  const [cropIntent, setCropIntent] = useState(false);
+  const [isCropImageReady, setIsCropImageReady] = useState(false);
+  const [hasCropIntent, setHasCropIntent] = useState(false);
   const [assetUrl, setAssetUrl] = useState(createAssetUrl(asset, false));
   const [thumbnailUrl, setThumbnailUrl] = useState(createAssetUrl(asset, true));
   const { formatMessage } = useIntl();
@@ -125,22 +125,22 @@ export const PreviewBox = ({
   };
 
   const handleCropCancel = () => {
-    setCropIntent(false);
-    setCropImageReady(false);
+    setHasCropIntent(false);
+    setIsCropImageReady(false);
     stopCropping();
     onCropCancel();
   };
 
   const handleCropStart = () => {
-    setCropIntent(true);
+    setHasCropIntent(true);
   };
 
   useEffect(() => {
-    if (cropIntent && cropImageReady) {
+    if (hasCropIntent && isCropImageReady) {
       crop(previewRef.current);
       onCropStart();
     }
-  }, [cropImageReady, cropIntent, onCropStart, crop]);
+  }, [isCropImageReady, hasCropIntent, onCropStart, crop]);
 
   return (
     <>
@@ -212,10 +212,10 @@ export const PreviewBox = ({
             ref={previewRef}
             mime={asset.mime}
             name={asset.name}
-            url={cropIntent ? assetUrl : thumbnailUrl}
+            url={hasCropIntent ? assetUrl : thumbnailUrl}
             onLoad={() => {
-              if (cropIntent) {
-                setCropImageReady(true);
+              if (hasCropIntent) {
+                setIsCropImageReady(true);
               }
             }}
           />
