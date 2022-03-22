@@ -1,11 +1,13 @@
 'use strict';
 
-const providerService = require('./provider');
-const uploadService = require('./upload');
+const provider = require('./provider');
+const upload = require('./upload');
 const imageManipulation = require('./image-manipulation');
+const folder = require('./folder');
 
 module.exports = {
-  provider: providerService,
-  upload: uploadService,
+  provider,
+  upload,
+  folder,
   'image-manipulation': imageManipulation,
 };
