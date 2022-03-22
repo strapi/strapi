@@ -61,6 +61,7 @@
   "admin.pages.MarketPlacePage.helmet": "Marketplace - Plugins",
   "admin.pages.MarketPlacePage.title": "Marketplace",
   "admin.pages.MarketPlacePage.subtitle": "Get more out of Strapi",
+  "admin.pages.MarketPlacePage.production": "Manage plugins from the development environment",
   "admin.pages.MarketPlacePage.plugin.info.text": "Learn more",
   "admin.pages.MarketPlacePage.plugin.info.label": "Learn more about {pluginName}",
   "admin.pages.MarketPlacePage.plugin.copy": "Copy install command",

@@ -10,16 +10,21 @@ import {
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { useTracking } from '@strapi/helper-plugin';
+import { useTracking, useAppInfos } from '@strapi/helper-plugin';
 import MarketPlacePage from '../index';
 import server from './server';
 
+const toggleNotification = jest.fn();
+
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
-  useNotification: jest.fn(),
+  useNotification: jest.fn(() => {
+    return toggleNotification;
+  }),
   pxToRem: jest.fn(),
   CheckPagePermissions: ({ children }) => children,
   useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
+  useAppInfos: jest.fn(() => ({ autoReload: true })),
 }));
 
 const client = new QueryClient({
@@ -1526,5 +1531,24 @@ describe('Marketplace page', () => {
     const noResult = screen.getByText(`No result for "${badQuery}"`);
 
     expect(noResult).toBeVisible();
+  });
+
+  it('handles production environment', async () => {
+    // Simulate production environment
+    useAppInfos.mockImplementation(() => ({ autoReload: false }));
+    const { queryByText } = render(App);
+
+    // Should display notification
+    expect(toggleNotification).toHaveBeenCalledWith({
+      type: 'info',
+      message: {
+        id: 'admin.pages.MarketPlacePage.production',
+        defaultMessage: 'Manage plugins from the development environment',
+      },
+      blockTransition: true,
+    });
+
+    // Should not show install buttons
+    expect(queryByText(/copy install command/i)).not.toBeInTheDocument();
   });
 });

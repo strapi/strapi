@@ -28,7 +28,7 @@ const EllipsisText = styled(Typography)`
   overflow: hidden;
 `;
 
-const PluginCard = ({ plugin, installedPluginNames, useYarn }) => {
+const PluginCard = ({ plugin, installedPluginNames, useYarn, isInDevelopmentMode }) => {
   const { attributes } = plugin;
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
@@ -44,6 +44,50 @@ const PluginCard = ({ plugin, installedPluginNames, useYarn }) => {
     id: 'admin.pages.MarketPlacePage.plugin.tooltip.madeByStrapi',
     defaultMessage: 'Made by Strapi',
   });
+
+  // Decide to show install button or not
+  const showInstallButton = () => {
+    // Already installed
+    if (isInstalled) {
+      return (
+        <Box paddingLeft={4}>
+          <Icon as={Check} marginRight={2} width={12} height={12} color="success600" />
+          <Typography variant="omega" textColor="success600" fontWeight="bold">
+            {formatMessage({
+              id: 'admin.pages.MarketPlacePage.plugin.installed',
+              defaultMessage: 'Installed',
+            })}
+          </Typography>
+        </Box>
+      );
+    }
+
+    // In development, show install button
+    if (isInDevelopmentMode) {
+      return (
+        <CopyToClipboard
+          onCopy={() => {
+            trackUsage('willInstallPlugin');
+            toggleNotification({
+              type: 'success',
+              message: { id: 'admin.pages.MarketPlacePage.plugin.copy.success' },
+            });
+          }}
+          text={commandToCopy}
+        >
+          <Button size="S" startIcon={<Duplicate />} variant="secondary">
+            {formatMessage({
+              id: 'admin.pages.MarketPlacePage.plugin.copy',
+              defaultMessage: 'Copy install command',
+            })}
+          </Button>
+        </CopyToClipboard>
+      );
+    }
+
+    // Not in development and plugin not installed already. Show nothing
+    return null;
+  };
 
   return (
     <Flex
@@ -128,38 +172,14 @@ const PluginCard = ({ plugin, installedPluginNames, useYarn }) => {
             defaultMessage: 'Learn more',
           })}
         </LinkButton>
-        {isInstalled ? (
-          <Box paddingLeft={4}>
-            <Icon as={Check} marginRight={2} width={12} height={12} color="success600" />
-            <Typography variant="omega" textColor="success600" fontWeight="bold">
-              {formatMessage({
-                id: 'admin.pages.MarketPlacePage.plugin.installed',
-                defaultMessage: 'Installed',
-              })}
-            </Typography>
-          </Box>
-        ) : (
-          <CopyToClipboard
-            onCopy={() => {
-              trackUsage('willInstallPlugin');
-              toggleNotification({
-                type: 'success',
-                message: { id: 'admin.pages.MarketPlacePage.plugin.copy.success' },
-              });
-            }}
-            text={commandToCopy}
-          >
-            <Button size="S" startIcon={<Duplicate />} variant="secondary">
-              {formatMessage({
-                id: 'admin.pages.MarketPlacePage.plugin.copy',
-                defaultMessage: 'Copy install command',
-              })}
-            </Button>
-          </CopyToClipboard>
-        )}
+        {showInstallButton()}
       </Stack>
     </Flex>
   );
+};
+
+PluginCard.defaultProps = {
+  isInDevelopmentMode: false,
 };
 
 PluginCard.propTypes = {
@@ -181,6 +201,7 @@ PluginCard.propTypes = {
   }).isRequired,
   installedPluginNames: PropTypes.arrayOf(PropTypes.string).isRequired,
   useYarn: PropTypes.bool.isRequired,
+  isInDevelopmentMode: PropTypes.bool,
 };
 
 export default PluginCard;
