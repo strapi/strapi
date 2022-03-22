@@ -3,7 +3,6 @@
 const _ = require('lodash');
 const utils = require('@strapi/utils');
 const { getService } = require('../utils');
-const validateSettings = require('./validation/settings');
 const validateUploadBody = require('./validation/upload');
 
 const { sanitize } = utils;
@@ -55,24 +54,6 @@ module.exports = {
     await getService('upload').remove(file);
 
     ctx.body = await sanitizeOutput(file, ctx);
-  },
-
-  async updateSettings(ctx) {
-    const {
-      request: { body },
-    } = ctx;
-
-    const data = await validateSettings(body);
-
-    await getService('upload').setSettings(data);
-
-    ctx.body = { data };
-  },
-
-  async getSettings(ctx) {
-    const data = await getService('upload').getSettings();
-
-    ctx.body = { data };
   },
 
   async updateFileInfo(ctx) {
@@ -134,16 +115,5 @@ module.exports = {
     }
 
     await (id ? this.replaceFile : this.uploadFiles)(ctx);
-  },
-
-  async search(ctx) {
-    const { id } = ctx.params;
-    const entries = await strapi.query('plugin::upload.file').findMany({
-      where: {
-        $or: [{ hash: { $contains: id } }, { name: { $contains: id } }],
-      },
-    });
-
-    ctx.body = await sanitizeOutput(entries, ctx);
   },
 };
