@@ -12,6 +12,11 @@ export const AssetSource = {
   Computer: 'computer',
 };
 
+export const GridColumnSize = {
+  S: 180,
+  M: 250,
+};
+
 export const AssetDefinition = PropTypes.shape({
   id: PropTypes.number,
   height: PropTypes.number,

@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { Box } from '@strapi/design-system/Box';
 import { KeyboardNavigable } from '@strapi/design-system/KeyboardNavigable';
+import { Typography } from '@strapi/design-system/Typography';
 import { AssetCard } from '../AssetCard/AssetCard';
 import { Draggable } from './Draggable';
 
@@ -25,9 +26,18 @@ export const AssetList = ({
   selectedAssets,
   size,
   onReorderAsset,
+  title,
 }) => {
   return (
     <KeyboardNavigable tagName="article">
+      {title && (
+        <Box paddingTop={2} paddingBottom={2}>
+          <Typography as="h2" variant="delta" fontWeight="semiBold">
+            {title}
+          </Typography>
+        </Box>
+      )}
+
       <GridLayout size={size}>
         {assets.map((asset, index) => {
           const isSelected = Boolean(
@@ -79,6 +89,7 @@ AssetList.defaultProps = {
   onEditAsset: undefined,
   size: 'M',
   onReorderAsset: undefined,
+  title: null,
 };
 
 AssetList.propTypes = {
@@ -89,4 +100,5 @@ AssetList.propTypes = {
   selectedAssets: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
   size: PropTypes.oneOf(['S', 'M']),
   onReorderAsset: PropTypes.func,
+  title: PropTypes.string,
 };

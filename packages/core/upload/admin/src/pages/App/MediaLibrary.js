@@ -16,9 +16,11 @@ import { Button } from '@strapi/design-system/Button';
 import Plus from '@strapi/icons/Plus';
 import { Box } from '@strapi/design-system/Box';
 import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
+import { Stack } from '@strapi/design-system/Stack';
 import { UploadAssetDialog } from '../../components/UploadAssetDialog/UploadAssetDialog';
 import { EditAssetDialog } from '../../components/EditAssetDialog';
 import { AssetList } from '../../components/AssetList';
+import { FolderList } from '../../components/FolderList';
 import SortPicker from '../../components/SortPicker';
 import { useAssets } from '../../hooks/useAssets';
 import { getTrad } from '../../utils';
@@ -44,32 +46,35 @@ export const MediaLibrary = () => {
     isLoading: isLoadingPermissions,
   } = useMediaLibraryPermissions();
   const [{ query }, setQuery] = useQueryParams();
-
   const { formatMessage } = useIntl();
-  const { data, isLoading, error } = useAssets({
+  const { data: assetsData, isLoading: assetsLoading, error: assetsError } = useAssets({
     skipWhen: !canRead,
   });
 
-  const handleChangeSort = (value) => {
+  const handleChangeSort = value => {
     setQuery({ sort: value });
   };
 
   const [showUploadAssetDialog, setShowUploadAssetDialog] = useState(false);
   const [assetToEdit, setAssetToEdit] = useState(undefined);
   const [selected, { selectOne, selectAll }] = useSelectionState('id', []);
-  const toggleUploadAssetDialog = () => setShowUploadAssetDialog((prev) => !prev);
+  const toggleUploadAssetDialog = () => setShowUploadAssetDialog(prev => !prev);
 
   useFocusWhenNavigate();
 
-  const loading = isLoadingPermissions || isLoading;
-  const assets = data?.results;
-  const assetCount = data?.pagination?.total || 0;
-  const folderCount = 0;
+  const isLoadingFolders = false;
+  const folders = [];
+  const folderCount = folders.length;
+  const foldersAreLoading = isLoadingFolders;
+
+  const assetsAreLoading = isLoadingPermissions || assetsLoading;
+  const assets = assetsData?.results;
+  const assetCount = assetsData?.pagination?.total || 0;
   const isFiltering = Boolean(query._q || query.filters);
 
   return (
     <Layout>
-      <Main aria-busy={loading}>
+      <Main aria-busy={foldersAreLoading || assetsAreLoading}>
         <HeaderLayout
           title={formatMessage({
             id: getTrad('plugin.name'),
@@ -91,7 +96,9 @@ export const MediaLibrary = () => {
                   defaultMessage: 'Add new assets',
                 })}
               </Button>
-            ) : undefined
+            ) : (
+              undefined
+            )
           }
         />
 
@@ -140,55 +147,75 @@ export const MediaLibrary = () => {
             <BulkDeleteButton selectedAssets={selected} onSuccess={selectAll} />
           )}
 
-          {loading && <LoadingIndicatorPage />}
-          {error && <AnErrorOccurred />}
-          {!canRead && <NoPermissions />}
-          {canRead && assets && assets.length === 0 && (
-            <EmptyAssets
-              action={
-                canCreate && !isFiltering ? (
-                  <Button
-                    variant="secondary"
-                    startIcon={<Plus />}
-                    onClick={toggleUploadAssetDialog}
-                  >
-                    {formatMessage({
-                      id: getTrad('header.actions.add-assets'),
-                      defaultMessage: 'Add new assets',
-                    })}
-                  </Button>
-                ) : undefined
-              }
-              content={
-                // eslint-disable-next-line no-nested-ternary
-                isFiltering
-                  ? formatMessage({
-                      id: getTrad('list.assets-empty.title-withSearch'),
-                      defaultMessage: 'There are no assets with the applied filters',
-                    })
-                  : canCreate
-                  ? formatMessage({
-                      id: getTrad('list.assets.empty'),
-                      defaultMessage: 'Upload your first assets...',
-                    })
-                  : formatMessage({
-                      id: getTrad('list.assets.empty.no-permissions'),
-                      defaultMessage: 'The asset list is empty',
-                    })
-              }
-            />
-          )}
-          {canRead && assets && assets.length > 0 && (
-            <>
-              <AssetList
-                assets={assets}
-                onEditAsset={setAssetToEdit}
-                onSelectAsset={selectOne}
-                selectedAssets={selected}
+          {assetsAreLoading && <LoadingIndicatorPage />}
+
+          {assetsError && <AnErrorOccurred />}
+
+          <Stack spacing={8}>
+            {folders?.length > 0 && (
+              <FolderList
+                folders={folders}
+                title={formatMessage({
+                  id: getTrad('list.folders.title'),
+                  defaultMessage: 'Folders',
+                })}
               />
-              {data?.pagination && <PaginationFooter pagination={data.pagination} />}
-            </>
-          )}
+            )}
+
+            {!canRead && <NoPermissions />}
+
+            {canRead && assets?.length > 0 ? (
+              <>
+                <AssetList
+                  assets={assets}
+                  onEditAsset={setAssetToEdit}
+                  onSelectAsset={selectOne}
+                  selectedAssets={selected}
+                  title={formatMessage({
+                    id: getTrad('list.assets.title'),
+                    defaultMessage: 'Assets',
+                  })}
+                />
+
+                {assetsData?.pagination && <PaginationFooter pagination={assetsData.pagination} />}
+              </>
+            ) : (
+              <EmptyAssets
+                action={
+                  canCreate &&
+                  !isFiltering && (
+                    <Button
+                      variant="secondary"
+                      startIcon={<Plus />}
+                      onClick={toggleUploadAssetDialog}
+                    >
+                      {formatMessage({
+                        id: getTrad('header.actions.add-assets'),
+                        defaultMessage: 'Add new assets',
+                      })}
+                    </Button>
+                  )
+                }
+                content={
+                  // eslint-disable-next-line no-nested-ternary
+                  isFiltering
+                    ? formatMessage({
+                        id: getTrad('list.assets-empty.title-withSearch'),
+                        defaultMessage: 'There are no assets with the applied filters',
+                      })
+                    : canCreate
+                    ? formatMessage({
+                        id: getTrad('list.assets.empty'),
+                        defaultMessage: 'Upload your first assets...',
+                      })
+                    : formatMessage({
+                        id: getTrad('list.assets.empty.no-permissions'),
+                        defaultMessage: 'The asset list is empty',
+                      })
+                }
+              />
+            )}
+          </Stack>
         </ContentLayout>
       </Main>
 
