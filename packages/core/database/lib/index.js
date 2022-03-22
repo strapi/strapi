@@ -10,10 +10,20 @@ const { createMigrationsProvider } = require('./migrations');
 const { createLifecyclesProvider } = require('./lifecycles');
 const errors = require('./errors');
 
+const SqliteClient = require('knex/lib/dialects/sqlite3/index');
+
 // TODO: move back into strapi
 const { transformContentTypes } = require('./utils/content-types');
 
 const createConnection = config => {
+  if (config.client === 'sqlite') {
+    config.client = class MySqliteClient extends SqliteClient {
+      _driver() {
+        return require('sqlite3');
+      }
+    };
+  }
+
   const knexInstance = knex(config);
 
   return Object.assign(knexInstance, {
