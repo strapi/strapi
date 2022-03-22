@@ -41,7 +41,7 @@ async function build({
     ceRoot: path.resolve(cacheDir, 'admin', 'src'),
   };
 
-  const pluginsPath = Object.keys(plugins).map(pluginName => plugins[pluginName].appPathToPlugin  );
+  const pluginsPath = Object.keys(plugins).map(pluginName => plugins[pluginName].appPathToPlugin);
 
   const config = getCustomWebpackConfig(appDir, {
     appDir,
