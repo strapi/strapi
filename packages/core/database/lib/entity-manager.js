@@ -170,12 +170,12 @@ const createEntityManager = db => {
         .insert(dataToInsert)
         .execute();
 
-      await this.attachRelations(uid, id, data);
+      await this.attachRelations(uid, id.id, data);
 
       // TODO: in case there is no select or populate specified return the inserted data ?
-      // TODO: do not trigger the findOne lifecycles ?
+      // TODO: do not trigger the findOne lifecycles
       const result = await this.findOne(uid, {
-        where: { id },
+        where: { ...id },
         select: params.select,
         populate: params.populate,
       });

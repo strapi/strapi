@@ -170,7 +170,6 @@ module.exports = ({ strapi }) => ({
     const allActions = [...appActions, ...pluginsActions];
 
     const toDelete = _.difference(permissionsFoundInDB, allActions);
-
     await Promise.all(
       toDelete.map(action => {
         return strapi.query('plugin::users-permissions.permission').delete({ where: { action } });

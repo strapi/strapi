@@ -73,6 +73,10 @@ const createTable = meta => {
     } else if (types.isScalar(attribute.type)) {
       const column = createColumn(attribute.columnName || key, attribute);
 
+      if (column.name === 'id') {
+        column.primary = true;
+      }
+
       if (column.unique) {
         table.indexes.push({
           type: 'unique',
