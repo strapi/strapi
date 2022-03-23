@@ -154,11 +154,14 @@ module.exports = ({
                         roots,
                       },
                     ],
-                    require.resolve('@babel/plugin-proposal-class-properties'),
-                    require.resolve('@babel/plugin-syntax-dynamic-import'),
-                    require.resolve('@babel/plugin-transform-modules-commonjs'),
-                    require.resolve('@babel/plugin-proposal-async-generator-functions'),
 
+                    [
+                      require.resolve('@babel/plugin-transform-runtime'),
+                      {
+                        helpers: true,
+                        regenerator: true,
+                      },
+                    ],
                     [require.resolve('babel-plugin-styled-components'), { pure: true }],
                   ],
                 },
