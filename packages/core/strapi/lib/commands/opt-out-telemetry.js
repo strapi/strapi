@@ -37,7 +37,6 @@ const sendEvent = async uuid => {
       }),
       headers: { 'Content-Type': 'application/json' },
     });
-    console.log('success');
   } catch (e) {
     //...
   }
@@ -52,8 +51,6 @@ module.exports = async function optOutTelemetry() {
   }
 
   const [uuid, packageObj] = await readPackageJSON(packageJSON);
-  console.log(uuid);
-  console.log(machineID());
 
   if (packageObj.strapi.optOutTelemetry || !uuid) {
     console.log(`${chalk.yellow('Warning:')} telemetry is already disabled`);
