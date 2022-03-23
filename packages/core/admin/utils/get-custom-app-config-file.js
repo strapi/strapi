@@ -13,11 +13,9 @@ const getCustomAppConfigFile = async (dir, useTypeScript) => {
   const adminSrcPath = join(dir, 'src', 'admin');
   const files = await fse.readdir(adminSrcPath);
 
-  if (useTypeScript) {
-    return files.find(file => file.match(/app.tsx?$/));
-  }
+  const appRegex = new RegExp(`app.${useTypeScript ? 't' : 'j'}sx?$`);
 
-  return files.find(file => file.match(/app.jsx?$/));
+  return files.find(file => file.match(appRegex));
 };
 
 module.exports = getCustomAppConfigFile;
