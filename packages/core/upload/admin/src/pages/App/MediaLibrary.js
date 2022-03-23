@@ -151,77 +151,82 @@ export const MediaLibrary = () => {
 
           {assetsError && <AnErrorOccurred />}
 
-          <Stack spacing={8}>
-            {folders?.length > 0 && (
-              <FolderList
-                folders={folders}
-                title={formatMessage({
-                  id: getTrad('list.folders.title'),
-                  defaultMessage: 'Folders',
-                })}
-              />
-            )}
+          {!canRead && <NoPermissions />}
 
-            {!canRead && <NoPermissions />}
-
-            {canRead && assets?.length > 0 ? (
-              <>
-                <AssetList
-                  assets={assets}
-                  onEditAsset={setAssetToEdit}
-                  onSelectAsset={selectOne}
-                  selectedAssets={selected}
+          {canRead && (
+            <Stack spacing={8}>
+              {folders?.length > 0 && (
+                <FolderList
+                  folders={folders}
                   title={formatMessage({
-                    id: getTrad('list.assets.title'),
-                    defaultMessage: 'Assets',
+                    id: getTrad('list.folders.title'),
+                    defaultMessage: 'Folders',
                   })}
                 />
+              )}
 
-                {assetsData?.pagination && <PaginationFooter pagination={assetsData.pagination} />}
-              </>
-            ) : (
-              <EmptyAssets
-                action={
-                  canCreate &&
-                  !isFiltering && (
-                    <Button
-                      variant="secondary"
-                      startIcon={<Plus />}
-                      onClick={toggleUploadAssetDialog}
-                    >
-                      {formatMessage({
-                        id: getTrad('header.actions.add-assets'),
-                        defaultMessage: 'Add new assets',
-                      })}
-                    </Button>
-                  )
-                }
-                content={
-                  // eslint-disable-next-line no-nested-ternary
-                  isFiltering
-                    ? formatMessage({
-                        id: getTrad('list.assets-empty.title-withSearch'),
-                        defaultMessage: 'There are no assets with the applied filters',
-                      })
-                    : canCreate
-                    ? formatMessage({
-                        id: getTrad('list.assets.empty'),
-                        defaultMessage: 'Upload your first assets...',
-                      })
-                    : formatMessage({
-                        id: getTrad('list.assets.empty.no-permissions'),
-                        defaultMessage: 'The asset list is empty',
-                      })
-                }
-              />
-            )}
-          </Stack>
+              {assets?.length > 0 ? (
+                <>
+                  <AssetList
+                    assets={assets}
+                    onEditAsset={setAssetToEdit}
+                    onSelectAsset={selectOne}
+                    selectedAssets={selected}
+                    title={formatMessage({
+                      id: getTrad('list.assets.title'),
+                      defaultMessage: 'Assets',
+                    })}
+                  />
+
+                  {assetsData?.pagination && (
+                    <PaginationFooter pagination={assetsData.pagination} />
+                  )}
+                </>
+              ) : (
+                <EmptyAssets
+                  action={
+                    canCreate &&
+                    !isFiltering && (
+                      <Button
+                        variant="secondary"
+                        startIcon={<Plus />}
+                        onClick={toggleUploadAssetDialog}
+                      >
+                        {formatMessage({
+                          id: getTrad('header.actions.add-assets'),
+                          defaultMessage: 'Add new assets',
+                        })}
+                      </Button>
+                    )
+                  }
+                  content={
+                    // eslint-disable-next-line no-nested-ternary
+                    isFiltering
+                      ? formatMessage({
+                          id: getTrad('list.assets-empty.title-withSearch'),
+                          defaultMessage: 'There are no assets with the applied filters',
+                        })
+                      : canCreate
+                      ? formatMessage({
+                          id: getTrad('list.assets.empty'),
+                          defaultMessage: 'Upload your first assets...',
+                        })
+                      : formatMessage({
+                          id: getTrad('list.assets.empty.no-permissions'),
+                          defaultMessage: 'The asset list is empty',
+                        })
+                  }
+                />
+              )}
+            </Stack>
+          )}
         </ContentLayout>
       </Main>
 
       {showUploadAssetDialog && (
         <UploadAssetDialog onClose={toggleUploadAssetDialog} trackedLocation="upload" />
       )}
+
       {assetToEdit && (
         <EditAssetDialog
           onClose={() => setAssetToEdit(undefined)}
