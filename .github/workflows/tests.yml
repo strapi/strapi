@@ -71,7 +71,6 @@ jobs:
     strategy:
       matrix:
         node: [12, 14, 16]
-      max-parallel: 3
     services:
       postgres:
         # Docker Hub image
@@ -107,7 +106,6 @@ jobs:
     strategy:
       matrix:
         node: [12, 14, 16]
-      max-parallel: 3
     services:
       mysql:
         image: mysql
@@ -143,7 +141,6 @@ jobs:
     strategy:
       matrix:
         node: [12, 14, 16]
-      max-parallel: 3
     services:
       mysql:
         image: mysql:5
@@ -179,7 +176,6 @@ jobs:
     strategy:
       matrix:
         node: [12, 14, 16]
-      max-parallel: 3
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
@@ -194,11 +190,10 @@ jobs:
   e2e_ce_sqlite_legacy:
     runs-on: ubuntu-latest
     needs: [lint, unit_back, unit_front]
-    name: '[CE] E2E (sqlite, node: ${{ matrix.node }})'
+    name: '[CE] E2E (sqlite legacy, node: ${{ matrix.node }})'
     strategy:
       matrix:
         node: [12, 14, 16]
-      max-parallel: 3
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
@@ -221,7 +216,6 @@ jobs:
     strategy:
       matrix:
         node: [12, 14, 16]
-      max-parallel: 3
     services:
       postgres:
         # Docker Hub image
@@ -262,7 +256,6 @@ jobs:
     strategy:
       matrix:
         node: [12, 14, 16]
-      max-parallel: 3
     services:
       mysql:
         image: mysql
@@ -302,7 +295,6 @@ jobs:
     strategy:
       matrix:
         node: [12, 14, 16]
-      max-parallel: 3
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
@@ -318,14 +310,13 @@ jobs:
   e2e_ee_sqlite_legacy:
     runs-on: ubuntu-latest
     needs: [lint, unit_back, unit_front]
-    name: '[EE] E2E (sqlite, node: ${{ matrix.node }})'
+    name: '[EE] E2E (sqlite legacy, node: ${{ matrix.node }})'
     if: github.event.pull_request.head.repo.full_name == github.repository && !(github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]')
     env:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
       matrix:
         node: [12, 14, 16]
-      max-parallel: 3
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
