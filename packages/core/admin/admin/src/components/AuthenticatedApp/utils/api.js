@@ -21,7 +21,7 @@ const fetchStrapiLatestRelease = async toggleNotification => {
         link: {
           url: `https://github.com/strapi/strapi/releases/tag/${tag_name}`,
           label: {
-            id: 'notification.version.update.link',
+            id: 'global.see-more',
           },
         },
         blockTransition: true,

@@ -37,7 +37,7 @@ const baseForm = {
           items: [
             {
               intlLabel: {
-                id: getTrad('modalForm.attribute.text.type-selection'),
+                id: 'global.type',
                 defaultMessage: 'Type',
               },
               name: 'repeatable',
@@ -84,7 +84,7 @@ const baseForm = {
             nameField,
             {
               intlLabel: {
-                id: getTrad('modalForm.attribute.text.type-selection'),
+                id: 'global.type',
                 defaultMessage: 'Type',
               },
               name: 'type',
@@ -177,7 +177,7 @@ const baseForm = {
           items: [
             {
               intlLabel: {
-                id: getTrad('modalForm.attribute.text.type-selection'),
+                id: 'global.type',
                 defaultMessage: 'Type',
               },
               name: 'multiple',
@@ -312,7 +312,7 @@ const baseForm = {
           items: [
             {
               intlLabel: {
-                id: getTrad('modalForm.attribute.text.type-selection'),
+                id: 'global.type',
                 defaultMessage: 'Type',
               },
               name: 'type',
@@ -358,7 +358,7 @@ const baseForm = {
           items: [
             {
               intlLabel: {
-                id: getTrad('modalForm.attribute.text.type-selection'),
+                id: 'global.type',
                 defaultMessage: 'Type',
               },
               name: 'type',
@@ -429,7 +429,7 @@ const baseForm = {
                 {
                   key: '__null_reset_value__',
                   value: '',
-                  metadatas: { intlLabel: { id: getTrad('none'), defaultMessage: 'None' } },
+                  metadatas: { intlLabel: { id: 'global.none', defaultMessage: 'None' } },
                 },
                 ...options,
               ],

@@ -176,7 +176,7 @@ const ProfilePage = () => {
                 title={data.username || getFullName(data.firstname, data.lastname)}
                 primaryAction={
                   <Button startIcon={<Check />} loading={isSubmitting} type="submit">
-                    {formatMessage({ id: 'form.button.save', defaultMessage: 'Save' })}
+                    {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}
                   </Button>
                 }
               />
@@ -195,7 +195,7 @@ const ProfilePage = () => {
                       <Stack spacing={4}>
                         <Typography variant="delta" as="h2">
                           {formatMessage({
-                            id: 'Settings.profile.form.section.profile.title',
+                            id: 'global.profile',
                             defaultMessage: 'Profile',
                           })}
                         </Typography>
@@ -266,7 +266,7 @@ const ProfilePage = () => {
                       <Stack spacing={4}>
                         <Typography variant="delta" as="h2">
                           {formatMessage({
-                            id: 'Settings.profile.form.section.password.title',
+                            id: 'global.change-password',
                             defaultMessage: 'Change password',
                           })}
                         </Typography>
@@ -329,7 +329,7 @@ const ProfilePage = () => {
                               onChange={handleChange}
                               value={values.password || ''}
                               label={formatMessage({
-                                id: 'Auth.form.password.label',
+                                id: 'global.password',
                                 defaultMessage: 'Password',
                               })}
                               name="password"
@@ -451,7 +451,7 @@ const ProfilePage = () => {
                                 defaultMessage: 'Interface language',
                               })}
                               placeholder={formatMessage({
-                                id: 'components.Select.placeholder',
+                                id: 'global.select',
                                 defaultMessage: 'Select',
                               })}
                               hint={formatMessage({

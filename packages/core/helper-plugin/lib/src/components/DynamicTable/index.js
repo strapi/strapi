@@ -153,7 +153,7 @@ const Table = ({
                   size="L"
                   variant="danger-light"
                 >
-                  {formatMessage({ id: 'app.utils.delete', defaultMessage: 'Delete' })}
+                  {formatMessage({ id: 'global.delete', defaultMessage: 'Delete' })}
                 </Button>
               </BlockActions>
             </Flex>

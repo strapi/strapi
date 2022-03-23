@@ -250,7 +250,7 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
                 to="/"
               >
                 {formatMessage({
-                  id: 'app.components.go-back',
+                  id: 'global.back',
                   defaultMessage: 'Back',
                 })}
               </Link>
@@ -261,7 +261,7 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
                 startIcon={<Check />}
                 type="submit"
               >
-                {formatMessage({ id: 'form.button.save', defaultMessage: 'Save' })}
+                {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}
               </Button>
             }
           />

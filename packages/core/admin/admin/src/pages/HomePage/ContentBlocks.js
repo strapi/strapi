@@ -24,7 +24,7 @@ const ContentBlocks = () => {
       >
         <ContentBox
           title={formatMessage({
-            id: 'app.components.BlockLink.documentation',
+            id: 'global.documentation',
             defaultMessage: 'Documentation',
           })}
           subtitle={formatMessage({
