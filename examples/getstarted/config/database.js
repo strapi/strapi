@@ -1,5 +1,5 @@
 const sqlite = {
-  client: 'sqlite', // sqlite for old sqlite3 / sqlite3 for @vscode/sqlite3 // and better-sqlite3
+  client: 'sqlite',
   connection: {
     filename: '.tmp/data.db',
   },
