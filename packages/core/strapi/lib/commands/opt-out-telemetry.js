@@ -26,9 +26,9 @@ const writePackageJSON = async (path, file, spacing) => {
   }
 };
 
-const sendEvent = uuid => {
+const sendEvent = async uuid => {
   try {
-    fetch('https://analytics.strapi.io/track', {
+    await fetch('https://analytics.strapi.io/track', {
       method: 'POST',
       body: JSON.stringify({
         event: 'didOptOutTelemetry',
@@ -36,7 +36,7 @@ const sendEvent = uuid => {
         deviceId: machineID(),
       }),
       headers: { 'Content-Type': 'application/json' },
-    }).catch(() => {});
+    });
     console.log('success');
   } catch (e) {
     //...
@@ -52,6 +52,8 @@ module.exports = async function optOutTelemetry() {
   }
 
   const [uuid, packageObj] = await readPackageJSON(packageJSON);
+  console.log(uuid);
+  console.log(machineID());
 
   if (packageObj.strapi.optOutTelemetry || !uuid) {
     console.log(`${chalk.yellow('Warning:')} telemetry is already disabled`);
@@ -77,7 +79,7 @@ module.exports = async function optOutTelemetry() {
     process.exit(0);
   }
 
-  sendEvent(uuid);
+  await sendEvent(uuid);
   console.log(`${chalk.green('Successfully opted out of Strapi telemetry')}`);
   process.exit(0);
 };
