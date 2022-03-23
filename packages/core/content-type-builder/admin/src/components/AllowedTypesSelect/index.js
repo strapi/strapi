@@ -22,7 +22,7 @@ const AllowedTypesSelect = ({ intlLabel, name, onChange, value }) => {
   /* eslint-disable indent */
   const displayedValue =
     value === null || value.length === 0
-      ? formatMessage({ id: 'global.none' })
+      ? formatMessage({ id: 'global.none', defaultMessage: 'None' })
       : [...value]
           .sort()
           .map(v => upperFirst(v))
