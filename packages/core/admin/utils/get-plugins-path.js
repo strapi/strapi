@@ -6,13 +6,14 @@ const fs = require('fs-extra');
 const glob = require('glob');
 
 const getPluginsPath = () => {
-  const rootPath = join('..', '..', '..', 'packages');
+  const rootPath = resolve(__dirname, '..', join('..', '..', '..', 'packages'));
   const corePath = join(rootPath, 'core', '*');
   const pluginsPath = join(rootPath, 'plugins', '*');
   const corePackageDirs = glob.sync(corePath);
   const pluginsPackageDirs = glob.sync(pluginsPath);
+
   const packageDirs = [...corePackageDirs, ...pluginsPackageDirs].filter(dir => {
-    const isCoreAdmin = dir.includes('packages/core/admin/');
+    const isCoreAdmin = dir.includes('packages/core/admin');
     const pathToEntryPoint = join(dir, 'admin', 'src', 'index.js');
     const doesAdminFolderExist = fs.pathExistsSync(pathToEntryPoint);
 
