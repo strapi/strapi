@@ -159,7 +159,7 @@ const ApiTokenCreateView = () => {
                     size="L"
                   >
                     {formatMessage({
-                      id: 'app.components.Button.save',
+                      id: 'global.save',
                       defaultMessage: 'Save',
                     })}
                   </Button>
@@ -167,7 +167,7 @@ const ApiTokenCreateView = () => {
                 navigationAction={
                   <Link startIcon={<ArrowLeft />} to="/settings/api-tokens">
                     {formatMessage({
-                      id: 'app.components.go-back',
+                      id: 'global.back',
                       defaultMessage: 'Back',
                     })}
                   </Link>
@@ -188,7 +188,7 @@ const ApiTokenCreateView = () => {
                     <Stack spacing={4}>
                       <Typography variant="delta" as="h2">
                         {formatMessage({
-                          id: 'Settings.apiTokens.details',
+                          id: 'global.details',
                           defaultMessage: 'Details',
                         })}
                       </Typography>

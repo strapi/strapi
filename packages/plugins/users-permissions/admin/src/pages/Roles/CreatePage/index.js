@@ -86,7 +86,7 @@ const EditPage = () => {
                 !isLoadingPlugins && (
                   <Button type="submit" loading={isSubmitting} startIcon={<Check />}>
                     {formatMessage({
-                      id: 'app.components.Button.save',
+                      id: 'global.save',
                       defaultMessage: 'Save',
                     })}
                   </Button>
@@ -126,7 +126,7 @@ const EditPage = () => {
                           value={values.name || ''}
                           onChange={handleChange}
                           label={formatMessage({
-                            id: 'Settings.roles.form.input.name',
+                            id: 'global.name',
                             defaultMessage: 'Name',
                           })}
                           error={
@@ -142,7 +142,7 @@ const EditPage = () => {
                           value={values.description || ''}
                           onChange={handleChange}
                           label={formatMessage({
-                            id: 'Settings.roles.form.input.description',
+                            id: 'global.description',
                             defaultMessage: 'Description',
                           })}
                           error={
