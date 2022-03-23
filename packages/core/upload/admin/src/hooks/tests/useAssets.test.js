@@ -1,6 +1,3 @@
-/* eslint-disable import/order */
-/* eslint-disable import/first */
-
 import React from 'react';
 import { IntlProvider } from 'react-intl';
 import { QueryClientProvider, QueryClient } from 'react-query';
@@ -8,7 +5,9 @@ import { renderHook, act } from '@testing-library/react-hooks';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
 
 import { NotificationsProvider, useNotification } from '@strapi/helper-plugin';
+import { useNotifyAT } from '@strapi/design-system/LiveRegions';
 
+import { axiosInstance } from '../../utils';
 import { useAssets } from '../useAssets';
 
 const notifyStatusMock = jest.fn();
@@ -20,8 +19,6 @@ jest.mock('@strapi/design-system/LiveRegions', () => ({
   }),
 }));
 
-import { useNotifyAT } from '@strapi/design-system/LiveRegions';
-
 jest.mock('../../utils', () => ({
   ...jest.requireActual('../../utils'),
   axiosInstance: {
@@ -32,8 +29,6 @@ jest.mock('../../utils', () => ({
     }),
   },
 }));
-
-import { axiosInstance } from '../../utils';
 
 const notificationStatusMock = jest.fn();
 
