@@ -191,6 +191,25 @@ jobs:
         with:
           dbOptions: '--dbclient=sqlite --dbfile=./tmp/data.db'
 
+  e2e_ce_sqlite_legacy:
+    runs-on: ubuntu-latest
+    needs: [lint, unit_back, unit_front]
+    name: '[CE] E2E (sqlite, node: ${{ matrix.node }})'
+    strategy:
+      matrix:
+        node: [12, 14, 16]
+      max-parallel: 3
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node }}
+          cache: yarn
+      - uses: ./.github/actions/install-modules
+      - uses: ./.github/actions/run-e2e-tests
+        with:
+          dbOptions: '--dbclient=sqlite-legacy --dbfile=./tmp/data.db'
+
   # EE
   e2e_ee_pg:
     runs-on: ubuntu-latest
@@ -294,4 +313,27 @@ jobs:
       - uses: ./.github/actions/run-e2e-tests
         with:
           dbOptions: '--dbclient=sqlite --dbfile=./tmp/data.db'
+          runEE: true
+
+  e2e_ee_sqlite_legacy:
+    runs-on: ubuntu-latest
+    needs: [lint, unit_back, unit_front]
+    name: '[EE] E2E (sqlite, node: ${{ matrix.node }})'
+    if: github.event.pull_request.head.repo.full_name == github.repository && !(github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]')
+    env:
+      STRAPI_LICENSE: ${{ secrets.strapiLicense }}
+    strategy:
+      matrix:
+        node: [12, 14, 16]
+      max-parallel: 3
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node }}
+          cache: yarn
+      - uses: ./.github/actions/install-modules
+      - uses: ./.github/actions/run-e2e-tests
+        with:
+          dbOptions: '--dbclient=sqlite-legacy --dbfile=./tmp/data.db'
           runEE: true
