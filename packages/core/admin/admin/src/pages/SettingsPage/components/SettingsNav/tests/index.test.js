@@ -26,7 +26,7 @@ const menu = [
     intlLabel: { id: 'Settings.permissions', defaultMessage: 'Administration Panel' },
     links: [
       {
-        intlLabel: { id: 'Settings.permissions.menu.link.roles.label', defaultMessage: 'Roles' },
+        intlLabel: { id: 'global.roles', defaultMessage: 'Roles' },
         to: '/settings/roles',
         id: 'roles',
         isDisplayed: true,

@@ -52,7 +52,7 @@ const MarketPlacePage = () => {
   useFocusWhenNavigate();
 
   const marketplaceTitle = formatMessage({
-    id: 'admin.pages.MarketPlacePage.title',
+    id: 'global.marketplace',
     defaultMessage: 'Marketplace',
   });
 
@@ -152,7 +152,7 @@ const MarketPlacePage = () => {
         />
         <HeaderLayout
           title={formatMessage({
-            id: 'admin.pages.MarketPlacePage.title',
+            id: 'global.marketplace',
             defaultMessage: 'Marketplace',
           })}
           subtitle={formatMessage({

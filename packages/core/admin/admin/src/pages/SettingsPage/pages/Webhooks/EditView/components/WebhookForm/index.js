@@ -68,7 +68,7 @@ const WebhookForm = ({
                 </Button>
                 <Button startIcon={<Check />} onClick={handleSubmit} type="submit" size="L">
                   {formatMessage({
-                    id: 'app.components.Button.save',
+                    id: 'global.save',
                     defaultMessage: 'Save',
                   })}
                 </Button>
@@ -85,7 +85,7 @@ const WebhookForm = ({
             navigationAction={
               <Link startIcon={<ArrowLeft />} to="/settings/webhooks">
                 {formatMessage({
-                  id: 'app.components.go-back',
+                  id: 'global.back',
                   defaultMessage: 'Back',
                 })}
               </Link>
@@ -111,7 +111,7 @@ const WebhookForm = ({
                         name="name"
                         error={errors.name && formatMessage({ id: errors.name })}
                         label={formatMessage({
-                          id: 'Settings.webhooks.form.name',
+                          id: 'global.name',
                           defaultMessage: 'Name',
                         })}
                         required

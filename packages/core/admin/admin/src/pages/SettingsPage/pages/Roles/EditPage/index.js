@@ -117,7 +117,7 @@ const EditPage = () => {
                       size="L"
                     >
                       {formatMessage({
-                        id: 'app.components.Button.save',
+                        id: 'global.save',
                         defaultMessage: 'Save',
                       })}
                     </Button>
@@ -134,7 +134,7 @@ const EditPage = () => {
                 navigationAction={
                   <Link startIcon={<ArrowLeft />} to="/settings/roles">
                     {formatMessage({
-                      id: 'app.components.go-back',
+                      id: 'global.back',
                       defaultMessage: 'Back',
                     })}
                   </Link>

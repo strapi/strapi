@@ -46,7 +46,7 @@ function SelectOne({
         onMenuOpen={onMenuOpen}
         onMenuScrollToBottom={onMenuScrollToBottom}
         placeholder={formatMessage(
-          placeholder || { id: 'components.Select.placeholder', defaultMessage: 'Select...' }
+          placeholder || { id: 'global.select', defaultMessage: 'Select...' }
         )}
         styles={styles}
         value={isNull(value) ? null : { label: get(value, [mainField.name], ''), value }}
