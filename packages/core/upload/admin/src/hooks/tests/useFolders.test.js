@@ -1,14 +1,13 @@
-/* eslint-disable import/no-duplicates */
-/* eslint-disable import/order */
-/* eslint-disable import/first */
-
 import React from 'react';
 import { IntlProvider } from 'react-intl';
 import { QueryClientProvider, QueryClient } from 'react-query';
 import { renderHook, act } from '@testing-library/react-hooks';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
-import { NotificationsProvider } from '@strapi/helper-plugin';
 
+import { NotificationsProvider, useNotification } from '@strapi/helper-plugin';
+import { useNotifyAT } from '@strapi/design-system/LiveRegions';
+
+import { axiosInstance } from '../../utils';
 import { useFolders } from '../useFolders';
 
 const notifyStatusMock = jest.fn();
@@ -19,8 +18,6 @@ jest.mock('@strapi/design-system/LiveRegions', () => ({
     notifyStatus: notifyStatusMock,
   }),
 }));
-
-import { useNotifyAT } from '@strapi/design-system/LiveRegions';
 
 jest.mock('../../utils', () => ({
   ...jest.requireActual('../../utils'),
@@ -33,16 +30,12 @@ jest.mock('../../utils', () => ({
   },
 }));
 
-import { axiosInstance } from '../../utils';
-
 const notificationStatusMock = jest.fn();
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useNotification: () => notificationStatusMock,
 }));
-
-import { useNotification } from '@strapi/helper-plugin';
 
 const client = new QueryClient({
   defaultOptions: {
