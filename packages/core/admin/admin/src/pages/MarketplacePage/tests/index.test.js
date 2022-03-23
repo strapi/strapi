@@ -1547,6 +1547,7 @@ describe('Marketplace page', () => {
       },
       blockTransition: true,
     });
+    expect(toggleNotification).toHaveBeenCalledTimes(1);
 
     // Should not show install buttons
     expect(queryByText(/copy install command/i)).not.toBeInTheDocument();

@@ -5,18 +5,15 @@ import styled from 'styled-components';
 import { Box } from '@strapi/design-system/Box';
 import { Stack } from '@strapi/design-system/Stack';
 import { Typography } from '@strapi/design-system/Typography';
-import { Button } from '@strapi/design-system/Button';
 import { LinkButton } from '@strapi/design-system/LinkButton';
 import { Flex } from '@strapi/design-system/Flex';
 import { Icon } from '@strapi/design-system/Icon';
 import { Tooltip } from '@strapi/design-system/Tooltip';
 import ExternalLink from '@strapi/icons/ExternalLink';
-import Duplicate from '@strapi/icons/Duplicate';
-import Check from '@strapi/icons/Check';
 import CheckCircle from '@strapi/icons/CheckCircle';
-import { useNotification, useTracking } from '@strapi/helper-plugin';
-import { CopyToClipboard } from 'react-copy-to-clipboard';
+import { useTracking } from '@strapi/helper-plugin';
 import madeByStrapiIcon from '../../../../assets/images/icon_made-by-strapi.svg';
+import InstallPluginButton from './InstallPluginButton';
 
 // Custom component to have an ellipsis after the 2nd line
 const EllipsisText = styled(Typography)`
@@ -31,7 +28,6 @@ const EllipsisText = styled(Typography)`
 const PluginCard = ({ plugin, installedPluginNames, useYarn, isInDevelopmentMode }) => {
   const { attributes } = plugin;
   const { formatMessage } = useIntl();
-  const toggleNotification = useNotification();
   const { trackUsage } = useTracking();
 
   const isInstalled = installedPluginNames.includes(attributes.npmPackageName);
@@ -44,50 +40,6 @@ const PluginCard = ({ plugin, installedPluginNames, useYarn, isInDevelopmentMode
     id: 'admin.pages.MarketPlacePage.plugin.tooltip.madeByStrapi',
     defaultMessage: 'Made by Strapi',
   });
-
-  // Decide to show install button or not
-  const showInstallButton = () => {
-    // Already installed
-    if (isInstalled) {
-      return (
-        <Box paddingLeft={4}>
-          <Icon as={Check} marginRight={2} width={12} height={12} color="success600" />
-          <Typography variant="omega" textColor="success600" fontWeight="bold">
-            {formatMessage({
-              id: 'admin.pages.MarketPlacePage.plugin.installed',
-              defaultMessage: 'Installed',
-            })}
-          </Typography>
-        </Box>
-      );
-    }
-
-    // In development, show install button
-    if (isInDevelopmentMode) {
-      return (
-        <CopyToClipboard
-          onCopy={() => {
-            trackUsage('willInstallPlugin');
-            toggleNotification({
-              type: 'success',
-              message: { id: 'admin.pages.MarketPlacePage.plugin.copy.success' },
-            });
-          }}
-          text={commandToCopy}
-        >
-          <Button size="S" startIcon={<Duplicate />} variant="secondary">
-            {formatMessage({
-              id: 'admin.pages.MarketPlacePage.plugin.copy',
-              defaultMessage: 'Copy install command',
-            })}
-          </Button>
-        </CopyToClipboard>
-      );
-    }
-
-    // Not in development and plugin not installed already. Show nothing
-    return null;
-  };
 
   return (
     <Flex
@@ -172,7 +124,11 @@ const PluginCard = ({ plugin, installedPluginNames, useYarn, isInDevelopmentMode
             defaultMessage: 'Learn more',
           })}
         </LinkButton>
-        {showInstallButton()}
+        <InstallPluginButton
+          isInstalled={isInstalled}
+          isInDevelopmentMode={isInDevelopmentMode}
+          commandToCopy={commandToCopy}
+        />
       </Stack>
     </Flex>
   );
