@@ -2,6 +2,7 @@
 
 const path = require('path');
 const fs = require('fs-extra');
+const getCustomAppConfigFile = require('./get-custom-app-config-file');
 
 const DEFAULT_PLUGINS = [
   'content-type-builder',
@@ -31,11 +32,11 @@ const hasNonDefaultPlugins = plugins => {
 
 const hasCustomAdminCode = async (dir, useTypeScript) => {
   const customAdminPath = path.join(dir, 'src', 'admin');
-  const customAdminConfigFileExtension = useTypeScript ? 'app.tsx' : 'app.js';
-  const customAdminConfigFile = path.join(customAdminPath, customAdminConfigFileExtension);
+
+  const customAdminAppConfigFile = await getCustomAppConfigFile(dir, useTypeScript);
   const customAdminWebpackFile = path.join(customAdminPath, 'webpack.config.js');
 
-  const hasCustomConfigFile = await fs.pathExists(customAdminConfigFile);
+  const hasCustomConfigFile = !!customAdminAppConfigFile;
   const hasCustomWebpackFile = await fs.pathExists(customAdminWebpackFile);
 
   return hasCustomConfigFile || hasCustomWebpackFile;

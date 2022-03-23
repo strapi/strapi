@@ -3,6 +3,7 @@
 const path = require('path');
 const _ = require('lodash');
 const fs = require('fs-extra');
+const getCustomAppConfigFile = require('./get-custom-app-config-file');
 
 const getPkgPath = name => path.dirname(require.resolve(`${name}/package.json`));
 
@@ -82,26 +83,26 @@ async function createCacheDir({ appDir, plugins, useTypeScript }) {
   // copy admin core code
   await copyAdmin(cacheDir);
 
-  // Copy app.js or app.tsx if typescript is enabled
-  const customAdminConfigJSFilePath = path.join(appDir, 'src', 'admin', 'app.js');
-  const customAdminConfigTSXFilePath = path.join(appDir, 'src', 'admin', 'app.tsx');
-  const customAdminConfigFilePath = useTypeScript
-    ? customAdminConfigTSXFilePath
-    : customAdminConfigJSFilePath;
+  // Retrieve the custom config file extension
+  const customAdminAppConfigFile = await getCustomAppConfigFile(appDir, useTypeScript);
 
-  if (fs.existsSync(customAdminConfigFilePath)) {
+  if (customAdminAppConfigFile) {
     const defaultAdminConfigFilePath = path.resolve(cacheDir, 'admin', 'src', 'app.js');
+    const customAdminAppConfigFilePath = path.join(
+      appDir,
+      'src',
+      'admin',
+      customAdminAppConfigFile
+    );
+    const dest = path.resolve(cacheDir, 'admin', 'src', customAdminAppConfigFile);
 
     if (useTypeScript) {
       // Remove the default config file
       await fs.remove(defaultAdminConfigFilePath);
       // Copy the custom one
-      await fs.copy(
-        customAdminConfigTSXFilePath,
-        path.resolve(cacheDir, 'admin', 'src', 'app.tsx')
-      );
+      await fs.copy(customAdminAppConfigFilePath, dest);
     } else {
-      await fs.copy(customAdminConfigFilePath, path.resolve(cacheDir, 'admin', 'src', 'app.js'));
+      await fs.copy(customAdminAppConfigFilePath, dest);
     }
   }
 
