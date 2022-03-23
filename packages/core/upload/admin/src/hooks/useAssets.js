@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { useQuery } from 'react-query';
 import { useNotifyAT } from '@strapi/design-system/LiveRegions';
 import { useNotification, useQueryParams } from '@strapi/helper-plugin';
@@ -13,9 +12,25 @@ export const useAssets = ({ skipWhen }) => {
   const dataRequestURL = getRequestUrl('files');
 
   const getAssets = async () => {
-    const { data } = await axiosInstance.get(`${dataRequestURL}${rawQuery}`);
+    try {
+      const { data } = await axiosInstance.get(`${dataRequestURL}${rawQuery}`);
 
-    return data;
+      notifyStatus(
+        formatMessage({
+          id: 'list.asset.at.finished',
+          defaultMessage: 'The assets have finished loading.',
+        })
+      );
+
+      return data;
+    } catch (err) {
+      toggleNotification({
+        type: 'warning',
+        message: { id: 'notification.error' },
+      });
+
+      throw err;
+    }
   };
 
   const { data, error, isLoading } = useQuery([`assets`, rawQuery], getAssets, {
@@ -23,26 +38,6 @@ export const useAssets = ({ skipWhen }) => {
     staleTime: 0,
     cacheTime: 0,
   });
-
-  useEffect(() => {
-    if (data) {
-      notifyStatus(
-        formatMessage({
-          id: 'list.asset.at.finished',
-          defaultMessage: 'The assets have finished loading.',
-        })
-      );
-    }
-  }, [data, notifyStatus, formatMessage]);
-
-  useEffect(() => {
-    if (error) {
-      toggleNotification({
-        type: 'warning',
-        message: { id: 'notification.error' },
-      });
-    }
-  }, [error, toggleNotification]);
 
   return { data, error, isLoading };
 };
