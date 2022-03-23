@@ -86,7 +86,7 @@ async function createCacheDir({ appDir, plugins, useTypeScript }) {
   // Retrieve the custom config file extension
   const customAdminAppConfigFile = await getCustomAppConfigFile(appDir, useTypeScript);
 
-  if (customAdminAppConfigFile !== undefined) {
+  if (customAdminAppConfigFile) {
     const defaultAdminConfigFilePath = path.resolve(cacheDir, 'admin', 'src', 'app.js');
     const customAdminAppConfigFilePath = path.join(
       appDir,

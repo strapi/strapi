@@ -36,7 +36,7 @@ const hasCustomAdminCode = async (dir, useTypeScript) => {
   const customAdminAppConfigFile = await getCustomAppConfigFile(dir, useTypeScript);
   const customAdminWebpackFile = path.join(customAdminPath, 'webpack.config.js');
 
-  const hasCustomConfigFile = customAdminAppConfigFile !== undefined;
+  const hasCustomConfigFile = !!customAdminAppConfigFile;
   const hasCustomWebpackFile = await fs.pathExists(customAdminWebpackFile);
 
   return hasCustomConfigFile || hasCustomWebpackFile;
