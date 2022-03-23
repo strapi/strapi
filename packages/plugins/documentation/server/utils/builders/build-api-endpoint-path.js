@@ -172,8 +172,8 @@ module.exports = api => {
 
     paths = {
       ...paths,
-      ...getPaths(apiInfo).paths
-    }
+      ...getPaths(apiInfo).paths,
+    };
   }
 
   return { paths };

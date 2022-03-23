@@ -768,7 +768,7 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
             <span
               class="c12"
             >
-              Manage the assets before uploading them to the Media Library
+              Manage the assets before adding them to the Media Library
             </span>
           </div>
           <button

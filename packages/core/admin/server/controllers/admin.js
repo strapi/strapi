@@ -1,7 +1,9 @@
 'use strict';
 
+const path = require('path');
 const execa = require('execa');
 const _ = require('lodash');
+const { exists } = require('fs-extra');
 const { ValidationError } = require('@strapi/utils').errors;
 // eslint-disable-next-line node/no-extraneous-require
 const ee = require('@strapi/strapi/lib/utils/ee');
@@ -47,9 +49,17 @@ module.exports = {
     const strapiVersion = strapi.config.get('info.strapi', null);
     const nodeVersion = process.version;
     const communityEdition = !strapi.EE;
+    const useYarn = await exists(path.join(process.cwd(), 'yarn.lock'));
 
     return {
-      data: { currentEnvironment, autoReload, strapiVersion, nodeVersion, communityEdition },
+      data: {
+        currentEnvironment,
+        autoReload,
+        strapiVersion,
+        nodeVersion,
+        communityEdition,
+        useYarn,
+      },
     };
   },
 
@@ -82,6 +92,7 @@ module.exports = {
       name: plugin.info.name || key,
       displayName: plugin.info.displayName || plugin.info.name || key,
       description: plugin.info.description || '',
+      packageName: plugin.info.packageName,
     }));
 
     ctx.send({ plugins });

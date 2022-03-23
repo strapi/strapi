@@ -30,9 +30,6 @@ const StyledReddit = styled(Reddit)`
   > path:first-child {
     fill: #ff4500;
   }
-  > path:last-child {
-    fill: ${({ theme }) => theme.colors.neutral0};
-  }
 `;
 const StyledStrapi = styled(Strapi)`
   > path:first-child {
@@ -170,10 +167,7 @@ const SocialLinks = () => {
               })}
             </Typography>
           </Stack>
-          <Link
-            href="https://portal.productboard.com/strapi/1-roadmap/tabs/2-under-consideration"
-            endIcon={<ExternalLink />}
-          >
+          <Link href="https://feedback.strapi.io/" endIcon={<ExternalLink />}>
             {formatMessage({
               id: 'app.components.HomePage.roadmap',
               defaultMessage: 'See our road map',

@@ -72,7 +72,10 @@ module.exports = async inquirer => {
         type: 'list',
         name: 'multiple',
         message: 'Choose media type',
-        choices: [{ name: 'Multiple', value: true }, { name: 'Single', value: false }],
+        choices: [
+          { name: 'Multiple', value: true },
+          { name: 'Single', value: false },
+        ],
       },
       {
         type: 'confirm',
