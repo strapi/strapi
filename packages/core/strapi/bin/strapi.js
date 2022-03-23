@@ -230,7 +230,7 @@ program
 //    `$ strapi opt-out-telemetry`
 program
   .command('opt-out-telemetry')
-  .description('Stops Strapi from sending anonymous telemetry and metadata')
+  .description('Stop Strapi from sending anonymous telemetry and metadata')
   .action(getLocalScript('opt-out-telemetry'));
 
 program.parseAsync(process.argv);
