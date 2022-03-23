@@ -199,10 +199,6 @@ const createHelpers = db => {
   const createColumn = (tableBuilder, column) => {
     const { type, name, args = [], defaultTo, unsigned, notNullable } = column;
 
-    if (name === 'id') {
-      console.log(name, column);
-    }
-
     const col = tableBuilder[type](name, ...args);
 
     if (unsigned === true) {
