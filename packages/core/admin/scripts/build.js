@@ -2,7 +2,6 @@
 
 const path = require('path');
 const webpack = require('webpack');
-// eslint-disable-next-line node/no-extraneous-require
 const SpeedMeasurePlugin = require('speed-measure-webpack-plugin');
 
 const webpackConfig = require('../webpack.config');
@@ -84,7 +83,7 @@ buildAdmin()
   .then(() => {
     process.exit();
   })
-  .catch(err => {
+  .catch((err) => {
     console.error(err);
     process.exit(1);
   });
