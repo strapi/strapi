@@ -28,6 +28,7 @@
     "develop:webpack": "cross-env NODE_ENV=development webpack serve --config webpack.config.dev.js --progress profile",
     "prepublishOnly": "yarn build",
     "build": "rimraf build && node ./scripts/build.js",
+    "build:mesure": "rimraf build && cross-env MESURE_BUILD_SPEED=true node ./scripts/build.js",
     "test": "echo \"no tests yet\"",
     "test:unit": "jest --verbose",
     "test:front": "cross-env IS_EE=true jest --config ./jest.config.front.js",
@@ -37,10 +38,6 @@
   },
   "dependencies": {
     "@babel/core": "7.16.7",
-    "@babel/plugin-proposal-async-generator-functions": "7.16.7",
-    "@babel/plugin-proposal-class-properties": "7.16.7",
-    "@babel/plugin-syntax-dynamic-import": "7.8.3",
-    "@babel/plugin-transform-modules-commonjs": "7.16.7",
     "@babel/plugin-transform-runtime": "7.16.7",
     "@babel/preset-env": "7.16.7",
     "@babel/preset-react": "7.16.7",
@@ -131,7 +128,6 @@
     "sift": "13.5.0",
     "style-loader": "3.3.1",
     "styled-components": "^5.2.3",
-    "terser-webpack-plugin": "5.3.0",
     "webpack": "5.65.0",
     "webpack-cli": "4.9.1",
     "webpack-dev-server": "4.7.3",
@@ -140,6 +136,7 @@
   },
   "devDependencies": {
     "duplicate-dependencies-webpack-plugin": "0.2.0",
+    "speed-measure-webpack-plugin": "1.5.0",
     "webpack-bundle-analyzer": "4.4.1"
   },
   "engines": {

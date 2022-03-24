@@ -21,7 +21,6 @@
     }
   ],
   "main": "build/index.js",
-  "module": "lib/src/index.js",
   "files": [
     "build"
   ],

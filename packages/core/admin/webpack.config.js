@@ -1,14 +1,14 @@
 'use strict';
 
 const path = require('path');
+const fse = require('fs-extra');
 const webpack = require('webpack');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const ForkTsCheckerPlugin = require('fork-ts-checker-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const TerserPlugin = require('terser-webpack-plugin');
+const { ESBuildMinifyPlugin } = require('esbuild-loader');
 const WebpackBar = require('webpackbar');
 const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
-const isWsl = require('is-wsl');
 const alias = require('./webpack.alias');
 const getClientEnvironment = require('./env');
 
@@ -79,6 +79,11 @@ module.exports = ({
     });
   }
 
+  // Directly inject a polyfill in the webpack entry point before the entry point
+  // FIXME: I have noticed a bug regarding the helper-plugin and esbuild-loader
+  // The only I could fix it was to inject the babel polyfill
+  const babelPolyfill = '@babel/polyfill/dist/polyfill.min.js';
+
   return {
     mode: isProduction ? 'production' : 'development',
     bail: isProduction ? true : false,
@@ -86,7 +91,7 @@ module.exports = ({
     experiments: {
       topLevelAwait: true,
     },
-    entry,
+    entry: [babelPolyfill, entry],
     output: {
       path: dest,
       publicPath: options.adminPath,
@@ -98,28 +103,9 @@ module.exports = ({
     optimization: {
       minimize: optimize,
       minimizer: [
-        // Copied from react-scripts
-        new TerserPlugin({
-          terserOptions: {
-            parse: {
-              ecma: 8,
-            },
-            compress: {
-              ecma: 5,
-              warnings: false,
-              comparisons: false,
-              inline: 2,
-            },
-            mangle: {
-              safari10: true,
-            },
-            output: {
-              ecma: 5,
-              comments: false,
-              ascii_only: true,
-            },
-          },
-          parallel: !isWsl,
+        new ESBuildMinifyPlugin({
+          target: 'es2015',
+          css: true, // Apply minification to CSS assets
         }),
       ],
       runtimeChunk: true,
@@ -128,41 +114,79 @@ module.exports = ({
       rules: [
         {
           test: /\.m?js$/,
-          // TODO remove when plugins are built separately
-          include: [cacheDir, ...pluginsPath],
-          use: {
-            loader: require.resolve('babel-loader'),
-            options: {
-              cacheDirectory: true,
-              cacheCompression: isProduction,
-              compact: isProduction,
-              presets: [
-                require.resolve('@babel/preset-env'),
-                require.resolve('@babel/preset-react'),
-              ],
-              plugins: [
-                [
-                  require.resolve('@strapi/babel-plugin-switch-ee-ce'),
-                  {
-                    // Imported this tells the custom plugin where to look for the ee folder
-                    roots,
-                  },
-                ],
-                require.resolve('@babel/plugin-proposal-class-properties'),
-                require.resolve('@babel/plugin-syntax-dynamic-import'),
-                require.resolve('@babel/plugin-transform-modules-commonjs'),
-                require.resolve('@babel/plugin-proposal-async-generator-functions'),
+          include: cacheDir,
+          oneOf: [
+            // Use babel-loader for files that distinct the ee and ce code
+            // These files have an import Something from 'ee_else_ce/
+            {
+              test(filePath) {
+                if (!filePath) {
+                  return false;
+                }
 
-                [
-                  require.resolve('@babel/plugin-transform-runtime'),
-                  {
-                    // absoluteRuntime: true,s
-                    helpers: true,
-                    regenerator: true,
-                  },
-                ],
-                [require.resolve('babel-plugin-styled-components'), { pure: true }],
-              ],
+                try {
+                  const fileContent = fse.readFileSync(filePath).toString();
+
+                  if (fileContent.match(/from.* ['"]ee_else_ce\//)) {
+                    return true;
+                  }
+
+                  return false;
+                } catch (e) {
+                  return false;
+                }
+              },
+              use: {
+                loader: require.resolve('babel-loader'),
+                options: {
+                  cacheDirectory: true,
+                  cacheCompression: isProduction,
+                  compact: isProduction,
+                  presets: [
+                    require.resolve('@babel/preset-env'),
+                    require.resolve('@babel/preset-react'),
+                  ],
+                  plugins: [
+                    [
+                      require.resolve('@strapi/babel-plugin-switch-ee-ce'),
+                      {
+                        // Imported this tells the custom plugin where to look for the ee folder
+                        roots,
+                      },
+                    ],
+
+                    [
+                      require.resolve('@babel/plugin-transform-runtime'),
+                      {
+                        helpers: true,
+                        regenerator: true,
+                      },
+                    ],
+                    [require.resolve('babel-plugin-styled-components'), { pure: true }],
+                  ],
+                },
+              },
+            },
+            // Use esbuild-loader for the other files
+            {
+              use: {
+                loader: require.resolve('esbuild-loader'),
+                options: {
+                  loader: 'jsx',
+                  target: 'es2015',
+                },
+              },
+            },
+          ],
+        },
+        {
+          test: /\.m?js$/,
+          include: pluginsPath,
+          use: {
+            loader: require.resolve('esbuild-loader'),
+            options: {
+              loader: 'jsx',
+              target: 'es2015',
             },
           },
         },
@@ -212,8 +236,6 @@ module.exports = ({
       new HtmlWebpackPlugin({
         inject: true,
         template: path.resolve(__dirname, 'index.html'),
-        // FIXME
-        // favicon: path.resolve(__dirname, 'admin/src/favicon.ico'),
       }),
       new webpack.DefinePlugin(envVariables),
 
