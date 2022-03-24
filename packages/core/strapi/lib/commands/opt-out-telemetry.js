@@ -52,7 +52,7 @@ module.exports = async function optOutTelemetry() {
 
   const [uuid, packageObj] = await readPackageJSON(packageJSON);
 
-  if (packageObj.strapi.optOutTelemetry || !uuid) {
+  if (packageObj.strapi.telemetryDisabled || !uuid) {
     console.log(`${chalk.yellow('Warning:')} telemetry is already disabled`);
     process.exit(0);
   }
@@ -60,8 +60,8 @@ module.exports = async function optOutTelemetry() {
   const updatedPackageJSON = {
     ...packageObj,
     strapi: {
-      uuid: packageObj.strapi.uuid,
-      optOutTelemetry: true,
+      ...packageObj.strapi,
+      telemetryDisabled: true,
     },
   };
 
