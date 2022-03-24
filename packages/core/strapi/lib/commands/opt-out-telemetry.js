@@ -43,14 +43,14 @@ const sendEvent = async uuid => {
 };
 
 module.exports = async function optOutTelemetry() {
-  const packageJSON = resolve(process.cwd(), 'package.json');
+  const packageJSONPath = resolve(process.cwd(), 'package.json');
 
-  if (!packageJSON) {
+  if (!packageJSONPath) {
     console.log(`${chalk.yellow('Warning')}: could not find package.json`);
     process.exit(0);
   }
 
-  const [uuid, packageObj] = await readPackageJSON(packageJSON);
+  const [uuid, packageObj] = await readPackageJSON(packageJSONPath);
 
   if ((packageObj.strapi && packageObj.strapi.telemetryDisabled) || !uuid) {
     console.log(`${chalk.yellow('Warning:')} telemetry is already disabled`);
@@ -65,13 +65,13 @@ module.exports = async function optOutTelemetry() {
     },
   };
 
-  const write = await writePackageJSON(packageJSON, updatedPackageJSON, 2);
+  const write = await writePackageJSON(packageJSONPath, updatedPackageJSON, 2);
 
   if (!write) {
     console.log(
       `${chalk.yellow(
         'Warning'
-      )}: There has been an error, please set "optOutTelemetry": true in the "strapi" object of your package.json manually.`
+      )}: There has been an error, please set "telemetryDisabled": true in the "strapi" object of your package.json manually.`
     );
     process.exit(0);
   }
