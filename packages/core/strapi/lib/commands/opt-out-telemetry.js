@@ -71,7 +71,7 @@ module.exports = async function optOutTelemetry() {
     console.log(
       `${chalk.yellow(
         'Warning'
-      )}: There has been an error, please set "optOutTelemetry": true in the "strapi" object of your package.json manually.`
+      )}: There has been an error, please set "telemetryDisabled": true in the "strapi" object of your package.json manually.`
     );
     process.exit(0);
   }
