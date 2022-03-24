@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box } from '@strapi/design-system/Box';
 import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
-import { useFolderCard } from './FolderCardContext';
+import { useFolderCard } from '../contexts/FolderCard';
 
 export const FolderCardCheckbox = props => {
   const { id } = useFolderCard();

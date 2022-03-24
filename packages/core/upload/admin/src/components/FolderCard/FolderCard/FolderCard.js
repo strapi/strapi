@@ -7,8 +7,8 @@ import { Box } from '@strapi/design-system/Box';
 import { Stack } from '@strapi/design-system/Stack';
 import Folder from '@strapi/icons/Folder';
 
-import { FolderCardContext } from './FolderCardContext';
-import useId from './utils/useId';
+import { FolderCardContext } from '../contexts/FolderCard';
+import useId from '../hooks/useId';
 
 const FauxClickWrapper = styled.button`
   height: 100%;
@@ -31,7 +31,7 @@ const StyledFolder = styled(Folder)`
 `;
 
 export const FolderCard = ({ children, id, startAction, ariaLabel, onDoubleClick, ...props }) => {
-  const generatedId = useId(id);
+  const generatedId = useId('folder', id);
 
   return (
     <FolderCardContext.Provider value={{ id: generatedId }}>
