@@ -43,7 +43,7 @@ const sendEvent = async uuid => {
 };
 
 module.exports = async function optOutTelemetry() {
-  const packageJSON = resolve(process.cwd(), 'package.json');
+  const packageJSONPath = resolve(process.cwd(), 'package.json');
 
   if (!packageJSON) {
     console.log(`${chalk.yellow('Warning')}: could not find package.json`);
