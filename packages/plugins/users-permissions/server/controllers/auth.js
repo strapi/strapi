@@ -29,6 +29,16 @@ const sanitizeUser = (user, ctx) => {
   return sanitize.contentAPI.output(user, userSchema, { auth });
 };
 
+const getEmailConfirmationToken = (ctx) => {
+  if (ctx.request.method === "GET"){
+      // REST API Request
+      return ctx.query.confirmation;
+    }else{
+      // For GraphQL Request
+      return ctx.request.body.confirmation;
+    }
+}
+
 module.exports = {
   async callback(ctx) {
     const provider = ctx.params.provider || 'local';
@@ -376,7 +386,7 @@ module.exports = {
   },
 
   async emailConfirmation(ctx, next, returnUser) {
-    const { confirmation: confirmationToken } = ctx.query;
+    const confirmationToken = getEmailConfirmationToken(ctx);
 
     const userService = getService('user');
     const jwtService = getService('jwt');
