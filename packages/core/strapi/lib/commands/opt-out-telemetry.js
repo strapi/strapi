@@ -9,7 +9,7 @@ const machineID = require('../utils/machine-id');
 const readPackageJSON = async path => {
   try {
     const packageObj = await fse.readJson(path);
-    const uuid = packageObj.strapi.uuid;
+    const uuid = packageObj.strapi ? packageObj.strapi.uuid : null;
 
     return [uuid, packageObj];
   } catch (err) {
@@ -52,7 +52,7 @@ module.exports = async function optOutTelemetry() {
 
   const [uuid, packageObj] = await readPackageJSON(packageJSON);
 
-  if (packageObj.strapi.telemetryDisabled || !uuid) {
+  if ((packageObj.strapi && packageObj.strapi.telemetryDisabled) || !uuid) {
     console.log(`${chalk.yellow('Warning:')} telemetry is already disabled`);
     process.exit(0);
   }
