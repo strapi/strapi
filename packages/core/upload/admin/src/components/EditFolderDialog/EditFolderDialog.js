@@ -39,7 +39,11 @@ export const EditFolderDialog = ({ onClose, folder }) => {
       const res = await editFolder({ ...folder, ...values });
       onClose(res);
     } catch (err) {
-      // ...
+      /* TODO: it can fail because of several reasons
+        - folder name is already taken
+        - can not move a folder into itself or its children
+        - network & appliction errors
+      */
     }
   };
 
