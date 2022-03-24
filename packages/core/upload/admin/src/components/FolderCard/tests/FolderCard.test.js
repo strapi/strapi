@@ -9,7 +9,7 @@ import { FolderCard } from '../FolderCard';
 import { FolderCardBody } from '../FolderCardBody';
 import { FolderCardCheckbox } from '../FolderCardCheckbox';
 
-const ID_FIXTURE = 'folder-1';
+const ID_FIXTURE = 'folder';
 
 // eslint-disable-next-line react/prop-types
 const ComponentFixture = props => {
@@ -18,7 +18,6 @@ const ComponentFixture = props => {
       <FolderCard
         id={ID_FIXTURE}
         ariaLabel="Folder 1"
-        href="/"
         startAction={<></>}
         onDoubleClick={() => {}}
         {...props}
