@@ -76,7 +76,7 @@ const FormModalEndActions = ({
         }}
       >
         {formatMessage({
-          id: getTrad('form.button.finish'),
+          id: 'global.finish',
           defaultMessage: 'Finish',
         })}
       </Button>
@@ -95,7 +95,7 @@ const FormModalEndActions = ({
         }}
       >
         {formatMessage({
-          id: getTrad('form.button.finish'),
+          id: 'global.finish',
           defaultMessage: 'Finish',
         })}
       </Button>
@@ -131,7 +131,7 @@ const FormModalEndActions = ({
           }}
         >
           {formatMessage({
-            id: getTrad('form.button.finish'),
+            id: 'global.finish',
             defaultMessage: 'Finish',
           })}
         </Button> */}
@@ -196,7 +196,7 @@ const FormModalEndActions = ({
           }}
         >
           {formatMessage({
-            id: getTrad('form.button.finish'),
+            id: 'global.finish',
             defaultMessage: 'Finish',
           })}
         </Button>
@@ -232,7 +232,7 @@ const FormModalEndActions = ({
           }}
         >
           {formatMessage({
-            id: getTrad('form.button.finish'),
+            id: 'global.finish',
             defaultMessage: 'Finish',
           })}
         </Button>
@@ -254,7 +254,7 @@ const FormModalEndActions = ({
               }}
             >
               {formatMessage({
-                id: getTrad('form.button.delete'),
+                id: 'global.delete',
                 defaultMessage: 'Delete',
               })}
             </Button>
@@ -268,7 +268,7 @@ const FormModalEndActions = ({
               }}
             >
               {formatMessage({
-                id: getTrad('form.button.finish'),
+                id: 'global.finish',
                 defaultMessage: 'Finish',
               })}
             </Button>
@@ -285,7 +285,7 @@ const FormModalEndActions = ({
             }}
           >
             {formatMessage({
-              id: getTrad('form.button.continue'),
+              id: 'global.continue',
               defaultMessage: 'Continue',
             })}
           </Button>
@@ -308,7 +308,7 @@ const FormModalEndActions = ({
               }}
             >
               {formatMessage({
-                id: getTrad('form.button.delete'),
+                id: 'global.delete',
                 defaultMessage: 'Delete',
               })}
             </Button>
@@ -322,7 +322,7 @@ const FormModalEndActions = ({
               }}
             >
               {formatMessage({
-                id: getTrad('form.button.finish'),
+                id: 'global.finish',
                 defaultMessage: 'Finish',
               })}
             </Button>
@@ -339,7 +339,7 @@ const FormModalEndActions = ({
             }}
           >
             {formatMessage({
-              id: getTrad('form.button.continue'),
+              id: 'global.continue',
               defaultMessage: 'Continue',
             })}
           </Button>
@@ -361,7 +361,7 @@ const FormModalEndActions = ({
           }}
         >
           {formatMessage({
-            id: getTrad('form.button.delete'),
+            id: 'global.delete',
             defaultMessage: 'Delete',
           })}
         </Button>
@@ -375,7 +375,7 @@ const FormModalEndActions = ({
           }}
         >
           {formatMessage({
-            id: getTrad('form.button.finish'),
+            id: 'global.finish',
             defaultMessage: 'finish',
           })}
         </Button>

@@ -282,7 +282,7 @@ const ListView = () => {
                   variant="danger-light"
                 >
                   {formatMessage({
-                    id: 'Settings.webhooks.events.delete',
+                    id: 'global.delete',
                     defaultMessage: 'Delete',
                   })}
                 </Button>
@@ -318,7 +318,7 @@ const ListView = () => {
                       <Th>
                         <BaseCheckbox
                           aria-label={formatMessage({
-                            id: 'Settings.webhooks.list.all-entries.select',
+                            id: 'global.select-all-entries',
                             defaultMessage: 'Select all entries',
                           })}
                           indeterminate={
@@ -331,7 +331,7 @@ const ListView = () => {
                       <Th width="20%">
                         <Typography variant="sigma" textColor="neutral600">
                           {formatMessage({
-                            id: 'Settings.webhooks.form.name',
+                            id: 'global.name',
                             defaultMessage: 'Name',
                           })}
                         </Typography>
@@ -374,7 +374,7 @@ const ListView = () => {
                         <Td {...stopPropagation}>
                           <BaseCheckbox
                             aria-label={`${formatMessage({
-                              id: 'Settings.webhooks.list.select',
+                              id: 'global.select',
                               defaultMessage: 'Select',
                             })} ${webhook.name}`}
                             value={webhooksToDelete?.includes(webhook.id)}
@@ -395,11 +395,11 @@ const ListView = () => {
                           <Flex {...stopPropagation}>
                             <Switch
                               onLabel={formatMessage({
-                                id: 'Settings.webhooks.enabled',
+                                id: 'global.enabled',
                                 defaultMessage: 'Enabled',
                               })}
                               offLabel={formatMessage({
-                                id: 'Settings.webhooks.disabled',
+                                id: 'global.disabled',
                                 defaultMessage: 'Disabled',
                               })}
                               label={`${webhook.name} ${formatMessage({
@@ -431,7 +431,7 @@ const ListView = () => {
                               <IconButton
                                 onClick={() => handleDeleteClick(webhook.id)}
                                 label={formatMessage({
-                                  id: 'Settings.webhooks.events.delete',
+                                  id: 'global.delete',
                                   defaultMessage: 'Delete',
                                 })}
                                 icon={<Trash />}

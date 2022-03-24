@@ -51,7 +51,7 @@ const EmailTable = ({ canUpdate, onEditClick }) => {
             <Icon>
               <Reload
                 aria-label={formatMessage({
-                  id: getTrad('Email.template.reset_password'),
+                  id: 'global.reset-password',
                   defaultMessage: 'Reset password',
                 })}
               />
@@ -60,7 +60,7 @@ const EmailTable = ({ canUpdate, onEditClick }) => {
           <Td>
             <Typography>
               {formatMessage({
-                id: getTrad('Email.template.reset_password'),
+                id: 'global.reset-password',
                 defaultMessage: 'Reset password',
               })}
             </Typography>

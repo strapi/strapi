@@ -75,7 +75,7 @@ const Onboarding = () => {
     {
       icon: 'book',
       label: formatMessage({
-        id: 'app.components.LeftMenuFooter.documentation',
+        id: 'global.documentation',
         defaultMessage: 'Documentation',
       }),
       destination: 'https://docs.strapi.io',

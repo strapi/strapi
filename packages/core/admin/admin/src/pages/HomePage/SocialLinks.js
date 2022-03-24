@@ -167,10 +167,7 @@ const SocialLinks = () => {
               })}
             </Typography>
           </Stack>
-          <Link
-            href="https://portal.productboard.com/strapi/1-roadmap/tabs/2-under-consideration"
-            endIcon={<ExternalLink />}
-          >
+          <Link href="https://feedback.strapi.io/" endIcon={<ExternalLink />}>
             {formatMessage({
               id: 'app.components.HomePage.roadmap',
               defaultMessage: 'See our road map',

@@ -70,7 +70,7 @@ function SelectMany({
         onMenuOpen={onMenuOpen}
         onMenuScrollToBottom={onMenuScrollToBottom}
         placeholder={formatMessage(
-          placeholder || { id: 'components.Select.placeholder', defaultMessage: 'Select...' }
+          placeholder || { id: 'global.select', defaultMessage: 'Select...' }
         )}
         styles={styles}
         value={[]}
