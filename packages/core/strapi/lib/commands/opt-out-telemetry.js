@@ -11,7 +11,7 @@ const readPackageJSON = async path => {
     const packageObj = await fse.readJson(path);
     const uuid = packageObj.strapi ? packageObj.strapi.uuid : null;
 
-    return [uuid, packageObj];
+    return { uuid, packageObj };
   } catch (err) {
     console.error(`${chalk.red('Error')}: ${err.message}`);
   }
@@ -44,13 +44,14 @@ const sendEvent = async uuid => {
 
 module.exports = async function optOutTelemetry() {
   const packageJSONPath = resolve(process.cwd(), 'package.json');
+  const exists = await fse.pathExists(packageJSONPath);
 
-  if (!packageJSONPath) {
+  if (exists) {
     console.log(`${chalk.yellow('Warning')}: could not find package.json`);
     process.exit(0);
   }
 
-  const [uuid, packageObj] = await readPackageJSON(packageJSONPath);
+  const { uuid, packageObj } = await readPackageJSON(packageJSONPath);
 
   if ((packageObj.strapi && packageObj.strapi.telemetryDisabled) || !uuid) {
     console.log(`${chalk.yellow('Warning:')} telemetry is already disabled`);
