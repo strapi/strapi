@@ -6,11 +6,10 @@ const knex = require('knex');
 
 const SqliteClient = require('knex/lib/dialects/sqlite3/index');
 
-const tryBetterSqlite3Client = config => {
+const trySqlitePackage = packageName => {
   try {
-    require.resolve('better-sqlite3');
-    config.client = 'better-sqlite3';
-    return true;
+    require.resolve(packageName);
+    return packageName;
   } catch (error) {
     if (error.code === 'MODULE_NOT_FOUND') {
       return false;
@@ -18,45 +17,41 @@ const tryBetterSqlite3Client = config => {
     throw error;
   }
 };
-
-const tryVscodeSqlite3Client = () => {
-  try {
-    require.resolve('@vscode/sqlite3');
-    return true;
-  } catch (error) {
-    if (error.code === 'MODULE_NOT_FOUND') {
-      return false;
-    }
-    throw error;
+class LegacySqliteClient extends SqliteClient {
+  _driver() {
+    return require('sqlite3');
   }
+}
+
+const clientMap = {
+  'better-sqlite3': 'better-sqlite3',
+  '@vscode/sqlite3': 'sqlite',
+  sqlite3: LegacySqliteClient,
 };
 
-const tryLegacySqlite3Client = config => {
-  try {
-    require.resolve('sqlite3');
-    config.client = class MySqliteClient extends SqliteClient {
-      _driver() {
-        return require('sqlite3');
-      }
-    };
-
-    return true;
-  } catch (error) {
-    if (error.code === 'MODULE_NOT_FOUND') {
-      return false;
-    }
-    throw error;
+const getSqlitePackageName = () => {
+  // NOTE: allow forcing the package to use (mostly used for testing purposes)
+  if (typeof process.env.SQLITE_PKG !== undefined) {
+    return process.env.SQLITE_PKG;
   }
+
+  // NOTE: this tries to find the best sqlite module possible to use
+  // while keeping retro compatibiity
+  return (
+    trySqlitePackage('better-sqlite3') ||
+    trySqlitePackage('@vscode/sqlite3') ||
+    trySqlitePackage('sqlite3')
+  );
 };
 
 const createConnection = config => {
   const knexConfig = { ...config };
   if (knexConfig.client === 'sqlite') {
-    // NOTE: this tries to find the best sqlite module possible to use
-    // while keeping retro compatibiity
-    tryBetterSqlite3Client(knexConfig) ||
-      tryVscodeSqlite3Client(knexConfig) ||
-      tryLegacySqlite3Client(knexConfig);
+    const sqlitePackageName = getSqlitePackageName();
+
+    console.log(sqlitePackageName);
+
+    knexConfig.client = clientMap[sqlitePackageName];
   }
 
   const knexInstance = knex(knexConfig);

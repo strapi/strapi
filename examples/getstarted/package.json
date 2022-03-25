@@ -27,7 +27,9 @@
     "mysql": "2.18.1",
     "passport-google-oauth2": "0.2.0",
     "pg": "8.6.0",
-    "better-sqlite3": "7.5.0"
+    "better-sqlite3": "7.5.0",
+    "@vscode/sqlite3": "5.0.7",
+    "sqlite3": "5.0.2"
   },
   "strapi": {
     "uuid": "getstarted"
