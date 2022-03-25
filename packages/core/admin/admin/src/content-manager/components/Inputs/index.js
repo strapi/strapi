@@ -42,10 +42,7 @@ function Inputs({
 
   const disabled = useMemo(() => !get(metadatas, 'editable', true), [metadatas]);
   const type = fieldSchema.type;
-
-  const error = useMemo(() => {
-    return get(formErrors, [keys], null);
-  }, [formErrors, keys]);
+  const error = get(formErrors, [keys], null);
 
   const fieldName = useMemo(() => {
     return getFieldName(keys);
