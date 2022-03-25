@@ -32,7 +32,7 @@
     "@sindresorhus/slugify": "1.1.0",
     "@strapi/utils": "4.1.5",
     "chalk": "4.1.2",
-    "fs-extra": "10.0.0",
+    "fs-extra": "10.0.1",
     "node-plop": "0.26.3",
     "plop": "2.7.6",
     "pluralize": "8.0.0"
