@@ -1,5 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useRef, useReducer } from 'react';
-import { cloneDeep, get, isEmpty, isEqual, set } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
+import cloneDeep from 'lodash/cloneDeep';
+import get from 'lodash/get';
+import isEqual from 'lodash/isEqual';
+import set from 'lodash/set';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Prompt, Redirect } from 'react-router-dom';
@@ -11,10 +15,11 @@ import {
   useOverlayBlocker,
   useTracking,
 } from '@strapi/helper-plugin';
+
 import { getTrad, removeKeyInObject } from '../../utils';
 import reducer, { initialState } from './reducer';
 import { cleanData, createYupSchema, getYupInnerErrors } from './utils';
-import { handleAPIError } from './utils/handleAPIError';
+import { getAPIInnerError } from './utils/getAPIInnerError';
 
 const EditViewDataManagerProvider = ({
   allLayoutData,
@@ -298,17 +303,19 @@ const EditViewDataManagerProvider = ({
       }
 
       try {
-        const formData = createFormData(modifiedData);
+        if (isEmpty(errors)) {
+          const formData = createFormData(modifiedData);
 
-        if (isCreatingEntry) {
-          await onPost(formData, trackerProperty);
-        } else {
-          await onPut(formData, trackerProperty);
+          if (isCreatingEntry) {
+            await onPost(formData, trackerProperty);
+          } else {
+            await onPut(formData, trackerProperty);
+          }
         }
       } catch (err) {
         errors = {
           ...errors,
-          ...handleAPIError(err),
+          ...getAPIInnerError(err),
         };
       }
 
@@ -338,11 +345,13 @@ const EditViewDataManagerProvider = ({
     }
 
     try {
-      await onPublish();
+      if (isEmpty(errors)) {
+        await onPublish();
+      }
     } catch (err) {
       errors = {
         ...errors,
-        ...handleAPIError(err),
+        ...getAPIInnerError(err),
       };
     }
 
