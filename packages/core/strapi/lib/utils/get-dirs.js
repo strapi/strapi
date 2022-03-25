@@ -1,8 +1,8 @@
 'use strict';
 
-const { join } = require('path');
+const { join, resolve } = require('path');
 
-const getDirs = root => ({
+const getDirs = (root, { strapi }) => ({
   root,
   src: join(root, 'src'),
   api: join(root, 'src', 'api'),
@@ -11,7 +11,7 @@ const getDirs = root => ({
   policies: join(root, 'src', 'policies'),
   middlewares: join(root, 'src', 'middlewares'),
   config: join(root, 'config'),
-  public: join(root, 'public'),
+  public: resolve(root, strapi.config.get('server.dirs.public')),
 });
 
 module.exports = getDirs;
