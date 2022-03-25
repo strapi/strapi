@@ -10,7 +10,7 @@ const chalk = require('chalk');
  * @returns {Object}
  */
 async function getPackageInfo(packageName) {
-  const { stdout } = await execa.shell(`npm view ${packageName} name version --silent`);
+  const { stdout } = await execa('npm', ['view', packageName, 'name', 'version', '--silent']);
   // Use regex to parse name and version from CLI result
   const [name, version] = stdout.match(/(?<=')(.*?)(?=')/gm);
   return { name, version };
@@ -46,7 +46,7 @@ async function getTemplatePackageInfo(template) {
  */
 async function downloadNpmTemplate({ name, version }, parentDir) {
   // Download from npm
-  await execa.shell(`npm install ${name}@${version} --no-save --silent`, {
+  await execa('npm', ['install', `${name}@${version}`, '--no-save', '--silent'], {
     cwd: parentDir,
   });
 

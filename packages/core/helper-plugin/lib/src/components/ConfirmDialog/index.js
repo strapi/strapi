@@ -36,7 +36,7 @@ const ConfirmDialog = ({
       {...props}
     >
       <DialogBody icon={iconBody}>
-        <Stack size={2}>
+        <Stack spacing={2}>
           <Flex justifyContent="center">
             <Typography variant="omega" id="confirm-description">
               {formatMessage({

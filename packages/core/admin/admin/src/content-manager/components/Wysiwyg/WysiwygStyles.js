@@ -45,6 +45,7 @@ export const IconButtonGroupMargin = styled(IconButtonGroup)`
 
 export const EditorAndPreviewWrapper = styled.div`
   position: relative;
+  height: calc(100% - 48px);
 `;
 
 // FOOTER

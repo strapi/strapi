@@ -85,7 +85,7 @@ export const SingleSignOn = () => {
                 size="L"
               >
                 {formatMessage({
-                  id: 'app.components.Button.save',
+                  id: 'global.save',
                   defaultMessage: 'Save',
                 })}
               </Button>
@@ -100,10 +100,10 @@ export const SingleSignOn = () => {
             {showLoader ? (
               <LoadingIndicatorPage />
             ) : (
-              <Stack size={4} background="neutral0" padding={6} shadow="filterShadow" hasRadius>
+              <Stack spacing={4} background="neutral0" padding={6} shadow="filterShadow" hasRadius>
                 <Typography variant="delta" as="h2">
                   {formatMessage({
-                    id: 'Settings.sso.form.settings.title',
+                    id: 'global.settings',
                     defaultMessage: 'Settings',
                   })}
                 </Typography>

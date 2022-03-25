@@ -44,8 +44,8 @@ const Blocker = ({ displayedIcon, description, title, isOpen }) => {
   if (isOpen) {
     return ReactDOM.createPortal(
       <Overlay>
-        <Content size={6}>
-          <Stack size={2}>
+        <Content spacing={6}>
+          <Stack spacing={2}>
             <Flex justifyContent="center">
               <Typography as="h1" variant="alpha">
                 {formatMessage(title)}
@@ -78,7 +78,7 @@ const Blocker = ({ displayedIcon, description, title, isOpen }) => {
                 rel="noopener noreferrer nofollow"
               >
                 {formatMessage({
-                  id: 'app.components.BlockLink.documentation',
+                  id: 'global.documentation',
                   defaultMessage: 'Read the documentation',
                 })}
               </Link>

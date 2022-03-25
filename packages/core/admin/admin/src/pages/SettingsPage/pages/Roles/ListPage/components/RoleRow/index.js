@@ -13,8 +13,8 @@ const RoleRow = ({ id, name, description, usersCount, icons }) => {
 
   const usersCountText = formatMessage(
     {
-      id: `Roles.RoleRow.user-count.${usersCount > 1 ? 'plural' : 'singular'}`,
-      defaultMessage: '{number} user',
+      id: `Roles.RoleRow.user-count`,
+      defaultMessage: '{number, plural, =0 {#  user} one {#  user} other {# users}}',
     },
     { number: usersCount }
   );

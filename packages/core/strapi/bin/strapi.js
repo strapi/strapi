@@ -17,7 +17,7 @@ const checkCwdIsStrapiApp = name => {
     console.log(
       `You need to run ${yellow(
         `strapi ${name}`
-      )} in a Strapi project. Make sure you are in the right directory`
+      )} in a Strapi project. Make sure you are in the right directory.`
     );
     process.exit(1);
   };
@@ -40,7 +40,7 @@ const getLocalScript = name => (...args) => {
     console.log(
       `Error loading the local ${yellow(
         name
-      )} command. Strapi might not be installed in your "node_modules". You may need to run "npm install"`
+      )} command. Strapi might not be installed in your "node_modules". You may need to run "yarn install".`
     );
     process.exit(1);
   }
@@ -67,7 +67,7 @@ program.addHelpCommand('help [command]', 'Display help for command');
 program.version(packageJSON.version, '-v, --version', 'Output the version number');
 program
   .command('version')
-  .description('Output your version of Strapi')
+  .description('Output the version of Strapi')
   .action(() => {
     process.stdout.write(packageJSON.version + '\n');
     process.exit(0);
@@ -84,8 +84,8 @@ program
   .command('new <directory>')
   .option('--no-run', 'Do not start the application after it is created')
   .option('--use-npm', 'Force usage of npm instead of yarn to create the project')
-  .option('--debug', 'Display database connection error')
-  .option('--quickstart', 'Quickstart app creation')
+  .option('--debug', 'Display database connection errors')
+  .option('--quickstart', 'Create quickstart app')
   .option('--dbclient <dbclient>', 'Database client')
   .option('--dbhost <dbhost>', 'Database host')
   .option('--dbport <dbport>', 'Database port')
@@ -94,7 +94,7 @@ program
   .option('--dbpassword <dbpassword>', 'Database password')
   .option('--dbssl <dbssl>', 'Database SSL')
   .option('--dbfile <dbfile>', 'Database file path for sqlite')
-  .option('--dbforce', 'Overwrite database content if any')
+  .option('--dbforce', 'Allow overwriting existing database content')
   .description('Create a new application')
   .action(require('../lib/commands/new'));
 
@@ -110,7 +110,7 @@ program
   .alias('dev')
   .option('--no-build', 'Disable build')
   .option('--watch-admin', 'Enable watch', false)
-  .option('--polling', 'Watching file changes in network directories', false)
+  .option('--polling', 'Watch for file changes in network directories', false)
   .option('--browser <name>', 'Open the browser', true)
   .description('Start your Strapi application in development mode')
   .action(getLocalScript('develop'));
@@ -118,7 +118,7 @@ program
 // $ strapi generate
 program
   .command('generate')
-  .description('Launch interactive API generator')
+  .description('Launch the interactive API generator')
   .action(() => {
     checkCwdIsStrapiApp('generate');
     process.argv.splice(2, 1);
@@ -133,8 +133,8 @@ program
 
 program
   .command('build')
-  .option('--no-optimization', 'Build the Administration without assets optimization')
-  .description('Builds the strapi admin app')
+  .option('--no-optimization', 'Build the admin app without optimizing assets')
+  .description('Build the strapi admin app')
   .action(getLocalScript('build'));
 
 // `$ strapi install`
@@ -154,7 +154,7 @@ program
 program
   .command('watch-admin')
   .option('--browser <name>', 'Open the browser', true)
-  .description('Starts the admin dev server')
+  .description('Start the admin development server')
   .action(getLocalScript('watchAdmin'));
 
 program
@@ -174,6 +174,16 @@ program
   .action(getLocalScript('configurationRestore'));
 
 // Admin
+program
+  .command('admin:create-user')
+  .alias('admin:create')
+  .description('Create a new admin')
+  .option('-e, --email <email>', 'Email of the new admin')
+  .option('-p, --password <password>', 'Password of the new admin')
+  .option('-f, --firstname <first name>', 'First name of the new admin')
+  .option('-l, --lastname <last name>', 'Last name of the new admin')
+  .action(getLocalScript('admin-create'));
+
 program
   .command('admin:reset-user-password')
   .alias('admin:reset-password')

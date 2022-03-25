@@ -220,13 +220,18 @@ describe('LocaleSelect', () => {
         />
         <div
           class="c1"
+          spacing="1"
         >
           <label
             class="c2"
             for="combobox-1"
             id="combobox-1-label"
           >
-            Locales
+            <div
+              class="c3"
+            >
+              Locales
+            </div>
           </label>
           <div
             class="c3 c4"

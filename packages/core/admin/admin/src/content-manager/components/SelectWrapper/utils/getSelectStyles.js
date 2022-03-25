@@ -49,6 +49,8 @@ const getSelectStyles = theme => {
         ...base,
         width: '100%',
         marginTop: theme.spaces[1],
+        backgroundColor: theme.colors.neutral0,
+        color: theme.colors.neutral800,
         borderRadius: '4px !important',
         borderTopLeftRadius: '4px !important',
         borderTopRightRadius: '4px !important',
@@ -76,7 +78,7 @@ const getSelectStyles = theme => {
       return { ...base, lineHeight: theme.spaces[5], backgroundColor, borderRadius: 4 };
     },
     placeholder: base => ({ ...base, marginLeft: 0 }),
-    singleValue: base => ({ ...base, marginLeft: 0 }),
+    singleValue: base => ({ ...base, marginLeft: 0, color: theme.colors.neutral800 }),
     valueContainer: base => ({
       ...base,
       padding: 0,

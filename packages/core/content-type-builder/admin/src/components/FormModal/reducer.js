@@ -266,7 +266,7 @@ const reducer = (state = initialState, action) =>
           dataToSet = options;
         } else if (attributeType === 'media') {
           dataToSet = {
-            allowedTypes: ['images', 'files', 'videos'],
+            allowedTypes: ['images', 'files', 'videos', 'audios'],
             type: 'media',
             multiple: true,
             ...options,

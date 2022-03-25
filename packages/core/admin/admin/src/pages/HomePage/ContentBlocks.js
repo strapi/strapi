@@ -16,7 +16,7 @@ const ContentBlocks = () => {
   const { formatMessage } = useIntl();
 
   return (
-    <Stack size={5}>
+    <Stack spacing={5}>
       <BlockLink
         href="https://strapi.io/resource-center"
         target="_blank"
@@ -24,7 +24,7 @@ const ContentBlocks = () => {
       >
         <ContentBox
           title={formatMessage({
-            id: 'app.components.BlockLink.documentation',
+            id: 'global.documentation',
             defaultMessage: 'Documentation',
           })}
           subtitle={formatMessage({
