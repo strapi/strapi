@@ -19,6 +19,8 @@ import { Searchbar } from '@strapi/design-system/Searchbar';
 import { Box } from '@strapi/design-system/Box';
 import { LinkButton } from '@strapi/design-system/LinkButton';
 import { useNotifyAT } from '@strapi/design-system/LiveRegions';
+import { Typography } from '@strapi/design-system/Typography';
+import { Flex } from '@strapi/design-system/Flex';
 import Upload from '@strapi/icons/Upload';
 
 import PluginCard from './components/PluginCard';
@@ -27,6 +29,7 @@ import { fetchAppInformation } from './utils/api';
 import useFetchInstalledPlugins from '../../hooks/useFetchInstalledPlugins';
 import useFetchMarketplacePlugins from '../../hooks/useFetchMarketplacePlugins';
 import adminPermissions from '../../permissions';
+import offlineCloud from '../../assets/images/icon_offline-cloud.svg';
 
 const matchSearch = (plugins, search) => {
   return matchSorter(plugins, search, {
@@ -40,6 +43,30 @@ const matchSearch = (plugins, search) => {
   });
 };
 
+const getOnLineStatus = () =>
+  typeof navigator !== 'undefined' && typeof navigator.onLine === 'boolean'
+    ? navigator.onLine
+    : true;
+
+const useNavigatorOnLine = () => {
+  const [status, setStatus] = React.useState(getOnLineStatus());
+
+  const setOnline = () => setStatus(true);
+  const setOffline = () => setStatus(false);
+
+  useEffect(() => {
+    window.addEventListener('online', setOnline);
+    window.addEventListener('offline', setOffline);
+
+    return () => {
+      window.removeEventListener('online', setOnline);
+      window.removeEventListener('offline', setOffline);
+    };
+  }, []);
+
+  return status;
+};
+
 const MarketPlacePage = () => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
@@ -48,6 +75,7 @@ const MarketPlacePage = () => {
   const toggleNotification = useNotification();
   const [searchQuery, setSearchQuery] = useState('');
   const { autoReload: isInDevelopmentMode } = useAppInfos();
+  const isOnline = useNavigatorOnLine();
 
   useFocusWhenNavigate();
 
@@ -115,6 +143,56 @@ const MarketPlacePage = () => {
       });
     }
   }, [toggleNotification, isInDevelopmentMode]);
+
+  if (!isOnline) {
+    return (
+      <Layout>
+        <HeaderLayout
+          title={formatMessage({
+            id: 'global.marketplace',
+            defaultMessage: 'Marketplace',
+          })}
+          subtitle={formatMessage({
+            id: 'admin.pages.MarketPlacePage.subtitle',
+            defaultMessage: 'Get more out of Strapi',
+          })}
+          primaryAction={
+            <LinkButton
+              startIcon={<Upload />}
+              variant="tertiary"
+              href="https://market.strapi.io/submit-plugin"
+              onClick={() => trackUsage('didSubmitPlugin')}
+            >
+              {formatMessage({
+                id: 'admin.pages.MarketPlacePage.submit.plugin.link',
+                defaultMessage: 'Submit your plugin',
+              })}
+            </LinkButton>
+          }
+        />
+
+        <Flex
+          width="100%"
+          direction="column"
+          alignItems="center"
+          justifyContent="center"
+          paddingTop={11}
+        >
+          <Box paddingTop={8} paddingBottom={1}>
+            <Typography textColor="neutral700" variant="alpha">
+              You are offline
+            </Typography>
+          </Box>
+          <Box paddingBottom={3}>
+            <Typography textColor="neutral700" variant="epsilon">
+              You need to be connected to the Internet to access Strapi Market.
+            </Typography>
+          </Box>
+          <Box as="img" src={offlineCloud} alt="offline" width={11} height={11} />
+        </Flex>
+      </Layout>
+    );
+  }
 
   if (hasFailed) {
     return (
