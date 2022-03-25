@@ -13,19 +13,11 @@ const ConfigurationsProvider = ({
   const [{ menuLogo }, dispatch] = useReducer(reducer, initialState);
 
   const setMenuLogo = logo => {
-    if (logo) {
-      return dispatch({
-        type: 'CHANGE_LOGO',
-        logo,
-        isCustom: true,
-      });
-    }
-
     return dispatch({
       type: 'CHANGE_LOGO',
       logoType: 'menuLogo',
-      logo: defaultMenuLogo,
-      isCustom: false,
+      logo: logo || defaultMenuLogo,
+      isCustom: !!logo,
     });
   };
 
