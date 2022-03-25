@@ -35,7 +35,7 @@
     "test:unit": "jest --verbose"
   },
   "dependencies": {
-    "@sindresorhus/slugify": "1.1.0",
+    "@sindresorhus/slugify": "1.1.2",
     "date-fns": "2.24.0",
     "http-errors": "1.8.0",
     "lodash": "4.17.21",
