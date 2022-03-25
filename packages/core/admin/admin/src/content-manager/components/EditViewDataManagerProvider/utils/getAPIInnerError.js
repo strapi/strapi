@@ -6,6 +6,9 @@ export function getAPIInnerError(error) {
     acc[err.path.join('.')] = {
       id: getTrad(`apiError.${err.message}`),
       defaultMessage: err.message,
+      values: {
+        field: err.path[err.path.length - 1],
+      },
     };
 
     return acc;

@@ -65,8 +65,12 @@ const GenericInput = ({
       return null;
     }
 
+    const values = {
+      ...error.values,
+    };
+
     if (typeof error === 'string') {
-      return formatMessage({ id: error, defaultMessage: error });
+      return formatMessage({ id: error, defaultMessage: error }, values);
     }
 
     return formatMessage(
@@ -74,7 +78,7 @@ const GenericInput = ({
         id: error.id,
         defaultMessage: error?.defaultMessage ?? error.id,
       },
-      { fieldName: formatMessage(intlLabel) }
+      values
     );
   }
 
