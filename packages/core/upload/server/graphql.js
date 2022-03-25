@@ -2,6 +2,7 @@
 
 const path = require('path');
 const os = require('os');
+const mime = require('mime-types');
 const fse = require('fs-extra');
 const { getStreamSize } = require('./utils/file');
 
@@ -48,7 +49,7 @@ module.exports = ({ strapi }) => {
     const currentFile = uploadService.formatFileInfo(
       {
         filename,
-        type: mimetype,
+        type: mimetype || mime.lookup(filename),
         size: await getStreamSize(createReadStream()),
       },
       extraInfo || {},
@@ -143,16 +144,16 @@ module.exports = ({ strapi }) => {
               const { files: uploads, ...metas } = args;
 
               const files = await Promise.all(
-                uploads.map(upload => formatFile(upload, {}, { ...metas, tmpWorkingDirectory }))
+                uploads.map((upload) => formatFile(upload, {}, { ...metas, tmpWorkingDirectory }))
               );
 
               const uploadService = getUploadService('upload');
 
               const uploadedFiles = await Promise.all(
-                files.map(file => uploadService.uploadFileAndPersist(file, {}))
+                files.map((file) => uploadService.uploadFileAndPersist(file, {}))
               );
 
-              sanitizedEntities = uploadedFiles.map(file =>
+              sanitizedEntities = uploadedFiles.map((file) =>
                 toEntityResponse(file, { args, resourceUID: fileTypeName })
               );
             } finally {
