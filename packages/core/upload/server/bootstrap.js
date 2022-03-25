@@ -50,18 +50,18 @@ const createProvider = config => {
   const providerInstance = provider.init(providerOptions);
 
   if (!providerInstance.delete) {
-    throw new Error(`The upload provider "${providerName}" didn't implement the delete method.`);
+    throw new Error(`The upload provider "${providerName}" doesn't implement the delete method.`);
   }
 
   if (!providerInstance.upload && !providerInstance.uploadStream) {
     throw new Error(
-      `The upload provider "${providerName}" didn't implement the uploadStream nor the upload method.`
+      `The upload provider "${providerName}" doesn't implement the uploadStream nor the upload method.`
     );
   }
 
   if (!providerInstance.uploadStream) {
     process.emitWarning(
-      `The upload provider "${providerName}" didn't implement the uploadStream function. Strapi will fallback on the upload method. Some performance issues may occur.`
+      `The upload provider "${providerName}" doesn't implement the uploadStream function. Strapi will fallback on the upload method. Some performance issues may occur.`
     );
   }
 
