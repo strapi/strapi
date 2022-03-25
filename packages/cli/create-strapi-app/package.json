@@ -39,7 +39,7 @@
   },
   "dependencies": {
     "@strapi/generate-new": "4.1.5",
-    "commander": "6.1.0",
+    "commander": "6.2.1",
     "inquirer": "8.2.0"
   },
   "engines": {
