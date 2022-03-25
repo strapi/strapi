@@ -49,8 +49,6 @@ const createConnection = config => {
   if (knexConfig.client === 'sqlite') {
     const sqlitePackageName = getSqlitePackageName();
 
-    console.log(sqlitePackageName);
-
     knexConfig.client = clientMap[sqlitePackageName];
   }
 
