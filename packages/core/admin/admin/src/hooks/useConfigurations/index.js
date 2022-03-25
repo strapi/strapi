@@ -1,10 +1,11 @@
-import { useContext } from 'react';
+import { useContext, useRef } from 'react';
 import { ConfigurationsContext } from '../../contexts';
 
 const useConfigurations = () => {
   const context = useContext(ConfigurationsContext);
+  const contextRef = useRef(context);
 
-  return context;
+  return contextRef.current;
 };
 
 export default useConfigurations;

@@ -22,6 +22,7 @@ import NotFoundPage from '../NotFoundPage';
 import UseCasePage from '../UseCasePage';
 import { getUID } from './utils';
 import routes from './utils/routes';
+import { useConfigurations } from '../../hooks';
 
 const AuthenticatedApp = lazy(() =>
   import(/* webpackChunkName: "Admin-authenticatedApp" */ '../../components/AuthenticatedApp')
@@ -29,6 +30,7 @@ const AuthenticatedApp = lazy(() =>
 
 function App() {
   const toggleNotification = useNotification();
+  const { setMenuLogo } = useConfigurations();
   const { formatMessage } = useIntl();
   const [{ isLoading, hasAdmin, uuid }, setState] = useState({ isLoading: true, hasAdmin: false });
 
@@ -66,8 +68,10 @@ function App() {
     const getData = async () => {
       try {
         const {
-          data: { hasAdmin, uuid },
+          data: { hasAdmin, uuid, menuLogo },
         } = await request('/admin/init', { method: 'GET' });
+
+        setMenuLogo(menuLogo);
 
         if (uuid) {
           try {
@@ -99,7 +103,7 @@ function App() {
     };
 
     getData();
-  }, [toggleNotification]);
+  }, [toggleNotification, setMenuLogo]);
 
   const setHasAdmin = hasAdmin => setState(prev => ({ ...prev, hasAdmin }));
 

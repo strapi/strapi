@@ -93,7 +93,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
           defaultMessage: 'Workplace',
         })}
         title={menuTitle}
-        icon={<img src={menuLogo} alt={menuTitle} />}
+        icon={<img src={menuLogo?.logo} alt={menuTitle} />}
       />
 
       <Divider />
