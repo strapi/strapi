@@ -18,7 +18,7 @@ describe('CONTENT MANAGER | utils | mergeMetasWithSchema', () => {
     expect(results.contentType.attributes).toEqual(testData.contentType.attributes);
   });
 
-  it('should add the attribute propety to the main schema and the components', () => {
+  it('should add the attribute property to the main schema and the components', () => {
     const data = {
       component: {
         uid: 'test.test',

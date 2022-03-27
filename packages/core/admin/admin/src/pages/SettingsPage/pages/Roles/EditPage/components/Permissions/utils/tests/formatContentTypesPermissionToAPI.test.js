@@ -4,7 +4,7 @@ import formatContentTypesPermissionToAPI, {
 
 describe('ADMIN | COMPONENTS | Roles | Permissions | utils', () => {
   describe('createPropertyArray', () => {
-    it('should return an array of propety values', () => {
+    it('should return an array of property values', () => {
       const propertyValues = {
         f1: true,
         f2: false,
