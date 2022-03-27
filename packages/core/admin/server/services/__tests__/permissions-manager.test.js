@@ -3,7 +3,7 @@
 const { AbilityBuilder, Ability } = require('@casl/ability');
 const { pick } = require('lodash/fp');
 const sift = require('sift');
-const { buildStrapiQuery } = require('../permission/permissions-manager/query-builers');
+const { buildStrapiQuery } = require('../permission/permissions-manager/query-builders');
 const createPermissionsManager = require('../permission/permissions-manager');
 
 const allowedOperations = [
