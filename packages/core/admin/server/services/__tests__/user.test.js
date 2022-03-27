@@ -517,7 +517,7 @@ describe('User', () => {
       expect(userService.register(input)).rejects.toThrowError('Invalid registration info');
     });
 
-    test('Calls udpate service', async () => {
+    test('Calls update service', async () => {
       const findOne = jest.fn(() => Promise.resolve({ id: 1 }));
       const updateById = jest.fn(user => Promise.resolve(user));
 
