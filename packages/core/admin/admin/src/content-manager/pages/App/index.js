@@ -16,7 +16,7 @@ import getTrad from '../../utils/getTrad';
 import DragLayer from '../../components/DragLayer';
 import ModelsContext from '../../contexts/ModelsContext';
 import CollectionTypeRecursivePath from '../CollectionTypeRecursivePath';
-import ComponentSettingsView from '../ComponentSetttingsView';
+import ComponentSettingsView from '../ComponentSettingsView';
 import NoContentType from '../NoContentType';
 import NoPermissions from '../NoPermissions';
 import SingleTypeRecursivePath from '../SingleTypeRecursivePath';
