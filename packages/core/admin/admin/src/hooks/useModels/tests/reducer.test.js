@@ -78,10 +78,10 @@ describe('ADMIN | HOOKS | useModels | reducer', () => {
     });
   });
 
-  describe('GET_MODELS_SUCCEDED', () => {
+  describe('GET_MODELS_SUCCEEDED', () => {
     it('should return the state with the collectionTypes and singleTypes', () => {
       const action = {
-        type: 'GET_MODELS_SUCCEDED',
+        type: 'GET_MODELS_SUCCEEDED',
         contentTypes: [
           {
             uid: 'app.homepage',

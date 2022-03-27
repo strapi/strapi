@@ -25,7 +25,7 @@ const reducer = (state, action) =>
         draftState.isLoading = false;
         break;
       }
-      case 'GET_MODELS_SUCCEDED': {
+      case 'GET_MODELS_SUCCEEDED': {
         const getContentTypeByKind = kind =>
           action.contentTypes.filter(
             contentType => contentType.isDisplayed && contentType.kind === kind

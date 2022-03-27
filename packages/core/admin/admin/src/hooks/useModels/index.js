@@ -24,7 +24,7 @@ const useModels = () => {
       );
 
       dispatch({
-        type: 'GET_MODELS_SUCCEDED',
+        type: 'GET_MODELS_SUCCEEDED',
         contentTypes,
         components,
       });
