@@ -10,11 +10,11 @@ import isObject from 'lodash/isObject';
  */
 const mergeParams = (initialParams, params) => {
   return Object.keys(initialParams).reduce((acc, current) => {
-    const intialValue = initialParams[current];
-    const nextValue = get(params, [current], intialValue);
+    const initialValue = initialParams[current];
+    const nextValue = get(params, [current], initialValue);
 
-    if (isObject(intialValue)) {
-      return { ...acc, [current]: mergeParams(intialValue, nextValue) };
+    if (isObject(initialValue)) {
+      return { ...acc, [current]: mergeParams(initialValue, nextValue) };
     }
 
     acc[current] = nextValue;
