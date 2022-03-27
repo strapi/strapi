@@ -1167,7 +1167,7 @@ describe('Filtering API', () => {
     });
   });
 
-  describe('Complexe filtering', () => {
+  describe('Complex filtering', () => {
     test('Greater than and less than at the same time', async () => {
       let res = await rq({
         method: 'GET',

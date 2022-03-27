@@ -60,7 +60,7 @@ describe('CONTENT MANAGER | Containers | CollectionTypeFormWrapper | utils', () 
       expect(mergeParams({ ok: true }, null)).toEqual({ ok: true });
     });
 
-    it('should merge 2 complexe objects correctly', () => {
+    it('should merge 2 complex objects correctly', () => {
       const ref = {
         page: '1',
         pageSize: '10',
