@@ -267,9 +267,9 @@ const createHelpers = db => {
         dropIndex(tableBuilder, removedIndex);
       }
 
-      for (const updateddIndex of table.indexes.updated) {
-        debug(`Dropping updated index ${updateddIndex.name}`);
-        dropIndex(tableBuilder, updateddIndex.object);
+      for (const updatedIndex of table.indexes.updated) {
+        debug(`Dropping updated index ${updatedIndex.name}`);
+        dropIndex(tableBuilder, updatedIndex.object);
       }
 
       for (const removedForeignKey of table.foreignKeys.removed) {
