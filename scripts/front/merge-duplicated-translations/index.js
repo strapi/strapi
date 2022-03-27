@@ -65,7 +65,7 @@ const applyPackageScope = (packageName, searchResults) => {
   );
 };
 
-// Filters out duplicated transtations that are not in use
+// Filters out duplicated translations that are not in use
 const getValuesToMerge = keyUsage =>
   keyUsage
     .map(value => value.dups.filter(dup => dup.resultsCount > 0))
