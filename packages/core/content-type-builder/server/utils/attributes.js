@@ -33,7 +33,7 @@ const formatAttributes = model => {
 };
 
 /**
- * Fromats a component attribute
+ * Formats a component attribute
  * @param {string} key - the attribute key
  * @param {Object} attribute - the attribute
  * @param {Object} context - function context
