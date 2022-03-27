@@ -12,7 +12,7 @@
   "control-card.save": "保存",
   "filter.add": "フィルタを追加",
   "form.button.replace-media": "メディアの置き換え",
-  "form.input.decription.file-alt": "このテキストはアセットを表示できない場合に表示されます。",
+  "form.input.description.file-alt": "このテキストはアセットを表示できない場合に表示されます。",
   "form.input.label.file-alt": "代替テキスト",
   "form.input.label.file-caption": "キャプション",
   "form.input.label.file-name": "ファイル名",

@@ -247,7 +247,7 @@ export const EditAssetDialog = ({
                       })}
                       name="alternativeText"
                       hint={formatMessage({
-                        id: getTrad('form.input.decription.file-alt'),
+                        id: getTrad('form.input.description.file-alt'),
                         defaultMessage: 'This text will be displayed if the asset can’t be shown.',
                       })}
                       value={values.alternativeText}

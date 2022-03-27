@@ -15,7 +15,7 @@
   "control-card.stop-crop": "Zuschneiden abbrechen",
   "filter.add": "Filter hinzufügen",
   "form.button.replace-media": "Datei ersetzen",
-  "form.input.decription.file-alt": "Dieser Text wird angezeigt, wenn das Datei nicht angezeigt werden kann.",
+  "form.input.description.file-alt": "Dieser Text wird angezeigt, wenn das Datei nicht angezeigt werden kann.",
   "form.input.label.file-alt": "Alternativtext",
   "form.input.label.file-caption": "Bildtext",
   "form.input.label.file-name": "Dateiname",

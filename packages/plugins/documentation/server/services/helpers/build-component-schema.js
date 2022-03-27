@@ -7,7 +7,7 @@ const pascalCase = require('./utils/pascal-case');
 const { hasFindMethod, isLocalizedPath } = require('./utils/routes');
 
 /**
- * @decription Get all open api schema objects for a given content type
+ * @description Get all open api schema objects for a given content type
  *
  * @param {object} apiInfo
  * @property {string} apiInfo.uniqueName - Api name | Api name + Content type name

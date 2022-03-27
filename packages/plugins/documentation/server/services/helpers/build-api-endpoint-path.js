@@ -146,7 +146,7 @@ const getPaths = ({ routeInfo, uniqueName, contentTypeInfo }) => {
 };
 
 /**
- * @decription Gets all open api paths object for a given content type
+ * @description Gets all open api paths object for a given content type
  *
  * @param {object} apiInfo
  *
