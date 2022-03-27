@@ -9,7 +9,7 @@ const options = [
     label: 'All',
     children: [
       { label: 'images (JPEG, PNG, GIF, SVG, TIFF, ICO, DVU)', value: 'images' },
-      { label: 'videos (MPEG, MP4, Quicktime, WMV, AVI, FLV)', value: 'videos' },
+      { label: 'videos (MPEG, MP4, QuickTime, WMV, AVI, FLV)', value: 'videos' },
       { label: 'audios (MP3, WAV, OGG)', value: 'audios' },
       { label: 'files (CSV, ZIP, PDF, Excel, JSON, ...)', value: 'files' },
     ],
