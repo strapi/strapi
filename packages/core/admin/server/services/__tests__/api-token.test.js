@@ -298,11 +298,11 @@ describe('API Token', () => {
         },
       };
 
-      const res = await apiTokenService.getByName('unexistant-name');
+      const res = await apiTokenService.getByName('nonexistent-name');
 
       expect(findOne).toHaveBeenCalledWith({
         select: ['id', 'name', 'description', 'type', 'createdAt'],
-        where: { name: 'unexistant-name' },
+        where: { name: 'nonexistent-name' },
       });
       expect(res).toEqual(null);
     });
