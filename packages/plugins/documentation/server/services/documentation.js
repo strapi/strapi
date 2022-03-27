@@ -6,7 +6,7 @@ const _ = require('lodash');
 const { getAbsoluteServerUrl } = require('@strapi/utils');
 
 const defaultPluginConfig = require('../config/default-plugin-config');
-const { builApiEndpointPath, buildComponentSchema } = require('./helpers');
+const { buildApiEndpointPath, buildComponentSchema } = require('./helpers');
 
 module.exports = ({ strapi }) => {
   const config = strapi.config.get('plugin.documentation');
@@ -141,7 +141,7 @@ module.exports = ({ strapi }) => {
 
         const apiDocPath = path.join(apiDirPath, `${apiName}.json`);
 
-        const apiPath = builApiEndpointPath(api);
+        const apiPath = buildApiEndpointPath(api);
 
         if (!apiPath) {
           continue;
