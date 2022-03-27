@@ -1221,7 +1221,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                                 class="c57"
                                 id="email_reset_password"
                                 name="email_reset_password"
-                                placeholder="ex: https://youtfrontend.com/reset-password"
+                                placeholder="ex: https://yourfrontend.com/reset-password"
                                 type="text"
                                 value="https://cat-bounce.com/"
                               />
@@ -1348,7 +1348,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                                 class="c60"
                                 id="email_confirmation_redirection"
                                 name="email_confirmation_redirection"
-                                placeholder="ex: https://youtfrontend.com/email-confirmation"
+                                placeholder="ex: https://yourfrontend.com/email-confirmation"
                                 type="text"
                                 value=""
                               />
