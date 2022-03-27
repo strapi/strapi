@@ -72,7 +72,7 @@ const deleteCategory = async name => {
 
 /**
  * Checks if a category exists
- * @param {string} name category name to serach for
+ * @param {string} name category name to search for
  */
 const categoryExists = name => {
   const matchingIndex = Object.values(strapi.components).findIndex(
