@@ -135,7 +135,7 @@ const layout = [
           key: 'pizza',
           value: 'pizza',
           metadatas: {
-            intlLabel: { id: 'pizza-label', defaultMessage: 'Pizzza' },
+            intlLabel: { id: 'pizza-label', defaultMessage: 'Pizza' },
             disabled: false,
             hidden: false,
           },
