@@ -87,7 +87,7 @@ try {
 
 ### `getInstance()`
 
-Use it if you need direct access to the Sentry instance, which should already already be initialized. It's useful if `sendError` doesn't suit your needs.
+Use it if you need direct access to the Sentry instance, which should already be initialized. It's useful if `sendError` doesn't suit your needs.
 
 **Example**
 
