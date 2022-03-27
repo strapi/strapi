@@ -4,7 +4,7 @@ import produce from 'immer';
 // NOTE: instead of creating a shared reducer here, we could also create a hook
 // that returns the dispatch and the state, however it will mess with the linter
 // and force us to either disable the linter for the hooks dependencies array rule or
-// require us to add the dispatch to the array wich is not wanted. This refacto does not require us to
+// require us to add the dispatch to the array wich is not wanted. This refactor does not require us to
 // to do any of this.
 
 import {
