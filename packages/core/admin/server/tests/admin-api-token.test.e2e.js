@@ -15,11 +15,11 @@ const { createAuthRequest } = require('../../../../../test/helpers/request');
  * 5. Creates an api token with trimmed description and name (successfully)
  * 6. List all tokens (successfully)
  * 7. Deletes a token (successfully)
- * 8. Does not return an error if the ressource to delete does not exist
+ * 8. Does not return an error if the resource to delete does not exist
  * 9. Retrieves a token (successfully)
- * 10. Returns a 404 if the ressource to retrieve does not exist
+ * 10. Returns a 404 if the resource to retrieve does not exist
  * 11. Updates a token (successfully)
- * 12. Returns a 404 if the ressource to update does not exist
+ * 12. Returns a 404 if the resource to update does not exist
  * 13. Updates a token with partial payload (successfully)
  * 14. Fails to update an api token (invalid `type` in the body)
  * 15. Updates a token when passing a `null` description (successfully)
@@ -234,7 +234,7 @@ describe('Admin API Token CRUD (e2e)', () => {
     });
   });
 
-  test('8. Does not return an error if the ressource to delete does not exist', async () => {
+  test('8. Does not return an error if the resource to delete does not exist', async () => {
     const res = await rq({
       url: '/admin/api-tokens/42',
       method: 'DELETE',
@@ -260,7 +260,7 @@ describe('Admin API Token CRUD (e2e)', () => {
     });
   });
 
-  test('10. Returns a 404 if the ressource to retrieve does not exist', async () => {
+  test('10. Returns a 404 if the resource to retrieve does not exist', async () => {
     const res = await rq({
       url: '/admin/api-tokens/42',
       method: 'GET',
@@ -303,7 +303,7 @@ describe('Admin API Token CRUD (e2e)', () => {
     apiTokens[0] = res.body.data;
   });
 
-  test('12. Returns a 404 if the ressource to update does not exist', async () => {
+  test('12. Returns a 404 if the resource to update does not exist', async () => {
     const body = {
       name: 'api-token_tests-updated-name',
       description: 'api-token_tests-updated-description',
