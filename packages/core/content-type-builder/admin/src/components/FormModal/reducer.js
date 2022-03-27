@@ -57,7 +57,7 @@ const reducer = (state = initialState, action) =>
         const modifiedData = state.modifiedData;
 
         // Don't change the relation type if the allowed relations are not restricted
-        // TODO: replace with an obj { relation: 'x', bidirctional: true|false } when BE ready
+        // TODO: replace with an obj { relation: 'x', bidirectional: true|false } when BE ready
         if (Array.isArray(targetContentTypeAllowedRelations)) {
           const currentRelationType = getRelationType(
             modifiedData.relation,
