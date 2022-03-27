@@ -147,7 +147,7 @@ const hasPermissionsTestData = {
         conditions: null,
       },
       {
-        action: 'plugin::upload.assets.dowload',
+        action: 'plugin::upload.assets.download',
         subject: null,
         properties: {},
         conditions: null,
@@ -335,7 +335,7 @@ const hasPermissionsTestData = {
         conditions: [],
       },
       {
-        action: 'plugin::upload.assets.dowload',
+        action: 'plugin::upload.assets.download',
         subject: null,
         properties: {},
         conditions: [],
