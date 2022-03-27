@@ -735,7 +735,7 @@ describe('i18n settings page', () => {
     // it('shows an success toast when adding a locale is successful', async () => {
     //   request.mockImplementation((url, opts) => {
     //     if (opts.method === 'POST') {
-    //       return Promise.resolve({ id: 3, code: 'en-CA', name: 'Canadien' });
+    //       return Promise.resolve({ id: 3, code: 'en-CA', name: 'Canadian' });
     //     }
     //     if (url.includes('/i18n/locales')) return Promise.resolve([]);
 
