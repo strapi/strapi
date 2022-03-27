@@ -6,7 +6,7 @@ describe('stringifyDeep', () => {
   test('Stringifies recursively', () => {
     const input = {
       property: 15,
-      subOjbect: {
+      subObject: {
         property: 'test',
         number: 81,
         boolean: true,
@@ -16,7 +16,7 @@ describe('stringifyDeep', () => {
 
     expect(stringifyDeep(input)).toStrictEqual({
       property: '15',
-      subOjbect: {
+      subObject: {
         property: 'test',
         number: '81',
         boolean: 'true',
