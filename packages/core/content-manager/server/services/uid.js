@@ -29,19 +29,19 @@ module.exports = ({ strapi }) => ({
   async findUniqueUID({ contentTypeUID, field, value }) {
     const query = strapi.db.query(contentTypeUID);
 
-    const possibleColisions = await query
+    const possibleCollisions = await query
       .findMany({
         where: { [field]: { $contains: value } },
       })
       .then(results => results.map(result => result[field]));
 
-    if (possibleColisions.length === 0) {
+    if (possibleCollisions.length === 0) {
       return value;
     }
 
     let i = 1;
     let tmpUId = `${value}-${i}`;
-    while (possibleColisions.includes(tmpUId)) {
+    while (possibleCollisions.includes(tmpUId)) {
       i += 1;
       tmpUId = `${value}-${i}`;
     }
