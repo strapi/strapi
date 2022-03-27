@@ -117,7 +117,7 @@ export const SettingsPage = () => {
       <Helmet
         title={formatMessage({
           id: getTrad('page.title'),
-          defaultMessage: 'Settings - Media Libray',
+          defaultMessage: 'Settings - Media Library',
         })}
       />
       <form onSubmit={handleSubmit}>
