@@ -109,7 +109,7 @@ describe('ADMIN | COMPONENTS | Permissions | utils', () => {
 
   describe('createChildrenDefaultForm', () => {
     it('should return an object with all the leafs set to false', () => {
-      const chilrenForm = [
+      const childrenForm = [
         {
           subCategoryName: 'general',
           subCategoryId: 'general',
@@ -175,7 +175,7 @@ describe('ADMIN | COMPONENTS | Permissions | utils', () => {
         },
       };
 
-      expect(createChildrenDefaultForm(chilrenForm, conditions, [])).toEqual(expected);
+      expect(createChildrenDefaultForm(childrenForm, conditions, [])).toEqual(expected);
     });
   });
 
