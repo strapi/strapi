@@ -40,8 +40,8 @@ describe('Single Types', () => {
               find() {
                 return Promise.resolve();
               },
-              assocCreatorRoles(enitty) {
-                return enitty;
+              assocCreatorRoles(entity) {
+                return entity;
               },
             },
             'permission-checker': {
@@ -132,8 +132,8 @@ describe('Single Types', () => {
               find() {
                 return Promise.resolve();
               },
-              assocCreatorRoles(enitty) {
-                return enitty;
+              assocCreatorRoles(entity) {
+                return entity;
               },
               create: createFn,
             },
@@ -243,8 +243,8 @@ describe('Single Types', () => {
               find() {
                 return Promise.resolve(entity);
               },
-              assocCreatorRoles(enitty) {
-                return enitty;
+              assocCreatorRoles(entity) {
+                return entity;
               },
               delete: deleteFn,
             },
@@ -337,8 +337,8 @@ describe('Single Types', () => {
               find() {
                 return Promise.resolve(entity);
               },
-              assocCreatorRoles(enitty) {
-                return enitty;
+              assocCreatorRoles(entity) {
+                return entity;
               },
               publish: publishFn,
             },
@@ -431,8 +431,8 @@ describe('Single Types', () => {
               find() {
                 return Promise.resolve(entity);
               },
-              assocCreatorRoles(enitty) {
-                return enitty;
+              assocCreatorRoles(entity) {
+                return entity;
               },
               unpublish: unpublishFn,
             },
