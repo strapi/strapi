@@ -136,7 +136,7 @@ const reducer = (state, action) =>
        *  }
        * }
        *
-       * The value of the create checkbox for the restaurant will be ƒalse since not all its children have
+       * The value of the create checkbox for the restaurant will be false since not all its children have
        * truthy values and in order to set its value to true when need to have all the values of its children set to true.
        *
        * Similarly, we can reuse the logic for the components attributes
