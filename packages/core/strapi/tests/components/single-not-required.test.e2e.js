@@ -375,7 +375,7 @@ describe('Non repeatable and Not required component', () => {
       expect(updateRes.statusCode).toBe(400);
     });
 
-    test('Updates component if previsous component id is sent', async () => {
+    test('Updates component if previous component id is sent', async () => {
       const res = await rq.post('/', {
         body: {
           data: {
