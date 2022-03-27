@@ -7,7 +7,7 @@ const { resolveMiddlewares } = require('./middleware');
 /**
  * @typedef {import('../../').Strapi} Strapi
  * @typedef {Array<string|{name?: string, resolve?: string, config: any}>} MiddlewaresConfig
- * @typedef {Array<{name: string, hanlder: Function}>} Middlewares
+ * @typedef {Array<{name: string, handler: Function}>} Middlewares
  */
 
 const defaultConfig = [
