@@ -43,7 +43,7 @@ module.exports = async function({ file: filePath, pretty }) {
   output.write('\n');
   output.end();
 
-  // log success only when writting to file
+  // log success only when writing to file
   if (filePath) {
     console.log(`Successfully exported ${exportData.length} configuration entries`);
   }
