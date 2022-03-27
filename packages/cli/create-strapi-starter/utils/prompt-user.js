@@ -5,7 +5,7 @@ const inquirer = require('inquirer');
 /**
  * @param {string|null} projectName - The name/path of project
  * @param {string|null} starterUrl - The GitHub repo of the starter
- * @returns Object containting prompt answers
+ * @returns Object containing prompt answers
  */
 module.exports = async function promptUser(projectName, starter, program) {
   const mainQuestions = [
