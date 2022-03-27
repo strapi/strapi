@@ -42,13 +42,17 @@ describe('Email validator', () => {
       const validator = strapiUtils.validateYupSchema(
         validators.email(
           {
-            attr: { type: 'string', required: true },
+            attr: { type: 'string', required: true, regex: '^\\w+$' },
           },
           { isDraft: false }
         )
       );
 
-      expect(await validator('valid@email.com')).not.toBe('');
+      try {
+        await validator('');
+      } catch (err) {
+        expect(err).toBeInstanceOf(YupValidationError);
+      }
     });
   });
 });
