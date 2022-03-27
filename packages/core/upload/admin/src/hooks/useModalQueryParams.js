@@ -27,7 +27,7 @@ const useModalQueryParams = initialState => {
     setQueryObject(prev => ({ ...prev, pageSize: parseInt(pageSize, 10), page: 1 }));
   };
 
-  const handeChangePage = page => {
+  const handleChangePage = page => {
     setQueryObject(prev => ({ ...prev, page }));
   };
 
@@ -64,7 +64,7 @@ const useModalQueryParams = initialState => {
     {
       onChangeFilters: handleChangeFilters,
       onChangeFolder: handleChangeFolder,
-      onChangePage: handeChangePage,
+      onChangePage: handleChangePage,
       onChangePageSize: handleChangePageSize,
       onChangeSort: handleChangeSort,
       onChangeSearch: handleChangeSearch,
