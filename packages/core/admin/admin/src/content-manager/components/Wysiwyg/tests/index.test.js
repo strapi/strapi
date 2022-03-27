@@ -1591,7 +1591,7 @@ Code
     fireEvent.click(renderedContainer.querySelector('#preview'));
     fireEvent.click(renderedContainer.querySelector('#more'));
 
-    expect(document.getElementById('NumbertList')).not.toBeInTheDocument();
+    expect(document.getElementById('NumberList')).not.toBeInTheDocument();
   });
 
   it('should disable code button when editor is on preview mode', async () => {
