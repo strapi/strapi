@@ -86,7 +86,7 @@
     },
     "dynamiczone": {
       "type": "dynamiczone",
-      "components": ["basic.simple"]
+      "components": ["basic.simple", "plg-cookbook.recipe"]
     },
     "one_way_tag": {
       "type": "relation",

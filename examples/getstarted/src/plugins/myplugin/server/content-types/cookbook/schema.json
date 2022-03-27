@@ -1,0 +1,26 @@
+{
+  "info": {
+    "displayName": "Cookbook Notebook",
+    "singularName": "cookbook",
+    "pluralName": "cookbooks",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true,
+      "unique": true,
+      "configurable": true
+    },
+    "customComponent": {
+      "type": "dynamiczone",
+      "components": [
+        "plg-cookbook.recipe",
+        "plg-cookbook.note"
+      ]
+    }
+  }
+}

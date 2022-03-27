@@ -6,6 +6,7 @@
   "strapi": {
     "name": "my-plugin",
     "description": "Description of my plugin.",
-    "kind": "plugin"
+    "kind": "plugin",
+    "componentsPrefix": "plg"
   }
 }

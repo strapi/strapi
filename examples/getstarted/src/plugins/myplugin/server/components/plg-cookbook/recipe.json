@@ -1,0 +1,19 @@
+{
+  "collectionName": "components_myplugin_recipe",
+  "info": {
+    "displayName": "Recipe",
+    "icon": "cheese"
+  },
+  "options": {},
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "ingredients": {
+      "displayName": "Fields",
+      "type": "component",
+      "repeatable": true,
+      "component": "plg-cookbook.ingredient"
+    }
+  }
+}

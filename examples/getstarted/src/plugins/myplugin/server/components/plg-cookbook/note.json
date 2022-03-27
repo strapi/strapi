@@ -1,0 +1,16 @@
+{
+  "collectionName": "components_myplugin_note",
+  "info": {
+    "displayName": "Note",
+    "icon": "pencil-alt"
+  },
+  "options": {},
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "note": {
+      "type": "richtext"
+    }
+  }
+}

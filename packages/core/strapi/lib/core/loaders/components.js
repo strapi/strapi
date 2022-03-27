@@ -5,20 +5,18 @@ const _ = require('lodash');
 const { pathExists } = require('fs-extra');
 const loadFiles = require('../../load/load-files');
 
-module.exports = async strapi => {
-  if (!(await pathExists(strapi.dirs.components))) {
-    return {};
-  }
+module.exports = async (strapi) => {
+  const localComponentsMap = await loadLocalComponents(strapi);
+  const pluginComponentsMap = await loadPluginComponents(strapi);
 
-  const map = await loadFiles(strapi.dirs.components, '*/*.*(js|json)');
+  const map = _.defaultsDeep(localComponentsMap, pluginComponentsMap);
 
   return Object.keys(map).reduce((acc, category) => {
-    Object.keys(map[category]).forEach(key => {
+    Object.keys(map[category]).forEach((key) => {
       const schema = map[category][key];
 
-      const filePath = join(strapi.dirs.components, category, schema.__filename__);
-
       if (!schema.collectionName) {
+        const filePath = join(strapi.dirs.components, category, schema.__filename__);
         return strapi.stopWithError(
           `Component ${key} is missing a "collectionName" property.\nVerify file ${filePath}.`
         );
@@ -39,3 +37,41 @@ module.exports = async strapi => {
     return acc;
   }, {});
 };
+
+const loadPluginComponents = async (strapi) => {
+  const plugins = strapi.config.get('enabledPlugins');
+
+  if (!plugins) {
+    return {};
+  }
+
+  let components = {};
+
+  for (let plugin in plugins) {
+    const pluginConfig = plugins[plugin];
+    const componentsDir = join(pluginConfig.pathToPlugin, 'server', 'components');
+
+    if (await pathExists(componentsDir)) {
+      const componentCategories = await loadFiles(componentsDir, '*/*.*(js|json)');
+      const prefix = `${pluginConfig.info.componentsPrefix || plugin}-`;
+      const prefixedCategoriesMap = _.mapKeys(componentCategories, (_, key) => {
+        if (key.startsWith(prefix)) {
+          return key;
+        }
+        return `${prefix}${key}`;
+      });
+      _.merge(components, prefixedCategoriesMap);
+    }
+  }
+
+  return components;
+};
+
+async function loadLocalComponents(strapi) {
+  let localComponentsMap = {};
+
+  if (await pathExists(strapi.dirs.components)) {
+    localComponentsMap = await loadFiles(strapi.dirs.components, '*/*.*(js|json)');
+  }
+  return localComponentsMap;
+}

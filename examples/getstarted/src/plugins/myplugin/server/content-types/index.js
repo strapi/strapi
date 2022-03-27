@@ -2,4 +2,5 @@
 
 module.exports = {
   test: require('./test'),
+  cookbook: require('./cookbook'),
 };

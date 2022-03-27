@@ -1,0 +1,20 @@
+{
+  "collectionName": "components_myplugin_ingredient",
+  "info": {
+    "displayName": "Ingredient",
+    "icon": "vial"
+  },
+  "options": {},
+  "attributes": {
+    "name": {
+      "type": "string"
+    },
+    "amount": {
+      "type": "integer"
+    },
+    "unit": {
+      "type": "enumeration",
+      "enum": ["g", "ml", "kg", "unit", "cups"]
+    }
+  }
+}
