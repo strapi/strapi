@@ -1015,7 +1015,7 @@ describe('Filtering API', () => {
     });
   });
 
-  describe('Implict or', () => {
+  describe('Implicit or', () => {
     test('Filter equals', async () => {
       const res = await rq({
         method: 'GET',
