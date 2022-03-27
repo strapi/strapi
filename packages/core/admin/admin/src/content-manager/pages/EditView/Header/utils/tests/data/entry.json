@@ -37,7 +37,7 @@
   "updatedAt": "2020-09-01T14:47:53.627Z",
   "closing_period": {
     "id": 1,
-    "label": "closing labe",
+    "label": "closing label",
     "start_date": "2020-09-02",
     "end_date": "2020-09-02",
     "dish": {
