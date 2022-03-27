@@ -96,7 +96,7 @@ const findLayouts = (allLayouts, subjects) => {
 };
 
 /**
- * Creates the default for for a content type
+ * Creates the default for a content type
  * @param {object} layout.subjects All the content types to display
  * @param {array<object>} actionArray An action has the following shape:
  * action = {label: 'string', actionId: 'string', subjects: [object], applyToProperties: ['string]}
