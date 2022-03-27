@@ -93,7 +93,7 @@ const Header = ({
     const isPublishButtonLoading = isPublished
       ? status === 'unpublish-pending'
       : status === 'publish-pending';
-    const pubishButtonLabel = isPublished
+    const publishButtonLabel = isPublished
       ? { id: 'app.utils.unpublish', defaultMessage: 'Unpublish' }
       : { id: 'app.utils.publish', defaultMessage: 'Publish' };
 
@@ -119,7 +119,7 @@ const Header = ({
             startIcon={<Check />}
             variant="secondary"
           >
-            {formatMessage(pubishButtonLabel)}
+            {formatMessage(publishButtonLabel)}
           </Button>
         )}
         <Box paddingLeft={shouldShowPublishButton ? 2 : 0}>
