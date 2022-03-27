@@ -39,7 +39,7 @@ export const ProvidersPage = () => {
   const { trackUsage } = useTracking();
   const trackUsageRef = useRef(trackUsage);
   const [isOpen, setIsOpen] = useState(false);
-  const [isSubmiting, setIsSubmiting] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [providerToEditName, setProviderToEditName] = useState(null);
   const toggleNotification = useNotification();
   const { lockApp, unlockApp } = useOverlayBlocker();
@@ -80,7 +80,7 @@ export const ProvidersPage = () => {
       });
 
       trackUsageRef.current('didEditAuthenticationProvider');
-      setIsSubmiting(false);
+      setIsSubmitting(false);
       handleToggleModal();
       unlockApp();
     },
@@ -90,7 +90,7 @@ export const ProvidersPage = () => {
         message: { id: 'notification.error' },
       });
       unlockApp();
-      setIsSubmiting(false);
+      setIsSubmitting(false);
     },
     refetchActive: false,
   });
@@ -138,7 +138,7 @@ export const ProvidersPage = () => {
   };
 
   const handleSubmit = async values => {
-    setIsSubmiting(true);
+    setIsSubmitting(true);
 
     lockApp();
 
@@ -248,7 +248,7 @@ export const ProvidersPage = () => {
       <FormModal
         initialData={modifiedData[providerToEditName]}
         isOpen={isOpen}
-        isSubmiting={isSubmiting}
+        isSubmitting={isSubmitting}
         layout={layoutToRender}
         headerBreadcrumbs={[
           formatMessage({

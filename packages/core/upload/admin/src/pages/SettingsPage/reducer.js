@@ -3,7 +3,7 @@ import set from 'lodash/set';
 
 const initialState = {
   isLoading: true,
-  isSubmiting: false,
+  isSubmitting: false,
   initialData: {
     responsiveDimensions: true,
     sizeOptimization: true,
@@ -37,16 +37,16 @@ const reducer = (state, action) =>
         break;
       }
       case 'ON_SUBMIT': {
-        drafState.isSubmiting = true;
+        drafState.isSubmitting = true;
         break;
       }
       case 'SUBMIT_SUCCEEDED': {
         drafState.initialData = state.modifiedData;
-        drafState.isSubmiting = false;
+        drafState.isSubmitting = false;
         break;
       }
       case 'ON_SUBMIT_ERROR': {
-        drafState.isSubmiting = false;
+        drafState.isSubmitting = false;
         break;
       }
       default:

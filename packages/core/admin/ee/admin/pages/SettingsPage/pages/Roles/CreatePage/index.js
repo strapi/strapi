@@ -47,7 +47,7 @@ const CreatePage = () => {
   const toggleNotification = useNotification();
   const { lockApp, unlockApp } = useOverlayBlocker();
   const { formatMessage } = useIntl();
-  const [isSubmitting, setIsSubmiting] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { replace } = useHistory();
   const permissionsRef = useRef();
   const { trackUsage } = useTracking();
@@ -58,7 +58,7 @@ const CreatePage = () => {
 
   const handleCreateRoleSubmit = data => {
     lockApp();
-    setIsSubmiting(true);
+    setIsSubmitting(true);
 
     if (id) {
       trackUsage('willDuplicateRole');
@@ -91,7 +91,7 @@ const CreatePage = () => {
         return res;
       })
       .then(res => {
-        setIsSubmiting(false);
+        setIsSubmitting(false);
         toggleNotification({
           type: 'success',
           message: { id: 'Settings.roles.created', defaultMessage: 'created' },
@@ -100,7 +100,7 @@ const CreatePage = () => {
       })
       .catch(err => {
         console.error(err);
-        setIsSubmiting(false);
+        setIsSubmitting(false);
         toggleNotification({
           type: 'warning',
           message: { id: 'notification.error' },

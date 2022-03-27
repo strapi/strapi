@@ -22,7 +22,7 @@ const makeApp = (layout = { forms: [], schema: {} }, isOpen = false) => {
           onToggle={jest.fn()}
           headerBreadcrumbs={['Edit', 'Email']}
           onSubmit={jest.fn()}
-          isSubmiting={false}
+          isSubmitting={false}
           initialData={{}}
           providerToEditName="test"
         />

@@ -24,7 +24,7 @@ import Input from './Input';
 const FormModal = ({
   headerBreadcrumbs,
   initialData,
-  isSubmiting,
+  isSubmitting,
   layout,
   isOpen,
   onSubmit,
@@ -87,7 +87,7 @@ const FormModal = ({
                 }
                 endActions={
                   <>
-                    <Button type="submit" loading={isSubmiting}>
+                    <Button type="submit" loading={isSubmitting}>
                       {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}
                     </Button>
                   </>
@@ -114,7 +114,7 @@ FormModal.propTypes = {
     schema: PropTypes.object,
   }).isRequired,
   isOpen: PropTypes.bool.isRequired,
-  isSubmiting: PropTypes.bool.isRequired,
+  isSubmitting: PropTypes.bool.isRequired,
   onSubmit: PropTypes.func.isRequired,
   onToggle: PropTypes.func.isRequired,
   providerToEditName: PropTypes.string,
