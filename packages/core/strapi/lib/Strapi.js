@@ -488,7 +488,7 @@ class Strapi {
       configurable: true,
       enumerable: true,
       set(value) {
-        // Special state when the reloader is disabled temporarly (see GraphQL plugin example).
+        // Special state when the reloader is disabled temporarily (see GraphQL plugin example).
         if (state.isWatching === false && value === true) {
           state.shouldReload += 1;
         }
