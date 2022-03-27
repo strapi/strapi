@@ -137,7 +137,7 @@
   "modalForm.sub-header.chooseAttribute.singleType": "Выберите поле для вашего отдельного типа",
   "modelPage.attribute.relation-polymorphic": "Связь (полиморфная)",
   "modelPage.attribute.relationWith": "Связь с",
-  "notification.info.autoreaload-disable": "Для использования этого плагина требуется функция автоматической загрузки. Запустите свой сервер с помощью `strapi develop`",
+  "notification.info.autoreload-disable": "Для использования этого плагина требуется функция автоматической загрузки. Запустите свой сервер с помощью `strapi develop`",
   "notification.info.creating.notSaved": "Пожалуйста, сохраните изменения перед созданием нового компонента типа контента ",
   "plugin.description.long": "Моделируйте структуру данных вашего API. Создавайте новые поля и связи всего за минуту. Файлы в вашем проекте создаются и обновляются автоматически.",
   "plugin.description.short": "Моделируйте структуру данных вашего API.",

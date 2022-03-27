@@ -135,7 +135,7 @@
   "modalForm.sub-header.chooseAttribute.singleType": "Pilih bidang untuk tipe tunggal Anda",
   "modelPage.attribute.relation-polymorphic": "Hubungan (polimorfik)",
   "modelPage.attribute.relationWith": "Hubungan dengan",
-  "notification.info.autoreaload-disable": "Fitur autoReload diperlukan untuk menggunakan plugin ini. Mulai server Anda dengan `strapi develop`",
+  "notification.info.autoreload-disable": "Fitur autoReload diperlukan untuk menggunakan plugin ini. Mulai server Anda dengan `strapi develop`",
   "notification.info.creating.notSaved": "Harap simpan pekerjaan Anda sebelum membuat jenis atau komponen koleksi baru",
   "plugin.description.long": "Buat model struktur data API Anda. Buat bidang dan relasi baru hanya dalam satu menit. File secara otomatis dibuat dan diperbarui dalam proyek Anda.",
   "plugin.description.short": "Buat model struktur data API Anda.",

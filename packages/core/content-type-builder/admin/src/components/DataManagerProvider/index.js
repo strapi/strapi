@@ -153,7 +153,7 @@ const DataManagerProvider = ({
     if (!autoReload) {
       toggleNotification({
         type: 'info',
-        message: { id: getTrad('notification.info.autoreaload-disable') },
+        message: { id: getTrad('notification.info.autoreload-disable') },
       });
     }
   }, [autoReload, toggleNotification]);

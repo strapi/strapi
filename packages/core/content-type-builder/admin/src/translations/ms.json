@@ -132,7 +132,7 @@
   "modalForm.sub-header.chooseAttribute.singleType": "Pilih ruang untuk jenis tunggal anda",
   "modelPage.attribute.relation-polymorphic": "Perhubung (polimorfik)",
   "modelPage.attribute.relationWith": "Terhubung dengan",
-  "notification.info.autoreaload-disable": "Ciri autoReload diperlukan untuk menggunakan plugin ini. Mulakan pelayan anda dengan `strapi Develop`",
+  "notification.info.autoreload-disable": "Ciri autoReload diperlukan untuk menggunakan plugin ini. Mulakan pelayan anda dengan `strapi Develop`",
   "notification.info.creating.notSaved": "Sila simpan kerja anda sebelum tambah jenis koleksi atau komponen baru",
   "plugin.description.long": "Memodelkan struktur data API anda. Buat ruang dan hubungan baru hanya dalam satu minit. Fail dibuat dan dikemas kini secara automatik dalam projek anda .",
   "plugin.description.short": "Memodelkan struktur data API anda .",

@@ -110,7 +110,7 @@
   "modalForm.sub-header.chooseAttribute.collectionType": "为您的 Content Type 选择一个字段",
   "modalForm.sub-header.chooseAttribute.component": "为您的组件选择一个字段",
   "modelPage.attribute.relationWith": "关联",
-  "notification.info.autoreaload-disable": "要使用此插件，需要自动重载功能。请使用 `strapi develop` 启动服务",
+  "notification.info.autoreload-disable": "要使用此插件，需要自动重载功能。请使用 `strapi develop` 启动服务",
   "notification.info.creating.notSaved": "在创建新的内容类型或组件之前，请保存您的工作",
   "plugin.description.long": "给你的 API 的数据结构建模. 快速的创造新的字段(fields)和关系(relations)。将会自动在项目中创建和更新文件。",
   "plugin.description.short": "给你的 API 的数据结构建模",

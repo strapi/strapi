@@ -135,7 +135,7 @@
   "modalForm.sub-header.chooseAttribute.singleType": "Vyberte typ políčka pre jednorazový typ",
   "modelPage.attribute.relation-polymorphic": "Prepojenie (polymorfné)",
   "modelPage.attribute.relationWith": "Prepojenie s",
-  "notification.info.autoreaload-disable": "Funkcionalita AutoReload je povinná pre použitie tohto pluginu. Spustite Váš server pomocou príkazu `strapi develop`",
+  "notification.info.autoreload-disable": "Funkcionalita AutoReload je povinná pre použitie tohto pluginu. Spustite Váš server pomocou príkazu `strapi develop`",
   "notification.info.creating.notSaved": "Uložte zmeny pred vytvorením nového Typu obsahu alebo komponentu",
   "plugin.description.long": "Navrhnite štruktúru webu jednoducho. Vytvorte nové políčka a prepojenia behom pár sekúnd. Súbory sa automaticky vytvoria a upravia v rámci projektu.",
   "plugin.description.short": "Navrhnite štruktúru webu jednoducho.",

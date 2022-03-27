@@ -136,7 +136,7 @@
   "modalForm.sub-header.chooseAttribute.singleType": "Seleziona un campo per la tua Entità singola",
   "modelPage.attribute.relation-polymorphic": "Relazione (polimorfica)",
   "modelPage.attribute.relationWith": "Relazione con",
-  "notification.info.autoreaload-disable": "La funzionalità autoReload è richiesta per usare questo plugin. Avvia il tuo server con `strapi develop`",
+  "notification.info.autoreload-disable": "La funzionalità autoReload è richiesta per usare questo plugin. Avvia il tuo server con `strapi develop`",
   "notification.info.creating.notSaved": "Per favore, salva il tuo lavoro prima di creare nuovi Tipi di Contenuto o componenti",
   "plugin.description.long": "Modella la struttura dei dati delle tue API. Crea nuovi campi e relazioni in maniera visuale. I file vengono automaticamente creati e aggiornati nel tuo progetto.",
   "plugin.description.short": "Modella la struttura dei dati delle tue API.",

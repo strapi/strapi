@@ -148,7 +148,7 @@
   "modalForm.sub-header.chooseAttribute.singleType": "싱글 타입에 추가할 필드를 선택해주세요.",
   "modelPage.attribute.relation-polymorphic": "릴레이션 (polymorphic)",
   "modelPage.attribute.relationWith": "관계",
-  "notification.info.autoreaload-disable": "이 플러그인을 사용하려면 autoReload 기능이 필요합니다. `strapi develop`로 서버를 시작해주세요.",
+  "notification.info.autoreload-disable": "이 플러그인을 사용하려면 autoReload 기능이 필요합니다. `strapi develop`로 서버를 시작해주세요.",
   "notification.info.creating.notSaved": "새 콜렉션 타입 또는 컴포넌트를 만들기 전에 작업을 저장해주세요.",
   "plugin.description.long": "API를 위한 데이터 구조를 모델링 합니다. 새로운 필드와 릴레이션을 간단히 만드세요. 자동으로 설정 파일이 만들어 지고 프로젝트에 추가됩니다.",
   "plugin.description.short": "API를 위한 데이터 구조를 모델링 합니다.",

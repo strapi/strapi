@@ -133,7 +133,7 @@
   "modalForm.sub-header.chooseAttribute.singleType": "เลือกฟิลด์สำหรับชนิดเดี่ยวของคุณ",
   "modelPage.attribute.relation-polymorphic": "ความสัมพันธ์ (polymorphic)",
   "modelPage.attribute.relationWith": "ความสัมพันธ์กับ",
-  "notification.info.autoreaload-disable": "คุณลักษณะ autoReload จำเป็นต้องมีเพื่อใช้ปลั๊กอินนี้ เริ่มทำงานเซิร์ฟเวอร์ของคุณด้วย `strapi develop`",
+  "notification.info.autoreload-disable": "คุณลักษณะ autoReload จำเป็นต้องมีเพื่อใช้ปลั๊กอินนี้ เริ่มทำงานเซิร์ฟเวอร์ของคุณด้วย `strapi develop`",
   "notification.info.creating.notSaved": "โปรดบันทึกงานของคุณก่อนการสร้างชนิดคอลเล็กชันหรือคอมโพเนนต์ใหม่",
   "plugin.description.long": "โมเดลโครงสร้างข้อมูลของ API ของคุณ สร้างฟิลด์ใหม่และความสัมพันธ์ในเวลาเพียงหนึ่งนาที ไฟล์จะถูกสร้างและอัพเดตโดยอัตโนมัติในโปรเจ็กต์ของคุณ",
   "plugin.description.short": "โมเดลโครงสร้างข้อมูลของ API ของคุณ",

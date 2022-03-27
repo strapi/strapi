@@ -158,7 +158,7 @@
   "modelPage.attribute.relation-polymorphic": "Beziehung (polymorph)",
   "modelPage.attribute.relationWith": "Beziehung mit",
   "notification.error.dynamiczone-min.validation": "Eine dynamische Zone braucht mindestens eine Komponente, bevor sie gespeichert werden kann",
-  "notification.info.autoreaload-disable": "Das autoReload-Feature wird für dieses Plugin benötigt. Starte deinen Server mit `strapi develop`",
+  "notification.info.autoreload-disable": "Das autoReload-Feature wird für dieses Plugin benötigt. Starte deinen Server mit `strapi develop`",
   "notification.info.creating.notSaved": "Bitte speichere deine Arbeit bevor du einen neuen Inhaltstyp oder eine neue Komponente erstellst",
   "plugin.description.long": "Modelliere die Datenstruktur deiner API. Lege neue Felder und Beziehungen innerhalb von einer Minute an. Erforderliche Dateien werden automatisch in deinem Projekt angelegt und aktualisiert.",
   "plugin.description.short": "Modelliere die Datenstruktur deiner API.",

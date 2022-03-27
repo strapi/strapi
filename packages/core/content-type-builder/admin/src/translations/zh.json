@@ -131,7 +131,7 @@
   "modalForm.sub-header.chooseAttribute.singleType": "選擇單一型別的一個欄位",
   "modelPage.attribute.relation-polymorphic": "關聯 (多對多多型)",
   "modelPage.attribute.relationWith": "關聯到",
-  "notification.info.autoreaload-disable": "啟用這個擴充模組需要重新啟動，使用 `strapi develop` 指令重新啟動",
+  "notification.info.autoreload-disable": "啟用這個擴充模組需要重新啟動，使用 `strapi develop` 指令重新啟動",
   "notification.info.creating.notSaved": "在建立新的集合型別或元件前請記得儲存",
   "plugin.description.long": "為您的 API 定義資料結構，使您輕鬆新增欄位和關聯結構，您所做的修改會自動更新專案。",
   "plugin.description.short": "為您的 API 定義資料結構",

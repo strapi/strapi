@@ -148,7 +148,7 @@
   "modalForm.sub-header.chooseAttribute.singleType": "Vælg et felt til din enkelt type",
   "modelPage.attribute.relation-polymorphic": "Relation (polymorphic)",
   "modelPage.attribute.relationWith": "Relation med",
-  "notification.info.autoreaload-disable": "AutoReload funktionen er påkrævet for at bruge dette plugin. Start din server med `strapi develop`",
+  "notification.info.autoreload-disable": "AutoReload funktionen er påkrævet for at bruge dette plugin. Start din server med `strapi develop`",
   "notification.info.creating.notSaved": "Gem venligst dit arbejde inden du opretter en dokument type eller komponent",
   "plugin.description.long": "Modellér data strukturen i dit API. Opret felter og relationer på få minutter. Filerne bliver automatisk oprettet og opdateret i dit projekt.",
   "plugin.description.short": "Modellér data strukturen i dit API.",

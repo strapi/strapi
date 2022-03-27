@@ -125,7 +125,7 @@
   "modalForm.sub-header.chooseAttribute.singleType": "Selecteer een veld voor het enkel type",
   "modelPage.attribute.relation-polymorphic": "Relatie (polymorf)",
   "modelPage.attribute.relationWith": "Relatie met",
-  "notification.info.autoreaload-disable": "De autoReload-functie is vereist om deze plug-in te gebruiken. Herstart de server met `strapi develop`",
+  "notification.info.autoreload-disable": "De autoReload-functie is vereist om deze plug-in te gebruiken. Herstart de server met `strapi develop`",
   "notification.info.creating.notSaved": "Sla het werk op voordat je een nieuw collectie type of component aanmaakt",
   "plugin.description.long": "Modelleer de gegevensstructuur van de API. Maak nieuwe velden en relaties in slechts een minuut. De bestanden worden automatisch aangemaakt en bijgewerkt in jouw project.",
   "plugin.description.short": "Modelleer de gegevensstructuur van de API",
