@@ -345,7 +345,7 @@ const createEntityManager = db => {
      * Attach relations to a new entity
      *
      * @param {EntityManager} em - entity manager instance
-     * @param {Metadata} metadata - model metadta
+     * @param {Metadata} metadata - model metadata
      * @param {ID} id - entity ID
      * @param {object} data - data received for creation
      */
@@ -504,7 +504,7 @@ const createEntityManager = db => {
      * Updates relations of an existing entity
      *
      * @param {EntityManager} em - entity manager instance
-     * @param {Metadata} metadata - model metadta
+     * @param {Metadata} metadata - model metadata
      * @param {ID} id - entity ID
      * @param {object} data - data received for creation
      */
@@ -692,7 +692,7 @@ const createEntityManager = db => {
      * NOTE: Most of the deletion should be handled by ON DELETE CASCADE for dialects that have FKs
      *
      * @param {EntityManager} em - entity manager instance
-     * @param {Metadata} metadata - model metadta
+     * @param {Metadata} metadata - model metadata
      * @param {ID} id - entity ID
      */
     // TODO: wrap Transaction

@@ -16,7 +16,7 @@ module.exports = (schema, opts = {}) =>
       settings: createSettingsSchema(schema)
         .default(null)
         .nullable(),
-      metadatas: createMetadasSchema(schema)
+      metadatas: createMetadataSchema(schema)
         .default(null)
         .nullable(),
       layouts: createLayoutsSchema(schema, opts)
@@ -58,7 +58,7 @@ const createSettingsSchema = schema => {
     .noUnknown();
 };
 
-const createMetadasSchema = schema => {
+const createMetadataSchema = schema => {
   return yup.object().shape(
     Object.keys(schema.attributes).reduce((acc, key) => {
       acc[key] = yup
