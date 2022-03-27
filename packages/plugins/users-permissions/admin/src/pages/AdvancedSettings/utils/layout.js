@@ -46,7 +46,7 @@ const layout = [
     },
     placeholder: {
       id: getTrad('EditForm.inputToggle.placeholder.email-reset-password'),
-      defaultMessage: 'ex: https://yourfrontend.com/reset-password',
+      defaultMessage: 'ex: https://yourfrontend.example.com/reset-password',
     },
     name: 'email_reset_password',
     type: 'text',
@@ -82,7 +82,7 @@ const layout = [
     },
     placeholder: {
       id: getTrad('EditForm.inputToggle.placeholder.email-confirmation-redirection'),
-      defaultMessage: 'ex: https://yourfrontend.com/email-confirmation',
+      defaultMessage: 'ex: https://yourfrontend.example.com/email-confirmation',
     },
     name: 'email_confirmation_redirection',
     type: 'text',
