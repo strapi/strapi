@@ -160,7 +160,7 @@ describe('Relations', () => {
       ]);
     });
 
-    test('Omit somes ids', async () => {
+    test('Omit some ids', async () => {
       const result = [
         {
           id: 1,
