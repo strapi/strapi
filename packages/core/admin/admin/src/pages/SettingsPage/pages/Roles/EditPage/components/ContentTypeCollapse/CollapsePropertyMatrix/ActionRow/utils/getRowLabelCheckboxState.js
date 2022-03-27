@@ -28,7 +28,7 @@ const getActionIdsFromPropertyActions = propertyActions => {
  * @param {string} targetKey
  * @returns {object}
  */
-const getRowLabelCheckboxeState = (
+const getRowLabelCheckboxState = (
   propertyActions,
   modifiedData,
   pathToContentType,
@@ -55,5 +55,5 @@ const getRowLabelCheckboxeState = (
   return getCheckboxState(data);
 };
 
-export default getRowLabelCheckboxeState;
+export default getRowLabelCheckboxState;
 export { getActionIdsFromPropertyActions };

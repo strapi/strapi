@@ -1,6 +1,6 @@
-import getRowLabelCheckboxeState, {
+import getRowLabelCheckboxState, {
   getActionIdsFromPropertyActions,
-} from '../getRowLabelCheckboxeState';
+} from '../getRowLabelCheckboxState';
 
 describe('ADMIN | COMPONENTS | PERMISSIONS | ContentTypeCollapse | CollapsePropertyMatrix | ActionRow | utils', () => {
   describe('getActionIdsFromPropertyActions', () => {
@@ -25,9 +25,9 @@ describe('ADMIN | COMPONENTS | PERMISSIONS | ContentTypeCollapse | CollapsePrope
     });
   });
 
-  describe('getRowLabelCheckboxeState', () => {
+  describe('getRowLabelCheckboxState', () => {
     it('should return an object with the has hasAllActionsSelected and hasSomeActionsSelected set to false when the propertyActions is empty', () => {
-      expect(getRowLabelCheckboxeState([])).toEqual({
+      expect(getRowLabelCheckboxState([])).toEqual({
         hasAllActionsSelected: false,
         hasSomeActionsSelected: false,
       });
@@ -83,7 +83,7 @@ describe('ADMIN | COMPONENTS | PERMISSIONS | ContentTypeCollapse | CollapsePrope
       const expected = { hasAllActionsSelected: false, hasSomeActionsSelected: true };
 
       expect(
-        getRowLabelCheckboxeState(
+        getRowLabelCheckboxState(
           propertyActions,
           modifiedData,
           pathToContentType,
