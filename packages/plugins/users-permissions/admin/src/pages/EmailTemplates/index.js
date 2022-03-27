@@ -60,7 +60,7 @@ const EmailTemplatesPage = () => {
     onError: () => {
       toggleNotification({
         type: 'warning',
-        message: { id: 'notification.error', defaultMessage: 'An error occured' },
+        message: { id: 'notification.error', defaultMessage: 'An error occurred' },
       });
     },
   });
@@ -93,7 +93,7 @@ const EmailTemplatesPage = () => {
     onError: () => {
       toggleNotification({
         type: 'warning',
-        message: { id: 'notification.error', defaultMessage: 'An error occured' },
+        message: { id: 'notification.error', defaultMessage: 'An error occurred' },
       });
       unlockApp();
     },

@@ -33,7 +33,7 @@ const useRolesList = (shouldFetchData = true) => {
         data,
       });
     } catch (err) {
-      const message = get(err, ['response', 'payload', 'message'], 'An error occured');
+      const message = get(err, ['response', 'payload', 'message'], 'An error occurred');
 
       dispatch({
         type: 'GET_DATA_ERROR',

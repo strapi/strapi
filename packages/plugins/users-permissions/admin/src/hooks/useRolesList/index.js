@@ -40,7 +40,7 @@ const useRolesList = (shouldFetchData = true) => {
         data: roles,
       });
     } catch (err) {
-      const message = get(err, ['response', 'payload', 'message'], 'An error occured');
+      const message = get(err, ['response', 'payload', 'message'], 'An error occurred');
 
       if (isMounted.current) {
         dispatch({

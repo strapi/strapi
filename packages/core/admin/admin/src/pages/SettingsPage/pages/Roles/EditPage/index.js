@@ -76,7 +76,7 @@ const EditPage = () => {
     } catch (err) {
       console.error(err.response);
 
-      const errorMessage = get(err, 'response.payload.message', 'An error occured');
+      const errorMessage = get(err, 'response.payload.message', 'An error occurred');
       const message = get(err, 'response.payload.data.permissions[0]', errorMessage);
 
       toggleNotification({

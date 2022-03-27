@@ -14,7 +14,7 @@ const useFetchMarketplaceProviders = notifyLoad => {
     onError: () => {
       toggleNotification({
         type: 'warning',
-        message: { id: 'notification.error', defaultMessage: 'An error occured' },
+        message: { id: 'notification.error', defaultMessage: 'An error occurred' },
       });
     },
   });

@@ -64,7 +64,7 @@ const AdvancedSettingsPage = () => {
     onError: () => {
       toggleNotification({
         type: 'warning',
-        message: { id: getTrad('notification.error'), defaultMessage: 'An error occured' },
+        message: { id: getTrad('notification.error'), defaultMessage: 'An error occurred' },
       });
     },
   });
@@ -84,7 +84,7 @@ const AdvancedSettingsPage = () => {
     onError: () => {
       toggleNotification({
         type: 'warning',
-        message: { id: getTrad('notification.error'), defaultMessage: 'An error occured' },
+        message: { id: getTrad('notification.error'), defaultMessage: 'An error occurred' },
       });
       unlockApp();
     },

@@ -311,7 +311,7 @@ describe('i18n settings page', () => {
 
     //   request.mockImplementation((_, opts) =>
     //     opts.method === 'PUT'
-    //       ? Promise.reject(new Error('Something wrong occured'))
+    //       ? Promise.reject(new Error('Something wrong occurred'))
     //       : Promise.resolve(requestGetResponse)
     //   );
 

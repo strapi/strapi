@@ -120,7 +120,7 @@ export const UploadingAssetCard = ({
                 }
               : {
                   id: getTrad('upload.generic-error'),
-                  defaultMessage: 'An error occured while uploading the file.',
+                  defaultMessage: 'An error occurred while uploading the file.',
                 }
           )}
         </Typography>

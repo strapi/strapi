@@ -397,7 +397,7 @@ describe('InternalErrorPage', () => {
               <p
                 class="c11"
               >
-                An error occured
+                An error occurred
               </p>
             </div>
             <a

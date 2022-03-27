@@ -222,7 +222,7 @@
     "admin.pages.MarketPlacePage.subtitle": "സ്ട്രാപിയിൽ നിന്ന് കൂടുതൽ നേടൂ",
     "admin.pages.MarketPlacePage.missingPlugin.title": "ഒരു പ്ലഗിൻ നഷ്ടമായോ?",
     "admin.pages.MarketPlacePage.missingPlugin.description": "നിങ്ങൾ എന്ത് പ്ലഗിനാണ് തിരയുന്നതെന്ന് ഞങ്ങളോട് പറയൂ, ഞങ്ങളുടെ കമ്മ്യൂണിറ്റി പ്ലഗിൻ ഡെവലപ്പർമാർക്ക് പ്രചോദനം ലഭിക്കണമെങ്കിൽ ഞങ്ങൾ അവരെ അറിയിക്കും!",
-    "anErrorOccured": "ശ്ശോ! എന്തോ കുഴപ്പം സംഭവിച്ചു. ദയവായി, വീണ്ടും ശ്രമിക്കുക.",
+    "anErrorOccurred": "ശ്ശോ! എന്തോ കുഴപ്പം സംഭവിച്ചു. ദയവായി, വീണ്ടും ശ്രമിക്കുക.",
     "app.component.CopyToClipboard.label": "ക്ലിപ്പ്ബോർഡിലേക്ക് പകർത്തുക",
     "app.component.search.label": "{ലക്ഷ്യത്തിനായി} തിരയുക",
     "app.component.table.duplicate": "ഡ്യൂപ്ലിക്കേറ്റ് {ലക്ഷ്യം}",
