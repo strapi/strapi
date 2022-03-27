@@ -75,7 +75,7 @@ async function rollback(uid) {
  */
 const createDeleteApiFunction = baseName => {
   /**
-   * Delets a file in an api.
+   * Deletes a file in an api.
    * Will only update routes.json instead of deleting it if other routes are present
    * @param {string} filePath file path to delete
    */
