@@ -123,7 +123,7 @@ describe('Content Type Builder - Components', () => {
   });
 
   describe('Get /components', () => {
-    test('Returns valid enveloppe', async () => {
+    test('Returns valid envelope', async () => {
       const res = await rq({
         method: 'GET',
         url: '/content-type-builder/components',
