@@ -87,7 +87,7 @@ describe('Sentry service', () => {
     expect(mockCaptureException).toHaveBeenCalled();
   });
 
-  it('does not not send metadata when the option is disabled', () => {
+  it('does not send metadata when the option is disabled', () => {
     // Init with metadata option disabled
     global.strapi.config.get = () => ({ dsn: VALID_DSN, sendMetadata: false });
     const sentryService = sentryServiceLoader({ strapi });
