@@ -361,7 +361,7 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
   });
 
   describe('DELETE_NOT_SAVED_TYPE', () => {
-    it('Should reset the components and and contentTypes object', () => {
+    it('Should reset the components and contentTypes object', () => {
       const state = {
         ...initialState,
         components: {
