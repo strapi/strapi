@@ -35,7 +35,7 @@ const FormModal = ({ onToggle, onMetaChange, onSizeChange, onSubmit, type }) => 
       return 'date';
     }
 
-    if (['decimal', 'float', 'integer', 'biginter'].includes(type)) {
+    if (['decimal', 'float', 'integer', 'biginteger'].includes(type)) {
       return 'number';
     }
 
