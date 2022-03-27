@@ -3,7 +3,7 @@ import getAllAllowedHeaders from '../getAllAllowedHeader';
 describe('CONTENT MANAGER | containers | ListView | utils | getAllAllowedHeaders', () => {
   it('should return a sorted array containing all the displayed fields', () => {
     const attributes = {
-      addresse: {
+      addresses: {
         type: 'relation',
         relationType: 'morph',
       },

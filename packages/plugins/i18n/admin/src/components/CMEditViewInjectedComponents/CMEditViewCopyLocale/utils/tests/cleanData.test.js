@@ -5,7 +5,7 @@ describe('i18n | Components | CMEditViewCopyLocale | utils', () => {
     it('should change the localization key with the one passed in the argument', () => {
       const data = {
         address: 'test',
-        addresseses: [],
+        addresses: [],
         common: 'common',
         createdAt: '2021-03-17T15:34:05.866Z',
         createdBy: {
@@ -48,7 +48,7 @@ describe('i18n | Components | CMEditViewCopyLocale | utils', () => {
       const contentType = {
         attributes: {
           address: { type: 'relation' },
-          addresseses: { type: 'relation' },
+          addresses: { type: 'relation' },
           common: { pluginOptions: { i18n: { localized: true } }, type: 'text' },
           createdAt: { type: 'timestamp' },
           id: { type: 'integer' },
