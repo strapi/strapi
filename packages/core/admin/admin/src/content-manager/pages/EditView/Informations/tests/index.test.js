@@ -44,7 +44,7 @@ describe('CONTENT MANAGER | EditView | Header', () => {
     global.Date.now = RealNow;
   });
 
-  it('renders and matches the snaphsot', () => {
+  it('renders and matches the snapshot', () => {
     useCMEditViewDataManager.mockImplementationOnce(() => ({
       initialData: {},
       isCreatingEntry: true,
