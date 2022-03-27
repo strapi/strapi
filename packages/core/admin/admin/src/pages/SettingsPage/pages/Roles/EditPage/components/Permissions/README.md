@@ -152,7 +152,7 @@ In order to build the layout, the components use the `sections.collectionTypes.s
 
 This section covers the logic defined in order to display a global checkbox like the `create` one. Each global action, is considered as a parent checkbox since their purpose is to check or uncheck all the checkboxes that are located below them.
 
-Pratical example:
+Practical example:
 
 ```js
 // layout.sections.collectionTypes.actions
