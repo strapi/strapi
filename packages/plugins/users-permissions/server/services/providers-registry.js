@@ -81,7 +81,7 @@ const getInitialProviders = ({ purest }) => ({
         email: userBody.email,
       };
     }
-    // Get the email with Github's user/emails API
+    // Get the email with GitHub's user/emails API
     const { body: emailBody } = await github
       .get('user/emails')
       .auth(access_token)

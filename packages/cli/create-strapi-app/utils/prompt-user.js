@@ -4,7 +4,7 @@ const inquirer = require('inquirer');
 
 /**
  * @param {string|null} projectName - The name/path of project
- * @param {string|null} template - The Github repo of the template
+ * @param {string|null} template - The GitHub repo of the template
  * @returns Object containing prompt answers
  */
 module.exports = async function promptUser(projectName, program, hasDatabaseOptions) {
