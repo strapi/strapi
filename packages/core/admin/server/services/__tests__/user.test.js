@@ -355,7 +355,7 @@ describe('User', () => {
       expect(result).toBeTruthy();
     });
 
-    test('Return false if the user does not exists', async () => {
+    test('Return false if the user does not exist', async () => {
       const count = jest.fn(() => Promise.resolve(0));
 
       global.strapi = {
