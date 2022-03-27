@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`DynamicTabe / Cellcontent / RelationMultiple renders and matches the snapshot 1`] = `
+exports[`DynamicTable / Cellcontent / RelationMultiple renders and matches the snapshot 1`] = `
 .c11 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
