@@ -33,7 +33,7 @@ const generateNewApp = (projectDirectory, cliArguments) => {
     name: basename(rootPath),
     // disable quickstart run app after creation
     runQuickstartApp: cliArguments.run === false ? false : true,
-    // use pacakge version as strapiVersion (all packages have the same version);
+    // use package version as strapiVersion (all packages have the same version);
     strapiVersion: require('../package.json').version,
     debug: cliArguments.debug !== undefined,
     quick: cliArguments.quickstart,

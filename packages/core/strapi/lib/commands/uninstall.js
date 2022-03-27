@@ -24,7 +24,7 @@ module.exports = async (plugins, { deleteFiles }) => {
   const pluginArgs = plugins.map(name => `@strapi/plugin-${name}`);
 
   try {
-    // verify should rebuild before removing the pacakge
+    // verify should rebuild before removing the package
     let shouldRebuild = false;
     for (let name of plugins) {
       let pkgPath = findPackagePath(`@strapi/plugin-${name}`);
