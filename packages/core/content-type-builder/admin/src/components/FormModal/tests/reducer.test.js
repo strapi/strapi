@@ -436,7 +436,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
   });
 
   describe('SET_ATTRIBUTE_DATA_SCHEMA', () => {
-    it('Should handle the edition correcty', () => {
+    it('Should handle the edition correctly', () => {
       const expected = {
         ...initialState,
         initialData: { test: true },
