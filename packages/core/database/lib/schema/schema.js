@@ -43,7 +43,7 @@ const createTable = meta => {
 
         table.columns.push(createColumn(typeColumn.name, { type: 'string' }));
       } else if (attribute.joinColumn && attribute.owner) {
-        // NOTE: we could pass uniquness for oneToOne to avoid creating more than one to one
+        // NOTE: we could pass uniqueness for oneToOne to avoid creating more than one to one
 
         const { name: columnName, referencedColumn, referencedTable } = attribute.joinColumn;
 
