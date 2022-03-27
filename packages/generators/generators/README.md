@@ -14,5 +14,5 @@ Execute a generator without interactive mode.
 
 - `generatorName` - one of `api`, `controller`, `service`, `model`, `plugin`, `policy`.
 - `options` - options are specific to each generator
-- `plopOtions`
+- `plopOptions`
   - `dir`: base directory that plop will use as base directory for its actions
