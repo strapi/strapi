@@ -2,7 +2,8 @@ import { getType, getOtherInfos } from './content-manager/utils/getAttributeInfo
 
 // Contexts
 export { default as AppInfosContext } from './contexts/AppInfosContext';
-export { default as AutoReloadOverlayBockerContext } from './contexts/AutoReloadOverlayBockerContext';
+// For compatibility reasons, we're exporting the misspelled version of AutoReloadOverlayBlockerContext as well:
+export { default as AutoReloadOverlayBlockerContext, default as AutoReloadOverlayBockerContext } from './contexts/AutoReloadOverlayBlockerContext';
 export { default as NotificationsContext } from './contexts/NotificationsContext';
 export { default as OverlayBlockerContext } from './contexts/OverlayBlockerContext';
 

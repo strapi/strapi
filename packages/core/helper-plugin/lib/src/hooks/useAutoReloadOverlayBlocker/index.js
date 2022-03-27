@@ -5,7 +5,7 @@
  */
 
 import { useContext, useRef } from 'react';
-import AutoReloadOverlayBlockerContext from '../../contexts/AutoReloadOverlayBockerContext';
+import AutoReloadOverlayBlockerContext from '../../contexts/AutoReloadOverlayBlockerContext';
 
 const useAutoReloadOverlayBlocker = () => {
   const { lockApp, unlockApp } = useContext(AutoReloadOverlayBlockerContext);
