@@ -195,7 +195,7 @@ const mergeCustomizer = (dest, src) => {
 };
 
 /**
- * Add a graphql schema to the plugin's global graphl schema to be processed
+ * Add a graphql schema to the plugin's global graphql schema to be processed
  * @param {object} schema
  */
 const addGraphqlSchema = schema => {
