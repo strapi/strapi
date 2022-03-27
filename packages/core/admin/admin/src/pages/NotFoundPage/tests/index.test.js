@@ -397,7 +397,7 @@ describe('NotFoundPage', () => {
               <p
                 class="c11"
               >
-                Oops! We can't seem to find the page you're looging for...
+                Oops! We can't seem to find the page you're looking for...
               </p>
             </div>
             <a

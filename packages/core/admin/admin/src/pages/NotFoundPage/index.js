@@ -38,7 +38,7 @@ const NoContentType = () => {
           }
           content={formatMessage({
             id: 'app.page.not.found',
-            defaultMessage: "Oops! We can't seem to find the page you're looging for...",
+            defaultMessage: "Oops! We can't seem to find the page you're looking for...",
           })}
           hasRadius
           icon={<EmptyPictures width="10rem" />}
