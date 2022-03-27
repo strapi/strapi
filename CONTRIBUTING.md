@@ -142,7 +142,7 @@ $ node test/e2e.js --db=postgres
 $ node test/e2e.js --db=mysql
 ```
 
-### Running the tests for the Community Editon (CE)\*\*
+### Running the tests for the Community Edition (CE)\*\*
 
 The test suites run the tests for the Enterprise Edition (EE) version of Strapi by default. Should you want to test the Community Edition (CE) version, you will need to set the environment variable `STRAPI_DISABLE_EE` to true:
 
