@@ -201,7 +201,7 @@ describe('Pagination util', () => {
         });
       });
 
-      test('Uses apecified limit', () => {
+      test('Uses a specified limit', () => {
         const pagination = { limit: 999 };
         const defaultPagination = withDefaultPagination(pagination, { defaults });
 
