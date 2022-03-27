@@ -1,6 +1,6 @@
 'use strict';
 
-const createPivotJoin = (qb, joinTable, alias, tragetMeta) => {
+const createPivotJoin = (qb, joinTable, alias, targetMeta) => {
   const joinAlias = qb.getAlias();
   qb.join({
     alias: joinAlias,
@@ -14,7 +14,7 @@ const createPivotJoin = (qb, joinTable, alias, tragetMeta) => {
   const subAlias = qb.getAlias();
   qb.join({
     alias: subAlias,
-    referencedTable: tragetMeta.tableName,
+    referencedTable: targetMeta.tableName,
     referencedColumn: joinTable.inverseJoinColumn.referencedColumn,
     rootColumn: joinTable.inverseJoinColumn.name,
     rootTable: joinAlias,
@@ -30,7 +30,7 @@ const createJoin = (ctx, { alias, attributeName, attribute }) => {
     throw new Error(`Cannot join on non relational field ${attributeName}`);
   }
 
-  const tragetMeta = db.metadata.get(attribute.target);
+  const targetMeta = db.metadata.get(attribute.target);
 
   const joinColumn = attribute.joinColumn;
 
@@ -38,7 +38,7 @@ const createJoin = (ctx, { alias, attributeName, attribute }) => {
     const subAlias = qb.getAlias();
     qb.join({
       alias: subAlias,
-      referencedTable: tragetMeta.tableName,
+      referencedTable: targetMeta.tableName,
       referencedColumn: joinColumn.referencedColumn,
       rootColumn: joinColumn.name,
       rootTable: alias,
@@ -48,7 +48,7 @@ const createJoin = (ctx, { alias, attributeName, attribute }) => {
 
   const joinTable = attribute.joinTable;
   if (joinTable) {
-    return createPivotJoin(qb, joinTable, alias, tragetMeta);
+    return createPivotJoin(qb, joinTable, alias, targetMeta);
   }
 
   return alias;
