@@ -93,7 +93,7 @@ function ListView({
 
   // FIXME
   // Using a ref to avoid requests being fired multiple times on slug on change
-  // We need it because the hook as mulitple dependencies so it may run before the permissions have checked
+  // We need it because the hook as multiple dependencies so it may run before the permissions have checked
   const requestUrlRef = useRef('');
 
   const fetchData = useCallback(
