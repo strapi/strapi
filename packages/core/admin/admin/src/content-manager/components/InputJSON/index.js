@@ -132,7 +132,7 @@ class InputJSON extends React.Component {
       },
     });
 
-    // Remove higlight error
+    // Remove highlight error
     if (this.state.markedText) {
       this.state.markedText.clear();
       this.setState({ markedText: null, error: null });
