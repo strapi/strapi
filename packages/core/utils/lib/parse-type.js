@@ -54,7 +54,7 @@ const parseDateTimeOrTimestamp = value => {
 /**
  * Cast basic values based on attribute type
  * @param {Object} options - Options
- * @param {string} options.type - type of the atribute
+ * @param {string} options.type - type of the attribute
  * @param {*} options.value - value tu cast
  */
 const parseType = ({ type, value, forceCast = false }) => {
