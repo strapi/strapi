@@ -93,7 +93,7 @@ function createSchemaBuilder({ components, contentTypes }) {
     },
 
     /**
-     * Convert Attributes received from the API to the right syntaxt
+     * Convert Attributes received from the API to the right syntax
      *
      * @param {object} attributes input attributes
      * @returns {object} transformed attributes
