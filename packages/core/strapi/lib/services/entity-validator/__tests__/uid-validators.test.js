@@ -183,7 +183,7 @@ describe('UID validator', () => {
   });
 
   describe('regExp', () => {
-    test('it fails to validate the uid if it does not fit the requried format', async () => {
+    test('it fails to validate the uid if it does not fit the required format', async () => {
       expect.assertions(1);
       fakeFindOne.mockResolvedValueOnce(null);
 

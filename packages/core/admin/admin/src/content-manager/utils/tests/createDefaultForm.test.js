@@ -16,7 +16,7 @@ describe('CONTENT MANAGER | utils | createDefaultForm', () => {
     expect(createDefaultForm({ test: { type: 'json', required: true } }, {})).toEqual({ test: {} });
   });
 
-  it('should init the requide dynamic zone type with an empty array', () => {
+  it('should init the required dynamic zone type with an empty array', () => {
     expect(createDefaultForm({ test: { type: 'dynamiczone', required: true } })).toEqual({
       test: [],
     });

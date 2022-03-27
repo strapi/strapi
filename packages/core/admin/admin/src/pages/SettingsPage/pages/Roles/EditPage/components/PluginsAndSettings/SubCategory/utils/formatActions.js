@@ -5,7 +5,7 @@ import { createArrayOfValues } from '../../../utils';
  * We need to format the actions to an array of object that matches the ConditionsModal action's props
  * @param {array<object>} actions
  * @config {string} displayName the displayName of the action
- * @config {string} action requied, the name of the action
+ * @config {string} action required, the name of the action
  * @param {object} modifiedData
  * @param {array} pathToData
  */
