@@ -19,7 +19,7 @@ describe('Enumeration validator', () => {
       );
 
       try {
-        await validator('invalid-vlue');
+        await validator('invalid-value');
       } catch (err) {
         expect(err).toBeInstanceOf(YupValidationError);
       }
