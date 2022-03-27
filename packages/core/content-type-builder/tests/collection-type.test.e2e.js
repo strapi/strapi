@@ -91,7 +91,7 @@ describe('Content Type Builder - Content types', () => {
       expect(res.body).toMatchSnapshot();
     });
 
-    test('Successfull creation of a collection type with draftAndPublish enabled', async () => {
+    test('Successful creation of a collection type with draftAndPublish enabled', async () => {
       const res = await rq({
         method: 'POST',
         url: '/content-type-builder/content-types',

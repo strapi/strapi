@@ -85,7 +85,7 @@ paths:
         required: true
       responses:
         200:
-          description: Successfull registration
+          description: Successful registration
           content:
             application/json:
               schema:
