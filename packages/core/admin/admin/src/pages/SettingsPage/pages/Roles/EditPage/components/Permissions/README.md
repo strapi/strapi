@@ -70,7 +70,7 @@ const layout = {
   - someChecked: `true` or `false`,
   - checked: `true` of `false`
     > Both states are coupled: if `someChecked=true` then `checked=false`.
-    > In terms of user's interaction when cliking a parent checkbox it will toggle the value of its children.
+    > In terms of user's interaction when clicking a parent checkbox it will toggle the value of its children.
 
 Ex: given the following data:
 
