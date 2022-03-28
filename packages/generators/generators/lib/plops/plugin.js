@@ -1,7 +1,7 @@
 'use strict';
 
 const chalk = require('chalk');
-const { isKebabCase } = require('@strapi/utils');
+const { isKebabCase, toKebabCase } = require('@strapi/utils');
 
 const logInstructions = pluginName => {
   const maxLength = `    resolve: './src/plugins/${pluginName}'`.length;
@@ -33,10 +33,18 @@ module.exports = plop => {
         type: 'input',
         name: 'pluginName',
         message: 'Plugin name',
-        validate: value => isKebabCase(value) || 'Value must be in kebab-case',
       },
     ],
     actions(answers) {
+      if (!isKebabCase(answers.pluginName)) {
+        answers.pluginName = toKebabCase(answers.pluginName);
+        console.log(
+          chalk.yellow(
+            `Strapi only supports kebab-cased names for plugins.\nYour plugin has been automatically renamed to "${answers.pluginName}".`
+          )
+        );
+      }
+
       return [
         {
           type: 'addMany',
