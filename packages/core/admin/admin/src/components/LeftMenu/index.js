@@ -53,7 +53,7 @@ const LinkUser = styled(Link)`
 const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
   const buttonRef = useRef();
   const [userLinksVisible, setUserLinksVisible] = useState(false);
-  const { menuLogo } = useConfigurations();
+  const { customMenuLogo, defaultMenuLogo } = useConfigurations();
   const [condensed, setCondensed] = usePersistentState('navbar-condensed', false);
   const { userDisplayName } = useAppInfos();
   const { formatMessage } = useIntl();
@@ -93,7 +93,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
           defaultMessage: 'Workplace',
         })}
         title={menuTitle}
-        icon={<img src={menuLogo} alt={menuTitle} />}
+        icon={<img src={customMenuLogo || defaultMenuLogo} alt={menuTitle} />}
       />
 
       <Divider />
