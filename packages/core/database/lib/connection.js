@@ -31,12 +31,12 @@ const clientMap = {
 
 const getSqlitePackageName = () => {
   // NOTE: allow forcing the package to use (mostly used for testing purposes)
-  if (typeof process.env.SQLITE_PKG !== undefined) {
+  if (typeof process.env.SQLITE_PKG !== 'undefined') {
     return process.env.SQLITE_PKG;
   }
 
   // NOTE: this tries to find the best sqlite module possible to use
-  // while keeping retro compatibiity
+  // while keeping retro compatibility
   return (
     trySqlitePackage('better-sqlite3') ||
     trySqlitePackage('@vscode/sqlite3') ||
