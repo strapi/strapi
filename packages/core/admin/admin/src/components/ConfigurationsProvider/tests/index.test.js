@@ -3,7 +3,7 @@ import { render, fireEvent, screen } from '@testing-library/react';
 import ConfigurationsProvider from '../index';
 import { useConfigurations } from '../../../hooks';
 
-describe('LanguageProvider', () => {
+describe('ConfigurationsProvider', () => {
   it('should not crash', () => {
     const { container } = render(
       <ConfigurationsProvider
@@ -23,16 +23,16 @@ describe('LanguageProvider', () => {
     `);
   });
 
-  it('should update menuLogo with new logo when calling setMenuLogo with logo', () => {
+  it('should update customMenuLogo with setCustomMenuLogo', () => {
     const Test = () => {
-      const { setMenuLogo, menuLogo } = useConfigurations();
+      const { setCustomMenuLogo, customMenuLogo } = useConfigurations();
 
       return (
         <div>
-          <button type="button" onClick={() => setMenuLogo('michka.jpg')}>
+          <button type="button" onClick={() => setCustomMenuLogo('michka.jpg')}>
             Change logo
           </button>
-          <div>{menuLogo.logo}</div>
+          <div>{customMenuLogo}</div>
         </div>
       );
     };
@@ -54,16 +54,13 @@ describe('LanguageProvider', () => {
     expect(queryByText('strapi-menu.jpg')).not.toBeInTheDocument();
   });
 
-  it('should update menuLogo with defaultLogo when calling setMenuLogo without logo', () => {
+  it('should give access to defaultMenuLogo', () => {
     const Test = () => {
-      const { setMenuLogo, menuLogo } = useConfigurations();
+      const { defaultMenuLogo } = useConfigurations();
 
       return (
         <div>
-          <button type="button" onClick={() => setMenuLogo()}>
-            Change logo
-          </button>
-          <div>{menuLogo.logo}</div>
+          <div>{defaultMenuLogo}</div>
         </div>
       );
     };
@@ -78,8 +75,6 @@ describe('LanguageProvider', () => {
         <Test />
       </ConfigurationsProvider>
     );
-
-    fireEvent.click(screen.getByText('Change logo'));
 
     expect(queryByText('strapi-menu.jpg')).toBeInTheDocument();
   });

@@ -15,17 +15,13 @@ describe('ConfigurationsProvider | reducer', () => {
 
   it('should change logo if logoType exists', () => {
     const action = {
-      type: 'CHANGE_LOGO',
-      logoType: 'menuLogo',
+      type: 'SET_CUSTOM_LOGO',
+      logoType: 'customMenuLogo',
       logo: 'strapi.jpeg',
-      isCustom: false,
     };
 
     const expected = {
-      menuLogo: {
-        logo: 'strapi.jpeg',
-        isCustom: false,
-      },
+      customMenuLogo: 'strapi.jpeg',
     };
 
     expect(reducer(state, action)).toEqual(expected);
@@ -33,7 +29,7 @@ describe('ConfigurationsProvider | reducer', () => {
 
   it('should return state if logoType does not exist', () => {
     const action = {
-      type: 'CHANGE_LOGO',
+      type: 'SET_CUSTOM_LOGO',
       logoType: 'totoLogo',
       logo: 'strapi.jpeg',
       isCustom: false,

@@ -2,10 +2,10 @@ import { useContext, useRef } from 'react';
 import { ConfigurationsContext } from '../../contexts';
 
 const useConfigurations = () => {
-  const { setMenuLogo, ...rest } = useContext(ConfigurationsContext);
-  const setMenuLogoRef = useRef(setMenuLogo);
+  const { setCustomMenuLogo, ...rest } = useContext(ConfigurationsContext);
+  const setCustomMenuLogoRef = useRef(setCustomMenuLogo);
 
-  return { setMenuLogo: setMenuLogoRef.current, ...rest };
+  return { setCustomMenuLogo: setCustomMenuLogoRef.current, ...rest };
 };
 
 export default useConfigurations;

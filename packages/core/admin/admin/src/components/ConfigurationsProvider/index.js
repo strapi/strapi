@@ -10,14 +10,13 @@ const ConfigurationsProvider = ({
   showReleaseNotification,
   showTutorials,
 }) => {
-  const [{ menuLogo }, dispatch] = useReducer(reducer, initialState);
+  const [{ customMenuLogo }, dispatch] = useReducer(reducer, initialState);
 
-  const setMenuLogo = logo => {
+  const setCustomMenuLogo = logo => {
     return dispatch({
-      type: 'CHANGE_LOGO',
-      logoType: 'menuLogo',
-      logo: logo || defaultMenuLogo,
-      isCustom: !!logo,
+      type: 'SET_CUSTOM_LOGO',
+      logoType: 'customMenuLogo',
+      logo,
     });
   };
 
@@ -25,8 +24,9 @@ const ConfigurationsProvider = ({
     <ConfigurationsContext.Provider
       value={{
         authLogo,
-        menuLogo,
-        setMenuLogo,
+        customMenuLogo,
+        defaultMenuLogo,
+        setCustomMenuLogo,
         showReleaseNotification,
         showTutorials,
       }}
