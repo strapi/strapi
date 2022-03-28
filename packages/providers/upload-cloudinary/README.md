@@ -27,7 +27,7 @@ npm install @strapi/provider-upload-cloudinary --save
 - `providerOptions` is passed down during the construction of the provider. (ex: `cloudinary.config`). [Complete list of options](https://cloudinary.com/documentation/cloudinary_sdks#configuration_parameters).
 - `actionOptions` is passed directly to each method respectively allowing for custom options. You can see the complete list of [upload options](https://cloudinary.com/documentation/image_upload_api_reference#upload_optional_parameters) and [delete options](https://cloudinary.com/documentation/image_upload_api_reference#destroy_optional_parameters)
 
-See the [documentation about using a provider](https://docs.strapi.io/developer-docs/latest/plugins/upload.html#using-a-provider) for information on installing and using a provider. To understand the usage environment variables in Strapi, please refer to the [documentation of environment variables](https://docs.strapi.io/developer-docs/latest/setup-deployment-guides/configurations/optional/environment.html#environment-variables).
+See the [documentation about using a provider](https://docs.strapi.io/developer-docs/latest/plugins/upload.html#using-a-provider) for information on installing and using a provider. To understand how environment variables are used in Strapi, please refer to the [documentation about environment variables](https://docs.strapi.io/developer-docs/latest/setup-deployment-guides/configurations/optional/environment.html#environment-variables).
 
 ### Provider Configuration
 

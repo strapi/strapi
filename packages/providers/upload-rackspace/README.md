@@ -27,7 +27,7 @@ npm install @strapi/provider-upload-rackspace --save
 - `providerOptions` is passed down during the construction of the provider. (ex: `createClient(config)`). [Complete list of options](https://github.com/pkgcloud/pkgcloud/blob/master/docs/providers/rackspace/README.md). The implementation is based on the package `pkgcloud`. [Documentation](https://github.com/pkgcloud/pkgcloud#storage).
 - `actionOptions` is passed directly to each method respectively allowing for custom options. You can see the complete list of [upload options](https://github.com/pkgcloud/pkgcloud#upload-a-file) and [delete options](https://github.com/pkgcloud/pkgcloud/blob/master/docs/providers/rackspace/storage.md#clientremovefilecontainer-file-functionerr-result--)
 
-See the [documentation about using a provider](https://docs.strapi.io/developer-docs/latest/plugins/upload.html#using-a-provider) for information on installing and using a provider. To understand the usage environment variables in Strapi, please refer to the [documentation of environment variables](https://docs.strapi.io/developer-docs/latest/setup-deployment-guides/configurations/optional/environment.html#environment-variables).
+See the [documentation about using a provider](https://docs.strapi.io/developer-docs/latest/plugins/upload.html#using-a-provider) for information on installing and using a provider. To understand how environment variables are used in Strapi, please refer to the [documentation about environment variables](https://docs.strapi.io/developer-docs/latest/setup-deployment-guides/configurations/optional/environment.html#environment-variables).
 
 ### Provider Configuration
 
