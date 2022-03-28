@@ -31,14 +31,14 @@ const StyledFolder = styled(Folder)`
 `;
 
 export const FolderCard = ({ children, id, startAction, ariaLabel, onDoubleClick, ...props }) => {
-  const generatedId = useId('folder', id);
+  const generatedId = useId(id);
 
   return (
     <FolderCardContext.Provider value={{ id: generatedId }}>
       <Box position="relative" {...props}>
         <FauxClickWrapper
           type="button"
-          onClick={event => event.preventDefault()}
+          onClick={(event) => event.preventDefault()}
           onDoubleClick={onDoubleClick}
           zIndex={1}
           tabIndex={-1}
