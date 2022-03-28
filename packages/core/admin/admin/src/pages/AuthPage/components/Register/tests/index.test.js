@@ -38,7 +38,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
       }
 
       .c9 {
-        padding-top: 64px;
+        padding-top: 8px;
         padding-bottom: 64px;
       }
 
@@ -77,7 +77,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
       }
 
       .c21 > * + * {
-        margin-top: 32px;
+        margin-top: 24px;
       }
 
       .c12:focus-visible {
@@ -876,7 +876,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                     <h1
                       class="c17"
                     >
-                      Welcome!
+                      Welcome to Strapi!
                     </h1>
                   </div>
                   <div
@@ -885,13 +885,13 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                     <span
                       class="c20"
                     >
-                      Your credentials are only used to authenticate yourself on the admin panel. All saved data will be stored in your own database.
+                      Credentials are only used to authenticate in Strapi. All saved data will be stored in your database.
                     </span>
                   </div>
                 </div>
                 <div
                   class="c21"
-                  spacing="7"
+                  spacing="6"
                 >
                   <div
                     class="c22"
@@ -1081,7 +1081,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                           class="c37"
                           id="textinput-4-hint"
                         >
-                          Password must contain at least 8 characters, 1 uppercase, 1 lowercase and 1 number
+                          Must be at least 8 characters, 1 uppercase, 1 lowercase & 1 number
                         </p>
                       </div>
                     </div>
