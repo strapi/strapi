@@ -25,6 +25,18 @@ const files = [
     id: 6,
     mime: 'image/test',
   },
+  {
+    id: 7,
+    mime: 'audio/mpeg',
+  },
+  {
+    id: 8,
+    mime: 'audio/x-wav',
+  },
+  {
+    id: 9,
+    mime: 'audio/ogg',
+  },
 ];
 
 describe('UPLOAD | components | MediaLibraryInput | utils | getAllowedFiles', () => {
@@ -60,6 +72,25 @@ describe('UPLOAD | components | MediaLibraryInput | utils | getAllowedFiles', ()
     ]);
   });
 
+  it('returns an array with elements that are only video when the allowedTypes is videos', () => {
+    const results = getAllowedFiles(['audios'], files);
+
+    expect(results).toEqual([
+      {
+        id: 7,
+        mime: 'audio/mpeg',
+      },
+      {
+        id: 8,
+        mime: 'audio/x-wav',
+      },
+      {
+        id: 9,
+        mime: 'audio/ogg',
+      },
+    ]);
+  });
+
   it('returns an array with elements that are only image when the allowedTypes is images', () => {
     const results = getAllowedFiles(['images'], files);
 
@@ -80,7 +111,7 @@ describe('UPLOAD | components | MediaLibraryInput | utils | getAllowedFiles', ()
   });
 
   it('returns an array with elements that are image and video when the allowedTypes are videos and images', () => {
-    const results = getAllowedFiles(['videos', 'images'], files);
+    const results = getAllowedFiles(['videos', 'images', 'audios'], files);
 
     expect(results).toEqual([
       {
@@ -99,11 +130,23 @@ describe('UPLOAD | components | MediaLibraryInput | utils | getAllowedFiles', ()
         id: 6,
         mime: 'image/test',
       },
+      {
+        id: 7,
+        mime: 'audio/mpeg',
+      },
+      {
+        id: 8,
+        mime: 'audio/x-wav',
+      },
+      {
+        id: 9,
+        mime: 'audio/ogg',
+      },
     ]);
   });
 
   it('returns an array with all the elements', () => {
-    const results = getAllowedFiles(['videos', 'images', 'files'], files);
+    const results = getAllowedFiles(['videos', 'images', 'files', 'audios'], files);
 
     expect(results).toEqual(files);
   });

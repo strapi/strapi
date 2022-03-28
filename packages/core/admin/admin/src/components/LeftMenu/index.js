@@ -100,7 +100,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
 
       <NavSections>
         <NavLink to="/content-manager" icon={<Write />}>
-          {formatMessage({ id: 'content-manager.plugin.name', defaultMessage: 'Content manager' })}
+          {formatMessage({ id: 'global.content-manager', defaultMessage: 'Content manager' })}
         </NavLink>
 
         {pluginsSectionLinks.length > 0 ? (
@@ -160,7 +160,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
               <LinkUser tabIndex={0} onClick={handleToggleUserLinks} to="/me">
                 <Typography>
                   {formatMessage({
-                    id: 'app.components.LeftMenu.profile',
+                    id: 'global.profile',
                     defaultMessage: 'Profile',
                   })}
                 </Typography>

@@ -41,7 +41,7 @@ export const BulkDeleteButton = ({ selectedAssets, onSuccess }) => {
           startIcon={<Trash />}
           onClick={() => setShowConfirmDialog(true)}
         >
-          {formatMessage({ id: getTrad('control-card.delete'), defaultMessage: 'Delete' })}
+          {formatMessage({ id: 'global.delete', defaultMessage: 'Delete' })}
         </Button>
       </Stack>
 

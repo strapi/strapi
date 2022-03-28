@@ -143,7 +143,7 @@ const Register = ({ authType, fieldsToDisable, noSignin, onSubmit, schema }) => 
                       <Typography as="h1" variant="alpha">
                         {formatMessage({
                           id: 'Auth.form.welcome.title',
-                          defaultMessage: 'Welcome!',
+                          defaultMessage: 'Welcome to Strapi!',
                         })}
                       </Typography>
                     </Box>
@@ -152,12 +152,12 @@ const Register = ({ authType, fieldsToDisable, noSignin, onSubmit, schema }) => 
                         {formatMessage({
                           id: 'Auth.form.register.subtitle',
                           defaultMessage:
-                            'Your credentials are only used to authenticate yourself on the admin panel. All saved data will be stored in your own database.',
+                            'Credentials are only used to authenticate in Strapi. All saved data will be stored in your database.',
                         })}
                       </Typography>
                     </CenteredBox>
                   </Column>
-                  <Stack spacing={7}>
+                  <Stack spacing={6}>
                     <Grid gap={4}>
                       <GridItem col={6}>
                         <TextInput
@@ -227,11 +227,11 @@ const Register = ({ authType, fieldsToDisable, noSignin, onSubmit, schema }) => 
                       hint={formatMessage({
                         id: 'Auth.form.password.hint',
                         defaultMessage:
-                          'Password must contain at least 8 characters, 1 uppercase, 1 lowercase and 1 number',
+                          'Must be at least 8 characters, 1 uppercase, 1 lowercase & 1 number',
                       })}
                       required
                       label={formatMessage({
-                        id: 'Auth.form.password.label',
+                        id: 'global.password',
                         defaultMessage: 'Password',
                       })}
                       type={passwordShown ? 'text' : 'password'}
@@ -284,7 +284,7 @@ const Register = ({ authType, fieldsToDisable, noSignin, onSubmit, schema }) => 
                         {
                           id: 'Auth.form.register.news.label',
                           defaultMessage:
-                            'Keep me updated about the new features and upcoming improvements (by doing this you accept the {terms} and the {policy}).',
+                            'Keep me updated about new features & upcoming improvements (by doing this you accept the {terms} and the {policy}).',
                         },
                         {
                           terms: (

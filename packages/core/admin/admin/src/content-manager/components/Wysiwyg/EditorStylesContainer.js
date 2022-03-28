@@ -29,7 +29,8 @@ export const EditorStylesContainer = styled.div`
 
   .CodeMirror-scrollbar-filler,
   .CodeMirror-gutter-filler {
-    background-color: white; /* The little square between H and V scrollbars */
+    /* The little square between H and V scrollbars */
+    background-color: ${({ theme }) => `${theme.colors.neutral0}`};
   }
 
   /* GUTTER */
@@ -158,7 +159,7 @@ export const EditorStylesContainer = styled.div`
   .CodeMirror {
     position: relative;
     overflow: hidden;
-    background: white;
+    background: ${({ theme }) => `${theme.colors.neutral0}`};
   }
 
   .CodeMirror-scroll {
@@ -292,6 +293,7 @@ export const EditorStylesContainer = styled.div`
   .CodeMirror-cursor {
     position: absolute;
     pointer-events: none;
+    border-color: ${({ theme }) => `${theme.colors.neutral800}`};
   }
   .CodeMirror-measure pre {
     position: static;

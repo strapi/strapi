@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
-import { lightTheme } from '@strapi/design-system/themes';
+import { lightTheme, darkTheme } from '@strapi/design-system/themes';
 import merge from 'lodash/merge';
 import pick from 'lodash/pick';
 import isFunction from 'lodash/isFunction';
@@ -13,7 +13,6 @@ import App from './pages/App';
 import AuthLogo from './assets/images/logo_strapi_auth_v4.png';
 import MenuLogo from './assets/images/logo_strapi_menu.png';
 import Providers from './components/Providers';
-import Theme from './components/Theme';
 import languageNativeNames from './translations/languageNativeNames';
 import {
   INJECT_COLUMN_IN_TABLE,
@@ -34,7 +33,7 @@ class StrapiApp {
       locales: ['en'],
       menuLogo: MenuLogo,
       notifications: { releases: true },
-      theme: lightTheme,
+      themes: { light: lightTheme, dark: darkTheme },
       translations: {},
       tutorials: true,
     };
@@ -226,7 +225,7 @@ class StrapiApp {
     }
 
     if (this.customConfigurations?.theme) {
-      this.configurations.theme = merge(this.configurations.theme, this.customConfigurations.theme);
+      merge(this.configurations.themes.light, this.customConfigurations.theme);
     }
 
     if (this.customConfigurations?.notifications?.releases !== undefined) {
@@ -427,44 +426,43 @@ class StrapiApp {
     } = this.library;
 
     return (
-      <Theme theme={this.configurations.theme}>
-        <Providers
-          authLogo={this.configurations.authLogo}
-          components={components}
-          fields={fields}
-          localeNames={localeNames}
-          getAdminInjectedComponents={this.getAdminInjectedComponents}
-          getPlugin={this.getPlugin}
-          messages={this.configurations.translations}
-          menu={this.menu}
-          menuLogo={this.configurations.menuLogo}
-          plugins={this.plugins}
-          runHookParallel={this.runHookParallel}
-          runHookWaterfall={(name, initialValue, async = false) => {
-            return this.runHookWaterfall(name, initialValue, async, store);
-          }}
-          runHookSeries={this.runHookSeries}
-          settings={this.settings}
-          showTutorials={this.configurations.tutorials}
-          showReleaseNotification={this.configurations.notifications.releases}
-          store={store}
-        >
-          <>
-            <Helmet
-              link={[
-                {
-                  rel: 'icon',
-                  type: 'image/png',
-                  href: this.configurations.head.favicon,
-                },
-              ]}
-            />
-            <BrowserRouter basename={basename}>
-              <App store={store} />
-            </BrowserRouter>
-          </>
-        </Providers>
-      </Theme>
+      <Providers
+        authLogo={this.configurations.authLogo}
+        components={components}
+        fields={fields}
+        localeNames={localeNames}
+        getAdminInjectedComponents={this.getAdminInjectedComponents}
+        getPlugin={this.getPlugin}
+        messages={this.configurations.translations}
+        menu={this.menu}
+        menuLogo={this.configurations.menuLogo}
+        plugins={this.plugins}
+        runHookParallel={this.runHookParallel}
+        runHookWaterfall={(name, initialValue, async = false) => {
+          return this.runHookWaterfall(name, initialValue, async, store);
+        }}
+        runHookSeries={this.runHookSeries}
+        themes={this.configurations.themes}
+        settings={this.settings}
+        showTutorials={this.configurations.tutorials}
+        showReleaseNotification={this.configurations.notifications.releases}
+        store={store}
+      >
+        <>
+          <Helmet
+            link={[
+              {
+                rel: 'icon',
+                type: 'image/png',
+                href: this.configurations.head.favicon,
+              },
+            ]}
+          />
+          <BrowserRouter basename={basename}>
+            <App store={store} />
+          </BrowserRouter>
+        </>
+      </Providers>
     );
   }
 }

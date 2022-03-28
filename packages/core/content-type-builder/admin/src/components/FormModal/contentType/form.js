@@ -125,7 +125,7 @@ const forms = {
               },
               {
                 intlLabel: {
-                  id: getTrad('modalForm.attribute.text.type-selection'),
+                  id: 'global.type',
                   defaultMessage: 'Type',
                 },
                 name: 'kind',

@@ -38,9 +38,9 @@ const GuidedTourHomepage = () => {
   const activeSection = enrichedSections.find(section => !section.isDone)?.key;
 
   const handleSkip = () => {
-    setSkipped(true)
+    setSkipped(true);
     trackUsage('didSkipGuidedtour');
-  }
+  };
 
   return (
     <Box

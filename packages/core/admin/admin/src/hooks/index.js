@@ -8,3 +8,4 @@ export { default as useSettingsMenu } from './useSettingsMenu';
 export { default as useSettingsForm } from './useSettingsForm';
 export { default as usePermissionsDataManager } from './usePermissionsDataManager';
 export { default as useReleaseNotification } from './useReleaseNotification';
+export { default as useThemeToggle } from './useThemeToggle';

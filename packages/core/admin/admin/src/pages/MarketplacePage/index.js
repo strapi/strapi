@@ -10,6 +10,7 @@ import {
   useTracking,
   LoadingIndicatorPage,
   useNotification,
+  useAppInfos,
 } from '@strapi/helper-plugin';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { Layout, HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
@@ -46,11 +47,12 @@ const MarketPlacePage = () => {
   const trackUsageRef = useRef(trackUsage);
   const toggleNotification = useNotification();
   const [searchQuery, setSearchQuery] = useState('');
+  const { autoReload: isInDevelopmentMode } = useAppInfos();
 
   useFocusWhenNavigate();
 
   const marketplaceTitle = formatMessage({
-    id: 'admin.pages.MarketPlacePage.title',
+    id: 'global.marketplace',
     defaultMessage: 'Marketplace',
   });
 
@@ -101,6 +103,19 @@ const MarketPlacePage = () => {
     trackUsageRef.current('didGoToMarketplace');
   }, []);
 
+  useEffect(() => {
+    if (!isInDevelopmentMode) {
+      toggleNotification({
+        type: 'info',
+        message: {
+          id: 'admin.pages.MarketPlacePage.production',
+          defaultMessage: 'Manage plugins from the development environment',
+        },
+        blockTransition: true,
+      });
+    }
+  }, [toggleNotification, isInDevelopmentMode]);
+
   if (hasFailed) {
     return (
       <Layout>
@@ -137,7 +152,7 @@ const MarketPlacePage = () => {
         />
         <HeaderLayout
           title={formatMessage({
-            id: 'admin.pages.MarketPlacePage.title',
+            id: 'global.marketplace',
             defaultMessage: 'Marketplace',
           })}
           subtitle={formatMessage({
@@ -198,6 +213,7 @@ const MarketPlacePage = () => {
                     plugin={plugin}
                     installedPluginNames={installedPluginNames}
                     useYarn={appInfoResponse.data.useYarn}
+                    isInDevelopmentMode={isInDevelopmentMode}
                   />
                 </GridItem>
               ))}
