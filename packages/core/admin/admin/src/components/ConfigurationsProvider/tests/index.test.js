@@ -23,10 +23,9 @@ describe('LanguageProvider', () => {
     `);
   });
 
-  it.only('should update menuLogo with setMenuLogo', () => {
+  it('should update menuLogo with new logo when calling setMenuLogo with logo', () => {
     const Test = () => {
       const { setMenuLogo, menuLogo } = useConfigurations();
-      console.log('tests', menuLogo);
 
       return (
         <div>
@@ -38,7 +37,7 @@ describe('LanguageProvider', () => {
       );
     };
 
-    const { container } = render(
+    const { queryByText } = render(
       <ConfigurationsProvider
         authLogo="strapi-auth.jpg"
         menuLogo="strapi-menu.jpg"
@@ -51,19 +50,37 @@ describe('LanguageProvider', () => {
 
     fireEvent.click(screen.getByText('Change logo'));
 
-    expect(container).toMatchInlineSnapshot(`
-      <div>
+    expect(queryByText('michka.jpg')).toBeInTheDocument();
+    expect(queryByText('strapi-menu.jpg')).not.toBeInTheDocument();
+  });
+
+  it('should update menuLogo with defaultLogo when calling setMenuLogo without logo', () => {
+    const Test = () => {
+      const { setMenuLogo, menuLogo } = useConfigurations();
+
+      return (
         <div>
-          <button
-            type="button"
-          >
+          <button type="button" onClick={() => setMenuLogo()}>
             Change logo
           </button>
-          <div>
-            strapi-menu.jpg
-          </div>
+          <div>{menuLogo.logo}</div>
         </div>
-      </div>
-    `);
+      );
+    };
+
+    const { queryByText } = render(
+      <ConfigurationsProvider
+        authLogo="strapi-auth.jpg"
+        menuLogo="strapi-menu.jpg"
+        showReleaseNotification={false}
+        showTutorials={false}
+      >
+        <Test />
+      </ConfigurationsProvider>
+    );
+
+    fireEvent.click(screen.getByText('Change logo'));
+
+    expect(queryByText('strapi-menu.jpg')).toBeInTheDocument();
   });
 });
