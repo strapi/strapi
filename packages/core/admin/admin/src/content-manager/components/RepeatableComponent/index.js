@@ -5,7 +5,6 @@ import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import get from 'lodash/get';
-import take from 'lodash/take';
 import { useNotification } from '@strapi/helper-plugin';
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
@@ -17,6 +16,7 @@ import ItemTypes from '../../utils/ItemTypes';
 import ComponentInitializer from '../ComponentInitializer';
 import connect from './utils/connect';
 import select from './utils/select';
+import getComponentErrorKeys from './utils/getComponentErrorKeys';
 import DraggedItem from './DraggedItem';
 import AccordionGroupCustom from './AccordionGroupCustom';
 
@@ -50,25 +50,16 @@ const RepeatableComponent = ({
   const [isDraggingSibling, setIsDraggingSibling] = useState(false);
   const [, drop] = useDrop({ accept: ItemTypes.COMPONENT });
   const { getComponentLayout } = useContentTypeLayout();
-  const componentLayoutData = useMemo(() => getComponentLayout(componentUid), [
-    componentUid,
-    getComponentLayout,
-  ]);
+  const componentLayoutData = useMemo(
+    () => getComponentLayout(componentUid),
+    [componentUid, getComponentLayout]
+  );
 
   const nextTempKey = useMemo(() => {
     return getMaxTempKey(componentValue || []) + 1;
   }, [componentValue]);
 
-  const componentErrorKeys = Object.keys(formErrors)
-    .filter(errorKey => {
-      return take(errorKey.split('.'), isNested ? 3 : 1).join('.') === name;
-    })
-    .map(errorKey => {
-      return errorKey
-        .split('.')
-        .slice(0, name.split('.').length + 1)
-        .join('.');
-    });
+  const componentErrorKeys = getComponentErrorKeys(name, formErrors, isNested);
 
   const toggleCollapses = () => {
     setCollapseToOpen('');
@@ -123,7 +114,7 @@ const RepeatableComponent = ({
   }
 
   const doesRepComponentHasChildError = componentErrorKeys.some(
-    error => error.split('.').length > 1
+    (error) => error.split('.').length > 1
   );
 
   if (doesRepComponentHasChildError && !hasMinError) {
