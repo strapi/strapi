@@ -1164,7 +1164,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                         <div
                           class="c42"
                         >
-                          Keep me updated about the new features and upcoming improvements (by doing this you accept the 
+                          Keep me updated about new features & upcoming improvements (by doing this you accept the 
                           <a
                             class="c43"
                             href="https://strapi.io/terms"

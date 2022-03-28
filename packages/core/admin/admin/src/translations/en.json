@@ -38,7 +38,7 @@
   "Auth.form.password.hide-password": "Hide password",
   "Auth.form.password.hint": "Must be at least 8 characters, 1 uppercase, 1 lowercase & 1 number",
   "Auth.form.password.show-password": "Show password",
-  "Auth.form.register.news.label": "Keep me updated about the new features and upcoming improvements (by doing this you accept the {terms} and the {policy}).",
+  "Auth.form.register.news.label": "Keep me updated about new features & upcoming improvements (by doing this you accept the {terms} and the {policy}).",
   "Auth.form.register.subtitle": "Credentials are only used to authenticate in Strapi. All saved data will be stored in your database.",
   "Auth.form.rememberMe.label": "Remember me",
   "Auth.form.username.label": "Username",

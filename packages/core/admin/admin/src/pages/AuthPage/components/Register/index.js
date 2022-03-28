@@ -284,7 +284,7 @@ const Register = ({ authType, fieldsToDisable, noSignin, onSubmit, schema }) => 
                         {
                           id: 'Auth.form.register.news.label',
                           defaultMessage:
-                            'Keep me updated about the new features and upcoming improvements (by doing this you accept the {terms} and the {policy}).',
+                            'Keep me updated about new features & upcoming improvements (by doing this you accept the {terms} and the {policy}).',
                         },
                         {
                           terms: (
