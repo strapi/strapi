@@ -157,10 +157,10 @@ function Inputs({
     return disabled;
   }, [disabled, isCreatingEntry, isUserAllowedToEditField, isUserAllowedToReadField]);
 
-  const options = useMemo(() => generateOptions(fieldSchema.enum || [], isRequired), [
-    fieldSchema,
-    isRequired,
-  ]);
+  const options = useMemo(
+    () => generateOptions(fieldSchema.enum || [], isRequired),
+    [fieldSchema, isRequired]
+  );
 
   const { label, description, placeholder, visible } = metadatas;
 
@@ -174,7 +174,7 @@ function Inputs({
         description={description ? { id: description, defaultMessage: description } : null}
         intlLabel={{ id: label, defaultMessage: label }}
         labelAction={labelAction}
-        error={formatMessage(error)}
+        error={error && formatMessage(error)}
         name={keys}
         required={isRequired}
       />
@@ -212,7 +212,7 @@ function Inputs({
         }
         queryInfos={queryInfos}
         value={value}
-        error={formatMessage(error)}
+        error={error && formatMessage(error)}
       />
     );
   }
