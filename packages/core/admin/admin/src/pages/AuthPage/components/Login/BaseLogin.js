@@ -16,7 +16,7 @@ import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 import { Formik } from 'formik';
 import { Column, LayoutContent } from '../../../../layouts/UnauthenticatedLayout';
-import Logo from '../Logo';
+import Logo from '../../../../components/UnauthenticatedLogo';
 import FieldActionWrapper from '../FieldActionWrapper';
 
 const PasswordInput = styled(TextInput)`
@@ -75,7 +75,7 @@ const Login = ({ onSubmit, schema, children }) => {
                 )}
               </Column>
 
-              <Stack size={6}>
+              <Stack spacing={6}>
                 <TextInput
                   error={
                     errors.email
@@ -107,7 +107,7 @@ const Login = ({ onSubmit, schema, children }) => {
                   onChange={handleChange}
                   value={values.password}
                   label={formatMessage({
-                    id: 'Auth.form.password.label',
+                    id: 'global.password',
                     defaultMessage: 'Password',
                   })}
                   name="password"

@@ -9,6 +9,7 @@ const {
   getNonLocalizedAttributes,
   copyNonLocalizedAttributes,
   fillNonLocalizedAttributes,
+  getNestedPopulateOfNonLocalizedAttributes,
 } = require('../content-types')();
 
 describe('content-types service', () => {
@@ -567,6 +568,84 @@ describe('content-types service', () => {
         ld: 1,
         le: {},
       });
+    });
+  });
+
+  describe('getNestedPopulateOfNonLocalizedAttributes', () => {
+    beforeAll(() => {
+      const getModel = model =>
+        ({
+          'api::country.country': {
+            attributes: {
+              name: {
+                type: 'string',
+              },
+              nonLocalizedName: {
+                type: 'string',
+                pluginOptions: {
+                  i18n: {
+                    localized: false,
+                  },
+                },
+              },
+              comp: {
+                type: 'component',
+                repeatable: false,
+                component: 'basic.mycompo',
+                pluginOptions: {
+                  i18n: {
+                    localized: false,
+                  },
+                },
+              },
+              dz: {
+                type: 'dynamiczone',
+                components: ['basic.mycompo', 'default.mydz'],
+                pluginOptions: {
+                  i18n: {
+                    localized: false,
+                  },
+                },
+              },
+              myrelation: {
+                type: 'relation',
+                relation: 'manyToMany',
+                target: 'api::category.category',
+                inversedBy: 'addresses',
+              },
+            },
+          },
+          'basic.mycompo': {
+            attributes: {
+              title: {
+                type: 'string',
+              },
+              image: {
+                allowedTypes: ['images', 'files', 'videos'],
+                type: 'media',
+                multiple: false,
+              },
+            },
+          },
+          'default.mydz': {
+            attributes: {
+              name: {
+                type: 'string',
+              },
+              picture: {
+                type: 'media',
+              },
+            },
+          },
+        }[model]);
+
+      global.strapi = { getModel };
+    });
+
+    test('Populate component, dz and media and not relations', () => {
+      const result = getNestedPopulateOfNonLocalizedAttributes('api::country.country');
+
+      expect(result).toEqual(['comp', 'dz', 'comp.image', 'dz.image', 'dz.picture']);
     });
   });
 });

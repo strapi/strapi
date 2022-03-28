@@ -67,6 +67,24 @@ export const FromComputerForm = ({ onClose, onAddAssets, trackedLocation }) => {
     onAddAssets(assets);
   };
 
+  const handleDrop = e => {
+    if (e?.dataTransfer?.files) {
+      const files = e.dataTransfer.files;
+      const assets = [];
+
+      for (let i = 0; i < files.length; i++) {
+        const file = files.item(i);
+        const asset = rawFileToAsset(file, AssetSource.Computer);
+
+        assets.push(asset);
+      }
+
+      onAddAssets(assets);
+    }
+
+    setDragOver(false);
+  };
+
   return (
     <form>
       <Box paddingLeft={8} paddingRight={8} paddingTop={6} paddingBottom={6}>
@@ -81,6 +99,7 @@ export const FromComputerForm = ({ onClose, onAddAssets, trackedLocation }) => {
             position="relative"
             onDragEnter={handleDragEnter}
             onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
           >
             <Flex justifyContent="center">
               <Wrapper>

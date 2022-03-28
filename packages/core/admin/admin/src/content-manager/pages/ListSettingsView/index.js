@@ -191,7 +191,7 @@ const ListSettingsView = ({ layout, slug }) => {
           <HeaderLayout
             navigationAction={
               <Link startIcon={<ArrowLeft />} to={goBackUrl} id="go-back">
-                {formatMessage({ id: 'app.components.go-back', defaultMessage: 'Back' })}
+                {formatMessage({ id: 'global.back', defaultMessage: 'Back' })}
               </Link>
             }
             primaryAction={
@@ -201,7 +201,7 @@ const ListSettingsView = ({ layout, slug }) => {
                 disabled={isEqual(modifiedData, initialData)}
                 type="submit"
               >
-                {formatMessage({ id: 'form.button.save', defaultMessage: 'Save' })}
+                {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}
               </Button>
             }
             subtitle={formatMessage({

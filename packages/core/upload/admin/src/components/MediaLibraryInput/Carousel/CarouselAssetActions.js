@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { CarouselActions } from '@strapi/design-system/Carousel';
+import { CarouselActions } from '@strapi/design-system/CarouselInput';
 import { IconButton } from '@strapi/design-system/IconButton';
 import { prefixFileUrlWithBackendUrl } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
@@ -32,7 +32,7 @@ export const CarouselAssetActions = ({ asset, onDeleteAsset, onAddAsset, onEditA
       {onDeleteAsset && (
         <IconButton
           label={formatMessage({
-            id: getTrad('app.utils.delete'),
+            id: 'global.delete',
             defaultMessage: 'Delete',
           })}
           icon={<TrashIcon />}

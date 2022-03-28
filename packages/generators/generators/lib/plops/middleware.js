@@ -2,6 +2,7 @@
 
 const getDestinationPrompts = require('./prompts/get-destination-prompts');
 const validateInput = require('./utils/validate-input');
+const getFilePath = require('./utils/get-file-path');
 
 module.exports = plop => {
   // middleware generator
@@ -17,15 +18,7 @@ module.exports = plop => {
       ...getDestinationPrompts('middleware', plop.getDestBasePath(), { rootFolder: true }),
     ],
     actions(answers) {
-      let filePath;
-      if (answers.destination === 'api') {
-        filePath = `api/{{ api }}`;
-      } else if (answers.destination === 'plugin') {
-        filePath = `plugins/{{ plugin }}`;
-      } else {
-        filePath = `./`;
-      }
-
+      const filePath = getFilePath(answers.destination);
       return [
         {
           type: 'add',

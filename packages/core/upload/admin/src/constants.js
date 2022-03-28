@@ -4,6 +4,7 @@ export const AssetType = {
   Video: 'video',
   Image: 'image',
   Document: 'doc',
+  Audio: 'audio',
 };
 
 export const AssetSource = {

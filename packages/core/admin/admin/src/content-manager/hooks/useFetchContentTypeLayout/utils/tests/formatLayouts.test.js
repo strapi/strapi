@@ -485,11 +485,21 @@ describe('Content Manager | hooks | useFetchContentTypeLayout | utils ', () => {
       const data = {
         uid: 'address',
         layouts: {
-          list: ['test', 'categories'],
+          list: ['test', 'categories', 'component'],
         },
         metadatas: {
           test: {
             list: { ok: true },
+          },
+          component: {
+            list: {
+              mainField: {
+                name: 'name',
+                schema: {
+                  type: 'string',
+                },
+              },
+            },
           },
           categories: {
             list: {
@@ -508,6 +518,22 @@ describe('Content Manager | hooks | useFetchContentTypeLayout | utils ', () => {
           categories: {
             type: 'relation',
             targetModel: 'category',
+          },
+          component: {
+            type: 'component',
+            component: 'some.component',
+            repeatable: false,
+          },
+        },
+      };
+      const components = {
+        'some.component': {
+          settings: {
+            mainField: 'name',
+          },
+
+          attributes: {
+            type: 'string',
           },
         },
       };
@@ -533,9 +559,23 @@ describe('Content Manager | hooks | useFetchContentTypeLayout | utils ', () => {
           fieldSchema: { type: 'relation', targetModel: 'category' },
           queryInfos: { defaultParams: {}, endPoint: 'collection-types/address' },
         },
+        {
+          name: 'component',
+          key: '__component_key__',
+          metadatas: {
+            mainField: {
+              name: 'name',
+            },
+          },
+          fieldSchema: {
+            type: 'component',
+            component: 'some.component',
+            repeatable: false,
+          },
+        },
       ];
 
-      expect(formatListLayoutWithMetas(data)).toEqual(expected);
+      expect(formatListLayoutWithMetas(data, components)).toEqual(expected);
     });
   });
 

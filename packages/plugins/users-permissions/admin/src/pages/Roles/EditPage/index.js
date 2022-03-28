@@ -97,7 +97,7 @@ const EditPage = () => {
                     startIcon={<Check />}
                   >
                     {formatMessage({
-                      id: 'app.components.Button.save',
+                      id: 'global.save',
                       defaultMessage: 'Save',
                     })}
                   </Button>
@@ -108,14 +108,14 @@ const EditPage = () => {
               navigationAction={
                 <Link startIcon={<ArrowLeft />} to="/settings/users-permissions/roles">
                   {formatMessage({
-                    id: 'app.components.go-back',
+                    id: 'global.back',
                     defaultMessage: 'Back',
                   })}
                 </Link>
               }
             />
             <ContentLayout>
-              <Stack size={7}>
+              <Stack spacing={7}>
                 <Box
                   background="neutral0"
                   hasRadius
@@ -125,7 +125,7 @@ const EditPage = () => {
                   paddingLeft={7}
                   paddingRight={7}
                 >
-                  <Stack size={4}>
+                  <Stack spacing={4}>
                     <Typography variant="delta" as="h2">
                       {formatMessage({
                         id: getTrad('EditPage.form.roles'),
@@ -139,7 +139,7 @@ const EditPage = () => {
                           value={values.name || ''}
                           onChange={handleChange}
                           label={formatMessage({
-                            id: 'Settings.roles.form.input.name',
+                            id: 'global.name',
                             defaultMessage: 'Name',
                           })}
                           error={
@@ -155,7 +155,7 @@ const EditPage = () => {
                           value={values.description || ''}
                           onChange={handleChange}
                           label={formatMessage({
-                            id: 'Settings.roles.form.input.description',
+                            id: 'global.description',
                             defaultMessage: 'Description',
                           })}
                           error={

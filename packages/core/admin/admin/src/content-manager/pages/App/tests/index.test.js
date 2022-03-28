@@ -8,7 +8,9 @@ import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { render, screen } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
+import { lightTheme, darkTheme } from '@strapi/design-system';
 import Theme from '../../../../components/Theme';
+import ThemeToggleProvider from '../../../../components/ThemeToggleProvider';
 import { App as ContentManagerApp } from '..';
 import cmReducers from '../../../../reducers';
 import useModels from '../useModels';
@@ -25,13 +27,16 @@ jest.mock('@fortawesome/react-fontawesome', () => ({
 
 jest.mock('../../NoContentType', () => () => <div>NoContentType</div>);
 
+jest.mock('@strapi/helper-plugin', () => ({
+  ...jest.requireActual('@strapi/helper-plugin'),
+  useGuidedTour: jest.fn(() => ({
+    startSection: jest.fn(),
+  })),
+}));
+
 describe('Content manager | App | main', () => {
   beforeEach(() => {
     jest.resetModules(); // Most important - it clears the cache
-  });
-
-  afterEach(() => {
-    jest.resetAllMocks();
   });
 
   it('should not crash', () => {
@@ -93,15 +98,17 @@ describe('Content manager | App | main', () => {
 
     const { container } = render(
       <IntlProvider messages={{}} defaultLocale="en" locale="en">
-        <Theme>
-          <DndProvider backend={HTML5Backend}>
-            <Provider store={store}>
-              <Router history={history}>
-                <ContentManagerApp />
-              </Router>
-            </Provider>
-          </DndProvider>
-        </Theme>
+        <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
+          <Theme>
+            <DndProvider backend={HTML5Backend}>
+              <Provider store={store}>
+                <Router history={history}>
+                  <ContentManagerApp />
+                </Router>
+              </Provider>
+            </DndProvider>
+          </Theme>
+        </ThemeToggleProvider>
       </IntlProvider>
     );
 
@@ -196,6 +203,7 @@ describe('Content manager | App | main', () => {
         background: #eaeaef;
         padding: 4px;
         border-radius: 4px;
+        min-width: 20px;
       }
 
       .c24 {
@@ -265,6 +273,24 @@ describe('Content manager | App | main', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c22 {
+        display: -webkit-inline-box;
+        display: -webkit-inline-flex;
+        display: -ms-inline-flexbox;
+        display: inline-flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: center;
+        -webkit-justify-content: center;
+        -ms-flex-pack: center;
+        justify-content: center;
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -450,10 +476,6 @@ describe('Content manager | App | main', () => {
         fill: #666687;
       }
 
-      .c22 {
-        display: inline-block;
-      }
-
       .c18 {
         border: none;
         padding: 0;
@@ -558,149 +580,158 @@ describe('Content manager | App | main', () => {
           >
             <ul
               class="c13"
+              spacing="2"
             >
               <li>
                 <div
-                  class="c14 c15"
+                  class=""
                 >
                   <div
-                    class="c16"
+                    class="c14 c15"
                   >
                     <div
-                      class="c17 c18"
+                      class="c16"
                     >
                       <div
-                        class="c19"
+                        class="c17 c18"
+                      >
+                        <div
+                          class="c19"
+                        >
+                          <span
+                            class="c4 c20"
+                          >
+                            Collection Types
+                          </span>
+                        </div>
+                      </div>
+                      <div
+                        class="c21 c22 c23"
                       >
                         <span
                           class="c4 c20"
                         >
-                          Collection Types
+                          1
                         </span>
                       </div>
                     </div>
-                    <div
-                      class="c21 c22 c23"
-                    >
-                      <span
-                        class="c4 c20"
-                      >
-                        1
-                      </span>
-                    </div>
                   </div>
-                </div>
-                <ul
-                  id="subnav-list-4"
-                >
-                  <li>
-                    <a
-                      aria-current="page"
-                      class="c24 c25 active"
-                      href="/content-manager/collectionType/category"
-                    >
-                      <div
-                        class="c17"
+                  <ul
+                    id="subnav-list-4"
+                  >
+                    <li>
+                      <a
+                        aria-current="page"
+                        class="c24 c25 active"
+                        href="/content-manager/collectionType/category"
                       >
-                        <svg
-                          class="c26"
-                          fill="none"
-                          height="1em"
-                          viewBox="0 0 4 4"
-                          width="1em"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <rect
-                            fill="#A5A5BA"
-                            height="4"
-                            rx="2"
-                            width="4"
-                          />
-                        </svg>
                         <div
-                          class="c27"
+                          class="c17"
                         >
-                          <span
-                            class="c4 c28"
+                          <svg
+                            class="c26"
+                            fill="none"
+                            height="1em"
+                            viewBox="0 0 4 4"
+                            width="1em"
+                            xmlns="http://www.w3.org/2000/svg"
                           >
-                            Categories
-                          </span>
+                            <rect
+                              fill="#A5A5BA"
+                              height="4"
+                              rx="2"
+                              width="4"
+                            />
+                          </svg>
+                          <div
+                            class="c27"
+                          >
+                            <span
+                              class="c4 c28"
+                            >
+                              Categories
+                            </span>
+                          </div>
                         </div>
-                      </div>
-                    </a>
-                  </li>
-                </ul>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
               </li>
               <li>
                 <div
-                  class="c14 c15"
+                  class=""
                 >
                   <div
-                    class="c16"
+                    class="c14 c15"
                   >
                     <div
-                      class="c17 c18"
+                      class="c16"
                     >
                       <div
-                        class="c19"
+                        class="c17 c18"
+                      >
+                        <div
+                          class="c19"
+                        >
+                          <span
+                            class="c4 c20"
+                          >
+                            Single Types
+                          </span>
+                        </div>
+                      </div>
+                      <div
+                        class="c21 c22 c23"
                       >
                         <span
                           class="c4 c20"
                         >
-                          Single Types
+                          1
                         </span>
                       </div>
                     </div>
-                    <div
-                      class="c21 c22 c23"
-                    >
-                      <span
-                        class="c4 c20"
-                      >
-                        1
-                      </span>
-                    </div>
                   </div>
-                </div>
-                <ul
-                  id="subnav-list-5"
-                >
-                  <li>
-                    <a
-                      class="c24 c25"
-                      href="/homepage"
-                    >
-                      <div
-                        class="c17"
+                  <ul
+                    id="subnav-list-5"
+                  >
+                    <li>
+                      <a
+                        class="c24 c25"
+                        href="/homepage"
                       >
-                        <svg
-                          class="c26"
-                          fill="none"
-                          height="1em"
-                          viewBox="0 0 4 4"
-                          width="1em"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <rect
-                            fill="#A5A5BA"
-                            height="4"
-                            rx="2"
-                            width="4"
-                          />
-                        </svg>
                         <div
-                          class="c27"
+                          class="c17"
                         >
-                          <span
-                            class="c4 c28"
+                          <svg
+                            class="c26"
+                            fill="none"
+                            height="1em"
+                            viewBox="0 0 4 4"
+                            width="1em"
+                            xmlns="http://www.w3.org/2000/svg"
                           >
-                            Home page
-                          </span>
+                            <rect
+                              fill="#A5A5BA"
+                              height="4"
+                              rx="2"
+                              width="4"
+                            />
+                          </svg>
+                          <div
+                            class="c27"
+                          >
+                            <span
+                              class="c4 c28"
+                            >
+                              Home page
+                            </span>
+                          </div>
                         </div>
-                      </div>
-                    </a>
-                  </li>
-                </ul>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
               </li>
             </ul>
           </div>
@@ -777,15 +808,17 @@ describe('Content manager | App | main', () => {
 
     render(
       <IntlProvider messages={{}} defaultLocale="en" locale="en">
-        <Theme>
-          <DndProvider backend={HTML5Backend}>
-            <Provider store={store}>
-              <Router history={history}>
-                <ContentManagerApp />
-              </Router>
-            </Provider>
-          </DndProvider>
-        </Theme>
+        <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
+          <Theme>
+            <DndProvider backend={HTML5Backend}>
+              <Provider store={store}>
+                <Router history={history}>
+                  <ContentManagerApp />
+                </Router>
+              </Provider>
+            </DndProvider>
+          </Theme>
+        </ThemeToggleProvider>
       </IntlProvider>
     );
 
@@ -821,15 +854,17 @@ describe('Content manager | App | main', () => {
 
     render(
       <IntlProvider messages={{}} defaultLocale="en" locale="en">
-        <Theme>
-          <DndProvider backend={HTML5Backend}>
-            <Provider store={store}>
-              <Router history={history}>
-                <ContentManagerApp />
-              </Router>
-            </Provider>
-          </DndProvider>
-        </Theme>
+        <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
+          <Theme>
+            <DndProvider backend={HTML5Backend}>
+              <Provider store={store}>
+                <Router history={history}>
+                  <ContentManagerApp />
+                </Router>
+              </Provider>
+            </DndProvider>
+          </Theme>
+        </ThemeToggleProvider>
       </IntlProvider>
     );
 
@@ -864,15 +899,17 @@ describe('Content manager | App | main', () => {
 
     render(
       <IntlProvider messages={{}} defaultLocale="en" locale="en">
-        <Theme>
-          <DndProvider backend={HTML5Backend}>
-            <Provider store={store}>
-              <Router history={history}>
-                <ContentManagerApp />
-              </Router>
-            </Provider>
-          </DndProvider>
-        </Theme>
+        <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
+          <Theme>
+            <DndProvider backend={HTML5Backend}>
+              <Provider store={store}>
+                <Router history={history}>
+                  <ContentManagerApp />
+                </Router>
+              </Provider>
+            </DndProvider>
+          </Theme>
+        </ThemeToggleProvider>
       </IntlProvider>
     );
 

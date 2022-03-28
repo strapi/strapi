@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
+import { Box } from '@strapi/design-system/Box';
 import {
   Card,
   CardAction,
@@ -15,6 +16,7 @@ import {
 } from '@strapi/design-system/Card';
 import { IconButton } from '@strapi/design-system/IconButton';
 import Pencil from '@strapi/icons/Pencil';
+import Trash from '@strapi/icons/Trash';
 import { useIntl } from 'react-intl';
 import { getTrad } from '../../utils';
 
@@ -31,6 +33,7 @@ export const ImageAssetCard = ({
   selected,
   onSelect,
   onEdit,
+  onRemove,
   size,
   alt,
 }) => {
@@ -45,23 +48,38 @@ export const ImageAssetCard = ({
     <Card>
       <CardHeader>
         {onSelect && <CardCheckbox value={selected} onValueChange={onSelect} />}
-        {onEdit && (
+        {(onRemove || onEdit) && (
           <CardAction position="end">
-            <IconButton
-              label={formatMessage({ id: getTrad('control-card.edit'), defaultMessage: 'Edit' })}
-              icon={<Pencil />}
-              onClick={onEdit}
-            />
+            {onRemove && (
+              <IconButton
+                label={formatMessage({
+                  id: getTrad('control-card.remove-selection'),
+                  defaultMessage: 'Remove from selection',
+                })}
+                icon={<Trash />}
+                onClick={onRemove}
+              />
+            )}
+
+            {onEdit && (
+              <IconButton
+                label={formatMessage({ id: getTrad('control-card.edit'), defaultMessage: 'Edit' })}
+                icon={<Pencil />}
+                onClick={onEdit}
+              />
+            )}
           </CardAction>
         )}
         <CardAsset src={optimizedCachingThumbnail} size={size} alt={alt} />
       </CardHeader>
       <CardBody>
         <CardContent>
-          <CardTitle as="h2">{name}</CardTitle>
+          <Box paddingTop={1}>
+            <CardTitle as="h2">{name}</CardTitle>
+          </Box>
           <CardSubtitle>
             <Extension>{extension}</Extension>
-            {height && width && ` - ${height}✕${width}`}
+            {height && width && ` - ${width}✕${height}`}
           </CardSubtitle>
         </CardContent>
         <CardBadge>
@@ -78,6 +96,7 @@ ImageAssetCard.defaultProps = {
   selected: false,
   onEdit: undefined,
   onSelect: undefined,
+  onRemove: undefined,
   size: 'M',
 };
 
@@ -88,6 +107,7 @@ ImageAssetCard.propTypes = {
   name: PropTypes.string.isRequired,
   onEdit: PropTypes.func,
   onSelect: PropTypes.func,
+  onRemove: PropTypes.func,
   width: PropTypes.number,
   thumbnail: PropTypes.string.isRequired,
   selected: PropTypes.bool,

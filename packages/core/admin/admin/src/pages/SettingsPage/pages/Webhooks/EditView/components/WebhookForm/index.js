@@ -50,7 +50,7 @@ const WebhookForm = ({
         <Form noValidate>
           <HeaderLayout
             primaryAction={
-              <Stack horizontal size={2}>
+              <Stack horizontal spacing={2}>
                 <Button
                   onClick={() => {
                     triggerWebhook();
@@ -68,7 +68,7 @@ const WebhookForm = ({
                 </Button>
                 <Button startIcon={<Check />} onClick={handleSubmit} type="submit" size="L">
                   {formatMessage({
-                    id: 'app.components.Button.save',
+                    id: 'global.save',
                     defaultMessage: 'Save',
                   })}
                 </Button>
@@ -85,14 +85,14 @@ const WebhookForm = ({
             navigationAction={
               <Link startIcon={<ArrowLeft />} to="/settings/webhooks">
                 {formatMessage({
-                  id: 'app.components.go-back',
+                  id: 'global.back',
                   defaultMessage: 'Back',
                 })}
               </Link>
             }
           />
           <ContentLayout>
-            <Stack size={4}>
+            <Stack spacing={4}>
               {showTriggerResponse && (
                 <div className="trigger-wrapper">
                   <TriggerContainer
@@ -103,7 +103,7 @@ const WebhookForm = ({
                 </div>
               )}
               <Box background="neutral0" padding={8} shadow="filterShadow" hasRadius>
-                <Stack size={6}>
+                <Stack spacing={6}>
                   <Grid gap={6}>
                     <GridItem col={6}>
                       <Field
@@ -111,7 +111,7 @@ const WebhookForm = ({
                         name="name"
                         error={errors.name && formatMessage({ id: errors.name })}
                         label={formatMessage({
-                          id: 'Settings.webhooks.form.name',
+                          id: 'global.name',
                           defaultMessage: 'Name',
                         })}
                         required

@@ -267,7 +267,7 @@ function ListView({
         navigationAction={
           <Link startIcon={<ArrowLeft />} to="/content-manager/">
             {formatMessage({
-              id: 'app.components.HeaderLayout.link.go-back',
+              id: 'global.back',
               defaultMessage: 'Back',
             })}
           </Link>
@@ -388,9 +388,6 @@ export function mapDispatchToProps(dispatch) {
     dispatch
   );
 }
-const withConnect = connect(
-  mapStateToProps,
-  mapDispatchToProps
-);
+const withConnect = connect(mapStateToProps, mapDispatchToProps);
 
 export default compose(withConnect)(memo(ListView, isEqual));

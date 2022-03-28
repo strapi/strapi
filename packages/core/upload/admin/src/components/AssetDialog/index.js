@@ -127,8 +127,8 @@ export const AssetDialog = ({
               canCreate ? (
                 <Button variant="secondary" startIcon={<PlusIcon />} onClick={onAddAsset}>
                   {formatMessage({
-                    id: getTrad('modal.header.browse'),
-                    defaultMessage: 'Upload assets',
+                    id: getTrad('header.actions.add-assets'),
+                    defaultMessage: 'Add new assets',
                   })}
                 </Button>
               ) : (

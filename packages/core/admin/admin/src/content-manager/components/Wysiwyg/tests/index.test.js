@@ -1,7 +1,8 @@
 import * as React from 'react';
 import { IntlProvider } from 'react-intl';
 import { render, waitFor, fireEvent } from '@testing-library/react';
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { ThemeProvider } from '@strapi/design-system/ThemeProvider';
+import { lightTheme } from '@strapi/design-system/themes';
 import Wysiwyg from '../index';
 
 jest.mock('@strapi/helper-plugin', () => ({
@@ -39,6 +40,7 @@ describe('Wysiwyg render and actions buttons', () => {
             name="rich-text"
             intlLabel={{ id: 'hello world', defaultMessage: 'hello world' }}
             onChange={onChange}
+            disabled={false}
           />
         </IntlProvider>
       </ThemeProvider>
@@ -203,7 +205,7 @@ describe('Wysiwyg render and actions buttons', () => {
         background: #ffffff;
       }
 
-      .c28 .sc-bjeSbO {
+      .c28 .sc-pVTFL {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -482,16 +484,6 @@ describe('Wysiwyg render and actions buttons', () => {
         cursor: not-allowed;
       }
 
-      .c15 {
-        color: #666687;
-        display: block;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        font-size: 0.875rem;
-        line-height: 1.43;
-      }
-
       .c14 {
         padding-right: 16px;
         padding-left: 16px;
@@ -533,6 +525,16 @@ describe('Wysiwyg render and actions buttons', () => {
         align-items: center;
       }
 
+      .c15 {
+        color: #666687;
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: 0.875rem;
+        line-height: 1.43;
+      }
+
       .c8 {
         display: -webkit-box;
         display: -webkit-flex;
@@ -546,10 +548,6 @@ describe('Wysiwyg render and actions buttons', () => {
       .c8 > * {
         margin-top: 0;
         margin-bottom: 0;
-      }
-
-      .c8 > * + * {
-        margin-top: 0px;
       }
 
       .c10 {
@@ -607,7 +605,8 @@ describe('Wysiwyg render and actions buttons', () => {
       }
 
       .c32 {
-        cursor: not-allowed !important;
+        cursor: auto;
+        height: 100%;
       }
 
       .c32 .CodeMirror-placeholder {
@@ -628,7 +627,7 @@ describe('Wysiwyg render and actions buttons', () => {
 
       .c32 .CodeMirror-scrollbar-filler,
       .c32 .CodeMirror-gutter-filler {
-        background-color: white;
+        background-color: #ffffff;
       }
 
       .c32 .CodeMirror-gutters {
@@ -751,7 +750,7 @@ describe('Wysiwyg render and actions buttons', () => {
       .c32 .CodeMirror {
         position: relative;
         overflow: hidden;
-        background: white;
+        background: #ffffff;
       }
 
       .c32 .CodeMirror-scroll {
@@ -815,7 +814,7 @@ describe('Wysiwyg render and actions buttons', () => {
         margin: 0;
         white-space: pre;
         word-wrap: normal;
-        line-height: inherit;
+        line-height: 1.5;
         color: inherit;
         position: relative;
         overflow: visible;
@@ -877,6 +876,7 @@ describe('Wysiwyg render and actions buttons', () => {
       .c32 .CodeMirror-cursor {
         position: absolute;
         pointer-events: none;
+        border-color: #32324d;
       }
 
       .c32 .CodeMirror-measure pre {
@@ -1008,6 +1008,7 @@ describe('Wysiwyg render and actions buttons', () => {
 
       .c31 {
         position: relative;
+        height: calc(100% - 48px);
       }
 
       .c36 {
@@ -1031,9 +1032,11 @@ describe('Wysiwyg render and actions buttons', () => {
 
       <div
         class="c0"
+        spacing="1"
       >
         <div
           class="c1 c2"
+          spacing="1"
         >
           <span
             class="c3"
@@ -1238,7 +1241,6 @@ describe('Wysiwyg render and actions buttons', () => {
           >
             <div
               class="c32"
-              disabled=""
             >
               <textarea
                 style="display: none;"
@@ -1254,8 +1256,6 @@ describe('Wysiwyg render and actions buttons', () => {
                     aria-label="Editor"
                     autocapitalize="off"
                     autocorrect="off"
-                    disabled=""
-                    readonly=""
                     spellcheck="false"
                     style="position: absolute; bottom: -1em; padding: 0px; width: 1000px; height: 1em; min-height: 1em; outline: none;"
                     tabindex="0"

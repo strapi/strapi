@@ -5,7 +5,9 @@ import { Router, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { createMemoryHistory } from 'history';
 import { useRBAC } from '@strapi/helper-plugin';
+import { lightTheme, darkTheme } from '@strapi/design-system';
 import Theme from '../../../../../../components/Theme';
+import ThemeToggleProvider from '../../../../../../components/ThemeToggleProvider';
 import ListPage from '../index';
 import server from './utils/server';
 
@@ -30,13 +32,15 @@ const makeApp = history => {
   return (
     <QueryClientProvider client={client}>
       <IntlProvider messages={{}} defaultLocale="en" textComponent="span" locale="en">
-        <Theme>
-          <Router history={history}>
-            <Route path="/settings/user">
-              <ListPage />
-            </Route>
-          </Router>
-        </Theme>
+        <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
+          <Theme>
+            <Router history={history}>
+              <Route path="/settings/user">
+                <ListPage />
+              </Route>
+            </Router>
+          </Theme>
+        </ThemeToggleProvider>
       </IntlProvider>
     </QueryClientProvider>
   );
@@ -293,6 +297,11 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
       .c6:active {
         border: 1px solid #4945ff;
         background: #4945ff;
+      }
+
+      .c6 svg > g,
+      .c6 svg path {
+        fill: #ffffff;
       }
 
       .c23 {
@@ -700,16 +709,6 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         cursor: not-allowed;
       }
 
-      .c56 {
-        color: #32324d;
-        display: block;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        font-size: 0.875rem;
-        line-height: 1.43;
-      }
-
       .c55 {
         padding-right: 16px;
         padding-left: 16px;
@@ -751,6 +750,16 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         align-items: center;
       }
 
+      .c56 {
+        color: #32324d;
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: 0.875rem;
+        line-height: 1.43;
+      }
+
       .c49 {
         display: -webkit-box;
         display: -webkit-flex;
@@ -764,10 +773,6 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
       .c49 > * {
         margin-top: 0;
         margin-bottom: 0;
-      }
-
-      .c49 > * + * {
-        margin-top: 0px;
       }
 
       .c51 {
@@ -1562,7 +1567,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
               </div>
               <nav
                 aria-label="pagination"
-                class="sc-evcjhq"
+                class="sc-XxNYO"
               >
                 <ul
                   class="c62 c63"
@@ -1616,7 +1621,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                         xmlns="http://www.w3.org/2000/svg"
                       >
                         <path
-                          d="M.12 1.88L6.227 8 .12 14.12 2 16l8-8-8-8L.12 1.88z"
+                          d="M0 1.88L6.107 8 0 14.12 1.88 16l8-8-8-8L0 1.88z"
                           fill="#32324D"
                         />
                       </svg>

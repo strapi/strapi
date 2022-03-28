@@ -89,8 +89,8 @@ export const MediaLibrary = () => {
             canCreate ? (
               <Button startIcon={<Plus />} onClick={toggleUploadAssetDialog}>
                 {formatMessage({
-                  id: getTrad('header.actions.upload-assets'),
-                  defaultMessage: 'Upload assets',
+                  id: getTrad('header.actions.add-assets'),
+                  defaultMessage: 'Add new assets',
                 })}
               </Button>
             ) : (
@@ -157,8 +157,8 @@ export const MediaLibrary = () => {
                     onClick={toggleUploadAssetDialog}
                   >
                     {formatMessage({
-                      id: getTrad('modal.header.browse'),
-                      defaultMessage: 'Upload assets',
+                      id: getTrad('header.actions.add-assets'),
+                      defaultMessage: 'Add new assets',
                     })}
                   </Button>
                 ) : (

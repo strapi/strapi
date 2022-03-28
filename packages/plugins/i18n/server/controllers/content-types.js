@@ -20,9 +20,15 @@ module.exports = {
 
     await validateGetNonLocalizedAttributesInput({ model, id, locale });
 
-    const modelDef = strapi.getModel(model);
-    const { copyNonLocalizedAttributes, isLocalizedContentType } = getService('content-types');
+    const {
+      copyNonLocalizedAttributes,
+      isLocalizedContentType,
+      getNestedPopulateOfNonLocalizedAttributes,
+    } = getService('content-types');
     const { READ_ACTION, CREATE_ACTION } = strapi.admin.services.constants;
+
+    const modelDef = strapi.contentType(model);
+    const attributesToPopulate = getNestedPopulateOfNonLocalizedAttributes(model);
 
     if (!isLocalizedContentType(modelDef)) {
       throw new ApplicationError('model.not.localized');
@@ -32,7 +38,7 @@ module.exports = {
 
     const entity = await strapi
       .query(model)
-      .findOne({ where: params, populate: ['localizations'] });
+      .findOne({ where: params, populate: [...attributesToPopulate, 'localizations'] });
 
     if (!entity) {
       return ctx.notFound();
@@ -52,11 +58,7 @@ module.exports = {
       .filter(perm => getLocalesProperty(perm).includes(locale))
       .map(getFieldsProperty);
 
-    const permittedFields = pipe(
-      flatten,
-      getFirstLevelPath,
-      uniq
-    )(localePermissions);
+    const permittedFields = pipe(flatten, getFirstLevelPath, uniq)(localePermissions);
 
     const nonLocalizedFields = copyNonLocalizedAttributes(modelDef, entity);
     const sanitizedNonLocalizedFields = pick(permittedFields, nonLocalizedFields);

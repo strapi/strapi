@@ -18,7 +18,7 @@ module.exports = ({ strapi }) => {
     try {
       await next();
     } catch (error) {
-      sentry.sendError(error, (scope, sentryInstance) => {
+      sentryService.sendError(error, (scope, sentryInstance) => {
         scope.addEventProcessor(event => {
           // Parse Koa context to add error metadata
           return sentryInstance.Handlers.parseRequest(event, ctx.request, {
