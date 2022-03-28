@@ -46,7 +46,7 @@ module.exports = async function optOutTelemetry() {
   const packageJSONPath = resolve(process.cwd(), 'package.json');
   const exists = await fse.pathExists(packageJSONPath);
 
-  if (exists) {
+  if (!exists) {
     console.log(`${chalk.yellow('Warning')}: could not find package.json`);
     process.exit(0);
   }
