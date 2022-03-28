@@ -14,11 +14,12 @@ import {
   useNotification,
   useOverlayBlocker,
   useTracking,
+  getYupInnerErrors,
 } from '@strapi/helper-plugin';
 
 import { getTrad, removeKeyInObject } from '../../utils';
 import reducer, { initialState } from './reducer';
-import { cleanData, createYupSchema, getYupInnerErrors } from './utils';
+import { cleanData, createYupSchema } from './utils';
 import { getAPIInnerError } from './utils/getAPIInnerError';
 
 const EditViewDataManagerProvider = ({
@@ -268,7 +269,7 @@ const EditViewDataManagerProvider = ({
   );
 
   const createFormData = useCallback(
-    data => {
+    (data) => {
       // First we need to remove the added keys needed for the dnd
       const preparedData = removeKeyInObject(cloneDeep(data), '__temp_key__');
       // Then we need to apply our helper
@@ -292,7 +293,7 @@ const EditViewDataManagerProvider = ({
   }, [hasDraftAndPublish, shouldNotRunValidations]);
 
   const handleSubmit = useCallback(
-    async e => {
+    async (e) => {
       e.preventDefault();
       let errors = {};
 
@@ -362,8 +363,8 @@ const EditViewDataManagerProvider = ({
   }, [allLayoutData, currentContentTypeLayout, isCreatingEntry, modifiedData, onPublish]);
 
   const shouldCheckDZErrors = useCallback(
-    dzName => {
-      const doesDZHaveError = Object.keys(formErrors).some(key => key.split('.')[0] === dzName);
+    (dzName) => {
+      const doesDZHaveError = Object.keys(formErrors).some((key) => key.split('.')[0] === dzName);
       const shouldCheckErrors = !isEmpty(formErrors) && doesDZHaveError;
 
       return shouldCheckErrors;
@@ -417,7 +418,7 @@ const EditViewDataManagerProvider = ({
     });
   }, []);
 
-  const onRemoveRelation = useCallback(keys => {
+  const onRemoveRelation = useCallback((keys) => {
     dispatch({
       type: 'REMOVE_RELATION',
       keys,
