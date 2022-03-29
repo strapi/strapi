@@ -42,7 +42,7 @@ const SettingsPage = lazy(() =>
 const useTrackUsage = () => {
   const { trackUsage } = useTracking();
   const dispatch = useDispatch();
-  const appStatus = useSelector(state => state['strapi-admin_app'].status);
+  const appStatus = useSelector(state => state.admin_app.status);
 
   useEffect(() => {
     // Make sure the event is only send once after accessing the admin panel

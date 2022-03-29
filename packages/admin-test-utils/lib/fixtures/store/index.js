@@ -4,7 +4,7 @@
 const { combineReducers, createStore } = require('redux');
 
 const reducers = {
-  'strapi-admin_app': jest.fn(() => ({ status: 'init' })),
+  admin_app: jest.fn(() => ({ status: 'init' })),
   'content-manager_app': jest.fn(() => ({
     components: [],
     status: 'loading',

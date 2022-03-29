@@ -15,7 +15,7 @@ const contentManagerReducers = {
 };
 
 const reducers = {
-  'strapi-admin_app': appReducer,
+  admin_app: appReducer,
   rbacProvider: rbacProviderReducer,
   ...contentManagerReducers,
 };
