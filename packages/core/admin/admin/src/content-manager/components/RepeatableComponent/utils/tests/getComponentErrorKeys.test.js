@@ -19,7 +19,7 @@ describe('getComponentErrorKeys', () => {
       'parent.child.1.field': 'validation-error',
     };
 
-    expect(getComponentErrorKeys('parent.child', FIXTURE, true)).toStrictEqual([
+    expect(getComponentErrorKeys('parent.child', FIXTURE)).toStrictEqual([
       'parent.child.0',
       'parent.child.1',
     ]);
