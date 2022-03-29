@@ -205,6 +205,8 @@
   "Users.components.List.empty.withFilters": "There is no users with the applied filters...",
   "Users.components.List.empty.withSearch": "There is no users corresponding to the search ({search})...",
   "admin.pages.MarketPlacePage.helmet": "Marketplace - Plugins",
+  "admin.pages.MarketPlacePage.offline.title": "You are offline",
+  "admin.pages.MarketPlacePage.offline.subtitle": "You need to be connected to the Internet to access Strapi Market.",
   "admin.pages.MarketPlacePage.plugin.copy": "Copy install command",
   "admin.pages.MarketPlacePage.plugin.copy.success": "Install command ready to be pasted in your terminal",
   "admin.pages.MarketPlacePage.plugin.info": "Learn more",
