@@ -19,7 +19,7 @@ export default function serverRestartWatcher(response, didShutDownServer) {
     })
       .then(res => {
         if (res.status >= 400) {
-          throw new Error('not available');
+          throw new Error('server is down');
         }
 
         if (!didShutDownServer) {

@@ -29,7 +29,7 @@ import retrieveComponentsFromSchema from './utils/retrieveComponentsFromSchema';
 import retrieveNestedComponents from './utils/retrieveNestedComponents';
 import { retrieveComponentsThatHaveComponents } from './utils/retrieveComponentsThatHaveComponents';
 import { getComponentsToPost, formatMainDataType, sortContentType } from './utils/cleanData';
-import serverRestartWatcher from './utils/request';
+import serverRestartWatcher from './utils/serverRestartWatcher';
 import validateSchema from './utils/validateSchema';
 
 import {
