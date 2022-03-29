@@ -3,6 +3,12 @@ import { useTrackUsage } from '..';
 
 const trackUsageMock = jest.fn();
 
+jest.mock('react-redux', () => ({
+  ...jest.requireActual('react-redux'),
+  useDispatch: jest.fn(() => jest.fn()),
+  useSelector: jest.fn(() => 'init'),
+}));
+
 jest.mock('@strapi/helper-plugin', () => ({
   useTracking: jest.fn(() => ({ trackUsage: trackUsageMock })),
 }));
