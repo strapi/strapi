@@ -23,7 +23,7 @@ import { Flex } from '@strapi/design-system/Flex';
 
 import PluginCard from './components/PluginCard';
 import { EmptyPluginSearch } from './components/EmptyPluginSearch';
-import MarketplacePageHeader from './components/MarketplacePageHeader';
+import PageHeader from './components/PageHeader';
 import { fetchAppInformation } from './utils/api';
 import useFetchInstalledPlugins from '../../hooks/useFetchInstalledPlugins';
 import useFetchMarketplacePlugins from '../../hooks/useFetchMarketplacePlugins';
@@ -123,7 +123,7 @@ const MarketPlacePage = () => {
   if (!isOnline) {
     return (
       <Layout>
-        <MarketplacePageHeader />
+        <PageHeader />
         <Flex
           width="100%"
           direction="column"
@@ -187,7 +187,7 @@ const MarketPlacePage = () => {
             defaultMessage: 'Marketplace - Plugins',
           })}
         />
-        <MarketplacePageHeader />
+        <PageHeader />
         <ContentLayout>
           <Box width="25%" paddingBottom={4}>
             <Searchbar

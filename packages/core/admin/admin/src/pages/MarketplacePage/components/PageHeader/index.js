@@ -5,7 +5,7 @@ import { LinkButton } from '@strapi/design-system/LinkButton';
 import Upload from '@strapi/icons/Upload';
 import { useTracking } from '@strapi/helper-plugin';
 
-const MarketplacePageHeader = () => {
+const PageHeader = () => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
 
@@ -36,4 +36,4 @@ const MarketplacePageHeader = () => {
   );
 };
 
-export default MarketplacePageHeader;
+export default PageHeader;
