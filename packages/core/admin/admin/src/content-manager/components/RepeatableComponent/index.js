@@ -207,9 +207,6 @@ RepeatableComponent.propTypes = {
 
 const Memoized = memo(RepeatableComponent);
 
-export default connect(
-  Memoized,
-  select
-);
+export default connect(Memoized, select);
 
 export { RepeatableComponent };

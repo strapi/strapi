@@ -150,7 +150,10 @@ describe('CONTENT MANAGER | CONTAINERS | EditSettingsView | reducer', () => {
             edit: [
               {
                 rowId: 0,
-                rowContent: [{ name: 'title', size: 6 }, { name: '_TEMP_', size: 6 }],
+                rowContent: [
+                  { name: 'title', size: 6 },
+                  { name: '_TEMP_', size: 6 },
+                ],
               },
             ],
           },
@@ -170,7 +173,10 @@ describe('CONTENT MANAGER | CONTAINERS | EditSettingsView | reducer', () => {
         edit: [
           {
             rowId: 0,
-            rowContent: [{ name: 'title', size: 8 }, { name: '_TEMP_', size: 4 }],
+            rowContent: [
+              { name: 'title', size: 8 },
+              { name: '_TEMP_', size: 4 },
+            ],
           },
         ],
       };
@@ -186,7 +192,10 @@ describe('CONTENT MANAGER | CONTAINERS | EditSettingsView | reducer', () => {
             edit: [
               {
                 rowId: 0,
-                rowContent: [{ name: 'title', size: 8 }, { name: 'isActive', size: 4 }],
+                rowContent: [
+                  { name: 'title', size: 8 },
+                  { name: 'isActive', size: 4 },
+                ],
               },
             ],
           },
@@ -234,7 +243,10 @@ describe('CONTENT MANAGER | CONTAINERS | EditSettingsView | reducer', () => {
               },
               {
                 rowId: 1,
-                rowContent: [{ name: 'title', size: 6 }, { name: '_TEMP_', size: 6 }],
+                rowContent: [
+                  { name: 'title', size: 6 },
+                  { name: '_TEMP_', size: 6 },
+                ],
               },
             ],
           },
@@ -358,7 +370,10 @@ describe('CONTENT MANAGER | CONTAINERS | EditSettingsView | reducer', () => {
             edit: [
               {
                 rowId: 0,
-                rowContent: [{ name: 'isActive', size: 4 }, { name: '_TEMP_', size: 8 }],
+                rowContent: [
+                  { name: 'isActive', size: 4 },
+                  { name: '_TEMP_', size: 8 },
+                ],
               },
             ],
           },
@@ -404,7 +419,10 @@ describe('CONTENT MANAGER | CONTAINERS | EditSettingsView | reducer', () => {
             },
             {
               rowId: 1,
-              rowContent: [{ name: 'slug', size: 6 }, { name: '_TEMP_', size: 6 }],
+              rowContent: [
+                { name: 'slug', size: 6 },
+                { name: '_TEMP_', size: 6 },
+              ],
             },
           ],
         },
@@ -424,7 +442,10 @@ describe('CONTENT MANAGER | CONTAINERS | EditSettingsView | reducer', () => {
               },
               {
                 rowId: 1,
-                rowContent: [{ name: 'second', size: 4 }, { name: '_TEMP_', size: 8 }],
+                rowContent: [
+                  { name: 'second', size: 4 },
+                  { name: '_TEMP_', size: 8 },
+                ],
               },
             ],
           },
@@ -455,7 +476,10 @@ describe('CONTENT MANAGER | CONTAINERS | EditSettingsView | reducer', () => {
             },
             {
               rowId: 1,
-              rowContent: [{ name: 'slug', size: 6 }, { name: '_TEMP_', size: 6 }],
+              rowContent: [
+                { name: 'slug', size: 6 },
+                { name: '_TEMP_', size: 6 },
+              ],
             },
           ],
         },
@@ -475,7 +499,10 @@ describe('CONTENT MANAGER | CONTAINERS | EditSettingsView | reducer', () => {
               },
               {
                 rowId: 1,
-                rowContent: [{ name: 'slug', size: 6 }, { name: '_TEMP_', size: 6 }],
+                rowContent: [
+                  { name: 'slug', size: 6 },
+                  { name: '_TEMP_', size: 6 },
+                ],
               },
             ],
           },
@@ -499,7 +526,10 @@ describe('CONTENT MANAGER | CONTAINERS | EditSettingsView | reducer', () => {
         edit: [
           {
             rowId: 0,
-            rowContent: [{ name: 'city', size: 6 }, { name: 'slug', size: 6 }],
+            rowContent: [
+              { name: 'city', size: 6 },
+              { name: 'slug', size: 6 },
+            ],
           },
           {
             rowId: 1,
@@ -518,7 +548,10 @@ describe('CONTENT MANAGER | CONTAINERS | EditSettingsView | reducer', () => {
             edit: [
               {
                 rowId: 0,
-                rowContent: [{ name: 'city', size: 6 }, { name: 'slug', size: 6 }],
+                rowContent: [
+                  { name: 'city', size: 6 },
+                  { name: 'slug', size: 6 },
+                ],
               },
               {
                 rowId: 1,

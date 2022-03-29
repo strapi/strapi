@@ -50,7 +50,11 @@ const ActionWrapper = styled.div`
 `;
 
 const mapToLocaleName = (locales, localeCode) =>
-  get(locales.find(({ code }) => code === localeCode), 'name', localeCode);
+  get(
+    locales.find(({ code }) => code === localeCode),
+    'name',
+    localeCode
+  );
 
 const LocaleListCell = ({ localizations, locale: currentLocaleCode, id }) => {
   const locales = useSelector(selectI18NLocales);
