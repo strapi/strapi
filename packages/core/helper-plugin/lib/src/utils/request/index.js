@@ -1,4 +1,3 @@
-import 'whatwg-fetch';
 import startsWith from 'lodash/startsWith';
 import auth from '../auth';
 
