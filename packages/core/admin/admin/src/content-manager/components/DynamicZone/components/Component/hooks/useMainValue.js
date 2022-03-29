@@ -3,13 +3,7 @@ import { get, toString } from 'lodash';
 import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 
 export function getDisplayedValue(modifiedData, componentFieldPath, mainField) {
-  let displayedValue = toString(get(modifiedData, [...componentFieldPath, mainField], ''));
-
-  if (displayedValue.length > 50) {
-    displayedValue = `${displayedValue.substring(0, 50)}...`;
-  }
-
-  return displayedValue;
+  return toString(get(modifiedData, [...componentFieldPath, mainField], ''));
 }
 
 function useMainValue(schema, componentFieldPath) {
