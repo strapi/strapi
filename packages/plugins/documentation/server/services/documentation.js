@@ -166,10 +166,11 @@ module.exports = ({ strapi }) => {
         }
 
         // Update the paths
-        const apiPathsObject = builApiEndpointPath(api);
+        const apiPathsObject = builApiEndpointPath(api) || overrides.paths;
         if (!apiPathsObject) {
           continue;
         }
+
         _.merge(paths, apiPathsObject);
 
         await fs.ensureFile(apiDocPath);
