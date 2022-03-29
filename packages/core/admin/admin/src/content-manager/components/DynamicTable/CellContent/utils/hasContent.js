@@ -16,7 +16,12 @@ export default function hasContent(type, content, metadatas, fieldSchema) {
       return content.length > 0;
     }
 
-    const value = content[mainFieldName];
+    const value = content?.[mainFieldName];
+
+    // relations, media ... show the id as fallback
+    if (mainFieldName === 'id' && isNumber(value)) {
+      return true;
+    }
 
     /* The ID field reports itself as type `integer`, which makes it
        impossible to distinguish it from other number fields.
