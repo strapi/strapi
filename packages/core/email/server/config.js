@@ -1,4 +1,5 @@
 'use strict';
+const documentation = require('./documentation');
 
 module.exports = {
   default: {
@@ -7,6 +8,8 @@ module.exports = {
     settings: {
       defaultFrom: 'Strapi <no-reply@strapi.io>',
     },
+    documentation,
   },
+
   validator() {},
 };

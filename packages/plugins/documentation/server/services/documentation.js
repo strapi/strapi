@@ -88,6 +88,7 @@ module.exports = ({ strapi }) => {
 
     getPluginAndApiInfo() {
       const plugins = _.get(config, 'x-strapi-config.plugins');
+
       const pluginsToDocument = plugins.map(plugin => {
         return {
           name: plugin,
@@ -117,36 +118,62 @@ module.exports = ({ strapi }) => {
       return {};
     },
 
+    async getApiOrPluginOverride(api, version) {
+      const apiDocumentationPath = this.getApiDocumentationPath(api);
+      // Check if the plugin developer set documentation on the config object
+      if (api.getter === 'plugin') {
+        const pluginConfig = strapi.config.get(`plugin.${api.name}`);
+        // Plugin overrides must be set on the documentation key of the plugin config
+        if ('documentation' in pluginConfig) return pluginConfig.documentation.overrides[version];
+      }
+
+      const overridePath = path.join(
+        apiDocumentationPath,
+        version,
+        'overrides',
+        `${api.name}.json`
+      );
+      const exists = await fs.pathExists(overridePath);
+      if (!exists) return;
+
+      // Always prefer the end user override
+      return fs.readJSON(overridePath);
+    },
+
     /**
      * @description - Creates the Swagger json files
      */
     async generateFullDoc(version = this.getDocumentationVersion()) {
-      let paths = {};
-      let schemas = {};
+      const paths = {};
+      const schemas = {};
+      const overrides = {};
       const apis = this.getPluginAndApiInfo();
+
       for (const api of apis) {
-        const apiName = api.name;
         const apiDirPath = path.join(this.getApiDocumentationPath(api), version);
+        const apiDocPath = path.join(apiDirPath, `${api.name}.json`);
 
-        const apiDocPath = path.join(apiDirPath, `${apiName}.json`);
-
-        const apiPath = builApiEndpointPath(api);
-
-        if (!apiPath) {
-          continue;
+        // Update the overrides
+        const override = await this.getApiOrPluginOverride(api, version);
+        if (override) {
+          _.merge(overrides, override);
         }
 
-        await fs.ensureFile(apiDocPath);
-        await fs.writeJson(apiDocPath, apiPath, { spaces: 2 });
-
+        // Update the schemas
         const componentSchema = buildComponentSchema(api);
+        if (componentSchema) {
+          _.merge(schemas, componentSchema);
+        }
 
-        schemas = {
-          ...schemas,
-          ...componentSchema,
-        };
+        // Update the paths
+        const apiPathsObject = builApiEndpointPath(api);
+        if (!apiPathsObject) {
+          continue;
+        }
+        _.merge(paths, apiPathsObject);
 
-        paths = { ...paths, ...apiPath };
+        await fs.ensureFile(apiDocPath);
+        await fs.writeJson(apiDocPath, apiPathsObject, { spaces: 2 });
       }
 
       const fullDocJsonPath = path.join(
@@ -172,9 +199,10 @@ module.exports = ({ strapi }) => {
 
       const customConfig = await this.getCustomConfig();
       const config = _.merge(defaultConfig, customConfig);
+      const fullDoc = _.merge({ ...config, paths }, overrides);
 
       await fs.ensureFile(fullDocJsonPath);
-      await fs.writeJson(fullDocJsonPath, { ...config, paths }, { spaces: 2 });
+      await fs.writeJson(fullDocJsonPath, fullDoc, { spaces: 2 });
     },
   };
 };

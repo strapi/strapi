@@ -144,31 +144,8 @@ const getPaths = ({ routeInfo, uniqueName }) => {
  *
  * @returns {object} Open API paths
  */
-const getAllPathsForContentType = ({
-  name,
-  getter,
-  ctNames,
-  uniqueName,
-  routeInfo,
-  attributes,
-}) => {
+const getAllPathsForContentType = ({ uniqueName, routeInfo, attributes }) => {
   let paths = {};
-  if (!ctNames.length && getter === 'plugin') {
-    const routeInfo = strapi.plugin(name).routes['admin'];
-
-    const apiInfo = {
-      routeInfo,
-      uniqueName,
-    };
-
-    paths = {
-      ...paths,
-      ...getPaths(apiInfo),
-    };
-
-    return getPaths(apiInfo);
-  }
-
   const apiInfo = {
     routeInfo,
     attributes,

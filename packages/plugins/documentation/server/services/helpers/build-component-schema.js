@@ -17,23 +17,13 @@ const pascalCase = require('./utils/pascal-case');
  *
  * @returns {object} Open API schemas
  */
-const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName, ctNames, getter }) => {
+const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
   // Store response and request schemas in an object
   let schemas = {};
   // Set flag false since schemas are always objects
   const isListOfEntities = false;
   // Get all the route methods
   const routeMethods = routeInfo.routes.map(route => route.method);
-
-  if (!ctNames.length && getter === 'plugin') {
-    // Set arbitrary attributes
-    const attributes = { foo: { type: 'string' } };
-
-    schemas = {
-      ...schemas,
-      [pascalCase(uniqueName)]: getSchemaData(isListOfEntities, cleanSchemaAttributes(attributes)),
-    };
-  }
 
   if (routeMethods.includes('POST') || routeMethods.includes('PUT')) {
     const requiredAttributes = Object.entries(attributes)
