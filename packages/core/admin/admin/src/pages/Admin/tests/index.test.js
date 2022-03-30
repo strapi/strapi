@@ -8,6 +8,12 @@ import { useStrapiApp } from '@strapi/helper-plugin';
 import { useMenu } from '../../../hooks';
 import Admin from '../index';
 
+jest.mock('react-redux', () => ({
+  ...jest.requireActual('react-redux'),
+  useDispatch: jest.fn(() => jest.fn()),
+  useSelector: jest.fn(() => 'init'),
+}));
+
 jest.mock('@strapi/helper-plugin', () => ({
   LoadingIndicatorPage: () => <div>Loading</div>,
   useStrapiApp: jest.fn(() => ({ menu: [] })),
