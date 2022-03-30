@@ -12,4 +12,8 @@ module.exports = async ({ strapi }) => {
   if (strapi.plugin('graphql')) {
     require('./graphql')({ strapi });
   }
+
+  if (strapi.plugin('documentation')) {
+    require('./documentation')({ strapi });
+  }
 };

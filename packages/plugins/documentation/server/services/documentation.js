@@ -3,6 +3,7 @@
 const path = require('path');
 const fs = require('fs-extra');
 const _ = require('lodash');
+
 const { getAbsoluteServerUrl } = require('@strapi/utils');
 
 const defaultPluginConfig = require('../config/default-plugin-config');
@@ -118,46 +119,17 @@ module.exports = ({ strapi }) => {
       return {};
     },
 
-    async getApiOrPluginOverride(api, version) {
-      const apiDocumentationPath = this.getApiDocumentationPath(api);
-      // Check if the plugin developer set documentation on the config object
-      if (api.getter === 'plugin') {
-        const pluginConfig = strapi.config.get(`plugin.${api.name}`);
-        // Plugin overrides must be set on the documentation key of the plugin config
-        if ('documentation' in pluginConfig) return pluginConfig.documentation.overrides[version];
-      }
-
-      const overridePath = path.join(
-        apiDocumentationPath,
-        version,
-        'overrides',
-        `${api.name}.json`
-      );
-      const exists = await fs.pathExists(overridePath);
-      if (!exists) return;
-
-      // Always prefer the end user override
-      return fs.readJSON(overridePath);
-    },
-
     /**
      * @description - Creates the Swagger json files
      */
     async generateFullDoc(version = this.getDocumentationVersion()) {
       const paths = {};
       const schemas = {};
-      const overrides = {};
       const apis = this.getPluginAndApiInfo();
 
       for (const api of apis) {
         const apiDirPath = path.join(this.getApiDocumentationPath(api), version);
         const apiDocPath = path.join(apiDirPath, `${api.name}.json`);
-
-        // Update the overrides
-        const override = await this.getApiOrPluginOverride(api, version);
-        if (override) {
-          _.merge(overrides, override);
-        }
 
         // Update the schemas
         const componentSchema = buildComponentSchema(api);
@@ -166,7 +138,7 @@ module.exports = ({ strapi }) => {
         }
 
         // Update the paths
-        const apiPathsObject = builApiEndpointPath(api) || overrides.paths;
+        const apiPathsObject = builApiEndpointPath(api);
         if (!apiPathsObject) {
           continue;
         }
@@ -197,9 +169,13 @@ module.exports = ({ strapi }) => {
       _.set(defaultConfig, ['info', 'x-generation-date'], new Date().toISOString());
       _.set(defaultConfig, ['info', 'version'], version);
       _.merge(defaultConfig.components, { schemas });
-
       const customConfig = await this.getCustomConfig();
       const config = _.merge(defaultConfig, customConfig);
+
+      const overrides = strapi
+        .plugin('documentation')
+        .service('override')
+        .getOverridesForVersion(version);
       const fullDoc = _.merge({ ...config, paths }, overrides);
 
       await fs.ensureFile(fullDocJsonPath);

@@ -4,5 +4,6 @@ const overrides = {
 };
 
 module.exports = ({ strapi }) => {
+  console.log('coucou');
   strapi.plugin('documentation').services.override.register(overrides);
 };

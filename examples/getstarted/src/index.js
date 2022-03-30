@@ -7,7 +7,11 @@ module.exports = {
    *
    * This gives you an opportunity to extend code.
    */
-  register({ strapi }) {},
+  register({ strapi }) {
+    if (strapi.plugin('documentation')) {
+      require('./documentation')({ strapi });
+    }
+  },
 
   /**
    * An asynchronous bootstrap function that runs before
