@@ -50,8 +50,15 @@ describe('hasContent', () => {
     });
   });
 
+  describe('ID', () => {
+    it('returns true for id main fields', () => {
+      const normalizedContent = hasContent('media', { id: 1 });
+      expect(normalizedContent).toEqual(true);
+    });
+  });
+
   describe('single component', () => {
-    it('extracts content from single components with content', () => {
+    it('extracts content with content', () => {
       const normalizedContent = hasContent(
         'component',
         { name: 'content', id: 1 },
@@ -60,7 +67,7 @@ describe('hasContent', () => {
       expect(normalizedContent).toEqual(true);
     });
 
-    it('extracts content from single components without content', () => {
+    it('extracts content without content', () => {
       const normalizedContent = hasContent(
         'component',
         { name: '', id: 1 },
@@ -69,7 +76,7 @@ describe('hasContent', () => {
       expect(normalizedContent).toEqual(false);
     });
 
-    it('extracts integers from single components with content', () => {
+    it('extracts integers with content', () => {
       const normalizedContent = hasContent(
         'component',
         { number: 1, id: 1 },
@@ -78,7 +85,7 @@ describe('hasContent', () => {
       expect(normalizedContent).toEqual(true);
     });
 
-    it('extracts integers from single components without content', () => {
+    it('extracts integers without content', () => {
       const normalizedContent = hasContent(
         'component',
         { number: null, id: 1 },
@@ -87,7 +94,7 @@ describe('hasContent', () => {
       expect(normalizedContent).toEqual(false);
     });
 
-    it('extracts float from single components with content', () => {
+    it('extracts float with content', () => {
       const normalizedContent = hasContent(
         'component',
         { number: 1.11, id: 1 },
@@ -96,7 +103,7 @@ describe('hasContent', () => {
       expect(normalizedContent).toEqual(true);
     });
 
-    it('extracts float from single components without content', () => {
+    it('extracts float without content', () => {
       const normalizedContent = hasContent(
         'component',
         { number: null, id: 1 },
@@ -105,7 +112,7 @@ describe('hasContent', () => {
       expect(normalizedContent).toEqual(false);
     });
 
-    it('extracts decimal from single components with content', () => {
+    it('extracts decimal with content', () => {
       const normalizedContent = hasContent(
         'component',
         { number: 1.11, id: 1 },
@@ -114,7 +121,7 @@ describe('hasContent', () => {
       expect(normalizedContent).toEqual(true);
     });
 
-    it('extracts decimal from single components without content', () => {
+    it('extracts decimal without content', () => {
       const normalizedContent = hasContent(
         'component',
         { number: null, id: 1 },
@@ -123,7 +130,7 @@ describe('hasContent', () => {
       expect(normalizedContent).toEqual(false);
     });
 
-    it('extracts biginteger from single components with content', () => {
+    it('extracts biginteger with content', () => {
       const normalizedContent = hasContent(
         'component',
         { number: '12345678901234567890', id: 1 },
@@ -132,7 +139,7 @@ describe('hasContent', () => {
       expect(normalizedContent).toEqual(true);
     });
 
-    it('extracts biginteger from single components without content', () => {
+    it('extracts biginteger without content', () => {
       const normalizedContent = hasContent(
         'component',
         { number: null, id: 1 },
@@ -140,10 +147,28 @@ describe('hasContent', () => {
       );
       expect(normalizedContent).toEqual(false);
     });
+
+    it('does not fail if the attribute is not set', () => {
+      const normalizedContent = hasContent(
+        'component',
+        { id: 1 },
+        { mainField: { name: 'number', type: 'biginteger' } }
+      );
+      expect(normalizedContent).toEqual(false);
+    });
+
+    it('returns true id the main field is an id', () => {
+      const normalizedContent = hasContent(
+        'component',
+        { id: 1 },
+        { mainField: { name: 'id', type: 'integer' } }
+      );
+      expect(normalizedContent).toEqual(true);
+    });
   });
 
   describe('repeatable components', () => {
-    it('extracts content from repeatable components with content', () => {
+    it('extracts content with content', () => {
       const normalizedContent = hasContent(
         'component',
         [{ name: 'content_2', value: 'truthy', id: 1 }],
@@ -153,7 +178,7 @@ describe('hasContent', () => {
       expect(normalizedContent).toEqual(true);
     });
 
-    it('extracts content from repeatable components without content', () => {
+    it('extracts content without content', () => {
       const normalizedContent = hasContent(
         'component',
         [{ name: 'content_2', value: '', id: 1 }],
@@ -163,7 +188,7 @@ describe('hasContent', () => {
       expect(normalizedContent).toEqual(true);
     });
 
-    it('extracts content from repeatable components without content', () => {
+    it('extracts content without content', () => {
       const normalizedContent = hasContent(
         'component',
         [{ id: 1 }, { id: 2 }],
@@ -173,7 +198,7 @@ describe('hasContent', () => {
       expect(normalizedContent).toEqual(true);
     });
 
-    it('extracts content from repeatable components without content', () => {
+    it('extracts content without content', () => {
       const normalizedContent = hasContent(
         'component',
         [],
