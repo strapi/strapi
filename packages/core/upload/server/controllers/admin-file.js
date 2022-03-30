@@ -2,7 +2,7 @@
 
 const { getService } = require('../utils');
 const { ACTIONS } = require('../constants');
-const findEntityAndCheckPermissions = require('./utils/find-entity-and-check-permissions');
+const { findEntityAndCheckPermissions } = require('./utils/find-entity-and-check-permissions');
 
 const fileModel = 'plugin::upload.file';
 

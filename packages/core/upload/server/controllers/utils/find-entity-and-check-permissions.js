@@ -8,7 +8,7 @@ const { getService } = require('../../utils');
 const { CREATED_BY_ATTRIBUTE } = contentTypesUtils.constants;
 
 const findEntityAndCheckPermissions = async (ability, action, model, id) => {
-  const file = await getService('upload').findOne(id, [CREATED_BY_ATTRIBUTE]);
+  const file = await getService('upload').findOne(id, [CREATED_BY_ATTRIBUTE, 'folder']);
 
   if (_.isNil(file)) {
     throw new NotFoundError();

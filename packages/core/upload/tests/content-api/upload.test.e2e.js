@@ -6,7 +6,7 @@ const path = require('path');
 // Helpers.
 const { createTestBuilder } = require('../../../../../test/helpers/builder');
 const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
-const { createAuthRequest } = require('../../../../../test/helpers/request');
+const { createContentAPIRequest } = require('../../../../../test/helpers/request');
 
 const builder = createTestBuilder();
 let strapi;
@@ -28,7 +28,7 @@ describe('Upload plugin end to end tests', () => {
   beforeAll(async () => {
     await builder.addContentType(dogModel).build();
     strapi = await createStrapiInstance();
-    rq = await createAuthRequest({ strapi });
+    rq = await createContentAPIRequest({ strapi });
   });
 
   afterAll(async () => {
@@ -88,7 +88,7 @@ describe('Upload plugin end to end tests', () => {
         method: 'POST',
         url: '/upload',
         formData: {
-          files: fs.createReadStream(path.join(__dirname, 'rec.jpg')),
+          files: fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')),
         },
       });
 
@@ -121,7 +121,7 @@ describe('Upload plugin end to end tests', () => {
         method: 'POST',
         url: '/upload',
         formData: {
-          files: fs.createReadStream(path.join(__dirname, 'thumbnail_target.png')),
+          files: fs.createReadStream(path.join(__dirname, '../utils/thumbnail_target.png')),
         },
       });
 
@@ -185,7 +185,7 @@ describe('Upload plugin end to end tests', () => {
         url: '/api/dogs?populate=*',
         formData: {
           data: '{}',
-          'files.profilePicture': fs.createReadStream(path.join(__dirname, 'rec.jpg')),
+          'files.profilePicture': fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')),
         },
       });
 
@@ -213,7 +213,7 @@ describe('Upload plugin end to end tests', () => {
         url: '/api/dogs?populate=*',
         formData: {
           data: '{}',
-          'files.profilePicture': fs.createReadStream(path.join(__dirname, 'rec.pdf')),
+          'files.profilePicture': fs.createReadStream(path.join(__dirname, '../utils/rec.pdf')),
         },
       });
 

@@ -42,11 +42,10 @@ module.exports = {
 
     const existingFolders = await strapi.entityService.findMany(folderModel, {
       filters: {
-        parent: body.parent,
+        parent: body.parent || null,
         name: body.name,
       },
     });
-
     if (existingFolders.length > 0) {
       throw new ApplicationError('name already taken');
     }

@@ -1,6 +1,5 @@
 'use strict';
 
-const uuid = require('uuid/v4');
 const { trimChars, trimCharsEnd, trimCharsStart } = require('lodash/fp');
 
 // TODO: to use once https://github.com/strapi/strapi/pull/12534 is merged
@@ -21,21 +20,13 @@ const joinBy = (joint, ...args) => {
   }, '');
 };
 
-const generateUID = () => uuid();
+const getPath = async (folderId, fileName) => {
+  if (!folderId) return joinBy('/', '/', fileName);
 
-const setPathAndUID = async folder => {
-  let parentPath = '/';
-  if (folder.parent) {
-    const parentFolder = await strapi.entityService.findOne(folderModel, folder.parent);
-    parentPath = parentFolder.path;
-  }
-
-  return Object.assign(folder, {
-    uid: generateUID(),
-    path: joinBy('/', parentPath, folder.name),
-  });
+  const parentFolder = await strapi.entityService.findOne(folderModel, folderId);
+  return joinBy('/', parentFolder.path, fileName);
 };
 
 module.exports = {
-  setPathAndUID,
+  getPath,
 };

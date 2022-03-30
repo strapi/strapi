@@ -45,7 +45,7 @@ describe('Upload plugin end to end tests', () => {
       map: JSON.stringify({
         nFile1: ['variables.file'],
       }),
-      nFile1: fs.createReadStream(path.join(__dirname, '/rec.jpg')),
+      nFile1: fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')),
     };
 
     const res = await rq({ method: 'POST', url: '/graphql', formData });
@@ -94,8 +94,8 @@ describe('Upload plugin end to end tests', () => {
         nFile0: ['variables.files.0'],
         nFile1: ['variables.files.1'],
       }),
-      nFile0: fs.createReadStream(path.join(__dirname, '/rec.jpg')),
-      nFile1: fs.createReadStream(path.join(__dirname, '/rec.jpg')),
+      nFile0: fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')),
+      nFile1: fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')),
     };
 
     const res = await rq({ method: 'POST', url: '/graphql', formData });
@@ -144,7 +144,7 @@ describe('Upload plugin end to end tests', () => {
       map: JSON.stringify({
         nFile1: ['variables.file'],
       }),
-      nFile1: fs.createReadStream(path.join(__dirname, '/rec.pdf')),
+      nFile1: fs.createReadStream(path.join(__dirname, '../utils/rec.pdf')),
     };
 
     const res = await rq({ method: 'POST', url: '/graphql', formData });
@@ -193,8 +193,8 @@ describe('Upload plugin end to end tests', () => {
         nFile0: ['variables.files.0'],
         nFile1: ['variables.files.1'],
       }),
-      nFile0: fs.createReadStream(path.join(__dirname, '/rec.pdf')),
-      nFile1: fs.createReadStream(path.join(__dirname, '/rec.pdf')),
+      nFile0: fs.createReadStream(path.join(__dirname, '../utils/rec.pdf')),
+      nFile1: fs.createReadStream(path.join(__dirname, '../utils/rec.pdf')),
     };
 
     const res = await rq({ method: 'POST', url: '/graphql', formData });
@@ -354,7 +354,7 @@ describe('Upload plugin end to end tests', () => {
       map: JSON.stringify({
         nFile1: ['variables.file'],
       }),
-      nFile1: fs.createReadStream(path.join(__dirname, '/rec.jpg')),
+      nFile1: fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')),
     };
 
     const res = await rq({ method: 'POST', url: '/graphql', formData });
@@ -404,7 +404,7 @@ describe('Upload plugin end to end tests', () => {
       map: JSON.stringify({
         nFile1: ['variables.file'],
       }),
-      nFile1: fs.createReadStream(path.join(__dirname, '/rec.pdf')),
+      nFile1: fs.createReadStream(path.join(__dirname, '../utils/rec.pdf')),
     };
 
     const res = await rq({ method: 'POST', url: '/graphql', formData });
