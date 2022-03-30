@@ -18,7 +18,7 @@ import { useContentTypeLayout } from '../../../../hooks';
 import { getTrad } from '../../../../utils';
 import FieldComponent from '../../../FieldComponent';
 import Rectangle from './Rectangle';
-import useMainValue from './hooks/useMainValue';
+import { connect, select } from './utils';
 
 const ActionStack = styled(Stack)`
   svg {
@@ -56,15 +56,11 @@ const Component = ({
   removeComponentFromDynamicZone,
   showDownIcon,
   showUpIcon,
+  // Passed with the select function
+  mainValue,
 }) => {
   const { formatMessage } = useIntl();
   const { getComponentLayout } = useContentTypeLayout();
-  const componentLayoutData = useMemo(() => {
-    const layout = getComponentLayout(componentUid);
-
-    return layout;
-  }, [componentUid, getComponentLayout]);
-  const mainValue = useMainValue(componentLayoutData, [name, index]);
   const { icon, friendlyName } = useMemo(() => {
     const {
       info: { icon, displayName },
@@ -193,6 +189,12 @@ Component.propTypes = {
   removeComponentFromDynamicZone: PropTypes.func.isRequired,
   showDownIcon: PropTypes.bool.isRequired,
   showUpIcon: PropTypes.bool.isRequired,
+  mainValue: PropTypes.string.isRequired,
 };
 
-export default memo(Component, isEqual);
+const Memoized = memo(Component, isEqual);
+
+export default connect(
+  Memoized,
+  select
+);
