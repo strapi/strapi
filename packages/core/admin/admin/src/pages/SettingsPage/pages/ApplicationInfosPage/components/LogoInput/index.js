@@ -35,11 +35,15 @@ const LogoInput = ({ customLogo, defaultLogo }) => {
   );
 };
 
+LogoInput.defaultProps = {
+  customLogo: null,
+};
+
 LogoInput.propTypes = {
   customLogo: PropType.shape({
     url: PropType.string,
     name: PropType.string,
-  }).isRequired,
+  }),
   defaultLogo: PropType.string.isRequired,
 };
 

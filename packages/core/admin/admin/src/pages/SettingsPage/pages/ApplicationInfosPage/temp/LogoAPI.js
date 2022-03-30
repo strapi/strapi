@@ -9,6 +9,7 @@ class LogoAPI {
       url: CatLogo,
       name: 'cat-logo.png',
     };
+    // this.menuLogo = null
   }
 
   getLogo = () => {

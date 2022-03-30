@@ -8,8 +8,10 @@ import LogoAPI from '../../temp/LogoAPI';
 const API = new LogoAPI();
 
 const Form = () => {
-  const { defaultMenuLogo } = useConfigurations();
-  const [customMenuLogo, setCustomMenuLogo] = useState({ url: null, name: null });
+  const {
+    logos: { menu },
+  } = useConfigurations();
+  const [customMenuLogo, setCustomMenuLogo] = useState(null);
 
   // Temp class to mimic crud API
   // to remove once back routes are ready
@@ -33,7 +35,7 @@ const Form = () => {
     >
       <Grid gap={4}>
         <GridItem col={6} s={12}>
-          <LogoInput customLogo={customMenuLogo} defaultLogo={defaultMenuLogo} />
+          <LogoInput customLogo={customMenuLogo} defaultLogo={menu.default} />
         </GridItem>
       </Grid>
     </Box>
