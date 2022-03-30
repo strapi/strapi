@@ -1,4 +1,5 @@
 const SERVER_HAS_NOT_BEEN_KILLED_MESSAGE = 'did-not-kill-server';
+const SERVER_HAS_BEEN_KILLED_MESSAGE = 'server is down';
 
 /**
  * Server restart watcher
@@ -19,7 +20,7 @@ export default function serverRestartWatcher(response, didShutDownServer) {
     })
       .then(res => {
         if (res.status >= 400) {
-          throw new Error('server is down');
+          throw new Error(SERVER_HAS_BEEN_KILLED_MESSAGE);
         }
 
         if (!didShutDownServer) {
