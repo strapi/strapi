@@ -1,5 +1,9 @@
 import { useEffect, useState } from 'react';
 
+/**
+ * For more details about this hook see:
+ * https://www.30secondsofcode.org/react/s/use-navigator-on-line
+ */
 const useNavigatorOnLine = () => {
   const onlineStatus =
     typeof navigator !== 'undefined' && typeof navigator.onLine === 'boolean'

@@ -29,7 +29,7 @@ import useFetchInstalledPlugins from '../../hooks/useFetchInstalledPlugins';
 import useFetchMarketplacePlugins from '../../hooks/useFetchMarketplacePlugins';
 import adminPermissions from '../../permissions';
 import offlineCloud from '../../assets/images/icon_offline-cloud.svg';
-import useNavigatorOnLine from './hooks/use-navigator-on-line';
+import useNavigatorOnLine from '../../hooks/use-navigator-on-line';
 
 const matchSearch = (plugins, search) => {
   return matchSorter(plugins, search, {
