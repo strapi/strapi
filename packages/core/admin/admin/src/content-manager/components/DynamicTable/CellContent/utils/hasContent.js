@@ -19,7 +19,7 @@ export default function hasContent(type, content, metadatas, fieldSchema) {
     const value = content?.[mainFieldName];
 
     // relations, media ... show the id as fallback
-    if (mainFieldName === 'id' && isNumber(value)) {
+    if (mainFieldName === 'id' && ![undefined, null].includes(value)) {
       return true;
     }
 
