@@ -25,14 +25,17 @@ describe('ConfigurationsProvider', () => {
 
   it('should update customMenuLogo with setCustomMenuLogo', () => {
     const Test = () => {
-      const { setCustomMenuLogo, customMenuLogo } = useConfigurations();
+      const {
+        setCustomLogo,
+        logos: { menu },
+      } = useConfigurations();
 
       return (
         <div>
-          <button type="button" onClick={() => setCustomMenuLogo('michka.jpg')}>
+          <button type="button" onClick={() => setCustomLogo('michka.jpg', 'menu')}>
             Change logo
           </button>
-          <div>{customMenuLogo}</div>
+          <div>{menu.custom}</div>
         </div>
       );
     };
@@ -54,13 +57,15 @@ describe('ConfigurationsProvider', () => {
     expect(queryByText('strapi-menu.jpg')).not.toBeInTheDocument();
   });
 
-  it('should give access to defaultMenuLogo', () => {
+  it.only('should give access to defaultMenuLogo', () => {
     const Test = () => {
-      const { defaultMenuLogo } = useConfigurations();
+      const {
+        logos: { menu },
+      } = useConfigurations();
 
       return (
         <div>
-          <div>{defaultMenuLogo}</div>
+          <div>{menu.default}</div>
         </div>
       );
     };
