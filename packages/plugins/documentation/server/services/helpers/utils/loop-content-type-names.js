@@ -1,5 +1,5 @@
 'use strict';
-
+const _ = require('lodash');
 /**
  * @description A reusable loop for building api endpoint paths and component schemas
  *
@@ -21,8 +21,11 @@ const loopContentTypeNames = (api, callback) => {
         ? strapi.plugin(api.name).routes['content-api']
         : strapi.api[api.name].routes[contentTypeName];
 
-    // Parse a unique name if the api name and contentType name don't match
-    const uniqueName = api.name === contentTypeName ? api.name : `${api.name} - ${contentTypeName}`;
+    // Uppercase the first letter of the api name
+    const apiName = _.startCase(api.name);
+    // Create a unique name if the api name and contentType name don't match
+    const uniqueName =
+      api.name === contentTypeName ? apiName : `${apiName} - ${_.startCase(contentTypeName)}`;
 
     const apiInfo = {
       ...api,
