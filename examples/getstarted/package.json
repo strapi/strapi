@@ -28,7 +28,7 @@
     "passport-google-oauth2": "0.2.0",
     "pg": "8.6.0",
     "better-sqlite3": "7.5.0",
-    "@vscode/sqlite3": "5.0.7",
+    "@vscode/sqlite3": "5.0.8",
     "sqlite3": "5.0.2"
   },
   "strapi": {
