@@ -38,7 +38,6 @@ const RepeatableComponent = ({
   componentUid,
   componentValue,
   componentValueLength,
-  isNested,
   isReadOnly,
   max,
   min,
@@ -50,16 +49,16 @@ const RepeatableComponent = ({
   const [isDraggingSibling, setIsDraggingSibling] = useState(false);
   const [, drop] = useDrop({ accept: ItemTypes.COMPONENT });
   const { getComponentLayout } = useContentTypeLayout();
-  const componentLayoutData = useMemo(
-    () => getComponentLayout(componentUid),
-    [componentUid, getComponentLayout]
-  );
+  const componentLayoutData = useMemo(() => getComponentLayout(componentUid), [
+    componentUid,
+    getComponentLayout,
+  ]);
 
   const nextTempKey = useMemo(() => {
     return getMaxTempKey(componentValue || []) + 1;
   }, [componentValue]);
 
-  const componentErrorKeys = getComponentErrorKeys(name, formErrors, isNested);
+  const componentErrorKeys = getComponentErrorKeys(name, formErrors);
 
   const toggleCollapses = () => {
     setCollapseToOpen('');
@@ -114,7 +113,7 @@ const RepeatableComponent = ({
   }
 
   const doesRepComponentHasChildError = componentErrorKeys.some(
-    (error) => error.split('.').length > 1
+    error => error.split('.').length > 1
   );
 
   if (doesRepComponentHasChildError && !hasMinError) {
@@ -178,7 +177,6 @@ RepeatableComponent.defaultProps = {
   componentValue: null,
   componentValueLength: 0,
   formErrors: {},
-  isNested: false,
   max: Infinity,
   min: 0,
 };
@@ -189,7 +187,6 @@ RepeatableComponent.propTypes = {
   componentValue: PropTypes.oneOfType([PropTypes.array, PropTypes.object]),
   componentValueLength: PropTypes.number,
   formErrors: PropTypes.object,
-  isNested: PropTypes.bool,
   isReadOnly: PropTypes.bool.isRequired,
   max: PropTypes.number,
   min: PropTypes.number,
