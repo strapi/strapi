@@ -37,9 +37,10 @@ module.exports = {
   },
 
   async init() {
-    const uuid = strapi.config.get('uuid', false);
+    let uuid = strapi.config.get('uuid', false);
     const hasAdmin = await getService('user').exists();
-
+    const telemetryDisabled = strapi.config.get('packageJsonStrapi.telemetryDisabled', false);
+    if (telemetryDisabled) uuid = null;
     return { data: { uuid, hasAdmin } };
   },
 
