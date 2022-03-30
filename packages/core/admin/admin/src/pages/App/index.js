@@ -30,10 +30,7 @@ const AuthenticatedApp = lazy(() =>
 function App() {
   const toggleNotification = useNotification();
   const { formatMessage } = useIntl();
-  const [{ isLoading, hasAdmin, uuid, telemetryDisabled }, setState] = useState({
-    isLoading: true,
-    hasAdmin: false,
-  });
+  const [{ isLoading, hasAdmin, uuid }, setState] = useState({ isLoading: true, hasAdmin: false });
 
   const authRoutes = useMemo(() => {
     return makeUniqueRoutes(
@@ -69,32 +66,30 @@ function App() {
     const getData = async () => {
       try {
         const {
-          data: { hasAdmin, uuid, telemetryDisabled },
+          data: { hasAdmin, uuid },
         } = await request('/admin/init', { method: 'GET' });
 
-        setState({ isLoading: false, hasAdmin, uuid, telemetryDisabled });
+        if (uuid) {
+          try {
+            const deviceId = await getUID();
 
-        if (telemetryDisabled || !uuid) {
-          return;
+            fetch('https://analytics.strapi.io/track', {
+              method: 'POST',
+              body: JSON.stringify({
+                event: 'didInitializeAdministration',
+                uuid,
+                deviceId,
+              }),
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            });
+          } catch (e) {
+            // Silent.
+          }
         }
 
-        try {
-          const deviceId = await getUID();
-
-          fetch('https://analytics.strapi.io/track', {
-            method: 'POST',
-            body: JSON.stringify({
-              event: 'didInitializeAdministration',
-              uuid,
-              deviceId,
-            }),
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          });
-        } catch (e) {
-          // Silent.
-        }
+        setState({ isLoading: false, hasAdmin, uuid });
       } catch (err) {
         toggleNotification({
           type: 'warning',
@@ -115,7 +110,7 @@ function App() {
   return (
     <Suspense fallback={<LoadingIndicatorPage />}>
       <SkipToContent>{formatMessage({ id: 'skipToContent' })}</SkipToContent>
-      <TrackingContext.Provider value={{ uuid, telemetryDisabled }}>
+      <TrackingContext.Provider value={uuid}>
         <Switch>
           {authRoutes}
           <Route
