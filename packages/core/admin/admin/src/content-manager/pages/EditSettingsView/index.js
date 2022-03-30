@@ -59,7 +59,6 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
         'relation',
         'component',
         'boolean',
-        'date',
         'media',
         'richtext',
         'timestamp',
