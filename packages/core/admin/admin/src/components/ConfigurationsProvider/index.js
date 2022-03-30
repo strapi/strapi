@@ -1,4 +1,4 @@
-import React, { useReducer } from 'react';
+import React, { useReducer, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { ConfigurationsContext } from '../../contexts';
 import reducer, { initialState } from './reducer';
@@ -6,27 +6,29 @@ import reducer, { initialState } from './reducer';
 const ConfigurationsProvider = ({
   children,
   authLogo,
-  menuLogo: defaultMenuLogo,
+  menuLogo,
   showReleaseNotification,
   showTutorials,
 }) => {
-  const [{ customMenuLogo }, dispatch] = useReducer(reducer, initialState);
+  const [{ logos }, dispatch] = useReducer(reducer, initialState);
 
-  const setCustomMenuLogo = logo => {
+  const setCustomLogo = (logo, logoType) => {
     return dispatch({
       type: 'SET_CUSTOM_LOGO',
-      logoType: 'customMenuLogo',
-      logo,
+      logoType,
+      value: logo,
     });
   };
+  const setCustomLogoRef = useRef(setCustomLogo);
 
   return (
     <ConfigurationsContext.Provider
       value={{
-        authLogo,
-        customMenuLogo,
-        defaultMenuLogo,
-        setCustomMenuLogo,
+        logos: {
+          menu: { custom: logos.menu, default: menuLogo },
+          auth: { custom: null, default: authLogo },
+        },
+        setCustomLogo: setCustomLogoRef.current,
         showReleaseNotification,
         showTutorials,
       }}

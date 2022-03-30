@@ -8,16 +8,16 @@
 import produce from 'immer';
 
 const initialState = {
-  customMenuLogo: null,
+  logos: {
+    menu: null,
+  },
 };
 
 const reducer = (state = initialState, action) =>
   produce(state, draftState => {
     switch (action.type) {
       case 'SET_CUSTOM_LOGO': {
-        if (action.logo !== undefined && draftState[action.logoType] !== undefined) {
-          draftState[action.logoType] = action.logo;
-        }
+        draftState.logos[action.logoType] = action.value;
         break;
       }
       default: {
