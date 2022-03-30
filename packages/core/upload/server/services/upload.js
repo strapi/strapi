@@ -63,16 +63,19 @@ module.exports = ({ strapi }) => ({
     strapi.eventHub.emit(event, { media: sanitizedData });
   },
 
-  formatFileInfo({ filename, type, size }, fileInfo = {}, metas = {}) {
+  async formatFileInfo({ filename, type, size }, fileInfo = {}, metas = {}) {
+    const fileService = getService('file');
+
     const ext = path.extname(filename);
     const basename = path.basename(fileInfo.name || filename, ext);
-
     const usedName = fileInfo.name || filename;
 
     const entity = {
       name: usedName,
       alternativeText: fileInfo.alternativeText,
       caption: fileInfo.caption,
+      folder: fileInfo.folder,
+      path: await fileService.getPath(fileInfo.folder, usedName),
       hash: generateFileName(basename),
       ext,
       mime: type,
@@ -103,7 +106,7 @@ module.exports = ({ strapi }) => ({
   },
 
   async enhanceFile(file, fileInfo = {}, metas = {}) {
-    const currentFile = this.formatFileInfo(
+    const currentFile = await this.formatFileInfo(
       {
         filename: file.name,
         type: file.type,
@@ -198,17 +201,22 @@ module.exports = ({ strapi }) => ({
     return this.add(fileData, { user });
   },
 
-  async updateFileInfo(id, { name, alternativeText, caption }, { user } = {}) {
+  async updateFileInfo(id, { name, alternativeText, caption, folder }, { user } = {}) {
     const dbFile = await this.findOne(id);
 
     if (!dbFile) {
       throw new NotFoundError();
     }
 
+    const fileService = getService('file');
+
+    const newName = _.isNil(name) ? dbFile.name : name;
     const newInfos = {
-      name: _.isNil(name) ? dbFile.name : name,
+      name: newName,
       alternativeText: _.isNil(alternativeText) ? dbFile.alternativeText : alternativeText,
       caption: _.isNil(caption) ? dbFile.caption : caption,
+      folder: _.isUndefined(folder) ? dbFile.folder : folder,
+      path: _.isUndefined(folder) ? dbFile.path : await fileService.getPath(folder, newName),
     };
 
     return this.update(id, newInfos, { user });
@@ -222,7 +230,6 @@ module.exports = ({ strapi }) => ({
     );
 
     const dbFile = await this.findOne(id);
-
     if (!dbFile) {
       throw new NotFoundError();
     }
@@ -236,7 +243,7 @@ module.exports = ({ strapi }) => ({
       const { fileInfo } = data;
       fileData = await this.enhanceFile(file, fileInfo);
 
-      // keep a constant hash
+      // keep a constant hash and extension so the file url doesn't change when the file is replaced
       _.assign(fileData, {
         hash: dbFile.hash,
         ext: dbFile.ext,
