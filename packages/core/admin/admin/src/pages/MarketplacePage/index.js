@@ -129,9 +129,9 @@ const MarketPlacePage = () => {
           direction="column"
           alignItems="center"
           justifyContent="center"
-          paddingTop={11}
+          style={{ paddingTop: '120px' }}
         >
-          <Box paddingTop={11} paddingBottom={1}>
+          <Box paddingBottom={2}>
             <Typography textColor="neutral700" variant="alpha">
               {formatMessage({
                 id: 'admin.pages.MarketPlacePage.offline.title',
@@ -139,7 +139,7 @@ const MarketPlacePage = () => {
               })}
             </Typography>
           </Box>
-          <Box paddingBottom={3}>
+          <Box paddingBottom={6}>
             <Typography textColor="neutral700" variant="epsilon">
               {formatMessage({
                 id: 'admin.pages.MarketPlacePage.offline.subtitle',
@@ -147,7 +147,12 @@ const MarketPlacePage = () => {
               })}
             </Typography>
           </Box>
-          <Box as="img" src={offlineCloud} alt="offline" width={11} height={11} />
+          <Box
+            as="img"
+            src={offlineCloud}
+            alt="offline"
+            style={{ width: '88px', height: '88px' }}
+          />
         </Flex>
       </Layout>
     );
