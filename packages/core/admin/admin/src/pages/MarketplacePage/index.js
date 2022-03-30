@@ -175,7 +175,6 @@ const MarketPlacePage = () => {
           }
         />
         <ContentLayout>
-          <MissingPluginBanner />
           <Box width="25%" paddingBottom={4}>
             <Searchbar
               name="searchbar"
