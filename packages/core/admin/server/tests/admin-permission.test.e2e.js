@@ -336,6 +336,12 @@ describe('Role CRUD End to End', () => {
                 "subCategory": "marketplace",
               },
               Object {
+                "action": "admin::project-settings.update",
+                "category": "project",
+                "displayName": "Update the project level settings",
+                "subCategory": "general",
+              },
+              Object {
                 "action": "admin::roles.create",
                 "category": "users and roles",
                 "displayName": "Create",
@@ -815,6 +821,12 @@ describe('Role CRUD End to End', () => {
                   "subCategory": "marketplace",
                 },
                 Object {
+                  "action": "admin::project-settings.update",
+                  "category": "project",
+                  "displayName": "Update the project level settings",
+                  "subCategory": "general",
+                },
+                Object {
                   "action": "admin::provider-login.read",
                   "category": "single sign on",
                   "displayName": "Read",
@@ -1227,6 +1239,12 @@ describe('Role CRUD End to End', () => {
                   "category": "plugins and marketplace",
                   "displayName": "Access the marketplace",
                   "subCategory": "marketplace",
+                },
+                Object {
+                  "action": "admin::project-settings.update",
+                  "category": "project",
+                  "displayName": "Update the project level settings",
+                  "subCategory": "general",
                 },
                 Object {
                   "action": "admin::roles.create",
