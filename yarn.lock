@@ -3425,6 +3425,17 @@
     lodash "4.17.21"
     yup "0.32.9"
 
+"@strapi/utils@4.1.6":
+  version "4.1.6"
+  resolved "https://registry.yarnpkg.com/@strapi/utils/-/utils-4.1.6.tgz#edfdec2470143b2437cc95a5119ef5fa7d892eb4"
+  integrity sha512-QVuxGKHw9uh72CwtpKJTPz5ECgFBbtydvUjY34PCZMPkJ0EQ7/spz3KZbB+v2JSPgy1apZJn5qkBGFcvSvBxRw==
+  dependencies:
+    "@sindresorhus/slugify" "1.1.0"
+    date-fns "2.24.0"
+    http-errors "1.8.0"
+    lodash "4.17.21"
+    yup "0.32.9"
+
 "@stylelint/postcss-css-in-js@^0.37.2":
   version "0.37.2"
   resolved "https://registry.yarnpkg.com/@stylelint/postcss-css-in-js/-/postcss-css-in-js-0.37.2.tgz#7e5a84ad181f4234a2480803422a47b8749af3d2"
