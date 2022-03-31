@@ -76,7 +76,10 @@ class Strapi {
     this.dirs = utils.getDirs(resolveWorkingDirectories(opts));
 
     // Load the app configuration from the dist directory
-    const appConfig = loadConfiguration(this.dirs.dist.root, opts);
+    const appConfig = loadConfiguration(
+      { appDir: this.dirs.app.root, distDir: this.dirs.dist.root },
+      opts
+    );
 
     // Instanciate the Strapi container
     this.container = createContainer(this);

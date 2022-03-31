@@ -49,7 +49,7 @@ const primaryProcess = async ({ distDir, appDir, build, isTSProject, watchAdmin,
     await buildTypeScript({ srcDir: appDir, distDir, watch: false });
   }
 
-  const config = loadConfiguration(distDir);
+  const config = loadConfiguration({ appDir, distDir });
   const serveAdminPanel = getOr(true, 'admin.serveAdminPanel')(config);
 
   const buildExists = fs.existsSync(path.join(distDir, 'build'));

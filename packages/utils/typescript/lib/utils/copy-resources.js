@@ -3,7 +3,7 @@
 const path = require('path');
 const fse = require('fs-extra');
 
-const DEFAULT_RESOURCES_PATHS = ['public', 'favicon.ico', 'package.json'];
+const DEFAULT_RESOURCES_PATHS = ['public', 'favicon.ico'];
 
 module.exports = async (dir, resources = DEFAULT_RESOURCES_PATHS) => {
   await Promise.all(
