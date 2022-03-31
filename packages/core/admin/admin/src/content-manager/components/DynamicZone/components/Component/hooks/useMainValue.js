@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
-import { get, toString } from 'lodash';
+import get from 'lodash/get';
+import toString from 'lodash/toString';
 import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 
 export function getDisplayedValue(modifiedData, componentFieldPath, mainField) {
