@@ -3,15 +3,10 @@ import { useNotification } from '@strapi/helper-plugin';
 import { axiosInstance, getRequestUrl } from '../utils';
 
 const editFolderRequest = folder => {
-  const query = folder?.id ? `?id=${folder.id}` : '';
-  const url = getRequestUrl(`folders${query}`);
-  const formData = Object.entries(folder).reduce((acc, [key, value]) => {
-    acc.append(key, value);
+  const method = folder?.id ? 'put' : 'post';
+  const url = getRequestUrl('folders');
 
-    return acc;
-  }, new FormData());
-
-  return axiosInstance.post(url, formData).then(res => res.data);
+  return axiosInstance[method](url, folder).then(res => res.data);
 };
 
 export const useEditFolder = () => {

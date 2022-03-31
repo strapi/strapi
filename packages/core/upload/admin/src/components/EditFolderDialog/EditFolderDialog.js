@@ -31,16 +31,31 @@ export const EditFolderDialog = ({ onClose, folder }) => {
 
   const initialFormData = {
     ...folder,
-    name: folder?.name || undefined,
   };
 
-  const handleSubmit = async values => {
+  const handleSubmit = async (values, { setErrors }) => {
     try {
-      const res = await editFolder({ ...folder, ...values });
-      onClose(res);
+      await editFolder({
+        ...folder,
+        ...values,
+        parent: values.parent ?? null,
+      });
+
+      onClose();
     } catch (err) {
+      let errors = {};
+
+      // TODO: use getAPIInnerError ?
+      const res = err.response.data.error;
+
+      // TODO: needs to be refactored in the backend
+      if (res.message === 'name already taken') {
+        errors.name = 'Has to be unique';
+      }
+
+      setErrors(errors);
+
       /* TODO: it can fail because of several reasons
-        - folder name is already taken
         - can not move a folder into itself or its children
         - network & appliction errors
       */
