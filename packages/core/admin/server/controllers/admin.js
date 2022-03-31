@@ -43,6 +43,10 @@ module.exports = {
     return { data: { uuid, hasAdmin } };
   },
 
+  async updateProjectSettings(ctx) {
+    console.log(ctx);
+  },
+
   async information() {
     const currentEnvironment = strapi.config.get('environment');
     const autoReload = strapi.config.get('autoReload', false);
