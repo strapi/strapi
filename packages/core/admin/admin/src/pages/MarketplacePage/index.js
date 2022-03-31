@@ -147,7 +147,7 @@ const MarketPlacePage = () => {
               })}
             </Typography>
           </Box>
-          <Box
+          <img
             as="img"
             src={offlineCloud}
             alt="offline"
