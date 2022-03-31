@@ -48,14 +48,14 @@ export const MediaLibrary = () => {
   } = useMediaLibraryPermissions();
   const [{ query }, setQuery] = useQueryParams();
   const { formatMessage } = useIntl();
-  const { data: foldersData, isLoading: foldersIsLoading, errors: foldersError } = useFolders({
-    enabled: true,
-  });
+
   const { data: assetsData, isLoading: assetsLoading, error: assetsError } = useAssets({
     skipWhen: !canRead,
   });
 
-  console.log(foldersData, foldersError);
+  const { data: foldersData, isLoading: foldersIsLoading, errors: foldersError } = useFolders({
+    enabled: assetsData?.pagination?.page === 1,
+  });
 
   const handleChangeSort = value => {
     setQuery({ sort: value });
@@ -63,13 +63,13 @@ export const MediaLibrary = () => {
 
   const [showUploadAssetDialog, setShowUploadAssetDialog] = useState(false);
   const [assetToEdit, setAssetToEdit] = useState(undefined);
-  const [selected, { selectOne, selectAll }] = useSelectionState('id', []);
+  const [selected, { selectOne, selectAll }] = useSelectionState(['type', 'id'], []);
   const toggleUploadAssetDialog = () => setShowUploadAssetDialog(prev => !prev);
 
   useFocusWhenNavigate();
 
   const folders = foldersData?.results;
-  const folderCount = folders?.length ?? 0;
+  const folderCount = folders?.length || 0;
 
   const assets = assetsData?.results;
   const assetCount = assetsData?.pagination?.total || 0;
@@ -121,15 +121,16 @@ export const MediaLibrary = () => {
                   <BaseCheckbox
                     aria-label={formatMessage({
                       id: getTrad('bulk.select.label'),
-                      defaultMessage: 'Select all assets',
+                      defaultMessage: 'Select all folders & assets',
                     })}
                     indeterminate={
-                      assets?.length > 0 &&
-                      selected.length > 0 &&
-                      selected.length !== assets?.length
+                      selected?.length > 0 && selected?.length !== assetCount + folderCount
                     }
-                    value={assets?.length > 0 && selected.length === assets?.length}
-                    onChange={() => selectAll(assets)}
+                    value={
+                      (assetCount > 0 || folderCount > 0) &&
+                      selected.length === assetCount + folderCount
+                    }
+                    onChange={() => selectAll([assets, folders])}
                   />
                 </BoxWithHeight>
               )}
@@ -148,13 +149,11 @@ export const MediaLibrary = () => {
         />
 
         <ContentLayout>
-          {selected.length > 0 && (
-            <BulkDeleteButton selectedAssets={selected} onSuccess={selectAll} />
-          )}
+          {selected.length > 0 && <BulkDeleteButton selected={selected} onSuccess={selectAll} />}
 
           {isLoading && <LoadingIndicatorPage />}
 
-          {assetsError && <AnErrorOccurred />}
+          {(assetsError || foldersError) && <AnErrorOccurred />}
 
           {!canRead && <NoPermissions />}
 
@@ -163,6 +162,8 @@ export const MediaLibrary = () => {
               {folders?.length > 0 && (
                 <FolderList
                   folders={folders}
+                  onSelectFolder={selectOne}
+                  selectedFolders={selected.filter(({ type }) => type === 'folder')}
                   title={formatMessage({
                     id: getTrad('list.folders.title'),
                     defaultMessage: 'Folders',
@@ -170,13 +171,13 @@ export const MediaLibrary = () => {
                 />
               )}
 
-              {assets?.length > 0 ? (
+              {assetCount > 0 ? (
                 <>
                   <AssetList
                     assets={assets}
                     onEditAsset={setAssetToEdit}
                     onSelectAsset={selectOne}
-                    selectedAssets={selected}
+                    selectedAssets={selected.filter(({ type }) => type === 'asset')}
                     title={formatMessage({
                       id: getTrad('list.assets.title'),
                       defaultMessage: 'Assets',

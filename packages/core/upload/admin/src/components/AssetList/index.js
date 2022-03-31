@@ -40,9 +40,9 @@ export const AssetList = ({
 
       <GridLayout size={size}>
         {assets.map((asset, index) => {
-          const isSelected = Boolean(
-            selectedAssets.find(currentAsset => currentAsset.id === asset.id)
-          );
+          const isSelected = !!selectedAssets.find(currentAsset => currentAsset.id === asset.id);
+
+          console.log(selectedAssets, asset, isSelected);
 
           if (onReorderAsset) {
             return (
@@ -52,7 +52,7 @@ export const AssetList = ({
                   asset={asset}
                   isSelected={isSelected}
                   onEdit={onEditAsset ? () => onEditAsset(asset) : undefined}
-                  onSelect={() => onSelectAsset(asset)}
+                  onSelect={() => onSelectAsset({ ...asset, type: 'asset' })}
                   size={size}
                 />
               </Draggable>
@@ -66,19 +66,11 @@ export const AssetList = ({
               asset={asset}
               isSelected={isSelected}
               onEdit={onEditAsset ? () => onEditAsset(asset) : undefined}
-              onSelect={() => onSelectAsset(asset)}
+              onSelect={() => onSelectAsset({ ...asset, type: 'asset' })}
               size={size}
             />
           );
         })}
-
-        {/* TODO: Remove this when we have media queries */}
-        <div aria-hidden />
-        <div aria-hidden />
-        <div aria-hidden />
-        <div aria-hidden />
-        <div aria-hidden />
-        <div aria-hidden />
       </GridLayout>
     </KeyboardNavigable>
   );

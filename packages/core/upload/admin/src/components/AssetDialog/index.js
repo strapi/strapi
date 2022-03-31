@@ -51,7 +51,7 @@ export const AssetDialog = ({
   const { data, isLoading, error } = useModalAssets({ skipWhen: !canRead, rawQuery });
 
   const [selectedAssets, { selectOne, selectAll, selectOnly, setSelections }] = useSelectionState(
-    'id',
+    ['id'],
     initiallySelectedAssets
   );
 

@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
+import { useHistory } from 'react-router-dom';
 import { Box } from '@strapi/design-system/Box';
 import { KeyboardNavigable } from '@strapi/design-system/KeyboardNavigable';
 import { Flex } from '@strapi/design-system/Flex';
@@ -19,7 +20,9 @@ const GridLayout = styled(Box)`
   grid-gap: ${({ theme }) => theme.spaces[4]};
 `;
 
-export const FolderList = ({ title, folders, size }) => {
+export const FolderList = ({ title, folders, size, onSelectFolder, selectedFolders }) => {
+  const history = useHistory();
+
   return (
     <KeyboardNavigable tagName="article">
       {title && (
@@ -32,14 +35,27 @@ export const FolderList = ({ title, folders, size }) => {
 
       <GridLayout size={size}>
         {folders.map(folder => {
+          const isSelected = !!selectedFolders.find(
+            currentFolder => currentFolder.id === folder.id
+          );
+          // TODO: is there a better way to retrieve the plugin base URL?
+          const url = `/admin/plugins/upload?parent=${folder.id}`;
+
           return (
             <FolderCard
-              key={`folder-${folder.uuid}`}
+              ariaLabel={folder.name}
               id="folder"
-              startAction={<FolderCardCheckbox />}
+              key={`folder-${folder.uuid}`}
+              onDoubleClick={() => history.push(url)}
+              startAction={
+                <FolderCardCheckbox
+                  value={isSelected}
+                  onChange={() => onSelectFolder({ ...folder, type: 'folder' })}
+                />
+              }
             >
               <FolderCardBody>
-                <FolderCardLink href={`/admin/plugins/upload?parent=${folder.id}`}>
+                <FolderCardLink href={url}>
                   <Flex as="h2" direction="column" alignItems="start">
                     <Typography textColor="neutral800" variant="omega" fontWeight="semiBold">
                       {folder.name}
@@ -62,11 +78,14 @@ export const FolderList = ({ title, folders, size }) => {
 
 FolderList.defaultProps = {
   size: 'M',
+  selectedFolders: [],
   title: null,
 };
 
 FolderList.propTypes = {
   folders: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
   size: PropTypes.oneOf(['S', 'M']),
+  selectedFolders: PropTypes.array,
+  onSelectFolder: PropTypes.func.isRequired,
   title: PropTypes.string,
 };

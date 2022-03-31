@@ -14,8 +14,6 @@ export const useFolders = ({ enabled = true }) => {
   const dataRequestURL = getRequestUrl('folders');
 
   const fetchFolders = async () => {
-    console.log('wat');
-
     try {
       const { data } = await axiosInstance.get(`${dataRequestURL}${rawQuery}`);
 
