@@ -7,24 +7,24 @@ import { Stack } from '@strapi/design-system/Stack';
 import Trash from '@strapi/icons/Trash';
 import { ConfirmDialog } from '@strapi/helper-plugin';
 
-import { useBulkRemoveAsset } from '../../../hooks/useBulkRemoveAsset';
-import { useBulkRemoveFolder } from '../../../hooks/useBulkRemoveFolder';
+import { useBulkRemove } from '../../../hooks/useBulkRemove';
 import getTrad from '../../../utils/getTrad';
 
 export const BulkDeleteButton = ({ selected, onSuccess }) => {
   const { formatMessage } = useIntl();
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const { isLoading: isLoadingAssets, remove: removeAssets } = useBulkRemove('assets');
+  const { isLoading: isLoadingFolders, remove: removeFolders } = useBulkRemove('folders');
 
-  const { isLoadingAssets, removeAssets } = useBulkRemoveAsset();
-  const { isLoadingFolders, removeFolders } = useBulkRemoveFolder();
   const isLoading = isLoadingAssets || isLoadingFolders;
 
   const handleConfirmRemove = async () => {
+    const assets = selected.filter(({ type }) => type === 'asset');
+    const folders = selected.filter(({ type }) => type === 'folder');
+
     await Promise.all([
-      removeAssets(selected.filter(({ type }) => type === 'asset').map(({ asset: { id } }) => id)),
-      removeFolders(
-        selected.filter(({ type }) => type === 'folder').map(({ folder: { id } }) => id)
-      ),
+      assets.length > 0 && removeAssets(assets.map(({ asset: { id } }) => id)),
+      folders.length > 0 && removeFolders(folders.map(({ folder: { id } }) => id)),
     ]);
 
     onSuccess();

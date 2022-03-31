@@ -4,19 +4,24 @@ import { useNotification } from '@strapi/helper-plugin';
 import pluginId from '../pluginId';
 import { removeAssetRequest } from '../utils/removeAssetQuery';
 
-const bulkRemoveQuery = folderIDs => {
-  const promises = folderIDs.map(folderID => removeAssetRequest(folderID));
-
-  return Promise.all(promises);
-};
-
-export const useBulkRemoveFolder = () => {
+export const useBulkRemove = type => {
   const toggleNotification = useNotification();
   const queryClient = useQueryClient();
 
+  const bulkRemoveQuery = ids => {
+    const promises = ids.map(id => removeAssetRequest(id));
+
+    return Promise.all(promises);
+  };
+
   const mutation = useMutation(bulkRemoveQuery, {
     onSuccess: () => {
-      queryClient.refetchQueries([pluginId, 'folders'], { active: true });
+      if (type === 'folders') {
+        queryClient.refetchQueries([pluginId, 'folders'], { active: true });
+      } else if (type === 'assets') {
+        queryClient.refetchQueries([pluginId, 'assets'], { active: true });
+        queryClient.refetchQueries([pluginId, 'asset-count'], { active: true });
+      }
 
       toggleNotification({
         type: 'success',
@@ -31,7 +36,7 @@ export const useBulkRemoveFolder = () => {
     },
   });
 
-  const removeFolders = folderIDs => mutation.mutateAsync(folderIDs);
+  const remove = (...args) => mutation.mutateAsync(...args);
 
-  return { ...mutation, removeFolders };
+  return { ...mutation, remove };
 };
