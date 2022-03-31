@@ -102,6 +102,7 @@
   "Settings.application.customization": "Customization",
   "Settings.application.customization.carousel.title": "Logo",
   "Settings.application.customization.carousel.change-action": "Change logo",
+  "Settings.application.customization.carousel-slide.label": "Logo slide",
   "Settings.error": "Error",
   "Settings.global": "Global Settings",
   "Settings.permissions": "Administration panel",

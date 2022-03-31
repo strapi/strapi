@@ -35,7 +35,12 @@ const LogoInput = ({ customLogo, defaultLogo }) => {
         </CarouselActions>
       }
     >
-      <CarouselSlide label="logo slide">
+      <CarouselSlide
+        label={formatMessage({
+          id: 'Settings.application.customization.carousel-slide.label',
+          defaultMessage: 'Logo slide',
+        })}
+      >
         <Box
           maxHeight="40%"
           maxWidth="40%"

@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useIntl } from 'react-intl';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { Box } from '@strapi/design-system/Box';
-import { Stack } from '@strapi/design-system/Stack';
 import { Typography } from '@strapi/design-system/Typography';
 import LogoInput from '../LogoInput';
 import { useConfigurations } from '../../../../../../hooks';
@@ -37,19 +36,17 @@ const Form = () => {
       paddingRight={6}
       paddingLeft={6}
     >
-      <Stack spacing={5}>
-        <Typography variant="delta" as="h3">
-          {formatMessage({
-            id: 'Settings.application.customization',
-            defaultMessage: 'Customization',
-          })}
-        </Typography>
-        <Grid>
-          <GridItem col={6} s={12}>
-            <LogoInput customLogo={customMenuLogo} defaultLogo={menu.default} />
-          </GridItem>
-        </Grid>
-      </Stack>
+      <Typography variant="delta" as="h3">
+        {formatMessage({
+          id: 'Settings.application.customization',
+          defaultMessage: 'Customization',
+        })}
+      </Typography>
+      <Grid paddingTop={5}>
+        <GridItem col={6} s={12}>
+          <LogoInput customLogo={customMenuLogo} defaultLogo={menu.default} />
+        </GridItem>
+      </Grid>
     </Box>
   );
 };
