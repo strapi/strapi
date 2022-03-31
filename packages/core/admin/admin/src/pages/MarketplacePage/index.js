@@ -27,6 +27,7 @@ import { fetchAppInformation } from './utils/api';
 import useFetchInstalledPlugins from '../../hooks/useFetchInstalledPlugins';
 import useFetchMarketplacePlugins from '../../hooks/useFetchMarketplacePlugins';
 import adminPermissions from '../../permissions';
+import MissingPluginBanner from './components/MissingPluginBanner';
 
 const matchSearch = (plugins, search) => {
   return matchSorter(plugins, search, {
@@ -219,6 +220,9 @@ const MarketPlacePage = () => {
               ))}
             </Grid>
           )}
+          <Box paddingTop={7}>
+            <MissingPluginBanner />
+          </Box>
         </ContentLayout>
       </Main>
     </Layout>
