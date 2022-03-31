@@ -3254,12 +3254,12 @@
     pluralize "^8.0.0"
     subscriptions-transport-ws "0.9.19"
 
-"@strapi/plugin-i18n@4.1.5":
-  version "4.1.5"
-  resolved "https://registry.yarnpkg.com/@strapi/plugin-i18n/-/plugin-i18n-4.1.5.tgz#84e0f47b9847fb08a86a0bb50b00d7481c1d69c6"
-  integrity sha512-gQu0VoSxyGHVKooTbvMt6bxxQdVRFh6KaI29nh44yUenVKQsjSkpUwTUpSUrG9GZvnTr4RsDKPlg8DY+XIUumQ==
+"@strapi/plugin-i18n@4.1.6":
+  version "4.1.6"
+  resolved "https://registry.yarnpkg.com/@strapi/plugin-i18n/-/plugin-i18n-4.1.6.tgz#07f1622ad4c317f9cdc3f9394c677d2a008c49ba"
+  integrity sha512-PMp4VDZ1O+kpixU7e75r0OzlmvqOFLzkyuM6pZZsHbrLiVVe17IIj6FSm2vIhQU4iPREeEFkXn0b7/294yywbQ==
   dependencies:
-    "@strapi/utils" "4.1.5"
+    "@strapi/utils" "4.1.6"
     lodash "4.17.21"
 
 "@strapi/plugin-sentry@4.1.5":
@@ -3418,6 +3418,17 @@
   version "4.1.5"
   resolved "https://registry.yarnpkg.com/@strapi/utils/-/utils-4.1.5.tgz#3e80f59476cab470ba0fdb42a075b5ae47e998f2"
   integrity sha512-Oz7ur7TsoqA4IOPdk6H3YwsVZ+FOi9wp+iRReKao8yfo4YKJjSYlHQlNXUaAqOOlFnT0ol7G3KF+uF8jLcfxDA==
+  dependencies:
+    "@sindresorhus/slugify" "1.1.0"
+    date-fns "2.24.0"
+    http-errors "1.8.0"
+    lodash "4.17.21"
+    yup "0.32.9"
+
+"@strapi/utils@4.1.6":
+  version "4.1.6"
+  resolved "https://registry.yarnpkg.com/@strapi/utils/-/utils-4.1.6.tgz#edfdec2470143b2437cc95a5119ef5fa7d892eb4"
+  integrity sha512-QVuxGKHw9uh72CwtpKJTPz5ECgFBbtydvUjY34PCZMPkJ0EQ7/spz3KZbB+v2JSPgy1apZJn5qkBGFcvSvBxRw==
   dependencies:
     "@sindresorhus/slugify" "1.1.0"
     date-fns "2.24.0"
