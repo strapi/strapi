@@ -1,7 +1,7 @@
 import CatLogo from './cat-logo.png';
 
 // Temp class to mimic crud API
-// to remove once back routes are ready
+// to remove once back end routes are ready
 
 class LogoAPI {
   constructor() {

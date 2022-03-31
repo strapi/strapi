@@ -54,12 +54,12 @@ describe('Application page', () => {
         padding-top: 4px;
       }
 
-      .c36 {
+      .c35 {
         max-width: 40%;
         max-height: 40%;
       }
 
-      .c39 {
+      .c38 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -73,21 +73,21 @@ describe('Application page', () => {
         outline: none;
       }
 
-      .c39 svg {
+      .c38 svg {
         height: 12px;
         width: 12px;
       }
 
-      .c39 svg > g,
-      .c39 svg path {
+      .c38 svg > g,
+      .c38 svg path {
         fill: #ffffff;
       }
 
-      .c39[aria-disabled='true'] {
+      .c38[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c39:after {
+      .c38:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -102,11 +102,11 @@ describe('Application page', () => {
         border: 2px solid transparent;
       }
 
-      .c39:focus-visible {
+      .c38:focus-visible {
         outline: none;
       }
 
-      .c39:focus-visible:after {
+      .c38:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -117,7 +117,7 @@ describe('Application page', () => {
         border: 2px solid #4945ff;
       }
 
-      .c40 {
+      .c39 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -134,26 +134,26 @@ describe('Application page', () => {
         width: 2rem;
       }
 
-      .c40 svg > g,
-      .c40 svg path {
+      .c39 svg > g,
+      .c39 svg path {
         fill: #8e8ea9;
       }
 
-      .c40:hover svg > g,
-      .c40:hover svg path {
+      .c39:hover svg > g,
+      .c39:hover svg path {
         fill: #666687;
       }
 
-      .c40:active svg > g,
-      .c40:active svg path {
+      .c39:active svg > g,
+      .c39:active svg path {
         fill: #a5a5ba;
       }
 
-      .c40[aria-disabled='true'] {
+      .c39[aria-disabled='true'] {
         background-color: #eaeaef;
       }
 
-      .c40[aria-disabled='true'] svg path {
+      .c39[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
@@ -301,12 +301,6 @@ describe('Application page', () => {
         gap: 0px;
       }
 
-      .c24 {
-        display: grid;
-        grid-template-columns: repeat(12,1fr);
-        gap: 16px;
-      }
-
       .c16 {
         grid-column: span 6;
         max-width: 100%;
@@ -382,7 +376,7 @@ describe('Application page', () => {
         display: flex;
       }
 
-      .c28 {
+      .c27 {
         background: #f6f6f9;
         padding: 8px;
         border-radius: 4px;
@@ -390,40 +384,40 @@ describe('Application page', () => {
         border: 1px solid #dcdce4;
       }
 
-      .c29 {
+      .c28 {
         position: relative;
       }
 
-      .c31 {
+      .c30 {
         padding-right: 8px;
         padding-left: 8px;
         width: 100%;
       }
 
-      .c33 {
+      .c32 {
         height: 124px;
       }
 
-      .c37 {
+      .c36 {
         position: absolute;
         bottom: 4px;
         width: 100%;
       }
 
-      .c41 {
+      .c40 {
         padding-top: 8px;
         padding-right: 16px;
         padding-left: 16px;
       }
 
-      .c26 {
+      .c25 {
         font-weight: 600;
         color: #32324d;
         font-size: 0.75rem;
         line-height: 1.33;
       }
 
-      .c42 {
+      .c41 {
         color: #666687;
         display: block;
         white-space: nowrap;
@@ -433,13 +427,13 @@ describe('Application page', () => {
         line-height: 1.33;
       }
 
-      .c43 {
+      .c42 {
         color: #666687;
         font-size: 0.75rem;
         line-height: 1.33;
       }
 
-      .c27 {
+      .c26 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -453,7 +447,7 @@ describe('Application page', () => {
         align-items: center;
       }
 
-      .c34 {
+      .c33 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -471,17 +465,17 @@ describe('Application page', () => {
         align-items: center;
       }
 
-      .c30 {
+      .c29 {
         display: grid;
         grid-template-columns: auto 1fr auto;
         grid-template-areas: 'startAction slides endAction';
       }
 
-      .c32 {
+      .c31 {
         grid-area: slides;
       }
 
-      .c25 {
+      .c24 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -491,25 +485,25 @@ describe('Application page', () => {
         flex-direction: column;
       }
 
-      .c25 > * {
+      .c24 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c25 > * + * {
+      .c24 > * + * {
         margin-top: 4px;
       }
 
-      .c38 > * {
+      .c37 > * {
         margin-left: 0;
         margin-right: 0;
       }
 
-      .c38 > * + * {
+      .c37 > * + * {
         margin-left: 4px;
       }
 
-      .c35 {
+      .c34 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -753,114 +747,124 @@ describe('Application page', () => {
                     class="c11"
                   >
                     <div
-                      class="c24"
+                      class="c12"
+                      spacing="5"
                     >
+                      <h3
+                        class="c13"
+                      >
+                        Customization
+                      </h3>
                       <div
-                        class="c16"
+                        class="c15"
                       >
                         <div
-                          class=""
+                          class="c16"
                         >
-                          <div>
-                            <div
-                              class="c25"
-                              spacing="1"
-                            >
-                              <label
-                                class="c26"
-                                for="carouselinput-1"
-                              >
-                                <div
-                                  class="c27"
-                                >
-                                  Logo
-                                </div>
-                              </label>
+                          <div
+                            class=""
+                          >
+                            <div>
                               <div
-                                class=""
-                                id="carouselinput-1"
+                                class="c24"
+                                spacing="1"
                               >
-                                <div
-                                  class="c28"
+                                <label
+                                  class="c25"
+                                  for="carouselinput-1"
                                 >
-                                  <section
-                                    aria-label="Logo"
-                                    aria-roledescription="carousel"
-                                    class="c29 c30"
-                                  >
-                                    <div
-                                      aria-live="polite"
-                                      class="c31 c32"
-                                      width="100%"
-                                    >
-                                      <div
-                                        aria-label="logo slide"
-                                        aria-roledescription="slide"
-                                        class="c33 c34 c35"
-                                        height="124px"
-                                        role="group"
-                                      >
-                                        <img
-                                          alt="First"
-                                          class="c36"
-                                          src="IMAGE_MOCK"
-                                        />
-                                      </div>
-                                    </div>
-                                    <div
-                                      class="c37 c34 c38"
-                                      spacing="1"
-                                      width="100%"
-                                    >
-                                      <span>
-                                        <button
-                                          aria-disabled="false"
-                                          aria-labelledby="tooltip-1"
-                                          class="c39 c40"
-                                          tabindex="0"
-                                          type="button"
-                                        >
-                                          <svg
-                                            fill="none"
-                                            height="1em"
-                                            viewBox="0 0 24 24"
-                                            width="1em"
-                                            xmlns="http://www.w3.org/2000/svg"
-                                          >
-                                            <path
-                                              d="M24 13.604a.3.3 0 01-.3.3h-9.795V23.7a.3.3 0 01-.3.3h-3.21a.3.3 0 01-.3-.3v-9.795H.3a.3.3 0 01-.3-.3v-3.21a.3.3 0 01.3-.3h9.795V.3a.3.3 0 01.3-.3h3.21a.3.3 0 01.3.3v9.795H23.7a.3.3 0 01.3.3v3.21z"
-                                              fill="#212134"
-                                            />
-                                          </svg>
-                                        </button>
-                                      </span>
-                                    </div>
-                                  </section>
                                   <div
-                                    class="c41"
+                                    class="c26"
                                   >
-                                    <span>
+                                    Logo
+                                  </div>
+                                </label>
+                                <div
+                                  class=""
+                                  id="carouselinput-1"
+                                >
+                                  <div
+                                    class="c27"
+                                  >
+                                    <section
+                                      aria-label="Logo"
+                                      aria-roledescription="carousel"
+                                      class="c28 c29"
+                                    >
                                       <div
-                                        aria-labelledby="tooltip-2"
-                                        class="c34"
-                                        tabindex="0"
+                                        aria-live="polite"
+                                        class="c30 c31"
+                                        width="100%"
                                       >
-                                        <span
-                                          class="c42"
+                                        <div
+                                          aria-label="logo slide"
+                                          aria-roledescription="slide"
+                                          class="c32 c33 c34"
+                                          height="124px"
+                                          role="group"
                                         >
-                                          cat-logo.png
+                                          <img
+                                            alt="Logo"
+                                            class="c35"
+                                            src="IMAGE_MOCK"
+                                          />
+                                        </div>
+                                      </div>
+                                      <div
+                                        class="c36 c33 c37"
+                                        spacing="1"
+                                        width="100%"
+                                      >
+                                        <span>
+                                          <button
+                                            aria-disabled="false"
+                                            aria-labelledby="tooltip-1"
+                                            class="c38 c39"
+                                            tabindex="0"
+                                            type="button"
+                                          >
+                                            <svg
+                                              fill="none"
+                                              height="1em"
+                                              viewBox="0 0 24 24"
+                                              width="1em"
+                                              xmlns="http://www.w3.org/2000/svg"
+                                            >
+                                              <path
+                                                d="M24 13.604a.3.3 0 01-.3.3h-9.795V23.7a.3.3 0 01-.3.3h-3.21a.3.3 0 01-.3-.3v-9.795H.3a.3.3 0 01-.3-.3v-3.21a.3.3 0 01.3-.3h9.795V.3a.3.3 0 01.3-.3h3.21a.3.3 0 01.3.3v9.795H23.7a.3.3 0 01.3.3v3.21z"
+                                                fill="#212134"
+                                              />
+                                            </svg>
+                                          </button>
                                         </span>
                                       </div>
-                                    </span>
+                                    </section>
+                                    <div
+                                      class="c40"
+                                    >
+                                      <span>
+                                        <div
+                                          aria-labelledby="tooltip-2"
+                                          class="c33"
+                                          tabindex="0"
+                                        >
+                                          <span
+                                            class="c41"
+                                          >
+                                            cat-logo.png
+                                          </span>
+                                        </div>
+                                      </span>
+                                    </div>
                                   </div>
                                 </div>
+                                <p
+                                  class="c42"
+                                  id="carouselinput-1-hint"
+                                >
+                                  Change the admin panel logo (Max dimension: 750*750, Max file size: TBC)
+                                </p>
                               </div>
-                              <p
-                                class="c43"
-                                id="carouselinput-1-hint"
-                              >
-                                Change the admin panel logo (Max dimension: 750*750, Max file size: TBC)
-                              </p>
                             </div>
                           </div>
                         </div>
