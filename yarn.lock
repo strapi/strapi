@@ -3342,12 +3342,12 @@
     aws-sdk "2.892.0"
     lodash "4.17.21"
 
-"@strapi/provider-upload-cloudinary@4.1.5":
-  version "4.1.5"
-  resolved "https://registry.yarnpkg.com/@strapi/provider-upload-cloudinary/-/provider-upload-cloudinary-4.1.5.tgz#6f30666b22043358d851a364261bf8888e99d6f3"
-  integrity sha512-6AIFMta2cSOJp2WYnnR+j7eBwBaN/zETEjHRJKLfGqpkAIU9QCmSzFStLkKiQ/k04xyTtCy8uxYxdNQQYUhQSA==
+"@strapi/provider-upload-cloudinary@4.1.6":
+  version "4.1.6"
+  resolved "https://registry.yarnpkg.com/@strapi/provider-upload-cloudinary/-/provider-upload-cloudinary-4.1.6.tgz#ebc5a2459926b4162e8698840e7183d4af127554"
+  integrity sha512-69OSAD8Zje+xD3fkjZI/n4BFqfOur8399KoQzFOBRbmr8Yt/t7gwH3mIC58TbU396r4eXqlzMLBHpnLlHrupsw==
   dependencies:
-    "@strapi/utils" "4.1.5"
+    "@strapi/utils" "4.1.6"
     cloudinary "^1.25.1"
     into-stream "^5.1.0"
 
@@ -3418,6 +3418,17 @@
   version "4.1.5"
   resolved "https://registry.yarnpkg.com/@strapi/utils/-/utils-4.1.5.tgz#3e80f59476cab470ba0fdb42a075b5ae47e998f2"
   integrity sha512-Oz7ur7TsoqA4IOPdk6H3YwsVZ+FOi9wp+iRReKao8yfo4YKJjSYlHQlNXUaAqOOlFnT0ol7G3KF+uF8jLcfxDA==
+  dependencies:
+    "@sindresorhus/slugify" "1.1.0"
+    date-fns "2.24.0"
+    http-errors "1.8.0"
+    lodash "4.17.21"
+    yup "0.32.9"
+
+"@strapi/utils@4.1.6":
+  version "4.1.6"
+  resolved "https://registry.yarnpkg.com/@strapi/utils/-/utils-4.1.6.tgz#edfdec2470143b2437cc95a5119ef5fa7d892eb4"
+  integrity sha512-QVuxGKHw9uh72CwtpKJTPz5ECgFBbtydvUjY34PCZMPkJ0EQ7/spz3KZbB+v2JSPgy1apZJn5qkBGFcvSvBxRw==
   dependencies:
     "@sindresorhus/slugify" "1.1.0"
     date-fns "2.24.0"
