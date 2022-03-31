@@ -3,8 +3,11 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { Box } from '@strapi/design-system/Box';
 import { KeyboardNavigable } from '@strapi/design-system/KeyboardNavigable';
+import { Flex } from '@strapi/design-system/Flex';
 import { Typography } from '@strapi/design-system/Typography';
+import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
 
+import { FolderCard, FolderCardBody, FolderCardCheckbox, FolderCardLink } from '../FolderCard';
 import { GridColumnSize } from '../../constants';
 
 const GridLayout = styled(Box)`
@@ -28,9 +31,29 @@ export const FolderList = ({ title, folders, size }) => {
       )}
 
       <GridLayout size={size}>
-        {folders.map((folder, index) => {
-          // eslint-disable-next-line react/no-array-index-key
-          return <Box key={`folder-${index}`}>{JSON.stringify(folder)}</Box>;
+        {folders.map(folder => {
+          return (
+            <FolderCard
+              key={`folder-${folder.uuid}`}
+              id="folder"
+              startAction={<FolderCardCheckbox />}
+            >
+              <FolderCardBody>
+                <FolderCardLink href={`/admin/plugins/upload?parent=${folder.id}`}>
+                  <Flex as="h2" direction="column" alignItems="start">
+                    <Typography textColor="neutral800" variant="omega" fontWeight="semiBold">
+                      {folder.name}
+                      <VisuallyHidden>:</VisuallyHidden>
+                    </Typography>
+
+                    <Typography as="span" textColor="neutral600" variant="pi">
+                      {folder.children.count} folder, {folder.files.count} assets
+                    </Typography>
+                  </Flex>
+                </FolderCardLink>
+              </FolderCardBody>
+            </FolderCard>
+          );
         })}
       </GridLayout>
     </KeyboardNavigable>

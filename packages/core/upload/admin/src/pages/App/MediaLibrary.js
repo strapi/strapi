@@ -23,6 +23,7 @@ import { AssetList } from '../../components/AssetList';
 import { FolderList } from '../../components/FolderList';
 import SortPicker from '../../components/SortPicker';
 import { useAssets } from '../../hooks/useAssets';
+import { useFolders } from '../../hooks/useFolders';
 import { getTrad } from '../../utils';
 import { Filters } from './components/Filters';
 import { PaginationFooter } from '../../components/PaginationFooter';
@@ -47,9 +48,14 @@ export const MediaLibrary = () => {
   } = useMediaLibraryPermissions();
   const [{ query }, setQuery] = useQueryParams();
   const { formatMessage } = useIntl();
+  const { data: foldersData, isLoading: foldersIsLoading, errors: foldersError } = useFolders({
+    enabled: true,
+  });
   const { data: assetsData, isLoading: assetsLoading, error: assetsError } = useAssets({
     skipWhen: !canRead,
   });
+
+  console.log(foldersData, foldersError);
 
   const handleChangeSort = value => {
     setQuery({ sort: value });
@@ -62,19 +68,18 @@ export const MediaLibrary = () => {
 
   useFocusWhenNavigate();
 
-  const isLoadingFolders = false;
-  const folders = [];
-  const folderCount = folders.length;
-  const foldersAreLoading = isLoadingFolders;
+  const folders = foldersData?.results;
+  const folderCount = folders?.length ?? 0;
 
-  const assetsAreLoading = isLoadingPermissions || assetsLoading;
   const assets = assetsData?.results;
   const assetCount = assetsData?.pagination?.total || 0;
+
+  const isLoading = foldersIsLoading || isLoadingPermissions || assetsLoading;
   const isFiltering = Boolean(query._q || query.filters);
 
   return (
     <Layout>
-      <Main aria-busy={foldersAreLoading || assetsAreLoading}>
+      <Main aria-busy={isLoading}>
         <HeaderLayout
           title={formatMessage({
             id: getTrad('plugin.name'),
@@ -147,7 +152,7 @@ export const MediaLibrary = () => {
             <BulkDeleteButton selectedAssets={selected} onSuccess={selectAll} />
           )}
 
-          {assetsAreLoading && <LoadingIndicatorPage />}
+          {isLoading && <LoadingIndicatorPage />}
 
           {assetsError && <AnErrorOccurred />}
 

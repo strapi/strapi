@@ -2,6 +2,8 @@ import { useQuery } from 'react-query';
 import { useNotifyAT } from '@strapi/design-system/LiveRegions';
 import { useNotification, useQueryParams } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
+
+import pluginId from '../pluginId';
 import { axiosInstance, getRequestUrl } from '../utils';
 
 export const useFolders = ({ enabled = true }) => {
@@ -12,6 +14,8 @@ export const useFolders = ({ enabled = true }) => {
   const dataRequestURL = getRequestUrl('folders');
 
   const fetchFolders = async () => {
+    console.log('wat');
+
     try {
       const { data } = await axiosInstance.get(`${dataRequestURL}${rawQuery}`);
 
@@ -33,7 +37,7 @@ export const useFolders = ({ enabled = true }) => {
     }
   };
 
-  const { data, error, isLoading } = useQuery([`folders`, rawQuery], fetchFolders, {
+  const { data, error, isLoading } = useQuery([pluginId, `folders`, rawQuery], fetchFolders, {
     enabled,
     staleTime: 0,
     cacheTime: 0,
