@@ -94,7 +94,7 @@ describe('useEditFolder', () => {
       await editFolder(FOLDER_CREATE_FIXTURE);
     });
 
-    expect(axiosInstance.post).toHaveBeenCalledWith('/upload/folders', expect.any(FormData));
+    expect(axiosInstance.post).toHaveBeenCalledWith('/upload/folders', expect.any(Object));
   });
 
   test('calls the proper endpoint when editing a folder', async () => {
@@ -107,10 +107,7 @@ describe('useEditFolder', () => {
       await editFolder(FOLDER_EDIT_FIXTURE);
     });
 
-    expect(axiosInstance.post).toHaveBeenCalledWith(
-      `/upload/folders?id=${FOLDER_EDIT_FIXTURE.id}`,
-      expect.any(FormData)
-    );
+    expect(axiosInstance.put).toHaveBeenCalledWith('/upload/folders', expect.any(Object));
   });
 
   test('does not call toggleNotification in case of success', async () => {
@@ -144,7 +141,7 @@ describe('useEditFolder', () => {
     );
   });
 
-  test('calls toggleNotification in case of non 403 error', async () => {
+  test('calls toggleNotification in case of an error', async () => {
     axiosInstance.post.mockRejectedValue({ message: 'err-test' });
 
     const toggleNotification = useNotification();
