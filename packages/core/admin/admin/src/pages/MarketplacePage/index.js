@@ -123,37 +123,35 @@ const MarketPlacePage = () => {
   if (!isOnline) {
     return (
       <Layout>
-        <PageHeader />
-        <Flex
-          width="100%"
-          direction="column"
-          alignItems="center"
-          justifyContent="center"
-          style={{ paddingTop: '120px' }}
-        >
-          <Box paddingBottom={2}>
-            <Typography textColor="neutral700" variant="alpha">
-              {formatMessage({
-                id: 'admin.pages.MarketPlacePage.offline.title',
-                defaultMessage: 'You are offline',
-              })}
-            </Typography>
-          </Box>
-          <Box paddingBottom={6}>
-            <Typography textColor="neutral700" variant="epsilon">
-              {formatMessage({
-                id: 'admin.pages.MarketPlacePage.offline.subtitle',
-                defaultMessage: 'You need to be connected to the Internet to access Strapi Market.',
-              })}
-            </Typography>
-          </Box>
-          <img
-            as="img"
-            src={offlineCloud}
-            alt="offline"
-            style={{ width: '88px', height: '88px' }}
-          />
-        </Flex>
+        <Main>
+          <PageHeader />
+          <Flex
+            width="100%"
+            direction="column"
+            alignItems="center"
+            justifyContent="center"
+            style={{ paddingTop: '120px' }}
+          >
+            <Box paddingBottom={2}>
+              <Typography textColor="neutral700" variant="alpha">
+                {formatMessage({
+                  id: 'admin.pages.MarketPlacePage.offline.title',
+                  defaultMessage: 'You are offline',
+                })}
+              </Typography>
+            </Box>
+            <Box paddingBottom={6}>
+              <Typography textColor="neutral700" variant="epsilon">
+                {formatMessage({
+                  id: 'admin.pages.MarketPlacePage.offline.subtitle',
+                  defaultMessage:
+                    'You need to be connected to the Internet to access Strapi Market.',
+                })}
+              </Typography>
+            </Box>
+            <img src={offlineCloud} alt="offline" style={{ width: '88px', height: '88px' }} />
+          </Flex>
+        </Main>
       </Layout>
     );
   }
