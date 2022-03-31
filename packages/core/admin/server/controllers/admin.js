@@ -8,6 +8,7 @@ const { ValidationError } = require('@strapi/utils').errors;
 // eslint-disable-next-line node/no-extraneous-require
 const ee = require('@strapi/strapi/lib/utils/ee');
 
+const { validateUpdateProjectSettings } = require('../validation/project-settings');
 const { getService } = require('../utils');
 
 const PLUGIN_NAME_REGEX = /^[A-Za-z][A-Za-z0-9-_]+$/;
@@ -44,7 +45,13 @@ module.exports = {
   },
 
   async updateProjectSettings(ctx) {
-    console.log(ctx);
+    const {
+      request: { files },
+    } = ctx;
+
+    await validateUpdateProjectSettings(files);
+
+    console.log(files);
   },
 
   async information() {
