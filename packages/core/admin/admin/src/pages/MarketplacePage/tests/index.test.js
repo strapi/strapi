@@ -17,7 +17,7 @@ import server from './server';
 
 const toggleNotification = jest.fn();
 
-jest.mock('../../../hooks/use-navigator-on-line', () => jest.fn(() => true));
+jest.mock('../../../hooks/useNavigatorOnLine', () => jest.fn(() => true));
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
