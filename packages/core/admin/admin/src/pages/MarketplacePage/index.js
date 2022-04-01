@@ -125,7 +125,7 @@ const MarketPlacePage = () => {
     return (
       <Layout>
         <Main>
-          <PageHeader />
+          <PageHeader isOnline={isOnline} />
           <Flex
             width="100%"
             direction="column"
@@ -191,7 +191,7 @@ const MarketPlacePage = () => {
             defaultMessage: 'Marketplace - Plugins',
           })}
         />
-        <PageHeader />
+        <PageHeader isOnline={isOnline} />
         <ContentLayout>
           <Box width="25%" paddingBottom={4}>
             <Searchbar
