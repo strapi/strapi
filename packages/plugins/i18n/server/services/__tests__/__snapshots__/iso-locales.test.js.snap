@@ -1099,6 +1099,10 @@ Array [
     "name": "Kwasio (Cameroon) (nmg-CM)",
   },
   Object {
+    "code": "ky",
+    "name": "Kyrgyz (ky)",
+  },
+  Object {
     "code": "lag",
     "name": "Langi (lag)",
   },
@@ -1793,6 +1797,10 @@ Array [
   Object {
     "code": "dav-KE",
     "name": "Taita (Kenya) (dav-KE)",
+  },
+  Object {
+    "code": "tg",
+    "name": "Tajik (tg)",
   },
   Object {
     "code": "ta",
