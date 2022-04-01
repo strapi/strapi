@@ -1,5 +1,5 @@
 'use strict';
 const role = require('./role');
-const user = require('./user');
+const auth = require('./auth');
 
-module.exports = [role, user];
+module.exports = [auth, role];

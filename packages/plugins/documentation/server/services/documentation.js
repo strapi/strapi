@@ -176,6 +176,13 @@ module.exports = ({ strapi }) => {
         .plugin('documentation')
         .service('override')
         .getOverridesForVersion(version);
+
+      console.log(overrides);
+      // Since paths are very deep, delete them and start fresh
+      Object.keys(overrides.components.schemas).forEach(overridePath => {
+        delete schemas[overridePath];
+      });
+
       const fullDoc = _.merge({ ...config, paths }, overrides);
 
       await fs.ensureFile(fullDocJsonPath);
