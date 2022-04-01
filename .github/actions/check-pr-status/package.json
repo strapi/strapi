@@ -10,7 +10,7 @@
   },
   "devDependencies": {
     "@actions/core": "1.6.0",
-    "@actions/github": "5.0.0",
+    "@actions/github": "5.0.1",
     "@vercel/ncc": "0.33.3"
   }
 }
