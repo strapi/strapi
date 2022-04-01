@@ -22,6 +22,9 @@ const loopContentTypeNames = (api, callback) => {
         ? strapi.plugin(api.name).routes['content-api']
         : strapi.api[api.name].routes[contentTypeName];
 
+    // Return early when routeInfo is undefined
+    if (!routeInfo) return;
+
     // Uppercase the first letter of the api name
     const apiName = _.startCase(api.name);
     // Create a unique name if the api name and contentType name don't match
