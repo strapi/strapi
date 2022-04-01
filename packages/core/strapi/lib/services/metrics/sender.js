@@ -47,6 +47,7 @@ module.exports = strapi => {
     version: strapi.config.get('info.strapi'),
     strapiVersion: strapi.config.get('info.strapi'),
     projectType: isEE ? 'Enterprise' : 'Community',
+    useTypescript: strapi.config.server.useTypescript,
   };
 
   addPackageJsonStrapiMetadata(anonymous_metadata, strapi);
