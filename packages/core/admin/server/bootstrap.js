@@ -12,12 +12,12 @@ const defaultAdminAuthSettings = {
   },
 };
 
-const registerPermissionActions = () => {
-  getService('permission').actionProvider.registerMany(adminActions.actions);
+const registerPermissionActions = async () => {
+  await getService('permission').actionProvider.registerMany(adminActions.actions);
 };
 
-const registerAdminConditions = () => {
-  getService('permission').conditionProvider.registerMany(adminConditions.conditions);
+const registerAdminConditions = async () => {
+  await getService('permission').conditionProvider.registerMany(adminConditions.conditions);
 };
 
 const registerModelHooks = () => {
@@ -53,8 +53,8 @@ const syncAuthSettings = async () => {
 };
 
 module.exports = async () => {
-  registerAdminConditions();
-  registerPermissionActions();
+  await registerAdminConditions();
+  await registerPermissionActions();
   registerModelHooks();
 
   const permissionService = getService('permission');

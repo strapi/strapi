@@ -30,6 +30,7 @@ import useFetchMarketplacePlugins from '../../hooks/useFetchMarketplacePlugins';
 import adminPermissions from '../../permissions';
 import offlineCloud from '../../assets/images/icon_offline-cloud.svg';
 import useNavigatorOnLine from '../../hooks/useNavigatorOnLine';
+import MissingPluginBanner from './components/MissingPluginBanner';
 
 const matchSearch = (plugins, search) => {
   return matchSorter(plugins, search, {
@@ -237,6 +238,9 @@ const MarketPlacePage = () => {
               ))}
             </Grid>
           )}
+          <Box paddingTop={7}>
+            <MissingPluginBanner />
+          </Box>
         </ContentLayout>
       </Main>
     </Layout>

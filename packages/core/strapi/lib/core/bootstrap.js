@@ -1,8 +1,9 @@
 'use strict';
 
 const { getConfigUrls } = require('@strapi/utils');
+const fse = require('fs-extra');
 
-module.exports = function({ strapi }) {
+module.exports = async function({ strapi }) {
   strapi.config.port = strapi.config.get('server.port') || strapi.config.port;
   strapi.config.host = strapi.config.get('server.host') || strapi.config.host;
 
@@ -21,5 +22,12 @@ module.exports = function({ strapi }) {
 
   if (!shouldServeAdmin) {
     strapi.config.serveAdminPanel = false;
+  }
+
+  // ensure public repository exists
+  if (!(await fse.pathExists(strapi.dirs.public))) {
+    throw new Error(
+      `The public folder (${strapi.dirs.public}) doesn't exist or is not accessible. Please make sure it exists.`
+    );
   }
 };

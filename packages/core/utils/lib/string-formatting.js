@@ -1,5 +1,6 @@
 'use strict';
 const _ = require('lodash');
+const { trimChars, trimCharsEnd, trimCharsStart } = require('lodash/fp');
 const slugify = require('@sindresorhus/slugify');
 
 const nameToSlug = (name, options = { separator: '-' }) => slugify(name, options);
@@ -44,6 +45,19 @@ const isCamelCase = value => /^[a-z][a-zA-Z0-9]+$/.test(value);
 const isKebabCase = value => /^([a-z][a-z0-9]*)(-[a-z0-9]+)*$/.test(value);
 const startsWithANumber = value => /^[0-9]/.test(value);
 
+const joinBy = (joint, ...args) => {
+  const trim = trimChars(joint);
+  const trimEnd = trimCharsEnd(joint);
+  const trimStart = trimCharsStart(joint);
+
+  return args.reduce((url, path, index) => {
+    if (args.length === 1) return path;
+    if (index === 0) return trimEnd(path);
+    if (index === args.length - 1) return url + joint + trimStart(path);
+    return url + joint + trim(path);
+  }, '');
+};
+
 module.exports = {
   nameToSlug,
   nameToCollectionName,
@@ -56,4 +70,5 @@ module.exports = {
   isKebabCase,
   toRegressedEnumValue,
   startsWithANumber,
+  joinBy,
 };
