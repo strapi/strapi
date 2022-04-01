@@ -7373,13 +7373,14 @@ better-opn@^2.1.1:
   dependencies:
     open "^7.0.3"
 
-better-sqlite3@7.5.0:
-  version "7.5.0"
-  resolved "https://registry.yarnpkg.com/better-sqlite3/-/better-sqlite3-7.5.0.tgz#2a91cb616453f002096743b0e5b66a7021cd1c63"
-  integrity sha512-6FdG9DoytYGDhLW7VWW1vxjEz7xHkqK6LnaUQYA8d6GHNgZhu9PFX2xwKEEnSBRoT1J4PjTUPeg217ShxNmuPg==
+better-sqlite3@7.4.6:
+  version "7.4.6"
+  resolved "https://registry.yarnpkg.com/better-sqlite3/-/better-sqlite3-7.4.6.tgz#c5dc35c71bb9c9ef5d9e16019686371ff6a5f25e"
+  integrity sha512-LB/UxnMhcJY12bRCDXl2jTk0lsbXHCHOLn3cPjGhy3GCcVPGq45sCGJPUdfBZnfXGN14tYTJyq0ztUI3lGng8A==
   dependencies:
     bindings "^1.5.0"
     prebuild-install "^7.0.0"
+    tar "^6.1.11"
 
 big-integer@^1.6.16:
   version "1.6.51"
@@ -21179,7 +21180,7 @@ tar-stream@^2.1.4:
     inherits "^2.0.3"
     readable-stream "^3.1.1"
 
-tar@6.1.11, tar@^6.0.2, tar@^6.1.0:
+tar@6.1.11, tar@^6.0.2, tar@^6.1.0, tar@^6.1.11:
   version "6.1.11"
   resolved "https://registry.yarnpkg.com/tar/-/tar-6.1.11.tgz#6760a38f003afa1b2ffd0ffe9e9abbd0eab3d621"
   integrity sha512-an/KZQzQUkZCkuoAA64hM92X0Urb6VpRhAFllDzz44U2mcD5scmT3zBc4VgVpkugF580+DQn8eAFSyoQt0tznA==
