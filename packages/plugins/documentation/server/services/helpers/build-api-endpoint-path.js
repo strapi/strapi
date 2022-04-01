@@ -70,7 +70,7 @@ const getPathWithPrefix = (prefix, path) => {
 };
 
 /**
- * @description Get's all paths based on routes
+ * @description Gets all paths based on routes
  *
  * @param {object} apiInfo
  * @property {object} apiInfo.routeInfo - The api routes object
