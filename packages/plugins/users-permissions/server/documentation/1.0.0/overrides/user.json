@@ -2,6 +2,7 @@
   "paths": {
     "/users-permissions/init": {
       "get": {
+        "tags": ["Users Permissions - Authentication"],
         "responses": {
           "200": {
             "description": "Response",

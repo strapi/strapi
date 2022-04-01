@@ -2,7 +2,6 @@
 
 const _ = require('lodash');
 const pathToRegexp = require('path-to-regexp');
-
 const pascalCase = require('./utils/pascal-case');
 const queryParams = require('./utils/query-params');
 const loopContentTypeNames = require('./utils/loop-content-type-names');
@@ -78,8 +77,17 @@ const getPathWithPrefix = (prefix, path) => {
  *
  * @returns {object}
  */
-const getPaths = ({ routeInfo, uniqueName }) => {
-  const paths = routeInfo.routes.reduce((acc, route) => {
+const getPaths = ({ routeInfo, uniqueName, contentTypeInfo }) => {
+  // Get the routes for the current content type
+  const contentTypeRoutes = routeInfo.routes.filter(route => {
+    return (
+      route.path.includes(contentTypeInfo.pluralName) ||
+      route.path.includes(contentTypeInfo.singularName)
+    );
+  });
+
+  // Builde the paths object for the current content type
+  const paths = contentTypeRoutes.reduce((acc, route) => {
     // TODO: Find a more reliable way to determine list of entities vs a single entity
     const isListOfEntities = route.handler.split('.').pop() === 'find';
     const methodVerb = route.method.toLowerCase();
@@ -144,13 +152,8 @@ const getPaths = ({ routeInfo, uniqueName }) => {
  *
  * @returns {object} Open API paths
  */
-const getAllPathsForContentType = ({ uniqueName, routeInfo, attributes }) => {
+const getAllPathsForContentType = apiInfo => {
   let paths = {};
-  const apiInfo = {
-    routeInfo,
-    attributes,
-    uniqueName,
-  };
 
   const pathsObject = getPaths(apiInfo);
 

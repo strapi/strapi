@@ -9,11 +9,11 @@ const _ = require('lodash');
  * @returns {function}
  */
 const loopContentTypeNames = (api, callback) => {
+  let result = {};
   for (const contentTypeName of api.ctNames) {
     // Get the attributes found on the api's contentType
     const uid = `${api.getter}::${api.name}.${contentTypeName}`;
-    const ct = strapi.contentType(uid);
-    const attributes = ct.attributes;
+    const { attributes, info: contentTypeInfo } = strapi.contentType(uid);
 
     // Get the routes for the current api
     const routeInfo =
@@ -32,10 +32,16 @@ const loopContentTypeNames = (api, callback) => {
       routeInfo,
       attributes,
       uniqueName,
+      contentTypeInfo,
     };
 
-    return callback(apiInfo);
+    result = {
+      ...result,
+      ...callback(apiInfo),
+    };
   }
+
+  return result;
 };
 
 module.exports = loopContentTypeNames;
