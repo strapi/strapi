@@ -78,8 +78,16 @@ const getPathWithPrefix = (prefix, path) => {
  *
  * @returns {object}
  */
-const getPaths = ({ routeInfo, uniqueName }) => {
-  const paths = routeInfo.routes.reduce((acc, route) => {
+const getPaths = ({ routeInfo, uniqueName, contentTypeInfo }) => {
+  // Get the routes for the current content type
+  const contentTypeRoutes = routeInfo.routes.filter(route => {
+    return (
+      route.path.includes(contentTypeInfo.pluralName) ||
+      route.path.includes(contentTypeInfo.singularName)
+    );
+  });
+
+  const paths = contentTypeRoutes.reduce((acc, route) => {
     // TODO: Find a more reliable way to determine list of entities vs a single entity
     const isListOfEntities = route.handler.split('.').pop() === 'find';
     const methodVerb = route.method.toLowerCase();
@@ -144,36 +152,8 @@ const getPaths = ({ routeInfo, uniqueName }) => {
  *
  * @returns {object} Open API paths
  */
-const getAllPathsForContentType = ({
-  name,
-  getter,
-  ctNames,
-  uniqueName,
-  routeInfo,
-  attributes,
-}) => {
+const getAllPathsForContentType = apiInfo => {
   let paths = {};
-  if (!ctNames.length && getter === 'plugin') {
-    const routeInfo = strapi.plugin(name).routes['admin'];
-
-    const apiInfo = {
-      routeInfo,
-      uniqueName,
-    };
-
-    paths = {
-      ...paths,
-      ...getPaths(apiInfo),
-    };
-
-    return getPaths(apiInfo);
-  }
-
-  const apiInfo = {
-    routeInfo,
-    attributes,
-    uniqueName,
-  };
 
   const pathsObject = getPaths(apiInfo);
 
