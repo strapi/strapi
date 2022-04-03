@@ -59,7 +59,7 @@
   "error.contentType.singularName-used": "Dieser Wert kann nicht gleich sein wie der Plural-Wert",
   "error.contentTypeName.reserved-name": "Dieser Name kann nicht genutzt werden, da er andere Funktionalitäten beeinträchtigen würde",
   "error.validation.enum-duplicate": "Doppelte Werte sind nicht erlaubt",
-  "error.validation.enum-empty-string": "Leere Strings sind nicht erlaubt",
+  "error.validation.enum-empty-string": "Leere Werte sind nicht erlaubt",
   "error.validation.enum-number": "Werte können nicht mit einer Zahl beginnen",
   "error.validation.minSupMax": "Wert kann nicht höher sein",
   "error.validation.positive": "Muss eine positive Zahl sein",
