@@ -77,7 +77,7 @@
   "form.attribute.item.customColumnName": "Eigener Spaltenname",
   "form.attribute.item.customColumnName.description": "Dies ist nützlich, um Spalten in der Datenbank für Antworten der API umzubenennen",
   "form.attribute.item.date.type.date": "Datum (Bsp: 01.01.{currentYear})",
-  "form.attribute.item.date.type.datetime": "Datum & Uhrzeit (Bsp: 01/01/{currentYear} 00:00)",
+  "form.attribute.item.date.type.datetime": "Datum & Uhrzeit (Bsp: 01.01.{currentYear} 00:00)",
   "form.attribute.item.date.type.time": "Uhrzeit (Bsp: 00:00)",
   "form.attribute.item.defineRelation.fieldName": "Feldname",
   "form.attribute.item.enumeration.graphql": "Namensüberschreibung für GraphQL",
