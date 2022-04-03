@@ -86,6 +86,7 @@ const getPaths = ({ routeInfo, uniqueName, contentTypeInfo }) => {
     );
   });
 
+  // Build the path object for the current content type
   const paths = contentTypeRoutes.reduce((acc, route) => {
     // TODO: Find a more reliable way to determine list of entities vs a single entity
     const isListOfEntities = route.handler.split('.').pop() === 'find';
