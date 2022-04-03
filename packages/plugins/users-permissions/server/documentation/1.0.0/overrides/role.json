@@ -2,6 +2,7 @@
   "paths": {
     "/users-permissions/init": {
       "get": {
+        "tags": ["Users Permissions - Role"],
         "responses": {
           "200": {
             "description": "Response",
@@ -22,6 +23,7 @@
     },
     "/users-permissions/roles/{id}": {
       "get": {
+        "tags": ["Users Permissions - Role"],
         "responses": {
           "200": {
             "content": {
@@ -180,6 +182,7 @@
     },
     "/users-permissions/roles": {
       "get": {
+        "tags": ["Users Permissions - Role"],
         "responses": {
           "200": {
             "content": {
