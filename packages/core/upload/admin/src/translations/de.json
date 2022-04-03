@@ -67,7 +67,7 @@
   "modal.selected-list.sub-header-subtitle": "Drag & Drop, um die Dateien in diesem Bereich anzuordnen.",
   "modal.upload-list.footer.button": "Lade {number, plural, one {# Datei} other {# Dateien}} in die Bibliothek",
   "modal.upload-list.sub-header-subtitle": "Dateien bearbeiten vor dem Hochladen in die Bibliothek",
-  "modal.upload-list.sub-header.button": "Mehr Dateien hinzufügen",
+  "modal.upload-list.sub-header.button": "Weitere Dateien hinzufügen",
   "modal.upload.cancelled": "Upload manuell abgebrochen.",
   "page.title": "Einstellungen - Medienbibliothek",
   "permissions.not-allowed.update": "Du hast nicht die nötige Berechtigung, diese Datei zu bearbeiten.",
