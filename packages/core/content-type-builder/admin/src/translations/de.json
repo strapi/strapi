@@ -44,7 +44,7 @@
   "components.componentSelect.value-component": "{number} Komponente ausgewählt (Tippen um nach Komponente zu suchen)",
   "components.componentSelect.value-components": "{number} Komponenten ausgewählt",
   "configurations": "Konfigurationen",
-  "contentType.apiId-plural.description": "Pluralisierte API ID",
+  "contentType.apiId-plural.description": "API-ID im Plural",
   "contentType.apiId-plural.label": "API ID (Plural)",
   "contentType.apiId-singular.description": "Die UID wird verwendet, um API-Routen und Datenbank-Tabellen/-Sammlungen zu erstellen",
   "contentType.apiId-singular.label": "API ID (Singular)",
