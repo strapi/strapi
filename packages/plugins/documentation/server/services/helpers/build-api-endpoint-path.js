@@ -69,7 +69,7 @@ const getPathWithPrefix = (prefix, path) => {
 };
 
 /**
- * @description Get's all paths based on routes
+ * @description Gets all paths based on routes
  *
  * @param {object} apiInfo
  * @property {object} apiInfo.routeInfo - The api routes object
@@ -86,7 +86,6 @@ const getPaths = ({ routeInfo, uniqueName, contentTypeInfo }) => {
     );
   });
 
-  // Builde the paths object for the current content type
   const paths = contentTypeRoutes.reduce((acc, route) => {
     // TODO: Find a more reliable way to determine list of entities vs a single entity
     const isListOfEntities = route.handler.split('.').pop() === 'find';
