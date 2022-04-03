@@ -169,21 +169,20 @@ module.exports = ({ strapi }) => {
       _.set(defaultConfig, ['info', 'x-generation-date'], new Date().toISOString());
       _.set(defaultConfig, ['info', 'version'], version);
       _.merge(defaultConfig.components, { schemas });
+
       const customConfig = await this.getCustomConfig();
       const config = _.merge(defaultConfig, customConfig);
 
+      // Add the overrides to the full doc
       const overrides = strapi
         .plugin('documentation')
         .service('override')
         .getOverridesForVersion(version);
-
-      console.log(overrides);
-      // Since paths are very deep, delete them and start fresh
-      Object.keys(overrides.components.schemas).forEach(overridePath => {
-        delete schemas[overridePath];
-      });
-
-      const fullDoc = _.merge({ ...config, paths }, overrides);
+      // Replace the keys on the paths objects
+      const { paths: newPaths, ...restOfOverrides } = overrides;
+      const overridePaths = Object.assign({}, paths, newPaths);
+      // Merge the rest
+      const fullDoc = _.merge({ ...config, paths: overridePaths }, restOfOverrides);
 
       await fs.ensureFile(fullDocJsonPath);
       await fs.writeJson(fullDocJsonPath, fullDoc, { spaces: 2 });
