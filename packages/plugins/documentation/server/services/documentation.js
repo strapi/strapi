@@ -179,10 +179,10 @@ module.exports = ({ strapi }) => {
         .service('override')
         .getOverridesForVersion(version);
       // Replace the keys on the paths objects
-      const { paths: newPaths, ...restOfOverrides } = overrides;
-      const overridePaths = Object.assign({}, paths, newPaths);
+      const { paths: overridePaths, ...restOfOverrides } = overrides;
+      const newPaths = Object.assign({}, paths, overridePaths);
       // Merge the rest
-      const fullDoc = _.merge({ ...config, paths: overridePaths }, restOfOverrides);
+      const fullDoc = _.merge({ ...config, paths: newPaths }, restOfOverrides);
 
       await fs.ensureFile(fullDocJsonPath);
       await fs.writeJson(fullDocJsonPath, fullDoc, { spaces: 2 });
