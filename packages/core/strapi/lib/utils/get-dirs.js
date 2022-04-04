@@ -1,8 +1,8 @@
 'use strict';
 
-const { join } = require('path');
+const { join, resolve } = require('path');
 
-const getDirs = ({ appDir, distDir }) => ({
+const getDirs = ({ app: appDir, dist: distDir }, { strapi }) => ({
   dist: {
     root: distDir,
     src: join(distDir, 'src'),
@@ -12,7 +12,6 @@ const getDirs = ({ appDir, distDir }) => ({
     policies: join(distDir, 'src', 'policies'),
     middlewares: join(distDir, 'src', 'middlewares'),
     config: join(distDir, 'config'),
-    public: join(distDir, 'public'),
   },
   app: {
     root: appDir,
@@ -23,7 +22,9 @@ const getDirs = ({ appDir, distDir }) => ({
     policies: join(appDir, 'src', 'policies'),
     middlewares: join(appDir, 'src', 'middlewares'),
     config: join(appDir, 'config'),
-    public: join(appDir, 'public'),
+  },
+  static: {
+    public: resolve(appDir, strapi.config.get('server.dirs.public')),
   },
 });
 

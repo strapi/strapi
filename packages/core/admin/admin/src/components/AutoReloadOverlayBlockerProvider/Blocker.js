@@ -78,7 +78,7 @@ const Blocker = ({ displayedIcon, description, title, isOpen }) => {
                 rel="noopener noreferrer nofollow"
               >
                 {formatMessage({
-                  id: 'app.components.BlockLink.documentation',
+                  id: 'global.documentation',
                   defaultMessage: 'Read the documentation',
                 })}
               </Link>

@@ -7,7 +7,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
-import { lightTheme } from '@strapi/design-system';
+import { lightTheme, darkTheme } from '@strapi/design-system';
 import Theme from '../../../../components/Theme';
 import ThemeToggleProvider from '../../../../components/ThemeToggleProvider';
 import NoPermissions from '../index';
@@ -23,7 +23,7 @@ describe('<NoPermissions />', () => {
       container: { firstChild },
     } = render(
       <IntlProvider locale="en" messages={{}} defaultLocale="en" textComponent="span">
-        <ThemeToggleProvider themes={{ light: lightTheme }}>
+        <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
           <Theme>
             <NoPermissions />
           </Theme>

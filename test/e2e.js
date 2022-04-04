@@ -4,6 +4,8 @@ const path = require('path');
 const execa = require('execa');
 const yargs = require('yargs');
 
+process.env.NODE_ENV = 'test';
+
 const appName = 'testApp';
 process.env.ENV_PATH = path.resolve(__dirname, '..', appName, '.env');
 

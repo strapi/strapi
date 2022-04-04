@@ -4,7 +4,7 @@ import { StrapiAppProvider, AppInfosContext } from '@strapi/helper-plugin';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryHistory } from 'history';
-import { lightTheme } from '@strapi/design-system';
+import { lightTheme, darkTheme } from '@strapi/design-system';
 import Theme from '../../../components/Theme';
 import ThemeToggleProvider from '../../../components/ThemeToggleProvider';
 import { SettingsPage } from '..';
@@ -27,7 +27,7 @@ jest.mock('react-intl', () => ({
 jest.mock('../pages/ApplicationInfosPage', () => () => <h1>App infos</h1>);
 
 const makeApp = (history, settings) => (
-  <ThemeToggleProvider themes={{ light: lightTheme }}>
+  <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
     <Theme>
       <AppInfosContext.Provider value={{ shouldUpdateStrapi: false }}>
         <StrapiAppProvider
@@ -172,7 +172,7 @@ describe('ADMIN | pages | SettingsPage', () => {
         class="c0"
       >
         <nav
-          aria-label="app.components.LeftMenuLinkContainer.settings"
+          aria-label="global.settings"
           class="c1"
         >
           <div
@@ -184,7 +184,7 @@ describe('ADMIN | pages | SettingsPage', () => {
               <h2
                 class="c4"
               >
-                app.components.LeftMenuLinkContainer.settings
+                global.settings
               </h2>
             </div>
             <div

@@ -6,6 +6,7 @@ const fs = require('fs-extra');
 const chokidar = require('chokidar');
 const execa = require('execa');
 const { getOr } = require('lodash/fp');
+const { joinBy } = require('@strapi/utils');
 const tsUtils = require('@strapi/typescript-utils');
 
 const loadConfiguration = require('../core/app-configuration');
@@ -157,6 +158,9 @@ function watchFileChanges({ appDir, strapiInstance, watchIgnoreFiles, polling })
       /tmp/,
       '**/src/admin/**',
       '**/src/plugins/**/admin/**',
+      // FIXME pass the plugin path to the strapiAdmin.build and strapiAdmin.watch in order to stop copying
+      // the FE files when using TS
+      '**/dist/src/plugins/test/admin/**',
       '**/documentation',
       '**/documentation/**',
       '**/node_modules',
@@ -167,6 +171,8 @@ function watchFileChanges({ appDir, strapiInstance, watchIgnoreFiles, polling })
       '**/index.html',
       '**/public',
       '**/public/**',
+      strapiInstance.dirs.public,
+      joinBy('/', strapiInstance.dirs.public, '**'),
       '**/*.db*',
       '**/exports/**',
       '**/dist/**',

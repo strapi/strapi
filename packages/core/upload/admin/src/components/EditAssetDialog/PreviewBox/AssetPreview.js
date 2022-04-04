@@ -13,16 +13,16 @@ const CardAsset = styled(Flex)`
   background: linear-gradient(180deg, #ffffff 0%, #f6f6f9 121.48%);
 `;
 
-export const AssetPreview = forwardRef(({ mime, url, name }, ref) => {
+export const AssetPreview = forwardRef(({ mime, url, name, ...props }, ref) => {
   const [lang] = usePersistentState('strapi-admin-language', 'en');
 
   if (mime.includes(AssetType.Image)) {
-    return <img ref={ref} src={url} alt={name} />;
+    return <img ref={ref} src={url} alt={name} {...props} />;
   }
 
   if (mime.includes(AssetType.Video)) {
     return (
-      <video controls src={url} ref={ref}>
+      <video controls src={url} ref={ref} {...props}>
         <track label={name} default kind="captions" srcLang={lang} src="" />
       </video>
     );
@@ -30,7 +30,7 @@ export const AssetPreview = forwardRef(({ mime, url, name }, ref) => {
 
   if (mime.includes(AssetType.Audio)) {
     return (
-      <audio controls src={url} ref={ref}>
+      <audio controls src={url} ref={ref} {...props}>
         {name}
       </audio>
     );
@@ -38,14 +38,14 @@ export const AssetPreview = forwardRef(({ mime, url, name }, ref) => {
 
   if (mime.includes('pdf')) {
     return (
-      <CardAsset justifyContent="center">
+      <CardAsset justifyContent="center" {...props}>
         <FilePdfIcon aria-label={name} />
       </CardAsset>
     );
   }
 
   return (
-    <CardAsset justifyContent="center">
+    <CardAsset justifyContent="center" {...props}>
       <FileIcon aria-label={name} />
     </CardAsset>
   );

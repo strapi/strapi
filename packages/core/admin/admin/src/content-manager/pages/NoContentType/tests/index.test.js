@@ -3,7 +3,7 @@ import { render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
-import { lightTheme } from '@strapi/design-system';
+import { lightTheme, darkTheme } from '@strapi/design-system';
 import Theme from '../../../../components/Theme';
 import ThemeToggleProvider from '../../../../components/ThemeToggleProvider';
 import NoContentType from '../index';
@@ -19,7 +19,7 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
     } = render(
       <Router history={createMemoryHistory()}>
         <IntlProvider messages={{}} defaultLocale="en" textComponent="span" locale="en">
-          <ThemeToggleProvider themes={{ light: lightTheme }}>
+          <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
             <Theme>
               <NoContentType />
             </Theme>

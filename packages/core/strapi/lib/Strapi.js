@@ -6,7 +6,6 @@ const { isFunction } = require('lodash/fp');
 const { createLogger } = require('@strapi/logger');
 const { Database } = require('@strapi/database');
 const { createAsyncParallelHook } = require('@strapi/utils').hooks;
-const { isTypeScriptProjectSync } = require('@strapi/typescript-utils');
 
 const loadConfiguration = require('./core/app-configuration');
 
@@ -66,19 +65,17 @@ const resolveWorkingDirectories = opts => {
   const appDir = opts.appDir ? path.resolve(cwd, opts.appDir) : cwd;
   const distDir = opts.distDir ? path.resolve(cwd, opts.distDir) : appDir;
 
-  return { appDir, distDir };
+  return { app: appDir, dist: distDir };
 };
 
 class Strapi {
   constructor(opts = {}) {
     destroyOnSignal(this);
 
-    // Create a mapping of every useful directory (both for the app and dist directories)
-    this.dirs = utils.getDirs(resolveWorkingDirectories(opts));
+    const rootDirs = resolveWorkingDirectories(opts);
 
     // Load the app configuration from the dist directory
-    const appConfig = loadConfiguration(this.dirs.dist.root, opts);
-    appConfig.server.useTypescript = isTypeScriptProjectSync(this.dirs.app.root);
+    const appConfig = loadConfiguration({ appDir: rootDirs.app, distDir: rootDirs.dist }, opts);
 
     // Instanciate the Strapi container
     this.container = createContainer(this);
@@ -95,6 +92,9 @@ class Strapi {
     this.container.register('plugins', pluginsRegistry(this));
     this.container.register('apis', apisRegistry(this));
     this.container.register('auth', createAuth(this));
+
+    // Create a mapping of every useful directory (for the app, dist and static directories)
+    this.dirs = utils.getDirs(rootDirs, { strapi: this });
 
     // Strapi state management variables
     this.isLoaded = false;

@@ -219,6 +219,9 @@ module.exports = async function createProject(scope, { client, connection, depen
 const installArguments = ['install', '--production', '--no-optional'];
 function runInstall({ rootPath, useYarn }) {
   if (useYarn) {
+    // Increase timeout for slow internet connections.
+    installArguments.push('--network-timeout 1000000');
+
     return execa('yarnpkg', installArguments, {
       cwd: rootPath,
       stdin: 'ignore',
