@@ -112,8 +112,6 @@ class Strapi {
     this.telemetry = createTelemetry(this);
 
     createUpdateNotifier(this).notify();
-
-    console.log(JSON.stringify(appConfig, null, 2));
   }
 
   get config() {
