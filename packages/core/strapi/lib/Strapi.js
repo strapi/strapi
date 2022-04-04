@@ -6,6 +6,7 @@ const { isFunction } = require('lodash/fp');
 const { createLogger } = require('@strapi/logger');
 const { Database } = require('@strapi/database');
 const { createAsyncParallelHook } = require('@strapi/utils').hooks;
+const { isTypeScriptProjectSync } = require('@strapi/typescript-utils');
 
 const loadConfiguration = require('./core/app-configuration');
 
@@ -76,6 +77,7 @@ class Strapi {
 
     // Load the app configuration from the dist directory
     const appConfig = loadConfiguration({ appDir: rootDirs.app, distDir: rootDirs.dist }, opts);
+    appConfig.server.useTypescript = isTypeScriptProjectSync(this.dirs.app.root);
 
     // Instanciate the Strapi container
     this.container = createContainer(this);
