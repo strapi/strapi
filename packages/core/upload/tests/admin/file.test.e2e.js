@@ -26,13 +26,21 @@ describe('File', () => {
       const folderRes = await rq({
         method: 'POST',
         url: '/upload/folders',
-        body: { name: `folder ${i}` },
+        body: { name: `my folder ${i}` },
       });
       data.folders.push(folderRes.body.data);
     }
   });
 
   afterAll(async () => {
+    await rq({
+      method: 'POST',
+      url: '/upload/folders/batch-delete',
+      body: {
+        ids: data.folders.map(f => f.id),
+      },
+    });
+
     await strapi.destroy();
     await builder.cleanup();
   });
@@ -67,7 +75,6 @@ describe('File', () => {
         height: expect.any(Number),
         url: expect.any(String),
         provider: 'local',
-        path: '/rec.jpg',
         folder: null,
       });
 
@@ -106,11 +113,26 @@ describe('File', () => {
         height: expect.any(Number),
         url: expect.any(String),
         provider: 'local',
-        path: '/folder 1/rec.jpg',
-        folder: { id: 1 },
+        folder: { id: data.folders[0].id },
       });
 
       data.files.push(file);
+    });
+
+    test("Cannot create a file inside a folder that doesn't exist", async () => {
+      const res = await rq({
+        method: 'POST',
+        url: '/upload',
+        formData: {
+          files: fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')),
+          fileInfo: JSON.stringify({
+            folder: '1234', // id that doesn't exist
+          }),
+        },
+      });
+
+      expect(res.status).toBe(400);
+      expect(res.body.error.message).toBe("the folder doesn't exist");
     });
   });
 
@@ -145,7 +167,6 @@ describe('File', () => {
           height: expect.any(Number),
           url: expect.any(String),
           provider: 'local',
-          path: '/folder 2/rec.pdf',
           folder: { id: data.folders[1].id },
         });
         data.files[1] = file;
@@ -179,7 +200,6 @@ describe('File', () => {
           height: expect.any(Number),
           url: expect.any(String),
           provider: 'local',
-          path: '/folder 1/rec.pdf',
           folder: { id: data.folders[0].id },
         });
         data.files[1] = file;
@@ -215,7 +235,6 @@ describe('File', () => {
           height: expect.any(Number),
           url: expect.any(String),
           provider: 'local',
-          path: '/folder 1/rec.pdf',
           folder: { id: data.folders[0].id },
         });
         data.files[0] = file;
@@ -249,7 +268,6 @@ describe('File', () => {
           height: expect.any(Number),
           url: expect.any(String),
           provider: 'local',
-          path: '/folder 2/rec.pdf',
           folder: { id: data.folders[1].id },
         });
         data.files[1] = file;
@@ -286,7 +304,6 @@ describe('File', () => {
           height: expect.any(Number),
           url: expect.any(String),
           provider: 'local',
-          path: '/rec.jpg',
           folder: null,
         });
         data.files[0] = file;
@@ -320,10 +337,43 @@ describe('File', () => {
           height: expect.any(Number),
           url: expect.any(String),
           provider: 'local',
-          path: '/rec.pdf',
           folder: null,
         });
         data.files[1] = file;
+      });
+    });
+
+    describe("Cannot create a file inside a folder that doesn't exist", () => {
+      test('when replacing the file', async () => {
+        const res = await rq({
+          method: 'POST',
+          url: `/upload?id=${data.files[1].id}`,
+          formData: {
+            files: fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')),
+            fileInfo: JSON.stringify({
+              folder: '1234', // id that doesn't exist
+            }),
+          },
+        });
+
+        console.log('res.body', res.body);
+        expect(res.status).toBe(400);
+        expect(res.body.error.message).toBe("the folder doesn't exist");
+      });
+
+      test('whithout replacing the file', async () => {
+        const res = await rq({
+          method: 'POST',
+          url: `/upload?id=${data.files[1].id}`,
+          formData: {
+            fileInfo: JSON.stringify({
+              folder: '1234', // id that doesn't exist
+            }),
+          },
+        });
+
+        expect(res.status).toBe(400);
+        expect(res.body.error.message).toBe("the folder doesn't exist");
       });
     });
   });

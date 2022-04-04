@@ -123,5 +123,21 @@ module.exports = {
         ],
       },
     },
+    {
+      method: 'POST',
+      path: '/folders/batch-delete',
+      handler: 'admin-folder.deleteMany',
+      config: {
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          {
+            name: 'admin::hasPermissions',
+            config: {
+              actions: ['plugin::upload.read'],
+            },
+          },
+        ],
+      },
+    },
   ],
 };
