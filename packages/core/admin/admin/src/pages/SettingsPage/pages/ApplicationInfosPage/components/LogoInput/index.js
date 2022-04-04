@@ -9,7 +9,7 @@ import LogoModalStepper from '../LogoModalStepper';
 
 const LogoInput = ({ customLogo, defaultLogo }) => {
   const { formatMessage } = useIntl();
-  const [isDialogOpen, setIsDialogOpen] = useState(true);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   return (
     <>

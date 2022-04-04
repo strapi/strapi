@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
@@ -6,13 +7,17 @@ import { Icon } from '@strapi/design-system/Icon';
 import { Typography } from '@strapi/design-system/Typography';
 import { Button } from '@strapi/design-system/Button';
 import PicturePlus from '@strapi/icons/PicturePlus';
+import { parseFileMetadatas } from '../../utils/parseFileMetadatas';
+import { ACCEPTED_FORMAT } from '../../utils/constants';
 
 const FileInput = styled(Box)`
   opacity: 0;
 `;
 
 const FromComputerForm = () => {
+  const { formatMessage } = useIntl();
   const [dragOver, setDragOver] = useState(false);
+  const [fileError, setFileError] = useState(false);
   const inputRef = useRef(null);
 
   const handleDragEnter = () => setDragOver(true);
@@ -23,16 +28,35 @@ const FromComputerForm = () => {
     inputRef.current.click();
   };
 
-  const handleDrop = e => {
-    const files = e?.dataTransfer?.files;
-    console.log(files);
+  const handleChange = async () => {
     handleDragLeave();
+    const file = inputRef.current.files[0];
+
+    if (!file) {
+      return;
+    }
+
+    try {
+      const fileToAsset = await parseFileMetadatas(file);
+      console.log(fileToAsset);
+    } catch (err) {
+      if (err.displayMessage) {
+        setFileError(formatMessage(err.displayMessage));
+      } else {
+        throw err;
+      }
+    }
   };
 
-  const handleChange = () => {
-    const files = inputRef.current.files;
-    console.log(files);
-    handleDragLeave();
+  const getBorderColor = () => {
+    if (dragOver) {
+      return 'primary500';
+    }
+    if (fileError) {
+      return 'danger600';
+    }
+
+    return 'neutral300';
   };
 
   return (
@@ -46,13 +70,12 @@ const FromComputerForm = () => {
             hasRadius
             justifyContent="center"
             background={dragOver ? 'primary100' : 'neutral100'}
-            borderColor={dragOver ? 'primary500' : 'neutral300'}
+            borderColor={getBorderColor()}
             borderStyle="dashed"
             borderWidth="1px"
             position="relative"
             onDragEnter={handleDragEnter}
             onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
           >
             <Flex justifyContent="center">
               <Flex direction="column">
@@ -68,7 +91,7 @@ const FromComputerForm = () => {
                 </Box>
 
                 <FileInput
-                  accept=".jpg,.png,.svg"
+                  accept={ACCEPTED_FORMAT.map(format => `.${format}`)}
                   cursor="pointer"
                   as="input"
                   position="absolute"
@@ -97,6 +120,13 @@ const FromComputerForm = () => {
               </Flex>
             </Flex>
           </Box>
+          {fileError && (
+            <Box paddingTop={2}>
+              <Typography textColor="danger600" variant="pi" as="p">
+                {fileError}
+              </Typography>
+            </Box>
+          )}
         </label>
       </Box>
     </form>
