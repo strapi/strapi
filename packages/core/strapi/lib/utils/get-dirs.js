@@ -12,7 +12,6 @@ const getDirs = ({ app: appDir, dist: distDir }, { strapi }) => ({
     policies: join(distDir, 'src', 'policies'),
     middlewares: join(distDir, 'src', 'middlewares'),
     config: join(distDir, 'config'),
-    public: join(distDir, 'public'),
   },
   app: {
     root: appDir,
@@ -23,7 +22,6 @@ const getDirs = ({ app: appDir, dist: distDir }, { strapi }) => ({
     policies: join(appDir, 'src', 'policies'),
     middlewares: join(appDir, 'src', 'middlewares'),
     config: join(appDir, 'config'),
-    public: join(appDir, 'public'),
   },
   static: {
     public: resolve(appDir, strapi.config.get('server.dirs.public')),
