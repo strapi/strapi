@@ -30,7 +30,7 @@ const SettingsNav = ({ menu }) => {
   });
 
   const label = formatMessage({
-    id: 'app.components.LeftMenuLinkContainer.settings',
+    id: 'global.settings',
     defaultMessage: 'Settings',
   });
 

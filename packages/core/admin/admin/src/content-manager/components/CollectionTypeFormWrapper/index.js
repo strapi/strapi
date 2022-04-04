@@ -203,8 +203,6 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
   const displayErrors = useCallback(
     err => {
       const errorPayload = err.response.data;
-      console.error(errorPayload);
-
       let errorMessage = get(errorPayload, ['error', 'message'], 'Bad Request');
 
       // TODO handle errors correctly when back-end ready
@@ -272,10 +270,14 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
         dispatch(setStatus('resolved'));
 
         replace(`/content-manager/collectionType/${slug}/${data.id}${rawQuery}`);
+
+        return Promise.resolve(data);
       } catch (err) {
-        trackUsageRef.current('didNotCreateEntry', { error: err, trackerProperty });
         displayErrors(err);
+        trackUsageRef.current('didNotCreateEntry', { error: err, trackerProperty });
         dispatch(setStatus('resolved'));
+
+        return Promise.reject(err);
       }
     },
     [
@@ -308,9 +310,13 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
         type: 'success',
         message: { id: getTrad('success.record.publish') },
       });
+
+      return Promise.resolve(data);
     } catch (err) {
       displayErrors(err);
       dispatch(setStatus('resolved'));
+
+      return Promise.reject(err);
     }
   }, [cleanReceivedData, displayErrors, id, slug, dispatch, toggleNotification]);
 
@@ -334,11 +340,15 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
         dispatch(submitSucceeded(cleanReceivedData(data)));
 
         dispatch(setStatus('resolved'));
+
+        return Promise.resolve(data);
       } catch (err) {
         trackUsageRef.current('didNotEditEntry', { error: err, trackerProperty });
         displayErrors(err);
 
         dispatch(setStatus('resolved'));
+
+        return Promise.reject(err);
       }
     },
     [cleanReceivedData, displayErrors, slug, id, dispatch, toggleNotification]
@@ -362,9 +372,13 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
 
       dispatch(submitSucceeded(cleanReceivedData(data)));
       dispatch(setStatus('resolved'));
+
+      return Promise.resolve(data);
     } catch (err) {
       dispatch(setStatus('resolved'));
       displayErrors(err);
+
+      return Promise.reject(err);
     }
   }, [cleanReceivedData, displayErrors, id, slug, dispatch, toggleNotification]);
 

@@ -633,10 +633,6 @@ describe('Homepage', () => {
         fill: #ff4500;
       }
 
-      .c52 > path:last-child {
-        fill: #ffffff;
-      }
-
       .c55 > path:first-child {
         fill: #8e75ff;
       }
@@ -1106,7 +1102,7 @@ describe('Homepage', () => {
                           </div>
                           <a
                             class="c38"
-                            href="https://portal.productboard.com/strapi/1-roadmap/tabs/2-under-consideration"
+                            href="https://feedback.strapi.io/"
                             rel="noreferrer noopener"
                             target="_blank"
                           >

@@ -2,7 +2,9 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { useGuidedTour } from '@strapi/helper-plugin';
+import { lightTheme, darkTheme } from '@strapi/design-system';
 import Theme from '../../../Theme';
+import ThemeToggleProvider from '../../../ThemeToggleProvider';
 import GuidedTourModal from '../index';
 
 jest.mock('@strapi/helper-plugin', () => ({
@@ -28,11 +30,13 @@ jest.mock('@strapi/helper-plugin', () => ({
 }));
 
 const App = (
-  <Theme>
-    <IntlProvider locale="en" messages={{}} defaultLocale="en" textComponent="span">
-      <GuidedTourModal />
-    </IntlProvider>
-  </Theme>
+  <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
+    <Theme>
+      <IntlProvider locale="en" messages={{}} defaultLocale="en" textComponent="span">
+        <GuidedTourModal />
+      </IntlProvider>
+    </Theme>
+  </ThemeToggleProvider>
 );
 
 describe('<GuidedTourModal />', () => {
@@ -564,7 +568,7 @@ describe('<GuidedTourModal />', () => {
         position: fixed;
         z-index: 4;
         inset: 0;
-        background: #32324d33;
+        background: #32324d1F;
       }
 
       <body>

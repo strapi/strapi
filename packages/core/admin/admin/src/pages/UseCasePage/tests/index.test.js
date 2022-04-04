@@ -58,7 +58,7 @@ describe('Admin | UseCasePage', () => {
       }
 
       .c9 {
-        padding-top: 64px;
+        padding-top: 8px;
         padding-bottom: 64px;
       }
 

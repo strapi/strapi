@@ -7,7 +7,9 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
+import { lightTheme, darkTheme } from '@strapi/design-system';
 import Theme from '../../../../components/Theme';
+import ThemeToggleProvider from '../../../../components/ThemeToggleProvider';
 import NoPermissions from '../index';
 
 jest.mock('@strapi/helper-plugin', () => ({
@@ -21,9 +23,11 @@ describe('<NoPermissions />', () => {
       container: { firstChild },
     } = render(
       <IntlProvider locale="en" messages={{}} defaultLocale="en" textComponent="span">
-        <Theme>
-          <NoPermissions />
-        </Theme>
+        <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
+          <Theme>
+            <NoPermissions />
+          </Theme>
+        </ThemeToggleProvider>
       </IntlProvider>
     );
 

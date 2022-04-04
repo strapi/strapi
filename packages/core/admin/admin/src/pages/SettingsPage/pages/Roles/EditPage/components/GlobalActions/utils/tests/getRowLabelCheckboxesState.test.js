@@ -10,7 +10,10 @@ describe('ADMIN | COMPONENTS | PERMISSIONS | GlobalActions | utils', () => {
     });
 
     it('should return an array of actionId string', () => {
-      const data = [{ test: true, actionId: 'create' }, { test: 'false', actionId: 'read' }];
+      const data = [
+        { test: true, actionId: 'create' },
+        { test: 'false', actionId: 'read' },
+      ];
       const expected = ['create', 'read'];
 
       expect(getActionsIds(data)).toEqual(expected);

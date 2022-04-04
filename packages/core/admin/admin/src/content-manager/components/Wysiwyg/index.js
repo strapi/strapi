@@ -118,7 +118,6 @@ const Wysiwyg = ({
       )
     : '';
 
-  const errorMessage = error ? formatMessage({ id: error, defaultMessage: error }) : '';
   const label = intlLabel.id
     ? formatMessage(
         { id: intlLabel.id, defaultMessage: intlLabel.defaultMessage },
@@ -157,7 +156,7 @@ const Wysiwyg = ({
             disabled={disabled}
             isExpandMode={isExpandMode}
             editorRef={editorRef}
-            error={errorMessage}
+            error={error}
             isPreviewMode={isPreviewMode}
             name={name}
             onChange={onChange}
@@ -171,10 +170,10 @@ const Wysiwyg = ({
         <Hint description={description} name={name} error={error} />
       </Stack>
 
-      {errorMessage && (
+      {error && (
         <Box paddingTop={1}>
           <Typography variant="pi" textColor="danger600" data-strapi-field-error>
-            {errorMessage}
+            {error}
           </Typography>
         </Box>
       )}

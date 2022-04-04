@@ -14,7 +14,10 @@ import init from './init';
 import { initialState, reducer } from './reducer';
 
 const AuthPage = ({ hasAdmin, setHasAdmin }) => {
-  const { push } = useHistory();
+  const {
+    push,
+    location: { search },
+  } = useHistory();
   const { changeLocale } = useLocalesProvider();
   const { setSkipped } = useGuidedTour();
   const { trackUsage } = useTracking();
@@ -119,7 +122,7 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
       auth.setToken(token, body.rememberMe);
       auth.setUserInfo(user, body.rememberMe);
 
-      push('/');
+      redirectToPreviousLocation();
     } catch (err) {
       if (err.response) {
         const errorMessage = get(
@@ -174,6 +177,7 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
         if (isUserSuperAdmin) {
           persistStateToLocaleStorage.setSkipped(false);
           setSkipped(false);
+          trackUsage('didLaunchGuidedtour');
         }
       }
 
@@ -189,8 +193,7 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
         return;
       }
 
-      // Redirect to the homePage
-      push('/');
+      redirectToPreviousLocation();
     } catch (err) {
       trackUsage('didNotCreateFirstAdmin');
 
@@ -238,6 +241,17 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
     }
   };
 
+  const redirectToPreviousLocation = () => {
+    if (authType === 'login') {
+      const redirectTo = query.get('redirectTo');
+      const redirectUrl = redirectTo ? decodeURIComponent(redirectTo) : '/';
+
+      push(redirectUrl);
+    } else {
+      push('/');
+    }
+  };
+
   // Redirect the user to the login page if
   // the endpoint does not exist or
   // there is already an admin user oo
@@ -248,7 +262,16 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
 
   // Redirect the user to the register-admin if it is the first user
   if (!hasAdmin && authType !== 'register-admin') {
-    return <Redirect to="/auth/register-admin" />;
+    return (
+      <Redirect
+        to={{
+          pathname: '/auth/register-admin',
+          // Forward the `?redirectTo` from /auth/login
+          // /abc => /auth/login?redirectTo=%2Fabc => /auth/register-admin?redirectTo=%2Fabc
+          search,
+        }}
+      />
+    );
   }
 
   return (
