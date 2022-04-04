@@ -34,8 +34,9 @@ const rawFileToAsset = rawFile => {
 };
 
 export const parseFileMetadatas = async file => {
-  const isFormatAuthorized = ACCEPTED_FORMAT.some(format => file.type.includes(format));
   let error;
+
+  const isFormatAuthorized = ACCEPTED_FORMAT.some(format => file.type.includes(format));
 
   if (!isFormatAuthorized) {
     error = new Error('File format');

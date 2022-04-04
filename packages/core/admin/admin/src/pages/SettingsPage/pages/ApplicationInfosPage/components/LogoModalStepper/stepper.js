@@ -2,17 +2,23 @@ import AddLogoDialog from './AddLogoDialog';
 import PendingLogoDialog from './PendingLogoDialog';
 
 const stepper = {
-  add: {
+  upload: {
     Component: AddLogoDialog,
-    modalTitle: 'Upload logo',
+    modalTitle: {
+      id: 'Settings.application.customization.modal.upload',
+      defaultMessage: 'Upload logo',
+    },
     next: 'pending',
     prev: null,
   },
   pending: {
     Component: PendingLogoDialog,
-    modalTitle: 'Pending logo',
+    modalTitle: {
+      id: 'Settings.application.customization.modal.pending',
+      defaultMessage: 'Pending logo',
+    },
     next: null,
-    prev: 'add',
+    prev: 'upload',
   },
 };
 

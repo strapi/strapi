@@ -58,7 +58,7 @@ const LogoInput = ({ customLogo, defaultLogo }) => {
       </CarouselInput>
       <LogoModalStepper
         onClose={() => setIsDialogOpen(false)}
-        initialStep={customLogo ? 'pending' : 'add'}
+        initialStep={customLogo ? 'pending' : 'upload'}
         isOpen={isDialogOpen}
       />
     </>

@@ -8,7 +8,8 @@
 import produce from 'immer';
 
 const initialState = {
-  currentStep: 'add',
+  currentStep: 'upload',
+  localImage: undefined,
 };
 
 const reducer = (state = initialState, action) =>
@@ -16,6 +17,10 @@ const reducer = (state = initialState, action) =>
     switch (action.type) {
       case 'GO_TO': {
         draftState.currentStep = action.to;
+        break;
+      }
+      case 'SET_LOCAL_IMAGE': {
+        draftState.localImage = action.value;
         break;
       }
       default: {

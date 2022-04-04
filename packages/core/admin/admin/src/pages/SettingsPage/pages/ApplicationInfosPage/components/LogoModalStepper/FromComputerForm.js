@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 import { Box } from '@strapi/design-system/Box';
@@ -14,7 +15,7 @@ const FileInput = styled(Box)`
   opacity: 0;
 `;
 
-const FromComputerForm = () => {
+const FromComputerForm = ({ setLocalImage, goTo, next }) => {
   const { formatMessage } = useIntl();
   const [dragOver, setDragOver] = useState(false);
   const [fileError, setFileError] = useState(false);
@@ -37,8 +38,9 @@ const FromComputerForm = () => {
     }
 
     try {
-      const fileToAsset = await parseFileMetadatas(file);
-      console.log(fileToAsset);
+      const asset = await parseFileMetadatas(file);
+      setLocalImage(asset);
+      goTo(next);
     } catch (err) {
       if (err.displayMessage) {
         setFileError(formatMessage(err.displayMessage));
@@ -77,47 +79,52 @@ const FromComputerForm = () => {
             onDragEnter={handleDragEnter}
             onDragLeave={handleDragLeave}
           >
-            <Flex justifyContent="center">
-              <Flex direction="column">
-                <Icon
-                  color="primary600"
-                  width={`${60 / 16}rem`}
-                  height={`${60 / 16}rem`}
-                  as={PicturePlus}
-                />
+            <Flex justifyContent="center" direction="column">
+              <Icon
+                color="primary600"
+                width={`${60 / 16}rem`}
+                height={`${60 / 16}rem`}
+                as={PicturePlus}
+                aria-hidden
+              />
 
-                <Box paddingTop={3} paddingBottom={5}>
-                  <Typography variant="delta">Drag & Drop here or</Typography>
-                </Box>
+              <Box paddingTop={3} paddingBottom={5}>
+                <Typography variant="delta" as="span">
+                  Drag and Drop here or
+                </Typography>
+              </Box>
 
-                <FileInput
-                  accept={ACCEPTED_FORMAT.map(format => `.${format}`)}
-                  cursor="pointer"
-                  as="input"
-                  position="absolute"
-                  left={0}
-                  right={0}
-                  bottom={0}
-                  top={0}
-                  width="100%"
-                  type="file"
-                  name="files"
-                  tabIndex={-1}
-                  zIndex={1}
-                  onChange={handleChange}
-                  ref={inputRef}
-                />
+              <FileInput
+                accept={ACCEPTED_FORMAT.map(format => `.${format}`)}
+                cursor="pointer"
+                as="input"
+                position="absolute"
+                left={0}
+                right={0}
+                bottom={0}
+                top={0}
+                width="100%"
+                type="file"
+                name="files"
+                tabIndex={-1}
+                zIndex={1}
+                onChange={handleChange}
+                ref={inputRef}
+              />
 
-                <Button type="button" onClick={handleClick}>
-                  Browse files
-                </Button>
+              <Button type="button" onClick={handleClick}>
+                {formatMessage({
+                  id: 'Settings.application.customization.modal.upload.cta.browse',
+                  defaultMessage: 'Browse files',
+                })}
+              </Button>
 
-                <Box paddingTop={6}>
-                  <Typography variant="pi" textColor="neutral600">
-                    Max dimension: 750*750, Max size: TBC
-                  </Typography>
-                </Box>
-              </Flex>
+              <Box paddingTop={6}>
+                <Typography variant="pi" textColor="neutral600">
+                  {/* Add translation once we know more about max size */}
+                  Max dimension: 750*750, Max size: TBC
+                </Typography>
+              </Box>
             </Flex>
           </Box>
           {fileError && (
@@ -131,6 +138,16 @@ const FromComputerForm = () => {
       </Box>
     </form>
   );
+};
+
+FromComputerForm.defaultProps = {
+  next: null,
+};
+
+FromComputerForm.propTypes = {
+  setLocalImage: PropTypes.func.isRequired,
+  goTo: PropTypes.func.isRequired,
+  next: PropTypes.string,
 };
 
 export default FromComputerForm;
