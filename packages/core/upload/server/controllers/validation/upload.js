@@ -1,12 +1,23 @@
 'use strict';
 
 const { yup, validateYupSchema } = require('@strapi/utils');
+const { isNil } = require('lodash/fp');
+const { getService } = require('../../utils');
 
 const fileInfoSchema = yup.object({
   name: yup.string().nullable(),
   alternativeText: yup.string().nullable(),
   caption: yup.string().nullable(),
-  folder: yup.strapiID().nullable(),
+  folder: yup
+    .strapiID()
+    .nullable()
+    .test('folder-exists', "the folder doesn't exist", async folderId => {
+      if (isNil(folderId)) {
+        return true;
+      }
+
+      return getService('folder').exists({ id: folderId });
+    }),
 });
 
 const uploadSchema = yup.object({

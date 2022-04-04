@@ -64,8 +64,6 @@ module.exports = ({ strapi }) => ({
   },
 
   async formatFileInfo({ filename, type, size }, fileInfo = {}, metas = {}) {
-    const fileService = getService('file');
-
     const ext = path.extname(filename);
     const basename = path.basename(fileInfo.name || filename, ext);
     const usedName = fileInfo.name || filename;
@@ -75,7 +73,6 @@ module.exports = ({ strapi }) => ({
       alternativeText: fileInfo.alternativeText,
       caption: fileInfo.caption,
       folder: fileInfo.folder,
-      path: await fileService.getPath(fileInfo.folder, usedName),
       hash: generateFileName(basename),
       ext,
       mime: type,
@@ -208,15 +205,12 @@ module.exports = ({ strapi }) => ({
       throw new NotFoundError();
     }
 
-    const fileService = getService('file');
-
     const newName = _.isNil(name) ? dbFile.name : name;
     const newInfos = {
       name: newName,
       alternativeText: _.isNil(alternativeText) ? dbFile.alternativeText : alternativeText,
       caption: _.isNil(caption) ? dbFile.caption : caption,
       folder: _.isUndefined(folder) ? dbFile.folder : folder,
-      path: _.isUndefined(folder) ? dbFile.path : await fileService.getPath(folder, newName),
     };
 
     return this.update(id, newInfos, { user });
