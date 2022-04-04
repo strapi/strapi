@@ -51,7 +51,9 @@ module.exports = {
 
     await validateUpdateProjectSettings(files);
 
-    console.log(files);
+    const uploadedFiles = await getService('project-settings').uploadProjectSettingsFiles(files);
+
+    console.log(uploadedFiles);
   },
 
   async information() {

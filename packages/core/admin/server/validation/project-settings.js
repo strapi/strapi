@@ -8,7 +8,7 @@ const ALLOWED_LOGO_FILE_TYPES = ['image/jpeg', 'image/png', 'image/svg+xml'];
 const updateProjectSettings = yup
   .object({
     menuLogo: yup.object({
-      name: yup.string().max(255),
+      name: yup.string(),
       type: yup.string().oneOf(ALLOWED_LOGO_FILE_TYPES),
       size: yup.number().max(MAX_LOGO_SIZE),
     }),

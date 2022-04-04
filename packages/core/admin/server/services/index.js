@@ -13,4 +13,5 @@ module.exports = {
   auth: require('./auth'),
   action: require('./action'),
   'api-token': require('./api-token'),
+  'project-settings': require('./project-settings'),
 };
