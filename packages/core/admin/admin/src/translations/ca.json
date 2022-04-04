@@ -47,7 +47,7 @@
   "Auth.form.welcome.title": "Benvingut!",
   "Auth.link.forgot-password": "Heu oblidat la contrasenya?",
   "Auth.link.ready": "A punt per iniciar sessió?",
-  "Auth.link.signin": "Registrar-se",
+  "Auth.link.signin": "Iniciar sessió",
   "Auth.link.signin.account": "Ja tens un compte?",
   "Auth.login.sso.divider": "O inicia sessió amb",
   "Auth.login.sso.loading": "Carregant proveïdors...",
