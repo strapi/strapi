@@ -13,7 +13,6 @@
   "HeaderNav.link.advancedSettings": "進階設定",
   "HeaderNav.link.emailTemplates": "郵件範本",
   "HeaderNav.link.providers": "驗證方式",
-  "HeaderNav.link.roles": "身份",
   "Plugin.permissions.plugins.description": "為 {name} 擴充功能定義所有可用的操作",
   "Plugins.header.description": "只有綁定路徑的操作會顯示在下方",
   "Plugins.header.title": "權限",

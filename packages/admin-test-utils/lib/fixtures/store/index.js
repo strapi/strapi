@@ -15,6 +15,7 @@ const reducers = {
   'content-manager_listView': jest.fn(() => ({
     data: [],
     isLoading: true,
+    components: [],
     contentType: {},
     initialDisplayedHeaders: [],
     displayedHeaders: [],

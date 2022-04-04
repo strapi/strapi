@@ -13,7 +13,6 @@
   "HeaderNav.link.advancedSettings": "Geavanceerde instellingen",
   "HeaderNav.link.emailTemplates": "E-mail sjabloon",
   "HeaderNav.link.providers": "Leveranciers",
-  "HeaderNav.link.roles": "Rollen & Permissies",
   "Plugin.permissions.plugins.description": "Voer alle toegestane acties in voor extensie {name}.",
   "Plugins.header.description": "Alleen acties gekoppeld aan een route worden hieronder weergegeven.",
   "Plugins.header.title": "Permissies",

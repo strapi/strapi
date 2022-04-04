@@ -9,7 +9,7 @@ import { render, fireEvent, screen } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { useNotification } from '@strapi/helper-plugin';
 import { act } from 'react-dom/test-utils';
-import { lightTheme } from '@strapi/design-system';
+import { lightTheme, darkTheme } from '@strapi/design-system';
 import Theme from '../../Theme';
 import ThemeToggleProvider from '../../ThemeToggleProvider';
 import Notifications from '../index';
@@ -21,7 +21,7 @@ describe('<Notifications />', () => {
     const {
       container: { firstChild },
     } = render(
-      <ThemeToggleProvider themes={{ light: lightTheme }}>
+      <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
         <Theme>
           <IntlProvider locale="en" messages={messages} defaultLocale="en" textComponent="span">
             <Notifications>
@@ -85,7 +85,7 @@ describe('<Notifications />', () => {
     };
 
     render(
-      <ThemeToggleProvider themes={{ light: lightTheme }}>
+      <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
         <Theme>
           <IntlProvider locale="en" defaultLocale="en" messages={messages} textComponent="span">
             <Notifications>
@@ -128,7 +128,7 @@ describe('<Notifications />', () => {
     };
 
     render(
-      <ThemeToggleProvider themes={{ light: lightTheme }}>
+      <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
         <Theme>
           <IntlProvider locale="en" defaultLocale="en" messages={messages} textComponent="span">
             <Notifications>

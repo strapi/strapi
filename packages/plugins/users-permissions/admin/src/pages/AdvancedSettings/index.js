@@ -154,7 +154,7 @@ const AdvancedSettingsPage = () => {
                     startIcon={<Check />}
                     size="L"
                   >
-                    {formatMessage({ id: getTrad('Form.save'), defaultMessage: 'Save' })}
+                    {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}
                   </Button>
                 }
               />
@@ -171,7 +171,7 @@ const AdvancedSettingsPage = () => {
                   <Stack spacing={4}>
                     <Typography variant="delta" as="h2">
                       {formatMessage({
-                        id: getTrad('Form.title.advancedSettings'),
+                        id: 'global.settings',
                         defaultMessage: 'Settings',
                       })}
                     </Typography>

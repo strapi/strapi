@@ -21,7 +21,7 @@ const ListViewLayout = ({ layout, ...props }) => {
   }, [rawQuery, replace, redirectionLink]);
 
   useEffect(() => {
-    dispatch(setLayout(layout.contentType));
+    dispatch(setLayout(layout));
   }, [dispatch, layout]);
 
   useEffect(() => {

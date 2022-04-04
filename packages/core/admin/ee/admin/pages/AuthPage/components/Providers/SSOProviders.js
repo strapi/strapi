@@ -83,7 +83,7 @@ const SSOProviders = ({ providers, displayAllProviders }) => {
         <GridItem col={4}>
           <Tooltip
             label={formatMessage({
-              id: 'Auth.form.button.login.providers.see-more',
+              id: 'global.see-more',
             })}
           >
             <SSOButton as={Link} to="/auth/providers">

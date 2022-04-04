@@ -172,7 +172,7 @@ const Header = ({
             to="/"
           >
             {formatMessage({
-              id: 'app.components.HeaderLayout.link.go-back',
+              id: 'global.back',
               defaultMessage: 'Back',
             })}
           </Link>

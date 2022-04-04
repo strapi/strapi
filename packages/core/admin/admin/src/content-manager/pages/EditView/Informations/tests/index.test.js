@@ -8,7 +8,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { useCMEditViewDataManager } from '@strapi/helper-plugin';
-import { lightTheme } from '@strapi/design-system';
+import { lightTheme, darkTheme } from '@strapi/design-system';
 import Theme from '../../../../../components/Theme';
 import ThemeToggleProvider from '../../../../../components/ThemeToggleProvider';
 import Informations from '../index';
@@ -24,7 +24,7 @@ const makeApp = () => {
       defaultLocale="en"
       messages={{ 'containers.Edit.information': 'Information' }}
     >
-      <ThemeToggleProvider themes={{ light: lightTheme }}>
+      <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
         <Theme>
           <Informations />
         </Theme>

@@ -1102,7 +1102,7 @@ describe('Homepage', () => {
                           </div>
                           <a
                             class="c38"
-                            href="https://portal.productboard.com/strapi/1-roadmap/tabs/2-under-consideration"
+                            href="https://feedback.strapi.io/"
                             rel="noreferrer noopener"
                             target="_blank"
                           >

@@ -21,7 +21,7 @@ const LoadingView = ({ apiTokenName }) => {
       <HeaderLayout
         primaryAction={
           <Button disabled startIcon={<Check />} type="button" size="L">
-            {formatMessage({ id: 'form.button.save', defaultMessage: 'Save' })}
+            {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}
           </Button>
         }
         title={

@@ -2,6 +2,8 @@
 
 const path = require('path');
 const webpack = require('webpack');
+const { isObject } = require('lodash');
+// eslint-disable-next-line node/no-extraneous-require
 const SpeedMeasurePlugin = require('speed-measure-webpack-plugin');
 
 const webpackConfig = require('../webpack.config');
@@ -68,7 +70,20 @@ const buildAdmin = async () => {
         if (messages.errors.length > 1) {
           messages.errors.length = 1;
         }
-        return reject(new Error(messages.errors.join('\n\n')));
+
+        return reject(
+          new Error(
+            messages.errors.reduce((acc, error) => {
+              if (isObject(error)) {
+                acc += error.message;
+              } else {
+                acc += error.join('\n\n');
+              }
+
+              return acc;
+            }, '')
+          )
+        );
       }
 
       return resolve({
@@ -83,7 +98,7 @@ buildAdmin()
   .then(() => {
     process.exit();
   })
-  .catch((err) => {
+  .catch(err => {
     console.error(err);
     process.exit(1);
   });

@@ -15,7 +15,6 @@
   "HeaderNav.link.advancedSettings": "Cài đặt nâng cao",
   "HeaderNav.link.emailTemplates": "Mẫu email",
   "HeaderNav.link.providers": "Các nhà cung cấp",
-  "HeaderNav.link.roles": "Các Vai trò & Quyền",
   "Plugin.permissions.plugins.description": "Định nghĩa tất cả hành động được phép cho {name} plugin.",
   "Plugins.header.description": "Chỉ các hành động đến bởi một đường dẫn được liệt kê bên dưới.",
   "Plugins.header.title": "Các Quyền",
