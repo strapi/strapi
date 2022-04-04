@@ -11,10 +11,13 @@ import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { useTracking, useAppInfos } from '@strapi/helper-plugin';
+import useNavigatorOnLine from '../../../hooks/useNavigatorOnLine';
 import MarketPlacePage from '../index';
 import server from './server';
 
 const toggleNotification = jest.fn();
+
+jest.mock('../../../hooks/useNavigatorOnLine', () => jest.fn(() => true));
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -1664,7 +1667,7 @@ describe('Marketplace page', () => {
     expect(noResult).toBeVisible();
   });
 
-  it('handles production environment', async () => {
+  it('handles production environment', () => {
     // Simulate production environment
     useAppInfos.mockImplementation(() => ({ autoReload: false }));
     const { queryByText } = render(App);
@@ -1678,9 +1681,25 @@ describe('Marketplace page', () => {
       },
       blockTransition: true,
     });
+
     expect(toggleNotification).toHaveBeenCalledTimes(1);
 
     // Should not show install buttons
     expect(queryByText(/copy install command/i)).not.toBeInTheDocument();
+  });
+
+  it('shows an online layout', () => {
+    render(App);
+    const offlineText = screen.queryByText('You are offline');
+
+    expect(offlineText).toEqual(null);
+  });
+
+  it('shows the offline layout', () => {
+    useNavigatorOnLine.mockReturnValueOnce(false);
+    render(App);
+    const offlineText = screen.getByText('You are offline');
+
+    expect(offlineText).toBeVisible();
   });
 });
