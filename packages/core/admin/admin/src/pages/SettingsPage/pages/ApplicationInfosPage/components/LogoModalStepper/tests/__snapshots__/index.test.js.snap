@@ -599,7 +599,7 @@ exports[`ApplicationsInfosPage || LogoModalStepper from computer should render u
                       <span
                         class="c18"
                       >
-                        From URL
+                        From url
                       </span>
                     </div>
                   </button>
@@ -619,7 +619,9 @@ exports[`ApplicationsInfosPage || LogoModalStepper from computer should render u
                     <div
                       class="c21"
                     >
-                      <label>
+                      <label
+                        for="logo-upload"
+                      >
                         <div
                           class="c22"
                         >
@@ -657,6 +659,7 @@ exports[`ApplicationsInfosPage || LogoModalStepper from computer should render u
                               accept="image/jpeg,image/png,image/svg+xml"
                               class="c28 c29"
                               cursor="pointer"
+                              id="logo-upload"
                               name="files"
                               tabindex="-1"
                               type="file"

@@ -12,7 +12,7 @@ import reducer, { initialState } from './reducer';
 import stepper from './stepper';
 
 const LogoModalStepper = ({ initialStep, isOpen, onClose }) => {
-  const [{ currentStep, localImage }, dispatch] = useReducer(reducer, initialState);
+  const [{ currentStep }, dispatch] = useReducer(reducer, initialState);
   const { Component, modalTitle, next } = stepper[currentStep];
   const { formatMessage } = useIntl();
 
@@ -51,7 +51,7 @@ const LogoModalStepper = ({ initialStep, isOpen, onClose }) => {
         </Typography>
       </ModalHeader>
       <ModalBody>
-        <Component setLocalImage={setLocalImage} localImage={localImage} goTo={goTo} next={next} />
+        <Component setLocalImage={setLocalImage} goTo={goTo} next={next} />
       </ModalBody>
       <ModalFooter />
     </ModalLayout>

@@ -10,7 +10,13 @@ const AddLogoDialog = ({ setLocalImage, goTo, next }) => {
   const { formatMessage } = useIntl();
 
   return (
-    <TabGroup label="How do you want to upload your assets?" variant="simple">
+    <TabGroup
+      label={formatMessage({
+        id: 'Settings.application.customization.modal.tab.label',
+        defaultMessage: 'How do you want to upload your assets?',
+      })}
+      variant="simple"
+    >
       <Box paddingLeft={2} paddingRight={2}>
         <Tabs>
           <Tab>
@@ -22,7 +28,7 @@ const AddLogoDialog = ({ setLocalImage, goTo, next }) => {
           <Tab>
             {formatMessage({
               id: 'Settings.application.customization.modal.upload.from-url',
-              defaultMessage: 'From URL',
+              defaultMessage: 'From url',
             })}
           </Tab>
         </Tabs>

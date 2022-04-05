@@ -64,8 +64,7 @@ const FromComputerForm = ({ setLocalImage, goTo, next }) => {
   return (
     <form>
       <Box paddingLeft={2} paddingRight={2} paddingTop={6} paddingBottom={6}>
-        {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
-        <label>
+        <label htmlFor="logo-upload">
           <Box
             paddingTop={9}
             paddingBottom={7}
@@ -90,7 +89,10 @@ const FromComputerForm = ({ setLocalImage, goTo, next }) => {
 
               <Box paddingTop={3} paddingBottom={5}>
                 <Typography variant="delta" as="span">
-                  Drag and Drop here or
+                  {formatMessage({
+                    id: 'Settings.application.customization.modal.upload.drag-drop',
+                    defaultMessage: 'Drag and Drop here or',
+                  })}
                 </Typography>
               </Box>
 
@@ -110,6 +112,7 @@ const FromComputerForm = ({ setLocalImage, goTo, next }) => {
                 zIndex={1}
                 onChange={handleChange}
                 ref={inputRef}
+                id="logo-upload"
               />
 
               <Button type="button" onClick={handleClick}>
