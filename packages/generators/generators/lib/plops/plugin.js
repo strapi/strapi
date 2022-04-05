@@ -39,7 +39,7 @@ module.exports = plop => {
     ],
     actions(answers) {
       const currentDir = process.cwd();
-      const language = tsUtils.isTypeScriptProjectSync(currentDir) ? 'ts' : 'js';
+      const language = tsUtils.isUsingTypeScriptSync(currentDir) ? 'ts' : 'js';
 
       // TODO: Adds tsconfig & build command for TS plugins?
 

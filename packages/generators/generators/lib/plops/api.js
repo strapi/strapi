@@ -49,7 +49,7 @@ module.exports = plop => {
     actions(answers) {
       const filePath = answers.isPluginApi && answers.plugin ? 'plugins/{{plugin}}' : 'api/{{id}}';
       const currentDir = process.cwd();
-      const language = tsUtils.isTypeScriptProjectSync(currentDir) ? 'ts' : 'js';
+      const language = tsUtils.isUsingTypeScriptSync(currentDir) ? 'ts' : 'js';
 
       const baseActions = [
         {

@@ -21,7 +21,7 @@ const { buildTypeScript, buildAdmin } = require('./builders');
 module.exports = async function({ build, watchAdmin, polling, browser }) {
   const appDir = process.cwd();
 
-  const isTSProject = await tsUtils.isTypeScriptProject(appDir);
+  const isTSProject = await tsUtils.isUsingTypeScript(appDir);
   const distDir = isTSProject ? path.join(appDir, 'dist') : appDir;
 
   try {
@@ -61,6 +61,7 @@ const primaryProcess = async ({ distDir, appDir, build, isTSProject, watchAdmin,
       await buildAdmin({
         buildDestDir: distDir,
         forceBuild: false,
+        // TODO: delegates the is-ts-project check to the admin
         isTSProject,
         optimization: false,
         srcDir: appDir,

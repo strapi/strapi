@@ -20,7 +20,7 @@ module.exports = plop => {
     actions(answers) {
       const filePath = getFilePath(answers.destination);
       const currentDir = process.cwd();
-      const language = tsUtils.isTypeScriptProjectSync(currentDir) ? 'ts' : 'js';
+      const language = tsUtils.isUsingTypeScriptSync(currentDir) ? 'ts' : 'js';
 
       return [
         {
