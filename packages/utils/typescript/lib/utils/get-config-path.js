@@ -2,8 +2,8 @@
 
 const ts = require('typescript');
 
-const DEFAULT_FILE_NAME = 'tsconfig-server.json';
+const DEFAULT_TS_CONFIG_FILENAME = 'tsconfig.json';
 
-module.exports = (dir, filename = DEFAULT_FILE_NAME) => {
+module.exports = (dir, filename = DEFAULT_TS_CONFIG_FILENAME) => {
   return ts.findConfigFile(dir, ts.sys.fileExists, filename);
 };
