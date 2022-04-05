@@ -54,7 +54,7 @@ module.exports = ({
     const tsChecker = new ForkTsCheckerPlugin({
       typescript: {
         // FIXME
-        configFile: path.join(appDir, 'tsconfig-admin.json'),
+        configFile: path.join(appDir, 'src', 'admin', 'tsconfig.json'),
       },
     });
 
