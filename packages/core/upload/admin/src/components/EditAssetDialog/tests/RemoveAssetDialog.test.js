@@ -8,6 +8,11 @@ import { RemoveAssetDialog } from '../RemoveAssetDialog';
 import en from '../../../translations/en.json';
 import server from './server';
 
+jest.mock('../../../utils/deleteRequest', () => ({
+  ...jest.requireActual('../../../utils/deleteRequest'),
+  deleteRequest: jest.fn().mockResolvedValue({ id: 1 }),
+}));
+
 const messageForPlugin = Object.keys(en).reduce((acc, curr) => {
   acc[curr] = `upload.${en[curr]}`;
 
