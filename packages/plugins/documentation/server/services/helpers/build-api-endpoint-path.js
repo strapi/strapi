@@ -122,7 +122,7 @@ const getPaths = ({ routeInfo, uniqueName, contentTypeInfo }) => {
         content: {
           'application/json': {
             schema: {
-              $ref: `#/components/schemas/New${pascalCase(uniqueName)}`,
+              $ref: `#/components/schemas/${pascalCase(uniqueName)}Request`,
             },
           },
         },

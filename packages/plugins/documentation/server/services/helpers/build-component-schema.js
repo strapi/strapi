@@ -1,16 +1,13 @@
 'use strict';
 
 const cleanSchemaAttributes = require('./utils/clean-schema-attributes');
-const getSchemaData = require('./utils/get-schema-data');
 const loopContentTypeNames = require('./utils/loop-content-type-names');
 const pascalCase = require('./utils/pascal-case');
 
 /**
- * @decription Gets all open api schema objects for a given content type
+ * @decription Get all open api schema objects for a given content type
  *
  * @param {object} apiInfo
- * @property {string} apiInfo.getter - api | plugin
- * @property {array} apiInfo.ctNames - All contentType names on the api
  * @property {string} apiInfo.uniqueName - Api name | Api name + Content type name
  * @property {object} apiInfo.attributes - Attributes on content type
  * @property {object} apiInfo.routeInfo - The routes for the api
@@ -20,11 +17,10 @@ const pascalCase = require('./utils/pascal-case');
 const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
   // Store response and request schemas in an object
   let schemas = {};
-  // Set flag false since schemas are always objects
-  const isListOfEntities = false;
   // Get all the route methods
   const routeMethods = routeInfo.routes.map(route => route.method);
 
+  // When the route methods contain any post or put requests
   if (routeMethods.includes('POST') || routeMethods.includes('PUT')) {
     const requiredAttributes = Object.entries(attributes)
       .filter(([, attribute]) => attribute.required)
@@ -37,9 +33,10 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
         ? Object.assign({}, ...requiredAttributes)
         : attributes;
 
+    // Build the request schema
     schemas = {
       ...schemas,
-      [`New${pascalCase(uniqueName)}`]: {
+      [`${pascalCase(uniqueName)}Request`]: {
         type: 'object',
         properties: {
           data: {
@@ -51,9 +48,60 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
     };
   }
 
+  // Check for routes that need to return a list
+  const hasListOfEntities = routeInfo.routes.filter(
+    route => route.handler.split('.').pop() === 'find'
+  ).length;
+
+  if (hasListOfEntities) {
+    // Build the list response schema
+    schemas = {
+      ...schemas,
+      [`${pascalCase(uniqueName)}ListResponse`]: {
+        properties: {
+          data: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                id: { type: 'string' },
+                attributes: { type: 'object', properties: cleanSchemaAttributes(attributes) },
+              },
+            },
+          },
+          meta: {
+            type: 'object',
+            properties: {
+              pagination: {
+                properties: {
+                  page: { type: 'integer' },
+                  pageSize: { type: 'integer', minimum: 25 },
+                  pageCount: { type: 'integer', maximum: 1 },
+                  total: { type: 'integer' },
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+  }
+
+  // Build the response schema
   schemas = {
     ...schemas,
-    [pascalCase(uniqueName)]: getSchemaData(isListOfEntities, cleanSchemaAttributes(attributes)),
+    [`${pascalCase(uniqueName)}Response`]: {
+      properties: {
+        data: {
+          type: 'object',
+          properties: {
+            id: { type: 'string' },
+            attributes: { type: 'object', properties: cleanSchemaAttributes(attributes) },
+          },
+        },
+        meta: { type: 'object' },
+      },
+    },
   };
 
   return schemas;

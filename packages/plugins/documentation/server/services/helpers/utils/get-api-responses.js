@@ -1,55 +1,6 @@
 'use strict';
 
 const pascalCase = require('./pascal-case');
-/**
- *
- * @param {boolean} isSingleEntity - Checks for a single entity
- * @returns {object} The correctly formatted meta object
- */
-const getMeta = isListOfEntities => {
-  if (isListOfEntities) {
-    return {
-      type: 'object',
-      properties: {
-        pagination: {
-          properties: {
-            page: { type: 'integer' },
-            pageSize: { type: 'integer', minimum: 25 },
-            pageCount: { type: 'integer', maximum: 1 },
-            total: { type: 'integer' },
-          },
-        },
-      },
-    };
-  }
-
-  return { type: 'object' };
-};
-
-const getSchemaAsArrayOrObject = (isListOfEntities, name) => {
-  if (isListOfEntities) {
-    return {
-      properties: {
-        data: {
-          type: 'array',
-          items: {
-            $ref: `#/components/schemas/${pascalCase(name)}`,
-          },
-        },
-        meta: getMeta(isListOfEntities),
-      },
-    };
-  }
-
-  return {
-    properties: {
-      data: {
-        $ref: `#/components/schemas/${pascalCase(name)}`,
-      },
-      meta: getMeta(isListOfEntities),
-    },
-  };
-};
 
 /**
  * @description - Builds the Swagger response object for a given api
@@ -60,16 +11,23 @@ const getSchemaAsArrayOrObject = (isListOfEntities, name) => {
  *
  * @returns The Swagger responses
  */
-module.exports = (name, route, isListOfEntities = false) => {
-  let schema;
-  if (route.method === 'DELETE') {
-    schema = {
-      type: 'integer',
-      format: 'int64',
-    };
-  } else {
-    schema = getSchemaAsArrayOrObject(isListOfEntities, name);
-  }
+const getApiResponse = (name, route, isListOfEntities = false) => {
+  const getSchema = () => {
+    if (route.method === 'DELETE') {
+      return {
+        type: 'integer',
+        format: 'int64',
+      };
+    }
+
+    if (isListOfEntities) {
+      return { $ref: `#/components/schemas/${pascalCase(name)}ListResponse` };
+    }
+
+    return { $ref: `#/components/schemas/${pascalCase(name)}Response` };
+  };
+
+  const schema = getSchema();
 
   return {
     responses: {
@@ -134,3 +92,5 @@ module.exports = (name, route, isListOfEntities = false) => {
     },
   };
 };
+
+module.exports = getApiResponse;
