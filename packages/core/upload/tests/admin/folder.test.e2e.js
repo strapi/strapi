@@ -2,7 +2,7 @@
 
 // Test a simple default API with no relations
 
-const { omit } = require('lodash/fp');
+const { omit, pick } = require('lodash/fp');
 
 const { createTestBuilder } = require('../../../../../test/helpers/builder');
 const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
@@ -13,6 +13,14 @@ let rq;
 let data = {
   folders: [],
 };
+
+const uuidRegex = /^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
+const rootPathRegex = /^\/[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
+const getFolderPathRegex = uid =>
+  new RegExp(
+    '^/' + uid + '/[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$',
+    'i'
+  );
 
 describe('Folder', () => {
   const builder = createTestBuilder();
@@ -42,12 +50,13 @@ describe('Folder', () => {
       expect(res.body.data).toMatchObject({
         id: expect.anything(),
         name: 'folder 1',
-        uid: expect.anything(),
-        path: '/folder 1',
+        uid: expect.stringMatching(uuidRegex),
+        path: expect.stringMatching(rootPathRegex),
         createdAt: expect.anything(),
         updatedAt: expect.anything(),
         parent: null,
       });
+      expect(res.body.data.uid).toBe(res.body.data.path.split('/').pop());
 
       data.folders.push(omit('parent', res.body.data));
     });
@@ -65,12 +74,13 @@ describe('Folder', () => {
       expect(res.body.data).toMatchObject({
         id: expect.anything(),
         name: 'folder-2',
-        uid: expect.anything(),
-        path: '/folder 1/folder-2',
+        uid: expect.stringMatching(uuidRegex),
+        path: expect.stringMatching(getFolderPathRegex(data.folders[0].uid)),
         createdAt: expect.anything(),
         updatedAt: expect.anything(),
         parent: data.folders[0],
       });
+      expect(res.body.data.uid).toBe(res.body.data.path.split('/').pop());
 
       data.folders.push(omit('parent', res.body.data));
     });
@@ -151,8 +161,8 @@ describe('Folder', () => {
       expect(res.body.results).toEqual(
         expect.arrayContaining([
           {
+            ...data.folders[0],
             children: { count: 1 },
-            createdAt: expect.anything(),
             createdBy: {
               firstname: expect.anything(),
               id: expect.anything(),
@@ -160,12 +170,7 @@ describe('Folder', () => {
               username: null,
             },
             files: { count: 0 },
-            id: expect.anything(),
-            name: 'folder 1',
             parent: null,
-            path: '/folder 1',
-            uid: expect.anything(),
-            updatedAt: expect.anything(),
             updatedBy: {
               firstname: expect.anything(),
               id: expect.anything(),
@@ -174,8 +179,8 @@ describe('Folder', () => {
             },
           },
           {
+            ...data.folders[1],
             children: { count: 0 },
-            createdAt: expect.anything(),
             createdBy: {
               firstname: expect.anything(),
               id: expect.anything(),
@@ -183,19 +188,7 @@ describe('Folder', () => {
               username: null,
             },
             files: { count: 0 },
-            id: expect.anything(),
-            name: 'folder-2',
-            parent: {
-              createdAt: expect.anything(),
-              id: expect.anything(),
-              name: 'folder 1',
-              path: '/folder 1',
-              uid: expect.anything(),
-              updatedAt: expect.anything(),
-            },
-            path: '/folder 1/folder-2',
-            uid: expect.anything(),
-            updatedAt: expect.anything(),
+            parent: pick(['createdAt', 'id', 'name', 'path', 'uid', 'updatedAt'], data.folders[0]),
             updatedBy: {
               firstname: expect.anything(),
               id: expect.anything(),
@@ -220,22 +213,8 @@ describe('Folder', () => {
 
       expect(res.body.data).toEqual(
         expect.arrayContaining([
-          {
-            createdAt: expect.anything(),
-            id: expect.anything(),
-            name: 'folder 1',
-            path: '/folder 1',
-            uid: expect.anything(),
-            updatedAt: expect.anything(),
-          },
-          {
-            createdAt: expect.anything(),
-            id: expect.anything(),
-            name: 'folder-2',
-            path: '/folder 1/folder-2',
-            uid: expect.anything(),
-            updatedAt: expect.anything(),
-          },
+          pick(['id', 'name', 'path', 'uid', 'updatedAt', 'createdAt'])(data.folders[0]),
+          pick(['id', 'name', 'path', 'uid', 'updatedAt', 'createdAt'])(data.folders[1]),
         ])
       );
     });
