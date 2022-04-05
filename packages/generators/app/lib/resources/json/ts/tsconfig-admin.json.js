@@ -1,20 +1,7 @@
 'use strict';
 
 module.exports = () => ({
-  compilerOptions: {
-    lib: ['es2019', 'es2020.promise', 'es2020.bigint', 'es2020.string', 'DOM'],
-    noImplicitAny: false,
-    module: 'es2020',
-    target: 'es5',
-    jsx: 'react',
-    allowJs: true,
-    moduleResolution: 'node',
-    skipLibCheck: true,
-    esModuleInterop: true,
-    allowSyntheticDefaultImports: true,
-    resolveJsonModule: true,
-    noEmit: false,
-    incremental: true,
-  },
-  exclude: ['node_modules', '**/*.test.js', '*.js'],
+  extends: '@strapi/typescript-utils/lib/configs/admin',
+
+  exclude: ['node_modules/', 'build/', 'dist/', '**/*.test.ts'],
 });

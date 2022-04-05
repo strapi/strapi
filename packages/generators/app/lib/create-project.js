@@ -81,16 +81,19 @@ module.exports = async function createProject(scope, { client, connection, depen
 
     if (useTypescript) {
       const tsJSONDir = join(__dirname, 'resources', 'json', 'ts');
-      const files = ['tsconfig-admin.json.js', 'tsconfig-server.json.js'];
+      const filesMap = {
+        'tsconfig-admin.json.js': 'src/admin',
+        'tsconfig-server.json.js': '.',
+      };
 
-      files.forEach(file => {
-        const srcPath = join(tsJSONDir, file);
-        const destPath = join(rootPath, `${file.slice(0, -3)}`);
+      for (const [fileName, path] of Object.entries(filesMap)) {
+        const srcPath = join(tsJSONDir, fileName);
+        const destPath = join(rootPath, path, 'tsconfig.json');
 
         const json = require(srcPath)();
 
-        fse.writeJSONSync(destPath, json);
-      });
+        await fse.writeJSON(destPath, JSON.stringify(json, null, 2));
+      }
     }
 
     // ensure node_modules is created
