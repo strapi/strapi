@@ -75,6 +75,7 @@ const getPathWithPrefix = (prefix, path) => {
  * @param {object} apiInfo
  * @property {object} apiInfo.routeInfo - The api routes object
  * @property {string} apiInfo.uniqueName - Content type name | Api name + Content type name
+ * @property {object} apiInfo.contentTypeInfo - The info object found on content type schemas
  *
  * @returns {object}
  */
@@ -143,12 +144,6 @@ const getPaths = ({ routeInfo, uniqueName, contentTypeInfo }) => {
  * @decription Gets all open api paths object for a given content type
  *
  * @param {object} apiInfo
- * @property {string} apiInfo.name - The name of the api
- * @property {string} apiInfo.getter - api | plugin
- * @property {array} apiInfo.ctNames - All contentType names on the api
- * @property {string} apiInfo.uniqueName - Api name | Api name + Content type name
- * @property {object} apiInfo.attributes - Attributes on content type
- * @property {object} apiInfo.routeInfo - The routes for the api
  *
  * @returns {object} Open API paths
  */

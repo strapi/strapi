@@ -5,7 +5,7 @@ const pascalCase = require('./pascal-case');
 /**
  * @description - Builds the Swagger response object for a given api
  *
- * @param {object} attributes - The attributes found on a contentType
+ * @param {object} name - Name of the api or plugin
  * @param {object} route - The current route
  * @param {boolean} isListOfEntities - Checks for a list of entitities
  *
