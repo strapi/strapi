@@ -95,7 +95,7 @@ const FromComputerForm = ({ setLocalImage, goTo, next }) => {
               </Box>
 
               <FileInput
-                accept={ACCEPTED_FORMAT.map(format => `.${format}`)}
+                accept={ACCEPTED_FORMAT}
                 cursor="pointer"
                 as="input"
                 position="absolute"

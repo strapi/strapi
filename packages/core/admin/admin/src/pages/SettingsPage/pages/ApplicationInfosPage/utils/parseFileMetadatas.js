@@ -36,7 +36,7 @@ const rawFileToAsset = rawFile => {
 export const parseFileMetadatas = async file => {
   let error;
 
-  const isFormatAuthorized = ACCEPTED_FORMAT.some(format => file.type.includes(format));
+  const isFormatAuthorized = ACCEPTED_FORMAT.includes(file.type);
 
   if (!isFormatAuthorized) {
     error = new Error('File format');
@@ -46,6 +46,7 @@ export const parseFileMetadatas = async file => {
   }
 
   const fileDimensions = await getFileDimensions(file);
+
   const areDimensionsAuthorized =
     fileDimensions.width < DIMENSION && fileDimensions.height < DIMENSION;
 
