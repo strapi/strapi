@@ -1,51 +1,25 @@
 'use strict';
 
-const _ = require('lodash');
 const jwt = require('jsonwebtoken');
-const request = require('request');
 // Purest strategies.
-const purest = require('purest')({ request });
-const purestConfig = require('@purest/providers');
+const purest = require('purest');
 
-module.exports = async ({ provider, access_token, callback, query, providers }) => {
+module.exports = async ({ provider, access_token, query, providers }) => {
   switch (provider) {
     case 'discord': {
-      const discord = purest({
-        provider: 'discord',
-        config: {
-          discord: {
-            'https://discordapp.com/api/': {
-              __domain: {
-                auth: {
-                  auth: { bearer: '[0]' },
-                },
-              },
-              '{endpoint}': {
-                __path: {
-                  alias: '__default',
-                },
-              },
-            },
-          },
-        },
-      });
-      discord
-        .query()
+      const discord = purest({ provider: 'discord' });
+      return discord
         .get('users/@me')
         .auth(access_token)
-        .request((err, res, body) => {
-          if (err) {
-            callback(err);
-          } else {
-            // Combine username and discriminator because discord username is not unique
-            var username = `${body.username}#${body.discriminator}`;
-            callback(null, {
-              username,
-              email: body.email,
-            });
-          }
+        .request()
+        .then(({ body }) => {
+          // Combine username and discriminator because discord username is not unique
+          var username = `${body.username}#${body.discriminator}`;
+          return {
+            username,
+            email: body.email,
+          };
         });
-      break;
     }
     case 'cognito': {
       // get the id_token
@@ -53,60 +27,43 @@ module.exports = async ({ provider, access_token, callback, query, providers }) 
       // decode the jwt token
       const tokenPayload = jwt.decode(idToken);
       if (!tokenPayload) {
-        callback(new Error('unable to decode jwt token'));
+        throw new Error('unable to decode jwt token');
       } else {
-        callback(null, {
+        return {
           username: tokenPayload['cognito:username'],
           email: tokenPayload.email,
-        });
+        };
       }
-      break;
     }
     case 'facebook': {
-      const facebook = purest({
-        provider: 'facebook',
-        config: purestConfig,
-      });
+      const facebook = purest({ provider: 'facebook' });
 
-      facebook
-        .query()
-        .get('me?fields=name,email')
+      return facebook
+        .get('me')
         .auth(access_token)
-        .request((err, res, body) => {
-          if (err) {
-            callback(err);
-          } else {
-            callback(null, {
-              username: body.name,
-              email: body.email,
-            });
-          }
-        });
-      break;
+        .qs({ fields: 'name,email' })
+        .request()
+        .then(({ body }) => ({
+          username: body.name,
+          email: body.email,
+        }));
     }
     case 'google': {
-      const google = purest({ provider: 'google', config: purestConfig });
+      const google = purest({ provider: 'google' });
 
-      google
+      return google
         .query('oauth')
         .get('tokeninfo')
         .qs({ access_token })
-        .request((err, res, body) => {
-          if (err) {
-            callback(err);
-          } else {
-            callback(null, {
-              username: body.email.split('@')[0],
-              email: body.email,
-            });
-          }
-        });
-      break;
+        .request()
+        .then(({ body }) => ({
+          username: body.email.split('@')[0],
+          email: body.email,
+        }));
     }
     case 'github': {
       const github = purest({
         provider: 'github',
-        config: purestConfig,
         defaults: {
           headers: {
             'user-agent': 'strapi',
@@ -114,360 +71,207 @@ module.exports = async ({ provider, access_token, callback, query, providers }) 
         },
       });
 
-      github
-        .query()
+      return github
         .get('user')
         .auth(access_token)
-        .request((err, res, userbody) => {
-          if (err) {
-            return callback(err);
-          }
-
+        .request()
+        .then(({ body: userbody }) => {
           // This is the public email on the github profile
           if (userbody.email) {
-            return callback(null, {
+            return {
               username: userbody.login,
               email: userbody.email,
-            });
+            };
           }
-
           // Get the email with Github's user/emails API
-          github
-            .query()
+          return github
             .get('user/emails')
             .auth(access_token)
-            .request((err, res, emailsbody) => {
-              if (err) {
-                return callback(err);
-              }
-
-              return callback(null, {
+            .request()
+            .then(({ body: emailsbody }) => {
+              return {
                 username: userbody.login,
                 email: Array.isArray(emailsbody)
                   ? emailsbody.find(email => email.primary === true).email
                   : null,
-              });
+              };
             });
         });
-      break;
     }
     case 'microsoft': {
-      const microsoft = purest({
-        provider: 'microsoft',
-        config: purestConfig,
-      });
+      const microsoft = purest({ provider: 'microsoft' });
 
-      microsoft
-        .query()
+      return microsoft
         .get('me')
         .auth(access_token)
-        .request((err, res, body) => {
-          if (err) {
-            callback(err);
-          } else {
-            callback(null, {
-              username: body.userPrincipalName,
-              email: body.userPrincipalName,
-            });
-          }
-        });
-      break;
+        .request()
+        .then(({ body }) => ({
+          username: body.userPrincipalName,
+          email: body.userPrincipalName,
+        }));
     }
     case 'twitter': {
       const twitter = purest({
         provider: 'twitter',
-        config: purestConfig,
-        key: providers.twitter.key,
-        secret: providers.twitter.secret,
       });
 
-      twitter
-        .query()
+      return twitter
         .get('account/verify_credentials')
         .auth(access_token, query.access_secret)
         .qs({ screen_name: query['raw[screen_name]'], include_email: 'true' })
-        .request((err, res, body) => {
-          if (err) {
-            callback(err);
-          } else {
-            callback(null, {
-              username: body.screen_name,
-              email: body.email,
-            });
-          }
-        });
-      break;
+        .request()
+        .then(({ body }) => ({
+          username: body.screen_name,
+          email: body.email,
+        }));
     }
     case 'instagram': {
-      const instagram = purest({
-        provider: 'instagram',
-        key: providers.instagram.key,
-        secret: providers.instagram.secret,
-        config: purestConfig,
-      });
+      const instagram = purest({ provider: 'instagram' });
 
-      instagram
-        .query()
+      return instagram
         .get('me')
-        .qs({ access_token, fields: 'id,username' })
-        .request((err, res, body) => {
-          if (err) {
-            callback(err);
-          } else {
-            callback(null, {
-              username: body.username,
-              email: `${body.username}@strapi.io`, // dummy email as Instagram does not provide user email
-            });
-          }
-        });
-      break;
+        .auth(access_token)
+        .qs({ fields: 'id,username' })
+        .request()
+        .then(({ body }) => ({
+          username: body.username,
+          email: `${body.username}@strapi.io`, // dummy email as Instagram does not provide user email
+        }));
     }
     case 'vk': {
-      const vk = purest({
-        provider: 'vk',
-        config: purestConfig,
-      });
+      const vk = purest({ provider: 'vk' });
 
-      vk.query()
+      return vk
         .get('users.get')
-        .qs({ access_token, id: query.raw.user_id, v: '5.122' })
-        .request((err, res, body) => {
-          if (err) {
-            callback(err);
-          } else {
-            callback(null, {
-              username: `${body.response[0].last_name} ${body.response[0].first_name}`,
-              email: query.raw.email,
-            });
-          }
-        });
-      break;
+        .auth(access_token)
+        .qs({ id: query.raw.user_id, v: '5.122' })
+        .request()
+        .then(({ body }) => ({
+          username: `${body.response[0].last_name} ${body.response[0].first_name}`,
+          email: query.raw.email,
+        }));
     }
     case 'twitch': {
       const twitch = purest({
         provider: 'twitch',
         config: {
           twitch: {
-            'https://api.twitch.tv': {
-              __domain: {
-                auth: {
-                  headers: {
-                    Authorization: 'Bearer [0]',
-                    'Client-ID': '[1]',
-                  },
-                },
-              },
-              'helix/{endpoint}': {
-                __path: {
-                  alias: '__default',
-                },
-              },
-              'oauth2/{endpoint}': {
-                __path: {
-                  alias: 'oauth',
-                },
+            default: {
+              origin: 'https://api.twitch.tv',
+              path: 'helix/{path}',
+              headers: {
+                Authorization: 'Bearer {auth}',
+                'Client-Id': '{auth}',
               },
             },
           },
         },
       });
 
-      twitch
+      return twitch
         .get('users')
         .auth(access_token, providers.twitch.key)
-        .request((err, res, body) => {
-          if (err) {
-            callback(err);
-          } else {
-            callback(null, {
-              username: body.data[0].login,
-              email: body.data[0].email,
-            });
-          }
-        });
-      break;
+        .request()
+        .then(({ body }) => ({
+          username: body.data[0].login,
+          email: body.data[0].email,
+        }));
     }
     case 'linkedin': {
-      const linkedIn = purest({
-        provider: 'linkedin',
-        config: {
-          linkedin: {
-            'https://api.linkedin.com': {
-              __domain: {
-                auth: [{ auth: { bearer: '[0]' } }],
-              },
-              '[version]/{endpoint}': {
-                __path: {
-                  alias: '__default',
-                  version: 'v2',
-                },
-              },
-            },
-          },
-        },
-      });
-      try {
-        const getDetailsRequest = () => {
-          return new Promise((resolve, reject) => {
-            linkedIn
-              .query()
-              .get('me')
-              .auth(access_token)
-              .request((err, res, body) => {
-                if (err) {
-                  return reject(err);
-                }
-                resolve(body);
-              });
-          });
-        };
+      const linkedIn = purest({ provider: 'linkedin' });
+      const {
+        body: { localizedFirstName },
+      } = await linkedIn
+        .get('me')
+        .auth(access_token)
+        .request();
+      const {
+        body: { elements },
+      } = await linkedIn
+        .get('emailAddress?q=members&projection=(elements*(handle~))')
+        .auth(access_token)
+        .request();
 
-        const getEmailRequest = () => {
-          return new Promise((resolve, reject) => {
-            linkedIn
-              .query()
-              .get('emailAddress?q=members&projection=(elements*(handle~))')
-              .auth(access_token)
-              .request((err, res, body) => {
-                if (err) {
-                  return reject(err);
-                }
-                resolve(body);
-              });
-          });
-        };
+      const email = elements[0]['handle~'];
 
-        const { localizedFirstName } = await getDetailsRequest();
-        const { elements } = await getEmailRequest();
-        const email = elements[0]['handle~'];
-
-        callback(null, {
-          username: localizedFirstName,
-          email: email.emailAddress,
-        });
-      } catch (err) {
-        callback(err);
-      }
-      break;
+      return {
+        username: localizedFirstName,
+        email: email.emailAddress,
+      };
     }
     case 'reddit': {
       const reddit = purest({
         provider: 'reddit',
-        config: purestConfig,
-        defaults: {
-          headers: {
-            'user-agent': 'strapi',
-          },
-        },
-      });
-
-      reddit
-        .query('auth')
-        .get('me')
-        .auth(access_token)
-        .request((err, res, body) => {
-          if (err) {
-            callback(err);
-          } else {
-            callback(null, {
-              username: body.name,
-              email: `${body.name}@strapi.io`, // dummy email as Reddit does not provide user email
-            });
-          }
-        });
-      break;
-    }
-    case 'auth0': {
-      const purestAuth0Conf = {};
-      purestAuth0Conf[`https://${providers.auth0.subdomain}.auth0.com`] = {
-        __domain: {
-          auth: {
-            auth: { bearer: '[0]' },
-          },
-        },
-        '{endpoint}': {
-          __path: {
-            alias: '__default',
-          },
-        },
-      };
-      const auth0 = purest({
-        provider: 'auth0',
         config: {
-          auth0: purestAuth0Conf,
-        },
-      });
-
-      auth0
-        .get('userinfo')
-        .auth(access_token)
-        .request((err, res, body) => {
-          if (err) {
-            callback(err);
-          } else {
-            const username =
-              body.username || body.nickname || body.name || body.email.split('@')[0];
-            const email = body.email || `${username.replace(/\s+/g, '.')}@strapi.io`;
-
-            callback(null, {
-              username,
-              email,
-            });
-          }
-        });
-      break;
-    }
-    case 'cas': {
-      const provider_url = 'https://' + _.get(providers.cas, 'subdomain');
-      const cas = purest({
-        provider: 'cas',
-        config: {
-          cas: {
-            [provider_url]: {
-              __domain: {
-                auth: {
-                  auth: { bearer: '[0]' },
-                },
-              },
-              '{endpoint}': {
-                __path: {
-                  alias: '__default',
-                },
+          reddit: {
+            default: {
+              origin: 'https://oauth.reddit.com',
+              path: 'api/{version}/{path}',
+              version: 'v1',
+              headers: {
+                Authorization: 'Bearer {auth}',
+                'user-agent': 'strapi',
               },
             },
           },
         },
       });
-      cas
-        .query()
-        .get('oidc/profile')
+
+      return reddit
+        .get('me')
         .auth(access_token)
-        .request((err, res, body) => {
-          if (err) {
-            callback(err);
-          } else {
-            // CAS attribute may be in body.attributes or "FLAT", depending on CAS config
-            const username = body.attributes
-              ? body.attributes.strapiusername || body.id || body.sub
-              : body.strapiusername || body.id || body.sub;
-            const email = body.attributes
-              ? body.attributes.strapiemail || body.attributes.email
-              : body.strapiemail || body.email;
-            if (!username || !email) {
-              strapi.log.warn(
-                'CAS Response Body did not contain required attributes: ' + JSON.stringify(body)
-              );
-            }
-            callback(null, {
-              username,
-              email,
-            });
-          }
+        .request()
+        .then(({ body }) => ({
+          username: body.name,
+          email: `${body.name}@strapi.io`, // dummy email as Reddit does not provide user email
+        }));
+    }
+    case 'auth0': {
+      const auth0 = purest({ provider: 'auth0' });
+
+      return auth0
+        .get('userinfo')
+        .subdomain(providers.auth0.subdomain)
+        .auth(access_token)
+        .request()
+        .then(({ body }) => {
+          const username = body.username || body.nickname || body.name || body.email.split('@')[0];
+          const email = body.email || `${username.replace(/\s+/g, '.')}@strapi.io`;
+
+          return {
+            username,
+            email,
+          };
         });
-      break;
+    }
+    case 'cas': {
+      const cas = purest({ provider: 'cas' });
+
+      return cas
+        .get('oidc/profile')
+        .subdomain(providers.cas.subdomain)
+        .auth(access_token)
+        .request()
+        .then(({ body }) => {
+          // CAS attribute may be in body.attributes or "FLAT", depending on CAS config
+          const username = body.attributes
+            ? body.attributes.strapiusername || body.id || body.sub
+            : body.strapiusername || body.id || body.sub;
+          const email = body.attributes
+            ? body.attributes.strapiemail || body.attributes.email
+            : body.strapiemail || body.email;
+          if (!username || !email) {
+            strapi.log.warn(
+              'CAS Response Body did not contain required attributes: ' + JSON.stringify(body)
+            );
+          }
+          return {
+            username,
+            email,
+          };
+        });
     }
     default:
-      callback(new Error('Unknown provider.'));
-      break;
+      throw new Error('Unknown provider.');
   }
 };
