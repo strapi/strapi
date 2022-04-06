@@ -3,6 +3,20 @@
 const uploadService = require('../upload')({});
 
 describe('Upload service', () => {
+  beforeAll(() => {
+    global.strapi = {
+      plugins: {
+        upload: {
+          services: {
+            file: {
+              getLocation: () => '/a-location',
+            },
+          },
+        },
+      },
+    };
+  });
+
   describe('formatFileInfo', () => {
     test('Generates hash', async () => {
       const fileData = {

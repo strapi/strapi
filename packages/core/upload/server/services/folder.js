@@ -23,17 +23,17 @@ const joinBy = (joint, ...args) => {
 
 const generateUID = () => uuid();
 
-const setPathAndUID = async folder => {
+const setLocationAndUID = async folder => {
   const uid = generateUID();
-  let parentPath = '/';
+  let parentLocation = '/';
   if (folder.parent) {
     const parentFolder = await strapi.entityService.findOne(folderModel, folder.parent);
-    parentPath = parentFolder.path;
+    parentLocation = parentFolder.location;
   }
 
   return Object.assign(folder, {
     uid,
-    path: joinBy('/', parentPath, uid),
+    location: joinBy('/', parentLocation, uid),
   });
 };
 
@@ -61,5 +61,5 @@ const exists = async (params = {}) => {
 module.exports = {
   exists,
   deleteByIds,
-  setPathAndUID,
+  setLocationAndUID,
 };
