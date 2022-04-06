@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { useIntl } from 'react-intl';
 import {
   useAppInfos,
@@ -13,20 +13,39 @@ import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { Typography } from '@strapi/design-system/Typography';
 import { Stack } from '@strapi/design-system/Stack';
 import { Link } from '@strapi/design-system/Link';
+import { Button } from '@strapi/design-system/Button';
 import ExternalLink from '@strapi/icons/ExternalLink';
+import Check from '@strapi/icons/Check';
 import Form from './components/Form';
+import LogoAPI from './temp/LogoAPI';
+
+const API = new LogoAPI();
 
 const permissions = [{ action: 'admin::project-settings.update', subject: null }];
 
 const ApplicationInfosPage = () => {
+  const inputsRef = useRef();
   const { formatMessage } = useIntl();
   useFocusWhenNavigate();
   const appInfos = useAppInfos();
   const { shouldUpdateStrapi, latestStrapiReleaseTag, strapiVersion } = appInfos;
+  const [modifiedData, setModifiedData] = useState({ menuLogo: undefined });
 
   const currentPlan = appInfos.communityEdition
     ? 'app.components.UpgradePlanModal.text-ce'
     : 'app.components.UpgradePlanModal.text-ee';
+
+  const handleSubmit = () => {
+    const data = inputsRef.current.getValues();
+    API.setProjectSettings(data);
+  };
+
+  useEffect(() => {
+    const projectSettingsStored = API.getProjectSettings();
+    const { menuLogo } = projectSettingsStored;
+
+    setModifiedData(prev => ({ ...prev, menuLogo }));
+  }, []);
 
   return (
     <Layout>
@@ -38,6 +57,11 @@ const ApplicationInfosPage = () => {
             id: 'Settings.application.description',
             defaultMessage: 'Administration panel’s global information',
           })}
+          primaryAction={
+            <Button onClick={handleSubmit} startIcon={<Check />}>
+              Save
+            </Button>
+          }
         />
         <ContentLayout>
           <Stack spacing={6}>
@@ -135,7 +159,7 @@ const ApplicationInfosPage = () => {
               </Stack>
             </Box>
             <CheckPermissions permissions={permissions}>
-              <Form />
+              <Form ref={inputsRef} projectSettingsStored={modifiedData} />
             </CheckPermissions>
           </Stack>
         </ContentLayout>

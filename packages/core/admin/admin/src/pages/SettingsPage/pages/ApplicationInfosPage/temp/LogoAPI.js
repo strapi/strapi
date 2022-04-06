@@ -5,15 +5,23 @@
 
 class LogoAPI {
   constructor() {
-    // this.menuLogo = {
-    //   url: CatLogo,
-    //   name: 'cat-logo.png',
+    // this.projectSettings = {
+    //   menuLogo: {
+    //     url: CatLogo,
+    //     name: 'cat-logo.png',
+    //   }
     // };
-    this.menuLogo = null;
+    this.projectSettings = {
+      menuLogo: null,
+    };
   }
 
-  getLogo = () => {
-    return this.menuLogo;
+  getProjectSettings = () => {
+    return this.projectSettings;
+  };
+
+  setProjectSettings = data => {
+    console.log(data);
   };
 }
 

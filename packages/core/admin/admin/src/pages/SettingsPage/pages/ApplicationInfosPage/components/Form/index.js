@@ -1,23 +1,21 @@
-import React, { useReducer, useEffect } from 'react';
+import React, { useReducer, useEffect, forwardRef, useImperativeHandle } from 'react';
+import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { Box } from '@strapi/design-system/Box';
 import { Typography } from '@strapi/design-system/Typography';
 import LogoInput from '../LogoInput';
 import { useConfigurations } from '../../../../../../hooks';
-import LogoAPI from '../../temp/LogoAPI';
 import reducer, { initialState } from './reducer';
 
-const API = new LogoAPI();
-
-const Form = () => {
+const Form = forwardRef(({ projectSettingsStored }, ref) => {
   const { formatMessage } = useIntl();
   const {
     logos: { menu },
   } = useConfigurations();
-  const [{ customMenuLogo }, dispatch] = useReducer(reducer, initialState);
+  const [{ menuLogo }, dispatch] = useReducer(reducer, initialState);
 
-  const onChangeMenuLogo = asset => {
+  const handleChangeMenuLogo = asset => {
     dispatch({
       type: 'SET_CUSTOM_MENU_LOGO',
       value: asset,
@@ -27,12 +25,16 @@ const Form = () => {
   // Temp class to mimic crud API
   // to remove once back end routes are ready
   useEffect(() => {
-    const storedLogo = API.getLogo();
+    const { menuLogo } = projectSettingsStored;
 
-    if (storedLogo) {
-      onChangeMenuLogo(storedLogo);
+    if (menuLogo) {
+      handleChangeMenuLogo(menuLogo);
     }
-  }, []);
+  }, [projectSettingsStored]);
+
+  useImperativeHandle(ref, () => ({
+    getValues: () => ({ menuLogo }),
+  }));
 
   return (
     <Box
@@ -53,14 +55,27 @@ const Form = () => {
       <Grid paddingTop={5}>
         <GridItem col={6} s={12}>
           <LogoInput
-            onChangeLogo={onChangeMenuLogo}
-            customLogo={customMenuLogo}
+            onChangeLogo={handleChangeMenuLogo}
+            customLogo={menuLogo}
             defaultLogo={menu.default}
           />
         </GridItem>
       </Grid>
     </Box>
   );
+});
+
+Form.defaultProps = {
+  projectSettingsStored: null,
+};
+
+Form.propTypes = {
+  projectSettingsStored: PropTypes.shape({
+    menuLogo: PropTypes.shape({
+      url: PropTypes.string,
+      name: PropTypes.string,
+    }),
+  }),
 };
 
 export default Form;

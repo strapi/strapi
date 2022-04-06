@@ -10,7 +10,7 @@ import { SIZE, DIMENSION } from '../../utils/constants';
 
 const LogoInput = ({ customLogo, defaultLogo, onChangeLogo }) => {
   const { formatMessage } = useIntl();
-  const [isDialogOpen, setIsDialogOpen] = useState(true);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   return (
     <>
