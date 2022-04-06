@@ -1,12 +1,7 @@
 import React, { useReducer, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import {
-  ModalLayout,
-  ModalBody,
-  ModalHeader,
-  ModalFooter,
-} from '@strapi/design-system/ModalLayout';
+import { ModalLayout, ModalHeader } from '@strapi/design-system/ModalLayout';
 import { Typography } from '@strapi/design-system/Typography';
 import reducer, { initialState } from './reducer';
 import stepper from './stepper';
@@ -50,10 +45,7 @@ const LogoModalStepper = ({ initialStep, isOpen, onClose }) => {
           {formatMessage(modalTitle)}
         </Typography>
       </ModalHeader>
-      <ModalBody>
-        <Component setLocalImage={setLocalImage} goTo={goTo} next={next} />
-      </ModalBody>
-      <ModalFooter />
+      <Component setLocalImage={setLocalImage} goTo={goTo} next={next} onClose={onClose} />
     </ModalLayout>
   );
 };

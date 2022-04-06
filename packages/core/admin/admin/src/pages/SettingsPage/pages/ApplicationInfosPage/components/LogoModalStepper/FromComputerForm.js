@@ -7,6 +7,7 @@ import { Stack } from '@strapi/design-system/Stack';
 import { Flex } from '@strapi/design-system/Flex';
 import { Icon } from '@strapi/design-system/Icon';
 import { Typography } from '@strapi/design-system/Typography';
+import { ModalFooter } from '@strapi/design-system/ModalLayout';
 import { Button } from '@strapi/design-system/Button';
 import { Field, FieldError, FieldInput } from '@strapi/design-system/Field';
 import PicturePlus from '@strapi/icons/PicturePlus';
@@ -22,7 +23,7 @@ const FileInput = styled(FieldInput)`
   right: 0;
 `;
 
-const FromComputerForm = ({ setLocalImage, goTo, next }) => {
+const FromComputerForm = ({ setLocalImage, goTo, next, onClose }) => {
   const { formatMessage } = useIntl();
   const [dragOver, setDragOver] = useState(false);
   const [fileError, setFileError] = useState(undefined);
@@ -70,81 +71,93 @@ const FromComputerForm = ({ setLocalImage, goTo, next }) => {
   };
 
   return (
-    <form>
-      <Box paddingLeft={2} paddingRight={2} paddingTop={6} paddingBottom={6}>
-        <Field name="logo-upload" error={fileError}>
-          <label htmlFor="logo-upload">
-            <Stack spacing={2}>
-              <Flex
-                paddingTop={9}
-                paddingBottom={7}
-                hasRadius
-                justifyContent="center"
-                direction="column"
-                background={dragOver ? 'primary100' : 'neutral100'}
-                borderColor={getBorderColor()}
-                borderStyle="dashed"
-                borderWidth="1px"
-                position="relative"
-                onDragEnter={handleDragEnter}
-                onDragLeave={handleDragLeave}
-              >
-                <Icon
-                  color="primary600"
-                  width={`${60 / 16}rem`}
-                  height={`${60 / 16}rem`}
-                  as={PicturePlus}
-                  aria-hidden
-                />
+    <>
+      <form>
+        <Box paddingLeft={8} paddingRight={8} paddingTop={6} paddingBottom={6}>
+          <Field name="logo-upload" error={fileError}>
+            <label htmlFor="logo-upload">
+              <Stack spacing={2}>
+                <Flex
+                  paddingTop={9}
+                  paddingBottom={7}
+                  hasRadius
+                  justifyContent="center"
+                  direction="column"
+                  background={dragOver ? 'primary100' : 'neutral100'}
+                  borderColor={getBorderColor()}
+                  borderStyle="dashed"
+                  borderWidth="1px"
+                  position="relative"
+                  onDragEnter={handleDragEnter}
+                  onDragLeave={handleDragLeave}
+                >
+                  <Icon
+                    color="primary600"
+                    width={`${60 / 16}rem`}
+                    height={`${60 / 16}rem`}
+                    as={PicturePlus}
+                    aria-hidden
+                  />
 
-                <Box paddingTop={3} paddingBottom={5}>
-                  <Typography variant="delta" as="span">
+                  <Box paddingTop={3} paddingBottom={5}>
+                    <Typography variant="delta" as="span">
+                      {formatMessage({
+                        id: 'Settings.application.customization.modal.upload.drag-drop',
+                        defaultMessage: 'Drag and Drop here or',
+                      })}
+                    </Typography>
+                  </Box>
+
+                  <FileInput
+                    accept={ACCEPTED_FORMAT}
+                    cursor="pointer"
+                    as="input"
+                    type="file"
+                    name="files"
+                    tabIndex={-1}
+                    zIndex={1}
+                    onChange={handleChange}
+                    ref={inputRef}
+                    id="logo-upload"
+                  />
+
+                  <Button type="button" onClick={handleClick}>
                     {formatMessage({
-                      id: 'Settings.application.customization.modal.upload.drag-drop',
-                      defaultMessage: 'Drag and Drop here or',
+                      id: 'Settings.application.customization.modal.upload.cta.browse',
+                      defaultMessage: 'Browse files',
                     })}
-                  </Typography>
-                </Box>
+                  </Button>
 
-                <FileInput
-                  accept={ACCEPTED_FORMAT}
-                  cursor="pointer"
-                  as="input"
-                  type="file"
-                  name="files"
-                  tabIndex={-1}
-                  zIndex={1}
-                  onChange={handleChange}
-                  ref={inputRef}
-                  id="logo-upload"
-                />
-
-                <Button type="button" onClick={handleClick}>
-                  {formatMessage({
-                    id: 'Settings.application.customization.modal.upload.cta.browse',
-                    defaultMessage: 'Browse files',
-                  })}
-                </Button>
-
-                <Box paddingTop={6}>
-                  <Typography variant="pi" textColor="neutral600">
-                    {formatMessage(
-                      {
-                        id: 'Settings.application.customization.modal.upload.file-validation',
-                        defaultMessage:
-                          'Max dimension: {dimension}*{dimension}, Max size: {size}KB',
-                      },
-                      { size: SIZE, dimension: DIMENSION }
-                    )}
-                  </Typography>
-                </Box>
-              </Flex>
-              <FieldError />
-            </Stack>
-          </label>
-        </Field>
-      </Box>
-    </form>
+                  <Box paddingTop={6}>
+                    <Typography variant="pi" textColor="neutral600">
+                      {formatMessage(
+                        {
+                          id: 'Settings.application.customization.modal.upload.file-validation',
+                          defaultMessage:
+                            'Max dimension: {dimension}*{dimension}, Max size: {size}KB',
+                        },
+                        { size: SIZE, dimension: DIMENSION }
+                      )}
+                    </Typography>
+                  </Box>
+                </Flex>
+                <FieldError />
+              </Stack>
+            </label>
+          </Field>
+        </Box>
+      </form>
+      <ModalFooter
+        startActions={
+          <Button onClick={onClose} variant="tertiary">
+            {formatMessage({
+              id: 'Settings.application.customization.modal.cancel',
+              defaultMessage: 'Cancel',
+            })}
+          </Button>
+        }
+      />
+    </>
   );
 };
 
@@ -153,9 +166,10 @@ FromComputerForm.defaultProps = {
 };
 
 FromComputerForm.propTypes = {
-  setLocalImage: PropTypes.func.isRequired,
   goTo: PropTypes.func.isRequired,
   next: PropTypes.string,
+  onClose: PropTypes.func.isRequired,
+  setLocalImage: PropTypes.func.isRequired,
 };
 
 export default FromComputerForm;

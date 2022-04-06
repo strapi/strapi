@@ -104,6 +104,7 @@
   "Settings.application.customization.carousel.change-action": "Change logo",
   "Settings.application.customization.carousel-slide.label": "Logo slide",
   "Settings.application.customization.carousel-hint": "Change the admin panel logo (Max dimension: {dimension}*{dimension}, Max file size: {size}KB)",
+  "Settings.application.customization.modal.cancel": "Cancel",
   "Settings.application.customization.modal.upload": "Upload logo",
   "Settings.application.customization.modal.tab.label": "How do you want to upload your assets?",
   "Settings.application.customization.modal.upload.from-computer": "From computer",

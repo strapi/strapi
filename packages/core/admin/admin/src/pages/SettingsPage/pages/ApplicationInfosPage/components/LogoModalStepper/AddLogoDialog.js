@@ -6,7 +6,7 @@ import { Box } from '@strapi/design-system/Box';
 import { Divider } from '@strapi/design-system/Divider';
 import FromComputerForm from './FromComputerForm';
 
-const AddLogoDialog = ({ setLocalImage, goTo, next }) => {
+const AddLogoDialog = ({ setLocalImage, goTo, next, onClose }) => {
   const { formatMessage } = useIntl();
 
   return (
@@ -17,7 +17,7 @@ const AddLogoDialog = ({ setLocalImage, goTo, next }) => {
       })}
       variant="simple"
     >
-      <Box paddingLeft={2} paddingRight={2}>
+      <Box paddingLeft={8} paddingRight={8}>
         <Tabs>
           <Tab>
             {formatMessage({
@@ -37,7 +37,12 @@ const AddLogoDialog = ({ setLocalImage, goTo, next }) => {
       </Box>
       <TabPanels>
         <TabPanel>
-          <FromComputerForm setLocalImage={setLocalImage} goTo={goTo} next={next} />
+          <FromComputerForm
+            onClose={onClose}
+            setLocalImage={setLocalImage}
+            goTo={goTo}
+            next={next}
+          />
         </TabPanel>
         <TabPanel>TO DO</TabPanel>
       </TabPanels>
@@ -50,9 +55,10 @@ AddLogoDialog.defaultProps = {
 };
 
 AddLogoDialog.propTypes = {
-  setLocalImage: PropTypes.func.isRequired,
   goTo: PropTypes.func.isRequired,
   next: PropTypes.string,
+  onClose: PropTypes.func.isRequired,
+  setLocalImage: PropTypes.func.isRequired,
 };
 
 export default AddLogoDialog;
