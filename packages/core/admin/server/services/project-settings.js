@@ -4,70 +4,67 @@ const fs = require('fs');
 
 const PROJECT_SETTINGS_FILE_INPUTS = ['menuLogo'];
 
-const getFormatedFilesData = async files => {
+const parseFilesData = async files => {
   const formatedFilesData = {};
 
-  const results = PROJECT_SETTINGS_FILE_INPUTS.map(async inputName => {
-    if (!files[inputName]) {
-      return;
-    }
+  await Promise.all(
+    PROJECT_SETTINGS_FILE_INPUTS.map(async inputName => {
+      // Do not parse empty file inputs
+      if (!files[inputName]) {
+        return;
+      }
 
-    formatedFilesData[inputName] = {
-      path: files[inputName].path,
+      const getStream = () => fs.createReadStream(files[inputName].path);
 
-      // Get file info
-      ...strapi
-        .plugin('upload')
-        .service('upload')
-        .formatFileInfo({
-          filename: files[inputName].name,
-          type: files[inputName].type,
-          size: files[inputName].size,
-        }),
+      formatedFilesData[inputName] = {
+        path: files[inputName].path,
+        stream: getStream(),
+      };
 
-      // Get image file dimensions
-      ...(await strapi
-        .plugin('upload')
-        .service('image-manipulation')
-        .getDimensions({ getStream: () => fs.createReadStream(files[inputName].path) })),
-    };
-  });
+      // Add formated data for the upload provider
+      Object.assign(
+        formatedFilesData[inputName],
+        strapi
+          .plugin('upload')
+          .service('upload')
+          .formatFileInfo({
+            filename: files[inputName].name,
+            type: files[inputName].type,
+            size: files[inputName].size,
+          })
+      );
 
-  await Promise.all(results);
-
-  return formatedFilesData;
-};
-
-const uploadFiles = async files => {
-  const formatedFilesData = getFormatedFilesData(files);
-
-  Object.values(formatedFilesData).map(data =>
-    // Do not await to upload asynchronously
-    strapi.plugin('upload').provider.uploadStream({
-      ...data,
-      stream: fs.createReadStream(data.path),
+      // Add image dimensions
+      Object.assign(
+        formatedFilesData[inputName],
+        await strapi
+          .plugin('upload')
+          .service('image-manipulation')
+          .getDimensions({ getStream })
+      );
     })
   );
 
   return formatedFilesData;
 };
 
-const updateProjectSettings = async (body, uploadedFiles) => {
-  const store = await strapi.store({ type: 'core', name: 'admin' });
+const uploadFiles = async files => {
+  return Promise.all(Object.values(files).map(strapi.plugin('upload').provider.uploadStream));
+};
 
+const updateProjectSettings = async (body, files) => {
+  const store = await strapi.store({ type: 'core', name: 'admin' });
   const previousSettings = await store.get({ key: 'project-settings' });
 
   const newSettings = {
     ...body,
-    ...uploadedFiles,
+    ...files,
   };
 
   PROJECT_SETTINGS_FILE_INPUTS.forEach(inputName => {
     if (newSettings[inputName] !== undefined && !(typeof newSettings[inputName] === 'object')) {
       // If the user input exists but is not a formdata "file" remove the file
       newSettings[inputName] = null;
-
-      // TODO unlink the file
     } else if (!newSettings[inputName]) {
       // If the user input is undefined reuse previous setting (do not update field)
       newSettings[inputName] = previousSettings[inputName];
@@ -82,11 +79,14 @@ const updateProjectSettings = async (body, uploadedFiles) => {
     }
   });
 
+  // No await to proceed asynchronously
+  uploadFiles(files);
+
   return store.set({ key: 'project-settings', value: { ...previousSettings, ...newSettings } });
 };
 
 module.exports = {
-  getFormatedFilesData,
+  parseFilesData,
   uploadFiles,
   updateProjectSettings,
 };

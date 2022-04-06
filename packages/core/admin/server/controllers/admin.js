@@ -58,13 +58,12 @@ module.exports = {
     await validateUpdateProjectSettings(body);
     await validateUpdateProjectSettingsFiles(files);
 
-    const formatedFiles = await projectSettingsService.getFormatedFilesData(files);
+    const formatedFiles = await projectSettingsService.parseFilesData(files);
     await validateUpdateProjectSettingsImagesDimensions(formatedFiles);
 
-    const uploadedFiles = await projectSettingsService.uploadFiles(files);
     const updatedProjectSettings = await projectSettingsService.updateProjectSettings(
       body,
-      uploadedFiles
+      formatedFiles
     );
 
     console.log(updatedProjectSettings);
