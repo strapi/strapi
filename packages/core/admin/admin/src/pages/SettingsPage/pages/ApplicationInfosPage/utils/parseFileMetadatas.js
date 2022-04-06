@@ -1,13 +1,14 @@
 import { DIMENSION, SIZE, ACCEPTED_FORMAT } from './constants';
 
 const FILE_FORMAT_ERROR_MESSAGE = {
-  id: 'app',
+  id: 'Settings.application.customization.modal.upload.error-format',
   defaultMessage: 'Wrong format uploaded (accepted formats only: jpeg, jpg, png, svg).',
 };
 
 const FILE_SIZING_ERROR_MESSAGE = {
-  id: 'app',
-  defaultMessage: 'Wrong sizing uploaded (max dimension: 750*750, max file size: TBC)',
+  id: 'Settings.application.customization.modal.upload.error-size',
+  defaultMessage:
+    'The file uploaded is too large (max dimension: {dimension}*{dimension}, max file size: {size}KB)',
 };
 
 const getFileDimensions = file => {

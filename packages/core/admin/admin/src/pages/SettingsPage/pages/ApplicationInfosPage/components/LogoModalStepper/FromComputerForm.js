@@ -3,22 +3,29 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 import { Box } from '@strapi/design-system/Box';
+import { Stack } from '@strapi/design-system/Stack';
 import { Flex } from '@strapi/design-system/Flex';
 import { Icon } from '@strapi/design-system/Icon';
 import { Typography } from '@strapi/design-system/Typography';
 import { Button } from '@strapi/design-system/Button';
+import { Field, FieldError, FieldInput } from '@strapi/design-system/Field';
 import PicturePlus from '@strapi/icons/PicturePlus';
 import { parseFileMetadatas } from '../../utils/parseFileMetadatas';
-import { ACCEPTED_FORMAT } from '../../utils/constants';
+import { ACCEPTED_FORMAT, SIZE, DIMENSION } from '../../utils/constants';
 
-const FileInput = styled(Box)`
+const FileInput = styled(FieldInput)`
   opacity: 0;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
 `;
 
 const FromComputerForm = ({ setLocalImage, goTo, next }) => {
   const { formatMessage } = useIntl();
   const [dragOver, setDragOver] = useState(false);
-  const [fileError, setFileError] = useState(false);
+  const [fileError, setFileError] = useState(undefined);
   const inputRef = useRef(null);
 
   const handleDragEnter = () => setDragOver(true);
@@ -43,7 +50,8 @@ const FromComputerForm = ({ setLocalImage, goTo, next }) => {
       goTo(next);
     } catch (err) {
       if (err.displayMessage) {
-        setFileError(formatMessage(err.displayMessage));
+        setFileError(formatMessage(err.displayMessage, { size: SIZE, dimension: DIMENSION }));
+        inputRef.current.focus();
       } else {
         throw err;
       }
@@ -64,80 +72,77 @@ const FromComputerForm = ({ setLocalImage, goTo, next }) => {
   return (
     <form>
       <Box paddingLeft={2} paddingRight={2} paddingTop={6} paddingBottom={6}>
-        <label htmlFor="logo-upload">
-          <Box
-            paddingTop={9}
-            paddingBottom={7}
-            hasRadius
-            justifyContent="center"
-            background={dragOver ? 'primary100' : 'neutral100'}
-            borderColor={getBorderColor()}
-            borderStyle="dashed"
-            borderWidth="1px"
-            position="relative"
-            onDragEnter={handleDragEnter}
-            onDragLeave={handleDragLeave}
-          >
-            <Flex justifyContent="center" direction="column">
-              <Icon
-                color="primary600"
-                width={`${60 / 16}rem`}
-                height={`${60 / 16}rem`}
-                as={PicturePlus}
-                aria-hidden
-              />
+        <Field name="logo-upload" error={fileError}>
+          <label htmlFor="logo-upload">
+            <Stack spacing={2}>
+              <Flex
+                paddingTop={9}
+                paddingBottom={7}
+                hasRadius
+                justifyContent="center"
+                direction="column"
+                background={dragOver ? 'primary100' : 'neutral100'}
+                borderColor={getBorderColor()}
+                borderStyle="dashed"
+                borderWidth="1px"
+                position="relative"
+                onDragEnter={handleDragEnter}
+                onDragLeave={handleDragLeave}
+              >
+                <Icon
+                  color="primary600"
+                  width={`${60 / 16}rem`}
+                  height={`${60 / 16}rem`}
+                  as={PicturePlus}
+                  aria-hidden
+                />
 
-              <Box paddingTop={3} paddingBottom={5}>
-                <Typography variant="delta" as="span">
+                <Box paddingTop={3} paddingBottom={5}>
+                  <Typography variant="delta" as="span">
+                    {formatMessage({
+                      id: 'Settings.application.customization.modal.upload.drag-drop',
+                      defaultMessage: 'Drag and Drop here or',
+                    })}
+                  </Typography>
+                </Box>
+
+                <FileInput
+                  accept={ACCEPTED_FORMAT}
+                  cursor="pointer"
+                  as="input"
+                  type="file"
+                  name="files"
+                  tabIndex={-1}
+                  zIndex={1}
+                  onChange={handleChange}
+                  ref={inputRef}
+                  id="logo-upload"
+                />
+
+                <Button type="button" onClick={handleClick}>
                   {formatMessage({
-                    id: 'Settings.application.customization.modal.upload.drag-drop',
-                    defaultMessage: 'Drag and Drop here or',
+                    id: 'Settings.application.customization.modal.upload.cta.browse',
+                    defaultMessage: 'Browse files',
                   })}
-                </Typography>
-              </Box>
+                </Button>
 
-              <FileInput
-                accept={ACCEPTED_FORMAT}
-                cursor="pointer"
-                as="input"
-                position="absolute"
-                left={0}
-                right={0}
-                bottom={0}
-                top={0}
-                width="100%"
-                type="file"
-                name="files"
-                tabIndex={-1}
-                zIndex={1}
-                onChange={handleChange}
-                ref={inputRef}
-                id="logo-upload"
-              />
-
-              <Button type="button" onClick={handleClick}>
-                {formatMessage({
-                  id: 'Settings.application.customization.modal.upload.cta.browse',
-                  defaultMessage: 'Browse files',
-                })}
-              </Button>
-
-              <Box paddingTop={6}>
-                <Typography variant="pi" textColor="neutral600">
-                  {/* Add translation once we know more about max size */}
-                  Max dimension: 750*750, Max size: TBC
-                </Typography>
-              </Box>
-            </Flex>
-          </Box>
-          {fileError && (
-            <Box paddingTop={2}>
-              <Typography textColor="danger600" variant="pi" as="p">
-                {fileError}
-              </Typography>
-            </Box>
-          )}
-        </label>
+                <Box paddingTop={6}>
+                  <Typography variant="pi" textColor="neutral600">
+                    {formatMessage(
+                      {
+                        id: 'Settings.application.customization.modal.upload.file-validation',
+                        defaultMessage:
+                          'Max dimension: {dimension}*{dimension}, Max size: {size}KB',
+                      },
+                      { size: SIZE, dimension: DIMENSION }
+                    )}
+                  </Typography>
+                </Box>
+              </Flex>
+              <FieldError />
+            </Stack>
+          </label>
+        </Field>
       </Box>
     </form>
   );

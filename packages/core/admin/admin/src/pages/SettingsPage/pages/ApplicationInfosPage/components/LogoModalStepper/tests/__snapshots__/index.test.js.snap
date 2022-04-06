@@ -214,7 +214,7 @@ exports[`ApplicationsInfosPage || LogoModalStepper from computer should render u
   line-height: 1.43;
 }
 
-.c27 {
+.c28 {
   color: #32324d;
   font-weight: 500;
   font-size: 1rem;
@@ -271,32 +271,9 @@ exports[`ApplicationsInfosPage || LogoModalStepper from computer should render u
   padding-left: 8px;
 }
 
-.c22 {
-  background: #f6f6f9;
-  padding-top: 48px;
-  padding-bottom: 32px;
-  border-radius: 4px;
-  border-style: dashed;
-  border-width: 1px;
-  border-color: #c0c0cf;
-  position: relative;
-}
-
-.c26 {
+.c27 {
   padding-top: 12px;
   padding-bottom: 20px;
-}
-
-.c28 {
-  position: absolute;
-  left: 0px;
-  right: 0px;
-  top: 0px;
-  bottom: 0px;
-  z-index: 1;
-  cursor: pointer;
-  width: 100%;
-  cursor: pointer;
 }
 
 .c34 {
@@ -313,7 +290,37 @@ exports[`ApplicationsInfosPage || LogoModalStepper from computer should render u
   margin: 0;
 }
 
+.c22 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+}
+
+.c22 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c22 > * + * {
+  margin-top: 8px;
+}
+
 .c23 {
+  background: #f6f6f9;
+  padding-top: 48px;
+  padding-bottom: 32px;
+  border-radius: 4px;
+  border-style: dashed;
+  border-width: 1px;
+  border-color: #c0c0cf;
+  position: relative;
+}
+
+.c24 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -331,13 +338,13 @@ exports[`ApplicationsInfosPage || LogoModalStepper from computer should render u
   align-items: center;
 }
 
-.c24 {
+.c25 {
   color: #4945ff;
   width: 3.75rem;
   height: 3.75rem;
 }
 
-.c25 path {
+.c26 path {
   fill: #4945ff;
 }
 
@@ -418,7 +425,7 @@ exports[`ApplicationsInfosPage || LogoModalStepper from computer should render u
   background: #4945ff;
 }
 
-.c31 .sc-fmWebE {
+.c31 .sc-eBTqsU {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -478,6 +485,11 @@ exports[`ApplicationsInfosPage || LogoModalStepper from computer should render u
 
 .c29 {
   opacity: 0;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
 }
 
 <body
@@ -619,75 +631,77 @@ exports[`ApplicationsInfosPage || LogoModalStepper from computer should render u
                     <div
                       class="c21"
                     >
-                      <label
-                        for="logo-upload"
-                      >
-                        <div
-                          class="c22"
+                      <div>
+                        <label
+                          for="logo-upload"
                         >
                           <div
-                            class="c23"
+                            class="c22"
+                            spacing="2"
                           >
-                            <svg
-                              aria-hidden="true"
-                              class="c24 c25"
-                              fill="none"
-                              height="3.75rem"
-                              viewBox="0 0 24 20"
-                              width="3.75rem"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M21.569 2.398H7.829v1.586h13.74c.47 0 .826.5.826 1.094v9.853l-2.791-3.17a2.13 2.13 0 00-.74-.55 2.214 2.214 0 00-.912-.196 2.215 2.215 0 00-.912.191 2.131 2.131 0 00-.74.546l-2.93 3.385-2.973-3.36a2.147 2.147 0 00-.741-.545 2.228 2.228 0 00-1.824.007c-.286.13-.538.319-.739.553l-2.931 3.432V7.653H2.51v9.894c.023.153.06.304.108.452v.127l.041.095c.057.142.126.28.207.412l.099.15c.074.107.157.207.247.302l.124.119c.13.118.275.222.43.309h.024c.36.214.775.327 1.198.325h16.515c.36-.004.716-.085 1.039-.24.323-.153.606-.375.827-.648a2.78 2.78 0 00.504-.888c.066-.217.108-.44.124-.666V5.078a2.497 2.497 0 00-.652-1.81 2.706 2.706 0 00-1.776-.87z"
-                                fill="#32324D"
-                              />
-                              <path
-                                d="M12.552 9.199c.912 0 1.651-.71 1.651-1.585 0-.876-.74-1.586-1.651-1.586-.912 0-1.652.71-1.652 1.586 0 .875.74 1.585 1.652 1.585zM3.303 6.408h.826V3.997h2.477v-.793-.793H4.129V0h-.826c-.219 0-.85.002-.826 0v2.411H0v1.586h2.477v2.41h.826z"
-                                fill="#32324D"
-                              />
-                            </svg>
                             <div
-                              class="c26"
+                              class="c23 c24"
                             >
-                              <span
+                              <svg
+                                aria-hidden="true"
+                                class="c25 c26"
+                                fill="none"
+                                height="3.75rem"
+                                viewBox="0 0 24 20"
+                                width="3.75rem"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M21.569 2.398H7.829v1.586h13.74c.47 0 .826.5.826 1.094v9.853l-2.791-3.17a2.13 2.13 0 00-.74-.55 2.214 2.214 0 00-.912-.196 2.215 2.215 0 00-.912.191 2.131 2.131 0 00-.74.546l-2.93 3.385-2.973-3.36a2.147 2.147 0 00-.741-.545 2.228 2.228 0 00-1.824.007c-.286.13-.538.319-.739.553l-2.931 3.432V7.653H2.51v9.894c.023.153.06.304.108.452v.127l.041.095c.057.142.126.28.207.412l.099.15c.074.107.157.207.247.302l.124.119c.13.118.275.222.43.309h.024c.36.214.775.327 1.198.325h16.515c.36-.004.716-.085 1.039-.24.323-.153.606-.375.827-.648a2.78 2.78 0 00.504-.888c.066-.217.108-.44.124-.666V5.078a2.497 2.497 0 00-.652-1.81 2.706 2.706 0 00-1.776-.87z"
+                                  fill="#32324D"
+                                />
+                                <path
+                                  d="M12.552 9.199c.912 0 1.651-.71 1.651-1.585 0-.876-.74-1.586-1.651-1.586-.912 0-1.652.71-1.652 1.586 0 .875.74 1.585 1.652 1.585zM3.303 6.408h.826V3.997h2.477v-.793-.793H4.129V0h-.826c-.219 0-.85.002-.826 0v2.411H0v1.586h2.477v2.41h.826z"
+                                  fill="#32324D"
+                                />
+                              </svg>
+                              <div
                                 class="c27"
                               >
-                                Drag and Drop here or
-                              </span>
-                            </div>
-                            <input
-                              accept="image/jpeg,image/png,image/svg+xml"
-                              class="c28 c29"
-                              cursor="pointer"
-                              id="logo-upload"
-                              name="files"
-                              tabindex="-1"
-                              type="file"
-                              width="100%"
-                            />
-                            <button
-                              aria-disabled="false"
-                              class="c30 c31"
-                              type="button"
-                            >
-                              <span
-                                class="c32 c33"
+                                <span
+                                  class="c28"
+                                >
+                                  Drag and Drop here or
+                                </span>
+                              </div>
+                              <input
+                                accept="image/jpeg,image/png,image/svg+xml"
+                                class="c29"
+                                cursor="pointer"
+                                id="logo-upload"
+                                name="files"
+                                tabindex="-1"
+                                type="file"
+                              />
+                              <button
+                                aria-disabled="false"
+                                class="c30 c31"
+                                type="button"
                               >
-                                Browse files
-                              </span>
-                            </button>
-                            <div
-                              class="c34"
-                            >
-                              <span
-                                class="c35"
+                                <span
+                                  class="c32 c33"
+                                >
+                                  Browse files
+                                </span>
+                              </button>
+                              <div
+                                class="c34"
                               >
-                                Max dimension: 750*750, Max size: TBC
-                              </span>
+                                <span
+                                  class="c35"
+                                >
+                                  Max dimension: 750*750, Max size: 100KB
+                                </span>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </label>
+                        </label>
+                      </div>
                     </div>
                   </form>
                 </div>

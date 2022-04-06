@@ -6,10 +6,11 @@ import { IconButton } from '@strapi/design-system/IconButton';
 import { Box } from '@strapi/design-system/Box';
 import Plus from '@strapi/icons/Plus';
 import LogoModalStepper from '../LogoModalStepper';
+import { SIZE, DIMENSION } from '../../utils/constants';
 
 const LogoInput = ({ customLogo, defaultLogo }) => {
   const { formatMessage } = useIntl();
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(true);
 
   return (
     <>
@@ -19,7 +20,14 @@ const LogoInput = ({ customLogo, defaultLogo }) => {
           defaultMessage: 'Logo',
         })}
         selectedSlide={0}
-        hint="Change the admin panel logo (Max dimension: 750*750, Max file size: TBC)"
+        hint={formatMessage(
+          {
+            id: 'Settings.application.customization.carousel-hint',
+            defaultMessage:
+              'Change the admin panel logo (Max dimension: {dimension}*{dimension}, Max file size: {size}KB)',
+          },
+          { size: SIZE, dimension: DIMENSION }
+        )}
         previousLabel="Previous slide"
         nextLabel="Next slide"
         onNext={() => {}}

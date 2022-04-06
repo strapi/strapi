@@ -70,7 +70,9 @@ describe('ApplicationsInfosPage || LogoModalStepper', () => {
 
       await waitFor(() =>
         expect(
-          screen.getByText('Wrong sizing uploaded (max dimension: 750*750, max file size: TBC)')
+          screen.getByText(
+            'The file uploaded is too large (max dimension: 750*750, max file size: 100KB)'
+          )
         ).toBeInTheDocument()
       );
     });
@@ -89,7 +91,9 @@ describe('ApplicationsInfosPage || LogoModalStepper', () => {
 
       await waitFor(() =>
         expect(
-          screen.getByText('Wrong sizing uploaded (max dimension: 750*750, max file size: TBC)')
+          screen.getByText(
+            'The file uploaded is too large (max dimension: 750*750, max file size: 100KB)'
+          )
         ).toBeInTheDocument()
       );
     });
