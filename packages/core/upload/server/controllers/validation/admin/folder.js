@@ -1,7 +1,7 @@
 'use strict';
 
 const { yup, validateYupSchema } = require('@strapi/utils');
-const { getService } = require('../../utils');
+const { getService } = require('../../../utils');
 
 const NO_SLASH_REGEX = /^[^/]+$/;
 const NO_SPACES_AROUND = /^(?! ).+(?<! )$/;

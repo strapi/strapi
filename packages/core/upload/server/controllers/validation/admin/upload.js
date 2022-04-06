@@ -2,7 +2,7 @@
 
 const { yup, validateYupSchema } = require('@strapi/utils');
 const { isNil } = require('lodash/fp');
-const { getService } = require('../../utils');
+const { getService } = require('../../../utils');
 
 const fileInfoSchema = yup.object({
   name: yup.string().nullable(),

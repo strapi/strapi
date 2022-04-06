@@ -2,7 +2,7 @@
 
 const { setCreatorFields, pipeAsync } = require('@strapi/utils');
 const { getService } = require('../utils');
-const { validateCreateFolder, validateDeleteManyFolders } = require('./validation/folder');
+const { validateCreateFolder, validateDeleteManyFolders } = require('./validation/admin/folder');
 
 const folderModel = 'plugin::upload.folder';
 
