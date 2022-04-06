@@ -9,6 +9,10 @@ class LogoAPI {
     //   menuLogo: {
     //     url: CatLogo,
     //     name: 'cat-logo.png',
+    //     width: 100,
+    //     height: 100,
+    //     ext: "png",
+    //     size: 123482,
     //   }
     // };
     this.projectSettings = {

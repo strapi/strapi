@@ -69,6 +69,7 @@ const LogoInput = ({ customLogo, defaultLogo, onChangeLogo }) => {
         initialStep={customLogo ? 'pending' : 'upload'}
         isOpen={isDialogOpen}
         onChangeLogo={onChangeLogo}
+        customLogo={customLogo}
       />
     </>
   );
