@@ -7,11 +7,11 @@ import { components } from 'react-select';
 
 import { Flex } from '@strapi/design-system/Flex';
 import { Icon } from '@strapi/design-system/Icon';
+import { ReactSelect as Select, pxToRem } from '@strapi/helper-plugin';
 import { Typography } from '@strapi/design-system/Typography';
 import ChevronUp from '@strapi/icons/ChevronUp';
 import ChevronDown from '@strapi/icons/ChevronDown';
 
-import { ReactSelect as Select, pxToRem } from '@strapi/helper-plugin';
 import flattenTree from './utils/flattenTree';
 
 const ToggleButton = styled.button`
