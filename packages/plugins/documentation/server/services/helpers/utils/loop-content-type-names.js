@@ -26,10 +26,10 @@ const loopContentTypeNames = (api, callback) => {
     if (!routeInfo) return;
 
     // Uppercase the first letter of the api name
-    const apiName = _.startCase(api.name);
+    const apiName = _.upperFirst(api.name);
     // Create a unique name if the api name and contentType name don't match
     const uniqueName =
-      api.name === contentTypeName ? apiName : `${apiName} - ${_.startCase(contentTypeName)}`;
+      api.name === contentTypeName ? apiName : `${apiName} - ${_.upperFirst(contentTypeName)}`;
 
     const apiInfo = {
       ...api,

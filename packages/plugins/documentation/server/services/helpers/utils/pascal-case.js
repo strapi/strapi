@@ -2,7 +2,7 @@
 const _ = require('lodash');
 
 const pascalCase = string => {
-  return _.startCase(_.camelCase(string)).replace(/ /g, '');
+  return _.upperFirst(_.camelCase(string));
 };
 
 module.exports = pascalCase;
