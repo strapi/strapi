@@ -171,6 +171,9 @@ const getAllPathsForContentType = apiInfo => {
  * @returns {object}
  */
 const buildApiEndpointPath = api => {
+  // A reusable loop for building paths and component schemas
+  // Uses the api param to build a new set of params for each content type
+  // Passes these new params to the function provided
   return loopContentTypeNames(api, getAllPathsForContentType);
 };
 

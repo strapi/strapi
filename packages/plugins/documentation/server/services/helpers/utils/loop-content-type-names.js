@@ -7,7 +7,7 @@ const _ = require('lodash');
  * @param {object} api - Api information to pass to the callback
  * @param {function} callback - Logic to execute for the given api
  *
- * @returns {function}
+ * @returns {object}
  */
 const loopContentTypeNames = (api, callback) => {
   let result = {};
@@ -27,6 +27,7 @@ const loopContentTypeNames = (api, callback) => {
 
     // Uppercase the first letter of the api name
     const apiName = _.upperFirst(api.name);
+
     // Create a unique name if the api name and contentType name don't match
     const uniqueName =
       api.name === contentTypeName ? apiName : `${apiName} - ${_.upperFirst(contentTypeName)}`;
