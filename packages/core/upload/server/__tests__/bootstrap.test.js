@@ -4,7 +4,15 @@ const { join } = require('path');
 
 const bootstrap = require('../bootstrap');
 
-jest.mock('@strapi/provider-upload-local', () => ({ init() {} }));
+jest.mock('@strapi/provider-upload-local', () => ({
+  init() {
+    return {
+      uploadStream: jest.fn(),
+      upload: jest.fn(),
+      delete: jest.fn(),
+    };
+  },
+}));
 
 describe('Upload plugin bootstrap function', () => {
   test('Sets default config if it does not exist', async () => {
