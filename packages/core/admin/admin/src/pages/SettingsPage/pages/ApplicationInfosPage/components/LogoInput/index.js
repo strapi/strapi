@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useIntl } from 'react-intl';
-import PropType from 'prop-types';
+import PropTypes from 'prop-types';
 import { CarouselInput, CarouselSlide, CarouselActions } from '@strapi/design-system/CarouselInput';
 import { IconButton } from '@strapi/design-system/IconButton';
 import { Box } from '@strapi/design-system/Box';
@@ -8,7 +8,7 @@ import Plus from '@strapi/icons/Plus';
 import LogoModalStepper from '../LogoModalStepper';
 import { SIZE, DIMENSION } from '../../utils/constants';
 
-const LogoInput = ({ customLogo, defaultLogo }) => {
+const LogoInput = ({ customLogo, defaultLogo, onChangeLogo }) => {
   const { formatMessage } = useIntl();
   const [isDialogOpen, setIsDialogOpen] = useState(true);
 
@@ -68,6 +68,7 @@ const LogoInput = ({ customLogo, defaultLogo }) => {
         onClose={() => setIsDialogOpen(false)}
         initialStep={customLogo ? 'pending' : 'upload'}
         isOpen={isDialogOpen}
+        onChangeLogo={onChangeLogo}
       />
     </>
   );
@@ -78,11 +79,12 @@ LogoInput.defaultProps = {
 };
 
 LogoInput.propTypes = {
-  customLogo: PropType.shape({
-    url: PropType.string,
-    name: PropType.string,
+  customLogo: PropTypes.shape({
+    url: PropTypes.string,
+    name: PropTypes.string,
   }),
-  defaultLogo: PropType.string.isRequired,
+  defaultLogo: PropTypes.string.isRequired,
+  onChangeLogo: PropTypes.func.isRequired,
 };
 
 export default LogoInput;

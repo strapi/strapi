@@ -6,9 +6,9 @@ import { Typography } from '@strapi/design-system/Typography';
 import reducer, { initialState } from './reducer';
 import stepper from './stepper';
 
-const LogoModalStepper = ({ initialStep, isOpen, onClose }) => {
-  const [{ currentStep }, dispatch] = useReducer(reducer, initialState);
-  const { Component, modalTitle, next } = stepper[currentStep];
+const LogoModalStepper = ({ initialStep, isOpen, onClose, onChangeLogo }) => {
+  const [{ currentStep, localImage }, dispatch] = useReducer(reducer, initialState);
+  const { Component, modalTitle, next, prev } = stepper[currentStep];
   const { formatMessage } = useIntl();
 
   useEffect(() => {
@@ -45,7 +45,15 @@ const LogoModalStepper = ({ initialStep, isOpen, onClose }) => {
           {formatMessage(modalTitle)}
         </Typography>
       </ModalHeader>
-      <Component setLocalImage={setLocalImage} goTo={goTo} next={next} onClose={onClose} />
+      <Component
+        setLocalImage={setLocalImage}
+        goTo={goTo}
+        next={next}
+        prev={prev}
+        onClose={onClose}
+        asset={localImage}
+        onChangeLogo={onChangeLogo}
+      />
     </ModalLayout>
   );
 };
@@ -54,6 +62,7 @@ LogoModalStepper.propTypes = {
   initialStep: PropTypes.string.isRequired,
   isOpen: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
+  onChangeLogo: PropTypes.func.isRequired,
 };
 
 export default LogoModalStepper;
