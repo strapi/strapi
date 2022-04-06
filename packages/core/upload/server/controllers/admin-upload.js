@@ -4,7 +4,7 @@ const _ = require('lodash');
 const { ApplicationError } = require('@strapi/utils').errors;
 const { getService } = require('../utils');
 const { ACTIONS } = require('../constants');
-const validateUploadBody = require('./validation/upload');
+const validateUploadBody = require('./validation/admin/upload');
 const { findEntityAndCheckPermissions } = require('./utils/find-entity-and-check-permissions');
 
 const fileModel = 'plugin::upload.file';
