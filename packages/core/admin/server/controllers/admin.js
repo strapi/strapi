@@ -11,6 +11,7 @@ const ee = require('@strapi/strapi/lib/utils/ee');
 const {
   validateUpdateProjectSettings,
   validateUpdateProjectSettingsFiles,
+  validateUpdateProjectSettingsImagesDimensions,
 } = require('../validation/project-settings');
 const { getService } = require('../utils');
 
@@ -48,6 +49,8 @@ module.exports = {
   },
 
   async updateProjectSettings(ctx) {
+    const projectSettingsService = getService('project-settings');
+
     const {
       request: { files, body },
     } = ctx;
@@ -55,7 +58,8 @@ module.exports = {
     await validateUpdateProjectSettings(body);
     await validateUpdateProjectSettingsFiles(files);
 
-    const projectSettingsService = getService('project-settings');
+    const formatedFiles = await projectSettingsService.getFormatedFilesData(files);
+    await validateUpdateProjectSettingsImagesDimensions(formatedFiles);
 
     const uploadedFiles = await projectSettingsService.uploadFiles(files);
     const updatedProjectSettings = await projectSettingsService.updateProjectSettings(

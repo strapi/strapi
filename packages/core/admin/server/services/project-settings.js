@@ -1,28 +1,45 @@
 'use strict';
 
 const fs = require('fs');
-const { transform } = require('lodash');
 
 const PROJECT_SETTINGS_FILE_INPUTS = ['menuLogo'];
 
-const getFormatedFileData = data => ({
-  path: data.path,
-  ...strapi
-    .plugin('upload')
-    .service('upload')
-    .formatFileInfo({
-      filename: data.name,
-      type: data.type,
-      size: data.size,
-    }),
-});
+const getFormatedFilesData = async files => {
+  const formatedFilesData = {};
+
+  const results = PROJECT_SETTINGS_FILE_INPUTS.map(async inputName => {
+    if (!files[inputName]) {
+      return;
+    }
+
+    formatedFilesData[inputName] = {
+      path: files[inputName].path,
+
+      // Get file info
+      ...strapi
+        .plugin('upload')
+        .service('upload')
+        .formatFileInfo({
+          filename: files[inputName].name,
+          type: files[inputName].type,
+          size: files[inputName].size,
+        }),
+
+      // Get image file dimensions
+      ...(await strapi
+        .plugin('upload')
+        .service('image-manipulation')
+        .getDimensions({ getStream: () => fs.createReadStream(files[inputName].path) })),
+    };
+  });
+
+  await Promise.all(results);
+
+  return formatedFilesData;
+};
 
 const uploadFiles = async files => {
-  const formatedFilesData = transform(files, (result, value, key) => {
-    if (value) {
-      result[key] = getFormatedFileData(value);
-    }
-  });
+  const formatedFilesData = getFormatedFilesData(files);
 
   Object.values(formatedFilesData).map(data =>
     // Do not await to upload asynchronously
@@ -59,8 +76,8 @@ const updateProjectSettings = async (body, uploadedFiles) => {
       newSettings[inputName] = {
         name: newSettings[inputName].name,
         url: 'test',
-        width: 0,
-        height: 0,
+        width: newSettings[inputName].width,
+        height: newSettings[inputName].height,
       };
     }
   });
@@ -69,6 +86,7 @@ const updateProjectSettings = async (body, uploadedFiles) => {
 };
 
 module.exports = {
+  getFormatedFilesData,
   uploadFiles,
   updateProjectSettings,
 };
