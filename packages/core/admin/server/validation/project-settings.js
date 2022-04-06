@@ -7,6 +7,12 @@ const ALLOWED_LOGO_FILE_TYPES = ['image/jpeg', 'image/png', 'image/svg+xml'];
 
 const updateProjectSettings = yup
   .object({
+    menuLogo: yup.string(),
+  })
+  .noUnknown();
+
+const updateProjectSettingsFiles = yup
+  .object({
     menuLogo: yup.object({
       name: yup.string(),
       type: yup.string().oneOf(ALLOWED_LOGO_FILE_TYPES),
@@ -17,4 +23,5 @@ const updateProjectSettings = yup
 
 module.exports = {
   validateUpdateProjectSettings: validateYupSchemaSync(updateProjectSettings),
+  validateUpdateProjectSettingsFiles: validateYupSchemaSync(updateProjectSettingsFiles),
 };
