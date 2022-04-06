@@ -46,34 +46,35 @@ const SelectTree = ({ options: defaultOptions, ...props }) => {
     });
   }, [openValues, flatDefaultOptions, toplevelDefaultOptions]);
 
-  function handleToggle(e, data) {
+  function handleToggle(e, value) {
     e.preventDefault();
     e.stopPropagation();
 
-    if (openValues.includes(data.value)) {
-      setOpenValues(prev => prev.filter(prevData => prevData !== data.value));
+    if (openValues.includes(value)) {
+      setOpenValues(prev => prev.filter(prevData => prevData !== value));
     } else {
-      setOpenValues(prev => [...prev, data.value]);
+      setOpenValues(prev => [...prev, value]);
     }
   }
 
   const CustomOption = ({ children, data, ...props }) => {
     const hasChildren = data?.children?.length > 0;
+    const { depth, value } = data;
 
     return (
       <>
         <components.Option {...props}>
           <Flex alignItems="start">
             <Typography textColor="neutral800">
-              <span style={{ paddingLeft: `${data.depth * 10}px` }}>{children}</span>
+              <span style={{ paddingLeft: `${depth * 10}px` }}>{children}</span>
             </Typography>
 
             {hasChildren && (
-              <ToggleButton type="button" onClick={event => handleToggle(event, data)}>
+              <ToggleButton type="button" onClick={event => handleToggle(event, value)}>
                 <Icon
                   width={pxToRem(14)}
                   color="neutral500"
-                  as={openValues.includes(data.value) ? ChevronUp : ChevronDown}
+                  as={openValues.includes(value) ? ChevronUp : ChevronDown}
                 />
               </ToggleButton>
             )}
