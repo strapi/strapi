@@ -134,6 +134,7 @@ const updateProjectSettings = async (body, files) => {
 };
 
 module.exports = {
+  deleteOldFiles,
   parseFilesData,
   getProjectSettings,
   updateProjectSettings,
