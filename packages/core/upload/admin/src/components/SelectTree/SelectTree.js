@@ -24,7 +24,7 @@ const hasParent = option => !option.parent;
 const hasParentOrMatchesValue = (option, value) =>
   option.value === value || option.parent === value;
 
-const SelectTree = ({ options: defaultOptions, ...props }) => {
+const SelectTree = ({ options: defaultOptions, maxDisplayDepth, ...props }) => {
   const flatDefaultOptions = useMemo(() => flattenTree(defaultOptions), [defaultOptions]);
   const toplevelDefaultOptions = useMemo(() => flatDefaultOptions.filter(hasParent), [
     flatDefaultOptions,
@@ -60,13 +60,14 @@ const SelectTree = ({ options: defaultOptions, ...props }) => {
   const CustomOption = ({ children, data, ...props }) => {
     const hasChildren = data?.children?.length > 0;
     const { depth, value } = data;
+    const normalizedDepth = Math.min(depth, maxDisplayDepth);
 
     return (
       <>
         <components.Option {...props}>
           <Flex alignItems="start">
             <Typography textColor="neutral800">
-              <span style={{ paddingLeft: `${depth * 10}px` }}>{children}</span>
+              <span style={{ paddingLeft: `${normalizedDepth * 10}px` }}>{children}</span>
             </Typography>
 
             {hasChildren && (
@@ -87,7 +88,12 @@ const SelectTree = ({ options: defaultOptions, ...props }) => {
   return <Select components={{ Option: CustomOption }} options={options} {...props} />;
 };
 
+SelectTree.defaultProps = {
+  maxDisplayDepth: 5,
+};
+
 SelectTree.propTypes = {
+  maxDisplayDepth: PropTypes.number,
   options: PropTypes.array.isRequired,
 };
 
