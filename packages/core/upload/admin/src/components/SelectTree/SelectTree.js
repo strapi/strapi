@@ -1,23 +1,12 @@
 /* eslint-disable react/prop-types */
 
 import React, { useEffect, useState, useMemo } from 'react';
-import styled from 'styled-components';
 import PropTypes from 'prop-types';
-import { components } from 'react-select';
+import { ReactSelect as Select } from '@strapi/helper-plugin';
 
-import { Flex } from '@strapi/design-system/Flex';
-import { Icon } from '@strapi/design-system/Icon';
-import { ReactSelect as Select, pxToRem } from '@strapi/helper-plugin';
-import { Typography } from '@strapi/design-system/Typography';
-import ChevronUp from '@strapi/icons/ChevronUp';
-import ChevronDown from '@strapi/icons/ChevronDown';
+import Option from './Option';
 
 import flattenTree from './utils/flattenTree';
-
-const ToggleButton = styled.button`
-  align-self: flex-end;
-  margin-left: auto;
-`;
 
 const hasParent = option => !option.parent;
 
@@ -57,35 +46,22 @@ const SelectTree = ({ options: defaultOptions, maxDisplayDepth, ...props }) => {
     }
   }
 
-  const CustomOption = ({ children, data, ...props }) => {
-    const hasChildren = data?.children?.length > 0;
-    const { depth, value } = data;
-    const normalizedDepth = Math.min(depth, maxDisplayDepth);
-
-    return (
-      <>
-        <components.Option {...props}>
-          <Flex alignItems="start">
-            <Typography textColor="neutral800">
-              <span style={{ paddingLeft: `${normalizedDepth * 10}px` }}>{children}</span>
-            </Typography>
-
-            {hasChildren && (
-              <ToggleButton type="button" onClick={event => handleToggle(event, value)}>
-                <Icon
-                  width={pxToRem(14)}
-                  color="neutral500"
-                  as={openValues.includes(value) ? ChevronUp : ChevronDown}
-                />
-              </ToggleButton>
-            )}
-          </Flex>
-        </components.Option>
-      </>
-    );
-  };
-
-  return <Select components={{ Option: CustomOption }} options={options} {...props} />;
+  return (
+    <Select
+      components={{
+        Option: props => (
+          <Option
+            {...props}
+            onToggle={(...args) => handleToggle(...args)}
+            isOpen={openValues.includes(props.data?.value)}
+            maxDisplayDepth={maxDisplayDepth}
+          />
+        ),
+      }}
+      options={options}
+      {...props}
+    />
+  );
 };
 
 const OptionShape = PropTypes.shape({
