@@ -139,5 +139,21 @@ module.exports = {
         ],
       },
     },
+    {
+      method: 'POST',
+      path: '/folders/actions/tree',
+      handler: 'admin-folder.getTree',
+      config: {
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          {
+            name: 'admin::hasPermissions',
+            config: {
+              actions: ['plugin::upload.read'],
+            },
+          },
+        ],
+      },
+    },
   ],
 };
