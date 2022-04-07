@@ -61,7 +61,7 @@ module.exports = {
     const formatedFiles = await projectSettingsService.parseFilesData(files);
     await validateUpdateProjectSettingsImagesDimensions(formatedFiles);
 
-    return projectSettingsService.updateProjectSettings(body, formatedFiles);
+    return projectSettingsService.updateProjectSettings({ body, files: formatedFiles });
   },
 
   async information() {

@@ -133,7 +133,7 @@ describe('Project setting', () => {
         },
       };
 
-      await deleteOldFiles(previousSettings, newSettings);
+      await deleteOldFiles({ previousSettings, newSettings });
 
       expect(unlinkSync).not.toBeCalled();
     });
@@ -150,7 +150,7 @@ describe('Project setting', () => {
 
       const newSettings = previousSettings;
 
-      await deleteOldFiles(previousSettings, newSettings);
+      await deleteOldFiles({ previousSettings, newSettings });
 
       expect(unlinkSync).not.toBeCalled();
     });
@@ -167,7 +167,7 @@ describe('Project setting', () => {
 
       const newSettings = { menuLogo: null };
 
-      await deleteOldFiles(previousSettings, newSettings);
+      await deleteOldFiles({ previousSettings, newSettings });
 
       expect(unlinkSync).toBeCalledTimes(1);
       expect(unlinkSync).toBeCalledWith(previousSettings.menuLogo.path);
@@ -190,7 +190,7 @@ describe('Project setting', () => {
         },
       };
 
-      await deleteOldFiles(previousSettings, newSettings);
+      await deleteOldFiles({ previousSettings, newSettings });
 
       expect(unlinkSync).toBeCalledTimes(1);
       expect(unlinkSync).toBeCalledWith(previousSettings.menuLogo.path);
@@ -228,7 +228,7 @@ describe('Project setting', () => {
         },
       };
 
-      await updateProjectSettings(body, files);
+      await updateProjectSettings({ body, files });
 
       expect(storeSet).toBeCalledTimes(1);
       expect(storeSet).toBeCalledWith({
@@ -245,7 +245,7 @@ describe('Project setting', () => {
         menuLogo: null,
       };
 
-      await updateProjectSettings(body, files);
+      await updateProjectSettings({ body, files });
 
       expect(storeSet).toBeCalledTimes(1);
       expect(storeSet).toBeCalledWith({
@@ -268,7 +268,7 @@ describe('Project setting', () => {
         },
       };
 
-      await updateProjectSettings(body, files);
+      await updateProjectSettings({ body, files });
 
       expect(storeSet).toBeCalledTimes(1);
       expect(storeSet).toBeCalledWith({

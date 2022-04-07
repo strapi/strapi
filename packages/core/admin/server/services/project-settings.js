@@ -73,7 +73,7 @@ const uploadFiles = async files => {
   return Promise.all(Object.values(files).map(strapi.plugin('upload').provider.uploadStream));
 };
 
-const deleteOldFiles = async (previousSettings, newSettings) => {
+const deleteOldFiles = async ({ previousSettings, newSettings }) => {
   return Promise.all(
     PROJECT_SETTINGS_FILE_INPUTS.map(async inputName => {
       // Skip if there was no previous file
@@ -96,7 +96,7 @@ const deleteOldFiles = async (previousSettings, newSettings) => {
   );
 };
 
-const updateProjectSettings = async (body, files) => {
+const updateProjectSettings = async ({ body, files }) => {
   const store = await strapi.store({ type: 'core', name: 'admin' });
   const previousSettings = await store.get({ key: 'project-settings' });
 
@@ -126,9 +126,12 @@ const updateProjectSettings = async (body, files) => {
 
   // No await to proceed asynchronously
   uploadFiles(files);
-  deleteOldFiles(previousSettings, newSettings);
+  deleteOldFiles({ previousSettings, newSettings });
 
-  store.set({ key: 'project-settings', value: { ...previousSettings, ...newSettings } });
+  await store.set({
+    key: 'project-settings',
+    value: { ...previousSettings, ...newSettings },
+  });
 
   return getProjectSettings();
 };
