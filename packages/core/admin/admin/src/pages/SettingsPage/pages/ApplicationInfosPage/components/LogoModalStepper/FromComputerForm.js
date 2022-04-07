@@ -21,6 +21,7 @@ const FileInput = styled(FieldInput)`
   bottom: 0;
   left: 0;
   right: 0;
+  z-index: 1;
 `;
 
 const FromComputerForm = ({ setLocalImage, goTo, next, onClose }) => {

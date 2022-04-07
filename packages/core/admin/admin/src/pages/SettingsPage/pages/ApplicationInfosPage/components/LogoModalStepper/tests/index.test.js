@@ -25,7 +25,12 @@ const render = props =>
   renderTL(
     <ThemeProvider theme={lightTheme}>
       <IntlProvider locale="en" messages={{}} textComponent="span">
-        <LogoModalStepper {...props} isOpen onClose={() => jest.fn()} />
+        <LogoModalStepper
+          {...props}
+          isOpen
+          onClose={() => jest.fn()}
+          onChangeLogo={() => jest.fn()}
+        />
       </IntlProvider>
     </ThemeProvider>
   );
@@ -109,6 +114,23 @@ describe('ApplicationsInfosPage || LogoModalStepper', () => {
       });
 
       await waitFor(() => expect(screen.getByText('Pending logo')).toBeInTheDocument());
+    });
+
+    it('should let user choose another logo', async () => {
+      render({ initialStep: 'upload' });
+      const file = new File(['(⌐□_□)'], 'michka.png', { type: 'image/png' });
+
+      const fileInput = document.querySelector('[type="file"]');
+
+      fireEvent.change(fileInput, {
+        target: { files: [file] },
+      });
+
+      await waitFor(() => expect(screen.getByText('Pending logo')).toBeInTheDocument());
+
+      fireEvent.click(screen.getByText('Choose another logo'));
+
+      await waitFor(() => expect(screen.getByText('Upload logo')).toBeInTheDocument());
     });
   });
 });

@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useIntl } from 'react-intl';
 import {
   useAppInfos,
@@ -17,9 +17,6 @@ import { Button } from '@strapi/design-system/Button';
 import ExternalLink from '@strapi/icons/ExternalLink';
 import Check from '@strapi/icons/Check';
 import Form from './components/Form';
-import LogoAPI from './temp/LogoAPI';
-
-const API = new LogoAPI();
 
 const permissions = [{ action: 'admin::project-settings.update', subject: null }];
 
@@ -29,7 +26,7 @@ const ApplicationInfosPage = () => {
   useFocusWhenNavigate();
   const appInfos = useAppInfos();
   const { shouldUpdateStrapi, latestStrapiReleaseTag, strapiVersion } = appInfos;
-  const [modifiedData, setModifiedData] = useState({ menuLogo: undefined });
+  const [modifiedData] = useState({ menuLogo: undefined });
 
   const currentPlan = appInfos.communityEdition
     ? 'app.components.UpgradePlanModal.text-ce'
@@ -37,15 +34,8 @@ const ApplicationInfosPage = () => {
 
   const handleSubmit = () => {
     const data = inputsRef.current.getValues();
-    API.setProjectSettings(data);
+    console.log(data);
   };
-
-  useEffect(() => {
-    const projectSettingsStored = API.getProjectSettings();
-    const { menuLogo } = projectSettingsStored;
-
-    setModifiedData(prev => ({ ...prev, menuLogo }));
-  }, []);
 
   return (
     <Layout>
@@ -59,7 +49,7 @@ const ApplicationInfosPage = () => {
           })}
           primaryAction={
             <Button onClick={handleSubmit} startIcon={<Check />}>
-              Save
+              {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}
             </Button>
           }
         />
