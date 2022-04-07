@@ -10,7 +10,7 @@ import { SIZE, DIMENSION } from '../../utils/constants';
 
 const LogoInput = ({ customLogo, defaultLogo }) => {
   const { formatMessage } = useIntl();
-  const [isDialogOpen, setIsDialogOpen] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
     <>
@@ -36,7 +36,7 @@ const LogoInput = ({ customLogo, defaultLogo }) => {
         actions={
           <CarouselActions>
             <IconButton
-              onClick={() => setIsDialogOpen(true)}
+              onClick={() => setIsModalOpen(true)}
               label={formatMessage({
                 id: 'Settings.application.customization.carousel.change-action',
                 defaultMessage: 'Change logo',
@@ -65,9 +65,9 @@ const LogoInput = ({ customLogo, defaultLogo }) => {
         </CarouselSlide>
       </CarouselInput>
       <LogoModalStepper
-        onClose={() => setIsDialogOpen(false)}
+        onClose={() => setIsModalOpen(false)}
         initialStep={customLogo ? 'pending' : 'upload'}
-        isOpen={isDialogOpen}
+        isOpen={isModalOpen}
       />
     </>
   );
