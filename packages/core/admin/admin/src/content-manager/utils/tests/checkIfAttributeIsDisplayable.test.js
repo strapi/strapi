@@ -33,4 +33,12 @@ describe('CONTENT MANAGER | utils | checkIfAttributeIsDisplayable', () => {
 
     expect(checkIfAttributeIsDisplayable(attribute)).toBeTruthy();
   });
+
+  it('should return false if the field is private', () => {
+    const attribute = {
+      private: true,
+    };
+
+    expect(checkIfAttributeIsDisplayable(attribute)).toBeFalsy();
+  });
 });

@@ -1,7 +1,11 @@
 import { toLower } from 'lodash';
 
 const checkIfAttributeIsDisplayable = attribute => {
-  const type = attribute.type;
+  const { type, private: isPrivate } = attribute;
+
+  if (isPrivate) {
+    return false;
+  }
 
   if (type === 'relation') {
     return !toLower(attribute.relationType).includes('morph');
