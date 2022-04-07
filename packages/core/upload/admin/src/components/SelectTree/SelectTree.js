@@ -88,13 +88,25 @@ const SelectTree = ({ options: defaultOptions, maxDisplayDepth, ...props }) => {
   return <Select components={{ Option: CustomOption }} options={options} {...props} />;
 };
 
+const OptionShape = PropTypes.shape({
+  value: PropTypes.number.isRequired,
+  label: PropTypes.string.isRequired,
+  children: PropTypes.array,
+});
+
+OptionShape.children = PropTypes.arrayOf(PropTypes.shape(OptionShape));
+
+OptionShape.defaultProps = {
+  children: undefined,
+};
+
 SelectTree.defaultProps = {
   maxDisplayDepth: 5,
 };
 
 SelectTree.propTypes = {
   maxDisplayDepth: PropTypes.number,
-  options: PropTypes.array.isRequired,
+  options: PropTypes.arrayOf(OptionShape).isRequired,
 };
 
 export default SelectTree;
