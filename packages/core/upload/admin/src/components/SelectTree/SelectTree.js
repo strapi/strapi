@@ -1,5 +1,3 @@
-/* eslint-disable react/prop-types */
-
 import React, { useEffect, useState, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { ReactSelect as Select } from '@strapi/helper-plugin';
@@ -53,6 +51,7 @@ const SelectTree = ({ options: defaultOptions, maxDisplayDepth, ...props }) => {
           <Option
             {...props}
             onToggle={(...args) => handleToggle(...args)}
+            // eslint-disable-next-line react/prop-types
             isOpen={openValues.includes(props.data?.value)}
             maxDisplayDepth={maxDisplayDepth}
           />
