@@ -56,7 +56,7 @@ describe('hasContent', () => {
       expect(normalizedContent).toEqual(true);
     });
 
-    it('returns false if disabled', () => {
+    it('returns true if disabled', () => {
       const normalizedContent = hasContent('boolean', false);
       expect(normalizedContent).toEqual(true);
     });
