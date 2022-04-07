@@ -32,7 +32,7 @@ global.strapi = {
             hash: 'filename_123',
             ext: '.png',
             mime: 'image/png',
-            size: 1024 * 1024,
+            size: 123,
           }),
         },
         'image-manipulation': {
@@ -49,6 +49,8 @@ global.strapi = {
         url: 'file/url',
         width: 100,
         height: 100,
+        ext: 'png',
+        size: 123,
       },
     }),
     set: storeSet,
@@ -62,7 +64,7 @@ describe('Project setting', () => {
     it('Should parse valid files object', async () => {
       const files = {
         menuLogo: {
-          size: 24085,
+          size: 123,
           path: '/tmp/filename_123',
           name: 'file.png',
           type: 'image/png',
@@ -77,7 +79,7 @@ describe('Project setting', () => {
           hash: 'filename_123',
           ext: '.png',
           mime: 'image/png',
-          size: 1024 * 1024,
+          size: 123,
           stream: null,
           width: 100,
           height: 100,
@@ -111,6 +113,8 @@ describe('Project setting', () => {
           url: 'file/url',
           width: 100,
           height: 100,
+          ext: 'png',
+          size: 123,
         },
       };
 
@@ -208,7 +212,7 @@ describe('Project setting', () => {
           hash: 'filename_123',
           ext: '.png',
           mime: 'image/png',
-          size: 1024 * 1024,
+          size: 123,
           stream: null,
           width: 100,
           height: 100,
@@ -225,6 +229,8 @@ describe('Project setting', () => {
           url: '/uploads/filename_123.png',
           width: 100,
           height: 100,
+          ext: 'png',
+          size: 123,
         },
       };
 
@@ -265,6 +271,8 @@ describe('Project setting', () => {
           url: 'file/url',
           width: 100,
           height: 100,
+          ext: 'png',
+          size: 123,
         },
       };
 

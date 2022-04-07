@@ -23,13 +23,12 @@ const updateProjectSettingsFiles = yup
   })
   .noUnknown();
 
-const updateProjectSettingsImagesDimensions = yup
-  .object({
-    menuLogo: yup.object({
-      width: yup.number().max(MAX_IMAGE_WIDTH),
-      height: yup.number().max(MAX_IMAGE_HEIGHT),
-    }),
-  })
+const updateProjectSettingsImagesDimensions = yup.object({
+  menuLogo: yup.object({
+    width: yup.number().max(MAX_IMAGE_WIDTH),
+    height: yup.number().max(MAX_IMAGE_HEIGHT),
+  }),
+});
 
 module.exports = {
   validateUpdateProjectSettings: validateYupSchemaSync(updateProjectSettings),

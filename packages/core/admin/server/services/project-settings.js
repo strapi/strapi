@@ -55,6 +55,7 @@ const getProjectSettings = async () => {
   const store = await strapi.store({ type: 'core', name: 'admin' });
   const projectSettings = await store.get({ key: 'project-settings' });
 
+  // Filter file input fields
   PROJECT_SETTINGS_FILE_INPUTS.forEach(inputName => {
     if (projectSettings[inputName]) {
       projectSettings[inputName] = pick(projectSettings[inputName], [
@@ -62,6 +63,8 @@ const getProjectSettings = async () => {
         'url',
         'width',
         'height',
+        'ext',
+        'size',
       ]);
     }
   });
@@ -120,6 +123,8 @@ const updateProjectSettings = async ({ body, files }) => {
         url: newSettings[inputName].url,
         width: newSettings[inputName].width,
         height: newSettings[inputName].height,
+        ext: newSettings[inputName].ext.replace('.', ''),
+        size: newSettings[inputName].size,
       };
     }
   });
