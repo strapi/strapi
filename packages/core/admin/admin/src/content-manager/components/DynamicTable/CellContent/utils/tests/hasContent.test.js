@@ -50,6 +50,23 @@ describe('hasContent', () => {
     });
   });
 
+  describe('boolean', () => {
+    it('returns true if enabled', () => {
+      const normalizedContent = hasContent('boolean', true);
+      expect(normalizedContent).toEqual(true);
+    });
+
+    it('returns false if disabled', () => {
+      const normalizedContent = hasContent('boolean', false);
+      expect(normalizedContent).toEqual(true);
+    });
+
+    it('returns false for null', () => {
+      const normalizedContent = hasContent('boolean', null);
+      expect(normalizedContent).toEqual(false);
+    });
+  });
+
   describe('ID', () => {
     it('returns true for id main fields', () => {
       const normalizedContent = hasContent('media', { id: 1 });
