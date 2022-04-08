@@ -61,6 +61,7 @@ module.exports = async () => {
   const userService = getService('user');
   const roleService = getService('role');
   const apiTokenService = getService('api-token');
+  const tokenService = getService('token');
 
   await roleService.createRolesIfNoneExist();
   await roleService.resetSuperAdminPermissions();
@@ -73,5 +74,6 @@ module.exports = async () => {
 
   await syncAuthSettings();
 
-  apiTokenService.createSaltIfNotDefined();
+  apiTokenService.checkSaltIsDefined();
+  tokenService.checkSecretIsDefined();
 };
