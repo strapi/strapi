@@ -71,7 +71,7 @@ const getSelectStyles = theme => {
     option: (base, state) => {
       let backgroundColor = base.backgroundColor;
 
-      if (state.isFocused) {
+      if (state.isFocused || state.isSelected) {
         backgroundColor = theme.colors.primary100;
       }
 
