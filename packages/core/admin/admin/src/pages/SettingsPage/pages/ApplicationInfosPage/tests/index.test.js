@@ -806,7 +806,7 @@ describe('Application page', () => {
                                         <img
                                           alt="Logo"
                                           class="c36"
-                                          src="IMAGE_MOCK"
+                                          src="defaultAuthLogo.png"
                                         />
                                       </div>
                                     </div>
@@ -851,7 +851,7 @@ describe('Application page', () => {
                                         <span
                                           class="c42"
                                         >
-                                          cat-logo.png
+                                          logo.png
                                         </span>
                                       </div>
                                     </span>
@@ -862,7 +862,7 @@ describe('Application page', () => {
                                 class="c43"
                                 id="carouselinput-1-hint"
                               >
-                                Change the admin panel logo (Max dimension: 750*750, Max file size: TBC)
+                                Change the admin panel logo (Max dimension: 750*750, Max file size: 100KB)
                               </p>
                             </div>
                           </div>

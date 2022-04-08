@@ -44,7 +44,11 @@ const Form = () => {
       </Typography>
       <Grid paddingTop={5}>
         <GridItem col={6} s={12}>
-          <LogoInput customLogo={customMenuLogo} defaultLogo={menu.default} />
+          <LogoInput
+            onChangeLogo={setCustomMenuLogo}
+            customLogo={customMenuLogo}
+            defaultLogo={menu.default}
+          />
         </GridItem>
       </Grid>
     </Box>
