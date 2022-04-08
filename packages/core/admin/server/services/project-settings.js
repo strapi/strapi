@@ -1,7 +1,6 @@
 'use strict';
 
 const fs = require('fs');
-const path = require('path');
 const { pick } = require('lodash');
 
 const PROJECT_SETTINGS_FILE_INPUTS = ['menuLogo'];
@@ -37,13 +36,11 @@ const parseFilesData = async files => {
           .getDimensions({ getStream })
       );
 
-      // Add file path, url and stream
-      const url = `/uploads/${formatedFilesData[inputName].hash}${formatedFilesData[inputName].ext}`;
+      // Add file path, and stream
       Object.assign(formatedFilesData[inputName], {
-        path: path.join(strapi.dirs.public, url),
         stream: getStream(),
         tmpPath: files[inputName].path,
-        url,
+        provider: strapi.config.get('plugin.upload').provider,
       });
     })
   );
@@ -87,14 +84,19 @@ const deleteOldFiles = async ({ previousSettings, newSettings }) => {
       // Skip if the file was not changed
       if (
         newSettings[inputName] &&
-        previousSettings[inputName].path === newSettings[inputName].path
+        previousSettings[inputName].url === newSettings[inputName].url
       ) {
+        return;
+      }
+
+      // Skip if the file was not uploaded with the current provider
+      if (strapi.config.get('plugin.upload').provider !== previousSettings[inputName].provider) {
         return;
       }
 
       // There was a previous file and an new file was uploaded
       // Remove the previous file
-      fs.unlinkSync(previousSettings[inputName].path);
+      strapi.plugin('upload').provider.delete(previousSettings[inputName]);
     })
   );
 };
@@ -102,6 +104,8 @@ const deleteOldFiles = async ({ previousSettings, newSettings }) => {
 const updateProjectSettings = async ({ body, files }) => {
   const store = await strapi.store({ type: 'core', name: 'admin' });
   const previousSettings = await store.get({ key: 'project-settings' });
+
+  await uploadFiles(files);
 
   const newSettings = {
     ...body,
@@ -119,18 +123,18 @@ const updateProjectSettings = async ({ body, files }) => {
       // Update the file
       newSettings[inputName] = {
         name: newSettings[inputName].name,
-        path: newSettings[inputName].path,
+        hash: newSettings[inputName].hash,
         url: newSettings[inputName].url,
         width: newSettings[inputName].width,
         height: newSettings[inputName].height,
-        ext: newSettings[inputName].ext.replace('.', ''),
+        ext: newSettings[inputName].ext,
         size: newSettings[inputName].size,
+        provider: newSettings[inputName].provider,
       };
     }
   });
 
   // No await to proceed asynchronously
-  uploadFiles(files);
   deleteOldFiles({ previousSettings, newSettings });
 
   await store.set({

@@ -1,6 +1,5 @@
 'use strict';
 
-const { unlinkSync } = require('fs');
 const {
   parseFilesData,
   getProjectSettings,
@@ -10,18 +9,24 @@ const {
 
 jest.mock('fs', () => ({
   createReadStream: () => null,
-  unlinkSync: jest.fn(),
 }));
 
 const storeSet = jest.fn();
+const providerDelete = jest.fn();
 global.strapi = {
   dirs: {
     public: 'publicDir',
   },
+  config: {
+    get: () => ({ provider: 'local' }),
+  },
   plugins: {
     upload: {
       provider: {
-        uploadStream: jest.fn(),
+        async uploadStream(file) {
+          file.url = `/uploads/${file.hash}`;
+        },
+        delete: providerDelete,
       },
       services: {
         upload: {
@@ -45,12 +50,12 @@ global.strapi = {
     get: () => ({
       menuLogo: {
         name: 'name',
-        path: 'path/to/file',
         url: 'file/url',
         width: 100,
         height: 100,
         ext: 'png',
         size: 123,
+        provider: 'local',
       },
     }),
     set: storeSet,
@@ -79,13 +84,12 @@ describe('Project setting', () => {
           hash: 'filename_123',
           ext: '.png',
           mime: 'image/png',
+          provider: 'local',
           size: 123,
           stream: null,
           width: 100,
           height: 100,
-          path: 'publicDir/uploads/filename_123.png',
           tmpPath: '/tmp/filename_123',
-          url: '/uploads/filename_123.png',
         },
       };
 
@@ -131,24 +135,25 @@ describe('Project setting', () => {
       const newSettings = {
         menuLogo: {
           size: 24085,
-          path: '/tmp/filename_123',
           name: 'file.png',
           type: 'image/png',
+          url: 'file/url',
         },
       };
 
       await deleteOldFiles({ previousSettings, newSettings });
 
-      expect(unlinkSync).not.toBeCalled();
+      expect(providerDelete).not.toBeCalled();
     });
 
     it('Does not delete when there is no new file uploaded', async () => {
       const previousSettings = {
         menuLogo: {
           size: 24085,
-          path: '/tmp/filename_123',
           name: 'file.png',
           type: 'image/png',
+          provider: 'local',
+          url: 'file/url',
         },
       };
 
@@ -156,16 +161,17 @@ describe('Project setting', () => {
 
       await deleteOldFiles({ previousSettings, newSettings });
 
-      expect(unlinkSync).not.toBeCalled();
+      expect(providerDelete).not.toBeCalled();
     });
 
     it('Deletes when inputs are explicitely set to null', async () => {
       const previousSettings = {
         menuLogo: {
           size: 24085,
-          path: '/tmp/filename_123',
           name: 'file.png',
           type: 'image/png',
+          provider: 'local',
+          url: 'file/url',
         },
       };
 
@@ -173,31 +179,30 @@ describe('Project setting', () => {
 
       await deleteOldFiles({ previousSettings, newSettings });
 
-      expect(unlinkSync).toBeCalledTimes(1);
-      expect(unlinkSync).toBeCalledWith(previousSettings.menuLogo.path);
+      expect(providerDelete).toBeCalledTimes(1);
     });
 
     it('Deletes when new files are uploaded', async () => {
       const previousSettings = {
         menuLogo: {
           size: 24085,
-          path: '/tmp/filename_123',
           name: 'file.png',
           type: 'image/png',
+          provider: 'local',
+          url: 'file/url',
         },
       };
 
       const newSettings = {
         menuLogo: {
           ...previousSettings.menuLogo,
-          path: 'another/path',
+          url: 'file/new',
         },
       };
 
       await deleteOldFiles({ previousSettings, newSettings });
 
-      expect(unlinkSync).toBeCalledTimes(1);
-      expect(unlinkSync).toBeCalledWith(previousSettings.menuLogo.path);
+      expect(providerDelete).toBeCalledTimes(1);
     });
   });
 
@@ -216,7 +221,6 @@ describe('Project setting', () => {
           stream: null,
           width: 100,
           height: 100,
-          path: 'publicDir/uploads/filename_123.png',
           tmpPath: '/tmp/filename_123',
           url: '/uploads/filename_123.png',
         },
@@ -225,11 +229,11 @@ describe('Project setting', () => {
       const expectedOutput = {
         menuLogo: {
           name: 'filename.png',
-          path: 'publicDir/uploads/filename_123.png',
-          url: '/uploads/filename_123.png',
+          hash: 'filename_123',
+          url: '/uploads/filename_123',
           width: 100,
           height: 100,
-          ext: 'png',
+          ext: '.png',
           size: 123,
         },
       };
@@ -267,12 +271,12 @@ describe('Project setting', () => {
       const expectedOutput = {
         menuLogo: {
           name: 'name',
-          path: 'path/to/file',
           url: 'file/url',
           width: 100,
           height: 100,
           ext: 'png',
           size: 123,
+          provider: 'local',
         },
       };
 
