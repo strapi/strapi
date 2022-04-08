@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Meta, ArgsTable, Canvas, Story } from '@storybook/addon-docs';
 import SelectTree from './index';
 
@@ -13,6 +14,7 @@ into `react-select` are forwarded.
 <Canvas>
   <Story name="base">
     {() => {
+        const [value, setValue] = useState(null);
         const options = [
             {
                 value: 1,
@@ -47,7 +49,12 @@ into `react-select` are forwarded.
                 label: 'Folder 3'
             }
         ];
-        return (<SelectTree options={options} onChange={props => console.log(props)} />)
+        return (
+            <>
+                <SelectTree options={options} defaultValue={{ value: 22 }} onChange={({ value }) => setValue(value)} />
+                <p>Selected Value: {value}</p>
+            </>
+        )
     }}
   </Story>
 </Canvas>
