@@ -418,7 +418,10 @@ class StrapiApp {
 
   render() {
     const store = this.createStore();
-    const localeNames = pick(languageNativeNames, this.configurations.locales || []);
+    const localeNames = pick(
+      { ...languageNativeNames, ...this.customConfigurations.languageNativeNames },
+      this.configurations.locales || []
+    );
 
     const {
       components: { components },
