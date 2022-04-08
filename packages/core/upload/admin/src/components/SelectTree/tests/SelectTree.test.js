@@ -1,10 +1,10 @@
 import React from 'react';
 import { render } from '@testing-library/react';
-
 import { IntlProvider } from 'react-intl';
+
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 
-import SelectTree from '../SelectTree';
+import SelectTree from '../index';
 
 const FIXTURE_OPTIONS = [
   {
@@ -38,13 +38,17 @@ const FIXTURE_OPTIONS = [
 const ComponentFixture = props => (
   <IntlProvider locale="en" messages={{}}>
     <ThemeProvider theme={lightTheme}>
-      <SelectTree {...props} />
+      <SelectTree defaultValue={{ value: 'f1' }} {...props} />
     </ThemeProvider>
   </IntlProvider>
 );
 
+const setup = props => {
+  return render(<ComponentFixture options={FIXTURE_OPTIONS} {...props} />);
+};
+
 describe('SelectTree', () => {
   test('renders', () => {
-    expect(render(<ComponentFixture options={FIXTURE_OPTIONS} />)).toMatchSnapshot();
+    expect(setup()).toMatchSnapshot();
   });
 });
