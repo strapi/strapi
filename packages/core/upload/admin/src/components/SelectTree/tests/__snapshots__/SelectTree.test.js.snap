@@ -53,6 +53,12 @@ Object {
       <div
         class=" css-npt6n7-container"
       >
+        <span
+          aria-atomic="false"
+          aria-live="polite"
+          aria-relevant="additions text"
+          class="css-1f43avz-a11yText-A11yText"
+        />
         <div
           class=" css-1sb7bue-control"
         >
@@ -60,10 +66,8 @@ Object {
             class=" css-1kj7tu4-ValueContainer"
           >
             <div
-              class=" css-930xd4-placeholder"
-            >
-              Select...
-            </div>
+              class=" css-p5rves-singleValue"
+            />
             <div
               class="css-reu10z-Input"
             >
@@ -142,6 +146,12 @@ Object {
     <div
       class=" css-npt6n7-container"
     >
+      <span
+        aria-atomic="false"
+        aria-live="polite"
+        aria-relevant="additions text"
+        class="css-1f43avz-a11yText-A11yText"
+      />
       <div
         class=" css-1sb7bue-control"
       >
@@ -149,10 +159,8 @@ Object {
           class=" css-1kj7tu4-ValueContainer"
         >
           <div
-            class=" css-930xd4-placeholder"
-          >
-            Select...
-          </div>
+            class=" css-p5rves-singleValue"
+          />
           <div
             class="css-reu10z-Input"
           >
@@ -182,7 +190,7 @@ Object {
           class=" css-1hb7zxy-IndicatorsContainer"
         >
           <button
-            class="sc-gVkuDy sc-bPVzhA sc-evQXBP hghsOQ cDFemq cOhtSo"
+            class="sc-hGnimi sc-bPVzhA sc-evQXBP iaYaJy cDFemq cOhtSo"
             type="button"
           >
             <svg
