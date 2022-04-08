@@ -1,21 +1,21 @@
 /* eslint-disable consistent-return */
 /*
  *
- * LogoModalStepper reducer
+ * LogoInput reducer
  *
  */
 
 import produce from 'immer';
 
 const initialState = {
-  localImage: undefined,
+  currentStep: undefined,
 };
 
 const reducer = (state = initialState, action) =>
   produce(state, draftState => {
     switch (action.type) {
-      case 'SET_LOCAL_IMAGE': {
-        draftState.localImage = action.value;
+      case 'GO_TO': {
+        draftState.currentStep = action.to;
         break;
       }
       default: {

@@ -1,4 +1,4 @@
-import React, { useReducer, useEffect, forwardRef, useImperativeHandle } from 'react';
+import React, { useReducer, forwardRef, useImperativeHandle } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
@@ -7,13 +7,16 @@ import { Typography } from '@strapi/design-system/Typography';
 import LogoInput from '../LogoInput';
 import { useConfigurations } from '../../../../../../hooks';
 import reducer, { initialState } from './reducer';
+import init from './init';
 
 const Form = forwardRef(({ projectSettingsStored }, ref) => {
   const { formatMessage } = useIntl();
   const {
     logos: { menu },
   } = useConfigurations();
-  const [{ menuLogo }, dispatch] = useReducer(reducer, initialState);
+  const [{ menuLogo }, dispatch] = useReducer(reducer, initialState, () =>
+    init(projectSettingsStored)
+  );
 
   const handleChangeMenuLogo = asset => {
     dispatch({
@@ -21,16 +24,6 @@ const Form = forwardRef(({ projectSettingsStored }, ref) => {
       value: asset,
     });
   };
-
-  // Temp class to mimic crud API
-  // to remove once back end routes are ready
-  useEffect(() => {
-    const { menuLogo } = projectSettingsStored;
-
-    if (menuLogo) {
-      handleChangeMenuLogo(menuLogo);
-    }
-  }, [projectSettingsStored]);
 
   useImperativeHandle(ref, () => ({
     getValues: () => ({ menuLogo }),

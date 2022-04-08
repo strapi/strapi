@@ -1,16 +1,26 @@
-import React, { useState } from 'react';
+import React, { useReducer } from 'react';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import { CarouselInput, CarouselSlide, CarouselActions } from '@strapi/design-system/CarouselInput';
 import { IconButton } from '@strapi/design-system/IconButton';
 import { Box } from '@strapi/design-system/Box';
 import Plus from '@strapi/icons/Plus';
+import reducer, { initialState } from './reducer';
 import LogoModalStepper from '../LogoModalStepper';
 import { SIZE, DIMENSION } from '../../utils/constants';
+import stepper from './stepper';
 
 const LogoInput = ({ customLogo, defaultLogo, onChangeLogo }) => {
+  const [{ currentStep }, dispatch] = useReducer(reducer, initialState);
+  const { Component, next, prev, modalTitle } = stepper[currentStep] || {};
   const { formatMessage } = useIntl();
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const goTo = to => {
+    dispatch({
+      type: 'GO_TO',
+      to,
+    });
+  };
 
   return (
     <>
@@ -36,7 +46,7 @@ const LogoInput = ({ customLogo, defaultLogo, onChangeLogo }) => {
         actions={
           <CarouselActions>
             <IconButton
-              onClick={() => setIsDialogOpen(true)}
+              onClick={() => goTo(customLogo ? 'pending' : 'upload')}
               label={formatMessage({
                 id: 'Settings.application.customization.carousel.change-action',
                 defaultMessage: 'Change logo',
@@ -65,11 +75,14 @@ const LogoInput = ({ customLogo, defaultLogo, onChangeLogo }) => {
         </CarouselSlide>
       </CarouselInput>
       <LogoModalStepper
-        onClose={() => setIsDialogOpen(false)}
-        initialStep={customLogo ? 'pending' : 'upload'}
-        isOpen={isDialogOpen}
+        Component={Component}
+        currentStep={currentStep}
         onChangeLogo={onChangeLogo}
         customLogo={customLogo}
+        goTo={goTo}
+        next={next}
+        prev={prev}
+        modalTitle={modalTitle}
       />
     </>
   );

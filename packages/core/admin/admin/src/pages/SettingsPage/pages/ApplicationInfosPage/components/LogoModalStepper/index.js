@@ -1,31 +1,22 @@
-import React, { useReducer, useEffect } from 'react';
+import React, { useReducer } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { ModalLayout, ModalHeader } from '@strapi/design-system/ModalLayout';
 import { Typography } from '@strapi/design-system/Typography';
 import reducer, { initialState } from './reducer';
-import stepper from './stepper';
 
-const LogoModalStepper = ({ initialStep, isOpen, onClose, onChangeLogo, customLogo }) => {
-  const [{ currentStep, localImage }, dispatch] = useReducer(reducer, initialState);
-  const { Component, modalTitle, next, prev } = stepper[currentStep];
+const LogoModalStepper = ({
+  onChangeLogo,
+  customLogo,
+  goTo,
+  Component,
+  modalTitle,
+  next,
+  prev,
+  currentStep,
+}) => {
+  const [{ localImage }, dispatch] = useReducer(reducer, initialState);
   const { formatMessage } = useIntl();
-
-  useEffect(() => {
-    if (isOpen) {
-      goTo(initialStep);
-    }
-    // Disabling the rule because we just want to open the modal at a specific step
-    // then we let the stepper handle the navigation
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen]);
-
-  const goTo = to => {
-    dispatch({
-      type: 'GO_TO',
-      to,
-    });
-  };
 
   const setLocalImage = asset => {
     dispatch({
@@ -34,12 +25,12 @@ const LogoModalStepper = ({ initialStep, isOpen, onClose, onChangeLogo, customLo
     });
   };
 
-  if (!isOpen) {
+  if (!currentStep) {
     return null;
   }
 
   return (
-    <ModalLayout labelledBy="modal" onClose={onClose}>
+    <ModalLayout labelledBy="modal" onClose={() => goTo(null)}>
       <ModalHeader>
         <Typography fontWeight="bold" as="h2" id="modal">
           {formatMessage(modalTitle)}
@@ -50,7 +41,7 @@ const LogoModalStepper = ({ initialStep, isOpen, onClose, onChangeLogo, customLo
         goTo={goTo}
         next={next}
         prev={prev}
-        onClose={onClose}
+        onClose={() => goTo(null)}
         asset={localImage || customLogo}
         onChangeLogo={onChangeLogo}
       />
@@ -59,10 +50,17 @@ const LogoModalStepper = ({ initialStep, isOpen, onClose, onChangeLogo, customLo
 };
 
 LogoModalStepper.defaultProps = {
+  Component: undefined,
+  currentStep: undefined,
   customLogo: undefined,
+  modalTitle: undefined,
+  next: null,
+  prev: null,
 };
 
 LogoModalStepper.propTypes = {
+  Component: PropTypes.elementType,
+  currentStep: PropTypes.string,
   customLogo: PropTypes.shape({
     name: PropTypes.string,
     url: PropTypes.string,
@@ -70,10 +68,14 @@ LogoModalStepper.propTypes = {
     height: PropTypes.number,
     ext: PropTypes.string,
   }),
-  initialStep: PropTypes.string.isRequired,
-  isOpen: PropTypes.bool.isRequired,
-  onClose: PropTypes.func.isRequired,
+  goTo: PropTypes.func.isRequired,
+  modalTitle: PropTypes.shape({
+    id: PropTypes.string,
+    defaultMessage: PropTypes.string,
+  }),
+  next: PropTypes.string,
   onChangeLogo: PropTypes.func.isRequired,
+  prev: PropTypes.string,
 };
 
 export default LogoModalStepper;
