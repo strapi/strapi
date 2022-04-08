@@ -44,7 +44,9 @@ const createProvider = config => {
   try {
     provider = require(modulePath);
   } catch (err) {
-    throw new Error(`Could not load upload provider "${providerName}".`);
+    throw new Error(
+      `Could not load upload provider "${providerName}".\n${err.message}\n${err.stack}`
+    );
   }
 
   const providerInstance = provider.init(providerOptions);
