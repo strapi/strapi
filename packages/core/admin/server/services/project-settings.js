@@ -10,21 +10,23 @@ const parseFilesData = async files => {
 
   await Promise.all(
     PROJECT_SETTINGS_FILE_INPUTS.map(async inputName => {
+      const file = files[inputName];
+
       // Skip empty file inputs
-      if (!files[inputName]) {
+      if (!file) {
         return;
       }
 
-      const getStream = () => fs.createReadStream(files[inputName].path);
+      const getStream = () => fs.createReadStream(file.path);
 
       // Add formated data for the upload provider
       formatedFilesData[inputName] = strapi
         .plugin('upload')
         .service('upload')
         .formatFileInfo({
-          filename: files[inputName].name,
-          type: files[inputName].type,
-          size: files[inputName].size,
+          filename: file.name,
+          type: file.type,
+          size: file.size,
         });
 
       // Add image dimensions
@@ -39,7 +41,7 @@ const parseFilesData = async files => {
       // Add file path, and stream
       Object.assign(formatedFilesData[inputName], {
         stream: getStream(),
-        tmpPath: files[inputName].path,
+        tmpPath: file.path,
         provider: strapi.config.get('plugin.upload').provider,
       });
     })
@@ -54,22 +56,25 @@ const getProjectSettings = async () => {
 
   // Filter file input fields
   PROJECT_SETTINGS_FILE_INPUTS.forEach(inputName => {
-    if (projectSettings[inputName]) {
-      projectSettings[inputName] = pick(projectSettings[inputName], [
-        'name',
-        'url',
-        'width',
-        'height',
-        'ext',
-        'size',
-      ]);
+    if (!projectSettings[inputName]) {
+      return;
     }
+
+    projectSettings[inputName] = pick(projectSettings[inputName], [
+      'name',
+      'url',
+      'width',
+      'height',
+      'ext',
+      'size',
+    ]);
   });
 
   return projectSettings;
 };
 
 const uploadFiles = async files => {
+  // Call the provider upload function for each file
   return Promise.all(Object.values(files).map(strapi.plugin('upload').provider.uploadStream));
 };
 
@@ -113,25 +118,29 @@ const updateProjectSettings = async ({ body, files }) => {
   };
 
   PROJECT_SETTINGS_FILE_INPUTS.forEach(inputName => {
+    // If the user input exists but is not a formdata "file" remove it
     if (newSettings[inputName] !== undefined && !(typeof newSettings[inputName] === 'object')) {
-      // If the user input exists but is not a formdata "file" remove the file
       newSettings[inputName] = null;
-    } else if (!newSettings[inputName]) {
-      // If the user input is undefined reuse previous setting (do not update field)
-      newSettings[inputName] = previousSettings[inputName];
-    } else {
-      // Update the file
-      newSettings[inputName] = {
-        name: newSettings[inputName].name,
-        hash: newSettings[inputName].hash,
-        url: newSettings[inputName].url,
-        width: newSettings[inputName].width,
-        height: newSettings[inputName].height,
-        ext: newSettings[inputName].ext,
-        size: newSettings[inputName].size,
-        provider: newSettings[inputName].provider,
-      };
+      return;
     }
+
+    // If the user input is undefined reuse previous setting (do not update field)
+    if (!newSettings[inputName]) {
+      newSettings[inputName] = previousSettings[inputName];
+      return;
+    }
+
+    // Update the file
+    newSettings[inputName] = pick(newSettings[inputName], [
+      'name',
+      'hash',
+      'url',
+      'width',
+      'height',
+      'ext',
+      'size',
+      'provider',
+    ]);
   });
 
   // No await to proceed asynchronously
