@@ -5,23 +5,22 @@ import { ReactSelect as Select } from '@strapi/helper-plugin';
 import Option from './Option';
 
 import flattenTree from './utils/flattenTree';
+import getOpenValues from './utils/getOpenValues';
 
 const hasParent = option => !option.parent;
 
 const hasParentOrMatchesValue = (option, value) =>
   option.value === value || option.parent === value;
 
-const SelectTree = ({ options: defaultOptions, maxDisplayDepth, ...props }) => {
+const SelectTree = ({ options: defaultOptions, maxDisplayDepth, defaultValue, ...props }) => {
   const flatDefaultOptions = useMemo(() => flattenTree(defaultOptions), [defaultOptions]);
-  const toplevelDefaultOptions = useMemo(() => flatDefaultOptions.filter(hasParent), [
-    flatDefaultOptions,
-  ]);
-  const [options, setOptions] = useState(toplevelDefaultOptions);
-  const [openValues, setOpenValues] = useState([]);
+  const optionsFiltered = useMemo(() => flatDefaultOptions.filter(hasParent), [flatDefaultOptions]);
+  const [options, setOptions] = useState(optionsFiltered);
+  const [openValues, setOpenValues] = useState(getOpenValues(flatDefaultOptions, defaultValue));
 
   useEffect(() => {
     if (openValues.length === 0) {
-      setOptions(toplevelDefaultOptions);
+      setOptions(optionsFiltered);
     }
 
     openValues.forEach(value => {
@@ -31,7 +30,7 @@ const SelectTree = ({ options: defaultOptions, maxDisplayDepth, ...props }) => {
 
       setOptions(filtered);
     });
-  }, [openValues, flatDefaultOptions, toplevelDefaultOptions]);
+  }, [openValues, flatDefaultOptions, optionsFiltered]);
 
   function handleToggle(e, value) {
     e.preventDefault();
@@ -58,13 +57,14 @@ const SelectTree = ({ options: defaultOptions, maxDisplayDepth, ...props }) => {
         ),
       }}
       options={options}
+      defaultValue={defaultValue}
       {...props}
     />
   );
 };
 
 const OptionShape = PropTypes.shape({
-  value: PropTypes.number.isRequired,
+  value: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
   label: PropTypes.string.isRequired,
   children: PropTypes.array,
 });
@@ -76,10 +76,14 @@ OptionShape.defaultProps = {
 };
 
 SelectTree.defaultProps = {
+  defaultValue: undefined,
   maxDisplayDepth: 5,
 };
 
 SelectTree.propTypes = {
+  defaultValue: PropTypes.shape({
+    value: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
+  }),
   maxDisplayDepth: PropTypes.number,
   options: PropTypes.arrayOf(OptionShape).isRequired,
 };
