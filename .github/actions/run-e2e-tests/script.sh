@@ -4,6 +4,7 @@ if [[ -z "$RUN_EE" ]]; then
 fi
 
 export ENV_PATH="$(pwd)/testApp/.env"
+export JWT_SECRET="aSecret"
 
 opts=($DB_OPTIONS)
 
