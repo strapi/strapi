@@ -67,12 +67,12 @@ module.exports = {
       required: true,
     },
     url: {
-      type: 'string',
+      type: 'text',
       configurable: false,
       required: true,
     },
     previewUrl: {
-      type: 'string',
+      type: 'text',
       configurable: false,
     },
     provider: {
