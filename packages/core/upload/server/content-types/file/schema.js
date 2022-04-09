@@ -28,11 +28,11 @@ module.exports = {
       required: true,
     },
     alternativeText: {
-      type: 'string',
+      type: 'text',
       configurable: false,
     },
     caption: {
-      type: 'string',
+      type: 'text',
       configurable: false,
     },
     width: {
