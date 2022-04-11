@@ -9,7 +9,7 @@ import { ModalFooter } from '@strapi/design-system/ModalLayout';
 import { Typography } from '@strapi/design-system/Typography';
 import ImageCardAsset from './ImageCardAsset';
 
-const PendingLogoDialog = ({ onClose, asset, prev, goTo, setLocalImage, onChangeLogo }) => {
+const PendingLogoDialog = ({ onClose, asset, prev, next, goTo, setLocalImage, onChangeLogo }) => {
   const { formatMessage } = useIntl();
 
   const handleGoBack = () => {
@@ -19,7 +19,7 @@ const PendingLogoDialog = ({ onClose, asset, prev, goTo, setLocalImage, onChange
 
   const handleUpload = () => {
     onChangeLogo(asset);
-    onClose();
+    goTo(next);
   };
 
   return (
@@ -82,6 +82,7 @@ PendingLogoDialog.propTypes = {
     height: PropTypes.number,
     ext: PropTypes.string,
   }).isRequired,
+  next: PropTypes.string.isRequired,
   onClose: PropTypes.func.isRequired,
   onChangeLogo: PropTypes.func.isRequired,
   prev: PropTypes.string.isRequired,
