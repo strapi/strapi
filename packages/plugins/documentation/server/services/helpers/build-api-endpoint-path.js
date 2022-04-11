@@ -52,21 +52,19 @@ const getPathParams = routePath => {
 
 /**
  *
- * @param {string} prefix - The route prefix
- * @param {string} path - The route path
+ * @param {string} prefix - The prefix found on the routes object
+ * @param {string} path - The current route
  *
  * @returns {string}
  */
-const getPathWithPrefix = (prefix, path) => {
-  if (path.includes('localizations')) {
-    return path;
+const getPathWithPrefix = (globalRoutePrefix, route) => {
+  if (_.has(route.info, 'pluginName') && _.has(route.config, 'prefix')) {
+    // Set the prefix specified on a plugin route
+    return route.config.prefix.concat(route.path);
   }
 
-  if (path.endsWith('/')) {
-    return prefix;
-  }
-
-  return prefix.concat(path);
+  // Set the prefix set for all routes
+  return globalRoutePrefix.concat(route.path);
 };
 
 /**
@@ -94,9 +92,11 @@ const getPaths = ({ routeInfo, uniqueName, contentTypeInfo }) => {
     const methodVerb = route.method.toLowerCase();
 
     const hasPathParams = route.path.includes('/:');
+
     const pathWithPrefix = routeInfo.prefix
-      ? getPathWithPrefix(routeInfo.prefix, route.path)
+      ? getPathWithPrefix(routeInfo.prefix, route)
       : route.path;
+
     const routePath = hasPathParams ? parsePathWithVariables(pathWithPrefix) : pathWithPrefix;
 
     const { responses } = getApiResponses(uniqueName, route, isListOfEntities);
