@@ -1096,6 +1096,10 @@
     "name":"Kwasio (Cameroon) (nmg-CM)"
   },
   {
+    "code":"ky",
+    "name":"Kyrgyz (ky)"
+  },
+  {
     "code":"lag",
     "name":"Langi (lag)"
   },
@@ -1790,6 +1794,10 @@
   {
     "code":"dav-KE",
     "name":"Taita (Kenya) (dav-KE)"
+  },
+  {
+    "code":"tg",
+    "name":"Tajik (tg)"
   },
   {
     "code":"ta",
