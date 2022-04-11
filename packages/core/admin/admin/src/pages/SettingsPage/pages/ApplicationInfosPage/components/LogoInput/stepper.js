@@ -1,5 +1,5 @@
-import AddLogoDialog from './AddLogoDialog';
-import PendingLogoDialog from './PendingLogoDialog';
+import AddLogoDialog from '../LogoModalStepper/AddLogoDialog';
+import PendingLogoDialog from '../LogoModalStepper/PendingLogoDialog';
 
 const stepper = {
   upload: {

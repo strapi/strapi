@@ -25,12 +25,15 @@ const getFileDimensions = file => {
   });
 };
 
-const rawFileToAsset = rawFile => {
+const rawFileToAsset = (rawFile, fileDimensions) => {
   return {
+    ext: rawFile.name.split('.').pop(),
     size: rawFile.size / 1000,
     name: rawFile.name,
     url: URL.createObjectURL(rawFile),
     rawFile,
+    width: fileDimensions.width,
+    height: fileDimensions.height,
   };
 };
 
@@ -58,7 +61,7 @@ export const parseFileMetadatas = async file => {
     throw error;
   }
 
-  const asset = rawFileToAsset(file);
+  const asset = rawFileToAsset(file, fileDimensions);
 
   const isSizeAuthorized = asset.size < SIZE;
 

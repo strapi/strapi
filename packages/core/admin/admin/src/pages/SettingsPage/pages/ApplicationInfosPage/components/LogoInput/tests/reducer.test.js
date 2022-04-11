@@ -9,23 +9,16 @@ describe('ApplicationsInfosPage | LogoModalStepper | reducer', () => {
     });
   });
 
-  describe('SET_LOCAL_IMAGE', () => {
-    it('should update localImage', () => {
+  describe('GO_TO', () => {
+    it('should update current step', () => {
       const state = { ...initialState };
 
-      const file = new File(['(⌐□_□)'], 'michka.gif', { type: 'image/gif' });
-
       const action = {
-        type: 'SET_LOCAL_IMAGE',
-        value: {
-          name: 'cat-logo-test.jpeg',
-          rawFile: file,
-          size: 9.948,
-          url: 'blob:http://localhost:4000/4e6f9416-18f2-490d-b7a1-26a49d58c70e',
-        },
+        type: 'GO_TO',
+        to: 'pending',
       };
 
-      const expected = { ...initialState, localImage: action.value };
+      const expected = { ...initialState, currentStep: action.to };
       const actual = reducer(state, action);
 
       expect(actual).toEqual(expected);

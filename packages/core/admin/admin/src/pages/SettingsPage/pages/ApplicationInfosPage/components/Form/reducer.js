@@ -1,21 +1,21 @@
 /* eslint-disable consistent-return */
 /*
  *
- * LogoModalStepper reducer
+ * ApplicationInfosPage Form reducer
  *
  */
 
 import produce from 'immer';
 
 const initialState = {
-  localImage: undefined,
+  menuLogo: null,
 };
 
 const reducer = (state = initialState, action) =>
   produce(state, draftState => {
     switch (action.type) {
-      case 'SET_LOCAL_IMAGE': {
-        draftState.localImage = action.value;
+      case 'SET_CUSTOM_MENU_LOGO': {
+        draftState.menuLogo = action.value;
         break;
       }
       default: {

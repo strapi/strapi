@@ -1,16 +1,26 @@
-import React, { useState } from 'react';
+import React, { useReducer } from 'react';
 import { useIntl } from 'react-intl';
-import PropType from 'prop-types';
+import PropTypes from 'prop-types';
 import { CarouselInput, CarouselSlide, CarouselActions } from '@strapi/design-system/CarouselInput';
 import { IconButton } from '@strapi/design-system/IconButton';
 import { Box } from '@strapi/design-system/Box';
 import Plus from '@strapi/icons/Plus';
+import reducer, { initialState } from './reducer';
 import LogoModalStepper from '../LogoModalStepper';
 import { SIZE, DIMENSION } from '../../utils/constants';
+import stepper from './stepper';
 
-const LogoInput = ({ customLogo, defaultLogo }) => {
+const LogoInput = ({ customLogo, defaultLogo, onChangeLogo }) => {
+  const [{ currentStep }, dispatch] = useReducer(reducer, initialState);
+  const { Component, next, prev, modalTitle } = stepper[currentStep] || {};
   const { formatMessage } = useIntl();
-  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const goTo = to => {
+    dispatch({
+      type: 'GO_TO',
+      to,
+    });
+  };
 
   return (
     <>
@@ -36,7 +46,7 @@ const LogoInput = ({ customLogo, defaultLogo }) => {
         actions={
           <CarouselActions>
             <IconButton
-              onClick={() => setIsModalOpen(true)}
+              onClick={() => goTo(customLogo ? 'pending' : 'upload')}
               label={formatMessage({
                 id: 'Settings.application.customization.carousel.change-action',
                 defaultMessage: 'Change logo',
@@ -65,9 +75,14 @@ const LogoInput = ({ customLogo, defaultLogo }) => {
         </CarouselSlide>
       </CarouselInput>
       <LogoModalStepper
-        onClose={() => setIsModalOpen(false)}
-        initialStep={customLogo ? 'pending' : 'upload'}
-        isOpen={isModalOpen}
+        Component={Component}
+        currentStep={currentStep}
+        onChangeLogo={onChangeLogo}
+        customLogo={customLogo}
+        goTo={goTo}
+        next={next}
+        prev={prev}
+        modalTitle={modalTitle}
       />
     </>
   );
@@ -78,11 +93,12 @@ LogoInput.defaultProps = {
 };
 
 LogoInput.propTypes = {
-  customLogo: PropType.shape({
-    url: PropType.string,
-    name: PropType.string,
+  customLogo: PropTypes.shape({
+    url: PropTypes.string,
+    name: PropTypes.string,
   }),
-  defaultLogo: PropType.string.isRequired,
+  defaultLogo: PropTypes.string.isRequired,
+  onChangeLogo: PropTypes.func.isRequired,
 };
 
 export default LogoInput;

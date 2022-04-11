@@ -1,30 +1,33 @@
-import React, { useState, useEffect } from 'react';
+import React, { useReducer, forwardRef, useImperativeHandle } from 'react';
+import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { Box } from '@strapi/design-system/Box';
 import { Typography } from '@strapi/design-system/Typography';
 import LogoInput from '../LogoInput';
 import { useConfigurations } from '../../../../../../hooks';
-import LogoAPI from '../../temp/LogoAPI';
+import reducer, { initialState } from './reducer';
+import init from './init';
 
-const API = new LogoAPI();
-
-const Form = () => {
+const Form = forwardRef(({ projectSettingsStored }, ref) => {
   const { formatMessage } = useIntl();
   const {
     logos: { menu },
   } = useConfigurations();
-  const [customMenuLogo, setCustomMenuLogo] = useState(null);
+  const [{ menuLogo }, dispatch] = useReducer(reducer, initialState, () =>
+    init(projectSettingsStored)
+  );
 
-  // Temp class to mimic crud API
-  // to remove once back end routes are ready
-  useEffect(() => {
-    const storedLogo = API.getLogo();
+  const handleChangeMenuLogo = asset => {
+    dispatch({
+      type: 'SET_CUSTOM_MENU_LOGO',
+      value: asset,
+    });
+  };
 
-    if (storedLogo) {
-      setCustomMenuLogo(storedLogo);
-    }
-  }, []);
+  useImperativeHandle(ref, () => ({
+    getValues: () => ({ menuLogo }),
+  }));
 
   return (
     <Box
@@ -45,14 +48,27 @@ const Form = () => {
       <Grid paddingTop={5}>
         <GridItem col={6} s={12}>
           <LogoInput
-            onChangeLogo={setCustomMenuLogo}
-            customLogo={customMenuLogo}
+            onChangeLogo={handleChangeMenuLogo}
+            customLogo={menuLogo}
             defaultLogo={menu.default}
           />
         </GridItem>
       </Grid>
     </Box>
   );
+});
+
+Form.defaultProps = {
+  projectSettingsStored: null,
+};
+
+Form.propTypes = {
+  projectSettingsStored: PropTypes.shape({
+    menuLogo: PropTypes.shape({
+      url: PropTypes.string,
+      name: PropTypes.string,
+    }),
+  }),
 };
 
 export default Form;
