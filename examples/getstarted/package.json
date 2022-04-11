@@ -24,7 +24,7 @@
     "@strapi/strapi": "4.1.7",
     "@strapi/utils": "4.1.7",
     "@vscode/sqlite3": "5.0.8",
-    "better-sqlite3": "7.4.6",
+    "better-sqlite3": "7.5.1",
     "lodash": "4.17.21",
     "mysql": "2.18.1",
     "passport-google-oauth2": "0.2.0",
