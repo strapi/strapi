@@ -59,11 +59,11 @@ const getPathParams = routePath => {
  */
 const getPathWithPrefix = (globalRoutePrefix, route) => {
   if (_.has(route.info, 'pluginName') && _.has(route.config, 'prefix')) {
-    // Set the prefix specified on a plugin route
+    // Use the prefix specified on a plugin route
     return route.config.prefix.concat(route.path);
   }
 
-  // Set the prefix set for all routes
+  // Use the prefix specified for all routes
   return globalRoutePrefix.concat(route.path);
 };
 
