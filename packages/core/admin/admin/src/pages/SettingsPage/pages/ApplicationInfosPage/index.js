@@ -33,8 +33,9 @@ const ApplicationInfosPage = () => {
     : 'app.components.UpgradePlanModal.text-ee';
 
   const handleSubmit = () => {
-    const data = inputsRef.current.getValues();
-    console.log(data);
+    // form values received here
+    // to do - handle this data
+    // const data = inputsRef.current.getValues();
   };
 
   return (

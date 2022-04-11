@@ -25,12 +25,16 @@ const LogoModalStepper = ({
     });
   };
 
+  const handleCloseModal = () => {
+    goTo(null);
+  };
+
   if (!currentStep) {
     return null;
   }
 
   return (
-    <ModalLayout labelledBy="modal" onClose={() => goTo(null)}>
+    <ModalLayout labelledBy="modal" onClose={handleCloseModal}>
       <ModalHeader>
         <Typography fontWeight="bold" as="h2" id="modal">
           {formatMessage(modalTitle)}
@@ -41,7 +45,7 @@ const LogoModalStepper = ({
         goTo={goTo}
         next={next}
         prev={prev}
-        onClose={() => goTo(null)}
+        onClose={handleCloseModal}
         asset={localImage || customLogo}
         onChangeLogo={onChangeLogo}
       />
